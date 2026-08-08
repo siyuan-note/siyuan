@@ -13,14 +13,20 @@ import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
 import {addBaseURL, parseSiYuanUriInfo, setNoteBook} from "../util/pathName";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
-import {handleTouchEnd, handleTouchMove, handleTouchStart, handleTouchUp} from "./util/touch";
+import {
+    handleTouchEnd,
+    handleTouchMove,
+    handleTouchSelectionChange,
+    handleTouchStart,
+    handleTouchUp,
+} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {initAssets} from "../util/assets";
 import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
-import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
+import {activeBlur, hideKeyboardToolbarByApp, showKeyboardToolbar} from "./util/keyboardToolbar";
 import {
     getLocalStorage,
     initWindowOpenOverride,
@@ -214,6 +220,7 @@ class App {
             document.addEventListener("touchmove", handleTouchMove, false);
             document.addEventListener("touchend", handleTouchEnd, false);
             document.addEventListener("touchcancel", handleTouchEnd, false);
+            document.addEventListener("selectionchange", handleTouchSelectionChange, true);
             window.addEventListener("nativePhysicalTouchUp", handleTouchUp, false);
             window.addEventListener("keyup", () => {
                 window.siyuan.ctrlIsPressed = false;
@@ -279,7 +286,7 @@ window.goBack = goBack;
 window.showMessage = showMessage;
 window.processIOSPurchaseResponse = processIOSPurchaseResponse;
 window.showKeyboardToolbar = showKeyboardToolbar;
-window.hideKeyboardToolbar = hideKeyboardToolbar;
+window.hideKeyboardToolbar = hideKeyboardToolbarByApp;
 window.openFileByURL = (openURL) => {
     const blockInfo = parseSiYuanUriInfo(openURL);
     if (blockInfo != null) {

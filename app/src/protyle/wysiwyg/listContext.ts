@@ -47,6 +47,11 @@ export const getLastListItemElement = (listElement: HTMLElement) => {
         item.getAttribute("data-type") === "NodeListItem") as HTMLElement | undefined;
 };
 
+export const getFirstListItemElement = (listElement: HTMLElement) => {
+    return Array.from(listElement.children).find((item) =>
+        item.getAttribute("data-type") === "NodeListItem") as HTMLElement | undefined;
+};
+
 export const getListContext = (nodeElement: HTMLElement, editorElement: HTMLElement): TListContext | undefined => {
     let listItemElement: HTMLElement | null = nodeElement;
     while (listItemElement && listItemElement !== editorElement &&

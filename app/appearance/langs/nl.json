@@ -1,4 +1,6 @@
 {
+	"listBlock": "Lijstblok",
+	"prependListItem": "Lijstitem toevoegen aan het begin van de huidige lijst",
 	"selectToPageStart": "Tekst vanaf de cursor tot het begin van de pagina selecteren",
 	"selectToPageEnd": "Tekst vanaf de cursor tot het einde van de pagina selecteren",
 	"appendListItem": "Lijstitem toevoegen aan het einde van de huidige lijst",

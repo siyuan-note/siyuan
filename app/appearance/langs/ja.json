@@ -1,4 +1,6 @@
 {
+	"listBlock": "リストブロック",
+	"prependListItem": "現在のリストの先頭にリスト項目を追加",
 	"selectToPageStart": "カーソルからページの先頭までのテキストを選択",
 	"selectToPageEnd": "カーソルからページの末尾までのテキストを選択",
 	"appendListItem": "現在のリストの末尾にリスト項目を追加",

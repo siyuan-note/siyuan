@@ -1,4 +1,6 @@
 {
+	"listBlock": "Blok daftar",
+	"prependListItem": "Tambahkan item daftar ke awal daftar saat ini",
 	"selectToPageStart": "Pilih teks dari kursor hingga awal halaman",
 	"selectToPageEnd": "Pilih teks dari kursor hingga akhir halaman",
 	"appendListItem": "Tambahkan item daftar ke akhir daftar saat ini",

@@ -1,4 +1,6 @@
 {
+	"listBlock": "Blok zoznamu",
+	"prependListItem": "Pridať položku na začiatok aktuálneho zoznamu",
 	"selectToPageStart": "Vybrať text od kurzora po začiatok stránky",
 	"selectToPageEnd": "Vybrať text od kurzora po koniec stránky",
 	"appendListItem": "Pridať položku na koniec aktuálneho zoznamu",

@@ -1,4 +1,6 @@
 {
+	"listBlock": "列表區塊",
+	"prependListItem": "在目前列表開頭新增列表項",
 	"selectToPageStart": "選取游標至頁首的文字",
 	"selectToPageEnd": "選取游標至頁尾的文字",
 	"appendListItem": "在目前列表末尾新增列表項",

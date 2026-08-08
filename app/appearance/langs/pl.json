@@ -1,4 +1,6 @@
 {
+	"listBlock": "Blok listy",
+	"prependListItem": "Dodaj element na początku bieżącej listy",
 	"selectToPageStart": "Zaznacz tekst od kursora do początku strony",
 	"selectToPageEnd": "Zaznacz tekst od kursora do końca strony",
 	"appendListItem": "Dodaj element na końcu bieżącej listy",

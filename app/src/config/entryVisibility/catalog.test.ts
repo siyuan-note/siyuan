@@ -73,15 +73,19 @@ test("sortable entry catalog groups contain valid separator positions", () => {
     });
 });
 
-test("append list item follows the insert entries in the block menu", () => {
+test("list block submenu follows the base block entries", () => {
     const children = getEntryCatalogChildren("gutter.single");
-    const insertAfterIndex = children.findIndex((item) => item.key === "insertAfter");
-    const appendListItem = children[insertAfterIndex + 1];
+    const deleteIndex = children.findIndex((item) => item.key === "delete");
+    const separator = children[deleteIndex + 1];
+    const listBlock = children[deleteIndex + 2];
 
-    assert.ok(0 <= insertAfterIndex);
-    assert.equal(appendListItem?.key, "appendListItem");
-    assert.equal(appendListItem?.type, "entry");
-    assert.equal(appendListItem?.simple, true);
+    assert.ok(0 <= deleteIndex);
+    assert.equal(separator?.key, "separator_listBlock");
+    assert.equal(separator?.type, "separator");
+    assert.equal(listBlock?.key, "listBlock");
+    assert.equal(listBlock?.type, "entry");
+    assert.equal(listBlock?.simple, true);
+    assert.deepEqual(listBlock?.children?.map((item) => item.key), ["prependListItem", "appendListItem"]);
 });
 
 test("simple profile follows the reviewed defaults", () => {

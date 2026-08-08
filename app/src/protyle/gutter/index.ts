@@ -91,7 +91,7 @@ import {showMessage} from "../../dialog/message";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
-import {appendListItem} from "../wysiwyg/list";
+import {appendListItem, prependListItem} from "../wysiwyg/list";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -1898,7 +1898,36 @@ export class Gutter {
                 }
             }).element);
         }
-        if (type === "NodeSuperBlock" && !protyle.disabled) {
+        if ((type === "NodeList" || type === "NodeListItem") && allowStructuralMutation) {
+            const listBlockSubmenu: IMenu[] = [{
+                id: "prependListItem",
+                icon: "iconBefore",
+                label: window.siyuan.languages.prependListItem,
+                click() {
+                    hideElements(["select"], protyle);
+                    countBlockWord([], protyle.block.rootID);
+                    void prependListItem(protyle, nodeElement as HTMLElement, range);
+                }
+            }, {
+                id: "appendListItem",
+                icon: "iconAfter",
+                label: window.siyuan.languages.appendListItem,
+                accelerator: window.siyuan.config.keymap.editor.list.appendListItem.custom,
+                click() {
+                    hideElements(["select"], protyle);
+                    countBlockWord([], protyle.block.rootID);
+                    void appendListItem(protyle, nodeElement as HTMLElement, range);
+                }
+            }];
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_listBlock", type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "listBlock",
+                icon: "iconList",
+                label: window.siyuan.languages.listBlock,
+                type: "submenu",
+                submenu: listBlockSubmenu,
+            }).element);
+        } else if (type === "NodeSuperBlock" && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "separator_cancelSuperBlock",
                 type: "separator"
@@ -2521,19 +2550,6 @@ export class Gutter {
                     insertEmptyBlock(protyle, "afterend", nodeElement);
                 }
             }).element);
-            if (type === "NodeList" || type === "NodeListItem") {
-                window.siyuan.menus.menu.append(new MenuItem({
-                    id: "appendListItem",
-                    icon: "iconListItem",
-                    label: window.siyuan.languages.appendListItem,
-                    accelerator: window.siyuan.config.keymap.editor.list.appendListItem.custom,
-                    click() {
-                        hideElements(["select"], protyle);
-                        countBlockWord([], protyle.block.rootID);
-                        void appendListItem(protyle, nodeElement as HTMLElement, range);
-                    }
-                }).element);
-            }
         }
         if (!protyle.disabled) {
             const countElement = nodeElement.lastElementChild?.querySelector(".protyle-attr--refcount");

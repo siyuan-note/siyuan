@@ -10,6 +10,7 @@ import {setFold} from "../util/blockFold";
 import {scrollCenter} from "../../util/highlightById";
 import {
     getAppendListContext,
+    getFirstListItemElement,
     getFollowingOrderedListMarkerUpdates,
     getLastListItemElement,
     getOrderedListMarkerUpdates,
@@ -157,7 +158,21 @@ const getFocusedOrderedListUpdates = async (protyle: IProtyle, listItemElement: 
 
 const insertingFocusedListItems = new WeakSet<IProtyle>();
 
-const appendingListItems = new WeakSet<IProtyle>();
+const insertingBoundaryListItems = new WeakSet<IProtyle>();
+
+const getFocusedListElement = async (protyle: IProtyle, listID: string) => {
+    const response = await fetchSyncPost("/api/block/getBlockDOM", {
+        id: listID,
+        notebook: protyle.notebookId,
+    });
+    const template = document.createElement("template");
+    template.innerHTML = response.data?.dom || "";
+    const listElement = template.content.firstElementChild as HTMLElement;
+    if (listElement?.getAttribute("data-type") !== "NodeList") {
+        return;
+    }
+    return listElement;
+};
 
 const getFocusedListTailItem = async (protyle: IProtyle, listID: string, currentListItem?: HTMLElement) => {
     const tailResponse = await fetchSyncPost("/api/block/getTailChildBlocks", {
@@ -187,7 +202,7 @@ const getFocusedListTailItem = async (protyle: IProtyle, listID: string, current
 };
 
 export const appendListItem = async (protyle: IProtyle, nodeElement: HTMLElement, range?: Range) => {
-    if (appendingListItems.has(protyle)) {
+    if (insertingBoundaryListItems.has(protyle)) {
         return;
     }
     const context = getAppendListContext(nodeElement, protyle.wysiwyg.element);
@@ -195,7 +210,7 @@ export const appendListItem = async (protyle: IProtyle, nodeElement: HTMLElement
         return;
     }
 
-    appendingListItems.add(protyle);
+    insertingBoundaryListItems.add(protyle);
     try {
         let tailItemElement: HTMLElement | undefined;
         if (context.listElement) {
@@ -234,7 +249,106 @@ export const appendListItem = async (protyle: IProtyle, nodeElement: HTMLElement
         focusByWbr(newListItemElement, editorRange);
         scrollCenter(protyle, newListItemElement);
     } finally {
-        appendingListItems.delete(protyle);
+        insertingBoundaryListItems.delete(protyle);
+    }
+};
+
+export const prependListItem = async (protyle: IProtyle, nodeElement: HTMLElement, range?: Range) => {
+    if (insertingBoundaryListItems.has(protyle)) {
+        return;
+    }
+    const context = getAppendListContext(nodeElement, protyle.wysiwyg.element);
+    if (!context) {
+        return;
+    }
+
+    insertingBoundaryListItems.add(protyle);
+    try {
+        let listElement = context.listElement;
+        if (!listElement && protyle.block.parentID) {
+            listElement = await getFocusedListElement(protyle, protyle.block.parentID);
+        }
+        if (!listElement) {
+            return;
+        }
+        const firstListItemElement = getFirstListItemElement(listElement);
+        const firstID = firstListItemElement?.getAttribute("data-node-id");
+        if (!firstListItemElement || !firstID) {
+            return;
+        }
+
+        let startIndex: number | undefined;
+        if (firstListItemElement.getAttribute("data-subtype") === "o") {
+            const parsedIndex = Number.parseInt(firstListItemElement.getAttribute("data-marker"), 10);
+            startIndex = Number.isFinite(parsedIndex) ? Math.trunc(parsedIndex) : 1;
+        }
+        const newListItemElement = genListItemElement(firstListItemElement, 0, true, startIndex);
+        const id = newListItemElement.getAttribute("data-node-id");
+        const doOperations: IOperation[] = [{
+            action: "insert",
+            id,
+            data: newListItemElement.outerHTML,
+            nextID: firstID,
+        }];
+        const undoOperations: IOperation[] = [];
+        if (startIndex !== undefined) {
+            const listItemElements = Array.from(listElement.children).filter((item) =>
+                item.getAttribute("data-type") === "NodeListItem") as HTMLElement[];
+            const markerUpdates = getFollowingOrderedListMarkerUpdates(
+                newListItemElement.getAttribute("data-marker"),
+                listItemElements.map((item) => item.getAttribute("data-marker")));
+            listItemElements.forEach((item, index) => {
+                const marker = markerUpdates[index];
+                if (!marker) {
+                    return;
+                }
+                const itemID = item.getAttribute("data-node-id");
+                undoOperations.push({
+                    action: "update",
+                    id: itemID,
+                    data: item.outerHTML,
+                });
+                item.setAttribute("data-marker", marker);
+                const actionElement = item.querySelector(".protyle-action--order");
+                if (actionElement) {
+                    actionElement.textContent = marker;
+                }
+                doOperations.push({
+                    action: "update",
+                    id: itemID,
+                    data: item.outerHTML,
+                });
+            });
+        }
+
+        const editorRange = range || getEditorRange(protyle.wysiwyg.element);
+        const localNextElement = context.listElement ? firstListItemElement : context.listItemElement;
+        if (!localNextElement?.isConnected) {
+            return;
+        }
+        if (!context.listElement && startIndex !== undefined) {
+            const currentItemElement = Array.from(listElement.children).find((item) =>
+                item.getAttribute("data-node-id") === context.listItemElement?.getAttribute("data-node-id"));
+            const marker = currentItemElement?.getAttribute("data-marker");
+            if (marker) {
+                context.listItemElement.setAttribute("data-marker", marker);
+                const actionElement = context.listItemElement.querySelector(".protyle-action--order");
+                if (actionElement) {
+                    actionElement.textContent = marker;
+                }
+            }
+        }
+        localNextElement.insertAdjacentElement("beforebegin", newListItemElement);
+        undoOperations.unshift({
+            action: "delete",
+            id,
+            context: getUndoFocusContext(protyle.wysiwyg.element, editorRange, true),
+        });
+        transaction(protyle, doOperations, undoOperations);
+        focusByWbr(newListItemElement, editorRange);
+        scrollCenter(protyle, newListItemElement);
+    } finally {
+        insertingBoundaryListItems.delete(protyle);
     }
 };
 

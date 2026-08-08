@@ -1,4 +1,6 @@
 {
+	"listBlock": "Listenblock",
+	"prependListItem": "Listenelement am Anfang der aktuellen Liste hinzufügen",
 	"selectToPageStart": "Text vom Cursor bis zum Seitenanfang auswählen",
 	"selectToPageEnd": "Text vom Cursor bis zum Seitenende auswählen",
 	"appendListItem": "Listenelement am Ende der aktuellen Liste hinzufügen",

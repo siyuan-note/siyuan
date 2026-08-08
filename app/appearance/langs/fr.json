@@ -1,4 +1,6 @@
 {
+	"listBlock": "Bloc de liste",
+	"prependListItem": "Ajouter un élément au début de la liste actuelle",
 	"selectToPageStart": "Sélectionner le texte du curseur jusqu'au début de la page",
 	"selectToPageEnd": "Sélectionner le texte du curseur jusqu'à la fin de la page",
 	"appendListItem": "Ajouter un élément à la fin de la liste actuelle",

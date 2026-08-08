@@ -1,4 +1,6 @@
 {
+	"listBlock": "Liste bloğu",
+	"prependListItem": "Geçerli listenin başına liste öğesi ekle",
 	"selectToPageStart": "İmleçten sayfanın başına kadar metni seç",
 	"selectToPageEnd": "İmleçten sayfanın sonuna kadar metni seç",
 	"appendListItem": "Geçerli listenin sonuna liste öğesi ekle",

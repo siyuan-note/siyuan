@@ -280,6 +280,11 @@ const gutterMultiple = () => [
 
 const gutterSingle = () => [
     ...gutterBase(false),
+    separator("separator_listBlock"),
+    node("listBlock", lang("listBlock"), true, [
+        node("prependListItem", lang("prependListItem")),
+        node("appendListItem", lang("appendListItem")),
+    ]),
     separator("separator_cancelSuperBlock"),
     node("superBlock", lang("superBlock"), true, [
         node("cancelSuperBlock", () => `${window.siyuan.languages.cancel} ${window.siyuan.languages.superBlock}`),
@@ -361,7 +366,6 @@ const gutterSingle = () => [
     node("enterBack", lang("enterBack"), false),
     node("insertBefore", lang("insertBefore")),
     node("insertAfter", lang("insertAfter")),
-    node("appendListItem", lang("appendListItem")),
     node("jumpTo", lang("jumpTo"), false, [
         node("jumpToParentPrev", lang("jumpToParentPrev"), false),
         node("jumpToParentNext", lang("jumpToParentNext"), false),

@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     getAppendListContext,
+    getFirstListItemElement,
     getFollowingOrderedListMarkerUpdates,
     getLastListItemElement,
     getListContext,
@@ -171,6 +172,16 @@ describe("getLastListItemElement", () => {
         const list = new TestElement("NodeList", "list", "u").append(first, last, new TestElement());
 
         assert.equal(getLastListItemElement(asHTMLElement(list)), asHTMLElement(last));
+    });
+});
+
+describe("getFirstListItemElement", () => {
+    it("ignores non-list-item children at the beginning", () => {
+        const first = new TestElement("NodeListItem", "first", "u");
+        const last = new TestElement("NodeListItem", "last", "u");
+        const list = new TestElement("NodeList", "list", "u").append(new TestElement(), first, last);
+
+        assert.equal(getFirstListItemElement(asHTMLElement(list)), asHTMLElement(first));
     });
 });
 

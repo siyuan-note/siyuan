@@ -24,7 +24,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -533,39 +532,9 @@ func getFile(c *gin.Context) {
 }
 
 func refuseToAccess(c *gin.Context, fileAbsPath string, ret *gulu.Result) bool {
-	// 规范化并解析符号链接，防止通过大小写或符号链接绕过
-	fileNorm := normalizeAndResolve(fileAbsPath)
-
-	// 禁止访问配置文件 conf/conf.json
-	confPath := normalizeAndResolve(filepath.Join(util.ConfDir, "conf.json"))
-	if fileNorm == confPath {
-		ret.Code = http.StatusForbidden
-		ret.Msg = http.StatusText(http.StatusForbidden)
-		c.JSON(http.StatusAccepted, ret)
-		return true
-	}
-
-	// 禁止访问 data/snippets/conf.json
-	snippetPath := normalizeAndResolve(filepath.Join(util.DataDir, "snippets", "conf.json"))
-	if fileNorm == snippetPath {
-		ret.Code = http.StatusForbidden
-		ret.Msg = http.StatusText(http.StatusForbidden)
-		c.JSON(http.StatusAccepted, ret)
-		return true
-	}
-
-	// 禁止访问 data/templates 目录
-	templatesBase := normalizeAndResolve(filepath.Join(util.DataDir, "templates"))
-	if gulu.File.IsSubPath(templatesBase, fileNorm) {
-		ret.Code = http.StatusForbidden
-		ret.Msg = http.StatusText(http.StatusForbidden)
-		c.JSON(http.StatusAccepted, ret)
-		return true
-	}
-
-	// 禁止访问 data/.siyuan/publishAccess.json
-	publishAccessPath := normalizeAndResolve(filepath.Join(util.DataDir, ".siyuan", "publishAccess.json"))
-	if fileNorm == publishAccessPath {
+	// 禁止访问敏感文件（conf/conf.json、data/snippets/conf.json、data/templates、data/.siyuan/publishAccess.json），
+	// 规范化与符号链接解析见 util.NormalizeAndResolve，防止通过大小写或符号链接绕过
+	if util.IsForbiddenAbsPath(fileAbsPath) {
 		ret.Code = http.StatusForbidden
 		ret.Msg = http.StatusText(http.StatusForbidden)
 		c.JSON(http.StatusAccepted, ret)
@@ -582,22 +551,6 @@ func refuseToAccess(c *gin.Context, fileAbsPath string, ret *gulu.Result) bool {
 	}
 
 	return false
-}
-
-// normalizeAndResolve 将路径转为绝对、解析符号链接并清理；在需要时转为小写以实现不区分大小写比较
-func normalizeAndResolve(p string) string {
-	if abs, err := filepath.Abs(p); err == nil {
-		p = abs
-	}
-	if eval, err := filepath.EvalSymlinks(p); err == nil {
-		p = eval
-	}
-	p = filepath.Clean(p)
-	// 在 Windows 和 macOS 上文件系统通常为不区分大小写，使用小写统一比较
-	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
-		p = strings.ToLower(p)
-	}
-	return p
 }
 
 func readDir(c *gin.Context) {

@@ -1446,7 +1446,15 @@ export class WYSIWYG {
                         columnElements.push(columnElement);
                     }
                 });
+                const initialDragRight = dragRect.right;
+                const widthScale = dragRect.width / oldWidth || 1;
                 const snapGuideThreshold = 16;
+                const snapGuideRight = previousWidth === undefined ? undefined :
+                    initialDragRight + (previousWidth - oldWidth) * widthScale;
+                const resizeScrollSpacer = document.createElement("div");
+                resizeScrollSpacer.className = "av__width-scroll-spacer";
+                resizeScrollSpacer.style.width = `${scrollElement.scrollWidth}px`;
+                scrollElement.appendChild(resizeScrollSpacer);
                 let newWidth = oldWidth;
                 let resizeSnapped = false;
                 let resizeGuide: HTMLElement;
@@ -1454,12 +1462,12 @@ export class WYSIWYG {
                 let pendingResize: { width: number, snapped: boolean } | undefined;
                 let resizeAnimationFrame: number | undefined;
                 const updateResizePreview = (snapped: boolean) => {
-                    const currentDragRect = dragElement.getBoundingClientRect();
                     const currentHeaderRect = headerElement.getBoundingClientRect();
                     if (!resizeTip) {
-                        if (previousElement) {
+                        if (snapGuideRight !== undefined) {
                             resizeGuide = document.createElement("div");
                             resizeGuide.className = "av__width-guide";
+                            resizeGuide.style.left = `${snapGuideRight}px`;
                             document.body.appendChild(resizeGuide);
                         }
                         resizeTip = document.createElement("div");
@@ -1469,28 +1477,23 @@ export class WYSIWYG {
                     const showSnapGuide = !snapped && typeof previousWidth === "number" &&
                         Math.abs(newWidth - previousWidth) <= snapGuideThreshold;
                     resizeGuide?.classList.toggle("fn__none", !showSnapGuide);
-                    if (resizeGuide && previousElement) {
-                        const previousRect = previousElement.getBoundingClientRect();
-                        resizeGuide.style.left = `${currentDragRect.left + previousRect.width}px`;
+                    if (resizeGuide) {
                         resizeGuide.style.top = `${Math.round(currentHeaderRect.top)}px`;
                         resizeGuide.style.height = `${Math.round(currentHeaderRect.height)}px`;
                     }
-                    resizeTip.style.left = `${currentDragRect.right}px`;
+                    const dragRight = initialDragRight + (newWidth - oldWidth) * widthScale;
+                    resizeTip.style.left = `${dragRight}px`;
                     resizeTip.style.top = `${Math.round(currentHeaderRect.top)}px`;
                     resizeTip.textContent = `${newWidth}px${snapped ?
                         window.siyuan.languages.sameWidthAsLeftColumnTip : ""}`;
                 };
-                const updateResizePreviewOnScroll = () => {
-                    updateResizePreview(resizeSnapped);
-                };
                 const clearResizePreview = () => {
                     target.classList.remove("av__widthdrag--active");
-                    scrollElement.removeEventListener("scroll", updateResizePreviewOnScroll);
+                    resizeScrollSpacer.remove();
                     resizeGuide?.remove();
                     resizeTip?.remove();
                 };
                 target.classList.add("av__widthdrag--active");
-                scrollElement.addEventListener("scroll", updateResizePreviewOnScroll, {passive: true});
                 updateResizePreview(resizeSnapped);
                 const flushResize = () => {
                     if (!pendingResize) {

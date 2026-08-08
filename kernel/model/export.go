@@ -4356,6 +4356,19 @@ func prepareExportTrees(docPaths []string, boxIDs ...string) (defBlockIDs []stri
 	return
 }
 
+func loadExportRelatedTree(blockID, sourceBoxID string) (ret *parse.Tree, err error) {
+	var block *treenode.BlockTree
+	if IsEncryptedBox(sourceBoxID) {
+		block = treenode.GetBlockTreeInExactBox(blockID, sourceBoxID)
+	} else {
+		block = treenode.GetBlockTree(blockID)
+	}
+	if nil == block || !IsSameCryptoBoundary(sourceBoxID, block.BoxID) {
+		return nil, ErrTreeNotFound
+	}
+	return LoadTreeByBlockIDInExactBox(block.RootID, block.BoxID)
+}
+
 func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees map[string]*parse.Tree) {
 	if nil != retTrees[tree.ID] {
 		return
@@ -4372,12 +4385,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees map[string
 			if "" == defID {
 				return ast.WalkContinue
 			}
-			defBlock := treenode.GetBlockTreeInBox(defID, tree.Box)
-			if nil == defBlock {
-				return ast.WalkSkipChildren
-			}
-
-			defTree, err := LoadTreeByBlockIDInExactBox(defBlock.RootID, tree.Box)
+			defTree, err := loadExportRelatedTree(defID, tree.Box)
 			if err != nil {
 				return ast.WalkSkipChildren
 			}
@@ -4392,12 +4400,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees map[string
 			if "" == defID {
 				return ast.WalkContinue
 			}
-			defBlock := treenode.GetBlockTreeInBox(defID, tree.Box)
-			if nil == defBlock {
-				return ast.WalkSkipChildren
-			}
-
-			defTree, err := LoadTreeByBlockIDInExactBox(defBlock.RootID, tree.Box)
+			defTree, err := loadExportRelatedTree(defID, tree.Box)
 			if err != nil {
 				return ast.WalkSkipChildren
 			}
@@ -4441,12 +4444,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees map[string
 					continue
 				}
 
-				defBlock := getExportBlockTreeInBox(blockID, tree.Box)
-				if nil == defBlock {
-					continue
-				}
-
-				defTree, err := LoadTreeByBlockIDInExactBox(defBlock.RootID, tree.Box)
+				defTree, err := loadExportRelatedTree(blockID, tree.Box)
 				if err != nil {
 					continue
 				}

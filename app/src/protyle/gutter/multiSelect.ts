@@ -1,5 +1,21 @@
 export const hasMultipleBlockSelection = (blockSelectElements: Element[]) => blockSelectElements.length > 1;
 
+export const getSameContainerHeadingLevel = (selectElements: Element[]) => {
+    if (selectElements.length < 2) {
+        return;
+    }
+    const firstElement = selectElements[0];
+    const subtype = firstElement.getAttribute("data-subtype");
+    if (firstElement.getAttribute("data-type") !== "NodeHeading" || !/^h[1-6]$/.test(subtype)) {
+        return;
+    }
+    if (selectElements.some((item) => item.getAttribute("data-type") !== "NodeHeading" ||
+        item.getAttribute("data-subtype") !== subtype || item.parentElement !== firstElement.parentElement)) {
+        return;
+    }
+    return Number.parseInt(subtype.substring(1));
+};
+
 export const getGutterSelection = (blockSelectElements: Element[], rangeSelectElements: Element[]) => {
     if (hasMultipleBlockSelection(blockSelectElements)) {
         return {isMultiSelect: true, selectElements: blockSelectElements};

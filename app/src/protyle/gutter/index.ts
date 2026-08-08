@@ -77,6 +77,7 @@ import {getPlainText} from "../util/paste";
 import {
     getGutterSelection,
     getGutterSelectionTarget,
+    getSameContainerHeadingLevel,
     hasMultipleBlockSelection,
     isCrossBlockTextRange,
     isGutterInsertStateMatched
@@ -1004,6 +1005,7 @@ export class Gutter {
 
     public renderMultipleMenu(protyle: IProtyle, selectsElement: Element[]) {
         let isList = false;
+        const headingLevel = getSameContainerHeadingLevel(selectsElement);
         const selectsElementGroups: Element[][] = [];
         selectsElement.forEach((item) => {
             if (item.classList.contains("li")) {
@@ -1152,6 +1154,22 @@ export class Gutter {
                 type: "submenu",
                 submenu: turnIntoSubmenu
             }).element);
+            if (headingLevel) {
+                const ids = selectsElement.map((item) => item.getAttribute("data-node-id"));
+                const headingSubMenu: IMenu[] = [];
+                for (let level = 1; level <= 6; level++) {
+                    if (level !== headingLevel) {
+                        headingSubMenu.push(this.genHeadingTransform(protyle, ids, level));
+                    }
+                }
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "tWithSubtitle",
+                    type: "submenu",
+                    icon: "iconRefresh",
+                    label: window.siyuan.languages.tWithSubtitle,
+                    submenu: headingSubMenu
+                }).element);
+            }
             if (isContinue && !(selectsElement[0].parentElement.classList.contains("sb") &&
                 selectsElement.length + 1 === selectsElement[0].parentElement.childElementCount)) {
                 window.siyuan.menus.menu.append(new MenuItem({
@@ -2661,18 +2679,25 @@ export class Gutter {
         return window.siyuan.menus.menu;
     }
 
-    private genHeadingTransform(protyle: IProtyle, id: string, level: number) {
+    private genHeadingTransform(protyle: IProtyle, id: string | string[], level: number) {
+        const ids = Array.isArray(id) ? id : [id];
         return {
             id: "heading" + level,
             iconHTML: "",
             icon: "iconHeading" + level,
             label: window.siyuan.languages["heading" + level],
             click() {
-                fetchPost("/api/block/getHeadingLevelTransaction", {
-                    id,
-                    level
+                fetchPost("/api/block/getHeadingLevelTransaction", ids.length === 1 ? {
+                    id: ids[0],
+                    level,
+                } : {
+                    ids,
+                    level,
                 }, (response) => {
-                    response.data.doOperations.forEach((operation: IOperation, index: number) => {
+                    if (!response.data?.doOperations?.length) {
+                        return;
+                    }
+                    response.data.doOperations.forEach((operation: IOperation) => {
                         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                             itemElement.outerHTML = operation.data;
                         });
@@ -2680,10 +2705,11 @@ export class Gutter {
                         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                             mathRender(itemElement);
                         });
-                        if (index === 0) {
-                            focusBlock(protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`), protyle.wysiwyg.element, true);
-                        }
                     });
+                    const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${ids[0]}"]`);
+                    if (focusElement) {
+                        focusBlock(focusElement, protyle.wysiwyg.element, true);
+                    }
                     transaction(protyle, response.data.doOperations, response.data.undoOperations);
                 });
             }

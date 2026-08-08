@@ -467,10 +467,19 @@ func getHeadingLevelTransaction(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
 	level := int(arg["level"].(float64))
 
-	transaction, err := model.GetHeadingLevelTransaction(id, level)
+	var ids []string
+	if idsArg, ok := arg["ids"].([]any); ok {
+		for _, id := range idsArg {
+			ids = append(ids, id.(string))
+		}
+		ids = gulu.Str.RemoveDuplicatedElem(ids)
+	} else {
+		ids = []string{arg["id"].(string)}
+	}
+
+	transaction, err := model.GetHeadingLevelBatchTransaction(ids, level)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

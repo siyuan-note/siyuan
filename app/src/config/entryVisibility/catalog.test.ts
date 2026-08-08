@@ -107,6 +107,24 @@ test("super block actions and vertical alignment use their respective menu group
     assert.equal(getEntryCatalogChildren("gutter.multi.layout").some((item) => item.key === "alignTop"), false);
 });
 
+test("multiple block heading transform follows the regular transform menu", () => {
+    const children = getEntryCatalogChildren("gutter.multi");
+
+    assert.deepEqual(children.slice(0, 3).map((item) => item.key), [
+        "turnInto",
+        "tWithSubtitle",
+        "mergeSuperBlock",
+    ]);
+    assert.deepEqual(getEntryCatalogChildren("gutter.multi.tWithSubtitle").map((item) => item.key), [
+        "heading1",
+        "heading2",
+        "heading3",
+        "heading4",
+        "heading5",
+        "heading6",
+    ]);
+});
+
 test("simple profile follows the reviewed defaults", () => {
     const shown = [
         "document.title.copy.copyBlockEmbed",

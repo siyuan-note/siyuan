@@ -1,4 +1,5 @@
 {
+	"selectAllIncompleteTip": "Yalnızca yüklenen içerik blokları seçildi; yüklenmeyen içerik blokları seçilmedi",
 	"listBlock": "Liste bloğu",
 	"prependListItem": "Geçerli listenin başına liste öğesi ekle",
 	"selectToPageStart": "İmleçten sayfanın başına kadar metni seç",

@@ -1,4 +1,5 @@
 {
+	"selectAllIncompleteTip": "僅選取了已載入的內容區塊，未載入的內容區塊未被選取",
 	"listBlock": "列表區塊",
 	"prependListItem": "在目前列表開頭新增列表項",
 	"selectToPageStart": "選取游標至頁首的文字",

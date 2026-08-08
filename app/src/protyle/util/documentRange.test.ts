@@ -1,14 +1,27 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {updateDocumentBottomEof} from "./documentRange";
+import {hasUnloadedDocumentBlocks, updateDocumentBottomEof} from "./documentRange";
 
-const createWysiwygElement = (lastElementEof?: string, initialBottomEof = false) => {
-    let bottomEof = initialBottomEof;
+const createWysiwygElement = (options: {
+    firstElementEof?: string,
+    firstElementIndex?: string,
+    lastElementEof?: string,
+    initialBottomEof?: boolean,
+} = {}) => {
+    let bottomEof = options.initialBottomEof || false;
+    const createElement = (eof?: string, index?: string) => ({
+        getAttribute: (name: string) => {
+            if (name === "data-eof") {
+                return eof || null;
+            }
+            return name === "data-node-index" ? index || null : null;
+        },
+    });
     return {
         element: {
-            lastElementChild: lastElementEof ? {
-                getAttribute: (name: string) => name === "data-eof" ? lastElementEof : null,
-            } : null,
+            firstElementChild: options.firstElementEof || options.firstElementIndex ?
+                createElement(options.firstElementEof, options.firstElementIndex) : null,
+            lastElementChild: options.lastElementEof ? createElement(options.lastElementEof) : null,
             hasAttribute: (name: string) => name === "data-bottom-eof" && bottomEof,
             toggleAttribute: (name: string, force: boolean) => {
                 if (name === "data-bottom-eof") {
@@ -22,7 +35,7 @@ const createWysiwygElement = (lastElementEof?: string, initialBottomEof = false)
 
 describe("updateDocumentBottomEof", () => {
     it("marks the loaded range when its last block is the document end", () => {
-        const wysiwyg = createWysiwygElement("2");
+        const wysiwyg = createWysiwygElement({lastElementEof: "2"});
 
         updateDocumentBottomEof(wysiwyg.element);
 
@@ -30,7 +43,7 @@ describe("updateDocumentBottomEof", () => {
     });
 
     it("clears the state when the loaded range no longer contains the document end", () => {
-        const wysiwyg = createWysiwygElement(undefined, true);
+        const wysiwyg = createWysiwygElement({initialBottomEof: true});
 
         updateDocumentBottomEof(wysiwyg.element);
 
@@ -38,10 +51,42 @@ describe("updateDocumentBottomEof", () => {
     });
 
     it("preserves the document end when probing the beginning of a single-block range", () => {
-        const wysiwyg = createWysiwygElement("1", true);
+        const wysiwyg = createWysiwygElement({lastElementEof: "1", initialBottomEof: true});
 
         updateDocumentBottomEof(wysiwyg.element, true);
 
         assert.equal(wysiwyg.hasBottomEof(), true);
+    });
+});
+
+describe("hasUnloadedDocumentBlocks", () => {
+    it("ignores document boundaries when dynamic loading is disabled", () => {
+        const wysiwyg = createWysiwygElement();
+
+        assert.equal(hasUnloadedDocumentBlocks(wysiwyg.element, false), false);
+    });
+
+    it("recognizes the initial block index as the document start", () => {
+        const wysiwyg = createWysiwygElement({firstElementIndex: "0", initialBottomEof: true});
+
+        assert.equal(hasUnloadedDocumentBlocks(wysiwyg.element, true), false);
+    });
+
+    it("recognizes the explicit document boundaries", () => {
+        const wysiwyg = createWysiwygElement({firstElementEof: "1", initialBottomEof: true});
+
+        assert.equal(hasUnloadedDocumentBlocks(wysiwyg.element, true), false);
+    });
+
+    it("detects unloaded blocks before the loaded range", () => {
+        const wysiwyg = createWysiwygElement({firstElementIndex: "10", initialBottomEof: true});
+
+        assert.equal(hasUnloadedDocumentBlocks(wysiwyg.element, true), true);
+    });
+
+    it("detects unloaded blocks after the loaded range", () => {
+        const wysiwyg = createWysiwygElement({firstElementEof: "1"});
+
+        assert.equal(hasUnloadedDocumentBlocks(wysiwyg.element, true), true);
     });
 });

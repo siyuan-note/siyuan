@@ -1,4 +1,5 @@
 {
+	"selectAllIncompleteTip": "読み込み済みのコンテンツブロックのみが選択され、未読み込みのコンテンツブロックは選択されていません",
 	"listBlock": "リストブロック",
 	"prependListItem": "現在のリストの先頭にリスト項目を追加",
 	"selectToPageStart": "カーソルからページの先頭までのテキストを選択",

@@ -1,4 +1,5 @@
 {
+	"selectAllIncompleteTip": "Wybrano tylko załadowane bloki treści; niezaładowane bloki treści nie zostały wybrane",
 	"listBlock": "Blok listy",
 	"prependListItem": "Dodaj element na początku bieżącej listy",
 	"selectToPageStart": "Zaznacz tekst od kursora do początku strony",

@@ -1,4 +1,5 @@
 {
+	"selectAllIncompleteTip": "불러온 콘텐츠 블록만 선택되었으며 불러오지 않은 콘텐츠 블록은 선택되지 않았습니다",
 	"listBlock": "목록 블록",
 	"prependListItem": "현재 목록 시작 부분에 목록 항목 추가",
 	"selectToPageStart": "커서부터 페이지 시작까지 텍스트 선택",

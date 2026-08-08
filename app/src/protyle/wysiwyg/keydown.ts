@@ -18,6 +18,7 @@ import {
     setLastNodeRange,
 } from "../util/selection";
 import {selectTextToEditorBoundary} from "../util/selectionBoundary";
+import {hasUnloadedDocumentBlocks} from "../util/documentRange";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -158,6 +159,13 @@ const showSelectAllTip = () => {
             }
         });
     });
+};
+
+const showSelectAllIncompleteTip = () => {
+    if (window.siyuan.config.appearance.notifications?.selectAllTip === false) {
+        return;
+    }
+    showMessage(window.siyuan.languages.selectAllIncompleteTip, 6000, "info", "selectAllIncompleteTip");
 };
 
 const getAdjacentInlineMath = (range: Range, editableElement: Element, previous: boolean): HTMLElement | undefined => {
@@ -1406,6 +1414,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectedCurrentContent && !protyle.lite &&
                 !nodeElement.classList.contains("code-block") && !isMobile()) {
                 showSelectAllTip();
+            } else if (!selectedCurrentContent && hasUnloadedDocumentBlocks(
+                protyle.wysiwyg.element,
+                !protyle.lite && !protyle.block.showAll && protyle.block.scroll && !protyle.options.backlinkData
+            )) {
+                showSelectAllIncompleteTip();
             }
             return true;
         }

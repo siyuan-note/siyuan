@@ -1,4 +1,5 @@
 {
+	"selectAllIncompleteTip": "Solo se seleccionaron los bloques de contenido cargados; los bloques de contenido no cargados no se seleccionaron",
 	"listBlock": "Bloque de lista",
 	"prependListItem": "Añadir un elemento al principio de la lista actual",
 	"selectToPageStart": "Seleccionar texto desde el cursor hasta el principio de la página",

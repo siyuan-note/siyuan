@@ -1,4 +1,5 @@
 {
+	"selectAllIncompleteTip": "Vybrali sa iba načítané bloky obsahu; nenačítané bloky obsahu neboli vybrané",
 	"listBlock": "Blok zoznamu",
 	"prependListItem": "Pridať položku na začiatok aktuálneho zoznamu",
 	"selectToPageStart": "Vybrať text od kurzora po začiatok stránky",

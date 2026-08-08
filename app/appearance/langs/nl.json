@@ -1,4 +1,5 @@
 {
+	"selectAllIncompleteTip": "Alleen geladen inhoudsblokken zijn geselecteerd; niet-geladen inhoudsblokken zijn niet geselecteerd",
 	"listBlock": "Lijstblok",
 	"prependListItem": "Lijstitem toevoegen aan het begin van de huidige lijst",
 	"selectToPageStart": "Tekst vanaf de cursor tot het begin van de pagina selecteren",

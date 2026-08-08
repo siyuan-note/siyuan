@@ -56,6 +56,7 @@ import {isEncryptedBox} from "../../util/pathName";
 import {
     getAVRowDropTarget,
     getSameSuperBlockEdgeTarget,
+    getSuperBlockResizeDropTarget,
     getTopListDragTarget,
     isAttributeViewTitleTarget,
     isDragTargetInSource,
@@ -2374,7 +2375,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         hideCaretLine();
         // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
-        targetElement = hasClosestByClassName(event.target, "av__gallery-item") || hasClosestByClassName(event.target, "av__gallery-add") ||
+        const superBlockResizeElement = hasClosestByClassName(event.target, "sb__resize");
+        const superBlockResizeTarget = getSuperBlockResizeDropTarget(superBlockResizeElement);
+        targetElement = superBlockResizeTarget || hasClosestByClassName(event.target, "av__gallery-item") || hasClosestByClassName(event.target, "av__gallery-add") ||
             hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") ||
             hasClosestBlock(event.target);
         targetElement = getAVRowDropTarget(targetElement);
@@ -2383,7 +2386,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // 拖拽到属性视图 gallery 内，但没选中 item
             return;
         }
-        const point = {x: event.clientX, y: event.clientY, className: ""};
+        // 横排超级块的调整手柄位于两个直接子块之间，拖拽块经过时表示插入到前一列之后。
+        const point = {x: event.clientX, y: event.clientY, className: superBlockResizeTarget ? "dragover__right" : ""};
 
         // 超级块中有a，b两个段落块，移动到 ab 之间的间隙 targetElement 会变为超级块，需修正为 a
         if (targetElement && (targetElement.classList.contains("bq") || targetElement.classList.contains("sb") || targetElement.classList.contains("list") || targetElement.classList.contains("li"))) {

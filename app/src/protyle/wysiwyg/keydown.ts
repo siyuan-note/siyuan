@@ -17,6 +17,8 @@ import {
     setInsertWbrHTML,
     setLastNodeRange,
 } from "../util/selection";
+import {selectTextToEditorBoundary} from "../util/selectionBoundary";
+import {hasUnloadedDocumentBlocks} from "../util/documentRange";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -65,13 +67,16 @@ import {fontEvent} from "../toolbar/Font";
 import {applyTableCellStyleHotkey} from "../toolbar/tableCell";
 import {
     addSubList,
+    appendListItem,
     insertEmptyChildList,
     insertEmptyListItem,
     listIndent,
     listOutdent,
+    prependListItem,
     toggleTaskListItem
 } from "./list";
 import {
+    getAppendListContext,
     getListContext,
     getListConversionType,
     getListShortcutAction,
@@ -94,7 +99,7 @@ import {scrollCenter} from "../../util/highlightById";
 import {BlockPanel} from "../../block/Panel";
 import * as dayjs from "dayjs";
 import {highlightRender} from "../render/highlightRender";
-import {countBlockWord} from "../../layout/status";
+import {countBlockWord, countSelectWord} from "../../layout/status";
 import {moveToDown, moveToUp} from "./move";
 import {beforePaste, pasteAsPlainText} from "../util/paste";
 import {preventScroll} from "../scroll/preventScroll";
@@ -154,6 +159,13 @@ const showSelectAllTip = () => {
             }
         });
     });
+};
+
+const showSelectAllIncompleteTip = () => {
+    if (window.siyuan.config.appearance.notifications?.selectAllIncompleteTip === false) {
+        return;
+    }
+    showMessage(window.siyuan.languages.selectAllIncompleteTip, 6000, "info", "selectAllIncompleteTip");
 };
 
 const getAdjacentInlineMath = (range: Range, editableElement: Element, previous: boolean): HTMLElement | undefined => {
@@ -638,6 +650,29 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 command: "enterBack",
                 previousRange: range,
             });
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+
+        let selectToPageStart: boolean | undefined;
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.selectToPageStart.custom, event)) {
+            selectToPageStart = true;
+        } else if (matchHotKey(window.siyuan.config.keymap.editor.general.selectToPageEnd.custom, event)) {
+            selectToPageStart = false;
+        }
+        if (selectToPageStart !== undefined) {
+            hideElements(["hint", "select"], protyle);
+            const selectedRange = selectTextToEditorBoundary(protyle.wysiwyg.element, selectToPageStart);
+            if (selectedRange) {
+                if (selectToPageStart) {
+                    protyle.wysiwyg.element.firstElementChild?.scrollIntoView();
+                } else {
+                    protyle.wysiwyg.element.lastElementChild?.scrollIntoView(false);
+                }
+                protyle.toolbar.render(protyle, selectedRange);
+                countSelectWord(selectedRange, protyle.block.rootID);
+            }
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -1379,6 +1414,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectedCurrentContent && !protyle.lite &&
                 !nodeElement.classList.contains("code-block") && !isMobile()) {
                 showSelectAllTip();
+            } else if (!selectedCurrentContent && hasUnloadedDocumentBlocks(
+                protyle.wysiwyg.element,
+                !protyle.lite && !protyle.block.showAll && protyle.block.scroll && !protyle.options.backlinkData
+            )) {
+                showSelectAllIncompleteTip();
             }
             return true;
         }
@@ -2098,6 +2138,22 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             event.stopPropagation();
             return;
+        }
+
+        if (matchHotKey(window.siyuan.config.keymap.editor.list.prependListItem.custom, event) &&
+            !isInEmbedBlock(nodeElement) && getAppendListContext(nodeElement, protyle.wysiwyg.element)) {
+            void prependListItem(protyle, nodeElement, range);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+
+        if (matchHotKey(window.siyuan.config.keymap.editor.list.appendListItem.custom, event) &&
+            !isInEmbedBlock(nodeElement) && getAppendListContext(nodeElement, protyle.wysiwyg.element)) {
+            void appendListItem(protyle, nodeElement, range);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.list.checkToggle.custom, event)) {

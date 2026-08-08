@@ -393,6 +393,7 @@ declare namespace Config {
         workspaceNotSSD: boolean;
         browserCompatibility: boolean;
         selectAllTip?: boolean;
+        selectAllIncompleteTip?: boolean;
     }
 
     /**
@@ -1187,6 +1188,8 @@ declare namespace Config {
         refresh: IKey;
         refTab: IKey;
         rename: IKey;
+        selectToPageEnd: IKey;
+        selectToPageStart: IKey;
         showInFolder: IKey;
         spaceRepetition: IKey;
         switchReadonly: IKey;
@@ -1260,6 +1263,8 @@ declare namespace Config {
      * SiYuan editor list shortcut keys
      */
     export interface IKeymapEditorList extends IKeys {
+        prependListItem: IKey;
+        appendListItem: IKey;
         checkToggle: IKey;
         indent: IKey;
         outdent: IKey;

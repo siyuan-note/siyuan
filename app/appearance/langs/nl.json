@@ -1,4 +1,11 @@
 {
+	"msgSelectAllIncompleteTip": "Waarschuwing voor onvolledige selectie in de editor",
+	"selectAllIncompleteTip": "Let op: sommige niet-geladen inhoudsblokken zijn nog niet geselecteerd",
+	"listBlock": "Lijstblok",
+	"prependListItem": "Lijstitem toevoegen aan het begin van de huidige lijst",
+	"selectToPageStart": "Tekst vanaf de cursor tot het begin van de pagina selecteren",
+	"selectToPageEnd": "Tekst vanaf de cursor tot het einde van de pagina selecteren",
+	"appendListItem": "Lijstitem toevoegen aan het einde van de huidige lijst",
 	"secretAllowedHosts": "Toegestane hosts",
 	"secretAllowedHostsTip": "Hostnamen waarnaar dit geheim mag worden verzonden, gescheiden door komma's, bijv. api.example.com; leeg laten om alle verzoeken te weigeren, en geheimen worden nooit in de aanvraag-URL geïnterpoleerd",
 	"editorMarkdownInlineFullWidthStrikethrough": "Doorhaalopmaak met volledige breedte",

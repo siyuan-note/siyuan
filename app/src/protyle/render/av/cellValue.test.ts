@@ -2,9 +2,43 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     cellValueIsEmpty,
+    cloneAVCellValueSnapshot,
     genRelationAVCellValue,
     getConvertedEmptyAVCellValue,
 } from "./cellValue";
+
+describe("cloneAVCellValueSnapshot", () => {
+    it("preserves empty collection values in transaction snapshots", () => {
+        const assetValue = {type: "mAsset"} as IAVCellValue;
+        const selectValue = {type: "select"} as IAVCellValue;
+
+        assert.deepEqual(cloneAVCellValueSnapshot(assetValue), {
+            type: "mAsset",
+            mAsset: [],
+        });
+        assert.deepEqual(cloneAVCellValueSnapshot(selectValue), {
+            type: "select",
+            mSelect: [],
+        });
+        assert.equal(assetValue.mAsset, undefined);
+        assert.equal(selectValue.mSelect, undefined);
+    });
+
+    it("creates an independent snapshot of populated collection values", () => {
+        const value = {
+            type: "mAsset",
+            mAsset: [{
+                name: "asset.png",
+                content: "assets/asset.png",
+                type: "file",
+            }],
+        } as IAVCellValue;
+        const snapshot = cloneAVCellValueSnapshot(value);
+
+        snapshot.mAsset[0].name = "changed.png";
+        assert.equal(value.mAsset[0].name, "asset.png");
+    });
+});
 
 describe("getConvertedEmptyAVCellValue", () => {
     const emptyBlockValue: IAVCellValue = {

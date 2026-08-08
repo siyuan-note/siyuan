@@ -59,7 +59,9 @@ export const getAVCellSelection = (blockElement: HTMLElement) => {
 };
 
 export const setAVCellSelection = (blockElement: HTMLElement, selection: IAVCellSelection) => {
-    getState(blockElement).cell = selection;
+    const state = getState(blockElement);
+    state.cell = selection;
+    delete state.item;
 };
 
 export const clearAVCellSelectionState = (blockElement: HTMLElement) => {
@@ -107,6 +109,7 @@ export const getAVItemSelection = (blockElement: HTMLElement) => {
 
 export const setAVItemAnchorState = (blockElement: HTMLElement, itemID: string, groupID: string) => {
     const state = getState(blockElement);
+    delete state.cell;
     state.item = {
         anchorID: itemID,
         anchorGroupID: groupID,
@@ -116,7 +119,9 @@ export const setAVItemAnchorState = (blockElement: HTMLElement, itemID: string, 
 };
 
 export const setAVItemSelectionState = (blockElement: HTMLElement, selection: IAVItemSelection) => {
-    getState(blockElement).item = selection;
+    const state = getState(blockElement);
+    state.item = selection;
+    delete state.cell;
 };
 
 export const clearAVItemSelectionState = (blockElement: HTMLElement) => {

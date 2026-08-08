@@ -1,4 +1,11 @@
 {
+	"msgSelectAllIncompleteTip": "تحذير التحديد غير الكامل في المحرر",
+	"selectAllIncompleteTip": "يرجى ملاحظة أن بعض كتل المحتوى غير المحمّلة لا تزال غير محددة",
+	"listBlock": "كتلة قائمة",
+	"prependListItem": "إضافة عنصر قائمة إلى بداية القائمة الحالية",
+	"selectToPageStart": "تحديد النص من المؤشر إلى بداية الصفحة",
+	"selectToPageEnd": "تحديد النص من المؤشر إلى نهاية الصفحة",
+	"appendListItem": "إضافة عنصر قائمة إلى نهاية القائمة الحالية",
 	"secretAllowedHosts": "النطاقات المسموح بها",
 	"secretAllowedHostsTip": "أسماء المضيفات التي يمكن إرسال هذا السر إليها، مفصولة بفواصل، مثل api.example.com؛ اتركها فارغة لرفض جميع الطلبات، ولا يتم إدراج الأسرار في عنوان URL للطلب أبدًا",
 	"editorMarkdownInlineFullWidthStrikethrough": "بناء الشطب بعرض كامل",

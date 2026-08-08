@@ -1,4 +1,4 @@
-import {focusByWbr, getUndoFocusContext} from "../util/selection";
+import {focusByWbr, getEditorRange, getUndoFocusContext} from "../util/selection";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
 import {genEmptyBlock} from "../../block/util";
 import * as dayjs from "dayjs";
@@ -9,7 +9,10 @@ import {getEmbedChildOperationContext, getParentBlock, getPreviousBlockSibling} 
 import {setFold} from "../util/blockFold";
 import {scrollCenter} from "../../util/highlightById";
 import {
+    getAppendListContext,
+    getFirstListItemElement,
     getFollowingOrderedListMarkerUpdates,
+    getLastListItemElement,
     getOrderedListMarkerUpdates,
     type TListSubtype
 } from "./listContext";
@@ -154,6 +157,200 @@ const getFocusedOrderedListUpdates = async (protyle: IProtyle, listItemElement: 
 };
 
 const insertingFocusedListItems = new WeakSet<IProtyle>();
+
+const insertingBoundaryListItems = new WeakSet<IProtyle>();
+
+const getFocusedListElement = async (protyle: IProtyle, listID: string) => {
+    const response = await fetchSyncPost("/api/block/getBlockDOM", {
+        id: listID,
+        notebook: protyle.notebookId,
+    });
+    const template = document.createElement("template");
+    template.innerHTML = response.data?.dom || "";
+    const listElement = template.content.firstElementChild as HTMLElement;
+    if (listElement?.getAttribute("data-type") !== "NodeList") {
+        return;
+    }
+    return listElement;
+};
+
+const getFocusedListTailItem = async (protyle: IProtyle, listID: string, currentListItem?: HTMLElement) => {
+    const tailResponse = await fetchSyncPost("/api/block/getTailChildBlocks", {
+        id: listID,
+        n: 1,
+        notebook: protyle.notebookId,
+    });
+    const tailBlock = tailResponse.data?.[0] as {id?: string, type?: string} | undefined;
+    if (!tailBlock?.id || tailBlock.type !== "i") {
+        return;
+    }
+    if (currentListItem?.getAttribute("data-node-id") === tailBlock.id) {
+        return currentListItem;
+    }
+
+    const domResponse = await fetchSyncPost("/api/block/getBlockDOM", {
+        id: tailBlock.id,
+        notebook: protyle.notebookId,
+    });
+    const template = document.createElement("template");
+    template.innerHTML = domResponse.data?.dom || "";
+    const tailItemElement = template.content.firstElementChild as HTMLElement;
+    if (tailItemElement?.getAttribute("data-type") !== "NodeListItem") {
+        return;
+    }
+    return tailItemElement;
+};
+
+export const appendListItem = async (protyle: IProtyle, nodeElement: HTMLElement, range?: Range) => {
+    if (insertingBoundaryListItems.has(protyle)) {
+        return;
+    }
+    const context = getAppendListContext(nodeElement, protyle.wysiwyg.element);
+    if (!context) {
+        return;
+    }
+
+    insertingBoundaryListItems.add(protyle);
+    try {
+        let tailItemElement: HTMLElement | undefined;
+        if (context.listElement) {
+            tailItemElement = getLastListItemElement(context.listElement);
+        } else if (protyle.block.parentID) {
+            tailItemElement = await getFocusedListTailItem(protyle, protyle.block.parentID,
+                context.listItemElement);
+        }
+        if (!tailItemElement) {
+            return;
+        }
+
+        const tailID = tailItemElement.getAttribute("data-node-id");
+        if (!tailID) {
+            return;
+        }
+        const newListItemElement = genListItemElement(tailItemElement, 0, true);
+        const id = newListItemElement.getAttribute("data-node-id");
+        const editorRange = range || getEditorRange(protyle.wysiwyg.element);
+        const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, editorRange, true);
+        const localPreviousElement = context.listElement ? tailItemElement : context.listItemElement;
+        if (!localPreviousElement?.isConnected) {
+            return;
+        }
+        localPreviousElement.insertAdjacentElement("afterend", newListItemElement);
+        transaction(protyle, [{
+            action: "insert",
+            id,
+            data: newListItemElement.outerHTML,
+            previousID: tailID,
+        }], [{
+            action: "delete",
+            id,
+            context: undoFocusContext,
+        }]);
+        focusByWbr(newListItemElement, editorRange);
+        scrollCenter(protyle, newListItemElement);
+    } finally {
+        insertingBoundaryListItems.delete(protyle);
+    }
+};
+
+export const prependListItem = async (protyle: IProtyle, nodeElement: HTMLElement, range?: Range) => {
+    if (insertingBoundaryListItems.has(protyle)) {
+        return;
+    }
+    const context = getAppendListContext(nodeElement, protyle.wysiwyg.element);
+    if (!context) {
+        return;
+    }
+
+    insertingBoundaryListItems.add(protyle);
+    try {
+        let listElement = context.listElement;
+        if (!listElement && protyle.block.parentID) {
+            listElement = await getFocusedListElement(protyle, protyle.block.parentID);
+        }
+        if (!listElement) {
+            return;
+        }
+        const firstListItemElement = getFirstListItemElement(listElement);
+        const firstID = firstListItemElement?.getAttribute("data-node-id");
+        if (!firstListItemElement || !firstID) {
+            return;
+        }
+
+        let startIndex: number | undefined;
+        if (firstListItemElement.getAttribute("data-subtype") === "o") {
+            const parsedIndex = Number.parseInt(firstListItemElement.getAttribute("data-marker"), 10);
+            startIndex = Number.isFinite(parsedIndex) ? Math.trunc(parsedIndex) : 1;
+        }
+        const newListItemElement = genListItemElement(firstListItemElement, 0, true, startIndex);
+        const id = newListItemElement.getAttribute("data-node-id");
+        const doOperations: IOperation[] = [{
+            action: "insert",
+            id,
+            data: newListItemElement.outerHTML,
+            nextID: firstID,
+        }];
+        const undoOperations: IOperation[] = [];
+        if (startIndex !== undefined) {
+            const listItemElements = Array.from(listElement.children).filter((item) =>
+                item.getAttribute("data-type") === "NodeListItem") as HTMLElement[];
+            const markerUpdates = getFollowingOrderedListMarkerUpdates(
+                newListItemElement.getAttribute("data-marker"),
+                listItemElements.map((item) => item.getAttribute("data-marker")));
+            listItemElements.forEach((item, index) => {
+                const marker = markerUpdates[index];
+                if (!marker) {
+                    return;
+                }
+                const itemID = item.getAttribute("data-node-id");
+                undoOperations.push({
+                    action: "update",
+                    id: itemID,
+                    data: item.outerHTML,
+                });
+                item.setAttribute("data-marker", marker);
+                const actionElement = item.querySelector(".protyle-action--order");
+                if (actionElement) {
+                    actionElement.textContent = marker;
+                }
+                doOperations.push({
+                    action: "update",
+                    id: itemID,
+                    data: item.outerHTML,
+                });
+            });
+        }
+
+        const editorRange = range || getEditorRange(protyle.wysiwyg.element);
+        const localNextElement = context.listElement ? firstListItemElement : context.listItemElement;
+        if (!localNextElement?.isConnected) {
+            return;
+        }
+        if (!context.listElement && startIndex !== undefined) {
+            const currentItemElement = Array.from(listElement.children).find((item) =>
+                item.getAttribute("data-node-id") === context.listItemElement?.getAttribute("data-node-id"));
+            const marker = currentItemElement?.getAttribute("data-marker");
+            if (marker) {
+                context.listItemElement.setAttribute("data-marker", marker);
+                const actionElement = context.listItemElement.querySelector(".protyle-action--order");
+                if (actionElement) {
+                    actionElement.textContent = marker;
+                }
+            }
+        }
+        localNextElement.insertAdjacentElement("beforebegin", newListItemElement);
+        undoOperations.unshift({
+            action: "delete",
+            id,
+            context: getUndoFocusContext(protyle.wysiwyg.element, editorRange, true),
+        });
+        transaction(protyle, doOperations, undoOperations);
+        focusByWbr(newListItemElement, editorRange);
+        scrollCenter(protyle, newListItemElement);
+    } finally {
+        insertingBoundaryListItems.delete(protyle);
+    }
+};
 
 export const insertEmptyListItem = async (protyle: IProtyle, listItemElement: HTMLElement, range: Range) => {
     const listElement = listItemElement.parentElement;

@@ -20,8 +20,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
-	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -394,28 +392,69 @@ func isKnownCloudDrivePath(workspaceAbsPath string) bool {
 		strings.Contains(workspaceAbsPathLower, "天翼云")
 }
 
-func isICloudPath(workspaceAbsPath string) (ret bool) {
-	if !gulu.OS.IsDarwin() {
+func isICloudPath(workspaceAbsPath string) bool {
+	if !gulu.OS.IsDarwin() || !filepath.IsAbs(workspaceAbsPath) {
 		return false
 	}
 
-	workspaceAbsPathLower := strings.ToLower(workspaceAbsPath)
+	workspacePath := ResolveLongestExistingParent(workspaceAbsPath)
+	if existingPath := longestExistingPath(workspacePath); "" != existingPath {
+		isUbiquitous, err := isUbiquitousItem(existingPath)
+		if nil != err {
+			logging.LogDebugf("check iCloud status for path [%s] failed: %s", existingPath, err)
+		} else if isUbiquitous {
+			logging.LogWarnf("workspace [%s] is in iCloud path [%s], detected by system metadata", workspaceAbsPath, existingPath)
+			return true
+		}
+	}
 
 	// macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
 	iCloudRoot := filepath.Join(HomeDir, "Library", "Mobile Documents")
-	WalkWithSymlinks(iCloudRoot, func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() {
-			return nil
+	if resolvedRoot, matched := matchICloudRoot(HomeDir, iCloudRoot, workspacePath); matched {
+		logging.LogWarnf("workspace [%s] is in iCloud path [%s]", workspaceAbsPath, resolvedRoot)
+		return true
+	}
+	return false
+}
+
+func longestExistingPath(path string) string {
+	path = filepath.Clean(path)
+	for {
+		if _, err := os.Stat(path); nil == err {
+			return path
 		}
 
-		if strings.HasPrefix(workspaceAbsPathLower, strings.ToLower(path)) {
-			ret = true
-			logging.LogWarnf("workspace [%s] is in iCloud path [%s]", workspaceAbsPath, path)
-			return io.EOF
+		parent := filepath.Dir(path)
+		if parent == path {
+			return ""
 		}
-		return nil
-	})
-	return
+		path = parent
+	}
+}
+
+func matchICloudRoot(homeDir, iCloudRoot, workspacePath string) (resolvedRoot string, matched bool) {
+	resolvedHome, err := filepath.EvalSymlinks(filepath.Clean(homeDir))
+	if nil != err || !filepath.IsAbs(resolvedHome) {
+		return
+	}
+
+	resolvedRoot, err = filepath.EvalSymlinks(filepath.Clean(iCloudRoot))
+	if nil != err || !filepath.IsAbs(resolvedRoot) || IsPartitionRootPath(resolvedRoot) || resolvedHome == resolvedRoot ||
+		!gulu.File.IsSubPath(resolvedHome, resolvedRoot) {
+		return "", false
+	}
+
+	resolvedWorkspace := ResolveLongestExistingParent(workspacePath)
+	if !filepath.IsAbs(resolvedWorkspace) {
+		return "", false
+	}
+	return resolvedRoot, isSameOrSubPath(resolvedRoot, resolvedWorkspace)
+}
+
+func isSameOrSubPath(root, target string) bool {
+	root = filepath.Clean(root)
+	target = filepath.Clean(target)
+	return root == target || gulu.File.IsSubPath(root, target)
 }
 
 func existAvailabilityStatus(workspaceAbsPath string) bool {

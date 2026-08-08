@@ -1017,43 +1017,113 @@ func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 }
 
 func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction, err error) {
-	tree, err := LoadTreeByBlockID(id)
+	return GetHeadingLevelBatchTransaction([]string{id}, level)
+}
+
+func GetHeadingLevelBatchTransaction(ids []string, level int) (transaction *Transaction, err error) {
+	if len(ids) == 0 || level < 1 || 6 < level {
+		return
+	}
+
+	tree, err := LoadTreeByBlockID(ids[0])
 	if err != nil {
 		return
 	}
 
-	node := treenode.GetNodeInTree(tree, id)
-	if nil == node {
-		err = fmt.Errorf(Conf.Language(15), id)
+	selectedHeadings, valid, missingID := headingLevelSelection(tree, ids)
+	if "" != missingID {
+		err = fmt.Errorf(Conf.Language(15), missingID)
+		return
+	}
+	if !valid || len(selectedHeadings) == 0 {
 		return
 	}
 
-	if ast.NodeHeading != node.Type {
-		return
-	}
-
-	hLevel := node.HeadingLevel
+	hLevel := selectedHeadings[0].HeadingLevel
 	if hLevel == level {
 		return
 	}
 
 	diff := level - hLevel
-	var children, childrenHeadings []*ast.Node
-	children = append(children, node)
-	children = append(children, treenode.HeadingChildren(node)...)
-	for _, c := range children {
-		ccH := c.ChildrenByType(ast.NodeHeading)
-		childrenHeadings = append(childrenHeadings, ccH...)
-	}
+	childrenHeadings := collectHeadingLevelNodes(tree.Root, selectedHeadings)
 	fillBlockRefCount(childrenHeadings, tree.Box)
 
+	var foldedHeadings []*ast.Node
+	for _, heading := range selectedHeadings {
+		if treenode.IsSelfFolded(heading) {
+			foldedHeadings = append(foldedHeadings, heading)
+		}
+	}
+
+	transaction = buildHeadingLevelTransaction(childrenHeadings, foldedHeadings, diff)
+	return
+}
+
+func headingLevelSelection(tree *parse.Tree, ids []string) (ret []*ast.Node, valid bool, missingID string) {
+	if nil == tree || nil == tree.Root || len(ids) == 0 {
+		return
+	}
+
+	selectedIDs := map[string]struct{}{}
+	var parent *ast.Node
+	headingLevel := 0
+	for _, id := range ids {
+		if _, ok := selectedIDs[id]; ok {
+			continue
+		}
+		selectedIDs[id] = struct{}{}
+
+		heading := treenode.GetNodeInTree(tree, id)
+		if nil == heading {
+			return nil, false, id
+		}
+		if ast.NodeHeading != heading.Type {
+			return nil, false, ""
+		}
+		if len(ret) == 0 {
+			parent = heading.Parent
+			headingLevel = heading.HeadingLevel
+		} else if heading.Parent != parent || heading.HeadingLevel != headingLevel {
+			return nil, false, ""
+		}
+		ret = append(ret, heading)
+	}
+	valid = 0 < len(ret)
+	return
+}
+
+func collectHeadingLevelNodes(root *ast.Node, selectedHeadings []*ast.Node) (ret []*ast.Node) {
+	selectedNodes := map[*ast.Node]struct{}{}
+	for _, heading := range selectedHeadings {
+		selectedNodes[heading] = struct{}{}
+		for _, child := range treenode.HeadingChildren(heading) {
+			for _, childHeading := range child.ChildrenByType(ast.NodeHeading) {
+				selectedNodes[childHeading] = struct{}{}
+			}
+		}
+	}
+
+	ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+		if _, ok := selectedNodes[node]; ok {
+			ret = append(ret, node)
+		}
+		return ast.WalkContinue
+	})
+	return
+}
+
+func buildHeadingLevelTransaction(headings, foldedHeadings []*ast.Node, diff int) (transaction *Transaction) {
 	transaction = &Transaction{}
-	if treenode.IsSelfFolded(node) {
-		unfoldHeading(node, node)
+	for _, heading := range foldedHeadings {
+		treenode.SetSelfFolded(heading, false)
+		transaction.DoOperations = append(transaction.DoOperations, &Operation{Action: "unfoldHeading", ID: heading.ID})
 	}
 
 	luteEngine := util.NewLute()
-	for _, c := range childrenHeadings {
+	for _, c := range headings {
 		op := &Operation{}
 		op.ID = c.ID
 		op.Action = "update"
@@ -1072,6 +1142,9 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 		op.Action = "update"
 		op.Data = luteEngine.RenderNodeBlockDOM(cleanRenderNode(c, false))
 		transaction.DoOperations = append(transaction.DoOperations, op)
+	}
+	for _, heading := range foldedHeadings {
+		transaction.UndoOperations = append(transaction.UndoOperations, &Operation{Action: "foldHeading", ID: heading.ID})
 	}
 	return
 }

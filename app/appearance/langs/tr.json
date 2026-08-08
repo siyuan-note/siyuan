@@ -1,4 +1,11 @@
 {
+	"msgSelectAllIncompleteTip": "Düzenleyicide eksik tümünü seçme uyarısı",
+	"selectAllIncompleteTip": "Lütfen bazı yüklenmemiş içerik bloklarının seçilmediğini unutmayın",
+	"listBlock": "Liste bloğu",
+	"prependListItem": "Geçerli listenin başına liste öğesi ekle",
+	"selectToPageStart": "İmleçten sayfanın başına kadar metni seç",
+	"selectToPageEnd": "İmleçten sayfanın sonuna kadar metni seç",
+	"appendListItem": "Geçerli listenin sonuna liste öğesi ekle",
 	"secretAllowedHosts": "İzin verilen sunucular",
 	"secretAllowedHostsTip": "Bu sırrın gönderilebileceği, virgülle ayrılmış sunucu adları, ör. api.example.com; tüm istekleri reddetmek için boş bırakın ve sırlar istek URL'sine asla eklenmez",
 	"editorMarkdownInlineFullWidthStrikethrough": "Tam genişlikli üstü çizili sözdizimi",

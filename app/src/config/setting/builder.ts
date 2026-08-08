@@ -134,6 +134,7 @@ type ButtonSpec = {
     desc?: string;
     label: string;
     icon: string;
+    keywords?: string[];
     afterMount?: (root: HTMLElement) => void | Promise<void>;
 };
 
@@ -328,7 +329,8 @@ class SettingGroupBuilder<TId extends string> {
     button(spec: ButtonSpec) {
         this.slot({
             key: `button_${spec.id}`,
-            keywords: [spec.title, spec.desc, spec.label].filter((s): s is string => Boolean(s)),
+            keywords: [spec.title, spec.desc, spec.label, ...(spec.keywords ?? [])]
+                .filter((s): s is string => Boolean(s)),
             html: () => genButtonRowHtml(spec.id, spec.title, spec.desc, spec.label, spec.icon),
             afterMount: spec.afterMount,
         });

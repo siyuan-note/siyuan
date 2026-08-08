@@ -246,8 +246,12 @@ export const selectRow = (checkElement: Element, type: "toggle" | "select" | "un
     }
     const useElement = checkElement.querySelector("use");
     const bodyElement = hasClosestByClassName(rowElement, "av__body") as HTMLElement;
+    const blockElement = hasClosestByClassName(rowElement, "av") as HTMLElement;
+    if (blockElement && (type === "select" ||
+        (type === "toggle" && useElement.getAttribute("xlink:href") !== "#iconCheck"))) {
+        clearSelect(["cell"], blockElement);
+    }
     if (rowElement.classList.contains("av__row--header") || type === "unselectAll") {
-        const blockElement = hasClosestByClassName(rowElement, "av") as HTMLElement;
         if (blockElement) {
             clearAVItemSelectionState(blockElement);
         }

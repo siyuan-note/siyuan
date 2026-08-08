@@ -1,4 +1,11 @@
 {
+	"msgSelectAllIncompleteTip": "Upozornenie na neúplný výber v editore",
+	"selectAllIncompleteTip": "Upozorňujeme, že niektoré nenačítané bloky obsahu neboli vybrané",
+	"listBlock": "Blok zoznamu",
+	"prependListItem": "Pridať položku na začiatok aktuálneho zoznamu",
+	"selectToPageStart": "Vybrať text od kurzora po začiatok stránky",
+	"selectToPageEnd": "Vybrať text od kurzora po koniec stránky",
+	"appendListItem": "Pridať položku na koniec aktuálneho zoznamu",
 	"secretAllowedHosts": "Povolené hostitele",
 	"secretAllowedHostsTip": "Názvy hostiteľov, na ktoré možno tento tajný kľúč odoslať, oddelené čiarkami, napr. api.example.com; nechajte prázdne, aby sa zamietli všetky požiadavky, a tajné kľúče sa nikdy nedosadzujú do URL požiadavky",
 	"editorMarkdownInlineFullWidthStrikethrough": "Plnošírková syntax prečiarknutia",

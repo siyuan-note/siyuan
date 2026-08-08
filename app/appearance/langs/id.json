@@ -1,4 +1,11 @@
 {
+	"msgSelectAllIncompleteTip": "Peringatan pilih semua tidak lengkap di editor",
+	"selectAllIncompleteTip": "Perhatikan bahwa masih ada blok konten yang belum dimuat dan belum dipilih",
+	"listBlock": "Blok daftar",
+	"prependListItem": "Tambahkan item daftar ke awal daftar saat ini",
+	"selectToPageStart": "Pilih teks dari kursor hingga awal halaman",
+	"selectToPageEnd": "Pilih teks dari kursor hingga akhir halaman",
+	"appendListItem": "Tambahkan item daftar ke akhir daftar saat ini",
 	"secretAllowedHosts": "Host yang diizinkan",
 	"secretAllowedHostsTip": "Nama host yang boleh menerima rahasia ini, dipisahkan koma, mis. api.example.com; biarkan kosong untuk menolak semua permintaan, dan rahasia tidak pernah disisipkan ke URL permintaan",
 	"editorMarkdownInlineFullWidthStrikethrough": "Sintaks coret lebar penuh",

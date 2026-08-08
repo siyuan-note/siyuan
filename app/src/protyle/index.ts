@@ -51,6 +51,7 @@ import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
 import {setFoldById, zoomOut} from "../menus/protyle";
 import {setEditMode} from "./util/setEditMode";
+import {waitForPendingTransactions} from "./util/transactionQueue";
 
 export class Protyle {
 
@@ -540,6 +541,11 @@ export class Protyle {
 
     public insert(html: string, isBlock = false, useProtyleRange = false) {
         insertHTML(html, this.protyle, isBlock, useProtyleRange);
+    }
+
+    public async flushPendingTransactions() {
+        await this.protyle.wysiwyg.flushPendingInput();
+        await waitForPendingTransactions(this.protyle);
     }
 
     public transaction(doOperations: IOperation[], undoOperations?: IOperation[]) {

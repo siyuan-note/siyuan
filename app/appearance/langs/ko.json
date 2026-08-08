@@ -1,4 +1,11 @@
 {
+	"msgSelectAllIncompleteTip": "편집기 전체 선택 누락 경고",
+	"selectAllIncompleteTip": "아직 불러오지 않아 선택되지 않은 콘텐츠 블록이 있습니다",
+	"listBlock": "목록 블록",
+	"prependListItem": "현재 목록 시작 부분에 목록 항목 추가",
+	"selectToPageStart": "커서부터 페이지 시작까지 텍스트 선택",
+	"selectToPageEnd": "커서부터 페이지 끝까지 텍스트 선택",
+	"appendListItem": "현재 목록 끝에 목록 항목 추가",
 	"secretAllowedHosts": "허용된 호스트",
 	"secretAllowedHostsTip": "이 시크릿을 보낼 수 있는 호스트 이름을 쉼표로 구분해 입력합니다(예: api.example.com). 비워두면 모든 요청을 거부하며, 시크릿은 요청 URL에 삽입되지 않습니다",
 	"editorMarkdownInlineFullWidthStrikethrough": "전각 취소선 구문",

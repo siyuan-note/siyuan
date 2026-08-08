@@ -14,6 +14,7 @@ import {getCurrentEditor} from "../editor";
 import {Constants} from "../../constants";
 import {getEmbedChildOperationContext} from "../../protyle/wysiwyg/getBlock";
 import {backModel} from "../menu/model";
+import {hasVisibleSelectionText} from "./touchSelection";
 
 let clientX: number;
 let clientY: number;
@@ -27,6 +28,7 @@ let scrollBlock: boolean;
 let isFirstMove = true;
 // 长按进入多选的定时器
 let longPressTimer: number;
+let longPressBlockElement: HTMLElement;
 
 const popSide = (render = true) => {
     if (render) {
@@ -45,9 +47,34 @@ const clearLongPress = () => {
     }
 };
 
+const clearInvisibleEditorSelection = () => {
+    const editor = getCurrentEditor();
+    const selection = window.getSelection();
+    if (!editor || !selection || selection.rangeCount === 0) {
+        return false;
+    }
+    const range = selection.getRangeAt(0);
+    if (range.collapsed || hasVisibleSelectionText(range.toString()) ||
+        !editor.protyle.wysiwyg.element.contains(range.startContainer) ||
+        !editor.protyle.wysiwyg.element.contains(range.endContainer)) {
+        return false;
+    }
+    selection.removeAllRanges();
+    activeBlur();
+    return true;
+};
+
 export const handleTouchUp = () => {
     if (Date.now() - time < Constants.TIMEOUT_MULTIPLE_SELECT) {
         clearLongPress();
+    }
+    clearInvisibleEditorSelection();
+    longPressBlockElement = undefined;
+};
+
+export const handleTouchSelectionChange = () => {
+    if (longPressBlockElement) {
+        clearInvisibleEditorSelection();
     }
 };
 
@@ -226,6 +253,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
 
 export const handleTouchStart = (event: TouchEvent) => {
     time = Date.now();
+    longPressBlockElement = undefined;
     const target = event.touches[0].target as HTMLElement;
     if (0 < event.touches.length && (target.tagName === "VIDEO" || target.tagName === "AUDIO")) {
         // https://github.com/siyuan-note/siyuan/issues/14569
@@ -271,11 +299,13 @@ export const handleTouchStart = (event: TouchEvent) => {
     if (clientX && clientY && editor && !editor.protyle.toolbar.isMultiSelectMode()) {
         const blockElement = hasClosestBlock(target);
         if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
+            longPressBlockElement = blockElement;
             longPressTimer = window.setTimeout(() => {
+                clearInvisibleEditorSelection();
                 const selection = window.getSelection();
                 if (selection?.rangeCount > 0) {
                     const range = selection.getRangeAt(0);
-                    if (!range.collapsed && range.toString().replace(Constants.ZWSP, "") !== "" &&
+                    if (!range.collapsed && hasVisibleSelectionText(range.toString()) &&
                         editor.protyle.wysiwyg.element.contains(range.startContainer) &&
                         editor.protyle.wysiwyg.element.contains(range.endContainer)) {
                         longPressTimer = undefined;

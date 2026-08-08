@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {
     getGutterSelection,
     getGutterSelectionTarget,
+    getSameContainerHeadingLevel,
     isCrossBlockTextRange,
     isGutterInsertStateMatched
 } from "./multiSelect";
@@ -10,6 +11,7 @@ import {
 class TestElement {
     parentElement: TestElement | null = null;
     children: TestElement[] = [];
+    attributes = new Map<string, string>();
 
     append(...elements: TestElement[]) {
         elements.forEach(element => {
@@ -17,6 +19,15 @@ class TestElement {
             this.children.push(element);
         });
         return this;
+    }
+
+    setAttribute(name: string, value: string) {
+        this.attributes.set(name, value);
+        return this;
+    }
+
+    getAttribute(name: string) {
+        return this.attributes.get(name) || null;
     }
 
     contains(element: TestElement) {
@@ -32,6 +43,52 @@ class TestElement {
 }
 
 const asElement = (element: TestElement) => element as unknown as Element;
+
+const heading = (level: number) => asElement(new TestElement()
+    .setAttribute("data-type", "NodeHeading")
+    .setAttribute("data-subtype", `h${level}`));
+
+describe("getSameContainerHeadingLevel", () => {
+    it("returns the level for headings in the same block container", () => {
+        const parent = new TestElement();
+        const first = heading(2);
+        const second = heading(2);
+        parent.append(first as unknown as TestElement, second as unknown as TestElement);
+
+        assert.equal(getSameContainerHeadingLevel([first, second]), 2);
+    });
+
+    it("accepts non-contiguous headings in the same block container", () => {
+        const parent = new TestElement();
+        const first = heading(3);
+        const paragraph = new TestElement().setAttribute("data-type", "NodeParagraph");
+        const second = heading(3);
+        parent.append(first as unknown as TestElement, paragraph, second as unknown as TestElement);
+
+        assert.equal(getSameContainerHeadingLevel([first, second]), 3);
+    });
+
+    it("rejects mixed levels, block types, and containers", () => {
+        const parent = new TestElement();
+        const first = heading(1);
+        const second = heading(2);
+        const paragraph = asElement(new TestElement().setAttribute("data-type", "NodeParagraph"));
+        parent.append(first as unknown as TestElement, second as unknown as TestElement,
+            paragraph as unknown as TestElement);
+
+        assert.equal(getSameContainerHeadingLevel([first, second]), undefined);
+        assert.equal(getSameContainerHeadingLevel([first, paragraph]), undefined);
+
+        const otherParent = new TestElement();
+        const otherHeading = heading(1);
+        otherParent.append(otherHeading as unknown as TestElement);
+        assert.equal(getSameContainerHeadingLevel([first, otherHeading]), undefined);
+    });
+
+    it("requires an actual multiple selection", () => {
+        assert.equal(getSameContainerHeadingLevel([heading(1)]), undefined);
+    });
+});
 
 describe("getGutterSelection", () => {
     it("keeps the regular gutter behavior for a single selected block", () => {

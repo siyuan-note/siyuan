@@ -1,4 +1,11 @@
 {
+	"msgSelectAllIncompleteTip": "एडिटर में अपूर्ण चयन चेतावनी",
+	"selectAllIncompleteTip": "ध्यान दें कि कुछ लोड नहीं किए गए सामग्री ब्लॉक अभी भी नहीं चुने गए हैं",
+	"listBlock": "सूची ब्लॉक",
+	"prependListItem": "वर्तमान सूची की शुरुआत में सूची आइटम जोड़ें",
+	"selectToPageStart": "कर्सर से पृष्ठ के आरंभ तक टेक्स्ट चुनें",
+	"selectToPageEnd": "कर्सर से पृष्ठ के अंत तक टेक्स्ट चुनें",
+	"appendListItem": "वर्तमान सूची के अंत में सूची आइटम जोड़ें",
 	"secretAllowedHosts": "अनुमत होस्ट",
 	"secretAllowedHostsTip": "वे होस्टनाम जिन्हें यह गुप्त मान भेजा जा सकता है, अल्पविराम से अलग किए गए, जैसे api.example.com; सभी अनुरोध अस्वीकार करने के लिए खाली छोड़ें, और गुप्त मान कभी भी अनुरोध URL में प्रतिस्थापित नहीं होते",
 	"editorMarkdownInlineFullWidthStrikethrough": "पूर्ण-चौड़ाई स्ट्राइकथ्रू सिंटैक्स",

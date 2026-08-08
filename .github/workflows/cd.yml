@@ -210,20 +210,6 @@ jobs:
           GOPATH: ${{ github.workspace }}/go
           GOARCH: ${{ matrix.config.goarch }}
 
-      - name: Start Building Electron App (Background)
-        if: matrix.config.e2e_shards != ''
-        shell: bash
-        run: |
-          (
-            set +e
-            pnpm run ${{ matrix.config.electron_args }}
-            exit_code="$?"
-            echo "${exit_code}" > "${RUNNER_TEMP}/electron-build.exit"
-            exit "${exit_code}"
-          ) > "${RUNNER_TEMP}/electron-build.log" 2>&1 < /dev/null &
-          echo "$!" > "${RUNNER_TEMP}/electron-build.pid"
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
-
       - name: Checkout siyuan-testing
         if: matrix.config.e2e_shards != ''
         continue-on-error: true
@@ -402,43 +388,11 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Wait for Electron Packaging
-        if: always() && matrix.config.e2e_shards != ''
-        shell: bash
-        run: |
-          pid="$(cat "${RUNNER_TEMP}/electron-build.pid" 2>/dev/null)"
-          exit_code=""
-          for attempt in {1..120}; do
-            if [ -f "${RUNNER_TEMP}/electron-build.exit" ]; then
-              exit_code="$(cat "${RUNNER_TEMP}/electron-build.exit")"
-              break
-            fi
-            if ! kill -0 "${pid}" 2>/dev/null; then
-              cat "${RUNNER_TEMP}/electron-build.log"
-              echo "::error::Electron packaging process exited unexpectedly"
-              exit 1
-            fi
-            sleep 5
-          done
-          if [ -z "${exit_code}" ]; then
-            cat "${RUNNER_TEMP}/electron-build.log"
-            echo "::error::Electron packaging timed out"
-            kill -KILL "${pid}" 2>/dev/null || true
-            exit 1
-          fi
-          if [ "${exit_code}" -ne 0 ]; then
-            cat "${RUNNER_TEMP}/electron-build.log"
-          else
-            tail -n 20 "${RUNNER_TEMP}/electron-build.log"
-          fi
-          exit "${exit_code}"
-
       - name: Install RPM build tools
         if: matrix.config.goos == 'linux'
         run: sudo apt-get install -y rpm
 
       - name: Building Electron App
-        if: matrix.config.e2e_shards == ''
         run: pnpm run ${{ matrix.config.electron_args }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
 

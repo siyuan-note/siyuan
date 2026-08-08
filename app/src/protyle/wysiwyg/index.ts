@@ -307,10 +307,10 @@ export class WYSIWYG {
     private preventInput: boolean;
     private copyAsRichText = false;
     private inputTimeout: number;
-    private pendingInputTimeouts = new Map<number, () => void>();
+    private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
     public tableControl: TableControl;
 
-    private scheduleInput(callback: () => void, delay = 0, replace = true) {
+    private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
             clearTimeout(this.inputTimeout);
             this.pendingInputTimeouts.delete(this.inputTimeout);
@@ -320,7 +320,7 @@ export class WYSIWYG {
             if (this.inputTimeout === timeout) {
                 this.inputTimeout = undefined;
             }
-            callback();
+            void callback();
         }, delay);
         this.pendingInputTimeouts.set(timeout, callback);
         if (replace) {
@@ -328,12 +328,12 @@ export class WYSIWYG {
         }
     }
 
-    public flushPendingInput() {
+    public async flushPendingInput() {
         const callbacks = Array.from(this.pendingInputTimeouts.values());
         this.pendingInputTimeouts.forEach((callback, timeout) => clearTimeout(timeout));
         this.pendingInputTimeouts.clear();
         this.inputTimeout = undefined;
-        callbacks.forEach(callback => callback());
+        await Promise.all(callbacks.map(callback => callback()));
     }
 
     public copyRichText() {
@@ -1064,7 +1064,8 @@ export class WYSIWYG {
             }
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
             const galleryItemElement = hasClosestByClassName(target, "av__gallery-item");
-            const avCellElement = hasClosestByClassName(target, "av__cell") as HTMLElement;
+            const rowElement = hasClosestByClassName(target, "av__row");
+            const avCellElement = hasClosestByClassName(target, "av__cell");
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
             const mostLeft = wysiwygRect.left + (parseInt(wysiwygStyle.paddingLeft) || 24) + 1;
@@ -1082,7 +1083,7 @@ export class WYSIWYG {
                 getSelection().getRangeAt(0).cloneRange() : undefined;
             if (event.shiftKey) {
                 if (!isMobile() && !protyle.disabled && nodeElement?.dataset.avType === "table" &&
-                    avCellElement?.dataset.id &&
+                    avCellElement && avCellElement.dataset.id &&
                     selectAVCellRange(nodeElement, avCellElement)) {
                     focusBlock(nodeElement);
                     this.preventClick = true;
@@ -1090,8 +1091,9 @@ export class WYSIWYG {
                     event.stopPropagation();
                     return;
                 }
-                if (!hasSelectClassElement && galleryItemElement &&
-                    selectAVItemRange(nodeElement, galleryItemElement as HTMLElement)) {
+                const itemElement = galleryItemElement ||
+                    (rowElement && !rowElement.classList.contains("av__row--header") ? rowElement : false);
+                if (!hasSelectClassElement && itemElement && selectAVItemRange(nodeElement, itemElement)) {
                     focusBlock(nodeElement);
                     this.preventClick = true;
                     event.preventDefault();
@@ -1115,7 +1117,6 @@ export class WYSIWYG {
             }
             if (isOnlyMeta(event) && !event.shiftKey && !event.altKey && !startsFromPadding) {
                 let ctrlElement = nodeElement;
-                const rowElement = hasClosestByClassName(target, "av__row");
                 if (!hasSelectClassElement && (galleryItemElement || (rowElement && !rowElement.classList.contains("av__row--header")))) {
                     if (galleryItemElement) {
                         const galleryBodyElement = hasClosestByClassName(galleryItemElement, "av__body") as HTMLElement;
@@ -1429,7 +1430,7 @@ export class WYSIWYG {
                 const dragColId = dragElement.getAttribute("data-col-id");
                 const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
                 const headerElement = hasClosestByClassName(target, "av__row--header") as HTMLElement;
-                const scrollElement = nodeElement.querySelector(".av__scroll");
+                const scrollElement = nodeElement.querySelector<HTMLElement>(".av__scroll");
                 if (!dragColId || !bodyElement || !headerElement || !scrollElement) {
                     return;
                 }
@@ -1451,29 +1452,23 @@ export class WYSIWYG {
                 const snapGuideThreshold = 16;
                 const snapGuideRight = previousWidth === undefined ? undefined :
                     initialDragRight + (previousWidth - oldWidth) * widthScale;
-                const headerRect = headerElement.getBoundingClientRect();
-                const headerTop = headerRect.top;
-                const guideHeight = Math.round(headerRect.height);
+                const resizeScrollSpacer = document.createElement("div");
+                resizeScrollSpacer.className = "av__width-scroll-spacer";
+                resizeScrollSpacer.style.width = `${scrollElement.scrollWidth}px`;
+                scrollElement.appendChild(resizeScrollSpacer);
                 let newWidth = oldWidth;
                 let resizeSnapped = false;
                 let resizeGuide: HTMLElement;
                 let resizeTip: HTMLElement;
                 let pendingResize: { width: number, snapped: boolean } | undefined;
                 let resizeAnimationFrame: number | undefined;
-                target.classList.add("av__widthdrag--active");
-                const clearResizePreview = () => {
-                    target.classList.remove("av__widthdrag--active");
-                    resizeGuide?.remove();
-                    resizeTip?.remove();
-                };
                 const updateResizePreview = (snapped: boolean) => {
+                    const currentHeaderRect = headerElement.getBoundingClientRect();
                     if (!resizeTip) {
                         if (snapGuideRight !== undefined) {
                             resizeGuide = document.createElement("div");
                             resizeGuide.className = "av__width-guide";
                             resizeGuide.style.left = `${snapGuideRight}px`;
-                            resizeGuide.style.top = `${Math.round(headerTop)}px`;
-                            resizeGuide.style.height = `${guideHeight}px`;
                             document.body.appendChild(resizeGuide);
                         }
                         resizeTip = document.createElement("div");
@@ -1483,12 +1478,23 @@ export class WYSIWYG {
                     const showSnapGuide = !snapped && typeof previousWidth === "number" &&
                         Math.abs(newWidth - previousWidth) <= snapGuideThreshold;
                     resizeGuide?.classList.toggle("fn__none", !showSnapGuide);
+                    if (resizeGuide) {
+                        resizeGuide.style.top = `${Math.round(currentHeaderRect.top)}px`;
+                        resizeGuide.style.height = `${Math.round(currentHeaderRect.height)}px`;
+                    }
                     const dragRight = initialDragRight + (newWidth - oldWidth) * widthScale;
                     resizeTip.style.left = `${dragRight}px`;
-                    resizeTip.style.top = `${Math.round(headerTop)}px`;
+                    resizeTip.style.top = `${Math.round(currentHeaderRect.top)}px`;
                     resizeTip.textContent = `${newWidth}px${snapped ?
                         window.siyuan.languages.sameWidthAsLeftColumnTip : ""}`;
                 };
+                const clearResizePreview = () => {
+                    target.classList.remove("av__widthdrag--active");
+                    resizeScrollSpacer.remove();
+                    resizeGuide?.remove();
+                    resizeTip?.remove();
+                };
+                target.classList.add("av__widthdrag--active");
                 updateResizePreview(resizeSnapped);
                 const flushResize = () => {
                     if (!pendingResize) {
@@ -3930,19 +3936,15 @@ export class WYSIWYG {
                 // 百度输入法中文反双引号 https://github.com/siyuan-note/siyuan/issues/9686
                 event.data === "”" ||
                 event.data === "「")) {
-                this.scheduleInput(() => {
-                    // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
-                    input(protyle, blockElement, range, true);
-                });
+                // 搜狗拼音数字后面句号变为点；Mac 反向双引号无法输入
+                this.scheduleInput(() => input(protyle, blockElement, range, true));
             } else {
                 if (isMac() && event.data === "【】") {
-                    this.scheduleInput(() => {
-                        input(protyle, blockElement, range, true, event);
-                    }, Constants.TIMEOUT_INPUT, false);
+                    this.scheduleInput(() => input(protyle, blockElement, range, true, event),
+                        Constants.TIMEOUT_INPUT, false);
                 } else {
-                    this.scheduleInput(() => {
-                        input(protyle, blockElement, range, true, event, lineBreakInputOperations);
-                    });
+                    this.scheduleInput(() => input(protyle, blockElement, range, true, event,
+                        lineBreakInputOperations));
                 }
             }
             event.stopPropagation();

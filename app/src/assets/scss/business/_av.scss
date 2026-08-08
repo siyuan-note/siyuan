@@ -1186,6 +1186,14 @@
     z-index: 1000;
   }
 
+  &__width-scroll-spacer {
+    height: 1px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+  }
+
   &__width-tip {
     background-color: var(--b3-tooltips-background);
     border-radius: var(--b3-border-radius);

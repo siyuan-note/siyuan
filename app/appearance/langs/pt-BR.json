@@ -1,4 +1,11 @@
 {
+	"msgSelectAllIncompleteTip": "Aviso de seleção incompleta no editor",
+	"selectAllIncompleteTip": "Observe que ainda há blocos de conteúdo não carregados que não foram selecionados",
+	"listBlock": "Bloco de lista",
+	"prependListItem": "Adicionar item ao início da lista atual",
+	"selectToPageStart": "Selecionar texto do cursor até o início da página",
+	"selectToPageEnd": "Selecionar texto do cursor até o fim da página",
+	"appendListItem": "Adicionar item ao final da lista atual",
 	"secretAllowedHosts": "Hosts permitidos",
 	"secretAllowedHostsTip": "Nomes de host para os quais este segredo pode ser enviado, separados por vírgulas, ex.: api.example.com; deixe vazio para negar todas as solicitações, e segredos nunca são interpolados na URL da solicitação",
 	"editorMarkdownInlineFullWidthStrikethrough": "Sintaxe de tachado de largura completa",

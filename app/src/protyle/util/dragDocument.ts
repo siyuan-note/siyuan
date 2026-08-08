@@ -75,6 +75,22 @@ export const getSameSuperBlockEdgeTarget = (sourceElements: Element[], targetEle
     return childBlocks[isRight ? childBlocks.length - 1 : 0];
 };
 
+export const getSuperBlockResizeDropTarget = (resizeElement: HTMLElement | false): HTMLElement | undefined => {
+    if (!resizeElement || !resizeElement.classList.contains("sb__resize")) {
+        return;
+    }
+    const superBlock = resizeElement.parentElement;
+    if (superBlock?.getAttribute("data-type") !== "NodeSuperBlock" ||
+        superBlock.getAttribute("data-sb-layout") !== "col") {
+        return;
+    }
+    let targetElement = resizeElement.previousElementSibling as HTMLElement;
+    while (targetElement && !targetElement.hasAttribute("data-node-id")) {
+        targetElement = targetElement.previousElementSibling as HTMLElement;
+    }
+    return targetElement;
+};
+
 export const getTopListDragTarget = (targetElement: Element) => {
     let topList = targetElement;
     while (topList.parentElement?.classList.contains("li") ||

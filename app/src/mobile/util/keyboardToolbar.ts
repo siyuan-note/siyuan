@@ -18,6 +18,7 @@ import {callMobileAppShowKeyboard, canInput, keyboardLockUntil} from "./mobileAp
 import {isNotEditBlock} from "../../protyle/wysiwyg/getBlock";
 import {getMirror, getUndoRootID, hasUndoStateMirror, initMirror} from "../../protyle/undo/globalUndo";
 import {getMobilePluginToolbarItems} from "./pluginToolbar";
+import {hasVisibleSelectionText} from "./touchSelection";
 
 let renderKeyboardToolbarTimeout: number;
 let scrollSelectionIntoViewTimeout: number;
@@ -704,6 +705,24 @@ export const hideKeyboardToolbar = () => {
     if (modelElement.style.transform === "translateX(0px)") {
         modelElement.style.paddingBottom = "";
     }
+};
+
+export const hideKeyboardToolbarByApp = () => {
+    preventKeyboardToolbarRender();
+    hideKeyboardToolbar();
+    const editor = getCurrentEditor();
+    const selection = getSelection();
+    if (!editor || !selection || selection.rangeCount === 0 || selection.isCollapsed) {
+        return;
+    }
+    const range = selection.getRangeAt(0);
+    if (!hasVisibleSelectionText(range.toString()) ||
+        !editor.protyle.wysiwyg.element.contains(range.startContainer) ||
+        !editor.protyle.wysiwyg.element.contains(range.endContainer)) {
+        return;
+    }
+    (document.activeElement as HTMLElement)?.blur();
+    selection.removeAllRanges();
 };
 
 export const activeBlur = () => {

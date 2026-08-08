@@ -73,6 +73,58 @@ test("sortable entry catalog groups contain valid separator positions", () => {
     });
 });
 
+test("list block submenu follows the base block entries", () => {
+    const children = getEntryCatalogChildren("gutter.single");
+    const deleteIndex = children.findIndex((item) => item.key === "delete");
+    const separator = children[deleteIndex + 1];
+    const listBlock = children[deleteIndex + 2];
+
+    assert.ok(0 <= deleteIndex);
+    assert.equal(separator?.key, "separator_listBlock");
+    assert.equal(separator?.type, "separator");
+    assert.equal(listBlock?.key, "listBlock");
+    assert.equal(listBlock?.type, "entry");
+    assert.equal(listBlock?.simple, true);
+    assert.deepEqual(listBlock?.children?.map((item) => item.key), ["prependListItem", "appendListItem"]);
+});
+
+test("super block actions and vertical alignment use their respective menu groups", () => {
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.superBlock").map((item) => item.key), [
+        "cancelSuperBlock",
+        "turnIntoVLayout",
+        "turnIntoHLayout",
+    ]);
+
+    const singleLayoutKeys = getEntryCatalogChildren("gutter.single.layout").map((item) => item.key);
+    const horizontalSeparatorIndex = singleLayoutKeys.indexOf("separator_1");
+    assert.deepEqual(singleLayoutKeys.slice(horizontalSeparatorIndex + 1, horizontalSeparatorIndex + 6), [
+        "alignTop",
+        "alignMiddle",
+        "alignBottom",
+        "useDefaultVerticalAlign",
+        "separator_verticalAlign",
+    ]);
+    assert.equal(getEntryCatalogChildren("gutter.multi.layout").some((item) => item.key === "alignTop"), false);
+});
+
+test("multiple block heading transform follows the regular transform menu", () => {
+    const children = getEntryCatalogChildren("gutter.multi");
+
+    assert.deepEqual(children.slice(0, 3).map((item) => item.key), [
+        "turnInto",
+        "tWithSubtitle",
+        "mergeSuperBlock",
+    ]);
+    assert.deepEqual(getEntryCatalogChildren("gutter.multi.tWithSubtitle").map((item) => item.key), [
+        "heading1",
+        "heading2",
+        "heading3",
+        "heading4",
+        "heading5",
+        "heading6",
+    ]);
+});
+
 test("simple profile follows the reviewed defaults", () => {
     const shown = [
         "document.title.copy.copyBlockEmbed",
@@ -80,10 +132,10 @@ test("simple profile follows the reviewed defaults", () => {
         "document.title.export.exportImage",
         "gutter.single.addToAgent",
         "gutter.single.turnInto.code",
-        "gutter.single.superBlock.superBlockAlignment.alignTop",
-        "gutter.single.superBlock.superBlockAlignment.alignMiddle",
-        "gutter.single.superBlock.superBlockAlignment.alignBottom",
-        "gutter.single.superBlock.superBlockAlignment.useDefaultVerticalAlign",
+        "gutter.single.layout.alignTop",
+        "gutter.single.layout.alignMiddle",
+        "gutter.single.layout.alignBottom",
+        "gutter.single.layout.useDefaultVerticalAlign",
         "gutter.single.table.tableHeaderRow",
         "gutter.single.table.tableHeaderColumn",
         "gutter.single.table.alignment.alignTop",

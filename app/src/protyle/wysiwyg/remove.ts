@@ -98,11 +98,12 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
                                      startElement: HTMLElement, endElement: HTMLElement,
                                      mergeEndElement = true) => {
     const ranges = getBlockRanges(editorElement, selectedRange);
+    const rangeStartElement = ranges[0]?.blockElement || startElement;
     const selectedElements: HTMLElement[] = [];
     selectedRange.cloneContents().querySelectorAll<HTMLElement>("[data-node-id]").forEach(item => {
         const element = editorElement.querySelector<HTMLElement>(`[data-node-id="${item.getAttribute("data-node-id")}"]`);
-        if (!element || selectedElements.includes(element) || element === startElement || element === endElement ||
-            element.contains(startElement) || element.contains(endElement) || isInEmbedBlock(element)) {
+        if (!element || selectedElements.includes(element) || element === rangeStartElement || element === endElement ||
+            element.contains(rangeStartElement) || element.contains(endElement) || isInEmbedBlock(element)) {
             return;
         }
         const elementRange = document.createRange();
@@ -127,18 +128,18 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
         rangesByBlock.set(item.blockElement, blockRanges);
     });
 
-    const startEditableElement = rangesByBlock.get(startElement)?.[0]?.editableElement;
+    const startEditableElement = rangesByBlock.get(rangeStartElement)?.[0]?.editableElement;
     const endEditableElement = rangesByBlock.get(endElement)?.[0]?.editableElement;
-    const blockType = startElement.getAttribute("data-type");
+    const blockType = rangeStartElement.getAttribute("data-type");
     let removeEndElement: Element;
     const siblingListItemMergeContext = getCrossBlockSiblingListItemMergeContext(
-        editorElement, startElement, endElement);
-    if (mergeEndElement && startElement !== endElement && startEditableElement && endEditableElement &&
+        editorElement, rangeStartElement, endElement);
+    if (mergeEndElement && rangeStartElement !== endElement && startEditableElement && endEditableElement &&
         ["NodeParagraph", "NodeHeading"].includes(blockType) &&
         blockType === endElement.getAttribute("data-type") &&
         endElement.getAttribute("fold") !== "1") {
         const topElement = siblingListItemMergeContext?.removeEndElement ||
-            getCrossBlockMergeRemoveElement(editorElement, startElement, endElement);
+            getCrossBlockMergeRemoveElement(editorElement, rangeStartElement, endElement);
         if (topElement) {
             removeEndElement = topElement;
             for (let i = removeElements.length - 1; i >= 0; i--) {
@@ -155,7 +156,7 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
     });
     return {
         ranges,
-        startElement,
+        startElement: rangeStartElement,
         endElement,
         rangeRemoveElements,
         removeElements,

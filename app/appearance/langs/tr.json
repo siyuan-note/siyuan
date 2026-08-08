@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "Önce bulut senkronizasyonunu etkinleştirin",
 	"msgSelectAllIncompleteTip": "Düzenleyicide eksik tümünü seçme uyarısı",
 	"selectAllIncompleteTip": "Lütfen bazı yüklenmemiş içerik bloklarının seçilmediğini unutmayın",
 	"listBlock": "Liste bloğu",

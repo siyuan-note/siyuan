@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "कृपया पहले क्लाउड सिंक सक्षम करें",
 	"msgSelectAllIncompleteTip": "एडिटर में अपूर्ण चयन चेतावनी",
 	"selectAllIncompleteTip": "ध्यान दें कि कुछ लोड नहीं किए गए सामग्री ब्लॉक अभी भी नहीं चुने गए हैं",
 	"listBlock": "सूची ब्लॉक",

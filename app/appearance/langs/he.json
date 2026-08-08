@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "יש להפעיל תחילה את הסנכרון בענן",
 	"msgSelectAllIncompleteTip": "אזהרת בחירה חלקית בעורך",
 	"selectAllIncompleteTip": "לתשומת לבך, עדיין יש בלוקי תוכן שלא נטענו ולא נבחרו",
 	"listBlock": "בלוק רשימה",

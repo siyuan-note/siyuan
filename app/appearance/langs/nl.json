@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "Schakel eerst cloudsynchronisatie in",
 	"msgSelectAllIncompleteTip": "Waarschuwing voor onvolledige selectie in de editor",
 	"selectAllIncompleteTip": "Let op: sommige niet-geladen inhoudsblokken zijn nog niet geselecteerd",
 	"listBlock": "Lijstblok",

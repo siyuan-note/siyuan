@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "Please enable cloud sync first",
 	"msgSelectAllIncompleteTip": "Incomplete editor select-all warning",
 	"selectAllIncompleteTip": "Please note that some unloaded content blocks remain unselected",
 	"listBlock": "List block",

@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "Najpierw włącz synchronizację w chmurze",
 	"msgSelectAllIncompleteTip": "Ostrzeżenie o niepełnym zaznaczeniu w edytorze",
 	"selectAllIncompleteTip": "Pamiętaj, że niektóre niezaładowane bloki treści nie zostały wybrane",
 	"listBlock": "Blok listy",

@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "请先启用云端同步",
 	"msgSelectAllIncompleteTip": "编辑器全选不完整提示",
 	"selectAllIncompleteTip": "请注意，仍有未加载的内容块未被选中",
 	"listBlock": "列表块",

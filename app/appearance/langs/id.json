@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "Aktifkan sinkronisasi cloud terlebih dahulu",
 	"msgSelectAllIncompleteTip": "Peringatan pilih semua tidak lengkap di editor",
 	"selectAllIncompleteTip": "Perhatikan bahwa masih ada blok konten yang belum dimuat dan belum dipilih",
 	"listBlock": "Blok daftar",

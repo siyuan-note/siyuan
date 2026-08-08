@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "Activa primero la sincronización en la nube",
 	"msgSelectAllIncompleteTip": "Aviso de selección incompleta en el editor",
 	"selectAllIncompleteTip": "Ten en cuenta que todavía hay bloques de contenido sin cargar que no se han seleccionado",
 	"listBlock": "Bloque de lista",

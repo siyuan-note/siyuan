@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "يرجى تمكين المزامنة السحابية أولاً",
 	"msgSelectAllIncompleteTip": "تحذير التحديد غير الكامل في المحرر",
 	"selectAllIncompleteTip": "يرجى ملاحظة أن بعض كتل المحتوى غير المحمّلة لا تزال غير محددة",
 	"listBlock": "كتلة قائمة",

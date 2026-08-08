@@ -1,4 +1,5 @@
 {
+	"lanSyncRequiresCloudSync": "Veuillez d'abord activer la synchronisation cloud",
 	"msgSelectAllIncompleteTip": "Avertissement de sélection incomplète dans l’éditeur",
 	"selectAllIncompleteTip": "Veuillez noter que certains blocs de contenu non chargés n’ont pas été sélectionnés",
 	"listBlock": "Bloc de liste",

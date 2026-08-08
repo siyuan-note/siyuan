@@ -86,6 +86,7 @@ func TestGetNotebookInfoHidesInvisibleNotebookFromReader(t *testing.T) {
 		"1s":   "1 second %s",
 		"xs":   "%d seconds %s",
 		"1m":   "1 minute %s",
+		"xm":   "%d minutes %s",
 		"xh":   "%d hours %s",
 		"1h":   "1 hour %s",
 		"1d":   "1 day %s",

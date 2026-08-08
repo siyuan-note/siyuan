@@ -26,3 +26,23 @@ export const resizeRectBounds = (initial: RectBounds, boundary: RectBounds, dire
     }
     return result;
 };
+
+export const moveRectBounds = (initial: RectBounds, boundary: RectBounds, deltaX: number, deltaY: number) => {
+    const width = initial.right - initial.left;
+    const height = initial.bottom - initial.top;
+    const left = clamp(initial.left + deltaX, boundary.left, boundary.right - width);
+    const top = clamp(initial.top + deltaY, boundary.top, boundary.bottom - height);
+    return {
+        left,
+        top,
+        right: left + width,
+        bottom: top + height,
+    };
+};
+
+export const hideRectResizeHandles = (element: ParentNode) => {
+    element.querySelectorAll(".pdf__rect--selected").forEach(item => {
+        item.classList.remove("pdf__rect--selected");
+        item.querySelectorAll(".pdf__rect-resize").forEach(handle => handle.remove());
+    });
+};

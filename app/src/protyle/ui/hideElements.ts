@@ -1,4 +1,5 @@
 import {getAllEditor} from "../../layout/getAll";
+import {hideRectResizeHandles} from "../../asset/rectAnnotationResize";
 import {isIPhone} from "../util/compatibility";
 import {hideGutterElements} from "./gutterVisibility";
 
@@ -89,6 +90,7 @@ export const hideAllElements = (types: string[]) => {
         document.querySelectorAll(".pdf__util").forEach(item => {
             item.classList.add("fn__none");
         });
+        hideRectResizeHandles(document);
     }
     if (types.includes("gutter")) {
         document.querySelectorAll(".protyle-gutters").forEach(item => {

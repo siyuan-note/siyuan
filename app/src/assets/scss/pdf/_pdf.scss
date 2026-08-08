@@ -88,8 +88,17 @@
       }
     }
 
+    &[data-mode="rect"] > div {
+      cursor: move;
+    }
+
     &--selected > div {
       z-index: 2;
+      cursor: move;
+    }
+
+    &--dragging > div {
+      cursor: grabbing;
     }
 
     &-resize {

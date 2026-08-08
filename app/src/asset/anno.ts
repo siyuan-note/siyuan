@@ -11,10 +11,11 @@ import {isMobile} from "../util/functions";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {filesize} from "filesize";
-import {resizeRectBounds} from "./rectAnnotationResize";
+import {hideRectResizeHandles, moveRectBounds, resizeRectBounds} from "./rectAnnotationResize";
 import type {RectBounds, RectResizeDirection} from "./rectAnnotationResize";
 
 const RECT_RESIZE_MIN_SIZE = 8;
+const RECT_DRAG_THRESHOLD = 3;
 
 export const initAnno = (element: HTMLElement, pdf: any) => {
     getConfig(pdf);
@@ -133,14 +134,19 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             }
         };
     });
+    let ignoreRectClick = false;
     element.firstElementChild.addEventListener("mousedown", (event: MouseEvent) => {
-        const handleElement = (event.target as HTMLElement).closest(".pdf__rect-resize") as HTMLElement;
-        if (!handleElement || event.button !== 0) {
+        if (event.button !== 0 || rectAnnoElement.classList.contains("toggled")) {
             return;
         }
-        const target = handleElement.closest(".pdf__rect") as HTMLElement;
-        const direction = handleElement.dataset.direction as RectResizeDirection;
-        if (!target || !direction) {
+        const eventTarget = event.target as HTMLElement;
+        const handleElement = eventTarget.closest(".pdf__rect-resize") as HTMLElement;
+        const target = eventTarget.closest(".pdf__rect") as HTMLElement;
+        if (!target || (!handleElement && !isRectAnnotationElement(target))) {
+            return;
+        }
+        const direction = handleElement?.dataset.direction as RectResizeDirection;
+        if (handleElement && !direction) {
             return;
         }
         const pageElement = hasClosestByClassName(target, "page");
@@ -167,37 +173,61 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             right: canvasRect.right,
             bottom: canvasRect.bottom,
         };
-        let resized = initial;
+        const startX = event.clientX;
+        const startY = event.clientY;
+        let bounds = initial;
         let position: number[];
         const updateAnnotationElement = () => {
             position = page.viewport.convertToPdfPoint(
-                resized.left - canvasRect.left,
-                resized.top - canvasRect.top,
+                bounds.left - canvasRect.left,
+                bounds.top - canvasRect.top,
             ).concat(page.viewport.convertToPdfPoint(
-                resized.right - canvasRect.left,
-                resized.bottom - canvasRect.top,
+                bounds.right - canvasRect.left,
+                bounds.bottom - canvasRect.top,
             ));
             setRectPosition(annotationElement, page, position);
         };
-        updateAnnotationElement();
-        element.querySelector(".pdf__util").classList.add("fn__none");
+        let moved = false;
         const mousemove = (moveEvent: MouseEvent) => {
-            resized = resizeRectBounds(initial, boundary, direction, moveEvent.clientX, moveEvent.clientY,
-                RECT_RESIZE_MIN_SIZE);
+            const deltaX = moveEvent.clientX - startX;
+            const deltaY = moveEvent.clientY - startY;
+            if (!moved && Math.hypot(deltaX, deltaY) < RECT_DRAG_THRESHOLD) {
+                return;
+            }
+            if (!moved) {
+                moved = true;
+                if (!target.classList.contains("pdf__rect--selected")) {
+                    showToolbar(element, undefined, target);
+                }
+                hideToolbarMenu(element);
+                target.classList.add("pdf__rect--dragging");
+            }
+            bounds = handleElement ?
+                resizeRectBounds(initial, boundary, direction, moveEvent.clientX, moveEvent.clientY,
+                    RECT_RESIZE_MIN_SIZE) :
+                moveRectBounds(initial, boundary, deltaX, deltaY);
             updateAnnotationElement();
         };
         const mouseup = () => {
             document.removeEventListener("mousemove", mousemove);
             document.removeEventListener("mouseup", mouseup);
+            target.classList.remove("pdf__rect--dragging");
+            if (!moved) {
+                return;
+            }
+            ignoreRectClick = true;
+            setTimeout(() => {
+                ignoreRectClick = false;
+            });
 
             const config = getConfig(pdf);
             const id = target.getAttribute("data-node-id");
             const annoItem = config?.[id] as IPdfAnno;
             const pageItem = annoItem?.pages?.find(item => item.index === pageIndex);
             if (!pageItem) {
-                resized = initial;
+                bounds = initial;
                 updateAnnotationElement();
-                showToolbar(element, undefined, target);
+                hideToolbarMenu(element);
                 return;
             }
             pageItem.positions = [position];
@@ -207,7 +237,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
                 data: JSON.stringify(config),
             });
-            showToolbar(element, undefined, target);
+            hideToolbarMenu(element);
         };
         document.addEventListener("mousemove", mousemove);
         document.addEventListener("mouseup", mouseup);
@@ -217,6 +247,17 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
     element.firstElementChild.addEventListener("click", (event: MouseEvent) => {
         let processed = false;
         let target = event.target as HTMLElement;
+        if (ignoreRectClick) {
+            ignoreRectClick = false;
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
+        if (target.closest(".pdf__rect-resize")) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if (typeof event.detail === "string") {
             window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor = event.detail === "0" ?
                 (window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor || "var(--b3-pdf-background1)")
@@ -455,15 +496,12 @@ const setRelation = (pdf: any) => {
 };
 
 const hideToolbar = (element: HTMLElement) => {
-    element.querySelector(".pdf__util").classList.add("fn__none");
+    hideToolbarMenu(element);
     hideRectResizeHandles(element);
 };
 
-const hideRectResizeHandles = (element: HTMLElement) => {
-    element.querySelectorAll(".pdf__rect--selected").forEach(item => {
-        item.classList.remove("pdf__rect--selected");
-        item.querySelectorAll(".pdf__rect-resize").forEach(handle => handle.remove());
-    });
+const hideToolbarMenu = (element: HTMLElement) => {
+    element.querySelector(".pdf__util").classList.add("fn__none");
 };
 
 const isRectAnnotationElement = (element: HTMLElement) => element.dataset.mode === "rect" ||
@@ -511,7 +549,7 @@ const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) =
     }
     utilElement.classList.remove("pdf__util--hide");
     const targetRect = target.firstElementChild.getBoundingClientRect();
-    setPosition(utilElement, targetRect.left, targetRect.top + targetRect.height + 4);
+    setPosition(utilElement, targetRect.left, targetRect.bottom + 4, targetRect.height + 8);
 };
 
 const getTextNode = (element: HTMLElement, isFirst: boolean) => {

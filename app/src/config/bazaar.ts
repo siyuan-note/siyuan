@@ -166,7 +166,7 @@ export const bazaar = {
                 </div>
                 <input data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
                 <div class="fn__flex config-bazaar__actions">
-                    <label class="b3-button b3-button--outline config-bazaar__local-package ariaLabel" data-type="install-local-package" data-position="north" aria-label="${window.siyuan.languages.installLocalBazaarPackage}">
+                    <label class="block__icon block__icon--show config-bazaar__local-package ariaLabel" data-type="install-local-package" data-position="north" aria-label="${window.siyuan.languages.installLocalBazaarPackage}">
                         <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>
                         <input class="b3-form__upload" data-type="local-package-file" type="file" accept=".zip,application/zip">
                     </label>
@@ -1253,7 +1253,7 @@ type="checkbox">
         bazaar._localPackageUploading = uploading;
         const labelElement = bazaar.element.querySelector('[data-type="install-local-package"]');
         const inputElement = labelElement?.querySelector('input[type="file"]') as HTMLInputElement;
-        labelElement?.classList.toggle("b3-button--progress", uploading);
+        labelElement?.toggleAttribute("disabled", uploading);
         if (inputElement) {
             inputElement.disabled = uploading;
         }

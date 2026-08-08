@@ -1048,13 +1048,14 @@ func GetHeadingLevelBatchTransaction(ids []string, level int) (transaction *Tran
 	childrenHeadings := collectHeadingLevelNodes(tree.Root, selectedHeadings)
 	fillBlockRefCount(childrenHeadings, tree.Box)
 
+	var foldedHeadings []*ast.Node
 	for _, heading := range selectedHeadings {
 		if treenode.IsSelfFolded(heading) {
-			unfoldHeading(heading, heading)
+			foldedHeadings = append(foldedHeadings, heading)
 		}
 	}
 
-	transaction = buildHeadingLevelTransaction(childrenHeadings, diff)
+	transaction = buildHeadingLevelTransaction(childrenHeadings, foldedHeadings, diff)
 	return
 }
 
@@ -1114,8 +1115,13 @@ func collectHeadingLevelNodes(root *ast.Node, selectedHeadings []*ast.Node) (ret
 	return
 }
 
-func buildHeadingLevelTransaction(headings []*ast.Node, diff int) (transaction *Transaction) {
+func buildHeadingLevelTransaction(headings, foldedHeadings []*ast.Node, diff int) (transaction *Transaction) {
 	transaction = &Transaction{}
+	for _, heading := range foldedHeadings {
+		treenode.SetSelfFolded(heading, false)
+		transaction.DoOperations = append(transaction.DoOperations, &Operation{Action: "unfoldHeading", ID: heading.ID})
+	}
+
 	luteEngine := util.NewLute()
 	for _, c := range headings {
 		op := &Operation{}
@@ -1136,6 +1142,9 @@ func buildHeadingLevelTransaction(headings []*ast.Node, diff int) (transaction *
 		op.Action = "update"
 		op.Data = luteEngine.RenderNodeBlockDOM(cleanRenderNode(c, false))
 		transaction.DoOperations = append(transaction.DoOperations, op)
+	}
+	for _, heading := range foldedHeadings {
+		transaction.UndoOperations = append(transaction.UndoOperations, &Operation{Action: "foldHeading", ID: heading.ID})
 	}
 	return
 }

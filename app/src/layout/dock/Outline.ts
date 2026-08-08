@@ -35,6 +35,7 @@ import {
     operationsMayChangeOutline,
     transactionsMayChangeRootHeadingNumberSetting
 } from "../../protyle/util/headingNumberCore";
+import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../../protyle/util/headingTransform";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -1424,22 +1425,22 @@ export class Outline extends Model {
                     id,
                     level
                 }, (response) => {
-                    response.data.doOperations.forEach((operation: any, index: number) => {
-                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
-                            itemElement.outerHTML = operation.data;
-                        });
-                        // 使用 outer 后元素需要重新查询
-                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
-                            mathRender(itemElement);
-                        });
-                        if (index === 0) {
-                            const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${operation.id}"]`);
-                            if (focusElement) {
-                                focusElement.scrollIntoView({behavior: "smooth", block: "center"});
-                            }
+                    if (!response.data?.doOperations?.length) {
+                        return;
+                    }
+                    applyHeadingLevelUpdates(protyle, response.data.doOperations, mathRender);
+                    const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+                    if (focusElement) {
+                        focusElement.scrollIntoView({behavior: "smooth", block: "center"});
+                    }
+                    const childUpdateOperations = getHeadingLevelUpdateOperations(response.data.doOperations, new Set([id]));
+                    const hasUnfoldOperation = response.data.doOperations.some((operation: IOperation) =>
+                        operation.action === "unfoldHeading");
+                    transaction(protyle, response.data.doOperations, response.data.undoOperations, hasUnfoldOperation ? {
+                        callback() {
+                            applyHeadingLevelUpdates(protyle, childUpdateOperations, mathRender);
                         }
-                    });
-                    transaction(protyle, response.data.doOperations, response.data.undoOperations);
+                    } : undefined);
                 });
             }
         };

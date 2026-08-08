@@ -93,6 +93,7 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
 import {appendListItem, prependListItem} from "../wysiwyg/list";
+import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -2698,20 +2699,19 @@ export class Gutter {
                     if (!response.data?.doOperations?.length) {
                         return;
                     }
-                    response.data.doOperations.forEach((operation: IOperation) => {
-                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
-                            itemElement.outerHTML = operation.data;
-                        });
-                        // 使用 outer 后元素需要重新查询
-                        protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
-                            mathRender(itemElement);
-                        });
-                    });
+                    applyHeadingLevelUpdates(protyle, response.data.doOperations, mathRender);
                     const focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${ids[0]}"]`);
                     if (focusElement) {
                         focusBlock(focusElement, protyle.wysiwyg.element, true);
                     }
-                    transaction(protyle, response.data.doOperations, response.data.undoOperations);
+                    const childUpdateOperations = getHeadingLevelUpdateOperations(response.data.doOperations, new Set(ids));
+                    const hasUnfoldOperation = response.data.doOperations.some((operation: IOperation) =>
+                        operation.action === "unfoldHeading");
+                    transaction(protyle, response.data.doOperations, response.data.undoOperations, hasUnfoldOperation ? {
+                        callback() {
+                            applyHeadingLevelUpdates(protyle, childUpdateOperations, mathRender);
+                        }
+                    } : undefined);
                 });
             }
         };

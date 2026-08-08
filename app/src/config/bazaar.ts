@@ -166,8 +166,8 @@ export const bazaar = {
                 </div>
                 <input data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
                 <div class="fn__flex config-bazaar__actions">
-                    <label class="b3-button b3-button--outline config-bazaar__local-package" data-type="install-local-package">
-                        <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.installLocalBazaarPackage}
+                    <label class="b3-button b3-button--outline config-bazaar__local-package ariaLabel" data-type="install-local-package" data-position="north" aria-label="${window.siyuan.languages.installLocalBazaarPackage}">
+                        <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>
                         <input class="b3-form__upload" data-type="local-package-file" type="file" accept=".zip,application/zip">
                     </label>
                     <button class="b3-button fn__none" data-type="install-all">${window.siyuan.languages.updateAll}</button>

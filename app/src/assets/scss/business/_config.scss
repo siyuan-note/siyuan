@@ -380,6 +380,10 @@
     &__local-package {
       overflow: hidden;
       position: relative;
+
+      svg {
+        margin-right: 0;
+      }
     }
 
     &__panel {

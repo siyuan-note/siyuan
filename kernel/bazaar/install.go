@@ -81,6 +81,16 @@ func incPackageDownloads(repoURL, systemID string) {
 		}).Post(u)
 }
 
+// packageManifestNames 各类型集市包清单文件名
+var packageManifestNames = func() map[string]string {
+	// localPackageManifests 是清单文件名到包类型的映射，这里反转出包类型到清单文件名的映射
+	names := make(map[string]string, len(localPackageManifests))
+	for manifest, pkgType := range localPackageManifests {
+		names[pkgType] = manifest
+	}
+	return names
+}()
+
 // InstallPackage 安装集市包
 func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageName string, update bool) error {
 	var fallbackInstallTime time.Time
@@ -95,7 +105,7 @@ func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageNa
 	if err != nil {
 		return err
 	}
-	if err = installPackage(data, installPath); err != nil {
+	if err = installPackage(data, installPath, pkgType, packageName, update); err != nil {
 		return err
 	}
 	RemoveInstalledPackageSizeCache(pkgType, packageName)
@@ -113,7 +123,19 @@ func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageNa
 	return nil
 }
 
-func installPackage(data []byte, installPath string) (err error) {
+func installPackage(data []byte, installPath, pkgType, packageName string, update bool) (err error) {
+	// 非更新安装时目标目录已存在且非空则拒绝覆盖，防止把其他包的内容写入已有包目录
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
+	if !update {
+		entries, statErr := os.ReadDir(installPath)
+		if statErr != nil && !os.IsNotExist(statErr) {
+			return statErr
+		}
+		if 0 < len(entries) {
+			return errors.New("marketplace package install path already exists")
+		}
+	}
+
 	tmpPackage := filepath.Join(util.TempDir, "bazaar", "package")
 	if err = os.MkdirAll(tmpPackage, 0755); err != nil {
 		return
@@ -140,6 +162,20 @@ func installPackage(data []byte, installPath string) (err error) {
 	srcPath := unzipPath
 	if 1 == len(dirs) && dirs[0].IsDir() {
 		srcPath = filepath.Join(unzipPath, dirs[0].Name())
+	}
+
+	// 校验下载包自身声明的名称与请求安装的包名一致，防止把其他包的内容写入指定目录
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
+	jsonFileName, ok := packageManifestNames[pkgType]
+	if !ok {
+		return errors.New("invalid marketplace package type")
+	}
+	pkg, parseErr := ParsePackageJSON(filepath.Join(srcPath, jsonFileName))
+	if parseErr != nil || nil == pkg {
+		return errors.New("marketplace package manifest not found or invalid")
+	}
+	if packageName != pkg.Name {
+		return fmt.Errorf("marketplace package name mismatch: expected [%s], got [%s]", packageName, pkg.Name)
 	}
 
 	if err = filelock.Copy(srcPath, installPath); err != nil {

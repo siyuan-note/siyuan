@@ -88,6 +88,56 @@
       }
     }
 
+    &--selected > div {
+      z-index: 2;
+    }
+
+    &-resize {
+      position: absolute;
+      z-index: 3;
+      width: 10px;
+      height: 10px;
+      box-sizing: border-box;
+      border: 2px solid var(--pdf-annotation-color);
+      border-radius: 50%;
+      background-color: var(--b3-theme-surface);
+      pointer-events: auto;
+
+      &--nw {
+        top: 0;
+        left: 0;
+        transform: translate(-50%, -50%);
+      }
+
+      &--ne {
+        top: 0;
+        right: 0;
+        transform: translate(50%, -50%);
+      }
+
+      &--sw {
+        bottom: 0;
+        left: 0;
+        transform: translate(-50%, 50%);
+      }
+
+      &--se {
+        right: 0;
+        bottom: 0;
+        transform: translate(50%, 50%);
+      }
+
+      &[data-direction="nw"],
+      &[data-direction="se"] {
+        cursor: nwse-resize;
+      }
+
+      &[data-direction="ne"],
+      &[data-direction="sw"] {
+        cursor: nesw-resize;
+      }
+    }
+
     &:not([data-type="border"]) > div {
       background-color: color-mix(in srgb, var(--pdf-annotation-color) 35%, transparent);
     }

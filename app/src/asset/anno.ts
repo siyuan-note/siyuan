@@ -11,6 +11,10 @@ import {isMobile} from "../util/functions";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {filesize} from "filesize";
+import {resizeRectBounds} from "./rectAnnotationResize";
+import type {RectBounds, RectResizeDirection} from "./rectAnnotationResize";
+
+const RECT_RESIZE_MIN_SIZE = 8;
 
 export const initAnno = (element: HTMLElement, pdf: any) => {
     getConfig(pdf);
@@ -129,6 +133,87 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             }
         };
     });
+    element.firstElementChild.addEventListener("mousedown", (event: MouseEvent) => {
+        const handleElement = (event.target as HTMLElement).closest(".pdf__rect-resize") as HTMLElement;
+        if (!handleElement || event.button !== 0) {
+            return;
+        }
+        const target = handleElement.closest(".pdf__rect") as HTMLElement;
+        const direction = handleElement.dataset.direction as RectResizeDirection;
+        if (!target || !direction) {
+            return;
+        }
+        const pageElement = hasClosestByClassName(target, "page");
+        if (!pageElement) {
+            return;
+        }
+        const pageIndex = parseInt(pageElement.getAttribute("data-page-number")) - 1;
+        const page = pdf.pdfViewer.getPageView(pageIndex);
+        if (!page) {
+            return;
+        }
+        const canvasRect = page.canvas.getBoundingClientRect();
+        const annotationElement = target.firstElementChild as HTMLElement;
+        const targetRect = annotationElement.getBoundingClientRect();
+        const initial: RectBounds = {
+            left: targetRect.left,
+            top: targetRect.top,
+            right: targetRect.right,
+            bottom: targetRect.bottom,
+        };
+        const boundary: RectBounds = {
+            left: canvasRect.left,
+            top: canvasRect.top,
+            right: canvasRect.right,
+            bottom: canvasRect.bottom,
+        };
+        let resized = initial;
+        let position: number[];
+        const updateAnnotationElement = () => {
+            position = page.viewport.convertToPdfPoint(
+                resized.left - canvasRect.left,
+                resized.top - canvasRect.top,
+            ).concat(page.viewport.convertToPdfPoint(
+                resized.right - canvasRect.left,
+                resized.bottom - canvasRect.top,
+            ));
+            setRectPosition(annotationElement, page, position);
+        };
+        updateAnnotationElement();
+        element.querySelector(".pdf__util").classList.add("fn__none");
+        const mousemove = (moveEvent: MouseEvent) => {
+            resized = resizeRectBounds(initial, boundary, direction, moveEvent.clientX, moveEvent.clientY,
+                RECT_RESIZE_MIN_SIZE);
+            updateAnnotationElement();
+        };
+        const mouseup = () => {
+            document.removeEventListener("mousemove", mousemove);
+            document.removeEventListener("mouseup", mouseup);
+
+            const config = getConfig(pdf);
+            const id = target.getAttribute("data-node-id");
+            const annoItem = config?.[id] as IPdfAnno;
+            const pageItem = annoItem?.pages?.find(item => item.index === pageIndex);
+            if (!pageItem) {
+                resized = initial;
+                updateAnnotationElement();
+                showToolbar(element, undefined, target);
+                return;
+            }
+            pageItem.positions = [position];
+            annoItem.mode = "rect";
+            target.dataset.mode = "rect";
+            fetchPost("/api/asset/setFileAnnotation", {
+                path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
+                data: JSON.stringify(config),
+            });
+            showToolbar(element, undefined, target);
+        };
+        document.addEventListener("mousemove", mousemove);
+        document.addEventListener("mouseup", mouseup);
+        event.preventDefault();
+        event.stopPropagation();
+    }, {capture: true});
     element.firstElementChild.addEventListener("click", (event: MouseEvent) => {
         let processed = false;
         let target = event.target as HTMLElement;
@@ -371,10 +456,23 @@ const setRelation = (pdf: any) => {
 
 const hideToolbar = (element: HTMLElement) => {
     element.querySelector(".pdf__util").classList.add("fn__none");
+    hideRectResizeHandles(element);
 };
+
+const hideRectResizeHandles = (element: HTMLElement) => {
+    element.querySelectorAll(".pdf__rect--selected").forEach(item => {
+        item.classList.remove("pdf__rect--selected");
+        item.querySelectorAll(".pdf__rect-resize").forEach(handle => handle.remove());
+    });
+};
+
+const isRectAnnotationElement = (element: HTMLElement) => element.dataset.mode === "rect" ||
+    (element.dataset.mode === "" && element.childElementCount === 1 &&
+        /-P\d+-\d{14}-\w{7}$/.test(element.dataset.content));
 
 let rectElement: HTMLElement;
 const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) => {
+    hideRectResizeHandles(element);
     if (target) {
         // 阻止 popover
         target.setAttribute("prevent-popover", "true");
@@ -395,6 +493,22 @@ const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) =
         return;
     }
     rectElement = target;
+    if (isRectAnnotationElement(target)) {
+        target.classList.add("pdf__rect--selected");
+        const annotationElement = target.firstElementChild as HTMLElement;
+        ["nw", "ne", "sw", "se"].forEach(corner => {
+            const handle = document.createElement("span");
+            handle.className = `pdf__rect-resize pdf__rect-resize--${corner}`;
+            annotationElement.append(handle);
+        });
+        const targetRect = annotationElement.getBoundingClientRect();
+        annotationElement.querySelectorAll(".pdf__rect-resize").forEach((item: HTMLElement) => {
+            const handleRect = item.getBoundingClientRect();
+            const vertical = handleRect.top + handleRect.height / 2 < targetRect.top + targetRect.height / 2 ? "n" : "s";
+            const horizontal = handleRect.left + handleRect.width / 2 < targetRect.left + targetRect.width / 2 ? "w" : "e";
+            item.dataset.direction = vertical + horizontal;
+        });
+    }
     utilElement.classList.remove("pdf__util--hide");
     const targetRect = target.firstElementChild.getBoundingClientRect();
     setPosition(utilElement, targetRect.left, targetRect.top + targetRect.height + 4);
@@ -701,16 +815,10 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
     rectDiv.setAttribute("data-type", selected.type);
     rectDiv.style.setProperty("--pdf-annotation-color", selected.color);
     selected.coords.forEach((rect) => {
-        const bounds = viewport.convertToViewportRectangle(rect);
-        const width = Math.abs(bounds[0] - bounds[2]);
-        if (width <= 0) {
+        const rectChild = document.createElement("div");
+        if (!setRectPosition(rectChild, page, rect, viewport)) {
             return;
         }
-        const rectChild = document.createElement("div");
-        rectChild.style.left = `${Math.min(bounds[0], bounds[2])}px`;
-        rectChild.style.top = `${Math.min(bounds[1], bounds[3])}px`;
-        rectChild.style.width = `${width}px`;
-        rectChild.style.height = `${Math.abs(bounds[1] - bounds[3])}px`;
         rectDiv.append(rectChild);
     });
     rectDiv.setAttribute("data-content", selected.content);
@@ -719,6 +827,19 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
         hlPDFRect(rectsElement, selected.id);
     }
     return rectDiv;
+};
+
+const setRectPosition = (element: HTMLElement, page: any, rect: number[], viewport = page.viewport.clone({rotation: 0})) => {
+    const bounds = viewport.convertToViewportRectangle(rect);
+    const width = Math.abs(bounds[0] - bounds[2]);
+    if (width <= 0) {
+        return false;
+    }
+    element.style.left = `${Math.min(bounds[0], bounds[2])}px`;
+    element.style.top = `${Math.min(bounds[1], bounds[3])}px`;
+    element.style.width = `${width}px`;
+    element.style.height = `${Math.abs(bounds[1] - bounds[3])}px`;
+    return true;
 };
 
 export const hlPDFRect = (element: HTMLElement, id: string) => {

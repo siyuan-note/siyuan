@@ -298,29 +298,51 @@ export const initUI = (protyle: IProtyle) => {
         const buttonElement = hasClosestByTag(event.target, "BUTTON");
         if (buttonElement && buttonElement.parentElement.classList.contains("protyle-gutters")) {
             const type = buttonElement.getAttribute("data-type");
-            if (type === "fold" || type === "NodeAttributeViewRow") {
+            if (buttonElement.classList.contains("protyle-gutters__line") ||
+                buttonElement.classList.contains("protyle-gutters__plus")) {
+                return;
+            }
+            const targetButtonElement = type === "fold" ?
+                buttonElement.previousElementSibling || buttonElement.nextElementSibling : buttonElement;
+            if (!targetButtonElement) {
+                hideElements(["gutter"], protyle);
+                return;
+            }
+            const gutterNodeElement = protyle.gutter.getNodeElement(protyle, targetButtonElement);
+            if (!gutterNodeElement) {
+                hideElements(["gutter"], protyle);
+                return;
+            }
+            if (type === "fold") {
                 Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
                     item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
                 });
                 return;
             }
-            const gutterNodeElement = protyle.gutter.getNodeElement(protyle, buttonElement);
-            if (gutterNodeElement) {
-                const bodyQueryClass = (buttonElement.dataset.groupId && buttonElement.dataset.groupId !== "undefined") ? `.av__body[data-group-id="${buttonElement.dataset.groupId}"] ` : "";
-                const rowItem = gutterNodeElement.querySelector(bodyQueryClass + `.av__row[data-id="${buttonElement.dataset.rowId}"]`);
-                Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
-                    if (gutterNodeElement !== hlItem) {
-                        hlItem.classList.remove("protyle-wysiwyg--hl");
-                    }
-                    if (rowItem && rowItem !== hlItem) {
-                        rowItem.classList.remove("av__row--hl");
-                    }
+            const bodyQueryClass = (buttonElement.dataset.groupId && buttonElement.dataset.groupId !== "undefined") ? `.av__body[data-group-id="${buttonElement.dataset.groupId}"] ` : "";
+            const rowItem = gutterNodeElement.querySelector(bodyQueryClass + `.av__row[data-id="${buttonElement.dataset.rowId}"]`);
+            if ((type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu") && !rowItem) {
+                hideElements(["gutter"], protyle);
+                return;
+            }
+            if (type === "NodeAttributeViewRow") {
+                Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
+                    item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
                 });
-                if (type === "NodeAttributeViewRowMenu") {
-                    rowItem.classList.add("av__row--hl");
-                } else {
-                    gutterNodeElement.classList.add("protyle-wysiwyg--hl");
+                return;
+            }
+            Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
+                if (gutterNodeElement !== hlItem) {
+                    hlItem.classList.remove("protyle-wysiwyg--hl");
                 }
+                if (rowItem && rowItem !== hlItem) {
+                    rowItem.classList.remove("av__row--hl");
+                }
+            });
+            if (type === "NodeAttributeViewRowMenu") {
+                rowItem.classList.add("av__row--hl");
+            } else {
+                gutterNodeElement.classList.add("protyle-wysiwyg--hl");
             }
             event.preventDefault();
             return;

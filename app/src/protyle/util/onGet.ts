@@ -512,6 +512,7 @@ export const enableProtyle = (protyle: IProtyle) => {
             protyle.breadcrumb.element.parentElement.querySelector('[data-type="outdent"]').classList.remove("fn__none");
         }
     }
+    hideElements(["gutter"], protyle);
     hideTooltip();
 };
 

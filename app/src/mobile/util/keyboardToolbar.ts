@@ -706,16 +706,6 @@ export const hideKeyboardToolbar = () => {
     }
 };
 
-export const hideKeyboardToolbarByApp = () => {
-    hideKeyboardToolbar();
-    const selection = getSelection();
-    if (!selection || selection.isCollapsed) {
-        return;
-    }
-    (document.activeElement as HTMLElement)?.blur();
-    selection.removeAllRanges();
-};
-
 export const activeBlur = () => {
     const now = Date.now();
     if (now < keyboardLockUntil) {

@@ -3657,10 +3657,85 @@ export class WYSIWYG {
         let lineBreakUndoContext: Record<string, string>;
         // 仅矫正从数据库外进入的占位光标，避免重置数据库内部的方向键导航。
         let arrowStartElement: false | HTMLElement | undefined;
+        // Android 软键盘在空块中会先发送 Unidentified 并清空选区，需在实际回车或退格事件前恢复。
+        let mobileUnidentifiedKeyState: { range: Range; time: number; placeholder?: HTMLBRElement };
+        // Android 会在边界退格的 keyup 中再次清空选区，需用 input 事件后的最终光标立即恢复。
+        let mobileUnidentifiedInputRange: Range;
+        const takeMobileUnidentifiedKeyState = () => {
+            const keyState = mobileUnidentifiedKeyState;
+            mobileUnidentifiedKeyState = undefined;
+            if (!keyState || Date.now() - keyState.time > 1000 ||
+                !this.element.contains(keyState.range.startContainer)) {
+                keyState?.placeholder?.remove();
+                return;
+            }
+            return keyState;
+        };
         this.element.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (isInAndroid()) {
+                if (event.key === "Unidentified") {
+                    mobileUnidentifiedInputRange = undefined;
+                    mobileUnidentifiedKeyState?.placeholder?.remove();
+                    const selection = getSelection();
+                    if (selection.rangeCount > 0) {
+                        const range = selection.getRangeAt(0);
+                        if (this.element.contains(range.startContainer)) {
+                            let placeholder: HTMLBRElement;
+                            const blockElement = hasClosestBlock(range.startContainer);
+                            const editableElement = blockElement && getContenteditableElement(blockElement);
+                            if (range.collapsed && editableElement?.childNodes.length === 0) {
+                                placeholder = document.createElement("br");
+                                editableElement.appendChild(placeholder);
+                                focusByRange(range);
+                            }
+                            mobileUnidentifiedKeyState = {
+                                range: range.cloneRange(),
+                                time: Date.now(),
+                                placeholder,
+                            };
+                        } else {
+                            mobileUnidentifiedKeyState = undefined;
+                        }
+                    } else {
+                        mobileUnidentifiedKeyState = undefined;
+                    }
+                } else {
+                    const unidentifiedState = takeMobileUnidentifiedKeyState();
+                    if (event.key === "Enter" && unidentifiedState) {
+                        focusByRange(unidentifiedState.range);
+                    } else if (unidentifiedState?.placeholder) {
+                        unidentifiedState.placeholder.remove();
+                        focusByRange(unidentifiedState.range);
+                    }
+                }
+            }
             if (!event.repeat && !event.altKey && !event.shiftKey && !event.ctrlKey && !event.metaKey &&
                 !event.isComposing && event.key.startsWith("Arrow")) {
                 arrowStartElement = hasClosestBlock(getEditorRange(this.element).startContainer);
+            }
+        });
+        this.element.addEventListener("input", (event: InputEvent) => {
+            if (!isInAndroid() || event.inputType !== "deleteContentBackward") {
+                return;
+            }
+            const selection = getSelection();
+            if (selection.rangeCount === 0) {
+                mobileUnidentifiedInputRange = undefined;
+                return;
+            }
+            const range = selection.getRangeAt(0);
+            mobileUnidentifiedInputRange = this.element.contains(range.startContainer) &&
+                this.element.contains(range.endContainer) ? range.cloneRange() : undefined;
+        });
+        this.element.addEventListener("keyup", (event: KeyboardEvent) => {
+            if (!isInAndroid() || event.key !== "Unidentified") {
+                return;
+            }
+            const range = mobileUnidentifiedInputRange;
+            mobileUnidentifiedInputRange = undefined;
+            if (getSelection().rangeCount === 0 && range && this.element.contains(range.startContainer) &&
+                this.element.contains(range.endContainer)) {
+                focusByRange(range);
             }
         });
         // 记录组合开始时的光标位置，用于取消组合后恢复光标（输入法删空候选词会导致浏览器移动光标）
@@ -3756,6 +3831,23 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
+            const unidentifiedState = isInAndroid() ? takeMobileUnidentifiedKeyState() : undefined;
+            if (event.inputType === "deleteContentBackward" && unidentifiedState) {
+                unidentifiedState.placeholder?.remove();
+                focusByRange(unidentifiedState.range);
+                const keydownEvent = new KeyboardEvent("keydown", {
+                    key: "Backspace",
+                    code: "Backspace",
+                    bubbles: true,
+                    cancelable: true,
+                });
+                this.element.dispatchEvent(keydownEvent);
+                if (keydownEvent.defaultPrevented) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+            }
             if (!isComposition) {
                 beforeBlockquoteInput(protyle, event);
             }

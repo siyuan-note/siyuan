@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260808195552"
+		"updated": "20260808211451"
 	},
 	"Children": [
 		{
@@ -3754,7 +3754,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260808195552"
+				"updated": "20260808211451"
 			},
 			"Children": [
 				{
@@ -11329,7 +11329,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-ans1gna",
-				"updated": "20260808193828"
+				"updated": "20260808211451"
 			},
 			"Children": [
 				{
@@ -11353,7 +11353,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154319-4oe7doq",
-				"updated": "20260808193828"
+				"updated": "20260808211451"
 			},
 			"Children": [
 				{
@@ -11612,54 +11612,6 @@
 									"Data": "Task list"
 								}
 							]
-						}
-					]
-				},
-				{
-					"Type": "NodeTableRow",
-					"Data": "tr",
-					"Children": [
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Add a list item to the end of the current list"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td",
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Shift+Enter"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​/ "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧⌘Enter"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								}
-							]
-						},
-						{
-							"Type": "NodeTableCell",
-							"Data": "td"
 						}
 					]
 				},

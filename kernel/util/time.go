@@ -228,7 +228,7 @@ func humanizeTimeMagnitudes(lang string) (labels map[string]any, magnitudes []hu
 		{D: 2 * time.Second, Format: labels["1s"].(string), DivBy: 1},
 		{D: time.Minute, Format: labels["xs"].(string), DivBy: time.Second},
 		{D: 2 * time.Minute, Format: labels["1m"].(string), DivBy: 1},
-		{D: time.Hour, Format: labels["xh"].(string), DivBy: time.Minute},
+		{D: time.Hour, Format: labels["xm"].(string), DivBy: time.Minute},
 		{D: 2 * time.Hour, Format: labels["1h"].(string), DivBy: 1},
 		{D: humanize.Day, Format: labels["xh"].(string), DivBy: time.Hour},
 		{D: 2 * humanize.Day, Format: labels["1d"].(string), DivBy: 1},

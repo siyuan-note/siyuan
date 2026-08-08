@@ -40,6 +40,12 @@ export const moveRectBounds = (initial: RectBounds, boundary: RectBounds, deltaX
     };
 };
 
+export const getRectImageName = (content: string, rotation: number, positionHash: string) => {
+    const annotationID = content.substring(content.length - 22);
+    const imageID = positionHash ? annotationID.substring(0, 15) + positionHash.substring(0, 7) : annotationID;
+    return content.substring(0, content.length - 22) + (rotation ? `${rotation}-` : "") + imageID + ".png";
+};
+
 export const hideRectResizeHandles = (element: ParentNode) => {
     element.querySelectorAll(".pdf__rect--selected").forEach(item => {
         item.classList.remove("pdf__rect--selected");

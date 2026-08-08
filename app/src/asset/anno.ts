@@ -11,7 +11,8 @@ import {isMobile} from "../util/functions";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {filesize} from "filesize";
-import {hideRectResizeHandles, moveRectBounds, resizeRectBounds} from "./rectAnnotationResize";
+import md5 from "blueimp-md5";
+import {getRectImageName, hideRectResizeHandles, moveRectBounds, resizeRectBounds} from "./rectAnnotationResize";
 import type {RectBounds, RectResizeDirection} from "./rectAnnotationResize";
 
 const RECT_RESIZE_MIN_SIZE = 8;
@@ -903,13 +904,19 @@ export const hlPDFRect = (element: HTMLElement, id: string) => {
 };
 
 const copyAnno = (idPath: string, fileName: string, pdf: any) => {
-    const mode = rectElement.getAttribute("data-mode");
-    const content = rectElement.getAttribute("data-content");
+    const annotationElement = rectElement;
+    const mode = annotationElement.getAttribute("data-mode");
+    const content = annotationElement.getAttribute("data-content");
+    const pageElement = hasClosestByClassName(annotationElement, "page");
+    const pageIndex = pageElement ? parseInt(pageElement.getAttribute("data-page-number")) - 1 : -1;
+    const annotation = getConfig(pdf)?.[annotationElement.getAttribute("data-node-id")] as IPdfAnno;
+    const positions = annotation?.pages?.find(item => item.index === pageIndex)?.positions;
+    const positionHash = positions ? md5(JSON.stringify(positions)).substring(0, 7) : "";
     setTimeout(() => {
         if (mode === "rect" ||
-            (mode === "" && rectElement.childElementCount === 1 && content.startsWith(fileName)) // 兼容历史，以前没有 mode
+            (mode === "" && annotationElement.childElementCount === 1 && content.startsWith(fileName)) // 兼容历史，以前没有 mode
         ) {
-            getRectImgData(pdf).then((imageData) => {
+            getRectImgData(pdf, annotationElement).then((imageData) => {
                 fetch(imageData.url).then((response) => {
                     return response.blob();
                 }).then((blob) => {
@@ -919,7 +926,7 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
                     }
                     confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
                         const formData = new FormData();
-                        const imageName = content.substring(0, content.length - 22) + (imageData.rotation ? `${imageData.rotation}-` : "") + content.substring(content.length - 22) + ".png";
+                        const imageName = getRectImageName(content, imageData.rotation, positionHash);
                         formData.append("file[]", blob, imageName);
                         formData.append("skipIfDuplicated", "true");
                         fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
@@ -935,8 +942,8 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
     }, Constants.TIMEOUT_DBLCLICK);
 };
 
-async function getRectImgData(pdfObj: any) {
-    const pageElement = hasClosestByClassName(rectElement, "page");
+async function getRectImgData(pdfObj: any, annotationElement: HTMLElement) {
+    const pageElement = hasClosestByClassName(annotationElement, "page");
     if (!pageElement) {
         return;
     }
@@ -965,7 +972,7 @@ async function getRectImgData(pdfObj: any) {
         viewport: captureViewport
     }).promise;
 
-    const rectStyle = (rectElement.firstElementChild as HTMLElement).style;
+    const rectStyle = (annotationElement.firstElementChild as HTMLElement).style;
     const captureImageData = captureCtx.getImageData(
         CAPTURE_SCALE_RATIO * parseFloat(rectStyle.left),
         CAPTURE_SCALE_RATIO * parseFloat(rectStyle.top),

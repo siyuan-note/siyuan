@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {hideRectResizeHandles, moveRectBounds, resizeRectBounds} from "./rectAnnotationResize";
+import {getRectImageName, hideRectResizeHandles, moveRectBounds, resizeRectBounds} from "./rectAnnotationResize";
 
 const initial = {left: 20, top: 30, right: 80, bottom: 90};
 const boundary = {left: 0, top: 0, right: 100, bottom: 120};
@@ -56,6 +56,16 @@ describe("rectangle annotation resizing", () => {
             {left: 0, top: 0, right: 60, bottom: 60});
         assert.deepEqual(moveRectBounds(initial, boundary, 80, 90),
             {left: 40, top: 60, right: 100, bottom: 120});
+    });
+
+    it("uses the rectangle position hash in copied image names", () => {
+        const content = "example-P1-20260809120000-abcdefg";
+        assert.equal(getRectImageName(content, 0, "0123456"),
+            "example-P1-20260809120000-0123456.png");
+        assert.equal(getRectImageName(content, 90, "7654321"),
+            "example-P1-90-20260809120000-7654321.png");
+        assert.equal(getRectImageName(content, 0, ""),
+            "example-P1-20260809120000-abcdefg.png");
     });
 
     it("keeps resized rectangles within the page", () => {

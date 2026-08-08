@@ -38,7 +38,7 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
         html: () => '<div id="cloudSpace" class="b3-label config-item"></div>',
     });
     group.switch("sync.enabled", {
-        title: window.siyuan.languages.openSyncTip1,
+        title: window.siyuan.languages.cloudSync,
         desc: window.siyuan.languages.openSyncTip2,
         save: (value) => patchSyncConfig("sync.enabled", value),
     });

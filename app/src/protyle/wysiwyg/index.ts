@@ -1429,7 +1429,7 @@ export class WYSIWYG {
                 const dragColId = dragElement.getAttribute("data-col-id");
                 const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
                 const headerElement = hasClosestByClassName(target, "av__row--header") as HTMLElement;
-                const scrollElement = nodeElement.querySelector(".av__scroll");
+                const scrollElement = nodeElement.querySelector<HTMLElement>(".av__scroll");
                 if (!dragColId || !bodyElement || !headerElement || !scrollElement) {
                     return;
                 }
@@ -1446,34 +1446,20 @@ export class WYSIWYG {
                         columnElements.push(columnElement);
                     }
                 });
-                const initialDragRight = dragRect.right;
-                const widthScale = dragRect.width / oldWidth || 1;
                 const snapGuideThreshold = 16;
-                const snapGuideRight = previousWidth === undefined ? undefined :
-                    initialDragRight + (previousWidth - oldWidth) * widthScale;
-                const headerRect = headerElement.getBoundingClientRect();
-                const headerTop = headerRect.top;
-                const guideHeight = Math.round(headerRect.height);
                 let newWidth = oldWidth;
                 let resizeSnapped = false;
                 let resizeGuide: HTMLElement;
                 let resizeTip: HTMLElement;
                 let pendingResize: { width: number, snapped: boolean } | undefined;
                 let resizeAnimationFrame: number | undefined;
-                target.classList.add("av__widthdrag--active");
-                const clearResizePreview = () => {
-                    target.classList.remove("av__widthdrag--active");
-                    resizeGuide?.remove();
-                    resizeTip?.remove();
-                };
                 const updateResizePreview = (snapped: boolean) => {
+                    const currentDragRect = dragElement.getBoundingClientRect();
+                    const currentHeaderRect = headerElement.getBoundingClientRect();
                     if (!resizeTip) {
-                        if (snapGuideRight !== undefined) {
+                        if (previousElement) {
                             resizeGuide = document.createElement("div");
                             resizeGuide.className = "av__width-guide";
-                            resizeGuide.style.left = `${snapGuideRight}px`;
-                            resizeGuide.style.top = `${Math.round(headerTop)}px`;
-                            resizeGuide.style.height = `${guideHeight}px`;
                             document.body.appendChild(resizeGuide);
                         }
                         resizeTip = document.createElement("div");
@@ -1483,12 +1469,28 @@ export class WYSIWYG {
                     const showSnapGuide = !snapped && typeof previousWidth === "number" &&
                         Math.abs(newWidth - previousWidth) <= snapGuideThreshold;
                     resizeGuide?.classList.toggle("fn__none", !showSnapGuide);
-                    const dragRight = initialDragRight + (newWidth - oldWidth) * widthScale;
-                    resizeTip.style.left = `${dragRight}px`;
-                    resizeTip.style.top = `${Math.round(headerTop)}px`;
+                    if (resizeGuide && previousElement) {
+                        const previousRect = previousElement.getBoundingClientRect();
+                        resizeGuide.style.left = `${currentDragRect.left + previousRect.width}px`;
+                        resizeGuide.style.top = `${Math.round(currentHeaderRect.top)}px`;
+                        resizeGuide.style.height = `${Math.round(currentHeaderRect.height)}px`;
+                    }
+                    resizeTip.style.left = `${currentDragRect.right}px`;
+                    resizeTip.style.top = `${Math.round(currentHeaderRect.top)}px`;
                     resizeTip.textContent = `${newWidth}px${snapped ?
                         window.siyuan.languages.sameWidthAsLeftColumnTip : ""}`;
                 };
+                const updateResizePreviewOnScroll = () => {
+                    updateResizePreview(resizeSnapped);
+                };
+                const clearResizePreview = () => {
+                    target.classList.remove("av__widthdrag--active");
+                    scrollElement.removeEventListener("scroll", updateResizePreviewOnScroll);
+                    resizeGuide?.remove();
+                    resizeTip?.remove();
+                };
+                target.classList.add("av__widthdrag--active");
+                scrollElement.addEventListener("scroll", updateResizePreviewOnScroll, {passive: true});
                 updateResizePreview(resizeSnapped);
                 const flushResize = () => {
                     if (!pendingResize) {

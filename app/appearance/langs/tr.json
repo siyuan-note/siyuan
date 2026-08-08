@@ -1,5 +1,6 @@
 {
-	"selectAllIncompleteTip": "Yalnızca yüklenen içerik blokları seçildi; yüklenmeyen içerik blokları seçilmedi",
+	"msgSelectAllIncompleteTip": "Düzenleyicide eksik tümünü seçme uyarısı",
+	"selectAllIncompleteTip": "Lütfen bazı yüklenmemiş içerik bloklarının seçilmediğini unutmayın",
 	"listBlock": "Liste bloğu",
 	"prependListItem": "Geçerli listenin başına liste öğesi ekle",
 	"selectToPageStart": "İmleçten sayfanın başına kadar metni seç",

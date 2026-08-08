@@ -393,6 +393,7 @@ declare namespace Config {
         workspaceNotSSD: boolean;
         browserCompatibility: boolean;
         selectAllTip?: boolean;
+        selectAllIncompleteTip?: boolean;
     }
 
     /**

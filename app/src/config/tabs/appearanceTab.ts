@@ -520,6 +520,7 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.msgWorkspaceNotSSD,
             window.siyuan.languages.msgBrowserCompatibility,
             window.siyuan.languages.msgSelectAllTip,
+            window.siyuan.languages.msgSelectAllIncompleteTip,
         ],
         afterMount: mountAppearanceSetNotifications,
     }, (stack) => {
@@ -663,13 +664,15 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
 
 const NOTIFICATIONS_ITEMS: {
     field: keyof Config.IAppearanceNotifications;
-    labelKey: "msgDocTreeMaxList" | "msgTagMaxList" | "msgWorkspaceNotSSD" | "msgBrowserCompatibility" | "msgSelectAllTip";
+    labelKey: "msgDocTreeMaxList" | "msgTagMaxList" | "msgWorkspaceNotSSD" | "msgBrowserCompatibility" |
+        "msgSelectAllTip" | "msgSelectAllIncompleteTip";
 }[] = [
     {field: "docTreeMaxList", labelKey: "msgDocTreeMaxList"},
     {field: "tagMaxList", labelKey: "msgTagMaxList"},
     {field: "workspaceNotSSD", labelKey: "msgWorkspaceNotSSD"},
     {field: "browserCompatibility", labelKey: "msgBrowserCompatibility"},
     {field: "selectAllTip", labelKey: "msgSelectAllTip"},
+    {field: "selectAllIncompleteTip", labelKey: "msgSelectAllIncompleteTip"},
 ];
 
 const genNotificationsDialogHtml = (): string => {
@@ -693,6 +696,7 @@ const readNotificationsFromDialog = (root: HTMLElement): Config.IAppearanceNotif
         workspaceNotSSD: (root.querySelector("#workspaceNotSSD") as HTMLInputElement).checked,
         browserCompatibility: (root.querySelector("#browserCompatibility") as HTMLInputElement).checked,
         selectAllTip: (root.querySelector("#selectAllTip") as HTMLInputElement).checked,
+        selectAllIncompleteTip: (root.querySelector("#selectAllIncompleteTip") as HTMLInputElement).checked,
     };
 };
 

@@ -1,5 +1,6 @@
 {
-	"selectAllIncompleteTip": "Es wurden nur geladene Inhaltsblöcke ausgewählt; nicht geladene Inhaltsblöcke wurden nicht ausgewählt",
+	"msgSelectAllIncompleteTip": "Warnung bei unvollständiger Auswahl im Editor",
+	"selectAllIncompleteTip": "Bitte beachten Sie, dass noch nicht geladene Inhaltsblöcke nicht ausgewählt wurden",
 	"listBlock": "Listenblock",
 	"prependListItem": "Listenelement am Anfang der aktuellen Liste hinzufügen",
 	"selectToPageStart": "Text vom Cursor bis zum Seitenanfang auswählen",

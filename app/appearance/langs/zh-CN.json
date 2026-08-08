@@ -1,5 +1,6 @@
 {
-	"selectAllIncompleteTip": "仅选中了已加载的内容块，未加载的内容块未被选中",
+	"msgSelectAllIncompleteTip": "编辑器全选不完整提示",
+	"selectAllIncompleteTip": "请注意，仍有未加载的内容块未被选中",
 	"listBlock": "列表块",
 	"prependListItem": "在当前列表开头添加列表项",
 	"selectToPageStart": "选中光标至页首的文本",

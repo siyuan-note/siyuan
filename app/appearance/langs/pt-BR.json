@@ -1,5 +1,6 @@
 {
-	"selectAllIncompleteTip": "Somente os blocos de conteúdo carregados foram selecionados; os blocos de conteúdo não carregados não foram selecionados",
+	"msgSelectAllIncompleteTip": "Aviso de seleção incompleta no editor",
+	"selectAllIncompleteTip": "Observe que ainda há blocos de conteúdo não carregados que não foram selecionados",
 	"listBlock": "Bloco de lista",
 	"prependListItem": "Adicionar item ao início da lista atual",
 	"selectToPageStart": "Selecionar texto do cursor até o início da página",

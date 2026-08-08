@@ -1,5 +1,6 @@
 {
-	"selectAllIncompleteTip": "Only loaded content blocks were selected; unloaded content blocks were not selected",
+	"msgSelectAllIncompleteTip": "Incomplete editor select-all warning",
+	"selectAllIncompleteTip": "Please note that some unloaded content blocks remain unselected",
 	"listBlock": "List block",
 	"prependListItem": "Add a list item to the beginning of the current list",
 	"selectToPageStart": "Select text from the cursor to the beginning of the page",

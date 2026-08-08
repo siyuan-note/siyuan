@@ -1,5 +1,6 @@
 {
-	"selectAllIncompleteTip": "Alleen geladen inhoudsblokken zijn geselecteerd; niet-geladen inhoudsblokken zijn niet geselecteerd",
+	"msgSelectAllIncompleteTip": "Waarschuwing voor onvolledige selectie in de editor",
+	"selectAllIncompleteTip": "Let op: sommige niet-geladen inhoudsblokken zijn nog niet geselecteerd",
 	"listBlock": "Lijstblok",
 	"prependListItem": "Lijstitem toevoegen aan het begin van de huidige lijst",
 	"selectToPageStart": "Tekst vanaf de cursor tot het begin van de pagina selecteren",

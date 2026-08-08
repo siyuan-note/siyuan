@@ -162,7 +162,7 @@ const showSelectAllTip = () => {
 };
 
 const showSelectAllIncompleteTip = () => {
-    if (window.siyuan.config.appearance.notifications?.selectAllTip === false) {
+    if (window.siyuan.config.appearance.notifications?.selectAllIncompleteTip === false) {
         return;
     }
     showMessage(window.siyuan.languages.selectAllIncompleteTip, 6000, "info", "selectAllIncompleteTip");

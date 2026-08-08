@@ -1,5 +1,6 @@
 {
-	"selectAllIncompleteTip": "נבחרו רק בלוקי התוכן שנטענו; בלוקי תוכן שלא נטענו לא נבחרו",
+	"msgSelectAllIncompleteTip": "אזהרת בחירה חלקית בעורך",
+	"selectAllIncompleteTip": "לתשומת לבך, עדיין יש בלוקי תוכן שלא נטענו ולא נבחרו",
 	"listBlock": "בלוק רשימה",
 	"prependListItem": "הוספת פריט לתחילת הרשימה הנוכחית",
 	"selectToPageStart": "בחירת טקסט מהסמן עד לתחילת הדף",

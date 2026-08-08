@@ -1,5 +1,6 @@
 {
-	"selectAllIncompleteTip": "読み込み済みのコンテンツブロックのみが選択され、未読み込みのコンテンツブロックは選択されていません",
+	"msgSelectAllIncompleteTip": "エディターの不完全な全選択警告",
+	"selectAllIncompleteTip": "未読み込みのコンテンツブロックが選択されていないことに注意してください",
 	"listBlock": "リストブロック",
 	"prependListItem": "現在のリストの先頭にリスト項目を追加",
 	"selectToPageStart": "カーソルからページの先頭までのテキストを選択",

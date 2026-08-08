@@ -1,5 +1,6 @@
 {
-	"selectAllIncompleteTip": "Hanya blok konten yang telah dimuat yang dipilih; blok konten yang belum dimuat tidak dipilih",
+	"msgSelectAllIncompleteTip": "Peringatan pilih semua tidak lengkap di editor",
+	"selectAllIncompleteTip": "Perhatikan bahwa masih ada blok konten yang belum dimuat dan belum dipilih",
 	"listBlock": "Blok daftar",
 	"prependListItem": "Tambahkan item daftar ke awal daftar saat ini",
 	"selectToPageStart": "Pilih teks dari kursor hingga awal halaman",

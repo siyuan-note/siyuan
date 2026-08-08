@@ -1,5 +1,5 @@
 import {hideElements} from "../ui/hideElements";
-import {isMac, isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
+import {isNotCtrl, isOnlyMeta, updateHotkeyTip, writeText} from "../util/compatibility";
 import {
     focusBlock,
     focusByRange,
@@ -678,34 +678,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if ((event.shiftKey && !event.altKey && isNotCtrl(event) && (event.key === "Home" || event.key === "End") && isMac()) ||
-            (event.shiftKey && !event.altKey && isOnlyMeta(event) && (event.key === "Home" || event.key === "End") && !isMac())) {
-            const topElement = hasTopClosestByAttribute(nodeElement, "data-node-id", null);
-            if (topElement) {
-                // 超级块内已选中某个块
-                topElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                    item.classList.remove("protyle-wysiwyg--select");
-                });
-                topElement.classList.add("protyle-wysiwyg--select");
-                const ids: string[] = [];
-                ids.push(topElement.getAttribute("data-node-id"));
-                let nextElement = event.key === "Home" ? topElement.previousElementSibling : topElement.nextElementSibling;
-                while (nextElement) {
-                    nextElement.classList.add("protyle-wysiwyg--select");
-                    ids.push(nextElement.getAttribute("data-node-id"));
-                    nextElement = event.key === "Home" ? nextElement.previousElementSibling : nextElement.nextElementSibling;
-                }
-                countBlockWord(ids);
-                if (event.key === "Home") {
-                    protyle.wysiwyg.element.firstElementChild.scrollIntoView();
-                } else {
-                    protyle.wysiwyg.element.lastElementChild.scrollIntoView(false);
-                }
-            }
-            event.stopPropagation();
-            event.preventDefault();
-            return;
-        }
         // https://github.com/siyuan-note/siyuan/issues/11726
         if ((event.key === "Home" || event.key === "End") && !event.shiftKey && !event.altKey && isNotCtrl(event)) {
             hideElements(["hint"], protyle);

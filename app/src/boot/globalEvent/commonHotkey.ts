@@ -103,6 +103,10 @@ export const correctHotkey = (app: App) => {
                 Constants.SIYUAN_KEYMAP.general[key].default.replace("⌃", "⌥");
         });
         Constants.SIYUAN_KEYMAP.editor.general.redo.custom = Constants.SIYUAN_KEYMAP.editor.general.redo.default = "⌘Y";
+        Constants.SIYUAN_KEYMAP.editor.general.selectToPageStart.custom =
+            Constants.SIYUAN_KEYMAP.editor.general.selectToPageStart.default = "⇧⌘Home";
+        Constants.SIYUAN_KEYMAP.editor.general.selectToPageEnd.custom =
+            Constants.SIYUAN_KEYMAP.editor.general.selectToPageEnd.default = "⇧⌘End";
     }
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");

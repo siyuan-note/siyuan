@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260808211451"
+		"updated": "20260809003223"
 	},
 	"Children": [
 		{
@@ -3746,7 +3746,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20260808211451"
+				"updated": "20260809003223"
 			},
 			"Children": [
 				{
@@ -3761,7 +3761,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20260808195552"
+				"updated": "20260809003223"
 			},
 			"Children": [
 				{
@@ -3781,7 +3781,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20260808195552"
+				"updated": "20260809003223"
 			},
 			"Children": [
 				{
@@ -6306,8 +6306,6 @@
 						}
 					]
 				},
-				{"Type": "NodeTableRow", "Data": "tr", "Children": [{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "選取游標至已載入內容首部的文字"}]}, {"Type": "NodeTableCell", "Data": "td"}, {"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "無預設快速鍵，可自訂"}]}]},
-				{"Type": "NodeTableRow", "Data": "tr", "Children": [{"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "選取游標至已載入內容尾部的文字"}]}, {"Type": "NodeTableCell", "Data": "td"}, {"Type": "NodeTableCell", "Data": "td", "Children": [{"Type": "NodeText", "Data": "無預設快速鍵，可自訂"}]}]},
 				{
 					"Type": "NodeTableRow",
 					"Data": "tr",
@@ -6318,7 +6316,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取目前區塊至已載入內容首部的內容區塊"
+									"Data": "選取游標至已載入內容首部的文字"
 								}
 							]
 						},
@@ -6384,7 +6382,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選取目前區塊至已載入內容尾部的內容區塊"
+									"Data": "選取游標至已載入內容尾部的文字"
 								}
 							]
 						},

@@ -510,11 +510,13 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
             icon: "iconSettings",
         });
     });
-    group.stack({
-        key: "notifications",
+    group.button({
+        id: "notificationsSetting",
+        title: window.siyuan.languages.notifications,
+        desc: window.siyuan.languages.notificationsMsgPushTip,
+        label: window.siyuan.languages.config,
+        icon: "iconSettings",
         keywords: [
-            window.siyuan.languages.notifications,
-            window.siyuan.languages.notificationsMsgPushTip,
             window.siyuan.languages.msgDocTreeMaxList,
             window.siyuan.languages.msgTagMaxList,
             window.siyuan.languages.msgWorkspaceNotSSD,
@@ -523,14 +525,6 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.msgSelectAllIncompleteTip,
         ],
         afterMount: mountAppearanceSetNotifications,
-    }, (stack) => {
-        stack.title(window.siyuan.languages.notifications);
-        stack.button({
-            id: "notificationsSetting",
-            label: window.siyuan.languages.config,
-            icon: "iconSettings",
-        });
-        stack.desc(window.siyuan.languages.notificationsMsgPushTip);
     });
     const desktopModeControl = controlBoolean("desktopMode", {
         readConfig: () => desktopModeCookie.read(),

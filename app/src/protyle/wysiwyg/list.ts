@@ -8,7 +8,11 @@ import {hasClosestByClassName, isBlockElement} from "../util/hasClosest";
 import {getEmbedChildOperationContext, getParentBlock, getPreviousBlockSibling} from "./getBlock";
 import {setFold} from "../util/blockFold";
 import {scrollCenter} from "../../util/highlightById";
-import {getFollowingOrderedListMarkerUpdates, type TListSubtype} from "./listContext";
+import {
+    getFollowingOrderedListMarkerUpdates,
+    getOrderedListMarkerUpdates,
+    type TListSubtype
+} from "./listContext";
 import {fetchSyncPost} from "../../util/fetch";
 
 const getLastChildBlock = (element: Element) => {
@@ -35,29 +39,26 @@ const unfoldElements = (protyle: IProtyle, elements: Element[]) => {
 
 export const updateListOrder = (listElement: Element, sIndex?: number) => {
     if (listElement.getAttribute("data-subtype") !== "o") {
-        return;
+        return true;
     }
-    let starIndex: number;
-    Array.from(listElement.children).forEach((item, index) => {
-        // https://github.com/siyuan-note/siyuan/issues/16315 第三点会有为空的情况
-        if (!item.classList.contains("li")) {
-            return;
-        }
-        if (index === 0) {
-            if (sIndex) {
-                starIndex = sIndex;
-                item.setAttribute("data-marker", (starIndex) + ".");
-                item.querySelector(".protyle-action--order").textContent = (starIndex) + ".";
-            } else {
-                starIndex = parseInt(item.getAttribute("data-marker"));
+    const blockChildren = Array.from(listElement.children).filter(item => item.hasAttribute("data-node-id"));
+    if (blockChildren.some(item => item.getAttribute("data-type") !== "NodeListItem")) {
+        return false;
+    }
+    const listItemElements = blockChildren as HTMLElement[];
+    const markerUpdates = getOrderedListMarkerUpdates(
+        listItemElements.map(item => item.getAttribute("data-marker")), sIndex);
+    listItemElements.forEach((item, index) => {
+        const marker = markerUpdates[index];
+        if (marker) {
+            item.setAttribute("data-marker", marker);
+            const actionElement = item.querySelector(".protyle-action--order");
+            if (actionElement) {
+                actionElement.textContent = marker;
             }
-        } else if (item.classList.contains("li")) {
-            // 保证列表项的缩放和常规列表属性的存在
-            starIndex++;
-            item.setAttribute("data-marker", (starIndex) + ".");
-            item.querySelector(".protyle-action--order").textContent = (starIndex) + ".";
         }
     });
+    return true;
 };
 
 export const toggleTaskListItem = (protyle: IProtyle, taskItemElement: Element): void => {

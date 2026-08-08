@@ -200,6 +200,10 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		}
 	}
 
+	tx.markStructureCheck(heading)
+	for _, child := range headingChildren {
+		tx.markStructureCheck(child)
+	}
 	tx.writeTree(tree)
 	return
 }

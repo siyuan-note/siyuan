@@ -4,6 +4,7 @@ import {
     getFollowingOrderedListMarkerUpdates,
     getListContext,
     getListConversionType,
+    getOrderedListMarkerUpdates,
     getListShortcutAction,
     shouldIgnoreListShortcut,
     type TListSubtype
@@ -182,6 +183,22 @@ describe("getFollowingOrderedListMarkerUpdates", () => {
 
     it("ignores an invalid current marker", () => {
         assert.deepEqual(getFollowingOrderedListMarkerUpdates("*", ["2."]), [undefined]);
+    });
+});
+
+describe("getOrderedListMarkerUpdates", () => {
+    it("preserves ordered lists starting from zero", () => {
+        assert.deepEqual(getOrderedListMarkerUpdates(["0.", "1."]), [undefined, undefined]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["5.", "9."]), [undefined, "6."]);
+    });
+
+    it("supports an explicit zero start index", () => {
+        assert.deepEqual(getOrderedListMarkerUpdates(["1.", "2."], 0), ["0.", "1."]);
+    });
+
+    it("replaces invalid markers instead of producing NaN", () => {
+        assert.deepEqual(getOrderedListMarkerUpdates(["NaN.", "NaN."]), ["1.", "2."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["2.", "3."], Number.NaN), ["1.", "2."]);
     });
 });
 

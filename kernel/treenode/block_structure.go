@@ -56,6 +56,22 @@ func ValidateBlockSubtree(root *ast.Node) error {
 	return ret
 }
 
+// ValidateBlockPlacement 校验内容块在当前父节点中的位置，并校验其内部结构。
+func ValidateBlockPlacement(node *ast.Node) error {
+	if nil == node || !isContentBlock(node) {
+		return invalidBlockNodeError(node)
+	}
+
+	parent := node.Parent
+	for nil != parent && !isContentBlock(parent) {
+		parent = parent.Parent
+	}
+	if nil != parent && !CanContainBlock(parent.Type, node.Type) {
+		return invalidBlockContainmentError(parent, node)
+	}
+	return ValidateBlockSubtree(node)
+}
+
 // ValidateBlockReplacement 校验新块能否替换旧块，并校验新块内部的容纳关系。
 func ValidateBlockReplacement(oldNode, newNode *ast.Node) error {
 	if nil == oldNode || !isContentBlock(oldNode) {

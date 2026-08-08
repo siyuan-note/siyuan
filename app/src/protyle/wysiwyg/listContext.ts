@@ -85,6 +85,18 @@ export const getFollowingOrderedListMarkerUpdates = (currentMarker: string, foll
     });
 };
 
+export const getOrderedListMarkerUpdates = (markers: string[], startIndex?: number) => {
+    if (markers.length === 0) {
+        return [];
+    }
+    const parsedStartIndex = startIndex === undefined ? Number.parseInt(markers[0], 10) : startIndex;
+    const normalizedStartIndex = Number.isFinite(parsedStartIndex) ? Math.trunc(parsedStartIndex) : 1;
+    return markers.map((marker, index) => {
+        const expectedMarker = `${normalizedStartIndex + index}.`;
+        return marker === expectedMarker ? undefined : expectedMarker;
+    });
+};
+
 export const shouldIgnoreListShortcut = (hasBlockSelection: boolean, selectedType?: string) => {
     return hasBlockSelection && selectedType === "NodeListItem";
 };

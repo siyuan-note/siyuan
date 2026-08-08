@@ -68,6 +68,36 @@ func TestValidateBlockSubtree(t *testing.T) {
 	}
 }
 
+func TestValidateBlockPlacement(t *testing.T) {
+	document := &ast.Node{Type: ast.NodeDocument, ID: "document"}
+	list := &ast.Node{Type: ast.NodeList, ID: "list"}
+	item := &ast.Node{Type: ast.NodeListItem, ID: "item"}
+	paragraph := &ast.Node{Type: ast.NodeParagraph, ID: "paragraph"}
+	document.AppendChild(list)
+	list.AppendChild(item)
+	item.AppendChild(paragraph)
+
+	if err := ValidateBlockPlacement(item); nil != err {
+		t.Fatalf("expected list item placement to be valid, got [%s]", err)
+	}
+	if err := ValidateBlockPlacement(paragraph); nil != err {
+		t.Fatalf("expected paragraph placement to be valid, got [%s]", err)
+	}
+
+	invalidParagraph := &ast.Node{Type: ast.NodeParagraph, ID: "invalid-paragraph"}
+	list.AppendChild(invalidParagraph)
+	if err := ValidateBlockPlacement(invalidParagraph); nil == err {
+		t.Fatal("expected paragraph directly under list to be rejected")
+	}
+
+	invalidItem := &ast.Node{Type: ast.NodeListItem, ID: "invalid-item"}
+	invalidItem.AppendChild(&ast.Node{Type: ast.NodeListItem, ID: "nested-item"})
+	list.AppendChild(invalidItem)
+	if err := ValidateBlockPlacement(invalidItem); nil == err {
+		t.Fatal("expected invalid list item subtree to be rejected")
+	}
+}
+
 func TestValidateBlockReplacement(t *testing.T) {
 	list := &ast.Node{Type: ast.NodeList, ID: "list"}
 	oldItem := &ast.Node{Type: ast.NodeListItem, ID: "item"}

@@ -137,6 +137,10 @@ func flushTx(tx *Transaction) {
 			}
 			util.PushTxErr(pushMsg, txErr.code, nil)
 			return
+		case TxErrCodeReloadUI:
+			logging.LogErrorf("transaction structure validation failed: %s", txErr.msg)
+			util.ReloadUI()
+			return
 		case TxErrCodeDataIsSyncing:
 			util.PushMsg(Conf.Language(222), 5000)
 		case TxErrHandleAttributeView:
@@ -188,6 +192,7 @@ const (
 	TxErrHandleAttributeView = 3
 	TxErrCodePushMsg         = 4
 	TxErrCodeSkipTx          = 5 // 操作被跳过，不弹状态异常
+	TxErrCodeReloadUI        = 6 // 事务已回滚，重新加载界面以恢复前后端一致状态
 )
 
 type TxErr struct {
@@ -465,6 +470,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		tx.rollback()
 		return
 	}
+	if ret = tx.validateStructureChanges(); nil != ret {
+		tx.rollback()
+		return
+	}
 
 	if cr := tx.commit(); nil != cr {
 		logging.LogErrorf("commit tx failed: %s", cr)
@@ -673,6 +682,10 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 		treenode.RefreshUpdated(srcNode)
 		tx.nodes[srcNode.ID] = srcNode
+		tx.markStructureCheck(srcNode)
+		for _, child := range headingChildren {
+			tx.markStructureCheck(child)
+		}
 		treenode.RefreshUpdated(srcTree.Root)
 		tx.writeTree(srcTree)
 		if !isSameTree {
@@ -760,6 +773,10 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 	treenode.RefreshUpdated(srcNode)
 	tx.nodes[srcNode.ID] = srcNode
+	tx.markStructureCheck(srcNode)
+	for _, child := range headingChildren {
+		tx.markStructureCheck(child)
+	}
 	treenode.RefreshUpdated(srcTree.Root)
 	tx.writeTree(srcTree)
 	if !isSameTree {
@@ -884,6 +901,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 
 		treenode.CreatedUpdated(toInsert)
 		tx.nodes[toInsert.ID] = toInsert
+		tx.markStructureCheck(toInsert)
 	}
 
 	treenode.CreatedUpdated(insertedNode)
@@ -998,6 +1016,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 
 		treenode.CreatedUpdated(toInsert)
 		tx.nodes[toInsert.ID] = toInsert
+		tx.markStructureCheck(toInsert)
 	}
 
 	treenode.CreatedUpdated(insertedNode)
@@ -1093,6 +1112,11 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	}
 	if nil != srcEmptyList {
 		srcEmptyList.Unlink()
+	}
+	tx.markStructureCheck(srcNode)
+	tx.markStructureCheck(targetNewList)
+	for _, child := range headingChildren {
+		tx.markStructureCheck(child)
 	}
 
 	tx.writeTree(srcTree)
@@ -1572,6 +1596,10 @@ func (tx *Transaction) doInsert0(operation *Operation, tree *parse.Tree) (ret *T
 
 	treenode.CreatedUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
+	tx.markStructureCheck(insertedNode)
+	for _, remain := range remains {
+		tx.markStructureCheck(remain)
+	}
 
 	// 收集引用的定义块 ID
 	refDefIDs := getRefDefIDs(insertedNode)
@@ -1690,7 +1718,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	}
 	if err = treenode.ValidateBlockReplacement(oldNode, updatedNode); err != nil {
 		logging.LogErrorf("validate updated block [%s] structure failed: %s", id, err)
-		return &TxErr{code: TxErrCodePushMsg, msg: err.Error(), id: id}
+		return &TxErr{code: TxErrCodeReloadUI, msg: err.Error(), id: id}
 	}
 	if err = validateBlockUpdateType(oldNode, updatedNode, operation.LockType); err != nil {
 		logging.LogError(err.Error())
@@ -2021,6 +2049,7 @@ func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 	// 兜底校验：禁止跨加密边界块引（创建文档可能携带跨边界引用）
 	// 必须在 getRefDefIDs 之前，避免跨边界引用被收集进引用缓存
 	degradeCrossBoundaryBlockRefs(tree.Root, tree.Box)
+	tx.markStructureCheck(tree.Root)
 	tx.writeTree(tree)
 	// 新建文档中的引用均为本次新增，刷新其最近引用时间用于块引"最近引用"排序
 	TouchRefUsed(getRefDefIDs(tree.Root))
@@ -2207,6 +2236,50 @@ type listItemFoldCandidate struct {
 	tree *parse.Tree
 }
 
+func (tx *Transaction) markStructureCheck(node *ast.Node) {
+	if nil == node {
+		return
+	}
+	if nil == tx.structureCheckNodes {
+		tx.structureCheckNodes = map[*ast.Node]struct{}{}
+	}
+	tx.structureCheckNodes[node] = struct{}{}
+}
+
+func isNodeInDocument(node *ast.Node) bool {
+	for current := node; nil != current; current = current.Parent {
+		if ast.NodeDocument == current.Type {
+			return true
+		}
+	}
+	return false
+}
+
+func (tx *Transaction) structureOperationSummary() string {
+	var operations []string
+	for index, operation := range tx.DoOperations {
+		switch operation.Action {
+		case "append", "appendInsert", "insert", "move", "moveOutlineHeading", "prependInsert":
+			operations = append(operations, fmt.Sprintf("%d:%s id=%s parent=%s previous=%s next=%s",
+				index, operation.Action, operation.ID, operation.ParentID, operation.PreviousID, operation.NextID))
+		}
+	}
+	return strings.Join(operations, "; ")
+}
+
+func (tx *Transaction) validateStructureChanges() (ret *TxErr) {
+	for node := range tx.structureCheckNodes {
+		if !isNodeInDocument(node) {
+			continue
+		}
+		if err := treenode.ValidateBlockPlacement(node); nil != err {
+			msg := fmt.Sprintf("%s, operations [%s]", err, tx.structureOperationSummary())
+			return &TxErr{code: TxErrCodeReloadUI, msg: msg, id: node.ID}
+		}
+	}
+	return
+}
+
 type Transaction struct {
 	Timestamp      int64        `json:"timestamp"`
 	DoOperations   []*Operation `json:"doOperations"`
@@ -2230,6 +2303,7 @@ type Transaction struct {
 	listItemFoldCandidates   []listItemFoldCandidate
 	listItemFoldCandidateIDs map[string]struct{}
 	deletedAttrViewBlockIDs  map[string]map[string]struct{}
+	structureCheckNodes      map[*ast.Node]struct{}
 
 	luteEngine *lute.Lute
 	m          *sync.Mutex
@@ -2287,6 +2361,7 @@ func (tx *Transaction) begin() (err error) {
 	tx.listItemFoldCandidates = nil
 	tx.listItemFoldCandidateIDs = map[string]struct{}{}
 	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
+	tx.structureCheckNodes = map[*ast.Node]struct{}{}
 	tx.luteEngine = util.NewLute()
 	tx.m.Lock()
 	tx.state.Store(1)
@@ -2362,6 +2437,7 @@ func (tx *Transaction) rollback() {
 	tx.trees, tx.nodes, tx.boxIcons, tx.removedCreatedDocs, tx.restoredCreatedDocs = nil, nil, nil, nil, nil
 	tx.listItemFoldCandidates, tx.listItemFoldCandidateIDs = nil, nil
 	tx.deletedAttrViewBlockIDs = nil
+	tx.structureCheckNodes = nil
 	tx.state.Store(3)
 	tx.m.Unlock()
 	return

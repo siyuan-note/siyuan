@@ -1064,6 +1064,7 @@ export class WYSIWYG {
             }
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
             const galleryItemElement = hasClosestByClassName(target, "av__gallery-item");
+            const rowElement = hasClosestByClassName(target, "av__row");
             const avCellElement = hasClosestByClassName(target, "av__cell");
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
@@ -1090,8 +1091,9 @@ export class WYSIWYG {
                     event.stopPropagation();
                     return;
                 }
-                if (!hasSelectClassElement && galleryItemElement &&
-                    selectAVItemRange(nodeElement, galleryItemElement as HTMLElement)) {
+                const itemElement = galleryItemElement ||
+                    (rowElement && !rowElement.classList.contains("av__row--header") ? rowElement : false);
+                if (!hasSelectClassElement && itemElement && selectAVItemRange(nodeElement, itemElement)) {
                     focusBlock(nodeElement);
                     this.preventClick = true;
                     event.preventDefault();
@@ -1115,7 +1117,6 @@ export class WYSIWYG {
             }
             if (isOnlyMeta(event) && !event.shiftKey && !event.altKey && !startsFromPadding) {
                 let ctrlElement = nodeElement;
-                const rowElement = hasClosestByClassName(target, "av__row");
                 if (!hasSelectClassElement && (galleryItemElement || (rowElement && !rowElement.classList.contains("av__row--header")))) {
                     if (galleryItemElement) {
                         const galleryBodyElement = hasClosestByClassName(galleryItemElement, "av__body") as HTMLElement;

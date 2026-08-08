@@ -681,7 +681,8 @@
 
 .protyle-wysiwyg .table > div:first-child,
 .b3-typography .table > div:first-child {
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .protyle-wysiwyg [data-node-id].table table,

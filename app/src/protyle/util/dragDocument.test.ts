@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {
     getAVRowDropTarget,
     getSameSuperBlockEdgeTarget,
+    getSuperBlockResizeDropTarget,
     getTopListDragTarget,
     isAttributeViewTitleTarget,
     isDragTargetInSource,
@@ -198,6 +199,30 @@ describe("getSameSuperBlockEdgeTarget", () => {
         const {blocks, superBlock} = createSuperBlock("row");
 
         assert.equal(getSameSuperBlockEdgeTarget([blocks[1]], superBlock, false), undefined);
+    });
+});
+
+describe("getSuperBlockResizeDropTarget", () => {
+    it("uses the previous column for a horizontal super block resize handle", () => {
+        const {blocks, superBlock} = createSuperBlock();
+        const resize = {
+            classList: {contains: (className: string) => className === "sb__resize"},
+            parentElement: superBlock,
+            previousElementSibling: blocks[1],
+        } as unknown as HTMLElement;
+
+        assert.equal(getSuperBlockResizeDropTarget(resize), blocks[1]);
+    });
+
+    it("ignores resize handles outside a horizontal super block", () => {
+        const {blocks, superBlock} = createSuperBlock("row");
+        const resize = {
+            classList: {contains: (className: string) => className === "sb__resize"},
+            parentElement: superBlock,
+            previousElementSibling: blocks[1],
+        } as unknown as HTMLElement;
+
+        assert.equal(getSuperBlockResizeDropTarget(resize), undefined);
     });
 });
 

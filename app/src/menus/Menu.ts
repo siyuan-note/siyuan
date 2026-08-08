@@ -111,7 +111,7 @@ export class Menu {
                     if (lastShowElements.length > 0) {
                         lastShowElements[lastShowElements.length - 1].classList.remove("b3-menu__item--show");
                         if (this.element.classList.contains("b3-menu--sheet")) {
-                            this.setSheetHeight(this.element.dataset.position === "bottom" ? "bottom" : "all");
+                            this.setSheetHeight();
                         }
                     } else {
                         this.closeSheet();
@@ -149,7 +149,7 @@ export class Menu {
             itemElement.classList.add("b3-menu__item--show");
             if (!isSubMenuShown) {
                 if (this.element.classList.contains("b3-menu--sheet")) {
-                    this.setSheetHeight(this.element.dataset.position === "bottom" ? "bottom" : "all");
+                    this.setSheetHeight();
                 } else if (!this.element.classList.contains("b3-menu--fullscreen")) {
                     this.showSubMenu(subMenuElement);
                 }
@@ -338,20 +338,12 @@ export class Menu {
         labelElement.textContent = parentLabelElement?.textContent.trim() || window.siyuan.languages.back;
     }
 
-    private setSheetHeight(position: "bottom" | "all") {
+    private setSheetHeight() {
         this.updateSheetTitle();
-        if (position === "bottom") {
-            this.element.style.height = "56vh";
-            return;
-        }
-        const shownItems = this.element.querySelectorAll(".b3-menu__item--show");
-        if (shownItems.length > 0) {
-            return;
-        }
-        const maxHeight = window.innerHeight * .56;
-        const titleHeight = this.element.firstElementChild.getBoundingClientRect().height;
-        const contentHeight = this.element.lastElementChild.scrollHeight;
-        this.element.style.height = Math.min(maxHeight, Math.max(160, titleHeight + contentHeight)) + "px";
+        const mobileSize = window.siyuan.mobile.size;
+        const orientationSize = mobileSize.isLandscape ? mobileSize.landscape : mobileSize.portrait;
+        // 使用当前方向记录的完整视口高度，避免软键盘收起期间菜单高度被压缩
+        this.element.style.height = Math.max(window.innerHeight, orientationSize?.height1 || 0) * .56 + "px";
     }
 
     public showSubMenu(subMenuElement: HTMLElement) {
@@ -362,7 +354,7 @@ export class Menu {
             return;
         }
         if (this.element.classList.contains("b3-menu--sheet")) {
-            this.setSheetHeight(this.element.dataset.position === "bottom" ? "bottom" : "all");
+            this.setSheetHeight();
             return;
         }
         const itemRect = subMenuElement.parentElement.getBoundingClientRect();
@@ -456,7 +448,7 @@ export class Menu {
                 subElement.classList.add("b3-menu__item--current");
                 subElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
                 if (this.element.classList.contains("b3-menu--sheet")) {
-                    this.setSheetHeight(this.element.dataset.position === "bottom" ? "bottom" : "all");
+                    this.setSheetHeight();
                 }
                 return;
             }
@@ -487,7 +479,6 @@ export class Menu {
         this.element.removeAttribute("style");  // zIndex
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
         this.element.removeAttribute("data-from");    // 标识菜单入口
-        this.element.removeAttribute("data-position");
         this.data = undefined;    // 移除数据
     }
 
@@ -586,14 +577,13 @@ export class Menu {
         this.element.querySelectorAll(":scope > .b3-menu__items, .b3-menu__submenu > .b3-menu__items")
             .forEach(updateMenuItemGroupClasses);
         this.element.classList.add("b3-menu--fullscreen", "b3-menu--sheet");
-        this.element.dataset.position = position;
         this.element.style.transform = "translateY(100%)";
         this.showFullscreenScrim();
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.firstElementChild.classList.remove("fn__none");
         this.element.classList.remove("fn__none");
         window.addEventListener("touchmove", this.preventDefault, {passive: false});
-        this.setSheetHeight(position);
+        this.setSheetHeight();
         void this.element.offsetHeight;
         requestAnimationFrame(() => {
             if (this.element.classList.contains("b3-menu--sheet")) {

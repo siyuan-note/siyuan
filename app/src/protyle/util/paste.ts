@@ -581,8 +581,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             });
 
             if (response) {
-                // 插件返回的是完整的剪贴板载荷，未返回字段需清空，避免原数据影响后续处理
-                const normalizedResponse = normalizePasteResponse(response);
+                // 插件返回的是完整的剪贴板文本载荷，文件字段仅在显式返回时替换
+                const normalizedResponse = normalizePasteResponse(response, files);
                 textHTML = normalizedResponse.textHTML;
                 textPlain = normalizedResponse.textPlain;
                 siyuanHTML = normalizedResponse.siyuanHTML;

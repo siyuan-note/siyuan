@@ -3,12 +3,13 @@ import * as assert from "node:assert/strict";
 import {normalizePasteResponse} from "./pasteResponse";
 
 describe("normalizePasteResponse", () => {
-    it("clears clipboard formats omitted from a plugin response", () => {
-        assert.deepEqual(normalizePasteResponse({textPlain: "updated"}), {
+    it("clears omitted text formats and preserves existing files", () => {
+        const files = [{} as File];
+        assert.deepEqual(normalizePasteResponse({textPlain: "updated"}, files), {
             textHTML: "",
             textPlain: "updated",
             siyuanHTML: "",
-            files: [],
+            files,
         });
     });
 
@@ -24,6 +25,16 @@ describe("normalizePasteResponse", () => {
             textPlain: "updated",
             siyuanHTML: "<div data-type=\"NodeParagraph\">updated</div>",
             files,
+        });
+    });
+
+    it("clears existing files when a plugin returns an empty file list", () => {
+        const files = [{} as File];
+        assert.deepEqual(normalizePasteResponse({textPlain: "updated", files: []}, files), {
+            textHTML: "",
+            textPlain: "updated",
+            siyuanHTML: "",
+            files: [],
         });
     });
 });

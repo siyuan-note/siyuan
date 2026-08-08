@@ -14,7 +14,7 @@ import {transaction} from "../wysiwyg/transaction";
 import {getAssetExtension, getAssetName, getDisplayName, isEncryptedBox} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
 import {updateListOrder} from "../wysiwyg/list";
-import {escapeHtml} from "../../util/escape";
+import {escapeHtml, stripSearchMark} from "../../util/escape";
 import {zoomOut} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {genAssetHTML} from "../../asset/renderAssets";
@@ -449,13 +449,13 @@ export const genHintItemHTML = (item: IBlock) => {
     }
     let attrHTML = "";
     if (item.name) {
-        attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg><span>${escapeHtml(item.name)}</span></span><span class="fn__space"></span>`;
+        attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconN"></use></svg><span>${item.name}</span></span><span class="fn__space"></span>`;
     }
     if (item.alias) {
-        attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconA"></use></svg><span>${escapeHtml(item.alias)}</span></span><span class="fn__space"></span>`;
+        attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconA"></use></svg><span>${item.alias}</span></span><span class="fn__space"></span>`;
     }
     if (item.memo) {
-        attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconM"></use></svg><span>${escapeHtml(item.memo)}</span></span>`;
+        attrHTML += `<span class="fn__flex"><svg class="b3-list-item__hinticon"><use xlink:href="#iconM"></use></svg><span>${item.memo}</span></span>`;
     }
     if (attrHTML) {
         attrHTML = `<div class="fn__flex b3-list-item__meta b3-list-item__showall">${attrHTML}</div>`;
@@ -520,7 +520,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
                 createItemCount++;
             }
             response.data.blocks.forEach((item: IBlock) => {
-                const name = item.name ? escapeHtml(item.name) : item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
+                const name = item.name ? stripSearchMark(item.name) : item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
                 let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${name}</span>`;
                 if (source === "search") {
                     value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${key}${Constants.ZWSP}${name}</span>`;

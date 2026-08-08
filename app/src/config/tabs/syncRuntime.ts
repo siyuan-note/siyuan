@@ -5,6 +5,7 @@ import {
     updateAccountSwitchesVisibility,
 } from "./accountUi";
 import {
+    refreshLANSyncConfigItemVisibility,
     refreshSyncModeRelatedItems,
     refreshSyncTabPanels,
 } from "./syncUi";
@@ -25,22 +26,17 @@ export const mountSyncTabExtras = (root: HTMLElement) => {
 };
 
 export const refreshLANSyncStatus = (root: Element) => {
-    const cloudSyncEnabled = window.siyuan.config.sync.enabled;
-    const switchElement = root.querySelector(`#${CSS.escape("sync.lan.enabled")}`) as HTMLInputElement | null;
-    if (switchElement) {
-        switchElement.disabled = !cloudSyncEnabled;
-    }
     const statusElement = root.querySelector('[data-type="lanSyncStatus"]');
     if (!statusElement) {
         return;
     }
-    if (!cloudSyncEnabled) {
-        statusElement.textContent = window.siyuan.languages.lanSyncRequiresCloudSync;
+    if (!window.siyuan.config.sync.enabled) {
+        statusElement.textContent = "";
         return;
     }
     fetchSyncPost("/api/sync/getSyncLANStatus", {}).then((response) => {
         if (!window.siyuan.config.sync.enabled) {
-            statusElement.textContent = window.siyuan.languages.lanSyncRequiresCloudSync;
+            statusElement.textContent = "";
             return;
         }
         if (response.code === 0 && response.data) {
@@ -120,6 +116,7 @@ export const patchSyncConfig = (controlId: string, value: unknown) => {
             fetchPost("/api/sync/setSyncEnable", {enabled}, () => {
                 window.siyuan.config.sync.enabled = enabled;
                 if (syncTabElement) {
+                    refreshLANSyncConfigItemVisibility(syncTabElement);
                     refreshLANSyncStatus(syncTabElement);
                 }
                 processSync();

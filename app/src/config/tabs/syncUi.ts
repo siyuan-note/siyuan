@@ -18,6 +18,13 @@ export const refreshSyncModeRelatedItems = (root: Element) => {
     setSyncModeRelatedConfigItemVisible(root);
 };
 
+/** 根据云端同步和运行环境刷新局域网同步配置项可见性 */
+export const refreshLANSyncConfigItemVisibility = (root: Element) => {
+    const visible = window.siyuan.config.sync.provider === 0 ? !needSubscribe("") : isPaidUser();
+    root.querySelector(`#${CSS.escape("sync.lan.enabled")}`)?.closest(".config-item")?.classList.toggle(
+        "fn__none", !visible || !window.siyuan.config.sync.enabled || window.siyuan.config.system.container === "docker");
+};
+
 const setSyncConfigItemVisible = (root: Element) => {
     const visible = window.siyuan.config.sync.provider === 0 ? !needSubscribe("") : isPaidUser();
     [
@@ -34,8 +41,7 @@ const setSyncConfigItemVisible = (root: Element) => {
     .forEach((id) => {
         root.querySelector(`#${CSS.escape(id)}`)?.closest(".config-item")?.classList.toggle("fn__none", !visible);
     });
-    root.querySelector(`#${CSS.escape("sync.lan.enabled")}`)?.closest(".config-item")?.classList.toggle(
-        "fn__none", !visible || window.siyuan.config.system.container === "docker");
+    refreshLANSyncConfigItemVisibility(root);
 };
 
 const setSyncModeRelatedConfigItemVisible = (root: Element) => {

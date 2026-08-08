@@ -708,8 +708,12 @@ export const hideKeyboardToolbar = () => {
 
 export const hideKeyboardToolbarByApp = () => {
     hideKeyboardToolbar();
+    const selection = getSelection();
+    if (!selection || selection.isCollapsed) {
+        return;
+    }
     (document.activeElement as HTMLElement)?.blur();
-    getSelection()?.removeAllRanges();
+    selection.removeAllRanges();
 };
 
 export const activeBlur = () => {

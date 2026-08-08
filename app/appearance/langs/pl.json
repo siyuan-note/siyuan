@@ -1,4 +1,6 @@
 {
+	"secretAllowedHosts": "Dozwolone hosty",
+	"secretAllowedHostsTip": "Nazwy hostów, do których można wysłać ten sekret, oddzielone przecinkami, np. api.example.com; pozostaw puste, aby odrzucać wszystkie żądania, a sekrety nigdy nie są interpolowane do adresu URL żądania",
 	"editorMarkdownInlineFullWidthStrikethrough": "Pełnoszeroka składnia przekreślenia",
 	"editorMarkdownInlineFullWidthStrikethroughTip": "Po włączeniu <code class='fn__code'>～～foo～～</code> jest interpretowane jako śródliniowa składnia przekreślenia",
 	"confirmOverwriteLocalBazaarPackage": "Pakiet [${name}] jest już zainstalowany. Zaktualizować go wybranym pakietem lokalnym?",
@@ -387,7 +389,7 @@
 	"secretsVariables": "Tajemnice i zmienne",
 	"secrets": "Tajemnice",
 	"variables": "Zmienne",
-	"secretsTip": "Udostępniane Skill i MCP do odwoływania się przez $NAME, ${NAME} lub {{secrets.NAME}}; wtyczki mogą z nich korzystać przez API. Wartości tajemnic nie wchodzą w rozmowy AI i są przechowywane zaszyfrowane",
+	"secretsTip": "Udostępniane Skill i MCP do odwoływania się przez $NAME, ${NAME} lub {{secrets.NAME}}; wtyczki mogą z nich korzystać przez API. Wartości tajemnic nie wchodzą w rozmowy AI, są przechowywane zaszyfrowane i wysyłane tylko do hostów dozwolonych dla każdej tajemnicy",
 	"variablesTip": "Udostępniane Skill i MCP do odwoływania się przez $NAME, ${NAME} lub {{vars.NAME}}; można ich używać również w czatach i treści skill. Wtyczki mogą z nich korzystać przez API. Wartości zmiennych wchodzą w rozmowy AI i są przechowywane jako zwykły tekst",
 	"secretName": "Nazwa tajemnicy",
 	"variableName": "Nazwa zmiennej",

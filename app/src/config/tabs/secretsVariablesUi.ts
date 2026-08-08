@@ -9,6 +9,7 @@ import {secretsConfigApi, variablesConfigApi} from "./secretsVariablesRuntime";
 interface NamedItem {
     name: string;
     value: string;
+    allowedHosts?: string[];
 }
 
 // region 密钥区块（Secrets）
@@ -19,6 +20,8 @@ export const getSecretsBlockKeywords = (): string[] => [
     window.siyuan.languages.addSecret,
     window.siyuan.languages.secretName,
     window.siyuan.languages.secretValue,
+    window.siyuan.languages.secretAllowedHosts,
+    window.siyuan.languages.secretAllowedHostsTip,
     window.siyuan.languages.noSecretConfigured,
 ];
 
@@ -96,8 +99,13 @@ const renderSecretList = (root: HTMLElement) => {
     });
 };
 
-const saveSecrets = (root: HTMLElement, items: Config.ISecret[]) => {
-    secretsConfigApi.patch("items", items, () => renderSecretList(root));
+const saveSecrets = (root: HTMLElement, items: NamedItem[]) => {
+    const normalized: Config.ISecret[] = items.map((item) => ({
+        name: item.name,
+        value: item.value,
+        allowedHosts: item.allowedHosts ?? [],
+    }));
+    secretsConfigApi.patch("items", normalized, () => renderSecretList(root));
 };
 
 const getSecretName = (el: HTMLElement): string | undefined =>
@@ -271,6 +279,16 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
 </div>`
         : `<input class="b3-text-field fn__block" id="itemValue" type="text" spellcheck="false" value="${Lute.EscapeHTMLStr(initial.value)}"/>`;
 
+    const initialHosts: string[] = isSecret ? (initial.allowedHosts ?? []) : [];
+    const hostsInputHtml = isSecret
+        ? `<div class="b3-label b3-label--inner">
+    <div class="config-name">${window.siyuan.languages.secretAllowedHosts}</div>
+    <div class="b3-label__text">${window.siyuan.languages.secretAllowedHostsTip}</div>
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" id="itemAllowedHosts" type="text" spellcheck="false" value="${Lute.EscapeHTMLStr(initialHosts.join(", "))}"/>
+</div>`
+        : "";
+
     const dialog = new Dialog({
         title: titleKey,
         width: isMobile() ? "92vw" : "520px",
@@ -281,6 +299,7 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
         <div class="fn__hr"></div>
         <input class="b3-text-field fn__block" id="itemName" type="text" spellcheck="false" value="${Lute.EscapeHTMLStr(initial.name)}"/>
     </div>
+    ${hostsInputHtml}
     <div class="b3-label b3-label--inner">
         <div class="config-name">${valueKey}</div>
         <div class="fn__hr"></div>
@@ -307,6 +326,12 @@ const openItemDialog = (options: OpenItemDialogOptions) => {
             name: dialog.element.querySelector<HTMLInputElement>("#itemName").value.trim(),
             value: dialog.element.querySelector<HTMLInputElement>("#itemValue").value,
         };
+        if (isSecret) {
+            next.allowedHosts = (dialog.element.querySelector<HTMLInputElement>("#itemAllowedHosts")?.value ?? "")
+                .split(/[,\s;]+/)
+                .map((host) => host.trim())
+                .filter((host) => host !== "");
+        }
         if (!next.name) {
             showMessage(nameRequiredKey);
             return;

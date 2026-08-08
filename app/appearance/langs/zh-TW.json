@@ -1,4 +1,6 @@
 {
+	"secretAllowedHosts": "允許的主機",
+	"secretAllowedHostsTip": "允許傳送此金鑰的主機名稱，以逗號分隔，例如 api.example.com；留空則拒絕所有要求，且金鑰永遠不會被插入到要求 URL 中",
 	"editorMarkdownInlineFullWidthStrikethrough": "全形刪除線語法",
 	"editorMarkdownInlineFullWidthStrikethroughTip": "啟用後將支援 <code class='fn__code'>～～foo～～</code> 行級刪除線語法輸入",
 	"confirmOverwriteLocalBazaarPackage": "集市套件 [${name}] 已安裝，是否使用所選本機套件更新？",
@@ -387,7 +389,7 @@
 	"secretsVariables": "金鑰和變數",
 	"secrets": "金鑰",
 	"variables": "變數",
-	"secretsTip": "提供給 Skill 和 MCP 透過 $NAME、${NAME} 或 {{secrets.NAME}} 參照，外掛可透過介面使用。金鑰值不會進入 AI 對話，並且是加密儲存的",
+	"secretsTip": "提供給 Skill 和 MCP 透過 $NAME、${NAME} 或 {{secrets.NAME}} 參照，外掛可透過介面使用。金鑰值不會進入 AI 對話，加密儲存，並且只會傳送到每個金鑰允許的主機",
 	"variablesTip": "提供給 Skill 和 MCP 透過 $NAME、${NAME} 或 {{vars.NAME}} 參照，也可在對話和技能正文中使用，外掛可透過介面使用。變數值會進入 AI 對話，並且是明文儲存的",
 	"secretName": "金鑰命名",
 	"variableName": "變數命名",

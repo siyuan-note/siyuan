@@ -1,4 +1,6 @@
 {
+	"secretAllowedHosts": "Zulässige Hosts",
+	"secretAllowedHostsTip": "Hostnamen, an die dieses Secret gesendet werden darf, durch Kommas getrennt, z. B. api.example.com; leer lassen, um alle Anfragen zu verweigern, und Secrets werden niemals in die Anforderungs-URL interpoliert",
 	"editorMarkdownInlineFullWidthStrikethrough": "Vollbreite-Durchstreichsyntax",
 	"editorMarkdownInlineFullWidthStrikethroughTip": "Wenn aktiviert, wird <code class='fn__code'>～～foo～～</code> als Inline-Durchstreichsyntax ausgewertet",
 	"confirmOverwriteLocalBazaarPackage": "Das Paket [${name}] ist bereits installiert. Mit dem ausgewählten lokalen Paket aktualisieren?",
@@ -387,7 +389,7 @@
 	"secretsVariables": "Secrets und Variablen",
 	"secrets": "Secrets",
 	"variables": "Variablen",
-	"secretsTip": "Werden Skill und MCP zum Referenzieren über $NAME, ${NAME} oder {{secrets.NAME}} bereitgestellt; Plugins können sie über eine API nutzen. Secret-Werte gehen nicht in KI-Gespräche ein und werden verschlüsselt gespeichert",
+	"secretsTip": "Werden Skill und MCP zum Referenzieren über $NAME, ${NAME} oder {{secrets.NAME}} bereitgestellt; Plugins können sie über eine API nutzen. Secret-Werte gehen nicht in KI-Gespräche ein, werden verschlüsselt gespeichert und nur an die für jedes Secret erlaubten Hosts gesendet",
 	"variablesTip": "Werden Skill und MCP zum Referenzieren über $NAME, ${NAME} oder {{vars.NAME}} bereitgestellt; auch in Chats und Skill-Inhalten verwendbar. Plugins können sie über eine API nutzen. Variablenwerte gehen in KI-Gespräche ein und werden als Klartext gespeichert",
 	"secretName": "Secret-Name",
 	"variableName": "Variablenname",

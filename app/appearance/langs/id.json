@@ -1,4 +1,6 @@
 {
+	"secretAllowedHosts": "Host yang diizinkan",
+	"secretAllowedHostsTip": "Nama host yang boleh menerima rahasia ini, dipisahkan koma, mis. api.example.com; biarkan kosong untuk menolak semua permintaan, dan rahasia tidak pernah disisipkan ke URL permintaan",
 	"editorMarkdownInlineFullWidthStrikethrough": "Sintaks coret lebar penuh",
 	"editorMarkdownInlineFullWidthStrikethroughTip": "Jika diaktifkan, <code class='fn__code'>～～foo～～</code> diurai sebagai sintaks coret sebaris",
 	"confirmOverwriteLocalBazaarPackage": "Paket [${name}] sudah terpasang. Perbarui dengan paket lokal yang dipilih?",
@@ -387,7 +389,7 @@
 	"secretsVariables": "Rahasia dan Variabel",
 	"secrets": "Rahasia",
 	"variables": "Variabel",
-	"secretsTip": "Disediakan untuk Skill dan MCP untuk dirujuk melalui $NAME, ${NAME} atau {{secrets.NAME}}; plugin dapat menggunakannya via API. Nilai rahasia tidak masuk ke percakapan AI dan disimpan terenkripsi",
+	"secretsTip": "Disediakan untuk Skill dan MCP untuk dirujuk melalui $NAME, ${NAME} atau {{secrets.NAME}}; plugin dapat menggunakannya via API. Nilai rahasia tidak masuk ke percakapan AI, disimpan terenkripsi, dan hanya dikirim ke host yang diizinkan untuk setiap rahasia",
 	"variablesTip": "Disediakan untuk Skill dan MCP untuk dirujuk melalui $NAME, ${NAME} atau {{vars.NAME}}; juga dapat digunakan dalam chat dan konten skill. Plugin dapat menggunakannya via API. Nilai variabel masuk ke percakapan AI dan disimpan sebagai teks biasa",
 	"secretName": "Nama rahasia",
 	"variableName": "Nama variabel",

@@ -1,4 +1,6 @@
 {
+	"secretAllowedHosts": "許可されたホスト",
+	"secretAllowedHostsTip": "このシークレットの送信先として許可するホスト名をカンマ区切りで指定します（例：api.example.com）。空のままにするとすべてのリクエストを拒否し、シークレットはリクエスト URL に挿入されることはありません",
 	"editorMarkdownInlineFullWidthStrikethrough": "全角取り消し線構文",
 	"editorMarkdownInlineFullWidthStrikethroughTip": "有効にすると、<code class='fn__code'>～～foo～～</code> をインライン取り消し線構文として解析します",
 	"confirmOverwriteLocalBazaarPackage": "パッケージ [${name}] はすでにインストールされています。選択したローカルパッケージで更新しますか？",
@@ -387,7 +389,7 @@
 	"secretsVariables": "シークレットと変数",
 	"secrets": "シークレット",
 	"variables": "変数",
-	"secretsTip": "Skill と MCP が $NAME、${NAME} または {{secrets.NAME}} を介して参照するために提供されます。プラグインは API 経由で使用できます。シークレット値は AI の会話に入らず、暗号化して保存されます",
+	"secretsTip": "Skill と MCP が $NAME、${NAME} または {{secrets.NAME}} を介して参照するために提供されます。プラグインは API 経由で使用できます。シークレット値は AI の会話に入らず、暗号化して保存され、各シークレットで許可されたホストにのみ送信されます",
 	"variablesTip": "Skill と MCP が $NAME、${NAME} または {{vars.NAME}} を介して参照するために提供されます。チャットやスキルの内容でも使用できます。プラグインは API 経由で使用できます。変数値は AI の会話に入り、平文で保存されます",
 	"secretName": "シークレット名",
 	"variableName": "変数名",

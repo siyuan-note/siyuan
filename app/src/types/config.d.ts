@@ -1610,10 +1610,13 @@ declare namespace Config {
 
     /**
      * A named secret. The value is AES-encrypted at rest on the kernel side.
+     * The secret is only interpolated when the request destination host is in
+     * the allowed hosts list; an empty list denies all requests.
      */
     export interface ISecret {
         name: string;
         value: string;
+        allowedHosts: string[];
     }
 
     /**

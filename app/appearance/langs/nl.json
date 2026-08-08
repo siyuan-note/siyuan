@@ -1,4 +1,6 @@
 {
+	"secretAllowedHosts": "Toegestane hosts",
+	"secretAllowedHostsTip": "Hostnamen waarnaar dit geheim mag worden verzonden, gescheiden door komma's, bijv. api.example.com; leeg laten om alle verzoeken te weigeren, en geheimen worden nooit in de aanvraag-URL geïnterpoleerd",
 	"editorMarkdownInlineFullWidthStrikethrough": "Doorhaalopmaak met volledige breedte",
 	"editorMarkdownInlineFullWidthStrikethroughTip": "Indien ingeschakeld, wordt <code class='fn__code'>～～foo～～</code> geïnterpreteerd als inline doorhaalopmaak",
 	"confirmOverwriteLocalBazaarPackage": "Pakket [${name}] is al geïnstalleerd. Bijwerken met het geselecteerde lokale pakket?",
@@ -387,7 +389,7 @@
 	"secretsVariables": "Secrets en variabelen",
 	"secrets": "Geheimen",
 	"variables": "Variabelen",
-	"secretsTip": "Beschikbaar gesteld voor Skill en MCP om te verwijzen via $NAME, ${NAME} of {{secrets.NAME}}; plugins kunnen ze via API gebruiken. Secret-waarden gaan niet AI-gesprekken in en worden versleuteld opgeslagen",
+	"secretsTip": "Beschikbaar gesteld voor Skill en MCP om te verwijzen via $NAME, ${NAME} of {{secrets.NAME}}; plugins kunnen ze via API gebruiken. Secret-waarden gaan niet AI-gesprekken in, worden versleuteld opgeslagen en worden alleen naar de voor elk geheim toegestane hosts gestuurd",
 	"variablesTip": "Beschikbaar gesteld voor Skill en MCP om te verwijzen via $NAME, ${NAME} of {{vars.NAME}}; ook te gebruiken in chats en skill-inhoud. Plugins kunnen ze via API gebruiken. Variabelenwaarden gaan AI-gesprekken in en worden als platte tekst opgeslagen",
 	"secretName": "Secret-naam",
 	"variableName": "Variabelenaam",

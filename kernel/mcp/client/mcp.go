@@ -170,7 +170,8 @@ func (h *headerRoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 	for k, v := range h.headers {
 		// 对每个 header 值里的 {{secrets.NAME}}、{{vars.NAME}} 占位符插值，
 		// 使 MCP 服务的 Authorization 等头部可引用密钥/变量而无需明文存储。
-		clone.Header.Set(k, conf.ResolveSecretsVars(model.Conf.Secrets, model.Conf.Variables, v))
+		// 密钥插值限定目标主机为该 MCP 服务的出站地址，防止密钥被转发到其他主机。
+		clone.Header.Set(k, conf.ResolveSecretsVarsForHost(model.Conf.Secrets, model.Conf.Variables, req.URL.Hostname(), v))
 	}
 	return h.base.RoundTrip(clone)
 }

@@ -1,4 +1,6 @@
 {
+	"secretAllowedHosts": "Allowed hosts",
+	"secretAllowedHostsTip": "Hostnames this secret may be sent to, separated by commas, e.g. api.example.com; leave empty to deny all requests, and secrets are never interpolated into the request URL",
 	"editorMarkdownInlineFullWidthStrikethrough": "Full-width strikethrough syntax",
 	"editorMarkdownInlineFullWidthStrikethroughTip": "When enabled, <code class='fn__code'>～～foo～～</code> is parsed as inline strikethrough syntax",
 	"confirmOverwriteLocalBazaarPackage": "Package [${name}] is already installed. Update it with the selected local package?",
@@ -387,7 +389,7 @@
 	"secretsVariables": "Secrets and Variables",
 	"secrets": "Secrets",
 	"variables": "Variables",
-	"secretsTip": "Provided for Skill and MCP to reference via $NAME, ${NAME} or {{secrets.NAME}}; plugins can use them via API. Secret values do not enter AI conversations and are stored encrypted",
+	"secretsTip": "Provided for Skill and MCP to reference via $NAME, ${NAME} or {{secrets.NAME}}; plugins can use them via API. Secret values do not enter AI conversations, are stored encrypted, and are only sent to the hosts allowed for each secret",
 	"variablesTip": "Provided for Skill and MCP to reference via $NAME, ${NAME} or {{vars.NAME}}; also usable in chats and skill content. Plugins can use them via API. Variable values enter AI conversations and are stored as plain text",
 	"secretName": "Secret name",
 	"variableName": "Variable name",

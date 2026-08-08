@@ -191,12 +191,19 @@ const gutterTurnInto = () => node("turnInto", lang("turnInto"), true, [
         ]),
     ]);
 
-const gutterLayout = () => node("layout", lang("layout"), true, [
+const gutterLayout = (includeSuperBlockAlignment = false) => node("layout", lang("layout"), true, [
     node("alignLeft", lang("alignLeft")),
     node("alignCenter", lang("alignCenter")),
     node("alignRight", lang("alignRight")),
     node("justify", lang("justify")),
     separator("separator_1"),
+    ...(includeSuperBlockAlignment ? [
+        node("alignTop", lang("alignTop")),
+        node("alignMiddle", lang("alignMiddle")),
+        node("alignBottom", lang("alignBottom")),
+        node("useDefaultVerticalAlign", lang("useDefaultVerticalAlign")),
+        separator("separator_verticalAlign"),
+    ] : []),
     node("ltr", lang("ltr")),
     node("rtl", lang("rtl")),
     separator("separator_2"),
@@ -290,12 +297,6 @@ const gutterSingle = () => [
         node("cancelSuperBlock", () => `${window.siyuan.languages.cancel} ${window.siyuan.languages.superBlock}`),
         node("turnIntoVLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.vLayout}`),
         node("turnIntoHLayout", () => `${window.siyuan.languages.turnInto} ${window.siyuan.languages.hLayout}`),
-        node("superBlockAlignment", lang("alignment"), true, [
-            node("alignTop", lang("alignTop")),
-            node("alignMiddle", lang("alignMiddle")),
-            node("alignBottom", lang("alignBottom")),
-            node("useDefaultVerticalAlign", lang("useDefaultVerticalAlign")),
-        ]),
     ]),
     separator("separator_code"),
     node("code", lang("code"), true, [
@@ -378,7 +379,7 @@ const gutterSingle = () => [
     node("foldRecursive", lang("foldRecursive")),
     node("attr", lang("attr")),
     node("appearance", lang("appearance")),
-    gutterLayout(),
+    gutterLayout(true),
     gutterWidth(),
     separator("separator_4"),
     node("wechatReminder", lang("wechatReminder"), false),

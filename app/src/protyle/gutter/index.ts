@@ -1937,6 +1937,7 @@ export class Gutter {
             if (allowStructuralMutation) {
                 superBlockSubmenu.push({
                     id: "cancelSuperBlock",
+                    iconHTML: "",
                     label: window.siyuan.languages.cancel + " " + window.siyuan.languages.superBlock,
                     accelerator: window.siyuan.config.keymap.editor.general[isCol ? "hLayout" : "vLayout"].custom,
                     async click() {
@@ -1950,6 +1951,7 @@ export class Gutter {
             }
             superBlockSubmenu.push({
                 id: "turnInto" + (isCol ? "VLayout" : "HLayout"),
+                iconHTML: "",
                 accelerator: window.siyuan.config.keymap.editor.general[isCol ? "vLayout" : "hLayout"].custom,
                 label: window.siyuan.languages.turnInto + " " + window.siyuan.languages[isCol ? "vLayout" : "hLayout"],
                 click() {
@@ -1964,53 +1966,6 @@ export class Gutter {
                     focusByRange(protyle.toolbar.range);
                     hideElements(["gutter"], protyle);
                 }
-            });
-            const verticalAlign = nodeElement.getAttribute(Constants.CUSTOM_SY_SUPER_BLOCK_VERTICAL_ALIGN) || "";
-            const setVerticalAlign = (value: "" | "top" | "middle" | "bottom") => {
-                if (verticalAlign === value) {
-                    return;
-                }
-                const oldHTML = nodeElement.outerHTML;
-                if (value) {
-                    nodeElement.setAttribute(Constants.CUSTOM_SY_SUPER_BLOCK_VERTICAL_ALIGN, value);
-                } else {
-                    nodeElement.removeAttribute(Constants.CUSTOM_SY_SUPER_BLOCK_VERTICAL_ALIGN);
-                }
-                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, nodeElement, oldHTML);
-                focusByRange(protyle.toolbar.range);
-                hideElements(["gutter"], protyle);
-            };
-            superBlockSubmenu.push({
-                id: "superBlockAlignment",
-                icon: "iconAlignSettings",
-                label: window.siyuan.languages.alignment,
-                type: "submenu",
-                ignore: !isCol,
-                submenu: [{
-                    id: "alignTop",
-                    icon: "iconAlignTop",
-                    label: window.siyuan.languages.alignTop,
-                    checked: verticalAlign === "top",
-                    click: () => setVerticalAlign("top"),
-                }, {
-                    id: "alignMiddle",
-                    icon: "iconAlignMiddle",
-                    label: window.siyuan.languages.alignMiddle,
-                    checked: verticalAlign === "middle",
-                    click: () => setVerticalAlign("middle"),
-                }, {
-                    id: "alignBottom",
-                    icon: "iconAlignBottom",
-                    label: window.siyuan.languages.alignBottom,
-                    checked: verticalAlign === "bottom",
-                    click: () => setVerticalAlign("bottom"),
-                }, {
-                    id: "useDefaultVerticalAlign",
-                    label: window.siyuan.languages.useDefaultVerticalAlign,
-                    checked: !["top", "middle", "bottom"].includes(verticalAlign),
-                    click: () => setVerticalAlign(""),
-                }]
             });
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "superBlock",
@@ -2742,6 +2697,53 @@ export class Gutter {
 
     private genAlign(nodeElements: Element[], protyle: IProtyle) {
         const disabledRTL = nodeElements.some(e => ["NodeAttributeView", "NodeCodeBlock", "NodeMathBlock"].includes(e.getAttribute("data-type")));
+        const isHorizontalSuperBlock = nodeElements.length === 1 &&
+            nodeElements[0].getAttribute("data-type") === "NodeSuperBlock" &&
+            nodeElements[0].getAttribute("data-sb-layout") === "col";
+        const verticalAlign = isHorizontalSuperBlock ? (nodeElements[0] as HTMLElement).style.alignItems : "";
+        const verticalAlignMenu: IMenu[] = isHorizontalSuperBlock ? [{
+            id: "alignTop",
+            icon: "iconAlignTop",
+            label: window.siyuan.languages.alignTop,
+            checked: verticalAlign === "flex-start",
+            click: () => {
+                this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                    e.style.alignItems = "flex-start";
+                });
+            },
+        }, {
+            id: "alignMiddle",
+            icon: "iconAlignMiddle",
+            label: window.siyuan.languages.alignMiddle,
+            checked: verticalAlign === "center",
+            click: () => {
+                this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                    e.style.alignItems = "center";
+                });
+            },
+        }, {
+            id: "alignBottom",
+            icon: "iconAlignBottom",
+            label: window.siyuan.languages.alignBottom,
+            checked: verticalAlign === "flex-end",
+            click: () => {
+                this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                    e.style.alignItems = "flex-end";
+                });
+            },
+        }, {
+            id: "useDefaultVerticalAlign",
+            label: window.siyuan.languages.useDefaultVerticalAlign,
+            checked: verticalAlign === "",
+            click: () => {
+                this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                    e.style.alignItems = "";
+                });
+            },
+        }, {
+            id: "separator_verticalAlign",
+            type: "separator",
+        }] : [];
         window.siyuan.menus.menu.append(new MenuItem({
             id: "layout",
             icon: "iconAlignSettings",
@@ -2807,7 +2809,7 @@ export class Gutter {
             }, {
                 id: "separator_1",
                 type: "separator"
-            }, {
+            }, ...verticalAlignMenu, {
                 id: "ltr",
                 icon: "iconLtr",
                 ignore: disabledRTL,
@@ -2858,6 +2860,9 @@ export class Gutter {
                         } else {
                             e.style.textAlign = "";
                             e.style.direction = "";
+                            if (e.getAttribute("data-type") === "NodeSuperBlock") {
+                                e.style.alignItems = "";
+                            }
                         }
                     });
                 }

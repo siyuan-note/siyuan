@@ -664,6 +664,8 @@
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {
     flex-direction: column;
     flex-wrap: initial;
+    // 桌面端纵向对齐使用内联样式，移动端堆叠时需恢复拉伸
+    align-items: stretch !important;
 
     & > div {
       margin-right: 0;
@@ -673,9 +675,6 @@
     }
   }
 
-  .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"][custom-sy-super-block-vertical-align] {
-    align-items: stretch;
-  }
 }
 
 .protyle-db-attr__toggle {

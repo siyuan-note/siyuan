@@ -18,13 +18,11 @@ package plugin
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/dop251/goja"
 	"github.com/samber/lo"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -162,25 +160,20 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 				err = argErr
 				return
 			}
-			abs, resolveErr := resolvePath(path)
-			if resolveErr != nil {
-				err = resolveErr
-				return
-			}
-
 			go func() (result []byte, err error) {
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.storage.get: %v", r)
 					}
+					operationResult, operationErr := result, err
 					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-						if err != nil {
-							return nil, err
+						if operationErr != nil {
+							return nil, operationErr
 						}
 
 						content := rt.NewObject()
-						if err = ObjectSetDataMethods(p, rt, content, result); err != nil {
-							return nil, err
+						if dataErr := ObjectSetDataMethods(p, rt, content, operationResult); dataErr != nil {
+							return nil, dataErr
 						}
 
 						return content, nil
@@ -197,13 +190,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 					})
 				}()
 
-				data, readErr := filelock.ReadFile(abs)
-				if readErr != nil {
-					err = readErr
-					return
-				}
-
-				result = data
+				result, err = p.storageGet(path)
 				return
 			}()
 
@@ -248,25 +235,20 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 				return
 			}
 
-			abs, resolveErr := resolvePath(path)
-			if resolveErr != nil {
-				err = resolveErr
-				return
-			}
-
 			go func() (result any, err error) {
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.storage.put: %v", r)
 					}
 
+					operationResult, operationErr := result, err
 					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-						if lo.IsNil(err) {
-							if resolveErr := resolve(result); resolveErr != nil {
+						if lo.IsNil(operationErr) {
+							if resolveErr := resolve(operationResult); resolveErr != nil {
 								logging.LogErrorf("[plugin:%s] siyuan.storage.put resolve: %v", p.Name, resolveErr)
 							}
 						} else {
-							if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+							if rejectErr := reject(rt.NewGoError(operationErr)); rejectErr != nil {
 								logging.LogErrorf("[plugin:%s] siyuan.storage.put reject: %v", p.Name, rejectErr)
 							}
 						}
@@ -274,11 +256,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 					}, nil)
 				}()
 
-				if mkdirErr := os.MkdirAll(filepath.Dir(abs), 0755); mkdirErr != nil {
-					err = fmt.Errorf("failed to make directory: %w", mkdirErr)
-					return
-				}
-				if writeErr := filelock.WriteFile(abs, []byte(content)); writeErr != nil {
+				if writeErr := p.storagePut(path, []byte(content)); writeErr != nil {
 					err = fmt.Errorf("failed to write file: %w", writeErr)
 					return
 				}
@@ -325,29 +303,20 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 				return
 			}
 
-			abs, resolveErr := resolvePath(path)
-			if resolveErr != nil {
-				err = resolveErr
-				return
-			}
-			if abs == p.storageDir {
-				err = fmt.Errorf("cannot remove storage root")
-				return
-			}
-
 			go func() (result any, err error) {
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.storage.remove: %v", r)
 					}
 
+					operationResult, operationErr := result, err
 					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-						if lo.IsNil(err) {
-							if resolveErr := resolve(result); resolveErr != nil {
+						if lo.IsNil(operationErr) {
+							if resolveErr := resolve(operationResult); resolveErr != nil {
 								logging.LogErrorf("[plugin:%s] siyuan.storage.remove resolve: %v", p.Name, resolveErr)
 							}
 						} else {
-							if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+							if rejectErr := reject(rt.NewGoError(operationErr)); rejectErr != nil {
 								logging.LogErrorf("[plugin:%s] siyuan.storage.remove reject: %v", p.Name, rejectErr)
 							}
 						}
@@ -355,7 +324,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 					}, nil)
 				}()
 
-				if removeErr := os.RemoveAll(abs); removeErr != nil {
+				if removeErr := p.storageRemove(path); removeErr != nil {
 					err = fmt.Errorf("failed to remove: %w", removeErr)
 					return
 				}
@@ -397,24 +366,20 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 				err = argErr
 				return
 			}
-			abs, resolveErr := resolvePath(path)
-			if resolveErr != nil {
-				err = resolveErr
-				return
-			}
 
 			go func() (result any, err error) {
 				defer func() {
 					if r := recover(); r != nil {
 						err = fmt.Errorf("panic during siyuan.storage.list: %v", r)
 					}
+					operationResult, operationErr := result, err
 					p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-						if lo.IsNil(err) {
-							if resolveErr := resolve(result); resolveErr != nil {
+						if lo.IsNil(operationErr) {
+							if resolveErr := resolve(operationResult); resolveErr != nil {
 								logging.LogErrorf("[plugin:%s] siyuan.storage.list resolve: %v", p.Name, resolveErr)
 							}
 						} else {
-							if rejectErr := reject(rt.NewGoError(err)); rejectErr != nil {
+							if rejectErr := reject(rt.NewGoError(operationErr)); rejectErr != nil {
 								logging.LogErrorf("[plugin:%s] siyuan.storage.list reject: %v", p.Name, rejectErr)
 							}
 						}
@@ -422,27 +387,7 @@ func injectStorage(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err 
 					}, nil)
 				}()
 
-				entries, readErr := os.ReadDir(abs)
-				if readErr != nil {
-					err = fmt.Errorf("failed to read directory: %w", readErr)
-					return
-				}
-
-				results := make([]R, 0, len(entries))
-				for _, entry := range entries {
-					info, infoErr := entry.Info()
-					if infoErr != nil {
-						continue
-					}
-					results = append(results, R{
-						"name":      entry.Name(),
-						"isDir":     info.IsDir(),
-						"isSymlink": util.IsSymlink(entry),
-						"updated":   info.ModTime().Unix(),
-					})
-				}
-
-				result = results
+				result, err = p.storageList(path)
 				return
 			}()
 

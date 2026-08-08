@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"path/filepath"
 	"sync"
 	"sync/atomic"
@@ -266,9 +265,8 @@ func (p *KernelPlugin) start() (err error) {
 
 	p.updateState(PluginStateLoading)
 
-	baseDir := filepath.Join(util.DataDir, "storage", "petal", p.Name)
-	if err := os.MkdirAll(baseDir, 0755); err != nil {
-		return fmt.Errorf("create plugin dir [%s] failed: %s", baseDir, err)
+	if err := p.ensureStorageRoot(); err != nil {
+		return fmt.Errorf("create plugin storage root [%s] failed: %w", p.storageDir, err)
 	}
 
 	if runtimeErr := p.InitRuntime(); runtimeErr != nil {

@@ -58,7 +58,7 @@ BUNDLED_COMPONENTS = [
     ),
     (
         "abcjs",
-        "6.2.2 and 6.5.0",
+        "6.7.0",
         "MIT",
         "https://github.com/paulrosen/abcjs",
         "app/stage/protyle/js/abcjs/",

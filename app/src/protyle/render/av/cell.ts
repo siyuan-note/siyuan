@@ -23,6 +23,7 @@ import {getCompressURL, removeCompressURL} from "../../../util/image";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 import {
     cellValueIsEmpty,
+    cloneAVCellValueSnapshot,
     genEmptyAVCellValue,
     genRelationAVCellValue,
     getConvertedEmptyAVCellValue,
@@ -802,10 +803,11 @@ export const updateCellsValue = async (protyle: IProtyle, nodeElement: HTMLEleme
         const colId = source.selectedCell?.colID || (item ? getColId(item, viewType) : "");
         const renderedOldValue = source.selectedCell?.cell.value ||
             (item ? genCellValueByElement(type, item) : undefined);
-        const oldValue = item && renderedOldValue ? getAVBatchSourceValue(item, renderedOldValue) : renderedOldValue;
-        if (!colId || !oldValue) {
+        const sourceOldValue = item && renderedOldValue ? getAVBatchSourceValue(item, renderedOldValue) : renderedOldValue;
+        if (!colId || !sourceOldValue) {
             continue;
         }
+        const oldValue = cloneAVCellValueSnapshot(sourceOldValue);
         const batchMode = getAVBatchEditMode(item);
         if (elementIndex === 0 && item && batchMode !== "replace") {
             batchDisplayValue = getAVBatchDisplayValue(item, renderedOldValue);

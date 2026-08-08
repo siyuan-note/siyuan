@@ -50,6 +50,7 @@ import {
     showAVPasteSkeleton,
 } from "../render/av/paste";
 import {getAVColumnFitWidth, getAVColumnTextMeasurer} from "../render/av/columnWidth";
+import {cloneAVCellValueSnapshot} from "../render/av/cellValue";
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
 import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
@@ -327,7 +328,7 @@ const pasteAVMatrix = async (options: {
         row.cells.forEach((cell, index) => {
             const column = originalColumns[index];
             if (column) {
-                originalCellValues.set(`${row.id}:${column.id}`, JSON.parse(JSON.stringify(cell.value)));
+                originalCellValues.set(`${row.id}:${column.id}`, cloneAVCellValueSnapshot(cell.value));
             }
         });
     });

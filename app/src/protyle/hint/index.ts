@@ -57,6 +57,7 @@ import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
+import {getBlockHintCloseLength} from "./blockHintRange";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -79,6 +80,32 @@ type TCreateTargetSession = {
     path: string;
     renderID: number;
     targets: Partial<Record<TCreateTargetType, TCreateTargetState>>;
+};
+
+const getWholeTextOffset = (textNode: Text, offset: number) => {
+    let previousSibling = textNode.previousSibling;
+    while (previousSibling?.nodeType === 3) {
+        offset += previousSibling.textContent.length;
+        previousSibling = previousSibling.previousSibling;
+    }
+    return offset;
+};
+
+const setRangeEndByWholeTextOffset = (range: Range, textNode: Text, offset: number) => {
+    while (textNode.previousSibling?.nodeType === 3) {
+        textNode = textNode.previousSibling as Text;
+    }
+    while (textNode) {
+        if (offset <= textNode.textContent.length) {
+            range.setEnd(textNode, offset);
+            return;
+        }
+        offset -= textNode.textContent.length;
+        if (textNode.nextSibling?.nodeType !== 3) {
+            return;
+        }
+        textNode = textNode.nextSibling as Text;
+    }
 };
 
 export class Hint {
@@ -633,29 +660,16 @@ ${genHintItemHTML(item)}
         // QQ 拼音输入法自动补全需移除补全内容 https://github.com/siyuan-note/siyuan/issues/320
         // 前后有标记符的情况 https://github.com/siyuan-note/siyuan/issues/2511
         const endSplit = Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar];
-        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && endSplit && range.startContainer.nodeType === 3
-            && (range.startContainer as Text).wholeText.indexOf(endSplit) > -1
-            // 在包含 )) 的块中引用时会丢失字符  https://ld246.com/article/1679980200782
-            && (range.startContainer as Text).wholeText.indexOf(this.splitChar) > -1) {
-            let matchEndChar = 0;
-            let textNode = range.startContainer;
-            while (textNode && matchEndChar < 2) {
-                const index = textNode.textContent.indexOf(endSplit);
-                const startIndex = textNode.textContent.indexOf(this.splitChar);
-                if (index > -1 && (index < startIndex || startIndex < 0)) {
-                    matchEndChar = 2;
-                    range.setEnd(textNode, index + 2);
-                    break;
-                }
-                const indexOne = textNode.textContent.indexOf(endSplit.substr(1));
-                if (indexOne > -1) {
-                    matchEndChar += 1;
-                }
-                if (matchEndChar === 2) {
-                    range.setEnd(textNode, indexOne + 1);
-                    break;
-                }
-                textNode = textNode.nextSibling;
+        // 仅移除当前提示所属的闭合符号，保留外层配对和后续文本中的同名符号
+        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && endSplit && this.lastIndex > -1 &&
+            range.startContainer.nodeType === 3) {
+            const textNode = range.startContainer as Text;
+            const caretOffset = getWholeTextOffset(textNode, range.startOffset);
+            const triggerOffset = getWholeTextOffset(textNode, this.lastIndex);
+            const closeLength = getBlockHintCloseLength(textNode.wholeText.substring(0, triggerOffset),
+                textNode.wholeText.substring(caretOffset), this.splitChar, endSplit);
+            if (closeLength > 0) {
+                setRangeEndByWholeTextOffset(range, textNode, caretOffset + closeLength);
             }
         }
 

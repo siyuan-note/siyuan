@@ -704,8 +704,7 @@ func resolveDocContentTemplatePath(templatePath string) (string, error) {
 	}
 	templateRoot := filepath.Join(util.DataDir, "templates")
 	absPath := filepath.Join(templateRoot, cleanPath)
-	rel, err := filepath.Rel(templateRoot, absPath)
-	if nil != err || ".." == rel || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) {
+	if !gulu.File.IsSubPath(templateRoot, absPath) {
 		return "", errors.New("content template path is outside templates directory")
 	}
 	if !filelock.IsExist(absPath) {
@@ -723,8 +722,7 @@ func resolveDocContentTemplatePath(templatePath string) (string, error) {
 	if nil != err || !info.Mode().IsRegular() {
 		return "", fmt.Errorf("content template [%s] is not a regular file", templatePath)
 	}
-	realRel, err := filepath.Rel(realRoot, realPath)
-	if nil != err || ".." == realRel || strings.HasPrefix(realRel, ".."+string(os.PathSeparator)) {
+	if !gulu.File.IsSubPath(realRoot, realPath) {
 		return "", errors.New("content template path is outside templates directory")
 	}
 	return realPath, nil

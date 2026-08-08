@@ -344,15 +344,13 @@ export class Menu {
             this.element.style.height = "56vh";
             return;
         }
-        let itemsElement = this.element.lastElementChild;
         const shownItems = this.element.querySelectorAll(".b3-menu__item--show");
         if (shownItems.length > 0) {
-            itemsElement = shownItems[shownItems.length - 1]
-                .querySelector(":scope > .b3-menu__submenu > .b3-menu__items") || itemsElement;
+            return;
         }
         const maxHeight = window.innerHeight * .56;
         const titleHeight = this.element.firstElementChild.getBoundingClientRect().height;
-        const contentHeight = itemsElement.scrollHeight;
+        const contentHeight = this.element.lastElementChild.scrollHeight;
         this.element.style.height = Math.min(maxHeight, Math.max(160, titleHeight + contentHeight)) + "px";
     }
 

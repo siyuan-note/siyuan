@@ -74,7 +74,13 @@ import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
-import {getGutterSelection, getGutterSelectionTarget, isGutterInsertStateMatched} from "./multiSelect";
+import {
+    getGutterSelection,
+    getGutterSelectionTarget,
+    hasMultipleBlockSelection,
+    isCrossBlockTextRange,
+    isGutterInsertStateMatched
+} from "./multiSelect";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
@@ -118,13 +124,7 @@ const getBlockTypeName = (type: string) => {
 
 const getCrossBlockTextRange = (protyle: IProtyle) => {
     const range = protyle.toolbar.range;
-    if (!range || range.collapsed || !protyle.wysiwyg.element.contains(range.startContainer) ||
-        !protyle.wysiwyg.element.contains(range.endContainer)) {
-        return;
-    }
-    const startElement = hasClosestBlock(range.startContainer);
-    const endElement = hasClosestBlock(range.endContainer);
-    if (startElement && endElement && startElement !== endElement) {
+    if (isCrossBlockTextRange(range, protyle.wysiwyg.element, hasClosestBlock)) {
         return range;
     }
 };
@@ -1427,9 +1427,9 @@ export class Gutter {
         }
         const editableElement = getContenteditableElement(nodeElement);
         const range = protyle.toolbar.range;
-        if (range && protyle.wysiwyg.element.contains(range.startContainer) &&
-            protyle.wysiwyg.element.contains(range.endContainer) &&
-            hasClosestBlock(range.startContainer) !== hasClosestBlock(range.endContainer)) {
+        const blockSelectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+        if (range && !hasMultipleBlockSelection(blockSelectElements) &&
+            isCrossBlockTextRange(range, protyle.wysiwyg.element, hasClosestBlock)) {
             hideElements(["select"], protyle);
             if (range.intersectsNode(hasClosestBlock(editableElement) || nodeElement)) {
                 selectBlocksByRange(protyle, range);

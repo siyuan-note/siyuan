@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getGutterSelection, getGutterSelectionTarget, isGutterInsertStateMatched} from "./multiSelect";
+import {
+    getGutterSelection,
+    getGutterSelectionTarget,
+    isCrossBlockTextRange,
+    isGutterInsertStateMatched
+} from "./multiSelect";
 
 class TestElement {
     parentElement: TestElement | null = null;
@@ -12,6 +17,17 @@ class TestElement {
             this.children.push(element);
         });
         return this;
+    }
+
+    contains(element: TestElement) {
+        let currentElement: TestElement | null = element;
+        while (currentElement) {
+            if (currentElement === this) {
+                return true;
+            }
+            currentElement = currentElement.parentElement;
+        }
+        return false;
     }
 }
 
@@ -101,6 +117,53 @@ describe("getGutterSelectionTarget", () => {
 
         assert.equal(getGutterSelectionTarget([asElement(first), asElement(second)], asElement(unrelated)),
             undefined);
+    });
+});
+
+describe("isCrossBlockTextRange", () => {
+    const getBlock = (node: Node) => node as unknown as Element;
+
+    it("detects a range spanning two blocks inside the editor", () => {
+        const boundary = new TestElement();
+        const start = new TestElement();
+        const end = new TestElement();
+        boundary.append(start, end);
+        const range = {
+            collapsed: false,
+            startContainer: asElement(start),
+            endContainer: asElement(end)
+        } as unknown as Range;
+
+        assert.equal(isCrossBlockTextRange(range, asElement(boundary), getBlock), true);
+    });
+
+    it("ignores a collapsed or same-block range", () => {
+        const boundary = new TestElement();
+        const block = new TestElement();
+        boundary.append(block);
+        const range = {
+            collapsed: false,
+            startContainer: asElement(block),
+            endContainer: asElement(block)
+        } as unknown as Range;
+
+        assert.equal(isCrossBlockTextRange(range, asElement(boundary), getBlock), false);
+        (range as unknown as { collapsed: boolean }).collapsed = true;
+        assert.equal(isCrossBlockTextRange(range, asElement(boundary), getBlock), false);
+    });
+
+    it("ignores a range outside the editor", () => {
+        const boundary = new TestElement();
+        const start = new TestElement();
+        const end = new TestElement();
+        boundary.append(start);
+        const range = {
+            collapsed: false,
+            startContainer: asElement(start),
+            endContainer: asElement(end)
+        } as unknown as Range;
+
+        assert.equal(isCrossBlockTextRange(range, asElement(boundary), getBlock), false);
     });
 });
 

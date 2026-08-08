@@ -51,6 +51,7 @@ import {dropEvent} from "../util/editorCommonEvent";
 import {beforeBlockquoteInput, input} from "./input";
 import {
     getContenteditableElement,
+    getEmbedChildOperationContext,
     getFirstBlock,
     getLastBlock,
     getNextBlock,
@@ -185,11 +186,34 @@ import {
     isBlockDragSelectTopReached,
     resolveBlockDragSelectStart
 } from "./blockDragSelect";
+import {isCrossBlockTextRange} from "../gutter/multiSelect";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
     toStart: boolean;
 }
+
+const refreshGutterByPointer = (protyle: IProtyle, pointerElement: Element | null,
+                                fallbackElement?: HTMLElement) => {
+    if (!protyle.gutter) {
+        return;
+    }
+    let gutterElement = pointerElement && hasClosestBlock(pointerElement);
+    if (!gutterElement) {
+        gutterElement = fallbackElement;
+    }
+    if (gutterElement) {
+        const embedElement = isInEmbedBlock(gutterElement);
+        if (embedElement && !getEmbedChildOperationContext(gutterElement)) {
+            gutterElement = embedElement;
+        }
+    }
+    if (gutterElement && protyle.wysiwyg.element.contains(gutterElement)) {
+        protyle.gutter.render(protyle, gutterElement, pointerElement || gutterElement);
+    } else {
+        hideElements(["gutter"], protyle);
+    }
+};
 
 const getShiftClickBlockByPoint = (wysiwygElement: HTMLElement, startElement: HTMLElement, x: number, y: number) => {
     const blockElements = Array.from(wysiwygElement.children).filter(item =>
@@ -340,6 +364,7 @@ export class WYSIWYG {
             endElement = shiftClickBlockPoint?.blockElement;
         }
         if (startElement && endElement && startElement !== endElement) {
+            const gutterElement = endElement;
             const blockRange = getBlockRangeSelectElements(startElement, endElement);
             startElement = blockRange.startElement;
             endElement = blockRange.endElement;
@@ -374,6 +399,7 @@ export class WYSIWYG {
                 } else {
                     focusBlock(selectElements[0], protyle.wysiwyg.element, false);
                 }
+                refreshGutterByPointer(protyle, document.elementFromPoint(event.clientX, event.clientY), gutterElement);
             }
             return true;
         }
@@ -4605,6 +4631,8 @@ export class WYSIWYG {
                 return;
             }
 
+            // 需在工具栏渲染前记录鼠标释放位置，避免浮层覆盖选区末端
+            const pointerElement = document.elementFromPoint(event.clientX, event.clientY);
             setTimeout(() => {
                 // 选中后，在选中的文字上点击需等待 range 更新
                 let newRange = getEditorRange(this.element);
@@ -4658,6 +4686,9 @@ export class WYSIWYG {
                     protyle.toolbar.range = newRange;
                 }
                 /// #endif
+                if (protyle.gutter && isCrossBlockTextRange(newRange, this.element, hasClosestBlock)) {
+                    refreshGutterByPointer(protyle, pointerElement);
+                }
                 if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
                     countSelectWord(newRange, protyle.block.rootID);
                 }

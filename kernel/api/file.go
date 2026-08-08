@@ -17,6 +17,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -606,7 +607,6 @@ func readDir(c *gin.Context) {
 
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
-		c.JSON(http.StatusOK, ret)
 		return
 	}
 
@@ -617,61 +617,108 @@ func readDir(c *gin.Context) {
 		return
 	}
 
-	dirAbsPath, err := util.GetAbsPathInWorkspace(dirPath)
-	if err != nil {
+	guard, err := newWorkspacePathGuard(util.WorkspaceDir, dirPath)
+	if errors.Is(err, errWorkspacePathOutside) {
 		ret.Code = http.StatusForbidden
-		ret.Msg = err.Error()
+		ret.Msg = errWorkspacePathOutside.Error()
 		return
 	}
-	// 加密笔记本的任何目录都不允许通过原始文件 API 枚举（不只 .sy）：
-	// 目录结构、文档 ID、随机化资产名和时间戳可能泄漏信息；合法读取走专用 API（已加密感知）
-	if rejectEncryptedBoxPath(dirAbsPath) {
-		ret.Code = -3
-		ret.Msg = model.Conf.Language(321)
-		return
-	}
-	info, err := os.Stat(dirAbsPath)
 	if os.IsNotExist(err) {
 		ret.Code = http.StatusNotFound
 		ret.Msg = "path does not exist"
 		return
 	}
 	if err != nil {
-		logging.LogErrorf("stat [%s] failed: %s", dirAbsPath, err)
+		logging.LogErrorf("validate directory [%s] failed: %s", dirPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 		return
 	}
-	if !info.IsDir() {
-		logging.LogErrorf("file [%s] is not a directory", dirAbsPath)
+	// 加密笔记本的任何目录都不允许通过原始文件 API 枚举（不只 .sy）：
+	// 目录结构、文档 ID、随机化资产名和时间戳可能泄漏信息；合法读取走专用 API（已加密感知）
+	if rejectEncryptedBoxPath(guard.requestedPath) {
+		ret.Code = -3
+		ret.Msg = model.Conf.Language(321)
+		return
+	}
+	if guard.unsupportedReparse {
+		logging.LogErrorf("read directory [%s] failed: %s", guard.requestedPath, errWorkspaceUnsupportedReparse)
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+		return
+	}
+	if !guard.requestedInfo.IsDir() {
+		logging.LogErrorf("file [%s] is not a directory", guard.requestedPath)
 		ret.Code = http.StatusConflict
 		ret.Msg = "path is not a directory"
 		return
 	}
 
-	entries, err := os.ReadDir(dirAbsPath)
+	unlock := guard.lock()
+	defer unlock()
+	if err = guard.revalidate(); err != nil {
+		logging.LogErrorf("revalidate directory [%s] failed: %s", guard.requestedPath, err)
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+		return
+	}
+	root, err := guard.openRoot()
 	if err != nil {
-		logging.LogErrorf("read dir [%s] failed: %s", dirAbsPath, err)
+		logging.LogErrorf("open workspace root [%s] failed: %s", guard.workspacePath, err)
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+		return
+	}
+	defer root.Close()
+	if err = guard.revalidate(); err != nil {
+		logging.LogErrorf("revalidate directory [%s] failed: %s", guard.requestedPath, err)
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+		return
+	}
+	directory, err := openReadDirDirectory(root, guard.relativePath)
+	if err != nil {
+		logging.LogErrorf("open rooted directory [%s] failed: %s", guard.requestedPath, err)
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+		return
+	}
+	defer directory.Close()
+	directoryInfo, err := directory.Stat()
+	if err != nil || guard.verifyRequestedInfo(directoryInfo) != nil || !directoryInfo.IsDir() {
+		logging.LogErrorf("verify rooted directory [%s] failed: %v", guard.requestedPath, err)
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+		return
+	}
+	if err = guard.revalidate(); err != nil {
+		logging.LogErrorf("revalidate directory [%s] failed: %s", guard.requestedPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
 		return
 	}
 
-	files := []map[string]any{}
-	for _, entry := range entries {
-		path := filepath.Join(dirAbsPath, entry.Name())
-		info, err = os.Stat(path)
-		if err != nil {
-			logging.LogErrorf("stat [%s] failed: %s", path, err)
-			ret.Code = http.StatusInternalServerError
-			ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
-			return
-		}
+	snapshot, err := readDirSnapshot(root, directory, guard.relativePath, guard.resolvedWorkspace)
+	if err != nil {
+		logging.LogErrorf("read directory snapshot [%s] failed: %s", guard.requestedPath, err)
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+		return
+	}
+	if err = guard.revalidate(); err != nil {
+		logging.LogErrorf("revalidate directory [%s] failed: %s", guard.requestedPath, err)
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+		return
+	}
+
+	files := make([]map[string]any, 0, len(snapshot))
+	for _, entry := range snapshot {
 		files = append(files, map[string]any{
-			"name":      entry.Name(),
-			"isDir":     info.IsDir(),
-			"isSymlink": util.IsSymlink(entry),
-			"updated":   info.ModTime().Unix(),
+			"name":      entry.name,
+			"isDir":     entry.isDir,
+			"isSymlink": entry.isSymlink,
+			"updated":   entry.updated,
 		})
 	}
 

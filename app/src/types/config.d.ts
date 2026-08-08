@@ -1260,6 +1260,7 @@ declare namespace Config {
      * SiYuan editor list shortcut keys
      */
     export interface IKeymapEditorList extends IKeys {
+        appendListItem: IKey;
         checkToggle: IKey;
         indent: IKey;
         outdent: IKey;

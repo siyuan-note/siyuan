@@ -73,6 +73,17 @@ test("sortable entry catalog groups contain valid separator positions", () => {
     });
 });
 
+test("append list item follows the insert entries in the block menu", () => {
+    const children = getEntryCatalogChildren("gutter.single");
+    const insertAfterIndex = children.findIndex((item) => item.key === "insertAfter");
+    const appendListItem = children[insertAfterIndex + 1];
+
+    assert.ok(0 <= insertAfterIndex);
+    assert.equal(appendListItem?.key, "appendListItem");
+    assert.equal(appendListItem?.type, "entry");
+    assert.equal(appendListItem?.simple, true);
+});
+
 test("simple profile follows the reviewed defaults", () => {
     const shown = [
         "document.title.copy.copyBlockEmbed",

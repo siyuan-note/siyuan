@@ -1,4 +1,5 @@
 {
+	"appendListItem": "Aggiungi un elemento alla fine dell'elenco corrente",
 	"secretAllowedHosts": "Host consentiti",
 	"secretAllowedHostsTip": "Nomi host a cui questo segreto può essere inviato, separati da virgole, es. api.example.com; lascia vuoto per negare tutte le richieste, e i segreti non vengono mai interpolati nell'URL della richiesta",
 	"editorMarkdownInlineFullWidthStrikethrough": "Sintassi barrata a larghezza intera",

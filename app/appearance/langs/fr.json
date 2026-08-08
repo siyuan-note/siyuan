@@ -1,4 +1,5 @@
 {
+	"appendListItem": "Ajouter un élément à la fin de la liste actuelle",
 	"secretAllowedHosts": "Hôtes autorisés",
 	"secretAllowedHostsTip": "Noms d'hôte auxquels ce secret peut être envoyé, séparés par des virgules, par ex. api.example.com ; laissez vide pour refuser toutes les requêtes, et les secrets ne sont jamais interpolés dans l'URL de la requête",
 	"editorMarkdownInlineFullWidthStrikethrough": "Syntaxe de barré en pleine chasse",

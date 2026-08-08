@@ -12,10 +12,39 @@ export type TListContext = {
     subtype: TListSubtype,
 };
 
+export type TAppendListContext = {
+    listElement?: HTMLElement,
+    listItemElement?: HTMLElement,
+};
+
 const LIST_CONVERSION_TYPES: Record<TListSubtype, Partial<Record<TListSubtype, string>>> = {
     u: {o: "UL2OL", t: "UL2TL"},
     o: {u: "OL2UL", t: "OL2TL"},
     t: {u: "TL2UL", o: "TL2OL"},
+};
+
+export const getAppendListContext = (nodeElement: HTMLElement,
+                                     editorElement: HTMLElement): TAppendListContext | undefined => {
+    let currentElement: HTMLElement | null = nodeElement;
+    while (currentElement && currentElement !== editorElement) {
+        const type = currentElement.getAttribute("data-type");
+        if (type === "NodeList") {
+            return {listElement: currentElement};
+        }
+        if (type === "NodeListItem") {
+            const parentElement = currentElement.parentElement;
+            return {
+                listElement: parentElement?.getAttribute("data-type") === "NodeList" ? parentElement : undefined,
+                listItemElement: currentElement,
+            };
+        }
+        currentElement = currentElement.parentElement;
+    }
+};
+
+export const getLastListItemElement = (listElement: HTMLElement) => {
+    return Array.from(listElement.children).reverse().find((item) =>
+        item.getAttribute("data-type") === "NodeListItem") as HTMLElement | undefined;
 };
 
 export const getListContext = (nodeElement: HTMLElement, editorElement: HTMLElement): TListContext | undefined => {

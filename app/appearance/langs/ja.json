@@ -1,4 +1,5 @@
 {
+	"appendListItem": "現在のリストの末尾にリスト項目を追加",
 	"secretAllowedHosts": "許可されたホスト",
 	"secretAllowedHostsTip": "このシークレットの送信先として許可するホスト名をカンマ区切りで指定します（例：api.example.com）。空のままにするとすべてのリクエストを拒否し、シークレットはリクエスト URL に挿入されることはありません",
 	"editorMarkdownInlineFullWidthStrikethrough": "全角取り消し線構文",

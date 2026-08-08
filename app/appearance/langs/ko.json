@@ -1,4 +1,5 @@
 {
+	"appendListItem": "현재 목록 끝에 목록 항목 추가",
 	"secretAllowedHosts": "허용된 호스트",
 	"secretAllowedHostsTip": "이 시크릿을 보낼 수 있는 호스트 이름을 쉼표로 구분해 입력합니다(예: api.example.com). 비워두면 모든 요청을 거부하며, 시크릿은 요청 URL에 삽입되지 않습니다",
 	"editorMarkdownInlineFullWidthStrikethrough": "전각 취소선 구문",

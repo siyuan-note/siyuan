@@ -1,4 +1,5 @@
 {
+	"appendListItem": "הוספת פריט לסוף הרשימה הנוכחית",
 	"secretAllowedHosts": "מארחים מורשים",
 	"secretAllowedHostsTip": "שמות מארחים שאליהם ניתן לשלוח סוד זה, מופרדים בפסיקים, למשל api.example.com; השאר ריק כדי לדחות את כל הבקשות, וסודות לעולם אינם מוחלפים בכתובת ה-URL של הבקשה",
 	"editorMarkdownInlineFullWidthStrikethrough": "תחביר קו חוצה ברוחב מלא",

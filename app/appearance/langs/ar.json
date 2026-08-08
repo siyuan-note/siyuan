@@ -1,4 +1,5 @@
 {
+	"appendListItem": "إضافة عنصر قائمة إلى نهاية القائمة الحالية",
 	"secretAllowedHosts": "النطاقات المسموح بها",
 	"secretAllowedHostsTip": "أسماء المضيفات التي يمكن إرسال هذا السر إليها، مفصولة بفواصل، مثل api.example.com؛ اتركها فارغة لرفض جميع الطلبات، ولا يتم إدراج الأسرار في عنوان URL للطلب أبدًا",
 	"editorMarkdownInlineFullWidthStrikethrough": "بناء الشطب بعرض كامل",

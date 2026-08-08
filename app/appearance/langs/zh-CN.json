@@ -1,4 +1,5 @@
 {
+	"appendListItem": "在当前列表末尾添加列表项",
 	"secretAllowedHosts": "允许的主机",
 	"secretAllowedHostsTip": "允许发送该密钥的主机名，用逗号分隔，例如 api.example.com；留空则拒绝所有请求，且密钥永远不会被插入到请求 URL 中",
 	"editorMarkdownInlineFullWidthStrikethrough": "全角删除线语法",

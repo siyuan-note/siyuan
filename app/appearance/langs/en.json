@@ -1,4 +1,5 @@
 {
+	"appendListItem": "Add a list item to the end of the current list",
 	"secretAllowedHosts": "Allowed hosts",
 	"secretAllowedHostsTip": "Hostnames this secret may be sent to, separated by commas, e.g. api.example.com; leave empty to deny all requests, and secrets are never interpolated into the request URL",
 	"editorMarkdownInlineFullWidthStrikethrough": "Full-width strikethrough syntax",

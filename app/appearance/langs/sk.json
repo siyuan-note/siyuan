@@ -1,4 +1,5 @@
 {
+	"appendListItem": "Pridať položku na koniec aktuálneho zoznamu",
 	"secretAllowedHosts": "Povolené hostitele",
 	"secretAllowedHostsTip": "Názvy hostiteľov, na ktoré možno tento tajný kľúč odoslať, oddelené čiarkami, napr. api.example.com; nechajte prázdne, aby sa zamietli všetky požiadavky, a tajné kľúče sa nikdy nedosadzujú do URL požiadavky",
 	"editorMarkdownInlineFullWidthStrikethrough": "Plnošírková syntax prečiarknutia",

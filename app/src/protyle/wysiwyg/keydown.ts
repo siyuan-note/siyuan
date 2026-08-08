@@ -65,6 +65,7 @@ import {fontEvent} from "../toolbar/Font";
 import {applyTableCellStyleHotkey} from "../toolbar/tableCell";
 import {
     addSubList,
+    appendListItem,
     insertEmptyChildList,
     insertEmptyListItem,
     listIndent,
@@ -72,6 +73,7 @@ import {
     toggleTaskListItem
 } from "./list";
 import {
+    getAppendListContext,
     getListContext,
     getListConversionType,
     getListShortcutAction,
@@ -2098,6 +2100,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             event.stopPropagation();
             return;
+        }
+
+        if (matchHotKey(window.siyuan.config.keymap.editor.list.appendListItem.custom, event) &&
+            !isInEmbedBlock(nodeElement) && getAppendListContext(nodeElement, protyle.wysiwyg.element)) {
+            void appendListItem(protyle, nodeElement, range);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.list.checkToggle.custom, event)) {

@@ -1,4 +1,5 @@
 {
+	"appendListItem": "เพิ่มรายการที่ท้ายรายการปัจจุบัน",
 	"secretAllowedHosts": "โฮสต์ที่อนุญาต",
 	"secretAllowedHostsTip": "ชื่อโฮสต์ที่อนุญาตให้ส่งความลับนี้ไปได้ คั่นด้วยเครื่องหมายจุลภาค เช่น api.example.com; เว้นว่างไว้เพื่อปฏิเสธคำขอทั้งหมด และความลับจะไม่ถูกแทรกลงใน URL ของคำขอ",
 	"editorMarkdownInlineFullWidthStrikethrough": "ไวยากรณ์ขีดฆ่าแบบเต็มความกว้าง",

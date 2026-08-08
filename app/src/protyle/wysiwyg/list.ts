@@ -1,4 +1,4 @@
-import {focusByWbr, getUndoFocusContext} from "../util/selection";
+import {focusByWbr, getEditorRange, getUndoFocusContext} from "../util/selection";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
 import {genEmptyBlock} from "../../block/util";
 import * as dayjs from "dayjs";
@@ -9,7 +9,9 @@ import {getEmbedChildOperationContext, getParentBlock, getPreviousBlockSibling} 
 import {setFold} from "../util/blockFold";
 import {scrollCenter} from "../../util/highlightById";
 import {
+    getAppendListContext,
     getFollowingOrderedListMarkerUpdates,
+    getLastListItemElement,
     getOrderedListMarkerUpdates,
     type TListSubtype
 } from "./listContext";
@@ -154,6 +156,87 @@ const getFocusedOrderedListUpdates = async (protyle: IProtyle, listItemElement: 
 };
 
 const insertingFocusedListItems = new WeakSet<IProtyle>();
+
+const appendingListItems = new WeakSet<IProtyle>();
+
+const getFocusedListTailItem = async (protyle: IProtyle, listID: string, currentListItem?: HTMLElement) => {
+    const tailResponse = await fetchSyncPost("/api/block/getTailChildBlocks", {
+        id: listID,
+        n: 1,
+        notebook: protyle.notebookId,
+    });
+    const tailBlock = tailResponse.data?.[0] as {id?: string, type?: string} | undefined;
+    if (!tailBlock?.id || tailBlock.type !== "i") {
+        return;
+    }
+    if (currentListItem?.getAttribute("data-node-id") === tailBlock.id) {
+        return currentListItem;
+    }
+
+    const domResponse = await fetchSyncPost("/api/block/getBlockDOM", {
+        id: tailBlock.id,
+        notebook: protyle.notebookId,
+    });
+    const template = document.createElement("template");
+    template.innerHTML = domResponse.data?.dom || "";
+    const tailItemElement = template.content.firstElementChild as HTMLElement;
+    if (tailItemElement?.getAttribute("data-type") !== "NodeListItem") {
+        return;
+    }
+    return tailItemElement;
+};
+
+export const appendListItem = async (protyle: IProtyle, nodeElement: HTMLElement, range?: Range) => {
+    if (appendingListItems.has(protyle)) {
+        return;
+    }
+    const context = getAppendListContext(nodeElement, protyle.wysiwyg.element);
+    if (!context) {
+        return;
+    }
+
+    appendingListItems.add(protyle);
+    try {
+        let tailItemElement: HTMLElement | undefined;
+        if (context.listElement) {
+            tailItemElement = getLastListItemElement(context.listElement);
+        } else if (protyle.block.parentID) {
+            tailItemElement = await getFocusedListTailItem(protyle, protyle.block.parentID,
+                context.listItemElement);
+        }
+        if (!tailItemElement) {
+            return;
+        }
+
+        const tailID = tailItemElement.getAttribute("data-node-id");
+        if (!tailID) {
+            return;
+        }
+        const newListItemElement = genListItemElement(tailItemElement, 0, true);
+        const id = newListItemElement.getAttribute("data-node-id");
+        const editorRange = range || getEditorRange(protyle.wysiwyg.element);
+        const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, editorRange, true);
+        const localPreviousElement = context.listElement ? tailItemElement : context.listItemElement;
+        if (!localPreviousElement?.isConnected) {
+            return;
+        }
+        localPreviousElement.insertAdjacentElement("afterend", newListItemElement);
+        transaction(protyle, [{
+            action: "insert",
+            id,
+            data: newListItemElement.outerHTML,
+            previousID: tailID,
+        }], [{
+            action: "delete",
+            id,
+            context: undoFocusContext,
+        }]);
+        focusByWbr(newListItemElement, editorRange);
+        scrollCenter(protyle, newListItemElement);
+    } finally {
+        appendingListItems.delete(protyle);
+    }
+};
 
 export const insertEmptyListItem = async (protyle: IProtyle, listItemElement: HTMLElement, range: Range) => {
     const listElement = listItemElement.parentElement;

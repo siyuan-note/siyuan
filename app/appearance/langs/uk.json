@@ -1,4 +1,5 @@
 {
+	"appendListItem": "Додати елемент у кінець поточного списку",
 	"secretAllowedHosts": "Дозволені хости",
 	"secretAllowedHostsTip": "Імена хостів, на які можна надсилати цей секрет, через кому, напр. api.example.com; залиште порожнім, щоб заборонити всі запити, і секрети ніколи не підставляються в URL запиту",
 	"editorMarkdownInlineFullWidthStrikethrough": "Повноширинний синтаксис закреслення",

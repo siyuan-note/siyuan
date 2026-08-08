@@ -1,7 +1,9 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    getAppendListContext,
     getFollowingOrderedListMarkerUpdates,
+    getLastListItemElement,
     getListContext,
     getListConversionType,
     getOrderedListMarkerUpdates,
@@ -115,6 +117,60 @@ describe("getListContext", () => {
         new TestElement("NodeListItem", "list-item", "t").append(editor, new TestElement());
 
         assert.equal(getListContext(asHTMLElement(paragraph), asHTMLElement(editor)), undefined);
+    });
+});
+
+describe("getAppendListContext", () => {
+    it("uses the nearest list in a nested list", () => {
+        const paragraph = new TestElement("NodeParagraph", "paragraph");
+        const innerListItem = new TestElement("NodeListItem", "inner-item", "u").append(paragraph);
+        const innerList = new TestElement("NodeList", "inner-list", "u").append(innerListItem);
+        const outerListItem = new TestElement("NodeListItem", "outer-item", "u").append(innerList);
+        const outerList = new TestElement("NodeList", "outer-list", "u").append(outerListItem);
+        const editor = new TestElement().append(outerList);
+
+        const context = getAppendListContext(asHTMLElement(paragraph), asHTMLElement(editor));
+
+        assert.equal(context?.listElement, asHTMLElement(innerList));
+        assert.equal(context?.listItemElement, asHTMLElement(innerListItem));
+    });
+
+    it("uses a selected list as the current list", () => {
+        const {list, editor} = createList("o");
+
+        const context = getAppendListContext(asHTMLElement(list), asHTMLElement(editor));
+
+        assert.equal(context?.listElement, asHTMLElement(list));
+        assert.equal(context?.listItemElement, undefined);
+    });
+
+    it("supports a focused list item without its list wrapper", () => {
+        const paragraph = new TestElement("NodeParagraph", "paragraph");
+        const listItem = new TestElement("NodeListItem", "list-item", "t").append(paragraph);
+        const editor = new TestElement().append(listItem);
+
+        const context = getAppendListContext(asHTMLElement(paragraph), asHTMLElement(editor));
+
+        assert.equal(context?.listElement, undefined);
+        assert.equal(context?.listItemElement, asHTMLElement(listItem));
+    });
+
+    it("does not cross the current editor boundary", () => {
+        const paragraph = new TestElement("NodeParagraph", "paragraph");
+        const editor = new TestElement().append(paragraph);
+        new TestElement("NodeListItem", "list-item", "u").append(editor);
+
+        assert.equal(getAppendListContext(asHTMLElement(paragraph), asHTMLElement(editor)), undefined);
+    });
+});
+
+describe("getLastListItemElement", () => {
+    it("ignores non-list-item children at the end", () => {
+        const first = new TestElement("NodeListItem", "first", "u");
+        const last = new TestElement("NodeListItem", "last", "u");
+        const list = new TestElement("NodeList", "list", "u").append(first, last, new TestElement());
+
+        assert.equal(getLastListItemElement(asHTMLElement(list)), asHTMLElement(last));
     });
 });
 

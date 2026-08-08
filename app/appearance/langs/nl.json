@@ -1,4 +1,5 @@
 {
+	"appendListItem": "Lijstitem toevoegen aan het einde van de huidige lijst",
 	"secretAllowedHosts": "Toegestane hosts",
 	"secretAllowedHostsTip": "Hostnamen waarnaar dit geheim mag worden verzonden, gescheiden door komma's, bijv. api.example.com; leeg laten om alle verzoeken te weigeren, en geheimen worden nooit in de aanvraag-URL geïnterpoleerd",
 	"editorMarkdownInlineFullWidthStrikethrough": "Doorhaalopmaak met volledige breedte",

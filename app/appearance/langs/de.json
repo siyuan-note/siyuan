@@ -1,4 +1,5 @@
 {
+	"appendListItem": "Listenelement am Ende der aktuellen Liste hinzufügen",
 	"secretAllowedHosts": "Zulässige Hosts",
 	"secretAllowedHostsTip": "Hostnamen, an die dieses Secret gesendet werden darf, durch Kommas getrennt, z. B. api.example.com; leer lassen, um alle Anfragen zu verweigern, und Secrets werden niemals in die Anforderungs-URL interpoliert",
 	"editorMarkdownInlineFullWidthStrikethrough": "Vollbreite-Durchstreichsyntax",

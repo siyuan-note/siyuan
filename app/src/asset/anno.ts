@@ -15,7 +15,6 @@ import {hideRectResizeHandles, moveRectBounds, resizeRectBounds} from "./rectAnn
 import type {RectBounds, RectResizeDirection} from "./rectAnnotationResize";
 
 const RECT_RESIZE_MIN_SIZE = 8;
-const RECT_DRAG_THRESHOLD = 3;
 
 export const initAnno = (element: HTMLElement, pdf: any) => {
     getConfig(pdf);
@@ -191,7 +190,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
         const mousemove = (moveEvent: MouseEvent) => {
             const deltaX = moveEvent.clientX - startX;
             const deltaY = moveEvent.clientY - startY;
-            if (!moved && Math.hypot(deltaX, deltaY) < RECT_DRAG_THRESHOLD) {
+            if (!moved && Math.hypot(deltaX, deltaY) < Constants.SIZE_DRAG_THRESHOLD) {
                 return;
             }
             if (!moved) {

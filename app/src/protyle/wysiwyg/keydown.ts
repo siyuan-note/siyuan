@@ -71,6 +71,7 @@ import {
     insertEmptyListItem,
     listIndent,
     listOutdent,
+    prependListItem,
     toggleTaskListItem
 } from "./list";
 import {
@@ -2124,6 +2125,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             event.stopPropagation();
             return;
+        }
+
+        if (matchHotKey(window.siyuan.config.keymap.editor.list.prependListItem.custom, event) &&
+            !isInEmbedBlock(nodeElement) && getAppendListContext(nodeElement, protyle.wysiwyg.element)) {
+            void prependListItem(protyle, nodeElement, range);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         }
 
         if (matchHotKey(window.siyuan.config.keymap.editor.list.appendListItem.custom, event) &&

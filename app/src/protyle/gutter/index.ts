@@ -1921,6 +1921,7 @@ export class Gutter {
                 id: "prependListItem",
                 icon: "iconBefore",
                 label: window.siyuan.languages.prependListItem,
+                accelerator: window.siyuan.config.keymap.editor.list.prependListItem.custom,
                 click() {
                     hideElements(["select"], protyle);
                     countBlockWord([], protyle.block.rootID);

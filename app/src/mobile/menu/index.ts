@@ -226,7 +226,7 @@ export const initRightMenu = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuSyncNow") {
-                syncGuide();
+                syncGuide(app);
                 event.preventDefault();
                 event.stopPropagation();
                 break;

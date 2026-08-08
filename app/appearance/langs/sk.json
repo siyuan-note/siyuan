@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "Plnošírková syntax prečiarknutia",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "Po zapnutí sa <code class='fn__code'>～～foo～～</code> interpretuje ako riadková syntax prečiarknutia",
 	"confirmOverwriteLocalBazaarPackage": "Balík [${name}] je už nainštalovaný. Aktualizovať ho vybraným lokálnym balíkom?",
 	"localBazaarPackageFileError": "Vyberte jeden súbor .zip lokálneho balíka z trhoviska",
 	"dropLocalBazaarPackage": "Sem presuňte súbor .zip lokálneho balíka z trhoviska",

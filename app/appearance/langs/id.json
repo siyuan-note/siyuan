@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "Sintaks coret lebar penuh",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "Jika diaktifkan, <code class='fn__code'>～～foo～～</code> diurai sebagai sintaks coret sebaris",
 	"confirmOverwriteLocalBazaarPackage": "Paket [${name}] sudah terpasang. Perbarui dengan paket lokal yang dipilih?",
 	"localBazaarPackageFileError": "Pilih satu berkas .zip paket pasar lokal",
 	"dropLocalBazaarPackage": "Letakkan berkas .zip paket pasar lokal di sini",

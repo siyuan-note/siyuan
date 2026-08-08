@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "ไวยากรณ์ขีดฆ่าแบบเต็มความกว้าง",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "เมื่อเปิดใช้ <code class='fn__code'>～～foo～～</code> จะถูกแปลเป็นไวยากรณ์ขีดฆ่าในบรรทัด",
 	"confirmOverwriteLocalBazaarPackage": "ติดตั้งแพ็กเกจ [${name}] แล้ว ต้องการอัปเดตด้วยแพ็กเกจภายในเครื่องที่เลือกหรือไม่?",
 	"localBazaarPackageFileError": "โปรดเลือกไฟล์ .zip ของแพ็กเกจตลาดภายในเครื่องหนึ่งไฟล์",
 	"dropLocalBazaarPackage": "วางไฟล์ .zip ของแพ็กเกจตลาดภายในเครื่องที่นี่",

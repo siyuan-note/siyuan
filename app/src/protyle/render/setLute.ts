@@ -120,6 +120,7 @@ const setLute = (options: ILuteOptions) => {
     lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
     lute.SetGFMStrikethrough1(false);
     lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
+    lute.SetFullWidthStrikethrough(window.siyuan.config.editor.markdown.inlineFullWidthStrikethrough);
     lute.SetMark(window.siyuan.config.editor.markdown.inlineMark);
     lute.SetSpin(true);
     lute.SetProtyleWYSIWYG(true);

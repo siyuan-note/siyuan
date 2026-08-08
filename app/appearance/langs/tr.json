@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "Tam genişlikli üstü çizili sözdizimi",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "Etkinleştirildiğinde <code class='fn__code'>～～foo～～</code> satır içi üstü çizili sözdizimi olarak ayrıştırılır",
 	"confirmOverwriteLocalBazaarPackage": "[${name}] paketi zaten yüklü. Seçilen yerel paketle güncellensin mi?",
 	"localBazaarPackageFileError": "Lütfen tek bir yerel mağaza paketi .zip dosyası seçin",
 	"dropLocalBazaarPackage": "Yerel mağaza paketi .zip dosyasını buraya bırakın",

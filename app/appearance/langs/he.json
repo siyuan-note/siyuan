@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "תחביר קו חוצה ברוחב מלא",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "כאשר האפשרות מופעלת, <code class='fn__code'>～～foo～～</code> מפוענח כתחביר קו חוצה בתוך השורה",
 	"confirmOverwriteLocalBazaarPackage": "החבילה [${name}] כבר מותקנת. לעדכן אותה באמצעות החבילה המקומית שנבחרה?",
 	"localBazaarPackageFileError": "יש לבחור קובץ .zip אחד של חבילה מקומית מהשוק",
 	"dropLocalBazaarPackage": "יש לשחרר כאן קובץ .zip של חבילה מקומית מהשוק",

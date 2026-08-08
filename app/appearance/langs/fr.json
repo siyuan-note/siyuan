@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "Syntaxe de barré en pleine chasse",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "Une fois activée, <code class='fn__code'>～～foo～～</code> est interprété comme une syntaxe de barré en ligne",
 	"confirmOverwriteLocalBazaarPackage": "Le paquet [${name}] est déjà installé. Le mettre à jour avec le paquet local sélectionné ?",
 	"localBazaarPackageFileError": "Veuillez sélectionner un seul fichier .zip de paquet local du marché",
 	"dropLocalBazaarPackage": "Déposez ici un fichier .zip de paquet local du marché",

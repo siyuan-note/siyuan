@@ -27,27 +27,29 @@ import (
 
 // MarkdownSettings 运行时 Markdown 配置。
 var MarkdownSettings = &Markdown{
-	InlineAsterisk:      true,
-	InlineUnderscore:    true,
-	InlineSup:           true,
-	InlineSub:           true,
-	InlineTag:           true,
-	InlineMath:          true,
-	InlineStrikethrough: true,
-	InlineMark:          true,
-	CodeBlockMiddleDot:  new(true),
+	InlineAsterisk:               true,
+	InlineUnderscore:             true,
+	InlineSup:                    true,
+	InlineSub:                    true,
+	InlineTag:                    true,
+	InlineMath:                   true,
+	InlineStrikethrough:          true,
+	InlineFullWidthStrikethrough: false,
+	InlineMark:                   true,
+	CodeBlockMiddleDot:           new(true),
 }
 
 type Markdown struct {
-	InlineAsterisk      bool  `json:"inlineAsterisk"`      // 是否启用行级 * 语法
-	InlineUnderscore    bool  `json:"inlineUnderscore"`    // 是否启用行级 _ 语法
-	InlineSup           bool  `json:"inlineSup"`           // 是否启用行级上标
-	InlineSub           bool  `json:"inlineSub"`           // 是否启用行级下标
-	InlineTag           bool  `json:"inlineTag"`           // 是否启用行级标签
-	InlineMath          bool  `json:"inlineMath"`          // 是否启用行级公式
-	InlineStrikethrough bool  `json:"inlineStrikethrough"` // 是否启用行级删除线
-	InlineMark          bool  `json:"inlineMark"`          // 是否启用行级标记
-	CodeBlockMiddleDot  *bool `json:"codeBlockMiddleDot"`  // 是否启用中点代码块快捷输入
+	InlineAsterisk               bool  `json:"inlineAsterisk"`               // 是否启用行级 * 语法
+	InlineUnderscore             bool  `json:"inlineUnderscore"`             // 是否启用行级 _ 语法
+	InlineSup                    bool  `json:"inlineSup"`                    // 是否启用行级上标
+	InlineSub                    bool  `json:"inlineSub"`                    // 是否启用行级下标
+	InlineTag                    bool  `json:"inlineTag"`                    // 是否启用行级标签
+	InlineMath                   bool  `json:"inlineMath"`                   // 是否启用行级公式
+	InlineStrikethrough          bool  `json:"inlineStrikethrough"`          // 是否启用行级删除线
+	InlineFullWidthStrikethrough bool  `json:"inlineFullWidthStrikethrough"` // 是否启用全角行级删除线
+	InlineMark                   bool  `json:"inlineMark"`                   // 是否启用行级标记
+	CodeBlockMiddleDot           *bool `json:"codeBlockMiddleDot"`           // 是否启用中点代码块快捷输入
 }
 
 func NewLute() (ret *lute.Lute) {
@@ -68,6 +70,7 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetTag(MarkdownSettings.InlineTag)
 	ret.SetInlineMath(MarkdownSettings.InlineMath)
 	ret.SetGFMStrikethrough(MarkdownSettings.InlineStrikethrough)
+	ret.SetFullWidthStrikethrough(MarkdownSettings.InlineFullWidthStrikethrough)
 	ret.SetMark(MarkdownSettings.InlineMark)
 	ret.SetInlineMathAllowDigitAfterOpenMarker(true)
 	ret.SetGFMStrikethrough1(false)
@@ -114,6 +117,7 @@ func NewStdLute() (ret *lute.Lute) {
 	ret.SetTag(MarkdownSettings.InlineTag)
 	ret.SetInlineMath(MarkdownSettings.InlineMath)
 	ret.SetGFMStrikethrough(MarkdownSettings.InlineStrikethrough)
+	ret.SetFullWidthStrikethrough(MarkdownSettings.InlineFullWidthStrikethrough)
 	ret.SetGFMStrikethrough1(false)
 	return
 }

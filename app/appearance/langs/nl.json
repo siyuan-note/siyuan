@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "Doorhaalopmaak met volledige breedte",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "Indien ingeschakeld, wordt <code class='fn__code'>～～foo～～</code> geïnterpreteerd als inline doorhaalopmaak",
 	"confirmOverwriteLocalBazaarPackage": "Pakket [${name}] is al geïnstalleerd. Bijwerken met het geselecteerde lokale pakket?",
 	"localBazaarPackageFileError": "Selecteer één .zip-bestand van een lokaal marktplaatspakket",
 	"dropLocalBazaarPackage": "Zet hier een .zip-bestand van een lokaal marktplaatspakket neer",

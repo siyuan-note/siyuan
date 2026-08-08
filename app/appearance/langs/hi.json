@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "पूर्ण-चौड़ाई स्ट्राइकथ्रू सिंटैक्स",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "सक्षम होने पर <code class='fn__code'>～～foo～～</code> को इनलाइन स्ट्राइकथ्रू सिंटैक्स के रूप में पार्स किया जाता है",
 	"confirmOverwriteLocalBazaarPackage": "पैकेज [${name}] पहले से इंस्टॉल है। क्या इसे चुने गए स्थानीय पैकेज से अपडेट करना है?",
 	"localBazaarPackageFileError": "कृपया स्थानीय बाज़ार पैकेज की एक .zip फ़ाइल चुनें",
 	"dropLocalBazaarPackage": "स्थानीय बाज़ार पैकेज की .zip फ़ाइल यहाँ छोड़ें",

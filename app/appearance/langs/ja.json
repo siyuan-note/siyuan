@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "全角取り消し線構文",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "有効にすると、<code class='fn__code'>～～foo～～</code> をインライン取り消し線構文として解析します",
 	"confirmOverwriteLocalBazaarPackage": "パッケージ [${name}] はすでにインストールされています。選択したローカルパッケージで更新しますか？",
 	"localBazaarPackageFileError": "ローカルマーケットプレイスパッケージの .zip ファイルを1つ選択してください",
 	"dropLocalBazaarPackage": "ローカルマーケットプレイスパッケージの .zip ファイルをここにドロップ",

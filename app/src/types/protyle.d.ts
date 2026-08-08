@@ -241,6 +241,8 @@ declare class Lute {
 
     public SetGFMStrikethrough1(enable: boolean): void;
 
+    public SetFullWidthStrikethrough(enable: boolean): void;
+
     public SetMark(enable: boolean): void;
 
     public SetSub(enable: boolean): void;

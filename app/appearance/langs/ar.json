@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "بناء الشطب بعرض كامل",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "عند التفعيل، يتم تحليل <code class='fn__code'>～～foo～～</code> كبناء شطب مضمن",
 	"confirmOverwriteLocalBazaarPackage": "الحزمة [${name}] مثبتة بالفعل. هل تريد تحديثها بالحزمة المحلية المحددة؟",
 	"localBazaarPackageFileError": "يرجى تحديد ملف .zip واحد لحزمة السوق المحلية",
 	"dropLocalBazaarPackage": "أفلت ملف .zip لحزمة السوق المحلية هنا",

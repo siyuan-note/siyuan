@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "Pełnoszeroka składnia przekreślenia",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "Po włączeniu <code class='fn__code'>～～foo～～</code> jest interpretowane jako śródliniowa składnia przekreślenia",
 	"confirmOverwriteLocalBazaarPackage": "Pakiet [${name}] jest już zainstalowany. Zaktualizować go wybranym pakietem lokalnym?",
 	"localBazaarPackageFileError": "Wybierz jeden plik .zip lokalnego pakietu z rynku",
 	"dropLocalBazaarPackage": "Upuść tutaj plik .zip lokalnego pakietu z rynku",

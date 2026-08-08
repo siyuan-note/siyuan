@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "全角删除线语法",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "启用后将支持 <code class='fn__code'>～～foo～～</code> 行级删除线语法输入",
 	"confirmOverwriteLocalBazaarPackage": "集市包 [${name}] 已安装，是否使用所选本地包更新？",
 	"localBazaarPackageFileError": "请选择一个本地集市包 .zip 文件",
 	"dropLocalBazaarPackage": "拖放本地集市包 .zip 文件到这里",

@@ -24,46 +24,12 @@ import {updateAVName} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {nbsp2space} from "../util/normalizeText";
 import {getBlockquoteContext, isBlockquoteMarker, shouldCancelBlockquote} from "./blockquote";
-import {getFullWidthStrikethroughMarkerOffsets} from "./strikethrough";
 
 interface IInputOperations {
     doOperations: IOperation[];
     undoOperations: IOperation[];
     undoContext?: Record<string, string>;
 }
-
-const normalizeFullWidthStrikethrough = (editElement: HTMLElement, wbrElement: HTMLElement) => {
-    const inlineContainer = wbrElement.closest("td, th") || editElement;
-    const literalElement = wbrElement.parentElement?.closest(
-        '[data-type~="a"], [data-type~="block-ref"], [data-type~="code"], [data-type~="file-annotation-ref"], ' +
-        '[data-type~="inline-math"], [data-type~="kbd"], [data-type~="tag"]'
-    );
-    if (literalElement && inlineContainer.contains(literalElement)) {
-        return false;
-    }
-
-    const prefixRange = document.createRange();
-    prefixRange.setStart(inlineContainer, 0);
-    prefixRange.setEndBefore(wbrElement);
-    const prefix = prefixRange.toString().split(Constants.ZWSP).join("");
-    const offsets = getFullWidthStrikethroughMarkerOffsets(prefix);
-    if (!offsets) {
-        return false;
-    }
-
-    const openRange = focusByOffset(inlineContainer, offsets.openStart,
-        offsets.openStart + offsets.markerLength, false, true);
-    const closeRange = focusByOffset(inlineContainer, offsets.closeStart,
-        offsets.closeStart + offsets.markerLength, false, true);
-    if (!openRange || !closeRange) {
-        return false;
-    }
-    closeRange.deleteContents();
-    closeRange.insertNode(document.createTextNode("~~"));
-    openRange.deleteContents();
-    openRange.insertNode(document.createTextNode("~~"));
-    return true;
-};
 
 export const beforeBlockquoteInput = (protyle: IProtyle, event: InputEvent) => {
     if (event.isComposing || !event.cancelable || (event.data !== ">" && event.data !== "》")) {
@@ -282,10 +248,6 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             }
             return;
         }
-    }
-    if (type !== "NodeCodeBlock" && currentWbrElement &&
-        window.siyuan.config.editor.markdown.inlineStrikethrough) {
-        normalizeFullWidthStrikethrough(editElement, currentWbrElement);
     }
     const trimStartHTML = editElement.innerHTML.trimStart();
     const trimStartText = editElement.textContent.trimStart();

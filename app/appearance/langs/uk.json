@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "Повноширинний синтаксис закреслення",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "Якщо ввімкнено, <code class='fn__code'>～～foo～～</code> розпізнається як рядковий синтаксис закреслення",
 	"confirmOverwriteLocalBazaarPackage": "Пакет [${name}] уже встановлено. Оновити його вибраним локальним пакетом?",
 	"localBazaarPackageFileError": "Виберіть один .zip-файл локального пакета маркетплейсу",
 	"dropLocalBazaarPackage": "Перетягніть сюди .zip-файл локального пакета маркетплейсу",

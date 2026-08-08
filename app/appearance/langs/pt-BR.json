@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "Sintaxe de tachado de largura completa",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "Quando ativada, <code class='fn__code'>～～foo～～</code> é interpretado como sintaxe de tachado em linha",
 	"confirmOverwriteLocalBazaarPackage": "O pacote [${name}] já está instalado. Atualizá-lo com o pacote local selecionado?",
 	"localBazaarPackageFileError": "Selecione um arquivo .zip de pacote local do mercado",
 	"dropLocalBazaarPackage": "Solte aqui um arquivo .zip de pacote local do mercado",

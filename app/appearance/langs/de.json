@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "Vollbreite-Durchstreichsyntax",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "Wenn aktiviert, wird <code class='fn__code'>～～foo～～</code> als Inline-Durchstreichsyntax ausgewertet",
 	"confirmOverwriteLocalBazaarPackage": "Das Paket [${name}] ist bereits installiert. Mit dem ausgewählten lokalen Paket aktualisieren?",
 	"localBazaarPackageFileError": "Bitte genau eine .zip-Datei eines lokalen Marktplatzpakets auswählen",
 	"dropLocalBazaarPackage": ".zip-Datei eines lokalen Marktplatzpakets hier ablegen",

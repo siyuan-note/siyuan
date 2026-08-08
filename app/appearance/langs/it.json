@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthStrikethrough": "Sintassi barrata a larghezza intera",
+	"editorMarkdownInlineFullWidthStrikethroughTip": "Se attivata, <code class='fn__code'>～～foo～～</code> viene interpretato come sintassi barrata in linea",
 	"confirmOverwriteLocalBazaarPackage": "Il pacchetto [${name}] è già installato. Aggiornarlo con il pacchetto locale selezionato?",
 	"localBazaarPackageFileError": "Seleziona un solo file .zip di un pacchetto locale del marketplace",
 	"dropLocalBazaarPackage": "Rilascia qui un file .zip di un pacchetto locale del marketplace",

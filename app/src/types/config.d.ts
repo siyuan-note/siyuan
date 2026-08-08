@@ -471,6 +471,10 @@ declare namespace Config {
          */
         inlineStrikethrough: boolean;
         /**
+         * Whether to enable the full-width inline strikethrough
+         */
+        inlineFullWidthStrikethrough: boolean;
+        /**
          * Whether to enable the inline mark
          */
         inlineMark: boolean;

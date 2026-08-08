@@ -380,7 +380,7 @@ interface IClipboardData {
     textHTML?: string,
     textPlain?: string,
     siyuanHTML?: string,
-    files?: File[],
+    files?: FileList | DataTransferItemList | File[],
     localFiles?: ILocalFiles[],
 }
 

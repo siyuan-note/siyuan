@@ -23,6 +23,7 @@ import * as dayjs from "dayjs";
 import {updateListOrder} from "../wysiwyg/list";
 import {refreshSbAndPersistWidth} from "../../block/util";
 import {shouldPreservePastedBlockStructure} from "./pasteSource";
+import {normalizePasteResponse} from "./pasteResponse";
 import {applyLuteMarkdownSyntax} from "../render/luteMarkdownSyntax";
 
 export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement) => {
@@ -521,7 +522,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
     }
     /// #endif
-    const originalTextHTML = textHTML;
+    let originalTextHTML = textHTML;
     if (vscodeEditorData) {
         try {
             const metadata = JSON.parse(vscodeEditorData);
@@ -565,7 +566,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
 
     if (protyle && protyle.app && protyle.app.plugins) {
         for (let i = 0; i < protyle.app.plugins.length; i++) {
-            const response: IClipboardData & { files: FileList } = await new Promise((resolve) => {
+            const response = await new Promise<IClipboardData | undefined>((resolve) => {
                 const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
                     protyle,
                     resolve,
@@ -579,17 +580,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
             });
 
-            if (response?.textHTML) {
-                textHTML = response.textHTML;
-            }
-            if (response?.textPlain) {
-                textPlain = response.textPlain;
-            }
-            if (response?.siyuanHTML) {
-                siyuanHTML = response.siyuanHTML;
-            }
-            if (response?.files) {
-                files = response.files as FileList;
+            if (response) {
+                // 插件返回的是完整的剪贴板载荷，未返回字段需清空，避免原数据影响后续处理
+                const normalizedResponse = normalizePasteResponse(response);
+                textHTML = normalizedResponse.textHTML;
+                textPlain = normalizedResponse.textPlain;
+                siyuanHTML = normalizedResponse.siyuanHTML;
+                files = normalizedResponse.files;
+                originalTextHTML = textHTML;
             }
         }
     }

@@ -5,7 +5,7 @@ import {
     updateAccountSwitchesVisibility,
 } from "./accountUi";
 import {
-    refreshSyncEnabledRelatedItems,
+    refreshLANSyncConfigItemVisibility,
     refreshSyncModeRelatedItems,
     refreshSyncTabPanels,
 } from "./syncUi";
@@ -30,7 +30,15 @@ export const refreshLANSyncStatus = (root: Element) => {
     if (!statusElement) {
         return;
     }
+    if (!window.siyuan.config.sync.enabled) {
+        statusElement.textContent = "";
+        return;
+    }
     fetchSyncPost("/api/sync/getSyncLANStatus", {}).then((response) => {
+        if (!window.siyuan.config.sync.enabled) {
+            statusElement.textContent = "";
+            return;
+        }
         if (response.code === 0 && response.data) {
             if (!response.data.active) {
                 statusElement.textContent = window.siyuan.languages.lanSyncInactive;
@@ -108,7 +116,8 @@ export const patchSyncConfig = (controlId: string, value: unknown) => {
             fetchPost("/api/sync/setSyncEnable", {enabled}, () => {
                 window.siyuan.config.sync.enabled = enabled;
                 if (syncTabElement) {
-                    refreshSyncEnabledRelatedItems(syncTabElement);
+                    refreshLANSyncConfigItemVisibility(syncTabElement);
+                    refreshLANSyncStatus(syncTabElement);
                 }
                 processSync();
             });

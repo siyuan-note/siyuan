@@ -20,7 +20,7 @@ import {initAssets} from "../util/assets";
 import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
-import {activeBlur, hideKeyboardToolbarByApp, showKeyboardToolbar} from "./util/keyboardToolbar";
+import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
 import {
     getLocalStorage,
     initWindowOpenOverride,
@@ -279,7 +279,7 @@ window.goBack = goBack;
 window.showMessage = showMessage;
 window.processIOSPurchaseResponse = processIOSPurchaseResponse;
 window.showKeyboardToolbar = showKeyboardToolbar;
-window.hideKeyboardToolbar = hideKeyboardToolbarByApp;
+window.hideKeyboardToolbar = hideKeyboardToolbar;
 window.openFileByURL = (openURL) => {
     const blockInfo = parseSiYuanUriInfo(openURL);
     if (blockInfo != null) {

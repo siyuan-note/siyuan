@@ -1,3 +1,5 @@
+import {applyLuteMarkdownSyntax} from "./luteMarkdownSyntax";
+
 // Lute 配置全部读取全局 window.siyuan.config / window.siyuan.emojis，跨编辑器一致，
 // 因此所有 Protyle 编辑器共用同一个 Lute 实例，将内存与初始化开销从 O(编辑器数) 降为 O(1)。
 // AgentChat 不复用此共享单例，而是通过 getAgentLute 构建独立实例，使渲染不受编辑器设置影响。
@@ -112,16 +114,7 @@ const setLute = (options: ILuteOptions) => {
     lute.SetTag(true);
     lute.SetSuperBlock(true);
     lute.SetCallout(true);
-    lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
-    lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
-    lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
-    lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
-    lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
-    lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
-    lute.SetGFMStrikethrough1(false);
-    lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
-    lute.SetFullWidthStrikethrough(window.siyuan.config.editor.markdown.inlineFullWidthStrikethrough);
-    lute.SetMark(window.siyuan.config.editor.markdown.inlineMark);
+    applyLuteMarkdownSyntax(lute, window.siyuan.config.editor.markdown);
     lute.SetSpin(true);
     lute.SetProtyleWYSIWYG(true);
     if (options.lazyLoadImage) {

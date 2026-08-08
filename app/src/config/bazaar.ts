@@ -166,8 +166,8 @@ export const bazaar = {
                 </div>
                 <input data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
                 <div class="fn__flex config-bazaar__actions">
-                    <label class="b3-button b3-button--outline config-bazaar__local-package" data-type="install-local-package">
-                        <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.installLocalBazaarPackage}
+                    <label class="block__icon block__icon--show config-bazaar__local-package ariaLabel" data-type="install-local-package" data-position="north" aria-label="${window.siyuan.languages.installLocalBazaarPackage}">
+                        <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>
                         <input class="b3-form__upload" data-type="local-package-file" type="file" accept=".zip,application/zip">
                     </label>
                     <button class="b3-button fn__none" data-type="install-all">${window.siyuan.languages.updateAll}</button>
@@ -616,7 +616,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         const typeBtn = contentElement.previousElementSibling.querySelector(`[data-type="${myType}"]`) as HTMLElement;
         if (contentElement.getAttribute("data-loading") === "true" ||
             typeBtn?.classList.contains("b3-button--outline")) {
-            return;
+            return false;
         }
         bazaar._updateDownloadedToolbar(bazaarType);
         contentElement.setAttribute("data-loading", "true");
@@ -629,7 +629,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         };
         if (!(bazaarType in installedAPI)) {
             contentElement.removeAttribute("data-loading");
-            return;
+            return false;
         }
         bazaar._updateDownloadedSortSelect(bazaarType);
         const initialSortValue = bazaar._getDownloadedSortValue(bazaarType);
@@ -711,14 +711,18 @@ type="checkbox">
             if (sideElement?.getAttribute("data-from") === "downloaded" &&
                 sideElement.getAttribute("data-package-type") === bazaarType) {
                 const packageName = sideElement.getAttribute("data-name");
-                bazaar._data.downloaded.find((i) => {
-                    if (i.name === packageName) {
-                        bazaar._renderReadme(bazaarType, "downloaded", i);
-                        return true;
-                    }
-                });
+                const downloadedItem = bazaar._data.downloaded.find((item) => item.name === packageName);
+                if (downloadedItem) {
+                    const detail = bazaar._getPackageDetail(bazaarType, packageName);
+                    bazaar._setPackageDetail(bazaarType, packageName, {
+                        ...detail,
+                        installed: downloadedItem,
+                    });
+                    bazaar._refreshReadmeDetail(bazaarType, packageName);
+                }
             }
         });
+        return true;
     },
     _data: {
         themes: [] as IBazaarItem[],
@@ -905,7 +909,8 @@ type="checkbox">
                 highlightRender(mdElement);
             });
         }
-        if (installed) {
+        const needsPackageDetail = !detail && (from === "downloaded" || (from === "bazaar" && data.installed));
+        if (installed && !needsPackageDetail) {
             fetchPost("/api/bazaar/getInstalledPackageSize", {
                 packageType: bazaarType,
                 packageName: installed.name,
@@ -922,7 +927,7 @@ type="checkbox">
             });
         }
         readmeElement.classList.add("config__view--show");
-        if (!detail && (from === "downloaded" || (from === "bazaar" && data.installed))) {
+        if (needsPackageDetail) {
             bazaar._fetchPackageDetail(bazaarType, data.name, (packageDetail) => {
                 const sideElement = readmeElement.querySelector(".item__side");
                 if (sideElement?.getAttribute("data-from") !== from ||
@@ -1091,10 +1096,16 @@ type="checkbox">
         });
     },
     _refreshPackageUI(bazaarType: TBazaarType, packageName: string, app: App) {
-        bazaar._genMyHTML(bazaarType, app);
-        bazaar._reloadBazaarType(bazaarType);
-        bazaar._checkUpdate(true);
-        bazaar._refreshReadmeDetail(bazaarType, packageName);
+        const sideElement = bazaar.element.querySelector("#configBazaarReadme.config__view--show .item__side");
+        const refreshFromDownloadedList = sideElement?.getAttribute("data-from") === "downloaded" &&
+            sideElement.getAttribute("data-package-type") === bazaarType;
+        const refreshDownloadedList = bazaar._genMyHTML(bazaarType, app);
+        if (bazaarType !== "plugins") {
+            bazaar._reloadBazaarType(bazaarType);
+        }
+        if (!refreshFromDownloadedList || !refreshDownloadedList) {
+            bazaar._refreshReadmeDetail(bazaarType, packageName);
+        }
     },
     _setPluginEnabled(app: App, item: IBazaarItem, enabled: boolean, callback: () => void) {
         fetchPost("/api/petal/setPetalEnabled", {
@@ -1253,7 +1264,7 @@ type="checkbox">
         bazaar._localPackageUploading = uploading;
         const labelElement = bazaar.element.querySelector('[data-type="install-local-package"]');
         const inputElement = labelElement?.querySelector('input[type="file"]') as HTMLInputElement;
-        labelElement?.classList.toggle("b3-button--progress", uploading);
+        labelElement?.toggleAttribute("disabled", uploading);
         if (inputElement) {
             inputElement.disabled = uploading;
         }
@@ -1704,7 +1715,6 @@ type="checkbox">
                         bazaar._setPluginEnabled(app, pluginItem, enabled, () => {
                             target.removeAttribute("disabled");
                             this._genMyHTML("plugins", app, true);
-                            bazaar._refreshReadmeDetail("plugins", pluginItem.name);
                         });
                     }
                     event.stopPropagation();

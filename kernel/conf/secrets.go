@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,18 +19,22 @@ package conf
 import (
 	"encoding/hex"
 	"regexp"
+	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // Secret 是一条命名密钥，Name 为引用名（如 weread_key），Value 在运行时为明文，落盘时由 Secrets.Encrypt 加密。
+// AllowedHosts 是该密钥允许发送到的目标主机列表（不含协议与端口，大小写不敏感，精确匹配）；
+// 为空时该密钥不会在任何请求中插值，防止密钥被发送到未授权的目标主机。
 type Secret struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Name         string   `json:"name"`
+	Value        string   `json:"value"`
+	AllowedHosts []string `json:"allowedHosts"`
 }
 
 // Secrets 是全局密钥库，脱离 AI 配置独立存在，供智能体 http_request 工具、MCP 服务 headers 等以
-// {{secret:名字}} 形式引用。落盘时 Value 经 AES 加密，运行时为明文。
+// {{secrets.名字}} 形式引用。落盘时 Value 经 AES 加密，运行时为明文。
 type Secrets struct {
 	Items []*Secret `json:"items"`
 }
@@ -112,6 +116,57 @@ func (s *Secrets) lookup(name string) (string, bool) {
 	return "", false
 }
 
+// hostAllowed 判断 host 是否命中密钥的允许主机列表，空列表视为不允许任何主机。
+// 仅做不区分大小写的精确匹配，子域名、后缀拼接与 IP 直写均不隐式放行。
+func hostAllowed(item *Secret, host string) bool {
+	if item == nil || host == "" {
+		return false
+	}
+	for _, allowed := range item.AllowedHosts {
+		if strings.EqualFold(strings.TrimSpace(allowed), host) {
+			return true
+		}
+	}
+	return false
+}
+
+// ResolveForHost 与 Resolve 类似，但只有当目标 host 命中该密钥的 AllowedHosts 时才替换，
+// 未命中时保留原文，避免密钥被发送到未授权的目标主机；host 为空时不替换任何密钥。
+// 必须在内存明文状态下（InitConf 解密后或 AppConf.Save 的 defer 还原后）调用。
+func (s *Secrets) ResolveForHost(in, host string) string {
+	if s == nil {
+		return in
+	}
+	in = secretPlaceholder.ReplaceAllStringFunc(in, func(match string) string {
+		sub := secretPlaceholder.FindStringSubmatch(match)
+		if len(sub) < 2 {
+			return match
+		}
+		for _, item := range s.Items {
+			if item != nil && item.Name == sub[1] && hostAllowed(item, host) {
+				return item.Value
+			}
+		}
+		return match
+	})
+	return resolveDollar(in, s.lookupForHost(host))
+}
+
+// lookupForHost 按名查找密钥值，仅当 host 命中密钥的允许主机列表时返回。
+func (s *Secrets) lookupForHost(host string) func(name string) (string, bool) {
+	return func(name string) (string, bool) {
+		if s == nil {
+			return "", false
+		}
+		for _, item := range s.Items {
+			if item != nil && item.Name == name && hostAllowed(item, host) {
+				return item.Value, true
+			}
+		}
+		return "", false
+	}
+}
+
 // dollarPlaceholder 匹配无前缀的 shell 风格变量引用：${NAME} 与 $NAME。
 // NAME 限定为字母/数字/下划线，避免误匹配 $100、正则等。
 var dollarPlaceholder = regexp.MustCompile(`\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)`)
@@ -146,5 +201,13 @@ func resolveDollar(in string, lookups ...func(string) (string, bool)) string {
 // 供智能体 http_request 工具、MCP 服务 headers 等统一消费密钥与变量。
 func ResolveSecretsVars(secrets *Secrets, vars *Variables, in string) string {
 	in = secrets.Resolve(in)
+	return vars.Resolve(in)
+}
+
+// ResolveSecretsVarsForHost 在 ResolveSecretsVars 的基础上按目标主机限制密钥插值：
+// {{secrets.NAME}} 与 $NAME/${NAME} 只有在该密钥的 AllowedHosts 包含 host 时才替换，
+// 未命中时保留原文；变量不受主机限制。供 http_request 工具、MCP 客户端等按出站目标主机消费密钥与变量。
+func ResolveSecretsVarsForHost(secrets *Secrets, vars *Variables, host, in string) string {
+	in = secrets.ResolveForHost(in, host)
 	return vars.Resolve(in)
 }

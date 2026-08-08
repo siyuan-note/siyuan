@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -200,6 +200,10 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		}
 	}
 
+	tx.markStructureCheck(heading)
+	for _, child := range headingChildren {
+		tx.markStructureCheck(child)
+	}
 	tx.writeTree(tree)
 	return
 }

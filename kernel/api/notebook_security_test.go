@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -86,6 +86,7 @@ func TestGetNotebookInfoHidesInvisibleNotebookFromReader(t *testing.T) {
 		"1s":   "1 second %s",
 		"xs":   "%d seconds %s",
 		"1m":   "1 minute %s",
+		"xm":   "%d minutes %s",
 		"xh":   "%d hours %s",
 		"1h":   "1 hour %s",
 		"1d":   "1 day %s",

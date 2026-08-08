@@ -2,7 +2,7 @@
   "name": "SiYuan",
   "desktopName": "org.b3log.siyuan",
   "version": "3.8.0-alpha.4",
-  "description": "Refactor your thinking",
+  "description": "From thought to insight, with agents",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
   "packageManager": "pnpm@11.18.0",

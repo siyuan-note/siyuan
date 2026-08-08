@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -99,11 +99,10 @@ func resolvePath(rel string) (string, error) {
 	if resolved := util.ResolveLongestExistingParent(abs); resolved != abs && !gulu.File.IsSubPath(util.WorkspaceDir, resolved) {
 		return "", fmt.Errorf("symlink escapes workspace: %s", rel)
 	}
-	// 禁止访问配置文件 conf/conf.json（含 accessAuthCode/api.token/cookieKey 等明文凭据），
-	// 对齐 HTTP 文件 API 的既定黑名单（见 kernel/api/file.go 的 refuseToAccess）。
-	confPath := filepath.Join(util.ConfDir, "conf.json")
-	if abs == confPath {
-		return "", fmt.Errorf("access to conf.json is forbidden")
+	// 禁止访问敏感文件（conf/conf.json、data/snippets/conf.json、data/templates、data/.siyuan/publishAccess.json），
+	// 与 HTTP 文件 API 共用同一黑名单（见 kernel/util/path_guard.go 的 IsForbiddenAbsPath）
+	if util.IsForbiddenAbsPath(abs) {
+		return "", fmt.Errorf("access to sensitive workspace file is forbidden: %s", rel)
 	}
 	return abs, nil
 }

@@ -1064,7 +1064,7 @@ export class WYSIWYG {
             }
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
             const galleryItemElement = hasClosestByClassName(target, "av__gallery-item");
-            const avCellElement = hasClosestByClassName(target, "av__cell") as HTMLElement;
+            const avCellElement = hasClosestByClassName(target, "av__cell");
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
             const mostLeft = wysiwygRect.left + (parseInt(wysiwygStyle.paddingLeft) || 24) + 1;
@@ -1082,7 +1082,7 @@ export class WYSIWYG {
                 getSelection().getRangeAt(0).cloneRange() : undefined;
             if (event.shiftKey) {
                 if (!isMobile() && !protyle.disabled && nodeElement?.dataset.avType === "table" &&
-                    avCellElement?.dataset.id &&
+                    avCellElement && avCellElement.dataset.id &&
                     selectAVCellRange(nodeElement, avCellElement)) {
                     focusBlock(nodeElement);
                     this.preventClick = true;

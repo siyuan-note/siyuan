@@ -1,78 +1,61 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getBlockHintRangeAdjustment} from "./blockHintRange";
+import {getBlockHintCloseLength, getBlockHintTriggerOffset} from "./blockHintRange";
 
-describe("getBlockHintRangeAdjustment", () => {
-    it("preserves brackets outside the trigger range", () => {
+describe("getBlockHintTriggerOffset", () => {
+    it("uses the latest overlapping trigger inside existing closing markers", () => {
+        assert.equal(getBlockHintTriggerOffset("[[[", "]]", "[[", "]]"), 1);
+        assert.equal(getBlockHintTriggerOffset("【【【query", "】】", "【【", "】】"), 1);
+    });
+
+    it("replaces exactly the latest trigger in the reported scenario", () => {
         const text = "[[[]]";
-        // getKey 会将三连开括号的起点定位到第一个字符
-        const triggerOffset = 0;
         const caretOffset = 3;
-        const adjustment = getBlockHintRangeAdjustment(text.substring(0, triggerOffset),
-            text.substring(triggerOffset, caretOffset), text.substring(caretOffset), "[[", "]]");
+        const triggerOffset = getBlockHintTriggerOffset(text.substring(0, caretOffset),
+            text.substring(caretOffset), "[[", "]]");
+        const closeLength = getBlockHintCloseLength(text.substring(0, triggerOffset),
+            text.substring(caretOffset), "[[", "]]");
 
-        assert.equal(text.substring(0, triggerOffset + adjustment.preserveOpenLength) + "reference" +
-            text.substring(caretOffset + adjustment.closeLength), "[[reference]]");
-        assert.equal(text.substring(triggerOffset + adjustment.preserveOpenLength, caretOffset)
-            .substring(adjustment.removeOpenLength), "");
+        assert.equal(text.substring(0, triggerOffset) + "reference" +
+            text.substring(caretOffset + closeLength), "[reference]]");
+    });
+
+    it("keeps the first trigger when the query starts with an opening marker", () => {
+        const text = "[[[电影自习室] 全集";
+        const triggerOffset = getBlockHintTriggerOffset(text, "", "[[", "]]");
+
+        assert.equal(triggerOffset, 0);
+        assert.equal(text.substring(triggerOffset + 2), "[电影自习室] 全集");
+        assert.equal(getBlockHintTriggerOffset("[[[", "]", "[[", "]]"), 0);
+        assert.equal(getBlockHintTriggerOffset("【【【", "】", "【【", "】】"), 0);
+    });
+
+    it("extracts the query after the latest overlapping trigger", () => {
+        const text = "[[[query";
+        const triggerOffset = getBlockHintTriggerOffset(text, "]]", "[[", "]]");
+
+        assert.equal(text.substring(triggerOffset + 2), "query");
+    });
+});
+
+describe("getBlockHintCloseLength", () => {
+    it("preserves closing markers paired before the actual trigger", () => {
+        assert.equal(getBlockHintCloseLength("[", "]]", "[[", "]]"), 0);
+        assert.equal(getBlockHintCloseLength("【", "】】", "【【", "】】"), 0);
     });
 
     it("removes an automatically completed closing marker", () => {
-        assert.deepEqual(getBlockHintRangeAdjustment("text", "[[query", "]]tail", "[[", "]]"), {
-            preserveOpenLength: 0,
-            removeOpenLength: 2,
-            closeLength: 2,
-        });
-        assert.deepEqual(getBlockHintRangeAdjustment("text", "（（query", "））tail", "（（", "））"), {
-            preserveOpenLength: 0,
-            removeOpenLength: 2,
-            closeLength: 2,
-        });
-    });
-
-    it("preserves repeated existing pairs around the inserted reference", () => {
-        assert.deepEqual(getBlockHintRangeAdjustment("", "【【【query", "】】", "【【", "】】"), {
-            preserveOpenLength: 2,
-            removeOpenLength: 1,
-            closeLength: 0,
-        });
-    });
-
-    it("removes only the newly entered opening marker from static reference text", () => {
-        const text = "[[[query]]";
-        const caretOffset = 8;
-        const adjustment = getBlockHintRangeAdjustment("", text.substring(0, caretOffset),
-            text.substring(caretOffset), "[[", "]]");
-        const selectedText = text.substring(adjustment.preserveOpenLength,
-            caretOffset + adjustment.closeLength);
-
-        assert.equal(selectedText.substring(adjustment.removeOpenLength,
-            selectedText.length - adjustment.closeLength), "query");
+        assert.equal(getBlockHintCloseLength("text", "]]tail", "[[", "]]"), 2);
+        assert.equal(getBlockHintCloseLength("text", "））tail", "（（", "））"), 2);
     });
 
     it("does not remove unrelated closing markers", () => {
-        assert.deepEqual(getBlockHintRangeAdjustment("text", "[[query", "tail]]", "[[", "]]"), {
-            preserveOpenLength: 0,
-            removeOpenLength: 2,
-            closeLength: 0,
-        });
-        assert.deepEqual(getBlockHintRangeAdjustment("text))", "((query", "tail", "((", "))"), {
-            preserveOpenLength: 0,
-            removeOpenLength: 2,
-            closeLength: 0,
-        });
+        assert.equal(getBlockHintCloseLength("text", "tail]]", "[[", "]]"), 0);
+        assert.equal(getBlockHintCloseLength("text))", "tail", "((", "))"), 0);
     });
 
     it("accounts for balanced pairs before the trigger", () => {
-        assert.deepEqual(getBlockHintRangeAdjustment("[done]", "[[query", "]]", "[[", "]]"), {
-            preserveOpenLength: 0,
-            removeOpenLength: 2,
-            closeLength: 2,
-        });
-        assert.deepEqual(getBlockHintRangeAdjustment("(done)", "((query", "))", "((", "))"), {
-            preserveOpenLength: 0,
-            removeOpenLength: 2,
-            closeLength: 2,
-        });
+        assert.equal(getBlockHintCloseLength("[done]", "]]", "[[", "]]"), 2);
+        assert.equal(getBlockHintCloseLength("(done)", "))", "((", "))"), 2);
     });
 });

@@ -58,7 +58,7 @@ import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
-import {getBlockHintRangeAdjustment} from "./blockHintRange";
+import {getBlockHintCloseLength, getBlockHintTriggerOffset} from "./blockHintRange";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -249,7 +249,13 @@ export class Hint {
         }
         const start = getSelectionOffset(protyle.toolbar.range.startContainer, protyle.wysiwyg.element).start;
         const currentLineValue = protyle.toolbar.range.startContainer.textContent.substring(0, start) || "";
-        const key = this.getKey(currentLineValue, protyle.options.hint.extend);
+        let textAfterCaret = "";
+        if (protyle.toolbar.range.startContainer.nodeType === 3) {
+            const textNode = protyle.toolbar.range.startContainer as Text;
+            const caretOffset = getWholeTextOffset(textNode, protyle.toolbar.range.startOffset);
+            textAfterCaret = textNode.wholeText.substring(caretOffset);
+        }
+        const key = this.getKey(currentLineValue, textAfterCaret, protyle.options.hint.extend);
         if (typeof key === "undefined" ||
             hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "code") ||
             hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "NodeCodeBlock")) {
@@ -682,27 +688,21 @@ ${genHintItemHTML(item)}
         // 前后有标记符的情况 https://github.com/siyuan-note/siyuan/issues/2511
         const endSplit = Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar];
         // 仅移除当前提示所属的闭合符号，保留触发范围外的原有符号
-        let triggerStartOffset = this.lastIndex;
-        let removeOpenLength = this.splitChar.length;
         let removeCloseLength = 0;
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && endSplit && this.lastIndex > -1 &&
             range.startContainer.nodeType === 3) {
             const textNode = range.startContainer as Text;
             const caretOffset = getWholeTextOffset(textNode, range.startOffset);
             const triggerOffset = getWholeTextOffset(textNode, this.lastIndex);
-            const adjustment = getBlockHintRangeAdjustment(textNode.wholeText.substring(0, triggerOffset),
-                textNode.wholeText.substring(triggerOffset, caretOffset), textNode.wholeText.substring(caretOffset),
-                this.splitChar, endSplit);
-            triggerStartOffset += adjustment.preserveOpenLength;
-            removeOpenLength = adjustment.removeOpenLength;
-            removeCloseLength = adjustment.closeLength;
-            if (adjustment.closeLength > 0) {
-                setRangeEndByWholeTextOffset(range, textNode, caretOffset + adjustment.closeLength);
+            removeCloseLength = getBlockHintCloseLength(textNode.wholeText.substring(0, triggerOffset),
+                textNode.wholeText.substring(caretOffset), this.splitChar, endSplit);
+            if (removeCloseLength > 0) {
+                setRangeEndByWholeTextOffset(range, textNode, caretOffset + removeCloseLength);
             }
         }
 
-        if (triggerStartOffset > -1) {
-            range.setStart(range.startContainer, triggerStartOffset);
+        if (this.lastIndex > -1) {
+            range.setStart(range.startContainer, this.lastIndex);
             focusByRange(range);
         }
         if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && value.startsWith("((newSubDoc ") &&
@@ -745,8 +745,8 @@ ${genHintItemHTML(item)}
             tempElement = tempElement.firstElementChild as HTMLDivElement;
             if (refIsS) {
                 const selectedText = range.toString();
-                const staticText = selectedText.substring(removeOpenLength,
-                    Math.max(removeOpenLength, selectedText.length - removeCloseLength));
+                const staticText = selectedText.substring(this.splitChar.length,
+                    Math.max(this.splitChar.length, selectedText.length - removeCloseLength));
                 if (staticText) {
                     tempElement.setAttribute("data-subtype", "s");
                     tempElement.innerText = staticText;
@@ -1173,7 +1173,7 @@ ${genHintItemHTML(item)}
         }
     }
 
-    private getKey(currentLineValue: string, extend: IHintExtend[]) {
+    private getKey(currentLineValue: string, textAfterCaret: string, extend: IHintExtend[]) {
         const prevSplit = this.splitChar;
         const prevLastIndex = this.lastIndex;
         this.lastIndex = -1;
@@ -1182,10 +1182,8 @@ ${genHintItemHTML(item)}
             let currentLastIndex = currentLineValue.lastIndexOf(item.key);
             // https://ld246.com/article/1701670704754
             if (Constants.BLOCK_HINT_KEYS.includes(item.key) && currentLastIndex > -1) {
-                const thirdLastIndex = currentLineValue.lastIndexOf(item.key + item.key.substring(0, 1));
-                if (thirdLastIndex > -1) {
-                    currentLastIndex = Math.min(currentLastIndex, currentLineValue.lastIndexOf(item.key + item.key.substring(0, 1)));
-                }
+                currentLastIndex = getBlockHintTriggerOffset(currentLineValue, textAfterCaret, item.key,
+                    Constants.BLOCK_HINT_CLOSE_KEYS[item.key]);
             }
             if (this.lastIndex < currentLastIndex) {
                 this.splitChar = item.key;
@@ -1207,11 +1205,9 @@ ${genHintItemHTML(item)}
                 currentLineValue.substr(this.lastIndex - 1, 2) === "::");
 
         }
-        const lineArray = currentLineValue.split(this.splitChar);
-        const lastItem = lineArray[lineArray.length - 1];
-        if (lineArray.length > 1 &&
-            // https://github.com/siyuan-note/siyuan/issues/10637
-            lastItem.trimStart() === lastItem &&
+        const lastItem = currentLineValue.substring(this.lastIndex + this.splitChar.length);
+        // https://github.com/siyuan-note/siyuan/issues/10637
+        if (lastItem.trimStart() === lastItem &&
             lastItem.length < Constants.SIZE_TITLE) {
             // 输入法自动补全 https://github.com/siyuan-note/insider/issues/100
             if (this.splitChar === "【【" && currentLineValue.endsWith("【【】")) {

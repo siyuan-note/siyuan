@@ -7,6 +7,7 @@ import {setStorageVal} from "../util/compatibility";
 import {isSupportCSSHL} from "../render/searchMarkRender";
 import {isEncryptedBox} from "../../util/pathName";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {getSavedScrollRange, getScrollRequestParams} from "./scrollRequest";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly ||
@@ -16,8 +17,10 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
     }
     const attr: IScrollAttr = {
         rootId: protyle.block.rootID,
-        startId: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
-        endId: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+        ...getSavedScrollRange(
+            protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
+            protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
+        ),
         scrollTop: protyle.contentElement.scrollTop || parseInt(protyle.contentElement.getAttribute("data-scrolltop")) || 0,
     };
     let range: Range;
@@ -133,6 +136,7 @@ export const getDocByScroll = (options: {
             if (response.code === 1) {
                 const getDocParam: Record<string, any> = {
                     id: options.scrollAttr.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr.startId,
+                    ...getScrollRequestParams(window.siyuan.config.editor.dynamicLoadBlocks),
                     query: options.protyle.query?.key,
                     queryMethod: options.protyle.query?.method,
                     queryTypes: options.protyle.query?.types,
@@ -162,8 +166,11 @@ export const getDocByScroll = (options: {
     }
     const getDocParam: Record<string, any> = {
         id: options.scrollAttr?.rootId || options.mergedOptions?.blockId || options.protyle.block?.rootID || options.scrollAttr?.startId,
-        startID: options.scrollAttr?.startId,
-        endID: options.scrollAttr?.endId,
+        ...getScrollRequestParams(
+            window.siyuan.config.editor.dynamicLoadBlocks,
+            options.scrollAttr?.startId,
+            options.scrollAttr?.endId,
+        ),
         query: options.protyle.query?.key,
         queryMethod: options.protyle.query?.method,
         queryTypes: options.protyle.query?.types,

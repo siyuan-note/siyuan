@@ -342,8 +342,12 @@ func GetSyncLANStatus() map[string]interface{} {
 	discoveredCount := 0
 	connectedCount := 0
 	if nil != manager {
-		discoveredCount = manager.DiscoveredPeerCount()
 		connectedCount = manager.ConnectedPeerCount()
+		discoveredCount = manager.DiscoveredPeerCount()
+		// 已认证设备必然已经被发现，避免两次状态采样之间完成认证时出现数量倒序。
+		if discoveredCount < connectedCount {
+			discoveredCount = connectedCount
+		}
 	}
 	enabled := false
 	maxConcurrentReqs := 16

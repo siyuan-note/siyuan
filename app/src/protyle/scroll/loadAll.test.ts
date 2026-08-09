@@ -1,6 +1,18 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {loadUntilDocumentBoundary} from "./loadAll";
+import {isDocumentBlockCountCovered, loadUntilDocumentBoundary} from "./loadAll";
+
+describe("isDocumentBlockCountCovered", () => {
+    it("covers an unchanged or smaller document", () => {
+        assert.equal(isDocumentBlockCountCovered(192, 192), true);
+        assert.equal(isDocumentBlockCountCovered(192, 128), true);
+    });
+
+    it("does not cover a document that grew while loading", () => {
+        assert.equal(isDocumentBlockCountCovered(192, 193), false);
+        assert.equal(isDocumentBlockCountCovered(192), false);
+    });
+});
 
 describe("loadUntilDocumentBoundary", () => {
     it("does not request content when the boundary is already loaded", async () => {
@@ -36,6 +48,25 @@ describe("loadUntilDocumentBoundary", () => {
 
         assert.equal(loaded, true);
         assert.equal(index, 2);
+    });
+
+    it("finishes after one request marks the boundary", async () => {
+        let boundaryLoaded = false;
+        let requests = 0;
+
+        const loaded = await loadUntilDocumentBoundary({
+            isCurrent: () => true,
+            isBoundaryLoaded: () => boundaryLoaded,
+            getBoundaryID: () => "last",
+            load: async () => {
+                requests++;
+                boundaryLoaded = true;
+                return true;
+            },
+        });
+
+        assert.equal(loaded, true);
+        assert.equal(requests, 1);
     });
 
     it("stops when loading fails", async () => {

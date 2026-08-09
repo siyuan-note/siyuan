@@ -585,7 +585,7 @@ declare namespace Config {
         /**
          * Whether to retain dynamically loaded content blocks
          */
-        keepLazyLoad: boolean;
+        keepLoadedContent: boolean;
         /**
          * The number of blocks loaded each time they are dynamically loaded
          */

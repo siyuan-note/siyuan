@@ -378,7 +378,7 @@ export class WYSIWYG {
                 const ids: string[] = [];
                 const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
                 if (!hasSelectClassElement && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") &&
-                    !protyle.scroll.keepLazyLoad &&
+                    !protyle.scroll.keepLoadedContent &&
                     (startElement.getBoundingClientRect().top < -protyle.contentElement.clientHeight * 2 ||
                         endElement.getBoundingClientRect().bottom > protyle.contentElement.clientHeight * 2)) {
                     showMessage(window.siyuan.languages.crossKeepLazyLoad);

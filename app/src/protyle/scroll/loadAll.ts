@@ -1,3 +1,6 @@
+export const isDocumentBlockCountCovered = (requestSize: number, blockCount?: number) =>
+    typeof blockCount === "number" && requestSize >= blockCount;
+
 export const loadUntilDocumentBoundary = async (options: {
     isCurrent: () => boolean,
     isBoundaryLoaded: () => boolean,

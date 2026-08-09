@@ -8,8 +8,8 @@ import {showTooltip} from "../../dialog/tooltip";
 import {isEncryptedBox} from "../../util/pathName";
 import {updateScrollVisibility} from "./visibility";
 import {hideMessage, showMessage} from "../../dialog/message";
-import {isDocumentBoundaryLoaded} from "../util/documentRange";
-import {loadUntilDocumentBoundary} from "./loadAll";
+import {isDocumentBoundaryLoaded, markDocumentBoundaryLoaded} from "../util/documentRange";
+import {isDocumentBlockCountCovered, loadUntilDocumentBoundary} from "./loadAll";
 import {
     DynamicLoadState,
     type IDynamicLoadRequest,
@@ -25,7 +25,7 @@ export class Scroll {
     private dynamicLoadFinish?: (success: boolean) => void;
     private loadingAll = false;
     public lastScrollTop: number;
-    public keepLazyLoad: boolean;   // 保持加载内容
+    public keepLoadedContent: boolean;   // 保持加载内容
 
     constructor(protyle: IProtyle) {
         this.parentElement = document.createElement("div");
@@ -42,7 +42,7 @@ export class Scroll {
 
         this.element = this.parentElement.querySelector(".protyle-scroll__bar");
         this.element.classList.add("fn__none");
-        this.keepLazyLoad = window.siyuan.config.editor.keepLazyLoad;
+        this.keepLoadedContent = window.siyuan.config.editor.keepLoadedContent;
         this.lastScrollTop = 0;
         this.inputElement = this.element.firstElementChild as HTMLInputElement;
         this.inputElement.addEventListener("input", () => {
@@ -162,7 +162,7 @@ export class Scroll {
     }
 
     public shouldKeepLoadedContent() {
-        return this.keepLazyLoad || this.loadingAll;
+        return this.keepLoadedContent || this.loadingAll;
     }
 
     public invalidateDynamicLoad(protyle: IProtyle) {
@@ -200,7 +200,14 @@ export class Scroll {
                 return boundaryElement?.getAttribute("data-node-id");
             },
             load: () => new Promise<boolean>((resolve) => {
-                if (!this.loadDynamic(protyle, mode, {size, onFinish: resolve})) {
+                const requestSize = Math.max(size, protyle.block.blockCount || 0);
+                const onFinish = (success: boolean) => {
+                    if (success && isDocumentBlockCountCovered(requestSize, protyle.block.blockCount)) {
+                        markDocumentBoundaryLoaded(protyle.wysiwyg.element, position);
+                    }
+                    resolve(success);
+                };
+                if (!this.loadDynamic(protyle, mode, {size: requestSize, onFinish})) {
                     resolve(false);
                 }
             }),

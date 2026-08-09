@@ -6,7 +6,7 @@ import {resize} from "../../protyle/util/resize";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 
 const applyEditorConfig = (data: Config.IEditor) => {
-    const refreshKeepLazyLoad = window.siyuan.config.editor.keepLazyLoad !== data.keepLazyLoad;
+    const refreshKeepLoadedContent = window.siyuan.config.editor.keepLoadedContent !== data.keepLoadedContent;
     const refreshDatabaseRowLayout = window.siyuan.config.editor.fullWidth !== data.fullWidth;
     const refreshHeadingNumbers = window.siyuan.config.editor.headingNumber !== data.headingNumber ||
         window.siyuan.config.editor.headingNumberFormat !== data.headingNumberFormat;
@@ -25,8 +25,8 @@ const applyEditorConfig = (data: Config.IEditor) => {
     }
     getAllEditor().forEach((editorItem) => {
         const protyle = editorItem.protyle;
-        if (refreshKeepLazyLoad) {
-            protyle.scroll.keepLazyLoad = data.keepLazyLoad;
+        if (refreshKeepLoadedContent) {
+            protyle.scroll.keepLoadedContent = data.keepLoadedContent;
         }
         protyle.databaseAttributePanel?.updateDisplayConfig();
         reloadProtyle(protyle, false);

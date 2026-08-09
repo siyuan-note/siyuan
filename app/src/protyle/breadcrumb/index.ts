@@ -801,10 +801,10 @@ ${padHTML}
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "keepLazyLoad",
                     icon: "iconKeepContent",
-                    current: protyle.scroll.keepLazyLoad,
+                    current: protyle.scroll.keepLoadedContent,
                     label: window.siyuan.languages.keepLazyLoad,
                     click: () => {
-                        protyle.scroll.keepLazyLoad = !protyle.scroll.keepLazyLoad;
+                        protyle.scroll.keepLoadedContent = !protyle.scroll.keepLoadedContent;
                     }
                 }).element);
             }

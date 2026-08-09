@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {hasUnloadedDocumentBlocks, isDocumentBoundaryLoaded, updateDocumentBottomEof} from "./documentRange";
+import {
+    hasUnloadedDocumentBlocks,
+    isDocumentBoundaryLoaded,
+    markDocumentBoundaryLoaded,
+    updateDocumentBottomEof
+} from "./documentRange";
 
 const createWysiwygElement = (options: {
     firstElementEof?: string,
@@ -9,14 +14,22 @@ const createWysiwygElement = (options: {
     initialBottomEof?: boolean,
 } = {}) => {
     let bottomEof = options.initialBottomEof || false;
-    const createElement = (eof?: string, index?: string) => ({
-        getAttribute: (name: string) => {
-            if (name === "data-eof") {
-                return eof || null;
-            }
-            return name === "data-node-index" ? index || null : null;
-        },
-    });
+    const createElement = (eof?: string, index?: string) => {
+        let currentEof = eof;
+        return {
+            getAttribute: (name: string) => {
+                if (name === "data-eof") {
+                    return currentEof || null;
+                }
+                return name === "data-node-index" ? index || null : null;
+            },
+            setAttribute: (name: string, value: string) => {
+                if (name === "data-eof") {
+                    currentEof = value;
+                }
+            },
+        };
+    };
     return {
         element: {
             firstElementChild: options.firstElementEof || options.firstElementIndex ?
@@ -103,6 +116,25 @@ describe("isDocumentBoundaryLoaded", () => {
         const wysiwyg = createWysiwygElement({initialBottomEof: true});
 
         assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "before"), false);
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "after"), true);
+    });
+});
+
+describe("markDocumentBoundaryLoaded", () => {
+    it("marks the beginning without changing the document end", () => {
+        const wysiwyg = createWysiwygElement({firstElementIndex: "10"});
+
+        markDocumentBoundaryLoaded(wysiwyg.element, "before");
+
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "before"), true);
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "after"), false);
+    });
+
+    it("marks the last block and updates the document end", () => {
+        const wysiwyg = createWysiwygElement({lastElementEof: "0"});
+
+        markDocumentBoundaryLoaded(wysiwyg.element, "after");
+
         assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "after"), true);
     });
 });

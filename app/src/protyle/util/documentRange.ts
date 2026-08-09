@@ -17,6 +17,15 @@ export const isDocumentBoundaryLoaded = (wysiwygElement: HTMLElement, position: 
         firstElement?.getAttribute("data-node-index") === "0";
 };
 
+export const markDocumentBoundaryLoaded = (wysiwygElement: HTMLElement, position: "before" | "after") => {
+    const boundaryElement = position === "before" ?
+        wysiwygElement.firstElementChild : wysiwygElement.lastElementChild;
+    boundaryElement?.setAttribute("data-eof", position === "before" ? "1" : "2");
+    if (position === "after") {
+        updateDocumentBottomEof(wysiwygElement);
+    }
+};
+
 export const hasUnloadedDocumentBlocks = (wysiwygElement: HTMLElement, dynamicLoad: boolean) => {
     if (!dynamicLoad) {
         return false;

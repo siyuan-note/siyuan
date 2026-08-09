@@ -53,7 +53,7 @@ type Editor struct {
 	ListItemDotNumberClickFocus     bool           `json:"listItemDotNumberClickFocus"`     // 单击列表项标记聚焦
 	FloatWindowMode                 int            `json:"floatWindowMode"`                 // 浮窗触发模式，0：光标悬停，1：按住 Ctrl 悬停，2：不触发浮窗
 	FloatWindowDelay                *int           `json:"floatWindowDelay"`                // 浮窗悬停触发延迟，单位：毫秒，默认 620，nil 表示未设置
-	KeepLazyLoad                    bool           `json:"keepLazyLoad"`                    // 是否保持动态加载的内容
+	KeepLoadedContent               bool           `json:"keepLoadedContent"`               // 是否保持动态加载的内容
 	DynamicLoadBlocks               int            `json:"dynamicLoadBlocks"`               // 块动态数，下限 48
 	Justify                         bool           `json:"justify"`                         // 是否两端对齐
 	RTL                             bool           `json:"rtl"`                             // 是否从右到左显示
@@ -107,7 +107,7 @@ func NewEditor() *Editor {
 		ListItemDotNumberClickFocus:     true,
 		FloatWindowMode:                 0,
 		FloatWindowDelay:                new(620),
-		KeepLazyLoad:                    false,
+		KeepLoadedContent:               false,
 		DynamicLoadBlocks:               192,
 		Justify:                         false,
 		RTL:                             false,

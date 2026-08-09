@@ -1,4 +1,6 @@
 {
+	"autoTextDirection": "Automatyczny kierunek tekstu",
+	"autoTextDirectionTip": "Automatycznie wykrywaj kierunek tekstu każdego bloku na podstawie jego zawartości",
 	"loadAllContent": "Wczytaj całą zawartość",
 	"keepLazyLoadTip": "Zachowuj dynamicznie wczytane bloki treści, aby ograniczyć ponowne wczytywanie podczas przewijania; długie dokumenty mogą zużywać więcej pamięci",
 	"msgSelectAllIncompleteTip": "Ostrzeżenie o niepełnym zaznaczeniu w edytorze",

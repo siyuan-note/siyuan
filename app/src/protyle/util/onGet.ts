@@ -21,6 +21,7 @@ import {stickyRow} from "../render/av/row";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {isEncryptedBox} from "../../util/pathName";
+import {syncAutoDirectionRuntime} from "./autoDirection";
 import {
     invalidateHeadingNumberRefresh,
     queueHeadingNumberRefresh,
@@ -69,6 +70,7 @@ export const onGet = (options: {
         // block not found
         return;
     }
+    syncAutoDirectionRuntime(options.protyle);
     options.protyle.notebookId = options.data.data.box;
     options.protyle.path = options.data.data.path;
 

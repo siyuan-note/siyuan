@@ -1,4 +1,6 @@
 {
+	"autoTextDirection": "自動文字方向",
+	"autoTextDirectionTip": "根據每個區塊的內容自動偵測其文字方向",
 	"loadAllContent": "載入全部內容",
 	"keepLazyLoadTip": "保留動態載入的內容區塊，以減少捲動時的重複載入；長文件可能佔用更多記憶體",
 	"msgSelectAllIncompleteTip": "編輯器全選不完整提示",

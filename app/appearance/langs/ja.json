@@ -1,4 +1,6 @@
 {
+	"autoTextDirection": "テキスト方向の自動判定",
+	"autoTextDirectionTip": "各ブロックの内容に基づいてテキスト方向を自動的に判定します",
 	"loadAllContent": "すべてのコンテンツを読み込む",
 	"keepLazyLoadTip": "動的に読み込んだコンテンツブロックを保持してスクロール時の再読み込みを減らします。長い文書ではメモリ使用量が増える場合があります",
 	"msgSelectAllIncompleteTip": "エディターの不完全な全選択警告",

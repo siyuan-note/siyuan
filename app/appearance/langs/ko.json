@@ -1,4 +1,6 @@
 {
+	"autoTextDirection": "텍스트 방향 자동 감지",
+	"autoTextDirectionTip": "각 블록의 내용에 따라 텍스트 방향을 자동으로 감지합니다",
 	"loadAllContent": "모든 콘텐츠 불러오기",
 	"keepLazyLoadTip": "동적으로 불러온 콘텐츠 블록을 유지하여 스크롤할 때 반복 로드를 줄입니다. 긴 문서는 더 많은 메모리를 사용할 수 있습니다",
 	"msgSelectAllIncompleteTip": "편집기 전체 선택 누락 경고",

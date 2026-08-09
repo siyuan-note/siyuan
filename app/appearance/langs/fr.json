@@ -1,4 +1,6 @@
 {
+	"autoTextDirection": "Direction automatique du texte",
+	"autoTextDirectionTip": "Détecte automatiquement la direction du texte de chaque bloc en fonction de son contenu",
 	"loadAllContent": "Charger tout le contenu",
 	"keepLazyLoadTip": "Conserver les blocs de contenu chargés dynamiquement afin de réduire les chargements répétés lors du défilement; les documents longs peuvent utiliser davantage de mémoire",
 	"msgSelectAllIncompleteTip": "Avertissement de sélection incomplète dans l’éditeur",

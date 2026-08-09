@@ -1,4 +1,6 @@
 {
+	"autoTextDirection": "Otomatik metin yönü",
+	"autoTextDirectionTip": "Her bloğun metin yönünü içeriğine göre otomatik olarak algılar",
 	"loadAllContent": "Tüm içeriği yükle",
 	"keepLazyLoadTip": "Kaydırma sırasında yinelenen yüklemeleri azaltmak için dinamik olarak yüklenen içerik bloklarını koru; uzun belgeler daha fazla bellek kullanabilir",
 	"msgSelectAllIncompleteTip": "Düzenleyicide eksik tümünü seçme uyarısı",

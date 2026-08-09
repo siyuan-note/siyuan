@@ -1,4 +1,6 @@
 {
+	"autoTextDirection": "Automatic text direction",
+	"autoTextDirectionTip": "Automatically detect the text direction of each block based on its content",
 	"loadAllContent": "Load all content",
 	"keepLazyLoadTip": "Retain dynamically loaded content blocks to reduce repeated loading while scrolling; long documents may use more memory",
 	"msgSelectAllIncompleteTip": "Incomplete editor select-all warning",

@@ -1,4 +1,6 @@
 {
+	"autoTextDirection": "Automatický smer textu",
+	"autoTextDirectionTip": "Automaticky zistiť smer textu každého bloku podľa jeho obsahu",
 	"loadAllContent": "Načítať celý obsah",
 	"keepLazyLoadTip": "Ponechať dynamicky načítané bloky obsahu, aby sa obmedzilo opakované načítavanie pri posúvaní; dlhé dokumenty môžu využívať viac pamäte",
 	"msgSelectAllIncompleteTip": "Upozornenie na neúplný výber v editore",

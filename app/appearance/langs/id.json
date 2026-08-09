@@ -1,4 +1,6 @@
 {
+	"autoTextDirection": "Arah teks otomatis",
+	"autoTextDirectionTip": "Deteksi arah teks setiap blok secara otomatis berdasarkan isinya",
 	"loadAllContent": "Muat semua konten",
 	"keepLazyLoadTip": "Pertahankan blok konten yang dimuat secara dinamis untuk mengurangi pemuatan berulang saat menggulir; dokumen panjang mungkin menggunakan lebih banyak memori",
 	"msgSelectAllIncompleteTip": "Peringatan pilih semua tidak lengkap di editor",

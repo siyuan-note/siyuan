@@ -2819,6 +2819,7 @@ type AvSearchTempResult struct {
 	AvName         string
 	AvUpdated      int64
 	Score          float64
+	Matched        bool
 	SearchInfo     *av.AttributeViewSearchInfo
 	MatchedViewIDs map[string]bool
 }
@@ -3113,6 +3114,7 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 		if hit || len(matchedViewIDs) > 0 {
 			a.AvName = name
 			a.Score = score
+			a.Matched = hit
 			a.SearchInfo = searchInfo
 			a.MatchedViewIDs = matchedViewIDs
 			avSearchTmpResults = append(avSearchTmpResults, a)
@@ -3184,6 +3186,7 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 			AvName:  tmpResult.AvName,
 			BlockID: node.ID,
 			HPath:   hPath,
+			Matched: tmpResult.Matched,
 		}
 		ret = append(ret, parent)
 

@@ -18,6 +18,7 @@ import {writeText} from "../../util/compatibility";
 import {Constants} from "../../../constants";
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {getAVColumnTextMeasurer, getAVTableFitWidths} from "./columnWidth";
+import {getSearchAVFocus} from "./searchAVFocus";
 
 interface IAVItem {
     avID: string;
@@ -56,15 +57,11 @@ const genSearchList = (element: Element, keyword: string, options: IOpenSearchAV
     }, (response) => {
         let html = "";
         const results = response.data.results as Array<IAVItem & { children: IAVItem[] }>;
-        const hasMatchedView = showViews && results.some((item) => item.children?.some((subItem) => subItem.matched));
-        let focusAssigned = false;
+        const focus = getSearchAVFocus(results, keyword);
         results.forEach((item, index) => {
             const hasChildren = item.children && item.children.length > 0 && showViews;
             const expandChildren = hasChildren && item.children.some((subItem) => subItem.matched);
-            const focusParent = !hasMatchedView && index === 0;
-            if (focusParent) {
-                focusAssigned = true;
-            }
+            const focusParent = focus?.resultIndex === index && focus.viewIndex === undefined;
             html += `<div class="b3-list-item b3-list-item--narrow${focusParent ? " b3-list-item--focus" : ""}" data-av-id="${item.avID}" data-block-id="${item.blockID}">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl${showViews ? "" : " fn__none"}" style="height:auto;align-self: stretch;margin: 4px 0;">
         <svg class="b3-list-item__arrow${expandChildren ? " b3-list-item__arrow--open" : ""}">${hasChildren ? '<use xlink:href="#iconRight"></use>' : ""}</svg>
@@ -80,12 +77,9 @@ const genSearchList = (element: Element, keyword: string, options: IOpenSearchAV
 </div>`;
             if (hasChildren) {
                 html += `<div class="${expandChildren ? "" : "fn__none"}">`;
-                item.children.forEach((subItem) => {
+                item.children.forEach((subItem, viewIndex) => {
                     const viewDefaultName = getViewName(subItem.viewLayout);
-                    const focusView = !focusAssigned && Boolean(subItem.matched);
-                    if (focusView) {
-                        focusAssigned = true;
-                    }
+                    const focusView = focus?.resultIndex === index && focus.viewIndex === viewIndex;
                     html += `<div style="padding-left: 48px;" class="b3-list-item b3-list-item--narrow${focusView ? " b3-list-item--focus" : ""}" data-av-id="${subItem.avID}" data-view-id="${subItem.viewID}" data-block-id="${subItem.blockID}">
 <span class="b3-list-item__text">${escapeHtml(subItem.viewName)}</span> 
 <span class="b3-list-item__meta">${viewDefaultName}</span>

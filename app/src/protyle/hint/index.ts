@@ -39,6 +39,7 @@ import {
     addEmoji,
     EmojiPanelController,
     genEmojiCategoryButtons,
+    openEmojiPanel,
     unicode2Emoji,
 } from "../../emoji";
 import {blockRender} from "../render/blockRender";
@@ -543,15 +544,35 @@ ${genHintItemHTML(item)}
         }
         this.emojiBrowseMode = value === "";
         this.emojiPanel.renderSearch(value, 256);
-        this.emojiPanel.activate();
         const firstEmojiElement = this.element.querySelector(".emojis__item");
         if (firstEmojiElement) {
             this.element.classList.remove("fn__none");
             const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
+            this.emojiPanel.activate();
         } else {
             this.element.classList.add("fn__none");
+            this.emojiPanel.deactivate();
         }
+    }
+
+    private openEmojiInsertPanel(protyle: IProtyle, range: Range) {
+        const targetElement = hasClosestBlock(range.startContainer);
+        const targetID = targetElement ? targetElement.getAttribute("data-node-id") : protyle.block.rootID;
+        const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
+        protyle.toolbar.range = range.cloneRange();
+        openEmojiPanel("", "insert", {
+            x: textareaPosition.left,
+            y: textareaPosition.top + 26,
+            h: 30,
+            w: 30,
+        }, (unicode) => {
+            if (!unicode) {
+                return;
+            }
+            focusByRange(protyle.toolbar.range);
+            insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle, false, true);
+        }, undefined, {targetID});
     }
 
     private destroyEmojiPanel() {
@@ -855,10 +876,9 @@ ${genHintItemHTML(item)}
                 return;
             } else if (value === "emoji") {
                 range.deleteContents();
-                range.insertNode(document.createTextNode(":"));
                 range.collapse(false);
                 focusByRange(range);
-                this.genEmojiHTML(protyle);
+                this.openEmojiInsertPanel(protyle, range);
                 return;
             } else if (value.startsWith("style")) {
                 range.deleteContents();

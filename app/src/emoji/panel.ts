@@ -7,6 +7,23 @@ export type TCustomEmojiGroup = {
 
 export type TRandomEmojiScope = "all" | "builtIn" | "custom";
 
+export type TEmojiPanelPageMode = "common" | "custom" | "search" | "";
+export type TEmojiPanelResizeAction = "none" | "render" | "refresh";
+
+export const getEmojiPanelResizeAction = (
+    pageMode: TEmojiPanelPageMode,
+    columnCount: number,
+    nextColumnCount: number,
+): TEmojiPanelResizeAction => {
+    if (pageMode !== "common" && pageMode !== "custom") {
+        return "none";
+    }
+    if (columnCount !== nextColumnCount) {
+        return "render";
+    }
+    return pageMode === "common" ? "refresh" : "none";
+};
+
 export const getRandomEmojiCategories = (categories: IEmoji[], scope: TRandomEmojiScope) => {
     return categories.filter((category) => category.items.length > 0 &&
         (scope === "all" || (category.id === "custom") === (scope === "custom")));

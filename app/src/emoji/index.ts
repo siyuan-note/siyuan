@@ -28,9 +28,11 @@ import {
     collectEmojiMatches,
     getActiveEmojiCategory,
     getEmojiItemMap,
+    getEmojiPanelResizeAction,
     getEmojiVirtualChunks,
     getRandomEmojiCategories,
     groupCustomEmojiItems,
+    type TEmojiPanelPageMode,
     type TRandomEmojiScope,
 } from "./panel";
 
@@ -199,7 +201,7 @@ export class EmojiPanelController {
     private selectionObserver?: IntersectionObserver;
     private resizeObserver: ResizeObserver;
     private active = true;
-    private pageMode: "common" | "custom" | "search" | "" = "";
+    private pageMode: TEmojiPanelPageMode = "";
     private searchMode = false;
     private scrollFrame = 0;
     private virtualTimer = 0;
@@ -218,16 +220,19 @@ export class EmojiPanelController {
             if (!this.active || this.pageMode === "search" || this.panelElement.clientWidth === 0) {
                 return;
             }
-            if (this.pageMode === "custom") {
-                const columnCount = this.getColumnCount();
-                if (columnCount !== this.columnCount) {
+            const columnCount = this.getColumnCount();
+            const resizeAction = getEmojiPanelResizeAction(this.pageMode, this.columnCount, columnCount);
+            if (resizeAction === "render") {
+                if (this.pageMode === "custom") {
                     this.renderCustomPage();
-                }
-            } else if (this.pageMode === "common") {
-                const columnCount = this.getColumnCount();
-                if (columnCount !== this.columnCount) {
+                } else {
                     this.renderCommonPage(this.categoryID);
                 }
+            } else if (resizeAction === "refresh") {
+                this.updateCategoryOffsets();
+                this.updateBuiltInChunkOffsets();
+                this.renderVisibleBuiltInChunks(this.categoryID);
+                this.ensureCurrentSelection();
             }
         });
         this.resizeObserver.observe(this.panelElement);
@@ -812,7 +817,7 @@ const genWeekdayOptions = (lang: string, weekdayType: string) => {
 
 export const openEmojiPanel = (
     id: string,
-    type: "doc" | "notebook" | "av",
+    type: "doc" | "notebook" | "av" | "insert",
     position: IPosition,
     callback?: (emoji: string) => void,
     dynamicImgElement?: HTMLElement,
@@ -890,7 +895,7 @@ export const openEmojiPanel = (
         <div class="fn__space${type === "av" ? " fn__none" : ""}"></div>
         <div data-type="tab-link" class="ariaLabel block__icon block__icon--show${type === "av" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.upload} ${window.siyuan.languages.image}"><svg><use xlink:href="#iconUpload"></use></svg></div>
         <div class="fn__flex-1"></div>
-        <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="remove" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
+        <span class="block__icon block__icon--show fn__flex-center ariaLabel${type === "insert" ? " fn__none" : ""}" data-action="remove" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
     </div>
     <div class="emojis__tabbody">
         <div class="fn__none" data-type="tab-emoji">
@@ -1222,8 +1227,12 @@ export const openEmojiPanel = (
                 showMessage(window.siyuan.languages.kernelFault8);
                 return;
             }
-            reloadEmoji();
-            applyLinkIcon(response.data.path);
+            if (type === "insert") {
+                reloadEmoji(() => applyLinkIcon(response.data.path));
+            } else {
+                reloadEmoji();
+                applyLinkIcon(response.data.path);
+            }
         });
     };
     customIconFileElement.addEventListener("change", () => {
@@ -1630,12 +1639,13 @@ const putEmojis = (protyle: IProtyle) => {
     }
 };
 
-export const reloadEmoji = () => {
+export const reloadEmoji = (callback?: () => void) => {
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
         const editors = getAllEditor();
         if (editors.length > 0) {
             putEmojis(editors[0].protyle);
         }
+        callback?.();
     });
 };

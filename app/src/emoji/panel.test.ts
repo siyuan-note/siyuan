@@ -4,6 +4,7 @@ import {
     collectEmojiMatches,
     getActiveEmojiCategory,
     getEmojiItemMap,
+    getEmojiPanelResizeAction,
     getEmojiVirtualChunks,
     getRandomEmojiCategories,
     groupCustomEmojiItems,
@@ -40,6 +41,22 @@ describe("getEmojiVirtualChunks", () => {
         const items = Array.from({length: 15}, (_, index) => createEmoji(index.toString()));
         const chunks = getEmojiVirtualChunks(items, 3, 2);
         assert.deepEqual(chunks.map((chunk) => chunk.length), [6, 6, 3]);
+    });
+});
+
+describe("getEmojiPanelResizeAction", () => {
+    it("refreshes visible built-in chunks when a hidden panel becomes visible at the same column count", () => {
+        assert.equal(getEmojiPanelResizeAction("common", 10, 10), "refresh");
+    });
+
+    it("rerenders common and custom pages when the column count changes", () => {
+        assert.equal(getEmojiPanelResizeAction("common", 10, 8), "render");
+        assert.equal(getEmojiPanelResizeAction("custom", 10, 8), "render");
+    });
+
+    it("does not refresh unchanged custom or search pages", () => {
+        assert.equal(getEmojiPanelResizeAction("custom", 10, 10), "none");
+        assert.equal(getEmojiPanelResizeAction("search", 10, 10), "none");
     });
 });
 

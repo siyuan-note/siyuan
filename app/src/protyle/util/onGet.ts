@@ -221,7 +221,8 @@ const setHTML = (options: {
     const updateReadonly = typeof options.updateReadonly === "undefined" ? protyle.wysiwyg.element.innerHTML === "" : options.updateReadonly;
     if (options.action.includes(Constants.CB_GET_APPEND)) {
         // 动态加载移除
-        if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
+        if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") &&
+            !protyle.scroll.shouldKeepLoadedContent() && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
             let removeElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
             const removeElements = [];
             while (protyle.wysiwyg.element.childElementCount > 2 && removeElements &&
@@ -249,7 +250,8 @@ const setHTML = (options: {
         protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (firstElement.getBoundingClientRect().top - lastTop);
         protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop;
         // 动态加载移除
-        if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad) {
+        if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") &&
+            !protyle.scroll.shouldKeepLoadedContent()) {
             const removeElements: Element[] = [];
             let childCount = protyle.wysiwyg.element.childElementCount;
             let scrollHeight = protyle.contentElement.scrollHeight;

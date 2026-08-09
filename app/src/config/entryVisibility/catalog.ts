@@ -499,6 +499,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("netAssets2LocalAssets", lang("netAssets2LocalAssets"), false),
             node("uploadAssets2CDN", lang("uploadAssets2CDN"), false),
             node("share2Liandi", lang("share2Liandi"), false),
+            node("loadAllContent", lang("loadAllContent")),
             node("keepLazyLoad", lang("keepLazyLoad")),
             separator("separator_1"),
             node("refresh", lang("refresh")),

@@ -1,4 +1,6 @@
 {
+	"loadAllContent": "Charger tout le contenu",
+	"keepLazyLoadTip": "Conserver les blocs de contenu chargés dynamiquement afin de réduire les chargements répétés lors du défilement; les documents longs peuvent utiliser davantage de mémoire",
 	"msgSelectAllIncompleteTip": "Avertissement de sélection incomplète dans l’éditeur",
 	"selectAllIncompleteTip": "Veuillez noter que certains blocs de contenu non chargés n’ont pas été sélectionnés",
 	"listBlock": "Bloc de liste",

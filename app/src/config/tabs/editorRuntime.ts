@@ -6,6 +6,7 @@ import {resize} from "../../protyle/util/resize";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 
 const applyEditorConfig = (data: Config.IEditor) => {
+    const refreshKeepLazyLoad = window.siyuan.config.editor.keepLazyLoad !== data.keepLazyLoad;
     const refreshDatabaseRowLayout = window.siyuan.config.editor.fullWidth !== data.fullWidth;
     const refreshHeadingNumbers = window.siyuan.config.editor.headingNumber !== data.headingNumber ||
         window.siyuan.config.editor.headingNumberFormat !== data.headingNumberFormat;
@@ -24,6 +25,9 @@ const applyEditorConfig = (data: Config.IEditor) => {
     }
     getAllEditor().forEach((editorItem) => {
         const protyle = editorItem.protyle;
+        if (refreshKeepLazyLoad) {
+            protyle.scroll.keepLazyLoad = data.keepLazyLoad;
+        }
         protyle.databaseAttributePanel?.updateDisplayConfig();
         reloadProtyle(protyle, false);
         let isFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);

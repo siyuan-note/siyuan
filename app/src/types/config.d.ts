@@ -583,6 +583,10 @@ declare namespace Config {
          */
         databaseAttrUseTabs: boolean;
         /**
+         * Whether to retain dynamically loaded content blocks
+         */
+        keepLazyLoad: boolean;
+        /**
          * The number of blocks loaded each time they are dynamically loaded
          */
         dynamicLoadBlocks: number;

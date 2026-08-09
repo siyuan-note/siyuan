@@ -1,4 +1,6 @@
 {
+	"loadAllContent": "Tüm içeriği yükle",
+	"keepLazyLoadTip": "Kaydırma sırasında yinelenen yüklemeleri azaltmak için dinamik olarak yüklenen içerik bloklarını koru; uzun belgeler daha fazla bellek kullanabilir",
 	"msgSelectAllIncompleteTip": "Düzenleyicide eksik tümünü seçme uyarısı",
 	"selectAllIncompleteTip": "Lütfen bazı yüklenmemiş içerik bloklarının seçilmediğini unutmayın",
 	"listBlock": "Liste bloğu",

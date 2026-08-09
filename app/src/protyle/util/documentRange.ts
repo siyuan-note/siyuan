@@ -8,12 +8,19 @@ export const updateDocumentBottomEof = (wysiwygElement: HTMLElement, preserveCur
     );
 };
 
+export const isDocumentBoundaryLoaded = (wysiwygElement: HTMLElement, position: "before" | "after") => {
+    if (position === "after") {
+        return wysiwygElement.hasAttribute("data-bottom-eof");
+    }
+    const firstElement = wysiwygElement.firstElementChild;
+    return firstElement?.getAttribute("data-eof") === "1" ||
+        firstElement?.getAttribute("data-node-index") === "0";
+};
+
 export const hasUnloadedDocumentBlocks = (wysiwygElement: HTMLElement, dynamicLoad: boolean) => {
     if (!dynamicLoad) {
         return false;
     }
-    const firstElement = wysiwygElement.firstElementChild;
-    const topEof = firstElement?.getAttribute("data-eof") === "1" ||
-        firstElement?.getAttribute("data-node-index") === "0";
-    return !topEof || !wysiwygElement.hasAttribute("data-bottom-eof");
+    return !isDocumentBoundaryLoaded(wysiwygElement, "before") ||
+        !isDocumentBoundaryLoaded(wysiwygElement, "after");
 };

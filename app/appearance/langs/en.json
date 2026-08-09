@@ -1,4 +1,6 @@
 {
+	"loadAllContent": "Load all content",
+	"keepLazyLoadTip": "Retain dynamically loaded content blocks to reduce repeated loading while scrolling; long documents may use more memory",
 	"msgSelectAllIncompleteTip": "Incomplete editor select-all warning",
 	"selectAllIncompleteTip": "Please note that some unloaded content blocks remain unselected",
 	"listBlock": "List block",

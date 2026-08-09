@@ -1,4 +1,6 @@
 {
+	"loadAllContent": "Alle inhoud laden",
+	"keepLazyLoadTip": "Behoud dynamisch geladen inhoudsblokken om herhaald laden tijdens het scrollen te verminderen; lange documenten kunnen meer geheugen gebruiken",
 	"msgSelectAllIncompleteTip": "Waarschuwing voor onvolledige selectie in de editor",
 	"selectAllIncompleteTip": "Let op: sommige niet-geladen inhoudsblokken zijn nog niet geselecteerd",
 	"listBlock": "Lijstblok",

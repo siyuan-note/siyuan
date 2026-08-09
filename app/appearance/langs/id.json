@@ -1,4 +1,6 @@
 {
+	"loadAllContent": "Muat semua konten",
+	"keepLazyLoadTip": "Pertahankan blok konten yang dimuat secara dinamis untuk mengurangi pemuatan berulang saat menggulir; dokumen panjang mungkin menggunakan lebih banyak memori",
 	"msgSelectAllIncompleteTip": "Peringatan pilih semua tidak lengkap di editor",
 	"selectAllIncompleteTip": "Perhatikan bahwa masih ada blok konten yang belum dimuat dan belum dipilih",
 	"listBlock": "Blok daftar",

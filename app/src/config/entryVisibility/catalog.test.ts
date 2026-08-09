@@ -125,6 +125,15 @@ test("multiple block heading transform follows the regular transform menu", () =
     ]);
 });
 
+test("document loading actions follow the document menu order", () => {
+    const children = getEntryCatalogChildren("document.more");
+    const loadAllIndex = children.findIndex((item) => item.key === "loadAllContent");
+
+    assert.ok(0 <= loadAllIndex);
+    assert.equal(children[loadAllIndex + 1]?.key, "keepLazyLoad");
+    assert.equal(children[loadAllIndex + 2]?.key, "separator_1");
+});
+
 test("simple profile follows the reviewed defaults", () => {
     const shown = [
         "document.title.copy.copyBlockEmbed",
@@ -144,6 +153,7 @@ test("simple profile follows the reviewed defaults", () => {
         "gutter.single.table.alignment.useDefaultVerticalAlign",
         "inline.text.more.tableHeaderRow",
         "inline.text.more.tableHeaderColumn",
+        "document.more.loadAllContent",
         "document.more.keepLazyLoad",
         "document.more.headingNumber",
         "docTree.notebook.sort.fileNameNatASC",

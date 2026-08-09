@@ -1,4 +1,6 @@
 {
+	"loadAllContent": "Načítať celý obsah",
+	"keepLazyLoadTip": "Ponechať dynamicky načítané bloky obsahu, aby sa obmedzilo opakované načítavanie pri posúvaní; dlhé dokumenty môžu využívať viac pamäte",
 	"msgSelectAllIncompleteTip": "Upozornenie na neúplný výber v editore",
 	"selectAllIncompleteTip": "Upozorňujeme, že niektoré nenačítané bloky obsahu neboli vybrané",
 	"listBlock": "Blok zoznamu",

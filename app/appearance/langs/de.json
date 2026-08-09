@@ -1,4 +1,6 @@
 {
+	"loadAllContent": "Alle Inhalte laden",
+	"keepLazyLoadTip": "Dynamisch geladene Inhaltsblöcke beibehalten, um wiederholtes Laden beim Scrollen zu reduzieren; lange Dokumente können mehr Arbeitsspeicher belegen",
 	"msgSelectAllIncompleteTip": "Warnung bei unvollständiger Auswahl im Editor",
 	"selectAllIncompleteTip": "Bitte beachten Sie, dass noch nicht geladene Inhaltsblöcke nicht ausgewählt wurden",
 	"listBlock": "Listenblock",

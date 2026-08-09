@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {hasUnloadedDocumentBlocks, updateDocumentBottomEof} from "./documentRange";
+import {hasUnloadedDocumentBlocks, isDocumentBoundaryLoaded, updateDocumentBottomEof} from "./documentRange";
 
 const createWysiwygElement = (options: {
     firstElementEof?: string,
@@ -88,5 +88,21 @@ describe("hasUnloadedDocumentBlocks", () => {
         const wysiwyg = createWysiwygElement({firstElementEof: "1"});
 
         assert.equal(hasUnloadedDocumentBlocks(wysiwyg.element, true), true);
+    });
+});
+
+describe("isDocumentBoundaryLoaded", () => {
+    it("checks the beginning independently from the document end", () => {
+        const wysiwyg = createWysiwygElement({firstElementIndex: "0"});
+
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "before"), true);
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "after"), false);
+    });
+
+    it("checks the document end independently from the beginning", () => {
+        const wysiwyg = createWysiwygElement({initialBottomEof: true});
+
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "before"), false);
+        assert.equal(isDocumentBoundaryLoaded(wysiwyg.element, "after"), true);
     });
 });

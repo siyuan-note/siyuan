@@ -54,6 +54,10 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.pasteURLAutoConvert,
         desc: window.siyuan.languages.pasteURLAutoConvertTip,
     });
+    group.switch("editor.keepLazyLoad", {
+        title: window.siyuan.languages.keepLazyLoad,
+        desc: window.siyuan.languages.keepLazyLoadTip,
+    });
     group.number("editor.dynamicLoadBlocks", {
         title: window.siyuan.languages.dynamicLoadBlocks,
         desc: window.siyuan.languages.dynamicLoadBlocksTip,

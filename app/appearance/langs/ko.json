@@ -1,4 +1,6 @@
 {
+	"loadAllContent": "모든 콘텐츠 불러오기",
+	"keepLazyLoadTip": "동적으로 불러온 콘텐츠 블록을 유지하여 스크롤할 때 반복 로드를 줄입니다. 긴 문서는 더 많은 메모리를 사용할 수 있습니다",
 	"msgSelectAllIncompleteTip": "편집기 전체 선택 누락 경고",
 	"selectAllIncompleteTip": "아직 불러오지 않아 선택되지 않은 콘텐츠 블록이 있습니다",
 	"listBlock": "목록 블록",

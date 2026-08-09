@@ -1,4 +1,6 @@
 {
+	"loadAllContent": "載入全部內容",
+	"keepLazyLoadTip": "保留動態載入的內容區塊，以減少捲動時的重複載入；長文件可能佔用更多記憶體",
 	"msgSelectAllIncompleteTip": "編輯器全選不完整提示",
 	"selectAllIncompleteTip": "請注意，仍有未載入的內容區塊未被選取",
 	"listBlock": "列表區塊",

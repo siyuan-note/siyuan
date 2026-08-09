@@ -7,6 +7,9 @@ import {goEnd, goHome} from "../wysiwyg/commonHotkey";
 import {showTooltip} from "../../dialog/tooltip";
 import {isEncryptedBox} from "../../util/pathName";
 import {updateScrollVisibility} from "./visibility";
+import {hideMessage, showMessage} from "../../dialog/message";
+import {isDocumentBoundaryLoaded} from "../util/documentRange";
+import {loadUntilDocumentBoundary} from "./loadAll";
 import {
     DynamicLoadState,
     type IDynamicLoadRequest,
@@ -19,7 +22,8 @@ export class Scroll {
     private inputElement: HTMLInputElement;
     private dynamicLoadState = new DynamicLoadState();
     private dynamicLoadAbortController?: AbortController;
-    private dynamicLoadFinish?: () => void;
+    private dynamicLoadFinish?: (success: boolean) => void;
+    private loadingAll = false;
     public lastScrollTop: number;
     public keepLazyLoad: boolean;   // 保持加载内容
 
@@ -38,7 +42,7 @@ export class Scroll {
 
         this.element = this.parentElement.querySelector(".protyle-scroll__bar");
         this.element.classList.add("fn__none");
-        this.keepLazyLoad = false;
+        this.keepLazyLoad = window.siyuan.config.editor.keepLazyLoad;
         this.lastScrollTop = 0;
         this.inputElement = this.element.firstElementChild as HTMLInputElement;
         this.inputElement.addEventListener("input", () => {
@@ -72,7 +76,8 @@ export class Scroll {
 
     public loadDynamic(protyle: IProtyle, mode: TDynamicLoadMode, options?: {
         beforeApply?: () => void,
-        onFinish?: () => void,
+        onFinish?: (success: boolean) => void,
+        size?: number,
     }) {
         const anchorElement = mode === 1 ?
             protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
@@ -96,11 +101,12 @@ export class Scroll {
         const getDocParam: IObject = {
             id: anchorID,
             mode,
-            size: window.siyuan.config.editor.dynamicLoadBlocks,
+            size: options?.size || window.siyuan.config.editor.dynamicLoadBlocks,
         };
         if (isEncryptedBox(protyle.notebookId)) {
             getDocParam.notebook = protyle.notebookId;
         }
+        let success = false;
         void fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
             const currentAnchor = mode === 1 ?
                 protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
@@ -118,10 +124,45 @@ export class Scroll {
                     Constants.CB_GET_UNCHANGEID
                 ],
             });
+            success = getResponse.code === 0;
         }, undefined, undefined, abortController.signal).finally(() => {
-            this.finishDynamicLoad(request, protyle);
+            this.finishDynamicLoad(request, protyle, success);
         });
         return true;
+    }
+
+    public async loadAll(protyle: IProtyle) {
+        const rootID = protyle.block.rootID;
+        if (this.loadingAll || !rootID || protyle.block.showAll || !protyle.block.scroll) {
+            return false;
+        }
+
+        this.loadingAll = true;
+        this.invalidateDynamicLoad(protyle);
+        const messageID = showMessage(window.siyuan.languages.loading, -1);
+        const size = Math.max(
+            window.siyuan.config.editor.dynamicLoadBlocks,
+            protyle.block.blockCount || 0
+        );
+        try {
+            const topLoaded = await this.loadUntilBoundary(protyle, rootID, 1, size);
+            const bottomLoaded = topLoaded && await this.loadUntilBoundary(protyle, rootID, 2, size);
+            if (!bottomLoaded || protyle.block.rootID !== rootID || !protyle.element.isConnected) {
+                return false;
+            }
+            protyle.block.scroll = false;
+            this.update(protyle);
+            return true;
+        } finally {
+            this.loadingAll = false;
+            if (messageID) {
+                hideMessage(messageID);
+            }
+        }
+    }
+
+    public shouldKeepLoadedContent() {
+        return this.keepLazyLoad || this.loadingAll;
     }
 
     public invalidateDynamicLoad(protyle: IProtyle) {
@@ -133,11 +174,11 @@ export class Scroll {
         this.dynamicLoadAbortController = undefined;
         this.dynamicLoadFinish = undefined;
         protyle.wysiwyg.element.removeAttribute("data-top");
-        onFinish?.();
+        onFinish?.(false);
         abortController?.abort();
     }
 
-    private finishDynamicLoad(request: IDynamicLoadRequest, protyle: IProtyle) {
+    private finishDynamicLoad(request: IDynamicLoadRequest, protyle: IProtyle, success: boolean) {
         if (!this.dynamicLoadState.finish(request)) {
             return;
         }
@@ -145,7 +186,25 @@ export class Scroll {
         this.dynamicLoadAbortController = undefined;
         this.dynamicLoadFinish = undefined;
         protyle.wysiwyg.element.removeAttribute("data-top");
-        onFinish?.();
+        onFinish?.(success);
+    }
+
+    private async loadUntilBoundary(protyle: IProtyle, rootID: string, mode: TDynamicLoadMode, size: number) {
+        const position = mode === 1 ? "before" : "after";
+        return loadUntilDocumentBoundary({
+            isCurrent: () => protyle.block.rootID === rootID && protyle.element.isConnected,
+            isBoundaryLoaded: () => isDocumentBoundaryLoaded(protyle.wysiwyg.element, position),
+            getBoundaryID: () => {
+                const boundaryElement = mode === 1 ?
+                    protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
+                return boundaryElement?.getAttribute("data-node-id");
+            },
+            load: () => new Promise<boolean>((resolve) => {
+                if (!this.loadDynamic(protyle, mode, {size, onFinish: resolve})) {
+                    resolve(false);
+                }
+            }),
+        });
     }
 
     private setIndex(protyle: IProtyle) {

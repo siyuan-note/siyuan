@@ -21,6 +21,7 @@ import {saveLayout} from "../../layout/util";
 import {ipcRenderer} from "electron";
 /// #endif
 import {onGet} from "../util/onGet";
+import {hasUnloadedDocumentBlocks} from "../util/documentRange";
 import {hideElements} from "../ui/hideElements";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {reloadProtyle} from "../util/reload";
@@ -787,6 +788,16 @@ ${padHTML}
                 }
             }
             if (!protyle.scroll?.element.classList.contains("fn__none")) {
+                if (hasUnloadedDocumentBlocks(protyle.wysiwyg.element, true)) {
+                    window.siyuan.menus.menu.append(new MenuItem({
+                        id: "loadAllContent",
+                        icon: "iconSelectAll",
+                        label: window.siyuan.languages.loadAllContent,
+                        click: () => {
+                            void protyle.scroll.loadAll(protyle);
+                        }
+                    }).element);
+                }
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "keepLazyLoad",
                     icon: "iconKeepContent",

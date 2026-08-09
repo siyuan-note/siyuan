@@ -1,4 +1,6 @@
 {
+	"loadAllContent": "加载全部内容",
+	"keepLazyLoadTip": "保留动态加载的内容块，以减少滚动时的重复加载；长文档可能占用更多内存",
 	"msgSelectAllIncompleteTip": "编辑器全选不完整提示",
 	"selectAllIncompleteTip": "请注意，仍有未加载的内容块未被选中",
 	"listBlock": "列表块",

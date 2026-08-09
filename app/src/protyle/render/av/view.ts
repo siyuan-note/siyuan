@@ -10,22 +10,7 @@ import {Constants} from "../../../constants";
 import {clearSelect} from "../../util/clear";
 import {getAVVisibleViewIDs, setAVVisibleViewIDs} from "./viewVisibility";
 import {isNotEditBlock} from "../../wysiwyg/getBlock";
-
-// countFilterLeaves 递归统计过滤节点树中的叶子数量（分组不计入）。
-const countFilterLeaves = (filters: IAVFilter[]): number => {
-    let count = 0;
-    const walk = (nodes: IAVFilter[]) => {
-        nodes.forEach(n => {
-            if (n.filters) {
-                walk(n.filters);
-            } else {
-                count++;
-            }
-        });
-    };
-    walk(filters);
-    return count;
-};
+import {countFilterLeaves} from "./filterTree";
 
 export const setAVBlockVisibleViewIDs = (
     protyle: IProtyle,

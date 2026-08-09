@@ -9,6 +9,7 @@ import {unicode2Emoji} from "../../../emoji";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {getFieldsByData} from "./view";
 import {Constants} from "../../../constants";
+import {countFilterLeaves} from "./filterTree";
 
 const isExactRelationOperator = (operator: string) =>
     operator === "Contains any item" || operator === "Does not contain any item";
@@ -301,8 +302,7 @@ export const getFiltersHTML = (data: IAV) => {
         : "and";
     html = genNodeHTML(root, "", 0, "", rootCombination);
 
-    const countLeaves = (nodes: IAVFilter[]): number => nodes.reduce((sum, n) => sum + (n.filters ? countLeaves(n.filters) : 1), 0);
-    const leafCount = countLeaves(root.filters || []);
+    const leafCount = countFilterLeaves(root.filters || []);
 
     return `<div class="b3-menu__items">
 <button class="b3-menu__item" data-type="nobg">

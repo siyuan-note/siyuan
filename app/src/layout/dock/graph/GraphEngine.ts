@@ -112,14 +112,17 @@ export class GraphEngine {
         options: IGraphOptions,
         palette: IGraphPalette,
         focusId = "",
+        resetLayout = false,
     ) {
         if (this.destroyed) {
             return;
         }
         const previous = new Map<string, [number, number]>();
-        this.data?.nodes.forEach((node, index) => {
-            previous.set(node.id, [this.positions[index * 2], this.positions[index * 2 + 1]]);
-        });
+        if (!resetLayout) {
+            this.data?.nodes.forEach((node, index) => {
+                previous.set(node.id, [this.positions[index * 2], this.positions[index * 2 + 1]]);
+            });
+        }
         this.options = {...options};
         this.palette = palette;
         this.data = normalizeGraphData(nodes, links, options.nodeSize);

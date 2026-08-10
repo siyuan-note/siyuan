@@ -3,6 +3,7 @@ import {IGraphLayoutOptions} from "./types";
 const TREE_THETA_SQUARED = 0.25;
 const MAX_TREE_DEPTH = 32;
 const STABLE_TICKS = 12;
+const ISOLATED_CENTER_STRENGTH_FACTOR = 3;
 
 export class GraphForceLayout {
     public readonly positions: Float32Array;
@@ -82,7 +83,6 @@ export class GraphForceLayout {
         this.positions[index * 2 + 1] = y;
         this.velocities[index * 2] = 0;
         this.velocities[index * 2 + 1] = 0;
-        this.restart();
     }
 
     public release(index: number) {
@@ -131,8 +131,10 @@ export class GraphForceLayout {
                 this.velocities[offset + 1] = 0;
                 continue;
             }
-            this.forces[offset] -= this.positions[offset] * this.options.centerStrength;
-            this.forces[offset + 1] -= this.positions[offset + 1] * this.options.centerStrength;
+            const centerStrength = this.options.centerStrength *
+                (this.degrees[index] === 0 ? ISOLATED_CENTER_STRENGTH_FACTOR : 1);
+            this.forces[offset] -= this.positions[offset] * centerStrength;
+            this.forces[offset + 1] -= this.positions[offset + 1] * centerStrength;
             let velocityX = (this.velocities[offset] + this.forces[offset] / this.masses[index] * timestep) * damping;
             let velocityY = (this.velocities[offset + 1] + this.forces[offset + 1] / this.masses[index] * timestep) * damping;
             const velocity = Math.hypot(velocityX, velocityY);
@@ -179,6 +181,7 @@ export class GraphForceLayout {
     private applyRepulsion() {
         for (let body = 0; body < this.sizes.length; body++) {
             const bodyOffset = body * 2;
+            const bodyMass = this.masses[body];
             const bodyX = this.positions[bodyOffset];
             const bodyY = this.positions[bodyOffset + 1];
             let stackLength = 1;
@@ -199,11 +202,11 @@ export class GraphForceLayout {
                 const width = this.treeHalves[cell] * 2;
                 if (cellBody >= 0 || width * width / distanceSquared < TREE_THETA_SQUARED) {
                     const distance = Math.sqrt(distanceSquared);
-                    let force = this.options.repulsion * mass / distanceSquared;
+                    let force = this.options.repulsion * bodyMass * mass / distanceSquared;
                     if (cellBody >= 0) {
                         const minimumDistance = (this.sizes[body] + this.sizes[cellBody]) * 1.2;
                         if (distance < minimumDistance) {
-                            force += (minimumDistance - distance) * 0.5 / distance;
+                            force += (minimumDistance - distance) * 0.5 * bodyMass * this.masses[cellBody] / distance;
                         }
                     }
                     this.forces[bodyOffset] += deltaX * force;

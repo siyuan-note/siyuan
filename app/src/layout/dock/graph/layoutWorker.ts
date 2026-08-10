@@ -83,7 +83,6 @@ workerScope.onmessage = (event) => {
         restart();
     } else if (message.type === "pin") {
         layout.pin(message.index, message.x, message.y);
-        restart();
     } else if (message.type === "release") {
         layout.release(message.index);
         restart();

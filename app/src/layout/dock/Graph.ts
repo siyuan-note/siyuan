@@ -473,7 +473,7 @@ export class Graph extends Model {
                 }
                 this.graphData = response.data;
                 window.siyuan.config.graph.global = response.data.conf;
-                this.onGraph(false);
+                this.onGraph(false, refresh);
                 element.classList.remove("fn__rotate");
             });
         } else {
@@ -513,7 +513,7 @@ export class Graph extends Model {
                 }
                 this.graphData = response.data;
                 window.siyuan.config.graph.local = response.data.conf;
-                this.onGraph(focus);
+                this.onGraph(focus, refresh);
             });
         }
     }
@@ -612,7 +612,7 @@ export class Graph extends Model {
         this.pendingGraphConf = undefined;
     }
 
-    public onGraph(hl: boolean) {
+    public onGraph(hl: boolean, resetLayout = false) {
         this.updateNodeCount();
         if (this.graphElement.clientHeight === 0) {
             // 界面没有渲染时不能进行渲染
@@ -649,7 +649,8 @@ export class Graph extends Model {
         };
         if (this.renderedGraphData !== this.graphData) {
             this.renderedGraphData = this.graphData;
-            this.graphEngine.setData(this.graphData.nodes, this.graphData.links, options, palette, hl ? this.blockId : "");
+            this.graphEngine.setData(this.graphData.nodes, this.graphData.links, options, palette,
+                hl ? this.blockId : "", resetLayout);
         } else {
             this.graphEngine.updateOptions(options, palette);
             this.graphEngine.resize();

@@ -49,4 +49,44 @@ describe("graph force layout", () => {
         layout.step(10);
         layout.positions.forEach((value) => assert.ok(Number.isFinite(value)));
     });
+
+    it("balances repulsion across different node masses", () => {
+        const layout = new GraphForceLayout({
+            degrees: new Uint32Array([0, 8]),
+            layout: {
+                centerStrength: 0,
+                linkDistance: 100,
+                repulsion: 600,
+                springStrength: 0,
+            },
+            positions: new Float32Array([-100, 0, 100, 0]),
+            sizes: new Float32Array([15, 15]),
+            sources: new Uint32Array(),
+            targets: new Uint32Array(),
+        });
+        layout.step();
+        const lightDisplacement = -100 - layout.positions[0];
+        const heavyDisplacement = layout.positions[2] - 100;
+        assert.ok(Math.abs(lightDisplacement - heavyDisplacement * (1 + Math.sqrt(8))) < 0.0001);
+    });
+
+    it("pulls isolated nodes inward more strongly", () => {
+        const layout = new GraphForceLayout({
+            degrees: new Uint32Array([0, 1]),
+            layout: {
+                centerStrength: 0.01,
+                linkDistance: 100,
+                repulsion: 0,
+                springStrength: 0,
+            },
+            positions: new Float32Array([100, 0, -100, 0]),
+            sizes: new Float32Array([15, 15]),
+            sources: new Uint32Array(),
+            targets: new Uint32Array(),
+        });
+        layout.step();
+        const isolatedDisplacement = 100 - layout.positions[0];
+        const connectedDisplacement = layout.positions[2] + 100;
+        assert.ok(isolatedDisplacement > connectedDisplacement * 4);
+    });
 });

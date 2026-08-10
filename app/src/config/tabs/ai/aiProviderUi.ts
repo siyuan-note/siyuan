@@ -5,6 +5,7 @@ import {fetchPost} from "../../../util/fetch";
 import {aiConfigApi} from "./aiRuntime";
 import {Menu} from "../../../plugin/Menu";
 import {upDownHint} from "../../../util/upDownHint";
+import {moveModelItem} from "./aiModelOrder";
 
 type ModelPickerGroup = "editing" | "agent" | "imageGeneration";
 type GroupedModelPickerElement = HTMLInputElement | HTMLButtonElement;
@@ -262,7 +263,11 @@ const renderDraftModels = (container: HTMLElement, models: Config.IModel[], avai
     }
     const modelInputClass = availableModels.length > 0 ? "b3-select" : "b3-text-field";
     const modelInputAction = availableModels.length > 0 ? ' data-action="selectModel" data-menu="true" readonly' : "";
-    container.innerHTML = models.map((model, index) => `<div class="fn__flex b3-label config-item config-wrap" data-model-index="${index}">
+    container.innerHTML = models.map((model, index) => `<div class="fn__flex b3-label config-item config-wrap config-ai-provider__model" data-model-index="${index}">
+    <button class="block__icon block__icon--show config-ai-provider__model-drag" data-action="sortModel" type="button" draggable="true" aria-label="${window.siyuan.languages.sort}">
+        <svg><use xlink:href="#iconDrag"></use></svg>
+    </button>
+    <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" data-model-field="enabled" type="checkbox"${model.enabled ? " checked" : ""} aria-label="${window.siyuan.languages.enable}">
     <span class="fn__space"></span>
     <input class="${modelInputClass} fn__flex-1" data-model-field="name" type="text"${modelInputAction} spellcheck="false" placeholder="${window.siyuan.languages.selectModel}" value="${escapeHTML(model.name)}">
@@ -466,6 +471,8 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     let availableModelContextLengths: Record<string, number> = {};
     let hasFetchedModels = false;
     let fetchingModels = false;
+    let draggingModelIndex: number | undefined;
+    let dropModelTarget: {index: number; after: boolean} | undefined;
     const validateAPIKey = () => {
         if (!requiresAPIKey(draft) || draft.apiKey.trim() !== "") {
             return true;
@@ -483,6 +490,105 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     };
     updateModelActionButtons();
     renderDraftModels(modelsContainer, draft.models, availableModels);
+
+    const clearModelDropTarget = () => {
+        modelsContainer.querySelectorAll(".config-ai-provider__model--drop-before, .config-ai-provider__model--drop-after")
+            .forEach((item) => item.classList.remove(
+                "config-ai-provider__model--drop-before", "config-ai-provider__model--drop-after"));
+        dropModelTarget = undefined;
+    };
+    const reorderDraftModels = (sourceIndex: number, targetIndex: number, after: boolean) => {
+        const movedModel = draft.models[sourceIndex];
+        const models = moveModelItem(draft.models, sourceIndex, targetIndex, after);
+        if (!models) {
+            return false;
+        }
+        draft.models = models;
+        renderDraftModels(modelsContainer, draft.models, availableModels);
+        const movedIndex = draft.models.indexOf(movedModel);
+        modelsContainer.querySelector<HTMLElement>(
+            `[data-model-index="${movedIndex}"] [data-action="sortModel"]`,
+        )?.focus();
+        return true;
+    };
+
+    modelsContainer.addEventListener("dragstart", (event: DragEvent) => {
+        const handle = (event.target as Element).closest<HTMLElement>("[data-action='sortModel']");
+        const row = handle?.closest<HTMLElement>("[data-model-index]");
+        const modelIndex = Number(row?.dataset.modelIndex);
+        if (!handle || !row || !Number.isInteger(modelIndex) || !draft.models[modelIndex]) {
+            event.preventDefault();
+            return;
+        }
+        draggingModelIndex = modelIndex;
+        row.classList.add("config-ai-provider__model--dragging");
+        if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", String(modelIndex));
+        }
+    });
+    modelsContainer.addEventListener("dragover", (event: DragEvent) => {
+        if (!Number.isInteger(draggingModelIndex)) {
+            return;
+        }
+        const row = (event.target as Element).closest<HTMLElement>("[data-model-index]");
+        const targetIndex = Number(row?.dataset.modelIndex);
+        if (!row || !Number.isInteger(targetIndex)) {
+            clearModelDropTarget();
+            return;
+        }
+        const after = event.clientY >= row.getBoundingClientRect().top + row.offsetHeight / 2;
+        clearModelDropTarget();
+        if (!moveModelItem(draft.models, draggingModelIndex, targetIndex, after)) {
+            return;
+        }
+        event.preventDefault();
+        if (event.dataTransfer) {
+            event.dataTransfer.dropEffect = "move";
+        }
+        dropModelTarget = {index: targetIndex, after};
+        row.classList.add(`config-ai-provider__model--drop-${after ? "after" : "before"}`);
+    });
+    modelsContainer.addEventListener("drop", (event: DragEvent) => {
+        if (!Number.isInteger(draggingModelIndex) || !dropModelTarget) {
+            return;
+        }
+        event.preventDefault();
+        const sourceIndex = draggingModelIndex;
+        const target = dropModelTarget;
+        draggingModelIndex = undefined;
+        clearModelDropTarget();
+        reorderDraftModels(sourceIndex, target.index, target.after);
+    });
+    modelsContainer.addEventListener("dragend", () => {
+        draggingModelIndex = undefined;
+        clearModelDropTarget();
+        modelsContainer.querySelector(".config-ai-provider__model--dragging")?.classList.remove(
+            "config-ai-provider__model--dragging");
+    });
+    modelsContainer.addEventListener("keydown", (event: KeyboardEvent) => {
+        const handle = (event.target as Element).closest<HTMLElement>("[data-action='sortModel']");
+        if (!handle || !["ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) {
+            return;
+        }
+        const sourceIndex = Number(handle.closest<HTMLElement>("[data-model-index]")?.dataset.modelIndex);
+        let targetIndex = sourceIndex;
+        let after = false;
+        if (event.key === "ArrowUp") {
+            targetIndex--;
+        } else if (event.key === "ArrowDown") {
+            targetIndex++;
+            after = true;
+        } else if (event.key === "Home") {
+            targetIndex = 0;
+        } else {
+            targetIndex = draft.models.length - 1;
+            after = true;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        reorderDraftModels(sourceIndex, targetIndex, after);
+    });
 
     const addDraftModel = () => {
         draft.models.push({id: "", enabled: true, name: "", displayName: ""});

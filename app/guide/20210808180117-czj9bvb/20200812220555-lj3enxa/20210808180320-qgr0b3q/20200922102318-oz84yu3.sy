@@ -6,7 +6,7 @@
 		"id": "20200922102318-oz84yu3",
 		"title": "主题",
 		"type": "doc",
-		"updated": "20260810222021"
+		"updated": "20260810230450"
 	},
 	"Children": [
 		{
@@ -1348,7 +1348,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201225202158-kmavboj",
-				"updated": "20260810222021"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1373,7 +1373,7 @@
 			},
 			"Properties": {
 				"id": "20201225202158-jnsfuj4",
-				"updated": "20260810222021"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1461,7 +1461,7 @@
 					},
 					"Properties": {
 						"id": "20201225202158-1ege8ss",
-						"updated": "20260810215053"
+						"updated": "20260810230450"
 					},
 					"Children": [
 						{
@@ -1469,12 +1469,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131160321-kd1yoes",
-								"updated": "20260810215053"
+								"updated": "20260810230450"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "使用开发者工具定位并调整样式：打开开发者工具，启用元素选择器并点击需要修改的界面元素，在 Elements 面板中查看对应的 HTML，然后在 Styles 面板中调整样式"
+									"Data": "使用开发者工具定位并调整样式：打开开发者工具，启用元素选择器并点击需要修改的界面元素，在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Elements"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 面板中查看对应的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTML"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，然后在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Styles"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 面板中调整样式"
 								}
 							]
 						}

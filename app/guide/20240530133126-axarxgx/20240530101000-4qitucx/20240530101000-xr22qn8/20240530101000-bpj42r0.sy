@@ -7,7 +7,7 @@
 		"id": "20240530101000-bpj42r0",
 		"title": "テーマ",
 		"type": "doc",
-		"updated": "20260810215424"
+		"updated": "20260810230450"
 	},
 	"Children": [
 		{
@@ -1067,7 +1067,7 @@
 			"Properties": {
 				"ID": "20240530101000-6pz8s9i",
 				"id": "20240530101000-9nkaihq",
-				"updated": "20260810215121"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1090,7 +1090,7 @@
 			"Properties": {
 				"ID": "20240530101000-w4ueh95",
 				"id": "20240530101000-bo6l8c1",
-				"updated": "20260810215121"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1298,7 +1298,7 @@
 					"Properties": {
 						"ID": "20240530101000-9qze5c3",
 						"id": "20240530101000-rokr1na",
-						"updated": "20260810215121"
+						"updated": "20260810230450"
 					},
 					"Children": [
 						{
@@ -1307,12 +1307,39 @@
 							"Properties": {
 								"ID": "20240530101000-j9mw5mf",
 								"id": "20240530101000-0rok9l0",
-								"updated": "20260810215121"
+								"updated": "20260810230450"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "デベロッパーツールを使用してスタイルを特定・調整します。デベロッパーツールを開き、要素選択ツールを有効にして変更する UI 要素をクリックし、Elements パネルで対応する HTML を確認してから、Styles パネルでスタイルを調整します。調整内容を theme.css に反映して保存します"
+									"Data": "デベロッパーツールを使用してスタイルを特定・調整します。デベロッパーツールを開き、要素選択ツールを有効にして変更する UI 要素をクリックし、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Elements"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " パネルで対応する "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTML"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を確認してから、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Styles"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " パネルでスタイルを調整します。調整内容を theme.css に反映して保存します"
 								}
 							]
 						}

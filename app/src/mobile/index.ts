@@ -56,15 +56,6 @@ import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {openByMobile} from "../editor/openLink";
 import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 
-type TStartupStage = "frontend-entry" | "lute-ready" | "plugins-ready" | "loading-removed" | "frontend-ready";
-
-const reportStartupStage = (stage: TStartupStage) => {
-    window.performance.mark(`siyuan-startup-${stage}`);
-    window.JSAndroid?.reportStartupStage?.(stage);
-};
-
-reportStartupStage("frontend-entry");
-
 class App {
     public plugins: import("../plugin").Plugin[] = [];
     public appId: string;
@@ -179,13 +170,11 @@ class App {
         });
         fetchPost("/api/system/getConf", {}, async (confResponse) => {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
-            reportStartupStage("lute-ready");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = confResponse.data.conf;
             window.siyuan.isPublish = confResponse.data.isPublish;
             correctHotkey(siyuanApp);
             await loadPlugins(this);
-            reportStartupStage("plugins-ready");
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
@@ -194,7 +183,7 @@ class App {
                     bootSync();
                     appearanceConfigApi.apply(window.siyuan.config.appearance);
                     initMessage();
-                    initAssets(() => reportStartupStage("loading-removed"));
+                    initAssets();
                     if (!isInMobileApp()) {
                         if (isChromeBrowser()) {
                             document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
@@ -219,7 +208,6 @@ class App {
                                 initRightMenu(this);
                                 openChangelog();
                                 window.siyuan.isReady = true;
-                                reportStartupStage("frontend-ready");
                                 mainWs.flushMainMessages();
                             } catch (error) {
                                 console.error("Failed to initialize mobile framework:", error);

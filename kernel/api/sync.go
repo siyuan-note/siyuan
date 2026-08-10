@@ -469,7 +469,6 @@ func performSync(c *gin.Context) {
 	}
 	if mobileSwitch {
 		if !util.IsBooted() {
-			logging.LogDebugf("skip mobile switch sync while kernel is booting")
 			return
 		}
 		if nil == model.Conf.GetUser() || !model.Conf.Sync.Enabled {

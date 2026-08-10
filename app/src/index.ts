@@ -54,17 +54,6 @@ import {setTitle} from "./util/processTitle";
 import {ensureUILayout} from "./util/ensureUILayout";
 import {applyEntryVisibility} from "./config/entryVisibility/runtime";
 
-type TStartupStage = "frontend-entry" | "lute-ready" | "plugins-ready" | "layout-ready" | "frontend-ready";
-
-const reportStartupStage = (stage: TStartupStage) => {
-    window.performance.mark(`siyuan-startup-${stage}`);
-    /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_STARTUP_STAGE, stage);
-    /// #endif
-};
-
-reportStartupStage("frontend-entry");
-
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
     public appId: string;
@@ -284,7 +273,6 @@ export class App {
         const notebookPromise = setNoteBook();
         fetchPost("/api/system/getConf", {}, async (response) => {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
-            reportStartupStage("lute-ready");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
             ensureUILayout();
@@ -292,7 +280,6 @@ export class App {
             setBodyHighlight();
             await notebookPromise;
             await loadPlugins(this);
-            reportStartupStage("plugins-ready");
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
@@ -303,7 +290,6 @@ export class App {
                         await ensureOnboarding();
                         await setNoteBook();
                         await onGetConfig(response.data.start, this);
-                        reportStartupStage("layout-ready");
                         onSetaccount();
                         setTitle("", true);
                         initMessage();
@@ -314,7 +300,6 @@ export class App {
                         }
                         /// #endif
                         window.siyuan.isReady = true;
-                        reportStartupStage("frontend-ready");
                         mainWs.flushMainMessages();
                     });
                 });

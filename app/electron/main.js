@@ -81,27 +81,6 @@ const spellcheckContexts = new Map();
 const pendingSpellcheckRequests = new Map();
 const pendingNativeContextMenuRequests = new Map();
 const spellcheckContextMenuContents = new Set();
-const startupStartedAt = Date.now();
-let startupPreviousAt = startupStartedAt;
-const startupStages = new Set();
-const allowedFrontendStartupStages = new Set([
-    "frontend-entry",
-    "lute-ready",
-    "plugins-ready",
-    "layout-ready",
-    "frontend-ready",
-]);
-const markStartup = (stage) => {
-    if (startupStages.has(stage)) {
-        return;
-    }
-    startupStages.add(stage);
-
-    const now = Date.now();
-    writeLog("startup timing [container=electron, stage=" + stage + ", elapsed=" + (now - startupStartedAt) +
-        "ms, delta=" + (now - startupPreviousAt) + "ms]");
-    startupPreviousAt = now;
-};
 const normalizeClipboardText = (text) => text.replace(/\r\n?/g, "\n");
 const isOpenAsHidden = function () {
     return 1 === workspaces.length && openAsHidden;
@@ -220,12 +199,6 @@ const bindSpellcheckContextMenu = (contents) => {
 
 remote.initialize();
 
-ipcMain.on("siyuan-startup-stage", (event, stage) => {
-    if (allowedFrontendStartupStages.has(stage)) {
-        markStartup(stage);
-    }
-});
-
 // Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
 // getPath("userData") 会创建空的 SiYuan 目录，改为 app.getPath("appData")
 app.setPath("userData", path.join(app.getPath("appData"), app.getName() + "-Electron"));
@@ -263,7 +236,6 @@ app.commandLine.appendSwitch("disable-features", "AutoupgradeMixedContent");
 
 // Support set Chromium command line arguments on the desktop https://github.com/siyuan-note/siyuan/issues/9696
 writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");
-markStartup("electron-main-loaded");
 let argStart = 1;
 if (!app.isPackaged) {
     argStart = 2;
@@ -960,7 +932,6 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
         writeLog("initMainWindow: app not ready, skipping");
         return;
     }
-    markStartup("main-window-init-started");
 
     // 恢复主窗体状态
     let oldWindowState = {};
@@ -1055,7 +1026,6 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
         titleBarStyle: "hidden",
         icon: path.join(appDir, "stage", "icon-large.png"),
     });
-    markStartup("main-window-created");
     remote.enable(currentWindow.webContents);
     bindSpellcheckContextMenu(currentWindow.webContents);
 
@@ -1071,7 +1041,6 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
     // pending（既不 resolve 也不 reject），会导致 loadURL 永不执行，主窗口卡在启动页无法显示。
     // 这里无论 setProxy 是否完成，最多等待 5 秒后强制加载主界面。
     const loadMainURL = () => {
-        markStartup("frontend-load-requested");
         currentWindow.loadURL(getServer(currentKernelPort) + "/stage/build/app/?v=" + Date.now());
     };
     net.fetch(getServer(currentKernelPort) + "/api/system/getNetwork", {method: "POST"}).then((response) => {
@@ -1133,7 +1102,6 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
     });
 
     currentWindow.webContents.on("did-finish-load", () => {
-        markStartup("frontend-page-loaded");
         let siyuanOpenURL = process.argv.find((arg) => arg.startsWith("siyuan://"));
         if (siyuanOpenURL) {
             if (currentWindow.isMinimized()) {
@@ -1196,7 +1164,6 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
         }
     }, 60000);
     ipcMain.once("siyuan-ready-to-show", () => {
-        markStartup("window-show-requested");
         clearTimeout(readyToShowTimeout); // 正常收到信号则取消超时兜底
         if (isOpenAsHidden()) {
             currentWindow.minimize();
@@ -1227,7 +1194,6 @@ const showWindow = (wnd) => {
 
 const initKernel = (workspace, port, lang, safeMode) => {
     return new Promise(async (resolve) => {
-        markStartup("kernel-init-started");
         bootWindow = new BrowserWindow({
             show: false,
             width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
@@ -1250,7 +1216,6 @@ const initKernel = (workspace, port, lang, safeMode) => {
         } else {
             bootWindow.show();
         }
-        markStartup("boot-window-visible");
 
         const kernelName = "win32" === process.platform ? "SiYuan-Kernel.exe" : "SiYuan-Kernel";
         const kernelPath = path.join(appDir, "kernel", kernelName);
@@ -1379,7 +1344,6 @@ const initKernel = (workspace, port, lang, safeMode) => {
 
         if (0 === apiData.code) {
             writeLog("got kernel version [" + apiData.data + "]");
-            markStartup("kernel-http-serving");
             if (!isDevEnv && apiData.data !== appVer) {
                 writeLog(`kernel [${apiData.data}] is running, shutdown it now and then start kernel [${appVer}]`);
                 requestKernelExit(currentKernelPort);
@@ -1407,10 +1371,8 @@ const initKernel = (workspace, port, lang, safeMode) => {
                         const progressResult = await net.fetch(getServer(currentKernelPort) + "/api/system/bootProgress");
                         const progressData = await progressResult.json();
                         if (progressData.data.progress >= 100) {
-                            markStartup("kernel-ready");
                             // 内核完成后等待动画快进收尾（200ms）再进入主窗口
                             await sleep(200);
-                            markStartup("boot-animation-finished");
                             resolve(currentKernelPort);
                             progressing = true;
                         } else {
@@ -1433,7 +1395,6 @@ const initKernel = (workspace, port, lang, safeMode) => {
 };
 
 app.whenReady().then(() => {
-    markStartup("electron-ready");
     // Trust self-signed TLS certificates for local HTTPS server
     session.defaultSession.setCertificateVerifyProc((request, callback) => {
         if (request.hostname === "127.0.0.1" || request.hostname === "localhost") {

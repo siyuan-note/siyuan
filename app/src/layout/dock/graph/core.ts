@@ -8,6 +8,12 @@ import {
 } from "./types";
 
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+const EDGE_OPACITY_FACTOR = 1.25;
+const HIGHLIGHT_EDGE_OPACITY_FACTOR = 2.5;
+export const MIN_GRAPH_EDGE_WIDTH = 1.5;
+
+export const getGraphEdgeOpacity = (lineOpacity: number, highlighted: boolean) =>
+    Math.max(0, Math.min(1, lineOpacity * (highlighted ? HIGHLIGHT_EDGE_OPACITY_FACTOR : EDGE_OPACITY_FACTOR)));
 
 export const getGraphNodeSize = (baseSize: number, definitions: number) => {
     if (definitions < 1) {

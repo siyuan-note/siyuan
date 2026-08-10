@@ -17,6 +17,7 @@ import {IGraphNodeClick, IGraphSourceLink, IGraphSourceNode} from "./graph/types
 
 export class Graph extends Model {
     public inputElement: HTMLInputElement;
+    private countElement: HTMLElement;
     private graphElement: HTMLDivElement;
     private graphEngine: GraphEngine;
     private panelElement: HTMLElement;
@@ -233,7 +234,7 @@ export class Graph extends Model {
 <button class="b3-button b3-button--small fn__block">${window.siyuan.languages.reset}</button>`;
         }
         this.element.innerHTML = `<div class="block__icons"> 
-    <div class="block__logo fn__flex-1">${this.type === "global" ? window.siyuan.languages.globalGraph : window.siyuan.languages.graphView}</div>
+    <div class="block__logo block__logo--counter fn__flex-1">${this.type === "global" ? window.siyuan.languages.globalGraph : window.siyuan.languages.graphView}<span class="counter fn__none" data-type="node-count"></span></div>
     <input class="b3-text-field search__label fn__size200 fn__none" placeholder="${window.siyuan.languages.searchPlaceholder}" />
     <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.search}"><svg><use xlink:href='#iconFilter'></use></svg></span>
     <span class="fn__space"></span>
@@ -253,6 +254,7 @@ export class Graph extends Model {
     ${panelHTML}
 </div>
 <div class="fn__flex-1 graph__svg"></div>`;
+        this.countElement = this.element.querySelector('[data-type="node-count"]');
         this.graphElement = this.element.querySelector(".graph__svg");
         this.graphEngine = new GraphEngine(this.graphElement, {
             onNodeClick: (details) => this.openGraphNode(details),
@@ -611,6 +613,7 @@ export class Graph extends Model {
     }
 
     public onGraph(hl: boolean) {
+        this.updateNodeCount();
         if (this.graphElement.clientHeight === 0) {
             // 界面没有渲染时不能进行渲染
             return;
@@ -654,6 +657,16 @@ export class Graph extends Model {
                 this.hlNode(this.blockId);
             }
         }
+    }
+
+    private updateNodeCount() {
+        if (!this.graphData?.nodes) {
+            this.countElement.textContent = "";
+            this.countElement.classList.add("fn__none");
+            return;
+        }
+        this.countElement.textContent = this.graphData.nodes.length.toString();
+        this.countElement.classList.remove("fn__none");
     }
 
     private openGraphNode(details: IGraphNodeClick) {

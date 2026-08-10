@@ -4,6 +4,7 @@ import {
     createInitialPositions,
     fitGraphCamera,
     getDraggedGraphPosition,
+    getGraphEdgeOpacity,
     getGraphNodeSize,
     normalizeGraphData,
 } from "./core";
@@ -62,6 +63,13 @@ describe("graph data normalization", () => {
     it("keeps the pointer grab offset while dragging", () => {
         const position = getDraggedGraphPosition(80, 100, {scale: 2, x: 20, y: 40}, 5, -3);
         assert.deepEqual(position, {x: 35, y: 27});
+    });
+
+    it("emphasizes highlighted edges without exceeding valid opacity", () => {
+        assert.ok(Math.abs(getGraphEdgeOpacity(0.36, false) - 0.45) < Number.EPSILON);
+        assert.ok(Math.abs(getGraphEdgeOpacity(0.36, true) - 0.9) < Number.EPSILON);
+        assert.equal(getGraphEdgeOpacity(0.8, true), 1);
+        assert.equal(getGraphEdgeOpacity(-0.5, false), 0);
     });
 
     it("scales referenced nodes logarithmically", () => {

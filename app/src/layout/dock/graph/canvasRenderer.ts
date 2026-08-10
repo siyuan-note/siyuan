@@ -1,4 +1,5 @@
 import {getGraphNodeColor, IGraphRenderer, IGraphRenderState} from "./renderer";
+import {getGraphEdgeOpacity, MIN_GRAPH_EDGE_WIDTH} from "./core";
 
 export class GraphCanvasRenderer implements IGraphRenderer {
     private readonly canvas: HTMLCanvasElement;
@@ -23,9 +24,8 @@ export class GraphCanvasRenderer implements IGraphRenderer {
         const context = this.context;
         context.setTransform(state.devicePixelRatio, 0, 0, state.devicePixelRatio, 0, 0);
         context.clearRect(0, 0, state.width, state.height);
-        context.lineWidth = Math.max(1, state.options.linkWidth * state.camera.scale);
+        context.lineWidth = Math.max(MIN_GRAPH_EDGE_WIDTH, state.options.linkWidth * state.camera.scale);
         context.lineCap = "round";
-        context.globalAlpha = state.options.lineOpacity;
         this.drawEdgeGroup(state, false, false);
         this.drawEdgeGroup(state, true, false);
         this.drawEdgeGroup(state, false, true);
@@ -67,6 +67,7 @@ export class GraphCanvasRenderer implements IGraphRenderer {
         }
         context.strokeStyle = highlighted ? state.palette.highlightLine :
             reference ? state.palette.referenceLine : state.palette.line;
+        context.globalAlpha = getGraphEdgeOpacity(state.options.lineOpacity, highlighted);
         context.stroke();
     }
 
@@ -105,6 +106,7 @@ export class GraphCanvasRenderer implements IGraphRenderer {
             const highlighted = link.source === state.selected || link.target === state.selected ||
                 link.source === state.hovered || link.target === state.hovered;
             context.fillStyle = highlighted ? state.palette.highlightLine : state.palette.referenceLine;
+            context.globalAlpha = getGraphEdgeOpacity(state.options.lineOpacity, highlighted);
             context.fill();
         });
     }

@@ -143,28 +143,28 @@
     --b3-button-active-shadow: 0 2px 3px 1px rgb(0 0 0 / .3), 0 2px 4px 2px rgb(0 0 0 /.15);
 
     /* 图表颜色 */
-    --b3-graph-p-point: #477980;
-    --b3-graph-heading-point: #7055a5;
-    --b3-graph-math-point: #3f7f5f;
-    --b3-graph-code-point: #34798a;
-    --b3-graph-table-point: #416fa8;
-    --b3-graph-list-point: #a64f75;
-    --b3-graph-todo-point: #a87422;
-    --b3-graph-olist-point: #894c6b;
-    --b3-graph-listitem-point: #af603a;
-    --b3-graph-bq-point: #715d97;
-    --b3-graph-callout-point: #54814f;
-    --b3-graph-super-point: #92589b;
-    --b3-graph-doc-point: #4f6f9a;
-    --b3-graph-tag-point: #7c852a;
-    --b3-graph-asset-point: #307d69;
+    --b3-graph-p-point: #076f7e;
+    --b3-graph-heading-point: #8250df;
+    --b3-graph-math-point: #80FFA5;
+    --b3-graph-code-point: #00DDFF;
+    --b3-graph-table-point: #37A2FF;
+    --b3-graph-list-point: #FF0087;
+    --b3-graph-todo-point: #FFBF00;
+    --b3-graph-olist-point: #b3005f;
+    --b3-graph-listitem-point: #f65b00;
+    --b3-graph-bq-point: #8d48e3;
+    --b3-graph-callout-point: var(--b3-theme-success);
+    --b3-graph-super-point: #dd79ff;
+    --b3-graph-doc-point: #202124;
+    --b3-graph-tag-point: #dbf32f;
+    --b3-graph-asset-point: #05c091;
     --b3-graph-line: rgba(0, 0, 0, .6);
     --b3-graph-ref-line: #d23f31;
     --b3-graph-tag-line: #5f6b06;
     --b3-graph-tag-tag-line: #dbf32f;
     --b3-graph-asset-line: #037457;
     --b3-graph-hl-point: #c98a00;
-    --b3-graph-hl-line: #4285f4;
+    --b3-graph-hl-line: #d23f31;
 
     /* 代码片段背景 */
     --b3-protyle-code-background: rgba(27, 31, 35, .05);

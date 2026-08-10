@@ -1,4 +1,5 @@
 import {getGraphNodeColor, IGraphRenderer, IGraphRenderState, parseGraphColor} from "./renderer";
+import {getGraphEdgeOpacity, MIN_GRAPH_EDGE_WIDTH} from "./core";
 
 const NODE_VERTEX_SHADER = `#version 300 es
 layout(location = 0) in vec2 a_corner;
@@ -51,6 +52,7 @@ layout(location = 3) in vec4 a_color;
 layout(location = 4) in float a_state;
 uniform vec2 u_viewport;
 uniform vec3 u_camera;
+uniform float u_min_width;
 uniform float u_width;
 out vec4 v_color;
 out float v_state;
@@ -65,7 +67,7 @@ void main() {
     float distance = max(0.001, length(delta));
     vec2 direction = delta / distance;
     vec2 normal = vec2(-direction.y, direction.x);
-    float width = max(1.0, u_width * u_camera.z);
+    float width = max(u_min_width, u_width * u_camera.z);
     float half_width = width * 0.5;
     float outer_half_width = half_width + 1.0;
     float line_position = mix(-outer_half_width, distance + outer_half_width, a_corner.x);
@@ -89,6 +91,7 @@ in float v_half_width;
 in float v_length;
 in float v_position;
 uniform vec4 u_highlight;
+uniform float u_highlight_opacity;
 uniform float u_opacity;
 out vec4 out_color;
 void main() {
@@ -104,7 +107,8 @@ void main() {
         discard;
     }
     vec4 color = v_state > 0.0 ? u_highlight : v_color;
-    out_color = vec4(color.rgb, color.a * u_opacity * coverage);
+    float opacity = v_state > 0.0 ? u_highlight_opacity : u_opacity;
+    out_color = vec4(color.rgb, color.a * opacity * coverage);
 }`;
 
 const ARROW_VERTEX_SHADER = `#version 300 es
@@ -144,6 +148,7 @@ in vec4 v_color;
 in float v_state;
 in vec3 v_barycentric;
 uniform vec4 u_highlight;
+uniform float u_highlight_opacity;
 uniform float u_opacity;
 out vec4 out_color;
 void main() {
@@ -151,7 +156,8 @@ void main() {
     float antialias = max(fwidth(distance), 0.0001);
     float coverage = smoothstep(0.0, antialias, distance);
     vec4 color = v_state > 0.0 ? u_highlight : v_color;
-    out_color = vec4(color.rgb, color.a * u_opacity * coverage);
+    float opacity = v_state > 0.0 ? u_highlight_opacity : u_opacity;
+    out_color = vec4(color.rgb, color.a * opacity * coverage);
 }`;
 
 export class GraphWebGLRenderer implements IGraphRenderer {
@@ -225,7 +231,7 @@ export class GraphWebGLRenderer implements IGraphRenderer {
         this.arrowStateBuffer = this.createBuffer();
         this.configureVertexArrays();
         gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     }
 
     public render(state: IGraphRenderState) {
@@ -378,8 +384,12 @@ export class GraphWebGLRenderer implements IGraphRenderer {
         gl.useProgram(this.edgeProgram);
         gl.bindVertexArray(this.edgeVao);
         this.setViewUniforms(this.edgeProgram, state);
+        gl.uniform1f(this.getUniform(this.edgeProgram, "u_min_width"), MIN_GRAPH_EDGE_WIDTH);
         gl.uniform1f(this.getUniform(this.edgeProgram, "u_width"), state.options.linkWidth);
-        gl.uniform1f(this.getUniform(this.edgeProgram, "u_opacity"), state.options.lineOpacity);
+        gl.uniform1f(this.getUniform(this.edgeProgram, "u_opacity"),
+            getGraphEdgeOpacity(state.options.lineOpacity, false));
+        gl.uniform1f(this.getUniform(this.edgeProgram, "u_highlight_opacity"),
+            getGraphEdgeOpacity(state.options.lineOpacity, true));
         gl.uniform4fv(this.getUniform(this.edgeProgram, "u_highlight"), this.highlightLine);
         gl.drawArraysInstanced(gl.TRIANGLES, 0, 6, state.data.links.length);
     }
@@ -393,7 +403,10 @@ export class GraphWebGLRenderer implements IGraphRenderer {
         gl.bindVertexArray(this.arrowVao);
         this.setViewUniforms(this.arrowProgram, state);
         gl.uniform1f(this.getUniform(this.arrowProgram, "u_width"), state.options.linkWidth);
-        gl.uniform1f(this.getUniform(this.arrowProgram, "u_opacity"), state.options.lineOpacity);
+        gl.uniform1f(this.getUniform(this.arrowProgram, "u_opacity"),
+            getGraphEdgeOpacity(state.options.lineOpacity, false));
+        gl.uniform1f(this.getUniform(this.arrowProgram, "u_highlight_opacity"),
+            getGraphEdgeOpacity(state.options.lineOpacity, true));
         gl.uniform4fv(this.getUniform(this.arrowProgram, "u_highlight"), this.highlightLine);
         gl.drawArraysInstanced(gl.TRIANGLES, 0, 3, this.arrowIndices.length);
     }

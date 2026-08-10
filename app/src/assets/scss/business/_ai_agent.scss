@@ -691,7 +691,8 @@
   padding: 4px 8px;
   background-image: none;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex: 0 1 auto;
+  min-width: 30px;
 
   &-icon {
     height: 14px;
@@ -703,6 +704,7 @@
   &-label {
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
   }
 }
 
@@ -713,7 +715,8 @@
   padding: 4px 8px;
   background-image: none;
   white-space: nowrap;
-  min-width: 0;
+  flex: 0 1 auto;
+  min-width: 30px;
 
   &-icon {
     height: 14px;
@@ -737,17 +740,20 @@
   padding: 4px 8px;
   background-image: none;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex: 0 1 auto;
+  min-width: 30px;
 
   &-icon {
     height: 14px;
     width: 14px;
     color: var(--b3-theme-on-surface);
+    flex-shrink: 0;
   }
 
   &-label {
     overflow: hidden;
     text-overflow: ellipsis;
+    min-width: 0;
   }
 }
 

@@ -17,6 +17,9 @@
 package util
 
 import (
+	"errors"
+	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -66,46 +69,9 @@ func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 }
 
 func initWorkspaceDirMobile(workspaceBaseDir string) {
-	if gulu.File.IsDir(workspaceBaseDir) {
-		entries, err := os.ReadDir(workspaceBaseDir)
-		if err != nil {
-			logging.LogErrorf("read workspace dir [%s] failed: %s", workspaceBaseDir, err)
-		} else {
-			// 旧版 iOS 端会在 workspaceBaseDir 下直接创建工作空间，这里需要将数据迁移到 workspaceBaseDir/siyuan/ 文件夹下
-			var oldConf, oldData, oldTemp bool
-			for _, entry := range entries {
-				if entry.IsDir() && "conf" == entry.Name() {
-					oldConf = true
-					continue
-				}
-				if entry.IsDir() && "data" == entry.Name() {
-					oldData = true
-					continue
-				}
-				if entry.IsDir() && "temp" == entry.Name() {
-					oldTemp = true
-					continue
-				}
-			}
-			if oldConf && oldData && oldTemp {
-				for _, entry := range entries {
-					if "home" == entry.Name() || "siyuan" == entry.Name() {
-						continue
-					}
-
-					from := filepath.Join(workspaceBaseDir, entry.Name())
-					to := filepath.Join(workspaceBaseDir, "siyuan", entry.Name())
-					if err = os.Rename(from, to); err != nil {
-						logging.LogErrorf("move workspace dir [%s] failed: %s", workspaceBaseDir, err)
-					} else {
-						logging.LogInfof("moved workspace dir [fomr=%s, to=%s]", from, to)
-					}
-				}
-
-				os.RemoveAll(filepath.Join(workspaceBaseDir, "sync"))
-				os.RemoveAll(filepath.Join(workspaceBaseDir, "backup"))
-			}
-		}
+	migrated, err := migrateLegacyIOSWorkspace(workspaceBaseDir)
+	if err != nil {
+		logging.LogErrorf("migrate legacy iOS workspace [%s] failed: %s", workspaceBaseDir, err)
 	}
 
 	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")
@@ -123,6 +89,9 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 		workspacePaths = append(workspacePaths, WorkspaceDir)
 	} else {
 		workspacePaths, _ = ReadWorkspacePaths()
+		if migrated {
+			workspacePaths = replaceLegacyIOSWorkspacePath(workspacePaths, workspaceBaseDir, defaultWorkspaceDir)
+		}
 
 		if 0 < len(workspacePaths) {
 			WorkspaceDir = workspacePaths[len(workspacePaths)-1]
@@ -172,4 +141,82 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 
 	LogPath = filepath.Join(TempDir, "siyuan.log")
 	logging.SetLogPath(LogPath)
+}
+
+// 仅迁移工作空间规范定义的目录，保留基目录下的其他工作空间和用户文件。
+var legacyIOSWorkspaceEntries = []string{"conf", "data", "repo", "history", "corrupted", "temp", "sync", "backup"}
+
+type workspaceDirMove struct {
+	from string
+	to   string
+}
+
+func migrateLegacyIOSWorkspace(workspaceBaseDir string) (migrated bool, err error) {
+	if ContainerIOS != Container || !gulu.File.IsDir(workspaceBaseDir) {
+		return false, nil
+	}
+
+	for _, name := range []string{"conf", "data", "temp"} {
+		if !gulu.File.IsDir(filepath.Join(workspaceBaseDir, name)) {
+			return false, nil
+		}
+	}
+
+	defaultWorkspaceDir := filepath.Join(workspaceBaseDir, "siyuan")
+	destinationEntries, readErr := os.ReadDir(defaultWorkspaceDir)
+	if readErr != nil {
+		return false, fmt.Errorf("read destination [%s] failed: %w", defaultWorkspaceDir, readErr)
+	}
+	if 0 < len(destinationEntries) {
+		return false, fmt.Errorf("destination [%s] is not empty", defaultWorkspaceDir)
+	}
+
+	var moves []workspaceDirMove
+	for _, name := range legacyIOSWorkspaceEntries {
+		from := filepath.Join(workspaceBaseDir, name)
+		if _, statErr := os.Lstat(from); statErr != nil {
+			if errors.Is(statErr, fs.ErrNotExist) {
+				continue
+			}
+			return false, fmt.Errorf("stat source [%s] failed: %w", from, statErr)
+		}
+
+		to := filepath.Join(defaultWorkspaceDir, name)
+		if _, statErr := os.Lstat(to); statErr == nil {
+			return false, fmt.Errorf("destination [%s] already exists", to)
+		} else if !errors.Is(statErr, fs.ErrNotExist) {
+			return false, fmt.Errorf("stat destination [%s] failed: %w", to, statErr)
+		}
+		moves = append(moves, workspaceDirMove{from: from, to: to})
+	}
+
+	var completed []workspaceDirMove
+	for _, move := range moves {
+		if renameErr := os.Rename(move.from, move.to); renameErr != nil {
+			var rollbackErrors []error
+			for i := len(completed) - 1; 0 <= i; i-- {
+				completedMove := completed[i]
+				if rollbackErr := os.Rename(completedMove.to, completedMove.from); rollbackErr != nil {
+					rollbackErrors = append(rollbackErrors, fmt.Errorf("rollback [%s] to [%s] failed: %w",
+						completedMove.to, completedMove.from, rollbackErr))
+				}
+			}
+			return false, errors.Join(append([]error{fmt.Errorf("move [%s] to [%s] failed: %w", move.from, move.to, renameErr)}, rollbackErrors...)...)
+		}
+		completed = append(completed, move)
+	}
+
+	for _, move := range completed {
+		logging.LogInfof("moved legacy iOS workspace dir [from=%s, to=%s]", move.from, move.to)
+	}
+	return true, nil
+}
+
+func replaceLegacyIOSWorkspacePath(workspacePaths []string, workspaceBaseDir, defaultWorkspaceDir string) []string {
+	for i, workspacePath := range workspacePaths {
+		if filepath.Clean(workspacePath) == filepath.Clean(workspaceBaseDir) {
+			workspacePaths[i] = defaultWorkspaceDir
+		}
+	}
+	return DeduplicateWorkspacePaths(workspacePaths)
 }

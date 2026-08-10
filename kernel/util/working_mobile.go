@@ -220,3 +220,11 @@ func replaceLegacyIOSWorkspacePath(workspacePaths []string, workspaceBaseDir, de
 	}
 	return DeduplicateWorkspacePaths(workspacePaths)
 }
+
+// IsMobileWorkspaceBaseDir 判断路径是否为移动端保留的工作空间基目录。
+func IsMobileWorkspaceBaseDir(path string) bool {
+	if !IsMobileContainer() || "" == path || "" == HomeDir {
+		return false
+	}
+	return filepath.Clean(path) == filepath.Clean(filepath.Dir(HomeDir))
+}

@@ -122,6 +122,33 @@ func TestReplaceLegacyIOSWorkspacePath(t *testing.T) {
 	}
 }
 
+func TestIsMobileWorkspaceBaseDir(t *testing.T) {
+	originalContainer, originalHomeDir := Container, HomeDir
+	workspaceBaseDir := filepath.Join(t.TempDir(), "files")
+	Container = ContainerAndroid
+	HomeDir = filepath.Join(workspaceBaseDir, "home")
+	t.Cleanup(func() {
+		Container, HomeDir = originalContainer, originalHomeDir
+	})
+
+	for _, path := range []string{workspaceBaseDir, workspaceBaseDir + string(os.PathSeparator),
+		filepath.Join(workspaceBaseDir, ".")} {
+		if !IsMobileWorkspaceBaseDir(path) {
+			t.Fatalf("mobile workspace base dir [%s] should be reserved", path)
+		}
+	}
+	for _, path := range []string{filepath.Dir(workspaceBaseDir), filepath.Join(workspaceBaseDir, "siyuan")} {
+		if IsMobileWorkspaceBaseDir(path) {
+			t.Fatalf("path [%s] should not be treated as the mobile workspace base dir", path)
+		}
+	}
+
+	Container = ContainerStd
+	if IsMobileWorkspaceBaseDir(workspaceBaseDir) {
+		t.Fatal("desktop paths must not be treated as the mobile workspace base dir")
+	}
+}
+
 func prepareLegacyMobileWorkspace(t *testing.T) string {
 	t.Helper()
 	workspaceBaseDir := t.TempDir()

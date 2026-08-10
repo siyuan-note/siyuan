@@ -292,7 +292,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
         <span class="fn__space--small"></span>
         <span class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${escapeAttribute(window.siyuan.languages.total)}">${items.length}</span>
         <span class="fn__flex-1"></span>
-        <button class="b3-button b3-button--outline" data-type="toggleAgentCapabilityGroup" data-group-index="${groupIndex}">${groupEnabled ? window.siyuan.languages.agentCapabilitiesDisableAll : window.siyuan.languages.selectAll}</button>
+        <button class="b3-button b3-button--outline" data-type="toggleAgentCapabilityGroup" data-group-index="${groupIndex}">${groupEnabled ? window.siyuan.languages.agentCapabilitiesDisableAll : window.siyuan.languages.agentCapabilitiesEnableAll}</button>
     </div>
     <div class="config-items">
         ${items.map((capability) => {

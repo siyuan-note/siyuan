@@ -471,6 +471,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/graph/resetGraph", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, resetGraph)
 	ginServer.Handle("POST", "/api/graph/resetLocalGraph", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, resetLocalGraph)
+	ginServer.Handle("POST", "/api/graph/setGraphConf", model.CheckAuth, setGraphConf)
 	ginServer.Handle("POST", "/api/graph/getGraph", model.CheckAuth, getGraph)
 	ginServer.Handle("POST", "/api/graph/getLocalGraph", model.CheckAuth, getLocalGraph)
 

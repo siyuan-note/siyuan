@@ -62,14 +62,6 @@ The component list is informational and does not replace the license terms. Copy
 | plantuml-encoder | 1.4.0 | MIT | [upstream](https://github.com/markushedvall/plantuml-encoder) | app/stage/protyle/js/plantuml/plantuml-encoder.min.js |
 | pako | Bundled snapshot | MIT AND Zlib | [upstream](https://github.com/nodeca/pako) | Bundled by plantuml-encoder |
 | Viewer.js | 1.11.7 | MIT | [upstream](https://github.com/fengyuanchen/viewerjs) | app/stage/protyle/js/viewerjs/viewer.js |
-| vis-network | 9.1.13 | Apache-2.0 OR MIT | [upstream](https://github.com/visjs/vis-network) | app/stage/protyle/js/vis/vis-network.min.js |
-| @egjs/hammerjs | 2.0.17 | MIT | [upstream](https://github.com/naver/hammer.js) | Bundled by vis-network 9.1.13 |
-| component-emitter | 1.3.1 | MIT | [upstream](https://github.com/sindresorhus/component-emitter) | Bundled by vis-network 9.1.13 |
-| core-js | 3.33.0 | MIT | [upstream](https://github.com/zloirock/core-js) | Bundled by vis-network 9.1.13 |
-| keycharm | 0.4.0 | Apache-2.0 OR MIT | [upstream](https://github.com/visjs/keycharm) | Bundled by vis-network 9.1.13 |
-| uuid | 9.0.1 | MIT | [upstream](https://github.com/uuidjs/uuid) | Bundled by vis-network 9.1.13 |
-| vis-data | 7.1.9 | Apache-2.0 OR MIT | [upstream](https://github.com/visjs/vis-data) | Bundled by vis-network 9.1.13 |
-| vis-util | 5.0.7 | Apache-2.0 OR MIT | [upstream](https://github.com/visjs/vis-util) | Bundled by vis-network 9.1.13 |
 | Lute JavaScript runtime | Bundled snapshot | MulanPSL-2.0 | [upstream](https://github.com/88250/lute) | app/stage/protyle/js/lute/lute.min.js |
 | Pandoc | 3.5 | GPL-2.0-or-later | [upstream](https://github.com/jgm/pandoc) | app/pandoc/*.zip |
 | SQLite | 3.53.1 amalgamation | Public Domain | [upstream](https://www.sqlite.org/) | Compiled into the kernel by github.com/88250/go-sqlite3 |
@@ -5125,43 +5117,6 @@ cytoscape/dist/cytoscape.esm.mjs:
  *
  * Date: 2024-12-28T15:07:25.323Z
  */
-```
-
-### app/stage/protyle/js/vis/vis-network.min.js
-
-```text
-/**
- * vis-network
- * https://visjs.github.io/vis-network/
- *
- * A dynamic, browser-based visualization library.
- *
- * @version 9.1.13
- * @date    2025-06-28T12:43:17.849Z
- *
- * @copyright (c) 2011-2017 Almende B.V, http://almende.com
- * @copyright (c) 2017-2019 visjs contributors, https://github.com/visjs
- *
- * @license
- * vis.js is dual licensed under both
- *
- *   1. The Apache 2.0 License
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *   and
- *
- *   2. The MIT License
- *      http://opensource.org/licenses/MIT
- *
- * vis.js may be distributed under either license.
- */
-
-/*! Hammer.JS - v2.0.17-rc - 2019-12-16
-	 * http://naver.github.io/egjs
-	 *
-	 * Forked By Naver egjs
-	 * Copyright (c) hammerjs
-	 * Licensed under the MIT license */
 ```
 
 ## Go module license texts

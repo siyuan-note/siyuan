@@ -2,8 +2,6 @@ import {Tab} from "../Tab";
 import {getInstanceById, setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {Model} from "../Model";
-import {Constants} from "../../constants";
-import {addScript} from "../../protyle/util/addScript";
 import {BlockPanel} from "../../block/Panel";
 import {fullscreen} from "../../protyle/breadcrumb/action";
 import {fetchPost} from "../../util/fetch";
@@ -14,23 +12,28 @@ import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {Editor} from "../../editor";
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
-
-declare const vis: any;
+import {GraphEngine} from "./graph/GraphEngine";
+import {IGraphNodeClick, IGraphSourceLink, IGraphSourceNode} from "./graph/types";
 
 export class Graph extends Model {
     public inputElement: HTMLInputElement;
     private graphElement: HTMLDivElement;
+    private graphEngine: GraphEngine;
     private panelElement: HTMLElement;
     private element: HTMLElement;
-    private network: any;
+    private saveTimeout: number;
+    private searchTimeout: number;
+    private pendingGraphConf: IGraphCommon & {dailyNote: boolean, minRefs?: number};
     public blockId: string; // "local" / "pin" 必填
     public rootId: string; // "local" 必填
     public notebookId: string;
     public graphData: {
-        nodes: { box: string, id: string, path: string, type: string, color: IObject }[],
-        links: Record<string, unknown>[],
+        nodes: IGraphSourceNode[],
+        links: IGraphSourceLink[],
         box: string
     };
+    private renderedGraphData: Graph["graphData"];
+    private requestVersion = 0;
     public type: "local" | "pin" | "global";
 
     constructor(options: {
@@ -251,6 +254,9 @@ export class Graph extends Model {
 </div>
 <div class="fn__flex-1 graph__svg"></div>`;
         this.graphElement = this.element.querySelector(".graph__svg");
+        this.graphEngine = new GraphEngine(this.graphElement, {
+            onNodeClick: (details) => this.openGraphNode(details),
+        });
         this.inputElement = this.element.querySelector("input");
         this.panelElement = this.element.querySelector(".graph__panel") as HTMLElement;
         this.element.addEventListener("click", (event) => {
@@ -314,7 +320,7 @@ export class Graph extends Model {
             }
         });
         this.inputElement.addEventListener("compositionend", () => {
-            this.searchGraph(false);
+            this.scheduleGraphSearch();
         });
         this.inputElement.addEventListener("blur", (event: InputEvent) => {
             const inputElement = event.target as HTMLInputElement;
@@ -324,17 +330,25 @@ export class Graph extends Model {
             if (event.isComposing) {
                 return;
             }
-            this.searchGraph(false);
+            this.scheduleGraphSearch();
         });
         this.element.querySelectorAll(".b3-slider").forEach((item: HTMLInputElement) => {
             item.addEventListener("input", () => {
                 item.setAttribute("aria-label", item.value);
-                this.searchGraph(false);
+                if (item.getAttribute("data-type") === "minRefs") {
+                    this.scheduleGraphSearch();
+                } else {
+                    this.updateGraphOptions();
+                }
             });
         });
-        this.element.querySelectorAll(".b3-switch").forEach((item) => {
+        this.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
-                this.searchGraph(false);
+                if (item.getAttribute("data-type") === "arrow") {
+                    this.updateGraphOptions();
+                } else {
+                    this.searchGraph(false);
+                }
             });
         });
         this.searchGraph(options.type !== "global");
@@ -385,6 +399,11 @@ export class Graph extends Model {
     }
 
     private reset(conf: IGraphCommon & ({ dailyNote: boolean } | { minRefs: number, dailyNote: boolean })) {
+        if (this.saveTimeout) {
+            window.clearTimeout(this.saveTimeout);
+            this.saveTimeout = 0;
+        }
+        this.pendingGraphConf = undefined;
         if (this.type === "global") {
             window.siyuan.config.graph.global = conf as IGraphCommon & { minRefs: number, dailyNote: boolean };
             this.panelElement.querySelector("[data-type='minRefs']").setAttribute("aria-label", window.siyuan.config.graph.global.minRefs.toString());
@@ -426,44 +445,30 @@ export class Graph extends Model {
 
     public searchGraph(focus: boolean, id?: string, refresh = false) {
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
-        if (element.classList.contains("fn__rotate") && !id) {
+        if (element.classList.contains("fn__rotate") && refresh) {
             return;
         }
+        if (this.searchTimeout) {
+            window.clearTimeout(this.searchTimeout);
+            this.searchTimeout = 0;
+        }
+        if (this.saveTimeout) {
+            window.clearTimeout(this.saveTimeout);
+            this.saveTimeout = 0;
+            this.persistGraphConf();
+        }
+        const requestVersion = ++this.requestVersion;
         element.classList.add("fn__rotate");
-        const type = {
-            list: (this.panelElement.querySelector("[data-type='list']") as HTMLInputElement).checked,
-            listItem: (this.panelElement.querySelector("[data-type='listItem']") as HTMLInputElement).checked,
-            math: (this.panelElement.querySelector("[data-type='math']") as HTMLInputElement).checked,
-            paragraph: (this.panelElement.querySelector("[data-type='paragraph']") as HTMLInputElement).checked,
-            super: (this.panelElement.querySelector("[data-type='super']") as HTMLInputElement).checked,
-            table: (this.panelElement.querySelector("[data-type='table']") as HTMLInputElement).checked,
-            tag: (this.panelElement.querySelector("[data-type='tag']") as HTMLInputElement).checked,
-            heading: (this.panelElement.querySelector("[data-type='heading']") as HTMLInputElement).checked,
-            blockquote: (this.panelElement.querySelector("[data-type='blockquote']") as HTMLInputElement).checked,
-            callout: (this.panelElement.querySelector("[data-type='callout']") as HTMLInputElement).checked,
-            code: (this.panelElement.querySelector("[data-type='code']") as HTMLInputElement).checked,
-        };
-        const d3 = {
-            arrow: (this.panelElement.querySelector("[data-type='arrow']") as HTMLInputElement).checked,
-            nodeSize: parseFloat((this.panelElement.querySelector("[data-type='nodeSize']") as HTMLInputElement).value),
-            centerStrength: parseFloat((this.panelElement.querySelector("[data-type='centerStrength']") as HTMLInputElement).value),
-            collideRadius: parseFloat((this.panelElement.querySelector("[data-type='collideRadius']") as HTMLInputElement).value),
-            collideStrength: parseFloat((this.panelElement.querySelector("[data-type='collideStrength']") as HTMLInputElement).value),
-            lineOpacity: parseFloat((this.panelElement.querySelector("[data-type='lineOpacity']") as HTMLInputElement).value),
-            linkDistance: parseFloat((this.panelElement.querySelector("[data-type='linkDistance']") as HTMLInputElement).value),
-            linkWidth: parseFloat((this.panelElement.querySelector("[data-type='linkWidth']") as HTMLInputElement).value),
-        };
+        const conf = this.getGraphConf();
         if (this.type === "global") {
             // 全局
             fetchPost("/api/graph/getGraph", {
                 k: this.inputElement.value,
-                conf: {
-                    type,
-                    d3,
-                    dailyNote: (this.panelElement.querySelector("[data-type='dailyNote']") as HTMLInputElement).checked,
-                    minRefs: parseFloat((this.panelElement.querySelector("[data-type='minRefs']") as HTMLInputElement).value)
-                }
+                conf,
             }, response => {
+                if (requestVersion !== this.requestVersion) {
+                    return;
+                }
                 this.graphData = response.data;
                 window.siyuan.config.graph.global = response.data.conf;
                 this.onGraph(false);
@@ -475,12 +480,11 @@ export class Graph extends Model {
                 k: this.inputElement.value,
                 id: id || this.blockId,
                 notebook: isEncryptedBox(this.notebookId) ? this.notebookId : undefined,
-                conf: {
-                    type,
-                    d3,
-                    dailyNote: (this.panelElement.querySelector("[data-type='dailyNote']") as HTMLInputElement).checked,
-                },
+                conf,
             }, response => {
+                if (requestVersion !== this.requestVersion) {
+                    return;
+                }
                 element.classList.remove("fn__rotate");
                 if (response.code !== 0) {
                     this.graphData = undefined;
@@ -513,20 +517,97 @@ export class Graph extends Model {
     }
 
     private hlNode(id: string) {
-        if (this.graphElement.clientHeight === 0 || !this.network || this.network.findNode(id).length === 0) {
+        if (this.graphElement.clientHeight === 0 || !this.graphEngine.hasNode(id)) {
             return;
         }
-        this.network.focus(id, {
-            animation: {
-                duration: 1000,
-                easingFunction: "easeInOutQuad",
-            },
-        });
-        this.network.selectNodes([id]);
+        this.graphEngine.focusNode(id);
     }
 
     public destroy() {
-        this.network?.destroy();
+        this.requestVersion++;
+        if (this.searchTimeout) {
+            window.clearTimeout(this.searchTimeout);
+        }
+        if (this.saveTimeout) {
+            window.clearTimeout(this.saveTimeout);
+            this.saveTimeout = 0;
+        }
+        this.persistGraphConf();
+        this.graphEngine.destroy();
+    }
+
+    private scheduleGraphSearch() {
+        if (this.searchTimeout) {
+            window.clearTimeout(this.searchTimeout);
+        }
+        this.searchTimeout = window.setTimeout(() => {
+            this.searchTimeout = 0;
+            this.searchGraph(false);
+        }, 160);
+    }
+
+    private getGraphConf() {
+        const type = {
+            list: (this.panelElement.querySelector("[data-type='list']") as HTMLInputElement).checked,
+            listItem: (this.panelElement.querySelector("[data-type='listItem']") as HTMLInputElement).checked,
+            math: (this.panelElement.querySelector("[data-type='math']") as HTMLInputElement).checked,
+            paragraph: (this.panelElement.querySelector("[data-type='paragraph']") as HTMLInputElement).checked,
+            super: (this.panelElement.querySelector("[data-type='super']") as HTMLInputElement).checked,
+            table: (this.panelElement.querySelector("[data-type='table']") as HTMLInputElement).checked,
+            tag: (this.panelElement.querySelector("[data-type='tag']") as HTMLInputElement).checked,
+            heading: (this.panelElement.querySelector("[data-type='heading']") as HTMLInputElement).checked,
+            blockquote: (this.panelElement.querySelector("[data-type='blockquote']") as HTMLInputElement).checked,
+            callout: (this.panelElement.querySelector("[data-type='callout']") as HTMLInputElement).checked,
+            code: (this.panelElement.querySelector("[data-type='code']") as HTMLInputElement).checked,
+        };
+        const d3 = {
+            arrow: (this.panelElement.querySelector("[data-type='arrow']") as HTMLInputElement).checked,
+            nodeSize: parseFloat((this.panelElement.querySelector("[data-type='nodeSize']") as HTMLInputElement).value),
+            centerStrength: parseFloat((this.panelElement.querySelector("[data-type='centerStrength']") as HTMLInputElement).value),
+            collideRadius: parseFloat((this.panelElement.querySelector("[data-type='collideRadius']") as HTMLInputElement).value),
+            collideStrength: parseFloat((this.panelElement.querySelector("[data-type='collideStrength']") as HTMLInputElement).value),
+            lineOpacity: parseFloat((this.panelElement.querySelector("[data-type='lineOpacity']") as HTMLInputElement).value),
+            linkDistance: parseFloat((this.panelElement.querySelector("[data-type='linkDistance']") as HTMLInputElement).value),
+            linkWidth: parseFloat((this.panelElement.querySelector("[data-type='linkWidth']") as HTMLInputElement).value),
+        };
+        const conf: IGraphCommon & {dailyNote: boolean, minRefs?: number} = {
+            type,
+            d3,
+            dailyNote: (this.panelElement.querySelector("[data-type='dailyNote']") as HTMLInputElement).checked,
+        };
+        if (this.type === "global") {
+            conf.minRefs = parseFloat((this.panelElement.querySelector("[data-type='minRefs']") as HTMLInputElement).value);
+        }
+        return conf;
+    }
+
+    private updateGraphOptions() {
+        const conf = this.getGraphConf();
+        if (this.type === "global") {
+            window.siyuan.config.graph.global = conf as IGraphCommon & {dailyNote: boolean, minRefs: number};
+        } else {
+            window.siyuan.config.graph.local = conf;
+        }
+        this.onGraph(false);
+        if (this.saveTimeout) {
+            window.clearTimeout(this.saveTimeout);
+        }
+        this.pendingGraphConf = conf;
+        this.saveTimeout = window.setTimeout(() => {
+            this.saveTimeout = 0;
+            this.persistGraphConf();
+        }, 300);
+    }
+
+    private persistGraphConf() {
+        if (!this.pendingGraphConf) {
+            return;
+        }
+        fetchPost("/api/graph/setGraphConf", {
+            type: this.type === "global" ? "global" : "local",
+            conf: this.pendingGraphConf,
+        });
+        this.pendingGraphConf = undefined;
     }
 
     public onGraph(hl: boolean) {
@@ -534,264 +615,90 @@ export class Graph extends Model {
             // 界面没有渲染时不能进行渲染
             return;
         }
-        this.network?.destroy();
         if (!this.graphData || !this.graphData.nodes || this.graphData.nodes.length === 0) {
+            this.renderedGraphData = undefined;
+            this.graphEngine.clear();
             return;
         }
-        // 使用颜色
         const rootStyle = getComputedStyle(document.body);
-        this.graphData.nodes.forEach(item => {
-            switch (item.type) {
-                case "NodeDocument":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-doc-point").trim()};
-                    break;
-                case "NodeParagraph":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-p-point").trim()};
-                    break;
-                case "NodeHeading":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-heading-point").trim()};
-                    break;
-                case "NodeMathBlock":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-math-point").trim()};
-                    break;
-                case "NodeCodeBlock":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-code-point").trim()};
-                    break;
-                case "NodeTable":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-table-point").trim()};
-                    break;
-                case "NodeList":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-list-point").trim()};
-                    break;
-                case "NodeListItem":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-listitem-point").trim()};
-                    break;
-                case "NodeBlockquote":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-bq-point").trim()};
-                    break;
-                case "NodeCallout":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-callout-point").trim()};
-                    break;
-                case "NodeSuperBlock":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-super-point").trim()};
-                    break;
-                case "tag":
-                case "textmark tag":
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-tag-point").trim()};
-                    break;
-                default:
-                    item.color = {background: rootStyle.getPropertyValue("--b3-graph-p-point").trim()};
-                    break;
+        const config = window.siyuan.config.graph[this.type === "global" ? "global" : "local"];
+        const options = {
+            ...config.d3,
+        };
+        const palette = {
+            background: rootStyle.getPropertyValue("--b3-theme-on-background").trim(),
+            blockquote: rootStyle.getPropertyValue("--b3-graph-bq-point").trim(),
+            callout: rootStyle.getPropertyValue("--b3-graph-callout-point").trim(),
+            code: rootStyle.getPropertyValue("--b3-graph-code-point").trim(),
+            document: rootStyle.getPropertyValue("--b3-graph-doc-point").trim(),
+            heading: rootStyle.getPropertyValue("--b3-graph-heading-point").trim(),
+            highlightLine: rootStyle.getPropertyValue("--b3-graph-hl-line").trim(),
+            highlightPoint: rootStyle.getPropertyValue("--b3-graph-hl-point").trim(),
+            line: rootStyle.getPropertyValue("--b3-graph-line").trim(),
+            list: rootStyle.getPropertyValue("--b3-graph-list-point").trim(),
+            listItem: rootStyle.getPropertyValue("--b3-graph-listitem-point").trim(),
+            math: rootStyle.getPropertyValue("--b3-graph-math-point").trim(),
+            paragraph: rootStyle.getPropertyValue("--b3-graph-p-point").trim(),
+            referenceLine: rootStyle.getPropertyValue("--b3-graph-ref-line").trim(),
+            superBlock: rootStyle.getPropertyValue("--b3-graph-super-point").trim(),
+            table: rootStyle.getPropertyValue("--b3-graph-table-point").trim(),
+            tag: rootStyle.getPropertyValue("--b3-graph-tag-point").trim(),
+        };
+        if (this.renderedGraphData !== this.graphData) {
+            this.renderedGraphData = this.graphData;
+            this.graphEngine.setData(this.graphData.nodes, this.graphData.links, options, palette, hl ? this.blockId : "");
+        } else {
+            this.graphEngine.updateOptions(options, palette);
+            this.graphEngine.resize();
+            if (hl) {
+                this.hlNode(this.blockId);
             }
-        });
-        this.graphData.links.forEach(item => {
-            if (item.ref) {
-                item.color = {color: rootStyle.getPropertyValue("--b3-graph-ref-line").trim()};
-            } else {
-                item.color = {color: rootStyle.getPropertyValue("--b3-graph-line").trim()};
-            }
-        });
-        addScript(`${Constants.PROTYLE_CDN}/js/vis/vis-network.min.js?v=9.1.13`, "protyleVisScript").then(() => {
-            this.network?.destroy();
-            if (!this.graphData || !this.graphData.nodes || this.graphData.nodes.length === 0) {
-                return;
-            }
-            const config = window.siyuan.config.graph[this.type === "global" ? "global" : "local"];
-            const timestep = 32 < this.graphData.nodes.length ? 0.1 : 0.5;
-            let maxVelocity = this.graphData.nodes.length;
-            if (this.graphData.nodes.length > 1024) {
-                maxVelocity = 1024;
-            }
-            if (this.graphData.nodes.length < 256) {
-                maxVelocity = 256;
-            }
-            let minVelocity = this.graphData.nodes.length;
-            if (this.graphData.nodes.length > 64) {
-                minVelocity = 64;
-            }
-            if (this.graphData.nodes.length < 16) {
-                minVelocity = 8;
-            }
-            const options = {
-                autoResize: true,
-                interaction: {
-                    hover: true,
-                    zoomSpeed: 0.5, // 1 is default
-                },
-                nodes: {
-                    borderWidth: 0,
-                    borderWidthSelected: 5,
-                    shape: "dot",
-                    font: {
-                        face: rootStyle.getPropertyValue("--b3-font-family-graph").trim(),
-                        size: 32,
-                        color: rootStyle.getPropertyValue("--b3-theme-on-background").trim(),
-                    },
-                    color: {
-                        hover: {
-                            border: rootStyle.getPropertyValue("--b3-graph-hl-point").trim(),
-                            background: rootStyle.getPropertyValue("--b3-graph-hl-point").trim()
-                        },
-                        highlight: {
-                            border: rootStyle.getPropertyValue("--b3-graph-hl-point").trim(),
-                            background: rootStyle.getPropertyValue("--b3-graph-hl-point").trim()
-                        },
-                    }
-                },
-                edges: {
-                    width: config.d3.linkWidth,
-                    arrowStrikethrough: false,
-                    smooth: false,
-                    color: {
-                        opacity: config.d3.lineOpacity,
-                        hover: rootStyle.getPropertyValue("--b3-graph-hl-line").trim(),
-                        highlight: rootStyle.getPropertyValue("--b3-graph-hl-line").trim(),
-                    }
-                },
-                layout: {
-                    randomSeed: 0,
-                    improvedLayout: false,
-                },
-                physics: {
-                    enabled: true,
-                    forceAtlas2Based: {
-                        theta: 0.5,
-                        gravitationalConstant: -config.d3.collideRadius,
-                        centralGravity: config.d3.centerStrength,
-                        springConstant: config.d3.collideStrength,
-                        springLength: config.d3.linkDistance,
-                        damping: 0.4,
-                        avoidOverlap: 0.5
-                    },
-                    maxVelocity: maxVelocity,
-                    minVelocity: minVelocity,
-                    solver: "forceAtlas2Based",
-                    stabilization: {
-                        enabled: true,
-                        iterations: 64,
-                        updateInterval: 64,
-                        onlyDynamicEdges: false,
-                        fit: true
-                    },
-                    timestep: timestep,
-                    adaptiveTimestep: true,
-                    wind: {x: 0, y: 0}
-                },
-            };
-            let i = Math.max(Math.ceil(this.graphData.nodes.length * 0.1), 128);
-            let j = Math.max(Math.ceil(this.graphData.links.length * 0.1), 128);
-            const nodes = new vis.DataSet(this.graphData.nodes.slice(0, i));
-            const edges = new vis.DataSet(this.graphData.links.slice(0, j));
-            const network = new vis.Network(this.graphElement, {nodes, edges}, options);
-            const initialScale = Math.max(0.03, 1 - 0.3 * Math.floor(this.graphData.nodes.length / 128));
-            if (1 !== initialScale) {
-                network.moveTo({
-                    position: {x: 0, y: 0},
-                    scale: initialScale,
-                    animation: false
+        }
+    }
+
+    private openGraphNode(details: IGraphNodeClick) {
+        const node = details.node;
+        if (-1 < node.type.indexOf("tag")) {
+            openGlobalSearch(this.app, `#${node.id}#`, !window.siyuan.ctrlIsPressed, {method: 0});
+            return;
+        }
+        if (window.siyuan.shiftIsPressed) {
+            checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
+                openFileById({
+                    app: this.app,
+                    id: node.id,
+                    position: "bottom",
+                    action,
+                    zoomIn
                 });
-            }
-            const time = 256;
-            const intervalNodeTime = Math.max(Math.ceil(time / 8), 32);
-            let batch = this.graphData.nodes.length / time / 2;
-            if (batch < 64) {
-                batch = 64;
-            }
-            if (batch > 256) {
-                batch = 256;
-            }
-            const intervalNode = setInterval(() => {
-                if (!network.images) {
-                    clearInterval(intervalEdge);
-                    return;
-                }
-                const nodesAdded = this.graphData.nodes.slice(i, i + batch);
-                if (nodesAdded.length === 0) {
-                    clearInterval(intervalNode);
-                    return;
-                }
-                network.body.data.nodes.add(nodesAdded);
-                i += batch;
-            }, intervalNodeTime);
-            const intervalEdge = setInterval(() => {
-                if (!network.images) {
-                    clearInterval(intervalEdge);
-                    return;
-                }
-                const edgesAdded = this.graphData.links.slice(j, j + batch);
-                if (edgesAdded.length === 0) {
-                    clearInterval(intervalEdge);
-                    network.fit({
-                        animation: true
-                    });
-                    return;
-                }
-                network.body.data.edges.add(edgesAdded);
-                j += batch;
-            }, time);
-            this.network = network;
-            network.on("stabilizationIterationsDone", () => {
-                network.physics.stopSimulation();
-                if (hl) {
-                    this.hlNode(this.blockId);
-                }
             });
-            network.on("dragEnd", () => {
-                setTimeout(() => {
-                    network.physics.stopSimulation();
-                }, 3000);
+        } else if (window.siyuan.altIsPressed) {
+            checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
+                openFileById({
+                    app: this.app,
+                    id: node.id,
+                    position: "right",
+                    action,
+                    zoomIn
+                });
             });
-            network.on("click", (params: any) => {
-                if (params.nodes.length !== 1) {
-                    return;
-                }
-                const node = this.graphData.nodes.find((item) => item.id === params.nodes[0]);
-                if (!node) {
-                    return;
-                }
-                if (-1 < node.type.indexOf("tag")) {
-                    openGlobalSearch(this.app, `#${node.id}#`, !window.siyuan.ctrlIsPressed, {method: 0});
-                    return;
-                }
-                if (window.siyuan.shiftIsPressed) {
-                    checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
-                        openFileById({
-                            app: this.app,
-                            id: node.id,
-                            position: "bottom",
-                            action,
-                            zoomIn
-                        });
-                    });
-                } else if (window.siyuan.altIsPressed) {
-                    checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
-                        openFileById({
-                            app: this.app,
-                            id: node.id,
-                            position: "right",
-                            action,
-                            zoomIn
-                        });
-                    });
-                } else if (window.siyuan.ctrlIsPressed) {
-                    window.siyuan.blockPanels.push(new BlockPanel({
-                        app: this.app,
-                        isBacklink: false,
-                        x: params.event.center.x,
-                        y: params.event.center.y,
-                        refDefs: [{refID: node.id}]
-                    }));
-                } else {
-                    checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
-                        openFileById({
-                            app: this.app,
-                            id: node.id,
-                            action,
-                            zoomIn
-                        });
-                    });
-                }
+        } else if (window.siyuan.ctrlIsPressed) {
+            window.siyuan.blockPanels.push(new BlockPanel({
+                app: this.app,
+                isBacklink: false,
+                x: details.x,
+                y: details.y,
+                refDefs: [{refID: node.id}]
+            }));
+        } else {
+            checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
+                openFileById({
+                    app: this.app,
+                    id: node.id,
+                    action,
+                    zoomIn
+                });
             });
-        });
+        }
     }
 }

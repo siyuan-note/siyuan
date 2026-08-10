@@ -1951,7 +1951,7 @@ func bootSyncRepo() (err error) {
 
 		start := time.Now()
 		syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-		cloudLatest, cloudLatestErr = repo.GetCloudLatest(syncContext)
+		cloudLatest, cloudLatestErr = repo.GetCloudLatestFast(syncContext)
 		if nil != cloudLatestErr && !errors.Is(cloudLatestErr, cloud.ErrCloudObjectNotFound) {
 			logging.LogErrorf("download cloud latest failed: %s", cloudLatestErr)
 		}

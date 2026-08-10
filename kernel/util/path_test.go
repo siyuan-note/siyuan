@@ -19,8 +19,36 @@ package util
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 )
+
+func TestFilterSelfChildDocsPreservesInputOrder(t *testing.T) {
+	paths := []string{
+		"/20260810000001-abcdefg/20260810000002-abcdefg.sy",
+		"/20260810000003-abcdefg.sy",
+		"/20260810000004-abcdefg/20260810000005-abcdefg.sy",
+	}
+	want := append([]string(nil), paths...)
+
+	if got := FilterSelfChildDocs(paths); !reflect.DeepEqual(got, want) {
+		t.Fatalf("unexpected filtered paths: got %v, want %v", got, want)
+	}
+	if !reflect.DeepEqual(paths, want) {
+		t.Fatalf("input paths changed: got %v, want %v", paths, want)
+	}
+}
+
+func TestFilterSelfChildDocsRemovesChildrenAndDuplicates(t *testing.T) {
+	parentPath := "/20260810000001-abcdefg.sy"
+	childPath := "/20260810000001-abcdefg/20260810000002-abcdefg.sy"
+	otherPath := "/20260810000003-abcdefg.sy"
+	paths := []string{childPath, otherPath, parentPath, otherPath}
+
+	if got, want := FilterSelfChildDocs(paths), []string{otherPath, parentPath}; !reflect.DeepEqual(got, want) {
+		t.Fatalf("unexpected filtered paths: got %v, want %v", got, want)
+	}
+}
 
 // TestGetTreeID 校验使用不同路径分隔符时均能提取相同的文档 ID。
 func TestGetTreeID(t *testing.T) {

@@ -4,6 +4,7 @@ import {
     findMovedFileTreeItem,
     IFileTreeMove,
     insertDocumentSortPath,
+    insertDocumentsSortPaths,
     parseDocumentTabDragData,
     remapMovedPath,
     restoreMovedExpandedDocItems,
@@ -61,6 +62,50 @@ describe("insertDocumentSortPath", () => {
             "/missing.sy",
             false
         ), undefined);
+    });
+});
+
+describe("insertDocumentsSortPaths", () => {
+    it("inserts documents from another parent after the target in source order", () => {
+        assert.deepEqual(insertDocumentsSortPaths(
+            ["/target-a.sy", "/target-b.sy", "/target-c.sy"],
+            ["/source-a.sy", "/source-b.sy", "/source-c.sy"],
+            "/target-b.sy",
+            true
+        ), ["/target-a.sy", "/target-b.sy", "/source-a.sy", "/source-b.sy", "/source-c.sy", "/target-c.sy"]);
+    });
+
+    it("reorders documents already under the target parent before the target", () => {
+        assert.deepEqual(insertDocumentsSortPaths(
+            ["/a.sy", "/source-a.sy", "/b.sy", "/source-b.sy", "/c.sy"],
+            ["/source-a.sy", "/source-b.sy"],
+            "/b.sy",
+            false
+        ), ["/a.sy", "/source-a.sy", "/source-b.sy", "/b.sy", "/c.sy"]);
+    });
+
+    it("removes source documents by ID when their parent paths change", () => {
+        assert.deepEqual(insertDocumentsSortPaths(
+            ["/old/source-a.sy", "/target.sy", "/old/source-b.sy"],
+            ["/new/source-a.sy", "/new/source-b.sy"],
+            "/target.sy",
+            true
+        ), ["/target.sy", "/new/source-a.sy", "/new/source-b.sy"]);
+    });
+
+    it("does not modify its input arrays", () => {
+        const siblingPaths = ["/a.sy", "/b.sy"];
+        const newPaths = ["/source-a.sy", "/source-b.sy"];
+
+        insertDocumentsSortPaths(siblingPaths, newPaths, "/b.sy", true);
+
+        assert.deepEqual(siblingPaths, ["/a.sy", "/b.sy"]);
+        assert.deepEqual(newPaths, ["/source-a.sy", "/source-b.sy"]);
+    });
+
+    it("returns undefined for empty sources or a missing target", () => {
+        assert.equal(insertDocumentsSortPaths(["/a.sy"], [], "/a.sy", true), undefined);
+        assert.equal(insertDocumentsSortPaths(["/a.sy"], ["/source.sy"], "/missing.sy", true), undefined);
     });
 });
 

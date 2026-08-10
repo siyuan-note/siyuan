@@ -58,7 +58,7 @@ import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
-import {getBlockHintCloseLength, getBlockHintTriggerOffset} from "./blockHintRange";
+import {getBlockHintTriggerOffset} from "./blockHintRange";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -90,23 +90,6 @@ const getWholeTextOffset = (textNode: Text, offset: number) => {
         previousSibling = previousSibling.previousSibling;
     }
     return offset;
-};
-
-const setRangeEndByWholeTextOffset = (range: Range, textNode: Text, offset: number) => {
-    while (textNode.previousSibling?.nodeType === 3) {
-        textNode = textNode.previousSibling as Text;
-    }
-    while (textNode) {
-        if (offset <= textNode.textContent.length) {
-            range.setEnd(textNode, offset);
-            return;
-        }
-        offset -= textNode.textContent.length;
-        if (textNode.nextSibling?.nodeType !== 3) {
-            return;
-        }
-        textNode = textNode.nextSibling as Text;
-    }
 };
 
 export class Hint {
@@ -686,23 +669,6 @@ ${genHintItemHTML(item)}
         }
         const html = nodeElement.outerHTML;
         // 自顶向下法新建文档后光标定位问题 https://github.com/siyuan-note/siyuan/issues/299
-        // QQ 拼音输入法自动补全需移除补全内容 https://github.com/siyuan-note/siyuan/issues/320
-        // 前后有标记符的情况 https://github.com/siyuan-note/siyuan/issues/2511
-        const endSplit = Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar];
-        // 仅移除当前提示所属的闭合符号，保留触发范围外的原有符号
-        let removeCloseLength = 0;
-        if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) && endSplit && this.lastIndex > -1 &&
-            range.startContainer.nodeType === 3) {
-            const textNode = range.startContainer as Text;
-            const caretOffset = getWholeTextOffset(textNode, range.startOffset);
-            const triggerOffset = getWholeTextOffset(textNode, this.lastIndex);
-            removeCloseLength = getBlockHintCloseLength(textNode.wholeText.substring(0, triggerOffset),
-                textNode.wholeText.substring(caretOffset), this.splitChar, endSplit);
-            if (removeCloseLength > 0) {
-                setRangeEndByWholeTextOffset(range, textNode, caretOffset + removeCloseLength);
-            }
-        }
-
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
             focusByRange(range);
@@ -747,8 +713,7 @@ ${genHintItemHTML(item)}
             tempElement = tempElement.firstElementChild as HTMLDivElement;
             if (refIsS) {
                 const selectedText = range.toString();
-                const staticText = selectedText.substring(this.splitChar.length,
-                    Math.max(this.splitChar.length, selectedText.length - removeCloseLength));
+                const staticText = selectedText.substring(this.splitChar.length);
                 if (staticText) {
                     tempElement.setAttribute("data-subtype", "s");
                     tempElement.innerText = staticText;

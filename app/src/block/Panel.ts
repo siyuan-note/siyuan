@@ -305,6 +305,7 @@ export class BlockPanel {
                 action.push(Constants.CB_GET_BACKLINK);
             }
             const isDocument = response.data.rootID === this.refDefs[index].refID;
+            let isInitialRender = true;
             const editor = new Protyle(this.app, editorElement, {
                 databaseAttr: true,
                 blockId: this.refDefs[index].refID,
@@ -336,6 +337,15 @@ export class BlockPanel {
                     }
                     if (afterCB) {
                         afterCB();
+                    }
+                    if (isInitialRender) {
+                        isInitialRender = false;
+                        if (isDocument) {
+                            const backgroundImageElement = editor.protyle.background.element.querySelector<HTMLElement>(".protyle-background__img");
+                            const scrollTop = backgroundImageElement?.clientHeight || 0;
+                            editor.protyle.contentElement.scrollTop = scrollTop;
+                            editor.protyle.scroll.lastScrollTop = scrollTop;
+                        }
                     }
                     // https://ld246.com/article/1653639418266
                     if (this.refDefs.length > 1 && editor.protyle.element.dataset.resized !== "true") {

@@ -264,9 +264,9 @@ export class GraphEngine {
         }
         if (wasHidden) {
             this.postLayoutMessage({type: "resume", generation: this.generation});
-            if (this.data && !this.cameraTouched) {
-                this.fit(false);
-            }
+        }
+        if (this.data && !this.cameraTouched && (wasHidden || this.autoFitPending)) {
+            this.fit(false);
         }
         this.scheduleRender();
     }

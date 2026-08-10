@@ -679,7 +679,9 @@ func getDocInfo(c *gin.Context) {
 	}
 	if nil == info {
 		ret.Code = -1
-		if err != nil && !errors.Is(err, model.ErrTreeNotFound) {
+		if errors.Is(err, model.ErrIndexing) {
+			ret.Msg = model.Conf.Language(56)
+		} else if err != nil && !errors.Is(err, model.ErrTreeNotFound) {
 			ret.Msg = err.Error()
 		} else {
 			ret.Msg = fmt.Sprintf(model.Conf.Language(15), id)

@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "اختر القدرات التي توفرها خدمة MCP في SiYuan للعملاء الخارجيين",
+	"agentCapabilitiesScopeAgent": "استخدام Agent",
+	"agentCapabilitiesScopeMcp": "التوفير عبر MCP",
 	"agentCapabilitiesApprovalMode": "وضع الموافقة",
 	"agentCapabilitiesDialogTip": "اختر القدرات المتاحة لـ Agent؛ كل تعريف مفعّل يزيد استخدام token",
 	"agentCapabilitiesSearch": "البحث في أسماء القدرات أو أوصافها",

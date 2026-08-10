@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "SiYuan MCP 서비스를 통해 외부 클라이언트에 제공할 기능을 선택하세요",
+	"agentCapabilitiesScopeAgent": "Agent에서 사용",
+	"agentCapabilitiesScopeMcp": "MCP로 제공",
 	"agentCapabilitiesApprovalMode": "승인 모드",
 	"agentCapabilitiesDialogTip": "Agent가 사용할 수 있는 기능을 선택하세요. 활성화된 정의마다 token 사용량이 늘어납니다",
 	"agentCapabilitiesSearch": "기능 이름 또는 설명 검색",

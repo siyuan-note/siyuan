@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "SiYuan MCP サービスを通じて外部クライアントに提供する機能を選択します",
+	"agentCapabilitiesScopeAgent": "Agent で使用",
+	"agentCapabilitiesScopeMcp": "MCP で外部提供",
 	"agentCapabilitiesApprovalMode": "承認モード",
 	"agentCapabilitiesDialogTip": "Agent が使用できる機能を選択します。有効な定義ごとに token 使用量が増えます",
 	"agentCapabilitiesSearch": "機能名または説明を検索",

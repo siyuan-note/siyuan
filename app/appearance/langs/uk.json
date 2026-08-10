@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "Виберіть можливості, що надаються зовнішнім клієнтам через службу MCP SiYuan",
+	"agentCapabilitiesScopeAgent": "Використання Agent",
+	"agentCapabilitiesScopeMcp": "Надавати через MCP",
 	"agentCapabilitiesApprovalMode": "Режим схвалення",
 	"agentCapabilitiesDialogTip": "Виберіть доступні Agent можливості; кожне ввімкнене визначення збільшує використання token",
 	"agentCapabilitiesSearch": "Пошук за назвою або описом можливості",

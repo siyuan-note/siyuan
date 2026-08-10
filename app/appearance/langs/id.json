@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "Pilih kemampuan yang disediakan layanan MCP SiYuan untuk klien eksternal",
+	"agentCapabilitiesScopeAgent": "Penggunaan Agent",
+	"agentCapabilitiesScopeMcp": "Sediakan melalui MCP",
 	"agentCapabilitiesApprovalMode": "Mode persetujuan",
 	"agentCapabilitiesDialogTip": "Pilih kemampuan yang tersedia untuk Agent; setiap definisi aktif meningkatkan penggunaan token",
 	"agentCapabilitiesSearch": "Cari nama atau deskripsi kemampuan",

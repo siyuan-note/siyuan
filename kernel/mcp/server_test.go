@@ -130,6 +130,86 @@ func TestModernProtocolClient(t *testing.T) {
 	}
 }
 
+func TestToolProjectionPolicyAndExecutionRecheck(t *testing.T) {
+	server := newServer()
+	allowed := true
+	projection := newToolProjection(server, func(tool *tools.Tool) bool {
+		return allowed && tool.Source != "mcp"
+	})
+	handlerCalls := 0
+	tool := &tools.Tool{
+		Name:         "projected",
+		Description:  "Projected tool",
+		InputSchema:  tools.ToolSchema{Type: "object"},
+		CapabilityID: "native/backend/projected",
+		Handler: func(map[string]any) (tools.CallToolResult, error) {
+			handlerCalls++
+			return tools.CallToolResult{}, nil
+		},
+	}
+	projection.sync(tool.Name, tool)
+
+	httpServer := httptest.NewServer(newHTTPHandler(server))
+	t.Cleanup(httpServer.Close)
+	client := mcpsdk.NewClient(&mcpsdk.Implementation{Name: "test-client", Version: "1.0.0"}, nil)
+	session, err := client.Connect(t.Context(), &mcpsdk.StreamableClientTransport{Endpoint: httpServer.URL}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { session.Close() })
+
+	listResult, err := session.ListTools(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !toolListContains(listResult.Tools, tool.Name) {
+		t.Fatal("allowed capability was not exposed")
+	}
+
+	allowed = false
+	callResult, err := session.CallTool(t.Context(), &mcpsdk.CallToolParams{Name: tool.Name})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !callResult.IsError || handlerCalls != 0 {
+		t.Fatalf("disabled capability was executed: result=%#v calls=%d", callResult, handlerCalls)
+	}
+
+	projection.sync(tool.Name, tool)
+	listResult, err = session.ListTools(t.Context(), nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if toolListContains(listResult.Tools, tool.Name) {
+		t.Fatal("disabled capability remained exposed")
+	}
+
+	allowed = true
+	projection.sync(tool.Name, tool)
+	callResult, err = session.CallTool(t.Context(), &mcpsdk.CallToolParams{Name: tool.Name})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if callResult.IsError || handlerCalls != 1 {
+		t.Fatalf("re-enabled capability was not executed: result=%#v calls=%d", callResult, handlerCalls)
+	}
+}
+
+func TestExternalMCPToolsAreNotReexposed(t *testing.T) {
+	if externalMCPToolAllowed(&tools.Tool{Name: "remote", Source: "mcp", Runtime: "mcp"}) {
+		t.Fatal("external MCP capability was exposed through the SiYuan MCP server")
+	}
+}
+
+func toolListContains(toolList []*mcpsdk.Tool, name string) bool {
+	for _, tool := range toolList {
+		if tool.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 func TestToolOutputSchemaSerialization(t *testing.T) {
 	server, httpServer := newTestHTTPServer(t)
 	syncTool(server, "structured", &tools.Tool{

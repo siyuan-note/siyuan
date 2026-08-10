@@ -644,7 +644,8 @@
   &-agent-capability {
     &__content {
       box-sizing: border-box;
-      height: 100%;
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
       padding: 0;
     }

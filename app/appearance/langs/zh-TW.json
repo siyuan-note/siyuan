@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "選擇透過思源 MCP 服務提供給外部客戶端的能力",
+	"agentCapabilitiesScopeAgent": "智能體使用",
+	"agentCapabilitiesScopeMcp": "MCP 對外提供",
 	"agentCapabilitiesApprovalMode": "批准方式",
 	"agentCapabilitiesDialogTip": "選擇智能體可以使用的能力；每個已啟用的定義都會增加 token 用量",
 	"agentCapabilitiesSearch": "搜尋能力名稱或描述",

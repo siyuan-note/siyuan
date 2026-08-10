@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "Kies de mogelijkheden die de SiYuan MCP-service aan externe clients aanbiedt",
+	"agentCapabilitiesScopeAgent": "Gebruik door Agent",
+	"agentCapabilitiesScopeMcp": "Aanbieden via MCP",
 	"agentCapabilitiesApprovalMode": "Goedkeuringsmodus",
 	"agentCapabilitiesDialogTip": "Kies de mogelijkheden die de Agent mag gebruiken; elke ingeschakelde definitie verhoogt het token-gebruik",
 	"agentCapabilitiesSearch": "Zoek op naam of beschrijving van mogelijkheden",

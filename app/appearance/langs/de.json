@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "Wählen Sie die Funktionen aus, die der SiYuan-MCP-Dienst externen Clients bereitstellt",
+	"agentCapabilitiesScopeAgent": "Agent-Nutzung",
+	"agentCapabilitiesScopeMcp": "Über MCP bereitstellen",
 	"agentCapabilitiesApprovalMode": "Genehmigungsmodus",
 	"agentCapabilitiesDialogTip": "Wählen Sie die für den Agent verfügbaren Funktionen; jede aktivierte Definition erhöht den token-Verbrauch",
 	"agentCapabilitiesSearch": "Funktionsnamen oder Beschreibungen durchsuchen",

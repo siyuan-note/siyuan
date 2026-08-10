@@ -617,7 +617,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/agent/setPermission", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setAgentSessionPermission)
 	ginServer.Handle("POST", "/api/ai/agent/question", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChatQuestion)
 	ginServer.Handle("POST", "/api/ai/agent/browserCapabilityResult", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, agentChatBrowserCapabilityResult)
-	ginServer.Handle("POST", "/api/ai/agent/lsCapabilities", model.CheckAuth, model.CheckAdminRole, lsAgentCapabilities)
+	ginServer.Handle("POST", "/api/ai/lsCapabilities", model.CheckAuth, model.CheckAdminRole, lsCapabilities)
 	ginServer.Handle("POST", "/api/ai/agent/title", model.CheckAuth, model.CheckAdminRole, agentChatTitle)
 	ginServer.Handle("POST", "/api/ai/agent/lsSessions", model.CheckAuth, model.CheckAdminRole, lsSessions)
 	ginServer.Handle("POST", "/api/ai/agent/getSession", model.CheckAuth, model.CheckAdminRole, getSession)

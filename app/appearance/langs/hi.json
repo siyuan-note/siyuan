@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "SiYuan MCP सेवा के माध्यम से बाहरी क्लाइंट को दी जाने वाली क्षमताएँ चुनें",
+	"agentCapabilitiesScopeAgent": "Agent में उपयोग",
+	"agentCapabilitiesScopeMcp": "MCP से उपलब्ध कराएँ",
 	"agentCapabilitiesApprovalMode": "स्वीकृति मोड",
 	"agentCapabilitiesDialogTip": "Agent के लिए उपलब्ध क्षमताएँ चुनें; हर सक्षम परिभाषा token उपयोग बढ़ाती है",
 	"agentCapabilitiesSearch": "क्षमता के नाम या विवरण खोजें",

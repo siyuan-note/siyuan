@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "เลือกความสามารถที่ให้บริการแก่ไคลเอนต์ภายนอกผ่านบริการ MCP ของ SiYuan",
+	"agentCapabilitiesScopeAgent": "ใช้โดย Agent",
+	"agentCapabilitiesScopeMcp": "ให้บริการผ่าน MCP",
 	"agentCapabilitiesApprovalMode": "โหมดการอนุมัติ",
 	"agentCapabilitiesDialogTip": "เลือกความสามารถที่ Agent ใช้ได้ โดยทุกข้อกำหนดที่เปิดใช้จะเพิ่มการใช้ token",
 	"agentCapabilitiesSearch": "ค้นหาชื่อหรือคำอธิบายความสามารถ",

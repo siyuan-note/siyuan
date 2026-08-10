@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "SiYuan MCP hizmeti üzerinden harici istemcilere sunulan yetenekleri seçin",
+	"agentCapabilitiesScopeAgent": "Agent kullanımı",
+	"agentCapabilitiesScopeMcp": "MCP ile sun",
 	"agentCapabilitiesApprovalMode": "Onay modu",
 	"agentCapabilitiesDialogTip": "Agent'ın kullanabileceği yetenekleri seçin; etkin her tanım token kullanımını artırır",
 	"agentCapabilitiesSearch": "Yetenek adı veya açıklaması ara",

@@ -131,7 +131,8 @@ type Model struct {
 }
 
 type MCP struct {
-	Servers []MCPServer `json:"servers"`
+	Servers        []MCPServer       `json:"servers"`
+	ExposurePolicy *CapabilityPolicy `json:"exposurePolicy"`
 }
 
 type MCPServer struct {
@@ -183,6 +184,24 @@ func defaultCapabilityPolicy() *CapabilityPolicy {
 	}
 }
 
+func normalizeCapabilityPolicy(policy *CapabilityPolicy) *CapabilityPolicy {
+	if policy == nil {
+		return defaultCapabilityPolicy()
+	}
+	if policy.Default != "deny" {
+		policy.Default = "allow"
+	}
+	if policy.Overrides == nil {
+		policy.Overrides = map[string]string{}
+	}
+	for id, decision := range policy.Overrides {
+		if id == "" || decision != "allow" && decision != "deny" {
+			delete(policy.Overrides, id)
+		}
+	}
+	return policy
+}
+
 func (policy *CapabilityPolicy) Allows(id string) bool {
 	if policy == nil {
 		return true
@@ -223,7 +242,7 @@ func defaultImageGeneration() *ImageGeneration {
 func NewAI() *AI {
 	ai := &AI{
 		Providers:       []*Provider{},
-		MCP:             &MCP{Servers: []MCPServer{}},
+		MCP:             &MCP{Servers: []MCPServer{}, ExposurePolicy: defaultCapabilityPolicy()},
 		Embedding:       defaultEmbedding(),
 		Rerank:          defaultRerank(),
 		Agent:           defaultAgent(),
@@ -449,10 +468,11 @@ func (ai *AI) Normalize() {
 		ai.Providers = []*Provider{}
 	}
 	if ai.MCP == nil {
-		ai.MCP = &MCP{Servers: []MCPServer{}}
+		ai.MCP = &MCP{Servers: []MCPServer{}, ExposurePolicy: defaultCapabilityPolicy()}
 	} else if ai.MCP.Servers == nil {
 		ai.MCP.Servers = []MCPServer{}
 	}
+	ai.MCP.ExposurePolicy = normalizeCapabilityPolicy(ai.MCP.ExposurePolicy)
 	serverIDs := map[string]bool{}
 	for i := range ai.MCP.Servers {
 		if ai.MCP.Servers[i].ID == "" || serverIDs[ai.MCP.Servers[i].ID] {
@@ -463,21 +483,7 @@ func (ai *AI) Normalize() {
 	if ai.Agent == nil {
 		ai.Agent = defaultAgent()
 	} else {
-		if ai.Agent.CapabilityPolicy == nil {
-			ai.Agent.CapabilityPolicy = defaultCapabilityPolicy()
-		} else {
-			if ai.Agent.CapabilityPolicy.Default != "deny" {
-				ai.Agent.CapabilityPolicy.Default = "allow"
-			}
-			if ai.Agent.CapabilityPolicy.Overrides == nil {
-				ai.Agent.CapabilityPolicy.Overrides = map[string]string{}
-			}
-			for id, decision := range ai.Agent.CapabilityPolicy.Overrides {
-				if id == "" || decision != "allow" && decision != "deny" {
-					delete(ai.Agent.CapabilityPolicy.Overrides, id)
-				}
-			}
-		}
+		ai.Agent.CapabilityPolicy = normalizeCapabilityPolicy(ai.Agent.CapabilityPolicy)
 		if ai.Agent.ApprovalPolicy == nil {
 			ai.Agent.ApprovalPolicy = defaultApprovalPolicy()
 		} else {

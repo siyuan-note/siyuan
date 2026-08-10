@@ -30,6 +30,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/agent"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -350,9 +351,9 @@ func agentChatBrowserCapabilityResult(c *gin.Context) {
 	c.JSON(http.StatusOK, ret)
 }
 
-func lsAgentCapabilities(c *gin.Context) {
+func lsCapabilities(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
-	ret.Data = agent.ListBackendCapabilities()
+	ret.Data = tools.ListCapabilityManifests()
 	c.JSON(http.StatusOK, ret)
 }
 

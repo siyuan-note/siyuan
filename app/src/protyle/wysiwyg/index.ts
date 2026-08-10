@@ -168,6 +168,7 @@ import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard, prepareRichClipboardHTML} from "../util/richClipboard";
+import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
@@ -699,6 +700,7 @@ export class WYSIWYG {
             let textPlain = "";
             let isInCodeBlock = false;
             let needClipboardWrite = false;
+            let useBlockDOMClipboardRichData = false;
             let nestedListPaste = false;
             if (selectElements.length > 0) {
                 const isRefText = selectElements[0].getAttribute("data-reftext") === "true";
@@ -724,6 +726,7 @@ export class WYSIWYG {
                         let itemHTML = "";
                         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                             needClipboardWrite = true;
+                            useBlockDOMClipboardRichData = true;
                             const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
                                 id: item.getAttribute("data-node-id"),
                                 removeFoldAttr: false
@@ -731,6 +734,7 @@ export class WYSIWYG {
                             itemHTML = response.data;
                         } else if (item.getAttribute("data-type") !== "NodeBlockQueryEmbed" && item.querySelector('[data-type="NodeHeading"][fold="1"]')) {
                             needClipboardWrite = true;
+                            useBlockDOMClipboardRichData = true;
                             const response = await fetchSyncPost("/api/block/getBlockDOM", {
                                 id: item.getAttribute("data-node-id"),
                                 notebook: protyle.notebookId,
@@ -950,24 +954,27 @@ export class WYSIWYG {
 
             if (!isInCodeBlock) {
                 enableLuteMarkdownSyntax(protyle);
+                const blockDOMClipboardRichData = useBlockDOMClipboardRichData && !copyAsRichText ?
+                    buildBlockDOMClipboardRichData(protyle.lute, html) : undefined;
                 // 表格选区（框选或跨多单元格文本选区）直接构建 BlockDOM，不走 HTML2BlockDOM 的 markdown 往返
                 //（GFM 表格只有单行表头，markdown 往返会丢失多行 thead 和单元格 th 属性）
-                let textSiyuan: string;
-                if (selectTableElement || selectTableRange) {
+                let textSiyuan = blockDOMClipboardRichData?.textSiyuan;
+                if (!textSiyuan && (selectTableElement || selectTableRange)) {
                     // 表格选区：html 已是合法 <table>...</table>（含 thead/tbody/fn__none 占位），
                     // 构建最小化 NodeTable BlockDOM，不经过 markdown 往返（GFM 表格只有单行表头，往返会丢失多行 thead）
                     const newId = Lute.NewNodeID();
                     textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
                     html = textSiyuan;
-                } else {
+                } else if (!textSiyuan) {
                     textSiyuan = html;
                 }
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 restoreLuteMarkdownSyntax(protyle);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                let exportedHTML = removeZWJ((selectTableElement || selectTableRange) ? html :
-                    (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : html) :
-                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
+                let exportedHTML = blockDOMClipboardRichData?.textHTML ??
+                    removeZWJ((selectTableElement || selectTableRange) ? html :
+                        (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : html) :
+                            protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
                 if (copyAsRichText) {
                     const prepared = prepareRichClipboardHTML(exportedHTML);
                     exportedHTML = prepared.html;
@@ -2970,6 +2977,7 @@ export class WYSIWYG {
             let textPlain = "";
             let isInCodeBlock = false;
             let needClipboardWrite = false;
+            let useBlockDOMClipboardRichData = false;
             let cutBlockSelection = false;
             let cutNextElement: Element | false;
             let cutAVCells: ReturnType<typeof getAVSelectedCells>;
@@ -2994,6 +3002,7 @@ export class WYSIWYG {
                     let itemHTML = "";
                     if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                         needClipboardWrite = true;
+                        useBlockDOMClipboardRichData = true;
                         const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
                             id: item.getAttribute("data-node-id"),
                             removeFoldAttr: false
@@ -3012,6 +3021,7 @@ export class WYSIWYG {
                         });
                     } else if (item.getAttribute("data-type") !== "NodeBlockQueryEmbed" && item.querySelector('[data-type="NodeHeading"][fold="1"]')) {
                         needClipboardWrite = true;
+                        useBlockDOMClipboardRichData = true;
                         const response = await fetchSyncPost("/api/block/getBlockDOM", {
                             id: item.getAttribute("data-node-id"),
                             notebook: protyle.notebookId,
@@ -3267,14 +3277,16 @@ export class WYSIWYG {
 
             if (!isInCodeBlock) {
                 enableLuteMarkdownSyntax(protyle);
+                const blockDOMClipboardRichData = useBlockDOMClipboardRichData ?
+                    buildBlockDOMClipboardRichData(protyle.lute, html) : undefined;
                 // 表格选区（框选或跨多单元格文本选区）直接构建 BlockDOM，不走 HTML2BlockDOM 的 markdown 往返
-                let textSiyuan: string;
-                if (selectTableElement || selectTableRange) {
+                let textSiyuan = blockDOMClipboardRichData?.textSiyuan;
+                if (!textSiyuan && (selectTableElement || selectTableRange)) {
                     // 表格选区：html 已是合法 <table>...</table>，构建最小化 NodeTable BlockDOM，不走 markdown 往返
                     const newId = Lute.NewNodeID();
                     textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
                     html = textSiyuan;
-                } else {
+                } else if (!textSiyuan) {
                     textSiyuan = html;
                 }
                 restoreLuteMarkdownSyntax(protyle);
@@ -3282,8 +3294,9 @@ export class WYSIWYG {
                     event.clipboardData.setData("text/siyuan", textSiyuan);
                 }
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const exportedHTML = removeZWJ((selectTableElement || selectTableRange) ? html :
-                    protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                const exportedHTML = blockDOMClipboardRichData?.textHTML ??
+                    removeZWJ((selectTableElement || selectTableRange) ? html :
+                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
                 const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${exportedHTML}`;
                 if (!cutClipboardWritten) {
                     event.clipboardData.setData("text/html", textHTML);

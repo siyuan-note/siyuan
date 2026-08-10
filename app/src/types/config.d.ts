@@ -172,6 +172,17 @@ declare namespace Config {
         temperature: number;
         maxCompletionTokens: number;
         maxToolCallRounds: number;
+        capabilityPolicy: {
+            default: "allow" | "deny";
+            overrides: Record<string, "allow" | "deny">;
+        };
+        approvalPolicy: {
+            default: "confirm" | "allow";
+            overrides: Record<string, {
+                default: "" | "confirm" | "allow";
+                actions: Record<string, "confirm" | "allow">;
+            }>;
+        };
     }
 
     /**

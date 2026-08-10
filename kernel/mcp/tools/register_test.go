@@ -27,6 +27,30 @@ func TestGetAllToolsSorted(t *testing.T) {
 	}
 }
 
+func TestBuildCapabilityIDKeepsSegmentsDistinct(t *testing.T) {
+	first := BuildCapabilityID("plugin", "backend", "example/plugin", "a/b")
+	second := BuildCapabilityID("plugin", "backend", "example_plugin", "a_b")
+	if first == second {
+		t.Fatalf("different capability segments produced the same ID: %s", first)
+	}
+	if first != BuildCapabilityID("plugin", "backend", "example/plugin", "a/b") {
+		t.Fatal("capability ID is not stable")
+	}
+}
+
+func TestToolEffectsForFallsBackToCapabilityDefault(t *testing.T) {
+	tool := &Tool{ActionEffects: map[string]ToolEffects{
+		"":      {LocalRead: true},
+		"write": {LocalWrite: true},
+	}}
+	if effects, ok := tool.EffectsFor("read"); !ok || !effects.LocalRead {
+		t.Fatal("capability-level effects were not used as the action fallback")
+	}
+	if effects, ok := tool.EffectsFor("write"); !ok || !effects.LocalWrite || effects.LocalRead {
+		t.Fatal("action effects did not override capability-level effects")
+	}
+}
+
 func TestObserveRegistry(t *testing.T) {
 	const name = "registry_observer_test"
 	RemoveTool(name)

@@ -299,7 +299,11 @@ func connectOneServer(ctx context.Context, server conf.MCPServer, interactive bo
 			Description:  desc,
 			InputSchema:  convertMCPSchema(tool.InputSchema),
 			OutputSchema: outputSchema,
+			CapabilityID: tools.BuildCapabilityID("mcp", "backend", server.ID, tool.Name),
 			Source:       "mcp",
+			OwnerID:      server.ID,
+			OwnerName:    server.Name,
+			Runtime:      "mcp",
 			ReadOnlyHint: readOnlyHint,
 			EffectScope:  tools.EffectScopeExternal,
 			Handler: func(args map[string]any) (tools.CallToolResult, error) {
@@ -375,12 +379,18 @@ func sanitizedServerNameCollision(server conf.MCPServer) bool {
 
 func mcpToolName(server conf.MCPServer, toolName string, collision bool) string {
 	name := "mcp_" + sanitize(server.Name) + "_" + sanitize(toolName)
-	if !collision {
+	if !collision && len(name) <= maxMCPToolNameLen {
 		return name
 	}
 	hash := sha256.Sum256([]byte(server.ID + "\x00" + toolName))
-	return fmt.Sprintf("%s_%x", name, hash[:6])
+	suffix := fmt.Sprintf("_%x", hash[:6])
+	if len(name) > maxMCPToolNameLen-len(suffix) {
+		name = name[:maxMCPToolNameLen-len(suffix)]
+	}
+	return name + suffix
 }
+
+const maxMCPToolNameLen = 64
 
 func registerMCPToolsForContext(ctx context.Context, registeredTools map[string]*tools.Tool) bool {
 	generation, ok := ctx.Value(mcpGenerationContextKey{}).(uint64)

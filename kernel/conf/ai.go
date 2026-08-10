@@ -39,14 +39,31 @@ type AI struct {
 }
 
 type Agent struct {
-	ModelID             string  `json:"modelId"`
-	SessionTimeout      int     `json:"sessionTimeout"`
-	StreamIdleTimeout   int     `json:"streamIdleTimeout"`
-	ConfirmTimeout      int     `json:"confirmTimeout"`
-	MaxRetries          int     `json:"maxRetries"`
-	Temperature         float64 `json:"temperature"`
-	MaxCompletionTokens int     `json:"maxCompletionTokens"`
-	MaxToolCallRounds   int     `json:"maxToolCallRounds"`
+	ModelID             string            `json:"modelId"`
+	SessionTimeout      int               `json:"sessionTimeout"`
+	StreamIdleTimeout   int               `json:"streamIdleTimeout"`
+	ConfirmTimeout      int               `json:"confirmTimeout"`
+	MaxRetries          int               `json:"maxRetries"`
+	Temperature         float64           `json:"temperature"`
+	MaxCompletionTokens int               `json:"maxCompletionTokens"`
+	MaxToolCallRounds   int               `json:"maxToolCallRounds"`
+	CapabilityPolicy    *CapabilityPolicy `json:"capabilityPolicy"`
+	ApprovalPolicy      *ApprovalPolicy   `json:"approvalPolicy"`
+}
+
+type CapabilityPolicy struct {
+	Default   string            `json:"default"`
+	Overrides map[string]string `json:"overrides"`
+}
+
+type ApprovalPolicy struct {
+	Default   string                         `json:"default"`
+	Overrides map[string]*CapabilityApproval `json:"overrides"`
+}
+
+type CapabilityApproval struct {
+	Default string            `json:"default"`
+	Actions map[string]string `json:"actions"`
 }
 
 // Editing holds behavior parameters used by the in-editor chat scenario. They
@@ -147,7 +164,48 @@ func defaultAgent() *Agent {
 		Temperature:         1.0,
 		MaxCompletionTokens: 0,
 		MaxToolCallRounds:   64,
+		CapabilityPolicy:    defaultCapabilityPolicy(),
+		ApprovalPolicy:      defaultApprovalPolicy(),
 	}
+}
+
+func defaultApprovalPolicy() *ApprovalPolicy {
+	return &ApprovalPolicy{
+		Default:   "confirm",
+		Overrides: map[string]*CapabilityApproval{},
+	}
+}
+
+func defaultCapabilityPolicy() *CapabilityPolicy {
+	return &CapabilityPolicy{
+		Default:   "allow",
+		Overrides: map[string]string{},
+	}
+}
+
+func (policy *CapabilityPolicy) Allows(id string) bool {
+	if policy == nil {
+		return true
+	}
+	if decision := policy.Overrides[id]; decision != "" {
+		return decision == "allow"
+	}
+	return policy.Default != "deny"
+}
+
+func (policy *ApprovalPolicy) AutoApproves(id, action string) bool {
+	if policy == nil {
+		return false
+	}
+	if override := policy.Overrides[id]; override != nil {
+		if decision := override.Actions[action]; decision != "" {
+			return decision == "allow"
+		}
+		if override.Default != "" {
+			return override.Default == "allow"
+		}
+	}
+	return policy.Default == "allow"
 }
 
 func defaultEditing() *Editing {
@@ -405,6 +463,26 @@ func (ai *AI) Normalize() {
 	if ai.Agent == nil {
 		ai.Agent = defaultAgent()
 	} else {
+		if ai.Agent.CapabilityPolicy == nil {
+			ai.Agent.CapabilityPolicy = defaultCapabilityPolicy()
+		} else {
+			if ai.Agent.CapabilityPolicy.Default != "deny" {
+				ai.Agent.CapabilityPolicy.Default = "allow"
+			}
+			if ai.Agent.CapabilityPolicy.Overrides == nil {
+				ai.Agent.CapabilityPolicy.Overrides = map[string]string{}
+			}
+			for id, decision := range ai.Agent.CapabilityPolicy.Overrides {
+				if id == "" || decision != "allow" && decision != "deny" {
+					delete(ai.Agent.CapabilityPolicy.Overrides, id)
+				}
+			}
+		}
+		if ai.Agent.ApprovalPolicy == nil {
+			ai.Agent.ApprovalPolicy = defaultApprovalPolicy()
+		} else {
+			normalizeApprovalPolicy(ai.Agent.ApprovalPolicy)
+		}
 		if ai.Agent.SessionTimeout < 0 {
 			ai.Agent.SessionTimeout = 0
 		} else if ai.Agent.SessionTimeout > 3600 {
@@ -528,6 +606,35 @@ func (ai *AI) Normalize() {
 	}
 	if !ast.IsNodeIDPattern(ai.Rerank.ID) {
 		ai.Rerank.ID = ast.NewNodeID()
+	}
+}
+
+func normalizeApprovalPolicy(policy *ApprovalPolicy) {
+	if policy.Default != "allow" {
+		policy.Default = "confirm"
+	}
+	if policy.Overrides == nil {
+		policy.Overrides = map[string]*CapabilityApproval{}
+	}
+	for id, override := range policy.Overrides {
+		if id == "" || override == nil {
+			delete(policy.Overrides, id)
+			continue
+		}
+		if override.Default != "allow" && override.Default != "confirm" {
+			override.Default = ""
+		}
+		if override.Actions == nil {
+			override.Actions = map[string]string{}
+		}
+		for action, decision := range override.Actions {
+			if decision != "allow" && decision != "confirm" {
+				delete(override.Actions, action)
+			}
+		}
+		if override.Default == "" && len(override.Actions) == 0 {
+			delete(policy.Overrides, id)
+		}
 	}
 }
 

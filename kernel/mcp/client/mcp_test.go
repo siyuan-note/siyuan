@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -189,6 +190,10 @@ func TestMCPToolNameDisambiguatesSanitizedCollisions(t *testing.T) {
 	}
 	if name := mcpToolName(serverA, "read_item", false); name != "mcp_name_with_space_read_item" {
 		t.Fatalf("unexpected ordinary MCP tool name: %q", name)
+	}
+	longName := mcpToolName(serverA, strings.Repeat("long tool name ", 10), false)
+	if len(longName) > maxMCPToolNameLen {
+		t.Fatalf("MCP tool name exceeds provider limit: %d", len(longName))
 	}
 }
 

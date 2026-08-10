@@ -65,7 +65,8 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - HTML components: asset.create_html writes HTML content as an asset and inserts a sandboxed IFrame block in one operation. Prefer self-contained HTML; only use remote resources when the user requests them.
 
 ## Response Guidelines
-- Reply in the language configured in SiYuan's appearance settings. When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs actually returned by a tool call (block.get/get_children/breadcrumb/batch_get/search); never fabricate IDs. For general mentions without a specific block, plain text is fine.
+- Reply in the language configured in SiYuan's appearance settings.
+- When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs actually returned by a tool call (block.get/get_children/breadcrumb/batch_get/search); never fabricate IDs. For general mentions without a specific block, plain text is fine.
 - Be concise: summarize rather than repeat large content.
 - For choices (which notebook/document/action), use the question tool — never a plain text list.
 - Use markdown; for code blocks always specify the language (e.g. python, go); use $...$ for inline and $...$ for block formulas.
@@ -253,26 +254,33 @@ func AnswerQuestion(id string, answers []string) bool {
 	}
 }
 
-// frontendCallResult 承载浏览器返回的前端工具执行结果。
-type frontendCallResult struct {
-	result  string
-	isError bool
+// browserCapabilityResult 承载浏览器返回的前端能力执行结果。
+type browserCapabilityResult struct {
+	result               string
+	structuredContent    any
+	structuredContentSet bool
+	isError              bool
 }
 
-var frontendCallChannelsMu sync.Mutex
-var frontendCallChannels = make(map[string]chan frontendCallResult)
+var browserCapabilityChannelsMu sync.Mutex
+var browserCapabilityChannels = make(map[string]chan browserCapabilityResult)
 
-// FrontendToolResult 由 API 在浏览器回传前端工具结果时调用，用于解除 Agent 的等待。
-func FrontendToolResult(callID string, result string, isError bool) bool {
-	frontendCallChannelsMu.Lock()
-	defer frontendCallChannelsMu.Unlock()
-	ch, ok := frontendCallChannels[callID]
+// BrowserCapabilityResult 由 API 在浏览器回传前端能力结果时调用，用于解除 Agent 的等待。
+func BrowserCapabilityResult(callID string, result string, structuredContent any, structuredContentSet, isError bool) bool {
+	browserCapabilityChannelsMu.Lock()
+	defer browserCapabilityChannelsMu.Unlock()
+	ch, ok := browserCapabilityChannels[callID]
 	if !ok {
 		return false
 	}
 	select {
-	case ch <- frontendCallResult{result: result, isError: isError}:
-		delete(frontendCallChannels, callID)
+	case ch <- browserCapabilityResult{
+		result:               result,
+		structuredContent:    structuredContent,
+		structuredContentSet: structuredContentSet,
+		isError:              isError,
+	}:
+		delete(browserCapabilityChannels, callID)
 		return true
 	default:
 		return false
@@ -326,6 +334,8 @@ type AgentEvent struct {
 	TurnID           string
 	PermissionMode   string
 	Effects          mcptools.ToolEffects
+	CapabilityID     string
+	Generation       uint64
 }
 
 type AgentMessage struct {
@@ -398,15 +408,6 @@ func newAgentUserMessage(content, entryID string, references []Reference, editor
 	}
 }
 
-// PluginAction describes a frontend action registered by a plugin (via Plugin.addAction()).
-// The frontend serializes the list of currently-registered plugin actions into each chat
-// request, and the backend injects them into the system prompt so the LLM can discover and
-// invoke them. Structurally identical to EditorContext: browser-owned state, refreshed per message.
-type PluginAction struct {
-	Name        string `json:"name"`        // full name: plugin__<pluginName>__<actionName>
-	Description string `json:"description"` // purpose description for the LLM
-}
-
 // SessionEntry 与前端 SessionStore.ts 中 entries 元素一一对应，
 // 是会话持久化的唯一数据源（不再单独持久化 messages）。
 type SessionEntry struct {
@@ -466,7 +467,7 @@ type agentCheckpoint struct {
 	LastCommittedTurnID   string         `json:"lastCommittedTurnID,omitempty"`
 }
 
-func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilityKey string, contextLimit int, sessionID string, userEntryID string, contentRevision int64, userMessage string, userBlockHTML *string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
+func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilityKey string, contextLimit int, sessionID string, userEntryID string, contentRevision int64, userMessage string, userBlockHTML *string, language string, references []Reference, editorCtx EditorContext, frontendCapabilities []FrontendCapability, regenerate bool, confirmTimeout time.Duration, maxRetries int, reasoningEffort string, requestTimeout, streamIdleTimeout time.Duration) <-chan AgentEvent {
 	ch := make(chan AgentEvent, 256)
 
 	go func() {
@@ -498,7 +499,17 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 		// 在此统一解析一次，后续 checkpoint 与消息重建均使用解析后的值，保证全链路一致。
 		userMessage = kernelModel.Conf.Variables.Resolve(userMessage)
 
-		tools := convertMCPToolsToOpenAI()
+		capabilityContext := capabilityAccessContext{
+			SessionID:  sessionID,
+			NotebookID: editorCtx.NotebookID,
+			DocumentID: editorCtx.ActiveDocID,
+		}
+		capabilities, capabilityErr := buildCapabilitySet(frontendCapabilities, capabilityContext)
+		if capabilityErr != nil {
+			sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
+			return
+		}
+		tools := capabilities.definitions
 		var messages []openai.ChatCompletionMessage
 		var checkpointMsgs []AgentMessage
 		var sessionEntries []SessionEntry
@@ -582,14 +593,14 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 							currentUserEntry.BlockHTML = *userBlockHTML
 						}
 					}
-					messages = checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, pluginActions, compaction)
+					messages = checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, capabilities, compaction)
 				}
 			}
 		}
 
 		if messages == nil {
 			checkpointMsgs = []AgentMessage{newAgentUserMessage(userMessage, userEntryID, references, editorCtx)}
-			messages = buildInitialMessages(userMessage, language, references, editorCtx, pluginActions)
+			messages = buildInitialMessages(userMessage, language, references, editorCtx, capabilities)
 		}
 
 		turnBaseIndex := len(checkpointMsgs)
@@ -720,7 +731,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 			selectedCandidateIndex := sort.Search(len(candidates), func(i int) bool {
 				candidate := candidates[i]
 				candidateCheckpointMsgs := checkpointMessagesAfterCompaction(sessionEntries, candidate, tail)
-				candidateMessages := checkpointMessagesToOpenAIWithSummary(candidateCheckpointMsgs, language, pluginActions, nil)
+				candidateMessages := checkpointMessagesToOpenAIWithSummary(candidateCheckpointMsgs, language, capabilities, nil)
 				candidateMessages, _ = projectImageMessages(candidateMessages)
 				baseTokens := estimateChatRequestTokens(model, candidateMessages, requestTools)
 				return compactionSummaryMinTokens <= inputBudget-baseTokens-compactionSummaryOverhead
@@ -731,7 +742,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 			selectedEntryCount := candidates[selectedCandidateIndex]
 			selectedCheckpointMsgs := checkpointMessagesAfterCompaction(sessionEntries, selectedEntryCount, tail)
 			selectedMessages := checkpointMessagesToOpenAIWithSummary(
-				selectedCheckpointMsgs, language, pluginActions, nil)
+				selectedCheckpointMsgs, language, capabilities, nil)
 			estimatedSelectedMessages, _ := projectImageMessages(selectedMessages)
 			baseTokens := estimateChatRequestTokens(model, estimatedSelectedMessages, requestTools)
 			summaryMaxTokens := min(
@@ -762,7 +773,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 				return false, fmt.Errorf("%w: build runtime state: %v", errContextCannotBeCompacted, err)
 			}
 			nextMessages := checkpointMessagesToOpenAIWithSummary(
-				selectedCheckpointMsgs, language, pluginActions, nextCompaction)
+				selectedCheckpointMsgs, language, capabilities, nextCompaction)
 			estimatedNextMessages, _ := projectImageMessages(nextMessages)
 			if estimateChatRequestTokens(model, estimatedNextMessages, requestTools) > inputBudget {
 				return false, fmt.Errorf("%w: compacted context still exceeds the input budget", errContextCannotBeCompacted)
@@ -791,10 +802,24 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 			}
 			modelRound++
 
-			requestTools := tools
+			roundCapabilities, capabilityErr := buildCapabilitySet(frontendCapabilities, capabilityContext)
+			if capabilityErr != nil {
+				if !saveTurn("interrupted") {
+					return
+				}
+				sendCriticalEvent(ctx, ch, AgentEvent{Type: "error", Error: capabilityErr.Error()})
+				return
+			}
+			requestTools := roundCapabilities.definitions
 			if maxRounds > 0 && toolCallRounds >= maxRounds {
 				// 工具调用达到上限后仍允许模型完成一次最终回答，但不再提供工具定义。
 				requestTools = nil
+				roundCapabilities = &capabilitySet{registrations: map[string]*capabilityRegistration{}}
+			}
+			capabilities = roundCapabilities
+			tools = requestTools
+			if len(messages) > 0 && messages[0].Role == openai.ChatMessageRoleSystem {
+				messages[0].Content = buildSystemPrompt(language, roundCapabilities)
 			}
 
 			_, compactErr := compactContext(requestTools, false)
@@ -1020,6 +1045,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 
 				for i, tc := range aggregatedToolCalls {
 					args := parsedArgs[i]
+					registration := roundCapabilities.registration(tc.Function.Name)
 					action := ""
 					if a, ok := args["action"]; ok {
 						action, _ = a.(string)
@@ -1033,17 +1059,18 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 						Arguments:  args,
 					})
 
-					_, _, toolInputErr := validateToolCallInput(ctx, tc.Function.Name, args)
+					toolInputErr := validateCapabilityCall(ctx, registration, args)
 					if toolInputErr == nil && !permissionController.allowSession.Load() &&
-						needsConfirm(tc.Function.Name, action, nil) {
+						needsCapabilityConfirm(registration, action, args, nil) {
 						confirmID := fmt.Sprintf("%s_%s_%d", turn.TurnID, tc.ID, i)
 						ch2 := make(chan confirmResult, 1)
 						confirmChannelsMu.Lock()
 						confirmChannels[confirmID] = &confirmWaiter{sessionID: sessionID, ch: ch2}
 						confirmChannelsMu.Unlock()
-						effects, _ := mcptools.GetTool(tc.Function.Name).EffectsFor(action)
+						effects := capabilityEffects(registration, action)
 						sendCriticalEvent(ctx, ch, AgentEvent{
 							Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID, Effects: effects,
+							CapabilityID: registration.ID,
 						})
 						var rejectionMsg string
 						var result confirmResult
@@ -1153,8 +1180,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 						return
 					default:
 					}
+					if toolInputErr == nil {
+						// 用户确认期间能力可能被禁用、卸载或重新注册，快照和执行前必须复核同一份注册。
+						toolInputErr = validateCapabilityCall(ctx, registration, args)
+					}
 
-					if toolInputErr == nil && !snapshotCreated && needsLocalSnapshot(tc.Function.Name, action) {
+					if toolInputErr == nil && !snapshotCreated && needsCapabilitySnapshot(registration, action) {
 						id, err := kernelModel.IndexRepo("AI agent auto snapshot")
 						if err != nil {
 							logging.LogErrorf("agent auto snapshot failed: %s", err)
@@ -1205,18 +1236,20 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 						sendCriticalEvent(ctx, ch, AgentEvent{Type: "snapshot", RoundID: roundID, SnapshotID: id})
 					}
 
-					// 工具执行前先持久化“即将执行”状态。若落盘失败则禁止执行，避免外部写操作已经发生，
-					// 但恢复层没有任何记录可用于阻止自动重试。
-					checkpointMsgs[assistantIdx].ToolCalls[i].State = "executing"
-					if !saveTurn("running") {
-						return
-					}
-					select {
-					case <-ctx.Done():
-						skipRemainingTools(i, "Operation cancelled")
-						saveTurn("interrupted")
-						return
-					default:
+					if toolInputErr == nil {
+						// 工具执行前先持久化“即将执行”状态。若落盘失败则禁止执行，避免外部写操作已经发生，
+						// 但恢复层没有任何记录可用于阻止自动重试。
+						checkpointMsgs[assistantIdx].ToolCalls[i].State = "executing"
+						if !saveTurn("running") {
+							return
+						}
+						select {
+						case <-ctx.Done():
+							skipRemainingTools(i, "Operation cancelled")
+							saveTurn("interrupted")
+							return
+						default:
+						}
 					}
 					var resultStr string
 					var modelAttachments []mcptools.ModelAttachment
@@ -1227,11 +1260,13 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 						isErr = true
 					} else if tc.Function.Name == "question" {
 						resultStr = handleQuestion(ctx, tc.Function.Arguments, ch, 5*time.Minute)
-					} else if tc.Function.Name == "frontend" {
-						resultStr, executionUnknown = handleFrontendTool(ctx, tc, ch, confirmTimeout)
-						isErr = executionUnknown
+					} else if registration.isBrowser() {
+						executed := handleBrowserCapability(ctx, tc, registration, ch, confirmTimeout)
+						resultStr = executed.Text
+						isErr = executed.IsError
+						executionUnknown = executed.ExecutionUnknown
 					} else {
-						executed := executeTool(ctx, tc, sessionID)
+						executed := executeCapability(ctx, tc, sessionID, registration)
 						resultStr = executed.Text
 						modelAttachments = executed.ModelAttachments
 						isErr = executed.IsError
@@ -1428,9 +1463,47 @@ var safeNativeToolActions = map[string]map[string]bool{
 	"export": {
 		"html": true, "preview": true,
 	},
-	"frontend": {
-		"open_setting": true, "focus_block": true, "open_document": true, "open_search": true,
-	},
+}
+
+func capabilityEffects(registration *capabilityRegistration, action string) mcptools.ToolEffects {
+	if registration == nil {
+		return mcptools.ToolEffects{}
+	}
+	if registration.isBrowser() {
+		effects, _ := registration.browserEffectsFor(action)
+		return effects
+	}
+	effects, _ := registration.Tool.EffectsFor(action)
+	return effects
+}
+
+func needsCapabilityConfirm(registration *capabilityRegistration, action string, args map[string]any,
+	alwaysAllow map[string]bool) bool {
+	if registration == nil {
+		return false
+	}
+	if alwaysAllow["*"] || alwaysAllow[registration.ID] || alwaysAllow[registration.ModelName+"::"+action] {
+		return false
+	}
+	if capabilityAutoApproved(registration, action, args) {
+		return false
+	}
+	if registration.isBrowser() {
+		effects, declared := registration.browserEffectsFor(action)
+		if effects.LocalWrite || effects.DataEgress || effects.ExternalCost {
+			return true
+		}
+		// 插件声明的浏览器能力不默认信任；只有显式的只读效果声明才能免确认。
+		return registration.Source != "native" && !declared
+	}
+	return needsConfirm(registration.ModelName, action, alwaysAllow)
+}
+
+func needsCapabilitySnapshot(registration *capabilityRegistration, action string) bool {
+	if registration == nil || registration.isBrowser() {
+		return false
+	}
+	return needsLocalSnapshot(registration.ModelName, action)
 }
 
 func needsConfirm(toolName string, action string, alwaysAllow map[string]bool) bool {
@@ -1488,7 +1561,7 @@ func needsLocalSnapshot(toolName, action string) bool {
 	if toolName == "import" && action == "md" {
 		actionSafe = false
 	}
-	if safeWholeTools[toolName] || actionSafe || toolName == "frontend" || (toolName == "repo" && action == "create") {
+	if safeWholeTools[toolName] || actionSafe || (toolName == "repo" && action == "create") {
 		return false
 	}
 	if tool == nil {
@@ -1585,75 +1658,104 @@ func finishConfirmWait(confirmID string, ch chan confirmResult) (confirmResult, 
 	}
 }
 
-// handleFrontendTool 通过 SSE 把前端工具操作发送到浏览器，并等待浏览器回传结果。
-func handleFrontendTool(ctx context.Context, tc openai.ToolCall, ch chan<- AgentEvent, timeout time.Duration) (string, bool) {
+// handleBrowserCapability 通过 SSE 把前端能力调用发送到浏览器，并等待浏览器回传结果。
+func handleBrowserCapability(ctx context.Context, tc openai.ToolCall, registration *capabilityRegistration,
+	ch chan<- AgentEvent, timeout time.Duration) executedToolResult {
+	if !capabilityStillExecutable(registration, parseToolArgs(tc.Function.Arguments)) {
+		return executedToolResult{Text: "Browser capability is disabled or no longer available.", IsError: true}
+	}
 	args := parseToolArgs(tc.Function.Arguments)
 	callID := ast.NewNodeID()
-	ch2 := make(chan frontendCallResult, 1)
-	frontendCallChannelsMu.Lock()
-	frontendCallChannels[callID] = ch2
-	frontendCallChannelsMu.Unlock()
+	ch2 := make(chan browserCapabilityResult, 1)
+	browserCapabilityChannelsMu.Lock()
+	browserCapabilityChannels[callID] = ch2
+	browserCapabilityChannelsMu.Unlock()
 
 	sendCriticalEvent(ctx, ch, AgentEvent{
-		Type:      "frontend_tool_call",
-		CallID:    callID,
-		Name:      tc.Function.Name,
-		Arguments: args,
+		Type:         "browser_capability_call",
+		CallID:       callID,
+		Name:         tc.Function.Name,
+		CapabilityID: registration.ID,
+		Generation:   registration.Generation,
+		Arguments:    args,
 	})
 
-	var fr frontendCallResult
+	var result browserCapabilityResult
 	select {
-	case fr = <-ch2:
+	case result = <-ch2:
 	case <-ctx.Done():
-		if acceptedResult, accepted := finishFrontendWait(callID, ch2); accepted {
-			fr = acceptedResult
+		if acceptedResult, accepted := finishBrowserCapabilityWait(callID, ch2); accepted {
+			result = acceptedResult
 		} else {
-			return "Frontend action was interrupted; execution result is unknown and must not be retried automatically.", true
+			return executedToolResult{
+				Text:             "Browser capability was interrupted; execution result is unknown and must not be retried automatically.",
+				IsError:          true,
+				ExecutionUnknown: true,
+			}
 		}
 	case <-time.After(timeout):
-		if acceptedResult, accepted := finishFrontendWait(callID, ch2); accepted {
-			fr = acceptedResult
+		if acceptedResult, accepted := finishBrowserCapabilityWait(callID, ch2); accepted {
+			result = acceptedResult
 		} else {
-			return "Frontend action timed out; execution result is unknown and must not be retried automatically.", true
+			return executedToolResult{
+				Text:             "Browser capability timed out; execution result is unknown and must not be retried automatically.",
+				IsError:          true,
+				ExecutionUnknown: true,
+			}
 		}
 	}
 
-	frontendCallChannelsMu.Lock()
-	delete(frontendCallChannels, callID)
-	frontendCallChannelsMu.Unlock()
+	browserCapabilityChannelsMu.Lock()
+	delete(browserCapabilityChannels, callID)
+	browserCapabilityChannelsMu.Unlock()
 
-	if fr.isError {
-		return "Frontend action failed: " + fr.result, false
+	toolResult := mcptools.CallToolResult{
+		StructuredContent:    result.structuredContent,
+		StructuredContentSet: result.structuredContentSet,
+		IsError:              result.isError,
 	}
-	return fr.result, false
+	if result.result != "" {
+		toolResult.Content = []mcptools.ContentItem{{Type: "text", Text: result.result}}
+	}
+	if err := registration.Validator.ValidateOutputContext(ctx, toolResult); err != nil {
+		return executedToolResult{
+			Text:             "Invalid browser capability output after execution; execution result may have side effects and must not be retried automatically: " + err.Error(),
+			IsError:          true,
+			ExecutionUnknown: true,
+		}
+	}
+	if result.isError {
+		return executedToolResult{Text: "Browser capability failed: " + resultToString(toolResult), IsError: true}
+	}
+	return executedToolResult{Text: resultToString(toolResult)}
 }
 
-func finishFrontendWait(callID string, ch chan frontendCallResult) (frontendCallResult, bool) {
-	frontendCallChannelsMu.Lock()
-	registered, exists := frontendCallChannels[callID]
+func finishBrowserCapabilityWait(callID string, ch chan browserCapabilityResult) (browserCapabilityResult, bool) {
+	browserCapabilityChannelsMu.Lock()
+	registered, exists := browserCapabilityChannels[callID]
 	pending := exists && registered == ch
 	if pending {
-		delete(frontendCallChannels, callID)
+		delete(browserCapabilityChannels, callID)
 	}
-	frontendCallChannelsMu.Unlock()
+	browserCapabilityChannelsMu.Unlock()
 	if pending {
-		return frontendCallResult{}, false
+		return browserCapabilityResult{}, false
 	}
 	select {
 	case result := <-ch:
 		return result, true
 	default:
-		return frontendCallResult{}, false
+		return browserCapabilityResult{}, false
 	}
 }
 
-func buildSystemPrompt(language string, pluginActions []PluginAction) string {
+func buildSystemPrompt(language string, capabilities *capabilitySet) string {
 	if kernelModel.Conf != nil && kernelModel.Conf.Appearance != nil && kernelModel.Conf.Appearance.Lang != "" {
 		language = kernelModel.Conf.Appearance.Lang
 	}
 
 	var sb strings.Builder
-	sb.WriteString(systemPrompt)
+	sb.WriteString(filterSystemPromptByCapabilities(systemPrompt, capabilities))
 	sb.WriteString("\n\n<env>\nWorkspace: ")
 	sb.WriteString(util.WorkspaceDir)
 	sb.WriteString("\nVersion: ")
@@ -1665,7 +1767,7 @@ func buildSystemPrompt(language string, pluginActions []PluginAction) string {
 	sb.WriteString("\n</env>")
 
 	skills := util.DiscoverSkills()
-	if len(skills) > 0 {
+	if capabilities.hasModelName("skill") && len(skills) > 0 {
 		sb.WriteString("\n\n<available_skills>\n")
 		for _, s := range skills {
 			sb.WriteString("  <skill>\n")
@@ -1681,37 +1783,25 @@ func buildSystemPrompt(language string, pluginActions []PluginAction) string {
 		sb.WriteString("Use the skill tool to load a skill when a task matches its description.")
 	}
 
-	if len(pluginActions) > 0 {
-		pluginActions = append([]PluginAction(nil), pluginActions...)
-		sort.Slice(pluginActions, func(i, j int) bool {
-			return pluginActions[i].Name < pluginActions[j].Name
-		})
-		sb.WriteString("\n\n<plugin_actions>\n")
-		sb.WriteString("The following frontend actions were registered by plugins. Invoke them via the \"frontend\" tool with action set to the full name shown below.\n")
-		for _, a := range pluginActions {
-			sb.WriteString("- ")
-			sb.WriteString(a.Name)
-			sb.WriteString(": ")
-			sb.WriteString(a.Description)
-			sb.WriteString("\n")
-		}
-		sb.WriteString("</plugin_actions>")
+	if capabilities.hasModelName("skill") {
+		sb.WriteString("\n\n")
+		sb.WriteString("## Skill Management\n")
+		sb.WriteString("Use the skill tool to manage reusable skills: \"save\" (create/update; provide name + SKILL.md content with YAML frontmatter ---\\nname: ...\\ndescription: ...\\n--- and markdown body), \"install\" (download & install a skill from a remote source — pass url; accepts 'owner/repo' shorthand like Tencent/WeChatReading, a full GitHub URL, a raw SKILL.md URL, or a release zip URL; installed globally), \"remove\", \"rename\" (name + new_name), \"list\". When the user says \"install xxx skill\" or pastes a command like \"npx skills add owner/repo -g\", extract the owner/repo and call skill.install.")
 	}
-
-	sb.WriteString("\n\n")
-	sb.WriteString("## Skill Management\n")
-	sb.WriteString("Use the skill tool to manage reusable skills: \"save\" (create/update; provide name + SKILL.md content with YAML frontmatter ---\\nname: ...\\ndescription: ...\\n--- and markdown body), \"install\" (download & install a skill from a remote source — pass url; accepts 'owner/repo' shorthand like Tencent/WeChatReading, a full GitHub URL, a raw SKILL.md URL, or a release zip URL; installed globally), \"remove\", \"rename\" (name + new_name), \"list\". When the user says \"install xxx skill\" or pastes a command like \"npx skills add owner/repo -g\", extract the owner/repo and call skill.install.")
 
 	sb.WriteString("\n\nReply in ")
 	sb.WriteString(util.I18nTerm(language, "_label"))
 	sb.WriteString(".")
-	sb.WriteString("\n\nIn the language configured in SiYuan's appearance settings, a daily note is called: ")
-	sb.WriteString(util.I18nTerm(language, "dailyNote"))
-	sb.WriteString(". When the user asks to write or create this, use dailynote.create, not document.create.")
+	if capabilities.hasModelName("dailynote") {
+		sb.WriteString("\n\nIn the language configured in SiYuan's appearance settings, a daily note is called: ")
+		sb.WriteString(util.I18nTerm(language, "dailyNote"))
+		sb.WriteString(". When the user asks to write or create this, use dailynote.create, not document.create.")
+	}
 	return sb.String()
 }
 
-func buildUserMessageContent(userMessage string, references []Reference, editorCtx *EditorContext) string {
+func buildUserMessageContent(userMessage string, references []Reference, editorCtx *EditorContext,
+	capabilities *capabilitySet) string {
 	if len(references) == 0 && editorCtx == nil {
 		return userMessage
 	}
@@ -1727,7 +1817,9 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 			sb.WriteString(ref.ID)
 			sb.WriteString(")\n")
 		}
-		sb.WriteString("Use the block tools to fetch their actual content before responding.\n")
+		if capabilities == nil || capabilities.hasModelName("block") {
+			sb.WriteString("Use the block tools to fetch their actual content before responding.\n")
+		}
 	}
 	if editorCtx != nil {
 		sb.WriteString("<editor_context>\n")
@@ -1789,7 +1881,9 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 				sb.WriteString("\n")
 			}
 		}
-		sb.WriteString("Use the block tools (e.g. block with action \"get\") to fetch actual content before responding.")
+		if capabilities == nil || capabilities.hasModelName("block") {
+			sb.WriteString("Use the block tools (e.g. block with action \"get\") to fetch actual content before responding.")
+		}
 		sb.WriteString("\n</editor_context>")
 	}
 	sb.WriteString("\n</turn_context>\n\n")
@@ -1797,10 +1891,10 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 	return sb.String()
 }
 
-func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext, pluginActions []PluginAction) []openai.ChatCompletionMessage {
+func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext, capabilities *capabilitySet) []openai.ChatCompletionMessage {
 	return []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, pluginActions)},
-		{Role: openai.ChatMessageRoleUser, Content: buildUserMessageContent(userMessage, references, cloneEditorContext(editorCtx))},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities)},
+		{Role: openai.ChatMessageRoleUser, Content: buildUserMessageContent(userMessage, references, cloneEditorContext(editorCtx), capabilities)},
 	}
 }
 
@@ -1899,13 +1993,13 @@ func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 	return msgs
 }
 
-func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, pluginActions []PluginAction) []openai.ChatCompletionMessage {
-	return checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, pluginActions, nil)
+func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, capabilities *capabilitySet) []openai.ChatCompletionMessage {
+	return checkpointMessagesToOpenAIWithSummary(checkpointMsgs, language, capabilities, nil)
 }
 
-func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, language string, pluginActions []PluginAction, compaction *runtimeCompaction) []openai.ChatCompletionMessage {
+func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, language string, capabilities *capabilitySet, compaction *runtimeCompaction) []openai.ChatCompletionMessage {
 	msgs := []openai.ChatCompletionMessage{
-		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, pluginActions)},
+		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities)},
 	}
 	if compaction != nil && strings.TrimSpace(compaction.Summary) != "" {
 		msgs = append(msgs, openai.ChatCompletionMessage{
@@ -1932,7 +2026,7 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 		cm := &checkpointMsgs[cmi]
 		switch cm.Role {
 		case "user":
-			content := buildUserMessageContent(cm.Content, cm.References, cm.EditorContext)
+			content := buildUserMessageContent(cm.Content, cm.References, cm.EditorContext, capabilities)
 			if content == "" {
 				content = " "
 			}

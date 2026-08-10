@@ -16,54 +16,100 @@
 
 import type {App} from "../../../index";
 
-export interface IAction {
-    name: string;
-    description?: string;
-    handler: (args: Record<string, unknown>, app: App) => Promise<{result?: string; error?: string}>;
+// 浏览器能力只在当前应用实例中执行，内核持有声明和本轮不可变的调用映射。
+
+export interface IAgentCapabilityEffects {
+    localRead?: boolean;
+    localWrite?: boolean;
+    dataEgress?: boolean;
+    externalCost?: boolean;
 }
 
-// Centralized action registry. Data structure is a registry so that plugins can register their
-// own frontend actions in a future version (via Plugin.addAction() -> registerAction). The first
-// version only loads built-in actions, but the lookup layer is already registry-shaped, so adding
-// plugin support later requires zero changes to the dispatch path.
-//
-// IMPORTANT: this module must NOT have any top-level value imports beyond the registry itself.
-// The built-in actions below pull in config/editor/search modules that participate in import
-// cycles with the layout/plugin graph, so they are loaded lazily via dynamic import() inside the
-// handlers (which are async). This keeps `import {lookupAction}` cycle-free.
-const actionRegistry = new Map<string, IAction>();
+export interface IAgentCapability {
+    id: string;
+    title?: string;
+    description: string;
+    inputSchema: Record<string, unknown>;
+    outputSchema?: Record<string, unknown>;
+    effects?: IAgentCapabilityEffects;
+    actionEffects?: Record<string, IAgentCapabilityEffects>;
+    source: "native" | "plugin";
+    ownerId?: string;
+    ownerName?: string;
+    generation?: number;
+    handler: (args: Record<string, unknown>, app: App) => Promise<{
+        result?: string;
+        structuredContent?: unknown;
+        error?: string;
+    }>;
+}
 
-export const registerAction = (a: IAction) => {
-    actionRegistry.set(a.name, a);
+export type IAgentCapabilityManifest = Omit<IAgentCapability, "handler"> & {generation: number};
+
+const capabilityRegistry = new Map<string, IAgentCapabilityManifest & Pick<IAgentCapability, "handler">>();
+let capabilityGeneration = 0;
+
+export const registerCapability = (capability: IAgentCapability) => {
+    capabilityGeneration++;
+    capabilityRegistry.set(capability.id, {...capability, generation: capabilityGeneration});
+    return capabilityGeneration;
 };
 
-export const lookupAction = (name: string): IAction | undefined => actionRegistry.get(name);
+export const lookupCapability = (id: string, generation?: number): IAgentCapability | undefined => {
+    const capability = capabilityRegistry.get(id);
+    if (!capability || generation !== undefined && capability.generation !== generation) {
+        return undefined;
+    }
+    return capability;
+};
 
-export const listActions = (): IAction[] => Array.from(actionRegistry.values());
+export const isCapabilityEnabled = (id: string): boolean => {
+    const policy = window.siyuan.config.ai.agent.capabilityPolicy;
+    if (!policy) {
+        return true;
+    }
+    return (policy.overrides[id] || policy.default) === "allow";
+};
 
-export const unregisterAction = (name: string) => {
-    actionRegistry.delete(name);
+export const listCapabilityManifests = (): IAgentCapabilityManifest[] => Array.from(capabilityRegistry.values()).map((capability) => ({
+    id: capability.id,
+    title: capability.title,
+    description: capability.description,
+    inputSchema: capability.inputSchema,
+    outputSchema: capability.outputSchema,
+    effects: capability.effects,
+    actionEffects: capability.actionEffects,
+    source: capability.source,
+    ownerId: capability.ownerId,
+    ownerName: capability.ownerName,
+    generation: capability.generation,
+}));
+
+export const unregisterCapability = (id: string, generation?: number) => {
+    if (generation !== undefined && capabilityRegistry.get(id)?.generation !== generation) {
+        return;
+    }
+    capabilityRegistry.delete(id);
 };
 
 /// #if !MOBILE
-registerAction({
-    name: "open_setting",
+registerCapability({
+    id: "native/frontend/open_setting",
+    title: "Open settings",
+    description: "Open SiYuan settings and optionally filter settings by a search query.",
+    inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
+    source: "native",
     handler: async (args, app) => {
         const query = (args.query as string | undefined)?.trim();
         const {openSetting} = await import("../../../config");
-        // openSetting() has a quirk: if a settings dialog already exists, it DESTROYS it and
-        // returns the destroyed dialog (the splice from window.siyuan.dialogs is deferred via
-        // setTimeout, so it can't be detected synchronously). To guarantee the panel is visible
-        // after this call, check first: if one is already open, reuse it; otherwise open fresh.
+        // 已有设置对话框时复用该实例，避免 openSetting() 销毁现有实例后返回待销毁的对象。
         const existing = window.siyuan.dialogs.find(d => d.element.querySelector(".config__tab-container"));
         let dialog = existing;
         if (!dialog) {
             dialog = openSetting(app);
         }
         if (query) {
-            // The settings panel has a built-in search box (wired by initConfigSearch in
-            // config/index.ts). Fill it and dispatch an "input" event to trigger live filtering,
-            // which surfaces matching config items.
+            // 填充设置面板的内置搜索框并触发实时筛选。
             const input = dialog.element.querySelector(".config__side .b3-text-field") as HTMLInputElement;
             if (input) {
                 input.value = query;
@@ -75,15 +121,19 @@ registerAction({
     },
 });
 
-registerAction({
-    name: "focus_block",
+registerCapability({
+    id: "native/frontend/focus_block",
+    title: "Focus block",
+    description: "Scroll a block already loaded in an editor into view and highlight it.",
+    inputSchema: {type: "object", properties: {id: {type: "string"}}, required: ["id"], additionalProperties: false},
+    source: "native",
     handler: async (args) => {
         const id = args.id as string | undefined;
         if (!id) {
             return {error: "missing required argument: id"};
         }
         const {getAllEditor} = await import("../../getAll");
-        // Find the editor whose document contains this block, then scroll it into view.
+        // 找到包含目标块的编辑器并滚动到该块。
         let blockEl: HTMLElement | null = null;
         for (const editor of getAllEditor()) {
             const el = editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) as HTMLElement | null;
@@ -96,15 +146,19 @@ registerAction({
             return {error: `Block ${id} is not loaded in any open editor. Use open_document to open it first.`};
         }
         blockEl.scrollIntoView({behavior: "smooth", block: "center"});
-        // Briefly highlight the block so the user can spot it.
+        // 短暂高亮目标块以便用户定位。
         blockEl.classList.add("protyle-wysiwyg--hl");
         setTimeout(() => blockEl?.classList.remove("protyle-wysiwyg--hl"), 2000);
         return {result: `Focused block ${id} in the active editor.`};
     },
 });
 
-registerAction({
-    name: "open_document",
+registerCapability({
+    id: "native/frontend/open_document",
+    title: "Open document",
+    description: "Open a SiYuan document by its block ID in the current app.",
+    inputSchema: {type: "object", properties: {id: {type: "string"}}, required: ["id"], additionalProperties: false},
+    source: "native",
     handler: async (args, app) => {
         const id = args.id as string | undefined;
         if (!id) {
@@ -123,8 +177,12 @@ registerAction({
     },
 });
 
-registerAction({
-    name: "open_search",
+registerCapability({
+    id: "native/frontend/open_search",
+    title: "Open search",
+    description: "Open the SiYuan search interface and optionally fill in a query.",
+    inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
+    source: "native",
     handler: async (args, app) => {
         const query = (args.query as string | undefined)?.trim();
         const [{openSearch}, {Constants}] = await Promise.all([
@@ -136,8 +194,12 @@ registerAction({
     },
 });
 /// #else
-registerAction({
-    name: "open_setting",
+registerCapability({
+    id: "native/frontend/open_setting",
+    title: "Open settings",
+    description: "Open SiYuan settings and optionally provide a search query.",
+    inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
+    source: "native",
     handler: async (args, app) => {
         const query = (args.query as string | undefined)?.trim();
         const [{hideMobileAgent, reopenMobileAgent}, {openMobileSetting}] = await Promise.all([
@@ -150,8 +212,12 @@ registerAction({
     },
 });
 
-registerAction({
-    name: "focus_block",
+registerCapability({
+    id: "native/frontend/focus_block",
+    title: "Focus block",
+    description: "Scroll a block already loaded in the current editor into view and highlight it.",
+    inputSchema: {type: "object", properties: {id: {type: "string"}}, required: ["id"], additionalProperties: false},
+    source: "native",
     handler: async (args) => {
         const id = args.id as string | undefined;
         if (!id) {
@@ -174,8 +240,12 @@ registerAction({
     },
 });
 
-registerAction({
-    name: "open_document",
+registerCapability({
+    id: "native/frontend/open_document",
+    title: "Open document",
+    description: "Open a SiYuan document by its block ID in the mobile app.",
+    inputSchema: {type: "object", properties: {id: {type: "string"}}, required: ["id"], additionalProperties: false},
+    source: "native",
     handler: async (args, app) => {
         const id = args.id as string | undefined;
         if (!id) {
@@ -196,8 +266,12 @@ registerAction({
     },
 });
 
-registerAction({
-    name: "open_search",
+registerCapability({
+    id: "native/frontend/open_search",
+    title: "Open search",
+    description: "Open the SiYuan mobile search interface and optionally fill in a query.",
+    inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
+    source: "native",
     handler: async (args, app) => {
         const query = (args.query as string | undefined)?.trim();
         const [{popSearch}, {hideMobileAgent}] = await Promise.all([

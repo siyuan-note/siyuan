@@ -35,18 +35,18 @@ import (
 )
 
 type agentChatReq struct {
-	SessionID       string               `json:"sessionID"`
-	UserEntryID     string               `json:"userEntryID"`
-	ContentRevision *int64               `json:"contentRevision"`
-	Message         string               `json:"message"`
-	BlockHTML       *string              `json:"blockHTML"`
-	Language        string               `json:"language"`
-	References      []agent.Reference    `json:"references"`
-	EditorContext   agent.EditorContext  `json:"editorContext"`
-	PluginActions   []agent.PluginAction `json:"pluginActions"`
-	Model           string               `json:"model,omitempty"`
-	Regenerate      bool                 `json:"regenerate"`
-	ReasoningEffort string               `json:"reasoningEffort,omitempty"`
+	SessionID            string                     `json:"sessionID"`
+	UserEntryID          string                     `json:"userEntryID"`
+	ContentRevision      *int64                     `json:"contentRevision"`
+	Message              string                     `json:"message"`
+	BlockHTML            *string                    `json:"blockHTML"`
+	Language             string                     `json:"language"`
+	References           []agent.Reference          `json:"references"`
+	EditorContext        agent.EditorContext        `json:"editorContext"`
+	FrontendCapabilities []agent.FrontendCapability `json:"frontendCapabilities"`
+	Model                string                     `json:"model,omitempty"`
+	Regenerate           bool                       `json:"regenerate"`
+	ReasoningEffort      string                     `json:"reasoningEffort,omitempty"`
 }
 
 type runningSession struct {
@@ -138,7 +138,7 @@ func agentChat(c *gin.Context) {
 	contextLimit := agent.ResolveModelContextLimit(selectedModel.Name, selectedModel.ContextLength)
 	imageCapabilityKey := fmt.Sprintf("%s\x00%s\x00%s\x00%s\x00%s",
 		selectedProvider.ID, selectedModel.ID, selectedProvider.BaseURL, selectedProvider.Protocol, selectedModel.Name)
-	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, imageCapabilityKey, contextLimit, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.BlockHTML, req.Language, req.References, req.EditorContext, req.PluginActions, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort, requestTimeout, streamIdleTimeout)
+	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, imageCapabilityKey, contextLimit, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.BlockHTML, req.Language, req.References, req.EditorContext, req.FrontendCapabilities, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort, requestTimeout, streamIdleTimeout)
 	defer cancel()
 	streamClosed := false
 	defer func() {
@@ -323,14 +323,16 @@ func agentChatQuestion(c *gin.Context) {
 	c.JSON(http.StatusOK, ret)
 }
 
-type agentFrontendResultReq struct {
-	CallID  string `json:"callID"`
-	Result  string `json:"result"`
-	IsError bool   `json:"isError"`
+type agentBrowserCapabilityResultReq struct {
+	CallID               string `json:"callID"`
+	Result               string `json:"result"`
+	StructuredContent    any    `json:"structuredContent"`
+	StructuredContentSet bool   `json:"structuredContentSet"`
+	IsError              bool   `json:"isError"`
 }
 
-func agentChatFrontendResult(c *gin.Context) {
-	req := &agentFrontendResultReq{}
+func agentChatBrowserCapabilityResult(c *gin.Context) {
+	req := &agentBrowserCapabilityResultReq{}
 	if err := c.ShouldBindJSON(req); err != nil {
 		ret := gulu.Ret.NewResult()
 		ret.Code = -1
@@ -339,12 +341,18 @@ func agentChatFrontendResult(c *gin.Context) {
 		return
 	}
 	ret := gulu.Ret.NewResult()
-	if !agent.FrontendToolResult(req.CallID, req.Result, req.IsError) {
+	if !agent.BrowserCapabilityResult(req.CallID, req.Result, req.StructuredContent, req.StructuredContentSet, req.IsError) {
 		ret.Code = -1
-		ret.Msg = "agent frontend tool call expired"
+		ret.Msg = "agent browser capability call expired"
 		c.JSON(http.StatusConflict, ret)
 		return
 	}
+	c.JSON(http.StatusOK, ret)
+}
+
+func lsAgentCapabilities(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	ret.Data = agent.ListBackendCapabilities()
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -725,11 +733,13 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 			"questionID": event.QuestionID,
 			"arguments":  event.Arguments,
 		})
-	case "frontend_tool_call":
-		return writeSSEEvent(c, "frontend_tool_call", map[string]any{
-			"callID":    event.CallID,
-			"name":      event.Name,
-			"arguments": event.Arguments,
+	case "browser_capability_call":
+		return writeSSEEvent(c, "browser_capability_call", map[string]any{
+			"callID":       event.CallID,
+			"name":         event.Name,
+			"capabilityID": event.CapabilityID,
+			"generation":   event.Generation,
+			"arguments":    event.Arguments,
 		})
 	case "snapshot":
 		return writeSSEEvent(c, "snapshot", map[string]string{

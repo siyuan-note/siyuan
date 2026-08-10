@@ -19,7 +19,18 @@ package tools
 import (
 	"context"
 	"encoding/json"
+	"net/url"
+	"strings"
 )
+
+// BuildCapabilityID 构造由来源、执行侧和提供方局部名称组成的稳定能力 ID。
+func BuildCapabilityID(source, side string, segments ...string) string {
+	parts := []string{url.PathEscape(source), url.PathEscape(side)}
+	for _, segment := range segments {
+		parts = append(parts, url.PathEscape(segment))
+	}
+	return strings.Join(parts, "/")
+}
 
 const (
 	EffectScopeLocal    = "local"
@@ -34,9 +45,16 @@ type Tool struct {
 	Description  string      `json:"description"`
 	InputSchema  ToolSchema  `json:"inputSchema"`
 	OutputSchema *ToolSchema `json:"outputSchema,omitempty"`
+	// CapabilityID 是 Agent 能力策略使用的稳定标识，不随模型函数名或显示标题变化。
+	CapabilityID string `json:"capabilityId,omitempty"`
 	// Source 标记工具来源："native"（SiYuan 内置）、"plugin"（插件注册）、"mcp"（外部 MCP 服务）。
 	// 用于 token 分类统计按来源拆分。空值按 "native" 处理（兼容旧调用方）。
 	Source string `json:"source,omitempty"`
+	// OwnerID 和 OwnerName 标识提供能力的插件或 MCP 服务，内置能力留空。
+	OwnerID   string `json:"ownerId,omitempty"`
+	OwnerName string `json:"ownerName,omitempty"`
+	// Runtime 描述执行位置：kernel、plugin-worker 或 mcp。
+	Runtime string `json:"runtime,omitempty"`
 	// ReadOnlyHint 仅在外部工具明确声明只读时为 true；未声明时按可能写入处理并要求确认。
 	ReadOnlyHint bool `json:"readOnlyHint,omitempty"`
 	// EffectScope 描述写操作影响范围，用于判断本地数据仓库快照是否具有回滚价值。
@@ -61,6 +79,9 @@ func (t *Tool) EffectsFor(action string) (ToolEffects, bool) {
 		return ToolEffects{}, false
 	}
 	effects, ok := t.ActionEffects[action]
+	if !ok && action != "" {
+		effects, ok = t.ActionEffects[""]
+	}
 	return effects, ok
 }
 

@@ -36,6 +36,15 @@ func setupCompactionAgentTest(t *testing.T) {
 	t.Cleanup(func() { kernelModel.Conf = originalConf })
 }
 
+func currentCapabilitiesForTest(t *testing.T) *capabilitySet {
+	t.Helper()
+	capabilities, err := buildCapabilitySet(nil, capabilityAccessContext{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return capabilities
+}
+
 func compactionTestContextLimit(t *testing.T, fullTokens, compactedBaseTokens int) int {
 	t.Helper()
 	targetBudget := fullTokens - 512
@@ -249,7 +258,7 @@ func TestAgentChatCompactsBeforeSendingOversizedContext(t *testing.T) {
 	}
 
 	checkpoint := entriesToAgentMessages(entries)
-	requestTools := convertMCPToolsToOpenAI()
+	requestTools := currentCapabilitiesForTest(t).definitions
 	fullTokens := estimateChatRequestTokens(
 		"test-model", checkpointMessagesToOpenAI(checkpoint, "English", nil), requestTools)
 	recentTokens := estimateChatRequestTokens(
@@ -342,7 +351,7 @@ func TestAgentChatRegenerateCompactionUsesTruncatedEditedHistory(t *testing.T) {
 	regenerateCheckpoint := entriesToAgentMessages(entries[:2])
 	regenerateCheckpoint = append(regenerateCheckpoint,
 		newAgentUserMessage(editedTarget, "user-2", nil, EditorContext{}))
-	requestTools := convertMCPToolsToOpenAI()
+	requestTools := currentCapabilitiesForTest(t).definitions
 	fullTokens := estimateChatRequestTokens(
 		"test-model", checkpointMessagesToOpenAI(regenerateCheckpoint, "English", nil), requestTools)
 	recentTokens := estimateChatRequestTokens(
@@ -435,7 +444,7 @@ func TestAgentChatRetriesOverflowAfterProactiveCompaction(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	requestTools := convertMCPToolsToOpenAI()
+	requestTools := currentCapabilitiesForTest(t).definitions
 	fullTokens := estimateChatRequestTokens(
 		"test-model", checkpointMessagesToOpenAI(entriesToAgentMessages(entries), "English", nil), requestTools)
 	afterFirstTokens := estimateChatRequestTokens(

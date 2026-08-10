@@ -56,19 +56,11 @@ func TestSystemPromptDocumentsBlockReferenceSyntax(t *testing.T) {
 	}
 }
 
-func TestSystemPromptSortsPluginActions(t *testing.T) {
-	actions := []PluginAction{
-		{Name: "plugin__z__run", Description: "Run Z"},
-		{Name: "plugin__a__run", Description: "Run A"},
-	}
-
-	forward := buildSystemPrompt("English", actions)
-	reversed := buildSystemPrompt("English", []PluginAction{actions[1], actions[0]})
-	if forward != reversed {
-		t.Fatal("plugin action order changed the system prompt")
-	}
-	if strings.Index(forward, actions[1].Name) > strings.Index(forward, actions[0].Name) {
-		t.Fatalf("plugin actions are not sorted in system prompt: %q", forward)
+func TestSystemPromptOmitsUnavailableSkillInstructions(t *testing.T) {
+	capabilities := &capabilitySet{registrations: map[string]*capabilityRegistration{}}
+	prompt := buildSystemPrompt("English", capabilities)
+	if strings.Contains(prompt, "<available_skills>") || strings.Contains(prompt, "Skill Management") {
+		t.Fatalf("unavailable skill instructions leaked into system prompt: %q", prompt)
 	}
 }
 

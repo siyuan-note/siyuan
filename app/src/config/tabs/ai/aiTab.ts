@@ -20,6 +20,11 @@ import {
     genGroupedModelPickerHtml,
     mountGroupedModelPicker,
 } from "./aiProviderUi";
+import {
+    genAgentCapabilityHtml,
+    getAgentCapabilityKeywords,
+    mountAgentCapabilityBlock,
+} from "./aiCapabilityUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -118,6 +123,17 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.agentMaxRetriesTip,
         min: 0,
         max: 10,
+    });
+};
+
+const registerAiAgentCapabilitiesGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("agentCapabilities", window.siyuan.languages.agentCapabilities);
+
+    group.slot({
+        key: "agentCapabilities",
+        keywords: getAgentCapabilityKeywords(),
+        html: genAgentCapabilityHtml,
+        afterMount: mountAgentCapabilityBlock,
     });
 };
 
@@ -257,6 +273,7 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiProvidersGroup(tab);
     registerAiEditingGroup(tab);
     registerAiAgentGroup(tab);
+    registerAiAgentCapabilitiesGroup(tab);
     registerAiImageGenerationGroup(tab);
     registerAiMcpGroup(tab);
     // TODO: add skills group?

@@ -69,6 +69,7 @@ import {
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
 import {setAVItemAnchor} from "../render/av/rangeSelect";
+import {getCaretRect} from "./caretRect";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`;
 
@@ -1187,19 +1188,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (isWithinEditor) {
             let caretLineShown = false;
             if (range && !hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
-                const rect = range.getBoundingClientRect();
                 const eventCellElement = hasClosestByTag(event.target as Node, "TD") ||
                     hasClosestByTag(event.target as Node, "TH");
                 const rangeCellElement = hasClosestByTag(range.startContainer, "TD") ||
                     hasClosestByTag(range.startContainer, "TH");
                 const cellElement = (eventCellElement || rangeCellElement) as HTMLElement | false;
                 const cellRect = cellElement ? cellElement.getBoundingClientRect() : undefined;
+                const blockElement = hasClosestBlock(range.startContainer) || hasClosestBlock(event.target as HTMLElement);
+                const editableElement = hasClosestByAttribute(range.startContainer, "contenteditable", "true") ||
+                    getContenteditableElement(blockElement as HTMLElement);
+                const editableStyle = editableElement ? getComputedStyle(editableElement) : undefined;
+                const rect = getCaretRect(range, editableStyle?.direction === "rtl");
                 // 空单元格的 Range 可能返回整张表的矩形，需要确认光标矩形仍位于目标单元格内。
-                const rectInCell = !cellRect || (
+                const rectInCell = !cellRect || !rect || (
                     rect.left >= cellRect.left - 1 && rect.left <= cellRect.right + 1 &&
-                    rect.top >= cellRect.top - 1 && rect.bottom <= cellRect.bottom + 1
+                    rect.top >= cellRect.top - 1 && rect.top + rect.height <= cellRect.bottom + 1
                 );
-                if (rect.height > 0 && rectInCell) {
+                if (rect && rectInCell) {
                     showCaretLine(rect.left, rect.top, rect.height);
                     caretLineShown = true;
                 } else if (cellElement && cellRect) {
@@ -1231,20 +1236,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         showCaretLine(left, top, height);
                         caretLineShown = true;
                     }
-                } else {
-                    const blockElement = hasClosestBlock(range.startContainer) || hasClosestBlock(event.target as HTMLElement);
-                    const editableElement = hasClosestByAttribute(range.startContainer, "contenteditable", "true") ||
-                        getContenteditableElement(blockElement as HTMLElement);
-                    if (editableElement) {
-                        const editableRect = editableElement.getBoundingClientRect();
-                        const editableStyle = getComputedStyle(editableElement);
-                        const lineHeight = parseFloat(editableStyle.lineHeight) || editableRect.height;
-                        const height = Math.min(lineHeight, editableRect.height);
-                        if (height > 0) {
-                            const left = editableStyle.direction === "rtl" ? editableRect.right - 2 : editableRect.left;
-                            showCaretLine(left, editableRect.top + (editableRect.height - height) / 2, height);
-                            caretLineShown = true;
-                        }
+                } else if (editableElement && editableStyle) {
+                    const editableRect = editableElement.getBoundingClientRect();
+                    const lineHeight = parseFloat(editableStyle.lineHeight) || editableRect.height;
+                    const height = Math.min(lineHeight, editableRect.height);
+                    if (height > 0) {
+                        const left = editableStyle.direction === "rtl" ? editableRect.right - 2 : editableRect.left;
+                        showCaretLine(left, editableRect.top + (editableRect.height - height) / 2, height);
+                        caretLineShown = true;
                     }
                 }
             }

@@ -14,13 +14,12 @@ import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openFileAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {
     copyPlainText,
-    isInAndroid,
-    isInHarmony,
     isMac,
     isOnlyMeta,
     saveExportFile,
     updateHotkeyAfterTip,
     updateHotkeyTip,
+    writeBlockDOMClipboard,
     writeText
 } from "../util/compatibility";
 import {
@@ -2345,14 +2344,8 @@ export class Gutter {
                     fetchPost("/api/block/getHeadingChildrenDOM", {
                         id,
                         removeFoldAttr: false
-                    }, (response) => {
-                        if (isInAndroid()) {
-                            window.JSAndroid.writeSiYuanHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), protyle.lute.BlockDOM2HTML(response.data).trimEnd(), response.data + Constants.ZWSP);
-                        } else if (isInHarmony()) {
-                            window.JSHarmony.writeSiYuanHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), protyle.lute.BlockDOM2HTML(response.data).trimEnd(), response.data + Constants.ZWSP);
-                        } else {
-                            writeText(response.data + Constants.ZWSP);
-                        }
+                    }, async (response) => {
+                        await writeBlockDOMClipboard(protyle.lute, response.data);
                     });
                 }
             }).element);
@@ -2382,12 +2375,11 @@ export class Gutter {
                                 if (!protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
                                     return;
                                 }
-                                if (isInAndroid()) {
-                                    window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                                } else if (isInHarmony()) {
-                                    window.JSHarmony.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                                } else {
-                                    writeText(response.data + Constants.ZWSP);
+                                if (!await writeBlockDOMClipboard(protyle.lute, response.data)) {
+                                    return;
+                                }
+                                if (!protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
+                                    return;
                                 }
                                 deleteResponse.data.doOperations.forEach((operation: IOperation) => {
                                     protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {

@@ -112,3 +112,21 @@ func TestInstalledPackageSizeCacheAndInvalidation(t *testing.T) {
 		t.Fatalf("expected refreshed size greater than %d, got %d", firstSize, refreshedSize)
 	}
 }
+
+func TestIsValidInstalledPackageRequiresExactName(t *testing.T) {
+	if !IsValidInstalledPackage(&Package{Name: "plugin-sample"}, "plugin-sample") {
+		t.Fatal("expected an exact package name match to be valid")
+	}
+	for _, test := range []struct {
+		pkg     *Package
+		dirName string
+	}{
+		{pkg: nil, dirName: "plugin-sample"},
+		{pkg: &Package{Name: "plugin-sample"}, dirName: "Plugin-Sample"},
+		{pkg: &Package{Name: "插件"}, dirName: "插件"},
+	} {
+		if IsValidInstalledPackage(test.pkg, test.dirName) {
+			t.Fatalf("expected package %#v in directory %q to be invalid", test.pkg, test.dirName)
+		}
+	}
+}

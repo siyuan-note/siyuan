@@ -1,4 +1,8 @@
 {
+	"bazaarPackageInvalid": "Nieprawidłowy",
+	"bazaarPackageMissingManifest": "Brakuje pliku manifestu pakietu z rynku",
+	"bazaarPackageInvalidManifest": "Plik manifestu pakietu z rynku jest nieprawidłowy",
+	"bazaarPackageNameMismatch": "Nazwa katalogu pakietu z rynku musi dokładnie odpowiadać polu name w manifeście",
 	"loadAllContent": "Wczytaj całą zawartość",
 	"keepLazyLoadTip": "Zachowuj dynamicznie wczytane bloki treści, aby ograniczyć ponowne wczytywanie podczas przewijania; długie dokumenty mogą zużywać więcej pamięci",
 	"msgSelectAllIncompleteTip": "Ostrzeżenie o niepełnym zaznaczeniu w edytorze",

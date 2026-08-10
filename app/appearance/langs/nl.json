@@ -1,4 +1,8 @@
 {
+	"bazaarPackageInvalid": "Ongeldig",
+	"bazaarPackageMissingManifest": "Het manifestbestand van het marktplaatspakket ontbreekt",
+	"bazaarPackageInvalidManifest": "Het manifestbestand van het marktplaatspakket is ongeldig",
+	"bazaarPackageNameMismatch": "De mapnaam van het marktplaatspakket moet exact overeenkomen met het veld name in het manifest",
 	"loadAllContent": "Alle inhoud laden",
 	"keepLazyLoadTip": "Behoud dynamisch geladen inhoudsblokken om herhaald laden tijdens het scrollen te verminderen; lange documenten kunnen meer geheugen gebruiken",
 	"msgSelectAllIncompleteTip": "Waarschuwing voor onvolledige selectie in de editor",

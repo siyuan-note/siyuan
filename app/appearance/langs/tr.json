@@ -1,4 +1,8 @@
 {
+	"bazaarPackageInvalid": "Geçersiz",
+	"bazaarPackageMissingManifest": "Pazar paketi bildirim dosyası eksik",
+	"bazaarPackageInvalidManifest": "Pazar paketi bildirim dosyası geçersiz",
+	"bazaarPackageNameMismatch": "Pazar paketi dizin adı bildirim dosyasındaki name alanıyla tam olarak eşleşmelidir",
 	"loadAllContent": "Tüm içeriği yükle",
 	"keepLazyLoadTip": "Kaydırma sırasında yinelenen yüklemeleri azaltmak için dinamik olarak yüklenen içerik bloklarını koru; uzun belgeler daha fazla bellek kullanabilir",
 	"msgSelectAllIncompleteTip": "Düzenleyicide eksik tümünü seçme uyarısı",

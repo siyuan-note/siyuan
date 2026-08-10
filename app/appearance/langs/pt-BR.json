@@ -1,4 +1,8 @@
 {
+	"bazaarPackageInvalid": "Inválido",
+	"bazaarPackageMissingManifest": "O arquivo de manifesto do pacote do marketplace está ausente",
+	"bazaarPackageInvalidManifest": "O arquivo de manifesto do pacote do marketplace é inválido",
+	"bazaarPackageNameMismatch": "O nome do diretório do pacote do marketplace deve corresponder exatamente ao campo name no manifesto",
 	"loadAllContent": "Carregar todo o conteúdo",
 	"keepLazyLoadTip": "Mantenha os blocos de conteúdo carregados dinamicamente para reduzir recarregamentos durante a rolagem; documentos longos podem usar mais memória",
 	"msgSelectAllIncompleteTip": "Aviso de seleção incompleta no editor",

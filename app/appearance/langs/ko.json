@@ -1,4 +1,8 @@
 {
+	"bazaarPackageInvalid": "비정상",
+	"bazaarPackageMissingManifest": "마켓플레이스 패키지 매니페스트 파일이 없습니다",
+	"bazaarPackageInvalidManifest": "마켓플레이스 패키지 매니페스트 파일이 올바르지 않습니다",
+	"bazaarPackageNameMismatch": "마켓플레이스 패키지 디렉터리 이름은 매니페스트의 name 필드와 정확히 일치해야 합니다",
 	"loadAllContent": "모든 콘텐츠 불러오기",
 	"keepLazyLoadTip": "동적으로 불러온 콘텐츠 블록을 유지하여 스크롤할 때 반복 로드를 줄입니다. 긴 문서는 더 많은 메모리를 사용할 수 있습니다",
 	"msgSelectAllIncompleteTip": "편집기 전체 선택 누락 경고",

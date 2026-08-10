@@ -93,6 +93,7 @@ type TOperation =
     | "setAttrViewUpdatedIncludeTime"
     | "setAttrViewCreatedIncludeTime"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
+type TBazaarPackageInvalidReason = "missing-manifest" | "invalid-manifest" | "name-mismatch"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "click-blockicon" | "click-editorcontent" | "click-pdf" | "click-editortitleicon" | "click-flashcard-action" |
@@ -1044,6 +1045,7 @@ interface IBazaarItem {
     preferredFunding: string;
     disallowUpdate: boolean;
     updateRequiredMinAppVer?: string;
+    invalidReason?: TBazaarPackageInvalidReason;
     installedIncompatible?: boolean; // 仅插件/主题
     bazaarIncompatible?: boolean; // 仅插件/主题
     enabled?: boolean; // 仅 plugin

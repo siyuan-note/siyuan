@@ -1,4 +1,8 @@
 {
+	"bazaarPackageInvalid": "Invalid",
+	"bazaarPackageMissingManifest": "The marketplace package manifest is missing",
+	"bazaarPackageInvalidManifest": "The marketplace package manifest is invalid",
+	"bazaarPackageNameMismatch": "The marketplace package directory name must exactly match the name field in the manifest",
 	"loadAllContent": "Load all content",
 	"keepLazyLoadTip": "Retain dynamically loaded content blocks to reduce repeated loading while scrolling; long documents may use more memory",
 	"msgSelectAllIncompleteTip": "Incomplete editor select-all warning",

@@ -1,4 +1,8 @@
 {
+	"bazaarPackageInvalid": "غير صالح",
+	"bazaarPackageMissingManifest": "ملف بيان حزمة السوق مفقود",
+	"bazaarPackageInvalidManifest": "ملف بيان حزمة السوق غير صالح",
+	"bazaarPackageNameMismatch": "يجب أن يتطابق اسم مجلد حزمة السوق تمامًا مع حقل name في ملف البيان",
 	"loadAllContent": "تحميل كل المحتوى",
 	"keepLazyLoadTip": "الاحتفاظ بكتل المحتوى المحملة ديناميكيا لتقليل تكرار التحميل أثناء التمرير؛ قد تستهلك المستندات الطويلة ذاكرة أكبر",
 	"msgSelectAllIncompleteTip": "تحذير التحديد غير الكامل في المحرر",

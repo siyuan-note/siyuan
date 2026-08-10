@@ -46,25 +46,8 @@ type UpdatedPackage struct {
 	Available *bazaar.Package `json:"available"`
 }
 
-var reservedPackageNames = map[string]bool{
-	"CON": true, "PRN": true, "AUX": true, "NUL": true,
-	"COM1": true, "COM2": true, "COM3": true, "COM4": true, "COM5": true,
-	"COM6": true, "COM7": true, "COM8": true, "COM9": true,
-	"LPT1": true, "LPT2": true, "LPT3": true, "LPT4": true, "LPT5": true,
-	"LPT6": true, "LPT7": true, "LPT8": true, "LPT9": true,
-}
-
 func isValidPackageName(packageName string) bool {
-	if len(packageName) < 1 || len(packageName) > 255 || packageName[0] == '.' || packageName[0] == ' ' ||
-		packageName[len(packageName)-1] == '.' || packageName[len(packageName)-1] == ' ' || strings.Contains(packageName, "..") {
-		return false
-	}
-	for _, char := range []byte(packageName) {
-		if char < 0x20 || char > 0x7E || strings.ContainsRune(`<>&'":/\|?*`, rune(char)) {
-			return false
-		}
-	}
-	return !reservedPackageNames[strings.ToUpper(packageName)]
+	return bazaar.IsValidPackageName(packageName)
 }
 
 func getPackageInstallPath(pkgType, packageName string) (string, string, error) {
@@ -245,6 +228,9 @@ func getUpdatedPackages(pkgType, frontend string) (updatedPackages []*UpdatedPac
 func buildUpdatedPackages(installedPackages []*bazaar.Package, bazaarPackagesMap map[string]*bazaar.Package) (updatedPackages []*UpdatedPackage) {
 	updatedPackages = []*UpdatedPackage{}
 	for _, installed := range installedPackages {
+		if installed.InvalidReason != "" {
+			continue
+		}
 		online := bazaarPackagesMap[installed.Name]
 		if online == nil || 0 <= semver.Compare("v"+installed.Version, "v"+online.Version) {
 			continue
@@ -314,9 +300,30 @@ func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installed
 
 	for _, dir := range dirs {
 		dirName := dir.Name()
+		if strings.HasPrefix(dirName, ".siyuan-package-install-") {
+			continue
+		}
 		pkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(basePath, dirName, jsonFileName))
 		if nil != parseErr || nil == pkg {
+			if pkgType == "templates" && errors.Is(parseErr, os.ErrNotExist) {
+				continue
+			}
+			reason := bazaar.PackageInvalidReasonInvalidManifest
+			if errors.Is(parseErr, os.ErrNotExist) {
+				reason = bazaar.PackageInvalidReasonMissingManifest
+			}
+			installedPackageInfos = append(installedPackageInfos, installedPackageInfo{
+				Pkg:     &bazaar.Package{Name: dirName, InvalidReason: reason},
+				DirName: dirName,
+			})
 			continue
+		}
+		if !bazaar.IsValidInstalledPackage(pkg, dirName) {
+			reason := bazaar.PackageInvalidReasonInvalidManifest
+			if pkg.Name != dirName {
+				reason = bazaar.PackageInvalidReasonNameMismatch
+			}
+			pkg = &bazaar.Package{Name: dirName, InvalidReason: reason}
 		}
 		installedPackageInfos = append(installedPackageInfos, installedPackageInfo{Pkg: pkg, DirName: dirName})
 	}
@@ -368,6 +375,9 @@ func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages
 		petals = getPetals()
 	}
 	for _, pkg := range installedPackages {
+		if pkg.InvalidReason != "" {
+			continue
+		}
 		switch pkgType {
 		case "plugins":
 			pkg.InstalledIncompatible = new(bazaar.IsIncompatiblePlugin(pkg, frontend))
@@ -407,6 +417,9 @@ func GetInstalledPackageSize(pkgType, packageName string) (size int64, hSize str
 // 在线集市不可用时仍返回本地信息，避免网络问题阻断已下载包详情。
 func GetBazaarPackageDetail(pkgType, packageName, frontend string) (installed, available *bazaar.Package) {
 	for _, pkg := range GetInstalledPackages(pkgType, frontend, "") {
+		if pkg.InvalidReason != "" {
+			continue
+		}
 		if pkg.Name == packageName {
 			installed = pkg
 			break
@@ -438,6 +451,9 @@ func GetBazaarPackages(pkgType, frontend, keyword string) (bazaarPackages []*baz
 	}
 	installedMap := make(map[string]*bazaar.Package, len(installedInfos))
 	for _, info := range installedInfos {
+		if info.Pkg.InvalidReason != "" {
+			continue
+		}
 		installedMap[info.Pkg.Name] = info.Pkg
 	}
 	for _, pkg := range bazaarPackages {
@@ -632,8 +648,21 @@ func UpdateBazaarPackage(pkgType, packageName, frontend string) error {
 	return errors.New("marketplace package update not found")
 }
 
+func getPackageUninstallPath(pkgType, packageName string) (installPath string, err error) {
+	installedInfos, basePath, _, err := GetInstalledPackageInfos(pkgType)
+	if err != nil {
+		return "", err
+	}
+	for _, info := range installedInfos {
+		if info.Pkg.Name == packageName {
+			return filepath.Join(basePath, info.DirName), nil
+		}
+	}
+	return "", errors.New("installed package not found")
+}
+
 func UninstallPackage(pkgType, packageName string) error {
-	installPath, _, err := getPackageInstallPath(pkgType, packageName)
+	installPath, err := getPackageUninstallPath(pkgType, packageName)
 	if err != nil {
 		return err
 	}

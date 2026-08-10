@@ -31,3 +31,8 @@ export const reorderTabItems = <T extends { id: string }>(items: T[], item: T, n
     }
     return true;
 };
+
+export const findNextTabId = <T extends { id: string }>(items: T[], candidateIds: string[]) => {
+    const existingIds = new Set(items.map((item) => item.id));
+    return candidateIds.find((id) => existingIds.has(id));
+};

@@ -54,7 +54,7 @@ import {recordBeforeResizeTop} from "../protyle/util/resize";
 import {sanitizeClosedTabs, setStorageVal} from "../protyle/util/compatibility";
 import {setTitle} from "../util/processTitle";
 import {dragOverScroll} from "../boot/globalEvent/dragover";
-import {clearTabDragPreview, reorderTabItems} from "./tabDrag";
+import {clearTabDragPreview, findNextTabId, reorderTabItems} from "./tabDrag";
 
 const createDragTabPlaceholder = () => {
     const dragTab = window.siyuan.dragTab;
@@ -303,8 +303,15 @@ export class Wnd {
                 clearTabDragPreview(it);
                 return;
             }
-            const nextTabHeaderElement = dragTabHeaderElement.nextElementSibling as HTMLElement;
-            const nextTabId = nextTabHeaderElement?.getAttribute("data-id") || undefined;
+            const nextTabIds: string[] = [];
+            let nextTabHeaderElement = dragTabHeaderElement.nextElementSibling as HTMLElement;
+            while (nextTabHeaderElement) {
+                const nextTabId = nextTabHeaderElement.getAttribute("data-id");
+                if (nextTabId) {
+                    nextTabIds.push(nextTabId);
+                }
+                nextTabHeaderElement = nextTabHeaderElement.nextElementSibling as HTMLElement;
+            }
             const tabData = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB));
             let oldTab = getInstanceById(tabData.id) as Tab;
             const wnd = getInstanceById(it.parentElement.getAttribute("data-id")) as Wnd;
@@ -325,6 +332,7 @@ export class Wnd {
                 clearTabDragPreview(it);
                 return;
             }
+            const nextTabId = findNextTabId(wnd.children, nextTabIds);
             const oldWnd = oldTab.parent;
             if (cloneTabElement) {
                 cloneTabElement.before(oldTab.headElement);

@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {reorderTabItems} from "./tabDrag";
+import {findNextTabId, reorderTabItems} from "./tabDrag";
 
 const createItems = () => [
     {id: "a"},
@@ -10,6 +10,19 @@ const createItems = () => [
 ];
 
 describe("tab drag ordering", () => {
+    it("uses the first surviving successor after tabs are removed", () => {
+        const items = createItems();
+        items.splice(1, 1);
+
+        assert.equal(findNextTabId(items, ["b", "c", "d"]), "c");
+    });
+
+    it("moves to the end when no successor survives", () => {
+        const items = createItems().slice(0, 1);
+
+        assert.equal(findNextTabId(items, ["b", "c", "d"]), undefined);
+    });
+
     it("moves a tab before the requested successor", () => {
         const items = createItems();
 

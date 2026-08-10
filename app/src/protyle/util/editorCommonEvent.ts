@@ -70,6 +70,7 @@ import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
 import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getCaretRect} from "./caretRect";
+import {isBlockRefDropTargetDisabled} from "./blockRefDrop";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`;
 
@@ -1164,7 +1165,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const range = getRangeByPoint(event.clientX, event.clientY);
         if (!range || isAttributeViewTitleDrop(event, range) ||
-            hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
+            isBlockRefDropTargetDisabled([event.target as Node, range.startContainer])) {
             return false;
         }
         focusByRange(range);
@@ -1185,9 +1186,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
+        if (range && isBlockRefDropTargetDisabled([event.target as Node, range.startContainer])) {
+            event.dataTransfer.dropEffect = "none";
+            hideDragTip();
+            hideCaretLine();
+            event.preventDefault();
+            return;
+        }
         if (isWithinEditor) {
             let caretLineShown = false;
-            if (range && !hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
+            if (range) {
                 const eventCellElement = hasClosestByTag(event.target as Node, "TD") ||
                     hasClosestByTag(event.target as Node, "TH");
                 const rangeCellElement = hasClosestByTag(range.startContainer, "TD") ||
@@ -1410,7 +1418,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         cleanupDragIndicators(editorElement);
                         return;
                     }
-                    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
+                    if (isBlockRefDropTargetDisabled([event.target as Node, range.startContainer])) {
                         return;
                     } else {
                         // 数据库和代码块的工具区不属于编辑内容，需按拖拽指示线将光标定位到可编辑区域开头或末尾。

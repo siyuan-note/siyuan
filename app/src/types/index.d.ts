@@ -324,6 +324,7 @@ interface Window {
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number
         cancelNotification(id: number): void
         logInputEvent?(details: string): void
+        reportStartupStage?(stage: string): void
     };
     JSHarmony: {
         openAuthURL(url: string): void

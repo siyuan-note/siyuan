@@ -58,27 +58,40 @@ var serveCmd = &cobra.Command{
 		return nil // bypass root's init — BootWithFlags() handles it
 	},
 	Run: func(cmd *cobra.Command, args []string) {
+		startupTimer := util.NewStartupTimer()
 		// --workspace 优先取 serve 自己的（rootCmd 的 persistent flag），兜底环境变量与默认值交给 util.BootWithFlags 内部处理（与原 Boot() 行为一致）。
 		ws := workspacePath
 
 		util.BootWithFlags(ws, serveWdPath, servePort, serveReadOnly, serveAccessAuthCode, serveLang, serveMode, serveSSL, serveAttachUI, serveSafeMode, serveEnablePprof)
+		startupTimer.Mark("workspace-ready")
 
 		model.InitJwtKey()
 		model.InitConf()
+		startupTimer.Mark("configuration-ready")
 		go server.Serve(false, model.Conf.CookieKey)
+		startupTimer.Mark("http-server-requested")
 		model.InitAppearance()
+		startupTimer.Mark("appearance-ready")
 		sql.InitDatabase(false)
+		startupTimer.Mark("main-database-ready")
 		sql.InitHistoryDatabase(false)
+		startupTimer.Mark("history-database-ready")
 		sql.InitAssetContentDatabase(false)
+		startupTimer.Mark("asset-database-ready")
 		sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
 		sql.SetIndexAssetPath(model.Conf.Search.IndexAssetPath)
 
 		model.BootSyncData()
+		startupTimer.Mark("boot-sync-finished")
 		model.InitBoxes()
+		startupTimer.Mark("notebooks-ready")
 		model.LoadFlashcards()
+		startupTimer.Mark("flashcards-ready")
 		util.LoadAssetsTexts()
+		startupTimer.Mark("asset-texts-ready")
 
 		util.SetBooted()
+		startupTimer.Mark("kernel-ready")
 		util.PushClearAllMsg()
 
 		job.StartCron()

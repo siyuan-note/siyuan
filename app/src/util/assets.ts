@@ -227,12 +227,15 @@ export const loadAssets = (data: Config.IAppearance) => {
     });
 };
 
-export const initAssets = () => {
+export const initAssets = (onLoadingRemoved?: () => void) => {
     const loadingElement = document.getElementById("loading");
     if (loadingElement) {
         setTimeout(() => {
             loadingElement.remove();
+            onLoadingRemoved?.();
         }, 160);
+    } else {
+        onLoadingRemoved?.();
     }
     updateMobileTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", event => {

@@ -126,28 +126,41 @@ func StartKernelFast(container, appDir, workspaceBaseDir, localIPs *C.char) {
 
 //export StartKernel
 func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer *C.char) {
+	startupTimer := util.NewStartupTimer()
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
 	util.MobileOSVer = C.GoString(osVer)
 	util.SetLocalIPs(strings.Split(C.GoString(localIPs), ","))
 	util.BootMobile(C.GoString(container), C.GoString(appDir), C.GoString(workspaceBaseDir), C.GoString(lang))
+	startupTimer.Mark("workspace-ready")
 
 	model.InitConf()
+	startupTimer.Mark("configuration-ready")
 	go server.Serve(false, model.Conf.CookieKey)
+	startupTimer.Mark("http-server-requested")
 	go func() {
 		model.InitAppearance()
+		startupTimer.Mark("appearance-ready")
 		sql.InitDatabase(false)
+		startupTimer.Mark("main-database-ready")
 		sql.InitHistoryDatabase(false)
+		startupTimer.Mark("history-database-ready")
 		sql.InitAssetContentDatabase(false)
+		startupTimer.Mark("asset-database-ready")
 		sql.SetCaseSensitive(model.Conf.Search.CaseSensitive)
 		sql.SetIndexAssetPath(model.Conf.Search.IndexAssetPath)
 
 		model.BootSyncData()
+		startupTimer.Mark("boot-sync-finished")
 		model.InitBoxes()
+		startupTimer.Mark("notebooks-ready")
 		model.LoadFlashcards()
+		startupTimer.Mark("flashcards-ready")
 		util.LoadAssetsTexts()
+		startupTimer.Mark("asset-texts-ready")
 
 		util.SetBooted()
+		startupTimer.Mark("kernel-ready")
 		util.PushClearAllMsg()
 
 		job.StartCron()

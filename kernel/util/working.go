@@ -30,6 +30,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
@@ -75,6 +76,32 @@ var (
 
 	SafeMode = false // 是否以安全模式启动：禁用代码片段、插件、自定义主题与图标
 )
+
+// StartupTimer 记录启动阶段的累计耗时和阶段耗时。
+type StartupTimer struct {
+	lock       sync.Mutex
+	startedAt  time.Time
+	previousAt time.Time
+}
+
+func NewStartupTimer() *StartupTimer {
+	now := time.Now()
+	return &StartupTimer{startedAt: now, previousAt: now}
+}
+
+func (timer *StartupTimer) Mark(stage string) {
+	if nil == timer {
+		return
+	}
+
+	timer.lock.Lock()
+	defer timer.lock.Unlock()
+
+	now := time.Now()
+	logging.LogInfof("startup timing [container=%s, stage=%s, elapsed=%dms, delta=%dms]", Container, stage,
+		now.Sub(timer.startedAt).Milliseconds(), now.Sub(timer.previousAt).Milliseconds())
+	timer.previousAt = now
+}
 
 // If a commandline parameter is empty, fallback to the env var.
 //

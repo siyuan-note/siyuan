@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "SiYuan MCP サービスを通じて外部クライアントに提供する機能を選択します",
+	"agentCapabilitiesScopeAgent": "Agent で使用",
+	"agentCapabilitiesScopeMcp": "MCP で外部提供",
 	"agentCapabilitiesApprovalMode": "承認モード",
 	"agentCapabilitiesDialogTip": "Agent が使用できる機能を選択します。有効な定義ごとに token 使用量が増えます",
 	"agentCapabilitiesSearch": "機能名または説明を検索",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "異常",
 	"bazaarPackageMissingManifest": "マーケットプレイスパッケージのマニフェストファイルがありません",
 	"bazaarPackageInvalidManifest": "マーケットプレイスパッケージのマニフェストファイルが無効です",
-	"bazaarPackageNameMismatch": "マーケットプレイスパッケージのディレクトリ名はマニフェストの name フィールドと完全に一致させてください",
+	"bazaarPackageNameMismatch": "マーケットプレイスパッケージのディレクトリ名がマニフェストの name フィールドの値と一致しません",
 	"loadAllContent": "すべてのコンテンツを読み込む",
 	"keepLazyLoadTip": "動的に読み込んだコンテンツブロックを保持してスクロール時の再読み込みを減らします。長い文書ではメモリ使用量が増える場合があります",
 	"msgSelectAllIncompleteTip": "エディターの不完全な全選択警告",

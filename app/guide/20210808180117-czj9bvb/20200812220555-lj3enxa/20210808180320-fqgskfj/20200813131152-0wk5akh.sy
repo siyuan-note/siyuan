@@ -6,7 +6,7 @@
 		"id": "20200813131152-0wk5akh",
 		"title": "在内容块中遨游",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -285,7 +285,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200920194146-psjundj",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -303,7 +303,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210106201752-1nedfs6",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -335,7 +335,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": " 控制。"
 				}
 			]
 		},
@@ -345,7 +345,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106201308-l8nlq6w",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -370,7 +370,7 @@
 			},
 			"Properties": {
 				"id": "20210104090757-g5onw59",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -386,7 +386,7 @@
 					},
 					"Properties": {
 						"id": "20210104090757-pb550rg",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -394,12 +394,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210205172718-90wokcr",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "将鼠标悬浮在反链列表的来源文档上可进行预览"
+									"Data": "将鼠标悬浮在反链列表的来源文档或反链内容的块标上可进行预览"
 								}
 							]
 						}

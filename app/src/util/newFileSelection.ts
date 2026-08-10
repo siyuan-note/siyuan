@@ -8,9 +8,11 @@ export type NewFileSelectionContext = {
     startBlockID: string;
     endBlockID: string;
     text: string;
+    undoContext?: Record<string, string>;
 };
 
-export const createNewFileSelectionContext = (protyle: IProtyle, range: Range) => {
+export const createNewFileSelectionContext = (protyle: IProtyle, range: Range,
+                                              undoContext?: Record<string, string>) => {
     // 固定触发时的文档和选区，异步创建完成后仅修改原位置 https://github.com/siyuan-note/siyuan/issues/16972
     const selectionRange = range.cloneRange();
     const startBlockElement = hasClosestBlock(selectionRange.startContainer);
@@ -26,6 +28,7 @@ export const createNewFileSelectionContext = (protyle: IProtyle, range: Range) =
         startBlockID: startBlockElement.getAttribute("data-node-id"),
         endBlockID: endBlockElement.getAttribute("data-node-id"),
         text: selectionRange.toString(),
+        undoContext,
     } as NewFileSelectionContext;
 };
 

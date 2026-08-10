@@ -38,13 +38,15 @@ const (
 
 // CheckHostSSRF 校验主机名解析出的 IP 不落在内网/回环等不可达地址段，
 // 防止智能体被诱导发起 SSRF 攻击。web_fetch 与 http_request 共用此校验。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rg26-cg95-gq6p
 func CheckHostSSRF(host string) error {
 	ips, err := net.LookupIP(host)
 	if err != nil {
 		return errors.New("failed to resolve host: " + err.Error())
 	}
 	for _, ip := range ips {
-		if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsPrivate() || ip.IsUnspecified() {
+		// 与 SSRFSafeDialer 共用 isPrivateIP，覆盖 NAT64、6to4、Teredo 等 IPv6 过渡地址。
+		if isPrivateIP(ip) {
 			return errors.New("access to private/internal IP is prohibited")
 		}
 	}

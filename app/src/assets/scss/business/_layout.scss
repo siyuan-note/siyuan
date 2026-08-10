@@ -234,6 +234,11 @@
         margin: 6px 4px;
         border-radius: var(--b3-border-radius);
 
+        &[data-clone="true"] {
+          opacity: .38;
+          pointer-events: none;
+        }
+
         &--full {
           max-width: none;
           flex: 1;

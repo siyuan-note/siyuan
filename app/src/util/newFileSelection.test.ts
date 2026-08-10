@@ -108,8 +108,9 @@ const createFixture = () => {
 describe("new document selection context", () => {
     it("captures the selected document and block boundaries", () => {
         const {protyle, range} = createFixture();
+        const undoContext = {undoFocusId: "start", undoFocusStart: "8"};
 
-        const context = createNewFileSelectionContext(protyle, range);
+        const context = createNewFileSelectionContext(protyle, range, undoContext);
 
         assert.notEqual(context?.range, range);
         assert.equal(context?.notebookId, "notebook");
@@ -118,6 +119,7 @@ describe("new document selection context", () => {
         assert.equal(context?.startBlockID, "start");
         assert.equal(context?.endBlockID, "end");
         assert.equal(context?.text, "selected");
+        assert.equal(context?.undoContext, undoContext);
     });
 
     it("keeps a connected selection in the original document valid", () => {

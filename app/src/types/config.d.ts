@@ -172,10 +172,7 @@ declare namespace Config {
         temperature: number;
         maxCompletionTokens: number;
         maxToolCallRounds: number;
-        capabilityPolicy: {
-            default: "allow" | "deny";
-            overrides: Record<string, "allow" | "deny">;
-        };
+        capabilityPolicy: ICapabilityPolicy;
         approvalPolicy: {
             default: "confirm" | "allow";
             overrides: Record<string, {
@@ -183,6 +180,11 @@ declare namespace Config {
                 actions: Record<string, "confirm" | "allow">;
             }>;
         };
+    }
+
+    export interface ICapabilityPolicy {
+        default: "allow" | "deny";
+        overrides: Record<string, "allow" | "deny">;
     }
 
     /**
@@ -260,6 +262,7 @@ declare namespace Config {
      */
     export interface IMCP {
         servers: IMCPServer[];
+        exposurePolicy: ICapabilityPolicy;
     }
 
     export interface IMCPServer {

@@ -6,7 +6,7 @@
 		"id": "20211226121326-v5kpxfp",
 		"title": "主題",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810230450"
 	},
 	"Children": [
 		{
@@ -1258,7 +1258,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226121625-kirhoib",
-				"updated": "20260809232000"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1273,7 +1273,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121625-tvni8h7",
-				"updated": "20260809232000"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1348,48 +1348,48 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226121625-yssmpht"
+						"id": "20211226121625-yssmpht",
+						"updated": "20260810230450"
 					},
 					"Children": [
 						{
 							"ID": "20211226121625-4zsm2ws",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226121625-4zsm2ws"
+								"id": "20211226121625-4zsm2ws",
+								"updated": "20260810230450"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "按照圖中 1-4 步不斷進行修改\n"
+									"Data": "使用開發者工具定位並調整樣式：開啟開發者工具，啟用元素選取器並點擊需要修改的介面元素，在 "
 								},
 								{
-									"Type": "NodeImage",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeBang"
-										},
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "custom-theme1.png"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "assets/custom-theme1-20210512172221-x541iq1.png"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Elements"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 面板中查看對應的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTML"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，然後在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Styles"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 面板中調整樣式"
 								}
 							]
 						}
@@ -1433,6 +1433,52 @@
 					]
 				},
 				{
+					"ID": "20260810212846-npfk41i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260810212846-npfk41i",
+						"updated": "20260810222021"
+					},
+					"Children": [
+						{
+							"ID": "20260810212846-v45720m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260810212846-v45720m",
+								"updated": "20260810222021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在開發者工具的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Network"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "（網路）分頁中勾選 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Disable cache"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "（停用快取）"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20211226121625-4wnr5ps",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -1441,7 +1487,7 @@
 					},
 					"Properties": {
 						"id": "20211226121625-4wnr5ps",
-						"updated": "20260809232000"
+						"updated": "20260810215424"
 					},
 					"Children": [
 						{
@@ -1449,7 +1495,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226121625-4woz4wx",
-								"updated": "20260809232000"
+								"updated": "20260810215424"
 							},
 							"Children": [
 								{
@@ -1487,10 +1533,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "刷新介面"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "。"
 								}
 							]
 						}

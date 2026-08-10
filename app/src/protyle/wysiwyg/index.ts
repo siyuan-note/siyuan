@@ -92,12 +92,13 @@ import {popSearch} from "../../mobile/menu/search";
 import {
     copyPlainText,
     encodeBase64,
+    getTextSiyuanFromTextHTML,
     isInAndroid,
-    isInHarmony,
     isInIOS,
     isMac,
     isOnlyMeta,
-    readClipboard
+    readClipboard,
+    writeClipboardData
 } from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -167,6 +168,7 @@ import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard, prepareRichClipboardHTML} from "../util/richClipboard";
+import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
@@ -622,52 +624,24 @@ export class WYSIWYG {
             clipboardData,
         }));
         const textPlain = clipboardData.getData("text/plain");
-        const textHTML = clipboardData.getData("text/html");
-        const textSiyuan = clipboardData.getData("text/siyuan");
-        if (!textPlain && !textHTML) {
+        const parsedHTML = getTextSiyuanFromTextHTML(clipboardData.getData("text/html"));
+        const textSiyuan = clipboardData.getData("text/siyuan") || parsedHTML.textSiyuan;
+        if (!textPlain && !parsedHTML.textHtml) {
             showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
             return false;
         }
-        const clipboardItem: Record<string, string> = {};
-        if (textPlain) {
-            clipboardItem["text/plain"] = textPlain;
-        }
-        if (textHTML) {
-            clipboardItem["text/html"] = textHTML;
-        }
-        try {
-            if (isInAndroid()) {
-                if (textSiyuan) {
-                    window.JSAndroid.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
-                } else if (textHTML) {
-                    window.JSAndroid.writeHTMLClipboard(textPlain, textHTML);
-                } else {
-                    window.JSAndroid.writeClipboard(textPlain);
-                }
-            } else if (isInHarmony()) {
-                if (textSiyuan) {
-                    window.JSHarmony.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
-                } else if (textHTML) {
-                    window.JSHarmony.writeHTMLClipboard(textPlain, textHTML);
-                } else {
-                    window.JSHarmony.writeClipboard(textPlain);
-                }
-            } else if (isInIOS()) {
-                window.webkit.messageHandlers.setClipboard.postMessage(textPlain);
-            } else if (navigator.clipboard?.write) {
-                await navigator.clipboard.write([new ClipboardItem(clipboardItem)]);
-            } else if (navigator.clipboard?.writeText) {
-                await navigator.clipboard.writeText(textPlain || textHTML);
-            } else {
-                showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
-                return false;
-            }
-            return true;
-        } catch (error) {
-            console.log("Cut write clipboard error:", error);
-            showMessage(error instanceof Error ? error.message : String(error), 7000, "error");
+        const result = await writeClipboardData({
+            textPlain,
+            textHTML: parsedHTML.textHtml,
+            textSiyuan,
+        }, {fallbackToPlainText: false});
+        if (result.status === "failed") {
+            console.log("Cut write clipboard error:", result.error);
+            showMessage(result.error instanceof Error ? result.error.message :
+                (result.error ? String(result.error) : window.siyuan.languages.clipboardPermissionDenied), 7000, "error");
             return false;
         }
+        return true;
     }
 
     private bindCommonEvent(protyle: IProtyle) {
@@ -726,6 +700,7 @@ export class WYSIWYG {
             let textPlain = "";
             let isInCodeBlock = false;
             let needClipboardWrite = false;
+            let useBlockDOMClipboardRichData = false;
             let nestedListPaste = false;
             if (selectElements.length > 0) {
                 const isRefText = selectElements[0].getAttribute("data-reftext") === "true";
@@ -751,6 +726,7 @@ export class WYSIWYG {
                         let itemHTML = "";
                         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                             needClipboardWrite = true;
+                            useBlockDOMClipboardRichData = true;
                             const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
                                 id: item.getAttribute("data-node-id"),
                                 removeFoldAttr: false
@@ -758,6 +734,7 @@ export class WYSIWYG {
                             itemHTML = response.data;
                         } else if (item.getAttribute("data-type") !== "NodeBlockQueryEmbed" && item.querySelector('[data-type="NodeHeading"][fold="1"]')) {
                             needClipboardWrite = true;
+                            useBlockDOMClipboardRichData = true;
                             const response = await fetchSyncPost("/api/block/getBlockDOM", {
                                 id: item.getAttribute("data-node-id"),
                                 notebook: protyle.notebookId,
@@ -977,41 +954,44 @@ export class WYSIWYG {
 
             if (!isInCodeBlock) {
                 enableLuteMarkdownSyntax(protyle);
+                const blockDOMClipboardRichData = useBlockDOMClipboardRichData && !copyAsRichText ?
+                    buildBlockDOMClipboardRichData(protyle.lute, html) : undefined;
                 // 表格选区（框选或跨多单元格文本选区）直接构建 BlockDOM，不走 HTML2BlockDOM 的 markdown 往返
                 //（GFM 表格只有单行表头，markdown 往返会丢失多行 thead 和单元格 th 属性）
-                let textSiyuan: string;
-                if (selectTableElement || selectTableRange) {
+                let textSiyuan = blockDOMClipboardRichData?.textSiyuan;
+                if (!textSiyuan && (selectTableElement || selectTableRange)) {
                     // 表格选区：html 已是合法 <table>...</table>（含 thead/tbody/fn__none 占位），
                     // 构建最小化 NodeTable BlockDOM，不经过 markdown 往返（GFM 表格只有单行表头，往返会丢失多行 thead）
                     const newId = Lute.NewNodeID();
                     textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
                     html = textSiyuan;
-                } else {
+                } else if (!textSiyuan) {
                     textSiyuan = html;
                 }
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 restoreLuteMarkdownSyntax(protyle);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                let exportedHTML = removeZWJ((selectTableElement || selectTableRange) ? html :
-                    (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : html) :
-                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
+                let exportedHTML = blockDOMClipboardRichData?.textHTML ??
+                    removeZWJ((selectTableElement || selectTableRange) ? html :
+                        (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : html) :
+                            protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
                 if (copyAsRichText) {
                     const prepared = prepareRichClipboardHTML(exportedHTML);
                     exportedHTML = prepared.html;
                     clipboardText = prepared.source;
                 }
-                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` +
-                    (nestedListPaste ? NESTED_LIST_PASTE_MARKER : "") + exportedHTML;
+                const clipboardHTML = (nestedListPaste ? NESTED_LIST_PASTE_MARKER : "") + exportedHTML;
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${clipboardHTML}`;
                 event.clipboardData.setData("text/plain", clipboardText);
                 event.clipboardData.setData("text/html", textHTML);
                 if (needClipboardWrite) {
-                    try {
-                        await navigator.clipboard.write([new ClipboardItem({
-                            ["text/plain"]: clipboardText,
-                            ["text/html"]: textHTML,
-                        })]);
-                    } catch (e) {
-                        console.log("Copy write clipboard error:", e);
+                    const result = await writeClipboardData({
+                        textPlain: clipboardText,
+                        textHTML: clipboardHTML,
+                        textSiyuan,
+                    });
+                    if (result.error || result.status === "failed") {
+                        console.log("Copy write clipboard error:", result.error);
                     }
                 }
                 enhanceRichClipboard(clipboardText, textHTML, protyle.notebookId);
@@ -2997,8 +2977,10 @@ export class WYSIWYG {
             let textPlain = "";
             let isInCodeBlock = false;
             let needClipboardWrite = false;
+            let useBlockDOMClipboardRichData = false;
             let cutBlockSelection = false;
             let cutNextElement: Element | false;
+            let cutAVCells: ReturnType<typeof getAVSelectedCells>;
             if (selectElements.length > 0) {
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
                     selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
@@ -3020,6 +3002,7 @@ export class WYSIWYG {
                     let itemHTML = "";
                     if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
                         needClipboardWrite = true;
+                        useBlockDOMClipboardRichData = true;
                         const response = await fetchSyncPost("/api/block/getHeadingChildrenDOM", {
                             id: item.getAttribute("data-node-id"),
                             removeFoldAttr: false
@@ -3038,6 +3021,7 @@ export class WYSIWYG {
                         });
                     } else if (item.getAttribute("data-type") !== "NodeBlockQueryEmbed" && item.querySelector('[data-type="NodeHeading"][fold="1"]')) {
                         needClipboardWrite = true;
+                        useBlockDOMClipboardRichData = true;
                         const response = await fetchSyncPost("/api/block/getBlockDOM", {
                             id: item.getAttribute("data-node-id"),
                             notebook: protyle.notebookId,
@@ -3083,9 +3067,9 @@ export class WYSIWYG {
             } else if (selectAVElement) {
                 needClipboardWrite = true;
                 const selectedCells = getAVSelectedCells(nodeElement);
-                const itemCells = selectedCells.length === 0 ? getAVSelectedTableCells(nodeElement) : undefined;
-                const cellsValue = await updateCellsValue(protyle, nodeElement, undefined, undefined, undefined,
-                    undefined, false, false, false, itemCells);
+                cutAVCells = selectedCells.length === 0 ? getAVSelectedTableCells(nodeElement) : selectedCells;
+                const cellsValue = selectedCells.length === 0 ? getAVCellData(cutAVCells) :
+                    getAVSelectedCellData(nodeElement);
                 html = JSON.stringify(cellsValue.json);
                 textPlain = cellsValue.text;
             } else if (selectTableElement) {
@@ -3293,14 +3277,16 @@ export class WYSIWYG {
 
             if (!isInCodeBlock) {
                 enableLuteMarkdownSyntax(protyle);
+                const blockDOMClipboardRichData = useBlockDOMClipboardRichData ?
+                    buildBlockDOMClipboardRichData(protyle.lute, html) : undefined;
                 // 表格选区（框选或跨多单元格文本选区）直接构建 BlockDOM，不走 HTML2BlockDOM 的 markdown 往返
-                let textSiyuan: string;
-                if (selectTableElement || selectTableRange) {
+                let textSiyuan = blockDOMClipboardRichData?.textSiyuan;
+                if (!textSiyuan && (selectTableElement || selectTableRange)) {
                     // 表格选区：html 已是合法 <table>...</table>，构建最小化 NodeTable BlockDOM，不走 markdown 往返
                     const newId = Lute.NewNodeID();
                     textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
                     html = textSiyuan;
-                } else {
+                } else if (!textSiyuan) {
                     textSiyuan = html;
                 }
                 restoreLuteMarkdownSyntax(protyle);
@@ -3308,22 +3294,31 @@ export class WYSIWYG {
                     event.clipboardData.setData("text/siyuan", textSiyuan);
                 }
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + removeZWJ((selectTableElement || selectTableRange) ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                const exportedHTML = blockDOMClipboardRichData?.textHTML ??
+                    removeZWJ((selectTableElement || selectTableRange) ? html :
+                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${exportedHTML}`;
                 if (!cutClipboardWritten) {
                     event.clipboardData.setData("text/html", textHTML);
                 }
                 let clipboardWriteSucceeded = true;
                 if (needClipboardWrite && !cutClipboardWritten) {
-                    try {
-                        await navigator.clipboard.write([new ClipboardItem({
-                            ["text/plain"]: textPlain,
-                            ["text/html"]: textHTML,
-                        })]);
-                    } catch (e) {
-                        console.log("Cut write clipboard error:", e);
+                    const result = await writeClipboardData({
+                        textPlain,
+                        textHTML: exportedHTML,
+                        textSiyuan,
+                    }, {fallbackToPlainText: false});
+                    if (result.status === "failed") {
+                        console.log("Cut write clipboard error:", result.error);
                         clipboardWriteSucceeded = false;
-                        showMessage(e instanceof Error ? e.message : String(e), 7000, "error");
+                        showMessage(result.error instanceof Error ? result.error.message :
+                            (result.error ? String(result.error) : window.siyuan.languages.clipboardPermissionDenied),
+                        7000, "error");
                     }
+                }
+                if (selectAVElement && clipboardWriteSucceeded) {
+                    await updateCellsValue(protyle, nodeElement, undefined, undefined, undefined,
+                        undefined, false, false, false, cutAVCells);
                 }
                 if (cutBlockSelection && clipboardWriteSucceeded) {
                     const removed = await removeBlock(protyle, nodeElement, range, "remove", true);

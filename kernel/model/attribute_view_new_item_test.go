@@ -63,6 +63,24 @@ func TestNewItemDocumentPreviewUsesCurrentDatabaseInstance(t *testing.T) {
 	}
 }
 
+func TestNewItemDocumentPreviewUsesBoxDocAsLogicalRoot(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	blockTree := &treenode.BlockTree{
+		ID:     fixture.box.ID,
+		RootID: fixture.box.ID,
+		BoxID:  fixture.box.ID,
+		HPath:  "/File operation test",
+	}
+
+	preview := newItemDocumentPreview(blockTree, fixture.box.ID, "2026/202608/", "Reference", false)
+	if "/2026/202608/Reference" != preview.HPath {
+		t.Fatalf("notebook document resolved to unexpected path: %+v", preview)
+	}
+	if "" != preview.parentID {
+		t.Fatalf("notebook document was used as a physical parent: %+v", preview)
+	}
+}
+
 func TestCreatedDocLifecycleOperationsRequireSnapshot(t *testing.T) {
 	docID := ast.NewNodeID()
 	tx := &Transaction{}

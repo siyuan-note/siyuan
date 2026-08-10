@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "Choisissez les capacités fournies aux clients externes par le service MCP de SiYuan",
+	"agentCapabilitiesScopeAgent": "Utilisation par l’Agent",
+	"agentCapabilitiesScopeMcp": "Fournir via MCP",
 	"agentCapabilitiesApprovalMode": "Mode d’approbation",
 	"agentCapabilitiesDialogTip": "Choisissez les capacités accessibles à l’Agent ; chaque définition activée augmente l’utilisation de token",
 	"agentCapabilitiesSearch": "Rechercher des noms ou descriptions de capacités",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "Non valide",
 	"bazaarPackageMissingManifest": "Le fichier manifeste du paquet de la place de marché est manquant",
 	"bazaarPackageInvalidManifest": "Le fichier manifeste du paquet de la place de marché n'est pas valide",
-	"bazaarPackageNameMismatch": "Le nom du répertoire du paquet de la place de marché doit correspondre exactement au champ name du manifeste",
+	"bazaarPackageNameMismatch": "Le nom du répertoire du paquet de la place de marché ne correspond pas à la valeur du champ name du manifeste",
 	"loadAllContent": "Charger tout le contenu",
 	"keepLazyLoadTip": "Conserver les blocs de contenu chargés dynamiquement afin de réduire les chargements répétés lors du défilement; les documents longs peuvent utiliser davantage de mémoire",
 	"msgSelectAllIncompleteTip": "Avertissement de sélection incomplète dans l’éditeur",

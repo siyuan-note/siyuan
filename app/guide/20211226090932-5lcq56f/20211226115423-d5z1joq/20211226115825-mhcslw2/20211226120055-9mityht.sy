@@ -6,7 +6,7 @@
 		"id": "20211226120055-9mityht",
 		"title": "什麼是內容區塊",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -135,7 +135,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120120-dpno0zb",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -149,12 +149,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120120-z442iy4",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "一篇文檔由多個內容區塊組成。部分內容區塊可以包含其他內容區塊，因此稱為容器區塊。完整的類型和包含規則請參考 "
+					"Data": "一篇文檔由多個內容區塊組成。部分內容區塊可以包含其他內容區塊，因此稱為容器區塊。完整的類型和包含規則請參考"
 				},
 				{
 					"Type": "NodeTextMark",

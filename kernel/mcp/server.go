@@ -35,9 +35,18 @@ import (
 const protocolVersion20260728 = "2026-07-28"
 
 var (
-	httpHandlerOnce sync.Once
-	httpHandler     http.Handler
+	httpHandlerOnce          sync.Once
+	httpHandler              http.Handler
+	externalToolProjectionMu sync.RWMutex
+	externalToolProjection   *toolProjection
 )
+
+type toolProjection struct {
+	mu      sync.RWMutex
+	server  *mcpsdk.Server
+	allows  func(*tools.Tool) bool
+	exposed map[string]*tools.Tool
+}
 
 func Serve(ginServer *gin.Engine) {
 	handler := getHTTPHandler()
@@ -52,12 +61,92 @@ func Serve(ginServer *gin.Engine) {
 func getHTTPHandler() http.Handler {
 	httpHandlerOnce.Do(func() {
 		server := newServer()
+		projection := newToolProjection(server, externalMCPToolAllowed)
+		externalToolProjectionMu.Lock()
+		externalToolProjection = projection
+		externalToolProjectionMu.Unlock()
 		tools.ObserveRegistry(func(name string, tool *tools.Tool) {
-			syncTool(server, name, tool)
+			projection.sync(name, tool)
 		})
 		httpHandler = newHTTPHandler(server)
 	})
 	return httpHandler
+}
+
+func newToolProjection(server *mcpsdk.Server, allows func(*tools.Tool) bool) *toolProjection {
+	return &toolProjection{server: server, allows: allows, exposed: map[string]*tools.Tool{}}
+}
+
+func (projection *toolProjection) sync(name string, tool *tools.Tool) {
+	projection.mu.Lock()
+	defer projection.mu.Unlock()
+
+	current := projection.exposed[name]
+	if tool == nil || !projection.allows(tool) {
+		if current != nil {
+			delete(projection.exposed, name)
+			projection.server.RemoveTools(name)
+		}
+		return
+	}
+	if current == tool {
+		return
+	}
+	if syncGuardedTool(projection.server, name, tool, func() bool {
+		return projection.allowsCall(name, tool)
+	}) {
+		projection.exposed[name] = tool
+	} else {
+		delete(projection.exposed, name)
+	}
+}
+
+func (projection *toolProjection) allowsCall(name string, tool *tools.Tool) bool {
+	projection.mu.RLock()
+	current := projection.exposed[name]
+	projection.mu.RUnlock()
+	return current == tool && projection.allows(tool)
+}
+
+func (projection *toolProjection) refresh() {
+	allTools := tools.GetAllTools()
+	registered := make(map[string]bool, len(allTools))
+	for _, tool := range allTools {
+		registered[tool.Name] = true
+		projection.sync(tool.Name, tool)
+	}
+
+	projection.mu.RLock()
+	exposedNames := make([]string, 0, len(projection.exposed))
+	for name := range projection.exposed {
+		if !registered[name] {
+			exposedNames = append(exposedNames, name)
+		}
+	}
+	projection.mu.RUnlock()
+	for _, name := range exposedNames {
+		projection.sync(name, nil)
+	}
+}
+
+// RefreshToolExposure 根据当前配置刷新 SiYuan MCP 服务对外提供的能力。
+func RefreshToolExposure() {
+	externalToolProjectionMu.RLock()
+	projection := externalToolProjection
+	externalToolProjectionMu.RUnlock()
+	if projection != nil {
+		projection.refresh()
+	}
+}
+
+func externalMCPToolAllowed(tool *tools.Tool) bool {
+	if tool == nil || tool.Source == "mcp" || tool.Runtime == "mcp" {
+		return false
+	}
+	if model.Conf == nil || model.Conf.AI == nil || model.Conf.AI.MCP == nil {
+		return true
+	}
+	return model.Conf.AI.MCP.ExposurePolicy.Allows(tools.CapabilityIDForTool(tool))
 }
 
 func newServer() *mcpsdk.Server {
@@ -131,20 +220,25 @@ func serveHTTP(handler http.Handler) gin.HandlerFunc {
 }
 
 func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
+	syncGuardedTool(server, name, tool, nil)
+}
+
+func syncGuardedTool(server *mcpsdk.Server, name string, tool *tools.Tool, allowed func() bool) (synced bool) {
 	if tool == nil {
 		server.RemoveTools(name)
-		return
+		return true
 	}
 	validator, err := tools.CompileToolValidator(tool)
 	if err != nil {
 		server.RemoveTools(name)
 		logging.LogWarnf("mcp: skip invalid server tool [%s]: %v", name, err)
-		return
+		return false
 	}
 	defer func() {
 		if recovered := recover(); recovered != nil {
 			server.RemoveTools(name)
 			logging.LogWarnf("mcp: skip invalid server tool [%s]: %v", name, recovered)
+			synced = false
 		}
 	}()
 
@@ -162,6 +256,9 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 	}
 
 	server.AddTool(sdkTool, func(ctx context.Context, request *mcpsdk.CallToolRequest) (*mcpsdk.CallToolResult, error) {
+		if allowed != nil && !allowed() {
+			return toolErrorResult("MCP capability is disabled or no longer available"), nil
+		}
 		arguments := map[string]any{}
 		if len(request.Params.Arguments) > 0 {
 			if err := json.Unmarshal(request.Params.Arguments, &arguments); err != nil {
@@ -232,6 +329,7 @@ func syncTool(server *mcpsdk.Server, name string, tool *tools.Tool) {
 			IsError:           result.IsError,
 		}, nil
 	})
+	return true
 }
 
 func convertContentItem(item tools.ContentItem) (mcpsdk.Content, error) {

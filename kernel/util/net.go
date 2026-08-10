@@ -169,29 +169,54 @@ func SSRFSafeDialer(timeout time.Duration) *net.Dialer {
 	}
 }
 
-// isPrivateIP 判断 IP 是否为私网地址，含内嵌私网 IPv4 的 IPv6 过渡地址（NAT64、6to4、Teredo）。
+// isPrivateIP 判断 IP 是否为私网地址，含内嵌私网 IPv4 的 IPv6 过渡地址（NAT64、6to4、Teredo、IPv4 兼容）。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-qq8m-8p8v-x4xg
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rg26-cg95-gq6p
 func isPrivateIP(ip net.IP) bool {
 	if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() ||
 		ip.IsPrivate() || ip.IsUnspecified() || ip.IsMulticast() {
 		return true
 	}
-
-	// Go 标准库的 IsPrivate 不识别 IPv6 过渡地址，需按 RFC 内嵌格式提取其中的 IPv4 后再递归判断。
-	if ip16 := ip.To16(); nil != ip16 && 16 == len(ip16) {
-		// NAT64（RFC 6052 64:ff9b::/96，含 RFC 8215 64:ff9b:1::/48）：低 32 位为内嵌 IPv4。
-		if ip16[0] == 0x00 && ip16[1] == 0x64 && ip16[2] == 0xff && ip16[3] == 0x9b {
-			return isPrivateIP(net.IPv4(ip16[12], ip16[13], ip16[14], ip16[15]))
-		}
-		// 6to4（RFC 3056 2002::/16）：第 16-47 位为内嵌 IPv4。
-		if ip16[0] == 0x20 && ip16[1] == 0x02 {
-			return isPrivateIP(net.IPv4(ip16[2], ip16[3], ip16[4], ip16[5]))
-		}
-		// Teredo（RFC 4380 2001:0000::/32）：低 32 位按位取反后为内嵌 IPv4。
-		if ip16[0] == 0x20 && ip16[1] == 0x01 && ip16[2] == 0x00 && ip16[3] == 0x00 {
-			return isPrivateIP(net.IPv4(ip16[12]^0xff, ip16[13]^0xff, ip16[14]^0xff, ip16[15]^0xff))
-		}
+	// Go 标准库的分类方法不识别 IPv6 过渡地址，需按 RFC 内嵌格式提取其中的 IPv4 后再递归判断。
+	if ip4 := extractEmbeddedIPv4(ip); nil != ip4 && !ip4.Equal(ip) {
+		return isPrivateIP(ip4)
 	}
 	return false
+}
+
+// extractEmbeddedIPv4 提取 IPv6 过渡地址（NAT64、6to4、Teredo、IPv4 兼容）中内嵌的 IPv4 地址，非过渡地址返回 nil。
+func extractEmbeddedIPv4(ip net.IP) net.IP {
+	ip16 := ip.To16()
+	if nil == ip16 || 16 != len(ip16) {
+		return nil
+	}
+	// NAT64（RFC 6052 64:ff9b::/96，含 RFC 8215 64:ff9b:1::/48）：低 32 位为内嵌 IPv4。
+	if ip16[0] == 0x00 && ip16[1] == 0x64 && ip16[2] == 0xff && ip16[3] == 0x9b {
+		return net.IPv4(ip16[12], ip16[13], ip16[14], ip16[15])
+	}
+	// 6to4（RFC 3056 2002::/16）：第 16-47 位为内嵌 IPv4。
+	if ip16[0] == 0x20 && ip16[1] == 0x02 {
+		return net.IPv4(ip16[2], ip16[3], ip16[4], ip16[5])
+	}
+	// Teredo（RFC 4380 2001:0000::/32）：低 32 位按位取反后为内嵌 IPv4。
+	if ip16[0] == 0x20 && ip16[1] == 0x01 && ip16[2] == 0x00 && ip16[3] == 0x00 {
+		return net.IPv4(ip16[12]^0xff, ip16[13]^0xff, ip16[14]^0xff, ip16[15]^0xff)
+	}
+	// IPv4 兼容地址（RFC 4291 已废弃 ::/96）：低 32 位为内嵌 IPv4。
+	if isZeroIPv6(ip16[0:12]) {
+		return net.IPv4(ip16[12], ip16[13], ip16[14], ip16[15])
+	}
+	return nil
+}
+
+// isZeroIPv6 判断字节切片是否全为零。
+func isZeroIPv6(b []byte) bool {
+	for _, v := range b {
+		if 0 != v {
+			return false
+		}
+	}
+	return true
 }
 
 func IsOnline(checkURL string, skipTlsVerify bool, timeout int) bool {

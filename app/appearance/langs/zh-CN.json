@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "选择通过思源 MCP 服务向外部客户端提供的能力",
+	"agentCapabilitiesScopeAgent": "智能体使用",
+	"agentCapabilitiesScopeMcp": "MCP 对外提供",
 	"agentCapabilitiesApprovalMode": "批准方式",
 	"agentCapabilitiesDialogTip": "选择智能体可以使用的能力；每个已启用的定义都会增加 token 用量",
 	"agentCapabilitiesSearch": "搜索能力名称或描述",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "异常",
 	"bazaarPackageMissingManifest": "集市包清单文件缺失",
 	"bazaarPackageInvalidManifest": "集市包清单文件无效",
-	"bazaarPackageNameMismatch": "集市包安装目录名必须与清单文件中的 name 字段完全一致",
+	"bazaarPackageNameMismatch": "集市包安装目录名与清单文件中的 name 字段值不一致",
 	"loadAllContent": "加载全部内容",
 	"keepLazyLoadTip": "保留动态加载的内容块，以减少滚动时的重复加载；长文档可能占用更多内存",
 	"msgSelectAllIncompleteTip": "编辑器全选不完整提示",

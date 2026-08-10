@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "Vyberte možnosti poskytované externým klientom prostredníctvom služby MCP SiYuan",
+	"agentCapabilitiesScopeAgent": "Použitie Agentom",
+	"agentCapabilitiesScopeMcp": "Poskytovať cez MCP",
 	"agentCapabilitiesApprovalMode": "Režim schvaľovania",
 	"agentCapabilitiesDialogTip": "Vyberte možnosti dostupné pre Agenta; každá povolená definícia zvyšuje spotrebu token",
 	"agentCapabilitiesSearch": "Hľadať názvy alebo popisy možností",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "Neplatný",
 	"bazaarPackageMissingManifest": "Súbor manifestu balíka trhoviska chýba",
 	"bazaarPackageInvalidManifest": "Súbor manifestu balíka trhoviska je neplatný",
-	"bazaarPackageNameMismatch": "Názov adresára balíka trhoviska sa musí presne zhodovať s poľom name v manifeste",
+	"bazaarPackageNameMismatch": "Názov adresára balíka trhoviska sa nezhoduje s hodnotou poľa name v manifeste",
 	"loadAllContent": "Načítať celý obsah",
 	"keepLazyLoadTip": "Ponechať dynamicky načítané bloky obsahu, aby sa obmedzilo opakované načítavanie pri posúvaní; dlhé dokumenty môžu využívať viac pamäte",
 	"msgSelectAllIncompleteTip": "Upozornenie na neúplný výber v editore",

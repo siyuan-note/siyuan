@@ -6,7 +6,7 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810230450"
 	},
 	"Children": [
 		{
@@ -1316,7 +1316,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201225174048-5e5cg0p",
-				"updated": "20260809232000"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1335,7 +1335,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201225174048-g8oxi84",
-				"updated": "20260809232000"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1410,7 +1410,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20201225174048-c3hch71"
+						"id": "20201225174048-c3hch71",
+						"updated": "20260810230450"
 					},
 					"Children": [
 						{
@@ -1418,41 +1419,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162108-0cl55js",
-								"updated": "20210512172253"
+								"updated": "20260810230450"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Continue to modify according to steps 1-4 in the figure\n"
+									"Data": "Use the developer tools to locate and adjust styles: open the developer tools, enable the element picker, click the UI element to modify, inspect the corresponding "
 								},
 								{
-									"Type": "NodeImage",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeBang"
-										},
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "custom-theme1.png"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "assets/custom-theme1-20210512172253-eqdgnkd.png"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTML"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Elements"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " panel, and adjust its styles in the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Styles"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " panel"
 								}
 							]
 						}
@@ -1494,6 +1493,48 @@
 					]
 				},
 				{
+					"ID": "20260810212846-c2or5gq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260810212846-c2or5gq",
+						"updated": "20260810215424"
+					},
+					"Children": [
+						{
+							"ID": "20260810212846-7znazcw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260810212846-7znazcw",
+								"updated": "20260810215424"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "In the developer tools, open the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Network"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " tab and enable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Disable cache"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20201225174048-k5l65hd",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -1502,7 +1543,7 @@
 					},
 					"Properties": {
 						"id": "20201225174048-k5l65hd",
-						"updated": "20260809232000"
+						"updated": "20260810215424"
 					},
 					"Children": [
 						{
@@ -1510,7 +1551,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162108-ibds25b",
-								"updated": "20260809232000"
+								"updated": "20260810215424"
 							},
 							"Children": [
 								{
@@ -1548,10 +1589,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Refresh UI"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "."
 								}
 							]
 						}

@@ -788,11 +788,6 @@ export class Background {
             // 移动端键盘弹起和点击加号需保持滚动高度一致
             this.imgElement.style.height = "200px";
             /// #endif
-            if (this.element.closest(".block__popover")) {
-                this.imgElement.style.removeProperty("height");
-                this.imgElement.style.removeProperty("min-height");
-                this.imgElement.style.removeProperty("max-height");
-            }
         } else {
             this.imgElement.parentElement.classList.add("fn__none");
             this.actionElements[2].classList.remove("fn__none");

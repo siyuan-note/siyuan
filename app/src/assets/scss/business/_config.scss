@@ -616,10 +616,36 @@
     padding-left: 12px;
   }
 
+  &-ai-provider {
+    &__model {
+      &--dragging {
+        opacity: .38;
+      }
+
+      &--drop-before {
+        box-shadow: inset 0 2px 0 var(--b3-theme-primary);
+      }
+
+      &--drop-after {
+        box-shadow: inset 0 -2px 0 var(--b3-theme-primary);
+      }
+    }
+
+    &__model-drag {
+      cursor: grab;
+      flex-shrink: 0;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+  }
+
   &-agent-capability {
     &__content {
       box-sizing: border-box;
-      height: 100%;
+      flex: 1;
+      min-height: 0;
       overflow-y: auto;
       padding: 0;
     }

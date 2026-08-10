@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getBlockHintCloseLength, getBlockHintTriggerOffset} from "./blockHintRange";
+import {getBlockHintTriggerOffset} from "./blockHintRange";
 
 describe("getBlockHintTriggerOffset", () => {
     it("uses the latest overlapping trigger inside existing closing markers", () => {
@@ -13,11 +13,8 @@ describe("getBlockHintTriggerOffset", () => {
         const caretOffset = 3;
         const triggerOffset = getBlockHintTriggerOffset(text.substring(0, caretOffset),
             text.substring(caretOffset), "[[", "]]");
-        const closeLength = getBlockHintCloseLength(text.substring(0, triggerOffset),
-            text.substring(caretOffset), "[[", "]]");
-
         assert.equal(text.substring(0, triggerOffset) + "reference" +
-            text.substring(caretOffset + closeLength), "[reference]]");
+            text.substring(caretOffset), "[reference]]");
     });
 
     it("keeps the first trigger when the query starts with an opening marker", () => {
@@ -36,26 +33,21 @@ describe("getBlockHintTriggerOffset", () => {
 
         assert.equal(text.substring(triggerOffset + 2), "query");
     });
-});
 
-describe("getBlockHintCloseLength", () => {
-    it("preserves closing markers paired before the actual trigger", () => {
-        assert.equal(getBlockHintCloseLength("[", "]]", "[[", "]]"), 0);
-        assert.equal(getBlockHintCloseLength("【", "】】", "【【", "】】"), 0);
+    it("preserves text after the caret when replacing a block hint", () => {
+        const text = "[[query]]tail";
+        const caretOffset = 7;
+        const triggerOffset = getBlockHintTriggerOffset(text.substring(0, caretOffset),
+            text.substring(caretOffset), "[[", "]]");
+
+        assert.equal(text.substring(0, triggerOffset) + "reference" + text.substring(caretOffset),
+            "reference]]tail");
     });
 
-    it("removes an automatically completed closing marker", () => {
-        assert.equal(getBlockHintCloseLength("text", "]]tail", "[[", "]]"), 2);
-        assert.equal(getBlockHintCloseLength("text", "））tail", "（（", "））"), 2);
-    });
+    it("includes manually entered closing markers in the query", () => {
+        const text = "[[foo]]";
+        const triggerOffset = getBlockHintTriggerOffset(text, "", "[[", "]]");
 
-    it("does not remove unrelated closing markers", () => {
-        assert.equal(getBlockHintCloseLength("text", "tail]]", "[[", "]]"), 0);
-        assert.equal(getBlockHintCloseLength("text))", "tail", "((", "))"), 0);
-    });
-
-    it("accounts for balanced pairs before the trigger", () => {
-        assert.equal(getBlockHintCloseLength("[done]", "]]", "[[", "]]"), 2);
-        assert.equal(getBlockHintCloseLength("(done)", "))", "((", "))"), 2);
+        assert.equal(text.substring(triggerOffset + 2), "foo]]");
     });
 });

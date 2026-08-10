@@ -83,7 +83,7 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) exec
 		return executedToolResult{Text: "unknown tool: " + tc.Function.Name, IsError: true}
 	}
 	return executeCapability(ctx, tc, sessionID, &capabilityRegistration{
-		ID:        capabilityIDForTool(tool),
+		ID:        tools.CapabilityIDForTool(tool),
 		ModelName: tool.Name,
 		Source:    tool.Source,
 		Runtime:   tool.Runtime,

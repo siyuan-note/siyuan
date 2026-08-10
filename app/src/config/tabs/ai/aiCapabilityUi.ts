@@ -5,6 +5,7 @@ import {aiConfigApi} from "./aiRuntime";
 
 type CapabilityDecision = "allow" | "deny";
 type ApprovalDecision = "allow" | "confirm";
+type CapabilityScope = "agent" | "mcp";
 
 const escapeAttribute = (value: string) => escapeAttr(escapeHtml(value));
 
@@ -27,18 +28,21 @@ interface ICapabilityInfo {
     ownerId?: string;
     ownerName?: string;
     runtime: "kernel" | "plugin-worker" | "mcp" | "browser";
-    enabled: boolean;
     available: boolean;
     actions?: ICapabilityActionInfo[];
 }
 
-const getCapabilityPolicy = (): Config.IAgent["capabilityPolicy"] =>
-    window.siyuan.config.ai.agent.capabilityPolicy || {default: "allow", overrides: {}};
+const getCapabilityPolicy = (scope: CapabilityScope): Config.ICapabilityPolicy => {
+    if (scope === "mcp") {
+        return window.siyuan.config.ai.mcp.exposurePolicy || {default: "allow", overrides: {}};
+    }
+    return window.siyuan.config.ai.agent.capabilityPolicy || {default: "allow", overrides: {}};
+};
 
 const getApprovalPolicy = (): Config.IAgent["approvalPolicy"] =>
     window.siyuan.config.ai.agent.approvalPolicy || {default: "confirm", overrides: {}};
 
-const isCapabilityAllowed = (id: string, policy = getCapabilityPolicy()) =>
+const isCapabilityAllowed = (id: string, scope: CapabilityScope, policy = getCapabilityPolicy(scope)) =>
     (policy.overrides[id] || policy.default) === "allow";
 
 const isCapabilityAutoApproved = (id: string, action = "", policy = getApprovalPolicy()) => {
@@ -72,7 +76,13 @@ const getManifestActions = (capability: ReturnType<typeof listCapabilityManifest
     return Array.from(names).sort().map((name) => ({name, effects: capability.actionEffects?.[name] || capability.effects}));
 };
 
-const getAllCapabilities = (backend: ICapabilityInfo[]): ICapabilityInfo[] => {
+const getAllCapabilities = (backend: ICapabilityInfo[], scope: CapabilityScope): ICapabilityInfo[] => {
+    if (scope === "mcp") {
+        return backend.filter((capability) => capability.source !== "mcp" && capability.runtime !== "mcp").sort((a, b) => {
+            const group = getGroupLabel(a).localeCompare(getGroupLabel(b));
+            return group || a.id.localeCompare(b.id);
+        });
+    }
     const frontend = listCapabilityManifests().map((capability): ICapabilityInfo => ({
         id: capability.id,
         name: capability.id.split("/").at(-1) || capability.id,
@@ -82,7 +92,6 @@ const getAllCapabilities = (backend: ICapabilityInfo[]): ICapabilityInfo[] => {
         ownerId: capability.ownerId,
         ownerName: capability.ownerName,
         runtime: "browser",
-        enabled: isCapabilityAllowed(capability.id),
         available: true,
         actions: getManifestActions(capability),
     }));
@@ -92,12 +101,12 @@ const getAllCapabilities = (backend: ICapabilityInfo[]): ICapabilityInfo[] => {
     });
 };
 
-const addUnavailableCapabilities = (capabilities: ICapabilityInfo[]) => {
+const addUnavailableCapabilities = (capabilities: ICapabilityInfo[], scope: CapabilityScope) => {
     const knownIDs = new Set(capabilities.map((capability) => capability.id));
-    const configuredIDs = new Set([
-        ...Object.keys(getCapabilityPolicy().overrides),
-        ...Object.keys(getApprovalPolicy().overrides),
-    ]);
+    const configuredIDs = new Set(Object.keys(getCapabilityPolicy(scope).overrides));
+    if (scope === "agent") {
+        Object.keys(getApprovalPolicy().overrides).forEach((id) => configuredIDs.add(id));
+    }
     configuredIDs.forEach((id) => {
         if (!knownIDs.has(id)) {
             capabilities.push({
@@ -106,7 +115,6 @@ const addUnavailableCapabilities = (capabilities: ICapabilityInfo[]) => {
                 description: "",
                 source: "native",
                 runtime: "kernel",
-                enabled: isCapabilityAllowed(id),
                 available: false,
                 actions: [],
             });
@@ -114,16 +122,18 @@ const addUnavailableCapabilities = (capabilities: ICapabilityInfo[]) => {
     });
 };
 
-const saveCapabilityPolicy = (policy: Config.IAgent["capabilityPolicy"], onApplied: () => void) => {
-    aiConfigApi.patch("agent.capabilityPolicy", policy, onApplied);
+const saveCapabilityPolicy = (scope: CapabilityScope, policy: Config.ICapabilityPolicy, onApplied: () => void) => {
+    const path = scope === "agent" ? "agent.capabilityPolicy" : "mcp.exposurePolicy";
+    aiConfigApi.patch(path, policy, onApplied);
 };
 
 const saveApprovalPolicy = (policy: Config.IAgent["approvalPolicy"], onApplied: () => void) => {
     aiConfigApi.patch("agent.approvalPolicy", policy, onApplied);
 };
 
-const setCapabilitiesDecision = (ids: string[], decision: CapabilityDecision, onApplied: () => void) => {
-    const policy = getCapabilityPolicy();
+const setCapabilitiesDecision = (scope: CapabilityScope, ids: string[], decision: CapabilityDecision,
+                                  onApplied: () => void) => {
+    const policy = getCapabilityPolicy(scope);
     const overrides = {...policy.overrides};
     ids.forEach((id) => {
         if (decision === policy.default) {
@@ -132,7 +142,7 @@ const setCapabilitiesDecision = (ids: string[], decision: CapabilityDecision, on
             overrides[id] = decision;
         }
     });
-    saveCapabilityPolicy({...policy, overrides}, onApplied);
+    saveCapabilityPolicy(scope, {...policy, overrides}, onApplied);
 };
 
 const setCapabilityApproval = (id: string, decision: ApprovalDecision, onApplied: () => void) => {
@@ -221,10 +231,11 @@ const showAgentCapabilityLoading = (root: HTMLElement) => {
     return view;
 };
 
-const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabilityInfo[]) => {
+const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: ICapabilityInfo[]) => {
     const expanded = new Set<string>();
     let query = "";
     let onlySelected = false;
+    let scope: CapabilityScope = "agent";
     const view = ensureAgentCapabilityView(settingRoot);
     view.innerHTML = `<div class="b3-dialog__header fn__flex">
     <div class="block__logo fn__pointer fn__flex-1" data-action="back">
@@ -233,11 +244,15 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
     </div>
 </div>
 <div class="b3-dialog__body fn__flex-1" style="overflow:hidden;">
+<div class="layout-tab-bar fn__flex">
+    <div class="item item--full item--focus" data-capability-scope="agent"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.agentCapabilitiesScopeAgent}</span><span class="fn__flex-1"></span></div>
+    <div class="item item--full" data-capability-scope="mcp"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.agentCapabilitiesScopeMcp}</span><span class="fn__flex-1"></span></div>
+</div>
 <div class="b3-dialog__content config-agent-capability__content">
     <div class="config-group config-agent-capability__controls">
         <div class="config-items">
             <div class="b3-label config-item">
-                <div class="b3-label__text">${window.siyuan.languages.agentCapabilitiesDialogTip}</div>
+                <div class="b3-label__text" data-type="agentCapabilityDialogTip"></div>
                 <div class="fn__hr--small"></div>
                 <div class="b3-form__icon">
                     <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
@@ -260,14 +275,23 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
     view.classList.add("config__view--show");
 
     const render = () => {
+        const capabilities = getAllCapabilities(backendCapabilities, scope);
+        addUnavailableCapabilities(capabilities, scope);
         const list = view.querySelector<HTMLElement>("[data-type='agentCapabilityList']");
         const count = view.querySelector<HTMLElement>("[data-type='agentCapabilitySelectedCount']");
-        if (!list || !count) {
+        const tip = view.querySelector<HTMLElement>("[data-type='agentCapabilityDialogTip']");
+        if (!list || !count || !tip) {
             return;
         }
+        tip.textContent = scope === "agent"
+            ? window.siyuan.languages.agentCapabilitiesDialogTip
+            : window.siyuan.languages.agentCapabilitiesMcpExposureTip;
+        view.querySelectorAll<HTMLElement>("[data-capability-scope]").forEach((item) => {
+            item.classList.toggle("item--focus", item.dataset.capabilityScope === scope);
+        });
         const normalizedQuery = query.trim().toLocaleLowerCase();
         const visible = capabilities.filter((capability) =>
-            (!onlySelected || isCapabilityAllowed(capability.id)) && capabilityMatches(capability, normalizedQuery));
+            (!onlySelected || isCapabilityAllowed(capability.id, scope)) && capabilityMatches(capability, normalizedQuery));
         const groups = new Map<string, ICapabilityInfo[]>();
         visible.forEach((capability) => {
             const label = capability.available
@@ -278,7 +302,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
             groups.set(label, items);
         });
         list.innerHTML = Array.from(groups.entries()).map(([label, items], groupIndex) => {
-            const groupEnabled = items.every((capability) => isCapabilityAllowed(capability.id));
+            const groupEnabled = items.every((capability) => isCapabilityAllowed(capability.id, scope));
             return `<section class="config-group" data-capability-group="${groupIndex}">
     <div class="config-title config-title--action">
         <span>${escapeHtml(label)}</span>
@@ -290,16 +314,16 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
     <div class="config-items">
         ${items.map((capability) => {
             const actions = capability.actions || [];
-            const opened = expanded.has(capability.id);
+            const opened = scope === "agent" && expanded.has(capability.id);
             return `<div class="b3-label config-item" data-capability-id="${escapeAttribute(capability.id)}">
     <div class="fn__flex config-wrap">
-        <button class="block__icon block__icon--show config-agent-capability__expand" data-type="toggleAgentCapabilityActions" aria-label="${escapeAttribute(window.siyuan.languages.config)}"><svg style="transform:rotate(${opened ? "90deg" : "0"});"><use xlink:href="#iconRight"></use></svg></button>
+        ${scope === "agent" ? `<button class="block__icon block__icon--show config-agent-capability__expand" data-type="toggleAgentCapabilityActions" aria-label="${escapeAttribute(window.siyuan.languages.config)}"><svg style="transform:rotate(${opened ? "90deg" : "0"});"><use xlink:href="#iconRight"></use></svg></button>` : ""}
         <div class="fn__flex-1 config-agent-capability__main">
             <div class="config-name">${escapeHtml(capability.title || capability.name)}</div>
             ${capability.description ? `<div class="b3-label__text config-agent-capability__description" title="${escapeAttribute(capability.description)}">${escapeHtml(capability.description)}</div>` : ""}
         </div>
         <span class="fn__space"></span>
-        <input class="b3-switch" data-type="toggleAgentCapability" type="checkbox" aria-label="${escapeAttribute(capability.title || capability.name)}"${isCapabilityAllowed(capability.id) ? " checked" : ""}>
+        <input class="b3-switch" data-type="toggleAgentCapability" type="checkbox" aria-label="${escapeAttribute(capability.title || capability.name)}"${isCapabilityAllowed(capability.id, scope) ? " checked" : ""}>
     </div>
     ${opened ? `<div class="config-agent-capability__details">
         <div class="fn__hr"></div>
@@ -331,7 +355,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
     </div>
 </section>`;
         }).join("");
-        const selected = capabilities.filter((capability) => isCapabilityAllowed(capability.id)).length;
+        const selected = capabilities.filter((capability) => isCapabilityAllowed(capability.id, scope)).length;
         count.textContent = window.siyuan.languages.agentCapabilitiesSelected
             .replace("${selected}", String(selected)).replace("${total}", String(capabilities.length));
 
@@ -341,8 +365,8 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
                 event.preventDefault();
                 event.stopPropagation();
                 const items = groupEntries[Number(button.dataset.groupIndex)] || [];
-                const decision = items.every((capability) => isCapabilityAllowed(capability.id)) ? "deny" : "allow";
-                setCapabilitiesDecision(items.map((capability) => capability.id), decision, onPolicyApplied);
+                const decision = items.every((capability) => isCapabilityAllowed(capability.id, scope)) ? "deny" : "allow";
+                setCapabilitiesDecision(scope, items.map((capability) => capability.id), decision, onPolicyApplied);
             });
         });
     };
@@ -367,10 +391,10 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
             return;
         }
         if (type === "toggleAgentCapability") {
-            setCapabilitiesDecision([id], input.checked ? "allow" : "deny", onPolicyApplied);
-        } else if (type === "toggleAgentCapabilityApproval") {
+            setCapabilitiesDecision(scope, [id], input.checked ? "allow" : "deny", onPolicyApplied);
+        } else if (scope === "agent" && type === "toggleAgentCapabilityApproval") {
             setCapabilityApproval(id, input.value as ApprovalDecision, onPolicyApplied);
-        } else if (type === "toggleAgentCapabilityActionApproval") {
+        } else if (scope === "agent" && type === "toggleAgentCapabilityActionApproval") {
             const action = input.dataset.capabilityAction;
             if (action !== undefined) {
                 setCapabilityActionApproval(id, action, input.value as ApprovalDecision, onPolicyApplied);
@@ -378,6 +402,14 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
         }
     };
     view.onclick = (event) => {
+        const scopeTarget = (event.target as HTMLElement).closest<HTMLElement>("[data-capability-scope]");
+        const nextScope = scopeTarget?.dataset.capabilityScope as CapabilityScope | undefined;
+        if (nextScope && nextScope !== scope) {
+            scope = nextScope;
+            expanded.clear();
+            render();
+            return;
+        }
         const action = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
         if (action?.dataset.action === "back") {
             closeAgentCapabilityView(view);
@@ -403,10 +435,8 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
 };
 
 const loadCapabilities = (callback: (capabilities: ICapabilityInfo[]) => void) => {
-    fetchPost("/api/ai/agent/lsCapabilities", {}, (response) => {
-        const capabilities = getAllCapabilities((response.data || []) as ICapabilityInfo[]);
-        addUnavailableCapabilities(capabilities);
-        callback(capabilities);
+    fetchPost("/api/ai/lsCapabilities", {}, (response) => {
+        callback((response.data || []) as ICapabilityInfo[]);
     });
 };
 
@@ -417,6 +447,9 @@ export const getAgentCapabilityKeywords = (): string[] => [
     window.siyuan.languages.agentCapabilitiesFrontend,
     window.siyuan.languages.agentCapabilitiesPlugins,
     window.siyuan.languages.agentCapabilitiesMcp,
+    window.siyuan.languages.agentCapabilitiesScopeAgent,
+    window.siyuan.languages.agentCapabilitiesScopeMcp,
+    window.siyuan.languages.agentCapabilitiesMcpExposureTip,
     window.siyuan.languages.agentCapabilitiesAutoApprove,
 ];
 

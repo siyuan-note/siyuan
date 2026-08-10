@@ -7,7 +7,7 @@
 		"id": "20240530101000-bpj42r0",
 		"title": "テーマ",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810230450"
 	},
 	"Children": [
 		{
@@ -1067,7 +1067,7 @@
 			"Properties": {
 				"ID": "20240530101000-6pz8s9i",
 				"id": "20240530101000-9nkaihq",
-				"updated": "20260803170332"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1090,7 +1090,7 @@
 			"Properties": {
 				"ID": "20240530101000-w4ueh95",
 				"id": "20240530101000-bo6l8c1",
-				"updated": "20260803170332"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1298,7 +1298,7 @@
 					"Properties": {
 						"ID": "20240530101000-9qze5c3",
 						"id": "20240530101000-rokr1na",
-						"updated": "20240530101000"
+						"updated": "20260810230450"
 					},
 					"Children": [
 						{
@@ -1307,21 +1307,39 @@
 							"Properties": {
 								"ID": "20240530101000-j9mw5mf",
 								"id": "20240530101000-0rok9l0",
-								"updated": "20240530101000"
+								"updated": "20260810230450"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "デベロッパーツールを使用してスタイルを特定・調整します。デベロッパーツールを開き、要素選択ツールを有効にして変更する UI 要素をクリックし、"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "theme.css"
+									"TextMarkTextContent": "Elements"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ファイルを開いてコーディングします"
+									"Data": " パネルで対応する "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTML"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を確認してから、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Styles"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " パネルでスタイルを調整します。調整内容を theme.css に反映して保存します"
 								}
 							]
 						}
@@ -1399,7 +1417,7 @@
 			"Properties": {
 				"ID": "20240530101000-qiqvdvm",
 				"id": "20240530101000-8qf0tmt",
-				"updated": "20260809232000"
+				"updated": "20260810215424"
 			},
 			"Children": [
 				{
@@ -1415,7 +1433,7 @@
 			"Properties": {
 				"ID": "20240530101000-qopm0a9",
 				"id": "20240530101000-yvr3cee",
-				"updated": "20260809232000"
+				"updated": "20260810215424"
 			},
 			"Children": [
 				{
@@ -1524,6 +1542,52 @@
 					]
 				},
 				{
+					"ID": "20260810212846-miipgg4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260810212846-miipgg4",
+						"updated": "20260810215424"
+					},
+					"Children": [
+						{
+							"ID": "20260810212846-86xeeqj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260810212846-86xeeqj",
+								"updated": "20260810215424"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デベロッパーツールの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Network"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " タブを開き、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Disable cache"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を有効にします"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20240530101000-66su770",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -1533,7 +1597,7 @@
 					"Properties": {
 						"ID": "20240530101000-cgxqpe3",
 						"id": "20240530101000-66su770",
-						"updated": "20260809232000"
+						"updated": "20260810215424"
 					},
 					"Children": [
 						{
@@ -1542,7 +1606,7 @@
 							"Properties": {
 								"ID": "20240530101000-pyzfcam",
 								"id": "20240530101000-xil54hs",
-								"updated": "20260809232000"
+								"updated": "20260810215424"
 							},
 							"Children": [
 								{
@@ -1583,7 +1647,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " を使用してください。"
+									"Data": " を使用してください"
 								}
 							]
 						}

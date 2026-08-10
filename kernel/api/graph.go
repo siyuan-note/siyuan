@@ -51,6 +51,60 @@ func resetLocalGraph(c *gin.Context) {
 	}
 }
 
+func setGraphConf(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var graphType string
+	var confArg map[string]any
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("type", &graphType, true, true),
+		util.BindJsonArg("conf", &confArg, true, false),
+	) {
+		return
+	}
+	graphConf, err := gulu.JSON.MarshalJSON(confArg)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	switch graphType {
+	case "global":
+		global := conf.NewGlobalGraph()
+		if err = gulu.JSON.UnmarshalJSON(graphConf, global); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
+			model.Conf.Graph.Global = global
+			model.Conf.Save()
+		}
+		ret.Data = global
+	case "local":
+		local := conf.NewLocalGraph()
+		if err = gulu.JSON.UnmarshalJSON(graphConf, local); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
+			model.Conf.Graph.Local = local
+			model.Conf.Save()
+		}
+		ret.Data = local
+	default:
+		ret.Code = -1
+	}
+}
+
 func getGraph(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -102,7 +156,6 @@ func getGraph(c *gin.Context) {
 		"box":   boxID,
 		"reqId": reqId,
 	}
-	util.RandomSleep(200, 500)
 }
 
 func getLocalGraph(c *gin.Context) {
@@ -173,5 +226,4 @@ func getLocalGraph(c *gin.Context) {
 		"conf":  local,
 		"reqId": reqId,
 	}
-	util.RandomSleep(200, 500)
 }

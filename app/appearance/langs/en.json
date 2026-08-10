@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "Choose the capabilities provided to external clients through the SiYuan MCP service",
+	"agentCapabilitiesScopeAgent": "Agent use",
+	"agentCapabilitiesScopeMcp": "Provide via MCP",
 	"agentCapabilitiesApprovalMode": "Approval mode",
 	"agentCapabilitiesDialogTip": "Choose the capabilities available to the Agent; each enabled definition increases token usage",
 	"agentCapabilitiesSearch": "Search capability names or descriptions",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "Invalid",
 	"bazaarPackageMissingManifest": "The marketplace package manifest is missing",
 	"bazaarPackageInvalidManifest": "The marketplace package manifest is invalid",
-	"bazaarPackageNameMismatch": "The marketplace package directory name must exactly match the name field in the manifest",
+	"bazaarPackageNameMismatch": "The marketplace package directory name does not match the value of the name field in the manifest",
 	"loadAllContent": "Load all content",
 	"keepLazyLoadTip": "Retain dynamically loaded content blocks to reduce repeated loading while scrolling; long documents may use more memory",
 	"msgSelectAllIncompleteTip": "Incomplete editor select-all warning",

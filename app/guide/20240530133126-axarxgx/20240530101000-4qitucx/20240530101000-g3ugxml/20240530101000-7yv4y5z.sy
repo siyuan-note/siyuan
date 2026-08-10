@@ -7,7 +7,7 @@
 		"id": "20240530101000-7yv4y5z",
 		"title": "ウィンドウとタブ",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204552-v3apeie",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -75,7 +75,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204552-bxaw5cp",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -120,7 +120,7 @@
 					},
 					"Properties": {
 						"id": "20260613204552-6u1bt08",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -128,12 +128,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204552-wkavag8",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "閉じる：タブを右クリックして「閉じる」を選択します。Windows と Linux では "
+									"Data": "閉じる：タブを右クリックして「閉じる」を選択するか、"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -151,7 +151,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、macOS では "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -184,7 +184,7 @@
 					},
 					"Properties": {
 						"id": "20260613204552-ue4khl6",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -192,12 +192,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204552-9hot4kx",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "再度開く：Windows と Linux では "
+									"Data": "再度開く："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -224,7 +224,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、macOS では "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -266,7 +266,7 @@
 					},
 					"Properties": {
 						"id": "20260613204552-wvncepl",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -274,12 +274,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204552-pcf6xlh",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "切り替え：Windows と Linux では "
+									"Data": "切り替え："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -294,60 +294,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Shift"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "["
-								},
-								{
-									"Type": "NodeText",
-									"Data": " / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "]"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "、macOS では "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘"
 								},
 								{
 									"Type": "NodeText",
@@ -383,11 +329,65 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
+									"TextMarkTextContent": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で前のタブに切り替え、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
 									"TextMarkTextContent": "]"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " を使用して前後のタブに切り替えます。"
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で次のタブに切り替えます。"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -405,7 +405,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " または "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -752,7 +752,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204552-tm8kqnq",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -767,7 +767,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204552-by321c5",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -812,7 +812,7 @@
 					},
 					"Properties": {
 						"id": "20260613204552-kfxsbje",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -820,12 +820,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204552-1fkwwcp",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最近のドキュメント：Windows と Linux では "
+									"Data": "最近のドキュメント："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -843,7 +843,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、macOS では "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -861,7 +861,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " を使用して最近のドキュメント一覧を開きます"
+									"Data": " で最近のドキュメント一覧を開きます"
 								}
 							]
 						}
@@ -909,7 +909,7 @@
 					},
 					"Properties": {
 						"id": "20260613204552-5007mjq",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -917,12 +917,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204552-kkiwecr",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "タブの切り替え：Windows と Linux では "
+									"Data": "タブの切り替え："
 								},
 								{
 									"Type": "NodeTextMark",
@@ -940,7 +940,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "、macOS では "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -958,7 +958,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " を使用して次の編集タブに切り替えます"
+									"Data": " で次の編集タブに切り替えます"
 								}
 							]
 						}
@@ -972,7 +972,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-4b69882",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -986,12 +986,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260809170000-af2044f",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "モバイル版でも複数のタブを使用できます。ツールバーのタブボタンをタップするとタブ一覧が開きます。"
+					"Data": "モバイル版でも複数のタブを使用できます。画面上部のタブボタンをタップするとタブ一覧が開きます。"
 				}
 			]
 		},

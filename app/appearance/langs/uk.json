@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "Виберіть можливості, що надаються зовнішнім клієнтам через службу MCP SiYuan",
+	"agentCapabilitiesScopeAgent": "Використання Agent",
+	"agentCapabilitiesScopeMcp": "Надавати через MCP",
 	"agentCapabilitiesApprovalMode": "Режим схвалення",
 	"agentCapabilitiesDialogTip": "Виберіть доступні Agent можливості; кожне ввімкнене визначення збільшує використання token",
 	"agentCapabilitiesSearch": "Пошук за назвою або описом можливості",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "Недійсний",
 	"bazaarPackageMissingManifest": "Файл маніфесту пакета торгового майданчика відсутній",
 	"bazaarPackageInvalidManifest": "Файл маніфесту пакета торгового майданчика недійсний",
-	"bazaarPackageNameMismatch": "Назва каталогу пакета торгового майданчика має точно збігатися з полем name у маніфесті",
+	"bazaarPackageNameMismatch": "Назва каталогу пакета торгового майданчика не збігається зі значенням поля name у маніфесті",
 	"loadAllContent": "Завантажити весь вміст",
 	"keepLazyLoadTip": "Зберігати динамічно завантажені блоки вмісту, щоб зменшити повторне завантаження під час прокручування; довгі документи можуть використовувати більше пам’яті",
 	"msgSelectAllIncompleteTip": "Попередження про неповний вибір у редакторі",

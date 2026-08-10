@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "SiYuan MCP hizmeti üzerinden harici istemcilere sunulan yetenekleri seçin",
+	"agentCapabilitiesScopeAgent": "Agent kullanımı",
+	"agentCapabilitiesScopeMcp": "MCP ile sun",
 	"agentCapabilitiesApprovalMode": "Onay modu",
 	"agentCapabilitiesDialogTip": "Agent'ın kullanabileceği yetenekleri seçin; etkin her tanım token kullanımını artırır",
 	"agentCapabilitiesSearch": "Yetenek adı veya açıklaması ara",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "Geçersiz",
 	"bazaarPackageMissingManifest": "Pazar paketi bildirim dosyası eksik",
 	"bazaarPackageInvalidManifest": "Pazar paketi bildirim dosyası geçersiz",
-	"bazaarPackageNameMismatch": "Pazar paketi dizin adı bildirim dosyasındaki name alanıyla tam olarak eşleşmelidir",
+	"bazaarPackageNameMismatch": "Pazar paketi dizin adı bildirim dosyasındaki name alanının değeriyle eşleşmiyor",
 	"loadAllContent": "Tüm içeriği yükle",
 	"keepLazyLoadTip": "Kaydırma sırasında yinelenen yüklemeleri azaltmak için dinamik olarak yüklenen içerik bloklarını koru; uzun belgeler daha fazla bellek kullanabilir",
 	"msgSelectAllIncompleteTip": "Düzenleyicide eksik tümünü seçme uyarısı",

@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "เลือกความสามารถที่ให้บริการแก่ไคลเอนต์ภายนอกผ่านบริการ MCP ของ SiYuan",
+	"agentCapabilitiesScopeAgent": "ใช้โดย Agent",
+	"agentCapabilitiesScopeMcp": "ให้บริการผ่าน MCP",
 	"agentCapabilitiesApprovalMode": "โหมดการอนุมัติ",
 	"agentCapabilitiesDialogTip": "เลือกความสามารถที่ Agent ใช้ได้ โดยทุกข้อกำหนดที่เปิดใช้จะเพิ่มการใช้ token",
 	"agentCapabilitiesSearch": "ค้นหาชื่อหรือคำอธิบายความสามารถ",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "ไม่ถูกต้อง",
 	"bazaarPackageMissingManifest": "ไม่พบไฟล์แมนิเฟสต์ของแพ็กเกจมาร์เก็ตเพลส",
 	"bazaarPackageInvalidManifest": "ไฟล์แมนิเฟสต์ของแพ็กเกจมาร์เก็ตเพลสไม่ถูกต้อง",
-	"bazaarPackageNameMismatch": "ชื่อไดเรกทอรีของแพ็กเกจมาร์เก็ตเพลสต้องตรงกับฟิลด์ name ในแมนิเฟสต์ทุกประการ",
+	"bazaarPackageNameMismatch": "ชื่อไดเรกทอรีของแพ็กเกจมาร์เก็ตเพลสไม่ตรงกับค่าของฟิลด์ name ในแมนิเฟสต์",
 	"loadAllContent": "โหลดเนื้อหาทั้งหมด",
 	"keepLazyLoadTip": "เก็บบล็อกเนื้อหาที่โหลดแบบไดนามิกไว้เพื่อลดการโหลดซ้ำขณะเลื่อน เอกสารขนาดยาวอาจใช้หน่วยความจำมากขึ้น",
 	"msgSelectAllIncompleteTip": "คำเตือนการเลือกทั้งหมดที่ไม่สมบูรณ์ในตัวแก้ไข",

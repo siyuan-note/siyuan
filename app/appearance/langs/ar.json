@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "اختر القدرات التي توفرها خدمة MCP في SiYuan للعملاء الخارجيين",
+	"agentCapabilitiesScopeAgent": "استخدام Agent",
+	"agentCapabilitiesScopeMcp": "التوفير عبر MCP",
 	"agentCapabilitiesApprovalMode": "وضع الموافقة",
 	"agentCapabilitiesDialogTip": "اختر القدرات المتاحة لـ Agent؛ كل تعريف مفعّل يزيد استخدام token",
 	"agentCapabilitiesSearch": "البحث في أسماء القدرات أو أوصافها",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "غير صالح",
 	"bazaarPackageMissingManifest": "ملف بيان حزمة السوق مفقود",
 	"bazaarPackageInvalidManifest": "ملف بيان حزمة السوق غير صالح",
-	"bazaarPackageNameMismatch": "يجب أن يتطابق اسم مجلد حزمة السوق تمامًا مع حقل name في ملف البيان",
+	"bazaarPackageNameMismatch": "اسم مجلد حزمة السوق لا يتطابق مع قيمة الحقل name في ملف البيان",
 	"loadAllContent": "تحميل كل المحتوى",
 	"keepLazyLoadTip": "الاحتفاظ بكتل المحتوى المحملة ديناميكيا لتقليل تكرار التحميل أثناء التمرير؛ قد تستهلك المستندات الطويلة ذاكرة أكبر",
 	"msgSelectAllIncompleteTip": "تحذير التحديد غير الكامل في المحرر",

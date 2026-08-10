@@ -33,10 +33,6 @@
       &__img {
         margin-bottom: 0;
 
-        img {
-          height: clamp(96px, 18vh, 180px);
-        }
-
         &:not(.fn__none) + .protyle-background__ia {
           display: none;
         }

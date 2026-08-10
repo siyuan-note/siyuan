@@ -6,7 +6,7 @@
 		"id": "20200813004931-q4cu8na",
 		"title": "什么是内容块",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -141,7 +141,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090752-qxk7yz6",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -159,12 +159,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090752-cg21nhc",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "一篇文档由多个内容块组成。部分内容块可以包含其他内容块，因此称为容器块。完整的类型和包含规则请参考 "
+					"Data": "一篇文档由多个内容块组成。部分内容块可以包含其他内容块，因此称为容器块。完整的类型和包含规则请参考"
 				},
 				{
 					"Type": "NodeTextMark",

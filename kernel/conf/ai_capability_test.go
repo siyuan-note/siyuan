@@ -41,6 +41,32 @@ func TestCapabilityPolicyNormalizeAndAllows(t *testing.T) {
 	}
 }
 
+func TestMCPExposurePolicyNormalizeAndAllows(t *testing.T) {
+	ai := NewAI()
+	ai.MCP.ExposurePolicy = &CapabilityPolicy{
+		Default: "invalid",
+		Overrides: map[string]string{
+			"native/backend/read": "deny",
+			"native/backend/bad":  "invalid",
+		},
+	}
+	ai.Normalize()
+
+	policy := ai.MCP.ExposurePolicy
+	if policy.Default != "allow" {
+		t.Fatalf("invalid MCP exposure default was not normalized: %s", policy.Default)
+	}
+	if policy.Allows("native/backend/read") {
+		t.Fatal("MCP exposure deny override was ignored")
+	}
+	if !policy.Allows("native/backend/write") {
+		t.Fatal("MCP exposure default allow was ignored")
+	}
+	if _, exists := policy.Overrides["native/backend/bad"]; exists {
+		t.Fatal("invalid MCP exposure override was not removed")
+	}
+}
+
 func TestApprovalPolicyNormalizeAndAutoApproves(t *testing.T) {
 	ai := NewAI()
 	ai.Agent.ApprovalPolicy = &ApprovalPolicy{

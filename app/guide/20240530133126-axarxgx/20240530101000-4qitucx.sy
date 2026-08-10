@@ -8,7 +8,7 @@
 		"id": "20240530101000-4qitucx",
 		"title": "スタートガイド",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -2205,7 +2205,7 @@
 			"Type": "NodeHeading",
 			"Properties": {
 				"id": "20240530101000-i7zafv0",
-				"updated": "20260729215152"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -2224,7 +2224,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-1pxmesd",
-				"updated": "20260729215152"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -2254,38 +2254,6 @@
 									"TextMarkBlockRefID": "20240530101000-na9sys7",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "サードパーティのクラウドストレージへの接続"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260729215152-2rtk8l3",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20260729215152-2rtk8l3",
-						"updated": "20260729215152"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-nrg07md",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-nn0744a",
-								"id": "20240530101000-nrg07md",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20240530101000-5k5d5i3",
-									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "アセットの内容検索"
 								}
 							]
 						}

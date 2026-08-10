@@ -38,26 +38,6 @@ type FrontendCapability struct {
 	Generation    uint64                       `json:"generation"`
 }
 
-type CapabilityInfo struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Title       string                 `json:"title,omitempty"`
-	Description string                 `json:"description"`
-	Source      string                 `json:"source"`
-	OwnerID     string                 `json:"ownerId,omitempty"`
-	OwnerName   string                 `json:"ownerName,omitempty"`
-	Runtime     string                 `json:"runtime"`
-	Effects     tools.ToolEffects      `json:"effects,omitempty"`
-	Enabled     bool                   `json:"enabled"`
-	Available   bool                   `json:"available"`
-	Actions     []CapabilityActionInfo `json:"actions,omitempty"`
-}
-
-type CapabilityActionInfo struct {
-	Name    string            `json:"name"`
-	Effects tools.ToolEffects `json:"effects,omitempty"`
-}
-
 type capabilityRegistration struct {
 	ID              string
 	ModelName       string
@@ -184,23 +164,6 @@ func filterSystemPromptByCapabilities(prompt string, set *capabilitySet) string 
 	return strings.Join(filtered, "\n")
 }
 
-func capabilityIDForTool(tool *tools.Tool) string {
-	if tool == nil {
-		return ""
-	}
-	if tool.CapabilityID != "" {
-		return tool.CapabilityID
-	}
-	source := tool.Source
-	if source == "" {
-		source = "native"
-	}
-	if tool.OwnerID != "" {
-		return tools.BuildCapabilityID(source, "backend", tool.OwnerID, tool.Name)
-	}
-	return tools.BuildCapabilityID(source, "backend", tool.Name)
-}
-
 func capabilityAllowed(id string, context capabilityAccessContext) bool {
 	return currentCapabilityAuthorizer.Allows(id, context)
 }
@@ -211,7 +174,7 @@ func buildCapabilitySet(frontendCapabilities []FrontendCapability, accessContext
 		ids:           map[string]*capabilityRegistration{},
 	}
 	for _, tool := range tools.GetAllTools() {
-		id := capabilityIDForTool(tool)
+		id := tools.CapabilityIDForTool(tool)
 		if id == "" || !capabilityAllowed(id, accessContext) {
 			continue
 		}
@@ -363,68 +326,6 @@ func frontendCapabilityModelName(id string) string {
 		name = name[:maxCapabilityModelNameLen-len(suffix)]
 	}
 	return name + suffix
-}
-
-func ListBackendCapabilities() []CapabilityInfo {
-	allTools := tools.GetAllTools()
-	result := make([]CapabilityInfo, 0, len(allTools))
-	for _, tool := range allTools {
-		source := tool.Source
-		if source == "" {
-			source = "native"
-		}
-		runtime := tool.Runtime
-		if runtime == "" {
-			runtime = "kernel"
-		}
-		id := capabilityIDForTool(tool)
-		actions := capabilityActionsForTool(tool)
-		effects, _ := tool.EffectsFor("")
-		result = append(result, CapabilityInfo{
-			ID:          id,
-			Name:        tool.Name,
-			Title:       tool.Title,
-			Description: tool.Description,
-			Source:      source,
-			OwnerID:     tool.OwnerID,
-			OwnerName:   tool.OwnerName,
-			Runtime:     runtime,
-			Effects:     effects,
-			Enabled:     capabilityAllowed(id, capabilityAccessContext{}),
-			Available:   true,
-			Actions:     actions,
-		})
-	}
-	sort.Slice(result, func(i, j int) bool {
-		return result[i].ID < result[j].ID
-	})
-	return result
-}
-
-func capabilityActionsForTool(tool *tools.Tool) []CapabilityActionInfo {
-	if tool == nil {
-		return nil
-	}
-	names := map[string]bool{}
-	if action, ok := tool.InputSchema.Properties["action"]; ok {
-		for _, name := range action.Enum {
-			if name != "" {
-				names[name] = true
-			}
-		}
-	}
-	for name := range tool.ActionEffects {
-		if name != "" {
-			names[name] = true
-		}
-	}
-	result := make([]CapabilityActionInfo, 0, len(names))
-	for name := range names {
-		effects, _ := tool.EffectsFor(name)
-		result = append(result, CapabilityActionInfo{Name: name, Effects: effects})
-	}
-	sort.Slice(result, func(i, j int) bool { return result[i].Name < result[j].Name })
-	return result
 }
 
 func capabilityStillExecutable(registration *capabilityRegistration, args map[string]any) bool {

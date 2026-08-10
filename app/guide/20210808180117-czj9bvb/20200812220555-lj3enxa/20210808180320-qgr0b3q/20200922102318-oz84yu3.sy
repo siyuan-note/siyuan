@@ -6,7 +6,7 @@
 		"id": "20200922102318-oz84yu3",
 		"title": "主题",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810230450"
 	},
 	"Children": [
 		{
@@ -1348,7 +1348,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201225202158-kmavboj",
-				"updated": "20260809232000"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1373,7 +1373,7 @@
 			},
 			"Properties": {
 				"id": "20201225202158-jnsfuj4",
-				"updated": "20260809232000"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1460,7 +1460,8 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20201225202158-1ege8ss"
+						"id": "20201225202158-1ege8ss",
+						"updated": "20260810230450"
 					},
 					"Children": [
 						{
@@ -1468,49 +1469,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131160321-kd1yoes",
-								"updated": "20210512172221"
+								"updated": "20260810230450"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "按照图中 1-4 步不断进行修改"
+									"Data": "使用开发者工具定位并调整样式：打开开发者工具，启用元素选择器并点击需要修改的界面元素，在 "
 								},
 								{
-									"Type": "NodeSoftBreak",
-									"Data": "\n"
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Elements"
 								},
 								{
-									"Type": "NodeImage",
-									"Children": [
-										{
-											"Type": "NodeBang",
-											"Data": "!"
-										},
-										{
-											"Type": "NodeOpenBracket",
-											"Data": "["
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "custom-theme1.png"
-										},
-										{
-											"Type": "NodeCloseBracket",
-											"Data": "]"
-										},
-										{
-											"Type": "NodeOpenParen",
-											"Data": "("
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "assets/custom-theme1-20210512172221-x541iq1.png"
-										},
-										{
-											"Type": "NodeCloseParen",
-											"Data": ")"
-										}
-									]
+									"Type": "NodeText",
+									"Data": " 面板中查看对应的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTML"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，然后在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Styles"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 面板中调整样式"
 								}
 							]
 						}
@@ -1556,6 +1547,56 @@
 					]
 				},
 				{
+					"ID": "20260810212846-hqmlhsy",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260810212846-hqmlhsy",
+						"updated": "20260810222021"
+					},
+					"Children": [
+						{
+							"ID": "20260810212846-vmik7ig",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260810212846-vmik7ig",
+								"updated": "20260810222021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在开发者工具的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Network"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "（网络）页签中勾选 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Disable cache"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "（停用缓存）"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20201225202158-gfmyvql",
 					"Type": "NodeListItem",
 					"Data": "*",
@@ -1568,7 +1609,7 @@
 					},
 					"Properties": {
 						"id": "20201225202158-gfmyvql",
-						"updated": "20260809232000"
+						"updated": "20260810215424"
 					},
 					"Children": [
 						{
@@ -1576,7 +1617,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131160321-nytjm59",
-								"updated": "20260809232000"
+								"updated": "20260810215424"
 							},
 							"Children": [
 								{
@@ -1614,10 +1655,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "刷新界面"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "。"
 								}
 							]
 						}

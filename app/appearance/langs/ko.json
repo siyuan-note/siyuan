@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "SiYuan MCP 서비스를 통해 외부 클라이언트에 제공할 기능을 선택하세요",
+	"agentCapabilitiesScopeAgent": "Agent에서 사용",
+	"agentCapabilitiesScopeMcp": "MCP로 제공",
 	"agentCapabilitiesApprovalMode": "승인 모드",
 	"agentCapabilitiesDialogTip": "Agent가 사용할 수 있는 기능을 선택하세요. 활성화된 정의마다 token 사용량이 늘어납니다",
 	"agentCapabilitiesSearch": "기능 이름 또는 설명 검색",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "비정상",
 	"bazaarPackageMissingManifest": "마켓플레이스 패키지 매니페스트 파일이 없습니다",
 	"bazaarPackageInvalidManifest": "마켓플레이스 패키지 매니페스트 파일이 올바르지 않습니다",
-	"bazaarPackageNameMismatch": "마켓플레이스 패키지 디렉터리 이름은 매니페스트의 name 필드와 정확히 일치해야 합니다",
+	"bazaarPackageNameMismatch": "마켓플레이스 패키지 디렉터리 이름이 매니페스트의 name 필드 값과 일치하지 않습니다",
 	"loadAllContent": "모든 콘텐츠 불러오기",
 	"keepLazyLoadTip": "동적으로 불러온 콘텐츠 블록을 유지하여 스크롤할 때 반복 로드를 줄입니다. 긴 문서는 더 많은 메모리를 사용할 수 있습니다",
 	"msgSelectAllIncompleteTip": "편집기 전체 선택 누락 경고",

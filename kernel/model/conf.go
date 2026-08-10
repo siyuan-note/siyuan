@@ -523,6 +523,8 @@ func InitConf() {
 	}
 	if nil == Conf.Graph || nil == Conf.Graph.Local || nil == Conf.Graph.Global {
 		Conf.Graph = conf.NewGraph()
+	} else {
+		Conf.Graph.NormalizeMaxBlocks()
 	}
 
 	isNewWorkspace := nil == Conf.System

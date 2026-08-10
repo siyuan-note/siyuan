@@ -7,7 +7,7 @@
 		"id": "20200923234011-ieuun1p",
 		"title": "Please Start Here",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -2152,7 +2152,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20240508005104-8y513nu",
-				"updated": "20260729215152"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -2170,7 +2170,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-2b920y9",
-				"updated": "20260729215152"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -2199,37 +2199,6 @@
 									"TextMarkBlockRefID": "20230805232018-hgrq0ju",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "Connect with third-party cloud storage"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260729215152-2qxl90a",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20260729215152-2qxl90a",
-						"updated": "20260729215152"
-					},
-					"Children": [
-						{
-							"ID": "20240508005115-lmg8nop",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20240508005115-lmg8nop",
-								"updated": "20240508005126"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20230805232134-3d6mx2k",
-									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "Search asset content"
 								}
 							]
 						}

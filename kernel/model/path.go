@@ -41,15 +41,11 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string, titleEmpty bo
 
 	hPath = strings.TrimSuffix(hPath, ".sy")
 	hPath = util.TrimSpaceInPath(hPath)
+	if IsBoxDoc(boxID, parentID) {
+		// 笔记本顶层文档是用户可见的逻辑根，完整路径应从笔记本根目录解析。
+		parentID = ""
+	}
 	if "" != parentID {
-		if IsBoxDoc(boxID, parentID) {
-			name := path.Base(hPath)
-			p := "/" + id + ".sy"
-			if _, err = createDoc(boxID, p, name, content, titleEmpty); err != nil {
-				logging.LogErrorf("create doc [%s] failed: %s", p, err)
-			}
-			return
-		}
 		// The save path is incorrect when creating a sub-doc by ref in a doc with the same name https://github.com/siyuan-note/siyuan/issues/8138
 		// 在指定了父文档 ID 的情况下优先查找父文档
 		parentHPath, name := path.Split(hPath)

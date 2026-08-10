@@ -649,6 +649,7 @@ interface ISiyuan {
     },
     dragElement?: HTMLElement,
     dragTitle?: string,
+    dragTab?: ITabDragData,
     currentDragOverTabHeadersElement?: HTMLElement
     touchDragActive?: boolean,
     touchDragGhost?: HTMLElement | null,
@@ -853,6 +854,15 @@ interface ITab {
     title?: string;
     panel?: string;
     callback?: (tab: import("../layout/Tab").Tab) => void;
+}
+
+interface ITabDragData {
+    title?: string;
+    icon?: string;
+    docIcon?: string;
+    pin: boolean;
+    focus: boolean;
+    unupdate: boolean;
 }
 
 interface IWebSocketData {

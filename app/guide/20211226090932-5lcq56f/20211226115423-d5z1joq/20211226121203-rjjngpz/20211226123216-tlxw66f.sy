@@ -6,7 +6,7 @@
 		"id": "20211226123216-tlxw66f",
 		"title": "視窗和分頁",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -59,7 +59,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204619-fm69hhx",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -74,7 +74,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204619-avdhx8g",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -119,7 +119,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-dgvepju",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -127,12 +127,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-z9ce3ch",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "關閉：右鍵分頁選擇「關閉」。Windows 和 Linux 使用 "
+									"Data": "關閉：右鍵分頁選擇「關閉」，或使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -150,7 +150,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，macOS 使用 "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -165,10 +165,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "W"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ""
 								}
 							]
 						}
@@ -183,7 +179,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-sq6chxr",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -191,12 +187,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-j0j2sby",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "恢復：Windows 和 Linux 使用 "
+									"Data": "恢復：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -223,7 +219,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，macOS 使用 "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -250,7 +246,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，可重新開啟最近關閉的分頁"
+									"Data": " 可重新開啟最近關閉的分頁"
 								}
 							]
 						}
@@ -265,7 +261,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-cs620vb",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -273,12 +269,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-t85dnxq",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "切換：Windows 和 Linux 使用 "
+									"Data": "切換：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -293,60 +289,6 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Shift"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "["
-								},
-								{
-									"Type": "NodeText",
-									"Data": " / "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "]"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，macOS 使用 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘"
 								},
 								{
 									"Type": "NodeText",
@@ -382,11 +324,65 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
+									"TextMarkTextContent": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 切換到上一個分頁，使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
 									"TextMarkTextContent": "]"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，可切換到上一個或下一個分頁；使用 "
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 切換到下一個分頁；使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -404,7 +400,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 或 "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -422,7 +418,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 可跳轉到第 1 至第 9 個分頁"
+									"Data": " 跳轉到第 1 至第 9 個分頁"
 								}
 							]
 						}
@@ -751,7 +747,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204619-dyapikx",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -766,7 +762,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204619-y78l7pj",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -811,7 +807,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-baro1m1",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -819,12 +815,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-05nm3h1",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最近的文件：Windows 和 Linux 使用 "
+									"Data": "最近的文件：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -842,7 +838,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，macOS 使用 "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -860,7 +856,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，可開啟最近文件列表"
+									"Data": " 開啟最近文件列表"
 								}
 							]
 						}
@@ -908,7 +904,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-bvod7rf",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -916,12 +912,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-js52gyc",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "分頁切換：Windows 和 Linux 使用 "
+									"Data": "分頁切換：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -939,7 +935,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，macOS 使用 "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -957,7 +953,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，可切換到下一個編輯分頁"
+									"Data": " 切換到下一個編輯分頁"
 								}
 							]
 						}
@@ -971,7 +967,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-c8ab2a7",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -985,12 +981,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260809170000-5ab3282",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "行動端同樣支援多分頁。點擊工具列上的分頁按鈕可開啟分頁概覽。"
+					"Data": "行動端同樣支援多分頁。點擊螢幕頂部的分頁按鈕可開啟分頁概覽。"
 				}
 			]
 		},

@@ -1,4 +1,7 @@
 {
+	"agentCapabilitiesMcpExposureTip": "SiYuan MCP सेवा के माध्यम से बाहरी क्लाइंट को दी जाने वाली क्षमताएँ चुनें",
+	"agentCapabilitiesScopeAgent": "Agent में उपयोग",
+	"agentCapabilitiesScopeMcp": "MCP से उपलब्ध कराएँ",
 	"agentCapabilitiesApprovalMode": "स्वीकृति मोड",
 	"agentCapabilitiesDialogTip": "Agent के लिए उपलब्ध क्षमताएँ चुनें; हर सक्षम परिभाषा token उपयोग बढ़ाती है",
 	"agentCapabilitiesSearch": "क्षमता के नाम या विवरण खोजें",
@@ -23,7 +26,7 @@
 	"bazaarPackageInvalid": "अमान्य",
 	"bazaarPackageMissingManifest": "मार्केटप्लेस पैकेज की मैनिफेस्ट फ़ाइल मौजूद नहीं है",
 	"bazaarPackageInvalidManifest": "मार्केटप्लेस पैकेज की मैनिफेस्ट फ़ाइल अमान्य है",
-	"bazaarPackageNameMismatch": "मार्केटप्लेस पैकेज की डायरेक्टरी का नाम मैनिफेस्ट फ़ाइल के name फ़ील्ड से बिल्कुल मेल खाना चाहिए",
+	"bazaarPackageNameMismatch": "मार्केटप्लेस पैकेज की डायरेक्टरी का नाम मैनिफेस्ट फ़ाइल में name फ़ील्ड के मान से मेल नहीं खाता",
 	"loadAllContent": "सभी सामग्री लोड करें",
 	"keepLazyLoadTip": "स्क्रॉल करते समय बार-बार लोड होने को कम करने के लिए गतिशील रूप से लोड किए गए सामग्री ब्लॉक बनाए रखें; लंबे दस्तावेज़ अधिक मेमोरी का उपयोग कर सकते हैं",
 	"msgSelectAllIncompleteTip": "एडिटर में अपूर्ण चयन चेतावनी",

@@ -2,6 +2,7 @@ import {getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {lockScreen} from "../dialog/processSystem";
 import type {App} from "../index";
+import {clearTabDragPreview} from "../layout/tabDrag";
 
 const closeTab = (ipcData: IWebSocketData) => {
     const tab = getInstanceById(ipcData.data);
@@ -14,15 +15,14 @@ export const onWindowsMsg = (ipcData: IWebSocketData, app: App) => {
         case "closetab":
             closeTab(ipcData);
             break;
+        case "setTabDragData":
+            window.siyuan.dragTab = ipcData.data as ITabDragData;
+            break;
         case "resetTabsStyle":
             // data: addRegionStyle, rmDragStyle, rmDragStyleRegionStyle
             if (ipcData.data === "rmDragStyle") {
-                document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
-                    item.classList.remove("layout-tab-bars--drag");
-                });
-                document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(tabItem => {
-                    tabItem.remove();
-                });
+                clearTabDragPreview();
+                window.siyuan.dragTab = undefined;
             } else {
                 document.querySelectorAll(".layout-tab-bar--readonly .fn__flex-1").forEach((item: HTMLElement) => {
                     if (item.getBoundingClientRect().top <= 6) {

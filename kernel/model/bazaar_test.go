@@ -139,7 +139,14 @@ func TestGetInstalledPackageInfosIncludesInvalidPackages(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if err := os.MkdirAll(filepath.Join(pluginsPath, "missing"), 0755); err != nil {
+	missingPath := filepath.Join(pluginsPath, "missing")
+	if err := os.MkdirAll(missingPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(missingPath, "index.js"), nil, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(pluginsPath, "empty", "i18n"), 0755); err != nil {
 		t.Fatal(err)
 	}
 

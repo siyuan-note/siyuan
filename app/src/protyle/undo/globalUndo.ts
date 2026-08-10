@@ -4,6 +4,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {waitForPendingTransactions} from "../util/transactionQueue";
 import {hasClosestByClassName} from "../util/hasClosest";
+import {getUndoFocusTarget} from "../util/selectionFocus";
 /// #if !MOBILE
 import {getActiveTab} from "../../layout/tabUtil";
 /// #endif
@@ -182,7 +183,13 @@ const focusRootIDs = (rootIDs: string[], focusBlockId?: string) => {
     // 只滚动发起窗口的焦点 protyle 到变更块；其它文档不强制重开（撤销物理结果在发起文档）
     const protyle = getActiveProtyle();
     if (protyle && rootIDs.includes(protyle.block?.rootID) && focusBlockId) {
-        const target = protyle.wysiwyg.element.querySelector(`[data-node-id="${focusBlockId}"]`);
+        const targets = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${focusBlockId}"]`));
+        const selection = getSelection();
+        const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+        // 同 ID 块可能同时存在于嵌入块和源文档中，优先定位撤销后选区所在的副本。
+        const target = getUndoFocusTarget(targets, item =>
+            !!range && protyle.wysiwyg.element.contains(range.startContainer) && item.contains(range.startContainer)
+        );
         if (target) {
             const rect = target.getBoundingClientRect();
             // 仅在变更块不在视口内时才滚动，避免打断用户当前的滚动位置

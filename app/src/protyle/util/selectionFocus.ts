@@ -7,3 +7,7 @@ export const getUndoFocusElement = <T>(
     const indexedElement = Number.isInteger(index) && index >= 0 ? elements[index] : undefined;
     return indexedElement || elements.find(isPreferred) || elements[0];
 };
+
+export const getUndoFocusTarget = <T>(elements: T[], containsSelection: (element: T) => boolean) => {
+    return elements.find(containsSelection) || elements[0];
+};

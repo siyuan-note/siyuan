@@ -11,6 +11,9 @@ import {isBrowser} from "../../util/functions";
 import type {App} from "../../index";
 import {genUUID} from "../../util/genID";
 import {buildBlockDOMClipboardData} from "./blockDOMClipboard";
+import {buildWebClipboardHTML, getTextSiyuanFromTextHTML} from "./clipboardData";
+
+export {encodeBase64, getTextSiyuanFromTextHTML} from "./clipboardData";
 
 export type TSaveExportFileResult = {
     status: "success" | "canceled" | "error";
@@ -54,58 +57,6 @@ const waitMobileExportFile = (callback: (requestID: string) => void) => {
 
 export const isPhablet = () => {
     return /Android|webOS|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(navigator.userAgent) || isIPhone() || isIPad();
-};
-
-export const encodeBase64 = (text: string): string => {
-    if (typeof Buffer !== "undefined") {
-        return Buffer.from(text, "utf8").toString("base64");
-    } else {
-        const encoder = new TextEncoder();
-        const bytes = encoder.encode(text);
-        let binary = "";
-        const chunkSize = 0x8000; // 避免栈溢出
-
-        for (let i = 0; i < bytes.length; i += chunkSize) {
-            const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
-            binary += String.fromCharCode(...chunk);
-        }
-
-        return btoa(binary);
-    }
-};
-
-export const getTextSiyuanFromTextHTML = (html: string) => {
-    if (html.trimStart().startsWith("<html") &&
-        html.substring(0, html.indexOf(">")).includes('xmlns:x="urn:schemas-microsoft-com:office:excel"')) {
-        // 移除 Microsoft Excel 中的 data-siyuan https://github.com/siyuan-note/siyuan/pull/16338
-        return {
-            textSiyuan: "",
-            textHtml: html.replace(/<!--data-siyuan='[^']+'-->/g, "")
-        };
-    }
-    const siyuanMatch = html.match(/<!--data-siyuan='([^']+)'-->/);
-    let textSiyuan = "";
-    let textHtml = html;
-    if (siyuanMatch) {
-        try {
-            if (typeof Buffer !== "undefined") {
-                const decodedBytes = Buffer.from(siyuanMatch[1], "base64");
-                textSiyuan = decodedBytes.toString("utf8");
-            } else {
-                const decoder = new TextDecoder();
-                const bytes = Uint8Array.from(atob(siyuanMatch[1]), char => char.charCodeAt(0));
-                textSiyuan = decoder.decode(bytes);
-            }
-            // 移除注释节点，保持原有的 text/html 内容
-            textHtml = html.replace(/<!--data-siyuan='[^']+'-->/g, "");
-        } catch (e) {
-            console.log("Failed to decode siyuan data from HTML comment:", e);
-        }
-    }
-    return {
-        textSiyuan,
-        textHtml
-    };
 };
 
 export const saveExportFile = async (uri: string, msgId?: string): Promise<TSaveExportFileResult> => {
@@ -430,39 +381,94 @@ const writePlainTextFallback = async (text: string) => {
     return copied;
 };
 
-export const writeBlockDOMClipboard = async (lute: Lute, blockDOM: string) => {
-    const {textPlain, textHTML, textSiyuan} = buildBlockDOMClipboardData(lute, blockDOM);
+export interface IClipboardWriteData {
+    textPlain: string;
+    textHTML?: string;
+    textSiyuan?: string;
+}
+
+export type TClipboardWriteStatus = "rich" | "plain" | "failed";
+
+export interface IClipboardWriteResult {
+    status: TClipboardWriteStatus;
+    error?: unknown;
+}
+
+export interface IClipboardWriteOptions {
+    fallbackToPlainText?: boolean;
+}
+
+export const writeClipboardData = async (data: IClipboardWriteData, options: IClipboardWriteOptions = {}): Promise<IClipboardWriteResult> => {
+    const textPlain = data.textPlain || "";
+    const textHTML = data.textHTML || "";
+    const textSiyuan = data.textSiyuan || "";
+    const fallbackToPlainText = options.fallbackToPlainText !== false;
     try {
         if (isInAndroid()) {
-            window.JSAndroid.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
-            return true;
+            if (textSiyuan) {
+                window.JSAndroid.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
+                return {status: "rich"};
+            }
+            if (textHTML) {
+                window.JSAndroid.writeHTMLClipboard(textPlain, textHTML);
+                return {status: "rich"};
+            }
+            window.JSAndroid.writeClipboard(textPlain);
+            return {status: "plain"};
         }
         if (isInHarmony()) {
-            window.JSHarmony.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
-            return true;
-        }
-        if (isInIOS() || !navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
-            const copied = await writePlainTextFallback(textPlain);
-            if (!copied) {
-                showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+            if (textSiyuan) {
+                window.JSHarmony.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
+                return {status: "rich"};
             }
-            return copied;
+            if (textHTML) {
+                window.JSHarmony.writeHTMLClipboard(textPlain, textHTML);
+                return {status: "rich"};
+            }
+            window.JSHarmony.writeClipboard(textPlain);
+            return {status: "plain"};
         }
-        await navigator.clipboard.write([new ClipboardItem({
-            "text/plain": new Blob([textPlain], {type: "text/plain"}),
-            "text/html": new Blob([
-                `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${textHTML}`
-            ], {type: "text/html"}),
-        })]);
-        return true;
-    } catch (e) {
-        console.log("Write block DOM clipboard error:", e);
-        if (await writePlainTextFallback(textPlain)) {
-            return true;
+        if (isInIOS()) {
+            window.webkit.messageHandlers.setClipboard.postMessage(textPlain || textHTML);
+            return {status: "plain"};
         }
+        if (textHTML && navigator.clipboard?.write && typeof ClipboardItem !== "undefined") {
+            const clipboardItem: Record<string, Blob> = {};
+            if (textPlain) {
+                clipboardItem["text/plain"] = new Blob([textPlain], {type: "text/plain"});
+            }
+            const webHTML = buildWebClipboardHTML(textHTML, textSiyuan);
+            clipboardItem["text/html"] = new Blob([webHTML], {type: "text/html"});
+            await navigator.clipboard.write([new ClipboardItem(clipboardItem)]);
+            return {status: "rich"};
+        }
+        if (!textHTML && navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(textPlain);
+            return {status: "plain"};
+        }
+    } catch (error) {
+        if (fallbackToPlainText && await writePlainTextFallback(textPlain || textHTML)) {
+            return {status: "plain", error};
+        }
+        return {status: "failed", error};
+    }
+    if (fallbackToPlainText && await writePlainTextFallback(textPlain || textHTML)) {
+        return {status: "plain"};
+    }
+    return {status: "failed"};
+};
+
+export const writeBlockDOMClipboard = async (lute: Lute, blockDOM: string) => {
+    const {textPlain, textHTML, textSiyuan} = buildBlockDOMClipboardData(lute, blockDOM);
+    const result = await writeClipboardData({textPlain, textHTML, textSiyuan});
+    if (result.error) {
+        console.log("Write block DOM clipboard error:", result.error);
+    }
+    if (result.status === "failed") {
         showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
         return false;
     }
+    return true;
 };
 
 export const copyPlainText = (text: string) => {

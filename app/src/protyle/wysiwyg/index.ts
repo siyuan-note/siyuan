@@ -92,12 +92,13 @@ import {popSearch} from "../../mobile/menu/search";
 import {
     copyPlainText,
     encodeBase64,
+    getTextSiyuanFromTextHTML,
     isInAndroid,
-    isInHarmony,
     isInIOS,
     isMac,
     isOnlyMeta,
-    readClipboard
+    readClipboard,
+    writeClipboardData
 } from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -622,52 +623,24 @@ export class WYSIWYG {
             clipboardData,
         }));
         const textPlain = clipboardData.getData("text/plain");
-        const textHTML = clipboardData.getData("text/html");
-        const textSiyuan = clipboardData.getData("text/siyuan");
-        if (!textPlain && !textHTML) {
+        const parsedHTML = getTextSiyuanFromTextHTML(clipboardData.getData("text/html"));
+        const textSiyuan = clipboardData.getData("text/siyuan") || parsedHTML.textSiyuan;
+        if (!textPlain && !parsedHTML.textHtml) {
             showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
             return false;
         }
-        const clipboardItem: Record<string, string> = {};
-        if (textPlain) {
-            clipboardItem["text/plain"] = textPlain;
-        }
-        if (textHTML) {
-            clipboardItem["text/html"] = textHTML;
-        }
-        try {
-            if (isInAndroid()) {
-                if (textSiyuan) {
-                    window.JSAndroid.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
-                } else if (textHTML) {
-                    window.JSAndroid.writeHTMLClipboard(textPlain, textHTML);
-                } else {
-                    window.JSAndroid.writeClipboard(textPlain);
-                }
-            } else if (isInHarmony()) {
-                if (textSiyuan) {
-                    window.JSHarmony.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
-                } else if (textHTML) {
-                    window.JSHarmony.writeHTMLClipboard(textPlain, textHTML);
-                } else {
-                    window.JSHarmony.writeClipboard(textPlain);
-                }
-            } else if (isInIOS()) {
-                window.webkit.messageHandlers.setClipboard.postMessage(textPlain);
-            } else if (navigator.clipboard?.write) {
-                await navigator.clipboard.write([new ClipboardItem(clipboardItem)]);
-            } else if (navigator.clipboard?.writeText) {
-                await navigator.clipboard.writeText(textPlain || textHTML);
-            } else {
-                showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
-                return false;
-            }
-            return true;
-        } catch (error) {
-            console.log("Cut write clipboard error:", error);
-            showMessage(error instanceof Error ? error.message : String(error), 7000, "error");
+        const result = await writeClipboardData({
+            textPlain,
+            textHTML: parsedHTML.textHtml,
+            textSiyuan,
+        }, {fallbackToPlainText: false});
+        if (result.status === "failed") {
+            console.log("Cut write clipboard error:", result.error);
+            showMessage(result.error instanceof Error ? result.error.message :
+                (result.error ? String(result.error) : window.siyuan.languages.clipboardPermissionDenied), 7000, "error");
             return false;
         }
+        return true;
     }
 
     private bindCommonEvent(protyle: IProtyle) {
@@ -1000,18 +973,18 @@ export class WYSIWYG {
                     exportedHTML = prepared.html;
                     clipboardText = prepared.source;
                 }
-                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` +
-                    (nestedListPaste ? NESTED_LIST_PASTE_MARKER : "") + exportedHTML;
+                const clipboardHTML = (nestedListPaste ? NESTED_LIST_PASTE_MARKER : "") + exportedHTML;
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${clipboardHTML}`;
                 event.clipboardData.setData("text/plain", clipboardText);
                 event.clipboardData.setData("text/html", textHTML);
                 if (needClipboardWrite) {
-                    try {
-                        await navigator.clipboard.write([new ClipboardItem({
-                            ["text/plain"]: clipboardText,
-                            ["text/html"]: textHTML,
-                        })]);
-                    } catch (e) {
-                        console.log("Copy write clipboard error:", e);
+                    const result = await writeClipboardData({
+                        textPlain: clipboardText,
+                        textHTML: clipboardHTML,
+                        textSiyuan,
+                    });
+                    if (result.error || result.status === "failed") {
+                        console.log("Copy write clipboard error:", result.error);
                     }
                 }
                 enhanceRichClipboard(clipboardText, textHTML, protyle.notebookId);
@@ -2999,6 +2972,7 @@ export class WYSIWYG {
             let needClipboardWrite = false;
             let cutBlockSelection = false;
             let cutNextElement: Element | false;
+            let cutAVCells: ReturnType<typeof getAVSelectedCells>;
             if (selectElements.length > 0) {
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
                     selectElements[0].parentElement.classList.contains("list") &&   // 反链复制列表项 https://github.com/siyuan-note/siyuan/issues/6555
@@ -3083,9 +3057,9 @@ export class WYSIWYG {
             } else if (selectAVElement) {
                 needClipboardWrite = true;
                 const selectedCells = getAVSelectedCells(nodeElement);
-                const itemCells = selectedCells.length === 0 ? getAVSelectedTableCells(nodeElement) : undefined;
-                const cellsValue = await updateCellsValue(protyle, nodeElement, undefined, undefined, undefined,
-                    undefined, false, false, false, itemCells);
+                cutAVCells = selectedCells.length === 0 ? getAVSelectedTableCells(nodeElement) : selectedCells;
+                const cellsValue = selectedCells.length === 0 ? getAVCellData(cutAVCells) :
+                    getAVSelectedCellData(nodeElement);
                 html = JSON.stringify(cellsValue.json);
                 textPlain = cellsValue.text;
             } else if (selectTableElement) {
@@ -3308,22 +3282,30 @@ export class WYSIWYG {
                     event.clipboardData.setData("text/siyuan", textSiyuan);
                 }
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + removeZWJ((selectTableElement || selectTableRange) ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                const exportedHTML = removeZWJ((selectTableElement || selectTableRange) ? html :
+                    protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${exportedHTML}`;
                 if (!cutClipboardWritten) {
                     event.clipboardData.setData("text/html", textHTML);
                 }
                 let clipboardWriteSucceeded = true;
                 if (needClipboardWrite && !cutClipboardWritten) {
-                    try {
-                        await navigator.clipboard.write([new ClipboardItem({
-                            ["text/plain"]: textPlain,
-                            ["text/html"]: textHTML,
-                        })]);
-                    } catch (e) {
-                        console.log("Cut write clipboard error:", e);
+                    const result = await writeClipboardData({
+                        textPlain,
+                        textHTML: exportedHTML,
+                        textSiyuan,
+                    }, {fallbackToPlainText: false});
+                    if (result.status === "failed") {
+                        console.log("Cut write clipboard error:", result.error);
                         clipboardWriteSucceeded = false;
-                        showMessage(e instanceof Error ? e.message : String(e), 7000, "error");
+                        showMessage(result.error instanceof Error ? result.error.message :
+                            (result.error ? String(result.error) : window.siyuan.languages.clipboardPermissionDenied),
+                        7000, "error");
                     }
+                }
+                if (selectAVElement && clipboardWriteSucceeded) {
+                    await updateCellsValue(protyle, nodeElement, undefined, undefined, undefined,
+                        undefined, false, false, false, cutAVCells);
                 }
                 if (cutBlockSelection && clipboardWriteSucceeded) {
                     const removed = await removeBlock(protyle, nodeElement, range, "remove", true);

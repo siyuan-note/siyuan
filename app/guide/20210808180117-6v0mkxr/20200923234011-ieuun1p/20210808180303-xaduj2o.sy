@@ -7,7 +7,7 @@
 		"id": "20210808180303-xaduj2o",
 		"title": "General Operations",
 		"type": "doc",
-		"updated": "20260614115148"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -253,7 +253,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240508004508-qssxra9",
-				"updated": "20240508004509"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -261,7 +261,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20210331201142-4g923es",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "Hyperlink"
+					"TextMarkTextContent": "Block hyperlink"
 				}
 			]
 		},
@@ -406,7 +406,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240508004537-14enffy",
-				"updated": "20240508004537"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -414,7 +414,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20230104152135-1iei0xa",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "Share document"
+					"TextMarkTextContent": "Share a document to the community"
 				}
 			]
 		},

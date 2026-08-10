@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20260807094000"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -882,7 +882,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501230739-whydmx1",
-				"updated": "20220501231230"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -896,21 +896,66 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220501230748-wvrcnzu",
-				"updated": "20220501231314"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在列表项下的第一个子块是省略块标的。可以将光标移到这个块中，然后通过 "
+					"Data": "当内容块的块标未显示时，可将光标置于该内容块中，多次按 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+/"
+					"TextMarkTextContent": "Shift"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 触发它的块标菜单。"
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 选中该内容块，再按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 打开块标菜单；macOS 使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		},

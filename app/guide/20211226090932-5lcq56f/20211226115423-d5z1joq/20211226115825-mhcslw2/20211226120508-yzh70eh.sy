@@ -6,7 +6,7 @@
 		"id": "20211226120508-yzh70eh",
 		"title": "嵌入內容區塊",
 		"type": "doc",
-		"updated": "20260730184353"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -326,7 +326,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120744-m07di8w",
-				"updated": "20211225234425"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -340,30 +340,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120744-4up21i9",
-				"updated": "20260730184353"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "查詢同時包含 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "在思源中"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 和 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "Kernel概念"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 文本的段落區塊，並排除當前文檔（否則當段落區塊也會包含到結果集中，因為當前段落同樣包含了這兩個文本，下面的案例類似）："
+					"Data": "查詢最近更新的 7 個非空段落區塊："
 				}
 			]
 		},
@@ -373,7 +355,7 @@
 			"Properties": {
 				"id": "20211226120744-om182d6",
 				"style": "height: 149px;",
-				"updated": "20260730184353"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -384,7 +366,7 @@
 				},
 				{
 					"Type": "NodeBlockQueryEmbedScript",
-					"Data": "SELECT * FROM blocks WHERE content LIKE '%在思源中%' AND content LIKE '%核心概念%' AND type = 'p' AND hpath NOT LIKE '%嵌入內容區塊%'"
+					"Data": "SELECT * FROM blocks WHERE type = 'p' AND content != '' ORDER BY updated DESC LIMIT 7"
 				},
 				{
 					"Type": "NodeCloseBrace"
@@ -1063,7 +1045,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202457-2da64g3",
-				"updated": "20260612202457"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1093,7 +1075,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202457-x9j6wcc",
-				"updated": "20260612202457"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1106,7 +1088,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nreturn [\n    \"20240601150405-a1b2c3d\",\n    \"20240601150405-e4f5g6h\"\n];\n}}\n"
+					"Data": "//!js\nreturn [\n    \"20240601150405-a1b2c3d\",\n    \"20240601150405-e4f5g6h\"\n];\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1135,7 +1117,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202457-68k9wdn",
-				"updated": "20260612202457"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1148,7 +1130,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待辦\" });\nreturn resp.data.blocks.map(b =\u003e b.id);\n}}\n"
+					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待辦\" });\nreturn resp.data.blocks.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1177,7 +1159,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202457-groigh0",
-				"updated": "20260612202457"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1190,7 +1172,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b =\u003e b.id);\n}}\n"
+					"Data": "//!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1219,7 +1201,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202457-btr2ts2",
-				"updated": "20260612202457"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1232,7 +1214,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) =\u003e attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) =\u003e id);\nreturn filtered;\n}}\n"
+					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) => attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) => id);\nreturn filtered;\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

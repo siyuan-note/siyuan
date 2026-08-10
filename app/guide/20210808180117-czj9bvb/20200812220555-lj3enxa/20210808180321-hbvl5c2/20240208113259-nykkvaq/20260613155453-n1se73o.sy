@@ -6,7 +6,7 @@
 		"id": "20260613155453-n1se73o",
 		"title": "字段类型",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -1602,7 +1602,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-r1eaue4",
-				"updated": "20260613155453"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1641,7 +1641,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-ruxy5mq",
-				"updated": "20260613155453"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1694,7 +1694,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-mg0ergn",
-						"updated": "20260613155453"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1702,7 +1702,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-lf0ybif",
-								"updated": "20260613155453"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -1716,8 +1716,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Shift+回车"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "回车"
 								},
 								{
 									"Type": "NodeText",

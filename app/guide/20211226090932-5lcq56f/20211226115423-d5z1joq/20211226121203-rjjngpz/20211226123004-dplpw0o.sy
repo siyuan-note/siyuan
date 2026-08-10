@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20260619110430"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -1770,7 +1770,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-4ihq4sa",
-				"updated": "20221114173626"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1784,7 +1784,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173549-5ie5uaj",
-				"updated": "20230820184235"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1794,7 +1794,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "社區集市倉庫"
 				},
 				{

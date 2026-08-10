@@ -7,7 +7,7 @@
 		"id": "20200812220555-lj3enxa",
 		"title": "请从这里开始",
 		"type": "doc",
-		"updated": "20260804233500"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -536,7 +536,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240507235327-j0kbj6i",
-				"updated": "20260729213849"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -551,7 +551,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729213849-2pjkn6k",
-				"updated": "20260729213849"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -625,7 +625,7 @@
 					},
 					"Properties": {
 						"id": "20260729213849-3foooyt",
-						"updated": "20260729213849"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -633,7 +633,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240507235407-itfe7y7",
-								"updated": "20240507235348"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -641,7 +641,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20221016213308-uz5af79",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "通过标题列表概述"
+									"TextMarkTextContent": "标题与列表混合排版"
 								}
 							]
 						}
@@ -851,7 +851,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260729213849-f9kxwuq",
-				"updated": "20260729213849"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -866,7 +866,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729213849-3o7e5yb",
-				"updated": "20260729213849"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1023,6 +1023,37 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260729213849-282plh9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260729213849-282plh9",
+						"updated": "20260729213849"
+					},
+					"Children": [
+						{
+							"ID": "20240507235944-5kf9qnr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240507235944-5kf9qnr",
+								"updated": "20240508000000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210615211733-v6rzowm",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "数据历史"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -1032,7 +1063,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260729213849-12omykh",
-				"updated": "20260729213849"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1047,7 +1078,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729213849-1jxtqlz",
-				"updated": "20260729213849"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1245,7 +1276,7 @@
 					},
 					"Properties": {
 						"id": "20260729213849-1ith3up",
-						"updated": "20260729213849"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1253,7 +1284,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240507235944-3sgjwm6",
-								"updated": "20240508000000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -1261,7 +1292,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20210331200042-94gs1hh",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "超链接"
+									"TextMarkTextContent": "块超链接"
 								}
 							]
 						}
@@ -1275,12 +1306,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260729213849-1tej5ia",
-				"updated": "20260804233500"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "学习与回顾"
+					"Data": "学习与人工智能"
 				}
 			]
 		},
@@ -1290,40 +1321,9 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729213849-1ksoqc7",
-				"updated": "20260804233500"
+				"updated": "20260809232000"
 			},
 			"Children": [
-				{
-					"ID": "20260729213849-282plh9",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20260729213849-282plh9",
-						"updated": "20260729213849"
-					},
-					"Children": [
-						{
-							"ID": "20240507235944-5kf9qnr",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20240507235944-5kf9qnr",
-								"updated": "20240508000000"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20210615211733-v6rzowm",
-									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "数据历史"
-								}
-							]
-						}
-					]
-				},
 				{
 					"ID": "20260729213849-fkk2ziy",
 					"Type": "NodeListItem",
@@ -1381,37 +1381,6 @@
 									"TextMarkBlockRefID": "20230303235619-ex5l63e",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "人工智能"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260804233300-mcpcnli",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20260804233300-mcpcnli",
-						"updated": "20260804233500"
-					},
-					"Children": [
-						{
-							"ID": "20260804233301-mcpcnpa",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804233301-mcpcnpa",
-								"updated": "20260804233500"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20260804223000-mcpsv01",
-									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "MCP 服务"
 								}
 							]
 						}
@@ -1575,7 +1544,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729213849-17vjx77",
-				"updated": "20260804233500"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1590,7 +1559,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729213849-38zyz2l",
-				"updated": "20260804233500"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1757,7 +1726,7 @@
 					},
 					"Properties": {
 						"id": "20260729213849-1ppin53",
-						"updated": "20260729213849"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1765,7 +1734,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240507235944-fbkyzjz",
-								"updated": "20240508000000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -1773,7 +1742,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20230104144904-39br4c6",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "分享文档"
+									"TextMarkTextContent": "分享文档到社区"
 								}
 							]
 						}

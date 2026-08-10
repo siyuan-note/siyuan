@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20260619110446"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -1797,7 +1797,7 @@
 			"Properties": {
 				"ID": "20240530101000-41fyx9q",
 				"id": "20240530101000-bkqjdmt",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1812,13 +1812,13 @@
 			"Properties": {
 				"ID": "20240530101000-x3uff8u",
 				"id": "20240530101000-y8h9h7d",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "コミュニティマーケットプレイスのリポジトリ"
 				},
 				{

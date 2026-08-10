@@ -8,7 +8,7 @@
 		"id": "20240530101000-g3ugxml",
 		"title": "基本操作",
 		"type": "doc",
-		"updated": "20260614115755"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -53,7 +53,7 @@
 			"Properties": {
 				"ID": "20240530101000-o6n6awj",
 				"id": "20240530101000-61q5p5y",
-				"updated": "20240530101000"
+				"updated": "20260809170000"
 			},
 			"Children": [
 				{
@@ -267,7 +267,7 @@
 			"Properties": {
 				"ID": "20240530101000-8uim2ps",
 				"id": "20240530101000-cfu9ut4",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -275,7 +275,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20240530101000-zprnpfi",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "ハイパーリンク"
+					"TextMarkTextContent": "ブロックハイパーリンク"
 				}
 			]
 		},
@@ -429,7 +429,7 @@
 			"Properties": {
 				"ID": "20240530101000-eprhd1b",
 				"id": "20240530101000-7lugcbv",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -437,7 +437,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20240530101000-4cqkoel",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "ドキュメントの公開"
+					"TextMarkTextContent": "コミュニティにドキュメントを共有"
 				}
 			]
 		},

@@ -7,7 +7,7 @@
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
 		"type": "doc",
-		"updated": "20260804235500"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194439-k7n1m8a",
-				"updated": "20260804235500"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-ffn21hi",
-				"updated": "20260804235500"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "將內容區塊設定為閃卡後，系統會通過間隔重複演算法 FSRS（GitHub repo: open-spaced-repetition/free-spaced-repetition-scheduler）自動安排複習，在遺忘臨界點提醒複習，幫助將短期記憶轉化為長期記憶。"
+					"Data": "將內容區塊設定為閃卡後，系統會通過間隔重複演算法 FSRS（GitHub repo: open-spaced-repetition/go-fsrs）自動安排複習，在遺忘臨界點提醒複習，幫助將短期記憶轉化為長期記憶。"
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20211226121808-fnxmngk",
 		"title": "資料庫表",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121831-ppl9gr8",
-				"updated": "20211225234715"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -34,12 +34,90 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226121831-umbkur3",
-				"updated": "20260730184353"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "該表用於存儲內容區塊資料。"
+					"Data": "公開查詢表包括 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "blocks"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（內容區塊）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "spans"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（行級元素）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（資源文件引用）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "attributes"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（區塊屬性）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "refs"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（區塊引用）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "和"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "file_annotation_refs"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（資源文件標註引用）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。下方列出了 blocks 表結構，其他表可透過同一 SQL 查詢介面使用。"
 				}
 			]
 		},

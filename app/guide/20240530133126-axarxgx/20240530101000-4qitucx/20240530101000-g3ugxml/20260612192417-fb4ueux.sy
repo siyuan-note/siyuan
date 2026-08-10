@@ -6,7 +6,7 @@
 		"id": "20260612192417-fb4ueux",
 		"title": "コマンドラインインターフェース",
 		"type": "doc",
-		"updated": "20260704130000"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -364,7 +364,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123956-eth7jbg",
-				"updated": "20260618123956"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -385,7 +385,7 @@
 			"Properties": {
 				"colgroup": "|||",
 				"id": "20260618123956-gr100ax",
-				"updated": "20260618123956"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -666,6 +666,70 @@
 								{
 									"Type": "NodeText",
 									"Data": "ドライランモード、パラメータを検証するだけで実行しない"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--log-level"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-v"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "設定値"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ログレベル：off、trace、debug、info、warn、error、fatal"
 								}
 							]
 						}
@@ -3100,7 +3164,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618123956-5p7zdwt",
-				"updated": "20260618123956"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -4100,7 +4164,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260618123956-dhw18eg",
-				"updated": "20260618123956"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -4113,7 +4177,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新しい見出し\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- リスト項目\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"> 引用\"\n\nsiyuan block update --id block-id --data \"変更後の内容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\n"
+					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新しい見出し\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- リスト項目\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"> 引用\"\n\nsiyuan block update --id block-id --data \"変更後の内容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\nsiyuan block update --id block-id --data \"updated content\" --lock-type\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -9641,7 +9705,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618123956-8fytpqd",
-				"updated": "20260618123956"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -10819,7 +10883,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260618123956-a0hdkdu",
-				"updated": "20260618123956"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -10834,15 +10898,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ フィールドタイプ："
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "block"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ / "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -11355,7 +11410,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618123956-aiwr7s6",
-				"updated": "20260618123956"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -11821,7 +11876,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260618123956-vjbk7c4",
-				"updated": "20260618123956"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -11834,7 +11889,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan template search\nsiyuan template search \"会議\"\nsiyuan template get --path templates/週報.md\nsiyuan template create --name \"週報\" --data \"# 週報\"\nsiyuan template create --name \"週報\" --file ./weekly.md\nsiyuan template create --name \"週報\" --data \"# 週報\" --overwrite\nsiyuan template render --path templates/週報.md --id doc-id\nsiyuan template save-as --id doc-id --name \"議事録\"\nsiyuan template save-as --id doc-id --name \"議事録\" --overwrite\nsiyuan template remove --path templates/週報.md\n"
+					"Data": "siyuan template search\nsiyuan template search \"会議\"\nsiyuan template get --path 週報.md\nsiyuan template create --name \"週報\" --data \"# 週報\"\nsiyuan template create --name \"週報\" --file ./weekly.md\nsiyuan template create --name \"週報\" --data \"# 週報\" --overwrite\nsiyuan template render --path 週報.md --id doc-id\nsiyuan template save-as --id doc-id --name \"議事録\"\nsiyuan template save-as --id doc-id --name \"議事録\" --overwrite\nsiyuan template remove --path 週報.md\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -12513,6 +12568,153 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260809180000-e111750",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260809180000-e111750",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サーバー"
+				}
+			]
+		},
+		{
+			"ID": "20260809180000-93036f1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260809180000-93036f1",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "HTTP サーバーを起動します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--wd"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で作業ディレクトリ、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でポート、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--readonly"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で読み取り専用モード、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--accessAuthCode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でアクセス認証コード、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--lang"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でインターフェース言語、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で dev または prod モードを指定します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--ssl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で HTTPS と WSS、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--safe-mode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でセーフモードを有効にします。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--attach-ui"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は Electron 内部専用です。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--enable-pprof"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は認証なしのプロセス診断情報を公開するため、ローカル開発でのみ使用してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260809180000-c7d60a1",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809180000-c7d60a1",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan serve --wd /path/to/workspace --port 6806\nsiyuan serve --wd /path/to/workspace --port 6806 --readonly true\nsiyuan serve --wd /path/to/workspace --port 6806 --accessAuthCode \"secret\" --lang ja --ssl\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

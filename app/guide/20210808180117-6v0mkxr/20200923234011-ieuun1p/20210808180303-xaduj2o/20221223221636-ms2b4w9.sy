@@ -7,7 +7,7 @@
 		"id": "20221223221636-ms2b4w9",
 		"title": "Flashcards",
 		"type": "doc",
-		"updated": "20260804235500"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194307-9kjmef3",
-				"updated": "20260804235500"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194307-wa1h7dm",
-				"updated": "20260804235500"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Once a content block is set as a flashcard, the system automatically schedules reviews using the FSRS spaced repetition algorithm (GitHub repo: open-spaced-repetition/free-spaced-repetition-scheduler), prompting reviews at the point of forgetting to help convert short-term memory into long-term memory."
+					"Data": "Once a content block is set as a flashcard, the system automatically schedules reviews using the FSRS spaced repetition algorithm (GitHub repo: open-spaced-repetition/go-fsrs), prompting reviews at the point of forgetting to help convert short-term memory into long-term memory."
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20260804171007-semnt04",
 		"title": "意味検索",
 		"type": "doc",
-		"updated": "20260804205607"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -358,7 +358,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170142-zvvrgcn",
-				"updated": "20260804180000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -372,7 +372,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170143-8vgqo3h",
-				"updated": "20260804180000"
+				"updated": "20260809160000"
 			},
 			"Children": [
 				{
@@ -387,6 +387,34 @@
 				{
 					"Type": "NodeText",
 					"Data": " を作成または編集します。gitignore 構文で 1 行に 1 つの除外パスを記述します。例："
+				}
+			]
+		},
+		{
+			"ID": "20260809160000-e9f4024",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809160000-e9f4024",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

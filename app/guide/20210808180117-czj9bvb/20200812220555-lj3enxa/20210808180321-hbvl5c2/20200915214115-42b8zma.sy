@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-lr6v0s2",
-				"updated": "20250115152740"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -229,16 +229,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210512171633-u3iy2xx",
-				"updated": "20230505083901"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeImage",
 					"Data": "span",
-					"Properties": {
-						"parent-style": "display: block;",
-						"style": "display: block;"
-					},
 					"Children": [
 						{
 							"Type": "NodeBang"
@@ -271,10 +267,6 @@
 							"Type": "NodeCloseParen"
 						}
 					]
-				},
-				{
-					"Type": "NodeKramdownSpanIAL",
-					"Data": "{: style=\"display: block;\" parent-style=\"display: block;\"}"
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20260804171005-semnt03",
 		"title": "Semantic Search",
 		"type": "doc",
-		"updated": "20260804205607"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -366,7 +366,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170142-y3lke9w",
-				"updated": "20260804180000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -380,7 +380,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170143-b24yz44",
-				"updated": "20260804180000"
+				"updated": "20260809160000"
 			},
 			"Children": [
 				{
@@ -395,6 +395,34 @@
 				{
 					"Type": "NodeText",
 					"Data": " on the file system. Enter one ignored path per line using gitignore syntax. For example:"
+				}
+			]
+		},
+		{
+			"ID": "20260809160000-bb1738e",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809160000-bb1738e",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

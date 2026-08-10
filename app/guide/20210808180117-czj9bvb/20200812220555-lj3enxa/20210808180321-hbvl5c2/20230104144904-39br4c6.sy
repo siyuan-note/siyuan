@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230104144904-39br4c6",
-		"title": "分享文档",
+		"title": "分享文档到社区",
 		"type": "doc",
-		"updated": "20250115162314"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230104144904-x8ercy0",
-				"updated": "20230104144943"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -29,22 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230104144943-w6iyk79",
-				"updated": "20230104145040"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "将单篇文档以 Markdown 格式分享到"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://ld246.com",
-					"TextMarkTextContent": "链滴"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "作为帖子发布。"
+					"Data": "将单篇文档以 Markdown 格式分享到社区作为帖子发布。"
 				}
 			]
 		},
@@ -54,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230104145023-wn3mydg",
-				"updated": "20250115162314"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -69,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230104150624-lcrjopw",
-				"updated": "20250115162314"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -81,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20230104150624-b9l823k",
-						"updated": "20230104150624"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -89,12 +79,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104150624-ddukdfe",
-								"updated": "20230104150624"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "需要注册并登录链滴账号"
+									"Data": "需要注册并登录思源账号"
 								}
 							]
 						}
@@ -109,7 +99,7 @@
 					},
 					"Properties": {
 						"id": "20230104150624-o50xdl0",
-						"updated": "20250115162314"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -117,7 +107,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104150624-mo2pi2i",
-								"updated": "20250115162314"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -136,7 +126,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "分享到链滴"
+									"TextMarkTextContent": "分享到社区"
 								},
 								{
 									"Type": "NodeText",
@@ -250,7 +240,7 @@
 					},
 					"Properties": {
 						"id": "20230104150624-pqzp2j0",
-						"updated": "20230104150624"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -258,7 +248,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104150624-h8b4fpf",
-								"updated": "20230104150624"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -281,7 +271,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ）用于关联链滴帖子 ID"
+									"Data": "​ ）用于关联社区帖子 ID"
 								}
 							]
 						}
@@ -376,7 +366,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230104151133-g7f115r",
-				"updated": "20230104151226"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -400,7 +390,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230104151212-kfez5m3",
-				"updated": "20230104151613"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -412,7 +402,7 @@
 					},
 					"Properties": {
 						"id": "20230104151230-j9zzy5g",
-						"updated": "20230104151230"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -420,18 +410,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104151230-ywamjso",
-								"updated": "20230104151348"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "分享文档到链滴需要积分，请参考"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://ld246.com/article/1441724208848",
-									"TextMarkTextContent": "积分规则"
+									"Data": "社区发布可能需要积分，请参考社区的积分规则"
 								}
 							]
 						}

@@ -6,7 +6,7 @@
 		"id": "20260613211829-rjgkboa",
 		"title": "內容統計",
 		"type": "doc",
-		"updated": "20260803160439"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613211901-dyms1hk",
-				"updated": "20260613211901"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613211901-8axxt6f",
-				"updated": "20260613211901"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "打開文件後，可以在編輯器底部狀態列和文件詳情選單中查看當前文件的統計資訊。"
+					"Data": "在桌面端打開文檔後，可以在編輯器底部狀態欄和文檔詳情選單中檢視目前文檔的統計資訊。"
 				}
 			]
 		},

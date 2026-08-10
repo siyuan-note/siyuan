@@ -6,7 +6,7 @@
 		"id": "20230506211210-1roopyo",
 		"title": "插件",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -151,7 +151,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506211224-p7vkirt",
-				"updated": "20230506211224"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -165,7 +165,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506211224-n2giwy1",
-				"updated": "20230820184231"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -175,7 +175,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "社區集市倉庫"
 				},
 				{

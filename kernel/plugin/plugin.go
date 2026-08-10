@@ -420,7 +420,7 @@ func (p *KernelPlugin) invokeAgentCapability(handler goja.Callable, args map[str
 		if taskResult.err != nil {
 			return tools.CallToolResult{
 				IsError: true,
-				Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("error invoking MCP tool handler: %v", taskResult.err)}},
+				Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("error invoking Agent capability handler: %v", taskResult.err)}},
 			}, nil
 		}
 
@@ -435,7 +435,7 @@ func (p *KernelPlugin) invokeAgentCapability(handler goja.Callable, args map[str
 		if marshalErr != nil {
 			return tools.CallToolResult{
 				IsError: true,
-				Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("error marshaling MCP tool result: %v", marshalErr)}},
+				Content: []tools.ContentItem{{Type: "text", Text: fmt.Sprintf("error marshaling Agent capability result: %v", marshalErr)}},
 			}, nil
 		}
 
@@ -448,7 +448,7 @@ func (p *KernelPlugin) invokeAgentCapability(handler goja.Callable, args map[str
 	case <-p.context.Done():
 		return tools.CallToolResult{
 			IsError: true,
-			Content: []tools.ContentItem{{Type: "text", Text: "plugin stopped while invoking MCP tool handler"}},
+			Content: []tools.ContentItem{{Type: "text", Text: "plugin stopped while invoking Agent capability handler"}},
 		}, nil
 	}
 }

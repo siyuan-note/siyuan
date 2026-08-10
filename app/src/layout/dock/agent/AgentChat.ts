@@ -5,8 +5,7 @@ import {genUUID} from "../../../util/genID";
 import {mountComposer, type AgentComposerData} from "./AgentComposer";
 import {disabledWYSIWYG} from "../../../protyle/util/disabledWYSIWYG";
 import {getAllEditor} from "../../getAll";
-import "./frontendActions";
-import {listActions, lookupAction} from "./frontendActions";
+import {isCapabilityEnabled, listCapabilityManifests, lookupCapability} from "./frontendCapabilities";
 import {AgentPermissionMode, AgentSession, SessionStore} from "./SessionStore";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
@@ -1718,7 +1717,7 @@ export class AgentChat extends Model {
         const blockHTML = sendData.blockHTML;
         const refs = sendData.references;
         const editorContext = this.captureEditorContext();
-        const pluginActions = this.getPluginActions();
+        const frontendCapabilities = listCapabilityManifests();
         if (!text || this.isStreaming || this.modelOptions.length === 0) {
             return;
         }
@@ -1795,7 +1794,7 @@ export class AgentChat extends Model {
             this.selectedReasoningEffort,
             undefined,
             editorContext,
-            pluginActions,
+            frontendCapabilities,
             userEntryId,
             SessionStore.getRevision(this.sessionId),
         );
@@ -1930,12 +1929,6 @@ export class AgentChat extends Model {
         }
         return ctx;
         /// #endif
-    }
-
-    private getPluginActions() {
-        return listActions()
-            .filter(action => action.name.startsWith("plugin__") && action.description)
-            .map(action => ({name: action.name, description: action.description as string}));
     }
 
     private readEditorContext(editor: {
@@ -2101,8 +2094,8 @@ export class AgentChat extends Model {
                     this.appendSnapshotInfo(event.snapshotID, snapshotEntryId);
                 }
                     break;
-                case "frontend_tool_call":
-                    this.handleFrontendToolCall(event.callID, event.arguments);
+                case "browser_capability_call":
+                    this.handleBrowserCapabilityCall(event.callID, event.capabilityID, event.generation, event.arguments);
                     break;
             }
         } catch (e) {
@@ -2875,7 +2868,7 @@ export class AgentChat extends Model {
         const lastUserText = lastUserEntry.content;
         const editorContext = this.captureEditorContext();
         lastUserEntry.editorContext = editorContext;
-        const pluginActions = this.getPluginActions();
+        const frontendCapabilities = listCapabilityManifests();
         this.abortController = new AbortController();
         const requestSessionId = this.sessionId;
         await fetchAgentSSE(
@@ -2904,7 +2897,7 @@ export class AgentChat extends Model {
             this.selectedReasoningEffort,
             true,
             editorContext,
-            pluginActions,
+            frontendCapabilities,
             lastUserEntry.id,
             SessionStore.getRevision(this.sessionId),
             editedData?.blockHTML,
@@ -3414,43 +3407,51 @@ export class AgentChat extends Model {
         return true;
     }
 
-    private async handleFrontendToolCall(callID: string, args: Record<string, unknown>) {
-        // Resolve the action name ("frontend" tool calls carry the action in args.action).
-        const action = (args.action as string | undefined) || "";
-        const handler = lookupAction(action);
-        if (!handler) {
-            await this.postFrontendResult(callID, `Unknown frontend action: ${action}`, true);
+    private async handleBrowserCapabilityCall(callID: string, capabilityID: string, generation: number,
+                                              args: Record<string, unknown>) {
+        const capability = lookupCapability(capabilityID, generation);
+        if (!capability || !isCapabilityEnabled(capabilityID)) {
+            await this.postBrowserCapabilityResult(
+                callID, `Browser capability is unavailable: ${capabilityID}`, undefined, false, true,
+            );
             return;
         }
         try {
-            const outcome = await handler.handler(args, this.app);
+            const outcome = await capability.handler(args, this.app);
             const result = outcome.result || "";
             const error = outcome.error || "";
-            await this.postFrontendResult(callID, error ? error : result, !!error);
+            await this.postBrowserCapabilityResult(
+                callID,
+                error ? error : result,
+                outcome.structuredContent,
+                Object.prototype.hasOwnProperty.call(outcome, "structuredContent"),
+                !!error,
+            );
         } catch (e) {
-            await this.postFrontendResult(callID, `Frontend action threw: ${(e as Error).message}`, true);
+            await this.postBrowserCapabilityResult(callID, `Browser capability threw: ${(e as Error).message}`, undefined, false, true);
         }
     }
 
-    private async postFrontendResult(callID: string, result: string, isError: boolean) {
+    private async postBrowserCapabilityResult(callID: string, result: string, structuredContent: unknown,
+                                              structuredContentSet: boolean, isError: boolean) {
         for (let attempt = 0; attempt < 3; attempt++) {
             try {
-                const resp = await fetch("/api/ai/agent/frontendToolResult", {
+                const resp = await fetch("/api/ai/agent/browserCapabilityResult", {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},
-                    body: JSON.stringify({callID, result, isError}),
+                    body: JSON.stringify({callID, result, structuredContent, structuredContentSet, isError}),
                 });
                 const response = await resp.json() as {code?: number};
                 if (resp.ok && response?.code === 0) {
                     return;
                 }
                 if (resp.status === 409) {
-                    console.error("agent frontend result expired:", callID);
+                    console.error("agent browser capability result expired:", callID);
                     return;
                 }
             } catch (e) {
                 if (attempt === 2) {
-                    console.error("agent frontend result request error:", e);
+                    console.error("agent browser capability result request error:", e);
                 }
             }
             await new Promise((resolve) => window.setTimeout(resolve, 200 * (attempt + 1)));

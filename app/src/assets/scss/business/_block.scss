@@ -77,6 +77,32 @@
     }
   }
 
+  &__edit-resize {
+    cursor: row-resize;
+    flex-shrink: 0;
+    height: 6px;
+    margin: -3px 0;
+    position: relative;
+    touch-action: none;
+    z-index: 6;
+
+    &::after {
+      background-color: var(--b3-theme-surface-lighter);
+      content: "";
+      height: .5px;
+      left: 0;
+      position: absolute;
+      top: 3px;
+      transition: var(--b3-transition);
+      width: 100%;
+    }
+
+    &:hover::after,
+    &--active::after {
+      background-color: var(--b3-scroll-color);
+    }
+  }
+
   &__icons {
     padding: 0 8px;
     display: flex;

@@ -11,7 +11,7 @@ import {ipcRenderer} from "electron";
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
-import {unregisterAction} from "../layout/dock/agent/frontendActions";
+import {unregisterCapability} from "../layout/dock/agent/frontendCapabilities";
 
 export const uninstall = (app: App, name: string, isReload: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {
@@ -57,8 +57,8 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
                 plugin.topBarIcons.splice(i, 1);
                 i--;
             }
-            // rm agent actions
-            plugin.agentActions.forEach(name => unregisterAction(name));
+            // 移除插件注册的 Agent 能力
+            plugin.agentCapabilities.forEach((capability) => unregisterCapability(capability.id, capability.generation));
             /// #if !MOBILE
             // rm statusBar
             plugin.statusBarIcons.forEach(item => {

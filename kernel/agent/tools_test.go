@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
@@ -291,14 +292,32 @@ func TestQueryToolActionEffects(t *testing.T) {
 	}
 }
 
-func TestNativeReadOnlyToolActions(t *testing.T) {
-	for _, action := range []string{"open_setting", "focus_block", "open_document", "open_search"} {
-		if needsConfirm("frontend", action, nil) || needsLocalSnapshot("frontend", action) {
-			t.Errorf("built-in frontend action %q must not require confirmation or create a snapshot", action)
-		}
+func TestBrowserCapabilityEffects(t *testing.T) {
+	native := &capabilityRegistration{ID: "native/frontend/open_search", ModelName: "frontend__open_search", Source: "native", Runtime: "browser"}
+	if needsCapabilityConfirm(native, "", nil, nil) || needsCapabilitySnapshot(native, "") {
+		t.Fatal("built-in browser capability must not require confirmation or create a snapshot")
 	}
-	if !needsConfirm("frontend", "plugin__example__write", nil) {
-		t.Fatal("plugin frontend actions with unknown effects must require confirmation")
+	pluginUnknown := &capabilityRegistration{ID: "plugin/frontend/example/run", ModelName: "frontend__plugin_run", Source: "plugin", Runtime: "browser"}
+	if !needsCapabilityConfirm(pluginUnknown, "", nil, nil) {
+		t.Fatal("plugin browser capability with unknown effects must require confirmation")
+	}
+	pluginRead := &capabilityRegistration{ID: "plugin/frontend/example/read", ModelName: "frontend__plugin_read", Source: "plugin", Runtime: "browser", Effects: tools.ToolEffects{LocalRead: true}, EffectsDeclared: true}
+	if needsCapabilityConfirm(pluginRead, "", nil, nil) {
+		t.Fatal("plugin browser capability declared local-read-only must not require confirmation")
+	}
+	pluginActions := &capabilityRegistration{
+		ID: "plugin/frontend/example/actions", ModelName: "frontend__plugin_actions", Source: "plugin", Runtime: "browser",
+		ActionEffects: map[string]tools.ToolEffects{
+			"read":  {LocalRead: true},
+			"write": {LocalWrite: true},
+		},
+	}
+	if needsCapabilityConfirm(pluginActions, "read", nil, nil) {
+		t.Fatal("plugin browser action with explicit read effects must not require confirmation")
+	}
+	if !needsCapabilityConfirm(pluginActions, "write", nil, nil) ||
+		!needsCapabilityConfirm(pluginActions, "unknown", nil, nil) {
+		t.Fatal("plugin browser write or undeclared action must require confirmation")
 	}
 	for _, action := range []string{"html", "preview"} {
 		if needsConfirm("export", action, nil) || needsLocalSnapshot("export", action) {
@@ -335,7 +354,7 @@ func TestConfirmSessionAcceptsResponseOnce(t *testing.T) {
 	}
 }
 
-func TestQuestionAndFrontendResultsAreAcceptedOnce(t *testing.T) {
+func TestQuestionAndBrowserCapabilityResultsAreAcceptedOnce(t *testing.T) {
 	const questionID = "test-question"
 	questionCh := make(chan QuestionAnswer, 1)
 	questionChannelsMu.Lock()
@@ -348,16 +367,17 @@ func TestQuestionAndFrontendResultsAreAcceptedOnce(t *testing.T) {
 		t.Fatalf("unexpected question answer: %#v", answer)
 	}
 
-	const callID = "test-frontend-call"
-	frontendCh := make(chan frontendCallResult, 1)
-	frontendCallChannelsMu.Lock()
-	frontendCallChannels[callID] = frontendCh
-	frontendCallChannelsMu.Unlock()
-	if !FrontendToolResult(callID, "result", false) || FrontendToolResult(callID, "duplicate", false) {
-		t.Fatal("frontend result was not accepted exactly once")
+	const callID = "test-browser-capability-call"
+	capabilityCh := make(chan browserCapabilityResult, 1)
+	browserCapabilityChannelsMu.Lock()
+	browserCapabilityChannels[callID] = capabilityCh
+	browserCapabilityChannelsMu.Unlock()
+	if !BrowserCapabilityResult(callID, "result", nil, false, false) ||
+		BrowserCapabilityResult(callID, "duplicate", nil, false, false) {
+		t.Fatal("browser capability result was not accepted exactly once")
 	}
-	if result := <-frontendCh; result.result != "result" || result.isError {
-		t.Fatalf("unexpected frontend result: %#v", result)
+	if result := <-capabilityCh; result.result != "result" || result.isError {
+		t.Fatalf("unexpected browser capability result: %#v", result)
 	}
 }
 
@@ -375,17 +395,60 @@ func TestWaitCompletionKeepsConcurrentlyAcceptedResults(t *testing.T) {
 		t.Fatalf("accepted question answer was lost: %#v, accepted=%v", answer, accepted)
 	}
 
-	const callID = "test-frontend-timeout-race"
-	frontendCh := make(chan frontendCallResult, 1)
-	frontendCallChannelsMu.Lock()
-	frontendCallChannels[callID] = frontendCh
-	frontendCallChannelsMu.Unlock()
-	if !FrontendToolResult(callID, "accepted", false) {
-		t.Fatal("frontend result was rejected")
+	const callID = "test-browser-capability-timeout-race"
+	capabilityCh := make(chan browserCapabilityResult, 1)
+	browserCapabilityChannelsMu.Lock()
+	browserCapabilityChannels[callID] = capabilityCh
+	browserCapabilityChannelsMu.Unlock()
+	if !BrowserCapabilityResult(callID, "accepted", nil, false, false) {
+		t.Fatal("browser capability result was rejected")
 	}
-	result, accepted := finishFrontendWait(callID, frontendCh)
+	result, accepted := finishBrowserCapabilityWait(callID, capabilityCh)
 	if !accepted || result.result != "accepted" || result.isError {
-		t.Fatalf("accepted frontend result was lost: %#v, accepted=%v", result, accepted)
+		t.Fatalf("accepted browser capability result was lost: %#v, accepted=%v", result, accepted)
+	}
+}
+
+func TestBrowserCapabilityValidatesStructuredOutput(t *testing.T) {
+	validationTool := &tools.Tool{
+		Name:        "test_browser_capability_output",
+		Description: "Test browser capability output",
+		InputSchema: tools.ToolSchema{Type: "object"},
+		OutputSchema: &tools.ToolSchema{
+			Type: "object",
+			Properties: map[string]tools.Property{
+				"value": {Type: "string"},
+			},
+			Required: []string{"value"},
+		},
+	}
+	validator, err := tools.CompileToolValidator(validationTool)
+	if err != nil {
+		t.Fatal(err)
+	}
+	registration := &capabilityRegistration{
+		ID:        "native/frontend/test_output",
+		ModelName: validationTool.Name,
+		Runtime:   "browser",
+		Validator: validator,
+	}
+	events := make(chan AgentEvent, 1)
+	resultCh := make(chan executedToolResult, 1)
+	go func() {
+		resultCh <- handleBrowserCapability(context.Background(), openai.ToolCall{
+			Function: openai.FunctionCall{Name: validationTool.Name, Arguments: `{}`},
+		}, registration, events, time.Second)
+	}()
+	event := <-events
+	if event.Type != "browser_capability_call" {
+		t.Fatalf("unexpected event: %#v", event)
+	}
+	if !BrowserCapabilityResult(event.CallID, "", map[string]any{"value": 1}, true, false) {
+		t.Fatal("browser capability result was rejected")
+	}
+	result := <-resultCh
+	if !result.IsError || !result.ExecutionUnknown {
+		t.Fatalf("invalid structured output was accepted: %#v", result)
 	}
 }
 

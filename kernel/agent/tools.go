@@ -28,22 +28,6 @@ import (
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 )
 
-func convertMCPToolsToOpenAI() []openai.Tool {
-	allTools := tools.GetAllTools()
-	result := make([]openai.Tool, 0, len(allTools))
-	for _, t := range allTools {
-		result = append(result, openai.Tool{
-			Type: openai.ToolTypeFunction,
-			Function: &openai.FunctionDefinition{
-				Name:        t.Name,
-				Description: t.Description,
-				Parameters:  convertSchema(t.InputSchema),
-			},
-		})
-	}
-	return result
-}
-
 type executedToolResult struct {
 	Text             string
 	ModelAttachments []tools.ModelAttachment
@@ -69,13 +53,53 @@ func validateToolCallInput(ctx context.Context, toolName string, args map[string
 	return t, validator, nil
 }
 
+func validateCapabilityCall(ctx context.Context, registration *capabilityRegistration, args map[string]any) error {
+	if registration == nil {
+		return fmt.Errorf("capability was not exposed in this model round")
+	}
+	if !capabilityStillExecutable(registration, args) {
+		return fmt.Errorf("capability is disabled or no longer available: %s", registration.ID)
+	}
+	if ctx.Err() != nil {
+		return fmt.Errorf("capability execution was cancelled before it started")
+	}
+	if registration.Validator == nil {
+		return fmt.Errorf("capability validator unavailable: %s", registration.ID)
+	}
+	if err := registration.Validator.ValidateInputContext(ctx, args); err != nil {
+		return fmt.Errorf("invalid capability arguments: %w", err)
+	}
+	if !registration.isBrowser() &&
+		(registration.Tool == nil || registration.Tool.ContextHandler == nil && registration.Tool.Handler == nil) {
+		return fmt.Errorf("capability handler unavailable: %s", registration.ID)
+	}
+	return nil
+}
+
 // executeTool 执行单次工具调用。
 func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) executedToolResult {
+	tool, validator := tools.LookupToolWithValidator(tc.Function.Name)
+	if tool == nil {
+		return executedToolResult{Text: "unknown tool: " + tc.Function.Name, IsError: true}
+	}
+	return executeCapability(ctx, tc, sessionID, &capabilityRegistration{
+		ID:        capabilityIDForTool(tool),
+		ModelName: tool.Name,
+		Source:    tool.Source,
+		Runtime:   tool.Runtime,
+		Tool:      tool,
+		Validator: validator,
+	})
+}
+
+func executeCapability(ctx context.Context, tc openai.ToolCall, sessionID string,
+	registration *capabilityRegistration) executedToolResult {
 	args := parseToolArgs(tc.Function.Arguments)
-	t, validator, err := validateToolCallInput(ctx, tc.Function.Name, args)
-	if err != nil {
+	if err := validateCapabilityCall(ctx, registration, args); err != nil {
 		return executedToolResult{Text: err.Error(), IsError: true}
 	}
+	t := registration.Tool
+	validator := registration.Validator
 	// _sessionID 和 _toolCallID 是原生工具专用的内部字段，用于关联会话状态和实现幂等操作。
 	// 仅注入给原生工具；MCP/插件工具的参数会原样转发给外部服务端，
 	// 严格校验（additionalProperties:false）的服务端（如 Flomo MCP）会因这个多余字段报错。

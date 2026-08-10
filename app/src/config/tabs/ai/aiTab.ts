@@ -20,6 +20,10 @@ import {
     genGroupedModelPickerHtml,
     mountGroupedModelPicker,
 } from "./aiProviderUi";
+import {
+    getAgentCapabilityKeywords,
+    mountAgentCapabilityBlock,
+} from "./aiCapabilityUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -118,6 +122,15 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.agentMaxRetriesTip,
         min: 0,
         max: 10,
+    });
+    group.button({
+        id: "aiAgentCapabilities",
+        title: window.siyuan.languages.agentCapabilities,
+        desc: window.siyuan.languages.agentCapabilitiesTip,
+        label: window.siyuan.languages.config,
+        icon: "iconSettings",
+        keywords: getAgentCapabilityKeywords(),
+        afterMount: mountAgentCapabilityBlock,
     });
 };
 

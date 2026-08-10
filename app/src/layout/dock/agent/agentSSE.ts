@@ -69,9 +69,11 @@ export type ISSEResult = {
     type: "permission";
     permissionMode: "confirm" | "allowSession";
 } | {
-    type: "frontend_tool_call";
+    type: "browser_capability_call";
     callID: string;
     name: string;
+    capabilityID: string;
+    generation: number;
     arguments: Record<string, unknown>;
 };
 
@@ -108,7 +110,19 @@ export async function fetchAgentSSE(
     reasoningEffort?: string,
     regenerate?: boolean,
     editorContext?: IEditorContext,
-    pluginActions?: Array<{name: string; description: string}>,
+    frontendCapabilities?: Array<{
+        id: string;
+        title?: string;
+        description: string;
+        inputSchema: Record<string, unknown>;
+        outputSchema?: Record<string, unknown>;
+        effects?: IToolEffects;
+        actionEffects?: Record<string, IToolEffects>;
+        source: "native" | "plugin";
+        ownerId?: string;
+        ownerName?: string;
+        generation: number;
+    }>,
     userEntryID?: string,
     contentRevision?: number,
     blockHTML?: string,
@@ -132,7 +146,7 @@ export async function fetchAgentSSE(
         if (reasoningEffort) { body.reasoningEffort = reasoningEffort; }
         if (regenerate) { body.regenerate = regenerate; }
         if (editorContext) { body.editorContext = editorContext; }
-        if (pluginActions && pluginActions.length > 0) { body.pluginActions = pluginActions; }
+        if (frontendCapabilities && frontendCapabilities.length > 0) { body.frontendCapabilities = frontendCapabilities; }
         if (userEntryID) { body.userEntryID = userEntryID; }
         if (typeof contentRevision === "number") { body.contentRevision = contentRevision; }
         if (blockHTML !== undefined) { body.blockHTML = blockHTML; }
@@ -336,11 +350,13 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
                 snapshotID: data.snapshotID as string,
                 roundID: data.roundID as string || undefined,
             };
-        case "frontend_tool_call":
+        case "browser_capability_call":
             return {
-                type: "frontend_tool_call",
+                type: "browser_capability_call",
                 callID: data.callID as string,
                 name: data.name as string,
+                capabilityID: data.capabilityID as string,
+                generation: data.generation as number,
                 arguments: (data.arguments || {}) as Record<string, unknown>,
             };
         default:

@@ -44,6 +44,9 @@ func checkWorkspaceDir(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
+	if rejectMobileWorkspaceBaseDir(ret, path) {
+		return
+	}
 	// 检查路径是否是分区根路径
 	if util.IsPartitionRootPath(path) {
 		ret.Code = -1
@@ -97,6 +100,9 @@ func createWorkspaceDir(c *gin.Context) {
 	absPath := arg["path"].(string)
 	absPath = util.RemoveInvalid(absPath)
 	absPath = strings.TrimSpace(absPath)
+	if rejectMobileWorkspaceBaseDir(ret, absPath) {
+		return
+	}
 	if isInvalidWorkspacePath(absPath) {
 		ret.Code = -1
 		ret.Msg = "This workspace name is not allowed, please use another name"
@@ -178,6 +184,9 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 	if absErr != nil {
 		ret.Code = -1
 		ret.Msg = absErr.Error()
+		return
+	}
+	if rejectMobileWorkspaceBaseDir(ret, cleanPath) {
 		return
 	}
 	if cleanPath == util.WorkspaceDir {
@@ -300,6 +309,9 @@ func setWorkspaceDir(c *gin.Context) {
 	}
 
 	path := arg["path"].(string)
+	if rejectMobileWorkspaceBaseDir(ret, path) {
+		return
+	}
 	if util.WorkspaceDir == path {
 		ret.Code = -1
 		ret.Msg = model.Conf.Language(78)
@@ -367,6 +379,9 @@ func isInvalidWorkspacePath(absPath string) bool {
 	if "" == absPath {
 		return true
 	}
+	if util.IsMobileWorkspaceBaseDir(absPath) {
+		return true
+	}
 	name := filepath.Base(absPath)
 	if "" == name {
 		return true
@@ -383,4 +398,14 @@ func isInvalidWorkspacePath(absPath string) bool {
 	}
 	toLower := strings.ToLower(name)
 	return gulu.Str.Contains(toLower, []string{"conf", "home", "data", "temp"})
+}
+
+func rejectMobileWorkspaceBaseDir(ret *gulu.Result, path string) bool {
+	if !util.IsMobileWorkspaceBaseDir(path) {
+		return false
+	}
+	ret.Code = -1
+	ret.Msg = model.Conf.Language(274)
+	ret.Data = map[string]any{"closeTimeout": 7000}
+	return true
 }

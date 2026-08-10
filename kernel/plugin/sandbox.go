@@ -109,7 +109,7 @@ func EnableSiyuanModule(p *KernelPlugin, rt *goja.Runtime) (err error) {
 	lo.Must0(injectLogger(p, rt, siyuan))
 	lo.Must0(injectStorage(p, rt, siyuan))
 	lo.Must0(injectRpc(p, rt, siyuan))
-	lo.Must0(injectMcp(p, rt, siyuan))
+	lo.Must0(injectAgent(p, rt, siyuan))
 	lo.Must0(injectClient(p, rt, siyuan))
 	lo.Must0(injectServer(p, rt, siyuan))
 	lo.Must0(injectSecretsVars(p, rt, siyuan))

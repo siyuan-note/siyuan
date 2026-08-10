@@ -23,7 +23,7 @@ import {uninstall} from "./uninstall";
 import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
 import {Kernel} from "./kernel";
-import {registerAction} from "../layout/dock/agent/frontendActions";
+import {IAgentCapabilityEffects, registerCapability} from "../layout/dock/agent/frontendCapabilities";
 
 export class Plugin {
     private app: App;
@@ -52,9 +52,7 @@ export class Plugin {
     public setting: Setting;
     public statusBarIcons: Element[] = [];
     public commands: ICommand[] = [];
-    // Full names of agent actions this plugin registered (plugin__<name>__<action>), tracked
-    // so they can be unregistered on uninstall.
-    public agentActions: string[] = [];
+    public agentCapabilities: Array<{id: string; generation: number}> = [];
     public models: {
         /// #if !MOBILE
         [key: string]: (options: { tab: Tab, data: any }) => Custom
@@ -435,17 +433,42 @@ export class Plugin {
         return found ? found.value : "";
     }
 
-    public addAgentAction(options: {
+    public addAgentCapability(options: {
         name: string,
+        title?: string,
         description: string,
-        handler: (args: Record<string, unknown>, app: App) => Promise<{result?: string; error?: string}>
+        inputSchema: Record<string, unknown>,
+        outputSchema?: Record<string, unknown>,
+        effects?: IAgentCapabilityEffects,
+        actionEffects?: Record<string, IAgentCapabilityEffects>,
+        handler: (args: Record<string, unknown>, app: App) => Promise<{
+            result?: string;
+            structuredContent?: unknown;
+            error?: string;
+        }>
     }): string {
-        const fullName = "plugin__" + this.name + "__" + options.name;
-        if (!this.agentActions.includes(fullName)) {
-            registerAction({name: fullName, description: options.description, handler: options.handler});
-            this.agentActions.push(fullName);
+        const name = options.name.trim();
+        if (!name || !options.description.trim()) {
+            throw new Error("Agent capability name and description are required");
         }
-        return fullName;
+        const id = "plugin/frontend/" + encodeURIComponent(this.name) + "/" + encodeURIComponent(name);
+        if (!this.agentCapabilities.some((capability) => capability.id === id)) {
+            const generation = registerCapability({
+                id,
+                title: options.title,
+                description: options.description,
+                inputSchema: options.inputSchema,
+                outputSchema: options.outputSchema,
+                effects: options.effects,
+                actionEffects: options.actionEffects,
+                source: "plugin",
+                ownerId: this.name,
+                ownerName: this.displayName || this.name,
+                handler: options.handler,
+            });
+            this.agentCapabilities.push({id, generation});
+        }
+        return id;
     }
 
     public addDock(options: {

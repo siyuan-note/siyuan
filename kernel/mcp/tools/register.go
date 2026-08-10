@@ -150,6 +150,12 @@ func register(t *Tool) {
 	if t.Source == "" {
 		t.Source = "native"
 	}
+	if t.CapabilityID == "" {
+		t.CapabilityID = BuildCapabilityID("native", "backend", t.Name)
+	}
+	if t.Runtime == "" {
+		t.Runtime = "kernel"
+	}
 	attachEncryptedBoxLeaseResolver(t)
 	if err := SetTool(t.Name, t); err != nil {
 		panic(fmt.Sprintf("register MCP tool [%s]: %v", t.Name, err))

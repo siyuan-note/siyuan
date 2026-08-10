@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "Embed HTML file",
+	"dragHTMLFileToIframe": "Embed dragged HTML files",
+	"dragHTMLFileToIframeTip": "Embed HTML files as IFrame blocks when dragging them into the editor",
 	"bazaarPackageInvalid": "Invalid",
 	"bazaarPackageMissingManifest": "The marketplace package manifest is missing",
 	"bazaarPackageInvalidManifest": "The marketplace package manifest is invalid",

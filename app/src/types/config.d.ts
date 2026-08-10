@@ -687,6 +687,10 @@ declare namespace Config {
          */
         pasteURLAutoConvert: boolean;
         /**
+         * Whether to embed dragged HTML files as IFrame blocks
+         */
+        dragHTMLFileToIframe: boolean;
+        /**
          * Whether to enable read-only mode
          */
         readOnly: boolean;

@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "HTML-Datei einbetten",
+	"dragHTMLFileToIframe": "Gezogene HTML-Dateien einbetten",
+	"dragHTMLFileToIframeTip": "HTML-Dateien beim Ziehen in den Editor als IFrame-Blöcke einbetten",
 	"bazaarPackageInvalid": "Ungültig",
 	"bazaarPackageMissingManifest": "Die Manifestdatei des Marktplatzpakets fehlt",
 	"bazaarPackageInvalidManifest": "Die Manifestdatei des Marktplatzpakets ist ungültig",

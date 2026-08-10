@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "HTML 파일 임베드",
+	"dragHTMLFileToIframe": "드래그한 HTML 파일 임베드",
+	"dragHTMLFileToIframeTip": "HTML 파일을 편집기로 드래그할 때 IFrame 블록으로 임베드",
 	"bazaarPackageInvalid": "비정상",
 	"bazaarPackageMissingManifest": "마켓플레이스 패키지 매니페스트 파일이 없습니다",
 	"bazaarPackageInvalidManifest": "마켓플레이스 패키지 매니페스트 파일이 올바르지 않습니다",

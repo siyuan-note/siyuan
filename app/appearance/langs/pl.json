@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "Osadź plik HTML",
+	"dragHTMLFileToIframe": "Osadzaj przeciągane pliki HTML",
+	"dragHTMLFileToIframeTip": "Osadzaj pliki HTML jako bloki IFrame podczas przeciągania ich do edytora",
 	"bazaarPackageInvalid": "Nieprawidłowy",
 	"bazaarPackageMissingManifest": "Brakuje pliku manifestu pakietu z rynku",
 	"bazaarPackageInvalidManifest": "Plik manifestu pakietu z rynku jest nieprawidłowy",

@@ -856,6 +856,8 @@ var assetScriptCapableExts = map[string]bool{
 	".shtml": true, ".svg": true, ".xhtml": true, ".xml": true,
 }
 
+const htmlAssetIFrameCSP = "sandbox allow-scripts; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
+
 // isAssetInlineUnsafe 判断资产是否禁止浏览器内联渲染：
 // 可执行脚本的扩展名，或标准库无法识别 Content-Type 的扩展名（http.ServeFile 会内容嗅探，可能识别为 text/html 执行脚本）
 func isAssetInlineUnsafe(absPath string) bool {
@@ -870,11 +872,23 @@ func isAssetInlineUnsafe(absPath string) bool {
 // 无条件加 X-Content-Type-Options: nosniff，可执行脚本的类型无条件强制附件下载；
 // absPath 用于判断内容类型，dispositionName 用于 Content-Disposition 文件名（加密笔记本场景为原始文件名）
 func secureAssetContentHeaders(context *gin.Context, absPath, dispositionName string) {
-	setAssetsAttachmentDisposition(context, dispositionName)
 	context.Header("X-Content-Type-Options", "nosniff")
+	if isHTMLAssetIFrameRequest(context, absPath) {
+		context.Header("Content-Type", "text/html; charset=utf-8")
+		context.Header("Content-Security-Policy", htmlAssetIFrameCSP)
+		return
+	}
+	setAssetsAttachmentDisposition(context, dispositionName)
 	if isAssetInlineUnsafe(absPath) {
 		context.Header("Content-Disposition", formatContentDispositionAttachment(filepath.Base(dispositionName)))
 	}
+}
+
+func isHTMLAssetIFrameRequest(context *gin.Context, absPath string) bool {
+	return strings.HasPrefix(context.Request.URL.Path, "/assets/") &&
+		!strings.EqualFold(context.Query("download"), "true") &&
+		model.IsHTMLAssetIFrameSrc(context.Request.URL.Path+"?"+context.Request.URL.RawQuery) &&
+		(strings.EqualFold(filepath.Ext(absPath), ".html") || strings.EqualFold(filepath.Ext(absPath), ".htm"))
 }
 
 func isValidAssetRequestPath(requestPath string) bool {

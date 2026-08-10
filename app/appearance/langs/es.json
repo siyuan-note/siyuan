@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "Incrustar archivo HTML",
+	"dragHTMLFileToIframe": "Incrustar archivos HTML arrastrados",
+	"dragHTMLFileToIframeTip": "Incrustar archivos HTML como bloques IFrame al arrastrarlos al editor",
 	"bazaarPackageInvalid": "No válido",
 	"bazaarPackageMissingManifest": "Falta el archivo de manifiesto del paquete del mercado",
 	"bazaarPackageInvalidManifest": "El archivo de manifiesto del paquete del mercado no es válido",

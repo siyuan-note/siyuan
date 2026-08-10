@@ -177,6 +177,61 @@ func TestSecureAssetContentHeadersForcesAttachmentOnScriptCapableAssets(t *testi
 	}
 }
 
+func TestSecureAssetContentHeadersSandboxesHTMLIFrameAssets(t *testing.T) {
+	assetPath := filepath.Join(t.TempDir(), "component.html")
+	if err := os.WriteFile(assetPath, []byte("<script>fetch('https://example.com')</script>"), 0644); err != nil {
+		t.Fatalf("write test asset failed: %v", err)
+	}
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+	context.Request = httptest.NewRequest(http.MethodGet, "/assets/component.html?iframe=true", nil)
+	secureAssetContentHeaders(context, assetPath, assetPath)
+
+	if disposition := recorder.Header().Get("Content-Disposition"); disposition != "" {
+		t.Fatalf("HTML IFrame asset must render inline, got Content-Disposition %q", disposition)
+	}
+	if got := recorder.Header().Get("Content-Type"); got != "text/html; charset=utf-8" {
+		t.Fatalf("HTML IFrame asset Content-Type = %q", got)
+	}
+	if got := recorder.Header().Get("Content-Security-Policy"); got != htmlAssetIFrameCSP {
+		t.Fatalf("HTML IFrame asset CSP = %q", got)
+	}
+	if recorder.Header().Get("X-Content-Type-Options") != "nosniff" {
+		t.Fatal("HTML IFrame asset missing X-Content-Type-Options header")
+	}
+}
+
+func TestSecureAssetContentHeadersRejectsInvalidHTMLIFrameRequests(t *testing.T) {
+	tests := []struct {
+		name       string
+		requestURL string
+		filename   string
+	}{
+		{name: "explicit download", requestURL: "/assets/component.html?iframe=true&download=true", filename: "component.html"},
+		{name: "non HTML asset", requestURL: "/assets/component.js?iframe=true", filename: "component.js"},
+		{name: "non asset route", requestURL: "/history/component.html?iframe=true", filename: "component.html"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assetPath := filepath.Join(t.TempDir(), test.filename)
+			if err := os.WriteFile(assetPath, []byte("test"), 0644); err != nil {
+				t.Fatalf("write test asset failed: %v", err)
+			}
+			recorder := httptest.NewRecorder()
+			context, _ := gin.CreateTestContext(recorder)
+			context.Request = httptest.NewRequest(http.MethodGet, test.requestURL, nil)
+			secureAssetContentHeaders(context, assetPath, assetPath)
+			if !strings.HasPrefix(recorder.Header().Get("Content-Disposition"), "attachment") {
+				t.Fatalf("invalid HTML IFrame request must download, got Content-Disposition %q",
+					recorder.Header().Get("Content-Disposition"))
+			}
+			if csp := recorder.Header().Get("Content-Security-Policy"); csp != "" {
+				t.Fatalf("invalid HTML IFrame request must not receive sandbox CSP, got %q", csp)
+			}
+		})
+	}
+}
+
 func TestSecureAssetContentHeadersAllowsInlineSafeAssets(t *testing.T) {
 	// 图片、音视频、PDF 等安全类型保持内联渲染，但仍需 nosniff
 	cases := []string{"test.png", "test.jpg", "test.webp", "test.mp4", "test.mp3", "test.pdf", "test.txt"}

@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "Вбудувати HTML-файл",
+	"dragHTMLFileToIframe": "Вбудовувати перетягнуті HTML-файли",
+	"dragHTMLFileToIframeTip": "Вбудовувати HTML-файли як блоки IFrame під час перетягування до редактора",
 	"bazaarPackageInvalid": "Недійсний",
 	"bazaarPackageMissingManifest": "Файл маніфесту пакета торгового майданчика відсутній",
 	"bazaarPackageInvalidManifest": "Файл маніфесту пакета торгового майданчика недійсний",

@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "Sematkan berkas HTML",
+	"dragHTMLFileToIframe": "Sematkan berkas HTML yang diseret",
+	"dragHTMLFileToIframeTip": "Sematkan berkas HTML sebagai blok IFrame saat diseret ke editor",
 	"bazaarPackageInvalid": "Tidak valid",
 	"bazaarPackageMissingManifest": "Berkas manifes paket marketplace tidak ditemukan",
 	"bazaarPackageInvalidManifest": "Berkas manifes paket marketplace tidak valid",

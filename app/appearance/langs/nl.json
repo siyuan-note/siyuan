@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "HTML-bestand insluiten",
+	"dragHTMLFileToIframe": "Gesleepte HTML-bestanden insluiten",
+	"dragHTMLFileToIframeTip": "HTML-bestanden als IFrame-blokken insluiten wanneer ze naar de editor worden gesleept",
 	"bazaarPackageInvalid": "Ongeldig",
 	"bazaarPackageMissingManifest": "Het manifestbestand van het marktplaatspakket ontbreekt",
 	"bazaarPackageInvalidManifest": "Het manifestbestand van het marktplaatspakket is ongeldig",

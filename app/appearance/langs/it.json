@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "Incorpora file HTML",
+	"dragHTMLFileToIframe": "Incorpora i file HTML trascinati",
+	"dragHTMLFileToIframeTip": "Incorpora i file HTML come blocchi IFrame quando vengono trascinati nell’editor",
 	"bazaarPackageInvalid": "Non valido",
 	"bazaarPackageMissingManifest": "Il file manifest del pacchetto del marketplace è mancante",
 	"bazaarPackageInvalidManifest": "Il file manifest del pacchetto del marketplace non è valido",

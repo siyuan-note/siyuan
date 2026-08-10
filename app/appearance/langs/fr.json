@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "Intégrer un fichier HTML",
+	"dragHTMLFileToIframe": "Intégrer les fichiers HTML déposés",
+	"dragHTMLFileToIframeTip": "Intégrer les fichiers HTML en tant que blocs IFrame lors de leur dépôt dans l’éditeur",
 	"bazaarPackageInvalid": "Non valide",
 	"bazaarPackageMissingManifest": "Le fichier manifeste du paquet de la place de marché est manquant",
 	"bazaarPackageInvalidManifest": "Le fichier manifeste du paquet de la place de marché n'est pas valide",

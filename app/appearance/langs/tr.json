@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "HTML dosyası göm",
+	"dragHTMLFileToIframe": "Sürüklenen HTML dosyalarını göm",
+	"dragHTMLFileToIframeTip": "HTML dosyalarını düzenleyiciye sürüklerken IFrame blokları olarak göm",
 	"bazaarPackageInvalid": "Geçersiz",
 	"bazaarPackageMissingManifest": "Pazar paketi bildirim dosyası eksik",
 	"bazaarPackageInvalidManifest": "Pazar paketi bildirim dosyası geçersiz",

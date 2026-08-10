@@ -493,6 +493,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
         children: [
             node("insertImage", lang("insertImage")),
             node("insertAsset", lang("insertAsset")),
+            node("insertHTMLFile", lang("insertHTMLFile")),
             node("startRecord", lang("startRecord"), false),
             node("endRecord", lang("endRecord"), false),
             node("netImg2LocalAsset", lang("netImg2LocalAsset")),

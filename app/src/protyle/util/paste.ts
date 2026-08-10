@@ -1,5 +1,6 @@
 import {Constants} from "../../constants";
 import {uploadFiles, uploadLocalFiles} from "../upload";
+import type {IUploadInsertOptions} from "../upload";
 import {processPasteCode, processRender} from "./processCode";
 import {getLocalFiles, getTextSiyuanFromTextHTML, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
@@ -487,7 +488,7 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
 
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | IClipboardData) & {
     target: HTMLElement
-}) => {
+}, uploadOptions?: IUploadInsertOptions) => {
     if ("clipboardData" in event || "dataTransfer" in event) {
         event.stopPropagation();
         event.preventDefault();
@@ -620,7 +621,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     }
     if (!nodeElement) {
         if (files && files.length > 0) {
-            uploadFiles(protyle, files);
+            uploadFiles(protyle, files, undefined, undefined, undefined, uploadOptions);
         }
         return;
     }
@@ -920,7 +921,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             });
             return;
         } else if (files && files.length > 0) {
-            uploadFiles(protyle, files);
+            uploadFiles(protyle, files, undefined, undefined, undefined, uploadOptions);
             return;
         } else if (textPlain.trim() !== "" && (files && files.length === 0 || !files)) {
             if (range.toString() !== "") {

@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "HTML फ़ाइल एम्बेड करें",
+	"dragHTMLFileToIframe": "खींची गई HTML फ़ाइलें एम्बेड करें",
+	"dragHTMLFileToIframeTip": "HTML फ़ाइलों को संपादक में खींचते समय IFrame ब्लॉक के रूप में एम्बेड करें",
 	"bazaarPackageInvalid": "अमान्य",
 	"bazaarPackageMissingManifest": "मार्केटप्लेस पैकेज की मैनिफेस्ट फ़ाइल मौजूद नहीं है",
 	"bazaarPackageInvalidManifest": "मार्केटप्लेस पैकेज की मैनिफेस्ट फ़ाइल अमान्य है",

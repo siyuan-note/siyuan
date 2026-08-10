@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "تضمين ملف HTML",
+	"dragHTMLFileToIframe": "تضمين ملفات HTML المسحوبة",
+	"dragHTMLFileToIframeTip": "تضمين ملفات HTML ككتل IFrame عند سحبها إلى المحرر",
 	"bazaarPackageInvalid": "غير صالح",
 	"bazaarPackageMissingManifest": "ملف بيان حزمة السوق مفقود",
 	"bazaarPackageInvalidManifest": "ملف بيان حزمة السوق غير صالح",

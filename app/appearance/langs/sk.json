@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "Vložiť súbor HTML",
+	"dragHTMLFileToIframe": "Vkladať presunuté súbory HTML",
+	"dragHTMLFileToIframeTip": "Vkladať súbory HTML ako bloky IFrame pri ich presunutí do editora",
 	"bazaarPackageInvalid": "Neplatný",
 	"bazaarPackageMissingManifest": "Súbor manifestu balíka trhoviska chýba",
 	"bazaarPackageInvalidManifest": "Súbor manifestu balíka trhoviska je neplatný",

@@ -62,6 +62,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Attributes: attr.get/set on any block. Database/attribute views: database.item_add (rows), database.key_add (columns), database.render (view). Create database blocks via database tools, never via the file tool.
 - Icons: attr.set only changes a document BLOCK's icon — it cannot set a NOTEBOOK's icon. For notebooks use notebook.set_icon (a specific emoji) or notebook.random_icon (random emoji, optionally scoped by id; omit id to randomize ALL notebooks).
 - Document images: image.list finds local images referenced by a document; call image.analyze on a returned asset path to attach it to the current model for understanding. image.generate creates a reusable image asset for insertion or other document operations.
+- HTML components: asset.create_html writes HTML content as an asset and inserts a sandboxed IFrame block in one operation. Prefer self-contained HTML; only use remote resources when the user requests them.
 
 ## Response Guidelines
 - Reply in the language configured in SiYuan's appearance settings. When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs actually returned by a tool call (block.get/get_children/breadcrumb/batch_get/search); never fabricate IDs. For general mentions without a specific block, plain text is fine.
@@ -176,7 +177,7 @@ var toolSignatureKeys = map[string][]string{
 	"template":  {"id", "path", "name", "keyword"},
 	"history":   {"path", "notebook", "query"},
 	"repo":      {"id", "left", "right", "name", "keyword"},
-	"asset":     {"id", "path"},
+	"asset":     {"id", "path", "name", "parentID", "nextID", "previousID"},
 	"image":     {"documentID", "assetPath", "action"},
 	"import":    {"notebook", "path"},
 	"export":    {"id"},

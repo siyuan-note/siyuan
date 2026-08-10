@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "HTML ファイルを埋め込む",
+	"dragHTMLFileToIframe": "ドラッグした HTML ファイルを埋め込む",
+	"dragHTMLFileToIframeTip": "HTML ファイルをエディターにドラッグしたときに IFrame ブロックとして埋め込む",
 	"bazaarPackageInvalid": "異常",
 	"bazaarPackageMissingManifest": "マーケットプレイスパッケージのマニフェストファイルがありません",
 	"bazaarPackageInvalidManifest": "マーケットプレイスパッケージのマニフェストファイルが無効です",

@@ -364,7 +364,9 @@ export class Hint {
                     range.setStart(range.startContainer, this.lastIndex);
                 }
                 range.deleteContents();
-                uploadFiles(protyle, event.target.files, event.target);
+                uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
+                    htmlAsIframe: event.target.dataset.uploadMode === "html-iframe",
+                });
                 hideElements(["hint", "toolbar"], protyle);
             });
         });

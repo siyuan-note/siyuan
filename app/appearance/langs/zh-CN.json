@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "嵌入 HTML 文件",
+	"dragHTMLFileToIframe": "嵌入拖拽的 HTML 文件",
+	"dragHTMLFileToIframeTip": "将拖拽到编辑器中的 HTML 文件嵌入为 IFrame 块",
 	"bazaarPackageInvalid": "异常",
 	"bazaarPackageMissingManifest": "集市包元数据文件缺失",
 	"bazaarPackageInvalidManifest": "集市包元数据文件无效",

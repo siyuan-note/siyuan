@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "ฝังไฟล์ HTML",
+	"dragHTMLFileToIframe": "ฝังไฟล์ HTML ที่ลากมา",
+	"dragHTMLFileToIframeTip": "ฝังไฟล์ HTML เป็นบล็อก IFrame เมื่อลากไฟล์เข้าสู่ตัวแก้ไข",
 	"bazaarPackageInvalid": "ไม่ถูกต้อง",
 	"bazaarPackageMissingManifest": "ไม่พบไฟล์แมนิเฟสต์ของแพ็กเกจมาร์เก็ตเพลส",
 	"bazaarPackageInvalidManifest": "ไฟล์แมนิเฟสต์ของแพ็กเกจมาร์เก็ตเพลสไม่ถูกต้อง",

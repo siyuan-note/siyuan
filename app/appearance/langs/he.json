@@ -1,4 +1,7 @@
 {
+	"insertHTMLFile": "הטמעת קובץ HTML",
+	"dragHTMLFileToIframe": "הטמעת קובצי HTML שנגררו",
+	"dragHTMLFileToIframeTip": "הטמעת קובצי HTML כבלוקי IFrame בעת גרירתם לעורך",
 	"bazaarPackageInvalid": "לא תקין",
 	"bazaarPackageMissingManifest": "קובץ המניפסט של חבילת השוק חסר",
 	"bazaarPackageInvalidManifest": "קובץ המניפסט של חבילת השוק אינו תקין",

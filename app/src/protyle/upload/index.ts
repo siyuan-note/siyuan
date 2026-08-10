@@ -22,6 +22,10 @@ interface FileWithPath extends File {
     path: string;
 }
 
+export interface IUploadInsertOptions {
+    htmlAsIframe?: boolean;
+}
+
 export class Upload {
     public element: HTMLElement;
     public isUploading: boolean;
@@ -90,7 +94,7 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
     return {files: uploadFileList, msgId};
 };
 
-const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
+const genUploadedLabel = async (responseText: string, protyle: IProtyle, options?: IUploadInsertOptions) => {
     const response = JSON.parse(responseText);
     let errorTip = "";
 
@@ -148,7 +152,7 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
             content: path,
             name: name
         });
-        successFileText += genAssetHTML(type, path, name, filename);
+        successFileText += genAssetHTML(type, path, name, filename, options?.htmlAsIframe);
         if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
             keys.length - 1 !== index) {
             if (nodeElement && nodeElement.classList.contains("table")) {
@@ -268,7 +272,8 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
     }, hasImage ? 0 : Constants.TIMEOUT_LOAD);
 };
 
-export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUpload: boolean) => {
+export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUpload: boolean,
+                                 options?: IUploadInsertOptions) => {
     let msg = "";
     const assetPaths: string[] = [];
     files.forEach(item => {
@@ -295,13 +300,14 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
             if (tip) {
                 showMessage(window.siyuan.languages.dndFolderTip.replace("${x}", `<b>${escapeHtml(tip.substring(0, tip.length - 2))}</b>`));
             }
-            genUploadedLabel(JSON.stringify(response), protyle);
+            genUploadedLabel(JSON.stringify(response), protyle, options);
         });
     });
 };
 
 export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferItemList | File[], element?: HTMLInputElement,
-                            successCB?: (res: string) => void, completeCB?: (succeeded: boolean) => void) => {
+                            successCB?: (res: string) => void, completeCB?: (succeeded: boolean) => void,
+                            options?: IUploadInsertOptions) => {
     // FileList | DataTransferItemList | File[] => File[]
     let fileList = [];
     for (let i = 0; i < files.length; i++) {
@@ -409,7 +415,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
                         if (protyle.options.upload.format) {
                             responseText = protyle.options.upload.format(files as File [], xhr.responseText);
                         }
-                        genUploadedLabel(responseText, protyle);
+                        genUploadedLabel(responseText, protyle, options);
                     }
                     let succeeded = true;
                     try {

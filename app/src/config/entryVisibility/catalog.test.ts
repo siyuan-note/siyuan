@@ -134,6 +134,14 @@ test("document loading actions follow the document menu order", () => {
     assert.equal(children[loadAllIndex + 2]?.key, "separator_1");
 });
 
+test("HTML file insertion follows general asset insertion", () => {
+    const children = getEntryCatalogChildren("document.more");
+    const insertAssetIndex = children.findIndex((item) => item.key === "insertAsset");
+
+    assert.ok(0 <= insertAssetIndex);
+    assert.equal(children[insertAssetIndex + 1]?.key, "insertHTMLFile");
+});
+
 test("simple profile follows the reviewed defaults", () => {
     const shown = [
         "document.title.copy.copyBlockEmbed",

@@ -1,5 +1,5 @@
 {
-	"agentCapabilitiesDialogTip": "选择 Agent 可以使用的能力；每个已启用的定义都会增加 token 用量",
+	"agentCapabilitiesDialogTip": "选择智能体可以使用的能力；每个已启用的定义都会增加 token 用量",
 	"agentCapabilitiesSearch": "搜索能力名称或描述",
 	"agentCapabilitiesOnlySelected": "仅看已选",
 	"agentCapabilitiesAutoApprove": "自动批准",
@@ -490,7 +490,7 @@
 	"aiEditingModelPickerTip": "选择编辑器块菜单或斜杠菜单 AI 操作使用的模型",
 	"aiAgentModelPickerTip": "选择智能体使用的模型",
 	"defaultModel": "默认模型",
-	"aiMcpServersTip": "为 AI Agent 配置 Model Context Protocol 外部工具服务",
+	"aiMcpServersTip": "为智能体配置 Model Context Protocol 外部工具服务",
 	"addAiMcpServer": "添加 MCP 服务",
 	"noMcpServerConfigured": "未配置 MCP 服务",
 	"aiMcpServerSettings": "MCP 服务设置",

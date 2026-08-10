@@ -181,30 +181,51 @@ const capabilityMatches = (capability: ICapabilityInfo, query: string) => {
 };
 
 const getCapabilityViewHost = (root: HTMLElement) =>
-    root.closest<HTMLElement>(".config__tab-container") || root;
+    root.closest<HTMLElement>(".config__panel") || root;
 
-const removeAgentCapabilityView = (root: HTMLElement, view?: HTMLElement) => {
+const ensureAgentCapabilityView = (root: HTMLElement) => {
     const host = getCapabilityViewHost(root);
-    const views = view ? [view] : Array.from(host.children).filter((element): element is HTMLElement =>
+    const existing = Array.from(host.children).find((element): element is HTMLElement =>
         element instanceof HTMLElement && element.classList.contains("config-agent-capability__view"));
-    views.forEach((item) => {
-        item.classList.remove("config__view--show");
-        item.addEventListener("transitionend", (event) => {
-            if (event.propertyName === "opacity") {
-                item.remove();
-            }
-        });
-        window.setTimeout(() => item.remove(), 300);
-    });
+    if (existing) {
+        return existing;
+    }
+    const view = document.createElement("div");
+    view.className = "config-agent-capability__view config__view";
+    host.append(view);
+    return view;
+};
+
+const closeAgentCapabilityView = (view: HTMLElement) => {
+    view.classList.remove("config__view--show");
+};
+
+const showAgentCapabilityLoading = (root: HTMLElement) => {
+    const view = ensureAgentCapabilityView(root);
+    view.innerHTML = `<div class="b3-dialog__header fn__flex">
+    <div class="block__logo fn__pointer fn__flex-1" data-action="back">
+        <svg class="block__logoicon"><use xlink:href="#iconLeft"></use></svg>
+        <span class="ft__breakword">${escapeHtml(window.siyuan.languages.agentCapabilities)}</span>
+    </div>
+</div>
+<div class="b3-dialog__body fn__flex-1 fn__flex-center">
+    <img src="/stage/loading-pure.svg" style="height:64px;width:64px;">
+</div>`;
+    view.onchange = null;
+    view.onclick = (event) => {
+        if ((event.target as HTMLElement).closest<HTMLElement>("[data-action='back']")) {
+            closeAgentCapabilityView(view);
+        }
+    };
+    view.classList.add("config__view--show");
+    return view;
 };
 
 const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabilityInfo[]) => {
     const expanded = new Set<string>();
     let query = "";
     let onlySelected = false;
-    removeAgentCapabilityView(settingRoot);
-    const view = document.createElement("div");
-    view.className = "config-agent-capability__view config__view";
+    const view = ensureAgentCapabilityView(settingRoot);
     view.innerHTML = `<div class="b3-dialog__header fn__flex">
     <div class="block__logo fn__pointer fn__flex-1" data-action="back">
         <svg class="block__logoicon"><use xlink:href="#iconLeft"></use></svg>
@@ -243,8 +264,6 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
     <div class="config-agent-capability__list" data-type="agentCapabilityList"></div>
 </div>
 </div>`;
-    getCapabilityViewHost(settingRoot).append(view);
-    view.getBoundingClientRect();
     view.classList.add("config__view--show");
 
     const render = () => {
@@ -269,7 +288,9 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
             const groupEnabled = items.every((capability) => isCapabilityAllowed(capability.id));
             return `<section class="config-group" data-capability-group="${groupIndex}">
     <div class="config-title config-title--action">
-        <span>${escapeHtml(label)} (${items.length})</span>
+        <span>${escapeHtml(label)}</span>
+        <span class="fn__space--small"></span>
+        <span class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${escapeAttribute(window.siyuan.languages.total)}">${items.length}</span>
         <span class="fn__flex-1"></span>
         <button class="b3-button b3-button--outline" data-type="toggleAgentCapabilityGroup" data-group-index="${groupIndex}">${groupEnabled ? window.siyuan.languages.agentCapabilitiesDisableAll : window.siyuan.languages.selectAll}</button>
     </div>
@@ -340,7 +361,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
         onlySelected = (event.target as HTMLInputElement).checked;
         render();
     });
-    view.addEventListener("change", (event) => {
+    view.onchange = (event) => {
         const input = event.target as HTMLInputElement;
         const type = input.dataset.type;
         const id = input.closest<HTMLElement>("[data-capability-id]")?.dataset.capabilityId;
@@ -357,11 +378,11 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
                 setCapabilityActionApproval(id, action, input.checked ? "allow" : "confirm", onPolicyApplied);
             }
         }
-    });
-    view.addEventListener("click", (event) => {
+    };
+    view.onclick = (event) => {
         const action = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
         if (action?.dataset.action === "back") {
-            removeAgentCapabilityView(settingRoot, view);
+            closeAgentCapabilityView(view);
             return;
         }
         const target = (event.target as HTMLElement).closest<HTMLElement>("[data-type]");
@@ -383,9 +404,8 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
                 render();
             }
         }
-    });
+    };
     render();
-    view.querySelector<HTMLInputElement>("[data-type='searchAgentCapabilities']")?.focus();
 };
 
 const loadCapabilities = (callback: (capabilities: ICapabilityInfo[]) => void) => {
@@ -407,7 +427,13 @@ export const getAgentCapabilityKeywords = (): string[] => [
 ];
 
 export const mountAgentCapabilityBlock = (root: HTMLElement) => {
+    ensureAgentCapabilityView(root);
     root.querySelector("#aiAgentCapabilities")?.addEventListener("click", () => {
-        loadCapabilities((capabilities) => openAgentCapabilityView(root, capabilities));
+        const view = showAgentCapabilityLoading(root);
+        loadCapabilities((capabilities) => {
+            if (view.classList.contains("config__view--show")) {
+                openAgentCapabilityView(root, capabilities);
+            }
+        });
     });
 };

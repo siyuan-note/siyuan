@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "Режим одобрения",
 	"agentCapabilitiesDialogTip": "Выберите доступные Agent возможности; каждое включённое определение увеличивает расход token",
 	"agentCapabilitiesSearch": "Поиск по названию или описанию возможности",
 	"agentCapabilitiesOnlySelected": "Только выбранные",

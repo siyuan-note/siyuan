@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "Onay modu",
 	"agentCapabilitiesDialogTip": "Agent'ın kullanabileceği yetenekleri seçin; etkin her tanım token kullanımını artırır",
 	"agentCapabilitiesSearch": "Yetenek adı veya açıklaması ara",
 	"agentCapabilitiesOnlySelected": "Yalnızca seçilenler",

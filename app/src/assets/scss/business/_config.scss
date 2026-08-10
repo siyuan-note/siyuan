@@ -639,15 +639,19 @@
     }
 
     &__expand {
-      margin-left: 8px;
+      margin-right: 8px;
     }
 
     &__details {
       margin: 0 -16px -16px;
 
       > .b3-label--inner {
-        padding-left: 32px;
-        padding-right: 48px;
+        padding-left: 48px;
+        padding-right: 16px;
+
+        &:last-child {
+          padding-bottom: 16px;
+        }
       }
     }
   }

@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "Goedkeuringsmodus",
 	"agentCapabilitiesDialogTip": "Kies de mogelijkheden die de Agent mag gebruiken; elke ingeschakelde definitie verhoogt het token-gebruik",
 	"agentCapabilitiesSearch": "Zoek op naam of beschrijving van mogelijkheden",
 	"agentCapabilitiesOnlySelected": "Alleen geselecteerde",

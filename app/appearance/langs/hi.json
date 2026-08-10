@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "स्वीकृति मोड",
 	"agentCapabilitiesDialogTip": "Agent के लिए उपलब्ध क्षमताएँ चुनें; हर सक्षम परिभाषा token उपयोग बढ़ाती है",
 	"agentCapabilitiesSearch": "क्षमता के नाम या विवरण खोजें",
 	"agentCapabilitiesOnlySelected": "केवल चयनित",

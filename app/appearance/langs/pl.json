@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "Tryb zatwierdzania",
 	"agentCapabilitiesDialogTip": "Wybierz możliwości dostępne dla Agent; każda włączona definicja zwiększa użycie token",
 	"agentCapabilitiesSearch": "Szukaj nazw lub opisów możliwości",
 	"agentCapabilitiesOnlySelected": "Tylko wybrane",

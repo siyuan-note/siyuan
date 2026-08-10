@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "Mode persetujuan",
 	"agentCapabilitiesDialogTip": "Pilih kemampuan yang tersedia untuk Agent; setiap definisi aktif meningkatkan penggunaan token",
 	"agentCapabilitiesSearch": "Cari nama atau deskripsi kemampuan",
 	"agentCapabilitiesOnlySelected": "Hanya yang dipilih",

@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "承認モード",
 	"agentCapabilitiesDialogTip": "Agent が使用できる機能を選択します。有効な定義ごとに token 使用量が増えます",
 	"agentCapabilitiesSearch": "機能名または説明を検索",
 	"agentCapabilitiesOnlySelected": "選択済みのみ",

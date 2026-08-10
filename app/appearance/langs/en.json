@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "Approval mode",
 	"agentCapabilitiesDialogTip": "Choose the capabilities available to the Agent; each enabled definition increases token usage",
 	"agentCapabilitiesSearch": "Search capability names or descriptions",
 	"agentCapabilitiesOnlySelected": "Selected only",

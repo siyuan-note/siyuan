@@ -252,13 +252,6 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
                 <span class="fn__space"></span>
                 <input class="b3-switch" data-type="onlySelectedAgentCapabilities" type="checkbox">
             </label>
-            <div class="fn__flex b3-label config-item config-wrap">
-                <div class="b3-label__text fn__flex-1">${window.siyuan.languages.agentCapabilitiesAutoApproveTip}</div>
-                <span class="fn__space"></span>
-                <button class="b3-button b3-button--outline" data-type="enableAllAgentCapabilities">${window.siyuan.languages.agentCapabilitiesEnableAll}</button>
-                <span class="fn__space"></span>
-                <button class="b3-button b3-button--outline" data-type="disableAllAgentCapabilities">${window.siyuan.languages.agentCapabilitiesDisableAll}</button>
-            </div>
         </div>
     </div>
     <div class="config-agent-capability__list" data-type="agentCapabilityList"></div>
@@ -300,33 +293,38 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
             const opened = expanded.has(capability.id);
             return `<div class="b3-label config-item" data-capability-id="${escapeAttribute(capability.id)}">
     <div class="fn__flex config-wrap">
+        <button class="block__icon block__icon--show config-agent-capability__expand" data-type="toggleAgentCapabilityActions" aria-label="${escapeAttribute(window.siyuan.languages.config)}"><svg style="transform:rotate(${opened ? "90deg" : "0"});"><use xlink:href="#iconRight"></use></svg></button>
         <div class="fn__flex-1 config-agent-capability__main">
             <div class="config-name">${escapeHtml(capability.title || capability.name)}</div>
             ${capability.description ? `<div class="b3-label__text config-agent-capability__description" title="${escapeAttribute(capability.description)}">${escapeHtml(capability.description)}</div>` : ""}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch" data-type="toggleAgentCapability" type="checkbox" aria-label="${escapeAttribute(capability.title || capability.name)}"${isCapabilityAllowed(capability.id) ? " checked" : ""}>
-        <button class="block__icon block__icon--show config-agent-capability__expand" data-type="toggleAgentCapabilityActions" aria-label="${escapeAttribute(window.siyuan.languages.agentCapabilitiesActions)}"><svg style="transform:rotate(${opened ? "90deg" : "0"});"><use xlink:href="#iconRight"></use></svg></button>
     </div>
     ${opened ? `<div class="config-agent-capability__details">
         <div class="fn__hr"></div>
         <div class="b3-label b3-label--inner">
             <div class="b3-label__text"><code>${escapeHtml(capability.id)}</code></div>
         </div>
-        <label class="fn__flex b3-label b3-label--inner config-wrap">
-            <div class="fn__flex-1">
-                <div class="config-name">${window.siyuan.languages.agentCapabilitiesAutoApprove}</div>
-                <div class="b3-label__text">${window.siyuan.languages.agentCapabilitiesAutoApproveTip}</div>
-            </div>
-            <span class="fn__space"></span>
-            <input class="b3-switch" data-type="toggleAgentCapabilityApproval" type="checkbox"${isCapabilityAutoApproved(capability.id) ? " checked" : ""}>
-        </label>
-        ${actions.length > 0 ? `<div class="b3-label b3-label--inner config-name">${window.siyuan.languages.agentCapabilitiesActions}</div>
-        ${actions.map((action) => `<label class="fn__flex b3-label b3-label--inner config-wrap">
+        <div class="b3-label b3-label--inner config-name fn__flex">
+            <span class="fn__flex-1">${window.siyuan.languages.agentCapabilitiesActions}</span>
+            <span class="ft__on-surface">${window.siyuan.languages.agentCapabilitiesApprovalMode}</span>
+        </div>
+        ${actions.length > 0 ? actions.map((action) => `<label class="fn__flex b3-label b3-label--inner config-wrap">
         <code class="fn__flex-1">${escapeHtml(action.name)}</code>
         <span class="fn__space"></span>
-        <input class="b3-switch" data-type="toggleAgentCapabilityActionApproval" data-capability-action="${escapeAttribute(action.name)}" type="checkbox"${isCapabilityAutoApproved(capability.id, action.name) ? " checked" : ""}>
-    </label>`).join("")}` : ""}
+        <select class="b3-select" data-type="toggleAgentCapabilityActionApproval" data-capability-action="${escapeAttribute(action.name)}">
+            <option value="confirm"${isCapabilityAutoApproved(capability.id, action.name) ? "" : " selected"}>${window.siyuan.languages.agentPermissionConfirm}</option>
+            <option value="allow"${isCapabilityAutoApproved(capability.id, action.name) ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesAutoApprove}</option>
+        </select>
+    </label>`).join("") : `<label class="fn__flex b3-label b3-label--inner config-wrap">
+        <span class="fn__flex-1">${window.siyuan.languages.use}</span>
+        <span class="fn__space"></span>
+        <select class="b3-select" data-type="toggleAgentCapabilityApproval">
+            <option value="confirm"${isCapabilityAutoApproved(capability.id) ? "" : " selected"}>${window.siyuan.languages.agentPermissionConfirm}</option>
+            <option value="allow"${isCapabilityAutoApproved(capability.id) ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesAutoApprove}</option>
+        </select>
+    </label>`}
     </div>` : ""}
 </div>`;
         }).join("")}
@@ -371,11 +369,11 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
         if (type === "toggleAgentCapability") {
             setCapabilitiesDecision([id], input.checked ? "allow" : "deny", onPolicyApplied);
         } else if (type === "toggleAgentCapabilityApproval") {
-            setCapabilityApproval(id, input.checked ? "allow" : "confirm", onPolicyApplied);
+            setCapabilityApproval(id, input.value as ApprovalDecision, onPolicyApplied);
         } else if (type === "toggleAgentCapabilityActionApproval") {
             const action = input.dataset.capabilityAction;
             if (action !== undefined) {
-                setCapabilityActionApproval(id, action, input.checked ? "allow" : "confirm", onPolicyApplied);
+                setCapabilityActionApproval(id, action, input.value as ApprovalDecision, onPolicyApplied);
             }
         }
     };
@@ -389,11 +387,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabi
         if (!target) {
             return;
         }
-        if (target.dataset.type === "enableAllAgentCapabilities") {
-            saveCapabilityPolicy({default: "allow", overrides: {}}, onPolicyApplied);
-        } else if (target.dataset.type === "disableAllAgentCapabilities") {
-            saveCapabilityPolicy({default: "deny", overrides: {}}, onPolicyApplied);
-        } else if (target.dataset.type === "toggleAgentCapabilityActions") {
+        if (target.dataset.type === "toggleAgentCapabilityActions") {
             const id = target.closest<HTMLElement>("[data-capability-id]")?.dataset.capabilityId;
             if (id) {
                 if (expanded.has(id)) {

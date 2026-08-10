@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "Genehmigungsmodus",
 	"agentCapabilitiesDialogTip": "Wählen Sie die für den Agent verfügbaren Funktionen; jede aktivierte Definition erhöht den token-Verbrauch",
 	"agentCapabilitiesSearch": "Funktionsnamen oder Beschreibungen durchsuchen",
 	"agentCapabilitiesOnlySelected": "Nur ausgewählte",

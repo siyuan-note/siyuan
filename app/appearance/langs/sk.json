@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "Režim schvaľovania",
 	"agentCapabilitiesDialogTip": "Vyberte možnosti dostupné pre Agenta; každá povolená definícia zvyšuje spotrebu token",
 	"agentCapabilitiesSearch": "Hľadať názvy alebo popisy možností",
 	"agentCapabilitiesOnlySelected": "Len vybrané",

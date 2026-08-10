@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "승인 모드",
 	"agentCapabilitiesDialogTip": "Agent가 사용할 수 있는 기능을 선택하세요. 활성화된 정의마다 token 사용량이 늘어납니다",
 	"agentCapabilitiesSearch": "기능 이름 또는 설명 검색",
 	"agentCapabilitiesOnlySelected": "선택 항목만",

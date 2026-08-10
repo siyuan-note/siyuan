@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "โหมดการอนุมัติ",
 	"agentCapabilitiesDialogTip": "เลือกความสามารถที่ Agent ใช้ได้ โดยทุกข้อกำหนดที่เปิดใช้จะเพิ่มการใช้ token",
 	"agentCapabilitiesSearch": "ค้นหาชื่อหรือคำอธิบายความสามารถ",
 	"agentCapabilitiesOnlySelected": "เฉพาะที่เลือก",

@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "批准方式",
 	"agentCapabilitiesDialogTip": "選擇智能體可以使用的能力；每個已啟用的定義都會增加 token 用量",
 	"agentCapabilitiesSearch": "搜尋能力名稱或描述",
 	"agentCapabilitiesOnlySelected": "僅看已選",

@@ -1,4 +1,5 @@
 {
+	"agentCapabilitiesApprovalMode": "מצב אישור",
 	"agentCapabilitiesDialogTip": "בחירת היכולות הזמינות ל-Agent; כל הגדרה מופעלת מגדילה את השימוש ב-token",
 	"agentCapabilitiesSearch": "חיפוש בשמות או בתיאורי יכולות",
 	"agentCapabilitiesOnlySelected": "רק נבחרות",

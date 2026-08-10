@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -53,7 +53,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-ddr3yub",
-				"updated": "20250115152732"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -225,15 +225,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123051-2p8rbm4",
-				"updated": "20220824172748"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeImage",
 					"Data": "span",
-					"Properties": {
-						"parent-style": "display: block;"
-					},
 					"Children": [
 						{
 							"Type": "NodeBang"
@@ -266,10 +263,6 @@
 							"Type": "NodeCloseParen"
 						}
 					]
-				},
-				{
-					"Type": "NodeKramdownSpanIAL",
-					"Data": "{: parent-style=\"display: block;\"}"
 				}
 			]
 		},

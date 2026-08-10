@@ -5,9 +5,9 @@
 	"Properties": {
 		"ID": "20240530101000-va0bfhr",
 		"id": "20240530101000-4cqkoel",
-		"title": "ドキュメントの公開",
+		"title": "コミュニティにドキュメントを共有",
 		"type": "doc",
-		"updated": "20250115162339"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-imf55p1",
 				"id": "20240530101000-ionqoxz",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -32,22 +32,12 @@
 			"Properties": {
 				"ID": "20240530101000-mucipix",
 				"id": "20240530101000-vp4fob2",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Markdown 形式の単一のドキュメントを "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://ld246.com",
-					"TextMarkTextContent": "Liandi"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " に投稿して公開します。"
+					"Data": "Markdown 形式の単一のドキュメントをコミュニティに投稿して公開します。"
 				}
 			]
 		},
@@ -58,7 +48,7 @@
 			"Properties": {
 				"ID": "20240530101000-yqjf2u6",
 				"id": "20240530101000-ta337sv",
-				"updated": "20250115162339"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -74,7 +64,7 @@
 			"Properties": {
 				"ID": "20240530101000-4zayyl0",
 				"id": "20240530101000-0nu3aou",
-				"updated": "20250115162339"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -87,7 +77,7 @@
 					"Properties": {
 						"ID": "20240530101000-ef4x6dv",
 						"id": "20240530101000-dmuu96j",
-						"updated": "20240530101000"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -96,12 +86,12 @@
 							"Properties": {
 								"ID": "20240530101000-74053pe",
 								"id": "20240530101000-3todhrv",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Liandi のアカウントに登録して SiYuan でログインする必要があります"
+									"Data": "SiYuan アカウントを登録してログインする必要があります"
 								}
 							]
 						}
@@ -117,7 +107,7 @@
 					"Properties": {
 						"ID": "20240530101000-4kifiue",
 						"id": "20240530101000-kfp6mgd",
-						"updated": "20250115162339"
+						"updated": "20260809160000"
 					},
 					"Children": [
 						{
@@ -125,7 +115,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-lt35ct2",
-								"updated": "20250115162339"
+								"updated": "20260809160000"
 							},
 							"Children": [
 								{
@@ -266,7 +256,7 @@
 					"Properties": {
 						"ID": "20240530101000-gbag4q9",
 						"id": "20240530101000-g5vxn95",
-						"updated": "20240530101000"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -275,7 +265,7 @@
 							"Properties": {
 								"ID": "20240530101000-hzn3183",
 								"id": "20240530101000-w95sz7z",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -298,7 +288,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ）属性が書き込まれ、リンクされた投稿 ID を関連付けます"
+									"Data": "​ ）属性が書き込まれ、コミュニティの投稿 ID を関連付けます"
 								}
 							]
 						}
@@ -400,7 +390,7 @@
 			"Properties": {
 				"ID": "20240530101000-gc2qhzt",
 				"id": "20240530101000-z3drf05",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -425,7 +415,7 @@
 			"Properties": {
 				"ID": "20240530101000-k68n555",
 				"id": "20240530101000-s31a99n",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -438,7 +428,7 @@
 					"Properties": {
 						"ID": "20240530101000-beo7pac",
 						"id": "20240530101000-169edsb",
-						"updated": "20240530101000"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -447,22 +437,12 @@
 							"Properties": {
 								"ID": "20240530101000-97zktty",
 								"id": "20240530101000-elf7s7x",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ドキュメントを LiuYun に公開するには"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://liuyun.io/article/1685240430351",
-									"TextMarkTextContent": "ポイント"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "が必要です"
+									"Data": "コミュニティへの公開にはポイントが必要な場合があります。コミュニティのポイント規則を参照してください"
 								}
 							]
 						}

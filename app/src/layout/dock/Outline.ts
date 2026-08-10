@@ -8,11 +8,9 @@ import {confirmBlockRef} from "../../util/checkBlockRef";
 import {getAllModels} from "../getAll";
 import {hasClosestBlock, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
 import {
-    isInAndroid,
-    isInHarmony,
     setStorageVal,
     updateHotkeyAfterTip,
-    writeText
+    writeBlockDOMClipboard
 } from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
@@ -1191,14 +1189,8 @@ export class Outline extends Model {
                 fetchPost("/api/block/getHeadingChildrenDOM", {
                     id,
                     removeFoldAttr: false
-                }, (response) => {
-                    if (isInAndroid()) {
-                        window.JSAndroid.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                    } else if (isInHarmony()) {
-                        window.JSHarmony.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                    } else {
-                        writeText(response.data + Constants.ZWSP);
-                    }
+                }, async (response) => {
+                    await writeBlockDOMClipboard(data.protyle.lute, response.data);
                 });
             }
         }).element);
@@ -1231,12 +1223,11 @@ export class Outline extends Model {
                             if (!data.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
                                 return;
                             }
-                            if (isInAndroid()) {
-                                window.JSAndroid.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                            } else if (isInHarmony()) {
-                                window.JSHarmony.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                            } else {
-                                writeText(response.data + Constants.ZWSP);
+                            if (!await writeBlockDOMClipboard(data.protyle.lute, response.data)) {
+                                return;
+                            }
+                            if (!data.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
+                                return;
                             }
                             deleteResponse.data.doOperations.forEach((operation: IOperation) => {
                                 data.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {

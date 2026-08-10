@@ -500,12 +500,8 @@ func InitConf() {
 	if 1 > len(Conf.Editor.SpellcheckLanguages) {
 		Conf.Editor.SpellcheckLanguages = []string{"en-US"}
 	}
-	if 0 > Conf.Editor.BacklinkExpandCount {
-		Conf.Editor.BacklinkExpandCount = 0
-	}
-	if -1 > Conf.Editor.BackmentionExpandCount {
-		Conf.Editor.BackmentionExpandCount = -1
-	}
+	Conf.Editor.BacklinkExpandCount = conf.NormalizeBacklinkExpandCount(Conf.Editor.BacklinkExpandCount)
+	Conf.Editor.BackmentionExpandCount = conf.NormalizeBacklinkExpandCount(Conf.Editor.BackmentionExpandCount)
 	if "" == Conf.Editor.HeadingNumberFormat {
 		Conf.Editor.HeadingNumberFormat = conf.DefaultHeadingNumberFormat
 	}

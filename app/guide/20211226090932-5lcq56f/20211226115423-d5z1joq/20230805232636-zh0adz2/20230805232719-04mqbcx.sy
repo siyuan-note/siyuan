@@ -7,7 +7,7 @@
 		"id": "20230805232719-04mqbcx",
 		"title": "功能特性",
 		"type": "doc",
-		"updated": "20230805232858"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -30,7 +30,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230805232858-0cdermn",
-				"updated": "20230805232932"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -59,37 +59,6 @@
 									"TextMarkBlockRefID": "20230805232903-erdoerp",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "對接第三方雲端存儲"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230805232858-tgkyp09",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230805232858-tgkyp09",
-						"updated": "20230805232932"
-					},
-					"Children": [
-						{
-							"ID": "20230805232858-wkq1if1",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230805232858-wkq1if1",
-								"updated": "20230805232932"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20230805232920-5fdco36",
-									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "搜索資源文件內容"
 								}
 							]
 						}

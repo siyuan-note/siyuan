@@ -1018,6 +1018,34 @@ func AssetPathWithoutQuery(relativePath string) string {
 	return filepath.ToSlash(relativePath)
 }
 
+// HTMLAssetIFrameSrc 返回用于安全渲染 HTML 资源的 IFrame 地址。
+func HTMLAssetIFrameSrc(assetPath string) string {
+	if IsHTMLAssetIFrameSrc(assetPath) {
+		return assetPath
+	}
+	parsed, err := url.Parse(assetPath)
+	if err != nil {
+		return assetPath
+	}
+	query := parsed.Query()
+	query.Set("iframe", "true")
+	parsed.RawQuery = query.Encode()
+	return parsed.String()
+}
+
+// IsHTMLAssetIFrameSrc 判断资源地址是否为 HTML 文件 IFrame 渲染地址。
+func IsHTMLAssetIFrameSrc(assetPath string) bool {
+	parsed, err := url.Parse(assetPath)
+	if err != nil || !strings.EqualFold(parsed.Query().Get("iframe"), "true") {
+		return false
+	}
+	if parsed.IsAbs() || parsed.Host != "" || !strings.HasPrefix(strings.TrimPrefix(parsed.Path, "/"), "assets/") {
+		return false
+	}
+	ext := strings.ToLower(path.Ext(parsed.Path))
+	return ext == ".html" || ext == ".htm"
+}
+
 func assetPathAndBox(relativePath, defaultBoxID string) (cleanPath, boxID string, err error) {
 	relativePath = strings.TrimSpace(relativePath)
 	boxID = defaultBoxID

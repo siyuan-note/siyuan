@@ -1,5 +1,6 @@
 import {Constants} from "../../constants";
 import {uploadFiles, uploadLocalFiles} from "../upload";
+import type {IUploadInsertOptions} from "../upload";
 import {processPasteCode, processRender} from "./processCode";
 import {getLocalFiles, getTextSiyuanFromTextHTML, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
@@ -22,7 +23,7 @@ import {updateTransaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
 import {updateListOrder} from "../wysiwyg/list";
 import {refreshSbAndPersistWidth} from "../../block/util";
-import {shouldPreservePastedBlockStructure} from "./pasteSource";
+import {extractCrossBlockPasteContext, shouldPreservePastedBlockStructure} from "./pasteSource";
 import {normalizePasteResponse} from "./pasteResponse";
 import {applyLuteMarkdownSyntax} from "../render/luteMarkdownSyntax";
 
@@ -311,7 +312,8 @@ export const convertPastedListItemSubtype = (listItemElement: HTMLElement, subty
     }
 };
 
-const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range: Range) => {
+const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range: Range,
+                              preserveNestedList: boolean) => {
     const pastedRoots = Array.from(tempElement.children) as HTMLElement[];
     if (!range.collapsed || pastedRoots.length < 2) {
         return false;
@@ -368,12 +370,14 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
             targetBlockElement.previousElementSibling?.classList.contains("protyle-action") !== true) {
             return false;
         }
-        const targetSubtype = targetContainerElement.getAttribute("data-subtype");
-        pastedChildren.forEach(item => {
-            if (item.getAttribute("data-subtype") !== targetSubtype) {
-                convertPastedListItemSubtype(item, targetSubtype);
-            }
-        });
+        if (!preserveNestedList) {
+            const targetSubtype = targetContainerElement.getAttribute("data-subtype");
+            pastedChildren.forEach(item => {
+                if (item.getAttribute("data-subtype") !== targetSubtype) {
+                    convertPastedListItemSubtype(item, targetSubtype);
+                }
+            });
+        }
     }
     const targetEditableElement = getContenteditableElement(targetBlockElement);
     const firstEditableElement = getContenteditableElement(firstBlockElement);
@@ -382,8 +386,10 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
         return false;
     }
 
-    const oldHTML = targetChildElement.outerHTML;
-    const oldListItemHTML = containerType === "NodeList" ? new Map(Array.from(
+    const isNestedListPaste = preserveNestedList && containerType === "NodeList";
+    const transactionElement = isNestedListPaste ? targetBlockElement : targetChildElement;
+    const oldHTML = transactionElement.outerHTML;
+    const oldListItemHTML = containerType === "NodeList" && !isNestedListPaste ? new Map(Array.from(
         targetContainerElement.querySelectorAll<HTMLElement>(":scope > .li")
     ).map(item => [item.getAttribute("data-node-id"), item.outerHTML])) : undefined;
     const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
@@ -415,11 +421,17 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
     }
     fixAdjacentTags(targetEditableElement);
     fixAdjacentTags(endEditableElement);
-    targetChildElement.after(...pastedChildren);
-    if (containerType === "NodeList") {
+    const insertedElements = isNestedListPaste ? [pastedContainerElement] : pastedChildren;
+    if (isNestedListPaste) {
+        targetBlockElement.after(pastedContainerElement);
+        updateListOrder(pastedContainerElement);
+    } else {
+        targetChildElement.after(...pastedChildren);
+    }
+    if (containerType === "NodeList" && !isNestedListPaste) {
         updateListOrder(targetContainerElement);
     }
-    targetChildElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+    transactionElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
 
     const widthDoOperations: IOperation[] = [];
     const widthUndoOperations: IOperation[] = [];
@@ -430,12 +442,13 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
     }
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
-    pastedChildren.slice().reverse().forEach(item => {
+    insertedElements.slice().reverse().forEach(item => {
         doOperations.push({
             action: "insert",
             id: item.getAttribute("data-node-id"),
             data: item.outerHTML,
-            previousID: targetChildElement.getAttribute("data-node-id")
+            previousID: (isNestedListPaste ? targetBlockElement : targetChildElement).getAttribute("data-node-id"),
+            parentID: isNestedListPaste ? targetChildElement.getAttribute("data-node-id") : undefined,
         });
         undoOperations.push({
             action: "delete",
@@ -465,7 +478,7 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
     doOperations.push(...widthDoOperations);
     undoOperations.unshift(...widthUndoOperations);
     focusByOffset(endBlockElement, pastedEnd, pastedEnd, true, true);
-    updateTransaction(protyle, targetChildElement, oldHTML, undoFocusContext, {
+    updateTransaction(protyle, transactionElement, oldHTML, undoFocusContext, {
         doOperations,
         undoOperations,
         context: getUndoFocusContext(protyle.wysiwyg.element, getEditorRange(protyle.wysiwyg.element), true)
@@ -475,7 +488,7 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
 
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | IClipboardData) & {
     target: HTMLElement
-}) => {
+}, uploadOptions?: IUploadInsertOptions) => {
     if ("clipboardData" in event || "dataTransfer" in event) {
         event.stopPropagation();
         event.preventDefault();
@@ -592,6 +605,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
     }
 
+    // 插件可能替换完整剪贴板载荷，因此仅从最终保留的内部数据中读取层级上下文
+    const crossBlockPasteContext = siyuanHTML ? extractCrossBlockPasteContext(textHTML) : {
+        nestedList: false,
+        html: textHTML,
+    };
+    textHTML = crossBlockPasteContext.html;
+    originalTextHTML = extractCrossBlockPasteContext(originalTextHTML).html;
+
 
     let nodeElement = hasClosestBlock(event.target);
     const range = getEditorRange(protyle.wysiwyg.element);
@@ -600,7 +621,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     }
     if (!nodeElement) {
         if (files && files.length > 0) {
-            uploadFiles(protyle, files);
+            uploadFiles(protyle, files, undefined, undefined, undefined, uploadOptions);
         }
         return;
     }
@@ -748,7 +769,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             item.hasAttribute("parent-heading"));
         // 完整块选择以及以标题开头的跨块文本选区需要保留块类型
         // 标题及下方块还需要保留折叠关系 https://github.com/siyuan-note/siyuan/issues/18419
-        if (isBlock && !preservePastedBlockStructure && !hasHeadingChildren && pasteCrossBlockRange(protyle, tempElement, range)) {
+        if (isBlock && !preservePastedBlockStructure && !hasHeadingChildren &&
+            pasteCrossBlockRange(protyle, tempElement, range, crossBlockPasteContext.nestedList)) {
             blockRender(protyle, protyle.wysiwyg.element);
             processRender(protyle.wysiwyg.element);
             highlightRender(protyle.wysiwyg.element);
@@ -899,7 +921,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             });
             return;
         } else if (files && files.length > 0) {
-            uploadFiles(protyle, files);
+            uploadFiles(protyle, files, undefined, undefined, undefined, uploadOptions);
             return;
         } else if (textPlain.trim() !== "" && (files && files.length === 0 || !files)) {
             if (range.toString() !== "") {

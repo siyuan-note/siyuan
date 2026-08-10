@@ -6,7 +6,7 @@
 		"id": "20211226122707-8cr09co",
 		"title": "資料歷史",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -169,7 +169,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120005-zarefxu",
-				"updated": "20260803163402"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135134-p6jpw7s",
-				"updated": "20260803163402"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -196,7 +196,7 @@
 					},
 					"Properties": {
 						"id": "20220501135134-8h6nsrg",
-						"updated": "20260803163402"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -204,12 +204,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135134-wmi0mal",
-								"updated": "20260803163402"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "每隔 10 分鐘會對這 10 分鐘內更新過的文檔生成歷史（間隔時間可通過 "
+									"Data": "每隔 10 分鐘會為該時段內更新過的文檔和文件生成文件歷史。可在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -218,7 +218,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -227,7 +227,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -236,16 +236,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ 進行調整），歷史文件夾後綴為 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "-update"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": " 中調整間隔，歷史資料夾後綴為 -update。"
 								}
 							]
 						}
@@ -1726,7 +1717,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226121454-8ay5lbb",
-				"updated": "20211226010158"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1740,7 +1731,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226121454-03u8yy2",
-				"updated": "20230713213240"
+				"updated": "20260809160000"
 			},
 			"Children": [
 				{
@@ -1755,6 +1746,34 @@
 				{
 					"Type": "NodeText",
 					"Data": "​， 其中每一行使用 data 文件夾的相對路徑進行配置，表示忽略文件或文件夾的路徑，支援通配符。例如："
+				}
+			]
+		},
+		{
+			"ID": "20260809160000-e44dcb6",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809160000-e44dcb6",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/**/*\nassets/*.pdf"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

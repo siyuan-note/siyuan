@@ -123,6 +123,7 @@ import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
 import {removeSearchMark} from "../toolbar/util";
 import {getTableCellTextStyleMenus} from "../toolbar/tableCell";
+import {isNestedListCrossBlockSelection, NESTED_LIST_PASTE_MARKER} from "../util/pasteSource";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
@@ -725,6 +726,7 @@ export class WYSIWYG {
             let textPlain = "";
             let isInCodeBlock = false;
             let needClipboardWrite = false;
+            let nestedListPaste = false;
             if (selectElements.length > 0) {
                 const isRefText = selectElements[0].getAttribute("data-reftext") === "true";
                 if (selectElements[0].getAttribute("data-type") === "NodeListItem" &&
@@ -916,6 +918,10 @@ export class WYSIWYG {
                     tempElement.append(range.cloneContents());
                     const isCrossBlock = nodeElement !== hasClosestBlock(range.endContainer);
                     if (isCrossBlock) {
+                        nestedListPaste = isNestedListCrossBlockSelection(
+                            hasClosestByAttribute(range.startContainer, "data-type", "NodeListItem"),
+                            hasClosestByAttribute(range.endContainer, "data-type", "NodeListItem"),
+                        );
                         this.normalizeCrossBlockCopy(tempElement, range);
                     }
                     const crossBlockTextPlain = isCrossBlock ? Array.from(tempElement.children)
@@ -994,7 +1000,8 @@ export class WYSIWYG {
                     exportedHTML = prepared.html;
                     clipboardText = prepared.source;
                 }
-                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` + exportedHTML;
+                const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->` +
+                    (nestedListPaste ? NESTED_LIST_PASTE_MARKER : "") + exportedHTML;
                 event.clipboardData.setData("text/plain", clipboardText);
                 event.clipboardData.setData("text/html", textHTML);
                 if (needClipboardWrite) {

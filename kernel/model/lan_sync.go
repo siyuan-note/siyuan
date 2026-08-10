@@ -40,25 +40,56 @@ var (
 
 	lanSyncManagerMu sync.RWMutex
 	lanSyncManager   *lansync.Manager
+	lanSyncConfig    *lanSyncRuntimeConfig
 
 	lanSyncHintMu       sync.Mutex
 	lastLANSyncHintID   string
 	lastLANSyncSchedule time.Time
 )
 
+type lanSyncRuntimeConfig struct {
+	repoKeyHash       [sha256.Size]byte
+	scope             string
+	deviceName        string
+	deviceOS          string
+	appVersion        string
+	maxConcurrentReqs int
+	nativeDiscovery   bool
+}
+
 func refreshLANSyncManager() {
+	refreshLANSyncManagerWithForce(false)
+}
+
+func refreshLANSyncManagerWithForce(force bool) {
 	lanSyncLifecycleMu.Lock()
 	defer lanSyncLifecycleMu.Unlock()
-	stopLANSyncManagerLocked()
 	if lanSyncShuttingDown {
 		return
 	}
 	if nil == Conf || nil == Conf.Sync || nil == Conf.Sync.LAN || !Conf.Sync.LAN.Enabled || !Conf.Sync.Enabled ||
 		1 > len(Conf.Repo.Key) || util.ContainerDocker == util.Container {
+		stopLANSyncManagerLocked()
 		return
 	}
-	ips := collectLANSyncIPs()
 	nativeDiscovery := util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container
+	config := &lanSyncRuntimeConfig{
+		repoKeyHash:       sha256.Sum256(Conf.Repo.Key),
+		scope:             lanSyncScope(),
+		deviceName:        Conf.System.Name,
+		deviceOS:          Conf.System.OS,
+		appVersion:        util.Ver,
+		maxConcurrentReqs: Conf.Sync.LAN.MaxConcurrentReqs,
+		nativeDiscovery:   nativeDiscovery,
+	}
+	lanSyncManagerMu.RLock()
+	manager := lanSyncManager
+	lanSyncManagerMu.RUnlock()
+	if !force && nil != manager && nil != lanSyncConfig && *config == *lanSyncConfig {
+		return
+	}
+	stopLANSyncManagerLocked()
+	ips := collectLANSyncIPs()
 	if 1 > len(ips) && !nativeDiscovery {
 		logging.LogWarnf("LAN sync service not started because no private network address is available")
 		scheduleLANSyncRetryLocked()
@@ -68,7 +99,7 @@ func refreshLANSyncManager() {
 		RepoPath:          util.RepoDir,
 		IdentityPath:      filepath.Join(util.ConfDir, "lan-sync-identity.json"),
 		RepoKey:           append([]byte(nil), Conf.Repo.Key...),
-		Scope:             lanSyncScope(),
+		Scope:             config.scope,
 		DeviceName:        Conf.System.Name,
 		DeviceOS:          Conf.System.OS,
 		AppVersion:        util.Ver,
@@ -85,6 +116,7 @@ func refreshLANSyncManager() {
 	}
 	lanSyncManagerMu.Lock()
 	lanSyncManager = manager
+	lanSyncConfig = config
 	lanSyncManagerMu.Unlock()
 }
 
@@ -164,6 +196,7 @@ func stopLANSyncManagerLocked() {
 	lanSyncManagerMu.Lock()
 	manager := lanSyncManager
 	lanSyncManager = nil
+	lanSyncConfig = nil
 	lanSyncManagerMu.Unlock()
 	if nil != manager {
 		manager.Stop()
@@ -191,12 +224,21 @@ func collectLANSyncIPs() (ret []net.IP) {
 	return
 }
 
-// RefreshLANSyncNetwork 在原生容器报告网络地址变化后重启局域网同步服务。
+// RefreshLANSyncNetwork 在原生容器报告网络地址变化后刷新局域网同步服务。
 func RefreshLANSyncNetwork() {
 	if nil == Conf {
 		return
 	}
-	refreshLANSyncManager()
+	if util.ContainerHarmony == util.Container {
+		refreshLANSyncManagerWithForce(true)
+		return
+	}
+	lanSyncManagerMu.RLock()
+	active := nil != lanSyncManager
+	lanSyncManagerMu.RUnlock()
+	if !active {
+		refreshLANSyncManager()
+	}
 }
 
 func newSyncRepository() (ret *dejavu.Repo, err error) {
@@ -300,8 +342,12 @@ func GetSyncLANStatus() map[string]interface{} {
 	discoveredCount := 0
 	connectedCount := 0
 	if nil != manager {
-		discoveredCount = manager.DiscoveredPeerCount()
 		connectedCount = manager.ConnectedPeerCount()
+		discoveredCount = manager.DiscoveredPeerCount()
+		// 已认证设备必然已经被发现，避免两次状态采样之间完成认证时出现数量倒序。
+		if discoveredCount < connectedCount {
+			discoveredCount = connectedCount
+		}
 	}
 	enabled := false
 	maxConcurrentReqs := 16

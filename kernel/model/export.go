@@ -1430,6 +1430,8 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom strin
 
 		if pdf {
 			processIFrame(tree)
+		} else {
+			processHTMLFileIFrame(tree)
 		}
 
 		luteEngine := NewLute()
@@ -1509,19 +1511,31 @@ func materializeHeadingNumbers(tree *parse.Tree, numbers map[string]string) {
 
 func processIFrame(tree *parse.Tree) {
 	// 导出 PDF/Word 时 IFrame 块使用超链接 https://github.com/siyuan-note/siyuan/issues/4035
+	processIFrameWithFilter(tree, nil)
+}
+
+func processHTMLFileIFrame(tree *parse.Tree) {
+	// 导出 HTML 时将 HTML 文件组件转换为链接。
+	processIFrameWithFilter(tree, func(src string) bool {
+		return IsHTMLAssetIFrameSrc(src)
+	})
+}
+
+func processIFrameWithFilter(tree *parse.Tree, filter func(src string) bool) {
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeIFrame != n.Type {
 			return ast.WalkContinue
 		}
 
+		src := treenode.GetNodeSrcTokens(n)
+		if filter != nil && !filter(src) {
+			return ast.WalkContinue
+		}
 		n.Type = ast.NodeParagraph
-		index := bytes.Index(n.Tokens, []byte("src=\""))
-		if 0 > index {
+		if src == "" {
 			n.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: n.Tokens})
 		} else {
-			src := n.Tokens[index+len("src=\""):]
-			src = src[:bytes.Index(src, []byte("\""))]
-			src = html.UnescapeHTML(src)
+			src := html.UnescapeHTML([]byte(src))
 			link := &ast.Node{Type: ast.NodeLink}
 			link.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
 			link.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: src})

@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230104152135-1iei0xa",
-		"title": "Share document",
+		"title": "Share a document to the community",
 		"type": "doc",
-		"updated": "20250115162330"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230104152142-rmqe7vt",
-				"updated": "20230104152142"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -29,22 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230104152142-hk6claf",
-				"updated": "20230104152142"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Share a single document in Markdown format to "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://ld246.com",
-					"TextMarkTextContent": "Liandi"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " as a post."
+					"Data": "Share a single document in Markdown format to the community as a post."
 				}
 			]
 		},
@@ -54,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230104152142-ffu9ddj",
-				"updated": "20250115162330"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -69,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230104152142-5whzbmo",
-				"updated": "20250115162330"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -81,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20230104152142-i2xkriy",
-						"updated": "20230104152142"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -89,12 +79,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104152142-sjznahd",
-								"updated": "20230104152142"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "You need to register and log in to your Liandi account"
+									"Data": "You need to register and log in to your SiYuan account"
 								}
 							]
 						}
@@ -109,7 +99,7 @@
 					},
 					"Properties": {
 						"id": "20230104152142-r0zanmc",
-						"updated": "20250115162330"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -117,7 +107,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104152142-9hf2y34",
-								"updated": "20250115162330"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -136,7 +126,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Share to Liandi"
+									"TextMarkTextContent": "Share to community"
 								},
 								{
 									"Type": "NodeText",
@@ -250,7 +240,7 @@
 					},
 					"Properties": {
 						"id": "20230104152142-1bqvmk9",
-						"updated": "20230104152142"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -258,7 +248,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104152142-10g0vrg",
-								"updated": "20230104152142"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -281,7 +271,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ) to the document to associate the link post ID"
+									"Data": "​ ) to the document to associate the community post ID"
 								}
 							]
 						}
@@ -376,7 +366,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230104152142-9t7oojd",
-				"updated": "20230104152234"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -396,7 +386,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230104152142-l7x5k2g",
-				"updated": "20230621111843"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -408,7 +398,7 @@
 					},
 					"Properties": {
 						"id": "20230104152142-z9vvov0",
-						"updated": "20230621111843"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -416,18 +406,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104152142-2uwf36x",
-								"updated": "20230621111843"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Points are required to share documents to LiuYun, please refer to "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://liuyun.io/article/1685240430351",
-									"TextMarkTextContent": "point rules"
+									"Data": "The community may require points for publishing; refer to its point rules"
 								}
 							]
 						}

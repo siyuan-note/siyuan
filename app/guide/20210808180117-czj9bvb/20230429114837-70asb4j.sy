@@ -7,7 +7,7 @@
 		"id": "20230429114837-70asb4j",
 		"title": "术语表",
 		"type": "doc",
-		"updated": "20260803163243"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -1225,7 +1225,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111026-m6i3oiu",
-				"updated": "20260614111026"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1267,12 +1267,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111026-uvaw8ee",
-				"updated": "20260614111026"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，集市是浏览和安装社区扩展的入口，包括主题、图标、插件、挂件和模板五种类型。用户可直接在应用内搜索、安装和更新。"
+					"Data": "在思源中，集市是浏览和安装社区扩展的入口，包括插件、主题、图标、模板和挂件。用户可直接在应用内搜索、安装和更新。"
 				}
 			]
 		},
@@ -1396,7 +1396,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111026-6d10qhl",
-				"updated": "20260614111026"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1438,7 +1438,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111026-l60fd37",
-				"updated": "20260614111026"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1447,8 +1447,26 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "Ctrl+Shift+P"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "P"
 				},
 				{
 					"Type": "NodeText",

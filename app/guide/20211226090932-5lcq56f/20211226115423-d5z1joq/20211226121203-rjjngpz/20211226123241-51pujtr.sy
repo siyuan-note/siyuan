@@ -6,7 +6,7 @@
 		"id": "20211226123241-51pujtr",
 		"title": "剪藏",
 		"type": "doc",
-		"updated": "20260803163402"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -132,7 +132,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226123253-m0sjvk6",
-				"updated": "20260803163402"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -149,7 +149,7 @@
 			},
 			"Properties": {
 				"id": "20211226123253-kp9r1b0",
-				"updated": "20260803163402"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -219,19 +219,21 @@
 						"Num": 2
 					},
 					"Properties": {
-						"id": "20211226123253-9olp7va"
+						"id": "20211226123253-9olp7va",
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
 							"ID": "20211226123253-s0ro53n",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226123253-s0ro53n"
+								"id": "20211226123253-s0ro53n",
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在 Web 頁面上選擇需要剪藏的內容，然後在右鍵菜單中選擇 “Copy to SiYuan”"
+									"Data": "在 Web 頁面上選擇需要剪藏的內容，然後在右鍵菜單中選擇 “複製到思源(SiYuan)”"
 								}
 							]
 						}
@@ -274,12 +276,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123253-79os888",
-				"updated": "20211228142738"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果需要剪藏整篇文章，可在擴充上直接點擊“Send to SiYuan”。"
+					"Data": "如果需要剪藏整篇文章，可在擴充上直接點擊“發送到思源(SiYuan)”。"
 				}
 			]
 		}

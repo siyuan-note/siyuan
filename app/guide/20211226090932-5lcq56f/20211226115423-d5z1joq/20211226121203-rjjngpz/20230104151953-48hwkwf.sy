@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20230104151953-48hwkwf",
-		"title": "分享文檔",
+		"title": "分享文檔到社區",
 		"type": "doc",
-		"updated": "20250115162319"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230104151954-rsdvv3l",
-				"updated": "20230104151954"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -29,22 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230104151954-kenzsk2",
-				"updated": "20230104151954"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "將單篇文檔以 Markdown 格式分享到"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://ld246.com",
-					"TextMarkTextContent": "鏈滴"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "作為帖子發布。"
+					"Data": "將單篇文檔以 Markdown 格式分享到社區作為帖子發布。"
 				}
 			]
 		},
@@ -54,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230104151954-i8wz140",
-				"updated": "20250115162319"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -69,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230104151954-2z1tu4k",
-				"updated": "20250115162319"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -81,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20230104151954-oajsj20",
-						"updated": "20230104151954"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -89,12 +79,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104151954-hrgcwx8",
-								"updated": "20230104151954"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "需要註冊並登錄鏈滴賬號"
+									"Data": "需要註冊並登錄思源賬號"
 								}
 							]
 						}
@@ -109,7 +99,7 @@
 					},
 					"Properties": {
 						"id": "20230104151954-fcw8i4u",
-						"updated": "20250115162319"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -117,7 +107,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104151954-j18rxht",
-								"updated": "20250115162319"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -136,7 +126,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "分享到鏈滴"
+									"TextMarkTextContent": "分享到社區"
 								},
 								{
 									"Type": "NodeText",
@@ -250,7 +240,7 @@
 					},
 					"Properties": {
 						"id": "20230104151954-6uj16rw",
-						"updated": "20230104151954"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -258,7 +248,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104151954-nmmwbf4",
-								"updated": "20230104151954"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -281,7 +271,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ）用於關聯鏈滴帖子 ID"
+									"Data": "​ ）用於關聯社區帖子 ID"
 								}
 							]
 						}
@@ -376,7 +366,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230104151954-pd0lmxx",
-				"updated": "20230104151954"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -396,7 +386,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230104151954-3xouceb",
-				"updated": "20230104151954"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -408,7 +398,7 @@
 					},
 					"Properties": {
 						"id": "20230104151954-96e5cea",
-						"updated": "20230104151954"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -416,18 +406,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104151954-4mun79t",
-								"updated": "20230104151954"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "分享文檔到鏈滴需要積分，請參考"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://ld246.com/article/1441724208848",
-									"TextMarkTextContent": "積分規則"
+									"Data": "社區發布可能需要積分，請參考社區的積分規則"
 								}
 							]
 						}

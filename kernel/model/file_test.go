@@ -20,6 +20,7 @@ import (
 	"errors"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -321,6 +322,26 @@ func TestMoveDocsRefreshDeduplicatesParentsAndNotebooks(t *testing.T) {
 		if 1 != count {
 			t.Fatalf("notebook [%s] refreshed %d times, want 1", boxID, count)
 		}
+	}
+}
+
+func TestOrderMoveDocPathsPreservesInputOrder(t *testing.T) {
+	box := &Box{ID: "20260810000000-abcdefg"}
+	firstPath := "/20260810000001-abcdefg.sy"
+	secondPath := "/20260810000002-abcdefg.sy"
+	pathsBoxes := map[string]*Box{
+		firstPath:  box,
+		secondPath: box,
+	}
+
+	got := orderMoveDocPaths([]string{
+		strings.TrimPrefix(secondPath, "/"),
+		firstPath,
+		secondPath,
+	}, pathsBoxes)
+	want := []string{secondPath, firstPath}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("unexpected ordered paths: got %v, want %v", got, want)
 	}
 }
 

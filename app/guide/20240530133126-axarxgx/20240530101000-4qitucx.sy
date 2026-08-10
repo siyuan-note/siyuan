@@ -8,7 +8,7 @@
 		"id": "20240530101000-4qitucx",
 		"title": "スタートガイド",
 		"type": "doc",
-		"updated": "20260804233500"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -553,7 +553,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240530101000-1omqwva",
-				"updated": "20260729215152"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -568,7 +568,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-2xrzv3t",
-				"updated": "20260729215152"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -644,7 +644,7 @@
 					},
 					"Properties": {
 						"id": "20260729215152-ktjtqt8",
-						"updated": "20260729215152"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -653,7 +653,7 @@
 							"Properties": {
 								"ID": "20240530101000-2ikvmp8",
 								"id": "20240530101000-hvzys4w",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -661,7 +661,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20240530101000-gcdp3gl",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "見出しとリストによるアウトライン"
+									"TextMarkTextContent": "見出しとリストを組み合わせたレイアウト"
 								}
 							]
 						}
@@ -876,7 +876,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260729215152-2c9k9kj",
-				"updated": "20260729215152"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -891,7 +891,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-mgz5ven",
-				"updated": "20260729215152"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -967,7 +967,7 @@
 					},
 					"Properties": {
 						"id": "20260729215152-2bu9b3l",
-						"updated": "20260729215152"
+						"updated": "20260809170000"
 					},
 					"Children": [
 						{
@@ -976,7 +976,7 @@
 							"Properties": {
 								"ID": "20240530101000-3fozwr5",
 								"id": "20240530101000-refez56",
-								"updated": "20240530101000"
+								"updated": "20260809170000"
 							},
 							"Children": [
 								{
@@ -1052,6 +1052,38 @@
 							]
 						}
 					]
+				},
+				{
+					"ID": "20260729215152-187iksg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260729215152-187iksg",
+						"updated": "20260729215152"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-upiseln",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-7nadfcb",
+								"id": "20240530101000-upiseln",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-txrc7z1",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "データ履歴"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -1061,7 +1093,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260729215152-2rlzjfu",
-				"updated": "20260729215152"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1076,7 +1108,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-39tvtd6",
-				"updated": "20260729215152"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1280,7 +1312,7 @@
 					},
 					"Properties": {
 						"id": "20260729215152-1pje552",
-						"updated": "20260729215152"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1289,7 +1321,7 @@
 							"Properties": {
 								"ID": "20240530101000-qb4nwwf",
 								"id": "20240530101000-5qe3p1k",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -1297,7 +1329,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20240530101000-zprnpfi",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "ハイパーリンク"
+									"TextMarkTextContent": "ブロックハイパーリンク"
 								}
 							]
 						}
@@ -1311,12 +1343,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260729215152-25hv1aw",
-				"updated": "20260804233500"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "学習と復習"
+					"Data": "学習と人工知能"
 				}
 			]
 		},
@@ -1326,41 +1358,9 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-1svfseh",
-				"updated": "20260804233500"
+				"updated": "20260809232000"
 			},
 			"Children": [
-				{
-					"ID": "20260729215152-187iksg",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20260729215152-187iksg",
-						"updated": "20260729215152"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-upiseln",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-7nadfcb",
-								"id": "20240530101000-upiseln",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20240530101000-txrc7z1",
-									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "データ履歴"
-								}
-							]
-						}
-					]
-				},
 				{
 					"ID": "20260729215152-3ryc8q8",
 					"Type": "NodeListItem",
@@ -1420,37 +1420,6 @@
 									"TextMarkBlockRefID": "20240530101000-ei5t6tt",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "人工知能"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260804233330-mcpjali",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20260804233330-mcpjali",
-						"updated": "20260804233500"
-					},
-					"Children": [
-						{
-							"ID": "20260804233331-mcpjapa",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20260804233331-mcpjapa",
-								"updated": "20260804233500"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20260804223003-mcpsv04",
-									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "MCP サービス"
 								}
 							]
 						}
@@ -1618,7 +1587,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260729215152-390ratq",
-				"updated": "20260804233500"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1633,7 +1602,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-1quwm31",
-				"updated": "20260804233500"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1804,7 +1773,7 @@
 					},
 					"Properties": {
 						"id": "20260729215152-1tigfax",
-						"updated": "20260729215152"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1812,7 +1781,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-jyl2mgp",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -1820,7 +1789,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20240530101000-4cqkoel",
 									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "ドキュメントの公開"
+									"TextMarkTextContent": "コミュニティにドキュメントを共有"
 								}
 							]
 						}

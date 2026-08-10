@@ -7,7 +7,7 @@
 		"id": "20240530101000-txrc7z1",
 		"title": "データ履歴",
 		"type": "doc",
-		"updated": "20260803170332"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -190,7 +190,7 @@
 			"Properties": {
 				"ID": "20240530101000-cx6826g",
 				"id": "20240530101000-6rh5qwn",
-				"updated": "20260803170332"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -206,7 +206,7 @@
 			"Properties": {
 				"ID": "20240530101000-yv055fx",
 				"id": "20240530101000-hah36a4",
-				"updated": "20260803170332"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -219,7 +219,7 @@
 					"Properties": {
 						"ID": "20240530101000-hddauoc",
 						"id": "20240530101000-squ7kgm",
-						"updated": "20260803170332"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -228,12 +228,12 @@
 							"Properties": {
 								"ID": "20240530101000-9j8nj4v",
 								"id": "20240530101000-52ypkox",
-								"updated": "20260803170332"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "10 分ごとに更新されたドキュメントの履歴が生成されます (この間隔は、"
+									"Data": "10 分ごとに、その間に更新されたドキュメントとファイルのファイル履歴が生成されます。間隔は "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -242,34 +242,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "エディタ"
+									"TextMarkTextContent": "ドキュメント"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "履歴生成間隔"
+									"TextMarkTextContent": "履歴の生成間隔"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ から調整できます)。履歴フォルダのサフィックスは "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "-update"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ です。"
+									"Data": " で変更でき、履歴フォルダーには -update サフィックスが付きます。"
 								}
 							]
 						}
@@ -532,7 +523,7 @@
 			"Properties": {
 				"ID": "20240530101000-e1mgcdp",
 				"id": "20240530101000-rwtz5xw",
-				"updated": "20250115153501"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -548,7 +539,7 @@
 			"Properties": {
 				"ID": "20240530101000-qlt85ct",
 				"id": "20240530101000-g4c7s4a",
-				"updated": "20250115153501"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -561,7 +552,7 @@
 					"Properties": {
 						"ID": "20240530101000-ma22ziz",
 						"id": "20240530101000-ty8dsb2",
-						"updated": "20250115153501"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -569,7 +560,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-jxujzyn",
-								"updated": "20260720201253"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -587,13 +578,12 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
+									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Alt"
 								},
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code kbd",
-									"TextMarkTextContent": "+"
+									"Type": "NodeText",
+									"Data": "+"
 								},
 								{
 									"Type": "NodeText",
@@ -601,7 +591,7 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
+									"TextMarkType": "kbd",
 									"TextMarkTextContent": "H"
 								},
 								{
@@ -1930,7 +1920,7 @@
 			"Properties": {
 				"ID": "20240530101000-vlp9z19",
 				"id": "20240530101000-nvr8ti7",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1945,7 +1935,7 @@
 			"Properties": {
 				"ID": "20240530101000-8mf8vzx",
 				"id": "20240530101000-2ekt5fx",
-				"updated": "20240530101000"
+				"updated": "20260809160000"
 			},
 			"Children": [
 				{
@@ -1960,6 +1950,34 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ というテキストファイルを作成し、無視したいファイルやフォルダごとに data フォルダからの相対パスを 1 行ずつ記述してください (ワイルドカードに対応)。以下に例を示します:"
+				}
+			]
+		},
+		{
+			"ID": "20260809160000-28adb0e",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809160000-28adb0e",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/**/*\nassets/*.pdf"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

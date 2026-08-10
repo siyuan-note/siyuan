@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260804235500"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -1027,7 +1027,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604222535-cb4cjo9",
-				"updated": "20260803163440"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1041,12 +1041,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260730103436-h7n2k4m",
-				"updated": "20260730103436"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "点击标题左侧三角可折叠或展开当前标题；按住 Alt（macOS 上为 ⌥）点击三角可折叠或展开直接子标题；按住 Alt（macOS 上为 ⌥）点击块标可折叠或展开同级标题。也可以使用块标菜单中的「折叠/展开直接子标题」和「折叠/展开同级标题」。"
+					"Data": "点击标题左侧三角可折叠或展开当前标题；按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS 上为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）点击三角可折叠或展开直接子标题；按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS 上为 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）点击块标可折叠或展开同级标题。也可以使用块标菜单中的「折叠/展开直接子标题」和「折叠/展开同级标题」。"
 				}
 			]
 		},
@@ -2146,7 +2182,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091228-cwrynj4",
-				"updated": "20260616224229"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -2318,7 +2354,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260616221353-d3vta43",
-				"updated": "20260616224229"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -2352,7 +2388,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "语法的高亮显示；导出时，该代码块不会以代码块形式导出，而是转为普通段落文本。"
+					"Data": "语法的高亮显示；导出为模板时，该代码块不会以代码块形式导出，而是转为普通段落文本。"
 				}
 			]
 		},

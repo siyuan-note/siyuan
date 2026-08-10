@@ -6,7 +6,7 @@
 		"id": "20260613155453-sncbsow",
 		"title": "フィールドタイプ",
 		"type": "doc",
-		"updated": "20260803170332"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -1602,7 +1602,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-j6ujmmn",
-				"updated": "20260613155453"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1641,7 +1641,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-hxzdpjl",
-				"updated": "20260613155453"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1694,7 +1694,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-bh825gx",
-						"updated": "20260613155453"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1702,7 +1702,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-n1bglqm",
-								"updated": "20260613155453"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -1716,8 +1716,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Shift+Enter"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",

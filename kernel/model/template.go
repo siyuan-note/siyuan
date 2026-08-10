@@ -151,6 +151,13 @@ func SearchTemplate(keyword string) (ret []*TemplateSearchResult) {
 
 		if group.IsDir() {
 			templateDir := filepath.Join(templates, group.Name())
+			manifestPath := filepath.Join(templateDir, "template.json")
+			if filelock.IsExist(manifestPath) {
+				pkg, parseErr := bazaar.ParsePackageJSON(manifestPath)
+				if parseErr != nil || !bazaar.IsValidInstalledPackage(pkg, group.Name()) {
+					continue
+				}
+			}
 			readmePaths := getTemplateReadmePaths(templateDir)
 			filelock.Walk(templateDir, func(path string, d fs.DirEntry, err error) error {
 				name := strings.ToLower(d.Name())

@@ -6,6 +6,7 @@ import {
     getBazaarCompatibilityFieldVisibility,
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
+    getBazaarPackageInvalidLanguageKey,
     getBazaarThemeModeLabels,
     isValidBazaarPackageName,
 } from "./bazaarPackage";
@@ -28,6 +29,14 @@ describe("getBazaarCompatibilityData", () => {
         assert.equal(getBazaarCompatibilityData("downloaded", undefined, available, fallback), fallback);
         assert.equal(getBazaarCompatibilityData("updated", installed, undefined, fallback), installed);
         assert.equal(getBazaarCompatibilityData("bazaar", undefined, undefined, fallback), fallback);
+    });
+});
+
+describe("getBazaarPackageInvalidLanguageKey", () => {
+    it("maps installed package failures to localized message keys", () => {
+        assert.equal(getBazaarPackageInvalidLanguageKey("missing-manifest"), "bazaarPackageMissingManifest");
+        assert.equal(getBazaarPackageInvalidLanguageKey("invalid-manifest"), "bazaarPackageInvalidManifest");
+        assert.equal(getBazaarPackageInvalidLanguageKey("name-mismatch"), "bazaarPackageNameMismatch");
     });
 });
 

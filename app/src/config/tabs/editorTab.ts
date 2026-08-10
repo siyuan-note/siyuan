@@ -332,6 +332,10 @@ const registerEditorAdvancedGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.katexMacrosTip,
         mode: "textarea",
     });
+    group.switch("editor.dragHTMLFileToIframe", {
+        title: window.siyuan.languages.dragHTMLFileToIframe,
+        desc: window.siyuan.languages.dragHTMLFileToIframeTip,
+    });
     group.switch("editor.allowSVGScript", {
         title: window.siyuan.languages.allowSVGScript,
         desc: window.siyuan.languages.allowSVGScriptTip,

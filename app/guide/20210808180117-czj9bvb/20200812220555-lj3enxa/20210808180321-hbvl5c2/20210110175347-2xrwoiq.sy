@@ -6,7 +6,7 @@
 		"id": "20210110175347-2xrwoiq",
 		"title": "日记",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180438-ficw3e7",
-				"updated": "20260613180438"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613180438-lbirm0p",
-				"updated": "20260613180438"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20260613180438-uyzyax7",
-						"updated": "20260613180438"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -79,7 +79,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613180438-8w4l3b6",
-								"updated": "20260613180438"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -93,8 +93,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Alt+5"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "5"
 								},
 								{
 									"Type": "NodeText",
@@ -102,8 +111,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "⌃5"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌃"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "5"
 								},
 								{
 									"Type": "NodeText",

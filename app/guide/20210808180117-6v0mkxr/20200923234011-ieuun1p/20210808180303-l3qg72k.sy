@@ -7,7 +7,7 @@
 		"id": "20210808180303-l3qg72k",
 		"title": "Advanced search",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -175,7 +175,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193423-ws0z1u9",
-				"updated": "20260613193423"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -204,7 +204,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613193423-6o0q64d",
-				"updated": "20260613193423"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -216,7 +216,7 @@
 					},
 					"Properties": {
 						"id": "20260613193423-3lwdirc",
-						"updated": "20260613193423"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -224,7 +224,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193423-8b9pf9i",
-								"updated": "20260613193423"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -238,8 +238,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+P"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "P"
 								},
 								{
 									"Type": "NodeText",
@@ -391,7 +400,7 @@
 					},
 					"Properties": {
 						"id": "20260613193423-9tqsg45",
-						"updated": "20260613193423"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -399,7 +408,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193423-0whdff2",
-								"updated": "20260613193423"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -413,8 +422,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Z"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Z"
 								},
 								{
 									"Type": "NodeText",

@@ -24,7 +24,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -282,14 +281,19 @@ func FilterMoveDocFromPaths(fromPaths []string, toPath string) (ret []string) {
 }
 
 func FilterSelfChildDocs(paths []string) (ret []string) {
-	sort.Slice(paths, func(i, j int) bool { return strings.Count(paths[i], "/") < strings.Count(paths[j], "/") })
-
-	dirs := map[string]string{}
+	selected := map[string]struct{}{}
 	for _, fromPath := range paths {
-		dir := strings.TrimSuffix(fromPath, ".sy")
+		selected[fromPath] = struct{}{}
+	}
+
+	added := map[string]struct{}{}
+	for _, fromPath := range paths {
+		if _, ok := added[fromPath]; ok {
+			continue
+		}
 		existParent := false
-		for d := range dirs {
-			if strings.HasPrefix(fromPath, d) {
+		for parentDir := path.Dir(fromPath); "/" != parentDir && "." != parentDir; parentDir = path.Dir(parentDir) {
+			if _, ok := selected[parentDir+".sy"]; ok {
 				existParent = true
 				break
 			}
@@ -297,8 +301,8 @@ func FilterSelfChildDocs(paths []string) (ret []string) {
 		if existParent {
 			continue
 		}
-		dirs[dir] = fromPath
 		ret = append(ret, fromPath)
+		added[fromPath] = struct{}{}
 	}
 	return
 }

@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20260804235500"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -1024,7 +1024,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122008-hsi1yp3",
-				"updated": "20260803163402"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1038,12 +1038,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260730103436-t6y3n8d",
-				"updated": "20260730184353"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "點選標題左側三角可摺疊或展開目前標題；按住 Alt（macOS 上為 ⌥）點選三角可摺疊或展開直接子標題；按住 Alt（macOS 上為 ⌥）點選區塊標可摺疊或展開同級標題。也可以使用區塊標選單中的「摺疊/展開直接子標題」和「摺疊/展開同級標題」。"
+					"Data": "點選標題左側三角可摺疊或展開目前標題；按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS 上為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）點選三角可摺疊或展開直接子標題；按住 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（macOS 上為 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "）點選區塊標可摺疊或展開同級標題。也可以使用區塊標選單中的「摺疊/展開直接子標題」和「摺疊/展開同級標題」。"
 				}
 			]
 		},
@@ -2144,7 +2180,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122008-fcs48nq",
-				"updated": "20260616224253"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -2316,7 +2352,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260616221535-0iq3rxe",
-				"updated": "20260616224253"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -2350,7 +2386,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "語法的高亮顯示；匯出時，該程式碼區塊不會以程式碼區塊形式匯出，而是轉為普通段落文字。"
+					"Data": "語法的高亮顯示；匯出為範本時，該程式碼區塊不會以程式碼區塊形式匯出，而是轉為普通段落文字。"
 				}
 			]
 		},

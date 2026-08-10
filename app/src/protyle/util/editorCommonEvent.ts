@@ -2048,15 +2048,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 size: event.dataTransfer.files[i].size
                             });
                         } else {
-                            paste(protyle, event);
+                            paste(protyle, event, {
+                                htmlAsIframe: window.siyuan.config.editor.dragHTMLFileToIframe && !event.altKey,
+                            });
                             break;
                         }
                     }
                     if (files.length > 0) {
-                        uploadLocalFiles(files, protyle, !event.altKey);
+                        uploadLocalFiles(files, protyle, !event.altKey, {
+                            htmlAsIframe: window.siyuan.config.editor.dragHTMLFileToIframe && !event.altKey,
+                        });
                     }
                 } else {
-                    paste(protyle, event);
+                    paste(protyle, event, {
+                        htmlAsIframe: event.dataTransfer.types.includes("Files") &&
+                            window.siyuan.config.editor.dragHTMLFileToIframe && !event.altKey,
+                    });
                 }
                 clearSelect(["av", "img"], protyle.wysiwyg.element);
             } else {

@@ -1648,6 +1648,26 @@ func (refresh *moveDocsRefresh) flushWith(refreshParent func(*parse.Tree), refre
 	}
 }
 
+func orderMoveDocPaths(fromPaths []string, pathsBoxes map[string]*Box) (ret []string) {
+	canonicalPaths := map[string]string{}
+	for canonicalPath := range pathsBoxes {
+		canonicalPaths[util.GetTreeID(canonicalPath)] = canonicalPath
+	}
+	addedPaths := map[string]struct{}{}
+	for _, fromPath := range fromPaths {
+		canonicalPath := canonicalPaths[util.GetTreeID(fromPath)]
+		if "" == canonicalPath {
+			continue
+		}
+		if _, ok := addedPaths[canonicalPath]; ok {
+			continue
+		}
+		ret = append(ret, canonicalPath)
+		addedPaths[canonicalPath] = struct{}{}
+	}
+	return
+}
+
 func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err error) {
 	toBox := Conf.Box(toBoxID)
 	if nil == toBox {
@@ -1655,7 +1675,8 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 		return
 	}
 	toPath = normalizeBoxDocTarget(toBoxID, toPath)
-	if _, err = getBoxesByPathsStrict(fromPaths); err != nil {
+	pathsBoxes, err := getBoxesByPathsStrict(fromPaths)
+	if err != nil {
 		return
 	}
 
@@ -1664,8 +1685,10 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 		return
 	}
 
-	pathsBoxes := getBoxesByPaths(fromPaths)
-	for fromPath, fromBox := range pathsBoxes {
+	fromPaths = orderMoveDocPaths(fromPaths, pathsBoxes)
+
+	for _, fromPath := range fromPaths {
+		fromBox := pathsBoxes[fromPath]
 		if nil != fromBox && IsBoxDocPath(fromBox.ID, fromPath) {
 			return errors.New(Conf.Language(341))
 		}
@@ -1682,7 +1705,8 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 	}
 
 	// 检查路径深度是否超过限制
-	for fromPath, fromBox := range pathsBoxes {
+	for _, fromPath := range fromPaths {
+		fromBox := pathsBoxes[fromPath]
 		childDepth := util.GetChildDocDepth(filepath.Join(util.DataDir, fromBox.ID, fromPath))
 		if depth := strings.Count(toPath, "/") + childDepth; 6 < depth && !Conf.FileTree.AllowCreateDeeper {
 			err = errors.New(Conf.Language(118))
@@ -1692,7 +1716,8 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 
 	// 禁止跨加密边界移动文档：加密笔记本是孤岛，不同加密笔记本各有独立 DEK，
 	// 跨边界移动（普通↔加密、加密 A↔加密 B）会导致密文用错 DEK 损坏数据
-	for _, fromBox := range pathsBoxes {
+	for _, fromPath := range fromPaths {
+		fromBox := pathsBoxes[fromPath]
 		if fromBox.ID != toBox.ID && !IsSameCryptoBoundary(fromBox.ID, toBox.ID) {
 			err = errors.New(Conf.Language(313))
 			return
@@ -1701,7 +1726,8 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 
 	// A progress layer appears when moving more than 64 documents at once https://github.com/siyuan-note/siyuan/issues/9356
 	subDocsCount := 0
-	for fromPath, fromBox := range pathsBoxes {
+	for _, fromPath := range fromPaths {
+		fromBox := pathsBoxes[fromPath]
 		subDocsCount += countSubDocs(fromBox.ID, fromPath)
 	}
 	needShowProgress := 64 < subDocsCount
@@ -1712,7 +1738,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 	FlushTxQueue()
 	luteEngine := util.NewLute()
 	refresh := newMoveDocsRefresh()
-	movedDocs := make([]moveDocResult, 0, len(pathsBoxes))
+	movedDocs := make([]moveDocResult, 0, len(fromPaths))
 	defer func() {
 		if 0 < len(movedDocs) {
 			evt := util.NewCmdResult("moveDocs", 0, util.PushModeBroadcast)
@@ -1723,7 +1749,8 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback any) (err err
 		refresh.flush()
 	}()
 	count := 0
-	for fromPath, fromBox := range pathsBoxes {
+	for _, fromPath := range fromPaths {
+		fromBox := pathsBoxes[fromPath]
 		count++
 		if needShowProgress {
 			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(70), fmt.Sprintf("%d/%d", count, len(fromPaths))))

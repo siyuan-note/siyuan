@@ -85,12 +85,46 @@ type Package struct {
 	DisallowInstall         bool   `json:"disallowInstall"`
 	DisallowUpdate          bool   `json:"disallowUpdate"`
 	UpdateRequiredMinAppVer string `json:"updateRequiredMinAppVer,omitempty"` // 升级目标要求的最小应用版本
+	InvalidReason           string `json:"invalidReason,omitempty"`           // 本地安装包异常原因
 
 	// 专用字段，nil 时不序列化
 	InstalledIncompatible *bool     `json:"installedIncompatible,omitempty"` // 插件/主题：本地已安装版本是否不兼容
 	BazaarIncompatible    *bool     `json:"bazaarIncompatible,omitempty"`    // 插件/主题：在线集市版本是否不兼容
 	Enabled               *bool     `json:"enabled,omitempty"`               // Plugin：是否启用
 	Modes                 *[]string `json:"modes,omitempty"`                 // Theme：支持的模式列表
+}
+
+const (
+	PackageInvalidReasonMissingManifest = "missing-manifest"
+	PackageInvalidReasonInvalidManifest = "invalid-manifest"
+	PackageInvalidReasonNameMismatch    = "name-mismatch"
+)
+
+var reservedPackageNames = map[string]bool{
+	"CON": true, "PRN": true, "AUX": true, "NUL": true,
+	"COM1": true, "COM2": true, "COM3": true, "COM4": true, "COM5": true,
+	"COM6": true, "COM7": true, "COM8": true, "COM9": true,
+	"LPT1": true, "LPT2": true, "LPT3": true, "LPT4": true, "LPT5": true,
+	"LPT6": true, "LPT7": true, "LPT8": true, "LPT9": true,
+}
+
+// IsValidPackageName 判断包名是否可以安全地用作跨平台目录名。
+func IsValidPackageName(packageName string) bool {
+	if len(packageName) < 1 || len(packageName) > 255 || packageName[0] == '.' || packageName[0] == ' ' ||
+		packageName[len(packageName)-1] == '.' || packageName[len(packageName)-1] == ' ' || strings.Contains(packageName, "..") {
+		return false
+	}
+	for _, char := range []byte(packageName) {
+		if char < 0x20 || char > 0x7E || strings.ContainsRune(`<>&'":/\|?*`, rune(char)) {
+			return false
+		}
+	}
+	return !reservedPackageNames[strings.ToUpper(packageName)]
+}
+
+// IsValidInstalledPackage 判断本地集市包的清单名是否与安装目录完全一致。
+func IsValidInstalledPackage(pkg *Package, dirName string) bool {
+	return pkg != nil && pkg.Name == dirName && IsValidPackageName(pkg.Name)
 }
 
 type StageRepo struct {

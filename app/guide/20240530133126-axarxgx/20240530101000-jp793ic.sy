@@ -8,7 +8,7 @@
 		"id": "20240530101000-jp793ic",
 		"title": "よくある質問",
 		"type": "doc",
-		"updated": "20260807094000"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -946,7 +946,7 @@
 			"Properties": {
 				"ID": "20240530101000-owjuw7q",
 				"id": "20240530101000-1u51q5t",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -971,21 +971,66 @@
 			"Properties": {
 				"ID": "20240530101000-lvkbcyv",
 				"id": "20240530101000-iryhc7k",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "リスト項目の最初のサブブロックはブロックアイコンが省略されています。カーソルをこのブロックに移動して、"
+					"Data": "ブロックアイコンが表示されていない場合は、そのブロックにカーソルを置き、"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+/"
+					"TextMarkTextContent": "Shift"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ でブロックメニューを呼び出してください。"
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を複数回押してブロックを選択してから、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でブロックメニューを開きます。macOS では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用します。"
 				}
 			]
 		},

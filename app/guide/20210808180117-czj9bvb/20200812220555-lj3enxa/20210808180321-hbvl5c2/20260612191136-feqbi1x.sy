@@ -6,7 +6,7 @@
 		"id": "20260612191136-feqbi1x",
 		"title": "命令行接口",
 		"type": "doc",
-		"updated": "20260704130000"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -364,7 +364,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618123536-hiq4p1p",
-				"updated": "20260618123536"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -385,7 +385,7 @@
 			"Properties": {
 				"colgroup": "|||",
 				"id": "20260618123536-45t5vzs",
-				"updated": "20260618123536"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -666,6 +666,70 @@
 								{
 									"Type": "NodeText",
 									"Data": "空运行模式，仅验证参数不实际执行"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--log-level"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-v"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "配置值"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "日志级别：off、trace、debug、info、warn、error 或 fatal"
 								}
 							]
 						}
@@ -3100,7 +3164,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618123536-dqkkd2b",
-				"updated": "20260618123536"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -4100,7 +4164,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260618123536-qjkychl",
-				"updated": "20260618123536"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -4113,7 +4177,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新标题\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- 列表项\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"> 引用\"\n\nsiyuan block update --id block-id --data \"修改后内容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\n"
+					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# 新标题\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"段落\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- 列表项\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"> 引用\"\n\nsiyuan block update --id block-id --data \"修改后内容\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\nsiyuan block update --id block-id --data \"updated content\" --lock-type\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -9641,7 +9705,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618123536-nyu2mbp",
-				"updated": "20260618123536"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -10819,7 +10883,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260618123536-g5phsr2",
-				"updated": "20260618123536"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -10834,15 +10898,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ 字段类型："
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "block"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ / "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -11355,7 +11410,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618123536-cso9051",
-				"updated": "20260618123536"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -11821,7 +11876,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260618123536-3or08xu",
-				"updated": "20260618123536"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -11834,7 +11889,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan template search\nsiyuan template search \"会议\"\nsiyuan template get --path templates/周报.md\nsiyuan template create --name \"周报\" --data \"# 周报\"\nsiyuan template create --name \"周报\" --file ./weekly.md\nsiyuan template create --name \"周报\" --data \"# 周报\" --overwrite\nsiyuan template render --path templates/周报.md --id doc-id\nsiyuan template save-as --id doc-id --name \"会议纪要\"\nsiyuan template save-as --id doc-id --name \"会议纪要\" --overwrite\nsiyuan template remove --path templates/周报.md\n"
+					"Data": "siyuan template search\nsiyuan template search \"会议\"\nsiyuan template get --path 周报.md\nsiyuan template create --name \"周报\" --data \"# 周报\"\nsiyuan template create --name \"周报\" --file ./weekly.md\nsiyuan template create --name \"周报\" --data \"# 周报\" --overwrite\nsiyuan template render --path 周报.md --id doc-id\nsiyuan template save-as --id doc-id --name \"会议纪要\"\nsiyuan template save-as --id doc-id --name \"会议纪要\" --overwrite\nsiyuan template remove --path 周报.md\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -12513,6 +12568,153 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260809180000-5cbbbae",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260809180000-5cbbbae",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "服务器"
+				}
+			]
+		},
+		{
+			"ID": "20260809180000-b8412b8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260809180000-b8412b8",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "启动 HTTP 服务器。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--wd"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 指定工作目录，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 指定端口，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--readonly"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 设置只读模式，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--accessAuthCode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 设置访问鉴权码，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--lang"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 设置界面语言，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 设置 dev 或 prod 模式，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--ssl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 启用 HTTPS 和 WSS，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--safe-mode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 启用安全模式。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--attach-ui"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 仅供 Electron 内部使用。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--enable-pprof"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 会公开无需鉴权的进程诊断信息，只能用于本地开发。"
+				}
+			]
+		},
+		{
+			"ID": "20260809180000-a25e336",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809180000-a25e336",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan serve --wd /path/to/workspace --port 6806\nsiyuan serve --wd /path/to/workspace --port 6806 --readonly true\nsiyuan serve --wd /path/to/workspace --port 6806 --accessAuthCode \"secret\" --lang zh-CN --ssl\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

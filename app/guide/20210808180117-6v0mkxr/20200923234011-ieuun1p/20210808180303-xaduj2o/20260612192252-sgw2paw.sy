@@ -6,7 +6,7 @@
 		"id": "20260612192252-sgw2paw",
 		"title": "Command Line Interface",
 		"type": "doc",
-		"updated": "20260704130000"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -364,7 +364,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260618124055-jh5iqpd",
-				"updated": "20260618124055"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -385,7 +385,7 @@
 			"Properties": {
 				"colgroup": "|||",
 				"id": "20260618124055-ynt2ojn",
-				"updated": "20260618124055"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -666,6 +666,70 @@
 								{
 									"Type": "NodeText",
 									"Data": "Dry-run mode: validate arguments without making changes"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--log-level"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "-v"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Configuration value"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Log level: off, trace, debug, info, warn, error, or fatal"
 								}
 							]
 						}
@@ -3100,7 +3164,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618124055-o0i15h9",
-				"updated": "20260618124055"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -4100,7 +4164,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260618124055-y8gn5g3",
-				"updated": "20260618124055"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -4113,7 +4177,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# New Heading\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"paragraph\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- list item\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"> quote\"\n\nsiyuan block update --id block-id --data \"updated content\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\n"
+					"Data": "siyuan block get --id block-id\nsiyuan block children --id block-id\nsiyuan block breadcrumb --id block-id\nsiyuan block dom --id block-id\nsiyuan block kramdown --id block-id\nsiyuan block kramdown --id block-id --mode md\nsiyuan block stat --id doc-id\n\nsiyuan block insert --parent parent-id --data \"# New Heading\"\nsiyuan block insert --parent parent-id --file ./content.md\nsiyuan block insert --parent parent-id --data \"paragraph\" --previous sibling-id\n\nsiyuan block append --parent parent-id --data \"- list item\"\nsiyuan block append --parent parent-id --file ./content.md\n\nsiyuan block prepend --parent parent-id --data \"> quote\"\n\nsiyuan block update --id block-id --data \"updated content\"\nsiyuan block update --id block-id --file ./content.md\n\nsiyuan block delete --id block-id\n\nsiyuan block move --id block-id --parent target-id\nsiyuan block move --id block-id --parent target-id --previous sibling-id\n\nsiyuan block batch-get --ids \"id1,id2,id3\"\nsiyuan block batch-kramdown --ids \"id1,id2,id3\"\nsiyuan block update --id block-id --data \"updated content\" --lock-type\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -9641,7 +9705,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618124055-680zq7t",
-				"updated": "20260618124055"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -10819,7 +10883,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260618124055-uk15vje",
-				"updated": "20260618124055"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -10834,15 +10898,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ field types: "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "block"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ / "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -11355,7 +11410,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260618124055-krii2n8",
-				"updated": "20260618124055"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -11821,7 +11876,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260618124055-2mql8ng",
-				"updated": "20260618124055"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -11834,7 +11889,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "siyuan template search\nsiyuan template search \"meeting\"\nsiyuan template get --path templates/weekly.md\nsiyuan template create --name \"weekly\" --data \"# Weekly\"\nsiyuan template create --name \"weekly\" --file ./weekly.md\nsiyuan template create --name \"weekly\" --data \"# Weekly\" --overwrite\nsiyuan template render --path templates/weekly.md --id doc-id\nsiyuan template save-as --id doc-id --name \"meeting-notes\"\nsiyuan template save-as --id doc-id --name \"meeting-notes\" --overwrite\nsiyuan template remove --path templates/weekly.md\n"
+					"Data": "siyuan template search\nsiyuan template search \"meeting\"\nsiyuan template get --path weekly.md\nsiyuan template create --name \"weekly\" --data \"# Weekly\"\nsiyuan template create --name \"weekly\" --file ./weekly.md\nsiyuan template create --name \"weekly\" --data \"# Weekly\" --overwrite\nsiyuan template render --path weekly.md --id doc-id\nsiyuan template save-as --id doc-id --name \"meeting-notes\"\nsiyuan template save-as --id doc-id --name \"meeting-notes\" --overwrite\nsiyuan template remove --path weekly.md\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -12513,6 +12568,153 @@
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260809180000-53b0536",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260809180000-53b0536",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Server"
+				}
+			]
+		},
+		{
+			"ID": "20260809180000-86e65af",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260809180000-86e65af",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Start the HTTP server. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--wd"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " specifies the working directory, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--port"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " the port, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--readonly"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " read-only mode, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--accessAuthCode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " the access authentication code, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--lang"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " the interface language, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--mode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " dev or prod mode, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--ssl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " HTTPS and WSS, and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--safe-mode"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " safe mode. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--attach-ui"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " is reserved for Electron. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "--enable-pprof"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " exposes unauthenticated process diagnostics and must only be used for local development."
+				}
+			]
+		},
+		{
+			"ID": "20260809180000-349101a",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809180000-349101a",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "siyuan serve --wd /path/to/workspace --port 6806\nsiyuan serve --wd /path/to/workspace --port 6806 --readonly true\nsiyuan serve --wd /path/to/workspace --port 6806 --accessAuthCode \"secret\" --lang en --ssl\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

@@ -39,12 +39,39 @@ export const insertDocumentSortPath = (
     targetPath: string,
     insertAfter: boolean
 ) => {
-    const paths = siblingPaths.filter((path) => getDocumentIDFromPath(path) !== sourceID);
+    return insertSortPaths(siblingPaths, [sourceID], [newPath], targetPath, insertAfter);
+};
+
+export const insertDocumentsSortPaths = (
+    siblingPaths: string[],
+    newPaths: string[],
+    targetPath: string,
+    insertAfter: boolean
+) => insertSortPaths(
+    siblingPaths,
+    newPaths.map(getDocumentIDFromPath),
+    newPaths,
+    targetPath,
+    insertAfter
+);
+
+const insertSortPaths = (
+    siblingPaths: string[],
+    sourceIDs: string[],
+    newPaths: string[],
+    targetPath: string,
+    insertAfter: boolean
+) => {
+    if (newPaths.length === 0 || newPaths.length !== sourceIDs.length) {
+        return;
+    }
+    const sourceIDSet = new Set(sourceIDs);
+    const paths = siblingPaths.filter((path) => !sourceIDSet.has(getDocumentIDFromPath(path)));
     const targetIndex = paths.indexOf(targetPath);
     if (targetIndex === -1) {
         return;
     }
-    paths.splice(targetIndex + (insertAfter ? 1 : 0), 0, newPath);
+    paths.splice(targetIndex + (insertAfter ? 1 : 0), 0, ...newPaths);
     return paths;
 };
 

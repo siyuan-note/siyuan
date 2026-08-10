@@ -687,6 +687,21 @@ ${padHTML}
                     window.siyuan.menus.menu.remove();
                 });
                 window.siyuan.menus.menu.append(uploadMenu);
+                const htmlUploadMenu = new MenuItem({
+                    id: "insertHTMLFile",
+                    icon: "iconHTML5",
+                    label: `${window.siyuan.languages.insertHTMLFile}<input class="b3-form__upload" type="file" multiple="multiple" accept=".html,.htm">`,
+                }).element;
+                htmlUploadMenu.querySelector("input").addEventListener("change", (event: InputEvent & {
+                    target: HTMLInputElement
+                }) => {
+                    if (event.target.files.length === 0) {
+                        return;
+                    }
+                    uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {htmlAsIframe: true});
+                    window.siyuan.menus.menu.remove();
+                });
+                window.siyuan.menus.menu.append(htmlUploadMenu);
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: this.mediaRecorder?.isRecording ? "endRecord" : "startRecord",
                     current: this.mediaRecorder && this.mediaRecorder.isRecording,

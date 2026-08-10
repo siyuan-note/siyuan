@@ -6,7 +6,7 @@
 		"id": "20260804171003-semnt02",
 		"title": "語意搜尋",
 		"type": "doc",
-		"updated": "20260804205607"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -366,7 +366,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170142-5q0v08u",
-				"updated": "20260804180000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -380,7 +380,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170143-zw7lm5z",
-				"updated": "20260804180000"
+				"updated": "20260809160000"
 			},
 			"Children": [
 				{
@@ -395,6 +395,34 @@
 				{
 					"Type": "NodeText",
 					"Data": " 文字檔案。每行填寫一個忽略路徑，支援 gitignore 語法。例如："
+				}
+			]
+		},
+		{
+			"ID": "20260809160000-8ad33a4",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809160000-8ad33a4",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

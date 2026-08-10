@@ -10,6 +10,7 @@ import {isEncryptedBox, isSiYuanUriProtocol} from "../../util/pathName";
 import {isBrowser} from "../../util/functions";
 import type {App} from "../../index";
 import {genUUID} from "../../util/genID";
+import {buildBlockDOMClipboardData} from "./blockDOMClipboard";
 
 export type TSaveExportFileResult = {
     status: "success" | "canceled" | "error";
@@ -381,6 +382,86 @@ export const writeText = (text: string) => {
                 focusByRange(range);
             }
         }
+    }
+};
+
+const writePlainTextFallback = async (text: string) => {
+    try {
+        if (isInAndroid()) {
+            window.JSAndroid.writeClipboard(text);
+            return true;
+        }
+        if (isInHarmony()) {
+            window.JSHarmony.writeClipboard(text);
+            return true;
+        }
+        if (isInIOS()) {
+            window.webkit.messageHandlers.setClipboard.postMessage(text);
+            return true;
+        }
+        if (navigator.clipboard?.writeText) {
+            await navigator.clipboard.writeText(text);
+            return true;
+        }
+    } catch (e) {
+        console.log("Write plain text clipboard error:", e);
+    }
+
+    let range: Range;
+    if (getSelection().rangeCount > 0) {
+        range = getSelection().getRangeAt(0).cloneRange();
+    }
+    const textElement = document.createElement("textarea");
+    textElement.value = text;
+    textElement.style.position = "fixed";
+    document.body.appendChild(textElement);
+    textElement.focus();
+    textElement.select();
+    let copied = false;
+    try {
+        copied = document.execCommand("copy");
+    } catch (e) {
+        console.log("Copy plain text clipboard error:", e);
+    }
+    document.body.removeChild(textElement);
+    if (range) {
+        focusByRange(range);
+    }
+    return copied;
+};
+
+export const writeBlockDOMClipboard = async (lute: Lute, blockDOM: string) => {
+    const {textPlain, textHTML, textSiyuan} = buildBlockDOMClipboardData(lute, blockDOM);
+    try {
+        if (isInAndroid()) {
+            window.JSAndroid.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
+            return true;
+        }
+        if (isInHarmony()) {
+            window.JSHarmony.writeSiYuanHTMLClipboard(textPlain, textHTML, textSiyuan);
+            return true;
+        }
+        if (isInIOS() || !navigator.clipboard?.write || typeof ClipboardItem === "undefined") {
+            const copied = await writePlainTextFallback(textPlain);
+            if (!copied) {
+                showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+            }
+            return copied;
+        }
+        await navigator.clipboard.write([new ClipboardItem({
+            "text/plain": new Blob([textPlain], {type: "text/plain"}),
+            "text/html": new Blob([
+                `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${textHTML}`
+            ], {type: "text/html"}),
+        })]);
+        return true;
+    } catch (e) {
+        console.log("Write block DOM clipboard error:", e);
+        if (await writePlainTextFallback(textPlain)) {
+            return true;
+        }
+        showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+        return false;
     }
 };
 

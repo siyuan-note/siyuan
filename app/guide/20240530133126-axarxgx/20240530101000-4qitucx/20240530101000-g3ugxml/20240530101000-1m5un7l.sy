@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20260803170332"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"Properties": {
 				"ID": "20240530101000-o6et1uc",
 				"id": "20240530101000-m11xu1w",
-				"updated": "20250115152709"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -235,16 +235,12 @@
 			"Properties": {
 				"ID": "20240530101000-v13sz9b",
 				"id": "20240530101000-ev9oag3",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeImage",
 					"Data": "span",
-					"Properties": {
-						"parent-style": "display: block;",
-						"style": "display: block;"
-					},
 					"Children": [
 						{
 							"Type": "NodeBang"
@@ -277,10 +273,6 @@
 							"Type": "NodeCloseParen"
 						}
 					]
-				},
-				{
-					"Type": "NodeKramdownSpanIAL",
-					"Data": "{: style=\"display: block;\" parent-style=\"display: block;\"}"
 				}
 			]
 		},

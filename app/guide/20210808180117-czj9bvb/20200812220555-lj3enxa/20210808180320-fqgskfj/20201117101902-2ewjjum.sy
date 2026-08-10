@@ -6,7 +6,7 @@
 		"id": "20201117101902-2ewjjum",
 		"title": "嵌入内容块",
 		"type": "doc",
-		"updated": "20260612202926"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -351,7 +351,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201224120447-fnapz6h",
-				"updated": "20201224120447"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -365,46 +365,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201224120447-acd7hwp",
-				"updated": "20201224120447"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "查询同时包含 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "在思源中"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 和 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "核心概念"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 文本的"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "段落块"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，并排除当前文档（否则当"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "段落块"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "也会包含到结果集中，因为当前段落同样包含了这两个文本，下面的案例类似）："
+					"Data": "查询最近更新的 7 个非空段落块："
 				}
 			]
 		},
@@ -413,7 +379,7 @@
 			"Type": "NodeBlockQueryEmbed",
 			"Properties": {
 				"id": "20210111224926-ju1sd4d",
-				"updated": "20240508085440"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -424,7 +390,7 @@
 				},
 				{
 					"Type": "NodeBlockQueryEmbedScript",
-					"Data": "SELECT * FROM blocks WHERE content LIKE '%在思源中%' AND content LIKE '%核心概念%' AND type = 'p' AND hpath NOT LIKE '%嵌入内容块%'"
+					"Data": "SELECT * FROM blocks WHERE type = 'p' AND content != '' ORDER BY updated DESC LIMIT 7"
 				},
 				{
 					"Type": "NodeCloseBrace"
@@ -1135,7 +1101,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-dt9gwb2",
-				"updated": "20260612202058"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1165,7 +1131,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202058-tv6co88",
-				"updated": "20260612202058"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1178,7 +1144,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nreturn [\n    \"20240601150405-a1b2c3d\",\n    \"20240601150405-e4f5g6h\"\n];\n}}\n"
+					"Data": "//!js\nreturn [\n    \"20240601150405-a1b2c3d\",\n    \"20240601150405-e4f5g6h\"\n];\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1207,7 +1173,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202058-wp4nan2",
-				"updated": "20260612202058"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1220,7 +1186,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待办\" });\nreturn resp.data.blocks.map(b =\u003e b.id);\n}}\n"
+					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待办\" });\nreturn resp.data.blocks.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1249,7 +1215,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202058-wvrepjj",
-				"updated": "20260612202058"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1262,7 +1228,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b =\u003e b.id);\n}}\n"
+					"Data": "//!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1291,7 +1257,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202058-6kivtwm",
-				"updated": "20260612202058"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1304,7 +1270,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) =\u003e attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) =\u003e id);\nreturn filtered;\n}}\n"
+					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) => attrs[\"custom-tag\"] === \"重要\")\n    .map(([id]) => id);\nreturn filtered;\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",

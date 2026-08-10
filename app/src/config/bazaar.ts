@@ -25,6 +25,7 @@ import {
     getBazaarCompatibilityFieldVisibility,
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
+    getBazaarPackageInvalidLanguageKey,
     getBazaarThemeModeLabels,
 } from "../util/bazaarPackage";
 
@@ -67,7 +68,7 @@ export const mountBazaarTab = (root: HTMLElement, keywords?: string, app?: App) 
  * 渲染集市 README
  */
 export const renderReadme = (bazaarType: TBazaarType, from: "downloaded" | "updated" | "bazaar", data: IBazaarItem) => {
-    if (bazaar.element == null) return;
+    if (bazaar.element == null || data.invalidReason) return;
     bazaar._renderReadme(bazaarType, from, data);
 };
 
@@ -328,6 +329,27 @@ export const bazaar = {
             ` data-position="north" aria-label="${window.siyuan.languages.incompatiblePluginTip}"`;
         const tooltipClass = bazaarType === "themes" ? "" : " ariaLabel";
         return `<span class="fn__space"></span><span${tooltip} class="fn__flex-center${tooltipClass} b3-chip b3-chip--error b3-chip--small">${window.siyuan.languages.incompatible}</span>`;
+    },
+    _getInvalidPackageTip(reason: IBazaarItem["invalidReason"]) {
+        return window.siyuan.languages[getBazaarPackageInvalidLanguageKey(reason)];
+    },
+    _genInvalidDownloadedCardHTML(item: IBazaarItem, bazaarType: TBazaarType) {
+        const tip = bazaar._getInvalidPackageTip(item.invalidReason);
+        return `<div data-name="${escapeAttr(item.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card">
+    <div class="b3-card__img"><img src="/stage/images/icon.png" loading="lazy"/></div>
+    <div class="fn__flex-1 fn__flex-column">
+        <div class="b3-card__info b3-card__info--left fn__flex-1">${escapeHtml(item.name)}</div>
+    </div>
+    <div class="b3-card__actions b3-card__actions--right">
+        <span data-position="north" aria-label="${escapeAttr(tip)}" class="fn__flex-center ariaLabel b3-chip b3-chip--error b3-chip--small">${window.siyuan.languages.bazaarPackageInvalid}</span>
+        <span data-position="north" class="ariaLabel block__icon block__icon--show" data-type="uninstall" aria-label="${window.siyuan.languages.uninstall}">
+            <svg><use xlink:href="#iconTrashcan"></use></svg>
+        </span>
+        <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
+            <svg><use xlink:href="#iconFolder"></use></svg>
+        </span>
+    </div>
+</div>`;
     },
     _getDetailKey(bazaarType: TBazaarType, packageName: string) {
         return `${bazaarType}:${packageName}`;
@@ -654,6 +676,9 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 counterElement.classList.remove("fn__none");
                 counterElement.textContent = packages.length.toString();
                 html = packages.map((bazaarItem: IBazaarItem) => {
+                    if (bazaarItem.invalidReason) {
+                        return bazaar._genInvalidDownloadedCardHTML(bazaarItem, bazaarType);
+                    }
                     const showSwitch = ["icons", "themes"].includes(bazaarType) && !bazaarItem.current;
                     const showDisable = ["icons", "themes"].includes(bazaarType) && bazaarItem.current;
                     let hasSetting = false;
@@ -1720,7 +1745,8 @@ type="checkbox">
                     event.stopPropagation();
                     break;
                 } else if (target.classList.contains("b3-card")) {
-                    if (!hasClosestByClassName(event.target as HTMLElement, "b3-card__actions--right") && pkgItem && pkgType) {
+                    if (!hasClosestByClassName(event.target as HTMLElement, "b3-card__actions--right") &&
+                        pkgItem && !pkgItem.invalidReason && pkgType) {
                         bazaar._renderReadme(pkgType, packageSource, pkgItem);
                     }
                     event.preventDefault();

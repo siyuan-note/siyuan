@@ -17,10 +17,13 @@
 package model
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestIsValidPackageName(t *testing.T) {
@@ -102,14 +105,122 @@ func TestBuildUpdatedPackagesIgnoresMissingAndCurrentPackages(t *testing.T) {
 	installedPackages := []*bazaar.Package{
 		{Name: "current", Version: "2.0.0"},
 		{Name: "missing", Version: "1.0.0"},
+		{Name: "invalid", Version: "1.0.0", InvalidReason: bazaar.PackageInvalidReasonNameMismatch},
 	}
 	bazaarPackagesMap := map[string]*bazaar.Package{
-		"current": &bazaar.Package{Name: "current", Version: "2.0.0"},
+		"current": {Name: "current", Version: "2.0.0"},
+		"invalid": {Name: "invalid", Version: "2.0.0"},
 	}
 
 	updated := buildUpdatedPackages(installedPackages, bazaarPackagesMap)
 	if len(updated) != 0 {
 		t.Fatalf("expected no updated packages, got %d", len(updated))
+	}
+}
+
+func TestGetInstalledPackageInfosIncludesInvalidPackages(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+
+	pluginsPath := filepath.Join(util.DataDir, "plugins")
+	packages := map[string]string{
+		"valid":        `{"name":"valid","version":"1.0.0"}`,
+		"mismatch":     `{"name":"other","version":"1.0.0"}`,
+		"invalid-json": `{`,
+		"插件":           `{"name":"插件","version":"1.0.0"}`,
+	}
+	for name, manifest := range packages {
+		dir := filepath.Join(pluginsPath, name)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, "plugin.json"), []byte(manifest), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.MkdirAll(filepath.Join(pluginsPath, "missing"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	infos, _, _, err := GetInstalledPackageInfos("plugins")
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := map[string]string{}
+	for _, info := range infos {
+		got[info.Pkg.Name] = info.Pkg.InvalidReason
+		if info.Pkg.Name != info.DirName {
+			t.Fatalf("expected package name %q to use directory name %q", info.Pkg.Name, info.DirName)
+		}
+	}
+	want := map[string]string{
+		"valid":        "",
+		"mismatch":     bazaar.PackageInvalidReasonNameMismatch,
+		"invalid-json": bazaar.PackageInvalidReasonInvalidManifest,
+		"missing":      bazaar.PackageInvalidReasonMissingManifest,
+		"插件":           bazaar.PackageInvalidReasonInvalidManifest,
+	}
+	if len(got) != len(want) {
+		t.Fatalf("expected %d packages, got %#v", len(want), got)
+	}
+	for name, reason := range want {
+		if got[name] != reason {
+			t.Fatalf("expected package %q reason %q, got %q", name, reason, got[name])
+		}
+	}
+}
+
+func TestGetInstalledPackageInfosKeepsPlainTemplateDirectories(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+
+	templatesPath := filepath.Join(util.DataDir, "templates")
+	if err := os.MkdirAll(filepath.Join(templatesPath, "plain"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	mismatchPath := filepath.Join(templatesPath, "mismatch")
+	if err := os.MkdirAll(mismatchPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(mismatchPath, "template.json"), []byte(`{"name":"other"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	infos, _, _, err := GetInstalledPackageInfos("templates")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(infos) != 1 || infos[0].Pkg.Name != "mismatch" ||
+		infos[0].Pkg.InvalidReason != bazaar.PackageInvalidReasonNameMismatch {
+		t.Fatalf("unexpected template package infos: %#v", infos)
+	}
+}
+
+func TestGetPackageUninstallPathUsesInvalidPackageDirectory(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+
+	pluginsPath := filepath.Join(util.DataDir, "plugins")
+	for name, manifestName := range map[string]string{"actual": "other", "other": "other"} {
+		dir := filepath.Join(pluginsPath, name)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		manifest := `{"name":"` + manifestName + `"}`
+		if err := os.WriteFile(filepath.Join(dir, "plugin.json"), []byte(manifest), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	installPath, err := getPackageUninstallPath("plugins", "actual")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if installPath != filepath.Join(pluginsPath, "actual") {
+		t.Fatalf("expected invalid package directory, got %q", installPath)
 	}
 }
 

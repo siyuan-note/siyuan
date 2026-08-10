@@ -7,7 +7,7 @@
 		"id": "20230805231816-h1z9mpc",
 		"title": "Function Features",
 		"type": "doc",
-		"updated": "20230903112409"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -30,7 +30,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230805231959-y72erst",
-				"updated": "20230805232135"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -59,37 +59,6 @@
 									"TextMarkBlockRefID": "20230805232018-hgrq0ju",
 									"TextMarkBlockRefSubtype": "s",
 									"TextMarkTextContent": "Connect with third-party cloud storage"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230805231959-dxodu0t",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20230805231959-dxodu0t",
-						"updated": "20230805232135"
-					},
-					"Children": [
-						{
-							"ID": "20230805231959-war6lc7",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230805231959-war6lc7",
-								"updated": "20230805232135"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20230805232134-3d6mx2k",
-									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "Search asset content"
 								}
 							]
 						}

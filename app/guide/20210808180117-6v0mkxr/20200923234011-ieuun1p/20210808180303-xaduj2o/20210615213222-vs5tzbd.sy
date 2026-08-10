@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -169,7 +169,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120326-dopr4db",
-				"updated": "20260803163440"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135308-30uwxvd",
-				"updated": "20260803163440"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -196,7 +196,7 @@
 					},
 					"Properties": {
 						"id": "20220501135308-kwaramc",
-						"updated": "20260803163440"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -204,20 +204,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135308-yr7v67z",
-								"updated": "20260803163440"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Every 10 minutes, "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "a"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " history will be generated for the documents updated within these 10 minutes (the interval can be set by "
+									"Data": "Every 10 minutes, file history is generated for documents and files updated during that interval. The interval can be adjusted in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -226,34 +218,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Documents"
+									"TextMarkTextContent": "Document"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "History Generation Interval"
+									"TextMarkTextContent": "History generation interval"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " ​ make adjustments), and the suffix of the history folder is "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "-update"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": ", and the history folder uses the suffix -update."
 								}
 							]
 						}
@@ -1776,7 +1759,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210928101257-l27t5uo",
-				"updated": "20210928101257"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1790,7 +1773,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210928101257-3m7efdr",
-				"updated": "20210928220616"
+				"updated": "20260809160000"
 			},
 			"Children": [
 				{
@@ -1805,6 +1788,34 @@
 				{
 					"Type": "NodeText",
 					"Data": " on the file system, each line is configured with the relative path of the data folder, which means that the path of the file or folder is ignored and wildcard characters are supported. E.g:"
+				}
+			]
+		},
+		{
+			"ID": "20260809160000-3ab2338",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809160000-3ab2338",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/**/*\nassets/*.pdf"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
 				}
 			]
 		},

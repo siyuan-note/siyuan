@@ -45,6 +45,7 @@ import {
     IDocumentTabDragData,
     IFileTreeMove,
     insertDocumentSortPath,
+    insertDocumentsSortPaths,
     parseDocumentTabDragData,
     restoreMovedExpandedDocItems,
     updateMovedSubtree
@@ -838,30 +839,49 @@ export class Files extends Model {
                         notebooks,
                     });
                 } else if ((ulSort === "6" || (window.siyuan.config.fileTree.sort === 6 && ulSort === "15")) && selectFileElements.length > 0) {
-                    let hasMove = false;
                     const toDir = pathPosix().dirname(toPath);
                     const newElementClassList = newElement.getAttribute("class");
-                    if (fromPaths.length > 0) {
-                        const sourceNotebookIds = selectFileElements.map((item) =>
-                            item.getAttribute("data-notebook-id") || item.closest("ul[data-url]")?.getAttribute("data-url") || "");
-                        if (!isMoveTargetAllowed(sourceNotebookIds, toURL)) {
-                            showMessage(window.siyuan.languages._kernel[313]);
-                            newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
-                            return;
-                        }
-                        await fetchSyncPost("/api/filetree/moveDocs", {
-                            toNotebook: toURL,
-                            fromPaths,
-                            toPath: toDir === "/" ? "/" : toDir + ".sy",
-                            callback: Constants.CB_MOVE_NOLIST,
-                        });
-                        selectFileElements.forEach(item => {
-                            const fromPath = item.getAttribute("data-path");
-                            const newPath = pathPosix().join(toDir, item.getAttribute("data-node-id") + ".sy");
-                            updateMovedSubtree(item, getFileTreeChildList(item), fromPath, newPath);
-                        });
-                        hasMove = true;
+                    const sourceNotebookIds = selectFileElements.map((item) =>
+                        item.getAttribute("data-notebook-id") || item.closest("ul[data-url]")?.getAttribute("data-url") || "");
+                    if (!isMoveTargetAllowed(sourceNotebookIds, toURL)) {
+                        showMessage(window.siyuan.languages._kernel[313]);
+                        newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                        return;
                     }
+                    const siblingPaths: string[] = [];
+                    Array.from(newElement.parentElement.children).forEach(item => {
+                        const itemPath = item.getAttribute("data-path");
+                        if (item.tagName === "LI" && itemPath) {
+                            siblingPaths.push(itemPath);
+                        }
+                    });
+                    const newPaths = selectFileElements.map((item) =>
+                        pathPosix().join(toDir, item.getAttribute("data-node-id") + ".sy"));
+                    const sortedPaths = insertDocumentsSortPaths(
+                        siblingPaths,
+                        newPaths,
+                        toPath,
+                        newElementClassList.includes("dragover__bottom")
+                    );
+                    if (!sortedPaths || (sortedPaths.length === siblingPaths.length &&
+                        sortedPaths.every((itemPath, index) => itemPath === siblingPaths[index]))) {
+                        newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                        return;
+                    }
+                    const moveResponse = await fetchSyncPost("/api/filetree/moveDocs", {
+                        toNotebook: toURL,
+                        fromPaths,
+                        toPath: toDir === "/" ? "/" : toDir + ".sy",
+                        callback: Constants.CB_MOVE_NOLIST,
+                    });
+                    if (moveResponse.code !== 0) {
+                        newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                        return;
+                    }
+                    selectFileElements.forEach((item, index) => {
+                        const fromPath = item.getAttribute("data-path");
+                        updateMovedSubtree(item, getFileTreeChildList(item), fromPath, newPaths[index]);
+                    });
                     if (newElementClassList.includes("dragover__top")) {
                         selectFileElements.forEach(item => {
                             let nextULElement;
@@ -874,7 +894,7 @@ export class Files extends Model {
                             }
                         });
                     } else if (newElementClassList.includes("dragover__bottom")) {
-                        selectFileElements.reverse().forEach(item => {
+                        [...selectFileElements].reverse().forEach(item => {
                             let nextULElement;
                             if (item.nextElementSibling && item.nextElementSibling.tagName === "UL") {
                                 nextULElement = item.nextElementSibling;
@@ -889,30 +909,26 @@ export class Files extends Model {
                             }
                         });
                     }
-                    const paths: string[] = [];
-                    Array.from(newElement.parentElement.children).forEach(item => {
-                        if (item.tagName === "LI") {
-                            paths.push(item.getAttribute("data-path"));
-                        }
-                    });
-                    fetchPost("/api/filetree/changeSort", {
-                        paths,
+                    const sortResponse = await fetchSyncPost("/api/filetree/changeSort", {
+                        paths: sortedPaths,
                         notebook: toURL
-                    }, () => {
-                        if (hasMove) {
-                            fetchPost("/api/filetree/listDocsByPath", {
-                                notebook: toURL,
-                                path: toDir === "/" ? "/" : toDir + ".sy",
-                                app: Constants.SIYUAN_APPID,
-                            }, response => {
-                                if (response.data.path === "/" && response.data.files.length === 0) {
-                                    showMessage(window.siyuan.languages.emptyContent);
-                                    return;
-                                }
-                                this.onLsHTML(response.data, oldScrollTop);
-                            });
-                        }
                     });
+                    if (sortResponse.code !== 0) {
+                        newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                        return;
+                    }
+                    const listResponse = await fetchSyncPost("/api/filetree/listDocsByPath", {
+                        notebook: toURL,
+                        path: toDir === "/" ? "/" : toDir + ".sy",
+                        app: Constants.SIYUAN_APPID,
+                    });
+                    if (listResponse.code === 0 && listResponse.data?.files) {
+                        if (listResponse.data.path === "/" && listResponse.data.files.length === 0) {
+                            showMessage(window.siyuan.languages.emptyContent);
+                        } else {
+                            this.onLsHTML(listResponse.data, oldScrollTop);
+                        }
+                    }
                 }
             }
             newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");

@@ -23,6 +23,17 @@ export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     };
 };
 
+export const getBazaarPackageInvalidLanguageKey = (reason?: TBazaarPackageInvalidReason) => {
+    switch (reason) {
+        case "missing-manifest":
+            return "bazaarPackageMissingManifest";
+        case "name-mismatch":
+            return "bazaarPackageNameMismatch";
+        default:
+            return "bazaarPackageInvalidManifest";
+    }
+};
+
 const getBazaarSystemLabels = (systems: string[], allLabel: string) => {
     if (!systems.length || systems.includes("all")) {
         return [allLabel];

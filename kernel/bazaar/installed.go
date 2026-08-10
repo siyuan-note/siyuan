@@ -65,6 +65,14 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 
 // SetInstalledPackageMetadata 设置本地集市包的通用元数据
 func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType string) bool {
+	if pkg.InvalidReason != "" {
+		pkg.PreferredName = pkg.Name
+		pkg.Installed = true
+		pkg.InstallTime, pkg.UpdateTime = getPackageTimes(pkgType, pkg.Name, installPath)
+		pkg.HInstallDate = time.UnixMilli(pkg.InstallTime).Format("2006-01-02")
+		return true
+	}
+
 	// 展示信息
 	pkg.IconURL = baseURLPath + "icon.png"
 	pkg.PreviewURL = baseURLPath + "preview.png"

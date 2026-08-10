@@ -28,6 +28,35 @@
         touch-action: none;
       }
     }
+
+    .protyle-background {
+      &__img {
+        margin-bottom: 0;
+
+        img {
+          height: clamp(96px, 18vh, 180px);
+        }
+
+        &:not(.fn__none) + .protyle-background__ia {
+          display: none;
+        }
+      }
+
+      &__ia {
+        position: absolute;
+        top: 8px;
+        right: 16px;
+        z-index: 2;
+        margin: 0 !important;
+
+        > .protyle-background__icon,
+        > .b3-chips,
+        [data-type="tag"],
+        [data-type="icon"] {
+          display: none;
+        }
+      }
+    }
   }
 
   &__content {

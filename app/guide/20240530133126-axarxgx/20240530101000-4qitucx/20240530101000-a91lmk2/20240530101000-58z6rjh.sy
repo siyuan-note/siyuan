@@ -7,7 +7,7 @@
 		"id": "20240530101000-58z6rjh",
 		"title": "データベーステーブル",
 		"type": "doc",
-		"updated": "20260803163243"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-vygoylv",
 				"id": "20240530101000-dgjyf1m",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -37,12 +37,90 @@
 			"Properties": {
 				"ID": "20240530101000-hvstsva",
 				"id": "20240530101000-t05qdqe",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "このテーブルはコンテンツブロックのデータを格納するために使用されます。"
+					"Data": "公開クエリテーブルには "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "blocks"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（コンテンツブロック）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "spans"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（インライン要素）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（アセット参照）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "attributes"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（ブロック属性）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "refs"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（ブロック参照）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "file_annotation_refs"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（アセット注釈参照）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " があります。以下に blocks テーブルの構造を示します。その他のテーブルも同じ SQL クエリインターフェースから使用できます。"
 				}
 			]
 		},

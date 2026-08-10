@@ -6,33 +6,9 @@
 		"id": "20201222100339-i5hzcph",
 		"title": "Database table",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
-		{
-			"ID": "20201117103851-gx21lz6",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20201117103851-gx21lz6",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
-					"Type": "NodeText",
-					"Data": "Table "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "blocks"
-				}
-			]
-		},
 		{
 			"ID": "20201224120448-t51cvuj",
 			"Type": "NodeParagraph",
@@ -122,6 +98,30 @@
 				{
 					"Type": "NodeText",
 					"Data": ". The blocks schema is listed below; the other tables can be queried through the same SQL interface."
+				}
+			]
+		},
+		{
+			"ID": "20201117103851-gx21lz6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20201117103851-gx21lz6",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "Table "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "blocks"
 				}
 			]
 		},
@@ -652,7 +652,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "{: name=\u0026quot;value\u0026quot;}"
+									"TextMarkTextContent": "{: name=&quot;value&quot;}"
 								},
 								{
 									"Type": "NodeText",

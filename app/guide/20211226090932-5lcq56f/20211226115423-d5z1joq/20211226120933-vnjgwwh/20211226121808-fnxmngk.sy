@@ -6,29 +6,9 @@
 		"id": "20211226121808-fnxmngk",
 		"title": "資料庫表",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
-		{
-			"ID": "20211226121831-ppl9gr8",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"id": "20211226121831-ppl9gr8",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "blocks"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 表"
-				}
-			]
-		},
 		{
 			"ID": "20211226121831-umbkur3",
 			"Type": "NodeParagraph",
@@ -118,6 +98,26 @@
 				{
 					"Type": "NodeText",
 					"Data": "。下方列出了 blocks 表結構，其他表可透過同一 SQL 查詢介面使用。"
+				}
+			]
+		},
+		{
+			"ID": "20211226121831-ppl9gr8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20211226121831-ppl9gr8",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "blocks"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 表"
 				}
 			]
 		},
@@ -648,7 +648,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "{: name=\u0026quot;value\u0026quot;}"
+									"TextMarkTextContent": "{: name=&quot;value&quot;}"
 								},
 								{
 									"Type": "NodeText",

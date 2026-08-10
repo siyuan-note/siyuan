@@ -7,7 +7,7 @@
 		"id": "20211226115423-d5z1joq",
 		"title": "請從這裡開始",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -1750,7 +1750,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20230104151953-48hwkwf",
 									"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "分享文檔到社區"
+									"TextMarkTextContent": "分享文檔到社區"
 								}
 							]
 						}
@@ -2160,7 +2160,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20240508003351-4zwl9vb",
-				"updated": "20260729215152"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -2178,7 +2178,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260729215152-205syf5",
-				"updated": "20260729215152"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -2207,37 +2207,6 @@
 									"TextMarkBlockRefID": "20230805232903-erdoerp",
 									"TextMarkBlockRefSubtype": "d",
 									"TextMarkTextContent": "對接第三方雲端存儲"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20260729215152-14aqmma",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20260729215152-14aqmma",
-						"updated": "20260729215152"
-					},
-					"Children": [
-						{
-							"ID": "20240508003403-bxu9xxq",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20240508003403-bxu9xxq",
-								"updated": "20240508003416"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20230805232920-5fdco36",
-									"TextMarkBlockRefSubtype": "d",
-									"TextMarkTextContent": "搜索資源文件內容"
 								}
 							]
 						}

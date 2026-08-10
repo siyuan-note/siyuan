@@ -6,7 +6,7 @@
 		"id": "20211226120349-rbkmozu",
 		"title": "在内容區塊中遨遊",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -258,7 +258,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120415-p3ajlx2",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -272,7 +272,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120415-xb01abh",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -304,7 +304,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": " 控制。"
 				}
 			]
 		},
@@ -314,7 +314,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120415-id98kff",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -329,7 +329,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226120415-b7xvx0p",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -341,7 +341,7 @@
 					},
 					"Properties": {
 						"id": "20211226120415-806dm3p",
-						"updated": "20260809232000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -349,12 +349,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120415-b4ufivw",
-								"updated": "20260809232000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "將滑鼠懸浮在反向連結列表的來源文檔上可進行預覽"
+									"Data": "將滑鼠懸浮在反向連結列表的來源文檔或反向連結內容的區塊標上可進行預覽"
 								}
 							]
 						}

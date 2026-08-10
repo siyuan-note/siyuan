@@ -6,7 +6,7 @@
 		"id": "20201117101902-2ewjjum",
 		"title": "嵌入内容块",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -814,7 +814,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "(url, data, callback?) =\u0026gt; void"
+									"TextMarkTextContent": "(url, data, callback?) =&gt; void"
 								},
 								{
 									"Type": "NodeText",
@@ -976,7 +976,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "number \u0026#124; undefined"
+									"TextMarkTextContent": "number &#124; undefined"
 								},
 								{
 									"Type": "NodeText",
@@ -1073,7 +1073,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "// 同步返回\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n\n// 异步返回（Promise 会被自动 await）\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待办\" })\n    .then(r =\u003e r.data.blocks.map(b =\u003e b.id));\n"
+					"Data": "// 同步返回\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n\n// 异步返回（Promise 会被自动 await）\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"待办\" })\n    .then(r => r.data.blocks.map(b => b.id));\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1101,7 +1101,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-dt9gwb2",
-				"updated": "20260809232000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -1115,13 +1115,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-8quyqb9",
-				"updated": "20260612202058"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "strong",
-					"TextMarkTextContent": "嵌入固定的几个块："
+					"Type": "NodeText",
+					"Data": "嵌入固定的几个块："
 				}
 			]
 		},
@@ -1157,13 +1156,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-nzro8zw",
-				"updated": "20260612202058"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "strong",
-					"TextMarkTextContent": "通过全文搜索动态获取："
+					"Type": "NodeText",
+					"Data": "通过全文搜索动态获取："
 				}
 			]
 		},
@@ -1199,13 +1197,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-2v9xnq8",
-				"updated": "20260612202058"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "strong",
-					"TextMarkTextContent": "获取当前文档下所有子块："
+					"Type": "NodeText",
+					"Data": "获取当前文档下所有子块："
 				}
 			]
 		},
@@ -1241,13 +1238,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202058-kb0mobj",
-				"updated": "20260612202058"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "strong",
-					"TextMarkTextContent": "按自定义属性过滤："
+					"Type": "NodeText",
+					"Data": "按自定义属性过滤："
 				}
 			]
 		},
@@ -1284,7 +1280,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202058-7o8g0fu",
-				"updated": "20260612202058"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -1301,7 +1297,7 @@
 			},
 			"Properties": {
 				"id": "20260612202058-ih0e8zv",
-				"updated": "20260612202058"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -1315,7 +1311,7 @@
 					},
 					"Properties": {
 						"id": "20260612202058-x78zwd5",
-						"updated": "20260612202058"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -1323,13 +1319,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202058-eixyatk",
-								"updated": "20260612202058"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "不做自动索引"
+									"Type": "NodeText",
+									"Data": "不做自动索引"
 								},
 								{
 									"Type": "NodeText",
@@ -1350,7 +1345,7 @@
 					},
 					"Properties": {
 						"id": "20260612202058-zjwzokw",
-						"updated": "20260612202058"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -1358,13 +1353,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202058-57rsop5",
-								"updated": "20260612202058"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "最大嵌套 4 层"
+									"Type": "NodeText",
+									"Data": "最大嵌套 4 层"
 								},
 								{
 									"Type": "NodeText",
@@ -1385,7 +1379,7 @@
 					},
 					"Properties": {
 						"id": "20260612202058-niuyc9c",
-						"updated": "20260612202058"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -1393,13 +1387,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202058-0x1tkd6",
-								"updated": "20260612202058"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "不嵌套自身类型"
+									"Type": "NodeText",
+									"Data": "不嵌套自身类型"
 								},
 								{
 									"Type": "NodeText",
@@ -1429,7 +1422,7 @@
 					},
 					"Properties": {
 						"id": "20260612202058-vuy2gbe",
-						"updated": "20260612202058"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -1437,13 +1430,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202058-c32za6h",
-								"updated": "20260612202058"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "错误提示"
+									"Type": "NodeText",
+									"Data": "错误提示"
 								},
 								{
 									"Type": "NodeText",
@@ -1464,7 +1456,7 @@
 					},
 					"Properties": {
 						"id": "20260612202058-8zhr6r3",
-						"updated": "20260612202058"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -1472,13 +1464,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202058-qh54hmx",
-								"updated": "20260612202058"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "安全性"
+									"Type": "NodeText",
+									"Data": "安全性"
 								},
 								{
 									"Type": "NodeText",
@@ -1487,7 +1478,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;script\u0026gt;"
+									"TextMarkTextContent": "&lt;script&gt;"
 								},
 								{
 									"Type": "NodeText",

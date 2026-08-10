@@ -7,30 +7,9 @@
 		"id": "20240530101000-58z6rjh",
 		"title": "データベーステーブル",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260810212846"
 	},
 	"Children": [
-		{
-			"ID": "20240530101000-dgjyf1m",
-			"Type": "NodeHeading",
-			"HeadingLevel": 2,
-			"Properties": {
-				"ID": "20240530101000-vygoylv",
-				"id": "20240530101000-dgjyf1m",
-				"updated": "20260809232000"
-			},
-			"Children": [
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "blocks"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ テーブル"
-				}
-			]
-		},
 		{
 			"ID": "20240530101000-t05qdqe",
 			"Type": "NodeParagraph",
@@ -121,6 +100,27 @@
 				{
 					"Type": "NodeText",
 					"Data": " があります。以下に blocks テーブルの構造を示します。その他のテーブルも同じ SQL クエリインターフェースから使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-dgjyf1m",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-vygoylv",
+				"id": "20240530101000-dgjyf1m",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "blocks"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ テーブル"
 				}
 			]
 		},
@@ -660,7 +660,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "{: name=\u0026quot;value\u0026quot;}"
+									"TextMarkTextContent": "{: name=&quot;value&quot;}"
 								},
 								{
 									"Type": "NodeText",

@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "हर क्षमता और क्रिया के लिए स्वचालित स्वीकृति अलग से तय की जा सकती है",
 	"agentCapabilitiesActions": "क्रियाएँ",
 	"agentCapabilitiesSelected": "चयनित: ${selected}/${total}",
-	"agentCapabilities": "Agent क्षमताएँ",
+	"agentCapabilities": "क्षमताएँ",
 	"agentCapabilitiesTip": "नियंत्रित करें कि Agent किन क्षमताओं को खोज और चला सकता है",
 	"agentCapabilitiesEnableAll": "सभी सक्षम करें",
 	"agentCapabilitiesDisableAll": "सभी अक्षम करें",

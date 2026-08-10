@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "ניתן להגדיר אישור אוטומטי בנפרד לכל יכולת ופעולה",
 	"agentCapabilitiesActions": "פעולות",
 	"agentCapabilitiesSelected": "נבחרו: ${selected}/${total}",
-	"agentCapabilities": "יכולות Agent",
+	"agentCapabilities": "יכולות",
 	"agentCapabilitiesTip": "שליטה ביכולות ש-Agent יכול לגלות ולהפעיל",
 	"agentCapabilitiesEnableAll": "הפעלת הכול",
 	"agentCapabilitiesDisableAll": "השבתת הכול",

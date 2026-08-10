@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "機能と操作ごとに自動承認を個別に設定できます",
 	"agentCapabilitiesActions": "操作",
 	"agentCapabilitiesSelected": "選択済み：${selected}/${total}",
-	"agentCapabilities": "Agent 機能",
+	"agentCapabilities": "機能",
 	"agentCapabilitiesTip": "Agent が検出して呼び出せる機能を制御します",
 	"agentCapabilitiesEnableAll": "すべて有効",
 	"agentCapabilitiesDisableAll": "すべて無効",

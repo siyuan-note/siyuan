@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "L’approbation automatique peut être définie séparément pour chaque capacité et action",
 	"agentCapabilitiesActions": "Actions",
 	"agentCapabilitiesSelected": "Sélectionnées : ${selected}/${total}",
-	"agentCapabilities": "Capacités de l’Agent",
+	"agentCapabilities": "Capacités",
 	"agentCapabilitiesTip": "Contrôler les capacités que l’Agent peut découvrir et appeler",
 	"agentCapabilitiesEnableAll": "Tout activer",
 	"agentCapabilitiesDisableAll": "Tout désactiver",

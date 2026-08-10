@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "Автоматическое одобрение можно настроить отдельно для каждой возможности и действия",
 	"agentCapabilitiesActions": "Действия",
 	"agentCapabilitiesSelected": "Выбрано: ${selected}/${total}",
-	"agentCapabilities": "Возможности Agent",
+	"agentCapabilities": "Возможности",
 	"agentCapabilitiesTip": "Управление возможностями, которые Agent может обнаруживать и вызывать",
 	"agentCapabilitiesEnableAll": "Включить все",
 	"agentCapabilitiesDisableAll": "Отключить все",

@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "ตั้งค่าการอนุมัติอัตโนมัติแยกตามความสามารถและการดำเนินการได้",
 	"agentCapabilitiesActions": "การดำเนินการ",
 	"agentCapabilitiesSelected": "เลือกแล้ว: ${selected}/${total}",
-	"agentCapabilities": "ความสามารถของ Agent",
+	"agentCapabilities": "ความสามารถ",
 	"agentCapabilitiesTip": "ควบคุมความสามารถที่ Agent สามารถค้นพบและเรียกใช้ได้",
 	"agentCapabilitiesEnableAll": "เปิดใช้ทั้งหมด",
 	"agentCapabilitiesDisableAll": "ปิดใช้ทั้งหมด",

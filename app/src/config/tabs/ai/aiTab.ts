@@ -21,7 +21,6 @@ import {
     mountGroupedModelPicker,
 } from "./aiProviderUi";
 import {
-    genAgentCapabilityHtml,
     getAgentCapabilityKeywords,
     mountAgentCapabilityBlock,
 } from "./aiCapabilityUi";
@@ -124,15 +123,13 @@ const registerAiAgentGroup = (tab: SettingTabBuilder) => {
         min: 0,
         max: 10,
     });
-};
-
-const registerAiAgentCapabilitiesGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("agentCapabilities", window.siyuan.languages.agentCapabilities);
-
-    group.slot({
-        key: "agentCapabilities",
+    group.button({
+        id: "aiAgentCapabilities",
+        title: window.siyuan.languages.agentCapabilities,
+        desc: window.siyuan.languages.agentCapabilitiesTip,
+        label: window.siyuan.languages.config,
+        icon: "iconSettings",
         keywords: getAgentCapabilityKeywords(),
-        html: genAgentCapabilityHtml,
         afterMount: mountAgentCapabilityBlock,
     });
 };
@@ -273,7 +270,6 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiProvidersGroup(tab);
     registerAiEditingGroup(tab);
     registerAiAgentGroup(tab);
-    registerAiAgentCapabilitiesGroup(tab);
     registerAiImageGenerationGroup(tab);
     registerAiMcpGroup(tab);
     // TODO: add skills group?

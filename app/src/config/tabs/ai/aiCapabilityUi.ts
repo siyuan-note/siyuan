@@ -1,7 +1,5 @@
-import {Dialog} from "../../../dialog";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
-import {isMobile} from "../../../util/functions";
 import {listCapabilityManifests} from "../../../layout/dock/agent/frontendCapabilities";
 import {aiConfigApi} from "./aiRuntime";
 
@@ -182,44 +180,76 @@ const capabilityMatches = (capability: ICapabilityInfo, query: string) => {
     ].some((value) => value?.toLocaleLowerCase().includes(query));
 };
 
-const openAgentCapabilityDialog = (settingRoot: HTMLElement, capabilities: ICapabilityInfo[]) => {
+const getCapabilityViewHost = (root: HTMLElement) =>
+    root.closest<HTMLElement>(".config__tab-container") || root;
+
+const removeAgentCapabilityView = (root: HTMLElement, view?: HTMLElement) => {
+    const host = getCapabilityViewHost(root);
+    const views = view ? [view] : Array.from(host.children).filter((element): element is HTMLElement =>
+        element instanceof HTMLElement && element.classList.contains("config-agent-capability__view"));
+    views.forEach((item) => {
+        item.classList.remove("config__view--show");
+        item.addEventListener("transitionend", (event) => {
+            if (event.propertyName === "opacity") {
+                item.remove();
+            }
+        });
+        window.setTimeout(() => item.remove(), 300);
+    });
+};
+
+const openAgentCapabilityView = (settingRoot: HTMLElement, capabilities: ICapabilityInfo[]) => {
     const expanded = new Set<string>();
     let query = "";
     let onlySelected = false;
-    const dialog = new Dialog({
-        title: window.siyuan.languages.agentCapabilities,
-        width: isMobile() ? "96vw" : "min(900px, 90vw)",
-        height: isMobile() ? "90vh" : "min(820px, 86vh)",
-        content: `<div class="b3-dialog__content" style="height:100%;box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden;">
-    <div class="b3-label b3-label--inner" style="flex-shrink:0;">${window.siyuan.languages.agentCapabilitiesDialogTip}</div>
-    <div class="fn__hr"></div>
-    <div class="fn__flex" style="flex-shrink:0;align-items:center;">
-        <div class="fn__flex-1" style="position:relative;">
-            <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-            <input class="b3-text-field b3-form__icon-input fn__block" data-type="searchAgentCapabilities" placeholder="${escapeAttribute(window.siyuan.languages.agentCapabilitiesSearch)}">
+    removeAgentCapabilityView(settingRoot);
+    const view = document.createElement("div");
+    view.className = "config-agent-capability__view config__view";
+    view.innerHTML = `<div class="b3-dialog__header fn__flex">
+    <div class="block__logo fn__pointer fn__flex-1" data-action="back">
+        <svg class="block__logoicon"><use xlink:href="#iconLeft"></use></svg>
+        <span class="ft__breakword">${escapeHtml(window.siyuan.languages.agentCapabilities)}</span>
+    </div>
+</div>
+<div class="b3-dialog__body fn__flex-1" style="overflow:hidden;">
+<div class="b3-dialog__content config-agent-capability__content">
+    <div class="config-group config-agent-capability__controls">
+        <div class="config-items">
+            <div class="b3-label config-item">
+                <div class="b3-label__text">${window.siyuan.languages.agentCapabilitiesDialogTip}</div>
+                <div class="fn__hr--small"></div>
+                <div class="b3-form__icon">
+                    <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
+                    <input class="b3-text-field b3-form__icon-input fn__block" data-type="searchAgentCapabilities" placeholder="${escapeAttribute(window.siyuan.languages.agentCapabilitiesSearch)}">
+                </div>
+            </div>
+            <label class="fn__flex b3-label config-item config-wrap">
+                <div class="fn__flex-1">
+                    <div class="config-name">${window.siyuan.languages.agentCapabilitiesOnlySelected}</div>
+                    <div class="b3-label__text" data-type="agentCapabilitySelectedCount"></div>
+                </div>
+                <span class="fn__space"></span>
+                <input class="b3-switch" data-type="onlySelectedAgentCapabilities" type="checkbox">
+            </label>
+            <div class="fn__flex b3-label config-item config-wrap">
+                <div class="b3-label__text fn__flex-1">${window.siyuan.languages.agentCapabilitiesAutoApproveTip}</div>
+                <span class="fn__space"></span>
+                <button class="b3-button b3-button--outline" data-type="enableAllAgentCapabilities">${window.siyuan.languages.agentCapabilitiesEnableAll}</button>
+                <span class="fn__space"></span>
+                <button class="b3-button b3-button--outline" data-type="disableAllAgentCapabilities">${window.siyuan.languages.agentCapabilitiesDisableAll}</button>
+            </div>
         </div>
-        <span class="fn__space"></span>
-        <label class="fn__flex-center"><input class="b3-switch" data-type="onlySelectedAgentCapabilities" type="checkbox"><span class="fn__space--small"></span>${window.siyuan.languages.agentCapabilitiesOnlySelected}</label>
     </div>
-    <div class="fn__hr"></div>
-    <div class="fn__flex" style="flex-shrink:0;">
-        <button class="b3-button b3-button--outline" data-type="enableAllAgentCapabilities">${window.siyuan.languages.agentCapabilitiesEnableAll}</button>
-        <span class="fn__space"></span>
-        <button class="b3-button b3-button--outline" data-type="disableAllAgentCapabilities">${window.siyuan.languages.agentCapabilitiesDisableAll}</button>
-    </div>
-    <div class="fn__hr"></div>
-    <div class="fn__flex-1" data-type="agentCapabilityList" style="min-height:0;overflow:auto;"></div>
-    <div class="fn__hr"></div>
-    <div class="fn__flex b3-label__text" style="flex-shrink:0;align-items:center;">
-        <span class="fn__flex-1">${window.siyuan.languages.agentCapabilitiesAutoApproveTip}</span>
-        <span data-type="agentCapabilitySelectedCount"></span>
-    </div>
-</div>`,
-    });
+    <div class="config-agent-capability__list" data-type="agentCapabilityList"></div>
+</div>
+</div>`;
+    getCapabilityViewHost(settingRoot).append(view);
+    view.getBoundingClientRect();
+    view.classList.add("config__view--show");
 
     const render = () => {
-        const list = dialog.element.querySelector<HTMLElement>("[data-type='agentCapabilityList']");
-        const count = dialog.element.querySelector<HTMLElement>("[data-type='agentCapabilitySelectedCount']");
+        const list = view.querySelector<HTMLElement>("[data-type='agentCapabilityList']");
+        const count = view.querySelector<HTMLElement>("[data-type='agentCapabilitySelectedCount']");
         if (!list || !count) {
             return;
         }
@@ -237,40 +267,50 @@ const openAgentCapabilityDialog = (settingRoot: HTMLElement, capabilities: ICapa
         });
         list.innerHTML = Array.from(groups.entries()).map(([label, items], groupIndex) => {
             const groupEnabled = items.every((capability) => isCapabilityAllowed(capability.id));
-            return `<details open data-capability-group="${groupIndex}">
-    <summary class="fn__flex" style="cursor:pointer;padding:8px 4px;align-items:center;">
-        <span class="fn__flex-1">${escapeHtml(label)} (${items.length})</span>
+            return `<section class="config-group" data-capability-group="${groupIndex}">
+    <div class="config-title config-title--action">
+        <span>${escapeHtml(label)} (${items.length})</span>
+        <span class="fn__flex-1"></span>
         <button class="b3-button b3-button--outline" data-type="toggleAgentCapabilityGroup" data-group-index="${groupIndex}">${groupEnabled ? window.siyuan.languages.agentCapabilitiesDisableAll : window.siyuan.languages.selectAll}</button>
-    </summary>
-    <div class="b3-list b3-list--border b3-list--background">
+    </div>
+    <div class="config-items">
         ${items.map((capability) => {
             const actions = capability.actions || [];
             const opened = expanded.has(capability.id);
-            const actionSummary = actions.length > 0
-                ? `<span class="b3-label__text" style="display:block;">${window.siyuan.languages.agentCapabilitiesActions}: ${escapeHtml(actions.map((action) => action.name).join(", "))}</span>`
-                : "";
-            return `<div data-capability-id="${escapeAttribute(capability.id)}">
-    <div class="b3-list-item b3-list-item--narrow" style="height:auto;align-items:flex-start;padding-top:10px;padding-bottom:10px;">
-        <input data-type="toggleAgentCapability" type="checkbox"${isCapabilityAllowed(capability.id) ? " checked" : ""}>
+            return `<div class="b3-label config-item" data-capability-id="${escapeAttribute(capability.id)}">
+    <div class="fn__flex config-wrap">
+        <div class="fn__flex-1 config-agent-capability__main">
+            <div class="config-name">${escapeHtml(capability.title || capability.name)}</div>
+            ${capability.description ? `<div class="b3-label__text config-agent-capability__description" title="${escapeAttribute(capability.description)}">${escapeHtml(capability.description)}</div>` : ""}
+        </div>
         <span class="fn__space"></span>
-        <span class="fn__flex-1" style="min-width:0;">
-            <span class="b3-list-item__text" style="display:block;">${escapeHtml(capability.title || capability.name)}</span>
-            ${capability.description ? `<span class="b3-label__text" style="display:block;">${escapeHtml(capability.description)}</span>` : ""}
-            ${actionSummary}
-            <span class="b3-list-item__meta" style="display:block;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(capability.id)}</span>
-        </span>
-        <span class="fn__space"></span>
-        <label class="fn__flex-center"><input class="b3-switch" data-type="toggleAgentCapabilityApproval" type="checkbox"${isCapabilityAutoApproved(capability.id) ? " checked" : ""}><span class="fn__space--small"></span>${window.siyuan.languages.agentCapabilitiesAutoApprove}</label>
-        ${actions.length > 0 ? `<button class="b3-list-item__action" data-type="toggleAgentCapabilityActions" aria-label="${escapeAttribute(window.siyuan.languages.agentCapabilitiesActions)}"><svg style="transform:rotate(${opened ? "90deg" : "0"});"><use xlink:href="#iconRight"></use></svg></button>` : ""}
+        <input class="b3-switch" data-type="toggleAgentCapability" type="checkbox" aria-label="${escapeAttribute(capability.title || capability.name)}"${isCapabilityAllowed(capability.id) ? " checked" : ""}>
+        <button class="block__icon block__icon--show config-agent-capability__expand" data-type="toggleAgentCapabilityActions" aria-label="${escapeAttribute(window.siyuan.languages.agentCapabilitiesActions)}"><svg style="transform:rotate(${opened ? "90deg" : "0"});"><use xlink:href="#iconRight"></use></svg></button>
     </div>
-    ${actions.length > 0 && opened ? `<div style="padding:0 12px 8px 42px;">${actions.map((action) => `<label class="fn__flex b3-label__text" style="padding:5px 0;align-items:center;">
-        <span class="fn__flex-1"><code>${escapeHtml(action.name)}</code></span>
+    ${opened ? `<div class="config-agent-capability__details">
+        <div class="fn__hr"></div>
+        <div class="b3-label b3-label--inner">
+            <div class="b3-label__text"><code>${escapeHtml(capability.id)}</code></div>
+        </div>
+        <label class="fn__flex b3-label b3-label--inner config-wrap">
+            <div class="fn__flex-1">
+                <div class="config-name">${window.siyuan.languages.agentCapabilitiesAutoApprove}</div>
+                <div class="b3-label__text">${window.siyuan.languages.agentCapabilitiesAutoApproveTip}</div>
+            </div>
+            <span class="fn__space"></span>
+            <input class="b3-switch" data-type="toggleAgentCapabilityApproval" type="checkbox"${isCapabilityAutoApproved(capability.id) ? " checked" : ""}>
+        </label>
+        ${actions.length > 0 ? `<div class="b3-label b3-label--inner config-name">${window.siyuan.languages.agentCapabilitiesActions}</div>
+        ${actions.map((action) => `<label class="fn__flex b3-label b3-label--inner config-wrap">
+        <code class="fn__flex-1">${escapeHtml(action.name)}</code>
+        <span class="fn__space"></span>
         <input class="b3-switch" data-type="toggleAgentCapabilityActionApproval" data-capability-action="${escapeAttribute(action.name)}" type="checkbox"${isCapabilityAutoApproved(capability.id, action.name) ? " checked" : ""}>
-    </label>`).join("")}</div>` : ""}
+    </label>`).join("")}` : ""}
+    </div>` : ""}
 </div>`;
         }).join("")}
     </div>
-</details>`;
+</section>`;
         }).join("");
         const selected = capabilities.filter((capability) => isCapabilityAllowed(capability.id)).length;
         count.textContent = window.siyuan.languages.agentCapabilitiesSelected
@@ -290,18 +330,17 @@ const openAgentCapabilityDialog = (settingRoot: HTMLElement, capabilities: ICapa
 
     const onPolicyApplied = () => {
         render();
-        refreshCapabilitySummary(settingRoot, capabilities);
     };
 
-    dialog.element.querySelector<HTMLInputElement>("[data-type='searchAgentCapabilities']")?.addEventListener("input", (event) => {
+    view.querySelector<HTMLInputElement>("[data-type='searchAgentCapabilities']")?.addEventListener("input", (event) => {
         query = (event.target as HTMLInputElement).value;
         render();
     });
-    dialog.element.querySelector<HTMLInputElement>("[data-type='onlySelectedAgentCapabilities']")?.addEventListener("change", (event) => {
+    view.querySelector<HTMLInputElement>("[data-type='onlySelectedAgentCapabilities']")?.addEventListener("change", (event) => {
         onlySelected = (event.target as HTMLInputElement).checked;
         render();
     });
-    dialog.element.addEventListener("change", (event) => {
+    view.addEventListener("change", (event) => {
         const input = event.target as HTMLInputElement;
         const type = input.dataset.type;
         const id = input.closest<HTMLElement>("[data-capability-id]")?.dataset.capabilityId;
@@ -319,7 +358,12 @@ const openAgentCapabilityDialog = (settingRoot: HTMLElement, capabilities: ICapa
             }
         }
     });
-    dialog.element.addEventListener("click", (event) => {
+    view.addEventListener("click", (event) => {
+        const action = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
+        if (action?.dataset.action === "back") {
+            removeAgentCapabilityView(settingRoot, view);
+            return;
+        }
         const target = (event.target as HTMLElement).closest<HTMLElement>("[data-type]");
         if (!target) {
             return;
@@ -341,8 +385,7 @@ const openAgentCapabilityDialog = (settingRoot: HTMLElement, capabilities: ICapa
         }
     });
     render();
-    dialog.element.querySelector<HTMLInputElement>("[data-type='searchAgentCapabilities']")?.focus();
-    refreshCapabilitySummary(settingRoot, capabilities);
+    view.querySelector<HTMLInputElement>("[data-type='searchAgentCapabilities']")?.focus();
 };
 
 const loadCapabilities = (callback: (capabilities: ICapabilityInfo[]) => void) => {
@@ -351,23 +394,6 @@ const loadCapabilities = (callback: (capabilities: ICapabilityInfo[]) => void) =
         addUnavailableCapabilities(capabilities);
         callback(capabilities);
     });
-};
-
-const refreshCapabilitySummary = (root: HTMLElement, loaded?: ICapabilityInfo[]) => {
-    const update = (capabilities: ICapabilityInfo[]) => {
-        const summary = root.querySelector<HTMLElement>("[data-type='agentCapabilitySummary']");
-        if (!summary) {
-            return;
-        }
-        const selected = capabilities.filter((capability) => isCapabilityAllowed(capability.id)).length;
-        summary.textContent = window.siyuan.languages.agentCapabilitiesSelected
-            .replace("${selected}", String(selected)).replace("${total}", String(capabilities.length));
-    };
-    if (loaded) {
-        update(loaded);
-    } else {
-        loadCapabilities(update);
-    }
 };
 
 export const getAgentCapabilityKeywords = (): string[] => [
@@ -380,25 +406,8 @@ export const getAgentCapabilityKeywords = (): string[] => [
     window.siyuan.languages.agentCapabilitiesAutoApprove,
 ];
 
-export const genAgentCapabilityHtml = (): string => `<div class="b3-label config-item" id="aiAgentCapabilities">
-    <div class="fn__flex">
-        <div class="fn__flex-1">
-            <div class="config-name">${window.siyuan.languages.agentCapabilities}</div>
-            <div class="b3-label__text">${window.siyuan.languages.agentCapabilitiesTip}</div>
-            <div class="b3-label__text" data-type="agentCapabilitySummary"></div>
-        </div>
-        <span class="fn__space"></span>
-        <button class="b3-button b3-button--outline fn__flex-center" data-type="configureAgentCapabilities">${window.siyuan.languages.config}</button>
-    </div>
-</div>`;
-
 export const mountAgentCapabilityBlock = (root: HTMLElement) => {
-    const block = root.querySelector<HTMLElement>("#aiAgentCapabilities");
-    if (!block) {
-        return;
-    }
-    refreshCapabilitySummary(root);
-    block.querySelector("[data-type='configureAgentCapabilities']")?.addEventListener("click", () => {
-        loadCapabilities((capabilities) => openAgentCapabilityDialog(root, capabilities));
+    root.querySelector("#aiAgentCapabilities")?.addEventListener("click", () => {
+        loadCapabilities((capabilities) => openAgentCapabilityView(root, capabilities));
     });
 };

@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "Automatyczne zatwierdzanie można ustawić osobno dla każdej możliwości i działania",
 	"agentCapabilitiesActions": "Działania",
 	"agentCapabilitiesSelected": "Wybrano: ${selected}/${total}",
-	"agentCapabilities": "Możliwości Agent",
+	"agentCapabilities": "Możliwości",
 	"agentCapabilitiesTip": "Kontroluj możliwości, które Agent może wykrywać i wywoływać",
 	"agentCapabilitiesEnableAll": "Włącz wszystko",
 	"agentCapabilitiesDisableAll": "Wyłącz wszystko",

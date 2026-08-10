@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "Persetujuan otomatis dapat diatur terpisah untuk setiap kemampuan dan tindakan",
 	"agentCapabilitiesActions": "Tindakan",
 	"agentCapabilitiesSelected": "Dipilih: ${selected}/${total}",
-	"agentCapabilities": "Kemampuan Agent",
+	"agentCapabilities": "Kemampuan",
 	"agentCapabilitiesTip": "Kontrol kemampuan yang dapat ditemukan dan dipanggil oleh Agent",
 	"agentCapabilitiesEnableAll": "Aktifkan semua",
 	"agentCapabilitiesDisableAll": "Nonaktifkan semua",

@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "يمكن ضبط الموافقة التلقائية بشكل منفصل لكل قدرة وإجراء",
 	"agentCapabilitiesActions": "الإجراءات",
 	"agentCapabilitiesSelected": "المحدد: ${selected}/${total}",
-	"agentCapabilities": "قدرات Agent",
+	"agentCapabilities": "القدرات",
 	"agentCapabilitiesTip": "التحكم في القدرات التي يمكن لـ Agent اكتشافها واستدعاؤها",
 	"agentCapabilitiesEnableAll": "تمكين الكل",
 	"agentCapabilitiesDisableAll": "تعطيل الكل",

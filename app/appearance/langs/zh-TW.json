@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "可以為每個能力及其操作分別設定是否自動核准",
 	"agentCapabilitiesActions": "操作",
 	"agentCapabilitiesSelected": "已選擇：${selected}/${total}",
-	"agentCapabilities": "Agent 能力",
+	"agentCapabilities": "能力",
 	"agentCapabilitiesTip": "控制 Agent 可以發現及呼叫的能力",
 	"agentCapabilitiesEnableAll": "全部啟用",
 	"agentCapabilitiesDisableAll": "全部停用",

@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "Автоматичне схвалення можна налаштувати окремо для кожної можливості та дії",
 	"agentCapabilitiesActions": "Дії",
 	"agentCapabilitiesSelected": "Вибрано: ${selected}/${total}",
-	"agentCapabilities": "Можливості Agent",
+	"agentCapabilities": "Можливості",
 	"agentCapabilitiesTip": "Керування можливостями, які Agent може знаходити та викликати",
 	"agentCapabilitiesEnableAll": "Увімкнути все",
 	"agentCapabilitiesDisableAll": "Вимкнути все",

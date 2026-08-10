@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "각 기능과 작업별로 자동 승인을 따로 설정할 수 있습니다",
 	"agentCapabilitiesActions": "작업",
 	"agentCapabilitiesSelected": "선택됨: ${selected}/${total}",
-	"agentCapabilities": "Agent 기능",
+	"agentCapabilities": "기능",
 	"agentCapabilitiesTip": "Agent가 검색하고 호출할 수 있는 기능을 제어합니다",
 	"agentCapabilitiesEnableAll": "모두 활성화",
 	"agentCapabilitiesDisableAll": "모두 비활성화",

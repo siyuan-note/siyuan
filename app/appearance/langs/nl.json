@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "Automatische goedkeuring kan per mogelijkheid en actie worden ingesteld",
 	"agentCapabilitiesActions": "Acties",
 	"agentCapabilitiesSelected": "Geselecteerd: ${selected}/${total}",
-	"agentCapabilities": "Agent-mogelijkheden",
+	"agentCapabilities": "Mogelijkheden",
 	"agentCapabilitiesTip": "Bepaal welke mogelijkheden de Agent kan ontdekken en aanroepen",
 	"agentCapabilitiesEnableAll": "Alles inschakelen",
 	"agentCapabilitiesDisableAll": "Alles uitschakelen",

@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "Otomatik onay her yetenek ve eylem için ayrı ayrı ayarlanabilir",
 	"agentCapabilitiesActions": "Eylemler",
 	"agentCapabilitiesSelected": "Seçilen: ${selected}/${total}",
-	"agentCapabilities": "Agent yetenekleri",
+	"agentCapabilities": "Yetenekler",
 	"agentCapabilitiesTip": "Agent'ın keşfedip çağırabileceği yetenekleri denetleyin",
 	"agentCapabilitiesEnableAll": "Tümünü etkinleştir",
 	"agentCapabilitiesDisableAll": "Tümünü devre dışı bırak",

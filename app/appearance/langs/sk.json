@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "Automatické schválenie možno nastaviť osobitne pre každú možnosť a akciu",
 	"agentCapabilitiesActions": "Akcie",
 	"agentCapabilitiesSelected": "Vybrané: ${selected}/${total}",
-	"agentCapabilities": "Možnosti Agenta",
+	"agentCapabilities": "Možnosti",
 	"agentCapabilitiesTip": "Určuje možnosti, ktoré môže Agent objaviť a volať",
 	"agentCapabilitiesEnableAll": "Povoliť všetko",
 	"agentCapabilitiesDisableAll": "Zakázať všetko",

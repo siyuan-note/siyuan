@@ -6,7 +6,7 @@
 	"agentCapabilitiesAutoApproveTip": "Die automatische Genehmigung kann für jede Funktion und Aktion getrennt festgelegt werden",
 	"agentCapabilitiesActions": "Aktionen",
 	"agentCapabilitiesSelected": "Ausgewählt: ${selected}/${total}",
-	"agentCapabilities": "Agent-Funktionen",
+	"agentCapabilities": "Funktionen",
 	"agentCapabilitiesTip": "Steuert, welche Funktionen der Agent erkennen und aufrufen kann",
 	"agentCapabilitiesEnableAll": "Alle aktivieren",
 	"agentCapabilitiesDisableAll": "Alle deaktivieren",

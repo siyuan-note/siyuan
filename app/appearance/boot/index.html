@@ -36,8 +36,8 @@
             opacity: 0;
             transform-box: fill-box;
             transform-origin: center;
-            animation: bootStreakConverge 1.8s cubic-bezier(0.33, 0, 0.2, 1) var(--delay, 0s) forwards,
-                       bootStreakFade 0.6s ease 1.6s forwards;
+            animation: bootStreakConverge 1.6s cubic-bezier(0.33, 0, 0.2, 1) var(--delay, 0s) forwards,
+                       bootStreakFade 0.5s ease 1.5s forwards;
         }
 
         @keyframes bootStreakConverge {
@@ -66,7 +66,7 @@
             transform-box: fill-box;
             transform-origin: center;
             transform: scale(0.94);
-            animation: bootLogoForm 1s cubic-bezier(0.22, 1, 0.36, 1) 1.5s forwards;
+            animation: bootLogoForm 0.75s cubic-bezier(0.22, 1, 0.36, 1) 1.25s forwards;
         }
 
         @keyframes bootLogoForm {
@@ -187,7 +187,7 @@
                 const dist = 600 + Math.random() * 800;
                 line.style.setProperty("--dx", Math.cos(angle) * dist + "px");
                 line.style.setProperty("--dy", Math.sin(angle) * dist + "px");
-                line.style.setProperty("--delay", (Math.random() * 0.6) + "s");
+                line.style.setProperty("--delay", (Math.random() * 0.4) + "s");
                 streaksG.appendChild(line);
             }
         });
@@ -248,7 +248,7 @@
                     es.close()
                     if (navigator.userAgent.indexOf('Electron') === -1) {
                         // 内核完成后尽快结束动画，把剩余动画快进到终态（200ms 收尾）
-                        const animTotalMs = 2500
+                        const animTotalMs = 2000
                         const elapsed = Date.now() - bootShowStart
                         const remaining = animTotalMs - elapsed
                         const bootSvg = document.querySelector("#bg svg")

@@ -22,6 +22,7 @@ import {Plugin} from "../../plugin";
 import {Custom} from "./Custom";
 import {clearBeforeResizeTop, recordBeforeResizeTop} from "../../protyle/util/resize";
 import {Constants} from "../../constants";
+import {updatePluginDockShowStates} from "./pluginDockState";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 
@@ -529,9 +530,6 @@ export class Dock {
                     });
                 }
             }
-            if (isSaveLayout) {
-                this.saveLocalPlugin(type, {show: false});
-            }
         } else {
             this.elements[index].querySelectorAll(".dock__item--active").forEach(item => {
                 item.classList.remove("dock__item--active", "dock__item--activefocus");
@@ -704,10 +702,11 @@ export class Dock {
             if (document.activeElement) {
                 (document.activeElement as HTMLElement).blur();
             }
-            if (isSaveLayout) {
-                this.saveLocalPlugin(type, {show: true});
-            }
             this.showDock();
+        }
+
+        if (isSaveLayout) {
+            this.saveLocalPluginShow(index);
         }
 
         // dock 中两个面板的显示关系
@@ -1011,5 +1010,25 @@ export class Dock {
                 return true;
             }
         });
+    }
+
+    private saveLocalPluginShow(index: number) {
+        const states: {type: string, show: boolean}[] = [];
+        this.elements[index].querySelectorAll(".dock__item").forEach((item) => {
+            const type = item.getAttribute("data-type");
+            if (type) {
+                states.push({
+                    type,
+                    show: item.classList.contains("dock__item--active"),
+                });
+            }
+        });
+        if (updatePluginDockShowStates(
+            states,
+            this.app.plugins,
+            window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS],
+        )) {
+            setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);
+        }
     }
 }

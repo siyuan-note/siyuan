@@ -176,6 +176,7 @@ export class BlockPanel {
             if (this.isBacklink) {
                 action.push(Constants.CB_GET_BACKLINK);
             }
+            const isDocument = response.data.rootID === this.refDefs[index].refID;
             const editor = new Protyle(this.app, editorElement, {
                 databaseAttr: true,
                 blockId: this.refDefs[index].refID,
@@ -186,7 +187,8 @@ export class BlockPanel {
                     scroll: true,
                     gutter: true,
                     breadcrumbDocName: true,
-                    title: response.data.rootID === this.refDefs[index].refID, // 如果块是文档，显示文档标题
+                    background: isDocument,
+                    title: isDocument, // 如果块是文档，显示文档标题
                 },
                 typewriterMode: false,
                 after: (editor) => {

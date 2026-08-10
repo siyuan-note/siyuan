@@ -21,6 +21,16 @@ import {fetchCoverData, getCategoryLabel} from "./coverData";
 import {openDocTagMenu} from "./openDocTagMenu";
 /// #endif
 
+const bindPopoverDialog = (dialog: Dialog, ownerElement: HTMLElement) => {
+    const popoverElement = ownerElement.closest<HTMLElement>(".block__popover");
+    const popoverOID = popoverElement?.dataset.oid;
+    const popoverLevel = popoverElement?.dataset.level;
+    if (popoverOID && popoverLevel) {
+        dialog.element.dataset.popoverOid = popoverOID;
+        dialog.element.dataset.popoverLevel = popoverLevel;
+    }
+};
+
 const bgs = [
     "background:radial-gradient(black 3px, transparent 4px),radial-gradient(black 3px, transparent 4px),linear-gradient(#fff 4px, transparent 0),linear-gradient(45deg, transparent 74px, transparent 75px, #a4a4a4 75px, #a4a4a4 76px, transparent 77px, transparent 109px),linear-gradient(-45deg, transparent 75px, transparent 76px, #a4a4a4 76px, #a4a4a4 77px, transparent 78px, transparent 109px),#fff;background-size: 109px 109px, 109px 109px,100% 6px, 109px 109px, 109px 109px;background-position: 54px 55px, 0px 0px, 0px 0px, 0px 0px, 0px 0px;",
     "background: linear-gradient(45deg, #dca 12%, transparent 0, transparent 88%, #dca 0),linear-gradient(135deg, transparent 37%, #a85 0, #a85 63%, transparent 0),linear-gradient(45deg, transparent 37%, #dca 0, #dca 63%, transparent 0) #753;background-size: 25px 25px;",
@@ -280,6 +290,7 @@ export class Background {
                         height: isMobile() ? "80vh" : "70vh",
                     });
                     dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDRANDOM);
+                    bindPopoverDialog(dialog, protyle.element);
 
                     const renderCSSPatterns = (d: Dialog) => {
                         let html = "";
@@ -475,6 +486,7 @@ export class Background {
 </div>`,
                     });
                     dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDLINK);
+                    bindPopoverDialog(dialog, protyle.element);
                     const btnsElement = dialog.element.querySelectorAll(".b3-button");
                     btnsElement[0].addEventListener("click", () => {
                         dialog.destroy();
@@ -776,6 +788,11 @@ export class Background {
             // 移动端键盘弹起和点击加号需保持滚动高度一致
             this.imgElement.style.height = "200px";
             /// #endif
+            if (this.element.closest(".block__popover")) {
+                this.imgElement.style.removeProperty("height");
+                this.imgElement.style.removeProperty("min-height");
+                this.imgElement.style.removeProperty("max-height");
+            }
         } else {
             this.imgElement.parentElement.classList.add("fn__none");
             this.actionElements[2].classList.remove("fn__none");

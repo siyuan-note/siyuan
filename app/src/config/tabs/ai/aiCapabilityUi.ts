@@ -243,7 +243,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
         <span class="ft__breakword">${escapeHtml(window.siyuan.languages.agentCapabilities)}</span>
     </div>
 </div>
-<div class="b3-dialog__body fn__flex-1 fn__flex-column" style="overflow:hidden;">
+<div class="b3-dialog__body fn__flex-1" style="overflow:hidden;">
 <div class="layout-tab-bar fn__flex">
     <div class="item item--full item--focus" data-capability-scope="agent"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.agentCapabilitiesScopeAgent}</span><span class="fn__flex-1"></span></div>
     <div class="item item--full" data-capability-scope="mcp"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.agentCapabilitiesScopeMcp}</span><span class="fn__flex-1"></span></div>

@@ -87,7 +87,10 @@ export class Editor extends Model {
         this.editor.protyle.model = this;
     }
 
-    public updateBacklinkPanel() {
+    public updateBacklinkPanel(reset = false) {
+        if (reset) {
+            this.destroyBacklinkPanel();
+        }
         if (!window.siyuan.config.editor.backlinkShowBottom) {
             this.destroyBacklinkPanel();
             return;

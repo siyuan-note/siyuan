@@ -79,6 +79,10 @@ const (
 	DefaultHeadingNumberFormat = "decimal-hierarchical"
 )
 
+func NormalizeBacklinkExpandCount(count int) int {
+	return max(-1, count)
+}
+
 func NewEditor() *Editor {
 	return &Editor{
 		FontSize:                        16,

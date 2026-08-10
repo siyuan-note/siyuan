@@ -66,6 +66,7 @@ import {base64ToURL} from "../util/image";
 import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
 import {isEncryptedBox} from "../util/pathName";
+import {getHTMLAssetIFrameSrc} from "../asset/html";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -2117,7 +2118,9 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
                         iframeElement.style.width = "640px";
                     }
                 } else {
-                    iframeElement.setAttribute("src", value);
+                    const src = getHTMLAssetIFrameSrc(value);
+                    iframeElement.setAttribute("src", src);
+                    (event.target as HTMLTextAreaElement).value = src;
                 }
 
                 updateTransaction(protyle, nodeElement, html);

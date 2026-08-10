@@ -391,8 +391,10 @@ func newItemDocumentPreview(blockTree *treenode.BlockTree, boxID, renderedPath, 
 	parentTemplate := newItemParentPathTemplate(renderedPath)
 	baseHPath := "/"
 	if boxID == blockTree.BoxID && !strings.HasPrefix(parentTemplate, "/") {
-		baseHPath = blockTree.HPath
-		preview.parentID = blockTree.RootID
+		if !IsBoxDoc(blockTree.BoxID, blockTree.RootID) {
+			baseHPath = blockTree.HPath
+			preview.parentID = blockTree.RootID
+		}
 	}
 	parentHPath := path.Clean(path.Join(baseHPath, parentTemplate))
 	if "." == parentHPath || "" == parentHPath {

@@ -160,6 +160,80 @@ func TestValidateCreateDocReportsClosedNotebook(t *testing.T) {
 	}
 }
 
+func TestCreateDocsByHPathUsesBoxDocAsLogicalRoot(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	boxDocTree := treenode.NewTree(
+		fixture.box.ID,
+		"/"+fixture.box.ID+".sy",
+		"/File operation test",
+		"File operation test",
+	)
+	if _, err := filesys.WriteTree(boxDocTree); err != nil {
+		t.Fatalf("write notebook document failed: %v", err)
+	}
+	treenode.UpsertBlockTree(boxDocTree)
+	t.Cleanup(func() {
+		for _, hPath := range []string{"/Direct reference", "/2026", "/2026/202608", "/2026/202608/Reference"} {
+			if tree := treenode.GetBlockTreeRootByHPath(fixture.box.ID, hPath); nil != tree {
+				cache.RemoveTreeData(tree.ID)
+				cache.RemoveDocIAL(tree.Path)
+			}
+		}
+		cache.RemoveTreeData(boxDocTree.ID)
+		cache.RemoveDocIAL(boxDocTree.Path)
+	})
+
+	directDocID := "20260718000003-abcdefg"
+	createdID, err := createDocsByHPath(
+		fixture.box.ID,
+		"/Direct reference",
+		"",
+		fixture.box.ID,
+		directDocID,
+		false,
+	)
+	if err != nil {
+		t.Fatalf("create direct document from notebook document failed: %v", err)
+	}
+	if directDocID != createdID {
+		t.Fatalf("unexpected direct document ID: got %s, want %s", createdID, directDocID)
+	}
+	directTree := treenode.GetBlockTree(directDocID)
+	if nil == directTree {
+		t.Fatalf("created direct document block tree [%s] not found", directDocID)
+	}
+	if "/Direct reference" != directTree.HPath || "/"+directDocID+".sy" != directTree.Path {
+		t.Fatalf("unexpected direct document location: %+v", directTree)
+	}
+
+	docID := "20260718000004-abcdefg"
+	createdID, err = createDocsByHPath(
+		fixture.box.ID,
+		"/2026/202608/Reference",
+		"",
+		fixture.box.ID,
+		docID,
+		false,
+	)
+	if err != nil {
+		t.Fatalf("create document from notebook document failed: %v", err)
+	}
+	if docID != createdID {
+		t.Fatalf("unexpected created document ID: got %s, want %s", createdID, docID)
+	}
+
+	createdTree := treenode.GetBlockTree(docID)
+	if nil == createdTree {
+		t.Fatalf("created document block tree [%s] not found", docID)
+	}
+	if "/2026/202608/Reference" != createdTree.HPath {
+		t.Fatalf("unexpected created document path: got %s", createdTree.HPath)
+	}
+	if "/"+docID+".sy" == createdTree.Path {
+		t.Fatalf("configured parent path was discarded: %s", createdTree.Path)
+	}
+}
+
 func TestGetBoxesByPathsStrictRejectsInvalidPaths(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	tests := []struct {

@@ -13,6 +13,7 @@ import {
     getEditorRange,
     getSelectionOffset,
     getSelectionPosition,
+    getUndoFocusContext,
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
 import {
@@ -668,6 +669,8 @@ ${genHintItemHTML(item)}
             id = nodeElement.getAttribute("data-node-id");
         }
         const html = nodeElement.outerHTML;
+        const undoContext = Constants.BLOCK_HINT_KEYS.includes(this.splitChar) ?
+            getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
         // 自顶向下法新建文档后光标定位问题 https://github.com/siyuan-note/siyuan/issues/299
         if (this.lastIndex > -1) {
             range.setStart(range.startContainer, this.lastIndex);
@@ -678,7 +681,7 @@ ${genHintItemHTML(item)}
             const prefix = "((newSubDoc ";
             const fileNames = value.substring(prefix.length, value.length - 4).split(`"${Constants.ZWSP}'`);
             const realFileName = fileNames.length === 1 ? fileNames[0] : fileNames[1];
-            newFileBySelectRange(protyle, range, "subDoc", refIsS ? "s" : "d", realFileName);
+            newFileBySelectRange(protyle, range, "subDoc", refIsS ? "s" : "d", realFileName, undoContext);
             return;
         }
         // 新建文件
@@ -691,7 +694,7 @@ ${genHintItemHTML(item)}
                 const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",
                     color: `${id}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${getBlockRefAnchorText(refIsS ? fileNames[0] : realFileName)}`
-                });
+                }, true, undoContext);
                 if (refElement[0]) {
                     protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
                 }
@@ -728,7 +731,7 @@ ${genHintItemHTML(item)}
             const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                 type: "id",
                 color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
-            });
+            }, true, undoContext);
             if (refElement[0]) {
                 protyle.toolbar.range.setEnd(refElement[0].lastChild, refElement[0].lastChild.textContent.length);
             }

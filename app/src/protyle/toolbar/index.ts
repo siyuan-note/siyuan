@@ -358,7 +358,7 @@ export class Toolbar {
     }
 
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar",
-                         textObj?: ITextOption, focusRange = true) {
+                         textObj?: ITextOption, focusRange = true, undoContext?: Record<string, string>) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement) {
             return;
@@ -380,7 +380,7 @@ export class Toolbar {
         if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             return;
         }
-        return this.setInlineMarkInBlock(protyle, type, action, textObj, undefined, focusRange);
+        return this.setInlineMarkInBlock(protyle, type, action, textObj, undefined, focusRange, undoContext);
     }
 
     private setBlockRangesInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar",
@@ -521,7 +521,8 @@ export class Toolbar {
     }
 
     private setInlineMarkInBlock(protyle: IProtyle, type: string, action: "range" | "toolbar",
-                                 textObj?: ITextOption, remove?: boolean, focusRange = true) {
+                                 textObj?: ITextOption, remove?: boolean, focusRange = true,
+                                 undoContext?: Record<string, string>) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             return;
@@ -1060,7 +1061,7 @@ export class Toolbar {
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         if (!isBatch) {
-            updateTransaction(protyle, nodeElement, html);
+            updateTransaction(protyle, nodeElement, html, undoContext);
         }
         nodeElement.querySelectorAll("wbr").forEach(item => {
             item.remove();

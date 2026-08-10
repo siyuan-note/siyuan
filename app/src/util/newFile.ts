@@ -111,7 +111,7 @@ const insertNewFileRef = (protyle: IProtyle, context: NewFileSelectionContext, i
     const refElements = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
         type: "id",
         color: `${id}${Constants.ZWSP}${refSubtype}${Constants.ZWSP}${anchorText}`
-    }, false);
+    }, false, context.undoContext);
     if (!refElements?.[0]) {
         return;
     }
@@ -158,7 +158,8 @@ export const newFileBySelect = (protyle: IProtyle, newFileName: string, context:
 };
 
 export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "subDoc" | "configured",
-                                     refSubtype: "d" | "s" = "d", name?: string) => {
+                                     refSubtype: "d" | "s" = "d", name?: string,
+                                     undoContext?: Record<string, string>) => {
     if (!isSameBlockRange(range)) {
         return;
     }
@@ -176,7 +177,7 @@ export const newFileBySelectRange = (protyle: IProtyle, range: Range, target: "s
     ) {
         selectAll(protyle, nodeElement, range);
     }
-    const selectionContext = createNewFileSelectionContext(protyle, range);
+    const selectionContext = createNewFileSelectionContext(protyle, range, undoContext);
     if (!selectionContext) {
         return;
     }

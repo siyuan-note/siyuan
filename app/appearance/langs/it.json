@@ -23,7 +23,7 @@
 	"bazaarPackageInvalid": "Non valido",
 	"bazaarPackageMissingManifest": "Il file manifest del pacchetto del marketplace è mancante",
 	"bazaarPackageInvalidManifest": "Il file manifest del pacchetto del marketplace non è valido",
-	"bazaarPackageNameMismatch": "Il nome della directory del pacchetto del marketplace deve corrispondere esattamente al campo name nel manifest",
+	"bazaarPackageNameMismatch": "Il nome della directory del pacchetto del marketplace non corrisponde al valore del campo name nel manifest",
 	"loadAllContent": "Carica tutto il contenuto",
 	"keepLazyLoadTip": "Mantieni i blocchi di contenuto caricati dinamicamente per ridurre i caricamenti ripetuti durante lo scorrimento; i documenti lunghi possono utilizzare più memoria",
 	"msgSelectAllIncompleteTip": "Avviso di selezione incompleta nell'editor",

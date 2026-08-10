@@ -23,7 +23,7 @@
 	"bazaarPackageInvalid": "Tidak valid",
 	"bazaarPackageMissingManifest": "Berkas manifes paket marketplace tidak ditemukan",
 	"bazaarPackageInvalidManifest": "Berkas manifes paket marketplace tidak valid",
-	"bazaarPackageNameMismatch": "Nama direktori paket marketplace harus sama persis dengan bidang name dalam manifes",
+	"bazaarPackageNameMismatch": "Nama direktori paket marketplace tidak cocok dengan nilai bidang name dalam manifes",
 	"loadAllContent": "Muat semua konten",
 	"keepLazyLoadTip": "Pertahankan blok konten yang dimuat secara dinamis untuk mengurangi pemuatan berulang saat menggulir; dokumen panjang mungkin menggunakan lebih banyak memori",
 	"msgSelectAllIncompleteTip": "Peringatan pilih semua tidak lengkap di editor",

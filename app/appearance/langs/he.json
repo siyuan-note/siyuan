@@ -23,7 +23,7 @@
 	"bazaarPackageInvalid": "לא תקין",
 	"bazaarPackageMissingManifest": "קובץ המניפסט של חבילת השוק חסר",
 	"bazaarPackageInvalidManifest": "קובץ המניפסט של חבילת השוק אינו תקין",
-	"bazaarPackageNameMismatch": "שם תיקיית חבילת השוק חייב להתאים בדיוק לשדה name בקובץ המניפסט",
+	"bazaarPackageNameMismatch": "שם תיקיית חבילת השוק אינו תואם לערך של השדה name בקובץ המניפסט",
 	"loadAllContent": "טעינת כל התוכן",
 	"keepLazyLoadTip": "שמירת בלוקי תוכן שנטענו באופן דינמי כדי לצמצם טעינות חוזרות בזמן גלילה; מסמכים ארוכים עשויים לצרוך יותר זיכרון",
 	"msgSelectAllIncompleteTip": "אזהרת בחירה חלקית בעורך",

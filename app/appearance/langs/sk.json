@@ -23,7 +23,7 @@
 	"bazaarPackageInvalid": "Neplatný",
 	"bazaarPackageMissingManifest": "Súbor manifestu balíka trhoviska chýba",
 	"bazaarPackageInvalidManifest": "Súbor manifestu balíka trhoviska je neplatný",
-	"bazaarPackageNameMismatch": "Názov adresára balíka trhoviska sa musí presne zhodovať s poľom name v manifeste",
+	"bazaarPackageNameMismatch": "Názov adresára balíka trhoviska sa nezhoduje s hodnotou poľa name v manifeste",
 	"loadAllContent": "Načítať celý obsah",
 	"keepLazyLoadTip": "Ponechať dynamicky načítané bloky obsahu, aby sa obmedzilo opakované načítavanie pri posúvaní; dlhé dokumenty môžu využívať viac pamäte",
 	"msgSelectAllIncompleteTip": "Upozornenie na neúplný výber v editore",

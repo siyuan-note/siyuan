@@ -23,7 +23,7 @@
 	"bazaarPackageInvalid": "異常",
 	"bazaarPackageMissingManifest": "集市套件清單檔案缺失",
 	"bazaarPackageInvalidManifest": "集市套件清單檔案無效",
-	"bazaarPackageNameMismatch": "集市套件安裝目錄名稱必須與清單檔案中的 name 欄位完全一致",
+	"bazaarPackageNameMismatch": "集市套件安裝目錄名稱與清單檔案中的 name 欄位值不一致",
 	"loadAllContent": "載入全部內容",
 	"keepLazyLoadTip": "保留動態載入的內容區塊，以減少捲動時的重複載入；長文件可能佔用更多記憶體",
 	"msgSelectAllIncompleteTip": "編輯器全選不完整提示",

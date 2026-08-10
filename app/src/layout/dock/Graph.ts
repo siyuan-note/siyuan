@@ -19,7 +19,7 @@ export class Graph extends Model {
     public inputElement: HTMLInputElement;
     private countElement: HTMLElement;
     private graphElement: HTMLDivElement;
-    private graphEngine: GraphEngine;
+    private graphEngine: GraphEngine | undefined;
     private panelElement: HTMLElement;
     private element: HTMLElement;
     private saveTimeout: number;
@@ -256,9 +256,7 @@ export class Graph extends Model {
 <div class="fn__flex-1 graph__svg"></div>`;
         this.countElement = this.element.querySelector('[data-type="node-count"]');
         this.graphElement = this.element.querySelector(".graph__svg");
-        this.graphEngine = new GraphEngine(this.graphElement, {
-            onNodeClick: (details) => this.openGraphNode(details),
-        });
+        this.ensureGraphEngine();
         this.inputElement = this.element.querySelector("input");
         this.panelElement = this.element.querySelector(".graph__panel") as HTMLElement;
         this.element.addEventListener("click", (event) => {
@@ -519,10 +517,11 @@ export class Graph extends Model {
     }
 
     private hlNode(id: string) {
-        if (this.graphElement.clientHeight === 0 || !this.graphEngine.hasNode(id)) {
+        const graphEngine = this.graphEngine;
+        if (this.graphElement.clientHeight === 0 || !graphEngine?.hasNode(id)) {
             return;
         }
-        this.graphEngine.focusNode(id);
+        graphEngine.focusNode(id);
     }
 
     public destroy() {
@@ -535,7 +534,9 @@ export class Graph extends Model {
             this.saveTimeout = 0;
         }
         this.persistGraphConf();
-        this.graphEngine.destroy();
+        this.graphEngine?.destroy();
+        this.graphEngine = undefined;
+        this.renderedGraphData = undefined;
     }
 
     private scheduleGraphSearch() {
@@ -614,13 +615,10 @@ export class Graph extends Model {
 
     public onGraph(hl: boolean, resetLayout = false) {
         this.updateNodeCount();
-        if (this.graphElement.clientHeight === 0) {
-            // 界面没有渲染时不能进行渲染
-            return;
-        }
+        const graphEngine = this.ensureGraphEngine();
         if (!this.graphData || !this.graphData.nodes || this.graphData.nodes.length === 0) {
             this.renderedGraphData = undefined;
-            this.graphEngine.clear();
+            graphEngine.clear();
             return;
         }
         const rootStyle = getComputedStyle(document.body);
@@ -649,15 +647,25 @@ export class Graph extends Model {
         };
         if (this.renderedGraphData !== this.graphData) {
             this.renderedGraphData = this.graphData;
-            this.graphEngine.setData(this.graphData.nodes, this.graphData.links, options, palette,
+            graphEngine.setData(this.graphData.nodes, this.graphData.links, options, palette,
                 hl ? this.blockId : "", resetLayout);
         } else {
-            this.graphEngine.updateOptions(options, palette);
-            this.graphEngine.resize();
+            graphEngine.updateOptions(options, palette);
+            graphEngine.resize();
             if (hl) {
                 this.hlNode(this.blockId);
             }
         }
+    }
+
+    private ensureGraphEngine() {
+        if (!this.graphEngine) {
+            this.graphEngine = new GraphEngine(this.graphElement, {
+                onNodeClick: (details) => this.openGraphNode(details),
+            });
+            this.renderedGraphData = undefined;
+        }
+        return this.graphEngine;
     }
 
     private updateNodeCount() {

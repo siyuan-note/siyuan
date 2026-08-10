@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20260810222021"
 	},
 	"Children": [
 		{
@@ -4286,7 +4286,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20260810212846"
+				"updated": "20260810222021"
 			},
 			"Children": [
 				{
@@ -4306,7 +4306,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20260810212846"
+				"updated": "20260810222021"
 			},
 			"Children": [
 				{
@@ -4406,17 +4406,9 @@
 									"TextMarkTextContent": "⌥"
 								},
 								{
-									"Type": "NodeText",
-									"Data": "+"
-								},
-								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⇧"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "+"
 								},
 								{
 									"Type": "NodeTextMark",

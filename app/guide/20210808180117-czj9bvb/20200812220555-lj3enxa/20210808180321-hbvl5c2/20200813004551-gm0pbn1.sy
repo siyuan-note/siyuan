@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20260810222021"
 	},
 	"Children": [
 		{
@@ -4280,7 +4280,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20260810212846"
+				"updated": "20260810222021"
 			},
 			"Children": [
 				{
@@ -4304,7 +4304,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20260810212846"
+				"updated": "20260810222021"
 			},
 			"Children": [
 				{
@@ -4404,17 +4404,9 @@
 									"TextMarkTextContent": "⌥"
 								},
 								{
-									"Type": "NodeText",
-									"Data": "+"
-								},
-								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⇧"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "+"
 								},
 								{
 									"Type": "NodeTextMark",

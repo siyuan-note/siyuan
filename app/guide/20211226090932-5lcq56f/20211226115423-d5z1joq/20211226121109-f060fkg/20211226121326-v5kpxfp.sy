@@ -6,7 +6,7 @@
 		"id": "20211226121326-v5kpxfp",
 		"title": "主題",
 		"type": "doc",
-		"updated": "20260810215424"
+		"updated": "20260810222021"
 	},
 	"Children": [
 		{
@@ -1258,7 +1258,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226121625-kirhoib",
-				"updated": "20260810215424"
+				"updated": "20260810222021"
 			},
 			"Children": [
 				{
@@ -1273,7 +1273,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121625-tvni8h7",
-				"updated": "20260810215424"
+				"updated": "20260810222021"
 			},
 			"Children": [
 				{
@@ -1414,7 +1414,7 @@
 					},
 					"Properties": {
 						"id": "20260810212846-npfk41i",
-						"updated": "20260810215424"
+						"updated": "20260810222021"
 					},
 					"Children": [
 						{
@@ -1422,7 +1422,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260810212846-v45720m",
-								"updated": "20260810215424"
+								"updated": "20260810222021"
 							},
 							"Children": [
 								{
@@ -1436,7 +1436,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 分頁中勾選 "
+									"Data": "（網路）分頁中勾選 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1445,16 +1445,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "（中文介面為「"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "停用快取"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "」）"
+									"Data": "（停用快取）"
 								}
 							]
 						}

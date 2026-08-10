@@ -1,5 +1,12 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {focusBlock, focusByWbr, focusSideBlock, getEditorRange, getUndoFocusContext} from "../util/selection";
+import {
+    focusBlock,
+    focusByWbr,
+    focusSideBlock,
+    getEditorRange,
+    getUndoFocusContext,
+    restoreUndoFocus
+} from "../util/selection";
 import {
     getContenteditableElement,
     getEmbedChildOperationContext,
@@ -39,6 +46,7 @@ import {
 } from "../util/headingNumber";
 import {MERMAID_LAYOUT_ATTR} from "../render/mermaidLayout";
 import {getPartialUpdateCleanupElements} from "./transactionUpdate";
+import {getMoveAffectedEmbedElements, shouldSyncMoveCopies} from "./transactionEmbed";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -138,7 +146,10 @@ const promiseTransaction = (options: {
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
     }
-    const isEmbedChildOperation = !!(range && getEmbedChildOperationContext(range.startContainer));
+    const embedChildOperationContext = range && getEmbedChildOperationContext(range.startContainer);
+    const isEmbedChildOperation = !!embedChildOperationContext;
+    const editingEmbedElement = embedChildOperationContext &&
+        (isInEmbedBlock(embedChildOperationContext.resultElement, false) || undefined);
     if (!options.skipSync) {
         options.doOperations.forEach((operation: IOperation) => {
             if (operation.action === "update") {
@@ -225,7 +236,8 @@ const promiseTransaction = (options: {
                 return;
             }
             if (operation.action === "move") {
-                if (protyle.options.backlinkData) {
+                // 反链和嵌入块编辑中存在同 ID 的普通副本，需同步回放移动操作
+                if (shouldSyncMoveCopies(!!protyle.options.backlinkData, isEmbedChildOperation)) {
                     const updateElements: Element[] = [];
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
                         if (!isInEmbedBlock(item)) {
@@ -278,11 +290,13 @@ const promiseTransaction = (options: {
                     // 块移出后刷新源超级块的手柄（originSb 在元素被移除前捕获）
                     refreshSbs(...originSbs);
                 }
-                // 更新嵌入块
-                protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-                    if (item.querySelector(`[data-node-id="${operation.id}"],[data-node-id="${operation.parentID}"],[data-node-id="${operation.previousID}"]`)) {
-                        pendingEmbedElements.add(item);
-                    }
+                // 当前编辑副本已由本地 DOM 操作更新，仅刷新其他受影响的嵌入块
+                getMoveAffectedEmbedElements(
+                    protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]'),
+                    operation,
+                    editingEmbedElement,
+                ).forEach(item => {
+                    pendingEmbedElements.add(item);
                 });
                 // 移动块（含撤销移动）后刷新相关超级块的拖拽手柄，避免手柄残留/缺失
                 const moveEls = [operation.id, operation.parentID, operation.previousID]
@@ -528,8 +542,9 @@ const refreshSbs = (...elements: (Element | undefined | null)[]) => {
     sbs.forEach(sb => refreshSbResize(sb));
 };
 
-const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, isUndo: boolean) => {
-    if (isUndo && updateElements[0]) {
+const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, isUndo: boolean,
+                     deferUndoFocus = false) => {
+    if (isUndo && updateElements[0] && !deferUndoFocus) {
         focusSideBlock(updateElements[0]);
     }
     // 删除前记录所在超级块，删除后刷新其拖拽手柄
@@ -626,6 +641,12 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     if (protyle.wysiwyg.element.firstElementChild?.classList.contains("protyle-password")) {
         return;
     }
+    const undoFocusContext = isUndo ? operations.find(item => item.context?.undoFocusId)?.context : undefined;
+    const undoFocusEmbedElement = undoFocusContext?.undoFocusEmbedId ? protyle.wysiwyg.element.querySelector(
+        `[data-type="NodeBlockQueryEmbed"][data-node-id="${undoFocusContext.undoFocusEmbedId}"]`
+    ) : undefined;
+    const deferUndoFocus = !!undoFocusContext?.undoFocusEmbedId;
+    const pendingUndoEmbedElements = new Set<Element>();
     operations.forEach(operation => {
         const updateElements: Element[] = [];
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
@@ -713,7 +734,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
         }
         if (operation.action === "delete") {
             if (updateElements.length > 0 || !isUndo) {
-                deleteBlock(updateElements, operation.id, protyle, isUndo);
+                deleteBlock(updateElements, operation.id, protyle, isUndo, deferUndoFocus);
             } else if (isUndo) {
                 zoomOut({
                     protyle,
@@ -726,7 +747,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
                                 updateElements.push(item);
                             }
                         });
-                        deleteBlock(updateElements, operation.id, protyle, isUndo);
+                        deleteBlock(updateElements, operation.id, protyle, isUndo, deferUndoFocus);
                     }
                 });
             }
@@ -1048,8 +1069,13 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             // 更新嵌入块。undo 已由 kernel 执行事务后广播，查询能拿到最新数据，无竞态。
             protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
                 if (item.querySelector(`[data-node-id="${operation.id}"],[data-node-id="${operation.parentID}"],[data-node-id="${operation.previousID}"]`)) {
-                    item.removeAttribute("data-render");
-                    blockRender(protyle, item);
+                    if (item === undoFocusEmbedElement) {
+                        // 当前嵌入块需在撤销操作全部回放后渲染，否则中途移除选区会把光标带到源块
+                        pendingUndoEmbedElements.add(item);
+                    } else {
+                        item.removeAttribute("data-render");
+                        blockRender(protyle, item);
+                    }
                 }
             });
             // 移动块（含重做/同步）后刷新相关超级块的拖拽手柄
@@ -1235,6 +1261,17 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             });
             return;
         }
+    });
+    pendingUndoEmbedElements.forEach(item => {
+        if (!item.isConnected) {
+            return;
+        }
+        item.removeAttribute("data-render");
+        blockRender(protyle, item, undefined, () => {
+            if (restoreUndoFocus(protyle, operations)) {
+                scrollCenter(protyle);
+            }
+        });
     });
     queueHeadingNumberRefresh(protyle, operations);
 };

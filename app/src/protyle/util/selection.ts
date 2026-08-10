@@ -18,6 +18,7 @@ import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 import {genRenderFrame} from "../render/util";
 import {Constants} from "../../constants";
+import {getUndoFocusElement} from "./selectionFocus";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -680,7 +681,7 @@ Record<string, string> | undefined => {
     endRange.collapse(false);
     const start = getSelectionOffset(startEditableElement, undefined, startRange, ignoreZWSP).start;
     const end = getSelectionOffset(endEditableElement, undefined, endRange, ignoreZWSP).end;
-    return {
+    const context: Record<string, string> = {
         undoFocusId: startBlockElement.getAttribute("data-node-id"),
         undoFocusIndex: startBlockElements.indexOf(startBlockElement).toString(),
         undoFocusStart: start.toString(),
@@ -690,6 +691,11 @@ Record<string, string> | undefined => {
         undoFocusEnd: end.toString(),
         undoFocusIgnoreZWSP: ignoreZWSP.toString(),
     };
+    const startEmbedElement = isInEmbedBlock(startBlockElement, false);
+    if (startEmbedElement && startEmbedElement === isInEmbedBlock(endBlockElement, false)) {
+        context.undoFocusEmbedId = startEmbedElement.getAttribute("data-node-id");
+    }
+    return context;
 };
 
 export const restoreFocusContext = (protyle: IProtyle, context: Record<string, string>) => {
@@ -698,22 +704,29 @@ export const restoreFocusContext = (protyle: IProtyle, context: Record<string, s
     if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < 0) {
         return false;
     }
-    const startBlockElements = Array.from(protyle.wysiwyg.element.querySelectorAll(
+    const focusScopeElement = context.undoFocusEmbedId ? protyle.wysiwyg.element.querySelector(
+        `[data-type="NodeBlockQueryEmbed"][data-node-id="${context.undoFocusEmbedId}"]`
+    ) : protyle.wysiwyg.element;
+    if (!focusScopeElement) {
+        return false;
+    }
+    const startBlockElements = Array.from(focusScopeElement.querySelectorAll(
         `[data-node-id="${context.undoFocusId}"]`
     ));
-    const startIndex = Number(context.undoFocusIndex);
-    const indexedStartElement = Number.isInteger(startIndex) && startIndex >= 0 ?
-        startBlockElements[startIndex] : undefined;
-    const startBlockElement = indexedStartElement ||
-        startBlockElements.find(item => !isInEmbedBlock(item, false)) || startBlockElements[0];
+    const startBlockElement = getUndoFocusElement(
+        startBlockElements,
+        context.undoFocusIndex,
+        item => !isInEmbedBlock(item, false),
+    );
     const endBlockElements = context.undoFocusEndId === context.undoFocusId ?
-        startBlockElements : Array.from(protyle.wysiwyg.element.querySelectorAll(
+        startBlockElements : Array.from(focusScopeElement.querySelectorAll(
             `[data-node-id="${context.undoFocusEndId || context.undoFocusId}"]`
         ));
-    const endIndex = Number(context.undoFocusEndIndex);
-    const indexedEndElement = Number.isInteger(endIndex) && endIndex >= 0 ? endBlockElements[endIndex] : undefined;
-    const endBlockElement = indexedEndElement ||
-        endBlockElements.find(item => !isInEmbedBlock(item, false)) || endBlockElements[0];
+    const endBlockElement = getUndoFocusElement(
+        endBlockElements,
+        context.undoFocusEndIndex,
+        item => !isInEmbedBlock(item, false),
+    );
     if (!startBlockElement || !endBlockElement) {
         return false;
     }

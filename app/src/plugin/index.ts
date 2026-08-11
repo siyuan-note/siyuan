@@ -235,7 +235,10 @@ export class Plugin {
         iconElement.id = `plugin_${this.name}_${this.topBarIcons.length}`;
         if (isMobile()) {
             iconElement.className = "b3-menu__item";
-            iconElement.innerHTML = (options.icon.startsWith("icon") ? `<svg class="b3-menu__icon"><use xlink:href="#${options.icon}"></use></svg>` : options.icon) +
+            const iconHTML = options.icon.startsWith("icon") ?
+                `<svg class="b3-menu__icon"><use xlink:href="#${options.icon}"></use></svg>` :
+                `<span class="b3-menu__icon b3-menu__icon--custom">${options.icon}</span>`;
+            iconElement.innerHTML = iconHTML +
                 `<span class="b3-menu__label">${options.title}</span>`;
         } else if (!isWindow()) {
             iconElement.className = "toolbar__item ariaLabel";

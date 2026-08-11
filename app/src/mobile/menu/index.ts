@@ -19,6 +19,8 @@ import {isMobile} from "../../util/functions";
 import {openModel} from "./model";
 import {getCurrentEditor} from "../editor";
 import {openDataMigration} from "../../menus/dataMigration";
+import {normalizeSearchText} from "../../config/search/normalize";
+import type {SettingTabMountContext} from "../../config/setting/builder";
 
 const getSettingTabFromMenuTarget = (target: HTMLElement): ISettingTabShell<TSettingTab> | undefined => {
     const item = target.closest(".b3-menu__item") as HTMLElement | null;
@@ -34,7 +36,26 @@ const getSettingTabsMenuHTML = () => getSettingTabDefs().map(def =>
         <span class="b3-menu__label">${def.title}</span>
     </div>`).join("");
 
-const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, returnCallback?: () => void) => {
+const filterSettingTabsMenu = (element: HTMLElement, keywords: string) => {
+    let hasMatch = false;
+    for (const def of getSettingTabDefs()) {
+        if (def.hidden) {
+            continue;
+        }
+        const item = element.querySelector(`#${settingTabToMenuId(def.id)}`);
+        const matches = !keywords || getSettingTab(def.id).scanSearch(keywords).matches;
+        item?.classList.toggle("config-search-hidden", !matches);
+        hasMatch ||= matches;
+    }
+    element.querySelector('[data-type="setting-search-empty"]')?.classList.toggle("fn__none", !keywords || hasMatch);
+};
+
+const openSettingTab = (
+    app: App,
+    settingTabDef: ISettingTabShell<TSettingTab>,
+    returnCallback?: () => void,
+    search?: SettingTabMountContext,
+) => {
     openModel({
         title: settingTabDef.title,
         icon: "iconLeft",
@@ -42,7 +63,7 @@ const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, 
         bindEvent(modelMainElement: HTMLElement) {
             const root = modelMainElement.firstElementChild as HTMLElement;
             bindSettingSaveDelegation(root);
-            void getSettingTab(settingTabDef.id).mount(root, undefined, app);
+            void getSettingTab(settingTabDef.id).mount(root, search, app);
         },
         backCallback() {
             if (returnCallback) {
@@ -55,22 +76,59 @@ const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, 
     });
 };
 
-const openSettingMenu = (app: App, transition?: "back", returnCallback?: () => void) => {
+const openSettingMenu = (
+    app: App,
+    transition?: "back",
+    returnCallback?: () => void,
+    initialSearchText = "",
+) => {
     openModel({
         title: window.siyuan.languages.config,
         icon: "iconLeft",
-        html: `<div class="b3-menu__groups">
-    <div class="b3-menu__group">
-        <div class="b3-menu__group-items">${getSettingTabsMenuHTML()}</div>
+        html: `<div class="mobile-setting-menu">
+    <div class="toolbar toolbar--border mobile-setting-menu__search">
+        <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__flex-1" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="b3-menu__groups mobile-setting-menu__groups">
+        <div class="b3-menu__group">
+            <div class="b3-menu__group-items">${getSettingTabsMenuHTML()}</div>
+        </div>
+        <div class="b3-list--empty fn__none" data-type="setting-search-empty">${window.siyuan.languages.emptyContent}</div>
     </div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {
+            const searchElement = modelMainElement.querySelector("input") as HTMLInputElement;
+            searchElement.value = initialSearchText;
+            const syncSearch = () => {
+                filterSettingTabsMenu(modelMainElement, normalizeSearchText(searchElement.value));
+            };
+            searchElement.addEventListener("compositionend", syncSearch);
+            searchElement.addEventListener("input", (event: InputEvent) => {
+                if (!event.isComposing) {
+                    syncSearch();
+                }
+            });
             modelMainElement.addEventListener("click", (event) => {
                 const def = getSettingTabFromMenuTarget(event.target as HTMLElement);
                 if (def) {
-                    openSettingTab(app, def, () => openSettingMenu(app, "back", returnCallback));
+                    const searchText = searchElement.value;
+                    const keywords = normalizeSearchText(searchText);
+                    let search: SettingTabMountContext | undefined;
+                    if (keywords) {
+                        const result = getSettingTab(def.id).scanSearch(keywords);
+                        if (!result.matches) {
+                            return;
+                        }
+                        search = {
+                            keywords,
+                            visibleItemIds: result.visibleItemIds,
+                            visibleGroupIds: result.visibleGroupIds,
+                        };
+                    }
+                    openSettingTab(app, def, () => openSettingMenu(app, "back", returnCallback, searchText), search);
                 }
             });
+            syncSearch();
         },
         backCallback() {
             if (returnCallback) {

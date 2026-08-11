@@ -342,6 +342,24 @@
 #model {
   box-sizing: border-box;
 
+  .mobile-setting-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+
+    &__search {
+      flex-shrink: 0;
+      padding: 8px 16px;
+    }
+
+    &__groups {
+      flex: 1;
+      height: auto;
+      min-height: 0;
+    }
+  }
+
   .config--mobile {
     box-sizing: border-box;
     height: 100%;

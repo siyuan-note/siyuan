@@ -546,8 +546,8 @@ export class AgentChat extends Model {
     private permissionLabel(mode = this.permissionMode) {
         const L = window.siyuan.languages;
         return mode === "allowSession" ?
-            (L.agentPermissionAllowSession || "Automatically allow") :
-            (L.agentPermissionConfirm || "Confirm every time");
+            (L.agentPermissionAllowSession || "Auto approve for this session") :
+            (L.agentPermissionFollowApprovalSettings || "Follow approval settings");
     }
 
     private applyPermissionMode(mode: AgentPermissionMode) {

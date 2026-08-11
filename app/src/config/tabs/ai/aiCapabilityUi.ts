@@ -323,8 +323,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
             </select>
         </label>
         ${actions.length > 0 ? `<div class="b3-label b3-label--inner config-name fn__flex">
-            <span class="fn__flex-1">${window.siyuan.languages.agentCapabilitiesActions}</span>
-            <span class="ft__on-surface">${window.siyuan.languages.agentCapabilitiesApprovalMode}</span>
+            <span class="fn__flex-1">${window.siyuan.languages.agentCapabilitiesActionApprovalMode}</span>
         </div>
         ${actions.map((action) => `<label class="fn__flex b3-label b3-label--inner config-wrap">
         <code class="fn__flex-1">${escapeHtml(action.name)}</code>
@@ -438,7 +437,7 @@ export const getAgentCapabilityKeywords = (): string[] => [
     window.siyuan.languages.agentCapabilitiesScopeMcp,
     window.siyuan.languages.agentCapabilitiesMcpExposureTip,
     window.siyuan.languages.agentCapabilitiesCapabilityApprovalMode,
-    window.siyuan.languages.agentCapabilitiesApprovalMode,
+    window.siyuan.languages.agentCapabilitiesActionApprovalMode,
     window.siyuan.languages.agentCapabilitiesFollowCapability,
     window.siyuan.languages.agentCapabilitiesRiskConfirm,
     window.siyuan.languages.agentCapabilitiesAutoApprove,

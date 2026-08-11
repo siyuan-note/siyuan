@@ -1,6 +1,6 @@
 {
-	"agentCapabilitiesDefaultApprovalMode": "Predvolený režim schvaľovania",
-	"agentCapabilitiesUseDefaultApproval": "Použiť predvolené nastavenie",
+	"agentCapabilitiesCapabilityApprovalMode": "Režim schvaľovania možnosti",
+	"agentCapabilitiesFollowCapability": "Podľa nastavenia schopnosti",
 	"agentCapabilitiesRiskConfirm": "Potvrdzovať podľa rizika",
 	"agentCapabilitiesMcpExposureTip": "Vyberte možnosti poskytované externým klientom prostredníctvom služby MCP SiYuan",
 	"agentCapabilitiesScopeAgent": "Použitie Agentom",

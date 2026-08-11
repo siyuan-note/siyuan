@@ -1,6 +1,6 @@
 {
-	"agentCapabilitiesDefaultApprovalMode": "โหมดการอนุมัติเริ่มต้น",
-	"agentCapabilitiesUseDefaultApproval": "ใช้การตั้งค่าเริ่มต้น",
+	"agentCapabilitiesCapabilityApprovalMode": "โหมดการอนุมัติของความสามารถ",
+	"agentCapabilitiesFollowCapability": "ตามการตั้งค่าความสามารถ",
 	"agentCapabilitiesRiskConfirm": "ยืนยันตามความเสี่ยง",
 	"agentCapabilitiesMcpExposureTip": "เลือกความสามารถที่ให้บริการแก่ไคลเอนต์ภายนอกผ่านบริการ MCP ของ SiYuan",
 	"agentCapabilitiesScopeAgent": "ใช้โดย Agent",

@@ -1,6 +1,6 @@
 {
-	"agentCapabilitiesDefaultApprovalMode": "Типовий режим підтвердження",
-	"agentCapabilitiesUseDefaultApproval": "Використовувати типове налаштування",
+	"agentCapabilitiesCapabilityApprovalMode": "Режим підтвердження можливості",
+	"agentCapabilitiesFollowCapability": "Успадкувати налаштування можливості",
 	"agentCapabilitiesRiskConfirm": "Підтверджувати залежно від ризику",
 	"agentCapabilitiesMcpExposureTip": "Виберіть можливості, що надаються зовнішнім клієнтам через службу MCP SiYuan",
 	"agentCapabilitiesScopeAgent": "Використання Agent",

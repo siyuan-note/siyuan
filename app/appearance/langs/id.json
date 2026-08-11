@@ -1,6 +1,6 @@
 {
-	"agentCapabilitiesDefaultApprovalMode": "Mode persetujuan default",
-	"agentCapabilitiesUseDefaultApproval": "Gunakan pengaturan default",
+	"agentCapabilitiesCapabilityApprovalMode": "Mode persetujuan kemampuan",
+	"agentCapabilitiesFollowCapability": "Ikuti pengaturan kemampuan",
 	"agentCapabilitiesRiskConfirm": "Konfirmasi berdasarkan risiko",
 	"agentCapabilitiesMcpExposureTip": "Pilih kemampuan yang disediakan layanan MCP SiYuan untuk klien eksternal",
 	"agentCapabilitiesScopeAgent": "Penggunaan Agent",

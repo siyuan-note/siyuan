@@ -1,6 +1,6 @@
 {
-	"agentCapabilitiesDefaultApprovalMode": "Standaardgoedkeuringsmodus",
-	"agentCapabilitiesUseDefaultApproval": "Standaardinstelling gebruiken",
+	"agentCapabilitiesCapabilityApprovalMode": "Goedkeuringsmodus van mogelijkheid",
+	"agentCapabilitiesFollowCapability": "Instelling van mogelijkheid volgen",
 	"agentCapabilitiesRiskConfirm": "Bevestigen op basis van risico",
 	"agentCapabilitiesMcpExposureTip": "Kies de mogelijkheden die de SiYuan MCP-service aan externe clients aanbiedt",
 	"agentCapabilitiesScopeAgent": "Gebruik door Agent",

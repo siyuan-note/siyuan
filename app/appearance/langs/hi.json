@@ -1,6 +1,6 @@
 {
-	"agentCapabilitiesDefaultApprovalMode": "डिफ़ॉल्ट अनुमोदन मोड",
-	"agentCapabilitiesUseDefaultApproval": "डिफ़ॉल्ट सेटिंग का उपयोग करें",
+	"agentCapabilitiesCapabilityApprovalMode": "क्षमता अनुमोदन मोड",
+	"agentCapabilitiesFollowCapability": "क्षमता सेटिंग का पालन करें",
 	"agentCapabilitiesRiskConfirm": "जोखिम के आधार पर पुष्टि करें",
 	"agentCapabilitiesMcpExposureTip": "SiYuan MCP सेवा के माध्यम से बाहरी क्लाइंट को दी जाने वाली क्षमताएँ चुनें",
 	"agentCapabilitiesScopeAgent": "Agent में उपयोग",

@@ -1,6 +1,6 @@
 {
-	"agentCapabilitiesDefaultApprovalMode": "默认批准方式",
-	"agentCapabilitiesUseDefaultApproval": "使用默认设置",
+	"agentCapabilitiesCapabilityApprovalMode": "能力批准方式",
+	"agentCapabilitiesFollowCapability": "跟随能力",
 	"agentCapabilitiesRiskConfirm": "按风险确认",
 	"agentCapabilitiesMcpExposureTip": "选择通过思源 MCP 服务向外部客户端提供的能力",
 	"agentCapabilitiesScopeAgent": "智能体使用",

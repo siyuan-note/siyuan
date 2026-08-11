@@ -1,6 +1,6 @@
 {
-	"agentCapabilitiesDefaultApprovalMode": "Mode d’approbation par défaut",
-	"agentCapabilitiesUseDefaultApproval": "Utiliser le réglage par défaut",
+	"agentCapabilitiesCapabilityApprovalMode": "Mode d’approbation de la capacité",
+	"agentCapabilitiesFollowCapability": "Suivre le réglage de la capacité",
 	"agentCapabilitiesRiskConfirm": "Confirmer selon le risque",
 	"agentCapabilitiesMcpExposureTip": "Choisissez les capacités fournies aux clients externes par le service MCP de SiYuan",
 	"agentCapabilitiesScopeAgent": "Utilisation par l’Agent",

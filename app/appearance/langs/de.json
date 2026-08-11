@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "Cache virtuelle Referenz ausführen"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "Version für Apple-Chips installieren",
+		"arm64TranslationMessage": "SiYuan führt derzeit die Intel-Version über Rosetta aus. Dies kann die Leistung deutlich beeinträchtigen. Bitte verwenden Sie die Version für Apple-Chips",
+		"downloadAppleSilicon": "Version für Apple-Chips herunterladen",
 		"showWindow": "Fenster anzeigen",
 		"hideWindow": "Fenster ausblenden",
 		"setWindowTop": "Fenster nach oben setzen",

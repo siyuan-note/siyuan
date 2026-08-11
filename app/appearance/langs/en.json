@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "Execute cache virtual reference"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "Install the Apple silicon version",
+		"arm64TranslationMessage": "SiYuan is currently running the Intel version through Rosetta. This may significantly reduce performance. Please use the Apple silicon version",
+		"downloadAppleSilicon": "Download the Apple silicon version",
 		"showWindow": "Show Window",
 		"hideWindow": "Hide Window",
 		"setWindowTop": "Set Window top",

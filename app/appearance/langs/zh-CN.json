@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "执行缓存虚拟引用"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "请安装 Apple 芯片版本",
+		"arm64TranslationMessage": "当前正在通过 Rosetta 运行 Intel 版本，这可能会显著影响性能，请改用 Apple 芯片版本",
+		"downloadAppleSilicon": "下载 Apple 芯片版本",
 		"showWindow": "显示主窗口",
 		"hideWindow": "隐藏主窗口",
 		"setWindowTop": "窗口置顶",

@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "가상 참조 캐시 실행"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "Apple 칩 버전 설치",
+		"arm64TranslationMessage": "현재 SiYuan이 Rosetta를 통해 Intel 버전으로 실행 중입니다. 성능이 크게 저하될 수 있으므로 Apple 칩 버전을 사용해 주세요",
+		"downloadAppleSilicon": "Apple 칩 버전 다운로드",
 		"showWindow": "창 표시",
 		"hideWindow": "창 숨기기",
 		"setWindowTop": "창 맨 위에 고정",

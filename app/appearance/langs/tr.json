@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "Sanal blok referansı önbelleğini çalıştır"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "Apple çip sürümünü yükleyin",
+		"arm64TranslationMessage": "SiYuan şu anda Intel sürümünü Rosetta üzerinden çalıştırıyor. Bu, performansı önemli ölçüde düşürebilir. Apple çip sürümünü kullanın",
+		"downloadAppleSilicon": "Apple çip sürümünü indir",
 		"showWindow": "Pencereyi göster",
 		"hideWindow": "Pencereyi gizle",
 		"setWindowTop": "Pencereyi üste sabitle",

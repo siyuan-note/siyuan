@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "वर्चुअल संदर्भ कैश निष्पादित करें"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "Apple चिप संस्करण इंस्टॉल करें",
+		"arm64TranslationMessage": "SiYuan अभी Rosetta के माध्यम से Intel संस्करण चला रहा है। इससे प्रदर्शन काफी प्रभावित हो सकता है। कृपया Apple चिप संस्करण का उपयोग करें",
+		"downloadAppleSilicon": "Apple चिप संस्करण डाउनलोड करें",
 		"showWindow": "विंडो दिखाएं",
 		"hideWindow": "विंडो छुपाएं",
 		"setWindowTop": "विंडो सबसे ऊपर रखें",

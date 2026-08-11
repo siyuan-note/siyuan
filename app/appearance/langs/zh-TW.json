@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "執行快取虛擬引用"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "請安裝 Apple 晶片版本",
+		"arm64TranslationMessage": "目前正透過 Rosetta 執行 Intel 版本，這可能會顯著影響效能，請改用 Apple 晶片版本",
+		"downloadAppleSilicon": "下載 Apple 晶片版本",
 		"showWindow": "顯示主窗口",
 		"hideWindow": "隱藏主窗口",
 		"setWindowTop": "窗口置頂",

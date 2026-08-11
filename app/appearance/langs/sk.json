@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "Vykonať kešovanie virtuálnych referencií"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "Nainštalovať verziu pre čipy Apple",
+		"arm64TranslationMessage": "SiYuan momentálne používa verziu Intel prostredníctvom Rosetty. To môže výrazne znížiť výkon. Použite verziu pre čipy Apple",
+		"downloadAppleSilicon": "Stiahnuť verziu pre čipy Apple",
 		"showWindow": "Zobraziť okno",
 		"hideWindow": "Skryť okno",
 		"setWindowTop": "Okno navrch",

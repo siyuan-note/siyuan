@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "Virtuele verwijzing cachen"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "Versie voor Apple-chips installeren",
+		"arm64TranslationMessage": "SiYuan voert momenteel de Intel-versie uit via Rosetta. Dit kan de prestaties aanzienlijk verminderen. Gebruik de versie voor Apple-chips",
+		"downloadAppleSilicon": "Versie voor Apple-chips downloaden",
 		"showWindow": "Venster tonen",
 		"hideWindow": "Venster verbergen",
 		"setWindowTop": "Venster bovenaan",

@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "בצע הפניה וירטואלית של מטמון"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "התקנת הגרסה לשבבי Apple",
+		"arm64TranslationMessage": "SiYuan פועל כעת בגרסת Intel דרך Rosetta. הדבר עלול לפגוע משמעותית בביצועים. יש להשתמש בגרסה לשבבי Apple",
+		"downloadAppleSilicon": "הורדת הגרסה לשבבי Apple",
 		"showWindow": "הצג חלון",
 		"hideWindow": "החבא חלון",
 		"setWindowTop": "קבע חלון למעלה",

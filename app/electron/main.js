@@ -75,6 +75,7 @@ let updateInstallPromise;
 let keepAppOpenDuringUpdate = false;
 let richClipboardOperation;
 let richClipboardSequence = 0;
+let appleSiliconWarningShown = false;
 const openDialogSingletons = new Set();
 let spellcheckContextSequence = 0;
 const spellcheckContexts = new Map();
@@ -1192,6 +1193,41 @@ const showWindow = (wnd) => {
     wnd.show();
 };
 
+const showAppleSiliconWarning = async (browserWindow, languages) => {
+    if (!app.isPackaged || process.platform !== "darwin" || !app.runningUnderARM64Translation ||
+        appleSiliconWarningShown || !languages || typeof languages.arm64TranslationTitle !== "string" ||
+        typeof languages.arm64TranslationMessage !== "string" || typeof languages.downloadAppleSilicon !== "string") {
+        return;
+    }
+    if (!browserWindow || browserWindow.isDestroyed()) {
+        return;
+    }
+    if (!browserWindow.isVisible()) {
+        browserWindow.once("show", () => void showAppleSiliconWarning(browserWindow, languages));
+        return;
+    }
+
+    appleSiliconWarningShown = true;
+    try {
+        await dialog.showMessageBox(browserWindow, {
+            type: "warning",
+            title: languages.arm64TranslationTitle,
+            message: languages.arm64TranslationTitle,
+            detail: languages.arm64TranslationMessage,
+            buttons: [languages.downloadAppleSilicon],
+            defaultId: 0,
+            noLink: true,
+        });
+        const packageName = `siyuan-${appVer}-mac-arm64.dmg`;
+        const downloadURL = /-(?:alpha|beta|rc)(?:[.-]|\d|$)/i.test(appVer)
+            ? `https://github.com/siyuan-note/siyuan/releases/download/v${appVer}/${packageName}`
+            : `https://release.liuyun.io/siyuan/${packageName}`;
+        await shell.openExternal(downloadURL);
+    } catch (error) {
+        writeLog("show Apple silicon warning or open package download failed: " + error);
+    }
+};
+
 const initKernel = (workspace, port, lang, safeMode) => {
     return new Promise(async (resolve) => {
         bootWindow = new BrowserWindow({
@@ -2060,6 +2096,7 @@ app.whenReady().then(() => {
                 }
             }
             workspaceItem.tray = tray;
+            void showAppleSiliconWarning(workspaceItem.browserWindow, data.languages);
         }
         await net.fetch(getServer(data.port) + "/api/system/uiproc?pid=" + process.pid, {method: "POST"});
     });

@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "تنفيذ حفظ المراجع الافتراضية في ذاكرة التخزين المؤقت"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "تثبيت إصدار شرائح Apple",
+		"arm64TranslationMessage": "يعمل SiYuan حاليًا بإصدار Intel عبر Rosetta، مما قد يؤثر بشكل ملحوظ في الأداء. يُرجى استخدام إصدار شرائح Apple",
+		"downloadAppleSilicon": "تنزيل إصدار شرائح Apple",
 		"showWindow": "إظهار النافذة",
 		"hideWindow": "إخفاء النافذة",
 		"setWindowTop": "تثبيت النافذة في المقدمة",

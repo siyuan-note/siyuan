@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "Виконати кешування віртуальних посилань на блоки"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "Установіть версію для чипів Apple",
+		"arm64TranslationMessage": "Зараз SiYuan запускає версію Intel через Rosetta. Це може значно знизити продуктивність. Використовуйте версію для чипів Apple",
+		"downloadAppleSilicon": "Завантажити версію для чипів Apple",
 		"showWindow": "Показати вікно",
 		"hideWindow": "Приховати вікно",
 		"setWindowTop": "Закріпити вікно поверх",

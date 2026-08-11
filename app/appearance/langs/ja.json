@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "仮想参照のキャッシュを作成中"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "Appleシリコン版をインストール",
+		"arm64TranslationMessage": "現在、SiYuanはRosetta経由でIntel版を実行しています。パフォーマンスが大幅に低下する可能性があるため、Appleシリコン版を使用してください",
+		"downloadAppleSilicon": "Appleシリコン版をダウンロード",
 		"showWindow": "ウィンドウを表示",
 		"hideWindow": "ウィンドウを非表示",
 		"setWindowTop": "ウィンドウを最前面に設定",

@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "Jalankan referensi virtual cache"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "Instal versi chip Apple",
+		"arm64TranslationMessage": "SiYuan saat ini menjalankan versi Intel melalui Rosetta. Hal ini dapat menurunkan performa secara signifikan. Gunakan versi chip Apple",
+		"downloadAppleSilicon": "Unduh versi chip Apple",
 		"showWindow": "Tampilkan Jendela",
 		"hideWindow": "Sembunyikan Jendela",
 		"setWindowTop": "Atur Jendela di atas",

@@ -2115,6 +2115,9 @@
 		"task.cache.virtualBlockRef": "แคชอ้างอิงเสมือน"
 	},
 	"_trayMenu": {
+		"arm64TranslationTitle": "ติดตั้งเวอร์ชันสำหรับชิป Apple",
+		"arm64TranslationMessage": "ขณะนี้ SiYuan กำลังเรียกใช้เวอร์ชัน Intel ผ่าน Rosetta ซึ่งอาจทำให้ประสิทธิภาพลดลงอย่างมาก โปรดใช้เวอร์ชันสำหรับชิป Apple",
+		"downloadAppleSilicon": "ดาวน์โหลดเวอร์ชันสำหรับชิป Apple",
 		"showWindow": "แสดงหน้าต่าง",
 		"hideWindow": "ซ่อนหน้าต่าง",
 		"setWindowTop": "ตั้งหน้าบน",

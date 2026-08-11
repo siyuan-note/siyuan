@@ -9,6 +9,9 @@ import {getAllModels} from "../layout/getAll";
 import {setStorageVal} from "../protyle/util/compatibility";
 import type {Tab} from "../layout/Tab";
 import {setTitle} from "./processTitle";
+/// #if !MOBILE
+import {removeBlockPanelEditors} from "../block/Panel";
+/// #endif
 
 export const reloadSync = (
     app: App,
@@ -60,6 +63,7 @@ export const reloadSync = (
         window.siyuan.mobile.docks.file?.init(false);
     });
     /// #else
+    removeBlockPanelEditors({rootIDs: data.removeRootIDs});
     const allModels = getAllModels();
     const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
         const docInfoParam: IObject = {

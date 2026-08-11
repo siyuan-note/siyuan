@@ -53,6 +53,7 @@ import {reloadSync} from "./util/reloadSync";
 import {setTitle} from "./util/processTitle";
 import {ensureUILayout} from "./util/ensureUILayout";
 import {applyEntryVisibility} from "./config/entryVisibility/runtime";
+import {removeBlockPanelEditors} from "./block/Panel";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -171,6 +172,7 @@ export class App {
                             break;
                         case "closeBox":
                         case "removeBox":
+                            removeBlockPanelEditors({notebookId: data.data.box});
                             getAllTabs().forEach((tab) => {
                                 if (tab.headElement) {
                                     const initTab = tab.headElement.getAttribute("data-initdata");
@@ -184,6 +186,7 @@ export class App {
                             });
                             break;
                         case "removeDoc":
+                            removeBlockPanelEditors({rootIDs: data.data.ids});
                             getAllTabs().forEach((tab) => {
                                 if (tab.headElement) {
                                     const initTab = tab.headElement.getAttribute("data-initdata");

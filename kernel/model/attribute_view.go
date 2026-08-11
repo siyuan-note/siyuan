@@ -7540,6 +7540,30 @@ func (tx *Transaction) doBatchUpdateAttrViewCells(operations []*Operation) (ret 
 	return
 }
 
+func (tx *Transaction) doUpdateAttrViewCells(operation *Operation) (ret *TxErr) {
+	if "" == operation.AvID || 0 == len(operation.CellUpdates) {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: "invalid attribute view cell updates"}
+	}
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	for _, cell := range operation.CellUpdates {
+		if nil == cell || "" == cell.KeyID || "" == cell.RowID {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: "invalid attribute view cell update"}
+		}
+		if _, err = updateAttributeViewValue(tx, attrView, cell.KeyID, cell.RowID, cell.Data, false); err != nil {
+			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+		}
+	}
+	regenAttrViewGroups(attrView)
+	if err = av.SaveAttributeView(attrView); err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: attrView.ID, msg: err.Error()}
+	}
+	refreshRelatedSrcAvs(attrView.ID, tx)
+	return
+}
+
 func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []any) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {

@@ -39,6 +39,7 @@ import {setFold} from "./blockFold";
 import {removeFoldHeading} from "./heading";
 import {
     AV_PASTE_READONLY_TYPES,
+    compactAVCellOperations,
     getAVPasteCellValue,
     getAVPasteValueForType,
     getAVPasteMatrixWidth,
@@ -591,12 +592,17 @@ const pasteAVMatrix = async (options: {
         removePlaceholderRows(options.blockElement);
     }
 
-    const doOperations = [...schemaDoOperations, ...widthDoOperations, ...rowDoOperations, ...cellDoOperations];
+    const doOperations = [
+        ...schemaDoOperations,
+        ...widthDoOperations,
+        ...rowDoOperations,
+        ...compactAVCellOperations(cellDoOperations),
+    ];
     if (doOperations.length === 0) {
         return;
     }
     const undoOperations = [
-        ...cellUndoOperations,
+        ...compactAVCellOperations(cellUndoOperations),
         ...rowUndoOperations,
         ...widthUndoOperations.reverse(),
         ...schemaUndoOperations.reverse(),

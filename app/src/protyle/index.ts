@@ -361,6 +361,7 @@ export class Protyle {
         const hadContent = this.protyle.wysiwyg.element.childElementCount > 0;
         let needCreateAction = "";
         let hasDeleteOp = false;
+        const operations: IOperation[] = [];
         data.data[0].doOperations.find((item: IOperation) => {
             if (this.protyle.options.backlinkData && ["delete", "move"].includes(item.action)) {
                 // 反链上下文只展示源文档的一部分，结构操作等待索引提交后按内容版本增量同步。
@@ -369,13 +370,16 @@ export class Protyle {
                 if (item.action === "delete") {
                     hasDeleteOp = true;
                 }
-                onTransaction(this.protyle, [item], false);
+                operations.push(item);
                 // 反链面板移除元素后，文档为空
                 if (!(item.action === "delete" && typeof item.data?.createEmptyParagraph === "boolean" && !item.data.createEmptyParagraph)) {
                     needCreateAction = item.action;
                 }
             }
         });
+        if (operations.length > 0) {
+            onTransaction(this.protyle, operations, false);
+        }
         // 聚焦块被分屏另一侧的删除操作连带删除时（容器块删除会级联删除其所有子孙块，如列表/超级块/引述等），当前页签的聚焦块已成为孤儿但仍显示，需退出聚焦
         // Improve editor state synchronization when deleting blocks https://github.com/siyuan-note/siyuan/issues/17742
         if (this.protyle.block.showAll && hasDeleteOp) {

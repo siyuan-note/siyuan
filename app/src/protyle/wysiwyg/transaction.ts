@@ -1224,7 +1224,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             return;
         }
         if (["addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
-            "updateAttrViewColOption", "updateAttrViewCell", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
+            "updateAttrViewColOption", "updateAttrViewCell", "updateAttrViewCells", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
             "setAttrViewColWrap", "setAttrViewColWidth", "setAttrViewColsWidth", "setAttrViewColAlign", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
             "setAttrViewSorts", "setAttrViewNewItemTemplates", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "setAttrViewColDateFormat", "removeAttrViewBlock",
             "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColPin", "addAttrViewView", "setAttrViewColIcon",

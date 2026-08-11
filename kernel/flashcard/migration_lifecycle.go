@@ -165,6 +165,13 @@ func (store *Store) rebaseDivergedLegacyMigration(ctx context.Context, plan Lega
 			changes = append(changes, change)
 			entityCount++
 		case RecordEvent:
+			exists, err := store.projection.eventExists(ctx, change.Event.EventID)
+			if err != nil {
+				return LegacyMigrationPlan{}, err
+			}
+			if exists {
+				continue
+			}
 			changes = append(changes, change)
 			reviewEventCount++
 		default:

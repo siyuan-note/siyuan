@@ -891,15 +891,6 @@ func ankiReviewEvent(collectionID, sourceID, cardID string, originCardID int64,
 	return event, event.Validate() == nil
 }
 
-func (projection *Projection) eventExists(ctx context.Context, eventID string) (bool, error) {
-	var found int
-	if err := projection.db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM events WHERE event_id = ?)",
-		eventID).Scan(&found); err != nil {
-		return false, err
-	}
-	return found != 0, nil
-}
-
 func countAnkiReviews(cards []ankiImportCard, reviews map[int64][]ankiImportReview) int {
 	count := 0
 	for _, card := range cards {

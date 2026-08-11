@@ -1,4 +1,5 @@
 {
+	"flashcardHistoryOnlyCards": "Старые карточки, сохранённые только для истории",
 	"flashcardTypedAnswer": "Ввод ответа",
 	"flashcardGenerationStatus": "Состояние генерации",
 	"flashcardReviewState": "Состояние повторения",

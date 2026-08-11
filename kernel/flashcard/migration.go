@@ -89,6 +89,7 @@ type LegacyMigrationReport struct {
 	LegacyCards           int
 	MigratedSources       int
 	MigratedCards         int
+	ArchivedCards         int
 	MergedCards           int
 	ReviewSets            int
 	ReviewEvents          int
@@ -189,7 +190,7 @@ func PrepareLegacyMigration(ctx context.Context, legacyRoot string,
 		},
 	}
 	entities, reviewEvents, logicalTime, err := buildLegacyRecords(ctx, decks, logs, options, &plan.Report,
-		migrationID, operationID)
+		operationID)
 	if err != nil {
 		return LegacyMigrationPlan{}, err
 	}
@@ -498,7 +499,7 @@ func legacyMigrationID(fingerprints []LegacyFileFingerprint, options LegacyMigra
 }
 
 func buildLegacyRecords(ctx context.Context, decks []legacyDeckInput, logs []legacyLogInput,
-	options LegacyMigrationOptions, report *LegacyMigrationReport, migrationID,
+	options LegacyMigrationOptions, report *LegacyMigrationReport,
 	operationID string) ([]plannedEntity, []Event, int64, error) {
 	var records []legacyCardRecord
 	logicalTime := int64(0)
@@ -609,7 +610,7 @@ func buildLegacyRecords(ctx context.Context, decks []legacyDeckInput, logs []leg
 				updatedAt: record.updatedAt, payload: LegacyCardAlias{
 					ID: aliasID, LegacyDeckID: record.deckID, LegacyCardID: record.cardID, BlockID: blockID,
 					CardID: cardID, Selected: record.deckID == selected.deckID && record.cardID == selected.cardID,
-					State: aliasState,
+					State: &aliasState,
 				}})
 			if safeCardMappings[record.cardID] == nil {
 				safeCardMappings[record.cardID] = map[string]string{}
@@ -627,6 +628,10 @@ func buildLegacyRecords(ctx context.Context, decks []legacyDeckInput, logs []leg
 		}
 		logicalTime = maxInt64(logicalTime, selected.updatedAt)
 	}
+	archivedEntities, archivedLogicalTime := buildLegacyHistoryRecords(logs, safeCardMappings,
+		encryptedLegacyCardIDs, report)
+	entities = append(entities, archivedEntities...)
+	logicalTime = maxInt64(logicalTime, archivedLogicalTime)
 	for _, deck := range decks {
 		cards := deckCards[deck.id]
 		reviewSetID := DeterministicID("legacy-review-set", deck.id)
@@ -649,11 +654,86 @@ func buildLegacyRecords(ctx context.Context, decks []legacyDeckInput, logs []leg
 		}
 		report.ReviewSets++
 	}
-	reviewEvents := buildLegacyReviewEvents(logs, safeCardMappings, encryptedLegacyCardIDs, migrationID, report)
+	reviewEvents := buildLegacyReviewEvents(logs, safeCardMappings, encryptedLegacyCardIDs, report)
 	for _, event := range reviewEvents {
 		logicalTime = maxInt64(logicalTime, event.OccurredAt)
 	}
 	return entities, reviewEvents, logicalTime, nil
+}
+
+// buildLegacyHistoryRecords 为已从当前卡文件移除但仍有复习日志的旧卡建立不可复习的审计映射。
+func buildLegacyHistoryRecords(logFiles []legacyLogInput, mappings map[string]map[string]string,
+	encryptedCardIDs map[string]struct{}, report *LegacyMigrationReport) ([]plannedEntity, int64) {
+	type historyRange struct {
+		createdAt int64
+		updatedAt int64
+	}
+	ranges := map[string]historyRange{}
+	for _, logFile := range logFiles {
+		for _, log := range logFile.logs {
+			if log == nil || strings.TrimSpace(log.CardID) == "" {
+				continue
+			}
+			if _, encrypted := encryptedCardIDs[log.CardID]; encrypted {
+				continue
+			}
+			reviewedAt := normalizeLegacyTimestamp(log.Reviewed)
+			current, found := ranges[log.CardID]
+			if !found || reviewedAt < current.createdAt {
+				current.createdAt = reviewedAt
+			}
+			if !found || reviewedAt > current.updatedAt {
+				current.updatedAt = reviewedAt
+			}
+			ranges[log.CardID] = current
+		}
+	}
+	legacyCardIDs := make([]string, 0, len(ranges))
+	for legacyCardID := range ranges {
+		legacyCardIDs = append(legacyCardIDs, legacyCardID)
+	}
+	sort.Strings(legacyCardIDs)
+	entities := make([]plannedEntity, 0, len(legacyCardIDs)*4)
+	logicalTime := int64(0)
+	for _, legacyCardID := range legacyCardIDs {
+		history := ranges[legacyCardID]
+		cardMappings := mappings[legacyCardID]
+		cardID := ""
+		sourceID := ""
+		if len(cardMappings) == 1 {
+			for mappedCardID, mappedSourceID := range cardMappings {
+				cardID = mappedCardID
+				sourceID = mappedSourceID
+			}
+		} else {
+			sourceID = DeterministicID("legacy-history-source", legacyCardID)
+			refID := DeterministicID("legacy-history-source-ref", legacyCardID)
+			cardID = DeterministicID("legacy-history-card", legacyCardID)
+			entities = append(entities,
+				plannedEntity{entityType: EntityCardSource, entityID: sourceID, updatedAt: history.updatedAt,
+					payload: CardSource{ID: sourceID, SchemaID: legacyQuickSchemaID, SourceType: "legacy-history",
+						PrimaryRefID: refID, DefaultPresetID: legacyPresetID,
+						GenerationConfig: json.RawMessage(`{"legacyHistory":true}`), Status: "deleted"}},
+				plannedEntity{entityType: EntityCardSourceRef, entityID: refID, updatedAt: history.updatedAt,
+					payload: CardSourceRef{ID: refID, SourceID: sourceID, FieldID: legacyQuickFieldID,
+						EntityType: "legacy-card-history", EntityID: legacyCardID, Role: "history", Sort: 0}},
+				plannedEntity{entityType: EntityCard, entityID: cardID, updatedAt: history.updatedAt,
+					payload: Card{ID: cardID, SourceID: sourceID, TemplateID: legacyQuickTemplateID,
+						VariantKey: "legacy-history", GenerationStatus: GenerationDeleted,
+						CreatedAt: history.createdAt, UpdatedAt: history.updatedAt}},
+			)
+			mappings[legacyCardID] = map[string]string{cardID: sourceID}
+			report.ArchivedCards++
+		}
+		aliasID := DeterministicID("legacy-history-alias", legacyCardID)
+		entities = append(entities,
+			plannedEntity{entityType: EntityLegacyCardAlias, entityID: aliasID, updatedAt: history.updatedAt,
+				payload: LegacyCardAlias{ID: aliasID, LegacyCardID: legacyCardID, CardID: cardID,
+					HistoryOnly: true}},
+		)
+		logicalTime = maxInt64(logicalTime, history.updatedAt)
+	}
+	return entities, logicalTime
 }
 
 func builtinLegacyEntities(options LegacyMigrationOptions, updatedAt int64) []plannedEntity {
@@ -712,7 +792,7 @@ func legacyReviewState(card *fsrs.Card, stateRevisionID string) ReviewStateSnaps
 }
 
 func buildLegacyReviewEvents(logFiles []legacyLogInput, mappings map[string]map[string]string,
-	encryptedCardIDs map[string]struct{}, migrationID string, report *LegacyMigrationReport) []Event {
+	encryptedCardIDs map[string]struct{}, report *LegacyMigrationReport) []Event {
 	var ret []Event
 	for _, logFile := range logFiles {
 		for index, log := range logFile.logs {
@@ -772,8 +852,8 @@ func buildLegacyReviewEvents(logFiles []legacyLogInput, mappings map[string]map[
 			}
 			event := Event{
 				EventType: EventReview,
-				EventID: DeterministicID("legacy-review-event", migrationID, logFile.file.fingerprint.Path,
-					fmt.Sprintf("%d", index), log.ID, log.CardID),
+				EventID: DeterministicID("legacy-review-event", fmt.Sprintf("%d", legacyFormatVersion),
+					logFile.file.fingerprint.Path, fmt.Sprintf("%d", index), log.ID, log.CardID),
 				EntityID: cardID, OccurredAt: reviewedAt, Payload: payloadJSON,
 			}
 			if event.Validate() != nil {

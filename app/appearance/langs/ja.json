@@ -1,4 +1,5 @@
 {
+	"flashcardHistoryOnlyCards": "履歴のみ保持する旧カード",
 	"flashcardTypedAnswer": "入力解答",
 	"flashcardGenerationStatus": "生成状態",
 	"flashcardReviewState": "復習状態",

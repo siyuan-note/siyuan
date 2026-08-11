@@ -1,4 +1,5 @@
 {
+	"flashcardHistoryOnlyCards": "기록만 보존된 기존 카드",
 	"flashcardTypedAnswer": "입력 답안",
 	"flashcardGenerationStatus": "생성 상태",
 	"flashcardReviewState": "복습 상태",

@@ -444,6 +444,8 @@ func TestLegacyMigrationIsDeterministicMergesDuplicatesAndExcludesEncryptedCards
 			Reviewed: newerReview / 1000, State: riff.Review},
 		{ID: "log-e", CardID: "legacy-e", Rating: riff.Hard, ScheduledDays: 1, ElapsedDays: 1,
 			Reviewed: newerReview / 1000, State: riff.Learning},
+		{ID: "log-deleted", CardID: "legacy-deleted", Rating: riff.Good, ScheduledDays: 8, ElapsedDays: 4,
+			Reviewed: newerReview / 1000, State: riff.Review},
 	})
 	weights := fsrs.DefaultWeights()
 	options := LegacyMigrationOptions{
@@ -475,7 +477,8 @@ func TestLegacyMigrationIsDeterministicMergesDuplicatesAndExcludesEncryptedCards
 	}
 	if !first.Report.Complete || first.Report.LegacyDecks != 2 || first.Report.LegacyCards != 4 ||
 		first.Report.MigratedSources != 2 || first.Report.MigratedCards != 2 || first.Report.MergedCards != 1 ||
-		first.Report.ReviewSets != 2 || first.Report.ReviewEvents != 2 || first.Report.OrphanedSources != 1 ||
+		first.Report.ArchivedCards != 1 || first.Report.ReviewSets != 2 || first.Report.ReviewEvents != 3 ||
+		first.Report.OrphanedSources != 1 ||
 		first.Report.SkippedEncryptedCards != 1 || first.Report.SkippedEncryptedLogs != 1 {
 		t.Fatalf("unexpected migration report: %+v", first.Report)
 	}
@@ -544,18 +547,31 @@ func TestLegacyMigrationIsDeterministicMergesDuplicatesAndExcludesEncryptedCards
 		t.Fatal(err)
 	}
 	for table, expected := range map[string]int{
-		"cards":                  2,
+		"cards":                  3,
 		"review_states":          2,
-		"review_events":          2,
+		"review_events":          3,
 		"review_sets":            2,
 		"review_set_memberships": 3,
-		"legacy_card_aliases":    3,
+		"legacy_card_aliases":    6,
 	} {
 		var count int
 		if err = store.Projection().db.QueryRowContext(ctx, "SELECT COUNT(*) FROM "+table).Scan(&count); err != nil ||
 			count != expected {
 			t.Fatalf("unexpected migrated table [%s] count: count=%d err=%v", table, count, err)
 		}
+	}
+	historyCardID := DeterministicID("legacy-history-card", "legacy-deleted")
+	var generationStatus string
+	if err = store.Projection().db.QueryRowContext(ctx,
+		"SELECT generation_status FROM cards WHERE id = ?", historyCardID).Scan(&generationStatus); err != nil ||
+		generationStatus != string(GenerationDeleted) {
+		t.Fatalf("deleted legacy card history was not archived: status=%s err=%v", generationStatus, err)
+	}
+	var historyEvents int
+	if err = store.Projection().db.QueryRowContext(ctx,
+		"SELECT COUNT(*) FROM review_events WHERE card_id = ?", historyCardID).Scan(&historyEvents); err != nil ||
+		historyEvents != 1 {
+		t.Fatalf("deleted legacy card review history was not preserved: count=%d err=%v", historyEvents, err)
 	}
 }
 

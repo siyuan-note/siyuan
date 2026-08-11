@@ -386,13 +386,14 @@ type SessionChoiceOption struct {
 
 // LegacyCardAlias 保存旧卡片到统一卡片的可审计映射和迁移前状态。
 type LegacyCardAlias struct {
-	ID           string              `json:"id"`
-	LegacyDeckID string              `json:"legacyDeckID"`
-	LegacyCardID string              `json:"legacyCardID"`
-	BlockID      string              `json:"blockID"`
-	CardID       string              `json:"cardID"`
-	Selected     bool                `json:"selected"`
-	State        ReviewStateSnapshot `json:"state"`
+	ID           string               `json:"id"`
+	LegacyDeckID string               `json:"legacyDeckID"`
+	LegacyCardID string               `json:"legacyCardID"`
+	BlockID      string               `json:"blockID"`
+	CardID       string               `json:"cardID"`
+	Selected     bool                 `json:"selected"`
+	HistoryOnly  bool                 `json:"historyOnly,omitempty"`
+	State        *ReviewStateSnapshot `json:"state,omitempty"`
 }
 
 // EntityRevision 保存实体的一次不可变修订。

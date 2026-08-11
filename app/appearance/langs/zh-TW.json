@@ -1,4 +1,5 @@
 {
+	"flashcardHistoryOnlyCards": "僅保留歷史的舊卡片",
 	"flashcardTypedAnswer": "輸入答案",
 	"flashcardGenerationStatus": "生成狀態",
 	"flashcardReviewState": "複習狀態",

@@ -23,6 +23,15 @@ import (
 	"strings"
 )
 
+func (projection *Projection) eventExists(ctx context.Context, eventID string) (bool, error) {
+	var found int
+	if err := projection.db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM events WHERE event_id = ?)",
+		eventID).Scan(&found); err != nil {
+		return false, err
+	}
+	return found != 0, nil
+}
+
 // DomainEvents 返回指定类型的不可变领域事件，并使用稳定顺序。
 func (projection *Projection) DomainEvents(ctx context.Context, eventTypes ...string) ([]Event, error) {
 	if len(eventTypes) == 0 {

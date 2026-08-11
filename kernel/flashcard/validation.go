@@ -258,7 +258,7 @@ func (source *CardSource) validate(entityID string) error {
 		return err
 	}
 	switch source.SourceType {
-	case "block", "multi-block", "qa", "av-row":
+	case "block", "multi-block", "qa", "av-row", "legacy-history":
 	case "cloze":
 		var config ClozeGenerationConfig
 		if err := decodeStrictJSON(source.GenerationConfig, &config); err != nil {
@@ -656,8 +656,17 @@ func (alias *LegacyCardAlias) validate(entityID string) error {
 	if err := validatePayloadID(entityID, alias.ID); err != nil {
 		return err
 	}
-	if strings.TrimSpace(alias.LegacyDeckID) == "" || strings.TrimSpace(alias.LegacyCardID) == "" ||
-		strings.TrimSpace(alias.BlockID) == "" || strings.TrimSpace(alias.CardID) == "" {
+	if strings.TrimSpace(alias.LegacyCardID) == "" || strings.TrimSpace(alias.CardID) == "" {
+		return errors.New("legacy card alias identity is incomplete")
+	}
+	if alias.HistoryOnly {
+		if strings.TrimSpace(alias.LegacyDeckID) != "" || strings.TrimSpace(alias.BlockID) != "" || alias.Selected ||
+			alias.State != nil {
+			return errors.New("history-only legacy card alias must not claim a deck, block, selection or state")
+		}
+		return nil
+	}
+	if strings.TrimSpace(alias.LegacyDeckID) == "" || strings.TrimSpace(alias.BlockID) == "" || alias.State == nil {
 		return errors.New("legacy card alias identity is incomplete")
 	}
 	return alias.State.validate()

@@ -148,6 +148,10 @@ func TestDivergedLegacyMigrationRebasesExistingEntities(t *testing.T) {
 	cardsPath := filepath.Join(legacyRoot, "deck-incremental.cards")
 	firstCard := legacyFSRSCard("legacy-first", "block-first", 1785900000000, 3)
 	writeMsgpack(t, cardsPath, map[string]*riff.FSRSCard{"legacy-first": firstCard})
+	logsPath := filepath.Join(legacyRoot, "logs", "202608.msgpack")
+	firstDeletedLog := &riff.Log{ID: "log-deleted-first", CardID: "legacy-deleted", Rating: riff.Good,
+		ScheduledDays: 3, ElapsedDays: 2, Reviewed: 1785950000, State: riff.Review}
+	writeMsgpack(t, logsPath, []*riff.Log{firstDeletedLog})
 	weights := fsrs.DefaultWeights()
 	options := LegacyMigrationOptions{
 		RequestRetention: 0.9, MaximumInterval: 36500, Weights: append([]float64(nil), weights[:]...),
@@ -173,8 +177,11 @@ func TestDivergedLegacyMigrationRebasesExistingEntities(t *testing.T) {
 
 	deck.Updated = 1787000000000
 	writeMsgpack(t, filepath.Join(legacyRoot, "deck-incremental.deck"), deck)
-	secondCard := legacyFSRSCard("legacy-second", "block-second", 1786900000000, 2)
-	writeMsgpack(t, cardsPath, map[string]*riff.FSRSCard{"legacy-first": firstCard, "legacy-second": secondCard})
+	secondCard := legacyFSRSCard("legacy-deleted", "block-second", 1786900000000, 2)
+	writeMsgpack(t, cardsPath, map[string]*riff.FSRSCard{"legacy-first": firstCard, "legacy-deleted": secondCard})
+	writeMsgpack(t, logsPath, []*riff.Log{firstDeletedLog,
+		{ID: "log-deleted-second", CardID: "legacy-deleted", Rating: riff.Easy, ScheduledDays: 5,
+			ElapsedDays: 3, Reviewed: 1786950000, State: riff.Review}})
 	status, err := store.CheckLegacyDivergence(ctx, legacyRoot)
 	if err != nil || status.State != MigrationStateLegacyDiverged {
 		t.Fatalf("legacy change did not enter divergence: status=%+v err=%v", status, err)
@@ -196,6 +203,27 @@ func TestDivergedLegacyMigrationRebasesExistingEntities(t *testing.T) {
 	cards, err := store.Projection().LegacyQuickCards(ctx, "deck-incremental")
 	if err != nil || len(cards) != 2 {
 		t.Fatalf("incremental migration did not retain both cards: cards=%+v err=%v", cards, err)
+	}
+	archivedCardID := DeterministicID("legacy-history-card", "legacy-deleted")
+	activeCardID := GeneratedCardID(DeterministicID("legacy-card-source", "block-second"), legacyQuickTemplateID,
+		"legacy-quick")
+	for cardID, expected := range map[string]int{archivedCardID: 1, activeCardID: 1} {
+		var count int
+		if err = store.Projection().db.QueryRowContext(ctx,
+			"SELECT COUNT(*) FROM review_events WHERE card_id = ?", cardID).Scan(&count); err != nil ||
+			count != expected {
+			t.Fatalf("incremental legacy history mapping is invalid: card=%s count=%d err=%v", cardID, count, err)
+		}
+	}
+	historyAliasID := DeterministicID("legacy-history-alias", "legacy-deleted")
+	historyAliasRevision, found, err := store.Projection().CurrentEntity(ctx, EntityLegacyCardAlias, historyAliasID)
+	if err != nil || !found {
+		t.Fatalf("incremental legacy history alias was not found: found=%t err=%v", found, err)
+	}
+	var historyAlias LegacyCardAlias
+	if err = decodeStrictJSON(historyAliasRevision.Payload, &historyAlias); err != nil ||
+		historyAlias.CardID != activeCardID {
+		t.Fatalf("incremental legacy history alias did not follow the restored card: alias=%+v err=%v", historyAlias, err)
 	}
 }
 

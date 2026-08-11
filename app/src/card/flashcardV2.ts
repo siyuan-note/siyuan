@@ -1,5 +1,6 @@
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {escapeAttr, escapeHtml} from "../util/escape";
@@ -10,6 +11,16 @@ import {listFlashcardV2PluginTypes} from "./flashcardV2Plugin";
 
 interface IFlashcardMigrationStatus {
     state: "Legacy" | "Preparing" | "Active" | "LegacyDiverged";
+}
+
+interface IFlashcardMigrationReport {
+    Complete: boolean;
+    MigratedCards: number;
+    ArchivedCards: number;
+    ReviewSets: number;
+    ReviewEvents: number;
+    InvalidCards: number;
+    UnmappedLogs: number;
 }
 
 interface IFlashcardEntityRevision<T> {
@@ -259,8 +270,20 @@ const refreshEffectiveCardValues = (card: IFlashcardSearchResult) => {
 
 const activateFlashcardV2 = (callback: () => void) => {
     fetchPost("/api/flashcard/previewMigration", {}, (previewResponse) => {
-        const report = previewResponse.data.report;
-        const details = `${window.siyuan.languages.flashcardMigrationConfirm}<br><br>${window.siyuan.languages.flashcardReviewSet}: ${report.ReviewSets}<br>${window.siyuan.languages.riffCard}: ${report.MigratedCards}`;
+        const report = previewResponse.data.report as IFlashcardMigrationReport;
+        const unresolved = report.InvalidCards + report.UnmappedLogs;
+        const summary = [
+            `${window.siyuan.languages.flashcardReviewSet}: ${report.ReviewSets}`,
+            `${window.siyuan.languages.riffCard}: ${report.MigratedCards}`,
+            `${window.siyuan.languages.flashcardHistoryOnlyCards}: ${report.ArchivedCards}`,
+            `${window.siyuan.languages.flashcardReviewHistory}: ${report.ReviewEvents}`,
+            `${window.siyuan.languages.invalid}: ${unresolved}`,
+        ].join("<br>");
+        if (!report.Complete) {
+            showMessage(`${window.siyuan.languages.dataMigration}<br>${summary}`, 0, "error");
+            return;
+        }
+        const details = `${window.siyuan.languages.flashcardMigrationConfirm}<br><br>${summary}`;
         confirmDialog(window.siyuan.languages.dataMigration, details, () => {
             fetchPost("/api/flashcard/activateMigration", {
                 migrationID: previewResponse.data.migrationID,

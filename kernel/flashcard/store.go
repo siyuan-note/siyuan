@@ -96,12 +96,11 @@ func (store *Store) applyLocked(ctx context.Context, operationID string, changes
 	if err != nil {
 		return OperationBatch{}, err
 	}
-	if existing, ok := store.journal.FindOperation(operationID); ok {
+	if existing, ok, err := store.findAppliedOperationLocked(ctx, operationID); err != nil {
+		return OperationBatch{}, err
+	} else if ok {
 		if existing.OperationDigest != digest {
 			return OperationBatch{}, ErrOperationConflict
-		}
-		if err = store.projection.ApplyBatch(ctx, existing); err != nil {
-			return existing, fmt.Errorf("apply existing flashcard projection: %w", err)
 		}
 		return existing, nil
 	}
@@ -116,6 +115,27 @@ func (store *Store) applyLocked(ctx context.Context, operationID string, changes
 		return batch, fmt.Errorf("apply flashcard projection: %w", err)
 	}
 	return batch, nil
+}
+
+// findAppliedOperation 查找权威操作，并确保 SQLite 投影已经摄取该批次。
+func (store *Store) findAppliedOperation(ctx context.Context, operationID string) (OperationBatch, bool, error) {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	if store.closed {
+		return OperationBatch{}, false, errors.New("flashcard store is closed")
+	}
+	return store.findAppliedOperationLocked(ctx, operationID)
+}
+
+func (store *Store) findAppliedOperationLocked(ctx context.Context, operationID string) (OperationBatch, bool, error) {
+	existing, found := store.journal.FindOperation(operationID)
+	if !found {
+		return OperationBatch{}, false, nil
+	}
+	if err := store.projection.ApplyBatch(ctx, existing); err != nil {
+		return OperationBatch{}, false, fmt.Errorf("apply existing flashcard projection: %w", err)
+	}
+	return existing, true, nil
 }
 
 // Refresh 导入同步后新增的权威分段，并幂等推进本地 SQLite 投影。

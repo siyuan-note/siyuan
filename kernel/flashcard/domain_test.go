@@ -365,6 +365,40 @@ func TestSnapshotFallsBackAndReplaysAllAuthorityBatches(t *testing.T) {
 	}
 }
 
+func TestSnapshotDoesNotReplaceUnavailableAuthorityBatches(t *testing.T) {
+	ctx := context.Background()
+	workspace := t.TempDir()
+	root := filepath.Join(workspace, "v2")
+	projectionPath := filepath.Join(workspace, "temp", "flashcards.db")
+	store, err := OpenStore(ctx, root, projectionPath, "device-a", &JournalOptions{WriterID: testWriterA})
+	if err != nil {
+		t.Fatal(err)
+	}
+	event := fixedEvent("test", "snapshot-ahead-event", "card-1", 100, `{}`)
+	if _, err = store.Apply(ctx, "snapshot-ahead-operation", []Change{{Kind: RecordEvent, Event: &event}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = store.CreateSnapshot(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if err = store.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.RemoveAll(filepath.Dir(projectionPath)); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = RebuildProjectionWithSnapshots(ctx, projectionPath, nil, SnapshotRoot(root)); err != nil {
+		t.Fatal(err)
+	}
+	projection, err := OpenProjection(projectionPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer projection.Close()
+	assertProjectionCounts(t, ctx, projection, 0, 0, 0)
+}
+
 func assertDisposableSnapshotTablesEmpty(t *testing.T, path string) {
 	t.Helper()
 	db, err := sql.Open("sqlite3", path+"?mode=ro&_busy_timeout=1000")
@@ -372,7 +406,11 @@ func assertDisposableSnapshotTablesEmpty(t *testing.T, path string) {
 		t.Fatal(err)
 	}
 	defer db.Close()
-	for _, table := range []string{"block_metadata", "source_availability"} {
+	tables := []string{"block_metadata", "block_search_content", "source_availability"}
+	if flashcardFTSAvailable {
+		tables = append(tables, "block_search_fts")
+	}
+	for _, table := range tables {
 		var count int
 		if err = db.QueryRow("SELECT COUNT(*) FROM " + table).Scan(&count); err != nil || count != 0 {
 			t.Fatalf("disposable snapshot table [%s] is not empty: count=%d err=%v", table, count, err)

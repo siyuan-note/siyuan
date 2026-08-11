@@ -14,6 +14,7 @@ import {
     openFlashcardV2AnkiPreview,
     openFlashcardV2BasicSource,
     openFlashcardV2Management,
+    openFlashcardV2Presets,
     openFlashcardV2ReviewSets,
     openFlashcardV2Statistics
 } from "./flashcardV2";
@@ -82,6 +83,10 @@ export const makeCard = (app: App, ids: string[]) => {
         <span class="fn__space"></span>
         <span data-type="reviewSets" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewSet}">
             <svg><use xlink:href="#iconDatabase"></use></svg>
+        </span>
+        <span class="fn__space"></span>
+        <span data-type="presets" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardPreset}">
+            <svg><use xlink:href="#iconSettings"></use></svg>
         </span>
         <span class="fn__space"></span>
         <span data-type="management" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.manage}">
@@ -168,6 +173,11 @@ export const makeCard = (app: App, ids: string[]) => {
                     break;
                 } else if (type === "reviewSets") {
                     openFlashcardV2ReviewSets(app);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "presets") {
+                    openFlashcardV2Presets();
                     event.stopPropagation();
                     event.preventDefault();
                     break;

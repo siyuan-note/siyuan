@@ -89,6 +89,9 @@ var queryFieldComparators = map[string]map[QueryComparator]struct{}{
 	"updatedAt":        orderedComparators(),
 	"reps":             orderedComparators(),
 	"lapses":           orderedComparators(),
+	"stability":        orderedComparators(),
+	"difficulty":       orderedComparators(),
+	"retrievability":   orderedComparators(),
 	"suspended":        comparatorSet(QueryEqual, QueryNotEqual),
 	"buried":           comparatorSet(QueryEqual, QueryNotEqual),
 	"flag":             comparatorSet(QueryEqual, QueryNotEqual, QueryIn, QueryNotIn),
@@ -98,6 +101,7 @@ var queryFieldComparators = map[string]map[QueryComparator]struct{}{
 	"blockID":          comparatorSet(QueryEqual, QueryNotEqual, QueryIn, QueryNotIn),
 	"notebookID":       comparatorSet(QueryEqual, QueryNotEqual, QueryIn, QueryNotIn),
 	"path":             comparatorSet(QueryEqual, QueryNotEqual, QueryContains, QueryStartsWith),
+	"content":          comparatorSet(QueryContains),
 }
 
 func comparatorSet(comparators ...QueryComparator) map[QueryComparator]struct{} {

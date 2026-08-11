@@ -117,3 +117,68 @@ func TestMutateEntitiesRejectsWholeBatchBeforeJournalWrite(t *testing.T) {
 		t.Fatalf("rejected mutation reached authority/projection: count=%d err=%v", count, countErr)
 	}
 }
+
+func TestMutateEntitiesRetryRecoversJournaledOperationProjection(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+
+	const operationID = "mutation-journaled-before-projection"
+	tag := Tag{ID: "tag-journaled", Name: "Journaled", NormalizedName: "journaled"}
+	mutation := EntityMutation{EntityType: EntityTag, EntityID: tag.ID, RequireAbsent: true,
+		UpdatedAt: 100, Payload: mustRawJSON(t, tag)}
+	revision, err := NewOperationEntityRevision(operationID, mutation.EntityType, mutation.EntityID, nil,
+		mutation.UpdatedAt, false, mutation.Payload)
+	if err != nil {
+		t.Fatal(err)
+	}
+	batch, created, err := store.journal.Append(operationID,
+		[]Change{{Kind: RecordEntityRevision, Revision: &revision}})
+	if err != nil || !created {
+		t.Fatalf("append journal-only operation: created=%v err=%v", created, err)
+	}
+	if _, found, queryErr := store.Projection().CurrentEntity(ctx, EntityTag, tag.ID); queryErr != nil || found {
+		t.Fatalf("journal-only operation unexpectedly reached projection: found=%v err=%v", found, queryErr)
+	}
+
+	result, err := store.MutateEntities(ctx, operationID, []EntityMutation{mutation})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Batch.BatchID != batch.BatchID || len(result.Revisions) != 1 {
+		t.Fatalf("unexpected recovered mutation result: %#v", result)
+	}
+	current, found, err := store.Projection().CurrentEntity(ctx, EntityTag, tag.ID)
+	if err != nil || !found || current.RevisionID != revision.RevisionID {
+		t.Fatalf("journaled mutation was not projected: found=%v revision=%#v err=%v", found, current, err)
+	}
+}
+
+func TestFlagDefinitionsUseStableVersionedEntities(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+
+	definitions := []FlagDefinition{
+		{ID: FlagDefinitionID(1), Flag: 1, Name: "Important"},
+		{ID: FlagDefinitionID(2), Flag: 2, Name: "Needs work"},
+	}
+	mutations := make([]EntityMutation, 0, len(definitions))
+	for _, definition := range definitions {
+		mutations = append(mutations, EntityMutation{EntityType: EntityFlagDefinition, EntityID: definition.ID,
+			RequireAbsent: true, UpdatedAt: 100, Payload: mustRawJSON(t, definition)})
+	}
+	if _, err := store.MutateEntities(ctx, "create-flag-definitions", mutations); err != nil {
+		t.Fatal(err)
+	}
+	page, err := store.Projection().ListEntities(ctx, EntityFlagDefinition, EntityListOptions{Limit: 10})
+	if err != nil || page.Total != 2 || len(page.Entities) != 2 {
+		t.Fatalf("list flag definitions: page=%+v err=%v", page, err)
+	}
+	invalid := FlagDefinition{ID: FlagDefinitionID(1), Flag: 2, Name: "Wrong identity"}
+	if _, err = store.MutateEntities(ctx, "invalid-flag-definition", []EntityMutation{{
+		EntityType: EntityFlagDefinition, EntityID: invalid.ID, UpdatedAt: 200, Payload: mustRawJSON(t, invalid),
+	}}); err == nil {
+		t.Fatal("expected a mismatched flag definition identity to fail")
+	}
+}

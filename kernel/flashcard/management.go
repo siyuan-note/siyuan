@@ -80,7 +80,9 @@ func (store *Store) ManageCards(ctx context.Context, request CardManagementReque
 	if err := request.validate(); err != nil {
 		return CardManagementResult{}, err
 	}
-	if existing, found := store.journal.FindOperation(request.OperationID); found {
+	if existing, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
+		return CardManagementResult{}, err
+	} else if found {
 		return cardManagementResultFromBatch(existing, request)
 	}
 	cardIDs := append([]string(nil), request.CardIDs...)

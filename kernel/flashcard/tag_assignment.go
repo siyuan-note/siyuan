@@ -59,7 +59,9 @@ func (store *Store) SetTagAssignments(ctx context.Context,
 	if err != nil {
 		return SetTagAssignmentsResult{}, err
 	}
-	if existing, found := store.journal.FindOperation(normalized.OperationID); found {
+	if existing, found, err := store.findAppliedOperationLocked(ctx, normalized.OperationID); err != nil {
+		return SetTagAssignmentsResult{}, err
+	} else if found {
 		return tagAssignmentsResultFromBatch(existing, normalized)
 	}
 	if err = store.validateTagAssignmentTargets(ctx, normalized); err != nil {

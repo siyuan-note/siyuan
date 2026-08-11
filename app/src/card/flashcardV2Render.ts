@@ -93,6 +93,11 @@ interface IMultiLineGenerationConfig {
     revealMode: "all" | "steps";
 }
 
+interface ITypedAnswerGenerationConfig extends IFlashcardV2AnswerCheckConfig {
+    trimWhitespace: boolean;
+    collapseWhitespace: boolean;
+}
+
 export interface IFlashcardV2RenderModel {
     card: {
         id: string;
@@ -106,7 +111,7 @@ export interface IFlashcardV2RenderModel {
         primaryRefID?: string;
         sourceType: string;
         generationConfig?: IClozeGenerationConfig | IOrderedGenerationConfig | IImageOcclusionConfig |
-            IChoiceGenerationConfig | IMultiLineGenerationConfig;
+            IChoiceGenerationConfig | IMultiLineGenerationConfig | ITypedAnswerGenerationConfig;
         pluginNamespace?: string;
         pluginDataVersion?: number;
         pluginData?: {
@@ -116,6 +121,7 @@ export interface IFlashcardV2RenderModel {
     };
     references: IFlashcardV2SourceReference[];
     template: {
+        answerMode?: string;
         frontSpec?: IFlashcardV2RenderSpec;
         backSpec?: IFlashcardV2RenderSpec;
         style?: string;
@@ -572,7 +578,8 @@ const renderFlashcardV2AnswerResult = (input: HTMLInputElement, result: IFlashca
 
 export const prepareFlashcardV2TypedAnswers = (element: Element, model: IFlashcardV2RenderModel,
     doms: Record<string, string>): IFlashcardV2TypedAnswerController | undefined => {
-    const inputs = [...element.querySelectorAll<HTMLInputElement>("[data-anki-type-answer]")];
+    const inputs = [...element.querySelectorAll<HTMLInputElement>(
+        "[data-anki-type-answer], [data-flashcard-type-answer]")];
     if (inputs.length === 0) {
         return;
     }
@@ -580,6 +587,14 @@ export const prepareFlashcardV2TypedAnswers = (element: Element, model: IFlashca
         .map((reference) => [reference.fieldID, reference]));
     return {
         check: () => inputs.map((input) => {
+            if (input.hasAttribute("data-flashcard-type-answer")) {
+                const acceptedAnswers = model.references.filter((reference) => reference.role.startsWith("answer:"))
+                    .map((reference) => flashcardV2ReferenceText(doms[reference.entityID] || ""));
+                const config = model.source.generationConfig as ITypedAnswerGenerationConfig;
+                const result = checkFlashcardV2Answer(input.value, acceptedAnswers, config);
+                renderFlashcardV2AnswerResult(input, result);
+                return result;
+            }
             const fieldID = input.dataset.ankiTypeAnswer || "";
             const reference = references.get(fieldID);
             const expected = reference ? flashcardV2ReferenceText(doms[reference.entityID] || "") : "";

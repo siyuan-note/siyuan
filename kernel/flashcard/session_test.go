@@ -187,3 +187,40 @@ func TestReinforcementSessionCanExplicitlyIncludePausedCards(t *testing.T) {
 		t.Fatalf("explicit paused reinforcement did not include the card: %#v", withPaused.SessionCards)
 	}
 }
+
+func TestReviewSetQueueOrdersAreStable(t *testing.T) {
+	fixtures := []CardSearchResult{
+		{Card: Card{ID: "card-a", CreatedAt: 30}, ReviewState: ReviewState{ReviewStateSnapshot: ReviewStateSnapshot{Due: 10}}, EffectivePriority: "retaining"},
+		{Card: Card{ID: "card-b", CreatedAt: 10}, ReviewState: ReviewState{ReviewStateSnapshot: ReviewStateSnapshot{Due: 30}}, EffectivePriority: "exam"},
+		{Card: Card{ID: "card-c", CreatedAt: 20}, ReviewState: ReviewState{ReviewStateSnapshot: ReviewStateSnapshot{Due: 20}}, EffectivePriority: "learning"},
+	}
+	assertOrder := func(mode string, expected []string) {
+		t.Helper()
+		results := append([]CardSearchResult(nil), fixtures...)
+		sortStudyQueue(results, ReviewSetOrder{Mode: mode}, "stable-seed")
+		actual := make([]string, len(results))
+		for index := range results {
+			actual[index] = results[index].Card.ID
+		}
+		for index := range expected {
+			if actual[index] != expected[index] {
+				t.Fatalf("unexpected %s queue order: got=%v want=%v", mode, actual, expected)
+			}
+		}
+	}
+	assertOrder(ReviewSetOrderPriorityDue, []string{"card-b", "card-c", "card-a"})
+	assertOrder(ReviewSetOrderDue, []string{"card-a", "card-c", "card-b"})
+	assertOrder(ReviewSetOrderAdded, []string{"card-b", "card-c", "card-a"})
+	randomFirst := append([]CardSearchResult(nil), fixtures...)
+	randomSecond := append([]CardSearchResult(nil), fixtures...)
+	sortStudyQueue(randomFirst, ReviewSetOrder{Mode: ReviewSetOrderRandom}, "stable-seed")
+	sortStudyQueue(randomSecond, ReviewSetOrder{Mode: ReviewSetOrderRandom}, "stable-seed")
+	for index := range randomFirst {
+		if randomFirst[index].Card.ID != randomSecond[index].Card.ID {
+			t.Fatalf("random review set order changed for the same seed: first=%v second=%v", randomFirst, randomSecond)
+		}
+	}
+	if _, err := parseReviewSetOrder(json.RawMessage(`{"mode":"unknown"}`)); err == nil {
+		t.Fatal("expected an unsupported review set order to fail")
+	}
+}

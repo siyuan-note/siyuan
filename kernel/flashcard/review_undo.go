@@ -57,7 +57,9 @@ func (store *Store) UndoReview(ctx context.Context, request ReviewUndoRequest) (
 	if err := request.validate(); err != nil {
 		return ReviewUndoResult{}, err
 	}
-	if batch, found := store.journal.FindOperation(request.OperationID); found {
+	if batch, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
+		return ReviewUndoResult{}, err
+	} else if found {
 		return reviewUndoResultFromBatch(batch, request)
 	}
 	targetEvent, targetPayload, batchID, found, err := store.projection.reviewEventByID(ctx,

@@ -36,8 +36,9 @@ type SetReviewSetMembershipsRequest struct {
 
 // SetReviewSetMembershipsResult 返回最终成员实体和权威批次。
 type SetReviewSetMembershipsResult struct {
-	Batch       OperationBatch                 `json:"batch"`
-	Memberships map[string]ReviewSetMembership `json:"memberships"`
+	Batch          OperationBatch                 `json:"batch"`
+	Memberships    map[string]ReviewSetMembership `json:"memberships"`
+	ClearedCardIDs []string                       `json:"clearedCardIDs"`
 }
 
 // SetReviewSetMemberships 为每个复习集和卡片对复用既有实体 ID，避免不同创建入口产生重复关系。
@@ -51,8 +52,10 @@ func (store *Store) SetReviewSetMemberships(ctx context.Context,
 	if err := request.validate(); err != nil {
 		return SetReviewSetMembershipsResult{}, err
 	}
-	if existing, found := store.journal.FindOperation(request.OperationID); found {
-		return reviewSetMembershipsFromBatch(existing, request)
+	if existing, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
+		return SetReviewSetMembershipsResult{}, err
+	} else if found {
+		return store.reviewSetMembershipsFromBatch(ctx, existing, request)
 	}
 	if revision, found, err := store.projection.CurrentEntity(ctx, EntityReviewSet, request.ReviewSetID); err != nil || !found || revision.Deleted {
 		if err != nil {
@@ -78,14 +81,18 @@ func (store *Store) SetReviewSetMemberships(ctx context.Context,
 		if membershipID == "" {
 			membershipID = DeterministicID("review-set-membership", request.ReviewSetID, cardID)
 		}
-		membership := ReviewSetMembership{ID: membershipID, ReviewSetID: request.ReviewSetID, CardID: cardID,
-			Mode: request.Mode}
 		parents := []string(nil)
 		if parentRevisionID != "" {
 			parents = []string{parentRevisionID}
 		}
+		deleted := request.Mode == MembershipAutomatic
+		payload := any(map[string]any{})
+		if !deleted {
+			payload = ReviewSetMembership{ID: membershipID, ReviewSetID: request.ReviewSetID, CardID: cardID,
+				Mode: request.Mode}
+		}
 		revision, err := NewOperationEntityRevision(request.OperationID, EntityReviewSetMembership,
-			membershipID, parents, request.ChangedAt, false, membership)
+			membershipID, parents, request.ChangedAt, deleted, payload)
 		if err != nil {
 			return SetReviewSetMembershipsResult{}, err
 		}
@@ -98,7 +105,7 @@ func (store *Store) SetReviewSetMemberships(ctx context.Context,
 	if err != nil {
 		return SetReviewSetMembershipsResult{}, err
 	}
-	return reviewSetMembershipsFromBatch(batch, request)
+	return store.reviewSetMembershipsFromBatch(ctx, batch, request)
 }
 
 func (request *SetReviewSetMembershipsRequest) validate() error {
@@ -106,7 +113,7 @@ func (request *SetReviewSetMembershipsRequest) validate() error {
 		request.ChangedAt <= 0 || len(request.CardIDs) == 0 {
 		return errors.New("flashcard review set membership operation is incomplete")
 	}
-	if request.Mode != MembershipInclude && request.Mode != MembershipExclude {
+	if request.Mode != MembershipInclude && request.Mode != MembershipExclude && request.Mode != MembershipAutomatic {
 		return fmt.Errorf("unsupported review set membership mode [%s]", request.Mode)
 	}
 	seen := make(map[string]struct{}, len(request.CardIDs))
@@ -130,6 +137,14 @@ func (projection *Projection) currentReviewSetMembership(ctx context.Context, re
 		WHERE membership.review_set_id = ? AND membership.card_id = ?`, EntityReviewSetMembership, reviewSetID,
 		cardID).Scan(&membershipID, &revisionID)
 	if errors.Is(err, sql.ErrNoRows) {
+		membershipID = DeterministicID("review-set-membership", reviewSetID, cardID)
+		revision, found, currentErr := projection.CurrentEntity(ctx, EntityReviewSetMembership, membershipID)
+		if currentErr != nil {
+			return "", "", currentErr
+		}
+		if found {
+			return membershipID, revision.RevisionID, nil
+		}
 		return "", "", nil
 	}
 	if err != nil {
@@ -138,7 +153,7 @@ func (projection *Projection) currentReviewSetMembership(ctx context.Context, re
 	return membershipID, revisionID, nil
 }
 
-func reviewSetMembershipsFromBatch(batch OperationBatch,
+func (store *Store) reviewSetMembershipsFromBatch(ctx context.Context, batch OperationBatch,
 	request SetReviewSetMembershipsRequest) (SetReviewSetMembershipsResult, error) {
 	if len(batch.Changes) != len(request.CardIDs) {
 		return SetReviewSetMembershipsResult{}, ErrOperationConflict
@@ -148,11 +163,26 @@ func reviewSetMembershipsFromBatch(batch OperationBatch,
 		expected[cardID] = struct{}{}
 	}
 	result := SetReviewSetMembershipsResult{Batch: batch,
-		Memberships: make(map[string]ReviewSetMembership, len(request.CardIDs))}
+		Memberships: make(map[string]ReviewSetMembership, len(request.CardIDs)), ClearedCardIDs: []string{}}
 	for _, change := range batch.Changes {
 		if change.Kind != RecordEntityRevision || change.Revision == nil ||
-			change.Revision.EntityType != EntityReviewSetMembership || change.Revision.Deleted ||
+			change.Revision.EntityType != EntityReviewSetMembership ||
 			change.Revision.UpdatedAt != request.ChangedAt {
+			return SetReviewSetMembershipsResult{}, ErrOperationConflict
+		}
+		if request.Mode == MembershipAutomatic {
+			cardID, err := store.clearedReviewSetMembershipCardID(ctx, *change.Revision, request)
+			if err != nil {
+				return SetReviewSetMembershipsResult{}, err
+			}
+			if _, found := expected[cardID]; !found || !change.Revision.Deleted {
+				return SetReviewSetMembershipsResult{}, ErrOperationConflict
+			}
+			delete(expected, cardID)
+			result.ClearedCardIDs = append(result.ClearedCardIDs, cardID)
+			continue
+		}
+		if change.Revision.Deleted {
 			return SetReviewSetMembershipsResult{}, ErrOperationConflict
 		}
 		var membership ReviewSetMembership
@@ -169,5 +199,33 @@ func reviewSetMembershipsFromBatch(batch OperationBatch,
 	if len(expected) != 0 {
 		return SetReviewSetMembershipsResult{}, ErrOperationConflict
 	}
+	sort.Strings(result.ClearedCardIDs)
 	return result, nil
+}
+
+func (store *Store) clearedReviewSetMembershipCardID(ctx context.Context, revision EntityRevision,
+	request SetReviewSetMembershipsRequest) (string, error) {
+	for _, cardID := range request.CardIDs {
+		if revision.EntityID == DeterministicID("review-set-membership", request.ReviewSetID, cardID) {
+			return cardID, nil
+		}
+	}
+	if len(revision.ParentRevisionIDs) != 1 {
+		return "", ErrOperationConflict
+	}
+	parent, found, err := store.projection.entityRevisionByID(ctx, revision.ParentRevisionIDs[0])
+	if err != nil {
+		return "", err
+	}
+	if !found || parent.Deleted || parent.EntityType != EntityReviewSetMembership {
+		return "", ErrOperationConflict
+	}
+	var membership ReviewSetMembership
+	if err = decodeStrictJSON(parent.Payload, &membership); err != nil {
+		return "", ErrOperationConflict
+	}
+	if membership.ID != revision.EntityID || membership.ReviewSetID != request.ReviewSetID {
+		return "", ErrOperationConflict
+	}
+	return membership.CardID, nil
 }

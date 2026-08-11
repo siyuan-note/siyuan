@@ -19,6 +19,7 @@ package flashcard
 import (
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 )
 
@@ -114,6 +115,52 @@ func TestCreateAdvancedSourcePersistsOrderedStepIdentityAndOrder(t *testing.T) {
 	}
 	if variant.Mode != "single" || !equalStrings(variant.StepIDs, want) {
 		t.Fatalf("ordered card did not preserve the requested step order: %+v", variant)
+	}
+}
+
+func TestCreateAdvancedSourceSupportsMultipleOcclusionsPerGroupAndMultipleGroupsPerOcclusion(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	applyGenerationEntities(t, ctx, store, "advanced-group-preset", 1,
+		testSchedulerPreset(legacyPresetID, false, false))
+	request := AdvancedSourceRequest{OperationID: "advanced-custom-groups", SourceID: "source-custom-groups",
+		Mode: AdvancedModeCloze, BlockIDs: []string{"block-a", "block-b", "block-c"}, CreatedAt: 10,
+		ClozeGroups: []AdvancedClozeGroup{
+			{ID: "group-second", DisplayOrder: 1, BlockIDs: []string{"block-b", "block-c"}},
+			{ID: "group-first", DisplayOrder: 0, BlockIDs: []string{"block-a", "block-b"}},
+		}}
+	result, err := store.CreateAdvancedSource(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Cards.Created) != 2 {
+		t.Fatalf("custom cloze groups generated %d cards", len(result.Cards.Created))
+	}
+	var source CardSource
+	if err = decodeStrictJSON(result.SourceRevision.Payload, &source); err != nil {
+		t.Fatal(err)
+	}
+	var config ClozeGenerationConfig
+	if err = decodeStrictJSON(source.GenerationConfig, &config); err != nil {
+		t.Fatal(err)
+	}
+	if len(config.Groups) != 2 || config.Groups[0].ID != "group-second" || config.Groups[0].DisplayOrder != 1 ||
+		len(config.Occlusions) != 3 || !equalStrings(config.Occlusions[1].GroupIDs,
+		[]string{"group-second", "group-first"}) {
+		t.Fatalf("custom cloze grouping was not preserved: %+v", config)
+	}
+}
+
+func TestCreateAdvancedSourceRejectsUngroupedClozeBlock(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	request := AdvancedSourceRequest{OperationID: "advanced-incomplete-groups", SourceID: "source-incomplete-groups",
+		Mode: AdvancedModeCloze, BlockIDs: []string{"block-a", "block-b"}, CreatedAt: 10,
+		ClozeGroups: []AdvancedClozeGroup{{ID: "group-a", BlockIDs: []string{"block-a"}}}}
+	if _, err := store.CreateAdvancedSource(ctx, request); err == nil {
+		t.Fatal("cloze source with an ungrouped block was accepted")
 	}
 }
 
@@ -302,5 +349,56 @@ func TestCreateAdvancedMultiLineSource(t *testing.T) {
 		references[1].Role != "answer:"+config.Answers[0].ID ||
 		references[2].Role != "answer:"+config.Answers[1].ID {
 		t.Fatalf("unexpected multi-line references: references=%+v err=%v", references, err)
+	}
+}
+
+func TestCreateAdvancedTypedAnswerSource(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	applyGenerationEntities(t, ctx, store, "advanced-typed-preset", 1,
+		testSchedulerPreset(legacyPresetID, false, false))
+	request := AdvancedSourceRequest{OperationID: "advanced-typed-source", SourceID: "source-typed-advanced",
+		Mode: AdvancedModeTypedAnswer, BlockIDs: []string{"question", "answer-a", "answer-b"}, CreatedAt: 10,
+		TypedConfig: &TypedAnswerConfig{IgnoreDiacritics: true, FuzzyMaxDistance: 2, TrimWhitespace: true,
+			CollapseWhitespace: true}}
+	result, err := store.CreateAdvancedSource(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Cards.Created) != 1 {
+		t.Fatalf("typed answer source did not create one schedulable card: %+v", result.Cards)
+	}
+	var source CardSource
+	if err = decodeStrictJSON(result.SourceRevision.Payload, &source); err != nil {
+		t.Fatal(err)
+	}
+	if source.SourceType != "typed-answer" || source.SchemaID != advancedTypedSchemaID {
+		t.Fatalf("unexpected typed answer source: %+v", source)
+	}
+	var config TypedAnswerConfig
+	if err = decodeStrictJSON(source.GenerationConfig, &config); err != nil {
+		t.Fatal(err)
+	}
+	if !config.IgnoreDiacritics || config.FuzzyMaxDistance != 2 || !config.TrimWhitespace ||
+		!config.CollapseWhitespace {
+		t.Fatalf("unexpected typed answer configuration: %+v", config)
+	}
+	references, err := store.Projection().CardSourceReferences(ctx, source.ID)
+	if err != nil || len(references) != 3 || references[0].Role != "question" ||
+		!strings.HasPrefix(references[1].Role, "answer:") || !strings.HasPrefix(references[2].Role, "answer:") {
+		t.Fatalf("unexpected typed answer references: references=%+v err=%v", references, err)
+	}
+	templateRevision, found, err := store.Projection().CurrentEntity(ctx, EntityCardTemplate,
+		advancedTypedTemplateID)
+	if err != nil || !found {
+		t.Fatalf("typed answer template was not found: found=%v err=%v", found, err)
+	}
+	var template CardTemplate
+	if err = decodeStrictJSON(templateRevision.Payload, &template); err != nil {
+		t.Fatal(err)
+	}
+	if template.AnswerMode != "typed" {
+		t.Fatalf("typed answer template did not enable answer checking: %+v", template)
 	}
 }

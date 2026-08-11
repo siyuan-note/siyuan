@@ -544,6 +544,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/flashcard/updateBasicDirection", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updateBasicFlashcardDirection)
 	ginServer.Handle("POST", "/api/flashcard/queryCards", model.CheckAuth, model.CheckAdminRole, queryFlashcards)
 	ginServer.Handle("POST", "/api/flashcard/previewReviewSet", model.CheckAuth, model.CheckAdminRole, previewFlashcardReviewSet)
+	ginServer.Handle("POST", "/api/flashcard/summarizeReviewSets", model.CheckAuth, model.CheckAdminRole, summarizeFlashcardReviewSets)
 	ginServer.Handle("POST", "/api/flashcard/startSession", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, startFlashcardSession)
 	ginServer.Handle("POST", "/api/flashcard/getSessionQueue", model.CheckAuth, model.CheckAdminRole, getFlashcardSessionQueue)
 	ginServer.Handle("POST", "/api/flashcard/updateSessionCard", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updateFlashcardSessionCard)

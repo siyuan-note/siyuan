@@ -34,6 +34,7 @@ const (
 	AdvancedModeChoiceMultiple = "choiceMultiple"
 	AdvancedModeMultiLineAll   = "multiLineAll"
 	AdvancedModeMultiLineSteps = "multiLineSteps"
+	AdvancedModeTypedAnswer    = "typedAnswer"
 )
 
 var (
@@ -51,6 +52,9 @@ var (
 	advancedMultiLineSchemaID       = DeterministicID("builtin", "multi-line-schema")
 	advancedMultiLineTemplateID     = DeterministicID("builtin", "multi-line-template")
 	advancedMultiLineFieldID        = DeterministicID("builtin", "multi-line-field")
+	advancedTypedSchemaID           = DeterministicID("builtin", "typed-answer-schema")
+	advancedTypedTemplateID         = DeterministicID("builtin", "typed-answer-template")
+	advancedTypedFieldID            = DeterministicID("builtin", "typed-answer-field")
 )
 
 // AdvancedSourceRequest 由有序块创建分组挖空、单卡逐步揭示或递进式多卡。
@@ -59,6 +63,7 @@ type AdvancedSourceRequest struct {
 	SourceID             string                `json:"sourceID"`
 	Mode                 string                `json:"mode"`
 	BlockIDs             []string              `json:"blockIDs"`
+	ClozeGroups          []AdvancedClozeGroup  `json:"clozeGroups,omitempty"`
 	ReviewSetIDs         []string              `json:"reviewSetIDs,omitempty"`
 	CreatedAt            int64                 `json:"createdAt"`
 	ImageConfig          *ImageOcclusionConfig `json:"imageConfig,omitempty"`
@@ -66,6 +71,32 @@ type AdvancedSourceRequest struct {
 	RandomizeOptions     bool                  `json:"randomizeOptions"`
 	DistractorQuery      *QueryAST             `json:"distractorQuery,omitempty"`
 	DynamicDistractors   int                   `json:"dynamicDistractors,omitempty"`
+	TypedConfig          *TypedAnswerConfig    `json:"typedConfig,omitempty"`
+}
+
+// TypedAnswerConfig 保存原生输入答案的声明式检查选项。
+type TypedAnswerConfig struct {
+	CaseSensitive      bool    `json:"caseSensitive"`
+	IgnoreDiacritics   bool    `json:"ignoreDiacritics"`
+	FuzzyMaxDistance   int     `json:"fuzzyMaxDistance,omitempty"`
+	FuzzyMaxRatio      float64 `json:"fuzzyMaxRatio,omitempty"`
+	TrimWhitespace     bool    `json:"trimWhitespace"`
+	CollapseWhitespace bool    `json:"collapseWhitespace"`
+}
+
+func (config *TypedAnswerConfig) validate() error {
+	if config == nil || config.FuzzyMaxDistance < 0 || config.FuzzyMaxDistance > 64 ||
+		config.FuzzyMaxRatio < 0 || config.FuzzyMaxRatio > 1 {
+		return errors.New("typed answer matching configuration is invalid")
+	}
+	return nil
+}
+
+// AdvancedClozeGroup 将一个有序分组映射到一个或多个挖空块。
+type AdvancedClozeGroup struct {
+	ID           string   `json:"id"`
+	DisplayOrder int      `json:"displayOrder"`
+	BlockIDs     []string `json:"blockIDs"`
 }
 
 // AdvancedSourceResult 返回卡源、稳定生成卡和复习集成员关系。
@@ -169,14 +200,25 @@ func (request *AdvancedSourceRequest) validate() error {
 		request.CreatedAt <= 0 || len(request.BlockIDs) == 0 {
 		return errors.New("advanced flashcard source requires an operation, source, blocks and time")
 	}
+	if request.Mode != AdvancedModeTypedAnswer && request.TypedConfig != nil {
+		return errors.New("non-typed flashcard mode must not contain typed answer configuration")
+	}
 	switch request.Mode {
-	case AdvancedModeCloze, AdvancedModeOrderedSingle, AdvancedModeOrderedCards:
+	case AdvancedModeCloze:
 		if request.ImageConfig != nil || len(request.CorrectOptionIndexes) != 0 || request.DistractorQuery != nil ||
 			request.DynamicDistractors != 0 || request.RandomizeOptions {
 			return errors.New("text flashcard mode must not contain image or choice configuration")
 		}
+		if err := validateAdvancedClozeGroups(request.BlockIDs, request.ClozeGroups); err != nil {
+			return err
+		}
+	case AdvancedModeOrderedSingle, AdvancedModeOrderedCards:
+		if len(request.ClozeGroups) != 0 || request.ImageConfig != nil || len(request.CorrectOptionIndexes) != 0 ||
+			request.DistractorQuery != nil || request.DynamicDistractors != 0 || request.RandomizeOptions {
+			return errors.New("ordered flashcard mode must not contain cloze, image or choice configuration")
+		}
 	case AdvancedModeImageOcclusion:
-		if len(request.BlockIDs) != 1 || request.ImageConfig == nil {
+		if len(request.BlockIDs) != 1 || request.ImageConfig == nil || len(request.ClozeGroups) != 0 {
 			return errors.New("image occlusion requires exactly one image block and geometry configuration")
 		}
 		if err := request.ImageConfig.validate(); err != nil {
@@ -187,7 +229,8 @@ func (request *AdvancedSourceRequest) validate() error {
 			return errors.New("image occlusion must not contain choice answers")
 		}
 	case AdvancedModeChoiceSingle, AdvancedModeChoiceMultiple:
-		if len(request.BlockIDs) < 3 || request.ImageConfig != nil || len(request.CorrectOptionIndexes) == 0 {
+		if len(request.BlockIDs) < 3 || request.ImageConfig != nil || len(request.ClozeGroups) != 0 ||
+			len(request.CorrectOptionIndexes) == 0 {
 			return errors.New("choice flashcard requires a question, at least two options, and a correct answer")
 		}
 		if request.Mode == AdvancedModeChoiceSingle && len(request.CorrectOptionIndexes) != 1 {
@@ -213,9 +256,21 @@ func (request *AdvancedSourceRequest) validate() error {
 			}
 		}
 	case AdvancedModeMultiLineAll, AdvancedModeMultiLineSteps:
-		if len(request.BlockIDs) < 2 || request.ImageConfig != nil || len(request.CorrectOptionIndexes) != 0 ||
-			request.DistractorQuery != nil || request.DynamicDistractors != 0 || request.RandomizeOptions {
+		if len(request.BlockIDs) < 2 || request.ImageConfig != nil || len(request.ClozeGroups) != 0 ||
+			len(request.CorrectOptionIndexes) != 0 || request.DistractorQuery != nil ||
+			request.DynamicDistractors != 0 || request.RandomizeOptions {
 			return errors.New("multi-line flashcard requires a question and at least one answer")
+		}
+	case AdvancedModeTypedAnswer:
+		if len(request.BlockIDs) < 2 || request.ImageConfig != nil || len(request.ClozeGroups) != 0 ||
+			len(request.CorrectOptionIndexes) != 0 || request.DistractorQuery != nil ||
+			request.DynamicDistractors != 0 || request.RandomizeOptions {
+			return errors.New("typed answer flashcard requires a question and at least one answer")
+		}
+		if request.TypedConfig != nil {
+			if err := request.TypedConfig.validate(); err != nil {
+				return err
+			}
 		}
 	default:
 		return fmt.Errorf("unsupported advanced flashcard mode [%s]", request.Mode)
@@ -224,6 +279,49 @@ func (request *AdvancedSourceRequest) validate() error {
 		return err
 	}
 	return validateUniqueStrings("advanced flashcard review set IDs", request.ReviewSetIDs, false)
+}
+
+func validateAdvancedClozeGroups(blockIDs []string, groups []AdvancedClozeGroup) error {
+	if len(groups) == 0 {
+		return nil
+	}
+	available := make(map[string]struct{}, len(blockIDs))
+	for _, blockID := range blockIDs {
+		available[blockID] = struct{}{}
+	}
+	assigned := make(map[string]struct{}, len(blockIDs))
+	groupIDs := map[string]struct{}{}
+	orders := map[int]struct{}{}
+	for _, group := range groups {
+		if strings.TrimSpace(group.ID) == "" || group.DisplayOrder < 0 || len(group.BlockIDs) == 0 {
+			return errors.New("advanced cloze group identity, order and blocks are required")
+		}
+		if _, duplicate := groupIDs[group.ID]; duplicate {
+			return fmt.Errorf("duplicate advanced cloze group [%s]", group.ID)
+		}
+		if _, duplicate := orders[group.DisplayOrder]; duplicate {
+			return fmt.Errorf("duplicate advanced cloze group display order [%d]", group.DisplayOrder)
+		}
+		groupIDs[group.ID] = struct{}{}
+		orders[group.DisplayOrder] = struct{}{}
+		seenBlocks := map[string]struct{}{}
+		for _, blockID := range group.BlockIDs {
+			if _, found := available[blockID]; !found {
+				return fmt.Errorf("advanced cloze group references unknown block [%s]", blockID)
+			}
+			if _, duplicate := seenBlocks[blockID]; duplicate {
+				return fmt.Errorf("advanced cloze group contains duplicate block [%s]", blockID)
+			}
+			seenBlocks[blockID] = struct{}{}
+			assigned[blockID] = struct{}{}
+		}
+	}
+	for _, blockID := range blockIDs {
+		if _, found := assigned[blockID]; !found {
+			return fmt.Errorf("advanced cloze block [%s] has no group", blockID)
+		}
+	}
+	return nil
 }
 
 func buildAdvancedSource(request AdvancedSourceRequest) (CardSource, []CardSourceRef, CardTemplate, error) {
@@ -249,6 +347,9 @@ func buildAdvancedSource(request AdvancedSourceRequest) (CardSource, []CardSourc
 	if request.Mode == AdvancedModeMultiLineAll || request.Mode == AdvancedModeMultiLineSteps {
 		return buildAdvancedMultiLineSource(request)
 	}
+	if request.Mode == AdvancedModeTypedAnswer {
+		return buildAdvancedTypedSource(request)
+	}
 	references := make([]CardSourceRef, 0, len(request.BlockIDs))
 	occlusionIDs := make([]string, len(request.BlockIDs))
 	for index, blockID := range request.BlockIDs {
@@ -265,14 +366,7 @@ func buildAdvancedSource(request AdvancedSourceRequest) (CardSource, []CardSourc
 	disabled := []string{advancedOrderedSingleTemplateID, advancedOrderedCardsTemplateID}
 	var config any
 	if request.Mode == AdvancedModeCloze {
-		cloze := ClozeGenerationConfig{Occlusions: make([]ClozeOcclusion, len(request.BlockIDs)),
-			Groups: make([]ClozeGroup, len(request.BlockIDs))}
-		for index, occlusionID := range occlusionIDs {
-			groupID := DeterministicID("advanced-cloze-group", request.SourceID, request.BlockIDs[index])
-			cloze.Occlusions[index] = ClozeOcclusion{ID: occlusionID, GroupIDs: []string{groupID},
-				DisplayOrder: index}
-			cloze.Groups[index] = ClozeGroup{ID: groupID, DisplayOrder: index}
-		}
+		cloze := advancedClozeConfig(request, occlusionIDs)
 		config = cloze
 	} else {
 		sourceType = "ordered"
@@ -309,6 +403,33 @@ func buildAdvancedSource(request AdvancedSourceRequest) (CardSource, []CardSourc
 		}
 	}
 	return CardSource{}, nil, CardTemplate{}, errors.New("advanced flashcard template was not found")
+}
+
+func advancedClozeConfig(request AdvancedSourceRequest, occlusionIDs []string) ClozeGenerationConfig {
+	ret := ClozeGenerationConfig{Occlusions: make([]ClozeOcclusion, len(request.BlockIDs))}
+	if len(request.ClozeGroups) == 0 {
+		ret.Groups = make([]ClozeGroup, len(request.BlockIDs))
+		for index, blockID := range request.BlockIDs {
+			groupID := DeterministicID("advanced-cloze-group", request.SourceID, blockID)
+			ret.Occlusions[index] = ClozeOcclusion{ID: occlusionIDs[index], GroupIDs: []string{groupID},
+				DisplayOrder: index}
+			ret.Groups[index] = ClozeGroup{ID: groupID, DisplayOrder: index}
+		}
+		return ret
+	}
+	groupIDsByBlock := make(map[string][]string, len(request.BlockIDs))
+	ret.Groups = make([]ClozeGroup, len(request.ClozeGroups))
+	for index, group := range request.ClozeGroups {
+		ret.Groups[index] = ClozeGroup{ID: group.ID, DisplayOrder: group.DisplayOrder}
+		for _, blockID := range group.BlockIDs {
+			groupIDsByBlock[blockID] = append(groupIDsByBlock[blockID], group.ID)
+		}
+	}
+	for index, blockID := range request.BlockIDs {
+		ret.Occlusions[index] = ClozeOcclusion{ID: occlusionIDs[index], GroupIDs: groupIDsByBlock[blockID],
+			DisplayOrder: index}
+	}
+	return ret
 }
 
 func buildAdvancedChoiceSource(request AdvancedSourceRequest) (CardSource, []CardSourceRef, CardTemplate, error) {
@@ -388,6 +509,36 @@ func buildAdvancedMultiLineSource(request AdvancedSourceRequest) (CardSource, []
 	return source, references, template, err
 }
 
+func buildAdvancedTypedSource(request AdvancedSourceRequest) (CardSource, []CardSourceRef, CardTemplate, error) {
+	references := make([]CardSourceRef, 0, len(request.BlockIDs))
+	references = append(references, CardSourceRef{
+		ID:       DeterministicID("typed-answer-source-ref", request.SourceID, "question", request.BlockIDs[0]),
+		SourceID: request.SourceID, FieldID: advancedTypedFieldID, EntityType: "block",
+		EntityID: request.BlockIDs[0], Role: "question", Required: true,
+	})
+	for index, blockID := range request.BlockIDs[1:] {
+		answerID := DeterministicID("typed-answer", request.SourceID, blockID)
+		references = append(references, CardSourceRef{
+			ID:       DeterministicID("typed-answer-source-ref", request.SourceID, "answer", blockID),
+			SourceID: request.SourceID, FieldID: advancedTypedFieldID, EntityType: "block", EntityID: blockID,
+			Role: "answer:" + answerID, Sort: index + 1, Required: true,
+		})
+	}
+	config := TypedAnswerConfig{FuzzyMaxRatio: 0.1, TrimWhitespace: true, CollapseWhitespace: true}
+	if request.TypedConfig != nil {
+		config = *request.TypedConfig
+	}
+	configJSON, err := CanonicalJSON(config)
+	if err != nil {
+		return CardSource{}, nil, CardTemplate{}, err
+	}
+	source := CardSource{ID: request.SourceID, SchemaID: advancedTypedSchemaID, SourceType: "typed-answer",
+		PrimaryRefID: references[0].ID, DefaultPresetID: legacyPresetID, GenerationConfig: configJSON,
+		Status: "active"}
+	template, err := advancedTypedTemplate()
+	return source, references, template, err
+}
+
 func (store *Store) ensureAdvancedEntities(ctx context.Context) error {
 	values, err := advancedEntityPayloads()
 	if err != nil {
@@ -456,6 +607,13 @@ func advancedEntityPayloads() ([]EntityMutation, error) {
 	multiLineSchema := CardSchema{ID: advancedMultiLineSchemaID, Name: "Multi-line", BuiltinType: "multi-line",
 		Fields:      []CardSchemaField{{ID: advancedMultiLineFieldID, Name: "Content", Type: "block", Required: true}},
 		TemplateIDs: []string{advancedMultiLineTemplateID}}
+	typedTemplate, err := advancedTypedTemplate()
+	if err != nil {
+		return nil, err
+	}
+	typedSchema := CardSchema{ID: advancedTypedSchemaID, Name: "Typed answer", BuiltinType: "typed-answer",
+		Fields:      []CardSchemaField{{ID: advancedTypedFieldID, Name: "Content", Type: "block", Required: true}},
+		TemplateIDs: []string{advancedTypedTemplateID}}
 	items := []struct {
 		entityType EntityType
 		entityID   string
@@ -464,7 +622,8 @@ func advancedEntityPayloads() ([]EntityMutation, error) {
 		{EntityCardTemplate, imageTemplate.ID, imageTemplate}, {EntityCardSchema, choiceSchema.ID, choiceSchema},
 		{EntityCardTemplate, choiceTemplate.ID, choiceTemplate},
 		{EntityCardSchema, multiLineSchema.ID, multiLineSchema},
-		{EntityCardTemplate, multiLineTemplate.ID, multiLineTemplate}}
+		{EntityCardTemplate, multiLineTemplate.ID, multiLineTemplate},
+		{EntityCardSchema, typedSchema.ID, typedSchema}, {EntityCardTemplate, typedTemplate.ID, typedTemplate}}
 	for _, template := range templates {
 		items = append(items, struct {
 			entityType EntityType
@@ -511,6 +670,20 @@ func advancedMultiLineTemplate() (CardTemplate, error) {
 	return CardTemplate{ID: advancedMultiLineTemplateID, SchemaID: advancedMultiLineSchemaID, Name: "Multi-line",
 		GenerationRule: json.RawMessage(`{"mode":"static","variantKey":"multi-line"}`), FrontSpec: spec,
 		BackSpec: spec, AnswerMode: "reveal", ContextPolicy: defaultFlashcardContextPolicy(), Enabled: true}, nil
+}
+
+func advancedTypedTemplate() (CardTemplate, error) {
+	front, err := CanonicalJSON(map[string]any{"type": "field", "role": "question"})
+	if err != nil {
+		return CardTemplate{}, err
+	}
+	back, err := CanonicalJSON(map[string]any{"type": "field", "fieldID": advancedTypedFieldID})
+	if err != nil {
+		return CardTemplate{}, err
+	}
+	return CardTemplate{ID: advancedTypedTemplateID, SchemaID: advancedTypedSchemaID, Name: "Typed answer",
+		GenerationRule: json.RawMessage(`{"mode":"static","variantKey":"typed"}`), FrontSpec: front,
+		BackSpec: back, AnswerMode: "typed", ContextPolicy: defaultFlashcardContextPolicy(), Enabled: true}, nil
 }
 
 func advancedTemplates() ([]CardTemplate, error) {

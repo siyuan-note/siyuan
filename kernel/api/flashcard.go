@@ -109,7 +109,13 @@ type queryFlashcardsRequest struct {
 
 type previewFlashcardReviewSetRequest struct {
 	ReviewSetID string                        `json:"reviewSetID"`
+	Query       *flashcardv2.QueryAST         `json:"query,omitempty"`
 	Options     flashcardv2.CardSearchOptions `json:"options"`
+}
+
+type summarizeFlashcardReviewSetsRequest struct {
+	ReviewSetIDs []string `json:"reviewSetIDs"`
+	Now          int64    `json:"now"`
 }
 
 type getFlashcardSessionQueueRequest struct {
@@ -304,12 +310,28 @@ func previewFlashcardReviewSet(c *gin.Context) {
 	if !bindFlashcardRequest(c, ret, request) {
 		return
 	}
-	page, err := model.PreviewFlashcardV2ReviewSet(c.Request.Context(), request.ReviewSetID, request.Options)
+	page, err := model.PreviewFlashcardV2ReviewSet(c.Request.Context(), request.ReviewSetID, request.Query,
+		request.Options)
 	if err != nil {
 		setFlashcardAPIError(ret, err)
 		return
 	}
 	ret.Data = page
+}
+
+func summarizeFlashcardReviewSets(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	request := &summarizeFlashcardReviewSetsRequest{}
+	if !bindFlashcardRequest(c, ret, request) {
+		return
+	}
+	summaries, err := model.SummarizeFlashcardV2ReviewSets(c.Request.Context(), request.ReviewSetIDs, request.Now)
+	if err != nil {
+		setFlashcardAPIError(ret, err)
+		return
+	}
+	ret.Data = map[string]any{"summaries": summaries}
 }
 
 func startFlashcardSession(c *gin.Context) {

@@ -28,8 +28,16 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	"github.com/mattn/go-sqlite3"
 )
+
+const flashcardSQLiteDriver = "sqlite3_flashcard"
+
+func init() {
+	sql.Register(flashcardSQLiteDriver, &sqlite3.SQLiteDriver{ConnectHook: func(connection *sqlite3.SQLiteConn) error {
+		return connection.RegisterFunc("flashcard_retrievability", projectedRetrievability, true)
+	}})
+}
 
 // ErrProjectionConflict 表示同一权威 ID 在投影中出现了不同内容。
 var ErrProjectionConflict = errors.New("flashcard projection contains conflicting immutable records")
@@ -142,7 +150,7 @@ func OpenProjection(path string) (*Projection, error) {
 		return nil, fmt.Errorf("create flashcard projection directory: %w", err)
 	}
 	dsn := path + "?_journal_mode=WAL&_synchronous=NORMAL&_foreign_keys=ON&_busy_timeout=7000"
-	db, err := sql.Open("sqlite3", dsn)
+	db, err := sql.Open(flashcardSQLiteDriver, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("open flashcard projection: %w", err)
 	}
@@ -797,7 +805,7 @@ func ProjectionNeedsRebuild(path string) bool {
 		actualDigest != expectedDigest {
 		return true
 	}
-	for _, object := range requiredProjectionObjects {
+	for _, object := range allRequiredProjectionObjects() {
 		var found int
 		if err = db.QueryRow("SELECT 1 FROM sqlite_master WHERE type = ? AND name = ?", object.typ, object.name).
 			Scan(&found); err != nil {
@@ -831,8 +839,11 @@ func rebuildProjection(ctx context.Context, path string, batches []OperationBatc
 			return err
 		}
 		if found {
-			if err = copyProjectionFile(snapshot.Path, rebuildPath); err != nil {
-				return err
+			covered, coverErr := snapshotCoveredByBatches(ctx, snapshot.Path, batches)
+			if coverErr == nil && covered {
+				if err = copyProjectionFile(snapshot.Path, rebuildPath); err != nil {
+					return err
+				}
 			}
 		}
 	}

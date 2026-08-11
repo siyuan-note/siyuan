@@ -155,7 +155,9 @@ func (store *Store) bindAnkiImportOperation(ctx context.Context, request AnkiImp
 	if store.closed {
 		return request, errors.New("flashcard store is closed")
 	}
-	if existing, found := store.journal.FindOperation(request.OperationID); found {
+	if existing, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
+		return request, err
+	} else if found {
 		if len(existing.Changes) != 1 || existing.Changes[0].Kind != RecordEvent ||
 			existing.Changes[0].Event == nil || existing.Changes[0].Event.EventType != EventAnkiImportStarted {
 			return request, ErrOperationConflict
@@ -415,7 +417,9 @@ func (store *Store) importAnkiNote(ctx context.Context, request AnkiImportReques
 		return false, 0, 0, err
 	}
 	operationID := request.OperationID + ":note:" + sourceID
-	if _, found := store.journal.FindOperation(operationID); found {
+	if _, found, err := store.findAppliedOperation(ctx, operationID); err != nil {
+		return false, 0, 0, err
+	} else if found {
 		return false, len(noteCards), countAnkiReviews(noteCards, reviewsByCard), nil
 	}
 	changes := make([]Change, 0)
@@ -684,7 +688,9 @@ func (store *Store) retireMissingAnkiSources(ctx context.Context, request AnkiIm
 			continue
 		}
 		operationID := request.OperationID + ":retired:" + source.ID
-		if _, found := store.journal.FindOperation(operationID); found {
+		if _, found, applyErr := store.findAppliedOperation(ctx, operationID); applyErr != nil {
+			return retired, applyErr
+		} else if found {
 			continue
 		}
 		changes := make([]Change, 0)

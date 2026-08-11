@@ -60,7 +60,9 @@ func (store *Store) MutateEntities(ctx context.Context, operationID string,
 	if strings.TrimSpace(operationID) == "" || len(mutations) == 0 {
 		return EntityMutationResult{}, errors.New("flashcard mutation operation and entities are required")
 	}
-	if existing, found := store.journal.FindOperation(operationID); found {
+	if existing, found, err := store.findAppliedOperationLocked(ctx, operationID); err != nil {
+		return EntityMutationResult{}, err
+	} else if found {
 		return mutationResultFromBatch(existing, mutations)
 	}
 

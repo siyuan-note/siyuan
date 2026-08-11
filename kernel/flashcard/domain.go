@@ -51,6 +51,7 @@ const (
 	EntityReviewSet           EntityType = "reviewSet"
 	EntityReviewSetMembership EntityType = "reviewSetMembership"
 	EntitySchedulerPreset     EntityType = "schedulerPreset"
+	EntityFlagDefinition      EntityType = "flagDefinition"
 	EntityTag                 EntityType = "tag"
 	EntityTagAssignment       EntityType = "tagAssignment"
 	EntityStudyPolicy         EntityType = "studyPolicy"
@@ -95,6 +96,8 @@ type MembershipMode string
 const (
 	MembershipInclude MembershipMode = "include"
 	MembershipExclude MembershipMode = "exclude"
+	// MembershipAutomatic 仅用于成员设置请求，表示清除手动覆盖，不会保存到成员实体中。
+	MembershipAutomatic MembershipMode = "automatic"
 )
 
 // CardSchema 定义卡源字段和可用模板。
@@ -260,6 +263,18 @@ type ReviewSet struct {
 	DefaultReviewMode string          `json:"defaultReviewMode"`
 }
 
+// ReviewSetOrder 保存复习集生成会话队列时使用的稳定排序方式。
+type ReviewSetOrder struct {
+	Mode string `json:"mode"`
+}
+
+const (
+	ReviewSetOrderPriorityDue = "priorityDue"
+	ReviewSetOrderDue         = "due"
+	ReviewSetOrderAdded       = "added"
+	ReviewSetOrderRandom      = "random"
+)
+
 // ReviewSetMembership 描述单张卡片的手动加入或排除关系。
 type ReviewSetMembership struct {
 	ID          string         `json:"id"`
@@ -274,6 +289,18 @@ type Tag struct {
 	ParentID       string `json:"parentID,omitempty"`
 	Name           string `json:"name"`
 	NormalizedName string `json:"normalizedName"`
+}
+
+// FlagDefinition 保存固定颜色旗标的工作区显示名称。
+type FlagDefinition struct {
+	ID   string `json:"id"`
+	Flag int    `json:"flag"`
+	Name string `json:"name"`
+}
+
+// FlagDefinitionID 返回一个旗标编号对应的稳定实体 ID。
+func FlagDefinitionID(flag int) string {
+	return fmt.Sprintf("flag-definition-%d", flag)
 }
 
 // TagAssignment 保存标签对卡源或单张卡片的独立分配。

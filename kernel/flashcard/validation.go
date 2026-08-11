@@ -35,6 +35,7 @@ var supportedEntityTypes = map[EntityType]struct{}{
 	EntityReviewSet:           {},
 	EntityReviewSetMembership: {},
 	EntitySchedulerPreset:     {},
+	EntityFlagDefinition:      {},
 	EntityTag:                 {},
 	EntityTagAssignment:       {},
 	EntityStudyPolicy:         {},
@@ -93,6 +94,9 @@ func validateEntityPayload(revision *EntityRevision) error {
 		return decodeAndValidateEntity(revision, &value, value.validate)
 	case EntitySchedulerPreset:
 		var value SchedulerPreset
+		return decodeAndValidateEntity(revision, &value, value.validate)
+	case EntityFlagDefinition:
+		var value FlagDefinition
 		return decodeAndValidateEntity(revision, &value, value.validate)
 	case EntityTag:
 		var value Tag
@@ -295,6 +299,14 @@ func (source *CardSource) validate(entityID string) error {
 		if err := config.validate(); err != nil {
 			return err
 		}
+	case "typed-answer":
+		var config TypedAnswerConfig
+		if err := decodeStrictJSON(source.GenerationConfig, &config); err != nil {
+			return fmt.Errorf("decode typed answer config: %w", err)
+		}
+		if err := config.validate(); err != nil {
+			return err
+		}
 	case "anki":
 		var config ImportedGenerationConfig
 		if err := decodeStrictJSON(source.GenerationConfig, &config); err != nil {
@@ -427,7 +439,24 @@ func (reviewSet *ReviewSet) validate(entityID string) error {
 			return err
 		}
 	}
-	return validateOptionalJSON("review set order", reviewSet.Order)
+	_, err := parseReviewSetOrder(reviewSet.Order)
+	return err
+}
+
+func parseReviewSetOrder(raw json.RawMessage) (ReviewSetOrder, error) {
+	if len(raw) == 0 {
+		return ReviewSetOrder{Mode: ReviewSetOrderPriorityDue}, nil
+	}
+	var order ReviewSetOrder
+	if err := decodeStrictJSON(raw, &order); err != nil {
+		return ReviewSetOrder{}, fmt.Errorf("decode review set order: %w", err)
+	}
+	switch order.Mode {
+	case ReviewSetOrderPriorityDue, ReviewSetOrderDue, ReviewSetOrderAdded, ReviewSetOrderRandom:
+		return order, nil
+	default:
+		return ReviewSetOrder{}, fmt.Errorf("unsupported review set order [%s]", order.Mode)
+	}
 }
 
 func (membership *ReviewSetMembership) validate(entityID string) error {
@@ -480,6 +509,20 @@ func (tag *Tag) validate(entityID string) error {
 	}
 	if tag.NormalizedName != NormalizeTagName(tag.Name) {
 		return errors.New("flashcard tag normalized name is invalid")
+	}
+	return nil
+}
+
+func (definition *FlagDefinition) validate(entityID string) error {
+	if err := validatePayloadID(entityID, definition.ID); err != nil {
+		return err
+	}
+	if definition.Flag < 1 || definition.Flag > 7 || definition.ID != FlagDefinitionID(definition.Flag) {
+		return errors.New("flashcard flag definition identity is invalid")
+	}
+	if strings.TrimSpace(definition.Name) == "" || definition.Name != strings.TrimSpace(definition.Name) ||
+		len(definition.Name) > 100 {
+		return errors.New("flashcard flag definition name is invalid")
 	}
 	return nil
 }

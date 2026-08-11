@@ -25,6 +25,14 @@ import (
 	"github.com/open-spaced-repetition/go-fsrs/v3"
 )
 
+func TestReviewRequestRejectsReviewSetWithoutSession(t *testing.T) {
+	request := ReviewRequest{OperationID: "review-without-session", CardID: "card-1", Rating: ReviewGood,
+		ReviewedAt: 100, ReviewMode: "normal", ReviewSetID: "review-set-1"}
+	if err := request.validate(); err == nil {
+		t.Fatal("expected review set without a study session to be rejected")
+	}
+}
+
 func TestReviewCardPersistsFullEventAndBuriesSiblingIdempotently(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)

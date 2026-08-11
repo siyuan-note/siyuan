@@ -79,7 +79,9 @@ func (store *Store) ReviewCard(ctx context.Context, request ReviewRequest) (Revi
 	if err := request.validate(); err != nil {
 		return ReviewResult{}, err
 	}
-	if batch, found := store.journal.FindOperation(request.OperationID); found {
+	if batch, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
+		return ReviewResult{}, err
+	} else if found {
 		return reviewResultFromBatch(batch, request)
 	}
 	cardRevision, found, err := store.projection.CurrentEntity(ctx, EntityCard, request.CardID)
@@ -369,6 +371,9 @@ func (request *ReviewRequest) validate() error {
 	}
 	if request.ReviewMode != "normal" && request.ReviewMode != "reinforcement" {
 		return fmt.Errorf("unsupported flashcard review mode [%s]", request.ReviewMode)
+	}
+	if request.ReviewSetID != "" && request.SessionID == "" {
+		return errors.New("flashcard review set requires a study session")
 	}
 	if request.BuryUntil < 0 {
 		return errors.New("flashcard sibling burial time must not be negative")

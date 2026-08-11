@@ -51,6 +51,31 @@ func TestCardSearchUsesTypedPredicatesAndAvailabilityFilters(t *testing.T) {
 	}
 	assertSearchCardIDs(t, results, []string{"card-query-4"})
 
+	stabilityQuery := predicateQuery("stability", QueryGreater, json.RawMessage(`7`))
+	results, err = store.Projection().SearchCards(ctx, &stabilityQuery, CardSearchOptions{
+		Now: now, IncludeInactive: true, IncludeSuspended: true, IncludeBuried: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertSearchCardIDs(t, results, []string{"card-query-4"})
+	difficultyQuery := predicateQuery("difficulty", QueryEqual, json.RawMessage(`7`))
+	results, err = store.Projection().SearchCards(ctx, &difficultyQuery, CardSearchOptions{
+		Now: now, IncludeInactive: true, IncludeSuspended: true, IncludeBuried: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertSearchCardIDs(t, results, []string{"card-query-4"})
+	retrievabilityQuery := predicateQuery("retrievability", QueryGreater, json.RawMessage(`0.9`))
+	results, err = store.Projection().SearchCards(ctx, &retrievabilityQuery, CardSearchOptions{
+		Now: now, IncludeInactive: true, IncludeSuspended: true, IncludeBuried: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertSearchCardIDs(t, results, []string{"card-query-4"})
+
 	all := QueryAST{Version: QueryVersion, Root: QueryExpression{Operator: QueryMatchAll}}
 	results, err = store.Projection().SearchCards(ctx, &all, CardSearchOptions{
 		Now: now, IncludeInactive: true, IncludeSuspended: true, IncludeBuried: true,
@@ -77,6 +102,27 @@ func TestCardSearchUsesTypedPredicatesAndAvailabilityFilters(t *testing.T) {
 		result.EffectiveTagIDs[0] != "tag-root" {
 		t.Fatalf("unexpected source-level effective values: %+v", result)
 	}
+}
+
+func TestCardSearchGroupsBeforePagination(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	now := int64(1786431600000)
+	setupQueryFixtures(t, ctx, store, now)
+	options := CardSearchOptions{Now: now, IncludeInactive: true, IncludeSuspended: true, IncludeBuried: true,
+		IncludePaused: true, GroupBySource: true, Limit: 1}
+	first, err := store.Projection().SearchCards(ctx, nil, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertSearchCardIDs(t, first, []string{"card-query-1", "card-query-2"})
+	options.Offset = 1
+	second, err := store.Projection().SearchCards(ctx, nil, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertSearchCardIDs(t, second, []string{"card-query-3", "card-query-4", "card-query-5"})
 }
 
 func TestReviewSetCombinesDynamicMembersIncludesAndExclusions(t *testing.T) {
@@ -107,6 +153,79 @@ func TestReviewSetCombinesDynamicMembersIncludesAndExclusions(t *testing.T) {
 	})
 	if err != nil || page.Total != 3 || len(page.CardIDs) != 1 || page.CardIDs[0] != "card-query-4" {
 		t.Fatalf("review set pagination changed membership semantics: page=%+v err=%v", page, err)
+	}
+	filter := predicateQuery("flag", QueryIn, json.RawMessage(`[4,5,6,7]`))
+	page, err = store.Projection().ReviewSetCardPageWithQuery(ctx, "review-set-query", &filter, CardSearchOptions{
+		Now: now, IncludeInactive: true, IncludeSuspended: true, IncludeBuried: true, Limit: 1, Offset: 1,
+	})
+	if err != nil || page.Total != 2 || len(page.CardIDs) != 1 || page.CardIDs[0] != "card-query-5" {
+		t.Fatalf("review set filter was not applied before pagination: page=%+v err=%v", page, err)
+	}
+	if _, err = store.SetReviewSetMemberships(ctx, SetReviewSetMembershipsRequest{
+		OperationID: "include-query-card-2-for-group-page", ReviewSetID: "review-set-query",
+		CardIDs: []string{"card-query-2"}, Mode: MembershipInclude, ChangedAt: now + 1,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	page, err = store.Projection().ReviewSetCardPage(ctx, "review-set-query", CardSearchOptions{
+		Now: now, IncludeInactive: true, IncludeSuspended: true, IncludeBuried: true, IncludePaused: true,
+		GroupBySource: true, Limit: 1,
+	})
+	if err != nil || page.Total != 2 || len(page.CardIDs) != 1 || page.CardIDs[0] != "card-query-2" {
+		t.Fatalf("review set did not paginate complete source groups: page=%+v err=%v", page, err)
+	}
+	page, err = store.Projection().ReviewSetCardPage(ctx, "review-set-query", CardSearchOptions{
+		Now: now, IncludeInactive: true, IncludeSuspended: true, IncludeBuried: true, IncludePaused: true,
+		GroupBySource: true, ReturnCards: true, Limit: 1, Offset: 1,
+	})
+	if err != nil || page.Total != 2 || len(page.CardIDs) != 3 || len(page.Cards) != 3 {
+		t.Fatalf("review set split a source group across pages: page=%+v err=%v", page, err)
+	}
+	for index, cardID := range page.CardIDs {
+		if page.Cards[index].Card.ID != cardID {
+			t.Fatalf("review set returned cards out of page order: page=%+v", page)
+		}
+	}
+}
+
+func TestReviewSetSummariesCountMembersAndCurrentlyDueCards(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	now := int64(1786431600000)
+	setupQueryFixtures(t, ctx, store, now)
+	stateRevision, found, err := store.Projection().CurrentEntity(ctx, EntityReviewState, "card-query-4")
+	if err != nil || !found {
+		t.Fatalf("review state for summary was not found: found=%v err=%v", found, err)
+	}
+	var state ReviewState
+	if err = decodeStrictJSON(stateRevision.Payload, &state); err != nil {
+		t.Fatal(err)
+	}
+	state.Due = now
+	operationID := "make-review-set-summary-card-due"
+	state.StateRevisionID = OperationRevisionID(operationID, EntityReviewState, state.CardID)
+	updatedState, err := NewOperationEntityRevision(operationID, EntityReviewState, state.CardID,
+		[]string{stateRevision.RevisionID}, now+1, false, state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = store.Apply(ctx, operationID,
+		[]Change{{Kind: RecordEntityRevision, Revision: &updatedState}}); err != nil {
+		t.Fatal(err)
+	}
+	summaries, err := store.Projection().ReviewSetSummaries(ctx, []string{"review-set-query"}, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	summary := summaries["review-set-query"]
+	if summary.ReviewSetID != "review-set-query" || summary.Cards != 2 || summary.Due != 1 ||
+		summary.Included != 1 || summary.Excluded != 1 {
+		t.Fatalf("unexpected review set summary: %+v", summary)
+	}
+	if _, err = store.Projection().ReviewSetSummaries(ctx,
+		[]string{"review-set-query", "review-set-query"}, now); err == nil {
+		t.Fatal("expected duplicate review set summary request to fail")
 	}
 }
 
@@ -141,6 +260,47 @@ func TestSetReviewSetMembershipsReusesExistingPairAndIsIdempotent(t *testing.T) 
 	cardIDs, err = store.Projection().ReviewSetCardIDs(ctx, request.ReviewSetID, CardSearchOptions{Now: now})
 	if err != nil || len(cardIDs) != 1 || cardIDs[0] != "card-query-1" {
 		t.Fatalf("existing exclusion was not replaced by inclusion: cards=%v err=%v", cardIDs, err)
+	}
+}
+
+func TestSetReviewSetMembershipsCanRestoreAutomaticQueryMembership(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	now := int64(1786431600000)
+	setupQueryFixtures(t, ctx, store, now)
+	clearRequest := SetReviewSetMembershipsRequest{OperationID: "clear-query-card-1",
+		ReviewSetID: "review-set-query", CardIDs: []string{"card-query-1"}, Mode: MembershipAutomatic,
+		ChangedAt: now + 1}
+	cleared, err := store.SetReviewSetMemberships(ctx, clearRequest)
+	if err != nil || len(cleared.ClearedCardIDs) != 1 || cleared.ClearedCardIDs[0] != "card-query-1" {
+		t.Fatalf("manual membership was not cleared: result=%+v err=%v", cleared, err)
+	}
+	retried, err := store.SetReviewSetMemberships(ctx, clearRequest)
+	if err != nil || retried.Batch.BatchID != cleared.Batch.BatchID {
+		t.Fatalf("membership clear retry changed its operation: result=%+v err=%v", retried, err)
+	}
+	cardIDs, err := store.Projection().ReviewSetCardIDs(ctx, clearRequest.ReviewSetID,
+		CardSearchOptions{Now: now})
+	if err != nil || !containsString(cardIDs, "card-query-1") {
+		t.Fatalf("cleared exclusion did not restore dynamic membership: cards=%v err=%v", cardIDs, err)
+	}
+	clearFresh := SetReviewSetMembershipsRequest{OperationID: "clear-query-card-2",
+		ReviewSetID: "review-set-query", CardIDs: []string{"card-query-2"}, Mode: MembershipAutomatic,
+		ChangedAt: now + 2}
+	if _, err = store.SetReviewSetMemberships(ctx, clearFresh); err != nil {
+		t.Fatal(err)
+	}
+	includeAfterClear := SetReviewSetMembershipsRequest{OperationID: "include-cleared-query-card-2",
+		ReviewSetID: "review-set-query", CardIDs: []string{"card-query-2"}, Mode: MembershipInclude,
+		ChangedAt: now + 3}
+	if _, err = store.SetReviewSetMemberships(ctx, includeAfterClear); err != nil {
+		t.Fatalf("fresh membership tombstone could not be superseded: %v", err)
+	}
+	cardIDs, err = store.Projection().ReviewSetCardIDs(ctx, clearRequest.ReviewSetID,
+		CardSearchOptions{Now: now, IncludeSuspended: true})
+	if err != nil || !containsString(cardIDs, "card-query-2") {
+		t.Fatalf("included membership after clear was not projected: cards=%v err=%v", cardIDs, err)
 	}
 }
 
@@ -187,9 +347,10 @@ func TestCardSearchUsesLocationQueriesAndHierarchicalStudyPolicies(t *testing.T)
 		t.Fatal(err)
 	}
 	if err = store.Projection().ReplaceBlockMetadata(ctx, []BlockMetadata{
-		{BlockID: "block-query-1", NotebookID: "notebook-other", RootID: "doc-other", Path: "/doc-other.sy"},
+		{BlockID: "block-query-1", NotebookID: "notebook-other", RootID: "doc-other", Path: "/doc-other.sy",
+			Content: "Unrelated source"},
 		{BlockID: "block-query-2", NotebookID: "notebook-query", RootID: "doc-child",
-			Path: "/doc-parent/doc-child.sy"},
+			Path: "/doc-parent/doc-child.sy", Content: "Alpha searchable content"},
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -210,6 +371,13 @@ func TestCardSearchUsesLocationQueriesAndHierarchicalStudyPolicies(t *testing.T)
 		}
 		assertSearchCardIDs(t, results, []string{"card-query-3", "card-query-4"})
 	}
+	contentQuery := predicateQuery("content", QueryContains, json.RawMessage(`"searchable"`))
+	results, err = store.Projection().SearchCards(ctx, &contentQuery, CardSearchOptions{Now: now,
+		IncludeSuspended: true, IncludeBuried: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	assertSearchCardIDs(t, results, []string{"card-query-3", "card-query-4"})
 
 	for index, policy := range []StudyPolicy{policies[2], policies[1]} {
 		current, currentFound, currentErr := store.Projection().CurrentEntity(ctx, EntityStudyPolicy, policy.ID)
@@ -565,6 +733,9 @@ func setupQueryFixtures(t *testing.T, ctx context.Context, store *Store, now int
 		queryFixtureState("card-query-4", operationID, "review", now+10000, false, 0),
 		queryFixtureState("card-query-5", operationID, "new", now, false, 0),
 	}
+	states[3].Stability = 8
+	states[3].Difficulty = 7
+	states[3].LastReview = now - 86400000
 	for _, state := range states {
 		entities = append(entities, struct {
 			entityType EntityType

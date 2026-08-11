@@ -128,6 +128,25 @@ func TestStatisticsRejectsAmbiguousScope(t *testing.T) {
 	}
 }
 
+func TestStatisticsIntersectsReviewSetAndQuery(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	now := int64(1786431600000)
+	setupQueryFixtures(t, ctx, store, now)
+	query := predicateQuery("flag", QueryEqual, json.RawMessage(`4`))
+	result, err := store.Projection().Statistics(ctx, StatisticsRequest{
+		ReviewSetID: "review-set-query", Query: &query, From: now - 86400000, To: now + 1, Now: now,
+		Bucket: StatisticsBucketDay, FutureDays: 1,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Scope != "reviewSet" || result.Overview.CurrentCards != 1 {
+		t.Fatalf("review set query statistics did not intersect scopes: %+v", result)
+	}
+}
+
 func TestStatisticsExcludesCardsWithUnresolvedSourceConflict(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)

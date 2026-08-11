@@ -189,7 +189,9 @@ func (store *Store) UpdateBasicSourceDirection(ctx context.Context,
 	if err := store.ensureBasicEntities(ctx); err != nil {
 		return BasicSourceResult{}, err
 	}
-	if existing, found := store.journal.FindOperation(request.OperationID); found {
+	if existing, found, err := store.findAppliedOperation(ctx, request.OperationID); err != nil {
+		return BasicSourceResult{}, err
+	} else if found {
 		return basicDirectionResultFromBatch(existing, request)
 	}
 	current, found, err := store.projection.CurrentEntity(ctx, EntityCardSource, request.SourceID)

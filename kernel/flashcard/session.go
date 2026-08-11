@@ -85,7 +85,9 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 	if err := request.validate(); err != nil {
 		return StudyQueueResult{}, err
 	}
-	if existing, found := store.journal.FindOperation(request.OperationID); found {
+	if existing, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
+		return StudyQueueResult{}, err
+	} else if found {
 		result, resultErr := studyQueueResultFromBatch(existing, request)
 		if resultErr != nil {
 			return StudyQueueResult{}, resultErr
@@ -121,6 +123,7 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 	mode := request.ReviewMode
 	newLimit := request.NewLimit
 	reviewLimit := request.ReviewLimit
+	reviewSetOrder := ReviewSetOrder{Mode: ReviewSetOrderPriorityDue}
 	var queryJSON json.RawMessage
 	if request.Query != nil {
 		data, err := CanonicalJSON(request.Query)
@@ -143,6 +146,10 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 		}
 		if mode == "" {
 			mode = reviewSet.DefaultReviewMode
+		}
+		reviewSetOrder, queryErr = parseReviewSetOrder(reviewSet.Order)
+		if queryErr != nil {
+			return StudyQueueResult{}, queryErr
 		}
 		newLimit = reviewSet.NewLimit
 		reviewLimit = reviewSet.ReviewLimit
@@ -192,17 +199,11 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 		}
 		results = filtered
 	}
-	sort.Slice(results, func(i, j int) bool {
-		leftPriority := effectiveQueuePriority(results[i])
-		rightPriority := effectiveQueuePriority(results[j])
-		if leftPriority != rightPriority {
-			return leftPriority < rightPriority
-		}
-		if results[i].ReviewState.Due != results[j].ReviewState.Due {
-			return results[i].ReviewState.Due < results[j].ReviewState.Due
-		}
-		return results[i].Card.ID < results[j].Card.ID
-	})
+	seed := request.Seed
+	if seed == "" {
+		seed = request.SessionID
+	}
+	sortStudyQueue(results, reviewSetOrder, seed)
 	selected := limitStudyQueue(results, newLimit, reviewLimit)
 	cardIDs := make([]string, len(selected))
 	for index := range selected {
@@ -216,10 +217,6 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 	selectionDigest, err := checksum(cardIDs)
 	if err != nil {
 		return StudyQueueResult{}, err
-	}
-	seed := request.Seed
-	if seed == "" {
-		seed = request.SessionID
 	}
 	session := StudySession{
 		ID: request.SessionID, ReviewSetID: request.ReviewSetID, QueryAST: queryJSON, ReviewMode: mode,
@@ -461,6 +458,39 @@ func effectiveQueuePriority(result CardSearchResult) int {
 	}
 }
 
+func sortStudyQueue(results []CardSearchResult, order ReviewSetOrder, seed string) {
+	sort.Slice(results, func(i, j int) bool {
+		left := results[i]
+		right := results[j]
+		switch order.Mode {
+		case ReviewSetOrderDue:
+			if left.ReviewState.Due != right.ReviewState.Due {
+				return left.ReviewState.Due < right.ReviewState.Due
+			}
+		case ReviewSetOrderAdded:
+			if left.Card.CreatedAt != right.Card.CreatedAt {
+				return left.Card.CreatedAt < right.Card.CreatedAt
+			}
+		case ReviewSetOrderRandom:
+			leftScore := DeterministicID("study-queue-order", seed, left.Card.ID)
+			rightScore := DeterministicID("study-queue-order", seed, right.Card.ID)
+			if leftScore != rightScore {
+				return leftScore < rightScore
+			}
+		default:
+			leftPriority := effectiveQueuePriority(left)
+			rightPriority := effectiveQueuePriority(right)
+			if leftPriority != rightPriority {
+				return leftPriority < rightPriority
+			}
+			if left.ReviewState.Due != right.ReviewState.Due {
+				return left.ReviewState.Due < right.ReviewState.Due
+			}
+		}
+		return left.Card.ID < right.Card.ID
+	})
+}
+
 func limitStudyQueue(results []CardSearchResult, newLimit, reviewLimit int) []CardSearchResult {
 	ret := make([]CardSearchResult, 0, len(results))
 	newCount := 0
@@ -595,7 +625,9 @@ func (store *Store) UpdateSessionCard(ctx context.Context, request SessionCardUp
 	if request.Status == "skipped" && strings.TrimSpace(request.SkipReason) == "" {
 		return SessionCard{}, errors.New("skipped flashcard requires a reason")
 	}
-	if existing, found := store.journal.FindOperation(request.OperationID); found {
+	if existing, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
+		return SessionCard{}, err
+	} else if found {
 		return sessionCardFromBatch(existing, request)
 	}
 	if err := store.requireActiveSession(ctx, request.SessionID, "", ""); err != nil {
@@ -662,7 +694,9 @@ func (store *Store) FinishStudySession(ctx context.Context, request FinishSessio
 		(request.Status != "completed" && request.Status != "abandoned") || request.EndedAt <= 0 {
 		return StudySession{}, errors.New("flashcard study session finish request is invalid")
 	}
-	if existing, found := store.journal.FindOperation(request.OperationID); found {
+	if existing, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
+		return StudySession{}, err
+	} else if found {
 		return finishedSessionFromBatch(existing, request)
 	}
 	current, found, err := store.projection.CurrentEntity(ctx, EntityStudySession, request.SessionID)

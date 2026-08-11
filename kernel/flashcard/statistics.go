@@ -173,17 +173,7 @@ func normalizeStatisticsRequest(request StatisticsRequest) (StatisticsRequest, e
 		request.TimezoneOffsetMinutes > 14*60 {
 		return request, errors.New("flashcard statistics request is invalid")
 	}
-	scopes := 0
-	if strings.TrimSpace(request.ReviewSetID) != "" {
-		scopes++
-	}
-	if request.Query != nil {
-		scopes++
-	}
-	if len(request.CardIDs) != 0 {
-		scopes++
-	}
-	if scopes > 1 {
+	if len(request.CardIDs) != 0 && (strings.TrimSpace(request.ReviewSetID) != "" || request.Query != nil) {
 		return request, errors.New("flashcard statistics accepts only one scope")
 	}
 	if request.Bucket == "" {
@@ -230,7 +220,7 @@ func (projection *Projection) resolveStatisticsScope(ctx context.Context, reques
 			return nil, nil, "", err
 		}
 		requested := stringSet(cardIDs)
-		current, err = projection.SearchCards(ctx, nil, options)
+		current, err = projection.SearchCards(ctx, request.Query, options)
 		current = filterCardSearchResults(current, requested)
 	} else if request.Query != nil {
 		scope = "query"
@@ -549,13 +539,7 @@ func startOfStatisticsBucket(value time.Time, bucket StatisticsBucket) time.Time
 }
 
 func statisticsRetrievability(state ReviewStateSnapshot, now int64) float64 {
-	if state.State == "new" || state.Stability <= 0 || state.LastReview <= 0 {
-		return 0
-	}
-	elapsedDays := math.Max(0, float64(now-state.LastReview)/86400000)
-	decay := -0.5
-	factor := math.Pow(0.9, 1/decay) - 1
-	return math.Pow(1+factor*elapsedDays/state.Stability, decay)
+	return projectedRetrievability(state.State, state.LastReview, state.Stability, now)
 }
 
 func intervalStatisticsDistribution() []StatisticsDistributionPoint {

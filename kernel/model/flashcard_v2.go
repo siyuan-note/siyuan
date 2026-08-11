@@ -148,10 +148,21 @@ func refreshFlashcardV2BlockMetadata(ctx context.Context, store *flashcardv2.Sto
 		}
 	}
 	metadata := make([]flashcardv2.BlockMetadata, 0, len(blockIDs))
+	blockContents := make(map[string]string, len(blockTrees))
+	contentBlockIDs := make([]string, 0, len(blockTrees))
+	for blockID := range blockTrees {
+		contentBlockIDs = append(contentBlockIDs, blockID)
+	}
+	for _, block := range kernelsql.GetBlocks(contentBlockIDs) {
+		if block != nil {
+			blockContents[block.ID] = block.Content
+		}
+	}
 	for _, blockID := range blockIDs {
 		if blockTree := blockTrees[blockID]; blockTree != nil {
 			metadata = append(metadata, flashcardv2.BlockMetadata{BlockID: blockTree.ID,
-				NotebookID: blockTree.BoxID, RootID: blockTree.RootID, Path: blockTree.Path, HPath: blockTree.HPath})
+				NotebookID: blockTree.BoxID, RootID: blockTree.RootID, Path: blockTree.Path, HPath: blockTree.HPath,
+				Content: blockContents[blockID]})
 		}
 	}
 	availability := make(map[string]bool, len(dependencies))
@@ -529,7 +540,7 @@ func truncateFlashcardV2Title(value string, limit int) string {
 
 // PreviewFlashcardV2ReviewSet 返回动态查询、手动纳入和排除合并后的卡片 ID。
 func PreviewFlashcardV2ReviewSet(ctx context.Context, reviewSetID string,
-	options flashcardv2.CardSearchOptions) (flashcardv2.ReviewSetCardPage, error) {
+	query *flashcardv2.QueryAST, options flashcardv2.CardSearchOptions) (flashcardv2.ReviewSetCardPage, error) {
 	store, err := requireFlashcardV2Store(ctx, false)
 	if err != nil {
 		return flashcardv2.ReviewSetCardPage{}, err
@@ -537,7 +548,7 @@ func PreviewFlashcardV2ReviewSet(ctx context.Context, reviewSetID string,
 	if err = refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
 		return flashcardv2.ReviewSetCardPage{}, err
 	}
-	page, err := store.Projection().ReviewSetCardPage(ctx, reviewSetID, options)
+	page, err := store.Projection().ReviewSetCardPageWithQuery(ctx, reviewSetID, query, options)
 	if err != nil {
 		return flashcardv2.ReviewSetCardPage{}, err
 	}
@@ -548,6 +559,19 @@ func PreviewFlashcardV2ReviewSet(ctx context.Context, reviewSetID string,
 		return flashcardv2.ReviewSetCardPage{}, err
 	}
 	return page, nil
+}
+
+// SummarizeFlashcardV2ReviewSets 返回复习集列表的成员数量和当前到期数量。
+func SummarizeFlashcardV2ReviewSets(ctx context.Context, reviewSetIDs []string,
+	now int64) (map[string]flashcardv2.ReviewSetSummary, error) {
+	store, err := requireFlashcardV2Store(ctx, false)
+	if err != nil {
+		return nil, err
+	}
+	if err = refreshFlashcardV2BlockMetadata(ctx, store, false); err != nil {
+		return nil, err
+	}
+	return store.Projection().ReviewSetSummaries(ctx, reviewSetIDs, now)
 }
 
 // ReconcileFlashcardV2Source 根据稳定变体键协调卡源生成的全部卡片。

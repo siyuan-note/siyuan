@@ -313,7 +313,9 @@ func (store *Store) ReconcileSourceCards(ctx context.Context, operationID, sourc
 	if store.closed {
 		return ReconcileResult{}, errors.New("flashcard store is closed")
 	}
-	if existingBatch, exists := store.journal.FindOperation(operationID); exists {
+	if existingBatch, exists, err := store.findAppliedOperationLocked(ctx, operationID); err != nil {
+		return ReconcileResult{}, err
+	} else if exists {
 		return reconcileResultFromBatch(existingBatch, sourceID, updatedAt)
 	}
 	sourceRevision, found, err := store.projection.CurrentEntity(ctx, EntityCardSource, sourceID)

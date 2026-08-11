@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 )
@@ -36,6 +37,8 @@ type CardSearchOptions struct {
 	IncludeBuried    bool  `json:"includeBuried"`
 	IncludePaused    bool  `json:"includePaused"`
 	IncludeConflicts bool  `json:"includeConflicts"`
+	GroupBySource    bool  `json:"groupBySource"`
+	ReturnCards      bool  `json:"returnCards"`
 	Limit            int   `json:"limit"`
 	Offset           int   `json:"offset"`
 }
@@ -61,8 +64,18 @@ type CardSearchResult struct {
 
 // ReviewSetCardPage 返回复习集合并成员后的稳定分页和未分页总数。
 type ReviewSetCardPage struct {
-	CardIDs []string `json:"cardIDs"`
-	Total   int      `json:"total"`
+	CardIDs []string           `json:"cardIDs"`
+	Cards   []CardSearchResult `json:"cards,omitempty"`
+	Total   int                `json:"total"`
+}
+
+// ReviewSetSummary 返回复习集列表所需的成员和到期摘要。
+type ReviewSetSummary struct {
+	ReviewSetID string `json:"reviewSetID"`
+	Cards       int    `json:"cards"`
+	Due         int    `json:"due"`
+	Included    int    `json:"included"`
+	Excluded    int    `json:"excluded"`
 }
 
 type compiledQuery struct {
@@ -96,6 +109,15 @@ const (
 		WHERE availability.source_id = c.source_id), 1)`
 	effectiveGenerationStatusSQL = `CASE WHEN c.generation_status = 'active' AND ` + sourceAvailableSQL +
 		` = 0 THEN 'orphaned' ELSE c.generation_status END`
+	sourceContentSQL = `COALESCE((SELECT group_concat(search_content.content, char(10))
+		FROM card_source_refs content_ref
+		JOIN block_search_content search_content ON search_content.block_id = content_ref.entity_id
+		WHERE content_ref.source_id = c.source_id AND content_ref.entity_type = 'block'), '')`
+	cardSearchFromSQL = `FROM cards c
+		JOIN entities ce ON ce.entity_type = ? AND ce.entity_id = c.id AND ce.deleted = 0
+		JOIN review_states rs ON rs.card_id = c.id
+		JOIN entities se ON se.entity_type = ? AND se.entity_id = rs.card_id AND se.deleted = 0
+		JOIN card_sources s ON s.id = c.source_id`
 )
 
 var querySQLFields = map[string]string{
@@ -112,16 +134,20 @@ var querySQLFields = map[string]string{
 	"updatedAt":        "c.updated_at",
 	"reps":             "rs.reps",
 	"lapses":           "rs.lapses",
+	"stability":        "rs.stability",
+	"difficulty":       "rs.difficulty",
 	"suspended":        "rs.suspended",
 	"flag":             "c.flag",
 	"priority":         effectivePrioritySQL,
 	"presetID":         "COALESCE(NULLIF(c.preset_override_id, ''), s.default_preset_id)",
 	"notebookID":       primaryBlockNotebookSQL,
 	"path":             primaryBlockPathSQL,
+	"content":          sourceContentSQL,
 }
 
 var numericQueryFields = map[string]struct{}{
-	"due": {}, "lastReview": {}, "createdAt": {}, "updatedAt": {}, "reps": {}, "lapses": {}, "flag": {},
+	"due": {}, "lastReview": {}, "createdAt": {}, "updatedAt": {}, "reps": {}, "lapses": {}, "stability": {},
+	"difficulty": {}, "flag": {},
 }
 
 // SearchCards 使用受限 AST 查询业务投影，不接受调用方提供 SQL。
@@ -134,15 +160,43 @@ func (projection *Projection) SearchCards(ctx context.Context, query *QueryAST,
 	if limit == 0 {
 		limit = maxCardSearchLimit
 	}
+	where, args, err := compileCardSearchFilter(query, options)
+	if err != nil {
+		return nil, err
+	}
+	order := "c.id"
+	offset := options.Offset
+	if options.GroupBySource {
+		sourceIDs, sourceErr := projection.searchCardSourcePage(ctx, where, args, limit, offset)
+		if sourceErr != nil {
+			return nil, sourceErr
+		}
+		if len(sourceIDs) == 0 {
+			return []CardSearchResult{}, nil
+		}
+		placeholders := make([]string, len(sourceIDs))
+		for index, sourceID := range sourceIDs {
+			placeholders[index] = "?"
+			args = append(args, sourceID)
+		}
+		where = append(where, "c.source_id IN ("+strings.Join(placeholders, ", ")+")")
+		limit = maxCardSearchLimit
+		offset = 0
+		order = "c.source_id, c.id"
+	}
+	return projection.searchCardsWithFilter(ctx, where, args, order, limit, offset)
+}
+
+func compileCardSearchFilter(query *QueryAST, options CardSearchOptions) ([]string, []any, error) {
 	compiled := compiledQuery{sql: "1 = 1"}
 	if query != nil {
 		if err := query.Validate(); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		var err error
 		compiled, err = compileQueryExpression(&query.Root, options.Now)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	where := []string{"(" + compiled.sql + ")"}
@@ -190,7 +244,36 @@ func (projection *Projection) SearchCards(ctx context.Context, query *QueryAST,
 		args = append(args, EntityCard, EntityReviewState, EntityCardSource, EntityCardTemplate, EntityCardSchema,
 			EntityCardSourceRef, EntitySchedulerPreset, EntityStudyPolicy, EntityTagAssignment)
 	}
-	args = append(args, limit, options.Offset)
+	return where, args, nil
+}
+
+func (projection *Projection) searchCardSourcePage(ctx context.Context, where []string, args []any,
+	limit, offset int) ([]string, error) {
+	statement := `SELECT DISTINCT c.source_id ` + cardSearchFromSQL + ` WHERE ` + strings.Join(where, " AND ") +
+		` ORDER BY c.source_id LIMIT ? OFFSET ?`
+	queryArgs := append([]any{EntityCard, EntityReviewState}, args...)
+	queryArgs = append(queryArgs, limit, offset)
+	rows, err := projection.db.QueryContext(ctx, statement, queryArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("search flashcard source groups: %w", err)
+	}
+	defer rows.Close()
+	ret := []string{}
+	for rows.Next() {
+		var sourceID string
+		if err = rows.Scan(&sourceID); err != nil {
+			return nil, fmt.Errorf("scan flashcard source group: %w", err)
+		}
+		ret = append(ret, sourceID)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate flashcard source groups: %w", err)
+	}
+	return ret, nil
+}
+
+func (projection *Projection) searchCardsWithFilter(ctx context.Context, where []string, args []any, order string,
+	limit, offset int) ([]CardSearchResult, error) {
 	statement := `SELECT ce.payload, se.payload, s.source_type, s.priority, ` + inheritedPrioritySQL +
 		`, s.default_preset_id, ` + effectivePrioritySQL + `, COALESCE(` + primaryBlockNotebookSQL +
 		`, ''), COALESCE(` + primaryBlockPathSQL + `, ''), COALESCE(
@@ -206,14 +289,10 @@ func (projection *Projection) SearchCards(ctx context.Context, query *QueryAST,
 			SELECT ta.tag_id FROM tag_assignments ta WHERE ta.target_type = 'source' AND ta.target_id = c.source_id
 			ORDER BY ta.tag_id
 		)), '[]')
-		FROM cards c
-		JOIN entities ce ON ce.entity_type = ? AND ce.entity_id = c.id AND ce.deleted = 0
-		JOIN review_states rs ON rs.card_id = c.id
-		JOIN entities se ON se.entity_type = ? AND se.entity_id = rs.card_id AND se.deleted = 0
-		JOIN card_sources s ON s.id = c.source_id
-		WHERE ` + strings.Join(where, " AND ") + ` ORDER BY c.id LIMIT ? OFFSET ?`
-	args = append([]any{EntityCard, EntityReviewState}, args...)
-	rows, err := projection.db.QueryContext(ctx, statement, args...)
+		` + cardSearchFromSQL + ` WHERE ` + strings.Join(where, " AND ") + ` ORDER BY ` + order + ` LIMIT ? OFFSET ?`
+	queryArgs := append([]any{EntityCard, EntityReviewState}, args...)
+	queryArgs = append(queryArgs, limit, offset)
+	rows, err := projection.db.QueryContext(ctx, statement, queryArgs...)
 	if err != nil {
 		return nil, fmt.Errorf("search flashcards: %w", err)
 	}
@@ -279,9 +358,75 @@ func (projection *Projection) ReviewSetCardIDs(ctx context.Context, reviewSetID 
 	return page.CardIDs, err
 }
 
+// ReviewSetSummaries 批量计算复习集列表摘要，避免前端为每个复习集分别发起请求。
+func (projection *Projection) ReviewSetSummaries(ctx context.Context, reviewSetIDs []string,
+	now int64) (map[string]ReviewSetSummary, error) {
+	if now <= 0 || len(reviewSetIDs) > 1000 {
+		return nil, errors.New("flashcard review set summary request is invalid")
+	}
+	seen := make(map[string]struct{}, len(reviewSetIDs))
+	for _, reviewSetID := range reviewSetIDs {
+		if strings.TrimSpace(reviewSetID) == "" {
+			return nil, errors.New("flashcard review set ID is required")
+		}
+		if _, duplicate := seen[reviewSetID]; duplicate {
+			return nil, fmt.Errorf("duplicate flashcard review set [%s]", reviewSetID)
+		}
+		seen[reviewSetID] = struct{}{}
+	}
+	options := CardSearchOptions{Now: now, IncludeSuspended: true, IncludeBuried: true, IncludePaused: true}
+	eligibleResults, err := projection.SearchCards(ctx, nil, options)
+	if err != nil {
+		return nil, err
+	}
+	dueCardIDs := make(map[string]struct{}, len(eligibleResults))
+	for _, result := range eligibleResults {
+		if !result.ReviewState.Suspended && result.ReviewState.BuriedUntil <= now &&
+			result.EffectivePriority != "paused" && result.ReviewState.Due <= now {
+			dueCardIDs[result.Card.ID] = struct{}{}
+		}
+	}
+	ret := make(map[string]ReviewSetSummary, len(reviewSetIDs))
+	for _, reviewSetID := range reviewSetIDs {
+		page, pageErr := projection.reviewSetCardPageWithEligible(ctx, reviewSetID, nil, options,
+			eligibleResults, true)
+		if pageErr != nil {
+			return nil, pageErr
+		}
+		summary := ReviewSetSummary{ReviewSetID: reviewSetID, Cards: page.Total}
+		for _, cardID := range page.CardIDs {
+			if _, due := dueCardIDs[cardID]; due {
+				summary.Due++
+			}
+		}
+		if err = projection.db.QueryRowContext(ctx, `SELECT
+			COALESCE(SUM(CASE WHEN membership.mode = ? THEN 1 ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN membership.mode = ? THEN 1 ELSE 0 END), 0)
+			FROM review_set_memberships membership WHERE membership.review_set_id = ?
+			AND NOT EXISTS (SELECT 1 FROM entity_conflicts conflict WHERE conflict.entity_type = ?
+				AND conflict.entity_id = membership.id AND conflict.resolved = 0)`, MembershipInclude,
+			MembershipExclude, reviewSetID, EntityReviewSetMembership).Scan(&summary.Included, &summary.Excluded); err != nil {
+			return nil, fmt.Errorf("summarize flashcard review set memberships: %w", err)
+		}
+		ret[reviewSetID] = summary
+	}
+	return ret, nil
+}
+
 // ReviewSetCardPage 计算动态命中和手动关系后再分页，保证偏移不会改变集合语义。
 func (projection *Projection) ReviewSetCardPage(ctx context.Context, reviewSetID string,
 	options CardSearchOptions) (ReviewSetCardPage, error) {
+	return projection.ReviewSetCardPageWithQuery(ctx, reviewSetID, nil, options)
+}
+
+// ReviewSetCardPageWithQuery 先计算复习集成员，再应用管理查询并分页。
+func (projection *Projection) ReviewSetCardPageWithQuery(ctx context.Context, reviewSetID string, query *QueryAST,
+	options CardSearchOptions) (ReviewSetCardPage, error) {
+	return projection.reviewSetCardPageWithEligible(ctx, reviewSetID, query, options, nil, false)
+}
+
+func (projection *Projection) reviewSetCardPageWithEligible(ctx context.Context, reviewSetID string, query *QueryAST,
+	options CardSearchOptions, eligibleResults []CardSearchResult, reuseEligible bool) (ReviewSetCardPage, error) {
 	if options.Offset < 0 || options.Limit < 0 || options.Limit > maxCardSearchLimit {
 		return ReviewSetCardPage{}, errors.New("flashcard review set page options are invalid")
 	}
@@ -306,11 +451,14 @@ func (projection *Projection) ReviewSetCardPage(ctx context.Context, reviewSetID
 		return ReviewSetCardPage{}, err
 	}
 	setOptions := options
+	setOptions.GroupBySource = false
 	setOptions.Limit = 0
 	setOptions.Offset = 0
-	eligibleResults, err := projection.SearchCards(ctx, nil, setOptions)
-	if err != nil {
-		return ReviewSetCardPage{}, err
+	if !reuseEligible {
+		eligibleResults, err = projection.SearchCards(ctx, nil, setOptions)
+		if err != nil {
+			return ReviewSetCardPage{}, err
+		}
 	}
 	eligible := make(map[string]struct{}, len(eligibleResults))
 	for _, result := range eligibleResults {
@@ -369,6 +517,21 @@ func (projection *Projection) ReviewSetCardPage(ctx context.Context, reviewSetID
 	for cardID := range conflictedMemberships {
 		delete(selected, cardID)
 	}
+	if query != nil {
+		filteredResults, searchErr := projection.SearchCards(ctx, query, setOptions)
+		if searchErr != nil {
+			return ReviewSetCardPage{}, searchErr
+		}
+		filtered := make(map[string]struct{}, len(filteredResults))
+		for _, result := range filteredResults {
+			filtered[result.Card.ID] = struct{}{}
+		}
+		for cardID := range selected {
+			if _, matched := filtered[cardID]; !matched {
+				delete(selected, cardID)
+			}
+		}
+	}
 	ret := make([]string, 0, len(selected))
 	for cardID := range selected {
 		if _, available := eligible[cardID]; available {
@@ -376,13 +539,61 @@ func (projection *Projection) ReviewSetCardPage(ctx context.Context, reviewSetID
 		}
 	}
 	sort.Strings(ret)
+	if options.GroupBySource {
+		cardsBySource := map[string][]string{}
+		sourceByCard := make(map[string]string, len(eligibleResults))
+		for _, result := range eligibleResults {
+			sourceByCard[result.Card.ID] = result.Card.SourceID
+		}
+		for _, cardID := range ret {
+			sourceID := sourceByCard[cardID]
+			if sourceID != "" {
+				cardsBySource[sourceID] = append(cardsBySource[sourceID], cardID)
+			}
+		}
+		sourceIDs := make([]string, 0, len(cardsBySource))
+		for sourceID := range cardsBySource {
+			sourceIDs = append(sourceIDs, sourceID)
+		}
+		sort.Strings(sourceIDs)
+		total := len(sourceIDs)
+		start := min(options.Offset, total)
+		end := total
+		if options.Limit > 0 {
+			end = min(start+options.Limit, total)
+		}
+		page := make([]string, 0)
+		for _, sourceID := range sourceIDs[start:end] {
+			page = append(page, cardsBySource[sourceID]...)
+		}
+		return buildReviewSetCardPage(page, total, eligibleResults, options.ReturnCards), nil
+	}
 	total := len(ret)
 	start := min(options.Offset, total)
 	end := total
 	if options.Limit > 0 {
 		end = min(start+options.Limit, total)
 	}
-	return ReviewSetCardPage{CardIDs: append([]string(nil), ret[start:end]...), Total: total}, nil
+	return buildReviewSetCardPage(ret[start:end], total, eligibleResults, options.ReturnCards), nil
+}
+
+func buildReviewSetCardPage(cardIDs []string, total int, eligibleResults []CardSearchResult,
+	returnCards bool) ReviewSetCardPage {
+	ret := ReviewSetCardPage{CardIDs: append([]string(nil), cardIDs...), Total: total}
+	if !returnCards {
+		return ret
+	}
+	results := make(map[string]CardSearchResult, len(eligibleResults))
+	for _, result := range eligibleResults {
+		results[result.Card.ID] = result
+	}
+	ret.Cards = make([]CardSearchResult, 0, len(cardIDs))
+	for _, cardID := range cardIDs {
+		if result, found := results[cardID]; found {
+			ret.Cards = append(ret.Cards, result)
+		}
+	}
+	return ret
 }
 
 func compileQueryExpression(expression *QueryExpression, now int64) (compiledQuery, error) {
@@ -424,6 +635,12 @@ func compileQueryPredicate(expression *QueryExpression, now int64) (compiledQuer
 	}
 	if expression.Field == "blockID" {
 		return compileBlockPredicate(expression)
+	}
+	if expression.Field == "content" {
+		return compileContentPredicate(expression)
+	}
+	if expression.Field == "retrievability" {
+		return compileRetrievabilityPredicate(expression, now)
 	}
 	if expression.Field == "buried" {
 		value, err := decodeQueryBool(expression.Value)
@@ -477,6 +694,54 @@ func compileQueryPredicate(expression *QueryExpression, now int64) (compiledQuer
 		}
 	}
 	return compileColumnComparison(column, expression.Comparator, values)
+}
+
+func compileContentPredicate(expression *QueryExpression) (compiledQuery, error) {
+	values, err := decodeQueryValues(expression.Value, false)
+	if err != nil {
+		return compiledQuery{}, err
+	}
+	text, ok := values[0].(string)
+	if !ok {
+		return compiledQuery{}, errors.New("flashcard content query requires text")
+	}
+	if !flashcardFTSAvailable || len([]rune(text)) < 3 {
+		return compileColumnComparison(sourceContentSQL, QueryContains, values)
+	}
+	phrase := `"` + strings.ReplaceAll(text, `"`, `""`) + `"`
+	return compiledQuery{sql: `EXISTS (SELECT 1 FROM card_source_refs content_ref
+		JOIN block_search_fts ON block_search_fts.block_id = content_ref.entity_id
+		WHERE content_ref.source_id = c.source_id AND content_ref.entity_type = 'block'
+		AND block_search_fts MATCH ?)`, args: []any{phrase}}, nil
+}
+
+func compileRetrievabilityPredicate(expression *QueryExpression, now int64) (compiledQuery, error) {
+	values, err := decodeQueryValues(expression.Value, false)
+	if err != nil {
+		return compiledQuery{}, err
+	}
+	number, err := queryNumber(values[0])
+	if err != nil {
+		return compiledQuery{}, errors.New("flashcard retrievability query requires a number")
+	}
+	comparison, err := compileColumnComparison(
+		"flashcard_retrievability(rs.state, COALESCE(rs.last_review, 0), rs.stability, ?)",
+		expression.Comparator, []any{number})
+	if err != nil {
+		return compiledQuery{}, err
+	}
+	comparison.args = append([]any{now}, comparison.args...)
+	return comparison, nil
+}
+
+func projectedRetrievability(state string, lastReview int64, stability float64, now int64) float64 {
+	if state == "new" || stability <= 0 || lastReview <= 0 {
+		return 0
+	}
+	elapsedDays := math.Max(0, float64(now-lastReview)/86400000)
+	decay := -0.5
+	factor := math.Pow(0.9, 1/decay) - 1
+	return math.Pow(1+factor*elapsedDays/stability, decay)
 }
 
 func compileTagPredicate(expression *QueryExpression) (compiledQuery, error) {

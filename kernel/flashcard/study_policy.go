@@ -68,7 +68,9 @@ func (store *Store) SaveStudyPolicy(ctx context.Context,
 		!validStudyPriority(request.Priority) || request.TargetDate != nil && *request.TargetDate < 0 {
 		return EntityRevision{}, errors.New("flashcard study policy save request is invalid")
 	}
-	if existing, found := store.journal.FindOperation(request.OperationID); found {
+	if existing, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
+		return EntityRevision{}, err
+	} else if found {
 		return savedStudyPolicyFromBatch(existing, request)
 	}
 	current, found, err := store.projection.StudyPolicyRevision(ctx, request.ScopeType, request.ScopeID)

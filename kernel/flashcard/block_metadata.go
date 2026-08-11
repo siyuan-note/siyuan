@@ -30,6 +30,7 @@ type BlockMetadata struct {
 	RootID     string `json:"rootID"`
 	Path       string `json:"path"`
 	HPath      string `json:"hPath"`
+	Content    string `json:"content,omitempty"`
 }
 
 // SourceBlockDependency 汇总一个卡源必须持续存在的普通块引用。
@@ -53,11 +54,11 @@ func validateBlockMetadata(values []BlockMetadata) error {
 	return nil
 }
 
-// RequiredBlockMetadataIDs 返回当前卡源主引用需要的位置元数据块 ID。
+// RequiredBlockMetadataIDs 返回当前卡源全部普通块引用需要的可重建元数据 ID。
 func (projection *Projection) RequiredBlockMetadataIDs(ctx context.Context) ([]string, error) {
 	rows, err := projection.db.QueryContext(ctx, `SELECT DISTINCT ref.entity_id
 		FROM card_sources source
-		JOIN card_source_refs ref ON ref.id = source.primary_ref_id
+		JOIN card_source_refs ref ON ref.source_id = source.id
 		WHERE ref.entity_type = 'block'
 		ORDER BY ref.entity_id`)
 	if err != nil {
@@ -125,11 +126,29 @@ func (projection *Projection) ReplaceBlockMetadata(ctx context.Context, values [
 	if _, err = tx.ExecContext(ctx, "DELETE FROM block_metadata"); err != nil {
 		return fmt.Errorf("clear flashcard block metadata: %w", err)
 	}
+	if _, err = tx.ExecContext(ctx, "DELETE FROM block_search_content"); err != nil {
+		return fmt.Errorf("clear flashcard block search content: %w", err)
+	}
+	if flashcardFTSAvailable {
+		if _, err = tx.ExecContext(ctx, "DELETE FROM block_search_fts"); err != nil {
+			return fmt.Errorf("clear flashcard block search index: %w", err)
+		}
+	}
 	for _, value := range values {
 		if _, err = tx.ExecContext(ctx, `INSERT INTO block_metadata
 			(block_id, notebook_id, root_id, path, h_path) VALUES (?, ?, ?, ?, ?)`, value.BlockID,
 			value.NotebookID, value.RootID, value.Path, value.HPath); err != nil {
 			return fmt.Errorf("insert flashcard block metadata [%s]: %w", value.BlockID, err)
+		}
+		if _, err = tx.ExecContext(ctx, `INSERT INTO block_search_content(block_id, content) VALUES (?, ?)`,
+			value.BlockID, value.Content); err != nil {
+			return fmt.Errorf("insert flashcard block search content [%s]: %w", value.BlockID, err)
+		}
+		if flashcardFTSAvailable {
+			if _, err = tx.ExecContext(ctx, `INSERT INTO block_search_fts(block_id, content) VALUES (?, ?)`,
+				value.BlockID, value.Content); err != nil {
+				return fmt.Errorf("index flashcard block search content [%s]: %w", value.BlockID, err)
+			}
 		}
 	}
 	if err = tx.Commit(); err != nil {
@@ -162,6 +181,14 @@ func (projection *Projection) ReplaceBlockMetadataAndSourceAvailability(ctx cont
 	if _, err = tx.ExecContext(ctx, "DELETE FROM block_metadata"); err != nil {
 		return fmt.Errorf("clear flashcard block metadata: %w", err)
 	}
+	if _, err = tx.ExecContext(ctx, "DELETE FROM block_search_content"); err != nil {
+		return fmt.Errorf("clear flashcard block search content: %w", err)
+	}
+	if flashcardFTSAvailable {
+		if _, err = tx.ExecContext(ctx, "DELETE FROM block_search_fts"); err != nil {
+			return fmt.Errorf("clear flashcard block search index: %w", err)
+		}
+	}
 	if _, err = tx.ExecContext(ctx, "DELETE FROM source_availability"); err != nil {
 		return fmt.Errorf("clear flashcard source availability: %w", err)
 	}
@@ -170,6 +197,16 @@ func (projection *Projection) ReplaceBlockMetadataAndSourceAvailability(ctx cont
 			(block_id, notebook_id, root_id, path, h_path) VALUES (?, ?, ?, ?, ?)`, value.BlockID,
 			value.NotebookID, value.RootID, value.Path, value.HPath); err != nil {
 			return fmt.Errorf("insert flashcard block metadata [%s]: %w", value.BlockID, err)
+		}
+		if _, err = tx.ExecContext(ctx, `INSERT INTO block_search_content(block_id, content) VALUES (?, ?)`,
+			value.BlockID, value.Content); err != nil {
+			return fmt.Errorf("insert flashcard block search content [%s]: %w", value.BlockID, err)
+		}
+		if flashcardFTSAvailable {
+			if _, err = tx.ExecContext(ctx, `INSERT INTO block_search_fts(block_id, content) VALUES (?, ?)`,
+				value.BlockID, value.Content); err != nil {
+				return fmt.Errorf("index flashcard block search content [%s]: %w", value.BlockID, err)
+			}
 		}
 	}
 	for sourceID, available := range availability {

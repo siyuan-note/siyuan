@@ -1,4 +1,5 @@
 import {Dialog} from "../dialog";
+import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {Constants} from "../constants";
 import type {App} from "../index";
@@ -59,8 +60,8 @@ interface IFlashcardV2ReviewResult {
     };
     buriedSiblingIDs: string[];
     skippedSessionCardIDs: string[];
-    beforeState: unknown;
-    afterState?: unknown;
+    beforeState: { suspended: boolean };
+    afterState?: { suspended: boolean };
     leechTagged: boolean;
     presetRevisionID: string;
     schedulerVersion: string;
@@ -99,6 +100,8 @@ export interface IFlashcardV2ReviewSessionOptions {
     includeBuried?: boolean;
     includePaused?: boolean;
 }
+
+const flashcardV2FlagColors = ["", "#d14343", "#d97706", "#2f9e44", "#3b82f6", "#8b5cf6", "#0891b2", "#db2777"];
 
 const nextLocalDay = (now: number) => {
     const date = new Date(now);
@@ -460,7 +463,8 @@ const sessionContent = () => `<div class="b3-dialog__content fn__flex-column" st
 </div>`;
 
 const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[], index: number,
-    isCurrent: () => boolean, callback: (rendered: IFlashcardV2RenderedCard) => void) => {
+    isCurrent: () => boolean, callback: (rendered: IFlashcardV2RenderedCard) => void,
+    unavailable: () => void) => {
     const current = queue[index];
     const contentElement = dialog.element.querySelector(".card__block") as HTMLElement;
     const contextElement = dialog.element.querySelector("[data-flashcard-context]") as HTMLElement;
@@ -471,7 +475,8 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
     contentElement.setAttribute("style", "overflow:auto;padding:16px");
     dialog.element.querySelector("[data-flashcard-count]").textContent = `${index + 1} / ${queue.length}`;
     setActionsVisible(dialog, false);
-    fetchPost("/api/flashcard/getRenderModel", {cardID: current.card.id}, (modelResponse) => {
+    let modelLoaded = false;
+    void fetchPost("/api/flashcard/getRenderModel", {cardID: current.card.id}, (modelResponse) => {
         if (!isCurrent()) {
             return;
         }
@@ -491,7 +496,9 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
         model.references = model.references.concat(dynamicReferences);
         const references = model.references.filter((reference) => reference.entityType === "block")
             .sort((left, right) => left.sort - right.sort);
-        fetchPost("/api/block/getBlockDOMs", {ids: references.map((reference) => reference.entityID)}, (domResponse) => {
+        let blocksLoaded = false;
+        modelLoaded = true;
+        void fetchPost("/api/block/getBlockDOMs", {ids: references.map((reference) => reference.entityID)}, (domResponse) => {
             if (!isCurrent()) {
                 return;
             }
@@ -517,6 +524,10 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
                 (ankiBack !== undefined ? ankiBack.trim() !== "" : answerReferences.length > 0);
             frontElement.innerHTML = specialFront === undefined ?
                 (ankiFront === undefined ? referenceHTML(frontReferences, doms) : ankiFront) : specialFront;
+            if (model.source.sourceType === "typed-answer" && model.template.answerMode === "typed") {
+                frontElement.insertAdjacentHTML("beforeend",
+                    '<input class="b3-text-field fn__block" data-flashcard-type-answer autocomplete="off">');
+            }
             answerElement.querySelector(".protyle-wysiwyg").innerHTML = specialFront === undefined ?
                 (ankiBack === undefined ? referenceHTML(answerReferences, doms) : ankiBack) : "";
             if (model.source.sourceType === "anki" && typeof model.card.variantData?.ord === "number") {
@@ -595,9 +606,19 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
                     doms,
                 })) : undefined,
             });
+            blocksLoaded = true;
             playbackController.activate("front");
-            (frontElement.querySelector("[data-anki-type-answer]") as HTMLInputElement)?.focus();
+            (frontElement.querySelector("[data-anki-type-answer], [data-flashcard-type-answer]") as
+                HTMLInputElement)?.focus();
+        }).then(() => {
+            if (!blocksLoaded && isCurrent()) {
+                unavailable();
+            }
         });
+    }).then(() => {
+        if (!modelLoaded && isCurrent()) {
+            unavailable();
+        }
     });
 };
 
@@ -695,6 +716,15 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             let lastReview: IFlashcardV2LastReview | undefined;
             let renderGeneration = 0;
             let sessionEndEmitted = false;
+            const flagDefinitions = new Map<number, string>();
+            void fetchPost("/api/flashcard/listEntities", {
+                entityType: "flagDefinition",
+                options: {limit: 7, offset: 0},
+            }, (response) => {
+                (response.data.entities as Array<{ payload: { flag: number, name: string } }>).forEach((revision) => {
+                    flagDefinitions.set(revision.payload.flag, revision.payload.name);
+                });
+            });
             const emitSessionEnded = (status: "completed" | "abandoned") => {
                 if (sessionEndEmitted) {
                     return;
@@ -747,7 +777,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             const renderCurrent = () => {
                 const generation = ++renderGeneration;
                 renderSessionCard(dialog, queue, index,
-                    () => !sessionFinished && generation === renderGeneration, acceptRendered);
+                    () => !sessionFinished && generation === renderGeneration, acceptRendered, () => {
+                        if (requestPending || sessionFinished || generation !== renderGeneration) {
+                            return;
+                        }
+                        requestPending = true;
+                        skipManagedSessionCards([queue[index].card.id], "unavailable");
+                    });
             };
             const refreshCurrent = () => {
                 if (!sessionFinished && index < queue.length) {
@@ -987,7 +1023,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 menu.addItem({
                     id: "flashcardV2SetFlag",
                     icon: "iconBookmark",
-                    label: `${window.siyuan.languages.cardStatus} ${(current.card.flag + 1) % 8}`,
+                    label: `${window.siyuan.languages.cardStatus} - ${flagDefinitions.get((current.card.flag + 1) % 8) || (current.card.flag + 1) % 8}`,
+                    bind: (element) => {
+                        const nextFlag = (current.card.flag + 1) % 8;
+                        if (nextFlag > 0) {
+                            (element.querySelector("svg") as SVGElement).style.color = flashcardV2FlagColors[nextFlag];
+                        }
+                    },
                     click: () => manageWithoutSkipping([current.card.id], "setFlag", {
                         flag: (current.card.flag + 1) % 8,
                     }),
@@ -1030,7 +1072,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         rating: ratingElement.dataset.rating,
                         answerResult: snapshotFlashcardV2AnswerResult(submittedAnswerResult),
                     });
-                    fetchPost("/api/flashcard/reviewCard", {
+                    let reviewed = false;
+                    void fetchPost("/api/flashcard/reviewCard", {
                         operationID: genUUID(),
                         cardID: queue[index].card.id,
                         rating: ratingElement.dataset.rating,
@@ -1042,6 +1085,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         buryUntil: nextLocalDay(reviewedAt),
                         answerResult: submittedAnswerResult,
                     }, (response) => {
+                        reviewed = true;
                         const result = response.data as IFlashcardV2ReviewResult;
                         queue[reviewedIndex].sessionCard.status = "reviewed";
                         (result.skippedSessionCardIDs || []).forEach((cardID) => {
@@ -1077,19 +1121,28 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                             presetRevisionID: result.presetRevisionID,
                             schedulerVersion: result.schedulerVersion,
                         });
+                        if (result.leechTagged || (!result.beforeState.suspended && result.afterState?.suspended)) {
+                            showMessage(window.siyuan.languages.flashcardLeeches, 6000, "warning");
+                        }
                         nextCard();
+                    }).then(() => {
+                        if (!reviewed) {
+                            requestPending = false;
+                        }
                     });
                     return;
                 }
                 if (target.closest('[data-type="undo-review"]') && lastReview && !requestPending) {
                     requestPending = true;
                     const undoing = lastReview;
-                    fetchPost("/api/flashcard/undoReview", {
+                    let undone = false;
+                    void fetchPost("/api/flashcard/undoReview", {
                         operationID: genUUID(),
                         reviewEventID: undoing.eventID,
                         cardID: undoing.cardID,
                         undoneAt: Date.now(),
                     }, (response) => {
+                        undone = true;
                         queue[undoing.index].sessionCard.status = "queued";
                         undoing.skippedSessionCardIDs.forEach((cardID) => {
                             const item = queue.find((candidate) => candidate.card.id === cardID);
@@ -1117,6 +1170,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                             leechTagRemoved: response.data.leechTagRemoved,
                         });
                         renderCurrent();
+                    }).then(() => {
+                        if (!undone) {
+                            requestPending = false;
+                        }
                     });
                     return;
                 }
@@ -1170,7 +1227,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 }
                 if (target.closest('[data-type="skip"]') && !requestPending) {
                     requestPending = true;
-                    fetchPost("/api/flashcard/updateSessionCard", {
+                    let skipped = false;
+                    void fetchPost("/api/flashcard/updateSessionCard", {
                         operationID: genUUID(),
                         sessionID,
                         cardID: queue[index].card.id,
@@ -1178,11 +1236,16 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         skipReason: "user",
                         updatedAt: Date.now(),
                     }, () => {
+                        skipped = true;
                         queue[index].sessionCard.status = "skipped";
                         lastReview = undefined;
                         setUndoVisible(dialog, false);
                         requestPending = false;
                         nextCard();
+                    }).then(() => {
+                        if (!skipped) {
+                            requestPending = false;
+                        }
                     });
                 }
             });

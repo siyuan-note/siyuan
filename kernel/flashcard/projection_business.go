@@ -213,6 +213,10 @@ var businessProjectionSchema = []string{
 		h_path TEXT NOT NULL
 	)`,
 	`CREATE INDEX IF NOT EXISTS idx_block_metadata_location ON block_metadata(notebook_id, path, block_id)`,
+	`CREATE TABLE IF NOT EXISTS block_search_content (
+		block_id TEXT PRIMARY KEY,
+		content TEXT NOT NULL
+	)`,
 	`CREATE TABLE IF NOT EXISTS source_availability (
 		source_id TEXT PRIMARY KEY,
 		available INTEGER NOT NULL
@@ -292,6 +296,7 @@ var requiredProjectionObjects = []projectionObject{
 	{typ: "table", name: "scheduler_presets"},
 	{typ: "table", name: "study_policies"},
 	{typ: "table", name: "block_metadata"},
+	{typ: "table", name: "block_search_content"},
 	{typ: "table", name: "source_availability"},
 	{typ: "table", name: "study_sessions"},
 	{typ: "table", name: "session_cards"},
@@ -308,9 +313,24 @@ var requiredProjectionObjects = []projectionObject{
 }
 
 func allProjectionSchema() []string {
-	ret := make([]string, 0, len(projectionSchema)+len(businessProjectionSchema))
+	ret := make([]string, 0, len(projectionSchema)+len(businessProjectionSchema)+1)
 	ret = append(ret, projectionSchema...)
 	ret = append(ret, businessProjectionSchema...)
+	if flashcardFTSAvailable {
+		ret = append(ret, `CREATE VIRTUAL TABLE IF NOT EXISTS block_search_fts USING fts5(
+			block_id UNINDEXED,
+			content,
+			tokenize='trigram'
+		)`)
+	}
+	return ret
+}
+
+func allRequiredProjectionObjects() []projectionObject {
+	ret := append([]projectionObject(nil), requiredProjectionObjects...)
+	if flashcardFTSAvailable {
+		ret = append(ret, projectionObject{typ: "table", name: "block_search_fts"})
+	}
 	return ret
 }
 
@@ -475,6 +495,8 @@ func projectCurrentEntity(ctx context.Context, tx *sql.Tx, revision *EntityRevis
 			value.BuryNewSiblings, value.BuryReviewSiblings, value.LeechThreshold, value.LeechAction,
 			revision.RevisionID)
 		return wrapProjectionError("scheduler preset", err)
+	case EntityFlagDefinition:
+		return nil
 	case EntityTag:
 		var value Tag
 		if err := decodeStrictJSON(revision.Payload, &value); err != nil {
@@ -591,6 +613,8 @@ func deleteProjectedEntity(ctx context.Context, tx *sql.Tx, entityType EntityTyp
 		table = "review_set_memberships"
 	case EntitySchedulerPreset:
 		table = "scheduler_presets"
+	case EntityFlagDefinition:
+		return nil
 	case EntityTag:
 		table = "tags"
 	case EntityTagAssignment:

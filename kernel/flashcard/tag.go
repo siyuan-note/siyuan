@@ -60,7 +60,9 @@ func (store *Store) SaveTag(ctx context.Context, request SaveTagRequest) (Entity
 	}
 	tag := Tag{ID: request.TagID, ParentID: request.ParentID, Name: request.Name,
 		NormalizedName: NormalizeTagName(request.Name)}
-	if existing, found := store.journal.FindOperation(request.OperationID); found {
+	if existing, found, err := store.findAppliedOperationLocked(ctx, request.OperationID); err != nil {
+		return EntityRevision{}, err
+	} else if found {
 		return savedTagFromBatch(existing, request, tag)
 	}
 	current, found, err := store.projection.CurrentEntity(ctx, EntityTag, request.TagID)

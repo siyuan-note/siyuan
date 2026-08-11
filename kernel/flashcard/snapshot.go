@@ -108,7 +108,11 @@ func clearDisposableSnapshotData(ctx context.Context, path string) error {
 		return fmt.Errorf("begin flashcard snapshot cache cleanup: %w", err)
 	}
 	defer func() { _ = tx.Rollback() }()
-	for _, table := range []string{"block_metadata", "source_availability"} {
+	tables := []string{"block_metadata", "block_search_content", "source_availability"}
+	if flashcardFTSAvailable {
+		tables = append(tables, "block_search_fts")
+	}
+	for _, table := range tables {
 		if _, err = tx.ExecContext(ctx, "DELETE FROM "+table); err != nil {
 			return fmt.Errorf("clear disposable flashcard snapshot table [%s]: %w", table, err)
 		}
@@ -234,6 +238,39 @@ func inspectSnapshot(path, writerID string, createdAt int64, expectedHash string
 		Hash:       hash,
 		BatchCount: batchCount,
 	}, nil
+}
+
+func snapshotCoveredByBatches(ctx context.Context, path string, batches []OperationBatch) (bool, error) {
+	authority := make(map[string]string, len(batches))
+	for _, batch := range batches {
+		if checksum, found := authority[batch.BatchID]; found && checksum != batch.Checksum {
+			return false, ErrProjectionConflict
+		}
+		authority[batch.BatchID] = batch.Checksum
+	}
+	db, err := sql.Open("sqlite3", path+"?mode=ro&_busy_timeout=1000")
+	if err != nil {
+		return false, err
+	}
+	defer db.Close()
+	rows, err := db.QueryContext(ctx, "SELECT batch_id, checksum FROM operation_batches")
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var batchID, checksum string
+		if err = rows.Scan(&batchID, &checksum); err != nil {
+			return false, err
+		}
+		if authority[batchID] != checksum {
+			return false, nil
+		}
+	}
+	if err = rows.Err(); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func parseSnapshotName(name string) (createdAt int64, hash string, ok bool) {

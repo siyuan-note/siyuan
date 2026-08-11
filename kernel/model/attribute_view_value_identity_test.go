@@ -162,6 +162,46 @@ func TestUpdateAttributeViewValueCreatesMissingCellForExistingItem(t *testing.T)
 	}
 }
 
+func TestUpdateAttributeViewValueContextIndexesCreatedCells(t *testing.T) {
+	const (
+		blockKeyID = "20260811190000-blockky"
+		textKeyID  = "20260811190001-textkey"
+		firstID    = "20260811190002-item001"
+		secondID   = "20260811190003-item002"
+	)
+	textKeyValues := &av.KeyValues{Key: &av.Key{ID: textKeyID, Type: av.KeyTypeText}}
+	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{
+		{
+			Key: &av.Key{ID: blockKeyID, Type: av.KeyTypeBlock},
+			Values: []*av.Value{{
+				BlockID: firstID,
+				Type:    av.KeyTypeBlock,
+				Block:   &av.ValueBlock{},
+			}, {
+				BlockID: secondID,
+				Type:    av.KeyTypeBlock,
+				Block:   &av.ValueBlock{},
+			}},
+		},
+		textKeyValues,
+	}}
+	context := newAttrViewValueUpdateContext(attrView)
+
+	for _, itemID := range []string{firstID, secondID} {
+		updated, err := updateAttributeViewValue0(nil, attrView, textKeyID, itemID,
+			&av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: itemID}}, false, context)
+		if nil != err {
+			t.Fatal(err)
+		}
+		if updated != context.values[textKeyID][itemID] || nil == updated.Text || itemID != updated.Text.Content {
+			t.Fatalf("created cell is missing from update context: %+v", updated)
+		}
+	}
+	if 2 != len(textKeyValues.Values) {
+		t.Fatalf("unexpected text value count: %d", len(textKeyValues.Values))
+	}
+}
+
 func TestCheckAttrViewCorrectsValueKeyID(t *testing.T) {
 	const targetKeyID = "20260806000000-targetk"
 	value := &av.Value{KeyID: "20260806000001-sourcek", Type: av.KeyTypeText}

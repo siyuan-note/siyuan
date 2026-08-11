@@ -29,18 +29,16 @@ export const getAVFilteredTipContext = (scope: TAVFilteredTipScope, protyle?: IP
     return context;
 };
 
-export const getAVItemRenderStatus = async (blockElement: HTMLElement, itemID: string, viewID?: string) => {
+export const getAVItemRenderStatuses = async (blockElement: HTMLElement, itemIDs: string[], viewID?: string) => {
     const searchInputElement = blockElement.querySelector('[data-type="av-search"]');
-    const response = await fetchSyncPost("/api/av/renderAttributeView", {
+    const response = await fetchSyncPost("/api/av/getAttributeViewItemStatuses", {
         id: blockElement.dataset.avId,
         viewID: viewID || "",
         query: searchInputElement?.textContent?.trim() || "",
         blockID: blockElement.dataset.nodeId,
-        initialLayout: blockElement.dataset.avType,
-        createIfNotExist: false,
-        targetItemID: itemID,
+        itemIDs,
     });
-    return (response.data as IAV)?.target?.status;
+    return response.data as Record<string, IAVRenderTarget["status"]>;
 };
 
 const getCandidates = (protyle: IProtyle, operation: IOperation, scope: TAVFilteredTipScope) => {
@@ -66,15 +64,18 @@ const getCandidates = (protyle: IProtyle, operation: IOperation, scope: TAVFilte
     return candidates;
 };
 
-const isFilteredInAllCandidates = async (candidates: HTMLElement[], itemID: string, viewID?: string) => {
-    const statuses = await Promise.all(candidates.map(async item => {
+const getFilteredItemID = async (candidates: HTMLElement[], itemIDs: string[], viewID?: string) => {
+    const candidateStatuses = await Promise.all(candidates.map(async item => {
         try {
-            return await getAVItemRenderStatus(item, itemID, viewID);
+            return await getAVItemRenderStatuses(item, itemIDs, viewID);
         } catch (e) {
             console.error(e);
         }
     }));
-    return statuses.every(status => Boolean(status && hiddenStatuses.has(status)));
+    return itemIDs.find(itemID => candidateStatuses.every(statuses => {
+        const status = statuses?.[itemID];
+        return Boolean(status && hiddenStatuses.has(status));
+    }));
 };
 
 export const inspectAVInsertedItem = async (protyle: IProtyle, operation: IOperation) => {
@@ -105,13 +106,7 @@ export const inspectAVInsertedItem = async (protyle: IProtyle, operation: IOpera
     }
 
     const viewID = scope === "database" ? undefined : operation.viewID;
-    let filteredItemID: string;
-    for (const itemID of insertedItemIDs) {
-        if (await isFilteredInAllCandidates(candidates, itemID, viewID)) {
-            filteredItemID = itemID;
-            break;
-        }
-    }
+    const filteredItemID = await getFilteredItemID(candidates, insertedItemIDs, viewID);
     if (!filteredItemID) {
         return;
     }

@@ -5685,7 +5685,14 @@ type insertAttrViewBlockResult struct {
 
 func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBlockID, viewID, groupID, previousItemID string, ignoreDefaultFill bool) (result *insertAttrViewBlockResult, err error) {
 	result = &insertAttrViewBlockResult{}
+	if 0 == len(srcs) {
+		return
+	}
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return
+	}
 
 	now := time.Now().UnixMilli()
 	for _, src := range srcs {
@@ -5720,15 +5727,30 @@ func addAttributeViewBlocks(tx *Transaction, srcs []map[string]any, avID, dbBloc
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock(now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, tree, tx, result); nil != avErr {
+		if avErr := addAttributeViewBlock0(attrView, now, avID, dbBlockID, viewID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, src, isDetached, ignoreDefaultFill, tree, tx, result); nil != avErr {
 			err = avErr
 			return
 		}
 	}
+	regenAttrViewGroups(attrView)
+	err = av.SaveAttributeView(attrView)
 	return
 }
 
 func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return
+	}
+	if err = addAttributeViewBlock0(attrView, now, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent, src, isDetached, ignoreDefaultFill, tree, tx, result); nil != err {
+		return
+	}
+	regenAttrViewGroups(attrView)
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlockID, viewID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, src map[string]any, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction, result *insertAttrViewBlockResult) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBoundBlockID)
@@ -5741,11 +5763,6 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 			addingItemID = ast.NewNodeID()
 			logging.LogWarnf("detached block id is empty, generate a new one [%s]", addingItemID)
 		}
-	}
-
-	attrView, err := av.ParseAttributeView(avID)
-	if err != nil {
-		return
 	}
 
 	var blockIcon string
@@ -5771,7 +5788,6 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 				blockValue.Block.Icon = blockIcon
 				blockValue.Block.Content = addingBlockContent
 				blockValue.UpdatedAt = now
-				err = av.SaveAttributeView(attrView)
 			}
 
 			msg := fmt.Sprintf(Conf.language(269), util.EscapeHTML(getAttrViewName(attrView)))
@@ -5869,11 +5885,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 		}
 	}
 
-	regenAttrViewGroups(attrView)
-	err = av.SaveAttributeView(attrView)
-	if nil == err {
-		result.InsertedItemIDs = append(result.InsertedItemIDs, addingItemID)
-	}
+	result.InsertedItemIDs = append(result.InsertedItemIDs, addingItemID)
 	return
 }
 
@@ -7548,11 +7560,12 @@ func (tx *Transaction) doUpdateAttrViewCells(operation *Operation) (ret *TxErr) 
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
+	context := newAttrViewValueUpdateContext(attrView)
 	for _, cell := range operation.CellUpdates {
 		if nil == cell || "" == cell.KeyID || "" == cell.RowID {
 			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: "invalid attribute view cell update"}
 		}
-		if _, err = updateAttributeViewValue(tx, attrView, cell.KeyID, cell.RowID, cell.Data, false); err != nil {
+		if _, err = updateAttributeViewValue0(tx, attrView, cell.KeyID, cell.RowID, cell.Data, false, context); err != nil {
 			return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 		}
 	}
@@ -7613,12 +7626,63 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, itemID string, valueD
 }
 
 func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID, itemID string, valueData any, save bool) (val *av.Value, err error) {
-	avID := attrView.ID
-	keyValues, err := attrView.GetKeyValues(keyID)
-	if nil != err {
-		return
+	return updateAttributeViewValue0(tx, attrView, keyID, itemID, valueData, save, nil)
+}
+
+type attrViewValueUpdateContext struct {
+	keyValues   map[string]*av.KeyValues
+	blockValues map[string]*av.Value
+	values      map[string]map[string]*av.Value
+}
+
+func newAttrViewValueUpdateContext(attrView *av.AttributeView) *attrViewValueUpdateContext {
+	context := &attrViewValueUpdateContext{
+		keyValues:   map[string]*av.KeyValues{},
+		blockValues: map[string]*av.Value{},
+		values:      map[string]map[string]*av.Value{},
 	}
-	blockVal := attrView.GetBlockValue(itemID)
+	for _, keyValues := range attrView.KeyValues {
+		if nil == keyValues || nil == keyValues.Key {
+			continue
+		}
+		context.keyValues[keyValues.Key.ID] = keyValues
+		values := map[string]*av.Value{}
+		for _, value := range keyValues.Values {
+			if nil == value {
+				continue
+			}
+			if _, exists := values[value.BlockID]; !exists {
+				values[value.BlockID] = value
+			}
+			if av.KeyTypeBlock == keyValues.Key.Type {
+				if _, exists := context.blockValues[value.BlockID]; !exists {
+					context.blockValues[value.BlockID] = value
+				}
+			}
+		}
+		context.values[keyValues.Key.ID] = values
+	}
+	return context
+}
+
+func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyID, itemID string, valueData any, save bool, context *attrViewValueUpdateContext) (val *av.Value, err error) {
+	avID := attrView.ID
+	var keyValues *av.KeyValues
+	var blockVal *av.Value
+	if nil == context {
+		keyValues, err = attrView.GetKeyValues(keyID)
+		if nil != err {
+			return
+		}
+		blockVal = attrView.GetBlockValue(itemID)
+	} else {
+		keyValues = context.keyValues[keyID]
+		if nil == keyValues {
+			err = av.ErrKeyNotFound
+			return
+		}
+		blockVal = context.blockValues[itemID]
+	}
 	if nil == blockVal {
 		err = av.ErrItemNotFound
 		return
@@ -7627,17 +7691,26 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	now := time.Now().UnixMilli()
 	oldIsDetached := blockVal.IsDetached
 	oldBoundBlockID := blockVal.Block.ID
-	for _, value := range keyValues.Values {
-		if itemID == value.BlockID {
-			val = value
-			val.Type = keyValues.Key.Type
-			break
+	if nil == context {
+		for _, value := range keyValues.Values {
+			if itemID == value.BlockID {
+				val = value
+				break
+			}
 		}
+	} else {
+		val = context.values[keyID][itemID]
+	}
+	if nil != val {
+		val.Type = keyValues.Key.Type
 	}
 
 	if nil == val {
 		val = &av.Value{ID: ast.NewNodeID(), KeyID: keyID, BlockID: itemID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
 		keyValues.Values = append(keyValues.Values, val)
+		if nil != context {
+			context.values[keyID][itemID] = val
+		}
 	}
 
 	valueID := val.ID

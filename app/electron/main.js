@@ -41,10 +41,16 @@ const {pathToFileURL} = require("url");
 const gNet = require("net");
 const childProcess = require("child_process");
 const remote = require("@electron/remote/main");
+const {
+    getAppleSiliconDownloadURL,
+    shouldDownloadAppleSilicon,
+    shouldShowAppleSiliconWarning,
+} = require("./appleSilicon");
 
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
 const isDevEnv = process.env.NODE_ENV === "development";
+const simulateRosetta = process.argv.includes("--simulate-rosetta");
 const appVer = app.getVersion();
 const confDir = path.join(app.getPath("home"), ".config", "siyuan");
 const windowStatePath = path.join(confDir, "windowState.json");
@@ -421,6 +427,29 @@ const resolveAppLanguage = (languageTags) => {
     };
 
     return languageMapping[language] || "en";
+};
+
+const loadAppleSiliconWarningLanguages = (requestedLanguage) => {
+    const language = resolveAppLanguage(requestedLanguage ? [requestedLanguage] : app.getPreferredSystemLanguages());
+    const languageDir = path.join(appDir, "appearance", "langs");
+    try {
+        const languageData = JSON.parse(fs.readFileSync(path.join(languageDir, `${language}.json`), "utf8"));
+        const languages = languageData._trayMenu;
+        if (languages && typeof languages.arm64TranslationTitle === "string" &&
+            typeof languages.arm64TranslationMessage === "string" &&
+            typeof languages.downloadAppleSilicon === "string" && typeof languages.quit === "string") {
+            return languages;
+        }
+    } catch (error) {
+        writeLog("load Apple silicon warning languages failed: " + error);
+    }
+    return {
+        arm64TranslationTitle: "Install the Apple silicon version",
+        arm64TranslationMessage: "SiYuan is running the Intel version through Rosetta. This may significantly " +
+            "reduce performance. Please use the Apple silicon version",
+        downloadAppleSilicon: "Download the Apple silicon version",
+        quit: "Quit application",
+    };
 };
 
 const markExpectedRendererExit = (window) => {
@@ -1193,43 +1222,49 @@ const showWindow = (wnd) => {
     wnd.show();
 };
 
-const showAppleSiliconWarning = async (browserWindow, languages) => {
-    if (!app.isPackaged || process.platform !== "darwin" || !app.runningUnderARM64Translation ||
-        appleSiliconWarningShown || !languages || typeof languages.arm64TranslationTitle !== "string" ||
-        typeof languages.arm64TranslationMessage !== "string" || typeof languages.downloadAppleSilicon !== "string") {
-        return;
+const showAppleSiliconWarning = async (lang) => {
+    if (!shouldShowAppleSiliconWarning({
+        isDevelopment: isDevEnv,
+        isPackaged: app.isPackaged,
+        platform: process.platform,
+        runningUnderARM64Translation: app.runningUnderARM64Translation,
+        simulateRosetta,
+    })) {
+        return true;
     }
-    if (!browserWindow || browserWindow.isDestroyed()) {
-        return;
-    }
-    if (!browserWindow.isVisible()) {
-        browserWindow.once("show", () => void showAppleSiliconWarning(browserWindow, languages));
-        return;
+    if (appleSiliconWarningShown) {
+        return false;
     }
 
     appleSiliconWarningShown = true;
+    const languages = loadAppleSiliconWarningLanguages(lang);
     try {
-        await dialog.showMessageBox(browserWindow, {
+        const {response} = await dialog.showMessageBox({
             type: "warning",
             title: languages.arm64TranslationTitle,
             message: languages.arm64TranslationTitle,
             detail: languages.arm64TranslationMessage,
-            buttons: [languages.downloadAppleSilicon],
+            buttons: [languages.downloadAppleSilicon, languages.quit],
             defaultId: 0,
+            cancelId: 1,
             noLink: true,
         });
-        const packageName = `siyuan-${appVer}-mac-arm64.dmg`;
-        const downloadURL = /-(?:alpha|beta|rc)(?:[.-]|\d|$)/i.test(appVer)
-            ? `https://github.com/siyuan-note/siyuan/releases/download/v${appVer}/${packageName}`
-            : `https://release.liuyun.io/siyuan/${packageName}`;
-        await shell.openExternal(downloadURL);
+        if (shouldDownloadAppleSilicon(response)) {
+            await shell.openExternal(getAppleSiliconDownloadURL(appVer));
+        }
     } catch (error) {
         writeLog("show Apple silicon warning or open package download failed: " + error);
     }
+    return false;
 };
 
 const initKernel = (workspace, port, lang, safeMode) => {
     return new Promise(async (resolve) => {
+        if (!await showAppleSiliconWarning(lang)) {
+            app.quit();
+            resolve(false);
+            return;
+        }
         bootWindow = new BrowserWindow({
             show: false,
             width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
@@ -2096,7 +2131,6 @@ app.whenReady().then(() => {
                 }
             }
             workspaceItem.tray = tray;
-            void showAppleSiliconWarning(workspaceItem.browserWindow, data.languages);
         }
         await net.fetch(getServer(data.port) + "/api/system/uiproc?pid=" + process.pid, {method: "POST"});
     });

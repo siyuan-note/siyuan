@@ -21,6 +21,7 @@
     "build:export": "webpack --mode production --config webpack.export.js",
     "gen:types": "tsc -d",
     "start": "cross-env NODE_ENV=development electron ./electron/main.js",
+    "start:simulate-rosetta": "cross-env NODE_ENV=development electron ./electron/main.js --simulate-rosetta",
     "install:electron": "cross-env ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ node node_modules/electron/install.js",
     "sign:dev": "node scripts/signDevElectron.js",
     "dist": "cross-env ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --config electron-builder.yml --publish=never",

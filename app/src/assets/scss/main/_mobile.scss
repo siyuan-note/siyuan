@@ -349,6 +349,8 @@
     min-height: 0;
 
     &__search {
+      background-color: var(--b3-theme-surface);
+      display: flex;
       flex-shrink: 0;
       padding: 8px 16px;
     }

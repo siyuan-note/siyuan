@@ -86,7 +86,7 @@ const openSettingMenu = (
         title: window.siyuan.languages.config,
         icon: "iconLeft",
         html: `<div class="mobile-setting-menu">
-    <div class="toolbar toolbar--border mobile-setting-menu__search">
+    <div class="mobile-setting-menu__search">
         <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__flex-1" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
     <div class="b3-menu__groups mobile-setting-menu__groups">

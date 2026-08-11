@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Сначала включите зашифрованную записную книжку в [Настройки - Аутентификация - Зашифрованная записная книжка]",
+	"encryptedNotebookRecoveryRequiredTip": "Необходимо восстановить конфигурацию зашифрованной записной книжки; сначала импортируйте резервную копию ключа в [Настройки - Аутентификация - Зашифрованная записная книжка]",
 	"agentCapabilitiesCapabilityApprovalMode": "Режим подтверждения возможности",
 	"agentCapabilitiesFollowCapability": "Наследовать настройку возможности",
 	"agentCapabilitiesRiskConfirm": "Подтверждать с учетом риска",

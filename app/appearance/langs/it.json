@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Abilita prima il blocco note crittografato in [Impostazioni - Autenticazione - Blocco note crittografato]",
+	"encryptedNotebookRecoveryRequiredTip": "La configurazione del blocco note crittografato deve essere ripristinata; importa prima il backup della chiave in [Impostazioni - Autenticazione - Blocco note crittografato]",
 	"agentCapabilitiesCapabilityApprovalMode": "Modalità di approvazione della capacità",
 	"agentCapabilitiesFollowCapability": "Segui l'impostazione della capacità",
 	"agentCapabilitiesRiskConfirm": "Conferma in base al rischio",

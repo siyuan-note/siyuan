@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Najpierw włącz zaszyfrowany notatnik w [Ustawienia - Uwierzytelnianie - Zaszyfrowany notatnik]",
+	"encryptedNotebookRecoveryRequiredTip": "Konfiguracja zaszyfrowanego notatnika wymaga przywrócenia; najpierw zaimportuj kopię zapasową klucza w [Ustawienia - Uwierzytelnianie - Zaszyfrowany notatnik]",
 	"agentCapabilitiesCapabilityApprovalMode": "Tryb zatwierdzania możliwości",
 	"agentCapabilitiesFollowCapability": "Zgodnie z ustawieniem możliwości",
 	"agentCapabilitiesRiskConfirm": "Potwierdzaj na podstawie ryzyka",

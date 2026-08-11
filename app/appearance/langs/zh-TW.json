@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "請先在 [設定 - 鑑權 - 加密筆記本] 中啟用加密筆記本",
+	"encryptedNotebookRecoveryRequiredTip": "加密筆記本設定需要復原，請先在 [設定 - 鑑權 - 加密筆記本] 中匯入金鑰",
 	"agentCapabilitiesCapabilityApprovalMode": "能力批准方式",
 	"agentCapabilitiesFollowCapability": "跟隨能力",
 	"agentCapabilitiesRiskConfirm": "依風險確認",

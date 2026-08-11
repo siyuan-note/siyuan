@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "कृपया पहले [सेटिंग्स - प्रमाणीकरण - एन्क्रिप्टेड नोटबुक] में एन्क्रिप्टेड नोटबुक सक्षम करें",
+	"encryptedNotebookRecoveryRequiredTip": "एन्क्रिप्टेड नोटबुक कॉन्फ़िगरेशन को पुनर्स्थापित करना आवश्यक है; कृपया पहले [सेटिंग्स - प्रमाणीकरण - एन्क्रिप्टेड नोटबुक] में कुंजी बैकअप आयात करें",
 	"agentCapabilitiesCapabilityApprovalMode": "क्षमता अनुमोदन मोड",
 	"agentCapabilitiesFollowCapability": "क्षमता सेटिंग का पालन करें",
 	"agentCapabilitiesRiskConfirm": "जोखिम के आधार पर पुष्टि करें",

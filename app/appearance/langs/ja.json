@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "先に [設定 - 認証 - 暗号化ノートブック] で暗号化ノートブックを有効にしてください",
+	"encryptedNotebookRecoveryRequiredTip": "暗号化ノートブックの設定を復元する必要があります。先に [設定 - 認証 - 暗号化ノートブック] でキーバックアップをインポートしてください",
 	"agentCapabilitiesCapabilityApprovalMode": "能力の承認方法",
 	"agentCapabilitiesFollowCapability": "能力の設定に従う",
 	"agentCapabilitiesRiskConfirm": "リスクに応じて確認",

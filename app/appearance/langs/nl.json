@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Schakel het versleutelde notitieboek eerst in via [Instellingen - Authenticatie - Versleuteld notitieboek]",
+	"encryptedNotebookRecoveryRequiredTip": "De configuratie van het versleutelde notitieboek moet worden hersteld; importeer eerst de sleutelback-up via [Instellingen - Authenticatie - Versleuteld notitieboek]",
 	"agentCapabilitiesCapabilityApprovalMode": "Goedkeuringsmodus van mogelijkheid",
 	"agentCapabilitiesFollowCapability": "Instelling van mogelijkheid volgen",
 	"agentCapabilitiesRiskConfirm": "Bevestigen op basis van risico",

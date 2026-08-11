@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Veuillez d’abord activer le carnet chiffré dans [Paramètres - Authentification - Carnet chiffré]",
+	"encryptedNotebookRecoveryRequiredTip": "La configuration du carnet chiffré doit être restaurée ; veuillez d’abord importer la sauvegarde de clé dans [Paramètres - Authentification - Carnet chiffré]",
 	"agentCapabilitiesCapabilityApprovalMode": "Mode d’approbation de la capacité",
 	"agentCapabilitiesFollowCapability": "Suivre le réglage de la capacité",
 	"agentCapabilitiesRiskConfirm": "Confirmer selon le risque",

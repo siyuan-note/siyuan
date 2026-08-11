@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Спочатку ввімкніть зашифрований блокнот у [Налаштування - Автентифікація - Зашифрований блокнот]",
+	"encryptedNotebookRecoveryRequiredTip": "Конфігурацію зашифрованого блокнота потрібно відновити; спочатку імпортуйте резервну копію ключа в [Налаштування - Автентифікація - Зашифрований блокнот]",
 	"agentCapabilitiesCapabilityApprovalMode": "Режим підтвердження можливості",
 	"agentCapabilitiesFollowCapability": "Успадкувати налаштування можливості",
 	"agentCapabilitiesRiskConfirm": "Підтверджувати залежно від ризику",

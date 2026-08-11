@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "โปรดเปิดใช้งานสมุดบันทึกเข้ารหัสใน [ตั้งค่า - การยืนยันตัวตน - สมุดบันทึกเข้ารหัส] ก่อน",
+	"encryptedNotebookRecoveryRequiredTip": "ต้องกู้คืนการตั้งค่าสมุดบันทึกเข้ารหัส โปรดนำเข้าการสำรองข้อมูลคีย์ใน [ตั้งค่า - การยืนยันตัวตน - สมุดบันทึกเข้ารหัส] ก่อน",
 	"agentCapabilitiesCapabilityApprovalMode": "โหมดการอนุมัติของความสามารถ",
 	"agentCapabilitiesFollowCapability": "ตามการตั้งค่าความสามารถ",
 	"agentCapabilitiesRiskConfirm": "ยืนยันตามความเสี่ยง",

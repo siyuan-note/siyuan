@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Bitte aktivieren Sie zuerst das verschlüsselte Notizbuch unter [Einstellungen - Authentifizierung - Verschlüsseltes Notizbuch]",
+	"encryptedNotebookRecoveryRequiredTip": "Die Konfiguration des verschlüsselten Notizbuchs muss wiederhergestellt werden; importieren Sie zuerst die Schlüsselsicherung unter [Einstellungen - Authentifizierung - Verschlüsseltes Notizbuch]",
 	"agentCapabilitiesCapabilityApprovalMode": "Genehmigungsmodus der Fähigkeit",
 	"agentCapabilitiesFollowCapability": "Fähigkeitseinstellung übernehmen",
 	"agentCapabilitiesRiskConfirm": "Nach Risiko bestätigen",

@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "먼저 [설정 - 인증 - 암호화 노트]에서 암호화 노트를 활성화하세요",
+	"encryptedNotebookRecoveryRequiredTip": "암호화 노트 설정을 복구해야 합니다. 먼저 [설정 - 인증 - 암호화 노트]에서 키 백업을 가져오세요",
 	"agentCapabilitiesCapabilityApprovalMode": "기능 승인 방식",
 	"agentCapabilitiesFollowCapability": "기능 설정 따르기",
 	"agentCapabilitiesRiskConfirm": "위험도에 따라 확인",

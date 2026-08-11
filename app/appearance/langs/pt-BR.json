@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Primeiro habilite o caderno criptografado em [Configurações - Autenticação - Caderno criptografado]",
+	"encryptedNotebookRecoveryRequiredTip": "A configuração do caderno criptografado precisa ser recuperada; primeiro importe o backup da chave em [Configurações - Autenticação - Caderno criptografado]",
 	"agentCapabilitiesCapabilityApprovalMode": "Modo de aprovação do recurso",
 	"agentCapabilitiesFollowCapability": "Seguir a configuração da capacidade",
 	"agentCapabilitiesRiskConfirm": "Confirmar conforme o risco",

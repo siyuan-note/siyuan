@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "请先在 [设置 - 鉴权 - 加密笔记本] 中启用加密笔记本",
+	"encryptedNotebookRecoveryRequiredTip": "加密笔记本配置需要恢复，请先在 [设置 - 鉴权 - 加密笔记本] 中导入密钥",
 	"agentCapabilitiesCapabilityApprovalMode": "能力批准方式",
 	"agentCapabilitiesFollowCapability": "跟随能力",
 	"agentCapabilitiesRiskConfirm": "按风险确认",

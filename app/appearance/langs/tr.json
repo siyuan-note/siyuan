@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Önce [Ayarlar - Kimlik Doğrulama - Şifreli not defteri] bölümünde şifreli not defterini etkinleştirin",
+	"encryptedNotebookRecoveryRequiredTip": "Şifreli not defteri yapılandırmasının kurtarılması gerekiyor; önce [Ayarlar - Kimlik Doğrulama - Şifreli not defteri] bölümünde anahtar yedeğini içe aktarın",
 	"agentCapabilitiesCapabilityApprovalMode": "Yetenek onay modu",
 	"agentCapabilitiesFollowCapability": "Yetenek ayarını izle",
 	"agentCapabilitiesRiskConfirm": "Riske göre onayla",

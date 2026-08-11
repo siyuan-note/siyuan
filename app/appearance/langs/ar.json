@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "يرجى أولاً تمكين الدفتر المشفر في [الإعدادات - المصادقة - دفتر مشفر]",
+	"encryptedNotebookRecoveryRequiredTip": "يجب استعادة إعدادات الدفتر المشفر؛ يرجى أولاً استيراد نسخة احتياطية من المفتاح في [الإعدادات - المصادقة - دفتر مشفر]",
 	"agentCapabilitiesCapabilityApprovalMode": "وضع الموافقة للقدرة",
 	"agentCapabilitiesFollowCapability": "اتباع إعداد القدرة",
 	"agentCapabilitiesRiskConfirm": "التأكيد حسب المخاطر",

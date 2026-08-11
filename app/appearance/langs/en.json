@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Please enable encrypted notebooks first in [Settings - Authentication - Encrypted Notebook]",
+	"encryptedNotebookRecoveryRequiredTip": "Encrypted notebook configuration needs to be recovered; please import a key backup first in [Settings - Authentication - Encrypted Notebook]",
 	"agentCapabilitiesCapabilityApprovalMode": "Capability approval mode",
 	"agentCapabilitiesFollowCapability": "Follow capability",
 	"agentCapabilitiesRiskConfirm": "Confirm based on risk",

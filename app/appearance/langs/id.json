@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Aktifkan buku catatan terenkripsi terlebih dahulu di [Pengaturan - Autentikasi - Buku catatan terenkripsi]",
+	"encryptedNotebookRecoveryRequiredTip": "Konfigurasi buku catatan terenkripsi perlu dipulihkan; impor cadangan kunci terlebih dahulu di [Pengaturan - Autentikasi - Buku catatan terenkripsi]",
 	"agentCapabilitiesCapabilityApprovalMode": "Mode persetujuan kemampuan",
 	"agentCapabilitiesFollowCapability": "Ikuti pengaturan kemampuan",
 	"agentCapabilitiesRiskConfirm": "Konfirmasi berdasarkan risiko",

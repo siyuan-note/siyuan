@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "Najprv povoľte šifrovaný zápisník v [Nastavenia - Autentifikácia - Šifrovaný zápisník]",
+	"encryptedNotebookRecoveryRequiredTip": "Konfiguráciu šifrovaného zápisníka je potrebné obnoviť; najprv importujte zálohu kľúča v [Nastavenia - Autentifikácia - Šifrovaný zápisník]",
 	"agentCapabilitiesCapabilityApprovalMode": "Režim schvaľovania možnosti",
 	"agentCapabilitiesFollowCapability": "Podľa nastavenia schopnosti",
 	"agentCapabilitiesRiskConfirm": "Potvrdzovať podľa rizika",

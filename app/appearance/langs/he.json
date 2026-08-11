@@ -1,4 +1,6 @@
 {
+	"encryptedNotebookNotEnabledTip": "יש להפעיל תחילה פנקס מוצפן ב-[הגדרות - אימות - פנקס מוצפן]",
+	"encryptedNotebookRecoveryRequiredTip": "יש לשחזר את תצורת הפנקס המוצפן; יש לייבא תחילה גיבוי מפתח ב-[הגדרות - אימות - פנקס מוצפן]",
 	"agentCapabilitiesCapabilityApprovalMode": "מצב האישור של היכולת",
 	"agentCapabilitiesFollowCapability": "לפי הגדרת היכולת",
 	"agentCapabilitiesRiskConfirm": "אישור לפי סיכון",

@@ -1,6 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    compactAVCellOperations,
     getAVPasteCellValue,
     getAVPasteValueForType,
     getAVPasteMatrixWidth,
@@ -144,6 +145,43 @@ describe("AV paste matrix helpers", () => {
         assert.equal(shouldShowAVPasteSkeleton(Array.from({length: 10}, () => Array(10))), true);
         assert.equal(shouldShowAVPasteSkeleton(Array.from({length: 9}, () => Array(10))), false);
         assert.equal(shouldShowAVPasteSkeleton([Array(100)]), true);
+    });
+
+    it("compacts cell updates by database after schema operations", () => {
+        const operations = compactAVCellOperations([{
+            action: "updateAttrViewColOptions",
+            avID: "av1",
+        }, {
+            action: "updateAttrViewCell",
+            id: "cell1",
+            avID: "av1",
+            keyID: "key1",
+            rowID: "row1",
+            data: {type: "text", text: {content: "a"}},
+        }, {
+            action: "updateAttrViewCell",
+            id: "cell2",
+            avID: "av1",
+            keyID: "key2",
+            rowID: "row2",
+            data: {type: "number", number: {content: 2}},
+        }]);
+
+        assert.equal(operations.length, 2);
+        assert.equal(operations[0].action, "updateAttrViewColOptions");
+        assert.deepEqual(operations[1], {
+            action: "updateAttrViewCells",
+            avID: "av1",
+            cellUpdates: [{
+                keyID: "key1",
+                rowID: "row1",
+                data: {type: "text", text: {content: "a"}},
+            }, {
+                keyID: "key2",
+                rowID: "row2",
+                data: {type: "number", number: {content: 2}},
+            }],
+        });
     });
 
 });

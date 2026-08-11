@@ -213,6 +213,44 @@ func appendAttributeViewSearchItemIDs(itemIDs []string, viewable av.Viewable, hi
 	return itemIDs
 }
 
+func GetAttributeViewItemStatuses(blockID, avID, viewID, query string, itemIDs []string) (ret map[string]string, err error) {
+	viewable, attrView, _, err := RenderAttributeViewWithTarget(blockID, avID, viewID, query, 1, math.MaxInt, nil, "", false, false, "", "")
+	if nil != err {
+		return nil, err
+	}
+	return getAttributeViewItemStatuses(attrView, viewable, itemIDs), nil
+}
+
+func getAttributeViewItemStatuses(attrView *av.AttributeView, viewable av.Viewable, itemIDs []string) (ret map[string]string) {
+	ret = map[string]string{}
+	requested := map[string]bool{}
+	for _, itemID := range itemIDs {
+		if "" == itemID || requested[itemID] {
+			continue
+		}
+		requested[itemID] = true
+		ret[itemID] = "itemNotFound"
+	}
+	if blockValues := attrView.GetBlockKeyValues(); nil != blockValues {
+		for _, value := range blockValues.Values {
+			if nil != value && requested[value.BlockID] {
+				ret[value.BlockID] = "filtered"
+			}
+		}
+	}
+	for _, itemID := range appendAttributeViewSearchItemIDs(nil, viewable, true) {
+		if requested[itemID] && "filtered" == ret[itemID] {
+			ret[itemID] = "groupHidden"
+		}
+	}
+	for _, itemID := range appendAttributeViewSearchItemIDs(nil, viewable, false) {
+		if requested[itemID] {
+			ret[itemID] = "visible"
+		}
+	}
+	return
+}
+
 func getAttributeViewBaseInstance(viewable av.Viewable) (ret *av.BaseInstance) {
 	switch instance := viewable.(type) {
 	case *av.Table:

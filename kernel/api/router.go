@@ -587,6 +587,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/snippet/removeSnippet", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeSnippet)
 
 	ginServer.Handle("POST", "/api/av/renderAttributeView", model.CheckAuth, renderAttributeView)
+	ginServer.Handle("POST", "/api/av/getAttributeViewItemStatuses", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewItemStatuses)
 	ginServer.Handle("POST", "/api/av/renderHistoryAttributeView", model.CheckAuth, model.CheckAdminRole, renderHistoryAttributeView)
 	ginServer.Handle("POST", "/api/av/renderSnapshotAttributeView", model.CheckAuth, model.CheckAdminRole, renderSnapshotAttributeView)
 	ginServer.Handle("POST", "/api/av/getAttributeViewKeys", model.CheckAuth, getAttributeViewKeys)

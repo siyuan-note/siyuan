@@ -10,7 +10,7 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import type {Tab} from "../layout/Tab";
 import {setTitle} from "./processTitle";
 /// #if !MOBILE
-import {removeBlockPanelEditors} from "../block/Panel";
+import {removeBlockPanelEditors} from "../block/panelRemoval";
 /// #endif
 
 export const reloadSync = (

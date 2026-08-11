@@ -128,6 +128,37 @@ export const shouldShowAVPasteSkeleton = (rows: unknown[][]) => {
     return rows.reduce((count, row) => count + row.length, 0) >= 100;
 };
 
+export const compactAVCellOperations = (operations: IOperation[]) => {
+    const cellOperations = operations.filter(operation => operation.action === "updateAttrViewCell");
+    if (cellOperations.length < 2) {
+        return operations;
+    }
+    const otherOperations = operations.filter(operation => operation.action !== "updateAttrViewCell");
+    const operationsByAV = new Map<string, IOperation[]>();
+    cellOperations.forEach(operation => {
+        const avID = operation.avID || "";
+        const groupedOperations = operationsByAV.get(avID) || [];
+        groupedOperations.push(operation);
+        operationsByAV.set(avID, groupedOperations);
+    });
+    operationsByAV.forEach((groupedOperations, avID) => {
+        if (!avID || groupedOperations.length === 1) {
+            otherOperations.push(...groupedOperations);
+            return;
+        }
+        otherOperations.push({
+            action: "updateAttrViewCells",
+            avID,
+            cellUpdates: groupedOperations.map(operation => ({
+                keyID: operation.keyID,
+                rowID: operation.rowID,
+                data: operation.data,
+            })),
+        });
+    });
+    return otherOperations;
+};
+
 export const showAVPasteSkeleton = (blockElement: HTMLElement, columnCount: number) => {
     if (blockElement.querySelector(".av__paste-skeleton")) {
         return false;

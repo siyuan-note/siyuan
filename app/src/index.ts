@@ -53,7 +53,7 @@ import {reloadSync} from "./util/reloadSync";
 import {setTitle} from "./util/processTitle";
 import {ensureUILayout} from "./util/ensureUILayout";
 import {applyEntryVisibility} from "./config/entryVisibility/runtime";
-import {removeBlockPanelEditors} from "./block/Panel";
+import {removeBlockPanelEditors} from "./block/panelRemoval";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];

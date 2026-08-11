@@ -319,7 +319,11 @@ type BlockStatResult struct {
 }
 
 func ContextPushMsg(context map[string]any, msg string) {
-	switch context[eventbus.CtxPushMsg].(int) {
+	pushTarget, ok := context[eventbus.CtxPushMsg].(int)
+	if !ok {
+		return
+	}
+	switch pushTarget {
 	case eventbus.CtxPushMsgToNone:
 		break
 	case eventbus.CtxPushMsgToProgress:

@@ -176,6 +176,11 @@ export class AVAttributePanel {
             this.refresh();
             return;
         }
+        if (operation.action === "updateAttrViewCells" && operation.cellUpdates?.some(cell =>
+            ["block", "number"].includes(cell.data?.type) && this.hasItem(cell.rowID))) {
+            this.refresh();
+            return;
+        }
         if (operation.action === "removeAttrViewBlock" &&
             (this.hasDatabase(operation.avID) || operation.srcIDs?.some(item => this.hasItem(item)))) {
             this.refresh();

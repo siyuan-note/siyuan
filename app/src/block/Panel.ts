@@ -25,6 +25,7 @@ import {
     matchesBlockPanelRemoval,
     planBlockPanelRemoval
 } from "./panelRemoval";
+import {getBlockPanelLoadPlan} from "./panelLoad";
 
 const BLOCK_PANEL_EDITOR_MIN_HEIGHT = 155;
 
@@ -408,31 +409,31 @@ export class BlockPanel {
                 notebookId: response.data.box,
                 rootID: response.data.rootID,
             });
+            const loadPlan = getBlockPanelLoadPlan(response.data.rootID, refDef.refID, this.isBacklink);
             const action: TProtyleAction[] = [];
-            if (response.data.rootID !== refDef.refID) {
+            if (!loadPlan.isDocument) {
                 action.push(Constants.CB_GET_ALL);
             } else {
                 action.push(Constants.CB_GET_CONTEXT);
                 // 不需要高亮 https://github.com/siyuan-note/siyuan/issues/11160#issuecomment-2084652764
             }
 
-            if (this.isBacklink) {
+            if (loadPlan.useBacklinkContext) {
                 action.push(Constants.CB_GET_BACKLINK);
             }
-            const isDocument = response.data.rootID === refDef.refID;
             let isInitialRender = true;
             const editor = new Protyle(this.app, editorElement, {
                 databaseAttr: true,
                 blockId: refDef.refID,
                 defIds: refDef.defIDs || [],
-                originalRefBlockIDs: this.isBacklink ? this.originalRefBlockIDs : undefined,
+                originalRefBlockIDs: loadPlan.useBacklinkContext ? this.originalRefBlockIDs : undefined,
                 action,
                 render: {
                     scroll: true,
                     gutter: true,
                     breadcrumbDocName: true,
-                    background: isDocument,
-                    title: isDocument, // 如果块是文档，显示文档标题
+                    background: loadPlan.isDocument,
+                    title: loadPlan.isDocument, // 如果块是文档，显示文档标题
                 },
                 typewriterMode: false,
                 after: (editor) => {
@@ -457,7 +458,7 @@ export class BlockPanel {
                     }
                     if (isInitialRender) {
                         isInitialRender = false;
-                        if (isDocument) {
+                        if (loadPlan.isDocument) {
                             const contentElement = editor.protyle.contentElement;
                             const titleElement = editor.protyle.title.element;
                             const marginTop = parseFloat(getComputedStyle(titleElement).marginTop) || 0;
@@ -645,14 +646,3 @@ export class BlockPanel {
         });
     }
 }
-
-export const removeBlockPanelEditors = (options: {notebookId?: string, rootIDs?: string[]}) => {
-    const removalOptions = {
-        notebookId: options.notebookId,
-        rootIDs: new Set(options.rootIDs || []),
-    };
-    if (!removalOptions.notebookId && removalOptions.rootIDs.size === 0) {
-        return;
-    }
-    [...window.siyuan.blockPanels].forEach(item => item.removeEditors(removalOptions));
-};

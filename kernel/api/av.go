@@ -114,6 +114,39 @@ func getAttributeViewBoundBlockIDsByItemIDs(c *gin.Context) {
 	ret.Data = model.GetAttributeViewBoundBlockIDs(avID, itemIDs)
 }
 
+func getAttributeViewItemStatuses(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["id"].(string)
+	blockID, _ := arg["blockID"].(string)
+	viewID, _ := arg["viewID"].(string)
+	query, _ := arg["query"].(string)
+	itemIDsArg := arg["itemIDs"].([]any)
+	itemIDs := make([]string, 0, len(itemIDsArg))
+	for _, itemIDArg := range itemIDsArg {
+		itemIDs = append(itemIDs, itemIDArg.(string))
+	}
+	if err := holdAttributeViewRequest(c, blockID, avID); nil != err {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
+
+	statuses, err := model.GetAttributeViewItemStatuses(blockID, avID, viewID, query, itemIDs)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = statuses
+}
+
 // getAttributeViewAddingBlockDefaultValues 用于获取添加块时的默认值。
 // 存在过滤或分组条件时，添加块时需要填充默认值到过滤字段或分组字段中，前端需要调用该接口来获取这些默认值以便填充。
 func getAttributeViewAddingBlockDefaultValues(c *gin.Context) {

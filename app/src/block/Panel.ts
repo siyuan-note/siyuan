@@ -645,14 +645,3 @@ export class BlockPanel {
         });
     }
 }
-
-export const removeBlockPanelEditors = (options: {notebookId?: string, rootIDs?: string[]}) => {
-    const removalOptions = {
-        notebookId: options.notebookId,
-        rootIDs: new Set(options.rootIDs || []),
-    };
-    if (!removalOptions.notebookId && removalOptions.rootIDs.size === 0) {
-        return;
-    }
-    [...window.siyuan.blockPanels].forEach(item => item.removeEditors(removalOptions));
-};

@@ -341,10 +341,13 @@ export class BlockPanel {
                     if (isInitialRender) {
                         isInitialRender = false;
                         if (isDocument) {
-                            const backgroundImageElement = editor.protyle.background.element.querySelector<HTMLElement>(".protyle-background__img");
-                            const scrollTop = backgroundImageElement?.clientHeight || 0;
-                            editor.protyle.contentElement.scrollTop = scrollTop;
-                            editor.protyle.scroll.lastScrollTop = scrollTop;
+                            const contentElement = editor.protyle.contentElement;
+                            const titleElement = editor.protyle.title.element;
+                            const marginTop = parseFloat(getComputedStyle(titleElement).marginTop) || 0;
+                            const scrollTop = contentElement.scrollTop + titleElement.getBoundingClientRect().top -
+                                contentElement.getBoundingClientRect().top - marginTop;
+                            contentElement.scrollTop = scrollTop;
+                            editor.protyle.scroll.lastScrollTop = contentElement.scrollTop;
                         }
                     }
                     // https://ld246.com/article/1653639418266

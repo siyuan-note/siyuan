@@ -314,7 +314,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
             <div class="b3-label__text"><code>${escapeHtml(capability.id)}</code></div>
         </div>
         <label class="fn__flex b3-label b3-label--inner config-wrap">
-            <span class="fn__flex-1">${window.siyuan.languages.use}</span>
+            <span class="fn__flex-1">${window.siyuan.languages.agentCapabilitiesDefaultApprovalMode}</span>
             <span class="fn__space"></span>
             <select class="b3-select" data-type="toggleAgentCapabilityApproval">
                 <option value="risk"${resolveCapabilityApproval(approvalPolicy, capability.id) === "risk" ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesRiskConfirm}</option>
@@ -330,7 +330,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
         <code class="fn__flex-1">${escapeHtml(action.name)}</code>
         <span class="fn__space"></span>
         <select class="b3-select" data-type="toggleAgentCapabilityActionApproval" data-capability-action="${escapeAttribute(action.name)}">
-            <option value=""${getCapabilityActionApproval(approvalPolicy, capability.id, action.name) === "" ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesFollowCapability}</option>
+            <option value=""${getCapabilityActionApproval(approvalPolicy, capability.id, action.name) === "" ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesUseDefaultApproval}</option>
             <option value="risk"${getCapabilityActionApproval(approvalPolicy, capability.id, action.name) === "risk" ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesRiskConfirm}</option>
             <option value="confirm"${getCapabilityActionApproval(approvalPolicy, capability.id, action.name) === "confirm" ? " selected" : ""}>${window.siyuan.languages.agentPermissionConfirm}</option>
             <option value="allow"${getCapabilityActionApproval(approvalPolicy, capability.id, action.name) === "allow" ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesAutoApprove}</option>
@@ -437,7 +437,8 @@ export const getAgentCapabilityKeywords = (): string[] => [
     window.siyuan.languages.agentCapabilitiesScopeAgent,
     window.siyuan.languages.agentCapabilitiesScopeMcp,
     window.siyuan.languages.agentCapabilitiesMcpExposureTip,
-    window.siyuan.languages.agentCapabilitiesFollowCapability,
+    window.siyuan.languages.agentCapabilitiesDefaultApprovalMode,
+    window.siyuan.languages.agentCapabilitiesUseDefaultApproval,
     window.siyuan.languages.agentCapabilitiesRiskConfirm,
     window.siyuan.languages.agentCapabilitiesAutoApprove,
 ];

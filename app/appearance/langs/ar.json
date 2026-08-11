@@ -1,5 +1,6 @@
 {
-	"agentCapabilitiesFollowCapability": "اتباع إعداد القدرة",
+	"agentCapabilitiesDefaultApprovalMode": "وضع الموافقة الافتراضي",
+	"agentCapabilitiesUseDefaultApproval": "استخدام الإعداد الافتراضي",
 	"agentCapabilitiesRiskConfirm": "التأكيد حسب المخاطر",
 	"agentCapabilitiesMcpExposureTip": "اختر القدرات التي توفرها خدمة MCP في SiYuan للعملاء الخارجيين",
 	"agentCapabilitiesScopeAgent": "استخدام Agent",

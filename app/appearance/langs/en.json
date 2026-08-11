@@ -1,5 +1,6 @@
 {
-	"agentCapabilitiesFollowCapability": "Follow capability",
+	"agentCapabilitiesDefaultApprovalMode": "Default approval mode",
+	"agentCapabilitiesUseDefaultApproval": "Use default setting",
 	"agentCapabilitiesRiskConfirm": "Confirm based on risk",
 	"agentCapabilitiesMcpExposureTip": "Choose the capabilities provided to external clients through the SiYuan MCP service",
 	"agentCapabilitiesScopeAgent": "Agent use",

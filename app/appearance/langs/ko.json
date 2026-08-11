@@ -1,5 +1,6 @@
 {
-	"agentCapabilitiesFollowCapability": "기능 설정 따르기",
+	"agentCapabilitiesDefaultApprovalMode": "기본 승인 방식",
+	"agentCapabilitiesUseDefaultApproval": "기본 설정 사용",
 	"agentCapabilitiesRiskConfirm": "위험도에 따라 확인",
 	"agentCapabilitiesMcpExposureTip": "SiYuan MCP 서비스를 통해 외부 클라이언트에 제공할 기능을 선택하세요",
 	"agentCapabilitiesScopeAgent": "Agent에서 사용",

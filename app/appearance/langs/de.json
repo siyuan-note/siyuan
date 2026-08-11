@@ -1,5 +1,6 @@
 {
-	"agentCapabilitiesFollowCapability": "Fähigkeitseinstellung übernehmen",
+	"agentCapabilitiesDefaultApprovalMode": "Standard-Genehmigungsmodus",
+	"agentCapabilitiesUseDefaultApproval": "Standardeinstellung verwenden",
 	"agentCapabilitiesRiskConfirm": "Nach Risiko bestätigen",
 	"agentCapabilitiesMcpExposureTip": "Wählen Sie die Funktionen aus, die der SiYuan-MCP-Dienst externen Clients bereitstellt",
 	"agentCapabilitiesScopeAgent": "Agent-Nutzung",

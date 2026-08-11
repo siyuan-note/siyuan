@@ -1,5 +1,6 @@
 {
-	"agentCapabilitiesFollowCapability": "Yetenek ayarını izle",
+	"agentCapabilitiesDefaultApprovalMode": "Varsayılan onay modu",
+	"agentCapabilitiesUseDefaultApproval": "Varsayılan ayarı kullan",
 	"agentCapabilitiesRiskConfirm": "Riske göre onayla",
 	"agentCapabilitiesMcpExposureTip": "SiYuan MCP hizmeti üzerinden harici istemcilere sunulan yetenekleri seçin",
 	"agentCapabilitiesScopeAgent": "Agent kullanımı",

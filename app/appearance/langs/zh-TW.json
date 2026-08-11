@@ -1,5 +1,6 @@
 {
-	"agentCapabilitiesFollowCapability": "跟隨能力",
+	"agentCapabilitiesDefaultApprovalMode": "預設批准方式",
+	"agentCapabilitiesUseDefaultApproval": "使用預設設定",
 	"agentCapabilitiesRiskConfirm": "依風險確認",
 	"agentCapabilitiesMcpExposureTip": "選擇透過思源 MCP 服務提供給外部客戶端的能力",
 	"agentCapabilitiesScopeAgent": "智能體使用",

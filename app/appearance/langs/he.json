@@ -1,5 +1,6 @@
 {
-	"agentCapabilitiesFollowCapability": "לפי הגדרת היכולת",
+	"agentCapabilitiesDefaultApprovalMode": "מצב אישור ברירת מחדל",
+	"agentCapabilitiesUseDefaultApproval": "שימוש בהגדרת ברירת המחדל",
 	"agentCapabilitiesRiskConfirm": "אישור לפי סיכון",
 	"agentCapabilitiesMcpExposureTip": "בחירת היכולות ששירות MCP של SiYuan מספק ללקוחות חיצוניים",
 	"agentCapabilitiesScopeAgent": "שימוש ה-Agent",

@@ -1,5 +1,6 @@
 {
-	"agentCapabilitiesFollowCapability": "Zgodnie z ustawieniem możliwości",
+	"agentCapabilitiesDefaultApprovalMode": "Domyślny tryb zatwierdzania",
+	"agentCapabilitiesUseDefaultApproval": "Użyj ustawienia domyślnego",
 	"agentCapabilitiesRiskConfirm": "Potwierdzaj na podstawie ryzyka",
 	"agentCapabilitiesMcpExposureTip": "Wybierz możliwości udostępniane klientom zewnętrznym przez usługę MCP SiYuan",
 	"agentCapabilitiesScopeAgent": "Użycie przez Agent",

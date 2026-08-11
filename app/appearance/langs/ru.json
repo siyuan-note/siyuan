@@ -1,5 +1,6 @@
 {
-	"agentCapabilitiesFollowCapability": "Наследовать настройку возможности",
+	"agentCapabilitiesDefaultApprovalMode": "Режим подтверждения по умолчанию",
+	"agentCapabilitiesUseDefaultApproval": "Использовать настройку по умолчанию",
 	"agentCapabilitiesRiskConfirm": "Подтверждать с учетом риска",
 	"agentCapabilitiesMcpExposureTip": "Выберите возможности, предоставляемые внешним клиентам через службу MCP SiYuan",
 	"agentCapabilitiesScopeAgent": "Использование Agent",

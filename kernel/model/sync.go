@@ -34,6 +34,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -103,7 +104,8 @@ func getSyncCloudLatestID() (ret string) {
 		logging.LogWarnf("create repo before perceived sync failed: %s", err)
 		return
 	}
-	latest, err := repo.GetCloudLatest(map[string]interface{}{})
+	syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToNone}
+	latest, err := repo.GetCloudLatestFast(syncContext)
 	if nil != err {
 		logging.LogWarnf("get cloud latest before perceived sync failed: %s", err)
 		return

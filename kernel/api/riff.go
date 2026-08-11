@@ -23,6 +23,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/riff"
+	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -43,6 +44,18 @@ func getRiffCardsByBlockIDs(c *gin.Context) {
 	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
+		return
+	}
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		blocks, err := model.GetLegacyFlashcardV2BlocksByIDs(c.Request.Context(), blockIDs)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		ret.Data = map[string]any{"blocks": blocks}
 		return
 	}
 
@@ -68,6 +81,15 @@ func batchSetRiffCardsDueTime(c *gin.Context) {
 			ID:  cardDue["id"].(string),
 			Due: cardDue["due"].(string),
 		})
+	}
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		if err := model.SetLegacyFlashcardV2DueTimes(c.Request.Context(), cardDues); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
+		return
 	}
 
 	err := model.SetFlashcardsDueTime(cardDues)
@@ -96,6 +118,15 @@ func resetRiffCards(c *gin.Context) {
 			blockIDs = append(blockIDs, blockID.(string))
 		}
 	}
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		if err := model.ResetLegacyFlashcardV2Cards(c.Request.Context(), typ, id, deckID, blockIDs); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
+		return
+	}
 
 	if err := model.ResetFlashcards(typ, id, deckID, blockIDs); err != nil {
 		ret.Code = -1
@@ -122,6 +153,19 @@ func getNotebookRiffCards(c *gin.Context) {
 	pageSize := 20
 	if nil != arg["pageSize"] {
 		pageSize = int(arg["pageSize"].(float64))
+	}
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		blocks, total, pageCount, err := model.GetLegacyNotebookFlashcardV2Blocks(c.Request.Context(), notebookID,
+			page, pageSize)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		ret.Data = map[string]any{"blocks": blocks, "total": total, "pageCount": pageCount}
+		return
 	}
 	blockIDs, total, pageCount := model.GetNotebookFlashcards(notebookID, page, pageSize)
 	ret.Data = map[string]any{
@@ -151,6 +195,19 @@ func getTreeRiffCards(c *gin.Context) {
 	if nil != arg["pageSize"] {
 		pageSize = int(arg["pageSize"].(float64))
 	}
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		blocks, total, pageCount, err := model.GetLegacyTreeFlashcardV2Blocks(c.Request.Context(), rootID, page,
+			pageSize)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		ret.Data = map[string]any{"blocks": blocks, "total": total, "pageCount": pageCount}
+		return
+	}
 	blockIDs, total, pageCount := model.GetTreeFlashcards(rootID, page, pageSize)
 	ret.Data = map[string]any{
 		"blocks":    blockIDs,
@@ -174,6 +231,19 @@ func getRiffCards(c *gin.Context) {
 	if nil != arg["pageSize"] {
 		pageSize = int(arg["pageSize"].(float64))
 	}
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		blocks, total, pageCount, err := model.GetLegacyFlashcardV2Blocks(c.Request.Context(), deckID, nil, page,
+			pageSize)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		ret.Data = map[string]any{"blocks": blocks, "total": total, "pageCount": pageCount}
+		return
+	}
 	blocks, total, pageCount := model.GetDeckFlashcards(deckID, page, pageSize)
 	ret.Data = map[string]any{
 		"blocks":    blocks,
@@ -195,6 +265,20 @@ func reviewRiffCard(c *gin.Context) {
 	cardID := arg["cardID"].(string)
 	rating := int(arg["rating"].(float64))
 	reviewedCardIDs := getReviewedCards(arg)
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		durationMS := int64(0)
+		if value, found := arg["durationMS"].(float64); found && value >= 0 {
+			durationMS = int64(value)
+		}
+		if err := model.ReviewLegacyFlashcardV2Card(c.Request.Context(), deckID, cardID, riff.Rating(rating),
+			durationMS); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
+		return
+	}
 	err := model.ReviewFlashcard(deckID, cardID, riff.Rating(rating), reviewedCardIDs)
 	if err != nil {
 		ret.Code = -1
@@ -214,6 +298,15 @@ func skipReviewRiffCard(c *gin.Context) {
 
 	deckID := arg["deckID"].(string)
 	cardID := arg["cardID"].(string)
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		if err := model.SkipLegacyFlashcardV2Card(c.Request.Context(), deckID, cardID); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
+		return
+	}
 	err := model.SkipReviewFlashcard(deckID, cardID)
 	if err != nil {
 		ret.Code = -1
@@ -233,6 +326,20 @@ func getNotebookRiffDueCards(c *gin.Context) {
 
 	notebookID := arg["notebook"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err :=
+			model.GetLegacyNotebookFlashcardV2DueCards(c.Request.Context(), notebookID, reviewedCardIDs)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		ret.Data = map[string]any{"cards": cards, "unreviewedCount": unreviewedCount,
+			"unreviewedNewCardCount": unreviewedNewCardCount, "unreviewedOldCardCount": unreviewedOldCardCount}
+		return
+	}
 	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetNotebookDueFlashcards(notebookID, reviewedCardIDs)
 	if err != nil {
 		ret.Code = -1
@@ -259,6 +366,20 @@ func getTreeRiffDueCards(c *gin.Context) {
 
 	rootID := arg["rootID"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err :=
+			model.GetLegacyTreeFlashcardV2DueCards(c.Request.Context(), rootID, reviewedCardIDs)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		ret.Data = map[string]any{"cards": cards, "unreviewedCount": unreviewedCount,
+			"unreviewedNewCardCount": unreviewedNewCardCount, "unreviewedOldCardCount": unreviewedOldCardCount}
+		return
+	}
 	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetTreeDueFlashcards(rootID, reviewedCardIDs)
 	if err != nil {
 		ret.Code = -1
@@ -285,6 +406,20 @@ func getRiffDueCards(c *gin.Context) {
 
 	deckID := arg["deckID"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err :=
+			model.GetLegacyFlashcardV2DueCards(c.Request.Context(), deckID, reviewedCardIDs, nil)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		ret.Data = map[string]any{"cards": cards, "unreviewedCount": unreviewedCount,
+			"unreviewedNewCardCount": unreviewedNewCardCount, "unreviewedOldCardCount": unreviewedOldCardCount}
+		return
+	}
 	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetDueFlashcards(deckID, reviewedCardIDs)
 	if err != nil {
 		ret.Code = -1
@@ -334,6 +469,20 @@ func removeRiffCards(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		deck, err := model.RemoveLegacyFlashcardV2Cards(c.Request.Context(), deckID, blockIDs)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if deck != nil {
+			ret.Data = legacyFlashcardV2DeckData(*deck)
+		}
+		return
+	}
 
 	transactions := []*model.Transaction{
 		{
@@ -377,6 +526,18 @@ func addRiffCards(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		deck, err := model.AddLegacyFlashcardV2Cards(c.Request.Context(), deckID, blockIDs)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		ret.Data = legacyFlashcardV2DeckData(deck)
+		return
+	}
 
 	transactions := []*model.Transaction{
 		{
@@ -408,6 +569,15 @@ func renameRiffDeck(c *gin.Context) {
 
 	deckID := arg["deckID"].(string)
 	name := arg["name"].(string)
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		if err := model.RenameLegacyFlashcardV2ReviewSet(c.Request.Context(), deckID, name); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
+		return
+	}
 	err := model.RenameDeck(deckID, name)
 	if err != nil {
 		ret.Code = -1
@@ -426,6 +596,15 @@ func removeRiffDeck(c *gin.Context) {
 	}
 
 	deckID := arg["deckID"].(string)
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		if err := model.RemoveLegacyFlashcardV2ReviewSet(c.Request.Context(), deckID); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
+		return
+	}
 	err := model.RemoveDeck(deckID)
 	if err != nil {
 		ret.Code = -1
@@ -444,6 +623,18 @@ func createRiffDeck(c *gin.Context) {
 	}
 
 	name := arg["name"].(string)
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		deck, err := model.CreateLegacyFlashcardV2ReviewSet(c.Request.Context(), "", name)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		ret.Data = legacyFlashcardV2DeckData(deck)
+		return
+	}
 	deck, err := model.CreateDeck(name)
 	if err != nil {
 		ret.Code = -1
@@ -456,6 +647,23 @@ func createRiffDeck(c *gin.Context) {
 func getRiffDecks(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
+
+	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
+		return
+	} else if active {
+		decks, err := model.GetLegacyFlashcardV2ReviewSets(c.Request.Context())
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		data := make([]any, 0, len(decks))
+		for _, deck := range decks {
+			data = append(data, legacyFlashcardV2DeckData(deck))
+		}
+		ret.Data = data
+		return
+	}
 
 	decks := model.GetDecks()
 	var data []any
@@ -475,5 +683,29 @@ func deckData(deck *riff.Deck) map[string]any {
 		"size":    model.CountSupportedFlashcards(deck),
 		"created": time.UnixMilli(deck.Created).Format("2006-01-02 15:04:05"),
 		"updated": time.UnixMilli(deck.Updated).Format("2006-01-02 15:04:05"),
+	}
+}
+
+func useFlashcardV2RiffAdapter(c *gin.Context, ret *gulu.Result) (active, ok bool) {
+	active, err := model.UseFlashcardV2Compatibility(c.Request.Context())
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return false, false
+	}
+	if active {
+		c.Header("Deprecation", "true")
+		c.Header("X-SiYuan-Replacement", "/api/flashcard")
+	}
+	return active, true
+}
+
+func legacyFlashcardV2DeckData(deck flashcardv2.LegacyReviewSetInfo) map[string]any {
+	return map[string]any{
+		"id":      deck.DeckID,
+		"name":    deck.Name,
+		"size":    deck.Size,
+		"created": time.UnixMilli(deck.CreatedAt).Format("2006-01-02 15:04:05"),
+		"updated": time.UnixMilli(deck.UpdatedAt).Format("2006-01-02 15:04:05"),
 	}
 }

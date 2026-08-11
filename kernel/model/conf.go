@@ -1056,6 +1056,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 			Unmount(box.ID)
 		}
 	}
+	closeFlashcardV2Store()
 	sql.CloseDatabase()
 	closePushQueue()
 	util.SaveAssetsTexts()

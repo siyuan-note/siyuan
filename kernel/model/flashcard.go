@@ -17,7 +17,9 @@
 package model
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"math"
 	"os"
 	"path/filepath"
@@ -43,9 +45,19 @@ import (
 // ValidateFlashcardBlockIDs 只允许普通笔记本中可确认存在的块进入全局闪卡存储。
 func ValidateFlashcardBlockIDs(blockIDs []string) error {
 	for _, blockID := range blockIDs {
-		if !isSupportedFlashcardBlock(blockID) {
+		blockTree := treenode.GetBlockTreeInExactBox(blockID, "")
+		if blockTree != nil && !IsEncryptedBox(blockTree.BoxID) {
+			continue
+		}
+		for _, boxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if treenode.GetBlockTreeInExactBox(blockID, boxID) != nil {
+				return errors.New(Conf.Language(313))
+			}
+		}
+		if blockTree != nil && IsEncryptedBox(blockTree.BoxID) {
 			return errors.New(Conf.Language(313))
 		}
+		return fmt.Errorf("flashcard block [%s] was not found", blockID)
 	}
 	return nil
 }
@@ -896,6 +908,14 @@ func (tx *Transaction) doRemoveFlashcards(operation *Operation) (ret *TxErr) {
 	if err := ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
 	}
+	if active, err := UseFlashcardV2Compatibility(context.Background()); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+	} else if active {
+		if _, err = RemoveLegacyFlashcardV2Cards(context.Background(), deckID, blockIDs); err != nil {
+			return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+		}
+		return nil
+	}
 
 	if err := tx.removeBlocksDeckAttr(blockIDs, deckID); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: deckID}
@@ -1012,6 +1032,14 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 	blockIDs := operation.BlockIDs
 	if err := ValidateFlashcardBlockIDs(blockIDs); err != nil {
 		return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+	}
+	if active, err := UseFlashcardV2Compatibility(context.Background()); err != nil {
+		return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+	} else if active {
+		if _, err = AddLegacyFlashcardV2Cards(context.Background(), deckID, blockIDs); err != nil {
+			return &TxErr{code: TxErrCodePushMsg, msg: err.Error()}
+		}
+		return nil
 	}
 
 	foundDeck := false
@@ -1135,6 +1163,7 @@ func LoadFlashcards() {
 			Decks[deckID] = deck
 		}
 	}
+	refreshFlashcardV2Store()
 }
 
 const builtinDeckID = "20230218211946-2kw8jgx"

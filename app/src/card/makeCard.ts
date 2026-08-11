@@ -9,6 +9,14 @@ import {Constants} from "../constants";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {transaction} from "../protyle/wysiwyg/transaction";
 import type {App} from "../index";
+import {
+    openFlashcardV2AdvancedSource,
+    openFlashcardV2AnkiPreview,
+    openFlashcardV2BasicSource,
+    openFlashcardV2Management,
+    openFlashcardV2ReviewSets,
+    openFlashcardV2Statistics
+} from "./flashcardV2";
 
 export const genCardItem = (item: ICardPackage) => {
     return `<li data-id="${item.id}" data-name="${escapeAttr(item.name)}" class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}">
@@ -62,6 +70,30 @@ export const makeCard = (app: App, ids: string[]) => {
         <span class="fn__space"></span>
         <span data-type="viewall" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.cardPreview}">
             <svg><use xlink:href="#iconEye"></use></svg>
+        </span>
+        ${ids.length > 1 ? `<span class="fn__space"></span>
+        <span data-type="basic" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDirectionBidirectional}">
+            <svg><use xlink:href="#iconBoth"></use></svg>
+        </span>` : ""}
+        ${ids.length > 0 ? `<span class="fn__space"></span>
+        <span data-type="advanced" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.configGroupAdvanced}">
+            <svg><use xlink:href="#iconSettings"></use></svg>
+        </span>` : ""}
+        <span class="fn__space"></span>
+        <span data-type="reviewSets" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewSet}">
+            <svg><use xlink:href="#iconDatabase"></use></svg>
+        </span>
+        <span class="fn__space"></span>
+        <span data-type="management" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.manage}">
+            <svg><use xlink:href="#iconList"></use></svg>
+        </span>
+        <span class="fn__space"></span>
+        <span data-type="statistics" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardStatistics}">
+            <svg><use xlink:href="#iconGraph"></use></svg>
+        </span>
+        <span class="fn__space"></span>
+        <span data-type="anki" class="block__icon block__icon--show b3-tooltips b3-tooltips__w" aria-label="Anki">
+            <svg><use xlink:href="#iconUpload"></use></svg>
         </span>
     </div>
     <div class="fn__hr"></div>
@@ -131,6 +163,36 @@ export const makeCard = (app: App, ids: string[]) => {
                     break;
                 } else if (type === "viewall") {
                     viewCards(app, "", window.siyuan.languages.all, "");
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "reviewSets") {
+                    openFlashcardV2ReviewSets(app);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "management") {
+                    openFlashcardV2Management();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "basic") {
+                    openFlashcardV2BasicSource(ids);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "advanced") {
+                    openFlashcardV2AdvancedSource(ids);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "statistics") {
+                    openFlashcardV2Statistics();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "anki") {
+                    openFlashcardV2AnkiPreview();
                     event.stopPropagation();
                     event.preventDefault();
                     break;

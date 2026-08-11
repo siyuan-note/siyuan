@@ -24,6 +24,10 @@ import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
 import {Kernel} from "./kernel";
 import {IAgentCapabilityEffects, registerCapability} from "../layout/dock/agent/frontendCapabilities";
+import {
+    type IFlashcardV2PluginRegistration,
+    registerFlashcardV2PluginType
+} from "../card/flashcardV2Plugin";
 
 export class Plugin {
     private app: App;
@@ -152,6 +156,10 @@ export class Plugin {
 
     public async updateCards(options: ICardData) {
         return options;
+    }
+
+    public registerFlashcardType(options: IFlashcardV2PluginRegistration) {
+        return registerFlashcardV2PluginType(this.name, options);
     }
 
     public onLayoutReady() {

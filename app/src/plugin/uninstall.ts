@@ -12,6 +12,7 @@ import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
 import {unregisterCapability} from "../layout/dock/agent/frontendCapabilities";
+import {unregisterFlashcardV2PluginTypes} from "../card/flashcardV2Plugin";
 
 export const uninstall = (app: App, name: string, isReload: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {
@@ -59,6 +60,7 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             }
             // 移除插件注册的 Agent 能力
             plugin.agentCapabilities.forEach((capability) => unregisterCapability(capability.id, capability.generation));
+            unregisterFlashcardV2PluginTypes(plugin.name);
             /// #if !MOBILE
             // rm statusBar
             plugin.statusBarIcons.forEach(item => {

@@ -276,6 +276,7 @@ export const bindCardEvent = async (options: {
             options.element.querySelector('[data-type="fullscreen"]'));
     }
     let index = 0;
+    let cardShownAt = performance.now();
     if (typeof options.index === "number") {
         index = options.index;
     }
@@ -323,6 +324,7 @@ export const bindCardEvent = async (options: {
                 options.cardsData = await options.app.plugins[i].updateCards(options.cardsData);
             }
             if (options.cardsData.cards.length > 0) {
+                cardShownAt = performance.now();
                 nextCard({
                     countElement,
                     editor,
@@ -732,6 +734,7 @@ export const bindCardEvent = async (options: {
         } else if (type === "-2") {    // 上一步
             if (index > 0) {
                 index--;
+                cardShownAt = performance.now();
                 nextCard({
                     countElement,
                     editor,
@@ -748,6 +751,7 @@ export const bindCardEvent = async (options: {
                 deckID: currentCard.deckID,
                 cardID: currentCard.cardID,
                 rating: parseInt(type),
+                durationMS: type === "-3" ? 0 : Math.max(0, Math.round(performance.now() - cardShownAt)),
                 reviewedCards: options.cardsData.cards
             }, () => {
                 /// #if MOBILE
@@ -781,6 +785,7 @@ export const bindCardEvent = async (options: {
                                 allDone(countElement, editor, actionElements);
                             }
                         } else {
+                            cardShownAt = performance.now();
                             nextCard({
                                 countElement,
                                 editor,
@@ -792,6 +797,7 @@ export const bindCardEvent = async (options: {
                     });
                     return;
                 }
+                cardShownAt = performance.now();
                 nextCard({
                     countElement,
                     editor,

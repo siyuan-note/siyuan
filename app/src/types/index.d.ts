@@ -110,6 +110,10 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide" |
     "code-language-update" | "code-language-change" |
+    "flashcard-review-session-started" | "flashcard-review-card-shown" |
+    "flashcard-review-answer-revealed" | "flashcard-review-rating-submitted" |
+    "flashcard-review-rating-completed" | "flashcard-review-undone" |
+    "flashcard-review-session-ended" |
     "kernel-plugin-state-change"
 type TAVView = "table" | "gallery" | "kanban"
 type TAVAlign = "" | "left" | "center" | "right"

@@ -313,19 +313,29 @@ func isValidSYImportToken(token string) bool {
 func saveImportUpload(c *gin.Context) (form *multipart.Form, writePath string, cleanup func(), err error) {
 	form, err = c.MultipartForm()
 	if err != nil {
+		if form != nil {
+			_ = form.RemoveAll()
+		} else if c.Request.MultipartForm != nil {
+			_ = c.Request.MultipartForm.RemoveAll()
+		}
 		return
 	}
 	files := form.File["file"]
 	if len(files) < 1 {
+		_ = form.RemoveAll()
 		err = errors.New("no file found")
 		return
 	}
 
 	importDir := filepath.Join(util.TempDir, "import", gulu.Rand.String(7))
 	if err = os.MkdirAll(importDir, 0755); err != nil {
+		_ = form.RemoveAll()
 		return
 	}
-	cleanup = func() { _ = os.RemoveAll(importDir) }
+	cleanup = func() {
+		_ = os.RemoveAll(importDir)
+		_ = form.RemoveAll()
+	}
 	writePath = filepath.Join(importDir, filepath.Base(files[0].Filename))
 	if !gulu.File.IsSubPath(importDir, writePath) {
 		err = errors.New("import path is not sub path of import dir")

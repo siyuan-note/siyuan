@@ -437,7 +437,7 @@ const loadAppleSiliconWarningLanguages = (requestedLanguage) => {
         const languages = languageData._trayMenu;
         if (languages && typeof languages.arm64TranslationTitle === "string" &&
             typeof languages.arm64TranslationMessage === "string" &&
-            typeof languages.downloadAppleSilicon === "string" && typeof languages.quit === "string") {
+            typeof languages.downloadAppleSilicon === "string") {
             return languages;
         }
     } catch (error) {
@@ -448,7 +448,6 @@ const loadAppleSiliconWarningLanguages = (requestedLanguage) => {
         arm64TranslationMessage: "SiYuan is running the Intel version through Rosetta. This may significantly " +
             "reduce performance. Please use the Apple silicon version",
         downloadAppleSilicon: "Download the Apple silicon version",
-        quit: "Quit application",
     };
 };
 
@@ -1244,8 +1243,9 @@ const showAppleSiliconWarning = async (lang) => {
             title: languages.arm64TranslationTitle,
             message: languages.arm64TranslationTitle,
             detail: languages.arm64TranslationMessage,
-            buttons: [languages.downloadAppleSilicon, languages.quit],
+            buttons: [languages.downloadAppleSilicon],
             defaultId: 0,
+            // 使用按钮数组之外的取消 ID，以区分关闭弹窗和点击下载。
             cancelId: 1,
             noLink: true,
         });

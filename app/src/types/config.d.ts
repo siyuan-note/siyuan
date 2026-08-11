@@ -174,10 +174,10 @@ declare namespace Config {
         maxToolCallRounds: number;
         capabilityPolicy: ICapabilityPolicy;
         approvalPolicy: {
-            default: "confirm" | "allow";
+            default: "risk" | "allow";
             overrides: Record<string, {
-                default: "" | "confirm" | "allow";
-                actions: Record<string, "confirm" | "allow">;
+                default: "" | "risk" | "confirm" | "allow";
+                actions: Record<string, "risk" | "confirm" | "allow">;
             }>;
         };
     }

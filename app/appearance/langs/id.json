@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "Ikuti pengaturan kemampuan",
+	"agentCapabilitiesRiskConfirm": "Konfirmasi berdasarkan risiko",
 	"agentCapabilitiesMcpExposureTip": "Pilih kemampuan yang disediakan layanan MCP SiYuan untuk klien eksternal",
 	"agentCapabilitiesScopeAgent": "Penggunaan Agent",
 	"agentCapabilitiesScopeMcp": "Sediakan melalui MCP",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "Setujui",
 	"agentConfirmReject": "Tolak",
 	"agentConfirmAlways": "Izinkan sesi",
-	"agentConfirmAlwaysDesc": "Jangan tanya lagi untuk operasi apa pun di sesi ini",
+	"agentConfirmAlwaysDesc": "Jangan tanya lagi dalam sesi ini, kecuali untuk kemampuan yang diatur agar selalu dikonfirmasi",
 	"agentConfirmPending": "Menunggu",
 	"agentTimeout": "Batas waktu",
 	"agentTimeoutTip": "Batas waktu total sesi agen, 0 = tanpa batas",

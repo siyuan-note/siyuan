@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "Podľa nastavenia schopnosti",
+	"agentCapabilitiesRiskConfirm": "Potvrdzovať podľa rizika",
 	"agentCapabilitiesMcpExposureTip": "Vyberte možnosti poskytované externým klientom prostredníctvom služby MCP SiYuan",
 	"agentCapabilitiesScopeAgent": "Použitie Agentom",
 	"agentCapabilitiesScopeMcp": "Poskytovať cez MCP",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "Schváliť",
 	"agentConfirmReject": "Odmietnuť",
 	"agentConfirmAlways": "Povoliť reláciu",
-	"agentConfirmAlwaysDesc": "V tejto relácii sa už nepýtať na žiadnu operáciu",
+	"agentConfirmAlwaysDesc": "V tejto relácii sa už nepýtať okrem schopností nastavených na potvrdenie pri každom použití",
 	"agentConfirmPending": "Čaká sa",
 	"agentTimeout": "Časový limit",
 	"agentTimeoutTip": "Celkový časový limit relácie agenta, 0 = bez limitu",

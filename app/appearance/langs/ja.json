@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "能力の設定に従う",
+	"agentCapabilitiesRiskConfirm": "リスクに応じて確認",
 	"agentCapabilitiesMcpExposureTip": "SiYuan MCP サービスを通じて外部クライアントに提供する機能を選択します",
 	"agentCapabilitiesScopeAgent": "Agent で使用",
 	"agentCapabilitiesScopeMcp": "MCP で外部提供",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "承認",
 	"agentConfirmReject": "拒否",
 	"agentConfirmAlways": "セッション許可",
-	"agentConfirmAlwaysDesc": "このセッションではいかなる操作も確認しない",
+	"agentConfirmAlwaysDesc": "「毎回確認」に設定された能力を除き、このセッションでは再確認しない",
 	"agentConfirmPending": "保留中",
 	"agentTimeout": "タイムアウト",
 	"agentTimeoutTip": "エージェント セッション全体のタイムアウト、0 は制限なし",

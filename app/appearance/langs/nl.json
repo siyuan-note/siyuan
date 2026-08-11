@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "Instelling van mogelijkheid volgen",
+	"agentCapabilitiesRiskConfirm": "Bevestigen op basis van risico",
 	"agentCapabilitiesMcpExposureTip": "Kies de mogelijkheden die de SiYuan MCP-service aan externe clients aanbiedt",
 	"agentCapabilitiesScopeAgent": "Gebruik door Agent",
 	"agentCapabilitiesScopeMcp": "Aanbieden via MCP",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "Goedkeuren",
 	"agentConfirmReject": "Afwijzen",
 	"agentConfirmAlways": "Sessie toestaan",
-	"agentConfirmAlwaysDesc": "Niet meer vragen voor enige operatie deze sessie",
+	"agentConfirmAlwaysDesc": "Niet opnieuw vragen in deze sessie, behalve voor mogelijkheden die op Altijd bevestigen staan",
 	"agentConfirmPending": "In behandeling",
 	"agentTimeout": "Time-out",
 	"agentTimeoutTip": "Totale time-out van de agentsessie, 0 = geen limiet",

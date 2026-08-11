@@ -1,10 +1,17 @@
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
 import {listCapabilityManifests} from "../../../layout/dock/agent/frontendCapabilities";
+import {
+    AgentActionApprovalDecision,
+    AgentApprovalDecision,
+    getCapabilityActionApproval,
+    resolveCapabilityApproval,
+    updateCapabilityActionApproval,
+    updateCapabilityApproval,
+} from "./aiCapabilityPolicy";
 import {aiConfigApi} from "./aiRuntime";
 
 type CapabilityDecision = "allow" | "deny";
-type ApprovalDecision = "allow" | "confirm";
 type CapabilityScope = "agent" | "mcp";
 
 const escapeAttribute = (value: string) => escapeAttr(escapeHtml(value));
@@ -40,15 +47,10 @@ const getCapabilityPolicy = (scope: CapabilityScope): Config.ICapabilityPolicy =
 };
 
 const getApprovalPolicy = (): Config.IAgent["approvalPolicy"] =>
-    window.siyuan.config.ai.agent.approvalPolicy || {default: "confirm", overrides: {}};
+    window.siyuan.config.ai.agent.approvalPolicy || {default: "risk", overrides: {}};
 
 const isCapabilityAllowed = (id: string, scope: CapabilityScope, policy = getCapabilityPolicy(scope)) =>
     (policy.overrides[id] || policy.default) === "allow";
-
-const isCapabilityAutoApproved = (id: string, action = "", policy = getApprovalPolicy()) => {
-    const override = policy.overrides[id];
-    return (override?.actions[action] || override?.default || policy.default) === "allow";
-};
 
 const getGroupLabel = (capability: ICapabilityInfo) => {
     const runtime = capability.runtime === "browser"
@@ -145,35 +147,15 @@ const setCapabilitiesDecision = (scope: CapabilityScope, ids: string[], decision
     saveCapabilityPolicy(scope, {...policy, overrides}, onApplied);
 };
 
-const setCapabilityApproval = (id: string, decision: ApprovalDecision, onApplied: () => void) => {
+const setCapabilityApproval = (id: string, decision: AgentApprovalDecision, onApplied: () => void) => {
     const policy = getApprovalPolicy();
-    const overrides = {...policy.overrides};
-    if (decision === policy.default) {
-        delete overrides[id];
-    } else {
-        overrides[id] = {default: decision, actions: {}};
-    }
-    saveApprovalPolicy({...policy, overrides}, onApplied);
+    saveApprovalPolicy(updateCapabilityApproval(policy, id, decision), onApplied);
 };
 
-const setCapabilityActionApproval = (id: string, action: string, decision: ApprovalDecision,
+const setCapabilityActionApproval = (id: string, action: string, decision: AgentActionApprovalDecision,
                                      onApplied: () => void) => {
     const policy = getApprovalPolicy();
-    const overrides = {...policy.overrides};
-    const current = overrides[id];
-    const capabilityDefault = current?.default || policy.default;
-    const actions = {...current?.actions};
-    if (decision === capabilityDefault) {
-        delete actions[action];
-    } else {
-        actions[action] = decision;
-    }
-    if (!current?.default && Object.keys(actions).length === 0) {
-        delete overrides[id];
-    } else {
-        overrides[id] = {default: current?.default || "", actions};
-    }
-    saveApprovalPolicy({...policy, overrides}, onApplied);
+    saveApprovalPolicy(updateCapabilityActionApproval(policy, id, action, decision), onApplied);
 };
 
 const capabilityMatches = (capability: ICapabilityInfo, query: string) => {
@@ -276,6 +258,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
 
     const render = () => {
         const capabilities = getAllCapabilities(backendCapabilities, scope);
+        const approvalPolicy = getApprovalPolicy();
         addUnavailableCapabilities(capabilities, scope);
         const list = view.querySelector<HTMLElement>("[data-type='agentCapabilityList']");
         const count = view.querySelector<HTMLElement>("[data-type='agentCapabilitySelectedCount']");
@@ -330,25 +313,29 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
         <div class="b3-label b3-label--inner">
             <div class="b3-label__text"><code>${escapeHtml(capability.id)}</code></div>
         </div>
-        <div class="b3-label b3-label--inner config-name fn__flex">
+        <label class="fn__flex b3-label b3-label--inner config-wrap">
+            <span class="fn__flex-1">${window.siyuan.languages.use}</span>
+            <span class="fn__space"></span>
+            <select class="b3-select" data-type="toggleAgentCapabilityApproval">
+                <option value="risk"${resolveCapabilityApproval(approvalPolicy, capability.id) === "risk" ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesRiskConfirm}</option>
+                <option value="confirm"${resolveCapabilityApproval(approvalPolicy, capability.id) === "confirm" ? " selected" : ""}>${window.siyuan.languages.agentPermissionConfirm}</option>
+                <option value="allow"${resolveCapabilityApproval(approvalPolicy, capability.id) === "allow" ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesAutoApprove}</option>
+            </select>
+        </label>
+        ${actions.length > 0 ? `<div class="b3-label b3-label--inner config-name fn__flex">
             <span class="fn__flex-1">${window.siyuan.languages.agentCapabilitiesActions}</span>
             <span class="ft__on-surface">${window.siyuan.languages.agentCapabilitiesApprovalMode}</span>
         </div>
-        ${actions.length > 0 ? actions.map((action) => `<label class="fn__flex b3-label b3-label--inner config-wrap">
+        ${actions.map((action) => `<label class="fn__flex b3-label b3-label--inner config-wrap">
         <code class="fn__flex-1">${escapeHtml(action.name)}</code>
         <span class="fn__space"></span>
         <select class="b3-select" data-type="toggleAgentCapabilityActionApproval" data-capability-action="${escapeAttribute(action.name)}">
-            <option value="confirm"${isCapabilityAutoApproved(capability.id, action.name) ? "" : " selected"}>${window.siyuan.languages.agentPermissionConfirm}</option>
-            <option value="allow"${isCapabilityAutoApproved(capability.id, action.name) ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesAutoApprove}</option>
+            <option value=""${getCapabilityActionApproval(approvalPolicy, capability.id, action.name) === "" ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesFollowCapability}</option>
+            <option value="risk"${getCapabilityActionApproval(approvalPolicy, capability.id, action.name) === "risk" ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesRiskConfirm}</option>
+            <option value="confirm"${getCapabilityActionApproval(approvalPolicy, capability.id, action.name) === "confirm" ? " selected" : ""}>${window.siyuan.languages.agentPermissionConfirm}</option>
+            <option value="allow"${getCapabilityActionApproval(approvalPolicy, capability.id, action.name) === "allow" ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesAutoApprove}</option>
         </select>
-    </label>`).join("") : `<label class="fn__flex b3-label b3-label--inner config-wrap">
-        <span class="fn__flex-1">${window.siyuan.languages.use}</span>
-        <span class="fn__space"></span>
-        <select class="b3-select" data-type="toggleAgentCapabilityApproval">
-            <option value="confirm"${isCapabilityAutoApproved(capability.id) ? "" : " selected"}>${window.siyuan.languages.agentPermissionConfirm}</option>
-            <option value="allow"${isCapabilityAutoApproved(capability.id) ? " selected" : ""}>${window.siyuan.languages.agentCapabilitiesAutoApprove}</option>
-        </select>
-    </label>`}
+    </label>`).join("")}` : ""}
     </div>` : ""}
 </div>`;
         }).join("")}
@@ -393,11 +380,11 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
         if (type === "toggleAgentCapability") {
             setCapabilitiesDecision(scope, [id], input.checked ? "allow" : "deny", onPolicyApplied);
         } else if (scope === "agent" && type === "toggleAgentCapabilityApproval") {
-            setCapabilityApproval(id, input.value as ApprovalDecision, onPolicyApplied);
+            setCapabilityApproval(id, input.value as AgentApprovalDecision, onPolicyApplied);
         } else if (scope === "agent" && type === "toggleAgentCapabilityActionApproval") {
             const action = input.dataset.capabilityAction;
             if (action !== undefined) {
-                setCapabilityActionApproval(id, action, input.value as ApprovalDecision, onPolicyApplied);
+                setCapabilityActionApproval(id, action, input.value as AgentActionApprovalDecision, onPolicyApplied);
             }
         }
     };
@@ -450,6 +437,8 @@ export const getAgentCapabilityKeywords = (): string[] => [
     window.siyuan.languages.agentCapabilitiesScopeAgent,
     window.siyuan.languages.agentCapabilitiesScopeMcp,
     window.siyuan.languages.agentCapabilitiesMcpExposureTip,
+    window.siyuan.languages.agentCapabilitiesFollowCapability,
+    window.siyuan.languages.agentCapabilitiesRiskConfirm,
     window.siyuan.languages.agentCapabilitiesAutoApprove,
 ];
 

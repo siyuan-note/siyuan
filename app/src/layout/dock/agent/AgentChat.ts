@@ -7,6 +7,7 @@ import {disabledWYSIWYG} from "../../../protyle/util/disabledWYSIWYG";
 import {getAllEditor} from "../../getAll";
 import {isCapabilityEnabled, listCapabilityManifests, lookupCapability} from "./frontendCapabilities";
 import {AgentPermissionMode, AgentSession, SessionStore} from "./SessionStore";
+import {genAgentConfirmActionButtons} from "./agentConfirmActions";
 import {AgentSessionPanel} from "./AgentSessionPanel";
 import {updateHotkeyAfterTip} from "../../../protyle/util/compatibility";
 import {getAgentLute} from "../../../protyle/render/setLute";
@@ -2034,7 +2035,7 @@ export class AgentChat extends Model {
                     break;
                 case "confirm":
                     this.setToolCallRunning(event.name, false);
-                    this.appendConfirm(event.name, event.arguments, event.confirmID, event.effects);
+                    this.appendConfirm(event.name, event.arguments, event.confirmID, event.effects, event.forced);
                     break;
                 case "permission":
                     this.applyPermissionMode(event.permissionMode);
@@ -3290,7 +3291,8 @@ export class AgentChat extends Model {
         return '<ul class="agent-chat__confirm-effects">' + items.map((item) => `<li>${escapeHtml(item)}</li>`).join("") + "</ul>";
     }
 
-    private async appendConfirm(name: string, args: Record<string, unknown>, confirmID: string, effects?: IToolEffects) {
+    private async appendConfirm(name: string, args: Record<string, unknown>, confirmID: string, effects?: IToolEffects,
+                                forced = false) {
         this.finishActiveThinking();
         this.flushThinkingStep();
         const L = window.siyuan.languages;
@@ -3303,9 +3305,12 @@ export class AgentChat extends Model {
             this.renderConfirmEffects(effects) +
             '<pre class="agent-chat__confirm-args">' + escapeHtml(argsStr) + "</pre>" +
             '<div class="agent-chat__confirm-actions">' +
-            '<button class="b3-button b3-button--cancel agent-chat__confirm-reject">' + (L.agentConfirmReject || "Reject") + "</button>" +
-            '<button class="b3-button b3-button--text agent-chat__confirm-approve">' + (L.agentConfirmApprove || "Approve") + "</button>" +
-            '<button class="b3-button b3-button--text agent-chat__confirm-always ariaLabel" data-position="n" aria-label="' + (L.agentConfirmAlwaysDesc || "Session Allow") + '">' + (L.agentConfirmAlways || "Session Allow") + "</button>" +
+            genAgentConfirmActionButtons(forced, {
+                reject: L.agentConfirmReject || "Reject",
+                approve: L.agentConfirmApprove || "Approve",
+                allowSession: L.agentConfirmAlways || "Session Allow",
+                allowSessionDescription: L.agentConfirmAlwaysDesc || "Session Allow",
+            }) +
             "</div>" +
             "</div>";
         const sessionID = this.sessionId;

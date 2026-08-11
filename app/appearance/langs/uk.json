@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "Успадкувати налаштування можливості",
+	"agentCapabilitiesRiskConfirm": "Підтверджувати залежно від ризику",
 	"agentCapabilitiesMcpExposureTip": "Виберіть можливості, що надаються зовнішнім клієнтам через службу MCP SiYuan",
 	"agentCapabilitiesScopeAgent": "Використання Agent",
 	"agentCapabilitiesScopeMcp": "Надавати через MCP",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "Підтвердити",
 	"agentConfirmReject": "Відхилити",
 	"agentConfirmAlways": "Дозволити сесію",
-	"agentConfirmAlwaysDesc": "Більше не питати про жодні операції в цій сесії",
+	"agentConfirmAlwaysDesc": "Більше не питати в цій сесії, крім можливостей із підтвердженням під час кожного виклику",
 	"agentConfirmPending": "Очікує",
 	"agentTimeout": "Таймаут",
 	"agentTimeoutTip": "Загальний таймаут сесії агента, 0 = без обмежень",

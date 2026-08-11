@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "跟随能力",
+	"agentCapabilitiesRiskConfirm": "按风险确认",
 	"agentCapabilitiesMcpExposureTip": "选择通过思源 MCP 服务向外部客户端提供的能力",
 	"agentCapabilitiesScopeAgent": "智能体使用",
 	"agentCapabilitiesScopeMcp": "MCP 对外提供",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "确认执行",
 	"agentConfirmReject": "拒绝",
 	"agentConfirmAlways": "会话允许",
-	"agentConfirmAlwaysDesc": "本次会话中不再询问任何确认",
+	"agentConfirmAlwaysDesc": "本次会话中不再询问确认，但设置为每次确认的能力除外",
 	"agentConfirmPending": "待确认",
 	"agentTimeout": "超时时间",
 	"agentTimeoutTip": "智能体会话总超时时间，0 表示不限制",

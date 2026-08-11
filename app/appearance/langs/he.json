@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "לפי הגדרת היכולת",
+	"agentCapabilitiesRiskConfirm": "אישור לפי סיכון",
 	"agentCapabilitiesMcpExposureTip": "בחירת היכולות ששירות MCP של SiYuan מספק ללקוחות חיצוניים",
 	"agentCapabilitiesScopeAgent": "שימוש ה-Agent",
 	"agentCapabilitiesScopeMcp": "אספקה דרך MCP",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "אשר",
 	"agentConfirmReject": "דחה",
 	"agentConfirmAlways": "אפשר הפעלה",
-	"agentConfirmAlwaysDesc": "אל תשאל שוב על שום פעולה בהפעלה זו",
+	"agentConfirmAlwaysDesc": "אל תשאל שוב בהפעלה זו, למעט יכולות שהוגדרו לאישור בכל פעם",
 	"agentConfirmPending": "ממתין",
 	"agentTimeout": "זמן קצוב",
 	"agentTimeoutTip": "זמן קצוב כולל להפעלת הסוכן, 0 = ללא הגבלה",

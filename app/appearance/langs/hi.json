@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "क्षमता सेटिंग का पालन करें",
+	"agentCapabilitiesRiskConfirm": "जोखिम के आधार पर पुष्टि करें",
 	"agentCapabilitiesMcpExposureTip": "SiYuan MCP सेवा के माध्यम से बाहरी क्लाइंट को दी जाने वाली क्षमताएँ चुनें",
 	"agentCapabilitiesScopeAgent": "Agent में उपयोग",
 	"agentCapabilitiesScopeMcp": "MCP से उपलब्ध कराएँ",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "स्वीकृत करें",
 	"agentConfirmReject": "अस्वीकृत करें",
 	"agentConfirmAlways": "सत्र अनुमति दें",
-	"agentConfirmAlwaysDesc": "इस सत्र में किसी भी कार्रवाई के लिए दोबारा न पूछें",
+	"agentConfirmAlwaysDesc": "इस सत्र में दोबारा न पूछें, हर बार पुष्टि के लिए सेट क्षमताओं को छोड़कर",
 	"agentConfirmPending": "लंबित",
 	"agentTimeout": "समय सीमा",
 	"agentTimeoutTip": "एजेंट सत्र की कुल समय सीमा, 0 = कोई सीमा नहीं",

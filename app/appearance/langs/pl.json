@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "Zgodnie z ustawieniem możliwości",
+	"agentCapabilitiesRiskConfirm": "Potwierdzaj na podstawie ryzyka",
 	"agentCapabilitiesMcpExposureTip": "Wybierz możliwości udostępniane klientom zewnętrznym przez usługę MCP SiYuan",
 	"agentCapabilitiesScopeAgent": "Użycie przez Agent",
 	"agentCapabilitiesScopeMcp": "Udostępnij przez MCP",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "Zatwierdź",
 	"agentConfirmReject": "Odrzuć",
 	"agentConfirmAlways": "Zezwól sesję",
-	"agentConfirmAlwaysDesc": "Nie pytaj ponownie o żadną operację w tej sesji",
+	"agentConfirmAlwaysDesc": "Nie pytaj ponownie w tej sesji, z wyjątkiem możliwości ustawionych na potwierdzanie za każdym razem",
 	"agentConfirmPending": "Oczekujące",
 	"agentTimeout": "Limit czasu",
 	"agentTimeoutTip": "Całkowity limit czasu sesji agenta, 0 = bez limitu",

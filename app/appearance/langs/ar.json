@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "اتباع إعداد القدرة",
+	"agentCapabilitiesRiskConfirm": "التأكيد حسب المخاطر",
 	"agentCapabilitiesMcpExposureTip": "اختر القدرات التي توفرها خدمة MCP في SiYuan للعملاء الخارجيين",
 	"agentCapabilitiesScopeAgent": "استخدام Agent",
 	"agentCapabilitiesScopeMcp": "التوفير عبر MCP",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "موافقة",
 	"agentConfirmReject": "رفض",
 	"agentConfirmAlways": "السماح بالجلسة",
-	"agentConfirmAlwaysDesc": "لا تسأل عن أي عملية في هذه الجلسة",
+	"agentConfirmAlwaysDesc": "لا تسأل مرة أخرى في هذه الجلسة، باستثناء القدرات المضبوطة على التأكيد في كل مرة",
 	"agentConfirmPending": "قيد الانتظار",
 	"agentTimeout": "المهلة",
 	"agentTimeoutTip": "إجمالي مهلة جلسة الوكيل، 0 = بلا حد",

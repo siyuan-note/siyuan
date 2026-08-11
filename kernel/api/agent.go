@@ -692,6 +692,7 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 			"arguments": event.Arguments,
 			"confirmID": event.ConfirmID,
 			"effects":   event.Effects,
+			"forced":    event.ForcedConfirm,
 		})
 	case agent.AgentEventPermission:
 		return writeSSEEvent(c, agent.AgentEventPermission, map[string]string{

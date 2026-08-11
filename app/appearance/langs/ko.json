@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "기능 설정 따르기",
+	"agentCapabilitiesRiskConfirm": "위험도에 따라 확인",
 	"agentCapabilitiesMcpExposureTip": "SiYuan MCP 서비스를 통해 외부 클라이언트에 제공할 기능을 선택하세요",
 	"agentCapabilitiesScopeAgent": "Agent에서 사용",
 	"agentCapabilitiesScopeMcp": "MCP로 제공",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "승인",
 	"agentConfirmReject": "거부",
 	"agentConfirmAlways": "세션 허용",
-	"agentConfirmAlwaysDesc": "이 세션에서 모든 작업에 대해 다시 묻지 않음",
+	"agentConfirmAlwaysDesc": "매번 확인하도록 설정된 기능을 제외하고 이 세션에서 다시 묻지 않음",
 	"agentConfirmPending": "대기 중",
 	"agentTimeout": "시간 초과",
 	"agentTimeoutTip": "에이전트 세션 전체 시간 초과, 0 은 제한 없음",

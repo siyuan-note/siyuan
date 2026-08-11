@@ -66,6 +66,12 @@ type CapabilityApproval struct {
 	Actions map[string]string `json:"actions"`
 }
 
+const (
+	ApprovalDecisionRisk    = "risk"
+	ApprovalDecisionConfirm = "confirm"
+	ApprovalDecisionAllow   = "allow"
+)
+
 // Editing holds behavior parameters used by the in-editor chat scenario. They
 // are kept here (instead of on Model) to mirror Agent and to decouple scenario
 // behavior from the model registry. See https://github.com/siyuan-note/siyuan/issues/17797
@@ -172,7 +178,7 @@ func defaultAgent() *Agent {
 
 func defaultApprovalPolicy() *ApprovalPolicy {
 	return &ApprovalPolicy{
-		Default:   "confirm",
+		Default:   ApprovalDecisionRisk,
 		Overrides: map[string]*CapabilityApproval{},
 	}
 }
@@ -212,19 +218,22 @@ func (policy *CapabilityPolicy) Allows(id string) bool {
 	return policy.Default != "deny"
 }
 
-func (policy *ApprovalPolicy) AutoApproves(id, action string) bool {
+func (policy *ApprovalPolicy) Decision(id, action string) string {
 	if policy == nil {
-		return false
+		return ApprovalDecisionRisk
 	}
 	if override := policy.Overrides[id]; override != nil {
 		if decision := override.Actions[action]; decision != "" {
-			return decision == "allow"
+			return decision
 		}
 		if override.Default != "" {
-			return override.Default == "allow"
+			return override.Default
 		}
 	}
-	return policy.Default == "allow"
+	if policy.Default == "" {
+		return ApprovalDecisionRisk
+	}
+	return policy.Default
 }
 
 func defaultEditing() *Editing {
@@ -616,8 +625,10 @@ func (ai *AI) Normalize() {
 }
 
 func normalizeApprovalPolicy(policy *ApprovalPolicy) {
-	if policy.Default != "allow" {
-		policy.Default = "confirm"
+	// 旧版中的 confirm 表示未自动批准，实际仍按操作风险判断，因此迁移为 risk。
+	if policy.Default == ApprovalDecisionConfirm ||
+		policy.Default != ApprovalDecisionAllow && policy.Default != ApprovalDecisionRisk {
+		policy.Default = ApprovalDecisionRisk
 	}
 	if policy.Overrides == nil {
 		policy.Overrides = map[string]*CapabilityApproval{}
@@ -627,14 +638,16 @@ func normalizeApprovalPolicy(policy *ApprovalPolicy) {
 			delete(policy.Overrides, id)
 			continue
 		}
-		if override.Default != "allow" && override.Default != "confirm" {
+		if override.Default != ApprovalDecisionAllow && override.Default != ApprovalDecisionConfirm &&
+			override.Default != ApprovalDecisionRisk {
 			override.Default = ""
 		}
 		if override.Actions == nil {
 			override.Actions = map[string]string{}
 		}
 		for action, decision := range override.Actions {
-			if decision != "allow" && decision != "confirm" {
+			if decision != ApprovalDecisionAllow && decision != ApprovalDecisionConfirm &&
+				decision != ApprovalDecisionRisk {
 				delete(override.Actions, action)
 			}
 		}

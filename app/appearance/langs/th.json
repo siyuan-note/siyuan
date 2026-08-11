@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "ตามการตั้งค่าความสามารถ",
+	"agentCapabilitiesRiskConfirm": "ยืนยันตามความเสี่ยง",
 	"agentCapabilitiesMcpExposureTip": "เลือกความสามารถที่ให้บริการแก่ไคลเอนต์ภายนอกผ่านบริการ MCP ของ SiYuan",
 	"agentCapabilitiesScopeAgent": "ใช้โดย Agent",
 	"agentCapabilitiesScopeMcp": "ให้บริการผ่าน MCP",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "อนุมัติ",
 	"agentConfirmReject": "ปฏิเสธ",
 	"agentConfirmAlways": "อนุญาตเซสชัน",
-	"agentConfirmAlwaysDesc": "ไม่ต้องถามอีกสำหรับการดำเนินการใดๆ ในเซสชันนี้",
+	"agentConfirmAlwaysDesc": "ไม่ต้องถามอีกในเซสชันนี้ ยกเว้นความสามารถที่ตั้งค่าให้ยืนยันทุกครั้ง",
 	"agentConfirmPending": "รอดำเนินการ",
 	"agentTimeout": "หมดเวลา",
 	"agentTimeoutTip": "หมดเวลารวมของเซสชันเอเจนต์, 0 = ไม่จำกัด",

@@ -67,33 +67,70 @@ func TestMCPExposurePolicyNormalizeAndAllows(t *testing.T) {
 	}
 }
 
-func TestApprovalPolicyNormalizeAndAutoApproves(t *testing.T) {
+func TestApprovalPolicyDefaultNormalization(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    string
+		expected string
+	}{
+		{name: "legacy confirm", value: ApprovalDecisionConfirm, expected: ApprovalDecisionRisk},
+		{name: "invalid", value: "invalid", expected: ApprovalDecisionRisk},
+		{name: "risk", value: ApprovalDecisionRisk, expected: ApprovalDecisionRisk},
+		{name: "allow", value: ApprovalDecisionAllow, expected: ApprovalDecisionAllow},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ai := NewAI()
+			ai.Agent.ApprovalPolicy = &ApprovalPolicy{Default: test.value}
+			ai.Normalize()
+			if actual := ai.Agent.ApprovalPolicy.Default; actual != test.expected {
+				t.Fatalf("unexpected normalized approval default: got %s, want %s", actual, test.expected)
+			}
+		})
+	}
+}
+
+func TestApprovalPolicyNormalizeAndDecision(t *testing.T) {
 	ai := NewAI()
 	ai.Agent.ApprovalPolicy = &ApprovalPolicy{
-		Default: "invalid",
+		Default: ApprovalDecisionRisk,
 		Overrides: map[string]*CapabilityApproval{
 			"native/backend/block": {
-				Default: "allow",
-				Actions: map[string]string{"remove": "confirm", "bad": "invalid"},
+				Default: ApprovalDecisionAllow,
+				Actions: map[string]string{
+					"get":    ApprovalDecisionRisk,
+					"remove": ApprovalDecisionConfirm,
+					"bad":    "invalid",
+				},
 			},
-			"native/backend/empty": {},
-			"":                     {Default: "allow"},
+			"native/backend/empty":   {},
+			"native/backend/invalid": {Default: "invalid"},
+			"":                       {Default: ApprovalDecisionAllow},
 		},
 	}
 	ai.Normalize()
 
 	policy := ai.Agent.ApprovalPolicy
-	if policy.Default != "confirm" {
-		t.Fatalf("invalid approval default was not normalized: %s", policy.Default)
+	if policy.Default != ApprovalDecisionRisk {
+		t.Fatalf("approval default was not preserved: %s", policy.Default)
 	}
-	if !policy.AutoApproves("native/backend/block", "get") {
-		t.Fatal("capability auto approval was ignored")
+	if policy.Decision("native/backend/block", "get") != ApprovalDecisionRisk {
+		t.Fatal("action risk decision was ignored")
 	}
-	if policy.AutoApproves("native/backend/block", "remove") {
-		t.Fatal("action confirmation override was ignored")
+	if policy.Decision("native/backend/block", "remove") != ApprovalDecisionConfirm {
+		t.Fatal("action confirmation decision was ignored")
+	}
+	if policy.Decision("native/backend/block", "update") != ApprovalDecisionAllow {
+		t.Fatal("capability approval decision was ignored")
+	}
+	if policy.Decision("native/backend/other", "get") != ApprovalDecisionRisk {
+		t.Fatal("policy risk decision was ignored")
 	}
 	if _, exists := policy.Overrides["native/backend/empty"]; exists {
 		t.Fatal("empty approval override was not removed")
+	}
+	if _, exists := policy.Overrides["native/backend/invalid"]; exists {
+		t.Fatal("invalid approval override was not removed")
 	}
 	if _, exists := policy.Overrides[""]; exists {
 		t.Fatal("empty approval capability ID was not removed")

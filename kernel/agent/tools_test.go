@@ -294,15 +294,15 @@ func TestQueryToolActionEffects(t *testing.T) {
 
 func TestBrowserCapabilityEffects(t *testing.T) {
 	native := &capabilityRegistration{ID: "native/frontend/open_search", ModelName: "frontend__open_search", Source: "native", Runtime: "browser"}
-	if needsCapabilityConfirm(native, "", nil, nil) || needsCapabilitySnapshot(native, "") {
+	if needsCapabilityConfirm(native, "", nil, false, nil) || needsCapabilitySnapshot(native, "") {
 		t.Fatal("built-in browser capability must not require confirmation or create a snapshot")
 	}
 	pluginUnknown := &capabilityRegistration{ID: "plugin/frontend/example/run", ModelName: "frontend__plugin_run", Source: "plugin", Runtime: "browser"}
-	if !needsCapabilityConfirm(pluginUnknown, "", nil, nil) {
+	if !needsCapabilityConfirm(pluginUnknown, "", nil, false, nil) {
 		t.Fatal("plugin browser capability with unknown effects must require confirmation")
 	}
 	pluginRead := &capabilityRegistration{ID: "plugin/frontend/example/read", ModelName: "frontend__plugin_read", Source: "plugin", Runtime: "browser", Effects: tools.ToolEffects{LocalRead: true}, EffectsDeclared: true}
-	if needsCapabilityConfirm(pluginRead, "", nil, nil) {
+	if needsCapabilityConfirm(pluginRead, "", nil, false, nil) {
 		t.Fatal("plugin browser capability declared local-read-only must not require confirmation")
 	}
 	pluginActions := &capabilityRegistration{
@@ -312,11 +312,11 @@ func TestBrowserCapabilityEffects(t *testing.T) {
 			"write": {LocalWrite: true},
 		},
 	}
-	if needsCapabilityConfirm(pluginActions, "read", nil, nil) {
+	if needsCapabilityConfirm(pluginActions, "read", nil, false, nil) {
 		t.Fatal("plugin browser action with explicit read effects must not require confirmation")
 	}
-	if !needsCapabilityConfirm(pluginActions, "write", nil, nil) ||
-		!needsCapabilityConfirm(pluginActions, "unknown", nil, nil) {
+	if !needsCapabilityConfirm(pluginActions, "write", nil, false, nil) ||
+		!needsCapabilityConfirm(pluginActions, "unknown", nil, false, nil) {
 		t.Fatal("plugin browser write or undeclared action must require confirmation")
 	}
 	for _, action := range []string{"html", "preview"} {

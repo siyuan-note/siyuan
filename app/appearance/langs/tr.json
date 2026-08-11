@@ -1,4 +1,6 @@
 {
+	"agentCapabilitiesFollowCapability": "Yetenek ayarını izle",
+	"agentCapabilitiesRiskConfirm": "Riske göre onayla",
 	"agentCapabilitiesMcpExposureTip": "SiYuan MCP hizmeti üzerinden harici istemcilere sunulan yetenekleri seçin",
 	"agentCapabilitiesScopeAgent": "Agent kullanımı",
 	"agentCapabilitiesScopeMcp": "MCP ile sun",
@@ -562,7 +564,7 @@
 	"agentConfirmApprove": "Onayla",
 	"agentConfirmReject": "Reddet",
 	"agentConfirmAlways": "Oturuma izin ver",
-	"agentConfirmAlwaysDesc": "Bu oturumda hiçbir işlem için tekrar sorma",
+	"agentConfirmAlwaysDesc": "Her seferinde onaylanacak şekilde ayarlanan yetenekler dışında bu oturumda tekrar sorma",
 	"agentConfirmPending": "Beklemede",
 	"agentTimeout": "Zaman aşımı",
 	"agentTimeoutTip": "Agent oturumu toplam zaman aşımı, 0 = sınırsız",

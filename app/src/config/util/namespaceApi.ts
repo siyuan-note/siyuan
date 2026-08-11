@@ -1,5 +1,5 @@
 import {fetchPost} from "../../util/fetch";
-import {mergeRecordByDottedPath} from "./dotPath";
+import {createNamespacePatchQueue} from "./namespacePatchQueue";
 
 export function createConfigNamespaceApi<TData>(options: {
     namespace: string;
@@ -17,27 +17,26 @@ export function createConfigNamespaceApi<TData>(options: {
     apply: (data: TData) => void;
 } {
     const {namespace, getConfig, setConfig, apiPath, applyFromResponse = true} = options;
-    const prefix = `${namespace}.`;
-
-    const post = (payload: TData, onApplied?: (data: TData) => void) => {
-        fetchPost(apiPath, payload, (response) => {
+    const submit = (payload: TData) => new Promise<TData | undefined>((resolve) => {
+        let completed = false;
+        void fetchPost(apiPath, payload, (response) => {
+            completed = true;
             const data = response.data as TData;
             if (applyFromResponse) {
                 // 当前修改设置之后内核不推送到所有前端实例，用响应数据更新本地 config
                 setConfig(data);
             }
-            onApplied?.(data);
+            resolve(data);
+        }).finally(() => {
+            if (!completed) {
+                resolve(undefined);
+            }
         });
-    };
+    });
+    const patch = createNamespacePatchQueue({namespace, getConfig, submit});
 
     return {
-        patch(relOrFullId, value, onApplied) {
-            const rel = relOrFullId.startsWith(prefix) ? relOrFullId.slice(prefix.length) : relOrFullId;
-            if (rel) {
-                const prev = getConfig() as unknown as Record<string, unknown>;
-                post(mergeRecordByDottedPath(prev, rel, value) as unknown as TData, onApplied);
-            }
-        },
+        patch,
         apply: setConfig,
     };
 }

@@ -1925,24 +1925,15 @@ func bootSyncRepo() (err error) {
 	}
 
 	isBootSyncing.Store(true)
-	bootStart := time.Now()
 
 	waitGroup := sync.WaitGroup{}
-	var beforeIndex, afterIndex *entity.Index
-	var indexElapsed time.Duration
-	var indexChangeGen uint64
-	var indexStable bool
 	var indexErr error
 	waitGroup.Go(func() {
 		defer logging.Recover()
 
-		indexStartChangeGen := syncDataChangeGen.Load()
 		start := time.Now()
-		beforeIndex, afterIndex, indexErr = indexRepoBeforeCloudSync(repo)
-		indexElapsed = time.Since(start)
-		indexChangeGen = syncDataChangeGen.Load()
-		indexStable = indexStartChangeGen == indexChangeGen
-		logging.LogInfof("boot index repo elapsed [%.2fs]", indexElapsed.Seconds())
+		_, _, indexErr = indexRepoBeforeCloudSync(repo)
+		logging.LogInfof("boot index repo elapsed [%.2fs]", time.Since(start).Seconds())
 	})
 	var cloudLatest *entity.Index
 	var cloudLatestErr error
@@ -2019,11 +2010,12 @@ func bootSyncRepo() (err error) {
 			defer unlockSync()
 
 			logging.LogInfof("syncing prepared boot data repo [device=%s, kernel=%s, provider=%d]", Conf.System.ID, KernelID, Conf.Sync.Provider)
-			var syncErr error
-			if indexStable && indexChangeGen == syncDataChangeGen.Load() {
-				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, beforeIndex, afterIndex, bootStart, indexElapsed, prefetchTraffic)
-			} else {
-				_, syncErr = syncRepoWithDNSRetry(false, false)
+			syncStart := time.Now()
+			indexStart := time.Now()
+			beforeIndex, afterIndex, syncErr := indexRepoBeforeCloudSync(repo)
+			indexElapsed := time.Since(indexStart)
+			if nil == syncErr {
+				syncErr = syncIndexedRepoAfterBootWithDNSRetry(repo, beforeIndex, afterIndex, syncStart, indexElapsed, prefetchTraffic)
 			}
 			if syncErr != nil {
 				logging.LogErrorf("boot background sync repo failed: %s", syncErr)

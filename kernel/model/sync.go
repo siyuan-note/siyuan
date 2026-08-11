@@ -156,10 +156,9 @@ func SyncDataUpload() {
 }
 
 var (
-	syncSameCount     = atomic.Int32{}
-	syncDataChangeGen = atomic.Uint64{}
-	autoSyncErrCount  = 0
-	fixSyncInterval   = 5 * time.Minute
+	syncSameCount    = atomic.Int32{}
+	autoSyncErrCount = 0
+	fixSyncInterval  = 5 * time.Minute
 
 	syncPlanTimeLock = sync.Mutex{}
 	syncPlanTime     = time.Now().Add(fixSyncInterval)
@@ -914,7 +913,6 @@ func getSyncIgnoreLines() (ret []string) {
 }
 
 func IncSync() {
-	syncDataChangeGen.Add(1)
 	syncSameCount.Store(0)
 	planSyncAfter(time.Duration(Conf.Sync.Interval) * time.Second)
 }

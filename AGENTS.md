@@ -16,7 +16,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
 
 ### Verification and prohibited operations
 
-1. **Frontend verification:** Do not use `npx webpack` or `pnpm dev` to verify changes; after changes, run `cd app && pnpm run lint` to check code style
+1. **Frontend verification:** Do not use `npx webpack` or `pnpm dev` to verify changes; after changes, run `pnpm run lint` with `app/` as the working directory to check code style
 2. **Frontend build:** Do NOT run `pnpm build` — the developer runs `pnpm dev` manually, and `pnpm build` will conflict with it, producing broken bundles
 3. **Kernel development:** After modifying Go code, run `gofmt`, but do not compile the kernel binary or restart a running kernel; the developer handles both manually
 4. **Git:** **NEVER** run `git commit` / `git push` unless explicitly asked — no exceptions
@@ -40,7 +40,11 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - Do not mechanically replace `塊` in ordinary words with `區塊`; preserve non-content-block terms such as `分塊` for data chunks and `覈取方塊` for Checkbox
    - Keep block terminology consistent between the Traditional Chinese interface and user guide
    - After modifying i18n files, run `python scripts/check-lang-keys.py` to verify key completeness across all language files
-2. **Windows scripting:** Prefer Node.js / Python; avoid PowerShell unless necessary
+2. **Cross-platform scripting:**
+   - Do not assume the current shell is Bash, zsh, or PowerShell. Confirm the shell before using shell-specific syntax; otherwise avoid constructs such as `&&`, heredocs, and `/dev/null`
+   - For simple sequences, use separate command calls and set the command working directory instead of chaining `cd` with another command
+   - For multi-step logic, write and run a temporary Node.js or Python script. On Windows, avoid PowerShell unless necessary
+   - Do not pass non-ASCII text through shell pipelines, PowerShell here-strings, `python -c`, or `node -e`; write the text to a UTF-8 file with a file-editing tool and consume that file instead
 3. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
 4. **User guide:** When editing the user guide, follow `docs/SY-FORMAT.md`
    - When a feature adds or changes shortcuts, update the shortcut documentation in the user guide in the same change; if the appropriate section is unclear, ask the user where it should be placed
@@ -52,7 +56,13 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - When explicitly asked to commit, follow the style of recent commits (gitmoji prefix + subject, in English)
    - Append the full issue/PR URL to the end of the commit title (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; never put the URL in the commit body, and do not fabricate one
 6. **GitHub:** Prefer the GitHub CLI (`gh`) for all GitHub operations, including reading issues, comments, pull requests, commits, statuses, and metadata. If `gh` is unavailable or does not support the operation, fall back to the GitHub API or web interface
-   - On Windows, when creating or updating GitHub text that contains non-ASCII characters, write the request payload to a UTF-8 JSON file and call the GitHub API with `gh api --input <file>`; do not pipe the text through PowerShell because its encoding may corrupt the content. Verify the published content and remove the temporary file afterward
+   - For GitHub write operations containing non-ASCII text on Windows or when shell encoding is uncertain, use this file-based workflow:
+     1. Create the request payload as UTF-8 JSON with a file-editing tool, not an inline shell command
+     2. Store it in the operating system's temporary directory with a unique name such as `siyuan-gh-<operation>-<timestamp>.json`; do not leave temporary payloads in the repository
+     3. Call the appropriate endpoint with `gh api --method <method> "<endpoint>" --input "<absolute-json-path>"`
+     4. Inspect the returned resource and read it back with `gh api` to verify the published text exactly, including line breaks and non-ASCII characters
+     5. Delete the temporary JSON file and confirm that it no longer exists
+   - Example for an issue comment: write `{"body":"<comment text>"}` to the UTF-8 JSON file, run `gh api --method POST "repos/{owner}/{repo}/issues/<number>/comments" --input "<absolute-json-path>"`, then read the returned comment by its `id` before deleting the file
 7. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request, and do not start it with `Fix`
    - If the issue is labeled `Bug`, objectively describe the problem or symptom instead of writing from a bug-fix perspective
    - If the issue is labeled `Enhancement`:

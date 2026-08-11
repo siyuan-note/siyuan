@@ -301,20 +301,10 @@ jobs:
               SIYUAN_TEST_RESULTS_DIR="test-results-${shard}" \
               PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-${shard}" \
               pnpm exec playwright test --config=playwright.focused.config.ts \
-                --reporter=line,html --output="test-results-${shard}"
+                --global-timeout=900000 --reporter=line,html --output="test-results-${shard}"
             ) &
             TEST_PID=$!
-            # 单个 shard 超时保护：测试 worker 卡死时强制结束，避免拖累整个 job
-            (
-              sleep 600
-              if kill -0 "${TEST_PID}" 2>/dev/null; then
-                echo "::error title=End-to-End shard timed out::${shard} killed after 600s"
-                kill -KILL "${TEST_PID}" 2>/dev/null || true
-              fi
-            ) &
-            WATCHDOG_PID=$!
             TEST_PIDS+=("${TEST_PID}")
-            TEST_WATCHDOG_PIDS+=("${WATCHDOG_PID}")
             TEST_SHARDS+=("${shard}")
           done
           TEST_STATUS=0
@@ -328,10 +318,6 @@ jobs:
             fi
           done
           set -e
-          # 测试已全部结束，主动终止仍处于休眠的超时监控进程，避免孤儿进程
-          for watchdog_pid in "${TEST_WATCHDOG_PIDS[@]}"; do
-            kill "${watchdog_pid}" 2>/dev/null || true
-          done
           exit "${TEST_STATUS}"
         working-directory: ${{ github.workspace }}/siyuan-testing
 

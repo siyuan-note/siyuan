@@ -48,7 +48,8 @@ type BlockTree struct {
 }
 
 var (
-	db *sql.DB
+	db                        *sql.DB
+	errBlockTreeDBUnavailable = errors.New("block tree database is unavailable")
 
 	initDatabaseLock = sync.RWMutex{}
 )
@@ -225,9 +226,9 @@ func GetBlockTreeByBoxPath(boxID, path string) (ret *BlockTree) {
 
 func CountTrees() (ret int) {
 	sqlStmt := "SELECT COUNT(*) FROM blocktrees WHERE type = 'd'"
-	err := queryRow(sqlStmt).Scan(&ret)
+	err := scanQueryRow(queryRow(sqlStmt), &ret)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, errBlockTreeDBUnavailable) {
 			return 0
 		}
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -237,9 +238,9 @@ func CountTrees() (ret int) {
 
 func CountBlocks() (ret int) {
 	sqlStmt := "SELECT COUNT(*) FROM blocktrees"
-	err := queryRow(sqlStmt).Scan(&ret)
+	err := scanQueryRow(queryRow(sqlStmt), &ret)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
+		if errors.Is(err, sql.ErrNoRows) || errors.Is(err, errBlockTreeDBUnavailable) {
 			return 0
 		}
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -346,8 +347,11 @@ func GetBlockTreeByHPathPreferredParentID(boxID, hPath, preferredParentID string
 func ExistBlockTree(id string) bool {
 	sqlStmt := "SELECT COUNT(*) FROM blocktrees WHERE id = ?"
 	var count int
-	err := queryRow(sqlStmt, id).Scan(&count)
+	err := scanQueryRow(queryRow(sqlStmt, id), &count)
 	if err != nil {
+		if errors.Is(err, errBlockTreeDBUnavailable) {
+			return false
+		}
 		if errors.Is(err, sql.ErrNoRows) {
 			// 全局未命中，遍历加密 box
 			for _, encBoxID := range GetOpenedEncryptedBoxIDs() {
@@ -496,9 +500,13 @@ func GetBlockTree(id string) (ret *BlockTree) {
 
 	ret = &BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE id = ?"
-	err := queryRow(sqlStmt, id).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
+	err := scanQueryRow(queryRow(sqlStmt, id), &ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path,
+		&ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
 		ret = nil
+		if errors.Is(err, errBlockTreeDBUnavailable) {
+			return
+		}
 		if errors.Is(err, sql.ErrNoRows) {
 			// 全局 blocktree 未命中，遍历已打开的加密笔记本查找
 			for _, encBoxID := range GetOpenedEncryptedBoxIDs() {
@@ -906,10 +914,18 @@ func queryRow(query string, args ...any) *sql.Row {
 		return nil
 	}
 
-	if nil == db {
+	database := db
+	if nil == database {
 		return nil
 	}
-	return db.QueryRow(query, args...)
+	return database.QueryRow(query, args...)
+}
+
+func scanQueryRow(row *sql.Row, dest ...any) error {
+	if row == nil {
+		return errBlockTreeDBUnavailable
+	}
+	return row.Scan(dest...)
 }
 
 func query(query string, args ...any) (*sql.Rows, error) {
@@ -1131,9 +1147,10 @@ func GetBlockTreeInExactBox(id, boxID string) (ret *BlockTree) {
 
 	ret = &BlockTree{}
 	sqlStmt := "SELECT * FROM blocktrees WHERE id = ?"
-	err := queryRow(sqlStmt, id).Scan(&ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path, &ret.HPath, &ret.Updated, &ret.Type)
+	err := scanQueryRow(queryRow(sqlStmt, id), &ret.ID, &ret.RootID, &ret.ParentID, &ret.BoxID, &ret.Path,
+		&ret.HPath, &ret.Updated, &ret.Type)
 	if err != nil {
-		if !errors.Is(err, sql.ErrNoRows) {
+		if !errors.Is(err, sql.ErrNoRows) && !errors.Is(err, errBlockTreeDBUnavailable) {
 			logging.LogErrorf("sql query [%s] failed: %v\n\t%s", sqlStmt, err, logging.ShortStack())
 		}
 		return nil

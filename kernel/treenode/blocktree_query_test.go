@@ -79,3 +79,27 @@ func TestCleanupInvalidBlockTrees(t *testing.T) {
 		t.Fatalf("cleanup should retain only valid blocktrees: count=%d, err=%v", count, err)
 	}
 }
+
+func TestQueriesWithoutDatabase(t *testing.T) {
+	previousDB := db
+	db = nil
+	t.Cleanup(func() {
+		db = previousDB
+	})
+
+	if count := CountTrees(); count != 0 {
+		t.Fatalf("tree count should be zero after closing database: %d", count)
+	}
+	if count := CountBlocks(); count != 0 {
+		t.Fatalf("block count should be zero after closing database: %d", count)
+	}
+	if ExistBlockTree("20260811000000-block01") {
+		t.Fatal("block should not exist after closing database")
+	}
+	if tree := GetBlockTree("20260811000000-block01"); tree != nil {
+		t.Fatalf("block tree should be nil after closing database: %+v", tree)
+	}
+	if tree := GetBlockTreeInExactBox("20260811000000-block01", ""); tree != nil {
+		t.Fatalf("exact block tree should be nil after closing database: %+v", tree)
+	}
+}

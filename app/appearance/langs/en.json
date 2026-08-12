@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "Document path",
 	"flashcardDynamicFilter": "Dynamic filter",
 	"flashcardDynamicFilterTip": "Automatically include cards that match the following conditions",
 	"flashcardBlockCard": "Block flashcard",

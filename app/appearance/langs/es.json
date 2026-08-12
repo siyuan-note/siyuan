@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "Ruta del documento",
 	"flashcardDynamicFilter": "Filtro dinámico",
 	"flashcardDynamicFilterTip": "Incluir automáticamente las tarjetas que cumplan las siguientes condiciones",
 	"flashcardBlockCard": "Tarjeta de bloque",

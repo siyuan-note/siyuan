@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "Cesta dokumentu",
 	"flashcardDynamicFilter": "Dynamický filter",
 	"flashcardDynamicFilterTip": "Automaticky zahrnúť karty, ktoré spĺňajú nasledujúce podmienky",
 	"flashcardBlockCard": "Bloková kartička",

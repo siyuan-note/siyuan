@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "مسار المستند",
 	"flashcardDynamicFilter": "التصفية الديناميكية",
 	"flashcardDynamicFilterTip": "تضمين البطاقات المطابقة للشروط التالية تلقائيًا",
 	"flashcardBlockCard": "بطاقة تعليمية للكتلة",

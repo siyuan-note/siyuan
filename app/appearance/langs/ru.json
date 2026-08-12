@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "Путь документа",
 	"flashcardDynamicFilter": "Динамический фильтр",
 	"flashcardDynamicFilterTip": "Автоматически включать карточки, соответствующие следующим условиям",
 	"flashcardBlockCard": "Блочная карточка",

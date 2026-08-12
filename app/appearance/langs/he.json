@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "נתיב המסמך",
 	"flashcardDynamicFilter": "סינון דינמי",
 	"flashcardDynamicFilterTip": "הכללת כרטיסים התואמים לתנאים הבאים באופן אוטומטי",
 	"flashcardBlockCard": "כרטיסיית בלוק",

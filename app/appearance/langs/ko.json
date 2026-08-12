@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "문서 경로",
 	"flashcardDynamicFilter": "동적 필터",
 	"flashcardDynamicFilterTip": "다음 조건과 일치하는 카드를 자동으로 포함",
 	"flashcardBlockCard": "블록 플래시카드",

@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "Jalur dokumen",
 	"flashcardDynamicFilter": "Filter dinamis",
 	"flashcardDynamicFilterTip": "Sertakan kartu yang cocok dengan kondisi berikut secara otomatis",
 	"flashcardBlockCard": "Kartu blok",

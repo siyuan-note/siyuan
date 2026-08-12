@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "दस्तावेज़ पथ",
 	"flashcardDynamicFilter": "डायनेमिक फ़िल्टर",
 	"flashcardDynamicFilterTip": "निम्न शर्तों से मेल खाने वाले कार्ड अपने आप शामिल करें",
 	"flashcardBlockCard": "ब्लॉक फ्लैशकार्ड",

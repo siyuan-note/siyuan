@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "文件路徑",
 	"flashcardDynamicFilter": "動態篩選",
 	"flashcardDynamicFilterTip": "自動收錄符合以下條件的卡片",
 	"flashcardBlockCard": "區塊閃卡",

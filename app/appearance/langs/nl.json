@@ -1,4 +1,5 @@
 {
+	"flashcardDocumentPath": "Documentpad",
 	"flashcardDynamicFilter": "Dynamisch filter",
 	"flashcardDynamicFilterTip": "Kaarten die aan de volgende voorwaarden voldoen automatisch opnemen",
 	"flashcardBlockCard": "Blok-flashcard",

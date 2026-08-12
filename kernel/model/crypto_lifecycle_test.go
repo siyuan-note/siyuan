@@ -40,6 +40,23 @@ func TestAcquireEncryptedBoxOperationsAllowsEmptyClosedScope(t *testing.T) {
 	release()
 }
 
+func TestEncryptedBoxOperationAdmissionCanWaitForInitialization(t *testing.T) {
+	boxID := "20260812223000-abcdefg"
+	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)
+	defer cleanup()
+
+	setEncryptedBoxStateWithAdmission(boxID, EncryptedBoxStateUnlocked, false)
+	if err := AcquireEncryptedBoxOperation(boxID); err == nil {
+		ReleaseEncryptedBoxOperation(boxID)
+		t.Fatal("encrypted notebook admitted an operation before initialization completed")
+	}
+	setEncryptedBoxState(boxID, EncryptedBoxStateUnlocked)
+	if err := AcquireEncryptedBoxOperation(boxID); err != nil {
+		t.Fatalf("initialized encrypted notebook rejected an operation: %v", err)
+	}
+	ReleaseEncryptedBoxOperation(boxID)
+}
+
 func TestAcquireEncryptedBoxOperationsReportsClosedScope(t *testing.T) {
 	boxID := "20260803190000-abcdefg"
 	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)

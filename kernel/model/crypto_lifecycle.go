@@ -51,6 +51,7 @@ type encryptedBoxLifecycle struct {
 	lock             sync.Mutex
 	condition        *sync.Cond
 	state            EncryptedBoxState
+	acceptOperations bool
 	activeOperations int
 }
 
@@ -70,9 +71,15 @@ func getEncryptedBoxLifecycle(boxID string) *encryptedBoxLifecycle {
 }
 
 func setEncryptedBoxState(boxID string, state EncryptedBoxState) {
+	setEncryptedBoxStateWithAdmission(boxID, state, state == EncryptedBoxStateUnlocked)
+}
+
+// setEncryptedBoxStateWithAdmission 更新生命周期状态，并控制是否接纳新的外部请求。
+func setEncryptedBoxStateWithAdmission(boxID string, state EncryptedBoxState, acceptOperations bool) {
 	lifecycle := getEncryptedBoxLifecycle(boxID)
 	lifecycle.lock.Lock()
 	lifecycle.state = state
+	lifecycle.acceptOperations = acceptOperations && state == EncryptedBoxStateUnlocked
 	lifecycle.condition.Broadcast()
 	lifecycle.lock.Unlock()
 }
@@ -95,6 +102,7 @@ func repairEncryptedBoxStateFromDEK(boxID string) {
 	defer lifecycle.lock.Unlock()
 	if lifecycle.state == EncryptedBoxStateLocked && IsBoxUnlocked(boxID) {
 		lifecycle.state = EncryptedBoxStateUnlocked
+		lifecycle.acceptOperations = true
 		lifecycle.condition.Broadcast()
 	}
 }
@@ -146,9 +154,10 @@ func AcquireEncryptedBoxOperation(boxID string) error {
 	defer lifecycle.lock.Unlock()
 	if lifecycle.state == EncryptedBoxStateLocked && IsBoxUnlocked(boxID) {
 		lifecycle.state = EncryptedBoxStateUnlocked
+		lifecycle.acceptOperations = true
 		lifecycle.condition.Broadcast()
 	}
-	if lifecycle.state != EncryptedBoxStateUnlocked {
+	if lifecycle.state != EncryptedBoxStateUnlocked || !lifecycle.acceptOperations {
 		return ErrEncryptedBoxNotUnlocked
 	}
 	lifecycle.activeOperations++
@@ -173,6 +182,7 @@ func beginEncryptedBoxLock(boxID string) {
 	lifecycle := getEncryptedBoxLifecycle(boxID)
 	lifecycle.lock.Lock()
 	lifecycle.state = EncryptedBoxStateLocking
+	lifecycle.acceptOperations = false
 	for lifecycle.activeOperations > 0 {
 		lifecycle.condition.Wait()
 	}

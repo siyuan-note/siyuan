@@ -74,6 +74,7 @@ export const initBlockPopover = (app: App) => {
             hasClosestByClassName(event.target, "av__calc--ashow") ||
             hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
+            const aElementParent = aElement.parentElement;
             let tooltipClass = "";
             let tip = aElement.getAttribute("aria-label") || "";
             if (aElement.classList.contains("av__cell") && !aElement.classList.contains("ariaLabel")) {
@@ -103,7 +104,8 @@ export const initBlockPopover = (app: App) => {
                         aElement.style.overflow = "";
                     }
                 }
-            } else if (aElement.parentElement.parentElement.classList.contains("av__views") && aElement.parentElement.classList.contains("layout-tab-bar")) {
+            } else if (aElementParent?.parentElement?.classList.contains("av__views") &&
+                aElementParent.classList.contains("layout-tab-bar")) {
                 const textElement = aElement.querySelector(".item__text");
                 const desc = aElement.getAttribute("data-desc");
                 if (textElement.scrollWidth > textElement.clientWidth + 0.5 || desc) {

@@ -93,6 +93,7 @@ import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
 import {appendListItem, prependListItem} from "../wysiwyg/list";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
+import {getGutterMarginHeight} from "./layout";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -137,7 +138,9 @@ export class Gutter {
     private gutterTip: string;
     private gutterTipBacklink: string;
     private renderKey = "";
+    // 缓存横排尺寸，压缩为纵排后仍使用横排尺寸计算位置
     private naturalWidth = 0;
+    private naturalHeight = 0;
 
     constructor(protyle: IProtyle) {
         if (isMac()) {
@@ -3506,6 +3509,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
             this.element.innerHTML = html;
             this.element.style.width = "";
             this.naturalWidth = this.element.clientWidth;
+            this.naturalHeight = this.element.clientHeight;
             this.renderKey = renderKey;
         }
         let contentTop = protyle.contentElement.getBoundingClientRect().top;
@@ -3542,6 +3546,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
             this.element.innerHTML = html;
             this.element.style.width = "";
             this.naturalWidth = this.element.clientWidth;
+            this.naturalHeight = this.element.clientHeight;
             naturalLeft = getNaturalLeft(this.naturalWidth);
             compressed = naturalLeft < this.element.parentElement.getBoundingClientRect().left;
             shouldRenderContent = true;
@@ -3567,10 +3572,14 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
             this.element.insertAdjacentHTML("beforeend", `<button class="protyle-gutters__line" data-type="gutterLineBefore" style="display:none"></button><button class="protyle-gutters__line" data-type="gutterLineAfter" style="display:none"></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusBefore" data-position="4west" aria-label="${window.siyuan.languages.insertBefore}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button><button class="protyle-gutters__plus ariaLabel" data-type="gutterPlusAfter" data-position="4west" aria-label="${window.siyuan.languages.insertAfter}" style="display:none"><svg><use xlink:href="#iconAdd"></use></svg></button>`);
         }
         if (!element.classList.contains("av__row")) {
-            if (rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 ||
-                (rect.height > Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8 && rect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) * 2 + 8)) {
-                marginHeight = (rect.height - this.element.clientHeight) / 2;
-            } else if ((nodeElement.getAttribute("data-type") === "NodeAttributeView" || element.getAttribute("data-type") === "NodeAttributeView") &&
+            const gutterMarginHeight = getGutterMarginHeight(
+                rect.height, this.element.clientHeight, this.naturalHeight,
+                window.siyuan.config.editor.fontSize);
+            if (typeof gutterMarginHeight === "number") {
+                marginHeight = gutterMarginHeight;
+            } else if (
+                (nodeElement.getAttribute("data-type") === "NodeAttributeView" ||
+                    element.getAttribute("data-type") === "NodeAttributeView") &&
                 contentTop < rect.top) {
                 marginHeight = 8;
             }

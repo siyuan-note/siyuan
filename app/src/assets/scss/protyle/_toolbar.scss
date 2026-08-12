@@ -78,7 +78,11 @@
       }
 
       &-menu {
-        padding: 1px 3px 1px 0;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        width: 16px;
 
         svg {
           height: 10px;

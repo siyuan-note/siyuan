@@ -191,3 +191,63 @@ func TestSnippetPublishAccess(t *testing.T) {
 		t.Fatalf("unexpected administrator fallback response: status=%d body=%q", recorder.Code, recorder.Body.String())
 	}
 }
+
+func TestPluginPublishAccess(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	originalDataDir := util.DataDir
+	originalConf := model.Conf
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Bazaar = &conf.Bazaar{Trust: true}
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+		model.Conf = originalConf
+	})
+
+	writePlugin := func(name string) {
+		pluginDir := filepath.Join(util.DataDir, "plugins", name)
+		if err := os.MkdirAll(pluginDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		manifest := []byte(`{"name":"` + name + `","version":"1.0.0","minAppVersion":"0.0.1"}`)
+		for fileName, content := range map[string][]byte{
+			"plugin.json": manifest,
+			"index.js":    []byte(name),
+		} {
+			if err := os.WriteFile(filepath.Join(pluginDir, fileName), content, 0644); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if _, err := model.SetPetalEnabled(name, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writePlugin("allowed")
+	writePlugin("user-disabled")
+	if _, err := model.SetPetalPublishEnabled("user-disabled", false); err != nil {
+		t.Fatal(err)
+	}
+
+	request := func(role model.Role, requestPath string) *httptest.ResponseRecorder {
+		engine := gin.New()
+		engine.Use(func(c *gin.Context) {
+			c.Set(model.RoleContextKey, role)
+			c.Next()
+		})
+		servePlugins(engine)
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, requestPath, nil))
+		return recorder
+	}
+	if recorder := request(model.RoleReader, "/plugins/allowed/index.js"); recorder.Code != http.StatusOK ||
+		recorder.Body.String() != "allowed" {
+		t.Fatalf("unexpected publish-enabled plugin response: status=%d body=%q", recorder.Code, recorder.Body.String())
+	}
+	if recorder := request(model.RoleReader, "/plugins/user-disabled/index.js"); recorder.Code != http.StatusForbidden {
+		t.Fatalf("user-disabled plugin should be forbidden in publish, got %d", recorder.Code)
+	}
+	if recorder := request(model.RoleAdministrator, "/plugins/user-disabled/index.js"); recorder.Code != http.StatusOK ||
+		recorder.Body.String() != "user-disabled" {
+		t.Fatalf("unexpected administrator plugin response: status=%d body=%q", recorder.Code, recorder.Body.String())
+	}
+}

@@ -1065,6 +1065,7 @@ interface IBazaarItem {
     installedIncompatible?: boolean; // 仅插件/主题
     bazaarIncompatible?: boolean; // 仅插件/主题
     enabled?: boolean; // 仅 plugin
+    userDisabledInPublish?: boolean; // 仅 plugin
     modes?: string[]; // 仅 theme
 }
 

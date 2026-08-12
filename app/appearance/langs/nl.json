@@ -1,4 +1,5 @@
 {
+	"pluginDisabledInPublishTip": "De auteur van de plug-in heeft deze plug-in uitgeschakeld in de publicatieservice",
 	"aiMcpEnv": "Omgevingsvariabelen",
 	"aiMcpEnvTip": "Geheimen waarnaar wordt verwezen worden aan dit programma verstrekt en rechtstreeks ingevoerde waarden worden als platte tekst opgeslagen",
 	"aiMcpEnvInvalid": "Ongeldige omgevingsvariabelen; controleer op lege, dubbele of ongeldige namen",

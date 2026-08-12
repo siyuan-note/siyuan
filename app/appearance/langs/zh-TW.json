@@ -1,4 +1,5 @@
 {
+	"pluginDisabledInPublishTip": "插件作者已禁止該插件在發布服務中執行",
 	"aiMcpEnv": "環境變數",
 	"aiMcpEnvTip": "引用的金鑰會提供給該程式，直接填寫的值將以明文儲存",
 	"aiMcpEnvInvalid": "環境變數無效，請檢查名稱是否為空、重複或包含無效字元",

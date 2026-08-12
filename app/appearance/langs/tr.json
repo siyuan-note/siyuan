@@ -1,4 +1,5 @@
 {
+	"pluginDisabledInPublishTip": "Eklenti yazarı bu eklentiyi yayımlama hizmetinde devre dışı bıraktı",
 	"aiMcpEnv": "Ortam değişkenleri",
 	"aiMcpEnvTip": "Başvurulan gizli bilgiler bu programa sağlanır ve doğrudan girilen değerler düz metin olarak saklanır",
 	"aiMcpEnvInvalid": "Geçersiz ortam değişkenleri; boş, yinelenen veya geçersiz adları kontrol edin",

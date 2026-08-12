@@ -1,4 +1,5 @@
 {
+	"pluginDisabledInPublishTip": "Pembuat plugin telah menonaktifkan plugin ini di layanan penerbitan",
 	"aiMcpEnv": "Variabel lingkungan",
 	"aiMcpEnvTip": "Rahasia yang dirujuk diberikan kepada program ini dan nilai yang dimasukkan langsung disimpan sebagai teks biasa",
 	"aiMcpEnvInvalid": "Variabel lingkungan tidak valid; periksa nama yang kosong, duplikat, atau tidak valid",

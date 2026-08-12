@@ -27,6 +27,7 @@ import {
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
     getBazaarThemeModeLabels,
+    isBazaarPluginEnabledInPublish,
 } from "../util/bazaarPackage";
 
 /** 集市 Tab 侧栏 / 全局搜索索引文案 */
@@ -687,6 +688,8 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                         // @ts-ignore
                         hasSetting = plugin && (plugin.setting || plugin.__proto__.hasOwnProperty("openSetting"));
                     }
+                    const showPublishSwitch = bazaarType === "plugins" && window.siyuan.config.publish.enable;
+                    const publishEnabled = isBazaarPluginEnabledInPublish(bazaarItem);
                     const available = bazaar._getUpdatedItem(bazaarType, bazaarItem.name)?.available;
                     return `<div data-name="${escapeAttr(bazaarItem.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${bazaarItem.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
@@ -694,6 +697,12 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             ${escapeHtml(bazaarItem.preferredName)}
             <div class="b3-card__desc" title="${escapeAttr(bazaarItem.preferredDesc)}">${escapeHtml(bazaarItem.preferredDesc)}</div>
+            ${showPublishSwitch ? `<div class="fn__hr--b"></div>
+            <label data-type="plugin-publish-enable-label" class="fn__flex" title="${escapeAttr(bazaarItem.disabledInPublish ? window.siyuan.languages.pluginDisabledInPublishTip : window.siyuan.languages.publishService)}">
+                <input data-type="plugin-publish-enable" data-position="north" class="b3-switch fn__flex-center" type="checkbox"${publishEnabled ? " checked" : ""}${bazaarItem.disabledInPublish ? " disabled" : ""}>
+                <span class="fn__space--small"></span>
+                <span class="fn__flex-center ft__on-surface">${window.siyuan.languages.publishService}</span>
+            </label>` : ""}
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
@@ -1155,6 +1164,20 @@ type="checkbox">
                 return;
             }
             loadPlugin(app, response.data).then(callback);
+        });
+    },
+    _setPluginPublishEnabled(item: IBazaarItem, enabled: boolean, callback: () => void) {
+        fetchPost("/api/petal/setPetalPublishEnabled", {
+            packageName: item.name,
+            enabled,
+        }, response => {
+            if (response.code !== 0) {
+                showMessage(response.msg);
+                callback();
+                return;
+            }
+            item.userDisabledInPublish = !enabled;
+            callback();
         });
     },
     _resolveThemeAppearanceMode(item: IBazaarItem) {
@@ -1728,6 +1751,20 @@ type="checkbox">
                                 });
                                 saveLayout();
                             }
+                        });
+                    }
+                    event.stopPropagation();
+                    break;
+                } else if (type === "plugin-publish-enable-label") {
+                    event.stopPropagation();
+                    break;
+                } else if (type === "plugin-publish-enable" && installedItem) {
+                    if (!target.hasAttribute("disabled")) {
+                        target.setAttribute("disabled", "disabled");
+                        const enabled = (target as HTMLInputElement).checked;
+                        bazaar._setPluginPublishEnabled(installedItem, enabled, () => {
+                            target.removeAttribute("disabled");
+                            this._genMyHTML("plugins", app, true);
                         });
                     }
                     event.stopPropagation();

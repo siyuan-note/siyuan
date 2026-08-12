@@ -91,6 +91,7 @@ type Package struct {
 	InstalledIncompatible *bool     `json:"installedIncompatible,omitempty"` // 插件/主题：本地已安装版本是否不兼容
 	BazaarIncompatible    *bool     `json:"bazaarIncompatible,omitempty"`    // 插件/主题：在线集市版本是否不兼容
 	Enabled               *bool     `json:"enabled,omitempty"`               // Plugin：是否启用
+	UserDisabledInPublish *bool     `json:"userDisabledInPublish,omitempty"` // Plugin：是否由用户在发布服务中禁用
 	Modes                 *[]string `json:"modes,omitempty"`                 // Theme：支持的模式列表
 }
 

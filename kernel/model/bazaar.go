@@ -409,6 +409,7 @@ func getInstalledPackages0(pkgType, frontend, keyword string) (installedPackages
 			petal := getPetalByName(pkg.Name, petals)
 			if nil != petal {
 				pkg.Enabled = new(petal.Enabled)
+				pkg.UserDisabledInPublish = new(petal.UserDisabledInPublish)
 			}
 		case "themes":
 			pkg.InstalledIncompatible = new(bazaar.IsIncompatibleTheme(pkg, frontend))

@@ -1,4 +1,5 @@
 {
+	"pluginDisabledInPublishTip": "The plugin author has disabled this plugin in the publish service",
 	"aiMcpEnv": "Environment variables",
 	"aiMcpEnvTip": "Referenced secrets are provided to this program, and direct values are stored in plaintext",
 	"aiMcpEnvInvalid": "Invalid environment variables; check for empty, duplicate, or invalid names",

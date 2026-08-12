@@ -23,6 +23,11 @@ export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     };
 };
 
+export const isBazaarPluginEnabledInPublish = (item: {
+    disabledInPublish?: boolean;
+    userDisabledInPublish?: boolean;
+}) => !item.disabledInPublish && !item.userDisabledInPublish;
+
 export const getBazaarPackageInvalidLanguageKey = (reason?: TBazaarPackageInvalidReason) => {
     switch (reason) {
         case "missing-manifest":

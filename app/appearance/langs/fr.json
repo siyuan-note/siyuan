@@ -1,4 +1,5 @@
 {
+	"pluginDisabledInPublishTip": "L’auteur du plugin a désactivé ce plugin dans le service de publication",
 	"aiMcpEnv": "Variables d'environnement",
 	"aiMcpEnvTip": "Les secrets référencés sont fournis à ce programme et les valeurs saisies directement sont stockées en texte brut",
 	"aiMcpEnvInvalid": "Variables d'environnement non valides ; vérifiez les noms vides, dupliqués ou non valides",

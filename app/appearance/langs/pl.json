@@ -1,4 +1,5 @@
 {
+	"pluginDisabledInPublishTip": "Autor wtyczki wyłączył tę wtyczkę w usłudze publikowania",
 	"aiMcpEnv": "Zmienne środowiskowe",
 	"aiMcpEnvTip": "Wskazane sekrety są udostępniane temu programowi, a wartości wpisane bezpośrednio są przechowywane jako zwykły tekst",
 	"aiMcpEnvInvalid": "Nieprawidłowe zmienne środowiskowe; sprawdź puste, zduplikowane lub nieprawidłowe nazwy",

@@ -8,6 +8,7 @@ import {
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
     getBazaarThemeModeLabels,
+    isBazaarPluginEnabledInPublish,
     isValidBazaarPackageName,
 } from "./bazaarPackage";
 
@@ -65,6 +66,18 @@ describe("getBazaarCompatibilityFieldVisibility", () => {
                 modes: false,
             });
         });
+    });
+});
+
+describe("isBazaarPluginEnabledInPublish", () => {
+    it("requires both the plugin author and the user to allow publishing", () => {
+        assert.equal(isBazaarPluginEnabledInPublish({}), true);
+        assert.equal(isBazaarPluginEnabledInPublish({disabledInPublish: true}), false);
+        assert.equal(isBazaarPluginEnabledInPublish({userDisabledInPublish: true}), false);
+        assert.equal(isBazaarPluginEnabledInPublish({
+            disabledInPublish: true,
+            userDisabledInPublish: true,
+        }), false);
     });
 });
 

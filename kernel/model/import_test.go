@@ -77,6 +77,66 @@ func TestImportFromLocalPathRejectsClosedNotebookBeforeWriting(t *testing.T) {
 	}
 }
 
+func TestGetImportAssetsDirSeparatesEncryptedNotebooks(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	normalBoxID := "20260812000000-normal0"
+	if err := os.MkdirAll(filepath.Join(util.DataDir, normalBoxID, "assets"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := getImportAssetsDir(normalBoxID), filepath.Join(util.DataDir, "assets"); got != want {
+		t.Fatalf("ordinary notebook import assets dir = %q, want %q", got, want)
+	}
+
+	encryptedBoxID := "20260812000001-encrypt"
+	markRuntimeEncryptedBox(encryptedBoxID)
+	t.Cleanup(func() {
+		forgetRuntimeEncryptedBox(encryptedBoxID)
+	})
+	if got, want := getImportAssetsDir(encryptedBoxID), filepath.Join(util.DataDir, encryptedBoxID, "assets"); got != want {
+		t.Fatalf("encrypted notebook import assets dir = %q, want %q", got, want)
+	}
+}
+
+func TestStoreAssetForBoxAvoidsGlobalNameCollision(t *testing.T) {
+	assetsDir := t.TempDir()
+	existingName := "image-20260812000002-abcdefg.png"
+	existingData := []byte("existing")
+	if err := os.WriteFile(filepath.Join(assetsDir, existingName), existingData, 0644); err != nil {
+		t.Fatal(err)
+	}
+	reusedName, err := storeAssetForBox("", assetsDir, existingName, existingData)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if reusedName != existingName {
+		t.Fatalf("identical global asset name = %q, want %q", reusedName, existingName)
+	}
+
+	newData := []byte("new")
+	storedName, err := storeAssetForBox("", assetsDir, existingName, newData)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if storedName == existingName {
+		t.Fatalf("conflicting global asset reused existing name %q", storedName)
+	}
+	if data, readErr := os.ReadFile(filepath.Join(assetsDir, existingName)); readErr != nil {
+		t.Fatal(readErr)
+	} else if string(data) != string(existingData) {
+		t.Fatalf("existing global asset was overwritten: %q", data)
+	}
+	if data, readErr := os.ReadFile(filepath.Join(assetsDir, storedName)); readErr != nil {
+		t.Fatal(readErr)
+	} else if string(data) != string(newData) {
+		t.Fatalf("new global asset content = %q, want %q", data, newData)
+	}
+}
+
 func TestReplaceAssetNamePreservesExistingQuery(t *testing.T) {
 	assetNameMap := map[string]string{"document.pdf": "encrypted.pdf"}
 	boxSuffix := "?box=20260731190414-j45dgmm"

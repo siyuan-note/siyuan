@@ -59,13 +59,18 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// getImportAssetsDir 返回导入资源的固定落盘目录。普通笔记本使用全局目录，加密笔记本保持资源隔离。
+func getImportAssetsDir(boxID string) string {
+	if IsEncryptedBox(boxID) {
+		return filepath.Join(util.DataDir, boxID, "assets")
+	}
+	return filepath.Join(util.DataDir, "assets")
+}
+
 func HTML2Tree(htmlStr string, luteEngine *lute.Lute, boxID string) (tree *parse.Tree, withMath bool) {
 	htmlStr = gulu.Str.RemovePUA(htmlStr)
-	assetDirPath := filepath.Join(util.DataDir, "assets")
-	if boxID != "" {
-		assetDirPath = filepath.Join(util.DataDir, boxID, "assets")
-		_ = os.MkdirAll(assetDirPath, 0755)
-	}
+	assetDirPath := getImportAssetsDir(boxID)
+	_ = os.MkdirAll(assetDirPath, 0755)
 	tree = luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -1202,7 +1207,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 
 	FlushTxQueue()
 
-	var baseHPath, baseTargetPath, boxLocalPath string
+	var baseHPath, baseTargetPath string
 	if "/" == toPath {
 		baseHPath = "/"
 		baseTargetPath = "/"
@@ -1215,7 +1220,10 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		baseHPath = block.HPath
 		baseTargetPath = strings.TrimSuffix(block.Path, ".sy")
 	}
-	boxLocalPath = filepath.Join(util.DataDir, boxID)
+	assetDirPath := getImportAssetsDir(boxID)
+	if err = os.MkdirAll(assetDirPath, 0755); err != nil {
+		return
+	}
 
 	hPathsIDs := map[string]string{}
 	idPaths := map[string]string{}
@@ -1252,12 +1260,7 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 						logging.LogErrorf("read asset [%s] failed: %s", currentPath, readErr)
 						return nil
 					}
-					assetDirForBox := filepath.Join(util.DataDir, "assets")
-					if boxID != "" {
-						assetDirForBox = filepath.Join(util.DataDir, boxID, "assets")
-						_ = os.MkdirAll(assetDirForBox, 0755)
-					}
-					name, err = storeAssetForBox(boxID, assetDirForBox, baseName, data)
+					name, err = storeAssetForBox(boxID, assetDirPath, baseName, data)
 					if err != nil {
 						logging.LogErrorf("store asset [%s] for box [%s] failed: %s", currentPath, boxID, err)
 						return nil
@@ -1371,8 +1374,6 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			tree.HPath = hPath
 			tree.Root.Spec = treenode.CurrentSpec
 
-			docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
-			assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
 			currentDir := filepath.Dir(currentPath)
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering || (ast.NodeLinkDest != n.Type && !n.IsTextMarkType("a")) {
@@ -1429,29 +1430,15 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 				var name string
 				if "" == existName {
 					baseName := filepath.Base(absolutePath)
-					if IsEncryptedBox(boxID) {
-						// 加密笔记本：文件名脱敏 + 内容加密
-						ext := filepath.Ext(baseName)
-						blockID := ast.NewNodeID()
-						name = encryptedAssetName(ext, blockID)
-						assetTargetPath := filepath.Join(assetDirPath, name)
-						src, readErr := filelock.ReadFile(absolutePath)
-						if readErr != nil {
-							logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
-							return ast.WalkContinue
-						}
-						if err = writeAssetFile(assetTargetPath, bytes.NewReader(src), boxID, baseName); err != nil {
-							logging.LogErrorf("write encrypted asset [%s] failed: %s", assetTargetPath, err)
-							return ast.WalkContinue
-						}
-					} else {
-						name = util.FilterUploadFileName(baseName)
-						name = util.AssetName(name, ast.NewNodeID())
-						assetTargetPath := filepath.Join(assetDirPath, name)
-						if err = filelock.Copy(absolutePath, assetTargetPath); err != nil {
-							logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
-							return ast.WalkContinue
-						}
+					data, readErr := filelock.ReadFile(absolutePath)
+					if readErr != nil {
+						logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
+						return ast.WalkContinue
+					}
+					name, err = storeAssetForBox(boxID, assetDirPath, util.FilterUploadFileName(baseName), data)
+					if err != nil {
+						logging.LogErrorf("store asset [%s] for box [%s] failed: %s", absolutePath, boxID, err)
+						return ast.WalkContinue
 					}
 					assetsDone[absolutePath] = name
 				} else {
@@ -1532,8 +1519,6 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		tree.Root.Spec = treenode.CurrentSpec
 
 		localPathParentDir := filepath.Dir(localPath)
-		docDirLocalPath := filepath.Dir(filepath.Join(boxLocalPath, targetPath))
-		assetDirPath := getAssetsDir(boxLocalPath, docDirLocalPath)
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || (ast.NodeLinkDest != n.Type && !n.IsTextMarkType("a")) {
 				return ast.WalkContinue
@@ -1581,29 +1566,15 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 			var name string
 			if "" == existName {
 				baseName := filepath.Base(absolutePath)
-				if IsEncryptedBox(boxID) {
-					// 加密笔记本：文件名脱敏 + 内容加密
-					ext := filepath.Ext(baseName)
-					blockID := ast.NewNodeID()
-					name = encryptedAssetName(ext, blockID)
-					assetTargetPath := filepath.Join(assetDirPath, name)
-					src, readErr := filelock.ReadFile(absolutePath)
-					if readErr != nil {
-						logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
-						return ast.WalkContinue
-					}
-					if err = writeAssetFile(assetTargetPath, bytes.NewReader(src), boxID, baseName); err != nil {
-						logging.LogErrorf("write encrypted asset [%s] failed: %s", assetTargetPath, err)
-						return ast.WalkContinue
-					}
-				} else {
-					name = util.FilterUploadFileName(baseName)
-					name = util.AssetName(name, ast.NewNodeID())
-					assetTargetPath := filepath.Join(assetDirPath, name)
-					if err = filelock.Copy(absolutePath, assetTargetPath); err != nil {
-						logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
-						return ast.WalkContinue
-					}
+				data, readErr := filelock.ReadFile(absolutePath)
+				if readErr != nil {
+					logging.LogErrorf("read asset [%s] failed: %s", absolutePath, readErr)
+					return ast.WalkContinue
+				}
+				name, err = storeAssetForBox(boxID, assetDirPath, util.FilterUploadFileName(baseName), data)
+				if err != nil {
+					logging.LogErrorf("store asset [%s] for box [%s] failed: %s", absolutePath, boxID, err)
+					return ast.WalkContinue
 				}
 				assetsDone[absolutePath] = name
 			} else {

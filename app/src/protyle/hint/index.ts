@@ -59,7 +59,7 @@ import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
-import {getBlockHintTriggerOffset} from "./blockHintRange";
+import {getBlockHintTriggerOffset, getBlockRefStaticText} from "./blockHintRange";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -721,7 +721,7 @@ ${genHintItemHTML(item)}
             tempElement = tempElement.firstElementChild as HTMLDivElement;
             if (refIsS) {
                 const selectedText = range.toString();
-                const staticText = selectedText.substring(this.splitChar.length);
+                const staticText = getBlockRefStaticText(selectedText, this.splitChar, this.lastIndex > -1);
                 if (staticText) {
                     tempElement.setAttribute("data-subtype", "s");
                     tempElement.innerText = staticText;

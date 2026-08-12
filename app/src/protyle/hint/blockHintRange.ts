@@ -7,3 +7,7 @@ export const getBlockHintTriggerOffset = (textBeforeCaret: string, textAfterCare
     const tripleOffset = textBeforeCaret.lastIndexOf(splitChar + splitChar.substring(0, 1));
     return tripleOffset > -1 ? Math.min(latestOffset, tripleOffset) : latestOffset;
 };
+
+export const getBlockRefStaticText = (selectedText: string, splitChar: string, includesTrigger: boolean) => {
+    return includesTrigger ? selectedText.substring(splitChar.length) : selectedText;
+};

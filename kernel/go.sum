@@ -175,8 +175,8 @@ github.com/gin-contrib/sse v1.1.1 h1:uGYpNwTacv5R68bSGMapo62iLTRa9l5zxGCps4hK6ko
 github.com/gin-contrib/sse v1.1.1/go.mod h1:QXzuVkA0YO7o/gun03UI1Q+FTI8ZV/n5t03kIQAI89s=
 github.com/gin-gonic/gin v1.11.0 h1:OW/6PLjyusp2PPXtyxKHU0RbX6I/l28FTdDlae5ueWk=
 github.com/gin-gonic/gin v1.11.0/go.mod h1:+iq/FyxlGzII0KHiBGjuNn4UNENUlKbGlNmc+W50Dls=
-github.com/go-jose/go-jose/v4 v4.1.3 h1:CVLmWDhDVRa6Mi/IgCgaopNosCaHz7zrMeF9MlZRkrs=
-github.com/go-jose/go-jose/v4 v4.1.3/go.mod h1:x4oUasVrzR7071A4TnHLGSPpNOm2a21K9Kf04k1rs08=
+github.com/go-jose/go-jose/v4 v4.1.4 h1:moDMcTHmvE6Groj34emNPLs/qtYXRVcd6S7NHbHz3kA=
+github.com/go-jose/go-jose/v4 v4.1.4/go.mod h1:x4oUasVrzR7071A4TnHLGSPpNOm2a21K9Kf04k1rs08=
 github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
 github.com/go-logr/logr v1.4.3/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-ole/go-ole v1.2.6/go.mod h1:pprOEPIfldk/42T2oK7lQ4v4JSDwmV0As9GaiUsvbm0=
@@ -403,12 +403,6 @@ github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05Ut
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
 github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17 h1:cZbH1QcW/LWYtaKBv2i0O96qVm6HXKeEE3Z74VYdUHM=
 github.com/siyuan-note/dataparser v0.0.0-20260115084335-b57cb8bc7c17/go.mod h1:zE2SJ4t+2lFAeLgmhi27YtfzdyOWh3l9DXXUr9m/xU0=
-github.com/siyuan-note/dejavu v0.0.0-20260806004431-101ab7692045 h1:JPSX5DRdfSSJ3rpEOG97/lLxO1EexYCWc38ZtMKxiTM=
-github.com/siyuan-note/dejavu v0.0.0-20260806004431-101ab7692045/go.mod h1:aTT2bB17VqAhdHHkScfDnMzJf8At3zYwGvTqntjiCwA=
-github.com/siyuan-note/dejavu v0.0.0-20260809143958-da62d786c482 h1:WkS4DY2Z1oALS3ziklr5OdkdmOAmoUIn3qpR8XNaT/s=
-github.com/siyuan-note/dejavu v0.0.0-20260809143958-da62d786c482/go.mod h1:aTT2bB17VqAhdHHkScfDnMzJf8At3zYwGvTqntjiCwA=
-github.com/siyuan-note/dejavu v0.0.0-20260810172624-2515c1cedd81 h1:s7CP259xPatSRSumna/fc40ftYR0EtEXNixdpN1dfeM=
-github.com/siyuan-note/dejavu v0.0.0-20260810172624-2515c1cedd81/go.mod h1:aTT2bB17VqAhdHHkScfDnMzJf8At3zYwGvTqntjiCwA=
 github.com/siyuan-note/dejavu v0.0.0-20260811012100-7ebd0ab8260f h1:A1zWCOaIcxCU87V8aE8SF351jccyOB/83E8MGlXBbdU=
 github.com/siyuan-note/dejavu v0.0.0-20260811012100-7ebd0ab8260f/go.mod h1:aTT2bB17VqAhdHHkScfDnMzJf8At3zYwGvTqntjiCwA=
 github.com/siyuan-note/encryption v0.0.0-20260715062728-9cb8e9548044 h1:b1/Q4DSREDvGh1/NbzR9873EKrjakdoUtsNlghWxUOI=

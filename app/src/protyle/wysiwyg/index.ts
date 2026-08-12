@@ -3877,16 +3877,12 @@ export class WYSIWYG {
             if (!startElement || !endElement || startElement === endElement) {
                 return;
             }
-            if (startElement.closest('[data-type="NodeListItem"]') ||
-                endElement.closest('[data-type="NodeListItem"]')) {
-                event.preventDefault();
-                event.stopPropagation();
-                await removeCrossBlockRange(protyle, range, startElement, endElement, false, {
-                    event: /^\d{1}$/.test(event.data) ? undefined : event,
-                    text: event.data,
-                });
-                return;
-            }
+            event.preventDefault();
+            event.stopPropagation();
+            await removeCrossBlockRange(protyle, range, startElement, endElement, false, {
+                event: /^\d{1}$/.test(event.data) ? undefined : event,
+                text: event.data,
+            });
         });
 
         this.element.addEventListener("input", (event: InputEvent) => {

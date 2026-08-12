@@ -17,9 +17,11 @@
 package model
 
 import (
+	"bytes"
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -137,30 +139,154 @@ func TestStoreAssetForBoxAvoidsGlobalNameCollision(t *testing.T) {
 	}
 }
 
-func TestReplaceAssetNamePreservesExistingQuery(t *testing.T) {
-	assetNameMap := map[string]string{"document.pdf": "encrypted.pdf"}
-	boxSuffix := "?box=20260731190414-j45dgmm"
+func TestRewriteImportedAssetReference(t *testing.T) {
+	const targetBoxID = "20260731190414-j45dgmm"
+	options := assetReferenceRewriteOptions{
+		pathMap:         map[string]string{"assets/document.pdf": "assets/encrypted.pdf"},
+		targetBoxID:     targetBoxID,
+		bindTargetBox:   true,
+		rewriteUnmapped: false,
+	}
 	tests := []struct {
-		path string
-		want string
+		reference string
+		want      string
 	}{
 		{
-			path: "assets/document.pdf",
-			want: "assets/encrypted.pdf?box=20260731190414-j45dgmm",
+			reference: "assets/document.pdf",
+			want:      "assets/encrypted.pdf?box=" + targetBoxID,
 		},
 		{
-			path: "assets/document.pdf?page=2",
-			want: "assets/encrypted.pdf?page=2&box=20260731190414-j45dgmm",
+			reference: "assets/document.pdf?page=2",
+			want:      "assets/encrypted.pdf?box=" + targetBoxID + "&page=2",
 		},
 		{
-			path: "assets/document.pdf?box=20260731190414-j45dgmm",
-			want: "assets/encrypted.pdf?box=20260731190414-j45dgmm",
+			reference: "assets/document.pdf?box=20260701000000-source0&page=2",
+			want:      "assets/encrypted.pdf?box=" + targetBoxID + "&page=2",
+		},
+		{
+			reference: "assets/document.pdf/20260731190415-annotat?box=20260701000000-source0",
+			want:      "assets/encrypted.pdf/20260731190415-annotat?box=" + targetBoxID,
+		},
+		{
+			reference: "assets/not-in-package.pdf?box=20260701000000-source0",
+			want:      "assets/not-in-package.pdf?box=20260701000000-source0",
 		},
 	}
 
 	for _, test := range tests {
-		if got := replaceAssetName(test.path, assetNameMap, boxSuffix); got != test.want {
-			t.Fatalf("replaceAssetName(%q) = %q, want %q", test.path, got, test.want)
+		if got := rewriteAssetReference(test.reference, options); got != test.want {
+			t.Fatalf("rewriteAssetReference(%q) = %q, want %q", test.reference, got, test.want)
 		}
+	}
+}
+
+func TestRewriteImportedAssetReferenceForNormalNotebook(t *testing.T) {
+	options := assetReferenceRewriteOptions{
+		pathMap: map[string]string{"assets/image.png": "assets/image.png"},
+	}
+	got := rewriteAssetReference("assets/image.png?box=20260701000000-source0&style=thumb", options)
+	want := "assets/image.png?style=thumb"
+	if got != want {
+		t.Fatalf("rewrite normal notebook asset reference = %q, want %q", got, want)
+	}
+}
+
+func TestImportSYAssets(t *testing.T) {
+	assetData := []byte("PDF data")
+	annotationData := []byte(`{"annotations":[]}`)
+
+	t.Run("normal notebook", func(t *testing.T) {
+		originalDataDir := util.DataDir
+		util.DataDir = filepath.Join(t.TempDir(), "data")
+		t.Cleanup(func() {
+			util.DataDir = originalDataDir
+		})
+
+		unzipRootPath, sourceAssetPath := writeImportSYAssetFixture(t, assetData, annotationData)
+		assetPathMap, err := importSYAssets(unzipRootPath, "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := assetPathMap[sourceAssetPath]; got != sourceAssetPath {
+			t.Fatalf("normal asset mapping = %q, want %q", got, sourceAssetPath)
+		}
+		assertFileContent(t, filepath.Join(util.DataDir, filepath.FromSlash(sourceAssetPath)), assetData)
+		assertFileContent(t, filepath.Join(util.DataDir, filepath.FromSlash(sourceAssetPath+".sya")), annotationData)
+	})
+
+	t.Run("encrypted notebook", func(t *testing.T) {
+		const boxID = "20260812000005-encrypt"
+		originalDataDir := util.DataDir
+		originalWorkspaceDir := util.WorkspaceDir
+		util.WorkspaceDir = t.TempDir()
+		util.DataDir = filepath.Join(util.WorkspaceDir, "data")
+		markRuntimeEncryptedBox(boxID)
+		dek, err := util.GenerateDEK()
+		if err != nil {
+			t.Fatal(err)
+		}
+		setDEKForTest(boxID, dek)
+		t.Cleanup(func() {
+			cachedDEKsLock.Lock()
+			if cachedDEK := cachedDEKs[boxID]; cachedDEK != nil {
+				zeroAndClear(cachedDEK)
+			}
+			delete(cachedDEKs, boxID)
+			cachedDEKsLock.Unlock()
+			forgetRuntimeEncryptedBox(boxID)
+			util.DataDir = originalDataDir
+			util.WorkspaceDir = originalWorkspaceDir
+		})
+
+		unzipRootPath, sourceAssetPath := writeImportSYAssetFixture(t, assetData, annotationData)
+		assetPathMap, err := importSYAssets(unzipRootPath, boxID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		targetAssetPath := assetPathMap[sourceAssetPath]
+		if targetAssetPath == "" || targetAssetPath == sourceAssetPath {
+			t.Fatalf("encrypted asset mapping = %q", targetAssetPath)
+		}
+		if !strings.HasPrefix(targetAssetPath, "assets/") {
+			t.Fatalf("encrypted asset path = %q", targetAssetPath)
+		}
+		if got, readErr := ReadAssetBytesInBox(boxID, targetAssetPath); readErr != nil {
+			t.Fatal(readErr)
+		} else if !bytes.Equal(got, assetData) {
+			t.Fatalf("encrypted asset plaintext = %q, want %q", got, assetData)
+		}
+		if got, readErr := ReadAssetBytesInBox(boxID, targetAssetPath+".sya"); readErr != nil {
+			t.Fatal(readErr)
+		} else if !bytes.Equal(got, annotationData) {
+			t.Fatalf("encrypted annotation plaintext = %q, want %q", got, annotationData)
+		}
+	})
+}
+
+func writeImportSYAssetFixture(t *testing.T, assetData, annotationData []byte) (unzipRootPath, assetPath string) {
+	t.Helper()
+	unzipRootPath = t.TempDir()
+	assetPath = "assets/nested/document.pdf"
+	absoluteAssetPath := filepath.Join(unzipRootPath, filepath.FromSlash(assetPath))
+	if err := os.MkdirAll(filepath.Dir(absoluteAssetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(absoluteAssetPath, assetData, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(absoluteAssetPath+".sya", annotationData, 0644); err != nil {
+		t.Fatal(err)
+	}
+	return
+}
+
+func assertFileContent(t *testing.T, path string, want []byte) {
+	t.Helper()
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, want) {
+		t.Fatalf("file [%s] content = %q, want %q", path, got, want)
 	}
 }

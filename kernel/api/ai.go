@@ -94,6 +94,69 @@ func chatGPTWithAction(c *gin.Context) {
 	ret.Data = model.ChatGPTWithAction(ids, action)
 }
 
+func lsAIEditorActions(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	actions, err := model.GetAIEditorActions()
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = actions
+}
+
+func saveAIEditorAction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id, name, action string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", &id, false, false),
+		util.BindJsonArg("name", &name, true, false),
+		util.BindJsonArg("action", &action, true, false),
+	) {
+		return
+	}
+
+	saved, err := model.SaveAIEditorAction(&model.AIEditorAction{
+		ID:     id,
+		Name:   name,
+		Action: action,
+	})
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = saved
+}
+
+func removeAIEditorAction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if err := model.RemoveAIEditorAction(id); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
+}
+
 // testModel 测试 AI 模型可用性。使用已保存的 Provider 或详情页草稿中的 baseURL/APIKey/超时，
 // 校验指定模型是否可用。优先通过 ListModels 拉取可用模型清单精确匹配，
 // 若该端点不可用则回退到极简 Chat Completion 验证连通性。

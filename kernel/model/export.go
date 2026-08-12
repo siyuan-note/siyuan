@@ -2487,9 +2487,11 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 	// 按文件夹结构复制选择的树
 	// 注意：tree 已被 filesys.LoadTree 透明解密成明文，这里序列化为明文 JSON 写盘
 	// （不可 filelock.ReadFile 直接读盘，加密笔记本的磁盘 .sy 是密文）。
+	portableAssetOptions := assetReferenceRewriteOptions{rewriteUnmapped: true}
 	total := len(trees) + len(refTrees)
 	for _, tree := range trees {
 		if encrypted {
+			rewriteTreeAssetReferences(tree, portableAssetOptions)
 			removeFlashcardAttrs(tree)
 		}
 		writePath := strings.TrimPrefix(tree.Path, rootDirPath)
@@ -2512,6 +2514,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string, i
 	// 引用树放在导出文件夹根路径下
 	for treeID, tree := range refTrees {
 		if IsEncryptedBox(tree.Box) {
+			rewriteTreeAssetReferences(tree, portableAssetOptions)
 			removeFlashcardAttrs(tree)
 		}
 		writePath := filepath.Join(exportDir, treeID+".sy")
@@ -2759,6 +2762,13 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
 		return
 	}
+	if boxID != "" && avData != nil {
+		avData, readErr = rewriteAttributeViewDataAssetReferences(avData, assetReferenceRewriteOptions{rewriteUnmapped: true})
+		if readErr != nil {
+			logging.LogErrorf("rewrite exported attribute view assets [%s] failed: %s", avID, readErr)
+			return
+		}
+	}
 	if avData != nil {
 		if mkdirErr := os.MkdirAll(exportStorageAvDir, 0755); mkdirErr != nil {
 			logging.LogErrorf("create export av folder [%s] failed: %s", exportStorageAvDir, mkdirErr)
@@ -2781,46 +2791,43 @@ func exportAv(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap
 		return
 	}
 
-	for _, keyValues := range attrView.KeyValues {
-		switch keyValues.Key.Type {
-		case av.KeyTypeMAsset: // 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
-			for _, value := range keyValues.Values {
-				for _, asset := range value.MAsset {
-					if !util.IsAssetLinkDest([]byte(asset.Content), false) {
-						continue
-					}
-
-					destPath := filepath.Join(exportFolder, AssetPathWithoutQuery(asset.Content))
-					srcPath := ""
-					if boxID != "" {
-						srcPath, _ = GetAssetAbsPathInBox(asset.Content, boxID)
-					}
-					if "" == srcPath {
-						_, srcPath, _ = lookupAssetPath(assetPathMap, AssetPathWithoutQuery(asset.Content))
-					}
-					if "" == srcPath {
-						logging.LogWarnf("get asset [%s] abs path failed", asset.Content)
-						continue
-					}
-
-					if copyErr := copyAssetDecryptIfEncrypted(srcPath, destPath); nil != copyErr {
-						logging.LogErrorf("copy asset failed: %s", copyErr)
-					}
-				}
-			}
-		}
-	}
+	copyExportAttributeViewAssets(attrView, boxID, exportFolder, assetPathMap)
 
 	// 级联导出关联列关联的数据库
-	exportRelationAvs(avID, boxID, exportStorageAvDir)
+	exportRelationAvs(avID, boxID, exportStorageAvDir, exportFolder, assetPathMap)
 }
 
-func exportRelationAvs(avID, boxID, exportStorageAvDir string) {
+func copyExportAttributeViewAssets(attrView *av.AttributeView, boxID, exportFolder string, assetPathMap map[string]string) {
+	// 导出资源文件列和指向本地资源的 URL 列 https://github.com/siyuan-note/siyuan/issues/9919
+	for _, assetPath := range getAttributeViewAssetsLinkDests(attrView, false, nil) {
+		destPath := filepath.Join(exportFolder, AssetPathWithoutQuery(assetPath))
+		srcPath := ""
+		if boxID != "" {
+			srcPath, _ = GetAssetAbsPathInBox(assetPath, boxID)
+		}
+		if "" == srcPath {
+			_, srcPath, _ = lookupAssetPath(assetPathMap, AssetPathWithoutQuery(assetPath))
+		}
+		if "" == srcPath {
+			logging.LogWarnf("get asset [%s] abs path failed", assetPath)
+			continue
+		}
+
+		if copyErr := copyAssetDecryptIfEncrypted(srcPath, destPath); nil != copyErr {
+			logging.LogErrorf("copy asset failed: %s", copyErr)
+		}
+	}
+}
+
+func exportRelationAvs(avID, boxID, exportStorageAvDir, exportFolder string, assetPathMap map[string]string) {
 	avIDs := hashset.New()
 	walkRelationAvs(avID, boxID, avIDs)
 
 	for _, v := range avIDs.Values() {
 		relAvID := v.(string)
+		if relAvID == avID {
+			continue
+		}
 		var relAvData []byte
 		var readErr error
 		if boxID != "" {
@@ -2832,12 +2839,33 @@ func exportRelationAvs(avID, boxID, exportStorageAvDir string) {
 			logging.LogErrorf("read relation attribute view [%s] failed: %s", relAvID, readErr)
 			continue
 		}
+		if boxID != "" && relAvData != nil {
+			relAvData, readErr = rewriteAttributeViewDataAssetReferences(relAvData,
+				assetReferenceRewriteOptions{rewriteUnmapped: true})
+			if readErr != nil {
+				logging.LogErrorf("rewrite exported relation attribute view assets [%s] failed: %s", relAvID, readErr)
+				continue
+			}
+		}
 		if relAvData == nil {
 			continue
 		}
 		if writeErr := os.WriteFile(filepath.Join(exportStorageAvDir, relAvID+".json"), relAvData, 0644); writeErr != nil {
 			logging.LogErrorf("write av json failed: %s", writeErr)
 		}
+
+		var attrView *av.AttributeView
+		var parseErr error
+		if boxID != "" {
+			attrView, parseErr = av.ParseAttributeViewInBox(relAvID, boxID)
+		} else {
+			attrView, parseErr = av.ParseAttributeView(relAvID)
+		}
+		if parseErr != nil {
+			logging.LogErrorf("parse relation attribute view [%s] failed: %s", relAvID, parseErr)
+			continue
+		}
+		copyExportAttributeViewAssets(attrView, boxID, exportFolder, assetPathMap)
 	}
 }
 

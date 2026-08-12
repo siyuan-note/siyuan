@@ -24,6 +24,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -132,10 +133,7 @@ func closePublishListener() {
 func startPublishReverseProxyService() {
 	logging.LogInfof("publish service [%s:%s] is running", Host, Port)
 
-	handler := &httputil.ReverseProxy{
-		Rewrite:   rewrite,
-		Transport: transport,
-	}
+	handler := newPublishReverseProxy(util.ServerURL, transport)
 
 	certPath, keyPath, certErr := util.GetOrCreateTLSCert()
 	if certErr == nil && "" != certPath {
@@ -159,10 +157,15 @@ func startPublishReverseProxyService() {
 	logging.LogInfof("publish service [%s:%s] is stopped", Host, Port)
 }
 
-func rewrite(r *httputil.ProxyRequest) {
-	r.SetURL(util.ServerURL)
-	r.SetXForwarded()
-	// r.Out.Host = r.In.Host // if desired
+func newPublishReverseProxy(target *url.URL, roundTripper http.RoundTripper) *httputil.ReverseProxy {
+	return &httputil.ReverseProxy{
+		Rewrite: func(request *httputil.ProxyRequest) {
+			request.SetURL(target)
+			request.Out.Host = request.In.Host
+			request.SetXForwarded()
+		},
+		Transport: roundTripper,
+	}
 }
 
 // publishAuthRejectResponse 构造发布服务认证拒绝响应，retryAfter 大于 0 时附加 Retry-After 头。

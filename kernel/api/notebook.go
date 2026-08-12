@@ -19,6 +19,7 @@ package api
 import (
 	"io"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -519,11 +520,25 @@ func lsNotebooks(c *gin.Context) {
 				}
 			}
 		}
+		sortNotebooksBySubFileCount(notebooks, model.Conf.FileTree.Sort)
 	}
 
 	ret.Data = map[string]any{
 		"notebooks":     notebooks,
 		"boxDocEnabled": boxDocEnabled,
+	}
+}
+
+func sortNotebooksBySubFileCount(notebooks []*model.Box, sortMode int) {
+	switch sortMode {
+	case util.SortModeSubDocCountASC:
+		sort.SliceStable(notebooks, func(i, j int) bool {
+			return notebooks[i].SubFileCount < notebooks[j].SubFileCount
+		})
+	case util.SortModeSubDocCountDESC:
+		sort.SliceStable(notebooks, func(i, j int) bool {
+			return notebooks[i].SubFileCount > notebooks[j].SubFileCount
+		})
 	}
 }
 

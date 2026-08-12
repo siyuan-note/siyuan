@@ -1237,7 +1237,6 @@
 	"syncProvider": "Penyedia layanan penyimpanan cloud",
 	"syncProviderTip": "Jika dipilih, layanan penyimpanan cloud dari penyedia ini akan digunakan untuk mencapai fungsi sinkronisasi dan pencadangan cloud",
 	"confirmReset": "Apakah Anda yakin ingin mereset semua pintasan keyboard ke pengaturan default?",
-	"notBatchRemove": "Penghapusan batch buku catatan tidak didukung",
 	"confirmRemoveAll": "Apakah Anda yakin ingin menghapus ${count} dokumen yang dipilih dan sub-dokumennya?",
 	"microphoneDenied": "Perlu mengizinkan Siyuan untuk mengakses mikrofon di Preferensi Sistem",
 	"microphoneNotAccess": "Akses ke mikrofon ditolak, buka Preferensi Sistem untuk mengatur ulang",

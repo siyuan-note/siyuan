@@ -1237,7 +1237,6 @@
 	"syncProvider": "Dostawca usługi pamięci w chmurze",
 	"syncProviderTip": "Jeśli zostanie wybrany, usługa pamięci w chmurze tego dostawcy zostanie wykorzystana do realizacji funkcji synchronizacji i kopii zapasowej w chmurze",
 	"confirmReset": "Czy na pewno chcesz przywrócić wszystkie skróty klawiszowe do ustawień domyślnych?",
-	"notBatchRemove": "Partycjonowanie notesów nie jest wspierane",
 	"confirmRemoveAll": "Czy na pewno chcesz usunąć wybrane ${count} dokumenty i ich poddokumenty?",
 	"microphoneDenied": "Należy zezwolić SiYuanowi na dostęp do mikrofonu w Ustawieniach systemowych",
 	"microphoneNotAccess": "Dostęp do mikrofonu jest zabroniony, przejdź do Ustawień systemowych, aby zresetować",

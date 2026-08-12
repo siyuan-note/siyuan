@@ -1237,7 +1237,6 @@
 	"syncProvider": "Cloud-Speicherdienstanbieter",
 	"syncProviderTip": "Wenn ausgewählt, wird der Cloud-Speicherdienst dieses Anbieters verwendet, um Cloud-Synchronisations- und Backup-Funktionen zu erreichen.",
 	"confirmReset": "Sind Sie sicher, dass Sie alle Tastenkombinationen auf die Standardwerte zurücksetzen möchten?",
-	"notBatchRemove": "Die Batch-Löschung von Notizen wird nicht unterstützt",
 	"confirmRemoveAll": "Sind Sie sicher, dass Sie die ausgewählten ${count} Dokumente und ihre Unterdokumente löschen möchten?",
 	"microphoneDenied": "Es muss SiYuan der Zugriff auf das Mikrofon in den Systemeinstellungen erlaubt werden.",
 	"microphoneNotAccess": "Der Zugriff auf das Mikrofon wurde verweigert, gehen Sie zu den Systemeinstellungen, um zurückzusetzen.",

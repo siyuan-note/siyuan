@@ -1237,7 +1237,6 @@
 	"syncProvider": "Poskytovateľ cloudu",
 	"syncProviderTip": "Vyberte poskytovateľa pre synchronizáciu a zálohovanie",
 	"confirmReset": "Naozaj resetovať všetky klávesové skratky?",
-	"notBatchRemove": "Hromadné mazanie zápisníkov nie je podporované",
 	"confirmRemoveAll": "Naozaj chcete odstrániť vybraných ${count} dokumentov vrátane poddokumentov?",
 	"microphoneDenied": "Povoľte prístup k mikrofónu v systémových nastaveniach",
 	"microphoneNotAccess": "Prístup k mikrofónu zamietnutý",

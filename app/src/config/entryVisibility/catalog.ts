@@ -450,8 +450,13 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "docTree.multi",
-        label: location(lang("entryDocPanel"), lang("multiSelect"), lang("more")),
+        label: location(lang("entryDocPanel"), lang("agentCatDoc"), lang("multiSelect"), lang("more")),
         children: docTreeMultiple(),
+    },
+    {
+        key: "docTree.notebooks",
+        label: location(lang("entryDocPanel"), lang("agentCatNotebook"), lang("multiSelect"), lang("more")),
+        children: [node("close", lang("close")), node("delete", lang("delete"))],
     },
     {
         key: "document.title",

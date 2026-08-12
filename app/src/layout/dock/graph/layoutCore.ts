@@ -3,13 +3,12 @@ import {IGraphLayoutOptions} from "./types";
 const TREE_THETA_SQUARED = 0.25;
 const MAX_TREE_DEPTH = 32;
 const STABLE_TICKS = 12;
-const ISOLATED_CENTER_STRENGTH_FACTOR = 3;
+const LEGACY_LINK_DISTANCE_FACTOR = 1.5;
 
 export class GraphForceLayout {
     public readonly positions: Float32Array;
     private readonly degrees: Uint32Array;
     private readonly forces: Float32Array;
-    private readonly masses: Float32Array;
     private readonly pinned: Uint8Array;
     private readonly pinnedPositions: Float32Array;
     private readonly sizes: Float32Array;
@@ -46,12 +45,8 @@ export class GraphForceLayout {
         this.targets = options.targets;
         this.forces = new Float32Array(this.positions.length);
         this.velocities = new Float32Array(this.positions.length);
-        this.masses = new Float32Array(this.sizes.length);
         this.pinned = new Uint8Array(this.sizes.length);
         this.pinnedPositions = new Float32Array(this.positions.length);
-        for (let index = 0; index < this.masses.length; index++) {
-            this.masses[index] = 1 + Math.sqrt(this.degrees[index]);
-        }
         const treeCapacity = Math.max(16, this.sizes.length * 4 + 1);
         this.treeBodies = new Int32Array(treeCapacity);
         this.treeCentersX = new Float64Array(treeCapacity);
@@ -83,6 +78,7 @@ export class GraphForceLayout {
         this.positions[index * 2 + 1] = y;
         this.velocities[index * 2] = 0;
         this.velocities[index * 2 + 1] = 0;
+        this.restart();
     }
 
     public release(index: number) {
@@ -119,7 +115,7 @@ export class GraphForceLayout {
         this.applySprings();
         const nodeCount = this.sizes.length;
         const timestep = nodeCount > 2048 ? 0.12 : nodeCount > 256 ? 0.18 : 0.25;
-        const damping = 0.6;
+        const damping = 0.4;
         const maxVelocity = Math.max(24, this.options.linkDistance * 0.25);
         let velocityTotal = 0;
         for (let index = 0; index < nodeCount; index++) {
@@ -131,12 +127,14 @@ export class GraphForceLayout {
                 this.velocities[offset + 1] = 0;
                 continue;
             }
-            const centerStrength = this.options.centerStrength *
-                (this.degrees[index] === 0 ? ISOLATED_CENTER_STRENGTH_FACTOR : 1);
+            const degreeWeight = this.degrees[index] + 1;
+            const centerStrength = this.options.centerStrength * degreeWeight;
             this.forces[offset] -= this.positions[offset] * centerStrength;
             this.forces[offset + 1] -= this.positions[offset + 1] * centerStrength;
-            let velocityX = (this.velocities[offset] + this.forces[offset] / this.masses[index] * timestep) * damping;
-            let velocityY = (this.velocities[offset + 1] + this.forces[offset + 1] / this.masses[index] * timestep) * damping;
+            let velocityX = this.velocities[offset] +
+                (this.forces[offset] - damping * this.velocities[offset]) * timestep;
+            let velocityY = this.velocities[offset + 1] +
+                (this.forces[offset + 1] - damping * this.velocities[offset + 1]) * timestep;
             const velocity = Math.hypot(velocityX, velocityY);
             if (velocity > maxVelocity) {
                 const ratio = maxVelocity / velocity;
@@ -160,6 +158,7 @@ export class GraphForceLayout {
     }
 
     private applySprings() {
+        const linkDistance = this.options.linkDistance * LEGACY_LINK_DISTANCE_FACTOR;
         for (let index = 0; index < this.sources.length; index++) {
             const source = this.sources[index];
             const target = this.targets[index];
@@ -168,7 +167,7 @@ export class GraphForceLayout {
             const deltaX = this.positions[targetOffset] - this.positions[sourceOffset];
             const deltaY = this.positions[targetOffset + 1] - this.positions[sourceOffset + 1];
             const distance = Math.max(0.001, Math.hypot(deltaX, deltaY));
-            const force = (distance - this.options.linkDistance) * this.options.springStrength;
+            const force = (distance - linkDistance) * this.options.springStrength;
             const forceX = deltaX / distance * force;
             const forceY = deltaY / distance * force;
             this.forces[sourceOffset] += forceX;
@@ -181,7 +180,7 @@ export class GraphForceLayout {
     private applyRepulsion() {
         for (let body = 0; body < this.sizes.length; body++) {
             const bodyOffset = body * 2;
-            const bodyMass = this.masses[body];
+            const degreeWeight = this.degrees[body] + 1;
             const bodyX = this.positions[bodyOffset];
             const bodyY = this.positions[bodyOffset + 1];
             let stackLength = 1;
@@ -202,11 +201,11 @@ export class GraphForceLayout {
                 const width = this.treeHalves[cell] * 2;
                 if (cellBody >= 0 || width * width / distanceSquared < TREE_THETA_SQUARED) {
                     const distance = Math.sqrt(distanceSquared);
-                    let force = this.options.repulsion * bodyMass * mass / distanceSquared;
+                    let force = this.options.repulsion * degreeWeight * mass / distanceSquared;
                     if (cellBody >= 0) {
                         const minimumDistance = (this.sizes[body] + this.sizes[cellBody]) * 1.2;
                         if (distance < minimumDistance) {
-                            force += (minimumDistance - distance) * 0.5 * bodyMass * this.masses[cellBody] / distance;
+                            force += (minimumDistance - distance) * 0.5 * degreeWeight / distance;
                         }
                     }
                     this.forces[bodyOffset] += deltaX * force;
@@ -244,7 +243,7 @@ export class GraphForceLayout {
         for (let cell = this.treeCount - 1; cell >= 0; cell--) {
             const body = this.treeBodies[cell];
             if (body >= 0) {
-                this.treeMasses[cell] = this.masses[body];
+                this.treeMasses[cell] = 1;
                 this.treePointsX[cell] = this.positions[body * 2];
                 this.treePointsY[cell] = this.positions[body * 2 + 1];
                 continue;

@@ -72,6 +72,7 @@ export class GraphEngine {
     private options: IGraphOptions;
     private palette: IGraphPalette;
     private pendingFocusId = "";
+    private readonly pendingNodeReleases = new Map<number, number>();
     private readonly pinnedNodes = new Map<number, [number, number]>();
     private pinchAction: IPinchAction;
     private pointerAction: IPointerAction;
@@ -80,6 +81,7 @@ export class GraphEngine {
     private positions = new Float32Array();
     private renderFrame = 0;
     private renderer: IGraphRenderer;
+    private releaseToken = 0;
     private selected = -1;
     private selectionVersion = 0;
     private styleVersion = 0;
@@ -138,6 +140,7 @@ export class GraphEngine {
         this.cameraTouched = false;
         this.focusAnimation++;
         this.resetInteraction();
+        this.pendingNodeReleases.clear();
         this.pinnedNodes.clear();
         this.hideTooltip();
         this.fit(false);
@@ -194,6 +197,7 @@ export class GraphEngine {
         this.focusAnimation++;
         this.autoFitPending = false;
         this.pendingFocusId = "";
+        this.pendingNodeReleases.clear();
         this.pinnedNodes.clear();
         this.data = undefined;
         this.positions = new Float32Array();
@@ -336,6 +340,8 @@ export class GraphEngine {
 
     private startLayout() {
         this.stopLayout();
+        this.pendingNodeReleases.forEach((_token, index) => this.pinnedNodes.delete(index));
+        this.pendingNodeReleases.clear();
         if (!this.data || this.data.nodes.length < 2) {
             if (this.pendingFocusId) {
                 this.focusNode(this.pendingFocusId);
@@ -351,8 +357,17 @@ export class GraphEngine {
             this.layoutWorker = worker;
             worker.onmessage = (event: MessageEvent<TGraphLayoutResponse>) => {
                 const message = event.data;
-                if (message.type !== "positions" || message.generation !== this.generation ||
-                    message.positions.length !== this.positions.length) {
+                if (message.generation !== this.generation) {
+                    return;
+                }
+                if (message.type === "released") {
+                    if (this.pendingNodeReleases.get(message.index) === message.token) {
+                        this.pendingNodeReleases.delete(message.index);
+                        this.pinnedNodes.delete(message.index);
+                    }
+                    return;
+                }
+                if (message.positions.length !== this.positions.length) {
                     return;
                 }
                 this.pinnedNodes.forEach((position, index) => {
@@ -616,6 +631,7 @@ export class GraphEngine {
                     const y = graph.y;
                     this.positions[action.node * 2] = x;
                     this.positions[action.node * 2 + 1] = y;
+                    this.pendingNodeReleases.delete(action.node);
                     this.pinnedNodes.set(action.node, [x, y]);
                     this.positionVersion++;
                     this.postLayoutMessage({
@@ -756,6 +772,18 @@ export class GraphEngine {
         }
         const offset = action.node * 2;
         this.pinnedNodes.set(action.node, [this.positions[offset], this.positions[offset + 1]]);
+        if (!this.layoutWorker) {
+            this.pinnedNodes.delete(action.node);
+            return;
+        }
+        const token = ++this.releaseToken;
+        this.pendingNodeReleases.set(action.node, token);
+        this.postLayoutMessage({
+            type: "release",
+            generation: this.generation,
+            index: action.node,
+            token,
+        });
     }
 
     private setHovered(index: number) {

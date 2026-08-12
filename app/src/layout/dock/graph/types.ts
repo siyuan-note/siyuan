@@ -27,9 +27,15 @@ export interface IGraphLink {
     ref: boolean;
 }
 
+export interface IGraphComponent {
+    key: string;
+    nodeIndices: number[];
+}
+
 export interface IGraphData {
     nodes: IGraphNode[];
     links: IGraphLink[];
+    components: IGraphComponent[];
     indexById: Map<string, number>;
     sources: Uint32Array;
     targets: Uint32Array;
@@ -116,6 +122,7 @@ export type TGraphLayoutRequest = {
     type: "release";
     generation: number;
     index: number;
+    token: number;
 } | {
     type: "pause" | "resume" | "stop";
     generation: number;
@@ -126,4 +133,9 @@ export type TGraphLayoutResponse = {
     generation: number;
     positions: Float32Array;
     settled: boolean;
+} | {
+    type: "released";
+    generation: number;
+    index: number;
+    token: number;
 };

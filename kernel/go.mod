@@ -48,7 +48,6 @@ require (
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/klauspost/compress v1.19.1
 	github.com/klippa-app/go-pdfium v1.17.2
 	github.com/lxzan/gws v1.9.1
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
@@ -98,7 +97,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.7-0.20260812001723-d5dfff50075a
+require github.com/88250/lute v1.7.8-0.20260812132341-89dbaf26397a
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
@@ -172,6 +171,7 @@ require (
 	github.com/jaytaylor/html2text v0.0.0-20230321000545-74c2419ad056 // indirect
 	github.com/jolestar/go-commons-pool/v2 v2.1.2 // indirect
 	github.com/juju/errors v1.0.0 // indirect
+	github.com/klauspost/compress v1.19.1 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/levigross/exp-html v0.0.0-20120902181939-8df60c69a8f5 // indirect

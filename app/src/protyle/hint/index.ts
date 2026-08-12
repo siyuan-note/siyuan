@@ -59,7 +59,7 @@ import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
-import {getBlockHintTriggerOffset} from "./blockHintRange";
+import {getBlockHintTriggerOffset, getBlockRefStaticText} from "./blockHintRange";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -721,7 +721,7 @@ ${genHintItemHTML(item)}
             tempElement = tempElement.firstElementChild as HTMLDivElement;
             if (refIsS) {
                 const selectedText = range.toString();
-                const staticText = selectedText.substring(this.splitChar.length);
+                const staticText = getBlockRefStaticText(selectedText, this.splitChar, this.lastIndex > -1);
                 if (staticText) {
                     tempElement.setAttribute("data-subtype", "s");
                     tempElement.innerText = staticText;
@@ -1051,15 +1051,22 @@ ${genHintItemHTML(item)}
                     highlightRender(nodeElement);
                 } else if (value.startsWith("<iframe") || value.startsWith("<video") || value.startsWith("<audio")) {
                     protyle.gutter.renderMenu(protyle, nodeElement);
-                    const rect = nodeElement.getBoundingClientRect();
-                    window.siyuan.menus.menu.popup({
-                        x: rect.left,
-                        y: rect.top,
-                        isLeft: true
-                    });
                     const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetVideo"], [data-id="assetAudio"], [data-id="assetIFrame"]');
-                    itemElement.classList.add("b3-menu__item--show");
-                    window.siyuan.menus.menu.showSubMenu(itemElement.querySelector(".b3-menu__submenu"));
+                    if (isMobile()) {
+                        // 移动端将资源子菜单内容提升为底部菜单根内容。
+                        const subMenuItemsElement = itemElement.querySelector(":scope > .b3-menu__submenu > .b3-menu__items");
+                        window.siyuan.menus.menu.element.lastElementChild.replaceChildren(...Array.from(subMenuItemsElement.children));
+                        window.siyuan.menus.menu.fullscreen();
+                    } else {
+                        const rect = nodeElement.getBoundingClientRect();
+                        window.siyuan.menus.menu.popup({
+                            x: rect.left,
+                            y: rect.top,
+                            isLeft: true
+                        });
+                        itemElement.classList.add("b3-menu__item--show");
+                        window.siyuan.menus.menu.showSubMenu(itemElement.querySelector(".b3-menu__submenu"));
+                    }
                     window.siyuan.menus.menu.element.querySelector("textarea").focus();
                 } else if (value === "---") {
                     focusBlock(nodeElement);

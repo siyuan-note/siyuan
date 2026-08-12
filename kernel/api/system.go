@@ -1204,6 +1204,7 @@ func setAppearanceMode(c *gin.Context) {
 	mode := int(arg["mode"].(float64))
 	model.Conf.Appearance.Mode = mode
 	model.LoadThemes()
+	model.WatchThemes()
 	model.Conf.Save()
 
 	ret.Data = map[string]any{

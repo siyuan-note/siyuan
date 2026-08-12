@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getBlockHintTriggerOffset} from "./blockHintRange";
+import {getBlockHintTriggerOffset, getBlockRefStaticText} from "./blockHintRange";
 
 describe("getBlockHintTriggerOffset", () => {
     it("uses the latest overlapping trigger inside existing closing markers", () => {
@@ -49,5 +49,17 @@ describe("getBlockHintTriggerOffset", () => {
         const triggerOffset = getBlockHintTriggerOffset(text, "", "[[", "]]");
 
         assert.equal(text.substring(triggerOffset + 2), "foo]]");
+    });
+});
+
+describe("getBlockRefStaticText", () => {
+    it("preserves the complete toolbar selection", () => {
+        assert.equal(getBlockRefStaticText("旧的开始", "((", false), "旧的开始");
+        assert.equal(getBlockRefStaticText("((literal", "((", false), "((literal");
+    });
+
+    it("removes the trigger from an inline block hint", () => {
+        assert.equal(getBlockRefStaticText("[[旧的开始", "[[", true), "旧的开始");
+        assert.equal(getBlockRefStaticText("((query", "((", true), "query");
     });
 });

@@ -759,6 +759,7 @@ func setAppearance(c *gin.Context) {
 	util.Lang = model.Conf.Lang
 	model.Conf.Save()
 	model.InitAppearance()
+	model.WatchThemes()
 
 	ret.Data = model.Conf.Appearance
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
@@ -865,6 +866,7 @@ func setTheme(c *gin.Context) {
 	}
 
 	model.InitAppearance()
+	model.WatchThemes()
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
 }
 

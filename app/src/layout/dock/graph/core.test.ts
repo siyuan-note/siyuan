@@ -30,6 +30,7 @@ describe("graph data normalization", () => {
         assert.deepEqual(Array.from(data.sources), [0]);
         assert.deepEqual(Array.from(data.targets), [1]);
         assert.deepEqual(Array.from(data.degrees), [1, 1]);
+        assert.deepEqual(data.components.map((component) => component.nodeIndices), [[0, 1]]);
         assert.equal(data.sizes[0], 10);
         assert.equal(data.sizes[1], 30);
     });
@@ -53,6 +54,51 @@ describe("graph data normalization", () => {
         assert.deepEqual(createInitialPositions(second, 400), createInitialPositions(first, 400));
     });
 
+    it("packs disconnected components without overlap", () => {
+        const data = normalizeGraphData([
+            ...nodes,
+            {id: "c", box: "box", path: "/c.sy", type: "NodeDocument", size: 15, defs: 0},
+            {id: "d", box: "box", path: "/d.sy", type: "NodeDocument", size: 15, defs: 0},
+        ], [
+            {from: "a", to: "b", ref: true},
+            {from: "c", to: "d", ref: true},
+        ], 15);
+        const positions = createInitialPositions(data, 400);
+        assert.equal(data.components.length, 2);
+        const firstBounds = {
+            minX: Math.min(positions[0], positions[2]) - 15,
+            maxX: Math.max(positions[0], positions[2]) + 15,
+            minY: Math.min(positions[1], positions[3]) - 15,
+            maxY: Math.max(positions[1], positions[3]) + 15,
+        };
+        const secondBounds = {
+            minX: Math.min(positions[4], positions[6]) - 15,
+            maxX: Math.max(positions[4], positions[6]) + 15,
+            minY: Math.min(positions[5], positions[7]) - 15,
+            maxY: Math.max(positions[5], positions[7]) + 15,
+        };
+        assert.ok(firstBounds.maxX < secondBounds.minX || secondBounds.maxX < firstBounds.minX ||
+            firstBounds.maxY < secondBounds.minY || secondBounds.maxY < firstBounds.minY);
+    });
+
+    it("scatters isolated nodes radially without forming rows", () => {
+        const isolatedNodes = Array.from({length: 128}, (_item, index) => ({
+            id: `isolated-${index.toString().padStart(3, "0")}`,
+            box: "box",
+            path: `/${index}.sy`,
+            type: "NodeDocument",
+            size: 15,
+            defs: 0,
+        }));
+        const data = normalizeGraphData(isolatedNodes, [], 15);
+        const positions = createInitialPositions(data, 100);
+        const uniqueY = new Set<number>();
+        for (let index = 0; index < isolatedNodes.length; index++) {
+            uniqueY.add(positions[index * 2 + 1]);
+        }
+        assert.ok(uniqueY.size > isolatedNodes.length / 2);
+    });
+
     it("fits positions into the available viewport", () => {
         const camera = fitGraphCamera(new Float32Array([-100, 0, 100, 0]), new Float32Array([10, 10]), 400, 200);
         assert.ok(camera.scale > 0);
@@ -66,7 +112,7 @@ describe("graph data normalization", () => {
     });
 
     it("emphasizes highlighted edges without exceeding valid opacity", () => {
-        assert.ok(Math.abs(getGraphEdgeOpacity(0.36, false) - 0.45) < Number.EPSILON);
+        assert.equal(getGraphEdgeOpacity(0.36, false), 0.36);
         assert.ok(Math.abs(getGraphEdgeOpacity(0.36, true) - 0.9) < Number.EPSILON);
         assert.equal(getGraphEdgeOpacity(0.8, true), 1);
         assert.equal(getGraphEdgeOpacity(-0.5, false), 0);

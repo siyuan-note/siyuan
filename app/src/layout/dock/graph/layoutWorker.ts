@@ -8,6 +8,7 @@ type TWorkerScope = {
 
 const workerScope = globalThis as unknown as TWorkerScope;
 let generation = 0;
+let interactive = false;
 let layout: GraphForceLayout;
 let paused = false;
 let scheduled = false;
@@ -43,10 +44,11 @@ const run = () => {
     do {
         settled = layout.step();
     } while (!settled && performance.now() - start < 12);
-    if (settled || performance.now() - lastPosted >= 32) {
+    if (settled || performance.now() - lastPosted >= (interactive ? 16 : 32)) {
         postPositions(settled);
     }
     if (settled) {
+        interactive = false;
         stopped = true;
         return;
     }
@@ -70,6 +72,7 @@ workerScope.onmessage = (event) => {
             sources: message.sources,
             targets: message.targets,
         });
+        interactive = false;
         paused = false;
         lastPosted = 0;
         restart();
@@ -83,8 +86,17 @@ workerScope.onmessage = (event) => {
         restart();
     } else if (message.type === "pin") {
         layout.pin(message.index, message.x, message.y);
+        interactive = true;
+        restart();
     } else if (message.type === "release") {
         layout.release(message.index);
+        interactive = true;
+        workerScope.postMessage({
+            type: "released",
+            generation,
+            index: message.index,
+            token: message.token,
+        }, []);
         restart();
     } else if (message.type === "pause") {
         paused = true;

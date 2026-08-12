@@ -420,6 +420,7 @@ export class Protyle {
     private getDoc(mergedOptions: IProtyleOptions) {
         const getDocParam: Record<string, any> = {
             id: mergedOptions.blockId,
+            includeDocInfo: true,
             isBacklink: mergedOptions.action.includes(Constants.CB_GET_BACKLINK),
             originalRefBlockIDs: mergedOptions.originalRefBlockIDs,
             // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后

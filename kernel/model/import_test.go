@@ -79,7 +79,7 @@ func TestImportFromLocalPathRejectsClosedNotebookBeforeWriting(t *testing.T) {
 	}
 }
 
-func TestGetImportAssetsDirSeparatesEncryptedNotebooks(t *testing.T) {
+func TestGetImportAssetsDir(t *testing.T) {
 	originalDataDir := util.DataDir
 	util.DataDir = t.TempDir()
 	t.Cleanup(func() {
@@ -87,20 +87,74 @@ func TestGetImportAssetsDirSeparatesEncryptedNotebooks(t *testing.T) {
 	})
 
 	normalBoxID := "20260812000000-normal0"
-	if err := os.MkdirAll(filepath.Join(util.DataDir, normalBoxID, "assets"), 0755); err != nil {
-		t.Fatal(err)
+	normalBoxDir := filepath.Join(util.DataDir, normalBoxID)
+	globalAssetsDir := filepath.Join(util.DataDir, "assets")
+	if got := GetImportAssetsDir(normalBoxID, normalBoxDir); got != globalAssetsDir {
+		t.Fatalf("ordinary notebook without local assets dir = %q, want %q", got, globalAssetsDir)
 	}
-	if got, want := getImportAssetsDir(normalBoxID), filepath.Join(util.DataDir, "assets"); got != want {
-		t.Fatalf("ordinary notebook import assets dir = %q, want %q", got, want)
+	if _, err := os.Stat(filepath.Join(normalBoxDir, "assets")); !os.IsNotExist(err) {
+		t.Fatalf("selecting ordinary notebook assets unexpectedly created the directory: %v", err)
 	}
 
-	encryptedBoxID := "20260812000001-encrypt"
+	boxAssetsDir := filepath.Join(normalBoxDir, "assets")
+	if err := os.MkdirAll(boxAssetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if got := GetImportAssetsDir(normalBoxID, normalBoxDir); got != boxAssetsDir {
+		t.Fatalf("ordinary notebook assets dir = %q, want %q", got, boxAssetsDir)
+	}
+
+	docDir := filepath.Join(normalBoxDir, "20260812000001-docdir")
+	docAssetsDir := filepath.Join(docDir, "assets")
+	if err := os.MkdirAll(docAssetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if got := GetImportAssetsDir(normalBoxID, docDir); got != docAssetsDir {
+		t.Fatalf("ordinary document assets dir = %q, want %q", got, docAssetsDir)
+	}
+
+	encryptedBoxID := "20260812000002-encrypt"
 	markRuntimeEncryptedBox(encryptedBoxID)
 	t.Cleanup(func() {
 		forgetRuntimeEncryptedBox(encryptedBoxID)
 	})
-	if got, want := getImportAssetsDir(encryptedBoxID), filepath.Join(util.DataDir, encryptedBoxID, "assets"); got != want {
-		t.Fatalf("encrypted notebook import assets dir = %q, want %q", got, want)
+	encryptedBoxAssetsDir := filepath.Join(util.DataDir, encryptedBoxID, "assets")
+	if got := GetImportAssetsDir(encryptedBoxID, docDir); got != encryptedBoxAssetsDir {
+		t.Fatalf("encrypted notebook assets dir = %q, want %q", got, encryptedBoxAssetsDir)
+	}
+}
+
+func TestHTML2TreeUsesExistingNotebookAssets(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	boxID := "20260812000003-htmlimg"
+	boxAssetsDir := filepath.Join(util.DataDir, boxID, "assets")
+	if err := os.MkdirAll(boxAssetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	tree, _ := HTML2Tree(`<img alt="diagram" src="data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=">`, util.NewLute(), boxID)
+	entries, err := os.ReadDir(boxAssetsDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 {
+		t.Fatalf("notebook assets count = %d, want 1", len(entries))
+	}
+	if _, err = os.Stat(filepath.Join(util.DataDir, "assets")); !os.IsNotExist(err) {
+		t.Fatalf("HTML conversion unexpectedly created global assets: %v", err)
+	}
+
+	assets := getAssetsLinkDests(tree.Root, false)
+	if len(assets) != 1 {
+		t.Fatalf("converted asset references = %v, want one reference", assets)
+	}
+	if strings.Contains(assets[0], "?box=") {
+		t.Fatalf("ordinary notebook asset reference contains box query: %q", assets[0])
 	}
 }
 

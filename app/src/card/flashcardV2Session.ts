@@ -392,7 +392,7 @@ const openFlashcardV2SessionTags = (targetType: "source" | "card", targetID: str
             title: window.siyuan.languages.tag,
             width: isMobile() ? "92vw" : "520px",
             height: "70vh",
-            content: `<div class="b3-dialog__content" style="box-sizing:border-box;height:100%;overflow:auto">${choices || `<div class="card__empty">${window.siyuan.languages.emptyContent}</div>`}</div>
+            content: `<div class="b3-dialog__content card__v2-panel"><div class="b3-list b3-list--background fn__flex-1 card__v2-panel-list">${choices || `<div class="card__empty">${window.siyuan.languages.emptyContent}</div>`}</div></div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
@@ -420,7 +420,7 @@ const openFlashcardV2SessionDue = (cardID: string, due: number, callback: () => 
     const dueDialog = new Dialog({
         title: window.siyuan.languages.setDueTime,
         width: isMobile() ? "92vw" : "420px",
-        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" type="datetime-local" value="${value}"></div>
+        content: `<div class="b3-dialog__content card__v2-form"><input class="b3-text-field fn__block" type="datetime-local" value="${value}"></div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>

@@ -320,7 +320,7 @@ const renderReviewSet = (revision: IFlashcardEntityRevision<IReviewSet>, summary
 <span class="b3-list-item__meta b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDueCard}">${summary.due}</span>
 <span class="b3-list-item__meta b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.new}">${summary.included}</span>
 <span class="b3-list-item__meta b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}">${summary.excluded}</span>` : "";
-    return `<li class="b3-list-item b3-list-item--narrow" data-id="${escapeAttr(revision.entityID)}" data-revision="${escapeAttr(revision.revisionID)}" data-review-mode="${escapeAttr(revision.payload.defaultReviewMode || "normal")}">
+    return `<li class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${escapeAttr(revision.entityID)}" data-revision="${escapeAttr(revision.revisionID)}" data-review-mode="${escapeAttr(revision.payload.defaultReviewMode || "normal")}">
 <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg>
 <span class="b3-list-item__text">${escapeHtml(revision.payload.name)}</span>
 <span class="b3-list-item__meta">${revision.payload.defaultReviewMode === "reinforcement" ? window.siyuan.languages.flashcardReviewReinforcement : window.siyuan.languages.flashcardReviewNormal}</span>
@@ -511,7 +511,8 @@ const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IRevi
         const dialog = new Dialog({
             title: window.siyuan.languages.flashcardReviewSet,
             width: isMobile() ? "92vw" : "560px",
-            content: `<div class="b3-dialog__content">
+            height: "82vh",
+            content: `<div class="b3-dialog__content card__v2-form">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.name}</div><input data-type="name" class="b3-text-field fn__block" value="${escapeAttr(current?.name || initialName)}"></label>
 <label class="b3-label fn__flex-center"><input data-type="queryEnabled" class="b3-switch fn__flex-center" type="checkbox"${current?.queryAST || initialQuery ? " checked" : ""}><span class="fn__space"></span>${window.siyuan.languages.filter}</label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.targetNotebook}</div><select data-filter="notebookID" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${notebooks.map((notebook) => `<option value="${escapeAttr(notebook.id)}">${escapeHtml(notebook.name)}</option>`).join("")}</select></label>
@@ -581,7 +582,7 @@ const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IRevi
 };
 
 const renderFlashcardV2Preset = (revision: IFlashcardEntityRevision<IFlashcardPreset>) => {
-    return `<li class="b3-list-item b3-list-item--narrow" data-id="${escapeAttr(revision.entityID)}" data-revision="${escapeAttr(revision.revisionID)}">
+    return `<li class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${escapeAttr(revision.entityID)}" data-revision="${escapeAttr(revision.revisionID)}">
 <svg class="b3-list-item__graphic"><use xlink:href="#iconSettings"></use></svg>
 <span class="b3-list-item__text">${escapeHtml(revision.payload.name)}</span>
 <span class="b3-list-item__meta">${revision.payload.requestRetention} / ${revision.payload.maximumInterval}</span>
@@ -607,7 +608,8 @@ const openFlashcardV2PresetEditor = (revision: IFlashcardEntityRevision<IFlashca
     const dialog = new Dialog({
         title: window.siyuan.languages.flashcardPreset,
         width: isMobile() ? "92vw" : "560px",
-        content: `<div class="b3-dialog__content" style="overflow:auto">
+        height: "82vh",
+        content: `<div class="b3-dialog__content card__v2-form">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.name}</div><input data-type="name" class="b3-text-field fn__block" value="${escapeAttr(current?.name || "")}"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamRequestRetention}</div><input data-type="retention" class="b3-text-field fn__block" type="number" min="0.01" max="1" step="0.01" value="${current?.requestRetention ?? window.siyuan.config.flashcard.requestRetention}"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardFSRSParamMaximumInterval}</div><input data-type="maximumInterval" class="b3-text-field fn__block" type="number" min="1" step="1" value="${current?.maximumInterval ?? window.siyuan.config.flashcard.maximumInterval}"></label>
@@ -682,9 +684,9 @@ export const openFlashcardV2Presets = () => {
                 title: window.siyuan.languages.flashcardPreset,
                 width: isMobile() ? "92vw" : "640px",
                 height: "70vh",
-                content: `<div class="b3-dialog__content fn__flex-column" style="box-sizing:border-box;height:100%">
-<div class="fn__flex"><span class="fn__flex-1"></span><button data-type="create" class="b3-button b3-button--text"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}</button></div>
-<div class="fn__hr"></div><ul class="b3-list b3-list--background fn__flex-1">${revisions.map(renderFlashcardV2Preset).join("")}</ul></div>`,
+                content: `<div class="b3-dialog__content card__v2-panel">
+<div class="card__v2-panel-toolbar"><span class="fn__flex-1"></span><button data-type="create" class="b3-button b3-button--text"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}</button></div>
+<ul class="b3-list b3-list--background fn__flex-1 card__v2-panel-list">${revisions.map(renderFlashcardV2Preset).join("")}</ul></div>`,
             });
             dialog.element.addEventListener("click", (event) => {
                 const target = (event.target as HTMLElement).closest("[data-type]") as HTMLElement;
@@ -746,11 +748,11 @@ const openFlashcardV2ReviewSetSession = (app: App, reviewSetID: string, name: st
     const dialog = new Dialog({
         title: name,
         width: isMobile() ? "92vw" : "480px",
-        content: `<div class="b3-dialog__content">
+        content: `<div class="b3-dialog__content card__v2-form">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardSessionMode}</div>
 <select data-type="reviewMode" class="b3-select fn__block"><option value="normal">${window.siyuan.languages.flashcardReviewNormal}</option><option value="reinforcement">${window.siyuan.languages.flashcardReviewReinforcement}</option></select></label>
-<div data-type="reinforcementOptions" class="fn__none">
-<div class="b3-label ft__secondary">${window.siyuan.languages.flashcardReviewReinforcementTip}</div>
+<div data-type="reinforcementOptions" class="fn__none card__v2-form-section">
+<div class="card__v2-form-note">${window.siyuan.languages.flashcardReviewReinforcementTip}</div>
 <label class="b3-label fn__flex-center"><input data-type="includeSuspended" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardIncludeSuspended}</label>
 <label class="b3-label fn__flex-center"><input data-type="includeBuried" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardIncludeBuried}</label>
 <label class="b3-label fn__flex-center"><input data-type="includePaused" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardIncludePaused}</label>
@@ -856,9 +858,9 @@ const openFlashcardV2Membership = (cardIDs: string | string[], callback: () => v
         const dialog = new Dialog({
             title: window.siyuan.languages.flashcardReviewSet,
             width: isMobile() ? "92vw" : "460px",
-            content: `<div class="b3-dialog__content">
-<select data-type="reviewSet" class="b3-select fn__block">${reviewSets.map((revision) => `<option value="${escapeAttr(revision.entityID)}">${escapeHtml(revision.payload.name)}</option>`).join("")}</select>
-<div class="fn__hr"></div><select data-type="mode" class="b3-select fn__block"><option value="include">${window.siyuan.languages.new}</option><option value="exclude">${window.siyuan.languages.remove}</option><option value="automatic">${window.siyuan.languages.default}</option></select>
+            content: `<div class="b3-dialog__content card__v2-form">
+<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardReviewSet}</div><select data-type="reviewSet" class="b3-select fn__block">${reviewSets.map((revision) => `<option value="${escapeAttr(revision.entityID)}">${escapeHtml(revision.payload.name)}</option>`).join("")}</select></label>
+<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.manage}</div><select data-type="mode" class="b3-select fn__block"><option value="include">${window.siyuan.languages.new}</option><option value="exclude">${window.siyuan.languages.remove}</option><option value="automatic">${window.siyuan.languages.default}</option></select></label>
 </div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
         });
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
@@ -894,7 +896,7 @@ const openFlashcardV2Direction = (sourceID: string, cards: IFlashcardSearchResul
     const dialog = new Dialog({
         title: window.siyuan.languages.type,
         width: isMobile() ? "92vw" : "420px",
-        content: `<div class="b3-dialog__content"><select class="b3-select fn__block">
+        content: `<div class="b3-dialog__content card__v2-form"><select class="b3-select fn__block">
 <option value="forward">${window.siyuan.languages.flashcardDirectionForward}</option>
 <option value="reverse">${window.siyuan.languages.flashcardDirectionReverse}</option>
 <option value="bidirectional">${window.siyuan.languages.flashcardDirectionBidirectional}</option>
@@ -937,7 +939,7 @@ const openFlashcardV2CardHistory = (cardID: string) => {
             title: window.siyuan.languages.dataHistory,
             width: isMobile() ? "92vw" : "640px",
             height: "70vh",
-            content: `<div class="b3-dialog__content" style="box-sizing:border-box;height:100%;overflow:auto"><ul class="b3-list b3-list--background">${events.map((event) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(event.payload.rating || event.payload.action || event.eventType)}</span><span class="b3-list-item__meta">${new Date(event.occurredAt).toLocaleString()}</span></li>`).join("")}</ul></div>`,
+            content: `<div class="b3-dialog__content card__v2-panel"><ul class="b3-list b3-list--background fn__flex-1 card__v2-panel-list">${events.map((event) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(event.payload.rating || event.payload.action || event.eventType)}</span><span class="b3-list-item__meta">${new Date(event.occurredAt).toLocaleString()}</span></li>`).join("")}</ul></div>`,
         });
     });
 };
@@ -964,7 +966,7 @@ const openFlashcardV2Due = (card: IFlashcardSearchResult, callback: () => void) 
     const dialog = new Dialog({
         title: window.siyuan.languages.setDueTime,
         width: isMobile() ? "92vw" : "420px",
-        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" type="datetime-local" value="${flashcardV2LocalDateTime(card.reviewState.due || Date.now())}"></div>
+        content: `<div class="b3-dialog__content card__v2-form"><input class="b3-text-field fn__block" type="datetime-local" value="${flashcardV2LocalDateTime(card.reviewState.due || Date.now())}"></div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
@@ -998,7 +1000,7 @@ const openFlashcardV2BatchDue = (cardIDs: string[], callback: () => void) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.setDueTime,
         width: isMobile() ? "92vw" : "420px",
-        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" type="datetime-local" value="${flashcardV2LocalDateTime(Date.now())}"></div>
+        content: `<div class="b3-dialog__content card__v2-form"><input class="b3-text-field fn__block" type="datetime-local" value="${flashcardV2LocalDateTime(Date.now())}"></div>
 <div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
     });
     const input = dialog.element.querySelector("input") as HTMLInputElement;
@@ -1033,7 +1035,7 @@ const openFlashcardV2CardSetting = (card: IFlashcardSearchResult, type: "preset"
         const dialog = new Dialog({
             title: type === "preset" ? window.siyuan.languages.flashcardPreset : window.siyuan.languages.flashcardPriority,
             width: isMobile() ? "92vw" : "420px",
-            content: `<div class="b3-dialog__content"><select class="b3-select fn__block">
+            content: `<div class="b3-dialog__content card__v2-form"><select class="b3-select fn__block">
 <option value="">${window.siyuan.languages.default}</option>
 ${type === "preset" ? presetOptions : priorityOptions}
 </select></div>
@@ -1091,8 +1093,8 @@ const openFlashcardV2StudyPolicy = (card: IFlashcardSearchResult, scopeType: "do
         const dialog = new Dialog({
             title: `${scopeType === "document" ? window.siyuan.languages.doc : window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardPriority}`,
             width: isMobile() ? "92vw" : "440px",
-            content: `<div class="b3-dialog__content"><select data-type="priority" class="b3-select fn__block">${options}</select>
-<div class="fn__hr"></div><label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.setDueTime}</div><input data-type="targetDate" class="b3-text-field fn__block" type="datetime-local" value="${current?.payload.targetDate ? flashcardV2LocalDateTime(current.payload.targetDate) : ""}"></label></div>
+            content: `<div class="b3-dialog__content card__v2-form"><select data-type="priority" class="b3-select fn__block">${options}</select>
+<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.setDueTime}</div><input data-type="targetDate" class="b3-text-field fn__block" type="datetime-local" value="${current?.payload.targetDate ? flashcardV2LocalDateTime(current.payload.targetDate) : ""}"></label></div>
 <div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
         });
         const priority = dialog.element.querySelector('[data-type="priority"]') as HTMLSelectElement;
@@ -1141,7 +1143,7 @@ const flashcardTagPath = (tag: IFlashcardTag, tags: Map<string, IFlashcardTag>) 
 const renderFlashcardTagChoices = (tags: IFlashcardTag[], selected: Set<string>) => {
     const byID = new Map(tags.map((tag) => [tag.id, tag]));
     return [...tags].sort((left, right) => flashcardTagPath(left, byID).localeCompare(flashcardTagPath(right, byID)))
-        .map((tag) => `<div class="b3-list-item b3-list-item--narrow" data-id="${escapeAttr(tag.id)}">
+        .map((tag) => `<div class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${escapeAttr(tag.id)}">
 <span class="b3-list-item__text">${escapeHtml(flashcardTagPath(tag, byID))}</span>
 <input class="b3-switch" type="checkbox" value="${escapeAttr(tag.id)}"${selected.has(tag.id) ? " checked" : ""}>
 <span data-type="editTag" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></span>
@@ -1177,7 +1179,7 @@ const openFlashcardV2TagEditor = (revision: IFlashcardEntityRevision<IFlashcardT
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
         width: isMobile() ? "92vw" : "460px",
-        content: `<div class="b3-dialog__content">
+        content: `<div class="b3-dialog__content card__v2-form">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.name}</div><input data-type="name" class="b3-text-field fn__block" value="${escapeAttr(revision.payload.name)}"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.move}</div><select data-type="parent" class="b3-select fn__block">${flashcardTagParentOptions(tags, flashcardTagDescendants(revision.entityID, tags))}</select></label>
 </div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
@@ -1218,11 +1220,11 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
             title: window.siyuan.languages.tag,
             width: isMobile() ? "92vw" : "520px",
             height: "70vh",
-            content: `<div class="b3-dialog__content fn__flex-column" style="box-sizing:border-box;height:100%">
-<div class="fn__flex"><input class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.newTag}"><span class="fn__space"></span>
+            content: `<div class="b3-dialog__content card__v2-panel">
+<div class="card__v2-panel-toolbar"><input class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.newTag}">
 <button data-type="createTag" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}</button></div>
-<div class="fn__hr"></div><label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.move}</div><select data-type="createTagParent" class="b3-select fn__block">${flashcardTagParentOptions(tags)}</select></label>
-<div class="fn__hr"></div><div data-tag-list class="b3-list b3-list--background fn__flex-1" style="overflow:auto">${renderFlashcardTagChoices(tags, selected)}</div></div>
+<label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.move}</div><select data-type="createTagParent" class="b3-select fn__block">${flashcardTagParentOptions(tags)}</select></label>
+<div data-tag-list class="b3-list b3-list--background fn__flex-1 card__v2-panel-list">${renderFlashcardTagChoices(tags, selected)}</div></div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
@@ -1311,7 +1313,7 @@ const openFlashcardV2FlagDefinitions = (
     const dialog = new Dialog({
         title: window.siyuan.languages.cardStatus,
         width: isMobile() ? "92vw" : "480px",
-        content: `<div class="b3-dialog__content">${Array.from({length: 7}, (_, index) => {
+        content: `<div class="b3-dialog__content card__v2-form card__v2-form--grid">${Array.from({length: 7}, (_, index) => {
             const flag = index + 1;
             return `<label class="b3-label"><div class="b3-label__text"${flashcardFlagStyle(flag)}>● ${flag}</div><input data-flag="${flag}" class="b3-text-field fn__block" maxlength="100" value="${escapeAttr(byFlag.get(flag)?.payload.name || "")}"></label>`;
         }).join("")}</div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button></div>`,
@@ -1384,7 +1386,7 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
         title: window.siyuan.languages.filter,
         width: isMobile() ? "92vw" : "620px",
         height: "70vh",
-        content: `<div class="b3-dialog__content" style="box-sizing:border-box;height:100%;overflow:auto">
+        content: `<div class="b3-dialog__content card__v2-form card__v2-form--grid" style="height:100%">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.search}</div><input data-filter="content" class="b3-text-field fn__block" value="${escapeAttr(filters.content || "")}"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.targetNotebook}</div><select data-filter="notebookID" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${notebooks.map((notebook) => `<option value="${escapeAttr(notebook.id)}">${escapeHtml(notebook.name)}</option>`).join("")}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.copyPath}</div><input data-filter="path" class="b3-text-field fn__block" placeholder="/" value="${escapeAttr(filters.path || "")}"></label>
@@ -1443,14 +1445,14 @@ const openFlashcardV2Conflicts = (callback: () => void) => {
             title: window.siyuan.languages.conflict,
             width: isMobile() ? "96vw" : "760px",
             height: "70vh",
-            content: `<div class="b3-dialog__content" style="box-sizing:border-box;height:100%;overflow:auto">
-${conflicts.length === 0 ? `<div class="card__empty">${window.siyuan.languages.emptyContent}</div>` : conflicts.map((conflict, conflictIndex) => `<div class="b3-label" data-conflict-index="${conflictIndex}">
-<div class="b3-label__text">${escapeHtml(conflict.entityType)} - ${escapeHtml(conflict.entityID)}</div>
+            content: `<div class="b3-dialog__content card__v2-conflicts">
+${conflicts.length === 0 ? `<div class="card__empty">${window.siyuan.languages.emptyContent}</div>` : conflicts.map((conflict, conflictIndex) => `<div class="card__v2-conflict" data-conflict-index="${conflictIndex}">
+<div class="card__v2-section-title">${escapeHtml(conflict.entityType)} - ${escapeHtml(conflict.entityID)}</div>
 ${conflict.revisions.map((revision) => {
                 const payload = JSON.stringify(revision.payload, undefined, 2);
-                return `<label class="b3-label"><div class="fn__flex-center"><input type="radio" name="flashcardConflict${conflictIndex}" value="${escapeAttr(revision.revisionID)}"${revision.revisionID === conflict.selectedRevisionID ? " checked" : ""}><span class="fn__space"></span><span class="fn__flex-1">${new Date(revision.updatedAt).toLocaleString()}</span><span class="b3-list-item__meta">${escapeHtml(revision.revisionID)}</span></div><pre class="fn__code" style="white-space:pre-wrap;max-height:160px;overflow:auto">${escapeHtml(payload.length > 4000 ? `${payload.slice(0, 4000)}...` : payload)}</pre></label>`;
+                return `<label class="card__v2-conflict-revision"><div class="fn__flex-center"><input type="radio" name="flashcardConflict${conflictIndex}" value="${escapeAttr(revision.revisionID)}"${revision.revisionID === conflict.selectedRevisionID ? " checked" : ""}><span class="fn__space"></span><span class="fn__flex-1">${new Date(revision.updatedAt).toLocaleString()}</span><span class="b3-list-item__meta">${escapeHtml(revision.revisionID)}</span></div><pre class="fn__code">${escapeHtml(payload.length > 4000 ? `${payload.slice(0, 4000)}...` : payload)}</pre></label>`;
             }).join("")}
-</div>`).join('<div class="fn__hr"></div>')}
+</div>`).join("")}
 </div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text"${conflicts.length === 0 ? " disabled" : ""}>${window.siyuan.languages.confirm}</button></div>`,
         });
         const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
@@ -1968,14 +1970,12 @@ export const openFlashcardV2ReviewSets = (app: App) => {
                 title: window.siyuan.languages.flashcardReviewSet,
                 width: isMobile() ? "92vw" : "640px",
                 height: "70vh",
-                content: `<div class="b3-dialog__content fn__flex-column" style="box-sizing: border-box;height: 100%">
-<div class="fn__flex">
+                content: `<div class="b3-dialog__content card__v2-panel">
+<div class="card__v2-panel-toolbar">
     <input class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.flashcardReviewSet}">
-    <span class="fn__space"></span>
     <button data-type="create" class="b3-button b3-button--text"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}</button>
 </div>
-<div class="fn__hr"></div>
-<ul class="b3-list b3-list--background fn__flex-1">${revisions.map((revision) => renderReviewSet(revision)).join("")}</ul>
+<ul class="b3-list b3-list--background fn__flex-1 card__v2-panel-list">${revisions.map((revision) => renderReviewSet(revision)).join("")}</ul>
 </div>`,
             });
             const refreshReviewSet = (revision: IFlashcardEntityRevision<IReviewSet>) => {
@@ -2068,8 +2068,8 @@ export const openFlashcardV2BasicSource = (blockIDs: string[]) => {
             const dialog = new Dialog({
                 title: window.siyuan.languages.riffCard,
                 width: isMobile() ? "92vw" : "520px",
-                content: `<div class="b3-dialog__content">
-<label class="b3-label">
+                content: `<div class="b3-dialog__content card__v2-basic card__v2-form">
+<label class="b3-label b3-label--inner card__v2-basic-field">
     <div class="b3-label__text">${window.siyuan.languages.type}</div>
     <select data-type="direction" class="b3-select fn__block">
         <option value="forward">${window.siyuan.languages.flashcardDirectionForward}</option>
@@ -2078,8 +2078,7 @@ export const openFlashcardV2BasicSource = (blockIDs: string[]) => {
         <option value="closed">${window.siyuan.languages.flashcardDirectionClosed}</option>
     </select>
 </label>
-<div class="fn__hr"></div>
-<label class="b3-label">
+<label class="b3-label b3-label--inner card__v2-basic-field">
     <div class="b3-label__text">${window.siyuan.languages.flashcardReviewSet}</div>
     <select data-type="reviewSets" class="b3-select fn__block" multiple size="${Math.min(6, Math.max(2, revisions.length))}">
         ${revisions.map((revision) => `<option value="${escapeAttr(revision.entityID)}">${escapeHtml(revision.payload.name)}</option>`).join("")}
@@ -2782,21 +2781,20 @@ export const openFlashcardV2AnkiPreview = () => {
                 title: `Anki - ${window.siyuan.languages.dataMigration}`,
                 width: isMobile() ? "92vw" : "720px",
                 height: "70vh",
-                content: `<div class="b3-dialog__content" style="box-sizing:border-box;height:100%;overflow:auto">
+                content: `<div class="b3-dialog__content card__v2-panel">
 ${statisticsItem(window.siyuan.languages.total, preview.noteCount)}
 ${statisticsItem(window.siyuan.languages.riffCard, preview.cardCount)}
 ${statisticsItem(window.siyuan.languages.revisionCount, preview.reviewCount)}
 ${statisticsItem(window.siyuan.languages.assets, preview.mediaCount)}
-<div class="fn__hr"></div>
-<ul class="b3-list b3-list--background">
+<div class="card__v2-section-title">${window.siyuan.languages.template}</div>
+<ul class="b3-list b3-list--background card__v2-panel-list">
 ${preview.noteTypes.map((noteType) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(noteType.name)}</span><span class="b3-list-item__meta">${escapeHtml(noteType.conversion)} · ${noteType.noteCount}</span></li>`).join("")}
 </ul>
-<div class="fn__hr"></div>
-<ul class="b3-list b3-list--background">
+<div class="card__v2-section-title">${window.siyuan.languages.flashcardReviewSet}</div>
+<ul class="b3-list b3-list--background card__v2-panel-list">
 ${preview.decks.map((deck) => `<li class="b3-list-item"><span class="b3-list-item__text">${escapeHtml(deck.name)}</span><span class="b3-list-item__meta">${deck.cardCount}</span></li>`).join("")}
 </ul>
-${preview.unsupported.length === 0 ? "" : `<div class="fn__hr"></div><div class="ft__warning">${preview.unsupported.map(escapeHtml).join("<br>")}</div>`}
-<div class="fn__hr"></div>
+${preview.unsupported.length === 0 ? "" : `<div class="ft__warning">${preview.unsupported.map(escapeHtml).join("<br>")}</div>`}
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.targetNotebook}</div>
 <select data-type="notebook" class="b3-select fn__block"${notebooks.length === 0 ? " disabled" : ""}>
 ${notebooks.map((notebook) => `<option value="${escapeAttr(notebook.id)}">${escapeHtml(notebook.name)}</option>`).join("")}
@@ -2872,7 +2870,7 @@ const flashcardV2StatisticsBars = <T, >(values: T[], label: (value: T) => string
 };
 
 const flashcardV2StatisticsDistribution = (label: string, values: IFlashcardStatisticsDistribution[]) => {
-    return `<div class="b3-label">${escapeHtml(label)}</div>${flashcardV2StatisticsBars(values,
+    return `<div class="card__v2-section-title">${escapeHtml(label)}</div>${flashcardV2StatisticsBars(values,
         (value) => value.label, (value) => value.count)}`;
 };
 
@@ -2882,7 +2880,7 @@ const renderFlashcardV2Statistics = (statistics: IFlashcardStatistics) => {
     const percent = (value: number) => `${(value * 100).toFixed(1)}%`;
     const averageDuration = statistics.history.averageDurationMS === undefined ? "-" :
         `${(statistics.history.averageDurationMS / 1000).toFixed(1)} ${window.siyuan.languages.second}`;
-    return `<div class="b3-label">${window.siyuan.languages.cardStatus}</div>
+    return `<div class="card__v2-section-title">${window.siyuan.languages.cardStatus}</div>
 ${statisticsItem(window.siyuan.languages.riffCard, statistics.overview.currentCards)}
 ${statisticsItem(window.siyuan.languages.flashcardNewCard, state.new || 0)}
 ${statisticsItem(window.siyuan.languages.flashcardReviewCard, (state.learning || 0) + (state.review || 0) + (state.relearning || 0))}
@@ -2891,7 +2889,7 @@ ${statisticsItem(window.siyuan.languages.flashcardSuspendedCards, statistics.ove
 ${statisticsItem(window.siyuan.languages.flashcardBuriedCards, statistics.overview.buried)}
 ${statisticsItem(window.siyuan.languages.flashcardLeeches, statistics.overview.leeches)}
 <div class="fn__hr"></div>
-<div class="b3-label">${window.siyuan.languages.flashcardReviewHistory}</div>
+<div class="card__v2-section-title">${window.siyuan.languages.flashcardReviewHistory}</div>
 ${statisticsItem(window.siyuan.languages.total, statistics.history.reviews)}
 ${statisticsItem(window.siyuan.languages.flashcardReviewedCards, statistics.history.uniqueCards)}
 ${statisticsItem(window.siyuan.languages.flashcardAccuracy, percent(statistics.history.accuracy))}
@@ -2905,7 +2903,7 @@ ${statisticsItem(window.siyuan.languages.cardRatingEasy, ratings.easy || 0)}
 ${flashcardV2StatisticsBars(statistics.series, (value) => new Date(value.start).toLocaleDateString(),
         (value) => value.reviews)}
 <div class="fn__hr"></div>
-<div class="b3-label">${window.siyuan.languages.flashcardUpcomingReviews}</div>
+<div class="card__v2-section-title">${window.siyuan.languages.flashcardUpcomingReviews}</div>
 ${flashcardV2StatisticsBars(statistics.futureDue, (value) => new Date(value.start).toLocaleDateString(),
         (value) => value.cards)}
 <div class="fn__hr"></div>
@@ -2927,13 +2925,13 @@ export const openFlashcardV2Statistics = (reviewSetID = "", query?: IFlashcardQu
             title: window.siyuan.languages.flashcardStatistics,
             width: isMobile() ? "96vw" : "780px",
             height: "82vh",
-            content: `<div class="b3-dialog__content fn__flex-column" style="box-sizing:border-box;height:100%">
-<div class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardStatisticsRange}</div><div class="fn__flex">
-<input data-type="statisticsFrom" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(fromDate)}"><span class="fn__space"></span>
-<input data-type="statisticsTo" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(toDate)}"><span class="fn__space"></span>
-<select data-type="statisticsBucket" class="b3-select"><option value="day">${window.siyuan.languages.day}</option><option value="week">${window.siyuan.languages.week}</option><option value="month">${window.siyuan.languages.month}</option></select><span class="fn__space"></span>
+            content: `<div class="b3-dialog__content fn__flex-column card__v2-statistics">
+<div class="card__v2-statistics-filter"><div class="card__v2-section-title">${window.siyuan.languages.flashcardStatisticsRange}</div><div class="card__v2-statistics-controls">
+<input data-type="statisticsFrom" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(fromDate)}">
+<input data-type="statisticsTo" class="b3-text-field fn__flex-1" type="date" value="${flashcardV2StatisticsDate(toDate)}">
+<select data-type="statisticsBucket" class="b3-select"><option value="day">${window.siyuan.languages.day}</option><option value="week">${window.siyuan.languages.week}</option><option value="month">${window.siyuan.languages.month}</option></select>
 <button data-type="statisticsApply" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
-</div></div><div class="fn__hr"></div><div data-type="statisticsContent" style="overflow:auto"></div></div>`,
+</div></div><div data-type="statisticsContent" class="card__v2-statistics-content"></div></div>`,
         });
         const from = dialog.element.querySelector('[data-type="statisticsFrom"]') as HTMLInputElement;
         const to = dialog.element.querySelector('[data-type="statisticsTo"]') as HTMLInputElement;

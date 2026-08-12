@@ -996,7 +996,6 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 const buried = (current.reviewState.buriedUntil || 0) > Date.now();
                 menu.addItem({
                     id: "flashcardV2Bury",
-                    icon: "iconClock",
                     label: buried ? window.siyuan.languages.flashcardUnbury : window.siyuan.languages.flashcardBury,
                     click: () => {
                         if (buried) {

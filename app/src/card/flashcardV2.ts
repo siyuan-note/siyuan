@@ -1,6 +1,7 @@
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {showMessage} from "../dialog/message";
+import {Menu} from "../plugin/Menu";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {escapeAttr, escapeHtml} from "../util/escape";
@@ -785,7 +786,6 @@ const openFlashcardV2ReviewSetSession = (app: App, reviewSetID: string, name: st
 const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
     selectedCardIDs: ReadonlySet<string> = new Set(), flagDefinitions: IFlashcardFlagDefinition[] = [],
     grouped = false) => {
-    const buried = (result.reviewState.buriedUntil || 0) > Date.now();
     return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
 <input data-type="selectCard" class="b3-list-item__graphic" type="checkbox"${selectedCardIDs.has(result.card.id) ? " checked" : ""}>
 <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg>
@@ -795,15 +795,16 @@ ${grouped ? "" : `<span class="b3-list-item__text">${escapeHtml(result.sourceTit
 </span>
 ${result.sourceType === "qa" ? `<span data-type="direction" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDirectionBidirectional}"><svg><use xlink:href="#iconBoth"></use></svg></span>` : ""}
 <span data-type="preset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardPreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
-<span data-type="priority" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardPriority}"><svg><use xlink:href="#iconSort"></use></svg></span>
+<span data-type="priority" class="fn__none"></span>
 <span data-type="tags" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.tag}"><svg><use xlink:href="#iconTag"></use></svg></span>
 <span data-type="suspend" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${result.reviewState.suspended ? window.siyuan.languages.continueReview1 : window.siyuan.languages.flashcardDirectionClosed}"><svg><use xlink:href="#icon${result.reviewState.suspended ? "Play" : "Pause"}"></use></svg></span>
-<span data-type="bury" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${buried ? window.siyuan.languages.flashcardUnbury : window.siyuan.languages.flashcardBury}"><svg><use xlink:href="#iconClock"></use></svg></span>
+<span data-type="bury" class="fn__none"></span>
 <span data-type="due" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.setDueTime}"><svg><use xlink:href="#iconCalendar"></use></svg></span>
 <span data-type="flag" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.cardStatus} - ${escapeAttr(flashcardFlagLabel(result.card.flag, flagDefinitions))}"${flashcardFlagStyle(result.card.flag)}><svg><use xlink:href="#iconBookmark"></use></svg></span>
 <span data-type="history" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.dataHistory}"><svg><use xlink:href="#iconHistory"></use></svg></span>
-${reviewSetID ? `<span data-type="exclude" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconClose"></use></svg></span>` : `<span data-type="membership" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardReviewSet}"><svg><use xlink:href="#iconDatabase"></use></svg></span>`}
+${reviewSetID ? `<span data-type="exclude" class="b3-list-item__action b3-list-item__action--warning b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconClose"></use></svg></span>` : '<span data-type="membership" class="fn__none"></span>'}
 <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}"><svg><use xlink:href="#iconUndo"></use></svg></span>
+<span data-type="more" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
 </li>`;
 };
 
@@ -1562,7 +1563,7 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
 <button data-type="statistics" class="b3-button b3-button--outline"><svg><use xlink:href="#iconGraph"></use></svg>${window.siyuan.languages.flashcardStatistics}</button>
 ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.flashcardReviewSet}</button>` : ""}
 <button data-type="flagDefinitions" class="b3-button b3-button--outline"><svg><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.cardStatus}</button>
-<button data-type="group" class="b3-button b3-button--outline"><svg><use xlink:href="#iconList"></use></svg>${window.siyuan.languages.group}</button>
+<button data-type="group" class="b3-button b3-button--outline">${window.siyuan.languages.group}</button>
 </div>
 </div>
 <div class="card__v2-management-selection">
@@ -1710,6 +1711,33 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                     return;
                 }
                 if (!item) {
+                    return;
+                }
+                if (type === "more") {
+                    const card = cards.find((result) => result.card.id === item.dataset.id);
+                    if (!card) {
+                        return;
+                    }
+                    const menu = new Menu();
+                    const addAction = (id: string, label: string, action: string) => {
+                        menu.addItem({
+                            id,
+                            label,
+                            click: () => (item.querySelector(`[data-type="${action}"]`) as HTMLElement)?.click(),
+                        });
+                    };
+                    addAction("flashcardV2Priority", window.siyuan.languages.flashcardPriority, "priority");
+                    addAction("flashcardV2Bury", (card.reviewState.buriedUntil || 0) > Date.now() ?
+                        window.siyuan.languages.flashcardUnbury : window.siyuan.languages.flashcardBury, "bury");
+                    if (!reviewSetID) {
+                        addAction("flashcardV2Membership", window.siyuan.languages.flashcardReviewSet, "membership");
+                    }
+                    if (isMobile()) {
+                        menu.fullscreen();
+                    } else {
+                        const rect = target.getBoundingClientRect();
+                        menu.open({x: rect.left, y: rect.bottom});
+                    }
                     return;
                 }
                 if (type === "selectCard") {

@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "Dynamický filter",
+	"flashcardDynamicFilterTip": "Automaticky zahrnúť karty, ktoré spĺňajú nasledujúce podmienky",
 	"flashcardBlockCard": "Bloková kartička",
 	"quickMakeCardCanceled": "Rýchle karty boli odstránené",
 	"quickMakeCardCompleted": "Rýchle vytváranie kariet bolo dokončené",

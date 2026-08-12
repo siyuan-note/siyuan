@@ -515,11 +515,18 @@ const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IRevi
             height: "82vh",
             content: `<div class="b3-dialog__content card__v2-form">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.name}</div><input data-type="name" class="b3-text-field fn__block" value="${escapeAttr(current?.name || initialName)}"></label>
-<label class="b3-label fn__flex-center"><input data-type="queryEnabled" class="b3-switch fn__flex-center" type="checkbox"${current?.queryAST || initialQuery ? " checked" : ""}><span class="fn__space"></span>${window.siyuan.languages.filter}</label>
+<div class="card__v2-filter">
+<label class="card__v2-filter-toggle">
+<span class="card__v2-filter-copy"><span class="card__v2-filter-title">${window.siyuan.languages.flashcardDynamicFilter}</span><span class="card__v2-filter-tip">${window.siyuan.languages.flashcardDynamicFilterTip}</span></span>
+<input data-type="queryEnabled" class="b3-switch" type="checkbox"${current?.queryAST || initialQuery ? " checked" : ""}>
+</label>
+<div data-type="queryFilters" class="card__v2-filter-fields">
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.targetNotebook}</div><select data-filter="notebookID" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${notebooks.map((notebook) => `<option value="${escapeAttr(notebook.id)}">${escapeHtml(notebook.name)}</option>`).join("")}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.copyPath}</div><input data-filter="path" class="b3-text-field fn__block" value="${escapeAttr(filters.path || "")}" placeholder="/"></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.tag}</div><select data-filter="tagID" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${tags.map((tag) => `<option value="${escapeAttr(tag.id)}">${escapeHtml(flashcardTagPath(tag, tagMap))}</option>`).join("")}</select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardPriority}</div><select data-filter="priority" class="b3-select fn__block"><option value="">${window.siyuan.languages.all}</option>${priorityOptions}</select></label>
+</div>
+</div>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.reviewMode}</div><select data-type="reviewMode" class="b3-select fn__block"><option value="normal">${window.siyuan.languages.flashcardReviewNormal}</option><option value="reinforcement">${window.siyuan.languages.flashcardReviewReinforcement}</option></select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.sort}</div><select data-type="order" class="b3-select fn__block"><option value="priorityDue">${window.siyuan.languages.sortDefault}</option><option value="due">${window.siyuan.languages.setDueTime}</option><option value="added">${window.siyuan.languages.createdAt}</option><option value="random">${window.siyuan.languages.random}</option></select></label>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardNewCardLimit}</div><input data-type="newLimit" class="b3-text-field fn__block" type="number" min="0" value="${current?.newLimit ?? window.siyuan.config.flashcard.newCardLimit}"></label>
@@ -535,7 +542,11 @@ const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IRevi
         const order = dialog.element.querySelector('[data-type="order"]') as HTMLSelectElement;
         order.value = current?.order?.mode || "priorityDue";
         const queryEnabled = dialog.element.querySelector('[data-type="queryEnabled"]') as HTMLInputElement;
-        const updateQueryEnabled = () => filterElements.forEach((element) => element.disabled = !queryEnabled.checked);
+        const queryFilters = dialog.element.querySelector('[data-type="queryFilters"]');
+        const updateQueryEnabled = () => {
+            filterElements.forEach((element) => element.disabled = !queryEnabled.checked);
+            queryFilters.classList.toggle("card__v2-filter-fields--disabled", !queryEnabled.checked);
+        };
         updateQueryEnabled();
         queryEnabled.addEventListener("change", updateQueryEnabled);
         let filtersChanged = revision === undefined && initialQuery === undefined;
@@ -2164,6 +2175,7 @@ interface IFlashcardV2ImageEditor {
     };
     hasShapes: () => boolean;
     redraw: () => void;
+    destroy: () => void;
 }
 
 interface IFlashcardV2AdvancedGenerationConfig {
@@ -2320,7 +2332,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         const index = Math.max(0, groupOrder.indexOf(groupID));
         return `hsla(${(index * 67 + 210) % 360}, 72%, 48%, ${alpha})`;
     };
-    const drawShape = (shape: IFlashcardV2ImageShape, width: number, height: number, alpha = .55) => {
+    const drawShape = (shape: IFlashcardV2ImageShape, width: number, height: number, alpha = 1) => {
         context.beginPath();
         if (shape.type === "polygon") {
             shape.points?.forEach((item, index) => {
@@ -2403,6 +2415,32 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         polygonButton.disabled = true;
         redraw();
     };
+    const undo = () => {
+        if (polygon.length > 0) {
+            polygon.pop();
+            polygonButton.disabled = polygon.length < 3;
+        } else {
+            const removed = shapes.pop();
+            if (removed && !shapes.some((shape) => shape.groupID === removed.groupID)) {
+                groupOrder.splice(groupOrder.indexOf(removed.groupID), 1);
+                updateGroups();
+            }
+        }
+        onChange(shapes.length > 0);
+        redraw();
+    };
+    const keydown = (event: KeyboardEvent) => {
+        if (element.classList.contains("fn__none") || event.altKey || !(event.ctrlKey || event.metaKey) ||
+            event.key.toLowerCase() !== "z") {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        if (!event.shiftKey) {
+            undo();
+        }
+    };
+    document.addEventListener("keydown", keydown, true);
     canvas.addEventListener("pointerdown", (event) => {
         if (shapeSelect.value === "polygon") {
             polygon.push(point(event));
@@ -2445,20 +2483,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     });
     groupSelect.addEventListener("change", redraw);
     polygonButton.addEventListener("click", finishPolygon);
-    undoButton.addEventListener("click", () => {
-        if (polygon.length > 0) {
-            polygon.pop();
-            polygonButton.disabled = polygon.length < 3;
-        } else {
-            const removed = shapes.pop();
-            if (removed && !shapes.some((shape) => shape.groupID === removed.groupID)) {
-                groupOrder.splice(groupOrder.indexOf(removed.groupID), 1);
-                updateGroups();
-            }
-        }
-        onChange(shapes.length > 0);
-        redraw();
-    });
+    undoButton.addEventListener("click", undo);
     image.addEventListener("load", redraw);
     requestAnimationFrame(redraw);
     return {
@@ -2482,6 +2507,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
         }),
         hasShapes: () => shapes.length > 0,
         redraw,
+        destroy: () => document.removeEventListener("keydown", keydown, true),
     };
 };
 
@@ -2571,10 +2597,12 @@ ${blockIDs.slice(1).map((blockID, index) => `<label class="fn__flex card__v2-cho
 <label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="typedCaseSensitive" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.searchCaseSensitive}</label>
 <label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="typedMatchDiacritics" class="b3-switch fn__flex-center" type="checkbox" checked><span class="fn__space"></span>${window.siyuan.languages.matchDiacritics}</label>
 </div>` : "";
+                let imageEditor: IFlashcardV2ImageEditor | undefined;
                 const dialog = new Dialog({
                     title: window.siyuan.languages.configGroupAdvanced,
                     width: isMobile() ? "96vw" : "720px",
                     height: imageSource || blockIDs.length >= 3 ? "82vh" : undefined,
+                    destroyCallback: () => imageEditor?.destroy(),
                     content: `<div class="b3-dialog__content card__v2-advanced">
 <label class="b3-label b3-label--inner card__v2-advanced-field">
     <div class="b3-label__text">${window.siyuan.languages.type}</div>
@@ -2634,7 +2662,6 @@ ${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
                     });
                     updateConfirm();
                 };
-                let imageEditor: IFlashcardV2ImageEditor | undefined;
                 if (imageSource) {
                     imageEditor = bindFlashcardV2ImageEditor(imageElement, imageSource.assetID, updateConfirm,
                         edit?.sourceType === "image-occlusion" ? edit.generationConfig : undefined);

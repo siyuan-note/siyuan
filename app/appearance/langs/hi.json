@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "डायनेमिक फ़िल्टर",
+	"flashcardDynamicFilterTip": "निम्न शर्तों से मेल खाने वाले कार्ड अपने आप शामिल करें",
 	"flashcardBlockCard": "ब्लॉक फ्लैशकार्ड",
 	"quickMakeCardCanceled": "त्वरित कार्ड हटा दिए गए",
 	"quickMakeCardCompleted": "त्वरित कार्ड निर्माण पूरा हुआ",

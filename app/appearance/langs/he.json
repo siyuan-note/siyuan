@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "סינון דינמי",
+	"flashcardDynamicFilterTip": "הכללת כרטיסים התואמים לתנאים הבאים באופן אוטומטי",
 	"flashcardBlockCard": "כרטיסיית בלוק",
 	"quickMakeCardCanceled": "הכרטיסים המהירים הוסרו",
 	"quickMakeCardCompleted": "יצירת הכרטיסים המהירה הושלמה",

@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "Dynamic filter",
+	"flashcardDynamicFilterTip": "Automatically include cards that match the following conditions",
 	"flashcardBlockCard": "Block flashcard",
 	"quickMakeCardCanceled": "Quick cards removed",
 	"quickMakeCardCompleted": "Quick card creation completed",

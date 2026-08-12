@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "Динамический фильтр",
+	"flashcardDynamicFilterTip": "Автоматически включать карточки, соответствующие следующим условиям",
 	"flashcardBlockCard": "Блочная карточка",
 	"quickMakeCardCanceled": "Быстрые карточки удалены",
 	"quickMakeCardCompleted": "Быстрое создание карточек завершено",

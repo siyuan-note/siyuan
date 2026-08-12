@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "Filtro dinámico",
+	"flashcardDynamicFilterTip": "Incluir automáticamente las tarjetas que cumplan las siguientes condiciones",
 	"flashcardBlockCard": "Tarjeta de bloque",
 	"quickMakeCardCanceled": "Tarjetas rápidas eliminadas",
 	"quickMakeCardCompleted": "Creación rápida de tarjetas completada",

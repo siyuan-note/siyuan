@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "ตัวกรองแบบไดนามิก",
+	"flashcardDynamicFilterTip": "รวมบัตรที่ตรงตามเงื่อนไขต่อไปนี้โดยอัตโนมัติ",
 	"flashcardBlockCard": "แฟลชการ์ดบล็อก",
 	"quickMakeCardCanceled": "ยกเลิกบัตรด่วนแล้ว",
 	"quickMakeCardCompleted": "สร้างบัตรด่วนเสร็จแล้ว",

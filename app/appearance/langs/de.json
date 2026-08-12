@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "Dynamischer Filter",
+	"flashcardDynamicFilterTip": "Karten, die den folgenden Bedingungen entsprechen, automatisch aufnehmen",
 	"flashcardBlockCard": "Block-Lernkarte",
 	"quickMakeCardCanceled": "Schnellkarten wurden entfernt",
 	"quickMakeCardCompleted": "Schnellkarten wurden erstellt",

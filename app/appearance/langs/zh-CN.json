@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "动态筛选",
+	"flashcardDynamicFilterTip": "自动收录符合以下条件的卡片",
 	"flashcardBlockCard": "块闪卡",
 	"quickMakeCardCanceled": "快速制卡：已取消",
 	"quickMakeCardCompleted": "快速制卡：处理完成",

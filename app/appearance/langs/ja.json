@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "動的フィルター",
+	"flashcardDynamicFilterTip": "次の条件に一致するカードを自動的に収録",
 	"flashcardBlockCard": "ブロックフラッシュカード",
 	"quickMakeCardCanceled": "クイックカードを解除しました",
 	"quickMakeCardCompleted": "クイックカードの作成が完了しました",

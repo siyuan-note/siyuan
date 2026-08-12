@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "Dinamik filtre",
+	"flashcardDynamicFilterTip": "Aşağıdaki koşullarla eşleşen kartları otomatik olarak dahil et",
 	"flashcardBlockCard": "Blok bilgi kartı",
 	"quickMakeCardCanceled": "Hızlı kartlar kaldırıldı",
 	"quickMakeCardCompleted": "Hızlı kart oluşturma tamamlandı",

@@ -1,4 +1,6 @@
 {
+	"flashcardDynamicFilter": "التصفية الديناميكية",
+	"flashcardDynamicFilterTip": "تضمين البطاقات المطابقة للشروط التالية تلقائيًا",
 	"flashcardBlockCard": "بطاقة تعليمية للكتلة",
 	"quickMakeCardCanceled": "تم إلغاء إنشاء البطاقات السريع",
 	"quickMakeCardCompleted": "اكتمل إنشاء البطاقات السريع",

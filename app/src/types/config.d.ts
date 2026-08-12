@@ -273,6 +273,8 @@ declare namespace Config {
         type: string;
         command: string;
         args?: string[];
+        inheritEnv?: string[];
+        env?: Record<string, string>;
         headers?: Record<string, string>;
         timeout: number;
         trustToolAnnotations: boolean;

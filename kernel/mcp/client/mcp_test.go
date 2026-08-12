@@ -20,6 +20,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -37,6 +39,105 @@ func TestIsReconnectableError(t *testing.T) {
 	authErr := errors.New("401 Unauthorized: invalid_token")
 	if isReconnectableError(authErr) {
 		t.Fatal("expected auth error not to trigger reconnect")
+	}
+}
+
+func TestBuildStdioEnvironment(t *testing.T) {
+	server := conf.MCPServer{
+		InheritEnv: []string{"PATH", "MISSING"},
+		Env: map[string]string{
+			"Path":  "{{vars.PATH}}",
+			"TOKEN": "{{secrets.TOKEN}}",
+		},
+	}
+	lookup := func(name string) (string, bool) {
+		if name == "PATH" {
+			return "inherited", true
+		}
+		return "", false
+	}
+	resolve := func(value string) string {
+		return strings.NewReplacer("{{vars.PATH}}", "explicit", "{{secrets.TOKEN}}", "secret").Replace(value)
+	}
+
+	env, err := buildStdioEnvironment(server, lookup, resolve, "windows")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"Path=explicit", "TOKEN=secret"}
+	if !reflect.DeepEqual(env, want) {
+		t.Fatalf("unexpected environment: got %#v, want %#v", env, want)
+	}
+}
+
+func TestBuildStdioEnvironmentDoesNotInheritUnselectedVariables(t *testing.T) {
+	lookupCalls := 0
+	env, err := buildStdioEnvironment(conf.MCPServer{}, func(string) (string, bool) {
+		lookupCalls++
+		return "unexpected", true
+	}, func(value string) string { return value }, "linux")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if lookupCalls != 0 || len(env) != 0 {
+		t.Fatalf("unexpected inherited environment: calls=%d, env=%#v", lookupCalls, env)
+	}
+}
+
+func TestBuildStdioEnvironmentReadsCurrentValueOnEveryStart(t *testing.T) {
+	current := ""
+	available := false
+	lookup := func(string) (string, bool) {
+		return current, available
+	}
+	server := conf.MCPServer{InheritEnv: []string{"JAVA_HOME"}}
+
+	env, err := buildStdioEnvironment(server, lookup, func(value string) string { return value }, "linux")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(env) != 0 {
+		t.Fatalf("unavailable variable was inherited: %#v", env)
+	}
+
+	current, available = "/opt/jdk", true
+	env, err = buildStdioEnvironment(server, lookup, func(value string) string { return value }, "linux")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"JAVA_HOME=/opt/jdk"}; !reflect.DeepEqual(env, want) {
+		t.Fatalf("current variable value was not inherited: got %#v, want %#v", env, want)
+	}
+}
+
+func TestValidateMCPServerEnvironment(t *testing.T) {
+	tests := []struct {
+		name   string
+		server conf.MCPServer
+		goos   string
+	}{
+		{name: "empty inherited name", server: conf.MCPServer{InheritEnv: []string{""}}, goos: "linux"},
+		{name: "invalid explicit name", server: conf.MCPServer{Env: map[string]string{"A=B": "value"}}, goos: "linux"},
+		{name: "NUL value", server: conf.MCPServer{Env: map[string]string{"KEY": "bad\x00value"}}, goos: "linux"},
+		{name: "Windows duplicate", server: conf.MCPServer{InheritEnv: []string{"PATH", "Path"}}, goos: "windows"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if err := validateMCPServerEnvironment(test.server, test.goos); err == nil {
+				t.Fatal("expected validation error")
+			}
+		})
+	}
+}
+
+func TestEnvironmentVariableNames(t *testing.T) {
+	names := environmentVariableNames([]string{"Path=one", "PATH=two", "TOKEN=value", "invalid", "=hidden"}, "windows")
+	if want := []string{"PATH", "TOKEN"}; !reflect.DeepEqual(names, want) {
+		t.Fatalf("unexpected names: got %#v, want %#v", names, want)
+	}
+	if defaults := defaultMCPEnvironmentNames("windows"); !slices.Contains(defaults, "PATH") ||
+		!slices.Contains(defaults, "PATHEXT") {
+		t.Fatalf("missing Windows defaults: %#v", defaults)
 	}
 }
 

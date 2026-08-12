@@ -280,6 +280,32 @@ func isCurrentUseTheme(themePath string) string {
 	return ""
 }
 
+func currentThemeDir() string {
+	if nil == Conf {
+		return ""
+	}
+
+	Conf.m.RLock()
+	defer Conf.m.RUnlock()
+	if nil == Conf.Appearance {
+		return ""
+	}
+
+	var themeName string
+	switch Conf.Appearance.Mode {
+	case 0:
+		themeName = Conf.Appearance.ThemeLight
+	case 1:
+		themeName = Conf.Appearance.ThemeDark
+	default:
+		return ""
+	}
+	if "" == themeName || "." == themeName || ".." == themeName || filepath.Base(themeName) != themeName {
+		return ""
+	}
+	return filepath.Clean(filepath.Join(util.ThemesPath, themeName))
+}
+
 func broadcastRefreshThemeIfCurrent(themeCssPath string) {
 	if !strings.HasSuffix(themeCssPath, "theme.css") {
 		return

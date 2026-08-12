@@ -97,7 +97,7 @@ func (writer *flashcardV2AnkiContentWriter) StoreMedia(ctx context.Context, orig
 	digest := sha256.Sum256(data)
 	extension := safeAnkiMediaExtension(originalName)
 	diskName := fmt.Sprintf("anki-%x%s", digest[:16], extension)
-	assetsDir := filepath.Join(util.DataDir, writer.notebookID, "assets")
+	assetsDir := filepath.Join(util.DataDir, "assets")
 	if err := os.MkdirAll(assetsDir, 0755); err != nil {
 		return "", err
 	}
@@ -111,7 +111,7 @@ func (writer *flashcardV2AnkiContentWriter) StoreMedia(ctx context.Context, orig
 	} else if err = filelock.WriteFile(writePath, data); err != nil {
 		return "", err
 	}
-	return "assets/" + url.PathEscape(diskName) + "?box=" + url.QueryEscape(writer.notebookID), nil
+	return "assets/" + url.PathEscape(diskName), nil
 }
 
 func safeAnkiMediaExtension(originalName string) string {

@@ -17,6 +17,9 @@
 package model
 
 import (
+	"context"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -24,6 +27,32 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestAnkiMediaUsesGlobalAssets(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	writer := &flashcardV2AnkiContentWriter{notebookID: "20260812000003-ankibox"}
+	assetPath, err := writer.StoreMedia(context.Background(), "Image.PNG", []byte("image data"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(assetPath, "?box=") {
+		t.Fatalf("ordinary Anki media path contains notebook query: %q", assetPath)
+	}
+	diskName := strings.TrimPrefix(assetPath, "assets/")
+	if data, readErr := os.ReadFile(filepath.Join(util.DataDir, "assets", diskName)); readErr != nil {
+		t.Fatal(readErr)
+	} else if string(data) != "image data" {
+		t.Fatalf("Anki media content = %q, want %q", data, "image data")
+	}
+	if _, statErr := os.Stat(filepath.Join(util.DataDir, writer.notebookID, "assets", diskName)); !os.IsNotExist(statErr) {
+		t.Fatalf("Anki media unexpectedly exists in notebook assets: %v", statErr)
+	}
+}
 
 func TestSafeAnkiHTMLToMarkdownRemovesExecutableContent(t *testing.T) {
 	markdown, err := safeAnkiHTMLToMarkdown(`<b>Question</b><script>alert(1)</script>` +

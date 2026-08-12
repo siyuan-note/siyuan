@@ -25,6 +25,18 @@ export const refreshLANSyncConfigItemVisibility = (root: Element) => {
         "fn__none", !visible || !window.siyuan.config.sync.enabled || window.siyuan.config.system.container === "docker");
 };
 
+/** 搜索时区分局域网同步的前置条件和硬性使用限制 */
+export const getLANSyncSearchAvailability = () => {
+    const entitled = window.siyuan.config.sync.provider === 0 ? !needSubscribe("") : isPaidUser();
+    if (!entitled || window.siyuan.config.system.container === "docker") {
+        return {available: false};
+    }
+    if (!window.siyuan.config.sync.enabled) {
+        return {available: false, reason: window.siyuan.languages._kernel[53]};
+    }
+    return {available: true};
+};
+
 const setSyncConfigItemVisible = (root: Element) => {
     const visible = window.siyuan.config.sync.provider === 0 ? !needSubscribe("") : isPaidUser();
     [

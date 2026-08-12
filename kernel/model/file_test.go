@@ -95,6 +95,37 @@ func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
 	}
 }
 
+func TestGetDocOptionallyIncludesDocInfo(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	Conf.Editor = conf.NewEditor()
+	Conf.Export = conf.NewExport()
+	expected, err := GetDocInfo(fixture.sourceID)
+	if nil != err {
+		t.Fatalf("get standalone document info failed: %v", err)
+	}
+
+	_, _, _, _, rootID, _, _, _, boxID, _, _, _, _, embedded, err := GetDoc(
+		"", "", fixture.sourceID, 0, "", nil, nil, 0, 0, 102400, false, map[string]string{}, true, true)
+	if nil != err {
+		t.Fatalf("get document with embedded info failed: %v", err)
+	}
+	if rootID != fixture.sourceID || boxID != fixture.box.ID {
+		t.Fatalf("unexpected loaded document: root [%s], box [%s]", rootID, boxID)
+	}
+	if !reflect.DeepEqual(embedded, expected) {
+		t.Fatalf("embedded document info differs from standalone result:\nembedded: %#v\nstandalone: %#v", embedded, expected)
+	}
+
+	_, _, _, _, _, _, _, _, _, _, _, _, _, omitted, err := GetDoc(
+		"", "", fixture.sourceID, 0, "", nil, nil, 0, 0, 102400, false, map[string]string{}, true, false)
+	if nil != err {
+		t.Fatalf("get document without embedded info failed: %v", err)
+	}
+	if nil != omitted {
+		t.Fatalf("document info should be omitted unless requested: %#v", omitted)
+	}
+}
+
 func TestRemoveDocRejectsInvalidPath(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 

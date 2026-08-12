@@ -212,6 +212,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             } else {
                 const getDocParam: IObject = {
                     id,
+                    includeDocInfo: true,
                     size: actionList.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                     mode: actionList.includes(Constants.CB_GET_CONTEXT) ? 3 : 0,
                 };

@@ -79,6 +79,7 @@ export const getDocByScroll = (options: {
     isValid?: () => boolean,
 }) => {
     const fetchDoc = (params: Record<string, any>, callback: (response: IWebSocketData) => void) => {
+        params.includeDocInfo = true;
         let handled = false;
         void fetchPost("/api/filetree/getDoc", params, (response) => {
             handled = true;

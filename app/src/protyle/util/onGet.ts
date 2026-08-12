@@ -28,6 +28,7 @@ import {
 } from "./headingNumber";
 import {updateDocumentBottomEof} from "./documentRange";
 import {disabledWYSIWYG} from "./disabledWYSIWYG";
+import {getEmbeddedDocInfoResponse} from "./docInfo";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -155,13 +156,7 @@ export const onGet = (options: {
         return;
     }
 
-    const docInfoParam: IObject = {
-        id: options.protyle.block.rootID
-    };
-    if (isEncryptedBox(options.protyle.notebookId)) {
-        docInfoParam.notebook = options.protyle.notebookId;
-    }
-    fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
+    const renderDoc = (response: IWebSocketData) => {
         if (options.isValid && !options.isValid()) {
             return;
         }
@@ -188,7 +183,20 @@ export const onGet = (options: {
             scrollPosition: options.scrollPosition
         }, options.protyle);
         removeLoading(options.protyle);
-    });
+    };
+    const embeddedDocInfoResponse = getEmbeddedDocInfoResponse(options.data);
+    if (embeddedDocInfoResponse) {
+        renderDoc(embeddedDocInfoResponse);
+        return;
+    }
+
+    const docInfoParam: IObject = {
+        id: options.protyle.block.rootID
+    };
+    if (isEncryptedBox(options.protyle.notebookId)) {
+        docInfoParam.notebook = options.protyle.notebookId;
+    }
+    fetchPost("/api/block/getDocInfo", docInfoParam, renderDoc);
 };
 
 const setHTML = (options: {

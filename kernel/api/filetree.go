@@ -1353,6 +1353,10 @@ func getDoc(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	includeDocInfo, _ := arg["includeDocInfo"].(bool)
+	if includeDocInfo && model.IsReadOnlyRoleContext(c) {
+		includeDocInfo = isBlockPublishAccessible(c, id, requestedNotebook)
+	}
 	idx := arg["index"]
 	index := 0
 	if nil != idx {
@@ -1429,14 +1433,15 @@ func getDoc(c *gin.Context) {
 	var isBacklinkExpand bool
 	var keywords []string
 	var headingNumbers map[string]string
+	var docInfo *model.BlockInfo
 	var err error
 	// 加密笔记本的打开文档走 InBox 版（查加密 blocktree + content db）
 	if requestedNotebook != "" && model.IsEncryptedBox(requestedNotebook) {
-		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, err =
-			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, requestedNotebook)
+		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, docInfo, err =
+			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, requestedNotebook)
 	} else {
-		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, err =
-			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
+		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, docInfo, err =
+			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo)
 	}
 	if errors.Is(err, model.ErrBlockNotFound) {
 		ret.Code = 3
@@ -1462,9 +1467,16 @@ func getDoc(c *gin.Context) {
 			headingNumbers = nil
 			scroll = false // 避免长页面可通过滚动无限刷出多个锁
 		}
+		if nil != docInfo {
+			if publishAccessRequired {
+				docInfo = nil
+			} else {
+				docInfo = model.FilterBlockInfoByPublishAccess(c, publishAccess, docInfo)
+			}
+		}
 	}
 
-	ret.Data = map[string]any{
+	data := map[string]any{
 		"id":                    id,
 		"mode":                  mode,
 		"parentID":              parentID,
@@ -1484,6 +1496,10 @@ func getDoc(c *gin.Context) {
 		"publishAccessRequired": publishAccessRequired,
 		"reqId":                 arg["reqId"],
 	}
+	if nil != docInfo {
+		data["docInfo"] = docInfo
+	}
+	ret.Data = data
 }
 
 func setPublishAccess(c *gin.Context) {

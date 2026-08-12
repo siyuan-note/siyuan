@@ -1,9 +1,11 @@
 {
+	"msgFormatPainterTip": "إشعارات تنشيط نسخ التنسيق والخروج منه",
+	"formatPainterInactive": "تم إلغاء تنشيط نسخ التنسيق",
 	"pluginDisabledInPublishTip": "عطّل مؤلف الإضافة هذه الإضافة في خدمة النشر",
 	"formatPainter": "نسخ التنسيق",
 	"formatPainterContinuous": "نسخ التنسيق المستمر",
-	"formatPainterActive": "نسخ التنسيق نشط؛ انقر للخروج",
-	"formatPainterContinuousActive": "نسخ التنسيق المستمر نشط؛ انقر للخروج",
+	"formatPainterActive": "نسخ التنسيق نشط؛ حدد نصًا لتطبيق التنسيق، واضغط Esc للخروج",
+	"formatPainterContinuousActive": "نسخ التنسيق المستمر نشط؛ حدد نصًا لتطبيق التنسيق، واضغط Esc للخروج",
 	"aiMcpEnv": "متغيرات البيئة",
 	"aiMcpEnvTip": "تُمرر الأسرار المشار إليها إلى هذا البرنامج، وتُخزن القيم المدخلة مباشرة كنص عادي",
 	"aiMcpEnvInvalid": "متغيرات البيئة غير صالحة؛ تحقق من الأسماء الفارغة أو المكررة أو غير الصالحة",

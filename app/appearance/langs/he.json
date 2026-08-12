@@ -1,9 +1,11 @@
 {
+	"msgFormatPainterTip": "התראות על הפעלה ויציאה ממברשת העיצוב",
+	"formatPainterInactive": "מברשת העיצוב הושבתה",
 	"pluginDisabledInPublishTip": "מחבר התוסף השבית תוסף זה בשירות הפרסום",
 	"formatPainter": "מברשת עיצוב",
 	"formatPainterContinuous": "מברשת עיצוב רציפה",
-	"formatPainterActive": "מברשת העיצוב פעילה; לחיצה תסיים",
-	"formatPainterContinuousActive": "מברשת העיצוב הרציפה פעילה; לחיצה תסיים",
+	"formatPainterActive": "מברשת העיצוב פעילה; יש לבחור טקסט להחלת העיצוב וללחוץ על Esc כדי לצאת",
+	"formatPainterContinuousActive": "מברשת העיצוב הרציפה פעילה; יש לבחור טקסט להחלת העיצוב וללחוץ על Esc כדי לצאת",
 	"aiMcpEnv": "משתני סביבה",
 	"aiMcpEnvTip": "סודות שמופנים יועברו לתוכנית זו, וערכים שיוזנו ישירות יישמרו כטקסט גלוי",
 	"aiMcpEnvInvalid": "משתני הסביבה אינם תקינים; יש לבדוק שמות ריקים, כפולים או לא תקינים",

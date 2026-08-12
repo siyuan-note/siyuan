@@ -1,9 +1,11 @@
 {
+	"msgFormatPainterTip": "格式刷啟用與退出提示",
+	"formatPainterInactive": "格式刷已退出",
 	"pluginDisabledInPublishTip": "插件作者已禁止該插件在發布服務中執行",
 	"formatPainter": "格式刷",
 	"formatPainterContinuous": "連續格式刷",
-	"formatPainterActive": "格式刷已啟用，點擊退出",
-	"formatPainterContinuousActive": "連續格式刷已啟用，點擊退出",
+	"formatPainterActive": "格式刷已啟用，選取文字套用格式，按 Esc 退出",
+	"formatPainterContinuousActive": "連續格式刷已啟用，選取文字套用格式，按 Esc 退出",
 	"aiMcpEnv": "環境變數",
 	"aiMcpEnvTip": "引用的金鑰會提供給該程式，直接填寫的值將以明文儲存",
 	"aiMcpEnvInvalid": "環境變數無效，請檢查名稱是否為空、重複或包含無效字元",

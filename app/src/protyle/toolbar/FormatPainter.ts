@@ -1,4 +1,5 @@
 import {Constants} from "../../constants";
+import {showMessage} from "../../dialog/message";
 import {MenuItem} from "../../menus/Menu";
 import {getBlockRanges} from "../util/selection";
 import {
@@ -8,6 +9,7 @@ import {
     IFormatPainterSnapshot,
     IFormatPainterStyle,
     shouldKeepFormatPainterActive,
+    shouldShowFormatPainterMessage,
     TFormatPainterMode,
 } from "./formatPainterCore";
 
@@ -65,6 +67,12 @@ class FormatPainterController {
     private mode?: TFormatPainterMode;
     private snapshot?: IFormatPainterSnapshot;
 
+    private showMessage(message: string, timeout: number) {
+        if (shouldShowFormatPainterMessage(window.siyuan.config.appearance.notifications?.formatPainterTip)) {
+            showMessage(message, timeout, "info", "formatPainter");
+        }
+    }
+
     public isActive() {
         return !!this.mode && !!this.snapshot;
     }
@@ -81,6 +89,8 @@ class FormatPainterController {
         this.snapshot = snapshot;
         document.body.dataset.formatPainter = mode;
         this.renderStatus();
+        this.showMessage(mode === "continuous" ? window.siyuan.languages.formatPainterContinuousActive :
+            window.siyuan.languages.formatPainterActive, 4000);
         protyle.toolbar.element.classList.add("fn__none");
         return true;
     }
@@ -109,6 +119,7 @@ class FormatPainterController {
         this.snapshot = undefined;
         delete document.body.dataset.formatPainter;
         document.getElementById("statusFormatPainter")?.remove();
+        this.showMessage(window.siyuan.languages.formatPainterInactive, 3000);
         return true;
     }
 

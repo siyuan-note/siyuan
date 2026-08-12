@@ -1,9 +1,11 @@
 {
+	"msgFormatPainterTip": "Notifikasi aktivasi dan keluar penyalinan format",
+	"formatPainterInactive": "Penyalinan format dinonaktifkan",
 	"pluginDisabledInPublishTip": "Pembuat plugin telah menonaktifkan plugin ini di layanan penerbitan",
 	"formatPainter": "Salin format",
 	"formatPainterContinuous": "Salin format berkelanjutan",
-	"formatPainterActive": "Penyalinan format aktif; klik untuk keluar",
-	"formatPainterContinuousActive": "Penyalinan format berkelanjutan aktif; klik untuk keluar",
+	"formatPainterActive": "Penyalinan format aktif; pilih teks untuk menerapkan format, lalu tekan Esc untuk keluar",
+	"formatPainterContinuousActive": "Penyalinan format berkelanjutan aktif; pilih teks untuk menerapkan format, lalu tekan Esc untuk keluar",
 	"aiMcpEnv": "Variabel lingkungan",
 	"aiMcpEnvTip": "Rahasia yang dirujuk diberikan kepada program ini dan nilai yang dimasukkan langsung disimpan sebagai teks biasa",
 	"aiMcpEnvInvalid": "Variabel lingkungan tidak valid; periksa nama yang kosong, duplikat, atau tidak valid",

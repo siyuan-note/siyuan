@@ -10,6 +10,8 @@ export type TFormatPainterMode = "once" | "continuous";
 
 export const shouldKeepFormatPainterActive = (mode: TFormatPainterMode) => mode === "continuous";
 
+export const shouldShowFormatPainterMessage = (enabled?: boolean) => enabled !== false;
+
 export interface IFormatPainterSnapshot {
     styles: IFormatPainterStyle;
     types: string[];

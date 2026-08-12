@@ -1,9 +1,11 @@
 {
+	"msgFormatPainterTip": "格式刷启用和退出提示",
+	"formatPainterInactive": "格式刷已退出",
 	"pluginDisabledInPublishTip": "插件作者已禁止该插件在发布服务中运行",
 	"formatPainter": "格式刷",
 	"formatPainterContinuous": "连续格式刷",
-	"formatPainterActive": "格式刷已启用，点击退出",
-	"formatPainterContinuousActive": "连续格式刷已启用，点击退出",
+	"formatPainterActive": "格式刷已启用，选择文本应用格式，按 Esc 退出",
+	"formatPainterContinuousActive": "连续格式刷已启用，选择文本应用格式，按 Esc 退出",
 	"aiMcpEnv": "环境变量",
 	"aiMcpEnvTip": "引用的密钥会提供给该程序，直接填写的值将以明文存储",
 	"aiMcpEnvInvalid": "环境变量无效，请检查名称是否为空、重复或包含非法字符",

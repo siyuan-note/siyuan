@@ -1,9 +1,11 @@
 {
+	"msgFormatPainterTip": "Benachrichtigungen beim Aktivieren und Beenden der Formatübertragung",
+	"formatPainterInactive": "Formatübertragung deaktiviert",
 	"pluginDisabledInPublishTip": "Der Plugin-Autor hat dieses Plugin im Veröffentlichungsdienst deaktiviert",
 	"formatPainter": "Format übertragen",
 	"formatPainterContinuous": "Format fortlaufend übertragen",
-	"formatPainterActive": "Formatübertragung aktiv; zum Beenden klicken",
-	"formatPainterContinuousActive": "Fortlaufende Formatübertragung aktiv; zum Beenden klicken",
+	"formatPainterActive": "Formatübertragung aktiv; Text zum Anwenden auswählen und Esc zum Beenden drücken",
+	"formatPainterContinuousActive": "Fortlaufende Formatübertragung aktiv; Text zum Anwenden auswählen und Esc zum Beenden drücken",
 	"aiMcpEnv": "Umgebungsvariablen",
 	"aiMcpEnvTip": "Referenzierte Geheimnisse werden diesem Programm bereitgestellt, direkt eingegebene Werte werden im Klartext gespeichert",
 	"aiMcpEnvInvalid": "Ungültige Umgebungsvariablen; prüfen Sie auf leere, doppelte oder ungültige Namen",

@@ -410,6 +410,7 @@ declare namespace Config {
         browserCompatibility: boolean;
         selectAllTip?: boolean;
         selectAllIncompleteTip?: boolean;
+        formatPainterTip?: boolean;
     }
 
     /**

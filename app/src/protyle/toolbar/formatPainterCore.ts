@@ -6,6 +6,10 @@ export interface IFormatPainterStyle {
     hollow?: boolean;
 }
 
+export type TFormatPainterMode = "once" | "continuous";
+
+export const shouldKeepFormatPainterActive = (mode: TFormatPainterMode) => mode === "continuous";
+
 export interface IFormatPainterSnapshot {
     styles: IFormatPainterStyle;
     types: string[];

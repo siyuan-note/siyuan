@@ -7,9 +7,9 @@ import {
     IFormatPainterSegment,
     IFormatPainterSnapshot,
     IFormatPainterStyle,
+    shouldKeepFormatPainterActive,
+    TFormatPainterMode,
 } from "./formatPainterCore";
-
-export type TFormatPainterMode = "once" | "continuous";
 
 const getSegment = (textNode: Text, editableElement: Element) => {
     const types: string[] = [];
@@ -95,7 +95,7 @@ class FormatPainterController {
         }
         const paintedRange = protyle.toolbar.range;
         protyle.toolbar.element.classList.add("fn__none");
-        if (this.mode === "once") {
+        if (!shouldKeepFormatPainterActive(this.mode)) {
             this.deactivate();
         }
         return paintedRange;
@@ -167,6 +167,7 @@ export class FormatPainter {
         const menuElement = document.createElement("button");
         menuElement.className = "protyle-toolbar__item protyle-toolbar__format-painter-menu " +
             "b3-tooltips b3-tooltips__n";
+        menuElement.setAttribute("data-menu", "true");
         menuElement.setAttribute("aria-label", window.siyuan.languages.formatPainterContinuous);
         menuElement.innerHTML = '<svg><use xlink:href="#iconDown"></use></svg>';
         menuElement.addEventListener("mousedown", event => event.preventDefault());
@@ -176,7 +177,9 @@ export class FormatPainter {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconFormat",
                 label: window.siyuan.languages.formatPainterContinuous,
-                click: () => formatPainter.activate(protyle, "continuous"),
+                click: () => {
+                    formatPainter.activate(protyle, "continuous");
+                },
             }).element);
             const rect = menuElement.getBoundingClientRect();
             window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});

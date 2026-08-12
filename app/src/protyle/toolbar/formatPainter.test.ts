@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getCommonFormatPainterSnapshot} from "./formatPainterCore";
+import {getCommonFormatPainterSnapshot, shouldKeepFormatPainterActive} from "./formatPainterCore";
 
 describe("getCommonFormatPainterSnapshot", () => {
     it("keeps only formats shared by every selected text segment", () => {
@@ -38,5 +38,12 @@ describe("getCommonFormatPainterSnapshot", () => {
 
     it("requires at least one selected text segment", () => {
         assert.equal(getCommonFormatPainterSnapshot([]), undefined);
+    });
+});
+
+describe("shouldKeepFormatPainterActive", () => {
+    it("keeps only continuous format painting active after applying a format", () => {
+        assert.equal(shouldKeepFormatPainterActive("once"), false);
+        assert.equal(shouldKeepFormatPainterActive("continuous"), true);
     });
 });

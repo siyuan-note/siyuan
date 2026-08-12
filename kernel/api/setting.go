@@ -200,6 +200,15 @@ func setAI(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if ai.MCP != nil {
+		for _, server := range ai.MCP.Servers {
+			if err = mcpclient.ValidateMCPServerEnvironment(server); err != nil {
+				ret.Code = -1
+				ret.Msg = "invalid MCP server environment: " + err.Error()
+				return
+			}
+		}
+	}
 
 	var oldServers []conf.MCPServer
 	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {
@@ -285,6 +294,7 @@ func setSecrets(c *gin.Context) {
 
 	model.Conf.Secrets = secrets
 	model.Conf.Save()
+	reconnectStdioMCPWithEnvironment()
 
 	ret.Data = model.Conf.Secrets
 }
@@ -314,8 +324,29 @@ func setVariables(c *gin.Context) {
 
 	model.Conf.Variables = variables
 	model.Conf.Save()
+	reconnectStdioMCPWithEnvironment()
 
 	ret.Data = model.Conf.Variables
+}
+
+func reconnectStdioMCPWithEnvironment() {
+	if model.Conf.AI == nil || model.Conf.AI.MCP == nil {
+		return
+	}
+	serverIDs := stdioMCPServerIDsWithEnvironment(model.Conf.AI.MCP.Servers)
+	if len(serverIDs) > 0 {
+		mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers, serverIDs, nil)
+	}
+}
+
+func stdioMCPServerIDsWithEnvironment(servers []conf.MCPServer) []string {
+	var serverIDs []string
+	for _, server := range servers {
+		if server.Enabled && server.Type == "stdio" && len(server.Env) > 0 {
+			serverIDs = append(serverIDs, server.ID)
+		}
+	}
+	return serverIDs
 }
 
 func setFlashcard(c *gin.Context) {

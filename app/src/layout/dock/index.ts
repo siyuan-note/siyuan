@@ -16,13 +16,17 @@ import {Protyle} from "../../protyle";
 import {Backlink} from "./Backlink";
 import {AgentChat} from "./agent/AgentChat";
 import {adjustDockPadding, resetFloatDockSize} from "./util";
-import {hasClosestByAttribute, hasClosestByClassName} from "../../protyle/util/hasClosest";
+import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import type {App} from "../../index";
 import {Plugin} from "../../plugin";
 import {Custom} from "./Custom";
 import {clearBeforeResizeTop, recordBeforeResizeTop} from "../../protyle/util/resize";
 import {Constants} from "../../constants";
-import {updatePluginDockShowStates} from "./pluginDockState";
+import {
+    type IPluginDockPlacementState,
+    updatePluginDockPlacements,
+    updatePluginDockShowStates,
+} from "./pluginDockState";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 
@@ -837,33 +841,21 @@ export class Dock {
         setTimeout(() => {
             saveLayout();
         }, Constants.TIMEOUT_TRANSITION);
-        let position: TPluginDockPosition;
-        const leftDockElement = hasClosestByAttribute(sourceElement, "id", "dockLeft");
-        const rightDockElement = hasClosestByAttribute(sourceElement, "id", "dockRight");
-        if (leftDockElement) {
-            if (leftDockElement.lastElementChild.contains(sourceElement)) {
-                position = "BottomLeft";
-            } else {
-                position = "Left" + (index === 0 ? "Top" : "Bottom") as TPluginDockPosition;
-            }
-        } else if (rightDockElement) {
-            if (rightDockElement.lastElementChild.contains(sourceElement)) {
-                position = "BottomRight";
-            } else {
-                position = "Right" + (index === 0 ? "Top" : "Bottom") as TPluginDockPosition;
-            }
+        const placements = sourceDock.getPluginDockPlacements();
+        if (sourceDock !== this) {
+            placements.push(...this.getPluginDockPlacements());
         }
-        let sortIndex = 0;
-        let previousElement = sourceElement;
-        while (previousElement.previousElementSibling) {
-            sortIndex++;
-            previousElement = previousElement.previousElementSibling;
+        const movedPlacement = placements.find((item) => item.type === type);
+        if (movedPlacement && Object.keys(size).length > 0) {
+            movedPlacement.size = size;
         }
-        this.saveLocalPlugin(type, {
-            index: sortIndex,
-            position,
-            size
-        });
+        if (updatePluginDockPlacements(
+            placements,
+            this.app.plugins,
+            window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS],
+        )) {
+            setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);
+        }
         adjustDockPadding();
         this.adjustSplit();
         sourceDock.adjustSplit();
@@ -974,6 +966,29 @@ export class Dock {
             return "8east";
         }
         return "8west";
+    }
+
+    private getPluginDockPlacements() {
+        const states: IPluginDockPlacementState[] = [];
+        [0, 1].forEach((index) => {
+            const position: TPluginDockPosition = this.position === "Bottom"
+                ? (index === 0 ? "BottomLeft" : "BottomRight")
+                : this.position + (index === 0 ? "Top" : "Bottom") as TPluginDockPosition;
+            let itemIndex = 0;
+            this.elements[index].querySelectorAll(".dock__item").forEach((item) => {
+                const type = item.getAttribute("data-type");
+                if (!type) {
+                    return;
+                }
+                states.push({
+                    type,
+                    position,
+                    index: itemIndex,
+                });
+                itemIndex++;
+            });
+        });
+        return states;
     }
 
     private adjustSplit() {

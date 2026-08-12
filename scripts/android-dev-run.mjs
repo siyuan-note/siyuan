@@ -144,13 +144,30 @@ function findTool(name) {
   fail(`${name} not found. Install it and try again`);
 }
 
+function wait(milliseconds) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+}
+
 function deviceSerial(adb) {
-  const lines = capture(adb, ["devices"]).split(/\r?\n/);
-  const devices = [];
-  for (const line of lines) {
-    const parts = line.split(/\t/);
-    if (parts.length === 2 && parts[1] === "device") {
-      devices.push(parts[0]);
+  const maxAttempts = 11;
+  let devices = [];
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const lines = capture(adb, ["devices"]).split(/\r?\n/);
+    devices = [];
+    for (const line of lines) {
+      const parts = line.split(/\t/);
+      if (parts.length === 2 && parts[1] === "device") {
+        devices.push(parts[0]);
+      }
+    }
+    if (device ? devices.includes(device) : devices.length > 0) {
+      break;
+    }
+    if (attempt === 1) {
+      console.log("Waiting up to 10 seconds for an adb device...");
+    }
+    if (attempt < maxAttempts) {
+      wait(1000);
     }
   }
   if (device) {

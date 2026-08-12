@@ -19,6 +19,13 @@ import {checkFold} from "../util/noRelyPCFunction";
 import {updateHotkeyAfterTip} from "../protyle/util/compatibility";
 import {getTopBarHeight} from "../layout/getTopBarHeight";
 import {activateAVLocateWithRetry} from "../protyle/render/av/locate";
+import {
+    IBlockPanelItemInfo,
+    IBlockPanelRemovalOptions,
+    matchesBlockPanelRemoval,
+    planBlockPanelRemoval
+} from "./panelRemoval";
+import {getBlockPanelLoadPlan} from "./panelLoad";
 
 const BLOCK_PANEL_EDITOR_MIN_HEIGHT = 155;
 
@@ -36,6 +43,10 @@ export class BlockPanel {
     private observerLoad: IntersectionObserver;
     private originalRefBlockIDs: IObject;
     private editorResizeCleanup?: () => void;
+    private refDefElements = new Map<IRefDefs, HTMLElement>();
+    private refDefEditors = new Map<IRefDefs, Protyle>();
+    private refDefInfos = new Map<IRefDefs, IBlockPanelItemInfo>();
+    private destroying = false;
 
     // x,y 和 targetElement 二选一必传
     constructor(options: {
@@ -186,6 +197,97 @@ export class BlockPanel {
         return this.editors.find(item => item.protyle.element === editorElement);
     }
 
+    private updateEditorIndexes() {
+        this.refDefs.forEach((refDef, index) => {
+            this.refDefElements.get(refDef)?.setAttribute("data-index", index.toString());
+        });
+    }
+
+    private removeRefDef(refDef: IRefDefs) {
+        if (!this.element || !this.refDefs.includes(refDef)) {
+            return;
+        }
+        this.editorResizeCleanup?.();
+        const editor = this.refDefEditors.get(refDef);
+        if (editor) {
+            this.refDefEditors.delete(refDef);
+            const editorIndex = this.editors.indexOf(editor);
+            if (editorIndex > -1) {
+                this.editors.splice(editorIndex, 1);
+            }
+            hideElements(["util"], editor.protyle);
+            editor.destroy();
+        }
+        const editorElement = this.refDefElements.get(refDef);
+        if (editorElement) {
+            this.observerLoad?.unobserve(editorElement);
+        }
+        if (editorElement?.nextElementSibling?.classList.contains("block__edit-resize")) {
+            editorElement.nextElementSibling.remove();
+        }
+        editorElement?.remove();
+        this.refDefElements.delete(refDef);
+        this.refDefInfos.delete(refDef);
+        this.refDefs.splice(this.refDefs.indexOf(refDef), 1);
+        if (this.refDefs.length === 0) {
+            this.destroy();
+            return;
+        }
+        this.updateEditorIndexes();
+        if (this.refDefs.length === 1) {
+            this.element.querySelectorAll(".block__edit-resize").forEach(item => item.remove());
+            const remainingEditor = this.refDefEditors.get(this.refDefs[0]);
+            if (remainingEditor) {
+                this.setAutoEditorHeight(remainingEditor);
+                this.resizeEditor(remainingEditor);
+            }
+        }
+    }
+
+    private resolveRemoval(refDef: IRefDefs, options: IBlockPanelRemovalOptions) {
+        if (!this.element || !this.refDefs.includes(refDef)) {
+            return;
+        }
+        fetchPost("/api/block/getBlockInfo", {id: refDef.refID}, (response) => {
+            if (!this.element || !this.refDefs.includes(refDef)) {
+                return;
+            }
+            if (response.code === 3) {
+                return;
+            }
+            if (response.code !== 0) {
+                this.removeRefDef(refDef);
+                return;
+            }
+            const info = {
+                notebookId: response.data.box,
+                rootID: response.data.rootID,
+            };
+            this.refDefInfos.set(refDef, info);
+            if (matchesBlockPanelRemoval(info, options)) {
+                this.removeRefDef(refDef);
+            }
+        });
+    }
+
+    public removeEditors(options: IBlockPanelRemovalOptions) {
+        if (!this.element) {
+            return;
+        }
+        const removalPlan = planBlockPanelRemoval(this.refDefs, (refDef) => {
+            const editor = this.refDefEditors.get(refDef);
+            const cachedInfo = this.refDefInfos.get(refDef);
+            return editor ? {
+                notebookId: editor.protyle.notebookId || cachedInfo?.notebookId,
+                rootID: editor.protyle.block.rootID || cachedInfo?.rootID,
+            } : cachedInfo;
+        }, options);
+        removalPlan.removeItems.forEach(refDef => this.removeRefDef(refDef));
+        if (this.element) {
+            removalPlan.unresolvedItems.forEach(refDef => this.resolveRemoval(refDef, options));
+        }
+    }
+
     private bindEditorResize() {
         const contentElement = this.element.querySelector(".block__content") as HTMLElement;
         contentElement.querySelectorAll(".block__edit-resize").forEach((resizeElement: HTMLElement) => {
@@ -284,44 +386,60 @@ export class BlockPanel {
     }
 
     private initProtyle(editorElement: HTMLElement, afterCB?: () => void) {
-        const index = parseInt(editorElement.getAttribute("data-index"));
-        fetchPost("/api/block/getBlockInfo", {id: this.refDefs[index].refID}, (response) => {
+        if (!editorElement.isConnected) {
+            return;
+        }
+        const refDef = this.refDefs[parseInt(editorElement.getAttribute("data-index"))];
+        if (!refDef) {
+            return;
+        }
+        fetchPost("/api/block/getBlockInfo", {id: refDef.refID}, (response) => {
+            if (!this.element || !this.refDefs.includes(refDef) || !editorElement.isConnected) {
+                return;
+            }
             if (response.code === 3) {
                 showMessage(response.msg);
                 return;
             }
-            if (!this.targetElement && typeof this.x === "undefined" && typeof this.y === "undefined") {
+            if (response.code !== 0) {
+                this.removeRefDef(refDef);
                 return;
             }
+            this.refDefInfos.set(refDef, {
+                notebookId: response.data.box,
+                rootID: response.data.rootID,
+            });
+            const loadPlan = getBlockPanelLoadPlan(response.data.rootID, refDef.refID, this.isBacklink);
             const action: TProtyleAction[] = [];
-            if (response.data.rootID !== this.refDefs[index].refID) {
+            if (!loadPlan.isDocument) {
                 action.push(Constants.CB_GET_ALL);
             } else {
                 action.push(Constants.CB_GET_CONTEXT);
                 // 不需要高亮 https://github.com/siyuan-note/siyuan/issues/11160#issuecomment-2084652764
             }
 
-            if (this.isBacklink) {
+            if (loadPlan.useBacklinkContext) {
                 action.push(Constants.CB_GET_BACKLINK);
             }
-            const isDocument = response.data.rootID === this.refDefs[index].refID;
             let isInitialRender = true;
             const editor = new Protyle(this.app, editorElement, {
                 databaseAttr: true,
-                blockId: this.refDefs[index].refID,
-                defIds: this.refDefs[index].defIDs || [],
-                originalRefBlockIDs: this.isBacklink ? this.originalRefBlockIDs : undefined,
+                blockId: refDef.refID,
+                defIds: refDef.defIDs || [],
+                originalRefBlockIDs: loadPlan.useBacklinkContext ? this.originalRefBlockIDs : undefined,
                 action,
                 render: {
                     scroll: true,
                     gutter: true,
                     breadcrumbDocName: true,
-                    background: isDocument,
-                    title: isDocument, // 如果块是文档，显示文档标题
+                    background: loadPlan.isDocument,
+                    title: loadPlan.isDocument, // 如果块是文档，显示文档标题
                 },
                 typewriterMode: false,
                 after: (editor) => {
-                    const refDef = this.refDefs[index];
+                    if (!this.element || !this.refDefs.includes(refDef) || !editor.protyle.element.isConnected) {
+                        return;
+                    }
                     if (refDef.avItemID) {
                         activateAVLocateWithRetry(editor.protyle, refDef.refID, {
                             itemID: refDef.avItemID,
@@ -332,7 +450,7 @@ export class BlockPanel {
                             persistView: false,
                         });
                     }
-                    if (response.data.rootID !== this.refDefs[index].refID) {
+                    if (response.data.rootID !== refDef.refID) {
                         editor.protyle.breadcrumb.element.parentElement.lastElementChild.classList.remove("fn__none");
                     }
                     if (afterCB) {
@@ -340,11 +458,14 @@ export class BlockPanel {
                     }
                     if (isInitialRender) {
                         isInitialRender = false;
-                        if (isDocument) {
-                            const backgroundImageElement = editor.protyle.background.element.querySelector<HTMLElement>(".protyle-background__img");
-                            const scrollTop = backgroundImageElement?.clientHeight || 0;
-                            editor.protyle.contentElement.scrollTop = scrollTop;
-                            editor.protyle.scroll.lastScrollTop = scrollTop;
+                        if (loadPlan.isDocument) {
+                            const contentElement = editor.protyle.contentElement;
+                            const titleElement = editor.protyle.title.element;
+                            const marginTop = parseFloat(getComputedStyle(titleElement).marginTop) || 0;
+                            const scrollTop = contentElement.scrollTop + titleElement.getBoundingClientRect().top -
+                                contentElement.getBoundingClientRect().top - marginTop;
+                            contentElement.scrollTop = scrollTop;
+                            editor.protyle.scroll.lastScrollTop = contentElement.scrollTop;
                         }
                     }
                     // https://ld246.com/article/1653639418266
@@ -356,11 +477,16 @@ export class BlockPanel {
                     editor.protyle.scroll.element.parentElement.setAttribute("style", `--b3-dynamicscroll-width:${Math.min(editor.protyle.contentElement.clientHeight - 49, 200)}px;`);
                 }
             });
+            this.refDefEditors.set(refDef, editor);
             this.editors.push(editor);
         });
     }
 
     public destroy() {
+        if (!this.element || this.destroying) {
+            return;
+        }
+        this.destroying = true;
         this.editorResizeCleanup?.();
         this.observerResize?.disconnect();
         this.observerLoad?.disconnect();
@@ -378,6 +504,9 @@ export class BlockPanel {
             });
             this.editors = [];
         }
+        this.refDefElements.clear();
+        this.refDefEditors.clear();
+        this.refDefInfos.clear();
         const level = parseInt(this.element.dataset.level);
         this.element.remove();
         this.element = undefined;
@@ -453,6 +582,7 @@ export class BlockPanel {
         });
         const topBarHeight = getTopBarHeight();
         this.element.querySelectorAll(".block__edit").forEach((item: HTMLElement, index) => {
+            this.refDefElements.set(this.refDefs[index], item);
             if (index < 5) {
                 this.initProtyle(item, index === 0 ? () => {
                     if (!document.contains(this.element)) {

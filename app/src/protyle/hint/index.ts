@@ -283,14 +283,19 @@ export class Hint {
             } else {
                 const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
                 if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
+                    const slashData = hintSlash(key, protyle);
+                    if (slashData.length === 0) {
+                        this.genHTML(slashData, protyle, true, "hint");
+                        return;
+                    }
                     const createTarget = this.prepareCreateTarget(protyle, "doc");
                     if (createTarget.result !== undefined) {
-                        this.genHTML(hintSlash(key, protyle, createTarget.result), protyle, false, "hint");
+                        this.genHTML(hintSlash(key, protyle, createTarget.result), protyle, true, "hint");
                     } else {
                         this.genLoading(protyle);
                         createTarget.promise.then((isCurrentSubDoc) => {
                             if (createTarget.isCurrent()) {
-                                this.genHTML(hintSlash(key, protyle, isCurrentSubDoc), protyle, false, "hint");
+                                this.genHTML(hintSlash(key, protyle, isCurrentSubDoc), protyle, true, "hint");
                             }
                         });
                     }
@@ -1165,6 +1170,7 @@ ${genHintItemHTML(item)}
         }
         // 上一次提示没有结束时不能被其余提示干扰 https://github.com/siyuan-note/siyuan/issues/14324
         if (!this.element.classList.contains("fn__none") && prevSplit && prevSplit !== this.splitChar &&
+            prevLastIndex > -1 && currentLineValue.startsWith(prevSplit, prevLastIndex) &&
             !(["/", "、"].includes(prevSplit) && this.splitChar === ":")) {
             this.splitChar = prevSplit;
             this.lastIndex = prevLastIndex;

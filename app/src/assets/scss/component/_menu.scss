@@ -137,9 +137,9 @@
       }
 
       &__icon {
-        height: 22px;
-        width: 22px;
-        margin: 0 16px 0 8px;
+        height: 18px;
+        width: 18px;
+        margin: 0 12px 0 8px;
 
         &--arrow {
           width: 12px;
@@ -323,9 +323,9 @@
     }
 
     .b3-menu__icon {
-      height: 22px;
-      margin: 0 16px 0 8px;
-      width: 22px;
+      height: 18px;
+      margin: 0 12px 0 8px;
+      width: 18px;
     }
   }
 
@@ -493,6 +493,20 @@
     flex-shrink: 0;
     color: var(--b3-menu-icon-color);
     font-variant-emoji: emoji;
+
+    &--custom {
+      align-items: center;
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+
+      & > svg {
+        display: block;
+        height: 100% !important;
+        margin: 0 !important;
+        width: 100% !important;
+      }
+    }
 
     &--small {
       margin: 0 0 0 8px;

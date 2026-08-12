@@ -295,10 +295,14 @@ export const newEncryptedNotebook = () => {
         return;
     }
     newEncryptedNotebookPending = true;
-    // 先检查加密功能是否已启用；未启用则提示去设置页启用
+    // 先检查加密功能状态；未启用或需要恢复时提示用户前往设置页处理
     fetchPost("/api/notebook/getEncryptedNotebookStatus", {}, (response) => {
+        if (response.data.state === "RecoveryRequired") {
+            showMessage(window.siyuan.languages.encryptedNotebookRecoveryRequiredTip, 6000, "error");
+            return;
+        }
         if (response.data.state !== "Enabled") {
-            showMessage(window.siyuan.languages.enableEncryptedNotebook, 6000);
+            showMessage(window.siyuan.languages.encryptedNotebookNotEnabledTip, 6000);
             return;
         }
         const dialog = new Dialog({

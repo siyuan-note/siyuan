@@ -21,7 +21,21 @@ import (
 	"testing"
 
 	"github.com/olahol/melody"
+	"github.com/siyuan-note/eventbus"
 )
+
+func TestContextPushMsgIgnoresInvalidContext(t *testing.T) {
+	contexts := []map[string]any{
+		nil,
+		{},
+		{eventbus.CtxPushMsg: nil},
+		{eventbus.CtxPushMsg: "invalid"},
+		{eventbus.CtxPushMsg: eventbus.CtxPushMsgToNone},
+	}
+	for _, context := range contexts {
+		ContextPushMsg(context, "test")
+	}
+}
 
 func TestIsPublishSession(t *testing.T) {
 	tests := []struct {

@@ -22,6 +22,7 @@ type TOperation =
     | "addFlashcards"
     | "removeFlashcards"
     | "updateAttrViewCell"
+    | "updateAttrViewCells"
     | "updateAttrViewCol"
     | "updateAttrViewColTemplate"
     | "sortAttrViewRow"
@@ -698,6 +699,11 @@ interface IOperation {
     format?: string // 属性视图字段格式化
     keyID?: string // updateAttrViewCell 专享
     rowID?: string // updateAttrViewCell 专享
+    cellUpdates?: Array<{
+        keyID: string,
+        rowID: string,
+        data: IAVCellValue,
+    }> // updateAttrViewCells 专享
     data?: any, // updateAttr 时为  { old: IObject, new: IObject }, updateAttrViewCell 时为 {TAVCol: {content: string}}
     parentID?: string
     previousID?: string

@@ -19,6 +19,8 @@ import {isMobile} from "../../util/functions";
 import {openModel} from "./model";
 import {getCurrentEditor} from "../editor";
 import {openDataMigration} from "../../menus/dataMigration";
+import {normalizeSearchText} from "../../config/search/normalize";
+import type {SettingTabSearchResult} from "../../config/setting/builder";
 
 const getSettingTabFromMenuTarget = (target: HTMLElement): ISettingTabShell<TSettingTab> | undefined => {
     const item = target.closest(".b3-menu__item") as HTMLElement | null;
@@ -33,6 +35,27 @@ const getSettingTabsMenuHTML = () => getSettingTabDefs().map(def =>
         <svg class="b3-menu__icon"><use xlink:href="#${def.icon}"></use></svg>
         <span class="b3-menu__label">${def.title}</span>
     </div>`).join("");
+
+const getSettingTabResultsHTML = () => getSettingTabDefs().map(def =>
+    `<div class="config mobile-setting-menu__result fn__none" data-name="${def.id}"></div>`).join("");
+
+const filterSettingTabsMenu = (element: HTMLElement, keywords: string) => {
+    const matches = new Map<TSettingTab, SettingTabSearchResult>();
+    for (const def of getSettingTabDefs()) {
+        if (def.hidden) {
+            continue;
+        }
+        const item = element.querySelector(`#${settingTabToMenuId(def.id)}`);
+        const result = keywords ? getSettingTab(def.id).scanSearch(keywords) : undefined;
+        const matched = !keywords || result?.matches;
+        item?.classList.toggle("config-search-hidden", !matched);
+        if (result?.matches) {
+            matches.set(def.id, result);
+        }
+    }
+    element.querySelector('[data-type="setting-search-empty"]')?.classList.toggle("fn__none", !keywords || matches.size > 0);
+    return matches;
+};
 
 const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, returnCallback?: () => void) => {
     openModel({
@@ -55,22 +78,90 @@ const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, 
     });
 };
 
-const openSettingMenu = (app: App, transition?: "back", returnCallback?: () => void) => {
+const openSettingMenu = (
+    app: App,
+    transition?: "back",
+    returnCallback?: () => void,
+) => {
     openModel({
         title: window.siyuan.languages.config,
         icon: "iconLeft",
-        html: `<div class="b3-menu__groups">
-    <div class="b3-menu__group">
-        <div class="b3-menu__group-items">${getSettingTabsMenuHTML()}</div>
+        html: `<div class="mobile-setting-menu">
+    <div class="mobile-setting-menu__search">
+        <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__flex-1" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="b3-menu__groups mobile-setting-menu__groups">
+        <div class="b3-menu__group">
+            <div class="b3-menu__group-items">${getSettingTabsMenuHTML()}</div>
+        </div>
+        <div class="b3-list--empty fn__none" data-type="setting-search-empty">${window.siyuan.languages.emptyContent}</div>
+        ${getSettingTabResultsHTML()}
     </div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {
+            const searchElement = modelMainElement.querySelector("input") as HTMLInputElement;
+            let selectedTabId: TSettingTab | undefined;
+            const showSearchResult = (keywords: string, tabId: TSettingTab, result: SettingTabSearchResult) => {
+                modelMainElement.querySelectorAll<HTMLElement>(".mobile-setting-menu__result").forEach((item) => {
+                    item.classList.toggle("fn__none", item.dataset.name !== tabId);
+                });
+                modelMainElement.querySelectorAll(".b3-menu__group-items > .b3-menu__item").forEach((item) => {
+                    item.classList.toggle("b3-menu__item--current", item.id === settingTabToMenuId(tabId));
+                });
+                const root = modelMainElement.querySelector(`.mobile-setting-menu__result[data-name="${tabId}"]`) as HTMLElement;
+                bindSettingSaveDelegation(root);
+                void getSettingTab(tabId).mount(root, {
+                    keywords,
+                    visibleItemIds: result.visibleItemIds,
+                    visibleGroupIds: result.visibleGroupIds,
+                }, app);
+            };
+            const syncSearch = () => {
+                const keywords = normalizeSearchText(searchElement.value);
+                const matches = filterSettingTabsMenu(modelMainElement, keywords);
+                if (!keywords || matches.size === 0) {
+                    selectedTabId = undefined;
+                    modelMainElement.querySelectorAll(".mobile-setting-menu__result").forEach((item) => {
+                        item.classList.add("fn__none");
+                    });
+                    modelMainElement.querySelectorAll(".b3-menu__group-items > .b3-menu__item").forEach((item) => {
+                        item.classList.remove("b3-menu__item--current");
+                    });
+                    return;
+                }
+                if (!selectedTabId || !matches.has(selectedTabId)) {
+                    selectedTabId = matches.keys().next().value;
+                }
+                if (selectedTabId) {
+                    const result = matches.get(selectedTabId);
+                    if (result) {
+                        showSearchResult(keywords, selectedTabId, result);
+                    }
+                }
+            };
+            searchElement.addEventListener("compositionend", syncSearch);
+            searchElement.addEventListener("input", (event: InputEvent) => {
+                if (!event.isComposing) {
+                    syncSearch();
+                }
+            });
             modelMainElement.addEventListener("click", (event) => {
                 const def = getSettingTabFromMenuTarget(event.target as HTMLElement);
                 if (def) {
+                    const keywords = normalizeSearchText(searchElement.value);
+                    if (keywords) {
+                        const result = getSettingTab(def.id).scanSearch(keywords);
+                        if (!result.matches) {
+                            return;
+                        }
+                        selectedTabId = def.id;
+                        showSearchResult(keywords, def.id, result);
+                        return;
+                    }
                     openSettingTab(app, def, () => openSettingMenu(app, "back", returnCallback));
                 }
             });
+            syncSearch();
         },
         backCallback() {
             if (returnCallback) {

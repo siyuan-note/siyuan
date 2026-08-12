@@ -83,11 +83,14 @@ func TestCapabilityPolicyControlsExposureAndExecution(t *testing.T) {
 		Default: "allow",
 		Actions: map[string]string{"write": "confirm"},
 	}
-	if needsCapabilityConfirm(backendRegistration, "delete", nil, nil) {
+	if needsCapabilityConfirm(backendRegistration, "delete", nil, false, nil) {
 		t.Fatal("capability auto approval was not applied")
 	}
-	if !needsCapabilityConfirm(backendRegistration, "write", nil, nil) {
+	if !needsCapabilityConfirm(backendRegistration, "write", nil, false, nil) {
 		t.Fatal("action confirmation override was not applied")
+	}
+	if !needsCapabilityConfirm(backendRegistration, "write", nil, true, nil) {
+		t.Fatal("explicit confirmation was bypassed by the session approval mode")
 	}
 
 	kernelModel.Conf.AI.Agent.CapabilityPolicy.Overrides[backendID] = "deny"
@@ -102,5 +105,46 @@ func TestCapabilityPolicyControlsExposureAndExecution(t *testing.T) {
 	}
 	if set.registration(toolName) != nil {
 		t.Fatal("disabled backend capability remained exposed")
+	}
+}
+
+func TestExplicitCapabilityConfirmationOverridesRiskAndSessionApproval(t *testing.T) {
+	originalConf := kernelModel.Conf
+	kernelModel.Conf = kernelModel.NewAppConf()
+	kernelModel.Conf.AI = conf.NewAI()
+	t.Cleanup(func() { kernelModel.Conf = originalConf })
+
+	registration := &capabilityRegistration{
+		ID:        "native/backend/search",
+		ModelName: "search",
+		Source:    "native",
+		Runtime:   "kernel",
+		Tool:      tools.SearchTool,
+	}
+	if needsCapabilityConfirm(registration, "fulltext", nil, false, nil) {
+		t.Fatal("risk-based local search unexpectedly required confirmation")
+	}
+	required, forced := capabilityConfirmRequirement(registration, "semantic", nil, false, nil)
+	if !required || forced {
+		t.Fatal("risk-based semantic search did not require confirmation")
+	}
+	if needsCapabilityConfirm(registration, "semantic", nil, true, nil) {
+		t.Fatal("session approval did not bypass risk-based confirmation")
+	}
+
+	kernelModel.Conf.AI.Agent.ApprovalPolicy.Overrides[registration.ID] = &conf.CapabilityApproval{
+		Default: conf.ApprovalDecisionConfirm,
+		Actions: map[string]string{"semantic": conf.ApprovalDecisionAllow},
+	}
+	required, forced = capabilityConfirmRequirement(registration, "fulltext", nil, false, nil)
+	if !required || !forced {
+		t.Fatal("explicit confirmation did not protect local search")
+	}
+	required, forced = capabilityConfirmRequirement(registration, "fulltext", nil, true, nil)
+	if !required || !forced {
+		t.Fatal("session approval bypassed explicit capability confirmation")
+	}
+	if needsCapabilityConfirm(registration, "semantic", nil, false, nil) {
+		t.Fatal("action auto approval did not override capability confirmation")
 	}
 }

@@ -16,6 +16,7 @@ import (
 	"unicode"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 )
@@ -82,27 +83,27 @@ func (configCapabilityAuthorizer) Allows(id string, _ capabilityAccessContext) b
 var currentCapabilityAuthorizer capabilityAuthorizer = configCapabilityAuthorizer{}
 
 type capabilityApprover interface {
-	AutoApproves(id, action string, context capabilityAccessContext) bool
+	Decision(id, action string, context capabilityAccessContext) string
 }
 
 type configCapabilityApprover struct{}
 
-func (configCapabilityApprover) AutoApproves(id, action string, _ capabilityAccessContext) bool {
+func (configCapabilityApprover) Decision(id, action string, _ capabilityAccessContext) string {
 	if kernelModel.Conf == nil || kernelModel.Conf.AI == nil || kernelModel.Conf.AI.Agent == nil {
-		return false
+		return conf.ApprovalDecisionRisk
 	}
-	return kernelModel.Conf.AI.Agent.ApprovalPolicy.AutoApproves(id, action)
+	return kernelModel.Conf.AI.Agent.ApprovalPolicy.Decision(id, action)
 }
 
 var currentCapabilityApprover capabilityApprover = configCapabilityApprover{}
 
-func capabilityAutoApproved(registration *capabilityRegistration, action string, args map[string]any) bool {
+func capabilityApprovalDecision(registration *capabilityRegistration, action string, args map[string]any) string {
 	if registration == nil {
-		return false
+		return conf.ApprovalDecisionRisk
 	}
 	accessContext := registration.AccessContext
 	accessContext.Arguments = args
-	return currentCapabilityApprover.AutoApproves(registration.ID, action, accessContext)
+	return currentCapabilityApprover.Decision(registration.ID, action, accessContext)
 }
 
 func (registration *capabilityRegistration) isBrowser() bool {

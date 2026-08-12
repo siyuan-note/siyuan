@@ -41,10 +41,16 @@ const {pathToFileURL} = require("url");
 const gNet = require("net");
 const childProcess = require("child_process");
 const remote = require("@electron/remote/main");
+const {
+    getAppleSiliconDownloadURL,
+    shouldDownloadAppleSilicon,
+    shouldShowAppleSiliconWarning,
+} = require("./appleSilicon");
 
 process.noAsar = true;
 const appDir = path.dirname(app.getAppPath());
 const isDevEnv = process.env.NODE_ENV === "development";
+const simulateRosetta = process.argv.includes("--simulate-rosetta");
 const appVer = app.getVersion();
 const confDir = path.join(app.getPath("home"), ".config", "siyuan");
 const windowStatePath = path.join(confDir, "windowState.json");
@@ -75,6 +81,7 @@ let updateInstallPromise;
 let keepAppOpenDuringUpdate = false;
 let richClipboardOperation;
 let richClipboardSequence = 0;
+let appleSiliconWarningShown = false;
 const openDialogSingletons = new Set();
 let spellcheckContextSequence = 0;
 const spellcheckContexts = new Map();
@@ -420,6 +427,28 @@ const resolveAppLanguage = (languageTags) => {
     };
 
     return languageMapping[language] || "en";
+};
+
+const loadAppleSiliconWarningLanguages = (requestedLanguage) => {
+    const language = resolveAppLanguage(requestedLanguage ? [requestedLanguage] : app.getPreferredSystemLanguages());
+    const languageDir = path.join(appDir, "appearance", "langs");
+    try {
+        const languageData = JSON.parse(fs.readFileSync(path.join(languageDir, `${language}.json`), "utf8"));
+        const languages = languageData._trayMenu;
+        if (languages && typeof languages.arm64TranslationTitle === "string" &&
+            typeof languages.arm64TranslationMessage === "string" &&
+            typeof languages.downloadAppleSilicon === "string") {
+            return languages;
+        }
+    } catch (error) {
+        writeLog("load Apple silicon warning languages failed: " + error);
+    }
+    return {
+        arm64TranslationTitle: "Install the Apple silicon version",
+        arm64TranslationMessage: "SiYuan is running the Intel version through Rosetta. This may significantly " +
+            "reduce performance. Please use the Apple silicon version",
+        downloadAppleSilicon: "Download the Apple silicon version",
+    };
 };
 
 const markExpectedRendererExit = (window) => {
@@ -1192,8 +1221,50 @@ const showWindow = (wnd) => {
     wnd.show();
 };
 
+const showAppleSiliconWarning = async (lang) => {
+    if (!shouldShowAppleSiliconWarning({
+        isDevelopment: isDevEnv,
+        isPackaged: app.isPackaged,
+        platform: process.platform,
+        runningUnderARM64Translation: app.runningUnderARM64Translation,
+        simulateRosetta,
+    })) {
+        return true;
+    }
+    if (appleSiliconWarningShown) {
+        return false;
+    }
+
+    appleSiliconWarningShown = true;
+    const languages = loadAppleSiliconWarningLanguages(lang);
+    try {
+        const {response} = await dialog.showMessageBox({
+            type: "warning",
+            title: languages.arm64TranslationTitle,
+            message: languages.arm64TranslationTitle,
+            detail: languages.arm64TranslationMessage,
+            buttons: [languages.downloadAppleSilicon],
+            defaultId: 0,
+            // 使用按钮数组之外的取消 ID，以区分关闭弹窗和点击下载。
+            cancelId: 1,
+            noLink: true,
+        });
+        if (shouldDownloadAppleSilicon(response)) {
+            await shell.openExternal(getAppleSiliconDownloadURL(appVer));
+        }
+    } catch (error) {
+        writeLog("show Apple silicon warning or open package download failed: " + error);
+    }
+    return false;
+};
+
 const initKernel = (workspace, port, lang, safeMode) => {
     return new Promise(async (resolve) => {
+        if (!await showAppleSiliconWarning(lang)) {
+            app.quit();
+            resolve(false);
+            return;
+        }
         bootWindow = new BrowserWindow({
             show: false,
             width: Math.floor(screen.getPrimaryDisplay().size.width / 2),

@@ -34,6 +34,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
+	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -103,7 +104,8 @@ func getSyncCloudLatestID() (ret string) {
 		logging.LogWarnf("create repo before perceived sync failed: %s", err)
 		return
 	}
-	latest, err := repo.GetCloudLatest(map[string]interface{}{})
+	syncContext := map[string]any{eventbus.CtxPushMsg: eventbus.CtxPushMsgToNone}
+	latest, err := repo.GetCloudLatestFast(syncContext)
 	if nil != err {
 		logging.LogWarnf("get cloud latest before perceived sync failed: %s", err)
 		return
@@ -156,10 +158,9 @@ func SyncDataUpload() {
 }
 
 var (
-	syncSameCount     = atomic.Int32{}
-	syncDataChangeGen = atomic.Uint64{}
-	autoSyncErrCount  = 0
-	fixSyncInterval   = 5 * time.Minute
+	syncSameCount    = atomic.Int32{}
+	autoSyncErrCount = 0
+	fixSyncInterval  = 5 * time.Minute
 
 	syncPlanTimeLock = sync.Mutex{}
 	syncPlanTime     = time.Now().Add(fixSyncInterval)
@@ -914,7 +915,6 @@ func getSyncIgnoreLines() (ret []string) {
 }
 
 func IncSync() {
-	syncDataChangeGen.Add(1)
 	syncSameCount.Store(0)
 	planSyncAfter(time.Duration(Conf.Sync.Interval) * time.Second)
 }

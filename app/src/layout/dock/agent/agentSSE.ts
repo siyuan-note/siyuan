@@ -1,9 +1,6 @@
-export type IToolEffects = {
-    localRead?: boolean;
-    localWrite?: boolean;
-    dataEgress?: boolean;
-    externalCost?: boolean;
-};
+import {buildAgentConfirmEvent, IToolEffects} from "./agentConfirmEvent";
+
+export type {IToolEffects} from "./agentConfirmEvent";
 
 export type ISSEResult = {
     type: "turn";
@@ -27,6 +24,7 @@ export type ISSEResult = {
     arguments: Record<string, unknown>;
     confirmID: string;
     effects?: IToolEffects;
+    forced?: boolean;
 } | {
     type: "tool_result";
     name: string;
@@ -295,12 +293,7 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
                 arguments: (data.arguments || {}) as Record<string, unknown>,
             };
         case "confirm":
-            return {
-                type: "confirm",
-                name: data.name as string,
-                arguments: (data.arguments || {}) as Record<string, unknown>,
-                confirmID: data.confirmID as string,
-            };
+            return buildAgentConfirmEvent(data);
         case "permission":
             return {
                 type: "permission",

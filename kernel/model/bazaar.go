@@ -247,6 +247,26 @@ func buildUpdatedPackages(installedPackages []*bazaar.Package, bazaarPackagesMap
 	return
 }
 
+func packageDirContainsFile(dirPath string) (bool, error) {
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return false, err
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			return true, nil
+		}
+		containsFile, readErr := packageDirContainsFile(filepath.Join(dirPath, entry.Name()))
+		if readErr != nil {
+			return false, readErr
+		}
+		if containsFile {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 // GetInstalledPackageInfos 获取本地集市包信息，并返回路径相关字段供调用方复用
 func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installedPackageInfo, basePath, baseURLPathPrefix string, err error) {
 	var jsonFileName string
@@ -300,16 +320,21 @@ func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installed
 
 	for _, dir := range dirs {
 		dirName := dir.Name()
+		installPath := filepath.Join(basePath, dirName)
 		if strings.HasPrefix(dirName, ".siyuan-package-install-") {
 			continue
 		}
-		pkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(basePath, dirName, jsonFileName))
+		pkg, parseErr := bazaar.ParsePackageJSON(filepath.Join(installPath, jsonFileName))
 		if nil != parseErr || nil == pkg {
 			if pkgType == "templates" && errors.Is(parseErr, os.ErrNotExist) {
 				continue
 			}
 			reason := bazaar.PackageInvalidReasonInvalidManifest
 			if errors.Is(parseErr, os.ErrNotExist) {
+				containsFile, readErr := packageDirContainsFile(installPath)
+				if readErr == nil && !containsFile {
+					continue
+				}
 				reason = bazaar.PackageInvalidReasonMissingManifest
 			}
 			installedPackageInfos = append(installedPackageInfos, installedPackageInfo{

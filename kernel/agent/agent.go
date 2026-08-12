@@ -34,6 +34,7 @@ import (
 	"github.com/siyuan-note/logging"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	mcptools "github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
@@ -334,6 +335,7 @@ type AgentEvent struct {
 	TurnID           string
 	PermissionMode   string
 	Effects          mcptools.ToolEffects
+	ForcedConfirm    bool
 	CapabilityID     string
 	Generation       uint64
 }
@@ -1060,8 +1062,12 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 					})
 
 					toolInputErr := validateCapabilityCall(ctx, registration, args)
-					if toolInputErr == nil && !permissionController.allowSession.Load() &&
-						needsCapabilityConfirm(registration, action, args, nil) {
+					requiresConfirm, forcedConfirm := false, false
+					if toolInputErr == nil {
+						requiresConfirm, forcedConfirm = capabilityConfirmRequirement(
+							registration, action, args, permissionController.allowSession.Load(), nil)
+					}
+					if requiresConfirm {
 						confirmID := fmt.Sprintf("%s_%s_%d", turn.TurnID, tc.ID, i)
 						ch2 := make(chan confirmResult, 1)
 						confirmChannelsMu.Lock()
@@ -1070,7 +1076,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 						effects := capabilityEffects(registration, action)
 						sendCriticalEvent(ctx, ch, AgentEvent{
 							Type: "confirm", Name: tc.Function.Name, Arguments: args, ConfirmID: confirmID, Effects: effects,
-							CapabilityID: registration.ID,
+							ForcedConfirm: forcedConfirm, CapabilityID: registration.ID,
 						})
 						var rejectionMsg string
 						var result confirmResult
@@ -1478,25 +1484,38 @@ func capabilityEffects(registration *capabilityRegistration, action string) mcpt
 }
 
 func needsCapabilityConfirm(registration *capabilityRegistration, action string, args map[string]any,
-	alwaysAllow map[string]bool) bool {
+	allowSession bool, alwaysAllow map[string]bool) bool {
+	required, _ := capabilityConfirmRequirement(registration, action, args, allowSession, alwaysAllow)
+	return required
+}
+
+func capabilityConfirmRequirement(registration *capabilityRegistration, action string, args map[string]any,
+	allowSession bool, alwaysAllow map[string]bool) (required, forced bool) {
 	if registration == nil {
-		return false
+		return false, false
+	}
+	decision := capabilityApprovalDecision(registration, action, args)
+	if decision == conf.ApprovalDecisionConfirm {
+		return true, true
+	}
+	if decision == conf.ApprovalDecisionAllow {
+		return false, false
+	}
+	if allowSession {
+		return false, false
 	}
 	if alwaysAllow["*"] || alwaysAllow[registration.ID] || alwaysAllow[registration.ModelName+"::"+action] {
-		return false
-	}
-	if capabilityAutoApproved(registration, action, args) {
-		return false
+		return false, false
 	}
 	if registration.isBrowser() {
 		effects, declared := registration.browserEffectsFor(action)
 		if effects.LocalWrite || effects.DataEgress || effects.ExternalCost {
-			return true
+			return true, false
 		}
 		// 插件声明的浏览器能力不默认信任；只有显式的只读效果声明才能免确认。
-		return registration.Source != "native" && !declared
+		return registration.Source != "native" && !declared, false
 	}
-	return needsConfirm(registration.ModelName, action, alwaysAllow)
+	return needsConfirm(registration.ModelName, action, alwaysAllow), false
 }
 
 func needsCapabilitySnapshot(registration *capabilityRegistration, action string) bool {

@@ -556,6 +556,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/snippet/removeSnippet", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeSnippet)
 
 	ginServer.Handle("POST", "/api/av/renderAttributeView", model.CheckAuth, renderAttributeView)
+	ginServer.Handle("POST", "/api/av/getAttributeViewItemStatuses", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewItemStatuses)
 	ginServer.Handle("POST", "/api/av/renderHistoryAttributeView", model.CheckAuth, model.CheckAdminRole, renderHistoryAttributeView)
 	ginServer.Handle("POST", "/api/av/renderSnapshotAttributeView", model.CheckAuth, model.CheckAdminRole, renderSnapshotAttributeView)
 	ginServer.Handle("POST", "/api/av/getAttributeViewKeys", model.CheckAuth, getAttributeViewKeys)
@@ -608,6 +609,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/listModels", model.CheckAuth, model.CheckAdminRole, listModels)
 	ginServer.Handle("POST", "/api/ai/embeddingStat", model.CheckAuth, model.CheckAdminRole, embeddingStat)
 	ginServer.Handle("POST", "/api/ai/mcpStatus", model.CheckAuth, model.CheckAdminRole, mcpStatus)
+	ginServer.Handle("POST", "/api/ai/mcpEnvironmentVariables", model.CheckAuth, model.CheckAdminRole, mcpEnvironmentVariables)
 	ginServer.Handle("POST", "/api/ai/mcpOAuthAuthorize", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, mcpOAuthAuthorize)
 	ginServer.Handle("POST", "/api/ai/mcpOAuthDisconnect", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, mcpOAuthDisconnect)
 	ginServer.Handle("POST", "/api/ai/reindexEmbedding", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reindexEmbedding)

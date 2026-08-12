@@ -1305,7 +1305,6 @@
 	"syncProvider": "Provedor de serviço de armazenamento em nuvem",
 	"syncProviderTip": "Se selecionado, o serviço de armazenamento em nuvem deste provedor será usado para alcançar funções de sincronização e backup em nuvem",
 	"confirmReset": "Tem certeza que deseja redefinir todos os atalhos de teclado para as configurações padrão?",
-	"notBatchRemove": "Exclusão em lote de bloco de notas não suportada",
 	"confirmRemoveAll": "Tem certeza que deseja excluir os ${count} documentos selecionados e seus subdocumentos?",
 	"microphoneDenied": "É necessário permitir que o SiYuan acesse o microfone nas Preferências do Sistema",
 	"microphoneNotAccess": "O acesso ao microfone foi negado, vá para as Preferências do Sistema para redefinir",

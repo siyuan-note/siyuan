@@ -551,6 +551,28 @@ func storeAssetForBox(boxID, assetDirPath, originalName string, data []byte) (di
 	// 普通 box：生成带 ID 的文件名，明文写入
 	diskName = util.AssetName(originalName, ast.NewNodeID())
 	writePath := filepath.Join(assetDirPath, diskName)
+	if existing, readErr := filelock.ReadFile(writePath); readErr == nil {
+		if bytes.Equal(existing, data) {
+			return diskName, nil
+		}
+
+		// 导入带有既有 NodeID 的文件时不能覆盖全局同名资源，冲突后强制生成新的资源 ID。
+		cleanName := util.RemoveID(originalName)
+		ext := filepath.Ext(cleanName)
+		name := strings.TrimSuffix(cleanName, ext)
+		if name == "" || ast.IsNodeIDPattern(name) {
+			name = "asset"
+		}
+		for {
+			diskName = util.AssetName(name+ext, ast.NewNodeID())
+			writePath = filepath.Join(assetDirPath, diskName)
+			if !filelock.IsExist(writePath) {
+				break
+			}
+		}
+	} else if !os.IsNotExist(readErr) {
+		return "", readErr
+	}
 	if err = filelock.WriteFile(writePath, data); err != nil {
 		return "", err
 	}

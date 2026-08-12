@@ -1305,7 +1305,6 @@
 	"syncProvider": "클라우드 저장소 서비스 제공자",
 	"syncProviderTip": "선택하면 해당 제공자의 클라우드 저장소 서비스를 사용하여 클라우드 동기화 및 백업 기능을 수행합니다",
 	"confirmReset": "모든 키보드 단축키를 기본 설정으로 초기화하시겠습니까?",
-	"notBatchRemove": "노트북 일괄 삭제는 지원되지 않습니다",
 	"confirmRemoveAll": "선택한 ${count}개의 문서와 하위 문서를 삭제하시겠습니까?",
 	"microphoneDenied": "시스템 환경설정에서 Siyuan이 마이크에 액세스하도록 허용해야 합니다",
 	"microphoneNotAccess": "마이크 액세스가 거부되었습니다. 재설정하려면 시스템 환경설정으로 이동하세요",

@@ -52,11 +52,6 @@ func extensionCopy(c *gin.Context) {
 		if model.IsEncryptedBox(nb) {
 			boxID = nb
 			assets = filepath.Join(util.DataDir, nb, "assets")
-		} else {
-			assets = filepath.Join(util.DataDir, nb, "assets")
-			if !gulu.File.IsDir(assets) {
-				assets = filepath.Join(util.DataDir, "assets")
-			}
 		}
 	}
 	if err := holdEncryptedBoxRequest(c, boxID); err != nil {

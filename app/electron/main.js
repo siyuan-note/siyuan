@@ -1260,11 +1260,7 @@ const showAppleSiliconWarning = async (lang) => {
 
 const initKernel = (workspace, port, lang, safeMode) => {
     return new Promise(async (resolve) => {
-        if (!await showAppleSiliconWarning(lang)) {
-            app.quit();
-            resolve(false);
-            return;
-        }
+        // 必须在首次异步等待前创建窗口，避免工作空间选择窗口关闭后因无窗口触发应用退出。
         bootWindow = new BrowserWindow({
             show: false,
             width: Math.floor(screen.getPrimaryDisplay().size.width / 2),
@@ -1277,6 +1273,12 @@ const initKernel = (workspace, port, lang, safeMode) => {
                 webSecurity: false,
             },
         });
+        if (!await showAppleSiliconWarning(lang)) {
+            bootWindow.destroy();
+            app.quit();
+            resolve(false);
+            return;
+        }
         let bootIndex = path.join(appDir, "app", "electron", "boot.html");
         if (isDevEnv) {
             bootIndex = path.join(appDir, "electron", "boot.html");

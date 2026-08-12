@@ -1305,7 +1305,6 @@
 	"syncProvider": "Bulut depolama sağlayıcısı",
 	"syncProviderTip": "Seçildiğinde, bulut senkronizasyonu ve yedekleme işlevleri bu sağlayıcının servisiyle gerçekleştirilir",
 	"confirmReset": "Tüm klavye kısayollarını varsayılanlara sıfırlamak istediğine emin misin?",
-	"notBatchRemove": "Not defteri toplu silme desteklenmiyor",
 	"confirmRemoveAll": "Seçilen ${count} belge ve alt belgelerini silmek istediğine emin misin?",
 	"microphoneDenied": "Siyuan’ın mikrofona erişmesine Sistem Ayarları’ndan izin verilmesi gerekiyor",
 	"microphoneNotAccess": "Mikrofon erişimi reddedildi, Sistem Ayarları’ndan sıfırla",

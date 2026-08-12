@@ -8,6 +8,7 @@ import {
     getEntryPaths,
 } from "./catalog";
 import {reorderEntrySlots, resolveEntryOrder} from "./order";
+import {getDocTreeEntryScope} from "./docTreeScope";
 
 export const ENTRY_VISIBILITY_VERSION = 2;
 export const ENTRY_PROFILE_SIMPLE = "simple";
@@ -103,16 +104,13 @@ const entryScope = (menuElement: HTMLElement): string => {
         case Constants.MENU_DOC_TREE_PANEL_MORE:
             return "docTree.panel";
         case Constants.MENU_DOC_TREE_MORE:
-            if (menuElement.dataset.from === Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOK) {
-                return "docTree.notebook";
-            }
-            if (menuElement.dataset.from === Constants.MENU_FROM_DOC_TREE_MORE_DOC) {
-                return "docTree.document";
-            }
-            if (menuElement.dataset.from === Constants.MENU_FROM_DOC_TREE_MORE_ITEMS) {
-                return "docTree.multi";
-            }
-            return "";
+            return getDocTreeEntryScope(menuElement.dataset.from, {
+                notebook: Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOK,
+                notebooks: Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOKS,
+                doc: Constants.MENU_FROM_DOC_TREE_MORE_DOC,
+                docs: Constants.MENU_FROM_DOC_TREE_MORE_DOCS,
+                items: Constants.MENU_FROM_DOC_TREE_MORE_ITEMS,
+            });
         case Constants.MENU_TITLE:
             return "document.title";
         case Constants.MENU_BREADCRUMB_MORE:

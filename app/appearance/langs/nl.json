@@ -1305,7 +1305,6 @@
 	"syncProvider": "Cloudopslagprovider",
 	"syncProviderTip": "Indien geselecteerd wordt de cloudopslagdienst van deze provider gebruikt voor cloudsynchronisatie en back-up",
 	"confirmReset": "Weet u zeker dat u alle sneltoetsen wilt herstellen naar de standaardinstellingen?",
-	"notBatchRemove": "Batchverwijdering niet ondersteund",
 	"confirmRemoveAll": "${count} documenten en subdocumenten verwijderen?",
 	"microphoneDenied": "Geef SiYuan microfoontoegang in Systeemvoorkeuren",
 	"microphoneNotAccess": "Microfoontoegang geweigerd; ga naar Systeemvoorkeuren om opnieuw in te stellen",

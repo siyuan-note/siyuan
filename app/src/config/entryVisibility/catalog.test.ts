@@ -134,6 +134,41 @@ test("document loading actions follow the document menu order", () => {
     assert.equal(children[loadAllIndex + 2]?.key, "separator_1");
 });
 
+test("multiple document and notebook entries follow their document tree menus", () => {
+    assert.deepEqual(getEntryCatalogChildren("docTree.notebooks").map((item) => item.key), ["close", "delete"]);
+    assert.ok(getEntryCatalogChildren("docTree.multi").some((item) => item.key === "delete"));
+});
+
+test("multiple document and notebook settings have distinct labels", () => {
+    const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {
+        configurable: true,
+        value: {
+            siyuan: {
+                languages: {
+                    agentCatDoc: "Document",
+                    agentCatNotebook: "Notebook",
+                    entryDocPanel: "Document panel",
+                    more: "More",
+                    multiSelect: "Multi-select",
+                },
+            },
+        },
+    });
+    try {
+        assert.equal(entryCatalog.find((item) => item.key === "docTree.multi")?.label(),
+            "Document panel - Document - Multi-select - More");
+        assert.equal(entryCatalog.find((item) => item.key === "docTree.notebooks")?.label(),
+            "Document panel - Notebook - Multi-select - More");
+    } finally {
+        if (windowDescriptor) {
+            Object.defineProperty(globalThis, "window", windowDescriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
+});
+
 test("HTML file insertion follows general asset insertion", () => {
     const children = getEntryCatalogChildren("document.more");
     const insertAssetIndex = children.findIndex((item) => item.key === "insertAsset");

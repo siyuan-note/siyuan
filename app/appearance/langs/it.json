@@ -1305,7 +1305,6 @@
 	"syncProvider": "Provider di servizio di archiviazione cloud",
 	"syncProviderTip": "Se selezionato, verrà utilizzato il servizio di archiviazione cloud di questo provider per sincronizzare e fare il backup dei dati",
 	"confirmReset": "Sei sicuro di voler ripristinare tutte le scorciatoie da tastiera alle impostazioni predefinite?",
-	"notBatchRemove": "La cancellazione in batch dei taccuini non è supportata",
 	"confirmRemoveAll": "Sei sicuro di voler eliminare i ${count} documenti selezionati e i loro sotto-documenti?",
 	"microphoneDenied": "SiYuan deve avere l'autorizzazione per accedere al microfono nelle Preferenze di Sistema",
 	"microphoneNotAccess": "L'accesso al microfono è negato, vai nelle Preferenze di Sistema per reimpostare",

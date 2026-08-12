@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20260812160000"
+		"updated": "20260812170000"
 	},
 	"Children": [
 		{
@@ -726,7 +726,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-vppxnqj",
-				"updated": "20260812160000"
+				"updated": "20260812170000"
 			},
 			"Children": [
 				{
@@ -740,7 +740,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170055-yibcbj8",
-				"updated": "20260812160000"
+				"updated": "20260812170000"
 			},
 			"Children": [
 				{
@@ -796,12 +796,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170056-84olaaf",
-				"updated": "20260812160000"
+				"updated": "20260812170000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "stdio 服務只會繼承使用者勾選的核心環境變數，並在每次啟動時讀取目前值；還可以在環境變數 JSON 中引用金鑰和變數。引用金鑰會將其明文提供給該程式及其子程序，直接填寫的值會以明文儲存。需要授權的 HTTP 服務會引導完成 OAuth 授權。金鑰和可重複使用的參數可以在 "
+					"Data": "stdio 服務只會繼承使用者勾選的核心環境變數，並在每次啟動時讀取目前值；還可以在環境變數項目中引用金鑰和變數。引用金鑰會將其明文提供給該程式及其子程序，直接填寫的值會以明文儲存。需要授權的 HTTP 服務會引導完成 OAuth 授權。金鑰和可重複使用的參數可以在 "
 				},
 				{
 					"Type": "NodeTextMark",

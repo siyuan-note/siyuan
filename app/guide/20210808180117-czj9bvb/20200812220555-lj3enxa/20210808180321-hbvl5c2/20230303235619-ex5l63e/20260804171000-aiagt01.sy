@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20260812160000"
+		"updated": "20260812170000"
 	},
 	"Children": [
 		{
@@ -726,7 +726,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170054-w5eqebc",
-				"updated": "20260812160000"
+				"updated": "20260812170000"
 			},
 			"Children": [
 				{
@@ -740,7 +740,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170055-qbwm9vb",
-				"updated": "20260812160000"
+				"updated": "20260812170000"
 			},
 			"Children": [
 				{
@@ -796,12 +796,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170056-3aqvrqh",
-				"updated": "20260812160000"
+				"updated": "20260812170000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "stdio 服务只会继承用户勾选的内核环境变量，并在每次启动时读取当前值；还可以在环境变量 JSON 中引用密钥和变量。引用密钥会将其明文提供给该程序及其子进程，直接填写的值会以明文存储。需要授权的 HTTP 服务会引导完成 OAuth 授权。密钥和可复用参数可以在 "
+					"Data": "stdio 服务只会继承用户勾选的内核环境变量，并在每次启动时读取当前值；还可以在环境变量条目中引用密钥和变量。引用密钥会将其明文提供给该程序及其子进程，直接填写的值会以明文存储。需要授权的 HTTP 服务会引导完成 OAuth 授权。密钥和可复用参数可以在 "
 				},
 				{
 					"Type": "NodeTextMark",

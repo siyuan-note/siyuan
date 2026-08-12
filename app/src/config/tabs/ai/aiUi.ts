@@ -657,9 +657,10 @@ const renderEnvironmentVariableOptions = (availableNames: string[], selectedName
                 : "")
             : `<span class="b3-list-item__meta">${window.siyuan.languages.aiMcpEnvUnavailable}</span>`;
         return `<label class="b3-list-item b3-list-item--narrow" data-mcp-env-option="${Lute.EscapeHTMLStr(name)}">
-    <input class="b3-switch" type="checkbox" data-mcp-inherit-env="${Lute.EscapeHTMLStr(name)}"${selected.has(key) ? " checked" : ""}>
     <span class="b3-list-item__text">${Lute.EscapeHTMLStr(name)}</span>
     ${status}
+    <span class="fn__space--small"></span>
+    <input class="b3-switch" type="checkbox" aria-label="${Lute.EscapeHTMLStr(name)}" data-mcp-inherit-env="${Lute.EscapeHTMLStr(name)}"${selected.has(key) ? " checked" : ""}>
 </label>`;
     }).join("");
 };
@@ -681,16 +682,44 @@ const parseStringRecord = (value: string, invalidMessage: string): Record<string
     return null;
 };
 
-const validateEnvironmentRecord = (env: Record<string, string>) => {
+const renderMcpEnvironmentRow = (name = "", value = "") => `<div data-mcp-env-row>
+    <div class="fn__flex">
+        <input class="b3-text-field fn__flex-1" data-mcp-env-name type="text" spellcheck="false" placeholder="NAME" value="${Lute.EscapeHTMLStr(name)}">
+        <span class="fn__space"></span>
+        <input class="b3-text-field fn__flex-1" data-mcp-env-value type="text" spellcheck="false" placeholder="{{secrets.NAME}}" value="${Lute.EscapeHTMLStr(value)}">
+        <span class="fn__space--small"></span>
+        <button class="block__icon block__icon--show block__icon--warning" data-type="deleteMcpEnvironmentVariable" type="button" aria-label="${window.siyuan.languages.delete}">
+            <svg><use xlink:href="#iconTrashcan"></use></svg>
+        </button>
+    </div>
+    <div class="fn__hr--small"></div>
+</div>`;
+
+const renderMcpEnvironmentRows = (env: Record<string, string>) => {
+    const entries = Object.entries(env);
+    return (entries.length === 0 ? [["", ""]] : entries)
+        .map(([name, value]) => renderMcpEnvironmentRow(name, value)).join("");
+};
+
+const readMcpEnvironmentRows = (dialogEl: HTMLElement): Record<string, string> | null => {
+    const env: Record<string, string> = {};
     const names = new Set<string>();
-    for (const [name, value] of Object.entries(env)) {
+    const rows = dialogEl.querySelectorAll<HTMLElement>("[data-mcp-env-row]");
+    for (const row of rows) {
+        const name = row.querySelector<HTMLInputElement>("[data-mcp-env-name]").value.trim();
+        const value = row.querySelector<HTMLInputElement>("[data-mcp-env-value]").value;
+        if (!name && !value) {
+            continue;
+        }
         const normalized = normalizeEnvironmentName(name);
         if (!name || name.includes("=") || name.includes("\0") || value.includes("\0") || names.has(normalized)) {
-            return false;
+            showMessage(window.siyuan.languages.aiMcpEnvInvalid);
+            return null;
         }
         names.add(normalized);
+        env[name] = value;
     }
-    return true;
+    return env;
 };
 
 const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: string | null,
@@ -717,9 +746,6 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
     const mcpTypeHidden = (fieldType: string) => initialServer.type !== fieldType ? " fn__none" : "";
     const argsText = (initialServer.args ?? []).join("\n");
     const selectedEnvironmentNames = isNew ? environment.defaults : (initialServer.inheritEnv ?? []);
-    const envText = Object.keys(initialServer.env ?? {}).length === 0
-        ? ""
-        : JSON.stringify(initialServer.env, null, 2);
     const headersText = Object.keys(initialServer.headers ?? {}).length === 0
         ? ""
         : JSON.stringify(initialServer.headers, null, 2);
@@ -769,7 +795,13 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         <div class="config-name">${window.siyuan.languages.aiMcpEnv}</div>
         <div class="b3-label__text">${window.siyuan.languages.aiMcpEnvTip}</div>
         <div class="fn__hr"></div>
-        <textarea class="b3-text-field fn__block" id="aiMcpServerEnv" rows="4" style="resize: vertical;" placeholder='{"API_KEY":"{{secrets.API_KEY}}"}'>${Lute.EscapeHTMLStr(envText)}</textarea>
+        <div id="aiMcpServerEnv">
+            ${renderMcpEnvironmentRows(initialServer.env ?? {})}
+        </div>
+        <button class="b3-button b3-button--outline fn__flex-center" data-type="addMcpEnvironmentVariable" type="button">
+            <svg class="b3-button__icon"><use xlink:href="#iconAdd"></use></svg>
+            ${window.siyuan.languages.addVariable}
+        </button>
     </div>
     <div class="b3-label b3-label--inner${mcpTypeHidden("http")}" data-mcp-type="http">
         <div class="config-name">URL</div>
@@ -817,6 +849,15 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
             item.classList.toggle("fn__none", !item.dataset.mcpEnvOption.toLowerCase().includes(keyword));
         });
     });
+    dialog.element.querySelector("#aiMcpServerEnv").addEventListener("click", (event) => {
+        const deleteButton = (event.target as HTMLElement).closest<HTMLElement>("[data-type=deleteMcpEnvironmentVariable]");
+        if (deleteButton) {
+            deleteButton.closest("[data-mcp-env-row]").remove();
+        }
+    });
+    dialog.element.querySelector<HTMLElement>("[data-type=addMcpEnvironmentVariable]").addEventListener("click", () => {
+        dialog.element.querySelector("#aiMcpServerEnv").insertAdjacentHTML("beforeend", renderMcpEnvironmentRow());
+    });
     const btns = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
     btns[0].addEventListener("click", () => dialog.destroy());
     btns[1].addEventListener("click", () => {
@@ -827,14 +868,8 @@ const openMcpServerDialogWithEnvironment = (root: HTMLElement, serverName: strin
         if (headers === null) {
             return;
         }
-        const env = parseStringRecord(
-            dialog.element.querySelector<HTMLTextAreaElement>("#aiMcpServerEnv").value,
-            window.siyuan.languages.aiMcpEnvInvalid,
-        );
-        if (env === null || !validateEnvironmentRecord(env)) {
-            if (env !== null) {
-                showMessage(window.siyuan.languages.aiMcpEnvInvalid);
-            }
+        const env = readMcpEnvironmentRows(dialog.element);
+        if (env === null) {
             return;
         }
         const nextServer: Config.IMCPServer = {

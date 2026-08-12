@@ -72,17 +72,7 @@ const registerFlashcardReviewGroup = (tab: SettingTabBuilder) => {
     });
 };
 
-const registerFlashcardOthersGroup = (tab: SettingTabBuilder) => {
-    const group = tab.group("others", window.siyuan.languages.configGroupOthers);
-
-    group.switch("flashcard.deck", {
-        title: window.siyuan.languages.flashcardDeck,
-        desc: window.siyuan.languages.flashcardDeckTip,
-    });
-};
-
 export const registerFlashcardTab = (tab: SettingTabBuilder) => {
     registerFlashcardCreationGroup(tab);
     registerFlashcardReviewGroup(tab);
-    registerFlashcardOthersGroup(tab);
 };

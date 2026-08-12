@@ -211,6 +211,9 @@ func (store *Store) UpdateBasicSourceDirection(ctx context.Context,
 	if source.SchemaID != basicSchemaID || source.SourceType != "qa" {
 		return BasicSourceResult{}, errors.New("flashcard source is not a built-in basic source")
 	}
+	if source.Status == "deleted" {
+		return BasicSourceResult{}, errors.New("deleted flashcard source cannot change direction")
+	}
 	source.DisabledTemplateIDs = basicDisabledTemplates(request.Direction)
 	payload, err := CanonicalJSON(source)
 	if err != nil {

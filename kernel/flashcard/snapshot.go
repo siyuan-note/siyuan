@@ -43,6 +43,34 @@ type SnapshotInfo struct {
 	BatchCount int64
 }
 
+// CreateSnapshotIfNeeded 在没有可用快照或权威批次增长达到阈值时创建快照。
+func (store *Store) CreateSnapshotIfNeeded(ctx context.Context, minimumBatchDelta int64) (SnapshotInfo, bool, error) {
+	if minimumBatchDelta < 1 {
+		return SnapshotInfo{}, false, errors.New("flashcard snapshot batch delta must be positive")
+	}
+	store.mu.Lock()
+	if store.closed {
+		store.mu.Unlock()
+		return SnapshotInfo{}, false, errors.New("flashcard store is closed")
+	}
+	root := SnapshotRoot(store.journal.root)
+	var batchCount int64
+	err := store.projection.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM operation_batches").Scan(&batchCount)
+	store.mu.Unlock()
+	if err != nil {
+		return SnapshotInfo{}, false, fmt.Errorf("count flashcard snapshot batches: %w", err)
+	}
+	best, found, err := BestSnapshot(root)
+	if err != nil {
+		return SnapshotInfo{}, false, err
+	}
+	if found && batchCount-best.BatchCount < minimumBatchDelta {
+		return best, false, nil
+	}
+	created, err := store.CreateSnapshot(ctx)
+	return created, err == nil, err
+}
+
 // SnapshotRoot 返回闪卡不可变快照目录。
 func SnapshotRoot(journalRoot string) string {
 	return filepath.Join(journalRoot, "snapshots")

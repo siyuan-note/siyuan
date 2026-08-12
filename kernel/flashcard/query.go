@@ -100,6 +100,7 @@ var queryFieldComparators = map[string]map[QueryComparator]struct{}{
 	"presetID":         comparatorSet(QueryEqual, QueryNotEqual, QueryIn, QueryNotIn, QueryExists),
 	"blockID":          comparatorSet(QueryEqual, QueryNotEqual, QueryIn, QueryNotIn),
 	"notebookID":       comparatorSet(QueryEqual, QueryNotEqual, QueryIn, QueryNotIn),
+	"rootID":           comparatorSet(QueryEqual, QueryNotEqual, QueryIn, QueryNotIn),
 	"path":             comparatorSet(QueryEqual, QueryNotEqual, QueryContains, QueryStartsWith),
 	"content":          comparatorSet(QueryContains),
 }

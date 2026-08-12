@@ -118,6 +118,188 @@ func TestCreateAdvancedSourcePersistsOrderedStepIdentityAndOrder(t *testing.T) {
 	}
 }
 
+func TestUpdateAdvancedSourcePreservesStableCardSchedule(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	applyGenerationEntities(t, ctx, store, "advanced-update-preset", 1,
+		testSchedulerPreset(legacyPresetID, false, false))
+	created, err := store.CreateAdvancedSource(ctx, AdvancedSourceRequest{OperationID: "advanced-update-create",
+		SourceID: "source-update", Mode: AdvancedModeOrderedSingle,
+		BlockIDs: []string{"block-first", "block-second"}, CreatedAt: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cardID := created.Cards.Created[0]
+	stateRevision, found, err := store.Projection().CurrentEntity(ctx, EntityReviewState, cardID)
+	if err != nil || !found {
+		t.Fatalf("created review state was not found: found=%v err=%v", found, err)
+	}
+	var state ReviewState
+	if err = decodeStrictJSON(stateRevision.Payload, &state); err != nil {
+		t.Fatal(err)
+	}
+	state.Due = 999
+	state.StateRevisionID = OperationRevisionID("advanced-update-schedule", EntityReviewState, cardID)
+	statePayload, err := CanonicalJSON(state)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = store.MutateEntities(ctx, "advanced-update-schedule", []EntityMutation{{
+		EntityType: EntityReviewState, EntityID: cardID, ExpectedRevisionID: stateRevision.RevisionID,
+		UpdatedAt: 15, Payload: statePayload,
+	}}); err != nil {
+		t.Fatal(err)
+	}
+	request := AdvancedSourceUpdateRequest{OperationID: "advanced-update-config", SourceID: "source-update",
+		ExpectedRevision: created.SourceRevision.RevisionID, Mode: AdvancedModeOrderedSingle,
+		BlockIDs: []string{"block-second", "block-first"}, UpdatedAt: 20}
+	updated, err := store.UpdateAdvancedSource(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(updated.Cards.Created) != 0 || !equalStrings(updated.Cards.Updated, []string{cardID}) {
+		t.Fatalf("advanced source update replaced its stable card: %+v", updated.Cards)
+	}
+	stateRevision, found, err = store.Projection().CurrentEntity(ctx, EntityReviewState, cardID)
+	if err != nil || !found || decodeStrictJSON(stateRevision.Payload, &state) != nil || state.Due != 999 {
+		t.Fatalf("advanced source update changed the review schedule: state=%+v found=%v err=%v", state, found, err)
+	}
+	references, err := store.Projection().CardSourceReferences(ctx, request.SourceID)
+	if err != nil || len(references) != 2 || references[0].EntityID != "block-second" ||
+		references[1].EntityID != "block-first" {
+		t.Fatalf("advanced source references were not reordered: references=%+v err=%v", references, err)
+	}
+	retried, err := store.UpdateAdvancedSource(ctx, request)
+	if err != nil || retried.SourceRevision.RevisionID != updated.SourceRevision.RevisionID ||
+		retried.Cards.Batch.BatchID != updated.Cards.Batch.BatchID {
+		t.Fatalf("advanced source update retry was not idempotent: result=%+v err=%v", retried, err)
+	}
+}
+
+func TestUpdateAdvancedSourceAssignsNewCardsToOriginalReviewSets(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	applyGenerationEntities(t, ctx, store, "advanced-membership-preset", 1,
+		testSchedulerPreset(legacyPresetID, false, false))
+	reviewSets := []ReviewSet{
+		{ID: "advanced-membership-set", Name: "Advanced", NewLimit: 20, ReviewLimit: 200,
+			DefaultReviewMode: "normal"},
+		{ID: "manual-membership-set", Name: "Manual", NewLimit: 20, ReviewLimit: 200,
+			DefaultReviewMode: "normal"},
+	}
+	changes := make([]Change, 0, len(reviewSets))
+	for _, reviewSet := range reviewSets {
+		revision, err := NewOperationEntityRevision("advanced-membership-sets", EntityReviewSet, reviewSet.ID, nil,
+			2, false, reviewSet)
+		if err != nil {
+			t.Fatal(err)
+		}
+		changes = append(changes, Change{Kind: RecordEntityRevision, Revision: &revision})
+	}
+	if _, err := store.Apply(ctx, "advanced-membership-sets", changes); err != nil {
+		t.Fatal(err)
+	}
+	const sourceID = "source-membership-update"
+	created, err := store.CreateAdvancedSource(ctx, AdvancedSourceRequest{
+		OperationID: "advanced-membership-create", SourceID: sourceID, Mode: AdvancedModeOrderedCards,
+		BlockIDs: []string{"block-first"}, ReviewSetIDs: []string{reviewSets[0].ID}, CreatedAt: 10,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = store.SetReviewSetMemberships(ctx, SetReviewSetMembershipsRequest{
+		OperationID: "advanced-membership-manual", ReviewSetID: reviewSets[1].ID,
+		CardIDs: created.Cards.Created, Mode: MembershipInclude, ChangedAt: 15,
+	}); err != nil {
+		t.Fatal(err)
+	}
+	updated, err := store.UpdateAdvancedSource(ctx, AdvancedSourceUpdateRequest{
+		OperationID: "advanced-membership-update", SourceID: sourceID,
+		ExpectedRevision: created.SourceRevision.RevisionID, Mode: AdvancedModeOrderedCards,
+		BlockIDs: []string{"block-first", "block-second"}, UpdatedAt: 20,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stepID := DeterministicID("advanced-ordered-step", sourceID, "block-second")
+	newCardID := GeneratedCardID(sourceID, advancedOrderedCardsTemplateID, "step:"+stepID)
+	wantMembershipID := DeterministicID("advanced-review-set-membership", reviewSets[0].ID, newCardID)
+	if !containsString(updated.Cards.Created, newCardID) || !equalStrings(updated.Memberships,
+		[]string{wantMembershipID}) {
+		t.Fatalf("new advanced card did not inherit its original review set: %+v", updated)
+	}
+	options := CardSearchOptions{Now: 100, IncludeSuspended: true, IncludeBuried: true, IncludePaused: true}
+	automaticCardIDs, err := store.Projection().ReviewSetCardIDs(ctx, reviewSets[0].ID, options)
+	if err != nil || !containsString(automaticCardIDs, newCardID) {
+		t.Fatalf("new advanced card was not projected into its original review set: cards=%v err=%v",
+			automaticCardIDs, err)
+	}
+	manualCardIDs, err := store.Projection().ReviewSetCardIDs(ctx, reviewSets[1].ID, options)
+	if err != nil || containsString(manualCardIDs, newCardID) {
+		t.Fatalf("new advanced card inherited a manual membership: cards=%v err=%v", manualCardIDs, err)
+	}
+	retried, err := store.UpdateAdvancedSource(ctx, AdvancedSourceUpdateRequest{
+		OperationID: "advanced-membership-update", SourceID: sourceID,
+		ExpectedRevision: created.SourceRevision.RevisionID, Mode: AdvancedModeOrderedCards,
+		BlockIDs: []string{"block-first", "block-second"}, UpdatedAt: 20,
+	})
+	if err != nil || !equalStrings(retried.Memberships, []string{wantMembershipID}) ||
+		retried.Cards.Batch.BatchID != updated.Cards.Batch.BatchID {
+		t.Fatalf("advanced membership update retry was not idempotent: result=%+v err=%v", retried, err)
+	}
+}
+
+func TestUpdateAdvancedSourceReactivatesRemovedVariantWithItsSchedule(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	applyGenerationEntities(t, ctx, store, "advanced-reactivate-preset", 1,
+		testSchedulerPreset(legacyPresetID, false, false))
+	const sourceID = "source-reactivate"
+	created, err := store.CreateAdvancedSource(ctx, AdvancedSourceRequest{OperationID: "advanced-reactivate-create",
+		SourceID: sourceID, Mode: AdvancedModeOrderedCards,
+		BlockIDs: []string{"block-first", "block-second"}, CreatedAt: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	stepID := DeterministicID("advanced-ordered-step", sourceID, "block-second")
+	cardID := GeneratedCardID(sourceID, advancedOrderedCardsTemplateID, "step:"+stepID)
+	if _, err = store.ManageCards(ctx, CardManagementRequest{OperationID: "advanced-reactivate-schedule",
+		CardIDs: []string{cardID}, Action: CardActionSetDue, ChangedAt: 15, Due: 999}); err != nil {
+		t.Fatal(err)
+	}
+	removed, err := store.UpdateAdvancedSource(ctx, AdvancedSourceUpdateRequest{
+		OperationID: "advanced-reactivate-remove", SourceID: sourceID,
+		ExpectedRevision: created.SourceRevision.RevisionID, Mode: AdvancedModeOrderedCards,
+		BlockIDs: []string{"block-first"}, UpdatedAt: 20,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cardRevision, found, err := store.Projection().CurrentEntity(ctx, EntityCard, cardID)
+	if err != nil || !found {
+		t.Fatalf("removed variant was not retained: found=%v err=%v", found, err)
+	}
+	var card Card
+	if err = decodeStrictJSON(cardRevision.Payload, &card); err != nil || card.GenerationStatus != GenerationDeleted {
+		t.Fatalf("removed variant did not become inactive: card=%+v err=%v", card, err)
+	}
+	restored, err := store.UpdateAdvancedSource(ctx, AdvancedSourceUpdateRequest{
+		OperationID: "advanced-reactivate-restore", SourceID: sourceID,
+		ExpectedRevision: removed.SourceRevision.RevisionID, Mode: AdvancedModeOrderedCards,
+		BlockIDs: []string{"block-first", "block-second"}, UpdatedAt: 30,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !containsString(restored.Cards.Updated, cardID) {
+		t.Fatalf("restored variant did not reuse its stable card: %+v", restored.Cards)
+	}
+	assertReviewStateForTest(t, ctx, store, cardID, 999, 0)
+}
+
 func TestCreateAdvancedSourceSupportsMultipleOcclusionsPerGroupAndMultipleGroupsPerOcclusion(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)
@@ -149,6 +331,47 @@ func TestCreateAdvancedSourceSupportsMultipleOcclusionsPerGroupAndMultipleGroups
 		len(config.Occlusions) != 3 || !equalStrings(config.Occlusions[1].GroupIDs,
 		[]string{"group-second", "group-first"}) {
 		t.Fatalf("custom cloze grouping was not preserved: %+v", config)
+	}
+}
+
+func TestCreateAdvancedSourceSupportsMultipleInlineOcclusionsInOneBlock(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	applyGenerationEntities(t, ctx, store, "advanced-inline-preset", 1,
+		testSchedulerPreset(legacyPresetID, false, false))
+	request := AdvancedSourceRequest{OperationID: "advanced-inline", SourceID: "source-inline",
+		Mode: AdvancedModeCloze, BlockIDs: []string{"block-a"}, CreatedAt: 10,
+		InlineOcclusions: []AdvancedInlineOcclusion{
+			{ID: "occlusion-first", BlockID: "block-a", DisplayOrder: 0},
+			{ID: "occlusion-second", BlockID: "block-a", DisplayOrder: 1},
+		},
+		ClozeGroups: []AdvancedClozeGroup{
+			{ID: "group-first", DisplayOrder: 0, OcclusionIDs: []string{"occlusion-first", "occlusion-second"}},
+			{ID: "group-second", DisplayOrder: 1, OcclusionIDs: []string{"occlusion-second"}},
+		}}
+	result, err := store.CreateAdvancedSource(ctx, request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Cards.Created) != 2 {
+		t.Fatalf("inline cloze groups generated %d cards", len(result.Cards.Created))
+	}
+	references, err := store.Projection().CardSourceReferences(ctx, request.SourceID)
+	if err != nil || len(references) != 1 || references[0].Role != "content" {
+		t.Fatalf("inline cloze source did not keep one content reference: refs=%+v err=%v", references, err)
+	}
+	var source CardSource
+	if err = decodeStrictJSON(result.SourceRevision.Payload, &source); err != nil {
+		t.Fatal(err)
+	}
+	var config ClozeGenerationConfig
+	if err = decodeStrictJSON(source.GenerationConfig, &config); err != nil {
+		t.Fatal(err)
+	}
+	if len(config.Occlusions) != 2 || config.Occlusions[0].ID != "occlusion-first" ||
+		!equalStrings(config.Occlusions[1].GroupIDs, []string{"group-first", "group-second"}) {
+		t.Fatalf("inline cloze configuration was not preserved: %+v", config)
 	}
 }
 

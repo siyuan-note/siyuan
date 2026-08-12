@@ -10,8 +10,8 @@ import * as path from "path";
 import {openMobileFileById} from "../../mobile/editor";
 /// #endif
 import {Constants} from "../../constants";
-import {openCardByData} from "../../card/openCard";
-import {viewCards} from "../../card/viewCards";
+import {openCardByScope} from "../../card/openCard";
+import {openFlashcardV2ManagementByRoots} from "../../card/flashcardV2";
 import {getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../../util/pathName";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {emitOpenMenu} from "../../plugin/EventBus";
@@ -183,61 +183,58 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     }
                 }).element);
             }
-            const isCardMade = !!response.data.ial[Constants.CUSTOM_RIFF_DECKS];
             if (!isEncryptedBox(protyle.notebookId)) {
-            const riffCardMenu: IMenu[] = [{
-                id: "spaceRepetition",
-                iconHTML: "",
-                label: window.siyuan.languages.spaceRepetition,
-                accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
-                click: () => {
-                    fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-                        openCardByData(protyle.app, response.data, "doc", protyle.block.rootID, response.data.name);
-                    });
-                }
-            }, {
-                id: "manage",
-                iconHTML: "",
-                label: window.siyuan.languages.manage,
-                click: () => {
-                    fetchPost("/api/filetree/getHPathByID", {
-                        id: protyle.block.rootID
-                    }, (response) => {
-                        viewCards(protyle.app, protyle.block.rootID, pathPosix().join(getNotebookName(protyle.notebookId), (response.data)), "Tree");
-                    });
-                }
-            }, {
-                id: isCardMade ? "removeCard" : "quickMakeCard",
-                iconHTML: "",
-                label: isCardMade ? window.siyuan.languages.removeCard : window.siyuan.languages.quickMakeCard,
-                accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
-                click: () => {
-                    let titleElement = protyle.title?.element;
-                    if (!titleElement) {
-                        titleElement = document.createElement("div");
-                        titleElement.setAttribute("data-node-id", protyle.block.rootID);
-                        titleElement.setAttribute(Constants.CUSTOM_RIFF_DECKS, response.data.ial[Constants.CUSTOM_RIFF_DECKS]);
+                const riffCardMenu: IMenu[] = [{
+                    id: "spaceRepetition",
+                    iconHTML: "",
+                    label: window.siyuan.languages.spaceRepetition,
+                    accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
+                    click: () => {
+                        openCardByScope(protyle.app, "doc", protyle.block.rootID, response.data.name);
                     }
-                    quickMakeCard(protyle, [titleElement]);
-                }
-            }];
-            if (window.siyuan.config.flashcard.deck) {
+                }, {
+                    id: "manage",
+                    iconHTML: "",
+                    label: window.siyuan.languages.manage,
+                    click: () => {
+                        openFlashcardV2ManagementByRoots([protyle.block.rootID], response.data.name);
+                    }
+                }, {
+                    id: "quickMakeCard",
+                    iconHTML: "",
+                    label: window.siyuan.languages.quickMakeCard,
+                    accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
+                    click: () => {
+                        let titleElement = protyle.title?.element;
+                        if (!titleElement) {
+                            titleElement = document.createElement("div");
+                            titleElement.setAttribute("data-node-id", protyle.block.rootID);
+                        }
+                        quickMakeCard(protyle, [titleElement]);
+                    }
+                }, {
+                    id: "removeCard",
+                    iconHTML: "",
+                    label: window.siyuan.languages.removeCard,
+                    click: () => {
+                        openFlashcardV2ManagementByRoots([protyle.block.rootID], window.siyuan.languages.removeCard);
+                    }
+                }];
                 riffCardMenu.push({
                     id: "addToDeck",
                     iconHTML: "",
-                    label: window.siyuan.languages.addToDeck,
+                    label: window.siyuan.languages.flashcardCardSource,
                     click: () => {
                         makeCard(protyle.app, [protyle.block.rootID]);
                     }
                 });
-            }
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "riffCard",
-                label: window.siyuan.languages.riffCard,
-                type: "submenu",
-                icon: "iconRiffCard",
-                submenu: riffCardMenu,
-            }).element);
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "riffCard",
+                    label: window.siyuan.languages.riffCard,
+                    type: "submenu",
+                    icon: "iconRiffCard",
+                    submenu: riffCardMenu,
+                }).element);
             }
         }
         window.siyuan.menus.menu.append(new MenuItem({

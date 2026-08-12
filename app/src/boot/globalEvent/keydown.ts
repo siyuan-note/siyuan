@@ -46,7 +46,7 @@ import {setZoom} from "../../layout/topBar";
 import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../../history/history";
-import {openCard, openCardByData} from "../../card/openCard";
+import {openCard, openCardByScope} from "../../card/openCard";
 import {lockScreen} from "../../dialog/processSystem";
 import {isWindow} from "../../util/functions";
 import {reloadProtyle} from "../../protyle/util/reload";
@@ -58,8 +58,7 @@ import {workspaceMenu} from "../../menus/workspace";
 import {resize} from "../../protyle/util/resize";
 import {Search} from "../../search";
 import {Custom} from "../../layout/dock/Custom";
-import {transaction} from "../../protyle/wysiwyg/transaction";
-import {quickMakeCard} from "../../card/makeCard";
+import {createQuickSources, quickMakeCard} from "../../card/makeCard";
 import {getContentByInlineHTML} from "../../protyle/wysiwyg/keydown";
 import {searchKeydown} from "./searchKeydown";
 import {historyKeydown} from "../../history/keydown";
@@ -326,9 +325,8 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) &&
         !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
-        fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-            openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title?.editElement.textContent || window.siyuan.languages.untitled);
-        });
+        openCardByScope(app, "doc", protyle.block.rootID,
+            protyle.title?.editElement.textContent || window.siyuan.languages.untitled);
         event.preventDefault();
         return true;
     }
@@ -643,13 +641,9 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) && !window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
         if (isFile) {
             const id = liElements[0].getAttribute("data-node-id");
-            fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
-                openCardByData(app, response.data, "doc", id, getDisplayName(liElements[0].getAttribute("data-name"), false, true));
-            });
+            openCardByScope(app, "doc", id, getDisplayName(liElements[0].getAttribute("data-name"), false, true));
         } else {
-            fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
-                openCardByData(app, response.data, "notebook", notebookId, getNotebookName(notebookId));
-            });
+            openCardByScope(app, "notebook", notebookId, getNotebookName(notebookId));
         }
         event.preventDefault();
         return true;
@@ -657,11 +651,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event) && !isEncryptedBox(notebookId)) {
         if (ids.length > 0) {
-            transaction(undefined, [{
-                action: "addFlashcards",
-                deckID: Constants.QUICK_DECK_ID,
-                blockIDs: ids,
-            }]);
+            createQuickSources(ids);
         }
         event.preventDefault();
         return true;

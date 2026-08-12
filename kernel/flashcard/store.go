@@ -112,7 +112,7 @@ func (store *Store) applyLocked(ctx context.Context, operationID string, changes
 		return OperationBatch{}, err
 	}
 	if err = store.projection.ApplyBatch(ctx, batch); err != nil {
-		return batch, fmt.Errorf("apply flashcard projection: %w", err)
+		return batch, store.invalidateLocked(fmt.Errorf("apply flashcard projection: %w", err))
 	}
 	return batch, nil
 }
@@ -133,7 +133,8 @@ func (store *Store) findAppliedOperationLocked(ctx context.Context, operationID 
 		return OperationBatch{}, false, nil
 	}
 	if err := store.projection.ApplyBatch(ctx, existing); err != nil {
-		return OperationBatch{}, false, fmt.Errorf("apply existing flashcard projection: %w", err)
+		return OperationBatch{}, false, store.invalidateLocked(
+			fmt.Errorf("apply existing flashcard projection: %w", err))
 	}
 	return existing, true, nil
 }
@@ -145,16 +146,30 @@ func (store *Store) Refresh(ctx context.Context) error {
 	if store.closed {
 		return errors.New("flashcard store is closed")
 	}
+	if err := EnsureManifest(store.journal.root); err != nil {
+		return store.invalidateLocked(err)
+	}
 	if err := store.journal.Reload(); err != nil {
-		return fmt.Errorf("reload flashcard journal: %w", err)
+		return store.invalidateLocked(fmt.Errorf("reload flashcard journal: %w", err))
 	}
 	for _, batch := range store.journal.Batches() {
 		if err := store.projection.ApplyBatch(ctx, batch); err != nil {
-			return fmt.Errorf("refresh flashcard projection with operation [%s]: %w", batch.OperationID, err)
+			return store.invalidateLocked(fmt.Errorf("refresh flashcard projection with operation [%s]: %w",
+				batch.OperationID, err))
 		}
 	}
 	_, err := store.resolveReviewConflictsLocked(ctx)
-	return err
+	if err != nil {
+		return store.invalidateLocked(err)
+	}
+	return nil
+}
+
+func (store *Store) invalidateLocked(cause error) error {
+	store.closed = true
+	projectionErr := store.projection.Close()
+	store.journal.abort()
+	return errors.Join(cause, projectionErr)
 }
 
 // RebuildProjection 删除并从权威日志重建当前 SQLite 投影。
@@ -196,10 +211,20 @@ func (store *Store) WriterID() string {
 	return store.journal.WriterID()
 }
 
+// IsClosed 返回当前存储是否已经关闭或因完整性错误失效。
+func (store *Store) IsClosed() bool {
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	return store.closed
+}
+
 // Close 封存权威日志并关闭 SQLite 投影。
 func (store *Store) Close() error {
 	store.mu.Lock()
 	defer store.mu.Unlock()
+	if store.closed {
+		return nil
+	}
 	store.closed = true
 	journalErr := store.journal.Close()
 	projectionErr := store.projection.Close()

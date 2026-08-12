@@ -37,6 +37,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	flashcardv2 "github.com/siyuan-note/siyuan/kernel/flashcard"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -1131,6 +1132,34 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 }
 
 func LoadFlashcards() {
+	loadFlashcards(true)
+}
+
+func loadFlashcards(waitForStorageSync bool) {
+	status, err := autoMigrateLegacyFlashcards(context.Background(), waitForStorageSync)
+	if err == nil && status.State == flashcardv2.MigrationStateActive {
+		Decks = map[string]*riff.Deck{}
+		return
+	}
+	if err != nil {
+		logging.LogErrorf("auto migrate flashcards failed: %s", err)
+	}
+	if status.State == flashcardv2.MigrationStateActive ||
+		status.State == flashcardv2.MigrationStateLegacyDiverged ||
+		(status.State == "" && flashcardV2ManifestExists()) {
+		// 已经启用新版后不得回退到旧存储继续写入，否则会形成两套分叉数据。
+		Decks = map[string]*riff.Deck{}
+		return
+	}
+	loadLegacyFlashcards()
+}
+
+func flashcardV2ManifestExists() bool {
+	_, err := os.Stat(filepath.Join(flashcardv2.V2Root(util.DataDir), "manifest.json"))
+	return err == nil
+}
+
+func loadLegacyFlashcards() {
 	riffSavePath := getRiffDir()
 	if err := os.MkdirAll(riffSavePath, 0755); err != nil {
 		logging.LogErrorf("create riff dir [%s] failed: %s", riffSavePath, err)
@@ -1163,7 +1192,6 @@ func LoadFlashcards() {
 			Decks[deckID] = deck
 		}
 	}
-	refreshFlashcardV2Store()
 }
 
 const builtinDeckID = "20230218211946-2kw8jgx"
@@ -1205,7 +1233,7 @@ func RemoveDeck(deckID string) (err error) {
 		}
 	}
 
-	LoadFlashcards()
+	loadLegacyFlashcards()
 	return
 }
 

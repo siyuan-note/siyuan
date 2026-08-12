@@ -162,6 +162,14 @@ func (journal *Journal) WriterID() string {
 	return journal.writerID
 }
 
+func (journal *Journal) abort() {
+	journal.mu.Lock()
+	defer journal.mu.Unlock()
+	journal.closed = true
+	journal.active = nil
+	journal.activePath = ""
+}
+
 // Batches 返回校验通过的全部权威操作批次。
 func (journal *Journal) Batches() []OperationBatch {
 	journal.mu.Lock()

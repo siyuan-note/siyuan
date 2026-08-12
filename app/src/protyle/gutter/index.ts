@@ -59,6 +59,7 @@ import {duplicateBlock} from "../wysiwyg/commonHotkey";
 import {isEncryptedBox, movePathTo, useShell} from "../../util/pathName";
 import {hintMoveBlock} from "../hint/extend";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
+import {openFlashcardV2ManagementByBlocks} from "../../card/flashcardV2";
 import {transferBlockRef} from "../../menus/block";
 import {isMobile} from "../../util/functions";
 import {AIActions} from "../../ai/actions";
@@ -1371,10 +1372,11 @@ export class Gutter {
                 id: "separator_quickMakeCard",
                 type: "separator"
             }).element);
-            const allCardsMade = !selectsElement.some(item => !item.hasAttribute(Constants.CUSTOM_RIFF_DECKS) && item.getAttribute("data-type") !== "NodeThematicBreak");
+            const ids = selectsElement.filter((item) => item.getAttribute("data-type") !== "NodeThematicBreak")
+                .map((item) => item.getAttribute("data-node-id"));
             window.siyuan.menus.menu.append(new MenuItem({
-                id: allCardsMade ? "removeCard" : "quickMakeCard",
-                label: allCardsMade ? window.siyuan.languages.removeCard : window.siyuan.languages.quickMakeCard,
+                id: "quickMakeCard",
+                label: window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
                 icon: "iconRiffCard",
                 click() {
@@ -1382,18 +1384,18 @@ export class Gutter {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
-                id: "addToDeck",
-                label: window.siyuan.languages.addToDeck,
-                icon: "iconRiffCard",
-                ignore: !window.siyuan.config.flashcard.deck,
+                id: "removeCard",
+                label: window.siyuan.languages.removeCard,
+                icon: "iconTrashcan",
                 click() {
-                    const ids: string[] = [];
-                    selectsElement.forEach(item => {
-                        if (item.getAttribute("data-type") === "NodeThematicBreak") {
-                            return;
-                        }
-                        ids.push(item.getAttribute("data-node-id"));
-                    });
+                    openFlashcardV2ManagementByBlocks(ids, window.siyuan.languages.removeCard);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "addToDeck",
+                label: window.siyuan.languages.flashcardCardSource,
+                icon: "iconRiffCard",
+                click() {
                     makeCard(protyle.app, ids);
                 }
             }).element);
@@ -2626,20 +2628,26 @@ export class Gutter {
             }).element);
         }
         if (type !== "NodeThematicBreak" && !window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
-            const isCardMade = nodeElement.hasAttribute(Constants.CUSTOM_RIFF_DECKS);
             window.siyuan.menus.menu.append(new MenuItem({
-                id: isCardMade ? "removeCard" : "quickMakeCard",
+                id: "quickMakeCard",
                 icon: "iconRiffCard",
-                label: isCardMade ? window.siyuan.languages.removeCard : window.siyuan.languages.quickMakeCard,
+                label: window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
                 click() {
                     quickMakeCard(protyle, [nodeElement]);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "removeCard",
+                icon: "iconTrashcan",
+                label: window.siyuan.languages.removeCard,
+                click() {
+                    openFlashcardV2ManagementByBlocks([id], window.siyuan.languages.removeCard);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
                 id: "addToDeck",
-                label: window.siyuan.languages.addToDeck,
-                ignore: !window.siyuan.config.flashcard.deck,
+                label: window.siyuan.languages.flashcardCardSource,
                 icon: "iconRiffCard",
                 click() {
                     makeCard(protyle.app, [id]);

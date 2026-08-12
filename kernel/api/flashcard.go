@@ -128,6 +128,10 @@ type getFlashcardHistoryRequest struct {
 	Offset int    `json:"offset"`
 }
 
+type listFlashcardConflictsRequest struct {
+	Limit int `json:"limit"`
+}
+
 type deleteFlashcardReviewSetRequest struct {
 	OperationID        string `json:"operationID"`
 	ReviewSetID        string `json:"reviewSetID"`
@@ -258,6 +262,66 @@ func createBasicFlashcardSource(c *gin.Context) {
 	ret.Data = result
 }
 
+func createQuickFlashcardSources(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	request := &flashcardv2.QuickSourceRequest{}
+	if !bindFlashcardRequest(c, ret, request) {
+		return
+	}
+	result, err := model.CreateFlashcardV2QuickSources(c.Request.Context(), *request)
+	if err != nil {
+		setFlashcardAPIError(ret, err)
+		return
+	}
+	ret.Data = result
+}
+
+func manageFlashcardSourceLifecycle(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	request := &flashcardv2.SourceLifecycleRequest{}
+	if !bindFlashcardRequest(c, ret, request) {
+		return
+	}
+	result, err := model.ManageFlashcardV2SourceLifecycle(c.Request.Context(), *request)
+	if err != nil {
+		setFlashcardAPIError(ret, err)
+		return
+	}
+	ret.Data = result
+}
+
+func listFlashcardConflicts(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	request := &listFlashcardConflictsRequest{}
+	if !bindFlashcardRequest(c, ret, request) {
+		return
+	}
+	result, err := model.ListFlashcardV2Conflicts(c.Request.Context(), request.Limit)
+	if err != nil {
+		setFlashcardAPIError(ret, err)
+		return
+	}
+	ret.Data = result
+}
+
+func resolveFlashcardConflict(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	request := &flashcardv2.ConflictResolutionRequest{}
+	if !bindFlashcardRequest(c, ret, request) {
+		return
+	}
+	result, err := model.ResolveFlashcardV2Conflict(c.Request.Context(), *request)
+	if err != nil {
+		setFlashcardAPIError(ret, err)
+		return
+	}
+	ret.Data = result
+}
+
 func createAdvancedFlashcardSource(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -266,6 +330,21 @@ func createAdvancedFlashcardSource(c *gin.Context) {
 		return
 	}
 	result, err := model.CreateFlashcardV2AdvancedSource(c.Request.Context(), *request)
+	if err != nil {
+		setFlashcardAPIError(ret, err)
+		return
+	}
+	ret.Data = result
+}
+
+func updateAdvancedFlashcardSource(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	request := &flashcardv2.AdvancedSourceUpdateRequest{}
+	if !bindFlashcardRequest(c, ret, request) {
+		return
+	}
+	result, err := model.UpdateFlashcardV2AdvancedSource(c.Request.Context(), *request)
 	if err != nil {
 		setFlashcardAPIError(ret, err)
 		return

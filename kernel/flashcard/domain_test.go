@@ -20,6 +20,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -362,6 +363,34 @@ func TestSnapshotFallsBackAndReplaysAllAuthorityBatches(t *testing.T) {
 	var count int
 	if err = rebuilt.Projection().db.QueryRowContext(ctx, "SELECT COUNT(*) FROM cards").Scan(&count); err != nil || count != 2 {
 		t.Fatalf("authority batches were not replayed after snapshot restore: count=%d err=%v", count, err)
+	}
+}
+
+func TestSnapshotIsCreatedOnlyAfterConfiguredBatchDelta(t *testing.T) {
+	ctx := context.Background()
+	workspace := t.TempDir()
+	store, err := OpenStore(ctx, filepath.Join(workspace, "v2"),
+		filepath.Join(workspace, "temp", "flashcards.db"), "device-a", &JournalOptions{WriterID: testWriterA})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	if _, created, createErr := store.CreateSnapshotIfNeeded(ctx, 2); createErr != nil || !created {
+		t.Fatalf("initial snapshot was not created: created=%v err=%v", created, createErr)
+	}
+	if _, created, createErr := store.CreateSnapshotIfNeeded(ctx, 2); createErr != nil || created {
+		t.Fatalf("unchanged projection created another snapshot: created=%v err=%v", created, createErr)
+	}
+	for index := 1; index <= 2; index++ {
+		event := fixedEvent("test", fmt.Sprintf("snapshot-delta-event-%d", index), "card-1", int64(index), `{}`)
+		if _, err = store.Apply(ctx, fmt.Sprintf("snapshot-delta-operation-%d", index),
+			[]Change{{Kind: RecordEvent, Event: &event}}); err != nil {
+			t.Fatal(err)
+		}
+		_, created, createErr := store.CreateSnapshotIfNeeded(ctx, 2)
+		if createErr != nil || created != (index == 2) {
+			t.Fatalf("unexpected snapshot decision at delta %d: created=%v err=%v", index, created, createErr)
+		}
 	}
 }
 

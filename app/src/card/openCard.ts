@@ -36,6 +36,8 @@ import {
     showFlashcardAnswer
 } from "./flashcardMode";
 import {setFold} from "../protyle/util/blockFold";
+import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
+import {flashcardV2LocationQuery} from "./flashcardV2Query";
 
 const genCardCount = (cardsData: ICardData, allIndex = 0) => {
     let newIndex = 0;
@@ -825,8 +827,35 @@ export const openCard = (app: App) => {
     if (window.siyuan.config.readonly) {
         return;
     }
-    fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
-        openCardByData(app, cardsResponse.data, "all");
+    fetchPost("/api/flashcard/getMigrationStatus", {}, (statusResponse) => {
+        if (statusResponse.data.state === "Legacy") {
+            fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
+                openCardByData(app, cardsResponse.data, "all");
+            });
+            return;
+        }
+        openFlashcardV2ReviewSession(app, "", window.siyuan.languages.riffCard, {reviewMode: "normal"});
+    });
+};
+
+export const openCardByScope = (app: App, cardType: "doc" | "notebook", id: string, title: string) => {
+    if (window.siyuan.config.readonly) {
+        return;
+    }
+    fetchPost("/api/flashcard/getMigrationStatus", {}, (statusResponse) => {
+        if (statusResponse.data.state === "Legacy") {
+            const endpoint = cardType === "doc" ? "/api/riff/getTreeRiffDueCards" :
+                "/api/riff/getNotebookRiffDueCards";
+            const request = cardType === "doc" ? {rootID: id} : {notebook: id};
+            fetchPost(endpoint, request, (cardsResponse) => {
+                openCardByData(app, cardsResponse.data, cardType, id, title);
+            });
+            return;
+        }
+        openFlashcardV2ReviewSession(app, "", title, {
+            reviewMode: "normal",
+            query: flashcardV2LocationQuery(cardType === "doc" ? "rootID" : "notebookID", id),
+        });
     });
 };
 

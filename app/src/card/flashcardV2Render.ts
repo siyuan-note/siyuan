@@ -810,8 +810,9 @@ export const buildFlashcardV2OcclusionPlan = (model: IFlashcardV2RenderModel): I
 };
 
 const findOcclusionElements = (element: Element, occlusionID: string) => {
-    return [...element.querySelectorAll("[data-flashcard-occlusion-id]")]
-        .filter((item) => item.getAttribute("data-flashcard-occlusion-id") === occlusionID);
+    return [...element.querySelectorAll("[data-flashcard-occlusion-id],[data-occlusion-id]")]
+        .filter((item) => (item.getAttribute("data-flashcard-occlusion-id") ||
+            item.getAttribute("data-occlusion-id")) === occlusionID);
 };
 
 const hideTextOcclusion = (element: Element, occlusionID: string) => {

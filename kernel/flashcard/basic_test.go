@@ -114,6 +114,28 @@ func TestCreateBasicForwardSourceKeepsBothStableDirectionsAndMemberships(t *test
 	}
 }
 
+func TestDeletedBasicSourceCannotChangeDirection(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	applyGenerationEntities(t, ctx, store, "basic-deleted-preset", 1,
+		testSchedulerPreset(legacyPresetID, false, false))
+	const sourceID = "source-basic-deleted"
+	if _, err := store.CreateBasicSource(ctx, BasicSourceRequest{OperationID: "basic-deleted-create",
+		SourceID: sourceID, BlockIDs: []string{"block-prompt", "block-answer"},
+		Direction: BasicDirectionForward, CreatedAt: 100}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.ManageSourceLifecycle(ctx, SourceLifecycleRequest{OperationID: "basic-deleted-delete",
+		SourceID: sourceID, Action: SourceActionDelete, ChangedAt: 110}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := store.UpdateBasicSourceDirection(ctx, BasicDirectionRequest{OperationID: "basic-deleted-direction",
+		SourceID: sourceID, Direction: BasicDirectionReverse, UpdatedAt: 120}); err == nil {
+		t.Fatal("deleted basic source changed direction")
+	}
+}
+
 func TestSourceDisabledTemplateDoesNotCreateCard(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)

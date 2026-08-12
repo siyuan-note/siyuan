@@ -33,6 +33,7 @@ import {
     type IFlashcardV2PluginRenderResult,
     snapshotFlashcardV2AnswerResult
 } from "./flashcardV2Plugin";
+import type {IFlashcardQueryAST} from "./flashcardV2Query";
 
 interface IFlashcardV2SessionQueueCard {
     sessionCard: {
@@ -96,6 +97,7 @@ interface IFlashcardV2RenderedCard {
 
 export interface IFlashcardV2ReviewSessionOptions {
     reviewMode: "normal" | "reinforcement";
+    query?: IFlashcardQueryAST;
     includeSuspended?: boolean;
     includeBuried?: boolean;
     includePaused?: boolean;
@@ -664,6 +666,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
         operationID: genUUID(),
         sessionID,
         reviewSetID,
+        query: options.query,
         reviewMode: options.reviewMode,
         seed: sessionID,
         now: Date.now(),

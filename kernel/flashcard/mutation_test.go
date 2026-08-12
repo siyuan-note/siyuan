@@ -118,6 +118,54 @@ func TestMutateEntitiesRejectsWholeBatchBeforeJournalWrite(t *testing.T) {
 	}
 }
 
+func TestMutateEntitiesRejectsUnresolvedEntityConflict(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	tag := Tag{ID: "tag-conflicted-mutation", Name: "Root", NormalizedName: "root"}
+	created, err := store.MutateEntities(ctx, "mutation-conflict-root", []EntityMutation{{
+		EntityType: EntityTag, EntityID: tag.ID, UpdatedAt: 100, Payload: mustRawJSON(t, tag),
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	firstTag := tag
+	firstTag.Name, firstTag.NormalizedName = "First", "first"
+	first, err := NewOperationEntityRevision("mutation-conflict-first", EntityTag, tag.ID,
+		[]string{created.Revisions[0].RevisionID}, 200, false, firstTag)
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondTag := tag
+	secondTag.Name, secondTag.NormalizedName = "Second", "second"
+	second, err := NewOperationEntityRevision("mutation-conflict-second", EntityTag, tag.ID,
+		[]string{created.Revisions[0].RevisionID}, 201, false, secondTag)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = store.Apply(ctx, "mutation-conflict-first",
+		[]Change{{Kind: RecordEntityRevision, Revision: &first}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = store.Apply(ctx, "mutation-conflict-second",
+		[]Change{{Kind: RecordEntityRevision, Revision: &second}}); err != nil {
+		t.Fatal(err)
+	}
+	current, found, err := store.Projection().CurrentEntity(ctx, EntityTag, tag.ID)
+	if err != nil || !found {
+		t.Fatalf("conflicted tag was not found: found=%v err=%v", found, err)
+	}
+	thirdTag := tag
+	thirdTag.Name, thirdTag.NormalizedName = "Third", "third"
+	_, err = store.MutateEntities(ctx, "mutation-conflict-third", []EntityMutation{{
+		EntityType: EntityTag, EntityID: tag.ID, ExpectedRevisionID: current.RevisionID,
+		UpdatedAt: 300, Payload: mustRawJSON(t, thirdTag),
+	}})
+	if !errors.Is(err, ErrRevisionConflict) {
+		t.Fatalf("mutation bypassed unresolved conflict: %v", err)
+	}
+}
+
 func TestMutateEntitiesRetryRecoversJournaledOperationProjection(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)

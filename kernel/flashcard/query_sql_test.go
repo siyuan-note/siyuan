@@ -362,6 +362,7 @@ func TestCardSearchUsesLocationQueriesAndHierarchicalStudyPolicies(t *testing.T)
 	}
 	for _, query := range []QueryAST{
 		predicateQuery("notebookID", QueryEqual, json.RawMessage(`"notebook-query"`)),
+		predicateQuery("rootID", QueryEqual, json.RawMessage(`"doc-child"`)),
 		predicateQuery("path", QueryStartsWith, json.RawMessage(`"/doc-parent"`)),
 	} {
 		results, err = store.Projection().SearchCards(ctx, &query, CardSearchOptions{Now: now,

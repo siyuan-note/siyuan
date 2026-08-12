@@ -8,6 +8,7 @@ import {genUUID} from "../util/genID";
 import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
 import type {App} from "../index";
 import {listFlashcardV2PluginTypes} from "./flashcardV2Plugin";
+import type {IFlashcardQueryAST, IFlashcardQueryExpression} from "./flashcardV2Query";
 
 interface IFlashcardMigrationStatus {
     state: "Legacy" | "Preparing" | "Active" | "LegacyDiverged";
@@ -32,6 +33,14 @@ interface IFlashcardEntityRevision<T> {
     payload: T;
 }
 
+interface IFlashcardEntityConflict {
+    entityType: string;
+    entityID: string;
+    selectedRevisionID: string;
+    detectedAt: number;
+    revisions: Array<IFlashcardEntityRevision<unknown>>;
+}
+
 interface IReviewSet {
     id: string;
     name: string;
@@ -49,19 +58,6 @@ interface IFlashcardReviewSetSummary {
     due: number;
     included: number;
     excluded: number;
-}
-
-interface IFlashcardQueryExpression {
-    operator: "matchAll" | "and" | "or" | "not" | "predicate";
-    children?: IFlashcardQueryExpression[];
-    field?: string;
-    comparator?: string;
-    value?: unknown;
-}
-
-interface IFlashcardQueryAST {
-    version: number;
-    root: IFlashcardQueryExpression;
 }
 
 interface IFlashcardStatistics {
@@ -115,6 +111,7 @@ interface IFlashcardSearchResult {
         priorityOverride?: string;
     };
     sourceType: string;
+    sourceStatus: "active" | "orphaned" | "deleted";
     sourcePriority: string;
     inheritedPriority: string;
     defaultPresetID: string;
@@ -181,6 +178,8 @@ interface IFlashcardStudyPolicy {
 }
 
 interface IFlashcardManagementFilters {
+    blockIDs?: string[];
+    rootIDs?: string[];
     content?: string;
     notebookID?: string;
     path?: string;
@@ -207,6 +206,8 @@ interface IFlashcardManagementFilters {
     retrievabilityFrom?: string;
     retrievabilityTo?: string;
 }
+
+type TFlashcardManagementStringFilter = Exclude<keyof IFlashcardManagementFilters, "blockIDs" | "rootIDs">;
 
 interface IFlashcardManagementOptions {
     tags: IFlashcardTag[];
@@ -392,6 +393,29 @@ const flashcardManagementQuery = (filters: IFlashcardManagementFilters): IFlashc
     if (filters.notebookID) {
         add("notebookID", "equal", filters.notebookID);
     }
+    if (filters.blockIDs?.length === 1) {
+        add("blockID", "equal", filters.blockIDs[0]);
+    } else if (filters.blockIDs && filters.blockIDs.length > 1) {
+        predicates.push({
+            operator: "predicate",
+            field: "blockID",
+            comparator: "in",
+            value: filters.blockIDs,
+        });
+    }
+    if (filters.rootIDs?.length === 1) {
+        add("rootID", "equal", filters.rootIDs[0]);
+    } else if (filters.rootIDs && filters.rootIDs.length > 1) {
+        predicates.push({
+            operator: "or",
+            children: filters.rootIDs.map((rootID) => ({
+                operator: "predicate",
+                field: "rootID",
+                comparator: "equal",
+                value: rootID,
+            })),
+        });
+    }
     if (filters.path) {
         add("path", "startsWith", filters.path);
     }
@@ -456,7 +480,8 @@ const flashcardManagementQuery = (filters: IFlashcardManagementFilters): IFlashc
 };
 
 const flashcardManagementFilterCount = (filters: IFlashcardManagementFilters) =>
-    Object.values(filters).filter((value) => value !== undefined && value !== "").length;
+    Object.entries(filters).filter(([key, value]) => !["blockIDs", "rootIDs"].includes(key) &&
+        value !== undefined && value !== "").length;
 
 const openFlashcardV2ReviewSetEditor = (revision: IFlashcardEntityRevision<IReviewSet> | undefined,
     callback: (saved: IFlashcardEntityRevision<IReviewSet>) => void, initialName = "",
@@ -781,14 +806,21 @@ const renderManagedCards = (cards: IFlashcardSearchResult[], grouped: boolean, r
         sourceCards.push(card);
         sources.set(card.card.sourceID, sourceCards);
     });
-    return [...sources.entries()].map(([sourceID, sourceCards]) => `<li class="b3-list-item b3-list-item--focus" data-source-id="${escapeAttr(sourceID)}">
+    return [...sources.entries()].map(([sourceID, sourceCards]) => {
+        const deleted = sourceCards[0].sourceStatus === "deleted";
+        const editable = ["cloze", "ordered", "image-occlusion", "choice", "multi-line", "typed-answer"]
+            .includes(sourceCards[0].sourceType);
+        return `<li class="b3-list-item b3-list-item--focus" data-source-id="${escapeAttr(sourceID)}">
 <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${escapeHtml(sourceCards[0].sourceTitle || sourceCards[0].sourceBlockID || sourceID)}</span>
 <span class="b3-list-item__meta">${sourceCards.length}</span>
+${editable && !deleted ? `<span data-type="editSource" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></span>` : ""}
 <span data-type="sourceTags" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.tag}"><svg><use xlink:href="#iconTag"></use></svg></span>
 <span data-type="documentPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.doc} - ${window.siyuan.languages.flashcardPriority}"><svg><use xlink:href="#iconFile"></use></svg></span>
 <span data-type="notebookPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardPriority}"><svg><use xlink:href="#iconFilesRoot"></use></svg></span>
-</li>${sourceCards.map((card) => renderManagedCard(card, reviewSetID, selectedCardIDs, flagDefinitions)).join("")}`).join("");
+<span data-type="sourceLifecycle" class="b3-list-item__action${deleted ? "" : " b3-list-item__action--warning"} b3-tooltips b3-tooltips__w" aria-label="${deleted ? window.siyuan.languages.restore : window.siyuan.languages.delete}"><svg><use xlink:href="#icon${deleted ? "Undo" : "Trashcan"}"></use></svg></span>
+</li>${sourceCards.map((card) => renderManagedCard(card, reviewSetID, selectedCardIDs, flagDefinitions)).join("")}`;
+    }).join("");
 };
 
 const setFlashcardV2ReviewSetMembership = (reviewSetID: string, cardIDs: string | string[],
@@ -1372,19 +1404,19 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
     });
     const elements = [...dialog.element.querySelectorAll<HTMLInputElement | HTMLSelectElement>("[data-filter]")];
     elements.forEach((element) => {
-        element.value = filters[element.dataset.filter as keyof IFlashcardManagementFilters] || "";
+        element.value = filters[element.dataset.filter as TFlashcardManagementStringFilter] || "";
     });
     dialog.element.querySelector(".b3-button--cancel").addEventListener("click", () => dialog.destroy());
     dialog.element.querySelector('[data-type="clear"]').addEventListener("click", () => {
-        callback({});
+        callback({blockIDs: filters.blockIDs, rootIDs: filters.rootIDs});
         dialog.destroy();
     });
     dialog.element.querySelector('[data-type="confirm"]').addEventListener("click", () => {
-        const next: IFlashcardManagementFilters = {};
+        const next: IFlashcardManagementFilters = {blockIDs: filters.blockIDs, rootIDs: filters.rootIDs};
         elements.forEach((element) => {
             const value = element.value.trim();
             if (value !== "") {
-                next[element.dataset.filter as keyof IFlashcardManagementFilters] = value;
+                next[element.dataset.filter as TFlashcardManagementStringFilter] = value;
             }
         });
         callback(next);
@@ -1393,6 +1425,52 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
 };
 
 const flashcardV2ManagementPageSize = 200;
+
+const openFlashcardV2Conflicts = (callback: () => void) => {
+    fetchPost("/api/flashcard/listConflicts", {limit: 1000}, (response) => {
+        const conflicts = response.data as IFlashcardEntityConflict[];
+        const dialog = new Dialog({
+            title: window.siyuan.languages.conflict,
+            width: isMobile() ? "96vw" : "760px",
+            height: "70vh",
+            content: `<div class="b3-dialog__content" style="box-sizing:border-box;height:100%;overflow:auto">
+${conflicts.length === 0 ? `<div class="card__empty">${window.siyuan.languages.emptyContent}</div>` : conflicts.map((conflict, conflictIndex) => `<div class="b3-label" data-conflict-index="${conflictIndex}">
+<div class="b3-label__text">${escapeHtml(conflict.entityType)} - ${escapeHtml(conflict.entityID)}</div>
+${conflict.revisions.map((revision) => {
+                const payload = JSON.stringify(revision.payload, undefined, 2);
+                return `<label class="b3-label"><div class="fn__flex-center"><input type="radio" name="flashcardConflict${conflictIndex}" value="${escapeAttr(revision.revisionID)}"${revision.revisionID === conflict.selectedRevisionID ? " checked" : ""}><span class="fn__space"></span><span class="fn__flex-1">${new Date(revision.updatedAt).toLocaleString()}</span><span class="b3-list-item__meta">${escapeHtml(revision.revisionID)}</span></div><pre class="fn__code" style="white-space:pre-wrap;max-height:160px;overflow:auto">${escapeHtml(payload.length > 4000 ? `${payload.slice(0, 4000)}...` : payload)}</pre></label>`;
+            }).join("")}
+</div>`).join('<div class="fn__hr"></div>')}
+</div><div class="b3-dialog__action"><button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div><button class="b3-button b3-button--text"${conflicts.length === 0 ? " disabled" : ""}>${window.siyuan.languages.confirm}</button></div>`,
+        });
+        const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
+        buttons[0].addEventListener("click", () => dialog.destroy());
+        buttons[1].addEventListener("click", () => {
+            const resolveNext = (index: number) => {
+                if (index >= conflicts.length) {
+                    dialog.destroy();
+                    callback();
+                    return;
+                }
+                const selected = dialog.element.querySelector<HTMLInputElement>(
+                    `input[name="flashcardConflict${index}"]:checked`);
+                if (!selected) {
+                    resolveNext(index + 1);
+                    return;
+                }
+                fetchPost("/api/flashcard/resolveConflict", {
+                    operationID: genUUID(),
+                    entityType: conflicts[index].entityType,
+                    entityID: conflicts[index].entityID,
+                    selectedRevisionID: selected.value,
+                    resolvedAt: Date.now(),
+                }, () => resolveNext(index + 1));
+            };
+            buttons[1].disabled = true;
+            resolveNext(0);
+        });
+    });
+};
 
 const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset = 0,
     filters: IFlashcardManagementFilters = {}, managementOptions?: IFlashcardManagementOptions, grouped = true) => {
@@ -1464,6 +1542,7 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
 <span class="b3-list-item__meta fn__flex-1">${pageLength === 0 ? 0 : offset + 1} - ${offset + pageLength}${total === undefined ? "" : ` / ${total}`}</span>
 <button data-type="pageNext" class="b3-button b3-button--outline"${hasNext ? "" : " disabled"}>${window.siyuan.languages.next}</button><span class="fn__space"></span>
 <button data-type="filter" class="b3-button b3-button--outline"><svg><use xlink:href="#iconFilter"></use></svg>${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button><span class="fn__space"></span>
+<button data-type="conflicts" class="b3-button b3-button--outline"><svg><use xlink:href="#iconWarning"></use></svg>${window.siyuan.languages.conflict}</button><span class="fn__space"></span>
 <button data-type="statistics" class="b3-button b3-button--outline"><svg><use xlink:href="#iconGraph"></use></svg>${window.siyuan.languages.flashcardStatistics}</button><span class="fn__space"></span>
 ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.flashcardReviewSet}</button><span class="fn__space"></span>` : ""}
 <button data-type="flagDefinitions" class="b3-button b3-button--outline"><svg><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.cardStatus}</button><span class="fn__space"></span>
@@ -1523,6 +1602,10 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                 }
                 if (type === "statistics") {
                     openFlashcardV2Statistics(reviewSetID, managementQuery);
+                    return;
+                }
+                if (type === "conflicts") {
+                    openFlashcardV2Conflicts(reloadPage);
                     return;
                 }
                 if (type === "saveReviewSet") {
@@ -1631,6 +1714,62 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                             reloadPage();
                         });
                     }
+                    return;
+                }
+                if (type === "sourceLifecycle" && item.dataset.sourceId) {
+                    const sourceCard = cards.find((card) => card.card.sourceID === item.dataset.sourceId);
+                    if (!sourceCard) {
+                        return;
+                    }
+                    const action = sourceCard.sourceStatus === "deleted" ? "restore" : "delete";
+                    const execute = () => fetchPost("/api/flashcard/manageSourceLifecycle", {
+                        operationID: genUUID(),
+                        sourceID: item.dataset.sourceId,
+                        action,
+                        changedAt: Date.now(),
+                    }, reloadPage);
+                    if (action === "delete") {
+                        confirmDialog(window.siyuan.languages.deleteOpConfirm,
+                            window.siyuan.languages.confirmDelete, execute);
+                    } else {
+                        execute();
+                    }
+                    return;
+                }
+                if (type === "editSource" && item.dataset.sourceId) {
+                    const sourceCards = cards.filter((card) => card.card.sourceID === item.dataset.sourceId);
+                    const sourceCard = sourceCards.find((card) => card.card.generationStatus === "active") ||
+                        sourceCards[0];
+                    if (!sourceCard) {
+                        return;
+                    }
+                    fetchPost("/api/flashcard/getRenderModel", {cardID: sourceCard.card.id}, (renderResponse) => {
+                        const model = renderResponse.data as {
+                            source: {sourceType: string, generationConfig: IFlashcardV2AdvancedGenerationConfig},
+                            references: Array<{entityType: string, entityID: string, role: string, sort: number}>,
+                            template: {generationRule: {mode: string}},
+                        };
+                        fetchPost("/api/flashcard/getEntity", {
+                            entityType: "cardSource",
+                            entityID: item.dataset.sourceId,
+                        }, (entityResponse) => {
+                            const revision = entityResponse.data.revision as IFlashcardEntityRevision<unknown>;
+                            const references = model.references.filter((reference) => reference.entityType === "block")
+                                .sort((left, right) => left.sort - right.sort);
+                            const blockIDs = references.map((reference) => reference.entityID);
+                            if (!entityResponse.data.found || blockIDs.length === 0) {
+                                return;
+                            }
+                            openFlashcardV2AdvancedSource(blockIDs, {
+                                sourceID: item.dataset.sourceId,
+                                expectedRevisionID: revision.revisionID,
+                                sourceType: model.source.sourceType,
+                                generationConfig: model.source.generationConfig,
+                                references,
+                                modeHint: model.template.generationRule.mode,
+                            }, reloadPage);
+                        });
+                    });
                     return;
                 }
                 if ((type === "documentPolicy" || type === "notebookPolicy") && item.dataset.sourceId) {
@@ -1784,6 +1923,20 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
 
 export const openFlashcardV2Management = () => {
     ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", window.siyuan.languages.manage));
+};
+
+export const openFlashcardV2ManagementByNotebook = (notebookID: string, name: string) => {
+    ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", name, 0, {notebookID}));
+};
+
+export const openFlashcardV2ManagementByBlocks = (blockIDs: string[], name: string) => {
+    const uniqueBlockIDs = [...new Set(blockIDs.filter(Boolean))];
+    ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", name, 0, {blockIDs: uniqueBlockIDs}));
+};
+
+export const openFlashcardV2ManagementByRoots = (rootIDs: string[], name: string) => {
+    const uniqueRootIDs = [...new Set(rootIDs.filter(Boolean))];
+    ensureFlashcardV2(() => openFlashcardV2ReviewSetCards("", name, 0, {rootIDs: uniqueRootIDs}));
 };
 
 export const openFlashcardV2ReviewSets = (app: App) => {
@@ -1969,6 +2122,57 @@ interface IFlashcardV2ImageEditor {
     redraw: () => void;
 }
 
+interface IFlashcardV2AdvancedGenerationConfig {
+    occlusions?: Array<{ id: string, groupIDs: string[], displayOrder: number }>;
+    groups?: Array<{ id: string, displayOrder: number, shapeIDs?: string[] }>;
+    steps?: Array<{ id: string, displayOrder: number, occlusionIDs: string[] }>;
+    shapes?: Array<Omit<IFlashcardV2ImageShape, "groupID">>;
+    frontMode?: string;
+    mode?: string;
+    options?: Array<{ id: string, displayOrder: number }>;
+    correctOptionIDs?: string[];
+    randomize?: boolean;
+    distractorQuery?: IFlashcardQueryAST;
+    dynamicDistractorCount?: number;
+    revealMode?: string;
+    caseSensitive?: boolean;
+    ignoreDiacritics?: boolean;
+    fuzzyMaxDistance?: number;
+    fuzzyMaxRatio?: number;
+    trimWhitespace?: boolean;
+    collapseWhitespace?: boolean;
+}
+
+interface IFlashcardV2AdvancedEdit {
+    sourceID: string;
+    expectedRevisionID: string;
+    sourceType: string;
+    generationConfig: IFlashcardV2AdvancedGenerationConfig;
+    references: Array<{ entityID: string, role: string, sort: number }>;
+    modeHint?: string;
+}
+
+const flashcardV2AdvancedEditMode = (edit?: IFlashcardV2AdvancedEdit) => {
+    if (!edit) {
+        return "cloze";
+    }
+    const config = edit.generationConfig;
+    switch (edit.sourceType) {
+        case "ordered":
+            return edit.modeHint === "orderedCards" ? "orderedCards" : "orderedSingle";
+        case "image-occlusion":
+            return "imageOcclusion";
+        case "choice":
+            return config.mode === "multiple" ? "choiceMultiple" : "choiceSingle";
+        case "multi-line":
+            return config.revealMode === "steps" ? "multiLineSteps" : "multiLineAll";
+        case "typed-answer":
+            return "typedAnswer";
+        default:
+            return "cloze";
+    }
+};
+
 const flashcardV2ImageSource = (blockID: string, dom: string) => {
     const template = document.createElement("template");
     template.innerHTML = window.DOMPurify.sanitize(dom, {
@@ -1991,8 +2195,50 @@ const flashcardV2BlockText = (blockID: string, dom: string) => {
     return text || blockID;
 };
 
+interface IFlashcardV2InlineOcclusion {
+    id: string;
+    blockID: string;
+    displayOrder: number;
+    label: string;
+}
+
+const prepareFlashcardV2InlineOcclusions = (blockIDs: string[], doms: Record<string, string>) => {
+    const targets: IFlashcardV2InlineOcclusion[] = [];
+    const updates: Array<{ id: string, data: string, dataType: "dom" }> = [];
+    const seen = new Set<string>();
+    blockIDs.forEach((blockID) => {
+        const template = document.createElement("template");
+        template.innerHTML = doms[blockID] || "";
+        let changed = false;
+        template.content.querySelectorAll<HTMLElement>('span[data-type~="mark"]').forEach((mark) => {
+            let id = mark.dataset.occlusionId;
+            if (!id) {
+                id = genUUID();
+                mark.dataset.occlusionId = id;
+                changed = true;
+            }
+            if (seen.has(id)) {
+                id = genUUID();
+                mark.dataset.occlusionId = id;
+                changed = true;
+            }
+            seen.add(id);
+            targets.push({
+                id,
+                blockID,
+                displayOrder: targets.length,
+                label: mark.textContent?.replace(/\s+/g, " ").trim() || blockID,
+            });
+        });
+        if (changed && template.content.firstElementChild) {
+            updates.push({id: blockID, data: template.content.firstElementChild.outerHTML, dataType: "dom"});
+        }
+    });
+    return {targets, updates};
+};
+
 const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
-    onChange: (hasShapes: boolean) => void): IFlashcardV2ImageEditor => {
+    onChange: (hasShapes: boolean) => void, initial?: IFlashcardV2AdvancedEdit["generationConfig"]): IFlashcardV2ImageEditor => {
     const image = element.querySelector("img") as HTMLImageElement;
     const canvas = element.querySelector("canvas") as HTMLCanvasElement;
     const context = canvas.getContext("2d");
@@ -2006,6 +2252,18 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     let start: IFlashcardV2ImagePoint | undefined;
     let current: IFlashcardV2ImagePoint | undefined;
     let polygon: IFlashcardV2ImagePoint[] = [];
+    if (initial?.groups && initial?.shapes) {
+        [...initial.groups].sort((left, right) => left.displayOrder - right.displayOrder).forEach((group) => {
+            groupOrder.push(group.id);
+            group.shapeIDs?.forEach((shapeID) => {
+                const shape = initial.shapes.find((item) => item.id === shapeID);
+                if (shape) {
+                    shapes.push({...shape, groupID: group.id});
+                }
+            });
+        });
+        frontMode.value = initial.frontMode || "hideAllAnswerOne";
+    }
 
     const point = (event: PointerEvent) => {
         const rect = canvas.getBoundingClientRect();
@@ -2080,6 +2338,7 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
             groupSelect.value = selected;
         }
     };
+    updateGroups();
     const addShape = (shape: Omit<IFlashcardV2ImageShape, "id" | "groupID">) => {
         let groupID = groupSelect.value;
         if (!groupID) {
@@ -2182,7 +2441,8 @@ const bindFlashcardV2ImageEditor = (element: Element, assetID: string,
     };
 };
 
-export const openFlashcardV2AdvancedSource = (blockIDs: string[]) => {
+export const openFlashcardV2AdvancedSource = (blockIDs: string[], edit?: IFlashcardV2AdvancedEdit,
+    callback?: () => void) => {
     if (blockIDs.length === 0) {
         return;
     }
@@ -2194,10 +2454,46 @@ export const openFlashcardV2AdvancedSource = (blockIDs: string[]) => {
             const revisions = response.data.entities as Array<IFlashcardEntityRevision<IReviewSet>>;
             const openDialog = (doms: Record<string, string>, imageSource?: { assetID: string, blockID: string }) => {
                 const pluginTypes = listFlashcardV2PluginTypes().filter((item) => item.registration.create);
-                const clozeGroupOrder = blockIDs.map(() => genUUID());
+                const preparedInline = prepareFlashcardV2InlineOcclusions(blockIDs, doms);
+                const initialOcclusionIDs = new Set([
+                    ...(edit?.generationConfig.occlusions || []).map((occlusion) => occlusion.id),
+                    ...(edit?.generationConfig.steps || []).flatMap((step) => step.occlusionIDs),
+                ]);
+                const referenceOcclusionByBlock = new Map(edit?.references
+                    .filter((reference) => reference.role.startsWith("occlusion:"))
+                    .map((reference) => [reference.entityID, reference.role.slice("occlusion:".length)]) || []);
+                const editingInlineOcclusions = !!edit && initialOcclusionIDs.size > 0 &&
+                    referenceOcclusionByBlock.size === 0;
+                const preparedTargets = edit && referenceOcclusionByBlock.size > 0 ? [] :
+                    edit && initialOcclusionIDs.size > 0 ? preparedInline.targets.filter((target) =>
+                        initialOcclusionIDs.has(target.id) ||
+                        initialOcclusionIDs.has(referenceOcclusionByBlock.get(target.blockID) || "")) :
+                        preparedInline.targets;
+                const usesInlineTargets = preparedTargets.length > 0 || editingInlineOcclusions;
+                const clozeTargets = preparedTargets.length > 0 ? preparedTargets : editingInlineOcclusions ? [] :
+                    blockIDs.map((blockID, displayOrder) => ({
+                    id: blockID,
+                    blockID,
+                    displayOrder,
+                    label: flashcardV2BlockText(blockID, doms[blockID] || ""),
+                }));
+                const initialGroups = edit?.sourceType === "cloze" ?
+                    [...(edit.generationConfig.groups || [])].sort((left, right) => left.displayOrder - right.displayOrder) : [];
+                const clozeGroupOrder = initialGroups.length > 0 ? initialGroups.map((group) => group.id) :
+                    clozeTargets.map(() => genUUID());
+                const initialGroupIDs = (target: IFlashcardV2InlineOcclusion) => {
+                    const occlusionID = initialOcclusionIDs.has(target.id) ? target.id :
+                        referenceOcclusionByBlock.get(target.blockID);
+                    return new Set(edit?.generationConfig.occlusions?.find((occlusion) =>
+                        occlusion.id === occlusionID)?.groupIDs || []);
+                };
                 const clozeEditorHTML = `<div data-type="clozeEditor">
 <div class="fn__hr"></div>
-${blockIDs.map((blockID, blockIndex) => `<label class="b3-label"><div class="b3-label__text">${escapeHtml(flashcardV2BlockText(blockID, doms[blockID] || ""))}</div><select data-type="clozeGroups" data-block-index="${blockIndex}" class="b3-select fn__block" multiple size="${Math.min(6, Math.max(2, blockIDs.length))}">${clozeGroupOrder.map((groupID, groupIndex) => `<option value="${escapeAttr(groupID)}"${groupIndex === blockIndex ? " selected" : ""}>${groupIndex + 1}</option>`).join("")}</select></label>`).join("")}
+${clozeTargets.map((target, targetIndex) => {
+                    const selected = initialGroupIDs(target);
+                    return `<label class="b3-label"><div class="b3-label__text">${escapeHtml(target.label)}</div><select data-type="clozeGroups" data-target-index="${targetIndex}" class="b3-select fn__block" multiple size="${Math.min(6, Math.max(2, clozeTargets.length))}">${clozeGroupOrder.map((groupID, groupIndex) => `<option value="${escapeAttr(groupID)}"${selected.size > 0 ? selected.has(groupID) ? " selected" : "" : groupIndex === targetIndex ? " selected" : ""}>${groupIndex + 1}</option>`).join("")}</select></label>`;
+                }).join("")}
+${clozeTargets.length === 0 ? `<div class="card__empty">${window.siyuan.languages.emptyContent}</div>` : ""}
 <button data-type="addClozeGroup" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.group}</button>
 </div>`;
                 const imageEditorHTML = imageSource ? `<div data-type="imageEditor" class="fn__none">
@@ -2261,13 +2557,13 @@ ${choiceEditorHTML}
 ${typedEditorHTML}
 <div class="fn__hr"></div>
 <div class="b3-label"><div class="b3-label__text">${window.siyuan.languages.total}</div>${blockIDs.length}</div>
-<div class="fn__hr"></div>
+${edit ? "" : `<div class="fn__hr"></div>
 <label class="b3-label">
     <div class="b3-label__text">${window.siyuan.languages.flashcardReviewSet}</div>
     <select data-type="reviewSets" class="b3-select fn__block" multiple size="${Math.min(6, Math.max(2, revisions.length))}">
         ${revisions.map((revision) => `<option value="${escapeAttr(revision.entityID)}">${escapeHtml(revision.payload.name)}</option>`).join("")}
     </select>
-</label>
+</label>`}
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -2286,9 +2582,11 @@ ${typedEditorHTML}
                 const clozeSelects = [...dialog.element.querySelectorAll<HTMLSelectElement>('[data-type="clozeGroups"]')];
                 const updateConfirm = () => {
                     const clozeMode = modeElement.value === "cloze";
+                    const orderedMode = modeElement.value === "orderedSingle" || modeElement.value === "orderedCards";
                     const imageMode = modeElement.value === "imageOcclusion";
                     const choiceMode = modeElement.value === "choiceSingle" || modeElement.value === "choiceMultiple";
-                    buttons[1].disabled = clozeMode && clozeSelects.some((select) => select.selectedOptions.length === 0) ||
+                    buttons[1].disabled = (clozeMode || orderedMode) && clozeTargets.length === 0 ||
+                        clozeMode && clozeSelects.some((select) => select.selectedOptions.length === 0) ||
                         imageMode && !imageEditor?.hasShapes() ||
                         choiceMode && !choiceInputs.some((input) => input.checked);
                 };
@@ -2302,7 +2600,8 @@ ${typedEditorHTML}
                 };
                 let imageEditor: IFlashcardV2ImageEditor | undefined;
                 if (imageSource) {
-                    imageEditor = bindFlashcardV2ImageEditor(imageElement, imageSource.assetID, updateConfirm);
+                    imageEditor = bindFlashcardV2ImageEditor(imageElement, imageSource.assetID, updateConfirm,
+                        edit?.sourceType === "image-occlusion" ? edit.generationConfig : undefined);
                 }
                 modeElement.addEventListener("change", () => {
                     const clozeMode = modeElement.value === "cloze";
@@ -2334,6 +2633,28 @@ ${typedEditorHTML}
                 dynamicChoice?.addEventListener("change", () => {
                     dynamicChoiceCount.disabled = !dynamicChoice.checked;
                 });
+                modeElement.value = flashcardV2AdvancedEditMode(edit);
+                if (edit?.sourceType === "choice") {
+                    const correctOptionIDs = new Set(edit.generationConfig.correctOptionIDs || []);
+                    choiceInputs.forEach((input) => {
+                        const option = edit.generationConfig.options?.[Number(input.dataset.choiceIndex)];
+                        input.checked = !!option && correctOptionIDs.has(option.id);
+                    });
+                    (dialog.element.querySelector('[data-type="choiceRandomize"]') as HTMLInputElement).checked =
+                        edit.generationConfig.randomize !== false;
+                    if (dynamicChoice && dynamicChoiceCount) {
+                        dynamicChoice.checked = !!edit.generationConfig.distractorQuery;
+                        dynamicChoiceCount.value = String(edit.generationConfig.dynamicDistractorCount || 3);
+                        dynamicChoiceCount.disabled = !dynamicChoice.checked;
+                    }
+                }
+                if (edit?.sourceType === "typed-answer") {
+                    (dialog.element.querySelector('[data-type="typedCaseSensitive"]') as HTMLInputElement).checked =
+                        !!edit.generationConfig.caseSensitive;
+                    (dialog.element.querySelector('[data-type="typedMatchDiacritics"]') as HTMLInputElement).checked =
+                        !edit.generationConfig.ignoreDiacritics;
+                }
+                modeElement.dispatchEvent(new Event("change"));
                 buttons[0].addEventListener("click", () => dialog.destroy());
                 buttons[1].addEventListener("click", () => {
                     const mode = modeElement.value;
@@ -2341,14 +2662,21 @@ ${typedEditorHTML}
                         return;
                     }
                     const reviewSets = dialog.element.querySelector('[data-type="reviewSets"]') as HTMLSelectElement;
-                    const reviewSetIDs = [...reviewSets.selectedOptions].map((option) => option.value);
+                    const reviewSetIDs = reviewSets ? [...reviewSets.selectedOptions].map((option) => option.value) : [];
                     const clozeGroups = mode === "cloze" ? clozeGroupOrder.map((groupID, displayOrder) => ({
                         id: groupID,
                         displayOrder,
-                        blockIDs: clozeSelects.filter((select) =>
-                            [...select.selectedOptions].some((option) => option.value === groupID))
-                            .map((select) => blockIDs[Number(select.dataset.blockIndex)]),
-                    })).filter((group) => group.blockIDs.length > 0) : undefined;
+                        ...(usesInlineTargets ? {
+                            occlusionIDs: clozeSelects.filter((select) =>
+                                [...select.selectedOptions].some((option) => option.value === groupID))
+                                .map((select) => clozeTargets[Number(select.dataset.targetIndex)].id),
+                        } : {
+                            blockIDs: clozeSelects.filter((select) =>
+                                [...select.selectedOptions].some((option) => option.value === groupID))
+                                .map((select) => clozeTargets[Number(select.dataset.targetIndex)].blockID),
+                        }),
+                    })).filter((group) => ("occlusionIDs" in group ? group.occlusionIDs : group.blockIDs).length > 0) :
+                        undefined;
                     if (mode.startsWith("plugin:")) {
                         const pluginType = pluginTypes.find((item) => item.sourceType === mode);
                         if (pluginType?.registration.create) {
@@ -2362,12 +2690,22 @@ ${typedEditorHTML}
                         }
                         return;
                     }
-                    fetchPost("/api/flashcard/createAdvancedSource", {
-                        operationID: genUUID(),
-                        sourceID: genUUID(),
+                    buttons[1].disabled = true;
+                    const operationID = genUUID();
+                    const sourceID = edit?.sourceID || genUUID();
+                    const changedAt = Date.now();
+                    const saveSource = () => fetchPost(edit ? "/api/flashcard/updateAdvancedSource" :
+                        "/api/flashcard/createAdvancedSource", {
+                        operationID,
+                        sourceID,
+                        expectedRevisionID: edit?.expectedRevisionID,
                         mode,
                         blockIDs: mode === "imageOcclusion" ? [imageSource.blockID] : blockIDs,
                         clozeGroups,
+                        inlineOcclusions: (mode === "cloze" || mode === "orderedSingle" ||
+                            mode === "orderedCards") && preparedTargets.length > 0 ?
+                            clozeTargets.map(({id, blockID, displayOrder}) => ({id, blockID, displayOrder})) :
+                            undefined,
                         imageConfig: mode === "imageOcclusion" ? imageEditor.getConfig() : undefined,
                         correctOptionIndexes: mode === "choiceSingle" || mode === "choiceMultiple" ?
                             choiceInputs.filter((input) => input.checked).map((input) => Number(input.dataset.choiceIndex)) :
@@ -2376,7 +2714,8 @@ ${typedEditorHTML}
                             (dialog.element.querySelector('[data-type="choiceRandomize"]') as HTMLInputElement).checked :
                             undefined,
                         distractorQuery: (mode === "choiceSingle" || mode === "choiceMultiple") &&
-                        dynamicChoice?.checked ? {version: 1, root: {operator: "matchAll"}} : undefined,
+                        dynamicChoice?.checked ? edit?.generationConfig.distractorQuery ||
+                            {version: 1, root: {operator: "matchAll"}} : undefined,
                         dynamicDistractors: (mode === "choiceSingle" || mode === "choiceMultiple") &&
                         dynamicChoice?.checked ? Math.min(50, Math.max(1, Number(dynamicChoiceCount.value) || 1)) :
                             undefined,
@@ -2385,13 +2724,25 @@ ${typedEditorHTML}
                                 HTMLInputElement).checked,
                             ignoreDiacritics: !(dialog.element.querySelector('[data-type="typedMatchDiacritics"]') as
                                 HTMLInputElement).checked,
-                            fuzzyMaxRatio: 0.1,
-                            trimWhitespace: true,
-                            collapseWhitespace: true,
+                            fuzzyMaxDistance: edit?.generationConfig.fuzzyMaxDistance,
+                            fuzzyMaxRatio: edit?.generationConfig.fuzzyMaxRatio ?? 0.1,
+                            trimWhitespace: edit?.generationConfig.trimWhitespace ?? true,
+                            collapseWhitespace: edit?.generationConfig.collapseWhitespace ?? true,
                         } : undefined,
-                        reviewSetIDs,
-                        createdAt: Date.now(),
-                    }, () => dialog.destroy());
+                        reviewSetIDs: edit ? undefined : reviewSetIDs,
+                        createdAt: edit ? undefined : changedAt,
+                        updatedAt: edit ? changedAt : undefined,
+                    }, () => {
+                        dialog.destroy();
+                        callback?.();
+                    });
+                    if (usesInlineTargets && (mode === "cloze" || mode === "orderedSingle" ||
+                        mode === "orderedCards") &&
+                        preparedInline.updates.length > 0) {
+                        fetchPost("/api/block/batchUpdateBlock", {blocks: preparedInline.updates}, saveSource);
+                    } else {
+                        saveSource();
+                    }
                 });
             };
             fetchPost("/api/block/getBlockDOMs", {ids: blockIDs}, (domResponse) => {

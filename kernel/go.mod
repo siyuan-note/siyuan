@@ -98,7 +98,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.7-0.20260808020116-d606c8168fe5
+require github.com/88250/lute v1.7.7-0.20260812000059-312850d06d22
 
 require (
 	dario.cat/mergo v1.0.2 // indirect

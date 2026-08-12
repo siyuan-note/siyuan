@@ -18,7 +18,7 @@ import {showMessage} from "../dialog/message";
 import {unicode2Emoji} from "../emoji";
 import {Dock} from "../layout/dock";
 import {escapeAttr, escapeHtml} from "../util/escape";
-import {viewCards} from "../card/viewCards";
+import {openFlashcardV2Management} from "../card/flashcardV2";
 import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -503,7 +503,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                         iconHTML: "",
                         label: window.siyuan.languages.manage,
                         click: () => {
-                            viewCards(app, "", window.siyuan.languages.all, "");
+                            openFlashcardV2Management();
                         }
                     }],
                 }).element);

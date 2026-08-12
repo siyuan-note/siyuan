@@ -64,6 +64,71 @@ func TestManifestIsDeterministicAcrossWriters(t *testing.T) {
 	}
 }
 
+func TestRefreshInvalidatesStoreWhenSyncedManifestIsIncompatible(t *testing.T) {
+	ctx := context.Background()
+	workspace := t.TempDir()
+	root := filepath.Join(workspace, "v2")
+	store, err := OpenStore(ctx, root, filepath.Join(workspace, "temp", "flashcards.db"), "device-a",
+		&JournalOptions{WriterID: testWriterA})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(root, manifestFilename), []byte(`{"formatVersion":999}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = store.Refresh(ctx); err == nil || !strings.Contains(err.Error(), "manifest") {
+		t.Fatalf("incompatible synced manifest was accepted: %v", err)
+	}
+	if _, err = store.Apply(ctx, "after-incompatible-manifest", nil); err == nil ||
+		!strings.Contains(err.Error(), "closed") {
+		t.Fatalf("invalidated store remained writable: %v", err)
+	}
+	if err = store.Close(); err != nil {
+		t.Fatalf("closing an invalidated store was not idempotent: %v", err)
+	}
+}
+
+func TestRefreshInvalidatesStoreWhenSyncedSegmentIsCorrupt(t *testing.T) {
+	ctx := context.Background()
+	workspace := t.TempDir()
+	root := filepath.Join(workspace, "v2")
+	store, err := OpenStore(ctx, root, filepath.Join(workspace, "temp", "flashcards.db"), "device-a",
+		&JournalOptions{WriterID: testWriterA})
+	if err != nil {
+		t.Fatal(err)
+	}
+	synced, err := OpenJournal(root, "device-b", &JournalOptions{WriterID: testWriterB})
+	if err != nil {
+		t.Fatal(err)
+	}
+	event := fixedEvent("test", "synced-event", "card-1", 1, `{"value":"original"}`)
+	if _, _, err = synced.Append("synced-operation", []Change{{Kind: RecordEvent, Event: &event}}); err != nil {
+		t.Fatal(err)
+	}
+	if err = synced.Close(); err != nil {
+		t.Fatal(err)
+	}
+	path := firstSegmentPath(t, root)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	data = []byte(strings.Replace(string(data), "original", "tampered", 1))
+	if err = os.WriteFile(path, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err = store.Refresh(ctx); !errors.Is(err, ErrCorruptSegment) {
+		t.Fatalf("corrupt synced segment was accepted: %v", err)
+	}
+	if _, err = store.Apply(ctx, "after-corrupt-segment", nil); err == nil ||
+		!strings.Contains(err.Error(), "closed") {
+		t.Fatalf("store remained writable after corrupt sync: %v", err)
+	}
+	if err = store.Close(); err != nil {
+		t.Fatalf("closing an invalidated store was not idempotent: %v", err)
+	}
+}
+
 func TestDeterministicIDUsesLengthDelimitedParts(t *testing.T) {
 	first := DeterministicID("migration", "ab", "c")
 	second := DeterministicID("migration", "a", "bc")

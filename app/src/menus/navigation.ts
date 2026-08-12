@@ -24,13 +24,12 @@ import {openFileById} from "../editor/util";
 /// #endif
 import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
-import {openCardByData} from "../card/openCard";
-import {viewCards} from "../card/viewCards";
+import {openCardByScope} from "../card/openCard";
+import {openFlashcardV2ManagementByNotebook, openFlashcardV2ManagementByRoots} from "../card/flashcardV2";
 import type {App} from "../index";
 import {openDocHistory} from "../history/doc";
 import {openEditorTab} from "./util";
-import {makeCard} from "../card/makeCard";
-import {transaction} from "../protyle/wysiwyg/transaction";
+import {createQuickSources, makeCard} from "../card/makeCard";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {saveExportFile} from "../protyle/util/compatibility";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
@@ -125,34 +124,24 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
             label: window.siyuan.languages.quickMakeCard,
             click: () => {
-                transaction(undefined, [{
-                    action: "addFlashcards",
-                    deckID: Constants.QUICK_DECK_ID,
-                    blockIDs,
-                }]);
+                createQuickSources(blockIDs);
             }
         }, {
             id: "removeCard",
             iconHTML: "",
             label: window.siyuan.languages.removeCard,
             click: () => {
-                transaction(undefined, [{
-                    action: "removeFlashcards",
-                    deckID: Constants.QUICK_DECK_ID,
-                    blockIDs,
-                }]);
+                openFlashcardV2ManagementByRoots(blockIDs, window.siyuan.languages.removeCard);
             }
         }];
-        if (window.siyuan.config.flashcard.deck) {
-            riffCardMenu.push({
-                id: "addToDeck",
-                iconHTML: "",
-                label: window.siyuan.languages.addToDeck,
-                click: () => {
-                    makeCard(app, blockIDs);
-                }
-            });
-        }
+        riffCardMenu.push({
+            id: "addToDeck",
+            iconHTML: "",
+            label: window.siyuan.languages.flashcardCardSource,
+            click: () => {
+                makeCard(app, blockIDs);
+            }
+        });
         window.siyuan.menus.menu.append(new MenuItem({
             id: "riffCard",
             label: window.siyuan.languages.riffCard,
@@ -326,9 +315,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 label: window.siyuan.languages.spaceRepetition,
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
-                    fetchPost("/api/riff/getNotebookRiffDueCards", {notebook: notebookId}, (response) => {
-                        openCardByData(app, response.data, "notebook", notebookId, name);
-                    });
+                    openCardByScope(app, "notebook", notebookId, name);
                     /// #if MOBILE
                     closePanel();
                     /// #endif
@@ -338,7 +325,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 iconHTML: "",
                 label: window.siyuan.languages.manage,
                 click: () => {
-                    viewCards(app, notebookId, name, "Notebook");
+                    openFlashcardV2ManagementByNotebook(notebookId, name);
                     /// #if MOBILE
                     closePanel();
                     /// #endif
@@ -628,9 +615,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 label: window.siyuan.languages.spaceRepetition,
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
-                    fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
-                        openCardByData(app, response.data, "doc", id, name);
-                    });
+                    openCardByScope(app, "doc", id, name);
                     /// #if MOBILE
                     closePanel();
                     /// #endif
@@ -640,11 +625,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 iconHTML: "",
                 label: window.siyuan.languages.manage,
                 click: () => {
-                    fetchPost("/api/filetree/getHPathByID", {
-                        id
-                    }, (response) => {
-                        viewCards(app, id, pathPosix().join(getNotebookName(notebookId), response.data), "Tree");
-                    });
+                    openFlashcardV2ManagementByRoots([id], name);
                     /// #if MOBILE
                     closePanel();
                     /// #endif
@@ -655,34 +636,24 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
                 label: window.siyuan.languages.quickMakeCard,
                 click: () => {
-                    transaction(undefined, [{
-                        action: "addFlashcards",
-                        deckID: Constants.QUICK_DECK_ID,
-                        blockIDs: [id]
-                    }]);
+                    createQuickSources([id]);
                 }
             }, {
                 id: "removeCard",
                 iconHTML: "",
                 label: window.siyuan.languages.removeCard,
                 click: () => {
-                    transaction(undefined, [{
-                        action: "removeFlashcards",
-                        deckID: Constants.QUICK_DECK_ID,
-                        blockIDs: [id]
-                    }]);
+                    openFlashcardV2ManagementByRoots([id], window.siyuan.languages.removeCard);
                 }
             }];
-            if (window.siyuan.config.flashcard.deck) {
-                riffCardMenu.push({
-                    id: "addToDeck",
-                    iconHTML: "",
-                    label: window.siyuan.languages.addToDeck,
-                    click: () => {
-                        makeCard(app, [id]);
-                    }
-                });
-            }
+            riffCardMenu.push({
+                id: "addToDeck",
+                iconHTML: "",
+                label: window.siyuan.languages.flashcardCardSource,
+                click: () => {
+                    makeCard(app, [id]);
+                }
+            });
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "riffCard",
                 label: window.siyuan.languages.riffCard,

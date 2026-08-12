@@ -59,19 +59,38 @@ var (
 
 // AdvancedSourceRequest 由有序块创建分组挖空、单卡逐步揭示或递进式多卡。
 type AdvancedSourceRequest struct {
-	OperationID          string                `json:"operationID"`
-	SourceID             string                `json:"sourceID"`
-	Mode                 string                `json:"mode"`
-	BlockIDs             []string              `json:"blockIDs"`
-	ClozeGroups          []AdvancedClozeGroup  `json:"clozeGroups,omitempty"`
-	ReviewSetIDs         []string              `json:"reviewSetIDs,omitempty"`
-	CreatedAt            int64                 `json:"createdAt"`
-	ImageConfig          *ImageOcclusionConfig `json:"imageConfig,omitempty"`
-	CorrectOptionIndexes []int                 `json:"correctOptionIndexes,omitempty"`
-	RandomizeOptions     bool                  `json:"randomizeOptions"`
-	DistractorQuery      *QueryAST             `json:"distractorQuery,omitempty"`
-	DynamicDistractors   int                   `json:"dynamicDistractors,omitempty"`
-	TypedConfig          *TypedAnswerConfig    `json:"typedConfig,omitempty"`
+	OperationID          string                    `json:"operationID"`
+	SourceID             string                    `json:"sourceID"`
+	Mode                 string                    `json:"mode"`
+	BlockIDs             []string                  `json:"blockIDs"`
+	ClozeGroups          []AdvancedClozeGroup      `json:"clozeGroups,omitempty"`
+	InlineOcclusions     []AdvancedInlineOcclusion `json:"inlineOcclusions,omitempty"`
+	ReviewSetIDs         []string                  `json:"reviewSetIDs,omitempty"`
+	CreatedAt            int64                     `json:"createdAt"`
+	ImageConfig          *ImageOcclusionConfig     `json:"imageConfig,omitempty"`
+	CorrectOptionIndexes []int                     `json:"correctOptionIndexes,omitempty"`
+	RandomizeOptions     bool                      `json:"randomizeOptions"`
+	DistractorQuery      *QueryAST                 `json:"distractorQuery,omitempty"`
+	DynamicDistractors   int                       `json:"dynamicDistractors,omitempty"`
+	TypedConfig          *TypedAnswerConfig        `json:"typedConfig,omitempty"`
+}
+
+// AdvancedSourceUpdateRequest 描述对现有内置高级卡源的原子配置更新。
+type AdvancedSourceUpdateRequest struct {
+	OperationID          string                    `json:"operationID"`
+	SourceID             string                    `json:"sourceID"`
+	ExpectedRevision     string                    `json:"expectedRevisionID"`
+	Mode                 string                    `json:"mode"`
+	BlockIDs             []string                  `json:"blockIDs"`
+	ClozeGroups          []AdvancedClozeGroup      `json:"clozeGroups,omitempty"`
+	InlineOcclusions     []AdvancedInlineOcclusion `json:"inlineOcclusions,omitempty"`
+	UpdatedAt            int64                     `json:"updatedAt"`
+	ImageConfig          *ImageOcclusionConfig     `json:"imageConfig,omitempty"`
+	CorrectOptionIndexes []int                     `json:"correctOptionIndexes,omitempty"`
+	RandomizeOptions     bool                      `json:"randomizeOptions"`
+	DistractorQuery      *QueryAST                 `json:"distractorQuery,omitempty"`
+	DynamicDistractors   int                       `json:"dynamicDistractors,omitempty"`
+	TypedConfig          *TypedAnswerConfig        `json:"typedConfig,omitempty"`
 }
 
 // TypedAnswerConfig 保存原生输入答案的声明式检查选项。
@@ -96,7 +115,15 @@ func (config *TypedAnswerConfig) validate() error {
 type AdvancedClozeGroup struct {
 	ID           string   `json:"id"`
 	DisplayOrder int      `json:"displayOrder"`
-	BlockIDs     []string `json:"blockIDs"`
+	BlockIDs     []string `json:"blockIDs,omitempty"`
+	OcclusionIDs []string `json:"occlusionIDs,omitempty"`
+}
+
+// AdvancedInlineOcclusion 将内容中的稳定文本标记映射到卡源挖空。
+type AdvancedInlineOcclusion struct {
+	ID           string `json:"id"`
+	BlockID      string `json:"blockID"`
+	DisplayOrder int    `json:"displayOrder"`
 }
 
 // AdvancedSourceResult 返回卡源、稳定生成卡和复习集成员关系。
@@ -195,6 +222,399 @@ func (store *Store) CreateAdvancedSource(ctx context.Context,
 	return result, nil
 }
 
+// UpdateAdvancedSource 在一个权威批次中更新卡源引用、配置和全部生成卡，保留稳定卡的排期与历史。
+func (store *Store) UpdateAdvancedSource(ctx context.Context,
+	request AdvancedSourceUpdateRequest) (AdvancedSourceResult, error) {
+	if strings.TrimSpace(request.ExpectedRevision) == "" || request.UpdatedAt <= 0 {
+		return AdvancedSourceResult{}, errors.New("advanced flashcard source update is invalid")
+	}
+	createRequest := request.createRequest()
+	if err := createRequest.validate(); err != nil {
+		return AdvancedSourceResult{}, err
+	}
+	if existing, found, err := store.findAppliedOperation(ctx, request.OperationID); err != nil {
+		return AdvancedSourceResult{}, err
+	} else if found {
+		return advancedUpdateResultFromBatch(existing, request)
+	}
+	if err := store.ensureAdvancedEntities(ctx); err != nil {
+		return AdvancedSourceResult{}, err
+	}
+	currentRevision, found, err := store.projection.CurrentEntity(ctx, EntityCardSource, request.SourceID)
+	if err != nil || !found || currentRevision.Deleted {
+		if err != nil {
+			return AdvancedSourceResult{}, err
+		}
+		return AdvancedSourceResult{}, ErrEntityNotFound
+	}
+	if currentRevision.RevisionID != request.ExpectedRevision {
+		return AdvancedSourceResult{}, ErrRevisionConflict
+	}
+	var currentSource CardSource
+	if err = decodeStrictJSON(currentRevision.Payload, &currentSource); err != nil {
+		return AdvancedSourceResult{}, err
+	}
+	if !isBuiltinAdvancedSource(currentSource) || currentSource.Status == "deleted" {
+		return AdvancedSourceResult{}, errors.New("flashcard source is not an editable built-in advanced source")
+	}
+	source, references, template, err := buildAdvancedSource(createRequest)
+	if err != nil {
+		return AdvancedSourceResult{}, err
+	}
+	source.DefaultPresetID = currentSource.DefaultPresetID
+	source.Priority = currentSource.Priority
+	source.Status = currentSource.Status
+	mutations, err := store.advancedReferenceMutations(ctx, request, references)
+	if err != nil {
+		return AdvancedSourceResult{}, err
+	}
+	sourcePayload, err := CanonicalJSON(source)
+	if err != nil {
+		return AdvancedSourceResult{}, err
+	}
+	mutations = append(mutations, EntityMutation{EntityType: EntityCardSource, EntityID: source.ID,
+		ExpectedRevisionID: currentRevision.RevisionID, UpdatedAt: request.UpdatedAt, Payload: sourcePayload})
+	cardMutations, cards, err := store.advancedCardMutations(ctx, request, source, template)
+	if err != nil {
+		return AdvancedSourceResult{}, err
+	}
+	mutations = append(mutations, cardMutations...)
+	membershipMutations, membershipIDs, err := store.advancedMembershipMutations(ctx, request, cards.Created)
+	if err != nil {
+		return AdvancedSourceResult{}, err
+	}
+	mutations = append(mutations, membershipMutations...)
+	mutationResult, err := store.MutateEntities(ctx, request.OperationID, mutations)
+	if err != nil {
+		return AdvancedSourceResult{}, err
+	}
+	result := AdvancedSourceResult{Cards: cards, Memberships: membershipIDs}
+	result.Cards.Batch = &mutationResult.Batch
+	for _, revision := range mutationResult.Revisions {
+		if revision.EntityType == EntityCardSource {
+			result.SourceRevision = revision
+			break
+		}
+	}
+	return result, nil
+}
+
+func (request AdvancedSourceUpdateRequest) createRequest() AdvancedSourceRequest {
+	return AdvancedSourceRequest{
+		OperationID: request.OperationID, SourceID: request.SourceID, Mode: request.Mode,
+		BlockIDs: request.BlockIDs, ClozeGroups: request.ClozeGroups, InlineOcclusions: request.InlineOcclusions,
+		CreatedAt: request.UpdatedAt, ImageConfig: request.ImageConfig,
+		CorrectOptionIndexes: request.CorrectOptionIndexes, RandomizeOptions: request.RandomizeOptions,
+		DistractorQuery: request.DistractorQuery, DynamicDistractors: request.DynamicDistractors,
+		TypedConfig: request.TypedConfig,
+	}
+}
+
+func isBuiltinAdvancedSource(source CardSource) bool {
+	switch source.SchemaID {
+	case advancedSchemaID, advancedImageSchemaID, advancedChoiceSchemaID, advancedMultiLineSchemaID,
+		advancedTypedSchemaID:
+		return true
+	default:
+		return false
+	}
+}
+
+func (store *Store) advancedReferenceMutations(ctx context.Context, request AdvancedSourceUpdateRequest,
+	references []CardSourceRef) ([]EntityMutation, error) {
+	currentReferences, err := store.projection.CardSourceReferences(ctx, request.SourceID)
+	if err != nil {
+		return nil, err
+	}
+	desiredIDs := make(map[string]struct{}, len(references))
+	mutations := make([]EntityMutation, 0, len(references)+len(currentReferences))
+	for _, reference := range references {
+		desiredIDs[reference.ID] = struct{}{}
+		payload, payloadErr := CanonicalJSON(reference)
+		if payloadErr != nil {
+			return nil, payloadErr
+		}
+		current, found, queryErr := store.projection.CurrentEntity(ctx, EntityCardSourceRef, reference.ID)
+		if queryErr != nil {
+			return nil, queryErr
+		}
+		mutation := EntityMutation{EntityType: EntityCardSourceRef, EntityID: reference.ID,
+			UpdatedAt: request.UpdatedAt, Payload: payload}
+		if found {
+			mutation.ExpectedRevisionID = current.RevisionID
+			if !current.Deleted {
+				var currentReference CardSourceRef
+				if err = decodeStrictJSON(current.Payload, &currentReference); err != nil {
+					return nil, err
+				}
+				if sameEntityPayload(currentReference, reference) {
+					continue
+				}
+			}
+		} else {
+			mutation.RequireAbsent = true
+		}
+		mutations = append(mutations, mutation)
+	}
+	for _, reference := range currentReferences {
+		if _, desired := desiredIDs[reference.ID]; desired {
+			continue
+		}
+		current, found, queryErr := store.projection.CurrentEntity(ctx, EntityCardSourceRef, reference.ID)
+		if queryErr != nil {
+			return nil, queryErr
+		}
+		if !found || current.Deleted {
+			continue
+		}
+		mutations = append(mutations, EntityMutation{EntityType: EntityCardSourceRef, EntityID: reference.ID,
+			ExpectedRevisionID: current.RevisionID, UpdatedAt: request.UpdatedAt, Deleted: true,
+			Payload: json.RawMessage(`{}`)})
+	}
+	return mutations, nil
+}
+
+func (store *Store) advancedCardMutations(ctx context.Context, request AdvancedSourceUpdateRequest,
+	source CardSource, template CardTemplate) ([]EntityMutation, ReconcileResult, error) {
+	variants, err := EnumerateCardVariants(source, template)
+	if err != nil {
+		return nil, ReconcileResult{}, err
+	}
+	existing, err := store.projection.cardRevisionsBySource(ctx, source.ID)
+	if err != nil {
+		return nil, ReconcileResult{}, err
+	}
+	existingByKey := make(map[string]EntityRevision, len(existing))
+	for _, revision := range existing {
+		var card Card
+		if err = decodeStrictJSON(revision.Payload, &card); err != nil {
+			return nil, ReconcileResult{}, err
+		}
+		existingByKey[cardVariantMapKey(card.TemplateID, card.VariantKey)] = revision
+	}
+	status := GenerationActive
+	if source.Status == "orphaned" {
+		status = GenerationOrphaned
+	}
+	mutations := make([]EntityMutation, 0, len(variants)*2+len(existing))
+	result := ReconcileResult{}
+	for _, variant := range variants {
+		key := cardVariantMapKey(template.ID, variant.Key)
+		card := Card{ID: GeneratedCardID(source.ID, template.ID, variant.Key), SourceID: source.ID,
+			TemplateID: template.ID, VariantKey: variant.Key, VariantData: variant.Data,
+			GenerationStatus: status, CreatedAt: request.UpdatedAt, UpdatedAt: request.UpdatedAt}
+		if revision, found := existingByKey[key]; found {
+			var current Card
+			if err = decodeStrictJSON(revision.Payload, &current); err != nil {
+				return nil, ReconcileResult{}, err
+			}
+			card.ID, card.CreatedAt, card.Flag = current.ID, current.CreatedAt, current.Flag
+			card.PresetOverrideID, card.PriorityOverride = current.PresetOverrideID, current.PriorityOverride
+			state, stateFound, stateErr := store.projection.CurrentEntity(ctx, EntityReviewState, card.ID)
+			if stateErr != nil || !stateFound || state.Deleted {
+				if stateErr != nil {
+					return nil, ReconcileResult{}, stateErr
+				}
+				return nil, ReconcileResult{}, fmt.Errorf("flashcard [%s] has no active review state", card.ID)
+			}
+			card.UpdatedAt = current.UpdatedAt
+			if sameEntityPayload(current, card) {
+				result.Unchanged = append(result.Unchanged, card.ID)
+				delete(existingByKey, key)
+				continue
+			}
+			card.UpdatedAt = request.UpdatedAt
+			payload, payloadErr := CanonicalJSON(card)
+			if payloadErr != nil {
+				return nil, ReconcileResult{}, payloadErr
+			}
+			mutations = append(mutations, EntityMutation{EntityType: EntityCard, EntityID: card.ID,
+				ExpectedRevisionID: revision.RevisionID, UpdatedAt: request.UpdatedAt, Payload: payload})
+			result.Updated = append(result.Updated, card.ID)
+			delete(existingByKey, key)
+			continue
+		}
+		_, priorFound, queryErr := store.projection.CurrentEntity(ctx, EntityCard, card.ID)
+		if queryErr != nil {
+			return nil, ReconcileResult{}, queryErr
+		}
+		if priorFound {
+			return nil, ReconcileResult{}, fmt.Errorf("flashcard [%s] already exists outside its source", card.ID)
+		}
+		stateRevisionID := OperationRevisionID(request.OperationID, EntityReviewState, card.ID)
+		state := ReviewState{CardID: card.ID, ReviewStateSnapshot: ReviewStateSnapshot{
+			State: "new", Due: request.UpdatedAt, StateRevisionID: stateRevisionID}}
+		cardPayload, payloadErr := CanonicalJSON(card)
+		if payloadErr != nil {
+			return nil, ReconcileResult{}, payloadErr
+		}
+		statePayload, payloadErr := CanonicalJSON(state)
+		if payloadErr != nil {
+			return nil, ReconcileResult{}, payloadErr
+		}
+		mutations = append(mutations,
+			EntityMutation{EntityType: EntityCard, EntityID: card.ID, RequireAbsent: true,
+				UpdatedAt: request.UpdatedAt, Payload: cardPayload},
+			EntityMutation{EntityType: EntityReviewState, EntityID: card.ID, RequireAbsent: true,
+				UpdatedAt: request.UpdatedAt, Payload: statePayload})
+		result.Created = append(result.Created, card.ID)
+	}
+	keys := make([]string, 0, len(existingByKey))
+	for key := range existingByKey {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		revision := existingByKey[key]
+		var card Card
+		if err = decodeStrictJSON(revision.Payload, &card); err != nil {
+			return nil, ReconcileResult{}, err
+		}
+		if card.GenerationStatus == GenerationDeleted {
+			result.Unchanged = append(result.Unchanged, card.ID)
+			continue
+		}
+		card.GenerationStatus = GenerationDeleted
+		card.UpdatedAt = request.UpdatedAt
+		payload, payloadErr := CanonicalJSON(card)
+		if payloadErr != nil {
+			return nil, ReconcileResult{}, payloadErr
+		}
+		mutations = append(mutations, EntityMutation{EntityType: EntityCard, EntityID: card.ID,
+			ExpectedRevisionID: revision.RevisionID, UpdatedAt: request.UpdatedAt, Payload: payload})
+		result.Updated = append(result.Updated, card.ID)
+	}
+	return mutations, result, nil
+}
+
+func (store *Store) advancedMembershipMutations(ctx context.Context, request AdvancedSourceUpdateRequest,
+	cardIDs []string) ([]EntityMutation, []string, error) {
+	if len(cardIDs) == 0 {
+		return nil, nil, nil
+	}
+	reviewSetIDs, err := store.projection.advancedSourceReviewSetIDs(ctx, request.SourceID)
+	if err != nil {
+		return nil, nil, err
+	}
+	mutations := make([]EntityMutation, 0, len(reviewSetIDs)*len(cardIDs))
+	membershipIDs := make([]string, 0, len(reviewSetIDs)*len(cardIDs))
+	for _, reviewSetID := range reviewSetIDs {
+		for _, cardID := range cardIDs {
+			membershipID := DeterministicID("advanced-review-set-membership", reviewSetID, cardID)
+			membership := ReviewSetMembership{ID: membershipID, ReviewSetID: reviewSetID, CardID: cardID,
+				Mode: MembershipInclude}
+			payload, payloadErr := CanonicalJSON(membership)
+			if payloadErr != nil {
+				return nil, nil, payloadErr
+			}
+			mutations = append(mutations, EntityMutation{EntityType: EntityReviewSetMembership,
+				EntityID: membershipID, RequireAbsent: true, UpdatedAt: request.UpdatedAt, Payload: payload})
+			membershipIDs = append(membershipIDs, membershipID)
+		}
+	}
+	return mutations, membershipIDs, nil
+}
+
+func (projection *Projection) advancedSourceReviewSetIDs(ctx context.Context, sourceID string) ([]string, error) {
+	rows, err := projection.db.QueryContext(ctx, `SELECT membership.id, membership.review_set_id,
+		membership.card_id FROM review_set_memberships membership
+		JOIN cards card ON card.id = membership.card_id
+		JOIN review_sets review_set ON review_set.id = membership.review_set_id
+		WHERE card.source_id = ? AND membership.mode = ?
+		AND NOT EXISTS (SELECT 1 FROM entity_conflicts conflict WHERE conflict.entity_type = ?
+			AND conflict.entity_id = membership.id AND conflict.resolved = 0)
+		AND NOT EXISTS (SELECT 1 FROM entity_conflicts conflict WHERE conflict.entity_type = ?
+			AND conflict.entity_id = card.id AND conflict.resolved = 0)
+		AND NOT EXISTS (SELECT 1 FROM entity_conflicts conflict WHERE conflict.entity_type = ?
+			AND conflict.entity_id = review_set.id AND conflict.resolved = 0)
+		ORDER BY membership.review_set_id, membership.card_id`, sourceID, MembershipInclude,
+		EntityReviewSetMembership, EntityCard, EntityReviewSet)
+	if err != nil {
+		return nil, fmt.Errorf("query advanced flashcard source review sets: %w", err)
+	}
+	defer rows.Close()
+	seen := map[string]struct{}{}
+	var reviewSetIDs []string
+	for rows.Next() {
+		var membershipID, reviewSetID, cardID string
+		if err = rows.Scan(&membershipID, &reviewSetID, &cardID); err != nil {
+			return nil, fmt.Errorf("scan advanced flashcard source review set: %w", err)
+		}
+		if membershipID != DeterministicID("advanced-review-set-membership", reviewSetID, cardID) {
+			continue
+		}
+		if _, found := seen[reviewSetID]; found {
+			continue
+		}
+		seen[reviewSetID] = struct{}{}
+		reviewSetIDs = append(reviewSetIDs, reviewSetID)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate advanced flashcard source review sets: %w", err)
+	}
+	return reviewSetIDs, nil
+}
+
+func advancedUpdateResultFromBatch(batch OperationBatch,
+	request AdvancedSourceUpdateRequest) (AdvancedSourceResult, error) {
+	result := AdvancedSourceResult{Cards: ReconcileResult{Batch: &batch}}
+	membershipCards := map[string]string{}
+	for _, change := range batch.Changes {
+		if change.Kind != RecordEntityRevision || change.Revision == nil ||
+			change.Revision.UpdatedAt != request.UpdatedAt {
+			return AdvancedSourceResult{}, ErrOperationConflict
+		}
+		revision := *change.Revision
+		switch revision.EntityType {
+		case EntityCardSource:
+			if revision.EntityID != request.SourceID || result.SourceRevision.RevisionID != "" ||
+				len(revision.ParentRevisionIDs) != 1 || revision.ParentRevisionIDs[0] != request.ExpectedRevision {
+				return AdvancedSourceResult{}, ErrOperationConflict
+			}
+			result.SourceRevision = revision
+		case EntityCard:
+			var card Card
+			if err := decodeStrictJSON(revision.Payload, &card); err != nil || card.SourceID != request.SourceID {
+				return AdvancedSourceResult{}, ErrOperationConflict
+			}
+			if len(revision.ParentRevisionIDs) == 0 {
+				result.Cards.Created = append(result.Cards.Created, card.ID)
+			} else {
+				result.Cards.Updated = append(result.Cards.Updated, card.ID)
+			}
+		case EntityReviewSetMembership:
+			if revision.Deleted {
+				return AdvancedSourceResult{}, ErrOperationConflict
+			}
+			var membership ReviewSetMembership
+			if err := decodeStrictJSON(revision.Payload, &membership); err != nil ||
+				membership.Mode != MembershipInclude || membership.ID != revision.EntityID ||
+				revision.EntityID != DeterministicID("advanced-review-set-membership", membership.ReviewSetID,
+					membership.CardID) {
+				return AdvancedSourceResult{}, ErrOperationConflict
+			}
+			membershipCards[revision.EntityID] = membership.CardID
+			result.Memberships = append(result.Memberships, revision.EntityID)
+		case EntityCardSourceRef, EntityReviewState:
+		default:
+			return AdvancedSourceResult{}, ErrOperationConflict
+		}
+	}
+	if result.SourceRevision.RevisionID == "" {
+		return AdvancedSourceResult{}, ErrOperationConflict
+	}
+	createdCards := make(map[string]struct{}, len(result.Cards.Created))
+	for _, cardID := range result.Cards.Created {
+		createdCards[cardID] = struct{}{}
+	}
+	for _, cardID := range membershipCards {
+		if _, found := createdCards[cardID]; !found {
+			return AdvancedSourceResult{}, ErrOperationConflict
+		}
+	}
+	return result, nil
+}
+
 func (request *AdvancedSourceRequest) validate() error {
 	if strings.TrimSpace(request.OperationID) == "" || strings.TrimSpace(request.SourceID) == "" ||
 		request.CreatedAt <= 0 || len(request.BlockIDs) == 0 {
@@ -212,13 +632,21 @@ func (request *AdvancedSourceRequest) validate() error {
 		if err := validateAdvancedClozeGroups(request.BlockIDs, request.ClozeGroups); err != nil {
 			return err
 		}
+		if err := validateAdvancedInlineOcclusions(request.BlockIDs, request.InlineOcclusions,
+			request.ClozeGroups); err != nil {
+			return err
+		}
 	case AdvancedModeOrderedSingle, AdvancedModeOrderedCards:
 		if len(request.ClozeGroups) != 0 || request.ImageConfig != nil || len(request.CorrectOptionIndexes) != 0 ||
 			request.DistractorQuery != nil || request.DynamicDistractors != 0 || request.RandomizeOptions {
 			return errors.New("ordered flashcard mode must not contain cloze, image or choice configuration")
 		}
+		if err := validateAdvancedInlineOcclusions(request.BlockIDs, request.InlineOcclusions, nil); err != nil {
+			return err
+		}
 	case AdvancedModeImageOcclusion:
-		if len(request.BlockIDs) != 1 || request.ImageConfig == nil || len(request.ClozeGroups) != 0 {
+		if len(request.BlockIDs) != 1 || request.ImageConfig == nil || len(request.ClozeGroups) != 0 ||
+			len(request.InlineOcclusions) != 0 {
 			return errors.New("image occlusion requires exactly one image block and geometry configuration")
 		}
 		if err := request.ImageConfig.validate(); err != nil {
@@ -230,7 +658,7 @@ func (request *AdvancedSourceRequest) validate() error {
 		}
 	case AdvancedModeChoiceSingle, AdvancedModeChoiceMultiple:
 		if len(request.BlockIDs) < 3 || request.ImageConfig != nil || len(request.ClozeGroups) != 0 ||
-			len(request.CorrectOptionIndexes) == 0 {
+			len(request.InlineOcclusions) != 0 || len(request.CorrectOptionIndexes) == 0 {
 			return errors.New("choice flashcard requires a question, at least two options, and a correct answer")
 		}
 		if request.Mode == AdvancedModeChoiceSingle && len(request.CorrectOptionIndexes) != 1 {
@@ -257,12 +685,14 @@ func (request *AdvancedSourceRequest) validate() error {
 		}
 	case AdvancedModeMultiLineAll, AdvancedModeMultiLineSteps:
 		if len(request.BlockIDs) < 2 || request.ImageConfig != nil || len(request.ClozeGroups) != 0 ||
+			len(request.InlineOcclusions) != 0 ||
 			len(request.CorrectOptionIndexes) != 0 || request.DistractorQuery != nil ||
 			request.DynamicDistractors != 0 || request.RandomizeOptions {
 			return errors.New("multi-line flashcard requires a question and at least one answer")
 		}
 	case AdvancedModeTypedAnswer:
 		if len(request.BlockIDs) < 2 || request.ImageConfig != nil || len(request.ClozeGroups) != 0 ||
+			len(request.InlineOcclusions) != 0 ||
 			len(request.CorrectOptionIndexes) != 0 || request.DistractorQuery != nil ||
 			request.DynamicDistractors != 0 || request.RandomizeOptions {
 			return errors.New("typed answer flashcard requires a question and at least one answer")
@@ -293,7 +723,8 @@ func validateAdvancedClozeGroups(blockIDs []string, groups []AdvancedClozeGroup)
 	groupIDs := map[string]struct{}{}
 	orders := map[int]struct{}{}
 	for _, group := range groups {
-		if strings.TrimSpace(group.ID) == "" || group.DisplayOrder < 0 || len(group.BlockIDs) == 0 {
+		if strings.TrimSpace(group.ID) == "" || group.DisplayOrder < 0 ||
+			(len(group.BlockIDs) == 0) == (len(group.OcclusionIDs) == 0) {
 			return errors.New("advanced cloze group identity, order and blocks are required")
 		}
 		if _, duplicate := groupIDs[group.ID]; duplicate {
@@ -304,6 +735,12 @@ func validateAdvancedClozeGroups(blockIDs []string, groups []AdvancedClozeGroup)
 		}
 		groupIDs[group.ID] = struct{}{}
 		orders[group.DisplayOrder] = struct{}{}
+		if len(group.OcclusionIDs) != 0 {
+			if err := validateUniqueStrings("advanced cloze group occlusion IDs", group.OcclusionIDs, false); err != nil {
+				return err
+			}
+			continue
+		}
 		seenBlocks := map[string]struct{}{}
 		for _, blockID := range group.BlockIDs {
 			if _, found := available[blockID]; !found {
@@ -316,10 +753,64 @@ func validateAdvancedClozeGroups(blockIDs []string, groups []AdvancedClozeGroup)
 			assigned[blockID] = struct{}{}
 		}
 	}
+	if len(groups) != 0 && len(groups[0].OcclusionIDs) != 0 {
+		return nil
+	}
 	for _, blockID := range blockIDs {
 		if _, found := assigned[blockID]; !found {
 			return fmt.Errorf("advanced cloze block [%s] has no group", blockID)
 		}
+	}
+	return nil
+}
+
+func validateAdvancedInlineOcclusions(blockIDs []string, occlusions []AdvancedInlineOcclusion,
+	groups []AdvancedClozeGroup) error {
+	if len(occlusions) == 0 {
+		for _, group := range groups {
+			if len(group.OcclusionIDs) != 0 {
+				return errors.New("advanced cloze groups require inline occlusions")
+			}
+		}
+		return nil
+	}
+	availableBlocks := stringSet(blockIDs)
+	occlusionIDs := map[string]struct{}{}
+	orders := map[int]struct{}{}
+	for _, occlusion := range occlusions {
+		if strings.TrimSpace(occlusion.ID) == "" || strings.TrimSpace(occlusion.BlockID) == "" ||
+			occlusion.DisplayOrder < 0 {
+			return errors.New("advanced inline occlusion identity, block and order are required")
+		}
+		if _, found := availableBlocks[occlusion.BlockID]; !found {
+			return fmt.Errorf("advanced inline occlusion references unknown block [%s]", occlusion.BlockID)
+		}
+		if _, duplicate := occlusionIDs[occlusion.ID]; duplicate {
+			return fmt.Errorf("duplicate advanced inline occlusion [%s]", occlusion.ID)
+		}
+		if _, duplicate := orders[occlusion.DisplayOrder]; duplicate {
+			return fmt.Errorf("duplicate advanced inline occlusion display order [%d]", occlusion.DisplayOrder)
+		}
+		occlusionIDs[occlusion.ID] = struct{}{}
+		orders[occlusion.DisplayOrder] = struct{}{}
+	}
+	if groups == nil {
+		return nil
+	}
+	assigned := map[string]struct{}{}
+	for _, group := range groups {
+		if len(group.BlockIDs) != 0 || len(group.OcclusionIDs) == 0 {
+			return errors.New("inline cloze groups must reference occlusion IDs")
+		}
+		for _, occlusionID := range group.OcclusionIDs {
+			if _, found := occlusionIDs[occlusionID]; !found {
+				return fmt.Errorf("advanced cloze group references unknown occlusion [%s]", occlusionID)
+			}
+			assigned[occlusionID] = struct{}{}
+		}
+	}
+	if len(assigned) != len(occlusionIDs) {
+		return errors.New("each advanced inline occlusion must belong to a cloze group")
 	}
 	return nil
 }
@@ -355,10 +846,14 @@ func buildAdvancedSource(request AdvancedSourceRequest) (CardSource, []CardSourc
 	for index, blockID := range request.BlockIDs {
 		occlusionID := DeterministicID("advanced-occlusion", request.SourceID, blockID)
 		occlusionIDs[index] = occlusionID
+		role := "occlusion:" + occlusionID
+		if len(request.InlineOcclusions) != 0 {
+			role = "content"
+		}
 		references = append(references, CardSourceRef{
 			ID: DeterministicID("advanced-card-source-ref", request.SourceID, blockID), SourceID: request.SourceID,
 			FieldID: advancedContentFieldID, EntityType: "block", EntityID: blockID,
-			Role: "occlusion:" + occlusionID, Sort: index, Required: true,
+			Role: role, Sort: index, Required: true,
 		})
 	}
 	templateID := advancedClozeTemplateID
@@ -370,11 +865,22 @@ func buildAdvancedSource(request AdvancedSourceRequest) (CardSource, []CardSourc
 		config = cloze
 	} else {
 		sourceType = "ordered"
-		ordered := OrderedGenerationConfig{Steps: make([]OrderedStep, len(request.BlockIDs))}
-		for index, occlusionID := range occlusionIDs {
-			ordered.Steps[index] = OrderedStep{
-				ID:           DeterministicID("advanced-ordered-step", request.SourceID, request.BlockIDs[index]),
-				DisplayOrder: index, OcclusionIDs: []string{occlusionID}, RevealBehavior: "append",
+		ordered := OrderedGenerationConfig{}
+		if len(request.InlineOcclusions) == 0 {
+			ordered.Steps = make([]OrderedStep, len(request.BlockIDs))
+			for index, blockID := range request.BlockIDs {
+				ordered.Steps[index] = OrderedStep{
+					ID: DeterministicID("advanced-ordered-step", request.SourceID, blockID), DisplayOrder: index,
+					OcclusionIDs: []string{occlusionIDs[index]}, RevealBehavior: "append",
+				}
+			}
+		} else {
+			ordered.Steps = make([]OrderedStep, len(request.InlineOcclusions))
+			for index, occlusion := range request.InlineOcclusions {
+				ordered.Steps[index] = OrderedStep{
+					ID:           DeterministicID("advanced-ordered-step", request.SourceID, occlusion.ID),
+					DisplayOrder: occlusion.DisplayOrder, OcclusionIDs: []string{occlusion.ID}, RevealBehavior: "append",
+				}
 			}
 		}
 		config = ordered
@@ -406,6 +912,22 @@ func buildAdvancedSource(request AdvancedSourceRequest) (CardSource, []CardSourc
 }
 
 func advancedClozeConfig(request AdvancedSourceRequest, occlusionIDs []string) ClozeGenerationConfig {
+	if len(request.InlineOcclusions) != 0 {
+		groupIDsByOcclusion := make(map[string][]string, len(request.InlineOcclusions))
+		ret := ClozeGenerationConfig{Occlusions: make([]ClozeOcclusion, len(request.InlineOcclusions)),
+			Groups: make([]ClozeGroup, len(request.ClozeGroups))}
+		for index, group := range request.ClozeGroups {
+			ret.Groups[index] = ClozeGroup{ID: group.ID, DisplayOrder: group.DisplayOrder}
+			for _, occlusionID := range group.OcclusionIDs {
+				groupIDsByOcclusion[occlusionID] = append(groupIDsByOcclusion[occlusionID], group.ID)
+			}
+		}
+		for index, occlusion := range request.InlineOcclusions {
+			ret.Occlusions[index] = ClozeOcclusion{ID: occlusion.ID,
+				GroupIDs: groupIDsByOcclusion[occlusion.ID], DisplayOrder: occlusion.DisplayOrder}
+		}
+		return ret
+	}
 	ret := ClozeGenerationConfig{Occlusions: make([]ClozeOcclusion, len(request.BlockIDs))}
 	if len(request.ClozeGroups) == 0 {
 		ret.Groups = make([]ClozeGroup, len(request.BlockIDs))

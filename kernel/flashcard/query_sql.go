@@ -48,6 +48,7 @@ type CardSearchResult struct {
 	Card              Card        `json:"card"`
 	ReviewState       ReviewState `json:"reviewState"`
 	SourceType        string      `json:"sourceType"`
+	SourceStatus      string      `json:"sourceStatus"`
 	SourcePriority    string      `json:"sourcePriority"`
 	InheritedPriority string      `json:"inheritedPriority"`
 	DefaultPresetID   string      `json:"defaultPresetID"`
@@ -87,6 +88,9 @@ const (
 	primaryBlockNotebookSQL = `(SELECT metadata.notebook_id FROM card_source_refs primary_ref
 		JOIN block_metadata metadata ON metadata.block_id = primary_ref.entity_id
 		WHERE primary_ref.id = s.primary_ref_id AND primary_ref.entity_type = 'block' LIMIT 1)`
+	primaryBlockRootSQL = `(SELECT metadata.root_id FROM card_source_refs primary_ref
+		JOIN block_metadata metadata ON metadata.block_id = primary_ref.entity_id
+		WHERE primary_ref.id = s.primary_ref_id AND primary_ref.entity_type = 'block' LIMIT 1)`
 	primaryBlockPathSQL = `(SELECT metadata.path FROM card_source_refs primary_ref
 		JOIN block_metadata metadata ON metadata.block_id = primary_ref.entity_id
 		WHERE primary_ref.id = s.primary_ref_id AND primary_ref.entity_type = 'block' LIMIT 1)`
@@ -107,7 +111,8 @@ const (
 	effectivePrioritySQL = `COALESCE(NULLIF(c.priority_override, ''), ` + inheritedPrioritySQL + `)`
 	sourceAvailableSQL   = `COALESCE((SELECT availability.available FROM source_availability availability
 		WHERE availability.source_id = c.source_id), 1)`
-	effectiveGenerationStatusSQL = `CASE WHEN c.generation_status = 'active' AND ` + sourceAvailableSQL +
+	effectiveGenerationStatusSQL = `CASE WHEN s.status = 'deleted' THEN 'deleted'
+		WHEN c.generation_status = 'active' AND ` + sourceAvailableSQL +
 		` = 0 THEN 'orphaned' ELSE c.generation_status END`
 	sourceContentSQL = `COALESCE((SELECT group_concat(search_content.content, char(10))
 		FROM card_source_refs content_ref
@@ -141,6 +146,7 @@ var querySQLFields = map[string]string{
 	"priority":         effectivePrioritySQL,
 	"presetID":         "COALESCE(NULLIF(c.preset_override_id, ''), s.default_preset_id)",
 	"notebookID":       primaryBlockNotebookSQL,
+	"rootID":           primaryBlockRootSQL,
 	"path":             primaryBlockPathSQL,
 	"content":          sourceContentSQL,
 }
@@ -274,12 +280,9 @@ func (projection *Projection) searchCardSourcePage(ctx context.Context, where []
 
 func (projection *Projection) searchCardsWithFilter(ctx context.Context, where []string, args []any, order string,
 	limit, offset int) ([]CardSearchResult, error) {
-	statement := `SELECT ce.payload, se.payload, s.source_type, s.priority, ` + inheritedPrioritySQL +
+	statement := `SELECT ce.payload, se.payload, s.source_type, s.status, s.priority, ` + inheritedPrioritySQL +
 		`, s.default_preset_id, ` + effectivePrioritySQL + `, COALESCE(` + primaryBlockNotebookSQL +
-		`, ''), COALESCE(` + primaryBlockPathSQL + `, ''), COALESCE(
-		(SELECT metadata.root_id FROM card_source_refs primary_ref
-			JOIN block_metadata metadata ON metadata.block_id = primary_ref.entity_id
-			WHERE primary_ref.id = s.primary_ref_id AND primary_ref.entity_type = 'block' LIMIT 1), ''), ` +
+		`, ''), COALESCE(` + primaryBlockPathSQL + `, ''), COALESCE(` + primaryBlockRootSQL + `, ''), ` +
 		sourceAvailableSQL + `,
 		COALESCE((SELECT json_group_array(tag_id) FROM (
 			SELECT ta.tag_id FROM tag_assignments ta WHERE ta.target_type = 'card' AND ta.target_id = c.id
@@ -302,7 +305,7 @@ func (projection *Projection) searchCardsWithFilter(ctx context.Context, where [
 		var cardPayload, statePayload []byte
 		var cardTagIDs, sourceTagIDs []byte
 		var result CardSearchResult
-		if err = rows.Scan(&cardPayload, &statePayload, &result.SourceType, &result.SourcePriority,
+		if err = rows.Scan(&cardPayload, &statePayload, &result.SourceType, &result.SourceStatus, &result.SourcePriority,
 			&result.InheritedPriority, &result.DefaultPresetID, &result.EffectivePriority,
 			&result.SourceNotebookID, &result.SourcePath, &result.SourceRootID, &result.SourceAvailable,
 			&cardTagIDs, &sourceTagIDs); err != nil {
@@ -314,7 +317,9 @@ func (projection *Projection) searchCardsWithFilter(ctx context.Context, where [
 		if err = decodeStrictJSON(statePayload, &result.ReviewState); err != nil {
 			return nil, err
 		}
-		if !result.SourceAvailable && result.Card.GenerationStatus == GenerationActive {
+		if result.SourceStatus == "deleted" {
+			result.Card.GenerationStatus = GenerationDeleted
+		} else if !result.SourceAvailable && result.Card.GenerationStatus == GenerationActive {
 			result.Card.GenerationStatus = GenerationOrphaned
 		}
 		if err = decodeStrictJSON(cardTagIDs, &result.CardTagIDs); err != nil {

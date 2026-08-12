@@ -84,6 +84,14 @@ func (store *Store) MutateEntities(ctx context.Context, operationID string,
 		if err != nil {
 			return EntityMutationResult{}, err
 		}
+		conflicted, err := store.projection.entityHasUnresolvedConflict(ctx, mutation.EntityType, mutation.EntityID)
+		if err != nil {
+			return EntityMutationResult{}, err
+		}
+		if conflicted {
+			return EntityMutationResult{}, fmt.Errorf("%w: entity [%s:%s] has an unresolved conflict",
+				ErrRevisionConflict, mutation.EntityType, mutation.EntityID)
+		}
 		if mutation.RequireAbsent && found {
 			return EntityMutationResult{}, fmt.Errorf("%w: entity [%s:%s] already exists", ErrRevisionConflict,
 				mutation.EntityType, mutation.EntityID)

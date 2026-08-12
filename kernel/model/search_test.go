@@ -232,6 +232,8 @@ func TestBuildOrderByPrioritizesExactDocumentAndHeading(t *testing.T) {
 
 	orderBy := buildOrderBy("数学", 0, 0)
 	assertOrderBySequence(t, orderBy,
+		"name = '数学'",
+		"instr(',' || alias || ',', ',数学,') > 0",
 		"content = '数学' AND type = 'd'",
 		"content LIKE '%数学%' AND type = 'd'",
 		"content = '数学' AND type = 'h'",
@@ -258,7 +260,7 @@ func TestBuildOrderByPrioritizesCaseInsensitiveExactMatches(t *testing.T) {
 	orderBy := buildOrderBy("seo", 0, 0)
 	assertOrderBySequence(t, orderBy,
 		"name LIKE 'seo' ESCAPE '\\'",
-		"alias LIKE 'seo' ESCAPE '\\'",
+		"(',' || alias || ',') LIKE '%,seo,%' ESCAPE '\\'",
 		"content LIKE 'seo' ESCAPE '\\' AND type = 'd'",
 		"content LIKE '%seo%' AND type = 'd'",
 		"content LIKE 'seo' ESCAPE '\\' AND type = 'h'",
@@ -305,6 +307,32 @@ func TestBuildOrderByRanksCaseInsensitiveExactContentFirst(t *testing.T) {
 	}
 }
 
+func TestBuildOrderByRanksExactAliasSegmentFirst(t *testing.T) {
+	setSearchCaseSensitive(t, false)
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		testDB.Close()
+	})
+	if _, err = testDB.Exec("CREATE TABLE blocks (name TEXT, alias TEXT, content TEXT, type TEXT, sort INTEGER, updated TEXT)"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = testDB.Exec("INSERT INTO blocks VALUES ('', '', '如何编写技术文档', 'd', 0, ''), ('', '技术文档,技术文档工程师', '技术写作', 'd', 1, '')"); err != nil {
+		t.Fatal(err)
+	}
+
+	row := testDB.QueryRow("SELECT content FROM blocks " + buildOrderBy("技术文档", 0, 0) + " LIMIT 1")
+	var content string
+	if err = row.Scan(&content); err != nil {
+		t.Fatal(err)
+	}
+	if "技术写作" != content {
+		t.Fatalf("完全命中的多值别名应排在文档标题包含命中之前：%q", content)
+	}
+}
+
 func TestBuildExactSearchOrderConditionEscapesKeyword(t *testing.T) {
 	setSearchCaseSensitive(t, true)
 	condition := buildExactSearchOrderCondition("content", "O'Reilly%_\\")
@@ -316,6 +344,51 @@ func TestBuildExactSearchOrderConditionEscapesKeyword(t *testing.T) {
 	condition = buildExactSearchOrderCondition("content", "O'Reilly%_\\")
 	if expected := "content LIKE 'O''Reilly\\%\\_\\\\' ESCAPE '\\'"; expected != condition {
 		t.Fatalf("忽略大小写的完全命中条件错误：got %q, want %q", condition, expected)
+	}
+}
+
+func TestBuildExactAliasSearchOrderCondition(t *testing.T) {
+	tests := []struct {
+		name          string
+		caseSensitive bool
+		alias         string
+		query         string
+		matched       bool
+	}{
+		{name: "single alias", caseSensitive: true, alias: "技术文档", query: "技术文档", matched: true},
+		{name: "first alias", caseSensitive: true, alias: "技术文档,技术写作", query: "技术文档", matched: true},
+		{name: "middle alias", caseSensitive: true, alias: "写作,技术文档,工程", query: "技术文档", matched: true},
+		{name: "last alias", caseSensitive: true, alias: "写作,技术文档", query: "技术文档", matched: true},
+		{name: "partial alias", caseSensitive: true, alias: "技术文档工程师", query: "技术文档", matched: false},
+		{name: "case sensitive mismatch", caseSensitive: true, alias: "SEO", query: "seo", matched: false},
+		{name: "case insensitive match", alias: "AS,SEO", query: "seo", matched: true},
+		{name: "escaped wildcard and backslash", alias: `other,100%_\\path,tail`, query: `100%_\\path`, matched: true},
+		{name: "escaped quote", alias: "other,O'Reilly,tail", query: "O'Reilly", matched: true},
+		{name: "comma query", alias: "foo,bar", query: "foo,bar", matched: false},
+		{name: "empty query", alias: "", query: "", matched: false},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			setSearchCaseSensitive(t, test.caseSensitive)
+			testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() {
+				testDB.Close()
+			})
+
+			condition := buildExactAliasSearchOrderCondition("alias", test.query)
+			row := testDB.QueryRow("SELECT CASE WHEN "+condition+" THEN 1 ELSE 0 END FROM (SELECT ? AS alias)", test.alias)
+			var matched int
+			if err = row.Scan(&matched); err != nil {
+				t.Fatal(err)
+			}
+			if test.matched != (1 == matched) {
+				t.Fatalf("别名完全命中状态错误：条件 %q，别名 %q，查询 %q，结果 %d", condition, test.alias, test.query, matched)
+			}
+		})
 	}
 }
 
@@ -494,6 +567,7 @@ func TestBuildHPathSearchOrderBy(t *testing.T) {
 	assertOrderBySequence(t, buildHPathSearchOrderBy("Parent", 0),
 		"matches.match_source ASC",
 		"CASE",
+		"instr(',' || b.alias || ',', ',Parent,') > 0",
 		"matches.path_level",
 		"b.sort ASC",
 		"b.updated DESC",

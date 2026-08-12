@@ -59,17 +59,34 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// getImportAssetsDir 返回导入资源的固定落盘目录。普通笔记本使用全局目录，加密笔记本保持资源隔离。
-func getImportAssetsDir(boxID string) string {
-	if IsEncryptedBox(boxID) {
-		return filepath.Join(util.DataDir, boxID, "assets")
+// GetImportAssetsDir 返回导入资源的落盘目录。普通笔记本复用已有本地目录，否则回退到全局目录。
+func GetImportAssetsDir(boxID, docDirLocalPath string) string {
+	globalAssetsDir := filepath.Join(util.DataDir, "assets")
+	if !ast.IsNodeIDPattern(boxID) {
+		return globalAssetsDir
 	}
-	return filepath.Join(util.DataDir, "assets")
+
+	boxLocalPath := filepath.Join(util.DataDir, boxID)
+	boxAssetsDir := filepath.Join(boxLocalPath, "assets")
+	if IsEncryptedBox(boxID) {
+		return boxAssetsDir
+	}
+
+	if docDirLocalPath != "" && gulu.File.IsSubPath(boxLocalPath, docDirLocalPath) {
+		docAssetsDir := filepath.Join(docDirLocalPath, "assets")
+		if gulu.File.IsDir(docAssetsDir) {
+			return docAssetsDir
+		}
+	}
+	if gulu.File.IsDir(boxAssetsDir) {
+		return boxAssetsDir
+	}
+	return globalAssetsDir
 }
 
 func HTML2Tree(htmlStr string, luteEngine *lute.Lute, boxID string) (tree *parse.Tree, withMath bool) {
 	htmlStr = gulu.Str.RemovePUA(htmlStr)
-	assetDirPath := getImportAssetsDir(boxID)
+	assetDirPath := GetImportAssetsDir(boxID, "")
 	_ = os.MkdirAll(assetDirPath, 0755)
 	tree = luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -1210,7 +1227,9 @@ func importFromLocalPath(boxID, localPath string, toPath string, skipRoot bool) 
 		baseHPath = block.HPath
 		baseTargetPath = strings.TrimSuffix(block.Path, ".sy")
 	}
-	assetDirPath := getImportAssetsDir(boxID)
+	targetDocDirLocalPath := filepath.Join(util.DataDir, boxID,
+		filepath.FromSlash(strings.TrimPrefix(baseTargetPath, "/")))
+	assetDirPath := GetImportAssetsDir(boxID, targetDocDirLocalPath)
 	if err = os.MkdirAll(assetDirPath, 0755); err != nil {
 		return
 	}

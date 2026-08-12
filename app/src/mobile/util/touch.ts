@@ -14,7 +14,7 @@ import {getCurrentEditor} from "../editor";
 import {Constants} from "../../constants";
 import {getEmbedChildOperationContext} from "../../protyle/wysiwyg/getBlock";
 import {backModel} from "../menu/model";
-import {hasVisibleSelectionText} from "./touchSelection";
+import {hasVisibleSelectionText, shouldRestoreLongPressSelection} from "./touchSelection";
 
 let clientX: number;
 let clientY: number;
@@ -29,6 +29,7 @@ let isFirstMove = true;
 // 长按进入多选的定时器
 let longPressTimer: number;
 let longPressBlockElement: HTMLElement;
+let longPressTouchRange: Range;
 
 const popSide = (render = true) => {
     if (render) {
@@ -64,16 +65,50 @@ const clearInvisibleEditorSelection = () => {
     return true;
 };
 
+const restoreInvisibleLongPressSelection = () => {
+    const editor = getCurrentEditor();
+    const selection = window.getSelection();
+    if (!editor || !selection || selection.rangeCount === 0 || !longPressBlockElement ||
+        !longPressTouchRange?.startContainer.isConnected ||
+        !longPressBlockElement.contains(longPressTouchRange.startContainer)) {
+        return false;
+    }
+    const range = selection.getRangeAt(0);
+    if (!editor.protyle.wysiwyg.element.contains(range.startContainer) ||
+        !editor.protyle.wysiwyg.element.contains(range.endContainer)) {
+        return false;
+    }
+    const startBlockElement = hasClosestBlock(range.startContainer);
+    const endBlockElement = hasClosestBlock(range.endContainer);
+    if (!shouldRestoreLongPressSelection(
+        range.collapsed,
+        range.toString(),
+        startBlockElement ? startBlockElement.getAttribute("data-node-id") : undefined,
+        endBlockElement ? endBlockElement.getAttribute("data-node-id") : undefined,
+        longPressBlockElement.getAttribute("data-node-id"),
+    )) {
+        return false;
+    }
+    const restoredRange = longPressTouchRange.cloneRange();
+    selection.removeAllRanges();
+    selection.addRange(restoredRange);
+    window.siyuan.mobile.touchRange = restoredRange.cloneRange();
+    return true;
+};
+
 export const handleTouchUp = () => {
     if (Date.now() - time < Constants.TIMEOUT_MULTIPLE_SELECT) {
         clearLongPress();
     }
-    clearInvisibleEditorSelection();
+    if (!restoreInvisibleLongPressSelection()) {
+        clearInvisibleEditorSelection();
+    }
     longPressBlockElement = undefined;
+    longPressTouchRange = undefined;
 };
 
 export const handleTouchSelectionChange = () => {
-    if (longPressBlockElement) {
+    if (longPressBlockElement && !restoreInvisibleLongPressSelection()) {
         clearInvisibleEditorSelection();
     }
 };
@@ -254,6 +289,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
 export const handleTouchStart = (event: TouchEvent) => {
     time = Date.now();
     longPressBlockElement = undefined;
+    longPressTouchRange = undefined;
     const target = event.touches[0].target as HTMLElement;
     if (0 < event.touches.length && (target.tagName === "VIDEO" || target.tagName === "AUDIO")) {
         // https://github.com/siyuan-note/siyuan/issues/14569
@@ -300,6 +336,14 @@ export const handleTouchStart = (event: TouchEvent) => {
         const blockElement = hasClosestBlock(target);
         if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
             longPressBlockElement = blockElement;
+            const touchRange = getRangeByPoint(event.touches[0].clientX, event.touches[0].clientY);
+            const touchRangeElement = touchRange.startContainer.nodeType === Node.ELEMENT_NODE ?
+                touchRange.startContainer as Element : touchRange.startContainer.parentElement;
+            const editableElement = touchRangeElement?.closest('[contenteditable="true"]');
+            if (editableElement && blockElement.contains(editableElement)) {
+                longPressTouchRange = touchRange.cloneRange();
+                longPressTouchRange.collapse(true);
+            }
             longPressTimer = window.setTimeout(() => {
                 clearInvisibleEditorSelection();
                 const selection = window.getSelection();
@@ -347,6 +391,7 @@ export const handleTouchMove = (event: TouchEvent) => {
     if (clientX && clientY &&
         (Math.abs(clientX - event.touches[0].clientX) >= 5 || Math.abs(clientY - event.touches[0].clientY) >= 5)) {
         clearLongPress();
+        longPressTouchRange = undefined;
     }
     if (!clientX || !clientY ||
         target.tagName === "AUDIO" ||

@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Blok bilgi kartı",
+	"quickMakeCardCanceled": "Hızlı kartlar kaldırıldı",
+	"quickMakeCardCompleted": "Hızlı kart oluşturma tamamlandı",
 	"aiMcpEnv": "Ortam değişkenleri",
 	"aiMcpEnvTip": "Başvurulan gizli bilgiler bu programa sağlanır ve doğrudan girilen değerler düz metin olarak saklanır",
 	"aiMcpEnvInvalid": "Geçersiz ortam değişkenleri; boş, yinelenen veya geçersiz adları kontrol edin",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Ters",
 	"flashcardDirectionBidirectional": "Çift yönlü",
 	"flashcardDirectionClosed": "Devre dışı",
-	"flashcardReviewSet": "Tekrar seti",
+	"flashcardReviewSet": "Deste",
 	"flashcardStatistics": "Bilgi kartı istatistikleri",
 	"flashcardMigrationConfirm": "Mevcut bilgi kartları yeni biçime yükseltilsin mi? Bu işlem eski biçimdeki yedeği değiştirmez",
 	"encryptedNotebookNotEnabledTip": "Önce [Ayarlar - Kimlik Doğrulama - Şifreli not defteri] bölümünde şifreli not defterini etkinleştirin",

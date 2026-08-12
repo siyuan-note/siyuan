@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Block flashcard",
+	"quickMakeCardCanceled": "Quick cards removed",
+	"quickMakeCardCompleted": "Quick card creation completed",
 	"aiMcpEnv": "Environment variables",
 	"aiMcpEnvTip": "Referenced secrets are provided to this program, and direct values are stored in plaintext",
 	"aiMcpEnvInvalid": "Invalid environment variables; check for empty, duplicate, or invalid names",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Reverse",
 	"flashcardDirectionBidirectional": "Bidirectional",
 	"flashcardDirectionClosed": "Disabled",
-	"flashcardReviewSet": "Review set",
+	"flashcardReviewSet": "Deck",
 	"flashcardStatistics": "Flashcard statistics",
 	"flashcardMigrationConfirm": "Upgrade existing flashcards to the new format? This operation does not modify the legacy backup",
 	"encryptedNotebookNotEnabledTip": "Please enable encrypted notebooks first in [Settings - Authentication - Encrypted Notebook]",

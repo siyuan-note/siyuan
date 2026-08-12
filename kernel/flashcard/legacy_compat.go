@@ -355,7 +355,7 @@ func (store *Store) AddLegacyQuickCards(ctx context.Context, operationID, deckID
 		}
 		if err = store.appendLegacyEntityIfMissing(ctx, &mutations, EntityCardSource, sourceID, updatedAt,
 			CardSource{ID: sourceID, SchemaID: legacyQuickSchemaID, SourceType: "block", PrimaryRefID: refID,
-				DefaultPresetID: legacyPresetID, GenerationConfig: json.RawMessage(`{"legacyQuick":true}`),
+				DefaultPresetID: legacyPresetID, GenerationConfig: json.RawMessage(`{"mode":"auto"}`),
 				Status: "active"}); err != nil {
 			return nil, err
 		}

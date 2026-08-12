@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "區塊閃卡",
+	"quickMakeCardCanceled": "快速製卡：已取消",
+	"quickMakeCardCompleted": "快速製卡：處理完成",
 	"aiMcpEnv": "環境變數",
 	"aiMcpEnvTip": "引用的金鑰會提供給該程式，直接填寫的值將以明文儲存",
 	"aiMcpEnvInvalid": "環境變數無效，請檢查名稱是否為空、重複或包含無效字元",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "反向",
 	"flashcardDirectionBidirectional": "雙向",
 	"flashcardDirectionClosed": "關閉",
-	"flashcardReviewSet": "復習集",
+	"flashcardReviewSet": "卡包",
 	"flashcardStatistics": "閃卡統計",
 	"flashcardMigrationConfirm": "要將現有閃卡升級到新格式嗎？此操作不會修改舊格式備份",
 	"encryptedNotebookNotEnabledTip": "請先在 [設定 - 鑑權 - 加密筆記本] 中啟用加密筆記本",

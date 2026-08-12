@@ -134,6 +134,7 @@ export interface IFlashcardV2RenderModel {
         };
     };
     schema?: {
+        builtinType?: string;
         fields: Array<{ id: string, name: string }>;
     };
 }

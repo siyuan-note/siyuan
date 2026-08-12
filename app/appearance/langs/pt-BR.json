@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Cartão de bloco",
+	"quickMakeCardCanceled": "Cartões rápidos removidos",
+	"quickMakeCardCompleted": "Criação rápida de cartões concluída",
 	"aiMcpEnv": "Variáveis de ambiente",
 	"aiMcpEnvTip": "Os segredos referenciados são fornecidos a este programa e os valores inseridos diretamente são armazenados como texto simples",
 	"aiMcpEnvInvalid": "Variáveis de ambiente inválidas; verifique se há nomes vazios, duplicados ou inválidos",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Inverso",
 	"flashcardDirectionBidirectional": "Bidirecional",
 	"flashcardDirectionClosed": "Desativado",
-	"flashcardReviewSet": "Conjunto de revisão",
+	"flashcardReviewSet": "Baralho",
 	"flashcardStatistics": "Estatísticas de flashcards",
 	"flashcardMigrationConfirm": "Atualizar os flashcards existentes para o novo formato? Esta operação não altera o backup no formato antigo",
 	"encryptedNotebookNotEnabledTip": "Primeiro habilite o caderno criptografado em [Configurações - Autenticação - Caderno criptografado]",

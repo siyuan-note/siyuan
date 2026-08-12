@@ -65,11 +65,16 @@ const FLASHCARD_HIDE_CLASSES = FLASHCARD_HIDE_CLASS_ENTRIES.map((entry) => entry
 
 const FLASHCARD_ANSWER_SELECTOR_ENTRIES: Array<[keyof FlashcardCreationConfig, string]> = [
     ["mark", "span[data-type~=\"mark\"]"],
-    ["list", ".list[custom-riff-decks] .li > .list, .li[custom-riff-decks] > .list"],
-    ["superBlock", ":scope > .sb[custom-riff-decks] > div:nth-of-type(n+2):not(.protyle-attr)"],
-    ["blockquote", ":scope > .bq[custom-riff-decks] > [data-node-id] ~ [data-node-id]"],
-    ["callout", ":scope > .callout[custom-riff-decks] > .callout-content > [data-node-id]"],
-    ["heading", ":scope > div[data-type=\"NodeHeading\"][custom-riff-decks] ~ div"],
+    ["list", ".list[custom-riff-decks] .li > .list, .li[custom-riff-decks] > .list, " +
+        "[data-flashcard-block-card] > .list .li > .list, [data-flashcard-block-card] > .li > .list"],
+    ["superBlock", ":scope > .sb[custom-riff-decks] > div:nth-of-type(n+2):not(.protyle-attr), " +
+        ":scope > [data-flashcard-block-card] > .sb > div:nth-of-type(n+2):not(.protyle-attr)"],
+    ["blockquote", ":scope > .bq[custom-riff-decks] > [data-node-id] ~ [data-node-id], " +
+        ":scope > [data-flashcard-block-card] > .bq > [data-node-id] ~ [data-node-id]"],
+    ["callout", ":scope > .callout[custom-riff-decks] > .callout-content > [data-node-id], " +
+        ":scope > [data-flashcard-block-card] > .callout > .callout-content > [data-node-id]"],
+    ["heading", ":scope > div[data-type=\"NodeHeading\"][custom-riff-decks] ~ div, " +
+        ":scope > [data-flashcard-block-card] > div[data-type=\"NodeHeading\"] ~ div"],
 ];
 
 export const hasFlashcardAnswer = (wysiwygElement: Element, config: FlashcardCreationConfig) => {
@@ -77,6 +82,9 @@ export const hasFlashcardAnswer = (wysiwygElement: Element, config: FlashcardCre
         return config[key] && Boolean(wysiwygElement.querySelector(selector));
     });
 };
+
+export const shouldShowFlashcardRatingsImmediately = (hasProgressiveReveal: boolean, hasInternalAnswer: boolean,
+    hasRenderedAnswer: boolean) => !hasProgressiveReveal && !hasInternalAnswer && !hasRenderedAnswer;
 
 export const showFlashcardAnswer = (element: Element) => {
     element.classList.remove(...FLASHCARD_HIDE_CLASSES);

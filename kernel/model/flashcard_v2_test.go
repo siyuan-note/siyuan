@@ -54,3 +54,18 @@ func TestValidateFlashcardV2MutationsAllowsPublicEntityDeletion(t *testing.T) {
 		t.Fatalf("deleting a public flashcard entity through the generic API failed: %v", err)
 	}
 }
+
+func TestApplyFlashcardV2SessionDefaultsUsesWorkspaceLimitsOnlyWithoutReviewSet(t *testing.T) {
+	request := applyFlashcardV2SessionDefaults(flashcardv2.StudyQueueRequest{}, 23, 234)
+	if request.NewLimit != 23 || request.ReviewLimit != 234 {
+		t.Fatalf("global flashcard session did not use workspace limits: %+v", request)
+	}
+	explicit := applyFlashcardV2SessionDefaults(flashcardv2.StudyQueueRequest{NewLimit: 4, ReviewLimit: 5}, 23, 234)
+	if explicit.NewLimit != 4 || explicit.ReviewLimit != 5 {
+		t.Fatalf("explicit flashcard session limits were overwritten: %+v", explicit)
+	}
+	reviewSet := applyFlashcardV2SessionDefaults(flashcardv2.StudyQueueRequest{ReviewSetID: "review-set"}, 23, 234)
+	if reviewSet.NewLimit != 0 || reviewSet.ReviewLimit != 0 {
+		t.Fatalf("review set limits were replaced before loading the review set: %+v", reviewSet)
+	}
+}

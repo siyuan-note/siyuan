@@ -45,6 +45,8 @@ var (
 	legacyQuickSchemaID   = DeterministicID("builtin", "legacy-quick-schema")
 	legacyQuickTemplateID = DeterministicID("builtin", "legacy-quick-template")
 	legacyQuickFieldID    = DeterministicID("builtin", "legacy-quick-content-field")
+	blockFlashcardName    = "Block Flashcard"
+	blockFlashcardType    = "block-flashcard"
 	legacyPresetID        = DeterministicID("builtin", "legacy-default-preset")
 )
 
@@ -584,7 +586,7 @@ func buildLegacyRecords(ctx context.Context, decks []legacyDeckInput, logs []leg
 			generationStatus = GenerationOrphaned
 			report.OrphanedSources++
 		}
-		generationConfig := json.RawMessage(`{"legacyQuick":true}`)
+		generationConfig := json.RawMessage(`{"mode":"auto"}`)
 		entities = append(entities,
 			plannedEntity{entityType: EntityCardSource, entityID: sourceID, updatedAt: selected.updatedAt, payload: CardSource{
 				ID: sourceID, SchemaID: legacyQuickSchemaID, SourceType: "block", PrimaryRefID: refID,
@@ -741,15 +743,15 @@ func builtinLegacyEntities(options LegacyMigrationOptions, updatedAt int64) []pl
 	templateIDs := []string{legacyQuickTemplateID}
 	return []plannedEntity{
 		{entityType: EntityCardSchema, entityID: legacyQuickSchemaID, updatedAt: updatedAt, payload: CardSchema{
-			ID: legacyQuickSchemaID, Name: "Legacy Quick Card", BuiltinType: "legacy-quick", Fields: fields,
+			ID: legacyQuickSchemaID, Name: blockFlashcardName, BuiltinType: blockFlashcardType, Fields: fields,
 			TemplateIDs: templateIDs, CreatedAt: updatedAt, UpdatedAt: updatedAt,
 		}},
 		{entityType: EntityCardTemplate, entityID: legacyQuickTemplateID, updatedAt: updatedAt, payload: CardTemplate{
-			ID: legacyQuickTemplateID, SchemaID: legacyQuickSchemaID, Name: "Legacy Quick Card",
+			ID: legacyQuickTemplateID, SchemaID: legacyQuickSchemaID, Name: blockFlashcardName,
 			GenerationRule: json.RawMessage(`{"mode":"static","variantKey":"legacy-quick"}`),
-			FrontSpec:      json.RawMessage(`{"side":"front","type":"legacyQuick"}`),
-			BackSpec:       json.RawMessage(`{"side":"back","type":"legacyQuick"}`),
-			AnswerMode:     "reveal", ContextPolicy: json.RawMessage(`{"type":"legacy"}`), Enabled: true,
+			FrontSpec:      json.RawMessage(`{"side":"front","type":"block"}`),
+			BackSpec:       json.RawMessage(`{"side":"back","type":"block"}`),
+			AnswerMode:     "auto", ContextPolicy: json.RawMessage(`{"type":"block"}`), Enabled: true,
 		}},
 		{entityType: EntitySchedulerPreset, entityID: legacyPresetID, updatedAt: updatedAt, payload: SchedulerPreset{
 			ID: legacyPresetID, Name: options.PresetName, SchedulerVersion: SchedulerVersionFSRS6,

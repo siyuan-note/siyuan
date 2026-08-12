@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "ब्लॉक फ्लैशकार्ड",
+	"quickMakeCardCanceled": "त्वरित कार्ड हटा दिए गए",
+	"quickMakeCardCompleted": "त्वरित कार्ड निर्माण पूरा हुआ",
 	"aiMcpEnv": "पर्यावरण चर",
 	"aiMcpEnvTip": "संदर्भित रहस्य इस प्रोग्राम को दिए जाते हैं और सीधे दर्ज किए गए मान सादे पाठ में संग्रहीत होते हैं",
 	"aiMcpEnvInvalid": "पर्यावरण चर अमान्य हैं; खाली, डुप्लिकेट या अमान्य नामों की जाँच करें",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "उल्टा",
 	"flashcardDirectionBidirectional": "द्विदिश",
 	"flashcardDirectionClosed": "बंद",
-	"flashcardReviewSet": "पुनरावृत्ति सेट",
+	"flashcardReviewSet": "कार्ड डेक",
 	"flashcardStatistics": "फ़्लैशकार्ड आँकड़े",
 	"flashcardMigrationConfirm": "मौजूदा फ़्लैशकार्ड को नए प्रारूप में उन्नत करें? यह प्रक्रिया पुराने प्रारूप के बैकअप को नहीं बदलेगी",
 	"encryptedNotebookNotEnabledTip": "कृपया पहले [सेटिंग्स - प्रमाणीकरण - एन्क्रिप्टेड नोटबुक] में एन्क्रिप्टेड नोटबुक सक्षम करें",

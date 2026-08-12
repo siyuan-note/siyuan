@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "블록 플래시카드",
+	"quickMakeCardCanceled": "빠른 카드 만들기가 취소되었습니다",
+	"quickMakeCardCompleted": "빠른 카드 만들기가 완료되었습니다",
 	"aiMcpEnv": "환경 변수",
 	"aiMcpEnvTip": "참조된 비밀은 이 프로그램에 제공되며 직접 입력한 값은 일반 텍스트로 저장됩니다",
 	"aiMcpEnvInvalid": "환경 변수가 잘못되었습니다. 비어 있거나 중복되거나 잘못된 이름이 있는지 확인하세요",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "역방향",
 	"flashcardDirectionBidirectional": "양방향",
 	"flashcardDirectionClosed": "비활성화",
-	"flashcardReviewSet": "복습 세트",
+	"flashcardReviewSet": "덱",
 	"flashcardStatistics": "플래시카드 통계",
 	"flashcardMigrationConfirm": "기존 플래시카드를 새 형식으로 업그레이드할까요? 이 작업은 이전 형식의 백업을 변경하지 않습니다",
 	"encryptedNotebookNotEnabledTip": "먼저 [설정 - 인증 - 암호화 노트]에서 암호화 노트를 활성화하세요",

@@ -39,7 +39,8 @@ func TestCardRenderModelIncludesStableOrderedReferencesAndVariant(t *testing.T) 
 		t.Fatal(err)
 	}
 	if model.Card.VariantKey != "legacy-quick" || model.Source.SchemaID != LegacyQuickSchemaID() ||
-		model.Template.ID != LegacyQuickTemplateID() || model.Schema.BuiltinType != "legacy-quick" ||
+		model.Template.ID != LegacyQuickTemplateID() || model.Schema.BuiltinType != blockFlashcardType ||
+		model.Template.AnswerMode != "auto" ||
 		len(model.References) != 1 || model.References[0].EntityID != "render-block" ||
 		model.ReviewState.CardID != model.Card.ID {
 		t.Fatalf("incomplete flashcard render model: %+v", model)

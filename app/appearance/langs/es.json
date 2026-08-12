@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Tarjeta de bloque",
+	"quickMakeCardCanceled": "Tarjetas rápidas eliminadas",
+	"quickMakeCardCompleted": "Creación rápida de tarjetas completada",
 	"aiMcpEnv": "Variables de entorno",
 	"aiMcpEnvTip": "Los secretos referenciados se proporcionan a este programa y los valores directos se almacenan como texto sin formato",
 	"aiMcpEnvInvalid": "Variables de entorno no válidas; compruebe si hay nombres vacíos, duplicados o no válidos",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Inversa",
 	"flashcardDirectionBidirectional": "Bidireccional",
 	"flashcardDirectionClosed": "Desactivada",
-	"flashcardReviewSet": "Conjunto de repaso",
+	"flashcardReviewSet": "Mazo",
 	"flashcardStatistics": "Estadísticas de tarjetas",
 	"flashcardMigrationConfirm": "¿Actualizar las tarjetas existentes al nuevo formato? Esta operación no modifica la copia de seguridad del formato anterior",
 	"encryptedNotebookNotEnabledTip": "Habilite primero el cuaderno cifrado en [Configuración - Autenticación - Cuaderno cifrado]",

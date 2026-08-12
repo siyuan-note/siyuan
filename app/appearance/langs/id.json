@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Kartu blok",
+	"quickMakeCardCanceled": "Kartu cepat dihapus",
+	"quickMakeCardCompleted": "Pembuatan kartu cepat selesai",
 	"aiMcpEnv": "Variabel lingkungan",
 	"aiMcpEnvTip": "Rahasia yang dirujuk diberikan kepada program ini dan nilai yang dimasukkan langsung disimpan sebagai teks biasa",
 	"aiMcpEnvInvalid": "Variabel lingkungan tidak valid; periksa nama yang kosong, duplikat, atau tidak valid",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Balik",
 	"flashcardDirectionBidirectional": "Dua arah",
 	"flashcardDirectionClosed": "Dinonaktifkan",
-	"flashcardReviewSet": "Set tinjauan",
+	"flashcardReviewSet": "Dek",
 	"flashcardStatistics": "Statistik kartu kilas",
 	"flashcardMigrationConfirm": "Tingkatkan kartu kilas yang ada ke format baru? Operasi ini tidak mengubah cadangan format lama",
 	"encryptedNotebookNotEnabledTip": "Aktifkan buku catatan terenkripsi terlebih dahulu di [Pengaturan - Autentikasi - Buku catatan terenkripsi]",

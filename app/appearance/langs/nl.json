@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Blok-flashcard",
+	"quickMakeCardCanceled": "Snelle kaarten verwijderd",
+	"quickMakeCardCompleted": "Snel kaarten maken voltooid",
 	"aiMcpEnv": "Omgevingsvariabelen",
 	"aiMcpEnvTip": "Geheimen waarnaar wordt verwezen worden aan dit programma verstrekt en rechtstreeks ingevoerde waarden worden als platte tekst opgeslagen",
 	"aiMcpEnvInvalid": "Ongeldige omgevingsvariabelen; controleer op lege, dubbele of ongeldige namen",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Omgekeerd",
 	"flashcardDirectionBidirectional": "Tweerichtings",
 	"flashcardDirectionClosed": "Uitgeschakeld",
-	"flashcardReviewSet": "Herhalingsset",
+	"flashcardReviewSet": "Kaartenset",
 	"flashcardStatistics": "Flashcardstatistieken",
 	"flashcardMigrationConfirm": "Bestaande flashcards naar de nieuwe indeling bijwerken? Deze bewerking wijzigt de back-up in de oude indeling niet",
 	"encryptedNotebookNotEnabledTip": "Schakel het versleutelde notitieboek eerst in via [Instellingen - Authenticatie - Versleuteld notitieboek]",

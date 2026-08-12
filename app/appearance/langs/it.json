@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Scheda di blocco",
+	"quickMakeCardCanceled": "Schede rapide rimosse",
+	"quickMakeCardCompleted": "Creazione rapida delle schede completata",
 	"aiMcpEnv": "Variabili d'ambiente",
 	"aiMcpEnvTip": "I segreti referenziati vengono forniti a questo programma e i valori inseriti direttamente vengono archiviati in testo semplice",
 	"aiMcpEnvInvalid": "Variabili d'ambiente non valide; verifica la presenza di nomi vuoti, duplicati o non validi",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Inversa",
 	"flashcardDirectionBidirectional": "Bidirezionale",
 	"flashcardDirectionClosed": "Disattivata",
-	"flashcardReviewSet": "Gruppo di ripasso",
+	"flashcardReviewSet": "Mazzo",
 	"flashcardStatistics": "Statistiche delle schede",
 	"flashcardMigrationConfirm": "Aggiornare le schede esistenti al nuovo formato? Questa operazione non modifica il backup nel formato precedente",
 	"encryptedNotebookNotEnabledTip": "Abilita prima il blocco note crittografato in [Impostazioni - Autenticazione - Blocco note crittografato]",

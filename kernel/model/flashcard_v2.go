@@ -78,6 +78,9 @@ func openFlashcardV2Store(ctx context.Context) (*flashcardv2.Store, error) {
 	if err == nil && status.State == flashcardv2.MigrationStateActive {
 		status, err = store.CheckLegacyDivergence(ctx, getRiffDir())
 	}
+	if err == nil && status.State == flashcardv2.MigrationStateActive {
+		_, err = store.UpgradeBlockFlashcardMode(ctx)
+	}
 	if err != nil {
 		_ = store.Close()
 		return nil, err
@@ -771,6 +774,9 @@ func CreateFlashcardV2QuickSources(ctx context.Context,
 	if err != nil {
 		return flashcardv2.QuickSourceResult{}, err
 	}
+	if request.Toggle {
+		return store.ToggleQuickSources(ctx, request)
+	}
 	return store.CreateQuickSources(ctx, request)
 }
 
@@ -920,6 +926,7 @@ func StartFlashcardV2Session(ctx context.Context,
 	if err := validateFlashcardV2QueryBoundary(request.Query); err != nil {
 		return flashcardv2.StudyQueueResult{}, err
 	}
+	request = applyFlashcardV2SessionDefaults(request, Conf.Flashcard.NewCardLimit, Conf.Flashcard.ReviewCardLimit)
 	store, err := requireFlashcardV2Store(ctx, true)
 	if err != nil {
 		return flashcardv2.StudyQueueResult{}, err
@@ -932,6 +939,21 @@ func StartFlashcardV2Session(ctx context.Context,
 	}
 	request.ValidateBlockIDs = ValidateFlashcardBlockIDs
 	return store.StartStudySession(ctx, request)
+}
+
+// applyFlashcardV2SessionDefaults 让未指定复习集的调用方沿用工作区每日上限。
+func applyFlashcardV2SessionDefaults(request flashcardv2.StudyQueueRequest, newLimit,
+	reviewLimit int) flashcardv2.StudyQueueRequest {
+	if request.ReviewSetID != "" {
+		return request
+	}
+	if request.NewLimit == 0 {
+		request.NewLimit = newLimit
+	}
+	if request.ReviewLimit == 0 {
+		request.ReviewLimit = reviewLimit
+	}
+	return request
 }
 
 // GetFlashcardV2SessionQueue 返回会话冻结顺序和当前状态。

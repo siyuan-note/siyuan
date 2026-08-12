@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "ブロックフラッシュカード",
+	"quickMakeCardCanceled": "クイックカードを解除しました",
+	"quickMakeCardCompleted": "クイックカードの作成が完了しました",
 	"aiMcpEnv": "環境変数",
 	"aiMcpEnvTip": "参照したシークレットはこのプログラムに渡され、直接入力した値は平文で保存されます",
 	"aiMcpEnvInvalid": "環境変数が無効です。名前が空、重複、または無効な文字を含んでいないか確認してください",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "逆方向",
 	"flashcardDirectionBidirectional": "双方向",
 	"flashcardDirectionClosed": "無効",
-	"flashcardReviewSet": "復習セット",
+	"flashcardReviewSet": "デッキ",
 	"flashcardStatistics": "フラッシュカード統計",
 	"flashcardMigrationConfirm": "既存のフラッシュカードを新しい形式にアップグレードしますか？この操作では旧形式のバックアップは変更されません",
 	"encryptedNotebookNotEnabledTip": "先に [設定 - 認証 - 暗号化ノートブック] で暗号化ノートブックを有効にしてください",

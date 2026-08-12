@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "כרטיסיית בלוק",
+	"quickMakeCardCanceled": "הכרטיסים המהירים הוסרו",
+	"quickMakeCardCompleted": "יצירת הכרטיסים המהירה הושלמה",
 	"aiMcpEnv": "משתני סביבה",
 	"aiMcpEnvTip": "סודות שמופנים יועברו לתוכנית זו, וערכים שיוזנו ישירות יישמרו כטקסט גלוי",
 	"aiMcpEnvInvalid": "משתני הסביבה אינם תקינים; יש לבדוק שמות ריקים, כפולים או לא תקינים",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "הפוך",
 	"flashcardDirectionBidirectional": "דו-כיווני",
 	"flashcardDirectionClosed": "מושבת",
-	"flashcardReviewSet": "ערכת חזרה",
+	"flashcardReviewSet": "חפיסת כרטיסים",
 	"flashcardStatistics": "סטטיסטיקת כרטיסיות",
 	"flashcardMigrationConfirm": "לשדרג את הכרטיסיות הקיימות לתבנית החדשה? פעולה זו אינה משנה את הגיבוי בתבנית הישנה",
 	"encryptedNotebookNotEnabledTip": "יש להפעיל תחילה פנקס מוצפן ב-[הגדרות - אימות - פנקס מוצפן]",

@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Блочная карточка",
+	"quickMakeCardCanceled": "Быстрые карточки удалены",
+	"quickMakeCardCompleted": "Быстрое создание карточек завершено",
 	"aiMcpEnv": "Переменные окружения",
 	"aiMcpEnvTip": "Указанные секреты передаются этой программе, а введённые напрямую значения хранятся в открытом виде",
 	"aiMcpEnvInvalid": "Недопустимые переменные окружения; проверьте пустые, повторяющиеся или недопустимые имена",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Обратная",
 	"flashcardDirectionBidirectional": "Двунаправленная",
 	"flashcardDirectionClosed": "Отключена",
-	"flashcardReviewSet": "Набор повторения",
+	"flashcardReviewSet": "Колода",
 	"flashcardStatistics": "Статистика карточек",
 	"flashcardMigrationConfirm": "Обновить существующие карточки до нового формата? Эта операция не изменяет резервную копию в старом формате",
 	"encryptedNotebookNotEnabledTip": "Сначала включите зашифрованную записную книжку в [Настройки - Аутентификация - Зашифрованная записная книжка]",

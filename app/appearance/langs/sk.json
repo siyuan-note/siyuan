@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Bloková kartička",
+	"quickMakeCardCanceled": "Rýchle karty boli odstránené",
+	"quickMakeCardCompleted": "Rýchle vytváranie kariet bolo dokončené",
 	"aiMcpEnv": "Premenné prostredia",
 	"aiMcpEnvTip": "Odkazované tajomstvá sa poskytnú tomuto programu a priamo zadané hodnoty sa uložia ako obyčajný text",
 	"aiMcpEnvInvalid": "Neplatné premenné prostredia; skontrolujte prázdne, duplicitné alebo neplatné názvy",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Obrátená",
 	"flashcardDirectionBidirectional": "Obojsmerná",
 	"flashcardDirectionClosed": "Vypnutá",
-	"flashcardReviewSet": "Sada na opakovanie",
+	"flashcardReviewSet": "Balíček",
 	"flashcardStatistics": "Štatistiky kartičiek",
 	"flashcardMigrationConfirm": "Aktualizovať existujúce kartičky na nový formát? Táto operácia nezmení zálohu v starom formáte",
 	"encryptedNotebookNotEnabledTip": "Najprv povoľte šifrovaný zápisník v [Nastavenia - Autentifikácia - Šifrovaný zápisník]",

@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Block-Lernkarte",
+	"quickMakeCardCanceled": "Schnellkarten wurden entfernt",
+	"quickMakeCardCompleted": "Schnellkarten wurden erstellt",
 	"aiMcpEnv": "Umgebungsvariablen",
 	"aiMcpEnvTip": "Referenzierte Geheimnisse werden diesem Programm bereitgestellt, direkt eingegebene Werte werden im Klartext gespeichert",
 	"aiMcpEnvInvalid": "Ungültige Umgebungsvariablen; prüfen Sie auf leere, doppelte oder ungültige Namen",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Rückwärts",
 	"flashcardDirectionBidirectional": "Beidseitig",
 	"flashcardDirectionClosed": "Deaktiviert",
-	"flashcardReviewSet": "Wiederholungsset",
+	"flashcardReviewSet": "Kartenstapel",
 	"flashcardStatistics": "Lernkartenstatistik",
 	"flashcardMigrationConfirm": "Vorhandene Lernkarten auf das neue Format aktualisieren? Die Sicherung im alten Format wird dabei nicht verändert",
 	"encryptedNotebookNotEnabledTip": "Bitte aktivieren Sie zuerst das verschlüsselte Notizbuch unter [Einstellungen - Authentifizierung - Verschlüsseltes Notizbuch]",

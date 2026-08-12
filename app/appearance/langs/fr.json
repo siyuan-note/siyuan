@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Carte de bloc",
+	"quickMakeCardCanceled": "Cartes rapides supprimées",
+	"quickMakeCardCompleted": "Création rapide de cartes terminée",
 	"aiMcpEnv": "Variables d'environnement",
 	"aiMcpEnvTip": "Les secrets référencés sont fournis à ce programme et les valeurs saisies directement sont stockées en texte brut",
 	"aiMcpEnvInvalid": "Variables d'environnement non valides ; vérifiez les noms vides, dupliqués ou non valides",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Verso",
 	"flashcardDirectionBidirectional": "Bidirectionnelle",
 	"flashcardDirectionClosed": "Désactivée",
-	"flashcardReviewSet": "Ensemble de révision",
+	"flashcardReviewSet": "Paquet",
 	"flashcardStatistics": "Statistiques des cartes mémoire",
 	"flashcardMigrationConfirm": "Mettre à niveau les cartes existantes vers le nouveau format ? Cette opération ne modifie pas la sauvegarde de l'ancien format",
 	"encryptedNotebookNotEnabledTip": "Veuillez d’abord activer le carnet chiffré dans [Paramètres - Authentification - Carnet chiffré]",

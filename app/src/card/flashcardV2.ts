@@ -263,6 +263,16 @@ const priorityLabel = (priority: string) => {
     return labels[priority] || labels.unset;
 };
 
+const reviewStateLabel = (state: string) => {
+    const labels: Record<string, string> = {
+        new: window.siyuan.languages.flashcardNewCard,
+        learning: window.siyuan.languages.flashcardPriorityLearning,
+        review: window.siyuan.languages.flashcardReviewCard,
+        relearning: `${window.siyuan.languages.flashcardPriorityLearning} - ${window.siyuan.languages.flashcardReviewCard}`,
+    };
+    return labels[state] || state;
+};
+
 const refreshEffectiveCardValues = (card: IFlashcardSearchResult) => {
     card.effectivePresetID = card.card.presetOverrideID || card.defaultPresetID;
     card.effectivePriority = card.card.priorityOverride || card.inheritedPriority || card.sourcePriority || "unset";
@@ -771,16 +781,16 @@ const openFlashcardV2ReviewSetSession = (app: App, reviewSetID: string, name: st
 };
 
 const renderManagedCard = (result: IFlashcardSearchResult, reviewSetID = "",
-    selectedCardIDs: ReadonlySet<string> = new Set(), flagDefinitions: IFlashcardFlagDefinition[] = []) => {
+    selectedCardIDs: ReadonlySet<string> = new Set(), flagDefinitions: IFlashcardFlagDefinition[] = [],
+    grouped = false) => {
     const buried = (result.reviewState.buriedUntil || 0) > Date.now();
-    return `<li class="b3-list-item b3-list-item--narrow" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
+    return `<li class="b3-list-item b3-list-item--narrow b3-list-item--hide-action card__v2-managed-card" data-id="${escapeAttr(result.card.id)}" data-flag="${result.card.flag}">
 <input data-type="selectCard" class="b3-list-item__graphic" type="checkbox"${selectedCardIDs.has(result.card.id) ? " checked" : ""}>
 <svg class="b3-list-item__graphic"><use xlink:href="#iconRiffCard"></use></svg>
-<span class="b3-list-item__text">${escapeHtml(result.sourceTitle || result.sourceBlockID || result.card.id)}</span>
-<span class="b3-list-item__meta">${escapeHtml(result.card.variantKey)}</span>
-<span data-type="state" class="b3-list-item__meta">${escapeHtml(result.reviewState.state)}</span>
-<span class="b3-list-item__meta">${result.reviewState.reps}</span>
-<span class="b3-list-item__meta">${escapeHtml(priorityLabel(result.effectivePriority))}</span>
+<span class="card__v2-managed-main">
+${grouped ? "" : `<span class="b3-list-item__text">${escapeHtml(result.sourceTitle || result.sourceBlockID || result.card.id)}</span>`}
+<span class="card__v2-managed-details"><span data-type="state" class="card__v2-managed-badge">${escapeHtml(reviewStateLabel(result.reviewState.state))}</span><span>${window.siyuan.languages.flashcardReviews} ${result.reviewState.reps}</span>${result.effectivePriority === "unset" ? "" : `<span>${escapeHtml(priorityLabel(result.effectivePriority))}</span>`}</span>
+</span>
 ${result.sourceType === "qa" ? `<span data-type="direction" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardDirectionBidirectional}"><svg><use xlink:href="#iconBoth"></use></svg></span>` : ""}
 <span data-type="preset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardPreset}"><svg><use xlink:href="#iconSettings"></use></svg></span>
 <span data-type="priority" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardPriority}"><svg><use xlink:href="#iconSort"></use></svg></span>
@@ -810,7 +820,7 @@ const renderManagedCards = (cards: IFlashcardSearchResult[], grouped: boolean, r
         const deleted = sourceCards[0].sourceStatus === "deleted";
         const editable = ["cloze", "ordered", "image-occlusion", "choice", "multi-line", "typed-answer"]
             .includes(sourceCards[0].sourceType);
-        return `<li class="b3-list-item b3-list-item--focus" data-source-id="${escapeAttr(sourceID)}">
+        return `<li class="b3-list-item b3-list-item--focus b3-list-item--hide-action card__v2-managed-source" data-source-id="${escapeAttr(sourceID)}">
 <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
 <span class="b3-list-item__text">${escapeHtml(sourceCards[0].sourceTitle || sourceCards[0].sourceBlockID || sourceID)}</span>
 <span class="b3-list-item__meta">${sourceCards.length}</span>
@@ -819,7 +829,7 @@ ${editable && !deleted ? `<span data-type="editSource" class="b3-list-item__acti
 <span data-type="documentPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.doc} - ${window.siyuan.languages.flashcardPriority}"><svg><use xlink:href="#iconFile"></use></svg></span>
 <span data-type="notebookPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardPriority}"><svg><use xlink:href="#iconFilesRoot"></use></svg></span>
 <span data-type="sourceLifecycle" class="b3-list-item__action${deleted ? "" : " b3-list-item__action--warning"} b3-tooltips b3-tooltips__w" aria-label="${deleted ? window.siyuan.languages.restore : window.siyuan.languages.delete}"><svg><use xlink:href="#icon${deleted ? "Undo" : "Trashcan"}"></use></svg></span>
-</li>${sourceCards.map((card) => renderManagedCard(card, reviewSetID, selectedCardIDs, flagDefinitions)).join("")}`;
+</li>${sourceCards.map((card) => renderManagedCard(card, reviewSetID, selectedCardIDs, flagDefinitions, true)).join("")}`;
     }).join("");
 };
 
@@ -1351,7 +1361,7 @@ const openFlashcardV2ManagementFilter = (filters: IFlashcardManagementFilters,
         `<option value="${flag}"${flashcardFlagStyle(flag)}>${escapeHtml(flashcardFlagLabel(flag, flagDefinitions))}</option>`).join("");
     const booleanOptions = `<option value="">${window.siyuan.languages.all}</option><option value="true">${window.siyuan.languages.enable}</option><option value="false">${window.siyuan.languages.disable}</option>`;
     const sourceTypeLabels: Record<string, string> = {
-        block: window.siyuan.languages.riffCard,
+        block: window.siyuan.languages.flashcardBlockCard,
         "multi-block": window.siyuan.languages.riffCard,
         qa: window.siyuan.languages.riffCard,
         cloze: window.siyuan.languages.flashcardClozeCards,
@@ -1537,22 +1547,29 @@ const openFlashcardV2ReviewSetCards = (reviewSetID: string, name: string, offset
                 title: name,
                 width: isMobile() ? "92vw" : "760px",
                 height: "70vh",
-                content: `<div class="b3-dialog__content fn__flex-column" style="box-sizing:border-box;height:100%">
-<div class="fn__flex"><button data-type="pagePrevious" class="b3-button b3-button--outline"${offset === 0 ? " disabled" : ""}>${window.siyuan.languages.previous}</button><span class="fn__space"></span>
-<span class="b3-list-item__meta fn__flex-1">${pageLength === 0 ? 0 : offset + 1} - ${offset + pageLength}${total === undefined ? "" : ` / ${total}`}</span>
-<button data-type="pageNext" class="b3-button b3-button--outline"${hasNext ? "" : " disabled"}>${window.siyuan.languages.next}</button><span class="fn__space"></span>
-<button data-type="filter" class="b3-button b3-button--outline"><svg><use xlink:href="#iconFilter"></use></svg>${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button><span class="fn__space"></span>
-<button data-type="conflicts" class="b3-button b3-button--outline"><svg><use xlink:href="#iconWarning"></use></svg>${window.siyuan.languages.conflict}</button><span class="fn__space"></span>
-<button data-type="statistics" class="b3-button b3-button--outline"><svg><use xlink:href="#iconGraph"></use></svg>${window.siyuan.languages.flashcardStatistics}</button><span class="fn__space"></span>
-${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.flashcardReviewSet}</button><span class="fn__space"></span>` : ""}
-<button data-type="flagDefinitions" class="b3-button b3-button--outline"><svg><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.cardStatus}</button><span class="fn__space"></span>
-<button data-type="group" class="b3-button b3-button--outline"><svg><use xlink:href="#iconList"></use></svg>${window.siyuan.languages.group}</button></div>
-<div class="fn__hr"></div><div class="fn__flex fn__flex-center" style="flex-wrap:wrap">
-<label class="fn__flex-center"><input data-type="selectPage" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.selectAll}</label><span class="fn__space"></span>
+                content: `<div class="b3-dialog__content fn__flex-column card__v2-management">
+<div class="card__v2-management-toolbar">
+<div class="card__v2-management-pagination">
+<button data-type="pagePrevious" class="b3-button b3-button--outline"${offset === 0 ? " disabled" : ""}>${window.siyuan.languages.previous}</button>
+<span class="b3-list-item__meta">${pageLength === 0 ? 0 : offset + 1} - ${offset + pageLength}${total === undefined ? "" : ` / ${total}`}</span>
+<button data-type="pageNext" class="b3-button b3-button--outline"${hasNext ? "" : " disabled"}>${window.siyuan.languages.next}</button>
+</div>
+<div class="card__v2-management-tools">
+<button data-type="filter" class="b3-button b3-button--outline"><svg><use xlink:href="#iconFilter"></use></svg>${window.siyuan.languages.filter}${filterCount === 0 ? "" : ` (${filterCount})`}</button>
+<button data-type="conflicts" class="b3-button b3-button--outline"><svg><use xlink:href="#iconWarning"></use></svg>${window.siyuan.languages.conflict}</button>
+<button data-type="statistics" class="b3-button b3-button--outline"><svg><use xlink:href="#iconGraph"></use></svg>${window.siyuan.languages.flashcardStatistics}</button>
+${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.flashcardReviewSet}</button>` : ""}
+<button data-type="flagDefinitions" class="b3-button b3-button--outline"><svg><use xlink:href="#iconBookmark"></use></svg>${window.siyuan.languages.cardStatus}</button>
+<button data-type="group" class="b3-button b3-button--outline"><svg><use xlink:href="#iconList"></use></svg>${window.siyuan.languages.group}</button>
+</div>
+</div>
+<div class="card__v2-management-selection">
+<label class="fn__flex-center"><input data-type="selectPage" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.selectAll}</label>
 <span data-type="selectedCount" class="b3-list-item__meta fn__flex-1">${window.siyuan.languages.selected} 0</span>
-<select data-type="batchAction" class="b3-select"><option value="">${window.siyuan.languages.manage}</option><option value="tags">${window.siyuan.languages.tag}</option><option value="membership">${reviewSetID ? window.siyuan.languages.remove : window.siyuan.languages.flashcardReviewSet}</option><option value="setDue">${window.siyuan.languages.setDueTime}</option><option value="suspend">${window.siyuan.languages.flashcardSuspendCard}</option><option value="resume">${window.siyuan.languages.continueReview1}</option><option value="bury">${window.siyuan.languages.flashcardBury}</option><option value="unbury">${window.siyuan.languages.flashcardUnbury}</option><option value="reset">${window.siyuan.languages.reset}</option>${batchFlagOptions}${batchPresetOptions}${batchPriorityOptions}</select><span class="fn__space"></span>
-<button data-type="batchApply" class="b3-button b3-button--text" disabled>${window.siyuan.languages.confirm}</button></div>
-<div class="fn__hr"></div><ul class="b3-list b3-list--background fn__flex-1">${cards.length === 0 ? `<li class="b3-list-item card__empty">${window.siyuan.languages.emptyContent}</li>` : renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul></div>`,
+<select data-type="batchAction" class="b3-select"><option value="">${window.siyuan.languages.manage}</option><option value="tags">${window.siyuan.languages.tag}</option><option value="membership">${reviewSetID ? window.siyuan.languages.remove : window.siyuan.languages.flashcardReviewSet}</option><option value="setDue">${window.siyuan.languages.setDueTime}</option><option value="suspend">${window.siyuan.languages.flashcardSuspendCard}</option><option value="resume">${window.siyuan.languages.continueReview1}</option><option value="bury">${window.siyuan.languages.flashcardBury}</option><option value="unbury">${window.siyuan.languages.flashcardUnbury}</option><option value="reset">${window.siyuan.languages.reset}</option>${batchFlagOptions}${batchPresetOptions}${batchPriorityOptions}</select>
+<button data-type="batchApply" class="b3-button b3-button--text" disabled>${window.siyuan.languages.confirm}</button>
+</div>
+<ul class="b3-list b3-list--background fn__flex-1 card__v2-management-list">${cards.length === 0 ? `<li class="b3-list-item card__empty">${window.siyuan.languages.emptyContent}</li>` : renderManagedCards(cards, grouped, reviewSetID, selectedCardIDs, flagDefinitions)}</ul></div>`,
             });
             const refreshSelection = () => {
                 const selectPage = dialog.element.querySelector('[data-type="selectPage"]') as HTMLInputElement;
@@ -2487,17 +2504,15 @@ export const openFlashcardV2AdvancedSource = (blockIDs: string[], edit?: IFlashc
                     return new Set(edit?.generationConfig.occlusions?.find((occlusion) =>
                         occlusion.id === occlusionID)?.groupIDs || []);
                 };
-                const clozeEditorHTML = `<div data-type="clozeEditor">
-<div class="fn__hr"></div>
+                const clozeEditorHTML = `<div data-type="clozeEditor" class="card__v2-advanced-section">
 ${clozeTargets.map((target, targetIndex) => {
                     const selected = initialGroupIDs(target);
-                    return `<label class="b3-label"><div class="b3-label__text">${escapeHtml(target.label)}</div><select data-type="clozeGroups" data-target-index="${targetIndex}" class="b3-select fn__block" multiple size="${Math.min(6, Math.max(2, clozeTargets.length))}">${clozeGroupOrder.map((groupID, groupIndex) => `<option value="${escapeAttr(groupID)}"${selected.size > 0 ? selected.has(groupID) ? " selected" : "" : groupIndex === targetIndex ? " selected" : ""}>${groupIndex + 1}</option>`).join("")}</select></label>`;
+                    return `<label class="b3-label b3-label--inner card__v2-advanced-field"><div class="b3-label__text">${escapeHtml(target.label)}</div><select data-type="clozeGroups" data-target-index="${targetIndex}" class="b3-select fn__block" multiple size="${Math.min(6, Math.max(2, clozeTargets.length))}">${clozeGroupOrder.map((groupID, groupIndex) => `<option value="${escapeAttr(groupID)}"${selected.size > 0 ? selected.has(groupID) ? " selected" : "" : groupIndex === targetIndex ? " selected" : ""}>${groupIndex + 1}</option>`).join("")}</select></label>`;
                 }).join("")}
 ${clozeTargets.length === 0 ? `<div class="card__empty">${window.siyuan.languages.emptyContent}</div>` : ""}
-<button data-type="addClozeGroup" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.group}</button>
+<div class="card__v2-advanced-section-action"><button data-type="addClozeGroup" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.group}</button></div>
 </div>`;
-                const imageEditorHTML = imageSource ? `<div data-type="imageEditor" class="fn__none">
-<div class="fn__hr"></div>
+                const imageEditorHTML = imageSource ? `<div data-type="imageEditor" class="fn__none card__v2-advanced-section">
 <div class="fn__flex">
     <select data-type="imageShape" class="b3-select">
         <option value="rectangle">${window.siyuan.languages.flashcardRectangle}</option>
@@ -2511,34 +2526,30 @@ ${clozeTargets.length === 0 ? `<div class="card__empty">${window.siyuan.language
     <span class="fn__space"></span>
     <button data-type="undoImageShape" class="b3-button b3-button--outline">${window.siyuan.languages.undo}</button>
 </div>
-<div class="fn__hr"></div>
 <select data-type="imageFrontMode" class="b3-select fn__block">
     <option value="hideAllAnswerOne">${window.siyuan.languages.flashcardImageHideAll}</option>
     <option value="hideCurrent">${window.siyuan.languages.flashcardImageHideCurrent}</option>
 </select>
 <div class="card__v2-image-editor"><img src="${escapeAttr(imageSource.assetID)}"><canvas></canvas></div>
 </div>` : "";
-                const choiceEditorHTML = blockIDs.length >= 3 ? `<div data-type="choiceEditor" class="fn__none">
-<div class="fn__hr"></div>
-<div class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardChoiceQuestion}</div>${escapeHtml(flashcardV2BlockText(blockIDs[0], doms[blockIDs[0]] || ""))}</div>
-<div class="fn__hr"></div>
-<div class="b3-label"><div class="b3-label__text">${window.siyuan.languages.flashcardCorrectAnswer}</div>
+                const choiceEditorHTML = blockIDs.length >= 3 ? `<div data-type="choiceEditor" class="fn__none card__v2-advanced-section">
+<div class="b3-label b3-label--inner card__v2-advanced-field"><div class="b3-label__text">${window.siyuan.languages.flashcardChoiceQuestion}</div>${escapeHtml(flashcardV2BlockText(blockIDs[0], doms[blockIDs[0]] || ""))}</div>
+<div class="b3-label b3-label--inner card__v2-advanced-field"><div class="b3-label__text">${window.siyuan.languages.flashcardCorrectAnswer}</div>
 ${blockIDs.slice(1).map((blockID, index) => `<label class="fn__flex card__v2-choice-source"><input data-type="choiceCorrect" data-choice-index="${index}" type="radio" name="flashcardChoiceCorrect"><span>${escapeHtml(flashcardV2BlockText(blockID, doms[blockID] || ""))}</span></label>`).join("")}
 </div>
-<label class="b3-label fn__flex-center"><input data-type="choiceRandomize" class="b3-switch fn__flex-center" type="checkbox" checked><span class="fn__space"></span>${window.siyuan.languages.flashcardRandomizeOptions}</label>
-<label class="b3-label fn__flex-center"><input data-type="choiceDynamic" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardDynamicDistractors}<span class="fn__flex-1"></span><input data-type="choiceDynamicCount" class="b3-text-field" style="width:72px" type="number" min="1" max="50" value="3" disabled></label>
+<label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="choiceRandomize" class="b3-switch fn__flex-center" type="checkbox" checked><span class="fn__space"></span>${window.siyuan.languages.flashcardRandomizeOptions}</label>
+<label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="choiceDynamic" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.flashcardDynamicDistractors}<span class="fn__flex-1"></span><input data-type="choiceDynamicCount" class="b3-text-field" style="width:72px" type="number" min="1" max="50" value="3" disabled></label>
 </div>` : "";
-                const typedEditorHTML = blockIDs.length >= 2 ? `<div data-type="typedEditor" class="fn__none">
-<div class="fn__hr"></div>
-<label class="b3-label fn__flex-center"><input data-type="typedCaseSensitive" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.searchCaseSensitive}</label>
-<label class="b3-label fn__flex-center"><input data-type="typedMatchDiacritics" class="b3-switch fn__flex-center" type="checkbox" checked><span class="fn__space"></span>${window.siyuan.languages.matchDiacritics}</label>
+                const typedEditorHTML = blockIDs.length >= 2 ? `<div data-type="typedEditor" class="fn__none card__v2-advanced-section">
+<label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="typedCaseSensitive" class="b3-switch fn__flex-center" type="checkbox"><span class="fn__space"></span>${window.siyuan.languages.searchCaseSensitive}</label>
+<label class="b3-label b3-label--inner fn__flex-center card__v2-advanced-switch"><input data-type="typedMatchDiacritics" class="b3-switch fn__flex-center" type="checkbox" checked><span class="fn__space"></span>${window.siyuan.languages.matchDiacritics}</label>
 </div>` : "";
                 const dialog = new Dialog({
                     title: window.siyuan.languages.configGroupAdvanced,
                     width: isMobile() ? "96vw" : "720px",
                     height: imageSource || blockIDs.length >= 3 ? "82vh" : undefined,
-                    content: `<div class="b3-dialog__content" style="overflow:auto">
-<label class="b3-label">
+                    content: `<div class="b3-dialog__content card__v2-advanced">
+<label class="b3-label b3-label--inner card__v2-advanced-field">
     <div class="b3-label__text">${window.siyuan.languages.type}</div>
     <select data-type="mode" class="b3-select fn__block">
         <option value="cloze">${window.siyuan.languages.flashcardClozeCards}</option>
@@ -2555,10 +2566,8 @@ ${clozeEditorHTML}
 ${imageEditorHTML}
 ${choiceEditorHTML}
 ${typedEditorHTML}
-<div class="fn__hr"></div>
-<div class="b3-label"><div class="b3-label__text">${window.siyuan.languages.total}</div>${blockIDs.length}</div>
-${edit ? "" : `<div class="fn__hr"></div>
-<label class="b3-label">
+<div class="card__v2-advanced-summary"><span>${window.siyuan.languages.total}</span><strong>${blockIDs.length}</strong></div>
+${edit ? "" : `<label class="b3-label b3-label--inner card__v2-advanced-field">
     <div class="b3-label__text">${window.siyuan.languages.flashcardReviewSet}</div>
     <select data-type="reviewSets" class="b3-select fn__block" multiple size="${Math.min(6, Math.max(2, revisions.length))}">
         ${revisions.map((revision) => `<option value="${escapeAttr(revision.entityID)}">${escapeHtml(revision.payload.name)}</option>`).join("")}

@@ -1,4 +1,5 @@
 import {Dialog} from "../dialog";
+import {showMessage} from "../dialog/message";
 import {Constants} from "../constants";
 import type {App} from "../index";
 import {hideElements} from "../protyle/ui/hideElements";
@@ -22,18 +23,30 @@ export const createQuickSources = (blockIDs: string[], callback?: () => void) =>
     }
     fetchPost("/api/flashcard/getMigrationStatus", {}, (statusResponse) => {
         if (statusResponse.data.state === "Legacy") {
-            transaction(undefined, [{
-                action: "addFlashcards",
-                deckID: Constants.QUICK_DECK_ID,
-                blockIDs,
-            }], undefined, {callback});
+            fetchPost("/api/riff/getRiffCardsByBlockIDs", {blockIDs}, (response) => {
+                const remove = (response.data.blocks as IBlock[]).every((block) => block.riffCard);
+                transaction(undefined, [{
+                    action: remove ? "removeFlashcards" : "addFlashcards",
+                    deckID: Constants.QUICK_DECK_ID,
+                    blockIDs,
+                }], undefined, {callback: () => {
+                    showMessage(remove ? window.siyuan.languages.quickMakeCardCanceled :
+                        window.siyuan.languages.quickMakeCardCompleted);
+                    callback?.();
+                }});
+            });
             return;
         }
         fetchPost("/api/flashcard/createQuickSources", {
             operationID: genUUID(),
             blockIDs,
             createdAt: Date.now(),
-        }, callback);
+            toggle: true,
+        }, (response) => {
+            showMessage(response.data.action === "removed" ? window.siyuan.languages.quickMakeCardCanceled :
+                window.siyuan.languages.quickMakeCardCompleted);
+            callback?.();
+        });
     });
 };
 

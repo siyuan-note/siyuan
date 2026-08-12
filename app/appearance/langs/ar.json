@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "بطاقة تعليمية للكتلة",
+	"quickMakeCardCanceled": "تم إلغاء إنشاء البطاقات السريع",
+	"quickMakeCardCompleted": "اكتمل إنشاء البطاقات السريع",
 	"aiMcpEnv": "متغيرات البيئة",
 	"aiMcpEnvTip": "تُمرر الأسرار المشار إليها إلى هذا البرنامج، وتُخزن القيم المدخلة مباشرة كنص عادي",
 	"aiMcpEnvInvalid": "متغيرات البيئة غير صالحة؛ تحقق من الأسماء الفارغة أو المكررة أو غير الصالحة",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "عكسي",
 	"flashcardDirectionBidirectional": "ثنائي الاتجاه",
 	"flashcardDirectionClosed": "معطل",
-	"flashcardReviewSet": "مجموعة المراجعة",
+	"flashcardReviewSet": "حزمة بطاقات",
 	"flashcardStatistics": "إحصاءات البطاقات التعليمية",
 	"flashcardMigrationConfirm": "هل تريد ترقية البطاقات التعليمية الحالية إلى التنسيق الجديد؟ لن تؤدي هذه العملية إلى تعديل النسخة الاحتياطية بالتنسيق القديم",
 	"encryptedNotebookNotEnabledTip": "يرجى أولاً تمكين الدفتر المشفر في [الإعدادات - المصادقة - دفتر مشفر]",

@@ -8,7 +8,12 @@ import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {genUUID} from "../util/genID";
 import {escapeAttr, escapeHtml} from "../util/escape";
-import {hasFlashcardAnswer, hideFlashcardAnswer, showFlashcardAnswer} from "./flashcardMode";
+import {
+    hasFlashcardAnswer,
+    hideFlashcardAnswer,
+    shouldShowFlashcardRatingsImmediately,
+    showFlashcardAnswer,
+} from "./flashcardMode";
 import {highlightRender} from "../protyle/render/highlightRender";
 import {processRender} from "../protyle/util/processCode";
 import {
@@ -131,6 +136,22 @@ const selectReferences = (references: IFlashcardV2SourceReference[], spec?: IFla
 
 const referenceHTML = (references: IFlashcardV2SourceReference[], doms: Record<string, string>) => {
     return references.map((reference) => flashcardV2ReferenceHTML(reference, doms)).join("");
+};
+
+const loadFlashcardV2DOMs = (model: IFlashcardV2RenderModel, references: IFlashcardV2SourceReference[],
+    callback: (doms: Record<string, string>) => void) => {
+    if (model.schema?.builtinType === "block-flashcard" && references.length === 1) {
+        const blockID = references[0].entityID;
+        return fetchPost("/api/filetree/getDoc", {
+            id: blockID,
+            mode: 0,
+            size: Constants.SIZE_GET_MAX,
+            highlight: false,
+        }, (response) => callback({[blockID]: response.data.content}));
+    }
+    return fetchPost("/api/block/getBlockDOMs", {
+        ids: references.map((reference) => reference.entityID),
+    }, (response) => callback(response.data as Record<string, string>));
 };
 
 const flashcardV2PlainText = (value: string) => {
@@ -428,8 +449,15 @@ const openFlashcardV2SessionDue = (cardID: string, due: number, callback: () => 
     input.focus();
 };
 
+const sessionCompletionContent = (canUndo: boolean) => `<div class="card__empty-icon">🔮</div>
+<span>${window.siyuan.languages.noDueCard}</span>
+<span class="card__v2-completion-actions">
+    ${canUndo ? `<button data-type="undo-review" class="b3-button b3-button--outline"><svg><use xlink:href="#iconUndo"></use></svg>${window.siyuan.languages.undo}</button>` : ""}
+    <button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</span>`;
+
 const sessionContent = () => `<div class="b3-dialog__content fn__flex-column" style="box-sizing:border-box;height:100%;padding:0">
-<div class="fn__flex" style="padding:8px 16px">
+<div data-flashcard-toolbar class="fn__flex" style="padding:8px 16px">
     <span data-flashcard-count class="ft__on-surface"></span>
     <span class="fn__flex-1"></span>
     <button data-type="read-aloud" class="block__icon ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
@@ -470,9 +498,12 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
     const current = queue[index];
     const contentElement = dialog.element.querySelector(".card__block") as HTMLElement;
     const contextElement = dialog.element.querySelector("[data-flashcard-context]") as HTMLElement;
+    const frontElement = dialog.element.querySelector("[data-flashcard-front]") as HTMLElement;
     dialog.element.querySelector("[data-flashcard-template-style]")?.remove();
+    dialog.element.querySelector("[data-flashcard-toolbar]").classList.remove("fn__none");
     contextElement.classList.add("fn__none");
     contextElement.innerHTML = "";
+    frontElement.className = "protyle-wysiwyg";
     contentElement.className = "card__block fn__flex-1";
     contentElement.setAttribute("style", "overflow:auto;padding:16px");
     dialog.element.querySelector("[data-flashcard-count]").textContent = `${index + 1} / ${queue.length}`;
@@ -500,11 +531,10 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
             .sort((left, right) => left.sort - right.sort);
         let blocksLoaded = false;
         modelLoaded = true;
-        void fetchPost("/api/block/getBlockDOMs", {ids: references.map((reference) => reference.entityID)}, (domResponse) => {
+        void loadFlashcardV2DOMs(model, references, (doms) => {
             if (!isCurrent()) {
                 return;
             }
-            const doms = domResponse.data as Record<string, string>;
             let frontReferences = selectReferences(references, model.template.frontSpec);
             if (frontReferences.length === 0) {
                 frontReferences = references.slice(0, 1);
@@ -515,7 +545,6 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
             }
             const frontIDs = new Set(frontReferences.map((reference) => reference.entityID));
             const answerReferences = backReferences.filter((reference) => !frontIDs.has(reference.entityID));
-            const frontElement = dialog.element.querySelector("[data-flashcard-front]");
             const answerElement = dialog.element.querySelector("[data-flashcard-answer]");
             const ankiFront = renderFlashcardV2AnkiTemplate(model, "front", doms);
             const ankiBack = ankiFront === undefined ? undefined :
@@ -526,6 +555,11 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
                 (ankiBack !== undefined ? ankiBack.trim() !== "" : answerReferences.length > 0);
             frontElement.innerHTML = specialFront === undefined ?
                 (ankiFront === undefined ? referenceHTML(frontReferences, doms) : ankiFront) : specialFront;
+            if (model.schema?.builtinType === "block-flashcard") {
+                frontElement.querySelectorAll("[data-flashcard-reference]").forEach((reference) => {
+                    reference.setAttribute("data-flashcard-block-card", "true");
+                });
+            }
             if (model.source.sourceType === "typed-answer" && model.template.answerMode === "typed") {
                 frontElement.insertAdjacentHTML("beforeend",
                     '<input class="b3-text-field fn__block" data-flashcard-type-answer autocomplete="off">');
@@ -576,7 +610,8 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
             if (hasInternalAnswer) {
                 hideFlashcardAnswer(contentElement, window.siyuan.config.flashcard);
             }
-            if (!revealController && !hasInternalAnswer && !hasRenderedAnswer) {
+            if (shouldShowFlashcardRatingsImmediately(Boolean(revealController), hasInternalAnswer,
+                hasRenderedAnswer)) {
                 setActionsVisible(dialog, true);
             }
             const sourceBlockID = references.find((reference) => reference.id === model.source.primaryRefID)?.entityID ||
@@ -670,8 +705,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
         reviewMode: options.reviewMode,
         seed: sessionID,
         now: Date.now(),
-        newLimit: 0,
-        reviewLimit: 0,
+        newLimit: window.siyuan.config.flashcard.newCardLimit,
+        reviewLimit: window.siyuan.config.flashcard.reviewCardLimit,
         includeSuspended: options.reviewMode === "reinforcement" && Boolean(options.includeSuspended),
         includeBuried: options.reviewMode === "reinforcement" && Boolean(options.includeBuried),
         includePaused: options.reviewMode === "reinforcement" && Boolean(options.includePaused),
@@ -694,10 +729,13 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         reviewMode: options.reviewMode,
                         status: "completed",
                     });
-                    new Dialog({
+                    const completionDialog = new Dialog({
                         title: name,
                         width: isMobile() ? "92vw" : "520px",
-                        content: `<div class="b3-dialog__content card__empty">${window.siyuan.languages.noDueCard}</div>`,
+                        content: `<div class="b3-dialog__content card__empty card__empty--space card__v2-completion">${sessionCompletionContent(false)}</div>`,
+                    });
+                    completionDialog.element.querySelector('[data-type="finish"]').addEventListener("click", () => {
+                        completionDialog.destroy();
                     });
                 });
                 return;
@@ -798,11 +836,15 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 completedPending = true;
                 dialog.element.querySelector("[data-flashcard-count]").textContent = `${queue.length} / ${queue.length}`;
                 const contentElement = dialog.element.querySelector(".card__block");
-                contentElement.querySelector("[data-flashcard-front]").textContent = window.siyuan.languages.noDueCard;
+                const frontElement = contentElement.querySelector("[data-flashcard-front]");
+                dialog.element.querySelector("[data-flashcard-toolbar]").classList.add("fn__none");
+                contentElement.querySelector("[data-flashcard-context]").classList.add("fn__none");
+                frontElement.className = "card__empty card__empty--space card__v2-completion";
+                frontElement.innerHTML = sessionCompletionContent(Boolean(lastReview));
                 contentElement.querySelector("[data-flashcard-answer]").classList.add("fn__none");
                 dialog.element.querySelector('[data-flashcard-action="reveal"]').classList.add("fn__none");
                 dialog.element.querySelector('[data-flashcard-action="ratings"]').classList.add("fn__none");
-                dialog.element.querySelector('[data-flashcard-action="finish"]').classList.remove("fn__none");
+                dialog.element.querySelector('[data-flashcard-action="finish"]').classList.add("fn__none");
             };
             const nextCard = () => {
                 playbackController?.cancel();
@@ -1266,6 +1308,12 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     return;
                 }
                 if (event.key === " " || event.key === "Enter") {
+                    if (completedPending) {
+                        (dialog.element.querySelector('.card__v2-completion [data-type="finish"]') as HTMLElement)
+                            .click();
+                        event.preventDefault();
+                        return;
+                    }
                     const finish = dialog.element.querySelector('[data-flashcard-action="finish"]');
                     if (!finish.classList.contains("fn__none")) {
                         (finish.querySelector('[data-type="finish"]') as HTMLElement).click();

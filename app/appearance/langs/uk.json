@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Блокова картка",
+	"quickMakeCardCanceled": "Швидкі картки видалено",
+	"quickMakeCardCompleted": "Швидке створення карток завершено",
 	"aiMcpEnv": "Змінні середовища",
 	"aiMcpEnvTip": "Указані секрети передаються цій програмі, а введені безпосередньо значення зберігаються як звичайний текст",
 	"aiMcpEnvInvalid": "Недопустимі змінні середовища; перевірте порожні, повторювані або недопустимі назви",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Зворотна",
 	"flashcardDirectionBidirectional": "Двонапрямна",
 	"flashcardDirectionClosed": "Вимкнена",
-	"flashcardReviewSet": "Набір повторення",
+	"flashcardReviewSet": "Колода",
 	"flashcardStatistics": "Статистика карток",
 	"flashcardMigrationConfirm": "Оновити наявні картки до нового формату? Ця операція не змінює резервну копію у старому форматі",
 	"encryptedNotebookNotEnabledTip": "Спочатку ввімкніть зашифрований блокнот у [Налаштування - Автентифікація - Зашифрований блокнот]",

@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "แฟลชการ์ดบล็อก",
+	"quickMakeCardCanceled": "ยกเลิกบัตรด่วนแล้ว",
+	"quickMakeCardCompleted": "สร้างบัตรด่วนเสร็จแล้ว",
 	"aiMcpEnv": "ตัวแปรสภาพแวดล้อม",
 	"aiMcpEnvTip": "ข้อมูลลับที่อ้างอิงจะถูกส่งให้โปรแกรมนี้ และค่าที่ป้อนโดยตรงจะถูกจัดเก็บเป็นข้อความธรรมดา",
 	"aiMcpEnvInvalid": "ตัวแปรสภาพแวดล้อมไม่ถูกต้อง โปรดตรวจสอบชื่อที่ว่าง ซ้ำ หรือไม่ถูกต้อง",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "ย้อนกลับ",
 	"flashcardDirectionBidirectional": "สองทิศทาง",
 	"flashcardDirectionClosed": "ปิดใช้งาน",
-	"flashcardReviewSet": "ชุดทบทวน",
+	"flashcardReviewSet": "สำรับ",
 	"flashcardStatistics": "สถิติแฟลชการ์ด",
 	"flashcardMigrationConfirm": "อัปเกรดแฟลชการ์ดที่มีอยู่เป็นรูปแบบใหม่หรือไม่? การดำเนินการนี้จะไม่แก้ไขข้อมูลสำรองในรูปแบบเดิม",
 	"encryptedNotebookNotEnabledTip": "โปรดเปิดใช้งานสมุดบันทึกเข้ารหัสใน [ตั้งค่า - การยืนยันตัวตน - สมุดบันทึกเข้ารหัส] ก่อน",

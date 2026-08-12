@@ -1,4 +1,7 @@
 {
+	"flashcardBlockCard": "Fiszka blokowa",
+	"quickMakeCardCanceled": "Szybkie karty usunięte",
+	"quickMakeCardCompleted": "Szybkie tworzenie kart zakończone",
 	"aiMcpEnv": "Zmienne środowiskowe",
 	"aiMcpEnvTip": "Wskazane sekrety są udostępniane temu programowi, a wartości wpisane bezpośrednio są przechowywane jako zwykły tekst",
 	"aiMcpEnvInvalid": "Nieprawidłowe zmienne środowiskowe; sprawdź puste, zduplikowane lub nieprawidłowe nazwy",
@@ -68,7 +71,7 @@
 	"flashcardDirectionReverse": "Odwrotna",
 	"flashcardDirectionBidirectional": "Dwukierunkowa",
 	"flashcardDirectionClosed": "Wyłączona",
-	"flashcardReviewSet": "Zestaw powtórek",
+	"flashcardReviewSet": "Talia",
 	"flashcardStatistics": "Statystyki fiszek",
 	"flashcardMigrationConfirm": "Uaktualnić istniejące fiszki do nowego formatu? Ta operacja nie zmienia kopii zapasowej w starym formacie",
 	"encryptedNotebookNotEnabledTip": "Najpierw włącz zaszyfrowany notatnik w [Ustawienia - Uwierzytelnianie - Zaszyfrowany notatnik]",

@@ -2213,12 +2213,12 @@ const prepareFlashcardV2InlineOcclusions = (blockIDs: string[], doms: Record<str
         template.content.querySelectorAll<HTMLElement>('span[data-type~="mark"]').forEach((mark) => {
             let id = mark.dataset.occlusionId;
             if (!id) {
-                id = genUUID();
+                id = Lute.NewNodeID();
                 mark.dataset.occlusionId = id;
                 changed = true;
             }
             if (seen.has(id)) {
-                id = genUUID();
+                id = Lute.NewNodeID();
                 mark.dataset.occlusionId = id;
                 changed = true;
             }

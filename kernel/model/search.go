@@ -1968,7 +1968,7 @@ func buildOrderBy(query string, method, orderBy int) string {
 		return clause // 默认是按相关度降序
 	default:
 		exactName := buildExactSearchOrderCondition("name", query)
-		exactAlias := buildExactSearchOrderCondition("alias", query)
+		exactAlias := buildExactAliasSearchOrderCondition("alias", query)
 		exactContent := buildExactSearchOrderCondition("content", query)
 		clause := "ORDER BY CASE " +
 			"WHEN " + exactName + " THEN 10 " +
@@ -1992,6 +1992,19 @@ func buildExactSearchOrderCondition(field, query string) string {
 	}
 	escapedQuery = strings.NewReplacer("\\", "\\\\", "%", "\\%", "_", "\\_").Replace(escapedQuery)
 	return field + " LIKE '" + escapedQuery + "' ESCAPE '\\'"
+}
+
+func buildExactAliasSearchOrderCondition(field, query string) string {
+	if "" == query || strings.Contains(query, ",") {
+		return "0"
+	}
+
+	escapedQuery := strings.ReplaceAll(query, "'", "''")
+	if Conf.Search.CaseSensitive {
+		return "instr(',' || " + field + " || ',', '," + escapedQuery + ",') > 0"
+	}
+	escapedQuery = strings.NewReplacer("\\", "\\\\", "%", "\\%", "_", "\\_").Replace(escapedQuery)
+	return "(',' || " + field + " || ',') LIKE '%," + escapedQuery + ",%' ESCAPE '\\'"
 }
 
 // buildTypeFilter returns a complete SQL predicate (including outer parens)
@@ -2632,7 +2645,7 @@ func buildHPathSearchOrderBy(query string, orderBy int) string {
 		return clause + stableOrder
 	default:
 		exactName := buildExactSearchOrderCondition("b.name", query)
-		exactAlias := buildExactSearchOrderCondition("b.alias", query)
+		exactAlias := buildExactAliasSearchOrderCondition("b.alias", query)
 		exactContent := buildExactSearchOrderCondition("b.content", query)
 		escapedQuery := strings.ReplaceAll(query, "'", "''")
 		clause := "ORDER BY matches.match_source ASC, CASE " +

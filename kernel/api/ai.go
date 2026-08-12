@@ -254,6 +254,17 @@ func mcpStatus(c *gin.Context) {
 	ret.Data = mcpclient.MCPStatus()
 }
 
+// mcpEnvironmentVariables 返回当前内核拥有的环境变量名称，供 stdio MCP 设置选择。
+func mcpEnvironmentVariables(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	names, defaults := mcpclient.MCPEnvironmentVariables()
+	ret.Data = map[string]any{
+		"names":    names,
+		"defaults": defaults,
+	}
+}
+
 func mcpOAuthAuthorize(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

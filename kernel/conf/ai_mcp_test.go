@@ -34,3 +34,24 @@ func TestNormalizeMCPServerIDs(t *testing.T) {
 		seen[server.ID] = true
 	}
 }
+
+func TestMigrateMCPEnvironment(t *testing.T) {
+	mcp := migrateMCP(map[string]any{
+		"servers": []any{
+			map[string]any{
+				"name":       "stdio",
+				"inheritEnv": []any{"PATH", "HOME"},
+				"env": map[string]any{
+					"TOKEN": "{{secrets.TOKEN}}",
+				},
+			},
+		},
+	})
+	if len(mcp.Servers) != 1 {
+		t.Fatalf("unexpected MCP servers: %#v", mcp.Servers)
+	}
+	server := mcp.Servers[0]
+	if len(server.InheritEnv) != 2 || server.InheritEnv[0] != "PATH" || server.Env["TOKEN"] != "{{secrets.TOKEN}}" {
+		t.Fatalf("unexpected migrated environment: %#v", server)
+	}
+}

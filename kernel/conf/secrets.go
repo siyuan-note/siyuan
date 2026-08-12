@@ -33,7 +33,7 @@ type Secret struct {
 	AllowedHosts []string `json:"allowedHosts"`
 }
 
-// Secrets 是全局密钥库，脱离 AI 配置独立存在，供智能体 http_request 工具、MCP 服务 headers 等以
+// Secrets 是全局密钥库，脱离 AI 配置独立存在，供智能体 http_request 工具、MCP 服务请求头和 stdio 环境变量等以
 // {{secrets.名字}} 形式引用。落盘时 Value 经 AES 加密，运行时为明文。
 type Secrets struct {
 	Items []*Secret `json:"items"`
@@ -198,7 +198,7 @@ func resolveDollar(in string, lookups ...func(string) (string, bool)) string {
 // Secrets.Resolve / Variables.Resolve 已各自处理显式语法与无前缀引用（仅查各自库），
 // 串行调用后即覆盖「$NAME 先密钥后变量」的优先级。仅在库中存在对应名字时才替换，
 // 找不到保留原文——因此 $100、正则等不相关内容不受影响。
-// 供智能体 http_request 工具、MCP 服务 headers 等统一消费密钥与变量。
+// 供智能体 http_request 工具、MCP 服务请求头和 stdio 环境变量等统一消费密钥与变量。
 func ResolveSecretsVars(secrets *Secrets, vars *Variables, in string) string {
 	in = secrets.Resolve(in)
 	return vars.Resolve(in)

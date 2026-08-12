@@ -24,8 +24,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
 	"reflect"
+	"runtime"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -448,6 +451,16 @@ func connectStdio(ctx context.Context, client *mcp.Client, server conf.MCPServer
 	}
 
 	cmd := exec.Command(server.Command, server.Args...)
+	cmdEnv, err := buildStdioEnvironment(server, os.LookupEnv, func(value string) string {
+		if model.Conf == nil {
+			return value
+		}
+		return conf.ResolveSecretsVars(model.Conf.Secrets, model.Conf.Variables, value)
+	}, runtime.GOOS)
+	if err != nil {
+		return nil, nil, fmt.Errorf("environment: %w", err)
+	}
+	cmd.Env = cmdEnv
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, nil, fmt.Errorf("stdin pipe: %w", err)
@@ -473,6 +486,129 @@ func connectStdio(ctx context.Context, client *mcp.Client, server conf.MCPServer
 	}
 
 	return session, cmd, nil
+}
+
+type environmentEntry struct {
+	name  string
+	value string
+}
+
+// buildStdioEnvironment 仅传递用户允许继承的变量，并用显式配置覆盖同名项。
+func buildStdioEnvironment(server conf.MCPServer, lookup func(string) (string, bool), resolve func(string) string,
+	goos string) ([]string, error) {
+	if err := validateMCPServerEnvironment(server, goos); err != nil {
+		return nil, err
+	}
+
+	entries := map[string]environmentEntry{}
+	for _, name := range server.InheritEnv {
+		if value, ok := lookup(name); ok {
+			entries[environmentKey(name, goos)] = environmentEntry{name: name, value: value}
+		}
+	}
+	for name, value := range server.Env {
+		value = resolve(value)
+		entries[environmentKey(name, goos)] = environmentEntry{name: name, value: value}
+	}
+
+	keys := make([]string, 0, len(entries))
+	for key := range entries {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+	ret := make([]string, 0, len(keys))
+	for _, key := range keys {
+		entry := entries[key]
+		ret = append(ret, entry.name+"="+entry.value)
+	}
+	return ret, nil
+}
+
+func environmentKey(name, goos string) string {
+	if goos == "windows" {
+		return strings.ToUpper(name)
+	}
+	return name
+}
+
+func validateEnvironmentName(name string) error {
+	if name == "" {
+		return errors.New("name is empty")
+	}
+	if strings.ContainsAny(name, "=\x00") {
+		return fmt.Errorf("invalid name %q", name)
+	}
+	return nil
+}
+
+func validateMCPServerEnvironment(server conf.MCPServer, goos string) error {
+	inherited := map[string]bool{}
+	for _, name := range server.InheritEnv {
+		if err := validateEnvironmentName(name); err != nil {
+			return err
+		}
+		key := environmentKey(name, goos)
+		if inherited[key] {
+			return fmt.Errorf("duplicate inherited variable %q", name)
+		}
+		inherited[key] = true
+	}
+	explicit := map[string]bool{}
+	for name, value := range server.Env {
+		if err := validateEnvironmentName(name); err != nil {
+			return err
+		}
+		if strings.ContainsRune(value, '\x00') {
+			return fmt.Errorf("variable %q contains NUL", name)
+		}
+		key := environmentKey(name, goos)
+		if explicit[key] {
+			return fmt.Errorf("duplicate variable %q", name)
+		}
+		explicit[key] = true
+	}
+	return nil
+}
+
+// ValidateMCPServerEnvironment 校验当前平台上的 stdio 环境变量配置。
+func ValidateMCPServerEnvironment(server conf.MCPServer) error {
+	return validateMCPServerEnvironment(server, runtime.GOOS)
+}
+
+func defaultMCPEnvironmentNames(goos string) []string {
+	if goos == "windows" {
+		return []string{"APPDATA", "HOMEDRIVE", "HOMEPATH", "LOCALAPPDATA", "PATH", "PATHEXT",
+			"PROCESSOR_ARCHITECTURE", "PROGRAMFILES", "SYSTEMDRIVE", "SYSTEMROOT", "TEMP", "USERNAME", "USERPROFILE"}
+	}
+	return []string{"HOME", "LOGNAME", "PATH", "SHELL", "TERM"}
+}
+
+func environmentVariableNames(environ []string, goos string) []string {
+	names := map[string]string{}
+	for _, item := range environ {
+		name, _, ok := strings.Cut(item, "=")
+		if !ok || name == "" {
+			continue
+		}
+		names[environmentKey(name, goos)] = name
+	}
+	ret := make([]string, 0, len(names))
+	for _, name := range names {
+		ret = append(ret, name)
+	}
+	sort.Slice(ret, func(i, j int) bool {
+		left, right := strings.ToUpper(ret[i]), strings.ToUpper(ret[j])
+		if left == right {
+			return ret[i] < ret[j]
+		}
+		return left < right
+	})
+	return ret
+}
+
+// MCPEnvironmentVariables 返回当前内核环境变量名称和新服务默认允许继承的名称，不暴露变量值。
+func MCPEnvironmentVariables() (names, defaults []string) {
+	return environmentVariableNames(os.Environ(), runtime.GOOS), defaultMCPEnvironmentNames(runtime.GOOS)
 }
 
 func connectHTTP(ctx context.Context, client *mcp.Client, server conf.MCPServer, interactive bool) (*mcp.ClientSession, *exec.Cmd, *mcpOAuthHandler, error) {

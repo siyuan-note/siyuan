@@ -148,6 +148,8 @@ type MCPServer struct {
 	Type                 string            `json:"type"`
 	Command              string            `json:"command"`
 	Args                 []string          `json:"args"`
+	InheritEnv           []string          `json:"inheritEnv"`
+	Env                  map[string]string `json:"env"`
 	URL                  string            `json:"url"`
 	Headers              map[string]string `json:"headers"`
 	Timeout              int               `json:"timeout"`
@@ -857,6 +859,8 @@ func migrateMCP(raw map[string]any) *MCP {
 			Type:                 getString(sm, "type"),
 			Command:              getString(sm, "command"),
 			Args:                 getStringSlice(sm, "args"),
+			InheritEnv:           getStringSlice(sm, "inheritEnv"),
+			Env:                  getStringMap(sm, "env"),
 			URL:                  getString(sm, "url"),
 			Headers:              getStringMap(sm, "headers"),
 			Timeout:              getInt(sm, "timeout"),

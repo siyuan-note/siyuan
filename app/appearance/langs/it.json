@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "L'autore del plugin ha disabilitato questo plugin nel servizio di pubblicazione",
+	"formatPainter": "Copia formato",
+	"formatPainterContinuous": "Copia formato continua",
+	"formatPainterActive": "Copia formato attiva; fai clic per uscire",
+	"formatPainterContinuousActive": "Copia formato continua attiva; fai clic per uscire",
 	"aiMcpEnv": "Variabili d'ambiente",
 	"aiMcpEnvTip": "I segreti referenziati vengono forniti a questo programma e i valori inseriti direttamente vengono archiviati in testo semplice",
 	"aiMcpEnvInvalid": "Variabili d'ambiente non valide; verifica la presenza di nomi vuoti, duplicati o non validi",

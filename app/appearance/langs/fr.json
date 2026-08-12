@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "L’auteur du plugin a désactivé ce plugin dans le service de publication",
+	"formatPainter": "Reproduire la mise en forme",
+	"formatPainterContinuous": "Reproduire la mise en forme en continu",
+	"formatPainterActive": "Reproduction de la mise en forme active ; cliquez pour quitter",
+	"formatPainterContinuousActive": "Reproduction continue de la mise en forme active ; cliquez pour quitter",
 	"aiMcpEnv": "Variables d'environnement",
 	"aiMcpEnvTip": "Les secrets référencés sont fournis à ce programme et les valeurs saisies directement sont stockées en texte brut",
 	"aiMcpEnvInvalid": "Variables d'environnement non valides ; vérifiez les noms vides, dupliqués ou non valides",

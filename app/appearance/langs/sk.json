@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "Autor doplnku zakázal tento doplnok v publikačnej službe",
+	"formatPainter": "Kopírovať formát",
+	"formatPainterContinuous": "Kopírovať formát nepretržite",
+	"formatPainterActive": "Kopírovanie formátu je aktívne; kliknutím ho ukončíte",
+	"formatPainterContinuousActive": "Nepretržité kopírovanie formátu je aktívne; kliknutím ho ukončíte",
 	"aiMcpEnv": "Premenné prostredia",
 	"aiMcpEnvTip": "Odkazované tajomstvá sa poskytnú tomuto programu a priamo zadané hodnoty sa uložia ako obyčajný text",
 	"aiMcpEnvInvalid": "Neplatné premenné prostredia; skontrolujte prázdne, duplicitné alebo neplatné názvy",

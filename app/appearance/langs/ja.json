@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "プラグインの作者が公開サービスでこのプラグインを無効にしています",
+	"formatPainter": "書式のコピー",
+	"formatPainterContinuous": "書式の連続コピー",
+	"formatPainterActive": "書式のコピーが有効です。クリックして終了",
+	"formatPainterContinuousActive": "書式の連続コピーが有効です。クリックして終了",
 	"aiMcpEnv": "環境変数",
 	"aiMcpEnvTip": "参照したシークレットはこのプログラムに渡され、直接入力した値は平文で保存されます",
 	"aiMcpEnvInvalid": "環境変数が無効です。名前が空、重複、または無効な文字を含んでいないか確認してください",

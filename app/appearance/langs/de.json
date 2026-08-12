@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "Der Plugin-Autor hat dieses Plugin im Veröffentlichungsdienst deaktiviert",
+	"formatPainter": "Format übertragen",
+	"formatPainterContinuous": "Format fortlaufend übertragen",
+	"formatPainterActive": "Formatübertragung aktiv; zum Beenden klicken",
+	"formatPainterContinuousActive": "Fortlaufende Formatübertragung aktiv; zum Beenden klicken",
 	"aiMcpEnv": "Umgebungsvariablen",
 	"aiMcpEnvTip": "Referenzierte Geheimnisse werden diesem Programm bereitgestellt, direkt eingegebene Werte werden im Klartext gespeichert",
 	"aiMcpEnvInvalid": "Ungültige Umgebungsvariablen; prüfen Sie auf leere, doppelte oder ungültige Namen",

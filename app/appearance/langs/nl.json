@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "De auteur van de plug-in heeft deze plug-in uitgeschakeld in de publicatieservice",
+	"formatPainter": "Opmaak kopiëren",
+	"formatPainterContinuous": "Opmaak doorlopend kopiëren",
+	"formatPainterActive": "Opmaak kopiëren is actief; klik om af te sluiten",
+	"formatPainterContinuousActive": "Opmaak doorlopend kopiëren is actief; klik om af te sluiten",
 	"aiMcpEnv": "Omgevingsvariabelen",
 	"aiMcpEnvTip": "Geheimen waarnaar wordt verwezen worden aan dit programma verstrekt en rechtstreeks ingevoerde waarden worden als platte tekst opgeslagen",
 	"aiMcpEnvInvalid": "Ongeldige omgevingsvariabelen; controleer op lege, dubbele of ongeldige namen",

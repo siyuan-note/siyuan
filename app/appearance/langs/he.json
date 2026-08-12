@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "מחבר התוסף השבית תוסף זה בשירות הפרסום",
+	"formatPainter": "מברשת עיצוב",
+	"formatPainterContinuous": "מברשת עיצוב רציפה",
+	"formatPainterActive": "מברשת העיצוב פעילה; לחיצה תסיים",
+	"formatPainterContinuousActive": "מברשת העיצוב הרציפה פעילה; לחיצה תסיים",
 	"aiMcpEnv": "משתני סביבה",
 	"aiMcpEnvTip": "סודות שמופנים יועברו לתוכנית זו, וערכים שיוזנו ישירות יישמרו כטקסט גלוי",
 	"aiMcpEnvInvalid": "משתני הסביבה אינם תקינים; יש לבדוק שמות ריקים, כפולים או לא תקינים",

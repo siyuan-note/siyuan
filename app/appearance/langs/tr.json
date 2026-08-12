@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "Eklenti yazarı bu eklentiyi yayımlama hizmetinde devre dışı bıraktı",
+	"formatPainter": "Biçim Boyacısı",
+	"formatPainterContinuous": "Sürekli Biçim Boyacısı",
+	"formatPainterActive": "Biçim Boyacısı etkin; çıkmak için tıklayın",
+	"formatPainterContinuousActive": "Sürekli Biçim Boyacısı etkin; çıkmak için tıklayın",
 	"aiMcpEnv": "Ortam değişkenleri",
 	"aiMcpEnvTip": "Başvurulan gizli bilgiler bu programa sağlanır ve doğrudan girilen değerler düz metin olarak saklanır",
 	"aiMcpEnvInvalid": "Geçersiz ortam değişkenleri; boş, yinelenen veya geçersiz adları kontrol edin",

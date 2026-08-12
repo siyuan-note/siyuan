@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "The plugin author has disabled this plugin in the publish service",
+	"formatPainter": "Format Painter",
+	"formatPainterContinuous": "Continuous Format Painter",
+	"formatPainterActive": "Format Painter active; click to exit",
+	"formatPainterContinuousActive": "Continuous Format Painter active; click to exit",
 	"aiMcpEnv": "Environment variables",
 	"aiMcpEnvTip": "Referenced secrets are provided to this program, and direct values are stored in plaintext",
 	"aiMcpEnvInvalid": "Invalid environment variables; check for empty, duplicate, or invalid names",

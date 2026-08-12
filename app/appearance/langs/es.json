@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "El autor del complemento ha deshabilitado este complemento en el servicio de publicación",
+	"formatPainter": "Copiar formato",
+	"formatPainterContinuous": "Copiar formato continuamente",
+	"formatPainterActive": "Copia de formato activa; haz clic para salir",
+	"formatPainterContinuousActive": "Copia continua de formato activa; haz clic para salir",
 	"aiMcpEnv": "Variables de entorno",
 	"aiMcpEnvTip": "Los secretos referenciados se proporcionan a este programa y los valores directos se almacenan como texto sin formato",
 	"aiMcpEnvInvalid": "Variables de entorno no válidas; compruebe si hay nombres vacíos, duplicados o no válidos",

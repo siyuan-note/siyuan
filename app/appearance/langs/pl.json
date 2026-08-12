@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "Autor wtyczki wyłączył tę wtyczkę w usłudze publikowania",
+	"formatPainter": "Malarz formatów",
+	"formatPainterContinuous": "Ciągły malarz formatów",
+	"formatPainterActive": "Malarz formatów jest aktywny; kliknij, aby zakończyć",
+	"formatPainterContinuousActive": "Ciągły malarz formatów jest aktywny; kliknij, aby zakończyć",
 	"aiMcpEnv": "Zmienne środowiskowe",
 	"aiMcpEnvTip": "Wskazane sekrety są udostępniane temu programowi, a wartości wpisane bezpośrednio są przechowywane jako zwykły tekst",
 	"aiMcpEnvInvalid": "Nieprawidłowe zmienne środowiskowe; sprawdź puste, zduplikowane lub nieprawidłowe nazwy",

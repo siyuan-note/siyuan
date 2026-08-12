@@ -117,6 +117,7 @@ export class Options {
             "sup",
             "sub",
             "clear",
+            "format-painter",
             "|",
             "code",
             "kbd",

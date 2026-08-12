@@ -57,6 +57,23 @@
       border-left: 1px solid var(--b3-theme-surface-lighter);
       margin: 6px 4px;
     }
+
+    &__format-painter {
+      display: flex;
+
+      > .protyle-toolbar__item:first-child {
+        padding-right: 4px;
+      }
+
+      &-menu {
+        padding: 1px 3px 1px 0;
+
+        svg {
+          height: 10px;
+          width: 10px;
+        }
+      }
+    }
   }
 
   &-hint {

@@ -1,5 +1,9 @@
 {
 	"pluginDisabledInPublishTip": "플러그인 작성자가 게시 서비스에서 이 플러그인을 비활성화했습니다",
+	"formatPainter": "서식 복사",
+	"formatPainterContinuous": "서식 연속 복사",
+	"formatPainterActive": "서식 복사가 활성화됨; 종료하려면 클릭",
+	"formatPainterContinuousActive": "서식 연속 복사가 활성화됨; 종료하려면 클릭",
 	"aiMcpEnv": "환경 변수",
 	"aiMcpEnvTip": "참조된 비밀은 이 프로그램에 제공되며 직접 입력한 값은 일반 텍스트로 저장됩니다",
 	"aiMcpEnvInvalid": "환경 변수가 잘못되었습니다. 비어 있거나 중복되거나 잘못된 이름이 있는지 확인하세요",

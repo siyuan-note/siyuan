@@ -75,6 +75,7 @@ import {copyTextByType} from "../../protyle/toolbar/util";
 import {onlyProtyleCommand} from "./command/protyle";
 import {cancelDrag} from "./dragover";
 import {bindAVPanelKeydown} from "../../protyle/render/av/keydown";
+import {formatPainter} from "../../protyle/toolbar/FormatPainter";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -1527,6 +1528,10 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     if (event.key === "Escape" && !event.isComposing) {
+        if (formatPainter.deactivate()) {
+            event.preventDefault();
+            return;
+        }
         cancelDrag();
         const imgPreviewElement = document.querySelector(".protyle-img");
         if (imgPreviewElement) {

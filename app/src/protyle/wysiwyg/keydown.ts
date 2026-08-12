@@ -65,6 +65,7 @@ import {
 import {getBlockquoteContext, shouldCancelBlockquote} from "./blockquote";
 import {fontEvent} from "../toolbar/Font";
 import {applyTableCellStyleHotkey} from "../toolbar/tableCell";
+import {formatPainter} from "../toolbar/FormatPainter";
 import {
     addSubList,
     appendListItem,
@@ -1602,6 +1603,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // esc
         if (event.key === "Escape") {
+            if (formatPainter.deactivate()) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             if (event.repeat) {
                 // https://github.com/siyuan-note/siyuan/issues/12989
                 const cardElement = hasClosestByClassName(range.startContainer, "card__main", true);

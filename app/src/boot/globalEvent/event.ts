@@ -16,6 +16,7 @@ import {getDockByType} from "../../layout/tabUtil";
 import {fetchPost} from "../../util/fetch";
 import {initHarmonyTextSelectionMenu} from "../../util/harmonyTextSelectionMenu";
 import {clearDragTipGhost, hideDragTip} from "../../protyle/util/dragTip";
+import {formatPainter} from "../../protyle/toolbar/FormatPainter";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`.toLowerCase();
 
@@ -219,6 +220,7 @@ export const initWindowEvent = (app: App) => {
     });
 
     window.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
+        formatPainter.deactivateByPointer(event.target);
         const tabBarElement = hasClosestByClassName(event.target, "layout-tab-bar", true);
         const isWindowTabBar = tabBarElement && Array.from(tabBarElement.parentElement.children).some((item) =>
             item.classList.contains("layout-tab-bar--readonly"));

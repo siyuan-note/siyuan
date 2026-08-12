@@ -229,6 +229,11 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         icon: "iconClear",
         tipPosition: "n",
     }, {
+        name: "format-painter",
+        lang: "formatPainter",
+        icon: "iconFormat",
+        tipPosition: "n",
+    }, {
         name: "|",
     }];
     const toolbarResult: IMenuItem[] = [];

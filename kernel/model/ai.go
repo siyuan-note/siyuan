@@ -94,9 +94,34 @@ func BuildAIEditorPrompt(input, action string) string {
 	return action + ":\n\n" + input
 }
 
+const aiEditorSystemPrompt = `You are an inline editing engine, not a conversational assistant.
+Complete the user's request directly and output only the final content to insert.
+Never ask the user for clarification or additional information.
+If the request is ambiguous or information is incomplete, choose a reasonable interpretation and produce the best possible result using only the supplied content.
+Do not explain your process, mention missing context, add conversational preambles, or offer follow-up help.
+Preserve the source language and Markdown structure unless the user requests otherwise.
+Questions are allowed when they are part of the requested output; do not ask questions to clarify the task.`
+
 type AIEditorMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
+}
+
+func buildAIEditorMessages(prompt string, history []AIEditorMessage, maxHistoryMessages int) []openai.ChatCompletionMessage {
+	if maxHistoryMessages < len(history) {
+		history = history[len(history)-maxHistoryMessages:]
+	}
+	messages := make([]openai.ChatCompletionMessage, 0, len(history)+2)
+	messages = append(messages, openai.ChatCompletionMessage{Role: openai.ChatMessageRoleSystem, Content: aiEditorSystemPrompt})
+	for _, item := range history {
+		role := strings.TrimSpace(item.Role)
+		content := strings.TrimSpace(item.Content)
+		if "" == content || (openai.ChatMessageRoleUser != role && openai.ChatMessageRoleAssistant != role) {
+			continue
+		}
+		messages = append(messages, openai.ChatCompletionMessage{Role: role, Content: content})
+	}
+	return append(messages, openai.ChatCompletionMessage{Role: openai.ChatMessageRoleUser, Content: prompt})
 }
 
 type AIEditorChatStream struct {
@@ -142,19 +167,7 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 		return nil, errors.New("AI editor input is empty")
 	}
 
-	if editing.MaxHistoryMessages < len(history) {
-		history = history[len(history)-editing.MaxHistoryMessages:]
-	}
-	messages := make([]openai.ChatCompletionMessage, 0, len(history)+1)
-	for _, item := range history {
-		role := strings.TrimSpace(item.Role)
-		content := strings.TrimSpace(item.Content)
-		if "" == content || (openai.ChatMessageRoleUser != role && openai.ChatMessageRoleAssistant != role) {
-			continue
-		}
-		messages = append(messages, openai.ChatCompletionMessage{Role: role, Content: content})
-	}
-	messages = append(messages, openai.ChatCompletionMessage{Role: openai.ChatMessageRoleUser, Content: prompt})
+	messages := buildAIEditorMessages(prompt, history, editing.MaxHistoryMessages)
 
 	req := openai.ChatCompletionRequest{
 		Model:               m.Name,

@@ -8,8 +8,18 @@ const getAnimationOptions = (): KeyframeAnimationOptions => ({
     fill: "both",
 });
 
-export const expandFileTree = (element: HTMLElement, onFinish?: () => void) => {
+const setAnimationStyles = (element: HTMLElement) => {
     element.style.overflow = "clip";
+    element.style.position = "relative";
+};
+
+const clearAnimationStyles = (element: HTMLElement) => {
+    element.style.removeProperty("overflow");
+    element.style.removeProperty("position");
+};
+
+export const expandFileTree = (element: HTMLElement, onFinish?: () => void) => {
+    setAnimationStyles(element);
     const animation = element.animate([
         {height: "0"},
         {height: `${element.scrollHeight}px`},
@@ -19,11 +29,11 @@ export const expandFileTree = (element: HTMLElement, onFinish?: () => void) => {
         if (!element.isConnected) {
             return;
         }
-        element.style.removeProperty("overflow");
+        clearAnimationStyles(element);
         onFinish?.();
     }, () => {
         if (element.isConnected) {
-            element.style.removeProperty("overflow");
+            clearAnimationStyles(element);
         }
     });
 };
@@ -61,7 +71,7 @@ export const collapseFileTree = (liElement: Element, onFinish: () => void) => {
         return;
     }
 
-    leafElement.style.overflow = "clip";
+    setAnimationStyles(leafElement);
     const animation = leafElement.animate([
         {height: `${leafElement.scrollHeight}px`},
         {height: "0"},

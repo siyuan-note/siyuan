@@ -227,6 +227,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
 
     // 段首换行
     if (editableElement.textContent !== "" && range.toString() === "" && position.start === 0) {
+        const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range);
         let newElement;
         const previousBlockElement = getPreviousBlockSibling(blockElement);
         if (previousBlockElement?.getAttribute("data-type") === "NodeHeading" &&
@@ -246,6 +247,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         const undoOperations: IOperation[] = [{
             action: "delete",
             id: newId,
+            context: undoFocusContext,
         }];
         if (blockElement.parentElement.classList.contains("sb") &&
             blockElement.parentElement.getAttribute("data-sb-layout") === "col") {

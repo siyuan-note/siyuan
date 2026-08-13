@@ -27,7 +27,12 @@ import {
 } from "./getBlock";
 import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../../block/util";
-import {listOutdent, updateListOrder} from "./list";
+import {
+    getFocusedOrderedListRemoveOperations,
+    getFocusedParentOrderedList,
+    listOutdent,
+    updateListOrder
+} from "./list";
 import {zoomOut} from "../../menus/protyle";
 import {preventScroll} from "../scroll/preventScroll";
 import {hideElements} from "../ui/hideElements";
@@ -1637,6 +1642,16 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
         protyle, deletedListItemIDs, [listItemElement], [listItemId])) {
         return;
     }
+    const shouldUpdateParentList = listElement.classList.contains("protyle-wysiwyg") &&
+        listItemElement.getAttribute("data-subtype") === "o";
+    const focusedParentListElement = shouldUpdateParentList ?
+        await getFocusedParentOrderedList(protyle, listElement) : undefined;
+    if (shouldUpdateParentList && !focusedParentListElement) {
+        return;
+    }
+    if (!listItemElement.isConnected || !previousListItem.isConnected) {
+        return;
+    }
     moveToPrevious(blockElement, range, isDelete);
     range.insertNode(document.createElement("wbr"));
     const html = listElement.outerHTML;
@@ -1732,7 +1747,11 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
         }
         transaction(protyle, doOperations, undoOperations);
     } else if (listElement.classList.contains("protyle-wysiwyg")) {
-        transaction(protyle, doOperations, undoOperations);
+        const orderOperations = focusedParentListElement ?
+            getFocusedOrderedListRemoveOperations(focusedParentListElement,
+                previousListItem as HTMLElement, listItemId) : {doOperations: [], undoOperations: []};
+        transaction(protyle, [...doOperations, ...orderOperations.doOperations],
+            [...undoOperations, ...orderOperations.undoOperations]);
     } else {
         if (listElement.getAttribute("data-subtype") === "o") {
             updateListOrder(listElement);

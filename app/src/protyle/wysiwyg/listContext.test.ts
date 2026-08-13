@@ -281,6 +281,8 @@ describe("getOrderedListMarkerUpdates", () => {
             [undefined, undefined, "12.", "13.", "14.", "15."]);
         assert.deepEqual(getOrderedListMarkerUpdates(["10.", "11.", "1.", "12.", "13.", "14.", "15."]),
             [undefined, undefined, "12.", "13.", "14.", "15.", "16."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["10.", "11.", "14.", "15.", "16.", "17.", "18."]),
+            [undefined, undefined, "12.", "13.", "14.", "15.", "16."]);
     });
 });
 

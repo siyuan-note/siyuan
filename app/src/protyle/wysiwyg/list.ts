@@ -240,6 +240,28 @@ export const getFocusedOrderedListInsertOperations = (listElement: HTMLElement, 
     return {doOperations, undoOperations};
 };
 
+export const getFocusedOrderedListRemoveOperations = (listElement: HTMLElement,
+                                                      previousListItemElement: HTMLElement,
+                                                      removedListItemID: string) => {
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    if (listElement.getAttribute("data-subtype") !== "o") {
+        return {doOperations, undoOperations};
+    }
+    const previousClone = getDirectListItemByID(listElement,
+        previousListItemElement.getAttribute("data-node-id"));
+    const removedClone = getDirectListItemByID(listElement, removedListItemID);
+    if (!previousClone || !removedClone) {
+        return {doOperations, undoOperations};
+    }
+    const oldHTML = listElement.outerHTML;
+    const startIndex = Number.parseInt(getOrderedListItemElements(listElement)[0]?.getAttribute("data-marker"), 10);
+    previousClone.replaceWith(previousListItemElement.cloneNode(true));
+    removedClone.remove();
+    appendFocusedListUpdate(listElement, oldHTML, doOperations, undoOperations, startIndex);
+    return {doOperations, undoOperations};
+};
+
 const appendFocusedIndentListUpdate = (listElement: HTMLElement, previousElement: HTMLElement,
                                        movedElements: Element[], doOperations: IOperation[],
                                        undoOperations: IOperation[]) => {
@@ -753,6 +775,7 @@ export const listIndent = async (protyle: IProtyle, liItemElements: Element[], r
                 appendFocusedIndentListUpdate(focusedParentListElement, previousElement as HTMLElement,
                     liItemElements, doOperations, undoOperations);
             }
+            newLastPreviousElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             transaction(protyle, doOperations, undoOperations);
         }
     } else {
@@ -873,6 +896,7 @@ export const listIndent = async (protyle: IProtyle, liItemElements: Element[], r
                 appendFocusedIndentListUpdate(focusedParentListElement, previousElement as HTMLElement,
                     liItemElements, doOperations, undoOperations);
             }
+            previousElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
             transaction(protyle, doOperations, undoOperations);
         }
     }

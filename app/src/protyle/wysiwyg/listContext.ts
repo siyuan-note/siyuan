@@ -54,6 +54,13 @@ export const getFirstListItemElement = (listElement: HTMLElement) => {
         item.getAttribute("data-type") === "NodeListItem") as HTMLElement | undefined;
 };
 
+export const getPreviousListItemID = (listElement: HTMLElement, listItemID: string) => {
+    const listItemElements = Array.from(listElement.children).filter((item) =>
+        item.getAttribute("data-type") === "NodeListItem");
+    const index = listItemElements.findIndex((item) => item.getAttribute("data-node-id") === listItemID);
+    return index > 0 ? listItemElements[index - 1].getAttribute("data-node-id") : undefined;
+};
+
 export const getListContext = (nodeElement: HTMLElement, editorElement: HTMLElement): TListContext | undefined => {
     let listItemElement: HTMLElement | null = nodeElement;
     while (listItemElement && listItemElement !== editorElement &&

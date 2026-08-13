@@ -9,6 +9,7 @@ import {
     getListConversionType,
     getOrderedListMarkerUpdates,
     getOrderedListMaxStart,
+    getPreviousListItemID,
     getListShortcutAction,
     parseOrderedListStart,
     shouldIgnoreListShortcut,
@@ -184,6 +185,19 @@ describe("getFirstListItemElement", () => {
         const list = new TestElement("NodeList", "list", "u").append(new TestElement(), first, last);
 
         assert.equal(getFirstListItemElement(asHTMLElement(list)), asHTMLElement(first));
+    });
+});
+
+describe("getPreviousListItemID", () => {
+    it("returns the original predecessor of a focused list item", () => {
+        const first = new TestElement("NodeListItem", "first", "o");
+        const middle = new TestElement("NodeListItem", "middle", "o");
+        const last = new TestElement("NodeListItem", "last", "o");
+        const list = new TestElement("NodeList", "list", "o").append(first, middle, last, new TestElement());
+
+        assert.equal(getPreviousListItemID(asHTMLElement(list), "middle"), "first");
+        assert.equal(getPreviousListItemID(asHTMLElement(list), "first"), undefined);
+        assert.equal(getPreviousListItemID(asHTMLElement(list), "missing"), undefined);
     });
 });
 

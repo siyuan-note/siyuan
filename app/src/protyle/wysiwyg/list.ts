@@ -15,6 +15,7 @@ import {
     getLastListItemElement,
     getOrderedListMarkerUpdates,
     getOrderedListMaxStart,
+    getPreviousListItemID,
     parseOrderedListStart,
     type TListSubtype
 } from "./listContext";
@@ -268,6 +269,32 @@ export const getFocusedOrderedListRemoveOperations = (listElement: HTMLElement,
     removedClone.remove();
     appendFocusedListUpdate(listElement, oldHTML, doOperations, undoOperations, startIndex);
     return {doOperations, undoOperations};
+};
+
+export const getFocusedOrderedListDeleteOperations = (listElement: HTMLElement,
+                                                      removedListItemElement: HTMLElement) => {
+    if (listElement.getAttribute("data-subtype") !== "o" ||
+        removedListItemElement.getAttribute("data-subtype") !== "o") {
+        return;
+    }
+    const removedListItemID = removedListItemElement.getAttribute("data-node-id");
+    const removedClone = getDirectListItemByID(listElement, removedListItemID);
+    if (!removedClone) {
+        return;
+    }
+    const previousID = getPreviousListItemID(listElement, removedListItemID);
+    removedClone.replaceWith(removedListItemElement.cloneNode(true));
+    const updatedRemovedClone = getDirectListItemByID(listElement, removedListItemID);
+    if (!updatedRemovedClone) {
+        return;
+    }
+    const oldHTML = listElement.outerHTML;
+    const startIndex = getOrderedListStart(listElement);
+    updatedRemovedClone.remove();
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    appendFocusedListUpdate(listElement, oldHTML, doOperations, undoOperations, startIndex);
+    return {doOperations, undoOperations, previousID};
 };
 
 const appendFocusedIndentListUpdate = (listElement: HTMLElement, previousElement: HTMLElement,

@@ -28,6 +28,7 @@ import {
 import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../../block/util";
 import {
+    getFocusedOrderedListDeleteOperations,
     getFocusedOrderedListRemoveOperations,
     getFocusedParentOrderedList,
     getOrderedListStart,
@@ -683,6 +684,10 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                                   type: "Delete" | "Backspace" | "remove", skipRefCheck = false) => {
     const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
     if (selectElements?.length > 0) {
+        const selectedTopElement = selectElements.length === 1 ? getTopAloneElement(selectElements[0]) : undefined;
+        const focusedOrderedListItem = selectedTopElement?.parentElement === protyle.wysiwyg.element &&
+            selectedTopElement.getAttribute("data-type") === "NodeListItem" &&
+            selectedTopElement.getAttribute("data-subtype") === "o" ? selectedTopElement as HTMLElement : undefined;
         const embedSelectElements = selectElements.filter(item => isInEmbedBlock(item));
         if (embedSelectElements.length > 0) {
             // 嵌入块内暂不支持跨边界或多块删除，避免上溯时删除查询目标。
@@ -741,6 +746,18 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 return false;
             }
             if (selectElements.some(item => !item.isConnected || !item.classList.contains("protyle-wysiwyg--select"))) {
+                return false;
+            }
+        }
+        let focusedOrderOperations: ReturnType<typeof getFocusedOrderedListDeleteOperations>;
+        if (focusedOrderedListItem) {
+            const focusedParentListElement = await getFocusedParentOrderedList(protyle, protyle.wysiwyg.element);
+            if (!focusedParentListElement) {
+                return false;
+            }
+            focusedOrderOperations = getFocusedOrderedListDeleteOperations(focusedParentListElement,
+                focusedOrderedListItem);
+            if (!focusedOrderOperations) {
                 return false;
             }
         }
@@ -839,6 +856,9 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 }
                 const previousBlockElement = getPreviousBlockSibling(topElement);
                 let previousID = previousBlockElement ? previousBlockElement.getAttribute("data-node-id") : "";
+                if (focusedOrderOperations && id === focusedOrderedListItem.getAttribute("data-node-id")) {
+                    previousID = focusedOrderOperations.previousID || "";
+                }
                 if (previousBlockElement &&
                     previousBlockElement.getAttribute("data-type") === "NodeHeading" &&
                     previousBlockElement.getAttribute("fold") === "1") {
@@ -935,6 +955,10 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     });
                 }
             }
+        }
+        if (focusedOrderOperations) {
+            deletes.push(...focusedOrderOperations.doOperations);
+            inserts.splice(0, 0, ...focusedOrderOperations.undoOperations);
         }
         if (deletes.length > 0) {
             if (topParentElement && topParentElement.getAttribute("data-type") === "NodeSuperBlock" && getSbChildBlockCount(topParentElement) === 1) {

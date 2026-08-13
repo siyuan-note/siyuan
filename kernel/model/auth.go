@@ -60,14 +60,21 @@ var (
 	jwtKeyErr  error
 )
 
-func InitJwtKey() error {
+func InitJwtKey() {
 	jwtKeyOnce.Do(func() {
-		if _, err := rand.Read(jwtKey); err != nil {
-			jwtKeyErr = err
-			logging.LogErrorf("generate JWT signing key failed: %s", err)
+		err := refreshJwtKey()
+		if err != nil {
+			logging.LogFatalf(logging.ExitCodeFatal, "initialize JWT signing key failed: %s", err)
 		}
 	})
-	return jwtKeyErr
+}
+
+func refreshJwtKey() error {
+	if _, err := rand.Read(jwtKey); err != nil {
+		logging.LogErrorf("generate JWT signing key failed: %s", err)
+		return err
+	}
+	return nil
 }
 
 func GetBasicAuthAccount(username string) *Account {

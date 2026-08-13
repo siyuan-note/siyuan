@@ -63,9 +63,7 @@ var serveCmd = &cobra.Command{
 
 		util.BootWithFlags(ws, serveWdPath, servePort, serveReadOnly, serveAccessAuthCode, serveLang, serveMode, serveSSL, serveAttachUI, serveSafeMode, serveEnablePprof)
 
-		if err := model.InitJwtKey(); err != nil {
-			logging.LogFatalf(logging.ExitCodeFatal, "initialize JWT signing key failed: %s", err)
-		}
+		model.InitJwtKey()
 		model.InitConf()
 		go server.Serve(false, model.Conf.CookieKey)
 		model.InitAppearance()

@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthTaskList": "Tam genişlikli görev listesi sözdizimi",
+	"editorMarkdownInlineFullWidthTaskListTip": "Etkinleştirildiğinde <code>【】</code> ve <code>【x】</code> görev listesi sözdizimi girişi desteklenir",
 	"duplicateCopy": "Kopya oluştur",
 	"runeCountWithEmbed": "Gömülü bloklarla karakterler",
 	"wordCountWithEmbed": "Gömülü bloklarla kelimeler",

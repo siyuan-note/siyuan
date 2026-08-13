@@ -315,6 +315,10 @@ const registerEditorMarkdownInlineGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.editorMarkdownInlineFullWidthStrikethrough,
         desc: window.siyuan.languages.editorMarkdownInlineFullWidthStrikethroughTip,
     });
+    group.switch("editor.markdown.inlineFullWidthTaskList", {
+        title: window.siyuan.languages.editorMarkdownInlineFullWidthTaskList,
+        desc: window.siyuan.languages.editorMarkdownInlineFullWidthTaskListTip,
+    });
     group.switch("editor.markdown.inlineMark", {
         title: window.siyuan.languages.editorMarkdownInlineMark,
         desc: window.siyuan.languages.editorMarkdownInlineMarkTip,

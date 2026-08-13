@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthTaskList": "Повноширинний синтаксис списку завдань",
+	"editorMarkdownInlineFullWidthTaskListTip": "Після ввімкнення підтримуватиметься введення синтаксису списку завдань <code>【】</code> і <code>【x】</code>",
 	"duplicateCopy": "Створити дублікат",
 	"runeCountWithEmbed": "Символи з урахуванням вбудованих блоків",
 	"wordCountWithEmbed": "Слова з урахуванням вбудованих блоків",

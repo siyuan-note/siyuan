@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthTaskList": "Full-width task list syntax",
+	"editorMarkdownInlineFullWidthTaskListTip": "When enabled, <code>【】</code> and <code>【x】</code> task list syntax input will be supported",
 	"duplicateCopy": "Create copy",
 	"runeCountWithEmbed": "Characters with embed blocks",
 	"wordCountWithEmbed": "Words with embed blocks",

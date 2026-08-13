@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthTaskList": "全角任务列表语法",
+	"editorMarkdownInlineFullWidthTaskListTip": "启用后将支持 <code>【】</code> 和 <code>【x】</code> 任务列表语法输入",
 	"duplicateCopy": "创建副本",
 	"runeCountWithEmbed": "含嵌入块字符数",
 	"wordCountWithEmbed": "含嵌入块字数",

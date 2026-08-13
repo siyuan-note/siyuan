@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthTaskList": "Vollbreite Aufgabenlistensyntax",
+	"editorMarkdownInlineFullWidthTaskListTip": "Wenn aktiviert, wird die Eingabe der Aufgabenlistensyntax <code>【】</code> und <code>【x】</code> unterstützt",
 	"duplicateCopy": "Kopie erstellen",
 	"runeCountWithEmbed": "Zeichen einschließlich eingebetteter Blöcke",
 	"wordCountWithEmbed": "Wörter einschließlich eingebetteter Blöcke",

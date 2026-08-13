@@ -493,6 +493,10 @@ declare namespace Config {
          */
         inlineFullWidthStrikethrough: boolean;
         /**
+         * Whether to enable the full-width task list shortcut
+         */
+        inlineFullWidthTaskList: boolean;
+        /**
          * Whether to enable the inline mark
          */
         inlineMark: boolean;

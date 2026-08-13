@@ -35,6 +35,7 @@ var MarkdownSettings = &Markdown{
 	InlineMath:                   true,
 	InlineStrikethrough:          true,
 	InlineFullWidthStrikethrough: false,
+	InlineFullWidthTaskList:      new(true),
 	InlineMark:                   true,
 	CodeBlockMiddleDot:           new(true),
 }
@@ -48,6 +49,7 @@ type Markdown struct {
 	InlineMath                   bool  `json:"inlineMath"`                   // 是否启用行级公式
 	InlineStrikethrough          bool  `json:"inlineStrikethrough"`          // 是否启用行级删除线
 	InlineFullWidthStrikethrough bool  `json:"inlineFullWidthStrikethrough"` // 是否启用全角行级删除线
+	InlineFullWidthTaskList      *bool `json:"inlineFullWidthTaskList"`      // 是否启用全角任务列表快捷输入
 	InlineMark                   bool  `json:"inlineMark"`                   // 是否启用行级标记
 	CodeBlockMiddleDot           *bool `json:"codeBlockMiddleDot"`           // 是否启用中点代码块快捷输入
 }

@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthTaskList": "Sintaxe de lista de tarefas de largura total",
+	"editorMarkdownInlineFullWidthTaskListTip": "Quando ativado, será possível inserir a sintaxe de lista de tarefas <code>【】</code> e <code>【x】</code>",
 	"duplicateCopy": "Criar cópia",
 	"runeCountWithEmbed": "Caracteres com blocos incorporados",
 	"wordCountWithEmbed": "Palavras com blocos incorporados",

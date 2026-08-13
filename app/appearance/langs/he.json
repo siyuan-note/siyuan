@@ -1,4 +1,6 @@
 {
+	"editorMarkdownInlineFullWidthTaskList": "תחביר רשימת משימות ברוחב מלא",
+	"editorMarkdownInlineFullWidthTaskListTip": "כאשר האפשרות מופעלת, תתאפשר הזנת תחביר רשימת המשימות <code>【】</code> ו-<code>【x】</code>",
 	"duplicateCopy": "צור עותק",
 	"runeCountWithEmbed": "תווים כולל בלוקים מוטמעים",
 	"wordCountWithEmbed": "מילים כולל בלוקים מוטמעים",

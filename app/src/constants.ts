@@ -472,6 +472,7 @@ export abstract class Constants {
             stickSearch: {default: "⇧⌘F", custom: "⇧⌘F"},
             replace: {default: "⌘R", custom: "⌘R"},
             closeTab: {default: "⌘W", custom: "⌘W"},
+            agentChat: {default: "", custom: ""},
             fileTree: {default: "⌃1", custom: "⌃1"},
             outline: {default: "⌃2", custom: "⌃2"},
             bookmark: {default: "⌃3", custom: "⌃3"},

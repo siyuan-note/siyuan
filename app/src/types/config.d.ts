@@ -1333,6 +1333,7 @@ declare namespace Config {
         stickSearch: IKey;
         replace: IKey;
         closeTab: IKey;
+        agentChat: IKey;
         fileTree: IKey;
         outline: IKey;
         bookmark: IKey;

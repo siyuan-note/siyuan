@@ -194,6 +194,10 @@
       }
     }
 
+    & > [data-type="text"] {
+      align-self: flex-start;
+    }
+
     [placeholder]:empty::after {
       color: var(--b3-empty-color);
       content: attr(placeholder);
@@ -226,7 +230,6 @@
   }
 
   textarea.b3-text-field--text {
-    align-self: flex-start;
     field-sizing: content;
   }
 

@@ -7,6 +7,7 @@ import {Constants} from "../../constants";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {exportLayout} from "../../layout/util";
+import {updateDockHotkeys} from "../../layout/dock/util";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/keydown";
 import {normalizeSearchText} from "../search/normalize";
@@ -657,6 +658,7 @@ const setKeymapFromDom = (root: HTMLElement) => {
     });
     const oldToggleWin = window.siyuan.config.keymap.general.toggleWin.custom;
     window.siyuan.config.keymap = data;
+    updateDockHotkeys();
     fetchPost("/api/setting/setKeymap", {
         data,
     }, () => {

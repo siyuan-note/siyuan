@@ -17,6 +17,7 @@
 package util
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -166,6 +167,46 @@ func SSRFSafeDialer(timeout time.Duration) *net.Dialer {
 			}
 			return nil
 		},
+	}
+}
+
+// ssrfSafeDialContext 返回智能体出站请求专用的拨号函数：拨号时自行解析主机名并拒绝私网地址，
+// 同时直接连接解析出的公网 IP，使 CheckHostSSRF 的守卫结果与拨号目标一致，
+// 从根上杜绝 DNS 重绑定导致的 TOCTOU 绕过。
+// 与 SSRFSafeDialer 不同，本拨号函数不依赖 SafeMode，始终强制执行。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-x8gv-g2g3-65fj
+func ssrfSafeDialContext(timeout time.Duration) func(ctx context.Context, network, addr string) (net.Conn, error) {
+	dialer := &net.Dialer{Timeout: timeout}
+	return func(ctx context.Context, network, addr string) (net.Conn, error) {
+		host, port, err := net.SplitHostPort(addr)
+		if err != nil {
+			return nil, err
+		}
+		if ip := net.ParseIP(host); ip != nil {
+			if isPrivateIP(ip) {
+				return nil, errors.New("access to private/internal IP is prohibited")
+			}
+			return dialer.DialContext(ctx, network, addr)
+		}
+		ips, err := net.DefaultResolver.LookupIPAddr(ctx, host)
+		if err != nil {
+			return nil, err
+		}
+		var lastErr error
+		for _, ipAddr := range ips {
+			if isPrivateIP(ipAddr.IP) {
+				continue
+			}
+			conn, err := dialer.DialContext(ctx, network, net.JoinHostPort(ipAddr.IP.String(), port))
+			if err == nil {
+				return conn, nil
+			}
+			lastErr = err
+		}
+		if lastErr != nil {
+			return nil, lastErr
+		}
+		return nil, errors.New("host has no public IP: " + host)
 	}
 }
 

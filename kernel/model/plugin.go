@@ -59,6 +59,8 @@ var (
 	OnKernelPluginStop   func(petal *Petal) // Called when a plugin is disabled (before stopping and unloading the plugin)
 	OnKernelPluginsStart func()             // Called to start all valid plugins
 	OnKernelPluginsStop  func()             // Called to stopping all valid plugins
+
+	OnPluginJwtKeyRefresh func() // Called when JWT signing key is refreshed
 )
 
 func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {

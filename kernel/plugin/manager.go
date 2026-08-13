@@ -76,6 +76,8 @@ func InitManager() {
 	model.OnKernelPluginsStart = func() { GetManager().Start() }
 	model.OnKernelPluginsStop = func() { GetManager().Stop() }
 
+	model.OnPluginJwtKeyRefresh = func() { GetManager().RefreshJwtKey() }
+
 	m.Start()
 }
 
@@ -231,6 +233,18 @@ func (m *PluginManager) Stop() {
 
 	m.state = PluginManagerStateStopped
 	logging.LogInfof("kernel plugin manager stopped, %d/%d plugin(s) unloaded", counter, all)
+}
+
+// RefreshJwtKey refreshes the JWT signing key for all loaded plugins.
+func (m *PluginManager) RefreshJwtKey() {
+	logging.LogInfof("kernel plugin manager refreshing JWT signing key for all plugins")
+
+	m.plugins.Range(func(key, value any) bool {
+		if p, ok := value.(*KernelPlugin); ok {
+			p.RefreshJwtKey()
+		}
+		return true
+	})
 }
 
 // StartPlugin starts a single kernel plugin.

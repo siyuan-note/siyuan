@@ -58,38 +58,6 @@
       margin: 6px 4px;
     }
 
-    &__format-painter {
-      display: flex;
-
-      > .protyle-toolbar__item {
-        border-radius: 0;
-      }
-
-      > .protyle-toolbar__item:first-child {
-        padding-right: 4px;
-      }
-
-      &:first-child > .protyle-toolbar__item:first-child {
-        border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
-      }
-
-      &:last-child > .protyle-toolbar__item:last-child {
-        border-radius: 0 var(--b3-border-radius) var(--b3-border-radius) 0;
-      }
-
-      &-menu {
-        align-items: center;
-        display: flex;
-        justify-content: center;
-        padding: 0;
-        width: 16px;
-
-        svg {
-          height: 10px;
-          width: 10px;
-        }
-      }
-    }
   }
 
   &-hint {

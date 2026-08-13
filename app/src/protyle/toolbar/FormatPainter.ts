@@ -161,41 +161,31 @@ export class FormatPainter {
     public element: HTMLElement;
 
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
-        this.element = document.createElement("div");
-        this.element.className = "protyle-toolbar__format-painter";
-
-        const buttonElement = document.createElement("button");
-        buttonElement.className = "protyle-toolbar__item b3-tooltips b3-tooltips__n";
-        buttonElement.setAttribute("data-type", menuItem.name);
-        buttonElement.setAttribute("aria-label", window.siyuan.languages.formatPainter);
-        buttonElement.innerHTML = '<svg><use xlink:href="#iconFormat"></use></svg>';
-        buttonElement.addEventListener("mousedown", event => event.preventDefault());
-        buttonElement.addEventListener("click", event => {
-            event.preventDefault();
-            formatPainter.activate(protyle, "once");
-        });
-
-        const menuElement = document.createElement("button");
-        menuElement.className = "protyle-toolbar__item protyle-toolbar__format-painter-menu " +
-            "b3-tooltips b3-tooltips__n";
-        menuElement.setAttribute("data-menu", "true");
-        menuElement.setAttribute("aria-label", window.siyuan.languages.formatPainterContinuous);
-        menuElement.innerHTML = '<svg><use xlink:href="#iconDown"></use></svg>';
-        menuElement.addEventListener("mousedown", event => event.preventDefault());
-        menuElement.addEventListener("click", event => {
+        this.element = document.createElement("button");
+        this.element.className = "protyle-toolbar__item b3-tooltips b3-tooltips__n";
+        this.element.setAttribute("data-type", menuItem.name);
+        this.element.setAttribute("data-menu", "true");
+        this.element.setAttribute("aria-label", window.siyuan.languages.formatPainter);
+        this.element.innerHTML = '<svg><use xlink:href="#iconFormat"></use></svg>';
+        this.element.addEventListener("mousedown", event => event.preventDefault());
+        this.element.addEventListener("click", event => {
             event.preventDefault();
             window.siyuan.menus.menu.remove();
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconFormat",
-                label: window.siyuan.languages.formatPainterContinuous,
-                click: () => {
-                    formatPainter.activate(protyle, "continuous");
-                },
-            }).element);
-            const rect = menuElement.getBoundingClientRect();
+            const items: {label: string, mode: TFormatPainterMode}[] = [
+                {label: window.siyuan.languages.formatPainter, mode: "once"},
+                {label: window.siyuan.languages.formatPainterContinuous, mode: "continuous"},
+            ];
+            items.forEach(item => {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    iconHTML: "",
+                    label: item.label,
+                    click: () => {
+                        formatPainter.activate(protyle, item.mode);
+                    },
+                }).element);
+            });
+            const rect = this.element.getBoundingClientRect();
             window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
         });
-
-        this.element.append(buttonElement, menuElement);
     }
 }

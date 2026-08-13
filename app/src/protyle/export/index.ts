@@ -279,6 +279,10 @@ const renderPDF = async (id: string) => {
         .b3-label:last-child {
             border-bottom: none;
         }
+
+        #mergeHeadingOptions .b3-label:last-child {
+            border-bottom: 1px solid var(--b3-theme-surface-lighter);
+        }
         
         #preview .render-node[data-subtype="plantuml"] object {
             max-width: 100%;

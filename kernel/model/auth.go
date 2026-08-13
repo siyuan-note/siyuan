@@ -18,6 +18,7 @@ package model
 
 import (
 	"crypto/rand"
+	"errors"
 	"net/http"
 	"slices"
 	"sync"
@@ -46,6 +47,7 @@ const (
 
 	iss                    = "siyuan-kernel"         // token 的发行者
 	publishServiceAudience = "siyuan-publish-server" // 发布服务 token 的受众
+	kernelPluginAudience   = "siyuan-kernel-plugin"  // 内核插件 token 的受众
 
 	ClaimsKeyRole string = "role"
 )
@@ -57,6 +59,8 @@ var (
 
 	jwtKey     = make([]byte, 32)
 	jwtKeyOnce sync.Once
+
+	ErrInvalidPublishServiceToken = errors.New("invalid publish service token")
 )
 
 func InitJwtKey() {
@@ -153,7 +157,7 @@ func CreatePluginJWT(name string) (string, error) {
 		jwt.MapClaims{
 			"iss": iss,
 			"sub": name,
-			"aud": "siyuan-kernel-plugin",
+			"aud": kernelPluginAudience,
 			"jti": uuid.New().String(),
 
 			ClaimsKeyRole: RoleAdministrator,
@@ -167,15 +171,26 @@ func CreatePluginJWT(name string) (string, error) {
 	}
 }
 
-func ParseJWT(tokenString string) (*jwt.Token, error) {
+func ParseJWT(tokenString string) (token *jwt.Token, err error) {
 	// REF: https://golang-jwt.github.io/jwt/usage/parse/
-	return jwt.Parse(
+	token, err = jwt.Parse(
 		tokenString,
 		func(token *jwt.Token) (any, error) {
 			return jwtKey, nil
 		},
 		jwt.WithIssuer(iss),
 	)
+	if err != nil {
+		return
+	}
+
+	if IsPublishServiceToken(token) {
+		if !IsValidPublishServiceToken(token) {
+			err = ErrInvalidPublishServiceToken
+			return
+		}
+	}
+	return
 }
 
 func ParseXAuthToken(r *http.Request) *jwt.Token {
@@ -213,4 +228,24 @@ func IsPublishServiceToken(token *jwt.Token) bool {
 	}
 	audience, err := claims.GetAudience()
 	return err == nil && slices.Contains(audience, publishServiceAudience)
+}
+
+// IsValidPublishServiceToken 检查 token 是否来自发布服务且有效
+func IsValidPublishServiceToken(token *jwt.Token) bool {
+	if !IsPublishServiceToken(token) {
+		return false
+	}
+
+	claims := GetTokenClaims(token)
+	username, ok := claims["sub"].(string)
+	if !ok {
+		return false
+	}
+
+	account := GetBasicAuthAccount(username)
+	if account == nil || account.Token != token.Raw {
+		return false
+	}
+
+	return true
 }

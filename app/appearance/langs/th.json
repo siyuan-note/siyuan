@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "สร้างสำเนา",
 	"runeCountWithEmbed": "อักขระรวมบล็อกฝัง",
 	"wordCountWithEmbed": "คำรวมบล็อกฝัง",
 	"embedStatIncomplete": "สถิติไม่สมบูรณ์เนื่องจากไม่สามารถนับบล็อกฝังบางรายการได้",
@@ -1609,7 +1610,7 @@
 	"sub": "ตัวห้อย",
 	"enter": "ซูมเข้า",
 	"enterBack": "ซูมออก",
-	"duplicate": "สร้างสำเนา",
+	"duplicate": "สร้างสำเนา / สร้างสำเนามิเรอร์",
 	"turnInto": "เปลี่ยนเป็น",
 	"split": "แบ่ง",
 	"underline": "ขีดเส้นใต้",

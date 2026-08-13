@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "إنشاء نسخة",
 	"runeCountWithEmbed": "عدد الأحرف مع الكتل المضمنة",
 	"wordCountWithEmbed": "عدد الكلمات مع الكتل المضمنة",
 	"embedStatIncomplete": "الإحصاءات غير مكتملة لتعذر احتساب بعض الكتل المضمنة",
@@ -1609,7 +1610,7 @@
 	"sub": "نص منخفض",
 	"enter": "تركيز",
 	"enterBack": "العودة للمستوى الأعلى",
-	"duplicate": "إنشاء نسخة",
+	"duplicate": "إنشاء نسخة / إنشاء نسخة مرآة",
 	"turnInto": "تحويل إلى",
 	"split": "تقسيم",
 	"underline": "خط سفلي",

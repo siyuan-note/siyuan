@@ -105,7 +105,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
     menu.addItem({
         id: "duplicate",
         icon: "iconCopy",
-        label: window.siyuan.languages.duplicate,
+        label: window.siyuan.languages.duplicateCopy,
         click() {
             document.querySelector(".av__panel")?.remove();
             const id = Lute.NewNodeID();
@@ -314,7 +314,7 @@ export const getViewHTML = (data: IAV) => {
     <svg class="b3-menu__icon">
         <use xlink:href="#iconCopy"></use>
     </svg>
-    <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.duplicateCopy}</span>
 </button>
 <button class="b3-menu__item b3-menu__item--warning${data.views.length > 1 ? "" : " fn__none"}" data-type="delete-view">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>

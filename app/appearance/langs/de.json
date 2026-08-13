@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "Kopie erstellen",
 	"runeCountWithEmbed": "Zeichen einschließlich eingebetteter Blöcke",
 	"wordCountWithEmbed": "Wörter einschließlich eingebetteter Blöcke",
 	"embedStatIncomplete": "Die Statistik ist unvollständig, da einige eingebettete Blöcke nicht gezählt werden konnten",
@@ -1609,7 +1610,7 @@
 	"sub": "Tiefgestellt",
 	"enter": "Vergrößern",
 	"enterBack": "Verkleinern",
-	"duplicate": "Kopie erstellen",
+	"duplicate": "Kopie erstellen / Spiegelkopie erstellen",
 	"turnInto": "Umwandeln in",
 	"split": "Teilen",
 	"underline": "Unterstreichen",

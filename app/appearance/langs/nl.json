@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "Kopie maken",
 	"runeCountWithEmbed": "Tekens inclusief ingesloten blokken",
 	"wordCountWithEmbed": "Woorden inclusief ingesloten blokken",
 	"embedStatIncomplete": "De statistieken zijn onvolledig omdat sommige ingesloten blokken niet konden worden geteld",
@@ -1609,7 +1610,7 @@
 	"sub": "Onderschrift",
 	"enter": "Inzoomen",
 	"enterBack": "Uitzoomen",
-	"duplicate": "Kopie maken",
+	"duplicate": "Kopie maken / Spiegelkopie maken",
 	"turnInto": "Omzetten naar",
 	"split": "Splitsen",
 	"underline": "Onderstreping",

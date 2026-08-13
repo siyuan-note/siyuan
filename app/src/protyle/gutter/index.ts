@@ -1271,7 +1271,7 @@ export class Gutter {
             copyMenu.push({
                 id: "duplicate",
                 iconHTML: "",
-                label: window.siyuan.languages.duplicate,
+                label: window.siyuan.languages.duplicateCopy,
                 accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
                 click() {
                     duplicateBlock(selectsElement, protyle);
@@ -3306,7 +3306,7 @@ export class Gutter {
             copyMenu.push({
                 id: "duplicate",
                 iconHTML: "",
-                label: window.siyuan.languages.duplicate,
+                label: window.siyuan.languages.duplicateCopy,
                 accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
                 click() {
                     duplicateBlock([nodeElement], protyle);

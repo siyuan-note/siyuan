@@ -1421,7 +1421,7 @@ export class TableControl {
             if (this.selection.mode !== "cell") {
                 menu.append(new MenuItem({
                     icon: "iconCopy",
-                    label: window.siyuan.languages.duplicate,
+                    label: window.siyuan.languages.duplicateCopy,
                     disabled: merged,
                     action: merged ? "iconInfo" : undefined,
                     actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,

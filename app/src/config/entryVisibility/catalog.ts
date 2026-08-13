@@ -105,7 +105,7 @@ const importChildren = () => [
 ];
 
 const docTreeCommon = (multi = false) => [
-    node("copy", lang("copy"), true, [...copyChildren(), node("duplicate", lang("duplicate"))]),
+    node("copy", lang("copy"), true, [...copyChildren(), node("duplicate", lang("duplicateCopy"))]),
     node("move", lang("move")),
     node("addToDatabase", lang("addToDatabase"), false),
     node("delete", lang("delete")),
@@ -161,7 +161,7 @@ const gutterCopyChildren = () => [
     node("copyText", lang("copyText")),
     node("copy", lang("copy")),
     node("copyAVID", lang("copyAVID")),
-    node("duplicate", lang("duplicate")),
+    node("duplicate", lang("duplicateCopy")),
     node("duplicateMirror", lang("duplicateMirror")),
     node("duplicateCompletely", lang("duplicateCompletely")),
 ];

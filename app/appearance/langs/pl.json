@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "Utwórz kopię",
 	"runeCountWithEmbed": "Znaki z osadzonymi blokami",
 	"wordCountWithEmbed": "Słowa z osadzonymi blokami",
 	"embedStatIncomplete": "Statystyki są niepełne, ponieważ nie udało się policzyć niektórych osadzonych bloków",
@@ -1609,7 +1610,7 @@
 	"sub": "Indeks dolny",
 	"enter": "Powiększ",
 	"enterBack": "Pomniejsz",
-	"duplicate": "Utwórz kopię",
+	"duplicate": "Utwórz kopię / Utwórz kopię lustrzaną",
 	"turnInto": "Zmień w",
 	"split": "Podziel",
 	"underline": "Podkreślenie",

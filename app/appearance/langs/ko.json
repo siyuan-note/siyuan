@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "사본 만들기",
 	"runeCountWithEmbed": "임베드 블록 포함 글자 수",
 	"wordCountWithEmbed": "임베드 블록 포함 단어 수",
 	"embedStatIncomplete": "일부 임베드 블록을 계산할 수 없어 통계가 완전하지 않습니다",
@@ -1609,7 +1610,7 @@
 	"sub": "아래첨자",
 	"enter": "확대",
 	"enterBack": "축소",
-	"duplicate": "사본 만들기",
+	"duplicate": "사본 만들기 / 미러 사본 만들기",
 	"turnInto": "변환",
 	"split": "분할",
 	"underline": "밑줄",

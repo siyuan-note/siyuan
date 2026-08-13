@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "Create copy",
 	"runeCountWithEmbed": "Characters with embed blocks",
 	"wordCountWithEmbed": "Words with embed blocks",
 	"embedStatIncomplete": "The statistics are incomplete because some embed blocks could not be counted",
@@ -1609,7 +1610,7 @@
 	"sub": "Subscript",
 	"enter": "Zoom in",
 	"enterBack": "Zoom out",
-	"duplicate": "Create copy",
+	"duplicate": "Create copy / Create mirror copy",
 	"turnInto": "Turn into",
 	"split": "Split",
 	"underline": "Underline",

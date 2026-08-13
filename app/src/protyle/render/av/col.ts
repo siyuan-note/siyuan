@@ -234,7 +234,7 @@ export const getEditHTML = (options: {
     if (colData.type !== "block") {
         html += `<button class="b3-menu__item${colData.type === "relation" ? " fn__none" : ""}" data-type="duplicateCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.duplicateCopy}</span>
 </button>
 <button class="b3-menu__item  b3-menu__item--warning" data-type="removeCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconTrashcan"></use></svg>
@@ -1318,7 +1318,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             menu.addItem({
                 id: "duplicate",
                 icon: "iconCopy",
-                label: window.siyuan.languages.duplicate,
+                label: window.siyuan.languages.duplicateCopy,
                 click() {
                     fetchPost("/api/av/renderAttributeView", {
                         id: avID,

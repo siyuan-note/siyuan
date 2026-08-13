@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "Crea copia",
 	"runeCountWithEmbed": "Caratteri con blocchi incorporati",
 	"wordCountWithEmbed": "Parole con blocchi incorporati",
 	"embedStatIncomplete": "Le statistiche sono incomplete perché non è stato possibile conteggiare alcuni blocchi incorporati",
@@ -1609,7 +1610,7 @@
 	"sub": "Pedice",
 	"enter": "Ingrandisci",
 	"enterBack": "Riduci",
-	"duplicate": "Crea copia",
+	"duplicate": "Crea copia / Crea copia speculare",
 	"turnInto": "Trasforma in",
 	"split": "Dividi",
 	"underline": "Sottolinea",

@@ -2187,7 +2187,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             action = window.siyuan.languages.dragTipEmbed;
         } else if (event.ctrlKey || protyle.lite) {
             // Ctrl=创建副本；lite 模式无修饰键也为复制
-            action = window.siyuan.languages.duplicate;
+            action = window.siyuan.languages.duplicateCopy;
         } else if (isChild) {
             action = window.siyuan.languages.dragTipListItemChild.replace("${x}", targetText);
         } else {
@@ -2336,7 +2336,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 action = window.siyuan.languages.dragTipEmbed;
             } else if (event.ctrlKey || protyle.lite) {
                 // Ctrl=创建副本；lite 模式无修饰键也为复制（不移动源块）
-                action = window.siyuan.languages.duplicate;
+                action = window.siyuan.languages.duplicateCopy;
             } else {
                 action = window.siyuan.languages.move;
             }

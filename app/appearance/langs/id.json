@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "Buat salinan",
 	"runeCountWithEmbed": "Karakter termasuk blok sematan",
 	"wordCountWithEmbed": "Kata termasuk blok sematan",
 	"embedStatIncomplete": "Statistik tidak lengkap karena beberapa blok sematan tidak dapat dihitung",
@@ -1609,7 +1610,7 @@
 	"sub": "Subskrip",
 	"enter": "Fokus",
 	"enterBack": "Fokus ke level atas",
-	"duplicate": "Buat salinan",
+	"duplicate": "Buat salinan / Buat salinan cermin",
 	"turnInto": "Ubah menjadi",
 	"split": "Pisahkan",
 	"underline": "Garis bawah",

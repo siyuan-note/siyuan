@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "צור עותק",
 	"runeCountWithEmbed": "תווים כולל בלוקים מוטמעים",
 	"wordCountWithEmbed": "מילים כולל בלוקים מוטמעים",
 	"embedStatIncomplete": "הסטטיסטיקה חלקית מכיוון שלא ניתן היה לספור חלק מהבלוקים המוטמעים",
@@ -1609,7 +1610,7 @@
 	"sub": "תת מצבה",
 	"enter": "התמקד",
 	"enterBack": "התמקד אחורה",
-	"duplicate": "צור עותק",
+	"duplicate": "צור עותק / צור עותק מראה",
 	"turnInto": "הפוך ל",
 	"split": "חלק",
 	"underline": "קו תחתון",

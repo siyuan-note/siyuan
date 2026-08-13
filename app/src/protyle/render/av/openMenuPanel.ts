@@ -1027,7 +1027,7 @@ export const openMenuPanel = (options: {
                     const menu = new Menu("moreFilter");
                     menu.addItem({
                         icon: "iconAdd",
-                        label: window.siyuan.languages.duplicate,
+                        label: window.siyuan.languages.duplicateCopy,
                         click: () => {
                             const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
                             duplicateFilterByPath(getEditableFilters(data), path);

@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "创建副本",
 	"runeCountWithEmbed": "含嵌入块字符数",
 	"wordCountWithEmbed": "含嵌入块字数",
 	"embedStatIncomplete": "部分嵌入块无法统计，结果不完整",
@@ -1609,7 +1610,7 @@
 	"sub": "下标",
 	"enter": "聚焦",
 	"enterBack": "聚焦到上层",
-	"duplicate": "创建副本",
+	"duplicate": "创建副本 / 创建镜像副本",
 	"turnInto": "转换为",
 	"split": "分屏",
 	"underline": "下划线",

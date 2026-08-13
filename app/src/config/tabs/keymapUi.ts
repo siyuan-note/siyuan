@@ -148,19 +148,7 @@ const buildKeymapCommandTexts = (): string[] => {
         }
     };
     Object.keys(Constants.SIYUAN_KEYMAP.general).forEach(pushKey);
-    Object.keys(Constants.SIYUAN_KEYMAP.editor.general).forEach((key) => {
-        // TODO 把 window.siyuan.languages.duplicate 直接换成 "创建副本 / 创建镜像副本"，
-        // 原先使用 window.siyuan.languages.duplicate 的其他地方换成用新的键
-        if (key === "duplicate") {
-            const duplicate = window.siyuan.languages.duplicate;
-            const duplicateMirror = window.siyuan.languages.duplicateMirror;
-            if (duplicate && duplicateMirror) {
-                out.push(`${duplicate} / ${duplicateMirror}`);
-            }
-        } else {
-            pushKey(key);
-        }
-    });
+    Object.keys(Constants.SIYUAN_KEYMAP.editor.general).forEach(pushKey);
     Object.keys(Constants.SIYUAN_KEYMAP.editor.heading).forEach(pushKey);
     Object.keys(Constants.SIYUAN_KEYMAP.editor.insert).forEach(pushKey);
     Object.keys(Constants.SIYUAN_KEYMAP.editor.list).forEach(pushKey);
@@ -287,11 +275,7 @@ const genKeymapItem = (keys: string) => {
             continue;
         }
         const item = config[key] ?? template[key];
-        let keymapName = window.siyuan.languages[key];
-        if ("editor" + Constants.ZWSP + "general" === keys && key === "duplicate") {
-            keymapName = `${window.siyuan.languages.duplicate} / ${window.siyuan.languages.duplicateMirror}`;
-        }
-        html.push(genKeymapRowHtml(keymapName, keys + Constants.ZWSP + key, item.custom, item.default));
+        html.push(genKeymapRowHtml(window.siyuan.languages[key], keys + Constants.ZWSP + key, item.custom, item.default));
     }
     return html.join("");
 };

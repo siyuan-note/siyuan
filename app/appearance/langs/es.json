@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "Crear copia",
 	"runeCountWithEmbed": "Caracteres con bloques incrustados",
 	"wordCountWithEmbed": "Palabras con bloques incrustados",
 	"embedStatIncomplete": "Las estadísticas están incompletas porque no se pudieron contar algunos bloques incrustados",
@@ -1609,7 +1610,7 @@
 	"sub": "Subíndice",
 	"enter": "Acercar",
 	"enterBack": "Alejar",
-	"duplicate": "Crear copia",
+	"duplicate": "Crear copia / Crear copia espejo",
 	"turnInto": "Convertir en",
 	"split": "Dividir",
 	"underline": "Subrayar",

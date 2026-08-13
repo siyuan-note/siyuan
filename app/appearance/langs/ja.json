@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "複製を作成",
 	"runeCountWithEmbed": "埋め込みブロックを含む文字数",
 	"wordCountWithEmbed": "埋め込みブロックを含む単語数",
 	"embedStatIncomplete": "一部の埋め込みブロックを集計できないため、統計は不完全です",
@@ -1609,7 +1610,7 @@
 	"sub": "下付き文字",
 	"enter": "ズームイン",
 	"enterBack": "ズームアウト",
-	"duplicate": "複製を作成",
+	"duplicate": "複製を作成 / ミラーのコピーを作成",
 	"turnInto": "変換",
 	"split": "分割",
 	"underline": "下線",

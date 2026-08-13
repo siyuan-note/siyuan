@@ -1,4 +1,5 @@
 {
+	"duplicateCopy": "建立副本",
 	"runeCountWithEmbed": "含嵌入區塊字元數",
 	"wordCountWithEmbed": "含嵌入區塊字數",
 	"embedStatIncomplete": "部分嵌入區塊無法統計，結果不完整",
@@ -1609,7 +1610,7 @@
 	"sub": "下標",
 	"enter": "聚焦",
 	"enterBack": "聚焦到上層",
-	"duplicate": "建立副本",
+	"duplicate": "建立副本 / 建立鏡像副本",
 	"turnInto": "轉換為",
 	"split": "並排顯示",
 	"underline": "底線",

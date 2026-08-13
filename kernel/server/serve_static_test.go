@@ -98,6 +98,40 @@ func TestStaticFileNestedSymlinkEscape(t *testing.T) {
 	}
 }
 
+func TestWidgetResponseDisablesCache(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	originalDataDir, originalConf := util.DataDir, model.Conf
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+		model.Conf = originalConf
+	})
+
+	widgetDir := filepath.Join(util.DataDir, "widgets", "example")
+	if err := os.MkdirAll(widgetDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(widgetDir, "index.html"), []byte("content"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(model.RoleContextKey, model.RoleAdministrator)
+		c.Next()
+	})
+	serveWidgets(engine)
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/widgets/example/", nil))
+	if recorder.Code != http.StatusOK || recorder.Body.String() != "content" {
+		t.Fatalf("unexpected widget response: status=%d body=%q", recorder.Code, recorder.Body.String())
+	}
+	if cacheControl := recorder.Header().Get("Cache-Control"); cacheControl != "private, no-store" {
+		t.Fatalf("unexpected widget cache control [%s]", cacheControl)
+	}
+}
+
 func TestTemplatesAndExportRequireAdministrator(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	originalDataDir, originalTempDir := util.DataDir, util.TempDir

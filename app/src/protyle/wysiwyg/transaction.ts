@@ -1284,21 +1284,25 @@ export const turnsIntoOneTransaction = async (options: {
     unfocus?: boolean,
     getOperations?: boolean,
     parentID?: string,
+    widthSourceElement?: HTMLElement,
 }) => {
     let parentElement: Element;
-    let firstChildOldStyle: string;
+    let widthSourceOldStyle: string;
+    let widthSourceElement: HTMLElement;
     const id = Lute.NewNodeID();
     if (options.type === "BlocksMergeSuperBlock") {
         parentElement = genSBElement(options.level, id);
         // 回车生成竖排超级块时，将横向超级块子块的宽度迁移到新超级块，并清除子块宽度
         // https://github.com/siyuan-note/siyuan/issues/9521
-        const firstChild = options.selectsElement[0] as HTMLElement;
-        if (firstChild.style.width) {
-            firstChildOldStyle = firstChild.getAttribute("style") || "";
-            (parentElement as HTMLElement).style.width = firstChild.style.width;
-            (parentElement as HTMLElement).style.flex = firstChild.style.flex;
-            firstChild.style.width = "";
-            firstChild.style.flex = "";
+        widthSourceElement = options.widthSourceElement || options.selectsElement[0] as HTMLElement;
+        if (widthSourceElement.style.width) {
+            (parentElement as HTMLElement).style.width = widthSourceElement.style.width;
+            (parentElement as HTMLElement).style.flex = widthSourceElement.style.flex;
+            if (options.selectsElement.includes(widthSourceElement)) {
+                widthSourceOldStyle = widthSourceElement.getAttribute("style") || "";
+                widthSourceElement.style.width = "";
+                widthSourceElement.style.flex = "";
+            }
         }
     } else if (options.type === "Blocks2Blockquote") {
         parentElement = document.createElement("div");
@@ -1404,17 +1408,16 @@ export const turnsIntoOneTransaction = async (options: {
             blockRender(options.protyle, item);
         }
     });
-    if (firstChildOldStyle !== undefined) {
-        const firstChild = options.selectsElement[0];
+    if (widthSourceOldStyle !== undefined) {
         doOperations.push({
             action: "setAttrs",
-            id: firstChild.getAttribute("data-node-id"),
-            data: JSON.stringify({style: firstChild.getAttribute("style") || ""})
+            id: widthSourceElement.getAttribute("data-node-id"),
+            data: JSON.stringify({style: widthSourceElement.getAttribute("style") || ""})
         });
         undoOperations.splice(undoOperations.length - 1, 0, {
             action: "setAttrs",
-            id: firstChild.getAttribute("data-node-id"),
-            data: JSON.stringify({style: firstChildOldStyle})
+            id: widthSourceElement.getAttribute("data-node-id"),
+            data: JSON.stringify({style: widthSourceOldStyle})
         });
     }
     // 子块移入完成后刷新超级块拖拽手柄

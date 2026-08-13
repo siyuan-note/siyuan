@@ -906,12 +906,16 @@ export const listIndent = async (protyle: IProtyle, liItemElements: Element[], r
     focusByWbr(protyle.wysiwyg.element, range);
 };
 
-export const breakList = (protyle: IProtyle, blockElement: Element, range: Range) => {
+export const breakList = async (protyle: IProtyle, blockElement: Element, range: Range) => {
     const listItemElement = blockElement.parentElement;
     if (!listItemElement.previousElementSibling) {
-        removeBlock(protyle, blockElement, range, "Backspace");
+        await removeBlock(protyle, blockElement, range, "Backspace");
         return;
     }
+    const listElement = listItemElement.parentElement;
+    const parentElement = listElement.parentElement;
+    const isHorizontalSuperBlock = parentElement.classList.contains("sb") &&
+        parentElement.getAttribute("data-sb-layout") === "col";
     const listItemId = listItemElement.getAttribute("data-node-id");
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
@@ -920,7 +924,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
     const newListId = Lute.NewNodeID();
     let newListHTML = "";
     let hasFind = 0;
-    Array.from(listItemElement.parentElement.children).forEach(item => {
+    Array.from(listElement.children).forEach(item => {
         if (!hasFind && item === listItemElement) {
             hasFind = 1;
         } else if (hasFind && !item.classList.contains("protyle-attr")) {
@@ -949,11 +953,12 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
     });
     undoOperations.reverse();
     newListHTML = `<div data-subtype="${listItemElement.getAttribute("data-subtype")}" data-node-id="${newListId}" data-type="NodeList" class="list" updated="${dayjs().format("YYYYMMDDHHmmss")}">${newListHTML}<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
-    listItemElement.parentElement.insertAdjacentHTML("afterend", newListHTML);
+    listElement.insertAdjacentHTML("afterend", newListHTML);
+    const newListElement = listElement.nextElementSibling as HTMLElement;
     doOperations.push({
         id: newListId,
         action: "insert",
-        previousID: listItemElement.parentElement.getAttribute("data-node-id"),
+        previousID: listElement.getAttribute("data-node-id"),
         data: newListHTML
     });
     undoOperations.push({
@@ -961,12 +966,13 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
         action: "delete"
     });
 
+    const movedBlockElements: Element[] = [];
     Array.from(listItemElement.children).reverse().forEach((item, index) => {
         if (!item.classList.contains("protyle-action") && !item.classList.contains("protyle-attr")) {
             doOperations.push({
                 id: item.getAttribute("data-node-id"),
                 action: "move",
-                previousID: listItemElement.parentElement.getAttribute("data-node-id")
+                previousID: listElement.getAttribute("data-node-id")
             });
             undoOperations.push({
                 id: item.getAttribute("data-node-id"),
@@ -974,20 +980,22 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
                 parentID: listItemId,
                 data: index === listItemElement.childElementCount - 2 ? "focus" : null
             });
-            listItemElement.parentElement.after(item);
+            listElement.after(item);
+            movedBlockElements.unshift(item);
         }
     });
 
-    const parentId = listItemElement.parentElement.getAttribute("data-node-id");
-    if (listItemElement.parentElement.childElementCount === 2) {
+    const parentId = listElement.getAttribute("data-node-id");
+    const listRemoved = listElement.childElementCount === 2;
+    if (listRemoved) {
         undoOperations.splice(0, 0, {
             id: parentId,
             action: "insert",
-            data: listItemElement.parentElement.outerHTML,
-            previousID: getPreviousBlockSibling(listItemElement.parentElement)?.getAttribute("data-node-id"),
-            parentID: getParentBlock(listItemElement.parentElement).getAttribute("data-node-id") || protyle.block.rootID
+            data: listElement.outerHTML,
+            previousID: getPreviousBlockSibling(listElement)?.getAttribute("data-node-id"),
+            parentID: getParentBlock(listElement).getAttribute("data-node-id") || protyle.block.rootID
         });
-        listItemElement.parentElement.remove();
+        listElement.remove();
         doOperations.push({
             id: parentId,
             action: "delete",
@@ -1007,6 +1015,21 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
         });
     }
 
+    if (isHorizontalSuperBlock) {
+        const selectsElement = listRemoved ?
+            [...movedBlockElements, newListElement] : [listElement, ...movedBlockElements, newListElement];
+        const mergeOperations = await turnsIntoOneTransaction({
+            protyle,
+            selectsElement,
+            type: "BlocksMergeSuperBlock",
+            level: "row",
+            unfocus: true,
+            getOperations: true,
+            widthSourceElement: listElement,
+        });
+        doOperations.push(...mergeOperations.doOperations);
+        undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+    }
     transaction(protyle, doOperations, undoOperations);
     focusByWbr(protyle.wysiwyg.element, range);
 };
@@ -1076,6 +1099,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
         }
         let topPreviousID = liId;
         let previousElement: Element = liElement;
+        const movedBlockElements: Element[] = [];
         let nextElement = liItemElements[liItemElements.length - 1].nextElementSibling;
         let lastBlockElement = getLastChildBlock(liItemElements[liItemElements.length - 1]);
         liItemElements.forEach(item => {
@@ -1100,6 +1124,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
                 topPreviousID = id;
                 previousElement.after(blockElement);
                 previousElement = blockElement;
+                movedBlockElements.push(blockElement);
             });
         });
         if (!window.siyuan.config.editor.listLogicalOutdent && !nextElement.classList.contains("protyle-attr")) {
@@ -1115,6 +1140,7 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
                 lastBlockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 lastBlockElement.innerHTML = `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
                 previousElement.after(lastBlockElement);
+                movedBlockElements.push(lastBlockElement);
                 topDoOperations.push({
                     action: "insert",
                     id: newId,
@@ -1176,7 +1202,8 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
             item.remove();
         });
 
-        if (liElement.childElementCount === 1) {
+        const listRemoved = liElement.childElementCount === 1;
+        if (listRemoved) {
             // 列表只有一项
             topDoOperations.push({
                 action: "delete",
@@ -1209,19 +1236,38 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
                 data: movedHTML,
             });
         }
-        if (liElement.childElementCount !== 1 && parentLiItemElement.classList.contains("sb") &&
+        if (parentLiItemElement.classList.contains("sb") &&
             parentLiItemElement.getAttribute("data-sb-layout") === "col") {
-            // 合并到同一个 transaction，避免新超级块 id 在第二个 transaction 中找不到
-            const mergeOperations = await turnsIntoOneTransaction({
-                protyle,
-                selectsElement: [liElement, liElement.nextElementSibling],
-                type: "BlocksMergeSuperBlock",
-                level: "row",
-                unfocus: true,
-                getOperations: true,
-            });
-            topDoOperations.push(...mergeOperations.doOperations);
-            topUndoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+            const selectsElement = listRemoved ? movedBlockElements : [liElement, ...movedBlockElements];
+            if (selectsElement.length > 1) {
+                // 合并到同一个 transaction，避免新超级块 id 在第二个 transaction 中找不到
+                const mergeOperations = await turnsIntoOneTransaction({
+                    protyle,
+                    selectsElement,
+                    type: "BlocksMergeSuperBlock",
+                    level: "row",
+                    unfocus: true,
+                    getOperations: true,
+                    widthSourceElement: liElement,
+                });
+                topDoOperations.push(...mergeOperations.doOperations);
+                topUndoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+            } else if (listRemoved && selectsElement.length === 1 && liElement.style.width) {
+                const targetElement = selectsElement[0] as HTMLElement;
+                const oldStyle = targetElement.getAttribute("style") || "";
+                targetElement.style.width = liElement.style.width;
+                targetElement.style.flex = liElement.style.flex;
+                topDoOperations.push({
+                    action: "setAttrs",
+                    id: targetElement.getAttribute("data-node-id"),
+                    data: JSON.stringify({style: targetElement.getAttribute("style") || ""})
+                });
+                topUndoOperations.splice(0, 0, {
+                    action: "setAttrs",
+                    id: targetElement.getAttribute("data-node-id"),
+                    data: JSON.stringify({style: oldStyle})
+                });
+            }
         }
         transaction(protyle, topDoOperations, topUndoOperations);
         focusByWbr(parentLiItemElement, range);

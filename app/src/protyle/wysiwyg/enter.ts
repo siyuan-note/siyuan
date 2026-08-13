@@ -237,15 +237,31 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         }
         blockElement.insertAdjacentElement("beforebegin", newElement);
         const newId = newElement.getAttribute("data-node-id");
-        transaction(protyle, [{
+        const doOperations: IOperation[] = [{
             action: "insert",
             data: newElement.outerHTML,
             id: newId,
             nextID: blockElement.getAttribute("data-node-id"),
-        }], [{
+        }];
+        const undoOperations: IOperation[] = [{
             action: "delete",
             id: newId,
-        }]);
+        }];
+        if (blockElement.parentElement.classList.contains("sb") &&
+            blockElement.parentElement.getAttribute("data-sb-layout") === "col") {
+            const mergeOperations = await turnsIntoOneTransaction({
+                protyle,
+                selectsElement: [newElement, blockElement],
+                type: "BlocksMergeSuperBlock",
+                level: "row",
+                unfocus: true,
+                getOperations: true,
+                widthSourceElement: blockElement,
+            });
+            doOperations.push(...mergeOperations.doOperations);
+            undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+        }
+        transaction(protyle, doOperations, undoOperations);
         newElement.querySelector("wbr").remove();
         removeEmptyNode(newElement);
         return true;
@@ -451,7 +467,7 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
             return true;
         } else if (!listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
             // 打断列表
-            breakList(protyle, blockElement, range);
+            await breakList(protyle, blockElement, range);
             return true;
         }
     }

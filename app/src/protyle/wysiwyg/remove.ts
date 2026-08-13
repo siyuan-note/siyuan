@@ -1615,6 +1615,7 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
                 level: "row",
                 unfocus: true,
                 getOperations: true,
+                widthSourceElement: listElement as HTMLElement,
             });
             doOperations.push(...mergeOperations.doOperations);
             undoOperations.splice(0, 0, ...mergeOperations.undoOperations);

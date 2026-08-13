@@ -1643,9 +1643,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
         nextElement = liElement.nextElementSibling;
         this.restoreMovedExpandedItems(nextElement, data.box);
-        nextElement.setAttribute("style", "top: -1px;position: relative;");
         expandFileTree(nextElement as HTMLElement, () => {
-            nextElement.removeAttribute("style");
             if (typeof scrollTop === "number") {
                 this.element.scroll({top: scrollTop, behavior: "smooth"});
             }

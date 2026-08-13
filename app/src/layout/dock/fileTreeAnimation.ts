@@ -9,7 +9,7 @@ const getAnimationOptions = (): KeyframeAnimationOptions => ({
 });
 
 export const expandFileTree = (element: HTMLElement, onFinish?: () => void) => {
-    element.style.overflow = "hidden";
+    element.style.overflow = "clip";
     const animation = element.animate([
         {height: "0"},
         {height: `${element.scrollHeight}px`},
@@ -61,7 +61,7 @@ export const collapseFileTree = (liElement: Element, onFinish: () => void) => {
         return;
     }
 
-    leafElement.style.overflow = "hidden";
+    leafElement.style.overflow = "clip";
     const animation = leafElement.animate([
         {height: `${leafElement.scrollHeight}px`},
         {height: "0"},

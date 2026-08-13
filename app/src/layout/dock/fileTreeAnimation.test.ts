@@ -121,7 +121,7 @@ describe("fileTreeAnimation", () => {
 
         assert.deepEqual(tree.getFrames(), [{height: "0"}, {height: "96px"}]);
         assert.equal(tree.getOptions().duration, 200);
-        assert.equal(tree.leafElement.style.overflow, "hidden");
+        assert.equal(tree.leafElement.style.overflow, "clip");
 
         tree.animation.finish();
         await tree.animation.animation.finished;
@@ -148,6 +148,7 @@ describe("fileTreeAnimation", () => {
         assert.equal(tree.isArrowClosed(), true);
         assert.equal(isFileTreeCollapsing(tree.liElement), true);
         assert.deepEqual(tree.getFrames(), [{height: "96px"}, {height: "0"}]);
+        assert.equal(tree.leafElement.style.overflow, "clip");
 
         tree.animation.finish();
         await tree.animation.animation.finished;

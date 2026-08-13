@@ -781,7 +781,7 @@ interface ILayoutJSON extends ILayoutOptions {
 interface ICommand {
     langKey: string, // 用于区分不同快捷键的 key, 同时作为 i18n 的字段名
     langText?: string, // 显示的文本, 指定后不再使用 langKey 对应的 i18n 文本
-    hotkey?: string, // 快捷键，默认为空字符串，不能使用单个字符或 Shift+单个字符
+    hotkey?: string, // 快捷键，默认为空字符串
     customHotkey?: string,
     callback?: () => void   // 其余回调存在时将不会触发
     globalCallback?: () => void // 焦点不在应用内时执行的回调
@@ -802,7 +802,7 @@ interface IPluginDockTab {
     position: TPluginDockPosition,
     size: Config.IUILayoutDockPanelSize,
     icon: string,
-    hotkey?: string, // 快捷键，不能使用单个字符或 Shift+单个字符
+    hotkey?: string,
     title: string,
     index?: number
     show?: boolean

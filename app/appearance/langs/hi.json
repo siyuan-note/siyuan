@@ -1,6 +1,6 @@
 {
-	"editorMarkdownInlineFullWidthTaskList": "पूर्ण-चौड़ाई कार्य सूची सिंटैक्स",
-	"editorMarkdownInlineFullWidthTaskListTip": "सक्षम होने पर <code>【】</code> और <code>【x】</code> कार्य सूची सिंटैक्स इनपुट समर्थित होगा",
+	"editorMarkdownBlockFullWidthTaskList": "पूर्ण-चौड़ाई कार्य सूची सिंटैक्स",
+	"editorMarkdownBlockFullWidthTaskListTip": "सक्षम होने पर <code>【】</code> और <code>【x】</code> कार्य सूची सिंटैक्स इनपुट समर्थित होगा",
 	"duplicateCopy": "प्रतिलिपि बनाएं",
 	"runeCountWithEmbed": "एम्बेड ब्लॉक सहित वर्ण",
 	"wordCountWithEmbed": "एम्बेड ब्लॉक सहित शब्द",

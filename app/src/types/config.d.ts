@@ -495,7 +495,7 @@ declare namespace Config {
         /**
          * Whether to enable the full-width task list shortcut
          */
-        inlineFullWidthTaskList: boolean;
+        blockFullWidthTaskList: boolean;
         /**
          * Whether to enable the inline mark
          */

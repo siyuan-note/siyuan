@@ -279,6 +279,10 @@ const registerEditorMarkdownBlockGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.codeBlockMiddleDot,
         desc: window.siyuan.languages.codeBlockMiddleDotTip,
     });
+    group.switch("editor.markdown.blockFullWidthTaskList", {
+        title: window.siyuan.languages.editorMarkdownBlockFullWidthTaskList,
+        desc: window.siyuan.languages.editorMarkdownBlockFullWidthTaskListTip,
+    });
 };
 
 const registerEditorMarkdownInlineGroup = (tab: SettingTabBuilder) => {
@@ -314,10 +318,6 @@ const registerEditorMarkdownInlineGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.markdown.inlineFullWidthStrikethrough", {
         title: window.siyuan.languages.editorMarkdownInlineFullWidthStrikethrough,
         desc: window.siyuan.languages.editorMarkdownInlineFullWidthStrikethroughTip,
-    });
-    group.switch("editor.markdown.inlineFullWidthTaskList", {
-        title: window.siyuan.languages.editorMarkdownInlineFullWidthTaskList,
-        desc: window.siyuan.languages.editorMarkdownInlineFullWidthTaskListTip,
     });
     group.switch("editor.markdown.inlineMark", {
         title: window.siyuan.languages.editorMarkdownInlineMark,

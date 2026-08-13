@@ -1,6 +1,6 @@
 {
-	"editorMarkdownInlineFullWidthTaskList": "Syntaxe de liste de tâches pleine chasse",
-	"editorMarkdownInlineFullWidthTaskListTip": "Lorsque cette option est activée, la saisie des syntaxes de liste de tâches <code>【】</code> et <code>【x】</code> est prise en charge",
+	"editorMarkdownBlockFullWidthTaskList": "Syntaxe de liste de tâches pleine chasse",
+	"editorMarkdownBlockFullWidthTaskListTip": "Lorsque cette option est activée, la saisie des syntaxes de liste de tâches <code>【】</code> et <code>【x】</code> est prise en charge",
 	"duplicateCopy": "Créer une copie",
 	"runeCountWithEmbed": "Caractères avec blocs intégrés",
 	"wordCountWithEmbed": "Mots avec blocs intégrés",

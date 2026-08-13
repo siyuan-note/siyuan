@@ -1,6 +1,6 @@
 {
-	"editorMarkdownInlineFullWidthTaskList": "전각 작업 목록 구문",
-	"editorMarkdownInlineFullWidthTaskListTip": "활성화하면 <code>【】</code> 및 <code>【x】</code> 작업 목록 구문 입력을 지원합니다",
+	"editorMarkdownBlockFullWidthTaskList": "전각 작업 목록 구문",
+	"editorMarkdownBlockFullWidthTaskListTip": "활성화하면 <code>【】</code> 및 <code>【x】</code> 작업 목록 구문 입력을 지원합니다",
 	"duplicateCopy": "사본 만들기",
 	"runeCountWithEmbed": "임베드 블록 포함 글자 수",
 	"wordCountWithEmbed": "임베드 블록 포함 단어 수",

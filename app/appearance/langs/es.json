@@ -1,6 +1,6 @@
 {
-	"editorMarkdownInlineFullWidthTaskList": "Sintaxis de lista de tareas de ancho completo",
-	"editorMarkdownInlineFullWidthTaskListTip": "Cuando está habilitado, se admite la entrada de la sintaxis de lista de tareas <code>【】</code> y <code>【x】</code>",
+	"editorMarkdownBlockFullWidthTaskList": "Sintaxis de lista de tareas de ancho completo",
+	"editorMarkdownBlockFullWidthTaskListTip": "Cuando está habilitado, se admite la entrada de la sintaxis de lista de tareas <code>【】</code> y <code>【x】</code>",
 	"duplicateCopy": "Crear copia",
 	"runeCountWithEmbed": "Caracteres con bloques incrustados",
 	"wordCountWithEmbed": "Palabras con bloques incrustados",

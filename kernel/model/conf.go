@@ -511,8 +511,8 @@ func InitConf() {
 	if nil == Conf.Editor.Markdown.CodeBlockMiddleDot {
 		Conf.Editor.Markdown.CodeBlockMiddleDot = defaultEditor.Markdown.CodeBlockMiddleDot
 	}
-	if nil == Conf.Editor.Markdown.InlineFullWidthTaskList {
-		Conf.Editor.Markdown.InlineFullWidthTaskList = defaultEditor.Markdown.InlineFullWidthTaskList
+	if nil == Conf.Editor.Markdown.BlockFullWidthTaskList {
+		Conf.Editor.Markdown.BlockFullWidthTaskList = defaultEditor.Markdown.BlockFullWidthTaskList
 	}
 	util.MarkdownSettings = Conf.Editor.Markdown
 

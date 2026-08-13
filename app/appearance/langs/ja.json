@@ -1,6 +1,6 @@
 {
-	"editorMarkdownInlineFullWidthTaskList": "全角タスクリスト構文",
-	"editorMarkdownInlineFullWidthTaskListTip": "有効にすると、<code>【】</code> および <code>【x】</code> のタスクリスト構文入力がサポートされます",
+	"editorMarkdownBlockFullWidthTaskList": "全角タスクリスト構文",
+	"editorMarkdownBlockFullWidthTaskListTip": "有効にすると、<code>【】</code> および <code>【x】</code> のタスクリスト構文入力がサポートされます",
 	"duplicateCopy": "複製を作成",
 	"runeCountWithEmbed": "埋め込みブロックを含む文字数",
 	"wordCountWithEmbed": "埋め込みブロックを含む単語数",

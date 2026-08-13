@@ -1,6 +1,6 @@
 {
-	"editorMarkdownInlineFullWidthTaskList": "Pełnoszerokowa składnia listy zadań",
-	"editorMarkdownInlineFullWidthTaskListTip": "Po włączeniu obsługiwane będzie wprowadzanie składni listy zadań <code>【】</code> i <code>【x】</code>",
+	"editorMarkdownBlockFullWidthTaskList": "Pełnoszerokowa składnia listy zadań",
+	"editorMarkdownBlockFullWidthTaskListTip": "Po włączeniu obsługiwane będzie wprowadzanie składni listy zadań <code>【】</code> i <code>【x】</code>",
 	"duplicateCopy": "Utwórz kopię",
 	"runeCountWithEmbed": "Znaki z osadzonymi blokami",
 	"wordCountWithEmbed": "Słowa z osadzonymi blokami",

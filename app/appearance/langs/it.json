@@ -1,6 +1,6 @@
 {
-	"editorMarkdownInlineFullWidthTaskList": "Sintassi dell'elenco attività a larghezza intera",
-	"editorMarkdownInlineFullWidthTaskListTip": "Se abilitata, sarà supportato l'inserimento della sintassi dell'elenco attività <code>【】</code> e <code>【x】</code>",
+	"editorMarkdownBlockFullWidthTaskList": "Sintassi dell'elenco attività a larghezza intera",
+	"editorMarkdownBlockFullWidthTaskListTip": "Se abilitata, sarà supportato l'inserimento della sintassi dell'elenco attività <code>【】</code> e <code>【x】</code>",
 	"duplicateCopy": "Crea copia",
 	"runeCountWithEmbed": "Caratteri con blocchi incorporati",
 	"wordCountWithEmbed": "Parole con blocchi incorporati",

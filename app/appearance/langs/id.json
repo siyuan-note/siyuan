@@ -1,6 +1,6 @@
 {
-	"editorMarkdownInlineFullWidthTaskList": "Sintaks daftar tugas lebar penuh",
-	"editorMarkdownInlineFullWidthTaskListTip": "Jika diaktifkan, input sintaks daftar tugas <code>【】</code> dan <code>【x】</code> akan didukung",
+	"editorMarkdownBlockFullWidthTaskList": "Sintaks daftar tugas lebar penuh",
+	"editorMarkdownBlockFullWidthTaskListTip": "Jika diaktifkan, input sintaks daftar tugas <code>【】</code> dan <code>【x】</code> akan didukung",
 	"duplicateCopy": "Buat salinan",
 	"runeCountWithEmbed": "Karakter termasuk blok sematan",
 	"wordCountWithEmbed": "Kata termasuk blok sematan",

@@ -17,7 +17,7 @@ describe("applyLuteMarkdownSyntax", () => {
             inlineMath: false,
             inlineStrikethrough: true,
             inlineFullWidthStrikethrough: true,
-            inlineFullWidthTaskList: true,
+            blockFullWidthTaskList: true,
             inlineMark: false,
             codeBlockMiddleDot: true,
         };

@@ -23,7 +23,7 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                                  additionalOperations?: IAdditionalOperations) => {
     const html = decodeHTML(editElement.innerHTML);
     const taskListMarker = getTaskListMarker(html,
-        window.siyuan.config.editor.markdown.inlineFullWidthTaskList !== false);
+        window.siyuan.config.editor.markdown.blockFullWidthTaskList !== false);
     if (type !== "NodeCodeBlock" &&
         // 任务列表首块不需要再更新为任务列表
         !blockElement.previousElementSibling?.classList.contains("protyle-action--task") &&

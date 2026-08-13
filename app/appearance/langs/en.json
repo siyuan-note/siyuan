@@ -1,4 +1,5 @@
 {
+	"safeModeJSTip": "Safe mode is enabled, <code>//!js</code> query embed blocks are disabled",
 	"tableHeaderBodyMergeUnsupported": "Table header and body cells cannot be merged",
 	"editorMarkdownBlockFullWidthTaskList": "Full-width task list block shortcut input",
 	"editorMarkdownBlockFullWidthTaskListTip": "When enabled, <code>【】</code> and <code>【X】</code> task list syntax input will be supported",

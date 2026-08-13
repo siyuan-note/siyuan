@@ -1,4 +1,5 @@
 {
+	"safeModeJSTip": "Mode aman diaktifkan, blok sematan kueri <code>//!js</code> dinonaktifkan",
 	"tableHeaderBodyMergeUnsupported": "Sel header dan isi tabel tidak dapat digabungkan",
 	"editorMarkdownBlockFullWidthTaskList": "Input pintasan blok daftar tugas lebar penuh",
 	"editorMarkdownBlockFullWidthTaskListTip": "Jika diaktifkan, input sintaks daftar tugas <code>【】</code> dan <code>【X】</code> akan didukung",

@@ -1,4 +1,5 @@
 {
+	"safeModeJSTip": "De veilige modus is ingeschakeld, <code>//!js</code>-query-embedblokken zijn uitgeschakeld",
 	"tableHeaderBodyMergeUnsupported": "Cellen uit de tabelkop en tabelinhoud kunnen niet worden samengevoegd",
 	"editorMarkdownBlockFullWidthTaskList": "Snelinvoer voor taaklijstblok met volledige breedte",
 	"editorMarkdownBlockFullWidthTaskListTip": "Indien ingeschakeld wordt invoer van de taaklijstsyntaxis <code>【】</code> en <code>【X】</code> ondersteund",

@@ -1,4 +1,5 @@
 {
+	"safeModeJSTip": "تم تفعيل الوضع الآمن، تم تعطيل الكتل المضمّنة للاستعلام <code>//!js</code>",
 	"tableHeaderBodyMergeUnsupported": "لا يمكن دمج خلايا رأس الجدول ونصه",
 	"editorMarkdownBlockFullWidthTaskList": "إدخال اختصار كتلة قائمة المهام بأقواس كاملة العرض",
 	"editorMarkdownBlockFullWidthTaskListTip": "عند التمكين، سيتم دعم إدخال صيغة قائمة المهام <code>【】</code> و <code>【X】</code>",

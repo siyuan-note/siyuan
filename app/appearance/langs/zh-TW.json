@@ -1,4 +1,5 @@
 {
+	"safeModeJSTip": "安全模式已啟用，已停用 <code>//!js</code> 查詢嵌入區塊",
 	"tableHeaderBodyMergeUnsupported": "標題列和正文列的單元格不能合併",
 	"editorMarkdownBlockFullWidthTaskList": "全形任務列表區塊快捷輸入",
 	"editorMarkdownBlockFullWidthTaskListTip": "啟用後將支援 <code>【】</code> 和 <code>【X】</code> 任務列表語法輸入",

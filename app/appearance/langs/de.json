@@ -1,4 +1,5 @@
 {
+	"safeModeJSTip": "Der abgesicherte Modus ist aktiviert, <code>//!js</code>-Abfrage-Embed-Blöcke sind deaktiviert",
 	"tableHeaderBodyMergeUnsupported": "Zellen aus Tabellenkopf und -körper können nicht zusammengeführt werden",
 	"editorMarkdownBlockFullWidthTaskList": "Vollbreite Aufgabenlistenblock-Schnelleingabe",
 	"editorMarkdownBlockFullWidthTaskListTip": "Wenn aktiviert, wird die Eingabe der Aufgabenlistensyntax <code>【】</code> und <code>【X】</code> unterstützt",

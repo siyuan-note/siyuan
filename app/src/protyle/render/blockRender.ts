@@ -47,6 +47,11 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
         }
 
         if (content.startsWith("//!js")) {
+            // 安全模式下禁用 JS 查询嵌入块，与代码片段（CSS/JS snippet）的处理保持一致
+            if (window.siyuan.config.system.safeMode) {
+                renderEmbed([], protyle, item, top, window.siyuan.languages.safeModeJSTip, onEmbedRender);
+                return;
+            }
             const renderError = (error: unknown) => {
                 console.error(error);
                 renderEmbed([], protyle, item, top, String(error), onEmbedRender);

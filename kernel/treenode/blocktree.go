@@ -307,40 +307,12 @@ func GetBlockTreeRootsByHPath(boxID, hPath string) (ret []*BlockTree) {
 	return
 }
 
-func GetBlockTreeByHPathPreferredParentID(boxID, hPath, preferredParentID string) (ret *BlockTree) {
-	hPath = gulu.Str.RemoveInvisible(hPath)
-	var roots []*BlockTree
-	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND hpath = ? AND parent_id = ? LIMIT 1"
-	rows, err := queryForBox(boxID, sqlStmt, boxID, hPath, preferredParentID)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
+// GetBlockTreeRootByIDAndHPath 按笔记本、根块 ID 和原始 HPath 精确查找文档。
+func GetBlockTreeRootByIDAndHPath(boxID, id, hPath string) (ret *BlockTree) {
+	ret = GetBlockTreeInExactBox(id, boxID)
+	if nil == ret || ret.ID != ret.RootID || "d" != ret.Type || hPath != ret.HPath {
+		ret = nil
 	}
-	defer rows.Close()
-	for rows.Next() {
-		var block BlockTree
-		if err = rows.Scan(&block.ID, &block.RootID, &block.ParentID, &block.BoxID, &block.Path, &block.HPath, &block.Updated, &block.Type); err != nil {
-			logging.LogErrorf("query scan field failed: %s", err)
-			return
-		}
-		if "" == preferredParentID {
-			ret = &block
-			return
-		}
-		roots = append(roots, &block)
-	}
-
-	if 1 > len(roots) {
-		return
-	}
-
-	for _, root := range roots {
-		if root.ID == preferredParentID {
-			ret = root
-			return
-		}
-	}
-	ret = roots[0]
 	return
 }
 

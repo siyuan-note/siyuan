@@ -15,7 +15,7 @@ import {highlightRender} from "../protyle/render/highlightRender";
 import {copyPlainText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {escapeHtml} from "../util/escape";
+import {escapeAriaLabel, escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
 
@@ -422,8 +422,7 @@ const updateTaskActions = (task: IAIEditorTask) => {
     if (conflict.missing || conflict.changed) {
         task.statusElement.textContent = window.siyuan.languages.aiSourceChanged;
     } else if (task.status === "streaming") {
-        task.statusElement.textContent = task.reasoning ?
-            "" : window.siyuan.languages.loading;
+        task.statusElement.textContent = "";
     } else if (task.notice) {
         task.statusElement.textContent = task.notice;
     } else if (task.status === "stopped") {
@@ -475,7 +474,7 @@ const handleTaskEvent = (task: IAIEditorTask, event: TAIEditorSSEEvent) => {
     } else if (event.type === "content") {
         finishTaskReasoning(task);
         task.body.classList.remove("fn__none");
-        task.statusElement.textContent = window.siyuan.languages.loading;
+        task.statusElement.textContent = "";
         task.content += event.token;
         scheduleTaskPreview(task);
     } else if (event.type === "truncated") {
@@ -518,7 +517,7 @@ const startTaskStream = (task: IAIEditorTask) => {
     task.body.classList.remove("fn__none");
     task.body.textContent = "";
     updateTaskModel(task);
-    task.statusElement.textContent = window.siyuan.languages.loading;
+    task.statusElement.textContent = "";
     task.stopButton.classList.remove("fn__none");
     task.actionsElement.classList.add("fn__none");
     fetchAIEditorSSE({
@@ -563,6 +562,16 @@ const createTaskButton = (action: string, label: string, primary = false) => {
     return button;
 };
 
+const createTaskIconButton = (action: string, label: string, icon: string) => {
+    const button = document.createElement("button");
+    button.className = "block__icon block__icon--show ariaLabel";
+    button.dataset.action = action;
+    button.dataset.position = "north";
+    button.setAttribute("aria-label", label);
+    button.innerHTML = `<svg><use xlink:href="#${icon}"></use></svg>`;
+    return button;
+};
+
 const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
     const panel = document.createElement("div");
     panel.className = `ai-editor-panel${isMobile() ? " ai-editor-panel--mobile" : ""}`;
@@ -571,7 +580,8 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
     panel.innerHTML = `<div class="ai-editor-panel__header">
     <span class="fn__flex-1 fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}<span class="ai-editor-panel__model"></span></span>
     <span class="ai-editor-panel__status"></span>
-    <button class="b3-button b3-button--outline ai-editor-panel__stop">${escapeHtml(window.siyuan.languages.agentStop)}</button>
+    <button class="ai-editor-panel__stop agent-chat__stop b3-button b3-button--icon b3-button--cancel ariaLabel" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.agentStop)}"><svg><use xlink:href="#iconSquareStop"></use></svg></button>
+    <button class="block__icon block__icon--show ariaLabel ai-editor-panel__close" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.close)}"><svg><use xlink:href="#iconClose"></use></svg></button>
 </div>
 <div class="ai-editor-panel__thinking agent-chat__msg--thinking fn__none">
     <div class="agent-chat__thinking-card">
@@ -588,12 +598,12 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
     </div>
 </div>
 <div class="ai-editor-panel__body protyle-wysiwyg" data-readonly="true"></div>
-<div class="ai-editor-panel__actions fn__none"></div>`;
+    <div class="ai-editor-panel__actions fn__none"></div>`;
     const actionsElement = panel.querySelector(".ai-editor-panel__actions") as HTMLElement;
+    actionsElement.append(createTaskIconButton("copy", window.siyuan.languages.copy, "iconCopy"));
+    actionsElement.append(createTaskIconButton("retry", window.siyuan.languages.retry, "iconRefresh"));
     actionsElement.append(createTaskButton("source", source.kind === "writing" ?
         window.siyuan.languages.aiInsertAtOriginal : window.siyuan.languages.insertAfter, true));
-    actionsElement.append(createTaskButton("copy", window.siyuan.languages.copy, true));
-    actionsElement.append(createTaskButton("retry", window.siyuan.languages.retry, true));
 
     const task: IAIEditorTask = {
         id: genUUID(),
@@ -620,6 +630,7 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         historyCommitted: false,
         updatePosition: () => undefined,
     };
+    (panel.querySelector(".ai-editor-panel__close") as HTMLButtonElement).addEventListener("click", () => cleanupTask(task));
     const thinkingHeader = task.thinkingElement.querySelector(".agent-chat__thinking-header") as HTMLElement;
     const expandIcon = task.thinkingElement.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
     const contractIcon = task.thinkingElement.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;

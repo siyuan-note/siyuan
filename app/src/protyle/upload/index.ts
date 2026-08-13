@@ -4,7 +4,7 @@ import {Constants} from "../../constants";
 import {destroy} from "../util/destroy";
 import {escapeHtml} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
-import {getEditorRange} from "../util/selection";
+import {getEditorRange, restoreFocusContext} from "../util/selection";
 import {pathPosix} from "../../util/pathName";
 import {genAssetHTML} from "../../asset/renderAssets";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
@@ -17,6 +17,8 @@ import {transaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
 import {getAVSelectedCells} from "../render/av/selectionState";
 import {getAVSelectedTableCells} from "../render/av/virtualScroll";
+import {isUploadInsertPositionAvailable} from "./insertPosition";
+import type {IUploadInsertPosition} from "./insertPosition";
 
 interface FileWithPath extends File {
     path: string;
@@ -24,6 +26,7 @@ interface FileWithPath extends File {
 
 export interface IUploadInsertOptions {
     htmlAsIframe?: boolean;
+    insertPosition?: IUploadInsertPosition;
 }
 
 export class Upload {
@@ -116,7 +119,7 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
         showMessage(errorTip);
     }
     let insertBlock = true;
-    const range = getEditorRange(protyle.wysiwyg.element);
+    const range = getUploadInsertRange(protyle, options?.insertPosition);
     if (range.toString() === "" && range.startContainer.nodeType === 3 && protyle.toolbar.getCurrentType(range).length > 0) {
         // 防止链接插入其他元素中 https://ld246.com/article/1676003478664
         range.setEndAfter(range.startContainer.parentElement);
@@ -265,11 +268,26 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
         return;
     }
     // 避免插入代码块中，其次因为都要独立成块 https://github.com/siyuan-note/siyuan/issues/7607
-    insertHTML(successFileText, protyle, insertBlock);
+    if (options?.insertPosition) {
+        protyle.toolbar.range = range;
+        insertHTML(successFileText, protyle, insertBlock, true);
+    } else {
+        insertHTML(successFileText, protyle, insertBlock);
+    }
     // 粘贴图片后定位不准确 https://github.com/siyuan-note/siyuan/issues/13336
     setTimeout(() => {
         scrollCenter(protyle, undefined, "nearest", "smooth");
     }, hasImage ? 0 : Constants.TIMEOUT_LOAD);
+};
+
+export const getUploadInsertRange = (protyle: IProtyle, position?: IUploadInsertPosition) => {
+    if (isUploadInsertPositionAvailable(protyle.wysiwyg.element, position)) {
+        return position.range.cloneRange();
+    }
+    if (position?.context && restoreFocusContext(protyle, position.context)) {
+        return getEditorRange(protyle.wysiwyg.element).cloneRange();
+    }
+    return getEditorRange(protyle.wysiwyg.element);
 };
 
 export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUpload: boolean,

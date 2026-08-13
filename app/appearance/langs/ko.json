@@ -1,4 +1,5 @@
 {
+	"tableHeaderBodyMergeUnsupported": "표 머리글과 본문의 셀은 병합할 수 없습니다",
 	"editorMarkdownBlockFullWidthTaskList": "전각 작업 목록 블록 단축 입력",
 	"editorMarkdownBlockFullWidthTaskListTip": "활성화하면 <code>【】</code> 및 <code>【X】</code> 작업 목록 구문 입력을 지원합니다",
 	"duplicateCopy": "사본 만들기",

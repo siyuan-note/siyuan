@@ -1,4 +1,5 @@
 {
+	"tableHeaderBodyMergeUnsupported": "Tablo başlığı ve gövdesindeki hücreler birleştirilemez",
 	"editorMarkdownBlockFullWidthTaskList": "Tam genişlikli görev listesi bloğu kısayol girişi",
 	"editorMarkdownBlockFullWidthTaskListTip": "Etkinleştirildiğinde <code>【】</code> ve <code>【X】</code> görev listesi sözdizimi girişi desteklenir",
 	"duplicateCopy": "Kopya oluştur",

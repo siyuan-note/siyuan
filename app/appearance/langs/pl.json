@@ -1,4 +1,5 @@
 {
+	"tableHeaderBodyMergeUnsupported": "Nie można scalać komórek nagłówka i treści tabeli",
 	"editorMarkdownBlockFullWidthTaskList": "Skrót wprowadzania bloku listy zadań o pełnej szerokości",
 	"editorMarkdownBlockFullWidthTaskListTip": "Po włączeniu obsługiwane będzie wprowadzanie składni listy zadań <code>【】</code> i <code>【X】</code>",
 	"duplicateCopy": "Utwórz kopię",

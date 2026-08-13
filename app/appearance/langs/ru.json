@@ -1,4 +1,5 @@
 {
+	"tableHeaderBodyMergeUnsupported": "Ячейки заголовка и тела таблицы нельзя объединить",
 	"editorMarkdownBlockFullWidthTaskList": "Быстрый ввод полноширинного блока списка задач",
 	"editorMarkdownBlockFullWidthTaskListTip": "После включения будет поддерживаться ввод синтаксиса списка задач <code>【】</code> и <code>【X】</code>",
 	"duplicateCopy": "Создать дубликат",

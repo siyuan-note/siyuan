@@ -1,4 +1,5 @@
 {
+	"tableHeaderBodyMergeUnsupported": "तालिका शीर्षलेख और मुख्य भाग की कोशिकाओं को मर्ज नहीं किया जा सकता",
 	"editorMarkdownBlockFullWidthTaskList": "पूर्ण-चौड़ाई कार्य सूची ब्लॉक शॉर्टकट इनपुट",
 	"editorMarkdownBlockFullWidthTaskListTip": "सक्षम होने पर <code>【】</code> और <code>【X】</code> कार्य सूची सिंटैक्स इनपुट समर्थित होगा",
 	"duplicateCopy": "प्रतिलिपि बनाएं",

@@ -1,4 +1,5 @@
 {
+	"tableHeaderBodyMergeUnsupported": "ไม่สามารถผสานเซลล์ส่วนหัวและเนื้อหาของตารางได้",
 	"editorMarkdownBlockFullWidthTaskList": "การป้อนทางลัดบล็อกรายการงานแบบเต็มความกว้าง",
 	"editorMarkdownBlockFullWidthTaskListTip": "เมื่อเปิดใช้งาน จะรองรับการป้อนไวยากรณ์รายการงาน <code>【】</code> และ <code>【X】</code>",
 	"duplicateCopy": "สร้างสำเนา",

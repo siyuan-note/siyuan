@@ -1,4 +1,5 @@
 {
+	"tableHeaderBodyMergeUnsupported": "Le celle dell'intestazione e del corpo della tabella non possono essere unite",
 	"editorMarkdownBlockFullWidthTaskList": "Inserimento rapido del blocco elenco attività a larghezza intera",
 	"editorMarkdownBlockFullWidthTaskListTip": "Se abilitata, sarà supportato l'inserimento della sintassi dell'elenco attività <code>【】</code> e <code>【X】</code>",
 	"duplicateCopy": "Crea copia",

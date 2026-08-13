@@ -1,4 +1,5 @@
 {
+	"tableHeaderBodyMergeUnsupported": "Клітинки заголовка й тіла таблиці не можна об’єднати",
 	"editorMarkdownBlockFullWidthTaskList": "Швидке введення повноширинного блоку списку завдань",
 	"editorMarkdownBlockFullWidthTaskListTip": "Після ввімкнення підтримуватиметься введення синтаксису списку завдань <code>【】</code> і <code>【X】</code>",
 	"duplicateCopy": "Створити дублікат",

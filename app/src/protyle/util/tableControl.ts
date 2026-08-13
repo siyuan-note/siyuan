@@ -1715,12 +1715,16 @@ export class TableControl {
         }
         const mergedCell = cells.length === 1 && (cells[0].rowSpan > 1 || cells[0].colSpan > 1);
         if (mergedCell || cells.length > 1) {
+            const mergeDisabledReason = !mergedCell && (!rectangle ?
+                window.siyuan.languages.tableRectangleSelectionRequired :
+                !this.isSelectionInOneSection() ? window.siyuan.languages.tableHeaderBodyMergeUnsupported : undefined);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: mergedCell ? "iconTableCellsSplit" : "iconTableCellsMerge",
                 label: mergedCell ? window.siyuan.languages.cancelMerged : window.siyuan.languages.mergeCell,
-                disabled: !mergedCell && (!rectangle || !this.isSelectionInOneSection()),
-                accelerator: !mergedCell && !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
+                disabled: !!mergeDisabledReason,
+                action: mergeDisabledReason ? "iconInfo" : undefined,
+                actionLabel: mergeDisabledReason,
                 click: () => mergedCell ? this.splitCell(cells[0]) : this.mergeCells(),
             }).element);
         }

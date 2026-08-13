@@ -1,4 +1,5 @@
 {
+	"tableHeaderBodyMergeUnsupported": "As células do cabeçalho e do corpo da tabela não podem ser mescladas",
 	"editorMarkdownBlockFullWidthTaskList": "Entrada rápida de bloco de lista de tarefas de largura total",
 	"editorMarkdownBlockFullWidthTaskListTip": "Quando ativado, será possível inserir a sintaxe de lista de tarefas <code>【】</code> e <code>【X】</code>",
 	"duplicateCopy": "Criar cópia",

@@ -1,4 +1,5 @@
 {
+	"tableHeaderBodyMergeUnsupported": "לא ניתן למזג תאים מכותרת הטבלה ומגוף הטבלה",
 	"editorMarkdownBlockFullWidthTaskList": "קלט קיצור לבלוק רשימת משימות ברוחב מלא",
 	"editorMarkdownBlockFullWidthTaskListTip": "כאשר האפשרות מופעלת, תתאפשר הזנת תחביר רשימת המשימות <code>【】</code> ו-<code>【X】</code>",
 	"duplicateCopy": "צור עותק",

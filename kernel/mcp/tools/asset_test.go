@@ -9,6 +9,7 @@
 package tools
 
 import (
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -45,5 +46,38 @@ func TestHTMLAssetIFrameBlockDOM(t *testing.T) {
 	tree := util.NewLute().BlockDOM2Tree(dom)
 	if tree.Root.FirstChild == nil || tree.Root.FirstChild.Type != ast.NodeIFrame {
 		t.Fatalf("created block is not an IFrame: %s", dom)
+	}
+}
+
+func TestValidateAssetUploadPaths(t *testing.T) {
+	origWorkspace := util.WorkspaceDir
+	util.WorkspaceDir = filepath.Join(t.TempDir(), "workspace")
+	t.Cleanup(func() { util.WorkspaceDir = origWorkspace })
+
+	inside := filepath.Join(util.WorkspaceDir, "data", "assets", "foo.png")
+	normalized, err := validateAssetUploadPaths([]string{inside})
+	if err != nil {
+		t.Fatalf("workspace-internal path must pass: %v", err)
+	}
+	if normalized[0] != inside {
+		t.Fatalf("path must be normalized to absolute: %q", normalized[0])
+	}
+
+	external := filepath.Join(util.HomeDir, "Documents", "report.pdf")
+	if util.IsSensitivePath(external) {
+		t.Skipf("test home path unexpectedly sensitive: %s", external)
+	}
+	if _, err = validateAssetUploadPaths([]string{external}); err != nil {
+		t.Fatalf("non-sensitive absolute path outside the workspace must pass: %v", err)
+	}
+
+	sensitive := filepath.Join(util.WorkspaceDir, "conf", "conf.json")
+	if _, err = validateAssetUploadPaths([]string{sensitive}); err == nil {
+		t.Fatal("sensitive path must be rejected")
+	}
+
+	sshKey := filepath.Join(util.HomeDir, ".ssh", "id_rsa")
+	if _, err = validateAssetUploadPaths([]string{sshKey}); err == nil {
+		t.Fatal("credential path must be rejected")
 	}
 }

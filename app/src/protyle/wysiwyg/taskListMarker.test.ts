@@ -8,15 +8,15 @@ describe("getTaskListMarker", () => {
             contentStartIndex: 2,
             marker: " ",
         });
-        assert.deepEqual(getTaskListMarker("【x】完成", true), {
+        assert.deepEqual(getTaskListMarker("【X】完成", true), {
             contentStartIndex: 3,
-            marker: "x",
+            marker: "X",
         });
     });
 
     it("keeps full-width task list shortcuts as text when disabled", () => {
         assert.equal(getTaskListMarker("【】待办", false), undefined);
-        assert.equal(getTaskListMarker("【x】完成", false), undefined);
+        assert.equal(getTaskListMarker("【X】完成", false), undefined);
     });
 
     it("always recognizes half-width task list shortcuts", () => {

@@ -1,6 +1,6 @@
 {
-	"editorMarkdownBlockFullWidthTaskList": "תחביר רשימת משימות ברוחב מלא",
-	"editorMarkdownBlockFullWidthTaskListTip": "כאשר האפשרות מופעלת, תתאפשר הזנת תחביר רשימת המשימות <code>【】</code> ו-<code>【x】</code>",
+	"editorMarkdownBlockFullWidthTaskList": "קלט קיצור לבלוק רשימת משימות ברוחב מלא",
+	"editorMarkdownBlockFullWidthTaskListTip": "כאשר האפשרות מופעלת, תתאפשר הזנת תחביר רשימת המשימות <code>【】</code> ו-<code>【X】</code>",
 	"duplicateCopy": "צור עותק",
 	"runeCountWithEmbed": "תווים כולל בלוקים מוטמעים",
 	"wordCountWithEmbed": "מילים כולל בלוקים מוטמעים",

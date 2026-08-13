@@ -1,6 +1,6 @@
 {
-	"editorMarkdownBlockFullWidthTaskList": "ไวยากรณ์รายการงานแบบเต็มความกว้าง",
-	"editorMarkdownBlockFullWidthTaskListTip": "เมื่อเปิดใช้งาน จะรองรับการป้อนไวยากรณ์รายการงาน <code>【】</code> และ <code>【x】</code>",
+	"editorMarkdownBlockFullWidthTaskList": "การป้อนทางลัดบล็อกรายการงานแบบเต็มความกว้าง",
+	"editorMarkdownBlockFullWidthTaskListTip": "เมื่อเปิดใช้งาน จะรองรับการป้อนไวยากรณ์รายการงาน <code>【】</code> และ <code>【X】</code>",
 	"duplicateCopy": "สร้างสำเนา",
 	"runeCountWithEmbed": "อักขระรวมบล็อกฝัง",
 	"wordCountWithEmbed": "คำรวมบล็อกฝัง",

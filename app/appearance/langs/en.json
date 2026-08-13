@@ -1,6 +1,6 @@
 {
-	"editorMarkdownBlockFullWidthTaskList": "Full-width task list syntax",
-	"editorMarkdownBlockFullWidthTaskListTip": "When enabled, <code>【】</code> and <code>【x】</code> task list syntax input will be supported",
+	"editorMarkdownBlockFullWidthTaskList": "Full-width task list block shortcut input",
+	"editorMarkdownBlockFullWidthTaskListTip": "When enabled, <code>【】</code> and <code>【X】</code> task list syntax input will be supported",
 	"duplicateCopy": "Create copy",
 	"runeCountWithEmbed": "Characters with embed blocks",
 	"wordCountWithEmbed": "Words with embed blocks",

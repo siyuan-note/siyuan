@@ -1,6 +1,6 @@
 {
-	"editorMarkdownBlockFullWidthTaskList": "صيغة قائمة المهام بأقواس كاملة العرض",
-	"editorMarkdownBlockFullWidthTaskListTip": "عند التمكين، سيتم دعم إدخال صيغة قائمة المهام <code>【】</code> و <code>【x】</code>",
+	"editorMarkdownBlockFullWidthTaskList": "إدخال اختصار كتلة قائمة المهام بأقواس كاملة العرض",
+	"editorMarkdownBlockFullWidthTaskListTip": "عند التمكين، سيتم دعم إدخال صيغة قائمة المهام <code>【】</code> و <code>【X】</code>",
 	"duplicateCopy": "إنشاء نسخة",
 	"runeCountWithEmbed": "عدد الأحرف مع الكتل المضمنة",
 	"wordCountWithEmbed": "عدد الكلمات مع الكتل المضمنة",

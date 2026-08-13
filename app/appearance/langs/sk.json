@@ -1,6 +1,6 @@
 {
-	"editorMarkdownBlockFullWidthTaskList": "Celošírková syntax zoznamu úloh",
-	"editorMarkdownBlockFullWidthTaskListTip": "Po povolení bude podporované zadávanie syntaxe zoznamu úloh <code>【】</code> a <code>【x】</code>",
+	"editorMarkdownBlockFullWidthTaskList": "Skratka na zadanie celošírkového bloku zoznamu úloh",
+	"editorMarkdownBlockFullWidthTaskListTip": "Po povolení bude podporované zadávanie syntaxe zoznamu úloh <code>【】</code> a <code>【X】</code>",
 	"duplicateCopy": "Vytvoriť kópiu",
 	"runeCountWithEmbed": "Znaky vrátane vložených blokov",
 	"wordCountWithEmbed": "Slová vrátane vložených blokov",

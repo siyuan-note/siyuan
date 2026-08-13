@@ -1,6 +1,6 @@
 {
-	"editorMarkdownBlockFullWidthTaskList": "Taaklijstsyntaxis met volledige breedte",
-	"editorMarkdownBlockFullWidthTaskListTip": "Indien ingeschakeld wordt invoer van de taaklijstsyntaxis <code>【】</code> en <code>【x】</code> ondersteund",
+	"editorMarkdownBlockFullWidthTaskList": "Snelinvoer voor taaklijstblok met volledige breedte",
+	"editorMarkdownBlockFullWidthTaskListTip": "Indien ingeschakeld wordt invoer van de taaklijstsyntaxis <code>【】</code> en <code>【X】</code> ondersteund",
 	"duplicateCopy": "Kopie maken",
 	"runeCountWithEmbed": "Tekens inclusief ingesloten blokken",
 	"wordCountWithEmbed": "Woorden inclusief ingesloten blokken",

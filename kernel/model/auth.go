@@ -57,25 +57,22 @@ var (
 
 	jwtKey     = make([]byte, 32)
 	jwtKeyOnce sync.Once
-	jwtKeyErr  error
 )
 
 func InitJwtKey() {
 	jwtKeyOnce.Do(func() {
-		err := RefreshJwtKey()
+		err := refreshJwtKey()
 		if err != nil {
 			logging.LogFatalf(logging.ExitCodeFatal, "initialize JWT signing key failed: %s", err)
 		}
 	})
 }
 
-func RefreshJwtKey() error {
+func refreshJwtKey() error {
 	if _, err := rand.Read(jwtKey); err != nil {
 		logging.LogErrorf("generate JWT signing key failed: %s", err)
 		return err
 	}
-	RefreshPublishJWT()
-	OnPluginJwtKeyRefresh()
 	return nil
 }
 
@@ -123,10 +120,10 @@ func InitPublishAccounts() {
 		}
 	}
 
-	RefreshPublishJWT()
+	refreshPublishJWT()
 }
 
-func RefreshPublishJWT() {
+func refreshPublishJWT() {
 	for username, account := range accountsMap {
 		// REF: https://golang-jwt.github.io/jwt/usage/create/
 		t := jwt.NewWithClaims(

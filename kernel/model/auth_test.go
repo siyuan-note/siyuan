@@ -78,9 +78,7 @@ func TestIsPublishServiceToken(t *testing.T) {
 }
 
 func TestInitPublishAccountsWithNilAuth(t *testing.T) {
-	if err := InitJwtKey(); err != nil {
-		t.Fatalf("InitJwtKey failed: %v", err)
-	}
+	InitJwtKey()
 
 	originalConf := Conf
 	originalAccounts := accountsMap
@@ -105,17 +103,13 @@ func TestInitPublishAccountsWithNilAuth(t *testing.T) {
 }
 
 func TestInitPublishAccountsPreservesPluginJWT(t *testing.T) {
-	if err := InitJwtKey(); err != nil {
-		t.Fatalf("InitJwtKey failed: %v", err)
-	}
-
+	InitJwtKey()
 	pluginToken, err := CreatePluginJWT("test-plugin")
 	if err != nil {
 		t.Fatalf("CreatePluginJWT failed: %v", err)
 	}
-	if err = InitJwtKey(); err != nil {
-		t.Fatalf("second InitJwtKey failed: %v", err)
-	}
+
+	InitJwtKey()
 	if _, err = ParseJWT(pluginToken); err != nil {
 		t.Fatalf("plugin JWT became invalid after repeated key initialization: %v", err)
 	}

@@ -162,14 +162,6 @@ func (p *KernelPlugin) State() PluginState {
 	return PluginState(p.state.Load())
 }
 
-func (p *KernelPlugin) RefreshJwtKey() {
-	token, err := model.CreatePluginJWT(p.Name)
-	if err != nil {
-		logging.LogErrorf("Failed to create plugin JWT for [%s]: %v", p.Name, err)
-	}
-	p.token = token
-}
-
 // Clear 移除插件注册的所有 Agent 能力和 RPC 方法，避免插件停止后在全局注册表中残留。
 func (p *KernelPlugin) Clear() {
 	p.rpcMethods.Clear()

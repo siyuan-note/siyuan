@@ -43,6 +43,7 @@ import {hideAllElements} from "../protyle/ui/hideElements";
 import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 import {Custom} from "./dock/Custom";
 import type {App} from "../index";
+import {pauseImageAnimation, resumeImageAnimation} from "../protyle/util/imageAnimation";
 import {unicode2Emoji} from "../emoji";
 import {closeWindow} from "../window/closeWin";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
@@ -540,10 +541,12 @@ export class Wnd {
                         }
                     }
                     item.panelElement.classList.remove("fn__none");
+                    resumeImageAnimation(item.panelElement, Constants.TIMEOUT_INPUT);
                 }
                 currentTab = item;
             } else {
                 item.headElement?.classList.remove("item--focus");
+                pauseImageAnimation(item.panelElement);
                 if (!item.panelElement.classList.contains("fn__none")) {
                     // 必须现判断，否则会触发 observer.observe(this.element, {attributeFilter: ["class"]}); 导致 https://ld246.com/article/1641198819303
                     item.panelElement.classList.add("fn__none");

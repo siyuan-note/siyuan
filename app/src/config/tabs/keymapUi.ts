@@ -12,6 +12,7 @@ import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globa
 import {normalizeSearchText} from "../search/normalize";
 import {genButtonRowHtml, genConfigGroup} from "../render/render";
 import type {Plugin} from "../../plugin";
+import {isDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 const keymapToolbarSearchStrings = (): string[] => [
     window.siyuan.languages.keymapTip,
     window.siyuan.languages.keymapTip2,
@@ -458,10 +459,10 @@ const bindKeymapList = (root: HTMLElement) => {
                 hasConflict = true;
             }
             if (
-                !hasConflict && (RESERVED_KEYMAPS.includes(keymapStr) || !matchHotKey(keymapStr, event) ||
+                !hasConflict && (isDisallowedTextInputHotkey(keymapStr) || RESERVED_KEYMAPS.includes(keymapStr) ||
+                !matchHotKey(keymapStr, event) ||
                 (isMac() && keys[0] === "general" && ["goToEditTabNext", "goToEditTabPrev"].includes(keys[1]) && keymapStr.includes("⌘")))
             ) {
-                // TODO 还应该禁止单个数字或字母作为快捷键？
                 showMessage(`${window.siyuan.languages.invalid} [${adoptKeymapStr}]`, undefined, undefined, "keymapInvalid");
                 hasConflict = true;
             } else {

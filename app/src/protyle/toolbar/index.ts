@@ -58,6 +58,7 @@ import {resizeSide} from "../../history/resizeSide";
 import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardToolbar";
 import {FormatPainter} from "./FormatPainter";
 import {IFormatPainterSnapshot} from "./formatPainterCore";
+import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -118,6 +119,7 @@ export class Toolbar {
                 if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
                     toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
                 }
+                toolbarItem.hotkey = clearDisallowedTextInputHotkey(toolbarItem.hotkey);
             });
             options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });
@@ -181,6 +183,7 @@ export class Toolbar {
                 if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
                     toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
                 }
+                toolbarItem.hotkey = clearDisallowedTextInputHotkey(toolbarItem.hotkey);
             });
             protyle.options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });

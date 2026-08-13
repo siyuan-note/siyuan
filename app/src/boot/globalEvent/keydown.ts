@@ -53,6 +53,7 @@ import {reloadProtyle} from "../../protyle/util/reload";
 import {fullscreen} from "../../protyle/breadcrumb/action";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import type {App} from "../../index";
+import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
 import {resize} from "../../protyle/util/resize";
@@ -1856,11 +1857,14 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
 
 export const sendGlobalShortcut = (app: App) => {
     /// #if !BROWSER
-    const hotkeys = [window.siyuan.config.keymap.general.toggleWin.custom];
+    const hotkeys = [clearDisallowedTextInputHotkey(window.siyuan.config.keymap.general.toggleWin.custom)];
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {
-            if (command.globalCallback) {
-                hotkeys.push(command.customHotkey);
+            if (command.globalCallback && command.customHotkey) {
+                const hotkey = clearDisallowedTextInputHotkey(command.customHotkey);
+                if (hotkey) {
+                    hotkeys.push(hotkey);
+                }
             }
         });
     });

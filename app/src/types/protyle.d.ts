@@ -391,7 +391,7 @@ interface IMenuItem {
     lang?: string;
     /** svg 图标 */
     icon?: string;
-    /** 快捷键 */
+    /** 快捷键，不能使用单个字符或 Shift+单个字符 */
     hotkey?: string;
     /** 提示的位置 */
     tipPosition?: string;

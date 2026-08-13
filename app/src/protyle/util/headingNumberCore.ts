@@ -113,10 +113,10 @@ export const buildHeadingNumberStyles = (scope: string, styles: IHeadingNumberSt
         "unicode-bidi:isolate;user-select:none;pointer-events:none;}",
     ];
     styles.forEach(style => {
-        const spacing = headingNumberNeedsSpacing(style.number) ? ".5em" : "0px";
+        const offset = headingNumberNeedsSpacing(style.number) ? `calc(${style.offset} + .5em)` : style.offset;
         rules.push(`${scopeSelector} [data-type="NodeHeading"][data-node-id="${escapeCSSString(style.id)}"]{` +
             `--b3-protyle-heading-number:"${escapeCSSString(style.number)}";` +
-            `--b3-protyle-heading-number-offset:calc(${style.offset} + ${spacing});}`);
+            `--b3-protyle-heading-number-offset:${offset};}`);
     });
     return rules.join("");
 };

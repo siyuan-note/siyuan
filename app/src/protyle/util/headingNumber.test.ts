@@ -161,7 +161,8 @@ describe("renderHeadingNumbers", () => {
         assert.match(css, /data-node-id="heading"/);
         assert.match(css, /--b3-protyle-heading-number:"1\.1"/);
         assert.match(css, /data-node-id="heading"[^}]*calc\(12px \+ \.5em\)/);
-        assert.match(css, /data-node-id="chinese-heading"[^}]*calc\(24px \+ 0px\)/);
+        assert.match(css, /data-node-id="chinese-heading"[^}]*heading-number-offset:24px/);
+        assert.doesNotMatch(css, /calc\([^)]*\+ 0px\)/);
         assert.match(css, /padding-inline-start:var\(--b3-protyle-heading-number-offset\)/);
         assert.match(css, />:first-child\[contenteditable]::before/);
         assert.doesNotMatch(css, />\[contenteditable]/);

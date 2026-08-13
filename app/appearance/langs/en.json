@@ -1,6 +1,4 @@
 {
-	"aiDiscard": "Discard",
-	"aiInsertAtCursor": "Insert at cursor",
 	"aiInsertAtOriginal": "Insert at original position",
 	"aiSourceChanged": "Source content changed",
 	"aiStopped": "Stopped",

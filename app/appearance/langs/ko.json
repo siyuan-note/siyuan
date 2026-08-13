@@ -1,6 +1,4 @@
 {
-	"aiDiscard": "버리기",
-	"aiInsertAtCursor": "현재 커서 위치에 삽입",
 	"aiInsertAtOriginal": "원래 위치에 삽입",
 	"aiSourceChanged": "원본 내용이 변경됨",
 	"aiStopped": "중지됨",

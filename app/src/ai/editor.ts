@@ -3,7 +3,6 @@ import {genUUID} from "../util/genID";
 import {
     focusByOffset,
     getBlockRanges,
-    getEditorRange,
     getSelectionOffset,
     setLastNodeRange
 } from "../protyle/util/selection";
@@ -36,7 +35,6 @@ interface IAIEditorSource {
     ids: string[];
     input: string;
     action: string;
-    replaceSupported: boolean;
     insertSupported: boolean;
 }
 
@@ -49,6 +47,7 @@ interface IAIEditorTask {
     notice: string;
     panel: HTMLElement;
     body: HTMLElement;
+    modelElement: HTMLElement;
     statusElement: HTMLElement;
     stopButton: HTMLButtonElement;
     actionsElement: HTMLElement;
@@ -67,8 +66,6 @@ interface IAIEditorState {
 }
 
 const states = new WeakMap<IProtyle, IAIEditorState>();
-const replaceableTypes = new Set(["NodeParagraph", "NodeHeading", "NodeCodeBlock"]);
-
 const getState = (protyle: IProtyle) => {
     let state = states.get(protyle);
     if (!state) {
@@ -76,6 +73,28 @@ const getState = (protyle: IProtyle) => {
         states.set(protyle, state);
     }
     return state;
+};
+
+const getEditingModelName = () => {
+    const aiConfig = window.siyuan.config.ai;
+    const modelID = aiConfig.editing?.modelId || "";
+    if (!modelID) {
+        return "";
+    }
+    for (const provider of aiConfig.providers) {
+        if (!provider.enabled) {
+            continue;
+        }
+        const model = provider.models.find(item => item.enabled && (item.id === modelID || item.name === modelID));
+        if (model) {
+            return model.displayName || model.name;
+        }
+    }
+    return "";
+};
+
+const updateTaskModel = (task: IAIEditorTask) => {
+    task.modelElement.textContent = getEditingModelName();
 };
 
 const normalizeSourceElement = (element: HTMLElement) => {
@@ -147,15 +166,12 @@ const buildSelectionSource = (protyle: IProtyle, range: Range, action: string): 
         end: item.end,
         signature: normalizeSourceElement(item.blockElement),
     }));
-    const replaceSupported = !protyle.disabled && blockRanges.length === 1 && blockRanges.every(item =>
-        replaceableTypes.has(item.blockElement.getAttribute("data-type")) && !isInEmbedBlock(item.blockElement));
     return {
         kind: "selection",
         parts,
         ids: [],
         input: blockRanges.map(item => sourcePartText(protyle, item.range)).filter(Boolean).join("\n\n"),
         action,
-        replaceSupported,
         insertSupported: !protyle.disabled,
     };
 };
@@ -187,16 +203,12 @@ const buildBlockSource = (protyle: IProtyle, elements: HTMLElement[], action: st
     if (parts.length === 0) {
         return;
     }
-    const replaceSupported = !protyle.disabled && sourceElements.length === 1 &&
-        parts.length === sourceElements.length && sourceElements.every(item =>
-        replaceableTypes.has(item.getAttribute("data-type")) && !isInEmbedBlock(item));
     return {
         kind: "blocks",
         parts,
         ids: sourceElements.map(item => item.getAttribute("data-node-id") || ""),
         input: "",
         action,
-        replaceSupported,
         insertSupported: !protyle.disabled,
     };
 };
@@ -221,7 +233,6 @@ const buildWritingSource = (protyle: IProtyle, element: HTMLElement, input: stri
         ids: [],
         input,
         action: "",
-        replaceSupported: false,
         insertSupported: !protyle.disabled,
     };
 };
@@ -263,13 +274,13 @@ const getInsertRange = (task: IAIEditorTask) => {
     return range;
 };
 
-const getInsertHTML = (task: IAIEditorTask, range: Range, asReplacement: boolean) => {
+const getInsertHTML = (task: IAIEditorTask, range: Range) => {
     const inCode = hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
         hasClosestByTag(range.startContainer, "CODE");
     const content = task.source.kind === "writing" ? `${task.source.input}\n\n${task.content}` : task.content;
     return {
         html: inCode ? content : task.protyle.lute.Md2BlockDOM(content),
-        isBlock: !inCode && !asReplacement,
+        isBlock: !inCode,
     };
 };
 
@@ -295,40 +306,22 @@ const cleanupTask = (task: IAIEditorTask) => {
     }
 };
 
-const applyTaskResult = (task: IAIEditorTask, action: "replace" | "source" | "cursor") => {
+const applyTaskResult = (task: IAIEditorTask) => {
     if (!task.content) {
         return;
     }
     const conflict = getSourceConflict(task);
-    let range: Range;
-    if (action === "replace") {
-        if (!task.source.replaceSupported || conflict.missing || conflict.changed) {
-            return;
-        }
-        range = rebuildSourceRange(task);
-    } else if (action === "source") {
-        if (!task.source.insertSupported || conflict.missing ||
-            (task.source.kind === "writing" && conflict.changed)) {
-            return;
-        }
-        range = getInsertRange(task);
-    } else {
-        if (!task.source.insertSupported) {
-            return;
-        }
-        range = task.protyle.toolbar.range;
-        if (!range || !task.protyle.wysiwyg.element.contains(range.startContainer)) {
-            range = getEditorRange(task.protyle.wysiwyg.element);
-        }
-        range = range?.cloneRange();
-        range?.collapse(false);
+    const range = getInsertRange(task);
+    if (!task.source.insertSupported || conflict.missing ||
+        (task.source.kind === "writing" && conflict.changed)) {
+        return;
     }
     if (!range || !task.protyle.wysiwyg.element.contains(range.startContainer)) {
         showMessage(window.siyuan.languages.aiSourceChanged, 5000, "error");
         return;
     }
     task.protyle.toolbar.range = range;
-    const insertion = getInsertHTML(task, range, action === "replace");
+    const insertion = getInsertHTML(task, range);
     insertHTML(insertion.html, task.protyle, insertion.isBlock, true);
     renderInsertedContent(task.protyle);
     cleanupTask(task);
@@ -365,21 +358,13 @@ const scheduleTaskPreview = (task: IAIEditorTask) => {
 
 const updateTaskActions = (task: IAIEditorTask) => {
     const conflict = getSourceConflict(task);
-    const replaceButton = task.actionsElement.querySelector<HTMLButtonElement>('[data-action="replace"]');
     const sourceButton = task.actionsElement.querySelector<HTMLButtonElement>('[data-action="source"]');
-    const cursorButton = task.actionsElement.querySelector<HTMLButtonElement>('[data-action="cursor"]');
-    if (replaceButton) {
-        replaceButton.disabled = !task.content || conflict.missing || conflict.changed || !task.source.replaceSupported;
-    }
     if (sourceButton) {
         sourceButton.disabled = !task.content || !task.source.insertSupported || conflict.missing ||
             (task.source.kind === "writing" && conflict.changed);
     }
-    if (cursorButton) {
-        cursorButton.disabled = !task.content || !task.source.insertSupported;
-    }
     task.actionsElement.querySelectorAll<HTMLButtonElement>("button").forEach(item => {
-        if (item.dataset.action !== "retry" && item.dataset.action !== "discard" && !task.content) {
+        if (item.dataset.action !== "retry" && !task.content) {
             item.disabled = true;
         }
     });
@@ -450,6 +435,7 @@ const startTaskStream = (task: IAIEditorTask) => {
     task.content = "";
     task.notice = "";
     task.body.textContent = "";
+    updateTaskModel(task);
     task.statusElement.textContent = window.siyuan.languages.loading;
     task.stopButton.classList.remove("fn__none");
     task.actionsElement.classList.add("fn__none");
@@ -501,22 +487,17 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
     panel.setAttribute("contenteditable", "false");
     panel.style.zIndex = (++window.siyuan.zIndex).toString();
     panel.innerHTML = `<div class="ai-editor-panel__header">
-    <span class="fn__flex-1">${escapeHtml(window.siyuan.languages.aiEdit)}</span>
+    <span class="fn__flex-1 fn__ellipsis">${escapeHtml(window.siyuan.languages.aiEdit)}<span class="ai-editor-panel__model"></span></span>
     <span class="ai-editor-panel__status"></span>
     <button class="b3-button b3-button--outline ai-editor-panel__stop">${escapeHtml(window.siyuan.languages.agentStop)}</button>
 </div>
 <div class="ai-editor-panel__body protyle-wysiwyg" data-readonly="true"></div>
 <div class="ai-editor-panel__actions fn__none"></div>`;
     const actionsElement = panel.querySelector(".ai-editor-panel__actions") as HTMLElement;
-    if (source.replaceSupported) {
-        actionsElement.append(createTaskButton("replace", window.siyuan.languages.replace, true));
-    }
     actionsElement.append(createTaskButton("source", source.kind === "writing" ?
-        window.siyuan.languages.aiInsertAtOriginal : window.siyuan.languages.insertAfter, !source.replaceSupported));
-    actionsElement.append(createTaskButton("cursor", window.siyuan.languages.aiInsertAtCursor));
-    actionsElement.append(createTaskButton("copy", window.siyuan.languages.copy));
-    actionsElement.append(createTaskButton("retry", window.siyuan.languages.retry));
-    actionsElement.append(createTaskButton("discard", window.siyuan.languages.aiDiscard));
+        window.siyuan.languages.aiInsertAtOriginal : window.siyuan.languages.insertAfter, true));
+    actionsElement.append(createTaskButton("copy", window.siyuan.languages.copy, true));
+    actionsElement.append(createTaskButton("retry", window.siyuan.languages.retry, true));
 
     const task: IAIEditorTask = {
         id: genUUID(),
@@ -527,6 +508,7 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         notice: "",
         panel,
         body: panel.querySelector(".ai-editor-panel__body") as HTMLElement,
+        modelElement: panel.querySelector(".ai-editor-panel__model") as HTMLElement,
         statusElement: panel.querySelector(".ai-editor-panel__status") as HTMLElement,
         stopButton: panel.querySelector(".ai-editor-panel__stop") as HTMLButtonElement,
         actionsElement,
@@ -565,14 +547,8 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
             return;
         }
         switch (button.dataset.action) {
-            case "replace":
-                applyTaskResult(task, "replace");
-                break;
             case "source":
-                applyTaskResult(task, "source");
-                break;
-            case "cursor":
-                applyTaskResult(task, "cursor");
+                applyTaskResult(task);
                 break;
             case "copy":
                 copyPlainText(task.content);
@@ -580,9 +556,6 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
                 break;
             case "retry":
                 retryTask(task);
-                break;
-            case "discard":
-                cleanupTask(task);
                 break;
         }
     });

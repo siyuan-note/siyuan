@@ -1,6 +1,4 @@
 {
-	"aiDiscard": "Ignorer",
-	"aiInsertAtCursor": "Insérer au curseur",
 	"aiInsertAtOriginal": "Insérer à la position d’origine",
 	"aiSourceChanged": "Le contenu source a été modifié",
 	"aiStopped": "Arrêté",

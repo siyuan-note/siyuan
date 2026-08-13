@@ -1,6 +1,4 @@
 {
-	"aiDiscard": "破棄",
-	"aiInsertAtCursor": "現在のカーソル位置に挿入",
 	"aiInsertAtOriginal": "元の位置に挿入",
 	"aiSourceChanged": "元の内容が変更されました",
 	"aiStopped": "停止しました",

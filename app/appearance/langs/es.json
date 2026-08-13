@@ -1,6 +1,4 @@
 {
-	"aiDiscard": "Descartar",
-	"aiInsertAtCursor": "Insertar en el cursor",
 	"aiInsertAtOriginal": "Insertar en la posición original",
 	"aiSourceChanged": "El contenido de origen cambió",
 	"aiStopped": "Detenido",

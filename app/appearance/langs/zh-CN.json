@@ -1,6 +1,4 @@
 {
-	"aiDiscard": "丢弃",
-	"aiInsertAtCursor": "在当前光标处插入",
 	"aiInsertAtOriginal": "在原位置插入",
 	"aiSourceChanged": "原内容已更改",
 	"aiStopped": "已停止",

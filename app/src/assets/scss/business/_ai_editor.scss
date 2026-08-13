@@ -29,9 +29,16 @@
     white-space: nowrap;
   }
 
+  &__model {
+    margin-inline-start: 4px;
+    color: var(--b3-theme-on-surface-light);
+    font-weight: normal;
+  }
+
   &__body.protyle-wysiwyg {
-    min-height: 72px;
-    padding: 12px 16px;
+    box-sizing: border-box;
+    min-height: 36px;
+    padding: 6px 8px;
     overflow: auto;
     color: var(--b3-theme-on-background);
     font-size: var(--b3-font-size);

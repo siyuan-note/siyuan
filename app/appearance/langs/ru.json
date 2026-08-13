@@ -1,6 +1,4 @@
 {
-	"aiDiscard": "Отбросить",
-	"aiInsertAtCursor": "Вставить в позицию курсора",
 	"aiInsertAtOriginal": "Вставить в исходную позицию",
 	"aiSourceChanged": "Исходное содержимое изменено",
 	"aiStopped": "Остановлено",

@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "Tingkat judul dokumen",
+	"mergeDocHeadingFlat": "Gunakan heading 1 untuk semua judul dokumen",
+	"mergeDocHeadingTree": "Ikuti hierarki dokumen",
+	"mergeContentHeadingMode": "Tingkat heading konten",
+	"mergeContentHeadingPreserve": "Pertahankan tingkat asli",
+	"mergeContentHeadingDemote": "Tempatkan di bawah judul dokumen",
 	"aiInsertAtOriginal": "Sisipkan di posisi semula",
 	"aiSourceChanged": "Konten sumber telah berubah",
 	"aiStopped": "Dihentikan",

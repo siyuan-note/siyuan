@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "مستويات عناوين المستندات",
+	"mergeDocHeadingFlat": "استخدام العنوان 1 لجميع عناوين المستندات",
+	"mergeDocHeadingTree": "اتباع التسلسل الهرمي للمستندات",
+	"mergeContentHeadingMode": "مستويات عناوين المحتوى",
+	"mergeContentHeadingPreserve": "الاحتفاظ بالمستويات الأصلية",
+	"mergeContentHeadingDemote": "وضعها أسفل عناوين المستندات",
 	"aiInsertAtOriginal": "إدراج في الموضع الأصلي",
 	"aiSourceChanged": "تم تغيير المحتوى المصدر",
 	"aiStopped": "تم الإيقاف",

@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "רמות כותרות המסמכים",
+	"mergeDocHeadingFlat": "השתמש בכותרת 1 לכל כותרות המסמכים",
+	"mergeDocHeadingTree": "פעל לפי היררכיית המסמכים",
+	"mergeContentHeadingMode": "רמות כותרות התוכן",
+	"mergeContentHeadingPreserve": "שמור על הרמות המקוריות",
+	"mergeContentHeadingDemote": "מקם מתחת לכותרות המסמכים",
 	"aiInsertAtOriginal": "הוספה במיקום המקורי",
 	"aiSourceChanged": "תוכן המקור השתנה",
 	"aiStopped": "נעצר",

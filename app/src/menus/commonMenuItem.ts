@@ -803,6 +803,8 @@ export const exportMd = (id: string) => {
                         id,
                         keepFold: localData.keepFold,
                         merge: localData.mergeSubdocs,
+                        mergeDocHeadingMode: localData.mergeDocHeadingMode,
+                        mergeContentHeadingMode: localData.mergeContentHeadingMode,
                     }, async response => {
                         const servePath = window.location.protocol + "//" + window.location.host + "/";
                         const html = await onExport(response, undefined, servePath, {type: "pdf", id});

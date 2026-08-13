@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "Úrovne názvov dokumentov",
+	"mergeDocHeadingFlat": "Použiť nadpis 1 pre všetky názvy dokumentov",
+	"mergeDocHeadingTree": "Riadiť sa hierarchiou dokumentov",
+	"mergeContentHeadingMode": "Úrovne nadpisov obsahu",
+	"mergeContentHeadingPreserve": "Zachovať pôvodné úrovne",
+	"mergeContentHeadingDemote": "Umiestniť pod názvy dokumentov",
 	"aiInsertAtOriginal": "Vložiť na pôvodné miesto",
 	"aiSourceChanged": "Zdrojový obsah bol zmenený",
 	"aiStopped": "Zastavené",

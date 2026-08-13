@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "दस्तावेज़ शीर्षक स्तर",
+	"mergeDocHeadingFlat": "सभी दस्तावेज़ शीर्षकों के लिए शीर्षक 1 का उपयोग करें",
+	"mergeDocHeadingTree": "दस्तावेज़ पदानुक्रम का अनुसरण करें",
+	"mergeContentHeadingMode": "सामग्री शीर्षक स्तर",
+	"mergeContentHeadingPreserve": "मूल स्तर बनाए रखें",
+	"mergeContentHeadingDemote": "दस्तावेज़ शीर्षकों के नीचे रखें",
 	"aiInsertAtOriginal": "मूल स्थान पर डालें",
 	"aiSourceChanged": "स्रोत सामग्री बदल गई है",
 	"aiStopped": "रोक दिया गया",

@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "Belge başlığı düzeyleri",
+	"mergeDocHeadingFlat": "Tüm belge başlıkları için başlık 1 kullan",
+	"mergeDocHeadingTree": "Belge hiyerarşisini izle",
+	"mergeContentHeadingMode": "İçerik başlığı düzeyleri",
+	"mergeContentHeadingPreserve": "Özgün düzeyleri koru",
+	"mergeContentHeadingDemote": "Belge başlıklarının altına yerleştir",
 	"aiInsertAtOriginal": "Özgün konuma ekle",
 	"aiSourceChanged": "Kaynak içerik değişti",
 	"aiStopped": "Durduruldu",

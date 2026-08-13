@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "Document title levels",
+	"mergeDocHeadingFlat": "Use heading 1 for all document titles",
+	"mergeDocHeadingTree": "Follow the document hierarchy",
+	"mergeContentHeadingMode": "Content heading levels",
+	"mergeContentHeadingPreserve": "Keep the original levels",
+	"mergeContentHeadingDemote": "Place below document titles",
 	"aiInsertAtOriginal": "Insert at original position",
 	"aiSourceChanged": "Source content changed",
 	"aiStopped": "Stopped",

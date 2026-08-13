@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "문서 제목 수준",
+	"mergeDocHeadingFlat": "모든 문서 제목에 제목 1 사용",
+	"mergeDocHeadingTree": "문서 계층 구조 따르기",
+	"mergeContentHeadingMode": "본문 제목 수준",
+	"mergeContentHeadingPreserve": "원래 수준 유지",
+	"mergeContentHeadingDemote": "문서 제목보다 낮게 배치",
 	"aiInsertAtOriginal": "원래 위치에 삽입",
 	"aiSourceChanged": "원본 내용이 변경됨",
 	"aiStopped": "중지됨",

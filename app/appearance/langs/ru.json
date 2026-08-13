@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "Уровни заголовков документов",
+	"mergeDocHeadingFlat": "Использовать заголовок 1 для всех названий документов",
+	"mergeDocHeadingTree": "Следовать иерархии документов",
+	"mergeContentHeadingMode": "Уровни заголовков содержимого",
+	"mergeContentHeadingPreserve": "Сохранить исходные уровни",
+	"mergeContentHeadingDemote": "Разместить ниже заголовков документов",
 	"aiInsertAtOriginal": "Вставить в исходную позицию",
 	"aiSourceChanged": "Исходное содержимое изменено",
 	"aiStopped": "Остановлено",

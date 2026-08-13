@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "Рівні заголовків документів",
+	"mergeDocHeadingFlat": "Використовувати заголовок 1 для всіх назв документів",
+	"mergeDocHeadingTree": "Дотримуватися ієрархії документів",
+	"mergeContentHeadingMode": "Рівні заголовків вмісту",
+	"mergeContentHeadingPreserve": "Зберегти початкові рівні",
+	"mergeContentHeadingDemote": "Розташувати нижче заголовків документів",
 	"aiInsertAtOriginal": "Вставити у вихідну позицію",
 	"aiSourceChanged": "Вихідний вміст змінено",
 	"aiStopped": "Зупинено",

@@ -707,7 +707,12 @@ export const getLocalStorage = (cb: () => void) => {
             downloadedTemplate: "0",
             downloadedWidget: "0",
         };
-        defaultStorage[Constants.LOCAL_EXPORTWORD] = {removeAssets: false, mergeSubdocs: false};
+        defaultStorage[Constants.LOCAL_EXPORTWORD] = {
+            removeAssets: false,
+            mergeSubdocs: false,
+            mergeDocHeadingMode: "flat",
+            mergeContentHeadingMode: "preserve",
+        };
         defaultStorage[Constants.LOCAL_EXPORTPDF] = {
             landscape: false,
             marginType: "0",
@@ -716,6 +721,8 @@ export const getLocalStorage = (cb: () => void) => {
             removeAssets: true,
             keepFold: false,
             mergeSubdocs: false,
+            mergeDocHeadingMode: "flat",
+            mergeContentHeadingMode: "preserve",
             watermark: false,
             paged: true
         };

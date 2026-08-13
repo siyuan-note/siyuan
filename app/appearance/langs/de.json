@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "Ebenen der Dokumenttitel",
+	"mergeDocHeadingFlat": "Alle Dokumenttitel als Überschrift 1",
+	"mergeDocHeadingTree": "Der Dokumenthierarchie folgen",
+	"mergeContentHeadingMode": "Überschriftenebenen im Inhalt",
+	"mergeContentHeadingPreserve": "Ursprüngliche Ebenen beibehalten",
+	"mergeContentHeadingDemote": "Unter Dokumenttiteln einordnen",
 	"aiInsertAtOriginal": "An der ursprünglichen Position einfügen",
 	"aiSourceChanged": "Quellinhalt wurde geändert",
 	"aiStopped": "Angehalten",

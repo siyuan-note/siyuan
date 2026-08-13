@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "ระดับชื่อเอกสาร",
+	"mergeDocHeadingFlat": "ใช้หัวข้อ 1 สำหรับชื่อเอกสารทั้งหมด",
+	"mergeDocHeadingTree": "เรียงตามลำดับชั้นของเอกสาร",
+	"mergeContentHeadingMode": "ระดับหัวข้อเนื้อหา",
+	"mergeContentHeadingPreserve": "คงระดับเดิม",
+	"mergeContentHeadingDemote": "วางไว้ใต้ชื่อเอกสาร",
 	"aiInsertAtOriginal": "แทรกที่ตำแหน่งเดิม",
 	"aiSourceChanged": "เนื้อหาต้นฉบับมีการเปลี่ยนแปลง",
 	"aiStopped": "หยุดแล้ว",

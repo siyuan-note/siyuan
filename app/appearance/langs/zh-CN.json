@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "文档标题层级",
+	"mergeDocHeadingFlat": "文档标题都为一级标题",
+	"mergeDocHeadingTree": "遵循文档层级关系",
+	"mergeContentHeadingMode": "正文标题层级",
+	"mergeContentHeadingPreserve": "保持正文标题层级不变",
+	"mergeContentHeadingDemote": "将正文标题置于文档标题之下",
 	"aiInsertAtOriginal": "在原位置插入",
 	"aiSourceChanged": "原内容已更改",
 	"aiStopped": "已停止",

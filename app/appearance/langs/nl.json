@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "Niveaus van documenttitels",
+	"mergeDocHeadingFlat": "Gebruik kop 1 voor alle documenttitels",
+	"mergeDocHeadingTree": "Volg de documenthiërarchie",
+	"mergeContentHeadingMode": "Niveaus van inhoudskoppen",
+	"mergeContentHeadingPreserve": "Behoud de oorspronkelijke niveaus",
+	"mergeContentHeadingDemote": "Plaats onder documenttitels",
 	"aiInsertAtOriginal": "Invoegen op oorspronkelijke positie",
 	"aiSourceChanged": "Broninhoud is gewijzigd",
 	"aiStopped": "Gestopt",

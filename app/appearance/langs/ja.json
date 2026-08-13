@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "文書タイトルの見出しレベル",
+	"mergeDocHeadingFlat": "すべての文書タイトルを見出し1にする",
+	"mergeDocHeadingTree": "文書の階層に従う",
+	"mergeContentHeadingMode": "本文の見出しレベル",
+	"mergeContentHeadingPreserve": "元のレベルを維持",
+	"mergeContentHeadingDemote": "文書タイトルより下位にする",
 	"aiInsertAtOriginal": "元の位置に挿入",
 	"aiSourceChanged": "元の内容が変更されました",
 	"aiStopped": "停止しました",

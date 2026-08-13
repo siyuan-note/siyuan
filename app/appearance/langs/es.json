@@ -1,4 +1,10 @@
 {
+	"mergeDocHeadingMode": "Niveles de títulos de documentos",
+	"mergeDocHeadingFlat": "Usar encabezado 1 para todos los títulos de documentos",
+	"mergeDocHeadingTree": "Seguir la jerarquía de documentos",
+	"mergeContentHeadingMode": "Niveles de los encabezados del contenido",
+	"mergeContentHeadingPreserve": "Conservar los niveles originales",
+	"mergeContentHeadingDemote": "Colocarlos debajo de los títulos de documentos",
 	"aiInsertAtOriginal": "Insertar en la posición original",
 	"aiSourceChanged": "El contenido de origen cambió",
 	"aiStopped": "Detenido",

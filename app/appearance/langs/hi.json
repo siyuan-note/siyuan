@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "प्रारंभिक संख्या",
+	"continueListNumbering": "सूची क्रमांकन जारी रखें",
 	"msgFormatPainterTip": "फ़ॉर्मैट पेंटर चालू करने और बाहर निकलने की सूचनाएँ",
 	"formatPainterInactive": "फ़ॉर्मैट पेंटर निष्क्रिय कर दिया गया है",
 	"pluginDisabledInPublishTip": "प्लगइन लेखक ने इस प्लगइन को प्रकाशन सेवा में अक्षम किया है",

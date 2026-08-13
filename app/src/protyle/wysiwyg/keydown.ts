@@ -1376,9 +1376,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 回车
         if (matchHotKey("↩", event) ||
             (matchHotKey("⇧↩", event) && nodeType === "NodeHeading")) {
-            enter(nodeElement, range, protyle);
             event.stopPropagation();
             event.preventDefault();
+            await enter(nodeElement, range, protyle);
             return;
         }
 
@@ -1880,6 +1880,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (isListOutdent) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
+                event.preventDefault();
+                event.stopPropagation();
                 let isContinuous = true;
                 selectElements.forEach((item, index) => {
                     if (item.nextElementSibling && selectElements[index + 1]) {
@@ -1890,10 +1892,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
                 if (isContinuous &&
                     (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
-                    listOutdent(protyle, Array.from(selectElements), range);
+                    await listOutdent(protyle, Array.from(selectElements), range);
                 }
-                event.preventDefault();
-                event.stopPropagation();
                 return true;
             } else if (rangeListItemElements.length > 0) {
                 event.preventDefault();
@@ -1904,9 +1904,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 return true;
             } else if (nodeElement.parentElement.classList.contains("li") && nodeType !== "NodeCodeBlock") {
-                listOutdent(protyle, [nodeElement.parentElement], range);
                 event.preventDefault();
                 event.stopPropagation();
+                await listOutdent(protyle, [nodeElement.parentElement], range);
                 return true;
             }
         }
@@ -1914,6 +1914,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (isListIndent) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
+                event.preventDefault();
+                event.stopPropagation();
                 let isContinuous = true;
                 selectElements.forEach((item, index) => {
                     if (item.nextElementSibling && selectElements[index + 1]) {
@@ -1924,23 +1926,21 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
                 if (isContinuous &&
                     (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
-                    listIndent(protyle, Array.from(selectElements), range);
+                    await listIndent(protyle, Array.from(selectElements), range);
                 }
-                event.preventDefault();
-                event.stopPropagation();
                 return true;
             } else if (rangeListItemElements.length > 0) {
-                listIndent(protyle, rangeListItemElements, range);
+                event.preventDefault();
+                event.stopPropagation();
+                await listIndent(protyle, rangeListItemElements, range);
                 if (rangeListItemFocusContext) {
                     restoreFocusContext(protyle, rangeListItemFocusContext);
                 }
-                event.preventDefault();
-                event.stopPropagation();
                 return true;
             } else if (nodeElement.parentElement.classList.contains("li") && nodeType !== "NodeCodeBlock") {
-                listIndent(protyle, [nodeElement.parentElement], range);
                 event.preventDefault();
                 event.stopPropagation();
+                await listIndent(protyle, [nodeElement.parentElement], range);
                 return true;
             }
         }
@@ -2047,7 +2047,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 });
                             }
                         } else if (action === "insertListItem") {
-                            insertEmptyListItem(protyle, listContext.listItemElement, range);
+                            await insertEmptyListItem(protyle, listContext.listItemElement, range);
                         } else if (action === "convertChildToList") {
                             turnsIntoOneTransaction({
                                 protyle,

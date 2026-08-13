@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Počiatočné číslo",
+	"continueListNumbering": "Pokračovať v číslovaní zoznamu",
 	"msgFormatPainterTip": "Upozornenia na aktiváciu a ukončenie kopírovania formátu",
 	"formatPainterInactive": "Kopírovanie formátu je deaktivované",
 	"pluginDisabledInPublishTip": "Autor doplnku zakázal tento doplnok v publikačnej službe",

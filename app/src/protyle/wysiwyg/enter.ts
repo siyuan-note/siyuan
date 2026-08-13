@@ -12,7 +12,14 @@ import {
     IEmbedChildOperationContext
 } from "./getBlock";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
-import {breakList, genListItemElement, listOutdent, updateListOrder} from "./list";
+import {
+    breakList,
+    genListItemElement,
+    getFocusedOrderedListInsertOperations,
+    getFocusedParentOrderedList,
+    listOutdent,
+    updateListOrder
+} from "./list";
 import {highlightRender} from "../render/highlightRender";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
@@ -213,7 +220,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         if ("none" === embedListEnterMode) {
             return;
         }
-        if ("list" === embedListEnterMode && listEnter(protyle, blockElement, range)) {
+        if ("list" === embedListEnterMode && await listEnter(protyle, blockElement, range)) {
             return true;
         }
     }
@@ -431,7 +438,7 @@ const getEmbedListEnterMode = (blockElement: HTMLElement, embedContext: IEmbedCh
     return embedContext.boundaryElement.contains(exitsList ? listElement.parentElement : listElement) ? "list" : "none";
 };
 
-const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
+const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
     const listItemElement = blockElement.parentElement;
     const editableElement = getContenteditableElement(blockElement);
     if (// \n 是因为 https://github.com/siyuan-note/siyuan/issues/3846
@@ -440,7 +447,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         !blockElement.querySelector("img") // https://ld246.com/article/1651820644238
     ) {
         if (listItemElement.nextElementSibling?.classList.contains("protyle-attr")) {
-            listOutdent(protyle, [blockElement.parentElement], range);
+            await listOutdent(protyle, [blockElement.parentElement], range);
             return true;
         } else if (!listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
             // 打断列表
@@ -486,6 +493,16 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         return true;
     }
 
+    const shouldUpdateParentList = listItemElement.getAttribute("data-subtype") === "o" &&
+        listItemElement.parentElement.classList.contains("protyle-wysiwyg");
+    const focusedParentListElement = shouldUpdateParentList ?
+        await getFocusedParentOrderedList(protyle, listItemElement.parentElement) : undefined;
+    if (shouldUpdateParentList && !focusedParentListElement) {
+        return true;
+    }
+    if (!listItemElement.isConnected) {
+        return true;
+    }
     const subListElement = listItemElement.querySelector(".list");
     let newElement;
     if (subListElement && listItemElement.getAttribute("fold") !== "1" &&
@@ -540,6 +557,9 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
                 updateListOrder(listItemElement.parentElement);
             }
             if (listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
+                const orderOperations = focusedParentListElement ?
+                    getFocusedOrderedListInsertOperations(focusedParentListElement, listItemElement, newElement) :
+                    {doOperations: [], undoOperations: []};
                 listItemElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                 transaction(protyle, [{
                     action: "update",
@@ -550,14 +570,14 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
                     id: newElement.getAttribute("data-node-id"),
                     data: newElement.outerHTML,
                     previousID: listItemElement.getAttribute("data-node-id")
-                }], [{
+                }, ...orderOperations.doOperations], [{
                     action: "delete",
                     id: newElement.getAttribute("data-node-id"),
                 }, {
                     action: "update",
                     data: listItemHTML,
                     id: listItemElement.getAttribute("data-node-id")
-                }]);
+                }, ...orderOperations.undoOperations]);
             } else {
                 updateTransaction(protyle, listItemElement.parentElement, html);
             }
@@ -629,6 +649,9 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         updateListOrder(listItemElement.parentElement);
     }
     if (listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
+        const orderOperations = focusedParentListElement ?
+            getFocusedOrderedListInsertOperations(focusedParentListElement, listItemElement, newElement) :
+            {doOperations: [], undoOperations: []};
         listItemElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         transaction(protyle, [{
             action: "update",
@@ -639,14 +662,14 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             id: newElement.getAttribute("data-node-id"),
             data: newElement.outerHTML,
             previousID: listItemElement.getAttribute("data-node-id")
-        }], [{
+        }, ...orderOperations.doOperations], [{
             action: "delete",
             id: newElement.getAttribute("data-node-id"),
         }, {
             action: "update",
             id: listItemElement.getAttribute("data-node-id"),
             data: listItemHTML
-        }]);
+        }, ...orderOperations.undoOperations]);
     } else {
         updateTransaction(protyle, listItemElement.parentElement, oldHTML);
     }

@@ -75,7 +75,7 @@ ${padHTML}
 <button class="block__icon fn__flex-center ariaLabel" data-type="more" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
 <button class="block__icon fn__flex-center fn__none ariaLabel" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
         this.element = element.firstElementChild as HTMLElement;
-        element.addEventListener("click", (event) => {
+        element.addEventListener("click", async (event) => {
             let target = event.target as HTMLElement;
             const arrowElement = target.closest(".protyle-breadcrumb__arrow");
             if (arrowElement && this.element.contains(arrowElement)) {
@@ -199,24 +199,24 @@ ${padHTML}
                     event.stopPropagation();
                     break;
                 } else if (type === "outdent") {
+                    event.preventDefault();
+                    event.stopPropagation();
                     if (protyle.toolbar.range) {
                         const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
                         if (blockElement) {
-                            listOutdent(protyle, [blockElement.parentElement], protyle.toolbar.range);
+                            await listOutdent(protyle, [blockElement.parentElement], protyle.toolbar.range);
                         }
                     }
-                    event.preventDefault();
-                    event.stopPropagation();
                     break;
                 } else if (type === "indent") {
+                    event.preventDefault();
+                    event.stopPropagation();
                     if (protyle.toolbar.range) {
                         const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
                         if (blockElement) {
-                            listIndent(protyle, [blockElement.parentElement], protyle.toolbar.range);
+                            await listIndent(protyle, [blockElement.parentElement], protyle.toolbar.range);
                         }
                     }
-                    event.preventDefault();
-                    event.stopPropagation();
                     break;
                 }
                 target = target.parentElement;

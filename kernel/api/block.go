@@ -1349,6 +1349,33 @@ func getBlockDOM(c *gin.Context) {
 	}
 }
 
+func getOrderedListContinueStart(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
+	start, found := model.GetOrderedListContinueStartInBox(id, boxID)
+	ret.Data = map[string]any{
+		"start": start,
+		"found": found,
+	}
+}
+
 func getBlockDOMs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

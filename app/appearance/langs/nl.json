@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Startnummer",
+	"continueListNumbering": "Lijstnummering voortzetten",
 	"msgFormatPainterTip": "Meldingen bij activeren en afsluiten van Opmaak kopiëren",
 	"formatPainterInactive": "Opmaak kopiëren uitgeschakeld",
 	"pluginDisabledInPublishTip": "De auteur van de plug-in heeft deze plug-in uitgeschakeld in de publicatieservice",

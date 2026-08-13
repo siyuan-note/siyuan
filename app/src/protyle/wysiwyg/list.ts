@@ -1,4 +1,4 @@
-import {focusByWbr, getEditorRange, getUndoFocusContext} from "../util/selection";
+import {focusByRange, focusByWbr, getEditorRange, getUndoFocusContext} from "../util/selection";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
 import {genEmptyBlock} from "../../block/util";
 import * as dayjs from "dayjs";
@@ -14,9 +14,14 @@ import {
     getFollowingOrderedListMarkerUpdates,
     getLastListItemElement,
     getOrderedListMarkerUpdates,
+    getOrderedListMaxStart,
+    parseOrderedListStart,
     type TListSubtype
 } from "./listContext";
 import {fetchSyncPost} from "../../util/fetch";
+import {Dialog} from "../../dialog";
+import {isMobile} from "../../util/functions";
+import {showMessage} from "../../dialog/message";
 
 const getLastChildBlock = (element: Element) => {
     if (!element || !element.lastElementChild) {
@@ -64,6 +69,68 @@ export const updateListOrder = (listElement: Element, sIndex?: number) => {
     return true;
 };
 
+const getOrderedListItemElements = (listElement: Element) => Array.from(listElement.children).filter((item) =>
+    item.getAttribute("data-type") === "NodeListItem") as HTMLElement[];
+
+export const setOrderedListStart = (protyle: IProtyle, listElement: HTMLElement, start: number) => {
+    if (listElement.getAttribute("data-type") !== "NodeList" ||
+        listElement.getAttribute("data-subtype") !== "o") {
+        return false;
+    }
+    const listItemElements = getOrderedListItemElements(listElement);
+    if (parseOrderedListStart(start.toString(), listItemElements.length) === undefined) {
+        return false;
+    }
+    const oldHTML = listElement.outerHTML;
+    updateListOrder(listElement, start);
+    updateTransaction(protyle, listElement, oldHTML);
+    return true;
+};
+
+export const openOrderedListStartDialog = (protyle: IProtyle, listElement: HTMLElement, range?: Range) => {
+    const listItemElements = getOrderedListItemElements(listElement);
+    const maxStart = getOrderedListMaxStart(listItemElements.length);
+    if (maxStart === undefined) {
+        return;
+    }
+    const initialStart = Number.parseInt(listItemElements[0].getAttribute("data-marker"), 10);
+    const dialog = new Dialog({
+        title: window.siyuan.languages.orderedListStart,
+        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" type="number" min="0" max="${maxStart}" step="1"></div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
+</div>`,
+        width: isMobile() ? "92vw" : "360px",
+        destroyCallback() {
+            if (range?.startContainer?.isConnected) {
+                focusByRange(range);
+            }
+        }
+    });
+    const inputElement = dialog.element.querySelector("input") as HTMLInputElement;
+    const buttonElements = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-button");
+    inputElement.value = Number.isFinite(initialStart) ? Math.trunc(initialStart).toString() : "1";
+    dialog.bindInput(inputElement, () => {
+        buttonElements[1].click();
+    });
+    inputElement.select();
+    buttonElements[0].addEventListener("click", () => {
+        dialog.destroy();
+    });
+    buttonElements[1].addEventListener("click", () => {
+        const start = parseOrderedListStart(inputElement.value, listItemElements.length);
+        if (start === undefined) {
+            showMessage(window.siyuan.languages.invalid, 3000, "error");
+            inputElement.focus();
+            inputElement.select();
+            return;
+        }
+        setOrderedListStart(protyle, listElement, start);
+        dialog.destroy();
+    });
+};
+
 export const toggleTaskListItem = (protyle: IProtyle, taskItemElement: Element): void => {
     const html = taskItemElement.outerHTML;
     const marker = taskItemElement.getAttribute("data-task");
@@ -96,71 +163,7 @@ export const genListItemElement = (listItemElement: Element, offset = 0, wbr = f
     return element.content.firstElementChild as HTMLElement;
 };
 
-const getFocusedOrderedListUpdates = async (protyle: IProtyle, listItemElement: HTMLElement) => {
-    const doOperations: IOperation[] = [];
-    const undoOperations: IOperation[] = [];
-    if (listItemElement.getAttribute("data-subtype") !== "o" || !protyle.block.parentID) {
-        return {doOperations, undoOperations};
-    }
-
-    try {
-        const response = await fetchSyncPost("/api/block/getBlockDOM", {
-            id: protyle.block.parentID,
-            notebook: protyle.notebookId,
-        });
-        const template = document.createElement("template");
-        template.innerHTML = response.data?.dom || "";
-        const listElement = template.content.firstElementChild as HTMLElement;
-        if (listElement?.getAttribute("data-type") !== "NodeList" ||
-            listElement.getAttribute("data-subtype") !== "o") {
-            return {doOperations, undoOperations};
-        }
-
-        const listItemElements = Array.from(listElement.children).filter((item) =>
-            item.getAttribute("data-type") === "NodeListItem") as HTMLElement[];
-        const currentIndex = listItemElements.findIndex((item) =>
-            item.getAttribute("data-node-id") === listItemElement.getAttribute("data-node-id"));
-        if (currentIndex < 0) {
-            return {doOperations, undoOperations};
-        }
-
-        const followingElements = listItemElements.slice(currentIndex + 1);
-        const markerUpdates = getFollowingOrderedListMarkerUpdates(
-            listItemElements[currentIndex].getAttribute("data-marker"),
-            followingElements.map((item) => item.getAttribute("data-marker")));
-        followingElements.forEach((item, index) => {
-            const marker = markerUpdates[index];
-            if (!marker) {
-                return;
-            }
-            const id = item.getAttribute("data-node-id");
-            undoOperations.push({
-                action: "update",
-                id,
-                data: item.outerHTML,
-            });
-            item.setAttribute("data-marker", marker);
-            const actionElement = item.querySelector(".protyle-action--order");
-            if (actionElement) {
-                actionElement.textContent = marker;
-            }
-            doOperations.push({
-                action: "update",
-                id,
-                data: item.outerHTML,
-            });
-        });
-    } catch (error) {
-        console.warn("get focused ordered list failed", error);
-    }
-    return {doOperations, undoOperations};
-};
-
-const insertingFocusedListItems = new WeakSet<IProtyle>();
-
-const insertingBoundaryListItems = new WeakSet<IProtyle>();
-
-const getFocusedListElement = async (protyle: IProtyle, listID: string) => {
+const getListElementByID = async (protyle: IProtyle, listID: string) => {
     const response = await fetchSyncPost("/api/block/getBlockDOM", {
         id: listID,
         notebook: protyle.notebookId,
@@ -173,6 +176,138 @@ const getFocusedListElement = async (protyle: IProtyle, listID: string) => {
     }
     return listElement;
 };
+
+const isFocusedListItemEditor = (protyle: IProtyle, editorElement: Element) =>
+    editorElement.classList.contains("protyle-wysiwyg") &&
+    editorElement.getAttribute("data-doc-type") === "NodeListItem" && !!protyle.block.parentID;
+
+export const getFocusedParentOrderedList = async (protyle: IProtyle, editorElement: Element) => {
+    if (!isFocusedListItemEditor(protyle, editorElement)) {
+        return;
+    }
+    try {
+        const listElement = await getListElementByID(protyle, protyle.block.parentID);
+        if (listElement?.getAttribute("data-subtype") === "o") {
+            return listElement;
+        }
+    } catch {
+        return;
+    }
+};
+
+const getDirectListItemByID = (listElement: Element, id: string) => Array.from(listElement.children).find((item) =>
+    item.getAttribute("data-type") === "NodeListItem" && item.getAttribute("data-node-id") === id) as
+    HTMLElement | undefined;
+
+const appendFocusedListUpdate = (listElement: HTMLElement, oldHTML: string,
+                                 doOperations: IOperation[], undoOperations: IOperation[], startIndex?: number) => {
+    updateListOrder(listElement, startIndex);
+    const id = listElement.getAttribute("data-node-id");
+    doOperations.push({
+        action: "update",
+        id,
+        data: listElement.outerHTML,
+    });
+    undoOperations.push({
+        action: "update",
+        id,
+        data: oldHTML,
+    });
+};
+
+export const getFocusedOrderedListInsertOperations = (listElement: HTMLElement, listItemElement: HTMLElement,
+                                                      newListItemElement: HTMLElement) => {
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    if (listItemElement.getAttribute("data-subtype") !== "o") {
+        return {doOperations, undoOperations};
+    }
+    const currentElement = getDirectListItemByID(listElement,
+        listItemElement.getAttribute("data-node-id"));
+    if (!currentElement) {
+        return {doOperations, undoOperations};
+    }
+    const oldHTML = listElement.outerHTML;
+    const startIndex = Number.parseInt(getOrderedListItemElements(listElement)[0]?.getAttribute("data-marker"), 10);
+    currentElement.replaceWith(listItemElement.cloneNode(true));
+    const updatedCurrentElement = getDirectListItemByID(listElement,
+        listItemElement.getAttribute("data-node-id"));
+    if (!updatedCurrentElement) {
+        return {doOperations, undoOperations};
+    }
+    updatedCurrentElement.insertAdjacentElement("afterend", newListItemElement.cloneNode(true) as HTMLElement);
+    appendFocusedListUpdate(listElement, oldHTML, doOperations, undoOperations, startIndex);
+    return {doOperations, undoOperations};
+};
+
+const appendFocusedIndentListUpdate = (listElement: HTMLElement, previousElement: HTMLElement,
+                                       movedElements: Element[], doOperations: IOperation[],
+                                       undoOperations: IOperation[]) => {
+    const previousID = previousElement.getAttribute("data-node-id");
+    const previousClone = getDirectListItemByID(listElement, previousID);
+    if (!previousClone) {
+        return;
+    }
+    const oldHTML = listElement.outerHTML;
+    const startIndex = Number.parseInt(getOrderedListItemElements(listElement)[0]?.getAttribute("data-marker"), 10);
+    previousClone.replaceWith(previousElement.cloneNode(true));
+    movedElements.forEach((item) => {
+        getDirectListItemByID(listElement, item.getAttribute("data-node-id"))?.remove();
+    });
+    appendFocusedListUpdate(listElement, oldHTML, doOperations, undoOperations, startIndex);
+};
+
+const appendFocusedOutdentListUpdate = (listElement: HTMLElement, parentListItemElement: HTMLElement,
+                                        movedElements: HTMLElement[], doOperations: IOperation[],
+                                        undoOperations: IOperation[]) => {
+    const parentClone = getDirectListItemByID(listElement,
+        parentListItemElement.getAttribute("data-node-id"));
+    if (!parentClone) {
+        return;
+    }
+    const oldHTML = listElement.outerHTML;
+    const startIndex = Number.parseInt(getOrderedListItemElements(listElement)[0]?.getAttribute("data-marker"), 10);
+    const referenceElement = parentClone.nextElementSibling;
+    if (parentListItemElement.isConnected) {
+        parentClone.replaceWith(parentListItemElement.cloneNode(true));
+    } else {
+        parentClone.remove();
+    }
+    movedElements.forEach((item) => {
+        listElement.insertBefore(item.cloneNode(true), referenceElement);
+    });
+    updateListOrder(listElement, startIndex);
+    movedElements.forEach((item) => {
+        const updatedElement = getDirectListItemByID(listElement, item.getAttribute("data-node-id"));
+        const marker = updatedElement?.getAttribute("data-marker");
+        if (!marker || marker === item.getAttribute("data-marker")) {
+            return;
+        }
+        undoOperations.push({
+            action: "update",
+            id: item.getAttribute("data-node-id"),
+            data: item.outerHTML,
+        });
+        item.setAttribute("data-marker", marker);
+        const actionElement = item.querySelector(".protyle-action--order");
+        if (actionElement) {
+            actionElement.textContent = marker;
+        }
+        item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+        doOperations.push({
+            action: "update",
+            id: item.getAttribute("data-node-id"),
+            data: item.outerHTML,
+        });
+    });
+    appendFocusedListUpdate(listElement, oldHTML, doOperations, undoOperations, startIndex);
+};
+
+const insertingFocusedListItems = new WeakSet<IProtyle>();
+
+const insertingBoundaryListItems = new WeakSet<IProtyle>();
+
+const getFocusedListElement = (protyle: IProtyle, listID: string) => getListElementByID(protyle, listID);
 
 const getFocusedListTailItem = async (protyle: IProtyle, listID: string, currentListItem?: HTMLElement) => {
     const tailResponse = await fetchSyncPost("/api/block/getTailChildBlocks", {
@@ -276,6 +411,7 @@ export const prependListItem = async (protyle: IProtyle, nodeElement: HTMLElemen
         if (!firstListItemElement || !firstID) {
             return;
         }
+        const oldListHTML = listElement.outerHTML;
 
         let startIndex: number | undefined;
         if (firstListItemElement.getAttribute("data-subtype") === "o") {
@@ -303,22 +439,31 @@ export const prependListItem = async (protyle: IProtyle, nodeElement: HTMLElemen
                     return;
                 }
                 const itemID = item.getAttribute("data-node-id");
-                undoOperations.push({
-                    action: "update",
-                    id: itemID,
-                    data: item.outerHTML,
-                });
+                if (context.listElement) {
+                    undoOperations.push({
+                        action: "update",
+                        id: itemID,
+                        data: item.outerHTML,
+                    });
+                }
                 item.setAttribute("data-marker", marker);
                 const actionElement = item.querySelector(".protyle-action--order");
                 if (actionElement) {
                     actionElement.textContent = marker;
                 }
-                doOperations.push({
-                    action: "update",
-                    id: itemID,
-                    data: item.outerHTML,
-                });
+                if (context.listElement) {
+                    doOperations.push({
+                        action: "update",
+                        id: itemID,
+                        data: item.outerHTML,
+                    });
+                }
             });
+            if (!context.listElement) {
+                firstListItemElement.insertAdjacentElement("beforebegin",
+                    newListItemElement.cloneNode(true) as HTMLElement);
+                appendFocusedListUpdate(listElement, oldListHTML, doOperations, undoOperations, startIndex);
+            }
         }
 
         const editorRange = range || getEditorRange(protyle.wysiwyg.element);
@@ -367,7 +512,15 @@ export const insertEmptyListItem = async (protyle: IProtyle, listItemElement: HT
         }
         insertingFocusedListItems.add(protyle);
         try {
-            const orderOperations = await getFocusedOrderedListUpdates(protyle, listItemElement);
+            const shouldUpdateParentList = listItemElement.getAttribute("data-subtype") === "o";
+            const parentListElement = shouldUpdateParentList ?
+                await getFocusedParentOrderedList(protyle, listElement) : undefined;
+            if (shouldUpdateParentList && !parentListElement) {
+                return;
+            }
+            const orderOperations = parentListElement ?
+                getFocusedOrderedListInsertOperations(parentListElement, listItemElement, newListItemElement) :
+                {doOperations: [], undoOperations: []};
             if (!listItemElement.isConnected) {
                 return;
             }
@@ -498,7 +651,7 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
     return true;
 };
 
-export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: Range) => {
+export const listIndent = async (protyle: IProtyle, liItemElements: Element[], range: Range) => {
     liItemElements.forEach(item => {
         item.removeAttribute("select-start");
         item.removeAttribute("select-end");
@@ -513,6 +666,16 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
     const listElement = liItemElements[0].parentElement;
     const previousElement = liItemElements[0].previousElementSibling as HTMLElement;
     if (!listElement || !previousElement) {
+        return;
+    }
+    const shouldUpdateParentList = isFocusedListItemEditor(protyle, listElement) &&
+        liItemElements[0].getAttribute("data-subtype") === "o";
+    const focusedParentListElement = shouldUpdateParentList ?
+        await getFocusedParentOrderedList(protyle, listElement) : undefined;
+    if (shouldUpdateParentList && !focusedParentListElement) {
+        return;
+    }
+    if (!previousElement.isConnected || liItemElements.some((item) => !item.isConnected)) {
         return;
     }
     range.collapse(false);
@@ -586,6 +749,10 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
                 data: previousLastListHTML,
                 id: newLastPreviousElement.getAttribute("data-node-id")
             });
+            if (focusedParentListElement) {
+                appendFocusedIndentListUpdate(focusedParentListElement, previousElement as HTMLElement,
+                    liItemElements, doOperations, undoOperations);
+            }
             transaction(protyle, doOperations, undoOperations);
         }
     } else {
@@ -679,6 +846,10 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
             const foldOperations = setFold(protyle, foldElement, true, false, false, true);
             doOperations.push(...foldOperations.doOperations);
             undoOperations.push(...foldOperations.undoOperations);
+            if (focusedParentListElement) {
+                appendFocusedIndentListUpdate(focusedParentListElement, previousElement as HTMLElement,
+                    liItemElements, doOperations, undoOperations);
+            }
             transaction(protyle, doOperations, undoOperations);
             focusByWbr(protyle.wysiwyg.element, range);
             return;
@@ -698,6 +869,10 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
                 data: previousHTML,
                 id: previousElement.getAttribute("data-node-id")
             });
+            if (focusedParentListElement) {
+                appendFocusedIndentListUpdate(focusedParentListElement, previousElement as HTMLElement,
+                    liItemElements, doOperations, undoOperations);
+            }
             transaction(protyle, doOperations, undoOperations);
         }
     }
@@ -851,6 +1026,18 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
         // https://ld246.com/article/1691981936960 情况下 zoom in 列表项
         return;
     }
+    const shouldUpdateParentList = isFocusedListItemEditor(protyle, parentParentElement) &&
+        parentLiItemElement.getAttribute("data-subtype") === "o";
+    const focusedParentListElement = shouldUpdateParentList ?
+        await getFocusedParentOrderedList(protyle, parentParentElement) : undefined;
+    if (shouldUpdateParentList && !focusedParentListElement) {
+        return;
+    }
+    if (!liElement.isConnected || !parentLiItemElement.isConnected ||
+        liItemElements.some((item) => !item.isConnected)) {
+        return;
+    }
+    const movedListItemElements = [...liItemElements] as HTMLElement[];
     if (parentLiItemElement.classList.contains("protyle-wysiwyg") || parentLiItemElement.classList.contains("sb") ||
         parentLiItemElement.classList.contains("bq") || parentLiItemElement.classList.contains("callout")) {
         // 顶层列表
@@ -1268,6 +1455,10 @@ export const listOutdent = async (protyle: IProtyle, liItemElements: Element[], 
         });
     }
     if (parentParentElement.classList.contains("protyle-wysiwyg")) {
+        if (focusedParentListElement) {
+            appendFocusedOutdentListUpdate(focusedParentListElement, parentLiItemElement as HTMLElement,
+                movedListItemElements, doOperations, undoOperations);
+        }
         transaction(protyle, doOperations, undoOperations);
     } else {
         if (parentLiItemElement && parentLiItemElement.getAttribute("data-subtype") === "o") {

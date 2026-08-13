@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Número inicial",
+	"continueListNumbering": "Continuar numeração da lista",
 	"msgFormatPainterTip": "Notificações ao ativar e sair do Pincel de formatação",
 	"formatPainterInactive": "Pincel de formatação desativado",
 	"pluginDisabledInPublishTip": "O autor do plugin desativou este plugin no serviço de publicação",

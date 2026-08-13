@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Numero iniziale",
+	"continueListNumbering": "Continua la numerazione dell'elenco",
 	"msgFormatPainterTip": "Notifiche di attivazione e uscita di Copia formato",
 	"formatPainterInactive": "Copia formato disattivata",
 	"pluginDisabledInPublishTip": "L'autore del plugin ha disabilitato questo plugin nel servizio di pubblicazione",

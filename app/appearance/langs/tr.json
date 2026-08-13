@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Başlangıç numarası",
+	"continueListNumbering": "Liste numaralandırmasına devam et",
 	"msgFormatPainterTip": "Biçim Boyacısını etkinleştirme ve kapatma bildirimleri",
 	"formatPainterInactive": "Biçim Boyacısı devre dışı bırakıldı",
 	"pluginDisabledInPublishTip": "Eklenti yazarı bu eklentiyi yayımlama hizmetinde devre dışı bıraktı",

@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "시작 번호",
+	"continueListNumbering": "목록 번호 계속",
 	"msgFormatPainterTip": "서식 복사 활성화 및 종료 알림",
 	"formatPainterInactive": "서식 복사가 비활성화됨",
 	"pluginDisabledInPublishTip": "플러그인 작성자가 게시 서비스에서 이 플러그인을 비활성화했습니다",

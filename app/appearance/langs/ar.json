@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "رقم البداية",
+	"continueListNumbering": "متابعة ترقيم القائمة",
 	"msgFormatPainterTip": "إشعارات تنشيط نسخ التنسيق والخروج منه",
 	"formatPainterInactive": "تم إلغاء تنشيط نسخ التنسيق",
 	"pluginDisabledInPublishTip": "عطّل مؤلف الإضافة هذه الإضافة في خدمة النشر",

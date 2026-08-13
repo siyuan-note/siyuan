@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Numer początkowy",
+	"continueListNumbering": "Kontynuuj numerację listy",
 	"msgFormatPainterTip": "Powiadomienia o włączeniu i wyłączeniu Malarza formatów",
 	"formatPainterInactive": "Malarz formatów wyłączony",
 	"pluginDisabledInPublishTip": "Autor wtyczki wyłączył tę wtyczkę w usłudze publikowania",

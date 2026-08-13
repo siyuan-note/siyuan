@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Startnummer",
+	"continueListNumbering": "Listennummerierung fortsetzen",
 	"msgFormatPainterTip": "Benachrichtigungen beim Aktivieren und Beenden der Formatübertragung",
 	"formatPainterInactive": "Formatübertragung deaktiviert",
 	"pluginDisabledInPublishTip": "Der Plugin-Autor hat dieses Plugin im Veröffentlichungsdienst deaktiviert",

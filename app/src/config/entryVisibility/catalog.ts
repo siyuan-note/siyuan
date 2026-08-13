@@ -298,6 +298,9 @@ const gutterSingle = () => [
     ...gutterBase(false),
     separator("separator_listBlock"),
     node("listBlock", lang("listBlock"), true, [
+        node("orderedListStart", lang("orderedListStart")),
+        node("continueListNumbering", lang("continueListNumbering")),
+        separator("separator_numbering"),
         node("prependListItem", lang("prependListItem")),
         node("appendListItem", lang("appendListItem")),
     ]),

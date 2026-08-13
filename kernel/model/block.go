@@ -1531,6 +1531,51 @@ type ChildBlock struct {
 	Markdown string `json:"markdown,omitempty"`
 }
 
+const maxOrderedListNumber = 999999999
+
+// GetOrderedListContinueStartInBox 返回同一父级中最近前置有序列表的续编起始编号。
+func GetOrderedListContinueStartInBox(id, boxID string) (start int, found bool) {
+	tree := loadTreeForBlockDOM(id, boxID)
+	if nil == tree {
+		return
+	}
+	return getOrderedListContinueStartFromTree(id, tree)
+}
+
+func getOrderedListContinueStartFromTree(id string, tree *parse.Tree) (start int, found bool) {
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node || ast.NodeList != node.Type || nil == node.ListData || 1 != node.ListData.Typ {
+		return
+	}
+
+	itemCount := 0
+	for item := node.FirstChild; nil != item; item = item.Next {
+		if ast.NodeListItem == item.Type {
+			itemCount++
+		}
+	}
+	if 1 > itemCount {
+		return
+	}
+
+	for previous := node.Previous; nil != previous; previous = previous.Previous {
+		if ast.NodeList != previous.Type || nil == previous.ListData || 1 != previous.ListData.Typ {
+			continue
+		}
+		for item := previous.LastChild; nil != item; item = item.Previous {
+			if ast.NodeListItem != item.Type || nil == item.ListData {
+				continue
+			}
+			if 0 > item.ListData.Num || item.ListData.Num > maxOrderedListNumber-itemCount {
+				return
+			}
+			return item.ListData.Num + 1, true
+		}
+		return
+	}
+	return
+}
+
 func GetChildBlocks(id string) (ret []*ChildBlock) {
 	return GetChildBlocksInBox(id, "")
 }

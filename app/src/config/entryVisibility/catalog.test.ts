@@ -85,7 +85,13 @@ test("list block submenu follows the base block entries", () => {
     assert.equal(listBlock?.key, "listBlock");
     assert.equal(listBlock?.type, "entry");
     assert.equal(listBlock?.simple, true);
-    assert.deepEqual(listBlock?.children?.map((item) => item.key), ["prependListItem", "appendListItem"]);
+    assert.deepEqual(listBlock?.children?.map((item) => item.key), [
+        "orderedListStart",
+        "continueListNumbering",
+        "separator_numbering",
+        "prependListItem",
+        "appendListItem",
+    ]);
 });
 
 test("super block actions and vertical alignment use their respective menu groups", () => {

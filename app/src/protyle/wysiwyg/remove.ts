@@ -1498,7 +1498,7 @@ const confirmRefRemoval = async (protyle: IProtyle, ids: string[], elements: Ele
 
 const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, isDelete = false) => {
     if (!blockElement.parentElement.previousElementSibling && blockElement.parentElement.nextElementSibling && blockElement.parentElement.nextElementSibling.classList.contains("protyle-attr")) {
-        listOutdent(protyle, [blockElement.parentElement], range, isDelete, blockElement);
+        await listOutdent(protyle, [blockElement.parentElement], range, isDelete, blockElement);
         return;
     }
     // 第一个子列表合并到上一个块的末尾

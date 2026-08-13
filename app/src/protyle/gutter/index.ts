@@ -91,7 +91,12 @@ import {showMessage} from "../../dialog/message";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
-import {appendListItem, prependListItem} from "../wysiwyg/list";
+import {
+    appendListItem,
+    openOrderedListStartDialog,
+    prependListItem,
+    setOrderedListStart
+} from "../wysiwyg/list";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
 import {getGutterMarginHeight} from "./layout";
 
@@ -1920,7 +1925,33 @@ export class Gutter {
             }).element);
         }
         if ((type === "NodeList" || type === "NodeListItem") && allowStructuralMutation) {
-            const listBlockSubmenu: IMenu[] = [{
+            const isOrderedList = type === "NodeList" && nodeElement.getAttribute("data-subtype") === "o";
+            let continueListStart: number;
+            const listBlockSubmenu: IMenu[] = [];
+            if (isOrderedList) {
+                listBlockSubmenu.push({
+                    id: "orderedListStart",
+                    icon: "iconEdit",
+                    label: window.siyuan.languages.orderedListStart,
+                    click() {
+                        openOrderedListStartDialog(protyle, nodeElement as HTMLElement, range);
+                    }
+                }, {
+                    id: "continueListNumbering",
+                    icon: "iconRefresh",
+                    label: window.siyuan.languages.continueListNumbering,
+                    disabled: true,
+                    click() {
+                        if (Number.isInteger(continueListStart)) {
+                            setOrderedListStart(protyle, nodeElement as HTMLElement, continueListStart);
+                        }
+                    }
+                }, {
+                    id: "separator_numbering",
+                    type: "separator",
+                });
+            }
+            listBlockSubmenu.push({
                 id: "prependListItem",
                 icon: "iconBefore",
                 label: window.siyuan.languages.prependListItem,
@@ -1940,15 +1971,32 @@ export class Gutter {
                     countBlockWord([], protyle.block.rootID);
                     void appendListItem(protyle, nodeElement as HTMLElement, range);
                 }
-            }];
+            });
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_listBlock", type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
+            const listBlockMenuItem = new MenuItem({
                 id: "listBlock",
                 icon: "iconList",
                 label: window.siyuan.languages.listBlock,
                 type: "submenu",
                 submenu: listBlockSubmenu,
-            }).element);
+            });
+            window.siyuan.menus.menu.append(listBlockMenuItem.element);
+            if (isOrderedList) {
+                const continueElement = listBlockMenuItem.element.querySelector<HTMLElement>(
+                    '[data-id="continueListNumbering"]'
+                );
+                fetchPost("/api/block/getOrderedListContinueStart", {
+                    id,
+                    notebook: protyle.notebookId,
+                }, (response) => {
+                    if (!continueElement?.isConnected || !response.data?.found ||
+                        !Number.isInteger(response.data.start)) {
+                        return;
+                    }
+                    continueListStart = response.data.start;
+                    continueElement.removeAttribute("disabled");
+                });
+            }
         } else if (type === "NodeSuperBlock" && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "separator_cancelSuperBlock",

@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Starting number",
+	"continueListNumbering": "Continue list numbering",
 	"msgFormatPainterTip": "Format Painter activation and exit notifications",
 	"formatPainterInactive": "Format Painter deactivated",
 	"pluginDisabledInPublishTip": "The plugin author has disabled this plugin in the publish service",

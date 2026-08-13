@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Numéro de départ",
+	"continueListNumbering": "Continuer la numérotation de la liste",
 	"msgFormatPainterTip": "Notifications d’activation et de désactivation de la reproduction de mise en forme",
 	"formatPainterInactive": "Reproduction de la mise en forme désactivée",
 	"pluginDisabledInPublishTip": "L’auteur du plugin a désactivé ce plugin dans le service de publication",

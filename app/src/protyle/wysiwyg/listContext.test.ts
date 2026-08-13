@@ -8,7 +8,9 @@ import {
     getListContext,
     getListConversionType,
     getOrderedListMarkerUpdates,
+    getOrderedListMaxStart,
     getListShortcutAction,
+    parseOrderedListStart,
     shouldIgnoreListShortcut,
     type TListSubtype
 } from "./listContext";
@@ -263,9 +265,40 @@ describe("getOrderedListMarkerUpdates", () => {
         assert.deepEqual(getOrderedListMarkerUpdates(["1.", "2."], 0), ["0.", "1."]);
     });
 
+    it("preserves an explicit custom start when the original first item is removed", () => {
+        assert.deepEqual(getOrderedListMarkerUpdates(["1.", "12.", "13."], 10), ["10.", "11.", "12."]);
+    });
+
     it("replaces invalid markers instead of producing NaN", () => {
         assert.deepEqual(getOrderedListMarkerUpdates(["NaN.", "NaN."]), ["1.", "2."]);
         assert.deepEqual(getOrderedListMarkerUpdates(["2.", "3."], Number.NaN), ["1.", "2."]);
+    });
+
+    it("renumbers the complete parent list after focused list edits", () => {
+        assert.deepEqual(getOrderedListMarkerUpdates(["10.", "11.", "12.", "12.", "13.", "14.", "15."]),
+            [undefined, undefined, undefined, "13.", "14.", "15.", "16."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["10.", "11.", "13.", "14.", "15.", "16."]),
+            [undefined, undefined, "12.", "13.", "14.", "15."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["10.", "11.", "1.", "12.", "13.", "14.", "15."]),
+            [undefined, undefined, "12.", "13.", "14.", "15.", "16."]);
+    });
+});
+
+describe("parseOrderedListStart", () => {
+    it("accepts non-negative integers within the list range", () => {
+        assert.equal(parseOrderedListStart("0", 3), 0);
+        assert.equal(parseOrderedListStart("0005", 3), 5);
+        assert.equal(parseOrderedListStart("999999997", 3), 999999997);
+        assert.equal(getOrderedListMaxStart(3), 999999997);
+    });
+
+    it("rejects malformed and overflowing values", () => {
+        assert.equal(parseOrderedListStart("-1", 3), undefined);
+        assert.equal(parseOrderedListStart("1.5", 3), undefined);
+        assert.equal(parseOrderedListStart("1x", 3), undefined);
+        assert.equal(parseOrderedListStart("999999998", 3), undefined);
+        assert.equal(parseOrderedListStart("1000000000", 1), undefined);
+        assert.equal(parseOrderedListStart("1", 0), undefined);
     });
 });
 

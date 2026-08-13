@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "開始番号",
+	"continueListNumbering": "リストの番号を継続",
 	"msgFormatPainterTip": "書式のコピーの有効化と終了の通知",
 	"formatPainterInactive": "書式のコピーを終了しました",
 	"pluginDisabledInPublishTip": "プラグインの作者が公開サービスでこのプラグインを無効にしています",

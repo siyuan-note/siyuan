@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "หมายเลขเริ่มต้น",
+	"continueListNumbering": "ดำเนินการลำดับเลขรายการต่อ",
 	"msgFormatPainterTip": "การแจ้งเตือนเมื่อเปิดและออกจากการคัดลอกรูปแบบ",
 	"formatPainterInactive": "ปิดการคัดลอกรูปแบบแล้ว",
 	"pluginDisabledInPublishTip": "ผู้เขียนปลั๊กอินได้ปิดใช้งานปลั๊กอินนี้ในบริการเผยแพร่",

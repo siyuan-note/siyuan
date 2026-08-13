@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Nomor awal",
+	"continueListNumbering": "Lanjutkan penomoran daftar",
 	"msgFormatPainterTip": "Notifikasi aktivasi dan keluar penyalinan format",
 	"formatPainterInactive": "Penyalinan format dinonaktifkan",
 	"pluginDisabledInPublishTip": "Pembuat plugin telah menonaktifkan plugin ini di layanan penerbitan",

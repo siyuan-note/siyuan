@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "起始編號",
+	"continueListNumbering": "繼續編號",
 	"msgFormatPainterTip": "格式刷啟用與退出提示",
 	"formatPainterInactive": "格式刷已退出",
 	"pluginDisabledInPublishTip": "插件作者已禁止該插件在發布服務中執行",

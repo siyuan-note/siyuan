@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "מספר התחלתי",
+	"continueListNumbering": "המשך מספור הרשימה",
 	"msgFormatPainterTip": "התראות על הפעלה ויציאה ממברשת העיצוב",
 	"formatPainterInactive": "מברשת העיצוב הושבתה",
 	"pluginDisabledInPublishTip": "מחבר התוסף השבית תוסף זה בשירות הפרסום",

@@ -17,6 +17,8 @@ export type TAppendListContext = {
     listItemElement?: HTMLElement,
 };
 
+export const ORDERED_LIST_MAX_NUMBER = 999999999;
+
 const LIST_CONVERSION_TYPES: Record<TListSubtype, Partial<Record<TListSubtype, string>>> = {
     u: {o: "UL2OL", t: "UL2TL"},
     o: {u: "OL2UL", t: "OL2TL"},
@@ -129,6 +131,25 @@ export const getOrderedListMarkerUpdates = (markers: string[], startIndex?: numb
         const expectedMarker = `${normalizedStartIndex + index}.`;
         return marker === expectedMarker ? undefined : expectedMarker;
     });
+};
+
+export const getOrderedListMaxStart = (itemCount: number) => {
+    if (!Number.isInteger(itemCount) || itemCount < 1 || itemCount > ORDERED_LIST_MAX_NUMBER) {
+        return;
+    }
+    return ORDERED_LIST_MAX_NUMBER - itemCount + 1;
+};
+
+export const parseOrderedListStart = (value: string, itemCount: number) => {
+    const maxStart = getOrderedListMaxStart(itemCount);
+    if (maxStart === undefined || !/^\d{1,9}$/.test(value)) {
+        return;
+    }
+    const start = Number(value);
+    if (!Number.isSafeInteger(start) || start > maxStart) {
+        return;
+    }
+    return start;
 };
 
 export const shouldIgnoreListShortcut = (hasBlockSelection: boolean, selectedType?: string) => {

@@ -894,7 +894,7 @@ export const initKeyboardToolbar = () => {
             event.preventDefault();
         }
     });
-    toolbarElement.addEventListener(isInAndroid() || isInHarmony() ? "touchend" : "click", (event) => {
+    toolbarElement.addEventListener(isInAndroid() || isInHarmony() ? "touchend" : "click", async (event) => {
         if (moved) {
             return;
         }
@@ -1081,7 +1081,7 @@ export const initKeyboardToolbar = () => {
                     tabCodeBlock(protyle, nodeElement, range, true);
                 }
             } else {
-                listOutdent(protyle, [nodeElement.parentElement], range);
+                await listOutdent(protyle, [nodeElement.parentElement], range);
             }
             focusByRange(range);
             return;
@@ -1091,7 +1091,7 @@ export const initKeyboardToolbar = () => {
                     tabCodeBlock(protyle, nodeElement, range);
                 }
             } else {
-                listIndent(protyle, [nodeElement.parentElement], range);
+                await listIndent(protyle, [nodeElement.parentElement], range);
             }
             focusByRange(range);
             return;

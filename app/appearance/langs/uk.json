@@ -1,4 +1,6 @@
 {
+	"orderedListStart": "Початковий номер",
+	"continueListNumbering": "Продовжити нумерацію списку",
 	"msgFormatPainterTip": "Сповіщення про ввімкнення та вимкнення формату за зразком",
 	"formatPainterInactive": "Формат за зразком вимкнено",
 	"pluginDisabledInPublishTip": "Автор плагіна вимкнув цей плагін у службі публікації",

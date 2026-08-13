@@ -128,7 +128,7 @@ BUNDLED_COMPONENTS = [
     ),
     (
         "highlight.js",
-        "11.11.2",
+        "11.12.0",
         "BSD-3-Clause",
         "https://github.com/highlightjs/highlight.js",
         "app/stage/protyle/js/highlight.js/",

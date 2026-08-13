@@ -190,21 +190,22 @@ func newHTTPHandler(server *mcpsdk.Server) http.Handler {
 	modern := mcpsdk.NewStreamableHTTPHandler(getServer, &mcpsdk.StreamableHTTPOptions{
 		Stateless:                    true,
 		JSONResponse:                 true,
-		CrossOriginProtection:        http.NewCrossOriginProtection(),
+		DisableLocalhostProtection:   true,
 		PropagateRequestCancellation: true,
 	})
 	legacy := mcpsdk.NewStreamableHTTPHandler(getServer, &mcpsdk.StreamableHTTPOptions{
-		JSONResponse:          true,
-		CrossOriginProtection: http.NewCrossOriginProtection(),
+		JSONResponse:               true,
+		DisableLocalhostProtection: true,
 	})
 
-	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+	handler := http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if isModernRequest(request) {
 			modern.ServeHTTP(writer, request)
 			return
 		}
 		legacy.ServeHTTP(writer, request)
 	})
+	return http.NewCrossOriginProtection().Handler(handler)
 }
 
 func isModernRequest(request *http.Request) bool {

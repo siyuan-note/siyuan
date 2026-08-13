@@ -37,6 +37,7 @@ import {
 import {removeBlock} from "../wysiwyg/remove";
 import {focusBlock, focusByRange, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
+import {shouldHideGutterAfterFold} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {
@@ -343,6 +344,7 @@ export class Gutter {
                     hideElements(["gutter"], protyle);
                     return;
                 }
+                let foldStatus = -1;
                 if (event.altKey && foldElement.getAttribute("data-type") === "NodeHeading") {
                     foldHeadingGroup(protyle, foldElement, "children").finally(() => {
                         buttonElement.removeAttribute("disabled");
@@ -394,14 +396,16 @@ export class Gutter {
                     transaction(protyle, doOperations, undoOperations);
                     buttonElement.removeAttribute("disabled");
                 } else {
-                    const foldStatus = setFold(protyle, foldElement).fold;
+                    foldStatus = setFold(protyle, foldElement).fold;
                     if (foldStatus === 1) {
                         (buttonElement.firstElementChild as HTMLElement).style.transform = "";
                     } else if (foldStatus === 0) {
                         (buttonElement.firstElementChild as HTMLElement).style.transform = "rotate(90deg)";
                     }
                 }
-                hideElements(["gutter"], protyle);
+                if (shouldHideGutterAfterFold(foldStatus)) {
+                    hideElements(["gutter"], protyle);
+                }
                 hideElements(["select"], protyle);
                 window.siyuan.menus.menu.remove();
                 return;

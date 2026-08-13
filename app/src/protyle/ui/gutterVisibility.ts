@@ -6,3 +6,5 @@ export const hideGutterElements = (elements: HTMLElement[], hidden: boolean) => 
         item.innerHTML = "";
     });
 };
+
+export const shouldHideGutterAfterFold = (foldStatus: number) => foldStatus !== 0;

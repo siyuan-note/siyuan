@@ -37,6 +37,14 @@ export const getGutterSelectionTarget = (selectElements: Element[], element: Ele
     }
 };
 
+export const getCrossBlockTextSelectionTarget = (blockSelectElements: Element[], rangeSelectElements: Element[],
+                                                  element: Element) => {
+    if (hasMultipleBlockSelection(blockSelectElements)) {
+        return;
+    }
+    return getGutterSelectionTarget(rangeSelectElements, element);
+};
+
 export const isCrossBlockTextRange = (range: Range | undefined, boundaryElement: Element,
                                       getBlock: (node: Node) => Element | false) => {
     if (!range || range.collapsed || !boundaryElement.contains(range.startContainer) ||

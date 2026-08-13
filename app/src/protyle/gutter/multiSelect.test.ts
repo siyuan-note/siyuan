@@ -1,6 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    getCrossBlockTextSelectionTarget,
     getGutterSelection,
     getGutterSelectionTarget,
     getSameContainerHeadingLevel,
@@ -174,6 +175,34 @@ describe("getGutterSelectionTarget", () => {
 
         assert.equal(getGutterSelectionTarget([asElement(first), asElement(second)], asElement(unrelated)),
             undefined);
+    });
+});
+
+describe("getCrossBlockTextSelectionTarget", () => {
+    it("uses a matching cross-block text selection when there is no multiple block selection", () => {
+        const selected = new TestElement();
+        const content = new TestElement();
+        selected.append(content);
+
+        assert.equal(getCrossBlockTextSelectionTarget([], [asElement(selected)], asElement(content)),
+            asElement(selected));
+        assert.equal(getCrossBlockTextSelectionTarget([asElement(new TestElement())], [asElement(selected)],
+            asElement(content)), asElement(selected));
+    });
+
+    it("keeps an existing multiple block selection ahead of a text selection", () => {
+        const first = asElement(new TestElement());
+        const second = asElement(new TestElement());
+        const rangeElement = asElement(new TestElement());
+
+        assert.equal(getCrossBlockTextSelectionTarget([first, second], [rangeElement], rangeElement), undefined);
+    });
+
+    it("ignores a gutter outside the cross-block text selection", () => {
+        const rangeElement = asElement(new TestElement());
+        const unrelated = asElement(new TestElement());
+
+        assert.equal(getCrossBlockTextSelectionTarget([], [rangeElement], unrelated), undefined);
     });
 });
 

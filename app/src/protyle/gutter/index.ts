@@ -75,6 +75,7 @@ import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
 import {
+    getCrossBlockTextSelectionTarget,
     getGutterSelection,
     getGutterSelectionTarget,
     getSameContainerHeadingLevel,
@@ -136,6 +137,23 @@ const getCrossBlockTextRange = (protyle: IProtyle) => {
     if (isCrossBlockTextRange(range, protyle.wysiwyg.element, hasClosestBlock)) {
         return range;
     }
+};
+
+const prepareCrossBlockTextSelection = (protyle: IProtyle, targetElement: Element) => {
+    const range = getCrossBlockTextRange(protyle);
+    const blockSelectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+    if (!range || hasMultipleBlockSelection(blockSelectElements)) {
+        return;
+    }
+    const rangeSelectElements = getBlockElementsByRange(range);
+    const selectionTarget = getCrossBlockTextSelectionTarget(blockSelectElements, rangeSelectElements, targetElement);
+    hideElements(["select"], protyle);
+    if (selectionTarget) {
+        selectBlocksByRange(protyle, range);
+    } else {
+        range.collapse(false);
+    }
+    return range;
 };
 
 export class Gutter {
@@ -214,6 +232,10 @@ export class Gutter {
                 });
             } else {
                 const gutterId = buttonElement.getAttribute("data-node-id");
+                const gutterNodeElement = this.getNodeElement(protyle, buttonElement) as HTMLElement;
+                if (gutterNodeElement) {
+                    prepareCrossBlockTextSelection(protyle, gutterNodeElement);
+                }
                 selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 let selectedIncludeGutter = false;
                 selectElements.forEach((item => {
@@ -224,13 +246,6 @@ export class Gutter {
                     selectIds.push(itemId);
                 }));
                 if (!selectedIncludeGutter) {
-                    let gutterNodeElement: HTMLElement;
-                    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${gutterId}"]`)).find((item: HTMLElement) => {
-                        if (!isInEmbedBlock(item) && this.isMatchNode(item)) {
-                            gutterNodeElement = item;
-                            return true;
-                        }
-                    });
                     if (gutterNodeElement) {
                         selectElements.forEach((item => {
                             item.classList.remove("protyle-wysiwyg--select");
@@ -1467,16 +1482,8 @@ export class Gutter {
             return;
         }
         const editableElement = getContenteditableElement(nodeElement);
-        const range = protyle.toolbar.range;
-        const blockSelectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-        if (range && !hasMultipleBlockSelection(blockSelectElements) &&
-            isCrossBlockTextRange(range, protyle.wysiwyg.element, hasClosestBlock)) {
-            hideElements(["select"], protyle);
-            if (range.intersectsNode(hasClosestBlock(editableElement) || nodeElement)) {
-                selectBlocksByRange(protyle, range);
-            } else {
-                range.collapse(false);
-            }
+        const range = prepareCrossBlockTextSelection(protyle, nodeElement);
+        if (range) {
             focusByRange(range);
         }
         const embedContext = getEmbedChildOperationContext(nodeElement);

@@ -3134,7 +3134,8 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 		var treeHPath string
 		for _, bID := range bIDs {
 			loadTreeStart := time.Now()
-			tree, _ := loadTreeByBlockIDInBox(bID, boxID)
+			// 数据库块关系可能因删除、同步或索引尚未完成而暂时失效，搜索时静默跳过。
+			tree, _ := loadTreeByBlockIDInBox0(bID, boxID, false)
 			loadTreeElapsed += time.Since(loadTreeStart)
 			loadTreeCount++
 			if nil == tree {

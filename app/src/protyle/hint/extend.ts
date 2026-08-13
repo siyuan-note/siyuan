@@ -13,7 +13,7 @@ import {replaceFileName} from "../../editor/rename";
 import {transaction} from "../wysiwyg/transaction";
 import {getAssetExtension, getAssetName, getDisplayName, isEncryptedBox} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
-import {updateListOrder} from "../wysiwyg/list";
+import {getOrderedListStart, updateListOrder} from "../wysiwyg/list";
 import {escapeHtml, stripSearchMark} from "../../util/escape";
 import {zoomOut} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
@@ -646,6 +646,7 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
     const doOperations: IOperation[] = [];
     let topSourceElement: Element;
     const parentElement = sourceElements[0].parentElement;
+    const listStart = getOrderedListStart(parentElement);
     let sideElement;
     sourceElements.forEach((item, index) => {
         if (index === sourceElements.length - 1 &&
@@ -673,7 +674,7 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
         topSourceElement.remove();
     } else if (parentElement.classList.contains("list") && parentElement.getAttribute("data-subtype") === "o" &&
         parentElement.childElementCount > 1) {
-        updateListOrder(parentElement, 1);
+        updateListOrder(parentElement, listStart);
         Array.from(parentElement.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;

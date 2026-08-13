@@ -17,6 +17,7 @@ import {
     genListItemElement,
     getFocusedOrderedListInsertOperations,
     getFocusedParentOrderedList,
+    getOrderedListStart,
     listOutdent,
     updateListOrder
 } from "./list";
@@ -485,7 +486,9 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
         // https://github.com/siyuan-note/siyuan/issues/8935
         const wbrElement = document.createElement("wbr");
         range.insertNode(wbrElement);
-        const html = listItemElement.parentElement.outerHTML;
+        const listElement = listItemElement.parentElement;
+        const html = listElement.outerHTML;
+        const listStart = getOrderedListStart(listElement);
         wbrElement.remove();
         let newElement = genListItemElement(listItemElement, -1, true);
         if (!blockElement.previousElementSibling.classList.contains("protyle-action")) {
@@ -502,9 +505,9 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
             listItemElement.insertAdjacentElement("beforebegin", newElement);
         }
         if (listItemElement.getAttribute("data-subtype") === "o") {
-            updateListOrder(listItemElement.parentElement);
+            updateListOrder(listElement, listStart);
         }
-        updateTransaction(protyle, listItemElement.parentElement, html);
+        updateTransaction(protyle, listElement, html);
         focusByWbr(newElement, range);
         scrollCenter(protyle);
         removeEmptyNode(newElement);
@@ -533,11 +536,12 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
             // 段末换行，在子列表中插入
             range.insertNode(document.createElement("wbr"));
             const html = listItemElement.outerHTML;
+            const listStart = getOrderedListStart(subListElement);
             blockElement.querySelector("wbr").remove();
             newElement = genListItemElement(subListElement.firstElementChild, -1, true);
             subListElement.firstElementChild.before(newElement);
             if (subListElement.getAttribute("data-subtype") === "o") {
-                updateListOrder(subListElement);
+                updateListOrder(subListElement, listStart);
             }
             updateTransaction(protyle, listItemElement, html);
             focusByWbr(listItemElement, range);

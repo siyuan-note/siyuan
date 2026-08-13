@@ -72,6 +72,14 @@ export const updateListOrder = (listElement: Element, sIndex?: number) => {
 const getOrderedListItemElements = (listElement: Element) => Array.from(listElement.children).filter((item) =>
     item.getAttribute("data-type") === "NodeListItem") as HTMLElement[];
 
+export const getOrderedListStart = (listElement: Element) => {
+    if (listElement.getAttribute("data-subtype") !== "o") {
+        return;
+    }
+    const start = Number.parseInt(getOrderedListItemElements(listElement)[0]?.getAttribute("data-marker"), 10);
+    return Number.isFinite(start) ? Math.trunc(start) : undefined;
+};
+
 export const setOrderedListStart = (protyle: IProtyle, listElement: HTMLElement, start: number) => {
     if (listElement.getAttribute("data-type") !== "NodeList" ||
         listElement.getAttribute("data-subtype") !== "o") {
@@ -228,7 +236,7 @@ export const getFocusedOrderedListInsertOperations = (listElement: HTMLElement, 
         return {doOperations, undoOperations};
     }
     const oldHTML = listElement.outerHTML;
-    const startIndex = Number.parseInt(getOrderedListItemElements(listElement)[0]?.getAttribute("data-marker"), 10);
+    const startIndex = getOrderedListStart(listElement);
     currentElement.replaceWith(listItemElement.cloneNode(true));
     const updatedCurrentElement = getDirectListItemByID(listElement,
         listItemElement.getAttribute("data-node-id"));
@@ -255,7 +263,7 @@ export const getFocusedOrderedListRemoveOperations = (listElement: HTMLElement,
         return {doOperations, undoOperations};
     }
     const oldHTML = listElement.outerHTML;
-    const startIndex = Number.parseInt(getOrderedListItemElements(listElement)[0]?.getAttribute("data-marker"), 10);
+    const startIndex = getOrderedListStart(listElement);
     previousClone.replaceWith(previousListItemElement.cloneNode(true));
     removedClone.remove();
     appendFocusedListUpdate(listElement, oldHTML, doOperations, undoOperations, startIndex);
@@ -271,7 +279,7 @@ const appendFocusedIndentListUpdate = (listElement: HTMLElement, previousElement
         return;
     }
     const oldHTML = listElement.outerHTML;
-    const startIndex = Number.parseInt(getOrderedListItemElements(listElement)[0]?.getAttribute("data-marker"), 10);
+    const startIndex = getOrderedListStart(listElement);
     previousClone.replaceWith(previousElement.cloneNode(true));
     movedElements.forEach((item) => {
         getDirectListItemByID(listElement, item.getAttribute("data-node-id"))?.remove();
@@ -288,7 +296,7 @@ const appendFocusedOutdentListUpdate = (listElement: HTMLElement, parentListItem
         return;
     }
     const oldHTML = listElement.outerHTML;
-    const startIndex = Number.parseInt(getOrderedListItemElements(listElement)[0]?.getAttribute("data-marker"), 10);
+    const startIndex = getOrderedListStart(listElement);
     const referenceElement = parentClone.nextElementSibling;
     if (parentListItemElement.isConnected) {
         parentClone.replaceWith(parentListItemElement.cloneNode(true));

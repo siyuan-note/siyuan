@@ -263,10 +263,13 @@ describe("getOrderedListMarkerUpdates", () => {
 
     it("supports an explicit zero start index", () => {
         assert.deepEqual(getOrderedListMarkerUpdates(["1.", "2."], 0), ["0.", "1."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["1.", "2.", "0."], 0), ["0.", "1.", "2."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["2.", "0.", "1."], 0), ["0.", "1.", "2."]);
     });
 
     it("preserves an explicit custom start when the original first item is removed", () => {
         assert.deepEqual(getOrderedListMarkerUpdates(["1.", "12.", "13."], 10), ["10.", "11.", "12."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["4.", "5.", "2."], 4), [undefined, undefined, "6."]);
     });
 
     it("replaces invalid markers instead of producing NaN", () => {

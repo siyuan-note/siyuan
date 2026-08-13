@@ -27,7 +27,7 @@ import {
     refreshSbResize
 } from "../../block/util";
 import {transaction, turnsIntoOneTransaction} from "../wysiwyg/transaction";
-import {updateListOrder} from "../wysiwyg/list";
+import {getOrderedListStart, updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "./onGet";
 /// #if !MOBILE
@@ -233,7 +233,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     });
     let newListElement: Element;
     let newListId: string;
-    const orderListElements: { [key: string]: Element } = {};
+    const orderListElements: { [key: string]: { element: Element, start?: number } } = {};
     // 在 DOM 移动前显式捕获每个源块的位置，供 undoOperations 使用。
     // 不能依赖循环内 getParentBlock(item)（移动后 item 的父已变），否则撤销会移到错误位置。
     // 关键：对于文档顶层块，getParentBlock 返回 .protyle-wysiwyg 容器（无 data-node-id），
@@ -379,7 +379,14 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 }
             }
             if (item.classList.contains("li") && item.getAttribute("data-subtype") === "o") {
-                orderListElements[item.parentElement.getAttribute("data-node-id")] = item.parentElement;
+                const listElement = item.parentElement;
+                const listID = listElement.getAttribute("data-node-id");
+                if (listID && !orderListElements[listID]) {
+                    orderListElements[listID] = {
+                        element: listElement,
+                        start: getOrderedListStart(listElement),
+                    };
+                }
             }
             if (newListId) {
                 newListElement.insertAdjacentElement("afterbegin", item);
@@ -562,7 +569,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         }
     }
     Object.keys(orderListElements).forEach(key => {
-        Array.from(orderListElements[key].children).forEach((item) => {
+        const orderList = orderListElements[key];
+        Array.from(orderList.element.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;
             }
@@ -572,8 +580,8 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 data: item.outerHTML
             });
         });
-        updateListOrder(orderListElements[key], 1);
-        Array.from(orderListElements[key].children).forEach((item) => {
+        updateListOrder(orderList.element, orderList.start);
+        Array.from(orderList.element.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;
             }
@@ -835,6 +843,8 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             parentID: targetParentElement.getAttribute("data-node-id")
         });
     }
+    const targetListStart = targetElement.getAttribute("data-type") === "NodeListItem" &&
+        targetElement.getAttribute("data-subtype") === "o" ? getOrderedListStart(targetElement.parentElement) : undefined;
     const moveToResult = await moveTo(protyle, sourceElements, sourceRowElement || targetElement, isSameEditor,
         sourceRowElement ? "afterbegin" : (isBottom ? "afterend" : "beforebegin"), isCopy, sourcePositions);
     if (sourceRowElement && isCopy) {
@@ -882,7 +892,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
                 data: item.outerHTML
             });
         });
-        updateListOrder(targetElement.parentElement, 1);
+        updateListOrder(targetElement.parentElement, targetListStart);
         Array.from(targetElement.parentElement.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;

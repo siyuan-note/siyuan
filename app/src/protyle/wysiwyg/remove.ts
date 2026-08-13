@@ -30,6 +30,7 @@ import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../.
 import {
     getFocusedOrderedListRemoveOperations,
     getFocusedParentOrderedList,
+    getOrderedListStart,
     listOutdent,
     updateListOrder
 } from "./list";
@@ -467,7 +468,10 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
     });
     const orderListElements = Array.from(new Set(removeElements
         .filter(item => item.classList.contains("li") && item.parentElement.getAttribute("data-subtype") === "o")
-        .map(item => item.parentElement)));
+        .map(item => item.parentElement))).map(item => ({
+        element: item,
+        start: getOrderedListStart(item),
+    }));
 
     rangesByBlock.forEach(blockRanges => {
         blockRanges.forEach(item => {
@@ -595,11 +599,11 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
         });
     });
     orderListElements.forEach(item => {
-        const oldListItems = new Map(Array.from(item.querySelectorAll<HTMLElement>(":scope > .li")).map(listItem => {
+        const oldListItems = new Map(Array.from(item.element.querySelectorAll<HTMLElement>(":scope > .li")).map(listItem => {
             return [listItem.getAttribute("data-node-id"), listItem.outerHTML];
         }));
-        updateListOrder(item);
-        item.querySelectorAll<HTMLElement>(":scope > .li").forEach(listItem => {
+        updateListOrder(item.element, item.start);
+        item.element.querySelectorAll<HTMLElement>(":scope > .li").forEach(listItem => {
             const id = listItem.getAttribute("data-node-id");
             const oldHTML = oldListItems.get(id);
             if (!oldHTML || oldHTML === listItem.outerHTML) {
@@ -762,6 +766,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
             }
         }
         let listElement: Element;
+        let listStart: number | undefined;
         let topParentElement: Element;
         hideElements(["select"], protyle);
         const unfoldData: {
@@ -857,9 +862,13 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                     parentID: getOperationParentID(topElement, protyle.block.parentID)
                 });
                 if (topElement.getAttribute("data-subtype") === "o" && topElement.classList.contains("li")) {
-                    listElement = topElement.parentElement;
+                    if (listElement !== topElement.parentElement) {
+                        listElement = topElement.parentElement;
+                        listStart = getOrderedListStart(listElement);
+                    }
                 } else {
                     listElement = undefined;
+                    listStart = undefined;
                 }
                 // https://github.com/siyuan-note/siyuan/issues/12327
                 if (topElement.parentElement.classList.contains("li") && topElement.parentElement.childElementCount === 4 &&
@@ -918,7 +927,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                         data: listElement.outerHTML
                     });
                     listElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
-                    updateListOrder(listElement, 1);
+                    updateListOrder(listElement, listStart);
                     deletes.push({
                         action: "update",
                         id: listElement.getAttribute("data-node-id"),
@@ -1516,6 +1525,7 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
         range.insertNode(document.createElement("wbr"));
         const listElement = blockElement.parentElement.parentElement;
         const listHTML = listElement.outerHTML;
+        const listStart = getOrderedListStart(listElement);
         const previousLastElement = blockElement.parentElement.parentElement.previousElementSibling.lastElementChild;
         const previousHTML = previousLastElement.parentElement.outerHTML;
         blockElement.parentElement.firstElementChild.remove();
@@ -1523,7 +1533,7 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
         previousLastElement.insertAdjacentHTML("beforebegin", blockElement.parentElement.innerHTML);
         blockElement.parentElement.remove();
         if (listElement.getAttribute("data-subtype") === "o") {
-            updateListOrder(listElement);
+            updateListOrder(listElement, listStart);
         }
         listElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         previousLastElement.parentElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
@@ -1561,6 +1571,7 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
         range.insertNode(document.createElement("wbr"));
         const listElement = blockElement.parentElement.parentElement;
         const listHTML = listElement.outerHTML;
+        const listStart = getOrderedListStart(listElement);
         blockElement.parentElement.firstElementChild.remove();
         blockElement.parentElement.lastElementChild.remove();
         const tempElement = document.createElement("div");
@@ -1583,7 +1594,7 @@ const removeLi = async (protyle: IProtyle, blockElement: Element, range: Range, 
         listElement.insertAdjacentHTML("beforebegin", blockElement.parentElement.innerHTML);
         blockElement.parentElement.remove();
         if (listElement.getAttribute("data-subtype") === "o") {
-            updateListOrder(listElement, parseInt(listElement.firstElementChild.getAttribute("data-marker")) - 1);
+            updateListOrder(listElement, listStart);
         }
         listElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         doOperations.splice(0, 0, {

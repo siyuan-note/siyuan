@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     buildHeadingNumberStyles,
+    headingNumberNeedsSpacing,
     invalidateHeadingNumberMeasurements,
     operationsMayChangeHeadingNumbers,
     operationsMayChangeOutline,
@@ -95,6 +96,17 @@ describe("resolveHeadingNumberEnabled", () => {
     });
 });
 
+describe("headingNumberNeedsSpacing", () => {
+    it("全角标点结尾不添加额外间距", () => {
+        assert.equal(headingNumberNeedsSpacing("一、"), false);
+        assert.equal(headingNumberNeedsSpacing("（一）"), false);
+        assert.equal(headingNumberNeedsSpacing("1）"), false);
+        assert.equal(headingNumberNeedsSpacing("1.2.3"), true);
+        assert.equal(headingNumberNeedsSpacing("1."), true);
+        assert.equal(headingNumberNeedsSpacing("①"), true);
+    });
+});
+
 describe("renderHeadingNumbers", () => {
     it("生成不依赖标题 DOM 状态的编号样式", () => {
         const root = new TestElement();
@@ -140,11 +152,16 @@ describe("renderHeadingNumbers", () => {
     });
 
     it("使用内边距对齐标题正文和续行", () => {
-        const css = buildHeadingNumberStyles("scope", [{id: "heading", number: "1.1", offset: "12px"}]);
+        const css = buildHeadingNumberStyles("scope", [
+            {id: "heading", number: "1.1", offset: "12px"},
+            {id: "chinese-heading", number: "一、", offset: "24px"},
+        ]);
 
         assert.match(css, /data-heading-number-scope="scope"/);
         assert.match(css, /data-node-id="heading"/);
         assert.match(css, /--b3-protyle-heading-number:"1\.1"/);
+        assert.match(css, /data-node-id="heading"[^}]*calc\(12px \+ \.5em\)/);
+        assert.match(css, /data-node-id="chinese-heading"[^}]*calc\(24px \+ 0px\)/);
         assert.match(css, /padding-inline-start:var\(--b3-protyle-heading-number-offset\)/);
         assert.match(css, />:first-child\[contenteditable]::before/);
         assert.doesNotMatch(css, />\[contenteditable]/);

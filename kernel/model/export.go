@@ -1504,7 +1504,7 @@ func applyHeadingNumbersForExport(tree *parse.Tree, bt *treenode.BlockTree, merg
 func materializeHeadingNumbers(tree *parse.Tree, numbers map[string]string) {
 	for _, heading := range collectOutlineHeadings(tree) {
 		if number := numbers[heading.ID]; "" != number {
-			heading.PrependChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(number + " ")})
+			heading.PrependChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(headingNumberPrefix(number))})
 		}
 	}
 }
@@ -1790,7 +1790,7 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node, headingNum
 
 func headingTitleWithNumber(title, headingID string, headingNumbers map[string]string) string {
 	if number := headingNumbers[headingID]; "" != number {
-		return number + " " + title
+		return headingNumberPrefix(number) + title
 	}
 	return title
 }

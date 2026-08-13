@@ -216,7 +216,7 @@ const renderPDF = async (id: string) => {
         }
         
         #action {
-          width: 232px;
+          width: 280px;
           background-color: var(--b3-theme-background);
           padding: 12px 0;
           position: fixed;
@@ -239,7 +239,7 @@ const renderPDF = async (id: string) => {
           max-width: 800px;
           margin: 24px auto;
           position: absolute;
-          right: 232px;
+          right: 280px;
           left: 0;
           min-height: calc(100% - 48px);
           box-sizing: border-box;

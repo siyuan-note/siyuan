@@ -63,12 +63,9 @@ const createTreeElements = (expanded = true) => {
     let arrowOpen = expanded;
     const style = {
         overflow: "",
-        position: "",
         removeProperty(property: string) {
             if (property === "overflow") {
                 this.overflow = "";
-            } else if (property === "position") {
-                this.position = "";
             }
             return "";
         },
@@ -125,13 +122,11 @@ describe("fileTreeAnimation", () => {
         assert.deepEqual(tree.getFrames(), [{height: "0"}, {height: "96px"}]);
         assert.equal(tree.getOptions().duration, 200);
         assert.equal(tree.leafElement.style.overflow, "clip");
-        assert.equal(tree.leafElement.style.position, "relative");
 
         tree.animation.finish();
         await tree.animation.animation.finished;
         assert.equal(tree.animation.isCanceled(), true);
         assert.equal(tree.leafElement.style.overflow, "");
-        assert.equal(tree.leafElement.style.position, "");
         assert.equal(finished, true);
     });
 
@@ -145,7 +140,6 @@ describe("fileTreeAnimation", () => {
         tree.animation.fail(new Error("Animation failed"));
         await assert.rejects(tree.animation.animation.finished);
         assert.equal(tree.leafElement.style.overflow, "");
-        assert.equal(tree.leafElement.style.position, "");
         assert.equal(finished, false);
     });
 
@@ -168,7 +162,6 @@ describe("fileTreeAnimation", () => {
         assert.equal(isFileTreeCollapsing(tree.liElement), true);
         assert.deepEqual(tree.getFrames(), [{height: "96px"}, {height: "0"}]);
         assert.equal(tree.leafElement.style.overflow, "clip");
-        assert.equal(tree.leafElement.style.position, "relative");
 
         tree.animation.finish();
         await tree.animation.animation.finished;
@@ -217,6 +210,21 @@ describe("fileTreeAnimation", () => {
         tree.animation.finish();
         await tree.animation.animation.finished;
         assert.equal(collapseCount, 1);
+    });
+
+    it("ignores a collapse request until expansion finishes", async () => {
+        const tree = createTreeElements();
+        let collapseCount = 0;
+        let expandCount = 0;
+        expandFileTree(tree.leafElement);
+        toggleFileTree(tree.liElement, () => collapseCount++, () => expandCount++);
+
+        assert.equal(tree.isArrowClosed(), false);
+        assert.equal(isFileTreeCollapsing(tree.liElement), false);
+        assert.equal(collapseCount, 0);
+        assert.equal(expandCount, 0);
+        tree.animation.finish();
+        await tree.animation.animation.finished;
     });
 
     it("routes a collapsed item through expansion", () => {

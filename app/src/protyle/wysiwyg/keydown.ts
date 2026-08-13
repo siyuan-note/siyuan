@@ -55,6 +55,7 @@ import {
     transaction,
     insertEmptyBlockquote,
     isEmptyParagraph,
+    turnEmptyParagraphsIntoTransaction,
     turnsIntoGroupsTransaction,
     turnsIntoOneTransaction,
     turnsIntoTransaction,
@@ -1779,6 +1780,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.code.custom, event) &&
             !["NodeCodeBlock", "NodeHeading", "NodeTable"].includes(nodeType) &&
             !isInEmbedBlock(nodeElement)) {
+            if (isEmptyParagraph(nodeElement)) {
+                turnEmptyParagraphsIntoTransaction({
+                    protyle,
+                    nodeElements: [nodeElement],
+                    type: "code",
+                });
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
+            }
             const editElement = getContenteditableElement(nodeElement);
             if (editElement) {
                 const html = nodeElement.outerHTML;

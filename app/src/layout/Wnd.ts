@@ -166,6 +166,7 @@ export class Wnd {
                     } else {
                         this.switchTab(target, true);
                     }
+                    this.showHeading();
                     break;
                 }
                 target = target.parentElement;

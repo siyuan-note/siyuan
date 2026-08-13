@@ -1926,77 +1926,73 @@ export class Gutter {
         }
         if ((type === "NodeList" || type === "NodeListItem") && allowStructuralMutation) {
             const isOrderedList = type === "NodeList" && nodeElement.getAttribute("data-subtype") === "o";
-            let continueListStart: number;
-            const listBlockSubmenu: IMenu[] = [];
-            if (isOrderedList) {
-                listBlockSubmenu.push({
-                    id: "orderedListStart",
-                    icon: "iconEdit",
-                    label: window.siyuan.languages.orderedListStart,
-                    click() {
-                        openOrderedListStartDialog(protyle, nodeElement as HTMLElement, range);
-                    }
-                }, {
-                    id: "continueListNumbering",
-                    icon: "iconRefresh",
-                    label: window.siyuan.languages.continueListNumbering,
-                    disabled: true,
-                    click() {
-                        if (Number.isInteger(continueListStart)) {
-                            setOrderedListStart(protyle, nodeElement as HTMLElement, continueListStart);
+            const continueListStartPromise = isOrderedList ? fetchSyncPost("/api/block/getOrderedListContinueStart", {
+                id,
+                notebook: protyle.notebookId,
+            }).then((response) => {
+                const start = response.data?.start;
+                return response.data?.found && typeof start === "number" && Number.isInteger(start) ? start : undefined;
+            }).catch(() => undefined) : undefined;
+            const genListBlockSubmenu = (continueListStart?: number) => {
+                const submenu: IMenu[] = [];
+                if (isOrderedList) {
+                    submenu.push({
+                        id: "orderedListStart",
+                        icon: "iconEdit",
+                        label: window.siyuan.languages.orderedListStart,
+                        click() {
+                            openOrderedListStartDialog(protyle, nodeElement as HTMLElement, range);
                         }
+                    });
+                    if (continueListStart !== undefined && Number.isInteger(continueListStart)) {
+                        submenu.push({
+                            id: "continueListNumbering",
+                            icon: "iconRefresh",
+                            label: window.siyuan.languages.continueListNumbering,
+                            click() {
+                                setOrderedListStart(protyle, nodeElement as HTMLElement, continueListStart);
+                            }
+                        });
+                    }
+                    submenu.push({
+                        id: "separator_numbering",
+                        type: "separator",
+                    });
+                }
+                submenu.push({
+                    id: "prependListItem",
+                    icon: "iconBefore",
+                    label: window.siyuan.languages.prependListItem,
+                    accelerator: window.siyuan.config.keymap.editor.list.prependListItem.custom,
+                    click() {
+                        hideElements(["select"], protyle);
+                        countBlockWord([], protyle.block.rootID);
+                        void prependListItem(protyle, nodeElement as HTMLElement, range);
                     }
                 }, {
-                    id: "separator_numbering",
-                    type: "separator",
+                    id: "appendListItem",
+                    icon: "iconAfter",
+                    label: window.siyuan.languages.appendListItem,
+                    accelerator: window.siyuan.config.keymap.editor.list.appendListItem.custom,
+                    click() {
+                        hideElements(["select"], protyle);
+                        countBlockWord([], protyle.block.rootID);
+                        void appendListItem(protyle, nodeElement as HTMLElement, range);
+                    }
                 });
-            }
-            listBlockSubmenu.push({
-                id: "prependListItem",
-                icon: "iconBefore",
-                label: window.siyuan.languages.prependListItem,
-                accelerator: window.siyuan.config.keymap.editor.list.prependListItem.custom,
-                click() {
-                    hideElements(["select"], protyle);
-                    countBlockWord([], protyle.block.rootID);
-                    void prependListItem(protyle, nodeElement as HTMLElement, range);
-                }
-            }, {
-                id: "appendListItem",
-                icon: "iconAfter",
-                label: window.siyuan.languages.appendListItem,
-                accelerator: window.siyuan.config.keymap.editor.list.appendListItem.custom,
-                click() {
-                    hideElements(["select"], protyle);
-                    countBlockWord([], protyle.block.rootID);
-                    void appendListItem(protyle, nodeElement as HTMLElement, range);
-                }
-            });
+                return submenu;
+            };
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_listBlock", type: "separator"}).element);
-            const listBlockMenuItem = new MenuItem({
+            window.siyuan.menus.menu.append(new MenuItem({
                 id: "listBlock",
                 icon: "iconList",
                 label: window.siyuan.languages.listBlock,
                 type: "submenu",
-                submenu: listBlockSubmenu,
-            });
-            window.siyuan.menus.menu.append(listBlockMenuItem.element);
-            if (isOrderedList) {
-                const continueElement = listBlockMenuItem.element.querySelector<HTMLElement>(
-                    '[data-id="continueListNumbering"]'
-                );
-                fetchPost("/api/block/getOrderedListContinueStart", {
-                    id,
-                    notebook: protyle.notebookId,
-                }, (response) => {
-                    if (!continueElement?.isConnected || !response.data?.found ||
-                        !Number.isInteger(response.data.start)) {
-                        return;
-                    }
-                    continueListStart = response.data.start;
-                    continueElement.removeAttribute("disabled");
-                });
-            }
+                submenu: genListBlockSubmenu(),
+                loadSubmenu: continueListStartPromise ? async () => {
+                    return genListBlockSubmenu(await continueListStartPromise);
+                } : undefined,
+            }).element);
         } else if (type === "NodeSuperBlock" && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "separator_cancelSuperBlock",

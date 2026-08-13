@@ -286,6 +286,7 @@ export class Hint {
                 if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
                     const slashData = hintSlash(key, protyle);
                     if (slashData.length === 0) {
+                        this.enableExtend = false;
                         this.genHTML(slashData, protyle, true, "hint");
                         return;
                     }

@@ -78,6 +78,10 @@ func TestIsPublishServiceToken(t *testing.T) {
 }
 
 func TestInitPublishAccountsWithNilAuth(t *testing.T) {
+	if err := InitJwtKey(); err != nil {
+		t.Fatalf("InitJwtKey failed: %v", err)
+	}
+
 	originalConf := Conf
 	originalAccounts := accountsMap
 	defer func() {
@@ -97,5 +101,36 @@ func TestInitPublishAccountsWithNilAuth(t *testing.T) {
 
 	if nil == Conf.Publish.Auth {
 		t.Fatal("InitPublishAccounts should default Publish.Auth when it is nil")
+	}
+}
+
+func TestInitPublishAccountsPreservesPluginJWT(t *testing.T) {
+	if err := InitJwtKey(); err != nil {
+		t.Fatalf("InitJwtKey failed: %v", err)
+	}
+
+	pluginToken, err := CreatePluginJWT("test-plugin")
+	if err != nil {
+		t.Fatalf("CreatePluginJWT failed: %v", err)
+	}
+	if err = InitJwtKey(); err != nil {
+		t.Fatalf("second InitJwtKey failed: %v", err)
+	}
+	if _, err = ParseJWT(pluginToken); err != nil {
+		t.Fatalf("plugin JWT became invalid after repeated key initialization: %v", err)
+	}
+
+	originalConf := Conf
+	originalAccounts := accountsMap
+	defer func() {
+		Conf = originalConf
+		accountsMap = originalAccounts
+	}()
+
+	Conf = NewAppConf()
+	InitPublishAccounts()
+
+	if _, err = ParseJWT(pluginToken); err != nil {
+		t.Fatalf("plugin JWT became invalid after publish account initialization: %v", err)
 	}
 }

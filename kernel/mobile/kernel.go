@@ -263,10 +263,18 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 }
 
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs string) {
+	if err := model.InitJwtKey(); err != nil {
+		logging.LogErrorf("start kernel failed: initialize JWT signing key: %s", err)
+		return
+	}
 	go server.Serve(true, model.Conf.CookieKey)
 }
 
 func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer string) {
+	if err := model.InitJwtKey(); err != nil {
+		logging.LogErrorf("start kernel failed: initialize JWT signing key: %s", err)
+		return
+	}
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
 	util.MobileOSVer = osVer

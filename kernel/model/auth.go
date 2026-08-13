@@ -55,15 +55,19 @@ var (
 	sessionsMap = SessionsMap{}
 	sessionLock = sync.Mutex{}
 
-	jwtKey = make([]byte, 32)
+	jwtKey     = make([]byte, 32)
+	jwtKeyOnce sync.Once
+	jwtKeyErr  error
 )
 
 func InitJwtKey() error {
-	if _, err := rand.Read(jwtKey); err != nil {
-		logging.LogErrorf("generate JWT signing key failed: %s", err)
-		return err
-	}
-	return nil
+	jwtKeyOnce.Do(func() {
+		if _, err := rand.Read(jwtKey); err != nil {
+			jwtKeyErr = err
+			logging.LogErrorf("generate JWT signing key failed: %s", err)
+		}
+	})
+	return jwtKeyErr
 }
 
 func GetBasicAuthAccount(username string) *Account {
@@ -114,11 +118,6 @@ func InitPublishAccounts() {
 }
 
 func InitPublishJWT() {
-	if _, err := rand.Read(jwtKey); err != nil {
-		logging.LogErrorf("generate JWT signing key failed: %s", err)
-		return
-	}
-
 	for username, account := range accountsMap {
 		// REF: https://golang-jwt.github.io/jwt/usage/create/
 		t := jwt.NewWithClaims(

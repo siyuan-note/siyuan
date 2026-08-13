@@ -121,11 +121,19 @@ func GetExportFileName(exportPath *C.char) *C.char {
 
 //export StartKernelFast
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs *C.char) {
+	if err := model.InitJwtKey(); err != nil {
+		logging.LogErrorf("start kernel failed: initialize JWT signing key: %s", err)
+		return
+	}
 	go server.Serve(true, model.Conf.CookieKey)
 }
 
 //export StartKernel
 func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer *C.char) {
+	if err := model.InitJwtKey(); err != nil {
+		logging.LogErrorf("start kernel failed: initialize JWT signing key: %s", err)
+		return
+	}
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
 	util.MobileOSVer = C.GoString(osVer)

@@ -38,17 +38,12 @@ import {getCloudURL} from "../../config/util/about";
 import {escapeAriaLabel} from "../../util/escape";
 import {refreshUndoButtons} from "../undo/globalUndo";
 import {getAllEditor} from "../../layout/getAll";
-import type {IBlockStat, IEmbedStat} from "../../layout/status";
+import {genEmbedStatTip, type IBlockStat, type IEmbedStat} from "../../layout/status";
 
 const genDocumentStatLabel = (stat: IBlockStat, statWithEmbed?: IBlockStat, embedStat?: IEmbedStat) => {
-    let html = `<div class="fn__flex">${window.siyuan.languages.runeCount}<span class="fn__space fn__flex-1"></span>${stat.runeCount}</div><div class="fn__flex">${window.siyuan.languages.wordCount}<span class="fn__space fn__flex-1"></span>${stat.wordCount}</div><div class="fn__flex">${window.siyuan.languages.linkCount}<span class="fn__space fn__flex-1"></span>${stat.linkCount}</div><div class="fn__flex">${window.siyuan.languages.imgCount}<span class="fn__space fn__flex-1"></span>${stat.imageCount}</div><div class="fn__flex">${window.siyuan.languages.refCount}<span class="fn__space fn__flex-1"></span>${stat.refCount}</div><div class="fn__flex">${window.siyuan.languages.blockCount}<span class="fn__space fn__flex-1"></span>${stat.blockCount}</div>`;
-    if (statWithEmbed) {
-        const incompleteAttrs = embedStat && !embedStat.complete ?
-            ` class="ariaLabel" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.embedStatIncomplete)}"` : "";
-        const prefix = embedStat && !embedStat.complete ? "≈" : "";
-        html += `<div class="fn__flex"><span${incompleteAttrs}>${prefix}${window.siyuan.languages.runeCountWithEmbed}</span><span class="fn__space fn__flex-1"></span>${statWithEmbed.runeCount}</div><div class="fn__flex"><span${incompleteAttrs}>${prefix}${window.siyuan.languages.wordCountWithEmbed}</span><span class="fn__space fn__flex-1"></span>${statWithEmbed.wordCount}</div>`;
-    }
-    return html;
+    const runeEmbedAttrs = statWithEmbed ? ` class="ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.runeCountWithEmbed, statWithEmbed.runeCount, embedStat))}"` : "";
+    const wordEmbedAttrs = statWithEmbed ? ` class="ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.wordCountWithEmbed, statWithEmbed.wordCount, embedStat))}"` : "";
+    return `<div class="fn__flex"><span${runeEmbedAttrs}>${window.siyuan.languages.runeCount}</span><span class="fn__space fn__flex-1"></span>${stat.runeCount}</div><div class="fn__flex"><span${wordEmbedAttrs}>${window.siyuan.languages.wordCount}</span><span class="fn__space fn__flex-1"></span>${stat.wordCount}</div><div class="fn__flex">${window.siyuan.languages.linkCount}<span class="fn__space fn__flex-1"></span>${stat.linkCount}</div><div class="fn__flex">${window.siyuan.languages.imgCount}<span class="fn__space fn__flex-1"></span>${stat.imageCount}</div><div class="fn__flex">${window.siyuan.languages.refCount}<span class="fn__space fn__flex-1"></span>${stat.refCount}</div><div class="fn__flex">${window.siyuan.languages.blockCount}<span class="fn__space fn__flex-1"></span>${stat.blockCount}</div>`;
 };
 
 export class Breadcrumb {

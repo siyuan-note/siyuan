@@ -259,12 +259,20 @@ export interface IEmbedStat {
     depthLimitCount: number;
 }
 
+export const genEmbedStatTip = (label: string, value: number, embedStat?: IEmbedStat) => {
+    const prefix = embedStat && !embedStat.complete ? "≈" : "";
+    const incompleteTip = embedStat && !embedStat.complete ? ` ${window.siyuan.languages.embedStatIncomplete}` : "";
+    return `${prefix}${label} ${value}${incompleteTip}`;
+};
+
 export const renderStatusbarCounter = (stat: IBlockStat, statWithEmbed?: IBlockStat, embedStat?: IEmbedStat) => {
     if (!stat) {
         return;
     }
-    let html = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>
-<span class="ft__on-surface">${window.siyuan.languages.wordCount}</span>&nbsp;${stat.wordCount}<span class="fn__space"></span>`;
+    const runeEmbedAttrs = statWithEmbed ? ` class="ft__on-surface ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.runeCountWithEmbed, statWithEmbed.runeCount, embedStat))}"` : " class=\"ft__on-surface\"";
+    const wordEmbedAttrs = statWithEmbed ? ` class="ft__on-surface ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.wordCountWithEmbed, statWithEmbed.wordCount, embedStat))}"` : " class=\"ft__on-surface\"";
+    let html = `<span${runeEmbedAttrs}>${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>
+<span${wordEmbedAttrs}>${window.siyuan.languages.wordCount}</span>&nbsp;${stat.wordCount}<span class="fn__space"></span>`;
     if (0 < stat.linkCount) {
         html += `<span class="ft__on-surface">${window.siyuan.languages.linkCount}</span>&nbsp;${stat.linkCount}<span class="fn__space"></span>`;
     }
@@ -276,14 +284,6 @@ export const renderStatusbarCounter = (stat: IBlockStat, statWithEmbed?: IBlockS
     }
     if (0 < stat.blockCount) {
         html += `<span class="ft__on-surface">${window.siyuan.languages.blockCount}</span>&nbsp;${stat.blockCount}<span class="fn__space"></span>`;
-    }
-    if (statWithEmbed) {
-        const incompleteClass = embedStat && !embedStat.complete ? " ariaLabel" : "";
-        const incompleteAttrs = embedStat && !embedStat.complete ?
-            ` data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.embedStatIncomplete)}"` : "";
-        const prefix = embedStat && !embedStat.complete ? "≈" : "";
-        html += `<span class="ft__on-surface${incompleteClass}"${incompleteAttrs}>${prefix}${window.siyuan.languages.runeCountWithEmbed}</span>&nbsp;${statWithEmbed.runeCount}<span class="fn__space"></span>
-<span class="ft__on-surface${incompleteClass}"${incompleteAttrs}>${prefix}${window.siyuan.languages.wordCountWithEmbed}</span>&nbsp;${statWithEmbed.wordCount}<span class="fn__space"></span>`;
     }
     document.querySelector("#status .status__counter").innerHTML = html;
 };

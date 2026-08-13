@@ -51,6 +51,16 @@
     white-space: pre-wrap;
   }
 
+  &__thinking {
+    flex-shrink: 0;
+    padding: 2px 8px;
+
+    .agent-chat__thinking-body--expanded {
+      max-height: 240px;
+      overflow-y: auto;
+    }
+  }
+
   &__actions {
     display: flex;
     flex-wrap: wrap;

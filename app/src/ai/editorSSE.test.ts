@@ -23,3 +23,12 @@ test("skips malformed AI editor SSE events", () => {
         token: "ok",
     }]);
 });
+
+test("parses AI editor reasoning events", () => {
+    const state = createAIEditorSSEParserState();
+    assert.deepEqual(parseAIEditorSSE(state,
+        "event:reasoning\ndata:{\"token\":\"thinking\"}\n\n"), [{
+        type: "reasoning",
+        token: "thinking",
+    }]);
+});

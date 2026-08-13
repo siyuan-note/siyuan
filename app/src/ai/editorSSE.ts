@@ -15,6 +15,9 @@ export type TAIEditorSSEEvent = {
     type: "start";
     taskID: string;
 } | {
+    type: "reasoning";
+    token: string;
+} | {
     type: "content";
     token: string;
 } | {
@@ -41,6 +44,8 @@ const buildEvent = (event: string, data: Record<string, unknown>): TAIEditorSSEE
             return {type: "start", taskID: String(data.taskID || "")};
         case "content":
             return {type: "content", token: String(data.token || "")};
+        case "reasoning":
+            return {type: "reasoning", token: String(data.token || "")};
         case "truncated":
             return {type: "truncated", message: String(data.message || "")};
         case "error":

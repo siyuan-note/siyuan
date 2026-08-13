@@ -45,6 +45,7 @@ interface IAIEditorTask {
     status: TAIEditorTaskStatus;
     content: string;
     notice: string;
+    reasoning: boolean;
     panel: HTMLElement;
     body: HTMLElement;
     modelElement: HTMLElement;
@@ -359,19 +360,19 @@ const scheduleTaskPreview = (task: IAIEditorTask) => {
 const updateTaskActions = (task: IAIEditorTask) => {
     const conflict = getSourceConflict(task);
     const sourceButton = task.actionsElement.querySelector<HTMLButtonElement>('[data-action="source"]');
+    const copyButton = task.actionsElement.querySelector<HTMLButtonElement>('[data-action="copy"]');
     if (sourceButton) {
         sourceButton.disabled = !task.content || !task.source.insertSupported || conflict.missing ||
             (task.source.kind === "writing" && conflict.changed);
     }
-    task.actionsElement.querySelectorAll<HTMLButtonElement>("button").forEach(item => {
-        if (item.dataset.action !== "retry" && !task.content) {
-            item.disabled = true;
-        }
-    });
+    if (copyButton) {
+        copyButton.disabled = !task.content;
+    }
     if (conflict.missing || conflict.changed) {
         task.statusElement.textContent = window.siyuan.languages.aiSourceChanged;
     } else if (task.status === "streaming") {
-        task.statusElement.textContent = window.siyuan.languages.loading;
+        task.statusElement.textContent = task.reasoning ?
+            window.siyuan.languages.agentThinking : window.siyuan.languages.loading;
     } else if (task.notice) {
         task.statusElement.textContent = task.notice;
     } else if (task.status === "stopped") {
@@ -411,7 +412,12 @@ const stopTask = (task: IAIEditorTask) => {
 };
 
 const handleTaskEvent = (task: IAIEditorTask, event: TAIEditorSSEEvent) => {
-    if (event.type === "content") {
+    if (event.type === "reasoning") {
+        task.reasoning = true;
+        task.statusElement.textContent = window.siyuan.languages.agentThinking;
+    } else if (event.type === "content") {
+        task.reasoning = false;
+        task.statusElement.textContent = window.siyuan.languages.loading;
         task.content += event.token;
         scheduleTaskPreview(task);
     } else if (event.type === "truncated") {
@@ -434,6 +440,7 @@ const startTaskStream = (task: IAIEditorTask) => {
     task.status = "streaming";
     task.content = "";
     task.notice = "";
+    task.reasoning = false;
     task.body.textContent = "";
     updateTaskModel(task);
     task.statusElement.textContent = window.siyuan.languages.loading;
@@ -506,6 +513,7 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         status: "streaming",
         content: "",
         notice: "",
+        reasoning: false,
         panel,
         body: panel.querySelector(".ai-editor-panel__body") as HTMLElement,
         modelElement: panel.querySelector(".ai-editor-panel__model") as HTMLElement,

@@ -160,6 +160,12 @@ func aiEditorChat(c *gin.Context) {
 			return
 		}
 		for _, choice := range response.Choices {
+			if "" != choice.Delta.ReasoningContent {
+				if err = writeSSEEvent(c, "reasoning", map[string]string{"token": choice.Delta.ReasoningContent}); nil != err {
+					return
+				}
+				flusher.Flush()
+			}
 			if "" != choice.Delta.Content {
 				if err = writeSSEEvent(c, "content", map[string]string{"token": choice.Delta.Content}); nil != err {
 					return

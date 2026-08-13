@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "Zeichen einschließlich eingebetteter Blöcke",
+	"wordCountWithEmbed": "Wörter einschließlich eingebetteter Blöcke",
+	"embedStatIncomplete": "Die Statistik ist unvollständig, da einige eingebettete Blöcke nicht gezählt werden konnten",
 	"mergeDocHeadingMode": "Ebenen der Dokumenttitel",
 	"mergeDocHeadingFlat": "Alle Dokumenttitel als Überschrift 1",
 	"mergeDocHeadingTree": "Der Dokumenthierarchie folgen",

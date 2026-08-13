@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "埋め込みブロックを含む文字数",
+	"wordCountWithEmbed": "埋め込みブロックを含む単語数",
+	"embedStatIncomplete": "一部の埋め込みブロックを集計できないため、統計は不完全です",
 	"mergeDocHeadingMode": "文書タイトルの見出しレベル",
 	"mergeDocHeadingFlat": "すべての文書タイトルを見出し1にする",
 	"mergeDocHeadingTree": "文書の階層に従う",

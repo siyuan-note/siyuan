@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "عدد الأحرف مع الكتل المضمنة",
+	"wordCountWithEmbed": "عدد الكلمات مع الكتل المضمنة",
+	"embedStatIncomplete": "الإحصاءات غير مكتملة لتعذر احتساب بعض الكتل المضمنة",
 	"mergeDocHeadingMode": "مستويات عناوين المستندات",
 	"mergeDocHeadingFlat": "استخدام العنوان 1 لجميع عناوين المستندات",
 	"mergeDocHeadingTree": "اتباع التسلسل الهرمي للمستندات",

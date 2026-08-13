@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "Karakter termasuk blok sematan",
+	"wordCountWithEmbed": "Kata termasuk blok sematan",
+	"embedStatIncomplete": "Statistik tidak lengkap karena beberapa blok sematan tidak dapat dihitung",
 	"mergeDocHeadingMode": "Tingkat judul dokumen",
 	"mergeDocHeadingFlat": "Gunakan heading 1 untuk semua judul dokumen",
 	"mergeDocHeadingTree": "Ikuti hierarki dokumen",

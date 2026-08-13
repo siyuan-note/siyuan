@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "Gömülü bloklarla karakterler",
+	"wordCountWithEmbed": "Gömülü bloklarla kelimeler",
+	"embedStatIncomplete": "Bazı gömülü bloklar sayılamadığı için istatistikler eksik",
 	"mergeDocHeadingMode": "Belge başlığı düzeyleri",
 	"mergeDocHeadingFlat": "Tüm belge başlıkları için başlık 1 kullan",
 	"mergeDocHeadingTree": "Belge hiyerarşisini izle",

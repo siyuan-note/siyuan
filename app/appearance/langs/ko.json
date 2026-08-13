@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "임베드 블록 포함 글자 수",
+	"wordCountWithEmbed": "임베드 블록 포함 단어 수",
+	"embedStatIncomplete": "일부 임베드 블록을 계산할 수 없어 통계가 완전하지 않습니다",
 	"mergeDocHeadingMode": "문서 제목 수준",
 	"mergeDocHeadingFlat": "모든 문서 제목에 제목 1 사용",
 	"mergeDocHeadingTree": "문서 계층 구조 따르기",

@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "含嵌入块字符数",
+	"wordCountWithEmbed": "含嵌入块字数",
+	"embedStatIncomplete": "部分嵌入块无法统计，结果不完整",
 	"mergeDocHeadingMode": "文档标题层级",
 	"mergeDocHeadingFlat": "文档标题都为一级标题",
 	"mergeDocHeadingTree": "遵循文档层级关系",

@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "Znaki z osadzonymi blokami",
+	"wordCountWithEmbed": "Słowa z osadzonymi blokami",
+	"embedStatIncomplete": "Statystyki są niepełne, ponieważ nie udało się policzyć niektórych osadzonych bloków",
 	"mergeDocHeadingMode": "Poziomy tytułów dokumentów",
 	"mergeDocHeadingFlat": "Użyj nagłówka 1 dla wszystkich tytułów dokumentów",
 	"mergeDocHeadingTree": "Zachowaj hierarchię dokumentów",

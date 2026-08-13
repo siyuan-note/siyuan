@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"database/sql"
+	"errors"
 	"math"
 	"regexp"
 	"strconv"
@@ -173,6 +174,31 @@ func SelectBlocksRawStmtInBoxContext(ctx context.Context, stmt string, page, lim
 	}
 	ret = selectBlocksRawStmtWithQuery(stmt, page, limit, queryFn)
 	err = ctx.Err()
+	return
+}
+
+// SelectBlocksRawStmtBoundedInBoxContext 执行原始块查询，并无条件限制返回行数。
+func SelectBlocksRawStmtBoundedInBoxContext(ctx context.Context, stmt string, limit int, boxID string) (ret []*Block, truncated bool, err error) {
+	rows, err := queryForBoxContext(ctx, boxID, stmt)
+	if nil != err {
+		return nil, false, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if limit <= len(ret) {
+			truncated = true
+			break
+		}
+		block := scanBlockRows(rows)
+		if nil == block {
+			return nil, false, errors.New("query result columns do not match blocks")
+		}
+		ret = append(ret, block)
+	}
+	if err = rows.Err(); nil != err {
+		return nil, false, err
+	}
 	return
 }
 

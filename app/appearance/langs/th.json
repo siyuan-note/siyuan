@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "อักขระรวมบล็อกฝัง",
+	"wordCountWithEmbed": "คำรวมบล็อกฝัง",
+	"embedStatIncomplete": "สถิติไม่สมบูรณ์เนื่องจากไม่สามารถนับบล็อกฝังบางรายการได้",
 	"mergeDocHeadingMode": "ระดับชื่อเอกสาร",
 	"mergeDocHeadingFlat": "ใช้หัวข้อ 1 สำหรับชื่อเอกสารทั้งหมด",
 	"mergeDocHeadingTree": "เรียงตามลำดับชั้นของเอกสาร",

@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "תווים כולל בלוקים מוטמעים",
+	"wordCountWithEmbed": "מילים כולל בלוקים מוטמעים",
+	"embedStatIncomplete": "הסטטיסטיקה חלקית מכיוון שלא ניתן היה לספור חלק מהבלוקים המוטמעים",
 	"mergeDocHeadingMode": "רמות כותרות המסמכים",
 	"mergeDocHeadingFlat": "השתמש בכותרת 1 לכל כותרות המסמכים",
 	"mergeDocHeadingTree": "פעל לפי היררכיית המסמכים",

@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "Caracteres con bloques incrustados",
+	"wordCountWithEmbed": "Palabras con bloques incrustados",
+	"embedStatIncomplete": "Las estadísticas están incompletas porque no se pudieron contar algunos bloques incrustados",
 	"mergeDocHeadingMode": "Niveles de títulos de documentos",
 	"mergeDocHeadingFlat": "Usar encabezado 1 para todos los títulos de documentos",
 	"mergeDocHeadingTree": "Seguir la jerarquía de documentos",

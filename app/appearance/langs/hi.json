@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "एम्बेड ब्लॉक सहित वर्ण",
+	"wordCountWithEmbed": "एम्बेड ब्लॉक सहित शब्द",
+	"embedStatIncomplete": "कुछ एम्बेड ब्लॉक की गणना नहीं हो सकी, इसलिए आँकड़े अपूर्ण हैं",
 	"mergeDocHeadingMode": "दस्तावेज़ शीर्षक स्तर",
 	"mergeDocHeadingFlat": "सभी दस्तावेज़ शीर्षकों के लिए शीर्षक 1 का उपयोग करें",
 	"mergeDocHeadingTree": "दस्तावेज़ पदानुक्रम का अनुसरण करें",

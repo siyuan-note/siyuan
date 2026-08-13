@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "Znaky vrátane vložených blokov",
+	"wordCountWithEmbed": "Slová vrátane vložených blokov",
+	"embedStatIncomplete": "Štatistika nie je úplná, pretože niektoré vložené bloky nebolo možné spočítať",
 	"mergeDocHeadingMode": "Úrovne názvov dokumentov",
 	"mergeDocHeadingFlat": "Použiť nadpis 1 pre všetky názvy dokumentov",
 	"mergeDocHeadingTree": "Riadiť sa hierarchiou dokumentov",

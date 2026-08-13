@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "Caratteri con blocchi incorporati",
+	"wordCountWithEmbed": "Parole con blocchi incorporati",
+	"embedStatIncomplete": "Le statistiche sono incomplete perché non è stato possibile conteggiare alcuni blocchi incorporati",
 	"mergeDocHeadingMode": "Livelli dei titoli dei documenti",
 	"mergeDocHeadingFlat": "Usa titolo 1 per tutti i titoli dei documenti",
 	"mergeDocHeadingTree": "Segui la gerarchia dei documenti",

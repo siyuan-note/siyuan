@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "Characters with embed blocks",
+	"wordCountWithEmbed": "Words with embed blocks",
+	"embedStatIncomplete": "The statistics are incomplete because some embed blocks could not be counted",
 	"mergeDocHeadingMode": "Document title levels",
 	"mergeDocHeadingFlat": "Use heading 1 for all document titles",
 	"mergeDocHeadingTree": "Follow the document hierarchy",

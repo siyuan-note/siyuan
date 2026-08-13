@@ -1770,26 +1770,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 		return
 	}
 
-	var nodes []*ast.Node
-	// headingMode: 0=显示标题与下方的块，1=仅显示标题，2=仅显示标题下方的块
-	if ast.NodeHeading == def.Type {
-		if 1 == headingMode {
-			// 仅显示标题
-			nodes = append(nodes, def)
-		} else if 2 == headingMode {
-			// 仅显示标题下方的块（去除标题）
-			if !treenode.IsSelfFolded(def) {
-				nodes = append(nodes, treenode.HeadingChildren(def)...)
-			}
-		} else {
-			// 0: 显示标题与下方的块
-			nodes = append(nodes, def)
-			nodes = append(nodes, treenode.HeadingChildren(def)...)
-		}
-	} else {
-		// 非标题块，直接添加
-		nodes = append(nodes, def)
-	}
+	nodes := embeddedBlockNodes(def, headingMode)
 
 	var b *treenode.BlockTree
 	if IsEncryptedBox(sqlBlock.Box) {
@@ -1835,6 +1816,30 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}
 	}
+	return
+}
+
+func embeddedBlockNodes(def *ast.Node, headingMode int) (ret []*ast.Node) {
+	if nil == def {
+		return
+	}
+	if ast.NodeHeading != def.Type {
+		return []*ast.Node{def}
+	}
+
+	// headingMode：0 表示显示标题与下方的块，1 表示仅显示标题，2 表示仅显示标题下方的块。
+	if 1 == headingMode {
+		return []*ast.Node{def}
+	}
+	if 2 == headingMode {
+		if !treenode.IsSelfFolded(def) {
+			ret = append(ret, treenode.HeadingChildren(def)...)
+		}
+		return
+	}
+
+	ret = append(ret, def)
+	ret = append(ret, treenode.HeadingChildren(def)...)
 	return
 }
 

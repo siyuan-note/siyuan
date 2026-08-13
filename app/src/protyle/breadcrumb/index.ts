@@ -38,6 +38,18 @@ import {getCloudURL} from "../../config/util/about";
 import {escapeAriaLabel} from "../../util/escape";
 import {refreshUndoButtons} from "../undo/globalUndo";
 import {getAllEditor} from "../../layout/getAll";
+import type {IBlockStat, IEmbedStat} from "../../layout/status";
+
+const genDocumentStatLabel = (stat: IBlockStat, statWithEmbed?: IBlockStat, embedStat?: IEmbedStat) => {
+    let html = `<div class="fn__flex">${window.siyuan.languages.runeCount}<span class="fn__space fn__flex-1"></span>${stat.runeCount}</div><div class="fn__flex">${window.siyuan.languages.wordCount}<span class="fn__space fn__flex-1"></span>${stat.wordCount}</div><div class="fn__flex">${window.siyuan.languages.linkCount}<span class="fn__space fn__flex-1"></span>${stat.linkCount}</div><div class="fn__flex">${window.siyuan.languages.imgCount}<span class="fn__space fn__flex-1"></span>${stat.imageCount}</div><div class="fn__flex">${window.siyuan.languages.refCount}<span class="fn__space fn__flex-1"></span>${stat.refCount}</div><div class="fn__flex">${window.siyuan.languages.blockCount}<span class="fn__space fn__flex-1"></span>${stat.blockCount}</div>`;
+    if (statWithEmbed) {
+        const incompleteAttrs = embedStat && !embedStat.complete ?
+            ` class="ariaLabel" data-position="north" aria-label="${escapeAriaLabel(window.siyuan.languages.embedStatIncomplete)}"` : "";
+        const prefix = embedStat && !embedStat.complete ? "≈" : "";
+        html += `<div class="fn__flex"><span${incompleteAttrs}>${prefix}${window.siyuan.languages.runeCountWithEmbed}</span><span class="fn__space fn__flex-1"></span>${statWithEmbed.runeCount}</div><div class="fn__flex"><span${incompleteAttrs}>${prefix}${window.siyuan.languages.wordCountWithEmbed}</span><span class="fn__space fn__flex-1"></span>${statWithEmbed.wordCount}</div>`;
+    }
+    return html;
+};
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -644,7 +656,13 @@ ${padHTML}
         if (cursorNodeElement) {
             id = cursorNodeElement.getAttribute("data-node-id");
         }
-        fetchPost("/api/block/getTreeStat", {id: id || (protyle.block.showAll ? protyle.block.id : protyle.block.rootID)}, (response) => {
+        const statRequest: IObject = {
+            id: id || (protyle.block.showAll ? protyle.block.id : protyle.block.rootID)
+        };
+        if (isEncryptedBox(protyle.notebookId)) {
+            statRequest.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/block/getTreeStat", statRequest, (response) => {
             window.siyuan.menus.menu.remove();
             window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BREADCRUMB_MORE);
             if (!protyle.contentElement.classList.contains("fn__none") && !protyle.disabled) {
@@ -1025,13 +1043,27 @@ ${padHTML}
                 });
             }
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
+            const docInfoElement = new MenuItem({
                 id: "docInfo",
                 iconHTML: "",
                 type: "readonly",
                 // 不能换行，否则移动端间距过大
-                label: `<div class="fn__flex">${window.siyuan.languages.runeCount}<span class="fn__space fn__flex-1"></span>${response.data.stat.runeCount}</div><div class="fn__flex">${window.siyuan.languages.wordCount}<span class="fn__space fn__flex-1"></span>${response.data.stat.wordCount}</div><div class="fn__flex">${window.siyuan.languages.linkCount}<span class="fn__space fn__flex-1"></span>${response.data.stat.linkCount}</div><div class="fn__flex">${window.siyuan.languages.imgCount}<span class="fn__space fn__flex-1"></span>${response.data.stat.imageCount}</div><div class="fn__flex">${window.siyuan.languages.refCount}<span class="fn__space fn__flex-1"></span>${response.data.stat.refCount}</div><div class="fn__flex">${window.siyuan.languages.blockCount}<span class="fn__space fn__flex-1"></span>${response.data.stat.blockCount}</div>`,
-            }).element);
+                label: genDocumentStatLabel(response.data.stat),
+            }).element;
+            window.siyuan.menus.menu.append(docInfoElement);
+            if (response.data.containsEmbed) {
+                fetchPost("/api/block/getTreeStat", {...statRequest, includeEmbed: true}, (embedResponse) => {
+                    if (!docInfoElement.isConnected ||
+                        window.siyuan.menus.menu.element.getAttribute("data-name") !== Constants.MENU_BREADCRUMB_MORE) {
+                        return;
+                    }
+                    docInfoElement.querySelector(".b3-menu__label").innerHTML = genDocumentStatLabel(
+                        embedResponse.data.stat,
+                        embedResponse.data.statWithEmbed,
+                        embedResponse.data.embedStat
+                    );
+                });
+            }
             /// #if MOBILE
             window.siyuan.menus.menu.fullscreen();
             /// #else

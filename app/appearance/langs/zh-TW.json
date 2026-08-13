@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "含嵌入區塊字元數",
+	"wordCountWithEmbed": "含嵌入區塊字數",
+	"embedStatIncomplete": "部分嵌入區塊無法統計，結果不完整",
 	"mergeDocHeadingMode": "文件標題層級",
 	"mergeDocHeadingFlat": "文件標題都為一級標題",
 	"mergeDocHeadingTree": "遵循文件層級關係",

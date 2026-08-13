@@ -1,4 +1,7 @@
 {
+	"runeCountWithEmbed": "Tekens inclusief ingesloten blokken",
+	"wordCountWithEmbed": "Woorden inclusief ingesloten blokken",
+	"embedStatIncomplete": "De statistieken zijn onvolledig omdat sommige ingesloten blokken niet konden worden geteld",
 	"mergeDocHeadingMode": "Niveaus van documenttitels",
 	"mergeDocHeadingFlat": "Gebruik kop 1 voor alle documenttitels",
 	"mergeDocHeadingTree": "Volg de documenthiërarchie",

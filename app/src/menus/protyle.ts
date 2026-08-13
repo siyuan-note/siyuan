@@ -2590,37 +2590,29 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         });
     }
     menus.push(...other2Menus);
-    if ((cellElement.parentElement.parentElement.tagName !== "THEAD" &&
-        ((!hasNone && !hasRowSpan) || (hasNone && !hasRowSpan && hasColSpan))) || colIsPure) {
-        menus.push({
-            id: "separator_delete",
-            type: "separator"
-        });
-    }
+    menus.push({
+        id: "separator_delete",
+        type: "separator"
+    });
     const removeMenus = [];
-    if (cellElement.parentElement.parentElement.tagName !== "THEAD" &&
-        ((!hasNone && !hasRowSpan) || (hasNone && !hasRowSpan && hasColSpan))) {
-        removeMenus.push({
-            id: "deleteRow",
-            icon: "iconDeleteRow",
-            label: window.siyuan.languages["delete-row"],
-            accelerator: window.siyuan.config.keymap.editor.table["delete-row"].custom,
-            click: () => {
-                deleteRow(protyle, range, cellElement, nodeElement);
-            }
-        });
-    }
-    if (colIsPure) {
-        removeMenus.push({
-            id: "deleteColumn",
-            icon: "iconDeleteColumn",
-            label: window.siyuan.languages["delete-column"],
-            accelerator: window.siyuan.config.keymap.editor.table["delete-column"].custom,
-            click: () => {
-                deleteColumn(protyle, range, nodeElement, cellElement);
-            }
-        });
-    }
+    removeMenus.push({
+        id: "deleteRow",
+        icon: "iconDeleteRow",
+        label: window.siyuan.languages["delete-row"],
+        accelerator: window.siyuan.config.keymap.editor.table["delete-row"].custom,
+        click: () => {
+            deleteRow(protyle, range, cellElement, nodeElement);
+        }
+    });
+    removeMenus.push({
+        id: "deleteColumn",
+        icon: "iconDeleteColumn",
+        label: window.siyuan.languages["delete-column"],
+        accelerator: window.siyuan.config.keymap.editor.table["delete-column"].custom,
+        click: () => {
+            deleteColumn(protyle, range, nodeElement, cellElement);
+        }
+    });
     menus.push(...removeMenus);
     return {menus, removeMenus, insertMenus, otherMenus, other2Menus};
 };

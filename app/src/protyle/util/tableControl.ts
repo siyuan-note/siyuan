@@ -1463,9 +1463,6 @@ export class TableControl {
                     icon: "iconTrashcan",
                     label: this.selection.mode === "row" ? window.siyuan.languages["delete-row"] :
                         window.siyuan.languages["delete-column"],
-                    disabled: merged,
-                    action: merged ? "iconInfo" : undefined,
-                    actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                     click: () => this.deleteSelection(false),
                 }).element);
             }
@@ -1698,9 +1695,6 @@ export class TableControl {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",
                 label: window.siyuan.languages["delete-row"],
-                disabled: cellSelection.merged,
-                action: cellSelection.merged ? "iconInfo" : undefined,
-                actionLabel: cellSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                 click: () => {
                     if (deleteTableRows(this.protyle, this.selection.node, cellSelection.rowIndexes)) {
                         this.clear();
@@ -1712,9 +1706,6 @@ export class TableControl {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",
                 label: window.siyuan.languages["delete-column"],
-                disabled: cellSelection.merged,
-                action: cellSelection.merged ? "iconInfo" : undefined,
-                actionLabel: cellSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                 click: () => {
                     if (deleteTableColumns(this.protyle, this.selection.node, cellSelection.columnIndexes)) {
                         this.clear();
@@ -1785,7 +1776,7 @@ export class TableControl {
     }
 
     private deleteSelection(clearOnly: boolean) {
-        if (!this.selection || !this.canMutateSelection()) {
+        if (!this.selection || (this.selection.mode === "cell" && !this.isRectangle())) {
             return;
         }
         if (clearOnly && this.selection.mode === "cell") {

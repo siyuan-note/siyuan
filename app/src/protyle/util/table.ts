@@ -6,6 +6,7 @@ import {
     getEditorRange,
     getSelectionOffset,
     getSelectionPosition,
+    getUndoFocusContext,
 } from "./selection";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
@@ -17,6 +18,7 @@ import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
+import {getProjectedTableHeadRowCount, projectTableCells} from "./tableSelection";
 
 const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
     if (nodeElement.getAttribute("custom-pinthead") === "true") {
@@ -239,62 +241,37 @@ export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElemen
 };
 
 export const deleteRow = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
-    if (cellElement.parentElement.parentElement.tagName !== "THEAD") {
-        const wbrElement = document.createElement("wbr");
-        range.insertNode(wbrElement);
-        const html = nodeElement.outerHTML;
-        wbrElement.remove();
-        const index = getColIndex(cellElement);
-        const tbodyElement = cellElement.parentElement.parentElement;
-        let previousTrElement = tbodyElement.previousElementSibling.lastElementChild as HTMLTableRowElement;
-        if (cellElement.parentElement.previousElementSibling) {
-            previousTrElement = cellElement.parentElement.previousElementSibling as HTMLTableRowElement;
-        }
-
-        if (tbodyElement.childElementCount === 1) {
-            tbodyElement.remove();
-        } else {
-            cellElement.parentElement.remove();
-        }
-        range.selectNodeContents(previousTrElement.cells[index]);
-        range.collapse(true);
-        focusByRange(range);
-        scrollToView(nodeElement, previousTrElement, protyle);
-        updateTransaction(protyle, nodeElement, html);
+    const tableElement = nodeElement.querySelector("table");
+    if (!tableElement) {
+        return;
     }
+    const info = buildTableGrid(tableElement).cellInfos.find(item => item.cell === cellElement);
+    if (!info) {
+        return;
+    }
+    deleteTableRows(protyle, nodeElement as HTMLElement,
+        Array.from({length: info.rowspan}, (_, index) => info.row + index), {
+            range,
+            row: info.row,
+            column: info.col,
+        });
 };
 
 export const deleteColumn = (protyle: IProtyle, range: Range, nodeElement: Element, cellElement: HTMLElement) => {
-    const wbrElement = document.createElement("wbr");
-    range.insertNode(wbrElement);
-    const html = nodeElement.outerHTML;
-    wbrElement.remove();
-    const index = getColIndex(cellElement);
-    const sideCellElement = (cellElement.previousElementSibling || cellElement.nextElementSibling) as HTMLElement;
-    if (sideCellElement) {
-        range.selectNodeContents(sideCellElement);
-        range.collapse(true);
-        // 滚动条横向定位
-        if (sideCellElement.offsetLeft + sideCellElement.clientWidth > nodeElement.firstElementChild.scrollLeft + nodeElement.firstElementChild.clientWidth) {
-            nodeElement.firstElementChild.scrollLeft = sideCellElement.offsetLeft + sideCellElement.clientWidth - nodeElement.firstElementChild.clientWidth;
-        }
-    } else {
-        nodeElement.classList.add("protyle-wysiwyg--select");
-        removeBlock(protyle, nodeElement, range, "remove");
+    const tableElement = nodeElement.querySelector("table");
+    if (!tableElement) {
         return;
     }
-    const tableElement = nodeElement.querySelector("table");
-    for (let i = 0; i < tableElement.rows.length; i++) {
-        const cells = tableElement.rows[i].cells;
-        if (cells.length === 1) {
-            tableElement.remove();
-            break;
-        }
-        cells[index].remove();
+    const info = buildTableGrid(tableElement).cellInfos.find(item => item.cell === cellElement);
+    if (!info) {
+        return;
     }
-    nodeElement.querySelectorAll("col")[index]?.remove();
-    updateTransaction(protyle, nodeElement, html);
-    focusByRange(range);
+    deleteTableColumns(protyle, nodeElement as HTMLElement,
+        Array.from({length: info.colspan}, (_, index) => info.col + index), {
+            range,
+            row: info.row,
+            column: info.col,
+        });
 };
 
 export const moveRowToUp = (protyle: IProtyle, range: Range, cellElement: HTMLElement, nodeElement: Element) => {
@@ -795,10 +772,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
 
     // 删除当前行
     if (matchHotKey(window.siyuan.config.keymap.editor.table["delete-row"].custom, event)) {
-        if ((!hasNone && !hasRowSpan) || //https://github.com/siyuan-note/siyuan/issues/5045
-            (hasNone && !hasRowSpan && hasColSpan)) {
-            deleteRow(protyle, range, cellElement, nodeElement);
-        }
+        deleteRow(protyle, range, cellElement, nodeElement);
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -806,9 +780,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
 
     // 删除当前列
     if (matchHotKey(window.siyuan.config.keymap.editor.table["delete-column"].custom, event)) {
-        if (colIsPure) {
-            deleteColumn(protyle, range, nodeElement, cellElement);
-        }
+        deleteColumn(protyle, range, nodeElement, cellElement);
         event.preventDefault();
         return true;
     }
@@ -1026,99 +998,194 @@ export const getTableCellSelectionIndexes = (
     };
 };
 
-const replaceTableCellTag = (cell: HTMLTableCellElement, tag: "th" | "td") => {
-    if (cell.tagName.toLowerCase() === tag) {
-        return;
+export interface IDeleteTableOptions {
+    range: Range;
+    row: number;
+    column: number;
+}
+
+const cloneTableCell = (sourceCell: HTMLTableCellElement | undefined, tag: "th" | "td") => {
+    const cell = document.createElement(tag);
+    if (!sourceCell) {
+        return cell;
     }
-    const newCell = document.createElement(tag);
-    Array.from(cell.attributes).forEach(attribute => {
-        newCell.setAttribute(attribute.name, attribute.value);
+    Array.from(sourceCell.attributes).forEach(attribute => {
+        cell.setAttribute(attribute.name, attribute.value);
     });
-    while (cell.firstChild) {
-        newCell.append(cell.firstChild);
-    }
-    cell.replaceWith(newCell);
+    Array.from(sourceCell.childNodes).forEach(child => cell.append(child.cloneNode(true)));
+    return cell;
 };
 
-const normalizeTableSections = (tableElement: HTMLTableElement) => {
-    const rows = Array.from(tableElement.rows);
-    const head = tableElement.tHead || tableElement.createTHead();
-    const body = tableElement.tBodies[0] || tableElement.createTBody();
-    head.innerHTML = "";
-    body.innerHTML = "";
-    rows.forEach((row, index) => {
-        Array.from(row.cells).forEach(cell => replaceTableCellTag(cell, index === 0 ? "th" : "td"));
-        (index === 0 ? head : body).append(row);
+const rebuildProjectedTable = (
+    tableElement: HTMLTableElement,
+    grid: ITableGrid,
+    retainedRows: number[],
+    retainedColumns: number[],
+) => {
+    const projection = projectTableCells(grid.cellInfos, retainedRows, retainedColumns);
+    const headRowCount = getProjectedTableHeadRowCount(projection.cells, projection.rows, grid.sectionOfRow);
+    const sourceRows = Array.from(tableElement.rows);
+    const sourceCells = sourceRows.map(row => Array.from(row.cells));
+    const sourceColumnGroup = Array.from(tableElement.children)
+        .find(item => item.tagName === "COLGROUP") as HTMLTableColElement | undefined;
+    const sourceColumns = Array.from(sourceColumnGroup?.children || []) as HTMLTableColElement[];
+    const outputCells = new Map<string, typeof projection.cells[number]>();
+    const coveredSlots = Array.from({length: projection.rows.length},
+        () => new Array(projection.columns.length).fill(false));
+    projection.cells.forEach(cell => {
+        outputCells.set(`${cell.row}:${cell.col}`, cell);
+        for (let row = cell.row; row < cell.row + cell.rowspan; row++) {
+            for (let column = cell.col; column < cell.col + cell.colspan; column++) {
+                if (row !== cell.row || column !== cell.col) {
+                    coveredSlots[row][column] = true;
+                }
+            }
+        }
     });
-    Array.from(tableElement.tBodies).slice(1).forEach(item => item.remove());
+
+    const nextTable = tableElement.cloneNode(false) as HTMLTableElement;
+    if (tableElement.caption) {
+        nextTable.append(tableElement.caption.cloneNode(true));
+    }
+    const columnGroup = sourceColumnGroup?.cloneNode(false) as HTMLTableColElement ||
+        document.createElement("colgroup");
+    projection.columns.forEach(column => {
+        const sourceColumn = sourceColumns[column];
+        if (sourceColumn) {
+            columnGroup.append(sourceColumn.cloneNode(true));
+        } else {
+            const newColumn = document.createElement("col");
+            newColumn.style.minWidth = "60px";
+            columnGroup.append(newColumn);
+        }
+    });
+    nextTable.append(columnGroup);
+    const head = tableElement.tHead?.cloneNode(false) as HTMLTableSectionElement ||
+        document.createElement("thead");
+    const body = tableElement.tBodies[0]?.cloneNode(false) as HTMLTableSectionElement ||
+        document.createElement("tbody");
+    projection.rows.forEach((sourceRow, row) => {
+        const rowElement = sourceRows[sourceRow]?.cloneNode(false) as HTMLTableRowElement ||
+            document.createElement("tr");
+        const tag = row < headRowCount ? "th" : "td";
+        projection.columns.forEach((sourceColumn, column) => {
+            const outputCell = outputCells.get(`${row}:${column}`);
+            const sourcePlaceholder = sourceCells[sourceRow]?.[sourceColumn];
+            const sourceCell = outputCell?.source.cell ||
+                (coveredSlots[row][column] && sourcePlaceholder?.classList.contains("fn__none") ?
+                    sourcePlaceholder : undefined);
+            const cell = cloneTableCell(sourceCell, tag);
+            if (outputCell) {
+                cell.classList.remove("fn__none");
+                if (outputCell.rowspan > 1) {
+                    cell.setAttribute("rowspan", outputCell.rowspan.toString());
+                } else {
+                    cell.removeAttribute("rowspan");
+                }
+                if (outputCell.colspan > 1) {
+                    cell.setAttribute("colspan", outputCell.colspan.toString());
+                } else {
+                    cell.removeAttribute("colspan");
+                }
+            } else if (coveredSlots[row][column]) {
+                cell.classList.add("fn__none");
+            } else {
+                cell.classList.remove("fn__none");
+                cell.removeAttribute("rowspan");
+                cell.removeAttribute("colspan");
+            }
+            rowElement.append(cell);
+        });
+        (row < headRowCount ? head : body).append(rowElement);
+    });
+    nextTable.append(head, body);
+    const scrollTop = tableElement.scrollTop;
+    tableElement.replaceWith(nextTable);
+    nextTable.scrollTop = scrollTop;
+    return {table: nextTable, projection};
+};
+
+const getProjectedIndex = (retainedIndexes: number[], sourceIndex: number) => {
+    const nextIndex = retainedIndexes.findIndex(index => index >= sourceIndex);
+    return nextIndex === -1 ? retainedIndexes.length - 1 : nextIndex;
+};
+
+const deleteTableRowsOrColumns = (
+    protyle: IProtyle,
+    nodeElement: HTMLElement,
+    rowIndexes: number[],
+    columnIndexes: number[],
+    options?: IDeleteTableOptions,
+) => {
+    const tableElement = nodeElement.querySelector("table");
+    if (!tableElement) {
+        return false;
+    }
+    const grid = buildTableGrid(tableElement);
+    const deletedRows = Array.from(new Set(rowIndexes))
+        .filter(index => index >= 0 && index < grid.rowCount).sort((a, b) => a - b);
+    const deletedColumns = Array.from(new Set(columnIndexes))
+        .filter(index => index >= 0 && index < grid.columnCount).sort((a, b) => a - b);
+    if (deletedRows.length === 0 && deletedColumns.length === 0) {
+        return false;
+    }
+    const deletedRowSet = new Set(deletedRows);
+    const deletedColumnSet = new Set(deletedColumns);
+    const retainedRows = Array.from({length: grid.rowCount}, (_, index) => index)
+        .filter(index => !deletedRowSet.has(index));
+    const retainedColumns = Array.from({length: grid.columnCount}, (_, index) => index)
+        .filter(index => !deletedColumnSet.has(index));
+    if (retainedRows.length === 0 || retainedColumns.length === 0) {
+        const range = options?.range || getEditorRange(nodeElement);
+        nodeElement.classList.add("protyle-wysiwyg--select");
+        removeBlock(protyle, nodeElement, range, "remove");
+        return true;
+    }
+
+    const oldHTML = nodeElement.outerHTML;
+    const undoContext = options ? getUndoFocusContext(protyle.wysiwyg.element, options.range, true) : undefined;
+    const {table} = rebuildProjectedTable(tableElement, grid, retainedRows, retainedColumns);
+    if (options) {
+        const sourceRow = deletedRows.length > 0 ? deletedRows[0] : options.row;
+        const sourceColumn = deletedColumns.length > 0 ? deletedColumns[0] : options.column;
+        const row = getProjectedIndex(retainedRows, sourceRow);
+        const column = getProjectedIndex(retainedColumns, sourceColumn);
+        const focusCell = buildTableGrid(table).grid[row]?.[column];
+        if (focusCell) {
+            options.range.selectNodeContents(focusCell);
+            options.range.collapse(true);
+            focusByRange(options.range);
+            const rowElement = table.rows[row];
+            if (rowElement) {
+                scrollToView(nodeElement, rowElement, protyle);
+            }
+            const scrollElement = nodeElement.firstElementChild as HTMLElement;
+            if (scrollElement && focusCell.offsetLeft + focusCell.clientWidth >
+                scrollElement.scrollLeft + scrollElement.clientWidth) {
+                scrollElement.scrollLeft = focusCell.offsetLeft + focusCell.clientWidth - scrollElement.clientWidth;
+            }
+        }
+    }
+    updateTransaction(protyle, nodeElement, oldHTML, undoContext);
+    return true;
 };
 
 export const deleteTableRows = (
     protyle: IProtyle,
     nodeElement: HTMLElement,
     rowIndexes: number[],
+    options?: IDeleteTableOptions,
 ) => {
-    const tableElement = nodeElement.querySelector("table");
-    if (!tableElement) {
-        return false;
-    }
-    const grid = buildTableGrid(tableElement);
-    if (grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1)) {
-        return false;
-    }
-    const indexes = Array.from(new Set(rowIndexes))
-        .filter(index => index >= 0 && index < grid.rowCount)
-        .sort((a, b) => b - a);
-    if (indexes.length === 0) {
-        return false;
-    }
-    if (indexes.length >= grid.rowCount) {
-        const range = getEditorRange(nodeElement);
-        nodeElement.classList.add("protyle-wysiwyg--select");
-        removeBlock(protyle, nodeElement, range, "remove");
-        return true;
-    }
-    const oldHTML = nodeElement.outerHTML;
-    const rows = Array.from(tableElement.rows);
-    indexes.forEach(index => rows[index]?.remove());
-    normalizeTableSections(tableElement);
-    updateTransaction(protyle, nodeElement, oldHTML);
-    return true;
+    return deleteTableRowsOrColumns(protyle, nodeElement, rowIndexes, [], options);
 };
 
 export const deleteTableColumns = (
     protyle: IProtyle,
     nodeElement: HTMLElement,
     columnIndexes: number[],
+    options?: IDeleteTableOptions,
 ) => {
-    const tableElement = nodeElement.querySelector("table");
-    if (!tableElement) {
-        return false;
-    }
-    const grid = buildTableGrid(tableElement);
-    if (grid.cellInfos.some(info => info.rowspan > 1 || info.colspan > 1)) {
-        return false;
-    }
-    const indexes = Array.from(new Set(columnIndexes))
-        .filter(index => index >= 0 && index < grid.columnCount)
-        .sort((a, b) => b - a);
-    if (indexes.length === 0) {
-        return false;
-    }
-    if (indexes.length >= grid.columnCount) {
-        const range = getEditorRange(nodeElement);
-        nodeElement.classList.add("protyle-wysiwyg--select");
-        removeBlock(protyle, nodeElement, range, "remove");
-        return true;
-    }
-    const oldHTML = nodeElement.outerHTML;
-    Array.from(tableElement.rows).forEach(row => {
-        indexes.forEach(index => row.cells[index]?.remove());
-    });
-    const columns = Array.from(tableElement.querySelectorAll("col"));
-    indexes.forEach(index => columns[index]?.remove());
-    updateTransaction(protyle, nodeElement, oldHTML);
-    return true;
+    return deleteTableRowsOrColumns(protyle, nodeElement, [], columnIndexes, options);
 };
 
 const getTableRangeBounds = (cellInfos: ITableCellInfo[], rowCount: number, startCell: HTMLElement, endCell: HTMLElement) => {

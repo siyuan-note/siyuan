@@ -1,9 +1,71 @@
-interface ITableSelectionCellInfo {
+export interface ITableSelectionCellInfo {
     row: number;
     col: number;
     rowspan: number;
     colspan: number;
 }
+
+export interface IProjectedTableCell<T extends ITableSelectionCellInfo> {
+    source: T;
+    row: number;
+    col: number;
+    rowspan: number;
+    colspan: number;
+}
+
+export const projectTableCells = <T extends ITableSelectionCellInfo>(
+    cellInfos: T[],
+    retainedRows: number[],
+    retainedColumns: number[],
+) => {
+    const rows = Array.from(new Set(retainedRows)).sort((a, b) => a - b);
+    const columns = Array.from(new Set(retainedColumns)).sort((a, b) => a - b);
+    const rowMap = new Map(rows.map((row, index) => [row, index]));
+    const columnMap = new Map(columns.map((column, index) => [column, index]));
+    const cells: IProjectedTableCell<T>[] = [];
+    cellInfos.forEach(info => {
+        const cellRows = rows.filter(row => row >= info.row && row < info.row + info.rowspan);
+        const cellColumns = columns.filter(column => column >= info.col && column < info.col + info.colspan);
+        if (cellRows.length === 0 || cellColumns.length === 0) {
+            return;
+        }
+        const row = rowMap.get(cellRows[0]);
+        const col = columnMap.get(cellColumns[0]);
+        if (row === undefined || col === undefined) {
+            return;
+        }
+        cells.push({
+            source: info,
+            row,
+            col,
+            rowspan: cellRows.length,
+            colspan: cellColumns.length,
+        });
+    });
+    cells.sort((a, b) => a.row - b.row || a.col - b.col);
+    return {rows, columns, cells};
+};
+
+export const getProjectedTableHeadRowCount = <T extends ITableSelectionCellInfo>(
+    cells: IProjectedTableCell<T>[],
+    retainedRows: number[],
+    sectionOfRow: string[],
+) => {
+    if (retainedRows.length === 0) {
+        return 0;
+    }
+    let headRowCount = Math.max(1, retainedRows.filter(row => sectionOfRow[row] === "thead").length);
+    let previousHeadRowCount = 0;
+    while (headRowCount !== previousHeadRowCount) {
+        previousHeadRowCount = headRowCount;
+        cells.forEach(cell => {
+            if (cell.row < headRowCount) {
+                headRowCount = Math.max(headRowCount, cell.row + cell.rowspan);
+            }
+        });
+    }
+    return Math.min(headRowCount, retainedRows.length);
+};
 
 export const getTableDragEdge = (targetCenter: number, minCenter: number, maxCenter: number) => {
     if (minCenter > maxCenter) {

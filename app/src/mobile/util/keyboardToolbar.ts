@@ -1077,9 +1077,7 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (type === "outdent") {
             if (nodeElement.classList.contains("code-block")) {
-                if (range.toString() !== "") {
-                    tabCodeBlock(protyle, nodeElement, range, true);
-                }
+                tabCodeBlock(protyle, nodeElement, range, true);
             } else {
                 await listOutdent(protyle, [nodeElement.parentElement], range);
             }
@@ -1087,9 +1085,7 @@ export const initKeyboardToolbar = () => {
             return;
         } else if (type === "indent") {
             if (nodeElement.classList.contains("code-block")) {
-                if (range.toString() !== "") {
-                    tabCodeBlock(protyle, nodeElement, range);
-                }
+                tabCodeBlock(protyle, nodeElement, range);
             } else {
                 await listIndent(protyle, [nodeElement.parentElement], range);
             }

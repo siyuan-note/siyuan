@@ -2310,8 +2310,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // tab 需等待 list 和 table 处理完成
         if (event.key === "Tab" && isNotCtrl(event) && !event.altKey) {
             event.preventDefault();
-            if (nodeType === "NodeCodeBlock" && selectText !== "") {
-                tabCodeBlock(protyle, nodeElement, range, event.shiftKey);
+            if (nodeType === "NodeCodeBlock") {
+                if (selectText !== "" || !event.shiftKey) {
+                    tabCodeBlock(protyle, nodeElement, range, event.shiftKey);
+                    return true;
+                }
                 return;
             }
             if (!event.shiftKey) {

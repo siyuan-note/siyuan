@@ -71,6 +71,7 @@ export abstract class Constants {
     public static readonly CUSTOM_SY_AV_VIEW: string = "custom-sy-av-view";
     public static readonly CUSTOM_SY_AV_VISIBLE_VIEWS: string = "custom-sy-av-visible-views";
     public static readonly CUSTOM_SY_TITLE_EMPTY: string = "custom-sy-title-empty";
+    public static readonly CUSTOM_SY_CODE_TAB_SPACES: string = "custom-sy-code-tab-spaces";
 
     // 临时标记 DOM 属性以辅助完成其功能
     public static readonly ATTRIBUTE_EDITING = "data-editing";

@@ -74,6 +74,7 @@ import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
+import {CODE_TAB_SPACE_VALUES} from "../wysiwyg/codeBlockUtil";
 import {
     getCrossBlockTextSelectionTarget,
     getGutterSelection,
@@ -2056,6 +2057,10 @@ export class Gutter {
             const linewrap = nodeElement.getAttribute("linewrap");
             const ligatures = nodeElement.getAttribute("ligatures");
             const linenumber = nodeElement.getAttribute("linenumber");
+            const codeTabSpaces = nodeElement.getAttribute(Constants.CUSTOM_SY_CODE_TAB_SPACES);
+            const codeTabSpacesOptions = [`<option value=""${codeTabSpaces === null ? " selected" : ""}>${window.siyuan.languages.default} (${window.siyuan.config.editor.codeTabSpaces})</option>`]
+                .concat(CODE_TAB_SPACE_VALUES.map((value) => `<option value="${value}"${codeTabSpaces === value.toString() ? " selected" : ""}>${value}</option>`))
+                .join("");
 
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "code",
@@ -2063,6 +2068,29 @@ export class Gutter {
                 icon: "iconCode",
                 label: window.siyuan.languages.code,
                 submenu: [{
+                    id: "md29",
+                    iconHTML: "",
+                    ignore: protyle.disabled,
+                    label: `<div class="fn__flex"><span>${window.siyuan.languages.md29}</span><span class="fn__space fn__flex-1"></span>
+<select class="b3-select">${codeTabSpacesOptions}</select></div>`,
+                    bind(element) {
+                        const selectElement = element.querySelector("select") as HTMLSelectElement;
+                        selectElement.addEventListener("click", (event) => event.stopPropagation());
+                        selectElement.addEventListener("change", () => {
+                            const value = selectElement.value;
+                            if (value === "") {
+                                nodeElement.removeAttribute(Constants.CUSTOM_SY_CODE_TAB_SPACES);
+                            } else {
+                                nodeElement.setAttribute(Constants.CUSTOM_SY_CODE_TAB_SPACES, value);
+                            }
+                            fetchPost("/api/attr/setBlockAttrs", {
+                                id,
+                                attrs: {[Constants.CUSTOM_SY_CODE_TAB_SPACES]: value}
+                            });
+                            window.siyuan.menus.menu.remove();
+                        });
+                    }
+                }, {
                     id: "md31",
                     iconHTML: "",
                     ignore: protyle.disabled,

@@ -312,6 +312,7 @@ const gutterSingle = () => [
     ]),
     separator("separator_code"),
     node("code", lang("code"), true, [
+        node("md29", lang("md29")),
         node("md31", lang("md31")),
         node("md2", lang("md2")),
         node("md27", lang("md27")),

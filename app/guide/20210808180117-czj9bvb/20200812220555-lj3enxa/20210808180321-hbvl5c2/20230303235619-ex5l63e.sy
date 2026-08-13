@@ -6,7 +6,7 @@
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20260804233000"
+		"updated": "20260813120000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170002-f53lzwu",
-				"updated": "20260804180000"
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
@@ -75,7 +75,7 @@
 			},
 			"Properties": {
 				"id": "20260804170004-q7ds60m",
-				"updated": "20260804180000"
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
@@ -212,7 +212,7 @@
 					},
 					"Properties": {
 						"id": "20260804170009-gz98pxs",
-						"updated": "20260804180000"
+						"updated": "20260813120000"
 					},
 					"Children": [
 						{
@@ -220,7 +220,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804170010-nnv0eos",
-								"updated": "20260804180000"
+								"updated": "20260813120000"
 							},
 							"Children": [
 								{
@@ -234,16 +234,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 唤起对话框，或者通过块标菜单中的 "
+									"Data": " 唤起编写对话框。进行 AI 编辑时，划选文本后使用划选工具栏中的 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "人工智能"
+									"TextMarkTextContent": "智能编辑"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 执行更多操作"
+									"Data": "，或从块标菜单中选择智能编辑。结果将流式显示在面板中，可替换、插入、复制、重试、停止或丢弃。仅支持替换单块内的普通划选；跨块划选、复杂来源或生成期间发生变化的来源仍可使用插入。"
 								}
 							]
 						}

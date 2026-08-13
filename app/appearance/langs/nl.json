@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Verwerpen",
+	"aiInsertAtCursor": "Invoegen bij cursor",
+	"aiInsertAtOriginal": "Invoegen op oorspronkelijke positie",
+	"aiSourceChanged": "Broninhoud is gewijzigd",
+	"aiStopped": "Gestopt",
+	"aiReplaceCurrentTask": "De huidige AI-bewerking stoppen en een nieuwe starten?",
 	"orderedListStart": "Startnummer",
 	"continueListNumbering": "Lijstnummering voortzetten",
 	"msgFormatPainterTip": "Meldingen bij activeren en afsluiten van Opmaak kopiëren",

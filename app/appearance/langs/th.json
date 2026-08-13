@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "ละทิ้ง",
+	"aiInsertAtCursor": "แทรกที่เคอร์เซอร์",
+	"aiInsertAtOriginal": "แทรกที่ตำแหน่งเดิม",
+	"aiSourceChanged": "เนื้อหาต้นฉบับมีการเปลี่ยนแปลง",
+	"aiStopped": "หยุดแล้ว",
+	"aiReplaceCurrentTask": "หยุดงานแก้ไขด้วย AI ปัจจุบันและเริ่มงานใหม่หรือไม่?",
 	"orderedListStart": "หมายเลขเริ่มต้น",
 	"continueListNumbering": "ดำเนินการลำดับเลขรายการต่อ",
 	"msgFormatPainterTip": "การแจ้งเตือนเมื่อเปิดและออกจากการคัดลอกรูปแบบ",

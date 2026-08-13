@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "At",
+	"aiInsertAtCursor": "İmleç konumuna ekle",
+	"aiInsertAtOriginal": "Özgün konuma ekle",
+	"aiSourceChanged": "Kaynak içerik değişti",
+	"aiStopped": "Durduruldu",
+	"aiReplaceCurrentTask": "Geçerli AI düzenleme görevini durdurup yeni bir görev başlatmak ister misiniz?",
 	"orderedListStart": "Başlangıç numarası",
 	"continueListNumbering": "Liste numaralandırmasına devam et",
 	"msgFormatPainterTip": "Biçim Boyacısını etkinleştirme ve kapatma bildirimleri",

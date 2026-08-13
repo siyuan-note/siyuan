@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Verwerfen",
+	"aiInsertAtCursor": "An der Einfügemarke einfügen",
+	"aiInsertAtOriginal": "An der ursprünglichen Position einfügen",
+	"aiSourceChanged": "Quellinhalt wurde geändert",
+	"aiStopped": "Angehalten",
+	"aiReplaceCurrentTask": "Aktuelle KI-Bearbeitungsaufgabe anhalten und eine neue starten?",
 	"orderedListStart": "Startnummer",
 	"continueListNumbering": "Listennummerierung fortsetzen",
 	"msgFormatPainterTip": "Benachrichtigungen beim Aktivieren und Beenden der Formatübertragung",

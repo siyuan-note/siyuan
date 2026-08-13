@@ -2265,11 +2265,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.ai.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
-            let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectsElement.length === 0) {
-                selectsElement = [nodeElement];
+            if (!range.collapsed && protyle.wysiwyg.element.contains(range.startContainer) &&
+                protyle.wysiwyg.element.contains(range.endContainer)) {
+                AIActions([], protyle, range.cloneRange());
+            } else {
+                let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                if (selectsElement.length === 0) {
+                    selectsElement = [nodeElement];
+                }
+                AIActions(selectsElement, protyle);
             }
-            AIActions(selectsElement, protyle);
             return;
         }
 

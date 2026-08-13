@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Ignorer",
+	"aiInsertAtCursor": "Insérer au curseur",
+	"aiInsertAtOriginal": "Insérer à la position d’origine",
+	"aiSourceChanged": "Le contenu source a été modifié",
+	"aiStopped": "Arrêté",
+	"aiReplaceCurrentTask": "Arrêter la tâche d’édition par IA actuelle et en démarrer une nouvelle ?",
 	"orderedListStart": "Numéro de départ",
 	"continueListNumbering": "Continuer la numérotation de la liste",
 	"msgFormatPainterTip": "Notifications d’activation et de désactivation de la reproduction de mise en forme",

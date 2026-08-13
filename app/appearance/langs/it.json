@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Scarta",
+	"aiInsertAtCursor": "Inserisci al cursore",
+	"aiInsertAtOriginal": "Inserisci nella posizione originale",
+	"aiSourceChanged": "Il contenuto di origine è cambiato",
+	"aiStopped": "Interrotto",
+	"aiReplaceCurrentTask": "Interrompere l’attività di modifica IA corrente e avviarne una nuova?",
 	"orderedListStart": "Numero iniziale",
 	"continueListNumbering": "Continua la numerazione dell'elenco",
 	"msgFormatPainterTip": "Notifiche di attivazione e uscita di Copia formato",

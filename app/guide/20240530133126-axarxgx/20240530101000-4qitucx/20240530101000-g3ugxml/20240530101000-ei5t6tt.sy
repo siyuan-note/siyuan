@@ -6,7 +6,7 @@
 		"id": "20240530101000-ei5t6tt",
 		"title": "人工知能",
 		"type": "doc",
-		"updated": "20260804233000"
+		"updated": "20260813120000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170002-b4z0hyu",
-				"updated": "20260804180000"
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
@@ -75,7 +75,7 @@
 			},
 			"Properties": {
 				"id": "20260804170004-pwxfq0o",
-				"updated": "20260804180000"
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
@@ -204,7 +204,7 @@
 					},
 					"Properties": {
 						"id": "20260804170009-bubnkd1",
-						"updated": "20260804180000"
+						"updated": "20260813120000"
 					},
 					"Children": [
 						{
@@ -212,7 +212,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804170010-5uzk823",
-								"updated": "20260804180000"
+								"updated": "20260813120000"
 							},
 							"Children": [
 								{
@@ -222,16 +222,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " でダイアログを開くか、ブロックメニューの "
+									"Data": " でライティングダイアログを開きます。AI 編集では、テキストを選択して選択ツールバーの "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "AI を呼び出す"
+									"TextMarkTextContent": "AI Edit"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " からその他の操作を実行します"
+									"Data": " を使うか、ブロックメニューから AI Edit を選びます。結果はパネルにストリーミング表示され、置換、挿入、コピー、再試行、停止、破棄ができます。置換できるのは、単一ブロック内の対応した選択範囲だけです。ブロックをまたぐ選択範囲、複雑な元データ、生成中に変更された元データには、引き続き挿入を使用できます。"
 								}
 							]
 						}

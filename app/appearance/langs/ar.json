@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "تجاهل",
+	"aiInsertAtCursor": "إدراج عند المؤشر",
+	"aiInsertAtOriginal": "إدراج في الموضع الأصلي",
+	"aiSourceChanged": "تم تغيير المحتوى المصدر",
+	"aiStopped": "تم الإيقاف",
+	"aiReplaceCurrentTask": "هل تريد إيقاف مهمة تحرير الذكاء الاصطناعي الحالية وبدء مهمة جديدة؟",
 	"orderedListStart": "رقم البداية",
 	"continueListNumbering": "متابعة ترقيم القائمة",
 	"msgFormatPainterTip": "إشعارات تنشيط نسخ التنسيق والخروج منه",

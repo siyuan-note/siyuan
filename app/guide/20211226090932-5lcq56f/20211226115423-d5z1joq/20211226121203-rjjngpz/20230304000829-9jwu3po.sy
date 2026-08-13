@@ -6,7 +6,7 @@
 		"id": "20230304000829-9jwu3po",
 		"title": "人工智能",
 		"type": "doc",
-		"updated": "20260804233000"
+		"updated": "20260813120000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170002-ffdgp2j",
-				"updated": "20260804180000"
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
@@ -75,7 +75,7 @@
 			},
 			"Properties": {
 				"id": "20260804170004-xvmu96u",
-				"updated": "20260804180000"
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
@@ -212,7 +212,7 @@
 					},
 					"Properties": {
 						"id": "20260804170009-5fzfiio",
-						"updated": "20260804180000"
+						"updated": "20260813120000"
 					},
 					"Children": [
 						{
@@ -220,7 +220,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804170010-dvzeba4",
-								"updated": "20260804180000"
+								"updated": "20260813120000"
 							},
 							"Children": [
 								{
@@ -234,16 +234,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 喚起對話框，或者透過區塊標選單中的 "
+									"Data": " 喚起編寫對話框。進行 AI 編輯時，劃選文字後使用劃選工具列中的 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "人工智能"
+									"TextMarkTextContent": "智慧編輯"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 執行更多操作"
+									"Data": "，或從區塊標選單中選擇智慧編輯。結果會串流顯示在面板中，可取代、插入、複製、重試、停止或捨棄。僅支援取代單一區塊內的一般劃選；跨區塊劃選、複雜來源或產生期間發生變化的來源仍可使用插入。"
 								}
 							]
 						}

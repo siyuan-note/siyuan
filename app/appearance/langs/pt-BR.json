@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Descartar",
+	"aiInsertAtCursor": "Inserir no cursor",
+	"aiInsertAtOriginal": "Inserir na posição original",
+	"aiSourceChanged": "O conteúdo de origem foi alterado",
+	"aiStopped": "Interrompido",
+	"aiReplaceCurrentTask": "Interromper a tarefa atual de edição com IA e iniciar uma nova?",
 	"orderedListStart": "Número inicial",
 	"continueListNumbering": "Continuar numeração da lista",
 	"msgFormatPainterTip": "Notificações ao ativar e sair do Pincel de formatação",

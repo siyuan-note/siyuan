@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Odrzuć",
+	"aiInsertAtCursor": "Wstaw przy kursorze",
+	"aiInsertAtOriginal": "Wstaw w pierwotnym miejscu",
+	"aiSourceChanged": "Treść źródłowa została zmieniona",
+	"aiStopped": "Zatrzymano",
+	"aiReplaceCurrentTask": "Zatrzymać bieżące zadanie edycji AI i rozpocząć nowe?",
 	"orderedListStart": "Numer początkowy",
 	"continueListNumbering": "Kontynuuj numerację listy",
 	"msgFormatPainterTip": "Powiadomienia o włączeniu i wyłączeniu Malarza formatów",

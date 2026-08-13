@@ -135,6 +135,7 @@ export class Toolbar {
         protyle.options.toolbar = toolbarKeyToMenu(isMobile() ? [
             "block-ref",
             "a",
+            "ai",
             "|",
             "text",
             "strong",
@@ -149,6 +150,7 @@ export class Toolbar {
         ] : [
             "block-ref",
             "a",
+            "ai",
             "|",
             "text",
             "strong",

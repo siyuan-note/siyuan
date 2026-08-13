@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "捨棄",
+	"aiInsertAtCursor": "在目前游標處插入",
+	"aiInsertAtOriginal": "在原位置插入",
+	"aiSourceChanged": "原內容已變更",
+	"aiStopped": "已停止",
+	"aiReplaceCurrentTask": "停止目前智慧編輯任務並開始新任務？",
 	"orderedListStart": "起始編號",
 	"continueListNumbering": "繼續編號",
 	"msgFormatPainterTip": "格式刷啟用與退出提示",

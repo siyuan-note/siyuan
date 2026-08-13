@@ -18,8 +18,11 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"errors"
+	"io"
 	"strings"
+	"time"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -71,15 +74,144 @@ func chatGPT(msg string, cloud bool) (ret string) {
 }
 
 func chatGPTWithAction(msg string, action string, cloud bool) (ret string) {
-	action = strings.TrimSpace(action)
-	if "" != action {
-		msg = action + ":\n\n" + msg
-	}
+	msg = BuildAIEditorPrompt(msg, action)
 	ret, _, err := chatGPTComplete(msg, nil, cloud)
 	if err != nil {
 		return
 	}
 	return
+}
+
+// BuildAIEditorPrompt 将编辑器输入填充到操作模板中。没有占位符时保持现有的操作前缀格式。
+func BuildAIEditorPrompt(input, action string) string {
+	action = strings.TrimSpace(action)
+	if "" == action {
+		return input
+	}
+	if strings.Contains(action, "{{input}}") {
+		return strings.ReplaceAll(action, "{{input}}", input)
+	}
+	return action + ":\n\n" + input
+}
+
+type AIEditorMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type AIEditorChatStream struct {
+	stream      *openai.ChatCompletionStream
+	cancel      context.CancelFunc
+	idleTimeout time.Duration
+}
+
+func (stream *AIEditorChatStream) Recv() (response openai.ChatCompletionStreamResponse, err error) {
+	timer, timerDone := startAIEditorCancelTimer(stream.idleTimeout, stream.cancel)
+	response, err = stream.stream.Recv()
+	if stopAIEditorCancelTimer(timer, timerDone) {
+		err = errors.New("AI editor stream idle timeout")
+	}
+	return
+}
+
+func (stream *AIEditorChatStream) Close() {
+	stream.cancel()
+	stream.stream.Close()
+}
+
+// NewAIEditorChatStream 创建绑定到编辑器请求生命周期的模型流。
+func NewAIEditorChatStream(ctx context.Context, ids []string, input, action string, history []AIEditorMessage) (*AIEditorChatStream, error) {
+	if !Conf.AI.HasAnyProvider() {
+		return nil, errors.New("no AI provider configured")
+	}
+
+	prov, m := Conf.AI.GetEditingModel()
+	if nil == prov || nil == m {
+		return nil, errors.New("no AI editing model configured")
+	}
+	editing := Conf.AI.Editing
+	if nil == editing {
+		return nil, errors.New("no AI editing config")
+	}
+
+	if "" == input && 0 < len(ids) {
+		input = getBlocksContent(ids)
+	}
+	prompt := BuildAIEditorPrompt(input, action)
+	if "" == strings.TrimSpace(prompt) {
+		return nil, errors.New("AI editor input is empty")
+	}
+
+	if editing.MaxHistoryMessages < len(history) {
+		history = history[len(history)-editing.MaxHistoryMessages:]
+	}
+	messages := make([]openai.ChatCompletionMessage, 0, len(history)+1)
+	for _, item := range history {
+		role := strings.TrimSpace(item.Role)
+		content := strings.TrimSpace(item.Content)
+		if "" == content || (openai.ChatMessageRoleUser != role && openai.ChatMessageRoleAssistant != role) {
+			continue
+		}
+		messages = append(messages, openai.ChatCompletionMessage{Role: role, Content: content})
+	}
+	messages = append(messages, openai.ChatCompletionMessage{Role: openai.ChatMessageRoleUser, Content: prompt})
+
+	req := openai.ChatCompletionRequest{
+		Model:               m.Name,
+		MaxCompletionTokens: editing.MaxCompletionTokens,
+		Temperature:         float32(editing.Temperature),
+		Messages:            messages,
+		Stream:              true,
+	}
+	streamCtx, cancel := context.WithCancel(ctx)
+	requestTimeout := time.Duration(prov.RequestTimeout) * time.Second
+	requestTimer, requestTimerDone := startAIEditorCancelTimer(requestTimeout, cancel)
+	client := util.NewOpenAIClientWithModel(prov.APIKey, prov.BaseURL, m.Name)
+	completionStream, err := client.CreateChatCompletionStream(streamCtx, req)
+	requestTimedOut := stopAIEditorCancelTimer(requestTimer, requestTimerDone)
+	if requestTimedOut {
+		err = errors.New("AI editor request timeout")
+	}
+	if nil != err {
+		cancel()
+		return nil, err
+	}
+	if nil == completionStream {
+		cancel()
+		return nil, errors.New("AI editor model returned nil stream")
+	}
+	return &AIEditorChatStream{
+		stream:      completionStream,
+		cancel:      cancel,
+		idleTimeout: 120 * time.Second,
+	}, nil
+}
+
+func startAIEditorCancelTimer(timeout time.Duration, cancel context.CancelFunc) (*time.Timer, <-chan struct{}) {
+	if 0 >= timeout {
+		return nil, nil
+	}
+	done := make(chan struct{})
+	timer := time.AfterFunc(timeout, func() {
+		cancel()
+		close(done)
+	})
+	return timer, done
+}
+
+func stopAIEditorCancelTimer(timer *time.Timer, done <-chan struct{}) bool {
+	if nil == timer {
+		return false
+	}
+	if timer.Stop() {
+		return false
+	}
+	<-done
+	return true
+}
+
+func IsAIEditorStreamDone(err error) bool {
+	return errors.Is(err, io.EOF)
 }
 
 func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, retContextMsgs []string, err error) {

@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Відкинути",
+	"aiInsertAtCursor": "Вставити в позицію курсора",
+	"aiInsertAtOriginal": "Вставити у вихідну позицію",
+	"aiSourceChanged": "Вихідний вміст змінено",
+	"aiStopped": "Зупинено",
+	"aiReplaceCurrentTask": "Зупинити поточне завдання редагування ШІ та почати нове?",
 	"orderedListStart": "Початковий номер",
 	"continueListNumbering": "Продовжити нумерацію списку",
 	"msgFormatPainterTip": "Сповіщення про ввімкнення та вимкнення формату за зразком",

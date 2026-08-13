@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Buang",
+	"aiInsertAtCursor": "Sisipkan di kursor",
+	"aiInsertAtOriginal": "Sisipkan di posisi semula",
+	"aiSourceChanged": "Konten sumber telah berubah",
+	"aiStopped": "Dihentikan",
+	"aiReplaceCurrentTask": "Hentikan tugas penyuntingan AI saat ini dan mulai tugas baru?",
 	"orderedListStart": "Nomor awal",
 	"continueListNumbering": "Lanjutkan penomoran daftar",
 	"msgFormatPainterTip": "Notifikasi aktivasi dan keluar penyalinan format",

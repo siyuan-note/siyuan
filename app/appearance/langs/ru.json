@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Отбросить",
+	"aiInsertAtCursor": "Вставить в позицию курсора",
+	"aiInsertAtOriginal": "Вставить в исходную позицию",
+	"aiSourceChanged": "Исходное содержимое изменено",
+	"aiStopped": "Остановлено",
+	"aiReplaceCurrentTask": "Остановить текущую задачу редактирования ИИ и начать новую?",
 	"orderedListStart": "Начальный номер",
 	"continueListNumbering": "Продолжить нумерацию списка",
 	"msgFormatPainterTip": "Уведомления о включении и отключении формата по образцу",

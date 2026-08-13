@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Discard",
+	"aiInsertAtCursor": "Insert at cursor",
+	"aiInsertAtOriginal": "Insert at original position",
+	"aiSourceChanged": "Source content changed",
+	"aiStopped": "Stopped",
+	"aiReplaceCurrentTask": "Stop the current AI editing task and start a new one?",
 	"orderedListStart": "Starting number",
 	"continueListNumbering": "Continue list numbering",
 	"msgFormatPainterTip": "Format Painter activation and exit notifications",

@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "버리기",
+	"aiInsertAtCursor": "현재 커서 위치에 삽입",
+	"aiInsertAtOriginal": "원래 위치에 삽입",
+	"aiSourceChanged": "원본 내용이 변경됨",
+	"aiStopped": "중지됨",
+	"aiReplaceCurrentTask": "현재 AI 편집 작업을 중지하고 새 작업을 시작할까요?",
 	"orderedListStart": "시작 번호",
 	"continueListNumbering": "목록 번호 계속",
 	"msgFormatPainterTip": "서식 복사 활성화 및 종료 알림",

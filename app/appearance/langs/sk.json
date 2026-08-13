@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "Zahodiť",
+	"aiInsertAtCursor": "Vložiť na pozíciu kurzora",
+	"aiInsertAtOriginal": "Vložiť na pôvodné miesto",
+	"aiSourceChanged": "Zdrojový obsah bol zmenený",
+	"aiStopped": "Zastavené",
+	"aiReplaceCurrentTask": "Zastaviť aktuálnu úlohu úprav pomocou AI a spustiť novú?",
 	"orderedListStart": "Počiatočné číslo",
 	"continueListNumbering": "Pokračovať v číslovaní zoznamu",
 	"msgFormatPainterTip": "Upozornenia na aktiváciu a ukončenie kopírovania formátu",

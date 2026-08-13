@@ -1,4 +1,10 @@
 {
+	"aiDiscard": "破棄",
+	"aiInsertAtCursor": "現在のカーソル位置に挿入",
+	"aiInsertAtOriginal": "元の位置に挿入",
+	"aiSourceChanged": "元の内容が変更されました",
+	"aiStopped": "停止しました",
+	"aiReplaceCurrentTask": "現在の AI 編集タスクを停止して新しいタスクを開始しますか？",
 	"orderedListStart": "開始番号",
 	"continueListNumbering": "リストの番号を継続",
 	"msgFormatPainterTip": "書式のコピーの有効化と終了の通知",

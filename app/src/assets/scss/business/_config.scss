@@ -415,6 +415,29 @@
       flex: 0 0 auto;
     }
 
+    &__update-tab {
+      position: relative;
+    }
+
+    &__update-count {
+      align-items: center;
+      background-color: var(--b3-theme-surface);
+      border-radius: 8px;
+      box-sizing: border-box;
+      color: var(--b3-theme-on-surface-light);
+      display: flex;
+      font-size: 10px;
+      height: 16px;
+      justify-content: center;
+      line-height: 16px;
+      min-width: 16px;
+      padding: 0 4px;
+      pointer-events: none;
+      position: absolute;
+      right: -7px;
+      top: -7px;
+    }
+
     &__tools {
       flex: 1 1 480px;
       min-width: 0;

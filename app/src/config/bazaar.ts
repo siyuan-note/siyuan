@@ -146,7 +146,7 @@ export const bazaar = {
     <div class="config-bazaar__panel" data-type="downloaded" data-init="true">
         <div class="fn__flex config-bazaar__title config-bazaar__title--downloaded">
             <div class="fn__flex config-bazaar__tabs">
-                <button data-type="myUpdate" class="b3-button b3-button--outline">${window.siyuan.languages.update}</button>
+                <button data-type="myUpdate" class="b3-button b3-button--outline config-bazaar__update-tab">${window.siyuan.languages.update}<span data-type="update-tab-count" class="config-bazaar__update-count fn__none"></span></button>
                 <button data-type="myPlugin" class="b3-button">${window.siyuan.languages.plugin}</button>
                 <button data-type="myTheme" class="b3-button b3-button--outline">${window.siyuan.languages.theme}</button>
                 <button data-type="myIcon" class="b3-button b3-button--outline">${window.siyuan.languages.icon}</button>
@@ -552,11 +552,21 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     _isUpdatePanelActive() {
         return !bazaar.element.querySelector('[data-type="myUpdate"]')?.classList.contains("b3-button--outline");
     },
+    _syncUpdateTabCounter() {
+        const counterElement = bazaar.element?.querySelector('[data-type="update-tab-count"]');
+        if (!counterElement) {
+            return;
+        }
+        const count = this._updateState === "loaded" ? this._getUpdatedItems().length : 0;
+        counterElement.classList.toggle("fn__none", count === 0);
+        counterElement.textContent = count.toString();
+    },
     _checkUpdate(force = false) {
         if (!force && ["loading", "loaded"].includes(this._updateState)) {
             return;
         }
         this._updateState = "loading";
+        this._syncUpdateTabCounter();
         const requestID = ++this._updateRequestID;
         if (this._isUpdatePanelActive()) {
             this._renderUpdatePanel();
@@ -567,6 +577,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             }
             if (response.code !== 0 || !response.data) {
                 this._updateState = "error";
+                this._syncUpdateTabCounter();
                 if (this._isUpdatePanelActive()) {
                     this._renderUpdatePanel();
                 }
@@ -574,6 +585,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             }
             this._data.update = response.data;
             this._updateState = "loaded";
+            this._syncUpdateTabCounter();
             this._syncDownloadedUpdateButtons();
             if (this._isUpdatePanelActive()) {
                 this._renderUpdatePanel();
@@ -1357,6 +1369,7 @@ type="checkbox">
             bazaar._data.details.delete(bazaar._getDetailKey(data.packageType, data.packageName));
             bazaar._data.update[data.packageType] = bazaar._data.update[data.packageType].filter((item) =>
                 item.installed.name !== data.packageName);
+            bazaar._syncUpdateTabCounter();
             bazaar.switchBazaarTab(app, data.packageType, "downloaded");
             if (data.packageType === "plugins" && !data.updated) {
                 if (window.siyuan.config.bazaar.petalDisabled) {

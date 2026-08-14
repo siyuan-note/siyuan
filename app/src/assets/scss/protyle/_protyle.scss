@@ -45,6 +45,13 @@
     }
   }
 
+  @media (hover: none) {
+    &__down,
+    &__up {
+      opacity: 1;
+    }
+  }
+
   &__bar {
     position: absolute;
     right: calc(4px - var(--b3-dynamicscroll-width) / 2);

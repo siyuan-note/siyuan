@@ -366,15 +366,16 @@ type StudySession struct {
 
 // SessionCard 保存会话内卡片顺序、跳过状态和确定性选项顺序。
 type SessionCard struct {
-	ID             string                `json:"id"`
-	SessionID      string                `json:"sessionID"`
-	CardID         string                `json:"cardID"`
-	Sort           int                   `json:"sort"`
-	Status         string                `json:"status"`
-	SkipReason     string                `json:"skipReason,omitempty"`
-	OptionOrder    []string              `json:"optionOrder,omitempty"`
-	DynamicOptions []SessionChoiceOption `json:"dynamicOptions,omitempty"`
-	StepResults    json.RawMessage       `json:"stepResults,omitempty"`
+	ID              string                `json:"id"`
+	SessionID       string                `json:"sessionID"`
+	CardID          string                `json:"cardID"`
+	StateRevisionID string                `json:"stateRevisionID,omitempty"`
+	Sort            int                   `json:"sort"`
+	Status          string                `json:"status"`
+	SkipReason      string                `json:"skipReason,omitempty"`
+	OptionOrder     []string              `json:"optionOrder,omitempty"`
+	DynamicOptions  []SessionChoiceOption `json:"dynamicOptions,omitempty"`
+	StepResults     json.RawMessage       `json:"stepResults,omitempty"`
 }
 
 // SessionChoiceOption 固化动态干扰项身份与内容引用，保证会话重放一致。

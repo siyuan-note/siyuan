@@ -168,7 +168,11 @@ describe("flashcardV2Render", () => {
 
     it("renders sanitized Anki fields, conditions, FrontSide, and typed answers declaratively", () => {
         const previousWindow = globalThis.window;
-        globalThis.window = {DOMPurify: {sanitize: (value: string) => value}} as Window & typeof globalThis;
+        let sanitizeOptions: { FORBID_ATTR?: string[] } | undefined;
+        globalThis.window = {DOMPurify: {sanitize: (value: string, options: { FORBID_ATTR?: string[] }) => {
+            sanitizeOptions = options;
+            return value;
+        }}} as Window & typeof globalThis;
         try {
             const ankiModel = {
                 card: {id: "card", variantKey: "anki-card:1", variantData: {ord: 0}},
@@ -190,6 +194,7 @@ describe("flashcardV2Render", () => {
             assert.match(front, /data-anki-type-answer="back"/);
             assert.match(back, /Question/);
             assert.match(back, /Answer/);
+            assert.deepEqual(sanitizeOptions?.FORBID_ATTR, ["style"]);
         } finally {
             globalThis.window = previousWindow;
         }

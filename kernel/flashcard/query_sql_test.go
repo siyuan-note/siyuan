@@ -524,6 +524,49 @@ func TestUnresolvedSourceConflictIsExcludedFromSearch(t *testing.T) {
 	}
 }
 
+func TestUnresolvedAssignedTagAncestorConflictIsExcludedFromSearchAndReview(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	now := int64(1786431600000)
+	setupQueryFixtures(t, ctx, store, now)
+	base, found, err := store.Projection().CurrentEntity(ctx, EntityTag, "tag-root")
+	if err != nil || !found {
+		t.Fatalf("base tag was not found: found=%v err=%v", found, err)
+	}
+	for index, operationID := range []string{"manual-tag-ancestor-branch-a", "manual-tag-ancestor-branch-b"} {
+		var tag Tag
+		if err = decodeStrictJSON(base.Payload, &tag); err != nil {
+			t.Fatal(err)
+		}
+		tag.Name = []string{"Root A", "Root B"}[index]
+		tag.NormalizedName = NormalizeTagName(tag.Name)
+		revision, revisionErr := NewOperationEntityRevision(operationID, EntityTag, tag.ID,
+			[]string{base.RevisionID}, now+int64(index+1), false, tag)
+		if revisionErr != nil {
+			t.Fatal(revisionErr)
+		}
+		if _, err = store.Apply(ctx, operationID, []Change{{Kind: RecordEntityRevision, Revision: &revision}}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	cardQuery := predicateQuery("cardID", QueryEqual, json.RawMessage(`"card-query-1"`))
+	results, err := store.Projection().SearchCards(ctx, &cardQuery, CardSearchOptions{Now: now})
+	if err != nil || len(results) != 0 {
+		t.Fatalf("card with an unresolved assigned tag ancestor conflict entered normal search: results=%+v err=%v",
+			results, err)
+	}
+	results, err = store.Projection().SearchCards(ctx, &cardQuery,
+		CardSearchOptions{Now: now, IncludeConflicts: true})
+	if err != nil || len(results) != 1 {
+		t.Fatalf("management could not inspect the tag-conflicted card: results=%+v err=%v", results, err)
+	}
+	conflicted, err := store.Projection().CardHasUnresolvedConflict(ctx, "card-query-1")
+	if err != nil || !conflicted {
+		t.Fatalf("assigned tag ancestor conflict did not block card mutations: conflicted=%v err=%v", conflicted, err)
+	}
+}
+
 func TestUnresolvedSourceReferenceConflictIsExcludedFromSearchAndReview(t *testing.T) {
 	ctx := context.Background()
 	store := newGenerationTestStore(t, ctx)

@@ -247,7 +247,8 @@ func (store *Store) StartStudySession(ctx context.Context, request StudyQueueReq
 		}
 		sessionCard := SessionCard{
 			ID: DeterministicID("session-card", session.ID, result.Card.ID), SessionID: session.ID,
-			CardID: result.Card.ID, Sort: index, Status: "queued", OptionOrder: optionOrder,
+			CardID: result.Card.ID, StateRevisionID: result.ReviewState.StateRevisionID,
+			Sort: index, Status: "queued", OptionOrder: optionOrder,
 			DynamicOptions: dynamicOptions,
 		}
 		revision, revisionErr := NewOperationEntityRevision(request.OperationID, EntitySessionCard, sessionCard.ID, nil,

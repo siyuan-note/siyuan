@@ -79,12 +79,17 @@ func (store *Store) ActivateLegacyMigration(ctx context.Context, legacyRoot stri
 	if err := VerifyLegacyMigrationInputs(legacyRoot, plan.InputFiles); err != nil {
 		return LegacyActivationResult{}, err
 	}
+	store.mu.Lock()
+	defer store.mu.Unlock()
+	if store.closed {
+		return LegacyActivationResult{}, errors.New("flashcard store is closed")
+	}
 	status, err := store.LegacyMigrationStatus(ctx)
 	if err != nil {
 		return LegacyActivationResult{}, err
 	}
-	if status.State == MigrationStateActive && status.MigrationID != plan.MigrationID {
-		return LegacyActivationResult{}, errors.New("another flashcard migration is already active")
+	if err = validateLegacyMigrationContinuation(status, plan); err != nil {
+		return LegacyActivationResult{}, err
 	}
 	if status.State == MigrationStateLegacyDiverged {
 		plan, err = store.rebaseDivergedLegacyMigration(ctx, plan, status)
@@ -98,7 +103,7 @@ func (store *Store) ActivateLegacyMigration(ctx context.Context, legacyRoot stri
 	if err = store.projection.ValidateBusinessChanges(ctx, plan.Changes); err != nil {
 		return LegacyActivationResult{}, fmt.Errorf("validate migrated flashcard references: %w", err)
 	}
-	preparedBatch, err := store.Apply(ctx, plan.OperationID, plan.Changes)
+	preparedBatch, err := store.applyLocked(ctx, plan.OperationID, plan.Changes)
 	if err != nil {
 		return LegacyActivationResult{}, err
 	}
@@ -125,7 +130,7 @@ func (store *Store) ActivateLegacyMigration(ctx context.Context, legacyRoot stri
 		return LegacyActivationResult{}, err
 	}
 	operationID := "legacy-migration:" + plan.MigrationID + ":activate"
-	activationBatch, err := store.Apply(ctx, operationID, []Change{{Kind: RecordEvent, Event: &activation}})
+	activationBatch, err := store.applyLocked(ctx, operationID, []Change{{Kind: RecordEvent, Event: &activation}})
 	if err != nil {
 		return LegacyActivationResult{}, err
 	}
@@ -134,6 +139,34 @@ func (store *Store) ActivateLegacyMigration(ctx context.Context, legacyRoot stri
 		return LegacyActivationResult{}, err
 	}
 	return LegacyActivationResult{PreparedBatch: preparedBatch, ActivationBatch: activationBatch, Status: status}, nil
+}
+
+func validateLegacyMigrationContinuation(status LegacyMigrationStatus, plan LegacyMigrationPlan) error {
+	switch status.State {
+	case MigrationStatePreparing:
+		if status.Prepared == nil {
+			return errors.New("preparing flashcard migration lacks its prepared event")
+		}
+		var prepared MigrationPreparedPayload
+		if err := decodeStrictJSON(status.Prepared.Payload, &prepared); err != nil {
+			return err
+		}
+		if prepared.MigrationID != plan.MigrationID || prepared.RecordDigest != plan.RecordDigest {
+			return errors.New("another flashcard migration is already preparing")
+		}
+	case MigrationStateActive:
+		if status.Activated == nil {
+			return errors.New("active flashcard migration lacks its activation event")
+		}
+		var activated MigrationActivatedPayload
+		if err := decodeStrictJSON(status.Activated.Payload, &activated); err != nil {
+			return err
+		}
+		if activated.MigrationID != plan.MigrationID || activated.RecordDigest != plan.RecordDigest {
+			return errors.New("another flashcard migration is already active")
+		}
+	}
+	return nil
 }
 
 // rebaseDivergedLegacyMigration 将旧存储全量候选衔接到当前实体，避免把增量重新写成并发根修订。

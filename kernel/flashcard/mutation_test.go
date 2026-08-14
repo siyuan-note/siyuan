@@ -18,6 +18,7 @@ package flashcard
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"testing"
 )
@@ -115,6 +116,40 @@ func TestMutateEntitiesRejectsWholeBatchBeforeJournalWrite(t *testing.T) {
 	}
 	if count, countErr := store.Projection().OperationCount(ctx); countErr != nil || count != 0 {
 		t.Fatalf("rejected mutation reached authority/projection: count=%d err=%v", count, countErr)
+	}
+}
+
+func TestMutateEntitiesRejectsDeletingActiveCardReviewState(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	createdAt := int64(1786431600000)
+	schemaID := "schema-review-state-delete"
+	templateID := "template-review-state-delete"
+	source := testGenerationSource("source-review-state-delete", schemaID, "qa", json.RawMessage(`{}`))
+	preset := testSchedulerPreset("preset-review-state-delete", false, false)
+	source.DefaultPresetID = preset.ID
+	applyGenerationEntities(t, ctx, store, "setup-review-state-delete", createdAt,
+		testGenerationSchema(schemaID, []string{templateID}),
+		testGenerationTemplate(templateID, schemaID, GenerationStatic, "forward", true), source, preset)
+	if _, err := store.ReconcileSourceCards(ctx, "reconcile-review-state-delete", source.ID, createdAt); err != nil {
+		t.Fatal(err)
+	}
+	cardID := GeneratedCardID(source.ID, templateID, "forward")
+	stateRevision, found, err := store.Projection().CurrentEntity(ctx, EntityReviewState, cardID)
+	if err != nil || !found {
+		t.Fatalf("review state was not created: found=%v err=%v", found, err)
+	}
+	if _, err = store.MutateEntities(ctx, "delete-review-state-only", []EntityMutation{{
+		EntityType: EntityReviewState, EntityID: cardID, ExpectedRevisionID: stateRevision.RevisionID,
+		UpdatedAt: createdAt + 1, Deleted: true,
+	}}); err == nil {
+		t.Fatal("review state was deleted while its card remained active")
+	}
+	current, found, err := store.Projection().CurrentEntity(ctx, EntityReviewState, cardID)
+	if err != nil || !found || current.Deleted || current.RevisionID != stateRevision.RevisionID {
+		t.Fatalf("rejected review state deletion changed the projection: revision=%+v found=%v err=%v",
+			current, found, err)
 	}
 }
 

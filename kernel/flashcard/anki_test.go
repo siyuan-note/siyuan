@@ -133,6 +133,31 @@ func TestPreviewAnkiPackageReadsCollectionAndCompatibility(t *testing.T) {
 	}
 }
 
+func TestValidateAnkiRecordCounts(t *testing.T) {
+	tests := []struct {
+		name    string
+		preview AnkiPackagePreview
+		message string
+	}{
+		{"notes", AnkiPackagePreview{NoteCount: maxAnkiNoteCount + 1}, "Anki package contains too many notes"},
+		{"cards", AnkiPackagePreview{CardCount: maxAnkiCardCount + 1}, "Anki package contains too many cards"},
+		{"reviews", AnkiPackagePreview{ReviewCount: maxAnkiReviewCount + 1}, "Anki package contains too many reviews"},
+		{"total", AnkiPackagePreview{NoteCount: maxAnkiNoteCount, CardCount: maxAnkiCardCount,
+			ReviewCount: maxAnkiRecordCount - maxAnkiNoteCount - maxAnkiCardCount + 1},
+			"Anki package contains too many records"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if err := validateAnkiRecordCounts(test.preview); err == nil || err.Error() != test.message {
+				t.Fatalf("unexpected Anki record limit result: %v", err)
+			}
+		})
+	}
+	if err := validateAnkiRecordCounts(AnkiPackagePreview{NoteCount: 1, CardCount: 1, ReviewCount: 1}); err != nil {
+		t.Fatalf("valid Anki record counts were rejected: %v", err)
+	}
+}
+
 func TestPreviewModernCompressedAnkiPackage(t *testing.T) {
 	root := t.TempDir()
 	databasePath := filepath.Join(root, "collection.anki21b.sqlite")

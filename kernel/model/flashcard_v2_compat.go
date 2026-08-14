@@ -46,8 +46,12 @@ func UseFlashcardV2Compatibility(ctx context.Context) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return status.State == flashcardv2.MigrationStateActive ||
-		status.State == flashcardv2.MigrationStateLegacyDiverged, nil
+	return isFlashcardV2AuthorityState(status.State), nil
+}
+
+func isFlashcardV2AuthorityState(state string) bool {
+	return state == flashcardv2.MigrationStatePreparing || state == flashcardv2.MigrationStateActive ||
+		state == flashcardv2.MigrationStateLegacyDiverged
 }
 
 // GetLegacyFlashcardV2Blocks 返回旧管理接口能够表示的单块快速卡。

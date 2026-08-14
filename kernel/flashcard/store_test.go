@@ -237,6 +237,51 @@ func TestStoreRecoversJournaledOperationAfterProjectionCrash(t *testing.T) {
 	}
 }
 
+func TestStoreInvalidatesAfterPersistedJournalSealFailure(t *testing.T) {
+	ctx := context.Background()
+	workspace := t.TempDir()
+	journalRoot := filepath.Join(workspace, "v2")
+	projectionPath := filepath.Join(workspace, "temp", "flashcards.db")
+	store, err := OpenStore(ctx, journalRoot, projectionPath, "device-a", &JournalOptions{
+		WriterID: testWriterA, MaxBatchesPerSegment: 2,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	first := fixedEvent("test", "persisted-seal-first", "card-1", 1, `{}`)
+	if _, err = store.Apply(ctx, "persisted-seal-first",
+		[]Change{{Kind: RecordEvent, Event: &first}}); err != nil {
+		t.Fatal(err)
+	}
+	candidate := *store.journal.active
+	candidate.EndSequence++
+	blockedPath := store.journal.sealedSegmentPath(&candidate)
+	if err = os.Mkdir(blockedPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	second := fixedEvent("test", "persisted-seal-second", "card-1", 2, `{}`)
+	batch, err := store.Apply(ctx, "persisted-seal-second",
+		[]Change{{Kind: RecordEvent, Event: &second}})
+	if err == nil || batch.OperationID != "persisted-seal-second" {
+		t.Fatalf("persisted seal failure did not return its durable batch: batch=%+v err=%v", batch, err)
+	}
+	if !store.IsClosed() {
+		t.Fatal("store remained usable with a projection behind its persisted journal")
+	}
+	if err = os.Remove(blockedPath); err != nil {
+		t.Fatal(err)
+	}
+	reopened, err := OpenStore(ctx, journalRoot, projectionPath, "device-b", &JournalOptions{WriterID: testWriterB})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reopened.Close()
+	if count, countErr := reopened.Projection().EventCount(ctx); countErr != nil || count != 2 {
+		t.Fatalf("reopened store did not catch its projection up to the persisted batch: count=%d err=%v", count,
+			countErr)
+	}
+}
+
 func TestJournalSealsAndReloadsMultipleSegments(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "v2")
 	journal, err := OpenJournal(root, "device-a", &JournalOptions{

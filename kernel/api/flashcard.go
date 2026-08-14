@@ -18,6 +18,7 @@ package api
 
 import (
 	"errors"
+	"mime/multipart"
 	"net/http"
 	"strings"
 	"time"
@@ -28,10 +29,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 )
 
+const maxAnkiMultipartOverhead int64 = 1 << 20
+
 func previewAnkiFlashcardPackage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
-	_, writePath, cleanup, err := saveImportUpload(c)
+	_, writePath, cleanup, err := saveAnkiImportUpload(c)
 	if err != nil {
 		setFlashcardAPIError(ret, err)
 		return
@@ -48,7 +51,7 @@ func previewAnkiFlashcardPackage(c *gin.Context) {
 func importAnkiFlashcardPackage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
-	form, writePath, cleanup, err := saveImportUpload(c)
+	form, writePath, cleanup, err := saveAnkiImportUpload(c)
 	if err != nil {
 		setFlashcardAPIError(ret, err)
 		return
@@ -67,6 +70,24 @@ func importAnkiFlashcardPackage(c *gin.Context) {
 		return
 	}
 	ret.Data = report
+}
+
+func saveAnkiImportUpload(c *gin.Context) (form *multipart.Form, writePath string, cleanup func(), err error) {
+	requestLimit := flashcardv2.MaxAnkiPackageArchiveSize + maxAnkiMultipartOverhead
+	if c.Request.ContentLength > requestLimit {
+		return nil, "", nil, errors.New("Anki package upload exceeds its size limit")
+	}
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, requestLimit)
+	form, writePath, cleanup, err = saveImportUpload(c)
+	if err != nil {
+		return
+	}
+	files := form.File["file"]
+	if len(files) == 0 || files[0].Size > flashcardv2.MaxAnkiPackageArchiveSize {
+		cleanup()
+		return nil, "", nil, errors.New("Anki package upload exceeds its size limit")
+	}
+	return
 }
 
 func firstFlashcardFormValue(values []string) string {

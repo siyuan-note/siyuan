@@ -148,6 +148,24 @@ func (store *Store) ReviewCard(ctx context.Context, request ReviewRequest) (Revi
 	if state.Suspended && request.ReviewMode == "normal" {
 		return ReviewResult{}, errors.New("suspended flashcard cannot be reviewed normally")
 	}
+	if request.ReviewMode == "normal" {
+		queryValue, queryErr := CanonicalJSON(request.CardID)
+		if queryErr != nil {
+			return ReviewResult{}, queryErr
+		}
+		query := QueryAST{Version: QueryVersion, Root: QueryExpression{
+			Operator: QueryPredicate, Field: "cardID", Comparator: QueryEqual, Value: queryValue,
+		}}
+		eligible, queryErr := store.projection.SearchCards(ctx, &query, CardSearchOptions{
+			Now: request.ReviewedAt, Limit: 1,
+		})
+		if queryErr != nil {
+			return ReviewResult{}, queryErr
+		}
+		if len(eligible) != 1 || eligible[0].ReviewState.Due > request.ReviewedAt {
+			return ReviewResult{}, errors.New("flashcard is no longer eligible for normal review")
+		}
+	}
 	before := state.ReviewStateSnapshot
 	if request.ReviewMode == "normal" && before.LastReview > request.ReviewedAt {
 		return ReviewResult{}, errors.New("flashcard review time precedes the current state")
@@ -216,7 +234,7 @@ func (store *Store) ReviewCard(ctx context.Context, request ReviewRequest) (Revi
 		result.BuriedSiblingIDs = buriedIDs
 	}
 	if request.SessionID != "" {
-		sessionChange, sessionCard, sessionErr := store.reviewSessionCard(ctx, request)
+		sessionChange, sessionCard, sessionErr := store.reviewSessionCard(ctx, request, stateRevision.RevisionID)
 		if sessionErr != nil {
 			return ReviewResult{}, sessionErr
 		}
@@ -324,7 +342,8 @@ func (store *Store) leechTagChanges(ctx context.Context, operationID, cardID str
 	return changes, true, nil
 }
 
-func (store *Store) reviewSessionCard(ctx context.Context, request ReviewRequest) (Change, SessionCard, error) {
+func (store *Store) reviewSessionCard(ctx context.Context, request ReviewRequest,
+	stateRevisionID string) (Change, SessionCard, error) {
 	if err := store.requireActiveSession(ctx, request.SessionID, request.ReviewSetID, request.ReviewMode); err != nil {
 		return Change{}, SessionCard{}, err
 	}
@@ -343,6 +362,10 @@ func (store *Store) reviewSessionCard(ctx context.Context, request ReviewRequest
 	if sessionCard.Status != "queued" && sessionCard.Status != "shown" {
 		return Change{}, SessionCard{}, fmt.Errorf("flashcard session card cannot be reviewed from status [%s]",
 			sessionCard.Status)
+	}
+	if request.ReviewMode == "normal" && sessionCard.StateRevisionID != "" &&
+		sessionCard.StateRevisionID != stateRevisionID {
+		return Change{}, SessionCard{}, errors.New("flashcard schedule changed after the study session started")
 	}
 	sessionCard.Status = "reviewed"
 	sessionCard.SkipReason = ""

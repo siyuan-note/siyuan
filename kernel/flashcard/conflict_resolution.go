@@ -19,6 +19,7 @@ package flashcard
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -137,8 +138,12 @@ func (store *Store) ResolveEntityConflict(ctx context.Context,
 			return EntityRevision{}, err
 		}
 	}
+	payload, err := conflictResolutionPayload(request.OperationID, selected)
+	if err != nil {
+		return EntityRevision{}, err
+	}
 	merge, err := NewOperationEntityRevision(request.OperationID, request.EntityType, request.EntityID,
-		revisionIDs, request.ResolvedAt, selected.Deleted, selected.Payload)
+		revisionIDs, request.ResolvedAt, selected.Deleted, payload)
 	if err != nil {
 		return EntityRevision{}, err
 	}
@@ -175,9 +180,24 @@ func (store *Store) conflictResolutionFromBatch(ctx context.Context, batch Opera
 	}
 	selectedRevision, found, err := store.projection.entityRevisionByID(ctx, request.SelectedRevision)
 	if err != nil || !found || selectedRevision.EntityType != request.EntityType ||
-		selectedRevision.EntityID != request.EntityID || selectedRevision.Deleted != revision.Deleted ||
-		!bytes.Equal(selectedRevision.Payload, revision.Payload) {
+		selectedRevision.EntityID != request.EntityID || selectedRevision.Deleted != revision.Deleted {
+		return EntityRevision{}, ErrOperationConflict
+	}
+	expectedPayload, err := conflictResolutionPayload(request.OperationID, selectedRevision)
+	if err != nil || !bytes.Equal(expectedPayload, revision.Payload) {
 		return EntityRevision{}, ErrOperationConflict
 	}
 	return revision, nil
+}
+
+func conflictResolutionPayload(operationID string, selected EntityRevision) (json.RawMessage, error) {
+	if selected.Deleted || selected.EntityType != EntityReviewState {
+		return append(json.RawMessage(nil), selected.Payload...), nil
+	}
+	var state ReviewState
+	if err := decodeStrictJSON(selected.Payload, &state); err != nil {
+		return nil, err
+	}
+	state.StateRevisionID = OperationRevisionID(operationID, selected.EntityType, selected.EntityID)
+	return CanonicalJSON(state)
 }

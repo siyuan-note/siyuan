@@ -1205,10 +1205,9 @@ func loadFlashcards(waitForStorageSync bool) {
 	if err != nil {
 		logging.LogErrorf("auto migrate flashcards failed: %s", err)
 	}
-	if status.State == flashcardv2.MigrationStateActive ||
-		status.State == flashcardv2.MigrationStateLegacyDiverged ||
+	if isFlashcardV2AuthorityState(status.State) ||
 		(status.State == "" && flashcardV2ManifestExists()) {
-		// 已经启用新版后不得回退到旧存储继续写入，否则会形成两套分叉数据。
+		// 已经生成新版权威记录后不得回退到旧存储继续写入，否则会形成两套分叉数据。
 		Decks = map[string]*riff.Deck{}
 		return
 	}

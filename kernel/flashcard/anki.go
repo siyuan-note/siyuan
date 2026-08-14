@@ -39,24 +39,32 @@ import (
 )
 
 const (
+	// MaxAnkiPackageArchiveSize 限制通过 HTTP 上传的单个 Anki 压缩包大小。
+	MaxAnkiPackageArchiveSize int64 = 1 << 30
+
 	maxAnkiCollectionSize = 4 << 30
 	maxAnkiMediaMapSize   = 16 << 20
+	maxAnkiNoteCount      = 500_000
+	maxAnkiCardCount      = 1_000_000
+	maxAnkiReviewCount    = 2_000_000
+	maxAnkiRecordCount    = 2_000_000
 )
 
 // AnkiPackagePreview 保存导入确认前不含笔记正文的集合结构与兼容性报告。
 type AnkiPackagePreview struct {
-	PackageDigest   string                `json:"packageDigest"`
-	CollectionID    string                `json:"collectionID"`
-	CollectionCrt   int64                 `json:"collectionCrt"`
-	SchemaVersion   int                   `json:"schemaVersion"`
-	NoteCount       int                   `json:"noteCount"`
-	CardCount       int                   `json:"cardCount"`
-	ReviewCount     int                   `json:"reviewCount"`
-	MediaCount      int                   `json:"mediaCount"`
-	NoteTypes       []AnkiNoteTypePreview `json:"noteTypes"`
-	Decks           []AnkiDeckPreview     `json:"decks"`
-	Unsupported     []string              `json:"unsupported"`
-	CollectionEntry string                `json:"collectionEntry"`
+	PackageDigest      string                `json:"packageDigest"`
+	CollectionID       string                `json:"collectionID"`
+	CollectionCrt      int64                 `json:"collectionCrt"`
+	SchemaVersion      int                   `json:"schemaVersion"`
+	NoteCount          int                   `json:"noteCount"`
+	CardCount          int                   `json:"cardCount"`
+	ReviewCount        int                   `json:"reviewCount"`
+	MediaCount         int                   `json:"mediaCount"`
+	NoteTypes          []AnkiNoteTypePreview `json:"noteTypes"`
+	Decks              []AnkiDeckPreview     `json:"decks"`
+	Unsupported        []string              `json:"unsupported"`
+	CollectionEntry    string                `json:"collectionEntry"`
+	legacyCollectionID string
 }
 
 // AnkiNoteTypePreview 描述 Note Type 字段、模板和预期转换方式。
@@ -240,6 +248,9 @@ func previewAnkiCollection(ctx context.Context, path string) (AnkiPackagePreview
 	if err = db.QueryRowContext(ctx, "SELECT COUNT(*) FROM revlog").Scan(&preview.ReviewCount); err != nil {
 		return AnkiPackagePreview{}, fmt.Errorf("count Anki reviews: %w", err)
 	}
+	if err = validateAnkiRecordCounts(preview); err != nil {
+		return AnkiPackagePreview{}, err
+	}
 	notesByModel, err := ankiCountByID(ctx, db, "SELECT mid, COUNT(*) FROM notes GROUP BY mid")
 	if err != nil {
 		return AnkiPackagePreview{}, err
@@ -271,8 +282,29 @@ func previewAnkiCollection(ctx context.Context, path string) (AnkiPackagePreview
 	if err != nil {
 		return AnkiPackagePreview{}, err
 	}
-	preview.CollectionID = DeterministicID("anki-collection", strconv.FormatInt(created, 10), identity)
+	preview.CollectionID = DeterministicID("anki-collection", strconv.FormatInt(created, 10))
+	preview.legacyCollectionID = DeterministicID("anki-collection", strconv.FormatInt(created, 10), identity)
 	return preview, nil
+}
+
+func validateAnkiRecordCounts(preview AnkiPackagePreview) error {
+	if preview.NoteCount < 0 || preview.CardCount < 0 || preview.ReviewCount < 0 {
+		return errors.New("Anki package contains an invalid record count")
+	}
+	if preview.NoteCount > maxAnkiNoteCount {
+		return errors.New("Anki package contains too many notes")
+	}
+	if preview.CardCount > maxAnkiCardCount {
+		return errors.New("Anki package contains too many cards")
+	}
+	if preview.ReviewCount > maxAnkiReviewCount {
+		return errors.New("Anki package contains too many reviews")
+	}
+	total := int64(preview.NoteCount) + int64(preview.CardCount) + int64(preview.ReviewCount)
+	if total > maxAnkiRecordCount {
+		return errors.New("Anki package contains too many records")
+	}
+	return nil
 }
 
 func parseModernAnkiModels(ctx context.Context, db *sql.DB) ([]ankiModel, error) {

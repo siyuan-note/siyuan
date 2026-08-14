@@ -10,6 +10,10 @@ import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
 import type {App} from "../index";
 import {listFlashcardV2PluginTypes} from "./flashcardV2Plugin";
 import type {IFlashcardQueryAST, IFlashcardQueryExpression} from "./flashcardV2Query";
+import {
+    buildFlashcardV2TagAssignmentGroups,
+    getFlashcardV2TagSelection,
+} from "./flashcardV2State";
 
 interface IFlashcardMigrationStatus {
     state: "Legacy" | "Preparing" | "Active" | "LegacyDiverged";
@@ -843,6 +847,7 @@ ${editable && !deleted ? `<span data-type="editSource" class="b3-list-item__acti
 <span data-type="documentPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.doc} - ${window.siyuan.languages.flashcardPriority}"><svg><use xlink:href="#iconFile"></use></svg></span>
 <span data-type="notebookPolicy" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.notebook} - ${window.siyuan.languages.flashcardPriority}"><svg><use xlink:href="#iconFilesRoot"></use></svg></span>
 <span data-type="sourceLifecycle" class="b3-list-item__action${deleted ? "" : " b3-list-item__action--warning"} b3-tooltips b3-tooltips__w" aria-label="${deleted ? window.siyuan.languages.restore : window.siyuan.languages.delete}"><svg><use xlink:href="#icon${deleted ? "Undo" : "Trashcan"}"></use></svg></span>
+<span data-type="sourceMore" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>
 </li>${sourceCards.map((card) => renderManagedCard(card, reviewSetID, selectedCardIDs, flagDefinitions, true)).join("")}`;
     }).join("");
 };
@@ -1152,12 +1157,12 @@ const flashcardTagPath = (tag: IFlashcardTag, tags: Map<string, IFlashcardTag>) 
     return names.join(" / ");
 };
 
-const renderFlashcardTagChoices = (tags: IFlashcardTag[], selected: Set<string>) => {
+const renderFlashcardTagChoices = (tags: IFlashcardTag[], selected: Set<string>, mixed: Set<string> = new Set()) => {
     const byID = new Map(tags.map((tag) => [tag.id, tag]));
     return [...tags].sort((left, right) => flashcardTagPath(left, byID).localeCompare(flashcardTagPath(right, byID)))
-        .map((tag) => `<div class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${escapeAttr(tag.id)}">
+        .map((tag) => `<div class="b3-list-item b3-list-item--narrow card__v2-tag-choice${isMobile() ? "" : " b3-list-item--hide-action"}" data-id="${escapeAttr(tag.id)}"${mixed.has(tag.id) ? " data-mixed=\"true\"" : ""}>
 <span class="b3-list-item__text">${escapeHtml(flashcardTagPath(tag, byID))}</span>
-<input class="b3-switch" type="checkbox" value="${escapeAttr(tag.id)}"${selected.has(tag.id) ? " checked" : ""}>
+<input class="b3-switch" type="checkbox" value="${escapeAttr(tag.id)}" aria-checked="${mixed.has(tag.id) ? "mixed" : selected.has(tag.id)}"${selected.has(tag.id) ? " checked" : ""}>
 <span data-type="editTag" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></span>
 </div>`).join("");
 };
@@ -1220,14 +1225,22 @@ const openFlashcardV2TagEditor = (revision: IFlashcardEntityRevision<IFlashcardT
 };
 
 const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | string[], selectedTagIDs: string[],
-    callback: (tagIDs: string[]) => void) => {
+    callback: (tagIDs: string[]) => void,
+    initialAssignments?: Readonly<Record<string, readonly string[]>>) => {
     fetchPost("/api/flashcard/listEntities", {
         entityType: "tag",
         options: {limit: 1000, offset: 0},
     }, (response) => {
         const revisions = response.data.entities as Array<IFlashcardEntityRevision<IFlashcardTag>>;
         const tags = revisions.map((revision) => revision.payload);
-        const selected = new Set(selectedTagIDs);
+        const targetIDs = Array.isArray(targetID) ? targetID : [targetID];
+        const initialSelection = initialAssignments ? getFlashcardV2TagSelection(targetIDs, initialAssignments) : {
+            selected: selectedTagIDs,
+            mixed: [],
+        };
+        const selected = new Set(initialSelection.selected);
+        const mixed = new Set(initialSelection.mixed);
+        const changes = new Map<string, boolean>();
         const dialog = new Dialog({
             title: window.siyuan.languages.tag,
             width: isMobile() ? "92vw" : "520px",
@@ -1236,19 +1249,30 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
 <div class="card__v2-panel-toolbar"><input class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.newTag}">
 <button data-type="createTag" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}</button></div>
 <label class="b3-label"><div class="b3-label__text">${window.siyuan.languages.move}</div><select data-type="createTagParent" class="b3-select fn__block">${flashcardTagParentOptions(tags)}</select></label>
-<div data-tag-list class="b3-list b3-list--background fn__flex-1 card__v2-panel-list">${renderFlashcardTagChoices(tags, selected)}</div></div>
+<div data-tag-list class="b3-list b3-list--background fn__flex-1 card__v2-panel-list">${renderFlashcardTagChoices(tags, selected, mixed)}</div></div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,
         });
+        const applyMixedState = () => {
+            dialog.element.querySelectorAll<HTMLInputElement>("[data-tag-list] input[type=checkbox]")
+                .forEach((input) => {
+                    const isMixed = mixed.has(input.value) && !changes.has(input.value);
+                    input.indeterminate = isMixed;
+                    input.setAttribute("aria-checked", isMixed ? "mixed" : input.checked.toString());
+                });
+        };
         const refreshTags = () => {
-            dialog.element.querySelector("[data-tag-list]").innerHTML = renderFlashcardTagChoices(tags, selected);
+            dialog.element.querySelector("[data-tag-list]").innerHTML =
+                renderFlashcardTagChoices(tags, selected, mixed);
             const parent = dialog.element.querySelector('[data-type="createTagParent"]') as HTMLSelectElement;
             const parentID = parent.value;
             parent.innerHTML = flashcardTagParentOptions(tags);
             parent.value = tags.some((tag) => tag.id === parentID) ? parentID : "";
+            applyMixedState();
         };
+        applyMixedState();
         dialog.element.querySelector("[data-tag-list]").addEventListener("change", (event) => {
             const input = event.target as HTMLInputElement;
             if (input.type !== "checkbox") {
@@ -1259,6 +1283,11 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
             } else {
                 selected.delete(input.value);
             }
+            mixed.delete(input.value);
+            changes.set(input.value, input.checked);
+            input.indeterminate = false;
+            input.setAttribute("aria-checked", input.checked.toString());
+            input.closest("[data-mixed]")?.removeAttribute("data-mixed");
         });
         dialog.element.querySelector("[data-tag-list]").addEventListener("click", (event) => {
             const target = (event.target as HTMLElement).closest('[data-type="editTag"]');
@@ -1296,25 +1325,48 @@ const openFlashcardV2Tags = (targetType: "source" | "card", targetID: string | s
                 revisions.push(revision);
                 tags.push(revision.payload);
                 selected.add(tagID);
+                mixed.delete(tagID);
+                changes.set(tagID, true);
                 input.value = "";
                 refreshTags();
             });
         });
-        const buttons = dialog.element.querySelectorAll(".b3-dialog__action .b3-button");
+        const buttons = dialog.element.querySelectorAll<HTMLButtonElement>(".b3-dialog__action .b3-button");
         buttons[0].addEventListener("click", () => dialog.destroy());
         buttons[1].addEventListener("click", () => {
             const tagIDs = [...dialog.element.querySelectorAll<HTMLInputElement>("[data-tag-list] input:checked")]
                 .map((input) => input.value).sort();
-            fetchPost("/api/flashcard/setTagAssignments", {
-                operationID: genUUID(),
-                targetType,
-                targetIDs: Array.isArray(targetID) ? targetID : [targetID],
-                tagIDs,
-                changedAt: Date.now(),
-            }, () => {
-                callback(tagIDs);
+            if (initialAssignments && changes.size === 0) {
                 dialog.destroy();
-            });
+                return;
+            }
+            const groups = initialAssignments ? buildFlashcardV2TagAssignmentGroups(targetIDs, initialAssignments,
+                Object.fromEntries(changes)) : [{targetIDs, tagIDs}];
+            const changedAt = Date.now();
+            buttons.forEach((button) => button.disabled = true);
+            const saveGroup = (index: number) => {
+                if (index >= groups.length) {
+                    callback(tagIDs);
+                    dialog.destroy();
+                    return;
+                }
+                let saved = false;
+                void fetchPost("/api/flashcard/setTagAssignments", {
+                    operationID: genUUID(),
+                    targetType,
+                    targetIDs: groups[index].targetIDs,
+                    tagIDs: groups[index].tagIDs,
+                    changedAt,
+                }, () => {
+                    saved = true;
+                    saveGroup(index + 1);
+                }).then(() => {
+                    if (!saved) {
+                        buttons.forEach((button) => button.disabled = false);
+                    }
+                });
+            };
+            saveGroup(0);
         });
     });
 };
@@ -1675,10 +1727,10 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                         return;
                     }
                     if (action === "tags") {
-                        const commonTags = selectedCards.slice(1).reduce((common, card) =>
-                            common.filter((tagID) => card.cardTagIDs.includes(tagID)),
-                        [...(selectedCards[0].cardTagIDs || [])]);
-                        openFlashcardV2Tags("card", selected, commonTags, reloadPage);
+                        const assignments = Object.fromEntries(selectedCards.map((card) =>
+                            [card.card.id, card.cardTagIDs || []]));
+                        const selection = getFlashcardV2TagSelection(selected, assignments);
+                        openFlashcardV2Tags("card", selected, selection.selected, reloadPage, assignments);
                         return;
                     }
                     if (action === "setDue") {
@@ -1724,6 +1776,28 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                 if (!item) {
                     return;
                 }
+                if (type === "sourceMore") {
+                    const menu = new Menu();
+                    ["editSource", "sourceTags", "documentPolicy", "notebookPolicy", "sourceLifecycle"]
+                        .forEach((action) => {
+                            const actionElement = item.querySelector(`[data-type="${action}"]`) as HTMLElement;
+                            if (!actionElement) {
+                                return;
+                            }
+                            menu.addItem({
+                                id: `flashcardV2${action}`,
+                                label: actionElement.getAttribute("aria-label") || "",
+                                click: () => actionElement.click(),
+                            });
+                        });
+                    if (isMobile()) {
+                        menu.fullscreen();
+                    } else {
+                        const rect = target.getBoundingClientRect();
+                        menu.open({x: rect.left, y: rect.bottom});
+                    }
+                    return;
+                }
                 if (type === "more") {
                     const card = cards.find((result) => result.card.id === item.dataset.id);
                     if (!card) {
@@ -1737,12 +1811,28 @@ ${reviewSetID === "" ? `<button data-type="saveReviewSet" class="b3-button b3-bu
                             click: () => (item.querySelector(`[data-type="${action}"]`) as HTMLElement)?.click(),
                         });
                     };
+                    const addElementAction = (id: string, action: string) => {
+                        const actionElement = item.querySelector(`[data-type="${action}"]`) as HTMLElement;
+                        if (actionElement) {
+                            addAction(id, actionElement.getAttribute("aria-label") || "", action);
+                        }
+                    };
+                    addElementAction("flashcardV2Direction", "direction");
+                    addElementAction("flashcardV2Preset", "preset");
                     addAction("flashcardV2Priority", window.siyuan.languages.flashcardPriority, "priority");
+                    addElementAction("flashcardV2Tags", "tags");
+                    addElementAction("flashcardV2Suspend", "suspend");
                     addAction("flashcardV2Bury", (card.reviewState.buriedUntil || 0) > Date.now() ?
                         window.siyuan.languages.flashcardUnbury : window.siyuan.languages.flashcardBury, "bury");
-                    if (!reviewSetID) {
+                    addElementAction("flashcardV2Due", "due");
+                    addElementAction("flashcardV2Flag", "flag");
+                    addElementAction("flashcardV2History", "history");
+                    if (reviewSetID) {
+                        addElementAction("flashcardV2Exclude", "exclude");
+                    } else {
                         addAction("flashcardV2Membership", window.siyuan.languages.flashcardReviewSet, "membership");
                     }
+                    addElementAction("flashcardV2Reset", "reset");
                     if (isMobile()) {
                         menu.fullscreen();
                     } else {
@@ -2566,7 +2656,7 @@ ${clozeTargets.length === 0 ? `<div class="card__empty">${window.siyuan.language
 <div class="card__v2-advanced-section-action"><button data-type="addClozeGroup" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.group}</button></div>
 </div>`;
                 const imageEditorHTML = imageSource ? `<div data-type="imageEditor" class="fn__none card__v2-advanced-section">
-<div class="fn__flex">
+<div class="card__v2-advanced-image-toolbar">
     <select data-type="imageShape" class="b3-select">
         <option value="rectangle">${window.siyuan.languages.flashcardRectangle}</option>
         <option value="ellipse">${window.siyuan.languages.flashcardEllipse}</option>

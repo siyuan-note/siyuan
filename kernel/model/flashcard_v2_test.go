@@ -69,3 +69,17 @@ func TestApplyFlashcardV2SessionDefaultsUsesWorkspaceLimitsOnlyWithoutReviewSet(
 		t.Fatalf("review set limits were replaced before loading the review set: %+v", reviewSet)
 	}
 }
+
+func TestFlashcardV2AuthorityStateBlocksLegacyFallback(t *testing.T) {
+	for state, expected := range map[string]bool{
+		"":                                       false,
+		flashcardv2.MigrationStateLegacy:         false,
+		flashcardv2.MigrationStatePreparing:      true,
+		flashcardv2.MigrationStateActive:         true,
+		flashcardv2.MigrationStateLegacyDiverged: true,
+	} {
+		if actual := isFlashcardV2AuthorityState(state); actual != expected {
+			t.Fatalf("unexpected V2 authority decision for state [%s]: got=%v want=%v", state, actual, expected)
+		}
+	}
+}

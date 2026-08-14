@@ -146,13 +146,14 @@ type MultiLineAnswer struct {
 
 // ImportedGenerationConfig 保存外部卡包中已经实例化的稳定模板变体。
 type ImportedGenerationConfig struct {
-	CollectionID string            `json:"collectionID,omitempty"`
-	NoteID       int64             `json:"noteID,omitempty"`
-	GUID         string            `json:"guid,omitempty"`
-	ModelID      int64             `json:"modelID,omitempty"`
-	ReviewSetIDs []string          `json:"reviewSetIDs,omitempty"`
-	TagIDs       []string          `json:"tagIDs,omitempty"`
-	Variants     []ImportedVariant `json:"variants"`
+	CollectionID  string            `json:"collectionID,omitempty"`
+	CollectionCrt int64             `json:"collectionCrt,omitempty"`
+	NoteID        int64             `json:"noteID,omitempty"`
+	GUID          string            `json:"guid,omitempty"`
+	ModelID       int64             `json:"modelID,omitempty"`
+	ReviewSetIDs  []string          `json:"reviewSetIDs,omitempty"`
+	TagIDs        []string          `json:"tagIDs,omitempty"`
+	Variants      []ImportedVariant `json:"variants"`
 }
 
 // ImportedVariant 将一个外部卡片身份映射到导入后的模板和安全回退数据。

@@ -107,8 +107,11 @@ func (store *Store) applyLocked(ctx context.Context, operationID string, changes
 	if err = store.projection.ValidateChanges(ctx, normalizedChanges); err != nil {
 		return OperationBatch{}, fmt.Errorf("validate flashcard changes: %w", err)
 	}
-	batch, _, err := store.journal.Append(operationID, normalizedChanges)
+	batch, persisted, err := store.journal.Append(operationID, normalizedChanges)
 	if err != nil {
+		if persisted {
+			return batch, store.invalidateLocked(fmt.Errorf("seal persisted flashcard journal batch: %w", err))
+		}
 		return OperationBatch{}, err
 	}
 	if err = store.projection.ApplyBatch(ctx, batch); err != nil {

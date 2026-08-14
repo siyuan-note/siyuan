@@ -188,6 +188,58 @@ func TestReinforcementSessionCanExplicitlyIncludePausedCards(t *testing.T) {
 	}
 }
 
+func TestNormalSessionRejectsCardReviewedInAnotherSession(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	createdAt := int64(1786431600000)
+	schemaID := "schema-concurrent-session"
+	templateID := "template-concurrent-session"
+	source := testGenerationSource("source-concurrent-session", schemaID, "qa", json.RawMessage(`{}`))
+	preset := testSchedulerPreset("preset-concurrent-session", false, false)
+	source.DefaultPresetID = preset.ID
+	applyGenerationEntities(t, ctx, store, "setup-concurrent-session", createdAt,
+		testGenerationSchema(schemaID, []string{templateID}),
+		testGenerationTemplate(templateID, schemaID, GenerationStatic, "forward", true), source, preset)
+	if _, err := store.ReconcileSourceCards(ctx, "reconcile-concurrent-session", source.ID, createdAt); err != nil {
+		t.Fatal(err)
+	}
+	query := QueryAST{Version: QueryVersion, Root: QueryExpression{Operator: QueryMatchAll}}
+	for _, sessionID := range []string{"concurrent-session-a", "concurrent-session-b"} {
+		result, err := store.StartStudySession(ctx, StudyQueueRequest{
+			OperationID: "start-" + sessionID, SessionID: sessionID, Query: &query,
+			ReviewMode: "normal", Now: createdAt, NewLimit: 10, ReviewLimit: 10,
+		})
+		if err != nil || len(result.SessionCards) != 1 || result.SessionCards[0].StateRevisionID == "" {
+			t.Fatalf("session did not freeze the current review state: result=%+v err=%v", result, err)
+		}
+	}
+	cardID := GeneratedCardID(source.ID, templateID, "forward")
+	firstReview, err := store.ReviewCard(ctx, ReviewRequest{
+		OperationID: "review-concurrent-session-a", CardID: cardID, Rating: ReviewGood,
+		ReviewedAt: createdAt + 1000, DurationMS: 500, SessionID: "concurrent-session-a", ReviewMode: "normal",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = store.ReviewCard(ctx, ReviewRequest{
+		OperationID: "review-before-next-due", CardID: cardID, Rating: ReviewGood,
+		ReviewedAt: createdAt + 1100, DurationMS: 500, ReviewMode: "normal",
+	}); err == nil {
+		t.Fatal("a card that was no longer due was reviewed normally")
+	}
+	if firstReview.AfterState == nil || firstReview.AfterState.Due <= createdAt+1000 {
+		t.Fatalf("first review did not schedule a future due date: %+v", firstReview.AfterState)
+	}
+	if _, err := store.ReviewCard(ctx, ReviewRequest{
+		OperationID: "review-concurrent-session-b", CardID: cardID, Rating: ReviewGood,
+		ReviewedAt: firstReview.AfterState.Due, DurationMS: 500,
+		SessionID: "concurrent-session-b", ReviewMode: "normal",
+	}); err == nil {
+		t.Fatal("a stale session reviewed a card after another session changed its schedule")
+	}
+}
+
 func TestReviewSetQueueOrdersAreStable(t *testing.T) {
 	fixtures := []CardSearchResult{
 		{Card: Card{ID: "card-a", CreatedAt: 30}, ReviewState: ReviewState{ReviewStateSnapshot: ReviewStateSnapshot{Due: 10}}, EffectivePriority: "retaining"},

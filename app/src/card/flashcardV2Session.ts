@@ -39,6 +39,11 @@ import {
     snapshotFlashcardV2AnswerResult
 } from "./flashcardV2Plugin";
 import type {IFlashcardQueryAST} from "./flashcardV2Query";
+import {
+    canUseFlashcardV2ReviewActions,
+    getFlashcardV2ReviewShortcutAction,
+    shouldLoadFlashcardV2HeadingChildren,
+} from "./flashcardV2State";
 
 interface IFlashcardV2SessionQueueCard {
     sessionCard: {
@@ -109,6 +114,7 @@ export interface IFlashcardV2ReviewSessionOptions {
 }
 
 const flashcardV2FlagColors = ["", "#d14343", "#d97706", "#2f9e44", "#3b82f6", "#8b5cf6", "#0891b2", "#db2777"];
+let flashcardV2ReviewOpening = false;
 
 const nextLocalDay = (now: number) => {
     const date = new Date(now);
@@ -140,18 +146,27 @@ const referenceHTML = (references: IFlashcardV2SourceReference[], doms: Record<s
 
 const loadFlashcardV2DOMs = (model: IFlashcardV2RenderModel, references: IFlashcardV2SourceReference[],
     callback: (doms: Record<string, string>) => void) => {
-    if (model.schema?.builtinType === "block-flashcard" && references.length === 1) {
-        const blockID = references[0].entityID;
-        return fetchPost("/api/filetree/getDoc", {
-            id: blockID,
-            mode: 0,
-            size: Constants.SIZE_GET_MAX,
-            highlight: false,
-        }, (response) => callback({[blockID]: response.data.content}));
-    }
-    return fetchPost("/api/block/getBlockDOMs", {
-        ids: references.map((reference) => reference.entityID),
-    }, (response) => callback(response.data as Record<string, string>));
+    const blockIDs = references.map((reference) => reference.entityID);
+    let headingRequest: ReturnType<typeof fetchPost> | undefined;
+    return fetchPost("/api/block/getBlockDOMs", {ids: blockIDs}, (response) => {
+        const doms = response.data as Record<string, string>;
+        if (model.schema?.builtinType === "block-flashcard" && references.length === 1) {
+            const blockID = references[0].entityID;
+            const template = document.createElement("template");
+            template.innerHTML = doms[blockID] || "";
+            const sourceElement = [...template.content.querySelectorAll<HTMLElement>("[data-node-id]")]
+                .find((element) => element.dataset.nodeId === blockID);
+            if (sourceElement && shouldLoadFlashcardV2HeadingChildren(
+                sourceElement.getAttribute("data-type"), sourceElement.getAttribute("fold"))) {
+                headingRequest = fetchPost("/api/block/getHeadingChildrenDOM", {
+                    id: blockID,
+                    removeFoldAttr: true,
+                }, (headingResponse) => callback({[blockID]: headingResponse.data as string}));
+                return;
+            }
+        }
+        callback(doms);
+    }).then(() => headingRequest);
 };
 
 const flashcardV2PlainText = (value: string) => {
@@ -332,6 +347,14 @@ const setActionsVisible = (dialog: Dialog, revealed: boolean) => {
     dialog.element.querySelector('[data-flashcard-action="finish"]').classList.add("fn__none");
 };
 
+const setReviewActionsEnabled = (dialog: Dialog, enabled: boolean) => {
+    const contentElement = dialog.element.querySelector(".card__block");
+    contentElement?.setAttribute("aria-busy", enabled ? "false" : "true");
+    dialog.element.querySelectorAll<HTMLButtonElement>("[data-type=show], [data-rating]").forEach((button) => {
+        button.disabled = !enabled;
+    });
+};
+
 const setUndoVisible = (dialog: Dialog, visible: boolean) => {
     dialog.element.querySelector('[data-type="undo-review"]').classList.toggle("fn__none", !visible);
 };
@@ -456,38 +479,35 @@ const sessionCompletionContent = (canUndo: boolean) => `<div class="card__empty-
     <button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </span>`;
 
-const sessionContent = () => `<div class="b3-dialog__content fn__flex-column" style="box-sizing:border-box;height:100%;padding:0">
-<div data-flashcard-toolbar class="fn__flex" style="padding:8px 16px">
+const sessionContent = () => `<div class="b3-dialog__content fn__flex-column card__v2-session">
+<div data-flashcard-toolbar class="fn__flex card__v2-session-toolbar">
     <span data-flashcard-count class="ft__on-surface"></span>
     <span class="fn__flex-1"></span>
     <button data-type="read-aloud" class="block__icon ariaLabel${typeof window.speechSynthesis === "undefined" ? " fn__none" : ""}" aria-label="${window.siyuan.languages.flashcardReadAloud}"><svg><use xlink:href="#iconPlay"></use></svg></button>
-    <span class="fn__space"></span>
     <button data-type="edit-source" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.edit}"><svg><use xlink:href="#iconEdit"></use></svg></button>
-    <span class="fn__space"></span>
     <button data-type="more" class="block__icon ariaLabel" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
-    <span class="fn__space"></span>
     <button data-type="undo-review" class="block__icon ariaLabel fn__none" aria-label="${window.siyuan.languages.undo}"><svg><use xlink:href="#iconUndo"></use></svg></button>
 </div>
-<div class="card__block fn__flex-1" style="overflow:auto;padding:16px">
+<div class="card__block fn__flex-1 card__v2-session-content" aria-busy="true">
     <div data-flashcard-context class="card__v2-context ft__secondary fn__none"></div>
     <div class="protyle-wysiwyg" contenteditable="false" data-flashcard-front></div>
     <div class="fn__none" data-flashcard-answer><div class="fn__hr"></div><div class="protyle-wysiwyg" contenteditable="false"></div></div>
 </div>
-<div data-flashcard-action="reveal" class="fn__flex card__action">
-    <button data-type="show" class="b3-button b3-button--text"><div class="card__icon">👀</div>${window.siyuan.languages.cardShowAnswer}</button>
+<div data-flashcard-action="reveal" class="fn__flex card__action card__v2-session-actions">
+    <button data-type="show" class="b3-button b3-button--text" disabled><div class="card__icon">👀</div>${window.siyuan.languages.cardShowAnswer}</button>
     <span class="fn__space"></span>
     <button data-type="skip" class="b3-button b3-button--cancel"><div class="card__icon">💤</div>${window.siyuan.languages.skip}</button>
 </div>
-<div data-flashcard-action="ratings" class="fn__flex card__action fn__none">
-    <button data-rating="again" class="b3-button b3-button--error"><div class="card__icon">🙈</div>${window.siyuan.languages.cardRatingAgain}</button>
+<div data-flashcard-action="ratings" class="fn__flex card__action card__v2-session-actions fn__none">
+    <button data-rating="again" class="b3-button b3-button--error" disabled><div class="card__icon">🙈</div>${window.siyuan.languages.cardRatingAgain}</button>
     <span class="fn__space"></span>
-    <button data-rating="hard" class="b3-button b3-button--warning"><div class="card__icon">😬</div>${window.siyuan.languages.cardRatingHard}</button>
+    <button data-rating="hard" class="b3-button b3-button--warning" disabled><div class="card__icon">😬</div>${window.siyuan.languages.cardRatingHard}</button>
     <span class="fn__space"></span>
-    <button data-rating="good" class="b3-button b3-button--info"><div class="card__icon">😊</div>${window.siyuan.languages.cardRatingGood}</button>
+    <button data-rating="good" class="b3-button b3-button--info" disabled><div class="card__icon">😊</div>${window.siyuan.languages.cardRatingGood}</button>
     <span class="fn__space"></span>
-    <button data-rating="easy" class="b3-button b3-button--success"><div class="card__icon">🌈</div>${window.siyuan.languages.cardRatingEasy}</button>
+    <button data-rating="easy" class="b3-button b3-button--success" disabled><div class="card__icon">🌈</div>${window.siyuan.languages.cardRatingEasy}</button>
 </div>
-<div data-flashcard-action="finish" class="fn__flex card__action fn__none">
+<div data-flashcard-action="finish" class="fn__flex card__action card__v2-session-actions fn__none">
     <button data-type="finish" class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>
 </div>`;
@@ -499,15 +519,19 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
     const contentElement = dialog.element.querySelector(".card__block") as HTMLElement;
     const contextElement = dialog.element.querySelector("[data-flashcard-context]") as HTMLElement;
     const frontElement = dialog.element.querySelector("[data-flashcard-front]") as HTMLElement;
+    const answerElement = dialog.element.querySelector("[data-flashcard-answer]") as HTMLElement;
     dialog.element.querySelector("[data-flashcard-template-style]")?.remove();
     dialog.element.querySelector("[data-flashcard-toolbar]").classList.remove("fn__none");
     contextElement.classList.add("fn__none");
     contextElement.innerHTML = "";
     frontElement.className = "protyle-wysiwyg";
-    contentElement.className = "card__block fn__flex-1";
-    contentElement.setAttribute("style", "overflow:auto;padding:16px");
+    frontElement.innerHTML = "";
+    answerElement.classList.add("fn__none");
+    (answerElement.querySelector(".protyle-wysiwyg") as HTMLElement).innerHTML = "";
+    contentElement.className = "card__block fn__flex-1 card__v2-session-content";
     dialog.element.querySelector("[data-flashcard-count]").textContent = `${index + 1} / ${queue.length}`;
     setActionsVisible(dialog, false);
+    setReviewActionsEnabled(dialog, false);
     let modelLoaded = false;
     void fetchPost("/api/flashcard/getRenderModel", {cardID: current.card.id}, (modelResponse) => {
         if (!isCurrent()) {
@@ -545,7 +569,6 @@ const renderSessionCard = (dialog: Dialog, queue: IFlashcardV2SessionQueueCard[]
             }
             const frontIDs = new Set(frontReferences.map((reference) => reference.entityID));
             const answerReferences = backReferences.filter((reference) => !frontIDs.has(reference.entityID));
-            const answerElement = dialog.element.querySelector("[data-flashcard-answer]");
             const ankiFront = renderFlashcardV2AnkiTemplate(model, "front", doms);
             const ankiBack = ankiFront === undefined ? undefined :
                 renderFlashcardV2AnkiTemplate(model, "back", doms, ankiFront);
@@ -664,7 +687,7 @@ const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => 
     const dialog = new Dialog({
         title: window.siyuan.languages.edit,
         width: isMobile() ? "100vw" : "80vw",
-        height: isMobile() ? "100vh" : "78vh",
+        height: isMobile() ? "100dvh" : "78vh",
         content: '<div data-type="flashcardSourceEditor" style="height:100%"></div>',
         destroyCallback: () => {
             editorHolder.current?.destroy();
@@ -696,8 +719,20 @@ const openFlashcardV2SourceEditor = (app: App, blockID: string, callback: () => 
 
 export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name: string,
     options: IFlashcardV2ReviewSessionOptions = {reviewMode: "normal"}) => {
+    const existing = window.siyuan.dialogs.find((item) =>
+        item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD ||
+        item.element.hasAttribute("data-flashcard-v2-review"));
+    if (existing) {
+        existing.destroy();
+        return;
+    }
+    if (flashcardV2ReviewOpening) {
+        return;
+    }
+    flashcardV2ReviewOpening = true;
     const sessionID = genUUID();
-    fetchPost("/api/flashcard/startSession", {
+    let sessionStarted = false;
+    void fetchPost("/api/flashcard/startSession", {
         operationID: genUUID(),
         sessionID,
         reviewSetID,
@@ -711,7 +746,10 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
         includeBuried: options.reviewMode === "reinforcement" && Boolean(options.includeBuried),
         includePaused: options.reviewMode === "reinforcement" && Boolean(options.includePaused),
     }, () => {
-        fetchPost("/api/flashcard/getSessionQueue", {sessionID}, (queueResponse) => {
+        sessionStarted = true;
+        let queueLoaded = false;
+        void fetchPost("/api/flashcard/getSessionQueue", {sessionID}, (queueResponse) => {
+            queueLoaded = true;
             const queue = (queueResponse.data.cards as IFlashcardV2SessionQueueCard[])
                 .filter((item) => item.card.generationStatus === "active" &&
                     (item.sessionCard.status === "queued" || item.sessionCard.status === "shown"));
@@ -722,7 +760,9 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 cardCount: queue.length,
             });
             if (queue.length === 0) {
-                finishSession(sessionID, "completed", () => {
+                let completionShown = false;
+                void finishSession(sessionID, "completed", () => {
+                    completionShown = true;
                     emitFlashcardV2Lifecycle(app, "flashcard-review-session-ended", {
                         sessionID,
                         reviewSetID,
@@ -734,9 +774,15 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         width: isMobile() ? "92vw" : "520px",
                         content: `<div class="b3-dialog__content card__empty card__empty--space card__v2-completion">${sessionCompletionContent(false)}</div>`,
                     });
+                    completionDialog.element.setAttribute("data-flashcard-v2-review", "");
+                    flashcardV2ReviewOpening = false;
                     completionDialog.element.querySelector('[data-type="finish"]').addEventListener("click", () => {
                         completionDialog.destroy();
                     });
+                }).then(() => {
+                    if (!completionShown) {
+                        flashcardV2ReviewOpening = false;
+                    }
                 });
                 return;
             }
@@ -753,6 +799,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             let pluginEdit: (() => Promise<void>) | undefined;
             let sessionFinished = false;
             let requestPending = false;
+            let renderPending = true;
             let completedPending = false;
             let lastReview: IFlashcardV2LastReview | undefined;
             let renderGeneration = 0;
@@ -780,8 +827,9 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             };
             const dialog = new Dialog({
                 title: name,
+                positionId: Constants.DIALOG_OPENCARD,
                 width: isMobile() ? "100vw" : "860px",
-                height: isMobile() ? "100vh" : "78vh",
+                height: isMobile() ? "100dvh" : "78vh",
                 content: sessionContent(),
                 destroyCallback: () => {
                     renderGeneration++;
@@ -792,6 +840,16 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                         finishSession(sessionID, status, () => emitSessionEnded(status));
                     }
                 },
+            });
+            dialog.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
+            dialog.element.setAttribute("data-flashcard-v2-review", "");
+            flashcardV2ReviewOpening = false;
+            const canUseReviewActions = () => canUseFlashcardV2ReviewActions({
+                renderPending,
+                requestPending,
+                sessionFinished,
+                index,
+                queueLength: queue.length,
             });
             const acceptRendered = (rendered: IFlashcardV2RenderedCard) => {
                 playbackController?.cancel();
@@ -805,6 +863,8 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 currentModel = rendered.model;
                 pluginEdit = rendered.pluginEdit;
                 answerResult = undefined;
+                renderPending = false;
+                setReviewActionsEnabled(dialog, true);
                 emitFlashcardV2Lifecycle(app, "flashcard-review-card-shown", {
                     cardID: rendered.model.card.id,
                     sourceID: rendered.model.card.sourceID,
@@ -817,6 +877,15 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             };
             const renderCurrent = () => {
                 const generation = ++renderGeneration;
+                renderPending = true;
+                revealController = undefined;
+                typedAnswerController = undefined;
+                choiceController = undefined;
+                pluginAnswerController = undefined;
+                sourceBlockID = undefined;
+                currentModel = undefined;
+                pluginEdit = undefined;
+                answerResult = undefined;
                 renderSessionCard(dialog, queue, index,
                     () => !sessionFinished && generation === renderGeneration, acceptRendered, () => {
                         if (requestPending || sessionFinished || generation !== renderGeneration) {
@@ -833,7 +902,9 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             };
             const showCompletion = () => {
                 renderGeneration++;
+                renderPending = false;
                 completedPending = true;
+                setReviewActionsEnabled(dialog, true);
                 dialog.element.querySelector("[data-flashcard-count]").textContent = `${queue.length} / ${queue.length}`;
                 const contentElement = dialog.element.querySelector(".card__block");
                 const frontElement = contentElement.querySelector("[data-flashcard-front]");
@@ -861,6 +932,9 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 showCompletion();
             };
             const reveal = () => {
+                if (!canUseReviewActions()) {
+                    return;
+                }
                 const contentElement = dialog.element.querySelector(".card__block");
                 const complete = revealController?.revealNext() ?? true;
                 if (complete) {
@@ -1097,11 +1171,56 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                     menu.open({x: rect.left, y: rect.bottom});
                 }
             };
+            const handleReviewShortcut = (shortcut: string) => {
+                const action = getFlashcardV2ReviewShortcutAction(shortcut);
+                if (action === "revealOrGood") {
+                    if (completedPending) {
+                        (dialog.element.querySelector('.card__v2-completion [data-type="finish"]') as HTMLElement)
+                            ?.click();
+                        return true;
+                    }
+                    const finish = dialog.element.querySelector('[data-flashcard-action="finish"]');
+                    if (!finish.classList.contains("fn__none")) {
+                        (finish.querySelector('[data-type="finish"]') as HTMLElement)?.click();
+                        return true;
+                    }
+                    const ratings = dialog.element.querySelector('[data-flashcard-action="ratings"]');
+                    if (ratings.classList.contains("fn__none")) {
+                        reveal();
+                    } else {
+                        (ratings.querySelector('[data-rating="good"]') as HTMLElement)?.click();
+                    }
+                    return true;
+                }
+                if (action && ["again", "hard", "good", "easy"].includes(action)) {
+                    const ratings = dialog.element.querySelector('[data-flashcard-action="ratings"]');
+                    if (!ratings.classList.contains("fn__none") && canUseReviewActions()) {
+                        (ratings.querySelector(`[data-rating="${action}"]`) as HTMLElement)?.click();
+                    }
+                    return true;
+                }
+                if (action === "skip") {
+                    (dialog.element.querySelector('[data-type="skip"]') as HTMLElement)?.click();
+                    return true;
+                }
+                if (action === "undo") {
+                    if (lastReview) {
+                        (dialog.element.querySelector('[data-type="undo-review"]') as HTMLElement)?.click();
+                    }
+                    return true;
+                }
+                return false;
+            };
+            dialog.element.firstElementChild.addEventListener("click", (event: MouseEvent) => {
+                if (typeof event.detail === "string") {
+                    handleReviewShortcut(event.detail);
+                }
+            });
             dialog.element.addEventListener("click", (event) => {
                 const target = event.target as HTMLElement;
                 const ratingElement = target.closest("[data-rating]") as HTMLElement;
                 const ratingsElement = dialog.element.querySelector('[data-flashcard-action="ratings"]');
-                if (ratingElement && !ratingsElement.classList.contains("fn__none") && !requestPending) {
+                if (ratingElement && !ratingsElement.classList.contains("fn__none") && canUseReviewActions()) {
                     requestPending = true;
                     const reviewedAt = Date.now();
                     const reviewedIndex = index;
@@ -1300,48 +1419,31 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 const eventTarget = event.target as HTMLElement;
                 const editing = Boolean(eventTarget.closest("input,textarea,select,[contenteditable=true]"));
                 if (editing) {
-                    if (event.key === "Enter" && eventTarget.matches("[data-anki-type-answer]")) {
+                    if (event.key === "Enter" &&
+                        eventTarget.matches("[data-anki-type-answer], [data-flashcard-type-answer]")) {
                         reveal();
                         event.preventDefault();
+                        event.stopPropagation();
                     }
                     return;
                 }
-                if (event.key === " " || event.key === "Enter") {
-                    if (completedPending) {
-                        (dialog.element.querySelector('.card__v2-completion [data-type="finish"]') as HTMLElement)
-                            .click();
-                        event.preventDefault();
-                        return;
-                    }
-                    const finish = dialog.element.querySelector('[data-flashcard-action="finish"]');
-                    if (!finish.classList.contains("fn__none")) {
-                        (finish.querySelector('[data-type="finish"]') as HTMLElement).click();
-                        event.preventDefault();
-                        return;
-                    }
-                    const ratings = dialog.element.querySelector('[data-flashcard-action="ratings"]');
-                    if (ratings.classList.contains("fn__none")) {
-                        reveal();
-                    } else {
-                        (ratings.querySelector('[data-rating="good"]') as HTMLElement).click();
-                    }
+                if (handleReviewShortcut(event.key)) {
                     event.preventDefault();
-                } else if (["1", "2", "3", "4"].includes(event.key)) {
-                    const ratings = dialog.element.querySelector('[data-flashcard-action="ratings"]');
-                    if (ratings.classList.contains("fn__none")) {
-                        return;
-                    }
-                    const rating = ["again", "hard", "good", "easy"][Number(event.key) - 1];
-                    (dialog.element.querySelector(`[data-rating="${rating}"]`) as HTMLElement).click();
-                    event.preventDefault();
-                } else if (event.key === "0") {
-                    (dialog.element.querySelector('[data-type="skip"]') as HTMLElement)?.click();
-                    event.preventDefault();
+                    event.stopPropagation();
                 }
             });
             dialog.element.setAttribute("tabindex", "-1");
             dialog.element.focus();
             renderCurrent();
+        }).then(() => {
+            if (!queueLoaded) {
+                flashcardV2ReviewOpening = false;
+                void finishSession(sessionID, "abandoned");
+            }
         });
+    }).then(() => {
+        if (!sessionStarted) {
+            flashcardV2ReviewOpening = false;
+        }
     });
 };

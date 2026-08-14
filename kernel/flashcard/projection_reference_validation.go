@@ -49,6 +49,9 @@ var businessReferenceChecks = []referenceCheck{
 		WHERE s.default_preset_id <> '' AND p.id IS NULL LIMIT 1`},
 	{name: "card review state", query: `SELECT rs.card_id FROM review_states rs
 		LEFT JOIN cards c ON c.id = rs.card_id WHERE c.id IS NULL LIMIT 1`},
+	{name: "card missing review state", query: `SELECT c.id FROM cards c
+		LEFT JOIN review_states rs ON rs.card_id = c.id
+		WHERE c.generation_status <> 'deleted' AND rs.card_id IS NULL LIMIT 1`},
 	{name: "review set membership", query: `SELECT m.id FROM review_set_memberships m
 		LEFT JOIN review_sets s ON s.id = m.review_set_id LEFT JOIN cards c ON c.id = m.card_id
 		WHERE s.id IS NULL OR c.id IS NULL LIMIT 1`},

@@ -139,6 +139,102 @@ func TestLegacyMigrationActivationRejectsChangedPreviewInput(t *testing.T) {
 	}
 }
 
+func TestPreparingLegacyMigrationResumesTheSamePlan(t *testing.T) {
+	ctx := context.Background()
+	legacyRoot := filepath.Join(t.TempDir(), "missing-riff")
+	plan, err := PrepareLegacyMigration(ctx, legacyRoot, preparingMigrationTestOptions())
+	if err != nil {
+		t.Fatal(err)
+	}
+	workspace := t.TempDir()
+	store, err := OpenStore(ctx, filepath.Join(workspace, "v2"), filepath.Join(workspace, "temp", "flashcards.db"),
+		"device-a", &JournalOptions{WriterID: testWriterA})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	preparedBatch, err := store.Apply(ctx, plan.OperationID, plan.Changes)
+	if err != nil {
+		t.Fatal(err)
+	}
+	status, err := store.LegacyMigrationStatus(ctx)
+	if err != nil || status.State != MigrationStatePreparing || status.MigrationID != plan.MigrationID {
+		t.Fatalf("migration did not remain preparing after its candidate batch: status=%+v err=%v", status, err)
+	}
+	activation, err := store.ActivateLegacyMigration(ctx, legacyRoot, plan)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if activation.PreparedBatch.BatchID != preparedBatch.BatchID || activation.Status.State != MigrationStateActive {
+		t.Fatalf("same preparing plan did not resume idempotently: activation=%+v", activation)
+	}
+	if conflicts, countErr := store.Projection().ConflictCount(ctx); countErr != nil || conflicts != 0 {
+		t.Fatalf("same preparing plan created entity conflicts: count=%d err=%v", conflicts, countErr)
+	}
+}
+
+func TestPreparingLegacyMigrationRejectsDifferentPlan(t *testing.T) {
+	ctx := context.Background()
+	legacyRoot := filepath.Join(t.TempDir(), "riff")
+	options := preparingMigrationTestOptions()
+	firstPlan, err := PrepareLegacyMigration(ctx, legacyRoot, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	workspace := t.TempDir()
+	store, err := OpenStore(ctx, filepath.Join(workspace, "v2"), filepath.Join(workspace, "temp", "flashcards.db"),
+		"device-a", &JournalOptions{WriterID: testWriterA})
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer store.Close()
+	if _, err = store.Apply(ctx, firstPlan.OperationID, firstPlan.Changes); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.MkdirAll(legacyRoot, 0755); err != nil {
+		t.Fatal(err)
+	}
+	deck := riff.Deck{ID: "deck-preparing-changed", Name: "Changed", Algo: riff.AlgoFSRS,
+		Created: 1785000000000, Updated: 1786000000000}
+	writeMsgpack(t, filepath.Join(legacyRoot, "deck-preparing-changed.deck"), deck)
+	writeMsgpack(t, filepath.Join(legacyRoot, "deck-preparing-changed.cards"), map[string]*riff.FSRSCard{
+		"legacy-preparing-changed": legacyFSRSCard("legacy-preparing-changed", "block-preparing-changed",
+			1785900000000, 3),
+	})
+	secondPlan, err := PrepareLegacyMigration(ctx, legacyRoot, options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if secondPlan.MigrationID == firstPlan.MigrationID {
+		t.Fatal("changed legacy input did not produce another migration plan")
+	}
+	if _, err = store.ActivateLegacyMigration(ctx, legacyRoot, secondPlan); err == nil {
+		t.Fatal("preparing migration accepted a different parentless plan")
+	}
+	if _, found := store.journal.FindOperation(secondPlan.OperationID); found {
+		t.Fatal("rejected preparing migration wrote the different candidate plan")
+	}
+	status, err := store.LegacyMigrationStatus(ctx)
+	if err != nil || status.State != MigrationStatePreparing || status.MigrationID != firstPlan.MigrationID {
+		t.Fatalf("rejected plan changed preparing migration status: status=%+v err=%v", status, err)
+	}
+	if conflicts, countErr := store.Projection().ConflictCount(ctx); countErr != nil || conflicts != 0 {
+		t.Fatalf("rejected preparing plan created parentless conflicts: count=%d err=%v", conflicts, countErr)
+	}
+}
+
+func preparingMigrationTestOptions() LegacyMigrationOptions {
+	weights := fsrs.DefaultWeights()
+	return LegacyMigrationOptions{
+		RequestRetention: 0.9, MaximumInterval: 36500, Weights: append([]float64(nil), weights[:]...),
+		NewLimit: 20, ReviewLimit: 200, LeechThreshold: 8, LeechAction: "tag", PresetName: "Default",
+		EmptyDeckID: "builtin-preparing", EmptyDeckName: "Built-in Deck",
+		ResolveBlock: func(context.Context, string) (LegacyBlockInfo, error) {
+			return LegacyBlockInfo{Exists: true}, nil
+		},
+	}
+}
+
 func TestDivergedLegacyMigrationRebasesExistingEntities(t *testing.T) {
 	ctx := context.Background()
 	legacyRoot := t.TempDir()

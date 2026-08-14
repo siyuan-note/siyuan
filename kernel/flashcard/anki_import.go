@@ -92,6 +92,11 @@ func (store *Store) ImportAnkiPackage(ctx context.Context,
 	if data.Preview.PackageDigest != preview.PackageDigest || data.Preview.CollectionID != preview.CollectionID {
 		return AnkiImportReport{}, errors.New("Anki package changed while it was being imported")
 	}
+	collectionID, err := store.resolveAnkiCollectionID(ctx, data.Preview, data.Notes)
+	if err != nil {
+		return AnkiImportReport{}, err
+	}
+	data.Preview.CollectionID = collectionID
 	definitions, err := store.prepareAnkiDefinitions(ctx, data, request)
 	if err != nil {
 		return AnkiImportReport{}, err
@@ -164,7 +169,8 @@ func (store *Store) bindAnkiImportOperation(ctx context.Context, request AnkiImp
 		}
 		var payload ankiImportOperationPayload
 		if err := decodeStrictJSON(existing.Changes[0].Event.Payload, &payload); err != nil ||
-			payload.PackageDigest != preview.PackageDigest || payload.CollectionID != preview.CollectionID ||
+			payload.PackageDigest != preview.PackageDigest ||
+			(payload.CollectionID != preview.CollectionID && payload.CollectionID != preview.legacyCollectionID) ||
 			payload.TargetID != request.TargetID || payload.ImportedAt <= 0 {
 			return request, ErrOperationConflict
 		}
@@ -188,6 +194,102 @@ func (store *Store) bindAnkiImportOperation(ctx context.Context, request AnkiImp
 		return request, err
 	}
 	return request, nil
+}
+
+type ankiCollectionCandidate struct {
+	collectionID  string
+	collectionCrt bool
+	activeSources int
+	matchedNotes  map[string]struct{}
+}
+
+func (store *Store) resolveAnkiCollectionID(ctx context.Context, preview AnkiPackagePreview,
+	notes []ankiImportNote) (string, error) {
+	noteIdentities := make(map[string]struct{}, len(notes))
+	for _, note := range notes {
+		noteIdentities[ankiImportedNoteIdentity(note.GUID, note.ID)] = struct{}{}
+	}
+	rows, err := store.projection.db.QueryContext(ctx, `SELECT generation_config, status FROM card_sources
+		WHERE source_type = 'anki' ORDER BY id`)
+	if err != nil {
+		return "", err
+	}
+	defer rows.Close()
+	candidates := map[string]*ankiCollectionCandidate{}
+	for rows.Next() {
+		var configJSON []byte
+		var status string
+		if err = rows.Scan(&configJSON, &status); err != nil {
+			return "", err
+		}
+		var config ImportedGenerationConfig
+		if err = decodeStrictJSON(configJSON, &config); err != nil {
+			return "", fmt.Errorf("decode existing Anki source identity: %w", err)
+		}
+		collectionID := strings.TrimSpace(config.CollectionID)
+		if collectionID == "" {
+			continue
+		}
+		candidate := candidates[collectionID]
+		if candidate == nil {
+			candidate = &ankiCollectionCandidate{collectionID: collectionID, matchedNotes: map[string]struct{}{}}
+			candidates[collectionID] = candidate
+		}
+		if preview.CollectionCrt != 0 && config.CollectionCrt == preview.CollectionCrt {
+			candidate.collectionCrt = true
+		}
+		if status != "deleted" {
+			candidate.activeSources++
+		}
+		identity := ankiImportedNoteIdentity(config.GUID, config.NoteID)
+		if _, found := noteIdentities[identity]; found {
+			candidate.matchedNotes[identity] = struct{}{}
+		}
+	}
+	if err = rows.Err(); err != nil {
+		return "", err
+	}
+	if legacy := candidates[preview.legacyCollectionID]; legacy != nil {
+		return legacy.collectionID, nil
+	}
+	var best *ankiCollectionCandidate
+	for _, candidate := range candidates {
+		if candidate.collectionCrt && betterAnkiCollectionCandidate(candidate, best, preview.CollectionID) {
+			best = candidate
+		}
+	}
+	if best != nil {
+		return best.collectionID, nil
+	}
+	for _, candidate := range candidates {
+		if len(candidate.matchedNotes) != 0 && betterAnkiCollectionCandidate(candidate, best, preview.CollectionID) {
+			best = candidate
+		}
+	}
+	if best != nil {
+		return best.collectionID, nil
+	}
+	return preview.CollectionID, nil
+}
+
+func ankiImportedNoteIdentity(guid string, noteID int64) string {
+	return strings.TrimSpace(guid) + "\x00" + strconv.FormatInt(noteID, 10)
+}
+
+func betterAnkiCollectionCandidate(candidate, current *ankiCollectionCandidate, stableID string) bool {
+	if current == nil {
+		return true
+	}
+	if len(candidate.matchedNotes) != len(current.matchedNotes) {
+		return len(candidate.matchedNotes) > len(current.matchedNotes)
+	}
+	if candidate.activeSources != current.activeSources {
+		return candidate.activeSources > current.activeSources
+	}
+	if (candidate.collectionID == stableID) != (current.collectionID == stableID) {
+		return candidate.collectionID == stableID
+	}
+	return candidate.collectionID < current.collectionID
 }
 
 func (store *Store) prepareAnkiDefinitions(ctx context.Context, data ankiImportPackage,
@@ -410,8 +512,9 @@ func (store *Store) importAnkiNote(ctx context.Context, request AnkiImportReques
 		}
 	}
 	sort.Strings(tagIDs)
-	importConfig := ImportedGenerationConfig{CollectionID: data.Preview.CollectionID, NoteID: note.ID,
-		GUID: note.GUID, ModelID: note.ModelID, ReviewSetIDs: reviewSetIDs, TagIDs: tagIDs, Variants: variants}
+	importConfig := ImportedGenerationConfig{CollectionID: data.Preview.CollectionID,
+		CollectionCrt: data.Preview.CollectionCrt, NoteID: note.ID, GUID: note.GUID, ModelID: note.ModelID,
+		ReviewSetIDs: reviewSetIDs, TagIDs: tagIDs, Variants: variants}
 	config, err := CanonicalJSON(importConfig)
 	if err != nil {
 		return false, 0, 0, err
@@ -825,9 +928,9 @@ func ankiInitialReviewState(cardID string, card ankiImportCard, collectionCrt, i
 		state = "relearning"
 	}
 	due := importedAt
-	if card.Queue == 1 || card.Queue == 3 || card.Queue == 4 {
+	if card.Queue == 1 || card.Queue == 4 {
 		due = card.Due * 1000
-	} else if state == "review" && card.Due >= 0 {
+	} else if (card.Queue == 3 || state == "review") && card.Due >= 0 {
 		due = (collectionCrt + card.Due*86400) * 1000
 	}
 	if due <= 0 {

@@ -245,10 +245,20 @@ func compileCardSearchFilter(query *QueryAST, options CardSearchOptions) ([]stri
 					SELECT assignment.id FROM tag_assignments assignment
 					WHERE (assignment.target_type = 'card' AND assignment.target_id = c.id) OR
 						(assignment.target_type = 'source' AND assignment.target_id = c.source_id)
+				)) OR
+				(ec.entity_type = ? AND ec.entity_id IN (
+					WITH RECURSIVE assigned_tags(id) AS (
+						SELECT assignment.tag_id FROM tag_assignments assignment
+						WHERE (assignment.target_type = 'card' AND assignment.target_id = c.id) OR
+							(assignment.target_type = 'source' AND assignment.target_id = c.source_id)
+						UNION
+						SELECT tag.parent_id FROM tags tag JOIN assigned_tags child ON tag.id = child.id
+						WHERE tag.parent_id <> ''
+					) SELECT id FROM assigned_tags
 				))
 			))`)
 		args = append(args, EntityCard, EntityReviewState, EntityCardSource, EntityCardTemplate, EntityCardSchema,
-			EntityCardSourceRef, EntitySchedulerPreset, EntityStudyPolicy, EntityTagAssignment)
+			EntityCardSourceRef, EntitySchedulerPreset, EntityStudyPolicy, EntityTagAssignment, EntityTag)
 	}
 	return where, args, nil
 }

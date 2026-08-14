@@ -131,9 +131,9 @@ func TestImportAnkiPackageWritesContentRelationsScheduleHistoryTagsAndMedia(t *t
 	movedRequest := request
 	movedRequest.OperationID = "anki-import-moved"
 	movedRequest.ImportedAt++
-	movedRequest.PackagePath = createAnkiImportPackageForTestOptions(t, 2, true)
+	movedRequest.PackagePath = createAnkiImportPackageForTestWithDefinitions(t, 2, true, true)
 	moved, err := store.ImportAnkiPackage(ctx, movedRequest)
-	if err != nil || moved.Cards != 1 || moved.ReviewEvents != 0 {
+	if err != nil || moved.CollectionID != report.CollectionID || moved.Cards != 1 || moved.ReviewEvents != 0 {
 		t.Fatalf("Anki card deck move failed: report=%+v err=%v", moved, err)
 	}
 	oldDeckCards, err := store.Projection().ReviewSetCardIDs(ctx,
@@ -167,6 +167,90 @@ func TestImportAnkiPackageWritesContentRelationsScheduleHistoryTagsAndMedia(t *t
 	}
 }
 
+func TestImportAnkiPackageReusesLegacyCollectionIdentity(t *testing.T) {
+	ctx := context.Background()
+	store := newGenerationTestStore(t, ctx)
+	defer store.Close()
+	basePath := createAnkiImportPackageForTest(t)
+	basePreview, err := PreviewAnkiPackage(ctx, basePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	legacyID := basePreview.legacyCollectionID
+	note := ankiImportNote{ID: 10, GUID: "guid-10", ModelID: 100}
+	sourceID := ankiSourceID(legacyID, note)
+	config := ImportedGenerationConfig{CollectionID: legacyID, NoteID: note.ID, GUID: note.GUID,
+		ModelID: note.ModelID, Variants: []ImportedVariant{{TemplateID: "legacy-template", Key: "anki-card:20"}}}
+	source := CardSource{ID: sourceID, SchemaID: "legacy-schema", SourceType: "anki",
+		PrimaryRefID: "legacy-primary-ref", DefaultPresetID: legacyPresetID,
+		GenerationConfig: mustRawJSON(t, config), Status: "active"}
+	applyGenerationEntities(t, ctx, store, "seed-legacy-anki", 1,
+		testGenerationSchema("legacy-schema", []string{"legacy-template"}),
+		testGenerationTemplate("legacy-template", "legacy-schema", GenerationStatic, "legacy", true),
+		testSchedulerPreset(legacyPresetID, false, false), source)
+
+	changedPath := createAnkiImportPackageForTestWithDefinitions(t, 1, true, true)
+	changedPreview, err := PreviewAnkiPackage(ctx, changedPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if changedPreview.CollectionID != basePreview.CollectionID || changedPreview.legacyCollectionID == legacyID {
+		t.Fatalf("Anki collection identities did not expose the compatibility transition: base=%+v changed=%+v",
+			basePreview, changedPreview)
+	}
+	operationID := "import-existing-legacy-anki"
+	importedAt := int64(1786431600000)
+	payload, err := CanonicalJSON(ankiImportOperationPayload{PackageDigest: changedPreview.PackageDigest,
+		CollectionID: changedPreview.legacyCollectionID, TargetID: "notebook-a", ImportedAt: importedAt})
+	if err != nil {
+		t.Fatal(err)
+	}
+	event := Event{EventType: EventAnkiImportStarted,
+		EventID: DeterministicID("anki-import-started", operationID), EntityID: changedPreview.legacyCollectionID,
+		OccurredAt: importedAt, Payload: payload}
+	if _, err = store.Apply(ctx, operationID, []Change{{Kind: RecordEvent, Event: &event}}); err != nil {
+		t.Fatal(err)
+	}
+	writer := &ankiImportTestWriter{}
+	report, err := store.ImportAnkiPackage(ctx, AnkiImportRequest{OperationID: operationID,
+		PackagePath: changedPath, TargetID: "notebook-a", ImportedAt: importedAt + 1, Writer: writer})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.CollectionID != legacyID || len(writer.notes) != 1 || writer.notes[0].SourceID != sourceID {
+		t.Fatalf("legacy Anki source identity was not reused: report=%+v notes=%+v", report, writer.notes)
+	}
+	stableSourceID := ankiSourceID(changedPreview.CollectionID, note)
+	if _, found, lookupErr := store.Projection().CurrentEntity(ctx, EntityCardSource, stableSourceID); lookupErr != nil || found {
+		t.Fatalf("legacy compatibility created a duplicate stable source: found=%v err=%v", found, lookupErr)
+	}
+	revision, found, err := store.Projection().CurrentEntity(ctx, EntityCardSource, sourceID)
+	if err != nil || !found {
+		t.Fatalf("legacy Anki source was not retained: found=%v err=%v", found, err)
+	}
+	var imported CardSource
+	if err = decodeStrictJSON(revision.Payload, &imported); err != nil {
+		t.Fatal(err)
+	}
+	var importedConfig ImportedGenerationConfig
+	if err = decodeStrictJSON(imported.GenerationConfig, &importedConfig); err != nil ||
+		importedConfig.CollectionCrt != changedPreview.CollectionCrt {
+		t.Fatalf("legacy Anki source was not upgraded with its collection creation time: config=%+v err=%v",
+			importedConfig, err)
+	}
+}
+
+func TestAnkiQueueThreeUsesCollectionSchedulerDay(t *testing.T) {
+	collectionCrt := int64(1700000000)
+	state := ankiInitialReviewState("card", ankiImportCard{Type: 3, Queue: 3, Due: 30}, collectionCrt,
+		1786431600000, nil, "import-queue-three")
+	want := (collectionCrt + 30*86400) * 1000
+	if state.State != "relearning" || state.Due != want {
+		t.Fatalf("Anki relearning due day was not converted with the collection scheduler: state=%+v want=%d",
+			state, want)
+	}
+}
+
 func TestAnkiTemplateConversionUsesExactFieldsAndRemovesExecutableMarkup(t *testing.T) {
 	models, err := parseAnkiModels([]byte(`{"100":{"id":100,"name":"Basic","type":0,"flds":[` +
 		`{"name":"Front","ord":0},{"name":"FrontExtra","ord":1},{"name":"Back","ord":2}],"tmpls":[]}}`))
@@ -190,6 +274,11 @@ func createAnkiImportPackageForTest(t *testing.T) string {
 }
 
 func createAnkiImportPackageForTestOptions(t *testing.T, deckID int64, includeNote bool) string {
+	return createAnkiImportPackageForTestWithDefinitions(t, deckID, includeNote, false)
+}
+
+func createAnkiImportPackageForTestWithDefinitions(t *testing.T, deckID int64, includeNote,
+	extraDefinitions bool) string {
 	t.Helper()
 	root := t.TempDir()
 	databasePath := filepath.Join(root, "collection.anki2")
@@ -199,6 +288,10 @@ func createAnkiImportPackageForTestOptions(t *testing.T, deckID int64, includeNo
 	}
 	models := `{"100":{"id":100,"name":"Basic","type":0,"flds":[{"name":"Front","ord":0},{"name":"Back","ord":1}],"tmpls":[{"name":"Card 1","ord":0,"qfmt":"{{Front}}","afmt":"{{FrontSide}}<hr>{{Back}}"}]}}`
 	decks := `{"1":{"id":1,"name":"Imported"},"2":{"id":2,"name":"Moved"}}`
+	if extraDefinitions {
+		models = strings.TrimSuffix(models, "}") + `,"200":{"id":200,"name":"Extra","type":0,"flds":[{"name":"Text","ord":0}],"tmpls":[{"name":"Card 1","ord":0,"qfmt":"{{Text}}","afmt":"{{Text}}"}]}}`
+		decks = strings.TrimSuffix(decks, "}") + `,"3":{"id":3,"name":"Extra"}}`
+	}
 	statements := []string{
 		`CREATE TABLE col (crt INTEGER, ver INTEGER, models TEXT, decks TEXT)`,
 		`CREATE TABLE notes (id INTEGER, guid TEXT, mid INTEGER, mod INTEGER, usn INTEGER, tags TEXT, flds TEXT,

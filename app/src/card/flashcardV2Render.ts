@@ -515,6 +515,7 @@ export const renderFlashcardV2AnkiTemplate = (model: IFlashcardV2RenderModel, si
     }
     const safeMarkup = window.DOMPurify.sanitize(spec.markup, {
         FORBID_TAGS: ["script", "style", "iframe", "frame", "frameset", "object", "embed"],
+        FORBID_ATTR: ["style"],
         ALLOWED_URI_REGEXP: flashcardV2TemplateURI,
     });
     const fields = new Map((model.schema?.fields || []).map((field) => [field.name, field.id]));

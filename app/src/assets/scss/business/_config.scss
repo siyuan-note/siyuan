@@ -382,6 +382,10 @@
       position: relative;
     }
 
+    &__publish-switch {
+      display: inline-flex;
+    }
+
     &__panel {
       height: 100%;
       overflow: auto;

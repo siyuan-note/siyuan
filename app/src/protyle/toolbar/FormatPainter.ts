@@ -163,7 +163,7 @@ class FormatPainterController {
             element = document.createElement("button");
             element.id = "statusFormatPainter";
             element.className = "toolbar__item ariaLabel status__format-painter";
-            element.innerHTML = '<svg><use xlink:href="#iconFormat"></use></svg>';
+            element.innerHTML = '<svg><use xlink:href="#iconPaintRoller"></use></svg>';
             element.addEventListener("click", () => this.deactivate());
             const helpElement = statusElement.querySelector("#statusHelp");
             if (helpElement) {
@@ -188,7 +188,7 @@ export class FormatPainter {
         this.element.setAttribute("data-type", menuItem.name);
         this.element.setAttribute("data-menu", "true");
         this.element.setAttribute("aria-label", window.siyuan.languages.formatPainter);
-        this.element.innerHTML = '<svg><use xlink:href="#iconFormat"></use></svg>';
+        this.element.innerHTML = '<svg><use xlink:href="#iconPaintRoller"></use></svg>';
         this.element.addEventListener("mousedown", event => event.preventDefault());
         this.element.addEventListener("click", event => {
             event.preventDefault();

@@ -108,6 +108,63 @@ func TestCapabilityPolicyControlsExposureAndExecution(t *testing.T) {
 	}
 }
 
+func TestMCPCapabilityRequiresEnabledConfiguredServer(t *testing.T) {
+	const toolName = "test_mcp_owner_availability"
+	const serverID = "test-mcp-server"
+
+	originalConf := kernelModel.Conf
+	kernelModel.Conf = kernelModel.NewAppConf()
+	kernelModel.Conf.AI = conf.NewAI()
+	t.Cleanup(func() { kernelModel.Conf = originalConf })
+
+	tool := &tools.Tool{
+		Name:         toolName,
+		CapabilityID: tools.BuildCapabilityID("mcp", "backend", serverID, "read"),
+		Description:  "Test MCP owner availability",
+		InputSchema:  tools.ToolSchema{Type: "object"},
+		Source:       "mcp",
+		OwnerID:      serverID,
+		Runtime:      "mcp",
+		Handler: func(args map[string]any) (tools.CallToolResult, error) {
+			return tools.CallToolResult{}, nil
+		},
+	}
+	if err := tools.SetTool(toolName, tool); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { tools.RemoveTool(toolName) })
+
+	set, err := buildCapabilitySet(nil, capabilityAccessContext{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if set.registration(toolName) != nil {
+		t.Fatal("MCP capability without a configured server was exposed")
+	}
+
+	kernelModel.Conf.AI.MCP.Servers = []conf.MCPServer{{ID: serverID, Enabled: true}}
+	set, err = buildCapabilitySet(nil, capabilityAccessContext{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	registration := set.registration(toolName)
+	if registration == nil || !capabilityStillExecutable(registration, nil) {
+		t.Fatal("MCP capability for an enabled configured server was unavailable")
+	}
+
+	kernelModel.Conf.AI.MCP.Servers[0].Enabled = false
+	if capabilityStillExecutable(registration, nil) {
+		t.Fatal("MCP capability remained executable after its server was disabled")
+	}
+	set, err = buildCapabilitySet(nil, capabilityAccessContext{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if set.registration(toolName) != nil {
+		t.Fatal("MCP capability for a disabled server was exposed")
+	}
+}
+
 func TestExplicitCapabilityConfirmationOverridesRiskAndSessionApproval(t *testing.T) {
 	originalConf := kernelModel.Conf
 	kernelModel.Conf = kernelModel.NewAppConf()

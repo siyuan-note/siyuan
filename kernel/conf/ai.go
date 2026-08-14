@@ -19,6 +19,7 @@ package conf
 import (
 	"encoding/hex"
 	"encoding/json"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -516,6 +517,7 @@ func (ai *AI) Normalize() {
 			ai.Agent.MaxRetries = 10
 		}
 	}
+	ai.pruneOrphanedMCPCapabilityPolicies()
 	if ai.Editing == nil {
 		ai.Editing = defaultEditing()
 	} else {
@@ -623,6 +625,32 @@ func (ai *AI) Normalize() {
 	}
 	if !ast.IsNodeIDPattern(ai.Rerank.ID) {
 		ai.Rerank.ID = ast.NewNodeID()
+	}
+}
+
+func (ai *AI) pruneOrphanedMCPCapabilityPolicies() {
+	configuredServerIDs := make(map[string]bool, len(ai.MCP.Servers))
+	for _, server := range ai.MCP.Servers {
+		configuredServerIDs[url.PathEscape(server.ID)] = true
+	}
+
+	isOrphaned := func(id string) bool {
+		const prefix = "mcp/backend/"
+		if !strings.HasPrefix(id, prefix) {
+			return false
+		}
+		serverID, _, ok := strings.Cut(strings.TrimPrefix(id, prefix), "/")
+		return ok && !configuredServerIDs[serverID]
+	}
+	for id := range ai.Agent.CapabilityPolicy.Overrides {
+		if isOrphaned(id) {
+			delete(ai.Agent.CapabilityPolicy.Overrides, id)
+		}
+	}
+	for id := range ai.Agent.ApprovalPolicy.Overrides {
+		if isOrphaned(id) {
+			delete(ai.Agent.ApprovalPolicy.Overrides, id)
+		}
 	}
 }
 

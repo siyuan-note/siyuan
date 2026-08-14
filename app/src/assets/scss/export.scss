@@ -49,6 +49,14 @@ svg {
   }
 }
 
+.exporting .protyle-wysiwyg [data-node-id] {
+  // 使用普通块布局以确保列表跨页后保持内容流顺序
+  &.list,
+  &.li {
+    display: block;
+  }
+}
+
 @media print {
   // 尽量避免块内分页
   .protyle-wysiwyg [data-node-id] {

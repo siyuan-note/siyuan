@@ -378,7 +378,7 @@ document.body.insertAdjacentHTML('afterbegin', `<svg id="iconsLitheness" style="
   <symbol id="iconHTML5" viewBox="-3 -3 38 38">
     <path d="M24.52 9.38l0.32-3.5h-17.68l0.94 10.68h12.24l-0.44 4.56-3.94 1.060-3.92-1.060-0.26-2.8h-3.5l0.44 5.56 7.24 2h0.080v-0.020l7.18-1.98 1-10.88h-12.88l-0.3-3.62h13.48zM1.92 0h28.16l-2.56 28.76-11.56 3.24-11.48-3.24z"></path>
   </symbol>
-  <symbol id="iconStar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+  <symbol id="iconStar" viewBox="0 0 24 24" fill="var(--b3-icon-star-fill, none)" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
     <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
   </symbol>
   <symbol id="iconSpreadEven" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">

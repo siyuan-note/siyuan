@@ -485,11 +485,11 @@
     }
 
     &__rating-star {
-      display: inline-block;
-      font-family: sans-serif;
-      font-style: normal;
-      line-height: 1;
-      text-align: center;
+      --b3-icon-star-fill: currentColor;
+      display: block;
+      flex-shrink: 0;
+      height: 1em;
+      width: 1em;
     }
 
     &__rating-stars {

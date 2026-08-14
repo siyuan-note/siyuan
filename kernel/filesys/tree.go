@@ -579,6 +579,9 @@ func fixTreeJSONData(boxID, p string, jsonData []byte, luteEngine *lute.Lute, de
 		ret.ID = pathID
 		ret.Root.SetIALAttr("id", ret.ID)
 	}
+	if treenode.FixInvalidListChildren(ret.Root) {
+		needFix = true
+	}
 
 	if !needFix {
 		return jsonData, false, nil

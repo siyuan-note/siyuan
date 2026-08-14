@@ -2307,7 +2307,9 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
         otherMenus.push({
             id: "transposeTable",
             label: window.siyuan.languages.transposeTable,
-            click: () => transposeTable(protyle, nodeElement, range)
+            click: () => {
+                transposeTable(protyle, nodeElement, range);
+            }
         });
     }
     otherMenus.push({id: "separator_1", type: "separator"});

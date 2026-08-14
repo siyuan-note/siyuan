@@ -21,6 +21,8 @@ import (
 	"errors"
 	"maps"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -51,15 +53,26 @@ func applyRhyBazaarHash(ctx context.Context) {
 }
 
 type StageBazaarResult struct {
-	StageIndex  *StageIndex             // stage 索引
-	BazaarStats map[string]*bazaarStats // 统计信息
-	Online      bool                    // online 状态
-	StageErr    error                   // stage 错误
+	StageIndex      *StageIndex               // stage 索引
+	BazaarStats     map[string]*bazaarStats   // 下载统计信息
+	BazaarRatings   map[string]*PackageRating // 评分统计信息
+	RatingAvailable bool                      // 评分统计信息是否可用
+	Online          bool                      // online 状态
+	StageErr        error                     // stage 错误
 }
 
 var stageBazaarFlight singleflight.Group
 var onlineCheckFlight singleflight.Group
 var bazaarStatsFlight singleflight.Group
+var bazaarRatingsPrefetching atomic.Bool
+
+var (
+	applyBazaarCacheHash = applyRhyBazaarHash
+	bazaarOnlineLoader   = isBazaarOnline
+	stageIndexLoader     = getStageIndex
+	bazaarStatsLoader    = getBazaarStats
+	bazaarRatingsLoader  = getBazaarRatings
+)
 
 // getStageAndBazaar 获取 stage 索引和 bazaar 索引，相同 pkgType 的并发调用会合并为一次实际请求 (single-flight)
 func getStageAndBazaar(pkgType string, showError bool) (result StageBazaarResult) {
@@ -83,13 +96,23 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	defer cancel()
 	stageIndex := getStageIndexFromCache(ctx, pkgType)
 	statsMap := getBazaarStatsFromCache(ctx)
+	ratingsMap, ratingsAvailable := getBazaarRatingsFromCache(false)
+	_, ratingsFresh := getBazaarRatingsFromCache(true)
 	if nil != stageIndex && nil != statsMap {
+		if !ratingsFresh {
+			prefetchBazaarRatings()
+		}
+		if !ratingsAvailable {
+			ratingsMap = nil
+		}
 		// 两者都从缓存返回，不需要 online 检查
 		return StageBazaarResult{
-			StageIndex:  stageIndex,
-			BazaarStats: statsMap,
-			Online:      true,
-			StageErr:    nil,
+			StageIndex:      stageIndex,
+			BazaarStats:     statsMap,
+			BazaarRatings:   ratingsMap,
+			RatingAvailable: ratingsAvailable,
+			Online:          true,
+			StageErr:        nil,
 		}
 	}
 	var onlineResult bool
@@ -97,37 +120,60 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	var stageErr error
 	wg := &sync.WaitGroup{}
 	wg.Go(func() {
-		onlineResult = isBazaarOnline()
+		onlineResult = bazaarOnlineLoader()
 		onlineDone <- true
 	})
 	wg.Go(func() {
-		stageIndex, stageErr = getStageIndex(ctx, pkgType)
+		stageIndex, stageErr = stageIndexLoader(ctx, pkgType)
 	})
 	wg.Go(func() {
-		statsMap = getBazaarStats(ctx)
+		statsMap = bazaarStatsLoader(ctx)
 	})
+	if !ratingsFresh {
+		prefetchBazaarRatings()
+	}
 
 	<-onlineDone
 	if !onlineResult {
 		// 不在线时立即取消其他请求并返回结果，避免等待 HTTP 请求超时
 		cancel()
 		return StageBazaarResult{
-			StageIndex:  stageIndex,
-			BazaarStats: statsMap,
-			Online:      false,
-			StageErr:    stageErr,
+			StageIndex:      stageIndex,
+			BazaarStats:     statsMap,
+			BazaarRatings:   ratingsMap,
+			RatingAvailable: ratingsAvailable,
+			Online:          false,
+			StageErr:        stageErr,
 		}
 	}
 
 	// 在线时等待所有请求完成
 	wg.Wait()
+	ratingsMap, ratingsAvailable = getBazaarRatingsFromCache(false)
+	if !ratingsAvailable {
+		ratingsMap = nil
+	}
 
 	return StageBazaarResult{
-		StageIndex:  stageIndex,
-		BazaarStats: statsMap,
-		Online:      onlineResult,
-		StageErr:    stageErr,
+		StageIndex:      stageIndex,
+		BazaarStats:     statsMap,
+		BazaarRatings:   ratingsMap,
+		RatingAvailable: ratingsAvailable,
+		Online:          onlineResult,
+		StageErr:        stageErr,
 	}
+}
+
+func prefetchBazaarRatings() {
+	if !bazaarRatingsPrefetching.CompareAndSwap(false, true) {
+		return
+	}
+	go func() {
+		defer bazaarRatingsPrefetching.Store(false)
+		ratingCtx, ratingCancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer ratingCancel()
+		_, _ = bazaarRatingsLoader(ratingCtx)
+	}()
 }
 
 func isBazaarOnline() bool {
@@ -148,7 +194,7 @@ func isBazaarOnline0() (ret bool) {
 
 // getStageIndexFromCache 仅从缓存获取 stage 索引，无缓存时返回 nil（读前根据 util 已同步的 bazaar hash 视情况清理缓存）
 func getStageIndexFromCache(ctx context.Context, pkgType string) *StageIndex {
-	applyRhyBazaarHash(ctx)
+	applyBazaarCacheHash(ctx)
 	bazaarMemMu.RLock()
 	defer bazaarMemMu.RUnlock()
 	return stageIndexCache[pkgType]
@@ -207,6 +253,36 @@ func getStageRepoByURL(ctx context.Context, pkgType, url string) *StageRepo {
 	return stageIndex.reposByURL[url]
 }
 
+// HasBazaarPackage 判断指定名称是否存在于官方集市 Stage 索引中。
+func HasBazaarPackage(ctx context.Context, pkgType, packageName string) (bool, error) {
+	packageNames, err := GetExistingBazaarPackageNames(ctx, pkgType, []string{packageName})
+	return 0 < len(packageNames), err
+}
+
+// GetExistingBazaarPackageNames 筛选存在于官方集市 Stage 索引中的包名。
+func GetExistingBazaarPackageNames(ctx context.Context, pkgType string, packageNames []string) ([]string, error) {
+	stageIndex, err := getStageIndex(ctx, pkgType)
+	if nil != err {
+		return nil, err
+	}
+	if nil == stageIndex {
+		return nil, errors.New("stage index is unavailable")
+	}
+	official := make(map[string]bool, len(stageIndex.Repos))
+	for _, repo := range stageIndex.Repos {
+		if nil != repo && nil != repo.Package {
+			official[repo.Package.Name] = true
+		}
+	}
+	ret := make([]string, 0, len(packageNames))
+	for _, packageName := range packageNames {
+		if official[packageName] {
+			ret = append(ret, packageName)
+		}
+	}
+	return ret, nil
+}
+
 // bazaarStats 集市包统计信息
 type bazaarStats struct {
 	Downloads int `json:"downloads"` // 下载次数
@@ -214,7 +290,7 @@ type bazaarStats struct {
 
 // getBazaarStatsFromCache 仅从缓存获取集市包统计信息，无缓存时返回 nil
 func getBazaarStatsFromCache(ctx context.Context) (ret map[string]*bazaarStats) {
-	applyRhyBazaarHash(ctx)
+	applyBazaarCacheHash(ctx)
 	bazaarMemMu.RLock()
 	defer bazaarMemMu.RUnlock()
 	if 0 == len(bazaarStatsCache) {

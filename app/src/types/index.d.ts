@@ -1025,6 +1025,14 @@ interface IBazaarFunding {
     custom?: string[];
 }
 
+type TBazaarRatingDistribution = [number, number, number, number, number];
+
+interface IBazaarRating {
+    average: number;
+    count: number;
+    distribution: TBazaarRatingDistribution;
+}
+
 interface IBazaarItem {
     preferredName: string;
     minAppVersion: string;
@@ -1040,6 +1048,8 @@ interface IBazaarItem {
     author: string;
     updated: string;
     downloads: number;
+    ratingAvailable?: boolean;
+    rating?: IBazaarRating;
     disallowInstall: boolean;
     current: boolean;
     installed: boolean;

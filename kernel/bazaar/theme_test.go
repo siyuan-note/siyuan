@@ -41,7 +41,7 @@ func TestBuildBazaarThemeCompatibility(t *testing.T) {
 					Name:      "theme",
 					Frontends: test.frontends,
 				},
-			}, nil, "themes", test.frontend)
+			}, nil, nil, false, "themes", test.frontend)
 			if nil == pkg || nil == pkg.BazaarIncompatible {
 				t.Fatal("expected theme compatibility metadata")
 			}

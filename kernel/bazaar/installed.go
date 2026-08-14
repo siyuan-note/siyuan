@@ -65,6 +65,7 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 
 // SetInstalledPackageMetadata 设置本地集市包的通用元数据
 func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType string) bool {
+	clearBazaarPackageRating(pkg)
 	if pkg.InvalidReason != "" {
 		pkg.PreferredName = pkg.Name
 		pkg.Installed = true

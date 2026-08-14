@@ -39,8 +39,21 @@ type Funding struct {
 	Custom         []string `json:"custom"`
 }
 
+// PackageRating 描述集市包的公开评分汇总。
+type PackageRating struct {
+	Average      float64  `json:"average"`
+	Count        int64    `json:"count"`
+	Distribution [5]int64 `json:"distribution"`
+}
+
+func clearBazaarPackageRating(pkg *Package) {
+	pkg.RatingAvailable = false
+	pkg.Rating = nil
+}
+
 // Package 描述了集市包元数据和传递给前端的其他信息。
-//   - 集市包新增元数据字段需要同步修改 bazaar 的工作流，参考 https://github.com/siyuan-note/bazaar/commit/aa36d0003139c52d8e767c6e18a635be006323e2
+//   - 集市包新增元数据字段需要同步修改 bazaar 的工作流，参考
+//     https://github.com/siyuan-note/bazaar/commit/aa36d0003139c52d8e767c6e18a635be006323e2
 type Package struct {
 	Author            string        `json:"author"`
 	URL               string        `json:"url"`
@@ -86,6 +99,9 @@ type Package struct {
 	DisallowUpdate          bool   `json:"disallowUpdate"`
 	UpdateRequiredMinAppVer string `json:"updateRequiredMinAppVer,omitempty"` // 升级目标要求的最小应用版本
 	InvalidReason           string `json:"invalidReason,omitempty"`           // 本地安装包异常原因
+
+	RatingAvailable bool           `json:"ratingAvailable"`  // 在线集市公开评分是否可用
+	Rating          *PackageRating `json:"rating,omitempty"` // 在线集市公开评分
 
 	// 专用字段，nil 时不序列化
 	InstalledIncompatible *bool     `json:"installedIncompatible,omitempty"` // 插件/主题：本地已安装版本是否不兼容

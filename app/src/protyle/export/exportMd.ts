@@ -20,6 +20,7 @@ interface IExportMdOptions {
     id?: string;
     ids?: string[];
     notebook?: string;
+    notebooks?: string[];
 }
 
 // openExportOptionsDialog 渲染「通用 + Markdown 专属」两组开关，确认时回调 onConfirm 传出全部 13 项。
@@ -139,7 +140,7 @@ interface IExportMdOptionsPayload {
     removeAssetsID: boolean;
 }
 
-// exportMarkdownZip 为 Markdown .zip 导出入口：弹参数对话框，确认后按 id/ids/notebook 调对应 API。
+// exportMarkdownZip 为 Markdown .zip 导出入口：弹参数对话框，确认后按文档、文档集合或笔记本集合调用对应 API。
 // 单文档时先查询文档信息，若无子文档/关联文档则隐藏对应配置项，减少干扰。
 export const exportMarkdownZip = async(options: IExportMdOptions) => {
     let showSubDocs = true;
@@ -156,15 +157,17 @@ export const exportMarkdownZip = async(options: IExportMdOptions) => {
     }
     openExportOptionsDialog(params => {
         const exportMarkdown = () => {
-        const msgId = showMessage(window.siyuan.languages.exporting, -1);
-        const cb = (response: IWebSocketData) => saveExportFile(response.data.zip, msgId);
-        if (options.id) {
-            fetchPost("/api/export/exportMd", {id: options.id, ...params}, cb);
-        } else if (options.ids) {
-            fetchPost("/api/export/exportMds", {ids: options.ids, ...params}, cb);
-        } else {
-            fetchPost("/api/export/exportNotebookMd", {notebook: options.notebook, ...params}, cb);
-        }
+            const msgId = showMessage(window.siyuan.languages.exporting, -1);
+            const cb = (response: IWebSocketData) => saveExportFile(response.data.zip, msgId);
+            if (options.notebooks?.length) {
+                fetchPost("/api/export/exportNotebooksMd", {notebooks: options.notebooks, ...params}, cb);
+            } else if (options.id) {
+                fetchPost("/api/export/exportMd", {id: options.id, ...params}, cb);
+            } else if (options.ids) {
+                fetchPost("/api/export/exportMds", {ids: options.ids, ...params}, cb);
+            } else {
+                fetchPost("/api/export/exportNotebookMd", {notebook: options.notebook, ...params}, cb);
+            }
         };
         if (encrypted) {
             confirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, exportMarkdown);

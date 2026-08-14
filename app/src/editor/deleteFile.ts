@@ -61,7 +61,8 @@ export const deleteNotebooks = async (notebookIds: string[]) => {
     if (refResults.some((result) => result === undefined)) {
         return;
     }
-    const notebookNames = uniqueNotebookIds.map((notebook) => escapeHtml(getNotebookName(notebook))).join("<br>");
+    const notebookNames = uniqueNotebookIds.map((notebook) => escapeHtml(getNotebookName(notebook)))
+        .join(", ");
     let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", notebookNames)}
 <div class="fn__hr"></div>
 <div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;
@@ -144,7 +145,7 @@ export const deleteFiles = async (liElements: Element[]) => {
                     return notebook ? escapeHtml(getNotebookName(notebook)) : "";
                 }
                 return escapeHtml(getDisplayName(item.getAttribute("data-path"), true, true));
-            }).filter(Boolean).join("<br>");
+            }).filter(Boolean).join(", ");
             let tip = `${window.siyuan.languages.confirmDeleteTip.replace("${x}", itemNames)}
 <div class="fn__hr"></div>
 <div class="ft__smaller ft__on-surface">${window.siyuan.languages.rollbackTip.replace("${x}", window.siyuan.config.editor.historyRetentionDays)}</div>`;

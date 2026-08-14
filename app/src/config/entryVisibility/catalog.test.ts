@@ -151,7 +151,20 @@ test("document loading actions follow the document menu order", () => {
 });
 
 test("multiple document and notebook entries follow their document tree menus", () => {
-    assert.deepEqual(getEntryCatalogChildren("docTree.notebooks").map((item) => item.key), ["close", "delete"]);
+    assert.deepEqual(getEntryCatalogChildren("docTree.notebooks").map((item) => item.key), [
+        "sort",
+        "search",
+        "replace",
+        "separator_1",
+        "close",
+        "delete",
+        "separator_2",
+        "export",
+    ]);
+    assert.deepEqual(getEntryCatalogChildren("docTree.notebooks.export").map((item) => item.key), [
+        "exportSiYuanZip",
+        "exportMarkdown",
+    ]);
     assert.ok(getEntryCatalogChildren("docTree.multi").some((item) => item.key === "delete"));
 });
 

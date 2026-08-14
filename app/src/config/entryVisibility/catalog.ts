@@ -460,7 +460,19 @@ export const entryCatalog: IEntryCatalogSection[] = [
     {
         key: "docTree.notebooks",
         label: location(lang("entryDocPanel"), lang("agentCatNotebook"), lang("multiSelect"), lang("more")),
-        children: [node("close", lang("close")), node("delete", lang("delete"))],
+        children: [
+            node("sort", lang("sort"), true, sortChildren()),
+            node("search", lang("search")),
+            node("replace", lang("replace")),
+            separator("separator_1"),
+            node("close", lang("close")),
+            node("delete", lang("delete")),
+            separator("separator_2"),
+            node("export", lang("export"), true, [
+                node("exportSiYuanZip", literal("SiYuan .sy.zip")),
+                node("exportMarkdown", literal("Markdown .zip")),
+            ]),
+        ],
     },
     {
         key: "document.title",

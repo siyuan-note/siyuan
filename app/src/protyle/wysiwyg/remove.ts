@@ -53,6 +53,7 @@ import * as dayjs from "dayjs";
 import {mergeSameInlineElement} from "../toolbar/util";
 import {
     getBlockRefCheckElementChain,
+    getCrossBlockEndAction,
     getCrossBlockNestedListMergeContext,
     getCrossBlockMergeRemoveElement,
     getCrossBlockSiblingListItemMergeContext,
@@ -74,6 +75,28 @@ interface ICrossBlockReplacement {
     event?: InputEvent;
     text: string;
 }
+
+const hasMeaningfulContent = (element: Element) => {
+    const text = (element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim();
+    return text !== "" || !!element.querySelector(".img, .emoji, [data-type~='inline-math']");
+};
+
+const isEntireMeaningfulContentSelected = (selectedRange: Range, editableElement: Element) => {
+    const contentRange = document.createRange();
+    contentRange.selectNodeContents(editableElement);
+    if (isEntireBlockContentSelected(selectedRange, contentRange)) {
+        return true;
+    }
+    const beforeRange = contentRange.cloneRange();
+    beforeRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
+    const afterRange = contentRange.cloneRange();
+    afterRange.setStart(selectedRange.endContainer, selectedRange.endOffset);
+    const beforeElement = document.createElement("div");
+    beforeElement.append(beforeRange.cloneContents());
+    const afterElement = document.createElement("div");
+    afterElement.append(afterRange.cloneContents());
+    return !hasMeaningfulContent(beforeElement) && !hasMeaningfulContent(afterElement);
+};
 
 const ensureListItemContentBlock = (listItemElement: Element, doOperations: IOperation[],
                                     undoOperations: IOperation[]) => {
@@ -103,7 +126,7 @@ const ensureListItemContentBlock = (listItemElement: Element, doOperations: IOpe
 
 const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: Range,
                                      startElement: HTMLElement, endElement: HTMLElement,
-                                     mergeEndElement = true) => {
+                                     handleEndElement = true) => {
     const ranges = getBlockRanges(editorElement, selectedRange);
     const rangeStartElement = ranges[0]?.blockElement || startElement;
     const selectedElements: HTMLElement[] = [];
@@ -136,19 +159,25 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
     });
 
     const startEditableElement = rangesByBlock.get(rangeStartElement)?.[0]?.editableElement;
-    const endEditableElement = rangesByBlock.get(endElement)?.[0]?.editableElement;
-    const blockType = rangeStartElement.getAttribute("data-type");
-    let removeEndElement: Element;
+    const endBlockRange = rangesByBlock.get(endElement)?.[0];
+    const endEditableElement = endBlockRange?.editableElement;
+    let mergeEndElement: Element;
     const siblingListItemMergeContext = getCrossBlockSiblingListItemMergeContext(
         editorElement, rangeStartElement, endElement);
-    if (mergeEndElement && rangeStartElement !== endElement && startEditableElement && endEditableElement &&
-        ["NodeParagraph", "NodeHeading"].includes(blockType) &&
-        blockType === endElement.getAttribute("data-type") &&
-        endElement.getAttribute("fold") !== "1") {
-        const topElement = siblingListItemMergeContext?.removeEndElement ||
+    const endAction = handleEndElement && rangeStartElement !== endElement && startEditableElement && endBlockRange ?
+        getCrossBlockEndAction(
+            rangeStartElement.getAttribute("data-type"),
+            endElement.getAttribute("data-type"),
+            isEntireMeaningfulContentSelected(endBlockRange.range, endEditableElement),
+            endElement.getAttribute("fold") === "1",
+        ) : undefined;
+    if (endAction) {
+        const topElement = (endAction === "merge" ? siblingListItemMergeContext?.removeEndElement : undefined) ||
             getCrossBlockMergeRemoveElement(editorElement, rangeStartElement, endElement);
         if (topElement) {
-            removeEndElement = topElement;
+            if (endAction === "merge") {
+                mergeEndElement = topElement;
+            }
             for (let i = removeElements.length - 1; i >= 0; i--) {
                 if (topElement.contains(removeElements[i])) {
                     removeElements.splice(i, 1);
@@ -170,7 +199,7 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
         rangesByBlock,
         startEditableElement,
         endEditableElement,
-        removeEndElement,
+        mergeEndElement,
         siblingListItemMergeContext,
         updateElements,
     };
@@ -178,10 +207,10 @@ const getCrossBlockRemovalContext = (editorElement: HTMLElement, selectedRange: 
 
 const getCrossBlockRemovalPlan = (editorElement: HTMLElement, selectedRange: Range,
                                    startElement: HTMLElement, endElement: HTMLElement,
-                                   mergeEndElement = true, replacement = false) => {
+                                   handleEndElement = true, replacement = false) => {
     const context = getCrossBlockRemovalContext(
-        editorElement, selectedRange, startElement, endElement, mergeEndElement);
-    if (!mergeEndElement) {
+        editorElement, selectedRange, startElement, endElement, handleEndElement);
+    if (!handleEndElement) {
         return {
             ...context,
             nestedListMergeContext: undefined,
@@ -269,28 +298,6 @@ const addExactRefCheckElementChain = (elementsByID: Map<string, HTMLElement>, ex
     });
 };
 
-const hasMeaningfulContent = (element: Element) => {
-    const text = (element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim();
-    return text !== "" || !!element.querySelector(".img, .emoji, [data-type~='inline-math']");
-};
-
-const isEntireMeaningfulContentSelected = (selectedRange: Range, editableElement: Element) => {
-    const contentRange = document.createRange();
-    contentRange.selectNodeContents(editableElement);
-    if (isEntireBlockContentSelected(selectedRange, contentRange)) {
-        return true;
-    }
-    const beforeRange = contentRange.cloneRange();
-    beforeRange.setEnd(selectedRange.startContainer, selectedRange.startOffset);
-    const afterRange = contentRange.cloneRange();
-    afterRange.setStart(selectedRange.endContainer, selectedRange.endOffset);
-    const beforeElement = document.createElement("div");
-    beforeElement.append(beforeRange.cloneContents());
-    const afterElement = document.createElement("div");
-    afterElement.append(afterRange.cloneContents());
-    return !hasMeaningfulContent(beforeElement) && !hasMeaningfulContent(afterElement);
-};
-
 const getBlockRefCheckTargetsFromContext = (context: ReturnType<typeof getCrossBlockRemovalContext>,
                                             removedElements: HTMLElement[], retainedElements: HTMLElement[] = []) => {
     const elementsByID = new Map<string, HTMLElement>();
@@ -305,7 +312,7 @@ const getBlockRefCheckTargetsFromContext = (context: ReturnType<typeof getCrossB
         }
     });
     let mergedEndHasRemainingContent = false;
-    if (context.removeEndElement) {
+    if (context.mergeEndElement) {
         const endRange = context.ranges.find(item => item.blockElement === context.endElement);
         if (endRange) {
             mergedEndHasRemainingContent = !isEntireMeaningfulContentSelected(
@@ -339,13 +346,13 @@ const getBlockRefCheckTargetsFromContext = (context: ReturnType<typeof getCrossB
 
 export const getRangeBlockRefCheckTargets = (editorElement: HTMLElement, selectedRange: Range,
                                               startElement: HTMLElement, endElement: HTMLElement,
-                                              mergeEndElement = false) => {
-    const plan = mergeEndElement ? getCrossBlockRemovalPlan(
+                                              handleEndElement = false) => {
+    const plan = handleEndElement ? getCrossBlockRemovalPlan(
         editorElement, selectedRange, startElement, endElement) : undefined;
     const context = plan || getCrossBlockRemovalContext(
         editorElement, selectedRange, startElement, endElement, false);
     return getBlockRefCheckTargetsFromContext(
-        context, mergeEndElement ? context.removeElements : context.rangeRemoveElements,
+        context, handleEndElement ? context.removeElements : context.rangeRemoveElements,
         plan?.retainedElements || []);
 };
 
@@ -388,7 +395,7 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
         rangesByBlock,
         startEditableElement,
         endEditableElement,
-        removeEndElement,
+        mergeEndElement,
         siblingListItemMergeContext,
         updateElements,
     } = context;
@@ -505,7 +512,7 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
     const movedEndElements = siblingListItemMergeContext ?
         mergeCrossBlockSiblingListItems(siblingListItemMergeContext) :
         {movedEndBlocks: [], movedEndListItems: []};
-    if (removeEndElement && !nestedListMergeContext) {
+    if (mergeEndElement && !nestedListMergeContext) {
         const firstEndNode = endEditableElement.firstChild;
         while (endEditableElement.firstChild) {
             startEditableElement.append(endEditableElement.firstChild);

@@ -53,9 +53,10 @@ const (
 )
 
 var (
-	accountsMap = AccountsMap{}
-	sessionsMap = SessionsMap{}
-	sessionLock = sync.Mutex{}
+	accountsMap  = AccountsMap{}
+	accountsLock = sync.RWMutex{}
+	sessionsMap  = SessionsMap{}
+	sessionLock  = sync.Mutex{}
 
 	jwtKey     = make([]byte, 32)
 	jwtKeyOnce sync.Once
@@ -81,7 +82,14 @@ func refreshJwtKey() error {
 }
 
 func GetBasicAuthAccount(username string) *Account {
-	return accountsMap[username]
+	accountsLock.RLock()
+	defer accountsLock.RUnlock()
+	account := accountsMap[username]
+	if account == nil {
+		return nil
+	}
+	accountCopy := *account
+	return &accountCopy
 }
 
 func GetBasicAuthUsernameBySessionID(sessionID string) string {
@@ -114,21 +122,29 @@ func InitPublishAccounts() {
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rp9f-c2fj-h648
 		Conf.Publish.Auth = conf.NewPublish().Auth
 	}
-	accountsMap = AccountsMap{
+	accounts := AccountsMap{
 		"": &Account{}, // 匿名用户
 	}
 	for _, account := range Conf.Publish.Auth.Accounts {
-		accountsMap[account.Username] = &Account{
+		accounts[account.Username] = &Account{
 			Username: account.Username,
 			Password: account.Password,
 		}
 	}
 
-	refreshPublishJWT()
+	if err := refreshPublishJWT(accounts); err != nil {
+		logging.LogErrorf("JWT signature failed: %s", err)
+		return
+	}
+
+	// 账户及其 token 发布后保持不可变，更新时整体替换完整快照，避免请求读取到构建中的状态。
+	accountsLock.Lock()
+	accountsMap = accounts
+	accountsLock.Unlock()
 }
 
-func refreshPublishJWT() {
-	for username, account := range accountsMap {
+func refreshPublishJWT(accounts AccountsMap) error {
+	for username, account := range accounts {
 		// REF: https://golang-jwt.github.io/jwt/usage/create/
 		t := jwt.NewWithClaims(
 			jwt.SigningMethodHS256,
@@ -142,12 +158,12 @@ func refreshPublishJWT() {
 			},
 		)
 		if token, err := t.SignedString(jwtKey); err != nil {
-			logging.LogErrorf("JWT signature failed: %s", err)
-			return
+			return err
 		} else {
 			account.Token = token
 		}
 	}
+	return nil
 }
 
 // CreatePluginJWT 为指定名称的内核插件创建一个 JWT，包含管理员权限。插件使用这个 JWT 调用内核 API。

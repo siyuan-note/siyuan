@@ -17,11 +17,27 @@
 package model
 
 import (
+	"errors"
+	"sync"
 	"testing"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 )
+
+func preserveAuthState(t *testing.T) {
+	t.Helper()
+	originalConf := Conf
+	accountsLock.RLock()
+	originalAccounts := accountsMap
+	accountsLock.RUnlock()
+	t.Cleanup(func() {
+		Conf = originalConf
+		accountsLock.Lock()
+		accountsMap = originalAccounts
+		accountsLock.Unlock()
+	})
+}
 
 func TestIsPublishServiceToken(t *testing.T) {
 	tests := []struct {
@@ -79,13 +95,7 @@ func TestIsPublishServiceToken(t *testing.T) {
 
 func TestInitPublishAccountsWithNilAuth(t *testing.T) {
 	InitJwtKey()
-
-	originalConf := Conf
-	originalAccounts := accountsMap
-	defer func() {
-		Conf = originalConf
-		accountsMap = originalAccounts
-	}()
+	preserveAuthState(t)
 
 	Conf = NewAppConf()
 	Conf.Publish = &conf.Publish{Enable: true, Port: 6808}
@@ -100,4 +110,71 @@ func TestInitPublishAccountsWithNilAuth(t *testing.T) {
 	if nil == Conf.Publish.Auth {
 		t.Fatal("InitPublishAccounts should default Publish.Auth when it is nil")
 	}
+}
+
+func TestJWTLifecycle(t *testing.T) {
+	InitJwtKey()
+	preserveAuthState(t)
+
+	pluginToken, err := CreatePluginJWT("test-plugin")
+	if err != nil {
+		t.Fatalf("CreatePluginJWT failed: %v", err)
+	}
+	InitJwtKey()
+	if _, err = ParseJWT(pluginToken); err != nil {
+		t.Fatalf("plugin JWT became invalid after repeated key initialization: %v", err)
+	}
+
+	Conf = NewAppConf()
+	InitPublishAccounts()
+	firstPublishAccount := GetBasicAuthAccount("")
+	if firstPublishAccount == nil {
+		t.Fatal("anonymous publish account is missing")
+	}
+	if _, err = ParseJWT(firstPublishAccount.Token); err != nil {
+		t.Fatalf("current publish JWT is invalid: %v", err)
+	}
+
+	InitPublishAccounts()
+	if _, err = ParseJWT(pluginToken); err != nil {
+		t.Fatalf("plugin JWT became invalid after publish account initialization: %v", err)
+	}
+	if _, err = ParseJWT(firstPublishAccount.Token); !errors.Is(err, ErrInvalidPublishServiceToken) {
+		t.Fatalf("stale publish JWT error = %v, want %v", err, ErrInvalidPublishServiceToken)
+	}
+	refreshedPublishAccount := GetBasicAuthAccount("")
+	if refreshedPublishAccount == nil {
+		t.Fatal("refreshed anonymous publish account is missing")
+	}
+	if _, err = ParseJWT(refreshedPublishAccount.Token); err != nil {
+		t.Fatalf("refreshed publish JWT is invalid: %v", err)
+	}
+}
+
+func TestConcurrentPublishAccountRefreshAndJWTParsing(t *testing.T) {
+	InitJwtKey()
+	preserveAuthState(t)
+
+	Conf = NewAppConf()
+	InitPublishAccounts()
+	account := GetBasicAuthAccount("")
+	if account == nil {
+		t.Fatal("anonymous publish account is missing")
+	}
+
+	var wait sync.WaitGroup
+	wait.Add(2)
+	go func() {
+		defer wait.Done()
+		for i := 0; i < 100; i++ {
+			InitPublishAccounts()
+		}
+	}()
+	go func() {
+		defer wait.Done()
+		for i := 0; i < 100; i++ {
+			_, _ = ParseJWT(account.Token)
+		}
+	}()
+	wait.Wait()
 }

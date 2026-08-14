@@ -23,6 +23,7 @@ import {
     moveRowToUp,
     setTableAlign,
     toggleTableHeader,
+    transposeTable,
     updateTableTitle
 } from "../protyle/util/table";
 import {mathRender} from "../protyle/render/mathRender";
@@ -2302,6 +2303,15 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             updateTableTitle(protyle, nodeElement);
         }
     });
+    if (alignWholeTable) {
+        otherMenus.push({
+            id: "transposeTable",
+            label: window.siyuan.languages.transposeTable,
+            click: () => {
+                transposeTable(protyle, nodeElement, range);
+            }
+        });
+    }
     otherMenus.push({id: "separator_1", type: "separator"});
     const horizontalCells = alignWholeTable ? Array.from(tableElement.rows[0].cells) : [cellElement];
     const alignmentMenus: IMenu[] = [{

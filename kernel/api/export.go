@@ -436,6 +436,33 @@ func exportNotebookMd(c *gin.Context) {
 	}
 }
 
+func exportNotebooksMd(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	notebooks := parseExportNotebookIDs(arg)
+	if len(notebooks) < 1 {
+		ret.Code = -1
+		return
+	}
+	for _, notebook := range notebooks {
+		if model.IsEncryptedBox(notebook) {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(313)
+			return
+		}
+	}
+	zipPath := model.ExportNotebooksMarkdownWithOptions(notebooks, model.ParseExportOptions(arg))
+	ret.Data = map[string]any{
+		"name": path.Base(zipPath),
+		"zip":  zipPath,
+	}
+}
+
 func exportMds(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -506,6 +533,45 @@ func exportNotebookSY(c *gin.Context) {
 	ret.Data = map[string]any{
 		"zip": zipPath,
 	}
+}
+
+func exportNotebooksSY(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	notebooks := parseExportNotebookIDs(arg)
+	if len(notebooks) < 1 {
+		ret.Code = -1
+		return
+	}
+	for _, notebook := range notebooks {
+		if model.IsEncryptedBox(notebook) {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(313)
+			return
+		}
+	}
+	zipPath := model.ExportNotebooksSY(notebooks)
+	ret.Data = map[string]any{
+		"zip": zipPath,
+	}
+}
+
+func parseExportNotebookIDs(arg map[string]any) (ret []string) {
+	values, ok := arg["notebooks"].([]any)
+	if !ok {
+		return
+	}
+	for _, value := range values {
+		if notebook, valueOK := value.(string); valueOK && notebook != "" {
+			ret = append(ret, notebook)
+		}
+	}
+	return
 }
 
 func exportSYs(c *gin.Context) {

@@ -123,21 +123,6 @@ const bindDatabaseAttrSettingsVisibility = (root: HTMLElement) => {
     toggle();
 };
 
-const bindHeadingNumberFormatVisibility = (root: HTMLElement) => {
-    const headingNumberSwitch = root.querySelector<HTMLInputElement>(`#${CSS.escape("editor.headingNumber")}`);
-    if (!headingNumberSwitch) {
-        return;
-    }
-    const toggle = () => {
-        root.querySelector(`#${CSS.escape("editor.headingNumberFormat")}`)?.closest(".config-item")?.classList.toggle(
-            "fn__none",
-            !headingNumberSwitch.checked,
-        );
-    };
-    headingNumberSwitch.addEventListener("change", toggle);
-    toggle();
-};
-
 const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("blockFeatures", window.siyuan.languages.configGroupBlockFeatures);
     group.switch("editor.displayNetImgMark", {
@@ -155,7 +140,6 @@ const registerEditorBlockFeaturesGroup = (tab: SettingTabBuilder) => {
     group.switch("editor.headingNumber", {
         title: window.siyuan.languages.headingNumber,
         desc: window.siyuan.languages.headingNumberTip,
-        afterMount: bindHeadingNumberFormatVisibility,
     });
     group.select("editor.headingNumberFormat", {
         title: window.siyuan.languages.headingNumberFormat,

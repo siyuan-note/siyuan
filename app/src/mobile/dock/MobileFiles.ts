@@ -27,6 +27,7 @@ import {
     expandFileTree,
     isFileTreeCollapsing
 } from "../../layout/dock/fileTreeAnimation";
+import {updateNotebookRootForBoxDoc} from "../../util/notebookRoot";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
 import {
     collectExpandedDocIDs,
@@ -552,6 +553,11 @@ export class MobileFiles extends Model {
                         this.init(false);
                     });
                     break;
+                case "boxDocFeatureChanged":
+                    setNoteBook(() => {
+                        this.updateBoxDocFeature();
+                    });
+                    break;
                 case "notebookIconChanged":
                     this.updateNotebookIcon(data.data);
                     break;
@@ -778,6 +784,26 @@ export class MobileFiles extends Model {
         liElement.querySelector(".b3-list-item__icon")?.setAttribute("aria-label",
             Number(liElement.getAttribute("data-count")) > 0 ?
                 window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument);
+    }
+
+    private updateBoxDocFeature() {
+        const enabled = window.siyuan.config.fileTree.boxDocEnabled;
+        window.siyuan.notebooks.forEach((notebook) => {
+            if (notebook.closed) {
+                return;
+            }
+            const notebookElement = this.element.querySelector<HTMLElement>(`:scope > ul[data-url="${notebook.id}"]`);
+            const rootElement = notebookElement?.querySelector<HTMLElement>(":scope > li[data-type=\"navigation-root\"]");
+            if (!notebookElement || !rootElement) {
+                return;
+            }
+
+            const subFileCount = updateNotebookRootForBoxDoc(rootElement, notebook, enabled);
+            rootElement.querySelector<HTMLElement>(".b3-list-item__icon")?.setAttribute("aria-label", enabled ?
+                (subFileCount > 0 ? window.siyuan.languages.docIconClickExpand : window.siyuan.languages.openDocument) :
+                window.siyuan.languages.changeIcon);
+            this.element.append(notebookElement);
+        });
     }
 
     private genNotebook(item: INotebook) {

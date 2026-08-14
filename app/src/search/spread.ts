@@ -12,12 +12,16 @@ export const openSearch = async (options: {
     hotkey: string,
     key?: string,
     notebookId?: string,
+    notebookIds?: string[],
     searchPath?: string
 }) => {
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
     let hPath = "";
     let idPath: string[] = [];
-    if (options.notebookId) {
+    if (options.notebookIds?.length) {
+        idPath = [...options.notebookIds];
+        hPath = options.notebookIds.map((notebookId) => getNotebookName(notebookId)).join(" ");
+    } else if (options.notebookId) {
         hPath = getNotebookName(options.notebookId);
         idPath.push(options.notebookId);
         if (options.searchPath && options.searchPath !== "/") {
@@ -66,7 +70,12 @@ export const openSearch = async (options: {
                 cloneData.k = selectText;
             }
             item.element.setAttribute("data-key", options.hotkey);
-            if (options.hotkey === Constants.DIALOG_REPLACE) {
+            if (options.notebookId || options.notebookIds?.length) {
+                cloneData.hasReplace = options.hotkey === Constants.DIALOG_REPLACE;
+                cloneData.hPath = hPath;
+                cloneData.idPath = [...idPath];
+                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+            } else if (options.hotkey === Constants.DIALOG_REPLACE) {
                 cloneData.hasReplace = true;
                 item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
             } else if (options.hotkey === Constants.DIALOG_GLOBALSEARCH) {

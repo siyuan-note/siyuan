@@ -18,6 +18,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -35,7 +36,7 @@ func TestSetBazaarPackageRatingArgumentValidation(t *testing.T) {
 	engine := gin.New()
 	engine.POST("/rating", setBazaarPackageRating)
 
-	for _, rating := range []any{0, 1.5, 6, "5"} {
+	for _, rating := range []any{-1, 1.5, 6, "5"} {
 		body, err := json.Marshal(map[string]any{
 			"packageType": "plugins",
 			"packageName": "sample",
@@ -48,6 +49,36 @@ func TestSetBazaarPackageRatingArgumentValidation(t *testing.T) {
 		if 0 == response.Code {
 			t.Fatalf("expected rating %v to be rejected", rating)
 		}
+	}
+}
+
+func TestSetBazaarPackageRatingAcceptsCancellation(t *testing.T) {
+	oldSetRating := setBazaarPackageRatingModel
+	t.Cleanup(func() { setBazaarPackageRatingModel = oldSetRating })
+	called := false
+	setBazaarPackageRatingModel = func(_ context.Context, pkgType, packageName string,
+		rating int) (*bazaar.PackageRating, bool, int, error) {
+		called = true
+		if "plugins" != pkgType || "sample" != packageName || 0 != rating {
+			t.Fatalf("unexpected cancellation arguments: type=%s package=%s rating=%d", pkgType, packageName, rating)
+		}
+		return nil, true, 0, nil
+	}
+
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	engine.POST("/rating", setBazaarPackageRating)
+	body, err := json.Marshal(map[string]any{
+		"packageType": "plugins",
+		"packageName": "sample",
+		"rating":      0,
+	})
+	if nil != err {
+		t.Fatal(err)
+	}
+	response := performBazaarRatingRequest(t, engine, body)
+	if 0 != response.Code || !called {
+		t.Fatalf("cancellation was not accepted: response=%+v called=%v", response, called)
 	}
 }
 

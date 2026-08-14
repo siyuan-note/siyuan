@@ -89,6 +89,24 @@ func TestBuildBazaarPackageIgnoresManifestRating(t *testing.T) {
 	}
 }
 
+func TestBuildBazaarPackageUsesPackageDownloadStatistics(t *testing.T) {
+	repo := &StageRepo{URL: "owner/repo@hash", Package: &Package{Name: "sample"}}
+	pkg := buildBazaarPackageWithMetadata(repo, map[string]*bazaarStats{
+		"sample":     {Downloads: 9},
+		"owner/repo": {Downloads: 7},
+	}, nil, false, "plugins", "")
+	if nil == pkg || 9 != pkg.Downloads {
+		t.Fatalf("package download statistics were not preferred: %+v", pkg)
+	}
+	repo = &StageRepo{URL: "Owner/Repo@hash", Package: &Package{Name: "sample"}}
+	pkg = buildBazaarPackageWithMetadata(repo, map[string]*bazaarStats{
+		"owner/repo": {Downloads: 7},
+	}, nil, false, "plugins", "")
+	if nil == pkg || 7 != pkg.Downloads {
+		t.Fatalf("legacy repository download statistics were not preserved: %+v", pkg)
+	}
+}
+
 func TestClearBazaarPackageRating(t *testing.T) {
 	pkg := &Package{
 		RatingAvailable: true,
@@ -165,6 +183,7 @@ func TestFetchBazaarRatingRegion(t *testing.T) {
 func TestBazaarRatingCacheLastGoodAndOverride(t *testing.T) {
 	resetBazaarRatingTestState(t)
 	now := time.Unix(1000, 0)
+	bazaarIndexNow = func() time.Time { return now }
 	bazaarRatingNow = func() time.Time { return now }
 	bazaarRatingCacheTTL = time.Minute
 	bazaarRatingOverrideTTL = 5 * time.Minute
@@ -207,6 +226,44 @@ func TestBazaarRatingCacheLastGoodAndOverride(t *testing.T) {
 	rating, available = GetBazaarPackageRating(context.Background(), "sample")
 	if !available || nil == rating || 6 != rating.Count || 11.0/3.0 != rating.Average {
 		t.Fatalf("stale refresh overwrote submitted distribution: available=%v rating=%+v", available, rating)
+	}
+}
+
+func TestBazaarPublicRatingTombstone(t *testing.T) {
+	resetBazaarRatingTestState(t)
+	now := time.Unix(1000, 0)
+	bazaarIndexNow = func() time.Time { return now }
+	bazaarRatingNow = func() time.Time { return now }
+	bazaarRatingOverrideTTL = 5 * time.Minute
+	bazaarIndexState.mu.Lock()
+	bazaarIndexState.snapshot = testBazaarIndex(1, true)
+	bazaarIndexState.snapshot.packages["sample"].Rating = &PackageRating{
+		Average: 5, Count: 1, Distribution: [5]int64{0, 0, 0, 0, 1},
+	}
+	bazaarIndexState.expiresAt = now.Add(time.Hour)
+	bazaarIndexState.mu.Unlock()
+
+	if !ClearBazaarPackageRating("sample") {
+		t.Fatal("valid rating tombstone was rejected")
+	}
+	if ClearBazaarPackageRating("bad/name/extra") {
+		t.Fatal("invalid package name should be rejected")
+	}
+	rating, available := GetCachedBazaarPackageRating("sample")
+	if !available || nil != rating {
+		t.Fatalf("tombstoned rating should be available without an aggregate: available=%v rating=%+v",
+			available, rating)
+	}
+	ratings, available := GetBazaarPackageRatings(context.Background(), []string{"sample"})
+	if !available || 0 != len(ratings) {
+		t.Fatalf("batch response should omit a tombstoned rating: available=%v ratings=%+v", available, ratings)
+	}
+
+	now = now.Add(bazaarRatingOverrideTTL)
+	rating, available = GetCachedBazaarPackageRating("sample")
+	if !available || nil == rating || 1 != rating.Count {
+		t.Fatalf("expired tombstone did not reveal the refreshed index: available=%v rating=%+v",
+			available, rating)
 	}
 }
 
@@ -267,13 +324,69 @@ func TestBazaarPackageRatingAfterUpdateNeedsOnlyOtherRegion(t *testing.T) {
 	bazaarRatingRegionCaches[1].loaded = true
 	bazaarRatingRegionCaches[1].data = map[string]bazaarRatingDistribution{"sample": {1, 0, 0, 0, 0}}
 
-	rating, available := GetBazaarPackageRatingAfterUpdate(0, "sample", [5]int64{0, 0, 0, 0, 2})
+	rating, available := GetBazaarPackageRatingAfterUpdate(context.Background(), 0, "sample", [5]int64{0, 0, 0, 0, 2})
 	if !available || nil == rating || 3 != rating.Count || 11.0/3.0 != rating.Average {
 		t.Fatalf("unexpected rating after update: available=%v rating=%+v", available, rating)
 	}
 	bazaarRatingRegionCaches[1] = bazaarRatingRegionCache{}
-	if _, available = GetBazaarPackageRatingAfterUpdate(0, "sample", [5]int64{0, 0, 0, 0, 2}); available {
+	bazaarRatingRegionFetcher = func(context.Context, int) (map[string]bazaarRatingDistribution, error) {
+		return nil, errors.New("offline")
+	}
+	if _, available = GetBazaarPackageRatingAfterUpdate(context.Background(), 0, "sample",
+		[5]int64{0, 0, 0, 0, 2}); available {
 		t.Fatal("rating should be unavailable before the other region is loaded")
+	}
+}
+
+func TestBazaarPackageRatingAfterUpdateLoadsLegacyFallback(t *testing.T) {
+	resetBazaarRatingTestState(t)
+	var fetchCount atomic.Int32
+	bazaarRatingRegionFetcher = func(_ context.Context, region int) (map[string]bazaarRatingDistribution, error) {
+		fetchCount.Add(1)
+		if 1 != region {
+			t.Fatalf("unexpected legacy rating region: %d", region)
+		}
+		return map[string]bazaarRatingDistribution{"sample": {1, 0, 0, 0, 0}}, nil
+	}
+
+	rating, available := GetBazaarPackageRatingAfterUpdate(context.Background(), 0, "sample",
+		[5]int64{0, 0, 0, 0, 2})
+	if !available || nil == rating || 3 != rating.Count || 11.0/3.0 != rating.Average || 1 != fetchCount.Load() {
+		t.Fatalf("unexpected legacy rating fallback: available=%v rating=%+v fetches=%d",
+			available, rating, fetchCount.Load())
+	}
+}
+
+func TestBazaarPackageRatingAfterCancellationReturnsAvailableWithoutRating(t *testing.T) {
+	resetBazaarRatingTestState(t)
+	bazaarRatingRegionCaches[1].loaded = true
+	bazaarRatingRegionCaches[1].data = map[string]bazaarRatingDistribution{}
+
+	rating, available := GetBazaarPackageRatingAfterUpdate(context.Background(), 0, "sample", [5]int64{})
+	if !available || nil != rating {
+		t.Fatalf("global zero-count rating should remain available: available=%v rating=%+v", available, rating)
+	}
+	rating, available = GetCachedBazaarPackageRating("sample")
+	if !available || nil != rating {
+		t.Fatalf("zero-count result should install a public tombstone: available=%v rating=%+v", available, rating)
+	}
+}
+
+func TestBazaarPackageRatingAfterUpdateRejectsTotalCountOverflow(t *testing.T) {
+	resetBazaarRatingTestState(t)
+	bazaarRatingRegionCaches[1].loaded = true
+	bazaarRatingRegionCaches[1].data = map[string]bazaarRatingDistribution{
+		"sample": {0, 1, 0, 0, 0},
+	}
+
+	rating, available := GetBazaarPackageRatingAfterUpdate(
+		context.Background(), 0, "sample", [5]int64{math.MaxInt64, 0, 0, 0, 0})
+	if available || nil != rating {
+		t.Fatalf("overflowing total count should be rejected: available=%v rating=%+v", available, rating)
+	}
+	if rating, overridden := getBazaarPublicRatingOverride("sample", bazaarRatingNow()); overridden || nil != rating {
+		t.Fatalf("overflowing total count must not install a public tombstone: overridden=%v rating=%+v",
+			overridden, rating)
 	}
 }
 
@@ -374,6 +487,8 @@ func TestBazaarRatingInitialFailureBackoff(t *testing.T) {
 
 func resetBazaarRatingTestState(t *testing.T) {
 	t.Helper()
+	resetBazaarIndexTestState(t)
+	resetBazaarRatingOverrides(t)
 	oldTTL := bazaarRatingCacheTTL
 	oldOverrideTTL := bazaarRatingOverrideTTL
 	oldRetryDelay := bazaarRatingRetryDelay
@@ -382,6 +497,14 @@ func resetBazaarRatingTestState(t *testing.T) {
 	for region := range bazaarRatingRegionCount {
 		bazaarRatingRegionCaches[region] = bazaarRatingRegionCache{}
 	}
+	// 使用新索引尚未启用的缓存状态，避免旧区域评分测试发起真实统一索引请求。
+	bazaarIndexState.mu.Lock()
+	bazaarIndexState.snapshot = &bazaarIndexSnapshot{
+		packages:    map[string]*bazaarIndexPackage{},
+		legacyStats: map[string]*bazaarStats{},
+	}
+	bazaarIndexState.expiresAt = time.Now().Add(24 * time.Hour)
+	bazaarIndexState.mu.Unlock()
 	t.Cleanup(func() {
 		bazaarRatingCacheTTL = oldTTL
 		bazaarRatingOverrideTTL = oldOverrideTTL

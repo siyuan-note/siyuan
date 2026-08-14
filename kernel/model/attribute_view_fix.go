@@ -25,6 +25,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -115,6 +116,35 @@ func checkAttrView(attrView *av.AttributeView, view *av.View) (changed bool) {
 		changed = true
 	}
 
+	return
+}
+
+func normalizeAttributeViewBlockRefSubtypes(attrView *av.AttributeView) (changed bool) {
+	blockValues := attrView.GetBlockKeyValues()
+	if nil == blockValues {
+		return
+	}
+
+	var blockIDs []string
+	addedBlockIDs := map[string]bool{}
+	for _, value := range blockValues.Values {
+		if nil == value || nil == value.Block || value.IsDetached || "" == value.Block.ID || value.Block.RefSubtype.IsValid() {
+			continue
+		}
+		if !addedBlockIDs[value.Block.ID] {
+			blockIDs = append(blockIDs, value.Block.ID)
+			addedBlockIDs[value.Block.ID] = true
+		}
+	}
+	attrs := sql.BatchGetBlockAttrs(blockIDs)
+	for _, value := range blockValues.Values {
+		if nil == value || nil == value.Block {
+			continue
+		}
+		if value.NormalizeBlockRefSubtype(attrView.ID, attrs[value.Block.ID]) {
+			changed = true
+		}
+	}
 	return
 }
 

@@ -64,6 +64,7 @@ func TestPrefetchBazaarRatingsCoalescesConcurrentCalls(t *testing.T) {
 }
 
 func TestGetStageAndBazaarDoesNotWaitForRatings(t *testing.T) {
+	resetBazaarRatingTestState(t)
 	oldApplyHash := applyBazaarCacheHash
 	oldOnlineLoader := bazaarOnlineLoader
 	oldStageLoader := stageIndexLoader
@@ -73,9 +74,7 @@ func TestGetStageAndBazaarDoesNotWaitForRatings(t *testing.T) {
 	bazaarRatingsPrefetching.Store(false)
 	bazaarMemMu.Lock()
 	oldStageCache := stageIndexCache
-	oldStatsCache := bazaarStatsCache
 	stageIndexCache = map[string]*StageIndex{}
-	bazaarStatsCache = map[string]*bazaarStats{}
 	bazaarMemMu.Unlock()
 	t.Cleanup(func() {
 		applyBazaarCacheHash = oldApplyHash
@@ -87,7 +86,6 @@ func TestGetStageAndBazaarDoesNotWaitForRatings(t *testing.T) {
 		bazaarRatingsPrefetching.Store(false)
 		bazaarMemMu.Lock()
 		stageIndexCache = oldStageCache
-		bazaarStatsCache = oldStatsCache
 		bazaarMemMu.Unlock()
 	})
 
@@ -148,9 +146,7 @@ func TestGetStageAndBazaarIncludesCompletedRatingPrefetch(t *testing.T) {
 	bazaarRatingsPrefetching.Store(false)
 	bazaarMemMu.Lock()
 	oldStageCache := stageIndexCache
-	oldStatsCache := bazaarStatsCache
 	stageIndexCache = map[string]*StageIndex{}
-	bazaarStatsCache = map[string]*bazaarStats{}
 	bazaarMemMu.Unlock()
 	t.Cleanup(func() {
 		applyBazaarCacheHash = oldApplyHash
@@ -161,7 +157,6 @@ func TestGetStageAndBazaarIncludesCompletedRatingPrefetch(t *testing.T) {
 		bazaarRatingsPrefetching.Store(false)
 		bazaarMemMu.Lock()
 		stageIndexCache = oldStageCache
-		bazaarStatsCache = oldStatsCache
 		bazaarMemMu.Unlock()
 	})
 
@@ -199,5 +194,86 @@ func TestGetStageAndBazaarIncludesCompletedRatingPrefetch(t *testing.T) {
 	rating := result.BazaarRatings["sample"]
 	if nil == rating || 2 != rating.Count || ([5]int64{0, 0, 0, 0, 2}) != rating.Distribution {
 		t.Fatalf("unexpected prefetched rating: %+v", rating)
+	}
+}
+
+func TestGetStageAndBazaarOfflineDoesNotWaitForLoaders(t *testing.T) {
+	resetBazaarRatingTestState(t)
+	oldApplyHash := applyBazaarCacheHash
+	oldOnlineLoader := bazaarOnlineLoader
+	oldStageLoader := stageIndexLoader
+	oldStatsLoader := bazaarStatsLoader
+	oldRatingsLoader := bazaarRatingsLoader
+	bazaarRatingsPrefetching.Store(false)
+	bazaarMemMu.Lock()
+	oldStageCache := stageIndexCache
+	stageIndexCache = map[string]*StageIndex{}
+	bazaarMemMu.Unlock()
+	t.Cleanup(func() {
+		applyBazaarCacheHash = oldApplyHash
+		bazaarOnlineLoader = oldOnlineLoader
+		stageIndexLoader = oldStageLoader
+		bazaarStatsLoader = oldStatsLoader
+		bazaarRatingsLoader = oldRatingsLoader
+		bazaarRatingsPrefetching.Store(false)
+		bazaarMemMu.Lock()
+		stageIndexCache = oldStageCache
+		bazaarMemMu.Unlock()
+	})
+
+	applyBazaarCacheHash = func(context.Context) {}
+	loadersStarted := make(chan struct{}, 2)
+	releaseStage := make(chan struct{})
+	releaseStats := make(chan struct{})
+	stageReturning := make(chan struct{})
+	statsReturned := make(chan struct{})
+	ratingLoaded := make(chan struct{})
+	stageIndexLoader = func(context.Context, string) (*StageIndex, error) {
+		loadersStarted <- struct{}{}
+		<-releaseStage
+		close(stageReturning)
+		return &StageIndex{}, nil
+	}
+	bazaarStatsLoader = func(context.Context) map[string]*bazaarStats {
+		loadersStarted <- struct{}{}
+		<-releaseStats
+		close(statsReturned)
+		return map[string]*bazaarStats{}
+	}
+	bazaarRatingsLoader = func(context.Context) (map[string]*PackageRating, bool) {
+		close(ratingLoaded)
+		return map[string]*PackageRating{}, false
+	}
+	bazaarOnlineLoader = func() bool {
+		<-loadersStarted
+		<-loadersStarted
+		close(releaseStage)
+		<-stageReturning
+		return false
+	}
+
+	resultDone := make(chan StageBazaarResult, 1)
+	go func() {
+		resultDone <- getStageAndBazaar0("plugins")
+	}()
+	select {
+	case result := <-resultDone:
+		if result.Online {
+			t.Fatal("offline marketplace was reported as online")
+		}
+	case <-time.After(time.Second):
+		close(releaseStats)
+		t.Fatal("offline marketplace waited for a loader that ignored cancellation")
+	}
+	close(releaseStats)
+	select {
+	case <-statsReturned:
+	case <-time.After(time.Second):
+		t.Fatal("blocked statistics loader did not finish after release")
+	}
+	select {
+	case <-ratingLoaded:
+	case <-time.After(time.Second):
+		t.Fatal("rating prefetch did not finish")
 	}
 }

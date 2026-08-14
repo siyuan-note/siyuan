@@ -437,7 +437,15 @@
 }
 
 .agent-chat__thinking-text {
+  flex-shrink: 0;
+}
+
+.agent-chat__thinking-latest {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--b3-theme-on-surface);
+  white-space: nowrap;
 }
 
 .agent-chat__thinking-arrow {

@@ -38,6 +38,7 @@ import {
     expandFileTree,
     toggleFileTree
 } from "./fileTreeAnimation";
+import {updateNotebookRootForBoxDoc} from "../../util/notebookRoot";
 import {
     collectExpandedDocIDs,
     findMovedFileTreeItem,
@@ -1048,6 +1049,11 @@ export class Files extends Model {
                         this.init(false);
                     });
                     break;
+                case "boxDocFeatureChanged":
+                    setNoteBook(() => {
+                        this.updateBoxDocFeature();
+                    });
+                    break;
                 case "notebookIconChanged":
                     this.updateNotebookIcon(data.data);
                     break;
@@ -1192,6 +1198,31 @@ export class Files extends Model {
             'li[data-type="navigation-file"], li[data-type="navigation-root"]'
         ).forEach((item) => {
             this.updateDocActionElement(item);
+        });
+    }
+
+    private updateBoxDocFeature() {
+        const enabled = window.siyuan.config.fileTree.boxDocEnabled;
+        window.siyuan.notebooks.forEach((notebook) => {
+            if (notebook.closed) {
+                return;
+            }
+            const notebookElement = this.element.querySelector<HTMLElement>(`:scope > ul[data-url="${notebook.id}"]`);
+            const rootElement = notebookElement?.querySelector<HTMLElement>(":scope > li[data-type=\"navigation-root\"]");
+            if (!notebookElement || !rootElement) {
+                return;
+            }
+
+            updateNotebookRootForBoxDoc(rootElement, notebook, enabled);
+            const iconElement = rootElement.querySelector<HTMLElement>(".b3-list-item__icon");
+            iconElement?.classList.toggle("popover__block", enabled);
+            if (enabled) {
+                iconElement?.setAttribute("data-id", notebook.id);
+            } else {
+                iconElement?.removeAttribute("data-id");
+            }
+            this.updateDocActionElement(rootElement);
+            this.element.append(notebookElement);
         });
     }
 

@@ -55,8 +55,93 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
     const items = getDocTreeMenuItems(selectedItems);
     if (type === "notebooks") {
         window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_NOTEBOOKS);
+        const notebookIds = items.map((item) => item.id);
+        const notebookNames = notebookIds.map((notebookId) => getNotebookName(notebookId)).join(" ");
         if (!window.siyuan.config.readonly) {
-            const notebookIds = items.map((item) => item.id);
+            const sortModes = selectedItems.map((item) => parseInt(item.parentElement?.getAttribute("data-sortmode")));
+            const sortMode = sortModes.every((item) => item === sortModes[0]) ? sortModes[0] : -1;
+            const subMenu = sortMenu("notebook", sortMode, async (sort) => {
+                let files;
+                /// #if MOBILE
+                files = window.siyuan.mobile.docks.file;
+                /// #else
+                files = (getDockByType("file").data["file"] as Files);
+                /// #endif
+                for (const item of selectedItems) {
+                    const notebookId = item.parentElement?.getAttribute("data-url");
+                    if (!notebookId) {
+                        continue;
+                    }
+                    const response = await fetchSyncPost("/api/notebook/setNotebookConf", {
+                        notebook: notebookId,
+                        conf: {sortMode: sort},
+                    });
+                    if (response.code !== 0) {
+                        continue;
+                    }
+                    item.parentElement.setAttribute("data-sortmode", sort.toString());
+                    const toggleElement = item.querySelector(".b3-list-item__arrow--open");
+                    if (toggleElement) {
+                        toggleElement.classList.remove("b3-list-item__arrow--open");
+                        item.nextElementSibling?.remove();
+                        files.getLeaf(item, notebookId);
+                    }
+                }
+            });
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "sort",
+                icon: "iconSort",
+                label: window.siyuan.languages.sort,
+                type: "submenu",
+                submenu: subMenu,
+            }).element);
+        }
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "search",
+            label: window.siyuan.languages.search,
+            accelerator: window.siyuan.config.keymap.general.search.custom,
+            icon: "iconSearch",
+            click() {
+                /// #if MOBILE
+                popSearch(app, {
+                    hasReplace: false,
+                    hPath: notebookNames,
+                    idPath: notebookIds,
+                    page: 1,
+                });
+                /// #else
+                openSearch({
+                    app,
+                    hotkey: Constants.DIALOG_SEARCH,
+                    notebookIds,
+                });
+                /// #endif
+            }
+        }).element);
+        if (!window.siyuan.config.readonly) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "replace",
+                label: window.siyuan.languages.replace,
+                accelerator: window.siyuan.config.keymap.general.replace.custom,
+                icon: "iconReplace",
+                click() {
+                    /// #if MOBILE
+                    popSearch(app, {
+                        hasReplace: true,
+                        hPath: notebookNames,
+                        idPath: notebookIds,
+                        page: 1,
+                    });
+                    /// #else
+                    openSearch({
+                        app,
+                        hotkey: Constants.DIALOG_REPLACE,
+                        notebookIds,
+                    });
+                    /// #endif
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
             if (notebookIds.every((notebookId) => !Object.values(Constants.HELP_PATH).includes(notebookId))) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "close",
@@ -79,12 +164,41 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                 }
             }).element);
         }
+        const ignoreExport = notebookIds.some((notebookId) => isEncryptedBox(notebookId));
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "separator_2",
+            type: "separator",
+            ignore: ignoreExport,
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "export",
+            label: window.siyuan.languages.export,
+            type: "submenu",
+            icon: "iconUpload",
+            ignore: ignoreExport,
+            submenu: [{
+                id: "exportSiYuanZip",
+                label: "SiYuan .sy.zip",
+                icon: "iconSiYuan",
+                click: () => {
+                    const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                    fetchPost("/api/export/exportNotebooksSY", {notebooks: notebookIds}, (response) => {
+                        saveExportFile(response.data.zip, msgId);
+                    });
+                }
+            }, {
+                id: "exportMarkdown",
+                label: "Markdown .zip",
+                icon: "iconMarkdown",
+                click: () => exportMarkdownZip({notebooks: notebookIds}),
+            }]
+        }).element);
         if (app.plugins) {
             emitOpenMenu({
                 plugins: app.plugins,
                 type: "open-menu-doctree",
                 detail: {elements: selectItemElements, type: "notebooks", items},
-                separatorPosition: !window.siyuan.config.readonly ? "top" : undefined,
+                separatorPosition: "top",
             });
         }
         return window.siyuan.menus.menu;

@@ -201,6 +201,13 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
     const thinkingSteps = prepared.flatMap(entry => entry.type === "thinking" ? (entry.steps || []) : []);
     const matchedSteps = new Set<AgentHistoryThinkingStep>();
     const recovered: Array<{ entry: AgentHistoryEntry; step: AgentHistoryThinkingStep }> = [];
+    const questionEntries = prepared.filter(entry => entry.type === "question");
+    const matchedQuestionEntries = new Set<AgentHistoryEntry>();
+    const questionContentInsertions: Array<{
+        sourceEntry: AgentHistoryEntry;
+        anchorStep?: AgentHistoryThinkingStep;
+        questionEntry?: AgentHistoryEntry
+    }> = [];
     const todoInsertions: Array<{
         sourceEntry: AgentHistoryEntry;
         anchorStep?: AgentHistoryThinkingStep;
@@ -213,6 +220,26 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
         }
         const isProcess = !!entry.toolCalls?.length;
         const toolNames = entry.toolCalls?.map(call => call.name || "").filter(Boolean) || [];
+        const questionCallCount = entry.toolCalls?.filter(call => call.name === "question").length || 0;
+        const hasQuestion = questionCallCount > 0;
+        const hasQuestionContent = hasQuestion && !!entry.content?.trim();
+        let questionEntry: AgentHistoryEntry | undefined;
+        for (let i = 0; i < questionCallCount; i++) {
+            let matchedQuestion: AgentHistoryEntry | undefined;
+            if (entry.roundID) {
+                matchedQuestion = questionEntries.find(item =>
+                    !matchedQuestionEntries.has(item) && item.roundID === entry.roundID);
+            }
+            if (!matchedQuestion) {
+                matchedQuestion = questionEntries.find(item =>
+                    !matchedQuestionEntries.has(item) && (!entry.roundID || !item.roundID));
+            }
+            if (!matchedQuestion) {
+                break;
+            }
+            matchedQuestionEntries.add(matchedQuestion);
+            questionEntry = questionEntry || matchedQuestion;
+        }
         let step: AgentHistoryThinkingStep | undefined;
         let relatedSteps: AgentHistoryThinkingStep[] = [];
         if (entry.roundID) {
@@ -228,16 +255,28 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
         }
         let presentationStep = step;
         if (step) {
-            enrichThinkingStep(step, entry, isProcess);
+            enrichThinkingStep(step, entry, isProcess && !hasQuestionContent);
             enrichThinkingStepTools(step, relatedSteps.length > 0 ? relatedSteps : [step], entry);
             matchedSteps.add(step);
         } else if (isProcess || entry.reasoningContent?.trim()) {
-            presentationStep = buildRecoveredThinkingStep(entry, isProcess);
+            presentationStep = buildRecoveredThinkingStep(entry, isProcess && !hasQuestionContent);
             recovered.push({entry, step: presentationStep});
         }
+        if (hasQuestionContent) {
+            if (presentationStep) {
+                presentationStep.content = undefined;
+            }
+            questionContentInsertions.push({
+                sourceEntry: entry,
+                anchorStep: presentationStep,
+                questionEntry,
+            });
+        }
         if (isProcess) {
-            // 带工具调用的 assistant 是模型协议过程，不单独渲染为回答气泡。
-            entry.content = undefined;
+            // 普通工具调用的 assistant 是模型协议过程，不单独渲染为回答气泡；question 的同轮正文用于引出提问。
+            if (!hasQuestionContent) {
+                entry.content = undefined;
+            }
             const remainingToolCalls: NonNullable<AgentHistoryEntry["toolCalls"]> = [];
             for (const call of entry.toolCalls || []) {
                 if (call.name === "todo_write" && call.result?.trim()) {
@@ -307,6 +346,34 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
         }
     }
 
+    for (const item of questionContentInsertions) {
+        const anchorEntry = item.anchorStep
+            ? prepared.find(entry => entry.type === "thinking" && entry.steps?.includes(item.anchorStep!))
+            : undefined;
+        if (anchorEntry && item.questionEntry) {
+            const anchorIndex = prepared.indexOf(anchorEntry);
+            const questionIndex = prepared.indexOf(item.questionEntry);
+            if (anchorIndex > questionIndex) {
+                prepared.splice(anchorIndex, 1);
+                prepared.splice(prepared.indexOf(item.questionEntry), 0, anchorEntry);
+            }
+        }
+
+        const sourceIndex = prepared.indexOf(item.sourceEntry);
+        if (sourceIndex < 0) {
+            continue;
+        }
+        prepared.splice(sourceIndex, 1);
+        const questionIndex = item.questionEntry ? prepared.indexOf(item.questionEntry) : -1;
+        if (questionIndex >= 0) {
+            prepared.splice(questionIndex, 0, item.sourceEntry);
+        } else if (anchorEntry) {
+            prepared.splice(prepared.indexOf(anchorEntry) + 1, 0, item.sourceEntry);
+        } else {
+            prepared.splice(Math.min(sourceIndex, prepared.length), 0, item.sourceEntry);
+        }
+    }
+
     const todoOffsets = new Map<AgentHistoryEntry, number>();
     for (const item of todoInsertions) {
         const anchorEntry = item.anchorStep
@@ -348,8 +415,8 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
     return prepared;
 };
 
-// 将持久化协议消息投影为 UI 条目：同一用户轮次中的工具调用消息归入思考卡片，
-// 只有不带工具调用的 assistant 作为最终回答展示。
+// 将持久化协议消息投影为 UI 条目：普通工具调用消息归入思考卡片，
+// question 的同轮正文保留在提问卡片前，其余不带工具调用的 assistant 作为回答展示。
 export const buildAgentPresentationEntries = (entries: AgentHistoryEntry[]): AgentHistoryEntry[] => {
     const result: AgentHistoryEntry[] = [];
     let turnEntries: AgentHistoryEntry[] = [];

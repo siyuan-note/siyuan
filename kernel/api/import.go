@@ -87,6 +87,21 @@ func importSYNotebook(c *gin.Context) {
 		return
 	}
 	defer cleanup()
+	if ids, bundle, bundleErr := model.ImportSYNotebookBundle(writePath); bundle {
+		if bundleErr != nil {
+			ret.Code = -1
+			ret.Msg = bundleErr.Error()
+			return
+		}
+		boxes, mountErr := mountImportedNotebooks(ids)
+		if nil != mountErr {
+			ret.Code = -1
+			ret.Msg = mountErr.Error()
+			return
+		}
+		ret.Data = map[string]any{"notebooks": boxes}
+		return
+	}
 
 	id, err := model.ImportSYNotebook(writePath)
 	if err != nil {
@@ -129,6 +144,21 @@ func importSYAuto(c *gin.Context) {
 		return
 	}
 	defer cleanup()
+	if ids, bundle, bundleErr := model.ImportSYNotebookBundle(writePath); bundle {
+		if bundleErr != nil {
+			ret.Code = -1
+			ret.Msg = bundleErr.Error()
+			return
+		}
+		boxes, mountErr := mountImportedNotebooks(ids)
+		if nil != mountErr {
+			ret.Code = -1
+			ret.Msg = mountErr.Error()
+			return
+		}
+		ret.Data = map[string]any{"type": "notebooks", "notebooks": boxes}
+		return
+	}
 
 	var notebook string
 	if values := form.Value["notebook"]; len(values) > 0 {
@@ -175,6 +205,25 @@ func importSYAuto(c *gin.Context) {
 	event := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
 	event.Data = map[string]any{"box": box, "existed": existed}
 	util.PushEvent(event)
+}
+
+func mountImportedNotebooks(ids []string) (ret []*model.Box, err error) {
+	for _, id := range ids {
+		var existed bool
+		existed, err = model.Mount(id)
+		if nil != err {
+			return
+		}
+		box := model.Conf.Box(id)
+		if nil == box {
+			return nil, fmt.Errorf("opened notebook [%s] not found", id)
+		}
+		ret = append(ret, box)
+		event := util.NewCmdResult("createnotebook", 0, util.PushModeBroadcast)
+		event.Data = map[string]any{"box": box, "existed": existed}
+		util.PushEvent(event)
+	}
+	return
 }
 
 func continueImportSY(c *gin.Context) {

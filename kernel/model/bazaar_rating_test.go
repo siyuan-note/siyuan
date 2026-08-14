@@ -25,6 +25,7 @@ import (
 	"slices"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 )
@@ -175,8 +176,8 @@ func TestSetBazaarPackageRatingValidatesRangeBeforeRequest(t *testing.T) {
 		return "token", nil
 	}
 
-	if _, _, _, err := SetBazaarPackageRating(context.Background(), "plugins", "sample", 0); nil == err {
-		t.Fatal("expected invalid rating to fail")
+	if _, _, _, err := SetBazaarPackageRating(context.Background(), "plugins", "sample", -1); nil == err {
+		t.Fatal("expected negative rating to fail")
 	}
 	if called {
 		t.Fatal("invalid rating should fail before package validation or cloud request")
@@ -234,11 +235,21 @@ func TestSetBazaarPackageRatingRejectsInvalidCloudDistribution(t *testing.T) {
 func TestSetBazaarPackageRatingRequest(t *testing.T) {
 	oldServer := bazaarRatingCloudServer
 	oldValidator := bazaarRatingValidatePackage
+	oldAfterUpdate := bazaarRatingAfterUpdate
 	t.Cleanup(func() {
 		bazaarRatingCloudServer = oldServer
 		bazaarRatingValidatePackage = oldValidator
+		bazaarRatingAfterUpdate = oldAfterUpdate
 	})
 	bazaarRatingValidatePackage = func(_ context.Context, _, _ string) (string, error) { return "secret", nil }
+	bazaarRatingAfterUpdate = func(_ context.Context, region int, packageName string,
+		distribution [5]int64) (*bazaar.PackageRating, bool) {
+		if region < 0 || "sample" != packageName || ([5]int64{0, 0, 0, 1, 0}) != distribution {
+			t.Fatalf("unexpected legacy rating update: region=%d package=%s distribution=%v",
+				region, packageName, distribution)
+		}
+		return nil, false
+	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if request.URL.Path != "/apis/siyuan/bazaar/setBazaarPackageRating" {
@@ -252,7 +263,7 @@ func TestSetBazaarPackageRatingRequest(t *testing.T) {
 			t.Fatalf("unexpected request body: %+v", body)
 		}
 		writer.Header().Set("Content-Type", "application/json")
-		_, _ = writer.Write([]byte(`{"code":0,"msg":"","data":{"rating":4,"distribution":[0,0,0,1,0]}}`))
+		_, _ = writer.Write([]byte(`{"code":0,"msg":"","data":{"rating":4,"ratingAvailable":false,"publicRating":null,"distribution":[0,0,0,1,0]}}`))
 	}))
 	defer server.Close()
 	bazaarRatingCloudServer = func() string { return server.URL }
@@ -263,5 +274,195 @@ func TestSetBazaarPackageRatingRequest(t *testing.T) {
 	}
 	if ratingAvailable {
 		t.Fatal("global rating should be unavailable before the other region is loaded")
+	}
+}
+
+func TestSetBazaarPackageRatingUsesPublicRating(t *testing.T) {
+	oldServer := bazaarRatingCloudServer
+	oldValidator := bazaarRatingValidatePackage
+	t.Cleanup(func() {
+		bazaarRatingCloudServer = oldServer
+		bazaarRatingValidatePackage = oldValidator
+	})
+	bazaarRatingValidatePackage = func(_ context.Context, _, _ string) (string, error) { return "secret", nil }
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"code":0,"msg":"","data":{"rating":4,"ratingAvailable":true,"publicRating":{"average":4,"count":2,"distribution":[0,0,0,2,0]}}}`))
+	}))
+	defer server.Close()
+	bazaarRatingCloudServer = func() string { return server.URL }
+
+	rating, ratingAvailable, userRating, err := SetBazaarPackageRating(context.Background(), "plugins", "sample-public", 4)
+	if nil != err || !ratingAvailable || 4 != userRating || nil == rating || 2 != rating.Count || 4 != rating.Average {
+		t.Fatalf("unexpected public rating response: rating=%+v available=%v userRating=%d err=%v",
+			rating, ratingAvailable, userRating, err)
+	}
+}
+
+func TestSetBazaarPackageRatingRejectsInvalidPublicRating(t *testing.T) {
+	oldServer := bazaarRatingCloudServer
+	oldValidator := bazaarRatingValidatePackage
+	t.Cleanup(func() {
+		bazaarRatingCloudServer = oldServer
+		bazaarRatingValidatePackage = oldValidator
+	})
+	bazaarRatingValidatePackage = func(_ context.Context, _, _ string) (string, error) { return "secret", nil }
+
+	for _, response := range []string{
+		`{"code":0,"msg":"","data":{"rating":4,"ratingAvailable":true}}`,
+		`{"code":0,"msg":"","data":{"rating":3,"ratingAvailable":true,"publicRating":{"average":4,"count":1,"distribution":[0,0,0,1,0]}}}`,
+		`{"code":0,"msg":"","data":{"rating":4,"publicRating":{"average":4,"count":1,"distribution":[0,0,0,1,0]}}}`,
+		`{"code":0,"msg":"","data":{"rating":4,"ratingAvailable":true,"publicRating":{"average":5,"count":1,"distribution":[0,0,0,1,0]}}}`,
+		`{"code":0,"msg":"","data":{"rating":4,"ratingAvailable":true,"publicRating":{"average":5,"count":1,"distribution":[0,0,0,0,1]}}}`,
+		`{"code":0,"msg":"","data":{"rating":4,"ratingAvailable":false,"publicRating":{"average":4,"count":1,"distribution":[0,0,0,1,0]}}}`,
+	} {
+		server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			_, _ = writer.Write([]byte(response))
+		}))
+		bazaarRatingCloudServer = func() string { return server.URL }
+		if _, _, _, err := SetBazaarPackageRating(context.Background(), "plugins", "sample-invalid-public", 4); nil == err {
+			server.Close()
+			t.Fatalf("expected invalid public rating to fail: %s", response)
+		}
+		server.Close()
+	}
+}
+
+func TestSetBazaarPackageRatingCancellationWithoutRemainingRatings(t *testing.T) {
+	oldServer := bazaarRatingCloudServer
+	oldValidator := bazaarRatingValidatePackage
+	t.Cleanup(func() {
+		bazaarRatingCloudServer = oldServer
+		bazaarRatingValidatePackage = oldValidator
+	})
+	bazaarRatingValidatePackage = func(_ context.Context, _, _ string) (string, error) { return "secret", nil }
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		var body map[string]any
+		if err := json.NewDecoder(request.Body).Decode(&body); nil != err {
+			t.Error(err)
+			return
+		}
+		if float64(0) != body["rating"] {
+			t.Errorf("unexpected cancellation body: %+v", body)
+			return
+		}
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"code":0,"msg":"","data":{"rating":0,"ratingAvailable":true,"publicRating":null}}`))
+	}))
+	defer server.Close()
+	bazaarRatingCloudServer = func() string { return server.URL }
+
+	rating, ratingAvailable, userRating, err := SetBazaarPackageRating(
+		context.Background(), "plugins", "sample-cancel-last", 0)
+	if nil != err || !ratingAvailable || 0 != userRating || nil != rating {
+		t.Fatalf("unexpected last-rating cancellation response: rating=%+v available=%v userRating=%d err=%v",
+			rating, ratingAvailable, userRating, err)
+	}
+}
+
+func TestSetBazaarPackageRatingCancellationWithRemainingRatings(t *testing.T) {
+	oldServer := bazaarRatingCloudServer
+	oldValidator := bazaarRatingValidatePackage
+	t.Cleanup(func() {
+		bazaarRatingCloudServer = oldServer
+		bazaarRatingValidatePackage = oldValidator
+	})
+	bazaarRatingValidatePackage = func(_ context.Context, _, _ string) (string, error) { return "secret", nil }
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"code":0,"msg":"","data":{"rating":0,"ratingAvailable":true,"publicRating":{"average":4,"count":1,"distribution":[0,0,0,1,0]}}}`))
+	}))
+	defer server.Close()
+	bazaarRatingCloudServer = func() string { return server.URL }
+
+	rating, ratingAvailable, userRating, err := SetBazaarPackageRating(
+		context.Background(), "plugins", "sample-cancel-remaining", 0)
+	if nil != err || !ratingAvailable || 0 != userRating || nil == rating || 1 != rating.Count || 4 != rating.Average {
+		t.Fatalf("unexpected cancellation response: rating=%+v available=%v userRating=%d err=%v",
+			rating, ratingAvailable, userRating, err)
+	}
+}
+
+func TestSetBazaarPackageRatingLegacyCancellation(t *testing.T) {
+	oldServer := bazaarRatingCloudServer
+	oldValidator := bazaarRatingValidatePackage
+	oldAfterUpdate := bazaarRatingAfterUpdate
+	t.Cleanup(func() {
+		bazaarRatingCloudServer = oldServer
+		bazaarRatingValidatePackage = oldValidator
+		bazaarRatingAfterUpdate = oldAfterUpdate
+	})
+	bazaarRatingValidatePackage = func(_ context.Context, _, _ string) (string, error) { return "secret", nil }
+	bazaarRatingAfterUpdate = func(_ context.Context, _ int, packageName string,
+		distribution [5]int64) (*bazaar.PackageRating, bool) {
+		if "sample-cancel-legacy" != packageName || ([5]int64{}) != distribution {
+			t.Fatalf("unexpected legacy cancellation: package=%s distribution=%v", packageName, distribution)
+		}
+		return nil, true
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"code":0,"msg":"","data":{"rating":0,"ratingAvailable":false,"publicRating":null,"distribution":[0,0,0,0,0]}}`))
+	}))
+	defer server.Close()
+	bazaarRatingCloudServer = func() string { return server.URL }
+
+	rating, ratingAvailable, userRating, err := SetBazaarPackageRating(
+		context.Background(), "plugins", "sample-cancel-legacy", 0)
+	if nil != err || !ratingAvailable || 0 != userRating || nil != rating {
+		t.Fatalf("unexpected legacy cancellation response: rating=%+v available=%v userRating=%d err=%v",
+			rating, ratingAvailable, userRating, err)
+	}
+}
+
+func TestSetBazaarPackageRatingSerializesCloudResponses(t *testing.T) {
+	oldServer := bazaarRatingCloudServer
+	oldValidator := bazaarRatingValidatePackage
+	t.Cleanup(func() {
+		bazaarRatingCloudServer = oldServer
+		bazaarRatingValidatePackage = oldValidator
+	})
+	bazaarRatingValidatePackage = func(_ context.Context, _, _ string) (string, error) { return "secret", nil }
+
+	var active atomic.Int32
+	var maxActive atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+		current := active.Add(1)
+		for {
+			maximum := maxActive.Load()
+			if current <= maximum || maxActive.CompareAndSwap(maximum, current) {
+				break
+			}
+		}
+		time.Sleep(20 * time.Millisecond)
+		active.Add(-1)
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"code":0,"msg":"","data":{"rating":0,"ratingAvailable":true,"publicRating":null}}`))
+	}))
+	defer server.Close()
+	bazaarRatingCloudServer = func() string { return server.URL }
+
+	start := make(chan struct{})
+	errorsCh := make(chan error, 2)
+	for range 2 {
+		go func() {
+			<-start
+			_, _, _, err := SetBazaarPackageRating(context.Background(), "plugins", "sample-cancel-serial", 0)
+			errorsCh <- err
+		}()
+	}
+	close(start)
+	for range 2 {
+		if err := <-errorsCh; nil != err {
+			t.Fatal(err)
+		}
+	}
+	if 1 != maxActive.Load() {
+		t.Fatalf("rating submissions were not serialized: max concurrent requests=%d", maxActive.Load())
 	}
 }

@@ -1167,8 +1167,8 @@ func TestFilterPathsByPublishAccess(t *testing.T) {
 
 	newPaths := func() []*Path {
 		return []*Path{
-			{ID: publicID, Name: "/" + publicID + ".sy", HPath: "/public", Type: "path", NodeType: "NodeDocument"},
 			{ID: protectedID, Name: "/" + protectedID + ".sy", HPath: "/protected", Type: "path", NodeType: "NodeDocument"},
+			{ID: publicID, Name: "/" + publicID + ".sy", HPath: "/public", Type: "path", NodeType: "NodeDocument"},
 			{ID: hiddenID, Name: "/" + hiddenID + ".sy", HPath: "/hidden", Type: "path", NodeType: "NodeDocument"},
 			{ID: disabledID, Name: "/" + disabledID + ".sy", HPath: "/disabled", Type: "path", NodeType: "NodeDocument"},
 		}
@@ -1191,7 +1191,7 @@ func TestFilterPathsByPublishAccess(t *testing.T) {
 		Value: util.SHA256Hash([]byte(protectedID + protectedPassword)),
 	})
 	filtered = FilterPathsByPublishAccess(c, publishAccess, newPaths())
-	if len(filtered) != 2 || filtered[0].ID != publicID || filtered[1].ID != protectedID {
+	if len(filtered) != 2 || filtered[0].ID != protectedID || filtered[1].ID != publicID {
 		t.Fatalf("unexpected authenticated backlink paths: %+v", filtered)
 	}
 }

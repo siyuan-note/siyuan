@@ -276,7 +276,8 @@ func TestNewBoundAttributeViewItemValueUsesDynamicAnchorText(t *testing.T) {
 	if nil != err {
 		t.Fatalf("create bound attribute view item value failed: %s", err)
 	}
-	if bound.IsDetached || docID != bound.Block.ID || "" != bound.Block.Content || "1f4c4" != bound.Block.Icon {
+	if bound.IsDetached || docID != bound.Block.ID || "" != bound.Block.Content || "1f4c4" != bound.Block.Icon ||
+		av.BlockRefSubtypeDynamic != bound.Block.RefSubtype {
 		t.Fatalf("the bound item should use dynamic anchor text: %+v", bound)
 	}
 	if !original.IsDetached || "" != original.Block.ID || "Detached item" != original.Block.Content {

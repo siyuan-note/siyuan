@@ -120,7 +120,11 @@ func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*baz
 	pkg.HSize = humanize.BytesCustomCeil(uint64(pkg.Size), 2)
 	pkg.InstallSize = repo.InstallSize
 	pkg.HInstallSize = humanize.BytesCustomCeil(uint64(pkg.InstallSize), 2)
-	if stats := bazaarStats[repoURLHash[0]]; nil != stats { // 通过 bazaarStats[owner/repo] 获取单个包的统计数据
+	stats := bazaarStats[pkg.Name]
+	if nil == stats {
+		stats = bazaarStats[strings.ToLower(repoURLHash[0])] // 兼容旧版索引中的 owner/repo 下载统计
+	}
+	if nil != stats {
 		pkg.Downloads = stats.Downloads
 	}
 	pkg.RatingAvailable = ratingsAvailable

@@ -245,7 +245,7 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
     }, {
         name: "format-painter",
         lang: "formatPainter",
-        icon: "iconFormat",
+        icon: "iconPaintRoller",
         tipPosition: "n",
     }, {
         name: "|",

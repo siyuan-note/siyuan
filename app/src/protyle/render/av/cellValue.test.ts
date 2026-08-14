@@ -4,8 +4,30 @@ import {
     cellValueIsEmpty,
     cloneAVCellValueSnapshot,
     genRelationAVCellValue,
+    getAVBlockRefSubtype,
     getConvertedEmptyAVCellValue,
 } from "./cellValue";
+
+describe("getAVBlockRefSubtype", () => {
+    it("uses only a valid dynamic subtype and safely falls back to static", () => {
+        assert.equal(getAVBlockRefSubtype({
+            type: "block",
+            block: {content: "Dynamic", refSubtype: "d"},
+        }), "d");
+        assert.equal(getAVBlockRefSubtype({
+            type: "block",
+            block: {content: "Static", refSubtype: "s"},
+        }), "s");
+        assert.equal(getAVBlockRefSubtype({
+            type: "block",
+            block: {content: "Legacy"},
+        }), "s");
+        assert.equal(getAVBlockRefSubtype({
+            type: "block",
+            block: {content: "Invalid", refSubtype: "invalid"},
+        } as unknown as IAVCellValue), "s");
+    });
+});
 
 describe("cloneAVCellValueSnapshot", () => {
     it("preserves empty collection values in transaction snapshots", () => {

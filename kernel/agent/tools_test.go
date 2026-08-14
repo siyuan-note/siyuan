@@ -381,6 +381,26 @@ func TestQuestionAndBrowserCapabilityResultsAreAcceptedOnce(t *testing.T) {
 	}
 }
 
+func TestQuestionEventIncludesRoundID(t *testing.T) {
+	const roundID = "test-round"
+	events := make(chan AgentEvent, 1)
+	resultCh := make(chan string, 1)
+	go func() {
+		resultCh <- handleQuestion(context.Background(), `{"questions":[]}`, roundID, events, time.Second)
+	}()
+
+	event := <-events
+	if event.Type != "question" || event.RoundID != roundID || event.QuestionID == "" {
+		t.Fatalf("unexpected question event: %#v", event)
+	}
+	if !AnswerQuestion(event.QuestionID, []string{"answer"}) {
+		t.Fatal("question answer was rejected")
+	}
+	if result := <-resultCh; result != "answer" {
+		t.Fatalf("unexpected question result: %q", result)
+	}
+}
+
 func TestWaitCompletionKeepsConcurrentlyAcceptedResults(t *testing.T) {
 	const questionID = "test-question-timeout-race"
 	questionCh := make(chan QuestionAnswer, 1)

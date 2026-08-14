@@ -511,6 +511,9 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	// 做一些数据兼容和订正处理
 	changed := checkAttrView(attrView, view)
 	changed = upgradeAttributeViewSpec(attrView) || changed
+	if !ignoreRows {
+		changed = normalizeAttributeViewBlockRefSubtypes(attrView) || changed
+	}
 	if writable && changed {
 		if err = av.SaveAttributeView(attrView); nil != err {
 			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)

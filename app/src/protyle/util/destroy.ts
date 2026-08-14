@@ -6,7 +6,7 @@ export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
-    hideElements(["util"], protyle);
+    hideElements(["util"], protyle, true);
     destroyAIEditor(protyle);
     protyle.hint?.destroy();
     protyle.preview?.destroy();

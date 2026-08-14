@@ -19,7 +19,6 @@ package bazaar
 import (
 	"context"
 	"errors"
-	"maps"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -32,9 +31,8 @@ import (
 
 var (
 	bazaarMemMu        sync.RWMutex
-	bazaarCacheRhyHash string                          // bazaar hash，发生变更时清空以下缓存
-	stageIndexCache    = make(map[string]*StageIndex)  // pkgType -> 集市包索引
-	bazaarStatsCache   = make(map[string]*bazaarStats) // 集市统计数据
+	bazaarCacheRhyHash string                         // bazaar hash，发生变更时清空以下缓存
+	stageIndexCache    = make(map[string]*StageIndex) // pkgType -> 集市包索引
 )
 
 func applyRhyBazaarHash(ctx context.Context) {
@@ -46,7 +44,6 @@ func applyRhyBazaarHash(ctx context.Context) {
 	defer bazaarMemMu.Unlock()
 	if bazaarCacheRhyHash != "" && bazaarHash != bazaarCacheRhyHash {
 		clear(stageIndexCache)
-		clear(bazaarStatsCache)
 		logging.LogInfof("rhy bazaar hash changed, clearing bazaar caches")
 	}
 	bazaarCacheRhyHash = bazaarHash
@@ -63,7 +60,6 @@ type StageBazaarResult struct {
 
 var stageBazaarFlight singleflight.Group
 var onlineCheckFlight singleflight.Group
-var bazaarStatsFlight singleflight.Group
 var bazaarRatingsPrefetching atomic.Bool
 
 var (
@@ -115,28 +111,41 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 			StageErr:        nil,
 		}
 	}
-	var onlineResult bool
-	onlineDone := make(chan bool, 1)
-	var stageErr error
-	wg := &sync.WaitGroup{}
-	wg.Go(func() {
-		onlineResult = bazaarOnlineLoader()
-		onlineDone <- true
-	})
-	wg.Go(func() {
-		stageIndex, stageErr = stageIndexLoader(ctx, pkgType)
-	})
-	wg.Go(func() {
-		statsMap = bazaarStatsLoader(ctx)
-	})
+	type stageLoadResult struct {
+		index *StageIndex
+		err   error
+	}
+	onlineResultCh := make(chan bool, 1)
+	stageResultCh := make(chan stageLoadResult, 1)
+	statsResultCh := make(chan map[string]*bazaarStats, 1)
+	go func() {
+		onlineResultCh <- bazaarOnlineLoader()
+	}()
+	go func() {
+		index, err := stageIndexLoader(ctx, pkgType)
+		stageResultCh <- stageLoadResult{index: index, err: err}
+	}()
+	go func() {
+		statsResultCh <- bazaarStatsLoader(ctx)
+	}()
 	if !ratingsFresh {
 		prefetchBazaarRatings()
 	}
 
-	<-onlineDone
+	onlineResult := <-onlineResultCh
 	if !onlineResult {
 		// 不在线时立即取消其他请求并返回结果，避免等待 HTTP 请求超时
 		cancel()
+		var stageErr error
+		select {
+		case stageResult := <-stageResultCh:
+			stageIndex, stageErr = stageResult.index, stageResult.err
+		default:
+		}
+		select {
+		case statsMap = <-statsResultCh:
+		default:
+		}
 		return StageBazaarResult{
 			StageIndex:      stageIndex,
 			BazaarStats:     statsMap,
@@ -148,7 +157,9 @@ func getStageAndBazaar0(pkgType string) (result StageBazaarResult) {
 	}
 
 	// 在线时等待所有请求完成
-	wg.Wait()
+	stageResult := <-stageResultCh
+	stageIndex, stageErr := stageResult.index, stageResult.err
+	statsMap = <-statsResultCh
 	ratingsMap, ratingsAvailable = getBazaarRatingsFromCache(false)
 	if !ratingsAvailable {
 		ratingsMap = nil
@@ -291,44 +302,11 @@ type bazaarStats struct {
 // getBazaarStatsFromCache 仅从缓存获取集市包统计信息，无缓存时返回 nil
 func getBazaarStatsFromCache(ctx context.Context) (ret map[string]*bazaarStats) {
 	applyBazaarCacheHash(ctx)
-	bazaarMemMu.RLock()
-	defer bazaarMemMu.RUnlock()
-	if 0 == len(bazaarStatsCache) {
-		return nil
-	}
-	return bazaarStatsCache
+	index, _ := getBazaarIndexFromCache()
+	return bazaarStatsFromIndex(index)
 }
 
 // getBazaarStats 获取集市包统计信息
 func getBazaarStats(ctx context.Context) map[string]*bazaarStats {
-	if cached := getBazaarStatsFromCache(ctx); nil != cached {
-		return cached
-	}
-
-	v, _, _ := bazaarStatsFlight.Do("bazaarStats", func() (any, error) {
-		return getBazaarStats0(ctx), nil
-	})
-	return v.(map[string]*bazaarStats)
-}
-
-func getBazaarStats0(ctx context.Context) (result map[string]*bazaarStats) {
-	request := httpclient.NewBrowserRequest()
-	u := util.BazaarStatServer + "/bazaar/index.json"
-	resp, reqErr := request.SetContext(ctx).SetSuccessResult(&result).Get(u)
-	if nil != reqErr {
-		logging.LogErrorf("get bazaar stats [%s] failed: %s", u, reqErr)
-		return
-	}
-	if 200 != resp.StatusCode {
-		logging.LogErrorf("get bazaar stats [%s] failed: %d", u, resp.StatusCode)
-		return
-	}
-	if nil == result {
-		result = make(map[string]*bazaarStats)
-	}
-	bazaarMemMu.Lock()
-	clear(bazaarStatsCache)
-	maps.Copy(bazaarStatsCache, result)
-	bazaarMemMu.Unlock()
-	return
+	return bazaarStatsFromIndex(getBazaarIndex(ctx))
 }

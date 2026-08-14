@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sync"
 
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -34,6 +35,8 @@ var (
 	bazaarRatingInstalledPackageInfos = GetInstalledPackageInfos
 	bazaarRatingExistingPackageNames  = bazaar.GetExistingBazaarPackageNames
 	bazaarRatingPublicPackageRatings  = bazaar.GetBazaarPackageRatings
+	bazaarRatingAfterUpdate           = bazaar.GetBazaarPackageRatingAfterUpdate
+	bazaarRatingSetMu                 sync.Mutex
 )
 
 type bazaarRatingCloudResult[T any] struct {
@@ -47,8 +50,10 @@ type bazaarPackageUserRatingData struct {
 }
 
 type bazaarPackageSetRatingData struct {
-	Rating       int     `json:"rating"`
-	Distribution []int64 `json:"distribution"`
+	Rating          int                   `json:"rating"`
+	RatingAvailable *bool                 `json:"ratingAvailable"`
+	PublicRating    *bazaar.PackageRating `json:"publicRating"`
+	Distribution    []int64               `json:"distribution"`
 }
 
 // ErrBazaarRatingRateLimited 表示评分请求受到云端频率限制。
@@ -126,12 +131,15 @@ func GetBazaarPackageRating(ctx context.Context, pkgType, packageName string) (r
 	return rating, ratingAvailable, data.Rating, nil
 }
 
-// SetBazaarPackageRating 设置已安装官方包的当前用户评分。
+// SetBazaarPackageRating 设置或取消已安装官方包的当前用户评分。
 func SetBazaarPackageRating(ctx context.Context, pkgType, packageName string, userRating int) (rating *bazaar.PackageRating,
 	ratingAvailable bool, retUserRating int, err error) {
-	if 1 > userRating || 5 < userRating {
-		return nil, false, 0, errors.New("rating must be an integer from 1 to 5")
+	if 0 > userRating || 5 < userRating {
+		return nil, false, 0, errors.New("rating must be an integer from 0 to 5")
 	}
+	bazaarRatingSetMu.Lock()
+	defer bazaarRatingSetMu.Unlock()
+
 	token, err := bazaarRatingValidatePackage(ctx, pkgType, packageName)
 	if nil != err {
 		return nil, false, 0, err
@@ -147,21 +155,55 @@ func SetBazaarPackageRating(ctx context.Context, pkgType, packageName string, us
 	if nil != err {
 		return nil, false, 0, err
 	}
-	if 1 > data.Rating || 5 < data.Rating {
+	if data.Rating != userRating {
 		return nil, false, 0, errors.New("invalid user rating returned by cloud server")
+	}
+	if nil != data.RatingAvailable {
+		if !*data.RatingAvailable {
+			if nil != data.PublicRating {
+				return nil, false, 0, errors.New("invalid public rating returned by cloud server")
+			}
+			if 0 == len(data.Distribution) {
+				return nil, false, data.Rating, nil
+			}
+		} else {
+			if nil == data.PublicRating {
+				if 0 != data.Rating || !bazaar.ClearBazaarPackageRating(packageName) {
+					return nil, false, 0, errors.New("invalid public rating returned by cloud server")
+				}
+				rating, ratingAvailable = bazaar.GetCachedBazaarPackageRating(packageName)
+				if !ratingAvailable || nil != rating {
+					return nil, false, 0, errors.New("invalid public rating returned by cloud server")
+				}
+				return nil, true, data.Rating, nil
+			}
+			if 0 < data.Rating && 1 > data.PublicRating.Distribution[data.Rating-1] {
+				return nil, false, 0, errors.New("invalid public rating returned by cloud server")
+			}
+			if !bazaar.ApplyBazaarPackageRating(packageName, data.PublicRating) {
+				return nil, false, 0, errors.New("invalid public rating returned by cloud server")
+			}
+			rating, ratingAvailable = bazaar.GetCachedBazaarPackageRating(packageName)
+			if !ratingAvailable || nil == rating {
+				return nil, false, 0, errors.New("invalid public rating returned by cloud server")
+			}
+			return rating, true, data.Rating, nil
+		}
+	} else if nil != data.PublicRating {
+		return nil, false, 0, errors.New("invalid public rating returned by cloud server")
 	}
 	if 5 != len(data.Distribution) {
 		return nil, false, 0, errors.New("invalid rating distribution returned by cloud server")
 	}
 	distribution := [5]int64(data.Distribution)
-	if 1 > distribution[data.Rating-1] {
+	if 0 < data.Rating && 1 > distribution[data.Rating-1] {
 		return nil, false, 0, errors.New("invalid rating distribution returned by cloud server")
 	}
 	if !bazaar.ApplyBazaarPackageRatingDistribution(region, packageName, distribution) {
 		return nil, false, 0, errors.New("invalid rating distribution returned by cloud server")
 	}
 
-	rating, ratingAvailable = bazaar.GetBazaarPackageRatingAfterUpdate(region, packageName, distribution)
+	rating, ratingAvailable = bazaarRatingAfterUpdate(ctx, region, packageName, distribution)
 	return rating, ratingAvailable, data.Rating, nil
 }
 

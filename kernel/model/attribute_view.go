@@ -1989,6 +1989,7 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 				v.Block.Created = now
 				v.Block.Updated = now
 				v.Block.ID = ""
+				v.Block.RefSubtype = ""
 			}
 			v.IsDetached = true
 			v.CreatedAt = now
@@ -2410,6 +2411,11 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, p
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
+	}
+	if normalizeAttributeViewBlockRefSubtypes(attrView) {
+		if saveErr := av.SaveAttributeView(attrView); nil != saveErr {
+			logging.LogWarnf("save attribute view [%s] block reference subtypes failed: %s", avID, saveErr)
+		}
 	}
 	attributeViewName = getAttrViewName(attrView)
 
@@ -5767,8 +5773,10 @@ func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlock
 	}
 
 	var blockIcon string
+	var blockRefSubtype av.BlockRefSubtype
 	if !isDetached {
-		blockIcon, addingBlockContent = getNodeAvBlockText(node, "")
+		blockIcon, addingBlockContent = getNodeAvBlockText(node, avID)
+		blockRefSubtype = getNodeAvBlockRefSubtype(node, avID)
 		addingBlockContent = util.UnescapeHTML(addingBlockContent)
 	}
 
@@ -5788,6 +5796,7 @@ func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlock
 				blockValue.IsDetached = isDetached
 				blockValue.Block.Icon = blockIcon
 				blockValue.Block.Content = addingBlockContent
+				blockValue.Block.RefSubtype = blockRefSubtype
 				blockValue.UpdatedAt = now
 			}
 
@@ -5809,7 +5818,7 @@ func addAttributeViewBlock0(attrView *av.AttributeView, now int64, avID, dbBlock
 		IsDetached: isDetached,
 		CreatedAt:  now,
 		UpdatedAt:  now,
-		Block:      &av.ValueBlock{Icon: blockIcon, Content: addingBlockContent, Created: now, Updated: now}}
+		Block:      &av.ValueBlock{Icon: blockIcon, Content: addingBlockContent, RefSubtype: blockRefSubtype, Created: now, Updated: now}}
 	if !isDetached {
 		blockValue.Block.ID = addingBoundBlockID
 	}
@@ -7466,9 +7475,10 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 		if !isDetached && blockVal.Block.ID == newNodeID && nil != node && nil != tree {
 			bindBlockAv0(tx, avID, node, tree)
 			blockVal.IsDetached = false
-			icon, content := getNodeAvBlockText(node, "")
+			icon, content := getNodeAvBlockText(node, avID)
 			content = util.UnescapeHTML(content)
 			blockVal.Block.Icon, blockVal.Block.Content = icon, content
+			blockVal.Block.RefSubtype = getNodeAvBlockRefSubtype(node, avID)
 			blockVal.UpdatedAt = now
 			regenAttrViewGroups(attrView)
 			targetItemID = blockVal.BlockID
@@ -7491,13 +7501,15 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 				bindBlockAv(tx, avID, newNodeID)
 
 				blockVal.Block.ID = newNodeID
-				icon, content := getNodeAvBlockText(node, "")
+				icon, content := getNodeAvBlockText(node, avID)
 				content = util.UnescapeHTML(content)
 				blockVal.Block.Icon, blockVal.Block.Content = icon, content
+				blockVal.Block.RefSubtype = getNodeAvBlockRefSubtype(node, avID)
 
 				refreshRelatedSrcAvs(avID, tx)
 			} else {
 				blockVal.Block.ID = ""
+				blockVal.Block.RefSubtype = ""
 			}
 		}
 	}
@@ -7819,6 +7831,17 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 
 			if !val.IsDetached { // 现在绑定了块
 				bindBlockAv(tx, avID, val.Block.ID)
+				node, _, _ := getNodeByBlockID(tx, val.Block.ID)
+				if nil != node {
+					icon, content := getNodeAvBlockText(node, avID)
+					val.Block.Icon = icon
+					val.Block.Content = util.UnescapeHTML(content)
+					val.Block.RefSubtype = getNodeAvBlockRefSubtype(node, avID)
+				} else {
+					val.Block.RefSubtype = av.BlockRefSubtypeDynamic
+				}
+			} else {
+				val.Block.RefSubtype = ""
 			}
 		} else {
 			// 之前绑定了块
@@ -7826,6 +7849,7 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 			if val.IsDetached { // 现在是非绑定块
 				unbindBlockAv(tx, avID, val.Block.ID)
 				val.Block.ID = ""
+				val.Block.RefSubtype = ""
 			} else {
 				// 现在也绑定了块
 
@@ -7833,7 +7857,16 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)
 					bindBlockAv(tx, avID, val.Block.ID)
-					val.Block.Content = util.UnescapeHTML(val.Block.Content)
+					node, _, _ := getNodeByBlockID(tx, val.Block.ID)
+					if nil != node {
+						icon, content := getNodeAvBlockText(node, avID)
+						val.Block.Icon = icon
+						val.Block.Content = util.UnescapeHTML(content)
+						val.Block.RefSubtype = getNodeAvBlockRefSubtype(node, avID)
+					} else {
+						val.Block.Content = util.UnescapeHTML(val.Block.Content)
+						val.Block.RefSubtype = av.BlockRefSubtypeDynamic
+					}
 				} else { // 之前绑定的块和现在绑定的块一样
 					content := strings.TrimSpace(val.Block.Content)
 					node, tree, _ := getNodeByBlockID(tx, val.Block.ID)
@@ -7841,9 +7874,11 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 					if "" == content {
 						// 使用动态锚文本
 						val.Block.Content = util.UnescapeHTML(blockText)
+						val.Block.RefSubtype = av.BlockRefSubtypeDynamic
 						updateBlockValueStaticText(tx, node, tree, avID, "")
 					} else {
 						val.Block.Content = content
+						val.Block.RefSubtype = av.BlockRefSubtypeStatic
 						updateBlockValueStaticText(tx, node, tree, avID, content)
 					}
 				}

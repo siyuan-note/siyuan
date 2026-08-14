@@ -39,6 +39,8 @@ var validPackageTypes = map[string]bool{
 	"widgets":   true,
 }
 
+var setBazaarPackageRatingModel = model.SetBazaarPackageRating
+
 func installLocalBazaarPackage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -366,13 +368,13 @@ func setBazaarPackageRating(c *gin.Context) {
 		ret.Msg = "Invalid package type"
 		return
 	}
-	if ratingArg < 1 || 5 < ratingArg || ratingArg != math.Trunc(ratingArg) {
+	if ratingArg < 0 || 5 < ratingArg || ratingArg != math.Trunc(ratingArg) {
 		ret.Code = 1
-		ret.Msg = "Rating must be an integer from 1 to 5"
+		ret.Msg = "Rating must be an integer from 0 to 5"
 		return
 	}
 
-	rating, ratingAvailable, userRating, err := model.SetBazaarPackageRating(
+	rating, ratingAvailable, userRating, err := setBazaarPackageRatingModel(
 		c.Request.Context(), pkgType, packageName, int(ratingArg))
 	if nil != err {
 		setBazaarPackageRatingError(ret, err)

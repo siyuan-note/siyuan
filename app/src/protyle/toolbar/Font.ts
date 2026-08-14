@@ -5,6 +5,7 @@ import {Constants} from "../../constants";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {updateBatchTransaction} from "../wysiwyg/transaction";
 import {lineNumberRender} from "../render/highlightRender";
+import {closeSubElement} from "./subElementLifecycle";
 
 const MAX_RECENT_FONT_STYLES = 14;
 
@@ -40,6 +41,7 @@ export class Font extends ToolbarItem {
             const triggerRect = this.element.getBoundingClientRect();
             const visibleTriggerRect = triggerRect.width > 0 && triggerRect.height > 0 ? triggerRect : undefined;
             protyle.toolbar.element.classList.add("fn__none");
+            closeSubElement(protyle.toolbar);
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";
             protyle.toolbar.subElement.style.padding = "";
@@ -48,7 +50,6 @@ export class Font extends ToolbarItem {
             protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
             protyle.toolbar.subElement.classList.remove("fn__none");
             limitRecentFontStyleRows(appearanceElement);
-            protyle.toolbar.subElementCloseCB = undefined;
             focusByRange(protyle.toolbar.range);
             /// #if !MOBILE
             protyle.toolbar.setSelectionElementPosition(

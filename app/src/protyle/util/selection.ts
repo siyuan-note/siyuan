@@ -1021,7 +1021,7 @@ export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle
     }
 };
 
-export const focusByWbr = (element: Element, range: Range) => {
+export const focusByWbr = (element: Element, range: Range, preserveWbr = false) => {
     const wbrElements = element.querySelectorAll("wbr");
     if (wbrElements.length === 0) {
         return;
@@ -1073,7 +1073,9 @@ export const focusByWbr = (element: Element, range: Range) => {
         }
     }
     range.collapse(true);
-    wbrElement.remove();
+    if (!preserveWbr) {
+        wbrElement.remove();
+    }
     focusByRange(range);
     return range;
 };

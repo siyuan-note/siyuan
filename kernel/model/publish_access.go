@@ -1297,18 +1297,15 @@ func FilterPathsByPublishAccess(c *gin.Context, publishAccess PublishAccess, pat
 	publishInvisible := GetInvisiblePublishAccess(publishAccess)
 	publishDisable := GetDisablePublishAccess(publishAccess)
 
-	IDtoPathIndexMap := make(map[string]int)
-	for i, path := range paths {
+	for _, path := range paths {
 		IDs = append(IDs, path.ID)
-		IDtoPathIndexMap[path.ID] = i
 	}
 	bts := treenode.GetBlockTrees(IDs)
-	for _, bt := range bts {
+	for _, path := range paths {
+		bt := bts[path.ID]
 		if bt == nil {
 			continue
 		}
-		pathIndex := IDtoPathIndexMap[bt.ID]
-		path := paths[pathIndex]
 		passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
 		if CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) &&
 			CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishDisable) &&

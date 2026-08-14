@@ -1332,7 +1332,8 @@ interface IAVCellValue {
     block?: {
         content: string,
         id?: string,
-        icon?: string
+        icon?: string,
+        refSubtype?: "s" | "d"
     }
     url?: {
         content: string

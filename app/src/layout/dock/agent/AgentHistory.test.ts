@@ -144,6 +144,122 @@ describe("AgentHistory", () => {
         ]);
     });
 
+    it("renders question content before its question card instead of inside thinking", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "choose"},
+            {
+                id: "thinking-1",
+                type: "thinking",
+                steps: [{
+                    roundID: "round-1",
+                    reasoningContent: "partial reasoning",
+                    toolNames: ["question"],
+                    toolCallIDs: ["call-question"],
+                    content: "Choose a color",
+                }],
+            },
+            {id: "question-1", type: "question", roundID: "round-1"},
+            {
+                id: "assistant-1",
+                type: "assistant",
+                roundID: "round-1",
+                content: "Choose a color",
+                reasoningContent: "authoritative reasoning",
+                toolCalls: [{id: "call-question", name: "question"}],
+            },
+            {id: "assistant-2", type: "assistant", roundID: "round-2", content: "Done"},
+        ]);
+
+        assert.deepEqual(display.map(entry => entry.id), [
+            "user-1", "thinking-1", "assistant-1", "question-1", "assistant-2",
+        ]);
+        assert.equal(display.find(entry => entry.id === "thinking-1")?.steps?.[0].content, undefined);
+        assert.equal(display.find(entry => entry.id === "thinking-1")?.steps?.[0].reasoningContent,
+            "authoritative reasoning");
+        assert.deepEqual(display.filter(entry => entry.type === "assistant" && entry.content?.trim())
+            .map(entry => entry.content), ["Choose a color", "Done"]);
+    });
+
+    it("restores legacy question content without question round IDs", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "choose"},
+            {
+                id: "thinking-1",
+                type: "thinking",
+                steps: [{
+                    reasoningContent: "reasoning",
+                    toolNames: ["question"],
+                    content: "Choose a color",
+                }],
+            },
+            {id: "question-1", type: "question"},
+            {
+                id: "assistant-1",
+                type: "assistant",
+                content: "Choose a color",
+                toolCalls: [{name: "question"}],
+            },
+        ]);
+
+        assert.deepEqual(display.map(entry => entry.id), [
+            "user-1", "thinking-1", "assistant-1", "question-1",
+        ]);
+        assert.equal(display.find(entry => entry.id === "thinking-1")?.steps?.[0].content, undefined);
+    });
+
+    it("matches legacy question content after a contentless question", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "choose"},
+            {
+                id: "thinking-1",
+                type: "thinking",
+                steps: [{reasoningContent: "first", toolNames: ["question"]}],
+            },
+            {id: "question-1", type: "question"},
+            {
+                id: "thinking-2",
+                type: "thinking",
+                steps: [{reasoningContent: "second", toolNames: ["question"], content: "Choose again"}],
+            },
+            {id: "question-2", type: "question"},
+            {id: "assistant-1", type: "assistant", toolCalls: [{name: "question"}]},
+            {
+                id: "assistant-2",
+                type: "assistant",
+                content: "Choose again",
+                toolCalls: [{name: "question"}],
+            },
+        ]);
+
+        const secondContentIndex = display.findIndex(entry => entry.id === "assistant-2");
+        assert.ok(secondContentIndex > display.findIndex(entry => entry.id === "thinking-2"));
+        assert.ok(secondContentIndex < display.findIndex(entry => entry.id === "question-2"));
+        assert.ok(secondContentIndex > display.findIndex(entry => entry.id === "question-1"));
+        assert.equal(display.find(entry => entry.id === "thinking-2")?.steps?.[0].content, undefined);
+    });
+
+    it("places recovered thinking and question content before the question card", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "choose"},
+            {id: "question-1", type: "question", roundID: "round-1"},
+            {
+                id: "assistant-1",
+                type: "assistant",
+                roundID: "round-1",
+                content: "Choose a color",
+                reasoningContent: "reasoning",
+                toolCalls: [{id: "call-question", name: "question"}],
+            },
+            {id: "assistant-2", type: "assistant", roundID: "round-2", content: "Done"},
+        ]);
+
+        assert.deepEqual(display.map(entry => entry.id || entry.type), [
+            "user-1", "thinking", "assistant-1", "question-1", "assistant-2",
+        ]);
+        assert.equal(display[1].steps?.[0].content, undefined);
+        assert.equal(display[1].steps?.[0].roundID, "round-1");
+    });
+
     it("uses round IDs to restore authoritative process content", () => {
         const display = buildAgentPresentationEntries([
             {id: "user-1", type: "user", content: "work"},

@@ -1,4 +1,8 @@
 {
+	"bazaarRemoveRating": "ลบคะแนน",
+	"bazaarRatingRemoved": "ลบคะแนนแล้ว",
+	"bazaarRemoveRatingFailed": "ลบคะแนนไม่สำเร็จ",
+	"transposeTable": "สลับแถวและคอลัมน์ของตาราง",
 	"bazaarRatingRateLimited": "มีคำขอให้คะแนนมากเกินไป โปรดลองอีกครั้งในภายหลัง",
 	"sortByRatingDesc": "เรียงคะแนนจากมากไปน้อย",
 	"sortByRatingAsc": "เรียงคะแนนจากน้อยไปมาก",

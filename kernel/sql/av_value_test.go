@@ -46,3 +46,49 @@ func TestFillAttributeViewKeyValuesSkipsMissingKey(t *testing.T) {
 		t.Fatalf("value for a missing key was added to the existing key: %+v", attrView.KeyValues[0].Values)
 	}
 }
+
+func TestFillAttributeViewBlockRefSubtypes(t *testing.T) {
+	const avID = "20260814000000-avtest1"
+	dynamic := &av.Value{
+		Type: av.KeyTypeBlock,
+		Block: &av.ValueBlock{
+			ID: "20260814000001-dynamic", Content: "Dynamic",
+		},
+	}
+	static := &av.Value{
+		Type: av.KeyTypeBlock,
+		Block: &av.ValueBlock{
+			ID: "20260814000002-static1", Content: "Old",
+		},
+	}
+	detached := &av.Value{
+		Type:       av.KeyTypeBlock,
+		IsDetached: true,
+		Block:      &av.ValueBlock{Content: "Detached", RefSubtype: av.BlockRefSubtypeStatic},
+	}
+	attrView := &av.AttributeView{
+		ID: avID,
+		KeyValues: []*av.KeyValues{{
+			Key:    &av.Key{ID: "20260814000003-primary", Type: av.KeyTypeBlock},
+			Values: []*av.Value{dynamic, static, detached},
+		}},
+	}
+	attrs := map[string]map[string]string{
+		dynamic.Block.ID: {},
+		static.Block.ID: {
+			av.NodeAttrViewStaticText + "-" + avID: "Static",
+		},
+	}
+
+	fillAttributeViewBlockRefSubtypes(attrView, attrs)
+
+	if av.BlockRefSubtypeDynamic != dynamic.Block.RefSubtype || "Dynamic" != dynamic.Block.Content {
+		t.Fatalf("unexpected dynamic block value: %+v", dynamic.Block)
+	}
+	if av.BlockRefSubtypeStatic != static.Block.RefSubtype || "Static" != static.Block.Content {
+		t.Fatalf("unexpected static block value: %+v", static.Block)
+	}
+	if "" != detached.Block.RefSubtype {
+		t.Fatalf("detached block value retained a reference subtype: %+v", detached.Block)
+	}
+}

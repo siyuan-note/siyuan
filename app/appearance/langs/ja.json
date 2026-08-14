@@ -1,4 +1,8 @@
 {
+	"bazaarRemoveRating": "評価を取り消す",
+	"bazaarRatingRemoved": "評価を取り消しました",
+	"bazaarRemoveRatingFailed": "評価の取り消しに失敗しました",
+	"transposeTable": "表を転置",
 	"bazaarRatingRateLimited": "評価リクエストが多すぎます。しばらくしてからもう一度お試しください",
 	"sortByRatingDesc": "評価の高い順",
 	"sortByRatingAsc": "評価の低い順",

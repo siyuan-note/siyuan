@@ -183,6 +183,7 @@ func TestFetchBazaarRatingRegion(t *testing.T) {
 func TestBazaarRatingCacheLastGoodAndOverride(t *testing.T) {
 	resetBazaarRatingTestState(t)
 	now := time.Unix(1000, 0)
+	bazaarIndexNow = func() time.Time { return now }
 	bazaarRatingNow = func() time.Time { return now }
 	bazaarRatingCacheTTL = time.Minute
 	bazaarRatingOverrideTTL = 5 * time.Minute
@@ -225,6 +226,44 @@ func TestBazaarRatingCacheLastGoodAndOverride(t *testing.T) {
 	rating, available = GetBazaarPackageRating(context.Background(), "sample")
 	if !available || nil == rating || 6 != rating.Count || 11.0/3.0 != rating.Average {
 		t.Fatalf("stale refresh overwrote submitted distribution: available=%v rating=%+v", available, rating)
+	}
+}
+
+func TestBazaarPublicRatingTombstone(t *testing.T) {
+	resetBazaarRatingTestState(t)
+	now := time.Unix(1000, 0)
+	bazaarIndexNow = func() time.Time { return now }
+	bazaarRatingNow = func() time.Time { return now }
+	bazaarRatingOverrideTTL = 5 * time.Minute
+	bazaarIndexState.mu.Lock()
+	bazaarIndexState.snapshot = testBazaarIndex(1, true)
+	bazaarIndexState.snapshot.packages["sample"].Rating = &PackageRating{
+		Average: 5, Count: 1, Distribution: [5]int64{0, 0, 0, 0, 1},
+	}
+	bazaarIndexState.expiresAt = now.Add(time.Hour)
+	bazaarIndexState.mu.Unlock()
+
+	if !ClearBazaarPackageRating("sample") {
+		t.Fatal("valid rating tombstone was rejected")
+	}
+	if ClearBazaarPackageRating("bad/name/extra") {
+		t.Fatal("invalid package name should be rejected")
+	}
+	rating, available := GetCachedBazaarPackageRating("sample")
+	if !available || nil != rating {
+		t.Fatalf("tombstoned rating should be available without an aggregate: available=%v rating=%+v",
+			available, rating)
+	}
+	ratings, available := GetBazaarPackageRatings(context.Background(), []string{"sample"})
+	if !available || 0 != len(ratings) {
+		t.Fatalf("batch response should omit a tombstoned rating: available=%v ratings=%+v", available, ratings)
+	}
+
+	now = now.Add(bazaarRatingOverrideTTL)
+	rating, available = GetCachedBazaarPackageRating("sample")
+	if !available || nil == rating || 1 != rating.Count {
+		t.Fatalf("expired tombstone did not reveal the refreshed index: available=%v rating=%+v",
+			available, rating)
 	}
 }
 
@@ -315,6 +354,39 @@ func TestBazaarPackageRatingAfterUpdateLoadsLegacyFallback(t *testing.T) {
 	if !available || nil == rating || 3 != rating.Count || 11.0/3.0 != rating.Average || 1 != fetchCount.Load() {
 		t.Fatalf("unexpected legacy rating fallback: available=%v rating=%+v fetches=%d",
 			available, rating, fetchCount.Load())
+	}
+}
+
+func TestBazaarPackageRatingAfterCancellationReturnsAvailableWithoutRating(t *testing.T) {
+	resetBazaarRatingTestState(t)
+	bazaarRatingRegionCaches[1].loaded = true
+	bazaarRatingRegionCaches[1].data = map[string]bazaarRatingDistribution{}
+
+	rating, available := GetBazaarPackageRatingAfterUpdate(context.Background(), 0, "sample", [5]int64{})
+	if !available || nil != rating {
+		t.Fatalf("global zero-count rating should remain available: available=%v rating=%+v", available, rating)
+	}
+	rating, available = GetCachedBazaarPackageRating("sample")
+	if !available || nil != rating {
+		t.Fatalf("zero-count result should install a public tombstone: available=%v rating=%+v", available, rating)
+	}
+}
+
+func TestBazaarPackageRatingAfterUpdateRejectsTotalCountOverflow(t *testing.T) {
+	resetBazaarRatingTestState(t)
+	bazaarRatingRegionCaches[1].loaded = true
+	bazaarRatingRegionCaches[1].data = map[string]bazaarRatingDistribution{
+		"sample": {0, 1, 0, 0, 0},
+	}
+
+	rating, available := GetBazaarPackageRatingAfterUpdate(
+		context.Background(), 0, "sample", [5]int64{math.MaxInt64, 0, 0, 0, 0})
+	if available || nil != rating {
+		t.Fatalf("overflowing total count should be rejected: available=%v rating=%+v", available, rating)
+	}
+	if rating, overridden := getBazaarPublicRatingOverride("sample", bazaarRatingNow()); overridden || nil != rating {
+		t.Fatalf("overflowing total count must not install a public tombstone: overridden=%v rating=%+v",
+			overridden, rating)
 	}
 }
 

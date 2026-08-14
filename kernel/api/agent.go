@@ -733,6 +733,7 @@ func writeSSE(c *gin.Context, event agent.AgentEvent) error {
 	case "question":
 		return writeSSEEvent(c, "question", map[string]any{
 			"questionID": event.QuestionID,
+			"roundID":    event.RoundID,
 			"arguments":  event.Arguments,
 		})
 	case "browser_capability_call":

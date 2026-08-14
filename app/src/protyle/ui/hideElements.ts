@@ -2,6 +2,7 @@ import {getAllEditor} from "../../layout/getAll";
 import {hideRectResizeHandles} from "../../asset/rectAnnotationResize";
 import {isIPhone} from "../util/compatibility";
 import {hideGutterElements} from "./gutterVisibility";
+import {closeSubElement} from "../toolbar/subElementLifecycle";
 
 // "gutter", "toolbar", "select", "hint", "util", "dialog", "gutterOnly"
 export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = false) => {
@@ -48,10 +49,7 @@ export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = f
         if (!protyle.toolbar.isMultiSelectMode() &&
             (focusHide || !pinElement || (pinElement && pinElement.getAttribute("aria-label") === window.siyuan.languages.pin))) {
             protyle.toolbar.subElement.classList.add("fn__none");
-            if (protyle.toolbar.subElementCloseCB) {
-                protyle.toolbar.subElementCloseCB();
-                protyle.toolbar.subElementCloseCB = undefined;
-            }
+            closeSubElement(protyle.toolbar);
         }
     }
     if (panels.includes("select")) {
@@ -78,10 +76,7 @@ export const hideAllElements = (types: string[]) => {
                 if (!item.protyle.toolbar.isMultiSelectMode() &&
                     (!pinElement || (pinElement && pinElement.getAttribute("aria-label") === window.siyuan.languages.pin))) {
                     item.protyle.toolbar.subElement.classList.add("fn__none");
-                    if (item.protyle.toolbar.subElementCloseCB) {
-                        item.protyle.toolbar.subElementCloseCB();
-                        item.protyle.toolbar.subElementCloseCB = undefined;
-                    }
+                    closeSubElement(item.protyle.toolbar);
                 }
             }
         });

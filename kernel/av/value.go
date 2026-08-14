@@ -467,12 +467,51 @@ func (value *Value) GetValByType(typ KeyType) (ret any) {
 	return
 }
 
+type BlockRefSubtype string
+
+const (
+	BlockRefSubtypeStatic  BlockRefSubtype = "s"
+	BlockRefSubtypeDynamic BlockRefSubtype = "d"
+)
+
+func (subtype BlockRefSubtype) IsValid() bool {
+	return BlockRefSubtypeStatic == subtype || BlockRefSubtypeDynamic == subtype
+}
+
 type ValueBlock struct {
-	ID      string `json:"id,omitempty"` // 绑定的块 ID，非绑定块时为空
-	Icon    string `json:"icon,omitempty"`
-	Content string `json:"content"`
-	Created int64  `json:"created,omitempty"`
-	Updated int64  `json:"updated,omitempty"`
+	ID         string          `json:"id,omitempty"` // 绑定的块 ID，非绑定块时为空
+	Icon       string          `json:"icon,omitempty"`
+	Content    string          `json:"content"`
+	RefSubtype BlockRefSubtype `json:"refSubtype,omitempty"`
+	Created    int64           `json:"created,omitempty"`
+	Updated    int64           `json:"updated,omitempty"`
+}
+
+func (value *Value) NormalizeBlockRefSubtype(avID string, attrs map[string]string) (changed bool) {
+	if nil == value || KeyTypeBlock != value.Type || nil == value.Block {
+		return
+	}
+
+	expected := BlockRefSubtype("")
+	if !value.IsDetached && "" != value.Block.ID {
+		if value.Block.RefSubtype.IsValid() {
+			return
+		}
+
+		expected = BlockRefSubtypeDynamic
+		if staticText := attrs[NodeAttrViewStaticText+"-"+avID]; "" != staticText {
+			expected = BlockRefSubtypeStatic
+			if value.Block.Content != staticText {
+				value.Block.Content = staticText
+				changed = true
+			}
+		}
+	}
+	if value.Block.RefSubtype != expected {
+		value.Block.RefSubtype = expected
+		changed = true
+	}
+	return
 }
 
 type ValueText struct {

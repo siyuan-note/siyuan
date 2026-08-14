@@ -1265,7 +1265,7 @@ func AgentChat(ctx context.Context, client *openai.Client, model, imageCapabilit
 						resultStr = toolInputErr.Error()
 						isErr = true
 					} else if tc.Function.Name == "question" {
-						resultStr = handleQuestion(ctx, tc.Function.Arguments, ch, 5*time.Minute)
+						resultStr = handleQuestion(ctx, tc.Function.Arguments, roundID, ch, 5*time.Minute)
 					} else if registration.isBrowser() {
 						executed := handleBrowserCapability(ctx, tc, registration, ch, confirmTimeout)
 						resultStr = executed.Text
@@ -1597,7 +1597,7 @@ func needsLocalSnapshot(toolName, action string) bool {
 	}
 }
 
-func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, timeout time.Duration) string {
+func handleQuestion(ctx context.Context, argsJSON, roundID string, ch chan<- AgentEvent, timeout time.Duration) string {
 	args := parseToolArgs(argsJSON)
 	questionID := ast.NewNodeID()
 	ch2 := make(chan QuestionAnswer, 1)
@@ -1608,6 +1608,7 @@ func handleQuestion(ctx context.Context, argsJSON string, ch chan<- AgentEvent, 
 	sendCriticalEvent(ctx, ch, AgentEvent{
 		Type:       "question",
 		QuestionID: questionID,
+		RoundID:    roundID,
 		Arguments:  args,
 	})
 

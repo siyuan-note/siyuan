@@ -1,4 +1,8 @@
 {
+	"bazaarRemoveRating": "Видалити оцінку",
+	"bazaarRatingRemoved": "Оцінку видалено",
+	"bazaarRemoveRatingFailed": "Не вдалося видалити оцінку",
+	"transposeTable": "Транспонувати таблицю",
 	"bazaarRatingRateLimited": "Забагато запитів на оцінювання. Спробуйте ще раз пізніше",
 	"sortByRatingDesc": "Оцінка за спаданням",
 	"sortByRatingAsc": "Оцінка за зростанням",

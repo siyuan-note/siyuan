@@ -104,7 +104,14 @@ type SessionEntry =
     timestamp?: number
 })
     | (EntryBase & { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; effects?: IToolEffects; status?: string })
-    | (EntryBase & { type: "question"; questionID: string; questions: Array<Record<string, unknown>>; status?: string; answers?: string[] })
+    | (EntryBase & {
+    type: "question";
+    questionID: string;
+    questions: Array<Record<string, unknown>>;
+    roundID?: string;
+    status?: string;
+    answers?: string[]
+})
     | (EntryBase & { type: "todo"; result: string; callID?: string; roundID?: string })
     | (EntryBase & { type: "snapshot"; snapshotID: string; roundID?: string })
     | (EntryBase & { type: "rollback"; snapshotID: string });
@@ -2070,7 +2077,7 @@ export class AgentChat extends Model {
                     this.appendRetry(event.attempt, event.maxRetries);
                     break;
                 case "question":
-                    this.appendQuestion(event.questionID, event.arguments);
+                    this.appendQuestion(event.questionID, event.arguments, event.roundID);
                     break;
                 case "reasoning":
                     this.appendReasoning(event.token);
@@ -2579,6 +2586,7 @@ export class AgentChat extends Model {
             for (let i = 0; i < oldCards.length; i++) {
                 const card = oldCards[i] as HTMLElement;
                 card.classList.add("agent-chat__msg--thinking-done");
+                card.querySelector(".agent-chat__thinking-latest")?.classList.add("fn__none");
                 const txtEl = card.querySelector(".agent-chat__thinking-text");
                 if (txtEl) {
                     txtEl.textContent = doneText;
@@ -2642,7 +2650,7 @@ export class AgentChat extends Model {
             existingCard.remove();
         }
 
-        const bodyHTML = '<div class="agent-chat__thinking-body agent-chat__thinking-body--preview">' +
+        const bodyHTML = '<div class="agent-chat__thinking-body">' +
             detailLines +
             "</div>";
 
@@ -2659,6 +2667,7 @@ export class AgentChat extends Model {
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
             "</span>" +
             '<span class="agent-chat__thinking-text">' + escapeHtml(text) + "</span>" +
+            '<span class="agent-chat__thinking-latest"></span>' +
             "</div>" +
             bodyHTML +
             "</div>";
@@ -2692,6 +2701,11 @@ export class AgentChat extends Model {
                 const reasoningEl = allReasoning[allReasoning.length - 1] as HTMLElement;
                 if (reasoningEl) {
                     reasoningEl.textContent = this.currentThinkingReasoningContent;
+                    const latestElement = thinking.parentElement?.querySelector(".agent-chat__thinking-latest") as HTMLElement | null;
+                    if (latestElement) {
+                        latestElement.textContent = this.currentThinkingReasoningContent.replace(/\s+/g, " ").trim();
+                        latestElement.scrollLeft = latestElement.scrollWidth;
+                    }
                     // 预览态固定高度，滚到底部让最新 reasoning 内容可见。
                     const body = reasoningEl.closest(".agent-chat__thinking-body") as HTMLElement | null;
                     if (body) {
@@ -3453,9 +3467,29 @@ export class AgentChat extends Model {
         }
     }
 
-    private appendQuestion(questionID: string, args: Record<string, unknown>) {
+    private appendQuestion(questionID: string, args: Record<string, unknown>, roundID?: string) {
+        this.flushTokenUpdate();
+        const content = this.currentContent;
         this.finishActiveThinking();
         this.flushThinkingStep();
+        const timestamp = Date.now();
+        if (this.currentAIElement) {
+            if (content.trim()) {
+                this.finalizeStreamingBody(content, timestamp);
+            } else {
+                this.currentAIElement.remove();
+            }
+            this.currentAIElement = null;
+            this.observeStickTarget(null);
+        } else if (content.trim()) {
+            this.appendPersistedAssistant(
+                content,
+                timestamp,
+                this.currentAssistantEntryId || SessionStore.newSessionId(),
+            );
+        }
+        this.currentAssistantEntryId = "";
+        this.currentContent = "";
         const L = window.siyuan.languages;
         const rawQuestions = args.questions as Array<Record<string, unknown>>;
         if (!rawQuestions || rawQuestions.length === 0) {
@@ -3475,6 +3509,7 @@ export class AgentChat extends Model {
             type: "question",
             questionID: questionID,
             questions: rawQuestions,
+            roundID: roundID || this.currentRoundID || undefined,
             status: "pending",
         });
 
@@ -3897,6 +3932,7 @@ export class AgentChat extends Model {
                 body?.classList.remove("agent-chat__thinking-body--preview");
             }
             el.classList.add("agent-chat__msg--thinking-done");
+            el.querySelector(".agent-chat__thinking-latest")?.classList.add("fn__none");
             if (doneText) {
                 const textEl = el.querySelector(".agent-chat__thinking-text");
                 if (textEl) {

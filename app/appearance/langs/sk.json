@@ -1,4 +1,8 @@
 {
+	"bazaarRemoveRating": "Odstrániť hodnotenie",
+	"bazaarRatingRemoved": "Hodnotenie bolo odstránené",
+	"bazaarRemoveRatingFailed": "Hodnotenie sa nepodarilo odstrániť",
+	"transposeTable": "Transponovať tabuľku",
 	"bazaarRatingRateLimited": "Príliš veľa požiadaviek na hodnotenie. Skúste to znova neskôr",
 	"sortByRatingDesc": "Hodnotenie zostupne",
 	"sortByRatingAsc": "Hodnotenie vzostupne",

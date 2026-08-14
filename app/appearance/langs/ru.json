@@ -1,4 +1,8 @@
 {
+	"bazaarRemoveRating": "Удалить оценку",
+	"bazaarRatingRemoved": "Оценка удалена",
+	"bazaarRemoveRatingFailed": "Не удалось удалить оценку",
+	"transposeTable": "Транспонировать таблицу",
 	"bazaarRatingRateLimited": "Слишком много запросов на оценку. Повторите попытку позже",
 	"sortByRatingDesc": "Оценка по убыванию",
 	"sortByRatingAsc": "Оценка по возрастанию",

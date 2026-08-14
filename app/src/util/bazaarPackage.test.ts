@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     applyBazaarPackageRatingToItem,
+    beginBazaarRatingSubmission,
     beginBazaarRatingRequest,
     getBazaarBackendSystemLabels,
     getBazaarCompatibilityData,
@@ -10,14 +11,19 @@ import {
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
     getBazaarRatingErrorLanguageKey,
+    getBazaarRatingMutationVersion,
     getBazaarThemeModeLabels,
+    isBazaarPackageRatingEditable,
     isBazaarPackageRatingLoaded,
     isBazaarPluginEnabledInPublish,
+    isBazaarRatingRemovalAvailable,
     isLatestBazaarRatingRequest,
+    isBazaarRatingMutationVersionCurrent,
     isValidBazaarPackageName,
     normalizeBazaarPackageRatingResponse,
     normalizeBazaarPackageRatingsResponse,
     normalizeBazaarRating,
+    normalizeBazaarUserRating,
     sortBazaarPackagesByRating,
 } from "./bazaarPackage";
 
@@ -286,6 +292,30 @@ describe("normalizeBazaarPackageRatingsResponse", () => {
     });
 });
 
+describe("normalizeBazaarUserRating", () => {
+    it("accepts removal and star rating values", () => {
+        assert.equal(normalizeBazaarUserRating(0), 0);
+        assert.equal(normalizeBazaarUserRating(1), 1);
+        assert.equal(normalizeBazaarUserRating(5), 5);
+    });
+
+    it("rejects values outside the rating protocol", () => {
+        assert.equal(normalizeBazaarUserRating(-1), undefined);
+        assert.equal(normalizeBazaarUserRating(2.5), undefined);
+        assert.equal(normalizeBazaarUserRating(6), undefined);
+        assert.equal(normalizeBazaarUserRating("0"), undefined);
+    });
+});
+
+describe("isBazaarRatingRemovalAvailable", () => {
+    it("shows removal only for an existing star rating", () => {
+        assert.equal(isBazaarRatingRemovalAvailable(0), false);
+        assert.equal(isBazaarRatingRemovalAvailable(1), true);
+        assert.equal(isBazaarRatingRemovalAvailable(5), true);
+        assert.equal(isBazaarRatingRemovalAvailable(undefined), false);
+    });
+});
+
 describe("applyBazaarPackageRatingToItem", () => {
     it("propagates public availability with a rating", () => {
         const item = {
@@ -367,6 +397,50 @@ describe("isBazaarPackageRatingLoaded", () => {
         assert.equal(isBazaarPackageRatingLoaded("updated", false, true), false);
         assert.equal(isBazaarPackageRatingLoaded("downloaded", true, false), true);
         assert.equal(isBazaarPackageRatingLoaded("updated", true, false), true);
+    });
+});
+
+describe("isBazaarPackageRatingEditable", () => {
+    it("allows installed packages from every detail source", () => {
+        assert.equal(isBazaarPackageRatingEditable("downloaded", true), true);
+        assert.equal(isBazaarPackageRatingEditable("updated", true), true);
+        assert.equal(isBazaarPackageRatingEditable("bazaar", true), true);
+    });
+
+    it("rejects uninstalled online packages and missing sources", () => {
+        assert.equal(isBazaarPackageRatingEditable("bazaar", false), false);
+        assert.equal(isBazaarPackageRatingEditable(undefined, true), false);
+        assert.equal(isBazaarPackageRatingEditable("unknown", true), false);
+    });
+});
+
+describe("bazaar rating mutation ordering", () => {
+    it("rejects a batch snapshot captured before a rating mutation", () => {
+        const versions = new Map<string, number>();
+        const key = "plugins:package";
+        const capturedVersion = getBazaarRatingMutationVersion(versions, key);
+        beginBazaarRatingRequest(versions, key);
+        assert.equal(isBazaarRatingMutationVersionCurrent(versions, key, capturedVersion), false);
+    });
+
+    it("keeps unrelated package snapshots current", () => {
+        const versions = new Map<string, number>();
+        const firstVersion = getBazaarRatingMutationVersion(versions, "plugins:first");
+        const secondVersion = getBazaarRatingMutationVersion(versions, "plugins:second");
+        beginBazaarRatingRequest(versions, "plugins:first");
+        assert.equal(isBazaarRatingMutationVersionCurrent(versions, "plugins:first", firstVersion), false);
+        assert.equal(isBazaarRatingMutationVersionCurrent(versions, "plugins:second", secondVersion), true);
+    });
+});
+
+describe("bazaar rating submission lock", () => {
+    it("allows only one in-flight submission for the same user and package", () => {
+        const submittingKeys = new Set<string>();
+        const key = "user|plugins:package";
+        assert.equal(beginBazaarRatingSubmission(submittingKeys, key), true);
+        assert.equal(beginBazaarRatingSubmission(submittingKeys, key), false);
+        submittingKeys.delete(key);
+        assert.equal(beginBazaarRatingSubmission(submittingKeys, key), true);
     });
 });
 

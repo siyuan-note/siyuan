@@ -384,6 +384,16 @@ func getNodeAvBlockText(node *ast.Node, avID string) (icon, content string) {
 	return
 }
 
+func getNodeAvBlockRefSubtype(node *ast.Node, avID string) av.BlockRefSubtype {
+	if nil == node {
+		return av.BlockRefSubtypeDynamic
+	}
+	if "" != avID && "" != node.IALAttr(av.NodeAttrViewStaticText+"-"+avID) {
+		return av.BlockRefSubtypeStatic
+	}
+	return av.BlockRefSubtypeDynamic
+}
+
 func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 	switch node.Type {
 	case ast.NodeBlockQueryEmbed:

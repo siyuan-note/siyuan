@@ -1,4 +1,8 @@
 {
+	"bazaarRemoveRating": "Puanı kaldır",
+	"bazaarRatingRemoved": "Puan kaldırıldı",
+	"bazaarRemoveRatingFailed": "Puan kaldırılamadı",
+	"transposeTable": "Tabloyu transpoze et",
 	"bazaarRatingRateLimited": "Çok fazla değerlendirme isteği var. Lütfen daha sonra tekrar deneyin",
 	"sortByRatingDesc": "Puana göre azalan",
 	"sortByRatingAsc": "Puana göre artan",

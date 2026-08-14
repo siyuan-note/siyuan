@@ -1,4 +1,8 @@
 {
+	"bazaarRemoveRating": "Eliminar puntuación",
+	"bazaarRatingRemoved": "Puntuación eliminada",
+	"bazaarRemoveRatingFailed": "No se pudo eliminar la puntuación",
+	"transposeTable": "Transponer tabla",
 	"bazaarRatingRateLimited": "Demasiadas solicitudes de valoración. Inténtalo de nuevo más tarde",
 	"sortByRatingDesc": "Valoración descendente",
 	"sortByRatingAsc": "Valoración ascendente",

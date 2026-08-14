@@ -18,7 +18,12 @@ import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {Dialog} from "../../dialog";
 import {isMobile} from "../../util/functions";
-import {getProjectedTableHeadRowCount, projectTableCells} from "./tableSelection";
+import {
+    getProjectedTableHeadRowCount,
+    getTableHeadRowCount,
+    projectTableCells,
+    transposeTableCells,
+} from "./tableSelection";
 
 const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
     if (nodeElement.getAttribute("custom-pinthead") === "true") {
@@ -46,6 +51,21 @@ export const getColIndex = (cellElement: HTMLElement) => {
 export const isTableHeaderEnabled = (nodeElement: Element, type: "row" | "column") => {
     return type === "row" ? nodeElement.getAttribute("custom-sy-table-header-row") !== "false" :
         nodeElement.getAttribute("custom-sy-table-header-column") === "true";
+};
+
+const setTableHeaderEnabled = (nodeElement: Element, type: "row" | "column", enabled: boolean) => {
+    const attribute = `custom-sy-table-header-${type}`;
+    if (type === "row") {
+        if (enabled) {
+            nodeElement.removeAttribute(attribute);
+        } else {
+            nodeElement.setAttribute(attribute, "false");
+        }
+    } else if (enabled) {
+        nodeElement.setAttribute(attribute, "true");
+    } else {
+        nodeElement.removeAttribute(attribute);
+    }
 };
 
 export const toggleTableHeader = (protyle: IProtyle, nodeElement: Element, type: "row" | "column") => {
@@ -1014,6 +1034,107 @@ const cloneTableCell = (sourceCell: HTMLTableCellElement | undefined, tag: "th" 
     });
     Array.from(sourceCell.childNodes).forEach(child => cell.append(child.cloneNode(true)));
     return cell;
+};
+
+const resetTableCellColumnLayout = (cell: HTMLTableCellElement) => {
+    cell.removeAttribute("align");
+    cell.style.removeProperty("width");
+    cell.style.removeProperty("min-width");
+    cell.style.removeProperty("max-width");
+    if (!cell.getAttribute("style")) {
+        cell.removeAttribute("style");
+    }
+};
+
+export const transposeTable = (protyle: IProtyle, nodeElement: Element, range: Range) => {
+    const tableElement = nodeElement.querySelector("table");
+    if (!tableElement) {
+        return false;
+    }
+    const grid = buildTableGrid(tableElement);
+    if (grid.rowCount === 0 || grid.columnCount === 0) {
+        return false;
+    }
+    if (!tableElement.contains(range.startContainer)) {
+        const firstCell = tableElement.querySelector("th, td");
+        if (!firstCell) {
+            return false;
+        }
+        range.selectNodeContents(firstCell);
+        range.collapse(true);
+    }
+    range.insertNode(document.createElement("wbr"));
+    const oldHTML = nodeElement.outerHTML;
+    const rowHeaderEnabled = isTableHeaderEnabled(nodeElement, "row");
+    const columnHeaderEnabled = isTableHeaderEnabled(nodeElement, "column");
+    const transposed = transposeTableCells(grid.cellInfos, grid.rowCount, grid.columnCount);
+    const headRowCount = getTableHeadRowCount(transposed.cells, transposed.rowCount);
+    const outputCells = new Map<string, typeof transposed.cells[number]>();
+    const coveredSlots = Array.from({length: transposed.rowCount},
+        () => new Array(transposed.columnCount).fill(false));
+    transposed.cells.forEach(cell => {
+        outputCells.set(`${cell.row}:${cell.col}`, cell);
+        for (let row = cell.row; row < cell.row + cell.rowspan; row++) {
+            for (let column = cell.col; column < cell.col + cell.colspan; column++) {
+                if (row !== cell.row || column !== cell.col) {
+                    coveredSlots[row][column] = true;
+                }
+            }
+        }
+    });
+
+    const nextTable = tableElement.cloneNode(false) as HTMLTableElement;
+    if (tableElement.caption) {
+        nextTable.append(tableElement.caption.cloneNode(true));
+    }
+    const sourceColumnGroup = Array.from(tableElement.children)
+        .find(item => item.tagName === "COLGROUP") as HTMLTableColElement | undefined;
+    const columnGroup = sourceColumnGroup?.cloneNode(false) as HTMLTableColElement ||
+        document.createElement("colgroup");
+    for (let column = 0; column < transposed.columnCount; column++) {
+        const columnElement = document.createElement("col");
+        columnElement.style.minWidth = "60px";
+        columnGroup.append(columnElement);
+    }
+    nextTable.append(columnGroup);
+    const head = tableElement.tHead?.cloneNode(false) as HTMLTableSectionElement ||
+        document.createElement("thead");
+    const body = tableElement.tBodies[0]?.cloneNode(false) as HTMLTableSectionElement ||
+        document.createElement("tbody");
+    for (let row = 0; row < transposed.rowCount; row++) {
+        const rowElement = document.createElement("tr");
+        const tag = row < headRowCount ? "th" : "td";
+        for (let column = 0; column < transposed.columnCount; column++) {
+            const outputCell = outputCells.get(`${row}:${column}`);
+            const cell = outputCell ? cloneTableCell(outputCell.source.cell, tag) : document.createElement(tag);
+            resetTableCellColumnLayout(cell);
+            if (outputCell) {
+                cell.classList.remove("fn__none");
+                if (outputCell.rowspan > 1) {
+                    cell.setAttribute("rowspan", outputCell.rowspan.toString());
+                } else {
+                    cell.removeAttribute("rowspan");
+                }
+                if (outputCell.colspan > 1) {
+                    cell.setAttribute("colspan", outputCell.colspan.toString());
+                } else {
+                    cell.removeAttribute("colspan");
+                }
+            } else if (coveredSlots[row][column]) {
+                cell.classList.add("fn__none");
+            }
+            rowElement.append(cell);
+        }
+        (row < headRowCount ? head : body).append(rowElement);
+    }
+    nextTable.append(head, body);
+    tableElement.replaceWith(nextTable);
+    setTableHeaderEnabled(nodeElement, "row", columnHeaderEnabled);
+    setTableHeaderEnabled(nodeElement, "column", rowHeaderEnabled);
+    (nodeElement.firstElementChild as HTMLElement).scrollLeft = 0;
+    updateTransaction(protyle, nodeElement, oldHTML);
+    focusByWbr(nodeElement, range);
+    return true;
 };
 
 const rebuildProjectedTable = (

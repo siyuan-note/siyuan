@@ -53,6 +53,7 @@ interface IAIEditorTask {
     thinkingBody: HTMLElement;
     thinkingReasoningElement: HTMLElement;
     thinkingTextElement: HTMLElement;
+    thinkingLatestElement: HTMLElement;
     thinkingStartedAt: number;
     thinkingTimer?: number;
     modelElement: HTMLElement;
@@ -358,6 +359,8 @@ const renderTaskPreview = (task: IAIEditorTask, rich = false) => {
 
 const renderTaskReasoning = (task: IAIEditorTask) => {
     task.thinkingReasoningElement.textContent = task.reasoningContent;
+    task.thinkingLatestElement.textContent = task.reasoningContent.replace(/\s+/g, " ").trim();
+    task.thinkingLatestElement.scrollLeft = task.thinkingLatestElement.scrollWidth;
     task.thinkingBody.scrollTop = task.thinkingBody.scrollHeight;
 };
 
@@ -372,7 +375,8 @@ const startTaskReasoning = (task: IAIEditorTask) => {
     }
     task.reasoning = true;
     task.thinkingElement.classList.remove("fn__none", "agent-chat__msg--thinking-done");
-    task.thinkingBody.classList.add("agent-chat__thinking-body--preview");
+    task.thinkingLatestElement.classList.remove("fn__none");
+    task.thinkingBody.classList.remove("agent-chat__thinking-body--preview");
     task.body.classList.add("fn__none");
     updateTaskThinkingText(task);
     task.thinkingTimer = window.setInterval(() => updateTaskThinkingText(task), 1000);
@@ -389,6 +393,7 @@ const finishTaskReasoning = (task: IAIEditorTask) => {
     renderTaskReasoning(task);
     task.reasoning = false;
     task.thinkingElement.classList.add("agent-chat__msg--thinking-done");
+    task.thinkingLatestElement.classList.add("fn__none");
     if (!task.thinkingElement.hasAttribute("data-user-interacted")) {
         task.thinkingBody.classList.remove("agent-chat__thinking-body--preview");
     }
@@ -508,10 +513,11 @@ const startTaskStream = (task: IAIEditorTask) => {
     task.thinkingElement.classList.add("fn__none");
     task.thinkingElement.classList.remove("agent-chat__msg--thinking-done");
     task.thinkingElement.removeAttribute("data-user-interacted");
-    task.thinkingBody.classList.add("agent-chat__thinking-body--preview");
-    task.thinkingBody.classList.remove("agent-chat__thinking-body--expanded");
+    task.thinkingBody.classList.remove("agent-chat__thinking-body--preview", "agent-chat__thinking-body--expanded");
     task.thinkingReasoningElement.textContent = "";
     task.thinkingTextElement.textContent = window.siyuan.languages.agentThinking;
+    task.thinkingLatestElement.textContent = "";
+    task.thinkingLatestElement.classList.remove("fn__none");
     task.thinkingElement.querySelector(".agent-chat__thinking-arrow--expand")?.classList.remove("fn__none");
     task.thinkingElement.querySelector(".agent-chat__thinking-arrow--contract")?.classList.add("fn__none");
     task.body.classList.remove("fn__none");
@@ -591,8 +597,9 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
                 <svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>
             </span>
             <span class="agent-chat__thinking-text"></span>
+            <span class="agent-chat__thinking-latest"></span>
         </div>
-        <div class="agent-chat__thinking-body agent-chat__thinking-body--preview">
+        <div class="agent-chat__thinking-body">
             <div class="agent-chat__thinking-reasoning-text"></div>
         </div>
     </div>
@@ -620,6 +627,7 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         thinkingBody: panel.querySelector(".agent-chat__thinking-body") as HTMLElement,
         thinkingReasoningElement: panel.querySelector(".agent-chat__thinking-reasoning-text") as HTMLElement,
         thinkingTextElement: panel.querySelector(".agent-chat__thinking-text") as HTMLElement,
+        thinkingLatestElement: panel.querySelector(".agent-chat__thinking-latest") as HTMLElement,
         thinkingStartedAt: Date.now(),
         modelElement: panel.querySelector(".ai-editor-panel__model") as HTMLElement,
         statusElement: panel.querySelector(".ai-editor-panel__status") as HTMLElement,
@@ -642,13 +650,19 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
             task.thinkingBody.classList.remove("agent-chat__thinking-body--expanded");
             expandIcon.classList.remove("fn__none");
             contractIcon.classList.add("fn__none");
+            if (!task.thinkingElement.classList.contains("agent-chat__msg--thinking-done")) {
+                task.thinkingLatestElement.classList.remove("fn__none");
+                task.thinkingLatestElement.scrollLeft = task.thinkingLatestElement.scrollWidth;
+            }
         } else if (preview || task.thinkingElement.classList.contains("agent-chat__msg--thinking-done")) {
             task.thinkingBody.classList.remove("agent-chat__thinking-body--preview");
             task.thinkingBody.classList.add("agent-chat__thinking-body--expanded");
             expandIcon.classList.add("fn__none");
             contractIcon.classList.remove("fn__none");
+            task.thinkingLatestElement.classList.add("fn__none");
         } else {
             task.thinkingBody.classList.add("agent-chat__thinking-body--preview");
+            task.thinkingLatestElement.classList.add("fn__none");
         }
     });
     task.updatePosition = () => {

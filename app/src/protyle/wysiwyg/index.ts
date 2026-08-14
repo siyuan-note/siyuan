@@ -1120,7 +1120,7 @@ export class WYSIWYG {
                         setAVItemAnchor(nodeElement, rowElement as HTMLElement);
                     }
                 } else if (ctrlElement) {
-                    clearSelect(["row", "galleryItem"], this.element);
+                    clearSelect(["img", "row", "galleryItem"], this.element);
                     const embedBlockElement = isInEmbedBlock(ctrlElement);
                     if (embedBlockElement) {
                         ctrlElement = embedBlockElement;

@@ -1,4 +1,8 @@
 {
+	"bazaarRemoveRating": "रेटिंग हटाएँ",
+	"bazaarRatingRemoved": "रेटिंग हटा दी गई",
+	"bazaarRemoveRatingFailed": "रेटिंग हटाने में विफल",
+	"transposeTable": "तालिका ट्रांसपोज़ करें",
 	"bazaarRatingRateLimited": "बहुत अधिक रेटिंग अनुरोध। कृपया बाद में पुनः प्रयास करें",
 	"sortByRatingDesc": "रेटिंग के अनुसार अवरोही",
 	"sortByRatingAsc": "रेटिंग के अनुसार आरोही",

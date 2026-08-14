@@ -1,4 +1,8 @@
 {
+	"bazaarRemoveRating": "Usuń ocenę",
+	"bazaarRatingRemoved": "Ocena została usunięta",
+	"bazaarRemoveRatingFailed": "Nie udało się usunąć oceny",
+	"transposeTable": "Transponuj tabelę",
 	"bazaarRatingRateLimited": "Zbyt wiele żądań oceny. Spróbuj ponownie później",
 	"sortByRatingDesc": "Oceny malejąco",
 	"sortByRatingAsc": "Oceny rosnąco",

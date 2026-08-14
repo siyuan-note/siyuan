@@ -202,12 +202,9 @@ func assetUpload(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "files is required"}}, IsError: true}, nil
 	}
 	fileList := strings.Split(filesStr, ",")
-	for i, f := range fileList {
-		abs, err := filepath.Abs(strings.TrimSpace(f))
-		if err != nil {
-			return CallToolResult{Content: []ContentItem{{Type: "text", Text: "resolve path failed: " + err.Error()}}, IsError: true}, nil
-		}
-		fileList[i] = abs
+	fileList, err := validateAssetUploadPaths(fileList)
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "invalid asset path: " + err.Error()}}, IsError: true}, nil
 	}
 
 	succMap, err := model.InsertLocalAssets(id, fileList, true)
@@ -221,6 +218,23 @@ func assetUpload(args map[string]any) (CallToolResult, error) {
 		sb.WriteString(fmt.Sprintf("- %s -> %v\n", k, v))
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+// validateAssetUploadPaths 将上传路径归一化为绝对路径，并拒绝敏感路径，
+// 防止通过 AI 提示注入诱导上传本地凭据等敏感文件（如 SSH 私钥、云服务凭据）后外泄。
+// 非敏感的工作区外绝对路径仍然允许上传，与 globalCopyFiles 等接受工作区外路径的接口保持一致。
+func validateAssetUploadPaths(fileList []string) ([]string, error) {
+	for i, f := range fileList {
+		abs, err := filepath.Abs(strings.TrimSpace(f))
+		if err != nil {
+			return nil, err
+		}
+		if util.IsSensitivePath(abs) {
+			return nil, fmt.Errorf("asset path is sensitive: %s", abs)
+		}
+		fileList[i] = abs
+	}
+	return fileList, nil
 }
 
 func assetUnused(args map[string]any) (CallToolResult, error) {

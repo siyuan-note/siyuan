@@ -98,6 +98,26 @@ export const saveExport = (option: IExportOptions) => {
         <span class="fn__space"></span>
         <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>
     </label>
+    <label class="fn__flex b3-label merge-heading-option${localData.mergeSubdocs ? "" : " fn__none"}">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.mergeDocHeadingMode}
+        </div>
+        <span class="fn__space"></span>
+        <select id="mergeDocHeadingMode" class="b3-select">
+            <option value="flat" ${localData.mergeDocHeadingMode === "flat" ? "selected" : ""}>${window.siyuan.languages.mergeDocHeadingFlat}</option>
+            <option value="tree" ${localData.mergeDocHeadingMode === "tree" ? "selected" : ""}>${window.siyuan.languages.mergeDocHeadingTree}</option>
+        </select>
+    </label>
+    <label class="fn__flex b3-label merge-heading-option${localData.mergeSubdocs ? "" : " fn__none"}">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.mergeContentHeadingMode}
+        </div>
+        <span class="fn__space"></span>
+        <select id="mergeContentHeadingMode" class="b3-select">
+            <option value="preserve" ${localData.mergeContentHeadingMode === "preserve" ? "selected" : ""}>${window.siyuan.languages.mergeContentHeadingPreserve}</option>
+            <option value="demote" ${localData.mergeContentHeadingMode === "demote" ? "selected" : ""}>${window.siyuan.languages.mergeContentHeadingDemote}</option>
+        </select>
+    </label>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -106,16 +126,29 @@ export const saveExport = (option: IExportOptions) => {
             width: "520px",
         });
         wordDialog.element.setAttribute("data-key", Constants.DIALOG_EXPORTWORD);
+        const mergeSubdocsElement = wordDialog.element.querySelector("#mergeSubdocs") as HTMLInputElement;
+        mergeSubdocsElement.addEventListener("change", () => {
+            wordDialog.element.querySelectorAll(".merge-heading-option").forEach((item) => {
+                item.classList.toggle("fn__none", !mergeSubdocsElement.checked);
+            });
+        });
         const btnsElement = wordDialog.element.querySelectorAll(".b3-button");
         btnsElement[0].addEventListener("click", () => {
             wordDialog.destroy();
         });
         btnsElement[1].addEventListener("click", () => {
             const removeAssets = (wordDialog.element.querySelector("#removeAssets") as HTMLInputElement).checked;
-            const mergeSubdocs = (wordDialog.element.querySelector("#mergeSubdocs") as HTMLInputElement).checked;
-            window.siyuan.storage[Constants.LOCAL_EXPORTWORD] = {removeAssets, mergeSubdocs};
+            const mergeSubdocs = mergeSubdocsElement.checked;
+            const mergeDocHeadingMode = (wordDialog.element.querySelector("#mergeDocHeadingMode") as HTMLSelectElement).value;
+            const mergeContentHeadingMode = (wordDialog.element.querySelector("#mergeContentHeadingMode") as HTMLSelectElement).value;
+            window.siyuan.storage[Constants.LOCAL_EXPORTWORD] = {
+                removeAssets,
+                mergeSubdocs,
+                mergeDocHeadingMode,
+                mergeContentHeadingMode,
+            };
             setStorageVal(Constants.LOCAL_EXPORTWORD, window.siyuan.storage[Constants.LOCAL_EXPORTWORD]);
-            getExportPath(option, removeAssets, mergeSubdocs);
+            getExportPath(option, removeAssets, mergeSubdocs, mergeDocHeadingMode, mergeContentHeadingMode);
             wordDialog.destroy();
         });
     } else {
@@ -183,7 +216,7 @@ const renderPDF = async (id: string) => {
         }
         
         #action {
-          width: 232px;
+          width: 280px;
           background-color: var(--b3-theme-background);
           padding: 12px 0;
           position: fixed;
@@ -206,7 +239,7 @@ const renderPDF = async (id: string) => {
           max-width: 800px;
           margin: 24px auto;
           position: absolute;
-          right: 232px;
+          right: 280px;
           left: 0;
           min-height: calc(100% - 48px);
           box-sizing: border-box;
@@ -245,6 +278,10 @@ const renderPDF = async (id: string) => {
         
         .b3-label:last-child {
             border-bottom: none;
+        }
+
+        #mergeHeadingOptions .b3-label:last-child {
+            border-bottom: 1px solid var(--b3-theme-surface-lighter);
         }
         
         #preview .render-node[data-subtype="plantuml"] object {
@@ -354,6 +391,28 @@ const renderPDF = async (id: string) => {
             <span class="fn__hr"></span>
             <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>
         </label>
+        <div id="mergeHeadingOptions" class="${localData.mergeSubdocs ? "" : "fn__none"}">
+            <label class="b3-label">
+                <div>
+                    ${window.siyuan.languages.mergeDocHeadingMode}
+                </div>
+                <span class="fn__hr"></span>
+                <select class="b3-select" id="mergeDocHeadingMode">
+                    <option value="flat" ${localData.mergeDocHeadingMode === "flat" ? "selected" : ""}>${window.siyuan.languages.mergeDocHeadingFlat}</option>
+                    <option value="tree" ${localData.mergeDocHeadingMode === "tree" ? "selected" : ""}>${window.siyuan.languages.mergeDocHeadingTree}</option>
+                </select>
+            </label>
+            <label class="b3-label">
+                <div>
+                    ${window.siyuan.languages.mergeContentHeadingMode}
+                </div>
+                <span class="fn__hr"></span>
+                <select class="b3-select" id="mergeContentHeadingMode">
+                    <option value="preserve" ${localData.mergeContentHeadingMode === "preserve" ? "selected" : ""}>${window.siyuan.languages.mergeContentHeadingPreserve}</option>
+                    <option value="demote" ${localData.mergeContentHeadingMode === "demote" ? "selected" : ""}>${window.siyuan.languages.mergeContentHeadingDemote}</option>
+                </select>
+            </label>
+        </div>
         <label class="b3-label">
             <div>
                 ${window.siyuan.languages.export27}
@@ -536,6 +595,8 @@ ${getIconScript(servePath)}
         id: "${id}",
         keepFold: ${localData.keepFold},
         merge: ${localData.mergeSubdocs},
+        mergeDocHeadingMode: "${localData.mergeDocHeadingMode}",
+        mergeContentHeadingMode: "${localData.mergeContentHeadingMode}",
     }, response => {
         if (response.code !== 0) {
             alert(response.msg)
@@ -586,7 +647,17 @@ ${getIconScript(servePath)}
             refreshPreview();
         });
         const mergeSubdocsElement = actionElement.querySelector('#mergeSubdocs');
+        const mergeHeadingOptionsElement = actionElement.querySelector('#mergeHeadingOptions');
+        const mergeDocHeadingModeElement = actionElement.querySelector('#mergeDocHeadingMode');
+        const mergeContentHeadingModeElement = actionElement.querySelector('#mergeContentHeadingMode');
         mergeSubdocsElement.addEventListener('change', () => {
+            mergeHeadingOptionsElement.classList.toggle('fn__none', !mergeSubdocsElement.checked);
+            refreshPreview();
+        });
+        mergeDocHeadingModeElement.addEventListener('change', () => {
+            refreshPreview();
+        });
+        mergeContentHeadingModeElement.addEventListener('change', () => {
             refreshPreview();
         });
         const  watermarkElement = actionElement.querySelector('#watermark');
@@ -596,6 +667,8 @@ ${getIconScript(servePath)}
                 id: "${id}",
                 keepFold: keepFoldElement.checked,
                 merge: mergeSubdocsElement.checked,
+                mergeDocHeadingMode: mergeDocHeadingModeElement.value,
+                mergeContentHeadingMode: mergeContentHeadingModeElement.value,
             }, response2 => {
                 if (response2.code !== 0) {
                     alert(response2.msg)
@@ -664,6 +737,8 @@ ${getIconScript(servePath)}
                 pageSize,
                 keepFold: keepFoldElement.checked,
                 mergeSubdocs: mergeSubdocsElement.checked,
+                mergeDocHeadingMode: mergeDocHeadingModeElement.value,
+                mergeContentHeadingMode: mergeContentHeadingModeElement.value,
                 watermark: watermarkElement.checked,
                 removeAssets: actionElement.querySelector("#removeAssets").checked,
                 paged: !unPagedPageSize,
@@ -734,7 +809,14 @@ ${getSnippetJS()}
     });
 };
 
-const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubdocs?: boolean, confirmed = false) => {
+const getExportPath = (
+    option: IExportOptions,
+    removeAssets?: boolean,
+    mergeSubdocs?: boolean,
+    mergeDocHeadingMode?: string,
+    mergeContentHeadingMode?: string,
+    confirmed = false,
+) => {
     fetchPost("/api/block/getBlockInfo", {
         id: option.id
     }, async (response) => {
@@ -744,7 +826,7 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
         }
         if (!confirmed && isEncryptedBox(response.data.box)) {
             confirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, () => {
-                getExportPath(option, removeAssets, mergeSubdocs, true);
+                getExportPath(option, removeAssets, mergeSubdocs, mergeDocHeadingMode, mergeContentHeadingMode, true);
             });
             return;
         }
@@ -784,6 +866,8 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
                 pdf: option.type === "pdf",
                 removeAssets: removeAssets,
                 merge: mergeSubdocs,
+                mergeDocHeadingMode,
+                mergeContentHeadingMode,
                 savePath
             }, exportResponse => {
                 if (option.type === "word") {

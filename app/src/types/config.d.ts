@@ -410,6 +410,7 @@ declare namespace Config {
         browserCompatibility: boolean;
         selectAllTip?: boolean;
         selectAllIncompleteTip?: boolean;
+        formatPainterTip?: boolean;
     }
 
     /**
@@ -491,6 +492,10 @@ declare namespace Config {
          * Whether to enable the full-width inline strikethrough
          */
         inlineFullWidthStrikethrough: boolean;
+        /**
+         * Whether to enable the full-width task list shortcut
+         */
+        blockFullWidthTaskList: boolean;
         /**
          * Whether to enable the inline mark
          */
@@ -1328,6 +1333,7 @@ declare namespace Config {
         stickSearch: IKey;
         replace: IKey;
         closeTab: IKey;
+        agentChat: IKey;
         fileTree: IKey;
         outline: IKey;
         bookmark: IKey;

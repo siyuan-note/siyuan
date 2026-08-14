@@ -1773,22 +1773,35 @@ app.whenReady().then(() => {
             }
         }
         if (data.cmd === "siyuan-open-file") {
-            let hasMatch = false;
-            BrowserWindow.getAllWindows().find(item => {
-                const url = new URL(item.webContents.getURL());
-                if (item.webContents.id === event.sender.id || data.port !== url.port) {
-                    return;
+            const options = JSON.parse(data.options);
+            return BrowserWindow.getAllWindows().some(item => {
+                if (item.isDestroyed() || item.webContents.isDestroyed() ||
+                    item.webContents.id === event.sender.id) {
+                    return false;
                 }
-                const ids = decodeURIComponent(url.hash.substring(1)).split("\u200b");
-                const options = JSON.parse(data.options);
+
+                let url;
+                let ids;
+                try {
+                    const currentURL = item.webContents.getURL();
+                    if (!currentURL) {
+                        return false;
+                    }
+                    url = new URL(currentURL);
+                    ids = decodeURIComponent(url.hash.substring(1)).split("\u200b");
+                } catch {
+                    return false;
+                }
+                if (data.port !== url.port) {
+                    return false;
+                }
                 if (ids.includes(options.rootID) || ids.includes(options.assetPath)) {
                     item.focus();
                     item.webContents.send("siyuan-open-file", options);
-                    hasMatch = true;
                     return true;
                 }
+                return false;
             });
-            return hasMatch;
         }
     });
 

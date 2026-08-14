@@ -19,6 +19,7 @@ package api
 import (
 	"errors"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -259,6 +260,144 @@ func getBazaarPackage(c *gin.Context) {
 		"installed": installed,
 		"available": available,
 	}
+}
+
+func getBazaarPackageRatings(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var pkgType string
+	var packageNamesArg []any
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("packageType", &pkgType, true, true),
+		util.BindJsonArg("packageNames", &packageNamesArg, true, false),
+	) {
+		return
+	}
+	if !validPackageTypes[pkgType] {
+		ret.Code = 1
+		ret.Msg = "Invalid package type"
+		return
+	}
+
+	packageNames := make([]string, 0, len(packageNamesArg))
+	for _, item := range packageNamesArg {
+		packageName, elemOK := item.(string)
+		if !elemOK {
+			ret.Code = -1
+			ret.Msg = "Field [packageNames]: each element should be of type [String]"
+			return
+		}
+		packageNames = append(packageNames, packageName)
+	}
+
+	ratings, eligiblePackageNames, err := model.GetInstalledBazaarPackageRatings(c.Request.Context(), pkgType, packageNames)
+	if nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = bazaarPackageRatingsResponseData(ratings, eligiblePackageNames)
+}
+
+func bazaarPackageRatingsResponseData(ratings map[string]*bazaar.PackageRating,
+	eligiblePackageNames []string) map[string]any {
+	return map[string]any{
+		"ratings":              ratings,
+		"eligiblePackageNames": eligiblePackageNames,
+	}
+}
+
+func getBazaarPackageRating(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var pkgType, packageName string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("packageType", &pkgType, true, true),
+		util.BindJsonArg("packageName", &packageName, true, true),
+	) {
+		return
+	}
+	if !validPackageTypes[pkgType] {
+		ret.Code = 1
+		ret.Msg = "Invalid package type"
+		return
+	}
+
+	rating, ratingAvailable, userRating, err := model.GetBazaarPackageRating(c.Request.Context(), pkgType, packageName)
+	if nil != err {
+		setBazaarPackageRatingError(ret, err)
+		return
+	}
+	ret.Data = bazaarPackageRatingResponseData(rating, ratingAvailable, userRating)
+}
+
+func setBazaarPackageRating(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var pkgType, packageName string
+	var ratingArg float64
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("packageType", &pkgType, true, true),
+		util.BindJsonArg("packageName", &packageName, true, true),
+		util.BindJsonArg("rating", &ratingArg, true, false),
+	) {
+		return
+	}
+	if !validPackageTypes[pkgType] {
+		ret.Code = 1
+		ret.Msg = "Invalid package type"
+		return
+	}
+	if ratingArg < 1 || 5 < ratingArg || ratingArg != math.Trunc(ratingArg) {
+		ret.Code = 1
+		ret.Msg = "Rating must be an integer from 1 to 5"
+		return
+	}
+
+	rating, ratingAvailable, userRating, err := model.SetBazaarPackageRating(
+		c.Request.Context(), pkgType, packageName, int(ratingArg))
+	if nil != err {
+		setBazaarPackageRatingError(ret, err)
+		return
+	}
+	ret.Data = bazaarPackageRatingResponseData(rating, ratingAvailable, userRating)
+}
+
+func setBazaarPackageRatingError(ret *gulu.Result, err error) {
+	ret.Code = 1
+	ret.Msg = err.Error()
+	if errors.Is(err, model.ErrBazaarRatingRateLimited) {
+		ret.Data = map[string]any{"errorCode": "bazaarRatingRateLimited"}
+	}
+}
+
+func bazaarPackageRatingResponseData(rating *bazaar.PackageRating, ratingAvailable bool, userRating int) map[string]any {
+	ret := map[string]any{
+		"ratingAvailable": ratingAvailable,
+		"userRating":      userRating,
+	}
+	if nil != rating {
+		ret["rating"] = rating
+	}
+	return ret
 }
 
 func getBazaarPackageREADME(c *gin.Context) {

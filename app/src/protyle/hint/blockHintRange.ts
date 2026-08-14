@@ -11,3 +11,7 @@ export const getBlockHintTriggerOffset = (textBeforeCaret: string, textAfterCare
 export const getBlockRefStaticText = (selectedText: string, splitChar: string, includesTrigger: boolean) => {
     return includesTrigger ? selectedText.substring(splitChar.length) : selectedText;
 };
+
+export const endsWithMultiCharHintPrefix = (key: string, hintKeys: string[]) => {
+    return hintKeys.some((hintKey) => hintKey.length > 1 && key.endsWith(hintKey.substring(0, 1)));
+};

@@ -1421,7 +1421,7 @@ export class TableControl {
             if (this.selection.mode !== "cell") {
                 menu.append(new MenuItem({
                     icon: "iconCopy",
-                    label: window.siyuan.languages.duplicate,
+                    label: window.siyuan.languages.duplicateCopy,
                     disabled: merged,
                     action: merged ? "iconInfo" : undefined,
                     actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
@@ -1463,9 +1463,6 @@ export class TableControl {
                     icon: "iconTrashcan",
                     label: this.selection.mode === "row" ? window.siyuan.languages["delete-row"] :
                         window.siyuan.languages["delete-column"],
-                    disabled: merged,
-                    action: merged ? "iconInfo" : undefined,
-                    actionLabel: merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                     click: () => this.deleteSelection(false),
                 }).element);
             }
@@ -1698,9 +1695,6 @@ export class TableControl {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",
                 label: window.siyuan.languages["delete-row"],
-                disabled: cellSelection.merged,
-                action: cellSelection.merged ? "iconInfo" : undefined,
-                actionLabel: cellSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                 click: () => {
                     if (deleteTableRows(this.protyle, this.selection.node, cellSelection.rowIndexes)) {
                         this.clear();
@@ -1712,9 +1706,6 @@ export class TableControl {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconTrashcan",
                 label: window.siyuan.languages["delete-column"],
-                disabled: cellSelection.merged,
-                action: cellSelection.merged ? "iconInfo" : undefined,
-                actionLabel: cellSelection.merged ? window.siyuan.languages.splitMergedCellTip : undefined,
                 click: () => {
                     if (deleteTableColumns(this.protyle, this.selection.node, cellSelection.columnIndexes)) {
                         this.clear();
@@ -1724,12 +1715,16 @@ export class TableControl {
         }
         const mergedCell = cells.length === 1 && (cells[0].rowSpan > 1 || cells[0].colSpan > 1);
         if (mergedCell || cells.length > 1) {
+            const mergeDisabledReason = !mergedCell && (!rectangle ?
+                window.siyuan.languages.tableRectangleSelectionRequired :
+                !this.isSelectionInOneSection() ? window.siyuan.languages.tableHeaderBodyMergeUnsupported : undefined);
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: mergedCell ? "iconTableCellsSplit" : "iconTableCellsMerge",
                 label: mergedCell ? window.siyuan.languages.cancelMerged : window.siyuan.languages.mergeCell,
-                disabled: !mergedCell && (!rectangle || !this.isSelectionInOneSection()),
-                accelerator: !mergedCell && !rectangle ? window.siyuan.languages.tableRectangleSelectionRequired : undefined,
+                disabled: !!mergeDisabledReason,
+                action: mergeDisabledReason ? "iconInfo" : undefined,
+                actionLabel: mergeDisabledReason,
                 click: () => mergedCell ? this.splitCell(cells[0]) : this.mergeCells(),
             }).element);
         }
@@ -1785,7 +1780,7 @@ export class TableControl {
     }
 
     private deleteSelection(clearOnly: boolean) {
-        if (!this.selection || !this.canMutateSelection()) {
+        if (!this.selection || (this.selection.mode === "cell" && !this.isRectangle())) {
             return;
         }
         if (clearOnly && this.selection.mode === "cell") {

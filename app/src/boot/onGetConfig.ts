@@ -218,6 +218,8 @@ export const initWindow = async (app: App) => {
             removeAssets: ipcData.removeAssets,
             keepFold: ipcData.keepFold,
             mergeSubdocs: ipcData.mergeSubdocs,
+            mergeDocHeadingMode: ipcData.mergeDocHeadingMode,
+            mergeContentHeadingMode: ipcData.mergeContentHeadingMode,
             watermark: ipcData.watermark,
             landscape: ipcData.pdfOptions.landscape,
             marginType: ipcData.pdfOptions.marginType,
@@ -253,6 +255,8 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 pdf: true,
                 removeAssets: ipcData.removeAssets,
                 merge: ipcData.mergeSubdocs,
+                mergeDocHeadingMode: ipcData.mergeDocHeadingMode,
+                mergeContentHeadingMode: ipcData.mergeContentHeadingMode,
                 savePath,
             }, () => {
                 fs.writeFileSync(pdfFilePath, pdfData);
@@ -260,6 +264,8 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 fetchPost("/api/export/processPDF", {
                     id: ipcData.rootId,
                     merge: ipcData.mergeSubdocs,
+                    mergeDocHeadingMode: ipcData.mergeDocHeadingMode,
+                    mergeContentHeadingMode: ipcData.mergeContentHeadingMode,
                     path: pdfFilePath,
                     removeAssets: ipcData.removeAssets,
                     watermark: ipcData.watermark

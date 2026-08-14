@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {hideGutterElements} from "./gutterVisibility";
+import {hideGutterElements, shouldHideGutterAfterFold} from "./gutterVisibility";
 
 const createElement = (content: string) => {
     const classes = new Set<string>();
@@ -35,5 +35,16 @@ describe("hideGutterElements", () => {
 
         assert.equal(gutter.hasClass("fn__none"), false);
         assert.equal(gutter.element.innerHTML, "");
+    });
+});
+
+describe("shouldHideGutterAfterFold", () => {
+    it("展开块后保留块标", () => {
+        assert.equal(shouldHideGutterAfterFold(0), false);
+    });
+
+    it("折叠块或折叠状态未变化时隐藏块标", () => {
+        assert.equal(shouldHideGutterAfterFold(1), true);
+        assert.equal(shouldHideGutterAfterFold(-1), true);
     });
 });

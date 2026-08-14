@@ -985,7 +985,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement | undef
     copyMenu.push({
         id: "duplicate",
         iconHTML: "",
-        label: window.siyuan.languages.duplicate,
+        label: window.siyuan.languages.duplicateCopy,
         click: () => {
             duplicateRows(blockElement, protyle, selectedItemInfos.map(item => item.itemID));
         }

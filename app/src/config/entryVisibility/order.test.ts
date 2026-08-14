@@ -6,6 +6,13 @@ test("entry order keeps custom order and inserts new entries by their default ne
     assert.deepEqual(mergeEntryOrder(["a", "new", "b", "c"], ["c", "a", "b"]), ["c", "a", "new", "b"]);
 });
 
+test("entry order inserts the code block Tab setting before the existing code options", () => {
+    assert.deepEqual(mergeEntryOrder(
+        ["md29", "md31", "md2", "md27", "saveCodeBlockAsFile"],
+        ["saveCodeBlockAsFile", "md27", "md31", "md2"],
+    ), ["saveCodeBlockAsFile", "md27", "md29", "md31", "md2"]);
+});
+
 test("entry order ignores unknown and duplicate keys", () => {
     assert.deepEqual(mergeEntryOrder(["a", "b", "c"], ["missing", "c", "c", "a"]), ["c", "a", "b"]);
 });

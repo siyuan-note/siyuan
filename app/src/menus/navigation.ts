@@ -130,7 +130,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
             submenu: copySubMenu(blockIDs).concat([{
                 id: "duplicate",
                 iconHTML: "",
-                label: window.siyuan.languages.duplicate,
+                label: window.siyuan.languages.duplicateCopy,
                 accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
                 click() {
                     blockIDs.forEach((id) => {
@@ -610,7 +610,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             submenu: (copySubMenu([id]) as IMenu[]).concat([{
                 id: "duplicate",
                 iconHTML: "",
-                label: window.siyuan.languages.duplicate,
+                label: window.siyuan.languages.duplicateCopy,
                 accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
                 click() {
                     fetchPost("/api/filetree/duplicateDoc", {

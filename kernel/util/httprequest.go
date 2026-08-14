@@ -21,12 +21,13 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
-	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/httpclient"
 )
 
@@ -53,6 +54,18 @@ func CheckHostSSRF(host string) error {
 	return nil
 }
 
+// ssrfSafeClient 是智能体出站请求专用的 HTTP 客户端：保留 httpclient 的统一 UA 注入与传输配置，
+// 拨号走 ssrfSafeDialContext，连接阶段无条件拦截私网地址（不依赖 SafeMode），
+// 防止 CheckHostSSRF 与拨号之间的 DNS 重绑定 TOCTOU 绕过。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-x8gv-g2g3-65fj
+var ssrfSafeClient = newSSRFSafeClient()
+
+func newSSRFSafeClient() *http.Client {
+	transport := httpclient.NewTransport(false)
+	transport.DialContext = ssrfSafeDialContext(30 * time.Second)
+	return &http.Client{Timeout: 30 * time.Second, Transport: &httpclient.UserAgentTransport{Base: transport}}
+}
+
 // HTTPRequest 发起一次通用 HTTP 调用，供智能体 http_request 工具使用。
 // 与 WebFetch 不同：本函数不做 HTML→Markdown 转换，文本类响应（含 JSON/XML）原样返回，
 // 便于智能体直接消费 REST API 的 JSON 输出。method 取值：GET/POST/PUT/DELETE/PATCH。
@@ -75,15 +88,19 @@ func HTTPRequest(method, rawURL string, headers map[string]string, body string) 
 		method = "GET"
 	}
 
-	request := httpclient.NewBrowserRequest()
-	for k, v := range headers {
-		request.SetHeader(k, v)
-	}
+	var reqBody io.Reader
 	if body != "" && method != "GET" && method != "HEAD" {
-		request.SetBody(body)
+		reqBody = strings.NewReader(body)
+	}
+	req, err := http.NewRequest(method, rawURL, reqBody)
+	if err != nil {
+		return 0, "", "", errors.New("invalid request: " + err.Error())
+	}
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
 
-	resp, err := sendByMethod(request, method, rawURL)
+	resp, err := ssrfSafeClient.Do(req)
 	if err != nil {
 		return 0, "", "", errors.New("request failed: " + err.Error())
 	}
@@ -124,24 +141,6 @@ func HTTPRequest(method, rawURL string, headers map[string]string, body string) 
 	}
 
 	return statusCode, contentType, truncateRunes(string(respBody), maxHTTPRequestChars), nil
-}
-
-// sendByMethod 按 method 分发请求，统一走 NewBrowserRequest 返回的 *req.Request。
-func sendByMethod(request *req.Request, method, rawURL string) (*req.Response, error) {
-	switch method {
-	case "GET", "":
-		return request.Get(rawURL)
-	case "POST":
-		return request.Post(rawURL)
-	case "PUT":
-		return request.Put(rawURL)
-	case "DELETE":
-		return request.Delete(rawURL)
-	case "PATCH":
-		return request.Patch(rawURL)
-	default:
-		return nil, fmt.Errorf("unsupported method: %s", method)
-	}
 }
 
 // isTextContentType 判断 Content-Type 是否为可直接展示给智能体的文本类响应。

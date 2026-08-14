@@ -124,6 +124,7 @@ func TestCheckPluginAccessableInPublish(t *testing.T) {
 	}
 	writePlugin("allowed", false)
 	writePlugin("publish-disabled", true)
+	writePlugin("user-disabled", false)
 	writePlugin("disabled", false)
 	if err := os.MkdirAll(filepath.Join(util.DataDir, "storage", "petal"), 0755); err != nil {
 		t.Fatal(err)
@@ -131,6 +132,7 @@ func TestCheckPluginAccessableInPublish(t *testing.T) {
 	savePetals([]*Petal{
 		{Name: "allowed", Enabled: true},
 		{Name: "publish-disabled", Enabled: true},
+		{Name: "user-disabled", Enabled: true, UserDisabledInPublish: true},
 		{Name: "disabled", Enabled: false},
 	})
 
@@ -139,6 +141,9 @@ func TestCheckPluginAccessableInPublish(t *testing.T) {
 	}
 	if CheckPluginAccessableInPublish("publish-disabled") {
 		t.Fatal("publish-disabled plugin should not be accessable")
+	}
+	if CheckPluginAccessableInPublish("user-disabled") {
+		t.Fatal("user-disabled plugin should not be accessable")
 	}
 	if CheckPluginAccessableInPublish("disabled") {
 		t.Fatal("disabled plugin should not be accessable")

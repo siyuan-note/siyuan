@@ -1,11 +1,13 @@
 import {hideElements} from "../ui/hideElements";
 import {isSupportCSSHL} from "../render/searchMarkRender";
+import {destroyAIEditor} from "../../ai/editor";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
     hideElements(["util"], protyle);
+    destroyAIEditor(protyle);
     protyle.hint?.destroy();
     protyle.preview?.destroy();
     if (isSupportCSSHL()) {

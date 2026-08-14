@@ -7,11 +7,13 @@ import {Constants} from "../../constants";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {fetchPost} from "../../util/fetch";
 import {exportLayout} from "../../layout/util";
+import {updateDockHotkeys} from "../../layout/dock/util";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/keydown";
 import {normalizeSearchText} from "../search/normalize";
 import {genButtonRowHtml, genConfigGroup} from "../render/render";
 import type {Plugin} from "../../plugin";
+import {isDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 const keymapToolbarSearchStrings = (): string[] => [
     window.siyuan.languages.keymapTip,
     window.siyuan.languages.keymapTip2,
@@ -147,19 +149,7 @@ const buildKeymapCommandTexts = (): string[] => {
         }
     };
     Object.keys(Constants.SIYUAN_KEYMAP.general).forEach(pushKey);
-    Object.keys(Constants.SIYUAN_KEYMAP.editor.general).forEach((key) => {
-        // TODO 把 window.siyuan.languages.duplicate 直接换成 "创建副本 / 创建镜像副本"，
-        // 原先使用 window.siyuan.languages.duplicate 的其他地方换成用新的键
-        if (key === "duplicate") {
-            const duplicate = window.siyuan.languages.duplicate;
-            const duplicateMirror = window.siyuan.languages.duplicateMirror;
-            if (duplicate && duplicateMirror) {
-                out.push(`${duplicate} / ${duplicateMirror}`);
-            }
-        } else {
-            pushKey(key);
-        }
-    });
+    Object.keys(Constants.SIYUAN_KEYMAP.editor.general).forEach(pushKey);
     Object.keys(Constants.SIYUAN_KEYMAP.editor.heading).forEach(pushKey);
     Object.keys(Constants.SIYUAN_KEYMAP.editor.insert).forEach(pushKey);
     Object.keys(Constants.SIYUAN_KEYMAP.editor.list).forEach(pushKey);
@@ -286,11 +276,7 @@ const genKeymapItem = (keys: string) => {
             continue;
         }
         const item = config[key] ?? template[key];
-        let keymapName = window.siyuan.languages[key];
-        if ("editor" + Constants.ZWSP + "general" === keys && key === "duplicate") {
-            keymapName = `${window.siyuan.languages.duplicate} / ${window.siyuan.languages.duplicateMirror}`;
-        }
-        html.push(genKeymapRowHtml(keymapName, keys + Constants.ZWSP + key, item.custom, item.default));
+        html.push(genKeymapRowHtml(window.siyuan.languages[key], keys + Constants.ZWSP + key, item.custom, item.default));
     }
     return html.join("");
 };
@@ -458,10 +444,10 @@ const bindKeymapList = (root: HTMLElement) => {
                 hasConflict = true;
             }
             if (
-                !hasConflict && (RESERVED_KEYMAPS.includes(keymapStr) || !matchHotKey(keymapStr, event) ||
+                !hasConflict && (isDisallowedTextInputHotkey(keymapStr) || RESERVED_KEYMAPS.includes(keymapStr) ||
+                !matchHotKey(keymapStr, event) ||
                 (isMac() && keys[0] === "general" && ["goToEditTabNext", "goToEditTabPrev"].includes(keys[1]) && keymapStr.includes("⌘")))
             ) {
-                // TODO 还应该禁止单个数字或字母作为快捷键？
                 showMessage(`${window.siyuan.languages.invalid} [${adoptKeymapStr}]`, undefined, undefined, "keymapInvalid");
                 hasConflict = true;
             } else {
@@ -672,6 +658,7 @@ const setKeymapFromDom = (root: HTMLElement) => {
     });
     const oldToggleWin = window.siyuan.config.keymap.general.toggleWin.custom;
     window.siyuan.config.keymap = data;
+    updateDockHotkeys();
     fetchPost("/api/setting/setKeymap", {
         data,
     }, () => {

@@ -98,6 +98,40 @@ func TestStaticFileNestedSymlinkEscape(t *testing.T) {
 	}
 }
 
+func TestWidgetResponseDisablesCache(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	originalDataDir, originalConf := util.DataDir, model.Conf
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+		model.Conf = originalConf
+	})
+
+	widgetDir := filepath.Join(util.DataDir, "widgets", "example")
+	if err := os.MkdirAll(widgetDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(widgetDir, "index.html"), []byte("content"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(model.RoleContextKey, model.RoleAdministrator)
+		c.Next()
+	})
+	serveWidgets(engine)
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/widgets/example/", nil))
+	if recorder.Code != http.StatusOK || recorder.Body.String() != "content" {
+		t.Fatalf("unexpected widget response: status=%d body=%q", recorder.Code, recorder.Body.String())
+	}
+	if cacheControl := recorder.Header().Get("Cache-Control"); cacheControl != "private, no-store" {
+		t.Fatalf("unexpected widget cache control [%s]", cacheControl)
+	}
+}
+
 func TestTemplatesAndExportRequireAdministrator(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	originalDataDir, originalTempDir := util.DataDir, util.TempDir
@@ -189,5 +223,65 @@ func TestSnippetPublishAccess(t *testing.T) {
 	if recorder := request(model.RoleAdministrator, "/snippets/fallback.css"); recorder.Code != http.StatusOK ||
 		recorder.Body.String() != "fallback" {
 		t.Fatalf("unexpected administrator fallback response: status=%d body=%q", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestPluginPublishAccess(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	originalDataDir := util.DataDir
+	originalConf := model.Conf
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Bazaar = &conf.Bazaar{Trust: true}
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+		model.Conf = originalConf
+	})
+
+	writePlugin := func(name string) {
+		pluginDir := filepath.Join(util.DataDir, "plugins", name)
+		if err := os.MkdirAll(pluginDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		manifest := []byte(`{"name":"` + name + `","version":"1.0.0","minAppVersion":"0.0.1"}`)
+		for fileName, content := range map[string][]byte{
+			"plugin.json": manifest,
+			"index.js":    []byte(name),
+		} {
+			if err := os.WriteFile(filepath.Join(pluginDir, fileName), content, 0644); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if _, err := model.SetPetalEnabled(name, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writePlugin("allowed")
+	writePlugin("user-disabled")
+	if _, err := model.SetPetalPublishEnabled("user-disabled", false); err != nil {
+		t.Fatal(err)
+	}
+
+	request := func(role model.Role, requestPath string) *httptest.ResponseRecorder {
+		engine := gin.New()
+		engine.Use(func(c *gin.Context) {
+			c.Set(model.RoleContextKey, role)
+			c.Next()
+		})
+		servePlugins(engine)
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, requestPath, nil))
+		return recorder
+	}
+	if recorder := request(model.RoleReader, "/plugins/allowed/index.js"); recorder.Code != http.StatusOK ||
+		recorder.Body.String() != "allowed" {
+		t.Fatalf("unexpected publish-enabled plugin response: status=%d body=%q", recorder.Code, recorder.Body.String())
+	}
+	if recorder := request(model.RoleReader, "/plugins/user-disabled/index.js"); recorder.Code != http.StatusForbidden {
+		t.Fatalf("user-disabled plugin should be forbidden in publish, got %d", recorder.Code)
+	}
+	if recorder := request(model.RoleAdministrator, "/plugins/user-disabled/index.js"); recorder.Code != http.StatusOK ||
+		recorder.Body.String() != "user-disabled" {
+		t.Fatalf("unexpected administrator plugin response: status=%d body=%q", recorder.Code, recorder.Body.String())
 	}
 }

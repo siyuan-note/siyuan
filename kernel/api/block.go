@@ -799,7 +799,14 @@ func getTreeStat(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	var includeEmbed bool
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", &id, true, true),
+		util.BindJsonArg("includeEmbed", &includeEmbed, false, false),
+	) || util.InvalidIDPattern(id, ret) {
+		return
+	}
 	boxID := encryptedNotebookFromArg(arg)
 	if !holdBlockRequest(c, ret, boxID) {
 		return
@@ -811,10 +818,29 @@ func getTreeStat(c *gin.Context) {
 		}
 		return
 	}
-	ret.Data = map[string]any{
-		"reqId": arg["reqId"],
-		"stat":  filesys.StatTree(id),
+
+	var accessChecker model.EmbedBlockAccessChecker
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		accessChecker = func(blockID string) bool {
+			return model.CheckBlockIdAccessableByPublishAccessInBox(c, publishAccess, blockID, boxID)
+		}
 	}
+	stat := model.GetDocumentStat(c.Request.Context(), id, boxID, includeEmbed, accessChecker)
+	data := map[string]any{
+		"reqId":         arg["reqId"],
+		"stat":          nil,
+		"containsEmbed": false,
+	}
+	if nil != stat {
+		data["stat"] = stat.Stat
+		data["containsEmbed"] = stat.ContainsEmbed
+		if includeEmbed {
+			data["statWithEmbed"] = stat.StatWithEmbed
+			data["embedStat"] = stat.EmbedStat
+		}
+	}
+	ret.Data = data
 }
 
 func getDOMText(c *gin.Context) {
@@ -1346,6 +1372,33 @@ func getBlockDOM(c *gin.Context) {
 	ret.Data = map[string]string{
 		"id":  id,
 		"dom": dom,
+	}
+}
+
+func getOrderedListContinueStart(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+	boxID := encryptedNotebookFromArg(arg)
+	if !holdBlockRequest(c, ret, boxID) {
+		return
+	}
+	start, found := model.GetOrderedListContinueStartInBox(id, boxID)
+	ret.Data = map[string]any{
+		"start": start,
+		"found": found,
 	}
 }
 

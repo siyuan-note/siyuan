@@ -43,6 +43,7 @@ import {mountGroupedModelPicker, type IGroupedModelPicker} from "../../../config
 import {AI_CONFIG_CHANGED_EVENT} from "../../../config/tabs/ai/aiRuntime";
 import {isEncryptedBox} from "../../../util/pathName";
 import {Menu} from "../../../plugin/Menu";
+import {getAgentDefaultModelID, getUsableAgentModels} from "./agentModel";
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
@@ -184,6 +185,7 @@ export class AgentChat extends Model {
     private modelSelect: HTMLButtonElement;
     private groupedModelPicker?: IGroupedModelPicker;
     private selectedModel: string;
+    private defaultModelID = "";
     private modelOptions: Array<{ id: string; name: string }> = [];
     // 推理努力度（iconBrain + 菜单），仅实例记忆，刷新后回到默认。
     private reasoningEffortButton: HTMLButtonElement;
@@ -250,39 +252,22 @@ export class AgentChat extends Model {
         this.checkConfigChanged();
     };
 
-    // 比较 window.siyuan.config.ai 实际可用模型与缓存 modelOptions，不一致则刷新。
+    // 比较 window.siyuan.config.ai 的实际可用模型及默认模型与缓存，不一致则刷新。
     // 仅当处于欢迎页（无会话内容）时重渲染，以便从无模型提示块切回示例或反之；
     // 有会话内容时不重绘（避免破坏对话），refreshModelOptions 内已刷新 trigger 显示。
     private checkConfigChanged() {
-        const actualOptions = AgentChat.getUsableModels(window.siyuan.config.ai);
-        if (actualOptions.length === this.modelOptions.length && actualOptions.every((option, index) =>
-            option.id === this.modelOptions[index].id && option.name === this.modelOptions[index].name)) {
+        const actualOptions = getUsableAgentModels(window.siyuan.config.ai);
+        const actualDefaultModelID = getAgentDefaultModelID(window.siyuan.config.ai, actualOptions);
+        const optionsChanged = actualOptions.length !== this.modelOptions.length || actualOptions.some((option, index) =>
+            option.id !== this.modelOptions[index].id || option.name !== this.modelOptions[index].name);
+        const defaultChanged = actualDefaultModelID !== this.defaultModelID;
+        if (!optionsChanged && !defaultChanged) {
             return;
         }
-        this.refreshModelOptions();
+        this.refreshModelOptions(defaultChanged && this.entries.length === 0);
         if (this.entries.length === 0 && this.messagesContainer.querySelector(".agent-welcome")) {
             this.showWelcome();
         }
-    }
-
-    // 与后端 HasAnyProvider()/GetModel() 一致，仅返回已启用提供商中的已启用模型。
-    private static getUsableModels(aiConfig: Config.IAI): Array<{ id: string; name: string }> {
-        const options: Array<{ id: string; name: string }> = [];
-        for (const prov of aiConfig.providers || []) {
-            if (!prov.enabled) {
-                continue;
-            }
-            for (const m of prov.models) {
-                if (!m.enabled) {
-                    continue;
-                }
-                const displayName = m.displayName || m.name;
-                if (displayName) {
-                    options.push({id: m.id || m.name, name: displayName});
-                }
-            }
-        }
-        return options;
     }
 
     private initUI() {
@@ -521,14 +506,15 @@ export class AgentChat extends Model {
 
     // 从 window.siyuan.config.ai 重新计算可用模型列表，幂等可重复调用。
     // 与后端 HasAnyProvider()/GetModel() 判定一致：provider 和 model 均需 enabled。
-    // 零模型时显式置空 selectedModel（避免 undefined 透传到后端），失效选择自动重置。
-    refreshModelOptions() {
-        const newOptions = AgentChat.getUsableModels(window.siyuan.config.ai);
+    // 零模型时显式置空 selectedModel（避免 undefined 透传到后端），新会话及失效选择使用有效默认模型。
+    refreshModelOptions(resetToDefault = false) {
+        const newOptions = getUsableAgentModels(window.siyuan.config.ai);
+        this.defaultModelID = getAgentDefaultModelID(window.siyuan.config.ai, newOptions);
         this.modelOptions = newOptions;
-        // 若当前选择已失效（不在新列表中），则重置：有模型取第一个，无模型显式置空。
+        // 新会话使用默认模型；当前选择失效时也回退到有效默认模型。
         const stillValid = this.selectedModel && newOptions.some(o => o.id === this.selectedModel);
-        if (!stillValid) {
-            this.selectedModel = newOptions.length > 0 ? newOptions[0].id : "";
+        if (resetToDefault || !stillValid) {
+            this.selectedModel = this.defaultModelID;
         }
         this.updateModelLabel();
         this.updateSendButtonState();
@@ -911,6 +897,7 @@ export class AgentChat extends Model {
         this.sessionTitle = this.defaultTitle;
         this.pendingSessionTitle = null;
         this.entries = [];
+        this.refreshModelOptions(true);
         this.applyPermissionMode("confirm");
         this.showWelcome();
         this.scrollToBottom(true);
@@ -1230,6 +1217,7 @@ export class AgentChat extends Model {
         const deletedSessionID = this.sessionId;
         this.removeMirrorPlaceholder();
         this.entries = [];
+        this.refreshModelOptions(true);
         this.sessionId = SessionStore.newSessionId();
         this.currentTurnID = "";
         this.currentRoundID = "";
@@ -1647,6 +1635,7 @@ export class AgentChat extends Model {
         this.sessionTitle = this.defaultTitle;
         this.pendingSessionTitle = null;
         this.entries = [];
+        this.refreshModelOptions(true);
         this.applyPermissionMode("confirm");
         this.hasTitled = false;
         this.currentAIElement = null;

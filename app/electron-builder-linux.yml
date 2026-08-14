@@ -62,7 +62,9 @@ extraResources:
     filter: "!**/{.DS_Store}"
   - from: "appearance/icons"
     to: "appearance/icons"
-    filter: "!**/{.DS_Store}"
+    filter:
+      - "index.html"
+      - "litheness/**/*"
   - from: "appearance/langs"
     to: "appearance/langs"
     filter: "!**/{.DS_Store}"

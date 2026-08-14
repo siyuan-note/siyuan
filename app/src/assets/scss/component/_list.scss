@@ -348,6 +348,10 @@
       color: var(--b3-theme-on-surface-light);
       unicode-bidi: isolate;
       user-select: none;
+
+      &--no-spacing {
+        margin-inline-end: 0;
+      }
     }
 
     &__showall {

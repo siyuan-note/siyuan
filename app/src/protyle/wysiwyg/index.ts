@@ -190,6 +190,7 @@ import {
     resolveBlockDragSelectStart
 } from "./blockDragSelect";
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
+import {formatPainter} from "../toolbar/FormatPainter";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -2715,10 +2716,6 @@ export class WYSIWYG {
                                     id: "deleteRows",
                                     icon: "iconTrashcan",
                                     label: window.siyuan.languages["delete-row"],
-                                    disabled: cellSelection.merged,
-                                    action: cellSelection.merged ? "iconInfo" : undefined,
-                                    actionLabel: cellSelection.merged ?
-                                        window.siyuan.languages.splitMergedCellTip : undefined,
                                     click() {
                                         tableSelectElement.removeAttribute("style");
                                         deleteTableRows(protyle, tableBlockElement as HTMLElement,
@@ -2731,10 +2728,6 @@ export class WYSIWYG {
                                     id: "deleteColumns",
                                     icon: "iconTrashcan",
                                     label: window.siyuan.languages["delete-column"],
-                                    disabled: cellSelection.merged,
-                                    action: cellSelection.merged ? "iconInfo" : undefined,
-                                    actionLabel: cellSelection.merged ?
-                                        window.siyuan.languages.splitMergedCellTip : undefined,
                                     click() {
                                         tableSelectElement.removeAttribute("style");
                                         deleteTableColumns(protyle, tableBlockElement as HTMLElement,
@@ -4768,11 +4761,16 @@ export class WYSIWYG {
                 }
                 /// #if !MOBILE
                 if (newRange.toString().replace(Constants.ZWSP, "") !== "") {
-                    protyle.toolbar.render(protyle, newRange, event.detail > 0 ? {
-                        x: event.clientX,
-                        y: event.clientY,
-                        detail: event.detail,
-                    } : undefined);
+                    const paintedRange = formatPainter.paint(protyle, newRange);
+                    if (paintedRange) {
+                        newRange = paintedRange;
+                    } else {
+                        protyle.toolbar.render(protyle, newRange, event.detail > 0 ? {
+                            x: event.clientX,
+                            y: event.clientY,
+                            detail: event.detail,
+                        } : undefined);
+                    }
                 } else {
                     // https://github.com/siyuan-note/siyuan/issues/9785
                     protyle.toolbar.range = newRange;

@@ -1019,7 +1019,7 @@ func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
 	return
 }
 
-func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string, err error) {
+func ExportDocx(id, savePath string, removeAssets, merge bool, mergeHeadingOptions ...MergeHeadingOptions) (fullPath string, err error) {
 	err = withExportReadLockByBlockID(id, func() error {
 		pandocRuntime := util.GetPandocRuntime()
 		if !util.IsValidPandocBin(pandocRuntime.BinPath) {
@@ -1042,7 +1042,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 			return mkdirErr
 		}
 		defer os.RemoveAll(tmpDir)
-		name, content := ExportMarkdownHTML(id, tmpDir, true, merge)
+		name, content := ExportMarkdownHTML(id, tmpDir, true, merge, mergeHeadingOptions...)
 		content = strings.ReplaceAll(content, "  \n", "<br>\n")
 
 		tmpDocxPath := filepath.Join(tmpDir, name+".docx")
@@ -1099,7 +1099,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	return
 }
 
-func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string) {
+func ExportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptions ...MergeHeadingOptions) (name, dom string) {
 	if exportErr := withExportReadLockByBlockID(id, func() error {
 		bt := getExportBlockTree(id)
 		if nil == bt {
@@ -1110,7 +1110,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 
 		if merge {
 			var mergeErr error
-			tree, mergeErr = mergeSubDocs(tree)
+			tree, mergeErr = mergeSubDocs(tree, mergeHeadingOptionsOrDefault(mergeHeadingOptions), Conf.Export.AddTitle)
 			if nil != mergeErr {
 				logging.LogErrorf("merge sub docs failed: %s", mergeErr)
 				return nil
@@ -1280,7 +1280,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	return
 }
 
-func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom string, node *ast.Node) {
+func ExportHTML(id, savePath string, pdf, keepFold, merge bool, mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
 	if exportErr := withExportReadLockByBlockID(id, func() error {
 		savePath = strings.TrimSpace(savePath)
 
@@ -1297,7 +1297,7 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool) (name, dom strin
 
 		if merge {
 			var mergeErr error
-			tree, mergeErr = mergeSubDocs(tree)
+			tree, mergeErr = mergeSubDocs(tree, mergeHeadingOptionsOrDefault(mergeHeadingOptions), Conf.Export.AddTitle)
 			if nil != mergeErr {
 				logging.LogErrorf("merge sub docs failed: %s", mergeErr)
 				return nil
@@ -1504,7 +1504,7 @@ func applyHeadingNumbersForExport(tree *parse.Tree, bt *treenode.BlockTree, merg
 func materializeHeadingNumbers(tree *parse.Tree, numbers map[string]string) {
 	for _, heading := range collectOutlineHeadings(tree) {
 		if number := numbers[heading.ID]; "" != number {
-			heading.PrependChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(number + " ")})
+			heading.PrependChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(headingNumberPrefix(number))})
 		}
 	}
 }
@@ -1549,7 +1549,7 @@ func processIFrameWithFilter(tree *parse.Tree, filter func(src string) bool) {
 	})
 }
 
-func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
+func ProcessPDF(id, p string, merge, removeAssets, watermark bool, mergeHeadingOptions ...MergeHeadingOptions) (err error) {
 	err = withExportReadLockByBlockID(id, func() error {
 		tree, _ := LoadTreeByBlockID(id)
 		if nil == tree {
@@ -1559,7 +1559,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 
 		if merge {
 			var mergeErr error
-			tree, mergeErr = mergeSubDocs(tree)
+			tree, mergeErr = mergeSubDocs(tree, mergeHeadingOptionsOrDefault(mergeHeadingOptions), Conf.Export.AddTitle)
 			if nil != mergeErr {
 				logging.LogErrorf("merge sub docs failed: %s", mergeErr)
 				return nil
@@ -1790,7 +1790,7 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node, headingNum
 
 func headingTitleWithNumber(title, headingID string, headingNumbers map[string]string) string {
 	if number := headingNumbers[headingID]; "" != number {
-		return number + " " + title
+		return headingNumberPrefix(number) + title
 	}
 	return title
 }

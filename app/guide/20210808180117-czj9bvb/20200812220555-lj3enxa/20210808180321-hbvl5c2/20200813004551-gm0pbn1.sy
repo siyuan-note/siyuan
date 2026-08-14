@@ -7,9 +7,32 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260811122156"
+		"updated": "20260813143407"
 	},
 	"Children": [
+		{
+			"ID": "20260813143407-p4v8n2c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260813143407-p4v8n2c",
+				"updated": "20260813143407"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "为避免影响正常文本输入，不能将单个字符或与 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 组合的单个字符设置为快捷键。"
+				}
+			]
+		},
 		{
 			"ID": "20240112150737-e41yt1y",
 			"Type": "NodeHeading",

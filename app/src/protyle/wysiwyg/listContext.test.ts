@@ -8,7 +8,10 @@ import {
     getListContext,
     getListConversionType,
     getOrderedListMarkerUpdates,
+    getOrderedListMaxStart,
+    getPreviousListItemID,
     getListShortcutAction,
+    parseOrderedListStart,
     shouldIgnoreListShortcut,
     type TListSubtype
 } from "./listContext";
@@ -185,6 +188,19 @@ describe("getFirstListItemElement", () => {
     });
 });
 
+describe("getPreviousListItemID", () => {
+    it("returns the original predecessor of a focused list item", () => {
+        const first = new TestElement("NodeListItem", "first", "o");
+        const middle = new TestElement("NodeListItem", "middle", "o");
+        const last = new TestElement("NodeListItem", "last", "o");
+        const list = new TestElement("NodeList", "list", "o").append(first, middle, last, new TestElement());
+
+        assert.equal(getPreviousListItemID(asHTMLElement(list), "middle"), "first");
+        assert.equal(getPreviousListItemID(asHTMLElement(list), "first"), undefined);
+        assert.equal(getPreviousListItemID(asHTMLElement(list), "missing"), undefined);
+    });
+});
+
 describe("getListShortcutAction", () => {
     it("cancels or converts a single empty list", () => {
         const {paragraph, editor} = createList("u");
@@ -261,11 +277,47 @@ describe("getOrderedListMarkerUpdates", () => {
 
     it("supports an explicit zero start index", () => {
         assert.deepEqual(getOrderedListMarkerUpdates(["1.", "2."], 0), ["0.", "1."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["1.", "2.", "0."], 0), ["0.", "1.", "2."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["2.", "0.", "1."], 0), ["0.", "1.", "2."]);
+    });
+
+    it("preserves an explicit custom start when the original first item is removed", () => {
+        assert.deepEqual(getOrderedListMarkerUpdates(["1.", "12.", "13."], 10), ["10.", "11.", "12."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["4.", "5.", "2."], 4), [undefined, undefined, "6."]);
     });
 
     it("replaces invalid markers instead of producing NaN", () => {
         assert.deepEqual(getOrderedListMarkerUpdates(["NaN.", "NaN."]), ["1.", "2."]);
         assert.deepEqual(getOrderedListMarkerUpdates(["2.", "3."], Number.NaN), ["1.", "2."]);
+    });
+
+    it("renumbers the complete parent list after focused list edits", () => {
+        assert.deepEqual(getOrderedListMarkerUpdates(["10.", "11.", "12.", "12.", "13.", "14.", "15."]),
+            [undefined, undefined, undefined, "13.", "14.", "15.", "16."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["10.", "11.", "13.", "14.", "15.", "16."]),
+            [undefined, undefined, "12.", "13.", "14.", "15."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["10.", "11.", "1.", "12.", "13.", "14.", "15."]),
+            [undefined, undefined, "12.", "13.", "14.", "15.", "16."]);
+        assert.deepEqual(getOrderedListMarkerUpdates(["10.", "11.", "14.", "15.", "16.", "17.", "18."]),
+            [undefined, undefined, "12.", "13.", "14.", "15.", "16."]);
+    });
+});
+
+describe("parseOrderedListStart", () => {
+    it("accepts non-negative integers within the list range", () => {
+        assert.equal(parseOrderedListStart("0", 3), 0);
+        assert.equal(parseOrderedListStart("0005", 3), 5);
+        assert.equal(parseOrderedListStart("999999997", 3), 999999997);
+        assert.equal(getOrderedListMaxStart(3), 999999997);
+    });
+
+    it("rejects malformed and overflowing values", () => {
+        assert.equal(parseOrderedListStart("-1", 3), undefined);
+        assert.equal(parseOrderedListStart("1.5", 3), undefined);
+        assert.equal(parseOrderedListStart("1x", 3), undefined);
+        assert.equal(parseOrderedListStart("999999998", 3), undefined);
+        assert.equal(parseOrderedListStart("1000000000", 1), undefined);
+        assert.equal(parseOrderedListStart("1", 0), undefined);
     });
 });
 

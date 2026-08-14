@@ -104,13 +104,21 @@ func BroadcastByType(typ, cmd string, code int, msg string, data any) {
 }
 
 func SessionsByType(typ string) (ret []*melody.Session) {
+	return sessionsByType(typ, false)
+}
+
+func publishSessionsByType(typ string) (ret []*melody.Session) {
+	return sessionsByType(typ, true)
+}
+
+func sessionsByType(typ string, publish bool) (ret []*melody.Session) {
 	ret = []*melody.Session{}
 
 	sessions.Range(func(key, value any) bool {
 		appSessions := value.(*sync.Map)
 		appSessions.Range(func(key, value any) bool {
 			session := value.(*melody.Session)
-			if isPublishSession(session) {
+			if isPublishSession(session) != publish {
 				return true
 			}
 			if t, ok := session.Get("type"); ok && typ == t {
@@ -260,6 +268,15 @@ func ReloadUIResetScroll() {
 
 func ReloadUI() {
 	BroadcastByType("main", "reloadui", 0, "", nil)
+}
+
+// ReloadPublishServiceSessions 通知所有已打开的发布服务页面刷新，使发布插件设置立即生效。
+func ReloadPublishServiceSessions() {
+	for _, session := range publishSessionsByType("main") {
+		event := NewResult()
+		event.Cmd = "reloadpublishpage"
+		session.Write(event.Bytes())
+	}
 }
 
 func PushTxErr(msg string, code int, data any) {

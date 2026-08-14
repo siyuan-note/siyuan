@@ -1,7 +1,9 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    BLOCK_DRAGOVER_SELECTOR,
     getAVRowDropTarget,
+    getBlockDragoverTarget,
     getSameSuperBlockEdgeTarget,
     getSuperBlockResizeDropTarget,
     getTopListDragTarget,
@@ -32,6 +34,15 @@ const createBlockElement = (id: string, parentElement: Element = null) => ({
     getAttribute: (name: string) => name === "data-node-id" ? id : null,
     parentElement
 }) as unknown as Element;
+
+const createDragoverTarget = (active: boolean) => ({
+    matches: (selector: string) => selector === BLOCK_DRAGOVER_SELECTOR && active,
+}) as unknown as Element;
+
+const createDragoverScope = (indicatedTarget: Element | null, containedTargets: Element[]) => ({
+    contains: (target: Element) => containedTargets.includes(target),
+    querySelector: (selector: string) => selector === BLOCK_DRAGOVER_SELECTOR ? indicatedTarget : null,
+}) as unknown as HTMLElement;
 
 const createSuperBlock = (layout = "col") => {
     const children: Element[] = [];
@@ -72,6 +83,38 @@ describe("isSameDragEditor", () => {
         const targetEditor = {contains: (element: Element) => element === sourceElement} as unknown as Element;
 
         assert.equal(isSameDragEditor(targetEditor, sourceElement), true);
+    });
+});
+
+describe("getBlockDragoverTarget", () => {
+    it("uses the visible indicator when the cached target is stale", () => {
+        const cachedTarget = createDragoverTarget(false);
+        const indicatedTarget = createDragoverTarget(true);
+        const scope = createDragoverScope(indicatedTarget, [cachedTarget, indicatedTarget]);
+
+        assert.equal(getBlockDragoverTarget(scope, cachedTarget), indicatedTarget);
+    });
+
+    it("keeps an active cached target when other indicators exist", () => {
+        const cachedTarget = createDragoverTarget(true);
+        const indicatedTarget = createDragoverTarget(true);
+        const scope = createDragoverScope(indicatedTarget, [cachedTarget, indicatedTarget]);
+
+        assert.equal(getBlockDragoverTarget(scope, cachedTarget), cachedTarget);
+    });
+
+    it("falls back to a cached target before its indicator is rendered", () => {
+        const cachedTarget = createDragoverTarget(false);
+        const scope = createDragoverScope(null, [cachedTarget]);
+
+        assert.equal(getBlockDragoverTarget(scope, cachedTarget), cachedTarget);
+    });
+
+    it("ignores a cached target that is no longer in the editor", () => {
+        const cachedTarget = createDragoverTarget(true);
+        const scope = createDragoverScope(null, []);
+
+        assert.equal(getBlockDragoverTarget(scope, cachedTarget), null);
     });
 });
 

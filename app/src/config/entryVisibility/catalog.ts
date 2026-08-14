@@ -105,7 +105,7 @@ const importChildren = () => [
 ];
 
 const docTreeCommon = (multi = false) => [
-    node("copy", lang("copy"), true, [...copyChildren(), node("duplicate", lang("duplicate"))]),
+    node("copy", lang("copy"), true, [...copyChildren(), node("duplicate", lang("duplicateCopy"))]),
     node("move", lang("move")),
     node("addToDatabase", lang("addToDatabase"), false),
     node("delete", lang("delete")),
@@ -161,7 +161,7 @@ const gutterCopyChildren = () => [
     node("copyText", lang("copyText")),
     node("copy", lang("copy")),
     node("copyAVID", lang("copyAVID")),
-    node("duplicate", lang("duplicate")),
+    node("duplicate", lang("duplicateCopy")),
     node("duplicateMirror", lang("duplicateMirror")),
     node("duplicateCompletely", lang("duplicateCompletely")),
 ];
@@ -298,6 +298,9 @@ const gutterSingle = () => [
     ...gutterBase(false),
     separator("separator_listBlock"),
     node("listBlock", lang("listBlock"), true, [
+        node("orderedListStart", lang("orderedListStart")),
+        node("continueListNumbering", lang("continueListNumbering")),
+        separator("separator_numbering"),
         node("prependListItem", lang("prependListItem")),
         node("appendListItem", lang("appendListItem")),
     ]),
@@ -309,6 +312,7 @@ const gutterSingle = () => [
     ]),
     separator("separator_code"),
     node("code", lang("code"), true, [
+        node("md29", lang("md29")),
         node("md31", lang("md31")),
         node("md2", lang("md2")),
         node("md27", lang("md27")),

@@ -523,6 +523,7 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.msgBrowserCompatibility,
             window.siyuan.languages.msgSelectAllTip,
             window.siyuan.languages.msgSelectAllIncompleteTip,
+            window.siyuan.languages.msgFormatPainterTip,
         ],
         afterMount: mountAppearanceSetNotifications,
     });
@@ -659,7 +660,7 @@ const mountAppearanceSetStatusBar = (root: HTMLElement) => {
 const NOTIFICATIONS_ITEMS: {
     field: keyof Config.IAppearanceNotifications;
     labelKey: "msgDocTreeMaxList" | "msgTagMaxList" | "msgWorkspaceNotSSD" | "msgBrowserCompatibility" |
-        "msgSelectAllTip" | "msgSelectAllIncompleteTip";
+        "msgSelectAllTip" | "msgSelectAllIncompleteTip" | "msgFormatPainterTip";
 }[] = [
     {field: "docTreeMaxList", labelKey: "msgDocTreeMaxList"},
     {field: "tagMaxList", labelKey: "msgTagMaxList"},
@@ -667,6 +668,7 @@ const NOTIFICATIONS_ITEMS: {
     {field: "browserCompatibility", labelKey: "msgBrowserCompatibility"},
     {field: "selectAllTip", labelKey: "msgSelectAllTip"},
     {field: "selectAllIncompleteTip", labelKey: "msgSelectAllIncompleteTip"},
+    {field: "formatPainterTip", labelKey: "msgFormatPainterTip"},
 ];
 
 const genNotificationsDialogHtml = (): string => {
@@ -691,6 +693,7 @@ const readNotificationsFromDialog = (root: HTMLElement): Config.IAppearanceNotif
         browserCompatibility: (root.querySelector("#browserCompatibility") as HTMLInputElement).checked,
         selectAllTip: (root.querySelector("#selectAllTip") as HTMLInputElement).checked,
         selectAllIncompleteTip: (root.querySelector("#selectAllIncompleteTip") as HTMLInputElement).checked,
+        formatPainterTip: (root.querySelector("#formatPainterTip") as HTMLInputElement).checked,
     };
 };
 

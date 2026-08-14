@@ -1,6 +1,11 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
-import {getTableCellsInRectangle, getTableDragEdge} from "./tableSelection";
+import {
+    getProjectedTableHeadRowCount,
+    getTableCellsInRectangle,
+    getTableDragEdge,
+    projectTableCells,
+} from "./tableSelection";
 
 interface ITestCellInfo {
     id: string;
@@ -64,5 +69,82 @@ describe("getTableDragEdge", () => {
         assert.equal(getTableDragEdge(51, 50, 250), undefined);
         assert.equal(getTableDragEdge(249, 50, 250), undefined);
         assert.equal(getTableDragEdge(100, 150, 50), undefined);
+    });
+});
+
+describe("projectTableCells", () => {
+    const issueCells = [
+        createCell("a", 0, 0, 1, 2), createCell("b", 0, 2),
+        createCell("c", 1, 0), createCell("d", 1, 1), createCell("e", 1, 2, 2),
+        createCell("f", 2, 0), createCell("g", 2, 1),
+    ];
+    const simplify = (cells: ReturnType<typeof projectTableCells<ITestCellInfo>>["cells"]) => cells.map(item => ({
+        id: item.source.id,
+        row: item.row,
+        col: item.col,
+        rowspan: item.rowspan,
+        colspan: item.colspan,
+    }));
+
+    it("shrinks horizontal merged cells after deleting a covered column", () => {
+        const projection = projectTableCells(issueCells, [0, 1, 2], [1, 2]);
+
+        assert.deepEqual(simplify(projection.cells), [
+            {id: "a", row: 0, col: 0, rowspan: 1, colspan: 1},
+            {id: "b", row: 0, col: 1, rowspan: 1, colspan: 1},
+            {id: "d", row: 1, col: 0, rowspan: 1, colspan: 1},
+            {id: "e", row: 1, col: 1, rowspan: 2, colspan: 1},
+            {id: "g", row: 2, col: 0, rowspan: 1, colspan: 1},
+        ]);
+    });
+
+    it("moves a vertical merged cell to the first surviving row", () => {
+        const projection = projectTableCells(issueCells, [0, 2], [0, 1, 2]);
+
+        assert.deepEqual(simplify(projection.cells), [
+            {id: "a", row: 0, col: 0, rowspan: 1, colspan: 2},
+            {id: "b", row: 0, col: 2, rowspan: 1, colspan: 1},
+            {id: "f", row: 1, col: 0, rowspan: 1, colspan: 1},
+            {id: "g", row: 1, col: 1, rowspan: 1, colspan: 1},
+            {id: "e", row: 1, col: 2, rowspan: 1, colspan: 1},
+        ]);
+    });
+
+    it("removes a merged cell only after its whole region is deleted", () => {
+        const projection = projectTableCells(issueCells, [0], [0, 1, 2]);
+
+        assert.deepEqual(simplify(projection.cells), [
+            {id: "a", row: 0, col: 0, rowspan: 1, colspan: 2},
+            {id: "b", row: 0, col: 2, rowspan: 1, colspan: 1},
+        ]);
+    });
+
+    it("compresses non-contiguous retained rows and columns", () => {
+        const cells = [
+            createCell("a", 0, 0, 3, 3),
+            createCell("b", 0, 3),
+            createCell("c", 1, 3),
+            createCell("d", 2, 3),
+        ];
+        const projection = projectTableCells(cells, [0, 2], [0, 2, 3]);
+
+        assert.deepEqual(simplify(projection.cells), [
+            {id: "a", row: 0, col: 0, rowspan: 2, colspan: 2},
+            {id: "b", row: 0, col: 2, rowspan: 1, colspan: 1},
+            {id: "d", row: 1, col: 2, rowspan: 1, colspan: 1},
+        ]);
+    });
+
+    it("keeps the header large enough for merged cells", () => {
+        const cells = [
+            createCell("a", 0, 0, 3),
+            createCell("b", 0, 1),
+            createCell("c", 1, 1),
+            createCell("d", 2, 1),
+        ];
+        const projection = projectTableCells(cells, [1, 2], [0, 1]);
+
+        assert.equal(getProjectedTableHeadRowCount(projection.cells, projection.rows,
+            ["thead", "tbody", "tbody"]), 2);
     });
 });

@@ -4,6 +4,7 @@ import {focusByRange, focusByWbr} from "../util/selection";
 import {writeText} from "../util/compatibility";
 import {isArrayEqual} from "../../util/functions";
 import {hasSameTextStyle} from "./Font";
+import {AIActions} from "../../ai/actions";
 
 export const previewTemplate = (pathString: string, element: Element, parentId: string) => {
     if (!pathString) {
@@ -145,6 +146,19 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         icon: "iconLink",
         tipPosition: "n",
     }, {
+        name: "ai",
+        hotkey: window.siyuan.config.keymap.editor.general.ai.custom,
+        lang: "aiEdit",
+        icon: "iconSparkles",
+        tipPosition: "n",
+        click(protyle) {
+            const editor = protyle.protyle;
+            const range = editor.toolbar.range?.cloneRange();
+            if (range && !range.collapsed) {
+                AIActions([], editor, range);
+            }
+        },
+    }, {
         name: "strong",
         lang: "bold",
         hotkey: window.siyuan.config.keymap.editor.insert.bold.custom,
@@ -227,6 +241,11 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         lang: "clearInline",
         hotkey: window.siyuan.config.keymap.editor.insert.clearInline.custom,
         icon: "iconClear",
+        tipPosition: "n",
+    }, {
+        name: "format-painter",
+        lang: "formatPainter",
+        icon: "iconFormat",
         tipPosition: "n",
     }, {
         name: "|",

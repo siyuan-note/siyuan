@@ -87,4 +87,9 @@ func TestSessionsByTypeExcludesPublishSession(t *testing.T) {
 	if len(actual) != 1 || actual[0] != regularSession {
 		t.Fatalf("SessionsByType() returned %d sessions, want only the regular session", len(actual))
 	}
+
+	publishActual := publishSessionsByType(sessionType)
+	if len(publishActual) != 1 || publishActual[0] != publishSession {
+		t.Fatalf("publishSessionsByType() returned %d sessions, want only the publish session", len(publishActual))
+	}
 }

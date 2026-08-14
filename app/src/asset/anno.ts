@@ -14,6 +14,14 @@ import {filesize} from "filesize";
 import md5 from "blueimp-md5";
 import {getRectImageName, hideRectResizeHandles, moveRectBounds, resizeRectBounds} from "./rectAnnotationResize";
 import type {RectBounds, RectResizeDirection} from "./rectAnnotationResize";
+import {
+    getCaptureCanvasBounds,
+    getCaptureDisplayWidth,
+    getLimitedCaptureScale,
+    PDF_RECT_CAPTURE_PROFILE,
+    PDF_RECT_CAPTURE_SCALE,
+    PDF_RECT_DISPLAY_SCALE,
+} from "./pdfRectCapture";
 
 const RECT_RESIZE_MIN_SIZE = 8;
 
@@ -912,29 +920,33 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
     const annotation = getConfig(pdf)?.[annotationElement.getAttribute("data-node-id")] as IPdfAnno;
     const positions = annotation?.pages?.find(item => item.index === pageIndex)?.positions;
     const positionHash = positions ? md5(JSON.stringify(positions)).substring(0, 7) : "";
+    const position = positions?.[0];
     setTimeout(() => {
         if (mode === "rect" ||
             (mode === "" && annotationElement.childElementCount === 1 && content.startsWith(fileName)) // 兼容历史，以前没有 mode
         ) {
-            getRectImgData(pdf, annotationElement).then((imageData) => {
-                fetch(imageData.url).then((response) => {
-                    return response.blob();
-                }).then((blob) => {
-                    let msg = "";
-                    if (Constants.SIZE_UPLOAD_TIP_SIZE <= blob.size) {
-                        msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", content + ".png").replace("${y}", filesize(blob.size, {standard: "iec"}));
-                    }
-                    confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
-                        const formData = new FormData();
-                        const imageName = getRectImageName(content, imageData.rotation, positionHash);
-                        formData.append("file[]", blob, imageName);
-                        formData.append("skipIfDuplicated", "true");
-                        fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
-                            writeText(`<<${idPath} "${content}">>
-![](${response.data.succMap[imageName]})`);
-                        });
+            if (!position || pageIndex < 0) {
+                return;
+            }
+            getRectImgData(pdf, pageIndex + 1, position).then((imageData) => {
+                let msg = "";
+                if (Constants.SIZE_UPLOAD_TIP_SIZE <= imageData.blob.size) {
+                    msg = window.siyuan.languages.uploadFileTooLarge.replace("${x}", content + ".png")
+                        .replace("${y}", filesize(imageData.blob.size, {standard: "iec"}));
+                }
+                confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
+                    const formData = new FormData();
+                    const imageName = getRectImageName(content, imageData.rotation, positionHash,
+                        PDF_RECT_CAPTURE_PROFILE);
+                    formData.append("file[]", imageData.blob, imageName);
+                    formData.append("skipIfDuplicated", "true");
+                    fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
+                        writeText(`<<${idPath} "${content}">>
+![](${response.data.succMap[imageName]}){: style="width: ${imageData.displayWidth}px;"}`);
                     });
                 });
+            }).catch((error) => {
+                console.error(error);
             });
         } else {
             writeText(`<<${idPath} "${content}">>`);
@@ -942,69 +954,60 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
     }, Constants.TIMEOUT_DBLCLICK);
 };
 
-async function getRectImgData(pdfObj: any, annotationElement: HTMLElement) {
-    const pageElement = hasClosestByClassName(annotationElement, "page");
-    if (!pageElement) {
-        return;
-    }
-
-    const pageNumber = parseInt(pageElement.getAttribute("data-page-number"));
+async function getRectImgData(pdfObj: any, pageNumber: number, position: number[]) {
     const pageView = pdfObj.pdfViewer.getPageView(pageNumber - 1);
     if (!pageView) {
-        return;
+        throw new Error(`PDF page view ${pageNumber} is unavailable`);
     }
-
-    // PDF 截图时的缩放倍数，用于提高截图清晰度
-    const CAPTURE_SCALE_RATIO = 1.5;
 
     const pdfPage = await pdfObj.pdfDocument.getPage(pageNumber);
-    const captureViewport = pdfPage.getViewport({
-        scale: pdfObj.pdfViewer.currentScale * window.pdfjsLib.PixelsPerInch.PDF_TO_CSS_UNITS * CAPTURE_SCALE_RATIO,
-        rotation: 0
+    const totalRotation = ((pageView.rotation + pageView.pdfPageRotate) % 360 + 360) % 360;
+    const targetViewport = pdfPage.getViewport({
+        scale: PDF_RECT_CAPTURE_SCALE,
+        rotation: totalRotation,
     });
-    const captureCanvas = document.createElement("canvas");
-    captureCanvas.width = Math.floor(captureViewport.width);
-    captureCanvas.height = Math.floor(captureViewport.height);
-
-    const captureCtx = captureCanvas.getContext("2d");
-    await pdfPage.render({
-        canvasContext: captureCtx,
-        viewport: captureViewport
-    }).promise;
-
-    const rectStyle = (annotationElement.firstElementChild as HTMLElement).style;
-    const captureImageData = captureCtx.getImageData(
-        CAPTURE_SCALE_RATIO * parseFloat(rectStyle.left),
-        CAPTURE_SCALE_RATIO * parseFloat(rectStyle.top),
-        CAPTURE_SCALE_RATIO * parseFloat(rectStyle.width),
-        CAPTURE_SCALE_RATIO * parseFloat(rectStyle.height)
-    );
-
-    const resultCanvas = document.createElement("canvas");
-    resultCanvas.width = captureImageData.width;
-    resultCanvas.height = captureImageData.height;
-    // 页面实际旋转角度 = 用户旋转 + PDF 本身旋转
-    const totalRotation = (pageView.rotation + pageView.pdfPageRotate) % 360;
-    const resultCtx = resultCanvas.getContext("2d");
-    if (totalRotation === 0) {
-        resultCtx.putImageData(captureImageData, 0, 0);
-    } else {
-        // 交换宽高
-        if (totalRotation === 90 || totalRotation === 270) {
-            [resultCanvas.width, resultCanvas.height] = [resultCanvas.height, resultCanvas.width];
-        }
-        resultCtx.translate(resultCanvas.width / 2, resultCanvas.height / 2);
-        resultCtx.rotate((totalRotation * Math.PI) / 180);
-        // 在旋转后的画布坐标系上绘制图片
-        const tempCanvas = document.createElement("canvas");
-        tempCanvas.width = captureImageData.width;
-        tempCanvas.height = captureImageData.height;
-        const tempCtx = tempCanvas.getContext("2d");
-        tempCtx.putImageData(captureImageData, 0, 0);
-        resultCtx.drawImage(tempCanvas, -tempCanvas.width / 2, -tempCanvas.height / 2);
+    const targetRect = targetViewport.convertToViewportRectangle(position);
+    const captureScale = getLimitedCaptureScale(targetRect);
+    if (captureScale <= 0) {
+        throw new Error("PDF rectangle annotation has invalid coordinates");
     }
 
-    return {url: resultCanvas.toDataURL(), rotation: totalRotation};
+    const viewport = pdfPage.getViewport({scale: captureScale, rotation: totalRotation});
+    const captureBounds = getCaptureCanvasBounds(viewport.convertToViewportRectangle(position));
+    const captureViewport = pdfPage.getViewport({
+        scale: captureScale,
+        rotation: totalRotation,
+        offsetX: -captureBounds.left,
+        offsetY: -captureBounds.top,
+    });
+    const captureCanvas = document.createElement("canvas");
+    captureCanvas.width = captureBounds.width;
+    captureCanvas.height = captureBounds.height;
+
+    const captureCtx = captureCanvas.getContext("2d");
+    if (!captureCtx) {
+        throw new Error("Unable to create a canvas context for the PDF rectangle annotation");
+    }
+    await pdfPage.render({
+        canvasContext: captureCtx,
+        viewport: captureViewport,
+    }).promise;
+
+    const displayViewport = pdfPage.getViewport({scale: PDF_RECT_DISPLAY_SCALE, rotation: totalRotation});
+    const displayWidth = Math.min(
+        getCaptureDisplayWidth(displayViewport.convertToViewportRectangle(position)),
+        captureBounds.width,
+    );
+    const blob = await new Promise<Blob>((resolve, reject) => {
+        captureCanvas.toBlob((result) => {
+            if (result) {
+                resolve(result);
+            } else {
+                reject(new Error("Unable to encode the PDF rectangle annotation"));
+            }
+        }, "image/png");
+    });
+    return {blob, rotation: totalRotation, displayWidth};
 }
 
 const setConfig = (pdf: any, id: string, data: IPdfAnno) => {

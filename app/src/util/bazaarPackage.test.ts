@@ -1,14 +1,24 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    applyBazaarPackageRatingToItem,
+    beginBazaarRatingRequest,
     getBazaarBackendSystemLabels,
     getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
+    getBazaarRatingErrorLanguageKey,
     getBazaarThemeModeLabels,
+    isBazaarPackageRatingLoaded,
+    isBazaarPluginEnabledInPublish,
+    isLatestBazaarRatingRequest,
     isValidBazaarPackageName,
+    normalizeBazaarPackageRatingResponse,
+    normalizeBazaarPackageRatingsResponse,
+    normalizeBazaarRating,
+    sortBazaarPackagesByRating,
 } from "./bazaarPackage";
 
 describe("getBazaarCompatibilityData", () => {
@@ -65,6 +75,18 @@ describe("getBazaarCompatibilityFieldVisibility", () => {
                 modes: false,
             });
         });
+    });
+});
+
+describe("isBazaarPluginEnabledInPublish", () => {
+    it("requires both the plugin author and the user to allow publishing", () => {
+        assert.equal(isBazaarPluginEnabledInPublish({}), true);
+        assert.equal(isBazaarPluginEnabledInPublish({disabledInPublish: true}), false);
+        assert.equal(isBazaarPluginEnabledInPublish({userDisabledInPublish: true}), false);
+        assert.equal(isBazaarPluginEnabledInPublish({
+            disabledInPublish: true,
+            userDisabledInPublish: true,
+        }), false);
     });
 });
 
@@ -159,5 +181,221 @@ describe("isValidBazaarPackageName", () => {
     it("rejects decoded HTML payloads", () => {
         const payload = decodeURIComponent("%3Cimg%20src%3Dx%20onerror%3D%22require(%27child_process%27)%22%3E");
         assert.equal(isValidBazaarPackageName(payload), false);
+    });
+});
+
+describe("normalizeBazaarRating", () => {
+    it("normalizes a valid rating distribution", () => {
+        assert.deepEqual(normalizeBazaarRating({
+            average: 4.5,
+            count: 6,
+            distribution: [0, 0, 1, 1, 4],
+        }), {
+            average: 4.5,
+            count: 6,
+            distribution: [0, 0, 1, 1, 4],
+        });
+    });
+
+    it("rejects invalid averages and inconsistent distributions", () => {
+        assert.equal(normalizeBazaarRating({average: 0, count: 0}), undefined);
+        assert.equal(normalizeBazaarRating({average: Number.NaN, count: 1}), undefined);
+        assert.equal(normalizeBazaarRating({average: 6, count: 1}), undefined);
+        assert.equal(normalizeBazaarRating({
+            average: 3,
+            count: 1,
+            distribution: [-1, Number.NaN, 1] as unknown as TBazaarRatingDistribution,
+        }), undefined);
+        assert.equal(normalizeBazaarRating({
+            average: 4,
+            count: 2,
+            distribution: [0, 0, 0, 1, 0],
+        }), undefined);
+        assert.equal(normalizeBazaarRating({
+            average: 3,
+            count: 2,
+            distribution: [0, 0, 0, 2, 0],
+        }), undefined);
+    });
+});
+
+describe("normalizeBazaarPackageRatingResponse", () => {
+    it("keeps unavailable public ratings hidden", () => {
+        assert.deepEqual(normalizeBazaarPackageRatingResponse(undefined), {loaded: false});
+        assert.deepEqual(normalizeBazaarPackageRatingResponse({ratingAvailable: false}), {loaded: false});
+    });
+
+    it("distinguishes an available zero-rating package from unavailable ratings", () => {
+        assert.deepEqual(normalizeBazaarPackageRatingResponse({ratingAvailable: true}), {loaded: true});
+    });
+
+    it("accepts a valid public rating only when the public index is available", () => {
+        const rating: IBazaarRating = {average: 4.5, count: 2, distribution: [0, 0, 0, 1, 1]};
+        assert.deepEqual(normalizeBazaarPackageRatingResponse({ratingAvailable: true, rating}), {
+            loaded: true,
+            rating,
+        });
+        assert.deepEqual(normalizeBazaarPackageRatingResponse({ratingAvailable: false, rating}), {loaded: false});
+    });
+
+    it("rejects malformed public ratings even when marked available", () => {
+        assert.deepEqual(normalizeBazaarPackageRatingResponse({
+            ratingAvailable: true,
+            rating: {average: 5, count: 2, distribution: [0, 0, 0, 0, 1]},
+        }), {loaded: false});
+    });
+});
+
+describe("normalizeBazaarPackageRatingsResponse", () => {
+    it("loads only eligible installed packages and preserves official zero ratings", () => {
+        const rating: IBazaarRating = {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]};
+        assert.deepEqual(normalizeBazaarPackageRatingsResponse(["rated", "zero", "local"], {
+            eligiblePackageNames: ["rated", "zero"],
+            ratings: {rated: rating},
+        }), new Map([
+            ["rated", {ratingAvailable: true, rating}],
+            ["zero", {ratingAvailable: true}],
+            ["local", {ratingAvailable: false}],
+        ]));
+    });
+
+    it("ignores eligibility entries outside the current request", () => {
+        assert.deepEqual(normalizeBazaarPackageRatingsResponse(["requested"], {
+            eligiblePackageNames: ["requested", "extra"],
+            ratings: {},
+        }), new Map([["requested", {ratingAvailable: true}]]));
+    });
+
+    it("rejects malformed batch responses and malformed eligible ratings", () => {
+        assert.equal(normalizeBazaarPackageRatingsResponse(["package"], {
+            eligiblePackageNames: undefined,
+            ratings: {},
+        }), undefined);
+        assert.equal(normalizeBazaarPackageRatingsResponse(["package"], {
+            eligiblePackageNames: ["package", 1],
+            ratings: {},
+        }), undefined);
+        assert.equal(normalizeBazaarPackageRatingsResponse(["package"], {
+            eligiblePackageNames: ["package"],
+            ratings: [],
+        }), undefined);
+        assert.deepEqual(normalizeBazaarPackageRatingsResponse(["package"], {
+            eligiblePackageNames: ["package"],
+            ratings: {package: {average: 5, count: 2, distribution: [0, 0, 0, 0, 1]}},
+        }), new Map([["package", {ratingAvailable: false}]]));
+    });
+});
+
+describe("applyBazaarPackageRatingToItem", () => {
+    it("propagates public availability with a rating", () => {
+        const item = {
+            name: "package",
+            ratingAvailable: false,
+        } as {name: string, ratingAvailable: boolean, rating?: IBazaarRating};
+        const rating: IBazaarRating = {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]};
+        assert.equal(applyBazaarPackageRatingToItem(item, "package", rating), true);
+        assert.deepEqual(item, {name: "package", ratingAvailable: true, rating});
+    });
+
+    it("propagates public availability and clears stale data for a zero-rating package", () => {
+        const item = {
+            name: "package",
+            ratingAvailable: false,
+            rating: {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]} as IBazaarRating,
+        };
+        assert.equal(applyBazaarPackageRatingToItem(item, "package"), true);
+        assert.deepEqual(item, {name: "package", ratingAvailable: true});
+    });
+
+    it("does not update a different package", () => {
+        const item = {name: "other", ratingAvailable: false};
+        assert.equal(applyBazaarPackageRatingToItem(item, "package"), false);
+        assert.deepEqual(item, {name: "other", ratingAvailable: false});
+    });
+});
+
+describe("sortBazaarPackagesByRating", () => {
+    const packages = [
+        {name: "unrated", updated: "20260101"},
+        {name: "few", updated: "20260104", ratingAvailable: true, rating: {average: 4.5, count: 2, distribution: [0, 0, 0, 1, 1]}},
+        {name: "many-old", updated: "20260102", ratingAvailable: true, rating: {average: 4.5, count: 10, distribution: [0, 0, 0, 5, 5]}},
+        {name: "many-new", updated: "20260103", ratingAvailable: true, rating: {average: 4.5, count: 10, distribution: [0, 0, 0, 5, 5]}},
+        {name: "low", updated: "20260105", ratingAvailable: true, rating: {average: 2, count: 100, distribution: [0, 100, 0, 0, 0]}},
+    ] as Array<{name: string, updated: string, ratingAvailable?: boolean, rating?: IBazaarRating}>;
+
+    it("sorts descending with count and update-time tie breakers", () => {
+        assert.deepEqual(sortBazaarPackagesByRating(packages, true).map((item) => item.name), [
+            "many-new", "many-old", "few", "low", "unrated",
+        ]);
+    });
+
+    it("sorts ascending while keeping unrated packages last", () => {
+        assert.deepEqual(sortBazaarPackagesByRating(packages, false).map((item) => item.name), [
+            "low", "many-new", "many-old", "few", "unrated",
+        ]);
+    });
+
+    it("preserves the original order when all rating tie breakers match", () => {
+        const tied = [
+            {name: "first", updated: "20260101", ratingAvailable: true, rating: {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]}},
+            {name: "second", updated: "20260101", ratingAvailable: true, rating: {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]}},
+        ] as Array<{name: string, updated: string, ratingAvailable: boolean, rating: IBazaarRating}>;
+        assert.deepEqual(sortBazaarPackagesByRating(tied, true).map((item) => item.name), ["first", "second"]);
+    });
+
+    it("treats ratings without an available public index as unrated", () => {
+        const unavailable = [
+            {name: "available", ratingAvailable: true, rating: {average: 1, count: 1, distribution: [1, 0, 0, 0, 0]}},
+            {name: "unavailable", ratingAvailable: false, rating: {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]}},
+            {name: "missing-flag", rating: {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]}},
+        ] as Array<{name: string, ratingAvailable?: boolean, rating?: IBazaarRating}>;
+        assert.deepEqual(sortBazaarPackagesByRating(unavailable, true).map((item) => item.name), [
+            "available", "unavailable", "missing-flag",
+        ]);
+    });
+});
+
+describe("isBazaarPackageRatingLoaded", () => {
+    it("exposes online ratings only when both public indexes are available", () => {
+        assert.equal(isBazaarPackageRatingLoaded("bazaar", false, true), true);
+        assert.equal(isBazaarPackageRatingLoaded("bazaar", true, false), false);
+        assert.equal(isBazaarPackageRatingLoaded("bazaar", true), false);
+    });
+
+    it("waits for an explicit successful load for installed and update packages", () => {
+        assert.equal(isBazaarPackageRatingLoaded("downloaded", false, true), false);
+        assert.equal(isBazaarPackageRatingLoaded("updated", false, true), false);
+        assert.equal(isBazaarPackageRatingLoaded("downloaded", true, false), true);
+        assert.equal(isBazaarPackageRatingLoaded("updated", true, false), true);
+    });
+});
+
+describe("bazaar rating request ordering", () => {
+    it("accepts only the latest request for the same user and package", () => {
+        const requestIDs = new Map<string, number>();
+        const first = beginBazaarRatingRequest(requestIDs, "user|plugins:package");
+        const second = beginBazaarRatingRequest(requestIDs, "user|plugins:package");
+        assert.equal(isLatestBazaarRatingRequest(requestIDs, "user|plugins:package", first), false);
+        assert.equal(isLatestBazaarRatingRequest(requestIDs, "user|plugins:package", second), true);
+    });
+
+    it("tracks different users and packages independently", () => {
+        const requestIDs = new Map<string, number>();
+        const firstPackage = beginBazaarRatingRequest(requestIDs, "user|plugins:first");
+        const secondPackage = beginBazaarRatingRequest(requestIDs, "user|plugins:second");
+        const otherUser = beginBazaarRatingRequest(requestIDs, "other-user|plugins:first");
+        assert.equal(isLatestBazaarRatingRequest(requestIDs, "user|plugins:first", firstPackage), true);
+        assert.equal(isLatestBazaarRatingRequest(requestIDs, "user|plugins:second", secondPackage), true);
+        assert.equal(isLatestBazaarRatingRequest(requestIDs, "other-user|plugins:first", otherUser), true);
+    });
+});
+
+describe("getBazaarRatingErrorLanguageKey", () => {
+    it("recognizes only the stable rating rate-limit error code", () => {
+        assert.equal(getBazaarRatingErrorLanguageKey({errorCode: "bazaarRatingRateLimited"}),
+            "bazaarRatingRateLimited");
+        assert.equal(getBazaarRatingErrorLanguageKey({errorCode: "other"}), undefined);
+        assert.equal(getBazaarRatingErrorLanguageKey("bazaarRatingRateLimited"), undefined);
+        assert.equal(getBazaarRatingErrorLanguageKey(null), undefined);
     });
 });

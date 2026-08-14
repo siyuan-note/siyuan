@@ -55,6 +55,7 @@ import {
     transaction,
     insertEmptyBlockquote,
     isEmptyParagraph,
+    turnEmptyParagraphsIntoTransaction,
     turnsIntoGroupsTransaction,
     turnsIntoOneTransaction,
     turnsIntoTransaction,
@@ -65,6 +66,7 @@ import {
 import {getBlockquoteContext, shouldCancelBlockquote} from "./blockquote";
 import {fontEvent} from "../toolbar/Font";
 import {applyTableCellStyleHotkey} from "../toolbar/tableCell";
+import {formatPainter} from "../toolbar/FormatPainter";
 import {
     addSubList,
     appendListItem,
@@ -1374,9 +1376,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 回车
         if (matchHotKey("↩", event) ||
             (matchHotKey("⇧↩", event) && nodeType === "NodeHeading")) {
-            enter(nodeElement, range, protyle);
             event.stopPropagation();
             event.preventDefault();
+            await enter(nodeElement, range, protyle);
             return;
         }
 
@@ -1602,6 +1604,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // esc
         if (event.key === "Escape") {
+            if (formatPainter.deactivate()) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             if (event.repeat) {
                 // https://github.com/siyuan-note/siyuan/issues/12989
                 const cardElement = hasClosestByClassName(range.startContainer, "card__main", true);
@@ -1773,6 +1780,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.code.custom, event) &&
             !["NodeCodeBlock", "NodeHeading", "NodeTable"].includes(nodeType) &&
             !isInEmbedBlock(nodeElement)) {
+            if (isEmptyParagraph(nodeElement)) {
+                turnEmptyParagraphsIntoTransaction({
+                    protyle,
+                    nodeElements: [nodeElement],
+                    type: "code",
+                });
+                event.preventDefault();
+                event.stopPropagation();
+                return true;
+            }
             const editElement = getContenteditableElement(nodeElement);
             if (editElement) {
                 const html = nodeElement.outerHTML;
@@ -1863,6 +1880,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (isListOutdent) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
+                event.preventDefault();
+                event.stopPropagation();
                 let isContinuous = true;
                 selectElements.forEach((item, index) => {
                     if (item.nextElementSibling && selectElements[index + 1]) {
@@ -1873,10 +1892,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
                 if (isContinuous &&
                     (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
-                    listOutdent(protyle, Array.from(selectElements), range);
+                    await listOutdent(protyle, Array.from(selectElements), range);
                 }
-                event.preventDefault();
-                event.stopPropagation();
                 return true;
             } else if (rangeListItemElements.length > 0) {
                 event.preventDefault();
@@ -1887,9 +1904,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 return true;
             } else if (nodeElement.parentElement.classList.contains("li") && nodeType !== "NodeCodeBlock") {
-                listOutdent(protyle, [nodeElement.parentElement], range);
                 event.preventDefault();
                 event.stopPropagation();
+                await listOutdent(protyle, [nodeElement.parentElement], range);
                 return true;
             }
         }
@@ -1897,6 +1914,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (isListIndent) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
+                event.preventDefault();
+                event.stopPropagation();
                 let isContinuous = true;
                 selectElements.forEach((item, index) => {
                     if (item.nextElementSibling && selectElements[index + 1]) {
@@ -1907,23 +1926,21 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
                 if (isContinuous &&
                     (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
-                    listIndent(protyle, Array.from(selectElements), range);
+                    await listIndent(protyle, Array.from(selectElements), range);
                 }
-                event.preventDefault();
-                event.stopPropagation();
                 return true;
             } else if (rangeListItemElements.length > 0) {
-                listIndent(protyle, rangeListItemElements, range);
+                event.preventDefault();
+                event.stopPropagation();
+                await listIndent(protyle, rangeListItemElements, range);
                 if (rangeListItemFocusContext) {
                     restoreFocusContext(protyle, rangeListItemFocusContext);
                 }
-                event.preventDefault();
-                event.stopPropagation();
                 return true;
             } else if (nodeElement.parentElement.classList.contains("li") && nodeType !== "NodeCodeBlock") {
-                listIndent(protyle, [nodeElement.parentElement], range);
                 event.preventDefault();
                 event.stopPropagation();
+                await listIndent(protyle, [nodeElement.parentElement], range);
                 return true;
             }
         }
@@ -2030,7 +2047,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 });
                             }
                         } else if (action === "insertListItem") {
-                            insertEmptyListItem(protyle, listContext.listItemElement, range);
+                            await insertEmptyListItem(protyle, listContext.listItemElement, range);
                         } else if (action === "convertChildToList") {
                             turnsIntoOneTransaction({
                                 protyle,
@@ -2248,11 +2265,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.ai.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
-            let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectsElement.length === 0) {
-                selectsElement = [nodeElement];
+            if (!range.collapsed && protyle.wysiwyg.element.contains(range.startContainer) &&
+                protyle.wysiwyg.element.contains(range.endContainer)) {
+                AIActions([], protyle, range.cloneRange());
+            } else {
+                let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+                if (selectsElement.length === 0) {
+                    selectsElement = [nodeElement];
+                }
+                AIActions(selectsElement, protyle);
             }
-            AIActions(selectsElement, protyle);
             return;
         }
 
@@ -2288,8 +2310,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // tab 需等待 list 和 table 处理完成
         if (event.key === "Tab" && isNotCtrl(event) && !event.altKey) {
             event.preventDefault();
-            if (nodeType === "NodeCodeBlock" && selectText !== "") {
-                tabCodeBlock(protyle, nodeElement, range, event.shiftKey);
+            if (nodeType === "NodeCodeBlock") {
+                if (selectText !== "" || !event.shiftKey) {
+                    tabCodeBlock(protyle, nodeElement, range, event.shiftKey);
+                    return true;
+                }
                 return;
             }
             if (!event.shiftKey) {

@@ -17,8 +17,10 @@
 package util
 
 import (
+	"context"
 	"net"
 	"testing"
+	"time"
 )
 
 // TestIsSessionOriginAllowed 验证会话 Cookie 认证的 Origin 校验逻辑
@@ -174,6 +176,38 @@ func TestSSRFSafeDialerSafeMode(t *testing.T) {
 			err := dialer.Control("tcp", test.address, nil)
 			if test.blocked != (nil != err) {
 				t.Fatalf("Control(%q) error [%v], want blocked [%v]", test.address, err, test.blocked)
+			}
+		})
+	}
+}
+
+// TestSSRFSafeDialContext 验证 ssrfSafeDialContext 在连接阶段无条件拦截私网地址（不依赖 SafeMode），
+// 并拒绝解析结果全部为私网的域名，杜绝 DNS 重绑定 TOCTOU。
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-x8gv-g2g3-65fj
+func TestSSRFSafeDialContext(t *testing.T) {
+	dialContext := ssrfSafeDialContext(500 * time.Millisecond)
+
+	tests := []struct {
+		name    string
+		address string
+		blocked bool
+	}{
+		{name: "loopback", address: "127.0.0.1:80", blocked: true},
+		{name: "private", address: "192.168.1.1:80", blocked: true},
+		{name: "link-local", address: "169.254.169.254:80", blocked: true},
+		{name: "IPv6 loopback", address: "[::1]:80", blocked: true},
+		{name: "NAT64 loopback", address: "[64:ff9b::7f00:1]:80", blocked: true},
+		{name: "localhost 解析结果全为私网", address: "localhost:80", blocked: true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			conn, err := dialContext(context.Background(), "tcp", test.address)
+			if conn != nil {
+				conn.Close()
+			}
+			if test.blocked != (nil != err) {
+				t.Fatalf("dial %q error [%v], want blocked [%v]", test.address, err, test.blocked)
 			}
 		})
 	}

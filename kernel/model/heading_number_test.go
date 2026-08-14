@@ -116,6 +116,19 @@ func TestMaterializeHeadingNumbersPreservesSourceContext(t *testing.T) {
 	}
 }
 
+func TestMaterializeHeadingNumbersOmitsSpacingAfterFullWidthPunctuation(t *testing.T) {
+	root := &ast.Node{Type: ast.NodeDocument, ID: "root"}
+	heading := &ast.Node{Type: ast.NodeHeading, ID: "heading-1", HeadingLevel: 1}
+	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("标题")})
+	root.AppendChild(heading)
+
+	materializeHeadingNumbers(&parse.Tree{Root: root}, map[string]string{"heading-1": "一、"})
+
+	if got := string(heading.FirstChild.Tokens); "一、" != got {
+		t.Fatalf("unexpected materialized heading number: got %q, want %q", got, "一、")
+	}
+}
+
 func TestMaterializeHeadingNumbersSkipsSyntheticTitle(t *testing.T) {
 	root := &ast.Node{Type: ast.NodeDocument, ID: "root"}
 	title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1}
@@ -136,11 +149,14 @@ func TestMaterializeHeadingNumbersSkipsSyntheticTitle(t *testing.T) {
 }
 
 func TestHeadingTitleWithNumber(t *testing.T) {
-	numbers := map[string]string{"heading-1": "2.3"}
+	numbers := map[string]string{"heading-1": "2.3", "heading-2": "1）"}
 	if got := headingTitleWithNumber("Title", "heading-1", numbers); "2.3 Title" != got {
 		t.Fatalf("unexpected numbered heading title: got %q", got)
 	}
-	if got := headingTitleWithNumber("Title", "heading-2", numbers); "Title" != got {
+	if got := headingTitleWithNumber("Title", "heading-2", numbers); "1）Title" != got {
+		t.Fatalf("unexpected full-width numbered heading title: got %q", got)
+	}
+	if got := headingTitleWithNumber("Title", "heading-3", numbers); "Title" != got {
 		t.Fatalf("heading without a number should remain unchanged: got %q", got)
 	}
 }

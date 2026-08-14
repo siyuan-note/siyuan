@@ -434,6 +434,7 @@ func serveExport(ginServer *gin.Engine) {
 func serveWidgets(ginServer *gin.Engine) {
 	widgets := ginServer.Group("/widgets/", model.CheckAuth)
 	registerStaticFileHandlers(widgets, filepath.Join(util.DataDir, "widgets"), true, func(c *gin.Context, relativePath string) bool {
+		c.Header("Cache-Control", "private, no-store")
 		if !model.IsReadOnlyRoleContext(c) {
 			return true
 		}

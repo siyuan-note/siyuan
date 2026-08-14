@@ -265,6 +265,127 @@ func TestCreateDocsByHPathUsesBoxDocAsLogicalRoot(t *testing.T) {
 	}
 }
 
+func TestCreateDocsByHPathUsesExactParentDocument(t *testing.T) {
+	tests := []struct {
+		name  string
+		title string
+	}{
+		{name: "non-breaking space", title: "Parent\u00a0Document"},
+		{name: "zero-width joiner", title: "Parent \U0001F468\u200d\U0001F4BB"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			fixture := setupFileOperationTest(t)
+			parentID := "20260718000005-abcdefg"
+			parentPath := "/" + parentID + ".sy"
+			parentTree := treenode.NewTree(fixture.box.ID, parentPath, "/"+test.title, test.title)
+			if _, err := filesys.WriteTree(parentTree); err != nil {
+				t.Fatalf("write parent document failed: %v", err)
+			}
+			treenode.UpsertBlockTree(parentTree)
+			t.Cleanup(func() {
+				cache.RemoveTreeData(parentTree.ID)
+				cache.RemoveDocIAL(parentTree.Path)
+			})
+
+			childID := "20260718000006-abcdefg"
+			createdID, err := createDocsByHPath(
+				fixture.box.ID,
+				parentTree.HPath+"/Child",
+				"",
+				parentID,
+				childID,
+				false,
+			)
+			if err != nil {
+				t.Fatalf("create child document failed: %v", err)
+			}
+			if childID != createdID {
+				t.Fatalf("unexpected child document ID: got %s, want %s", createdID, childID)
+			}
+
+			childTree := treenode.GetBlockTree(childID)
+			if nil == childTree {
+				t.Fatalf("created child document block tree [%s] not found", childID)
+			}
+			wantPath := strings.TrimSuffix(parentPath, ".sy") + "/" + childID + ".sy"
+			if wantPath != childTree.Path {
+				t.Fatalf("child document created under unexpected parent: got %s, want %s", childTree.Path, wantPath)
+			}
+		})
+	}
+}
+
+func TestCreateDocsByHPathUsesParentIDForDuplicateHPath(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	title := "Parent\u00a0Document"
+	var parents []*parse.Tree
+	for _, parentID := range []string{"20260718000005-abcdefg", "20260718000006-abcdefg"} {
+		parentPath := "/" + parentID + ".sy"
+		parentTree := treenode.NewTree(fixture.box.ID, parentPath, "/"+title, title)
+		if _, err := filesys.WriteTree(parentTree); err != nil {
+			t.Fatalf("write parent document [%s] failed: %v", parentID, err)
+		}
+		treenode.UpsertBlockTree(parentTree)
+		parents = append(parents, parentTree)
+	}
+	t.Cleanup(func() {
+		for _, parentTree := range parents {
+			cache.RemoveTreeData(parentTree.ID)
+			cache.RemoveDocIAL(parentTree.Path)
+		}
+	})
+
+	selectedParent := parents[1]
+	childID := "20260718000007-abcdefg"
+	_, err := createDocsByHPath(
+		fixture.box.ID,
+		selectedParent.HPath+"/Child",
+		"",
+		selectedParent.ID,
+		childID,
+		false,
+	)
+	if err != nil {
+		t.Fatalf("create child document failed: %v", err)
+	}
+
+	childTree := treenode.GetBlockTree(childID)
+	if nil == childTree {
+		t.Fatalf("created child document block tree [%s] not found", childID)
+	}
+	wantPath := strings.TrimSuffix(selectedParent.Path, ".sy") + "/" + childID + ".sy"
+	if wantPath != childTree.Path {
+		t.Fatalf("child document created under unexpected duplicate parent: got %s, want %s", childTree.Path, wantPath)
+	}
+}
+
+func TestCreateDocsByHPathKeepsHPathFallbackForDifferentParent(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	childID := "20260718000005-abcdefg"
+	_, err := createDocsByHPath(
+		fixture.box.ID,
+		"/Target/Child",
+		"",
+		fixture.sourceID,
+		childID,
+		false,
+	)
+	if err != nil {
+		t.Fatalf("create document by configured hpath failed: %v", err)
+	}
+
+	childTree := treenode.GetBlockTree(childID)
+	if nil == childTree {
+		t.Fatalf("created child document block tree [%s] not found", childID)
+	}
+	wantPath := strings.TrimSuffix(fixture.targetPath, ".sy") + "/" + childID + ".sy"
+	if wantPath != childTree.Path {
+		t.Fatalf("configured hpath fallback used unexpected parent: got %s, want %s", childTree.Path, wantPath)
+	}
+}
+
 func TestGetBoxesByPathsStrictRejectsInvalidPaths(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	tests := []struct {

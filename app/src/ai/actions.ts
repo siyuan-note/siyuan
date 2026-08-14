@@ -1,32 +1,21 @@
 import {fetchPost} from "../util/fetch";
-import {focusByRange, setLastNodeRange} from "../protyle/util/selection";
-import {insertHTML} from "../protyle/util/insertHTML";
+import {focusByRange} from "../protyle/util/selection";
 import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
-import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
-import {blockRender} from "../protyle/render/blockRender";
-import {processRender} from "../protyle/util/processCode";
-import {highlightRender} from "../protyle/render/highlightRender";
 import {Constants} from "../constants";
-import {setStorageVal} from "../protyle/util/compatibility";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../util/escape";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {upDownHint} from "../util/upDownHint";
+import {clearAIEditorHistory, startAIEditorAction} from "./editor";
 
-export const fillContent = (protyle: IProtyle, data: string, elements: Element[]) => {
-    if (!data) {
-        return;
-    }
-    setLastNodeRange(getContenteditableElement(elements[elements.length - 1]), protyle.toolbar.range);
-    protyle.toolbar.range.collapse(true);
-    insertHTML(protyle.lute.SpinBlockDOM(data), protyle, true, true);
-    blockRender(protyle, protyle.wysiwyg.element);
-    processRender(protyle.wysiwyg.element);
-    highlightRender(protyle.wysiwyg.element);
-};
+interface IAIEditorAction {
+    id: string;
+    name: string;
+    action: string;
+}
 
-const editDialog = (customName: string, customMemo: string) => {
+const editDialog = (item: IAIEditorAction) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.update,
         content: `<div class="b3-dialog__content">
@@ -43,47 +32,38 @@ const editDialog = (customName: string, customMemo: string) => {
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_AIUPDATECUSTOMACTION);
     const nameElement = dialog.element.querySelector("input");
-    nameElement.value = customName;
+    nameElement.value = item.name;
     const customElement = dialog.element.querySelector("textarea");
     const btnsElement = dialog.element.querySelectorAll(".b3-button");
     dialog.bindInput(customElement, () => {
         (btnsElement[2] as HTMLButtonElement).click();
     });
-    customElement.value = customMemo;
+    customElement.value = item.action;
     btnsElement[1].addEventListener("click", () => {
         dialog.destroy();
     });
     btnsElement[2].addEventListener("click", () => {
-        window.siyuan.storage[Constants.LOCAL_AI].find((subItem: {
-            name: string,
-            memo: string
-        }) => {
-            if (customName === subItem.name && customMemo === subItem.memo) {
-                subItem.name = nameElement.value;
-                subItem.memo = customElement.value;
-                setStorageVal(Constants.LOCAL_AI, window.siyuan.storage[Constants.LOCAL_AI]);
-                return true;
-            }
+        if (!nameElement.value && !customElement.value) {
+            showMessage(window.siyuan.languages["_kernel"][142]);
+            return;
+        }
+        fetchPost("/api/ai/editor/saveAction", {
+            id: item.id,
+            name: nameElement.value,
+            action: customElement.value,
+        }, () => {
+            dialog.destroy();
         });
-        dialog.destroy();
     });
     btnsElement[0].addEventListener("click", () => {
-        window.siyuan.storage[Constants.LOCAL_AI].find((subItem: {
-            name: string,
-            memo: string
-        }, index: number) => {
-            if (customName === subItem.name && customMemo === subItem.memo) {
-                window.siyuan.storage[Constants.LOCAL_AI].splice(index, 1);
-                setStorageVal(Constants.LOCAL_AI, window.siyuan.storage[Constants.LOCAL_AI]);
-                return true;
-            }
+        fetchPost("/api/ai/editor/removeAction", {id: item.id}, () => {
+            dialog.destroy();
         });
-        dialog.destroy();
     });
     nameElement.focus();
 };
 
-const customDialog = (protyle: IProtyle, ids: string[], elements: Element[]) => {
+const customDialog = (protyle: IProtyle, elements: HTMLElement[], range?: Range) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.aiCustomAction,
         content: `<div class="b3-dialog__content">
@@ -113,25 +93,20 @@ const customDialog = (protyle: IProtyle, ids: string[], elements: Element[]) => 
             showMessage(window.siyuan.languages["_kernel"][142]);
             return;
         }
-        fetchPost("/api/ai/chatGPTWithAction", {
-            ids,
-            action: customElement.value,
-        }, (response) => {
-            dialog.destroy();
-            fillContent(protyle, response.data, elements);
-        });
+        dialog.destroy();
+        startAIEditorAction(protyle, elements, range, customElement.value);
     });
     btnsElement[2].addEventListener("click", () => {
         if (!nameElement.value && !customElement.value) {
             showMessage(window.siyuan.languages["_kernel"][142]);
             return;
         }
-        window.siyuan.storage[Constants.LOCAL_AI].push({
+        fetchPost("/api/ai/editor/saveAction", {
             name: nameElement.value,
-            memo: customElement.value
+            action: customElement.value,
+        }, () => {
+            dialog.destroy();
         });
-        setStorageVal(Constants.LOCAL_AI, window.siyuan.storage[Constants.LOCAL_AI]);
-        dialog.destroy();
     });
     nameElement.focus();
 };
@@ -155,18 +130,16 @@ const filterAI = (element: HTMLElement, inputElement: HTMLInputElement) => {
     element.querySelector(".b3-list-item:not(.fn__none)")?.classList.add("b3-list-item--focus");
 };
 
-export const AIActions = (elements: Element[], protyle: IProtyle) => {
+const openAIActions = (actions: IAIEditorAction[], elements: HTMLElement[], protyle: IProtyle, range?: Range) => {
     window.siyuan.menus.menu.remove();
-    const ids: string[] = [];
-    elements.forEach(item => {
-        ids.push(item.getAttribute("data-node-id"));
-    });
     const menu = new Menu(Constants.MENU_AI, () => {
-        focusByRange(protyle.toolbar.range);
+        if (protyle.toolbar.range) {
+            focusByRange(protyle.toolbar.range);
+        }
     });
     let customHTML = "";
-    window.siyuan.storage[Constants.LOCAL_AI].forEach((item: { name: string, memo: string }, index: number) => {
-        customHTML += `<div data-action="${escapeAttr(item.memo || item.name)}" data-position="10west" data-index="${index}" class="b3-list-item b3-list-item--narrow ariaLabel" aria-label="${escapeAriaLabel(item.memo)}">
+    actions.forEach((item) => {
+        customHTML += `<div data-type="saved" data-id="${escapeAttr(item.id)}" data-position="10west" class="b3-list-item b3-list-item--narrow ariaLabel" aria-label="${escapeAriaLabel(item.action)}">
     <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
     <span data-type="edit" class="b3-list-item__action"><svg><use xlink:href="#iconEdit"></use></svg></span>
 </div>`;
@@ -214,6 +187,23 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             /// #endif
             const listElement = element.querySelector(".b3-list");
             const inputElement = element.querySelector("input");
+            const runAction = (itemElement: HTMLElement) => {
+                let action = itemElement.dataset.action;
+                if (itemElement.dataset.type === "saved") {
+                    const item = actions.find((currentItem) => currentItem.id === itemElement.dataset.id);
+                    action = item?.action || item?.name;
+                }
+                if (typeof action !== "string") {
+                    return;
+                }
+                if (action === clearContext) {
+                    clearAIEditorHistory(protyle);
+                    showMessage(window.siyuan.languages.clearContextSucc);
+                } else {
+                    menu.close();
+                    startAIEditorAction(protyle, elements, range, action);
+                }
+            };
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;
@@ -230,20 +220,10 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                         return;
                     }
                     if (currentElement.dataset.type === "custom") {
-                        customDialog(protyle, ids, elements);
+                        customDialog(protyle, elements, range);
                         menu.close();
                     } else {
-                        fetchPost("/api/ai/chatGPTWithAction", {
-                            ids,
-                            action: currentElement.dataset.action
-                        }, (response) => {
-                            fillContent(protyle, response.data, elements);
-                        });
-                        if (currentElement.dataset.action === clearContext) {
-                            showMessage(window.siyuan.languages.clearContextSucc);
-                        } else {
-                            menu.close();
-                        }
+                        runAction(currentElement);
                     }
                 }
             });
@@ -260,25 +240,20 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                 let target = event.target as HTMLElement;
                 while (target && (target !== element)) {
                     if (target.classList.contains("b3-list-item__action")) {
-                        const subItem = window.siyuan.storage[Constants.LOCAL_AI][target.parentElement.dataset.index];
-                        editDialog(subItem.name, subItem.memo);
+                        const subItem = actions.find((item) => item.id === target.parentElement.dataset.id);
+                        if (subItem) {
+                            editDialog(subItem);
+                        }
                         menu.close();
                         event.stopPropagation();
                         event.preventDefault();
                         break;
                     } else if (target.classList.contains("b3-list-item")) {
                         if (target.dataset.type === "custom") {
-                            customDialog(protyle, ids, elements);
+                            customDialog(protyle, elements, range);
                             menu.close();
                         } else {
-                            fetchPost("/api/ai/chatGPTWithAction", {ids, action: target.dataset.action}, (response) => {
-                                fillContent(protyle, response.data, elements);
-                            });
-                            if (target.dataset.action === clearContext) {
-                                showMessage(window.siyuan.languages.clearContextSucc);
-                            } else {
-                                menu.close();
-                            }
+                            runAction(target);
                         }
                         event.stopPropagation();
                         event.preventDefault();
@@ -293,7 +268,8 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     /// #if MOBILE
     menu.fullscreen();
     /// #else
-    const rect = elements[elements.length - 1].getBoundingClientRect();
+    const rect = elements[elements.length - 1]?.getBoundingClientRect() || range?.getBoundingClientRect() ||
+        protyle.element.getBoundingClientRect();
     menu.open({
         x: rect.left,
         y: rect.bottom,
@@ -301,4 +277,25 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     });
     menu.element.querySelector("input").focus();
     /// #endif
+};
+
+let aiActionsRequestID = 0;
+
+export const AIActions = (elements: Element[], protyle: IProtyle, range?: Range) => {
+    window.siyuan.menus.menu.remove();
+    const sourceElements = elements.filter((item): item is HTMLElement => item instanceof HTMLElement);
+    const sourceRange = range?.cloneRange();
+    if (sourceRange) {
+        protyle.toolbar.range = sourceRange;
+    }
+    const requestID = ++aiActionsRequestID;
+    fetchPost("/api/ai/editor/lsActions", {}, (response) => {
+        if (requestID !== aiActionsRequestID ||
+            (sourceElements.length > 0 && !sourceElements[sourceElements.length - 1].isConnected) ||
+            (sourceRange && (!protyle.wysiwyg.element.contains(sourceRange.startContainer) ||
+                !protyle.wysiwyg.element.contains(sourceRange.endContainer)))) {
+            return;
+        }
+        openAIActions(Array.isArray(response.data) ? response.data : [], sourceElements, protyle, sourceRange);
+    });
 };

@@ -102,7 +102,7 @@ const createProfile = (base: Config.TEntryVisibilityBase, current = false, name?
 const duplicateProfile = (profile: Config.IEntryVisibilityProfile) => {
     const copy = JSON.parse(JSON.stringify(profile)) as Config.IEntryVisibilityProfile;
     copy.id = genUUID();
-    copy.name = uniqueName(`${profile.name} ${window.siyuan.languages.duplicate}`);
+    copy.name = uniqueName(`${profile.name} ${window.siyuan.languages.duplicateCopy}`);
     copy.orders ||= createEntryOrderSnapshot();
     return copy;
 };
@@ -158,7 +158,7 @@ const profileCard = (
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         ${active ? "" : `<button class="b3-button b3-button--outline" data-action="activate">${window.siyuan.languages.use}</button>`}
-        <button class="block__icon block__icon--show ariaLabel" data-action="duplicate" data-position="north" aria-label="${window.siyuan.languages.duplicate}"><svg><use xlink:href="#iconCopy"></use></svg></button>
+        <button class="block__icon block__icon--show ariaLabel" data-action="duplicate" data-position="north" aria-label="${window.siyuan.languages.duplicateCopy}"><svg><use xlink:href="#iconCopy"></use></svg></button>
         ${builtin ? "" : `<button class="block__icon block__icon--show ariaLabel" data-action="export" data-position="north" aria-label="${window.siyuan.languages.export}"><svg><use xlink:href="#iconDownload"></use></svg></button>`}
         <button class="block__icon block__icon--show${active || builtin ? " fn__none" : " block__icon--warning"} ariaLabel" data-action="delete" data-position="north" aria-label="${window.siyuan.languages.delete}"><svg><use xlink:href="#iconTrashcan"></use></svg></button>
     </div>
@@ -706,7 +706,7 @@ export const mountEntryVisibility = (root: HTMLElement) => {
             openProfileEditor(root, id);
         } else if (action === "duplicate") {
             const copy = profile ? duplicateProfile(profile) : createProfile(id as Config.TEntryVisibilityBase, false,
-                `${baseLabel(id as Config.TEntryVisibilityBase)} ${window.siyuan.languages.duplicate}`);
+                `${baseLabel(id as Config.TEntryVisibilityBase)} ${window.siyuan.languages.duplicateCopy}`);
             config.profiles.push(copy);
             saveEntryVisibility(config);
             renderProfileCards(root);

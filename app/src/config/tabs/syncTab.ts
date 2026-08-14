@@ -9,7 +9,7 @@ import {writeText} from "../../protyle/util/compatibility";
 import {bindSyncCloudListEvent, renderSyncCloudList, setKey} from "../../sync/syncGuide";
 import {Dialog} from "../../dialog";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
-import {getSyncProviderConfigKeywords} from "./syncUi";
+import {getLANSyncSearchAvailability, getSyncProviderConfigKeywords} from "./syncUi";
 import {mountLANSyncStatus, patchSyncConfig} from "./syncRuntime";
 import {openHistory} from "../../history/history";
 
@@ -75,6 +75,7 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
         desc: `${window.siyuan.languages.lanSyncTip}<div data-type="lanSyncStatus"></div>`,
         save: (value) => patchSyncConfig("sync.lan.enabled", value),
         afterMount: mountLANSyncStatus,
+        searchAvailability: getLANSyncSearchAvailability,
     });
     group.slot({
         key: "syncCloudDir",

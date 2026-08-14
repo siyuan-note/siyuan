@@ -1029,6 +1029,14 @@ interface IBazaarFunding {
     custom?: string[];
 }
 
+type TBazaarRatingDistribution = [number, number, number, number, number];
+
+interface IBazaarRating {
+    average: number;
+    count: number;
+    distribution: TBazaarRatingDistribution;
+}
+
 interface IBazaarItem {
     preferredName: string;
     minAppVersion: string;
@@ -1044,6 +1052,8 @@ interface IBazaarItem {
     author: string;
     updated: string;
     downloads: number;
+    ratingAvailable?: boolean;
+    rating?: IBazaarRating;
     disallowInstall: boolean;
     current: boolean;
     installed: boolean;
@@ -1069,6 +1079,7 @@ interface IBazaarItem {
     installedIncompatible?: boolean; // 仅插件/主题
     bazaarIncompatible?: boolean; // 仅插件/主题
     enabled?: boolean; // 仅 plugin
+    userDisabledInPublish?: boolean; // 仅 plugin
     modes?: string[]; // 仅 theme
 }
 

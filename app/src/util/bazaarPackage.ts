@@ -23,6 +23,11 @@ export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     };
 };
 
+export const isBazaarPluginEnabledInPublish = (item: {
+    disabledInPublish?: boolean;
+    userDisabledInPublish?: boolean;
+}) => !item.disabledInPublish && !item.userDisabledInPublish;
+
 export const getBazaarPackageInvalidLanguageKey = (reason?: TBazaarPackageInvalidReason) => {
     switch (reason) {
         case "missing-manifest":
@@ -90,6 +95,144 @@ export const getBazaarFundingItems = (funding: IBazaarFunding | null | undefined
         normalizeBazaarFundingURL(funding.github, "https://github.com/sponsors/"),
         ...(funding.custom || []),
     ].filter(Boolean);
+};
+
+export const normalizeBazaarRating = (rating: Partial<IBazaarRating> | null | undefined): IBazaarRating | undefined => {
+    const average = rating?.average;
+    const count = rating?.count;
+    if (typeof average !== "number" || !Number.isFinite(average) || average < 1 || average > 5 ||
+        typeof count !== "number" || !Number.isSafeInteger(count) || count < 1 || !Array.isArray(rating.distribution) ||
+        rating.distribution.length !== 5 || rating.distribution.some((value) =>
+            typeof value !== "number" || !Number.isSafeInteger(value) || value < 0)) {
+        return;
+    }
+    const distribution = [...rating.distribution] as TBazaarRatingDistribution;
+    const distributionCount = distribution.reduce((sum, value) => sum + value, 0);
+    const calculatedAverage = distribution.reduce((sum, value, index) => sum + value * (index + 1), 0) / count;
+    if (distributionCount !== count || Math.abs(calculatedAverage - average) > 0.01) {
+        return;
+    }
+    return {
+        average,
+        count,
+        distribution,
+    };
+};
+
+export const normalizeBazaarPackageRatingResponse = (data: {
+    ratingAvailable?: unknown;
+    rating?: Partial<IBazaarRating> | null;
+} | null | undefined): {loaded: boolean, rating?: IBazaarRating} => {
+    if (data?.ratingAvailable !== true) {
+        return {loaded: false};
+    }
+    if (!Object.prototype.hasOwnProperty.call(data, "rating")) {
+        return {loaded: true};
+    }
+    const rating = normalizeBazaarRating(data.rating);
+    return rating ? {loaded: true, rating} : {loaded: false};
+};
+
+export const normalizeBazaarPackageRatingsResponse = (
+    packageNames: string[],
+    data: {eligiblePackageNames?: unknown, ratings?: unknown} | null | undefined,
+) => {
+    if (!Array.isArray(data?.eligiblePackageNames) ||
+        data.eligiblePackageNames.some((packageName) => typeof packageName !== "string") ||
+        !data.ratings || typeof data.ratings !== "object" || Array.isArray(data.ratings)) {
+        return;
+    }
+    const eligiblePackageNames = new Set(data.eligiblePackageNames as string[]);
+    const ratings = data.ratings as Record<string, Partial<IBazaarRating> | null>;
+    const result = new Map<string, {ratingAvailable: boolean, rating?: IBazaarRating}>();
+    packageNames.forEach((packageName) => {
+        if (!eligiblePackageNames.has(packageName)) {
+            result.set(packageName, {ratingAvailable: false});
+            return;
+        }
+        const response: {ratingAvailable: boolean, rating?: Partial<IBazaarRating> | null} = {
+            ratingAvailable: true,
+        };
+        if (Object.prototype.hasOwnProperty.call(ratings, packageName)) {
+            response.rating = ratings[packageName];
+        }
+        const normalized = normalizeBazaarPackageRatingResponse(response);
+        result.set(packageName, normalized.loaded ? {
+            ratingAvailable: true,
+            ...(normalized.rating ? {rating: normalized.rating} : {}),
+        } : {ratingAvailable: false});
+    });
+    return result;
+};
+
+export const applyBazaarPackageRatingToItem = <T extends {
+    name: string;
+    ratingAvailable?: boolean;
+    rating?: IBazaarRating;
+}>(item: T | undefined, packageName: string, rating?: IBazaarRating) => {
+    if (!item || item.name !== packageName) {
+        return false;
+    }
+    item.ratingAvailable = true;
+    if (rating) {
+        item.rating = rating;
+    } else {
+        delete item.rating;
+    }
+    return true;
+};
+
+export const sortBazaarPackagesByRating = <T extends {
+    ratingAvailable?: boolean;
+    rating?: IBazaarRating;
+    updated?: string;
+}>(packages: T[], descending: boolean): T[] => packages.map((item, index) => ({item, index})).sort((a, b) => {
+    const aRating = a.item.ratingAvailable === true ? normalizeBazaarRating(a.item.rating) : undefined;
+    const bRating = b.item.ratingAvailable === true ? normalizeBazaarRating(b.item.rating) : undefined;
+    if (!aRating && !bRating) {
+        return a.index - b.index;
+    }
+    if (!aRating) {
+        return 1;
+    }
+    if (!bRating) {
+        return -1;
+    }
+    const averageResult = descending ? bRating.average - aRating.average : aRating.average - bRating.average;
+    if (averageResult) {
+        return averageResult;
+    }
+    const countResult = bRating.count - aRating.count;
+    if (countResult) {
+        return countResult;
+    }
+    const updatedResult = (b.item.updated || "").localeCompare(a.item.updated || "");
+    return updatedResult || a.index - b.index;
+}).map(({item}) => item);
+
+export const isBazaarPackageRatingLoaded = (
+    source: "downloaded" | "updated" | "bazaar",
+    asynchronouslyLoaded: boolean,
+    onlineRatingAvailable?: boolean,
+) => {
+    return source === "bazaar" ? onlineRatingAvailable === true : asynchronouslyLoaded;
+};
+
+export const beginBazaarRatingRequest = (requestIDs: Map<string, number>, key: string) => {
+    const requestID = (requestIDs.get(key) || 0) + 1;
+    requestIDs.set(key, requestID);
+    return requestID;
+};
+
+export const isLatestBazaarRatingRequest = (requestIDs: Map<string, number>, key: string, requestID: number) => {
+    return requestIDs.get(key) === requestID;
+};
+
+export const getBazaarRatingErrorLanguageKey = (data: unknown): "bazaarRatingRateLimited" | undefined => {
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+        return;
+    }
+    return (data as {errorCode?: unknown}).errorCode === "bazaarRatingRateLimited" ? "bazaarRatingRateLimited" : undefined;
 };
 
 export const isValidBazaarPackageName = (name: string) => {

@@ -40,10 +40,11 @@ export const moveRectBounds = (initial: RectBounds, boundary: RectBounds, deltaX
     };
 };
 
-export const getRectImageName = (content: string, rotation: number, positionHash: string) => {
+export const getRectImageName = (content: string, rotation: number, positionHash: string, captureProfile: string) => {
     const annotationID = content.substring(content.length - 22);
     const imageID = positionHash ? annotationID.substring(0, 15) + positionHash.substring(0, 7) : annotationID;
-    return content.substring(0, content.length - 22) + (rotation ? `${rotation}-` : "") + imageID + ".png";
+    return content.substring(0, content.length - 22) + (rotation ? `${rotation}-` : "") +
+        `${captureProfile}-${imageID}.png`;
 };
 
 export const hideRectResizeHandles = (element: ParentNode) => {

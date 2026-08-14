@@ -590,6 +590,43 @@ func TestLegacyInitializeDoesNotNegotiateModernProtocol(t *testing.T) {
 	}
 }
 
+func TestMCPAllowsNonLoopbackHostThroughLoopbackProxy(t *testing.T) {
+	_, httpServer := newTestHTTPServer(t)
+	tests := []struct {
+		name    string
+		body    string
+		headers map[string]string
+	}{
+		{
+			name: "modern",
+			body: `{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}`,
+			headers: map[string]string{
+				"Host":                 "192.168.5.77:8300",
+				"MCP-Protocol-Version": protocolVersion20260728,
+				"Mcp-Method":           "tools/list",
+			},
+		},
+		{
+			name: "legacy",
+			body: `{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"legacy","version":"1.0.0"}}}`,
+			headers: map[string]string{
+				"Host": "192.168.5.77:8300",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			response := postMCP(t, httpServer.URL, test.body, test.headers)
+			defer response.Body.Close()
+			if response.StatusCode != http.StatusOK {
+				data, _ := io.ReadAll(response.Body)
+				t.Fatalf("unexpected proxy response: %d %q", response.StatusCode, data)
+			}
+		})
+	}
+}
+
 func TestModernProtocolRejectsCrossOriginAndDelete(t *testing.T) {
 	_, httpServer := newTestHTTPServer(t)
 	body := `{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}`
@@ -627,7 +664,11 @@ func postMCP(t *testing.T, endpoint, body string, headers map[string]string) *ht
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Accept", "application/json, text/event-stream")
 	for name, value := range headers {
-		request.Header.Set(name, value)
+		if strings.EqualFold(name, "Host") {
+			request.Host = value
+		} else {
+			request.Header.Set(name, value)
+		}
 	}
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {

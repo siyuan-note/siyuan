@@ -303,6 +303,7 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
                 level: "row",
                 unfocus: true,
                 getOperations: true,
+                widthSourceElement: blockElement as HTMLElement,
             });
             doOperations.push(...mergeOperations.doOperations);
             undoOperations.splice(0, 0, ...mergeOperations.undoOperations);

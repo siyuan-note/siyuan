@@ -30,6 +30,14 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+type aiEditorChatReq struct {
+	TaskID  string                  `json:"taskID"`
+	IDs     []string                `json:"ids"`
+	Input   string                  `json:"input"`
+	Action  string                  `json:"action"`
+	History []model.AIEditorMessage `json:"history"`
+}
+
 func resolveAIProvider(arg map[string]any) (*conf.Provider, error) {
 	if providerConfig, ok := arg["providerConfig"]; ok && providerConfig != nil {
 		data, err := gulu.JSON.MarshalJSON(providerConfig)
@@ -92,6 +100,154 @@ func chatGPTWithAction(c *gin.Context) {
 	}
 	action := arg["action"].(string)
 	ret.Data = model.ChatGPTWithAction(ids, action)
+}
+
+func aiEditorChat(c *gin.Context) {
+	if !model.Conf.AI.HasAnyProvider() {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(193)
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	req := &aiEditorChatReq{}
+	if err := c.ShouldBindJSON(req); nil != err {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	stream, err := model.NewAIEditorChatStream(c.Request.Context(), req.IDs, req.Input, req.Action, req.History)
+	if nil != err {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	defer stream.Close()
+
+	flusher, ok := c.Writer.(http.Flusher)
+	if !ok {
+		return
+	}
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("X-Accel-Buffering", "no")
+	if err = writeSSEEvent(c, "start", map[string]string{"taskID": req.TaskID}); nil != err {
+		return
+	}
+	flusher.Flush()
+
+	finishReason := "stop"
+	for {
+		response, recvErr := stream.Recv()
+		if nil != recvErr {
+			if model.IsAIEditorStreamDone(recvErr) {
+				writeSSEEvent(c, "done", map[string]string{"finishReason": finishReason})
+				flusher.Flush()
+				return
+			}
+			if nil != c.Request.Context().Err() {
+				return
+			}
+			logging.LogErrorf("receive AI editor stream failed: %s", recvErr)
+			writeSSEError(c, recvErr.Error())
+			flusher.Flush()
+			return
+		}
+		for _, choice := range response.Choices {
+			if "" != choice.Delta.ReasoningContent {
+				if err = writeSSEEvent(c, "reasoning", map[string]string{"token": choice.Delta.ReasoningContent}); nil != err {
+					return
+				}
+				flusher.Flush()
+			}
+			if "" != choice.Delta.Content {
+				if err = writeSSEEvent(c, "content", map[string]string{"token": choice.Delta.Content}); nil != err {
+					return
+				}
+				flusher.Flush()
+			}
+			if "" == choice.FinishReason {
+				continue
+			}
+			finishReason = string(choice.FinishReason)
+			if "length" == finishReason {
+				writeSSEEvent(c, "truncated", map[string]string{"message": model.Conf.Language(297)})
+				flusher.Flush()
+			}
+			writeSSEEvent(c, "done", map[string]string{"finishReason": finishReason})
+			flusher.Flush()
+			return
+		}
+	}
+}
+
+func lsAIEditorActions(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	actions, err := model.GetAIEditorActions()
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = actions
+}
+
+func saveAIEditorAction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id, name, action string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", &id, false, false),
+		util.BindJsonArg("name", &name, true, false),
+		util.BindJsonArg("action", &action, true, false),
+	) {
+		return
+	}
+
+	saved, err := model.SaveAIEditorAction(&model.AIEditorAction{
+		ID:     id,
+		Name:   name,
+		Action: action,
+	})
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = saved
+}
+
+func removeAIEditorAction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if err := model.RemoveAIEditorAction(id); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }
 
 // testModel 测试 AI 模型可用性。使用已保存的 Provider 或详情页草稿中的 baseURL/APIKey/超时，

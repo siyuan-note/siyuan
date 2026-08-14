@@ -60,12 +60,12 @@ describe("rectangle annotation resizing", () => {
 
     it("uses the rectangle position hash in copied image names", () => {
         const content = "example-P1-20260809120000-abcdefg";
-        assert.equal(getRectImageName(content, 0, "0123456"),
-            "example-P1-20260809120000-0123456.png");
-        assert.equal(getRectImageName(content, 90, "7654321"),
-            "example-P1-90-20260809120000-7654321.png");
-        assert.equal(getRectImageName(content, 0, ""),
-            "example-P1-20260809120000-abcdefg.png");
+        assert.equal(getRectImageName(content, 0, "0123456", "capture-v2"),
+            "example-P1-capture-v2-20260809120000-0123456.png");
+        assert.equal(getRectImageName(content, 90, "7654321", "capture-v2"),
+            "example-P1-90-capture-v2-20260809120000-7654321.png");
+        assert.equal(getRectImageName(content, 0, "", "capture-v2"),
+            "example-P1-capture-v2-20260809120000-abcdefg.png");
     });
 
     it("keeps resized rectangles within the page", () => {

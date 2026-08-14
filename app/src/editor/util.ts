@@ -224,11 +224,15 @@ export const openFile = async (options: IOpenFileOptions) => {
                 optionsClone[key] = JSON.parse(JSON.stringify(options[key]));
             }
         });
-        hasMatch = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-            cmd: Constants.SIYUAN_OPEN_FILE,
-            options: JSON.stringify(optionsClone),
-            port: location.port,
-        });
+        try {
+            hasMatch = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: Constants.SIYUAN_OPEN_FILE,
+                options: JSON.stringify(optionsClone),
+                port: location.port,
+            });
+        } catch (e) {
+            console.warn("Check opened file window error:", e);
+        }
         if (hasMatch) {
             if (options.afterOpen) {
                 options.afterOpen();

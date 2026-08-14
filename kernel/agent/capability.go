@@ -169,6 +169,24 @@ func capabilityAllowed(id string, context capabilityAccessContext) bool {
 	return currentCapabilityAuthorizer.Allows(id, context)
 }
 
+func capabilityOwnerAvailable(source, runtime, ownerID string) bool {
+	if source != "mcp" && runtime != "mcp" {
+		return true
+	}
+	if ownerID == "" {
+		return true
+	}
+	if kernelModel.Conf == nil || kernelModel.Conf.AI == nil || kernelModel.Conf.AI.MCP == nil {
+		return false
+	}
+	for _, server := range kernelModel.Conf.AI.MCP.Servers {
+		if server.ID == ownerID {
+			return server.Enabled
+		}
+	}
+	return false
+}
+
 func buildCapabilitySet(frontendCapabilities []FrontendCapability, accessContext capabilityAccessContext) (*capabilitySet, error) {
 	set := &capabilitySet{
 		registrations: map[string]*capabilityRegistration{},
@@ -176,13 +194,6 @@ func buildCapabilitySet(frontendCapabilities []FrontendCapability, accessContext
 	}
 	for _, tool := range tools.GetAllTools() {
 		id := tools.CapabilityIDForTool(tool)
-		if id == "" || !capabilityAllowed(id, accessContext) {
-			continue
-		}
-		registered, validator := tools.LookupToolWithValidator(tool.Name)
-		if registered != tool || validator == nil {
-			continue
-		}
 		runtime := tool.Runtime
 		if runtime == "" {
 			runtime = "kernel"
@@ -190,6 +201,14 @@ func buildCapabilitySet(frontendCapabilities []FrontendCapability, accessContext
 		source := tool.Source
 		if source == "" {
 			source = "native"
+		}
+		if id == "" || !capabilityOwnerAvailable(source, runtime, tool.OwnerID) ||
+			!capabilityAllowed(id, accessContext) {
+			continue
+		}
+		registered, validator := tools.LookupToolWithValidator(tool.Name)
+		if registered != tool || validator == nil {
+			continue
 		}
 		registration := &capabilityRegistration{
 			ID:            id,
@@ -335,7 +354,12 @@ func capabilityStillExecutable(registration *capabilityRegistration, args map[st
 	}
 	accessContext := registration.AccessContext
 	accessContext.Arguments = args
-	if !capabilityAllowed(registration.ID, accessContext) {
+	ownerID := registration.OwnerID
+	if ownerID == "" && registration.Tool != nil {
+		ownerID = registration.Tool.OwnerID
+	}
+	if !capabilityOwnerAvailable(registration.Source, registration.Runtime, ownerID) ||
+		!capabilityAllowed(registration.ID, accessContext) {
 		return false
 	}
 	if registration.isBrowser() {

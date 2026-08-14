@@ -51,6 +51,16 @@ type CreateAttributeViewItemResult struct {
 	Transaction *Transaction `json:"-"`
 }
 
+// CreateAttributeViewItemMarkdown 描述通过数据库条目模板创建文档时使用的 Markdown 内容。
+type CreateAttributeViewItemMarkdown struct {
+	Title        string
+	Markdown     string
+	Tags         string
+	WithMath     bool
+	ClippingHref string
+	ListDocTree  bool
+}
+
 const (
 	CreateAttributeViewItemDocsSaveModeSubDoc   = "subDoc"
 	CreateAttributeViewItemDocsSaveModeTemplate = "template"
@@ -69,6 +79,20 @@ type CreateAttributeViewItemDocsResult struct {
 
 // CreateAttributeViewItem 按指定模板创建一个数据库条目。templateID 为空时创建空白游离条目。
 func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID string) (*CreateAttributeViewItemResult, error) {
+	return createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID, nil)
+}
+
+// CreateAttributeViewItemWithMarkdown 按指定的文档类型模板创建数据库条目，并使用传入的 Markdown 创建绑定文档。
+func CreateAttributeViewItemWithMarkdown(avID, blockID, viewID, templateID, previousID, groupID string,
+	document *CreateAttributeViewItemMarkdown) (*CreateAttributeViewItemResult, error) {
+	if nil == document {
+		return nil, errors.New("attribute view item markdown is nil")
+	}
+	return createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID, document)
+}
+
+func createAttributeViewItem(avID, blockID, viewID, templateID, previousID, groupID string,
+	document *CreateAttributeViewItemMarkdown) (*CreateAttributeViewItemResult, error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if nil != err {
 		return nil, err
@@ -90,7 +114,14 @@ func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 		attrView = &cloned
 		itemTemplate = cloned.NewItemTemplates[0]
 	}
-	preview, err := resolveAttributeViewNewItemTemplate(blockID, itemTemplate, createdAt)
+	if nil != document && av.NewItemTargetDocument != itemTemplate.TargetType {
+		return nil, fmt.Errorf("new item template [%s] does not create a bound block", templateID)
+	}
+	primaryFallback := ""
+	if nil != document {
+		primaryFallback = document.Title
+	}
+	preview, err := resolveAttributeViewNewItemTemplateWithFallback(blockID, itemTemplate, createdAt, primaryFallback)
 	if nil != err {
 		return nil, err
 	}
@@ -118,7 +149,7 @@ func CreateAttributeViewItem(avID, blockID, viewID, templateID, previousID, grou
 	isDetached := av.NewItemTargetDocument != itemTemplate.TargetType
 	var createdTree *parse.Tree
 	if !isDetached {
-		boundBlockID, createdTree, err = createAttributeViewItemDocument(preview, itemTemplate)
+		boundBlockID, createdTree, err = createAttributeViewItemDocumentWithMarkdown(preview, itemTemplate, document)
 		if nil != err {
 			return nil, err
 		}
@@ -329,6 +360,11 @@ func attributeViewItemDocumentTemplate(attrView *av.AttributeView, saveMode stri
 }
 
 func resolveAttributeViewNewItemTemplate(blockID string, itemTemplate *av.NewItemTemplate, createdAt time.Time) (*NewItemTemplatePreview, error) {
+	return resolveAttributeViewNewItemTemplateWithFallback(blockID, itemTemplate, createdAt, "")
+}
+
+func resolveAttributeViewNewItemTemplateWithFallback(blockID string, itemTemplate *av.NewItemTemplate, createdAt time.Time,
+	primaryFallback string) (*NewItemTemplatePreview, error) {
 	boxID := ""
 	if blockTree := treenode.GetBlockTree(blockID); blockTree != nil {
 		boxID = blockTree.BoxID
@@ -345,6 +381,9 @@ func resolveAttributeViewNewItemTemplate(blockID string, itemTemplate *av.NewIte
 		return nil, err
 	}
 	primary = strings.TrimSpace(primary)
+	if "" == strings.TrimSpace(itemTemplate.PrimaryKeyTemplate) && "" != strings.TrimSpace(primaryFallback) {
+		primary = strings.TrimSpace(primaryFallback)
+	}
 	preview := &NewItemTemplatePreview{PrimaryKey: primary}
 	if av.NewItemTargetDocument != itemTemplate.TargetType {
 		return preview, nil
@@ -418,13 +457,25 @@ func newItemDocumentPreview(blockTree *treenode.BlockTree, boxID, renderedPath, 
 }
 
 func createAttributeViewItemDocument(preview *NewItemTemplatePreview, itemTemplate *av.NewItemTemplate) (docID string, tree *parse.Tree, err error) {
+	return createAttributeViewItemDocumentWithMarkdown(preview, itemTemplate, nil)
+}
+
+func createAttributeViewItemDocumentWithMarkdown(preview *NewItemTemplatePreview, itemTemplate *av.NewItemTemplate,
+	document *CreateAttributeViewItemMarkdown) (docID string, tree *parse.Tree, err error) {
 	docID = ast.NewNodeID()
 	arg := map[string]any{"titleEmpty": "" == preview.PrimaryKey}
-	docID, err = CreateWithMarkdown("", preview.BoxID, preview.HPath, "", preview.parentID, docID, false, "", arg)
+	tags, markdown, clippingHref := "", "", ""
+	withMath := false
+	if nil != document {
+		tags, markdown, clippingHref = document.Tags, document.Markdown, document.ClippingHref
+		withMath = document.WithMath
+		arg["listDocTree"] = document.ListDocTree && !itemTemplate.HideInFileTree
+	}
+	docID, err = CreateWithMarkdown(tags, preview.BoxID, preview.HPath, markdown, preview.parentID, docID, withMath, clippingHref, arg)
 	if nil != err {
 		return
 	}
-	if "" != itemTemplate.ContentTemplatePath {
+	if nil == document && "" != itemTemplate.ContentTemplatePath {
 		if err = applyNewItemContentTemplate(itemTemplate.ContentTemplatePath, docID); nil != err {
 			err = newItemCreationError(err, removeCreatedNewItemDoc(docID))
 			return

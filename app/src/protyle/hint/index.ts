@@ -44,7 +44,8 @@ import {
     unicode2Emoji,
 } from "../../emoji";
 import {blockRender} from "../render/blockRender";
-import {uploadFiles} from "../upload";
+import {getUploadInsertRange, uploadFiles} from "../upload";
+import {createUploadInsertPosition} from "../upload/insertPosition";
 /// #if !MOBILE
 import {openFileById} from "../../editor/util";
 /// #endif
@@ -59,7 +60,7 @@ import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
-import {getBlockHintTriggerOffset, getBlockRefStaticText} from "./blockHintRange";
+import {endsWithMultiCharHintPrefix, getBlockHintTriggerOffset, getBlockRefStaticText} from "./blockHintRange";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -285,6 +286,9 @@ export class Hint {
                 if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
                     const slashData = hintSlash(key, protyle);
                     if (slashData.length === 0) {
+                        if (endsWithMultiCharHintPrefix(key, protyle.options.hint.extend.map((item) => item.key))) {
+                            this.enableExtend = false;
+                        }
                         this.genHTML(slashData, protyle, true, "hint");
                         return;
                     }
@@ -344,17 +348,34 @@ export class Hint {
 
     public bindUploadEvent(protyle: IProtyle, element: HTMLElement) {
         element.querySelectorAll('input[type="file"]').forEach(item => {
+            const captureInsertPosition = () => {
+                let range = protyle.toolbar.range;
+                if (!range || !protyle.wysiwyg.element.contains(range.startContainer) ||
+                    !protyle.wysiwyg.element.contains(range.endContainer)) {
+                    range = getEditorRange(protyle.wysiwyg.element);
+                }
+                range = range.cloneRange();
+                if (this.lastIndex > -1) {
+                    range.setStart(range.startContainer, this.lastIndex);
+                }
+                return createUploadInsertPosition(range,
+                    getUndoFocusContext(protyle.wysiwyg.element, range, true));
+            };
+            let insertPosition = captureInsertPosition();
+            item.addEventListener("click", () => {
+                insertPosition = captureInsertPosition();
+            });
             item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                 if (event.target.files.length === 0) {
                     return;
                 }
-                const range = getEditorRange(protyle.wysiwyg.element);
-                if (this.lastIndex > -1) {
-                    range.setStart(range.startContainer, this.lastIndex);
-                }
+                const range = getUploadInsertRange(protyle, insertPosition);
                 range.deleteContents();
+                range.collapse(true);
                 uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
                     htmlAsIframe: event.target.dataset.uploadMode === "html-iframe",
+                    insertPosition: createUploadInsertPosition(range,
+                        getUndoFocusContext(protyle.wysiwyg.element, range, true)),
                 });
                 hideElements(["hint", "toolbar"], protyle);
             });

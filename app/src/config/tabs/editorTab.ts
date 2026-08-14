@@ -279,6 +279,10 @@ const registerEditorMarkdownBlockGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.codeBlockMiddleDot,
         desc: window.siyuan.languages.codeBlockMiddleDotTip,
     });
+    group.switch("editor.markdown.blockFullWidthTaskList", {
+        title: window.siyuan.languages.editorMarkdownBlockFullWidthTaskList,
+        desc: window.siyuan.languages.editorMarkdownBlockFullWidthTaskListTip,
+    });
 };
 
 const registerEditorMarkdownInlineGroup = (tab: SettingTabBuilder) => {

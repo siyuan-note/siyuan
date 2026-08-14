@@ -13,13 +13,14 @@ import {replaceFileName} from "../../editor/rename";
 import {transaction} from "../wysiwyg/transaction";
 import {getAssetExtension, getAssetName, getDisplayName, isEncryptedBox} from "../../util/pathName";
 import {genEmptyElement} from "../../block/util";
-import {updateListOrder} from "../wysiwyg/list";
+import {getOrderedListStart, updateListOrder} from "../wysiwyg/list";
 import {escapeHtml, stripSearchMark} from "../../util/escape";
 import {zoomOut} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {genAssetHTML} from "../../asset/renderAssets";
 import {unicode2Emoji} from "../../emoji";
 import {avRender} from "../render/av/render";
+import {addWidgetCacheVersion} from "../util/widgetCache";
 
 const getHotkeyOrMarker = (hotkey: string, marker: string) => {
     if (hotkey) {
@@ -623,7 +624,8 @@ export const hintRenderWidget = (value: string, protyle: IProtyle) => {
     focusByRange(protyle.toolbar.range);
     // src 地址以 / 结尾
     // Use the path ending with `/` when loading the widget https://github.com/siyuan-note/siyuan/issues/10520
-    insertHTML(protyle.lute.SpinBlockDOM(`<iframe src="/widgets/${value}/" data-subtype="widget" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`), protyle, true);
+    const src = addWidgetCacheVersion(`/widgets/${value}/`, Constants.SIYUAN_VERSION);
+    insertHTML(protyle.lute.SpinBlockDOM(`<iframe src="${src}" data-subtype="widget" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`), protyle, true);
     hideElements(["util"], protyle);
 };
 
@@ -646,6 +648,7 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
     const doOperations: IOperation[] = [];
     let topSourceElement: Element;
     const parentElement = sourceElements[0].parentElement;
+    const listStart = getOrderedListStart(parentElement);
     let sideElement;
     sourceElements.forEach((item, index) => {
         if (index === sourceElements.length - 1 &&
@@ -673,7 +676,7 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
         topSourceElement.remove();
     } else if (parentElement.classList.contains("list") && parentElement.getAttribute("data-subtype") === "o" &&
         parentElement.childElementCount > 1) {
-        updateListOrder(parentElement, 1);
+        updateListOrder(parentElement, listStart);
         Array.from(parentElement.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;

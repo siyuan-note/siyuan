@@ -56,6 +56,9 @@ import {paste, pasteAsPlainText, pasteEscaped} from "../util/paste";
 import {escapeHtml} from "../../util/escape";
 import {resizeSide} from "../../history/resizeSide";
 import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardToolbar";
+import {FormatPainter} from "./FormatPainter";
+import {IFormatPainterSnapshot} from "./formatPainterCore";
+import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -116,6 +119,7 @@ export class Toolbar {
                 if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
                     toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
                 }
+                toolbarItem.hotkey = clearDisallowedTextInputHotkey(toolbarItem.hotkey);
             });
             options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });
@@ -133,6 +137,7 @@ export class Toolbar {
         protyle.options.toolbar = toolbarKeyToMenu(isMobile() ? [
             "block-ref",
             "a",
+            "ai",
             "|",
             "text",
             "strong",
@@ -147,6 +152,7 @@ export class Toolbar {
         ] : [
             "block-ref",
             "a",
+            "ai",
             "|",
             "text",
             "strong",
@@ -157,6 +163,7 @@ export class Toolbar {
             "sup",
             "sub",
             "clear",
+            "format-painter",
             "|",
             "code",
             "kbd",
@@ -176,6 +183,7 @@ export class Toolbar {
                 if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
                     toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
                 }
+                toolbarItem.hotkey = clearDisallowedTextInputHotkey(toolbarItem.hotkey);
             });
             protyle.options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });
@@ -381,6 +389,82 @@ export class Toolbar {
             return;
         }
         return this.setInlineMarkInBlock(protyle, type, action, textObj, undefined, focusRange, undoContext);
+    }
+
+    public applyFormatPainter(protyle: IProtyle, snapshot: IFormatPainterSnapshot) {
+        const selectedRange = this.range.cloneRange();
+        const startRange = selectedRange.cloneRange();
+        startRange.collapse(true);
+        const startsAtBlockEnd = isEndOfBlock(startRange);
+        const ranges = getBlockRanges(protyle.wysiwyg.element, selectedRange,
+            ["NodeCodeBlock", "NodeAttributeView"]).filter(item =>
+            !(startsAtBlockEnd && item.editableElement.contains(selectedRange.startContainer)) &&
+            item.range.toString().split(Constants.ZWSP).join(""));
+        if (ranges.length === 0) {
+            return false;
+        }
+        const preserveStart = !ranges.some(item => item.editableElement.contains(selectedRange.startContainer));
+        const preserveEnd = !ranges.some(item => item.editableElement.contains(selectedRange.endContainer));
+        const visibleOffsets = new Map(ranges.map(item =>
+            [item, getSelectionOffset(item.editableElement, undefined, item.range, true)]));
+        const rangesByBlock = new Map<HTMLElement, typeof ranges>();
+        ranges.forEach(item => {
+            const blockRanges = rangesByBlock.get(item.blockElement) || [];
+            blockRanges.push(item);
+            rangesByBlock.set(item.blockElement, blockRanges);
+        });
+        let selectionRange: Range;
+        updateBatchTransaction(Array.from(rangesByBlock.keys()), protyle, blockElement => {
+            rangesByBlock.get(blockElement).forEach(item => {
+                const position = visibleOffsets.get(item);
+                const resetRange = () => focusByOffset(
+                    item.editableElement, position.start, position.end, false, true
+                ) as Range;
+                let range = resetRange();
+                if (!range || range.collapsed) {
+                    return;
+                }
+                const applyMark = (type: string, textObj?: ITextOption) => {
+                    this.range = range;
+                    this.setInlineMarkInBlock(protyle, type, "range", textObj, type === "clear", false);
+                    range = resetRange() || this.range;
+                };
+                applyMark("clear");
+                snapshot.types.forEach(type => applyMark(type));
+                if (snapshot.styles.backgroundColor) {
+                    applyMark("text", {type: "backgroundColor", color: snapshot.styles.backgroundColor});
+                }
+                if (snapshot.styles.color) {
+                    applyMark("text", {type: "color", color: snapshot.styles.color});
+                }
+                if (snapshot.styles.fontSize) {
+                    applyMark("text", {type: "fontSize", color: snapshot.styles.fontSize});
+                }
+                if (snapshot.styles.shadow) {
+                    applyMark("text", {type: "style4"});
+                }
+                if (snapshot.styles.hollow) {
+                    applyMark("text", {type: "style2"});
+                }
+                const offsetRange = resetRange() || range;
+                if (selectionRange) {
+                    selectionRange.setEnd(offsetRange.endContainer, offsetRange.endOffset);
+                } else {
+                    selectionRange = offsetRange.cloneRange();
+                }
+            });
+        }, getUndoFocusContext(protyle.wysiwyg.element, selectedRange, true));
+        if (selectionRange) {
+            if (preserveStart) {
+                selectionRange.setStart(selectedRange.startContainer, selectedRange.startOffset);
+            }
+            if (preserveEnd) {
+                selectionRange.setEnd(selectedRange.endContainer, selectedRange.endOffset);
+            }
+            this.range = selectionRange;
+            focusByRange(selectionRange);
+        }
+        return true;
     }
 
     private setBlockRangesInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar",
@@ -2150,6 +2234,10 @@ export class Toolbar {
                 break;
             case "text":
                 menuItemObj = new Font(protyle, menuItem);
+                break;
+            case "format-painter":
+                menuItemObj = menuItem.click ? new ToolbarItem(protyle, menuItem) :
+                    new FormatPainter(protyle, menuItem);
                 break;
             case "a":
                 menuItemObj = new Link(protyle, menuItem);

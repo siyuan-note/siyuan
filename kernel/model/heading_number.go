@@ -98,6 +98,13 @@ func headingNumberLabels(tree *parse.Tree, format string) map[string]string {
 	return ret
 }
 
+func headingNumberPrefix(number string) string {
+	if strings.HasSuffix(number, "、") || strings.HasSuffix(number, "）") {
+		return number
+	}
+	return number + " "
+}
+
 func buildHeadingNumberEntries(tree *parse.Tree, format string) map[string]headingNumberEntry {
 	ret := map[string]headingNumberEntry{}
 	headings := collectOutlineHeadings(tree)

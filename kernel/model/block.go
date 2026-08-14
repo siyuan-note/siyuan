@@ -1531,6 +1531,51 @@ type ChildBlock struct {
 	Markdown string `json:"markdown,omitempty"`
 }
 
+const maxOrderedListNumber = 999999999
+
+// GetOrderedListContinueStartInBox 返回同一父级中最近前置有序列表的续编起始编号。
+func GetOrderedListContinueStartInBox(id, boxID string) (start int, found bool) {
+	tree := loadTreeForBlockDOM(id, boxID)
+	if nil == tree {
+		return
+	}
+	return getOrderedListContinueStartFromTree(id, tree)
+}
+
+func getOrderedListContinueStartFromTree(id string, tree *parse.Tree) (start int, found bool) {
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node || ast.NodeList != node.Type || nil == node.ListData || 1 != node.ListData.Typ {
+		return
+	}
+
+	itemCount := 0
+	for item := node.FirstChild; nil != item; item = item.Next {
+		if ast.NodeListItem == item.Type {
+			itemCount++
+		}
+	}
+	if 1 > itemCount {
+		return
+	}
+
+	for previous := node.Previous; nil != previous; previous = previous.Previous {
+		if ast.NodeList != previous.Type || nil == previous.ListData || 1 != previous.ListData.Typ {
+			continue
+		}
+		for item := previous.LastChild; nil != item; item = item.Previous {
+			if ast.NodeListItem != item.Type || nil == item.ListData {
+				continue
+			}
+			if 0 > item.ListData.Num || item.ListData.Num > maxOrderedListNumber-itemCount {
+				return
+			}
+			return item.ListData.Num + 1, true
+		}
+		return
+	}
+	return
+}
+
 func GetChildBlocks(id string) (ret []*ChildBlock) {
 	return GetChildBlocksInBox(id, "")
 }
@@ -1725,26 +1770,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 		return
 	}
 
-	var nodes []*ast.Node
-	// headingMode: 0=显示标题与下方的块，1=仅显示标题，2=仅显示标题下方的块
-	if ast.NodeHeading == def.Type {
-		if 1 == headingMode {
-			// 仅显示标题
-			nodes = append(nodes, def)
-		} else if 2 == headingMode {
-			// 仅显示标题下方的块（去除标题）
-			if !treenode.IsSelfFolded(def) {
-				nodes = append(nodes, treenode.HeadingChildren(def)...)
-			}
-		} else {
-			// 0: 显示标题与下方的块
-			nodes = append(nodes, def)
-			nodes = append(nodes, treenode.HeadingChildren(def)...)
-		}
-	} else {
-		// 非标题块，直接添加
-		nodes = append(nodes, def)
-	}
+	nodes := embeddedBlockNodes(def, headingMode)
 
 	var b *treenode.BlockTree
 	if IsEncryptedBox(sqlBlock.Box) {
@@ -1790,6 +1816,30 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}
 	}
+	return
+}
+
+func embeddedBlockNodes(def *ast.Node, headingMode int) (ret []*ast.Node) {
+	if nil == def {
+		return
+	}
+	if ast.NodeHeading != def.Type {
+		return []*ast.Node{def}
+	}
+
+	// headingMode：0 表示显示标题与下方的块，1 表示仅显示标题，2 表示仅显示标题下方的块。
+	if 1 == headingMode {
+		return []*ast.Node{def}
+	}
+	if 2 == headingMode {
+		if !treenode.IsSelfFolded(def) {
+			ret = append(ret, treenode.HeadingChildren(def)...)
+		}
+		return
+	}
+
+	ret = append(ret, def)
+	ret = append(ret, treenode.HeadingChildren(def)...)
 	return
 }
 

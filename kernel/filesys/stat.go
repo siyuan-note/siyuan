@@ -103,25 +103,45 @@ func StatTreeInBox(id, boxID string) (ret *util.BlockStatResult) {
 	return statTree(tree)
 }
 
+// StatTreeFromTree 统计整棵文档树。
+func StatTreeFromTree(tree *parse.Tree) (ret *util.BlockStatResult) {
+	if nil == tree || nil == tree.Root {
+		return
+	}
+	return StatNodes(tree, []*ast.Node{tree.Root})
+}
+
 func statTree(tree *parse.Tree) (ret *util.BlockStatResult) {
+	return StatTreeFromTree(tree)
+}
+
+// StatNodes 统计指定节点及其子节点。
+func StatNodes(tree *parse.Tree, nodes []*ast.Node) (ret *util.BlockStatResult) {
+	if nil == tree {
+		return
+	}
+
 	blockCount := 0
 	var databaseBlockNodes []*ast.Node
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || tree.Root == n {
+	for _, node := range nodes {
+		if nil == node {
+			continue
+		}
+		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			if n.IsBlock() && ast.NodeDocument != n.Type {
+				blockCount++
+			}
+
+			if ast.NodeAttributeView == n.Type {
+				databaseBlockNodes = append(databaseBlockNodes, n)
+			}
 			return ast.WalkContinue
-		}
-
-		if n.IsBlock() {
-			blockCount++
-		}
-
-		if ast.NodeAttributeView != n.Type {
-			return ast.WalkContinue
-		}
-
-		databaseBlockNodes = append(databaseBlockNodes, n)
-		return ast.WalkContinue
-	})
+		})
+	}
 
 	luteEngine := util.NewLute()
 	var dbRuneCnt, dbWordCnt, dbLinkCnt, dbImgCnt, dbRefCnt int
@@ -200,7 +220,18 @@ func statTree(tree *parse.Tree) (ret *util.BlockStatResult) {
 		dbWordCnt += dbStat.WordCount
 	}
 
-	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := tree.Root.Stat()
+	var runeCnt, wordCnt, linkCnt, imgCnt, refCnt int
+	for _, node := range nodes {
+		if nil == node {
+			continue
+		}
+		nodeRuneCnt, nodeWordCnt, nodeLinkCnt, nodeImgCnt, nodeRefCnt := node.Stat()
+		runeCnt += nodeRuneCnt
+		wordCnt += nodeWordCnt
+		linkCnt += nodeLinkCnt
+		imgCnt += nodeImgCnt
+		refCnt += nodeRefCnt
+	}
 	runeCnt += dbRuneCnt
 	wordCnt += dbWordCnt
 	linkCnt += dbLinkCnt

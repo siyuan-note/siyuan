@@ -93,6 +93,7 @@ export class Options {
         toolbar: isMobile() ? [
             "block-ref",
             "a",
+            "ai",
             "|",
             "text",
             "strong",
@@ -107,6 +108,7 @@ export class Options {
         ] : [
             "block-ref",
             "a",
+            "ai",
             "|",
             "text",
             "strong",
@@ -117,6 +119,7 @@ export class Options {
             "sup",
             "sub",
             "clear",
+            "format-painter",
             "|",
             "code",
             "kbd",

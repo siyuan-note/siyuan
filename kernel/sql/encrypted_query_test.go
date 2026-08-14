@@ -204,6 +204,29 @@ func TestSelectBlocksRawStmtInBoxPaginatesExistingLimit(t *testing.T) {
 	}
 }
 
+func TestSelectBlocksRawStmtBoundedInBoxContext(t *testing.T) {
+	testDB, boxID := useEncryptedQueryTestDB(t)
+	for i := 1; i <= 3; i++ {
+		id := fmt.Sprintf("block-%02d", i)
+		insertEncryptedQueryTestBlock(t, testDB, id, "", id, "d")
+	}
+
+	blocks, truncated, err := SelectBlocksRawStmtBoundedInBoxContext(
+		context.Background(), "SELECT * FROM blocks ORDER BY id", 2, boxID)
+	if nil != err {
+		t.Fatalf("bounded block query failed: %s", err)
+	}
+	if !truncated || 2 != len(blocks) || "block-01" != blocks[0].ID || "block-02" != blocks[1].ID {
+		t.Fatalf("unexpected bounded query result: blocks=%#v truncated=%v", blocks, truncated)
+	}
+
+	blocks, truncated, err = SelectBlocksRawStmtBoundedInBoxContext(
+		context.Background(), "SELECT * FROM blocks ORDER BY id", 3, boxID)
+	if nil != err || truncated || 3 != len(blocks) {
+		t.Fatalf("exactly bounded query should not be truncated: blocks=%#v truncated=%v err=%v", blocks, truncated, err)
+	}
+}
+
 func TestQueryNoLimitInBoxContextCancellation(t *testing.T) {
 	testDB, boxID := useEncryptedQueryTestDB(t)
 	previousDB := db

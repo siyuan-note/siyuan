@@ -3,6 +3,7 @@ const HEADING_NUMBER_CLASS = "protyle-heading-number";
 const HEADING_NUMBER_ACTIVE_CLASS = "protyle-heading-number--active";
 const HEADING_NUMBER_MEASURE_CLASS = "protyle-heading-number__measure";
 const HEADING_NUMBER_WIDTH_PROPERTY = "--b3-protyle-heading-number-width";
+const HEADING_NUMBER_NO_SPACING_SUFFIXES = ["、", "）"];
 const NUMBERED_HEADING_SELECTOR = `${HEADING_SELECTOR}[data-heading-number], ` +
     `${HEADING_SELECTOR} > [contenteditable][data-heading-number]`;
 const HEADING_CONTAINER_TYPES = new Set(["NodeDocument", "NodeList", "NodeListItem", "NodeSuperBlock"]);
@@ -31,6 +32,10 @@ export const resolveHeadingNumberEnabled = (customValue: string | null | undefin
 
 export const invalidateHeadingNumberMeasurements = () => {
     headingNumberMeasurements = new WeakMap<Element, {key: string, offset: string}>();
+};
+
+export const headingNumberNeedsSpacing = (number: string) => {
+    return !HEADING_NUMBER_NO_SPACING_SUFFIXES.some(suffix => number.endsWith(suffix));
 };
 
 export const clearHeadingNumberElements = (root: Element) => {
@@ -108,9 +113,10 @@ export const buildHeadingNumberStyles = (scope: string, styles: IHeadingNumberSt
         "unicode-bidi:isolate;user-select:none;pointer-events:none;}",
     ];
     styles.forEach(style => {
+        const offset = headingNumberNeedsSpacing(style.number) ? `calc(${style.offset} + .5em)` : style.offset;
         rules.push(`${scopeSelector} [data-type="NodeHeading"][data-node-id="${escapeCSSString(style.id)}"]{` +
             `--b3-protyle-heading-number:"${escapeCSSString(style.number)}";` +
-            `--b3-protyle-heading-number-offset:calc(${style.offset} + .5em);}`);
+            `--b3-protyle-heading-number-offset:${offset};}`);
     });
     return rules.join("");
 };

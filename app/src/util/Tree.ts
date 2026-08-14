@@ -5,6 +5,15 @@ import {unicode2Emoji} from "../emoji";
 import {Constants} from "../constants";
 import {escapeAriaLabel, escapeHtml} from "./escape";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
+import {headingNumberNeedsSpacing} from "../protyle/util/headingNumberCore";
+
+const genOutlineNumberHTML = (number?: string) => {
+    if (!number) {
+        return "";
+    }
+    const spacingClass = headingNumberNeedsSpacing(number) ? "" : " b3-list-item__number--no-spacing";
+    return `<span class="b3-list-item__number${spacingClass}">${escapeHtml(number)}</span>`;
+};
 
 export class Tree {
     public element: HTMLElement;
@@ -95,8 +104,7 @@ export class Tree {
             if (item.count) {
                 countHTML = `<span class="counter">${item.count}</span>`;
             }
-            const numberHTML = item.type === "outline" && item.number ?
-                `<span class="b3-list-item__number">${escapeHtml(item.number)}</span>` : "";
+            const numberHTML = item.type === "outline" ? genOutlineNumberHTML(item.number) : "";
             const hasChild = (item.children && item.children.length > 0) || (item.blocks && item.blocks.length > 0);
             let style = "";
             if (isM) {
@@ -150,8 +158,7 @@ ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'`
             if (item.count) {
                 countHTML = `<span class="counter">${item.count}</span>`;
             }
-            const numberHTML = type === "outline" && item.number ?
-                `<span class="b3-list-item__number">${escapeHtml(item.number)}</span>` : "";
+            const numberHTML = type === "outline" ? genOutlineNumberHTML(item.number) : "";
             let iconHTML;
             if (type === "outline") {
                 iconHTML = `<svg data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: 22px;width: ${isM?20:16}px;"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;

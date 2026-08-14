@@ -114,6 +114,7 @@ const openSettingMenu = (
                     keywords,
                     visibleItemIds: result.visibleItemIds,
                     visibleGroupIds: result.visibleGroupIds,
+                    unavailableItems: result.unavailableItems,
                 }, app);
             };
             const syncSearch = () => {

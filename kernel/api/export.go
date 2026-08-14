@@ -623,13 +623,15 @@ func exportDocx(c *gin.Context) {
 		return
 	}
 
-	var id, savePath string
+	var id, savePath, mergeDocHeadingMode, mergeContentHeadingMode string
 	var removeAssets, merge bool
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("id", &id, true, true),
 		util.BindJsonArg("savePath", &savePath, true, true),
 		util.BindJsonArg("removeAssets", &removeAssets, true, false),
 		util.BindJsonArg("merge", &merge, false, false),
+		util.BindJsonArg("mergeDocHeadingMode", &mergeDocHeadingMode, false, false),
+		util.BindJsonArg("mergeContentHeadingMode", &mergeContentHeadingMode, false, false),
 	) {
 		return
 	}
@@ -644,7 +646,8 @@ func exportDocx(c *gin.Context) {
 		return
 	}
 
-	fullPath, err := model.ExportDocx(id, savePath, removeAssets, merge)
+	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
+	fullPath, err := model.ExportDocx(id, savePath, removeAssets, merge, mergeHeadingOptions)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -872,20 +875,23 @@ func exportPreviewHTML(c *gin.Context) {
 		return
 	}
 
-	var id string
+	var id, mergeDocHeadingMode, mergeContentHeadingMode string
 	var keepFold, merge, image bool
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("id", &id, true, true),
 		util.BindJsonArg("keepFold", &keepFold, false, false),
 		util.BindJsonArg("merge", &merge, false, false),
 		util.BindJsonArg("image", &image, false, false),
+		util.BindJsonArg("mergeDocHeadingMode", &mergeDocHeadingMode, false, false),
+		util.BindJsonArg("mergeContentHeadingMode", &mergeContentHeadingMode, false, false),
 	) {
 		return
 	}
 	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
-	name, content, node := model.ExportHTML(id, "", true, keepFold, merge)
+	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
+	name, content, node := model.ExportHTML(id, "", true, keepFold, merge, mergeHeadingOptions)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
 
@@ -915,7 +921,7 @@ func exportHTML(c *gin.Context) {
 		return
 	}
 
-	var id, savePath string
+	var id, savePath, mergeDocHeadingMode, mergeContentHeadingMode string
 	var pdf, keepFold, merge bool
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("id", &id, true, true),
@@ -923,6 +929,8 @@ func exportHTML(c *gin.Context) {
 		util.BindJsonArg("savePath", &savePath, false, false),
 		util.BindJsonArg("keepFold", &keepFold, false, false),
 		util.BindJsonArg("merge", &merge, false, false),
+		util.BindJsonArg("mergeDocHeadingMode", &mergeDocHeadingMode, false, false),
+		util.BindJsonArg("mergeContentHeadingMode", &mergeContentHeadingMode, false, false),
 	) {
 		return
 	}
@@ -930,6 +938,7 @@ func exportHTML(c *gin.Context) {
 		return
 	}
 
+	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
 	savePath = strings.TrimSpace(savePath)
 	if savePath == "" {
 		folderName := "html-" + id + "-" + util.CurrentTimeSecondsStr()
@@ -938,7 +947,7 @@ func exportHTML(c *gin.Context) {
 			folderName = bt.BoxID + "/" + folderName
 		}
 		tmpDir := filepath.Join(util.TempDir, "export", folderName)
-		name, content, _ := model.ExportHTML(id, tmpDir, pdf, keepFold, merge)
+		name, content, _ := model.ExportHTML(id, tmpDir, pdf, keepFold, merge, mergeHeadingOptions)
 		ret.Data = map[string]any{
 			"id":      id,
 			"name":    name,
@@ -955,7 +964,7 @@ func exportHTML(c *gin.Context) {
 		return
 	}
 
-	name, content, _ := model.ExportHTML(id, savePath, pdf, keepFold, merge)
+	name, content, _ := model.ExportHTML(id, savePath, pdf, keepFold, merge, mergeHeadingOptions)
 	ret.Data = map[string]any{
 		"id":      id,
 		"name":    name,
@@ -994,18 +1003,21 @@ func processPDF(c *gin.Context) {
 		return
 	}
 
-	var id, pdfPath string
+	var id, pdfPath, mergeDocHeadingMode, mergeContentHeadingMode string
 	var merge bool
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("id", &id, true, true),
 		util.BindJsonArg("path", &pdfPath, true, true),
 		util.BindJsonArg("merge", &merge, false, false),
+		util.BindJsonArg("mergeDocHeadingMode", &mergeDocHeadingMode, false, false),
+		util.BindJsonArg("mergeContentHeadingMode", &mergeContentHeadingMode, false, false),
 	) {
 		return
 	}
 	removeAssets := arg["removeAssets"].(bool)
 	watermark := arg["watermark"].(bool)
-	err := model.ProcessPDF(id, pdfPath, merge, removeAssets, watermark)
+	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
+	err := model.ProcessPDF(id, pdfPath, merge, removeAssets, watermark, mergeHeadingOptions)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

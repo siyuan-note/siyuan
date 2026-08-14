@@ -29,6 +29,7 @@ import {
 import {updateDocumentBottomEof} from "./documentRange";
 import {disabledWYSIWYG} from "./disabledWYSIWYG";
 import {getEmbeddedDocInfoResponse} from "./docInfo";
+import {updateWidgetCacheVersion} from "./widgetCache";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -224,6 +225,7 @@ const setHTML = (options: {
             item.setAttribute("data-inline-memo-content", window.DOMPurify.sanitize(content));
         }
     });
+    updateWidgetCacheVersion(doc, Constants.SIYUAN_VERSION);
     options.content = doc.body.innerHTML;
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
     const updateReadonly = typeof options.updateReadonly === "undefined" ? protyle.wysiwyg.element.innerHTML === "" : options.updateReadonly;

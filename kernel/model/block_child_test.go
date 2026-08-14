@@ -71,3 +71,46 @@ func TestHeadingChildBlocksSkipSuperBlockCloseMarker(t *testing.T) {
 		t.Fatalf("unexpected heading child IDs: [%v]", ids)
 	}
 }
+
+func TestGetOrderedListContinueStartFromTree(t *testing.T) {
+	newList := func(id string, numbers ...int) *ast.Node {
+		list := &ast.Node{Type: ast.NodeList, ID: id, ListData: &ast.ListData{Typ: 1}}
+		for _, number := range numbers {
+			list.AppendChild(&ast.Node{Type: ast.NodeListItem, ID: id + "-item", ListData: &ast.ListData{Typ: 1, Num: number}})
+		}
+		return list
+	}
+
+	root := &ast.Node{Type: ast.NodeDocument, ID: "root"}
+	previousList := newList("previous", 6, 7)
+	root.AppendChild(previousList)
+	root.AppendChild(&ast.Node{Type: ast.NodeList, ID: "unordered", ListData: &ast.ListData{Typ: 0}})
+	root.AppendChild(&ast.Node{Type: ast.NodeParagraph, ID: "paragraph"})
+	currentList := newList("current", 1, 2, 3)
+	root.AppendChild(currentList)
+	tree := &parse.Tree{Root: root, ID: root.ID}
+
+	start, found := getOrderedListContinueStartFromTree(currentList.ID, tree)
+	if !found || 8 != start {
+		t.Fatalf("unexpected continue start: [%d, %v]", start, found)
+	}
+
+	innerCurrent := newList("inner-current", 1)
+	previousList.FirstChild.AppendChild(innerCurrent)
+	if _, found = getOrderedListContinueStartFromTree(innerCurrent.ID, tree); found {
+		t.Fatal("expected list numbering not to continue across parent boundaries")
+	}
+
+	if _, found = getOrderedListContinueStartFromTree(previousList.FirstChild.ID, tree); found {
+		t.Fatal("expected a list item to be rejected")
+	}
+
+	overflowRoot := &ast.Node{Type: ast.NodeDocument, ID: "overflow-root"}
+	overflowRoot.AppendChild(newList("overflow-previous", maxOrderedListNumber))
+	overflowCurrent := newList("overflow-current", 1)
+	overflowRoot.AppendChild(overflowCurrent)
+	overflowTree := &parse.Tree{Root: overflowRoot, ID: overflowRoot.ID}
+	if _, found = getOrderedListContinueStartFromTree(overflowCurrent.ID, overflowTree); found {
+		t.Fatal("expected overflowing list numbering to be unavailable")
+	}
+}

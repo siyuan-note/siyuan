@@ -1,6 +1,9 @@
 const FILE_TREE_ANIMATION_DURATION = 200;
 const FILE_TREE_ANIMATION_EASING = "cubic-bezier(0, 0, .2, 1)";
-const collapsingElements = new WeakMap<HTMLElement, Animation>();
+const animatingElements = new WeakMap<HTMLElement, {
+    animation: Animation,
+    type: "expand" | "collapse",
+}>();
 
 const getAnimationOptions = (): KeyframeAnimationOptions => ({
     duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : FILE_TREE_ANIMATION_DURATION,
@@ -8,23 +11,44 @@ const getAnimationOptions = (): KeyframeAnimationOptions => ({
     fill: "both",
 });
 
+const setAnimationStyles = (element: HTMLElement) => {
+    element.style.overflow = "clip";
+};
+
+const clearAnimationStyles = (element: HTMLElement) => {
+    element.style.removeProperty("overflow");
+};
+
 export const expandFileTree = (element: HTMLElement, onFinish?: () => void) => {
-    element.style.overflow = "hidden";
+    if (animatingElements.has(element)) {
+        return;
+    }
+    setAnimationStyles(element);
     const animation = element.animate([
         {height: "0"},
         {height: `${element.scrollHeight}px`},
     ], getAnimationOptions());
+    animatingElements.set(element, {animation, type: "expand"});
     animation.finished.then(() => {
+        if (animatingElements.get(element)?.animation !== animation) {
+            return;
+        }
+        animatingElements.delete(element);
         animation.cancel();
         if (!element.isConnected) {
             return;
         }
-        element.style.removeProperty("overflow");
+        clearAnimationStyles(element);
         onFinish?.();
     }, () => {
-        if (element.isConnected) {
-            element.style.removeProperty("overflow");
+        if (animatingElements.get(element)?.animation !== animation) {
+            return;
         }
+        animatingElements.delete(element);
+        if (!element.isConnected) {
+            return;
+        }
+        clearAnimationStyles(element);
     });
 };
 
@@ -35,43 +59,44 @@ const getLeafElement = (liElement: Element) => {
 
 export const isFileTreeCollapsing = (liElement: Element) => {
     const leafElement = getLeafElement(liElement);
-    return leafElement ? collapsingElements.has(leafElement) : false;
+    return leafElement ? animatingElements.get(leafElement)?.type === "collapse" : false;
 };
 
 export const cancelFileTreeCollapse = (liElement: Element) => {
     const leafElement = getLeafElement(liElement);
-    const animation = leafElement && collapsingElements.get(leafElement);
-    if (!animation) {
+    const animationState = leafElement && animatingElements.get(leafElement);
+    if (animationState?.type !== "collapse") {
         return false;
     }
-    collapsingElements.delete(leafElement);
-    animation.cancel();
+    animatingElements.delete(leafElement);
+    animationState.animation.cancel();
     leafElement.remove();
     return true;
 };
 
 export const collapseFileTree = (liElement: Element, onFinish: () => void) => {
-    liElement.querySelector(".b3-list-item__arrow")?.classList.remove("b3-list-item__arrow--open");
     const leafElement = getLeafElement(liElement);
     if (!leafElement) {
+        liElement.querySelector(".b3-list-item__arrow")?.classList.remove("b3-list-item__arrow--open");
         onFinish();
         return;
     }
-    if (collapsingElements.has(leafElement)) {
+    if (animatingElements.has(leafElement)) {
         return;
     }
 
-    leafElement.style.overflow = "hidden";
+    liElement.querySelector(".b3-list-item__arrow")?.classList.remove("b3-list-item__arrow--open");
+    setAnimationStyles(leafElement);
     const animation = leafElement.animate([
         {height: `${leafElement.scrollHeight}px`},
         {height: "0"},
     ], getAnimationOptions());
-    collapsingElements.set(leafElement, animation);
+    animatingElements.set(leafElement, {animation, type: "collapse"});
     animation.finished.then(() => {
-        if (collapsingElements.get(leafElement) !== animation) {
+        if (animatingElements.get(leafElement)?.animation !== animation) {
             return;
         }
-        collapsingElements.delete(leafElement);
+        animatingElements.delete(leafElement);
         if (!leafElement.isConnected) {
             animation.cancel();
             return;
@@ -80,10 +105,10 @@ export const collapseFileTree = (liElement: Element, onFinish: () => void) => {
         animation.cancel();
         onFinish();
     }, () => {
-        if (collapsingElements.get(leafElement) !== animation) {
+        if (animatingElements.get(leafElement)?.animation !== animation) {
             return;
         }
-        collapsingElements.delete(leafElement);
+        animatingElements.delete(leafElement);
         if (!leafElement.isConnected) {
             return;
         }
@@ -93,6 +118,10 @@ export const collapseFileTree = (liElement: Element, onFinish: () => void) => {
 };
 
 export const toggleFileTree = (liElement: Element, onCollapse: () => void, onExpand: () => void) => {
+    const leafElement = getLeafElement(liElement);
+    if (leafElement && animatingElements.has(leafElement)) {
+        return;
+    }
     if (liElement.querySelector(".b3-list-item__arrow--open")) {
         collapseFileTree(liElement, onCollapse);
     } else if (!isFileTreeCollapsing(liElement)) {

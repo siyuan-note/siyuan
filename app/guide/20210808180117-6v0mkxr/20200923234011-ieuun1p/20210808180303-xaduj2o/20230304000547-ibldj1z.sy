@@ -6,7 +6,7 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20260804233000"
+		"updated": "20260813120000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170002-24z0hpx",
-				"updated": "20260804180000"
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
@@ -75,7 +75,7 @@
 			},
 			"Properties": {
 				"id": "20260804170004-9yg5i8j",
-				"updated": "20260804180000"
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
@@ -204,7 +204,7 @@
 					},
 					"Properties": {
 						"id": "20260804170009-l87zz79",
-						"updated": "20260804180000"
+						"updated": "20260813120000"
 					},
 					"Children": [
 						{
@@ -212,7 +212,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260804170010-wxcjvxu",
-								"updated": "20260804180000"
+								"updated": "20260813120000"
 							},
 							"Children": [
 								{
@@ -226,16 +226,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " to open the dialog, or use "
+									"Data": " to open the writing dialog. For AI editing, select text and choose "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Artificial Intelligence"
+									"TextMarkTextContent": "AI Edit"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the block menu for more actions"
+									"Data": " in the selection toolbar, or choose it from the block menu. The result streams into a panel where you can replace or insert it, copy it, retry, stop, or discard it. Replacement is available only for a supported selection within one block. Cross-block selections, complex sources, and sources changed while generating can still use insertion."
 								}
 							]
 						}

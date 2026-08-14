@@ -226,6 +226,10 @@ html[data-frontend="browser-desktop"] {
     font-size: 12px;
   }
 
+  &__format-painter {
+    color: var(--b3-theme-primary);
+  }
+
   .fn__space:last-child {
     width: 5px;
   }

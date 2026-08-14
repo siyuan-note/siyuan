@@ -29,7 +29,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
-	"github.com/siyuan-note/httpclient"
 )
 
 const (
@@ -51,7 +50,7 @@ func WebFetch(rawURL, format string) (string, error) {
 		return "", err
 	}
 
-	resp, err := httpclient.NewBrowserRequest().Get(rawURL)
+	resp, err := ssrfSafeClient.Get(rawURL)
 	if err != nil {
 		return "", errors.New("fetch failed: " + err.Error())
 	}

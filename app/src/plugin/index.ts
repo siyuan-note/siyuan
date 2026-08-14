@@ -28,6 +28,31 @@ import {
     type IFlashcardV2PluginRegistration,
     registerFlashcardV2PluginType
 } from "../card/flashcardV2Plugin";
+import {isDisallowedTextInputHotkey, normalizePluginHotkey} from "../util/hotKeyPolicy";
+
+const updatePluginKeymap = (pluginName: string, key: string, hotkey: unknown) => {
+    if (!window.siyuan.config.keymap.plugin) {
+        window.siyuan.config.keymap.plugin = {};
+    }
+    if (!window.siyuan.config.keymap.plugin[pluginName]) {
+        window.siyuan.config.keymap.plugin[pluginName] = {};
+    }
+    const keymapItem = window.siyuan.config.keymap.plugin[pluginName][key];
+    const normalized = normalizePluginHotkey(hotkey, keymapItem?.custom);
+    if (!keymapItem) {
+        window.siyuan.config.keymap.plugin[pluginName][key] = {
+            default: normalized.defaultHotkey,
+            custom: normalized.customHotkey,
+        };
+    } else {
+        keymapItem.default = normalized.defaultHotkey;
+        keymapItem.custom = normalized.customHotkey;
+    }
+    normalized.ignoredHotkeys.forEach((ignoredHotkey) => {
+        console.warn(`Plugin ${pluginName} ignored disallowed hotkey "${ignoredHotkey}" for "${key}".`);
+    });
+    return window.siyuan.config.keymap.plugin[pluginName][key];
+};
 
 export class Plugin {
     private app: App;
@@ -103,25 +128,7 @@ export class Plugin {
             if (typeof toolbarItem.hotkey !== "string") {
                 toolbarItem.hotkey = "";
             }
-            if (!window.siyuan.config.keymap.plugin) {
-                window.siyuan.config.keymap.plugin = {};
-            }
-            if (!window.siyuan.config.keymap.plugin[options.name]) {
-                window.siyuan.config.keymap.plugin[options.name] = {
-                    [toolbarItem.name]: {
-                        default: toolbarItem.hotkey,
-                        custom: toolbarItem.hotkey,
-                    }
-                };
-            }
-            if (!window.siyuan.config.keymap.plugin[options.name][toolbarItem.name]) {
-                window.siyuan.config.keymap.plugin[options.name][toolbarItem.name] = {
-                    default: toolbarItem.hotkey,
-                    custom: toolbarItem.hotkey,
-                };
-            } else {
-                window.siyuan.config.keymap.plugin[options.name][toolbarItem.name].default = toolbarItem.hotkey;
-            }
+            toolbarItem.hotkey = updatePluginKeymap(options.name, toolbarItem.name, toolbarItem.hotkey).default;
         });
     }
 
@@ -170,37 +177,15 @@ export class Plugin {
         if (typeof command.hotkey !== "string") {
             command.hotkey = "";
         }
-        if (!window.siyuan.config.keymap.plugin) {
-            window.siyuan.config.keymap.plugin = {};
-        }
-        if (!window.siyuan.config.keymap.plugin[this.name]) {
-            command.customHotkey = command.hotkey;
-            window.siyuan.config.keymap.plugin[this.name] = {
-                [command.langKey]: {
-                    default: command.hotkey,
-                    custom: command.hotkey,
-                }
-            };
-        } else if (!window.siyuan.config.keymap.plugin[this.name][command.langKey]) {
-            command.customHotkey = command.hotkey;
-            window.siyuan.config.keymap.plugin[this.name][command.langKey] = {
-                default: command.hotkey,
-                custom: command.hotkey,
-            };
-        } else if (window.siyuan.config.keymap.plugin[this.name][command.langKey]) {
-            if (typeof window.siyuan.config.keymap.plugin[this.name][command.langKey].custom === "string") {
-                command.customHotkey = window.siyuan.config.keymap.plugin[this.name][command.langKey].custom;
-            } else {
-                command.customHotkey = command.hotkey;
-            }
-            window.siyuan.config.keymap.plugin[this.name][command.langKey]["default"] = command.hotkey;
-        }
+        const keymapItem = updatePluginKeymap(this.name, command.langKey, command.hotkey);
+        command.hotkey = keymapItem.default;
+        command.customHotkey = keymapItem.custom;
         if (typeof command.customHotkey !== "string") {
             console.error(`${this.name} - commands data is error and has been removed.`);
         } else {
             this.commands.push(command);
             /// #if !BROWSER
-            if (command.globalCallback) {
+            if (command.globalCallback && command.customHotkey && !isDisallowedTextInputHotkey(command.customHotkey)) {
                 ipcRenderer.send(Constants.SIYUAN_CMD, {
                     cmd: "registerGlobalShortcut",
                     accelerator: command.customHotkey
@@ -532,24 +517,7 @@ export class Plugin {
             }
             /// #endif
         };
-        if (!window.siyuan.config.keymap.plugin) {
-            window.siyuan.config.keymap.plugin = {};
-        }
-        if (!window.siyuan.config.keymap.plugin[this.name]) {
-            window.siyuan.config.keymap.plugin[this.name] = {};
-        }
-        const hotkey = typeof options.config.hotkey === "string" ? options.config.hotkey : "";
-        if (!window.siyuan.config.keymap.plugin[this.name][type2]) {
-            window.siyuan.config.keymap.plugin[this.name][type2] = {
-                default: hotkey,
-                custom: hotkey,
-            };
-        } else {
-            if (typeof window.siyuan.config.keymap.plugin[this.name][type2].custom !== "string") {
-                window.siyuan.config.keymap.plugin[this.name][type2].custom = hotkey;
-            }
-            window.siyuan.config.keymap.plugin[this.name][type2]["default"] = hotkey;
-        }
+        options.config.hotkey = updatePluginKeymap(this.name, type2, options.config.hotkey).default;
         addPluginDock(this);
         return this.docks[type2];
     }

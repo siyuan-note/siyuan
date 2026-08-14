@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "Tu valoración: ${rating}",
 	"bazaarRatingDistributionLabel": "${star} estrellas, ${count} valoraciones",
 	"bazaarRatingLoginTip": "Inicia sesión para valorar",
-	"bazaarRatingDownloadedTip": "Abre el paquete desde Descargados para valorarlo",
 	"bazaarRatingInstallTip": "Instala el paquete para valorarlo",
 	"bazaarRatingStarLabel": "Valoración de ${star} estrellas",
 	"bazaarRatingFailed": "No se pudo enviar la valoración",

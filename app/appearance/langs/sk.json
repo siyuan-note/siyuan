@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "Vaše hodnotenie: ${rating}",
 	"bazaarRatingDistributionLabel": "${star} hviezdičiek, ${count} hodnotení",
 	"bazaarRatingLoginTip": "Ak chcete hodnotiť, prihláste sa",
-	"bazaarRatingDownloadedTip": "Ak chcete balík ohodnotiť, otvorte ho v časti Stiahnuté",
 	"bazaarRatingInstallTip": "Ak chcete balík ohodnotiť, nainštalujte ho",
 	"bazaarRatingStarLabel": "Hodnotenie ${star} hviezdičkami",
 	"bazaarRatingFailed": "Hodnotenie sa nepodarilo odoslať",

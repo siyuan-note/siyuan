@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "คะแนนของคุณ: ${rating}",
 	"bazaarRatingDistributionLabel": "${star} ดาว, ${count} การให้คะแนน",
 	"bazaarRatingLoginTip": "เข้าสู่ระบบเพื่อให้คะแนน",
-	"bazaarRatingDownloadedTip": "เปิดแพ็กเกจจากรายการดาวน์โหลดเพื่อให้คะแนน",
 	"bazaarRatingInstallTip": "ติดตั้งแพ็กเกจเพื่อให้คะแนน",
 	"bazaarRatingStarLabel": "คะแนน ${star} ดาว",
 	"bazaarRatingFailed": "ไม่สามารถส่งคะแนนได้",

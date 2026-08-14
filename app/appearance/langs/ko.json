@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "내 평점: ${rating}",
 	"bazaarRatingDistributionLabel": "${star}점, 평가 ${count}개",
 	"bazaarRatingLoginTip": "평점을 남기려면 로그인하세요",
-	"bazaarRatingDownloadedTip": "평점을 남기려면 다운로드됨에서 패키지를 여세요",
 	"bazaarRatingInstallTip": "평점을 남기려면 패키지를 설치하세요",
 	"bazaarRatingStarLabel": "${star}점 평가",
 	"bazaarRatingFailed": "평점을 제출하지 못했습니다",

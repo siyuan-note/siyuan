@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "הדירוג שלך: ${rating}",
 	"bazaarRatingDistributionLabel": "${star} כוכבים, ${count} דירוגים",
 	"bazaarRatingLoginTip": "יש להתחבר כדי לדרג",
-	"bazaarRatingDownloadedTip": "יש לפתוח את החבילה מתוך הורדות כדי לדרג אותה",
 	"bazaarRatingInstallTip": "יש להתקין את החבילה כדי לדרג אותה",
 	"bazaarRatingStarLabel": "דירוג של ${star} כוכבים",
 	"bazaarRatingFailed": "שליחת הדירוג נכשלה",

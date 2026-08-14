@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "आपकी रेटिंग: ${rating}",
 	"bazaarRatingDistributionLabel": "${star} स्टार, ${count} रेटिंग",
 	"bazaarRatingLoginTip": "रेटिंग देने के लिए लॉग इन करें",
-	"bazaarRatingDownloadedTip": "रेटिंग देने के लिए डाउनलोड किए गए पैकेज से इसे खोलें",
 	"bazaarRatingInstallTip": "रेटिंग देने के लिए पैकेज इंस्टॉल करें",
 	"bazaarRatingStarLabel": "${star}-स्टार रेटिंग",
 	"bazaarRatingFailed": "रेटिंग सबमिट नहीं की जा सकी",

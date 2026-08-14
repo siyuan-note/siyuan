@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "你的评分：${rating}",
 	"bazaarRatingDistributionLabel": "${star} 星，${count} 人评分",
 	"bazaarRatingLoginTip": "登录后可评分",
-	"bazaarRatingDownloadedTip": "请从已下载中打开该集市包进行评分",
 	"bazaarRatingInstallTip": "安装该集市包后可评分",
 	"bazaarRatingStarLabel": "${star} 星评分",
 	"bazaarRatingFailed": "评分提交失败",

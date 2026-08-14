@@ -612,11 +612,11 @@
 
         &:hover,
         &:focus-visible {
-          color: var(--b3-theme-primary);
+          color: var(--b3-theme-on-surface);
         }
 
         &.config-bazaar__rating-picker--active {
-          color: var(--b3-theme-primary);
+          color: var(--b3-theme-on-surface);
 
           .config-bazaar__rating-star {
             --b3-icon-star-fill: currentColor;

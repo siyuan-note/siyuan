@@ -2649,7 +2649,7 @@ export class AgentChat extends Model {
             existingCard.remove();
         }
 
-        const bodyHTML = '<div class="agent-chat__thinking-body agent-chat__thinking-body--preview">' +
+        const bodyHTML = '<div class="agent-chat__thinking-body">' +
             detailLines +
             "</div>";
 
@@ -2666,7 +2666,7 @@ export class AgentChat extends Model {
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
             "</span>" +
             '<span class="agent-chat__thinking-text">' + escapeHtml(text) + "</span>" +
-            '<span class="agent-chat__thinking-latest fn__none"></span>' +
+            '<span class="agent-chat__thinking-latest"></span>' +
             "</div>" +
             bodyHTML +
             "</div>";

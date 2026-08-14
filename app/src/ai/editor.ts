@@ -375,8 +375,8 @@ const startTaskReasoning = (task: IAIEditorTask) => {
     }
     task.reasoning = true;
     task.thinkingElement.classList.remove("fn__none", "agent-chat__msg--thinking-done");
-    task.thinkingLatestElement.classList.add("fn__none");
-    task.thinkingBody.classList.add("agent-chat__thinking-body--preview");
+    task.thinkingLatestElement.classList.remove("fn__none");
+    task.thinkingBody.classList.remove("agent-chat__thinking-body--preview");
     task.body.classList.add("fn__none");
     updateTaskThinkingText(task);
     task.thinkingTimer = window.setInterval(() => updateTaskThinkingText(task), 1000);
@@ -513,12 +513,11 @@ const startTaskStream = (task: IAIEditorTask) => {
     task.thinkingElement.classList.add("fn__none");
     task.thinkingElement.classList.remove("agent-chat__msg--thinking-done");
     task.thinkingElement.removeAttribute("data-user-interacted");
-    task.thinkingBody.classList.add("agent-chat__thinking-body--preview");
-    task.thinkingBody.classList.remove("agent-chat__thinking-body--expanded");
+    task.thinkingBody.classList.remove("agent-chat__thinking-body--preview", "agent-chat__thinking-body--expanded");
     task.thinkingReasoningElement.textContent = "";
     task.thinkingTextElement.textContent = window.siyuan.languages.agentThinking;
     task.thinkingLatestElement.textContent = "";
-    task.thinkingLatestElement.classList.add("fn__none");
+    task.thinkingLatestElement.classList.remove("fn__none");
     task.thinkingElement.querySelector(".agent-chat__thinking-arrow--expand")?.classList.remove("fn__none");
     task.thinkingElement.querySelector(".agent-chat__thinking-arrow--contract")?.classList.add("fn__none");
     task.body.classList.remove("fn__none");
@@ -598,9 +597,9 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
                 <svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>
             </span>
             <span class="agent-chat__thinking-text"></span>
-            <span class="agent-chat__thinking-latest fn__none"></span>
+            <span class="agent-chat__thinking-latest"></span>
         </div>
-        <div class="agent-chat__thinking-body agent-chat__thinking-body--preview">
+        <div class="agent-chat__thinking-body">
             <div class="agent-chat__thinking-reasoning-text"></div>
         </div>
     </div>

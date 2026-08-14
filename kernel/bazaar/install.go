@@ -35,6 +35,7 @@ import (
 )
 
 var downloadPackageFlight singleflight.Group
+var bazaarDownloadCloudServer = util.GetCloudServer
 
 // downloadBazaarFile 下载集市文件
 func downloadBazaarFile(repoURLHash string, pushProgress bool) (data []byte, err error) {
@@ -68,16 +69,17 @@ func downloadBazaarFile(repoURLHash string, pushProgress bool) (data []byte, err
 }
 
 // incPackageDownloads 增加集市包下载次数
-func incPackageDownloads(repoURL, systemID string) {
+func incPackageDownloads(repoURL, packageName, systemID string) {
 	if "" == systemID {
 		return
 	}
 	repo := strings.TrimPrefix(repoURL, "https://github.com/")
-	u := util.GetCloudServer() + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
+	u := bazaarDownloadCloudServer() + "/apis/siyuan/bazaar/addBazaarPackageDownloadCount"
 	httpclient.NewCloudRequest30s().SetBody(
 		map[string]any{
-			"systemID": systemID,
-			"repo":     repo,
+			"systemID":    systemID,
+			"repo":        repo,
+			"packageName": packageName,
 		}).Post(u)
 }
 
@@ -119,7 +121,7 @@ func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageNa
 		logging.LogWarnf("set package [%s] folder mtime failed: %s", packageName, err)
 	}
 
-	go incPackageDownloads(repoURL, systemID)
+	go incPackageDownloads(repoURL, packageName, systemID)
 	return nil
 }
 

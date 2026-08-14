@@ -50,6 +50,7 @@ var (
 	bazaarRatingRegionCaches  [bazaarRatingRegionCount]bazaarRatingRegionCache
 	bazaarRatingRegionFlights [bazaarRatingRegionCount]singleflight.Group
 	bazaarRatingRegionFetcher = fetchBazaarRatingRegion
+	bazaarPublicRatingCache   = bazaarPublicRatingOverrides{overrides: map[string]bazaarPublicRatingOverride{}}
 )
 
 type bazaarRatingDistribution [5]int64
@@ -57,6 +58,16 @@ type bazaarRatingDistribution [5]int64
 type bazaarRatingOverride struct {
 	distribution bazaarRatingDistribution
 	expiresAt    time.Time
+}
+
+type bazaarPublicRatingOverride struct {
+	rating    *PackageRating
+	expiresAt time.Time
+}
+
+type bazaarPublicRatingOverrides struct {
+	mu        sync.RWMutex
+	overrides map[string]bazaarPublicRatingOverride
 }
 
 type bazaarRatingRegionCache struct {
@@ -74,7 +85,7 @@ type bazaarRatingRegionResult struct {
 }
 
 // GetBazaarPackageRatings 获取指定包的全球公开评分。
-// 第二个返回值表示两个区域是否都曾成功加载。
+// 第二个返回值表示公开评分索引是否可用。
 func GetBazaarPackageRatings(ctx context.Context, packageNames []string) (ret map[string]*PackageRating, available bool) {
 	all, available := getBazaarRatings(ctx)
 	if !available {
@@ -91,6 +102,9 @@ func GetBazaarPackageRatings(ctx context.Context, packageNames []string) (ret ma
 
 // GetBazaarPackageRating 获取单个包的全球公开评分。
 func GetBazaarPackageRating(ctx context.Context, packageName string) (rating *PackageRating, available bool) {
+	if rating, ok := getBazaarPublicRatingOverride(packageName, bazaarRatingNow()); ok {
+		return rating, true
+	}
 	ratings, available := getBazaarRatings(ctx)
 	if !available {
 		return nil, false
@@ -98,13 +112,43 @@ func GetBazaarPackageRating(ctx context.Context, packageName string) (rating *Pa
 	return clonePackageRating(ratings[packageName]), true
 }
 
-// GetCachedBazaarPackageRating 仅使用两个区域最后一次成功的数据获取单个包评分。
+// GetCachedBazaarPackageRating 仅使用最后一次成功的公开索引获取单个包评分。
 func GetCachedBazaarPackageRating(packageName string) (rating *PackageRating, available bool) {
+	if rating, ok := getBazaarPublicRatingOverride(packageName, bazaarRatingNow()); ok {
+		return rating, true
+	}
 	ratings, available := getBazaarRatingsFromCache(false)
 	if !available {
 		return nil, false
 	}
 	return clonePackageRating(ratings[packageName]), true
+}
+
+// ApplyBazaarPackageRating 使用评分提交响应临时覆盖统一索引中的公开评分。
+func ApplyBazaarPackageRating(packageName string, rating *PackageRating) bool {
+	if !IsValidPackageName(packageName) {
+		return false
+	}
+	normalized, valid := normalizePackageRating(rating)
+	if !valid {
+		return false
+	}
+	now := bazaarRatingNow()
+	bazaarPublicRatingCache.mu.Lock()
+	defer bazaarPublicRatingCache.mu.Unlock()
+	if nil == bazaarPublicRatingCache.overrides {
+		bazaarPublicRatingCache.overrides = map[string]bazaarPublicRatingOverride{}
+	}
+	for name, override := range bazaarPublicRatingCache.overrides {
+		if !now.Before(override.expiresAt) {
+			delete(bazaarPublicRatingCache.overrides, name)
+		}
+	}
+	bazaarPublicRatingCache.overrides[packageName] = bazaarPublicRatingOverride{
+		rating:    normalized,
+		expiresAt: now.Add(bazaarRatingOverrideTTL),
+	}
+	return true
 }
 
 // ApplyBazaarPackageRatingDistribution 使用评分提交响应覆盖当前区域中单个包的分布。
@@ -138,7 +182,7 @@ func ApplyBazaarPackageRatingDistribution(region int, packageName string, distri
 }
 
 // GetBazaarPackageRatingAfterUpdate 将当前区域的评分响应与另一区域最后一次成功的数据合并。
-func GetBazaarPackageRatingAfterUpdate(region int, packageName string,
+func GetBazaarPackageRatingAfterUpdate(ctx context.Context, region int, packageName string,
 	distribution [5]int64) (rating *PackageRating, available bool) {
 	if region < 0 || bazaarRatingRegionCount <= region || !IsValidPackageName(packageName) {
 		return nil, false
@@ -151,7 +195,10 @@ func GetBazaarPackageRatingAfterUpdate(region int, packageName string,
 	otherRegion := (region + 1) % bazaarRatingRegionCount
 	other, _ := snapshotBazaarRatingRegion(otherRegion, bazaarRatingNow())
 	if !other.loaded {
-		return nil, false
+		other = getBazaarRatingRegion(ctx, otherRegion)
+		if !other.loaded {
+			return nil, false
+		}
 	}
 	for i, count := range other.data[packageName] {
 		if count > math.MaxInt64-merged[i] {
@@ -159,11 +206,41 @@ func GetBazaarPackageRatingAfterUpdate(region int, packageName string,
 		}
 		merged[i] += count
 	}
-	return buildPackageRating(merged), true
+	rating = buildPackageRating(merged)
+	if nil == rating || !ApplyBazaarPackageRating(packageName, rating) {
+		return nil, false
+	}
+	return rating, true
 }
 
 func getBazaarRatings(ctx context.Context) (ret map[string]*PackageRating, available bool) {
 	if cached, ok := getBazaarRatingsFromCache(true); ok {
+		return cached, true
+	}
+	index := getBazaarIndex(ctx)
+	if ratings, ok := bazaarRatingsFromIndex(index); ok {
+		return applyBazaarPublicRatingOverrides(ratings, bazaarRatingNow()), true
+	}
+	return getLegacyBazaarRatings(ctx)
+}
+
+func getBazaarRatingsFromCache(requireFresh bool) (ret map[string]*PackageRating, available bool) {
+	index, fresh := getBazaarIndexFromCache()
+	if ratings, ok := bazaarRatingsFromIndex(index); ok {
+		if requireFresh && !fresh {
+			return map[string]*PackageRating{}, false
+		}
+		return applyBazaarPublicRatingOverrides(ratings, bazaarRatingNow()), true
+	}
+	ratings, available := getLegacyBazaarRatingsFromCache(requireFresh)
+	if !available {
+		return ratings, false
+	}
+	return applyBazaarPublicRatingOverrides(ratings, bazaarRatingNow()), true
+}
+
+func getLegacyBazaarRatings(ctx context.Context) (ret map[string]*PackageRating, available bool) {
+	if cached, ok := getLegacyBazaarRatingsFromCache(true); ok {
 		return cached, true
 	}
 
@@ -183,7 +260,7 @@ func getBazaarRatings(ctx context.Context) (ret map[string]*PackageRating, avail
 	return mergeBazaarRatingRegions(results), true
 }
 
-func getBazaarRatingsFromCache(requireFresh bool) (ret map[string]*PackageRating, available bool) {
+func getLegacyBazaarRatingsFromCache(requireFresh bool) (ret map[string]*PackageRating, available bool) {
 	now := bazaarRatingNow()
 	results := [bazaarRatingRegionCount]bazaarRatingRegionResult{}
 	for region := range bazaarRatingRegionCount {
@@ -194,6 +271,31 @@ func getBazaarRatingsFromCache(requireFresh bool) (ret map[string]*PackageRating
 		results[region] = result
 	}
 	return mergeBazaarRatingRegions(results), true
+}
+
+func getBazaarPublicRatingOverride(packageName string, now time.Time) (*PackageRating, bool) {
+	bazaarPublicRatingCache.mu.RLock()
+	defer bazaarPublicRatingCache.mu.RUnlock()
+	override, ok := bazaarPublicRatingCache.overrides[packageName]
+	if !ok || !now.Before(override.expiresAt) {
+		return nil, false
+	}
+	return clonePackageRating(override.rating), true
+}
+
+func applyBazaarPublicRatingOverrides(source map[string]*PackageRating, now time.Time) map[string]*PackageRating {
+	ret := make(map[string]*PackageRating, len(source))
+	for packageName, rating := range source {
+		ret[packageName] = clonePackageRating(rating)
+	}
+	bazaarPublicRatingCache.mu.RLock()
+	defer bazaarPublicRatingCache.mu.RUnlock()
+	for packageName, override := range bazaarPublicRatingCache.overrides {
+		if now.Before(override.expiresAt) {
+			ret[packageName] = clonePackageRating(override.rating)
+		}
+	}
+	return ret
 }
 
 func getBazaarRatingRegion(ctx context.Context, region int) bazaarRatingRegionResult {

@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getBacklinkGutterContentTop, getGutterMarginHeight} from "./layout";
+import {getBacklinkGutterContentTop, getFixedGutterPosition, getGutterMarginHeight} from "./layout";
 
 describe("getGutterMarginHeight", () => {
     it("uses the natural height after heading gutter buttons wrap", () => {
@@ -30,5 +30,15 @@ describe("getBacklinkGutterContentTop", () => {
 
     it("keeps the existing content boundary when it is lower", () => {
         assert.equal(getBacklinkGutterContentTop(80, 30, 62), 80);
+    });
+});
+
+describe("getFixedGutterPosition", () => {
+    it("keeps viewport coordinates without a transformed container", () => {
+        assert.equal(getFixedGutterPosition(240), 240);
+    });
+
+    it("converts viewport coordinates to transformed container coordinates", () => {
+        assert.equal(getFixedGutterPosition(860, 640), 220);
     });
 });

@@ -10,3 +10,7 @@ export const getGutterMarginHeight = (blockHeight: number, gutterHeight: number,
 export const getBacklinkGutterContentTop = (contentTop: number, panelTop?: number, titleBottom?: number) => {
     return Math.max(contentTop, panelTop ?? contentTop, titleBottom ?? contentTop);
 };
+
+export const getFixedGutterPosition = (viewportPosition: number, fixedContainerPosition?: number) => {
+    return viewportPosition - (fixedContainerPosition ?? 0);
+};

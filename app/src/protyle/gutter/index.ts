@@ -101,7 +101,7 @@ import {
     setOrderedListStart
 } from "../wysiwyg/list";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
-import {getBacklinkGutterContentTop, getGutterMarginHeight} from "./layout";
+import {getBacklinkGutterContentTop, getFixedGutterPosition, getGutterMarginHeight} from "./layout";
 import {closeSubElement} from "../toolbar/subElementLifecycle";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
@@ -122,6 +122,14 @@ const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeAudio: "audio",
     NodeWidget: "widget",
     NodeAttributeView: "database",
+};
+
+const getGutterFixedContainerRect = (protyle: IProtyle) => {
+    const floatLayoutElement = protyle.element.closest(".layout--float");
+    if (!floatLayoutElement || getComputedStyle(floatLayoutElement).transform === "none") {
+        return;
+    }
+    return floatLayoutElement.getBoundingClientRect();
 };
 
 // 根据块 data-type 返回本地化的类型名，用于块标拖拽提示「拖拽 ${x} 移动位置」
@@ -685,6 +693,7 @@ export class Gutter {
             if (protyle.disabled || !lineBefore || !lineAfter || !plusBefore || !plusAfter) {
                 return;
             }
+            const fixedContainerRect = getGutterFixedContainerRect(protyle);
             // 多选或跨块文本选择时不显示插入框线与加号 https://github.com/siyuan-note/siyuan/issues/18592
             if (protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").length > 1 ||
                 getCrossBlockTextRange(protyle)) {
@@ -752,24 +761,26 @@ export class Gutter {
                 lineBefore.style.opacity = "1";
                 lineBefore.style.width = "2px";
                 lineBefore.style.height = `${lineH}px`;
-                lineBefore.style.left = `${rightX}px`;
-                lineBefore.style.top = `${iconRect.top - 1}px`;
+                lineBefore.style.left = `${getFixedGutterPosition(rightX, fixedContainerRect?.left)}px`;
+                lineBefore.style.top = `${getFixedGutterPosition(iconRect.top - 1, fixedContainerRect?.top)}px`;
                 // 下方插入：块标右侧下半段
                 lineAfter.style.display = "";
                 lineAfter.style.opacity = "1";
                 lineAfter.style.width = "2px";
                 lineAfter.style.height = `${lineH}px`;
-                lineAfter.style.left = `${rightX}px`;
-                lineAfter.style.top = `${centerY + 1}px`;
+                lineAfter.style.left = `${getFixedGutterPosition(rightX, fixedContainerRect?.left)}px`;
+                lineAfter.style.top = `${getFixedGutterPosition(centerY + 1, fixedContainerRect?.top)}px`;
                 // +号位于右侧线条外偏，上下分开避免重叠
                 plusBefore.style.width = `${plusSize}px`;
                 plusBefore.style.height = `${plusSize}px`;
-                plusBefore.style.left = `${rightX + 4}px`;
-                plusBefore.style.top = `${iconRect.top + lineH / 2 - plusSize / 2}px`;
+                plusBefore.style.left = `${getFixedGutterPosition(rightX + 4, fixedContainerRect?.left)}px`;
+                plusBefore.style.top = `${getFixedGutterPosition(iconRect.top + lineH / 2 - plusSize / 2,
+                    fixedContainerRect?.top)}px`;
                 plusAfter.style.width = `${plusSize}px`;
                 plusAfter.style.height = `${plusSize}px`;
-                plusAfter.style.left = `${rightX + 4}px`;
-                plusAfter.style.top = `${centerY + 1 + lineH / 2 - plusSize / 2}px`;
+                plusAfter.style.left = `${getFixedGutterPosition(rightX + 4, fixedContainerRect?.left)}px`;
+                plusAfter.style.top = `${getFixedGutterPosition(centerY + 1 + lineH / 2 - plusSize / 2,
+                    fixedContainerRect?.top)}px`;
                 // 竖排时隐藏块标提示，避免其遮挡右侧框线与+号
                 hideTooltip();
             } else {
@@ -782,22 +793,24 @@ export class Gutter {
                 lineBefore.style.opacity = "1";
                 lineBefore.style.width = `${lineW}px`;
                 lineBefore.style.height = "2px";
-                lineBefore.style.left = `${left}px`;
-                lineBefore.style.top = `${rect.top - 4}px`;
+                lineBefore.style.left = `${getFixedGutterPosition(left, fixedContainerRect?.left)}px`;
+                lineBefore.style.top = `${getFixedGutterPosition(rect.top - 4, fixedContainerRect?.top)}px`;
                 lineAfter.style.display = "";
                 lineAfter.style.opacity = "1";
                 lineAfter.style.width = `${lineW}px`;
                 lineAfter.style.height = "2px";
-                lineAfter.style.left = `${left}px`;
-                lineAfter.style.top = `${rect.bottom + 2}px`;
+                lineAfter.style.left = `${getFixedGutterPosition(left, fixedContainerRect?.left)}px`;
+                lineAfter.style.top = `${getFixedGutterPosition(rect.bottom + 2, fixedContainerRect?.top)}px`;
                 plusBefore.style.width = `${plusSize}px`;
                 plusBefore.style.height = `${plusSize}px`;
-                plusBefore.style.left = `${plusLeft}px`;
-                plusBefore.style.top = `${rect.top - 5 - plusSize / 2 + 1}px`;
+                plusBefore.style.left = `${getFixedGutterPosition(plusLeft, fixedContainerRect?.left)}px`;
+                plusBefore.style.top = `${getFixedGutterPosition(rect.top - 5 - plusSize / 2 + 1,
+                    fixedContainerRect?.top)}px`;
                 plusAfter.style.width = `${plusSize}px`;
                 plusAfter.style.height = `${plusSize}px`;
-                plusAfter.style.left = `${plusLeft}px`;
-                plusAfter.style.top = `${rect.bottom + 3 - plusSize / 2 + 1}px`;
+                plusAfter.style.left = `${getFixedGutterPosition(plusLeft, fixedContainerRect?.left)}px`;
+                plusAfter.style.top = `${getFixedGutterPosition(rect.bottom + 3 - plusSize / 2 + 1,
+                    fixedContainerRect?.top)}px`;
             }
             window.clearTimeout(hidePlusTimeout);
         });
@@ -3673,9 +3686,12 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
             }
         }
         const foldElement = hasClosestByAttribute(element.parentElement, "fold", "1") as HTMLElement;
-        this.element.style.top = `${Math.max(rect.top + marginHeight, contentTop, foldElement ? foldElement.getBoundingClientRect().top : 0)}px`;
+        const fixedContainerRect = getGutterFixedContainerRect(protyle);
+        const top = Math.max(rect.top + marginHeight, contentTop, foldElement ? foldElement.getBoundingClientRect().top : 0);
+        this.element.style.top = `${getFixedGutterPosition(top, fixedContainerRect?.top)}px`;
         // 压缩模式需加 2，否则和折叠标题无法对齐
-        this.element.style.left = `${compressed ? rect.left - this.element.clientWidth - space / 2 + 3 : getNaturalLeft(this.element.clientWidth)}px`;
+        const left = compressed ? rect.left - this.element.clientWidth - space / 2 + 3 : getNaturalLeft(this.element.clientWidth);
+        this.element.style.left = `${getFixedGutterPosition(left, fixedContainerRect?.left)}px`;
     }
 }
 

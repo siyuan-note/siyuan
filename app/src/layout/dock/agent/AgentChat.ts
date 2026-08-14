@@ -2585,6 +2585,7 @@ export class AgentChat extends Model {
             for (let i = 0; i < oldCards.length; i++) {
                 const card = oldCards[i] as HTMLElement;
                 card.classList.add("agent-chat__msg--thinking-done");
+                card.querySelector(".agent-chat__thinking-latest")?.classList.add("fn__none");
                 const txtEl = card.querySelector(".agent-chat__thinking-text");
                 if (txtEl) {
                     txtEl.textContent = doneText;
@@ -2665,6 +2666,7 @@ export class AgentChat extends Model {
             '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
             "</span>" +
             '<span class="agent-chat__thinking-text">' + escapeHtml(text) + "</span>" +
+            '<span class="agent-chat__thinking-latest fn__none"></span>' +
             "</div>" +
             bodyHTML +
             "</div>";
@@ -2698,6 +2700,11 @@ export class AgentChat extends Model {
                 const reasoningEl = allReasoning[allReasoning.length - 1] as HTMLElement;
                 if (reasoningEl) {
                     reasoningEl.textContent = this.currentThinkingReasoningContent;
+                    const latestElement = thinking.parentElement?.querySelector(".agent-chat__thinking-latest") as HTMLElement | null;
+                    if (latestElement) {
+                        latestElement.textContent = this.currentThinkingReasoningContent.replace(/\s+/g, " ").trim();
+                        latestElement.scrollLeft = latestElement.scrollWidth;
+                    }
                     // 预览态固定高度，滚到底部让最新 reasoning 内容可见。
                     const body = reasoningEl.closest(".agent-chat__thinking-body") as HTMLElement | null;
                     if (body) {
@@ -3924,6 +3931,7 @@ export class AgentChat extends Model {
                 body?.classList.remove("agent-chat__thinking-body--preview");
             }
             el.classList.add("agent-chat__msg--thinking-done");
+            el.querySelector(".agent-chat__thinking-latest")?.classList.add("fn__none");
             if (doneText) {
                 const textEl = el.querySelector(".agent-chat__thinking-text");
                 if (textEl) {

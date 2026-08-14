@@ -183,6 +183,7 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
     const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
     const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
     const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
+    const latestElement = el.querySelector(".agent-chat__thinking-latest") as HTMLElement | null;
     if (!header || !body || !expandIcon || !contractIcon) {
         return;
     }
@@ -209,13 +210,19 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
                 body.classList.remove("agent-chat__thinking-body--expanded");
                 expandIcon.classList.remove("fn__none");
                 contractIcon.classList.add("fn__none");
+                latestElement?.classList.remove("fn__none");
+                if (latestElement) {
+                    latestElement.scrollLeft = latestElement.scrollWidth;
+                }
             } else if (isPreview) {
                 body.classList.remove("agent-chat__thinking-body--preview");
                 body.classList.add("agent-chat__thinking-body--expanded");
                 expandIcon.classList.add("fn__none");
                 contractIcon.classList.remove("fn__none");
+                latestElement?.classList.add("fn__none");
             } else {
                 body.classList.add("agent-chat__thinking-body--preview");
+                latestElement?.classList.add("fn__none");
             }
         }
     });

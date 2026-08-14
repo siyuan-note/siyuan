@@ -188,6 +188,7 @@ All Go libraries above are dependencies in `kernel/go.mod`. GitHub org: `siyuan-
 
 - **Editing any Go dependency (Lute / dejavu / gulu / eventbus / riff / filelock / httpclient / logging / go-sqlite3 / pdfcpu / epub / …):** these are imported by the kernel as Go modules (`kernel/go.mod`). To test a local change, add a temporary `replace` in `kernel/go.mod` pointing at your local checkout — but **never commit that `replace`**; it breaks builds for everyone else.
 - **Rebuilding `lute.min.js`:** it's the JS build of the Go `lute` project — generated upstream and checked into `app/stage/protyle/js/lute/`. Don't edit it here; change `lute`, rebuild, and copy the artifact in.
+- **Type declarations:** when changing files under `app/src/types/` or other TypeScript declarations and constants exposed to plugins, synchronize the corresponding declarations and constants in the `petal` repository in the same task.
 - **Mobile apps (`siyuan-android` / `siyuan-ios` / `siyuan-harmony`):** each is a separate native app that wraps the kernel built from this repo. For how to build, vendor the kernel binding, and wire everything up, **read each project's own README** — the toolchains and steps differ per platform and aren't documented here.
 - **`siyuan-chrome`:** independent TypeScript project; it only interacts with a running SiYuan instance through the public HTTP API documented in `docs/API.md`.
 

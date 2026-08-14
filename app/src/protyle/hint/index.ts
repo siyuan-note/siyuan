@@ -60,7 +60,7 @@ import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
-import {getBlockHintTriggerOffset, getBlockRefStaticText} from "./blockHintRange";
+import {endsWithMultiCharHintPrefix, getBlockHintTriggerOffset, getBlockRefStaticText} from "./blockHintRange";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -286,7 +286,9 @@ export class Hint {
                 if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
                     const slashData = hintSlash(key, protyle);
                     if (slashData.length === 0) {
-                        this.enableExtend = false;
+                        if (endsWithMultiCharHintPrefix(key, protyle.options.hint.extend.map((item) => item.key))) {
+                            this.enableExtend = false;
+                        }
                         this.genHTML(slashData, protyle, true, "hint");
                         return;
                     }

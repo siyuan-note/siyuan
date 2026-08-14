@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Mit der rechten Maustaste klicken, um das Menü dieses Listeneintrags zu öffnen; Shift+Klick, um seine Attribute zu öffnen",
 	"bazaarRemoveRating": "Bewertung entfernen",
 	"bazaarRatingRemoved": "Bewertung entfernt",
 	"bazaarRemoveRatingFailed": "Bewertung konnte nicht entfernt werden",

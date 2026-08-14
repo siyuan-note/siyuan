@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "לחץ לחיצה ימנית כדי לפתוח את התפריט של פריט רשימה זה; Shift+לחיצה כדי לפתוח את המאפיינים שלו",
 	"bazaarRemoveRating": "הסרת הדירוג",
 	"bazaarRatingRemoved": "הדירוג הוסר",
 	"bazaarRemoveRatingFailed": "הסרת הדירוג נכשלה",

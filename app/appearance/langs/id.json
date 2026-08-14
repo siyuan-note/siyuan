@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Klik kanan untuk membuka menu item daftar ini; Shift+klik untuk membuka atributnya",
 	"bazaarRemoveRating": "Hapus penilaian",
 	"bazaarRatingRemoved": "Penilaian dihapus",
 	"bazaarRemoveRatingFailed": "Gagal menghapus penilaian",

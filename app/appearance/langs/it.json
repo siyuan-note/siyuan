@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Fai clic con il pulsante destro per aprire il menu di questo elemento dell'elenco; Shift+clic per aprirne gli attributi",
 	"bazaarRemoveRating": "Rimuovi valutazione",
 	"bazaarRatingRemoved": "Valutazione rimossa",
 	"bazaarRemoveRatingFailed": "Impossibile rimuovere la valutazione",

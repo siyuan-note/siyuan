@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "마우스 오른쪽 버튼으로 이 목록 항목 메뉴 열기. Shift+클릭으로 속성 열기",
 	"bazaarRemoveRating": "평점 삭제",
 	"bazaarRatingRemoved": "평점이 삭제되었습니다",
 	"bazaarRemoveRatingFailed": "평점 삭제에 실패했습니다",

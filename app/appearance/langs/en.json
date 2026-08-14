@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Right-click to open this list item's menu; Shift+click to open its attributes",
 	"bazaarRemoveRating": "Remove rating",
 	"bazaarRatingRemoved": "Rating removed",
 	"bazaarRemoveRatingFailed": "Failed to remove rating",

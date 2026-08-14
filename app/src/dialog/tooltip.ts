@@ -6,6 +6,7 @@ export const showTooltip = (
     tooltipClass?: string,
     event?: MouseEvent,
     space: number = 0.5,
+    positionOverride?: string,
 ) => {
     if (isMobile() || !message) {
         return;
@@ -41,7 +42,7 @@ export const showTooltip = (
     messageElement.innerHTML = window.DOMPurify.sanitize(message);
     // 避免原本的 top 和 left 影响计算
     messageElement.removeAttribute("style");
-    const position = target.getAttribute("data-position");
+    const position = positionOverride || target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();
 
     let left;

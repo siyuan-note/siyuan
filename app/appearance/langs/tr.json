@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Bu liste öğesinin menüsünü açmak için sağ tıklayın; özniteliklerini açmak için Shift+tıklayın",
 	"bazaarRemoveRating": "Puanı kaldır",
 	"bazaarRatingRemoved": "Puan kaldırıldı",
 	"bazaarRemoveRatingFailed": "Puan kaldırılamadı",

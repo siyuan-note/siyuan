@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Kliknij prawym przyciskiem myszy, aby otworzyć menu tego elementu listy; Shift+kliknięcie otwiera jego atrybuty",
 	"bazaarRemoveRating": "Usuń ocenę",
 	"bazaarRatingRemoved": "Ocena została usunięta",
 	"bazaarRemoveRatingFailed": "Nie udało się usunąć oceny",

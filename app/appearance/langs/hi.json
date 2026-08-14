@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "इस सूची आइटम का मेनू खोलने के लिए राइट-क्लिक करें; इसकी विशेषताएँ खोलने के लिए Shift+क्लिक करें",
 	"bazaarRemoveRating": "रेटिंग हटाएँ",
 	"bazaarRatingRemoved": "रेटिंग हटा दी गई",
 	"bazaarRemoveRatingFailed": "रेटिंग हटाने में विफल",

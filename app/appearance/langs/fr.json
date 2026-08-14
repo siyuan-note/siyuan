@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Faites un clic droit pour ouvrir le menu de cet élément de liste ; Shift+clic pour ouvrir ses attributs",
 	"bazaarRemoveRating": "Supprimer la note",
 	"bazaarRatingRemoved": "Note supprimée",
 	"bazaarRemoveRatingFailed": "Échec de la suppression de la note",

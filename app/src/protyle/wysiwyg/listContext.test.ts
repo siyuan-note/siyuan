@@ -11,8 +11,10 @@ import {
     getOrderedListMaxStart,
     getPreviousListItemID,
     getListShortcutAction,
+    isListItemActionElement,
     parseOrderedListStart,
     shouldIgnoreListShortcut,
+    shouldOpenListItemAttr,
     type TListSubtype
 } from "./listContext";
 
@@ -55,6 +57,12 @@ class TestElement {
 }
 
 const asHTMLElement = (element: TestElement) => element as unknown as HTMLElement;
+
+const createActionElement = (parentType: string) => ({
+    parentElement: {
+        getAttribute: (name: string) => name === "data-type" ? parentType : null,
+    },
+}) as unknown as Element;
 
 const createList = (subtype: TListSubtype, ...children: TestElement[]) => {
     const paragraph = new TestElement("NodeParagraph", "paragraph");
@@ -326,6 +334,27 @@ describe("shouldIgnoreListShortcut", () => {
         assert.equal(shouldIgnoreListShortcut(true, "NodeListItem"), true);
         assert.equal(shouldIgnoreListShortcut(true, "NodeList"), false);
         assert.equal(shouldIgnoreListShortcut(false, "NodeListItem"), false);
+    });
+});
+
+describe("shouldOpenListItemAttr", () => {
+    it("prioritizes Shift-click on an editable list item marker", () => {
+        assert.equal(shouldOpenListItemAttr(true, false, createActionElement("NodeListItem")), true);
+    });
+
+    it("keeps range selection for other targets and read-only editors", () => {
+        assert.equal(shouldOpenListItemAttr(true, false, createActionElement("NodeCodeBlock")), false);
+        assert.equal(shouldOpenListItemAttr(true, true, createActionElement("NodeListItem")), false);
+        assert.equal(shouldOpenListItemAttr(false, false, createActionElement("NodeListItem")), false);
+        assert.equal(shouldOpenListItemAttr(true, false, false), false);
+    });
+});
+
+describe("isListItemActionElement", () => {
+    it("recognizes only actions directly owned by a list item", () => {
+        assert.equal(isListItemActionElement(createActionElement("NodeListItem")), true);
+        assert.equal(isListItemActionElement(createActionElement("NodeCodeBlock")), false);
+        assert.equal(isListItemActionElement(false), false);
     });
 });
 

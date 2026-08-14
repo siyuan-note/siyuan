@@ -163,6 +163,15 @@ export const shouldIgnoreListShortcut = (hasBlockSelection: boolean, selectedTyp
     return hasBlockSelection && selectedType === "NodeListItem";
 };
 
+export const isListItemActionElement = (actionElement: Element | false) => {
+    return !!actionElement && actionElement.parentElement?.getAttribute("data-type") === "NodeListItem";
+};
+
+export const shouldOpenListItemAttr = (shiftKey: boolean, disabled: boolean,
+                                       actionElement: Element | false) => {
+    return shiftKey && !disabled && isListItemActionElement(actionElement);
+};
+
 export const getListConversionType = (sourceSubtype: TListSubtype, targetSubtype: TListSubtype) => {
     if (sourceSubtype === targetSubtype) {
         return;

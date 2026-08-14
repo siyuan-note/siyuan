@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Clique com o botão direito para abrir o menu deste item da lista; Shift+clique para abrir seus atributos",
 	"bazaarRemoveRating": "Remover avaliação",
 	"bazaarRatingRemoved": "Avaliação removida",
 	"bazaarRemoveRatingFailed": "Falha ao remover avaliação",

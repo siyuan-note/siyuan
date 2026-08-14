@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Klik met de rechtermuisknop om het menu van dit lijstitem te openen; Shift+klik om de kenmerken te openen",
 	"bazaarRemoveRating": "Beoordeling verwijderen",
 	"bazaarRatingRemoved": "Beoordeling verwijderd",
 	"bazaarRemoveRatingFailed": "Beoordeling verwijderen mislukt",

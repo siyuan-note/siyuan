@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Haz clic derecho para abrir el menú de este elemento de lista; Shift+clic para abrir sus atributos",
 	"bazaarRemoveRating": "Eliminar puntuación",
 	"bazaarRatingRemoved": "Puntuación eliminada",
 	"bazaarRemoveRatingFailed": "No se pudo eliminar la puntuación",

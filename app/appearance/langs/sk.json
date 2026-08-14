@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Kliknutím pravým tlačidlom otvoríte ponuku tejto položky zoznamu; Shift+kliknutie otvorí jej atribúty",
 	"bazaarRemoveRating": "Odstrániť hodnotenie",
 	"bazaarRatingRemoved": "Hodnotenie bolo odstránené",
 	"bazaarRemoveRatingFailed": "Hodnotenie sa nepodarilo odstrániť",

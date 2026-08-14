@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Клацніть правою кнопкою миші, щоб відкрити меню цього елемента списку; Shift+клацання відкриває його атрибути",
 	"bazaarRemoveRating": "Видалити оцінку",
 	"bazaarRatingRemoved": "Оцінку видалено",
 	"bazaarRemoveRatingFailed": "Не вдалося видалити оцінку",

@@ -192,6 +192,7 @@ import {
 } from "./blockDragSelect";
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
+import {shouldOpenListItemAttr} from "./listContext";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -1072,7 +1073,9 @@ export class WYSIWYG {
                 Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")) : []);
             const rangeBeforePaddingMouseDown = startsFromPadding && getSelection().rangeCount > 0 ?
                 getSelection().getRangeAt(0).cloneRange() : undefined;
-            if (event.shiftKey) {
+            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
+                hasClosestByClassName(target, "protyle-action"));
+            if (event.shiftKey && !openListItemAttrByShift) {
                 if (!isMobile() && !protyle.disabled && nodeElement?.dataset.avType === "table" &&
                     avCellElement && avCellElement.dataset.id &&
                     selectAVCellRange(nodeElement, avCellElement)) {
@@ -4106,7 +4109,9 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
-            if (event.shiftKey) {
+            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
+                hasClosestByClassName(event.target, "protyle-action"));
+            if (event.shiftKey && !openListItemAttrByShift) {
                 const selection = getSelection();
                 const focusElement = selection.focusNode && hasClosestBlock(selection.focusNode) as HTMLElement;
                 // mousedown 未命中块间空白时，浏览器会先生成跨块文字选区，在 click 阶段将其转换为块选区
@@ -4586,7 +4591,7 @@ export class WYSIWYG {
                             updateTransaction(protyle, actionElement.parentElement.parentElement, oldHTML);
                         }
                         hideElements(["gutter"], protyle);
-                    } else if (event.shiftKey && !protyle.disabled) {
+                    } else if (shouldOpenListItemAttr(event.shiftKey, protyle.disabled, actionElement)) {
                         openAttr(actionElement.parentElement, "bookmark", protyle);
                     } else if (ctrlIsPressed) {
                         zoomOut({protyle, id: actionId});

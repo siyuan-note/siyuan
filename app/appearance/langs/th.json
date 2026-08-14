@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "คลิกขวาเพื่อเปิดเมนูของรายการนี้; Shift+คลิกเพื่อเปิดแอตทริบิวต์",
 	"bazaarRemoveRating": "ลบคะแนน",
 	"bazaarRatingRemoved": "ลบคะแนนแล้ว",
 	"bazaarRemoveRatingFailed": "ลบคะแนนไม่สำเร็จ",

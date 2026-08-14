@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Klik met de rechtermuisknop om het menu van dit lijstitem te openen; Shift+klik om de kenmerken te openen",
+	"listItemActionTip": "Klik met de rechtermuisknop <span class='ft__on-surface'>Menu van dit lijstitem openen</span><br>Shift+klik <span class='ft__on-surface'>Kenmerken openen</span>",
 	"bazaarRemoveRating": "Beoordeling verwijderen",
 	"bazaarRatingRemoved": "Beoordeling verwijderd",
 	"bazaarRemoveRatingFailed": "Beoordeling verwijderen mislukt",

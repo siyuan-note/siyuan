@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Klik kanan untuk membuka menu item daftar ini; Shift+klik untuk membuka atributnya",
+	"listItemActionTip": "Klik kanan <span class='ft__on-surface'>Buka menu item daftar ini</span><br>Shift+klik <span class='ft__on-surface'>Buka atributnya</span>",
 	"bazaarRemoveRating": "Hapus penilaian",
 	"bazaarRatingRemoved": "Penilaian dihapus",
 	"bazaarRemoveRatingFailed": "Gagal menghapus penilaian",

@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Kliknutím pravým tlačidlom otvoríte ponuku tejto položky zoznamu; Shift+kliknutie otvorí jej atribúty",
+	"listItemActionTip": "Kliknutie pravým tlačidlom <span class='ft__on-surface'>Otvoriť ponuku tejto položky zoznamu</span><br>Shift+kliknutie <span class='ft__on-surface'>Otvoriť jej atribúty</span>",
 	"bazaarRemoveRating": "Odstrániť hodnotenie",
 	"bazaarRatingRemoved": "Hodnotenie bolo odstránené",
 	"bazaarRemoveRatingFailed": "Hodnotenie sa nepodarilo odstrániť",

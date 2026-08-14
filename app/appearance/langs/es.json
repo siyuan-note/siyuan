@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Haz clic derecho para abrir el menú de este elemento de lista; Shift+clic para abrir sus atributos",
+	"listItemActionTip": "Clic derecho <span class='ft__on-surface'>Abrir el menú de este elemento de lista</span><br>Shift+clic <span class='ft__on-surface'>Abrir sus atributos</span>",
 	"bazaarRemoveRating": "Eliminar puntuación",
 	"bazaarRatingRemoved": "Puntuación eliminada",
 	"bazaarRemoveRatingFailed": "No se pudo eliminar la puntuación",

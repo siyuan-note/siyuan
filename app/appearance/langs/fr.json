@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Faites un clic droit pour ouvrir le menu de cet élément de liste ; Shift+clic pour ouvrir ses attributs",
+	"listItemActionTip": "Clic droit <span class='ft__on-surface'>Ouvrir le menu de cet élément de liste</span><br>Shift+clic <span class='ft__on-surface'>Ouvrir ses attributs</span>",
 	"bazaarRemoveRating": "Supprimer la note",
 	"bazaarRatingRemoved": "Note supprimée",
 	"bazaarRemoveRatingFailed": "Échec de la suppression de la note",

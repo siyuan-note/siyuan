@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "לחץ לחיצה ימנית כדי לפתוח את התפריט של פריט רשימה זה; Shift+לחיצה כדי לפתוח את המאפיינים שלו",
+	"listItemActionTip": "לחיצה ימנית <span class='ft__on-surface'>פתיחת התפריט של פריט רשימה זה</span><br>Shift+לחיצה <span class='ft__on-surface'>פתיחת המאפיינים שלו</span>",
 	"bazaarRemoveRating": "הסרת הדירוג",
 	"bazaarRatingRemoved": "הדירוג הוסר",
 	"bazaarRemoveRatingFailed": "הסרת הדירוג נכשלה",

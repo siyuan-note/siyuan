@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Mit der rechten Maustaste klicken, um das Menü dieses Listeneintrags zu öffnen; Shift+Klick, um seine Attribute zu öffnen",
+	"listItemActionTip": "Mit der rechten Maustaste klicken <span class='ft__on-surface'>Menü dieses Listeneintrags öffnen</span><br>Shift+Klick <span class='ft__on-surface'>Attribute öffnen</span>",
 	"bazaarRemoveRating": "Bewertung entfernen",
 	"bazaarRatingRemoved": "Bewertung entfernt",
 	"bazaarRemoveRatingFailed": "Bewertung konnte nicht entfernt werden",

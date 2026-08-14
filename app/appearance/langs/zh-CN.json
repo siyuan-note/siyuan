@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "右键打开该列表项菜单；Shift+单击打开属性",
+	"listItemActionTip": "右键 <span class='ft__on-surface'>打开该列表项菜单</span><br>Shift+点击 <span class='ft__on-surface'>打开属性</span>",
 	"bazaarRemoveRating": "取消评分",
 	"bazaarRatingRemoved": "已取消评分",
 	"bazaarRemoveRatingFailed": "取消评分失败",

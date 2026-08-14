@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Right-click to open this list item's menu; Shift+click to open its attributes",
+	"listItemActionTip": "Right-click <span class='ft__on-surface'>Open this list item's menu</span><br>Shift+click <span class='ft__on-surface'>Open its attributes</span>",
 	"bazaarRemoveRating": "Remove rating",
 	"bazaarRatingRemoved": "Rating removed",
 	"bazaarRemoveRatingFailed": "Failed to remove rating",

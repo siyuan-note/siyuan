@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Fai clic con il pulsante destro per aprire il menu di questo elemento dell'elenco; Shift+clic per aprirne gli attributi",
+	"listItemActionTip": "Clic destro <span class='ft__on-surface'>Apri il menu di questo elemento dell'elenco</span><br>Shift+clic <span class='ft__on-surface'>Apri i suoi attributi</span>",
 	"bazaarRemoveRating": "Rimuovi valutazione",
 	"bazaarRatingRemoved": "Valutazione rimossa",
 	"bazaarRemoveRatingFailed": "Impossibile rimuovere la valutazione",

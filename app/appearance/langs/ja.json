@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "右クリックでこのリスト項目のメニューを開く。Shift+クリックで属性を開く",
+	"listItemActionTip": "右クリック <span class='ft__on-surface'>このリスト項目のメニューを開く</span><br>Shift+クリック <span class='ft__on-surface'>属性を開く</span>",
 	"bazaarRemoveRating": "評価を取り消す",
 	"bazaarRatingRemoved": "評価を取り消しました",
 	"bazaarRemoveRatingFailed": "評価の取り消しに失敗しました",

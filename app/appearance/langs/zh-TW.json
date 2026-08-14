@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "右鍵開啟此清單項目的功能表；Shift+點擊開啟屬性",
+	"listItemActionTip": "右鍵 <span class='ft__on-surface'>開啟此清單項目的功能表</span><br>Shift+點擊 <span class='ft__on-surface'>開啟屬性</span>",
 	"bazaarRemoveRating": "取消評分",
 	"bazaarRatingRemoved": "已取消評分",
 	"bazaarRemoveRatingFailed": "取消評分失敗",

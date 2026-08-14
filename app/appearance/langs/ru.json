@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Щелкните правой кнопкой мыши, чтобы открыть меню этого элемента списка; Shift+щелчок открывает его атрибуты",
+	"listItemActionTip": "Щелчок правой кнопкой мыши <span class='ft__on-surface'>Открыть меню этого элемента списка</span><br>Shift+щелчок <span class='ft__on-surface'>Открыть его атрибуты</span>",
 	"bazaarRemoveRating": "Удалить оценку",
 	"bazaarRatingRemoved": "Оценка удалена",
 	"bazaarRemoveRatingFailed": "Не удалось удалить оценку",

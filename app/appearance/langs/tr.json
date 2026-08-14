@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Bu liste öğesinin menüsünü açmak için sağ tıklayın; özniteliklerini açmak için Shift+tıklayın",
+	"listItemActionTip": "Sağ tıklayın <span class='ft__on-surface'>Bu liste öğesinin menüsünü açın</span><br>Shift+tıklayın <span class='ft__on-surface'>Özniteliklerini açın</span>",
 	"bazaarRemoveRating": "Puanı kaldır",
 	"bazaarRatingRemoved": "Puan kaldırıldı",
 	"bazaarRemoveRatingFailed": "Puan kaldırılamadı",

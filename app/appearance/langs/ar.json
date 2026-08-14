@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "انقر بزر الماوس الأيمن لفتح قائمة عنصر القائمة هذا؛ انقر مع الضغط على Shift لفتح سماته",
+	"listItemActionTip": "انقر بزر الماوس الأيمن <span class='ft__on-surface'>فتح قائمة عنصر القائمة هذا</span><br>انقر مع الضغط على Shift <span class='ft__on-surface'>فتح سماته</span>",
 	"bazaarRemoveRating": "إزالة التقييم",
 	"bazaarRatingRemoved": "تمت إزالة التقييم",
 	"bazaarRemoveRatingFailed": "فشلت إزالة التقييم",

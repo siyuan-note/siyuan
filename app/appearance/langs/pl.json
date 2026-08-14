@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Kliknij prawym przyciskiem myszy, aby otworzyć menu tego elementu listy; Shift+kliknięcie otwiera jego atrybuty",
+	"listItemActionTip": "Kliknij prawym przyciskiem myszy <span class='ft__on-surface'>Otwórz menu tego elementu listy</span><br>Shift+kliknięcie <span class='ft__on-surface'>Otwórz jego atrybuty</span>",
 	"bazaarRemoveRating": "Usuń ocenę",
 	"bazaarRatingRemoved": "Ocena została usunięta",
 	"bazaarRemoveRatingFailed": "Nie udało się usunąć oceny",

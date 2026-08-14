@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "Клацніть правою кнопкою миші, щоб відкрити меню цього елемента списку; Shift+клацання відкриває його атрибути",
+	"listItemActionTip": "Клацання правою кнопкою миші <span class='ft__on-surface'>Відкрити меню цього елемента списку</span><br>Shift+клацання <span class='ft__on-surface'>Відкрити його атрибути</span>",
 	"bazaarRemoveRating": "Видалити оцінку",
 	"bazaarRatingRemoved": "Оцінку видалено",
 	"bazaarRemoveRatingFailed": "Не вдалося видалити оцінку",

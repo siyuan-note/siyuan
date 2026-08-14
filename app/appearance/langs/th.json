@@ -1,5 +1,5 @@
 {
-	"listItemActionTip": "คลิกขวาเพื่อเปิดเมนูของรายการนี้; Shift+คลิกเพื่อเปิดแอตทริบิวต์",
+	"listItemActionTip": "คลิกขวา <span class='ft__on-surface'>เปิดเมนูของรายการนี้</span><br>Shift+คลิก <span class='ft__on-surface'>เปิดแอตทริบิวต์</span>",
 	"bazaarRemoveRating": "ลบคะแนน",
 	"bazaarRatingRemoved": "ลบคะแนนแล้ว",
 	"bazaarRemoveRatingFailed": "ลบคะแนนไม่สำเร็จ",

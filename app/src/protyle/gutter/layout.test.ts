@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getGutterMarginHeight} from "./layout";
+import {getBacklinkGutterContentTop, getGutterMarginHeight} from "./layout";
 
 describe("getGutterMarginHeight", () => {
     it("uses the natural height after heading gutter buttons wrap", () => {
@@ -20,5 +20,15 @@ describe("getGutterMarginHeight", () => {
 
     it("falls back to the current height before the natural height is measured", () => {
         assert.equal(getGutterMarginHeight(44, 34, 0, 16), 5);
+    });
+});
+
+describe("getBacklinkGutterContentTop", () => {
+    it("keeps the gutter below the sticky document title", () => {
+        assert.equal(getBacklinkGutterContentTop(20, 30, 62), 62);
+    });
+
+    it("keeps the existing content boundary when it is lower", () => {
+        assert.equal(getBacklinkGutterContentTop(80, 30, 62), 80);
     });
 });

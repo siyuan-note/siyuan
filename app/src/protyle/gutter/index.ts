@@ -101,7 +101,7 @@ import {
     setOrderedListStart
 } from "../wysiwyg/list";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
-import {getGutterMarginHeight} from "./layout";
+import {getBacklinkGutterContentTop, getGutterMarginHeight} from "./layout";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -3598,9 +3598,13 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
         let contentTop = protyle.contentElement.getBoundingClientRect().top;
         if (protyle.options.backlinkData) {
             const backlinkElement = protyle.element.closest(".backlinkList, .backlinkMList");
-            if (backlinkElement) {
-                contentTop = Math.max(contentTop, backlinkElement.getBoundingClientRect().top);
-            }
+            const backlinkItemElement = protyle.element.closest(".backlinkList__item");
+            const titleElement = backlinkItemElement?.querySelector(":scope > .b3-list-item");
+            contentTop = getBacklinkGutterContentTop(
+                contentTop,
+                backlinkElement?.getBoundingClientRect().top,
+                titleElement?.getBoundingClientRect().bottom,
+            );
         }
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;

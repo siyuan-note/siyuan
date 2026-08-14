@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "Your rating: ${rating}",
 	"bazaarRatingDistributionLabel": "${star} stars, ${count} ratings",
 	"bazaarRatingLoginTip": "Log in to rate",
-	"bazaarRatingDownloadedTip": "Open the package from Downloaded to rate it",
 	"bazaarRatingInstallTip": "Install the package to rate it",
 	"bazaarRatingStarLabel": "${star}-star rating",
 	"bazaarRatingFailed": "Failed to submit rating",

@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "Penilaian Anda: ${rating}",
 	"bazaarRatingDistributionLabel": "${star} bintang, ${count} penilaian",
 	"bazaarRatingLoginTip": "Masuk untuk memberi penilaian",
-	"bazaarRatingDownloadedTip": "Buka paket dari Unduhan untuk memberi penilaian",
 	"bazaarRatingInstallTip": "Instal paket untuk memberi penilaian",
 	"bazaarRatingStarLabel": "Penilaian ${star} bintang",
 	"bazaarRatingFailed": "Penilaian gagal dikirim",

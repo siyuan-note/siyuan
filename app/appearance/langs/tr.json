@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "Puanınız: ${rating}",
 	"bazaarRatingDistributionLabel": "${star} yıldız, ${count} değerlendirme",
 	"bazaarRatingLoginTip": "Puan vermek için giriş yapın",
-	"bazaarRatingDownloadedTip": "Puan vermek için paketi İndirilenler bölümünden açın",
 	"bazaarRatingInstallTip": "Puan vermek için paketi kurun",
 	"bazaarRatingStarLabel": "${star} yıldızlı puan",
 	"bazaarRatingFailed": "Puan gönderilemedi",

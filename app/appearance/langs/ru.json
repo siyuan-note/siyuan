@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "Ваша оценка: ${rating}",
 	"bazaarRatingDistributionLabel": "${star} звёзд, ${count} оценок",
 	"bazaarRatingLoginTip": "Войдите, чтобы поставить оценку",
-	"bazaarRatingDownloadedTip": "Откройте пакет в разделе «Загруженные», чтобы оценить его",
 	"bazaarRatingInstallTip": "Установите пакет, чтобы оценить его",
 	"bazaarRatingStarLabel": "Оценка: ${star} звёзд",
 	"bazaarRatingFailed": "Не удалось отправить оценку",

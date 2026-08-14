@@ -382,6 +382,10 @@
       position: relative;
     }
 
+    &__publish-switch {
+      display: inline-flex;
+    }
+
     &__panel {
       height: 100%;
       overflow: auto;
@@ -470,7 +474,7 @@
       display: inline-flex;
       font-family: inherit;
       font-size: inherit;
-      line-height: inherit;
+      line-height: 16px;
       margin: 0;
       padding: 4px;
 
@@ -552,6 +556,10 @@
         color: var(--b3-theme-on-surface);
         font-size: 12px;
       }
+
+      > span:nth-child(4) {
+        text-align: left;
+      }
     }
 
     &__rating-track {
@@ -607,9 +615,16 @@
         }
 
         &:hover,
-        &:focus-visible,
+        &:focus-visible {
+          color: var(--b3-theme-on-surface);
+        }
+
         &.config-bazaar__rating-picker--active {
-          color: var(--b3-theme-primary);
+          color: var(--b3-theme-on-surface);
+
+          .config-bazaar__rating-star {
+            --b3-icon-star-fill: currentColor;
+          }
         }
       }
     }

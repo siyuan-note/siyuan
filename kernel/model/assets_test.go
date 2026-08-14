@@ -513,6 +513,59 @@ func TestUnusedAssetsContainPath(t *testing.T) {
 	}
 }
 
+func TestAllAssetAbsPathsWithAssetsInWorkspacePath(t *testing.T) {
+	originalDataDir := util.DataDir
+	originalConf := Conf
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+		Conf = originalConf
+	})
+
+	util.DataDir = filepath.Join(t.TempDir(), "assets", "workspace", "data")
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	globalAssetPath := filepath.Join(util.DataDir, "assets", "nested", "assets", "image.png")
+	if err := os.MkdirAll(filepath.Dir(globalAssetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(globalAssetPath, []byte("image"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	const (
+		boxID = "20260814140000-abcdefg"
+		docID = "20260814140001-hijklmn"
+	)
+	boxConfPath := filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json")
+	if err := os.MkdirAll(filepath.Dir(boxConfPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(boxConfPath, []byte(`{"name":"Notebook"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	notebookAssetPath := filepath.Join(util.DataDir, boxID, docID, "assets", "document.png")
+	if err := os.MkdirAll(filepath.Dir(notebookAssetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(notebookAssetPath, []byte("image"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	assets, err := allAssetAbsPaths()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expected := map[string]string{
+		"assets/nested/assets/image.png": globalAssetPath,
+		"assets/document.png":            notebookAssetPath,
+	}
+	for assetPath, expectedAbsPath := range expected {
+		if actualAbsPath := assets[assetPath]; actualAbsPath != expectedAbsPath {
+			t.Fatalf("asset path [%s]: got %q, want %q", assetPath, actualAbsPath, expectedAbsPath)
+		}
+	}
+}
+
 func TestGetAssetLinkDestsByNode(t *testing.T) {
 	const blockID = "20200101000000-abcdefg"
 	root := &ast.Node{Type: ast.NodeDocument}

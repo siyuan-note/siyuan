@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "あなたの評価：${rating}",
 	"bazaarRatingDistributionLabel": "${star} つ星、${count} 件の評価",
 	"bazaarRatingLoginTip": "評価するにはログインしてください",
-	"bazaarRatingDownloadedTip": "評価するには「ダウンロード済み」からパッケージを開いてください",
 	"bazaarRatingInstallTip": "評価するにはパッケージをインストールしてください",
 	"bazaarRatingStarLabel": "${star} つ星の評価",
 	"bazaarRatingFailed": "評価を送信できませんでした",

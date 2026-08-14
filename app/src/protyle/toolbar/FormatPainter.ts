@@ -66,6 +66,35 @@ export const getFormatPainterSnapshot = (rootElement: Element, range: Range) => 
 class FormatPainterController {
     private mode?: TFormatPainterMode;
     private snapshot?: IFormatPainterSnapshot;
+    private cursorElement?: HTMLElement;
+
+    private moveCursor = (event: MouseEvent) => {
+        if (!this.cursorElement) {
+            return;
+        }
+        const target = event.target;
+        if (!(target instanceof Element) || !target.closest(".protyle-wysiwyg[data-readonly=\"false\"]")) {
+            this.cursorElement.classList.add("fn__none");
+            return;
+        }
+        this.cursorElement.classList.remove("fn__none");
+        this.cursorElement.style.transform = `translate3d(${event.clientX + 8}px, ${event.clientY + 8}px, 0)`;
+    };
+
+    private renderCursor() {
+        this.removeCursor();
+        this.cursorElement = document.createElement("div");
+        this.cursorElement.className = "protyle-format-painter__cursor fn__none";
+        this.cursorElement.innerHTML = '<svg><use xlink:href="#iconPaintRoller"></use></svg>';
+        document.body.append(this.cursorElement);
+        document.addEventListener("mousemove", this.moveCursor);
+    }
+
+    private removeCursor() {
+        document.removeEventListener("mousemove", this.moveCursor);
+        this.cursorElement?.remove();
+        this.cursorElement = undefined;
+    }
 
     private showMessage(message: string, timeout: number) {
         if (shouldShowFormatPainterMessage(window.siyuan.config.appearance.notifications?.formatPainterTip)) {
@@ -88,6 +117,7 @@ class FormatPainterController {
         this.mode = mode;
         this.snapshot = snapshot;
         document.body.dataset.formatPainter = mode;
+        this.renderCursor();
         this.renderStatus();
         this.showMessage(mode === "continuous" ? window.siyuan.languages.formatPainterContinuousActive :
             window.siyuan.languages.formatPainterActive, 4000);
@@ -118,6 +148,7 @@ class FormatPainterController {
         this.mode = undefined;
         this.snapshot = undefined;
         delete document.body.dataset.formatPainter;
+        this.removeCursor();
         document.getElementById("statusFormatPainter")?.remove();
         this.showMessage(window.siyuan.languages.formatPainterInactive, 3000);
         return true;
@@ -141,7 +172,7 @@ class FormatPainterController {
             element = document.createElement("button");
             element.id = "statusFormatPainter";
             element.className = "toolbar__item ariaLabel status__format-painter";
-            element.innerHTML = '<svg><use xlink:href="#iconFormat"></use></svg>';
+            element.innerHTML = '<svg><use xlink:href="#iconPaintRoller"></use></svg>';
             element.addEventListener("click", () => this.deactivate());
             const helpElement = statusElement.querySelector("#statusHelp");
             if (helpElement) {
@@ -166,7 +197,7 @@ export class FormatPainter {
         this.element.setAttribute("data-type", menuItem.name);
         this.element.setAttribute("data-menu", "true");
         this.element.setAttribute("aria-label", window.siyuan.languages.formatPainter);
-        this.element.innerHTML = '<svg><use xlink:href="#iconFormat"></use></svg>';
+        this.element.innerHTML = '<svg><use xlink:href="#iconPaintRoller"></use></svg>';
         this.element.addEventListener("mousedown", event => event.preventDefault());
         this.element.addEventListener("click", event => {
             event.preventDefault();

@@ -46,6 +46,8 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - For multi-step logic, write and run a temporary Node.js or Python script. On Windows, avoid PowerShell unless necessary
    - Do not pass non-ASCII text through shell pipelines, PowerShell here-strings, `python -c`, or `node -e`; write the text to a UTF-8 file with a file-editing tool and consume that file instead
 3. **Icons:** Do not hand-write SVG; use existing icons from `app/appearance/icons/litheness/icon.js` when possible
+   - If no existing icon is suitable, source one from the official [Lucide icon library](https://lucide.dev/icons/) and adapt only attributes such as stroke width to match the established icon style; preserve the upstream path data
+   - When adding an icon to `app/appearance/icons/litheness/icon.js`, add its preview entry to `app/appearance/icons/index.html` in the same change and keep the order aligned
 4. **User guide:** When editing the user guide, follow `docs/SY-FORMAT.md`
    - When a feature adds or changes shortcuts, update the shortcut documentation in the user guide in the same change; if the appropriate section is unclear, ask the user where it should be placed
    - Represent in-app UI navigation paths as segmented `kbd` text marks: use one `NodeTextMark` with `TextMarkType: "kbd"` per navigation level, and place a plain `NodeText` containing ` - ` between adjacent levels

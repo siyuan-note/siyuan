@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "تقييمك: ${rating}",
 	"bazaarRatingDistributionLabel": "${star} نجوم، ${count} تقييمًا",
 	"bazaarRatingLoginTip": "سجّل الدخول للتقييم",
-	"bazaarRatingDownloadedTip": "افتح الحزمة من قسم التنزيلات لتقييمها",
 	"bazaarRatingInstallTip": "ثبّت الحزمة لتقييمها",
 	"bazaarRatingStarLabel": "تقييم ${star} نجوم",
 	"bazaarRatingFailed": "تعذر إرسال التقييم",

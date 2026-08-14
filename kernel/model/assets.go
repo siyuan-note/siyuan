@@ -2433,8 +2433,11 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 			continue
 		}
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
-		filelock.Walk(notebookAbsPath, func(path string, d fs.DirEntry, err error) error {
-			if notebookAbsPath == path {
+		walkErr := filelock.Walk(notebookAbsPath, func(walkPath string, d fs.DirEntry, walkErr error) error {
+			if walkErr != nil {
+				return walkErr
+			}
+			if notebookAbsPath == walkPath {
 				return nil
 			}
 			if isSkipFile(d.Name()) {
@@ -2444,14 +2447,18 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 				return nil
 			}
 
-			if filelock.IsHidden(path) {
+			if filelock.IsHidden(walkPath) {
 				// 清理资源文件时忽略隐藏文件 Ignore hidden files when cleaning unused assets https://github.com/siyuan-note/siyuan/issues/12172
 				return nil
 			}
 
 			if d.IsDir() && "assets" == d.Name() {
-				filelock.Walk(path, func(assetPath string, d fs.DirEntry, err error) error {
-					if path == assetPath {
+				assetsDirPath := walkPath
+				if nestedWalkErr := filelock.Walk(assetsDirPath, func(assetPath string, d fs.DirEntry, walkErr error) error {
+					if walkErr != nil {
+						return walkErr
+					}
+					if assetsDirPath == assetPath {
 						return nil
 					}
 					if isSkipFile(d.Name()) {
@@ -2460,23 +2467,30 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 						}
 						return nil
 					}
-					relPath := filepath.ToSlash(assetPath)
-					relPath = relPath[strings.Index(relPath, "assets/"):]
-					if d.IsDir() {
-						relPath += "/"
+					relPath, relErr := assetPathMapKey(assetsDirPath, assetPath, d.IsDir())
+					if relErr != nil {
+						return relErr
 					}
 					assetsAbsPathMap[relPath] = assetPath
 					return nil
-				})
+				}); nestedWalkErr != nil {
+					return nestedWalkErr
+				}
 				return filepath.SkipDir
 			}
 			return nil
 		})
+		if walkErr != nil {
+			return nil, fmt.Errorf("walk notebook assets [%s] failed: %w", notebookAbsPath, walkErr)
+		}
 	}
 
 	// 全局 assets
 	dataAssetsAbsPath := util.GetDataAssetsAbsPath()
-	filelock.Walk(dataAssetsAbsPath, func(assetPath string, d fs.DirEntry, err error) error {
+	walkErr := filelock.Walk(dataAssetsAbsPath, func(assetPath string, d fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
 		if dataAssetsAbsPath == assetPath {
 			return nil
 		}
@@ -2493,14 +2507,37 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 			return nil
 		}
 
-		relPath := filepath.ToSlash(assetPath)
-		relPath = relPath[strings.Index(relPath, "assets/"):]
-		if d.IsDir() {
-			relPath += "/"
+		relPath, relErr := assetPathMapKey(dataAssetsAbsPath, assetPath, d.IsDir())
+		if relErr != nil {
+			return relErr
 		}
 		assetsAbsPathMap[relPath] = assetPath
 		return nil
 	})
+	if walkErr != nil {
+		if os.IsNotExist(walkErr) {
+			return
+		}
+		return nil, fmt.Errorf("walk global assets [%s] failed: %w", dataAssetsAbsPath, walkErr)
+	}
+	return
+}
+
+func assetPathMapKey(assetsDirPath, assetPath string, isDir bool) (ret string, err error) {
+	relPath, err := filepath.Rel(assetsDirPath, assetPath)
+	if err != nil {
+		return
+	}
+	relPath = filepath.ToSlash(relPath)
+	if relPath == "." || relPath == ".." || strings.HasPrefix(relPath, "../") || path.IsAbs(relPath) {
+		err = fmt.Errorf("asset path [%s] is outside assets directory [%s]", assetPath, assetsDirPath)
+		return
+	}
+
+	ret = path.Join("assets", relPath)
+	if isDir {
+		ret += "/"
+	}
 	return
 }
 

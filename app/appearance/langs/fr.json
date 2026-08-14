@@ -10,7 +10,6 @@
 	"bazaarYourRatingValue": "Votre évaluation : ${rating}",
 	"bazaarRatingDistributionLabel": "${star} étoiles, ${count} évaluations",
 	"bazaarRatingLoginTip": "Connectez-vous pour évaluer",
-	"bazaarRatingDownloadedTip": "Ouvrez le paquet depuis Téléchargés pour l’évaluer",
 	"bazaarRatingInstallTip": "Installez le paquet pour l’évaluer",
 	"bazaarRatingStarLabel": "Évaluation de ${star} étoiles",
 	"bazaarRatingFailed": "Impossible d’envoyer l’évaluation",

@@ -41,6 +41,26 @@ const getSegment = (textNode: Text, editableElement: Element) => {
     };
 };
 
+const setFormatPainterCursor = () => {
+    const iconElement = document.getElementById("iconPaintRoller");
+    if (!iconElement) {
+        return;
+    }
+    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    Array.from(iconElement.attributes).forEach(attribute => {
+        if (attribute.name !== "id") {
+            svgElement.setAttribute(attribute.name, attribute.value);
+        }
+    });
+    svgElement.setAttribute("width", "24");
+    svgElement.setAttribute("height", "24");
+    svgElement.style.color = getComputedStyle(document.body).getPropertyValue("--b3-theme-on-background").trim() ||
+        "#000";
+    iconElement.childNodes.forEach(node => svgElement.append(node.cloneNode(true)));
+    const data = encodeURIComponent(new XMLSerializer().serializeToString(svgElement));
+    document.body.style.setProperty("--format-painter-cursor", `url("data:image/svg+xml,${data}") 10 21, text`);
+};
+
 export const getFormatPainterSnapshot = (rootElement: Element, range: Range) => {
     const segments: IFormatPainterSegment[] = [];
     getBlockRanges(rootElement, range, ["NodeCodeBlock", "NodeAttributeView"]).forEach(item => {
@@ -88,6 +108,7 @@ class FormatPainterController {
         this.mode = mode;
         this.snapshot = snapshot;
         document.body.dataset.formatPainter = mode;
+        setFormatPainterCursor();
         this.renderStatus();
         this.showMessage(mode === "continuous" ? window.siyuan.languages.formatPainterContinuousActive :
             window.siyuan.languages.formatPainterActive, 4000);
@@ -118,6 +139,7 @@ class FormatPainterController {
         this.mode = undefined;
         this.snapshot = undefined;
         delete document.body.dataset.formatPainter;
+        document.body.style.removeProperty("--format-painter-cursor");
         document.getElementById("statusFormatPainter")?.remove();
         this.showMessage(window.siyuan.languages.formatPainterInactive, 3000);
         return true;

@@ -45,7 +45,7 @@ import {
     queueHeadingNumberRefresh
 } from "../util/headingNumber";
 import {MERMAID_LAYOUT_ATTR} from "../render/mermaidLayout";
-import {getPartialUpdateCleanupElements} from "./transactionUpdate";
+import {getPartialUpdateCleanupElements, shouldDeferCodeBlockCaretRestore} from "./transactionUpdate";
 import {getMoveAffectedEmbedElements, shouldSyncMoveCopies} from "./transactionEmbed";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
@@ -609,14 +609,25 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
         item.previousElementSibling.remove();
 
         const wbrElement = item.querySelector("wbr");
+        const codeElement = item.getAttribute("data-type") === "NodeCodeBlock" ? item.querySelector(".hljs") : undefined;
+        // 未高亮的代码块由 highlightRender 使用 wbr 记录偏移，并在重建 DOM 后恢复光标。
+        const deferCodeBlockCaretRestore = shouldDeferCodeBlockCaretRestore({
+            isRangeBlock,
+            isReplay: isUndo,
+            hasCaret: !!wbrElement,
+            isCodeBlock: !!codeElement,
+            isRendered: codeElement?.getAttribute("data-render") === "true",
+        });
         if (isRangeBlock && isUndo) {
             if (wbrElement) {
-                focusByWbr(item, range);
+                focusByWbr(item, range, deferCodeBlockCaretRestore);
             } else {
                 focusBlock(item);
             }
         }
-        wbrElement?.remove();
+        if (!deferCodeBlockCaretRestore) {
+            wbrElement?.remove();
+        }
         // update 操作会生成新表格并替换旧节点，聚焦后需还原滚动，避免表格跳回开头
         if (tableScrollLeft > 0) {
             (item.firstElementChild as HTMLElement).scrollLeft = tableScrollLeft;

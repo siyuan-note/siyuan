@@ -322,7 +322,10 @@ export class AgentChat extends Model {
             '<svg class="agent-chat__reasoning-effort-icon"><use xlink:href="#iconBrain"></use></svg>' +
             '<span class="agent-chat__reasoning-effort-label"></span></button>' +
             "</div>" +
-            '<button class="agent-chat__send b3-button b3-button--icon b3-button--text ariaLabel" aria-label="' + (L.agentSend || "Send") + '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
+            '<button class="agent-chat__send b3-button b3-button--icon b3-button--text ariaLabel" aria-label="' +
+            escapeAriaLabel((L.agentSend || "Send") +
+                updateHotkeyAfterTip(window.siyuan.config.keymap.general.agentSend.custom)) +
+            '"><svg><use xlink:href="#iconSend"></use></svg></button>' +
             '<button class="agent-chat__stop b3-button b3-button--icon b3-button--cancel fn__none ariaLabel" aria-label="' + (L.agentStop || "Stop") + '"><svg><use xlink:href="#iconSquareStop"></use></svg></button>' +
             "</div>" +
             "</div>" +
@@ -379,7 +382,6 @@ export class AgentChat extends Model {
             // 内容变化时刷新发送按钮可用性（含用户输入、IME、程序化 clear 等所有 doc 变更）。
             this.updateSendButtonState();
         }, {
-            submitMode: this.host.mobile ? "mod-enter" : "enter",
             placeholder: this.host.mobile ? this.mobileComposerPlaceholder() : undefined,
         });
         // 块拖拽由 protyle 统一处理（复制块/引用/嵌入块→引用），无需自定义 drop handler。
@@ -2329,7 +2331,6 @@ export class AgentChat extends Model {
         }, undefined, {
             initialContent: initialData?.text ?? entry.content,
             initialBlockHTML: initialData?.blockHTML ?? entry.blockHTML,
-            submitMode: "mod-enter",
             onCancel: restore,
             enableHistory: false,
         });

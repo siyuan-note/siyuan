@@ -633,7 +633,7 @@
 	"agentQuestionSubmitted": "Enviado",
 	"agentQuestionPending": "Esperando respuesta",
 	"agentNewSession": "Nueva sesión",
-	"agentInputPlaceholder": "Escribe un mensaje, /habilidad, Enter para enviar...",
+	"agentInputPlaceholder": "Escribe un mensaje, /habilidad...",
 	"agentSend": "Enviar",
 	"agentStop": "Detener",
 	"editorFontSize": "Tamaño de fuente del editor",

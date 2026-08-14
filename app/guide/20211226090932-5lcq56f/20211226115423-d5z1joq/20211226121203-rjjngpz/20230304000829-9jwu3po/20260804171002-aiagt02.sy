@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20260812170000"
+		"updated": "20260814225521"
 	},
 	"Children": [
 		{
@@ -168,7 +168,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-qlngedh",
-				"updated": "20260804180000"
+				"updated": "20260814225521"
 			},
 			"Children": [
 				{
@@ -389,7 +389,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-1z57i1s",
-				"updated": "20260804230000"
+				"updated": "20260814225521"
 			},
 			"Children": [
 				{
@@ -403,7 +403,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170040-98fzzbm",
-				"updated": "20260804230000"
+				"updated": "20260814225521"
 			},
 			"Children": [
 				{
@@ -413,11 +413,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "回車"
+					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 傳送，使用 "
+					"Data": " + "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -435,7 +435,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 換行。智能體執行時可以點選停止按鈕中止目前任務。描述目標、範圍和預期輸出位置越明確，執行結果通常越穩定。"
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⇧⌘回車"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 傳送。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回車"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 遵循編輯器的區塊編輯行為，可用於建立區塊、換行或退出引述區塊和清單。智能體執行時可以點選停止按鈕中止目前任務。描述目標、範圍和預期輸出位置越明確，執行結果通常越穩定。"
 				}
 			]
 		},

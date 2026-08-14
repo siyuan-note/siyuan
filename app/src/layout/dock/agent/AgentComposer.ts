@@ -7,6 +7,7 @@ import {hintRef} from "../../../protyle/hint/extend";
 import {genEmptyElement} from "../../../block/util";
 import {blockRender} from "../../../protyle/render/blockRender";
 import {focusBlock} from "../../../protyle/util/selection";
+import {matchHotKey} from "../../../protyle/util/hotKey";
 
 export interface AgentComposerData {
     text: string;
@@ -33,7 +34,6 @@ type OnChangeCallback = () => void;
 interface ComposerOptions {
     initialContent?: string;
     initialBlockHTML?: string;
-    submitMode?: "enter" | "mod-enter";
     placeholder?: string;
     onCancel?: () => void;
     enableHistory?: boolean;
@@ -146,7 +146,6 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                               options: ComposerOptions = {}): ComposerHandle {
     const history = new ComposerHistory();
     const L = window.siyuan.languages;
-    const submitMode = options.submitMode || "enter";
     const enableHistory = options.enableHistory !== false;
 
     const app: App = window.siyuan.ws.app;
@@ -223,7 +222,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     });
     contentObserver.observe(wysiwyg.element, {childList: true, characterData: true, subtree: true});
 
-    // capture 阶段拦截 hint 选择、Enter 发送、历史翻页；undo/redo 交给 protyle 的 keydown（调 LocalUndo）。
+    // capture 阶段拦截 hint 选择、发送快捷键、历史翻页；undo/redo 交给 protyle 的 keydown（调 LocalUndo）。
     wysiwyg.element.addEventListener("keydown", (event: KeyboardEvent) => {
         if (event.isComposing) {
             return;
@@ -240,12 +239,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             return;
         }
 
-        // 底部输入框使用 Enter 发送，历史消息编辑使用 Ctrl/Cmd+Enter 确认。
-        const enterToSubmit = submitMode === "enter" && event.key === "Enter" &&
-            !event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey;
-        const modEnterToSubmit = submitMode === "mod-enter" && event.key === "Enter" &&
-            (event.ctrlKey || event.metaKey);
-        if (enterToSubmit || modEnterToSubmit) {
+        if (matchHotKey(window.siyuan.config.keymap.general.agentSend.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
             onSend();

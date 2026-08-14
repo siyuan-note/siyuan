@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20260812170000"
+		"updated": "20260814225521"
 	},
 	"Children": [
 		{
@@ -164,7 +164,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-2jaadkf",
-				"updated": "20260804180000"
+				"updated": "20260814225521"
 			},
 			"Children": [
 				{
@@ -385,7 +385,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-9kcdqv4",
-				"updated": "20260804180000"
+				"updated": "20260814225521"
 			},
 			"Children": [
 				{
@@ -399,17 +399,17 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170040-m2zcmhf",
-				"updated": "20260804180000"
+				"updated": "20260814225521"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で送信し、"
+					"Data": " + "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -427,7 +427,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で改行します。エージェントの実行中は停止ボタンで現在のタスクを中断できます。目的、範囲、出力先を明確に指定すると、通常はより安定した結果が得られます。"
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⇧⌘Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で送信します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " はエディターのブロック編集動作に従い、ブロックの作成、改行の挿入、引用ブロックやリストからの移動に使用できます。エージェントの実行中は停止ボタンで現在のタスクを中断できます。目的、範囲、出力先を明確に指定すると、通常はより安定した結果が得られます。"
 				}
 			]
 		},

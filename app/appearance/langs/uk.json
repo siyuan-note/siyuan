@@ -633,7 +633,7 @@
 	"agentQuestionSubmitted": "Надіслано",
 	"agentQuestionPending": "Очікує відповіді",
 	"agentNewSession": "Нова сесія",
-	"agentInputPlaceholder": "Введіть повідомлення, /навичка, Enter для надсилання...",
+	"agentInputPlaceholder": "Введіть повідомлення, /навичка...",
 	"agentSend": "Надіслати",
 	"agentStop": "Зупинити",
 	"editorFontSize": "Розмір шрифту редактора",

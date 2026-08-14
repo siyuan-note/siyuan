@@ -1334,6 +1334,7 @@ declare namespace Config {
         replace: IKey;
         closeTab: IKey;
         agentChat: IKey;
+        agentSend: IKey;
         fileTree: IKey;
         outline: IKey;
         bookmark: IKey;

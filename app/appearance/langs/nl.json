@@ -633,7 +633,7 @@
 	"agentQuestionSubmitted": "Verzonden",
 	"agentQuestionPending": "Wacht op antwoord",
 	"agentNewSession": "Nieuwe sessie",
-	"agentInputPlaceholder": "Typ een bericht, /vaardigheid, Enter om te verzenden...",
+	"agentInputPlaceholder": "Typ een bericht, /vaardigheid...",
 	"agentSend": "Verzenden",
 	"agentStop": "Stoppen",
 	"editorFontSize": "Editorlettergrootte",

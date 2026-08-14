@@ -521,7 +521,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     },
     _genRatingStarsHTML(value: number) {
         const activePercentage = Math.max(0, Math.min(100, value / 5 * 100));
-        const stars = Array.from({length: 5}, () => '<svg><use xlink:href="#iconStar"></use></svg>').join("");
+        const stars = Array.from({length: 5}, () => '<span class="config-bazaar__rating-star">&#9733;</span>').join("");
         return `<span class="config-bazaar__rating-stars" aria-hidden="true">
     ${stars}
     <span class="config-bazaar__rating-stars--active" style="width: ${activePercentage}%">${stars}</span>
@@ -533,7 +533,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         }
         const rating = normalizeBazaarRating(item.rating);
         const summary = bazaar._getRatingSummaryText(rating);
-        const content = `<svg><use xlink:href="#iconStar"></use></svg>
+        const content = `<span class="config-bazaar__rating-star" aria-hidden="true">&#9733;</span>
 <span class="fn__space--small"></span>
 <span>${escapeHtml(summary)}</span>`;
         if (editable && window.siyuan.user) {
@@ -556,7 +556,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 .replace("${count}", count.toLocaleString());
             return `<div class="config-bazaar__rating-row" aria-label="${escapeAttr(`${label} ${percentageText}`)}">
     <span>${star}</span>
-    <svg aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
+    <span class="config-bazaar__rating-star" aria-hidden="true">&#9733;</span>
     <span class="config-bazaar__rating-track" aria-hidden="true"><span style="width: ${percentage}%"></span></span>
     <span>${escapeHtml(percentageText)}</span>
     <span>${count.toLocaleString()}</span>
@@ -1550,7 +1550,7 @@ type="checkbox">
         const buttons = [1, 2, 3, 4, 5].map((rating) => {
             const label = window.siyuan.languages.bazaarRatingStarLabel.replace("${star}", rating.toString());
             return `<button type="button" role="radio" data-rating-value="${rating}" aria-checked="${selectedRating === rating}" aria-label="${escapeAttr(label)}" tabindex="${selectedRating === rating || (!selectedRating && rating === 1) ? "0" : "-1"}">
-    <svg><use xlink:href="#iconStar"></use></svg>
+    <span class="config-bazaar__rating-star" aria-hidden="true">&#9733;</span>
 </button>`;
         }).join("");
         const dialog = new Dialog({

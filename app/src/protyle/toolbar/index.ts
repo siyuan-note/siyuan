@@ -59,6 +59,7 @@ import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardT
 import {FormatPainter} from "./FormatPainter";
 import {IFormatPainterSnapshot} from "./formatPainterCore";
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
+import {closeSubElement} from "./subElementLifecycle";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -1194,6 +1195,13 @@ export class Toolbar {
 
     public showRender(protyle: IProtyle, renderElement: Element, updateElements?: Element[],
                       oldHTML?: string | Map<string, string>) {
+        if (!protyle.wysiwyg.element.contains(renderElement) || !hasClosestBlock(renderElement)) {
+            return;
+        }
+        this.clearSubElement();
+        if (!protyle.wysiwyg.element.contains(renderElement)) {
+            return;
+        }
         const nodeElement = hasClosestBlock(renderElement);
         if (!nodeElement) {
             return;
@@ -1256,7 +1264,6 @@ export class Toolbar {
         } else if (isInlineMemo) {
             title = window.siyuan.languages.memo;
         }
-        this.clearSubElement();
         this.subElement.style.padding = "0";
         this.subElement.style.display = "flex";
         this.subElement.style.flexDirection = "column";
@@ -1645,6 +1652,13 @@ export class Toolbar {
     }
 
     public showCodeLanguage(protyle: IProtyle, languageElements: HTMLElement[]) {
+        if (!protyle.wysiwyg.element.contains(languageElements[0]) || !hasClosestBlock(languageElements[0])) {
+            return;
+        }
+        this.clearSubElement();
+        if (!protyle.wysiwyg.element.contains(languageElements[0])) {
+            return;
+        }
         const nodeElement = hasClosestBlock(languageElements[0]);
         if (!nodeElement) {
             return;
@@ -1652,7 +1666,6 @@ export class Toolbar {
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
         this.range = getEditorRange(nodeElement);
-        this.clearSubElement();
         this.subElement.innerHTML = `<div data-id="codeLanguage" class="fn__flex-column" style="max-height:50vh">
     <input placeholder="${window.siyuan.languages.searchPlaceholder}" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"></div>
@@ -1786,9 +1799,15 @@ export class Toolbar {
     }
 
     public showMultiSelectMode(protyle: IProtyle, blockElement: HTMLElement) {
+        if (!protyle.wysiwyg.element.contains(blockElement)) {
+            return;
+        }
+        this.clearSubElement();
+        if (!protyle.wysiwyg.element.contains(blockElement)) {
+            return;
+        }
         blockElement.classList.add("protyle-wysiwyg--select");
         window.siyuan.menus.menu.remove();
-        this.clearSubElement();
         this.subElement.style.width = window.innerWidth - 16 + "px";
         this.subElement.style.padding = "0";
         this.subElement.innerHTML = `<div class="block__icons">
@@ -1829,10 +1848,16 @@ export class Toolbar {
     }
 
     public showTpl(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {
+        if (!protyle.wysiwyg.element.contains(nodeElement)) {
+            return;
+        }
+        this.clearSubElement();
+        if (!protyle.wysiwyg.element.contains(nodeElement)) {
+            return;
+        }
         this.range = range;
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
-        this.clearSubElement();
         this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
 <div class="fn__flex-column" style="${isMobile() ? "width: 100%" : "width: 256px"}">
     <div class="fn__flex" style="margin: 0 8px 4px 8px">
@@ -2011,10 +2036,16 @@ export class Toolbar {
     }
 
     public showWidget(protyle: IProtyle, nodeElement: HTMLElement, range: Range) {
+        if (!protyle.wysiwyg.element.contains(nodeElement)) {
+            return;
+        }
+        this.clearSubElement();
+        if (!protyle.wysiwyg.element.contains(nodeElement)) {
+            return;
+        }
         this.range = range;
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
-        this.clearSubElement();
         this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh">
     <input style="margin: 0 8px 4px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height:64px" src="/stage/loading-pure.svg"></div>
@@ -2088,9 +2119,15 @@ export class Toolbar {
     }
 
     public showContent(protyle: IProtyle, range: Range, nodeElement: Element, pluginMenus: IMenu[] = []) {
+        if (!protyle.wysiwyg.element.contains(nodeElement)) {
+            return;
+        }
+        this.clearSubElement();
+        if (!protyle.wysiwyg.element.contains(nodeElement)) {
+            return;
+        }
         this.range = range;
         hideElements(["hint"], protyle);
-        this.clearSubElement();
         this.subElement.style.width = "auto";
         this.subElement.style.padding = "0 8px";
         let html = "";
@@ -2330,8 +2367,7 @@ export class Toolbar {
     }
 
     private clearSubElement() {
+        closeSubElement(this);
         this.subElement.removeAttribute("style");
-        this.subElementCloseCB = null;
-        this.subElementResizeCB = null;
     }
 }

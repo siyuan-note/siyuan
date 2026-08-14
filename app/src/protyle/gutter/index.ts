@@ -102,6 +102,7 @@ import {
 } from "../wysiwyg/list";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
 import {getBacklinkGutterContentTop, getGutterMarginHeight} from "./layout";
+import {closeSubElement} from "../toolbar/subElementLifecycle";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -1372,6 +1373,7 @@ export class Gutter {
                     this.showMobileAppearance(protyle);
                     /// #else
                     protyle.toolbar.element.classList.add("fn__none");
+                    closeSubElement(protyle.toolbar);
                     protyle.toolbar.subElement.innerHTML = "";
                     protyle.toolbar.subElement.style.width = "";
                     protyle.toolbar.subElement.style.padding = "";
@@ -1380,7 +1382,6 @@ export class Gutter {
                     protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
                     protyle.toolbar.subElement.classList.remove("fn__none");
                     limitRecentFontStyleRows(fontMenuElement);
-                    protyle.toolbar.subElementCloseCB = undefined;
                     const position = selectsElement[0].getBoundingClientRect();
                     setPosition(protyle.toolbar.subElement, position.left, position.top);
                     /// #endif
@@ -2672,6 +2673,7 @@ export class Gutter {
                     this.showMobileAppearance(protyle);
                     /// #else
                     protyle.toolbar.element.classList.add("fn__none");
+                    closeSubElement(protyle.toolbar);
                     protyle.toolbar.subElement.innerHTML = "";
                     protyle.toolbar.subElement.style.width = "";
                     protyle.toolbar.subElement.style.padding = "";
@@ -2680,7 +2682,6 @@ export class Gutter {
                     protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
                     protyle.toolbar.subElement.classList.remove("fn__none");
                     limitRecentFontStyleRows(fontMenuElement);
-                    protyle.toolbar.subElementCloseCB = undefined;
                     const position = nodeElement.getBoundingClientRect();
                     setPosition(protyle.toolbar.subElement, position.left, position.top);
                     /// #endif

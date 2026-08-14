@@ -3,11 +3,28 @@ import * as assert from "node:assert/strict";
 import {
     clampBlockDragSelectY,
     getBlockDragSelectBlock,
+    getBlockDragSelectContentBounds,
     getBlockDragSelectProbeX,
     isBlockDragSelectBottomReached,
     isBlockDragSelectTopReached,
     resolveBlockDragSelectStart
 } from "./blockDragSelect";
+
+describe("getBlockDragSelectContentBounds", () => {
+    it("preserves zero padding for compact editors", () => {
+        assert.deepEqual(getBlockDragSelectContentBounds(10, 210, "0px", "0px"), {
+            left: 11,
+            right: 208,
+        });
+    });
+
+    it("uses the default editor padding when the computed value is unavailable", () => {
+        assert.deepEqual(getBlockDragSelectContentBounds(10, 210, "", ""), {
+            left: 35,
+            right: 192,
+        });
+    });
+});
 
 class TestElement {
     parentElement: TestElement | null = null;

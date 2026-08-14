@@ -184,6 +184,7 @@ import {getAVColumnResizeWidth} from "../render/av/columnWidth";
 import {
     clampBlockDragSelectY,
     getBlockDragSelectBlock,
+    getBlockDragSelectContentBounds,
     getBlockDragSelectProbeX,
     isBlockDragSelectBottomReached,
     isBlockDragSelectTopReached,
@@ -1056,8 +1057,10 @@ export class WYSIWYG {
             const avCellElement = hasClosestByClassName(target, "av__cell");
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
-            const mostLeft = wysiwygRect.left + (parseInt(wysiwygStyle.paddingLeft) || 24) + 1;
-            const mostRight = wysiwygRect.right - (parseInt(wysiwygStyle.paddingRight) || 16) - 2;
+            const contentBounds = getBlockDragSelectContentBounds(wysiwygRect.left, wysiwygRect.right,
+                wysiwygStyle.paddingLeft, wysiwygStyle.paddingRight);
+            const mostLeft = contentBounds.left;
+            const mostRight = contentBounds.right;
             const startsFromPadding = event.clientX < mostLeft - 1 || event.clientX > mostRight + 2 ||
                 event.clientY < wysiwygRect.top + (parseFloat(wysiwygStyle.paddingTop) || 0) ||
                 event.clientY > wysiwygRect.bottom - (parseFloat(wysiwygStyle.paddingBottom) || 0);

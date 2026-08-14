@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20260812170000"
+		"updated": "20260814235559"
 	},
 	"Children": [
 		{
@@ -168,7 +168,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-76js6ua",
-				"updated": "20260804180000"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -389,7 +389,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-6hkjcgx",
-				"updated": "20260804230000"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -403,7 +403,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170040-qf65tjk",
-				"updated": "20260804230000"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -413,16 +413,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "回车"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 发送，使用 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift"
+					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
@@ -435,7 +426,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 换行。智能体运行时可以单击停止按钮中止当前任务。描述目标、范围和期望输出位置越明确，执行结果通常越稳定。"
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 发送。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 遵循编辑器的块编辑行为，可用于创建块、换行或退出引述和列表。智能体运行时可以单击停止按钮中止当前任务。描述目标、范围和期望输出位置越明确，执行结果通常越稳定。"
 				}
 			]
 		},

@@ -474,6 +474,7 @@ export abstract class Constants {
             replace: {default: "⌘R", custom: "⌘R"},
             closeTab: {default: "⌘W", custom: "⌘W"},
             agentChat: {default: "", custom: ""},
+            agentSend: {default: "⌘↩", custom: "⌘↩"},
             fileTree: {default: "⌃1", custom: "⌃1"},
             outline: {default: "⌃2", custom: "⌃2"},
             bookmark: {default: "⌃3", custom: "⌃3"},

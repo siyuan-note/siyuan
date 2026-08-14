@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "คลิกขวา <span class='ft__on-surface'>เปิดเมนูของรายการนี้</span><br>Shift+คลิก <span class='ft__on-surface'>เปิดแอตทริบิวต์</span>",
 	"flashcardDocumentPath": "เส้นทางเอกสาร",
 	"flashcardDynamicFilter": "ตัวกรองแบบไดนามิก",
 	"flashcardDynamicFilterTip": "รวมบัตรที่ตรงตามเงื่อนไขต่อไปนี้โดยอัตโนมัติ",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "ส่งแล้ว",
 	"agentQuestionPending": "รอคำตอบ",
 	"agentNewSession": "เซสชันใหม่",
-	"agentInputPlaceholder": "พิมพ์ข้อความ, /ทักษะ, Enter เพื่อส่ง...",
+	"agentInputPlaceholder": "พิมพ์ข้อความ, /ทักษะ...",
 	"agentSend": "ส่ง",
 	"agentStop": "หยุด",
 	"editorFontSize": "ขนาดตัวอักษรตัวแก้ไข",

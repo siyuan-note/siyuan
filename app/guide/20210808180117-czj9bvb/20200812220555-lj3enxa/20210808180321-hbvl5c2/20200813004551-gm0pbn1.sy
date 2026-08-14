@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260813143407"
+		"updated": "20260814235559"
 	},
 	"Children": [
 		{
@@ -39,7 +39,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240112150737-e41yt1y",
-				"updated": "20260811122156"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20260811122156"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -575,6 +575,63 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘W"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "发送智能体消息"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "回车"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘回车"
 								},
 								{
 									"Type": "NodeText",

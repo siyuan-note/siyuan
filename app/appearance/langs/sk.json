@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Kliknutie pravým tlačidlom <span class='ft__on-surface'>Otvoriť ponuku tejto položky zoznamu</span><br>Shift+kliknutie <span class='ft__on-surface'>Otvoriť jej atribúty</span>",
 	"flashcardDocumentPath": "Cesta dokumentu",
 	"flashcardDynamicFilter": "Dynamický filter",
 	"flashcardDynamicFilterTip": "Automaticky zahrnúť karty, ktoré spĺňajú nasledujúce podmienky",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Odoslané",
 	"agentQuestionPending": "Čaká sa na odpoveď",
 	"agentNewSession": "Nová relácia",
-	"agentInputPlaceholder": "Napíšte správu, /zručnosť, Enter na odoslanie...",
+	"agentInputPlaceholder": "Napíšte správu, /zručnosť...",
 	"agentSend": "Odoslať",
 	"agentStop": "Zastaviť",
 	"editorFontSize": "Veľkosť písma editora",

@@ -1,5 +1,15 @@
 type TDragSelectRect = Pick<DOMRect, "left" | "right" | "top" | "bottom">;
 
+export const getBlockDragSelectContentBounds = (editorLeft: number, editorRight: number,
+                                                 paddingLeft: string, paddingRight: string) => {
+    const parsedPaddingLeft = parseFloat(paddingLeft);
+    const parsedPaddingRight = parseFloat(paddingRight);
+    return {
+        left: editorLeft + (Number.isNaN(parsedPaddingLeft) ? 24 : parsedPaddingLeft) + 1,
+        right: editorRight - (Number.isNaN(parsedPaddingRight) ? 16 : parsedPaddingRight) - 2,
+    };
+};
+
 type TResolveDragSelectBlockOptions = {
     x: number,
     top: number,

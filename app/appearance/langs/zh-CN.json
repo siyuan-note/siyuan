@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "右键 <span class='ft__on-surface'>打开该列表项菜单</span><br>Shift+点击 <span class='ft__on-surface'>打开属性</span>",
 	"flashcardDocumentPath": "文档路径",
 	"flashcardDynamicFilter": "动态筛选",
 	"flashcardDynamicFilterTip": "自动收录符合以下条件的卡片",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "已提交",
 	"agentQuestionPending": "待回答",
 	"agentNewSession": "新会话",
-	"agentInputPlaceholder": "输入消息，/技能，回车发送...",
+	"agentInputPlaceholder": "输入消息，/技能...",
 	"agentSend": "发送",
 	"agentStop": "停止",
 	"editorFontSize": "编辑器字号",

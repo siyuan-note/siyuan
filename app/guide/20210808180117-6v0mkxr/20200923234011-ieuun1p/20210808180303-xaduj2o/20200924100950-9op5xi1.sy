@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260813143406"
+		"updated": "20260814235559"
 	},
 	"Children": [
 		{
@@ -39,7 +39,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133532-44ubczo",
-				"updated": "20260811122156"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -63,7 +63,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154101-qrojg1b",
-				"updated": "20260811122156"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -583,6 +583,63 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌘W"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Send agent message"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘Enter"
 								},
 								{
 									"Type": "NodeText",

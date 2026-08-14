@@ -39,6 +39,19 @@ export interface ICrossBlockSiblingListItemMergeContext {
     trailingEndListItemElements: HTMLElement[];
 }
 
+export const getCrossBlockEndAction = (startType: string, endType: string, endFullySelected: boolean,
+                                       endFolded: boolean): "merge" | "delete" | undefined => {
+    if (endFolded) {
+        return;
+    }
+    if (["NodeParagraph", "NodeHeading"].includes(startType) && startType === endType) {
+        return "merge";
+    }
+    if (["NodeParagraph", "NodeHeading"].includes(endType) && endFullySelected) {
+        return "delete";
+    }
+};
+
 export const getCrossBlockSiblingListItemMergeContext = (editorElement: HTMLElement,
                                                           startElement: HTMLElement,
                                                           endElement: HTMLElement):

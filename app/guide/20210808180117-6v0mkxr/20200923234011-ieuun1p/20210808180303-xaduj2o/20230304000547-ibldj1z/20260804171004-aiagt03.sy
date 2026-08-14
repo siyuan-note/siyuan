@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20260812170000"
+		"updated": "20260814235559"
 	},
 	"Children": [
 		{
@@ -168,7 +168,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-iffmsq0",
-				"updated": "20260804180000"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -389,7 +389,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-x813t3f",
-				"updated": "20260804180000"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -403,7 +403,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170040-oce2o3k",
-				"updated": "20260804180000"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -413,16 +413,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to send and "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift"
+					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
@@ -435,7 +426,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " for a new line. While the agent is running, select the stop button to interrupt the current task. Results are generally more reliable when the goal, scope, and destination are explicit."
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to send. "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " follows the editor's block-editing behavior and can create blocks, insert line breaks, or exit blockquotes and lists. While the agent is running, select the stop button to interrupt the current task. Results are generally more reliable when the goal, scope, and destination are explicit."
 				}
 			]
 		},

@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Clique com o botão direito <span class='ft__on-surface'>Abrir o menu deste item da lista</span><br>Shift+clique <span class='ft__on-surface'>Abrir seus atributos</span>",
 	"flashcardDocumentPath": "Caminho do documento",
 	"flashcardDynamicFilter": "Filtro dinâmico",
 	"flashcardDynamicFilterTip": "Incluir automaticamente os cartões que correspondem às condições a seguir",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Enviado",
 	"agentQuestionPending": "Aguardando resposta",
 	"agentNewSession": "Nova sessão",
-	"agentInputPlaceholder": "Digite uma mensagem, /habilidade, Enter para enviar...",
+	"agentInputPlaceholder": "Digite uma mensagem, /habilidade...",
 	"agentSend": "Enviar",
 	"agentStop": "Parar",
 	"editorFontSize": "Tamanho da Fonte do Editor",

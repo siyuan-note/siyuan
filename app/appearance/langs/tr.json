@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Sağ tıklayın <span class='ft__on-surface'>Bu liste öğesinin menüsünü açın</span><br>Shift+tıklayın <span class='ft__on-surface'>Özniteliklerini açın</span>",
 	"flashcardDocumentPath": "Belge yolu",
 	"flashcardDynamicFilter": "Dinamik filtre",
 	"flashcardDynamicFilterTip": "Aşağıdaki koşullarla eşleşen kartları otomatik olarak dahil et",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Gönderildi",
 	"agentQuestionPending": "Cevap bekleniyor",
 	"agentNewSession": "Yeni oturum",
-	"agentInputPlaceholder": "Mesaj yazın, /beceri, Enter ile gönderin...",
+	"agentInputPlaceholder": "Mesaj yazın, /beceri...",
 	"agentSend": "Gönder",
 	"agentStop": "Durdur",
 	"editorFontSize": "Editör yazı boyutu",

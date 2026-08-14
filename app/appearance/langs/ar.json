@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "انقر بزر الماوس الأيمن <span class='ft__on-surface'>فتح قائمة عنصر القائمة هذا</span><br>انقر مع الضغط على Shift <span class='ft__on-surface'>فتح سماته</span>",
 	"flashcardDocumentPath": "مسار المستند",
 	"flashcardDynamicFilter": "التصفية الديناميكية",
 	"flashcardDynamicFilterTip": "تضمين البطاقات المطابقة للشروط التالية تلقائيًا",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "تم الإرسال",
 	"agentQuestionPending": "بانتظار الرد",
 	"agentNewSession": "جلسة جديدة",
-	"agentInputPlaceholder": "اكتب رسالة، /مهارة، Enter للإرسال...",
+	"agentInputPlaceholder": "اكتب رسالة، /مهارة...",
 	"agentSend": "إرسال",
 	"agentStop": "إيقاف",
 	"editorFontSize": "حجم خط المحرر",

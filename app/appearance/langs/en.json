@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Right-click <span class='ft__on-surface'>Open this list item's menu</span><br>Shift+click <span class='ft__on-surface'>Open its attributes</span>",
 	"flashcardDocumentPath": "Document path",
 	"flashcardDynamicFilter": "Dynamic filter",
 	"flashcardDynamicFilterTip": "Automatically include cards that match the following conditions",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Submitted",
 	"agentQuestionPending": "Awaiting answer",
 	"agentNewSession": "New Session",
-	"agentInputPlaceholder": "Type a message, /skill, Enter to send...",
+	"agentInputPlaceholder": "Type a message, /skill...",
 	"agentSend": "Send",
 	"agentStop": "Stop",
 	"editorFontSize": "Editor Font Size",

@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Kliknij prawym przyciskiem myszy <span class='ft__on-surface'>Otwórz menu tego elementu listy</span><br>Shift+kliknięcie <span class='ft__on-surface'>Otwórz jego atrybuty</span>",
 	"flashcardDocumentPath": "Ścieżka dokumentu",
 	"flashcardDynamicFilter": "Filtr dynamiczny",
 	"flashcardDynamicFilterTip": "Automatycznie uwzględniaj karty spełniające poniższe warunki",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Wysłano",
 	"agentQuestionPending": "Oczekiwanie na odpowiedź",
 	"agentNewSession": "Nowa sesja",
-	"agentInputPlaceholder": "Wpisz wiadomość, /umiejętność, Enter aby wysłać...",
+	"agentInputPlaceholder": "Wpisz wiadomość, /umiejętność...",
 	"agentSend": "Wyślij",
 	"agentStop": "Zatrzymaj",
 	"editorFontSize": "Rozmiar czcionki edytora",

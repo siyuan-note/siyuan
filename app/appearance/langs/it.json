@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Clic destro <span class='ft__on-surface'>Apri il menu di questo elemento dell'elenco</span><br>Shift+clic <span class='ft__on-surface'>Apri i suoi attributi</span>",
 	"flashcardDocumentPath": "Percorso documento",
 	"flashcardDynamicFilter": "Filtro dinamico",
 	"flashcardDynamicFilterTip": "Includi automaticamente le schede che corrispondono alle condizioni seguenti",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Inviato",
 	"agentQuestionPending": "In attesa di risposta",
 	"agentNewSession": "Nuova sessione",
-	"agentInputPlaceholder": "Digita un messaggio, /abilità, Invio per inviare...",
+	"agentInputPlaceholder": "Digita un messaggio, /abilità...",
 	"agentSend": "Invia",
 	"agentStop": "Ferma",
 	"editorFontSize": "Dimensione del font dell'editor",

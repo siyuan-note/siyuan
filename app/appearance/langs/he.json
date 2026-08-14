@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "לחיצה ימנית <span class='ft__on-surface'>פתיחת התפריט של פריט רשימה זה</span><br>Shift+לחיצה <span class='ft__on-surface'>פתיחת המאפיינים שלו</span>",
 	"flashcardDocumentPath": "נתיב המסמך",
 	"flashcardDynamicFilter": "סינון דינמי",
 	"flashcardDynamicFilterTip": "הכללת כרטיסים התואמים לתנאים הבאים באופן אוטומטי",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "נשלח",
 	"agentQuestionPending": "ממתין לתשובה",
 	"agentNewSession": "הפעלה חדשה",
-	"agentInputPlaceholder": "הקלד הודעה, /מיומנות, Enter לשליחה...",
+	"agentInputPlaceholder": "הקלד הודעה, /מיומנות...",
 	"agentSend": "שלח",
 	"agentStop": "עצור",
 	"editorFontSize": "גודל גופן העורך",

@@ -11,6 +11,7 @@ import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {desktopModeCookie} from "../../util/cookie";
 import {isBrowser, isMobile, objEquals} from "../../util/functions";
 import {exitSiYuan} from "../../dialog/processSystem";
+import {isInMobileApp} from "../../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openByMobile} from "../../editor/openLink";
 import {openSnippets} from "../util/snippets";
@@ -530,6 +531,13 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const desktopModeControl = controlBoolean("desktopMode", {
         readConfig: () => desktopModeCookie.read(),
     });
+    const reloadDesktopMode = () => {
+        if (isInMobileApp()) {
+            void exitSiYuan();
+            return;
+        }
+        window.location.replace("/");
+    };
     // Electron 桌面端固定访问 /stage/build/app/，其他客户端可切换桌面和移动界面
     // https://github.com/siyuan-note/siyuan/issues/18559
     if (isBrowser()) {
@@ -555,22 +563,21 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
                     left: {kind: "desc", text: window.siyuan.languages.mobileModeTip},
                     right: desktopModeControl,
                 },
-                {
+                ...(isInMobileApp() ? [{
                     left: {kind: "desc", text: window.siyuan.languages.desktopModeRestartTip},
-                },
+                } as const] : []),
             ]),
             controls: [{
                 control: desktopModeControl,
                 save: (value) => {
                     desktopModeCookie.set(value as boolean);
-                    // 切换桌面/移动模式需要重启应用才能加载对应 bundle，走正常退出流程后由用户手动重启
-                    void exitSiYuan();
+                    reloadDesktopMode();
                 },
             }],
             afterMount: (root) => {
                 root.querySelector("#resetDesktopMode")?.addEventListener("click", () => {
                     desktopModeCookie.remove();
-                    void exitSiYuan();
+                    reloadDesktopMode();
                 });
             },
         });

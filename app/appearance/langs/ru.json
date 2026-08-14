@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Щелчок правой кнопкой мыши <span class='ft__on-surface'>Открыть меню этого элемента списка</span><br>Shift+щелчок <span class='ft__on-surface'>Открыть его атрибуты</span>",
 	"flashcardDocumentPath": "Путь документа",
 	"flashcardDynamicFilter": "Динамический фильтр",
 	"flashcardDynamicFilterTip": "Автоматически включать карточки, соответствующие следующим условиям",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Отправлено",
 	"agentQuestionPending": "Ожидает ответа",
 	"agentNewSession": "Новая сессия",
-	"agentInputPlaceholder": "Введите сообщение, /навык, Enter для отправки...",
+	"agentInputPlaceholder": "Введите сообщение, /навык...",
 	"agentSend": "Отправить",
 	"agentStop": "Остановить",
 	"editorFontSize": "Размер шрифта редактора",

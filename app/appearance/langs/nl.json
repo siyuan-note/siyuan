@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Klik met de rechtermuisknop <span class='ft__on-surface'>Menu van dit lijstitem openen</span><br>Shift+klik <span class='ft__on-surface'>Kenmerken openen</span>",
 	"flashcardDocumentPath": "Documentpad",
 	"flashcardDynamicFilter": "Dynamisch filter",
 	"flashcardDynamicFilterTip": "Kaarten die aan de volgende voorwaarden voldoen automatisch opnemen",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Verzonden",
 	"agentQuestionPending": "Wacht op antwoord",
 	"agentNewSession": "Nieuwe sessie",
-	"agentInputPlaceholder": "Typ een bericht, /vaardigheid, Enter om te verzenden...",
+	"agentInputPlaceholder": "Typ een bericht, /vaardigheid...",
 	"agentSend": "Verzenden",
 	"agentStop": "Stoppen",
 	"editorFontSize": "Editorlettergrootte",

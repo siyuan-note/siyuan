@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Mit der rechten Maustaste klicken <span class='ft__on-surface'>Menü dieses Listeneintrags öffnen</span><br>Shift+Klick <span class='ft__on-surface'>Attribute öffnen</span>",
 	"flashcardDocumentPath": "Dokumentpfad",
 	"flashcardDynamicFilter": "Dynamischer Filter",
 	"flashcardDynamicFilterTip": "Karten, die den folgenden Bedingungen entsprechen, automatisch aufnehmen",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Gesendet",
 	"agentQuestionPending": "Wartet auf Antwort",
 	"agentNewSession": "Neue Sitzung",
-	"agentInputPlaceholder": "Nachricht eingeben, /Skill, Enter zum Senden...",
+	"agentInputPlaceholder": "Nachricht eingeben, /Skill...",
 	"agentSend": "Senden",
 	"agentStop": "Stopp",
 	"editorFontSize": "Editor-Schriftgröße",

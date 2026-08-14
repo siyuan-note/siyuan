@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "마우스 오른쪽 버튼 클릭 <span class='ft__on-surface'>이 목록 항목 메뉴 열기</span><br>Shift+클릭 <span class='ft__on-surface'>속성 열기</span>",
 	"flashcardDocumentPath": "문서 경로",
 	"flashcardDynamicFilter": "동적 필터",
 	"flashcardDynamicFilterTip": "다음 조건과 일치하는 카드를 자동으로 포함",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "제출됨",
 	"agentQuestionPending": "답변 대기 중",
 	"agentNewSession": "새 세션",
-	"agentInputPlaceholder": "메시지를 입력하고, /스킬, Enter로 전송...",
+	"agentInputPlaceholder": "메시지를 입력하고, /스킬...",
 	"agentSend": "보내기",
 	"agentStop": "중지",
 	"editorFontSize": "편집기 글꼴 크기",

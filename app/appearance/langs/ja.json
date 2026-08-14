@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "右クリック <span class='ft__on-surface'>このリスト項目のメニューを開く</span><br>Shift+クリック <span class='ft__on-surface'>属性を開く</span>",
 	"flashcardDocumentPath": "文書パス",
 	"flashcardDynamicFilter": "動的フィルター",
 	"flashcardDynamicFilterTip": "次の条件に一致するカードを自動的に収録",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "送信済み",
 	"agentQuestionPending": "回答待ち",
 	"agentNewSession": "新しいセッション",
-	"agentInputPlaceholder": "メッセージを入力、/スキル、Enterで送信...",
+	"agentInputPlaceholder": "メッセージを入力、/スキル...",
 	"agentSend": "送信",
 	"agentStop": "停止",
 	"editorFontSize": "エディターのフォントサイズ",

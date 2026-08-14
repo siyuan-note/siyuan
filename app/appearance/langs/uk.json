@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Клацання правою кнопкою миші <span class='ft__on-surface'>Відкрити меню цього елемента списку</span><br>Shift+клацання <span class='ft__on-surface'>Відкрити його атрибути</span>",
 	"flashcardDocumentPath": "Шлях документа",
 	"flashcardDynamicFilter": "Динамічний фільтр",
 	"flashcardDynamicFilterTip": "Автоматично включати картки, що відповідають наведеним нижче умовам",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Надіслано",
 	"agentQuestionPending": "Очікує відповіді",
 	"agentNewSession": "Нова сесія",
-	"agentInputPlaceholder": "Введіть повідомлення, /навичка, Enter для надсилання...",
+	"agentInputPlaceholder": "Введіть повідомлення, /навичка...",
 	"agentSend": "Надіслати",
 	"agentStop": "Зупинити",
 	"editorFontSize": "Розмір шрифту редактора",

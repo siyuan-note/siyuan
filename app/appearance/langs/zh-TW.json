@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "右鍵 <span class='ft__on-surface'>開啟此清單項目的功能表</span><br>Shift+點擊 <span class='ft__on-surface'>開啟屬性</span>",
 	"flashcardDocumentPath": "文件路徑",
 	"flashcardDynamicFilter": "動態篩選",
 	"flashcardDynamicFilterTip": "自動收錄符合以下條件的卡片",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "已提交",
 	"agentQuestionPending": "待回答",
 	"agentNewSession": "新會話",
-	"agentInputPlaceholder": "輸入訊息，/技能，Enter 送出...",
+	"agentInputPlaceholder": "輸入訊息，/技能...",
 	"agentSend": "送出",
 	"agentStop": "停止",
 	"editorFontSize": "編輯器字型大小",

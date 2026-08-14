@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "Klik kanan <span class='ft__on-surface'>Buka menu item daftar ini</span><br>Shift+klik <span class='ft__on-surface'>Buka atributnya</span>",
 	"flashcardDocumentPath": "Jalur dokumen",
 	"flashcardDynamicFilter": "Filter dinamis",
 	"flashcardDynamicFilterTip": "Sertakan kartu yang cocok dengan kondisi berikut secara otomatis",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "Terkirim",
 	"agentQuestionPending": "Menunggu jawaban",
 	"agentNewSession": "Sesi baru",
-	"agentInputPlaceholder": "Ketik pesan, /keterampilan, Enter untuk mengirim...",
+	"agentInputPlaceholder": "Ketik pesan, /keterampilan...",
 	"agentSend": "Kirim",
 	"agentStop": "Berhenti",
 	"editorFontSize": "Ukuran Font Editor",

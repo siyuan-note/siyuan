@@ -1,4 +1,5 @@
 {
+	"listItemActionTip": "राइट-क्लिक <span class='ft__on-surface'>इस सूची आइटम का मेनू खोलें</span><br>Shift+क्लिक <span class='ft__on-surface'>इसकी विशेषताएँ खोलें</span>",
 	"flashcardDocumentPath": "दस्तावेज़ पथ",
 	"flashcardDynamicFilter": "डायनेमिक फ़िल्टर",
 	"flashcardDynamicFilterTip": "निम्न शर्तों से मेल खाने वाले कार्ड अपने आप शामिल करें",
@@ -708,7 +709,7 @@
 	"agentQuestionSubmitted": "जमा हुआ",
 	"agentQuestionPending": "उत्तर की प्रतीक्षा",
 	"agentNewSession": "नया सत्र",
-	"agentInputPlaceholder": "संदेश लिखें, /कौशल, Enter भेजने के लिए...",
+	"agentInputPlaceholder": "संदेश लिखें, /कौशल...",
 	"agentSend": "भेजें",
 	"agentStop": "रोकें",
 	"editorFontSize": "संपादक फ़ॉन्ट आकार",

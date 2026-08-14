@@ -1,5 +1,5 @@
 import {getContenteditableElement} from "./getBlock";
-import {focusByOffset, getSelectionOffset, setLastNodeRange} from "../util/selection";
+import {focusByOffset, getSelectionOffset, getUndoFocusContext, setLastNodeRange} from "../util/selection";
 import {updateTransaction} from "./transaction";
 import {Constants} from "../../constants";
 import {
@@ -21,6 +21,7 @@ export const tabCodeBlock = (protyle: IProtyle, nodeElement: HTMLElement,
     if (!editableElement) {
         return;
     }
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range, true);
     const tabSpace = getCodeBlockTabSpace(nodeElement);
     const oldHTML = nodeElement.outerHTML;
     if (range.collapsed) {
@@ -47,7 +48,7 @@ export const tabCodeBlock = (protyle: IProtyle, nodeElement: HTMLElement,
             range.setStartAfter(textNode);
             range.collapse(true);
         }
-        updateTransaction(protyle, nodeElement, oldHTML);
+        updateTransaction(protyle, nodeElement, oldHTML, undoFocusContext);
         return;
     }
 
@@ -93,6 +94,6 @@ export const tabCodeBlock = (protyle: IProtyle, nodeElement: HTMLElement,
     const brElement = wbrElement.parentElement.querySelector("br");
     setLastNodeRange(brElement.previousSibling as Element, range, false);
     brElement.remove();
-    updateTransaction(protyle, nodeElement, oldHTML);
+    updateTransaction(protyle, nodeElement, oldHTML, undoFocusContext);
     wbrElement.remove();
 };

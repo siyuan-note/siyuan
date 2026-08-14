@@ -190,7 +190,7 @@
 	"tabStartup": "页签",
 	"configGroupMarkdownBlockSyntax": "Markdown 块级语法",
 	"codeBlockMiddleDot": "中点代码块快捷输入",
-	"codeBlockMiddleDotTip": "启用后，输入 <code class='fn__code'>···</code> 并按回车或继续输入中点时将转换为代码块",
+	"codeBlockMiddleDotTip": "启用后输入 <code class='fn__code'>···</code> 并按回车或继续输入中点时将转换为代码块",
 	"foldChildHeadings": "折叠/展开直接子标题",
 	"foldSiblingHeadings": "折叠/展开同级标题",
 	"copyViewMirror": "复制视图镜像",

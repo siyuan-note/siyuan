@@ -322,6 +322,10 @@ func PushReloadFiletree() {
 	BroadcastByType("filetree", "reloadFiletree", 0, "", nil)
 }
 
+func PushBoxDocFeatureChanged() {
+	BroadcastByType("filetree", "boxDocFeatureChanged", 0, "", nil)
+}
+
 func PushReloadTag() {
 	BroadcastByType("main", "reloadTag", 0, "", nil)
 }

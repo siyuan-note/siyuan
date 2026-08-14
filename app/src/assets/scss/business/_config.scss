@@ -466,31 +466,6 @@
       }
     }
 
-    &__rating-card {
-      align-items: center;
-      background: transparent;
-      border: 0;
-      color: var(--b3-theme-on-surface);
-      display: inline-flex;
-      font-family: inherit;
-      font-size: inherit;
-      gap: 4px;
-      line-height: 16px;
-      margin: 0;
-      padding: 4px;
-
-      &[data-type="rate-package"] {
-        cursor: pointer;
-      }
-
-      > .config-bazaar__rating-star {
-        color: var(--b3-theme-on-surface-light);
-        font-size: 14px;
-        height: 14px;
-        width: 14px;
-      }
-    }
-
     &__rating-star {
       --b3-icon-star-fill: currentColor;
       display: block;

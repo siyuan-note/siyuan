@@ -543,15 +543,16 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             minimumFractionDigits: 1,
             maximumFractionDigits: 1,
         });
-        return `<span data-rating-card-slot data-position="north" class="ariaLabel config-bazaar__rating-card block__icon block__icon--show block__icon--text${hidden ? " fn__none" : ""}" aria-label="${escapeAttr(summary)}">
-    <svg class="config-bazaar__rating-star config-bazaar__rating-star--outline" aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
+        return `<span data-rating-card-slot data-position="north" class="ariaLabel block__icon block__icon--show block__icon--text${hidden ? " fn__none" : ""}" aria-label="${escapeAttr(summary)}">
+    <svg aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
+    <span class="fn__space--small"></span>
     <span>${escapeHtml(average || "")}</span>
 </span>`;
     },
-    _genRatePackageButtonHTML(loaded: boolean) {
-        return `<button type="button" data-rating-card-slot data-position="north" data-type="rate-package" class="ariaLabel config-bazaar__rating-card block__icon block__icon--show${loaded ? "" : " fn__none"}" aria-label="${escapeAttr(window.siyuan.languages.bazaarRatePackage)}">
-    <svg class="config-bazaar__rating-star config-bazaar__rating-star--outline" aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
-</button>`;
+    _genRatePackageActionHTML(loaded: boolean) {
+        return `<span data-rating-card-slot data-position="north" data-type="rate-package" class="ariaLabel block__icon block__icon--show${loaded ? "" : " fn__none"}" aria-label="${escapeAttr(window.siyuan.languages.bazaarRatePackage)}">
+    <svg aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
+</span>`;
     },
     _genRatingDistributionHTML(rating?: IBazaarRating) {
         const normalized = normalizeBazaarRating(rating);
@@ -711,7 +712,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genUpdateButtonHTML(available, bazaarType)}
-        ${bazaar._genRatePackageButtonHTML(ratingLoaded)}
+        ${bazaar._genRatePackageActionHTML(ratingLoaded)}
     </div>
 </div>`;
     },
@@ -896,7 +897,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         ${bazaar._genUpdateButtonHTML(available, bazaarType, true)}
-        ${bazaar._genRatePackageButtonHTML(bazaar._data.downloadedRatingKeys.has(bazaar._getRatingKey(bazaarType, bazaarItem.name)))}
+        ${bazaar._genRatePackageActionHTML(bazaar._data.downloadedRatingKeys.has(bazaar._getRatingKey(bazaarType, bazaarItem.name)))}
         ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed", bazaarType)}
         ${bazaar._genFundingHTML(bazaarItem.preferredFunding, false)}
         ${hasSetting ? `<span data-position="north" class="ariaLabel block__icon block__icon--show${window.siyuan.config.bazaar.petalDisabled ? " fn__none" : ""}" data-type="setting" aria-label="${window.siyuan.languages.config}">

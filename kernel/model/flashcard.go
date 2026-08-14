@@ -42,8 +42,16 @@ import (
 
 // ValidateFlashcardBlockIDs 只允许普通笔记本中可确认存在的块进入全局闪卡存储。
 func ValidateFlashcardBlockIDs(blockIDs []string) error {
+	return validateFlashcardBlockIDs(blockIDs, treenode.GetBlockTree, IsEncryptedBox)
+}
+
+func validateFlashcardBlockIDs(blockIDs []string, getBlockTree func(string) *treenode.BlockTree, isEncryptedBox func(string) bool) error {
 	for _, blockID := range blockIDs {
-		if !isSupportedFlashcardBlock(blockID) {
+		bt := getBlockTree(blockID)
+		if bt == nil {
+			return errors.New(Conf.Language(180))
+		}
+		if isEncryptedBox(bt.BoxID) {
 			return errors.New(Conf.Language(313))
 		}
 	}
@@ -94,17 +102,34 @@ func validateFlashcardCard(deck *riff.Deck, cardID string) error {
 
 // ValidateFlashcardTransactions 在事务入队前校验所有闪卡操作。
 func ValidateFlashcardTransactions(transactions []*Transaction) error {
+	return ValidateFlashcardBlockIDs(flashcardBlockIDsToValidate(transactions))
+}
+
+func flashcardBlockIDsToValidate(transactions []*Transaction) (ret []string) {
 	for _, transaction := range transactions {
+		if transaction == nil {
+			continue
+		}
+		insertedBlockIDs := map[string]struct{}{}
 		for _, operation := range transaction.DoOperations {
+			if operation == nil {
+				continue
+			}
+			if operation.Action == "insert" && ast.IsNodeIDPattern(operation.ID) {
+				insertedBlockIDs[operation.ID] = struct{}{}
+			}
 			if operation.Action != "addFlashcards" && operation.Action != "removeFlashcards" {
 				continue
 			}
-			if err := ValidateFlashcardBlockIDs(operation.BlockIDs); err != nil {
-				return err
+			for _, blockID := range operation.BlockIDs {
+				if _, ok := insertedBlockIDs[blockID]; ok {
+					continue
+				}
+				ret = append(ret, blockID)
 			}
 		}
 	}
-	return nil
+	return
 }
 
 func GetFlashcardsByBlockIDs(blockIDs []string) (ret []*Block) {

@@ -18,6 +18,7 @@ jobs:
     outputs:
       release_title: ${{ steps.release_info.outputs.release_title }}
       version: ${{ steps.version.outputs.value }}
+      android_ref: ${{ steps.android_version.outputs.ref }}
       packageManager: ${{ steps.packageManager.outputs.value }}
       release_body: ${{ steps.release_info.outputs.release_body }}
     steps:
@@ -41,6 +42,31 @@ jobs:
         id: version
         run: |
           echo "value=$(jq .version ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
+
+      - name: Checkout siyuan-android
+        uses: actions/checkout@v6
+        with:
+          repository: siyuan-note/siyuan-android
+          ref: main
+          path: ${{ github.workspace }}/siyuan-android
+
+      - name: Verify siyuan-android version
+        id: android_version
+        # Android 的 siyuanVersionName 必须与 package.json 版本一致，否则在打包前终止整个流程。
+        run: |
+          ANDROID_VERSION=$(sed -nE 's/^[[:space:]]*siyuanVersionName[[:space:]]*=[[:space:]]*"([^"]+)"[[:space:]]*$/\1/p' build.gradle)
+          VERSION="${{ steps.version.outputs.value }}"
+          if [ -z "$ANDROID_VERSION" ]; then
+            echo "Unable to read siyuanVersionName from siyuan-android/build.gradle, stopping"
+            exit 1
+          fi
+          if [ "$ANDROID_VERSION" != "$VERSION" ]; then
+            echo "siyuan-android version ($ANDROID_VERSION) does not match package.json version ($VERSION), stopping"
+            exit 1
+          fi
+          echo "siyuan-android version matches: $ANDROID_VERSION"
+          echo "ref=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        working-directory: ${{ github.workspace }}/siyuan-android
 
       - name: Verify tag matches package.json version
         # 仅 tag 推送触发时校验：去掉 tag 前导 v 后与 package.json 中的版本号比对，
@@ -508,7 +534,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: siyuan-note/siyuan-android
-          ref: main
+          ref: ${{ needs.prepare.outputs.android_ref }}
           path: ${{ github.workspace }}/siyuan-android
 
       - name: Patch siyuan-android Repositories

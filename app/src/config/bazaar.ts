@@ -521,10 +521,11 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     },
     _genRatingStarsHTML(value: number) {
         const activePercentage = Math.max(0, Math.min(100, value / 5 * 100));
-        const stars = Array.from({length: 5}, () => '<svg class="config-bazaar__rating-star"><use xlink:href="#iconStar"></use></svg>').join("");
+        const inactiveStars = Array.from({length: 5}, () => '<svg class="config-bazaar__rating-star config-bazaar__rating-star--outline"><use xlink:href="#iconStar"></use></svg>').join("");
+        const activeStars = Array.from({length: 5}, () => '<svg class="config-bazaar__rating-star"><use xlink:href="#iconStar"></use></svg>').join("");
         return `<span class="config-bazaar__rating-stars" aria-hidden="true">
-    ${stars}
-    <span class="config-bazaar__rating-stars--active" style="width: ${activePercentage}%">${stars}</span>
+    ${inactiveStars}
+    <span class="config-bazaar__rating-stars--active" style="width: ${activePercentage}%">${activeStars}</span>
 </span>`;
     },
     _genCardRatingHTML(item: Pick<IBazaarItem, "rating">, editable = false, loaded = true) {
@@ -533,7 +534,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         }
         const rating = normalizeBazaarRating(item.rating);
         const summary = bazaar._getRatingSummaryText(rating);
-        const content = `<svg class="config-bazaar__rating-star" aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
+        const content = `<svg class="config-bazaar__rating-star config-bazaar__rating-star--outline" aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
 <span class="fn__space--small"></span>
 <span>${escapeHtml(summary)}</span>`;
         if (editable && window.siyuan.user) {

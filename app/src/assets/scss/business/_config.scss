@@ -479,8 +479,10 @@
       }
 
       > .config-bazaar__rating-star {
-        color: var(--b3-theme-primary);
+        color: var(--b3-theme-on-surface-light);
         font-size: 14px;
+        height: 14px;
+        width: 14px;
       }
     }
 
@@ -490,6 +492,10 @@
       flex-shrink: 0;
       height: 1em;
       width: 1em;
+
+      &--outline {
+        --b3-icon-star-fill: none;
+      }
     }
 
     &__rating-stars {
@@ -510,7 +516,7 @@
       }
 
       &--active {
-        color: var(--b3-theme-primary);
+        color: var(--b3-theme-on-surface);
         inset: 0 auto auto 0;
         overflow: hidden;
         position: absolute;
@@ -543,7 +549,7 @@
       grid-template-columns: 10px 14px minmax(48px, 1fr) auto auto;
 
       > .config-bazaar__rating-star {
-        color: var(--b3-theme-primary);
+        color: var(--b3-theme-on-surface);
         font-size: 12px;
       }
     }

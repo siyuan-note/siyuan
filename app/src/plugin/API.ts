@@ -238,7 +238,8 @@ const getActiveEditor = (wndActive = true) => {
     const allEditor = getAllEditor();
     if (range) {
         editor = allEditor.find(item => {
-            if (item.protyle.element.contains(range.startContainer)) {
+            if (!item.protyle.element.classList.contains("fn__none") &&
+                item.protyle.element.contains(range.startContainer)) {
                 return true;
             }
         });

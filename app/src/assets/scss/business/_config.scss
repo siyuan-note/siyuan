@@ -540,17 +540,22 @@
     }
 
     &__rating-distribution {
-      display: flex;
-      flex-direction: column;
+      display: grid;
       gap: 4px;
+      grid-template-columns: 10px 14px minmax(48px, 1fr) auto auto;
       margin-top: 8px;
     }
 
     &__rating-row {
       align-items: center;
       display: grid;
+      grid-column: 1 / -1;
       gap: 4px;
       grid-template-columns: 10px 14px minmax(48px, 1fr) auto auto;
+
+      @supports (grid-template-columns: subgrid) {
+        grid-template-columns: subgrid;
+      }
 
       > .config-bazaar__rating-star {
         color: var(--b3-theme-on-surface);

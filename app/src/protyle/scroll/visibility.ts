@@ -1,4 +1,9 @@
-export const updateScrollVisibility = (parentElement: HTMLElement, barElement: HTMLElement, visible: boolean) => {
-    parentElement.classList.toggle("fn__none", !visible);
-    barElement.classList.toggle("fn__none", !visible);
+export const updateScrollVisibility = (
+    parentElement: HTMLElement,
+    barElement: HTMLElement,
+    containerVisible: boolean,
+    barVisible: boolean,
+) => {
+    parentElement.classList.toggle("fn__none", !containerVisible);
+    barElement.classList.toggle("fn__none", !barVisible);
 };

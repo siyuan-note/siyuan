@@ -6,3 +6,7 @@ export const getGutterMarginHeight = (blockHeight: number, gutterHeight: number,
         return (blockHeight - (naturalGutterHeight || gutterHeight)) / 2;
     }
 };
+
+export const getBacklinkGutterContentTop = (contentTop: number, panelTop?: number, titleBottom?: number) => {
+    return Math.max(contentTop, panelTop ?? contentTop, titleBottom ?? contentTop);
+};

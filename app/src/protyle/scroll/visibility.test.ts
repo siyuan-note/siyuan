@@ -21,22 +21,32 @@ const createElement = () => {
 };
 
 describe("updateScrollVisibility", () => {
-    it("keeps the container and bar hidden together", () => {
+    it("hides the container and bar", () => {
         const parent = createElement();
         const bar = createElement();
 
-        updateScrollVisibility(parent.element, bar.element, false);
+        updateScrollVisibility(parent.element, bar.element, false, false);
 
         assert.equal(parent.hasClass("fn__none"), true);
         assert.equal(bar.hasClass("fn__none"), true);
     });
 
-    it("shows the container and bar together", () => {
+    it("shows the container while keeping the bar hidden", () => {
         const parent = createElement();
         const bar = createElement();
-        updateScrollVisibility(parent.element, bar.element, false);
 
-        updateScrollVisibility(parent.element, bar.element, true);
+        updateScrollVisibility(parent.element, bar.element, true, false);
+
+        assert.equal(parent.hasClass("fn__none"), false);
+        assert.equal(bar.hasClass("fn__none"), true);
+    });
+
+    it("shows the container and bar", () => {
+        const parent = createElement();
+        const bar = createElement();
+        updateScrollVisibility(parent.element, bar.element, false, false);
+
+        updateScrollVisibility(parent.element, bar.element, true, true);
 
         assert.equal(parent.hasClass("fn__none"), false);
         assert.equal(bar.hasClass("fn__none"), false);

@@ -7,7 +7,6 @@ import type {SettingTabBuilder} from "../setting/builder";
 import {controlNumber, controlSelect, controlString} from "../setting/control";
 import {genConfigItemName} from "../render/fragments";
 import {genButtonHtml, genNumberInputHtml} from "../render/render";
-import {setNoteBook} from "../../util/pathName";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 /// #endif
@@ -309,15 +308,6 @@ const registerFileOthersGroup = (tab: SettingTabBuilder) => {
     group.switch("fileTree.boxDocEnabled", {
         title: window.siyuan.languages.boxDocEnabled,
         desc: window.siyuan.languages.boxDocEnabledTip,
-        save: (value) => fileConfigApi.patch("boxDocEnabled", value, () => {
-            setNoteBook(() => {
-                /// #if MOBILE
-                window.siyuan.mobile.docks.file?.init(false);
-                /// #else
-                getAllModels().files.forEach((files) => files.init(false));
-                /// #endif
-            });
-        }),
     });
     group.number("fileTree.recentDocsMaxListCount", {
         title: window.siyuan.languages.recentDocsMaxListCount,

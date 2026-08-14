@@ -17,12 +17,37 @@
 package bazaar
 
 import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func TestIncPackageDownloadsIncludesPackageName(t *testing.T) {
+	oldServer := bazaarDownloadCloudServer
+	t.Cleanup(func() { bazaarDownloadCloudServer = oldServer })
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if "/apis/siyuan/bazaar/addBazaarPackageDownloadCount" != request.URL.Path {
+			t.Fatalf("unexpected download statistics path: %s", request.URL.Path)
+		}
+		body := map[string]any{}
+		if err := json.NewDecoder(request.Body).Decode(&body); nil != err {
+			t.Fatal(err)
+		}
+		if "system" != body["systemID"] || "owner/repo" != body["repo"] || "sample" != body["packageName"] {
+			t.Fatalf("unexpected download statistics body: %+v", body)
+		}
+		writer.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+	bazaarDownloadCloudServer = func() string { return server.URL }
+
+	incPackageDownloads("https://github.com/owner/repo", "sample", "system")
+}
 
 // TestInstallPackageNameMismatch 校验下载包声明的名称与请求安装的包名不一致时拒绝安装
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj

@@ -263,8 +263,9 @@ export class Scroll {
             this.inputElement.setAttribute("max", protyle.block.blockCount.toString());
             this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
         }
-        const visible = protyle.options.render.scroll && !protyle.block.showAll && protyle.block.scroll &&
+        const containerVisible = protyle.options.render.scroll &&
             !protyle.contentElement.classList.contains("fn__none");
-        updateScrollVisibility(this.parentElement, this.element, visible);
+        const barVisible = containerVisible && !protyle.block.showAll && protyle.block.scroll;
+        updateScrollVisibility(this.parentElement, this.element, containerVisible, barVisible);
     }
 }

@@ -186,7 +186,7 @@ func RefreshBoxDocFeature() {
 			}
 		}
 	}
-	ReloadFiletree()
+	util.PushBoxDocFeatureChanged()
 }
 
 func findBoxDoc(box *Box) (ret string, err error) {

@@ -190,7 +190,7 @@
 	"tabStartup": "Tabs",
 	"configGroupMarkdownBlockSyntax": "Markdown Block Syntax",
 	"codeBlockMiddleDot": "Middle dot code block shortcut",
-	"codeBlockMiddleDotTip": "When enabled, entering <code class='fn__code'>···</code> followed by Enter or another middle dot converts it to a code block",
+	"codeBlockMiddleDotTip": "When enabled entering <code class='fn__code'>···</code> followed by Enter or another middle dot converts it to a code block",
 	"foldChildHeadings": "Fold/expand direct subheadings",
 	"foldSiblingHeadings": "Fold/expand sibling headings",
 	"copyViewMirror": "Copy view mirror",

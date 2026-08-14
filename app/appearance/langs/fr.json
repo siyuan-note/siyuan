@@ -190,7 +190,7 @@
 	"tabStartup": "Onglets",
 	"configGroupMarkdownBlockSyntax": "Syntaxe de bloc Markdown",
 	"codeBlockMiddleDot": "Raccourci de bloc de code avec point médian",
-	"codeBlockMiddleDotTip": "Lorsque cette option est activée, la saisie de <code class='fn__code'>···</code> suivie d’Entrée ou d’un autre point médian est convertie en bloc de code",
+	"codeBlockMiddleDotTip": "Lorsque cette option est activée la saisie de <code class='fn__code'>···</code> suivie d’Entrée ou d’un autre point médian est convertie en bloc de code",
 	"foldChildHeadings": "Replier/déplier les sous-titres directs",
 	"foldSiblingHeadings": "Replier/déplier les titres de même niveau",
 	"copyViewMirror": "Copier le miroir de la vue",

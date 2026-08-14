@@ -190,7 +190,7 @@
 	"tabStartup": "Tab",
 	"configGroupMarkdownBlockSyntax": "Sintaks Blok Markdown",
 	"codeBlockMiddleDot": "Pintasan blok kode titik tengah",
-	"codeBlockMiddleDotTip": "Jika diaktifkan, memasukkan <code class='fn__code'>···</code> lalu menekan Enter atau mengetik titik tengah lainnya akan mengubahnya menjadi blok kode",
+	"codeBlockMiddleDotTip": "Jika diaktifkan memasukkan <code class='fn__code'>···</code> lalu menekan Enter atau mengetik titik tengah lainnya akan mengubahnya menjadi blok kode",
 	"foldChildHeadings": "Lipat/perluas judul turunan langsung",
 	"foldSiblingHeadings": "Lipat/perluas judul setingkat",
 	"copyViewMirror": "Salin cermin tampilan",

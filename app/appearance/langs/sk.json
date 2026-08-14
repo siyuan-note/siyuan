@@ -190,7 +190,7 @@
 	"tabStartup": "Karty",
 	"configGroupMarkdownBlockSyntax": "Bloková syntax Markdown",
 	"codeBlockMiddleDot": "Skratka bloku kódu so stredovou bodkou",
-	"codeBlockMiddleDotTip": "Ak je zapnuté, zadanie <code class='fn__code'>···</code> a následné stlačenie Enter alebo zadanie ďalšej stredovej bodky prevedie text na blok kódu",
+	"codeBlockMiddleDotTip": "Ak je zapnuté zadanie <code class='fn__code'>···</code> a následné stlačenie Enter alebo zadanie ďalšej stredovej bodky prevedie text na blok kódu",
 	"foldChildHeadings": "Zbaliť/rozbaliť priame podnadpisy",
 	"foldSiblingHeadings": "Zbaliť/rozbaliť nadpisy rovnakej úrovne",
 	"copyViewMirror": "Kopírovať zrkadlo zobrazenia",

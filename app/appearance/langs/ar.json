@@ -190,7 +190,7 @@
 	"tabStartup": "علامات التبويب",
 	"configGroupMarkdownBlockSyntax": "صيغة كتل Markdown",
 	"codeBlockMiddleDot": "اختصار كتلة التعليمات البرمجية بالنقطة الوسطى",
-	"codeBlockMiddleDotTip": "عند التمكين، يؤدي إدخال <code class='fn__code'>···</code> ثم الضغط على Enter أو إدخال نقطة وسطى أخرى إلى التحويل إلى كتلة تعليمات برمجية",
+	"codeBlockMiddleDotTip": "عند التمكين يؤدي إدخال <code class='fn__code'>···</code> ثم الضغط على Enter أو إدخال نقطة وسطى أخرى إلى التحويل إلى كتلة تعليمات برمجية",
 	"foldChildHeadings": "طي/توسيع العناوين الفرعية المباشرة",
 	"foldSiblingHeadings": "طي/توسيع العناوين الشقيقة",
 	"copyViewMirror": "نسخ مرآة العرض",

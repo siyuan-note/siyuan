@@ -190,7 +190,7 @@
 	"tabStartup": "כרטיסיות",
 	"configGroupMarkdownBlockSyntax": "תחביר בלוקים של Markdown",
 	"codeBlockMiddleDot": "קיצור לבלוק קוד באמצעות נקודה אמצעית",
-	"codeBlockMiddleDotTip": "כאשר האפשרות מופעלת, הקלדת <code class='fn__code'>···</code> ולאחריה Enter או נקודה אמצעית נוספת ממירה את הטקסט לבלוק קוד",
+	"codeBlockMiddleDotTip": "כאשר האפשרות מופעלת הקלדת <code class='fn__code'>···</code> ולאחריה Enter או נקודה אמצעית נוספת ממירה את הטקסט לבלוק קוד",
 	"foldChildHeadings": "כיווץ/הרחבה של כותרות משנה ישירות",
 	"foldSiblingHeadings": "כיווץ/הרחבה של כותרות אחיות",
 	"copyViewMirror": "העתקת שיקוף התצוגה",

@@ -190,7 +190,7 @@
 	"tabStartup": "Abas",
 	"configGroupMarkdownBlockSyntax": "Sintaxe de bloco Markdown",
 	"codeBlockMiddleDot": "Atalho de bloco de código com ponto médio",
-	"codeBlockMiddleDotTip": "Quando ativado, inserir <code class='fn__code'>···</code> seguido de Enter ou de outro ponto médio converte o texto em um bloco de código",
+	"codeBlockMiddleDotTip": "Quando ativado inserir <code class='fn__code'>···</code> seguido de Enter ou de outro ponto médio converte o texto em um bloco de código",
 	"foldChildHeadings": "Recolher/expandir subtítulos diretos",
 	"foldSiblingHeadings": "Recolher/expandir títulos do mesmo nível",
 	"copyViewMirror": "Copiar espelho da visualização",

@@ -190,7 +190,7 @@
 	"tabStartup": "Pestañas",
 	"configGroupMarkdownBlockSyntax": "Sintaxis de bloques Markdown",
 	"codeBlockMiddleDot": "Atajo de bloque de código con punto medio",
-	"codeBlockMiddleDotTip": "Cuando está activado, al introducir <code class='fn__code'>···</code> y pulsar Intro o escribir otro punto medio, se convierte en un bloque de código",
+	"codeBlockMiddleDotTip": "Cuando está activado al introducir <code class='fn__code'>···</code> y pulsar Intro o escribir otro punto medio, se convierte en un bloque de código",
 	"foldChildHeadings": "Contraer/expandir subtítulos directos",
 	"foldSiblingHeadings": "Contraer/expandir encabezados del mismo nivel",
 	"copyViewMirror": "Copiar espejo de vista",

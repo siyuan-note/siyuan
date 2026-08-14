@@ -30,6 +30,8 @@ interface ComposerHandle {
 
 type OnChangeCallback = () => void;
 
+const AGENT_HINT_OVERLAY_CLASS = "protyle-hint--agent-overlay";
+
 interface ComposerOptions {
     initialContent?: string;
     initialBlockHTML?: string;
@@ -51,9 +53,21 @@ const resetEmbedBlocks = (element: HTMLElement) => {
     });
 };
 
+const prepareAgentHint = (protyle: IProtyle) => {
+    if (protyle.hint.element.classList.contains("fn__none")) {
+        protyle.hint.element.style.zIndex = (++window.siyuan.zIndex).toString();
+    }
+};
+
+const hintAgentRef = (key: string, protyle: IProtyle, source: THintSource): IHintData[] => {
+    prepareAgentHint(protyle);
+    return hintRef(key, protyle, source);
+};
+
 // / 技能菜单：异步拉取 lsSkills，选中后把技能名作为纯文本插入（value 即技能名）。
 // 返回 [] 占位，数据在 fetch 回调里通过 protyle.hint.genHTML 填充（与 hintRef 异步模式一致）。
 const hintSkill = (key: string, protyle: IProtyle): IHintData[] => {
+    prepareAgentHint(protyle);
     protyle.hint.genLoading(protyle);
     fetchPost("/api/ai/agent/lsSkills", {}, (response) => {
         const rawSkills = (response && response.data) ? response.data : [];
@@ -164,16 +178,16 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
             // / 技能菜单（覆盖默认的块插入菜单 hintSlash）；[[ 块引用由 protyle 默认 extend 提供
             extend: [{
                 key: "((",
-                hint: hintRef,
+                hint: hintAgentRef,
             }, {
                 key: "【【",
-                hint: hintRef,
+                hint: hintAgentRef,
             }, {
                 key: "（（",
-                hint: hintRef,
+                hint: hintAgentRef,
             }, {
                 key: "[[",
-                hint: hintRef,
+                hint: hintAgentRef,
             }, {
                 key: "/",
                 hint: hintSkill,
@@ -188,6 +202,10 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     // 类方法（focus/insert/destroy）在 Protyle 实例上，内部数据属性在 IProtyle 上。
     const p = protyle.protyle;
     const wysiwyg = p.wysiwyg!;
+    const hintElement = p.hint.element;
+    // Hint 使用视口坐标定位，挂到顶层可避免受浮动 Dock 的变换坐标系和裁剪影响。
+    hintElement.classList.add(AGENT_HINT_OVERLAY_CLASS);
+    document.body.appendChild(hintElement);
     wysiwyg.element.setAttribute("data-readonly", "false");
 
     const setEmptyContent = () => {
@@ -309,6 +327,7 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
         destroy: () => {
             contentObserver.disconnect();
             protyle.destroy();
+            hintElement.remove();
         },
         getSendData: () => {
             const references: { id: string; title: string }[] = [];

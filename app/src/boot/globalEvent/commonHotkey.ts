@@ -167,6 +167,7 @@ export const filterHotkey = (event: KeyboardEvent, app: App) => {
     // 点击最近的文档列表会 dispatch keydown 的 Enter https://github.com/siyuan-note/siyuan/issues/12967
     if (event.isTrusted && isNotCtrl(event) && !event.shiftKey && !event.altKey &&
         !["INPUT", "TEXTAREA"].includes(target.tagName) &&
+        !target.isContentEditable &&
         ["0", "1", "2", "3", "4", "j", "k", "l", ";", "s", " ", "p", "enter", "a", "s", "d", "f", "q", "x"].includes(event.key.toLowerCase())) {
         let cardElement: Element;
         window.siyuan.dialogs.find(item => {

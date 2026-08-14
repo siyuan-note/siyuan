@@ -18,6 +18,7 @@ package treenode
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/88250/lute/ast"
 )
@@ -89,6 +90,142 @@ func ValidateBlockReplacement(oldNode, newNode *ast.Node) error {
 		return invalidBlockContainmentError(parent, newNode)
 	}
 	return ValidateBlockSubtree(newNode)
+}
+
+// FixInvalidListChildren 将列表下直属的非列表项内容块包装为列表项。
+func FixInvalidListChildren(root *ast.Node) (fixed bool) {
+	if nil == root {
+		return
+	}
+
+	var invalidChildren []*ast.Node
+	ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && nil != n.Parent && ast.NodeList == n.Parent.Type &&
+			ast.NodeListItem != n.Type && isContentBlock(n) {
+			invalidChildren = append(invalidChildren, n)
+		}
+		return ast.WalkContinue
+	})
+
+	fixedLists := map[*ast.Node]struct{}{}
+	for _, child := range invalidChildren {
+		list := child.Parent
+		itemID := ast.NewNodeID()
+		item := &ast.Node{
+			Type:     ast.NodeListItem,
+			ID:       itemID,
+			ListData: newListItemData(list, child),
+		}
+		item.SetIALAttr("id", itemID)
+		item.SetIALAttr("updated", itemID[:14])
+		var taskMarker *ast.Node
+		if 3 == item.ListData.Typ {
+			taskMarker = takeTaskListItemMarker(child)
+		}
+		child.InsertBefore(item)
+		child.Unlink()
+		if nil != taskMarker {
+			item.AppendChild(taskMarker)
+		}
+		item.AppendChild(child)
+		fixedLists[list] = struct{}{}
+		fixed = true
+	}
+	for list := range fixedLists {
+		normalizeOrderedListItems(list)
+	}
+	return
+}
+
+func newListItemData(list, child *ast.Node) (ret *ast.ListData) {
+	listType := 0
+	if nil != list.ListData {
+		listType = list.ListData.Typ
+	}
+
+	for sibling := child.Previous; nil != sibling; sibling = sibling.Previous {
+		if ast.NodeListItem == sibling.Type && nil != sibling.ListData {
+			ret = cloneListData(sibling.ListData)
+			ret.Typ = listType
+			ret.Checked = false
+			return
+		}
+	}
+	for sibling := child.Next; nil != sibling; sibling = sibling.Next {
+		if ast.NodeListItem == sibling.Type && nil != sibling.ListData {
+			ret = cloneListData(sibling.ListData)
+			ret.Typ = listType
+			ret.Checked = false
+			return
+		}
+	}
+
+	ret = &ast.ListData{Typ: listType}
+	if 0 == listType || 3 == listType {
+		ret.BulletChar = '*'
+		ret.Marker = []byte{'*'}
+	}
+	return
+}
+
+func cloneListData(data *ast.ListData) (ret *ast.ListData) {
+	ret = &ast.ListData{}
+	*ret = *data
+	ret.Marker = append([]byte(nil), data.Marker...)
+	return
+}
+
+func takeTaskListItemMarker(child *ast.Node) *ast.Node {
+	for marker := child.FirstChild; nil != marker; marker = marker.Next {
+		if ast.NodeTaskListItemMarker == marker.Type {
+			marker.Unlink()
+			return marker
+		}
+	}
+	if nil != child.Previous && ast.NodeTaskListItemMarker == child.Previous.Type {
+		marker := child.Previous
+		marker.Unlink()
+		return marker
+	}
+	return &ast.Node{Type: ast.NodeTaskListItemMarker}
+}
+
+func normalizeOrderedListItems(list *ast.Node) {
+	if nil == list.ListData || 1 != list.ListData.Typ {
+		return
+	}
+
+	start, delimiter, position := 1, byte('.'), 0
+	for item := list.FirstChild; nil != item; item = item.Next {
+		if ast.NodeListItem != item.Type {
+			continue
+		}
+		if nil != item.ListData {
+			if 0 != item.ListData.Delimiter {
+				delimiter = item.ListData.Delimiter
+			}
+			if 0 < item.ListData.Num || 0 != item.ListData.Delimiter || 0 < len(item.ListData.Marker) {
+				start = max(0, item.ListData.Num-position)
+				break
+			}
+		}
+		position++
+	}
+
+	num := start
+	for item := list.FirstChild; nil != item; item = item.Next {
+		if ast.NodeListItem != item.Type {
+			continue
+		}
+		if nil == item.ListData {
+			item.ListData = &ast.ListData{}
+		}
+		item.ListData.Typ = 1
+		item.ListData.Num = num
+		item.ListData.Delimiter = delimiter
+		item.ListData.Marker = []byte(strconv.Itoa(num) + string(delimiter))
+		num++
+	}
 }
 
 func isContentBlock(node *ast.Node) bool {

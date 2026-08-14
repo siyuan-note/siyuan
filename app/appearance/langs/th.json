@@ -1,4 +1,5 @@
 {
+	"transposeTable": "สลับแถวและคอลัมน์ของตาราง",
 	"bazaarRatingRateLimited": "มีคำขอให้คะแนนมากเกินไป โปรดลองอีกครั้งในภายหลัง",
 	"sortByRatingDesc": "เรียงคะแนนจากมากไปน้อย",
 	"sortByRatingAsc": "เรียงคะแนนจากน้อยไปมาก",

@@ -1,4 +1,5 @@
 {
+	"transposeTable": "Transposer le tableau",
 	"bazaarRatingRateLimited": "Trop de demandes de notation. Veuillez réessayer plus tard",
 	"sortByRatingDesc": "Note décroissante",
 	"sortByRatingAsc": "Note croissante",

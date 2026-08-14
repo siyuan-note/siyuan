@@ -1,4 +1,5 @@
 {
+	"transposeTable": "Transponer tabla",
 	"bazaarRatingRateLimited": "Demasiadas solicitudes de valoración. Inténtalo de nuevo más tarde",
 	"sortByRatingDesc": "Valoración descendente",
 	"sortByRatingAsc": "Valoración ascendente",

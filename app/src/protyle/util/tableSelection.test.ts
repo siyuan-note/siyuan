@@ -2,9 +2,11 @@ import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
 import {
     getProjectedTableHeadRowCount,
+    getTableHeadRowCount,
     getTableCellsInRectangle,
     getTableDragEdge,
     projectTableCells,
+    transposeTableCells,
 } from "./tableSelection";
 
 interface ITestCellInfo {
@@ -146,5 +148,90 @@ describe("projectTableCells", () => {
 
         assert.equal(getProjectedTableHeadRowCount(projection.cells, projection.rows,
             ["thead", "tbody", "tbody"]), 2);
+    });
+});
+
+describe("transposeTableCells", () => {
+    const simplify = (cells: ReturnType<typeof transposeTableCells<ITestCellInfo>>["cells"]) => cells.map(item => ({
+        id: item.source.id,
+        row: item.row,
+        col: item.col,
+        rowspan: item.rowspan,
+        colspan: item.colspan,
+    }));
+
+    it("swaps rows and columns", () => {
+        const cells = [
+            createCell("a", 0, 0), createCell("b", 0, 1), createCell("c", 0, 2),
+            createCell("d", 1, 0), createCell("e", 1, 1), createCell("f", 1, 2),
+        ];
+
+        const transposed = transposeTableCells(cells, 2, 3);
+
+        assert.equal(transposed.rowCount, 3);
+        assert.equal(transposed.columnCount, 2);
+        assert.deepEqual(simplify(transposed.cells), [
+            {id: "a", row: 0, col: 0, rowspan: 1, colspan: 1},
+            {id: "d", row: 0, col: 1, rowspan: 1, colspan: 1},
+            {id: "b", row: 1, col: 0, rowspan: 1, colspan: 1},
+            {id: "e", row: 1, col: 1, rowspan: 1, colspan: 1},
+            {id: "c", row: 2, col: 0, rowspan: 1, colspan: 1},
+            {id: "f", row: 2, col: 1, rowspan: 1, colspan: 1},
+        ]);
+    });
+
+    it("swaps merged cell spans", () => {
+        const cells = [
+            createCell("a", 0, 0, 1, 2), createCell("b", 0, 2),
+            createCell("c", 1, 0), createCell("d", 1, 1), createCell("e", 1, 2, 2),
+            createCell("f", 2, 0), createCell("g", 2, 1),
+        ];
+
+        const transposed = transposeTableCells(cells, 3, 3);
+
+        assert.deepEqual(simplify(transposed.cells), [
+            {id: "a", row: 0, col: 0, rowspan: 2, colspan: 1},
+            {id: "c", row: 0, col: 1, rowspan: 1, colspan: 1},
+            {id: "f", row: 0, col: 2, rowspan: 1, colspan: 1},
+            {id: "d", row: 1, col: 1, rowspan: 1, colspan: 1},
+            {id: "g", row: 1, col: 2, rowspan: 1, colspan: 1},
+            {id: "b", row: 2, col: 0, rowspan: 1, colspan: 1},
+            {id: "e", row: 2, col: 1, rowspan: 1, colspan: 2},
+        ]);
+    });
+
+    it("restores coordinates and spans after transposing twice", () => {
+        const cells = [
+            createCell("a", 0, 0, 1, 2), createCell("b", 0, 2),
+            createCell("c", 1, 0), createCell("d", 1, 1), createCell("e", 1, 2, 2),
+            createCell("f", 2, 0), createCell("g", 2, 1),
+        ];
+        const first = transposeTableCells(cells, 3, 3);
+        const intermediate = first.cells.map(item => ({
+            ...item.source,
+            row: item.row,
+            col: item.col,
+            rowspan: item.rowspan,
+            colspan: item.colspan,
+        }));
+
+        const second = transposeTableCells(intermediate, first.rowCount, first.columnCount);
+
+        assert.deepEqual(simplify(second.cells), cells.map(item => ({
+            id: item.id,
+            row: item.row,
+            col: item.col,
+            rowspan: item.rowspan,
+            colspan: item.colspan,
+        })));
+    });
+
+    it("expands the table head to contain transposed merged cells", () => {
+        const cells = [
+            createCell("a", 0, 0, 2),
+            createCell("b", 1, 1, 3),
+        ];
+
+        assert.equal(getTableHeadRowCount(cells, 4), 4);
     });
 });

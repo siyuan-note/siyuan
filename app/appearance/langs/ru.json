@@ -1,4 +1,5 @@
 {
+	"transposeTable": "Транспонировать таблицу",
 	"bazaarRatingRateLimited": "Слишком много запросов на оценку. Повторите попытку позже",
 	"sortByRatingDesc": "Оценка по убыванию",
 	"sortByRatingAsc": "Оценка по возрастанию",

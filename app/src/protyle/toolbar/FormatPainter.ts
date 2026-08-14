@@ -41,26 +41,6 @@ const getSegment = (textNode: Text, editableElement: Element) => {
     };
 };
 
-const setFormatPainterCursor = () => {
-    const iconElement = document.getElementById("iconPaintRoller");
-    if (!iconElement) {
-        return;
-    }
-    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    Array.from(iconElement.attributes).forEach(attribute => {
-        if (attribute.name !== "id") {
-            svgElement.setAttribute(attribute.name, attribute.value);
-        }
-    });
-    svgElement.setAttribute("width", "24");
-    svgElement.setAttribute("height", "24");
-    svgElement.style.color = getComputedStyle(document.body).getPropertyValue("--b3-theme-on-background").trim() ||
-        "#000";
-    iconElement.childNodes.forEach(node => svgElement.append(node.cloneNode(true)));
-    const data = encodeURIComponent(new XMLSerializer().serializeToString(svgElement));
-    document.body.style.setProperty("--format-painter-cursor", `url("data:image/svg+xml,${data}") 10 21, text`);
-};
-
 export const getFormatPainterSnapshot = (rootElement: Element, range: Range) => {
     const segments: IFormatPainterSegment[] = [];
     getBlockRanges(rootElement, range, ["NodeCodeBlock", "NodeAttributeView"]).forEach(item => {
@@ -86,6 +66,35 @@ export const getFormatPainterSnapshot = (rootElement: Element, range: Range) => 
 class FormatPainterController {
     private mode?: TFormatPainterMode;
     private snapshot?: IFormatPainterSnapshot;
+    private cursorElement?: HTMLElement;
+
+    private moveCursor = (event: MouseEvent) => {
+        if (!this.cursorElement) {
+            return;
+        }
+        const target = event.target;
+        if (!(target instanceof Element) || !target.closest(".protyle-wysiwyg[data-readonly=\"false\"]")) {
+            this.cursorElement.classList.add("fn__none");
+            return;
+        }
+        this.cursorElement.classList.remove("fn__none");
+        this.cursorElement.style.transform = `translate3d(${event.clientX + 8}px, ${event.clientY + 8}px, 0)`;
+    };
+
+    private renderCursor() {
+        this.removeCursor();
+        this.cursorElement = document.createElement("div");
+        this.cursorElement.className = "protyle-format-painter__cursor fn__none";
+        this.cursorElement.innerHTML = '<svg><use xlink:href="#iconPaintRoller"></use></svg>';
+        document.body.append(this.cursorElement);
+        document.addEventListener("mousemove", this.moveCursor);
+    }
+
+    private removeCursor() {
+        document.removeEventListener("mousemove", this.moveCursor);
+        this.cursorElement?.remove();
+        this.cursorElement = undefined;
+    }
 
     private showMessage(message: string, timeout: number) {
         if (shouldShowFormatPainterMessage(window.siyuan.config.appearance.notifications?.formatPainterTip)) {
@@ -108,7 +117,7 @@ class FormatPainterController {
         this.mode = mode;
         this.snapshot = snapshot;
         document.body.dataset.formatPainter = mode;
-        setFormatPainterCursor();
+        this.renderCursor();
         this.renderStatus();
         this.showMessage(mode === "continuous" ? window.siyuan.languages.formatPainterContinuousActive :
             window.siyuan.languages.formatPainterActive, 4000);
@@ -139,7 +148,7 @@ class FormatPainterController {
         this.mode = undefined;
         this.snapshot = undefined;
         delete document.body.dataset.formatPainter;
-        document.body.style.removeProperty("--format-painter-cursor");
+        this.removeCursor();
         document.getElementById("statusFormatPainter")?.remove();
         this.showMessage(window.siyuan.languages.formatPainterInactive, 3000);
         return true;

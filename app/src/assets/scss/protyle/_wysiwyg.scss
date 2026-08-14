@@ -890,7 +890,25 @@
 }
 
 body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
-  cursor: var(--format-painter-cursor, text);
+  cursor: text;
+}
+
+.protyle-format-painter__cursor {
+  position: fixed;
+  z-index: 9;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--b3-theme-on-background);
+  pointer-events: none;
+  will-change: transform;
+
+  svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
 }
 
 // 在思源中，不论只读模式还是预览点击图片都可以进行预览

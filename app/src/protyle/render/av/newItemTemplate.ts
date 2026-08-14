@@ -13,6 +13,7 @@ import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {upDownHint} from "../../../util/upDownHint";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
+import {getAVBlockRefSubtype} from "./cellValue";
 
 interface ICreatePosition {
     previousID?: string;
@@ -297,6 +298,7 @@ interface IRelationOption {
     content: string;
     icon: string;
     isDetached: boolean;
+    refSubtype: "s" | "d";
 }
 
 const getRelationOptions = (column: IAVColumn, callback: (options: IRelationOption[]) => void) => {
@@ -315,6 +317,7 @@ const getRelationOptions = (column: IAVColumn, callback: (options: IRelationOpti
             content: value.block?.content || window.siyuan.languages.untitled,
             icon: value.block?.icon || "",
             isDetached: !!value.isDetached,
+            refSubtype: getAVBlockRefSubtype(value),
         })).filter(option => option.id));
     });
 };
@@ -326,7 +329,7 @@ const renderRelationFieldValue = (target: HTMLElement, options: IRelationOption[
             return `<span class="av__cell--relation" data-row-id="${escapeAttr(option.id)}"><span><svg><use xlink:href="#iconLine"></use></svg><span class="fn__space--5"></span></span><span class="av__celltext">${escapeHtml(option.content)}</span></span>`;
         }
         const icon = unicode2Emoji(option.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
-        return `<span class="av__cell--relation" data-row-id="${escapeAttr(option.id)}" data-block-id="${escapeAttr(option.blockID)}"><span class="b3-menu__avemoji" data-unicode="${escapeAttr(option.icon)}">${icon}</span><span data-type="block-ref" data-id="${escapeAttr(option.blockID)}" data-subtype="s" class="av__celltext av__celltext--ref">${escapeHtml(option.content)}</span></span>`;
+        return `<span class="av__cell--relation" data-row-id="${escapeAttr(option.id)}" data-block-id="${escapeAttr(option.blockID)}"><span class="b3-menu__avemoji" data-unicode="${escapeAttr(option.icon)}">${icon}</span><span data-type="block-ref" data-id="${escapeAttr(option.blockID)}" data-subtype="${option.refSubtype}" class="av__celltext av__celltext--ref">${escapeHtml(option.content)}</span></span>`;
     }).join("");
     target.innerHTML = html;
 };

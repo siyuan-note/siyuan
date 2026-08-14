@@ -331,6 +331,7 @@ func newBoundAttributeViewItemValue(original *av.Value, docID, icon string) (*av
 	bound.Block.ID = docID
 	bound.Block.Content = ""
 	bound.Block.Icon = icon
+	bound.Block.RefSubtype = av.BlockRefSubtypeDynamic
 	return bound, nil
 }
 

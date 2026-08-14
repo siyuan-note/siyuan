@@ -1,3 +1,5 @@
+export const getAVBlockRefSubtype = (value?: IAVCellValue): "s" | "d" => value?.block?.refSubtype === "d" ? "d" : "s";
+
 export const cellValueIsEmpty = (value: IAVCellValue) => {
     if (value.type === "checkbox") {
         return false;

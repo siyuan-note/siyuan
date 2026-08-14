@@ -121,11 +121,13 @@ func GetExportFileName(exportPath *C.char) *C.char {
 
 //export StartKernelFast
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs *C.char) {
+	model.InitJwtKey()
 	go server.Serve(true, model.Conf.CookieKey)
 }
 
 //export StartKernel
 func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer *C.char) {
+	model.InitJwtKey()
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
 	util.MobileOSVer = C.GoString(osVer)

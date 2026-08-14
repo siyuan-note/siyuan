@@ -18,6 +18,7 @@ package model
 
 import (
 	"crypto/rand"
+	"errors"
 	"net/http"
 	"slices"
 	"sync"
@@ -46,19 +47,33 @@ const (
 
 	iss                    = "siyuan-kernel"         // token 的发行者
 	publishServiceAudience = "siyuan-publish-server" // 发布服务 token 的受众
+	kernelPluginAudience   = "siyuan-kernel-plugin"  // 内核插件 token 的受众
 
 	ClaimsKeyRole string = "role"
 )
 
 var (
-	accountsMap = AccountsMap{}
-	sessionsMap = SessionsMap{}
-	sessionLock = sync.Mutex{}
+	accountsMap  = AccountsMap{}
+	accountsLock = sync.RWMutex{}
+	sessionsMap  = SessionsMap{}
+	sessionLock  = sync.Mutex{}
 
-	jwtKey = make([]byte, 32)
+	jwtKey     = make([]byte, 32)
+	jwtKeyOnce sync.Once
+
+	ErrInvalidPublishServiceToken = errors.New("invalid publish service token")
 )
 
-func InitJwtKey() error {
+func InitJwtKey() {
+	jwtKeyOnce.Do(func() {
+		err := refreshJwtKey()
+		if err != nil {
+			logging.LogFatalf(logging.ExitCodeFatal, "initialize JWT signing key failed: %s", err)
+		}
+	})
+}
+
+func refreshJwtKey() error {
 	if _, err := rand.Read(jwtKey); err != nil {
 		logging.LogErrorf("generate JWT signing key failed: %s", err)
 		return err
@@ -67,7 +82,14 @@ func InitJwtKey() error {
 }
 
 func GetBasicAuthAccount(username string) *Account {
-	return accountsMap[username]
+	accountsLock.RLock()
+	defer accountsLock.RUnlock()
+	account := accountsMap[username]
+	if account == nil {
+		return nil
+	}
+	accountCopy := *account
+	return &accountCopy
 }
 
 func GetBasicAuthUsernameBySessionID(sessionID string) string {
@@ -100,26 +122,29 @@ func InitPublishAccounts() {
 		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rp9f-c2fj-h648
 		Conf.Publish.Auth = conf.NewPublish().Auth
 	}
-	accountsMap = AccountsMap{
+	accounts := AccountsMap{
 		"": &Account{}, // 匿名用户
 	}
 	for _, account := range Conf.Publish.Auth.Accounts {
-		accountsMap[account.Username] = &Account{
+		accounts[account.Username] = &Account{
 			Username: account.Username,
 			Password: account.Password,
 		}
 	}
 
-	InitPublishJWT()
-}
-
-func InitPublishJWT() {
-	if _, err := rand.Read(jwtKey); err != nil {
-		logging.LogErrorf("generate JWT signing key failed: %s", err)
+	if err := refreshPublishJWT(accounts); err != nil {
+		logging.LogErrorf("JWT signature failed: %s", err)
 		return
 	}
 
-	for username, account := range accountsMap {
+	// 账户及其 token 发布后保持不可变，更新时整体替换完整快照，避免请求读取到构建中的状态。
+	accountsLock.Lock()
+	accountsMap = accounts
+	accountsLock.Unlock()
+}
+
+func refreshPublishJWT(accounts AccountsMap) error {
+	for username, account := range accounts {
 		// REF: https://golang-jwt.github.io/jwt/usage/create/
 		t := jwt.NewWithClaims(
 			jwt.SigningMethodHS256,
@@ -133,12 +158,12 @@ func InitPublishJWT() {
 			},
 		)
 		if token, err := t.SignedString(jwtKey); err != nil {
-			logging.LogErrorf("JWT signature failed: %s", err)
-			return
+			return err
 		} else {
 			account.Token = token
 		}
 	}
+	return nil
 }
 
 // CreatePluginJWT 为指定名称的内核插件创建一个 JWT，包含管理员权限。插件使用这个 JWT 调用内核 API。
@@ -148,7 +173,7 @@ func CreatePluginJWT(name string) (string, error) {
 		jwt.MapClaims{
 			"iss": iss,
 			"sub": name,
-			"aud": "siyuan-kernel-plugin",
+			"aud": kernelPluginAudience,
 			"jti": uuid.New().String(),
 
 			ClaimsKeyRole: RoleAdministrator,
@@ -162,15 +187,26 @@ func CreatePluginJWT(name string) (string, error) {
 	}
 }
 
-func ParseJWT(tokenString string) (*jwt.Token, error) {
+func ParseJWT(tokenString string) (token *jwt.Token, err error) {
 	// REF: https://golang-jwt.github.io/jwt/usage/parse/
-	return jwt.Parse(
+	token, err = jwt.Parse(
 		tokenString,
 		func(token *jwt.Token) (any, error) {
 			return jwtKey, nil
 		},
 		jwt.WithIssuer(iss),
 	)
+	if err != nil {
+		return
+	}
+
+	if IsPublishServiceToken(token) {
+		if !IsValidPublishServiceToken(token) {
+			err = ErrInvalidPublishServiceToken
+			return
+		}
+	}
+	return
 }
 
 func ParseXAuthToken(r *http.Request) *jwt.Token {
@@ -208,4 +244,24 @@ func IsPublishServiceToken(token *jwt.Token) bool {
 	}
 	audience, err := claims.GetAudience()
 	return err == nil && slices.Contains(audience, publishServiceAudience)
+}
+
+// IsValidPublishServiceToken 检查 token 是否来自发布服务且有效
+func IsValidPublishServiceToken(token *jwt.Token) bool {
+	if !IsPublishServiceToken(token) {
+		return false
+	}
+
+	claims := GetTokenClaims(token)
+	username, ok := claims["sub"].(string)
+	if !ok {
+		return false
+	}
+
+	account := GetBasicAuthAccount(username)
+	if account == nil || account.Token != token.Raw {
+		return false
+	}
+
+	return true
 }

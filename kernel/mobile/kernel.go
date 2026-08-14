@@ -263,10 +263,12 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 }
 
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs string) {
+	model.InitJwtKey()
 	go server.Serve(true, model.Conf.CookieKey)
 }
 
 func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer string) {
+	model.InitJwtKey()
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
 	util.MobileOSVer = osVer

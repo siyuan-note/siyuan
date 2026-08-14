@@ -116,7 +116,22 @@ func TestSpinBlockDOMInputSizeLimit(t *testing.T) {
 	request.Header.Set("Content-Type", "application/json")
 	engine.ServeHTTP(recorder, request)
 
-	if recorder.Code != http.StatusRequestEntityTooLarge {
-		t.Fatalf("unexpected status code: got %d, want %d", recorder.Code, http.StatusRequestEntityTooLarge)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("unexpected status code: got %d, want %d", recorder.Code, http.StatusOK)
+	}
+
+	response := &struct {
+		Code int    `json:"code"`
+		Msg  string `json:"msg"`
+	}{}
+	if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+		t.Fatal(err)
+	}
+	if response.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("unexpected response code: got %d, want %d", response.Code, http.StatusRequestEntityTooLarge)
+	}
+	const expectedMessage = "dom input exceeds the maximum permitted size"
+	if response.Msg != expectedMessage {
+		t.Fatalf("unexpected response message: got %q, want %q", response.Msg, expectedMessage)
 	}
 }

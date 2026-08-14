@@ -55,6 +55,7 @@ export type ISSEResult = {
 } | {
     type: "question";
     questionID: string;
+    roundID?: string;
     arguments: Record<string, unknown>;
 } | {
     type: "reasoning";
@@ -333,6 +334,7 @@ function buildSSEResult(event: string, data: Record<string, unknown>): ISSEResul
             return {
                 type: "question",
                 questionID: data.questionID as string,
+                roundID: data.roundID as string || undefined,
                 arguments: (data.arguments || {}) as Record<string, unknown>,
             };
         case "reasoning":

@@ -104,7 +104,14 @@ type SessionEntry =
     timestamp?: number
 })
     | (EntryBase & { type: "confirm"; name: string; args: Record<string, unknown>; confirmID: string; effects?: IToolEffects; status?: string })
-    | (EntryBase & { type: "question"; questionID: string; questions: Array<Record<string, unknown>>; status?: string; answers?: string[] })
+    | (EntryBase & {
+    type: "question";
+    questionID: string;
+    questions: Array<Record<string, unknown>>;
+    roundID?: string;
+    status?: string;
+    answers?: string[]
+})
     | (EntryBase & { type: "todo"; result: string; callID?: string; roundID?: string })
     | (EntryBase & { type: "snapshot"; snapshotID: string; roundID?: string })
     | (EntryBase & { type: "rollback"; snapshotID: string });
@@ -2068,7 +2075,7 @@ export class AgentChat extends Model {
                     this.appendRetry(event.attempt, event.maxRetries);
                     break;
                 case "question":
-                    this.appendQuestion(event.questionID, event.arguments);
+                    this.appendQuestion(event.questionID, event.arguments, event.roundID);
                     break;
                 case "reasoning":
                     this.appendReasoning(event.token);
@@ -3452,9 +3459,29 @@ export class AgentChat extends Model {
         }
     }
 
-    private appendQuestion(questionID: string, args: Record<string, unknown>) {
+    private appendQuestion(questionID: string, args: Record<string, unknown>, roundID?: string) {
+        this.flushTokenUpdate();
+        const content = this.currentContent;
         this.finishActiveThinking();
         this.flushThinkingStep();
+        const timestamp = Date.now();
+        if (this.currentAIElement) {
+            if (content.trim()) {
+                this.finalizeStreamingBody(content, timestamp);
+            } else {
+                this.currentAIElement.remove();
+            }
+            this.currentAIElement = null;
+            this.observeStickTarget(null);
+        } else if (content.trim()) {
+            this.appendPersistedAssistant(
+                content,
+                timestamp,
+                this.currentAssistantEntryId || SessionStore.newSessionId(),
+            );
+        }
+        this.currentAssistantEntryId = "";
+        this.currentContent = "";
         const L = window.siyuan.languages;
         const rawQuestions = args.questions as Array<Record<string, unknown>>;
         if (!rawQuestions || rawQuestions.length === 0) {
@@ -3474,6 +3501,7 @@ export class AgentChat extends Model {
             type: "question",
             questionID: questionID,
             questions: rawQuestions,
+            roundID: roundID || this.currentRoundID || undefined,
             status: "pending",
         });
 

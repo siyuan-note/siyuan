@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20260814225521"
+		"updated": "20260814235559"
 	},
 	"Children": [
 		{
@@ -39,7 +39,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-0t4c1qf",
-				"updated": "20260814225521"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-4e9hm9i",
-				"updated": "20260814225521"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -622,15 +622,6 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Shift"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​+"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
 									"TextMarkTextContent": "回車"
 								},
 								{
@@ -640,7 +631,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⇧⌘回車"
+									"TextMarkTextContent": "⌘回車"
 								},
 								{
 									"Type": "NodeText",

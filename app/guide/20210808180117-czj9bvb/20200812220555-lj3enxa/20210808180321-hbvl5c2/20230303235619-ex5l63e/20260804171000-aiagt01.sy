@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20260814225521"
+		"updated": "20260814235559"
 	},
 	"Children": [
 		{
@@ -168,7 +168,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-76js6ua",
-				"updated": "20260814225521"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -389,7 +389,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-6hkjcgx",
-				"updated": "20260814225521"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -403,7 +403,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170040-qf65tjk",
-				"updated": "20260814225521"
+				"updated": "20260814235559"
 			},
 			"Children": [
 				{
@@ -422,15 +422,6 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " + "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
 					"TextMarkTextContent": "回车"
 				},
 				{
@@ -440,7 +431,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⇧⌘回车"
+					"TextMarkTextContent": "⌘回车"
 				},
 				{
 					"Type": "NodeText",

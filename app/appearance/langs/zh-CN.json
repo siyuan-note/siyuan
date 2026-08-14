@@ -1,4 +1,7 @@
 {
+	"bazaarRemoveRating": "取消评分",
+	"bazaarRatingRemoved": "已取消评分",
+	"bazaarRemoveRatingFailed": "取消评分失败",
 	"transposeTable": "转置表格",
 	"bazaarRatingRateLimited": "评分请求过于频繁，请稍后再试",
 	"sortByRatingDesc": "评分降序",

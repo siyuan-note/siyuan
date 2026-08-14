@@ -1,4 +1,7 @@
 {
+	"bazaarRemoveRating": "Remove rating",
+	"bazaarRatingRemoved": "Rating removed",
+	"bazaarRemoveRatingFailed": "Failed to remove rating",
 	"transposeTable": "Transpose table",
 	"bazaarRatingRateLimited": "Too many rating requests. Please try again later",
 	"sortByRatingDesc": "Descending by rating",

@@ -1,4 +1,7 @@
 {
+	"bazaarRemoveRating": "إزالة التقييم",
+	"bazaarRatingRemoved": "تمت إزالة التقييم",
+	"bazaarRemoveRatingFailed": "فشلت إزالة التقييم",
 	"transposeTable": "تبديل صفوف وأعمدة الجدول",
 	"bazaarRatingRateLimited": "طلبات تقييم كثيرة جدًا. يُرجى المحاولة مرة أخرى لاحقًا",
 	"sortByRatingDesc": "الترتيب حسب التقييم من الأعلى إلى الأدنى",

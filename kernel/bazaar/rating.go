@@ -133,6 +133,20 @@ func ApplyBazaarPackageRating(packageName string, rating *PackageRating) bool {
 	if !valid {
 		return false
 	}
+	applyBazaarPackageRatingOverride(packageName, normalized)
+	return true
+}
+
+// ClearBazaarPackageRating 使用评分取消响应临时隐藏统一索引中的旧公开评分。
+func ClearBazaarPackageRating(packageName string) bool {
+	if !IsValidPackageName(packageName) {
+		return false
+	}
+	applyBazaarPackageRatingOverride(packageName, nil)
+	return true
+}
+
+func applyBazaarPackageRatingOverride(packageName string, rating *PackageRating) {
 	now := bazaarRatingNow()
 	bazaarPublicRatingCache.mu.Lock()
 	defer bazaarPublicRatingCache.mu.Unlock()
@@ -145,10 +159,9 @@ func ApplyBazaarPackageRating(packageName string, rating *PackageRating) bool {
 		}
 	}
 	bazaarPublicRatingCache.overrides[packageName] = bazaarPublicRatingOverride{
-		rating:    normalized,
+		rating:    rating,
 		expiresAt: now.Add(bazaarRatingOverrideTTL),
 	}
-	return true
 }
 
 // ApplyBazaarPackageRatingDistribution 使用评分提交响应覆盖当前区域中单个包的分布。
@@ -207,7 +220,16 @@ func GetBazaarPackageRatingAfterUpdate(ctx context.Context, region int, packageN
 		merged[i] += count
 	}
 	rating = buildPackageRating(merged)
-	if nil == rating || !ApplyBazaarPackageRating(packageName, rating) {
+	if nil == rating {
+		if (bazaarRatingDistribution{}) != merged {
+			return nil, false
+		}
+		if !ClearBazaarPackageRating(packageName) {
+			return nil, false
+		}
+		return nil, true
+	}
+	if !ApplyBazaarPackageRating(packageName, rating) {
 		return nil, false
 	}
 	return rating, true
@@ -292,7 +314,11 @@ func applyBazaarPublicRatingOverrides(source map[string]*PackageRating, now time
 	defer bazaarPublicRatingCache.mu.RUnlock()
 	for packageName, override := range bazaarPublicRatingCache.overrides {
 		if now.Before(override.expiresAt) {
-			ret[packageName] = clonePackageRating(override.rating)
+			if nil == override.rating {
+				delete(ret, packageName)
+			} else {
+				ret[packageName] = clonePackageRating(override.rating)
+			}
 		}
 	}
 	return ret

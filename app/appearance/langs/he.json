@@ -1,4 +1,7 @@
 {
+	"bazaarRemoveRating": "הסרת הדירוג",
+	"bazaarRatingRemoved": "הדירוג הוסר",
+	"bazaarRemoveRatingFailed": "הסרת הדירוג נכשלה",
 	"transposeTable": "החלפת שורות ועמודות בטבלה",
 	"bazaarRatingRateLimited": "יותר מדי בקשות דירוג. יש לנסות שוב מאוחר יותר",
 	"sortByRatingDesc": "דירוג בסדר יורד",

@@ -1,4 +1,7 @@
 {
+	"bazaarRemoveRating": "Beoordeling verwijderen",
+	"bazaarRatingRemoved": "Beoordeling verwijderd",
+	"bazaarRemoveRatingFailed": "Beoordeling verwijderen mislukt",
 	"transposeTable": "Tabel transponeren",
 	"bazaarRatingRateLimited": "Te veel beoordelingsverzoeken. Probeer het later opnieuw",
 	"sortByRatingDesc": "Beoordeling aflopend",

@@ -1,4 +1,7 @@
 {
+	"bazaarRemoveRating": "Hapus penilaian",
+	"bazaarRatingRemoved": "Penilaian dihapus",
+	"bazaarRemoveRatingFailed": "Gagal menghapus penilaian",
 	"transposeTable": "Transposisikan tabel",
 	"bazaarRatingRateLimited": "Terlalu banyak permintaan penilaian. Silakan coba lagi nanti",
 	"sortByRatingDesc": "Peringkat menurun",

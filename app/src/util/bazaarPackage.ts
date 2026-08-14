@@ -165,6 +165,19 @@ export const normalizeBazaarPackageRatingsResponse = (
     return result;
 };
 
+export const normalizeBazaarUserRating = (rating: unknown) => {
+    if (!Number.isInteger(rating)) {
+        return;
+    }
+    const normalized = rating as number;
+    return normalized >= 0 && normalized <= 5 ? normalized : undefined;
+};
+
+export const isBazaarRatingRemovalAvailable = (rating: unknown) => {
+    const normalized = normalizeBazaarUserRating(rating);
+    return normalized !== undefined && normalized > 0;
+};
+
 export const applyBazaarPackageRatingToItem = <T extends {
     name: string;
     ratingAvailable?: boolean;
@@ -216,6 +229,27 @@ export const isBazaarPackageRatingLoaded = (
     onlineRatingAvailable?: boolean,
 ) => {
     return source === "bazaar" ? onlineRatingAvailable === true : asynchronouslyLoaded;
+};
+
+export const isBazaarPackageRatingEditable = (
+    source: string | undefined,
+    installed: boolean,
+) => installed && ["downloaded", "updated", "bazaar"].includes(source || "");
+
+export const getBazaarRatingMutationVersion = (versions: Map<string, number>, key: string) => versions.get(key) || 0;
+
+export const isBazaarRatingMutationVersionCurrent = (
+    versions: Map<string, number>,
+    key: string,
+    version: number,
+) => getBazaarRatingMutationVersion(versions, key) === version;
+
+export const beginBazaarRatingSubmission = (submittingKeys: Set<string>, key: string) => {
+    if (submittingKeys.has(key)) {
+        return false;
+    }
+    submittingKeys.add(key);
+    return true;
 };
 
 export const beginBazaarRatingRequest = (requestIDs: Map<string, number>, key: string) => {

@@ -1,4 +1,7 @@
 {
+	"bazaarRemoveRating": "Remover avaliação",
+	"bazaarRatingRemoved": "Avaliação removida",
+	"bazaarRemoveRatingFailed": "Falha ao remover avaliação",
 	"transposeTable": "Transpor tabela",
 	"bazaarRatingRateLimited": "Muitas solicitações de avaliação. Tente novamente mais tarde",
 	"sortByRatingDesc": "Avaliação decrescente",

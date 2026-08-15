@@ -34,7 +34,7 @@ import {highlightRender} from "../render/highlightRender";
 import {assetMenu, imgMenu} from "../../menus/protyle";
 import {hideElements} from "../ui/hideElements";
 import {fetchPost} from "../../util/fetch";
-import {stripSearchMark} from "../../util/escape";
+import {escapeHtml, escapeSearchHighlight, stripSearchMark} from "../../util/escape";
 import {getDisplayName, isEncryptedBox, pathPosix} from "../../util/pathName";
 import {
     addEmoji,
@@ -515,9 +515,9 @@ export class Hint {
                     let blockRefHTML;
                     if (source === "av") {
                         // av 搜索时需要获取值 https://github.com/siyuan-note/siyuan/issues/12020
-                        let refText = item.name ? stripSearchMark(item.name) : item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
+                        let refText = item.name ? stripSearchMark(escapeSearchHighlight(item.name)) : item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
                         if (nodeElement) {
-                            refText = item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || refText;
+                            refText = escapeHtml(item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || "") || refText;
                         }
                         blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
                     } else {

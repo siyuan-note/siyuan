@@ -1,3 +1,5 @@
+import {CODE_TAB_SPACE_VALUES} from "../../protyle/wysiwyg/codeBlockUtil";
+
 export interface IEntryCatalogNode {
     key: string;
     label: () => string;
@@ -29,6 +31,11 @@ const separator = (key: string): IEntryCatalogNode => ({
     simple: true,
     type: "separator",
 });
+
+const codeTabSpacesChildren = () => [
+    node("default", () => `${window.siyuan.languages.default} (${window.siyuan.config.editor.codeTabSpaces})`),
+    ...CODE_TAB_SPACE_VALUES.map((value) => node(`tabSpaces${value}`, literal(value.toString()))),
+];
 
 const copyChildren = () => [
     node("copyBlockRef", lang("copyBlockRef")),
@@ -312,7 +319,7 @@ const gutterSingle = () => [
     ]),
     separator("separator_code"),
     node("code", lang("code"), true, [
-        node("md29", lang("md29")),
+        node("md29", lang("md29"), true, codeTabSpacesChildren()),
         node("md31", lang("md31")),
         node("md2", lang("md2")),
         node("md27", lang("md27")),

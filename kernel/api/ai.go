@@ -345,7 +345,13 @@ func testRerankModel(c *gin.Context) {
 		return
 	}
 
-	matched, err := util.TestRerankModel(rerank.APIKey, rerank.Endpoint, rerank.Name, rerank.Timeout)
+	matched, err := util.TestRerankModel(util.RerankOptions{
+		APIKey:        rerank.APIKey,
+		Endpoint:      rerank.Endpoint,
+		Model:         rerank.Name,
+		RequestFormat: rerank.RequestFormat,
+		Timeout:       rerank.Timeout,
+	})
 	// 测试结果统一以 code=0 返回，具体成败信息放在 data 中由前端控制展示
 	result := map[string]any{
 		"matched": matched,

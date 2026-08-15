@@ -1,4 +1,8 @@
 {
+	"rerankRequestFormat": "Format permintaan rerank",
+	"rerankRequestFormatTip": "Pilih format permintaan yang diperlukan oleh layanan rerank",
+	"rerankRequestFormatCohere": "Kompatibel dengan Cohere/Jina",
+	"rerankRequestFormatDashScope": "Kompatibel dengan DashScope/ZenMux",
 	"listItemActionTip": "Klik kanan <span class='ft__on-surface'>Buka menu item daftar ini</span><br>Shift+klik <span class='ft__on-surface'>Buka atributnya</span>",
 	"bazaarRemoveRating": "Hapus penilaian",
 	"bazaarRatingRemoved": "Penilaian dihapus",

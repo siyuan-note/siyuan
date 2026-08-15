@@ -1,4 +1,8 @@
 {
+	"rerankRequestFormat": "重排 API 格式",
+	"rerankRequestFormatTip": "選擇重排服務所需的請求格式",
+	"rerankRequestFormatCohere": "Cohere/Jina 相容",
+	"rerankRequestFormatDashScope": "DashScope/ZenMux 相容",
 	"listItemActionTip": "右鍵 <span class='ft__on-surface'>開啟此清單項目的功能表</span><br>Shift+點擊 <span class='ft__on-surface'>開啟屬性</span>",
 	"bazaarRemoveRating": "取消評分",
 	"bazaarRatingRemoved": "已取消評分",

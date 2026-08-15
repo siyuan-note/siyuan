@@ -509,12 +509,44 @@ func closeOpenAIIdleConnections() {
 	}
 }
 
-// rerankRequest 对应主流重排服务的 /rerank 请求体（Jina/Cohere/阿里云 compatible-api 等）。
-type rerankRequest struct {
+type RerankRequestFormat string
+
+const (
+	RerankRequestFormatCohere    RerankRequestFormat = "cohere"
+	RerankRequestFormatDashScope RerankRequestFormat = "dashscope"
+)
+
+type RerankOptions struct {
+	APIKey        string
+	Endpoint      string
+	Model         string
+	RequestFormat RerankRequestFormat
+	TopN          int
+	Timeout       int
+}
+
+// rerankCohereRequest 对应 Jina、Cohere 和阿里云 compatible-api 等服务的扁平请求体。
+type rerankCohereRequest struct {
 	Model     string   `json:"model"`
 	Query     string   `json:"query"`
 	Documents []string `json:"documents"`
 	TopN      int      `json:"top_n,omitempty"`
+}
+
+type rerankDashScopeInput struct {
+	Query     string   `json:"query"`
+	Documents []string `json:"documents"`
+}
+
+type rerankDashScopeParameters struct {
+	TopN int `json:"top_n"`
+}
+
+// rerankDashScopeRequest 对应 DashScope 和 ZenMux 等服务的嵌套请求体。
+type rerankDashScopeRequest struct {
+	Model      string                     `json:"model"`
+	Input      rerankDashScopeInput       `json:"input"`
+	Parameters *rerankDashScopeParameters `json:"parameters,omitempty"`
 }
 
 // rerankResult 为响应 results 数组中的单项，index 指向 documents 下标。
@@ -526,6 +558,9 @@ type rerankResult struct {
 // rerankResponse 对应 /v1/rerank 响应体。
 type rerankResponse struct {
 	Results []rerankResult `json:"results"`
+	Output  *struct {
+		Results []rerankResult `json:"results"`
+	} `json:"output"`
 }
 
 // Rerank 调用重排服务对 query 与候选文档逐对精排。endpoint 为完整重排端点地址，不同服务商路径无统一标准
@@ -534,15 +569,15 @@ type rerankResponse struct {
 // 对每条 document 文本按 rerankDocTextMaxRunes 截断，防超服务端 token 限制并保证 UTF-8 完整。
 // topN 语义：topN <= 0 时不传 top_n（服务端默认返回全部文档评分，搜索场景用此避免被服务端 top_n 上限截断）；
 // topN > 0 时透传给服务端，仅用于测试连通性等只需少量结果的场景。
-func Rerank(query string, documents []string, apiKey, endpoint, model string, topN, timeout int) (indices []int, scores []float64, err error) {
-	if 1 > timeout {
-		timeout = 30
+func Rerank(query string, documents []string, options RerankOptions) (indices []int, scores []float64, err error) {
+	if 1 > options.Timeout {
+		options.Timeout = 30
 	}
 	if 1 > len(documents) {
 		return
 	}
-	if 0 < topN && topN > len(documents) {
-		topN = len(documents)
+	if 0 < options.TopN && options.TopN > len(documents) {
+		options.TopN = len(documents)
 	}
 
 	trimmed := make([]string, len(documents))
@@ -550,25 +585,20 @@ func Rerank(query string, documents []string, apiKey, endpoint, model string, to
 		trimmed[i] = truncateRerankDocument(doc)
 	}
 
-	body, err := json.Marshal(rerankRequest{
-		Model:     model,
-		Query:     query,
-		Documents: trimmed,
-		TopN:      topN,
-	})
+	body, err := marshalRerankRequest(query, trimmed, options)
 	if nil != err {
 		return
 	}
 
 	// endpoint 为完整重排端点地址，不做路径追加——不同服务商端点路径无统一标准，用户照文档填写。
-	req, err := http.NewRequest(http.MethodPost, strings.TrimRight(endpoint, "/"), bytes.NewReader(body))
+	req, err := http.NewRequest(http.MethodPost, strings.TrimRight(options.Endpoint, "/"), bytes.NewReader(body))
 	if nil != err {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", "Bearer "+apiKey)
+	req.Header.Set("Authorization", "Bearer "+options.APIKey)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(options.Timeout)*time.Second)
 	defer cancel()
 	req = req.WithContext(ctx)
 
@@ -594,7 +624,16 @@ func Rerank(query string, documents []string, apiKey, endpoint, model string, to
 		return
 	}
 
-	for _, r := range rr.Results {
+	results := rr.Results
+	if nil == results && nil != rr.Output {
+		results = rr.Output.Results
+	}
+	if nil == results {
+		err = errors.New("rerank response missing results")
+		return
+	}
+
+	for _, r := range results {
 		if r.Index < 0 || r.Index >= len(documents) {
 			continue
 		}
@@ -602,6 +641,29 @@ func Rerank(query string, documents []string, apiKey, endpoint, model string, to
 		scores = append(scores, r.RelevanceScore)
 	}
 	return
+}
+
+func marshalRerankRequest(query string, documents []string, options RerankOptions) ([]byte, error) {
+	if RerankRequestFormatDashScope == options.RequestFormat {
+		request := rerankDashScopeRequest{
+			Model: options.Model,
+			Input: rerankDashScopeInput{
+				Query:     query,
+				Documents: documents,
+			},
+		}
+		if 0 < options.TopN {
+			request.Parameters = &rerankDashScopeParameters{TopN: options.TopN}
+		}
+		return json.Marshal(request)
+	}
+
+	return json.Marshal(rerankCohereRequest{
+		Model:     options.Model,
+		Query:     query,
+		Documents: documents,
+		TopN:      options.TopN,
+	})
 }
 
 func truncateRerankDocument(document string) string {
@@ -614,9 +676,10 @@ func truncateRerankDocument(document string) string {
 
 // TestRerankModel 测试重排模型可用性，用极简 query+documents 发一次重排请求验证连通性与鉴权。
 // 返回值：matched 表示是否连通成功，err 为请求错误（鉴权失败、网络异常、模型不存在等，原样返回便于调用方展示原因）。
-func TestRerankModel(apiKey, apiBaseURL, model string, timeout int) (matched bool, err error) {
+func TestRerankModel(options RerankOptions) (matched bool, err error) {
 	documents := []string{"a", "b"}
-	indices, _, err := Rerank("1", documents, apiKey, apiBaseURL, model, len(documents), timeout)
+	options.TopN = len(documents)
+	indices, _, err := Rerank("1", documents, options)
 	if nil != err {
 		return
 	}

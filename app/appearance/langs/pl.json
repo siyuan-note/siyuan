@@ -1,4 +1,8 @@
 {
+	"rerankRequestFormat": "Format żądania ponownego rankingu",
+	"rerankRequestFormatTip": "Wybierz format żądania wymagany przez usługę ponownego rankingu",
+	"rerankRequestFormatCohere": "Zgodny z Cohere/Jina",
+	"rerankRequestFormatDashScope": "Zgodny z DashScope/ZenMux",
 	"listItemActionTip": "Kliknij prawym przyciskiem myszy <span class='ft__on-surface'>Otwórz menu tego elementu listy</span><br>Shift+kliknięcie <span class='ft__on-surface'>Otwórz jego atrybuty</span>",
 	"bazaarRemoveRating": "Usuń ocenę",
 	"bazaarRatingRemoved": "Ocena została usunięta",

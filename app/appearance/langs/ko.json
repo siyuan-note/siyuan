@@ -1,4 +1,8 @@
 {
+	"rerankRequestFormat": "재순위 요청 형식",
+	"rerankRequestFormatTip": "재순위 서비스에 필요한 요청 형식을 선택합니다",
+	"rerankRequestFormatCohere": "Cohere/Jina 호환",
+	"rerankRequestFormatDashScope": "DashScope/ZenMux 호환",
 	"listItemActionTip": "마우스 오른쪽 버튼 클릭 <span class='ft__on-surface'>이 목록 항목 메뉴 열기</span><br>Shift+클릭 <span class='ft__on-surface'>속성 열기</span>",
 	"bazaarRemoveRating": "평점 삭제",
 	"bazaarRatingRemoved": "평점이 삭제되었습니다",

@@ -236,6 +236,14 @@ const registerAiRerankGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.rerankModel,
         desc: window.siyuan.languages.rerankTip,
     });
+    group.select("ai.rerank.requestFormat", {
+        title: window.siyuan.languages.rerankRequestFormat,
+        desc: window.siyuan.languages.rerankRequestFormatTip,
+        options: [
+            {value: "cohere", label: window.siyuan.languages.rerankRequestFormatCohere},
+            {value: "dashscope", label: window.siyuan.languages.rerankRequestFormatDashScope},
+        ],
+    });
     group.textBlock("ai.rerank.endpoint", {
         title: window.siyuan.languages.apiEndpoint,
         desc: window.siyuan.languages.apiEndpointRerankTip,

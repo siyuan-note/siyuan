@@ -1,4 +1,8 @@
 {
+	"rerankRequestFormat": "Формат запроса переранжирования",
+	"rerankRequestFormatTip": "Выберите формат запроса, необходимый сервису переранжирования",
+	"rerankRequestFormatCohere": "Совместимый с Cohere/Jina",
+	"rerankRequestFormatDashScope": "Совместимый с DashScope/ZenMux",
 	"listItemActionTip": "Щелчок правой кнопкой мыши <span class='ft__on-surface'>Открыть меню этого элемента списка</span><br>Shift+щелчок <span class='ft__on-surface'>Открыть его атрибуты</span>",
 	"bazaarRemoveRating": "Удалить оценку",
 	"bazaarRatingRemoved": "Оценка удалена",

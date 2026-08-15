@@ -1,4 +1,8 @@
 {
+	"rerankRequestFormat": "Rerank-aanvraagindeling",
+	"rerankRequestFormatTip": "Selecteer de aanvraagindeling die de rerank-service vereist",
+	"rerankRequestFormatCohere": "Compatibel met Cohere/Jina",
+	"rerankRequestFormatDashScope": "Compatibel met DashScope/ZenMux",
 	"listItemActionTip": "Klik met de rechtermuisknop <span class='ft__on-surface'>Menu van dit lijstitem openen</span><br>Shift+klik <span class='ft__on-surface'>Kenmerken openen</span>",
 	"bazaarRemoveRating": "Beoordeling verwijderen",
 	"bazaarRatingRemoved": "Beoordeling verwijderd",

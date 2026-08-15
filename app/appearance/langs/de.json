@@ -1,4 +1,8 @@
 {
+	"rerankRequestFormat": "Rerank-Anfrageformat",
+	"rerankRequestFormatTip": "Das vom Rerank-Dienst benötigte Anfrageformat auswählen",
+	"rerankRequestFormatCohere": "Cohere/Jina-kompatibel",
+	"rerankRequestFormatDashScope": "DashScope/ZenMux-kompatibel",
 	"listItemActionTip": "Mit der rechten Maustaste klicken <span class='ft__on-surface'>Menü dieses Listeneintrags öffnen</span><br>Shift+Klick <span class='ft__on-surface'>Attribute öffnen</span>",
 	"bazaarRemoveRating": "Bewertung entfernen",
 	"bazaarRatingRemoved": "Bewertung entfernt",

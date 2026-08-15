@@ -81,7 +81,8 @@ type OpenAIImageAdapter struct {
 	timeout time.Duration
 }
 
-func ChatGPT(msg string, contextMsgs []string, c *openai.Client, model string, maxTokens int, temperature float64, timeout int) (ret string, stop bool, err error) {
+func ChatGPT(msg string, contextMsgs []string, c *openai.Client, protocol, model string, maxTokens int,
+	temperature float64, timeout int) (ret string, stop bool, err error) {
 	var reqMsgs []openai.ChatCompletionMessage
 
 	for _, ctxMsg := range contextMsgs {
@@ -115,7 +116,7 @@ func ChatGPT(msg string, contextMsgs []string, c *openai.Client, model string, m
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
-	resp, err := c.CreateChatCompletion(ctx, req)
+	resp, err := CreateOpenAICompletion(ctx, c, protocol, req, nil)
 	if err != nil {
 		PushErrMsg("Requesting failed, please check kernel log for more details", 3000)
 		logging.LogErrorf("create chat completion failed: %s", err)
@@ -229,10 +230,10 @@ func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string) *openai.Client {
 }
 
 // TestModel 测试模型可用性。优先调用 ListModels（GET /v1/models）拉取可用模型清单，
-// 校验 model 是否在其中；若该端点不可用（部分 OpenAI 兼容服务未实现），则回退到极简 Chat Completion。
+// 校验 model 是否在其中；若该端点不可用，则按 Provider 协议回退到极简文本生成请求。
 // 返回值：available 为可用模型清单（仅 ListModels 成功时填充），matched 表示 model 是否可用，
 // err 为请求错误（鉴权失败、网络异常、模型不存在等，原样返回便于调用方展示原因）。
-func TestModel(apiKey, apiBaseURL, model string, timeout int) (available []string, matched bool, err error) {
+func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int) (available []string, matched bool, err error) {
 	if 1 > timeout {
 		timeout = 30
 	}
@@ -254,14 +255,15 @@ func TestModel(apiKey, apiBaseURL, model string, timeout int) (available []strin
 		return
 	}
 
-	// ListModels 不可用时回退到极简 Chat Completion 验证连通性与鉴权
-	logging.LogInfof("list models failed [%s], fallback to chat completion: %s", apiBaseURL, listErr)
+	// ListModels 不可用时回退到极简文本生成请求验证连通性与鉴权。
+	logging.LogInfof("list models failed [%s], fallback to text completion: %s", apiBaseURL, listErr)
 	messages := []openai.ChatCompletionMessage{{Role: "user", Content: "1"}}
-	_, err = client.CreateChatCompletion(ctx, openai.ChatCompletionRequest{
+	_, err = CreateOpenAICompletion(ctx, client, protocol, openai.ChatCompletionRequest{
 		Model:               model,
 		Messages:            messages,
 		MaxCompletionTokens: 1,
-	})
+		Temperature:         1,
+	}, nil)
 	if nil != err {
 		logging.LogErrorf("test model [%s] failed: %s", model, err)
 		return

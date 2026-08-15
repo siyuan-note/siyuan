@@ -1,4 +1,5 @@
 {
+	"apiType": "API türü",
 	"rerankRequestFormat": "Yeniden sıralama istek biçimi",
 	"rerankRequestFormatTip": "Yeniden sıralama hizmetinin gerektirdiği istek biçimini seçin",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "Maksimum bağlam sayısı",
 	"apiMaxContextsTip": "API isteği sırasında gönderilen maksimum bağlam sayısı",
 	"apiBaseURL": "API Temel Adresi",
-	"apiBaseURLTip": "API isteklerinin temel adresi, örn. <code class='fn__code'>https://api.openai.com/v1</code>. Gerçek uç nokta bu adres altındaki <code class='fn__code'>/chat/completions</code> yoludur",
+	"apiBaseURLTip": "API isteklerinin temel adresi, örneğin <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "API istekleri için temel URL, örneğin <code class='fn__code'>https://api.openai.com/v1</code>. Gerçek endpoint bu adresin altındaki <code class='fn__code'>/embeddings</code> adresidir",
 	"apiUserAgentTip": "İsteği başlatan kullanıcı aracısı (<code class='fn__code'>User-Agent</code> HTTP başlığı)",
 	"apiVersion": "API sürümü",

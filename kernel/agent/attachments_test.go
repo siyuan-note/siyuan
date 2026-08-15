@@ -654,7 +654,7 @@ func TestAgentChatSendsToolAttachmentToCurrentModel(t *testing.T) {
 	defer server.Close()
 
 	events := AgentChat(
-		context.Background(), newTestOpenAIClient(server.URL), "test-model", "", 0, testSessionID, "user-1", 1,
+		context.Background(), newTestOpenAIClient(server.URL), "openai", "test-model", "", 0, testSessionID, "user-1", 1,
 		"look at the image", nil, "English", nil, EditorContext{}, nil, false, time.Second, 0, "", time.Second, time.Second,
 	)
 	doneSeen := false

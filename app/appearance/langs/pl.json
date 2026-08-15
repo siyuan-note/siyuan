@@ -1,4 +1,5 @@
 {
+	"apiType": "Typ API",
 	"rerankRequestFormat": "Format żądania ponownego rankingu",
 	"rerankRequestFormatTip": "Wybierz format żądania wymagany przez usługę ponownego rankingu",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "Maksymalna liczba kontekstów",
 	"apiMaxContextsTip": "Maksymalna liczba kontekstów przekazywana podczas żądania API",
 	"apiBaseURL": "Podstawowy adres API",
-	"apiBaseURLTip": "Podstawowy adres dla żądań API, np. <code class='fn__code'>https://api.openai.com/v1</code>. Rzeczywisty endpoint to <code class='fn__code'>/chat/completions</code> pod tym adresem",
+	"apiBaseURLTip": "Podstawowy adres dla żądań API, np. <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "Bazowy adres URL dla żądań API, np. <code class='fn__code'>https://api.openai.com/v1</code>. Rzeczywisty punkt końcowy to <code class='fn__code'>/embeddings</code> pod tym adresem",
 	"apiUserAgentTip": "Agent użytkownika, który inicjował żądanie, tzn. nagłówek HTTP <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "Wersja API",

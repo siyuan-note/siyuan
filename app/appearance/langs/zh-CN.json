@@ -1,4 +1,5 @@
 {
+	"apiType": "API 类型",
 	"rerankRequestFormat": "重排 API 格式",
 	"rerankRequestFormatTip": "选择重排服务所需的请求格式",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "最大上下文数",
 	"apiMaxContextsTip": "请求 API 时传入的最大上下文数",
 	"apiBaseURL": "API 基础地址",
-	"apiBaseURLTip": "请求 API 的基础地址，如 <code class='fn__code'>https://api.openai.com/v1</code>，实际请求端点为该地址下的 <code class='fn__code'>/chat/completions</code>",
+	"apiBaseURLTip": "请求 API 的基础地址，如 <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "请求 API 的基础地址，如 <code class='fn__code'>https://api.openai.com/v1</code>，实际请求端点为该地址下的 <code class='fn__code'>/embeddings</code>",
 	"apiUserAgentTip": "发起请求的用户代理，即 HTTP 标头 <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "API 版本",

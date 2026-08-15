@@ -1,4 +1,5 @@
 {
+	"apiType": "API-type",
 	"rerankRequestFormat": "Rerank-aanvraagindeling",
 	"rerankRequestFormatTip": "Selecteer de aanvraagindeling die de rerank-service vereist",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "Max contexts",
 	"apiMaxContextsTip": "Maximale contexts bij API-aanroep",
 	"apiBaseURL": "API-basis-URL",
-	"apiBaseURLTip": "De basis-URL voor API-verzoeken, bijv. <code class='fn__code'>https://api.openai.com/v1</code>. Het werkelijke endpoint is <code class='fn__code'>/chat/completions</code> onder dit adres",
+	"apiBaseURLTip": "De basis-URL voor API-verzoeken, bijvoorbeeld <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "De basis-URL voor API-verzoeken, bijv. <code class='fn__code'>https://api.openai.com/v1</code>. Het werkelijke endpoint is <code class='fn__code'>/embeddings</code> onder dit adres",
 	"apiUserAgentTip": "De User-Agent die het verzoek initieert, d.w.z. de HTTP-header <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "API-versie",

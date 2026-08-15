@@ -1,4 +1,5 @@
 {
+	"apiType": "API の種類",
 	"rerankRequestFormat": "リランキングリクエスト形式",
 	"rerankRequestFormatTip": "リランキングサービスが要求するリクエスト形式を選択します",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "コンテキストの最大数",
 	"apiMaxContextsTip": "API をリクエストする際に渡されるコンテキストの最大数",
 	"apiBaseURL": "API ベース URL",
-	"apiBaseURLTip": "API リクエストのベースアドレス（例: <code class='fn__code'>https://api.openai.com/v1</code>）。実際のエンドポイントはこのアドレスの <code class='fn__code'>/chat/completions</code> です",
+	"apiBaseURLTip": "API リクエストのベース URL、例: <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "API リクエストのベースアドレス（例: <code class='fn__code'>https://api.openai.com/v1</code>）。実際のエンドポイントはこのアドレスの <code class='fn__code'>/embeddings</code> です",
 	"apiUserAgentTip": "API のリクエストに使われるユーザーエージェント <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "API バージョン",

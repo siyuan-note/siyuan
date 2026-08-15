@@ -56,7 +56,7 @@ func TestKeylessModelFallsBackToChatCompletion(t *testing.T) {
 	}))
 	defer server.Close()
 
-	_, matched, err := TestModel("", server.URL+"/v1", "test-model", 5)
+	_, matched, err := TestModel("", server.URL+"/v1", OpenAIProtocolChatCompletions, "test-model", 5)
 	if err != nil || !matched || chatRequests.Load() != 1 {
 		t.Fatalf("unexpected model test result: matched=%v requests=%d err=%v", matched, chatRequests.Load(), err)
 	}

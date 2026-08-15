@@ -1,4 +1,5 @@
 {
+	"apiType": "Tipo de API",
 	"rerankRequestFormat": "Formato de solicitud de reordenación",
 	"rerankRequestFormatTip": "Selecciona el formato de solicitud requerido por el servicio de reordenación",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "Número máximo de contextos",
 	"apiMaxContextsTip": "El número máximo de contextos pasados ​​al solicitar la API",
 	"apiBaseURL": "URL base de la API",
-	"apiBaseURLTip": "La dirección base para las solicitudes API, p. ej., <code class='fn__code'>https://api.openai.com/v1</code>. El endpoint real es <code class='fn__code'>/chat/completions</code> bajo esta dirección",
+	"apiBaseURLTip": "La dirección base para las solicitudes API, p. ej., <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "La URL base para las solicitudes de API, por ejemplo <code class='fn__code'>https://api.openai.com/v1</code>. El endpoint real es <code class='fn__code'>/embeddings</code> bajo esta dirección",
 	"apiUserAgentTip": "El agente de usuario que inició la solicitud, es decir, el encabezado HTTP <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "Versión API",

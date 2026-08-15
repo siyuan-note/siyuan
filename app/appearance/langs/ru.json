@@ -1,4 +1,5 @@
 {
+	"apiType": "Тип API",
 	"rerankRequestFormat": "Формат запроса переранжирования",
 	"rerankRequestFormatTip": "Выберите формат запроса, необходимый сервису переранжирования",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "Максимальное количество контекстов",
 	"apiMaxContextsTip": "Максимальное количество контекстов переданное в запросе к API",
 	"apiBaseURL": "Базовый URL API",
-	"apiBaseURLTip": "Базовый адрес для запросов API, например <code class='fn__code'>https://api.openai.com/v1</code>. Фактический эндпоинт — <code class='fn__code'>/chat/completions</code> по этому адресу",
+	"apiBaseURLTip": "Базовый адрес для запросов API, например <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "Базовый URL для запросов API, например <code class='fn__code'>https://api.openai.com/v1</code>. Фактическая конечная точка — <code class='fn__code'>/embeddings</code> по этому адресу",
 	"apiUserAgentTip": "Пользовательский агент, инициировавший запрос, то есть HTTP заголовок <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "Версия API",

@@ -1,4 +1,5 @@
 {
+	"apiType": "API-Typ",
 	"rerankRequestFormat": "Rerank-Anfrageformat",
 	"rerankRequestFormatTip": "Das vom Rerank-Dienst benötigte Anfrageformat auswählen",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "Maximale Anzahl von Kontexten",
 	"apiMaxContextsTip": "Die maximale Anzahl von Kontexten, die bei der Anfrage an die API übergeben wird.",
 	"apiBaseURL": "API-Basis-URL",
-	"apiBaseURLTip": "Die Basisadresse für API-Anfragen, z. B. <code class='fn__code'>https://api.openai.com/v1</code>. Der tatsächliche Endpunkt ist <code class='fn__code'>/chat/completions</code> unter dieser Adresse",
+	"apiBaseURLTip": "Die Basisadresse für API-Anfragen, z. B. <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "Die Basis-URL für API-Anfragen, z. B. <code class='fn__code'>https://api.openai.com/v1</code>, der tatsächliche Endpunkt ist <code class='fn__code'>/embeddings</code> unter dieser Adresse",
 	"apiUserAgentTip": "Der User-Agent, der die Anfrage initiiert, d. h. der HTTP-Header <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "API-Version",

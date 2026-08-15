@@ -1,4 +1,5 @@
 {
+	"apiType": "Typ API",
 	"rerankRequestFormat": "Formát požiadavky na pretriedenie",
 	"rerankRequestFormatTip": "Vyberte formát požiadavky vyžadovaný službou pretriedenia",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "Maximum kontextov",
 	"apiMaxContextsTip": "Max počet kontextov odoslaných do API",
 	"apiBaseURL": "Základná URL API",
-	"apiBaseURLTip": "Napríklad <code class='fn__code'>https://api.openai.com/v1</code>. Skutočný endpoint je <code class='fn__code'>/chat/completions</code> na tejto adrese",
+	"apiBaseURLTip": "Základná adresa pre požiadavky API, napríklad <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "Základná adresa URL pre žiadosti API, napr. <code class='fn__code'>https://api.openai.com/v1</code>. Skutočný endpoint je <code class='fn__code'>/embeddings</code> pod touto adresou",
 	"apiUserAgentTip": "User agent, ktorý inicioval požiadavku, teda HTTP hlavička <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "Verzia API",

@@ -1,4 +1,5 @@
 {
+	"apiType": "סוג API",
 	"rerankRequestFormat": "פורמט בקשת סידור מחדש",
 	"rerankRequestFormatTip": "בחרו את פורמט הבקשה הנדרש על ידי שירות הסידור מחדש",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "מספר המקסימום של הקשרים",
 	"apiMaxContextsTip": "מספר המקסימום של ההקשרים שנשלחים בעת בקשת ה-API",
 	"apiBaseURL": "כתובת בסיס של API",
-	"apiBaseURLTip": "כתובת הבסיס לבקשות API, למשל <code class='fn__code'>https://api.openai.com/v1</code>. נקודת הקצה בפועל היא <code class='fn__code'>/chat/completions</code> תחת כתובת זו",
+	"apiBaseURLTip": "כתובת הבסיס לבקשות API, למשל <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "כתובת הבסיס לבקשות API, למשל <code class='fn__code'>https://api.openai.com/v1</code>. נקודת הקצה בפועל היא <code class='fn__code'>/embeddings</code> תחת כתובת זו",
 	"apiUserAgentTip": "סוכן המשתמש שהוזמן, כלומר קוד HTTP <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "גרסת API",

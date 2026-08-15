@@ -1,4 +1,5 @@
 {
+	"apiType": "ประเภท API",
 	"rerankRequestFormat": "รูปแบบคำขอจัดอันดับใหม่",
 	"rerankRequestFormatTip": "เลือกรูปแบบคำขอที่บริการจัดอันดับใหม่ต้องการ",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "บริบทสูงสุด",
 	"apiMaxContextsTip": "จำนวนบริบทสูงสุดที่ส่งเมื่อเรียก API",
 	"apiBaseURL": "URL ฐาน API",
-	"apiBaseURLTip": "URL ฐานสำหรับคำขอ API เช่น <code class='fn__code'>https://api.openai.com/v1</code> จุดปลายทางจริงคือ <code class='fn__code'>/chat/completions</code> ภายใต้ที่อยู่นี้",
+	"apiBaseURLTip": "URL ฐานสำหรับคำขอ API เช่น <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "URL พื้นฐานสำหรับคำขอ API เช่น <code class='fn__code'>https://api.openai.com/v1</code> โดย endpoint จริงคือ <code class='fn__code'>/embeddings</code> ภายใต้ที่อยู่นี้",
 	"apiUserAgentTip": "User-Agent ที่เริ่มต้นคำขอ คือส่วนหัว HTTP <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "เวอร์ชัน API",

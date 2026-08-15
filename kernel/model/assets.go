@@ -480,7 +480,8 @@ func validateImageModel(provider *conf.Provider, imageModel *conf.Model) error {
 	if provider == nil || imageModel == nil {
 		return errors.New("image model is not configured")
 	}
-	if provider.Protocol != "" && provider.Protocol != "openai" {
+	if provider.Protocol != "" && provider.Protocol != util.OpenAIProtocolChatCompletions &&
+		provider.Protocol != util.OpenAIProtocolResponses {
 		return fmt.Errorf("unsupported multimodal provider protocol: %s", provider.Protocol)
 	}
 	return nil

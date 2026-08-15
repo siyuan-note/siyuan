@@ -252,7 +252,7 @@ func removeAIEditorAction(c *gin.Context) {
 
 // testModel 测试 AI 模型可用性。使用已保存的 Provider 或详情页草稿中的 baseURL/APIKey/超时，
 // 校验指定模型是否可用。优先通过 ListModels 拉取可用模型清单精确匹配，
-// 若该端点不可用则回退到极简 Chat Completion 验证连通性。
+// 若该端点不可用则按 Provider 协议回退到极简文本生成请求验证连通性。
 func testModel(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -277,7 +277,8 @@ func testModel(c *gin.Context) {
 		return
 	}
 
-	available, matched, err := util.TestModel(provider.APIKey, provider.BaseURL, modelName, provider.RequestTimeout)
+	available, matched, err := util.TestModel(
+		provider.APIKey, provider.BaseURL, provider.Protocol, modelName, provider.RequestTimeout)
 	// 可用模型清单裁剪到前 50 条，避免响应体过大
 	if 50 < len(available) {
 		available = available[:50]

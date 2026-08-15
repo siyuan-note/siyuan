@@ -573,7 +573,7 @@ func (ai *AI) Normalize() {
 		p.APIKey = strings.TrimSpace(p.APIKey)
 		p.Protocol = strings.ToLower(strings.TrimSpace(p.Protocol))
 		if p.Protocol == "" {
-			p.Protocol = "openai"
+			p.Protocol = util.OpenAIProtocolChatCompletions
 		}
 		if 1 > p.RequestTimeout {
 			p.RequestTimeout = 120

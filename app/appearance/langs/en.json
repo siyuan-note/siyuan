@@ -1,4 +1,5 @@
 {
+	"apiType": "API type",
 	"rerankRequestFormat": "Rerank request format",
 	"rerankRequestFormatTip": "Select the request format required by the rerank service",
 	"rerankRequestFormatCohere": "Cohere/Jina",
@@ -1200,7 +1201,7 @@
 	"apiMaxContexts": "Maximum number of contexts",
 	"apiMaxContextsTip": "The maximum number of contexts passed in when requesting the API",
 	"apiBaseURL": "API Base URL",
-	"apiBaseURLTip": "The base URL for API requests, For example, , <code class='fn__code'>https://api.openai.com/v1</code>. The actual endpoint is <code class='fn__code'>/chat/completions</code> under this address",
+	"apiBaseURLTip": "The base URL for API requests, for example <code class='fn__code'>https://api.openai.com/v1</code>",
 	"apiBaseURLEmbeddingTip": "The base URL for API requests, For example, <code class='fn__code'>https://api.openai.com/v1</code>. The actual endpoint is <code class='fn__code'>/embeddings</code> under this address",
 	"apiUserAgentTip": "The user agent that initiated the request, that is, the HTTP header <code class='fn__code'>User-Agent</code>",
 	"apiVersion": "API version",

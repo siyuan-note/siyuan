@@ -501,6 +501,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     let siyuanHTML: string;
     let files: FileList | DataTransferItemList | File[];
     let vscodeEditorData = "";
+    let mathML = "";
+    let office = "";
     let wps = "";
     if ("clipboardData" in event) {
         textHTML = event.clipboardData.getData("text/html");
@@ -532,10 +534,20 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
 
     /// #if !BROWSER
     if (!("dataTransfer" in event) && !siyuanHTML && textHTML && textPlain) {
-        wps = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-            cmd: "clipboardReadWPS",
-            text: textPlain,
-        });
+        [mathML, office, wps] = await Promise.all([
+            ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "clipboardReadMathML",
+                text: textPlain,
+            }),
+            ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "clipboardReadOffice",
+                text: textPlain,
+            }),
+            ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: "clipboardReadWPS",
+                text: textPlain,
+            }),
+        ]);
     }
     if (!siyuanHTML && !textHTML && !textPlain && ("clipboardData" in event)) {
         const localFiles: ILocalFiles[] = await getLocalFiles();
@@ -611,6 +623,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 siyuanHTML = normalizedResponse.siyuanHTML;
                 files = normalizedResponse.files;
                 originalTextHTML = textHTML;
+                mathML = "";
+                office = "";
                 wps = "";
             }
         }
@@ -916,6 +930,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             fetchPost("/api/lute/html2BlockDOM", {
                 dom: tempElement.innerHTML,
                 text: textPlain,
+                mathML,
+                office,
                 wps,
             }, (response) => {
                 insertHTML(response.data, protyle, false, false, true);

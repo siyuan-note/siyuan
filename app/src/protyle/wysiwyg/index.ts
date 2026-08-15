@@ -1004,6 +1004,8 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            // 常规划选时排除属性占位，三击时恢复以保留浏览器的整段选择行为
+            this.element.classList.toggle("protyle-wysiwyg--select-attr", event.button === 0 && event.detail > 2);
             if (protyle.toolbar.isMultiSelectMode()) {
                 event.preventDefault();
                 event.stopPropagation();

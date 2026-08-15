@@ -37,7 +37,7 @@ import {
 import {removeBlock} from "../wysiwyg/remove";
 import {focusBlock, focusByRange, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
-import {shouldHideGutterAfterFold} from "../ui/gutterVisibility";
+import {markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {
@@ -428,7 +428,7 @@ export class Gutter {
                         (buttonElement.firstElementChild as HTMLElement).style.transform = "rotate(90deg)";
                     }
                 }
-                if (shouldHideGutterAfterFold(foldStatus)) {
+                if (!markGutterForFoldRestore(this.element, foldElement.getAttribute("data-node-id"), foldStatus)) {
                     hideElements(["gutter"], protyle);
                 }
                 hideElements(["select"], protyle);

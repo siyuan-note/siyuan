@@ -1151,6 +1151,8 @@
     padding-left: max(8px, env(safe-area-inset-left));
     padding-right: max(4px, env(safe-area-inset-right));
     border-bottom: .5px solid var(--b3-theme-background-light);
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   .agent-chat__title {

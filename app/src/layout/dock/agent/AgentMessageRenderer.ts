@@ -15,6 +15,7 @@ import {openLink} from "../../../editor/openLink";
 import {previewImages} from "../../../protyle/preview/image";
 import {getDiagramBlock, previewDiagram} from "../../../protyle/preview/diagram";
 import {removeCompressURL} from "../../../util/image";
+import {writeClipboardData} from "../../../protyle/util/compatibility";
 /// #if !MOBILE
 import {openGlobalSearch} from "../../../search/util";
 /// #else
@@ -248,6 +249,18 @@ export const addCopyButtons = (container: HTMLElement): void => {
     });
 };
 
+export const copyAgentText = async (text: string) => {
+    const result = await writeClipboardData({textPlain: text});
+    if (result.error) {
+        console.log("Write Agent clipboard error:", result.error);
+    }
+    if (result.status === "failed") {
+        showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+        return;
+    }
+    showMessage(window.siyuan.languages.copied, 2000);
+};
+
 // 构建单个复制按钮，getText 返回要复制的文本。
 const createCopyButton = (getText: () => string): HTMLElement => {
     const btn = document.createElement("span");
@@ -257,12 +270,7 @@ const createCopyButton = (getText: () => string): HTMLElement => {
     btn.setAttribute("data-position", "4north");
     btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const text = getText();
-        navigator.clipboard.writeText(text).then(() => {
-            showMessage(window.siyuan.languages.copied, 2000);
-        }).catch(() => {
-            showMessage(window.siyuan.languages.copied, 2000);
-        });
+        void copyAgentText(getText());
     });
     return btn;
 };

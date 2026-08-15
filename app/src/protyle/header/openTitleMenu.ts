@@ -2,7 +2,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, openFileWechatNotify,} from "../../menus/commonMenuItem";
 import {deleteFile} from "../../editor/deleteFile";
-import {encodeBase64, updateHotkeyTip} from "../util/compatibility";
+import {updateHotkeyTip, writeClipboardData} from "../util/compatibility";
 /// #if !MOBILE
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 import * as path from "path";
@@ -26,7 +26,7 @@ import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {openFileById} from "../../editor/util";
 import {hasTopClosestByClassName} from "../util/hasClosest";
 import {showMessage} from "../../dialog/message";
-import {removeZWJ} from "../util/normalizeText";
+import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
     hideTooltip();
@@ -69,13 +69,19 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     })
                 ]);
 
-                const textHTML = `<!--data-siyuan='${encodeBase64(responseHTML.data.dom)}'-->${removeZWJ(responseHTML.data.dom)}`;
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        "text/plain": new Blob([responseText.data.content], {type: "text/plain"}),
-                        "text/html": new Blob([textHTML], {type: "text/html"}),
-                    })
-                ]);
+                const {textHTML, textSiyuan} = buildBlockDOMClipboardRichData(protyle.lute, responseHTML.data.dom);
+                const result = await writeClipboardData({
+                    textPlain: responseText.data.content,
+                    textHTML,
+                    textSiyuan,
+                });
+                if (result.error) {
+                    console.log("Write document clipboard error:", result.error);
+                }
+                if (result.status === "failed") {
+                    showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+                    return;
+                }
 
                 showMessage(window.siyuan.languages.copied);
             }

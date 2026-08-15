@@ -425,16 +425,20 @@ func IsNetworkError(err error) bool {
 var (
 	embeddingHTTPClientOnce sync.Once
 	embeddingHTTPClient     *http.Client
+	embeddingHTTPTransport  *http.Transport
+	openAITransportMu       sync.Mutex
 )
 
 func getEmbeddingHTTPClient() *http.Client {
 	embeddingHTTPClientOnce.Do(func() {
-		transport := &http.Transport{
-			MaxConnsPerHost:     4, // 同一 embedding endpoint 的并发连接上限
-			MaxIdleConns:        8,
-			MaxIdleConnsPerHost: 4,
-			IdleConnTimeout:     90 * time.Second,
-		}
+		transport := httpclient.NewTransport(false)
+		transport.MaxConnsPerHost = 4 // 同一 embedding endpoint 的并发连接上限
+		transport.MaxIdleConns = 8
+		transport.MaxIdleConnsPerHost = 4
+		transport.IdleConnTimeout = 90 * time.Second
+		openAITransportMu.Lock()
+		embeddingHTTPTransport = transport
+		openAITransportMu.Unlock()
 		embeddingHTTPClient = httpclient.NewUserAgentClient(transport)
 	})
 	return embeddingHTTPClient
@@ -476,6 +480,7 @@ const rerankDocTextMaxRunes = 4000
 var (
 	rerankHTTPClientOnce sync.Once
 	rerankHTTPClient     *http.Client
+	rerankHTTPTransport  *http.Transport
 )
 
 func getRerankHTTPClient() *http.Client {
@@ -485,9 +490,23 @@ func getRerankHTTPClient() *http.Client {
 		transport.MaxIdleConns = 8
 		transport.MaxIdleConnsPerHost = 4
 		transport.IdleConnTimeout = 90 * time.Second
+		openAITransportMu.Lock()
+		rerankHTTPTransport = transport
+		openAITransportMu.Unlock()
 		rerankHTTPClient = httpclient.NewUserAgentClient(transport)
 	})
 	return rerankHTTPClient
+}
+
+func closeOpenAIIdleConnections() {
+	openAITransportMu.Lock()
+	defer openAITransportMu.Unlock()
+	if embeddingHTTPTransport != nil {
+		embeddingHTTPTransport.CloseIdleConnections()
+	}
+	if rerankHTTPTransport != nil {
+		rerankHTTPTransport.CloseIdleConnections()
+	}
 }
 
 // rerankRequest 对应主流重排服务的 /rerank 请求体（Jina/Cohere/阿里云 compatible-api 等）。

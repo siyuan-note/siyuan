@@ -17,6 +17,10 @@
 package util
 
 import (
+	"bufio"
+	"context"
+	"crypto/tls"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -26,9 +30,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/siyuan-note/httpclient"
+	golangProxy "golang.org/x/net/proxy"
 )
 
 const (
@@ -54,16 +60,240 @@ func CheckHostSSRF(host string) error {
 	return nil
 }
 
-// ssrfSafeClient 是智能体出站请求专用的 HTTP 客户端：保留 httpclient 的统一 UA 注入与传输配置，
-// 拨号走 ssrfSafeDialContext，连接阶段无条件拦截私网地址（不依赖 SafeMode），
-// 防止 CheckHostSSRF 与拨号之间的 DNS 重绑定 TOCTOU 绕过。
+// ssrfSafeClient 是智能体出站请求专用的 HTTP 客户端：直连时将目标固定到已校验的公网 IP，
+// 使用代理时则先与用户配置的代理建立隧道，再通过隧道连接固定后的目标 IP，同时保留原始 Host 和 TLS SNI。
+// 两种方式都不会在校验后再次按目标域名解析，避免 DNS 重绑定 TOCTOU 绕过。
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-x8gv-g2g3-65fj
 var ssrfSafeClient = newSSRFSafeClient()
 
 func newSSRFSafeClient() *http.Client {
-	transport := httpclient.NewTransport(false)
-	transport.DialContext = ssrfSafeDialContext(30 * time.Second)
+	return newSSRFSafeClientWithResolver(net.DefaultResolver.LookupIPAddr)
+}
+
+type lookupIPAddrFunc func(context.Context, string) ([]net.IPAddr, error)
+
+type ssrfSafeTransport struct {
+	directTransport *http.Transport
+	lookupIPAddr    lookupIPAddrFunc
+}
+
+func newSSRFSafeClientWithResolver(lookupIPAddr lookupIPAddrFunc) *http.Client {
+	directTransport := httpclient.NewTransport(false)
+	directTransport.Proxy = nil
+	directTransport.DialContext = ssrfSafeDialContext(30 * time.Second)
+	transport := &ssrfSafeTransport{directTransport: directTransport, lookupIPAddr: lookupIPAddr}
 	return &http.Client{Timeout: 30 * time.Second, Transport: &httpclient.UserAgentTransport{Base: transport}}
+}
+
+func (t *ssrfSafeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	proxyURL, err := httpclient.ProxyFromEnvironment(req)
+	if err != nil {
+		return nil, err
+	}
+	if proxyURL == nil {
+		return t.directTransport.RoundTrip(req)
+	}
+
+	targetAddr, err := t.resolvePublicTarget(req.Context(), req.URL)
+	if err != nil {
+		return nil, err
+	}
+	conn, reader, err := dialProxyTunnel(req.Context(), proxyURL, targetAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.URL.Scheme == "https" {
+		if reader.Buffered() != 0 {
+			conn.Close()
+			return nil, errors.New("proxy returned unexpected tunnel data")
+		}
+		tlsConn := tls.Client(conn, &tls.Config{ServerName: req.URL.Hostname(), NextProtos: []string{"http/1.1"}})
+		if err = tlsConn.HandshakeContext(req.Context()); err != nil {
+			conn.Close()
+			return nil, err
+		}
+		conn = tlsConn
+		reader = bufio.NewReader(conn)
+	}
+
+	targetReq := req.Clone(req.Context())
+	targetReq.URL = cloneURL(req.URL)
+	targetReq.URL.Scheme = ""
+	targetReq.URL.Host = ""
+	targetReq.RequestURI = ""
+	targetReq.Header.Del("Proxy-Authorization")
+	if targetReq.Host == "" {
+		targetReq.Host = req.URL.Host
+	}
+	if err = targetReq.Write(conn); err != nil {
+		conn.Close()
+		return nil, err
+	}
+	resp, err := http.ReadResponse(reader, targetReq)
+	if err != nil {
+		conn.Close()
+		return nil, err
+	}
+	resp.Request = req
+	resp.Body = newConnectionReadCloser(req.Context(), resp.Body, conn)
+	return resp, nil
+}
+
+func (t *ssrfSafeTransport) resolvePublicTarget(ctx context.Context, targetURL *url.URL) (string, error) {
+	host := targetURL.Hostname()
+	port := targetURL.Port()
+	if port == "" {
+		switch targetURL.Scheme {
+		case "http":
+			port = "80"
+		case "https":
+			port = "443"
+		default:
+			return "", errors.New("URL must start with http:// or https://")
+		}
+	}
+
+	if ip := net.ParseIP(host); ip != nil {
+		if isPrivateIP(ip) {
+			return "", errors.New("access to private/internal IP is prohibited")
+		}
+		return net.JoinHostPort(ip.String(), port), nil
+	}
+
+	ips, err := t.lookupIPAddr(ctx, host)
+	if err != nil {
+		return "", errors.New("failed to resolve host: " + err.Error())
+	}
+	if len(ips) == 0 {
+		return "", errors.New("host has no IP address: " + host)
+	}
+	for _, ipAddr := range ips {
+		if isPrivateIP(ipAddr.IP) {
+			return "", errors.New("access to private/internal IP is prohibited")
+		}
+	}
+	return net.JoinHostPort(ips[0].IP.String(), port), nil
+}
+
+func cloneURL(src *url.URL) *url.URL {
+	ret := *src
+	return &ret
+}
+
+func dialProxyTunnel(ctx context.Context, proxyURL *url.URL, targetAddr string) (net.Conn, *bufio.Reader, error) {
+	proxyAddr, err := proxyAddress(proxyURL)
+	if err != nil {
+		return nil, nil, err
+	}
+	dialer := &net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}
+	if strings.EqualFold(proxyURL.Scheme, "socks5") || strings.EqualFold(proxyURL.Scheme, "socks5h") {
+		var auth *golangProxy.Auth
+		if proxyURL.User != nil {
+			password, _ := proxyURL.User.Password()
+			auth = &golangProxy.Auth{User: proxyURL.User.Username(), Password: password}
+		}
+		socksDialer, err := golangProxy.SOCKS5("tcp", proxyAddr, auth, dialer)
+		if err != nil {
+			return nil, nil, err
+		}
+		contextDialer, ok := socksDialer.(golangProxy.ContextDialer)
+		if !ok {
+			return nil, nil, errors.New("SOCKS5 proxy does not support context dialing")
+		}
+		conn, err := contextDialer.DialContext(ctx, "tcp", targetAddr)
+		if err != nil {
+			return nil, nil, err
+		}
+		return conn, bufio.NewReader(conn), nil
+	}
+
+	conn, err := dialer.DialContext(ctx, "tcp", proxyAddr)
+	if err != nil {
+		return nil, nil, err
+	}
+	if strings.EqualFold(proxyURL.Scheme, "https") {
+		tlsConn := tls.Client(conn, &tls.Config{ServerName: proxyURL.Hostname(), NextProtos: []string{"http/1.1"}})
+		if err = tlsConn.HandshakeContext(ctx); err != nil {
+			conn.Close()
+			return nil, nil, err
+		}
+		conn = tlsConn
+	}
+
+	connectReq := &http.Request{
+		Method: http.MethodConnect,
+		URL:    &url.URL{Opaque: targetAddr},
+		Host:   targetAddr,
+		Header: make(http.Header),
+	}
+	if proxyURL.User != nil {
+		password, _ := proxyURL.User.Password()
+		credentials := proxyURL.User.Username() + ":" + password
+		connectReq.Header.Set("Proxy-Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(credentials)))
+	}
+	if err = connectReq.Write(conn); err != nil {
+		conn.Close()
+		return nil, nil, err
+	}
+	reader := bufio.NewReader(conn)
+	resp, err := http.ReadResponse(reader, connectReq)
+	if err != nil {
+		conn.Close()
+		return nil, nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		conn.Close()
+		return nil, nil, fmt.Errorf("proxy CONNECT returned %s", resp.Status)
+	}
+	return conn, reader, nil
+}
+
+func proxyAddress(proxyURL *url.URL) (string, error) {
+	port := proxyURL.Port()
+	if port == "" {
+		switch strings.ToLower(proxyURL.Scheme) {
+		case "http":
+			port = "80"
+		case "https":
+			port = "443"
+		case "socks5", "socks5h":
+			port = "1080"
+		default:
+			return "", errors.New("agent HTTP tools support HTTP, HTTPS and SOCKS5 proxies")
+		}
+	}
+	return net.JoinHostPort(proxyURL.Hostname(), port), nil
+}
+
+type connectionReadCloser struct {
+	io.ReadCloser
+	conn      net.Conn
+	done      chan struct{}
+	closeOnce sync.Once
+	closeErr  error
+}
+
+func newConnectionReadCloser(ctx context.Context, body io.ReadCloser, conn net.Conn) *connectionReadCloser {
+	ret := &connectionReadCloser{ReadCloser: body, conn: conn, done: make(chan struct{})}
+	go func() {
+		select {
+		case <-ctx.Done():
+			conn.Close()
+		case <-ret.done:
+		}
+	}()
+	return ret
+}
+
+func (c *connectionReadCloser) Close() error {
+	c.closeOnce.Do(func() {
+		close(c.done)
+		c.closeErr = c.ReadCloser.Close()
+		c.conn.Close()
+	})
+	return c.closeErr
 }
 
 // HTTPRequest 发起一次通用 HTTP 调用，供智能体 http_request 工具使用。

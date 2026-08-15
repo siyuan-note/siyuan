@@ -1129,6 +1129,10 @@
   overflow-y: auto;
 }
 
+.protyle-hint--agent-overlay {
+  font-size: var(--b3-font-size);
+}
+
 #model.model--agent {
   > .toolbar {
     display: none;

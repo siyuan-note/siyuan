@@ -4769,6 +4769,16 @@ export class WYSIWYG {
                     newRange.collapse(false);
                     focusByRange(newRange);
                 }
+                const tripleClickBlockElement = event.detail > 2 && hasClosestBlock(event.target);
+                if (tripleClickBlockElement &&
+                    ["NodeParagraph", "NodeHeading"].includes(tripleClickBlockElement.getAttribute("data-type")) &&
+                    tripleClickBlockElement.querySelector('[data-type~="inline-math"]')) {
+                    // 浏览器完成三击选区后，将行级公式截断的选区补齐到整个段落或标题
+                    const editableElement = getContenteditableElement(tripleClickBlockElement);
+                    setFirstNodeRange(editableElement, newRange);
+                    setLastNodeRange(editableElement, newRange, false);
+                    focusByRange(newRange);
+                }
                 /// #if !MOBILE
                 if (newRange.toString().replace(Constants.ZWSP, "") !== "") {
                     const paintedRange = formatPainter.paint(protyle, newRange);

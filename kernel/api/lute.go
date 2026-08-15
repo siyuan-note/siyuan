@@ -105,10 +105,13 @@ func html2BlockDOM(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	text, _ := arg["text"].(string)
+	wps, _ := arg["wps"].(string)
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
-	// 将 Word 批注转换为行级备注 https://github.com/siyuan-note/siyuan/issues/18748
+	// 将 Word 和 WPS 批注转换为行级备注 https://github.com/siyuan-note/siyuan/issues/18748
+	dom = normalizeWPSComments(dom, text, wps)
 	dom = normalizeMSWordComments(dom)
 	tree, _ := model.HTML2Tree(dom, luteEngine, boxID)
 	if nil == tree {

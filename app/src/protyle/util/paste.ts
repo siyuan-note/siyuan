@@ -26,6 +26,9 @@ import {refreshSbAndPersistWidth} from "../../block/util";
 import {extractCrossBlockPasteContext, shouldPreservePastedBlockStructure} from "./pasteSource";
 import {normalizePasteResponse} from "./pasteResponse";
 import {applyLuteMarkdownSyntax} from "../render/luteMarkdownSyntax";
+/// #if !BROWSER
+import {ipcRenderer} from "electron";
+/// #endif
 
 export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement) => {
     // 链接，备注，样式，引用，pdf标注粘贴 https://github.com/siyuan-note/siyuan/issues/11572
@@ -498,6 +501,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     let siyuanHTML: string;
     let files: FileList | DataTransferItemList | File[];
     let vscodeEditorData = "";
+    let wps = "";
     if ("clipboardData" in event) {
         textHTML = event.clipboardData.getData("text/html");
         textPlain = event.clipboardData.getData("text/plain");
@@ -527,6 +531,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     textPlain = textPlain.replace(/\r\n|\r|\u2028|\u2029/g, "\n");
 
     /// #if !BROWSER
+    if (!("dataTransfer" in event) && !siyuanHTML && textHTML && textPlain) {
+        wps = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+            cmd: "clipboardReadWPS",
+            text: textPlain,
+        });
+    }
     if (!siyuanHTML && !textHTML && !textPlain && ("clipboardData" in event)) {
         const localFiles: ILocalFiles[] = await getLocalFiles();
         if (localFiles.length > 0) {
@@ -601,6 +611,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 siyuanHTML = normalizedResponse.siyuanHTML;
                 files = normalizedResponse.files;
                 originalTextHTML = textHTML;
+                wps = "";
             }
         }
     }
@@ -903,7 +914,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 return;
             }
             fetchPost("/api/lute/html2BlockDOM", {
-                dom: tempElement.innerHTML
+                dom: tempElement.innerHTML,
+                text: textPlain,
+                wps,
             }, (response) => {
                 insertHTML(response.data, protyle, false, false, true);
                 protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {

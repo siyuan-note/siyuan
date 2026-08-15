@@ -1645,6 +1645,26 @@ app.whenReady().then(() => {
         if (data.cmd === "clipboardRead") {
             return clipboard.read(data.format);
         }
+        if (data.cmd === "clipboardReadWPS") {
+            if (typeof data.text !== "string" ||
+                normalizeClipboardText(clipboard.readText()) !== normalizeClipboardText(data.text)) {
+                return "";
+            }
+            const formats = clipboard.availableFormats().filter((format) =>
+                /kingsoft.*wps.*format/i.test(format));
+            formats.push("Kingsoft WPS Format");
+            for (let version = 6; version <= 20; version++) {
+                formats.push(`Kingsoft WPS ${version}.0 Format`);
+            }
+            // availableFormats 可能不包含 WPS 原生格式，需要尝试常见格式名
+            for (const format of new Set(formats)) {
+                const buffer = clipboard.readBuffer(format);
+                if (buffer.length <= 8 * 1024 * 1024 && buffer[0] === 0x50 && buffer[1] === 0x4b) {
+                    return buffer.toString("base64");
+                }
+            }
+            return "";
+        }
         if (data.cmd === "beginRichClipboard") {
             richClipboardOperation = undefined;
             const text = clipboard.readText();

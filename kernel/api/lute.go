@@ -17,6 +17,7 @@
 package api
 
 import (
+	"html"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -27,6 +28,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -106,6 +108,8 @@ func html2BlockDOM(c *gin.Context) {
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
+	// 将 Word 批注转换为行级备注 https://github.com/siyuan-note/siyuan/issues/18748
+	dom = normalizeMSWordComments(dom)
 	tree, _ := model.HTML2Tree(dom, luteEngine, boxID)
 	if nil == tree {
 		ret.Data = "Failed to convert"
@@ -232,6 +236,83 @@ func html2BlockDOM(c *gin.Context) {
 	renderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	output := renderer.Render()
 	ret.Data = gulu.Str.FromBytes(output)
+}
+
+func normalizeMSWordComments(dom string) string {
+	if !strings.Contains(dom, "mso-comment") && !strings.Contains(dom, "MsoComment") && !strings.Contains(dom, "msocom") {
+		return dom
+	}
+
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(dom))
+	if err != nil {
+		return dom
+	}
+
+	comments := map[string]string{}
+	doc.Find(`[id^="_com_"]`).Each(func(_ int, comment *goquery.Selection) {
+		id, _ := comment.Attr("id")
+		var paragraphs []string
+		comment.Find(".MsoCommentText").Each(func(_ int, paragraph *goquery.Selection) {
+			paragraph = paragraph.Clone()
+			paragraph.Find(".MsoCommentReference, .msocomoff").Remove()
+			if text := strings.TrimSpace(paragraph.Text()); text != "" {
+				paragraphs = append(paragraphs, text)
+			}
+		})
+		if 0 < len(paragraphs) {
+			comments[strings.TrimPrefix(id, "_com_")] = strings.Join(paragraphs, "\n")
+		}
+	})
+
+	doc.Find("a[style]").Each(func(_ int, anchor *goquery.Selection) {
+		style, _ := anchor.Attr("style")
+		if !strings.Contains(strings.ToLower(style), "mso-comment-reference:") {
+			return
+		}
+		if href, exists := anchor.Attr("href"); exists && href != "" {
+			return
+		}
+
+		content, err := anchor.Html()
+		if err != nil {
+			return
+		}
+		comment := comments[msWordCommentID(anchor, style)]
+		if comment == "" {
+			anchor.ReplaceWithHtml(content)
+			return
+		}
+		anchor.ReplaceWithHtml(`<span title="` + html.EscapeString(comment) + `">` + content + `</span>`)
+	})
+
+	doc.Find(".MsoCommentReference, .msocomanchor, .msocomoff").Remove()
+	doc.Find("[style]").Each(func(_ int, selection *goquery.Selection) {
+		style, _ := selection.Attr("style")
+		if strings.Contains(strings.ToLower(style), "mso-element:comment-list") {
+			selection.Remove()
+		}
+	})
+
+	ret, err := doc.Find("body").Html()
+	if err != nil {
+		return dom
+	}
+	return ret
+}
+
+func msWordCommentID(anchor *goquery.Selection, style string) string {
+	if href, exists := anchor.Next().Find(`a[href^="#_msocom_"]`).First().Attr("href"); exists {
+		return strings.TrimPrefix(href, "#_msocom_")
+	}
+
+	style = style[strings.Index(strings.ToLower(style), "mso-comment-reference:")+len("mso-comment-reference:"):]
+	if semicolon := strings.IndexByte(style, ';'); 0 <= semicolon {
+		style = style[:semicolon]
+	}
+	if underscore := strings.LastIndexByte(style, '_'); 0 <= underscore {
+		return strings.TrimSpace(style[underscore+1:])
+	}
+	return ""
 }
 
 func spinBlockDOM(c *gin.Context) {

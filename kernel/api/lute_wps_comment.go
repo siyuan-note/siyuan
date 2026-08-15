@@ -107,8 +107,12 @@ func normalizeWPSComments(dom, text, encoded string) string {
 	if len(nodeRanges) == 0 {
 		return dom
 	}
+	var commentSpans []*nethtml.Node
 	for node, ranges := range nodeRanges {
-		wrapWPSCommentRanges(node, ranges)
+		commentSpans = append(commentSpans, wrapWPSCommentRanges(node, ranges)...)
+	}
+	for _, span := range commentSpans {
+		liftWPSCommentSpan(span)
 	}
 
 	ret, err := doc.Find("body").Html()
@@ -275,7 +279,7 @@ func wpsHTMLTextPositions(root *nethtml.Node) (string, []wpsHTMLChar) {
 	return string(text), positions
 }
 
-func wrapWPSCommentRanges(node *nethtml.Node, ranges []wpsNodeRange) {
+func wrapWPSCommentRanges(node *nethtml.Node, ranges []wpsNodeRange) (ret []*nethtml.Node) {
 	if node.Parent == nil {
 		return
 	}
@@ -299,6 +303,7 @@ func wrapWPSCommentRanges(node *nethtml.Node, ranges []wpsNodeRange) {
 		}
 		span.AppendChild(&nethtml.Node{Type: nethtml.TextNode, Data: string(text[commentRange.start:commentRange.end])})
 		node.Parent.InsertBefore(span, node)
+		ret = append(ret, span)
 		cursor = commentRange.end
 	}
 	if cursor == 0 {
@@ -308,4 +313,46 @@ func wrapWPSCommentRanges(node *nethtml.Node, ranges []wpsNodeRange) {
 		node.Parent.InsertBefore(&nethtml.Node{Type: nethtml.TextNode, Data: string(text[cursor:])}, node)
 	}
 	node.Parent.RemoveChild(node)
+	return
+}
+
+func liftWPSCommentSpan(span *nethtml.Node) {
+	for span.Parent != nil && (span.Parent.DataAtom == atom.Font || span.Parent.DataAtom == atom.Span) {
+		parent := span.Parent
+		grandparent := parent.Parent
+		if grandparent == nil {
+			return
+		}
+		before := cloneWPSInline(parent)
+		for parent.FirstChild != span {
+			child := parent.FirstChild
+			parent.RemoveChild(child)
+			before.AppendChild(child)
+		}
+		parent.RemoveChild(span)
+		after := cloneWPSInline(parent)
+		for parent.FirstChild != nil {
+			child := parent.FirstChild
+			parent.RemoveChild(child)
+			after.AppendChild(child)
+		}
+		if before.FirstChild != nil {
+			grandparent.InsertBefore(before, parent)
+		}
+		grandparent.InsertBefore(span, parent)
+		if after.FirstChild != nil {
+			grandparent.InsertBefore(after, parent)
+		}
+		grandparent.RemoveChild(parent)
+	}
+}
+
+func cloneWPSInline(node *nethtml.Node) *nethtml.Node {
+	return &nethtml.Node{
+		Type:      node.Type,
+		DataAtom:  node.DataAtom,
+		Data:      node.Data,
+		Namespace: node.Namespace,
+		Attr:      append([]nethtml.Attribute(nil), node.Attr...),
+	}
 }

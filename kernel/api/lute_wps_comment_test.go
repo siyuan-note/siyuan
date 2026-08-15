@@ -23,7 +23,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/PuerkitoBio/goquery"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestNormalizeWPSComments(t *testing.T) {
@@ -46,6 +48,22 @@ func TestNormalizeWPSComments(t *testing.T) {
 	}
 	if doc.Find("body").Text() != "111111111111111111" {
 		t.Fatalf("unexpected normalized text: %s", doc.Find("body").Text())
+	}
+
+	luteEngine := util.NewLute()
+	luteEngine.SetHTMLTag2TextMark(true)
+	tree := luteEngine.HTML2Tree(normalized)
+	var inlineMemo *ast.Node
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && ast.NodeTextMark == node.Type && node.IsTextMarkType("inline-memo") {
+			inlineMemo = node
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	if inlineMemo == nil || inlineMemo.TextMarkTextContent != "111" ||
+		inlineMemo.TextMarkInlineMemoContent != "22222222222222" {
+		t.Fatal("WPS comment was not converted to an inline memo")
 	}
 }
 

@@ -728,7 +728,11 @@ export const hideKeyboardToolbarByApp = () => {
     hideKeyboardToolbar();
     const editor = getCurrentEditor();
     const selection = getSelection();
-    if (!editor || !selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    if (!editor) {
+        return;
+    }
+    hideElements(["util"], editor.protyle);
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
         return;
     }
     const range = selection.getRangeAt(0);

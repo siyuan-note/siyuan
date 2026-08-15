@@ -1,8 +1,8 @@
 {
 	"rerankRequestFormat": "تنسيق طلب إعادة الترتيب",
 	"rerankRequestFormatTip": "اختر تنسيق الطلب الذي تتطلبه خدمة إعادة الترتيب",
-	"rerankRequestFormatCohere": "متوافق مع Cohere/Jina",
-	"rerankRequestFormatDashScope": "متوافق مع DashScope/ZenMux",
+	"rerankRequestFormatCohere": "Cohere/Jina",
+	"rerankRequestFormatDashScope": "DashScope/ZenMux",
 	"listItemActionTip": "انقر بزر الماوس الأيمن <span class='ft__on-surface'>فتح قائمة عنصر القائمة هذا</span><br>انقر مع الضغط على Shift <span class='ft__on-surface'>فتح سماته</span>",
 	"bazaarRemoveRating": "إزالة التقييم",
 	"bazaarRatingRemoved": "تمت إزالة التقييم",

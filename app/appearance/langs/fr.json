@@ -1,8 +1,8 @@
 {
 	"rerankRequestFormat": "Format de requête de rerangement",
 	"rerankRequestFormatTip": "Sélectionnez le format de requête requis par le service de rerangement",
-	"rerankRequestFormatCohere": "Compatible avec Cohere/Jina",
-	"rerankRequestFormatDashScope": "Compatible avec DashScope/ZenMux",
+	"rerankRequestFormatCohere": "Cohere/Jina",
+	"rerankRequestFormatDashScope": "DashScope/ZenMux",
 	"listItemActionTip": "Clic droit <span class='ft__on-surface'>Ouvrir le menu de cet élément de liste</span><br>Shift+clic <span class='ft__on-surface'>Ouvrir ses attributs</span>",
 	"bazaarRemoveRating": "Supprimer la note",
 	"bazaarRatingRemoved": "Note supprimée",

@@ -1,8 +1,8 @@
 {
 	"rerankRequestFormat": "פורמט בקשת סידור מחדש",
 	"rerankRequestFormatTip": "בחרו את פורמט הבקשה הנדרש על ידי שירות הסידור מחדש",
-	"rerankRequestFormatCohere": "תואם Cohere/Jina",
-	"rerankRequestFormatDashScope": "תואם DashScope/ZenMux",
+	"rerankRequestFormatCohere": "Cohere/Jina",
+	"rerankRequestFormatDashScope": "DashScope/ZenMux",
 	"listItemActionTip": "לחיצה ימנית <span class='ft__on-surface'>פתיחת התפריט של פריט רשימה זה</span><br>Shift+לחיצה <span class='ft__on-surface'>פתיחת המאפיינים שלו</span>",
 	"bazaarRemoveRating": "הסרת הדירוג",
 	"bazaarRatingRemoved": "הדירוג הוסר",

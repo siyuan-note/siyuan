@@ -1,8 +1,8 @@
 {
 	"rerankRequestFormat": "Yeniden sıralama istek biçimi",
 	"rerankRequestFormatTip": "Yeniden sıralama hizmetinin gerektirdiği istek biçimini seçin",
-	"rerankRequestFormatCohere": "Cohere/Jina ile uyumlu",
-	"rerankRequestFormatDashScope": "DashScope/ZenMux ile uyumlu",
+	"rerankRequestFormatCohere": "Cohere/Jina",
+	"rerankRequestFormatDashScope": "DashScope/ZenMux",
 	"listItemActionTip": "Sağ tıklayın <span class='ft__on-surface'>Bu liste öğesinin menüsünü açın</span><br>Shift+tıklayın <span class='ft__on-surface'>Özniteliklerini açın</span>",
 	"bazaarRemoveRating": "Puanı kaldır",
 	"bazaarRatingRemoved": "Puan kaldırıldı",

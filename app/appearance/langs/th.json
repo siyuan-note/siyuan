@@ -1,8 +1,8 @@
 {
 	"rerankRequestFormat": "รูปแบบคำขอจัดอันดับใหม่",
 	"rerankRequestFormatTip": "เลือกรูปแบบคำขอที่บริการจัดอันดับใหม่ต้องการ",
-	"rerankRequestFormatCohere": "เข้ากันได้กับ Cohere/Jina",
-	"rerankRequestFormatDashScope": "เข้ากันได้กับ DashScope/ZenMux",
+	"rerankRequestFormatCohere": "Cohere/Jina",
+	"rerankRequestFormatDashScope": "DashScope/ZenMux",
 	"listItemActionTip": "คลิกขวา <span class='ft__on-surface'>เปิดเมนูของรายการนี้</span><br>Shift+คลิก <span class='ft__on-surface'>เปิดแอตทริบิวต์</span>",
 	"bazaarRemoveRating": "ลบคะแนน",
 	"bazaarRatingRemoved": "ลบคะแนนแล้ว",

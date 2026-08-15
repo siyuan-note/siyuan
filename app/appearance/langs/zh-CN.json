@@ -1,8 +1,8 @@
 {
 	"rerankRequestFormat": "重排 API 格式",
 	"rerankRequestFormatTip": "选择重排服务所需的请求格式",
-	"rerankRequestFormatCohere": "Cohere/Jina 兼容",
-	"rerankRequestFormatDashScope": "DashScope/ZenMux 兼容",
+	"rerankRequestFormatCohere": "Cohere/Jina",
+	"rerankRequestFormatDashScope": "DashScope/ZenMux",
 	"listItemActionTip": "右键 <span class='ft__on-surface'>打开该列表项菜单</span><br>Shift+点击 <span class='ft__on-surface'>打开属性</span>",
 	"bazaarRemoveRating": "取消评分",
 	"bazaarRatingRemoved": "已取消评分",

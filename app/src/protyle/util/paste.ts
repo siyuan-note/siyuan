@@ -26,6 +26,13 @@ import {refreshSbAndPersistWidth} from "../../block/util";
 import {extractCrossBlockPasteContext, shouldPreservePastedBlockStructure} from "./pasteSource";
 import {normalizePasteResponse} from "./pasteResponse";
 import {applyLuteMarkdownSyntax} from "../render/luteMarkdownSyntax";
+import {convertOfficeLists} from "./officeList";
+import {
+    extractWPSPresentationClipboard,
+    getWPSPresentationFallback,
+    type IWPSPresentationClipboard,
+    shouldConvertWPSPresentation,
+} from "./wpsPresentation";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -489,6 +496,22 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
     return true;
 };
 
+const insertConvertedBlockDOM = (protyle: IProtyle, dom: string) => {
+    insertHTML(dom, protyle, false, false, true);
+    protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
+        if (item.textContent === "") {
+            fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
+                item.innerHTML = response.data;
+            });
+        }
+    });
+    blockRender(protyle, protyle.wysiwyg.element);
+    processRender(protyle.wysiwyg.element);
+    highlightRender(protyle.wysiwyg.element);
+    avRender(protyle.wysiwyg.element, protyle);
+    scrollCenter(protyle, undefined, "nearest", "smooth");
+};
+
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | IClipboardData) & {
     target: HTMLElement
 }, uploadOptions?: IUploadInsertOptions) => {
@@ -504,19 +527,28 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     let mathML = "";
     let office = "";
     let wps = "";
+    let wpsPresentation: IWPSPresentationClipboard | undefined;
+    let officeListConverted = false;
     if ("clipboardData" in event) {
         textHTML = event.clipboardData.getData("text/html");
         textPlain = event.clipboardData.getData("text/plain");
         siyuanHTML = event.clipboardData.getData("text/siyuan");
         vscodeEditorData = event.clipboardData.getData("vscode-editor-data");
         files = event.clipboardData.files;
+        wpsPresentation = extractWPSPresentationClipboard(event.clipboardData.types,
+            (type) => event.clipboardData.getData(type));
     } else if ("dataTransfer" in event) {
         textHTML = event.dataTransfer.getData("text/html");
         textPlain = event.dataTransfer.getData("text/plain");
         siyuanHTML = event.dataTransfer.getData("text/siyuan");
         vscodeEditorData = event.dataTransfer.getData("vscode-editor-data");
+        wpsPresentation = extractWPSPresentationClipboard(event.dataTransfer.types,
+            (type) => event.dataTransfer.getData(type));
         if (event.dataTransfer.types[0] === "Files") {
             files = event.dataTransfer.items;
+        } else if (wpsPresentation && Array.from(event.dataTransfer.types).some((type) => type.toLowerCase() === "files")) {
+            // 混合的 DataTransferItemList 还包含字符串项，上传时仅保留文件
+            files = event.dataTransfer.files;
         }
     } else {
         if (event.localFiles?.length > 0) {
@@ -549,7 +581,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }),
         ]);
     }
-    if (!siyuanHTML && !textHTML && !textPlain && ("clipboardData" in event)) {
+    if (!siyuanHTML && !textHTML && !textPlain && !wpsPresentation && ("clipboardData" in event)) {
         const localFiles: ILocalFiles[] = await getLocalFiles();
         if (localFiles.length > 0) {
             readLocalFile(protyle, localFiles);
@@ -626,7 +658,17 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 mathML = "";
                 office = "";
                 wps = "";
+                wpsPresentation = undefined;
             }
+        }
+    }
+
+    if (!siyuanHTML && textHTML) {
+        const officeList = convertOfficeLists(textHTML);
+        textHTML = officeList.html;
+        if (officeList.convertedCount > 0) {
+            officeListConverted = true;
+            originalTextHTML = textHTML;
         }
     }
 
@@ -838,10 +880,33 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
         hideElements(["hint"], protyle);
     } else {
+        if (wpsPresentation && shouldConvertWPSPresentation(wpsPresentation, textHTML, siyuanHTML)) {
+            let response: IWebSocketData | undefined;
+            try {
+                response = await fetchSyncPost("/api/lute/wpsPresentation2BlockDOM", {
+                    data: wpsPresentation.data,
+                    text: textPlain,
+                    type: wpsPresentation.type,
+                });
+            } catch (e) {
+                // 内核不可用时继续使用剪贴板中的纯文本或图片
+            }
+            const result = response?.data as { converted?: unknown, dom?: unknown };
+            if (response?.code === 0 && result?.converted === true && typeof result.dom === "string" && result.dom.trim() !== "") {
+                insertConvertedBlockDOM(protyle, result.dom);
+                return;
+            }
+            const fallback = getWPSPresentationFallback(wpsPresentation.type, Boolean(files?.length));
+            if (fallback === "files") {
+                uploadFiles(protyle, files, undefined, undefined, undefined, uploadOptions);
+                return;
+            }
+            files = [];
+        }
         let isHTML = false;
         if (textHTML.replace("<!--StartFragment--><!--EndFragment-->", "").trim() !== "") {
             textHTML = textHTML.replace("<!--StartFragment-->", "").replace("<!--EndFragment-->", "").trim();
-            if (files && files.length === 1 && (
+            if (!officeListConverted && files && files.length === 1 && (
                 textHTML.startsWith("<img") ||  // 浏览器上复制单个图片
                 (textHTML.startsWith("<table") && textHTML.indexOf("<img") > -1)  // Excel 或者浏览器中复制带有图片的表格
             )) {
@@ -934,19 +999,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 office,
                 wps,
             }, (response) => {
-                insertHTML(response.data, protyle, false, false, true);
-                protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
-                    if (item.textContent === "") {
-                        fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
-                            item.innerHTML = response.data;
-                        });
-                    }
-                });
-                blockRender(protyle, protyle.wysiwyg.element);
-                processRender(protyle.wysiwyg.element);
-                highlightRender(protyle.wysiwyg.element);
-                avRender(protyle.wysiwyg.element, protyle);
-                scrollCenter(protyle, undefined, "nearest", "smooth");
+                insertConvertedBlockDOM(protyle, response.data);
             });
             return;
         } else if (files && files.length > 0) {

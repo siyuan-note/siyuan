@@ -59,19 +59,19 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
    - Append the full issue/PR URL to the end of the commit title (e.g. `https://github.com/siyuan-note/siyuan/issues/<NNN>`, not the `#NNN` short form — it is clickable) only when a related issue exists; never put the URL in the commit body, and do not fabricate one
 6. **GitHub:** Prefer the GitHub CLI (`gh`) for all GitHub operations, including reading issues, comments, pull requests, commits, statuses, and metadata. If `gh` is unavailable or does not support the operation, fall back to the GitHub API or web interface
    - When creating an issue, use an English title and a Chinese body whose first paragraph is the corresponding Chinese title; do not use the repository's issue templates or reproduce their form fields, and write a concise, task-specific body directly
-   - For GitHub write operations containing non-ASCII text on Windows or when shell encoding is uncertain, use this file-based workflow:
+   - When the selected endpoint supports labels, they may be included in the same create or update payload. Afterward, verify only that the issue or pull request itself succeeded (number, title, and body). Do not check whether labels were applied or send a follow-up request solely to apply them; GitHub silently drops label changes when the actor lacks push access
+   - For GitHub write operations containing non-ASCII text on Windows or when shell encoding is uncertain, use this file-based workflow. Do not use this workflow for ASCII-only requests:
      1. Create the request payload as UTF-8 JSON with a file-editing tool, not an inline shell command
      2. Store it in the operating system's temporary directory with a unique name such as `siyuan-gh-<operation>-<timestamp>.json`; do not leave temporary payloads in the repository
      3. Call the appropriate endpoint with `gh api --method <method> "<endpoint>" --input "<absolute-json-path>"`
      4. Inspect the returned resource and read it back with `gh api` to verify the published text exactly, including line breaks and non-ASCII characters
      5. Delete the temporary JSON file and confirm that it no longer exists
    - Example for an issue comment: write `{"body":"<comment text>"}` to the UTF-8 JSON file, run `gh api --method POST "repos/{owner}/{repo}/issues/<number>/comments" --input "<absolute-json-path>"`, then read the returned comment by its `id` before deleting the file
-7. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request, and do not start it with `Fix`
-   - If the issue is labeled `Bug`, objectively describe the problem or symptom instead of writing from a bug-fix perspective
-   - If the issue is labeled `Enhancement`:
-     - For improvements to existing functionality, write the title from an improvement perspective and prefer `Improve ...`
-     - For capabilities that did not previously exist, write the title from a support perspective and prefer `Support ...`
-   - If no applicable label is available, infer the perspective from the issue content
+7. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request, and do not start it with `Fix`. These rules choose title wording from the issue's nature; they are not an instruction to apply GitHub labels
+   - For a bug, objectively describe the problem or symptom instead of writing from a bug-fix perspective
+   - For an improvement to existing functionality, write the title from an improvement perspective and prefer `Improve ...`
+   - For a capability that did not previously exist, write the title from a support perspective and prefer `Support ...`
+   - If the nature is unclear, infer the perspective from the issue content
 8. **LD246:** When accessing `ld246.com`, set the HTTP `User-Agent` header to `SiYuan-Coding-Agent`
 9. **Configurable entries:**
    - Treat the `data-id` of a configurable desktop menu item and the `data-type` of a configurable dock entry as persisted configuration identifiers. Do not rename or reuse them unless the same change migrates existing visibility and order configuration

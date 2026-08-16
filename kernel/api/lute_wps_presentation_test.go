@@ -92,6 +92,17 @@ func TestWPSPresentationOrderedOverrideAndSkippedLevel(t *testing.T) {
 	if strings.Contains(htmlContent, `<li>A<ol><li>B</li></ol><ol>`) {
 		t.Fatalf("skipped levels produced adjacent child lists: %s", htmlContent)
 	}
+
+	plainText := "有序列表\n3.A\n1.B\n2.C\n4.D\nI.E"
+	if numberedHTML, ok := wpsPresentationHTML(encoded, plainText, "texts"); !ok || numberedHTML != expected {
+		t.Fatalf("visible auto-number text did not match: converted=%v html=%s", ok, numberedHTML)
+	}
+	if rawHTML, ok := wpsPresentationHTML(encoded, "有序列表\nA\nB\nC\nD\nE", "texts"); !ok || rawHTML != expected {
+		t.Fatalf("raw paragraph text did not match: converted=%v html=%s", ok, rawHTML)
+	}
+	if _, ok := wpsPresentationHTML(encoded, "有序列表\n2.A\n1.B\n2.C\n4.D\nI.E", "texts"); ok {
+		t.Fatal("incorrect visible auto-number text must not match")
+	}
 }
 
 func TestWPSPresentationTaskMarkers(t *testing.T) {
@@ -138,6 +149,30 @@ func TestWPSPresentationTaskMarkers(t *testing.T) {
 	}
 	if _, task := wpsPresentationTaskMarker("P", ""); task {
 		t.Fatal("font-dependent marker must not be inferred without its bullet font")
+	}
+}
+
+func TestWPSPresentationAutoNumberMarkers(t *testing.T) {
+	tests := []struct {
+		numType  string
+		ordinal  int
+		expected string
+	}{
+		{numType: "arabicPeriod", ordinal: 2, expected: "2."},
+		{numType: "alphaLcParenR", ordinal: 27, expected: "aa)"},
+		{numType: "alphaUcParenBoth", ordinal: 3, expected: "(C)"},
+		{numType: "romanLcPeriod", ordinal: 9, expected: "ix."},
+		{numType: "romanUcPlain", ordinal: 14, expected: "XIV"},
+	}
+	for _, test := range tests {
+		marker, ok := wpsPresentationAutoNumberMarker(test.numType, test.ordinal)
+		if !ok || marker != test.expected {
+			t.Errorf("unexpected auto-number marker: type=%s ordinal=%d marker=%q ok=%v",
+				test.numType, test.ordinal, marker, ok)
+		}
+	}
+	if marker, ok := wpsPresentationAutoNumberMarker("arabicDbPeriod", 1); ok || marker != "" {
+		t.Fatalf("unsupported auto-number type must not be approximated: marker=%q ok=%v", marker, ok)
 	}
 }
 

@@ -131,9 +131,11 @@ type wpsPresentationHTMLList struct {
 }
 
 type wpsPresentationHTMLListItem struct {
-	text     string
-	checked  bool
-	children []*wpsPresentationHTMLList
+	text      string
+	checked   bool
+	plainMark string
+	markSet   bool
+	children  []*wpsPresentationHTMLList
 }
 
 type wpsPresentationListStackEntry struct {
@@ -203,26 +205,26 @@ func wpsPresentationHTML(encoded, text, clipboardType string) (htmlContent strin
 		(archive.drawingCount != 1 || len(archive.containers) != 1 || archive.mixedObject) {
 		return "", false
 	}
-	if clipboardType == "texts" {
-		if text == "" || wpsPresentationNormalizedText(archive.containers) != normalizeWPSClipboardText(text) {
-			return "", false
-		}
-	}
-
-	var builder strings.Builder
+	var blocks []wpsPresentationHTMLBlock
 	convertedItems := 0
 	for _, container := range archive.containers {
-		blocks, count := buildWPSPresentationHTMLBlocks(container)
+		containerBlocks, count := buildWPSPresentationHTMLBlocks(container)
 		convertedItems += count
-		for _, block := range blocks {
-			renderWPSPresentationHTMLBlock(&builder, block)
-			if builder.Len() > maxWPSPresentationOutputBytes {
-				return "", false
-			}
-		}
+		blocks = append(blocks, containerBlocks...)
 	}
 	if convertedItems == 0 {
 		return "", false
+	}
+	if clipboardType == "texts" && (text == "" || !wpsPresentationTextMatches(archive.containers, blocks, text)) {
+		return "", false
+	}
+
+	var builder strings.Builder
+	for _, block := range blocks {
+		renderWPSPresentationHTMLBlock(&builder, block)
+		if builder.Len() > maxWPSPresentationOutputBytes {
+			return "", false
+		}
 	}
 	return builder.String(), true
 }
@@ -622,6 +624,138 @@ func wpsPresentationNormalizedText(containers []wpsPresentationContainer) string
 	return normalizeWPSClipboardText(builder.String())
 }
 
+func wpsPresentationTextMatches(containers []wpsPresentationContainer, blocks []wpsPresentationHTMLBlock, text string) bool {
+	normalized := normalizeWPSClipboardText(text)
+	if wpsPresentationNormalizedText(containers) == normalized {
+		return true
+	}
+	for _, separator := range []string{"", " ", "\t"} {
+		var builder strings.Builder
+		valid := true
+		for _, block := range blocks {
+			if !appendWPSPresentationPlainText(&builder, block, separator) {
+				valid = false
+				break
+			}
+		}
+		if valid && normalizeWPSClipboardText(builder.String()) == normalized {
+			return true
+		}
+	}
+	return false
+}
+
+func appendWPSPresentationPlainText(builder *strings.Builder, block wpsPresentationHTMLBlock, separator string) bool {
+	if block.paragraph != nil {
+		builder.WriteString(*block.paragraph)
+		return true
+	}
+	if block.list == nil {
+		return true
+	}
+	for _, item := range block.list.items {
+		if block.list.kind == wpsPresentationBulletOrdered {
+			if !item.markSet {
+				return false
+			}
+			builder.WriteString(item.plainMark)
+			builder.WriteString(separator)
+		}
+		builder.WriteString(item.text)
+		for _, child := range item.children {
+			if !appendWPSPresentationPlainText(builder, wpsPresentationHTMLBlock{list: child}, separator) {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+func wpsPresentationAutoNumberMarker(numType string, ordinal int) (string, bool) {
+	var suffix string
+	for _, candidate := range []string{"ParenBoth", "ParenR", "Period", "Plain"} {
+		if strings.HasSuffix(numType, candidate) {
+			suffix = candidate
+			numType = strings.TrimSuffix(numType, candidate)
+			break
+		}
+	}
+	if suffix == "" {
+		return "", false
+	}
+
+	var value string
+	switch numType {
+	case "arabic":
+		value = strconv.Itoa(ordinal)
+	case "alphaLc", "alphaUc":
+		value = wpsPresentationAlphabeticNumber(ordinal)
+		if numType == "alphaLc" {
+			value = strings.ToLower(value)
+		}
+	case "romanLc", "romanUc":
+		value = wpsPresentationRomanNumber(ordinal)
+		if numType == "romanLc" {
+			value = strings.ToLower(value)
+		}
+	default:
+		return "", false
+	}
+	if value == "" {
+		return "", false
+	}
+
+	switch suffix {
+	case "ParenBoth":
+		return "(" + value + ")", true
+	case "ParenR":
+		return value + ")", true
+	case "Period":
+		return value + ".", true
+	case "Plain":
+		return value, true
+	}
+	return "", false
+}
+
+func wpsPresentationAlphabeticNumber(ordinal int) string {
+	if ordinal < 1 {
+		return ""
+	}
+	var reversed []byte
+	for 0 < ordinal {
+		ordinal--
+		reversed = append(reversed, byte('A'+ordinal%26))
+		ordinal /= 26
+	}
+	for left, right := 0, len(reversed)-1; left < right; left, right = left+1, right-1 {
+		reversed[left], reversed[right] = reversed[right], reversed[left]
+	}
+	return string(reversed)
+}
+
+func wpsPresentationRomanNumber(ordinal int) string {
+	if ordinal < 1 {
+		return ""
+	}
+	values := []struct {
+		value  int
+		symbol string
+	}{
+		{1000, "M"}, {900, "CM"}, {500, "D"}, {400, "CD"},
+		{100, "C"}, {90, "XC"}, {50, "L"}, {40, "XL"},
+		{10, "X"}, {9, "IX"}, {5, "V"}, {4, "IV"}, {1, "I"},
+	}
+	var builder strings.Builder
+	for _, item := range values {
+		for item.value <= ordinal {
+			builder.WriteString(item.symbol)
+			ordinal -= item.value
+		}
+	}
+	return builder.String()
+}
+
 func resolveWPSPresentationBullet(container wpsPresentationContainer, paragraph wpsPresentationParagraph) wpsPresentationBulletChoice {
 	properties := []wpsPresentationParagraphProperties{
 		paragraph.properties,
@@ -753,7 +887,11 @@ func buildWPSPresentationHTMLBlocks(container wpsPresentationContainer) ([]wpsPr
 			stack = append(stack, wpsPresentationListStackEntry{rawLevel: paragraph.level, list: list})
 		}
 
-		list.items = append(list.items, &wpsPresentationHTMLListItem{text: paragraph.text, checked: bullet.checked})
+		item := &wpsPresentationHTMLListItem{text: paragraph.text, checked: bullet.checked}
+		if list.kind == wpsPresentationBulletOrdered {
+			item.plainMark, item.markSet = wpsPresentationAutoNumberMarker(list.numType, list.next)
+		}
+		list.items = append(list.items, item)
 		list.next++
 		convertedItems++
 	}

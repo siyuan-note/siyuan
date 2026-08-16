@@ -152,7 +152,9 @@ func Serve(fastMode bool, cookieKey string) {
 		model.Activity,   // 记录用户活动时间，用于 AutoFixIndex 的空闲判断
 		corsMiddleware(), // 后端服务支持 CORS 预检请求验证 https://github.com/siyuan-note/siyuan/pull/5593
 		jwtMiddleware,    // 解析 JWT https://github.com/siyuan-note/siyuan/issues/11364
-		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac"})),
+		gzip.Gzip(gzip.DefaultCompression,
+			gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac"}),
+			gzip.WithExcludedPathsRegexs([]string{`(?i)\.hei[cf]$`})),
 	)
 
 	sessionStore = cookie.NewStore([]byte(cookieKey))
@@ -980,8 +982,8 @@ func serveAssets(ginServer *gin.Engine) {
 		}
 
 		if heif.IsPath(p) {
-			// 下载始终返回原文件；预览请求统一转成浏览器可显示的 JPEG。
-			if !strings.EqualFold(context.Query("download"), "true") {
+			addHEIFVaryAccept(context)
+			if shouldTranscodeHEIF(context) {
 				if !acquireHEIFPreviewSlot(context) {
 					return
 				}
@@ -1024,7 +1026,11 @@ func serveAssets(ginServer *gin.Engine) {
 			context.Status(http.StatusForbidden)
 			return
 		}
-		if heif.IsPath(p) && !strings.EqualFold(context.Query("download"), "true") {
+		transcodeHEIF := heif.IsPath(p) && shouldTranscodeHEIF(context)
+		if heif.IsPath(p) {
+			addHEIFVaryAccept(context)
+		}
+		if transcodeHEIF {
 			if !acquireHEIFPreviewSlot(context) {
 				return
 			}
@@ -1034,7 +1040,7 @@ func serveAssets(ginServer *gin.Engine) {
 		if serveEncryptedHistory(context, p) {
 			return
 		}
-		if heif.IsPath(p) && !strings.EqualFold(context.Query("download"), "true") {
+		if transcodeHEIF {
 			servePlainHEIFPreview(context, p, "", false)
 			return
 		}
@@ -1311,13 +1317,18 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 	defer model.ReleaseBoxReadLock(boxID)
 	var ciphertext []byte
 	var readErr error
-	if heif.IsPath(absPath) && !strings.EqualFold(context.Query("download"), "true") {
+	heifRequest := heif.IsPath(absPath) && !strings.EqualFold(context.Query("download"), "true")
+	if heifRequest {
 		ciphertext, readErr = heif.ReadFileLimited(absPath, int64(heif.MaxInputBytes)+2*1024*1024)
 	} else {
 		ciphertext, readErr = os.ReadFile(absPath)
 	}
 	if readErr != nil {
-		context.Status(http.StatusNotFound)
+		if errors.Is(readErr, heif.ErrInputTooLarge) {
+			context.Status(http.StatusRequestEntityTooLarge)
+		} else {
+			context.Status(http.StatusNotFound)
+		}
 		return true
 	}
 	diskName := filepath.Base(absPath)
@@ -1328,6 +1339,10 @@ func serveEncryptedAsset(context *gin.Context, absPath string) bool {
 		return true
 	}
 	defer clear(plain)
+	if heifRequest && len(plain) > heif.MaxInputBytes {
+		context.Status(http.StatusRequestEntityTooLarge)
+		return true
+	}
 	// 下载时用原始文件名（查加密映射），查不到则退回磁盘名
 	dispositionName := absPath
 	if originalName := model.LookupAssetOriginalNameLocked(boxID, diskName); originalName != "" {
@@ -1385,14 +1400,14 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 	}
 	defer clear(dek)
 	defer model.ReleaseBoxReadLock(boxID)
-	if heif.IsPath(absPath) && !strings.EqualFold(context.Query("download"), "true") &&
-		rejectOversizedHEIF(context, absPath, true) {
+	heifRequest := heif.IsPath(absPath) && !strings.EqualFold(context.Query("download"), "true")
+	transcodeHEIF := heif.IsPath(absPath) && shouldTranscodeHEIF(context)
+	if heifRequest && rejectOversizedHEIF(context, absPath, true) {
 		return true
 	}
-	heifPreview := heif.IsPath(absPath) && !strings.EqualFold(context.Query("download"), "true")
 	var ciphertext []byte
 	var readErr error
-	if heifPreview {
+	if heifRequest {
 		ciphertext, readErr = heif.ReadFileLimited(absPath, int64(heif.MaxInputBytes)+2*1024*1024)
 	} else {
 		ciphertext, readErr = os.ReadFile(absPath)
@@ -1431,11 +1446,11 @@ func serveEncryptedHistory(context *gin.Context, absPath string) bool {
 		return true
 	}
 	defer clear(plain)
-	if heifPreview && len(plain) > heif.MaxInputBytes {
+	if heifRequest && len(plain) > heif.MaxInputBytes {
 		context.Status(http.StatusRequestEntityTooLarge)
 		return true
 	}
-	if heifPreview {
+	if transcodeHEIF {
 		writeHEIFPreview(context, absPath, plain, boxID, true)
 		return true
 	}
@@ -1502,8 +1517,11 @@ func serveRepoDiff(ginServer *gin.Engine) {
 			context.Status(http.StatusForbidden)
 			return
 		}
-		heifPreview := heif.IsPath(requestPath) && !strings.EqualFold(context.Query("download"), "true")
-		if heifPreview {
+		transcodeHEIF := heif.IsPath(requestPath) && shouldTranscodeHEIF(context)
+		if heif.IsPath(requestPath) {
+			addHEIFVaryAccept(context)
+		}
+		if transcodeHEIF {
 			if !acquireHEIFPreviewSlot(context) {
 				return
 			}
@@ -1534,7 +1552,7 @@ func serveRepoDiff(ginServer *gin.Engine) {
 			context.Status(http.StatusUnauthorized)
 			return
 		}
-		if heifPreview {
+		if transcodeHEIF {
 			servePlainHEIFPreview(context, p, encryptedBoxID, encryptedBoxID != "")
 			return
 		}

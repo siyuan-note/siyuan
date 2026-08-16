@@ -35,7 +35,39 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// GroupViewRenderSource 保存分组渲染可复用的表格行索引。
+// 索引中的行已经完成字段值生成和查询过滤，各分组仍会独立执行视图过滤、排序、统计和分页。
+type GroupViewRenderSource struct {
+	query     string
+	tableRows map[string]*av.TableRow
+}
+
+// NewGroupViewRenderSource 在父视图分页前建立可供所有表格分组复用的行索引。
+func NewGroupViewRenderSource(viewable av.Viewable, query string) (ret *GroupViewRenderSource) {
+	table, ok := viewable.(*av.Table)
+	if !ok {
+		return
+	}
+
+	ret = &GroupViewRenderSource{
+		query:     query,
+		tableRows: make(map[string]*av.TableRow, len(table.Rows)),
+	}
+	for _, row := range table.Rows {
+		if nil != row {
+			ret.tableRows[row.ID] = row
+		}
+	}
+	return
+}
+
 func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query string) (ret av.Viewable) {
+	return RenderGroupViewWithSource(attrView, view, groupView, query, nil, false)
+}
+
+// RenderGroupViewWithSource 优先从父表行索引组装分组；其他布局和查询不匹配时沿用独立渲染。
+func RenderGroupViewWithSource(attrView *av.AttributeView, view, groupView *av.View, query string,
+	source *GroupViewRenderSource, ignoreRows bool) (ret av.Viewable) {
 	var err error
 	switch groupView.LayoutType {
 	case av.LayoutTypeTable:
@@ -89,7 +121,30 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 
 	groupView.Filters = view.Filters
 	groupView.Sorts = view.Sorts
-	return RenderView(attrView, groupView, query, false)
+	reuseTableRows := nil != source && av.LayoutTypeTable == groupView.LayoutType && source.query == query
+	ret = RenderView(attrView, groupView, query, ignoreRows || reuseTableRows)
+	if ignoreRows {
+		return
+	}
+	if !reuseTableRows {
+		return
+	}
+
+	table := ret.(*av.Table)
+	table.Rows = make([]*av.TableRow, 0, len(groupView.GroupItemIDs))
+	lastPositions := make(map[string]int, len(groupView.GroupItemIDs))
+	for i, itemID := range groupView.GroupItemIDs {
+		lastPositions[itemID] = i
+	}
+	for i, itemID := range groupView.GroupItemIDs {
+		if lastPositions[itemID] != i {
+			continue
+		}
+		if row := source.tableRows[itemID]; nil != row {
+			table.Rows = append(table.Rows, row)
+		}
+	}
+	return
 }
 
 func RenderView(attrView *av.AttributeView, view *av.View, query string, ignoreRows bool) (ret av.Viewable) {

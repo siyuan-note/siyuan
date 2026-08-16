@@ -23,10 +23,12 @@ import (
 )
 
 func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView, ignoreRows bool) (ret *av.Table) {
-	viewable := attrView.RenderedViewables[view.ID]
-	if nil != viewable {
-		ret = viewable.(*av.Table)
-		return
+	if !ignoreRows {
+		viewable := attrView.RenderedViewables[view.ID]
+		if nil != viewable {
+			ret = viewable.(*av.Table)
+			return
+		}
 	}
 
 	ret = &av.Table{

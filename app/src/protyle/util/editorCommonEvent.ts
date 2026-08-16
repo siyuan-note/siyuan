@@ -68,7 +68,7 @@ import {
     uniqueDragIds
 } from "./dragDocument";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
-import {getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
+import {getAVPreviousItemID, getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
 import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getCaretRect} from "./caretRect";
 import {isBlockRefDropTargetDisabled} from "./blockRefDrop";
@@ -1574,7 +1574,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (targetClass.includes("dragover__bottom")) {
                             previousID = targetElement.getAttribute("data-id") || "";
                         } else {
-                            previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
+                            previousID = getAVPreviousItemID(
+                                hasClosestByClassName(targetElement, "av__body"), targetElement.getAttribute("data-id"));
                         }
                         const avID = blockElement.getAttribute("data-av-id");
                         if (gutterTypes[0] === "nodeattributeviewrowmenu") {
@@ -1586,7 +1587,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 const items = item.split("@");
                                 const id = items[0];
                                 const groupID = items[1] || "";
-                                const undoPreviousId = blockElement.querySelector(`.av__body${groupID ? `[data-group-id="${groupID}"]` : ""} .av__row[data-id="${id}"]`).previousElementSibling?.getAttribute("data-id") || "";
+                                const sourceRowElement = blockElement.querySelector(
+                                    `.av__body${groupID ? `[data-group-id="${groupID}"]` : ""} .av__row[data-id="${id}"]`);
+                                const undoPreviousId = getAVPreviousItemID(
+                                    hasClosestByClassName(sourceRowElement, "av__body"), id);
                                 if (previousID !== id && undoPreviousId !== previousID || (
                                     (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
                                 )) {
@@ -1951,16 +1955,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 拖拽到属性视图内
                     const blockElement = hasClosestBlock(targetElement);
                     if (blockElement) {
+                        const bodyElement = hasClosestByClassName(targetElement, "av__body");
                         let previousID = "";
                         if (targetElement.classList.contains("dragover__bottom") || targetElement.classList.contains("dragover__right")) {
                             previousID = targetElement.getAttribute("data-id") || "";
                         } else if (targetElement.classList.contains("dragover__top") || targetElement.classList.contains("dragover__left")) {
-                            previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
+                            previousID = getAVPreviousItemID(bodyElement, targetElement.getAttribute("data-id"));
                         }
                         const avID = blockElement.getAttribute("data-av-id");
                         const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                         const srcs: IOperationSrcs[] = [];
-                        const bodyElement = hasClosestByClassName(targetElement, "av__body");
                         const groupID = bodyElement && bodyElement.getAttribute("data-group-id");
                         ids.forEach(id => {
                             srcs.push({

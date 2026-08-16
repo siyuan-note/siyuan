@@ -22,6 +22,7 @@ import {
     getAVSelectedItemInfos,
     getAVSelectedItemPoints,
     getAVSelectedItems,
+    getAvBodyData,
     resetAVRowSelect,
     updateAVRowSelect
 } from "./virtualScroll";
@@ -34,7 +35,7 @@ import {previewAttrViewImages} from "../../preview/image";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
-import {avRender, getGroupFoldTip} from "./render";
+import {avRender, initUnfoldedGroupTables, setAVGroupFolded as setGroupFolded} from "./render";
 import {addView, openViewMenu} from "./view";
 import {isOnlyMeta, writeText} from "../../util/compatibility";
 import {selectAVItemRange, setAVItemAnchor} from "./rangeSelect";
@@ -173,12 +174,6 @@ const updateDatabaseRow = (protyle: IProtyle, target: HTMLElement) => {
     cellElement.classList.add("av__cell--select");
     addDragFill(cellElement);
     hintRef(textElement.textContent.trim(), protyle, "av");
-};
-
-const setGroupFolded = (foldElement: HTMLElement, folded: boolean) => {
-    foldElement.firstElementChild.classList.toggle("av__group-arrow--open", !folded);
-    foldElement.parentElement.nextElementSibling.classList.toggle("fn__none", folded);
-    foldElement.setAttribute("aria-label", getGroupFoldTip(folded));
 };
 
 const getAVEditFieldMenuItems = (protyle: IProtyle, blockElement: HTMLElement): IMenu[] => {
@@ -424,7 +419,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (type === "av-add-bottom" && !protyle.disabled) {
             const bodyElement = hasClosestByClassName(target, "av__body");
-            const previousID = (bodyElement && bodyElement.querySelector(".av__row--util")?.previousElementSibling?.getAttribute("data-id")) ||
+            const bodyData = bodyElement ? getAvBodyData(bodyElement) as IAVTable : undefined;
+            const previousID = bodyData?.rows?.[bodyData.rows.length - 1]?.id ||
+                (bodyElement && bodyElement.querySelector(".av__row--util")?.previousElementSibling?.getAttribute("data-id")) ||
                 target.previousElementSibling?.getAttribute("data-id") || undefined;
             const groupID = bodyElement ? bodyElement.getAttribute("data-group-id") : "";
             const templateID = blockElement.querySelector<HTMLElement>(".av__header")?.dataset.defaultTemplateId;
@@ -559,6 +556,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 Object.keys(undoData).forEach((groupID) => {
                     doData[groupID] = folded;
                 });
+                initUnfoldedGroupTables(blockElement, protyle);
                 updateGroupFoldedStates(blockElement, doData);
                 clearTimeout(foldTimeout);
                 transaction(protyle, [{
@@ -577,6 +575,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             } else {
                 target.setAttribute("data-processed", "true");
                 setGroupFolded(target, isOpen);
+                initUnfoldedGroupTables(blockElement, protyle);
                 updateGroupFoldedStates(blockElement, {[target.dataset.id]: isOpen});
                 clearTimeout(foldTimeout);
                 foldTimeout = window.setTimeout(() => {

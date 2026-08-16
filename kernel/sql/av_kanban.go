@@ -13,10 +13,12 @@ import (
 )
 
 func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView, ignoreRows bool) (ret *av.Kanban) {
-	viewable := attrView.RenderedViewables[view.ID]
-	if nil != viewable {
-		ret = viewable.(*av.Kanban)
-		return
+	if !ignoreRows {
+		viewable := attrView.RenderedViewables[view.ID]
+		if nil != viewable {
+			ret = viewable.(*av.Kanban)
+			return
+		}
 	}
 
 	ret = &av.Kanban{

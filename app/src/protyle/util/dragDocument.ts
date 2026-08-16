@@ -66,7 +66,11 @@ export const getAVRowDropTarget = (targetElement: HTMLElement | false): HTMLElem
     if (!targetElement || !targetElement.classList.contains("av__row--util")) {
         return targetElement;
     }
-    return targetElement.previousElementSibling as HTMLElement || targetElement;
+    let rowElement = targetElement.previousElementSibling as HTMLElement;
+    while (rowElement && !rowElement.matches(".av__row[data-id], .av__row--header")) {
+        rowElement = rowElement.previousElementSibling as HTMLElement;
+    }
+    return rowElement || targetElement;
 };
 
 export const isSameSiblingMove = <T>(siblings: T[], sources: T[], target: T, isBottom: boolean) => {

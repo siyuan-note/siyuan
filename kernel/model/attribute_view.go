@@ -1079,9 +1079,13 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 }
 
 func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.ViewGroup) {
-	var oldHideEmpty, firstInit, changeGroupField bool
+	if nil == group || "" == group.Field {
+		removeAttributeViewGroup0(view)
+		return
+	}
+
+	var firstInit, changeGroupField bool
 	if nil != view.Group {
-		oldHideEmpty = view.Group.HideEmpty
 		changeGroupField = group.Field != view.Group.Field
 	} else {
 		firstInit = true
@@ -1089,30 +1093,9 @@ func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.
 
 	groupStates := getAttrViewGroupStates(view)
 	view.Group = group
-	regenAttrViewGroups(attrView)
+	genAttrViewGroups(view, attrView)
 	setAttrViewGroupStates(view, groupStates)
-
-	if view.Group.HideEmpty != oldHideEmpty {
-		if !oldHideEmpty && view.Group.HideEmpty { // 启用隐藏空分组
-			for _, g := range view.Groups {
-				groupViewable := sql.RenderGroupView(attrView, view, g, "")
-				// 必须经过渲染才能得到最终的条目数
-				renderViewableInstance(groupViewable, view, attrView, 1, -1, false, "")
-				if g.GroupHidden == 0 && 1 > groupViewable.(av.Collection).CountItems() {
-					g.GroupHidden = 1
-				}
-			}
-		}
-		if oldHideEmpty && !view.Group.HideEmpty { // 禁用隐藏空分组
-			for _, g := range view.Groups {
-				groupViewable := sql.RenderGroupView(attrView, view, g, "")
-				renderViewableInstance(groupViewable, view, attrView, 1, -1, false, "")
-				if g.GroupHidden == 1 && 1 > groupViewable.(av.Collection).CountItems() {
-					g.GroupHidden = 0
-				}
-			}
-		}
-	}
+	syncAttrViewGroupHiddenStates(attrView, view)
 
 	if firstInit || changeGroupField { // 首次设置分组时
 		if groupKey := view.GetGroupKey(attrView); nil != groupKey {
@@ -1133,6 +1116,60 @@ func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.
 
 		for i, g := range view.Groups {
 			g.GroupSort = i
+		}
+	}
+}
+
+func syncAttrViewGroupHiddenStates(attrView *av.AttributeView, view *av.View) {
+	if !view.IsGroupView() {
+		return
+	}
+	if !view.Group.HideEmpty {
+		for _, groupView := range view.Groups {
+			if 2 != groupView.GroupHidden {
+				groupView.GroupHidden = 0
+			}
+		}
+		return
+	}
+
+	viewable := sql.RenderView(attrView, view, "", false)
+	cachedAttrViews := map[string]*av.AttributeView{}
+	rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
+	if table, ok := viewable.(*av.Table); ok {
+		// 过滤只依赖行字段值，先对完整父表执行一次，再按分组成员关系判断空分组。
+		filtered := *table
+		filtered.Rows = append([]*av.TableRow(nil), table.Rows...)
+		av.Filter(&filtered, attrView, rollupFurtherCollections, cachedAttrViews)
+		visibleItemIDs := make(map[string]bool, len(filtered.Rows))
+		for _, row := range filtered.Rows {
+			visibleItemIDs[row.ID] = true
+		}
+		for _, groupView := range view.Groups {
+			if 2 == groupView.GroupHidden {
+				continue
+			}
+			groupView.GroupHidden = 1
+			for _, itemID := range groupView.GroupItemIDs {
+				if visibleItemIDs[itemID] {
+					groupView.GroupHidden = 0
+					break
+				}
+			}
+		}
+		return
+	}
+
+	for _, groupView := range view.Groups {
+		if 2 == groupView.GroupHidden {
+			continue
+		}
+		groupViewable := sql.RenderGroupView(attrView, view, groupView, "")
+		av.Filter(groupViewable, attrView, rollupFurtherCollections, cachedAttrViews)
+		if 1 > groupViewable.(av.Collection).CountItems() {
+			groupView.GroupHidden = 1
+		} else {
+			groupView.GroupHidden = 0
 		}
 	}
 }

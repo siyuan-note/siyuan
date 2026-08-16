@@ -19,10 +19,12 @@ import (
 )
 
 func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView, ignoreRows bool) (ret *av.Gallery) {
-	viewable := attrView.RenderedViewables[view.ID]
-	if nil != viewable {
-		ret = viewable.(*av.Gallery)
-		return
+	if !ignoreRows {
+		viewable := attrView.RenderedViewables[view.ID]
+		if nil != viewable {
+			ret = viewable.(*av.Gallery)
+			return
+		}
 	}
 
 	ret = &av.Gallery{

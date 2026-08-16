@@ -747,6 +747,23 @@ ${getIconScript(servePath)}
                 parentWindowId: ${currentWindowId},
             };
         };
+        const waitForImages = () => Promise.all(Array.from(previewElement.querySelectorAll("img")).map((image) => {
+            image.loading = "eager";
+            if (image.complete) {
+                return Promise.resolve();
+            }
+            return new Promise((resolve) => {
+                const finish = () => {
+                    clearTimeout(timeout);
+                    image.removeEventListener("load", finish);
+                    image.removeEventListener("error", finish);
+                    resolve();
+                };
+                const timeout = setTimeout(finish, 30000);
+                image.addEventListener("load", finish, {once: true});
+                image.addEventListener("error", finish, {once: true});
+            });
+        }));
         actionElement.querySelector('.b3-button--text').addEventListener('click', async () => {
             const {ipcRenderer}  = require("electron");
             const result = await ipcRenderer.invoke("${Constants.SIYUAN_GET}", {
@@ -757,6 +774,7 @@ ${getIconScript(servePath)}
             if (result.canceled || result.filePaths.length === 0) {
                 return;
             }
+            await waitForImages();
             const isPaged = actionElement.querySelector("#paged").checked;
             let exportConfig;
             if (!isPaged) {

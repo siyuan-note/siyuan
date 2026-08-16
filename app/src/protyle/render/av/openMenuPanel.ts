@@ -39,6 +39,7 @@ import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCe
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
 import {getAssetExtension} from "../../../util/pathName";
+import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {isMobile} from "../../../util/functions";
 import {openLink} from "../../../editor/openLink";
@@ -1751,7 +1752,8 @@ export const openMenuPanel = (options: {
                         h: rect.height
                     }, (url, name) => {
                         let value: IAVCellAssetValue;
-                        if (Constants.SIYUAN_ASSETS_IMAGE.includes(getAssetExtension(url).toLowerCase())) {
+                        if (Constants.SIYUAN_ASSETS_IMAGE.includes(getAssetExtension(url).toLowerCase()) &&
+                            isBrowserRenderableImagePath(url)) {
                             value = {
                                 type: "image",
                                 content: url,
@@ -1779,7 +1781,8 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "openAssetItem") {
                     const assetLink = target.parentElement.dataset.content;
-                    if (target.parentElement.dataset.type === "image") {
+                    if (target.parentElement.dataset.type === "image" &&
+                        isBrowserRenderableImagePath(assetLink)) {
                         previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
                             options.blockElement.querySelector('[data-type="av-search"]')?.textContent.trim() || "");
                     } else {

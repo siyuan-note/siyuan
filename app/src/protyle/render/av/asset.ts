@@ -23,6 +23,7 @@ import * as dayjs from "dayjs";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
 import {base64ToURL, getCompressURL, removeCompressURL} from "../../../util/image";
+import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {filesize} from "filesize";
 import {genNetworkImageAssetValue} from "./assetValue";
@@ -82,7 +83,7 @@ export const getAssetHTML = (cellElements: HTMLElement[]) => {
     const batchMode = getAVBatchEditMode(cellElements[0]);
     getVisibleAssetValues(cellElements).forEach((item, index) => {
         let contentHTML;
-        if (item.type === "image") {
+        if (item.type === "image" && isBrowserRenderableImagePath(item.content)) {
             contentHTML = `<span data-type="openAssetItem" class="fn__flex-1 ariaLabel" aria-label="${escapeAriaLabel(item.content)}">
     <img style="max-height: 180px;max-width: 360px;border-radius: var(--b3-border-radius);margin: 4px 0;" src="${getCompressURL(encodeURI(item.content))}"/>
 </span>`;
@@ -382,7 +383,7 @@ export const editAssetItem = (options: {
     if (type !== "file" || openSubMenu.length > 0) {
         menu.addSeparator({id: "separator_2"});
     }
-    if (type !== "file") {
+    if (type !== "file" && isBrowserRenderableImagePath(linkAddress)) {
         menu.addItem({
             id: "cardPreview",
             icon: "iconPreview",

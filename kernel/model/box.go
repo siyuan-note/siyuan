@@ -40,6 +40,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -809,8 +810,9 @@ func ClearTempFiles() {
 }
 
 func clearTempFiles(count *int, size *int64) {
+	heif.ClearMemoryCache("")
 	for _, name := range []string{
-		"bazaar", "export", "import", "convert", "pandoc", "os", "base64", "install", "thumbnails", "repo", "clipboard",
+		"assets-cache", "bazaar", "export", "import", "convert", "pandoc", "os", "base64", "install", "thumbnails", "repo", "clipboard",
 	} {
 		clearTempDir(filepath.Join(util.TempDir, name), count, size)
 	}

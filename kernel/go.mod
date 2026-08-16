@@ -32,6 +32,7 @@ require (
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gabriel-vasile/mimetype v1.4.15
+	github.com/gen2brain/h265 v0.1.1
 	github.com/gin-contrib/gzip v1.2.6
 	github.com/gin-contrib/sessions v1.1.0
 	github.com/gin-contrib/sse v1.1.1

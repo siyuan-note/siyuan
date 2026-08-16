@@ -6,6 +6,7 @@ import {getAssetExtension} from "../util/pathName";
 import * as dayjs from "dayjs";
 import {escapeAttr} from "../util/escape";
 import {getHTMLAssetIFrameSrc, isHTMLFilePath} from "./html";
+import {isBrowserRenderableImagePath} from "../util/imageURL";
 
 export const renderAssetsPreview = (pathString: string) => {
     if (!pathString) {
@@ -68,7 +69,7 @@ export const genAssetHTML = (type: string, pathString: string, imgName: string, 
         html = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeIFrame" class="iframe" updated="${dayjs().format("YYYYMMDDHHmmss")}"><div class="iframe-content">${Constants.ZWSP}<iframe sandbox="allow-scripts" src="${iframeSrc}" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe><span class="protyle-action__drag" contenteditable="false"></span></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
     } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
         html = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeAudio" class="iframe" updated="${dayjs().format("YYYYMMDDHHmmss")}"><div class="iframe-content"><audio controls="controls" src="${pathString}"></audio>${Constants.ZWSP}</div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
-    } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
+    } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(type) && isBrowserRenderableImagePath(pathString)) {
         let netHTML = "";
         if (!pathString.startsWith("assets/")) {
             netHTML = '<span class="img__net"><svg><use xlink:href="#iconGlobe"></use></svg></span>';

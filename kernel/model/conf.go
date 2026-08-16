@@ -38,6 +38,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -1467,6 +1468,8 @@ func clearCorruptedNotebooks() {
 }
 
 func clearWorkspaceTemp(preserveInstallPkgs bool) {
+	heif.ClearMemoryCache("")
+	os.RemoveAll(filepath.Join(util.TempDir, "assets-cache"))
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))

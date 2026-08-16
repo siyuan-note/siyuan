@@ -288,3 +288,12 @@ func TestSecureAssetContentHeadersKeepsExplicitDownload(t *testing.T) {
 		t.Fatalf("explicit download=true must return attachment, got Content-Disposition %q", recorder.Header().Get("Content-Disposition"))
 	}
 }
+
+func TestEncryptedAssetCacheHeaders(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+	setEncryptedAssetCacheHeaders(context)
+	if got := recorder.Header().Get("Cache-Control"); got != "private, no-store" {
+		t.Fatalf("unexpected encrypted asset cache policy: %q", got)
+	}
+}

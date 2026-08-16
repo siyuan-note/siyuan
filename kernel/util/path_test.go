@@ -39,6 +39,18 @@ func TestFilterSelfChildDocsPreservesInputOrder(t *testing.T) {
 	}
 }
 
+func TestIsPossiblyImageWithQueryAndFragment(t *testing.T) {
+	for _, assetPath := range []string{
+		"assets/photo.heic",
+		"assets/photo.HEIF?box=20260816000000-abcdefg",
+		"assets/photo.heic?box=20260816000000-abcdefg#preview",
+	} {
+		if !IsPossiblyImage(assetPath) {
+			t.Fatalf("HEIF asset was not recognized as an image: %s", assetPath)
+		}
+	}
+}
+
 func TestFilterSelfChildDocsRemovesChildrenAndDuplicates(t *testing.T) {
 	parentPath := "/20260810000001-abcdefg.sy"
 	childPath := "/20260810000001-abcdefg/20260810000002-abcdefg.sy"

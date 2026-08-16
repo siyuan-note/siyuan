@@ -337,14 +337,18 @@ func IsAssetLinkDest(dest []byte, includeServePath bool) bool {
 }
 
 var (
-	SiYuanAssetsImage = []string{".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"}
+	SiYuanAssetsImage = []string{".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif", ".heic", ".heif"}
 	SiYuanAssetsAudio = []string{".mp3", ".wav", ".ogg", ".m4a", ".flac"}
 	SiYuanAssetsVideo = []string{".mov", ".weba", ".mkv", ".mp4", ".webm"}
 )
 
 // IsPossiblyImage 模糊判断指定文件链接是否可能是图片。
 func IsPossiblyImage(assetPath string) bool {
-	ext := strings.ToLower(filepath.Ext(assetPath))
+	extensionPath := assetPath
+	if index := strings.IndexAny(extensionPath, "?#"); index >= 0 {
+		extensionPath = extensionPath[:index]
+	}
+	ext := strings.ToLower(filepath.Ext(extensionPath))
 	if "" != ext {
 		return gulu.Str.Contains(ext, SiYuanAssetsImage)
 	}

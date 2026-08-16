@@ -47,6 +47,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -61,6 +62,14 @@ func GetAssetImgSizeInBox(assetPath, boxID string) (width, height int) {
 	data, err := ReadAssetBytesInBox(boxID, assetPath)
 	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", assetPath, err)
+		return
+	}
+	defer clear(data)
+	if heif.IsPath(assetPath) {
+		width, height, err = heif.ImageSize(data)
+		if err != nil {
+			logging.LogErrorf("open asset image [%s] failed: %s", assetPath, err)
+		}
 		return
 	}
 
@@ -82,7 +91,17 @@ func ReadAssetBytesInBox(boxID, relativePath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	data, readErr := os.ReadFile(absPath)
+	var data []byte
+	var readErr error
+	if heif.IsPath(relativePath) {
+		limit := int64(heif.MaxInputBytes)
+		if effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath); effectiveBoxID != "" && IsEncryptedBox(effectiveBoxID) {
+			limit += 2 * 1024 * 1024
+		}
+		data, readErr = heif.ReadFileLimited(absPath, limit)
+	} else {
+		data, readErr = os.ReadFile(absPath)
+	}
 	if readErr != nil {
 		return nil, readErr
 	}
@@ -95,11 +114,16 @@ func ReadAssetBytesInBox(boxID, relativePath string) ([]byte, error) {
 			ReleaseBoxReadLock(effectiveBoxID)
 			return nil, dekErr
 		}
+		defer clear(dek)
 		defer ReleaseBoxReadLock(effectiveBoxID)
 		diskName := filepath.Base(AssetPathWithoutQuery(relativePath))
 		plain, decErr := DecryptAsset(effectiveBoxID, diskName, dek, data)
 		if decErr != nil {
 			return nil, decErr
+		}
+		if heif.IsPath(relativePath) && len(plain) > heif.MaxInputBytes {
+			clear(plain)
+			return nil, heif.ErrInputTooLarge
 		}
 		return plain, nil
 	}

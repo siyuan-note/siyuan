@@ -573,7 +573,7 @@ func exportLockedByBlockID(id string) bool {
 
 // withExportReadLockByBlockID 由 blockID 反查 boxID，若属于加密笔记本则全程持读锁执行 fn。
 // 持锁期间 LockBox（自动锁定）会阻塞等待，避免操作中途清 DEK/删导出目录导致部分明文写出。
-// 普通笔记本或块树不存在时直接执行 fn。嵌套调用安全：sync.RWMutex.RLock 可重入。
+// 准入租约先于读锁取得，确保嵌套资源读取期间不会出现等待中的写锁。
 func withExportReadLockByBlockID(id string, fn func() error) error {
 	bt := getExportBlockTree(id)
 	if nil == bt || !IsEncryptedBox(bt.BoxID) {
@@ -582,11 +582,17 @@ func withExportReadLockByBlockID(id string, fn func() error) error {
 	if !IsBoxUnlocked(bt.BoxID) {
 		return errors.New(Conf.Language(314))
 	}
-	HoldBoxReadLock(bt.BoxID)
-	defer ReleaseBoxReadLock(bt.BoxID)
-	if _, dekErr := GetDEKIfUnlocked(bt.BoxID); dekErr != nil {
+	if err := AcquireEncryptedBoxOperation(bt.BoxID); err != nil {
 		return errors.New(Conf.Language(314))
 	}
+	defer ReleaseEncryptedBoxOperation(bt.BoxID)
+	HoldBoxReadLock(bt.BoxID)
+	defer ReleaseBoxReadLock(bt.BoxID)
+	dek, dekErr := GetDEKIfUnlocked(bt.BoxID)
+	if dekErr != nil {
+		return errors.New(Conf.Language(314))
+	}
+	clear(dek)
 	return fn()
 }
 

@@ -26,6 +26,7 @@ import {getPadding} from "../ui/initUI";
 import {hasTopClosestByAttribute} from "../util/hasClosest";
 import {addScriptSync} from "../util/addScript";
 import {prepareWechatCopy, prepareZhihuCopy} from "./platformCopy";
+import {isHEIFPath, isBrowserRenderableImagePath} from "../../util/imageURL";
 
 export class Preview {
     public element: HTMLElement;
@@ -142,7 +143,9 @@ export class Preview {
                             openBy(linkAddress, "folder");
                         } else if (event.shiftKey) {
                             openBy(linkAddress, "app");
-                        } else if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress).split("?")[0]))) {
+                        } else if (isHEIFPath(linkAddress) && !isBrowserRenderableImagePath(linkAddress)) {
+                            openBy(linkAddress, "app");
+                        } else if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress).split("?")[0]).toLowerCase())) {
                             openAsset(protyle.app, linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
                         }
                         /// #endif

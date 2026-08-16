@@ -36,6 +36,14 @@ describe("getCardCoverImageHTML", () => {
         assert.match(html, /src="assets\/cover\.png\?style=thumb"/);
     });
 
+    it("does not render cross-origin HEIF covers", () => {
+        assert.equal(getCardCoverImageHTML(
+            "https://example.com/cover.heic",
+            "https://example.com/cover.heic",
+            false,
+        ), "");
+    });
+
     it("applies a stored position only to the same image", () => {
         const position = {image: "assets/cover.png", x: 12.5, y: 87.5};
 

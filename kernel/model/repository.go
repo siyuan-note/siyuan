@@ -58,6 +58,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -519,12 +520,18 @@ func OpenRepoSnapshotFile(fileID string) (title, content string, displayInText b
 					repoBoxID = parts[0]
 				}
 				if repoBoxID != "" && IsEncryptedBox(repoBoxID) {
+					// 加密仓库快照的 HEIF 预览不落盘，保持与旧版普通文件展示行为一致。
+					if heif.IsPath(file.Path) {
+						return
+					}
 					HoldBoxReadLock(repoBoxID)
 					defer ReleaseBoxReadLock(repoBoxID)
 					// 加密 asset：尝试解密后预览，无法解密则 fail-closed
 					if dek, dekErr := GetDEKIfUnlocked(repoBoxID); dekErr == nil && dek != nil {
 						diskName := filepath.Base(file.Path)
-						if plainData, decErr := DecryptAsset(repoBoxID, diskName, dek, data); decErr == nil {
+						plainData, decErr := DecryptAsset(repoBoxID, diskName, dek, data)
+						clear(dek)
+						if decErr == nil {
 							data = plainData
 						} else {
 							logging.LogWarnf("decrypt repo snapshot asset [%s] failed: %s", file.Path, decErr)

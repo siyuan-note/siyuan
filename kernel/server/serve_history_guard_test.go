@@ -13,6 +13,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -61,6 +62,7 @@ func TestHistoryRouteBlocksSensitiveSnapshots(t *testing.T) {
 		{"/history/2026-08-15-120000-sync/.siyuan/publishAccess.json", http.StatusForbidden},
 		{"/history/2026-08-15-120000-sync/templates/private.md", http.StatusForbidden},
 		{"/history/2026-08-15-120000-sync/snippets/conf.json", http.StatusForbidden},
+		{"/history/2026-08-15-120000-sync%5ctemplates%5cprivate.md", http.StatusUnauthorized},
 		{"/history/2026-08-15-120000-sync/assets/image.png", http.StatusOK},
 	} {
 		recorder := httptest.NewRecorder()
@@ -91,6 +93,11 @@ func TestRepoDiffRouteBlocksSensitivePaths(t *testing.T) {
 	if err := os.WriteFile(allowedPath, []byte("asset"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	for _, name := range []string{"script.svg", "image.heic"} {
+		if err := os.WriteFile(filepath.Join(diffDir, "assets", name), []byte("asset"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
 
 	engine := gin.New()
 	engine.Use(func(c *gin.Context) {
@@ -112,6 +119,53 @@ func TestRepoDiffRouteBlocksSensitivePaths(t *testing.T) {
 		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, test.requestPath, nil))
 		if recorder.Code != test.wantStatus {
 			t.Fatalf("GET %s returned %d, want %d", test.requestPath, recorder.Code, test.wantStatus)
+		}
+	}
+
+	for _, requestPath := range []string{
+		"/repo/diff/assets/script.svg",
+		"/repo/diff/assets/image.heic?download=true",
+	} {
+		recorder := httptest.NewRecorder()
+		engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, requestPath, nil))
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("GET %s returned %d, want %d", requestPath, recorder.Code, http.StatusOK)
+		}
+		if disposition := recorder.Header().Get("Content-Disposition"); !strings.HasPrefix(disposition, "attachment") {
+			t.Fatalf("GET %s must download, got Content-Disposition %q", requestPath, disposition)
+		}
+		if recorder.Header().Get("X-Content-Type-Options") != "nosniff" {
+			t.Fatalf("GET %s missing X-Content-Type-Options", requestPath)
+		}
+	}
+}
+
+func TestCleanRepoDiffRequestPathUsesURLSeparators(t *testing.T) {
+	const requestPath = "/20260816000000-box001/assets/image.heic"
+	if got, valid := cleanRepoDiffRequestPath(requestPath); !valid || got != requestPath {
+		t.Fatalf("cleaned repository diff path is %q, want %q", got, requestPath)
+	}
+	for _, invalid := range []string{
+		`/20260816000000-box001\assets\image.heic`,
+		"/20260816000000-box001/../assets/image.heic",
+	} {
+		if got, valid := cleanRepoDiffRequestPath(invalid); valid {
+			t.Fatalf("unsafe repository diff path %q was accepted as %q", invalid, got)
+		}
+	}
+}
+
+func TestCleanHistoryRequestPathUsesURLSeparators(t *testing.T) {
+	const requestPath = "/2026-08-15-120000-sync/assets/image.heic"
+	if got, valid := cleanHistoryRequestPath(requestPath); !valid || got != requestPath {
+		t.Fatalf("cleaned history path is %q, want %q", got, requestPath)
+	}
+	for _, invalid := range []string{
+		`/2026-08-15-120000-sync\templates\private.md`,
+		"/2026-08-15-120000-sync/../templates/private.md",
+	} {
+		if got, valid := cleanHistoryRequestPath(invalid); valid {
+			t.Fatalf("unsafe history path %q was accepted as %q", invalid, got)
 		}
 	}
 }

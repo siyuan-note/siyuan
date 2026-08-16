@@ -2,6 +2,7 @@ import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {unicode2Emoji} from "../../../emoji";
 import {Constants} from "../../../constants";
 import {getCompressURL} from "../../../util/image";
+import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {formatDateDisplay, formatDateValue} from "./dateFormat";
 import {getAVBlockRefSubtype} from "./cellValue";
 
@@ -142,7 +143,7 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
             break;
         case "mAsset":
             value.mAsset?.forEach(item => {
-                if (item.type === "image") {
+                if (item.type === "image" && isBrowserRenderableImagePath(item.content)) {
                     html += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" src="${getCompressURL(item.content)}">`;
                 } else {
                     html += `<span class="b3-chip b3-chip--middle av__celltext--url ariaLabel" aria-label="${escapeAriaLabel(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${escapeHtml(item.name || item.content)}</span>`;

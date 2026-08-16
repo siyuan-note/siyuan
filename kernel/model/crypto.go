@@ -43,6 +43,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -1521,6 +1522,8 @@ func lockBoxWithPreparationHeld(boxID string, prepare func()) {
 
 // lockBoxHeld 在已持有 box 写锁的前提下执行该 box 的锁定清理（不含全局缓存刷新）。
 func lockBoxHeld(boxID string) {
+	// 此时已排空在途操作并持有 box 写锁，可以安全清除该笔记本的明文 HEIF 预览缓存。
+	heif.ClearMemoryCache(boxID)
 	RevokeManagedEncryptedExportsForBox(boxID)
 	ClearRichClipboardBox(boxID)
 
@@ -2641,6 +2644,8 @@ func cleanupFailedEncryptedBox(boxID string) {
 		return
 	}
 
+	// 创建失败路径不经过常规锁定流程，防御性清理可能生成的明文 HEIF 预览缓存。
+	heif.ClearMemoryCache(boxID)
 	cachedDEKsLock.Lock()
 	if cachedDEK, ok := cachedDEKs[boxID]; ok {
 		zeroAndClear(cachedDEK)

@@ -777,14 +777,30 @@
 
   &-ai-provider__view,
   &-agent-capability__view,
+  &-agent-user-skills__view,
   &-entry-visibility__view {
     flex-direction: column;
   }
 
   &-ai-provider__view > .b3-dialog__header,
   &-agent-capability__view > .b3-dialog__header,
+  &-agent-user-skills__view > .b3-dialog__header,
   &-entry-visibility__view > .b3-dialog__header {
     padding-left: 12px;
+  }
+
+  &-agent-user-skills {
+    &__content {
+      box-sizing: border-box;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 0;
+    }
+
+    &__content .config-group {
+      margin: 16px;
+    }
   }
 
   &-ai-provider {

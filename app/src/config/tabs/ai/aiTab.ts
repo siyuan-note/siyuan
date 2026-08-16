@@ -25,7 +25,6 @@ import {
     mountAgentCapabilityBlock,
 } from "./aiCapabilityUi";
 import {
-    genUserSkillsBlockHtml,
     getUserSkillsBlockKeywords,
     mountUserSkillsBlock,
 } from "./aiSkillUi";
@@ -163,10 +162,13 @@ const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
 const registerAiSkillsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("skills", window.siyuan.languages.tokenCatSkills);
 
-    group.slot({
-        key: "userSkills",
+    group.button({
+        id: "aiUserSkills",
+        title: window.siyuan.languages.agentUserSkills,
+        desc: window.siyuan.languages.agentUserSkillsTip,
+        label: window.siyuan.languages.config,
+        icon: "iconSettings",
         keywords: getUserSkillsBlockKeywords(),
-        html: genUserSkillsBlockHtml,
         afterMount: mountUserSkillsBlock,
     });
 };

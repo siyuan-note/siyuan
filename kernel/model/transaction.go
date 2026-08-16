@@ -138,7 +138,7 @@ func flushTx(tx *Transaction) {
 			util.PushTxErr(pushMsg, txErr.code, nil)
 			return
 		case TxErrCodeReloadUI:
-			logging.LogErrorf("transaction structure validation failed: %s", txErr.msg)
+			logging.LogErrorf("transaction failed and requires UI reload: %s", txErr.msg)
 			util.ReloadUI()
 			return
 		case TxErrCodeDataIsSyncing:
@@ -822,8 +822,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	block := treenode.GetBlockTree(operation.ParentID)
 	if nil == block {
 		logging.LogWarnf("not found block [%s]", operation.ParentID)
-		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
-		return
+		return &TxErr{code: TxErrCodeReloadUI, msg: "parent block not found", id: operation.ParentID}
 	}
 	tree, err := tx.loadTree(block.ID)
 	if err != nil {
@@ -926,8 +925,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 	block := treenode.GetBlockTree(operation.ParentID)
 	if nil == block {
 		logging.LogWarnf("not found block [%s]", operation.ParentID)
-		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
-		return
+		return &TxErr{code: TxErrCodeReloadUI, msg: "parent block not found", id: operation.ParentID}
 	}
 	tree, err := tx.loadTree(block.ID)
 	if err != nil {
@@ -1462,8 +1460,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	}
 	if nil == bt {
 		logging.LogWarnf("not found block tree [%s, %s, %s]", operation.ParentID, operation.PreviousID, operation.NextID)
-		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
-		return
+		return &TxErr{code: TxErrCodeReloadUI, msg: "insertion target block not found"}
 	}
 
 	var err error

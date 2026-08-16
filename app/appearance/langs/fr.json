@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "Compétences utilisateur",
+	"agentUserSkills": "Compétences externes",
 	"agentUserSkillsTip": "Activez individuellement les compétences en lecture seule depuis ~/.agents/skills ; les compétences externes peuvent être incompatibles avec les outils SiYuan",
 	"agentUserSkillsEmpty": "Aucune compétence trouvée dans ~/.agents/skills",
 	"agentUserSkillShadowed": "Remplacée par une compétence de l’espace de travail",

@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "ทักษะของผู้ใช้",
+	"agentUserSkills": "ทักษะภายนอก",
 	"agentUserSkillsTip": "เปิดใช้ทักษะแบบอ่านอย่างเดียวจาก ~/.agents/skills ทีละรายการ ทักษะภายนอกอาจไม่เข้ากันกับเครื่องมือของ SiYuan",
 	"agentUserSkillsEmpty": "ไม่พบทักษะใน ~/.agents/skills",
 	"agentUserSkillShadowed": "ถูกแทนที่โดยทักษะของพื้นที่ทำงาน",

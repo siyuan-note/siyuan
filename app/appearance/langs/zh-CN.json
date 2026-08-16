@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "用户技能",
+	"agentUserSkills": "外部技能",
 	"agentUserSkillsTip": "逐个启用 ~/.agents/skills 中的只读技能；外部技能可能与 SiYuan 工具不兼容",
 	"agentUserSkillsEmpty": "未在 ~/.agents/skills 中找到技能",
 	"agentUserSkillShadowed": "已被工作空间技能覆盖",

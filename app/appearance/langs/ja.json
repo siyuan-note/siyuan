@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "ユーザースキル",
+	"agentUserSkills": "外部スキル",
 	"agentUserSkillsTip": "~/.agents/skills の読み取り専用スキルを個別に有効にします。外部スキルは SiYuan のツールと互換性がない場合があります",
 	"agentUserSkillsEmpty": "~/.agents/skills にスキルが見つかりません",
 	"agentUserSkillShadowed": "ワークスペースのスキルによって上書きされています",

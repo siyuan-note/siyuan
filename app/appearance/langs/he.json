@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "מיומנויות משתמש",
+	"agentUserSkills": "מיומנויות חיצוניות",
 	"agentUserSkillsTip": "הפעל בנפרד מיומנויות לקריאה בלבד מתוך ~/.agents/skills; ייתכן שמיומנויות חיצוניות לא יתאימו לכלי SiYuan",
 	"agentUserSkillsEmpty": "לא נמצאו מיומנויות ב־~/.agents/skills",
 	"agentUserSkillShadowed": "נדרס על ידי מיומנות של סביבת העבודה",

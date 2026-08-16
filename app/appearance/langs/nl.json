@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "Gebruikersvaardigheden",
+	"agentUserSkills": "Externe vaardigheden",
 	"agentUserSkillsTip": "Schakel alleen-lezenvaardigheden uit ~/.agents/skills afzonderlijk in; externe vaardigheden zijn mogelijk niet compatibel met SiYuan-hulpmiddelen",
 	"agentUserSkillsEmpty": "Geen vaardigheden gevonden in ~/.agents/skills",
 	"agentUserSkillShadowed": "Overschreven door een werkruimtevaardigheid",

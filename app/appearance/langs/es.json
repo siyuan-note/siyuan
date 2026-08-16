@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "Habilidades de usuario",
+	"agentUserSkills": "Habilidades externas",
 	"agentUserSkillsTip": "Activa individualmente las habilidades de solo lectura de ~/.agents/skills; las habilidades externas pueden ser incompatibles con las herramientas de SiYuan",
 	"agentUserSkillsEmpty": "No se encontraron habilidades en ~/.agents/skills",
 	"agentUserSkillShadowed": "Reemplazada por una habilidad del espacio de trabajo",

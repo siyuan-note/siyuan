@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "User skills",
+	"agentUserSkills": "External skills",
 	"agentUserSkillsTip": "Individually enable read-only skills from ~/.agents/skills; external skills may be incompatible with SiYuan tools",
 	"agentUserSkillsEmpty": "No skills found in ~/.agents/skills",
 	"agentUserSkillShadowed": "Overridden by a workspace skill",

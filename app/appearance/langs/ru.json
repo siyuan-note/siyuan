@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "Пользовательские навыки",
+	"agentUserSkills": "Внешние навыки",
 	"agentUserSkillsTip": "Включайте по отдельности навыки только для чтения из ~/.agents/skills; внешние навыки могут быть несовместимы с инструментами SiYuan",
 	"agentUserSkillsEmpty": "В ~/.agents/skills навыки не найдены",
 	"agentUserSkillShadowed": "Переопределено навыком рабочего пространства",

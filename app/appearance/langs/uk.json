@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "Навички користувача",
+	"agentUserSkills": "Зовнішні навички",
 	"agentUserSkillsTip": "Вмикайте окремо навички лише для читання з ~/.agents/skills; зовнішні навички можуть бути несумісними з інструментами SiYuan",
 	"agentUserSkillsEmpty": "У ~/.agents/skills навичок не знайдено",
 	"agentUserSkillShadowed": "Перевизначено навичкою робочого простору",

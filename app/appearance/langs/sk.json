@@ -1,5 +1,5 @@
 {
-	"agentUserSkills": "Používateľské zručnosti",
+	"agentUserSkills": "Externé zručnosti",
 	"agentUserSkillsTip": "Jednotlivo povoľte zručnosti iba na čítanie z ~/.agents/skills; externé zručnosti nemusia byť kompatibilné s nástrojmi SiYuan",
 	"agentUserSkillsEmpty": "V ~/.agents/skills sa nenašli žiadne zručnosti",
 	"agentUserSkillShadowed": "Prepísaná zručnosťou pracovného priestoru",

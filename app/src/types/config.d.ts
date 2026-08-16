@@ -305,10 +305,6 @@ declare namespace Config {
          */
         closeButtonBehavior: number;
         /**
-         * Whether to close tabs by double-clicking
-         */
-        closeTabOnDoubleClick: boolean;
-        /**
          * Dark code block theme
          */
         codeBlockThemeDark: string;
@@ -904,6 +900,10 @@ declare namespace Config {
          * Whether to open the file in the current tab
          */
         openFilesUseCurrentTab: boolean;
+        /**
+         * Whether to close tabs by double-clicking
+         */
+        closeTabOnDoubleClick: boolean;
         /**
          * The storage path of the new document created using block references
          */

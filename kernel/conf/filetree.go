@@ -23,6 +23,7 @@ import (
 type FileTree struct {
 	AlwaysSelectOpenedFile   bool   `json:"alwaysSelectOpenedFile"`   // 是否自动选中当前打开的文件
 	OpenFilesUseCurrentTab   bool   `json:"openFilesUseCurrentTab"`   // 在当前页签打开文件
+	CloseTabOnDoubleClick    bool   `json:"closeTabOnDoubleClick"`    // 是否使用双击关闭页签
 	DocIconClickExpand       bool   `json:"docIconClickExpand"`       // 单击文档或笔记本图标时展开或折叠下级文档
 	ParentDocClickExpand     bool   `json:"parentDocClickExpand"`     // 单击父文档标题时展开或折叠下级文档
 	BoxDocEnabled            *bool  `json:"boxDocEnabled"`            // 是否启用顶层笔记本文档
@@ -51,6 +52,7 @@ func NewFileTree() *FileTree {
 	return &FileTree{
 		AlwaysSelectOpenedFile:   false,
 		OpenFilesUseCurrentTab:   false,
+		CloseTabOnDoubleClick:    false,
 		DocIconClickExpand:       false,
 		ParentDocClickExpand:     false,
 		BoxDocEnabled:            new(bool),

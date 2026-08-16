@@ -179,7 +179,7 @@ export const createThinkingCardElement = (step: {
     return el;
 };
 
-export const bindThinkingCardToggle = (el: HTMLElement): void => {
+export const bindThinkingCardToggle = (el: HTMLElement, onLayoutChange?: () => void): void => {
     const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
     const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
     const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
@@ -187,6 +187,13 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
     const latestElement = el.querySelector(".agent-chat__thinking-latest") as HTMLElement | null;
     if (!header || !body || !expandIcon || !contractIcon) {
         return;
+    }
+    if (onLayoutChange) {
+        body.addEventListener("transitionend", (event) => {
+            if (event.target === body && event.propertyName === "max-height") {
+                onLayoutChange();
+            }
+        });
     }
     header.addEventListener("click", () => {
         el.setAttribute("data-user-interacted", "true");
@@ -226,6 +233,7 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
                 latestElement?.classList.add("fn__none");
             }
         }
+        onLayoutChange?.();
     });
 };
 

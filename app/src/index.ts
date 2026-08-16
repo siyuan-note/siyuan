@@ -234,6 +234,13 @@ export class App {
                             }
                             break;
                         }
+                        case "docSortModeChanged": {
+                            const fileDock = getDockByType("file");
+                            if (fileDock) {
+                                (fileDock.data.file as Files).onDocSortModeChanged(data.data);
+                            }
+                            break;
+                        }
                         case "notebookSortChanged": {
                             const fileDock = getDockByType("file");
                             if (fileDock) {

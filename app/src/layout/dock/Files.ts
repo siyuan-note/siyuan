@@ -20,7 +20,6 @@ import {newEncryptedNotebook, newNotebook, openEncryptedNotebook} from "../../ut
 import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {
-    hasClosestByAttribute,
     hasClosestByClassName,
     hasClosestByTag,
     hasTopClosestByTag
@@ -51,6 +50,14 @@ import {
     restoreMovedExpandedDocItems,
     updateMovedSubtree
 } from "../../util/fileTreeMove";
+import {
+    FILE_TREE_CHILDREN_SORT_MODE,
+    FILE_TREE_EFFECTIVE_SORT_MODE,
+    getResponseEffectiveSortMode,
+    isCustomFileTreeList,
+    type IDocSortModeChanged,
+    updateFileTreeSortMode
+} from "../../util/fileTreeSort";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -59,6 +66,7 @@ export class Files extends Model {
     public lastSelectedElement: Element = null;
     private actionsElement: HTMLElement;
     private reloadNotebookInfoTimeout: number;
+    private docSortModeRefreshTimeout: number;
     private movedExpandedDocIDs = new Set<string>();
 
     constructor(options: { tab: Tab, app: App }) {
@@ -608,16 +616,15 @@ export class Files extends Model {
                     }
                 }
                 if (dragOverLastObj.element && dragOverLastObj.element === liElement && dragOverLastObj.positionY !== event.clientY) {
-                    const notebookElement = hasClosestByAttribute(liElement, "data-sortmode", null);
-                    if (!notebookElement) {
+                    const targetListElement = liElement.parentElement;
+                    if (!targetListElement) {
                         hideDragTip();
                         event.preventDefault();
                         return;
                     }
-                    const notebookSort = notebookElement.getAttribute("data-sortmode");
                     if ((dragOverLastObj.sourceOnlyRoot && targetType === "navigation-root" && window.siyuan.config.fileTree.sort === 6) ||
                         (!dragOverLastObj.sourceOnlyRoot && targetType !== "navigation-root" &&
-                            (notebookSort === "6" || (window.siyuan.config.fileTree.sort === 6 && notebookSort === "15")))
+                            isCustomFileTreeList(targetListElement))
                     ) {
                         const nodeRect = liElement.getBoundingClientRect();
                         const dragHeight = nodeRect.height * .2;
@@ -820,7 +827,7 @@ export class Files extends Model {
                 return;
             }
             if (newElement.classList.contains("dragover__bottom") || newElement.classList.contains("dragover__top")) {
-                const ulSort = newUlElement.getAttribute("data-sortmode");
+                const targetListElement = newElement.parentElement;
                 if (window.siyuan.config.fileTree.sort === 6 && selectRootElements.length > 0 &&
                     newElement.getAttribute("data-path") === "/") {
                     if (newElement.classList.contains("dragover__top")) {
@@ -839,7 +846,7 @@ export class Files extends Model {
                     fetchPost("/api/notebook/changeSortNotebook", {
                         notebooks,
                     });
-                } else if ((ulSort === "6" || (window.siyuan.config.fileTree.sort === 6 && ulSort === "15")) && selectFileElements.length > 0) {
+                } else if (isCustomFileTreeList(targetListElement) && selectFileElements.length > 0) {
                     const toDir = pathPosix().dirname(toPath);
                     const newElementClassList = newElement.getAttribute("class");
                     const sourceNotebookIds = selectFileElements.map((item) =>
@@ -984,8 +991,7 @@ export class Files extends Model {
             return;
         }
 
-        const notebookSort = notebookElement.getAttribute("data-sortmode");
-        if (notebookSort !== "6" && !(window.siyuan.config.fileTree.sort === 6 && notebookSort === "15")) {
+        if (!isCustomFileTreeList(targetElement.parentElement)) {
             return;
         }
         const targetDirectory = pathPosix().dirname(targetPath);
@@ -1501,14 +1507,10 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         if (!notebookElement) {
             return;
         }
-        const sortMode = notebookElement.getAttribute("data-sortmode");
-        if (sortMode !== "6" && !(sortMode === "15" && window.siyuan.config.fileTree.sort === 6)) {
-            return;
-        }
-
         const listPath = data.parentPath === "/" ? "/" : `${data.parentPath}.sy`;
         const liElement = notebookElement.querySelector(`li[data-path="${listPath}"]`);
-        if (!liElement?.nextElementSibling || liElement.nextElementSibling.tagName !== "UL") {
+        const listElement = liElement?.nextElementSibling;
+        if (!listElement || listElement.tagName !== "UL" || !isCustomFileTreeList(listElement)) {
             return;
         }
         fetchPost("/api/filetree/listDocsByPath", {
@@ -1518,6 +1520,14 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         }, response => {
             this.onLsHTML(response.data);
         });
+    }
+
+    public onDocSortModeChanged(data?: IDocSortModeChanged) {
+        updateFileTreeSortMode(data);
+        window.clearTimeout(this.docSortModeRefreshTimeout);
+        this.docSortModeRefreshTimeout = window.setTimeout(() => {
+            this.init(false);
+        }, 100);
     }
 
     public onNotebookSortChanged() {
@@ -1530,8 +1540,12 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     private onMove(response: IWebSocketData) {
+        const moves = response.data.moves as IFileTreeMove[];
+        const needsSortModeRefresh = moves.some((move) =>
+            move.fromNotebook !== move.toNotebook ||
+            pathPosix().dirname(move.fromPath) !== pathPosix().dirname(move.newPath));
         const refreshTargets = new Map<string, { element: HTMLElement, notebookId: string }>();
-        (response.data.moves as IFileTreeMove[]).forEach((move) => {
+        moves.forEach((move) => {
             const expandedDocIDs = new Set<string>();
             const movedItem = findMovedFileTreeItem(this.element, move);
             const sourceElement = movedItem?.element;
@@ -1621,6 +1635,11 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                 });
             }
         });
+        if (needsSortModeRefresh) {
+            this.getOpenPaths();
+            this.onDocSortModeChanged();
+            return;
+        }
         if (response.callback !== Constants.CB_MOVE_NOLIST) {
             refreshTargets.forEach((target) => {
                 this.getLeaf(target.element, target.notebookId, true);
@@ -1634,7 +1653,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         });
     }
 
-    private onLsHTML(data: { files: IFile[], box: string, path: string }, scrollTop?: number) {
+    private onLsHTML(data: IFileTreeList, scrollTop?: number) {
         if (data.files.length === 0) {
             return;
         }
@@ -1646,6 +1665,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         data.files.forEach((item: IFile) => {
             fileHTML += this.genFileHTML(item);
         });
+        const effectiveSortMode = getResponseEffectiveSortMode(data, data.box);
         let nextElement = liElement.nextElementSibling;
         if (nextElement && nextElement.tagName === "UL") {
             // 文件展开时，刷新
@@ -1663,6 +1683,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                 }
             });
             nextElement.innerHTML = tempElement.innerHTML;
+            nextElement.setAttribute(FILE_TREE_EFFECTIVE_SORT_MODE, effectiveSortMode.toString());
             this.restoreMovedExpandedItems(nextElement, data.box);
             if (typeof scrollTop === "number") {
                 this.element.scroll({top: scrollTop, behavior: "smooth"});
@@ -1671,7 +1692,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
             return;
         }
         liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
-        liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
+        liElement.insertAdjacentHTML("afterend", `<ul ${FILE_TREE_EFFECTIVE_SORT_MODE}="${effectiveSortMode}">${fileHTML}</ul>`);
         nextElement = liElement.nextElementSibling;
         this.restoreMovedExpandedItems(nextElement, data.box);
         expandFileTree(nextElement as HTMLElement, () => {
@@ -1682,11 +1703,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         this.refreshPublishAccessSwitch();
     }
 
-    private async onLsSelect(data: {
-        files: IFile[],
-        box: string,
-        path: string
-    }, filePath: string, setStorage: boolean, isSetCurrent: boolean) {
+    private async onLsSelect(data: IFileTreeList, filePath: string, setStorage: boolean, isSetCurrent: boolean) {
         let fileHTML = "";
         data.files.forEach((item: IFile) => {
             fileHTML += this.genFileHTML(item);
@@ -1709,7 +1726,8 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         if (emojiElement.textContent === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file)) {
             emojiElement.textContent = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
         }
-        liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
+        const effectiveSortMode = getResponseEffectiveSortMode(data, data.box);
+        liElement.insertAdjacentHTML("afterend", `<ul ${FILE_TREE_EFFECTIVE_SORT_MODE}="${effectiveSortMode}">${fileHTML}</ul>`);
         this.restoreMovedExpandedItems(liElement.nextElementSibling, data.box);
         let newLiElement;
         for (let i = 0; i < data.files.length; i++) {
@@ -1788,11 +1806,8 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         });
     }
 
-    public async selectItem(notebookId: string, filePath: string, data?: {
-        files: IFile[],
-        box: string,
-        path: string
-    }, setStorage = true, isSetCurrent = true) {
+    public async selectItem(notebookId: string, filePath: string, data?: IFileTreeList,
+                            setStorage = true, isSetCurrent = true) {
         filePath = filePath.replace(/\/\/+/g, "/");
         const treeElement = this.element.querySelector(`[data-url="${notebookId}"]`);
         if (!treeElement) {
@@ -1904,7 +1919,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         const actionClasses = `${iconExpands && item.subFileCount > 0 && !editingPublishAccess ? " file-tree__item--icon-expand" : ""}${
             iconExpands && item.subFileCount === 0 && !editingPublishAccess ? " file-tree__item--icon-open" : ""}${
             window.siyuan.config.fileTree.parentDocClickExpand && item.subFileCount > 0 ? " file-tree__item--title-expand" : ""}`;
-        return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
+        return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" ${FILE_TREE_CHILDREN_SORT_MODE}="${item.childrenSortMode ?? ""}"
 data-type="navigation-file" 
 style="--file-toggle-width:${paddingLeft + 18}px;--file-action-offset:${paddingLeft + 20}px"
 class="b3-list-item b3-list-item--hide-action${actionClasses}" data-path="${item.path}">
@@ -1963,7 +1978,10 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
             }
         }).element);
         if (!window.siyuan.config.readonly) {
-            const subMenu = sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort: number) => {
+            const subMenu = sortMenu("notebooks", window.siyuan.config.fileTree.sort, (sort) => {
+                if (sort === null) {
+                    return;
+                }
                 fetchPost("/api/setting/setFiletree", {
                     ...window.siyuan.config.fileTree,
                     sort,

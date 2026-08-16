@@ -1,4 +1,5 @@
 {
+	"sortByParent": "Utiliser les règles de tri de l’élément parent",
 	"agentUserSkills": "Compétences externes",
 	"agentUserSkillsTip": "Activez individuellement les compétences en lecture seule depuis ~/.agents/skills ; les compétences externes peuvent être incompatibles avec les outils SiYuan",
 	"agentUserSkillsEmpty": "Aucune compétence trouvée dans ~/.agents/skills",

@@ -17,7 +17,7 @@ import {popSearch} from "../mobile/menu/search";
 /// #endif
 import {Constants} from "../constants";
 import {newFileInTree} from "../util/newFile";
-import {hasClosestByTag, hasTopClosestByTag} from "../protyle/util/hasClosest";
+import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {deleteFiles, deleteNotebooks} from "../editor/deleteFile";
 /// #if !MOBILE
 import {openFileById} from "../editor/util";
@@ -36,6 +36,11 @@ import {saveExportFile} from "../protyle/util/compatibility";
 import {exportMarkdownZip} from "../protyle/export/exportMd";
 import {addFilesToDatabase} from "../protyle/render/av/addToDatabase";
 import {getDocTreeMenuItems, getDocTreeMenuType} from "./navigationSelection";
+import {
+    FILE_TREE_CHILDREN_SORT_MODE,
+    getConfiguredChildrenSortMode,
+    isCustomFileTreeList
+} from "../util/fileTreeSort";
 /// #if MOBILE
 import {openEmojiPanel} from "../emoji";
 import {openMobileFileByIdInNewTab} from "../mobile/editor";
@@ -62,12 +67,16 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
             const sortModes = selectedItems.map((item) => parseInt(item.parentElement?.getAttribute("data-sortmode")));
             const sortMode = sortModes.every((item) => item === sortModes[0]) ? sortModes[0] : -1;
             const subMenu = sortMenu("notebook", sortMode, async (sort) => {
+                if (sort === null) {
+                    return;
+                }
                 let files;
                 /// #if MOBILE
                 files = window.siyuan.mobile.docks.file;
                 /// #else
                 files = (getDockByType("file").data["file"] as Files);
                 /// #endif
+                let sortModeChanged = false;
                 for (const item of selectedItems) {
                     const notebookId = item.parentElement?.getAttribute("data-url");
                     if (!notebookId) {
@@ -81,12 +90,14 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                         continue;
                     }
                     item.parentElement.setAttribute("data-sortmode", sort.toString());
-                    const toggleElement = item.querySelector(".b3-list-item__arrow--open");
-                    if (toggleElement) {
-                        toggleElement.classList.remove("b3-list-item__arrow--open");
-                        item.nextElementSibling?.remove();
-                        files.getLeaf(item, notebookId);
+                    const notebook = window.siyuan.notebooks.find((notebookItem) => notebookItem.id === notebookId);
+                    if (notebook) {
+                        notebook.sortMode = sort;
                     }
+                    sortModeChanged = true;
+                }
+                if (sortModeChanged) {
+                    files?.onDocSortModeChanged();
                 }
             });
             window.siyuan.menus.menu.append(new MenuItem({
@@ -453,12 +464,18 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             }
         }).element);
         const subMenu = sortMenu("notebook", parseInt(liElement.parentElement.getAttribute("data-sortmode")), (sort) => {
+            if (sort === null) {
+                return;
+            }
             fetchPost("/api/notebook/setNotebookConf", {
                 notebook: notebookId,
                 conf: {
                     sortMode: sort
                 }
-            }, () => {
+            }, (response) => {
+                if (response.code !== 0) {
+                    return;
+                }
                 liElement.parentElement.setAttribute("data-sortmode", sort.toString());
                 let files;
                 /// #if MOBILE
@@ -466,12 +483,11 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 /// #else
                 files = (getDockByType("file").data["file"] as Files);
                 /// #endif
-                const toggleElement = liElement.querySelector(".b3-list-item__arrow--open");
-                if (toggleElement) {
-                    toggleElement.classList.remove("b3-list-item__arrow--open");
-                    liElement.nextElementSibling?.remove();
-                    files.getLeaf(liElement, notebookId);
+                const notebook = window.siyuan.notebooks.find((item) => item.id === notebookId);
+                if (notebook) {
+                    notebook.sortMode = sort;
                 }
+                files?.onDocSortModeChanged();
             });
             return true;
         });
@@ -691,8 +707,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     }
     /// #endif
     if (!window.siyuan.config.readonly) {
-        const topElement = hasTopClosestByTag(liElement, "UL");
-        if (window.siyuan.config.fileTree.sort === 6 || (topElement && topElement.dataset.sortmode === "6")) {
+        if (isCustomFileTreeList(liElement.parentElement)) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "newDocAbove",
                 icon: "iconBefore",
@@ -790,6 +805,32 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     openFileAttr(response.data.ial);
                 });
             }
+        }).element);
+        const configuredSortMode = getConfiguredChildrenSortMode(liElement);
+        const sortSubMenu = sortMenu("document", configuredSortMode, (sortMode) => {
+            fetchPost("/api/filetree/setDocSortMode", {
+                id,
+                sortMode,
+            }, (response) => {
+                if (response.code !== 0) {
+                    return;
+                }
+                liElement.setAttribute(FILE_TREE_CHILDREN_SORT_MODE, sortMode?.toString() || "");
+                let files;
+                /// #if MOBILE
+                files = window.siyuan.mobile.docks.file;
+                /// #else
+                files = (getDockByType("file").data["file"] as Files);
+                /// #endif
+                files?.onDocSortModeChanged();
+            });
+        });
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "sort",
+            icon: "iconSort",
+            label: window.siyuan.languages.sort,
+            type: "submenu",
+            submenu: sortSubMenu,
         }).element);
         if (!window.siyuan.config.readonly && !isEncryptedBox(notebookId)) {
             const riffCardMenu = [{
@@ -1050,7 +1091,8 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
     }).element);
 };
 
-export const sortMenu = (type: "notebooks" | "notebook", sortMode: number, clickEvent: (sort: number) => void) => {
+export const sortMenu = (type: "notebooks" | "notebook" | "document", sortMode: number | null,
+                         clickEvent: (sort: number | null) => void) => {
     const sortMenu: IMenu[] = [{
         id: "fileNameASC",
         checked: sortMode === 0,
@@ -1180,6 +1222,16 @@ export const sortMenu = (type: "notebooks" | "notebook", sortMode: number, click
             label: window.siyuan.languages.sortByFiletree,
             click: () => {
                 clickEvent(15);
+            }
+        });
+    } else if (type === "document") {
+        sortMenu.push({
+            id: "sortByParent",
+            checked: sortMode === null,
+            iconHTML: "",
+            label: window.siyuan.languages.sortByParent,
+            click: () => {
+                clickEvent(null);
             }
         });
     }

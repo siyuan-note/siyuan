@@ -1,4 +1,5 @@
 {
+	"sortByParent": "Sortierregeln des übergeordneten Elements verwenden",
 	"agentUserSkills": "Externe Skills",
 	"agentUserSkillsTip": "Schreibgeschützte Skills aus ~/.agents/skills einzeln aktivieren; externe Skills sind möglicherweise nicht mit den SiYuan-Werkzeugen kompatibel",
 	"agentUserSkillsEmpty": "Keine Skills in ~/.agents/skills gefunden",

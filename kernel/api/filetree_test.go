@@ -74,6 +74,43 @@ func TestSetSortRejectsInvalidRequest(t *testing.T) {
 	}
 }
 
+func TestSetDocSortModeRejectsInvalidRequest(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	engine.POST("/api/filetree/setDocSortMode", setDocSortMode)
+
+	tests := []struct {
+		name string
+		body string
+	}{
+		{name: "empty", body: `{}`},
+		{name: "missing sort mode", body: `{"id":"20260718000001-abcdefg"}`},
+		{name: "invalid ID", body: `{"id":"invalid","sortMode":0}`},
+		{name: "fractional sort mode", body: `{"id":"20260718000001-abcdefg","sortMode":1.5}`},
+		{name: "string sort mode", body: `{"id":"20260718000001-abcdefg","sortMode":"1"}`},
+		{name: "notebook fallback mode", body: `{"id":"20260718000001-abcdefg","sortMode":15}`},
+		{name: "internal unassigned mode", body: `{"id":"20260718000001-abcdefg","sortMode":256}`},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, "/api/filetree/setDocSortMode", strings.NewReader(test.body))
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			response := &struct {
+				Code int `json:"code"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); nil != err {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if -1 != response.Code {
+				t.Fatalf("invalid request returned code %d: %s", response.Code, recorder.Body.String())
+			}
+		})
+	}
+}
+
 func TestAuthFilePublishAccessReturnsUniformFailure(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

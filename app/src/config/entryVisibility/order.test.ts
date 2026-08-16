@@ -13,6 +13,13 @@ test("entry order inserts the code block Tab setting before the existing code op
     ), ["saveCodeBlockAsFile", "md27", "md29", "md31", "md2"]);
 });
 
+test("entry order inserts document sorting after attributes in existing profiles", () => {
+    assert.deepEqual(mergeEntryOrder(
+        ["rename", "attr", "sort", "riffCard", "search"],
+        ["search", "rename", "attr", "riffCard"],
+    ), ["search", "rename", "attr", "sort", "riffCard"]);
+});
+
 test("entry order ignores unknown and duplicate keys", () => {
     assert.deepEqual(mergeEntryOrder(["a", "b", "c"], ["missing", "c", "c", "a"]), ["c", "a", "b"]);
 });

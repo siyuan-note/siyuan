@@ -1,4 +1,5 @@
 {
+	"sortByParent": "Użyj reguł sortowania elementu nadrzędnego",
 	"agentUserSkills": "Umiejętności zewnętrzne",
 	"agentUserSkillsTip": "Włączaj osobno umiejętności tylko do odczytu z ~/.agents/skills; zewnętrzne umiejętności mogą być niezgodne z narzędziami SiYuan",
 	"agentUserSkillsEmpty": "Nie znaleziono umiejętności w ~/.agents/skills",

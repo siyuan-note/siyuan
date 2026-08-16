@@ -1,4 +1,5 @@
 {
+	"sortByParent": "使用父級排序規則",
 	"agentUserSkills": "外部技能",
 	"agentUserSkillsTip": "逐一啟用 ~/.agents/skills 中的唯讀技能；外部技能可能與 SiYuan 工具不相容",
 	"agentUserSkillsEmpty": "未在 ~/.agents/skills 中找到技能",

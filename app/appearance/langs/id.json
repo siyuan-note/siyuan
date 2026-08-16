@@ -1,4 +1,5 @@
 {
+	"sortByParent": "Gunakan aturan pengurutan induk",
 	"agentUserSkills": "Keterampilan eksternal",
 	"agentUserSkillsTip": "Aktifkan keterampilan hanya-baca dari ~/.agents/skills satu per satu; keterampilan eksternal mungkin tidak kompatibel dengan alat SiYuan",
 	"agentUserSkillsEmpty": "Tidak ada keterampilan yang ditemukan di ~/.agents/skills",

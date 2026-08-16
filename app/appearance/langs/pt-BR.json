@@ -1,4 +1,5 @@
 {
+	"sortByParent": "Usar regras de ordenação do item pai",
 	"agentUserSkills": "Habilidades externas",
 	"agentUserSkillsTip": "Ative individualmente as habilidades somente leitura de ~/.agents/skills; habilidades externas podem ser incompatíveis com as ferramentas do SiYuan",
 	"agentUserSkillsEmpty": "Nenhuma habilidade encontrada em ~/.agents/skills",

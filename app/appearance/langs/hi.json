@@ -1,4 +1,5 @@
 {
+	"sortByParent": "ऊपरी स्तर के क्रमबद्धता नियमों का उपयोग करें",
 	"agentUserSkills": "बाहरी कौशल",
 	"agentUserSkillsTip": "~/.agents/skills से केवल-पढ़ने योग्य कौशल अलग-अलग सक्षम करें; बाहरी कौशल SiYuan टूल के साथ असंगत हो सकते हैं",
 	"agentUserSkillsEmpty": "~/.agents/skills में कोई कौशल नहीं मिला",

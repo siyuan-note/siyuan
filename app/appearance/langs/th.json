@@ -1,4 +1,5 @@
 {
+	"sortByParent": "ใช้กฎการเรียงลำดับของระดับบน",
 	"agentUserSkills": "ทักษะภายนอก",
 	"agentUserSkillsTip": "เปิดใช้ทักษะแบบอ่านอย่างเดียวจาก ~/.agents/skills ทีละรายการ ทักษะภายนอกอาจไม่เข้ากันกับเครื่องมือของ SiYuan",
 	"agentUserSkillsEmpty": "ไม่พบทักษะใน ~/.agents/skills",

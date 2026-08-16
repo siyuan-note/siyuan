@@ -1,4 +1,5 @@
 {
+	"sortByParent": "Використовувати правила сортування батьківського елемента",
 	"agentUserSkills": "Зовнішні навички",
 	"agentUserSkillsTip": "Вмикайте окремо навички лише для читання з ~/.agents/skills; зовнішні навички можуть бути несумісними з інструментами SiYuan",
 	"agentUserSkillsEmpty": "У ~/.agents/skills навичок не знайдено",

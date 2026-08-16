@@ -47,7 +47,7 @@ const copyChildren = () => [
     node("copyID", lang("copyID"), false),
 ];
 
-const sortChildren = () => [
+const sortChildren = (inheritKey?: "sortByFiletree" | "sortByParent") => [
     node("fileNameASC", lang("fileNameASC"), false),
     node("fileNameDESC", lang("fileNameDESC"), false),
     node("fileNameNatASC", lang("fileNameNatASC")),
@@ -68,7 +68,7 @@ const sortChildren = () => [
     node("subDocCountDESC", lang("subDocCountDESC")),
     separator("separator_5"),
     node("customSort", lang("customSort")),
-    node("sortByFiletree", lang("sortByFiletree")),
+    ...(inheritKey ? [node(inheritKey, lang(inheritKey))] : []),
 ];
 
 const exportChildren = () => [
@@ -144,6 +144,7 @@ const docTreeDocument = () => {
         separator("separator_2"),
         node("rename", lang("rename")),
         node("attr", lang("attr")),
+        node("sort", lang("sort"), true, sortChildren("sortByParent")),
         riffCard,
         node("search", lang("search")),
         node("replace", lang("replace")),
@@ -438,7 +439,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("openDocument", lang("openDocument")),
             node("rename", lang("rename")),
             node("config", lang("config")),
-            node("sort", lang("sort"), true, sortChildren()),
+            node("sort", lang("sort"), true, sortChildren("sortByFiletree")),
             node("riffCard", lang("riffCard"), false),
             node("search", lang("search")),
             node("replace", lang("replace")),
@@ -468,7 +469,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
         key: "docTree.notebooks",
         label: location(lang("entryDocPanel"), lang("agentCatNotebook"), lang("multiSelect"), lang("more")),
         children: [
-            node("sort", lang("sort"), true, sortChildren()),
+            node("sort", lang("sort"), true, sortChildren("sortByFiletree")),
             node("search", lang("search")),
             node("replace", lang("replace")),
             separator("separator_1"),

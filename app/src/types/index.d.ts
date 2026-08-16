@@ -932,6 +932,14 @@ interface IFile {
     id: string;
     count: number;
     subFileCount: number;
+    childrenSortMode?: number | null;
+}
+
+interface IFileTreeList {
+    files: IFile[];
+    box: string;
+    path: string;
+    effectiveSortMode?: number;
 }
 
 interface IBlockTree {

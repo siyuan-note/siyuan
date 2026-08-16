@@ -1,4 +1,5 @@
 {
+	"sortByParent": "استخدام قواعد الفرز للمستوى الأعلى",
 	"agentUserSkills": "المهارات الخارجية",
 	"agentUserSkillsTip": "فعّل بشكل فردي مهارات القراءة فقط من ~/.agents/skills؛ قد لا تكون المهارات الخارجية متوافقة مع أدوات SiYuan",
 	"agentUserSkillsEmpty": "لم يتم العثور على مهارات في ~/.agents/skills",

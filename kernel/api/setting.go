@@ -557,6 +557,7 @@ func setFiletree(c *gin.Context) {
 		return
 	}
 
+	oldSortMode := model.Conf.FileTree.Sort
 	param, err := gulu.JSON.MarshalJSON(arg)
 	if err != nil {
 		ret.Code = -1
@@ -618,6 +619,9 @@ func setFiletree(c *gin.Context) {
 
 	model.Conf.FileTree = fileTree
 	model.Conf.Save()
+	if oldSortMode != fileTree.Sort {
+		model.PushDocSortModeChanged("global", "", "", "/", &fileTree.Sort)
+	}
 	if oldBoxDocEnabled != model.IsBoxDocEnabled() {
 		model.RefreshBoxDocFeature()
 	}

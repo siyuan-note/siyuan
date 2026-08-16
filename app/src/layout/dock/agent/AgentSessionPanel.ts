@@ -131,7 +131,12 @@ export class AgentSessionPanel {
                 }
             });
 
-            this.host.appendChild(this.popup);
+            // 桌面端浮层使用视口坐标定位，挂到顶层可避免受浮动 Dock 的变换坐标系和裁剪影响。
+            if (this.mobile) {
+                this.host.appendChild(this.popup);
+            } else {
+                document.body.appendChild(this.popup);
+            }
             this.popup.style.zIndex = (++window.siyuan.zIndex).toString();
 
             if (!this.mobile) {
@@ -432,8 +437,8 @@ export class AgentSessionPanel {
         }
     }
 
-	private closeAllSubmenus(except?: HTMLElement) {
-        this.host.querySelectorAll(".agent-session-more.b3-menu__item--show").forEach((el) => {
+    private closeAllSubmenus(except?: HTMLElement) {
+        this.popup?.querySelectorAll(".agent-session-more.b3-menu__item--show").forEach((el) => {
             if (el !== except) {
                 el.classList.remove("b3-menu__item--show");
             }

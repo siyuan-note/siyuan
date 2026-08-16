@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "استخدام النقر المزدوج لإغلاق علامات التبويب",
+	"closeTabOnDoubleClickTip": "عند التمكين، انقر نقرًا مزدوجًا فوق علامة تبويب لإغلاقها",
 	"sortByParent": "استخدام قواعد الفرز للمستوى الأعلى",
 	"agentUserSkills": "المهارات الخارجية",
 	"agentUserSkillsTip": "فعّل بشكل فردي مهارات القراءة فقط من ~/.agents/skills؛ قد لا تكون المهارات الخارجية متوافقة مع أدوات SiYuan",

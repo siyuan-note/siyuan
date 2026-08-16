@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "Sekmeleri çift tıklayarak kapat",
+	"closeTabOnDoubleClickTip": "Etkinleştirildiğinde bir sekmeyi kapatmak için çift tıklayın",
 	"sortByParent": "Üst öğenin sıralama kurallarını kullan",
 	"agentUserSkills": "Harici beceriler",
 	"agentUserSkillsTip": "~/.agents/skills içindeki salt okunur becerileri ayrı ayrı etkinleştirin; harici beceriler SiYuan araçlarıyla uyumlu olmayabilir",

@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "使用双击关闭页签",
+	"closeTabOnDoubleClickTip": "启用后，双击页签将其关闭",
 	"sortByParent": "使用父级排序规则",
 	"agentUserSkills": "外部技能",
 	"agentUserSkillsTip": "逐个启用 ~/.agents/skills 中的只读技能；外部技能可能与 SiYuan 工具不兼容",

@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "ダブルクリックでタブを閉じる",
+	"closeTabOnDoubleClickTip": "有効にすると、タブをダブルクリックして閉じます",
 	"sortByParent": "親の並べ替えルールを使う",
 	"agentUserSkills": "外部スキル",
 	"agentUserSkillsTip": "~/.agents/skills の読み取り専用スキルを個別に有効にします。外部スキルは SiYuan のツールと互換性がない場合があります",

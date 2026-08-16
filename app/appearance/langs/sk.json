@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "Zatvárať karty dvojitým kliknutím",
+	"closeTabOnDoubleClickTip": "Po povolení zatvoríte kartu dvojitým kliknutím",
 	"sortByParent": "Použiť pravidlá radenia nadradenej položky",
 	"agentUserSkills": "Externé zručnosti",
 	"agentUserSkillsTip": "Jednotlivo povoľte zručnosti iba na čítanie z ~/.agents/skills; externé zručnosti nemusia byť kompatibilné s nástrojmi SiYuan",

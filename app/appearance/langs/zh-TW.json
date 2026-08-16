@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "使用雙擊關閉分頁",
+	"closeTabOnDoubleClickTip": "啟用後，雙擊分頁將其關閉",
 	"sortByParent": "使用父級排序規則",
 	"agentUserSkills": "外部技能",
 	"agentUserSkillsTip": "逐一啟用 ~/.agents/skills 中的唯讀技能；外部技能可能與 SiYuan 工具不相容",

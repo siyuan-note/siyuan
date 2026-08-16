@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "Usar doble clic para cerrar pestañas",
+	"closeTabOnDoubleClickTip": "Cuando esté activado, haz doble clic en una pestaña para cerrarla",
 	"sortByParent": "Usar las reglas de ordenación del elemento superior",
 	"agentUserSkills": "Habilidades externas",
 	"agentUserSkillsTip": "Activa individualmente las habilidades de solo lectura de ~/.agents/skills; las habilidades externas pueden ser incompatibles con las herramientas de SiYuan",

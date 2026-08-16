@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "Usa il doppio clic per chiudere le schede",
+	"closeTabOnDoubleClickTip": "Quando l'opzione è attiva, fai doppio clic su una scheda per chiuderla",
 	"sortByParent": "Usa le regole di ordinamento dell'elemento padre",
 	"agentUserSkills": "Competenze esterne",
 	"agentUserSkillsTip": "Abilita singolarmente le competenze di sola lettura da ~/.agents/skills; le competenze esterne potrebbero non essere compatibili con gli strumenti di SiYuan",

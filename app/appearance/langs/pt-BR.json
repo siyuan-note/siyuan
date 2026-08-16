@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "Usar clique duplo para fechar abas",
+	"closeTabOnDoubleClickTip": "Quando ativado, clique duas vezes em uma aba para fechá-la",
 	"sortByParent": "Usar regras de ordenação do item pai",
 	"agentUserSkills": "Habilidades externas",
 	"agentUserSkillsTip": "Ative individualmente as habilidades somente leitura de ~/.agents/skills; habilidades externas podem ser incompatíveis com as ferramentas do SiYuan",

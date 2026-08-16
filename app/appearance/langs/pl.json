@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "Zamykanie kart podwójnym kliknięciem",
+	"closeTabOnDoubleClickTip": "Po włączeniu kliknij kartę dwukrotnie, aby ją zamknąć",
 	"sortByParent": "Użyj reguł sortowania elementu nadrzędnego",
 	"agentUserSkills": "Umiejętności zewnętrzne",
 	"agentUserSkillsTip": "Włączaj osobno umiejętności tylko do odczytu z ~/.agents/skills; zewnętrzne umiejętności mogą być niezgodne z narzędziami SiYuan",

@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "השתמש בלחיצה כפולה כדי לסגור כרטיסיות",
+	"closeTabOnDoubleClickTip": "כאשר האפשרות מופעלת, לחץ פעמיים על כרטיסייה כדי לסגור אותה",
 	"sortByParent": "השתמש בכללי המיון של פריט האב",
 	"agentUserSkills": "מיומנויות חיצוניות",
 	"agentUserSkillsTip": "הפעל בנפרד מיומנויות לקריאה בלבד מתוך ~/.agents/skills; ייתכן שמיומנויות חיצוניות לא יתאימו לכלי SiYuan",

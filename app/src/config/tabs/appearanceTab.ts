@@ -486,6 +486,10 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
             {value: 1, label: window.siyuan.languages.appearance11},
         ],
     });
+    group.switch("appearance.closeTabOnDoubleClick", {
+        title: window.siyuan.languages.closeTabOnDoubleClick,
+        desc: window.siyuan.languages.closeTabOnDoubleClickTip,
+    });
     group.switch("appearance.hideToolbar", {
         title: window.siyuan.languages.appearance19,
         desc: window.siyuan.languages.appearance20,

@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "Use double-click to close tabs",
+	"closeTabOnDoubleClickTip": "When enabled, double-click a tab to close it",
 	"sortByParent": "Use parent sorting rules",
 	"agentUserSkills": "External skills",
 	"agentUserSkillsTip": "Individually enable read-only skills from ~/.agents/skills; external skills may be incompatible with SiYuan tools",

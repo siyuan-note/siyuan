@@ -1,4 +1,6 @@
 {
+	"closeTabOnDoubleClick": "ใช้การดับเบิลคลิกเพื่อปิดแท็บ",
+	"closeTabOnDoubleClickTip": "เมื่อเปิดใช้ ให้ดับเบิลคลิกแท็บเพื่อปิด",
 	"sortByParent": "ใช้กฎการเรียงลำดับของระดับบน",
 	"agentUserSkills": "ทักษะภายนอก",
 	"agentUserSkillsTip": "เปิดใช้ทักษะแบบอ่านอย่างเดียวจาก ~/.agents/skills ทีละรายการ ทักษะภายนอกอาจไม่เข้ากันกับเครื่องมือของ SiYuan",

@@ -173,13 +173,14 @@ export class Wnd {
             }
         });
         this.headersElement.parentElement.addEventListener("dblclick", (event) => {
-            let target = event.target as HTMLElement;
-            while (target && !target.isEqualNode(this.headersElement)) {
-                if (window.siyuan.config.fileTree.openFilesUseCurrentTab && target.getAttribute("data-type") === "tab-header") {
-                    target.classList.remove("item--unupdate");
-                    break;
-                }
-                target = target.parentElement;
+            const tabElement = (event.target as Element).closest<HTMLElement>('[data-type="tab-header"][data-id]');
+            if (!tabElement || !this.headersElement.contains(tabElement)) {
+                return;
+            }
+            if (window.siyuan.config.appearance.closeTabOnDoubleClick) {
+                this.removeTab(tabElement.getAttribute("data-id"));
+            } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+                tabElement.classList.remove("item--unupdate");
             }
         });
         const tabHeadersElement = this.headersElement.parentElement;

@@ -289,8 +289,13 @@ jobs:
             local pid="$1"
             local port="$2"
             local log_path="$3"
+            local boot_progress_path="${RUNNER_TEMP}/siyuan-e2e-${port}-boot-progress.json"
             for attempt in {1..60}; do
-              if curl --fail --silent --request POST "http://127.0.0.1:${port}/api/system/getWorkspaceInfo" > /dev/null; then
+              if curl --fail --silent --output "${boot_progress_path}" --request POST \
+                "http://127.0.0.1:${port}/api/system/bootProgress" && \
+                node -e 'try { const data = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); process.exit(data.data?.progress >= 100 ? 0 : 1); } catch { process.exit(1); }' \
+                  "${boot_progress_path}"; then
+                rm -f "${boot_progress_path}"
                 return
               fi
               if ! kill -0 "${pid}" 2>/dev/null; then
@@ -300,6 +305,9 @@ jobs:
               sleep 1
             done
             cat "${log_path}"
+            if [ -f "${boot_progress_path}" ]; then
+              cat "${boot_progress_path}"
+            fi
             return 1
           }
           for shard_config in ${SIYUAN_E2E_SHARDS}; do

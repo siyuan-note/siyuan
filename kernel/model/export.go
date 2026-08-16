@@ -1536,7 +1536,7 @@ func processIFrame(tree *parse.Tree) {
 func processHTMLFileIFrame(tree *parse.Tree) {
 	// 导出 HTML 时将 HTML 文件组件转换为链接。
 	processIFrameWithFilter(tree, func(src string) bool {
-		return IsHTMLAssetIFrameSrc(src)
+		return IsLocalHTMLAssetPath(src)
 	})
 }
 

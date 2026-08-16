@@ -30,6 +30,7 @@ import {updateDocumentBottomEof} from "./documentRange";
 import {disabledWYSIWYG} from "./disabledWYSIWYG";
 import {getEmbeddedDocInfoResponse} from "./docInfo";
 import {updateWidgetCacheVersion} from "./widgetCache";
+import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -225,6 +226,7 @@ const setHTML = (options: {
             item.setAttribute("data-inline-memo-content", window.DOMPurify.sanitize(content));
         }
     });
+    normalizeHTMLAssetIFrameSources(doc);
     updateWidgetCacheVersion(doc, Constants.SIYUAN_VERSION);
     options.content = doc.body.innerHTML;
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;

@@ -1034,17 +1034,28 @@ func HTMLAssetIFrameSrc(assetPath string) string {
 	return parsed.String()
 }
 
+// IsLocalHTMLAssetPath 判断资源地址是否为本地 HTML 文件。
+func IsLocalHTMLAssetPath(assetPath string) bool {
+	parsed, err := url.Parse(assetPath)
+	if err != nil || parsed.IsAbs() || parsed.Host != "" {
+		return false
+	}
+	assetPath = strings.TrimPrefix(parsed.Path, "/")
+	assetPath = strings.TrimPrefix(assetPath, "./")
+	if !strings.HasPrefix(assetPath, "assets/") {
+		return false
+	}
+	ext := strings.ToLower(path.Ext(assetPath))
+	return ext == ".html" || ext == ".htm"
+}
+
 // IsHTMLAssetIFrameSrc 判断资源地址是否为 HTML 文件 IFrame 渲染地址。
 func IsHTMLAssetIFrameSrc(assetPath string) bool {
 	parsed, err := url.Parse(assetPath)
 	if err != nil || !strings.EqualFold(parsed.Query().Get("iframe"), "true") {
 		return false
 	}
-	if parsed.IsAbs() || parsed.Host != "" || !strings.HasPrefix(strings.TrimPrefix(parsed.Path, "/"), "assets/") {
-		return false
-	}
-	ext := strings.ToLower(path.Ext(parsed.Path))
-	return ext == ".html" || ext == ".htm"
+	return IsLocalHTMLAssetPath(assetPath)
 }
 
 func assetPathAndBox(relativePath, defaultBoxID string) (cleanPath, boxID string, err error) {

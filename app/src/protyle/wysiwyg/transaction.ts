@@ -48,6 +48,7 @@ import {
 import {MERMAID_LAYOUT_ATTR} from "../render/mermaidLayout";
 import {getPartialUpdateCleanupElements, shouldDeferCodeBlockCaretRestore} from "./transactionUpdate";
 import {getMoveAffectedEmbedElements, shouldSyncMoveCopies} from "./transactionEmbed";
+import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -113,6 +114,7 @@ const syncFoldAndStyleAttrs = (element: Element, operation: IOperation) => {
 };
 
 const getVisibleFoldHeadingHTML = (html: string) => {
+    html = normalizeHTMLAssetIFrameBlockDOM(html);
     if (!html.includes('data-type="NodeHeading"') || !html.includes('fold="1"')) {
         return html;
     }

@@ -1708,12 +1708,11 @@ func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string,
 			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize, boxID)
 		} else {
 			if 2 > len(strings.Split(strings.TrimSpace(query), " ")) {
-				rawQuery := strings.TrimSpace(query)
-				query = stringQuery(rawQuery)
-				if "" != rawQuery && searchHPath && isDocumentSearchEnabled(types) {
-					blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTSAndHPathInBox(rawQuery, query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, boxID)
+				ftsQuery, hPathQuery := buildKeywordSearchQueries(query)
+				if "" != hPathQuery && searchHPath && isDocumentSearchEnabled(types) {
+					blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTSAndHPathInBox(hPathQuery, ftsQuery, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize, boxID)
 				} else {
-					blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
+					blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTSInBox(ftsQuery, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
 				}
 			} else {
 				docMode = true // 文档全文搜索模式 https://github.com/siyuan-note/siyuan/issues/10584
@@ -3175,6 +3174,10 @@ func columnConcat() string {
 	}
 	buf.WriteString("||tag")
 	return buf.String()
+}
+
+func buildKeywordSearchQueries(query string) (ftsQuery, hPathQuery string) {
+	return stringQuery(query), strings.TrimSpace(query)
 }
 
 func stringQuery(query string) string {

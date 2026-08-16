@@ -103,3 +103,57 @@ func TestFTSAndHPathMatchesIntegration(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestSiYuanFTSMatchesWhitespace(t *testing.T) {
+	testDB, err := gosql.Open("sqlite3_extended", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	testDB.SetMaxOpenConns(1)
+	t.Cleanup(func() {
+		testDB.Close()
+	})
+	if _, err = testDB.Exec(`CREATE VIRTUAL TABLE whitespace_fts USING fts5(content, tokenize="siyuan")`); err != nil {
+		t.Fatal(err)
+	}
+	for _, content := range []string{"你好", "你 好", "你  好"} {
+		if _, err = testDB.Exec("INSERT INTO whitespace_fts(content) VALUES (?)", content); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	assertMatches := func(query string, expected []string) {
+		t.Helper()
+		ftsQuery, hPathQuery := buildKeywordSearchQueries(query)
+		if "" != hPathQuery {
+			t.Fatalf("纯空白查询不应参与层级路径搜索：%q", hPathQuery)
+		}
+		matchQuery := "{content}:(" + ftsQuery + ")"
+		rows, queryErr := testDB.Query("SELECT content FROM whitespace_fts WHERE whitespace_fts MATCH ? ORDER BY rowid", matchQuery)
+		if queryErr != nil {
+			t.Fatal(queryErr)
+		}
+		var actual []string
+		for rows.Next() {
+			var content string
+			if queryErr = rows.Scan(&content); queryErr != nil {
+				rows.Close()
+				t.Fatal(queryErr)
+			}
+			actual = append(actual, content)
+		}
+		if queryErr = rows.Err(); queryErr != nil {
+			rows.Close()
+			t.Fatal(queryErr)
+		}
+		if queryErr = rows.Close(); queryErr != nil {
+			t.Fatal(queryErr)
+		}
+		if !slices.Equal(actual, expected) {
+			t.Fatalf("空白查询 %q 的匹配结果错误：got %v, want %v", query, actual, expected)
+		}
+	}
+
+	assertMatches(" ", []string{"你 好", "你  好"})
+	assertMatches("  ", []string{"你  好"})
+}

@@ -347,6 +347,34 @@ func TestBuildExactSearchOrderConditionEscapesKeyword(t *testing.T) {
 	}
 }
 
+func TestBuildKeywordSearchQueries(t *testing.T) {
+	tests := []struct {
+		name          string
+		query         string
+		expectedFTS   string
+		expectedHPath string
+	}{
+		{name: "单个空格", query: " ", expectedFTS: `" "`},
+		{name: "连续空格", query: "  ", expectedFTS: `"  "`},
+		{name: "制表符", query: "\t", expectedFTS: "\"\t\""},
+		{name: "全角空格", query: "\u3000", expectedFTS: "\"\u3000\""},
+		{name: "普通关键词", query: "Parent", expectedFTS: `"Parent"`, expectedHPath: "Parent"},
+		{name: "首尾空格", query: " Parent ", expectedFTS: `" Parent "`, expectedHPath: "Parent"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ftsQuery, hPathQuery := buildKeywordSearchQueries(test.query)
+			if test.expectedFTS != ftsQuery {
+				t.Fatalf("FTS 查询错误：got %q, want %q", ftsQuery, test.expectedFTS)
+			}
+			if test.expectedHPath != hPathQuery {
+				t.Fatalf("层级路径查询错误：got %q, want %q", hPathQuery, test.expectedHPath)
+			}
+		})
+	}
+}
+
 func TestBuildExactAliasSearchOrderCondition(t *testing.T) {
 	tests := []struct {
 		name          string

@@ -993,7 +993,25 @@ func serveAssets(ginServer *gin.Engine) {
 	})
 
 	ginServer.GET("/history/*path", model.CheckAuth, model.CheckAdminRole, func(context *gin.Context) {
-		p := filepath.Join(util.HistoryDir, context.Param("path"))
+		requestPath := context.Param("path")
+		// 与 /repo/diff 一致，先拒绝路径穿越
+		if strings.Contains(requestPath, "..") {
+			context.Status(http.StatusUnauthorized)
+			return
+		}
+		p := filepath.Join(util.HistoryDir, requestPath)
+		// 历史快照可能包含敏感文件副本（如 data/.siyuan/publishAccess.json、data/templates 下的文件），
+		// 去掉快照目录前缀后按数据相对路径拒绝访问（见 kernel/util/path_guard.go 的 IsForbiddenDataRelPath）
+		rel := strings.TrimPrefix(requestPath, "/")
+		if idx := strings.Index(rel, "/"); 0 <= idx {
+			rel = rel[idx+1:]
+		} else {
+			rel = ""
+		}
+		if util.IsForbiddenDataRelPath(rel) {
+			context.Status(http.StatusForbidden)
+			return
+		}
 		// 加密笔记本的历史是密文（.sy/assets/AV），需先解密再输出
 		if serveEncryptedHistory(context, p) {
 			return
@@ -1243,6 +1261,11 @@ func serveRepoDiff(ginServer *gin.Engine) {
 		requestPath := filepath.Clean(context.Param("path"))
 		if strings.Contains(requestPath, "..") {
 			context.Status(http.StatusUnauthorized)
+			return
+		}
+		// 与 /history 一致，按数据相对路径拒绝敏感文件（纵深防御，正常仅存放资源文件）
+		if util.IsForbiddenDataRelPath(requestPath) {
+			context.Status(http.StatusForbidden)
 			return
 		}
 		// 从路径提取 boxID，加密笔记本已锁定时拒绝访问（锁定后 repo 预览解密文件仍存在磁盘上）

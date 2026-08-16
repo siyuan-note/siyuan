@@ -17,11 +17,10 @@
 package util
 
 import (
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	"github.com/88250/gulu"
 )
 
 // IsForbiddenAbsPath 判断绝对路径是否为敏感路径，HTTP 文件 API（kernel/api/file.go 的 refuseToAccess）
@@ -36,21 +35,40 @@ func IsForbiddenAbsPath(abs string) bool {
 		return true
 	}
 
+	// 数据目录内的敏感位置（snippets/conf.json、templates、.siyuan/publishAccess.json），
+	// 与历史快照、仓库 diff 路由（IsForbiddenDataRelPath）共用同一判断，避免黑名单分散维护。
+	dataNorm := NormalizeAndResolve(DataDir)
+	if rel, relErr := filepath.Rel(dataNorm, fileNorm); nil == relErr &&
+		!strings.HasPrefix(rel, "..") && IsForbiddenDataRelPath(rel) {
+		return true
+	}
+	return false
+}
+
+// IsForbiddenDataRelPath 判断数据目录下的相对路径是否指向敏感位置（data/snippets/conf.json、
+// data/templates 目录以及 data/.siyuan/publishAccess.json）。历史快照与仓库 diff 检出中的文件副本
+// 位于其他绝对路径下，无法用 IsForbiddenAbsPath 的精确匹配拦截，因此 /history 与 /repo/diff 路由
+// （kernel/server/serve.go）在去掉快照目录前缀后按数据相对路径调用本函数进行片段匹配。
+func IsForbiddenDataRelPath(rel string) bool {
+	// 统一为斜杠并清理（path.Clean 使用斜杠语义，避免 Windows 上分隔符差异）
+	rel = path.Clean("/" + filepath.ToSlash(rel))
+	// 在 Windows 和 macOS 上文件系统通常为不区分大小写，使用小写统一比较
+	if runtime.GOOS == "windows" || runtime.GOOS == "darwin" {
+		rel = strings.ToLower(rel)
+	}
+
 	// 禁止访问 data/snippets/conf.json
-	snippetPath := NormalizeAndResolve(filepath.Join(DataDir, "snippets", "conf.json"))
-	if fileNorm == snippetPath {
+	if rel == "/snippets/conf.json" {
 		return true
 	}
 
 	// 禁止访问 data/templates 目录（含目录本身及其全部子路径）
-	templatesBase := NormalizeAndResolve(filepath.Join(DataDir, "templates"))
-	if fileNorm == templatesBase || gulu.File.IsSubPath(templatesBase, fileNorm) {
+	if rel == "/templates" || strings.HasPrefix(rel, "/templates/") {
 		return true
 	}
 
 	// 禁止访问 data/.siyuan/publishAccess.json（含发布模式明文访问密码）
-	publishAccessPath := NormalizeAndResolve(filepath.Join(DataDir, ".siyuan", "publishAccess.json"))
-	if fileNorm == publishAccessPath {
+	if rel == "/.siyuan/publishaccess.json" {
 		return true
 	}
 	return false

@@ -1,5 +1,10 @@
 const MODIFIER_KEYS = "⌃⌥⇧⌘";
 const NON_CHARACTER_KEYS = new Set(["←", "↑", "→", "↓", "⇥", "⌫", "⌦", "↩"]);
+const RESERVED_KEYMAPS = new Set(["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥",
+    "⌃D", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "Escape"]);
+
+export const isReservedKeymap = (hotkey: string, keyPath: string[]) =>
+    RESERVED_KEYMAPS.has(hotkey) && !(hotkey === "↩" && keyPath[0] === "general" && keyPath[1] === "agentSend");
 
 export const isDisallowedTextInputHotkey = (hotkey: string) => {
     let mainKeyIndex = 0;

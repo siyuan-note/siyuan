@@ -13,7 +13,7 @@ import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globa
 import {normalizeSearchText} from "../search/normalize";
 import {genButtonRowHtml, genConfigGroup} from "../render/render";
 import type {Plugin} from "../../plugin";
-import {isDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
+import {isDisallowedTextInputHotkey, isReservedKeymap} from "../../util/hotKeyPolicy";
 const keymapToolbarSearchStrings = (): string[] => [
     window.siyuan.languages.keymapTip,
     window.siyuan.languages.keymapTip2,
@@ -444,7 +444,7 @@ const bindKeymapList = (root: HTMLElement) => {
                 hasConflict = true;
             }
             if (
-                !hasConflict && (isDisallowedTextInputHotkey(keymapStr) || RESERVED_KEYMAPS.includes(keymapStr) ||
+                !hasConflict && (isDisallowedTextInputHotkey(keymapStr) || isReservedKeymap(keymapStr, keys) ||
                 !matchHotKey(keymapStr, event) ||
                 (isMac() && keys[0] === "general" && ["goToEditTabNext", "goToEditTabPrev"].includes(keys[1]) && keymapStr.includes("⌘")))
             ) {
@@ -506,9 +506,6 @@ const bindKeymapList = (root: HTMLElement) => {
         sendUnregisterGlobalShortcut(window.siyuan.ws.app);
     });
 };
-
-const RESERVED_KEYMAPS = ["⌘A", "⌘X", "⌘C", "⌘V", "⌘-", "⌘=", "⌘0", "⇧⌘V", "⌘/", "⇧↑", "⇧↓", "⇧→", "⇧←", "⇧⇥",
-    "⌃D", "⇧⌘→", "⇧⌘←", "⌘Home", "⌘End", "⇧↩", "↩", "PageUp", "PageDown", "⌫", "⌦", "Escape"];
 
 const getKeymapString = (event: KeyboardEvent) => {
     const mac = isMac();

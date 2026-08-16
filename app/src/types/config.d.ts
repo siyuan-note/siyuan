@@ -1650,8 +1650,10 @@ declare namespace Config {
 
     /**
      * A named secret. The value is AES-encrypted at rest on the kernel side.
-     * The secret is only interpolated when the request destination host is in
-     * the allowed hosts list; an empty list denies all requests.
+     * The secret is only interpolated into HTTP outbound requests when the
+     * destination host is in the allowed hosts list; an empty list denies all
+     * HTTP requests. stdio MCP server environment variables are not restricted
+     * by this list.
      */
     export interface ISecret {
         name: string;

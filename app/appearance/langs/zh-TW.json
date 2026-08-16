@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "使用者技能",
+	"agentUserSkillsTip": "逐一啟用 ~/.agents/skills 中的唯讀技能；外部技能可能與 SiYuan 工具不相容",
+	"agentUserSkillsEmpty": "未在 ~/.agents/skills 中找到技能",
+	"agentUserSkillShadowed": "已被工作空間技能覆蓋",
 	"apiType": "API 類型",
 	"rerankRequestFormat": "重排 API 格式",
 	"rerankRequestFormatTip": "選擇重排服務所需的請求格式",

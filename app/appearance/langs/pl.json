@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "Umiejętności użytkownika",
+	"agentUserSkillsTip": "Włączaj osobno umiejętności tylko do odczytu z ~/.agents/skills; zewnętrzne umiejętności mogą być niezgodne z narzędziami SiYuan",
+	"agentUserSkillsEmpty": "Nie znaleziono umiejętności w ~/.agents/skills",
+	"agentUserSkillShadowed": "Zastąpiona przez umiejętność obszaru roboczego",
 	"apiType": "Typ API",
 	"rerankRequestFormat": "Format żądania ponownego rankingu",
 	"rerankRequestFormatTip": "Wybierz format żądania wymagany przez usługę ponownego rankingu",

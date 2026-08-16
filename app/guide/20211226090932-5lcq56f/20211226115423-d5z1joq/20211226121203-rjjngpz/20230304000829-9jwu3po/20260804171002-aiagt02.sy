@@ -6,7 +6,7 @@
 		"id": "20260804171002-aiagt02",
 		"title": "AI 智能體",
 		"type": "doc",
-		"updated": "20260816114944"
+		"updated": "20260816130653"
 	},
 	"Children": [
 		{
@@ -596,7 +596,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-vzu9h83",
-				"updated": "20260804180000"
+				"updated": "20260816130653"
 			},
 			"Children": [
 				{
@@ -610,7 +610,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170051-ygu80rw",
-				"updated": "20260804180000"
+				"updated": "20260816130653"
 			},
 			"Children": [
 				{
@@ -633,7 +633,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "。也可以逐一啟用使用者主目錄 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/.agents/skills/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 下的唯讀技能。"
 				}
 			]
 		},

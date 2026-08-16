@@ -6,7 +6,7 @@
 		"id": "20260804171004-aiagt03",
 		"title": "AI Agent",
 		"type": "doc",
-		"updated": "20260816114944"
+		"updated": "20260816130653"
 	},
 	"Children": [
 		{
@@ -596,7 +596,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-oqdi4d2",
-				"updated": "20260804180000"
+				"updated": "20260816130653"
 			},
 			"Children": [
 				{
@@ -610,7 +610,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170051-g7pwyzt",
-				"updated": "20260804180000"
+				"updated": "20260816130653"
 			},
 			"Children": [
 				{
@@ -630,6 +630,15 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
 					"TextMarkTextContent": "workspace/data/storage/ai/agent/skills/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". You can also individually enable read-only skills from the user directory "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/.agents/skills/"
 				},
 				{
 					"Type": "NodeText",

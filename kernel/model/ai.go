@@ -32,6 +32,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func EnabledUserSkills() []string {
+	if Conf == nil || Conf.AI == nil || Conf.AI.Agent == nil || Conf.AI.Agent.Skills == nil {
+		return nil
+	}
+	return append([]string(nil), Conf.AI.Agent.Skills.UserEnabled...)
+}
+
 func ChatGPT(msg string) (ret string) {
 	if !isOpenAIAPIEnabled() {
 		return

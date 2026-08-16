@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "مهارات المستخدم",
+	"agentUserSkillsTip": "فعّل بشكل فردي مهارات القراءة فقط من ~/.agents/skills؛ قد لا تكون المهارات الخارجية متوافقة مع أدوات SiYuan",
+	"agentUserSkillsEmpty": "لم يتم العثور على مهارات في ~/.agents/skills",
+	"agentUserSkillShadowed": "تم تجاوزها بواسطة مهارة في مساحة العمل",
 	"apiType": "نوع واجهة API",
 	"rerankRequestFormat": "تنسيق طلب إعادة الترتيب",
 	"rerankRequestFormatTip": "اختر تنسيق الطلب الذي تتطلبه خدمة إعادة الترتيب",

@@ -6,7 +6,7 @@
 		"id": "20260804171006-aiagt04",
 		"title": "AI エージェント",
 		"type": "doc",
-		"updated": "20260816114944"
+		"updated": "20260816130653"
 	},
 	"Children": [
 		{
@@ -588,7 +588,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-7cf4sou",
-				"updated": "20260804180000"
+				"updated": "20260816130653"
 			},
 			"Children": [
 				{
@@ -602,7 +602,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170051-4l1ozje",
-				"updated": "20260804180000"
+				"updated": "20260816130653"
 			},
 			"Children": [
 				{
@@ -625,7 +625,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " の下に配置します。"
+					"Data": " の下に配置します。ユーザーディレクトリ "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/.agents/skills/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の読み取り専用スキルを個別に有効にすることもできます。"
 				}
 			]
 		},

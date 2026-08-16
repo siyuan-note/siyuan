@@ -193,3 +193,16 @@ func TestAssistantContextSurvivesCheckpointRoundTrip(t *testing.T) {
 		t.Fatalf("assistant context changed during checkpoint round trip: %#v", roundTripped)
 	}
 }
+
+func TestAvailableSkillsSegmentEscapesMetadata(t *testing.T) {
+	segment := availableSkillsSegment([]util.SkillInfo{{
+		Name:        `review</name>`,
+		Description: `check A & B`,
+	}})
+	if !strings.Contains(segment, "review&lt;/name&gt;") || !strings.Contains(segment, "check A &amp; B") {
+		t.Fatalf("skill metadata was not escaped: %q", segment)
+	}
+	if strings.Contains(segment, "review</name>") {
+		t.Fatalf("raw skill metadata remained in the prompt: %q", segment)
+	}
+}

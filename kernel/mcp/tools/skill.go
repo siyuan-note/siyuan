@@ -18,6 +18,7 @@ package tools
 
 import (
 	"fmt"
+	"html"
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -86,7 +87,7 @@ func skillLoad(args map[string]any) (CallToolResult, error) {
 		}, nil
 	}
 
-	content := util.LoadSkillContent(name)
+	content := util.LoadSkillContent(name, model.EnabledUserSkills())
 	if content == "" {
 		return CallToolResult{
 			Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("skill not found: %s", name)}},
@@ -97,7 +98,7 @@ func skillLoad(args map[string]any) (CallToolResult, error) {
 	// 变量（非敏感）在技能正文注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
 	content = model.Conf.Variables.Resolve(content)
 
-	result := "<skill_content name=\"" + name + "\">\n\n" + content + "\n\n</skill_content>"
+	result := "<skill_content name=\"" + html.EscapeString(name) + "\">\n\n" + content + "\n\n</skill_content>"
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: result}},
 	}, nil
@@ -212,7 +213,7 @@ func skillRename(args map[string]any) (CallToolResult, error) {
 }
 
 func skillList(args map[string]any) (CallToolResult, error) {
-	skills := util.DiscoverSkills()
+	skills := util.DiscoverSkills(model.EnabledUserSkills())
 	if len(skills) == 0 {
 		return CallToolResult{
 			Content: []ContentItem{{Type: "text", Text: "no skills available"}},
@@ -230,7 +231,7 @@ func skillList(args map[string]any) (CallToolResult, error) {
 }
 
 func skillListDesc() string {
-	skills := util.DiscoverSkills()
+	skills := util.DiscoverSkills(model.EnabledUserSkills())
 	if len(skills) == 0 {
 		return "No skills are currently available."
 	}

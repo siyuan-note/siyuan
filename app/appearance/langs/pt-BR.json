@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "Habilidades do usuário",
+	"agentUserSkillsTip": "Ative individualmente as habilidades somente leitura de ~/.agents/skills; habilidades externas podem ser incompatíveis com as ferramentas do SiYuan",
+	"agentUserSkillsEmpty": "Nenhuma habilidade encontrada em ~/.agents/skills",
+	"agentUserSkillShadowed": "Substituída por uma habilidade do espaço de trabalho",
 	"apiType": "Tipo de API",
 	"rerankRequestFormat": "Formato da solicitação de reordenação",
 	"rerankRequestFormatTip": "Selecione o formato de solicitação exigido pelo serviço de reordenação",

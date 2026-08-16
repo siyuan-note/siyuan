@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html"
 	"io"
 	"math/rand/v2"
 	"os"
@@ -1840,6 +1841,27 @@ func finishBrowserCapabilityWait(callID string, ch chan browserCapabilityResult)
 	}
 }
 
+func availableSkillsSegment(skills []util.SkillInfo) string {
+	if len(skills) == 0 {
+		return ""
+	}
+	var sb strings.Builder
+	sb.WriteString("\n\n<available_skills>\n")
+	for _, skill := range skills {
+		sb.WriteString("  <skill>\n")
+		sb.WriteString("    <name>")
+		sb.WriteString(html.EscapeString(skill.Name))
+		sb.WriteString("</name>\n")
+		sb.WriteString("    <description>")
+		sb.WriteString(html.EscapeString(skill.Description))
+		sb.WriteString("</description>\n")
+		sb.WriteString("  </skill>\n")
+	}
+	sb.WriteString("</available_skills>\n\n")
+	sb.WriteString("Use the skill tool to load a skill when a task matches its description.")
+	return sb.String()
+}
+
 func buildSystemPrompt(language string, capabilities *capabilitySet) string {
 	if kernelModel.Conf != nil && kernelModel.Conf.Appearance != nil && kernelModel.Conf.Appearance.Lang != "" {
 		language = kernelModel.Conf.Appearance.Lang
@@ -1857,27 +1879,15 @@ func buildSystemPrompt(language string, capabilities *capabilitySet) string {
 	sb.WriteString(util.Container)
 	sb.WriteString("\n</env>")
 
-	skills := util.DiscoverSkills()
+	skills := util.DiscoverSkills(kernelModel.EnabledUserSkills())
 	if capabilities.hasModelName("skill") && len(skills) > 0 {
-		sb.WriteString("\n\n<available_skills>\n")
-		for _, s := range skills {
-			sb.WriteString("  <skill>\n")
-			sb.WriteString("    <name>")
-			sb.WriteString(s.Name)
-			sb.WriteString("</name>\n")
-			sb.WriteString("    <description>")
-			sb.WriteString(s.Description)
-			sb.WriteString("</description>\n")
-			sb.WriteString("  </skill>\n")
-		}
-		sb.WriteString("</available_skills>\n\n")
-		sb.WriteString("Use the skill tool to load a skill when a task matches its description.")
+		sb.WriteString(availableSkillsSegment(skills))
 	}
 
 	if capabilities.hasModelName("skill") {
 		sb.WriteString("\n\n")
 		sb.WriteString("## Skill Management\n")
-		sb.WriteString("Use the skill tool to manage reusable skills: \"save\" (create/update; provide name + SKILL.md content with YAML frontmatter ---\\nname: ...\\ndescription: ...\\n--- and markdown body), \"install\" (download & install a skill from a remote source — pass url; accepts 'owner/repo' shorthand like Tencent/WeChatReading, a full GitHub URL, a raw SKILL.md URL, or a release zip URL; installed globally), \"remove\", \"rename\" (name + new_name), \"list\". When the user says \"install xxx skill\" or pastes a command like \"npx skills add owner/repo -g\", extract the owner/repo and call skill.install.")
+		sb.WriteString("Use the skill tool to manage reusable skills: \"save\" (create/update; provide name + SKILL.md content with YAML frontmatter ---\\nname: ...\\ndescription: ...\\n--- and markdown body), \"install\" (download & install a skill from a remote source — pass url; accepts 'owner/repo' shorthand like Tencent/WeChatReading, a full GitHub URL, a raw SKILL.md URL, or a release zip URL; installed in the workspace), \"remove\", \"rename\" (name + new_name), \"list\". When the user says \"install xxx skill\" or pastes a command like \"npx skills add owner/repo -g\", extract the owner/repo and call skill.install.")
 	}
 
 	sb.WriteString("\n\nReply in ")
@@ -1995,25 +2005,11 @@ func skillsSegmentTokens(counter *tokenCounter) int {
 	if counter == nil {
 		return 0
 	}
-	skills := util.DiscoverSkills()
+	skills := util.DiscoverSkills(kernelModel.EnabledUserSkills())
 	if len(skills) == 0 {
 		return 0
 	}
-	var sb strings.Builder
-	sb.WriteString("\n\n<available_skills>\n")
-	for _, s := range skills {
-		sb.WriteString("  <skill>\n")
-		sb.WriteString("    <name>")
-		sb.WriteString(s.Name)
-		sb.WriteString("</name>\n")
-		sb.WriteString("    <description>")
-		sb.WriteString(s.Description)
-		sb.WriteString("</description>\n")
-		sb.WriteString("  </skill>\n")
-	}
-	sb.WriteString("</available_skills>\n\n")
-	sb.WriteString("Use the skill tool to load a skill when a task matches its description.")
-	return counter.count(sb.String())
+	return counter.count(availableSkillsSegment(skills))
 }
 
 // computeBreakdownIfNeeded 计算 10 类 token 分类明细。counter 初始化失败时返回 nil（前端兜底）。

@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "Keterampilan pengguna",
+	"agentUserSkillsTip": "Aktifkan keterampilan hanya-baca dari ~/.agents/skills satu per satu; keterampilan eksternal mungkin tidak kompatibel dengan alat SiYuan",
+	"agentUserSkillsEmpty": "Tidak ada keterampilan yang ditemukan di ~/.agents/skills",
+	"agentUserSkillShadowed": "Ditimpa oleh keterampilan ruang kerja",
 	"apiType": "Jenis API",
 	"rerankRequestFormat": "Format permintaan rerank",
 	"rerankRequestFormatTip": "Pilih format permintaan yang diperlukan oleh layanan rerank",

@@ -50,6 +50,11 @@ type Agent struct {
 	MaxToolCallRounds   int               `json:"maxToolCallRounds"`
 	CapabilityPolicy    *CapabilityPolicy `json:"capabilityPolicy"`
 	ApprovalPolicy      *ApprovalPolicy   `json:"approvalPolicy"`
+	Skills              *AgentSkills      `json:"skills"`
+}
+
+type AgentSkills struct {
+	UserEnabled []string `json:"userEnabled"`
 }
 
 type CapabilityPolicy struct {
@@ -181,6 +186,7 @@ func defaultAgent() *Agent {
 		MaxToolCallRounds:   64,
 		CapabilityPolicy:    defaultCapabilityPolicy(),
 		ApprovalPolicy:      defaultApprovalPolicy(),
+		Skills:              &AgentSkills{UserEnabled: []string{}},
 	}
 }
 
@@ -500,6 +506,25 @@ func (ai *AI) Normalize() {
 	if ai.Agent == nil {
 		ai.Agent = defaultAgent()
 	} else {
+		if ai.Agent.Skills == nil {
+			ai.Agent.Skills = &AgentSkills{UserEnabled: []string{}}
+		} else {
+			seen := map[string]struct{}{}
+			normalized := []string{}
+			for _, id := range ai.Agent.Skills.UserEnabled {
+				id = strings.TrimSpace(id)
+				key := strings.ToLower(id)
+				if id == "" || id == "." || id == ".." || strings.ContainsAny(id, `/\`) {
+					continue
+				}
+				if _, ok := seen[key]; ok {
+					continue
+				}
+				seen[key] = struct{}{}
+				normalized = append(normalized, id)
+			}
+			ai.Agent.Skills.UserEnabled = normalized
+		}
 		ai.Agent.CapabilityPolicy = normalizeCapabilityPolicy(ai.Agent.CapabilityPolicy)
 		if ai.Agent.ApprovalPolicy == nil {
 			ai.Agent.ApprovalPolicy = defaultApprovalPolicy()

@@ -776,8 +776,14 @@ func writeSSEInterrupted(c *gin.Context, message string) error {
 func lsSkills(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
-	skills := util.DiscoverSkills()
+	skills := util.DiscoverSkills(model.EnabledUserSkills())
 	ret.Data = skills
+}
+
+func lsUserSkills(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	ret.Data = util.DiscoverUserSkills(model.EnabledUserSkills())
 }
 
 type skillGetReq struct {
@@ -795,7 +801,7 @@ func getSkill(c *gin.Context) {
 		return
 	}
 
-	content, err := util.ReadSkill(req.Name)
+	content, err := util.ReadSkill(req.Name, model.EnabledUserSkills())
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

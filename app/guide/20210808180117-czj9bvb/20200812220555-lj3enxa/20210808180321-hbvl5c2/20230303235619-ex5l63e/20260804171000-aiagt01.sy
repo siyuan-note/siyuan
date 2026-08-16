@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20260816114944"
+		"updated": "20260816130653"
 	},
 	"Children": [
 		{
@@ -596,7 +596,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170050-qxi11l2",
-				"updated": "20260804180000"
+				"updated": "20260816130653"
 			},
 			"Children": [
 				{
@@ -610,7 +610,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170051-rx34vtk",
-				"updated": "20260804180000"
+				"updated": "20260816130653"
 			},
 			"Children": [
 				{
@@ -633,7 +633,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "。也可以逐个启用用户主目录 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/.agents/skills/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 下的只读技能。"
 				}
 			]
 		},

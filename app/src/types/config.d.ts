@@ -173,6 +173,9 @@ declare namespace Config {
         maxCompletionTokens: number;
         maxToolCallRounds: number;
         capabilityPolicy: ICapabilityPolicy;
+        skills: {
+            userEnabled: string[];
+        };
         approvalPolicy: {
             default: "risk" | "allow";
             overrides: Record<string, {

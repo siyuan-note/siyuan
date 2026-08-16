@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "사용자 스킬",
+	"agentUserSkillsTip": "~/.agents/skills의 읽기 전용 스킬을 개별적으로 활성화합니다. 외부 스킬은 SiYuan 도구와 호환되지 않을 수 있습니다",
+	"agentUserSkillsEmpty": "~/.agents/skills에서 스킬을 찾을 수 없습니다",
+	"agentUserSkillShadowed": "워크스페이스 스킬로 재정의되었습니다",
 	"apiType": "API 유형",
 	"rerankRequestFormat": "재순위 요청 형식",
 	"rerankRequestFormatTip": "재순위 서비스에 필요한 요청 형식을 선택합니다",

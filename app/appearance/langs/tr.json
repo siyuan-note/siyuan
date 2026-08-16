@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "Kullanıcı becerileri",
+	"agentUserSkillsTip": "~/.agents/skills içindeki salt okunur becerileri ayrı ayrı etkinleştirin; harici beceriler SiYuan araçlarıyla uyumlu olmayabilir",
+	"agentUserSkillsEmpty": "~/.agents/skills içinde beceri bulunamadı",
+	"agentUserSkillShadowed": "Çalışma alanı becerisi tarafından geçersiz kılındı",
 	"apiType": "API türü",
 	"rerankRequestFormat": "Yeniden sıralama istek biçimi",
 	"rerankRequestFormatTip": "Yeniden sıralama hizmetinin gerektirdiği istek biçimini seçin",

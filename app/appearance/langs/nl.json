@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "Gebruikersvaardigheden",
+	"agentUserSkillsTip": "Schakel alleen-lezenvaardigheden uit ~/.agents/skills afzonderlijk in; externe vaardigheden zijn mogelijk niet compatibel met SiYuan-hulpmiddelen",
+	"agentUserSkillsEmpty": "Geen vaardigheden gevonden in ~/.agents/skills",
+	"agentUserSkillShadowed": "Overschreven door een werkruimtevaardigheid",
 	"apiType": "API-type",
 	"rerankRequestFormat": "Rerank-aanvraagindeling",
 	"rerankRequestFormatTip": "Selecteer de aanvraagindeling die de rerank-service vereist",

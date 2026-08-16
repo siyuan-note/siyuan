@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "מיומנויות משתמש",
+	"agentUserSkillsTip": "הפעל בנפרד מיומנויות לקריאה בלבד מתוך ~/.agents/skills; ייתכן שמיומנויות חיצוניות לא יתאימו לכלי SiYuan",
+	"agentUserSkillsEmpty": "לא נמצאו מיומנויות ב־~/.agents/skills",
+	"agentUserSkillShadowed": "נדרס על ידי מיומנות של סביבת העבודה",
 	"apiType": "סוג API",
 	"rerankRequestFormat": "פורמט בקשת סידור מחדש",
 	"rerankRequestFormatTip": "בחרו את פורמט הבקשה הנדרש על ידי שירות הסידור מחדש",

@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "उपयोगकर्ता कौशल",
+	"agentUserSkillsTip": "~/.agents/skills से केवल-पढ़ने योग्य कौशल अलग-अलग सक्षम करें; बाहरी कौशल SiYuan टूल के साथ असंगत हो सकते हैं",
+	"agentUserSkillsEmpty": "~/.agents/skills में कोई कौशल नहीं मिला",
+	"agentUserSkillShadowed": "वर्कस्पेस कौशल द्वारा ओवरराइड किया गया",
 	"apiType": "API प्रकार",
 	"rerankRequestFormat": "पुनः क्रम अनुरोध प्रारूप",
 	"rerankRequestFormatTip": "पुनः क्रम सेवा के लिए आवश्यक अनुरोध प्रारूप चुनें",

@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "Навички користувача",
+	"agentUserSkillsTip": "Вмикайте окремо навички лише для читання з ~/.agents/skills; зовнішні навички можуть бути несумісними з інструментами SiYuan",
+	"agentUserSkillsEmpty": "У ~/.agents/skills навичок не знайдено",
+	"agentUserSkillShadowed": "Перевизначено навичкою робочого простору",
 	"apiType": "Тип API",
 	"rerankRequestFormat": "Формат запиту переранжування",
 	"rerankRequestFormatTip": "Виберіть формат запиту, потрібний сервісу переранжування",

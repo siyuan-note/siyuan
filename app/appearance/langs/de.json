@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "Benutzer-Skills",
+	"agentUserSkillsTip": "Schreibgeschützte Skills aus ~/.agents/skills einzeln aktivieren; externe Skills sind möglicherweise nicht mit den SiYuan-Werkzeugen kompatibel",
+	"agentUserSkillsEmpty": "Keine Skills in ~/.agents/skills gefunden",
+	"agentUserSkillShadowed": "Durch einen Workspace-Skill überschrieben",
 	"apiType": "API-Typ",
 	"rerankRequestFormat": "Rerank-Anfrageformat",
 	"rerankRequestFormatTip": "Das vom Rerank-Dienst benötigte Anfrageformat auswählen",

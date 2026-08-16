@@ -24,6 +24,11 @@ import {
     getAgentCapabilityKeywords,
     mountAgentCapabilityBlock,
 } from "./aiCapabilityUi";
+import {
+    genUserSkillsBlockHtml,
+    getUserSkillsBlockKeywords,
+    mountUserSkillsBlock,
+} from "./aiSkillUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -155,6 +160,17 @@ const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
     });
 };
 
+const registerAiSkillsGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("skills", window.siyuan.languages.tokenCatSkills);
+
+    group.slot({
+        key: "userSkills",
+        keywords: getUserSkillsBlockKeywords(),
+        html: genUserSkillsBlockHtml,
+        afterMount: mountUserSkillsBlock,
+    });
+};
+
 const registerAiMcpGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("mcp", window.siyuan.languages.configGroupMcp);
 
@@ -278,9 +294,9 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiProvidersGroup(tab);
     registerAiEditingGroup(tab);
     registerAiAgentGroup(tab);
+    registerAiSkillsGroup(tab);
     registerAiImageGenerationGroup(tab);
     registerAiMcpGroup(tab);
-    // TODO: add skills group?
     registerAiEmbeddingGroup(tab);
     registerAiRerankGroup(tab);
 };

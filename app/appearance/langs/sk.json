@@ -1,4 +1,8 @@
 {
+	"agentUserSkills": "Používateľské zručnosti",
+	"agentUserSkillsTip": "Jednotlivo povoľte zručnosti iba na čítanie z ~/.agents/skills; externé zručnosti nemusia byť kompatibilné s nástrojmi SiYuan",
+	"agentUserSkillsEmpty": "V ~/.agents/skills sa nenašli žiadne zručnosti",
+	"agentUserSkillShadowed": "Prepísaná zručnosťou pracovného priestoru",
 	"apiType": "Typ API",
 	"rerankRequestFormat": "Formát požiadavky na pretriedenie",
 	"rerankRequestFormatTip": "Vyberte formát požiadavky vyžadovaný službou pretriedenia",

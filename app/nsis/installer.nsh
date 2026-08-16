@@ -40,6 +40,7 @@ installLogDone:
 FunctionEnd
 
 !macro preInit
+    SetOutPath "$TEMP"
     ${IfNot} ${AtLeastWin10}
         !insertmacro WriteInstallLog "installer-rejected-unsupported-windows version=${VERSION}"
         MessageBox MB_ICONEXCLAMATION "非常抱歉，思源笔记无法在低于 Windows 10 的系统上进行安装$\n$\n\
@@ -50,9 +51,9 @@ FunctionEnd
     !insertmacro WriteInstallLog "installer-start version=${VERSION} package=$EXEPATH"
     Push $R8
     Push $R7
-    nsExec::Exec 'TASKKILL /F /IM "SiYuan.exe"'
+    nsExec::Exec '"$SYSDIR\taskkill.exe" /F /IM "SiYuan.exe"'
     Pop $R8
-    nsExec::Exec 'TASKKILL /F /IM "SiYuan-Kernel.exe"'
+    nsExec::Exec '"$SYSDIR\taskkill.exe" /F /IM "SiYuan-Kernel.exe"'
     Pop $R7
     !insertmacro WriteInstallLog "process-cleanup-complete version=${VERSION} app-result=$R8 kernel-result=$R7"
     Pop $R7
@@ -82,11 +83,11 @@ FunctionEnd
 !macro customInstall
     !insertmacro WriteInstallLog "payload-extracted version=${VERSION} target=$INSTDIR"
     RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
-    nsExec::ExecToLog 'cmd /c mklink /H "$INSTDIR\resources\kernel\siyuan.exe" "$INSTDIR\resources\kernel\SiYuan-Kernel.exe" 2>nul || ver>nul'
+    nsExec::ExecToLog '"$SYSDIR\cmd.exe" /c mklink /H "$INSTDIR\resources\kernel\siyuan.exe" "$INSTDIR\resources\kernel\SiYuan-Kernel.exe" 2>nul || ver>nul'
     ${If} $installMode == "all"
-        nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\");if((-not $p) -or -not ($p.Split(\";\") -contains $k)){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"Machine\")}else{Write-Host \"already in PATH\"}"'
+        nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\");if((-not $p) -or -not ($p.Split(\";\") -contains $k)){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"Machine\")}else{Write-Host \"already in PATH\"}"'
     ${Else}
-        nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");if((-not $p) -or -not ($p.Split(\";\") -contains $k)){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")}else{Write-Host \"already in PATH\"}"'
+        nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");if((-not $p) -or -not ($p.Split(\";\") -contains $k)){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")}else{Write-Host \"already in PATH\"}"'
     ${EndIf}
     !insertmacro WriteInstallLog "install-complete version=${VERSION} target=$INSTDIR"
 !macroend
@@ -116,9 +117,9 @@ FunctionEnd
 
     RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
     ${If} $installMode == "all"
-        nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\");if($p){$a=$p.Split(\";\") | ?{$_ -and ($_ -ne $k)};$p=[string]::Join(\";\",$a);[Environment]::SetEnvironmentVariable(\"Path\",$p,\"Machine\")}"'
+        nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\");if($p){$a=$p.Split(\";\") | ?{$_ -and ($_ -ne $k)};$p=[string]::Join(\";\",$a);[Environment]::SetEnvironmentVariable(\"Path\",$p,\"Machine\")}"'
     ${Else}
-        nsExec::ExecToLog 'powershell -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");if($p){$a=$p.Split(\";\") | ?{$_ -and ($_ -ne $k)};$p=[string]::Join(\";\",$a);[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")}"'
+        nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"User\");if($p){$a=$p.Split(\";\") | ?{$_ -and ($_ -ne $k)};$p=[string]::Join(\";\",$a);[Environment]::SetEnvironmentVariable(\"Path\",$p,\"User\")}"'
     ${EndIf}
 !macroend
 

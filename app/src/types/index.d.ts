@@ -112,7 +112,8 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "mobile-keyboard-show" | "mobile-keyboard-hide" |
     "code-language-update" | "code-language-change" |
     "kernel-plugin-state-change" |
-    "before-show-tooltip" | "before-hide-tooltip"
+    "before-show-tooltip" | "before-hide-tooltip" |
+    "common-menu-open" | "common-menu-closed"
 type TAVView = "table" | "gallery" | "kanban"
 type TAVAlign = "" | "left" | "center" | "right"
 type TAVDateFormat = "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"

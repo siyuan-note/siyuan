@@ -399,6 +399,11 @@
       }
     }
 
+    th:not([align]),
+    th[align=""] {
+      text-align: start;
+    }
+
     thead th,
     thead td {
       font-weight: 600;

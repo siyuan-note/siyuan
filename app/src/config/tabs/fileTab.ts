@@ -3,6 +3,7 @@ import {genNotebookOption} from "../../menus/onGetnotebookconf";
 import {fetchPost} from "../../util/fetch";
 import {editorConfigApi} from "./editorRuntime";
 import {fileConfigApi} from "./fileRuntime";
+import {appearanceConfigApi} from "./appearanceRuntime";
 import type {SettingTabBuilder} from "../setting/builder";
 import {controlNumber, controlSelect, controlString} from "../setting/control";
 import {genConfigItemName} from "../render/fragments";
@@ -74,6 +75,11 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
 
 const registerTabStartupGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("tabStartup", window.siyuan.languages.tabStartup);
+    group.switch("appearance.closeTabOnDoubleClick", {
+        title: window.siyuan.languages.closeTabOnDoubleClick,
+        desc: window.siyuan.languages.closeTabOnDoubleClickTip,
+        save: (value) => appearanceConfigApi.patch("closeTabOnDoubleClick", value),
+    });
     group.number("fileTree.maxOpenTabCount", {
         title: window.siyuan.languages.tabLimit,
         desc: window.siyuan.languages.tabLimit1,

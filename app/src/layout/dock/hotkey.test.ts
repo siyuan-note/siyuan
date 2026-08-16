@@ -1,22 +1,33 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
-import {updateDockHotkeyData} from "./hotkey";
+import {getDockHotkey} from "./hotkey";
 
 test("dock hotkeys use the latest keymap configuration", () => {
-    const docks = [{
+    const internalDock = {
         type: "agentChat",
         hotkeyLangId: "agentChat",
-        hotkey: "",
-    }, {
+    } as Config.IUILayoutDockTab;
+    const pluginDock = {
         type: "pluginDock",
-        hotkey: "⌘P",
-    }] as Config.IUILayoutDockTab[];
+    } as Config.IUILayoutDockTab;
     const keymap = {
-        agentChat: {default: "", custom: "⌘J"},
-    } as Config.IKeymapGeneral;
+        general: {
+            agentChat: {default: "", custom: "⌘J"},
+        },
+        plugin: {
+            plugin: {
+                pluginDock: {default: "⌘P", custom: "⌘K"},
+            },
+        },
+    };
+    const plugins = [{
+        name: "plugin",
+        docks: {pluginDock: {}},
+    }];
 
-    updateDockHotkeyData(docks, keymap);
-
-    assert.equal(docks[0].hotkey, "⌘J");
-    assert.equal(docks[1].hotkey, "⌘P");
+    assert.equal(getDockHotkey(internalDock, keymap, plugins), "⌘J");
+    assert.equal(getDockHotkey(pluginDock, keymap, plugins), "⌘K");
+    keymap.plugin.plugin.pluginDock.custom = "";
+    assert.equal(getDockHotkey(pluginDock, keymap, plugins), "");
+    assert.equal(getDockHotkey({...pluginDock, type: "unknown"}, keymap, plugins), "");
 });

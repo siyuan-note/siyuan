@@ -27,6 +27,7 @@ import {openFileById} from "../../editor/util";
 import {hasTopClosestByClassName} from "../util/hasClosest";
 import {showMessage} from "../../dialog/message";
 import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
+import {buildWebClipboardHTML} from "../util/clipboardData";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
     hideTooltip();
@@ -72,8 +73,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                 const {textHTML, textSiyuan} = buildBlockDOMClipboardRichData(protyle.lute, responseHTML.data.dom);
                 const result = await writeClipboardData({
                     textPlain: responseText.data.content,
-                    textHTML,
-                    textSiyuan,
+                    textHTML: buildWebClipboardHTML(textHTML, textSiyuan),
                 });
                 if (result.error) {
                     console.log("Write document clipboard error:", result.error);

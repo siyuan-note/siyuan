@@ -14,7 +14,7 @@ import {Constants} from "../../constants";
 import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {showMessage} from "../../dialog/message";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
-import {updateDockHotkeyData} from "./hotkey";
+import {getDockHotkey} from "./hotkey";
 
 export const openBacklink = async (options: {
     app: App,
@@ -207,15 +207,11 @@ export const resetFloatDockSize = () => {
 
 export const updateDockHotkeys = () => {
     const docks = getAllDocks();
-    updateDockHotkeyData(docks, window.siyuan.config.keymap.general);
     docks.forEach((item) => {
-        if (!item.hotkeyLangId) {
-            return;
-        }
+        const hotkey = getDockHotkey(item);
         document.querySelectorAll<HTMLElement>(`.dock__item[data-type="${CSS.escape(item.type)}"]`).forEach((element) => {
-            element.dataset.hotkey = item.hotkey;
-            element.setAttribute("aria-label", `<span style='white-space:pre'>${item.title} ${
-                item.hotkey ? updateHotkeyTip(item.hotkey) : ""
+            element.setAttribute("aria-label", `<span style='white-space:pre'>${element.dataset.title || ""} ${
+                hotkey ? updateHotkeyTip(hotkey) : ""
             }${window.siyuan.languages.dockTip}</span>`);
         });
     });

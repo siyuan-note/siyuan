@@ -27,6 +27,7 @@ import {
     updatePluginDockPlacements,
     updatePluginDockShowStates,
 } from "./pluginDockState";
+import {getDockHotkey} from "./hotkey";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 
@@ -931,7 +932,8 @@ export class Dock {
             } else if (item.type === "tags") {
                 item.icon = "iconTag";
             }
-            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkey="${item.hotkey || ""}" data-hotkeylangid="${item.hotkeyLangId || ""}" data-title="${item.title}" data-position="${tooltipPosition}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${item.hotkey ? updateHotkeyTip(item.hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
+            const hotkey = getDockHotkey(item);
+            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkeylangid="${item.hotkeyLangId || ""}" data-title="${item.title}" data-position="${tooltipPosition}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${hotkey ? updateHotkeyTip(hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
     <svg><use xlink:href="#${item.icon}"></use></svg>
 </span>`;
             this.data[item.type] = true;

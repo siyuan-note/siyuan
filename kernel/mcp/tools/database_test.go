@@ -108,11 +108,97 @@ func TestDatabaseNativeStructuredArguments(t *testing.T) {
 	}); nil != err {
 		t.Fatal(err)
 	}
+	if err = validator.ValidateInput(map[string]any{
+		"action":   "create",
+		"parentID": "20260816000000-parent1",
+		"keys": []any{
+			map[string]any{"name": "Name", "type": "text"},
+			map[string]any{"name": "Phone", "type": "phone"},
+		},
+	}); nil != err {
+		t.Fatal(err)
+	}
 	if err = validator.ValidateInput(map[string]any{"action": "item_remove", "itemIDs": "item-1,item-2"}); nil == err {
 		t.Fatal("expected comma-separated item IDs to be rejected")
 	}
 	if err = validator.ValidateInput(map[string]any{"action": "item_update", "value": `{"text":{"content":"Updated"}}`}); nil == err {
 		t.Fatal("expected string-encoded cell value to be rejected")
+	}
+}
+
+func TestDatabasePreviousKeyIDDefaultsToViewEnd(t *testing.T) {
+	view := &av.View{
+		ID:         "20260816000000-view001",
+		LayoutType: av.LayoutTypeTable,
+		Table: &av.LayoutTable{Columns: []*av.ViewTableColumn{
+			{BaseField: &av.BaseField{ID: "20260816000000-key0001"}},
+			{BaseField: &av.BaseField{ID: "20260816000000-key0002"}},
+		}},
+	}
+	attrView := &av.AttributeView{ID: "20260816000000-avtest1", Views: []*av.View{view}}
+
+	previousID, err := databasePreviousKeyID(attrView, map[string]any{})
+	if nil != err {
+		t.Fatal(err)
+	}
+	if "20260816000000-key0002" != previousID {
+		t.Fatalf("unexpected default previous key: %s", previousID)
+	}
+
+	previousID, err = databasePreviousKeyID(attrView, map[string]any{"prev": ""})
+	if nil != err || "" != previousID {
+		t.Fatalf("explicit empty previous key should be preserved: [%s], %v", previousID, err)
+	}
+	previousID, err = databasePreviousKeyID(attrView, map[string]any{"prev": "20260816000000-key0001"})
+	if nil != err || "20260816000000-key0001" != previousID {
+		t.Fatalf("explicit previous key should be preserved: [%s], %v", previousID, err)
+	}
+	if _, err = databasePreviousKeyID(attrView, map[string]any{"prev": "20260816000000-missing"}); nil == err {
+		t.Fatal("expected an unknown previous key to be rejected")
+	}
+}
+
+func TestDatabaseViewFieldIDsSupportsLayouts(t *testing.T) {
+	tests := []*av.View{
+		{
+			LayoutType: av.LayoutTypeTable,
+			Table: &av.LayoutTable{Columns: []*av.ViewTableColumn{
+				{BaseField: &av.BaseField{ID: "table-1"}}, {BaseField: &av.BaseField{ID: "table-2"}},
+			}},
+		},
+		{
+			LayoutType: av.LayoutTypeGallery,
+			Gallery: &av.LayoutGallery{CardFields: []*av.ViewGalleryCardField{
+				{BaseField: &av.BaseField{ID: "gallery-1"}}, {BaseField: &av.BaseField{ID: "gallery-2"}},
+			}},
+		},
+		{
+			LayoutType: av.LayoutTypeKanban,
+			Kanban: &av.LayoutKanban{Fields: []*av.ViewKanbanField{
+				{BaseField: &av.BaseField{ID: "kanban-1"}}, {BaseField: &av.BaseField{ID: "kanban-2"}},
+			}},
+		},
+	}
+	for _, view := range tests {
+		fieldIDs := databaseViewFieldIDs(view)
+		if len(fieldIDs) != 2 {
+			t.Fatalf("unexpected fields for layout [%s]: %v", view.LayoutType, fieldIDs)
+		}
+	}
+}
+
+func TestDatabaseActionEffects(t *testing.T) {
+	for _, action := range []string{"create", "key_add", "key_remove", "item_add", "item_remove", "item_update", "clean"} {
+		effects, ok := DatabaseTool.EffectsFor(action)
+		if !ok || !effects.LocalWrite {
+			t.Fatalf("database action [%s] should declare a local write", action)
+		}
+	}
+	for _, action := range []string{"search", "get", "render", "keys", "unused"} {
+		effects, ok := DatabaseTool.EffectsFor(action)
+		if !ok || !effects.LocalRead || effects.LocalWrite {
+			t.Fatalf("database action [%s] should declare a local read", action)
+		}
 	}
 }
 

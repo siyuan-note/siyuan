@@ -61,13 +61,15 @@ export const updateMobilePluginToolbar = (protyle: IProtyle) => {
 };
 
 const getAndroidSelectionContainer = (selection: Selection) => {
-    const anchorAgentMessages = hasClosestByClassName(selection.anchorNode, "agent-chat__messages", true);
-    const focusAgentMessages = hasClosestByClassName(selection.focusNode, "agent-chat__messages", true);
-    if (anchorAgentMessages || focusAgentMessages) {
-        if (anchorAgentMessages && focusAgentMessages && anchorAgentMessages !== focusAgentMessages) {
-            return;
-        }
-        return (anchorAgentMessages || focusAgentMessages) as HTMLElement;
+    const previousContainer = lastAndroidBoundedSelection?.container;
+    if (previousContainer?.classList.contains("agent-chat__body") &&
+        (previousContainer.contains(selection.anchorNode) || previousContainer.contains(selection.focusNode))) {
+        return previousContainer;
+    }
+    const anchorAgentBody = hasClosestByClassName(selection.anchorNode, "agent-chat__body", true);
+    const focusAgentBody = hasClosestByClassName(selection.focusNode, "agent-chat__body", true);
+    if (anchorAgentBody && anchorAgentBody === focusAgentBody) {
+        return anchorAgentBody;
     }
 
     const protyle = getCurrentEditor()?.protyle;

@@ -15,6 +15,7 @@ import {Constants} from "../../constants";
 import {getEmbedChildOperationContext} from "../../protyle/wysiwyg/getBlock";
 import {backModel} from "../menu/model";
 import {hasVisibleSelectionText, shouldRestoreLongPressSelection} from "./touchSelection";
+import {getTouchAxis} from "./touchGesture";
 
 let clientX: number;
 let clientY: number;
@@ -197,6 +198,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
     clientX = null;
     // 有些事件不经过 touchmove
 
+    if (!firstXY) {
+        return;
+    }
     const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
     const modelElement = hasClosestByAttribute(target, "id", "model", true);
     if (modelElement) {
@@ -296,6 +300,12 @@ export const handleTouchStart = (event: TouchEvent) => {
         activeBlur();
         return;
     }
+    // 可滚动面板内容优先处理原生滚动，避免斜向滑动触发侧栏关闭
+    if (hasClosestByAttribute(target, "data-prevent-swipe", null, true)) {
+        clientX = null;
+        clientY = null;
+        return;
+    }
     // 存在其他拖拽元素时
     const otherTouchElement = hasClosestByClassName(target, "b3-chip");
     if ((otherTouchElement && otherTouchElement.parentElement.classList.contains("b3-chips__doctag")) ||
@@ -319,6 +329,7 @@ export const handleTouchStart = (event: TouchEvent) => {
     yDiff = undefined;
     lastClientX = undefined;
     firstXY = undefined;
+    previousClientX = undefined;
     if (isIPhone() ||
         (event.touches[0].clientX > 8 && event.touches[0].clientX < window.innerWidth - 8)) {
         clientX = event.touches[0].clientX;
@@ -421,16 +432,13 @@ export const handleTouchMove = (event: TouchEvent) => {
 
     xDiff = Math.floor(clientX - event.touches[0].clientX);
     yDiff = Math.floor(clientY - event.touches[0].clientY);
-    if (!firstDirection) {
-        firstDirection = xDiff > 0 ? "toLeft" : "toRight";
-    }
     // 上下滚动防止左右滑动
     if (!firstXY) {
-        if (Math.abs(xDiff) > Math.abs(yDiff)) {
-            firstXY = "x";
-        } else {
-            firstXY = "y";
+        firstXY = getTouchAxis(xDiff, yDiff, Constants.SIZE_DRAG_THRESHOLD);
+        if (!firstXY) {
+            return;
         }
+        firstDirection = xDiff > 0 ? "toLeft" : "toRight";
         if (firstXY === "x") {
             if ((hasClosestByAttribute(target, "id", "menu") && firstDirection === "toLeft") ||
                 (hasClosestByAttribute(target, "id", "sidebar") && firstDirection === "toRight")) {

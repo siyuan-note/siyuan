@@ -48,8 +48,8 @@ export class Inbox extends Model {
 <div class="fn__loading fn__none">
     <img width="64px" src="/stage/loading-pure.svg"></div>
 </div>
-<div class="fn__flex-1 fn__none inboxDetails fn__flex-column" style="min-height: auto;background-color: var(--b3-theme-background)"></div>
-<div class="fn__flex-1"></div>`;
+<div class="fn__flex-1 fn__none inboxDetails fn__flex-column" data-prevent-swipe style="min-height: auto;background-color: var(--b3-theme-background)"></div>
+<div class="fn__flex-1" data-prevent-swipe></div>`;
         /// #else
         this.element.classList.add("fn__flex-column", "file-tree", "sy__inbox", "dockPanel");
         this.element.innerHTML = `<div class="block__icons">

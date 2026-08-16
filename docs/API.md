@@ -21,6 +21,7 @@
     * [Remove a document](#Remove-a-document)
     * [Move documents](#Move-documents)
     * [Set notebook and document sort values](#Set-notebook-and-document-sort-values)
+    * [Set a document's child document sort mode](#Set-a-documents-child-document-sort-mode)
     * [Get human-readable path based on path](#Get-human-readable-path-based-on-path)
     * [Get human-readable path based on ID](#Get-human-readable-path-based-on-ID)
     * [Get storage path based on ID](#Get-storage-path-based-on-ID)
@@ -562,6 +563,40 @@ Move documents by `id`:
     }
   }
   ```
+
+### Set a document's child document sort mode
+
+* `/api/filetree/setDocSortMode`
+* Parameters
+
+  ```json
+  {
+    "id": "20210917220056-yxtyl7i",
+    "sortMode": 4
+  }
+  ```
+
+    * `id`: ID of the regular document whose child documents use this sort mode; notebook root document IDs are not accepted
+    * `sortMode`: Integer from `0` through `14`; `null` clears the document's explicit setting and inherits the nearest parent document, notebook, or global document tree sort rule, in that order
+    * Values: `0`/`1` file name ascending/descending; `2`/`3` update time ascending/descending; `4`/`5` natural file name ascending/descending; `6` custom; `7`/`8` reference count ascending/descending; `9`/`10` creation time ascending/descending; `11`/`12` size ascending/descending; `13`/`14` child document count ascending/descending
+    * The declared sort mode is inherited by deeper descendants until another document declares its own sort mode
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "box": "20210817205410-2kvfpfn",
+      "id": "20210917220056-yxtyl7i",
+      "path": "/20210917220056-yxtyl7i.sy",
+      "sortMode": 4,
+      "effectiveSortMode": 4
+    }
+  }
+  ```
+
+    * `sortMode` is the explicit setting (`null` when inheriting), while `effectiveSortMode` is the actual sort mode after inheritance is resolved
 
 ### Get human-readable path based on path
 

@@ -523,6 +523,11 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 
 	// 渲染视图
 	viewable = sql.RenderView(attrView, view, query, ignoreRows)
+	var groupRenderSource *sql.GroupViewRenderSource
+	if !ignoreRows && view.IsGroupView() {
+		// 在父视图分页前保存完整行索引，分组表格复用已经生成的字段值。
+		groupRenderSource = sql.NewGroupViewRenderSource(viewable, query)
+	}
 	renderTargetItemID := targetItemID(target)
 	if view.IsGroupView() || view.LayoutType == av.LayoutTypeKanban {
 		renderTargetItemID = ""
@@ -538,7 +543,8 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 
 	// 渲染分组视图。当 ignoreRows 时若有已生成的分组则渲染元数据供面板使用，无分组则跳过（生成分组需要行数据）
 	if !ignoreRows || len(view.Groups) > 0 {
-		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, ignoreRows, writable, target, targetGroupID)
+		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, groupRenderSource,
+			ignoreRows, writable, target, targetGroupID)
 	}
 	if writable && nil == err && attrView.HasCardCoverPositionChanges() {
 		if err = av.SaveAttributeView(attrView); nil != err {
@@ -549,7 +555,9 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	return
 }
 
-func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string) (err error) {
+func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page,
+	pageSize int, groupPaging map[string]any, groupRenderSource *sql.GroupViewRenderSource, ignoreRows, writable bool,
+	target *AttributeViewRenderTarget, targetGroupID string) (err error) {
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
 		if view.LayoutType == av.LayoutTypeKanban {
@@ -641,7 +649,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
-		groupViewable := sql.RenderGroupView(attrView, view, groupView, query)
+		groupViewable := sql.RenderGroupViewWithSource(attrView, view, groupView, query, groupRenderSource, ignoreRows)
 
 		groupPage, groupPageSize := page, pageSize
 		if nil != groupPaging {

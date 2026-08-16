@@ -32,6 +32,7 @@ require (
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gabriel-vasile/mimetype v1.4.15
+	github.com/gen2brain/h265 v0.1.1
 	github.com/gin-contrib/gzip v1.2.6
 	github.com/gin-contrib/sessions v1.1.0
 	github.com/gin-contrib/sse v1.1.1
@@ -64,6 +65,7 @@ require (
 	github.com/pkoukk/tiktoken-go-loader v0.0.2
 	github.com/r3labs/sse/v2 v2.10.0
 	github.com/radovskyb/watcher v1.0.7
+	github.com/richardlehane/mscfb v1.0.7
 	github.com/rqlite/sql v0.0.0-20260224021119-1b2524a41372
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/samber/lo v1.53.0
@@ -97,7 +99,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.8-0.20260812132341-89dbaf26397a
+require github.com/88250/lute v1.7.8-0.20260816044801-e16e8e268504
 
 require (
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
@@ -204,7 +206,6 @@ require (
 	github.com/quic-go/quic-go v0.61.0 // indirect
 	github.com/refraction-networking/utls v1.8.2 // indirect
 	github.com/restic/chunker v0.5.0 // indirect
-	github.com/richardlehane/mscfb v1.0.7 // indirect
 	github.com/richardlehane/msoleps v1.0.6 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/segmentio/encoding v0.5.4 // indirect

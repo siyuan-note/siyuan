@@ -1437,6 +1437,20 @@ export class TableControl {
                         click: () => toggleTableHeader(this.protyle, this.selection.node, headerType),
                     }).element);
                 }
+                if (this.selection.mode === "column") {
+                    menu.append(new MenuItem({
+                        id: "autoFitColWidth",
+                        icon: "iconWidth",
+                        label: window.siyuan.languages.autoFitColWidth,
+                        click: () => this.setSelectedColumnWidth(),
+                    }).element);
+                    menu.append(new MenuItem({
+                        id: "useDefaultWidth",
+                        icon: "iconRefresh",
+                        label: window.siyuan.languages.useDefaultWidth,
+                        click: () => this.setSelectedColumnWidth(TABLE_DEFAULT_COLUMN_WIDTH),
+                    }).element);
+                }
                 menu.append(new MenuItem({type: "separator"}).element);
             }
             menu.append(new MenuItem({
@@ -1756,6 +1770,31 @@ export class TableControl {
             return;
         }
         setTableCellStyle(this.protyle, this.selection.node, this.getSelectedCells(), property, value);
+        this.scheduleRender();
+    }
+
+    private setSelectedColumnWidth(minWidth?: number) {
+        if (!this.selection || this.selection.mode !== "column") {
+            return;
+        }
+        const oldHTML = this.selection.node.outerHTML;
+        const columns = this.selection.table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col");
+        this.selection.indexes.forEach(index => {
+            const column = columns[index];
+            if (!column) {
+                return;
+            }
+            column.style.removeProperty("width");
+            if (minWidth === undefined) {
+                column.style.removeProperty("min-width");
+            } else {
+                column.style.minWidth = `${minWidth}px`;
+            }
+            if (!column.getAttribute("style")) {
+                column.removeAttribute("style");
+            }
+        });
+        updateTransaction(this.protyle, this.selection.node, oldHTML);
         this.scheduleRender();
     }
 

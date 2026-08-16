@@ -93,7 +93,10 @@ export const initWindowEvent = (app: App) => {
     }, true);
 
     let scrollTarget: HTMLElement | false;
-    window.addEventListener("dragstart", clearDragTipGhost, true);
+    window.addEventListener("dragstart", () => {
+        clearDragTipGhost();
+        hideTooltip();
+    }, true);
     window.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         const isDocumentTab = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENT_TAB);
         const tabBarElement = hasClosestByClassName(event.target, "layout-tab-bar");

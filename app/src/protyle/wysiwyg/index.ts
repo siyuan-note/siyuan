@@ -1004,6 +1004,8 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            // 常规划选时排除属性占位，三击时恢复以保留浏览器的整段选择行为
+            this.element.classList.toggle("protyle-wysiwyg--select-attr", event.button === 0 && event.detail > 2);
             if (protyle.toolbar.isMultiSelectMode()) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -3838,6 +3840,11 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
+            if (event.target === this.element &&
+                (event.inputType === "historyUndo" || event.inputType === "historyRedo")) {
+                event.preventDefault();
+                return;
+            }
             const unidentifiedState = isInAndroid() ? takeMobileUnidentifiedKeyState() : undefined;
             if (event.inputType === "deleteContentBackward" && unidentifiedState) {
                 unidentifiedState.placeholder?.remove();
@@ -4765,6 +4772,16 @@ export class WYSIWYG {
                 if (inlineMathElement) {
                     newRange.setEndAfter(inlineMathElement);
                     newRange.collapse(false);
+                    focusByRange(newRange);
+                }
+                const tripleClickBlockElement = event.detail > 2 && hasClosestBlock(event.target);
+                if (tripleClickBlockElement &&
+                    ["NodeParagraph", "NodeHeading"].includes(tripleClickBlockElement.getAttribute("data-type")) &&
+                    tripleClickBlockElement.querySelector('[data-type~="inline-math"]')) {
+                    // 浏览器完成三击选区后，将行级公式截断的选区补齐到整个段落或标题
+                    const editableElement = getContenteditableElement(tripleClickBlockElement);
+                    setFirstNodeRange(editableElement, newRange);
+                    setLastNodeRange(editableElement, newRange, false);
                     focusByRange(newRange);
                 }
                 /// #if !MOBILE

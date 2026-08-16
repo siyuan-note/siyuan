@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260814235559"
+		"updated": "20260815184617"
 	},
 	"Children": [
 		{
@@ -11512,7 +11512,7 @@
 			"Properties": {
 				"ID": "20240530101000-uaq4ub6",
 				"id": "20240530101000-yl0e0sq",
-				"updated": "20260811122156"
+				"updated": "20260815184617"
 			},
 			"Children": [
 				{
@@ -11542,7 +11542,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-wqr5cs1",
-				"updated": "20260811122156"
+				"updated": "20260815184617"
 			},
 			"Children": [
 				{
@@ -11766,7 +11766,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "L"
 								},
 								{
 									"Type": "NodeText",
@@ -11775,7 +11784,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘Enter"
+									"TextMarkTextContent": "⇧⌘L"
 								},
 								{
 									"Type": "NodeText",

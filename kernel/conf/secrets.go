@@ -25,8 +25,10 @@ import (
 )
 
 // Secret 是一条命名密钥，Name 为引用名（如 weread_key），Value 在运行时为明文，落盘时由 Secrets.Encrypt 加密。
-// AllowedHosts 是该密钥允许发送到的目标主机列表（不含协议与端口，大小写不敏感，精确匹配）；
-// 为空时该密钥不会在任何请求中插值，防止密钥被发送到未授权的目标主机。
+// AllowedHosts 是该密钥允许插值到的 HTTP 出站目标主机列表（不含协议与端口，大小写不敏感，精确匹配）；
+// 为空时该密钥不会插值到任何 HTTP 出站请求，防止密钥被发送到未授权的目标主机。
+// stdio 型 MCP 服务器的环境变量插值不受该列表约束：目标是无网络主机的本地子进程，管理员在 Env 中
+// 引用 {{secrets.NAME}} 本身就是对该服务器的显式授权。
 type Secret struct {
 	Name         string   `json:"name"`
 	Value        string   `json:"value"`
@@ -34,7 +36,8 @@ type Secret struct {
 }
 
 // Secrets 是全局密钥库，脱离 AI 配置独立存在，供智能体 http_request 工具、MCP 服务请求头和 stdio 环境变量等以
-// {{secrets.名字}} 形式引用。落盘时 Value 经 AES 加密，运行时为明文。
+// {{secrets.名字}} 形式引用。落盘时 Value 经 AES 加密，运行时为明文。AllowedHosts 仅约束 HTTP 出站插值，
+// stdio 环境变量面向管理员显式配置的本地子进程，不受主机列表约束。
 type Secrets struct {
 	Items []*Secret `json:"items"`
 }
@@ -199,6 +202,7 @@ func resolveDollar(in string, lookups ...func(string) (string, bool)) string {
 // 串行调用后即覆盖「$NAME 先密钥后变量」的优先级。仅在库中存在对应名字时才替换，
 // 找不到保留原文——因此 $100、正则等不相关内容不受影响。
 // 供智能体 http_request 工具、MCP 服务请求头和 stdio 环境变量等统一消费密钥与变量。
+// 不受 AllowedHosts 约束，仅用于目标无需主机限定的场景（如 stdio 环境变量）；HTTP 出站请改用 ResolveSecretsVarsForHost。
 func ResolveSecretsVars(secrets *Secrets, vars *Variables, in string) string {
 	in = secrets.Resolve(in)
 	return vars.Resolve(in)

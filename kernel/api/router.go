@@ -158,6 +158,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/getShorthandSavePath", model.CheckAuth, getShorthandSavePath)
 	ginServer.Handle("POST", "/api/filetree/changeSort", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, changeSort)
 	ginServer.Handle("POST", "/api/filetree/setSort", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setSort)
+	ginServer.Handle("POST", "/api/filetree/setDocSortMode", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setDocSortMode)
 	ginServer.Handle("POST", "/api/filetree/createDocWithMd", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createDocWithMd)
 	ginServer.Handle("POST", "/api/filetree/createDailyNote", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createDailyNote)
 	ginServer.Handle("POST", "/api/filetree/createDoc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createDoc)
@@ -217,6 +218,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/lute/spinBlockDOM", model.CheckAuth, model.CheckAdminRole, spinBlockDOM)
 	ginServer.Handle("POST", "/api/lute/html2BlockDOM", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, html2BlockDOM)
+	ginServer.Handle("POST", "/api/lute/wpsPresentation2BlockDOM", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, wpsPresentation2BlockDOM)
 	ginServer.Handle("POST", "/api/lute/copyStdMarkdown", model.CheckAuth, copyStdMarkdown)
 	ginServer.Handle("POST", "/api/lute/md2html", model.CheckAuth, md2HTML)
 
@@ -674,6 +676,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/ai/agent/saveSession", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, saveSession)
 	ginServer.Handle("POST", "/api/ai/agent/removeSession", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeSession)
 	ginServer.Handle("POST", "/api/ai/agent/lsSkills", model.CheckAuth, model.CheckAdminRole, lsSkills)
+	ginServer.Handle("POST", "/api/ai/agent/lsUserSkills", model.CheckAuth, model.CheckAdminRole, lsUserSkills)
 	ginServer.Handle("POST", "/api/ai/agent/getSkill", model.CheckAuth, model.CheckAdminRole, getSkill)
 	ginServer.Handle("POST", "/api/ai/agent/saveSkill", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, saveSkill)
 	ginServer.Handle("POST", "/api/ai/agent/removeSkill", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeSkill)

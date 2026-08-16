@@ -121,6 +121,14 @@ test("code block actions follow the code block menu order", () => {
         "md27",
         "saveCodeBlockAsFile",
     ]);
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.code.md29").map((item) => item.key), [
+        "default",
+        "tabSpaces0",
+        "tabSpaces2",
+        "tabSpaces4",
+        "tabSpaces6",
+        "tabSpaces8",
+    ]);
 });
 
 test("multiple block heading transform follows the regular transform menu", () => {
@@ -166,6 +174,52 @@ test("multiple document and notebook entries follow their document tree menus", 
         "exportMarkdown",
     ]);
     assert.ok(getEntryCatalogChildren("docTree.multi").some((item) => item.key === "delete"));
+});
+
+test("document tree sort menus follow their scope inheritance options", () => {
+    const documentEntries = getEntryCatalogChildren("docTree.document");
+    const attrIndex = documentEntries.findIndex((item) => item.key === "attr");
+    assert.deepEqual(documentEntries.slice(attrIndex, attrIndex + 3).map((item) => item.key), [
+        "attr",
+        "sort",
+        "riffCard",
+    ]);
+
+    const commonSortEntries = [
+        "fileNameASC",
+        "fileNameDESC",
+        "fileNameNatASC",
+        "fileNameNatDESC",
+        "separator_1",
+        "createdASC",
+        "createdDESC",
+        "modifiedASC",
+        "modifiedDESC",
+        "separator_2",
+        "refCountASC",
+        "refCountDESC",
+        "separator_3",
+        "docSizeASC",
+        "docSizeDESC",
+        "separator_4",
+        "subDocCountASC",
+        "subDocCountDESC",
+        "separator_5",
+        "customSort",
+    ];
+    assert.deepEqual(getEntryCatalogChildren("docTree.panel.sort").map((item) => item.key), commonSortEntries);
+    assert.deepEqual(getEntryCatalogChildren("docTree.notebooks.sort").map((item) => item.key), [
+        ...commonSortEntries,
+        "sortByFiletree",
+    ]);
+    assert.deepEqual(getEntryCatalogChildren("docTree.notebook.sort").map((item) => item.key), [
+        ...commonSortEntries,
+        "sortByFiletree",
+    ]);
+    assert.deepEqual(getEntryCatalogChildren("docTree.document.sort").map((item) => item.key), [
+        ...commonSortEntries,
+        "sortByParent",
+    ]);
 });
 
 test("multiple document and notebook settings have distinct labels", () => {
@@ -229,6 +283,8 @@ test("simple profile follows the reviewed defaults", () => {
         "document.more.keepLazyLoad",
         "document.more.headingNumber",
         "docTree.notebook.sort.fileNameNatASC",
+        "docTree.document.sort.fileNameNatASC",
+        "docTree.document.sort.sortByParent",
     ];
     const hidden = [
         "document.title.copy.copyDoc",
@@ -240,6 +296,7 @@ test("simple profile follows the reviewed defaults", () => {
         "document.more.netAssets2LocalAssets",
         "document.more.fullWidth",
         "docTree.notebook.sort.fileNameASC",
+        "docTree.document.sort.fileNameASC",
         "inline.image.copyFile",
     ];
     shown.forEach((path) => assert.equal(getEntryCatalogNode(path)?.simple, true, path));

@@ -32,8 +32,8 @@ export const initStatus = (isWindow = false) => {
     <svg><use xlink:href="#iconHelp"></use></svg>
 </div>`;
     document.querySelector("#status").addEventListener("click", (event) => {
-        let target = event.target as HTMLElement;
-        while (target.id !== "status") {
+        let target = event.target as HTMLElement | null;
+        while (target && target.id !== "status") {
             if (target.id === "barDock") {
                 toggleDockBar(target.firstElementChild.firstElementChild);
                 event.stopPropagation();

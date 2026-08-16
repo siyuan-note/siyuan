@@ -1,4 +1,5 @@
 import {escapeAttr} from "../../../util/escape";
+import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 
 const TRANSPARENT_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
@@ -31,6 +32,9 @@ export const getCardCoverImageHTML = (coverURL: string, imageURL: string, fitIma
                                       position?: IAVCardCoverPosition) => {
     if (coverURL.startsWith("background")) {
         return `<img class="av__gallery-img" src="${TRANSPARENT_IMAGE}" style="${escapeAttr(coverURL)}">`;
+    }
+    if (!isBrowserRenderableImagePath(coverURL)) {
+        return "";
     }
     const objectPosition = position?.image === coverURL ? ` style="object-position:${position.x}% ${position.y}%"` : "";
     return `<img loading="lazy" class="av__gallery-img${fitImage ? " av__gallery-img--fit" : ""}" src="${escapeAttr(imageURL)}"${objectPosition}>`;

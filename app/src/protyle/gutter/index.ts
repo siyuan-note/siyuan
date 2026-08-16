@@ -37,7 +37,7 @@ import {
 import {removeBlock} from "../wysiwyg/remove";
 import {focusBlock, focusByRange, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
-import {shouldHideGutterAfterFold} from "../ui/gutterVisibility";
+import {markGutterForFoldRestore} from "../ui/gutterVisibility";
 import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {
@@ -429,7 +429,7 @@ export class Gutter {
                         (buttonElement.firstElementChild as HTMLElement).style.transform = "rotate(90deg)";
                     }
                 }
-                if (shouldHideGutterAfterFold(foldStatus)) {
+                if (!markGutterForFoldRestore(this.element, foldElement.getAttribute("data-node-id"), foldStatus)) {
                     hideElements(["gutter"], protyle);
                 }
                 hideElements(["select"], protyle);
@@ -2074,9 +2074,17 @@ export class Gutter {
             const ligatures = nodeElement.getAttribute("ligatures");
             const linenumber = nodeElement.getAttribute("linenumber");
             const codeTabSpaces = nodeElement.getAttribute(Constants.CUSTOM_SY_CODE_TAB_SPACES);
-            const codeTabSpacesOptions = [`<option value=""${codeTabSpaces === null ? " selected" : ""}>${window.siyuan.languages.default} (${window.siyuan.config.editor.codeTabSpaces})</option>`]
-                .concat(CODE_TAB_SPACE_VALUES.map((value) => `<option value="${value}"${codeTabSpaces === value.toString() ? " selected" : ""}>${value}</option>`))
-                .join("");
+            const setCodeTabSpaces = (value: string) => {
+                if (value === "") {
+                    nodeElement.removeAttribute(Constants.CUSTOM_SY_CODE_TAB_SPACES);
+                } else {
+                    nodeElement.setAttribute(Constants.CUSTOM_SY_CODE_TAB_SPACES, value);
+                }
+                fetchPost("/api/attr/setBlockAttrs", {
+                    id,
+                    attrs: {[Constants.CUSTOM_SY_CODE_TAB_SPACES]: value}
+                });
+            };
 
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "code",
@@ -2087,25 +2095,25 @@ export class Gutter {
                     id: "md29",
                     iconHTML: "",
                     ignore: protyle.disabled,
-                    label: `<div class="fn__flex"><span>${window.siyuan.languages.md29}</span><span class="fn__space fn__flex-1"></span>
-<select class="b3-select">${codeTabSpacesOptions}</select></div>`,
-                    bind(element) {
-                        const selectElement = element.querySelector("select") as HTMLSelectElement;
-                        selectElement.addEventListener("click", (event) => event.stopPropagation());
-                        selectElement.addEventListener("change", () => {
-                            const value = selectElement.value;
-                            if (value === "") {
-                                nodeElement.removeAttribute(Constants.CUSTOM_SY_CODE_TAB_SPACES);
-                            } else {
-                                nodeElement.setAttribute(Constants.CUSTOM_SY_CODE_TAB_SPACES, value);
-                            }
-                            fetchPost("/api/attr/setBlockAttrs", {
-                                id,
-                                attrs: {[Constants.CUSTOM_SY_CODE_TAB_SPACES]: value}
-                            });
-                            window.siyuan.menus.menu.remove();
-                        });
-                    }
+                    label: window.siyuan.languages.md29,
+                    type: "submenu",
+                    submenu: [{
+                        id: "default",
+                        iconHTML: "",
+                        label: `${window.siyuan.languages.default} (${window.siyuan.config.editor.codeTabSpaces})`,
+                        checked: codeTabSpaces === null,
+                        click() {
+                            setCodeTabSpaces("");
+                        }
+                    }, ...CODE_TAB_SPACE_VALUES.map((value) => ({
+                        id: `tabSpaces${value}`,
+                        iconHTML: "",
+                        label: value.toString(),
+                        checked: codeTabSpaces === value.toString(),
+                        click() {
+                            setCodeTabSpaces(value.toString());
+                        }
+                    }))]
                 }, {
                     id: "md31",
                     iconHTML: "",

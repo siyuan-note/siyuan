@@ -7,6 +7,7 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {Menu} from "../../../plugin/Menu";
 import {objEquals} from "../../../util/functions";
 import {Constants} from "../../../constants";
+import {mergeGroupResponseView} from "./groupResponse";
 
 export const getPageSize = (blockElement: Element) => {
     const groupPageSize: {
@@ -50,9 +51,10 @@ export const setGroupMethod = async (options: {
     const response = await fetchSyncPost("/api/av/setAttrViewGroup", {
         blockID,
         avID: options.blockElement.getAttribute("data-av-id"),
-        group: data
+        group: data,
+        ignoreRows: true,
     });
-    options.data.view = response.data.view;
+    options.data.view = mergeGroupResponseView(options.data.view, response.data);
     options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
     bindGroupsEvent({
         protyle: options.protyle,
@@ -176,9 +178,10 @@ export const bindGroupsNumber = (options: {
         const response = await fetchSyncPost("/api/av/setAttrViewGroup", {
             blockID,
             avID: options.blockElement.getAttribute("data-av-id"),
-            group: options.data.view.group
+            group: options.data.view.group,
+            ignoreRows: true,
         });
-        options.data.view = response.data.view;
+        options.data.view = mergeGroupResponseView(options.data.view, response.data);
     };
 };
 
@@ -283,9 +286,10 @@ export const bindGroupsEvent = (options: {
         const response = await fetchSyncPost("/api/av/setAttrViewGroup", {
             blockID,
             avID: options.blockElement.getAttribute("data-av-id"),
-            group: options.data.view.group
+            group: options.data.view.group,
+            ignoreRows: true,
         });
-        options.data.view = response.data.view;
+        options.data.view = mergeGroupResponseView(options.data.view, response.data);
         options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
         bindGroupsEvent({
             protyle: options.protyle,
@@ -322,9 +326,10 @@ export const goGroupsDate = (options: {
                 const response = await fetchSyncPost("/api/av/setAttrViewGroup", {
                     blockID,
                     avID: options.blockElement.getAttribute("data-av-id"),
-                    group: options.data.view.group
+                    group: options.data.view.group,
+                    ignoreRows: true,
                 });
-                options.data.view = response.data.view;
+                options.data.view = mergeGroupResponseView(options.data.view, response.data);
                 options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
                 bindGroupsEvent({
                     protyle: options.protyle,
@@ -372,9 +377,10 @@ export const goGroupsSort = (options: {
                 const response = await fetchSyncPost("/api/av/setAttrViewGroup", {
                     blockID,
                     avID: options.blockElement.getAttribute("data-av-id"),
-                    group: options.data.view.group
+                    group: options.data.view.group,
+                    ignoreRows: true,
                 });
-                options.data.view = response.data.view;
+                options.data.view = mergeGroupResponseView(options.data.view, response.data);
                 options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
                 bindGroupsEvent({
                     protyle: options.protyle,

@@ -1,3 +1,5 @@
+import {CODE_TAB_SPACE_VALUES} from "../../protyle/wysiwyg/codeBlockUtil";
+
 export interface IEntryCatalogNode {
     key: string;
     label: () => string;
@@ -30,6 +32,11 @@ const separator = (key: string): IEntryCatalogNode => ({
     type: "separator",
 });
 
+const codeTabSpacesChildren = () => [
+    node("default", () => `${window.siyuan.languages.default} (${window.siyuan.config.editor.codeTabSpaces})`),
+    ...CODE_TAB_SPACE_VALUES.map((value) => node(`tabSpaces${value}`, literal(value.toString()))),
+];
+
 const copyChildren = () => [
     node("copyBlockRef", lang("copyBlockRef")),
     node("copyBlockEmbed", lang("copyBlockEmbed")),
@@ -40,7 +47,7 @@ const copyChildren = () => [
     node("copyID", lang("copyID"), false),
 ];
 
-const sortChildren = () => [
+const sortChildren = (inheritKey?: "sortByFiletree" | "sortByParent") => [
     node("fileNameASC", lang("fileNameASC"), false),
     node("fileNameDESC", lang("fileNameDESC"), false),
     node("fileNameNatASC", lang("fileNameNatASC")),
@@ -61,7 +68,7 @@ const sortChildren = () => [
     node("subDocCountDESC", lang("subDocCountDESC")),
     separator("separator_5"),
     node("customSort", lang("customSort")),
-    node("sortByFiletree", lang("sortByFiletree")),
+    ...(inheritKey ? [node(inheritKey, lang(inheritKey))] : []),
 ];
 
 const exportChildren = () => [
@@ -137,6 +144,7 @@ const docTreeDocument = () => {
         separator("separator_2"),
         node("rename", lang("rename")),
         node("attr", lang("attr")),
+        node("sort", lang("sort"), true, sortChildren("sortByParent")),
         riffCard,
         node("search", lang("search")),
         node("replace", lang("replace")),
@@ -312,7 +320,7 @@ const gutterSingle = () => [
     ]),
     separator("separator_code"),
     node("code", lang("code"), true, [
-        node("md29", lang("md29")),
+        node("md29", lang("md29"), true, codeTabSpacesChildren()),
         node("md31", lang("md31")),
         node("md2", lang("md2")),
         node("md27", lang("md27")),
@@ -431,7 +439,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("openDocument", lang("openDocument")),
             node("rename", lang("rename")),
             node("config", lang("config")),
-            node("sort", lang("sort"), true, sortChildren()),
+            node("sort", lang("sort"), true, sortChildren("sortByFiletree")),
             node("riffCard", lang("riffCard"), false),
             node("search", lang("search")),
             node("replace", lang("replace")),
@@ -461,7 +469,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
         key: "docTree.notebooks",
         label: location(lang("entryDocPanel"), lang("agentCatNotebook"), lang("multiSelect"), lang("more")),
         children: [
-            node("sort", lang("sort"), true, sortChildren()),
+            node("sort", lang("sort"), true, sortChildren("sortByFiletree")),
             node("search", lang("search")),
             node("replace", lang("replace")),
             separator("separator_1"),

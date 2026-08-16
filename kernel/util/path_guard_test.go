@@ -122,3 +122,59 @@ func TestIsForbiddenAbsPathSymlinkBypass(t *testing.T) {
 		t.Errorf("IsForbiddenAbsPath(symlink -> publishAccess.json) = false, want true")
 	}
 }
+
+// TestIsForbiddenDataRelPath 覆盖 /history 与 /repo/diff 路由共用的数据相对路径片段匹配黑名单。
+// 历史快照副本位于 HistoryDir 等绝对路径下，无法用 IsForbiddenAbsPath 精确匹配，因此按数据目录下的
+// 相对位置拦截：data/snippets/conf.json、data/templates 目录以及 data/.siyuan/publishAccess.json。
+func TestIsForbiddenDataRelPath(t *testing.T) {
+	forbidden := []string{
+		".siyuan/publishAccess.json",
+		"/.siyuan/publishAccess.json",
+		filepath.Join(".siyuan", "publishAccess.json"),
+		"templates",
+		"/templates",
+		filepath.Join("templates", "a.md"),
+		"snippets/conf.json",
+		filepath.Join("snippets", "conf.json"),
+	}
+	for _, p := range forbidden {
+		if got := IsForbiddenDataRelPath(p); !got {
+			t.Errorf("IsForbiddenDataRelPath(%q) = false, want true", p)
+		}
+	}
+
+	// 快照内合法文件不应被误判，尤其笔记本内名为 templates 的文档目录。
+	allowed := []string{
+		"",
+		"/",
+		"assets/image.png",
+		filepath.Join("20210808180117-6v0mkxr", "templates", "a.sy"),
+		filepath.Join("20210808180117-6v0mkxr", "20240101.sy"),
+		"plugins/example/main.js",
+		".siyuan/publishAccess.json.bak",
+		filepath.Join("20210808180117-6v0mkxr", ".siyuan", "publishAccess.json"),
+	}
+	for _, p := range allowed {
+		if got := IsForbiddenDataRelPath(p); got {
+			t.Errorf("IsForbiddenDataRelPath(%q) = true, want false", p)
+		}
+	}
+}
+
+// TestIsForbiddenDataRelPathCaseInsensitive 在大小写不敏感的文件系统上验证大小写变体无法绕过片段匹配。
+func TestIsForbiddenDataRelPathCaseInsensitive(t *testing.T) {
+	if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
+		t.Skip("case-insensitive comparison only on windows/darwin")
+	}
+
+	cases := []string{
+		filepath.Join(".SIYUAN", "PUBLISHACCESS.JSON"),
+		strings.ToUpper(filepath.Join("templates", "A.MD")),
+		filepath.Join("SNIPPETS", "CONF.JSON"),
+	}
+	for _, p := range cases {
+		if got := IsForbiddenDataRelPath(p); !got {
+			t.Errorf("IsForbiddenDataRelPath(%q) = false, want true (case variant)", p)
+		}
+	}
+}

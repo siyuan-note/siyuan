@@ -148,6 +148,12 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 
 	trees := filesys.LoadTrees(blockIDs)
 	var nodes []*ast.Node
+	type docSortModeChange struct {
+		oldAttrs map[string]string
+		node     *ast.Node
+		tree     *parse.Tree
+	}
+	var docSortModeChanges []docSortModeChange
 	boxIcons := map[string]string{}
 	for _, blockAttr := range blockAttrs {
 		id := blockAttr["id"].(string)
@@ -176,6 +182,7 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 
 		cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 		pushBlockAttrs(oldAttrs, node)
+		docSortModeChanges = append(docSortModeChanges, docSortModeChange{oldAttrs: oldAttrs, node: node, tree: tree})
 		nodes = append(nodes, node)
 	}
 
@@ -195,6 +202,14 @@ func BatchSetBlockAttrs(blockAttrs []map[string]any) (err error) {
 		if oldIcon != icon {
 			pushNotebookIconChanged(boxID, icon)
 		}
+	}
+	for _, change := range docSortModeChanges {
+		newAttrs := parse.IAL2Map(change.node.KramdownIAL)
+		if change.oldAttrs[DocSortModeAttr] != newAttrs[DocSortModeAttr] && ast.NodeDocument == change.node.Type {
+			cache.RemoveDocIALInBox(change.tree.Path, change.tree.Box)
+			cache.PutDocIALInBox(change.tree.Path, change.tree.Box, newAttrs)
+		}
+		pushDocSortModeChanged(change.oldAttrs, change.node, change.tree)
 	}
 
 	IncSync()
@@ -255,9 +270,15 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 	}
 
 	IncSync()
-	cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
+	newAttrs := parse.IAL2Map(node.KramdownIAL)
+	cache.PutBlockIALInBox(node.ID, tree.Box, newAttrs)
+	if oldAttrs[DocSortModeAttr] != newAttrs[DocSortModeAttr] && ast.NodeDocument == node.Type {
+		cache.RemoveDocIALInBox(tree.Path, tree.Box)
+		cache.PutDocIALInBox(tree.Path, tree.Box, newAttrs)
+	}
 
 	pushBlockAttrs(oldAttrs, node)
+	pushDocSortModeChanged(oldAttrs, node, tree)
 
 	if ("true" == oldAttrs[DocHiddenAttr]) != ("true" == nameValues[DocHiddenAttr]) {
 		ReloadFiletree()
@@ -326,8 +347,14 @@ func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameV
 	tx.writeTree(tree)
 
 	IncSync()
-	cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
+	newAttrs := parse.IAL2Map(node.KramdownIAL)
+	cache.PutBlockIALInBox(node.ID, tree.Box, newAttrs)
+	if oldAttrs[DocSortModeAttr] != newAttrs[DocSortModeAttr] && ast.NodeDocument == node.Type {
+		cache.RemoveDocIALInBox(tree.Path, tree.Box)
+		cache.PutDocIALInBox(tree.Path, tree.Box, newAttrs)
+	}
 	pushBlockAttrs(oldAttrs, node)
+	pushDocSortModeChanged(oldAttrs, node, tree)
 	return
 }
 
@@ -363,6 +390,20 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string, boxID string) (
 		if lowerName == "data-task" {
 			err = errors.New(`setting or removing [data-task] attribute is not allowed via this interface. Please use "/api/block/updateTaskListItemMarker" or "/api/block/batchUpdateTaskListItemMarker" to update the task list item marker`)
 			return
+		}
+		if DocSortModeAttr == lowerName {
+			if ast.NodeDocument != node.Type || IsBoxDoc(boxID, node.ID) {
+				err = fmt.Errorf("attribute [%s] is only supported on regular document roots", DocSortModeAttr)
+				return
+			}
+			if "" != value {
+				sortMode, parseErr := strconv.Atoi(value)
+				if nil != parseErr || !IsValidDocSortMode(sortMode) {
+					err = fmt.Errorf("invalid document sort mode [%s]", value)
+					return
+				}
+				value = strconv.Itoa(sortMode)
+			}
 		}
 
 		// 处理文档标签 https://github.com/siyuan-note/siyuan/issues/13311

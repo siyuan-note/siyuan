@@ -11,6 +11,7 @@ import {openAsset, openBy} from "./util";
 import {showMessage} from "../dialog/message";
 import {isInIOS, isInAndroid, isInHarmony} from "../protyle/util/compatibility";
 import type {App} from "../index";
+import {isBrowserRenderableImagePath} from "../util/imageURL";
 
 export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPressed = false) => {
     let linkAddress = Lute.UnEscapeHTMLStr(aLink);
@@ -32,8 +33,9 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
     openByMobile(linkAddress);
     /// #else
     if (isLocalPath(linkAddress)) {
-        const extension = getAssetExtension(linkAddress);
+        const extension = getAssetExtension(linkAddress).toLowerCase();
         if (Constants.SIYUAN_ASSETS_EXTS.includes(extension) &&
+            isBrowserRenderableImagePath(linkAddress) &&
             (
                 extension !== ".pdf" ||
                 // 本地 pdf 仅 assets/ 开头的才使用 siyuan 打开

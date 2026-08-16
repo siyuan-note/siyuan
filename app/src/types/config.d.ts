@@ -173,6 +173,9 @@ declare namespace Config {
         maxCompletionTokens: number;
         maxToolCallRounds: number;
         capabilityPolicy: ICapabilityPolicy;
+        skills: {
+            userEnabled: string[];
+        };
         approvalPolicy: {
             default: "risk" | "allow";
             overrides: Record<string, {
@@ -227,6 +230,7 @@ declare namespace Config {
         endpoint: string;
         apiKey: string;
         name: string;
+        requestFormat: "cohere" | "dashscope";
         timeout: number;
         candidateCount: number;
     }
@@ -300,6 +304,10 @@ declare namespace Config {
          * - `1`: Minimize to pallets
          */
         closeButtonBehavior: number;
+        /**
+         * Whether to close tabs by double-clicking
+         */
+        closeTabOnDoubleClick: boolean;
         /**
          * Dark code block theme
          */
@@ -1646,8 +1654,10 @@ declare namespace Config {
 
     /**
      * A named secret. The value is AES-encrypted at rest on the kernel side.
-     * The secret is only interpolated when the request destination host is in
-     * the allowed hosts list; an empty list denies all requests.
+     * The secret is only interpolated into HTTP outbound requests when the
+     * destination host is in the allowed hosts list; an empty list denies all
+     * HTTP requests. stdio MCP server environment variables are not restricted
+     * by this list.
      */
     export interface ISecret {
         name: string;
@@ -2098,10 +2108,6 @@ declare namespace Config {
      * SiYuan dock tab data
      */
     export interface IUILayoutDockTab {
-        /**
-         * Dock tab hotkey
-         */
-        hotkey?: string;
         /**
          * Hotkey description ID
          */

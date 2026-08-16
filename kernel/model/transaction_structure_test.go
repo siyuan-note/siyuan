@@ -96,6 +96,18 @@ func TestInsertRejectsParagraphDirectlyUnderList(t *testing.T) {
 	}
 }
 
+func TestInsertMissingTargetReturnsTransactionError(t *testing.T) {
+	setupStructureTransactionTest(t)
+	dom := util.NewLute().Md2BlockDOM("inserted", false)
+	tx := &Transaction{DoOperations: []*Operation{{
+		Action:   "insert",
+		ParentID: "20260816000000-missing",
+		Data:     dom,
+	}}}
+
+	requireStructureTransactionError(t, PerformTxSync(tx))
+}
+
 func TestMoveRejectsParagraphDirectlyUnderList(t *testing.T) {
 	tests := []struct {
 		name      string

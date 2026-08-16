@@ -27,6 +27,7 @@ export const getProvidersBlockKeywords = (): string[] => [
     window.siyuan.languages.aiModelSettings,
     window.siyuan.languages.apiBaseURL,
     window.siyuan.languages.apiBaseURLTip,
+    window.siyuan.languages.apiType,
     window.siyuan.languages.apiKey,
     window.siyuan.languages.apiKeyTip,
     window.siyuan.languages.apiTimeout,

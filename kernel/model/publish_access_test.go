@@ -325,9 +325,9 @@ func TestFilterAttributeViewBacklinksByPublishAccess(t *testing.T) {
 			expectedTotal: 0,
 		},
 		{
-			name:          "hidden target remains directly accessible",
+			name:          "hidden target filtered from backlink relations",
 			publishAccess: PublishAccess{{ID: targetDocID, Visible: false}},
-			expectedTotal: 1,
+			expectedTotal: 0,
 		},
 	}
 	for _, test := range tests {
@@ -335,6 +335,80 @@ func TestFilterAttributeViewBacklinksByPublishAccess(t *testing.T) {
 			filtered := FilterAttributeViewBacklinksByPublishAccess(c, test.publishAccess, newBacklinks())
 			if filtered.Total != test.expectedTotal || len(filtered.Items) != test.expectedTotal {
 				t.Fatalf("unexpected attribute view backlinks: %+v", filtered)
+			}
+		})
+	}
+}
+
+func TestFilterBlockAttributeViewKeysByPublishAccess(t *testing.T) {
+	const (
+		boxID      = "20260730150000-box0002"
+		publicID   = "20260730150001-public2"
+		hiddenID   = "20260730150002-hidden2"
+		disabledID = "20260730150003-disable"
+	)
+
+	oldDataDir := util.DataDir
+	oldBlockTreeDBPath := util.BlockTreeDBPath
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	treenode.InitBlockTree(true)
+	invalidateEncryptedPublishAccessCache()
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.DataDir = oldDataDir
+		util.BlockTreeDBPath = oldBlockTreeDBPath
+		invalidateEncryptedPublishAccessCache()
+		if "" != oldBlockTreeDBPath {
+			treenode.InitBlockTree(false)
+		}
+	})
+
+	for _, id := range []string{publicID, hiddenID, disabledID} {
+		tree := treenode.NewTree(boxID, "/"+id+".sy", "/"+id, id)
+		treenode.UpsertBlockTree(tree)
+	}
+
+	newKeys := func() []*BlockAttributeViewKeys {
+		return []*BlockAttributeViewKeys{
+			{AvID: "20260730150004-av0002", BlockIDs: []string{publicID}, KeyValues: []*av.KeyValues{{Key: &av.Key{ID: "20260730150005-key0001", Name: "Key 1"}}}},
+			{AvID: "20260730150006-av0003", BlockIDs: []string{hiddenID}, KeyValues: []*av.KeyValues{{Key: &av.Key{ID: "20260730150007-key0002", Name: "Key 2"}}}},
+			{AvID: "20260730150008-av0004", BlockIDs: []string{disabledID}, KeyValues: []*av.KeyValues{{Key: &av.Key{ID: "20260730150009-key0003", Name: "Key 3"}}}},
+		}
+	}
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+
+	tests := []struct {
+		name          string
+		publishAccess PublishAccess
+		expectedAvIDs []string
+	}{
+		{
+			name:          "public only",
+			expectedAvIDs: []string{"20260730150004-av0002", "20260730150006-av0003", "20260730150008-av0004"},
+		},
+		{
+			name:          "hidden filtered",
+			publishAccess: PublishAccess{{ID: hiddenID, Visible: false}},
+			expectedAvIDs: []string{"20260730150004-av0002", "20260730150008-av0004"},
+		},
+		{
+			name:          "disabled filtered",
+			publishAccess: PublishAccess{{ID: disabledID, Visible: true, Disable: true}},
+			expectedAvIDs: []string{"20260730150004-av0002", "20260730150006-av0003"},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			filtered := FilterBlockAttributeViewKeysByPublishAccess(c, test.publishAccess, newKeys())
+			if len(filtered) != len(test.expectedAvIDs) {
+				t.Fatalf("unexpected block attribute view keys: %+v", filtered)
+			}
+			for i, blockAttributeViewKey := range filtered {
+				if blockAttributeViewKey.AvID != test.expectedAvIDs[i] {
+					t.Fatalf("unexpected block attribute view keys: %+v", filtered)
+				}
 			}
 		})
 	}
@@ -1105,15 +1179,18 @@ func TestFilterEmbedBlocksByPublishAccessRemovesInternalFields(t *testing.T) {
 func TestFilterEmbedBlocksByPublishAccessDropsInaccessibleResults(t *testing.T) {
 	const (
 		boxID             = "20260720000000-boxid01"
+		unlistedDocID     = "20260720000001-unliste"
 		hiddenDocID       = "20260720000002-hiddend"
 		protectedDocID    = "20260720000003-protect"
 		protectedPassword = "password"
 	)
 	publishAccess := PublishAccess{
+		{ID: unlistedDocID, Visible: false},
 		{ID: hiddenDocID, Disable: true},
 		{ID: protectedDocID, Visible: true, Password: protectedPassword},
 	}
 	embedBlocks := []*EmbedBlock{
+		{Block: &Block{ID: "20260720000004-unliste", Box: boxID, Path: "/" + unlistedDocID + ".sy", Content: "unlisted"}},
 		{Block: &Block{ID: "20260720000004-hidden1", Box: boxID, Path: "/" + hiddenDocID + ".sy", Content: "hidden"}},
 		{Block: &Block{ID: "20260720000005-protect", Box: boxID, Path: "/" + protectedDocID + ".sy", Content: "protected"}},
 	}

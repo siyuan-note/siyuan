@@ -1645,6 +1645,63 @@ app.whenReady().then(() => {
         if (data.cmd === "clipboardRead") {
             return clipboard.read(data.format);
         }
+        if (data.cmd === "clipboardReadMathML") {
+            if (typeof data.text !== "string" ||
+                normalizeClipboardText(clipboard.readText()) !== normalizeClipboardText(data.text)) {
+                return "";
+            }
+            const formats = clipboard.availableFormats().filter((format) =>
+                /^mathml(?: presentation)?$/i.test(format));
+            formats.push("MathML", "MathML Presentation");
+            // availableFormats 可能不包含 Office 原生 MathML 格式，需要直接尝试标准格式名
+            for (const format of new Set(formats)) {
+                const buffer = clipboard.readBuffer(format);
+                if (buffer.length === 0 || buffer.length > 1024 * 1024 || buffer.length % 2 !== 0) {
+                    continue;
+                }
+                const mathML = buffer.toString("utf16le")
+                    .replace(/^\uFEFF/, "")
+                    .replace(/\0+$/, "")
+                    .trim();
+                if (/<(?:[A-Za-z_][\w.-]*:)?math(?:\s|>)/i.test(mathML)) {
+                    return mathML;
+                }
+            }
+            return "";
+        }
+        if (data.cmd === "clipboardReadOffice") {
+            if (typeof data.text !== "string" ||
+                normalizeClipboardText(clipboard.readText()) !== normalizeClipboardText(data.text)) {
+                return "";
+            }
+            const buffer = clipboard.readBuffer("Embed Source");
+            const compoundFileSignature = Buffer.from([0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]);
+            if (buffer.length === 0 || buffer.length > 8 * 1024 * 1024 ||
+                !buffer.subarray(0, compoundFileSignature.length).equals(compoundFileSignature)) {
+                return "";
+            }
+            return buffer.toString("base64");
+        }
+        if (data.cmd === "clipboardReadWPS") {
+            if (typeof data.text !== "string" ||
+                normalizeClipboardText(clipboard.readText()) !== normalizeClipboardText(data.text)) {
+                return "";
+            }
+            const formats = clipboard.availableFormats().filter((format) =>
+                /kingsoft.*wps.*format/i.test(format));
+            formats.push("Kingsoft WPS Format");
+            for (let version = 6; version <= 20; version++) {
+                formats.push(`Kingsoft WPS ${version}.0 Format`);
+            }
+            // availableFormats 可能不包含 WPS 原生格式，需要尝试常见格式名
+            for (const format of new Set(formats)) {
+                const buffer = clipboard.readBuffer(format);
+                if (buffer.length <= 8 * 1024 * 1024 && buffer[0] === 0x50 && buffer[1] === 0x4b) {
+                    return buffer.toString("base64");
+                }
+            }
+            return "";
+        }
         if (data.cmd === "beginRichClipboard") {
             richClipboardOperation = undefined;
             const text = clipboard.readText();

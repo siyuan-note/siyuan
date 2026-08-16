@@ -37,68 +37,188 @@ type SkillInfo struct {
 	Description string `json:"description"`
 }
 
+type UserSkillInfo struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Enabled     bool   `json:"enabled"`
+	Shadowed    bool   `json:"shadowed"`
+}
+
+type skillRecord struct {
+	Info    SkillInfo
+	DirName string
+	Root    string
+	Content string
+	Body    string
+}
+
 func SkillsDir() string {
 	return filepath.Join(DataDir, "storage", "ai", "agent", "skills")
 }
 
-func DiscoverSkills() []SkillInfo {
-	dir := SkillsDir()
-	entries, err := os.ReadDir(dir)
+func UserSkillsDir() string {
+	return filepath.Join(HomeDir, ".agents", "skills")
+}
+
+func readSkillRecords(root string) []skillRecord {
+	entries, err := os.ReadDir(root)
 	if err != nil {
 		return nil
 	}
 
-	var skills []SkillInfo
+	var records []skillRecord
 	for _, e := range entries {
-		if !e.IsDir() {
+		isDir := e.IsDir()
+		if !isDir && e.Type()&os.ModeSymlink != 0 {
+			if info, statErr := os.Stat(filepath.Join(root, e.Name())); statErr == nil {
+				isDir = info.IsDir()
+			}
+		}
+		if !isDir {
 			continue
 		}
-		skillDir := e.Name()
-		skillMdPath := filepath.Join(dir, skillDir, "SKILL.md")
+		dirName := e.Name()
+		skillMdPath := filepath.Join(root, dirName, "SKILL.md")
 		b, err := filelock.ReadFile(skillMdPath)
 		if err != nil {
 			continue
 		}
-		fm, body := parseSkillFrontmatter(string(b))
+		content := string(b)
+		fm, body := parseSkillFrontmatter(content)
 		name := fm["name"]
 		if name == "" {
-			name = skillDir
+			name = dirName
 		}
 		desc := fm["description"]
 		if desc == "" {
 			desc = firstLine(body)
 		}
-		skills = append(skills, SkillInfo{
-			Name:        name,
-			Description: desc,
+		records = append(records, skillRecord{
+			Info: SkillInfo{
+				Name:        name,
+				Description: desc,
+			},
+			DirName: dirName,
+			Root:    root,
+			Content: content,
+			Body:    body,
 		})
+	}
+	return records
+}
+
+func skillKey(name string) string {
+	return strings.ToLower(strings.TrimSpace(name))
+}
+
+func skillAliases(record skillRecord) []string {
+	aliases := []string{skillKey(record.Info.Name)}
+	dirName := skillKey(record.DirName)
+	if dirName != aliases[0] {
+		aliases = append(aliases, dirName)
+	}
+	return aliases
+}
+
+func hasClaimedSkillAlias(record skillRecord, claimed map[string]struct{}) bool {
+	for _, alias := range skillAliases(record) {
+		if _, ok := claimed[alias]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+func claimSkillAliases(record skillRecord, claimed map[string]struct{}) {
+	for _, alias := range skillAliases(record) {
+		claimed[alias] = struct{}{}
+	}
+}
+
+func enabledUserSkillSet(enabledUserSkills []string) map[string]struct{} {
+	ret := make(map[string]struct{}, len(enabledUserSkills))
+	for _, id := range enabledUserSkills {
+		if key := skillKey(id); key != "" {
+			ret[key] = struct{}{}
+		}
+	}
+	return ret
+}
+
+func resolveSkillRecords(enabledUserSkills []string) []skillRecord {
+	claimed := map[string]struct{}{}
+	var resolved []skillRecord
+	appendRecord := func(record skillRecord) {
+		if hasClaimedSkillAlias(record, claimed) {
+			return
+		}
+		claimSkillAliases(record, claimed)
+		resolved = append(resolved, record)
+	}
+	for _, record := range readSkillRecords(SkillsDir()) {
+		appendRecord(record)
+	}
+	enabled := enabledUserSkillSet(enabledUserSkills)
+	for _, record := range readSkillRecords(UserSkillsDir()) {
+		if _, ok := enabled[skillKey(record.DirName)]; ok {
+			appendRecord(record)
+		}
+	}
+	return resolved
+}
+
+func DiscoverSkills(enabledUserSkills []string) []SkillInfo {
+	records := resolveSkillRecords(enabledUserSkills)
+	skills := make([]SkillInfo, 0, len(records))
+	for _, record := range records {
+		skills = append(skills, record.Info)
 	}
 	return skills
 }
 
-func LoadSkillContent(name string) string {
-	dir := SkillsDir()
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return ""
+func DiscoverUserSkills(enabledUserSkills []string) []UserSkillInfo {
+	claimed := map[string]struct{}{}
+	for _, record := range readSkillRecords(SkillsDir()) {
+		if !hasClaimedSkillAlias(record, claimed) {
+			claimSkillAliases(record, claimed)
+		}
 	}
-	for _, e := range entries {
-		if !e.IsDir() {
-			continue
+
+	enabled := enabledUserSkillSet(enabledUserSkills)
+	var skills []UserSkillInfo
+	for _, record := range readSkillRecords(UserSkillsDir()) {
+		_, isEnabled := enabled[skillKey(record.DirName)]
+		shadowed := hasClaimedSkillAlias(record, claimed)
+		skills = append(skills, UserSkillInfo{
+			ID:          record.DirName,
+			Name:        record.Info.Name,
+			Description: record.Info.Description,
+			Enabled:     isEnabled,
+			Shadowed:    shadowed,
+		})
+		if isEnabled && !shadowed {
+			claimSkillAliases(record, claimed)
 		}
-		skillMdPath := filepath.Join(dir, e.Name(), "SKILL.md")
-		b, err := filelock.ReadFile(skillMdPath)
-		if err != nil {
-			continue
+	}
+	return skills
+}
+
+func findSkillRecord(records []skillRecord, name string) (skillRecord, bool) {
+	key := skillKey(name)
+	for _, record := range records {
+		for _, alias := range skillAliases(record) {
+			if alias == key {
+				return record, true
+			}
 		}
-		fm, body := parseSkillFrontmatter(string(b))
-		skillName := fm["name"]
-		if skillName == "" {
-			skillName = e.Name()
-		}
-		if strings.EqualFold(skillName, name) || strings.EqualFold(e.Name(), name) {
-			return body
-		}
+	}
+	return skillRecord{}, false
+}
+
+func LoadSkillContent(name string, enabledUserSkills []string) string {
+	if record, ok := findSkillRecord(resolveSkillRecords(enabledUserSkills), name); ok {
+		return record.Body
 	}
 	return ""
 }
@@ -118,16 +238,14 @@ func validateSkillName(name string) error {
 	return nil
 }
 
-func ReadSkill(name string) (string, error) {
+func ReadSkill(name string, enabledUserSkills []string) (string, error) {
 	if err := validateSkillName(name); err != nil {
 		return "", err
 	}
-	skillMdPath := filepath.Join(SkillsDir(), name, "SKILL.md")
-	b, err := filelock.ReadFile(skillMdPath)
-	if err != nil {
-		return "", fmt.Errorf("skill not found: %s", name)
+	if record, ok := findSkillRecord(resolveSkillRecords(enabledUserSkills), name); ok {
+		return record.Content, nil
 	}
-	return string(b), nil
+	return "", fmt.Errorf("skill not found: %s", name)
 }
 
 func SaveSkill(name, content string) error {
@@ -150,10 +268,14 @@ func RemoveSkill(name string) error {
 	if err := validateSkillName(name); err != nil {
 		return err
 	}
-	skillDir := filepath.Join(SkillsDir(), name)
-	if _, err := os.Stat(skillDir); os.IsNotExist(err) {
+	record, ok := findSkillRecord(readSkillRecords(SkillsDir()), name)
+	if !ok {
+		if _, found := findSkillRecord(readSkillRecords(UserSkillsDir()), name); found {
+			return fmt.Errorf("user skill is read-only: %s", name)
+		}
 		return fmt.Errorf("skill not found: %s", name)
 	}
+	skillDir := filepath.Join(record.Root, record.DirName)
 	return os.RemoveAll(skillDir)
 }
 
@@ -165,11 +287,15 @@ func RenameSkill(oldName, newName string) error {
 		return err
 	}
 	dir := SkillsDir()
-	oldDir := filepath.Join(dir, oldName)
-	newDir := filepath.Join(dir, newName)
-	if _, err := os.Stat(oldDir); os.IsNotExist(err) {
+	record, ok := findSkillRecord(readSkillRecords(dir), oldName)
+	if !ok {
+		if _, found := findSkillRecord(readSkillRecords(UserSkillsDir()), oldName); found {
+			return fmt.Errorf("user skill is read-only: %s", oldName)
+		}
 		return fmt.Errorf("skill not found: %s", oldName)
 	}
+	oldDir := filepath.Join(dir, record.DirName)
+	newDir := filepath.Join(dir, newName)
 	if _, err := os.Stat(newDir); err == nil {
 		return fmt.Errorf("skill already exists: %s", newName)
 	}

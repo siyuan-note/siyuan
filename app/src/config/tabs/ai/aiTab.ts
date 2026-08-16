@@ -24,6 +24,10 @@ import {
     getAgentCapabilityKeywords,
     mountAgentCapabilityBlock,
 } from "./aiCapabilityUi";
+import {
+    getUserSkillsBlockKeywords,
+    mountUserSkillsBlock,
+} from "./aiSkillUi";
 
 const registerAiProvidersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("providers", window.siyuan.languages.apiProvider);
@@ -155,6 +159,20 @@ const registerAiImageGenerationGroup = (tab: SettingTabBuilder) => {
     });
 };
 
+const registerAiSkillsGroup = (tab: SettingTabBuilder) => {
+    const group = tab.group("skills", window.siyuan.languages.tokenCatSkills);
+
+    group.button({
+        id: "aiUserSkills",
+        title: window.siyuan.languages.agentUserSkills,
+        desc: window.siyuan.languages.agentUserSkillsTip,
+        label: window.siyuan.languages.config,
+        icon: "iconSettings",
+        keywords: getUserSkillsBlockKeywords(),
+        afterMount: mountUserSkillsBlock,
+    });
+};
+
 const registerAiMcpGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("mcp", window.siyuan.languages.configGroupMcp);
 
@@ -236,6 +254,14 @@ const registerAiRerankGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.rerankModel,
         desc: window.siyuan.languages.rerankTip,
     });
+    group.select("ai.rerank.requestFormat", {
+        title: window.siyuan.languages.rerankRequestFormat,
+        desc: window.siyuan.languages.rerankRequestFormatTip,
+        options: [
+            {value: "cohere", label: window.siyuan.languages.rerankRequestFormatCohere},
+            {value: "dashscope", label: window.siyuan.languages.rerankRequestFormatDashScope},
+        ],
+    });
     group.textBlock("ai.rerank.endpoint", {
         title: window.siyuan.languages.apiEndpoint,
         desc: window.siyuan.languages.apiEndpointRerankTip,
@@ -270,9 +296,9 @@ export const registerAiTab = (tab: SettingTabBuilder) => {
     registerAiProvidersGroup(tab);
     registerAiEditingGroup(tab);
     registerAiAgentGroup(tab);
+    registerAiSkillsGroup(tab);
     registerAiImageGenerationGroup(tab);
     registerAiMcpGroup(tab);
-    // TODO: add skills group?
     registerAiEmbeddingGroup(tab);
     registerAiRerankGroup(tab);
 };

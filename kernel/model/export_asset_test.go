@@ -103,16 +103,26 @@ func TestResolveExportAssetPaths(t *testing.T) {
 func TestProcessHTMLFileIFrame(t *testing.T) {
 	root := &ast.Node{Type: ast.NodeDocument}
 	component := &ast.Node{Type: ast.NodeIFrame, Tokens: []byte(`<iframe src="assets/component.html?iframe=true"></iframe>`)}
+	legacyComponent := &ast.Node{Type: ast.NodeIFrame, Tokens: []byte(`<iframe src="assets/legacy.html"></iframe>`)}
 	external := &ast.Node{Type: ast.NodeIFrame, Tokens: []byte(`<iframe src="https://example.com/component.html?iframe=true"></iframe>`)}
+	nonHTML := &ast.Node{Type: ast.NodeIFrame, Tokens: []byte(`<iframe src="assets/component.svg?iframe=true"></iframe>`)}
 	root.AppendChild(component)
+	root.AppendChild(legacyComponent)
 	root.AppendChild(external)
+	root.AppendChild(nonHTML)
 
 	processHTMLFileIFrame(&parse.Tree{Root: root})
 
 	if component.Type != ast.NodeParagraph || component.FirstChild == nil || component.FirstChild.Type != ast.NodeLink {
 		t.Fatalf("HTML file IFrame was not converted to a link: %#v", component)
 	}
+	if legacyComponent.Type != ast.NodeParagraph || legacyComponent.FirstChild == nil || legacyComponent.FirstChild.Type != ast.NodeLink {
+		t.Fatalf("legacy HTML file IFrame was not converted to a link: %#v", legacyComponent)
+	}
 	if external.Type != ast.NodeIFrame || external.FirstChild != nil {
 		t.Fatalf("external IFrame must remain unchanged: %#v", external)
+	}
+	if nonHTML.Type != ast.NodeIFrame || nonHTML.FirstChild != nil {
+		t.Fatalf("non-HTML IFrame must remain unchanged: %#v", nonHTML)
 	}
 }

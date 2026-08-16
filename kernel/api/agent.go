@@ -139,7 +139,10 @@ func agentChat(c *gin.Context) {
 	contextLimit := agent.ResolveModelContextLimit(selectedModel.Name, selectedModel.ContextLength)
 	imageCapabilityKey := fmt.Sprintf("%s\x00%s\x00%s\x00%s\x00%s",
 		selectedProvider.ID, selectedModel.ID, selectedProvider.BaseURL, selectedProvider.Protocol, selectedModel.Name)
-	eventCh := agent.AgentChat(ctx, client, selectedModel.Name, imageCapabilityKey, contextLimit, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.BlockHTML, req.Language, req.References, req.EditorContext, req.FrontendCapabilities, req.Regenerate, confirmTimeout, maxRetries, req.ReasoningEffort, requestTimeout, streamIdleTimeout)
+	eventCh := agent.AgentChat(ctx, client, selectedProvider.Protocol, selectedModel.Name, imageCapabilityKey,
+		contextLimit, req.SessionID, req.UserEntryID, contentRevision, req.Message, req.BlockHTML, req.Language,
+		req.References, req.EditorContext, req.FrontendCapabilities, req.Regenerate, confirmTimeout, maxRetries,
+		req.ReasoningEffort, requestTimeout, streamIdleTimeout)
 	defer cancel()
 	streamClosed := false
 	defer func() {
@@ -390,7 +393,7 @@ func agentChatTitle(c *gin.Context) {
 	}
 	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name)
 
-	title := agent.GenerateTitle(client, selectedModel.Name, req.Message, req.Language)
+	title := agent.GenerateTitle(client, selectedProvider.Protocol, selectedModel.Name, req.Message, req.Language)
 	ret := gulu.Ret.NewResult()
 	ret.Data = title
 	c.JSON(http.StatusOK, ret)
@@ -773,8 +776,14 @@ func writeSSEInterrupted(c *gin.Context, message string) error {
 func lsSkills(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
-	skills := util.DiscoverSkills()
+	skills := util.DiscoverSkills(model.EnabledUserSkills())
 	ret.Data = skills
+}
+
+func lsUserSkills(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	ret.Data = util.DiscoverUserSkills(model.EnabledUserSkills())
 }
 
 type skillGetReq struct {
@@ -792,7 +801,7 @@ func getSkill(c *gin.Context) {
 		return
 	}
 
-	content, err := util.ReadSkill(req.Name)
+	content, err := util.ReadSkill(req.Name, model.EnabledUserSkills())
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

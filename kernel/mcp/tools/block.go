@@ -189,6 +189,9 @@ func blockInsert(args map[string]any) (CallToolResult, error) {
 	if v, ok := args["nextID"].(string); ok {
 		nextID = v
 	}
+	if parentID == "" && previousID == "" && nextID == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parentID, previousID, or nextID is required"}}, IsError: true}, nil
+	}
 	boxID, release, scopeErr := beginBlockToolScope(args, true, parentID, previousID, nextID)
 	if scopeErr != nil {
 		return blockToolError(scopeErr.Error())
@@ -210,7 +213,7 @@ func blockInsert(args map[string]any) (CallToolResult, error) {
 		}
 	}
 
-	transactions := []*model.Transaction{{
+	transaction := &model.Transaction{
 		DoOperations: []*model.Operation{{
 			Action:     "insert",
 			Data:       data,
@@ -218,10 +221,11 @@ func blockInsert(args map[string]any) (CallToolResult, error) {
 			PreviousID: previousID,
 			NextID:     nextID,
 		}},
-	}}
+	}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTxSync(transaction); err != nil {
+		return blockToolError("insert block failed: " + err.Error())
+	}
 
 	reloadID := nextID
 	if reloadID == "" {
@@ -266,16 +270,17 @@ func blockAppend(args map[string]any) (CallToolResult, error) {
 		}
 	}
 
-	transactions := []*model.Transaction{{
+	transaction := &model.Transaction{
 		DoOperations: []*model.Operation{{
 			Action:   "appendInsert",
 			Data:     data,
 			ParentID: parentID,
 		}},
-	}}
+	}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTxSync(transaction); err != nil {
+		return blockToolError("append block failed: " + err.Error())
+	}
 
 	if bt := treenode.GetBlockTreeInExactBox(parentID, boxID); bt != nil {
 		util.PushReloadProtyle(bt.RootID)
@@ -310,16 +315,17 @@ func blockPrepend(args map[string]any) (CallToolResult, error) {
 		}
 	}
 
-	transactions := []*model.Transaction{{
+	transaction := &model.Transaction{
 		DoOperations: []*model.Operation{{
 			Action:   "prependInsert",
 			Data:     data,
 			ParentID: parentID,
 		}},
-	}}
+	}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTxSync(transaction); err != nil {
+		return blockToolError("prepend block failed: " + err.Error())
+	}
 
 	if bt := treenode.GetBlockTreeInExactBox(parentID, boxID); bt != nil {
 		util.PushReloadProtyle(bt.RootID)
@@ -373,15 +379,16 @@ func blockDelete(args map[string]any) (CallToolResult, error) {
 
 	bt := treenode.GetBlockTreeInExactBox(id, boxID)
 
-	transactions := []*model.Transaction{{
+	transaction := &model.Transaction{
 		DoOperations: []*model.Operation{{
 			Action: "delete",
 			ID:     id,
 		}},
-	}}
+	}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTxSync(transaction); err != nil {
+		return blockToolError("delete block failed: " + err.Error())
+	}
 
 	if bt != nil {
 		util.PushReloadProtyle(bt.RootID)
@@ -434,17 +441,18 @@ func blockMove(args map[string]any) (CallToolResult, error) {
 		}
 	}
 
-	transactions := []*model.Transaction{{
+	transaction := &model.Transaction{
 		DoOperations: []*model.Operation{{
 			Action:     "move",
 			ID:         id,
 			ParentID:   parentID,
 			PreviousID: previousID,
 		}},
-	}}
+	}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTxSync(transaction); err != nil {
+		return blockToolError("move block failed: " + err.Error())
+	}
 
 	if bt := treenode.GetBlockTreeInExactBox(id, boxID); bt != nil {
 		util.PushReloadProtyle(bt.RootID)

@@ -403,18 +403,26 @@ export const insertAttrViewBlockAnimation = (options: {
     previousId: string,
     groupID?: string
 }) => {
+    const getPreviousTableRow = (element: Element) => {
+        let previousElement = element?.previousElementSibling as HTMLElement;
+        while (previousElement && !previousElement.matches(".av__row[data-id], .av__row--header")) {
+            previousElement = previousElement.previousElementSibling as HTMLElement;
+        }
+        return previousElement;
+    };
     options.blockElement.querySelector('[data-type="av-search"]').textContent = "";
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
     let previousElement = options.blockElement.querySelector(groupQuery + `.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
     // 有排序需要加入最后一行
     const hasSort = options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active");
     if (hasSort) {
-        previousElement = options.blockElement.querySelector(groupQuery + ".av__row--util").previousElementSibling;
+        previousElement = getPreviousTableRow(options.blockElement.querySelector(groupQuery + ".av__row--util"));
     }
     const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.groupID}"] `);
     if (bodyElement && ["updated", "created"].includes(bodyElement.getAttribute("data-dtype")) &&
         bodyElement.getAttribute("data-content") !== "_@today@_") {
-        previousElement = options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__row--util')?.previousElementSibling;
+        previousElement = getPreviousTableRow(
+            options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__row--util'));
     }
     if (!previousElement) {
         return;

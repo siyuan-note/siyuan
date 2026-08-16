@@ -26,8 +26,8 @@ let clearRenderGutterAfterScroll: () => void;
 let showUtil = false;
 let preventRender = false;
 let preventRenderTimeout: number;
-let restoringAndroidReadonlySelection = false;
-let lastAndroidReadonlySelection: {
+let restoringAndroidBoundedSelection = false;
+let lastAndroidBoundedSelection: {
     container: HTMLElement,
     anchorNode: Node,
     anchorOffset: number,
@@ -60,28 +60,46 @@ export const updateMobilePluginToolbar = (protyle: IProtyle) => {
     });
 };
 
-const preserveAndroidReadonlySelection = () => {
-    if (!isInAndroid() || restoringAndroidReadonlySelection) {
-        return false;
+const getAndroidSelectionContainer = (selection: Selection) => {
+    const previousContainer = lastAndroidBoundedSelection?.container;
+    if (previousContainer?.classList.contains("agent-chat__body") &&
+        (previousContainer.contains(selection.anchorNode) || previousContainer.contains(selection.focusNode))) {
+        return previousContainer;
     }
+    const anchorAgentBody = hasClosestByClassName(selection.anchorNode, "agent-chat__body", true);
+    const focusAgentBody = hasClosestByClassName(selection.focusNode, "agent-chat__body", true);
+    if (anchorAgentBody && anchorAgentBody === focusAgentBody) {
+        return anchorAgentBody;
+    }
+
     const protyle = getCurrentEditor()?.protyle;
     const previewVisible = protyle && !protyle.preview.element.classList.contains("fn__none");
     if (!protyle || (!protyle.disabled && !previewVisible)) {
-        lastAndroidReadonlySelection = undefined;
+        return;
+    }
+    return previewVisible ? protyle.preview.previewElement : protyle.wysiwyg.element;
+};
+
+const preserveAndroidBoundedSelection = () => {
+    if (!isInAndroid() || restoringAndroidBoundedSelection) {
         return false;
     }
     const selection = getSelection();
     if (!selection || selection.rangeCount === 0 || selection.isCollapsed ||
         !selection.anchorNode || !selection.focusNode) {
-        lastAndroidReadonlySelection = undefined;
+        lastAndroidBoundedSelection = undefined;
         return false;
     }
-    const container = previewVisible ? protyle.preview.previewElement : protyle.wysiwyg.element;
+    const container = getAndroidSelectionContainer(selection);
+    if (!container) {
+        lastAndroidBoundedSelection = undefined;
+        return false;
+    }
     const contains = (node: Node) => node === container || container.contains(node);
     const anchorInside = contains(selection.anchorNode);
     const focusInside = contains(selection.focusNode);
     if (anchorInside && focusInside) {
-        lastAndroidReadonlySelection = {
+        lastAndroidBoundedSelection = {
             container,
             anchorNode: selection.anchorNode,
             anchorOffset: selection.anchorOffset,
@@ -90,13 +108,13 @@ const preserveAndroidReadonlySelection = () => {
         };
         return false;
     }
-    const previous = lastAndroidReadonlySelection;
+    const previous = lastAndroidBoundedSelection;
     if (!previous || previous.container !== container || anchorInside === focusInside ||
         !previous.anchorNode.isConnected || !previous.focusNode.isConnected) {
-        lastAndroidReadonlySelection = undefined;
+        lastAndroidBoundedSelection = undefined;
         return false;
     }
-    restoringAndroidReadonlySelection = true;
+    restoringAndroidBoundedSelection = true;
     selection.setBaseAndExtent(
         anchorInside ? selection.anchorNode : previous.anchorNode,
         anchorInside ? selection.anchorOffset : previous.anchorOffset,
@@ -104,7 +122,7 @@ const preserveAndroidReadonlySelection = () => {
         focusInside ? selection.focusOffset : previous.focusOffset,
     );
     window.setTimeout(() => {
-        restoringAndroidReadonlySelection = false;
+        restoringAndroidBoundedSelection = false;
     });
     return true;
 };
@@ -712,7 +730,11 @@ export const hideKeyboardToolbarByApp = () => {
     hideKeyboardToolbar();
     const editor = getCurrentEditor();
     const selection = getSelection();
-    if (!editor || !selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    if (!editor) {
+        return;
+    }
+    hideElements(["util"], editor.protyle);
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
         return;
     }
     const range = selection.getRangeAt(0);
@@ -759,7 +781,7 @@ export const initKeyboardToolbar = () => {
         viewportHandler();
     }
     document.addEventListener("selectionchange", () => {
-        if (preserveAndroidReadonlySelection()) {
+        if (preserveAndroidBoundedSelection()) {
             return;
         }
         if (preventRender || (getCurrentEditor()?.protyle?.toolbar.isMultiSelectMode())) {

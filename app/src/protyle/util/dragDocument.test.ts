@@ -16,11 +16,13 @@ import {
     uniqueDragIds
 } from "./dragDocument";
 
-const createClassElement = (classNames: string[], parentElement: Element = null) => ({
+const createClassElement = (classNames: string[], parentElement: Element = null, dataID = "") => ({
     nodeType: 1,
     classList: {
         contains: (className: string) => classNames.includes(className),
     },
+    matches: (selector: string) => selector === ".av__row[data-id], .av__row--header" &&
+        (classNames.includes("av__row--header") || (classNames.includes("av__row") && !!dataID)),
     parentElement,
     querySelector: (): Element | null => null,
 }) as unknown as Element;
@@ -164,11 +166,29 @@ describe("uniqueDragIds", () => {
 
 describe("getAVRowDropTarget", () => {
     it("uses the preceding row for the table utility row", () => {
-        const row = createClassElement(["av__row"]);
+        const row = createClassElement(["av__row"], null, "row-1");
         const utilityRow = createClassElement(["av__row--util"]);
         Object.defineProperty(utilityRow, "previousElementSibling", {value: row});
 
         assert.equal(getAVRowDropTarget(utilityRow as HTMLElement), row);
+    });
+
+    it("skips a virtual bottom spacer before the table utility row", () => {
+        const row = createClassElement(["av__row"], null, "row-1");
+        const spacer = createClassElement(["av__spacer", "av__spacer--bottom"]);
+        const utilityRow = createClassElement(["av__row--util"]);
+        Object.defineProperty(spacer, "previousElementSibling", {value: row});
+        Object.defineProperty(utilityRow, "previousElementSibling", {value: spacer});
+
+        assert.equal(getAVRowDropTarget(utilityRow as HTMLElement), row);
+    });
+
+    it("uses the header as the drop target for an empty table", () => {
+        const header = createClassElement(["av__row--header"]);
+        const utilityRow = createClassElement(["av__row--util"]);
+        Object.defineProperty(utilityRow, "previousElementSibling", {value: header});
+
+        assert.equal(getAVRowDropTarget(utilityRow as HTMLElement), header);
     });
 
     it("keeps regular rows unchanged", () => {

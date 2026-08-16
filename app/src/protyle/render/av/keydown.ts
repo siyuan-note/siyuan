@@ -6,7 +6,7 @@ import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
 import {upDownHint} from "../../../util/upDownHint";
 import {clearSelect} from "../../util/clear";
-import {getAVSelectedItems} from "./virtualScroll";
+import {ensureAVTableAdjacentRow, getAVSelectedItems} from "./virtualScroll";
 import {createAttributeViewItemDocs} from "./newItemTemplate";
 import {
     moveAVCellRange,
@@ -144,7 +144,8 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         }
         let newCellElement;
         if (event.key === "ArrowLeft" || matchHotKey("⇧⇥", event)) {
-            const previousRowElement = rowElement.previousElementSibling;
+            const previousRowElement = ensureAVTableAdjacentRow(rowElement, "previous") ||
+                rowElement.previousElementSibling;
             if (selectCellElement.previousElementSibling && !selectCellElement.previousElementSibling.classList.contains("av__firstcol")) {
                 if (selectCellElement.previousElementSibling.classList.contains("av__colsticky")) {
                     newCellElement = selectCellElement.previousElementSibling.lastElementChild;
@@ -169,7 +170,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "ArrowRight" || matchHotKey("⇥", event)) {
-            const nextRowElement = rowElement.nextElementSibling;
+            const nextRowElement = ensureAVTableAdjacentRow(rowElement, "next") || rowElement.nextElementSibling;
             if (selectCellElement.nextElementSibling && selectCellElement.nextElementSibling.classList.contains("av__cell")) {
                 newCellElement = selectCellElement.nextElementSibling;
             } else if (!selectCellElement.nextElementSibling && selectCellElement.parentElement.nextElementSibling) {
@@ -197,7 +198,8 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "ArrowUp") {
-            const previousRowElement = rowElement.previousElementSibling;
+            const previousRowElement = ensureAVTableAdjacentRow(rowElement, "previous") ||
+                rowElement.previousElementSibling;
             if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
                 newCellElement = previousRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`);
             }
@@ -211,7 +213,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "ArrowDown") {
-            const nextRowElement = rowElement.nextElementSibling;
+            const nextRowElement = ensureAVTableAdjacentRow(rowElement, "next") || rowElement.nextElementSibling;
             if (nextRowElement && !nextRowElement.classList.contains("av__row--footer")) {
                 newCellElement = nextRowElement.querySelector(`.av__cell[data-col-id="${selectCellElement.dataset.colId}"]`);
             }
@@ -315,7 +317,9 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "ArrowUp") {
-            const previousRowElement = selectRowElements[0].previousElementSibling as HTMLElement;
+            const currentRowElement = selectRowElements[0] as HTMLElement;
+            const previousRowElement = ensureAVTableAdjacentRow(currentRowElement, "previous") ||
+                currentRowElement.previousElementSibling as HTMLElement;
             clearSelect(["row", "galleryItem"], nodeElement);
             if (previousRowElement?.matches(".av__row[data-id], .av__gallery-item[data-id]")) {
                 setAVItemAnchor(nodeElement, previousRowElement as HTMLElement);
@@ -328,7 +332,9 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "ArrowDown") {
-            const nextRowElement = selectRowElements[selectRowElements.length - 1].nextElementSibling as HTMLElement;
+            const currentRowElement = selectRowElements[selectRowElements.length - 1] as HTMLElement;
+            const nextRowElement = ensureAVTableAdjacentRow(currentRowElement, "next") ||
+                currentRowElement.nextElementSibling as HTMLElement;
             clearSelect(["row", "galleryItem"], nodeElement);
             if (nextRowElement?.matches(".av__row[data-id], .av__gallery-item[data-id]")) {
                 setAVItemAnchor(nodeElement, nextRowElement as HTMLElement);

@@ -232,6 +232,7 @@ func setAttrViewGroup(c *gin.Context) {
 	avID := arg["avID"].(string)
 	blockID := arg["blockID"].(string)
 	groupArg := arg["group"].(map[string]any)
+	ignoreRows, _ := arg["ignoreRows"].(bool)
 
 	data, err := gulu.JSON.MarshalJSON(groupArg)
 	if nil != err {
@@ -257,7 +258,7 @@ func setAttrViewGroup(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, false, "", "")
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil, "", false, ignoreRows, "", "")
 	if ret.Code == 0 && model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		retDataMap := ret.Data.(map[string]any)

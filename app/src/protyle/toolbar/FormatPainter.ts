@@ -173,7 +173,10 @@ class FormatPainterController {
             element.id = "statusFormatPainter";
             element.className = "toolbar__item ariaLabel status__format-painter";
             element.innerHTML = '<svg><use xlink:href="#iconPaintRoller"></use></svg>';
-            element.addEventListener("click", () => this.deactivate());
+            element.addEventListener("click", (event) => {
+                event.stopPropagation();
+                this.deactivate();
+            });
             const helpElement = statusElement.querySelector("#statusHelp");
             if (helpElement) {
                 helpElement.before(element);

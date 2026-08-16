@@ -45,6 +45,7 @@ import {AI_CONFIG_CHANGED_EVENT} from "../../../config/tabs/ai/aiRuntime";
 import {isEncryptedBox} from "../../../util/pathName";
 import {Menu} from "../../../plugin/Menu";
 import {getAgentDefaultModelID, getUsableAgentModels} from "./agentModel";
+import {AgentScrollStateMode, resolveAgentScrollState} from "./AgentScrollState";
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
@@ -93,6 +94,8 @@ type SessionEntry =
     type: "assistant";
     content?: string;
     reasoningContent?: string;
+    responseOutput?: Array<Record<string, unknown>>;
+    responseOutputTokens?: number;
     roundID?: string;
     toolCalls?: Array<{
         id?: string;
@@ -202,6 +205,7 @@ export class AgentChat extends Model {
     private permissionMode: AgentPermissionMode = "confirm";
     private userScrolledUp = false;
     private programmaticScroll = false;
+    private programmaticScrollGeneration = 0;
     private stickResizeObserver: ResizeObserver | null = null;
     // 按会话保存的距底部距离（scrollHeight - scrollTop），用于切换会话与开关 dock 面板后恢复滚动位置。
     // 用距底距离而非绝对 scrollTop：dock 展开/折叠有宽高过渡，期间 scrollHeight 变化，
@@ -365,17 +369,7 @@ export class AgentChat extends Model {
             if (this.programmaticScroll) {
                 return;
             }
-            const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-            // Hysteresis: only mark as scrolled-up when clearly above bottom (>=60),
-            // and only return to sticky when really at the bottom (<=10).
-            // This prevents the follow state from rapidly toggling while streaming
-            // causes scrollHeight to grow asynchronously.
-            if (!this.userScrolledUp) {
-                this.userScrolledUp = distanceFromBottom >= 60;
-            } else if (distanceFromBottom <= 10) {
-                this.userScrolledUp = false;
-            }
-            this.scrollBottomBtn.classList.toggle("agent-chat__scroll-bottom--visible", this.userScrolledUp);
+            this.syncScrollState("user");
             this.updateActiveMarker();
         }, {passive: true});
 
@@ -419,9 +413,9 @@ export class AgentChat extends Model {
             !!this.host.mobile,
         );
         // 监听滚动容器尺寸：dock 面板折叠时容器尺寸归零、浏览器把 scrollTop 钳制到 0；
-        // 这里在面板重新展开后恢复当前会话的滚动位置。dock 展开/折叠有 CSS 宽高过渡（约 0.2s），
-        // 过渡期间 scrollHeight 随尺寸变化，故在折叠→展开转换后用 rAF 循环持续校正约 320ms，
-        // 覆盖过渡动画直到布局稳定。
+        // 面板重新展开后恢复当前会话的滚动位置，普通尺寸变化则重新校验按钮状态。
+        // dock 展开/折叠有 CSS 宽高过渡（约 0.2s），过渡期间 scrollHeight 随尺寸变化，
+        // 故在折叠→展开转换后用 rAF 循环持续校正约 320ms，覆盖过渡动画直到布局稳定。
         this.layoutResizeObserver = new ResizeObserver(() => {
             const collapsed = this.messagesContainer.clientWidth === 0 || this.messagesContainer.clientHeight === 0;
             if (collapsed) {
@@ -433,6 +427,10 @@ export class AgentChat extends Model {
                 this.layoutVisible = true;
                 const saved = this.scrollBottomBySession.get(this.sessionId) ?? 0;
                 this.restoreScrollToBottom(saved);
+                return;
+            }
+            if (!this.programmaticScroll) {
+                this.syncScrollState("reconcile");
             }
         });
         this.layoutResizeObserver.observe(this.messagesContainer);
@@ -891,9 +889,6 @@ export class AgentChat extends Model {
             }
         });
         this.scrollBottomBtn.addEventListener("click", () => {
-            // 程序化滚动期间会忽略 scroll 事件，点击时需主动退出“用户已向上滚动”状态并隐藏按钮。
-            this.userScrolledUp = false;
-            this.scrollBottomBtn.classList.remove("agent-chat__scroll-bottom--visible");
             this.scrollToBottom(true, true);
         });
     }
@@ -1048,6 +1043,7 @@ export class AgentChat extends Model {
         if (this.mirrorPlaceholderEl) {
             this.mirrorPlaceholderEl.remove();
             this.mirrorPlaceholderEl = null;
+            this.syncScrollState("reconcile");
         }
     }
 
@@ -1098,7 +1094,7 @@ export class AgentChat extends Model {
         if (atBottom) {
             this.scrollToBottom(true);
         } else {
-            this.messagesContainer.scrollTop = savedScroll;
+            this.restoreScrollTop(savedScroll);
         }
         // 重绘会清空 DOM（含占位条）；若仍处于其他实例的流式中，重新显示占位条。
         if (this.mirrorLocked) {
@@ -2669,7 +2665,7 @@ export class AgentChat extends Model {
             bodyHTML +
             "</div>";
 
-        bindThinkingCardToggle(el);
+        bindThinkingCardToggle(el, () => this.syncScrollState("reconcile"));
         this.insertBeforeAI(el);
         this.scrollToBottom();
         this.observeStickTarget(el);
@@ -3015,7 +3011,7 @@ export class AgentChat extends Model {
                 if (atBottom) {
                     this.scrollToBottom(true);
                 } else {
-                    this.messagesContainer.scrollTop = savedScroll;
+                    this.restoreScrollTop(savedScroll);
                 }
             } else {
                 await this.reloadFromDisk(true);
@@ -3606,7 +3602,7 @@ export class AgentChat extends Model {
         reasoningContent: string
     }) {
         const el = createThinkingCardElement(step);
-        bindThinkingCardToggle(el);
+        bindThinkingCardToggle(el, () => this.syncScrollState("reconcile"));
         this.messagesContainer.appendChild(el);
     }
 
@@ -3657,7 +3653,7 @@ export class AgentChat extends Model {
             "</div>" +
             "</div>";
 
-        bindThinkingCardToggle(el);
+        bindThinkingCardToggle(el, () => this.syncScrollState("reconcile"));
         this.messagesContainer.appendChild(el);
         postRender(el, this.app, this.host.onNavigate);
     }
@@ -3870,6 +3866,9 @@ export class AgentChat extends Model {
         for (let i = 0; i < items.length; i++) {
             items[i].remove();
         }
+        if (items.length > 0) {
+            this.syncScrollState("reconcile");
+        }
     }
 
     // 启动思考计时器，每 100ms 刷新所有未完成思考卡片的标题文本为「思考中... X.Xs」。
@@ -3968,6 +3967,40 @@ export class AgentChat extends Model {
         return this.composer.getSendData().text.length > 0;
     }
 
+    private syncScrollState(mode: AgentScrollStateMode) {
+        const {scrollTop, scrollHeight, clientHeight} = this.messagesContainer;
+        // dock 折叠期间无法得到有效视口尺寸，保留当前会话的用户滚动意图，待恢复完成后重新派生。
+        if (!this.layoutVisible || clientHeight <= 0) {
+            this.scrollBottomBtn.classList.remove("agent-chat__scroll-bottom--visible");
+            return;
+        }
+        const state = resolveAgentScrollState({scrollTop, scrollHeight, clientHeight}, this.userScrolledUp, mode);
+        this.userScrolledUp = state.userScrolledUp;
+        this.scrollBottomBtn.classList.toggle("agent-chat__scroll-bottom--visible", state.buttonVisible);
+    }
+
+    private beginProgrammaticScroll(): number {
+        this.programmaticScroll = true;
+        this.programmaticScrollGeneration++;
+        return this.programmaticScrollGeneration;
+    }
+
+    private finishProgrammaticScroll(generation: number, mode: AgentScrollStateMode = "reconcile") {
+        if (generation !== this.programmaticScrollGeneration) {
+            return;
+        }
+        this.programmaticScroll = false;
+        this.syncScrollState(mode);
+    }
+
+    private restoreScrollTop(scrollTop: number) {
+        const generation = this.beginProgrammaticScroll();
+        this.messagesContainer.scrollTop = scrollTop;
+        requestAnimationFrame(() => {
+            this.finishProgrammaticScroll(generation, "restore");
+        });
+    }
+
     // 持续校正滚动位置约 duration ms（覆盖 dock 宽高过渡 / 异步富渲染期间 scrollHeight 变化），
     // 使 scrollTop 落到距底部 scrollBottom 的位置。scrollBottom 为 0 即贴底。
     // 供开关面板（layoutVisible 恢复）与切换会话（renderLoadedSession 后）共用。
@@ -3976,11 +4009,13 @@ export class AgentChat extends Model {
             return;
         }
         const startedAt = Date.now();
-        // 标记为程序化滚动，避免恢复期间触发 scroll 事件里的 userScrolledUp 翻转。
-        this.programmaticScroll = true;
+        const generation = this.beginProgrammaticScroll();
         const tick = () => {
+            if (generation !== this.programmaticScrollGeneration) {
+                return;
+            }
             if (!this.layoutVisible) {
-                this.programmaticScroll = false;
+                this.finishProgrammaticScroll(generation);
                 return;
             }
             const {scrollHeight} = this.messagesContainer;
@@ -3992,7 +4027,7 @@ export class AgentChat extends Model {
             } else {
                 // 多留一帧再清标志，确保最后一次 scroll 事件已被吞掉。
                 requestAnimationFrame(() => {
-                    this.programmaticScroll = false;
+                    this.finishProgrammaticScroll(generation, "restore");
                 });
             }
         };
@@ -4013,10 +4048,10 @@ export class AgentChat extends Model {
             // 卡片底部在文档中的位置 - 容器顶部在文档中的位置 + 当前已滚动量 = 卡片底部的 scrollTop 目标值。
             const target = this.messagesContainer.scrollTop + (cardRect.bottom - containerRect.top) + 8;
             const max = this.messagesContainer.scrollHeight - this.messagesContainer.clientHeight;
-            this.programmaticScroll = true;
+            const generation = this.beginProgrammaticScroll();
             this.messagesContainer.scrollTop = Math.min(target, max);
             requestAnimationFrame(() => {
-                this.programmaticScroll = false;
+                this.finishProgrammaticScroll(generation);
             });
         };
         if (delay > 0) {
@@ -4029,48 +4064,47 @@ export class AgentChat extends Model {
     private scrollToBottom(force = false, smooth = false) {
         if (!force && this.userScrolledUp) {
             return;
-        }        // Guard with a flag so the resulting scroll event can be told apart from
-        // a user-driven scroll. Without this, the programmatic stick-to-bottom
-        // write itself trips the scroll handler and, while streaming, flips
-        // userScrolledUp on transiently (scrollHeight keeps growing) which
-        // immediately breaks follow-scroll.
-        this.programmaticScroll = true;
+        }
+        if (force) {
+            this.userScrolledUp = false;
+            this.syncScrollState("reconcile");
+        }
+        // 递增序号保证只有最新滚动请求能够写入位置和解除保护，避免跨帧调用相互覆盖。
+        const generation = this.beginProgrammaticScroll();
         requestAnimationFrame(() => {
+            if (generation !== this.programmaticScrollGeneration) {
+                return;
+            }
             if (smooth) {
-                // Smooth scrolling fires scroll events asynchronously throughout the
-                // animation, so keep the guard raised until scrolling settles: on
-                // scrollend, on a 1s timeout fallback, or immediately if the user
-                // wheels/touches during the animation (counts as a user scroll).
+                // 平滑滚动会持续异步触发 scroll，直至 scrollend、超时或用户滚轮操作后才解除保护。
+                let timer = 0;
                 const finish = () => {
                     this.messagesContainer.removeEventListener("scrollend", finish);
                     this.messagesContainer.removeEventListener("wheel", onWheel);
                     clearTimeout(timer);
-                    this.programmaticScroll = false;
+                    this.finishProgrammaticScroll(generation);
                 };
                 const onWheel = () => {
                     this.messagesContainer.removeEventListener("scrollend", finish);
                     clearTimeout(timer);
-                    this.programmaticScroll = false;
+                    this.finishProgrammaticScroll(generation);
                 };
-                const timer = window.setTimeout(finish, 1000);
+                timer = window.setTimeout(finish, 1000);
                 this.messagesContainer.addEventListener("scrollend", finish, {once: true});
                 this.messagesContainer.addEventListener("wheel", onWheel, {once: true, passive: true});
                 this.messagesContainer.scrollTo({top: this.messagesContainer.scrollHeight, behavior: "smooth"});
             } else {
                 this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
-                // Reset the flag only after the scroll event caused by this write has
-                // been dispatched (a second RAF runs after layout/event delivery).
+                // 多留一帧等待本次写入产生的 scroll 事件分发完毕。
                 requestAnimationFrame(() => {
-                    this.programmaticScroll = false;
+                    this.finishProgrammaticScroll(generation);
                 });
             }
         });
     }
 
-    // Observe a streaming message card so that asynchronous content growth
-    // (code highlighting, images, mermaid, fonts) keeps the view pinned to the
-    // bottom while the user has not scrolled up. token frames only fire when a
-    // chunk arrives; this closes the gap between chunks.
+    // 观察流式消息卡片，让代码高亮、图片、图表和字体等异步内容增长也能在用户未向上滚动时保持贴底。
+    // token 帧只会在新数据块到达时触发，此观察器用于覆盖两个数据块之间发生的尺寸变化。
     private observeStickTarget(el: HTMLElement | null) {
         if (this.stickResizeObserver) {
             this.stickResizeObserver.disconnect();
@@ -4080,6 +4114,7 @@ export class AgentChat extends Model {
             return;
         }
         this.stickResizeObserver = new ResizeObserver(() => {
+            this.syncScrollState("reconcile");
             if (!this.userScrolledUp) {
                 this.scrollToBottom();
             }

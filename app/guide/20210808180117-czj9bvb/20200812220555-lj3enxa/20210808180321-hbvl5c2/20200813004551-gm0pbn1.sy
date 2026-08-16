@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20260814235559"
+		"updated": "20260815184617"
 	},
 	"Children": [
 		{
@@ -11560,7 +11560,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-x02vhoh",
-				"updated": "20260811122156"
+				"updated": "20260815184617"
 			},
 			"Children": [
 				{
@@ -11580,7 +11580,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-yv5msrs",
-				"updated": "20260811122156"
+				"updated": "20260815184617"
 			},
 			"Children": [
 				{
@@ -11800,7 +11800,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "回车"
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "L"
 								},
 								{
 									"Type": "NodeText",
@@ -11809,7 +11818,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘回车"
+									"TextMarkTextContent": "⇧⌘L"
 								},
 								{
 									"Type": "NodeText",

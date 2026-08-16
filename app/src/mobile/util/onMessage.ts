@@ -120,6 +120,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "filetreeSortChanged":
                 window.siyuan.mobile.docks.file?.onFiletreeSortChanged(data.data);
                 break;
+            case "docSortModeChanged":
+                window.siyuan.mobile.docks.file?.onDocSortModeChanged(data.data);
+                break;
             case "notebookSortChanged":
                 window.siyuan.mobile.docks.file?.onNotebookSortChanged();
                 break;

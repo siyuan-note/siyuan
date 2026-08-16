@@ -20,6 +20,7 @@ import {formatDateDisplay, formatDateValue, parseDateValue} from "./dateFormat";
 import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
+import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
 import {
     cellValueIsEmpty,
@@ -232,7 +233,8 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
     } else if (colType === "mAsset") {
         const content = getCellValueContent(value).toString();
         newValue.mAsset = [{
-            type: Constants.SIYUAN_ASSETS_IMAGE.includes(getAssetExtension(content).toLowerCase()) ? "image" : "file",
+            type: Constants.SIYUAN_ASSETS_IMAGE.includes(getAssetExtension(content).toLowerCase()) &&
+                isBrowserRenderableImagePath(content) ? "image" : "file",
             content,
             name: "",
         }];
@@ -308,7 +310,8 @@ export const genCellValue = (colType: TAVCol, value: string | any, dateFormat: T
             cellValue = {
                 type: colType,
                 mAsset: [{
-                    type: Constants.SIYUAN_ASSETS_IMAGE.includes(type) ? "image" : "file",
+                    type: Constants.SIYUAN_ASSETS_IMAGE.includes(type) &&
+                        isBrowserRenderableImagePath(value) ? "image" : "file",
                     content: value,
                     name: "",
                 }]
@@ -1147,7 +1150,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         text = `<span class="av__celltext" data-value='${rowIndex + 1}'>${rowIndex + 1}</span>`;
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
-            if (item.type === "image") {
+            if (item.type === "image" && isBrowserRenderableImagePath(item.content)) {
                 text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${escapeAriaLabel(item.content)}" src="${getCompressURL(encodeURI(item.content))}">`;
             } else {
                 text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAriaLabel(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${escapeHtml(item.name || item.content)}</span>`;

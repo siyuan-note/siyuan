@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/fs"
 	"maps"
+	"math"
 	"os"
 	"path"
 	"path/filepath"
@@ -52,24 +53,25 @@ import (
 )
 
 type File struct {
-	Path         string `json:"path"`
-	Name         string `json:"name"` // 标题，即 ial["title"]
-	TitleEmpty   bool   `json:"titleEmpty,omitempty"`
-	Icon         string `json:"icon"`
-	Name1        string `json:"name1"` // 命名，即 ial["name"]
-	Alias        string `json:"alias"`
-	Memo         string `json:"memo"`
-	Bookmark     string `json:"bookmark"`
-	ID           string `json:"id"`
-	Count        int    `json:"count"`
-	Size         uint64 `json:"size"`
-	HSize        string `json:"hSize"`
-	Mtime        int64  `json:"mtime"`
-	CTime        int64  `json:"ctime"`
-	HMtime       string `json:"hMtime"`
-	HCtime       string `json:"hCtime"`
-	Sort         int    `json:"sort"`
-	SubFileCount int    `json:"subFileCount"`
+	Path             string `json:"path"`
+	Name             string `json:"name"` // 标题，即 ial["title"]
+	TitleEmpty       bool   `json:"titleEmpty,omitempty"`
+	Icon             string `json:"icon"`
+	Name1            string `json:"name1"` // 命名，即 ial["name"]
+	Alias            string `json:"alias"`
+	Memo             string `json:"memo"`
+	Bookmark         string `json:"bookmark"`
+	ID               string `json:"id"`
+	Count            int    `json:"count"`
+	Size             uint64 `json:"size"`
+	HSize            string `json:"hSize"`
+	Mtime            int64  `json:"mtime"`
+	CTime            int64  `json:"ctime"`
+	HMtime           string `json:"hMtime"`
+	HCtime           string `json:"hCtime"`
+	Sort             int    `json:"sort"`
+	SubFileCount     int    `json:"subFileCount"`
+	ChildrenSortMode *int   `json:"childrenSortMode"`
 
 	NewFlashcardCount int `json:"newFlashcardCount"`
 	DueFlashcardCount int `json:"dueFlashcardCount"`
@@ -90,6 +92,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret.Alias = ial["alias"]
 	ret.Memo = ial["memo"]
 	ret.Bookmark = ial["bookmark"]
+	ret.ChildrenSortMode = docSortModeFromIAL(ial)
 	t, _ := time.ParseInLocation("20060102150405", ret.ID[:14], time.Local)
 	ret.CTime = t.Unix()
 	ret.HCtime = t.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(t, Conf.Lang)
@@ -105,6 +108,24 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret.Mtime = mTime.Unix()
 	ret.HMtime = mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang)
 	return
+}
+
+const DocSortModeAttr = "custom-sy-subdoc-sort-mode"
+
+func IsValidDocSortMode(sortMode int) bool {
+	return util.SortModeNameASC <= sortMode && sortMode <= util.SortModeSubDocCountDESC
+}
+
+func docSortModeFromIAL(ial map[string]string) *int {
+	value := ial[DocSortModeAttr]
+	if "" == value {
+		return nil
+	}
+	sortMode, err := strconv.Atoi(value)
+	if nil != err || !IsValidDocSortMode(sortMode) {
+		return nil
+	}
+	return &sortMode
 }
 
 func (box *Box) docIAL(p string) (ret map[string]string) {
@@ -377,6 +398,49 @@ type FileInfo struct {
 	isdir bool
 }
 
+// ResolveDocTreeSortMode 按当前父文档、最近祖先文档、笔记本和全局配置的顺序解析子文档排序方式。
+func ResolveDocTreeSortMode(boxID, listPath string) (sortMode int, err error) {
+	box := Conf.Box(boxID)
+	if nil == box {
+		return 0, errors.New(Conf.Language(0))
+	}
+
+	normalized, err := box.validateBoxPath(listPath)
+	if nil != err {
+		return 0, err
+	}
+	normalized = filepath.ToSlash(normalized)
+	if "" != normalized {
+		docPath := "/" + strings.TrimPrefix(path.Clean("/"+normalized), "/")
+		if !strings.HasSuffix(docPath, ".sy") {
+			docPath += ".sy"
+		}
+
+		for "" != docPath && !IsBoxDocPath(boxID, docPath) {
+			// 仅探测确实存在的文档，避免将同步中的临时缺失误判为损坏数据。
+			if box.Exist(docPath) {
+				if declared := docSortModeFromIAL(box.docIAL(docPath)); nil != declared {
+					return *declared, nil
+				}
+			}
+
+			docDir := strings.TrimSuffix(docPath, ".sy")
+			parentDir := path.Dir(docDir)
+			if "/" == parentDir || "." == parentDir {
+				break
+			}
+			docPath = parentDir + ".sy"
+		}
+	}
+
+	sortMode = Conf.FileTree.Sort
+	boxConf := box.GetConf()
+	if util.SortModeFileTree != boxConf.SortMode {
+		sortMode = boxConf.SortMode
+	}
+	return
+}
+
 func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden bool, maxListCount int) (ret []*File, totals int, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/cpu_profile_list_doc_tree")
@@ -404,12 +468,9 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 		return nil, 0, errors.New(Conf.Language(0))
 	}
 
-	boxConf := box.GetConf()
-
 	if util.SortModeUnassigned == sortMode {
-		sortMode = Conf.FileTree.Sort
-		if util.SortModeFileTree != boxConf.SortMode {
-			sortMode = boxConf.SortMode
+		if sortMode, err = ResolveDocTreeSortMode(boxID, listPath); nil != err {
+			return
 		}
 	}
 
@@ -2419,6 +2480,78 @@ func writeSortConfMap(confPath string, fullSortIDs map[string]int) error {
 	return nil
 }
 
+type DocSortModeResult struct {
+	Box               string `json:"box"`
+	ID                string `json:"id"`
+	Path              string `json:"path"`
+	SortMode          *int   `json:"sortMode"`
+	EffectiveSortMode int    `json:"effectiveSortMode"`
+}
+
+// SetDocSortMode 设置文档对子文档列表声明的排序方式，sortMode 为 nil 时恢复继承。
+func SetDocSortMode(id string, sortMode *int) (ret *DocSortModeResult, err error) {
+	if nil != sortMode && !IsValidDocSortMode(*sortMode) {
+		return nil, fmt.Errorf("invalid document sort mode [%d]", *sortMode)
+	}
+
+	FlushTxQueue()
+	tree, err := LoadTreeByBlockID(id)
+	if nil != err {
+		return nil, err
+	}
+	if tree.ID != id || tree.Root.ID != id || ast.NodeDocument != tree.Root.Type || IsBoxDoc(tree.Box, tree.ID) {
+		return nil, fmt.Errorf("block [%s] is not a document that can declare a child document sort mode", id)
+	}
+
+	value := ""
+	if nil != sortMode {
+		value = strconv.Itoa(*sortMode)
+	}
+	if tree.Root.IALAttr(DocSortModeAttr) != value {
+		if err = setNodeAttrs(tree.Root, tree, map[string]string{DocSortModeAttr: value}); nil != err {
+			return nil, err
+		}
+	}
+
+	effectiveSortMode, resolveErr := ResolveDocTreeSortMode(tree.Box, tree.Path)
+	if nil != resolveErr {
+		return nil, resolveErr
+	}
+	ret = &DocSortModeResult{
+		Box:               tree.Box,
+		ID:                tree.ID,
+		Path:              tree.Path,
+		SortMode:          sortMode,
+		EffectiveSortMode: effectiveSortMode,
+	}
+	return
+}
+
+func pushDocSortModeChanged(oldAttrs map[string]string, node *ast.Node, tree *parse.Tree) {
+	if nil == node || nil == tree || ast.NodeDocument != node.Type || node.ID != tree.ID || IsBoxDoc(tree.Box, tree.ID) {
+		return
+	}
+
+	oldSortMode := docSortModeFromIAL(oldAttrs)
+	newSortMode := docSortModeFromIAL(parse.IAL2Map(node.KramdownIAL))
+	if (nil == oldSortMode) == (nil == newSortMode) && (nil == oldSortMode || *oldSortMode == *newSortMode) {
+		return
+	}
+
+	PushDocSortModeChanged("document", tree.Box, tree.ID, tree.Path, newSortMode)
+}
+
+// PushDocSortModeChanged 广播会改变子文档有效排序方式的配置变更。
+func PushDocSortModeChanged(scope, boxID, id, p string, sortMode *int) {
+	util.BroadcastByType("main", "docSortModeChanged", 0, "", map[string]any{
+		"scope":    scope,
+		"box":      boxID,
+		"id":       id,
+		"path":     p,
+		"sortMode": sortMode,
+	})
+}
+
 func moveSorts(rootID, fromBox, toBox string) {
 	root := treenode.GetBlockTree(rootID)
 	if nil == root {
@@ -2454,7 +2587,7 @@ func moveSorts(rootID, fromBox, toBox string) {
 	bt := treenode.GetBlockTree(rootID)
 	if nil != bt {
 		parentPath := path.Dir(bt.Path)
-		docs, _, listErr := ListDocTree(toBox, parentPath, util.SortModeUnassigned, false, false, 102400)
+		docs, _, listErr := ListDocTree(toBox, parentPath, util.SortModeCustom, false, false, math.MaxInt)
 		if listErr != nil {
 			logging.LogErrorf("list doc tree failed: %s", listErr)
 			return
@@ -2748,7 +2881,7 @@ func (box *Box) setSortByConf(parentPath, id string) {
 }
 
 func (box *Box) addMaxSort(parentPath, id string) {
-	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeUnassigned, false, false, 102400)
+	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeCustom, false, false, math.MaxInt)
 	if err != nil {
 		logging.LogErrorf("list doc tree failed: %s", err)
 		return
@@ -2770,7 +2903,7 @@ func (box *Box) addMaxSort(parentPath, id string) {
 }
 
 func (box *Box) addMinSort(parentPath, id string) {
-	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeUnassigned, false, false, 1)
+	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeCustom, false, false, 1)
 	if err != nil {
 		logging.LogErrorf("list doc tree failed: %s", err)
 		return
@@ -2829,7 +2962,7 @@ func (box *Box) addSort(previousPath, id string) {
 	}
 
 	parentPath := path.Dir(previousPath)
-	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
+	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeCustom, false, false, math.MaxInt)
 	if err != nil {
 		logging.LogErrorf("list doc tree failed: %s", err)
 		return

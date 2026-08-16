@@ -115,7 +115,9 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "flashcard-review-answer-revealed" | "flashcard-review-rating-submitted" |
     "flashcard-review-rating-completed" | "flashcard-review-undone" |
     "flashcard-review-session-ended" |
-    "kernel-plugin-state-change"
+    "kernel-plugin-state-change" |
+    "before-show-tooltip" | "before-hide-tooltip" |
+    "common-menu-open" | "common-menu-closed"
 type TAVView = "table" | "gallery" | "kanban"
 type TAVAlign = "" | "left" | "center" | "right"
 type TAVDateFormat = "" | "full" | "month-day-year" | "day-month-year" | "year-month-day"
@@ -934,6 +936,14 @@ interface IFile {
     id: string;
     count: number;
     subFileCount: number;
+    childrenSortMode?: number | null;
+}
+
+interface IFileTreeList {
+    files: IFile[];
+    box: string;
+    path: string;
+    effectiveSortMode?: number;
 }
 
 interface IBlockTree {

@@ -19,6 +19,7 @@ package util
 import (
 	"os"
 	"path/filepath"
+	"reflect"
 	"sort"
 	"strings"
 	"testing"
@@ -52,6 +53,108 @@ func toSlashSet(ss []string) []string {
 	}
 	sort.Strings(out)
 	return out
+}
+
+func setSkillTestRoots(t *testing.T) (workspaceRoot, userRoot string) {
+	t.Helper()
+	originalDataDir, originalHomeDir := DataDir, HomeDir
+	root := t.TempDir()
+	DataDir = filepath.Join(root, "workspace", "data")
+	HomeDir = filepath.Join(root, "home")
+	t.Cleanup(func() {
+		DataDir, HomeDir = originalDataDir, originalHomeDir
+	})
+	return SkillsDir(), UserSkillsDir()
+}
+
+func writeSkill(t *testing.T, root, id, name, description, body string) {
+	t.Helper()
+	dir := filepath.Join(root, id)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	content := "---\nname: " + name + "\ndescription: " + description + "\n---\n" + body
+	if err := os.WriteFile(filepath.Join(dir, "SKILL.md"), []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDiscoverSkillsUsesEnabledUserSkillsWithWorkspacePriority(t *testing.T) {
+	workspaceRoot, userRoot := setSkillTestRoots(t)
+	writeSkill(t, workspaceRoot, "workspace-shared", "Shared", "workspace description", "workspace body")
+	writeSkill(t, userRoot, "shared", "Shared", "user description", "user body")
+	writeSkill(t, userRoot, "external", "External", "external description", "external body")
+
+	if got := DiscoverSkills(nil); !reflect.DeepEqual(got, []SkillInfo{{Name: "Shared", Description: "workspace description"}}) {
+		t.Fatalf("DiscoverSkills(nil) = %#v", got)
+	}
+	want := []SkillInfo{
+		{Name: "Shared", Description: "workspace description"},
+		{Name: "External", Description: "external description"},
+	}
+	if got := DiscoverSkills([]string{"SHARED", "external"}); !reflect.DeepEqual(got, want) {
+		t.Fatalf("DiscoverSkills(enabled) = %#v, want %#v", got, want)
+	}
+	if got := LoadSkillContent("shared", []string{"shared", "external"}); got != "workspace body" {
+		t.Fatalf("LoadSkillContent(shared) = %q", got)
+	}
+	if got := LoadSkillContent("External", []string{"external"}); got != "external body" {
+		t.Fatalf("LoadSkillContent(external) = %q", got)
+	}
+}
+
+func TestDiscoverUserSkillsReportsState(t *testing.T) {
+	workspaceRoot, userRoot := setSkillTestRoots(t)
+	writeSkill(t, workspaceRoot, "workspace-shared", "Shared", "workspace description", "workspace body")
+	writeSkill(t, userRoot, "external", "External", "external description", "external body")
+	writeSkill(t, userRoot, "shared", "Shared", "user description", "user body")
+
+	want := []UserSkillInfo{
+		{ID: "external", Name: "External", Description: "external description", Enabled: true},
+		{ID: "shared", Name: "Shared", Description: "user description", Enabled: true, Shadowed: true},
+	}
+	if got := DiscoverUserSkills([]string{"external", "shared"}); !reflect.DeepEqual(got, want) {
+		t.Fatalf("DiscoverUserSkills() = %#v, want %#v", got, want)
+	}
+}
+
+func TestUserSkillsAreReadOnlyAndRequireEnablement(t *testing.T) {
+	_, userRoot := setSkillTestRoots(t)
+	writeSkill(t, userRoot, "external", "External", "external description", "external body")
+
+	if _, err := ReadSkill("external", nil); err == nil {
+		t.Fatal("disabled user skill should not be readable")
+	}
+	content, err := ReadSkill("External", []string{"external"})
+	if err != nil || !strings.Contains(content, "external body") {
+		t.Fatalf("ReadSkill(enabled user skill) = %q, %v", content, err)
+	}
+	if err = RemoveSkill("External"); err == nil || !strings.Contains(err.Error(), "read-only") {
+		t.Fatalf("RemoveSkill(user skill) error = %v", err)
+	}
+	if err = RenameSkill("External", "renamed"); err == nil || !strings.Contains(err.Error(), "read-only") {
+		t.Fatalf("RenameSkill(user skill) error = %v", err)
+	}
+	if _, err = os.Stat(filepath.Join(userRoot, "external", "SKILL.md")); err != nil {
+		t.Fatalf("user skill changed: %v", err)
+	}
+}
+
+func TestDiscoverUserSkillsFollowsDirectorySymlinks(t *testing.T) {
+	_, userRoot := setSkillTestRoots(t)
+	targetRoot := filepath.Join(t.TempDir(), "targets")
+	writeSkill(t, targetRoot, "linked-target", "Linked", "linked description", "linked body")
+	if err := os.MkdirAll(userRoot, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join(targetRoot, "linked-target"), filepath.Join(userRoot, "linked")); err != nil {
+		t.Skipf("symlinks are unavailable: %v", err)
+	}
+
+	want := []UserSkillInfo{{ID: "linked", Name: "Linked", Description: "linked description"}}
+	if got := DiscoverUserSkills(nil); !reflect.DeepEqual(got, want) {
+		t.Fatalf("DiscoverUserSkills(symlink) = %#v, want %#v", got, want)
+	}
 }
 
 // TestFindSkillDirsRootSkill 验证 SKILL.md 直接在解压根时识别为单个 skill（相对路径 "."）。

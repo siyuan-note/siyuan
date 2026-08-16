@@ -1079,9 +1079,13 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 }
 
 func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.ViewGroup) {
-	var oldHideEmpty, firstInit, changeGroupField bool
+	if nil == group || "" == group.Field {
+		removeAttributeViewGroup0(view)
+		return
+	}
+
+	var firstInit, changeGroupField bool
 	if nil != view.Group {
-		oldHideEmpty = view.Group.HideEmpty
 		changeGroupField = group.Field != view.Group.Field
 	} else {
 		firstInit = true
@@ -1089,30 +1093,9 @@ func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.
 
 	groupStates := getAttrViewGroupStates(view)
 	view.Group = group
-	regenAttrViewGroups(attrView)
+	genAttrViewGroups(view, attrView)
 	setAttrViewGroupStates(view, groupStates)
-
-	if view.Group.HideEmpty != oldHideEmpty {
-		if !oldHideEmpty && view.Group.HideEmpty { // 启用隐藏空分组
-			for _, g := range view.Groups {
-				groupViewable := sql.RenderGroupView(attrView, view, g, "")
-				// 必须经过渲染才能得到最终的条目数
-				renderViewableInstance(groupViewable, view, attrView, 1, -1, false, "")
-				if g.GroupHidden == 0 && 1 > groupViewable.(av.Collection).CountItems() {
-					g.GroupHidden = 1
-				}
-			}
-		}
-		if oldHideEmpty && !view.Group.HideEmpty { // 禁用隐藏空分组
-			for _, g := range view.Groups {
-				groupViewable := sql.RenderGroupView(attrView, view, g, "")
-				renderViewableInstance(groupViewable, view, attrView, 1, -1, false, "")
-				if g.GroupHidden == 1 && 1 > groupViewable.(av.Collection).CountItems() {
-					g.GroupHidden = 0
-				}
-			}
-		}
-	}
+	syncAttrViewGroupHiddenStates(attrView, view)
 
 	if firstInit || changeGroupField { // 首次设置分组时
 		if groupKey := view.GetGroupKey(attrView); nil != groupKey {
@@ -1133,6 +1116,60 @@ func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.
 
 		for i, g := range view.Groups {
 			g.GroupSort = i
+		}
+	}
+}
+
+func syncAttrViewGroupHiddenStates(attrView *av.AttributeView, view *av.View) {
+	if !view.IsGroupView() {
+		return
+	}
+	if !view.Group.HideEmpty {
+		for _, groupView := range view.Groups {
+			if 2 != groupView.GroupHidden {
+				groupView.GroupHidden = 0
+			}
+		}
+		return
+	}
+
+	viewable := sql.RenderView(attrView, view, "", false)
+	cachedAttrViews := map[string]*av.AttributeView{}
+	rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
+	if table, ok := viewable.(*av.Table); ok {
+		// 过滤只依赖行字段值，先对完整父表执行一次，再按分组成员关系判断空分组。
+		filtered := *table
+		filtered.Rows = append([]*av.TableRow(nil), table.Rows...)
+		av.Filter(&filtered, attrView, rollupFurtherCollections, cachedAttrViews)
+		visibleItemIDs := make(map[string]bool, len(filtered.Rows))
+		for _, row := range filtered.Rows {
+			visibleItemIDs[row.ID] = true
+		}
+		for _, groupView := range view.Groups {
+			if 2 == groupView.GroupHidden {
+				continue
+			}
+			groupView.GroupHidden = 1
+			for _, itemID := range groupView.GroupItemIDs {
+				if visibleItemIDs[itemID] {
+					groupView.GroupHidden = 0
+					break
+				}
+			}
+		}
+		return
+	}
+
+	for _, groupView := range view.Groups {
+		if 2 == groupView.GroupHidden {
+			continue
+		}
+		groupViewable := sql.RenderGroupView(attrView, view, groupView, "")
+		av.Filter(groupViewable, attrView, rollupFurtherCollections, cachedAttrViews)
+		if 1 > groupViewable.(av.Collection).CountItems() {
+			groupView.GroupHidden = 1
+		} else {
+			groupView.GroupHidden = 0
 		}
 	}
 }
@@ -6964,100 +7001,111 @@ func AddAttributeViewKey(avID, blockID, keyID, keyName, keyType, keyIcon, previo
 		return
 	}
 
-	keyTyp := av.KeyType(keyType)
-	switch keyTyp {
-	case av.KeyTypeBlock:
-		return errors.New("cannot add an attribute view block key")
-	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
-		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
-		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
-
-		key := av.NewKey(keyID, keyName, filterAttrViewIconValue(keyIcon), keyTyp)
-		if av.KeyTypeDate == keyTyp || av.KeyTypeCreated == keyTyp || av.KeyTypeUpdated == keyTyp {
-			if !dateFormat.IsValid() {
-				return errors.New("invalid date display format")
-			}
-			key.DateFormat = dateFormat
-		}
-		if av.KeyTypeRollup == keyTyp {
-			key.Rollup = &av.Rollup{Calc: &av.RollupCalc{Operator: av.CalcOperatorNone}}
-		}
-
-		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
-
-		for _, view := range attrView.Views {
-			newField := &av.BaseField{ID: key.ID}
-			if nil != view.Table {
-				newField.Wrap = view.Table.WrapField
-
-				if "" == previousKeyID {
-					if av.LayoutTypeGallery == currentView.LayoutType || av.LayoutTypeKanban == currentView.LayoutType {
-						// 如果当前视图是卡片或看板视图则添加到最后
-						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: newField})
-					} else {
-						view.Table.Columns = append([]*av.ViewTableColumn{{BaseField: newField}}, view.Table.Columns...)
-					}
-				} else {
-					added := false
-					for i, column := range view.Table.Columns {
-						if column.ID == previousKeyID {
-							view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{{BaseField: newField}}, view.Table.Columns[i+1:]...)...)
-							added = true
-							break
-						}
-					}
-					if !added {
-						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: newField})
-					}
-				}
-			}
-
-			if nil != view.Gallery {
-				newField.Wrap = view.Gallery.WrapField
-
-				if "" == previousKeyID {
-					view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: newField})
-				} else {
-					added := false
-					for i, field := range view.Gallery.CardFields {
-						if field.ID == previousKeyID {
-							view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{{BaseField: newField}}, view.Gallery.CardFields[i+1:]...)...)
-							added = true
-							break
-						}
-					}
-					if !added {
-						view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: newField})
-					}
-				}
-			}
-
-			if nil != view.Kanban {
-				newField.Wrap = view.Kanban.WrapField
-
-				if "" == previousKeyID {
-					view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: newField})
-				} else {
-					added := false
-					for i, field := range view.Kanban.Fields {
-						if field.ID == previousKeyID {
-							view.Kanban.Fields = append(view.Kanban.Fields[:i+1], append([]*av.ViewKanbanField{{BaseField: newField}}, view.Kanban.Fields[i+1:]...)...)
-							added = true
-							break
-						}
-					}
-					if !added {
-						view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: newField})
-					}
-				}
-			}
-		}
-	default:
-		return fmt.Errorf("unsupported attribute view key type [%s]", keyType)
+	key, err := newAttributeViewKey(keyID, keyName, keyType, keyIcon, dateFormat)
+	if nil != err {
+		return err
 	}
+	addAttributeViewKey(attrView, currentView, key, previousKeyID)
 
 	err = av.SaveAttributeView(attrView)
 	return
+}
+
+func newAttributeViewKey(keyID, keyName, keyType, keyIcon string, dateFormat av.DateDisplayFormat) (ret *av.Key, err error) {
+	keyTyp := av.KeyType(keyType)
+	switch keyTyp {
+	case av.KeyTypeBlock:
+		return nil, errors.New("cannot add an attribute view block key")
+	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
+		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
+		av.KeyTypeRelation, av.KeyTypeRollup, av.KeyTypeLineNumber:
+	default:
+		return nil, fmt.Errorf("unsupported attribute view key type [%s]", keyType)
+	}
+
+	ret = av.NewKey(keyID, keyName, filterAttrViewIconValue(keyIcon), keyTyp)
+	if av.KeyTypeDate == keyTyp || av.KeyTypeCreated == keyTyp || av.KeyTypeUpdated == keyTyp {
+		if !dateFormat.IsValid() {
+			return nil, errors.New("invalid date display format")
+		}
+		ret.DateFormat = dateFormat
+	}
+	if av.KeyTypeRollup == keyTyp {
+		ret.Rollup = &av.Rollup{Calc: &av.RollupCalc{Operator: av.CalcOperatorNone}}
+	}
+	return
+}
+
+func addAttributeViewKey(attrView *av.AttributeView, currentView *av.View, key *av.Key, previousKeyID string) {
+	attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
+
+	for _, view := range attrView.Views {
+		newField := &av.BaseField{ID: key.ID}
+		if nil != view.Table {
+			newField.Wrap = view.Table.WrapField
+
+			if "" == previousKeyID {
+				if av.LayoutTypeGallery == currentView.LayoutType || av.LayoutTypeKanban == currentView.LayoutType {
+					// 如果当前视图是卡片或看板视图则添加到最后
+					view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: newField})
+				} else {
+					view.Table.Columns = append([]*av.ViewTableColumn{{BaseField: newField}}, view.Table.Columns...)
+				}
+			} else {
+				added := false
+				for i, column := range view.Table.Columns {
+					if column.ID == previousKeyID {
+						view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{{BaseField: newField}}, view.Table.Columns[i+1:]...)...)
+						added = true
+						break
+					}
+				}
+				if !added {
+					view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: newField})
+				}
+			}
+		}
+
+		if nil != view.Gallery {
+			newField.Wrap = view.Gallery.WrapField
+
+			if "" == previousKeyID {
+				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: newField})
+			} else {
+				added := false
+				for i, field := range view.Gallery.CardFields {
+					if field.ID == previousKeyID {
+						view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{{BaseField: newField}}, view.Gallery.CardFields[i+1:]...)...)
+						added = true
+						break
+					}
+				}
+				if !added {
+					view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: newField})
+				}
+			}
+		}
+
+		if nil != view.Kanban {
+			newField.Wrap = view.Kanban.WrapField
+
+			if "" == previousKeyID {
+				view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: newField})
+			} else {
+				added := false
+				for i, field := range view.Kanban.Fields {
+					if field.ID == previousKeyID {
+						view.Kanban.Fields = append(view.Kanban.Fields[:i+1], append([]*av.ViewKanbanField{{BaseField: newField}}, view.Kanban.Fields[i+1:]...)...)
+						added = true
+						break
+					}
+				}
+				if !added {
+					view.Kanban.Fields = append(view.Kanban.Fields, &av.ViewKanbanField{BaseField: newField})
+				}
+			}
+		}
+	}
 }
 
 func (tx *Transaction) doUpdateAttrViewColTemplate(operation *Operation) (ret *TxErr) {

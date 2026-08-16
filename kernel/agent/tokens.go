@@ -25,6 +25,7 @@ import (
 	loader "github.com/pkoukk/tiktoken-go-loader"
 	"github.com/sashabaranov/go-openai"
 	tools "github.com/siyuan-note/siyuan/kernel/mcp/tools"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 // tokenCounter 用 tiktoken 对文本进行 BPE 分词计数。
@@ -266,6 +267,61 @@ func estimateChatRequestTokens(model string, messages []openai.ChatCompletionMes
 		total += value
 	}
 	return total
+}
+
+func estimateProtocolRequestTokens(model, protocol string, messages []openai.ChatCompletionMessage,
+	checkpointMessages []AgentMessage, compaction *runtimeCompaction, tools []openai.Tool) int {
+	total := estimateChatRequestTokens(model, messages, tools)
+	if !util.IsOpenAIResponsesProtocol(protocol) {
+		return total
+	}
+	counter, err := getTokenCounter(model)
+	if err != nil {
+		counter = nil
+	}
+	for i := range checkpointMessages {
+		message := &checkpointMessages[i]
+		if len(message.ResponseOutput) == 0 {
+			continue
+		}
+		outputTokens := responseOutputTokenCost(model, message.ResponseOutput, message.ResponseOutputTokens)
+		visibleTokens := counter.count(message.Content) + counter.count(message.ReasoningContent)
+		for _, toolCall := range message.ToolCalls {
+			arguments := toolCall.ArgumentsJSON
+			if arguments == "" {
+				if data, marshalErr := json.Marshal(toolCall.Arguments); marshalErr == nil {
+					arguments = string(data)
+				}
+			}
+			visibleTokens += counter.count(toolCall.Name) + counter.count(arguments)
+		}
+		total += max(outputTokens-visibleTokens, 0)
+	}
+	if compaction != nil && len(compaction.ResponseOutput) > 0 {
+		total += responseOutputTokenCost(
+			model, compaction.ResponseOutput, compaction.ResponseOutputTokens)
+	}
+	return total
+}
+
+func responseOutputTokenCost(model string, output []json.RawMessage, reportedTokens int) int {
+	if reportedTokens > 0 {
+		return reportedTokens
+	}
+	counter, err := getTokenCounter(model)
+	if err != nil {
+		counter = nil
+	}
+	total := 0
+	for _, item := range output {
+		total += counter.count(string(item))
+	}
+	return total
+}
+
+func compactionOutputTokenCost(model string, output []json.RawMessage, reportedTokens int) int {
+	reported := responseOutputTokenCost(model, output, reportedTokens)
+	return max(reported, responseOutputTokenCost(model, output, 0))
 }
 
 func contextInputBudget(contextLimit, maxCompletionTokens int) int {

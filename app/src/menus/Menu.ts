@@ -456,7 +456,26 @@ export class Menu {
         this.removeImmediately();
     }
 
+    private emitCommonMenu(type: TEventBus, detail: {
+        name: string | null,
+        from: string | null,
+        mode?: "popup" | "fullscreen",
+    }) {
+        if (this.element.id !== "commonMenu") {
+            return;
+        }
+        window.siyuan.ws?.app?.plugins?.forEach((plugin) => {
+            plugin.eventBus.emit(type, {
+                menu: this.element,
+                ...detail,
+            });
+        });
+    }
+
     private removeImmediately() {
+        const menuName = this.element.getAttribute("data-name");
+        const menuFrom = this.element.getAttribute("data-from");
+        const wasOpen = !this.element.classList.contains("fn__none");
         clearTimeout(fullscreenCloseTimeout);
         this.hideFullscreenScrim();
         this.finishSheetTouch();
@@ -480,6 +499,9 @@ export class Menu {
         this.element.removeAttribute("data-name");    // 标识再次点击不消失
         this.element.removeAttribute("data-from");    // 标识菜单入口
         this.data = undefined;    // 移除数据
+        if (wasOpen) {
+            this.emitCommonMenu("common-menu-closed", {name: menuName, from: menuFrom});
+        }
     }
 
     public append(element?: HTMLElement, index?: number) {
@@ -503,6 +525,11 @@ export class Menu {
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
+        this.emitCommonMenu("common-menu-open", {
+            name: this.element.getAttribute("data-name"),
+            from: this.element.getAttribute("data-from"),
+            mode: "popup",
+        });
         window.addEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, {passive: false});
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
@@ -556,6 +583,11 @@ export class Menu {
         if (this.element.lastElementChild.innerHTML === "") {
             return;
         }
+        this.emitCommonMenu("common-menu-open", {
+            name: this.element.getAttribute("data-name"),
+            from: this.element.getAttribute("data-from"),
+            mode: "fullscreen",
+        });
         if (!isMobile()) {
             this.element.classList.add("b3-menu--fullscreen");
             this.element.style.zIndex = (++window.siyuan.zIndex).toString();

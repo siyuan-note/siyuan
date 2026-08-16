@@ -47,6 +47,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -61,6 +62,14 @@ func GetAssetImgSizeInBox(assetPath, boxID string) (width, height int) {
 	data, err := ReadAssetBytesInBox(boxID, assetPath)
 	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", assetPath, err)
+		return
+	}
+	defer clear(data)
+	if heif.IsPath(assetPath) {
+		width, height, err = heif.ImageSize(data)
+		if err != nil {
+			logging.LogErrorf("open asset image [%s] failed: %s", assetPath, err)
+		}
 		return
 	}
 
@@ -82,7 +91,17 @@ func ReadAssetBytesInBox(boxID, relativePath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	data, readErr := os.ReadFile(absPath)
+	var data []byte
+	var readErr error
+	if heif.IsPath(relativePath) {
+		limit := int64(heif.MaxInputBytes)
+		if effectiveBoxID := ExtractBoxIDFromAssetsPath(absPath); effectiveBoxID != "" && IsEncryptedBox(effectiveBoxID) {
+			limit += 2 * 1024 * 1024
+		}
+		data, readErr = heif.ReadFileLimited(absPath, limit)
+	} else {
+		data, readErr = os.ReadFile(absPath)
+	}
 	if readErr != nil {
 		return nil, readErr
 	}
@@ -95,11 +114,16 @@ func ReadAssetBytesInBox(boxID, relativePath string) ([]byte, error) {
 			ReleaseBoxReadLock(effectiveBoxID)
 			return nil, dekErr
 		}
+		defer clear(dek)
 		defer ReleaseBoxReadLock(effectiveBoxID)
 		diskName := filepath.Base(AssetPathWithoutQuery(relativePath))
 		plain, decErr := DecryptAsset(effectiveBoxID, diskName, dek, data)
 		if decErr != nil {
 			return nil, decErr
+		}
+		if heif.IsPath(relativePath) && len(plain) > heif.MaxInputBytes {
+			clear(plain)
+			return nil, heif.ErrInputTooLarge
 		}
 		return plain, nil
 	}
@@ -480,7 +504,8 @@ func validateImageModel(provider *conf.Provider, imageModel *conf.Model) error {
 	if provider == nil || imageModel == nil {
 		return errors.New("image model is not configured")
 	}
-	if provider.Protocol != "" && provider.Protocol != "openai" {
+	if provider.Protocol != "" && provider.Protocol != util.OpenAIProtocolChatCompletions &&
+		provider.Protocol != util.OpenAIProtocolResponses {
 		return fmt.Errorf("unsupported multimodal provider protocol: %s", provider.Protocol)
 	}
 	return nil
@@ -1033,17 +1058,28 @@ func HTMLAssetIFrameSrc(assetPath string) string {
 	return parsed.String()
 }
 
+// IsLocalHTMLAssetPath 判断资源地址是否为本地 HTML 文件。
+func IsLocalHTMLAssetPath(assetPath string) bool {
+	parsed, err := url.Parse(assetPath)
+	if err != nil || parsed.IsAbs() || parsed.Host != "" {
+		return false
+	}
+	assetPath = strings.TrimPrefix(parsed.Path, "/")
+	assetPath = strings.TrimPrefix(assetPath, "./")
+	if !strings.HasPrefix(assetPath, "assets/") {
+		return false
+	}
+	ext := strings.ToLower(path.Ext(assetPath))
+	return ext == ".html" || ext == ".htm"
+}
+
 // IsHTMLAssetIFrameSrc 判断资源地址是否为 HTML 文件 IFrame 渲染地址。
 func IsHTMLAssetIFrameSrc(assetPath string) bool {
 	parsed, err := url.Parse(assetPath)
 	if err != nil || !strings.EqualFold(parsed.Query().Get("iframe"), "true") {
 		return false
 	}
-	if parsed.IsAbs() || parsed.Host != "" || !strings.HasPrefix(strings.TrimPrefix(parsed.Path, "/"), "assets/") {
-		return false
-	}
-	ext := strings.ToLower(path.Ext(parsed.Path))
-	return ext == ".html" || ext == ".htm"
+	return IsLocalHTMLAssetPath(assetPath)
 }
 
 func assetPathAndBox(relativePath, defaultBoxID string) (cleanPath, boxID string, err error) {

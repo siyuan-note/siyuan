@@ -451,6 +451,8 @@ func connectStdio(ctx context.Context, client *mcp.Client, server conf.MCPServer
 	}
 
 	cmd := exec.Command(server.Command, server.Args...)
+	// stdio 环境变量插值不受密钥 AllowedHosts 约束：目标是本地子进程而非网络主机，管理员在 Env 中
+	// 引用 {{secrets.NAME}} 本身就是对该服务器的显式授权，与直接写入明文属于同一信任级别。
 	cmdEnv, err := buildStdioEnvironment(server, os.LookupEnv, func(value string) string {
 		if model.Conf == nil {
 			return value

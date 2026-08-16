@@ -19,7 +19,7 @@ import {clearSelect} from "../../util/clear";
 import {showMessage} from "../../../dialog/message";
 import {renderKanban} from "./kanban/render";
 import {bindAvSearch} from "./search";
-import {getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll";
+import {getAVData, getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "./virtualScroll";
 import {
     applyAVRenderContext,
     beginAVRender,
@@ -46,6 +46,12 @@ import {
     setAVVisibleViewIDs
 } from "./viewVisibility";
 import {removeAVPasteSkeleton} from "./paste";
+import {
+    getGroupTableRenderPlan,
+    getUninitializedGroupRowCounts,
+    GROUP_TABLE_ESTIMATED_ROW_HEIGHT,
+    GROUP_TABLE_INITIAL_ROW_BUDGET,
+} from "./groupTableVirtual";
 
 interface IIds {
     groupId: string,
@@ -175,7 +181,8 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     </div>`;
 };
 
-const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualData) => {
+const getTableHTMLs = (data: IAVTable, e: HTMLElement, virtualData: IAVVirtualData,
+                       reserveVirtualHeight = false) => {
     const freezeDragHTML = `<div class="av__freeze-drag ariaLabel" data-position="east" aria-label="${escapeAttr(window.siyuan.languages.freezeDrag)}"></div>`;
     let calcHTML = "";
     let contentHTML = `<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>${freezeDragHTML}</div>`;
@@ -250,7 +257,12 @@ style="width: ${escapeAttr(column.width) || "200px"}">${getCalcValue(column) || 
         }
         contentHTML += getRowHTML({data, row, rowIndex: rowIndex + (virtualData?.rowOffset || 0), pinIndex, type: "table"});
     });
-    return `${contentHTML}<div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
+    let bottomSpacerHTML = "";
+    if (reserveVirtualHeight && virtualData && virtualData.renderedEnd < data.rows.length - 1) {
+        const missingRowCount = data.rows.length - virtualData.renderedEnd - 1;
+        bottomSpacerHTML = `<div class="av__spacer av__spacer--bottom" data-row-count="${missingRowCount}" style="height: ${missingRowCount * GROUP_TABLE_ESTIMATED_ROW_HEIGHT}px"></div>`;
+    }
+    return `${contentHTML}${bottomSpacerHTML}<div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
     <div class="av__colsticky">
         <button class="b3-button av__button" data-type="av-add-bottom">
             <svg><use xlink:href="#iconAdd"></use></svg>
@@ -302,11 +314,15 @@ const renderGroupTable = (options: ITableOptions) => {
     const isSearching = searchInputElement && document.activeElement === searchInputElement;
     const query = searchInputElement?.textContent || "";
 
+    const plan = getGroupTableRenderPlan(options.data.view.groups as IAVTable[], options.resetData.virtualData);
+    options.blockElement.toggleAttribute(Constants.ATTRIBUTE_V_SCROLL, plan.virtualized);
     let avBodyHTML = "";
     options.data.view.groups.forEach((group: IAVTable) => {
         if (group.groupHidden === 0) {
+            const virtualData = plan.virtualData[group.id];
+            const renderBody = !group.groupFolded || virtualData?.locate;
             avBodyHTML += `${getGroupTitleHTML(group, group.rowCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}"${options.resetData.virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}"${virtualData?.locate ? ' data-av-locate-window="true"' : ""} style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${renderBody ? getTableHTMLs(group, options.blockElement, virtualData, true) : ""}</div>`;
         }
     });
     if (options.renderAll) {
@@ -321,6 +337,72 @@ const renderGroupTable = (options: ITableOptions) => {
         options.blockElement.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
     }
     afterRenderTable(options);
+};
+
+export const setAVGroupFolded = (foldElement: HTMLElement, folded: boolean) => {
+    foldElement.firstElementChild.classList.toggle("av__group-arrow--open", !folded);
+    const bodyElement = foldElement.parentElement.nextElementSibling as HTMLElement;
+    bodyElement.classList.toggle("fn__none", folded);
+    foldElement.setAttribute("aria-label", getGroupFoldTip(folded));
+
+    const blockElement = foldElement.closest<HTMLElement>(".av");
+    if (blockElement?.dataset.avType !== "table") {
+        return;
+    }
+    const groupID = bodyElement.dataset.groupId;
+    const data = getAVData(blockElement);
+    const group = data?.view.groups?.find(item => item.id === groupID);
+    if (group) {
+        group.groupFolded = folded;
+    }
+    if (!folded) {
+        return;
+    }
+    bodyElement.replaceChildren();
+};
+
+export const initUnfoldedGroupTables = (blockElement: HTMLElement, protyle: IProtyle) => {
+    if (blockElement.dataset.avType !== "table") {
+        return;
+    }
+    const data = getAVData(blockElement);
+    if (!data?.view.groups?.length) {
+        return;
+    }
+    const selectedItemPoints = getAVSelectedItemPoints(blockElement);
+    const bodies = Array.from(blockElement.querySelectorAll<HTMLElement>(".av__body:not(.fn__none)"))
+        .filter(bodyElement => bodyElement.closest(".av") === blockElement);
+    const uninitializedBodies = bodies.filter(bodyElement => !bodyElement.querySelector(".av__row--header"));
+    if (uninitializedBodies.length === 0) {
+        return;
+    }
+    const initializedRowCount = bodies.reduce((count, bodyElement) =>
+        count + bodyElement.querySelectorAll(".av__row[data-id]").length, 0);
+    const groups = uninitializedBodies.map(bodyElement =>
+        data.view.groups.find(group => group.id === bodyElement.dataset.groupId) as IAVTable).filter(Boolean);
+    const rowCounts = getUninitializedGroupRowCounts(groups, initializedRowCount);
+    const totalLoadedRows = bodies.reduce((count, bodyElement) => {
+        const group = data.view.groups.find(item => item.id === bodyElement.dataset.groupId) as IAVTable;
+        return count + (group?.rows?.length || 0);
+    }, 0);
+    uninitializedBodies.forEach(bodyElement => {
+        const group = data.view.groups.find(item => item.id === bodyElement.dataset.groupId) as IAVTable;
+        if (!group) {
+            return;
+        }
+        const rowCount = rowCounts[group.id] || 0;
+        const virtualData = rowCount > 0 && rowCount < group.rows.length ? {
+            renderedStart: 0,
+            renderedEnd: rowCount - 1,
+            topSpacerHeight: 0,
+        } : undefined;
+        bodyElement.innerHTML = getTableHTMLs(group, blockElement, virtualData, true);
+    });
+    blockElement.toggleAttribute(Constants.ATTRIBUTE_V_SCROLL,
+        totalLoadedRows > GROUP_TABLE_INITIAL_ROW_BUDGET || bodies.some(bodyElement =>
+            bodyElement.querySelector(".av__spacer")));
+    initVirtualScroll({protyle, blockElement, data, selectedItemPoints});
+    restoreAVCellSelection(blockElement);
 };
 
 const afterRenderTable = (options: ITableOptions) => {
@@ -936,8 +1018,10 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             : operation.data as Record<string, boolean>;
         getAVElements(protyle, operation.avID, operation.viewID).forEach((item) => {
             updateGroupFoldedStates(item, folded);
+            let needsGroupTableInit = false;
             Object.entries(folded).forEach(([groupID, groupFolded]) => {
-                const foldElement = item.querySelector(`[data-type="av-group-fold"][data-id="${groupID}"]`);
+                const foldElement = item.querySelector<HTMLElement>(
+                    `[data-type="av-group-fold"][data-id="${groupID}"]`);
                 if (!foldElement) {
                     return;
                 }
@@ -945,11 +1029,13 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     foldElement.removeAttribute("data-processed");
                     return;
                 }
-                foldElement.firstElementChild.classList.toggle("av__group-arrow--open", !groupFolded);
-                foldElement.parentElement.nextElementSibling.classList.toggle("fn__none", groupFolded);
-                foldElement.setAttribute("aria-label", getGroupFoldTip(groupFolded));
+                setAVGroupFolded(foldElement, groupFolded);
+                needsGroupTableInit = needsGroupTableInit || !groupFolded;
                 foldElement.removeAttribute("data-folding");
             });
+            if (needsGroupTableInit) {
+                initUnfoldedGroupTables(item, protyle);
+            }
         });
         return;
     }

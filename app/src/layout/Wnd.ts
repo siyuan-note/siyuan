@@ -26,7 +26,6 @@ import {Constants} from "../constants";
 import {ipcRenderer, webFrame} from "electron";
 import {setModelsHash} from "../window/setHeader";
 /// #endif
-import {Search} from "../search";
 import {showMessage} from "../dialog/message";
 import {openFileById, updatePanelByEditor} from "../editor/util";
 import {scrollCenter} from "../util/highlightById";
@@ -174,13 +173,14 @@ export class Wnd {
             }
         });
         this.headersElement.parentElement.addEventListener("dblclick", (event) => {
-            let target = event.target as HTMLElement;
-            while (target && !target.isEqualNode(this.headersElement)) {
-                if (window.siyuan.config.fileTree.openFilesUseCurrentTab && target.getAttribute("data-type") === "tab-header") {
-                    target.classList.remove("item--unupdate");
-                    break;
-                }
-                target = target.parentElement;
+            const tabElement = (event.target as Element).closest<HTMLElement>('[data-type="tab-header"][data-id]');
+            if (!tabElement || !this.headersElement.contains(tabElement)) {
+                return;
+            }
+            if (window.siyuan.config.appearance.closeTabOnDoubleClick) {
+                this.removeTab(tabElement.getAttribute("data-id"));
+            } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
+                tabElement.classList.remove("item--unupdate");
             }
         });
         const tabHeadersElement = this.headersElement.parentElement;
@@ -805,23 +805,8 @@ export class Wnd {
                     item.destroy();
                 }
             });
-            model.destroy();
-            return;
         }
-        if (model instanceof Search) {
-            model.destroy();
-            return;
-        }
-        if (model instanceof Asset) {
-            if (model.pdfObject && model.pdfObject.pdfLoadingTask) {
-                model.pdfObject.pdfLoadingTask.destroy();
-            }
-        }
-        if (model instanceof Custom) {
-            if (model.destroy) {
-                model.destroy();
-            }
-        }
+        model.destroy();
         model.send("closews", {});
     }
 

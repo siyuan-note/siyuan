@@ -4,6 +4,7 @@ import {
     clearDisallowedKeymapItems,
     clearDisallowedTextInputHotkey,
     isDisallowedTextInputHotkey,
+    isReservedKeymap,
     normalizePluginHotkey,
 } from "./hotKeyPolicy";
 
@@ -30,6 +31,13 @@ describe("text input hotkey policy", () => {
         ["⌘A", "⌃A", "⌥A", "⇧⌘A", "⌥⇧A", "⌃⌥⇧⌘A"].forEach((hotkey) => {
             assert.equal(isDisallowedTextInputHotkey(hotkey), false, hotkey);
         });
+    });
+
+    it("allows Enter only for the agent send shortcut", () => {
+        assert.equal(isReservedKeymap("↩", ["general", "agentSend"]), false);
+        assert.equal(isReservedKeymap("↩", ["general", "agentChat"]), true);
+        assert.equal(isReservedKeymap("↩", ["editor", "general", "insertAfter"]), true);
+        assert.equal(isReservedKeymap("⇧↩", ["general", "agentSend"]), true);
     });
 
     it("clears only disallowed text input hotkeys", () => {

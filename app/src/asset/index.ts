@@ -16,6 +16,7 @@ import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
 import {getDisplayName} from "../util/pathName";
+import {PdfLoadState} from "./pdfLoadState";
 
 export class Asset extends Model {
     public path: string;
@@ -23,6 +24,7 @@ export class Asset extends Model {
     private pdfId: number | string;
     private pdfPage: number;
     public pdfObject: any;
+    private pdfLoadState = new PdfLoadState();
 
     constructor(options: { app: App, tab: Tab, path: string, page?: number | string }) {
         super({app: options.app});
@@ -60,6 +62,9 @@ export class Asset extends Model {
         fetchPost("/api/asset/getFileAnnotation", {
             path: this.path + ".sya",
         }, (response) => {
+            if (this.pdfLoadState.isDestroyed) {
+                return;
+            }
             if (response.code !== 1) {
                 const config = JSON.parse(response.data.data);
                 if (config[this.pdfId]) {
@@ -93,6 +98,14 @@ export class Asset extends Model {
     }
 
     private render(isInit = true) {
+        if (this.pdfLoadState.isDestroyed) {
+            return;
+        }
+        this.pdfLoadState.clearPending();
+        if (!isInit && this.pdfObject) {
+            void this.pdfObject.close();
+            this.pdfObject = undefined;
+        }
         const type = this.path.substr(this.path.lastIndexOf(".")).toLowerCase().split("?")[0];
         // 对资源路径进行 HTML 转义后再拼入 src 属性，避免路径中包含 " 等字符导致属性逃逸引发 XSS
         const src = Lute.EscapeHTMLStr(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path);
@@ -104,9 +117,6 @@ export class Asset extends Model {
             this.element.innerHTML = `<div class="asset"><video controls="controls" src="${src}"></video></div>`;
         } else if (type === ".pdf") {
             /// #if !MOBILE
-            if (!isInit) {
-                this.pdfObject.close();
-            }
             this.element.innerHTML = `<div class="pdf__outer" id="outerContainer">
       <div id="sidebarContainer">
         <div id="toolbarSidebar">
@@ -523,25 +533,47 @@ export class Asset extends Model {
                 setStorageVal(Constants.LOCAL_PDFTHEME, window.siyuan.storage[Constants.LOCAL_PDFTHEME]);
             });
             // 初始化完成后需等待页签是否显示设置完成，才可以判断 pdf 是否能进行渲染
-            setTimeout(() => {
+            this.pdfLoadState.setTimeout(window.setTimeout(() => {
+                if (!this.pdfLoadState.consumeTimeout() || !this.element.isConnected) {
+                    return;
+                }
                 if (this.element.clientWidth === 0) {
                     const observer = new MutationObserver(() => {
-                        this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
-                            this.element, this.pdfPage, this.pdfId);
-                        this.element.setAttribute("data-loading", "true");
-                        observer.disconnect();
+                        if (!this.pdfLoadState.consumeObserver()) {
+                            return;
+                        }
+                        this.loadPdf();
                     });
-                    observer.observe(this.element, {attributeFilter: ["class"]});
+                    if (this.pdfLoadState.setObserver(observer)) {
+                        observer.observe(this.element, {attributeFilter: ["class"]});
+                    }
                 } else {
-                    this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
-                        this.element, this.pdfPage, this.pdfId);
-                    this.element.setAttribute("data-loading", "true");
+                    this.loadPdf();
                 }
                 /// #if !BROWSER
                 setModelsHash();
                 /// #endif
-            }, Constants.TIMEOUT_LOAD);
+            }, Constants.TIMEOUT_LOAD));
             /// #endif
         }
+    }
+
+    private loadPdf() {
+        if (this.pdfLoadState.isDestroyed || !this.element.isConnected) {
+            return;
+        }
+        this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
+            this.element, this.pdfPage, this.pdfId);
+        this.element.setAttribute("data-loading", "true");
+    }
+
+    public destroy() {
+        if (!this.pdfLoadState.destroy()) {
+            return;
+        }
+        if (this.pdfObject?.pdfLoadingTask) {
+            void this.pdfObject.pdfLoadingTask.destroy();
+        }
+        this.pdfObject = undefined;
     }
 }

@@ -7,6 +7,7 @@ import {avRender} from "./av/render";
 import {genRenderFrame} from "./util";
 import {isEncryptedBox} from "../../util/pathName";
 import {disabledWYSIWYG} from "../util/disabledWYSIWYG";
+import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
 
 /**
  * 渲染嵌入块
@@ -128,7 +129,7 @@ ${popover}${breadcrumbHTML}${blocksItem.block.content}
 </div>`;
     });
     if (blocks.length > 0) {
-        item.firstElementChild.insertAdjacentHTML("afterend", html);
+        item.firstElementChild.insertAdjacentHTML("afterend", normalizeHTMLAssetIFrameBlockDOM(html));
         improveBreadcrumbAppearance(item.querySelector(".protyle-wysiwyg__embed"));
     } else {
         item.firstElementChild.insertAdjacentHTML("afterend", `<div class="protyle-wysiwyg__embed ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${errorTip || window.siyuan.languages.refExpired}</div>`);

@@ -123,6 +123,71 @@ func TestEncryptedBoxLifecycleWaitsForActiveOperations(t *testing.T) {
 	}
 }
 
+func TestActiveOperationAllowsNestedAssetReadWhileLockWaits(t *testing.T) {
+	boxID := "20260816193000-abcdefg"
+	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)
+	defer cleanup()
+	originalWorkspaceDir := util.WorkspaceDir
+	util.WorkspaceDir = filepath.Dir(util.DataDir)
+	defer func() {
+		util.WorkspaceDir = originalWorkspaceDir
+	}()
+	setEncryptedBoxState(boxID, EncryptedBoxStateUnlocked)
+
+	dek, err := GetDEKIfUnlocked(boxID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	diskName := "asset-20260816193001-abcdefg.bin"
+	plaintext := []byte("nested encrypted asset")
+	ciphertext, err := EncryptAsset(boxID, diskName, diskName, dek, plaintext)
+	clear(dek)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assetDir := filepath.Join(util.DataDir, boxID, "assets")
+	if err = os.MkdirAll(assetDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(assetDir, diskName), ciphertext, 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = AcquireEncryptedBoxOperation(boxID); err != nil {
+		t.Fatal(err)
+	}
+	HoldBoxReadLock(boxID)
+	lockDone := make(chan struct{})
+	go func() {
+		beginEncryptedBoxLock(boxID)
+		setEncryptedBoxState(boxID, EncryptedBoxStateLocked)
+		close(lockDone)
+	}()
+	deadline := time.Now().Add(time.Second)
+	for GetEncryptedBoxState(boxID) != EncryptedBoxStateLocking && time.Now().Before(deadline) {
+		time.Sleep(time.Millisecond)
+	}
+	if state := GetEncryptedBoxState(boxID); state != EncryptedBoxStateLocking {
+		ReleaseBoxReadLock(boxID)
+		ReleaseEncryptedBoxOperation(boxID)
+		t.Fatalf("expected Locking state, got %s", state)
+	}
+
+	read, readErr := ReadAssetBytesInBox(boxID, "assets/"+diskName)
+	if readErr != nil || !bytes.Equal(read, plaintext) {
+		ReleaseBoxReadLock(boxID)
+		ReleaseEncryptedBoxOperation(boxID)
+		t.Fatalf("nested asset read failed: data=%q err=%v", read, readErr)
+	}
+	ReleaseBoxReadLock(boxID)
+	ReleaseEncryptedBoxOperation(boxID)
+	select {
+	case <-lockDone:
+	case <-time.After(time.Second):
+		t.Fatal("lock transition did not finish after the outer operation ended")
+	}
+}
+
 func TestEncryptedBoxReadLockDoesNotWaitDuringLocking(t *testing.T) {
 	boxID := "20260731160008-abcdefg"
 	cleanup := prepareEncryptedBoxLifecycleTest(t, boxID)

@@ -28,6 +28,7 @@ import (
 	"github.com/sashabaranov/go-openai"
 	mcptools "github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 const (
@@ -336,7 +337,33 @@ func createImageCompatibleStream(
 	retryDelay func(string, int) time.Duration,
 	ch chan<- AgentEvent,
 ) (
-	stream *openai.ChatCompletionStream,
+	stream *util.OpenAICompletionStream,
+	firstResponse openai.ChatCompletionStreamResponse,
+	cancel context.CancelFunc,
+	requestMessages []openai.ChatCompletionMessage,
+	downgraded bool,
+	unsupportedDetected bool,
+	err error,
+) {
+	return createProtocolImageCompatibleStream(ctx, client, util.OpenAIProtocolChatCompletions, req, nil, capabilityKey,
+		forceDowngrade, maxRetries, requestTimeout, streamIdleTimeout, retryDelay, ch)
+}
+
+func createProtocolImageCompatibleStream(
+	ctx context.Context,
+	client *openai.Client,
+	protocol string,
+	req openai.ChatCompletionRequest,
+	responseInput func(downgradeImages bool) []any,
+	capabilityKey string,
+	forceDowngrade bool,
+	maxRetries int,
+	requestTimeout time.Duration,
+	streamIdleTimeout time.Duration,
+	retryDelay func(string, int) time.Duration,
+	ch chan<- AgentEvent,
+) (
+	stream *util.OpenAICompletionStream,
 	firstResponse openai.ChatCompletionStreamResponse,
 	cancel context.CancelFunc,
 	requestMessages []openai.ChatCompletionMessage,
@@ -350,8 +377,12 @@ func createImageCompatibleStream(
 		requestMessages, downgraded = messagesForImageCapability(req.Messages, capabilityKey)
 	}
 	req.Messages = requestMessages
-	stream, firstResponse, cancel, err = createStreamWithRetry(
-		ctx, client, req, maxRetries, requestTimeout, streamIdleTimeout, retryDelay, ch)
+	var input []any
+	if responseInput != nil {
+		input = responseInput(downgraded)
+	}
+	stream, firstResponse, cancel, err = createProtocolStreamWithRetry(
+		ctx, client, protocol, req, input, maxRetries, requestTimeout, streamIdleTimeout, retryDelay, ch)
 	if err == nil || downgraded || !containsImageInput(requestMessages) || !isImageInputUnsupportedError(err) {
 		return
 	}
@@ -363,8 +394,11 @@ func createImageCompatibleStream(
 	}
 	fallbackReq := req
 	fallbackReq.Messages = fallbackMessages
-	stream, firstResponse, cancel, err = createStreamWithRetry(
-		ctx, client, fallbackReq, maxRetries, requestTimeout, streamIdleTimeout, retryDelay, ch)
+	if responseInput != nil {
+		input = responseInput(true)
+	}
+	stream, firstResponse, cancel, err = createProtocolStreamWithRetry(
+		ctx, client, protocol, fallbackReq, input, maxRetries, requestTimeout, streamIdleTimeout, retryDelay, ch)
 	requestMessages = fallbackMessages
 	downgraded = true
 	if err == nil {

@@ -34,6 +34,29 @@ func TestHTMLAssetIFrameSrc(t *testing.T) {
 	}
 }
 
+func TestIsLocalHTMLAssetPath(t *testing.T) {
+	for _, src := range []string{
+		"assets/component.html",
+		"./assets/component.htm?box=box-id",
+		"/assets/component.HTML?iframe=true#preview",
+	} {
+		if !IsLocalHTMLAssetPath(src) {
+			t.Fatalf("IsLocalHTMLAssetPath(%q) = false", src)
+		}
+	}
+
+	for _, src := range []string{
+		"component.html",
+		"assets/component.xhtml",
+		"https://example.com/assets/component.html",
+		"../assets/component.html",
+	} {
+		if IsLocalHTMLAssetPath(src) {
+			t.Fatalf("IsLocalHTMLAssetPath(%q) = true", src)
+		}
+	}
+}
+
 func TestIsHTMLAssetIFrameSrcRejectsInvalidSources(t *testing.T) {
 	for _, src := range []string{
 		"assets/component.html",

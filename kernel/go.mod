@@ -98,7 +98,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.8-0.20260816041104-25631e825160
+require github.com/88250/lute v1.7.8-0.20260816044801-e16e8e268504
 
 require (
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect

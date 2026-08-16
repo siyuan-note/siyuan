@@ -3840,6 +3840,11 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("beforeinput", async (event: InputEvent) => {
+            if (event.target === this.element &&
+                (event.inputType === "historyUndo" || event.inputType === "historyRedo")) {
+                event.preventDefault();
+                return;
+            }
             const unidentifiedState = isInAndroid() ? takeMobileUnidentifiedKeyState() : undefined;
             if (event.inputType === "deleteContentBackward" && unidentifiedState) {
                 unidentifiedState.placeholder?.remove();

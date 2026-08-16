@@ -1247,7 +1247,7 @@
 	"targetBlockID": "Docelowy identyfikator bloku",
 	"transferBlockRefTip": "Przenieś wszystkie odniesienia z tego bloku do docelowego bloku",
 	"transferBlockRef": "Przenieś odniesienie",
-	"sortByFiletree": "Użyj zasady sortowania dokumentów",
+	"sortByFiletree": "Użyj reguł sortowania panelu dokumentów",
 	"tabToWindow": "Przenieś do nowego okna",
 	"openByNewWindow": "Otwórz w nowym oknie",
 	"exitFocus": "Wyjdź z fokusu",

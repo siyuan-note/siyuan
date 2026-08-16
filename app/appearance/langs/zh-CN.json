@@ -1247,7 +1247,7 @@
 	"targetBlockID": "目标块 ID",
 	"transferBlockRefTip": "将该块的所有引用转移到目标块上",
 	"transferBlockRef": "转移引用",
-	"sortByFiletree": "使用文档排序规则",
+	"sortByFiletree": "使用文档面板排序规则",
 	"tabToWindow": "移动到新窗口",
 	"openByNewWindow": "使用新窗口打开",
 	"exitFocus": "退出聚焦",

@@ -1247,7 +1247,7 @@
 	"targetBlockID": "대상 블록 ID",
 	"transferBlockRefTip": "이 블록의 모든 참조를 대상 블록으로 전송합니다",
 	"transferBlockRef": "참조 전송",
-	"sortByFiletree": "문서 정렬 규칙 사용",
+	"sortByFiletree": "문서 패널 정렬 규칙 사용",
 	"tabToWindow": "새 창으로 이동",
 	"openByNewWindow": "새 창으로 열기",
 	"exitFocus": "포커스 종료",

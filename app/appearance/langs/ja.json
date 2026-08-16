@@ -1247,7 +1247,7 @@
 	"targetBlockID": "ターゲットブロック ID",
 	"transferBlockRefTip": "このブロックからターゲットブロックにすべての参照を転送します",
 	"transferBlockRef": "参照の転送",
-	"sortByFiletree": "ドキュメントの並べ替えルールを使う",
+	"sortByFiletree": "ドキュメントパネルの並べ替えルールを使う",
 	"tabToWindow": "新しいウィンドウに移動",
 	"openByNewWindow": "新しいウィンドウで開く",
 	"exitFocus": "フォーカス解除",

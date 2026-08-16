@@ -1247,7 +1247,7 @@
 	"targetBlockID": "Zielblock-ID",
 	"transferBlockRefTip": "Übertragen Sie alle Referenzen von diesem Block auf den Zielblock.",
 	"transferBlockRef": "Referenz übertragen",
-	"sortByFiletree": "Dokument-Sortierregel verwenden",
+	"sortByFiletree": "Sortierregeln des Dokument-Panels verwenden",
 	"tabToWindow": "In neues Fenster verschieben",
 	"openByNewWindow": "Mit neuem Fenster öffnen",
 	"exitFocus": "Fokus beenden",

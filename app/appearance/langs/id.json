@@ -1247,7 +1247,7 @@
 	"targetBlockID": "ID Blok Target",
 	"transferBlockRefTip": "Transfer semua referensi dari blok ini ke blok target",
 	"transferBlockRef": "Transfer Referensi",
-	"sortByFiletree": "Gunakan aturan pengurutan dokumen",
+	"sortByFiletree": "Gunakan aturan pengurutan panel dokumen",
 	"tabToWindow": "Pindahkan ke Jendela Baru",
 	"openByNewWindow": "Buka dengan Jendela Baru",
 	"exitFocus": "Keluar dari fokus",

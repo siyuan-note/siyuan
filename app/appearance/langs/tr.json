@@ -1247,7 +1247,7 @@
 	"targetBlockID": "Hedef Blok ID",
 	"transferBlockRefTip": "Bu bloktaki tüm referansları hedef bloğa aktar",
 	"transferBlockRef": "Referansları aktar",
-	"sortByFiletree": "Belge sıralama kuralını kullan",
+	"sortByFiletree": "Belge paneli sıralama kurallarını kullan",
 	"tabToWindow": "Yeni pencereye taşı",
 	"openByNewWindow": "Yeni pencerede aç",
 	"exitFocus": "Odak modundan çık",

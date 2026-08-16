@@ -1247,7 +1247,7 @@
 	"targetBlockID": "目標區塊 ID",
 	"transferBlockRefTip": "將該區塊的所有引用轉移到目標區塊上",
 	"transferBlockRef": "轉移引用",
-	"sortByFiletree": "使用文件排序規則",
+	"sortByFiletree": "使用文件面板排序規則",
 	"tabToWindow": "移動到新窗口",
 	"openByNewWindow": "使用新窗口打開",
 	"exitFocus": "退出聚焦",

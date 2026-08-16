@@ -1247,7 +1247,7 @@
 	"targetBlockID": "ID cieľového bloku",
 	"transferBlockRefTip": "Preniesť všetky odkazy z tohto bloku na cieľový blok",
 	"transferBlockRef": "Preniesť referenciu",
-	"sortByFiletree": "Použiť pravidlá radenia dokumentov",
+	"sortByFiletree": "Použiť pravidlá radenia panela dokumentov",
 	"tabToWindow": "Presunúť do nového okna",
 	"openByNewWindow": "Otvoriť v novom okne",
 	"exitFocus": "Ukončiť zameranie",

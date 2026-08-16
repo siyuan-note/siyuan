@@ -1247,7 +1247,7 @@
 	"targetBlockID": "معرف الكتلة المستهدفة",
 	"transferBlockRefTip": "نقل جميع المراجع من هذه الكتلة إلى الكتلة المستهدفة",
 	"transferBlockRef": "نقل المرجع",
-	"sortByFiletree": "استخدام قاعدة فرز المستندات",
+	"sortByFiletree": "استخدام قواعد فرز لوحة المستندات",
 	"tabToWindow": "الانتقال إلى نافذة جديدة",
 	"openByNewWindow": "فتح باستخدام نافذة جديدة",
 	"exitFocus": "الخروج من التركيز",

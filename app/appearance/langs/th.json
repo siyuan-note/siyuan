@@ -1247,7 +1247,7 @@
 	"targetBlockID": "ID บล็อกเป้าหมาย",
 	"transferBlockRefTip": "โอนอ้างอิงไปบล็อกเป้าหมาย",
 	"transferBlockRef": "โอนอ้างอิง",
-	"sortByFiletree": "ใช้กฎเรียงเอกสาร",
+	"sortByFiletree": "ใช้กฎการเรียงลำดับของแผงเอกสาร",
 	"tabToWindow": "ย้ายไปหน้าต่างใหม่",
 	"openByNewWindow": "เปิดหน้าต่างใหม่",
 	"exitFocus": "ออกโฟกัส",

@@ -1247,7 +1247,7 @@
 	"targetBlockID": "ID del blocco di destinazione",
 	"transferBlockRefTip": "Trasferisci tutti i riferimenti da questo blocco al blocco di destinazione",
 	"transferBlockRef": "Trasferisci riferimento",
-	"sortByFiletree": "Usa la regola di ordinamento dei documenti",
+	"sortByFiletree": "Usa le regole di ordinamento del pannello documenti",
 	"tabToWindow": "Sposta in una nuova finestra",
 	"openByNewWindow": "Apri in una nuova finestra",
 	"exitFocus": "Esci dalla modalità focus",

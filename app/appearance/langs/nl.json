@@ -1247,7 +1247,7 @@
 	"targetBlockID": "Doelblok-ID",
 	"transferBlockRefTip": "Draag alle verwijzingen van dit blok over naar het doelblok",
 	"transferBlockRef": "Verwijzing overdragen",
-	"sortByFiletree": "Documentsorteerregels gebruiken",
+	"sortByFiletree": "Sorteerregels van het documentpaneel gebruiken",
 	"tabToWindow": "Naar nieuw venster",
 	"openByNewWindow": "Openen met nieuw venster",
 	"exitFocus": "Focus verlaten",

@@ -11,6 +11,20 @@ export const showTooltip = (
     if (isMobile() || !message) {
         return;
     }
+    const messageElement = document.getElementById("tooltip");
+    const showDetail = {
+        message,
+        target,
+        tooltipElement: messageElement,
+    };
+    window.siyuan.ws.app.plugins.forEach(plugin => {
+        plugin.eventBus.emit("before-show-tooltip", showDetail);
+    });
+    message = showDetail.message;
+    if (!message) {
+        hideTooltip();
+        return;
+    }
     let targetRect = target.getBoundingClientRect();
     // 跨行元素
     const clientRects = Array.from(target.getClientRects());
@@ -37,7 +51,6 @@ export const showTooltip = (
         hideTooltip();
         return;
     }
-    const messageElement = document.getElementById("tooltip");
     messageElement.className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
     messageElement.innerHTML = window.DOMPurify.sanitize(message);
     // 避免原本的 top 和 left 影响计算
@@ -134,5 +147,14 @@ export const showTooltip = (
 };
 
 export const hideTooltip = () => {
-    document.getElementById("tooltip").classList.add("fn__none");
+    const messageElement = document.getElementById("tooltip");
+    if (messageElement.classList.contains("fn__none")) {
+        return;
+    }
+    window.siyuan.ws.app.plugins.forEach(plugin => {
+        plugin.eventBus.emit("before-hide-tooltip", {
+            tooltipElement: messageElement,
+        });
+    });
+    messageElement.classList.add("fn__none");
 };

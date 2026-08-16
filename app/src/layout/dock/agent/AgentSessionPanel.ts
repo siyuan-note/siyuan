@@ -145,7 +145,9 @@ export class AgentSessionPanel {
             const onResize = () => {
                 this.close();
             };
-            window.addEventListener("resize", onResize);
+            if (!this.mobile) {
+                window.addEventListener("resize", onResize);
+            }
             const closeOut = () => {
                 this.close();
                 document.removeEventListener("click", closeOut);

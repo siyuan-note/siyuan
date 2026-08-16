@@ -227,6 +227,7 @@ declare namespace Config {
         endpoint: string;
         apiKey: string;
         name: string;
+        requestFormat: "cohere" | "dashscope";
         timeout: number;
         candidateCount: number;
     }

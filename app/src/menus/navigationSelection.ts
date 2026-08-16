@@ -12,11 +12,15 @@ export const getDocTreeMenuType = (elements: Element[]): TDocTreeMenuType => {
     return "items";
 };
 
-export const getDocTreeMenuItems = (elements: Element[]) => elements.map((item) => ({
-    id: item.getAttribute("data-type") === "navigation-root" ?
-        item.closest("ul[data-url]")?.getAttribute("data-url") : item.getAttribute("data-node-id"),
-    path: item.getAttribute("data-path"),
-})).filter((item): item is { id: string, path: string } => Boolean(item.id && item.path));
+export const getDocTreeMenuItems = (elements: Element[]) => elements.map((item) => {
+    const notebookId = item.closest("ul[data-url]")?.getAttribute("data-url");
+    return {
+        id: item.getAttribute("data-type") === "navigation-root" ? notebookId : item.getAttribute("data-node-id"),
+        path: item.getAttribute("data-path"),
+        notebookId,
+    };
+}).filter((item): item is { id: string, path: string, notebookId: string } =>
+    Boolean(item.id && item.path && item.notebookId));
 
 export const getDocTreeDeleteTargets = (elements: Element[]) => {
     const items = getDocTreeMenuItems(elements);

@@ -53,7 +53,7 @@ import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {paste, pasteAsPlainText, pasteEscaped} from "../util/paste";
-import {escapeHtml} from "../../util/escape";
+import {escapeAttr, escapeHtml} from "../../util/escape";
 import {resizeSide} from "../../history/resizeSide";
 import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardToolbar";
 import {FormatPainter} from "./FormatPainter";
@@ -2077,9 +2077,9 @@ export class Toolbar {
                     content: string,
                     name: string
                 }, index: number) => {
-                    searchHTML += `<div data-value="${item.path}" data-content="${item.content}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
-    ${item.name}
-    <span class="b3-list-item__meta">${item.content}</span>
+                    searchHTML += `<div data-value="${escapeAttr(item.path)}" data-content="${escapeAttr(item.content)}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
+    ${escapeHtml(item.name)}
+    <span class="b3-list-item__meta">${escapeHtml(item.content)}</span>
 </div>`;
                 });
                 listElement.innerHTML = searchHTML;

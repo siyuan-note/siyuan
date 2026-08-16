@@ -5,6 +5,7 @@ import {fetchPost, fetchSyncPost} from "./fetch";
 import {Dialog} from "../dialog";
 import {getOpenNotebookCount} from "./pathName";
 import {replaceFileName, validateName} from "../editor/rename";
+import {escapeHtml} from "../util/escape";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
@@ -362,7 +363,7 @@ export const openEncryptedNotebook = (app: App, notebookId: string, name: string
         return;
     }
     const dialog = new Dialog({
-        title: window.siyuan.languages.unlockEncryptedNotebook.replace("${x}", name),
+        title: window.siyuan.languages.unlockEncryptedNotebook.replace("${x}", escapeHtml(name)),
         content: `<div class="b3-dialog__content">
     <input type="password" placeholder="${window.siyuan.languages.masterPassword}" class="b3-text-field fn__block">
     <div class="fn__hr--b"></div>

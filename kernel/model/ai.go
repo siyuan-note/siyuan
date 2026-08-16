@@ -125,7 +125,7 @@ func buildAIEditorMessages(prompt string, history []AIEditorMessage, maxHistoryM
 }
 
 type AIEditorChatStream struct {
-	stream      *openai.ChatCompletionStream
+	stream      *util.OpenAICompletionStream
 	cancel      context.CancelFunc
 	idleTimeout time.Duration
 }
@@ -180,7 +180,7 @@ func NewAIEditorChatStream(ctx context.Context, ids []string, input, action stri
 	requestTimeout := time.Duration(prov.RequestTimeout) * time.Second
 	requestTimer, requestTimerDone := startAIEditorCancelTimer(requestTimeout, cancel)
 	client := util.NewOpenAIClientWithModel(prov.APIKey, prov.BaseURL, m.Name)
-	completionStream, err := client.CreateChatCompletionStream(streamCtx, req)
+	completionStream, err := util.CreateOpenAICompletionStream(streamCtx, client, prov.Protocol, req, nil)
 	requestTimedOut := stopAIEditorCancelTimer(requestTimer, requestTimerDone)
 	if requestTimedOut {
 		err = errors.New("AI editor request timeout")
@@ -254,6 +254,7 @@ func chatGPTComplete(msg string, contextMsgs []string, cloud bool) (ret string, 
 		gpt = &OpenAIGPT{
 			c:                   util.NewOpenAIClientWithModel(prov.APIKey, prov.BaseURL, m.Name),
 			m:                   m,
+			protocol:            prov.Protocol,
 			timeout:             prov.RequestTimeout,
 			maxCompletionTokens: editing.MaxCompletionTokens,
 			temperature:         editing.Temperature,
@@ -336,13 +337,15 @@ type GPT interface {
 type OpenAIGPT struct {
 	c                   *openai.Client
 	m                   *conf.Model
+	protocol            string
 	timeout             int
 	maxCompletionTokens int
 	temperature         float64
 }
 
 func (gpt *OpenAIGPT) chat(msg string, contextMsgs []string) (partRet string, stop bool, err error) {
-	return util.ChatGPT(msg, contextMsgs, gpt.c, gpt.m.Name, gpt.maxCompletionTokens, gpt.temperature, gpt.timeout)
+	return util.ChatGPT(msg, contextMsgs, gpt.c, gpt.protocol, gpt.m.Name, gpt.maxCompletionTokens, gpt.temperature,
+		gpt.timeout)
 }
 
 type CloudGPT struct {

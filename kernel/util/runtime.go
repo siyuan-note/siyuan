@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -218,12 +219,22 @@ func SetNetworkProxy(proxyURL string) {
 	}
 
 	if "" != proxyURL {
-		logging.LogInfof("use network proxy [%s]", proxyURL)
+		logging.LogInfof("use network proxy [%s]", networkProxyLogValue(proxyURL))
 	} else {
 		logging.LogInfof("use network proxy [system]")
 	}
 
 	httpclient.CloseIdleConnections()
+	closeOpenAIIdleConnections()
+}
+
+func networkProxyLogValue(rawURL string) string {
+	proxyURL, err := url.Parse(rawURL)
+	if err != nil {
+		return "configured"
+	}
+	proxyURL.User = nil
+	return proxyURL.String()
 }
 
 const (

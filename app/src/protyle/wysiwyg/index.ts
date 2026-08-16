@@ -192,6 +192,7 @@ import {
 } from "./blockDragSelect";
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
+import {shouldOpenListItemAttr} from "./listContext";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -1003,6 +1004,8 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            // 常规划选时排除属性占位，三击时恢复以保留浏览器的整段选择行为
+            this.element.classList.toggle("protyle-wysiwyg--select-attr", event.button === 0 && event.detail > 2);
             if (protyle.toolbar.isMultiSelectMode()) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -1072,7 +1075,9 @@ export class WYSIWYG {
                 Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")) : []);
             const rangeBeforePaddingMouseDown = startsFromPadding && getSelection().rangeCount > 0 ?
                 getSelection().getRangeAt(0).cloneRange() : undefined;
-            if (event.shiftKey) {
+            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
+                hasClosestByClassName(target, "protyle-action"));
+            if (event.shiftKey && !openListItemAttrByShift) {
                 if (!isMobile() && !protyle.disabled && nodeElement?.dataset.avType === "table" &&
                     avCellElement && avCellElement.dataset.id &&
                     selectAVCellRange(nodeElement, avCellElement)) {
@@ -4106,7 +4111,9 @@ export class WYSIWYG {
                 event.stopPropagation();
                 return;
             }
-            if (event.shiftKey) {
+            const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
+                hasClosestByClassName(event.target, "protyle-action"));
+            if (event.shiftKey && !openListItemAttrByShift) {
                 const selection = getSelection();
                 const focusElement = selection.focusNode && hasClosestBlock(selection.focusNode) as HTMLElement;
                 // mousedown 未命中块间空白时，浏览器会先生成跨块文字选区，在 click 阶段将其转换为块选区
@@ -4586,7 +4593,7 @@ export class WYSIWYG {
                             updateTransaction(protyle, actionElement.parentElement.parentElement, oldHTML);
                         }
                         hideElements(["gutter"], protyle);
-                    } else if (event.shiftKey && !protyle.disabled) {
+                    } else if (shouldOpenListItemAttr(event.shiftKey, protyle.disabled, actionElement)) {
                         openAttr(actionElement.parentElement, "bookmark", protyle);
                     } else if (ctrlIsPressed) {
                         zoomOut({protyle, id: actionId});
@@ -4760,6 +4767,16 @@ export class WYSIWYG {
                 if (inlineMathElement) {
                     newRange.setEndAfter(inlineMathElement);
                     newRange.collapse(false);
+                    focusByRange(newRange);
+                }
+                const tripleClickBlockElement = event.detail > 2 && hasClosestBlock(event.target);
+                if (tripleClickBlockElement &&
+                    ["NodeParagraph", "NodeHeading"].includes(tripleClickBlockElement.getAttribute("data-type")) &&
+                    tripleClickBlockElement.querySelector('[data-type~="inline-math"]')) {
+                    // 浏览器完成三击选区后，将行级公式截断的选区补齐到整个段落或标题
+                    const editableElement = getContenteditableElement(tripleClickBlockElement);
+                    setFirstNodeRange(editableElement, newRange);
+                    setLastNodeRange(editableElement, newRange, false);
                     focusByRange(newRange);
                 }
                 /// #if !MOBILE

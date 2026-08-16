@@ -61,6 +61,128 @@ func TestStreamIdleTimeoutResetsAfterEachChunk(t *testing.T) {
 	}
 }
 
+func TestResponsesProgressEventsResetIdleTimeout(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		flusher := prepareTestStream(t, w)
+		writeResponsesTestEvent(t, w, flusher, "response.created", map[string]any{
+			"type": "response.created", "response": map[string]any{"id": "resp-progress"},
+		})
+		time.Sleep(60 * time.Millisecond)
+		writeResponsesTestEvent(t, w, flusher, "response.in_progress", map[string]any{
+			"type": "response.in_progress", "response": map[string]any{"id": "resp-progress"},
+		})
+		time.Sleep(60 * time.Millisecond)
+		writeResponsesTestEvent(t, w, flusher, "response.output_item.added", map[string]any{
+			"type": "response.output_item.added", "output_index": 0,
+			"item": map[string]any{"id": "rs-progress", "type": "reasoning", "status": "in_progress"},
+		})
+		time.Sleep(60 * time.Millisecond)
+		writeResponsesTestEvent(t, w, flusher, "response.output_text.delta", map[string]any{
+			"type": "response.output_text.delta", "output_index": 1, "delta": "done",
+		})
+		writeResponsesTestCompleted(t, w, flusher, "resp-progress", []any{map[string]any{
+			"id": "msg-progress", "type": "message", "role": "assistant", "status": "completed",
+			"content": []any{map[string]any{"type": "output_text", "text": "done"}},
+		}}, 5, 1)
+	}))
+	defer server.Close()
+
+	stream, firstResponse, cancel, err := createProtocolStreamWithRetry(
+		context.Background(), newTestOpenAIClient(server.URL), "openai-responses", testChatRequest(), nil,
+		0, time.Second, 100*time.Millisecond, noRetryDelay, make(chan AgentEvent, 1))
+	if err != nil {
+		t.Fatalf("create Responses stream failed: %v", err)
+	}
+	defer cancel()
+	defer stream.Close()
+
+	content := ""
+	response := firstResponse
+	for {
+		for _, choice := range response.Choices {
+			content += choice.Delta.Content
+		}
+		response, err = recvStreamWithIdleTimeout(stream, 100*time.Millisecond, cancel)
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			t.Fatalf("receive Responses progress stream failed: %v", err)
+		}
+	}
+	if content != "done" {
+		t.Fatalf("unexpected Responses content: %q", content)
+	}
+}
+
+func TestClassifyRetryResponsesErrors(t *testing.T) {
+	tests := []struct {
+		code string
+		want string
+	}{
+		{code: "invalid_request_error", want: "fatal"},
+		{code: "rate_limit_exceeded", want: "rate_limit"},
+		{code: "server_error", want: "server_error"},
+	}
+	for _, test := range tests {
+		t.Run(test.code, func(t *testing.T) {
+			got := classifyRetry(&openai.APIError{Code: test.code, Message: "test"})
+			if got != test.want {
+				t.Fatalf("retry category = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestCreateResponsesStreamRetriesErrorAfterProgress(t *testing.T) {
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		attempt := requests.Add(1)
+		flusher := prepareTestStream(t, w)
+		writeResponsesTestEvent(t, w, flusher, "response.created", map[string]any{
+			"type": "response.created", "response": map[string]any{"id": "resp-retry"},
+		})
+		if attempt == 1 {
+			writeResponsesTestEvent(t, w, flusher, "error", map[string]any{
+				"type": "error", "code": "server_error", "message": "try again",
+			})
+			return
+		}
+		writeResponsesTestEvent(t, w, flusher, "response.output_text.delta", map[string]any{
+			"type": "response.output_text.delta", "output_index": 0, "delta": "success",
+		})
+		writeResponsesTestCompleted(t, w, flusher, "resp-retry", []any{map[string]any{
+			"id": "msg-retry", "type": "message", "role": "assistant", "status": "completed",
+			"content": []any{map[string]any{"type": "output_text", "text": "success"}},
+		}}, 2, 1)
+	}))
+	defer server.Close()
+
+	events := make(chan AgentEvent, 2)
+	stream, firstResponse, cancel, err := createProtocolStreamWithRetry(
+		context.Background(), newTestOpenAIClient(server.URL), "openai-responses", testChatRequest(), nil,
+		1, time.Second, time.Second, noRetryDelay, events)
+	if err != nil {
+		t.Fatalf("create Responses stream failed: %v", err)
+	}
+	defer cancel()
+	defer stream.Close()
+	if requests.Load() != 2 {
+		t.Fatalf("request count = %d, want 2", requests.Load())
+	}
+	if len(firstResponse.Choices) != 1 || firstResponse.Choices[0].Delta.Content != "success" {
+		t.Fatalf("unexpected first Responses output: %#v", firstResponse)
+	}
+	select {
+	case event := <-events:
+		if event.Type != "retry" || event.RetryAttempt != 1 || event.RetryMax != 1 {
+			t.Fatalf("unexpected retry event: %#v", event)
+		}
+	default:
+		t.Fatal("missing Responses retry event")
+	}
+}
+
 func TestStreamIdleTimeoutAfterPartialResponse(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		flusher := prepareTestStream(t, w)
@@ -210,7 +332,7 @@ func TestAgentChatPartialStreamTimeoutSavesInterruptedWithoutRetry(t *testing.T)
 	}))
 	defer server.Close()
 
-	events := AgentChat(context.Background(), newTestOpenAIClient(server.URL), "test-model", "", 0, testSessionID, "user-1", 1, "hello", nil, "English", nil, EditorContext{}, nil, false, time.Second, 3, "", time.Second, 50*time.Millisecond)
+	events := AgentChat(context.Background(), newTestOpenAIClient(server.URL), "openai", "test-model", "", 0, testSessionID, "user-1", 1, "hello", nil, "English", nil, EditorContext{}, nil, false, time.Second, 3, "", time.Second, 50*time.Millisecond)
 	contentSeen := false
 	errorSeen := false
 	for event := range events {

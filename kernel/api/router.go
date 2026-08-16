@@ -217,6 +217,7 @@ func ServeAPI(ginServer *gin.Engine) {
 
 	ginServer.Handle("POST", "/api/lute/spinBlockDOM", model.CheckAuth, model.CheckAdminRole, spinBlockDOM)
 	ginServer.Handle("POST", "/api/lute/html2BlockDOM", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, html2BlockDOM)
+	ginServer.Handle("POST", "/api/lute/wpsPresentation2BlockDOM", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, wpsPresentation2BlockDOM)
 	ginServer.Handle("POST", "/api/lute/copyStdMarkdown", model.CheckAuth, copyStdMarkdown)
 	ginServer.Handle("POST", "/api/lute/md2html", model.CheckAuth, md2HTML)
 

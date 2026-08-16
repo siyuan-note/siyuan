@@ -37,6 +37,7 @@ import {countBlockWord} from "../../layout/status";
 import {isPaidUser, needSubscribe} from "../../util/needSubscribe";
 import {resize} from "../util/resize";
 import {scrollCenter} from "../../util/highlightById";
+import {consumeGutterFoldRestore} from "../ui/gutterVisibility";
 import {setFold} from "../util/blockFold";
 import {queueTransaction} from "../util/transactionQueue";
 import {
@@ -2112,6 +2113,18 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     });
 };
 
+const restoreGutterAfterFold = (protyle: IProtyle, id: string) => {
+    if (!consumeGutterFoldRestore(protyle.gutter.element, id)) {
+        return;
+    }
+    window.requestAnimationFrame(() => {
+        const nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`);
+        if (nodeElement) {
+            protyle.gutter.render(protyle, nodeElement);
+        }
+    });
+};
+
 const processFold = (operation: IOperation, protyle: IProtyle) => {
     if (operation.action === "unfoldHeading" || operation.action === "foldHeading") {
         const gutterFoldElement = protyle.gutter.element.querySelector('[data-type="fold"]');
@@ -2161,6 +2174,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
                 protyle.contentElement.scrollTop = scrollTop;
                 protyle.scroll.lastScrollTop = scrollTop;
             }
+            restoreGutterAfterFold(protyle, operation.id);
             return;
         }
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
@@ -2176,11 +2190,14 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
         // 折叠移除子块后，刷新折叠标题所在超级块的拖拽手柄（子块数变化）
         refreshSbs(...Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)));
         // 折叠标题后未触发动态加载 https://github.com/siyuan-note/siyuan/issues/4168
-        if (protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
+        const needsDynamicLoad = protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2" &&
             !protyle.scroll.element.classList.contains("fn__none") &&
-            protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2    // https://github.com/siyuan-note/siyuan/issues/7785
-        ) {
-            protyle.scroll.loadDynamic(protyle, 2);
+            // https://github.com/siyuan-note/siyuan/issues/7785
+            protyle.contentElement.scrollHeight - protyle.contentElement.scrollTop < protyle.contentElement.clientHeight * 2;
+        if (!needsDynamicLoad || !protyle.scroll.loadDynamic(protyle, 2, {
+            onFinish: () => restoreGutterAfterFold(protyle, operation.id),
+        })) {
+            restoreGutterAfterFold(protyle, operation.id);
         }
         return;
     }

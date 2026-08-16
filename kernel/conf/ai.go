@@ -106,13 +106,14 @@ type Embedding struct {
 // 采用主流重排服务的 /rerank 协议（OpenAI 官方暂无 rerank API）。
 // 各服务商端点路径不一（Jina /v1/rerank、阿里云 /v1/reranks 等），故 Endpoint 为完整端点地址。
 type Rerank struct {
-	ID             string `json:"id"`
-	Enabled        bool   `json:"enabled"`
-	APIKey         string `json:"apiKey"`
-	Endpoint       string `json:"endpoint"` // 完整重排端点 URL，按目标模型文档填写
-	Name           string `json:"name"`
-	Timeout        int    `json:"timeout"`
-	CandidateCount int    `json:"candidateCount"` // 向量召回后送入重排的候选文档数，默认 30；越大越准但越慢
+	ID             string                   `json:"id"`
+	Enabled        bool                     `json:"enabled"`
+	APIKey         string                   `json:"apiKey"`
+	Endpoint       string                   `json:"endpoint"` // 完整重排端点 URL，按目标模型文档填写
+	Name           string                   `json:"name"`
+	RequestFormat  util.RerankRequestFormat `json:"requestFormat"`
+	Timeout        int                      `json:"timeout"`
+	CandidateCount int                      `json:"candidateCount"` // 向量召回后送入重排的候选文档数，默认 30；越大越准但越慢
 }
 
 type Provider struct {
@@ -162,7 +163,11 @@ func defaultEmbedding() *Embedding {
 }
 
 func defaultRerank() *Rerank {
-	return &Rerank{Timeout: 30, CandidateCount: 30}
+	return &Rerank{
+		RequestFormat:  util.RerankRequestFormatCohere,
+		Timeout:        30,
+		CandidateCount: 30,
+	}
 }
 
 func defaultAgent() *Agent {
@@ -568,7 +573,7 @@ func (ai *AI) Normalize() {
 		p.APIKey = strings.TrimSpace(p.APIKey)
 		p.Protocol = strings.ToLower(strings.TrimSpace(p.Protocol))
 		if p.Protocol == "" {
-			p.Protocol = "openai"
+			p.Protocol = util.OpenAIProtocolChatCompletions
 		}
 		if 1 > p.RequestTimeout {
 			p.RequestTimeout = 120
@@ -617,6 +622,10 @@ func (ai *AI) Normalize() {
 	}
 	if ai.Rerank.Timeout < 1 {
 		ai.Rerank.Timeout = 30
+	}
+	if util.RerankRequestFormatCohere != ai.Rerank.RequestFormat &&
+		util.RerankRequestFormatDashScope != ai.Rerank.RequestFormat {
+		ai.Rerank.RequestFormat = util.RerankRequestFormatCohere
 	}
 	if ai.Rerank.CandidateCount < 5 {
 		ai.Rerank.CandidateCount = 5

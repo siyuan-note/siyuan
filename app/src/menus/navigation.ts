@@ -633,7 +633,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             detail: {
                 elements: selectItemElements,
                 type: "notebook",
-                items: [{id: notebookId, path: "/"}],
+                items: [{id: notebookId, path: "/", notebookId}],
             },
             separatorPosition: "top",
         });
@@ -945,7 +945,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             detail: {
                 elements: selectItemElements,
                 type: "doc",
-                items: [{id, path: pathString}],
+                items: [{id, path: pathString, notebookId}],
             },
             separatorPosition: "top",
         });

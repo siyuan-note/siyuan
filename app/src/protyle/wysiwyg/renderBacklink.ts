@@ -9,6 +9,7 @@ import {disabledForeverProtyle, disabledProtyle} from "../util/onGet";
 import {avRender} from "../render/av/render";
 import {hasClosestByAttribute} from "../util/hasClosest";
 import {isEncryptedBox} from "../../util/pathName";
+import {decodeHTML, escapeAttr, escapeHtml, escapeSearchHighlight} from "../../util/escape";
 
 interface IBacklinkData {
     id?: string,
@@ -216,7 +217,7 @@ export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst: boolean, p
         }
         html += `<span class="protyle-breadcrumb__item${index === blockPaths.length - 1 ? " protyle-breadcrumb__item--active" : ""}" data-id="${item.id}">
     <svg class="popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>
-    ${item.name ? `<span class="protyle-breadcrumb__text" title="${item.name}">${item.name}</span>` : ""}
+    ${item.name ? `<span class="protyle-breadcrumb__text" title="${escapeAttr(escapeHtml(decodeHTML(item.name)))}">${escapeSearchHighlight(item.name)}</span>` : ""}
 </span>`;
         if (index !== blockPaths.length - 1) {
             html += '<svg class="protyle-breadcrumb__arrow"><use xlink:href="#iconRight"></use></svg>';

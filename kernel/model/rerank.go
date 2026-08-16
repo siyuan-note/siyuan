@@ -16,6 +16,8 @@
 
 package model
 
+import "github.com/siyuan-note/siyuan/kernel/util"
+
 // defaultRerankCandidateCount 向量召回后默认送入重排的候选文档数，与 conf.defaultRerank 保持一致。
 const defaultRerankCandidateCount = 30
 
@@ -43,6 +45,13 @@ func rerankModel() string {
 		return Conf.AI.Rerank.Name
 	}
 	return ""
+}
+
+func rerankRequestFormat() util.RerankRequestFormat {
+	if nil != Conf.AI.Rerank && Conf.AI.Rerank.Enabled {
+		return Conf.AI.Rerank.RequestFormat
+	}
+	return util.RerankRequestFormatCohere
 }
 
 func rerankTimeout() int {

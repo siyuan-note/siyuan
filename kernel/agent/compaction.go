@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 const (
@@ -57,6 +58,7 @@ func cloneRuntimeCompaction(compaction *runtimeCompaction) *runtimeCompaction {
 		return nil
 	}
 	cloned := *compaction
+	cloned.ResponseOutput = util.CloneOpenAIResponseOutput(compaction.ResponseOutput)
 	return &cloned
 }
 
@@ -72,7 +74,14 @@ func compactionDigest(entries []SessionEntry) (string, error) {
 }
 
 func validRuntimeCompaction(entries []SessionEntry, compaction *runtimeCompaction) bool {
-	if compaction == nil || compaction.Version != compactionVersion || strings.TrimSpace(compaction.Summary) == "" {
+	if compaction == nil || compaction.Version != compactionVersion {
+		return false
+	}
+	if util.IsOpenAIResponsesProtocol(compaction.Protocol) {
+		if len(compaction.ResponseOutput) == 0 && strings.TrimSpace(compaction.Summary) == "" {
+			return false
+		}
+	} else if strings.TrimSpace(compaction.Summary) == "" {
 		return false
 	}
 	covered := compaction.CoveredEntryCount
@@ -84,6 +93,13 @@ func validRuntimeCompaction(entries []SessionEntry, compaction *runtimeCompactio
 	}
 	digest, err := compactionDigest(entries[:covered])
 	return err == nil && digest == compaction.CoveredDigest
+}
+
+func runtimeCompactionMatchesProtocol(compaction *runtimeCompaction, protocol string) bool {
+	if compaction == nil {
+		return false
+	}
+	return util.IsOpenAIResponsesProtocol(compaction.Protocol) == util.IsOpenAIResponsesProtocol(protocol)
 }
 
 func sessionUserEntryIndex(entries []SessionEntry, userEntryID string) int {
@@ -167,6 +183,13 @@ func compactionSummaryMessages(source string) []openai.ChatCompletionMessage {
 
 func createCompactionSummary(ctx context.Context, client *openai.Client, model, source string, maxTokens, maxRetries int,
 	requestTimeout, streamIdleTimeout time.Duration, ch chan<- AgentEvent) (summary string, promptTokens, completionTokens int, err error) {
+	return createProtocolCompactionSummary(ctx, client, util.OpenAIProtocolChatCompletions, model, source, maxTokens,
+		maxRetries, requestTimeout, streamIdleTimeout, ch)
+}
+
+func createProtocolCompactionSummary(ctx context.Context, client *openai.Client, protocol, model, source string,
+	maxTokens, maxRetries int, requestTimeout, streamIdleTimeout time.Duration,
+	ch chan<- AgentEvent) (summary string, promptTokens, completionTokens int, err error) {
 	if maxTokens < compactionSummaryMinTokens {
 		return "", 0, 0, errContextCannotBeCompacted
 	}
@@ -175,11 +198,12 @@ func createCompactionSummary(ctx context.Context, client *openai.Client, model, 
 		Model:               model,
 		Messages:            compactionSummaryMessages(source),
 		MaxCompletionTokens: maxTokens,
+		Temperature:         1,
 		Stream:              true,
 		StreamOptions:       &openai.StreamOptions{IncludeUsage: true},
 	}
-	stream, firstResponse, cancel, err := createStreamWithRetry(
-		ctx, client, request, maxRetries, requestTimeout, streamIdleTimeout, delayForCategory, ch)
+	stream, firstResponse, cancel, err := createProtocolStreamWithRetry(
+		ctx, client, protocol, request, nil, maxRetries, requestTimeout, streamIdleTimeout, delayForCategory, ch)
 	if err != nil {
 		return "", 0, 0, fmt.Errorf("compaction summary request failed: %w", err)
 	}
@@ -218,7 +242,59 @@ func createCompactionSummary(ctx context.Context, client *openai.Client, model, 
 	return summary, promptTokens, completionTokens, nil
 }
 
+func createResponseCompaction(ctx context.Context, client *openai.Client, request openai.ChatCompletionRequest,
+	responseInput []any, maxRetries int, requestTimeout time.Duration,
+	ch chan<- AgentEvent) (output []json.RawMessage, promptTokens, completionTokens int, err error) {
+	if maxRetries < 0 {
+		maxRetries = 0
+	}
+	var lastErr error
+	for attempt := 0; attempt <= maxRetries; attempt++ {
+		if attempt > 0 {
+			category := classifyRetry(lastErr)
+			delay := delayForCategory(category, attempt)
+			select {
+			case <-ctx.Done():
+				return nil, 0, 0, ctx.Err()
+			case <-time.After(delay):
+			}
+			sendEvent(ch, AgentEvent{Type: "retry", RetryAttempt: attempt, RetryMax: maxRetries})
+		}
+
+		requestCtx := ctx
+		cancel := func() {}
+		if requestTimeout > 0 {
+			requestCtx, cancel = context.WithTimeout(ctx, requestTimeout)
+		}
+		var usage *openai.ResponseUsage
+		output, usage, err = util.CompactOpenAIResponse(requestCtx, client, request, responseInput)
+		requestErr := requestCtx.Err()
+		cancel()
+		if errors.Is(requestErr, context.DeadlineExceeded) {
+			err = errModelRequestTimeout
+		}
+		if err == nil {
+			if usage != nil {
+				promptTokens = usage.InputTokens
+				completionTokens = usage.OutputTokens
+			}
+			return output, promptTokens, completionTokens, nil
+		}
+		lastErr = err
+		if classifyRetry(err) == "fatal" {
+			return nil, 0, 0, err
+		}
+	}
+	return nil, 0, 0, lastErr
+}
+
 func newRuntimeCompaction(entries []SessionEntry, coveredEntryCount int, summary string) (*runtimeCompaction, error) {
+	return newRuntimeProtocolSummaryCompaction(
+		entries, coveredEntryCount, summary, util.OpenAIProtocolChatCompletions)
+}
+
+func newRuntimeProtocolSummaryCompaction(entries []SessionEntry, coveredEntryCount int, summary,
+	protocol string) (*runtimeCompaction, error) {
 	if coveredEntryCount <= 0 || len(entries) <= coveredEntryCount || entries[coveredEntryCount].ID == "" {
 		return nil, errContextCannotBeCompacted
 	}
@@ -228,10 +304,33 @@ func newRuntimeCompaction(entries []SessionEntry, coveredEntryCount int, summary
 	}
 	return &runtimeCompaction{
 		Version:           compactionVersion,
+		Protocol:          protocol,
 		Summary:           summary,
 		CoveredEntryCount: coveredEntryCount,
 		NextEntryID:       entries[coveredEntryCount].ID,
 		CoveredDigest:     digest,
 		UpdatedAt:         time.Now().UnixMilli(),
+	}, nil
+}
+
+func newRuntimeResponseCompaction(entries []SessionEntry, coveredEntryCount int,
+	responseOutput []json.RawMessage, responseOutputTokens int) (*runtimeCompaction, error) {
+	if coveredEntryCount <= 0 || len(entries) <= coveredEntryCount || entries[coveredEntryCount].ID == "" ||
+		len(responseOutput) == 0 {
+		return nil, errContextCannotBeCompacted
+	}
+	digest, err := compactionDigest(entries[:coveredEntryCount])
+	if err != nil {
+		return nil, err
+	}
+	return &runtimeCompaction{
+		Version:              compactionVersion,
+		Protocol:             util.OpenAIProtocolResponses,
+		ResponseOutput:       util.CloneOpenAIResponseOutput(responseOutput),
+		ResponseOutputTokens: responseOutputTokens,
+		CoveredEntryCount:    coveredEntryCount,
+		NextEntryID:          entries[coveredEntryCount].ID,
+		CoveredDigest:        digest,
+		UpdatedAt:            time.Now().UnixMilli(),
 	}, nil
 }

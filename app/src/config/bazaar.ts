@@ -1975,7 +1975,7 @@ type="checkbox">
             if (response.code !== 0) {
                 if (data?.reason === "package-exists" && data.packageName) {
                     confirmDialog("⚠️ " + window.siyuan.languages.update,
-                        window.siyuan.languages.confirmOverwriteLocalBazaarPackage.replace("${name}", data.packageName), () => {
+                        window.siyuan.languages.confirmOverwriteLocalBazaarPackage.replace("${name}", escapeHtml(data.packageName)), () => {
                             bazaar._installLocalPackage(file, app, true);
                         });
                 } else if (data?.reason === "package-incompatible") {
@@ -2312,7 +2312,7 @@ type="checkbox">
                         widgets: "/api/bazaar/uninstallBazaarWidget",
                     };
                     const uninstallName = installedItem.name;
-                    confirmDialog("⚠️ " + window.siyuan.languages.uninstall, window.siyuan.languages.confirmUninstall.replace("${name}", uninstallName), () => {
+                    confirmDialog("⚠️ " + window.siyuan.languages.uninstall, window.siyuan.languages.confirmUninstall.replace("${name}", escapeHtml(uninstallName)), () => {
                         fetchPost(uninstallAPI[pkgType], {
                             packageName: uninstallName,
                             keyword: (bazaar.element.querySelector(`.config-bazaar__panel[data-type="${bazaar._type2tabType(pkgType)}"] .b3-text-field`) as HTMLInputElement).value,

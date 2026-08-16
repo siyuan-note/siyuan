@@ -110,13 +110,23 @@ func flashcardBlockIDsToValidate(transactions []*Transaction) (ret []string) {
 		if transaction == nil {
 			continue
 		}
+		hasFlashcardOperation := false
+		for _, operation := range transaction.DoOperations {
+			if operation != nil && (operation.Action == "addFlashcards" || operation.Action == "removeFlashcards") {
+				hasFlashcardOperation = true
+				break
+			}
+		}
+		if !hasFlashcardOperation {
+			continue
+		}
 		insertedBlockIDs := map[string]struct{}{}
 		for _, operation := range transaction.DoOperations {
 			if operation == nil {
 				continue
 			}
-			if operation.Action == "insert" && ast.IsNodeIDPattern(operation.ID) {
-				insertedBlockIDs[operation.ID] = struct{}{}
+			if operation.Action == "insert" {
+				collectInsertedFlashcardBlockIDs(operation, insertedBlockIDs)
 			}
 			if operation.Action != "addFlashcards" && operation.Action != "removeFlashcards" {
 				continue
@@ -130,6 +140,28 @@ func flashcardBlockIDsToValidate(transactions []*Transaction) (ret []string) {
 		}
 	}
 	return
+}
+
+func collectInsertedFlashcardBlockIDs(operation *Operation, blockIDs map[string]struct{}) {
+	if ast.IsNodeIDPattern(operation.ID) {
+		blockIDs[operation.ID] = struct{}{}
+		return
+	}
+
+	data, ok := operation.Data.(string)
+	if !ok || data == "" {
+		return
+	}
+	tree := util.NewLute().BlockDOM2Tree(data)
+	if tree == nil || tree.Root == nil {
+		return
+	}
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.IsBlock() && ast.IsNodeIDPattern(node.ID) {
+			blockIDs[node.ID] = struct{}{}
+		}
+		return ast.WalkContinue
+	})
 }
 
 func GetFlashcardsByBlockIDs(blockIDs []string) (ret []*Block) {

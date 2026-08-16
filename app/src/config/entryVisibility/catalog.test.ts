@@ -121,6 +121,14 @@ test("code block actions follow the code block menu order", () => {
         "md27",
         "saveCodeBlockAsFile",
     ]);
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.code.md29").map((item) => item.key), [
+        "default",
+        "tabSpaces0",
+        "tabSpaces2",
+        "tabSpaces4",
+        "tabSpaces6",
+        "tabSpaces8",
+    ]);
 });
 
 test("multiple block heading transform follows the regular transform menu", () => {

@@ -218,6 +218,7 @@ const openProviderCatalog = (root: HTMLElement) => {
                 displayName: preset.name,
                 baseURL: preset.baseURL,
                 apiKey: "",
+                protocol: preset.id === "openai" ? "openai-responses" : "openai",
                 requestTimeout: 120,
                 models: [],
             };
@@ -398,9 +399,15 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         displayName: preset?.name || "",
         baseURL: preset?.baseURL || "",
         apiKey: "",
+        protocol: preset?.id === "openai" ? "openai-responses" : "openai",
         requestTimeout: 120,
         models: [],
     };
+    draft.protocol ||= "openai";
+    const openAIApiType = findPreset(draft)?.id === "openai";
+    if (!openAIApiType) {
+        draft.protocol = "openai";
+    }
     const initialJSON = JSON.stringify(draft);
     const openedFromCatalog = !existing && !!preset;
     const view = createProviderView(
@@ -422,6 +429,14 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
                 ${genConfigItemMainHtml(window.siyuan.languages.apiBaseURL)}
                 <span class="fn__space"></span>
                 <input class="b3-text-field fn__flex-center fn__size200" data-provider-field="baseURL" type="text" spellcheck="false" value="${escapeHTML(draft.baseURL)}">
+            </label>
+            <label class="fn__flex b3-label config-item config-wrap${openAIApiType ? "" : " fn__none"}" data-type="openAIApiType">
+                ${genConfigItemMainHtml(window.siyuan.languages.apiType)}
+                <span class="fn__space"></span>
+                <select class="b3-select fn__flex-center fn__size200" data-provider-field="protocol">
+                    <option value="openai"${draft.protocol === "openai" ? " selected" : ""}>Chat Completions API</option>
+                    <option value="openai-responses"${draft.protocol === "openai-responses" ? " selected" : ""}>Responses API</option>
+                </select>
             </label>
             <label class="fn__flex b3-label config-item config-wrap">
                 ${genConfigItemMainHtml(window.siyuan.languages.apiTimeout)}
@@ -710,7 +725,8 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
 
     view.addEventListener("input", (event) => {
         const target = event.target as HTMLInputElement;
-        const providerField = target.dataset.providerField as "displayName" | "baseURL" | "apiKey" | "requestTimeout";
+        const providerField = target.dataset.providerField as
+            "displayName" | "baseURL" | "apiKey" | "protocol" | "requestTimeout";
         if (providerField) {
             if (providerField === "requestTimeout") {
                 draft.requestTimeout = Number.isFinite(target.valueAsNumber) ? target.valueAsNumber : 120;
@@ -719,6 +735,15 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
             }
             if (providerField === "baseURL") {
                 updateModelActionButtons();
+                const isOpenAI = findPreset(draft)?.id === "openai";
+                view.querySelector<HTMLElement>("[data-type='openAIApiType']")?.classList.toggle("fn__none", !isOpenAI);
+                if (!isOpenAI) {
+                    draft.protocol = "openai";
+                    const protocolSelect = view.querySelector<HTMLSelectElement>("[data-provider-field='protocol']");
+                    if (protocolSelect) {
+                        protocolSelect.value = draft.protocol;
+                    }
+                }
             }
             return;
         }
@@ -746,6 +771,10 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
 
     view.addEventListener("change", (event) => {
         const target = event.target as HTMLInputElement;
+        if (target.dataset.providerField === "protocol") {
+            draft.protocol = target.value;
+            return;
+        }
         if (target.dataset.modelField !== "enabled") {
             return;
         }

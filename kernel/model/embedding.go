@@ -602,7 +602,13 @@ func rerankSqlBlocks(query string, sqlBlocks []*sql.Block) []*sql.Block {
 	}
 
 	// topN=0 表示不传 top_n，要求服务端返回全部文档评分，避免被服务端 top_n 上限截断
-	indices, _, err := util.Rerank(query, documents, rerankKey(), rerankEndpoint(), rerankModel(), 0, rerankTimeout())
+	indices, _, err := util.Rerank(query, documents, util.RerankOptions{
+		APIKey:        rerankKey(),
+		Endpoint:      rerankEndpoint(),
+		Model:         rerankModel(),
+		RequestFormat: rerankRequestFormat(),
+		Timeout:       rerankTimeout(),
+	})
 	if nil != err {
 		logging.LogErrorf("rerank failed, fallback to vector similarity order: %s", err)
 		return sqlBlocks

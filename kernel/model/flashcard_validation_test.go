@@ -82,6 +82,28 @@ func TestFlashcardBlockIDsToValidateAllowsEarlierInsert(t *testing.T) {
 	}
 }
 
+func TestFlashcardBlockIDsToValidateReadsIDFromInsertData(t *testing.T) {
+	const insertedID = "20260814000000-insert1"
+	transactions := []*Transaction{
+		{
+			DoOperations: []*Operation{
+				{
+					Action: "insert",
+					Data:   `<div data-node-id="20260814000000-insert1" data-type="NodeParagraph" class="p"><div contenteditable="true">content</div><div class="protyle-attr" contenteditable="false"></div></div>`,
+				},
+				{Action: "addFlashcards", BlockIDs: []string{insertedID}},
+			},
+		},
+	}
+
+	if got := flashcardBlockIDsToValidate(transactions); len(got) != 0 {
+		t.Fatalf("a block ID from insert data should not be prevalidated, got %v", got)
+	}
+	if err := ValidateFlashcardTransactions(transactions); err != nil {
+		t.Fatalf("a flashcard block declared in earlier insert data should pass prevalidation: %s", err)
+	}
+}
+
 func TestFlashcardBlockIDsToValidatePreservesOperationOrder(t *testing.T) {
 	const insertedID = "20260814000000-insert1"
 	transactions := []*Transaction{

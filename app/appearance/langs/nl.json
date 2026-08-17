@@ -656,7 +656,7 @@
 	"agentQuestionPending": "Wacht op antwoord",
 	"agentNewSession": "Nieuwe sessie",
 	"agentInputPlaceholder": "Typ een bericht, /vaardigheid...",
-	"agentSend": "Verzenden",
+	"agentSend": "Naar agent verzenden",
 	"agentStop": "Stoppen",
 	"editorFontSize": "Editorlettergrootte",
 	"configGroupBehavior": "Gedrag",

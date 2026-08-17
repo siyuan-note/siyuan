@@ -656,7 +656,7 @@
 	"agentQuestionPending": "待回答",
 	"agentNewSession": "新會話",
 	"agentInputPlaceholder": "輸入訊息，/技能...",
-	"agentSend": "送出",
+	"agentSend": "智能體傳送",
 	"agentStop": "停止",
 	"editorFontSize": "編輯器字型大小",
 	"configGroupBehavior": "行為",

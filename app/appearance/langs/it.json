@@ -656,7 +656,7 @@
 	"agentQuestionPending": "In attesa di risposta",
 	"agentNewSession": "Nuova sessione",
 	"agentInputPlaceholder": "Digita un messaggio, /abilità...",
-	"agentSend": "Invia",
+	"agentSend": "Invia all'agente",
 	"agentStop": "Ferma",
 	"editorFontSize": "Dimensione del font dell'editor",
 	"configGroupBehavior": "Comportamento",

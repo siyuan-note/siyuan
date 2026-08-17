@@ -656,7 +656,7 @@
 	"agentQuestionPending": "Čaká sa na odpoveď",
 	"agentNewSession": "Nová relácia",
 	"agentInputPlaceholder": "Napíšte správu, /zručnosť...",
-	"agentSend": "Odoslať",
+	"agentSend": "Odoslať agentovi",
 	"agentStop": "Zastaviť",
 	"editorFontSize": "Veľkosť písma editora",
 	"configGroupBehavior": "Správanie",

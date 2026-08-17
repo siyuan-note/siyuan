@@ -656,7 +656,7 @@
 	"agentQuestionPending": "답변 대기 중",
 	"agentNewSession": "새 세션",
 	"agentInputPlaceholder": "메시지를 입력하고, /스킬...",
-	"agentSend": "보내기",
+	"agentSend": "에이전트에게 보내기",
 	"agentStop": "중지",
 	"editorFontSize": "편집기 글꼴 크기",
 	"configGroupBehavior": "동작",

@@ -656,7 +656,7 @@
 	"agentQuestionPending": "回答待ち",
 	"agentNewSession": "新しいセッション",
 	"agentInputPlaceholder": "メッセージを入力、/スキル...",
-	"agentSend": "送信",
+	"agentSend": "エージェント送信",
 	"agentStop": "停止",
 	"editorFontSize": "エディターのフォントサイズ",
 	"configGroupBehavior": "動作",

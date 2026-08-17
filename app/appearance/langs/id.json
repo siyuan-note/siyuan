@@ -656,7 +656,7 @@
 	"agentQuestionPending": "Menunggu jawaban",
 	"agentNewSession": "Sesi baru",
 	"agentInputPlaceholder": "Ketik pesan, /keterampilan...",
-	"agentSend": "Kirim",
+	"agentSend": "Kirim ke agen",
 	"agentStop": "Berhenti",
 	"editorFontSize": "Ukuran Font Editor",
 	"configGroupBehavior": "Perilaku",

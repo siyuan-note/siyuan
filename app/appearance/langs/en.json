@@ -656,7 +656,7 @@
 	"agentQuestionPending": "Awaiting answer",
 	"agentNewSession": "New Session",
 	"agentInputPlaceholder": "Type a message, /skill...",
-	"agentSend": "Send",
+	"agentSend": "Agent Send",
 	"agentStop": "Stop",
 	"editorFontSize": "Editor Font Size",
 	"configGroupBehavior": "Behavior",

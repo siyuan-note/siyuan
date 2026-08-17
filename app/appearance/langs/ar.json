@@ -656,7 +656,7 @@
 	"agentQuestionPending": "بانتظار الرد",
 	"agentNewSession": "جلسة جديدة",
 	"agentInputPlaceholder": "اكتب رسالة، /مهارة...",
-	"agentSend": "إرسال",
+	"agentSend": "إرسال إلى الوكيل",
 	"agentStop": "إيقاف",
 	"editorFontSize": "حجم خط المحرر",
 	"configGroupBehavior": "السلوك",

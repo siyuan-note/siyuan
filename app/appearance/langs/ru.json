@@ -656,7 +656,7 @@
 	"agentQuestionPending": "Ожидает ответа",
 	"agentNewSession": "Новая сессия",
 	"agentInputPlaceholder": "Введите сообщение, /навык...",
-	"agentSend": "Отправить",
+	"agentSend": "Отправить агенту",
 	"agentStop": "Остановить",
 	"editorFontSize": "Размер шрифта редактора",
 	"configGroupBehavior": "Поведение",

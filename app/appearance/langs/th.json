@@ -656,7 +656,7 @@
 	"agentQuestionPending": "รอคำตอบ",
 	"agentNewSession": "เซสชันใหม่",
 	"agentInputPlaceholder": "พิมพ์ข้อความ, /ทักษะ...",
-	"agentSend": "ส่ง",
+	"agentSend": "ส่งให้เอเจนต์",
 	"agentStop": "หยุด",
 	"editorFontSize": "ขนาดตัวอักษรตัวแก้ไข",
 	"configGroupBehavior": "พฤติกรรม",

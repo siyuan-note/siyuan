@@ -656,7 +656,7 @@
 	"agentQuestionPending": "Cevap bekleniyor",
 	"agentNewSession": "Yeni oturum",
 	"agentInputPlaceholder": "Mesaj yazın, /beceri...",
-	"agentSend": "Gönder",
+	"agentSend": "Ajana gönder",
 	"agentStop": "Durdur",
 	"editorFontSize": "Editör yazı boyutu",
 	"configGroupBehavior": "Davranış",

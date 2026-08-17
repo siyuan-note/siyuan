@@ -167,7 +167,7 @@ import {setFold} from "../util/blockFold";
 import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
-import {enhanceRichClipboard, prepareRichClipboardHTML} from "../util/richClipboard";
+import {enhanceRichClipboard, prepareExternalClipboardHTML, prepareRichClipboardHTML} from "../util/richClipboard";
 import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
@@ -1008,6 +1008,8 @@ export class WYSIWYG {
                     const prepared = prepareRichClipboardHTML(exportedHTML);
                     exportedHTML = prepared.html;
                     clipboardText = prepared.source;
+                } else {
+                    exportedHTML = prepareExternalClipboardHTML(exportedHTML);
                 }
                 const clipboardHTML = (nestedListPaste ? NESTED_LIST_PASTE_MARKER : "") + exportedHTML;
                 const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${clipboardHTML}`;
@@ -3325,9 +3327,9 @@ export class WYSIWYG {
                     event.clipboardData.setData("text/siyuan", textSiyuan);
                 }
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const exportedHTML = blockDOMClipboardRichData?.textHTML ??
+                const exportedHTML = prepareExternalClipboardHTML(blockDOMClipboardRichData?.textHTML ??
                     removeZWJ((selectTableElement || selectTableRange) ? html :
-                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
                 const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${exportedHTML}`;
                 if (!cutClipboardWritten) {
                     event.clipboardData.setData("text/html", textHTML);

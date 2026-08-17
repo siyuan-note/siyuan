@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Seçili sütun genişliklerini eşit dağıt",
+	"useDefaultWidthForAllColumns": "Tüm sütunlar için varsayılan genişliği kullan",
 	"closeTabOnDoubleClick": "Sekmeleri çift tıklayarak kapat",
 	"closeTabOnDoubleClickTip": "Etkinleştirildiğinde bir sekmeyi kapatmak için çift tıklayın",
 	"sortByParent": "Üst öğenin sıralama kurallarını kullan",

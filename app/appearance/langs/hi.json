@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "चयनित स्तंभों की चौड़ाई समान रूप से बाँटें",
+	"useDefaultWidthForAllColumns": "सभी स्तंभों के लिए डिफ़ॉल्ट चौड़ाई का उपयोग करें",
 	"closeTabOnDoubleClick": "टैब बंद करने के लिए डबल-क्लिक का उपयोग करें",
 	"closeTabOnDoubleClickTip": "सक्षम होने पर, किसी टैब को बंद करने के लिए उस पर डबल-क्लिक करें",
 	"sortByParent": "ऊपरी स्तर के क्रमबद्धता नियमों का उपयोग करें",

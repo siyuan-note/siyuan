@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "選択した列幅を均等にする",
+	"useDefaultWidthForAllColumns": "すべての列にデフォルト幅を使用",
 	"closeTabOnDoubleClick": "ダブルクリックでタブを閉じる",
 	"closeTabOnDoubleClickTip": "有効にすると、タブをダブルクリックして閉じます",
 	"sortByParent": "親の並べ替えルールを使う",

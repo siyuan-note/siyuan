@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "선택한 열 너비를 균등하게 분배",
+	"useDefaultWidthForAllColumns": "모든 열에 기본 너비 사용",
 	"closeTabOnDoubleClick": "두 번 클릭하여 탭 닫기",
 	"closeTabOnDoubleClickTip": "활성화하면 탭을 두 번 클릭하여 닫습니다",
 	"sortByParent": "상위 항목의 정렬 규칙 사용",

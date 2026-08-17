@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Rovnomerne rozložiť šírku vybraných stĺpcov",
+	"useDefaultWidthForAllColumns": "Použiť predvolenú šírku pre všetky stĺpce",
 	"closeTabOnDoubleClick": "Zatvárať karty dvojitým kliknutím",
 	"closeTabOnDoubleClickTip": "Po povolení zatvoríte kartu dvojitým kliknutím",
 	"sortByParent": "Použiť pravidlá radenia nadradenej položky",

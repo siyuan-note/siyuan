@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Rozłóż równomiernie szerokość wybranych kolumn",
+	"useDefaultWidthForAllColumns": "Użyj domyślnej szerokości dla wszystkich kolumn",
 	"closeTabOnDoubleClick": "Zamykanie kart podwójnym kliknięciem",
 	"closeTabOnDoubleClickTip": "Po włączeniu kliknij kartę dwukrotnie, aby ją zamknąć",
 	"sortByParent": "Użyj reguł sortowania elementu nadrzędnego",

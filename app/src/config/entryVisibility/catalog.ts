@@ -243,6 +243,8 @@ const gutterWidth = () => node("width", lang("width"), true, [
 
 const gutterTable = () => node("table", lang("table"), true, [
     node("useDefaultWidth", lang("useDefaultWidth")),
+    node("distributeAllColWidths", lang("distributeAllColWidths")),
+    node("useDefaultWidthForAllColumns", lang("useDefaultWidthForAllColumns")),
     node("pinTableHead", lang("pinTableHead")),
     node("unpinTableHead", lang("unpinTableHead")),
     node("tableHeaderRow", lang("tableHeaderRow")),

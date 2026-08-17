@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "均分所選欄寬",
+	"useDefaultWidthForAllColumns": "所有欄使用預設欄寬",
 	"closeTabOnDoubleClick": "使用雙擊關閉分頁",
 	"closeTabOnDoubleClickTip": "啟用後，雙擊分頁將其關閉",
 	"sortByParent": "使用父級排序規則",

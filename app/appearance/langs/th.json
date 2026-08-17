@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "กระจายความกว้างของคอลัมน์ที่เลือกให้เท่ากัน",
+	"useDefaultWidthForAllColumns": "ใช้ความกว้างเริ่มต้นสำหรับทุกคอลัมน์",
 	"closeTabOnDoubleClick": "ใช้การดับเบิลคลิกเพื่อปิดแท็บ",
 	"closeTabOnDoubleClickTip": "เมื่อเปิดใช้ ให้ดับเบิลคลิกแท็บเพื่อปิด",
 	"sortByParent": "ใช้กฎการเรียงลำดับของระดับบน",

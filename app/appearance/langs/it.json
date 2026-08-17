@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Distribuisci uniformemente la larghezza delle colonne selezionate",
+	"useDefaultWidthForAllColumns": "Usa la larghezza predefinita per tutte le colonne",
 	"closeTabOnDoubleClick": "Usa il doppio clic per chiudere le schede",
 	"closeTabOnDoubleClickTip": "Quando l'opzione è attiva, fai doppio clic su una scheda per chiuderla",
 	"sortByParent": "Usa le regole di ordinamento dell'elemento padre",

@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Distribute selected column widths evenly",
+	"useDefaultWidthForAllColumns": "Use default width for all columns",
 	"closeTabOnDoubleClick": "Use double-click to close tabs",
 	"closeTabOnDoubleClickTip": "When enabled, double-click a tab to close it",
 	"sortByParent": "Use parent sorting rules",

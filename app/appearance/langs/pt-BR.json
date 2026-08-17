@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Distribuir uniformemente a largura das colunas selecionadas",
+	"useDefaultWidthForAllColumns": "Usar a largura padrão para todas as colunas",
 	"closeTabOnDoubleClick": "Usar clique duplo para fechar abas",
 	"closeTabOnDoubleClickTip": "Quando ativado, clique duas vezes em uma aba para fechá-la",
 	"sortByParent": "Usar regras de ordenação do item pai",

@@ -68,6 +68,11 @@ import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
 import {isEncryptedBox} from "../util/pathName";
 import {getHTMLAssetIFrameSrc} from "../asset/html";
+import {
+    getDistributedTableColumnWidth,
+    isDefaultTableColumnWidth,
+    TABLE_DEFAULT_COLUMN_WIDTH,
+} from "../protyle/util/tableColumnWidth";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -2255,15 +2260,49 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             }
         });
     }
-    const thMatchElement = nodeElement.querySelectorAll("col")[colIndex];
-    if (thMatchElement && (thMatchElement.style.width || thMatchElement.style.minWidth !== "60px")) {
+    const columns = Array.from(tableElement.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col"));
+    const thMatchElement = columns[colIndex];
+    if (thMatchElement) {
         otherMenus.push({
             id: "useDefaultWidth",
             label: window.siyuan.languages.useDefaultWidth,
+            disabled: isDefaultTableColumnWidth(thMatchElement.style.width, thMatchElement.style.minWidth),
             click: () => {
                 const html = nodeElement.outerHTML;
                 thMatchElement.style.width = "";
-                thMatchElement.style.minWidth = "60px";
+                thMatchElement.style.minWidth = `${TABLE_DEFAULT_COLUMN_WIDTH}px`;
+                updateTransaction(protyle, nodeElement, html);
+            }
+        });
+    }
+    if (alignWholeTable) {
+        otherMenus.push({
+            id: "distributeAllColWidths",
+            icon: "iconScale",
+            label: window.siyuan.languages.distributeAllColWidths,
+            disabled: columns.length < 2,
+            click: () => {
+                const html = nodeElement.outerHTML;
+                const width = getDistributedTableColumnWidth(columns.map(column =>
+                    column.getBoundingClientRect().width || TABLE_DEFAULT_COLUMN_WIDTH));
+                columns.forEach(column => {
+                    column.style.width = `${width}px`;
+                    column.style.removeProperty("min-width");
+                });
+                updateTransaction(protyle, nodeElement, html);
+            }
+        });
+        otherMenus.push({
+            id: "useDefaultWidthForAllColumns",
+            label: window.siyuan.languages.useDefaultWidthForAllColumns,
+            disabled: columns.length === 0 || columns.every(column =>
+                isDefaultTableColumnWidth(column.style.width, column.style.minWidth)),
+            click: () => {
+                const html = nodeElement.outerHTML;
+                columns.forEach(column => {
+                    column.style.width = "";
+                    column.style.minWidth = `${TABLE_DEFAULT_COLUMN_WIDTH}px`;
+                });
                 updateTransaction(protyle, nodeElement, html);
             }
         });

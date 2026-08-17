@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Distribuir uniformemente el ancho de las columnas seleccionadas",
+	"useDefaultWidthForAllColumns": "Usar el ancho predeterminado para todas las columnas",
 	"closeTabOnDoubleClick": "Usar doble clic para cerrar pestañas",
 	"closeTabOnDoubleClickTip": "Cuando esté activado, haz doble clic en una pestaña para cerrarla",
 	"sortByParent": "Usar las reglas de ordenación del elemento superior",

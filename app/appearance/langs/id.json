@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Distribusikan lebar kolom yang dipilih secara merata",
+	"useDefaultWidthForAllColumns": "Gunakan lebar default untuk semua kolom",
 	"closeTabOnDoubleClick": "Gunakan klik dua kali untuk menutup tab",
 	"closeTabOnDoubleClickTip": "Jika diaktifkan, klik dua kali tab untuk menutupnya",
 	"sortByParent": "Gunakan aturan pengurutan induk",

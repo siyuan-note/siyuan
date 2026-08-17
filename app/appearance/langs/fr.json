@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Répartir uniformément la largeur des colonnes sélectionnées",
+	"useDefaultWidthForAllColumns": "Utiliser la largeur par défaut pour toutes les colonnes",
 	"closeTabOnDoubleClick": "Fermer les onglets par un double-clic",
 	"closeTabOnDoubleClickTip": "Lorsque cette option est activée, double-cliquez sur un onglet pour le fermer",
 	"sortByParent": "Utiliser les règles de tri de l’élément parent",

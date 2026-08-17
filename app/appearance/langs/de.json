@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Ausgewählte Spaltenbreiten gleichmäßig verteilen",
+	"useDefaultWidthForAllColumns": "Standardbreite für alle Spalten verwenden",
 	"closeTabOnDoubleClick": "Tabs per Doppelklick schließen",
 	"closeTabOnDoubleClickTip": "Wenn aktiviert, wird ein Tab durch Doppelklicken geschlossen",
 	"sortByParent": "Sortierregeln des übergeordneten Elements verwenden",

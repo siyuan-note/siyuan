@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "פזר את רוחב העמודות שנבחרו באופן שווה",
+	"useDefaultWidthForAllColumns": "השתמש ברוחב ברירת המחדל עבור כל העמודות",
 	"closeTabOnDoubleClick": "השתמש בלחיצה כפולה כדי לסגור כרטיסיות",
 	"closeTabOnDoubleClickTip": "כאשר האפשרות מופעלת, לחץ פעמיים על כרטיסייה כדי לסגור אותה",
 	"sortByParent": "השתמש בכללי המיון של פריט האב",

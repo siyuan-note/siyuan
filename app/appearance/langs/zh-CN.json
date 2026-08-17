@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "均分所选列宽",
+	"useDefaultWidthForAllColumns": "所有列使用默认列宽",
 	"closeTabOnDoubleClick": "使用双击关闭页签",
 	"closeTabOnDoubleClickTip": "启用后，双击页签将其关闭",
 	"sortByParent": "使用父级排序规则",

@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "توزيع عرض الأعمدة المحددة بالتساوي",
+	"useDefaultWidthForAllColumns": "استخدام العرض الافتراضي لجميع الأعمدة",
 	"closeTabOnDoubleClick": "استخدام النقر المزدوج لإغلاق علامات التبويب",
 	"closeTabOnDoubleClickTip": "عند التمكين، انقر نقرًا مزدوجًا فوق علامة تبويب لإغلاقها",
 	"sortByParent": "استخدام قواعد الفرز للمستوى الأعلى",

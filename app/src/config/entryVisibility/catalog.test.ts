@@ -113,6 +113,14 @@ test("super block actions and vertical alignment use their respective menu group
     assert.equal(getEntryCatalogChildren("gutter.multi.layout").some((item) => item.key === "alignTop"), false);
 });
 
+test("table block width actions keep current-column and whole-table scopes together", () => {
+    assert.deepEqual(getEntryCatalogChildren("gutter.single.table").slice(0, 3).map((item) => item.key), [
+        "useDefaultWidth",
+        "distributeAllColWidths",
+        "useDefaultWidthForAllColumns",
+    ]);
+});
+
 test("code block actions follow the code block menu order", () => {
     assert.deepEqual(getEntryCatalogChildren("gutter.single.code").map((item) => item.key), [
         "md29",
@@ -273,6 +281,8 @@ test("simple profile follows the reviewed defaults", () => {
         "gutter.single.layout.useDefaultVerticalAlign",
         "gutter.single.table.tableHeaderRow",
         "gutter.single.table.tableHeaderColumn",
+        "gutter.single.table.distributeAllColWidths",
+        "gutter.single.table.useDefaultWidthForAllColumns",
         "gutter.single.table.alignment.alignTop",
         "gutter.single.table.alignment.alignMiddle",
         "gutter.single.table.alignment.alignBottom",

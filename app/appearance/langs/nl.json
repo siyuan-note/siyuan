@@ -1,4 +1,6 @@
 {
+	"distributeSelectedColWidths": "Geselecteerde kolombreedtes gelijkmatig verdelen",
+	"useDefaultWidthForAllColumns": "Standaardbreedte voor alle kolommen gebruiken",
 	"closeTabOnDoubleClick": "Tabs sluiten door te dubbelklikken",
 	"closeTabOnDoubleClickTip": "Dubbelklik op een tab om deze te sluiten wanneer deze optie is ingeschakeld",
 	"sortByParent": "Sorteerregels van bovenliggend item gebruiken",

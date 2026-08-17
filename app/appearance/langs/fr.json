@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "${count} carnets de notes sélectionnés",
 	"dragTipSelectedDocs": "${count} documents sélectionnés",
 	"entrySlashMenu": "Menu de commandes slash",
 	"importNotebook": "Importer un carnet",

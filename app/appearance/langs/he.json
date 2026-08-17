@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "נבחרו ${count} מחברות",
 	"dragTipSelectedDocs": "נבחרו ${count} מסמכים",
 	"entrySlashMenu": "תפריט לוכסן",
 	"importNotebook": "ייבוא מחברת",

@@ -494,10 +494,16 @@ export class Files extends Model {
                 }
                 event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, ids);
                 event.dataTransfer.dropEffect = "move";
-                const isMultiDocumentSelection = selectElements.length > 1 &&
-                    selectElements.every((item) => item.getAttribute("data-type") === "navigation-file");
-                window.siyuan.dragTitle = isMultiDocumentSelection ?
-                    window.siyuan.languages.dragTipSelectedDocs.replace("${count}", selectElements.length.toString()) :
+                let selectionTitle = "";
+                if (selectElements.length > 1) {
+                    if (selectElements.every((item) => item.getAttribute("data-type") === "navigation-file")) {
+                        selectionTitle = window.siyuan.languages.dragTipSelectedDocs;
+                    } else if (selectElements.every((item) => item.getAttribute("data-type") === "navigation-root")) {
+                        selectionTitle = window.siyuan.languages.dragTipSelectedNotebooks;
+                    }
+                    selectionTitle = selectionTitle.replace("${count}", selectElements.length.toString());
+                }
+                window.siyuan.dragTitle = selectionTitle ||
                     (selectElements[0] as HTMLElement)?.querySelector(".b3-list-item__text")?.textContent?.trim() || "";
                 window.siyuan.dragElement = document.createElement("div");
                 window.siyuan.dragElement.innerText = ids;

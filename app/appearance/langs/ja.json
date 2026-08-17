@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "${count} 件のノートブックを選択",
 	"dragTipSelectedDocs": "${count} 件の文書を選択",
 	"entrySlashMenu": "スラッシュメニュー",
 	"importNotebook": "ノートブックをインポート",

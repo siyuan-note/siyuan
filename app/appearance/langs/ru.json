@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "Выбрано блокнотов: ${count}",
 	"dragTipSelectedDocs": "Выбрано документов: ${count}",
 	"entrySlashMenu": "Слэш-меню",
 	"importNotebook": "Импортировать блокнот",

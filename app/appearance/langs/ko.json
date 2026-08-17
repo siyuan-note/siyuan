@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "노트북 ${count}개 선택됨",
 	"dragTipSelectedDocs": "문서 ${count}개 선택됨",
 	"entrySlashMenu": "슬래시 메뉴",
 	"importNotebook": "노트북 가져오기",

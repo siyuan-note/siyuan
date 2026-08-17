@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "${count} taccuini selezionati",
 	"dragTipSelectedDocs": "${count} documenti selezionati",
 	"entrySlashMenu": "Menu slash",
 	"importNotebook": "Importa taccuino",

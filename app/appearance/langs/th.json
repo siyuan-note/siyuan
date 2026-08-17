@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "เลือกสมุด ${count} เล่ม",
 	"dragTipSelectedDocs": "เลือกเอกสาร ${count} ฉบับ",
 	"entrySlashMenu": "เมนูสแลช",
 	"importNotebook": "นำเข้าสมุดบันทึก",

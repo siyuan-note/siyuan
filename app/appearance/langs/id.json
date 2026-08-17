@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "${count} buku catatan dipilih",
 	"dragTipSelectedDocs": "${count} dokumen dipilih",
 	"entrySlashMenu": "Menu garis miring",
 	"importNotebook": "Impor buku catatan",

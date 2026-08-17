@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "選中 ${count} 個筆記本",
 	"dragTipSelectedDocs": "選中 ${count} 個文件",
 	"entrySlashMenu": "斜線選單",
 	"importNotebook": "導入筆記本",

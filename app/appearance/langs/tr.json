@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "${count} not defteri seçildi",
 	"dragTipSelectedDocs": "${count} belge seçildi",
 	"entrySlashMenu": "Eğik çizgi menüsü",
 	"importNotebook": "Not defteri içe aktar",

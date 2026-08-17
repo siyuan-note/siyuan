@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "Selected ${count} notebooks",
 	"dragTipSelectedDocs": "Selected ${count} documents",
 	"entrySlashMenu": "Slash menu",
 	"importNotebook": "Import Notebook",

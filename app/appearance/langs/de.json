@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "${count} Notizbücher ausgewählt",
 	"dragTipSelectedDocs": "${count} Dokumente ausgewählt",
 	"entrySlashMenu": "Slash-Menü",
 	"importNotebook": "Notizbuch importieren",

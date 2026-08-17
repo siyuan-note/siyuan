@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedNotebooks": "تم تحديد ${count} من دفاتر الملاحظات",
 	"dragTipSelectedDocs": "تم تحديد ${count} من المستندات",
 	"entrySlashMenu": "قائمة الشرطة المائلة",
 	"importNotebook": "استيراد دفتر ملاحظات",

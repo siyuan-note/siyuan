@@ -6,6 +6,7 @@ import {aiConfigApi} from "./aiRuntime";
 import {Menu} from "../../../plugin/Menu";
 import {upDownHint} from "../../../util/upDownHint";
 import {moveModelItem} from "./aiModelOrder";
+import {isHuawei} from "../../../protyle/util/compatibility";
 
 type ModelPickerGroup = "editing" | "agent" | "imageGeneration";
 type GroupedModelPickerElement = HTMLInputElement | HTMLButtonElement;
@@ -211,7 +212,8 @@ const openProviderCatalog = (root: HTMLElement) => {
     const view = createProviderView(root, window.siyuan.languages.apiProvider);
     const body = view.querySelector<HTMLElement>(".b3-dialog__body");
     body.innerHTML = `<div class="b3-dialog__content" style="padding: 0">${PROVIDER_CATEGORIES.map((category) => {
-        const cards = PROVIDER_PRESETS.filter((preset) => preset.category === category).map((preset) => {
+        const cards = PROVIDER_PRESETS.filter((preset) =>
+            preset.category === category && (!isHuawei() || preset.id !== "openai")).map((preset) => {
             const provider: Config.IProvider = {
                 id: "",
                 enabled: true,

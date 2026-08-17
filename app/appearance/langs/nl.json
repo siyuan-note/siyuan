@@ -1,4 +1,5 @@
 {
+	"entrySlashMenu": "Slashmenu",
 	"importNotebook": "Notitieboek importeren",
 	"distributeSelectedColWidths": "Geselecteerde kolombreedtes gelijkmatig verdelen",
 	"useDefaultWidthForAllColumns": "Standaardbreedte voor alle kolommen gebruiken",
@@ -171,7 +172,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Splits eerst de samengevoegde cellen",
 	"entryVisibility": "Menu's en dock",
-	"entryVisibilityTip": "Kies welke ingebouwde menu-items en dockpictogrammen op het bureaublad worden getoond",
+	"entryVisibilityTip": "Configureer de zichtbaarheid en volgorde van ingebouwde desktopmenu-items en slashmenu-items (inclusief plug-initems), en de zichtbaarheid van dockpictogrammen",
 	"entrySimple": "Eenvoudig",
 	"entryFull": "Volledig",
 	"entrySimpleTip": "Toont veelgebruikte items om snel aan de slag te gaan",

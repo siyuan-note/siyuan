@@ -1,4 +1,5 @@
 {
+	"entrySlashMenu": "Menu slash",
 	"importNotebook": "Importa taccuino",
 	"distributeSelectedColWidths": "Distribuisci uniformemente la larghezza delle colonne selezionate",
 	"useDefaultWidthForAllColumns": "Usa la larghezza predefinita per tutte le colonne",
@@ -171,7 +172,7 @@
 	"entrySubmenu": "Sottomenu",
 	"splitMergedCellTip": "Prima dividi le celle unite",
 	"entryVisibility": "Menu e barra di ancoraggio",
-	"entryVisibilityTip": "Scegli quali voci di menu e icone della barra di ancoraggio mostrare sul desktop",
+	"entryVisibilityTip": "Configura la visibilità e l'ordine delle voci integrate dei menu desktop e delle voci del menu slash (incluse le voci dei plugin), nonché la visibilità delle icone della barra di ancoraggio",
 	"entrySimple": "Semplice",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Mostra le voci usate più spesso per iniziare rapidamente",

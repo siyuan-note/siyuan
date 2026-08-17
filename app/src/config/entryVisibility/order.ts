@@ -17,6 +17,66 @@ export const mergeEntryOrder = (defaultOrder: string[], savedOrder?: string[]) =
     return result;
 };
 
+const findValidEntryOrderInterleave = (knownOrder: string[], unknownOrder: string[], slotKinds: boolean[],
+                                       separatorKeys: Set<string>) => {
+    const memo = new Map<string, string[] | null>();
+    const visit = (knownIndex: number, unknownIndex: number, previousSeparator: boolean): string[] | undefined => {
+        if (knownIndex === knownOrder.length && unknownIndex === unknownOrder.length) {
+            return previousSeparator ? undefined : [];
+        }
+        const state = `${knownIndex}:${unknownIndex}:${previousSeparator ? 1 : 0}`;
+        if (memo.has(state)) {
+            return memo.get(state) || undefined;
+        }
+        const preferUnknown = slotKinds[knownIndex + unknownIndex] === true;
+        const sources: Array<"known" | "unknown"> = preferUnknown ? ["unknown", "known"] : ["known", "unknown"];
+        for (const source of sources) {
+            const item = source === "known" ? knownOrder[knownIndex] : unknownOrder[unknownIndex];
+            if (typeof item !== "string") {
+                continue;
+            }
+            const separator = separatorKeys.has(item);
+            if (separator && (knownIndex + unknownIndex === 0 || previousSeparator)) {
+                continue;
+            }
+            const tail = source === "known"
+                ? visit(knownIndex + 1, unknownIndex, separator)
+                : visit(knownIndex, unknownIndex + 1, separator);
+            if (tail) {
+                const result = [item, ...tail];
+                memo.set(state, result);
+                return result;
+            }
+        }
+        memo.set(state, null);
+        return undefined;
+    };
+    return visit(0, 0, false);
+};
+
+export const mergeEntryOrderPreservingUnknown = (defaultOrder: string[], savedOrder?: string[],
+                                                   knownOrder?: string[], separatorKeys?: Set<string>) => {
+    const knownKeys = new Set(defaultOrder);
+    const mergedKnownOrder = mergeEntryOrder(defaultOrder, knownOrder ?? savedOrder);
+    let knownIndex = 0;
+    const savedUniqueOrder = (savedOrder || []).filter((key, index, order) => order.indexOf(key) === index);
+    const result = savedUniqueOrder
+        .map((key) => {
+            if (!knownKeys.has(key)) {
+                return key;
+            }
+            return mergedKnownOrder[knownIndex++];
+        })
+        .filter((key): key is string => typeof key === "string");
+    result.push(...mergedKnownOrder.slice(knownIndex));
+    if (separatorKeys && !isValidEntryOrder(result, separatorKeys)) {
+        const unknownOrder = savedUniqueOrder.filter((key) => !knownKeys.has(key));
+        const slotKinds = savedUniqueOrder.map((key) => !knownKeys.has(key));
+        return findValidEntryOrderInterleave(mergedKnownOrder, unknownOrder, slotKinds, separatorKeys) || result;
+    }
+    return result;
+};
+
 export const isValidEntryOrder = (order: string[], separatorKeys: Set<string>) => {
     if (order.length === 0 || separatorKeys.has(order[0]) || separatorKeys.has(order[order.length - 1])) {
         return false;

@@ -1,4 +1,5 @@
 {
+	"entrySlashMenu": "Ponuka príkazov s lomkou",
 	"importNotebook": "Importovať zápisník",
 	"distributeSelectedColWidths": "Rovnomerne rozložiť šírku vybraných stĺpcov",
 	"useDefaultWidthForAllColumns": "Použiť predvolenú šírku pre všetky stĺpce",
@@ -171,7 +172,7 @@
 	"entrySubmenu": "Podponuka",
 	"splitMergedCellTip": "Najprv rozdeľte zlúčené bunky",
 	"entryVisibility": "Ponuky a dok",
-	"entryVisibilityTip": "Vyberte vstavané položky ponuky a ikony doku zobrazované na počítači",
+	"entryVisibilityTip": "Nastavte viditeľnosť a poradie vstavaných položiek ponúk na pracovnej ploche a položiek ponuky príkazov s lomkou (vrátane položiek pluginov), ako aj viditeľnosť ikon doku",
 	"entrySimple": "Jednoduchý",
 	"entryFull": "Úplný",
 	"entrySimpleTip": "Zobrazuje často používané položky na rýchle začatie práce",

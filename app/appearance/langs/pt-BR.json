@@ -1,4 +1,5 @@
 {
+	"entrySlashMenu": "Menu slash",
 	"importNotebook": "Importar caderno",
 	"distributeSelectedColWidths": "Distribuir uniformemente a largura das colunas selecionadas",
 	"useDefaultWidthForAllColumns": "Usar a largura padrão para todas as colunas",
@@ -171,7 +172,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Divida primeiro as células mescladas",
 	"entryVisibility": "Menus e dock",
-	"entryVisibilityTip": "Escolha quais itens de menu e ícones do dock integrados são exibidos no computador",
+	"entryVisibilityTip": "Configure a visibilidade e a ordem dos itens integrados dos menus da área de trabalho e do menu slash (incluindo itens de plugins), bem como a visibilidade dos ícones do dock",
 	"entrySimple": "Simples",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Mostra os itens mais usados para começar rapidamente",

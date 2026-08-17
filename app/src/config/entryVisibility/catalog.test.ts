@@ -1,4 +1,6 @@
 import * as assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {resolve} from "node:path";
 import test from "node:test";
 import {
     entryCatalog,
@@ -9,7 +11,83 @@ import {
     getEntryParentPath,
     getEntryOrderParents,
     getEntryPaths,
+    getPluginSlashEntryKey,
+    getSlashMenuEntryPath,
+    isEntryOrderSortable,
+    refreshSlashMenuCatalog,
+    SLASH_MENU_ROOT_PATH,
 } from "./catalog";
+
+const slashMenuBuiltinOrder = [
+    "template",
+    "widget",
+    "assets",
+    "ref",
+    "blockEmbed",
+    "aiWriting",
+    "database",
+    "newFileRef",
+    "newSubDocRef",
+    "separator_1",
+    "heading1",
+    "heading2",
+    "heading3",
+    "heading4",
+    "heading5",
+    "heading6",
+    "list",
+    "orderedList",
+    "check",
+    "quote",
+    "calloutNote",
+    "calloutTip",
+    "calloutImportant",
+    "calloutWarning",
+    "calloutCaution",
+    "code",
+    "table",
+    "line",
+    "math",
+    "html",
+    "databaseTableView",
+    "databaseKanbanView",
+    "databaseGalleryView",
+    "separator_2",
+    "emoji",
+    "link",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "mark",
+    "sup",
+    "sub",
+    "inlineCode",
+    "kbd",
+    "tag",
+    "inlineMath",
+    "separator_3",
+    "insertAsset",
+    "insertHTMLFile",
+    "insertIframeURL",
+    "insertImgURL",
+    "insertVideoURL",
+    "insertAudioURL",
+    "separator_4",
+    "staff",
+    "chart",
+    "flowChart",
+    "graph",
+    "mermaid",
+    "mindmap",
+    "UML",
+    "separator_5",
+    "infoStyle",
+    "successStyle",
+    "warningStyle",
+    "errorStyle",
+    "clearFontStyle",
+];
 
 test("entry catalog paths are unique and indexed", () => {
     const paths: string[] = [];
@@ -29,6 +107,161 @@ test("entry catalog paths are unique and indexed", () => {
     entryCatalog.forEach((section) => visit(section.key, section.children));
     assert.equal(new Set(paths).size, paths.length);
     assert.deepEqual(new Set(getEntryPaths()), new Set(paths));
+});
+
+test("slash menu catalog follows the built-in hint order", () => {
+    const section = getEntryCatalogSection("editor.slash");
+    assert.deepEqual(section?.children.map((item) => item.key), ["menu"]);
+    const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
+    assert.deepEqual(children.map((item) => item.key), slashMenuBuiltinOrder);
+    assert.equal(children.filter((item) => item.type === "entry").length, 63);
+    assert.equal(children.filter((item) => item.type === "separator").length, 5);
+    assert.equal(children.every((item) => item.simple), true);
+});
+
+test("slash menu catalog stays aligned with the built-in hint declarations", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/protyle/hint/extend.ts"), "utf8");
+    const start = source.indexOf("export const getBuiltinSlashMenuItems");
+    const end = source.indexOf("export const hintSlash", start);
+    assert.notEqual(start, -1);
+    assert.notEqual(end, -1);
+    const hintOrder = Array.from(source.slice(start, end).matchAll(/\bid: "([^"]+)"/g), (match) => match[1]);
+    assert.deepEqual(hintOrder, [...slashMenuBuiltinOrder, "separator_6"]);
+});
+
+test("slash menu entries are indexed below their total switch", () => {
+    const templatePath = getSlashMenuEntryPath("template");
+    assert.equal(SLASH_MENU_ROOT_PATH, "editor.slash.menu");
+    assert.equal(templatePath, "editor.slash.menu.template");
+    assert.equal(getEntryCatalogNode(templatePath)?.key, "template");
+    assert.equal(getEntryParentPath(templatePath), SLASH_MENU_ROOT_PATH);
+    assert.deepEqual(getEntryCatalogPathChain("editor.slash", templatePath), [
+        SLASH_MENU_ROOT_PATH,
+        templatePath,
+    ]);
+});
+
+test("plugin slash keys encode dotted names and IDs without ambiguity", () => {
+    const dottedPlugin = getPluginSlashEntryKey("plugin.name", "entry");
+    const dottedEntry = getPluginSlashEntryKey("plugin", "name.entry");
+    const pluginSeparator = getPluginSlashEntryKey("plugin.name", "entry", "separator");
+    assert.equal(dottedPlugin, "plugin:plugin%2Ename:entry");
+    assert.equal(dottedEntry, "plugin:plugin:name%2Eentry");
+    assert.equal(pluginSeparator, "plugin-separator:plugin%2Ename:entry");
+    assert.notEqual(dottedPlugin, dottedEntry);
+    assert.notEqual(dottedPlugin, pluginSeparator);
+    assert.equal(dottedPlugin.includes("."), false);
+    assert.equal(dottedEntry.includes("."), false);
+});
+
+test("slash menu catalog refreshes unique plugin entries and its plugin separator", () => {
+    const firstKey = getPluginSlashEntryKey("plugin.one", "shared.id");
+    const secondKey = getPluginSlashEntryKey("plugin.two", "shared.id");
+    const fallbackKey = getPluginSlashEntryKey("plugin.three", "fallback");
+    try {
+        refreshSlashMenuCatalog([{
+            name: "plugin.one",
+            displayName: "Plugin One",
+            protyleSlash: [{
+                id: "shared.id",
+                html: '<span class="b3-list-item__text">HTML label</span>',
+                filter: ["Filter label"],
+            }, {
+                id: "shared.id",
+                html: '<span class="b3-list-item__text">Duplicate</span>',
+            }],
+        }, {
+            name: "plugin.two",
+            displayName: "Plugin Two",
+            protyleSlash: [{
+                id: "shared.id",
+                html: "<span>Missing text class</span>",
+                filter: ["Filter label"],
+            }],
+        }, {
+            name: "plugin.three",
+            displayName: "Plugin Three",
+            protyleSlash: [{
+                id: "fallback",
+                html: "<span>Missing text class</span>",
+            }],
+        }]);
+
+        const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
+        assert.deepEqual(children.slice(-4).map((item) => item.key), [
+            "separator_6",
+            firstKey,
+            secondKey,
+            fallbackKey,
+        ]);
+        assert.notEqual(firstKey, secondKey);
+        assert.equal(children.filter((item) => item.key === firstKey).length, 1);
+        assert.equal(getEntryCatalogNode(getSlashMenuEntryPath(firstKey))?.label(), "Plugin One - HTML label");
+        assert.equal(getEntryCatalogNode(getSlashMenuEntryPath(secondKey))?.label(), "Plugin Two - Filter label");
+        assert.equal(getEntryCatalogNode(getSlashMenuEntryPath(fallbackKey))?.label(), "Plugin Three - fallback");
+        assert.equal(getEntryParentPath(getSlashMenuEntryPath(firstKey)), SLASH_MENU_ROOT_PATH);
+    } finally {
+        refreshSlashMenuCatalog([]);
+    }
+    assert.equal(getEntryCatalogChildren(SLASH_MENU_ROOT_PATH).some((item) => item.key === "separator_6"), false);
+    assert.equal(getEntryCatalogNode(getSlashMenuEntryPath(firstKey)), undefined);
+});
+
+test("slash menu catalog keeps only renderable plugin separators", () => {
+    const leadingKey = getPluginSlashEntryKey("plugin.separators", "leading", "separator");
+    const firstKey = getPluginSlashEntryKey("plugin.separators", "first");
+    const middleKey = getPluginSlashEntryKey("plugin.separators", "middle", "separator");
+    const consecutiveKey = getPluginSlashEntryKey("plugin.separators", "consecutive", "separator");
+    const secondKey = getPluginSlashEntryKey("plugin.separators", "second");
+    const trailingKey = getPluginSlashEntryKey("plugin.separators", "trailing", "separator");
+    try {
+        refreshSlashMenuCatalog([{
+            name: "plugin.separators",
+            protyleSlash: [{
+                id: "leading",
+                html: "separator",
+            }, {
+                id: "first",
+                html: "First",
+            }, {
+                id: "middle",
+                html: "separator",
+            }, {
+                id: "consecutive",
+                html: "separator",
+            }, {
+                id: "second",
+                html: "Second",
+            }, {
+                id: "trailing",
+                html: "separator",
+            }],
+        }]);
+        const children = getEntryCatalogChildren(SLASH_MENU_ROOT_PATH);
+        assert.deepEqual(children.slice(-4).map((item) => item.key), [
+            "separator_6",
+            firstKey,
+            middleKey,
+            secondKey,
+        ]);
+        assert.equal(getEntryCatalogNode(getSlashMenuEntryPath(middleKey))?.type, "separator");
+        [leadingKey, consecutiveKey, trailingKey].forEach((key) => {
+            assert.equal(getEntryCatalogNode(getSlashMenuEntryPath(key)), undefined);
+        });
+    } finally {
+        refreshSlashMenuCatalog([]);
+    }
+});
+
+test("entry order sortability follows its section and parent entry", () => {
+    assert.equal(isEntryOrderSortable("editor.slash"), false);
+    assert.equal(isEntryOrderSortable(SLASH_MENU_ROOT_PATH), true);
+    assert.equal(isEntryOrderSortable("dock"), false);
+    assert.equal(isEntryOrderSortable("document.more"), true);
+    assert.equal(isEntryOrderSortable("gutter.single.turnInto"), true);
+    assert.equal(isEntryOrderSortable("missing"), false);
+    assert.equal(getEntryOrderParents().includes("editor.slash"), false);
+    assert.equal(getEntryOrderParents().includes(SLASH_MENU_ROOT_PATH), true);
 });
 
 test("conditional block resource menus have distinct configuration labels", () => {

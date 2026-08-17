@@ -1,4 +1,5 @@
 {
+	"entrySlashMenu": "Menu poleceń z ukośnikiem",
 	"importNotebook": "Importuj notatnik",
 	"distributeSelectedColWidths": "Rozłóż równomiernie szerokość wybranych kolumn",
 	"useDefaultWidthForAllColumns": "Użyj domyślnej szerokości dla wszystkich kolumn",
@@ -171,7 +172,7 @@
 	"entrySubmenu": "Podmenu",
 	"splitMergedCellTip": "Najpierw podziel scalone komórki",
 	"entryVisibility": "Menu i dok",
-	"entryVisibilityTip": "Wybierz wbudowane pozycje menu i ikony doku wyświetlane na komputerze",
+	"entryVisibilityTip": "Skonfiguruj widoczność i kolejność wbudowanych elementów menu pulpitu oraz elementów menu poleceń z ukośnikiem (w tym elementów wtyczek), a także widoczność ikon doku",
 	"entrySimple": "Prosty",
 	"entryFull": "Pełny",
 	"entrySimpleTip": "Wyświetla często używane pozycje, aby ułatwić szybki start",

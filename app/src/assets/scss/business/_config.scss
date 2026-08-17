@@ -946,6 +946,10 @@
         background-color: var(--b3-theme-primary-lightest);
         color: var(--b3-theme-primary);
         font-weight: 600;
+
+        > .b3-list-item__text {
+          color: inherit;
+        }
       }
     }
 

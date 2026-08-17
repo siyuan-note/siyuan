@@ -1,4 +1,5 @@
 {
+	"entrySlashMenu": "Eğik çizgi menüsü",
 	"importNotebook": "Not defteri içe aktar",
 	"distributeSelectedColWidths": "Seçili sütun genişliklerini eşit dağıt",
 	"useDefaultWidthForAllColumns": "Tüm sütunlar için varsayılan genişliği kullan",
@@ -171,7 +172,7 @@
 	"entrySubmenu": "Alt menü",
 	"splitMergedCellTip": "Önce birleştirilmiş hücreleri bölün",
 	"entryVisibility": "Menüler ve yuva",
-	"entryVisibilityTip": "Masaüstünde gösterilecek yerleşik menü öğelerini ve yuva simgelerini seçin",
+	"entryVisibilityTip": "Yerleşik masaüstü menü öğeleri ile eğik çizgi menüsü öğelerinin (eklenti öğeleri dahil) görünürlüğünü ve sırasını, ayrıca yuva simgelerinin görünürlüğünü yapılandırın",
 	"entrySimple": "Basit",
 	"entryFull": "Tam",
 	"entrySimpleTip": "Yeni kullanıcıların hızlıca başlayabilmesi için sık kullanılan öğeleri gösterir",

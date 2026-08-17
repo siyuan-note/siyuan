@@ -1,4 +1,5 @@
 {
+	"entrySlashMenu": "斜線選單",
 	"importNotebook": "導入筆記本",
 	"distributeSelectedColWidths": "均分所選欄寬",
 	"useDefaultWidthForAllColumns": "所有欄使用預設欄寬",
@@ -171,7 +172,7 @@
 	"entrySubmenu": "子菜單",
 	"splitMergedCellTip": "需要先拆分合併的單元格",
 	"entryVisibility": "選單與停靠欄",
-	"entryVisibilityTip": "設定桌面端內建選單項目和停靠欄圖示是否顯示",
+	"entryVisibilityTip": "設定桌面端內建選單項目和斜線選單項目（含插件項目）的顯示與排序，以及停靠欄圖示的顯示",
 	"entrySimple": "簡潔方案",
 	"entryFull": "完整方案",
 	"entrySimpleTip": "顯示常用入口，適合新使用者快速上手",

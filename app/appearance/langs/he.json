@@ -1,4 +1,5 @@
 {
+	"entrySlashMenu": "תפריט לוכסן",
 	"importNotebook": "ייבוא מחברת",
 	"distributeSelectedColWidths": "פזר את רוחב העמודות שנבחרו באופן שווה",
 	"useDefaultWidthForAllColumns": "השתמש ברוחב ברירת המחדל עבור כל העמודות",
@@ -171,7 +172,7 @@
 	"entrySubmenu": "תפריט משנה",
 	"splitMergedCellTip": "יש לפצל תחילה תאים ממוזגים",
 	"entryVisibility": "תפריטים וסרגל עגינה",
-	"entryVisibilityTip": "בחירת פריטי התפריט וסמלי סרגל העגינה המובנים שיוצגו במחשב",
+	"entryVisibilityTip": "הגדרת הנראות והסדר של פריטי תפריט שולחן העבודה המובנים ושל פריטי תפריט הלוכסן (כולל פריטי תוספים), והנראות של סמלי סרגל העגינה",
 	"entrySimple": "פשוט",
 	"entryFull": "מלא",
 	"entrySimpleTip": "מציג פריטים נפוצים כדי לעזור למשתמשים חדשים להתחיל במהירות",

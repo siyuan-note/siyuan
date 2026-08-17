@@ -1,4 +1,5 @@
 {
+	"entrySlashMenu": "Slash-Menü",
 	"importNotebook": "Notizbuch importieren",
 	"distributeSelectedColWidths": "Ausgewählte Spaltenbreiten gleichmäßig verteilen",
 	"useDefaultWidthForAllColumns": "Standardbreite für alle Spalten verwenden",
@@ -171,7 +172,7 @@
 	"entrySubmenu": "Untermenü",
 	"splitMergedCellTip": "Zusammengeführte Zellen müssen zuerst geteilt werden",
 	"entryVisibility": "Menüs und Dock",
-	"entryVisibilityTip": "Wählen Sie, welche integrierten Menüeinträge und Dock-Symbole auf dem Desktop angezeigt werden",
+	"entryVisibilityTip": "Konfigurieren Sie Sichtbarkeit und Reihenfolge integrierter Desktop-Menüeinträge und der Einträge im Slash-Menü (einschließlich Plugin-Einträgen) sowie die Sichtbarkeit der Dock-Symbole",
 	"entrySimple": "Einfach",
 	"entryFull": "Vollständig",
 	"entrySimpleTip": "Zeigt häufig verwendete Einträge für einen schnellen Einstieg",

@@ -9,6 +9,8 @@ import {
     getEntryPaths,
     IEntryCatalogNode,
     IEntryCatalogSection,
+    isEntryOrderSortable,
+    refreshSlashMenuCatalog,
 } from "./catalog";
 import {
     createEntryProfileSnapshot,
@@ -20,7 +22,7 @@ import {
     isEntryVisible,
     saveEntryVisibility,
 } from "./runtime";
-import {moveEntryOrder, resolveEntryOrder} from "./order";
+import {mergeEntryOrderPreservingUnknown, moveEntryOrder, resolveEntryOrder} from "./order";
 
 type TImportFile = {
     type: "siyuan-entry-profile" | "siyuan-entry-profile-bundle";
@@ -274,7 +276,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
             break;
         }
         columns.push(renderEntryColumn(profile, title, prefix, columnNodes, depth, selectedPaths,
-            parentEnabled, readOnly, !visiblePaths && section.sortable !== false && !readOnly));
+            parentEnabled, readOnly, !visiblePaths && isEntryOrderSortable(prefix) && !readOnly));
         const selectedPath = selectedPaths[depth];
         const selectedNode = selectedPath && columnNodes.find((item) => `${prefix}.${item.key}` === selectedPath);
         if (!selectedNode?.children?.length) {
@@ -329,6 +331,7 @@ const getEntrySearchFilter = (query: string) => {
 };
 
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
+    refreshSlashMenuCatalog(window.siyuan.ws?.app?.plugins || []);
     const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;
     const existing = profileID
         ? window.siyuan.config.appearance.entryVisibility.profiles.find((item) => item.id === profileID)
@@ -390,7 +393,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     let selectedSectionKey = entryCatalog[0].key;
     let selectedPaths: string[] = [];
     let previousQuery = "";
-    let dragging: {parentPath: string; sourceKey: string; order?: string[]} | undefined;
+    let dragging: {parentPath: string; sourceKey: string; defaultOrder?: string[]; order?: string[]} | undefined;
     const clearDropTarget = () => {
         browser.querySelectorAll(".config-entry-visibility__row--drop-before, .config-entry-visibility__row--drop-after")
             .forEach((item) => item.classList.remove("config-entry-visibility__row--drop-before",
@@ -482,6 +485,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             return;
         }
         const nodes = getEntryCatalogChildren(dragging.parentPath) || [];
+        dragging.defaultOrder = nodes.map((item) => item.key);
         const order = getProfileEntryOrder(draft, dragging.parentPath, nodes);
         const after = event.clientY >= row.getBoundingClientRect().top + row.offsetHeight / 2;
         const movedOrder = moveEntryOrder(order, dragging.sourceKey, row.dataset.entryKey, after,
@@ -496,12 +500,25 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         row.classList.add(`config-entry-visibility__row--drop-${after ? "after" : "before"}`);
     });
     browser.addEventListener("drop", (event: DragEvent) => {
-        if (!dragging?.order) {
+        if (!dragging?.defaultOrder || !dragging.order) {
             return;
         }
         event.preventDefault();
         draft.orders ||= {};
-        draft.orders[dragging.parentPath] = dragging.order;
+        const savedOrder = draft.orders[dragging.parentPath];
+        const separatorKeys = new Set([
+            ...(getEntryCatalogChildren(dragging.parentPath) || [])
+                .filter((item) => item.type === "separator")
+                .map((item) => item.key),
+            ...(savedOrder || []).filter((key) =>
+                key.startsWith("separator_") || key.startsWith("plugin-separator:")),
+        ]);
+        draft.orders[dragging.parentPath] = mergeEntryOrderPreservingUnknown(
+            dragging.defaultOrder,
+            savedOrder,
+            dragging.order,
+            separatorKeys,
+        );
         dragging = undefined;
         renderBrowser();
     });
@@ -677,6 +694,7 @@ export const genEntryVisibilityHtml = () => `<div class="b3-label config-item" d
 </div>`;
 
 export const mountEntryVisibility = (root: HTMLElement) => {
+    refreshSlashMenuCatalog(window.siyuan.ws?.app?.plugins || []);
     renderProfileCards(root);
     root.querySelector("[data-action='create']")?.addEventListener("click", () => openProfileEditor(root));
     root.querySelector("[data-action='export-all']")?.addEventListener("click", exportBundle);

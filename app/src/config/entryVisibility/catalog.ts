@@ -5,6 +5,7 @@ export interface IEntryCatalogNode {
     label: () => string;
     simple: boolean;
     type: "entry" | "separator";
+    sortable?: boolean;
     children?: IEntryCatalogNode[];
 }
 
@@ -18,12 +19,14 @@ export interface IEntryCatalogSection {
 const lang = (key: string) => () => window.siyuan.languages[key] || key;
 const literal = (value: string) => () => value;
 const location = (...labels: Array<() => string>) => () => labels.map((label) => label()).join(" - ");
-const node = (key: string, label: () => string, simple = true, children?: IEntryCatalogNode[]): IEntryCatalogNode => ({
+const node = (key: string, label: () => string, simple = true, children?: IEntryCatalogNode[],
+              sortable?: boolean): IEntryCatalogNode => ({
     key,
     label,
     simple,
     type: "entry",
     children,
+    sortable,
 });
 const separator = (key: string): IEntryCatalogNode => ({
     key,
@@ -406,6 +409,81 @@ const gutterSingle = () => [
     node("updateAndCreatedAt", () => `${window.siyuan.languages.modifiedAt} / ${window.siyuan.languages.createdAt}`, false),
 ];
 
+export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
+
+const slashMenuBuiltinChildren = [
+    node("template", lang("template")),
+    node("widget", lang("widget")),
+    node("assets", lang("assets")),
+    node("ref", lang("ref")),
+    node("blockEmbed", lang("blockEmbed")),
+    node("aiWriting", lang("aiWriting")),
+    node("database", lang("database")),
+    node("newFileRef", lang("newFileRef")),
+    node("newSubDocRef", lang("newSubDocRef")),
+    separator("separator_1"),
+    node("heading1", lang("heading1")),
+    node("heading2", lang("heading2")),
+    node("heading3", lang("heading3")),
+    node("heading4", lang("heading4")),
+    node("heading5", lang("heading5")),
+    node("heading6", lang("heading6")),
+    node("list", lang("list")),
+    node("orderedList", lang("ordered-list")),
+    node("check", lang("check")),
+    node("quote", lang("quote")),
+    node("calloutNote", location(lang("callout"), literal("Note"))),
+    node("calloutTip", location(lang("callout"), literal("Tip"))),
+    node("calloutImportant", location(lang("callout"), literal("Important"))),
+    node("calloutWarning", location(lang("callout"), literal("Warning"))),
+    node("calloutCaution", location(lang("callout"), literal("Caution"))),
+    node("code", lang("code")),
+    node("table", lang("table")),
+    node("line", lang("line")),
+    node("math", lang("math")),
+    node("html", literal("HTML")),
+    node("databaseTableView", lang("databaseTableView")),
+    node("databaseKanbanView", lang("databaseKanbanView")),
+    node("databaseGalleryView", lang("databaseGalleryView")),
+    separator("separator_2"),
+    node("emoji", lang("emoji")),
+    node("link", lang("link")),
+    node("bold", lang("bold")),
+    node("italic", lang("italic")),
+    node("underline", lang("underline")),
+    node("strike", lang("strike")),
+    node("mark", lang("mark")),
+    node("sup", lang("sup")),
+    node("sub", lang("sub")),
+    node("inlineCode", lang("inline-code")),
+    node("kbd", lang("kbd")),
+    node("tag", lang("tag")),
+    node("inlineMath", lang("inline-math")),
+    separator("separator_3"),
+    node("insertAsset", lang("insertAsset")),
+    node("insertHTMLFile", lang("insertHTMLFile")),
+    node("insertIframeURL", lang("insertIframeURL")),
+    node("insertImgURL", lang("insertImgURL")),
+    node("insertVideoURL", lang("insertVideoURL")),
+    node("insertAudioURL", lang("insertAudioURL")),
+    separator("separator_4"),
+    node("staff", literal("ABC")),
+    node("chart", literal("Chart")),
+    node("flowChart", literal("FlowChart")),
+    node("graph", literal("Graphviz")),
+    node("mermaid", literal("Mermaid")),
+    node("mindmap", literal("Mind map")),
+    node("UML", literal("PlantUML")),
+    separator("separator_5"),
+    node("infoStyle", lang("infoStyle")),
+    node("successStyle", lang("successStyle")),
+    node("warningStyle", lang("warningStyle")),
+    node("errorStyle", lang("errorStyle")),
+    node("clearFontStyle", lang("clearFontStyle")),
+];
+
+const slashMenuRoot = node("menu", lang("entrySlashMenu"), true, [...slashMenuBuiltinChildren], true);
+
 export const entryCatalog: IEntryCatalogSection[] = [
     {
         key: "dock",
@@ -559,6 +637,12 @@ export const entryCatalog: IEntryCatalogSection[] = [
             separator("separator_2"),
             node("docInfo", lang("blockCount"), false),
         ],
+    },
+    {
+        key: "editor.slash",
+        label: location(lang("editor"), lang("entrySlashMenu")),
+        sortable: false,
+        children: [slashMenuRoot],
     },
     {
         key: "gutter.single",
@@ -759,7 +843,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
 
 const entryMap = new Map<string, IEntryCatalogNode>();
 const parentMap = new Map<string, string>();
-const sectionMap = new Map(entryCatalog.map((section) => [section.key, section]));
+const sectionMap = new Map<string, IEntryCatalogSection>();
 const childrenMap = new Map<string, IEntryCatalogNode[]>();
 
 const indexNodes = (prefix: string, nodes: IEntryCatalogNode[]) => {
@@ -774,7 +858,18 @@ const indexNodes = (prefix: string, nodes: IEntryCatalogNode[]) => {
     });
 };
 
-entryCatalog.forEach((section) => indexNodes(section.key, section.children));
+const rebuildCatalogIndexes = () => {
+    entryMap.clear();
+    parentMap.clear();
+    sectionMap.clear();
+    childrenMap.clear();
+    entryCatalog.forEach((section) => {
+        sectionMap.set(section.key, section);
+        indexNodes(section.key, section.children);
+    });
+};
+
+rebuildCatalogIndexes();
 
 export const getEntryCatalogNode = (path: string) => entryMap.get(path);
 export const getEntryParentPath = (path: string) => parentMap.get(path);
@@ -783,8 +878,16 @@ export const getEntryPaths = () => Array.from(entryMap.entries())
     .map(([path]) => path);
 export const getEntryCatalogSection = (key: string) => sectionMap.get(key);
 export const getEntryCatalogChildren = (path: string) => childrenMap.get(path);
+export const isEntryOrderSortable = (parentPath: string) => {
+    const section = getEntryCatalogSection(parentPath);
+    if (section) {
+        return section.sortable !== false;
+    }
+    const entry = getEntryCatalogNode(parentPath);
+    return Boolean(entry && entry.sortable !== false);
+};
 export const getEntryOrderParents = () => Array.from(childrenMap.keys())
-    .filter((path) => getEntryCatalogSection(path)?.sortable !== false);
+    .filter(isEntryOrderSortable);
 export const getEntryCatalogPathChain = (sectionKey: string, path: string) => {
     const chain: string[] = [];
     let current: string | undefined = path;
@@ -796,4 +899,89 @@ export const getEntryCatalogPathChain = (sectionKey: string, path: string) => {
         current = getEntryParentPath(current);
     }
     return current === sectionKey ? chain : [];
+};
+
+interface ISlashMenuCatalogPlugin {
+    name: string;
+    displayName?: string;
+    protyleSlash: Array<{
+        id: string;
+        html: string;
+        filter?: string[];
+    }>;
+}
+
+const encodeSlashMenuEntryKeyPart = (value: string) => encodeURIComponent(value).replace(/\./g, "%2E");
+
+export const getPluginSlashEntryKey = (pluginName: string, slashID: string,
+                                       type: "entry" | "separator" = "entry") =>
+    `${type === "separator" ? "plugin-separator" : "plugin"}:${encodeSlashMenuEntryKeyPart(pluginName)}:${encodeSlashMenuEntryKeyPart(slashID)}`;
+
+export const getSlashMenuEntryPath = (entryKey: string) => `${SLASH_MENU_ROOT_PATH}.${entryKey}`;
+
+const getPluginSlashEntryText = (slash: ISlashMenuCatalogPlugin["protyleSlash"][number]) => {
+    if (typeof document !== "undefined") {
+        const template = document.createElement("template");
+        template.innerHTML = slash.html;
+        const text = template.content.querySelector(".b3-list-item__text")?.textContent?.trim();
+        if (text) {
+            return text;
+        }
+    }
+    const match = slash.html.match(/<[^>]*class\s*=\s*["'][^"']*\bb3-list-item__text\b[^"']*["'][^>]*>([\s\S]*?)<\/[^>]+>/i);
+    const text = match?.[1].replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    return text || slash.filter?.[0]?.trim() || slash.id;
+};
+
+let slashMenuCatalogSignature = "[]";
+
+const normalizeSlashMenuCatalogSeparators = (nodes: IEntryCatalogNode[]) => {
+    const result: IEntryCatalogNode[] = [];
+    nodes.forEach((item) => {
+        if (item.type === "separator" && (result.length === 0 || result[result.length - 1].type === "separator")) {
+            return;
+        }
+        result.push(item);
+    });
+    if (result[result.length - 1]?.type === "separator") {
+        result.pop();
+    }
+    return result;
+};
+
+export const refreshSlashMenuCatalog = (plugins: ISlashMenuCatalogPlugin[]) => {
+    const signature = JSON.stringify(plugins.map((plugin) => ({
+        name: plugin.name,
+        displayName: plugin.displayName,
+        items: plugin.protyleSlash.map((slash) => ({
+            id: slash.id,
+            html: slash.html,
+            filter: slash.filter,
+        })),
+    })));
+    if (signature === slashMenuCatalogSignature) {
+        return;
+    }
+    const pluginNodes: IEntryCatalogNode[] = [];
+    const pluginKeys = new Set<string>();
+    plugins.forEach((plugin) => {
+        plugin.protyleSlash.forEach((slash) => {
+            const identityKey = getPluginSlashEntryKey(plugin.name, slash.id);
+            if (pluginKeys.has(identityKey)) {
+                return;
+            }
+            pluginKeys.add(identityKey);
+            if (slash.html === "separator") {
+                pluginNodes.push(separator(getPluginSlashEntryKey(plugin.name, slash.id, "separator")));
+            } else {
+                const pluginName = plugin.displayName?.trim() || plugin.name;
+                pluginNodes.push(node(identityKey, literal(`${pluginName} - ${getPluginSlashEntryText(slash)}`)));
+            }
+        });
+    });
+    slashMenuRoot.children = normalizeSlashMenuCatalogSeparators(pluginNodes.length > 0
+        ? [...slashMenuBuiltinChildren, separator("separator_6"), ...pluginNodes]
+        : [...slashMenuBuiltinChildren]);
+    slashMenuCatalogSignature = signature;
+    rebuildCatalogIndexes();
 };

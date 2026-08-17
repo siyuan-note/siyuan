@@ -3,6 +3,7 @@ import {Constants} from "../../constants";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {genIconHTML} from "./util";
 import {applyMermaidLayout, getMermaidLayout, MERMAID_LAYOUT_ATTR} from "./mermaidLayout";
+import {MERMAID_SANITIZE_OPTIONS} from "./mermaidSanitize";
 
 let mermaidTidyTreePromise: Promise<void>;
 
@@ -122,12 +123,7 @@ const initMermaid = (mermaidElements: Element[]) => {
             );
             const mermaidData = await window.mermaid.render(id, content);
             let svg = mermaidData.svg.replace(/(href|src|xlink:href)\s*=\s*["']\\\\/gi, (match, p1) => `${p1}="about:blank"`);
-            svg = window.DOMPurify.sanitize(svg, {
-                USE_PROFILES: {svg: true, svgFilters: true, mathMl: true},
-                ADD_TAGS: ["foreignObject", "use", "style"],
-                ADD_ATTR: ["dominant-baseline", "xlink:href", "href"], // 保留对齐和链接属性
-                HTML_INTEGRATION_POINTS: {foreignobject: true} // 必须添加此项，否则 foreignObject 里的 HTML 内容会被清空
-            });
+            svg = window.DOMPurify.sanitize(svg, MERMAID_SANITIZE_OPTIONS);
             renderElement.lastElementChild.innerHTML = svg;
         } catch (e) {
             const errorElement = document.querySelector("#" + id);

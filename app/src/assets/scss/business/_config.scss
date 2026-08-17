@@ -924,6 +924,11 @@
         padding: 0 12px;
         text-overflow: ellipsis;
         white-space: nowrap;
+
+        > .b3-switch {
+          flex-shrink: 0;
+          margin-left: 8px;
+        }
       }
 
       &-list {

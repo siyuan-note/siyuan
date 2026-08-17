@@ -207,11 +207,20 @@ const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string
     aria-label="${escapeAttr(item.label())}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
     ${!parentEnabled && !readOnly ? " disabled" : ""}${isEntryChecked(profile, path, item) ? " checked" : ""}>`;
 
+interface IEntryColumnHeaderSwitch {
+    item: IEntryCatalogNode;
+    path: string;
+}
+
 const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
                            nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
-                           parentEnabled: boolean, readOnly: boolean, sortable: boolean) => `<section class="config-entry-visibility__column"
+                           parentEnabled: boolean, readOnly: boolean, sortable: boolean,
+                           headerSwitch?: IEntryColumnHeaderSwitch) => `<section class="config-entry-visibility__column"
     data-entry-column data-entry-depth="${depth}">
-    <div class="config-entry-visibility__column-title" title="${escapeAttr(title)}">${escapeHtml(title)}</div>
+    <div class="config-entry-visibility__column-title">
+        <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
+        ${headerSwitch ? renderEntrySwitch(profile, headerSwitch.path, headerSwitch.item, true, readOnly) : ""}
+    </div>
     <div class="config-entry-visibility__column-list">
         ${nodes.map((item) => {
         const path = `${prefix}.${item.key}`;
@@ -244,6 +253,11 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
     </div>
 </section>`;
 
+const getDirectDisplayRoot = (section: IEntryCatalogSection) => section.children.length === 1 &&
+    section.children[0].displayChildrenDirectly
+    ? section.children[0]
+    : undefined;
+
 const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey: string,
                             selectedPaths: string[], readOnly: boolean, visiblePaths?: Set<string>,
                             visibleSectionKeys?: Set<string>) => {
@@ -262,10 +276,17 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     </div>
 </section>`;
     const columns = [locationColumn];
-    let nodes = section.children;
-    let prefix = section.key;
-    let title = section.label();
-    let parentEnabled = true;
+    const directDisplayRoot = getDirectDisplayRoot(section);
+    const directDisplayRootPath = directDisplayRoot ? `${section.key}.${directDisplayRoot.key}` : "";
+    const columnSelectedPaths = directDisplayRoot && selectedPaths[0] === directDisplayRootPath
+        ? selectedPaths.slice(1)
+        : selectedPaths;
+    let nodes = directDisplayRoot?.children || section.children;
+    let prefix = directDisplayRoot ? directDisplayRootPath : section.key;
+    let title = directDisplayRoot?.label() || section.label();
+    let parentEnabled = directDisplayRoot
+        ? isEntryChecked(profile, directDisplayRootPath, directDisplayRoot)
+        : true;
     let depth = 0;
     while (nodes.length > 0) {
         const orderedNodes = orderEntryNodes(profile, prefix, nodes);
@@ -275,9 +296,10 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
         if (columnNodes.length === 0) {
             break;
         }
-        columns.push(renderEntryColumn(profile, title, prefix, columnNodes, depth, selectedPaths,
-            parentEnabled, readOnly, !visiblePaths && isEntryOrderSortable(prefix) && !readOnly));
-        const selectedPath = selectedPaths[depth];
+        columns.push(renderEntryColumn(profile, title, prefix, columnNodes, depth, columnSelectedPaths,
+            parentEnabled, readOnly, !visiblePaths && isEntryOrderSortable(prefix) && !readOnly,
+            depth === 0 && directDisplayRoot ? {item: directDisplayRoot, path: directDisplayRootPath} : undefined));
+        const selectedPath = columnSelectedPaths[depth];
         const selectedNode = selectedPath && columnNodes.find((item) => `${prefix}.${item.key}` === selectedPath);
         if (!selectedNode?.children?.length) {
             break;

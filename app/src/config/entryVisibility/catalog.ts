@@ -5,6 +5,7 @@ export interface IEntryCatalogNode {
     label: () => string;
     simple: boolean;
     type: "entry" | "separator";
+    displayChildrenDirectly?: boolean;
     sortable?: boolean;
     children?: IEntryCatalogNode[];
 }
@@ -482,7 +483,10 @@ const slashMenuBuiltinChildren = [
     node("clearFontStyle", lang("clearFontStyle")),
 ];
 
-const slashMenuRoot = node("menu", lang("entrySlashMenu"), true, [...slashMenuBuiltinChildren], true);
+const slashMenuRoot = {
+    ...node("menu", lang("entrySlashMenu"), true, [...slashMenuBuiltinChildren], true),
+    displayChildrenDirectly: true,
+};
 
 export const entryCatalog: IEntryCatalogSection[] = [
     {

@@ -133,6 +133,7 @@ test("slash menu entries are indexed below their total switch", () => {
     const templatePath = getSlashMenuEntryPath("template");
     assert.equal(SLASH_MENU_ROOT_PATH, "editor.slash.menu");
     assert.equal(templatePath, "editor.slash.menu.template");
+    assert.equal(getEntryCatalogNode(SLASH_MENU_ROOT_PATH)?.displayChildrenDirectly, true);
     assert.equal(getEntryCatalogNode(templatePath)?.key, "template");
     assert.equal(getEntryParentPath(templatePath), SLASH_MENU_ROOT_PATH);
     assert.deepEqual(getEntryCatalogPathChain("editor.slash", templatePath), [

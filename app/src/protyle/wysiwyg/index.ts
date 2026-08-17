@@ -193,6 +193,7 @@ import {
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldOpenListItemAttr} from "./listContext";
+import {getBlockEdgeCaretPoint, isCaretRangeInsideElement} from "./blockEdgeCaret";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -219,6 +220,31 @@ const refreshGutterByPointer = (protyle: IProtyle, pointerElement: Element | nul
     } else {
         hideElements(["gutter"], protyle);
     }
+};
+
+const focusTextBlockEdgeByPoint = (blockElement: HTMLElement, x: number, y: number,
+                                   contentLeft: number, contentRight: number) => {
+    const editableElement = getContenteditableElement(blockElement) as HTMLElement;
+    if (!editableElement || !blockElement.contains(editableElement) ||
+        editableElement.getAttribute("contenteditable") !== "true") {
+        return false;
+    }
+    const editableBlockElement = hasClosestBlock(editableElement);
+    if (!editableBlockElement ||
+        !["NodeParagraph", "NodeHeading"].includes(editableBlockElement.getAttribute("data-type"))) {
+        return false;
+    }
+    const point = getBlockEdgeCaretPoint(x, y, contentLeft, contentRight,
+        editableElement.getBoundingClientRect());
+    if (!point) {
+        return false;
+    }
+    const range = document.caretRangeFromPoint(point.x, point.y);
+    if (!isCaretRangeInsideElement(range, editableElement)) {
+        return false;
+    }
+    focusByRange(range);
+    return true;
 };
 
 const getShiftClickBlockByPoint = (wysiwygElement: HTMLElement, startElement: HTMLElement, x: number, y: number) => {
@@ -2439,7 +2465,11 @@ export class WYSIWYG {
                         const blockPoint = getShiftClickBlockByPoint(this.element, nodeElement,
                             mouseUpEvent.clientX, mouseUpEvent.clientY);
                         if (blockPoint) {
-                            focusBlock(blockPoint.blockElement, undefined, blockPoint.toStart);
+                            // 多行文本块左右空白点击需保留纵坐标 https://github.com/siyuan-note/siyuan/issues/18789
+                            if (!focusTextBlockEdgeByPoint(blockPoint.blockElement, mouseUpEvent.clientX,
+                                mouseUpEvent.clientY, mostLeft, mostRight)) {
+                                focusBlock(blockPoint.blockElement, undefined, blockPoint.toStart);
+                            }
                         } else {
                             focusBlock(nodeElement, undefined, mouseUpEvent.clientX < mostLeft);
                         }

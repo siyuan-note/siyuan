@@ -24,6 +24,7 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
+	"html"
 	"io"
 	"os/exec"
 	"strings"
@@ -41,6 +42,11 @@ const (
 	maxClipboardMathPandocOutput = 2 * 1024 * 1024
 	clipboardMathPandocTimeout   = 5 * time.Second
 	officeCompoundFileSignature  = "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1"
+)
+
+const (
+	officeHTMLOMMLNamespace = "http://schemas.microsoft.com/office/2004/12/omml"
+	docxOMMLNamespace       = "http://schemas.openxmlformats.org/officeDocument/2006/math"
 )
 
 type clipboardMath struct {
@@ -74,6 +80,18 @@ func convertClipboardMath(mathML, office, wps string) (markdown string, converte
 		logging.LogWarnf("convert clipboard math with pandoc failed: %s", err)
 	}
 	return
+}
+
+func convertOfficeHTMLClipboardMath(officeMathHTML string) (markdown string, converted bool) {
+	input, ok := officeHTMLClipboardMathInput(officeMathHTML)
+	if !ok {
+		return
+	}
+	markdown, converted, err := convertClipboardMathWithRunner("", "", base64.StdEncoding.EncodeToString(input), runClipboardMathPandoc)
+	if err != nil {
+		logging.LogWarnf("convert Office HTML clipboard math with pandoc failed: %s", err)
+	}
+	return markdown, converted
 }
 
 func convertClipboardMathWithRunner(mathML, office, wps string, runner clipboardMathPandocRunner) (markdown string, converted bool, err error) {
@@ -179,6 +197,109 @@ func officeClipboardMathInput(encoded string) (from string, input []byte, ok boo
 		return "docx", packageData, true
 	}
 	return
+}
+
+func officeHTMLClipboardMathInput(fragment string) (input []byte, ok bool) {
+	if fragment == "" || len(fragment) > maxClipboardMathMLBytes {
+		return
+	}
+	documentBody, ok := normalizeOfficeHTMLOMML(fragment)
+	if !ok {
+		return nil, false
+	}
+	documentXML := `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` +
+		`<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:m="` + docxOMMLNamespace + `"><w:body>` +
+		documentBody + `<w:sectPr/></w:body></w:document>`
+	return buildClipboardMathDOCX(documentXML)
+}
+
+func normalizeOfficeHTMLOMML(fragment string) (normalized string, ok bool) {
+	decoder := xml.NewDecoder(strings.NewReader(`<root xmlns:m="` + officeHTMLOMMLNamespace + `">` + fragment + `</root>`))
+	decoder.Entity = map[string]string{"nbsp": "\u00a0"}
+	var builder strings.Builder
+	var mathStack []string
+	rootCount := 0
+	for {
+		token, err := decoder.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", false
+		}
+		switch value := token.(type) {
+		case xml.StartElement:
+			if value.Name.Space != officeHTMLOMMLNamespace && value.Name.Space != docxOMMLNamespace {
+				continue
+			}
+			if len(mathStack) == 0 {
+				if value.Name.Local != "oMathPara" && value.Name.Local != "oMath" {
+					continue
+				}
+				rootCount++
+				builder.WriteString("<w:p>")
+			}
+			mathStack = append(mathStack, value.Name.Local)
+			builder.WriteString("<m:" + value.Name.Local)
+			for _, attr := range value.Attr {
+				if attr.Name.Space == officeHTMLOMMLNamespace || attr.Name.Space == docxOMMLNamespace {
+					builder.WriteString(` m:` + attr.Name.Local + `="` + html.EscapeString(attr.Value) + `"`)
+				} else if attr.Name.Space == "http://www.w3.org/XML/1998/namespace" {
+					builder.WriteString(` xml:` + attr.Name.Local + `="` + html.EscapeString(attr.Value) + `"`)
+				}
+			}
+			builder.WriteByte('>')
+		case xml.EndElement:
+			if value.Name.Space != officeHTMLOMMLNamespace && value.Name.Space != docxOMMLNamespace || len(mathStack) == 0 {
+				continue
+			}
+			localName := mathStack[len(mathStack)-1]
+			if localName != value.Name.Local {
+				return "", false
+			}
+			builder.WriteString("</m:" + localName + ">")
+			mathStack = mathStack[:len(mathStack)-1]
+			if len(mathStack) == 0 {
+				builder.WriteString("</w:p>")
+			}
+		case xml.CharData:
+			if len(mathStack) == 0 {
+				continue
+			}
+			content := strings.ReplaceAll(string(value), "\u00a0", " ")
+			if mathStack[len(mathStack)-1] == "t" {
+				builder.WriteString(html.EscapeString(content))
+			} else if mathStack[len(mathStack)-1] == "r" && strings.TrimSpace(content) != "" {
+				builder.WriteString(`<m:t xml:space="preserve">` + html.EscapeString(content) + `</m:t>`)
+			}
+		}
+	}
+	return builder.String(), rootCount > 0 && len(mathStack) == 0
+}
+
+func buildClipboardMathDOCX(documentXML string) (data []byte, ok bool) {
+	var buffer bytes.Buffer
+	writer := archivezip.NewWriter(&buffer)
+	files := map[string]string{
+		"[Content_Types].xml": `<?xml version="1.0" encoding="UTF-8"?>` +
+			`<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`,
+		"_rels/.rels": `<?xml version="1.0" encoding="UTF-8"?>` +
+			`<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`,
+		"word/document.xml": documentXML,
+	}
+	for name, content := range files {
+		file, err := writer.Create(name)
+		if err != nil {
+			return nil, false
+		}
+		if _, err = file.Write([]byte(content)); err != nil {
+			return nil, false
+		}
+	}
+	if err := writer.Close(); err != nil {
+		return nil, false
+	}
+	return buffer.Bytes(), true
 }
 
 func isClipboardMathDOCX(data []byte) bool {

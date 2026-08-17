@@ -148,6 +148,26 @@ func TestHeadingSiblingsKeepContainerBoundary(t *testing.T) {
 	assertHeadingIDs(t, HeadingSiblings(containerHeading), "container-heading", "container-heading-next")
 }
 
+func TestHeadingChildrenKeepSuperBlockBoundary(t *testing.T) {
+	superBlock := &ast.Node{Type: ast.NodeSuperBlock, ID: "super-block"}
+	heading := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1, ID: "heading"}
+	paragraph := &ast.Node{Type: ast.NodeParagraph, ID: "paragraph"}
+	closeMarker := &ast.Node{Type: ast.NodeSuperBlockCloseMarker}
+	superBlock.AppendChild(&ast.Node{Type: ast.NodeSuperBlockOpenMarker})
+	superBlock.AppendChild(&ast.Node{Type: ast.NodeSuperBlockLayoutMarker})
+	superBlock.AppendChild(heading)
+	superBlock.AppendChild(paragraph)
+	superBlock.AppendChild(closeMarker)
+
+	children := HeadingChildren(heading)
+	if 1 != len(children) || paragraph != children[0] {
+		t.Fatalf("heading children should stop before the super block close marker, got %d nodes", len(children))
+	}
+	if superBlock != closeMarker.Parent {
+		t.Fatal("heading child lookup should keep the close marker in the super block")
+	}
+}
+
 func assertHeadingIDs(t *testing.T, headings []*ast.Node, expected ...string) {
 	t.Helper()
 	if len(headings) != len(expected) {

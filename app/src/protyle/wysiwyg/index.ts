@@ -51,7 +51,7 @@ import {dropEvent} from "../util/editorCommonEvent";
 import {beforeBlockquoteInput, input} from "./input";
 import {
     getContenteditableElement,
-    getEmbedChildOperationContext,
+    getEmbedGutterOperationContext,
     getFirstBlock,
     getLastBlock,
     getNextBlock,
@@ -211,7 +211,7 @@ const refreshGutterByPointer = (protyle: IProtyle, pointerElement: Element | nul
     }
     if (gutterElement) {
         const embedElement = isInEmbedBlock(gutterElement);
-        if (embedElement && !getEmbedChildOperationContext(gutterElement)) {
+        if (embedElement && !getEmbedGutterOperationContext(gutterElement)) {
             gutterElement = embedElement;
         }
     }

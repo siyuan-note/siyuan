@@ -12,7 +12,7 @@ import {isChromeBrowser, isInAndroid, isInHarmony, isIPhone} from "../../protyle
 import {getRangeByPoint} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 import {Constants} from "../../constants";
-import {getEmbedChildOperationContext} from "../../protyle/wysiwyg/getBlock";
+import {getEmbedGutterOperationContext} from "../../protyle/wysiwyg/getBlock";
 import {backModel} from "../menu/model";
 import {hasVisibleSelectionText, shouldRestoreLongPressSelection} from "./touchSelection";
 import {getTouchAxis} from "./touchGesture";
@@ -174,7 +174,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
                 editor.protyle.gutter.render(editor.protyle,
-                    getEmbedChildOperationContext(nodeElement) ? nodeElement : embedElement, target);
+                    getEmbedGutterOperationContext(nodeElement) ? nodeElement : embedElement, target);
                 return;
             }
             editor.protyle.gutter.render(editor.protyle, nodeElement, target);

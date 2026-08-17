@@ -1,4 +1,5 @@
 {
+	"importNotebook": "Importa taccuino",
 	"distributeSelectedColWidths": "Distribuisci uniformemente la larghezza delle colonne selezionate",
 	"useDefaultWidthForAllColumns": "Usa la larghezza predefinita per tutte le colonne",
 	"closeTabOnDoubleClick": "Usa il doppio clic per chiudere le schede",
@@ -2579,6 +2580,7 @@
 		"369": "Configurazione OIDC non valida",
 		"370": "traffico accelerato LAN %s",
 		"371": "Il taccuino esiste già",
-		"372": "Il taccuino è stato ripristinato e rimane chiuso"
+		"372": "Il taccuino è stato ripristinato e rimane chiuso",
+		"373": "Questo archivio contiene dati di un taccuino. Importalo da [Albero dei documenti - Altro - Importa taccuino]"
 	}
 	}

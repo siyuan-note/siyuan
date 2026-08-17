@@ -137,6 +137,9 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute, boxID string) (tree *parse
 }
 
 func ImportSY(zipPath, boxID, toPath string) (err error) {
+	if isSYNotebookBundle(zipPath) {
+		return errors.New(Conf.Language(373))
+	}
 	_, err = importSY(zipPath, boxID, toPath, false, false)
 	return
 }
@@ -263,6 +266,10 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			return
 		}
 		createNotebook = isSYNotebookExport(hasImportedBoxConf, hasImportedBoxDocMeta)
+	}
+	if !createNotebook && isSYNotebookExport(hasImportedBoxConf, hasImportedBoxDocMeta) {
+		err = errors.New(Conf.Language(373))
+		return
 	}
 	if autoDetect && !createNotebook && boxID == "" {
 		err = ErrSYTargetNotebookRequired

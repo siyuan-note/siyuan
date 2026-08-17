@@ -1,4 +1,5 @@
 {
+	"importNotebook": "Notitieboek importeren",
 	"distributeSelectedColWidths": "Geselecteerde kolombreedtes gelijkmatig verdelen",
 	"useDefaultWidthForAllColumns": "Standaardbreedte voor alle kolommen gebruiken",
 	"closeTabOnDoubleClick": "Tabs sluiten door te dubbelklikken",
@@ -2579,6 +2580,7 @@
 		"369": "Ongeldige OIDC-configuratie",
 		"370": "LAN-versneld verkeer %s",
 		"371": "Het notitieboek bestaat al",
-		"372": "Het notitieboek is hersteld en blijft gesloten"
+		"372": "Het notitieboek is hersteld en blijft gesloten",
+		"373": "Dit archief bevat notitieboekgegevens. Importeer het via [Documentboom - Meer - Notitieboek importeren]"
 	}
 	}

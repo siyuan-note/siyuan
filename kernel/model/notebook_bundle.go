@@ -60,6 +60,22 @@ type inspectedSYNotebook struct {
 	blockIDs    []string
 }
 
+// isSYNotebookBundle 判断压缩包是否为批量笔记本导出包。
+func isSYNotebookBundle(zipPath string) bool {
+	archive, err := zip.OpenReader(zipPath)
+	if nil != err {
+		return false
+	}
+	defer archive.Close()
+	manifestSuffix := "/" + syNotebookBundleManifestPath
+	for _, file := range archive.File {
+		if strings.HasSuffix(file.Name, manifestSuffix) {
+			return true
+		}
+	}
+	return false
+}
+
 func exportNotebooksSYBundle(ids []string) (zipPath string) {
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	if len(ids) < 1 {

@@ -1,4 +1,5 @@
 {
+	"importNotebook": "导入笔记本",
 	"distributeSelectedColWidths": "均分所选列宽",
 	"useDefaultWidthForAllColumns": "所有列使用默认列宽",
 	"closeTabOnDoubleClick": "使用双击关闭页签",
@@ -2579,6 +2580,7 @@
 		"369": "OIDC 配置无效",
 		"370": "局域网加速流量 %s",
 		"371": "笔记本已存在",
-		"372": "笔记本已回滚并保持关闭状态"
+		"372": "笔记本已回滚并保持关闭状态",
+		"373": "该压缩包包含笔记本数据，请从 [文档树 - 更多 - 导入笔记本] 中导入"
 	}
 	}

@@ -109,6 +109,24 @@ func TestExportNotebooksSYKeepsCrossNotebookReferences(t *testing.T) {
 	writeExportRelatedTestTree(t, targetTree)
 
 	exportPath := ExportNotebooksSY([]string{sourceBoxID, targetBoxID})
+	exportAbsPath, err := exportedFilePath(exportPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if !isSYNotebookBundle(exportAbsPath) {
+		t.Fatal("exported archive was not detected as a notebook bundle")
+	}
+	if err = ImportSY(exportAbsPath, sourceBoxID, "/"); nil == err {
+		t.Fatal("notebook bundle should not be imported into a document")
+	}
+	singleExportPath := ExportNotebookSY(sourceBoxID)
+	singleExportAbsPath, err := exportedFilePath(singleExportPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if err = ImportSY(singleExportAbsPath, targetBoxID, "/"); nil == err {
+		t.Fatal("notebook archive should not be imported into a document")
+	}
 	syArchive := openExportArchive(t, exportPath)
 	syRoot := "Notebook-2"
 	sourceArchivePath := filepath.ToSlash(filepath.Join(syRoot, "notebooks", "Notebook.sy.zip"))

@@ -1,4 +1,5 @@
 {
+	"importNotebook": "Not defteri içe aktar",
 	"distributeSelectedColWidths": "Seçili sütun genişliklerini eşit dağıt",
 	"useDefaultWidthForAllColumns": "Tüm sütunlar için varsayılan genişliği kullan",
 	"closeTabOnDoubleClick": "Sekmeleri çift tıklayarak kapat",
@@ -2579,6 +2580,7 @@
 		"369": "Geçersiz OIDC yapılandırması",
 		"370": "LAN hızlandırılmış trafik %s",
 		"371": "Defter zaten mevcut",
-		"372": "Defter geri yüklendi ve kapalı kalacak"
+		"372": "Defter geri yüklendi ve kapalı kalacak",
+		"373": "Bu arşiv not defteri verileri içeriyor. [Belge ağacı - Diğer - Not defteri içe aktar] menüsünden içe aktarın"
 	}
 	}

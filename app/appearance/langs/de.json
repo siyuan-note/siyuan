@@ -1,4 +1,5 @@
 {
+	"importNotebook": "Notizbuch importieren",
 	"distributeSelectedColWidths": "Ausgewählte Spaltenbreiten gleichmäßig verteilen",
 	"useDefaultWidthForAllColumns": "Standardbreite für alle Spalten verwenden",
 	"closeTabOnDoubleClick": "Tabs per Doppelklick schließen",
@@ -2579,6 +2580,7 @@
 		"369": "Ungültige OIDC-Konfiguration",
 		"370": "LAN-beschleunigter Datenverkehr %s",
 		"371": "Das Notizbuch ist bereits vorhanden",
-		"372": "Das Notizbuch wurde wiederhergestellt und bleibt geschlossen"
+		"372": "Das Notizbuch wurde wiederhergestellt und bleibt geschlossen",
+		"373": "Dieses Archiv enthält Notizbuchdaten. Bitte importieren Sie es über [Dokumentenbaum - Mehr - Notizbuch importieren]"
 	}
 	}

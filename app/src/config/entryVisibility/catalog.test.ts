@@ -167,6 +167,14 @@ test("document loading actions follow the document menu order", () => {
 });
 
 test("multiple document and notebook entries follow their document tree menus", () => {
+    assert.deepEqual(getEntryCatalogChildren("docTree.panel").map((item) => item.key), [
+        "newNotebook",
+        "newEncryptedNotebook",
+        "importNotebook",
+        "rebuildDataIndex",
+        "sort",
+        "publishAccess",
+    ]);
     assert.deepEqual(getEntryCatalogChildren("docTree.notebooks").map((item) => item.key), [
         "sort",
         "search",

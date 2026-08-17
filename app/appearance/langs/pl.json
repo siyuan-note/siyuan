@@ -1,4 +1,5 @@
 {
+	"importNotebook": "Importuj notatnik",
 	"distributeSelectedColWidths": "Rozłóż równomiernie szerokość wybranych kolumn",
 	"useDefaultWidthForAllColumns": "Użyj domyślnej szerokości dla wszystkich kolumn",
 	"closeTabOnDoubleClick": "Zamykanie kart podwójnym kliknięciem",
@@ -2579,6 +2580,7 @@
 		"369": "Nieprawidłowa konfiguracja OIDC",
 		"370": "ruch przyspieszony przez LAN %s",
 		"371": "Notatnik już istnieje",
-		"372": "Notatnik został przywrócony i pozostaje zamknięty"
+		"372": "Notatnik został przywrócony i pozostaje zamknięty",
+		"373": "To archiwum zawiera dane notatnika. Zaimportuj je z [Drzewo dokumentów - Więcej - Importuj notatnik]"
 	}
 	}

@@ -1,4 +1,5 @@
 {
+	"importNotebook": "Import Notebook",
 	"distributeSelectedColWidths": "Distribute selected column widths evenly",
 	"useDefaultWidthForAllColumns": "Use default width for all columns",
 	"closeTabOnDoubleClick": "Use double-click to close tabs",
@@ -2579,6 +2580,7 @@
 		"369": "Invalid OIDC configuration",
 		"370": "LAN accelerated traffic %s",
 		"371": "The notebook already exists",
-		"372": "The notebook has been restored and remains closed"
+		"372": "The notebook has been restored and remains closed",
+		"373": "This archive contains notebook data. Please import it from [Document Tree - More - Import Notebook]"
 	}
 	}

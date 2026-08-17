@@ -1,4 +1,5 @@
 {
+	"importNotebook": "Impor buku catatan",
 	"distributeSelectedColWidths": "Distribusikan lebar kolom yang dipilih secara merata",
 	"useDefaultWidthForAllColumns": "Gunakan lebar default untuk semua kolom",
 	"closeTabOnDoubleClick": "Gunakan klik dua kali untuk menutup tab",
@@ -2579,6 +2580,7 @@
 		"369": "Konfigurasi OIDC tidak valid",
 		"370": "lalu lintas akselerasi LAN %s",
 		"371": "Buku catatan sudah ada",
-		"372": "Buku catatan telah dipulihkan dan tetap ditutup"
+		"372": "Buku catatan telah dipulihkan dan tetap ditutup",
+		"373": "Arsip ini berisi data buku catatan. Impor dari [Pohon dokumen - Lainnya - Impor buku catatan]"
 	}
 	}

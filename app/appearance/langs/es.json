@@ -1,4 +1,5 @@
 {
+	"importNotebook": "Importar cuaderno",
 	"distributeSelectedColWidths": "Distribuir uniformemente el ancho de las columnas seleccionadas",
 	"useDefaultWidthForAllColumns": "Usar el ancho predeterminado para todas las columnas",
 	"closeTabOnDoubleClick": "Usar doble clic para cerrar pestañas",
@@ -2579,6 +2580,7 @@
 		"369": "Configuración OIDC no válida",
 		"370": "tráfico acelerado por LAN %s",
 		"371": "El cuaderno ya existe",
-		"372": "El cuaderno se ha restaurado y permanece cerrado"
+		"372": "El cuaderno se ha restaurado y permanece cerrado",
+		"373": "Este archivo contiene datos de cuadernos. Impórtelo desde [Árbol de documentos - Más - Importar cuaderno]"
 	}
 	}

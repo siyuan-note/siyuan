@@ -16,7 +16,7 @@ import {
 } from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
-import {newEncryptedNotebook, newNotebook, openEncryptedNotebook} from "../../util/mount";
+import {importNotebook, newEncryptedNotebook, newNotebook, openEncryptedNotebook} from "../../util/mount";
 import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {
@@ -1962,6 +1962,20 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                     }
                 }).element);
             }
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "importNotebook",
+                icon: "iconDownload",
+                label: `${window.siyuan.languages.importNotebook}<input class="b3-form__upload" type="file" accept="application/zip">`,
+                bind: (element) => {
+                    element.querySelector<HTMLInputElement>(".b3-form__upload").addEventListener("change", (event) => {
+                        const file = (event.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                            window.siyuan.menus.menu.remove();
+                            importNotebook(file);
+                        }
+                    });
+                },
+            }).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "rebuildDataIndex",

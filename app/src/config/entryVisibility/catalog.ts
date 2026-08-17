@@ -429,6 +429,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
         children: [
             node("newNotebook", lang("newNotebook")),
             node("newEncryptedNotebook", lang("newEncryptedNotebook")),
+            node("importNotebook", lang("importNotebook")),
             node("rebuildDataIndex", lang("rebuildDataIndex")),
             node("sort", lang("sort"), true, sortChildren()),
             node("publishAccess", lang("publishAccess")),

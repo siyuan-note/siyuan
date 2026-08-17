@@ -1,4 +1,5 @@
 {
+	"importNotebook": "導入筆記本",
 	"distributeSelectedColWidths": "均分所選欄寬",
 	"useDefaultWidthForAllColumns": "所有欄使用預設欄寬",
 	"closeTabOnDoubleClick": "使用雙擊關閉分頁",
@@ -2579,6 +2580,7 @@
 		"369": "OIDC 設定無效",
 		"370": "區域網路加速流量 %s",
 		"371": "筆記本已存在",
-		"372": "筆記本已回滾並保持關閉狀態"
+		"372": "筆記本已回滾並保持關閉狀態",
+		"373": "該壓縮檔包含筆記本資料，請從 [文件樹 - 更多 - 導入筆記本] 中導入"
 	}
 	}

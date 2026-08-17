@@ -1,4 +1,5 @@
 {
+	"importNotebook": "Importar caderno",
 	"distributeSelectedColWidths": "Distribuir uniformemente a largura das colunas selecionadas",
 	"useDefaultWidthForAllColumns": "Usar a largura padrão para todas as colunas",
 	"closeTabOnDoubleClick": "Usar clique duplo para fechar abas",
@@ -2579,6 +2580,7 @@
 		"369": "Configuração OIDC inválida",
 		"370": "tráfego acelerado pela LAN %s",
 		"371": "O caderno já existe",
-		"372": "O caderno foi restaurado e permanece fechado"
+		"372": "O caderno foi restaurado e permanece fechado",
+		"373": "Este arquivo contém dados de caderno. Importe-o em [Árvore de documentos - Mais - Importar caderno]"
 	}
 	}

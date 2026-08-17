@@ -179,10 +179,9 @@ const normalizeRichClipboardTableSize = (tableElement: HTMLTableElement) => {
         return Math.max(80, Number.isFinite(width) ? width : 80);
     });
     const sourceWidth = columnWidths.reduce((width, columnWidth) => width + columnWidth, 0);
-    const targetWidth = Math.min(640, sourceWidth);
+    const targetWidth = Math.min(540, Math.max(360, sourceWidth));
     const scale = targetWidth / sourceWidth;
     const normalizedWidths = columnWidths.map(columnWidth => Math.round(columnWidth * scale));
-    const normalizedTableWidth = normalizedWidths.reduce((width, columnWidth) => width + columnWidth, 0);
 
     columnElements.slice(0, columnCount).forEach((columnElement, index) => {
         const width = normalizedWidths[index];
@@ -200,10 +199,9 @@ const normalizeRichClipboardTableSize = (tableElement: HTMLTableElement) => {
         columnIndex += colspan;
     });
 
-    tableElement.setAttribute("width", normalizedTableWidth.toString());
+    tableElement.setAttribute("width", "100%");
     tableElement.setAttribute("cellpadding", "0");
     tableElement.setAttribute("cellspacing", "0");
-    tableElement.style.width = `${normalizedTableWidth}px`;
     tableElement.style.tableLayout = "fixed";
     tableElement.style.fontSize = "14px";
     tableElement.style.lineHeight = "1.5";

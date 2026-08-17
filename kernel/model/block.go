@@ -1283,6 +1283,13 @@ func resolveEmbedContent(n *ast.Node, luteEngine *lute.Lute) {
 func loadTreeForBlockDOM(id, boxID string) *parse.Tree {
 	bt := treenode.GetBlockTreeInBox(id, boxID)
 	if nil == bt {
+		block := sql.GetBlockInBox(id, boxID)
+		if nil == block {
+			return nil
+		}
+		bt = treenode.GetBlockTreeInBox(block.RootID, boxID)
+	}
+	if nil == bt {
 		return nil
 	}
 	tree, err := loadTreeByBlockTree(bt)

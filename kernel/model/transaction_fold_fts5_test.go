@@ -22,6 +22,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/88250/lute/ast"
@@ -72,6 +73,15 @@ func TestCancelFoldedHeadingSuperBlockKeepsUndoBoundary(t *testing.T) {
 		t.Fatalf("write test tree failed: %s", err)
 	}
 	treenode.UpsertBlockTree(tree)
+	sql.IndexTreeQueue(tree)
+	sql.FlushQueue()
+	treenode.RemoveBlockTree(tree.Box, superBlockID)
+	superBlockDOM := GetBlockDOM(superBlockID)
+	for _, id := range []string{superBlockID, headingID, paragraphID} {
+		if !strings.Contains(superBlockDOM, `data-node-id="`+id+`"`) {
+			t.Fatalf("rendered super block DOM should contain block [%s]", id)
+		}
+	}
 
 	doOperations := []*Operation{
 		{Action: "unfoldHeading", ID: headingID},

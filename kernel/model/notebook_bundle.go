@@ -65,6 +65,7 @@ func exportNotebooksSYBundle(ids []string) (zipPath string) {
 	if len(ids) < 1 {
 		return
 	}
+	defer util.ClearPushProgress(100)
 
 	var boxes []*Box
 	for _, id := range ids {

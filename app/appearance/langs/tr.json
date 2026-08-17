@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "${count} belge seçildi",
 	"entrySlashMenu": "Eğik çizgi menüsü",
 	"importNotebook": "Not defteri içe aktar",
 	"distributeSelectedColWidths": "Seçili sütun genişliklerini eşit dağıt",

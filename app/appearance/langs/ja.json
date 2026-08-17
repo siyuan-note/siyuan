@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "${count} 件の文書を選択",
 	"entrySlashMenu": "スラッシュメニュー",
 	"importNotebook": "ノートブックをインポート",
 	"distributeSelectedColWidths": "選択した列幅を均等にする",

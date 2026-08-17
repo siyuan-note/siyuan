@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "Vybrané dokumenty: ${count}",
 	"entrySlashMenu": "Ponuka príkazov s lomkou",
 	"importNotebook": "Importovať zápisník",
 	"distributeSelectedColWidths": "Rovnomerne rozložiť šírku vybraných stĺpcov",

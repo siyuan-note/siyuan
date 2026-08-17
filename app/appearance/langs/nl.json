@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "${count} documenten geselecteerd",
 	"entrySlashMenu": "Slashmenu",
 	"importNotebook": "Notitieboek importeren",
 	"distributeSelectedColWidths": "Geselecteerde kolombreedtes gelijkmatig verdelen",

@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "${count} documents sélectionnés",
 	"entrySlashMenu": "Menu de commandes slash",
 	"importNotebook": "Importer un carnet",
 	"distributeSelectedColWidths": "Répartir uniformément la largeur des colonnes sélectionnées",

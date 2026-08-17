@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "${count} दस्तावेज़ चयनित",
 	"entrySlashMenu": "स्लैश मेनू",
 	"importNotebook": "नोटबुक आयात करें",
 	"distributeSelectedColWidths": "चयनित स्तंभों की चौड़ाई समान रूप से बाँटें",

@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "Wybrane dokumenty: ${count}",
 	"entrySlashMenu": "Menu poleceń z ukośnikiem",
 	"importNotebook": "Importuj notatnik",
 	"distributeSelectedColWidths": "Rozłóż równomiernie szerokość wybranych kolumn",

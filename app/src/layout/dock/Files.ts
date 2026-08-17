@@ -494,7 +494,11 @@ export class Files extends Model {
                 }
                 event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, ids);
                 event.dataTransfer.dropEffect = "move";
-                window.siyuan.dragTitle = (selectElements[0] as HTMLElement)?.querySelector(".b3-list-item__text")?.textContent?.trim() || "";
+                const isMultiDocumentSelection = selectElements.length > 1 &&
+                    selectElements.every((item) => item.getAttribute("data-type") === "navigation-file");
+                window.siyuan.dragTitle = isMultiDocumentSelection ?
+                    window.siyuan.languages.dragTipSelectedDocs.replace("${count}", selectElements.length.toString()) :
+                    (selectElements[0] as HTMLElement)?.querySelector(".b3-list-item__text")?.textContent?.trim() || "";
                 window.siyuan.dragElement = document.createElement("div");
                 window.siyuan.dragElement.innerText = ids;
             }

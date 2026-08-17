@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "تم تحديد ${count} من المستندات",
 	"entrySlashMenu": "قائمة الشرطة المائلة",
 	"importNotebook": "استيراد دفتر ملاحظات",
 	"distributeSelectedColWidths": "توزيع عرض الأعمدة المحددة بالتساوي",

@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "נבחרו ${count} מסמכים",
 	"entrySlashMenu": "תפריט לוכסן",
 	"importNotebook": "ייבוא מחברת",
 	"distributeSelectedColWidths": "פזר את רוחב העמודות שנבחרו באופן שווה",

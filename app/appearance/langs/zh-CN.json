@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "选中 ${count} 个文档",
 	"entrySlashMenu": "斜杠菜单",
 	"importNotebook": "导入笔记本",
 	"distributeSelectedColWidths": "均分所选列宽",

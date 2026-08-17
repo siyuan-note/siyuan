@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "เลือกเอกสาร ${count} ฉบับ",
 	"entrySlashMenu": "เมนูสแลช",
 	"importNotebook": "นำเข้าสมุดบันทึก",
 	"distributeSelectedColWidths": "กระจายความกว้างของคอลัมน์ที่เลือกให้เท่ากัน",

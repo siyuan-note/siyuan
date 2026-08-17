@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "${count} Dokumente ausgewählt",
 	"entrySlashMenu": "Slash-Menü",
 	"importNotebook": "Notizbuch importieren",
 	"distributeSelectedColWidths": "Ausgewählte Spaltenbreiten gleichmäßig verteilen",

@@ -1,4 +1,5 @@
 {
+	"dragTipSelectedDocs": "Выбрано документов: ${count}",
 	"entrySlashMenu": "Слэш-меню",
 	"importNotebook": "Импортировать блокнот",
 	"distributeSelectedColWidths": "Равномерно распределить ширину выбранных столбцов",

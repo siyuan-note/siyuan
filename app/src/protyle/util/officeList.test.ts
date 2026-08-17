@@ -34,7 +34,9 @@ describe("Office list style parsing", () => {
     it("only accepts actual PowerPoint bullet formats", () => {
         assert.equal(parsePptSpecialFormat("mso-special-format: bullet"), "bullet");
         assert.equal(parsePptSpecialFormat("MSO-SPECIAL-FORMAT:numbullet"), "numbullet");
+        assert.equal(parsePptSpecialFormat("mso-special-format:\"numbullet3\\,1\""), "numbullet");
         assert.equal(parsePptSpecialFormat("mso-special-format:nobullet"), undefined);
+        assert.equal(parsePptSpecialFormat("mso-special-format:bulletproof"), undefined);
         assert.equal(parsePptSpecialFormat("mso-special-format:lastCR"), undefined);
     });
 

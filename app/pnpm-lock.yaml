@@ -13,7 +13,7 @@ importers:
     dependencies:
       '@electron/remote':
         specifier: ^2.1.3
-        version: 2.1.3(electron@42.9.0(supports-color@8.1.1))
+        version: 2.1.3(electron@42.9.2(supports-color@8.1.1))
       zxcvbn:
         specifier: 4.4.2
         version: 4.4.2
@@ -55,8 +55,8 @@ importers:
         specifier: ^1.11.5
         version: 1.11.20
       electron:
-        specifier: 42.9.0
-        version: 42.9.0(supports-color@8.1.1)
+        specifier: 42.9.2
+        version: 42.9.2(supports-color@8.1.1)
       electron-builder:
         specifier: 26.15.7
         version: 26.15.7(electron-builder-squirrel-windows@26.15.7)(supports-color@8.1.1)
@@ -1494,8 +1494,8 @@ packages:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
 
-  electron@42.9.0:
-    resolution: {integrity: sha512-xyKfPbHP43Jx22Z1hItLR4KB5h3/avb5BIX4xaQZ6uPPRY4cQxuHnRVrKCGbSsMa/9zd0bBT4TAVNVuVjYcYtw==}
+  electron@42.9.2:
+    resolution: {integrity: sha512-DwCE6nUhzo8LTP5gHTEMDlATDkwBJ23/L8p4cUpRA56gsKb2PsYmHI2961KpSBxTzrd13YpGKbjzaUcP3+Y22w==}
     engines: {node: '>= 22.12.0'}
     hasBin: true
 
@@ -2452,8 +2452,8 @@ packages:
   pvtsutils@1.3.6:
     resolution: {integrity: sha512-PLgQXQ6H2FWCaeRak8vvk1GW462lMxB5s3Jm673N82zI4vqtVUPuZdffdZbPDFRoU8kAhItWFtPCWiPpp4/EDg==}
 
-  pvutils@1.1.5:
-    resolution: {integrity: sha512-KTqnxsgGiQ6ZAzZCVlJH5eOjSnvlyEgx1m8bkRJfOhmGRqfo5KLvmAlACQkrjEtOQ4B7wF9TdSLIs9O90MX9xA==}
+  pvutils@1.2.0:
+    resolution: {integrity: sha512-BbubeCEyTuQjVMakvJQ/Sxbc93F2pwmbsxONT/ZRrwU7Ua38d8unYTwXpTVLAKJ4BDuH9IGztCjQcd/N/39Dvg==}
     engines: {node: '>=16.0.0'}
 
   quick-lru@5.1.1:
@@ -3071,9 +3071,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron/remote@2.1.3(electron@42.9.0(supports-color@8.1.1))':
+  '@electron/remote@2.1.3(electron@42.9.2(supports-color@8.1.1))':
     dependencies:
-      electron: 42.9.0(supports-color@8.1.1)
+      electron: 42.9.2(supports-color@8.1.1)
 
   '@electron/universal@2.0.3(supports-color@8.1.1)':
     dependencies:
@@ -3916,7 +3916,7 @@ snapshots:
   asn1js@3.0.10:
     dependencies:
       pvtsutils: 1.3.6
-      pvutils: 1.1.5
+      pvutils: 1.2.0
       tslib: 2.8.1
 
   async-exit-hook@2.0.1: {}
@@ -4325,7 +4325,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@42.9.0(supports-color@8.1.1):
+  electron@42.9.2(supports-color@8.1.1):
     dependencies:
       '@electron-internal/extract-zip': 1.0.3
       '@electron/get': 4.0.3(supports-color@8.1.1)
@@ -5238,7 +5238,7 @@ snapshots:
       asn1js: 3.0.10
       bytestreamjs: 2.0.1
       pvtsutils: 1.3.6
-      pvutils: 1.1.5
+      pvutils: 1.2.0
       tslib: 2.8.1
 
   plist@3.1.0:
@@ -5322,7 +5322,7 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  pvutils@1.1.5: {}
+  pvutils@1.2.0: {}
 
   quick-lru@5.1.1: {}
 

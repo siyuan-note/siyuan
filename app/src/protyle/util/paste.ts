@@ -27,6 +27,7 @@ import {extractCrossBlockPasteContext, shouldPreservePastedBlockStructure} from 
 import {normalizePasteResponse} from "./pasteResponse";
 import {applyLuteMarkdownSyntax} from "../render/luteMarkdownSyntax";
 import {convertOfficeLists} from "./officeList";
+import {extractOfficeMathHTML} from "./officeMath";
 import {
     extractWPSPresentationClipboard,
     getWPSPresentationFallback,
@@ -526,6 +527,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     let vscodeEditorData = "";
     let mathML = "";
     let office = "";
+    let officeMathHTML = "";
     let wps = "";
     let wpsPresentation: IWPSPresentationClipboard | undefined;
     let officeListConverted = false;
@@ -563,6 +565,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
 
     // Improve the pasting of selected text in PDF rectangular annotation https://github.com/siyuan-note/siyuan/issues/11629
     textPlain = textPlain.replace(/\r\n|\r|\u2028|\u2029/g, "\n");
+    // PowerPoint 将可编辑公式放在条件注释中，必须在 DOM 解析和清理前读取
+    officeMathHTML = extractOfficeMathHTML(textHTML);
 
     /// #if !BROWSER
     if (!("dataTransfer" in event) && !siyuanHTML && textHTML && textPlain) {
@@ -657,6 +661,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 originalTextHTML = textHTML;
                 mathML = "";
                 office = "";
+                officeMathHTML = extractOfficeMathHTML(textHTML);
                 wps = "";
                 wpsPresentation = undefined;
             }
@@ -997,6 +1002,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 text: textPlain,
                 mathML,
                 office,
+                officeMathHTML,
                 wps,
             }, (response) => {
                 insertConvertedBlockDOM(protyle, response.data);

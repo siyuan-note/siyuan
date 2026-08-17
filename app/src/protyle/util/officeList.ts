@@ -119,7 +119,11 @@ export const parseWordListStyle = (style: string) => {
 
 export const parsePptSpecialFormat = (style: string): "bullet" | "numbullet" | undefined => {
     const value = parseInlineStyle(style)["mso-special-format"]?.trim().toLowerCase();
-    return value === "bullet" || value === "numbullet" ? value : undefined;
+    const normalized = value?.replace(/^(["'])(.*)\1$/, "$2").trim();
+    if (normalized && /^numbullet(?:[\d\\,]+)?$/.test(normalized)) {
+        return "numbullet";
+    }
+    return normalized && /^bullet(?:[\d\\,]+)?$/.test(normalized) ? "bullet" : undefined;
 };
 
 export const parseCssLengthToPoints = (value: string) => {

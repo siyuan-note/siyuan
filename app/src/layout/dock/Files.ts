@@ -53,8 +53,10 @@ import {
 import {
     FILE_TREE_CHILDREN_SORT_MODE,
     FILE_TREE_EFFECTIVE_SORT_MODE,
+    getFileTreeSortRefreshTargets,
     getResponseEffectiveSortMode,
     isCustomFileTreeList,
+    reorderFileTreeNotebooks,
     type IDocSortModeChanged,
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
@@ -67,6 +69,8 @@ export class Files extends Model {
     private actionsElement: HTMLElement;
     private reloadNotebookInfoTimeout: number;
     private docSortModeRefreshTimeout: number;
+    private docSortModeChanges = new Map<string, IDocSortModeChanged>();
+    private docSortModeFullRefresh = false;
     private movedExpandedDocIDs = new Set<string>();
 
     constructor(options: { tab: Tab, app: App }) {
@@ -1523,10 +1527,56 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
     }
 
     public onDocSortModeChanged(data?: IDocSortModeChanged) {
-        updateFileTreeSortMode(data);
+        updateFileTreeSortMode(data, this.element);
+        if (data) {
+            this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
+        } else {
+            this.docSortModeFullRefresh = true;
+        }
         window.clearTimeout(this.docSortModeRefreshTimeout);
         this.docSortModeRefreshTimeout = window.setTimeout(() => {
-            this.init(false);
+            const fullRefresh = this.docSortModeFullRefresh;
+            const changes = Array.from(this.docSortModeChanges.values());
+            this.docSortModeFullRefresh = false;
+            this.docSortModeChanges.clear();
+            if (fullRefresh) {
+                if (changes.some((item) => item.scope === "global")) {
+                    setNoteBook(() => this.init(false));
+                } else {
+                    this.init(false);
+                }
+                return;
+            }
+            const refreshLists = () => {
+                getFileTreeSortRefreshTargets(this.element, changes).forEach((target) => {
+                    const notebookElement = Array.from(this.element.children).find((item) =>
+                        item.getAttribute("data-url") === target.notebookId
+                    );
+                    const liElement = Array.from(notebookElement?.querySelectorAll("li[data-path]") || []).find((item) =>
+                        item.getAttribute("data-path") === target.path
+                    );
+                    if (liElement) {
+                        this.getLeaf(liElement, target.notebookId, true);
+                    }
+                });
+            };
+            if (changes.some((item) => item.scope === "global")) {
+                setNoteBook((notebooks) => {
+                    reorderFileTreeNotebooks(this.element, this.closeElement.lastElementChild, notebooks);
+                    this.element.querySelectorAll<HTMLElement>(
+                        ":scope > ul[data-url] > li[data-type=\"navigation-root\"]"
+                    ).forEach((item) => {
+                        if (window.siyuan.config.fileTree.sort === 6) {
+                            item.setAttribute("draggable", "true");
+                        } else {
+                            item.removeAttribute("draggable");
+                        }
+                    });
+                    refreshLists();
+                });
+            } else {
+                refreshLists();
+            }
         }, 100);
     }
 
@@ -1671,6 +1721,16 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
             // 文件展开时，刷新
             const tempElement = document.createElement("template");
             tempElement.innerHTML = fileHTML;
+            const focusedIDs = Array.from(nextElement.querySelectorAll(":scope > .b3-list-item--focus")).map((item) =>
+                item.getAttribute("data-node-id")
+            );
+            const lastSelectedID = nextElement.contains(this.lastSelectedElement) ?
+                this.lastSelectedElement.getAttribute("data-node-id") : "";
+            focusedIDs.forEach((id) => {
+                Array.from(tempElement.content.children).find((item) =>
+                    item.getAttribute("data-node-id") === id
+                )?.classList.add("b3-list-item--focus");
+            });
             // 保持文件夹展开状态
             nextElement.querySelectorAll(":scope > .b3-list-item > .b3-list-item__toggle> .b3-list-item__arrow--open").forEach(item => {
                 const openLiElement = hasClosestByClassName(item, "b3-list-item");
@@ -1683,6 +1743,11 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                 }
             });
             nextElement.innerHTML = tempElement.innerHTML;
+            if (lastSelectedID) {
+                this.lastSelectedElement = Array.from(nextElement.querySelectorAll("[data-node-id]")).find((item) =>
+                    item.getAttribute("data-node-id") === lastSelectedID
+                ) || null;
+            }
             nextElement.setAttribute(FILE_TREE_EFFECTIVE_SORT_MODE, effectiveSortMode.toString());
             this.restoreMovedExpandedItems(nextElement, data.box);
             if (typeof scrollTop === "number") {
@@ -2000,9 +2065,16 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                     ...window.siyuan.config.fileTree,
                     sort,
                 }, (response) => {
+                    if (response.code !== 0) {
+                        return;
+                    }
                     window.siyuan.config.fileTree = response.data;
-                    setNoteBook(() => {
-                        this.init(false);
+                    this.onDocSortModeChanged({
+                        scope: "global",
+                        box: "",
+                        id: "",
+                        path: "/",
+                        sortMode: sort,
                     });
                 });
             });

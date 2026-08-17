@@ -76,7 +76,6 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                 /// #else
                 files = (getDockByType("file").data["file"] as Files);
                 /// #endif
-                let sortModeChanged = false;
                 for (const item of selectedItems) {
                     const notebookId = item.parentElement?.getAttribute("data-url");
                     if (!notebookId) {
@@ -94,10 +93,13 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                     if (notebook) {
                         notebook.sortMode = sort;
                     }
-                    sortModeChanged = true;
-                }
-                if (sortModeChanged) {
-                    files?.onDocSortModeChanged();
+                    files?.onDocSortModeChanged({
+                        scope: "notebook",
+                        box: notebookId,
+                        id: "",
+                        path: "/",
+                        sortMode: sort,
+                    });
                 }
             });
             window.siyuan.menus.menu.append(new MenuItem({
@@ -487,7 +489,13 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 if (notebook) {
                     notebook.sortMode = sort;
                 }
-                files?.onDocSortModeChanged();
+                files?.onDocSortModeChanged({
+                    scope: "notebook",
+                    box: notebookId,
+                    id: "",
+                    path: "/",
+                    sortMode: sort,
+                });
             });
             return true;
         });
@@ -822,7 +830,13 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 /// #else
                 files = (getDockByType("file").data["file"] as Files);
                 /// #endif
-                files?.onDocSortModeChanged();
+                files?.onDocSortModeChanged({
+                    scope: "document",
+                    box: notebookId,
+                    id,
+                    path: pathString,
+                    sortMode,
+                });
             });
         });
         window.siyuan.menus.menu.append(new MenuItem({

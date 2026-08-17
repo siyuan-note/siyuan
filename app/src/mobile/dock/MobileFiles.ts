@@ -40,8 +40,10 @@ import {
 import {
     FILE_TREE_CHILDREN_SORT_MODE,
     FILE_TREE_EFFECTIVE_SORT_MODE,
+    getFileTreeSortRefreshTargets,
     getResponseEffectiveSortMode,
     isCustomFileTreeList,
+    reorderFileTreeNotebooks,
     type IDocSortModeChanged,
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
@@ -52,6 +54,8 @@ export class MobileFiles extends Model {
     private closeElement: HTMLElement;
     private reloadNotebookInfoTimeout: number;
     private docSortModeRefreshTimeout: number;
+    private docSortModeChanges = new Map<string, IDocSortModeChanged>();
+    private docSortModeFullRefresh = false;
     private movedExpandedDocIDs = new Set<string>();
     private touchDragState: {
         selectedElement: HTMLElement;
@@ -712,9 +716,16 @@ export class MobileFiles extends Model {
                 ...window.siyuan.config.fileTree,
                 sort,
             }, (response) => {
+                if (response.code !== 0) {
+                    return;
+                }
                 window.siyuan.config.fileTree = response.data;
-                setNoteBook(() => {
-                    this.init(false);
+                this.onDocSortModeChanged({
+                    scope: "global",
+                    box: "",
+                    id: "",
+                    path: "/",
+                    sortMode: sort,
                 });
             });
         });
@@ -1113,10 +1124,47 @@ export class MobileFiles extends Model {
     }
 
     public onDocSortModeChanged(data?: IDocSortModeChanged) {
-        updateFileTreeSortMode(data);
+        updateFileTreeSortMode(data, this.element);
+        if (data) {
+            this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
+        } else {
+            this.docSortModeFullRefresh = true;
+        }
         window.clearTimeout(this.docSortModeRefreshTimeout);
         this.docSortModeRefreshTimeout = window.setTimeout(() => {
-            this.init(false);
+            const fullRefresh = this.docSortModeFullRefresh;
+            const changes = Array.from(this.docSortModeChanges.values());
+            this.docSortModeFullRefresh = false;
+            this.docSortModeChanges.clear();
+            if (fullRefresh) {
+                if (changes.some((item) => item.scope === "global")) {
+                    setNoteBook(() => this.init(false));
+                } else {
+                    this.init(false);
+                }
+                return;
+            }
+            const refreshLists = () => {
+                getFileTreeSortRefreshTargets(this.element, changes).forEach((target) => {
+                    const notebookElement = Array.from(this.element.children).find((item) =>
+                        item.getAttribute("data-url") === target.notebookId
+                    );
+                    const liElement = Array.from(notebookElement?.querySelectorAll("li[data-path]") || []).find((item) =>
+                        item.getAttribute("data-path") === target.path
+                    );
+                    if (liElement) {
+                        this.getLeaf(liElement, target.notebookId, true);
+                    }
+                });
+            };
+            if (changes.some((item) => item.scope === "global")) {
+                setNoteBook((notebooks) => {
+                    reorderFileTreeNotebooks(this.element, this.closeElement.lastElementChild, notebooks);
+                    refreshLists();
+                });
+            } else {
+                refreshLists();
+            }
         }, 100);
     }
 
@@ -1190,6 +1238,14 @@ export class MobileFiles extends Model {
             // 文件展开时，刷新
             const tempElement = document.createElement("template");
             tempElement.innerHTML = fileHTML;
+            const focusedIDs = Array.from(nextElement.querySelectorAll(":scope > .b3-list-item--focus")).map((item) =>
+                item.getAttribute("data-node-id")
+            );
+            focusedIDs.forEach((id) => {
+                Array.from(tempElement.content.children).find((item) =>
+                    item.getAttribute("data-node-id") === id
+                )?.classList.add("b3-list-item--focus");
+            });
             // 保持文件夹展开状态
             nextElement.querySelectorAll(":scope > .b3-list-item > .b3-list-item__toggle> .b3-list-item__arrow--open").forEach(item => {
                 const openLiElement = hasClosestByClassName(item, "b3-list-item");

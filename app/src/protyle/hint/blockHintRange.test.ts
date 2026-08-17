@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {endsWithMultiCharHintPrefix, getBlockHintTriggerOffset, getBlockRefStaticText} from "./blockHintRange";
+import {
+    endsWithMultiCharHintPrefix,
+    getBlockHintTriggerOffset,
+    getBlockRefStaticText,
+    shouldIgnoreHintTrigger,
+} from "./blockHintRange";
 
 describe("getBlockHintTriggerOffset", () => {
     it("uses the latest overlapping trigger inside existing closing markers", () => {
@@ -61,6 +66,23 @@ describe("getBlockRefStaticText", () => {
     it("removes the trigger from an inline block hint", () => {
         assert.equal(getBlockRefStaticText("[[旧的开始", "[[", true), "旧的开始");
         assert.equal(getBlockRefStaticText("((query", "((", true), "query");
+    });
+});
+
+describe("shouldIgnoreHintTrigger", () => {
+    const blockHintKeys = ["((", "[[", "（（", "【【"];
+
+    it("keeps block reference queries intact when slash hints appear inside them", () => {
+        assert.equal(shouldIgnoreHintTrigger("[[", "、", blockHintKeys), true);
+        assert.equal(shouldIgnoreHintTrigger("((", "/", blockHintKeys), true);
+        assert.equal(shouldIgnoreHintTrigger("[[", "#", blockHintKeys), true);
+        assert.equal(shouldIgnoreHintTrigger("[[", ":", blockHintKeys), true);
+    });
+
+    it("does not block unrelated hint contexts", () => {
+        assert.equal(shouldIgnoreHintTrigger("", "、", blockHintKeys), false);
+        assert.equal(shouldIgnoreHintTrigger("#", "、", blockHintKeys), true);
+        assert.equal(shouldIgnoreHintTrigger("、", "[[", blockHintKeys), false);
     });
 });
 

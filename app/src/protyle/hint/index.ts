@@ -60,7 +60,12 @@ import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
-import {endsWithMultiCharHintPrefix, getBlockHintTriggerOffset, getBlockRefStaticText} from "./blockHintRange";
+import {
+    endsWithMultiCharHintPrefix,
+    getBlockHintTriggerOffset,
+    getBlockRefStaticText,
+    shouldIgnoreHintTrigger,
+} from "./blockHintRange";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -1189,8 +1194,10 @@ ${genHintItemHTML(item)}
                     Constants.BLOCK_HINT_CLOSE_KEYS[item.key]);
             }
             if (this.lastIndex < currentLastIndex) {
-                this.splitChar = item.key;
-                this.lastIndex = currentLastIndex;
+                if (!shouldIgnoreHintTrigger(this.splitChar, item.key, Constants.BLOCK_HINT_KEYS)) {
+                    this.splitChar = item.key;
+                    this.lastIndex = currentLastIndex;
+                }
             }
         });
         if (this.lastIndex === -1) {

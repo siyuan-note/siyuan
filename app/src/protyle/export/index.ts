@@ -235,16 +235,28 @@ const renderPDF = async (id: string) => {
             margin-left: 14px;
         }
         
+        #previewContainer {
+          position: fixed;
+          top: 0;
+          right: 280px;
+          bottom: 0;
+          left: 0;
+          overflow: auto;
+        }
+
         #preview {
           max-width: 800px;
           margin: 24px auto;
-          position: absolute;
-          right: 280px;
-          left: 0;
+          position: relative;
           min-height: calc(100% - 48px);
           box-sizing: border-box;
           background-color: var(--b3-theme-background);
           box-shadow: var(--b3-dialog-shadow);
+        }
+
+        .exporting #previewContainer {
+          position: inherit;
+          overflow: visible;
         }
         
         .exporting #preview {
@@ -435,8 +447,10 @@ const renderPDF = async (id: string) => {
       <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
-<div style="zoom:${localData.scale || 1}" id="preview">
-    <div class="fn__loading" style="left:0;height:100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>
+<div id="previewContainer">
+    <div style="zoom:${localData.scale || 1}" id="preview">
+        <div class="fn__loading" style="left:0;height:100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>
+    </div>
 </div>
 ${getIconScript(servePath)}
 <script src="${servePath}stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>

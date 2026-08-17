@@ -7,7 +7,7 @@ import {
 } from "../../protyle/util/hasClosest";
 import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
-import {activeBlur} from "./keyboardToolbar";
+import {activeBlur, resetAndroidBoundedSelectionGesture} from "./keyboardToolbar";
 import {isChromeBrowser, isInAndroid, isInHarmony, isIPhone} from "../../protyle/util/compatibility";
 import {getRangeByPoint} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
@@ -98,6 +98,7 @@ const restoreInvisibleLongPressSelection = () => {
 };
 
 export const handleTouchUp = () => {
+    resetAndroidBoundedSelectionGesture();
     if (Date.now() - time < Constants.TIMEOUT_MULTIPLE_SELECT) {
         clearLongPress();
     }

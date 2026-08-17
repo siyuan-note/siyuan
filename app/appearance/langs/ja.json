@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "${count} 件のノートブックを選択",
+	"formatPainterDoubleClickTip": "書式のコピー。ダブルクリックで連続使用",
 	"dragTipSelectedDocs": "${count} 件の文書を選択",
 	"entrySlashMenu": "スラッシュメニュー",
 	"importNotebook": "ノートブックをインポート",

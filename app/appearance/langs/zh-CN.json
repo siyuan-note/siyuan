@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "选中 ${count} 个笔记本",
+	"formatPainterDoubleClickTip": "格式刷，双击可连续使用",
 	"dragTipSelectedDocs": "选中 ${count} 个文档",
 	"entrySlashMenu": "斜杠菜单",
 	"importNotebook": "导入笔记本",

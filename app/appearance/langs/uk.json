@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "Вибрано блокнотів: ${count}",
+	"formatPainterDoubleClickTip": "Формат за зразком; двічі клацніть для безперервного використання",
 	"dragTipSelectedDocs": "Вибрано документів: ${count}",
 	"entrySlashMenu": "Слеш-меню",
 	"importNotebook": "Імпортувати блокнот",

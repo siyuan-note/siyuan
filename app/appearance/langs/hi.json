@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "${count} नोटबुक चयनित",
+	"formatPainterDoubleClickTip": "फ़ॉर्मैट पेंटर; लगातार उपयोग के लिए डबल-क्लिक करें",
 	"dragTipSelectedDocs": "${count} दस्तावेज़ चयनित",
 	"entrySlashMenu": "स्लैश मेनू",
 	"importNotebook": "नोटबुक आयात करें",

@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "Vybrané zápisníky: ${count}",
+	"formatPainterDoubleClickTip": "Kopírovať formát; dvojklikom zapnete nepretržité použitie",
 	"dragTipSelectedDocs": "Vybrané dokumenty: ${count}",
 	"entrySlashMenu": "Ponuka príkazov s lomkou",
 	"importNotebook": "Importovať zápisník",

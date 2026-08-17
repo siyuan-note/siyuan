@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "${count} blocos de notas selecionados",
+	"formatPainterDoubleClickTip": "Pincel de formatação; clique duas vezes para uso contínuo",
 	"dragTipSelectedDocs": "${count} documentos selecionados",
 	"entrySlashMenu": "Menu slash",
 	"importNotebook": "Importar caderno",

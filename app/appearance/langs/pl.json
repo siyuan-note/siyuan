@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "Wybrane notesy: ${count}",
+	"formatPainterDoubleClickTip": "Malarz formatów; kliknij dwukrotnie, aby używać w trybie ciągłym",
 	"dragTipSelectedDocs": "Wybrane dokumenty: ${count}",
 	"entrySlashMenu": "Menu poleceń z ukośnikiem",
 	"importNotebook": "Importuj notatnik",

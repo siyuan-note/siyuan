@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "Selected ${count} notebooks",
+	"formatPainterDoubleClickTip": "Format Painter; double-click for continuous use",
 	"dragTipSelectedDocs": "Selected ${count} documents",
 	"entrySlashMenu": "Slash menu",
 	"importNotebook": "Import Notebook",

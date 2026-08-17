@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "${count} not defteri seçildi",
+	"formatPainterDoubleClickTip": "Biçim Boyacısı; sürekli kullanım için çift tıklayın",
 	"dragTipSelectedDocs": "${count} belge seçildi",
 	"entrySlashMenu": "Eğik çizgi menüsü",
 	"importNotebook": "Not defteri içe aktar",

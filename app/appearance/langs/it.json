@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "${count} taccuini selezionati",
+	"formatPainterDoubleClickTip": "Copia formato; fai doppio clic per l'uso continuo",
 	"dragTipSelectedDocs": "${count} documenti selezionati",
 	"entrySlashMenu": "Menu slash",
 	"importNotebook": "Importa taccuino",

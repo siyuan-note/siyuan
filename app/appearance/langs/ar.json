@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "تم تحديد ${count} من دفاتر الملاحظات",
+	"formatPainterDoubleClickTip": "نسخ التنسيق؛ انقر نقرًا مزدوجًا للاستخدام المستمر",
 	"dragTipSelectedDocs": "تم تحديد ${count} من المستندات",
 	"entrySlashMenu": "قائمة الشرطة المائلة",
 	"importNotebook": "استيراد دفتر ملاحظات",

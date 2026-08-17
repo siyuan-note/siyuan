@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "${count} notitieboeken geselecteerd",
+	"formatPainterDoubleClickTip": "Opmaak kopiëren; dubbelklik voor doorlopend gebruik",
 	"dragTipSelectedDocs": "${count} documenten geselecteerd",
 	"entrySlashMenu": "Slashmenu",
 	"importNotebook": "Notitieboek importeren",

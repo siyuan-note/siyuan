@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "เลือกสมุด ${count} เล่ม",
+	"formatPainterDoubleClickTip": "คัดลอกรูปแบบ; ดับเบิลคลิกเพื่อใช้งานต่อเนื่อง",
 	"dragTipSelectedDocs": "เลือกเอกสาร ${count} ฉบับ",
 	"entrySlashMenu": "เมนูสแลช",
 	"importNotebook": "นำเข้าสมุดบันทึก",

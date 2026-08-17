@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "${count} carnets de notes sélectionnés",
+	"formatPainterDoubleClickTip": "Reproduire la mise en forme ; double-cliquez pour une utilisation continue",
 	"dragTipSelectedDocs": "${count} documents sélectionnés",
 	"entrySlashMenu": "Menu de commandes slash",
 	"importNotebook": "Importer un carnet",

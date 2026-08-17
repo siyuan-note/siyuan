@@ -1,5 +1,6 @@
 {
 	"dragTipSelectedNotebooks": "${count} Notizbücher ausgewählt",
+	"formatPainterDoubleClickTip": "Format übertragen; für fortlaufende Verwendung doppelklicken",
 	"dragTipSelectedDocs": "${count} Dokumente ausgewählt",
 	"entrySlashMenu": "Slash-Menü",
 	"importNotebook": "Notizbuch importieren",

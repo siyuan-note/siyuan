@@ -185,8 +185,6 @@
 	"entryBasedOn": "Temel alınan",
 	"entryCustomProfile": "Özel profil",
 	"entryCreateProfile": "Profil oluştur",
-	"entryRestoreBase": "[${x}] durumuna geri yükle",
-	"entryRestoreBaseConfirm": "Bu profildeki tüm öğeler [${x}] durumuna geri yüklensin mi?",
 	"entryImportInvalid": "Menü ve yuva profil dosyası geçersiz",
 	"mobileMenuQuickActions": "Hızlı işlemler",
 	"mobileMenuCreate": "Oluştur",

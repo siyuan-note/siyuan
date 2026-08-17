@@ -18,24 +18,30 @@ import {
     ENTRY_PROFILE_FULL,
     ENTRY_PROFILE_SIMPLE,
     ENTRY_VISIBILITY_VERSION,
-    getActiveEntryProfile,
     isEntryVisible,
     saveEntryVisibility,
+    TEntryVisibilityTemplate,
 } from "./runtime";
 import {mergeEntryOrderPreservingUnknown, moveEntryOrder, resolveEntryOrder} from "./order";
+import {
+    getProfileEntryVisibility,
+    isEntryVisibilityImportVersionSupported,
+    normalizeEntryVisibilityImportProfile,
+    TEntryVisibilityImportProfile,
+} from "./profile";
 
 type TImportFile = {
     type: "siyuan-entry-profile" | "siyuan-entry-profile-bundle";
     version: number;
-    profile?: Config.IEntryVisibilityProfile;
-    profiles?: Config.IEntryVisibilityProfile[];
+    profile?: TEntryVisibilityImportProfile;
+    profiles?: TEntryVisibilityImportProfile[];
 };
 
 const cloneConfig = () => JSON.parse(JSON.stringify(
     window.siyuan.config.appearance.entryVisibility
 )) as Config.IEntryVisibility;
 
-const baseLabel = (base: Config.TEntryVisibilityBase) => base === ENTRY_PROFILE_SIMPLE
+const templateLabel = (template: TEntryVisibilityTemplate) => template === ENTRY_PROFILE_SIMPLE
     ? window.siyuan.languages.entrySimple
     : window.siyuan.languages.entryFull;
 
@@ -77,20 +83,11 @@ const exportBundle = () => {
     } satisfies TImportFile);
 };
 
-const getCurrentBase = (): Config.TEntryVisibilityBase => {
-    const active = window.siyuan.config.appearance.entryVisibility.active;
-    if (active === ENTRY_PROFILE_SIMPLE || active === ENTRY_PROFILE_FULL) {
-        return active;
-    }
-    return getActiveEntryProfile()?.base || ENTRY_PROFILE_FULL;
-};
-
-const createProfile = (base: Config.TEntryVisibilityBase, current = false, name?: string) => {
+const createProfile = (template: TEntryVisibilityTemplate, current = false, name?: string) => {
     const profile: Config.IEntryVisibilityProfile = {
         id: genUUID(),
         name: uniqueName(name || window.siyuan.languages.entryCustomProfile),
-        base,
-        entries: createEntryProfileSnapshot(base),
+        entries: createEntryProfileSnapshot(template),
         orders: createEntryOrderSnapshot(current),
     };
     if (current) {
@@ -148,14 +145,13 @@ const createEntryView = (root: HTMLElement) => {
 const profileCard = (
     id: string,
     name: string,
-    base: Config.TEntryVisibilityBase,
     builtin: boolean,
     active: boolean,
 ) => `<div class="b3-card${active ? " b3-card--current" : ""}" data-profile-id="${escapeAttr(id)}" data-action="${builtin ? "view" : "edit"}">
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             <div class="fn__ellipsis config-name">${escapeHtml(name)}</div>
-            <div class="b3-card__desc">${builtin ? window.siyuan.languages.entryBuiltin : `${window.siyuan.languages.entryCustom} · ${window.siyuan.languages.entryBasedOn} ${baseLabel(base)}`}${active ? ` · ${window.siyuan.languages.current}` : ""}${builtin ? ` · ${base === ENTRY_PROFILE_SIMPLE ? window.siyuan.languages.entrySimpleTip : window.siyuan.languages.entryFullTip}` : ""}</div>
+            <div class="b3-card__desc">${builtin ? window.siyuan.languages.entryBuiltin : window.siyuan.languages.entryCustom}${active ? ` · ${window.siyuan.languages.current}` : ""}${builtin ? ` · ${id === ENTRY_PROFILE_SIMPLE ? window.siyuan.languages.entrySimpleTip : window.siyuan.languages.entryFullTip}` : ""}</div>
         </div>
     </div>
     <div class="b3-card__actions b3-card__actions--right">
@@ -173,20 +169,15 @@ const renderProfileCards = (root: HTMLElement) => {
     }
     const config = window.siyuan.config.appearance.entryVisibility;
     const cards = [
-        profileCard(ENTRY_PROFILE_SIMPLE, window.siyuan.languages.entrySimple, ENTRY_PROFILE_SIMPLE, true,
+        profileCard(ENTRY_PROFILE_SIMPLE, window.siyuan.languages.entrySimple, true,
             config.active === ENTRY_PROFILE_SIMPLE),
-        profileCard(ENTRY_PROFILE_FULL, window.siyuan.languages.entryFull, ENTRY_PROFILE_FULL, true,
+        profileCard(ENTRY_PROFILE_FULL, window.siyuan.languages.entryFull, true,
             config.active === ENTRY_PROFILE_FULL),
-        ...config.profiles.map((profile) => profileCard(profile.id, profile.name, profile.base, false,
+        ...config.profiles.map((profile) => profileCard(profile.id, profile.name, false,
             config.active === profile.id)),
     ];
     container.innerHTML = `<div class="b3-cards b3-cards--nowrap">${cards.join("")}</div>`;
 };
-
-const isEntryChecked = (profile: Config.IEntryVisibilityProfile, path: string, item: IEntryCatalogNode) =>
-    typeof profile.entries[path] === "boolean"
-        ? profile.entries[path]
-        : profile.base === ENTRY_PROFILE_FULL || item.simple;
 
 const getProfileEntryOrder = (profile: Config.IEntryVisibilityProfile, parentPath: string,
                               nodes = getEntryCatalogChildren(parentPath) || []) => {
@@ -205,7 +196,7 @@ const orderEntryNodes = (profile: Config.IEntryVisibilityProfile, parentPath: st
 const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string, item: IEntryCatalogNode,
                            parentEnabled: boolean, readOnly: boolean) => `<input class="b3-switch" type="checkbox"
     aria-label="${escapeAttr(item.label())}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
-    ${!parentEnabled && !readOnly ? " disabled" : ""}${isEntryChecked(profile, path, item) ? " checked" : ""}>`;
+    ${!parentEnabled && !readOnly ? " disabled" : ""}${getProfileEntryVisibility(profile, path) ? " checked" : ""}>`;
 
 const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
                            nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
@@ -302,7 +293,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     let prefix = directDisplayRoot ? directDisplayRootPath : section.key;
     let title = directDisplayRoot?.label() || section.label();
     let parentEnabled = directDisplayRoot
-        ? isEntryChecked(profile, directDisplayRootPath, directDisplayRoot)
+        ? getProfileEntryVisibility(profile, directDisplayRootPath)
         : true;
     let depth = 0;
     while (nodes.length > 0) {
@@ -320,7 +311,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
         if (!selectedNode?.children?.length) {
             break;
         }
-        parentEnabled = parentEnabled && isEntryChecked(profile, selectedPath, selectedNode);
+        parentEnabled = parentEnabled && getProfileEntryVisibility(profile, selectedPath);
         nodes = selectedNode.children;
         prefix = selectedPath;
         title = selectedNode.label();
@@ -371,14 +362,14 @@ const getEntrySearchFilter = (query: string) => {
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     refreshSlashMenuCatalog(window.siyuan.ws?.app?.plugins || []);
     const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;
+    let selectedTemplate: TEntryVisibilityTemplate | "current" = ENTRY_PROFILE_SIMPLE;
     const existing = profileID
         ? window.siyuan.config.appearance.entryVisibility.profiles.find((item) => item.id === profileID)
         : undefined;
     const draft: Config.IEntryVisibilityProfile = builtin
         ? {
             id: profileID,
-            name: baseLabel(profileID),
-            base: profileID,
+            name: templateLabel(profileID),
             entries: createEntryProfileSnapshot(profileID),
             orders: createEntryOrderSnapshot(),
         }
@@ -399,23 +390,21 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
                 <span class="fn__space"></span>
                 <input class="b3-text-field fn__flex-center fn__size200" data-profile-field="name" value="${escapeAttr(draft.name)}">
             </label>
-            <label class="fn__flex b3-label config-item config-wrap">
+            ${creating ? `<label class="fn__flex b3-label config-item config-wrap">
                 <div class="fn__flex-1"><div class="config-name">${window.siyuan.languages.entryBasedOn}</div></div>
                 <span class="fn__space"></span>
-                ${creating ? `<select class="b3-select fn__flex-center fn__size200" data-profile-field="base">
-                    <option value="simple"${draft.base === ENTRY_PROFILE_SIMPLE ? " selected" : ""}>${window.siyuan.languages.entrySimple}</option>
-                    <option value="full"${draft.base === ENTRY_PROFILE_FULL ? " selected" : ""}>${window.siyuan.languages.entryFull}</option>
+                <select class="b3-select fn__flex-center fn__size200" data-profile-field="template">
+                    <option value="simple">${window.siyuan.languages.entrySimple}</option>
+                    <option value="full">${window.siyuan.languages.entryFull}</option>
                     <option value="current">${window.siyuan.languages.current}</option>
-                </select>` : `<div class="fn__size200">${baseLabel(draft.base)}</div>`}
-            </label>
+                </select>
+            </label>` : ""}
         </div>
     </div>`}
     <div class="config-group">
         ${builtin ? `<div class="config-title">${escapeHtml(draft.name)}</div>` : ""}
         <div class="fn__flex">
             <input class="b3-text-field fn__flex-1" data-type="entry-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
-            ${builtin ? "" : `<span class="fn__space"></span>
-            <button class="b3-button b3-button--outline" data-action="restore">${window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base))}</button>`}
         </div>
     </div>
     <div class="config-entry-visibility__browser" data-type="entry-browser"></div>
@@ -427,7 +416,6 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
 </div>`;
     const browser = view.querySelector<HTMLElement>("[data-type='entry-browser']");
     const searchInput = view.querySelector<HTMLInputElement>("[data-type='entry-search']");
-    const restoreButton = view.querySelector<HTMLButtonElement>("[data-action='restore']");
     let selectedSectionKey = entryCatalog[0].key;
     let selectedPaths: string[] = [];
     let previousQuery = "";
@@ -436,11 +424,6 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         browser.querySelectorAll(".config-entry-visibility__row--drop-before, .config-entry-visibility__row--drop-after")
             .forEach((item) => item.classList.remove("config-entry-visibility__row--drop-before",
                 "config-entry-visibility__row--drop-after"));
-    };
-    const updateRestoreButton = () => {
-        if (restoreButton) {
-            restoreButton.textContent = window.siyuan.languages.entryRestoreBase.replace("${x}", baseLabel(draft.base));
-        }
     };
     const renderBrowser = (scrollToEnd = false, resetEntryColumns = false, revealSelection = false) => {
         const oldColumns = Array.from(browser.querySelectorAll<HTMLElement>("[data-entry-column]"));
@@ -585,19 +568,19 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             renderBrowser();
             return;
         }
-        if (target.dataset.profileField !== "base") {
+        if (target.dataset.profileField !== "template") {
             return;
         }
-        const selection = target.value;
-        draft.base = selection === "current" ? getCurrentBase() : selection as Config.TEntryVisibilityBase;
-        draft.entries = createEntryProfileSnapshot(draft.base);
-        draft.orders = createEntryOrderSnapshot(selection === "current");
-        if (selection === "current") {
+        selectedTemplate = target.value as TEntryVisibilityTemplate | "current";
+        draft.entries = createEntryProfileSnapshot(selectedTemplate === "current"
+            ? ENTRY_PROFILE_FULL
+            : selectedTemplate);
+        draft.orders = createEntryOrderSnapshot(selectedTemplate === "current");
+        if (selectedTemplate === "current") {
             getEntryPaths().forEach((path) => {
                 draft.entries[path] = isEntryVisible(path);
             });
         }
-        updateRestoreButton();
         renderBrowser();
     });
     view.addEventListener("click", (event) => {
@@ -626,14 +609,6 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             selectedPaths = selectedPaths.slice(0, depth);
             selectedPaths[depth] = actionElement.dataset.entryPath;
             renderBrowser(true);
-        } else if (!builtin && action === "restore") {
-            const restoreTarget = baseLabel(draft.base);
-            confirmDialog(window.siyuan.languages.entryRestoreBase.replace("${x}", restoreTarget),
-                window.siyuan.languages.entryRestoreBaseConfirm.replace("${x}", restoreTarget), () => {
-                draft.entries = createEntryProfileSnapshot(draft.base);
-                draft.orders = createEntryOrderSnapshot();
-                renderBrowser();
-            });
         } else if (!builtin && action === "confirm") {
             const nameInput = view.querySelector<HTMLInputElement>("[data-profile-field='name']");
             const name = draft.name.trim();
@@ -662,10 +637,10 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
 const importProfiles = async (root: HTMLElement, file: File) => {
     try {
         const data = JSON.parse(await file.text()) as TImportFile;
-        if (data.version !== 1 && data.version !== ENTRY_VISIBILITY_VERSION) {
+        if (!isEntryVisibilityImportVersionSupported(data.version, ENTRY_VISIBILITY_VERSION)) {
             throw new Error("unsupported version");
         }
-        let imported: Config.IEntryVisibilityProfile[];
+        let imported: TEntryVisibilityImportProfile[];
         if (data.type === "siyuan-entry-profile" && data.profile) {
             imported = [data.profile];
         } else if (data.type === "siyuan-entry-profile-bundle" && Array.isArray(data.profiles)) {
@@ -676,31 +651,15 @@ const importProfiles = async (root: HTMLElement, file: File) => {
         const config = cloneConfig();
         let importedCount = 0;
         imported.forEach((item) => {
-            if (!item || typeof item.name !== "string" || !item.name.trim() || !item.entries ||
-                Array.isArray(item.entries) ||
-                (item.base !== ENTRY_PROFILE_SIMPLE && item.base !== ENTRY_PROFILE_FULL)) {
+            const profile = normalizeEntryVisibilityImportProfile(item, data.version, createEntryOrderSnapshot());
+            if (!profile) {
                 return;
             }
-            const entries = Object.entries(item.entries).reduce<Record<string, boolean>>((result, [path, visible]) => {
-                if (typeof visible === "boolean") {
-                    result[path] = visible;
-                }
-                return result;
-            }, {});
-            const orders = item.orders && !Array.isArray(item.orders)
-                ? Object.entries(item.orders).reduce<Record<string, string[]>>((result, [path, order]) => {
-                    if (Array.isArray(order)) {
-                        result[path] = order.filter((key): key is string => typeof key === "string");
-                    }
-                    return result;
-                }, {})
-                : createEntryOrderSnapshot();
             config.profiles.push({
                 id: genUUID(),
-                name: uniqueName(item.name, config.profiles),
-                base: item.base,
-                entries,
-                orders,
+                name: uniqueName(profile.name, config.profiles),
+                entries: profile.entries,
+                orders: profile.orders,
             });
             importedCount++;
         });
@@ -761,8 +720,9 @@ export const mountEntryVisibility = (root: HTMLElement) => {
         } else if (action === "edit" || action === "view") {
             openProfileEditor(root, id);
         } else if (action === "duplicate") {
-            const copy = profile ? duplicateProfile(profile) : createProfile(id as Config.TEntryVisibilityBase, false,
-                `${baseLabel(id as Config.TEntryVisibilityBase)} ${window.siyuan.languages.duplicateCopy}`);
+            const template = id as TEntryVisibilityTemplate;
+            const copy = profile ? duplicateProfile(profile) : createProfile(template, false,
+                `${templateLabel(template)} ${window.siyuan.languages.duplicateCopy}`);
             config.profiles.push(copy);
             saveEntryVisibility(config);
             renderProfileCards(root);

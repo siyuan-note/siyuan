@@ -185,8 +185,6 @@
 	"entryBasedOn": "На основе",
 	"entryCustomProfile": "Пользовательский профиль",
 	"entryCreateProfile": "Создать профиль",
-	"entryRestoreBase": "Восстановить до [${x}]",
-	"entryRestoreBaseConfirm": "Восстановить все элементы этого профиля до [${x}]?",
 	"entryImportInvalid": "Недопустимый файл профиля меню и док-панели",
 	"mobileMenuQuickActions": "Быстрые действия",
 	"mobileMenuCreate": "Создание",

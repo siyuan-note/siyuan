@@ -185,8 +185,6 @@
 	"entryBasedOn": "Based on",
 	"entryCustomProfile": "Custom profile",
 	"entryCreateProfile": "Create profile",
-	"entryRestoreBase": "Restore to [${x}]",
-	"entryRestoreBaseConfirm": "Restore all entries in this profile to [${x}]?",
 	"entryImportInvalid": "Invalid menu and dock profile file",
 	"mobileMenuQuickActions": "Quick actions",
 	"mobileMenuCreate": "Create",

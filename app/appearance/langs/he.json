@@ -185,8 +185,6 @@
 	"entryBasedOn": "מבוסס על",
 	"entryCustomProfile": "פרופיל מותאם אישית",
 	"entryCreateProfile": "יצירת פרופיל",
-	"entryRestoreBase": "שחזור אל [${x}]",
-	"entryRestoreBaseConfirm": "לשחזר את כל הפריטים בפרופיל זה אל [${x}]?",
 	"entryImportInvalid": "קובץ פרופיל התפריטים וסרגל העגינה אינו תקין",
 	"mobileMenuQuickActions": "פעולות מהירות",
 	"mobileMenuCreate": "יצירה",

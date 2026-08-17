@@ -381,12 +381,9 @@ declare namespace Config {
         frontends?: string[];
     }
 
-    export type TEntryVisibilityBase = "simple" | "full";
-
     export interface IEntryVisibilityProfile {
         id: string;
         name: string;
-        base: TEntryVisibilityBase;
         entries: Record<string, boolean>;
         orders: Record<string, string[]>;
     }

@@ -185,8 +185,6 @@
 	"entryBasedOn": "อ้างอิงจาก",
 	"entryCustomProfile": "โปรไฟล์กำหนดเอง",
 	"entryCreateProfile": "สร้างโปรไฟล์",
-	"entryRestoreBase": "คืนค่าเป็น [${x}]",
-	"entryRestoreBaseConfirm": "คืนค่ารายการทั้งหมดในโปรไฟล์นี้เป็น [${x}] หรือไม่?",
 	"entryImportInvalid": "ไฟล์โปรไฟล์เมนูและแถบเชื่อมต่อไม่ถูกต้อง",
 	"mobileMenuQuickActions": "การดำเนินการด่วน",
 	"mobileMenuCreate": "สร้าง",

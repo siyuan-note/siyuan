@@ -9,10 +9,12 @@ import {
 } from "./catalog";
 import {reorderEntrySlots, resolveEntryOrder} from "./order";
 import {getDocTreeEntryScope} from "./docTreeScope";
+import {getProfileEntryVisibility} from "./profile";
 
-export const ENTRY_VISIBILITY_VERSION = 2;
+export const ENTRY_VISIBILITY_VERSION = 3;
 export const ENTRY_PROFILE_SIMPLE = "simple";
 export const ENTRY_PROFILE_FULL = "full";
+export type TEntryVisibilityTemplate = typeof ENTRY_PROFILE_SIMPLE | typeof ENTRY_PROFILE_FULL;
 
 const getConfig = () => window.siyuan.config.appearance.entryVisibility;
 
@@ -21,8 +23,8 @@ export const getActiveEntryProfile = () => {
     return config.profiles.find((item) => item.id === config.active);
 };
 
-const getBaseVisibility = (path: string, base: Config.TEntryVisibilityBase) =>
-    base === ENTRY_PROFILE_FULL || getEntryCatalogNode(path)?.simple !== false;
+const getTemplateVisibility = (path: string, template: TEntryVisibilityTemplate) =>
+    template === ENTRY_PROFILE_FULL || getEntryCatalogNode(path)?.simple !== false;
 
 export const isEntryVisible = (path: string): boolean => {
     /// #if MOBILE
@@ -33,12 +35,9 @@ export const isEntryVisible = (path: string): boolean => {
     if (config.active === ENTRY_PROFILE_FULL) {
         visible = true;
     } else if (config.active === ENTRY_PROFILE_SIMPLE) {
-        visible = getBaseVisibility(path, ENTRY_PROFILE_SIMPLE);
+        visible = getTemplateVisibility(path, ENTRY_PROFILE_SIMPLE);
     } else {
-        const profile = getActiveEntryProfile();
-        visible = typeof profile?.entries[path] === "boolean"
-            ? profile.entries[path]
-            : getBaseVisibility(path, profile?.base || ENTRY_PROFILE_FULL);
+        visible = getProfileEntryVisibility(getActiveEntryProfile(), path);
     }
     if (!visible) {
         return false;
@@ -51,9 +50,9 @@ export const isEntryVisible = (path: string): boolean => {
     /// #endif
 };
 
-export const createEntryProfileSnapshot = (base: Config.TEntryVisibilityBase) => {
+export const createEntryProfileSnapshot = (template: TEntryVisibilityTemplate) => {
     return getEntryPaths().reduce<Record<string, boolean>>((entries, path) => {
-        entries[path] = getBaseVisibility(path, base);
+        entries[path] = getTemplateVisibility(path, template);
         return entries;
     }, {});
 };

@@ -185,8 +185,6 @@
 	"entryBasedOn": "Gebaseerd op",
 	"entryCustomProfile": "Aangepast profiel",
 	"entryCreateProfile": "Profiel maken",
-	"entryRestoreBase": "Herstellen naar [${x}]",
-	"entryRestoreBaseConfirm": "Alle items in dit profiel herstellen naar [${x}]?",
 	"entryImportInvalid": "Ongeldig profielbestand voor menu's en dock",
 	"mobileMenuQuickActions": "Snelle acties",
 	"mobileMenuCreate": "Maken",

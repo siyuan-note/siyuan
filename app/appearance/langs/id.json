@@ -185,8 +185,6 @@
 	"entryBasedOn": "Berdasarkan",
 	"entryCustomProfile": "Profil kustom",
 	"entryCreateProfile": "Buat profil",
-	"entryRestoreBase": "Pulihkan ke [${x}]",
-	"entryRestoreBaseConfirm": "Pulihkan semua entri dalam profil ini ke [${x}]?",
 	"entryImportInvalid": "Berkas profil menu dan dok tidak valid",
 	"mobileMenuQuickActions": "Tindakan cepat",
 	"mobileMenuCreate": "Buat",

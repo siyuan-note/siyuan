@@ -185,8 +185,6 @@
 	"entryBasedOn": "Basierend auf",
 	"entryCustomProfile": "Benutzerdefiniertes Profil",
 	"entryCreateProfile": "Profil erstellen",
-	"entryRestoreBase": "Auf [${x}] zurücksetzen",
-	"entryRestoreBaseConfirm": "Alle Einträge dieses Profils auf [${x}] zurücksetzen?",
 	"entryImportInvalid": "Ungültige Menü- und Dock-Profildatei",
 	"mobileMenuQuickActions": "Schnellaktionen",
 	"mobileMenuCreate": "Erstellen",

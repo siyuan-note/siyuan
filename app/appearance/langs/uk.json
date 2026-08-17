@@ -185,8 +185,6 @@
 	"entryBasedOn": "На основі",
 	"entryCustomProfile": "Користувацький профіль",
 	"entryCreateProfile": "Створити профіль",
-	"entryRestoreBase": "Відновити до [${x}]",
-	"entryRestoreBaseConfirm": "Відновити всі елементи цього профілю до [${x}]?",
 	"entryImportInvalid": "Недійсний файл профілю меню та док-панелі",
 	"mobileMenuQuickActions": "Швидкі дії",
 	"mobileMenuCreate": "Створення",

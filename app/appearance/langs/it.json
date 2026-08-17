@@ -185,8 +185,6 @@
 	"entryBasedOn": "Basato su",
 	"entryCustomProfile": "Profilo personalizzato",
 	"entryCreateProfile": "Crea profilo",
-	"entryRestoreBase": "Ripristina a [${x}]",
-	"entryRestoreBaseConfirm": "Ripristinare tutte le voci di questo profilo a [${x}]?",
 	"entryImportInvalid": "File del profilo di menu e barra di ancoraggio non valido",
 	"mobileMenuQuickActions": "Azioni rapide",
 	"mobileMenuCreate": "Crea",

@@ -207,19 +207,12 @@ const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string
     aria-label="${escapeAttr(item.label())}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
     ${!parentEnabled && !readOnly ? " disabled" : ""}${isEntryChecked(profile, path, item) ? " checked" : ""}>`;
 
-interface IEntryColumnHeaderSwitch {
-    item: IEntryCatalogNode;
-    path: string;
-}
-
 const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
                            nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
-                           parentEnabled: boolean, readOnly: boolean, sortable: boolean,
-                           headerSwitch?: IEntryColumnHeaderSwitch) => `<section class="config-entry-visibility__column"
+                           parentEnabled: boolean, readOnly: boolean, sortable: boolean) => `<section class="config-entry-visibility__column"
     data-entry-column data-entry-depth="${depth}">
     <div class="config-entry-visibility__column-title">
         <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
-        ${headerSwitch ? renderEntrySwitch(profile, headerSwitch.path, headerSwitch.item, true, readOnly) : ""}
     </div>
     <div class="config-entry-visibility__column-list">
         ${nodes.map((item) => {
@@ -258,6 +251,34 @@ const getDirectDisplayRoot = (section: IEntryCatalogSection) => section.children
     ? section.children[0]
     : undefined;
 
+const renderEntryLocation = (profile: Config.IEntryVisibilityProfile, item: IEntryCatalogSection,
+                             current: boolean, readOnly: boolean) => {
+    const label = item.label();
+    const className = `b3-list-item config-entry-visibility__location${current ? " config-entry-visibility__location--current" : ""}`;
+    const directDisplayRoot = getDirectDisplayRoot(item);
+    if (!directDisplayRoot) {
+        return `<button class="${className}" data-action="select-entry-section"
+            data-entry-section="${escapeAttr(item.key)}" title="${escapeAttr(label)}">
+            <span class="b3-list-item__text">${escapeHtml(label)}</span>
+            <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
+        </button>`;
+    }
+    const directDisplayRootPath = `${item.key}.${directDisplayRoot.key}`;
+    return `<div class="${className}" data-action="select-entry-section"
+        data-entry-section="${escapeAttr(item.key)}">
+        <button class="config-entry-visibility__location-navigate" data-action="select-entry-section"
+            data-entry-section="${escapeAttr(item.key)}" title="${escapeAttr(label)}">
+            <span class="b3-list-item__text">${escapeHtml(label)}</span>
+        </button>
+        ${renderEntrySwitch(profile, directDisplayRootPath, directDisplayRoot, true, readOnly)}
+        <button class="block__icon block__icon--show config-entry-visibility__location-arrow"
+            data-action="select-entry-section" data-entry-section="${escapeAttr(item.key)}"
+            aria-label="${escapeAttr(window.siyuan.languages.expand)}">
+            <svg><use xlink:href="#iconRight"></use></svg>
+        </button>
+    </div>`;
+};
+
 const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey: string,
                             selectedPaths: string[], readOnly: boolean, visiblePaths?: Set<string>,
                             visibleSectionKeys?: Set<string>) => {
@@ -268,11 +289,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
     const locationColumn = `<section class="config-entry-visibility__column config-entry-visibility__column--locations" data-entry-column>
     <div class="config-entry-visibility__column-title">${window.siyuan.languages.position}</div>
     <div class="config-entry-visibility__column-list">
-        ${sections.map((item) => `<button class="b3-list-item config-entry-visibility__location${item.key === section.key ? " config-entry-visibility__location--current" : ""}"
-            data-action="select-entry-section" data-entry-section="${escapeAttr(item.key)}" title="${escapeAttr(item.label())}">
-            <span class="b3-list-item__text">${escapeHtml(item.label())}</span>
-            <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
-        </button>`).join("")}
+        ${sections.map((item) => renderEntryLocation(profile, item, item.key === section.key, readOnly)).join("")}
     </div>
 </section>`;
     const columns = [locationColumn];
@@ -297,8 +314,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
             break;
         }
         columns.push(renderEntryColumn(profile, title, prefix, columnNodes, depth, columnSelectedPaths,
-            parentEnabled, readOnly, !visiblePaths && isEntryOrderSortable(prefix) && !readOnly,
-            depth === 0 && directDisplayRoot ? {item: directDisplayRoot, path: directDisplayRootPath} : undefined));
+            parentEnabled, readOnly, !visiblePaths && isEntryOrderSortable(prefix) && !readOnly));
         const selectedPath = columnSelectedPaths[depth];
         const selectedNode = selectedPath && columnNodes.find((item) => `${prefix}.${item.key}` === selectedPath);
         if (!selectedNode?.children?.length) {

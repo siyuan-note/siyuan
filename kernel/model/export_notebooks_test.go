@@ -162,6 +162,38 @@ func TestExportNotebooksSYKeepsCrossNotebookReferences(t *testing.T) {
 	}
 }
 
+func TestImportNotebooksSYKeepsEmptyNotebooks(t *testing.T) {
+	const (
+		firstBoxID  = "20260817000100-box0001"
+		secondBoxID = "20260817000101-box0002"
+	)
+	setupExportRelatedTest(t, firstBoxID, secondBoxID)
+	for _, boxID := range []string{firstBoxID, secondBoxID} {
+		box := &Box{ID: boxID}
+		boxConf := box.GetConf()
+		boxConf.Name = boxID
+		if err := box.SaveConf(boxConf); nil != err {
+			t.Fatal(err)
+		}
+	}
+
+	exportPath := ExportNotebooksSY([]string{firstBoxID, secondBoxID})
+	exportAbsPath, err := exportedFilePath(exportPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	boxIDs, bundle, err := ImportSYNotebookBundle(exportAbsPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if !bundle {
+		t.Fatal("exported archive was not detected as a notebook bundle")
+	}
+	if len(boxIDs) != 2 {
+		t.Fatalf("imported %d notebooks, want 2", len(boxIDs))
+	}
+}
+
 func openExportArchive(t *testing.T, exportPath string) *zip.ReadCloser {
 	t.Helper()
 	if exportPath == "" {

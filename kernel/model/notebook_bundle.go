@@ -338,7 +338,8 @@ func inspectSYNotebookArchive(zipPath string) (ret *inspectedSYNotebook, err err
 	rootPath := filepath.Join(unzipPath, entries[0].Name())
 	ret = &inspectedSYNotebook{archivePath: zipPath, name: entries[0].Name()}
 	confPath := filepath.Join(rootPath, ".siyuan", "conf.json")
-	if filelock.IsExist(confPath) {
+	hasNotebookMetadata := filelock.IsExist(confPath)
+	if hasNotebookMetadata {
 		boxConf := conf.NewBoxConf()
 		confData, readConfErr := filelock.ReadFile(confPath)
 		if nil != readConfErr || gulu.JSON.UnmarshalJSON(confData, boxConf) != nil {
@@ -350,6 +351,7 @@ func inspectSYNotebookArchive(zipPath string) (ret *inspectedSYNotebook, err err
 	}
 	boxDocPath := filepath.Join(rootPath, ".siyuan", boxDocMetaName)
 	if filelock.IsExist(boxDocPath) {
+		hasNotebookMetadata = true
 		meta := &boxDocMeta{}
 		metaData, readMetaErr := filelock.ReadFile(boxDocPath)
 		if nil != readMetaErr || gulu.JSON.UnmarshalJSON(metaData, meta) != nil || meta.Spec != boxDocMetaSpec || !ast.IsNodeIDPattern(meta.BoxDocID) {
@@ -385,7 +387,7 @@ func inspectSYNotebookArchive(zipPath string) (ret *inspectedSYNotebook, err err
 		})
 		return nil
 	})
-	if nil != err || syCount < 1 {
+	if nil != err || (syCount < 1 && !hasNotebookMetadata) {
 		return nil, errors.New(Conf.Language(199))
 	}
 	for blockID := range seenBlockIDs {

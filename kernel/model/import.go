@@ -201,7 +201,7 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 		logging.LogErrorf("read unzip dir [%s] failed: %s", unzipPath, err)
 		return
 	}
-	if 1 != len(entries) || !entries[0].IsDir() || len(syPaths) < 1 {
+	if 1 != len(entries) || !entries[0].IsDir() {
 		logging.LogErrorf("invalid .sy.zip [%v]", entries)
 		err = errors.New(Conf.Language(199))
 		return
@@ -260,14 +260,20 @@ func importSY0(zipPath, boxID, toPath string, createNotebook, autoDetect bool, s
 			return
 		}
 	}
+	notebookExport := isSYNotebookExport(hasImportedBoxConf, hasImportedBoxDocMeta)
+	if len(syPaths) < 1 && !notebookExport {
+		logging.LogErrorf("invalid .sy.zip without documents or notebook metadata [unzipRootPath=%s]", unzipRootPath)
+		err = errors.New(Conf.Language(199))
+		return
+	}
 	if autoDetect {
 		if importedMetadataErr != nil {
 			err = errors.New(Conf.Language(199))
 			return
 		}
-		createNotebook = isSYNotebookExport(hasImportedBoxConf, hasImportedBoxDocMeta)
+		createNotebook = notebookExport
 	}
-	if !createNotebook && isSYNotebookExport(hasImportedBoxConf, hasImportedBoxDocMeta) {
+	if !createNotebook && notebookExport {
 		err = errors.New(Conf.Language(373))
 		return
 	}

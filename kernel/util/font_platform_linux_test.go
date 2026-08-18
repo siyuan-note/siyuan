@@ -14,10 +14,29 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-//go:build (!darwin && !windows && !linux) || ios || android
+//go:build linux && !android
 
 package util
 
-func loadPlatformFonts() []*Font {
-	return nil
+import (
+	"os/exec"
+	"testing"
+)
+
+func TestLoadFontconfigFonts(t *testing.T) {
+	if _, err := exec.LookPath("fc-list"); nil != err {
+		t.Skip("fc-list is unavailable")
+	}
+	fonts := loadPlatformFonts()
+	if 0 == len(fonts) {
+		t.Fatal("Fontconfig should return at least one system font")
+	}
+	for _, font := range fonts {
+		if "" == font.Family || "" == font.DisplayName {
+			t.Fatalf("Fontconfig returned an invalid font: %+v", font)
+		}
+		if font.Weight < 1 || 1000 < font.Weight {
+			t.Fatalf("Fontconfig returned an invalid font weight: %+v", font)
+		}
+	}
 }

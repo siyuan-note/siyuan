@@ -14,10 +14,34 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-//go:build (!darwin && !windows && !linux) || ios || android
+//go:build linux && !android
 
 package util
 
+import (
+	"context"
+	"os/exec"
+	"time"
+
+	"github.com/siyuan-note/logging"
+)
+
 func loadPlatformFonts() []*Font {
-	return nil
+	path, err := exec.LookPath("fc-list")
+	if nil != err {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	output, err := exec.CommandContext(ctx, path, "-f", fontconfigListFormat).Output()
+	if nil != err {
+		if ctx.Err() == context.DeadlineExceeded {
+			logging.LogWarnf("load Fontconfig fonts timed out")
+		} else {
+			logging.LogWarnf("load Fontconfig fonts failed: %s", err)
+		}
+		return nil
+	}
+	return parseFontconfigFonts(output, Lang)
 }

@@ -917,7 +917,8 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 				}
 			}
 			stream, firstResp, roundCancel, requestMessages, imageDowngraded, imageUnsupportedDetected, streamErr :=
-				createProtocolImageCompatibleStream(ctx, client, protocol, req, responseInput, imageCapabilityKey,
+				createProtocolImageCompatibleStream(util.ContextWithGeminiThoughtSummaries(ctx), client, protocol, req,
+					responseInput, imageCapabilityKey,
 					imageInputDisabled, maxRetries, requestTimeout, streamIdleTimeout, delayForCategory, ch)
 			if imageUnsupportedDetected {
 				imageInputDisabled = true
@@ -956,9 +957,50 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 
 			var contentBuilder strings.Builder
 			var reasoningBuilder strings.Builder
-			var aggregatedToolCalls []openai.ToolCall
+			var toolCallAccumulator toolCallStreamAccumulator
 			responseOutputTokens := 0
 			lastDraftCheckpoint := time.Now()
+			var reasoningSplitter reasoningTagSplitter
+			splitTaggedReasoning := thoughtSignatureState.TaggedSummariesAvailable()
+			writeContent := func(token string) {
+				if token == "" {
+					return
+				}
+				contentBuilder.WriteString(token)
+				sendEvent(ch, AgentEvent{Type: "content", Token: token})
+			}
+			writeReasoning := func(token string) {
+				if token == "" {
+					return
+				}
+				reasoningBuilder.WriteString(token)
+				sendEvent(ch, AgentEvent{Type: "reasoning", Token: token})
+			}
+			writeTaggedContent := func(token string) {
+				if !splitTaggedReasoning {
+					writeContent(token)
+					return
+				}
+				for _, segment := range reasoningSplitter.Write(token) {
+					if segment.reasoning {
+						writeReasoning(segment.text)
+					} else {
+						writeContent(segment.text)
+					}
+				}
+			}
+			flushTaggedContent := func() {
+				if !splitTaggedReasoning {
+					return
+				}
+				for _, segment := range reasoningSplitter.Flush() {
+					if segment.reasoning {
+						writeReasoning(segment.text)
+					} else {
+						writeContent(segment.text)
+					}
+				}
+			}
 
 			firstResponsePending := true
 			for {
@@ -970,6 +1012,7 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 					resp, recvErr = recvStreamWithIdleTimeout(stream, streamIdleTimeout, roundCancel)
 				}
 				if recvErr != nil {
+					flushTaggedContent()
 					if recvErr == io.EOF {
 						break
 					}
@@ -996,6 +1039,7 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 
 				select {
 				case <-ctx.Done():
+					flushTaggedContent()
 					turn.DraftContent = contentBuilder.String()
 					turn.DraftRoundID = roundID
 					saveTurn("interrupted")
@@ -1007,34 +1051,14 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 
 				for _, choice := range resp.Choices {
 					if choice.Delta.Content != "" {
-						contentBuilder.WriteString(choice.Delta.Content)
-						sendEvent(ch, AgentEvent{Type: "content", Token: choice.Delta.Content})
+						writeTaggedContent(choice.Delta.Content)
 					}
 
 					if choice.Delta.ReasoningContent != "" {
-						reasoningBuilder.WriteString(choice.Delta.ReasoningContent)
-						sendEvent(ch, AgentEvent{Type: "reasoning", Token: choice.Delta.ReasoningContent})
+						writeReasoning(choice.Delta.ReasoningContent)
 					}
 
-					for _, tcd := range choice.Delta.ToolCalls {
-						idx := 0
-						if tcd.Index != nil {
-							idx = *tcd.Index
-						}
-						for len(aggregatedToolCalls) <= idx {
-							aggregatedToolCalls = append(aggregatedToolCalls, openai.ToolCall{})
-						}
-						if tcd.ID != "" {
-							aggregatedToolCalls[idx].ID = tcd.ID
-						}
-						if tcd.Type != "" {
-							aggregatedToolCalls[idx].Type = tcd.Type
-						}
-						if tcd.Function.Name != "" {
-							aggregatedToolCalls[idx].Function.Name = tcd.Function.Name
-						}
-						aggregatedToolCalls[idx].Function.Arguments += tcd.Function.Arguments
-					}
+					toolCallAccumulator.Add(choice.Delta.ToolCalls)
 				}
 				if contentBuilder.Len() > 0 && time.Since(lastDraftCheckpoint) >= time.Second {
 					turn.DraftContent = contentBuilder.String()
@@ -1066,6 +1090,7 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 			turn.DraftContent = ""
 			turn.DraftRoundID = ""
 
+			aggregatedToolCalls := toolCallAccumulator.ToolCalls()
 			if len(aggregatedToolCalls) > 0 {
 				filtered := make([]openai.ToolCall, 0, len(aggregatedToolCalls))
 				for _, tc := range aggregatedToolCalls {

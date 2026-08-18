@@ -326,6 +326,7 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 		thoughtSignature     = "gemini-thought-signature"
 		argumentsJSON        = "{\n  \"action\": \"list\",\n  \"limit\": 9007199254740993\n}"
 		toolReasoning        = "I need to call the test tool."
+		taggedToolReasoning  = "<thought>" + toolReasoning + "</thought>"
 		firstFinalReasoning  = "The tool result is sufficient."
 		secondFinalReasoning = "I can answer from the restored context."
 	)
@@ -380,8 +381,8 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 		case 1:
 			flusher := prepareTestStream(t, w)
 			chunk := fmt.Sprintf(
-				`data: {"id":"chatcmpl-tool","object":"chat.completion.chunk","created":1,"model":"test-model","choices":[{"index":0,"delta":{"reasoning_content":%q,"tool_calls":[{"index":0,"id":%q,"function":{"name":%q,"arguments":%q},"extra_content":{"google":{"thought_signature":%q}}}]},"finish_reason":"tool_calls"}]}`+"\n\n",
-				toolReasoning, toolCallID, toolName, argumentsJSON, thoughtSignature,
+				`data: {"id":"chatcmpl-tool","object":"chat.completion.chunk","created":1,"model":"test-model","choices":[{"index":0,"delta":{"content":%q,"tool_calls":[{"index":0,"id":%q,"function":{"name":%q,"arguments":%q},"extra_content":{"google":{"thought_signature":%q}}}]},"finish_reason":"tool_calls"}]}`+"\n\n",
+				taggedToolReasoning, toolCallID, toolName, argumentsJSON, thoughtSignature,
 			)
 			if _, err = io.WriteString(w, chunk); err != nil {
 				t.Errorf("write tool response failed: %v", err)
@@ -407,7 +408,7 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 
 	firstTurnID := ""
 	events := AgentChat(
-		context.Background(), newTestGeminiOpenAIClient(server.URL), "openai", "test-model", "", 0,
+		context.Background(), newTestGeminiOpenAIClient(server.URL), "openai", "models/gemini-3.5-flash", "", 0,
 		testSessionID, "user-1", 1,
 		"use the tool", nil, "English", nil, EditorContext{}, nil, false, time.Second, 0, "", time.Second, time.Second,
 	)
@@ -452,7 +453,7 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 	}
 
 	events = AgentChat(
-		context.Background(), newTestGeminiOpenAIClient(server.URL), "openai", "test-model", "", 0,
+		context.Background(), newTestGeminiOpenAIClient(server.URL), "openai", "models/gemini-3.5-flash", "", 0,
 		testSessionID, "user-2", 3,
 		"continue", nil, "English", nil, EditorContext{}, nil, false, time.Second, 0, "", time.Second, time.Second,
 	)
@@ -525,7 +526,7 @@ func assertRestoredAssistantContext(
 			continue
 		}
 		if len(message.ToolCalls) == 1 && message.ToolCalls[0].Function.Name == toolName {
-			toolAssistantFound = message.ReasoningContent == toolReasoning &&
+			toolAssistantFound = message.Content == "" && message.ReasoningContent == toolReasoning &&
 				message.ToolCalls[0].ID == toolCallID &&
 				message.ToolCalls[0].Function.Arguments == argumentsJSON
 		}

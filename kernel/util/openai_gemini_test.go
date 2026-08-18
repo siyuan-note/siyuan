@@ -48,6 +48,50 @@ func TestIsGoogleGeminiOpenAICompatibleEndpoint(t *testing.T) {
 	}
 }
 
+func TestGeminiThinkingLevel(t *testing.T) {
+	tests := []struct {
+		effort string
+		level  string
+		ok     bool
+	}{
+		{"", "", true},
+		{"none", "low", true},
+		{"low", "low", true},
+		{"medium", "medium", true},
+		{"high", "high", true},
+		{"xhigh", "high", true},
+		{"max", "high", true},
+		{"unsupported", "", false},
+	}
+	for _, test := range tests {
+		level, ok := geminiThinkingLevel(test.effort)
+		if level != test.level || ok != test.ok {
+			t.Errorf("geminiThinkingLevel(%q) = %q, %v", test.effort, level, ok)
+		}
+	}
+}
+
+func TestConfigureGeminiThoughtSummariesScope(t *testing.T) {
+	gemini3 := map[string]any{"model": "models/gemini-3.5-flash"}
+	changed, configured := configureGeminiThoughtSummaries(gemini3)
+	if !changed || !configured {
+		t.Fatal("Gemini 3 thought summaries were not configured")
+	}
+	thinkingConfig := gemini3["extra_body"].(map[string]any)["google"].(map[string]any)["thinking_config"].(map[string]any)
+	if thinkingConfig["include_thoughts"] != true {
+		t.Fatalf("unexpected Gemini 3 thinking config: %#v", thinkingConfig)
+	}
+	if _, hasLevel := thinkingConfig["thinking_level"]; hasLevel {
+		t.Fatalf("default Gemini thinking level must remain model-defined: %#v", thinkingConfig)
+	}
+
+	gemini25 := map[string]any{"model": "models/gemini-2.5-flash", "reasoning_effort": "high"}
+	changed, configured = configureGeminiThoughtSummaries(gemini25)
+	if changed || configured || gemini25["reasoning_effort"] != "high" {
+		t.Fatalf("Gemini 2.5 request was changed: %#v", gemini25)
+	}
+}
+
 func TestGeminiThoughtSignatureTransportRoundTrip(t *testing.T) {
 	const (
 		existingCallID    = "call-existing"
@@ -82,7 +126,8 @@ func TestGeminiThoughtSignatureTransportRoundTrip(t *testing.T) {
 	state := NewGeminiThoughtSignatureState()
 	state.Set(existingCallID, existingSignature)
 	ctx := ContextWithGeminiThoughtSignatureState(context.Background(), state)
-	body := `{"model":"gemini-3.5-flash","messages":[` +
+	ctx = ContextWithGeminiThoughtSummaries(ctx)
+	body := `{"model":"models/gemini-3.5-flash","reasoning_effort":"high","messages":[` +
 		`{"role":"assistant","tool_calls":[` +
 		`{"id":"` + existingCallID + `","type":"function","function":{"name":"document","arguments":"{}"}},` +
 		`{"id":"` + legacyCallID + `","type":"","function":{"name":"block","arguments":"{}"}}]},` +
@@ -112,6 +157,47 @@ func TestGeminiThoughtSignatureTransportRoundTrip(t *testing.T) {
 	}
 	if got := state.Get(newCallID); got != newSignature {
 		t.Fatalf("captured thought signature = %q, want %q", got, newSignature)
+	}
+	if _, exists := captured["reasoning_effort"]; exists {
+		t.Fatal("reasoning_effort must be removed when Gemini thought summaries are enabled")
+	}
+	extraBody := captured["extra_body"].(map[string]any)
+	google := extraBody["google"].(map[string]any)
+	thinkingConfig := google["thinking_config"].(map[string]any)
+	if thinkingConfig["include_thoughts"] != true || thinkingConfig["thinking_level"] != "high" {
+		t.Fatalf("unexpected Gemini thinking config: %#v", thinkingConfig)
+	}
+	if !state.TaggedSummariesAvailable() {
+		t.Fatal("Gemini tagged thought summaries were not enabled")
+	}
+}
+
+func TestGeminiThoughtSummariesAreOptIn(t *testing.T) {
+	var received []byte
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		received, _ = io.ReadAll(r.Body)
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{}`)
+	}))
+	defer server.Close()
+
+	body := `{"model":"models/gemini-3.5-flash","messages":[{"role":"user","content":"hello"}]}`
+	state := NewGeminiThoughtSignatureState()
+	ctx := ContextWithGeminiThoughtSignatureState(context.Background(), state)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, server.URL+"/v1/chat/completions", strings.NewReader(body))
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := WrapGeminiThoughtSignatureTransport(server.Client()).Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = resp.Body.Close()
+	if string(received) != body {
+		t.Fatalf("request without summary opt-in changed: %s", received)
+	}
+	if state.TaggedSummariesAvailable() {
+		t.Fatal("Gemini tagged thought summaries were enabled without opt-in")
 	}
 }
 

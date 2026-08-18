@@ -37,12 +37,14 @@ const (
 )
 
 type geminiThoughtSignatureContextKey struct{}
+type geminiThoughtSummariesContextKey struct{}
 
 // GeminiThoughtSignatureState 保存同一次 Agent 请求中的 Gemini 工具调用签名。
 // 签名是不透明值，只按工具调用 ID 写入和读取，不进行解码或修改。
 type GeminiThoughtSignatureState struct {
-	mu         sync.RWMutex
-	signatures map[string]string
+	mu                       sync.RWMutex
+	signatures               map[string]string
+	taggedSummariesAvailable bool
 }
 
 func NewGeminiThoughtSignatureState() *GeminiThoughtSignatureState {
@@ -54,6 +56,11 @@ func ContextWithGeminiThoughtSignatureState(ctx context.Context, state *GeminiTh
 		return ctx
 	}
 	return context.WithValue(ctx, geminiThoughtSignatureContextKey{}, state)
+}
+
+// ContextWithGeminiThoughtSummaries 请求 Gemini 返回可展示的思考摘要，仅用于 Agent 主响应。
+func ContextWithGeminiThoughtSummaries(ctx context.Context) context.Context {
+	return context.WithValue(ctx, geminiThoughtSummariesContextKey{}, true)
 }
 
 func (s *GeminiThoughtSignatureState) Set(callID, signature string) {
@@ -78,9 +85,33 @@ func (s *GeminiThoughtSignatureState) Get(callID string) string {
 	return signature
 }
 
+func (s *GeminiThoughtSignatureState) TaggedSummariesAvailable() bool {
+	if s == nil {
+		return false
+	}
+	s.mu.RLock()
+	available := s.taggedSummariesAvailable
+	s.mu.RUnlock()
+	return available
+}
+
+func (s *GeminiThoughtSignatureState) enableTaggedSummaries() {
+	if s == nil {
+		return
+	}
+	s.mu.Lock()
+	s.taggedSummariesAvailable = true
+	s.mu.Unlock()
+}
+
 func geminiThoughtSignatureStateFromContext(ctx context.Context) *GeminiThoughtSignatureState {
 	state, _ := ctx.Value(geminiThoughtSignatureContextKey{}).(*GeminiThoughtSignatureState)
 	return state
+}
+
+func geminiThoughtSummariesRequested(ctx context.Context) bool {
+	requested, _ := ctx.Value(geminiThoughtSummariesContextKey{}).(bool)
+	return requested
 }
 
 func isGoogleGeminiOpenAICompatibleEndpoint(apiBaseURL, model string) bool {
@@ -112,7 +143,7 @@ func (t *geminiThoughtSignatureTransport) Do(req *http.Request) (*http.Response,
 	state := geminiThoughtSignatureStateFromContext(req.Context())
 	isChatRequest := req.Method == http.MethodPost && strings.Contains(req.URL.Path, "chat/completions")
 	if state != nil && isChatRequest {
-		injectGeminiThoughtSignatures(req, state)
+		prepareGeminiChatRequest(req, state, geminiThoughtSummariesRequested(req.Context()))
 	}
 
 	resp, err := t.base.Do(req)
@@ -128,7 +159,7 @@ func (t *geminiThoughtSignatureTransport) Do(req *http.Request) (*http.Response,
 	return resp, nil
 }
 
-func injectGeminiThoughtSignatures(req *http.Request, state *GeminiThoughtSignatureState) {
+func prepareGeminiChatRequest(req *http.Request, state *GeminiThoughtSignatureState, includeThoughtSummaries bool) {
 	if req.Body == nil {
 		return
 	}
@@ -148,6 +179,13 @@ func injectGeminiThoughtSignatures(req *http.Request, state *GeminiThoughtSignat
 	}
 	messages, _ := payload["messages"].([]any)
 	changed := false
+	if includeThoughtSummaries {
+		var summariesConfigured bool
+		changed, summariesConfigured = configureGeminiThoughtSummaries(payload)
+		if summariesConfigured {
+			state.enableTaggedSummaries()
+		}
+	}
 	for _, rawMessage := range messages {
 		message, _ := rawMessage.(map[string]any)
 		if message["role"] != openai.ChatMessageRoleAssistant {
@@ -181,6 +219,72 @@ func injectGeminiThoughtSignatures(req *http.Request, state *GeminiThoughtSignat
 		return
 	}
 	restoreOpenAIRequestBody(req, merged)
+}
+
+func configureGeminiThoughtSummaries(payload map[string]any) (changed, configured bool) {
+	model, _ := payload["model"].(string)
+	if !isGemini3Model(model) {
+		return false, false
+	}
+
+	reasoningEffort, _ := payload["reasoning_effort"].(string)
+	thinkingLevel, supported := geminiThinkingLevel(reasoningEffort)
+	if reasoningEffort != "" && !supported {
+		return false, false
+	}
+
+	extraBody := ensureGeminiJSONMap(payload, "extra_body")
+	google := ensureGeminiJSONMap(extraBody, "google")
+	thinkingConfig := ensureGeminiJSONMap(google, "thinking_config")
+	if includeThoughts, _ := thinkingConfig["include_thoughts"].(bool); !includeThoughts {
+		thinkingConfig["include_thoughts"] = true
+		changed = true
+	}
+	if reasoningEffort != "" {
+		delete(payload, "reasoning_effort")
+		changed = true
+		if _, hasLevel := thinkingConfig["thinking_level"]; !hasLevel {
+			if _, hasBudget := thinkingConfig["thinking_budget"]; !hasBudget {
+				thinkingConfig["thinking_level"] = thinkingLevel
+				changed = true
+			}
+		}
+	}
+	return changed, true
+}
+
+func ensureGeminiJSONMap(parent map[string]any, key string) map[string]any {
+	child, _ := parent[key].(map[string]any)
+	if child == nil {
+		child = map[string]any{}
+		parent[key] = child
+	}
+	return child
+}
+
+func isGemini3Model(model string) bool {
+	normalized := strings.ToLower(strings.TrimSpace(model))
+	if slash := strings.LastIndex(normalized, "/"); slash >= 0 {
+		normalized = normalized[slash+1:]
+	}
+	return strings.HasPrefix(normalized, "gemini-3")
+}
+
+func geminiThinkingLevel(reasoningEffort string) (string, bool) {
+	normalized := strings.ToLower(strings.TrimSpace(reasoningEffort))
+	switch normalized {
+	case "":
+		return "", true
+	case "none":
+		// Gemini 3 无法关闭思考，使用所有 Gemini 3 模型均支持的最低档位。
+		return "low", true
+	case "low", "medium", "high":
+		return normalized, true
+	case "xhigh", "max":
+		return "high", true
+	default:
+		return "", false
+	}
 }
 
 func isGeminiFunctionToolCall(toolCall map[string]any) bool {

@@ -14,10 +14,36 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-//go:build (!darwin && !windows) || ios
+//go:build windows && !ios
 
 package util
 
-func loadPlatformFonts() []*Font {
-	return nil
+import "testing"
+
+func TestLoadDirectWriteFonts(t *testing.T) {
+	oldLang := Lang
+	Lang = "zh-CN"
+	defer func() {
+		Lang = oldLang
+	}()
+
+	fonts := loadPlatformFonts()
+	if len(fonts) == 0 {
+		t.Fatal("DirectWrite should return at least one system font")
+	}
+	hasAliases := false
+	for _, font := range fonts {
+		if font.Family == "" || font.DisplayName == "" {
+			t.Fatalf("DirectWrite returned an invalid font: %+v", font)
+		}
+		if font.Weight < 1 || 1000 < font.Weight {
+			t.Fatalf("DirectWrite returned an invalid font weight: %+v", font)
+		}
+		if 0 < len(font.Aliases) {
+			hasAliases = true
+		}
+	}
+	if !hasAliases {
+		t.Fatal("DirectWrite should return localized font aliases")
+	}
 }

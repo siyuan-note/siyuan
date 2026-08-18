@@ -68,6 +68,24 @@ export const findAgentUserEntryIndex = (entries: AgentHistoryEntry[], userEntryI
     return -1;
 };
 
+export const isAgentAssistantContentFinalInTurn = (
+    entries: Array<{ type: string; content?: string }>, entryIndex: number
+): boolean => {
+    const entry = entries[entryIndex];
+    if (entry?.type !== "assistant" || !entry.content?.trim()) {
+        return false;
+    }
+    for (let i = entryIndex + 1; i < entries.length; i++) {
+        if (entries[i].type === "user") {
+            break;
+        }
+        if (entries[i].type === "assistant" && entries[i].content?.trim()) {
+            return false;
+        }
+    }
+    return true;
+};
+
 export const hasAgentExecutedToolsAfter = (entries: AgentHistoryEntry[], entryIndex: number): boolean => {
     return entries.slice(entryIndex + 1).some((entry) => {
         if (entry.type === "snapshot") {
@@ -97,9 +115,10 @@ const sameToolNames = (left: string[] | undefined, right: string[]): boolean => 
     return left.every((name, index) => name === right[index]);
 };
 
-const enrichThinkingStep = (step: AgentHistoryThinkingStep, entry: AgentHistoryEntry, includeContent: boolean) => {
-    if (includeContent && entry.content?.trim()) {
-        step.content = entry.content;
+const enrichThinkingStep = (step: AgentHistoryThinkingStep, entry: AgentHistoryEntry) => {
+    // assistant.content 是面向用户的权威正文；匹配成功后从兼容用的旧思考步骤中移除副本。
+    if (entry.content?.trim()) {
+        delete step.content;
     }
     if (entry.reasoningContent?.trim()) {
         step.reasoningContent = entry.reasoningContent;
@@ -173,13 +192,12 @@ const enrichThinkingStepTools = (step: AgentHistoryThinkingStep, relatedSteps: A
     }
 };
 
-const buildRecoveredThinkingStep = (entry: AgentHistoryEntry, includeContent: boolean): AgentHistoryThinkingStep => {
+const buildRecoveredThinkingStep = (entry: AgentHistoryEntry): AgentHistoryThinkingStep => {
     const step: AgentHistoryThinkingStep = {
         reasoning: "processing",
         reasoningContent: entry.reasoningContent || "",
         roundID: entry.roundID,
         toolNames: entry.toolCalls?.map(call => call.name || "").filter(Boolean),
-        content: includeContent ? entry.content : undefined,
     };
     const toolCallIDs = entry.toolCalls?.map(call => call.id || "").filter(Boolean) || [];
     if (toolCallIDs.length > 0) {
@@ -203,7 +221,7 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
     const recovered: Array<{ entry: AgentHistoryEntry; step: AgentHistoryThinkingStep }> = [];
     const questionEntries = prepared.filter(entry => entry.type === "question");
     const matchedQuestionEntries = new Set<AgentHistoryEntry>();
-    const questionContentInsertions: Array<{
+    const processContentInsertions: Array<{
         sourceEntry: AgentHistoryEntry;
         anchorStep?: AgentHistoryThinkingStep;
         questionEntry?: AgentHistoryEntry
@@ -221,8 +239,7 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
         const isProcess = !!entry.toolCalls?.length;
         const toolNames = entry.toolCalls?.map(call => call.name || "").filter(Boolean) || [];
         const questionCallCount = entry.toolCalls?.filter(call => call.name === "question").length || 0;
-        const hasQuestion = questionCallCount > 0;
-        const hasQuestionContent = hasQuestion && !!entry.content?.trim();
+        const hasProcessContent = isProcess && !!entry.content?.trim();
         let questionEntry: AgentHistoryEntry | undefined;
         for (let i = 0; i < questionCallCount; i++) {
             let matchedQuestion: AgentHistoryEntry | undefined;
@@ -255,28 +272,24 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
         }
         let presentationStep = step;
         if (step) {
-            enrichThinkingStep(step, entry, isProcess && !hasQuestionContent);
+            enrichThinkingStep(step, entry);
             enrichThinkingStepTools(step, relatedSteps.length > 0 ? relatedSteps : [step], entry);
             matchedSteps.add(step);
         } else if (isProcess || entry.reasoningContent?.trim()) {
-            presentationStep = buildRecoveredThinkingStep(entry, isProcess && !hasQuestionContent);
+            presentationStep = buildRecoveredThinkingStep(entry);
             recovered.push({entry, step: presentationStep});
         }
-        if (hasQuestionContent) {
+        if (hasProcessContent) {
             if (presentationStep) {
-                presentationStep.content = undefined;
+                delete presentationStep.content;
             }
-            questionContentInsertions.push({
+            processContentInsertions.push({
                 sourceEntry: entry,
                 anchorStep: presentationStep,
                 questionEntry,
             });
         }
         if (isProcess) {
-            // 普通工具调用的 assistant 是模型协议过程，不单独渲染为回答气泡；question 的同轮正文用于引出提问。
-            if (!hasQuestionContent) {
-                entry.content = undefined;
-            }
             const remainingToolCalls: NonNullable<AgentHistoryEntry["toolCalls"]> = [];
             for (const call of entry.toolCalls || []) {
                 if (call.name === "todo_write" && call.result?.trim()) {
@@ -338,15 +351,31 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
             }
         }
         if (synthetic.length > 0) {
-            const firstUnmatched = prepared.indexOf(synthetic[0].entry);
-            prepared.splice(firstUnmatched, 0, {
-                type: "thinking",
-                steps: synthetic.map(item => item.step),
-            });
+            let pending: Array<{ entry: AgentHistoryEntry; step: AgentHistoryThinkingStep }> = [];
+            const flushPending = () => {
+                if (pending.length === 0) {
+                    return;
+                }
+                const firstUnmatched = prepared.indexOf(pending[0].entry);
+                prepared.splice(firstUnmatched, 0, {
+                    type: "thinking",
+                    steps: pending.map(item => item.step),
+                });
+                pending = [];
+            };
+            for (const item of synthetic) {
+                pending.push(item);
+                // 实时界面会在模型输出正文后结束当前思考卡片，恢复时沿用同一边界保持思考与正文配套。
+                if (item.entry.content?.trim()) {
+                    flushPending();
+                }
+            }
+            flushPending();
         }
     }
 
-    for (const item of questionContentInsertions) {
+    const contentOffsets = new Map<AgentHistoryEntry, number>();
+    for (const item of processContentInsertions) {
         const anchorEntry = item.anchorStep
             ? prepared.find(entry => entry.type === "thinking" && entry.steps?.includes(item.anchorStep!))
             : undefined;
@@ -363,12 +392,23 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
         if (sourceIndex < 0) {
             continue;
         }
-        prepared.splice(sourceIndex, 1);
         const questionIndex = item.questionEntry ? prepared.indexOf(item.questionEntry) : -1;
+        if (questionIndex < 0 && anchorEntry) {
+            const anchorIndex = prepared.indexOf(anchorEntry);
+            const nextThinkingIndex = prepared.findIndex((entry, index) =>
+                index > anchorIndex && entry.type === "thinking");
+            if (sourceIndex > anchorIndex && (nextThinkingIndex < 0 || sourceIndex < nextThinkingIndex)) {
+                contentOffsets.set(anchorEntry, (contentOffsets.get(anchorEntry) || 0) + 1);
+                continue;
+            }
+        }
+        prepared.splice(sourceIndex, 1);
         if (questionIndex >= 0) {
-            prepared.splice(questionIndex, 0, item.sourceEntry);
+            prepared.splice(prepared.indexOf(item.questionEntry!), 0, item.sourceEntry);
         } else if (anchorEntry) {
-            prepared.splice(prepared.indexOf(anchorEntry) + 1, 0, item.sourceEntry);
+            const offset = contentOffsets.get(anchorEntry) || 0;
+            prepared.splice(prepared.indexOf(anchorEntry) + 1 + offset, 0, item.sourceEntry);
+            contentOffsets.set(anchorEntry, offset + 1);
         } else {
             prepared.splice(Math.min(sourceIndex, prepared.length), 0, item.sourceEntry);
         }
@@ -415,8 +455,8 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
     return prepared;
 };
 
-// 将持久化协议消息投影为 UI 条目：普通工具调用消息归入思考卡片，
-// question 的同轮正文保留在提问卡片前，其余不带工具调用的 assistant 作为回答展示。
+// 将持久化协议消息投影为 UI 条目：reasoningContent 与工具调用归入思考卡片，
+// assistant.content 始终作为正文展示，question 的同轮正文放在提问卡片前。
 export const buildAgentPresentationEntries = (entries: AgentHistoryEntry[]): AgentHistoryEntry[] => {
     const result: AgentHistoryEntry[] = [];
     let turnEntries: AgentHistoryEntry[] = [];

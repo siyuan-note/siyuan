@@ -8,6 +8,7 @@ import {
     getAgentThinkingToolGroups,
     hasAgentExecutedToolsAfter,
     hasAgentModelSpecificContext,
+    isAgentAssistantContentFinalInTurn,
     isAgentRegenerateStateCurrent
 } from "./AgentHistory";
 
@@ -24,6 +25,22 @@ describe("AgentHistory", () => {
         assert.equal(findAgentUserEntryIndex(entries, "user-2"), 2);
         assert.equal(findAgentUserEntryIndex(entries), 2);
         assert.equal(findAgentUserEntryIndex(entries, "missing"), -1);
+    });
+
+    it("shows regenerate only on the final assistant content in each user turn", () => {
+        const turnEntries = [
+            {type: "user", content: "First question"},
+            {type: "assistant", content: "Intermediate result"},
+            {type: "thinking"},
+            {type: "assistant", content: "Final result"},
+            {type: "assistant", toolCalls: [{}]},
+            {type: "user", content: "Second question"},
+            {type: "assistant", content: "Second result"},
+        ];
+        assert.equal(isAgentAssistantContentFinalInTurn(turnEntries, 1), false);
+        assert.equal(isAgentAssistantContentFinalInTurn(turnEntries, 3), true);
+        assert.equal(isAgentAssistantContentFinalInTurn(turnEntries, 4), false);
+        assert.equal(isAgentAssistantContentFinalInTurn(turnEntries, 6), true);
     });
 
     it("displays every positive thinking duration as at least one second", () => {
@@ -102,7 +119,7 @@ describe("AgentHistory", () => {
         assert.equal(entry.references, undefined);
     });
 
-    it("renders tool-call protocol messages inside thinking and keeps one final answer", () => {
+    it("keeps tool-call content outside thinking", () => {
         const display = buildAgentPresentationEntries([
             {id: "user-1", type: "user", content: "create backlink"},
             {id: "snapshot-1", type: "snapshot"},
@@ -136,11 +153,15 @@ describe("AgentHistory", () => {
         ]);
         const visibleAnswers = display.filter(entry =>
             entry.type === "assistant" && !!entry.content?.trim());
-        assert.deepEqual(visibleAnswers.map(entry => entry.content), ["Done"]);
-        assert.equal(display.filter(entry => entry.type === "thinking").length, 2);
-        assert.deepEqual(display.find(entry => entry.id === "thinking-2")?.steps?.map(step => step.content), [
+        assert.deepEqual(visibleAnswers.map(entry => entry.content), [
             "Both blocks are documents",
             "parentID is required",
+            "Done",
+        ]);
+        assert.equal(display.filter(entry => entry.type === "thinking").length, 2);
+        assert.deepEqual(display.find(entry => entry.id === "thinking-2")?.steps?.map(step => step.content), [
+            undefined,
+            undefined,
         ]);
     });
 
@@ -281,11 +302,10 @@ describe("AgentHistory", () => {
         const step = display.find(entry => entry.id === "thinking-1")?.steps?.[0];
         assert.deepEqual(step, {
             roundID: "round-1",
-            content: "authoritative content",
             reasoningContent: "authoritative reasoning",
             toolNames: ["block"],
         });
-        assert.equal(display.find(entry => entry.id === "assistant-1")?.content, undefined);
+        assert.equal(display.find(entry => entry.id === "assistant-1")?.content, "authoritative content");
     });
 
     it("synthesizes a thinking card when recovery has no UI process entries", () => {
@@ -307,10 +327,131 @@ describe("AgentHistory", () => {
             reasoningContent: "reasoning",
             roundID: "round-1",
             toolNames: ["block"],
-            content: "working",
         }]);
-        assert.equal(display[2].content, undefined);
+        assert.equal(display[2].content, "working");
         assert.equal(display[3].content, "Done");
+    });
+
+    it("keeps content from multiple recovered tool rounds visible", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "work"},
+            {
+                id: "assistant-1",
+                type: "assistant",
+                roundID: "round-1",
+                content: "Checking settings",
+                reasoningContent: "reasoning one",
+                toolCalls: [{name: "file"}],
+            },
+            {
+                id: "assistant-2",
+                type: "assistant",
+                roundID: "round-2",
+                reasoningContent: "reasoning two",
+                toolCalls: [{name: "file"}],
+            },
+            {
+                id: "assistant-3",
+                type: "assistant",
+                roundID: "round-3",
+                content: "Checking plugin configuration",
+                reasoningContent: "reasoning three",
+                toolCalls: [{name: "file"}],
+            },
+        ]);
+
+        assert.deepEqual(display.map(entry => entry.id || entry.type), [
+            "user-1", "thinking", "assistant-1", "thinking", "assistant-2", "assistant-3",
+        ]);
+        assert.deepEqual(display.filter(entry => entry.type === "thinking")
+            .map(entry => entry.steps?.map(step => step.roundID)), [["round-1"], ["round-2", "round-3"]]);
+        assert.deepEqual(display.filter(entry => entry.type === "assistant" && entry.content?.trim())
+            .map(entry => entry.content), ["Checking settings", "Checking plugin configuration"]);
+    });
+
+    it("keeps recovered thinking paired after an earlier question continuation", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "search"},
+            {
+                id: "thinking-old",
+                type: "thinking",
+                steps: [{roundID: "old-round", reasoningContent: "old reasoning"}],
+            },
+            {id: "question-1", type: "question", roundID: "old-round"},
+            {
+                id: "assistant-0",
+                type: "assistant",
+                roundID: "new-round-0",
+                reasoningContent: "first reasoning",
+                toolCalls: [{name: "search"}],
+            },
+            {
+                id: "assistant-1",
+                type: "assistant",
+                roundID: "new-round-1",
+                content: "First update",
+                reasoningContent: "second reasoning",
+                toolCalls: [{name: "search"}],
+            },
+            {
+                id: "assistant-2",
+                type: "assistant",
+                roundID: "new-round-2",
+                reasoningContent: "third reasoning",
+                toolCalls: [{name: "document"}],
+            },
+            {
+                id: "assistant-3",
+                type: "assistant",
+                roundID: "new-round-3",
+                content: "Second update",
+                reasoningContent: "fourth reasoning",
+                toolCalls: [{name: "document"}],
+            },
+        ]);
+
+        assert.deepEqual(display.map(entry => entry.id || entry.type), [
+            "user-1", "thinking-old", "question-1", "thinking", "assistant-0", "assistant-1",
+            "thinking", "assistant-2", "assistant-3",
+        ]);
+        assert.deepEqual(display.filter(entry => entry.type === "thinking")
+            .map(entry => entry.steps?.map(step => step.roundID)), [
+            ["old-round"], ["new-round-0", "new-round-1"], ["new-round-2", "new-round-3"],
+        ]);
+    });
+
+    it("places tool-round content before the next thinking card", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "work"},
+            {
+                id: "thinking-1",
+                type: "thinking",
+                steps: [{roundID: "round-1", reasoningContent: "reasoning one", toolNames: ["file"]}],
+            },
+            {
+                id: "thinking-2",
+                type: "thinking",
+                steps: [{roundID: "round-2", reasoningContent: "reasoning two", toolNames: ["file"]}],
+            },
+            {
+                id: "assistant-1",
+                type: "assistant",
+                roundID: "round-1",
+                content: "First progress update",
+                toolCalls: [{name: "file"}],
+            },
+            {
+                id: "assistant-2",
+                type: "assistant",
+                roundID: "round-2",
+                content: "Second progress update",
+                toolCalls: [{name: "file"}],
+            },
+        ]);
+
+        assert.deepEqual(display.map(entry => entry.id), [
+            "user-1", "thinking-1", "assistant-1", "thinking-2", "assistant-2",
+        ]);
     });
 
     it("falls back to legacy step matching and restores final reasoning", () => {
@@ -339,7 +480,6 @@ describe("AgentHistory", () => {
         ]);
         assert.deepEqual(display.map(entry => entry.type), ["user", "thinking", "assistant", "thinking", "assistant"]);
         assert.deepEqual(display[1].steps?.[0], {
-            content: "working",
             reasoningContent: "authoritative reasoning",
             roundID: "round-1",
             toolNames: ["block"],
@@ -349,9 +489,8 @@ describe("AgentHistory", () => {
             reasoningContent: "final reasoning",
             roundID: "round-2",
             toolNames: undefined,
-            content: undefined,
         }]);
-        assert.equal(display[2].content, undefined);
+        assert.equal(display[2].content, "working");
         assert.equal(display[4].content, "Done");
     });
 
@@ -383,7 +522,7 @@ describe("AgentHistory", () => {
             "round-2",
         ]);
         assert.equal(display.filter(entry => entry.type === "thinking").length, 1);
-        assert.equal(display.find(entry => entry.roundID === "round-1")?.content, undefined);
+        assert.equal(display.find(entry => entry.roundID === "round-1")?.content, "recovered middle");
     });
 
     it("keeps todo results after their corresponding thinking card", () => {

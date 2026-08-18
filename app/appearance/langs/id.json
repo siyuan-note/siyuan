@@ -1,4 +1,5 @@
 {
+	"useSystemProxy": "Gunakan proksi sistem",
 	"statusBarMsgSyncDataSnapshot": "Sinkronkan snapshot data",
 	"entryDocumentStatistics": "Statistik dokumen",
 	"entryTabMenu": "Menu tab",

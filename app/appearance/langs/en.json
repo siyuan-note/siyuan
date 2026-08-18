@@ -1,4 +1,5 @@
 {
+	"useSystemProxy": "Use system proxy",
 	"statusBarMsgSyncDataSnapshot": "Synchronize data snapshot",
 	"entryDocumentStatistics": "Document statistics",
 	"entryTabMenu": "Tab menu",

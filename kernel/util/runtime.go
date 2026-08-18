@@ -210,22 +210,56 @@ func GetDeviceName() string {
 	return ret
 }
 
-func SetNetworkProxy(proxyURL string) {
-	if err := os.Setenv("HTTPS_PROXY", proxyURL); err != nil {
-		logging.LogErrorf("set env [HTTPS_PROXY] failed: %s", err)
-	}
-	if err := os.Setenv("HTTP_PROXY", proxyURL); err != nil {
-		logging.LogErrorf("set env [HTTP_PROXY] failed: %s", err)
+func SetNetworkProxy(proxyURL string, useSystem bool) {
+	if useSystem {
+		restoreSystemNetworkProxyEnvironment()
+	} else {
+		for _, name := range networkProxyEnvironmentNames {
+			if err := os.Setenv(name, proxyURL); err != nil {
+				logging.LogErrorf("set env [%s] failed: %s", name, err)
+			}
+		}
 	}
 
-	if "" != proxyURL {
+	if useSystem {
+		logging.LogInfof("use network proxy [system]")
+	} else if "" != proxyURL {
 		logging.LogInfof("use network proxy [%s]", networkProxyLogValue(proxyURL))
 	} else {
-		logging.LogInfof("use network proxy [system]")
+		logging.LogInfof("use network proxy [direct]")
 	}
 
 	httpclient.CloseIdleConnections()
 	closeOpenAIIdleConnections()
+}
+
+var networkProxyEnvironmentNames = []string{"HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"}
+
+type networkProxyEnvironmentValue struct {
+	value string
+	set   bool
+}
+
+var systemNetworkProxyEnvironment = func() map[string]networkProxyEnvironmentValue {
+	ret := make(map[string]networkProxyEnvironmentValue, len(networkProxyEnvironmentNames))
+	for _, name := range networkProxyEnvironmentNames {
+		value, set := os.LookupEnv(name)
+		ret[name] = networkProxyEnvironmentValue{value: value, set: set}
+	}
+	return ret
+}()
+
+func restoreSystemNetworkProxyEnvironment() {
+	for _, name := range networkProxyEnvironmentNames {
+		value := systemNetworkProxyEnvironment[name]
+		if value.set {
+			if err := os.Setenv(name, value.value); err != nil {
+				logging.LogErrorf("set env [%s] failed: %s", name, err)
+			}
+		} else if err := os.Unsetenv(name); err != nil {
+			logging.LogErrorf("unset env [%s] failed: %s", name, err)
+		}
+	}
 }
 
 func networkProxyLogValue(rawURL string) string {

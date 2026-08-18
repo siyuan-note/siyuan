@@ -346,9 +346,13 @@ const windowNavigate = (currentWindow, windowType) => {
 };
 
 const setProxy = (proxyURL, webContents) => {
-    if (proxyURL.startsWith("://")) {
+    if (proxyURL.startsWith("system://")) {
         console.log("network proxy [system]");
         return webContents.session.setProxy({mode: "system"});
+    }
+    if (proxyURL.startsWith("://")) {
+        console.log("network proxy [direct]");
+        return webContents.session.setProxy({mode: "direct"});
     }
     console.log("network proxy [" + proxyURL + "]");
     return webContents.session.setProxy({proxyRules: proxyURL});

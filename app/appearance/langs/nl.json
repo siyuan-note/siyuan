@@ -1,4 +1,5 @@
 {
+	"useSystemProxy": "Systeemproxy gebruiken",
 	"statusBarMsgSyncDataSnapshot": "Gegevensmomentopname synchroniseren",
 	"entryDocumentStatistics": "Documentstatistieken",
 	"entryTabMenu": "Tabbladmenu",

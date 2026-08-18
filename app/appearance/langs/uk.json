@@ -1,4 +1,5 @@
 {
+	"useSystemProxy": "Використовувати системний проксі",
 	"statusBarMsgSyncDataSnapshot": "Синхронізувати знімок даних",
 	"entryDocumentStatistics": "Статистика документа",
 	"entryTabMenu": "Меню вкладок",

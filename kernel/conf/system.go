@@ -89,8 +89,12 @@ type NetworkProxy struct {
 }
 
 func (np *NetworkProxy) String() string {
-	if "" == np.Scheme {
+	if "" == np.Scheme || "system" == np.Scheme {
 		return ""
 	}
 	return np.Scheme + "://" + np.Host + ":" + np.Port
+}
+
+func (np *NetworkProxy) IsSystem() bool {
+	return "system" == np.Scheme
 }

@@ -1,4 +1,5 @@
 {
+	"useSystemProxy": "सिस्टम प्रॉक्सी का उपयोग करें",
 	"statusBarMsgSyncDataSnapshot": "डेटा स्नैपशॉट सिंक करें",
 	"entryDocumentStatistics": "दस्तावेज़ के आँकड़े",
 	"entryTabMenu": "टैब मेनू",

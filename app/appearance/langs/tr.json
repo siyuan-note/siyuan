@@ -1,4 +1,5 @@
 {
+	"useSystemProxy": "Sistem proxy'sini kullan",
 	"statusBarMsgSyncDataSnapshot": "Veri anlık görüntüsünü senkronize et",
 	"entryDocumentStatistics": "Belge istatistikleri",
 	"entryTabMenu": "Sekme menüsü",

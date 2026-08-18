@@ -1,4 +1,5 @@
 {
+	"useSystemProxy": "Použiť systémový proxy server",
 	"statusBarMsgSyncDataSnapshot": "Synchronizovať snímku údajov",
 	"entryDocumentStatistics": "Štatistiky dokumentu",
 	"entryTabMenu": "Ponuka kariet",

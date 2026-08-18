@@ -1,4 +1,5 @@
 {
+	"useSystemProxy": "Utiliser le proxy système",
 	"statusBarMsgSyncDataSnapshot": "Synchroniser l'instantané des données",
 	"entryDocumentStatistics": "Statistiques du document",
 	"entryTabMenu": "Menu des onglets",

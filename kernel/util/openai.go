@@ -905,7 +905,7 @@ func downloadGeneratedImage(ctx context.Context, rawURL string) ([]byte, error) 
 func generatedImageHTTPClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
-			Proxy:       http.ProxyFromEnvironment,
+			Proxy:       httpclient.ProxyFromEnvironment,
 			DialContext: generatedImageDialer().DialContext,
 		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {

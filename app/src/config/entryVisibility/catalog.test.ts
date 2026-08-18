@@ -491,6 +491,7 @@ test("configuration labels distinguish block scopes and size controls", () => {
                     entryPercentageWidth: "Percentage width",
                     entryPixelHeight: "Pixel height",
                     entryPercentageHeight: "Percentage height",
+                    entryDocumentStatistics: "Document statistics",
                 },
             },
         },
@@ -504,6 +505,7 @@ test("configuration labels distinguish block scopes and size controls", () => {
         assert.equal(getEntryCatalogNode("gutter.single.width.widthDrag")?.label(), "Percentage width");
         assert.equal(getEntryCatalogNode("inline.image.height.heightInput")?.label(), "Pixel height");
         assert.equal(getEntryCatalogNode("inline.image.height.heightDrag")?.label(), "Percentage height");
+        assert.equal(getEntryCatalogNode("document.more.docInfo")?.label(), "Document statistics");
     } finally {
         if (windowDescriptor) {
             Object.defineProperty(globalThis, "window", windowDescriptor);

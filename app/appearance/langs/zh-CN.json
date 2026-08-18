@@ -1,4 +1,6 @@
 {
+	"statusBarMsgSyncDataSnapshot": "同步数据快照",
+	"entryDocumentStatistics": "文档统计",
 	"entryTabMenu": "页签菜单",
 	"entrySingleBlock": "单个块",
 	"entryMultipleBlocks": "多个块",

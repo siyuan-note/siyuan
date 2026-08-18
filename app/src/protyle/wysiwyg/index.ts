@@ -193,7 +193,7 @@ import {
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldOpenListItemAttr} from "./listContext";
-import {getBlockEdgeCaretPoint, isCaretRangeInsideElement} from "./blockEdgeCaret";
+import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -234,16 +234,20 @@ const focusTextBlockEdgeByPoint = (blockElement: HTMLElement, x: number, y: numb
         !["NodeParagraph", "NodeHeading"].includes(editableBlockElement.getAttribute("data-type"))) {
         return false;
     }
-    const point = getBlockEdgeCaretPoint(x, y, contentLeft, contentRight,
-        editableElement.getBoundingClientRect());
-    if (!point) {
+    const caret = getBlockEdgeCaretRange(x, y, contentLeft, contentRight,
+        editableElement.getBoundingClientRect(), editableElement,
+        (pointX, pointY) => document.caretRangeFromPoint(pointX, pointY));
+    if (!caret) {
         return false;
     }
-    const range = document.caretRangeFromPoint(point.x, point.y);
-    if (!isCaretRangeInsideElement(range, editableElement)) {
+    focusByRange(caret.range);
+    // Range 可能吸附到目标行的另一端，由浏览器按视觉行移动到点击侧的行边界
+    const selection = getSelection();
+    selection.modify("move", caret.lineBoundaryDirection, "lineboundary");
+    const movedRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+    if (!isCaretRangeInsideElement(movedRange, editableElement)) {
         return false;
     }
-    focusByRange(range);
     return true;
 };
 

@@ -664,7 +664,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("default", lang("default")),
             ]),
             separator("separator_2"),
-            node("docInfo", lang("blockCount"), false),
+            node("docInfo", lang("entryDocumentStatistics"), false),
         ],
     },
     {

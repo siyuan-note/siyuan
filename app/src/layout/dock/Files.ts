@@ -7,6 +7,7 @@ import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
 import {newFileInTree} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
+import {isDocTreeDragSelectionAllowed} from "../../menus/navigationSelection";
 import {MenuItem} from "../../menus/Menu";
 import {showMessage} from "../../dialog/message";
 import {
@@ -456,7 +457,6 @@ export class Files extends Model {
             hideTooltip();
             const liElement = hasClosestByTag(event.target, "LI");
             if (liElement) {
-                this.parent.panelElement.classList.add("sy__file--disablehover");
                 let selectElements: Element[] = Array.from(this.element.querySelectorAll(".b3-list-item--focus"));
                 if (!liElement.classList.contains("b3-list-item--focus")) {
                     selectElements.forEach((item) => {
@@ -465,6 +465,11 @@ export class Files extends Model {
                     liElement.classList.add("b3-list-item--focus");
                     selectElements = [liElement];
                 }
+                if (!isDocTreeDragSelectionAllowed(selectElements)) {
+                    event.preventDefault();
+                    return;
+                }
+                this.parent.panelElement.classList.add("sy__file--disablehover");
                 let ids = "";
                 const ghostElement = document.createElement("ul");
                 selectElements.forEach((item: HTMLElement, index) => {

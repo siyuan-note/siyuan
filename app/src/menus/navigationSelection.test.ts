@@ -1,6 +1,11 @@
 import * as assert from "node:assert/strict";
 import test from "node:test";
-import {getDocTreeDeleteTargets, getDocTreeMenuItems, getDocTreeMenuType} from "./navigationSelection";
+import {
+    getDocTreeDeleteTargets,
+    getDocTreeMenuItems,
+    getDocTreeMenuType,
+    isDocTreeDragSelectionAllowed
+} from "./navigationSelection";
 
 const createItem = (type: "navigation-file" | "navigation-root", options: {
     id?: string,
@@ -42,6 +47,14 @@ test("document tree menu type distinguishes all selection kinds", () => {
     assert.equal(getDocTreeMenuType([notebook1]), "notebook");
     assert.equal(getDocTreeMenuType([notebook1, notebook2]), "notebooks");
     assert.equal(getDocTreeMenuType([notebook1, doc1]), "items");
+});
+
+test("document tree drag rejects mixed selections", () => {
+    assert.equal(isDocTreeDragSelectionAllowed([doc1]), true);
+    assert.equal(isDocTreeDragSelectionAllowed([doc1, doc2]), true);
+    assert.equal(isDocTreeDragSelectionAllowed([notebook1]), true);
+    assert.equal(isDocTreeDragSelectionAllowed([notebook1, notebook2]), true);
+    assert.equal(isDocTreeDragSelectionAllowed([notebook1, doc1]), false);
 });
 
 test("document tree menu items contain document and notebook identifiers", () => {

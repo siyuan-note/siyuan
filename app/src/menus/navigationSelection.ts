@@ -12,6 +12,8 @@ export const getDocTreeMenuType = (elements: Element[]): TDocTreeMenuType => {
     return "items";
 };
 
+export const isDocTreeDragSelectionAllowed = (elements: Element[]) => getDocTreeMenuType(elements) !== "items";
+
 export const getDocTreeMenuItems = (elements: Element[]) => elements.map((item) => {
     const notebookId = item.closest("ul[data-url]")?.getAttribute("data-url");
     return {

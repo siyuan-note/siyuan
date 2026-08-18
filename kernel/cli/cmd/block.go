@@ -216,21 +216,19 @@ var blockInsertCmd = &cobra.Command{
 		}
 
 		dom := markdownToBlockDOM(data)
-		transactions := []*model.Transaction{{
-			DoOperations: []*model.Operation{{
-				Action:     "insert",
-				Data:       dom,
-				ParentID:   parentID,
-				PreviousID: previousID,
-			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		operation := &model.Operation{
+			Action:     "insert",
+			Data:       dom,
+			ParentID:   parentID,
+			PreviousID: previousID,
+		}
+		if err = model.PerformTxSync(&model.Transaction{DoOperations: []*model.Operation{operation}}); err != nil {
+			return err
+		}
 		if bt := treenode.GetBlockTree(parentID); bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)
 		}
-		fmt.Println("ok")
-		return nil
+		return printBlockWriteResult(operation.ID)
 	},
 }
 
@@ -259,20 +257,18 @@ var blockAppendCmd = &cobra.Command{
 		}
 
 		dom := markdownToBlockDOM(data)
-		transactions := []*model.Transaction{{
-			DoOperations: []*model.Operation{{
-				Action:   "appendInsert",
-				Data:     dom,
-				ParentID: parentID,
-			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		operation := &model.Operation{
+			Action:   "appendInsert",
+			Data:     dom,
+			ParentID: parentID,
+		}
+		if err = model.PerformTxSync(&model.Transaction{DoOperations: []*model.Operation{operation}}); err != nil {
+			return err
+		}
 		if bt := treenode.GetBlockTree(parentID); bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)
 		}
-		fmt.Println("ok")
-		return nil
+		return printBlockWriteResult(operation.ID)
 	},
 }
 
@@ -301,21 +297,39 @@ var blockPrependCmd = &cobra.Command{
 		}
 
 		dom := markdownToBlockDOM(data)
-		transactions := []*model.Transaction{{
-			DoOperations: []*model.Operation{{
-				Action:   "prependInsert",
-				Data:     dom,
-				ParentID: parentID,
-			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		operation := &model.Operation{
+			Action:   "prependInsert",
+			Data:     dom,
+			ParentID: parentID,
+		}
+		if err = model.PerformTxSync(&model.Transaction{DoOperations: []*model.Operation{operation}}); err != nil {
+			return err
+		}
 		if bt := treenode.GetBlockTree(parentID); bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)
 		}
-		fmt.Println("ok")
-		return nil
+		return printBlockWriteResult(operation.ID)
 	},
+}
+
+func printBlockWriteResult(id string) error {
+	return writeBlockWriteResult(os.Stdout, id)
+}
+
+func writeBlockWriteResult(output io.Writer, id string) error {
+	if id == "" {
+		return fmt.Errorf("block write failed: empty block ID")
+	}
+	if outputFormat == "json" {
+		data, err := json.MarshalIndent(map[string]string{"id": id}, "", "  ")
+		if err != nil {
+			return err
+		}
+		_, err = fmt.Fprintln(output, string(data))
+		return err
+	}
+	_, err := fmt.Fprintln(output, id)
+	return err
 }
 
 var blockUpdateCmd = &cobra.Command{

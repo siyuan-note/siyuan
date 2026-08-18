@@ -47,12 +47,14 @@ var managedEncryptedExports = struct {
 	jobs map[string]managedEncryptedExport
 }{jobs: map[string]managedEncryptedExport{}}
 
-type MobileExportLease struct {
+type ExportArtifactLease struct {
 	ID   string `json:"leaseID"`
 	Path string `json:"path"`
 	Name string `json:"name"`
 	Size int64  `json:"size"`
 }
+
+type MobileExportLease = ExportArtifactLease
 
 type mobileExportLeaseState struct {
 	boxID      string
@@ -163,8 +165,8 @@ func IsManagedEncryptedExportPath(relativePath string) bool {
 	return len(parts) >= 1 && ast.IsNodeIDPattern(parts[0])
 }
 
-// AcquireMobileExportLease 为移动端导出取得覆盖整个原生复制过程的生命周期租约。
-func AcquireMobileExportLease(exportPath string) (lease *MobileExportLease, err error) {
+// AcquireExportArtifactLease 为导出产物取得覆盖整个复制过程的生命周期租约。
+func AcquireExportArtifactLease(exportPath string) (lease *ExportArtifactLease, err error) {
 	if after, ok := strings.CutPrefix(exportPath, "/export/"); ok {
 		fileName, decodeErr := url.PathUnescape(after)
 		if decodeErr != nil {
@@ -301,6 +303,11 @@ func AcquireMobileExportLease(exportPath string) (lease *MobileExportLease, err 
 	return
 }
 
+// AcquireMobileExportLease 为移动端导出取得覆盖整个原生复制过程的生命周期租约。
+func AcquireMobileExportLease(exportPath string) (lease *MobileExportLease, err error) {
+	return AcquireExportArtifactLease(exportPath)
+}
+
 // GetMobileExportName 返回移动端保存对话框使用的文件名，不生成明文临时文件。
 func GetMobileExportName(exportPath string) string {
 	if after, ok := strings.CutPrefix(exportPath, "/export/"); ok {
@@ -360,9 +367,14 @@ func registerMobileExportLeaseWithID(leaseID, boxID, artifact, name, cleanupDir 
 	return &MobileExportLease{ID: leaseID, Path: artifact, Name: name, Size: info.Size()}, nil
 }
 
+// ReleaseExportArtifactLease 释放导出产物租约；重复调用不会产生副作用。
+func ReleaseExportArtifactLease(leaseID string) {
+	releaseMobileExportLease(leaseID, false)
+}
+
 // ReleaseMobileExportLease 释放移动端导出租约；重复调用不会产生副作用。
 func ReleaseMobileExportLease(leaseID string) {
-	releaseMobileExportLease(leaseID, false)
+	ReleaseExportArtifactLease(leaseID)
 }
 
 func releaseMobileExportLease(leaseID string, expired bool) {

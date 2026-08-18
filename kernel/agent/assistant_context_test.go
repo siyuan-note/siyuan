@@ -24,6 +24,7 @@ import (
 	kernelConf "github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestResponsesContextPreservesEncryptedReasoningAndToolOutput(t *testing.T) {
@@ -322,6 +323,7 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 	const (
 		toolName             = "test_assistant_context"
 		toolCallID           = "call-original"
+		thoughtSignature     = "gemini-thought-signature"
 		argumentsJSON        = "{\n  \"action\": \"list\",\n  \"limit\": 9007199254740993\n}"
 		toolReasoning        = "I need to call the test tool."
 		firstFinalReasoning  = "The tool result is sufficient."
@@ -378,8 +380,8 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 		case 1:
 			flusher := prepareTestStream(t, w)
 			chunk := fmt.Sprintf(
-				`data: {"id":"chatcmpl-tool","object":"chat.completion.chunk","created":1,"model":"test-model","choices":[{"index":0,"delta":{"reasoning_content":%q,"tool_calls":[{"index":0,"id":%q,"type":"function","function":{"name":%q,"arguments":%q}}]},"finish_reason":"tool_calls"}]}`+"\n\n",
-				toolReasoning, toolCallID, toolName, argumentsJSON,
+				`data: {"id":"chatcmpl-tool","object":"chat.completion.chunk","created":1,"model":"test-model","choices":[{"index":0,"delta":{"reasoning_content":%q,"tool_calls":[{"index":0,"id":%q,"type":"function","function":{"name":%q,"arguments":%q},"extra_content":{"google":{"thought_signature":%q}}}]},"finish_reason":"tool_calls"}]}`+"\n\n",
+				toolReasoning, toolCallID, toolName, argumentsJSON, thoughtSignature,
 			)
 			if _, err = io.WriteString(w, chunk); err != nil {
 				t.Errorf("write tool response failed: %v", err)
@@ -388,9 +390,11 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 			flusher.Flush()
 			writeTestStreamDone(t, w, flusher)
 		case 2:
+			assertGeminiThoughtSignatureInRequest(t, body, toolCallID, thoughtSignature)
 			assertRestoredAssistantContext(t, request.Messages, toolName, toolCallID, argumentsJSON, toolReasoning, "")
 			writeAssistantContextStream(t, w, firstFinalReasoning, "first answer")
 		case 3:
+			assertGeminiThoughtSignatureInRequest(t, body, toolCallID, thoughtSignature)
 			assertRestoredAssistantContext(
 				t, request.Messages, toolName, toolCallID, argumentsJSON, toolReasoning, firstFinalReasoning,
 			)
@@ -403,7 +407,8 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 
 	firstTurnID := ""
 	events := AgentChat(
-		context.Background(), newTestOpenAIClient(server.URL), "openai", "test-model", "", 0, testSessionID, "user-1", 1,
+		context.Background(), newTestGeminiOpenAIClient(server.URL), "openai", "test-model", "", 0,
+		testSessionID, "user-1", 1,
 		"use the tool", nil, "English", nil, EditorContext{}, nil, false, time.Second, 0, "", time.Second, time.Second,
 	)
 	for event := range events {
@@ -428,6 +433,13 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 	if err != nil || revision != 2 {
 		t.Fatalf("commit first agent turn failed: revision=%d, err=%v", revision, err)
 	}
+	canonicalJSON, err := json.Marshal(canonical)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(canonicalJSON), `"thoughtSignature":"`+thoughtSignature+`"`) {
+		t.Fatalf("thought signature was not persisted: %s", canonicalJSON)
+	}
 
 	entries := canonical["entries"].([]any)
 	canonical["entries"] = append(entries, map[string]any{
@@ -440,7 +452,8 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 	}
 
 	events = AgentChat(
-		context.Background(), newTestOpenAIClient(server.URL), "openai", "test-model", "", 0, testSessionID, "user-2", 3,
+		context.Background(), newTestGeminiOpenAIClient(server.URL), "openai", "test-model", "", 0,
+		testSessionID, "user-2", 3,
 		"continue", nil, "English", nil, EditorContext{}, nil, false, time.Second, 0, "", time.Second, time.Second,
 	)
 	for event := range events {
@@ -460,6 +473,43 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 		runtime.ActiveTurn.Delta[0].ReasoningContent != secondFinalReasoning {
 		t.Fatalf("follow-up reasoning was not checkpointed: %#v", runtime.ActiveTurn)
 	}
+}
+
+func newTestGeminiOpenAIClient(serverURL string) *openai.Client {
+	config := openai.DefaultConfig("test-key")
+	config.BaseURL = serverURL + "/v1"
+	config.HTTPClient = util.WrapGeminiThoughtSignatureTransport(http.DefaultClient)
+	return openai.NewClientWithConfig(config)
+}
+
+func assertGeminiThoughtSignatureInRequest(t *testing.T, body []byte, callID, want string) {
+	t.Helper()
+	var payload map[string]any
+	if err := json.Unmarshal(body, &payload); err != nil {
+		t.Fatal(err)
+	}
+	messages, _ := payload["messages"].([]any)
+	for _, rawMessage := range messages {
+		message, _ := rawMessage.(map[string]any)
+		toolCalls, _ := message["tool_calls"].([]any)
+		for _, rawToolCall := range toolCalls {
+			toolCall, _ := rawToolCall.(map[string]any)
+			if toolCall["id"] == callID {
+				if got := geminiThoughtSignatureForTest(toolCall); got != want {
+					t.Fatalf("thought signature = %q, want %q", got, want)
+				}
+				return
+			}
+		}
+	}
+	t.Fatalf("tool call %q was not found in request", callID)
+}
+
+func geminiThoughtSignatureForTest(toolCall map[string]any) string {
+	extraContent, _ := toolCall["extra_content"].(map[string]any)
+	google, _ := extraContent["google"].(map[string]any)
+	signature, _ := google["thought_signature"].(string)
+	return signature
 }
 
 func assertRestoredAssistantContext(

@@ -356,13 +356,22 @@ type AgentMessage struct {
 }
 
 type AgentToolCall struct {
-	ID            string            `json:"id,omitempty"`
-	Name          string            `json:"name"`
-	Arguments     map[string]any    `json:"arguments"`
-	ArgumentsJSON string            `json:"argumentsJSON,omitempty"`
-	Result        string            `json:"result,omitempty"`
-	State         string            `json:"state,omitempty"`
-	Attachments   []AgentAttachment `json:"attachments,omitempty"`
+	ID            string                     `json:"id,omitempty"`
+	Name          string                     `json:"name"`
+	Arguments     map[string]any             `json:"arguments"`
+	ArgumentsJSON string                     `json:"argumentsJSON,omitempty"`
+	Result        string                     `json:"result,omitempty"`
+	State         string                     `json:"state,omitempty"`
+	Attachments   []AgentAttachment          `json:"attachments,omitempty"`
+	ProviderData  *AgentToolCallProviderData `json:"providerData,omitempty"`
+}
+
+type AgentToolCallProviderData struct {
+	Google *AgentGoogleToolCallProviderData `json:"google,omitempty"`
+}
+
+type AgentGoogleToolCallProviderData struct {
+	ThoughtSignature string `json:"thoughtSignature,omitempty"`
 }
 
 type AgentAttachment struct {
@@ -489,6 +498,8 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 				logging.LogErrorf("agent chat panic: %v\n%s", r, logging.ShortStack())
 			}
 		}()
+		thoughtSignatureState := util.NewGeminiThoughtSignatureState()
+		ctx = util.ContextWithGeminiThoughtSignatureState(ctx, thoughtSignatureState)
 
 		if kernelModel.Conf.AI.MCP != nil {
 			mcpclient.EnsureMCPConnected(kernelModel.Conf.AI.MCP.Servers)
@@ -615,6 +626,7 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 			checkpointMsgs = []AgentMessage{newAgentUserMessage(userMessage, userEntryID, references, editorCtx)}
 			messages = buildInitialMessages(userMessage, language, references, editorCtx, capabilities)
 		}
+		restoreGeminiThoughtSignatures(thoughtSignatureState, checkpointMsgs)
 
 		turnBaseIndex := len(checkpointMsgs)
 		turn := &agentRuntimeTurn{
@@ -1088,6 +1100,7 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 						Arguments:     args,
 						ArgumentsJSON: tc.Function.Arguments,
 						State:         "pending",
+						ProviderData:  geminiToolCallProviderData(thoughtSignatureState.Get(tc.ID)),
 					})
 				}
 				checkpointMsgs = append(checkpointMsgs, checkpointMsg)
@@ -2080,6 +2093,26 @@ func entriesToAgentMessages(entries []SessionEntry) []AgentMessage {
 		}
 	}
 	return msgs
+}
+
+func restoreGeminiThoughtSignatures(state *util.GeminiThoughtSignatureState, messages []AgentMessage) {
+	for _, message := range messages {
+		for _, toolCall := range message.ToolCalls {
+			if toolCall.ProviderData == nil || toolCall.ProviderData.Google == nil {
+				continue
+			}
+			state.Set(toolCall.ID, toolCall.ProviderData.Google.ThoughtSignature)
+		}
+	}
+}
+
+func geminiToolCallProviderData(signature string) *AgentToolCallProviderData {
+	if signature == "" {
+		return nil
+	}
+	return &AgentToolCallProviderData{
+		Google: &AgentGoogleToolCallProviderData{ThoughtSignature: signature},
+	}
 }
 
 func checkpointMessagesToOpenAI(checkpointMsgs []AgentMessage, language string, capabilities *capabilitySet) []openai.ChatCompletionMessage {

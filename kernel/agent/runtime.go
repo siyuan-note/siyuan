@@ -531,6 +531,9 @@ func applyRuntimeTurnToSessionLocked(session map[string]any, turn *agentRuntimeT
 				if len(call.Attachments) > 0 {
 					persistedCall["attachments"] = call.Attachments
 				}
+				if call.ProviderData != nil {
+					persistedCall["providerData"] = call.ProviderData
+				}
 				calls = append(calls, persistedCall)
 			}
 			entry["toolCalls"] = calls

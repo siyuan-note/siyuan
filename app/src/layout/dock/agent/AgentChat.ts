@@ -105,7 +105,12 @@ type SessionEntry =
         arguments: Record<string, unknown>;
         argumentsJSON?: string;
         result?: string;
-        state?: string
+        state?: string;
+        providerData?: {
+            google?: {
+                thoughtSignature?: string
+            }
+        }
     }>;
     timestamp?: number
 })

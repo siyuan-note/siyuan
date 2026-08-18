@@ -1945,10 +1945,11 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 			continue
 		}
 
-		lx := link.Rect.LL.X + link.Rect.Width()
-		ly := link.Rect.LL.Y + link.Rect.Height()/2
-		w := link.Rect.Height() / 2
-		h := link.Rect.Height() / 2
+		// 附件注解放在前端预留的链接尾部空间内。
+		lx := link.Rect.LL.X + link.Rect.Width() - link.Rect.Height()
+		ly := link.Rect.LL.Y
+		w := link.Rect.Height()
+		h := link.Rect.Height()
 
 		d := types.Dict(
 			map[string]types.Object{
@@ -1963,7 +1964,7 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 				"C":            types.NewNumberArray(0.5, 0.0, 0.5),
 				"CA":           types.Float(0.95),
 				"CreationDate": now,
-				"Name":         types.Name("FileAttachment"),
+				"Name":         types.Name("Paperclip"),
 				"FS":           *ir,
 				"NM":           types.StringLiteral(""),
 			},

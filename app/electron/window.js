@@ -1,6 +1,6 @@
 // 桌面端 pre-boot 窗口（init.html / workspace.html）共享脚本
 // 由各 HTML 通过 <script src="window.js"></script> 引入，依赖 nodeIntegration: true
-// 中文用 ld246.com，其他语言用 liuyun.io
+// 简体中文用 ld246.com，其他语言用 liuyun.io
 "use strict";
 
 // 解析 URL query 参数
@@ -73,8 +73,8 @@ const I18N_BASE = {
         feedback: "求助回饋建議",
         community: "使用者社群匯總",
         download: "下載最新版",
-        feedbackUrl: "https://ld246.com/article/1649901726096",
-        communityUrl: "https://ld246.com/article/1640266171309",
+        feedbackUrl: "https://liuyun.io/article/1686530886208",
+        communityUrl: "https://liuyun.io/article/1687779743723",
         downloadUrl: "https://b3log.org/siyuan/download.html",
         msgPartitionRoot: "⚠️ 請勿在分區根路徑上建立工作空間，請新增一個資料夾作為工作空間",
         msgNotEmpty: "⚠️ 該資料夾包含了其他檔案，請新增一個資料夾作為工作空間",

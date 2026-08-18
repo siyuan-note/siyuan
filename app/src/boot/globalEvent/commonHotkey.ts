@@ -175,13 +175,14 @@ export const syncAppMenuShortcuts = () => {
     const hotkey: Record<string, string> = {};
     Object.keys(appMenuHotkeyItems).forEach(id => {
         const item = appMenuHotkeyItems[id];
-        hotkey[id] = item.custom || item.default || "";
+        hotkey[id] = item.custom ?? item.default ?? "";
     });
     if (lastHotkeys && Object.keys(appMenuHotkeyItems).every(id => lastHotkeys[id] === hotkey[id])) {
         return;
     }
     lastHotkeys = {...hotkey};
     ipcRenderer.send(Constants.SIYUAN_SYNC_APP_MENU, {
+        workspaceDir: window.siyuan.config.system.workspaceDir,
         lang: window.siyuan.config.lang,
         readonly: window.siyuan.config.readonly,
         hotkey,

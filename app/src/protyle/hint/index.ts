@@ -279,37 +279,36 @@ export class Hint {
         // https://github.com/siyuan-note/siyuan/issues/5083
         if (this.splitChar === "/" || this.splitChar === "、") {
             clearTimeout(this.timeId);
+            const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
+            if (!this.enableSlash || !blockElement || isInEmbedBlock(blockElement)) {
+                return;
+            }
             if (protyle.lite) {
-                if (this.enableSlash) {
-                    protyle.options.hint.extend.find((item) => {
-                        if (item.key === "/" && item.hint) {
-                            item.hint(key, protyle, "hint");
-                            return true;
+                protyle.options.hint.extend.find((item) => {
+                    if (item.key === "/" && item.hint) {
+                        item.hint(key, protyle, "hint");
+                        return true;
+                    }
+                });
+            } else if (!isMobile()) {
+                const slashData = hintSlash(key, protyle);
+                if (slashData.length === 0) {
+                    if (endsWithMultiCharHintPrefix(key, protyle.options.hint.extend.map((item) => item.key))) {
+                        this.enableExtend = false;
+                    }
+                    this.genHTML(slashData, protyle, true, "hint");
+                    return;
+                }
+                const createTarget = this.prepareCreateTarget(protyle, "doc");
+                if (createTarget.result !== undefined) {
+                    this.genHTML(hintSlash(key, protyle, createTarget.result), protyle, true, "hint");
+                } else {
+                    this.genLoading(protyle);
+                    createTarget.promise.then((isCurrentSubDoc) => {
+                        if (createTarget.isCurrent()) {
+                            this.genHTML(hintSlash(key, protyle, isCurrentSubDoc), protyle, true, "hint");
                         }
                     });
-                }
-            } else {
-                const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
-                if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
-                    const slashData = hintSlash(key, protyle);
-                    if (slashData.length === 0) {
-                        if (endsWithMultiCharHintPrefix(key, protyle.options.hint.extend.map((item) => item.key))) {
-                            this.enableExtend = false;
-                        }
-                        this.genHTML(slashData, protyle, true, "hint");
-                        return;
-                    }
-                    const createTarget = this.prepareCreateTarget(protyle, "doc");
-                    if (createTarget.result !== undefined) {
-                        this.genHTML(hintSlash(key, protyle, createTarget.result), protyle, true, "hint");
-                    } else {
-                        this.genLoading(protyle);
-                        createTarget.promise.then((isCurrentSubDoc) => {
-                            if (createTarget.isCurrent()) {
-                                this.genHTML(hintSlash(key, protyle, isCurrentSubDoc), protyle, true, "hint");
-                            }
-                        });
-                    }
                 }
             }
             return;

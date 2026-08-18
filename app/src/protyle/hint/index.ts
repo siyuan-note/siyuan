@@ -280,12 +280,14 @@ export class Hint {
         if (this.splitChar === "/" || this.splitChar === "、") {
             clearTimeout(this.timeId);
             if (protyle.lite) {
-                protyle.options.hint.extend.find((item) => {
-                    if (item.key === "/" && item.hint) {
-                        item.hint(key, protyle, "hint");
-                        return true;
-                    }
-                });
+                if (this.enableSlash) {
+                    protyle.options.hint.extend.find((item) => {
+                        if (item.key === "/" && item.hint) {
+                            item.hint(key, protyle, "hint");
+                            return true;
+                        }
+                    });
+                }
             } else {
                 const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
                 if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {

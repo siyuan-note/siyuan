@@ -69,6 +69,75 @@ func refreshRefsByDefID(defID string) {
 	}
 }
 
+type refTreeLocation struct {
+	RootID string
+	BoxID  string
+}
+
+func refreshCrossTreeMoveRefs(refreshes []crossTreeMoveRefRefresh) {
+	if 1 > len(refreshes) {
+		return
+	}
+
+	// 先确保块索引已经反映移动后的文档归属，再按稳定的定义块 ID 重建引用方索引。
+	sql.FlushQueue()
+	movedDefIDsByBox := map[string][]string{}
+	rootIDs := []string{}
+	rootIDSet := map[string]struct{}{}
+	for _, refresh := range refreshes {
+		movedDefIDsByBox[refresh.BoxID] = append(movedDefIDsByBox[refresh.BoxID], refresh.MovedBlockIDs...)
+		for _, rootID := range []string{refresh.OldRootID, refresh.NewRootID} {
+			if "" == rootID {
+				continue
+			}
+			if _, ok := rootIDSet[rootID]; ok {
+				continue
+			}
+			rootIDSet[rootID] = struct{}{}
+			rootIDs = append(rootIDs, rootID)
+		}
+	}
+
+	refTreeLocations := []refTreeLocation{}
+	refTreeLocationSet := map[string]struct{}{}
+	affectedDefIDs := []string{}
+	affectedDefIDSet := map[string]struct{}{}
+	for boxID, movedDefIDs := range movedDefIDsByBox {
+		refs := sql.QueryRefsByDefIDsInBox(movedDefIDs, boxID)
+		for _, ref := range refs {
+			if _, ok := affectedDefIDSet[ref.DefBlockID]; !ok {
+				affectedDefIDSet[ref.DefBlockID] = struct{}{}
+				affectedDefIDs = append(affectedDefIDs, ref.DefBlockID)
+			}
+			locationKey := ref.Box + "\x00" + ref.RootID
+			if _, ok := refTreeLocationSet[locationKey]; ok {
+				continue
+			}
+			refTreeLocationSet[locationKey] = struct{}{}
+			refTreeLocations = append(refTreeLocations, refTreeLocation{RootID: ref.RootID, BoxID: ref.Box})
+		}
+	}
+
+	for _, location := range refTreeLocations {
+		refTree, err := loadTreeByBlockIDInBox(location.RootID, location.BoxID)
+		if nil != err {
+			logging.LogWarnf("load moved block ref tree [%s] in box [%s] failed: %s",
+				location.RootID, location.BoxID, err)
+			continue
+		}
+		sql.UpdateRefsTreeQueue(refTree)
+	}
+	sql.FlushQueue()
+
+	for _, rootID := range rootIDs {
+		refreshRefCount(rootID)
+	}
+	for _, defID := range affectedDefIDs {
+		refreshRefCount(defID)
+	}
+	ResetVirtualBlockRefCache()
+}
+
 type Backlink struct {
 	ID         string       `json:"id"`
 	DOM        string       `json:"dom"`

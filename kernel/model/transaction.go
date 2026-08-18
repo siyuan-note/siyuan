@@ -692,8 +692,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		tx.writeTree(srcTree)
 		if !isSameTree {
 			tx.writeTree(targetTree)
-			task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, srcTree.ID)
-			task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, srcNode.ID)
+			tx.recordCrossTreeMoveRefRefresh(srcTree, targetTree, srcNode, headingChildren)
 		}
 		return
 	}
@@ -783,8 +782,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	tx.writeTree(srcTree)
 	if !isSameTree {
 		tx.writeTree(targetTree)
-		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, srcTree.ID)
-		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, srcNode.ID)
+		tx.recordCrossTreeMoveRefRefresh(srcTree, targetTree, srcNode, headingChildren)
 	}
 	return
 }
@@ -1122,6 +1120,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	tx.writeTree(srcTree)
 	if !isSameTree {
 		tx.writeTree(targetTree)
+		tx.recordCrossTreeMoveRefRefresh(srcTree, targetTree, srcNode, headingChildren)
 	}
 	return
 }
@@ -2286,6 +2285,60 @@ func (tx *Transaction) validateStructureChanges() (ret *TxErr) {
 	return
 }
 
+type crossTreeMoveRefRefresh struct {
+	BoxID         string
+	OldRootID     string
+	NewRootID     string
+	MovedBlockIDs []string
+}
+
+func collectCrossTreeMovedBlockIDs(srcNode *ast.Node, headingChildren []*ast.Node) (ret []string) {
+	seen := map[string]struct{}{}
+	appendNode := func(node *ast.Node) {
+		if nil == node {
+			return
+		}
+		for _, id := range node.BlockIDs() {
+			if _, ok := seen[id]; ok {
+				continue
+			}
+			seen[id] = struct{}{}
+			ret = append(ret, id)
+		}
+	}
+	appendNode(srcNode)
+	for _, child := range headingChildren {
+		appendNode(child)
+	}
+	return
+}
+
+func (tx *Transaction) recordCrossTreeMoveRefRefresh(srcTree, targetTree *parse.Tree, srcNode *ast.Node,
+	headingChildren []*ast.Node) {
+	if nil == srcTree || nil == targetTree || srcTree.ID == targetTree.ID {
+		return
+	}
+	movedBlockIDs := collectCrossTreeMovedBlockIDs(srcNode, headingChildren)
+	if 1 > len(movedBlockIDs) {
+		return
+	}
+
+	for i := range tx.crossTreeMoveRefRefreshes {
+		refresh := &tx.crossTreeMoveRefRefreshes[i]
+		if refresh.BoxID != targetTree.Box || refresh.OldRootID != srcTree.ID || refresh.NewRootID != targetTree.ID {
+			continue
+		}
+		refresh.MovedBlockIDs = gulu.Str.RemoveDuplicatedElem(append(refresh.MovedBlockIDs, movedBlockIDs...))
+		return
+	}
+	tx.crossTreeMoveRefRefreshes = append(tx.crossTreeMoveRefRefreshes, crossTreeMoveRefRefresh{
+		BoxID:         targetTree.Box,
+		OldRootID:     srcTree.ID,
+		NewRootID:     targetTree.ID,
+		MovedBlockIDs: movedBlockIDs,
+	})
+}
+
 type Transaction struct {
 	Timestamp      int64        `json:"timestamp"`
 	DoOperations   []*Operation `json:"doOperations"`
@@ -2306,10 +2359,11 @@ type Transaction struct {
 	fromAPI  bool // 是否来自 /api/transactions HTTP 入口（用于撤销日志捕获判别）
 	isReplay bool // 是否为 undo/redo 重放构造的事务（重放不再进入撤销日志）
 
-	listItemFoldCandidates   []listItemFoldCandidate
-	listItemFoldCandidateIDs map[string]struct{}
-	deletedAttrViewBlockIDs  map[string]map[string]struct{}
-	structureCheckNodes      map[*ast.Node]struct{}
+	listItemFoldCandidates    []listItemFoldCandidate
+	listItemFoldCandidateIDs  map[string]struct{}
+	deletedAttrViewBlockIDs   map[string]map[string]struct{}
+	structureCheckNodes       map[*ast.Node]struct{}
+	crossTreeMoveRefRefreshes []crossTreeMoveRefRefresh
 
 	luteEngine *lute.Lute
 	m          *sync.Mutex
@@ -2368,6 +2422,7 @@ func (tx *Transaction) begin() (err error) {
 	tx.listItemFoldCandidateIDs = map[string]struct{}{}
 	tx.deletedAttrViewBlockIDs = map[string]map[string]struct{}{}
 	tx.structureCheckNodes = map[*ast.Node]struct{}{}
+	tx.crossTreeMoveRefRefreshes = nil
 	tx.luteEngine = util.NewLute()
 	tx.m.Lock()
 	tx.state.Store(1)
@@ -2431,11 +2486,16 @@ func (tx *Transaction) commit() (err error) {
 		PushCreate(box, tree.Path, nil)
 	}
 
+	crossTreeMoveRefRefreshes := append([]crossTreeMoveRefRefresh(nil), tx.crossTreeMoveRefRefreshes...)
 	IncSync()
 	tx.state.Store(2)
 	// 已提交且 trees 稳定后记录到全局撤销日志（rollback 不记录）
 	GlobalUndoLog.Record(tx)
 	tx.m.Unlock()
+	if 0 < len(crossTreeMoveRefRefreshes) {
+		task.AppendAsyncTaskWithDelay(task.RefreshCrossTreeMoveRefs, util.SQLFlushInterval,
+			refreshCrossTreeMoveRefs, crossTreeMoveRefRefreshes)
+	}
 	return
 }
 
@@ -2444,6 +2504,7 @@ func (tx *Transaction) rollback() {
 	tx.listItemFoldCandidates, tx.listItemFoldCandidateIDs = nil, nil
 	tx.deletedAttrViewBlockIDs = nil
 	tx.structureCheckNodes = nil
+	tx.crossTreeMoveRefRefreshes = nil
 	tx.state.Store(3)
 	tx.m.Unlock()
 	return

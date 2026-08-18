@@ -27,24 +27,40 @@ func TestSetNetworkProxy(t *testing.T) {
 	}
 	original := systemNetworkProxyEnvironment
 	systemNetworkProxyEnvironment = map[string]networkProxyEnvironmentValue{
-		"HTTP_PROXY":  {value: "http://system-http", set: true},
-		"HTTPS_PROXY": {value: "http://system-https", set: true},
-		"http_proxy":  {value: "http://system-http", set: true},
-		"https_proxy": {value: "http://system-https", set: true},
+		"HTTP_PROXY":  {value: "http://environment-http", set: true},
+		"HTTPS_PROXY": {value: "http://environment-https", set: true},
+		"http_proxy":  {value: "http://environment-http", set: true},
+		"https_proxy": {value: "http://environment-https", set: true},
+		"NO_PROXY":    {value: "environment.local", set: true},
+		"no_proxy":    {value: "environment.local", set: true},
+	}
+	originalLoader := loadSystemNetworkProxy
+	loadSystemNetworkProxy = func() (*systemNetworkProxyConfig, error) {
+		return &systemNetworkProxyConfig{
+			HTTPProxy:  "http://system-http",
+			HTTPSProxy: "http://system-https",
+			NoProxy:    "localhost,10.0.0.0/8",
+		}, nil
 	}
 	t.Cleanup(func() {
 		systemNetworkProxyEnvironment = original
+		loadSystemNetworkProxy = originalLoader
 	})
 
 	SetNetworkProxy("http://configured", false)
-	for _, name := range networkProxyEnvironmentNames {
+	for _, name := range append(networkProxyHTTPEnvironmentNames, networkProxyHTTPSEnvironmentNames...) {
 		if got := os.Getenv(name); got != "http://configured" {
 			t.Fatalf("%s = %q, want configured proxy", name, got)
 		}
 	}
+	for _, name := range networkProxyBypassEnvironmentNames {
+		if got := os.Getenv(name); got != "environment.local" {
+			t.Fatalf("%s = %q, want original bypass", name, got)
+		}
+	}
 
 	SetNetworkProxy("", false)
-	for _, name := range networkProxyEnvironmentNames {
+	for _, name := range append(networkProxyHTTPEnvironmentNames, networkProxyHTTPSEnvironmentNames...) {
 		if got := os.Getenv(name); got != "" {
 			t.Fatalf("%s = %q, want direct connection", name, got)
 		}
@@ -56,5 +72,8 @@ func TestSetNetworkProxy(t *testing.T) {
 	}
 	if got := os.Getenv("HTTPS_PROXY"); got != "http://system-https" {
 		t.Fatalf("HTTPS_PROXY = %q, want system proxy", got)
+	}
+	if got := os.Getenv("NO_PROXY"); got != "localhost,10.0.0.0/8" {
+		t.Fatalf("NO_PROXY = %q, want system bypass", got)
 	}
 }

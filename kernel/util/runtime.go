@@ -213,12 +213,18 @@ func GetDeviceName() string {
 func SetNetworkProxy(proxyURL string, useSystem bool) {
 	if useSystem {
 		restoreSystemNetworkProxyEnvironment()
-	} else {
-		for _, name := range networkProxyEnvironmentNames {
-			if err := os.Setenv(name, proxyURL); err != nil {
-				logging.LogErrorf("set env [%s] failed: %s", name, err)
-			}
+		systemProxy, err := loadSystemNetworkProxy()
+		if err != nil {
+			logging.LogWarnf("load system network proxy failed: %s", err)
+		} else if nil != systemProxy {
+			setNetworkProxyEnvironment(networkProxyHTTPEnvironmentNames, systemProxy.HTTPProxy)
+			setNetworkProxyEnvironment(networkProxyHTTPSEnvironmentNames, systemProxy.HTTPSProxy)
+			setNetworkProxyEnvironment(networkProxyBypassEnvironmentNames, systemProxy.NoProxy)
 		}
+	} else {
+		setNetworkProxyEnvironment(networkProxyHTTPEnvironmentNames, proxyURL)
+		setNetworkProxyEnvironment(networkProxyHTTPSEnvironmentNames, proxyURL)
+		restoreNetworkProxyEnvironment(networkProxyBypassEnvironmentNames)
 	}
 
 	if useSystem {
@@ -233,7 +239,12 @@ func SetNetworkProxy(proxyURL string, useSystem bool) {
 	closeOpenAIIdleConnections()
 }
 
-var networkProxyEnvironmentNames = []string{"HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"}
+var (
+	networkProxyHTTPEnvironmentNames   = []string{"HTTP_PROXY", "http_proxy"}
+	networkProxyHTTPSEnvironmentNames  = []string{"HTTPS_PROXY", "https_proxy"}
+	networkProxyBypassEnvironmentNames = []string{"NO_PROXY", "no_proxy"}
+	networkProxyEnvironmentNames       = []string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
+)
 
 type networkProxyEnvironmentValue struct {
 	value string
@@ -250,14 +261,24 @@ var systemNetworkProxyEnvironment = func() map[string]networkProxyEnvironmentVal
 }()
 
 func restoreSystemNetworkProxyEnvironment() {
-	for _, name := range networkProxyEnvironmentNames {
+	restoreNetworkProxyEnvironment(networkProxyEnvironmentNames)
+}
+
+func restoreNetworkProxyEnvironment(names []string) {
+	for _, name := range names {
 		value := systemNetworkProxyEnvironment[name]
 		if value.set {
-			if err := os.Setenv(name, value.value); err != nil {
-				logging.LogErrorf("set env [%s] failed: %s", name, err)
-			}
+			setNetworkProxyEnvironment([]string{name}, value.value)
 		} else if err := os.Unsetenv(name); err != nil {
 			logging.LogErrorf("unset env [%s] failed: %s", name, err)
+		}
+	}
+}
+
+func setNetworkProxyEnvironment(names []string, value string) {
+	for _, name := range names {
+		if err := os.Setenv(name, value); err != nil {
+			logging.LogErrorf("set env [%s] failed: %s", name, err)
 		}
 	}
 }

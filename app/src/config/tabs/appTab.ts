@@ -263,7 +263,8 @@ const mountNetworkProxy = (root: HTMLElement) => {
             /// #if !BROWSER
             ipcRenderer.invoke(Constants.SIYUAN_GET, {
                 cmd: "setProxy",
-                proxyURL: `${window.siyuan.config.system.networkProxy.scheme}://${window.siyuan.config.system.networkProxy.host}:${window.siyuan.config.system.networkProxy.port}`,
+                proxyMode: scheme === "system" ? "system" : scheme === "" ? "direct" : "fixed_servers",
+                proxyURL: scheme === "system" ? "://" : `${scheme}://${host}:${port}`,
             }).then(() => {
                 exportLayout({
                     errorExit: false,

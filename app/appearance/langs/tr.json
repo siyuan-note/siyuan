@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "Sistem proxy'sini kullan",
-	"statusBarMsgSyncDataSnapshot": "Veri anlık görüntüsünü senkronize et",
+	"statusBarMsgDataSync": "Veri senkronizasyonu",
 	"entryDocumentStatistics": "Belge istatistikleri",
 	"entryTabMenu": "Sekme menüsü",
 	"entrySingleBlock": "Tek blok",

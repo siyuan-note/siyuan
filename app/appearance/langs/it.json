@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "Usa proxy di sistema",
-	"statusBarMsgSyncDataSnapshot": "Sincronizza snapshot dei dati",
+	"statusBarMsgDataSync": "Sincronizzazione dei dati",
 	"entryDocumentStatistics": "Statistiche del documento",
 	"entryTabMenu": "Menu delle schede",
 	"entrySingleBlock": "Blocco singolo",

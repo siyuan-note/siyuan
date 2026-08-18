@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "Gunakan proksi sistem",
-	"statusBarMsgSyncDataSnapshot": "Sinkronkan snapshot data",
+	"statusBarMsgDataSync": "Sinkronisasi data",
 	"entryDocumentStatistics": "Statistik dokumen",
 	"entryTabMenu": "Menu tab",
 	"entrySingleBlock": "Blok tunggal",

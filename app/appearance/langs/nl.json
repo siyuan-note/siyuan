@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "Systeemproxy gebruiken",
-	"statusBarMsgSyncDataSnapshot": "Gegevensmomentopname synchroniseren",
+	"statusBarMsgDataSync": "Gegevenssynchronisatie",
 	"entryDocumentStatistics": "Documentstatistieken",
 	"entryTabMenu": "Tabbladmenu",
 	"entrySingleBlock": "Eén blok",

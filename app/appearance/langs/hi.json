@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "सिस्टम प्रॉक्सी का उपयोग करें",
-	"statusBarMsgSyncDataSnapshot": "डेटा स्नैपशॉट सिंक करें",
+	"statusBarMsgDataSync": "डेटा सिंक्रोनाइज़ेशन",
 	"entryDocumentStatistics": "दस्तावेज़ के आँकड़े",
 	"entryTabMenu": "टैब मेनू",
 	"entrySingleBlock": "एक ब्लॉक",

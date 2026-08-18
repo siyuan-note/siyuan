@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "使用系统代理",
-	"statusBarMsgSyncDataSnapshot": "同步数据快照",
+	"statusBarMsgDataSync": "数据同步",
 	"entryDocumentStatistics": "文档统计",
 	"entryTabMenu": "页签菜单",
 	"entrySingleBlock": "单个块",

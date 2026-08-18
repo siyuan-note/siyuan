@@ -416,7 +416,7 @@ func removeIndexes(removeFilePaths []string) (removeRootIDs []string) {
 
 		msg := fmt.Sprintf(Conf.Language(39), rootID)
 		util.IncBootProgress(bootProgressPart, msg)
-		util.PushStatusBar(msg)
+		pushSyncStatusBar(msg)
 
 		cache.RemoveTreeData(rootID)
 		block := treenode.GetBlockTree(rootID)
@@ -469,7 +469,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 			p := strings.TrimPrefix(upsertFile, box)
 			msg := fmt.Sprintf(Conf.Language(40), util.GetTreeID(p))
 			util.IncBootProgress(bootProgressPart, msg)
-			util.PushStatusBar(msg)
+			pushSyncStatusBar(msg)
 
 			rootID := util.GetTreeID(p)
 			cache.RemoveTreeData(rootID)

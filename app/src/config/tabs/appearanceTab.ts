@@ -635,7 +635,7 @@ const STATUS_BAR_MSG_ITEMS: { key: keyof Config.IAppearanceStatusBar; getLabel: 
         key: "msgTaskHistoryGenerateFileDisabled",
         getLabel: () => window.siyuan.languages._taskAction["task.history.generateFile"]
     },
-    {key: "msgSyncDataSnapshotDisabled", getLabel: () => window.siyuan.languages.statusBarMsgSyncDataSnapshot},
+    {key: "msgDataSyncDisabled", getLabel: () => window.siyuan.languages.statusBarMsgDataSync},
 ];
 
 const genStatusBarMsgDialogHtml = (): string => {

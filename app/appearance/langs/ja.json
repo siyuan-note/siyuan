@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "システムプロキシを使用",
-	"statusBarMsgSyncDataSnapshot": "データスナップショットを同期",
+	"statusBarMsgDataSync": "データ同期",
 	"entryDocumentStatistics": "ドキュメント統計",
 	"entryTabMenu": "タブメニュー",
 	"entrySingleBlock": "単一のブロック",

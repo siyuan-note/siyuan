@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "שימוש בשרת ה-Proxy של המערכת",
-	"statusBarMsgSyncDataSnapshot": "סנכרון צילום הנתונים",
+	"statusBarMsgDataSync": "סנכרון נתונים",
 	"entryDocumentStatistics": "סטטיסטיקות מסמך",
 	"entryTabMenu": "תפריט כרטיסיות",
 	"entrySingleBlock": "בלוק יחיד",

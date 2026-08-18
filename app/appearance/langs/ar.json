@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "استخدام وكيل النظام",
-	"statusBarMsgSyncDataSnapshot": "مزامنة لقطة البيانات",
+	"statusBarMsgDataSync": "مزامنة البيانات",
 	"entryDocumentStatistics": "إحصاءات المستند",
 	"entryTabMenu": "قائمة علامات التبويب",
 	"entrySingleBlock": "كتلة واحدة",

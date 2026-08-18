@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "Використовувати системний проксі",
-	"statusBarMsgSyncDataSnapshot": "Синхронізувати знімок даних",
+	"statusBarMsgDataSync": "Синхронізація даних",
 	"entryDocumentStatistics": "Статистика документа",
 	"entryTabMenu": "Меню вкладок",
 	"entrySingleBlock": "Один блок",

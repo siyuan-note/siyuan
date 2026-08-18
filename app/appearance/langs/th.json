@@ -1,6 +1,6 @@
 {
 	"useSystemProxy": "ใช้พร็อกซีของระบบ",
-	"statusBarMsgSyncDataSnapshot": "ซิงค์สแนปช็อตข้อมูล",
+	"statusBarMsgDataSync": "การซิงค์ข้อมูล",
 	"entryDocumentStatistics": "สถิติเอกสาร",
 	"entryTabMenu": "เมนูแท็บ",
 	"entrySingleBlock": "บล็อกเดียว",

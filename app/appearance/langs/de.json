@@ -185,7 +185,7 @@
 	"entrySubmenu": "Untermenü",
 	"splitMergedCellTip": "Zusammengeführte Zellen müssen zuerst geteilt werden",
 	"entryVisibility": "Menüs und Dock",
-	"entryVisibilityTip": "Konfigurieren Sie Sichtbarkeit und Reihenfolge integrierter Desktop-Menüeinträge und der Einträge im Slash-Menü (einschließlich Plugin-Einträgen) sowie die Sichtbarkeit der Dock-Symbole",
+	"entryVisibilityTip": "Konfigurieren Sie die Sichtbarkeit und Reihenfolge integrierter Desktop-Menüeinträge sowie die Sichtbarkeit der Dock-Symbole",
 	"entrySimple": "Einfach",
 	"entryFull": "Vollständig",
 	"entrySimpleTip": "Zeigt häufig verwendete Einträge für einen schnellen Einstieg",

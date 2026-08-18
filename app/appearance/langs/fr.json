@@ -185,7 +185,7 @@
 	"entrySubmenu": "Sous-menu",
 	"splitMergedCellTip": "Les cellules fusionnées doivent d'abord être fractionnées",
 	"entryVisibility": "Menus et barre d'ancrage",
-	"entryVisibilityTip": "Configurez la visibilité et l’ordre des éléments intégrés des menus de bureau et des éléments du menu de commandes slash (y compris les éléments de plugins), ainsi que la visibilité des icônes de la barre d’ancrage",
+	"entryVisibilityTip": "Configurez la visibilité et l’ordre des éléments intégrés des menus de bureau, ainsi que la visibilité des icônes de la barre d’ancrage",
 	"entrySimple": "Simple",
 	"entryFull": "Complet",
 	"entrySimpleTip": "Affiche les entrées courantes pour démarrer rapidement",

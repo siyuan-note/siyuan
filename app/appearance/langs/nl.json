@@ -185,7 +185,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Splits eerst de samengevoegde cellen",
 	"entryVisibility": "Menu's en dock",
-	"entryVisibilityTip": "Configureer de zichtbaarheid en volgorde van ingebouwde desktopmenu-items en slashmenu-items (inclusief plug-initems), en de zichtbaarheid van dockpictogrammen",
+	"entryVisibilityTip": "Configureer de zichtbaarheid en volgorde van ingebouwde desktopmenu-items en de zichtbaarheid van dockpictogrammen",
 	"entrySimple": "Eenvoudig",
 	"entryFull": "Volledig",
 	"entrySimpleTip": "Toont veelgebruikte items om snel aan de slag te gaan",

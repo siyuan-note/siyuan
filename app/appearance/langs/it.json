@@ -185,7 +185,7 @@
 	"entrySubmenu": "Sottomenu",
 	"splitMergedCellTip": "Prima dividi le celle unite",
 	"entryVisibility": "Menu e barra di ancoraggio",
-	"entryVisibilityTip": "Configura la visibilità e l'ordine delle voci integrate dei menu desktop e delle voci del menu slash (incluse le voci dei plugin), nonché la visibilità delle icone della barra di ancoraggio",
+	"entryVisibilityTip": "Configura la visibilità e l'ordine delle voci integrate dei menu desktop, nonché la visibilità delle icone della barra di ancoraggio",
 	"entrySimple": "Semplice",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Mostra le voci usate più spesso per iniziare rapidamente",

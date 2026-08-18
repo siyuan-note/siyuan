@@ -185,7 +185,7 @@
 	"entrySubmenu": "Podponuka",
 	"splitMergedCellTip": "Najprv rozdeľte zlúčené bunky",
 	"entryVisibility": "Ponuky a dok",
-	"entryVisibilityTip": "Nastavte viditeľnosť a poradie vstavaných položiek ponúk na pracovnej ploche a položiek ponuky príkazov s lomkou (vrátane položiek pluginov), ako aj viditeľnosť ikon doku",
+	"entryVisibilityTip": "Nastavte viditeľnosť a poradie vstavaných položiek ponúk na pracovnej ploche, ako aj viditeľnosť ikon doku",
 	"entrySimple": "Jednoduchý",
 	"entryFull": "Úplný",
 	"entrySimpleTip": "Zobrazuje často používané položky na rýchle začatie práce",

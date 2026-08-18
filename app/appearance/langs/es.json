@@ -185,7 +185,7 @@
 	"entrySubmenu": "Submenú",
 	"splitMergedCellTip": "Primero hay que dividir las celdas combinadas",
 	"entryVisibility": "Menús y panel acoplable",
-	"entryVisibilityTip": "Configura la visibilidad y el orden de los elementos integrados de los menús de escritorio y del menú slash (incluidos los elementos de complementos), así como la visibilidad de los iconos del panel acoplable",
+	"entryVisibilityTip": "Configura la visibilidad y el orden de los elementos integrados de los menús de escritorio, así como la visibilidad de los iconos del panel acoplable",
 	"entrySimple": "Sencillo",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Muestra las entradas más utilizadas para empezar rápidamente",

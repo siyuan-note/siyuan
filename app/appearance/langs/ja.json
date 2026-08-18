@@ -185,7 +185,7 @@
 	"entrySubmenu": "サブメニュー",
 	"splitMergedCellTip": "先に結合セルを分割する必要があります",
 	"entryVisibility": "メニューとドック",
-	"entryVisibilityTip": "デスクトップの組み込みメニュー項目とスラッシュメニュー項目（プラグイン項目を含む）の表示と順序、およびドックアイコンの表示を設定します",
+	"entryVisibilityTip": "デスクトップの組み込みメニュー項目の表示と順序、およびドックアイコンの表示を設定します",
 	"entrySimple": "シンプル",
 	"entryFull": "完全",
 	"entrySimpleTip": "よく使う項目を表示し、すぐに使い始められる構成",

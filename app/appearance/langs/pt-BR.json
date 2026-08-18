@@ -185,7 +185,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Divida primeiro as células mescladas",
 	"entryVisibility": "Menus e dock",
-	"entryVisibilityTip": "Configure a visibilidade e a ordem dos itens integrados dos menus da área de trabalho e do menu slash (incluindo itens de plugins), bem como a visibilidade dos ícones do dock",
+	"entryVisibilityTip": "Configure a visibilidade e a ordem dos itens integrados dos menus da área de trabalho, bem como a visibilidade dos ícones do dock",
 	"entrySimple": "Simples",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Mostra os itens mais usados para começar rapidamente",

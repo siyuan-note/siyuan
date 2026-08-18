@@ -185,7 +185,7 @@
 	"entrySubmenu": "子菜單",
 	"splitMergedCellTip": "需要先拆分合併的單元格",
 	"entryVisibility": "選單與停靠欄",
-	"entryVisibilityTip": "設定桌面端內建選單項目和斜線選單項目（含插件項目）的顯示與排序，以及停靠欄圖示的顯示",
+	"entryVisibilityTip": "設定桌面端內建選單項目的顯示與排序，以及停靠欄圖示的顯示",
 	"entrySimple": "簡潔方案",
 	"entryFull": "完整方案",
 	"entrySimpleTip": "顯示常用入口，適合新使用者快速上手",

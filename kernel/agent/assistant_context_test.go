@@ -380,7 +380,7 @@ func TestAgentChatRestoresCompleteAssistantContextAfterCommit(t *testing.T) {
 		case 1:
 			flusher := prepareTestStream(t, w)
 			chunk := fmt.Sprintf(
-				`data: {"id":"chatcmpl-tool","object":"chat.completion.chunk","created":1,"model":"test-model","choices":[{"index":0,"delta":{"reasoning_content":%q,"tool_calls":[{"index":0,"id":%q,"type":"function","function":{"name":%q,"arguments":%q},"extra_content":{"google":{"thought_signature":%q}}}]},"finish_reason":"tool_calls"}]}`+"\n\n",
+				`data: {"id":"chatcmpl-tool","object":"chat.completion.chunk","created":1,"model":"test-model","choices":[{"index":0,"delta":{"reasoning_content":%q,"tool_calls":[{"index":0,"id":%q,"function":{"name":%q,"arguments":%q},"extra_content":{"google":{"thought_signature":%q}}}]},"finish_reason":"tool_calls"}]}`+"\n\n",
 				toolReasoning, toolCallID, toolName, argumentsJSON, thoughtSignature,
 			)
 			if _, err = io.WriteString(w, chunk); err != nil {

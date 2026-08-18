@@ -91,7 +91,11 @@ func isGoogleGeminiOpenAICompatibleEndpoint(apiBaseURL, model string) bool {
 	if !strings.Contains(strings.ToLower(parsed.Path), "/openai") {
 		return false
 	}
-	return strings.HasPrefix(strings.ToLower(strings.TrimSpace(model)), "gemini-")
+	normalizedModel := strings.ToLower(strings.TrimSpace(model))
+	if slash := strings.LastIndex(normalizedModel, "/"); slash >= 0 {
+		normalizedModel = normalizedModel[slash+1:]
+	}
+	return strings.HasPrefix(normalizedModel, "gemini-")
 }
 
 // WrapGeminiThoughtSignatureTransport 为 Google OpenAI 兼容端点补充工具调用签名往返支持。
@@ -152,7 +156,7 @@ func injectGeminiThoughtSignatures(req *http.Request, state *GeminiThoughtSignat
 		toolCalls, _ := message["tool_calls"].([]any)
 		for _, rawToolCall := range toolCalls {
 			toolCall, _ := rawToolCall.(map[string]any)
-			if toolCall["type"] != string(openai.ToolTypeFunction) {
+			if !isGeminiFunctionToolCall(toolCall) {
 				continue
 			}
 			if geminiThoughtSignatureFromToolCall(toolCall) != "" {
@@ -177,6 +181,15 @@ func injectGeminiThoughtSignatures(req *http.Request, state *GeminiThoughtSignat
 		return
 	}
 	restoreOpenAIRequestBody(req, merged)
+}
+
+func isGeminiFunctionToolCall(toolCall map[string]any) bool {
+	toolType, _ := toolCall["type"].(string)
+	if toolType != "" && toolType != string(openai.ToolTypeFunction) {
+		return false
+	}
+	_, hasFunction := toolCall["function"].(map[string]any)
+	return hasFunction
 }
 
 func restoreOpenAIRequestBody(req *http.Request, body []byte) {

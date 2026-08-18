@@ -33,6 +33,7 @@ func TestIsGoogleGeminiOpenAICompatibleEndpoint(t *testing.T) {
 		want    bool
 	}{
 		{"https://generativelanguage.googleapis.com/v1beta/openai", "gemini-3.5-flash", true},
+		{"https://generativelanguage.googleapis.com/v1beta/openai", "models/gemini-3.5-flash", true},
 		{"https://GENERATIVELANGUAGE.GOOGLEAPIS.COM/v1beta/openai/", "GEMINI-3-pro", true},
 		{"https://generativelanguage.googleapis.com/v1beta", "gemini-3.5-flash", false},
 		{"https://example.com/v1beta/openai", "gemini-3.5-flash", false},
@@ -84,7 +85,7 @@ func TestGeminiThoughtSignatureTransportRoundTrip(t *testing.T) {
 	body := `{"model":"gemini-3.5-flash","messages":[` +
 		`{"role":"assistant","tool_calls":[` +
 		`{"id":"` + existingCallID + `","type":"function","function":{"name":"document","arguments":"{}"}},` +
-		`{"id":"` + legacyCallID + `","type":"function","function":{"name":"block","arguments":"{}"}}]},` +
+		`{"id":"` + legacyCallID + `","type":"","function":{"name":"block","arguments":"{}"}}]},` +
 		`{"role":"tool","tool_call_id":"` + existingCallID + `","content":"ok"}]}`
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, server.URL+"/v1/chat/completions", strings.NewReader(body))
 	if err != nil {

@@ -10,6 +10,7 @@ import {exportLayout} from "../../layout/util";
 import {updateDockHotkeys} from "../../layout/dock/util";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/keydown";
+import {syncAppMenuShortcuts} from "../../boot/globalEvent/commonHotkey";
 import {normalizeSearchText} from "../search/normalize";
 import {genButtonRowHtml, genConfigGroup} from "../render/render";
 import type {Plugin} from "../../plugin";
@@ -671,6 +672,7 @@ const setKeymapFromDom = (root: HTMLElement) => {
             });
         }
         sendGlobalShortcut(window.siyuan.ws.app);
+        syncAppMenuShortcuts();
         /// #endif
     });
 };

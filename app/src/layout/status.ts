@@ -77,7 +77,7 @@ export const initStatus = (isWindow = false) => {
                     label: window.siyuan.languages.feedback,
                     icon: "iconFeedback",
                     click: () => {
-                        if ("zh-CN" === window.siyuan.config.lang || "zh-TW" === window.siyuan.config.lang) {
+                        if ("zh-CN" === window.siyuan.config.lang) {
                             window.open("https://ld246.com/article/1649901726096");
                         } else {
                             window.open("https://liuyun.io/article/1686530886208");
@@ -89,7 +89,7 @@ export const initStatus = (isWindow = false) => {
                     label: window.siyuan.languages.debug,
                     icon: "iconBug",
                     click: () => {
-                        ipcRenderer.send(Constants.SIYUAN_CMD, "openDevTools");
+                        ipcRenderer.send(Constants.SIYUAN_CMD, "toggleDevTools");
                     }
                 }).element);
                 /// #endif

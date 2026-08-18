@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "قائمة علامات التبويب",
+	"entrySingleBlock": "كتلة واحدة",
+	"entryMultipleBlocks": "كتل متعددة",
+	"entryPixelWidth": "العرض بالبكسل",
+	"entryPercentageWidth": "العرض بالنسبة المئوية",
+	"entryPixelHeight": "الارتفاع بالبكسل",
+	"entryPercentageHeight": "الارتفاع بالنسبة المئوية",
 	"dragTipSelectedNotebooks": "تم تحديد ${count} من دفاتر الملاحظات",
 	"formatPainterDoubleClickTip": "نسخ التنسيق؛ انقر نقرًا مزدوجًا للاستخدام المستمر",
 	"dragTipSelectedDocs": "تم تحديد ${count} من المستندات",

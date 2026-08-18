@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Menu kart",
+	"entrySingleBlock": "Pojedynczy blok",
+	"entryMultipleBlocks": "Wiele bloków",
+	"entryPixelWidth": "Szerokość w pikselach",
+	"entryPercentageWidth": "Szerokość procentowa",
+	"entryPixelHeight": "Wysokość w pikselach",
+	"entryPercentageHeight": "Wysokość procentowa",
 	"dragTipSelectedNotebooks": "Wybrane notesy: ${count}",
 	"formatPainterDoubleClickTip": "Malarz formatów; kliknij dwukrotnie, aby używać w trybie ciągłym",
 	"dragTipSelectedDocs": "Wybrane dokumenty: ${count}",

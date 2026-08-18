@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Menu delle schede",
+	"entrySingleBlock": "Blocco singolo",
+	"entryMultipleBlocks": "Più blocchi",
+	"entryPixelWidth": "Larghezza in pixel",
+	"entryPercentageWidth": "Larghezza percentuale",
+	"entryPixelHeight": "Altezza in pixel",
+	"entryPercentageHeight": "Altezza percentuale",
 	"dragTipSelectedNotebooks": "${count} taccuini selezionati",
 	"formatPainterDoubleClickTip": "Copia formato; fai doppio clic per l'uso continuo",
 	"dragTipSelectedDocs": "${count} documenti selezionati",

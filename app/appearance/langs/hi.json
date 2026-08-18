@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "टैब मेनू",
+	"entrySingleBlock": "एक ब्लॉक",
+	"entryMultipleBlocks": "कई ब्लॉक",
+	"entryPixelWidth": "पिक्सेल में चौड़ाई",
+	"entryPercentageWidth": "प्रतिशत में चौड़ाई",
+	"entryPixelHeight": "पिक्सेल में ऊंचाई",
+	"entryPercentageHeight": "प्रतिशत में ऊंचाई",
 	"dragTipSelectedNotebooks": "${count} नोटबुक चयनित",
 	"formatPainterDoubleClickTip": "फ़ॉर्मैट पेंटर; लगातार उपयोग के लिए डबल-क्लिक करें",
 	"dragTipSelectedDocs": "${count} दस्तावेज़ चयनित",

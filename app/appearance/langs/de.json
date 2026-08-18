@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Tab-Menü",
+	"entrySingleBlock": "Einzelner Block",
+	"entryMultipleBlocks": "Mehrere Blöcke",
+	"entryPixelWidth": "Breite in Pixeln",
+	"entryPercentageWidth": "Breite in Prozent",
+	"entryPixelHeight": "Höhe in Pixeln",
+	"entryPercentageHeight": "Höhe in Prozent",
 	"dragTipSelectedNotebooks": "${count} Notizbücher ausgewählt",
 	"formatPainterDoubleClickTip": "Format übertragen; für fortlaufende Verwendung doppelklicken",
 	"dragTipSelectedDocs": "${count} Dokumente ausgewählt",

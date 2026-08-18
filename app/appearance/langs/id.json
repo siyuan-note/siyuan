@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Menu tab",
+	"entrySingleBlock": "Blok tunggal",
+	"entryMultipleBlocks": "Beberapa blok",
+	"entryPixelWidth": "Lebar piksel",
+	"entryPercentageWidth": "Lebar persentase",
+	"entryPixelHeight": "Tinggi piksel",
+	"entryPercentageHeight": "Tinggi persentase",
 	"dragTipSelectedNotebooks": "${count} buku catatan dipilih",
 	"formatPainterDoubleClickTip": "Salin format; klik dua kali untuk penggunaan berkelanjutan",
 	"dragTipSelectedDocs": "${count} dokumen dipilih",

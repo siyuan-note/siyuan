@@ -426,6 +426,93 @@ test("multiple document and notebook entries follow their document tree menus", 
     assert.ok(getEntryCatalogChildren("docTree.multi").some((item) => item.key === "delete"));
 });
 
+test("document tree configuration groups notebook scopes before document scopes", () => {
+    const panelIndex = entryCatalog.findIndex((item) => item.key === "docTree.panel");
+    assert.deepEqual(entryCatalog.slice(panelIndex, panelIndex + 5).map((item) => item.key), [
+        "docTree.panel",
+        "docTree.notebook",
+        "docTree.notebooks",
+        "docTree.document",
+        "docTree.multi",
+    ]);
+});
+
+test("tab menu catalog follows its conditional menu declarations", () => {
+    assert.deepEqual(getEntryCatalogChildren("tab").map((item) => item.key), [
+        "close",
+        "closeOthers",
+        "closeAll",
+        "closeUnmodified",
+        "closeLeft",
+        "closeRight",
+        "separator_1",
+        "split",
+        "copy",
+        "pin",
+        "unpin",
+        "tabToWindow",
+    ]);
+    assert.deepEqual(getEntryCatalogChildren("tab.split").map((item) => item.key), [
+        "splitLR",
+        "splitMoveR",
+        "splitTB",
+        "splitMoveB",
+        "unsplit",
+        "unsplitAll",
+    ]);
+    assert.deepEqual(getEntryCatalogChildren("tab.copy").map((item) => item.key), [
+        "copyBlockRef",
+        "copyBlockEmbed",
+        "copyProtocol",
+        "copyProtocolInMd",
+        "copyWebURL",
+        "copyHPath",
+        "copyID",
+    ]);
+});
+
+test("tab menu is connected to its entry visibility scope", () => {
+    const source = readFileSync(resolve(process.cwd(), "src/config/entryVisibility/runtime.ts"), "utf8");
+    assert.match(source, /case Constants\.MENU_TAB:\s*return "tab";/);
+});
+
+test("configuration labels distinguish block scopes and size controls", () => {
+    const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+    Object.defineProperty(globalThis, "window", {
+        configurable: true,
+        value: {
+            siyuan: {
+                languages: {
+                    editor: "Editor",
+                    entryGutterMenu: "Block icon menu",
+                    entrySingleBlock: "Single block",
+                    entryMultipleBlocks: "Multiple blocks",
+                    entryPixelWidth: "Pixel width",
+                    entryPercentageWidth: "Percentage width",
+                    entryPixelHeight: "Pixel height",
+                    entryPercentageHeight: "Percentage height",
+                },
+            },
+        },
+    });
+    try {
+        assert.equal(getEntryCatalogSection("gutter.single")?.label(),
+            "Editor - Block icon menu - Single block");
+        assert.equal(getEntryCatalogSection("gutter.multi")?.label(),
+            "Editor - Block icon menu - Multiple blocks");
+        assert.equal(getEntryCatalogNode("gutter.single.width.widthInput")?.label(), "Pixel width");
+        assert.equal(getEntryCatalogNode("gutter.single.width.widthDrag")?.label(), "Percentage width");
+        assert.equal(getEntryCatalogNode("inline.image.height.heightInput")?.label(), "Pixel height");
+        assert.equal(getEntryCatalogNode("inline.image.height.heightDrag")?.label(), "Percentage height");
+    } finally {
+        if (windowDescriptor) {
+            Object.defineProperty(globalThis, "window", windowDescriptor);
+        } else {
+            Reflect.deleteProperty(globalThis, "window");
+        }
+    }
+});
+
 test("document tree sort menus follow their scope inheritance options", () => {
     const documentEntries = getEntryCatalogChildren("docTree.document");
     const attrIndex = documentEntries.findIndex((item) => item.key === "attr");

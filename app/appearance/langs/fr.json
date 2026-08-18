@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Menu des onglets",
+	"entrySingleBlock": "Bloc unique",
+	"entryMultipleBlocks": "Plusieurs blocs",
+	"entryPixelWidth": "Largeur en pixels",
+	"entryPercentageWidth": "Largeur en pourcentage",
+	"entryPixelHeight": "Hauteur en pixels",
+	"entryPercentageHeight": "Hauteur en pourcentage",
 	"dragTipSelectedNotebooks": "${count} carnets de notes sélectionnés",
 	"formatPainterDoubleClickTip": "Reproduire la mise en forme ; double-cliquez pour une utilisation continue",
 	"dragTipSelectedDocs": "${count} documents sélectionnés",

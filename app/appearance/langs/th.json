@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "เมนูแท็บ",
+	"entrySingleBlock": "บล็อกเดียว",
+	"entryMultipleBlocks": "หลายบล็อก",
+	"entryPixelWidth": "ความกว้างเป็นพิกเซล",
+	"entryPercentageWidth": "ความกว้างเป็นเปอร์เซ็นต์",
+	"entryPixelHeight": "ความสูงเป็นพิกเซล",
+	"entryPercentageHeight": "ความสูงเป็นเปอร์เซ็นต์",
 	"dragTipSelectedNotebooks": "เลือกสมุด ${count} เล่ม",
 	"formatPainterDoubleClickTip": "คัดลอกรูปแบบ; ดับเบิลคลิกเพื่อใช้งานต่อเนื่อง",
 	"dragTipSelectedDocs": "เลือกเอกสาร ${count} ฉบับ",

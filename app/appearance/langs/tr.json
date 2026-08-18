@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Sekme menüsü",
+	"entrySingleBlock": "Tek blok",
+	"entryMultipleBlocks": "Birden fazla blok",
+	"entryPixelWidth": "Piksel genişliği",
+	"entryPercentageWidth": "Yüzde genişliği",
+	"entryPixelHeight": "Piksel yüksekliği",
+	"entryPercentageHeight": "Yüzde yüksekliği",
 	"dragTipSelectedNotebooks": "${count} not defteri seçildi",
 	"formatPainterDoubleClickTip": "Biçim Boyacısı; sürekli kullanım için çift tıklayın",
 	"dragTipSelectedDocs": "${count} belge seçildi",

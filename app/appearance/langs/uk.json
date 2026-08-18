@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Меню вкладок",
+	"entrySingleBlock": "Один блок",
+	"entryMultipleBlocks": "Кілька блоків",
+	"entryPixelWidth": "Ширина в пікселях",
+	"entryPercentageWidth": "Ширина у відсотках",
+	"entryPixelHeight": "Висота в пікселях",
+	"entryPercentageHeight": "Висота у відсотках",
 	"dragTipSelectedNotebooks": "Вибрано блокнотів: ${count}",
 	"formatPainterDoubleClickTip": "Формат за зразком; двічі клацніть для безперервного використання",
 	"dragTipSelectedDocs": "Вибрано документів: ${count}",

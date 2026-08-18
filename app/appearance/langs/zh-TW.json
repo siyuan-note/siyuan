@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "頁籤選單",
+	"entrySingleBlock": "單個區塊",
+	"entryMultipleBlocks": "多個區塊",
+	"entryPixelWidth": "像素寬度",
+	"entryPercentageWidth": "百分比寬度",
+	"entryPixelHeight": "像素高度",
+	"entryPercentageHeight": "百分比高度",
 	"dragTipSelectedNotebooks": "選中 ${count} 個筆記本",
 	"formatPainterDoubleClickTip": "格式刷，雙擊可連續使用",
 	"dragTipSelectedDocs": "選中 ${count} 個文件",

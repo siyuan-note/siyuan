@@ -119,3 +119,31 @@ test("entry order preserves plugin registration slots", () => {
     assert.deepEqual(reorderEntrySlots(items, ["b", "separator", "a"], (item) => item.key),
         [{key: "b"}, {key: "plugin"}, {key: "separator"}, {key: "a"}]);
 });
+
+test("tab menu ordering handles mutually exclusive and conditional entries", () => {
+    const order = [
+        "copy",
+        "split",
+        "unpin",
+        "pin",
+        "tabToWindow",
+        "separator_1",
+        "closeRight",
+        "closeLeft",
+        "closeUnmodified",
+        "closeAll",
+        "closeOthers",
+        "close",
+    ];
+    const reorder = (pinKey: "pin" | "unpin") => reorderEntrySlots([
+        {key: "close"},
+        {key: "separator_1"},
+        {key: "split"},
+        {key: "copy"},
+        {key: pinKey},
+        {key: "tabToWindow"},
+    ], order, (item) => item.key).map((item) => item.key);
+
+    assert.deepEqual(reorder("pin"), ["copy", "split", "pin", "tabToWindow", "separator_1", "close"]);
+    assert.deepEqual(reorder("unpin"), ["copy", "split", "unpin", "tabToWindow", "separator_1", "close"]);
+});

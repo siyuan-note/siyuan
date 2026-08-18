@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Tab menu",
+	"entrySingleBlock": "Single block",
+	"entryMultipleBlocks": "Multiple blocks",
+	"entryPixelWidth": "Pixel width",
+	"entryPercentageWidth": "Percentage width",
+	"entryPixelHeight": "Pixel height",
+	"entryPercentageHeight": "Percentage height",
 	"dragTipSelectedNotebooks": "Selected ${count} notebooks",
 	"formatPainterDoubleClickTip": "Format Painter; double-click for continuous use",
 	"dragTipSelectedDocs": "Selected ${count} documents",

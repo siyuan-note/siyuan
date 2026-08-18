@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Menu de abas",
+	"entrySingleBlock": "Bloco único",
+	"entryMultipleBlocks": "Vários blocos",
+	"entryPixelWidth": "Largura em pixels",
+	"entryPercentageWidth": "Largura percentual",
+	"entryPixelHeight": "Altura em pixels",
+	"entryPercentageHeight": "Altura percentual",
 	"dragTipSelectedNotebooks": "${count} blocos de notas selecionados",
 	"formatPainterDoubleClickTip": "Pincel de formatação; clique duas vezes para uso contínuo",
 	"dragTipSelectedDocs": "${count} documentos selecionados",

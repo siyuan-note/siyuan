@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Ponuka kariet",
+	"entrySingleBlock": "Jeden blok",
+	"entryMultipleBlocks": "Viac blokov",
+	"entryPixelWidth": "Šírka v pixeloch",
+	"entryPercentageWidth": "Šírka v percentách",
+	"entryPixelHeight": "Výška v pixeloch",
+	"entryPercentageHeight": "Výška v percentách",
 	"dragTipSelectedNotebooks": "Vybrané zápisníky: ${count}",
 	"formatPainterDoubleClickTip": "Kopírovať formát; dvojklikom zapnete nepretržité použitie",
 	"dragTipSelectedDocs": "Vybrané dokumenty: ${count}",

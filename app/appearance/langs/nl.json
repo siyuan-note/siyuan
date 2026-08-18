@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Tabbladmenu",
+	"entrySingleBlock": "Eén blok",
+	"entryMultipleBlocks": "Meerdere blokken",
+	"entryPixelWidth": "Breedte in pixels",
+	"entryPercentageWidth": "Breedte in procenten",
+	"entryPixelHeight": "Hoogte in pixels",
+	"entryPercentageHeight": "Hoogte in procenten",
 	"dragTipSelectedNotebooks": "${count} notitieboeken geselecteerd",
 	"formatPainterDoubleClickTip": "Opmaak kopiëren; dubbelklik voor doorlopend gebruik",
 	"dragTipSelectedDocs": "${count} documenten geselecteerd",

@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "タブメニュー",
+	"entrySingleBlock": "単一のブロック",
+	"entryMultipleBlocks": "複数のブロック",
+	"entryPixelWidth": "ピクセル単位の幅",
+	"entryPercentageWidth": "パーセント単位の幅",
+	"entryPixelHeight": "ピクセル単位の高さ",
+	"entryPercentageHeight": "パーセント単位の高さ",
 	"dragTipSelectedNotebooks": "${count} 件のノートブックを選択",
 	"formatPainterDoubleClickTip": "書式のコピー。ダブルクリックで連続使用",
 	"dragTipSelectedDocs": "${count} 件の文書を選択",

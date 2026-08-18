@@ -110,6 +110,8 @@ const entryScope = (menuElement: HTMLElement): string => {
                 docs: Constants.MENU_FROM_DOC_TREE_MORE_DOCS,
                 items: Constants.MENU_FROM_DOC_TREE_MORE_ITEMS,
             });
+        case Constants.MENU_TAB:
+            return "tab";
         case Constants.MENU_TITLE:
             return "document.title";
         case Constants.MENU_BREADCRUMB_MORE:

@@ -1,4 +1,11 @@
 {
+	"entryTabMenu": "Меню вкладок",
+	"entrySingleBlock": "Один блок",
+	"entryMultipleBlocks": "Несколько блоков",
+	"entryPixelWidth": "Ширина в пикселях",
+	"entryPercentageWidth": "Ширина в процентах",
+	"entryPixelHeight": "Высота в пикселях",
+	"entryPercentageHeight": "Высота в процентах",
 	"dragTipSelectedNotebooks": "Выбрано блокнотов: ${count}",
 	"formatPainterDoubleClickTip": "Формат по образцу; дважды щёлкните для непрерывного использования",
 	"dragTipSelectedDocs": "Выбрано документов: ${count}",

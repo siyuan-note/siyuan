@@ -232,7 +232,7 @@ const gutterLayout = (includeSuperBlockAlignment = false) => node("layout", lang
 ]);
 
 const gutterWidth = () => node("width", lang("width"), true, [
-    node("widthInput", lang("width")),
+    node("widthInput", lang("entryPixelWidth")),
     node("width_25%", literal("25%")),
     node("width_33%", literal("33%")),
     node("width_50%", literal("50%")),
@@ -240,7 +240,7 @@ const gutterWidth = () => node("width", lang("width"), true, [
     node("width_75%", literal("75%")),
     node("width_100%", literal("100%")),
     separator("separator_1"),
-    node("widthDrag", lang("width")),
+    node("widthDrag", lang("entryPercentageWidth")),
     separator("separator_2"),
     node("default", lang("default")),
 ]);
@@ -541,16 +541,6 @@ export const entryCatalog: IEntryCatalogSection[] = [
         ],
     },
     {
-        key: "docTree.document",
-        label: location(lang("entryDocPanel"), lang("doc"), lang("more")),
-        children: docTreeDocument(),
-    },
-    {
-        key: "docTree.multi",
-        label: location(lang("entryDocPanel"), lang("agentCatDoc"), lang("multiSelect"), lang("more")),
-        children: docTreeMultiple(),
-    },
-    {
         key: "docTree.notebooks",
         label: location(lang("entryDocPanel"), lang("agentCatNotebook"), lang("multiSelect"), lang("more")),
         children: [
@@ -565,6 +555,41 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("exportSiYuanZip", literal("SiYuan .sy.zip")),
                 node("exportMarkdown", literal("Markdown .zip")),
             ]),
+        ],
+    },
+    {
+        key: "docTree.document",
+        label: location(lang("entryDocPanel"), lang("doc"), lang("more")),
+        children: docTreeDocument(),
+    },
+    {
+        key: "docTree.multi",
+        label: location(lang("entryDocPanel"), lang("agentCatDoc"), lang("multiSelect"), lang("more")),
+        children: docTreeMultiple(),
+    },
+    {
+        key: "tab",
+        label: lang("entryTabMenu"),
+        children: [
+            node("close", lang("close")),
+            node("closeOthers", lang("closeOthers")),
+            node("closeAll", lang("closeAll")),
+            node("closeUnmodified", lang("closeUnmodified")),
+            node("closeLeft", lang("closeLeft")),
+            node("closeRight", lang("closeRight")),
+            separator("separator_1"),
+            node("split", lang("split"), true, [
+                node("splitLR", lang("splitLR")),
+                node("splitMoveR", lang("splitMoveR")),
+                node("splitTB", lang("splitTB")),
+                node("splitMoveB", lang("splitMoveB")),
+                node("unsplit", lang("unsplit")),
+                node("unsplitAll", lang("unsplitAll")),
+            ]),
+            node("copy", lang("copy"), true, copyChildren()),
+            node("pin", lang("pin")),
+            node("unpin", lang("unpin")),
+            node("tabToWindow", lang("tabToWindow")),
         ],
     },
     {
@@ -650,12 +675,12 @@ export const entryCatalog: IEntryCatalogSection[] = [
     },
     {
         key: "gutter.single",
-        label: location(lang("editor"), lang("entryGutterMenu"), lang("blockCount")),
+        label: location(lang("editor"), lang("entryGutterMenu"), lang("entrySingleBlock")),
         children: gutterSingle(),
     },
     {
         key: "gutter.multi",
-        label: location(lang("editor"), lang("entryGutterMenu"), lang("multiSelect")),
+        label: location(lang("editor"), lang("entryGutterMenu"), lang("entryMultipleBlocks")),
         children: gutterMultiple(),
     },
     {
@@ -729,7 +754,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("alignCenter", lang("alignCenter")),
             node("alignLeft", lang("alignLeft")),
             node("width", lang("width"), true, [
-                node("widthInput", lang("width")),
+                node("widthInput", lang("entryPixelWidth")),
                 node("width_25%", literal("25%")),
                 node("width_33%", literal("33%")),
                 node("width_50%", literal("50%")),
@@ -737,12 +762,12 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("width_75%", literal("75%")),
                 node("width_100%", literal("100%")),
                 separator("separator_1"),
-                node("widthDrag", lang("width")),
+                node("widthDrag", lang("entryPercentageWidth")),
                 separator("separator_2"),
                 node("default", lang("default")),
             ]),
             node("height", lang("height"), true, [
-                node("heightInput", lang("height")),
+                node("heightInput", lang("entryPixelHeight")),
                 node("width_25%", literal("25%")),
                 node("width_33%", literal("33%")),
                 node("width_50%", literal("50%")),
@@ -750,7 +775,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
                 node("width_75%", literal("75%")),
                 node("width_100%", literal("100%")),
                 separator("separator_1"),
-                node("heightDrag", lang("height")),
+                node("heightDrag", lang("entryPercentageHeight")),
                 separator("separator_2"),
                 node("default", lang("default")),
             ]),

@@ -2,6 +2,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../../util/hasClosest";
 import {Constants} from "../../../../constants";
 import {fetchSyncPost} from "../../../../util/fetch";
 import {focusBlock} from "../../../util/selection";
+import {getPendingBlockFocusMode} from "../../../util/focusRestore";
 import {avRender, genTabHeaderHTML, getGroupTitleHTML, updateSearch} from "../render";
 import {bindAvSearch} from "../search";
 import {processRender} from "../../../util/processCode";
@@ -117,8 +118,9 @@ export const afterRenderGallery = (options: ITableOptions) => {
     if (typeof options.resetData.oldOffset === "number") {
         options.protyle.contentElement.scrollTop = options.resetData.oldOffset;
     }
-    if (options.blockElement.getAttribute("data-need-focus") === "true") {
-        focusBlock(options.blockElement);
+    const pendingFocusMode = getPendingBlockFocusMode(options.blockElement.getAttribute("data-need-focus"));
+    if (pendingFocusMode) {
+        focusBlock(options.blockElement, undefined, true, pendingFocusMode === "zoom");
         options.blockElement.removeAttribute("data-need-focus");
     }
     options.blockElement.setAttribute("data-render", "true");

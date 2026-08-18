@@ -74,6 +74,7 @@ import {
     TABLE_DEFAULT_COLUMN_WIDTH,
 } from "../protyle/util/tableColumnWidth";
 import {getParentDocumentID} from "../protyle/util/parentDocument";
+import {shouldFocusAfterZoom} from "../protyle/util/focusRestore";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -1001,7 +1002,7 @@ export const zoomOut = (options: {
         }
         const focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId || options.id}"]`);
         if (focusElement) {
-            focusBlock(focusElement);
+            focusBlock(focusElement, undefined, true, true);
             focusElement.scrollIntoView();
             return;
         }
@@ -1030,7 +1031,13 @@ export const zoomOut = (options: {
         if (options.id !== options.protyle.block.rootID) {
             action.push(Constants.CB_GET_ALL);
         }
-        if (options.focusId) {
+        const focusAfterZoom = shouldFocusAfterZoom({
+            focusId: options.focusId,
+            id: options.id,
+            rootID: options.protyle.block.rootID,
+            isPushBack: options.isPushBack,
+        });
+        if (focusAfterZoom) {
             action.push(Constants.CB_GET_FOCUS);
         }
         onGet({
@@ -1044,6 +1051,7 @@ export const zoomOut = (options: {
             scrollPosition: options.focusId ? "start" : undefined,
             afterCB: options.callback,
             dataDocType: options.dataDocType,
+            focusAfterZoom,
         });
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (options.focusId) {
@@ -1065,7 +1073,7 @@ export const zoomOut = (options: {
                 } else {
                     showElement = getFirstBlock(showElement);
                 }
-                focusBlock(showElement);
+                focusBlock(showElement, undefined, true, true);
             } else if (!options.focusId) {
                 const getDocParam: IObject = {
                     id: options.protyle.block.rootID,
@@ -1080,6 +1088,7 @@ export const zoomOut = (options: {
                         protyle: options.protyle,
                         action: options.isPushBack ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO],
                         dataDocType: options.dataDocType,
+                        focusAfterZoom: true,
                     });
                 });
                 return;
@@ -1102,6 +1111,7 @@ export const zoomOut = (options: {
                             focusId: options.focusId
                         },
                         dataDocType: options.dataDocType,
+                        focusAfterZoom: true,
                     });
                 });
                 return;

@@ -4,6 +4,7 @@ import {Constants} from "../../../constants";
 import {addDragFill, cellScrollIntoView, popTextCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
+import {getPendingBlockFocusMode} from "../../util/focusRestore";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {getRowHTML, stickyRow, updateAVSelectionStatus, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
@@ -412,8 +413,9 @@ const afterRenderTable = (options: ITableOptions) => {
         options.resetData.dragFillId = undefined;
         options.resetData.activeIds = [];
     }
-    if (options.blockElement.getAttribute("data-need-focus") === "true") {
-        focusBlock(options.blockElement);
+    const pendingFocusMode = getPendingBlockFocusMode(options.blockElement.getAttribute("data-need-focus"));
+    if (pendingFocusMode) {
+        focusBlock(options.blockElement, undefined, true, pendingFocusMode === "zoom");
         options.blockElement.removeAttribute("data-need-focus");
     }
     options.blockElement.setAttribute("data-render", "true");

@@ -1,3 +1,5 @@
+import type {IFileTreeMove} from "./fileTreeMove";
+
 export const FILE_TREE_EFFECTIVE_SORT_MODE = "data-effective-sort-mode";
 export const FILE_TREE_CHILDREN_SORT_MODE = "data-children-sort-mode";
 
@@ -76,6 +78,32 @@ const addInheritedRefreshTargets = (parentElement: Element, notebookId: string,
         }
         addInheritedRefreshTargets(item, notebookId, targets);
     });
+};
+
+const getPathParent = (filePath: string) => {
+    const separatorIndex = filePath.lastIndexOf("/");
+    return separatorIndex <= 0 ? "/" : filePath.slice(0, separatorIndex);
+};
+
+export const getMovedFileTreeSortRefreshTargets = (element: Element, moves: IFileTreeMove[]) => {
+    const targets = new Map<string, IFileTreeSortRefreshTarget>();
+    moves.forEach((move) => {
+        if (move.fromNotebook === move.toNotebook &&
+            getPathParent(move.fromPath) === getPathParent(move.newPath)) {
+            return;
+        }
+        const notebookElement = getNotebookElements(element).find((item) =>
+            item.getAttribute("data-url") === move.toNotebook
+        );
+        const documentElement = findElement(notebookElement, (item) =>
+            item.tagName === "LI" && item.getAttribute("data-path") === move.newPath
+        );
+        if (!documentElement || getConfiguredChildrenSortMode(documentElement) !== null) {
+            return;
+        }
+        addInheritedRefreshTargets(documentElement, move.toNotebook, targets);
+    });
+    return Array.from(targets.values());
 };
 
 export const getFileTreeSortRefreshTargets = (element: Element, changes: IDocSortModeChanged[]) => {

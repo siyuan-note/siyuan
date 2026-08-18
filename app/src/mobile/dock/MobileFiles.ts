@@ -41,6 +41,7 @@ import {
     FILE_TREE_CHILDREN_SORT_MODE,
     FILE_TREE_EFFECTIVE_SORT_MODE,
     getFileTreeSortRefreshTargets,
+    getMovedFileTreeSortRefreshTargets,
     getResponseEffectiveSortMode,
     isCustomFileTreeList,
     reorderFileTreeNotebooks,
@@ -55,7 +56,6 @@ export class MobileFiles extends Model {
     private reloadNotebookInfoTimeout: number;
     private docSortModeRefreshTimeout: number;
     private docSortModeChanges = new Map<string, IDocSortModeChanged>();
-    private docSortModeFullRefresh = false;
     private movedExpandedDocIDs = new Set<string>();
     private touchDragState: {
         selectedElement: HTMLElement;
@@ -917,7 +917,7 @@ export class MobileFiles extends Model {
 
     private onMove(response: IWebSocketData) {
         const moves = response.data.moves as IFileTreeMove[];
-        const needsSortModeRefresh = moves.some((move) =>
+        const hasParentChange = moves.some((move) =>
             move.fromNotebook !== move.toNotebook ||
             pathPosix().dirname(move.fromPath) !== pathPosix().dirname(move.newPath));
         const refreshTargets = new Map<string, { element: HTMLElement, notebookId: string }>();
@@ -1011,16 +1011,25 @@ export class MobileFiles extends Model {
                 });
             }
         });
-        if (needsSortModeRefresh) {
+        if (hasParentChange) {
             this.getOpenPaths();
-            this.onDocSortModeChanged();
-            return;
         }
         if (response.callback !== Constants.CB_MOVE_NOLIST) {
             refreshTargets.forEach((target) => {
                 this.getLeaf(target.element, target.notebookId, true);
             });
         }
+        getMovedFileTreeSortRefreshTargets(this.element, moves).forEach((target) => {
+            const notebookElement = Array.from(this.element.children).find((item) =>
+                item.getAttribute("data-url") === target.notebookId
+            );
+            const liElement = Array.from(notebookElement?.querySelectorAll("li[data-path]") || []).find((item) =>
+                item.getAttribute("data-path") === target.path
+            );
+            if (liElement) {
+                this.getLeaf(liElement, target.notebookId, true);
+            }
+        });
     }
 
     private restoreMovedExpandedItems(listElement: Element, notebookId: string) {
@@ -1123,27 +1132,13 @@ export class MobileFiles extends Model {
         });
     }
 
-    public onDocSortModeChanged(data?: IDocSortModeChanged) {
+    public onDocSortModeChanged(data: IDocSortModeChanged) {
         updateFileTreeSortMode(data, this.element);
-        if (data) {
-            this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
-        } else {
-            this.docSortModeFullRefresh = true;
-        }
+        this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
         window.clearTimeout(this.docSortModeRefreshTimeout);
         this.docSortModeRefreshTimeout = window.setTimeout(() => {
-            const fullRefresh = this.docSortModeFullRefresh;
             const changes = Array.from(this.docSortModeChanges.values());
-            this.docSortModeFullRefresh = false;
             this.docSortModeChanges.clear();
-            if (fullRefresh) {
-                if (changes.some((item) => item.scope === "global")) {
-                    setNoteBook(() => this.init(false));
-                } else {
-                    this.init(false);
-                }
-                return;
-            }
             const refreshLists = () => {
                 getFileTreeSortRefreshTargets(this.element, changes).forEach((target) => {
                     const notebookElement = Array.from(this.element.children).find((item) =>

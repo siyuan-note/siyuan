@@ -6,6 +6,7 @@ import {
     getConfiguredChildrenSortMode,
     getFileTreeSortRefreshTargets,
     getFileTreeListSortMode,
+    getMovedFileTreeSortRefreshTargets,
     isCustomFileTreeList,
     reorderFileTreeNotebooks,
     updateFileTreeSortMode
@@ -124,6 +125,7 @@ const fileTreeFixture = () => {
     return {
         element: treeElement("DIV", {}, [notebook, explicitNotebook]),
         notebook,
+        overridden,
         parent,
     };
 };
@@ -164,6 +166,56 @@ test("document sorting refreshes expanded inherited lists up to an override", ()
         id: "parent",
         path: "/parent.sy",
         sortMode: 2,
+    }]), [
+        {notebookId: "notebook", path: "/parent.sy"},
+        {notebookId: "notebook", path: "/parent/inherited.sy"},
+    ]);
+});
+
+test("moving a document refreshes only expanded inherited lists in the moved subtree", () => {
+    const fixture = fileTreeFixture();
+    assert.deepEqual(getMovedFileTreeSortRefreshTargets(fixture.element, [{
+        fromNotebook: "notebook",
+        fromPath: "/source/parent.sy",
+        toNotebook: "notebook",
+        toPath: "/",
+        newPath: "/parent.sy",
+    }]), [
+        {notebookId: "notebook", path: "/parent.sy"},
+        {notebookId: "notebook", path: "/parent/inherited.sy"},
+    ]);
+});
+
+test("moving a document within the same parent does not refresh inherited sorting", () => {
+    const fixture = fileTreeFixture();
+    assert.deepEqual(getMovedFileTreeSortRefreshTargets(fixture.element, [{
+        fromNotebook: "notebook",
+        fromPath: "/parent.sy",
+        toNotebook: "notebook",
+        toPath: "/",
+        newPath: "/parent.sy",
+    }]), []);
+});
+
+test("moving a document with an explicit sorting rule does not refresh its subtree", () => {
+    const fixture = fileTreeFixture();
+    assert.deepEqual(getMovedFileTreeSortRefreshTargets(fixture.element, [{
+        fromNotebook: "notebook",
+        fromPath: "/source/overridden.sy",
+        toNotebook: "notebook",
+        toPath: "/parent.sy",
+        newPath: "/parent/overridden.sy",
+    }]), []);
+});
+
+test("moving a document across notebooks refreshes inherited sorting", () => {
+    const fixture = fileTreeFixture();
+    assert.deepEqual(getMovedFileTreeSortRefreshTargets(fixture.element, [{
+        fromNotebook: "source",
+        fromPath: "/parent.sy",
+        toNotebook: "notebook",
+        toPath: "/",
+        newPath: "/parent.sy",
     }]), [
         {notebookId: "notebook", path: "/parent.sy"},
         {notebookId: "notebook", path: "/parent/inherited.sy"},

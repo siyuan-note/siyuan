@@ -37,17 +37,19 @@ const (
 )
 
 type CustomFont struct {
-	ID          string `json:"id"`
-	Family      string `json:"family"`
-	Weight      int    `json:"weight"`
-	DisplayName string `json:"displayName"`
-	URL         string `json:"url"`
+	ID          string   `json:"id"`
+	Family      string   `json:"family"`
+	Weight      int      `json:"weight"`
+	DisplayName string   `json:"displayName"`
+	Aliases     []string `json:"aliases,omitempty"`
+	URL         string   `json:"url"`
 	path        string
 }
 
 var (
 	customFonts       []*CustomFont
 	customFontsLoaded bool
+	customFontsLang   string
 	customFontsLock   sync.Mutex
 	customFontTemps   = map[string]struct{}{}
 )
@@ -208,7 +210,7 @@ func GetCustomFontFile(id string) (string, *CustomFont, bool) {
 }
 
 func loadCustomFontsLocked() {
-	if customFontsLoaded {
+	if customFontsLoaded && customFontsLang == Lang {
 		return
 	}
 	cleanupCustomFontTempsLocked()
@@ -217,6 +219,7 @@ func loadCustomFontsLocked() {
 	entries, err := os.ReadDir(CustomFontDir())
 	if err != nil {
 		customFontsLoaded = true
+		customFontsLang = Lang
 		return
 	}
 
@@ -274,6 +277,7 @@ func loadCustomFontsLocked() {
 		return customFonts[i].DisplayName < customFonts[j].DisplayName
 	})
 	customFontsLoaded = true
+	customFontsLang = Lang
 }
 
 func cleanupCustomFontTempsLocked() {
@@ -353,6 +357,7 @@ func newCustomFont(id, fontPath string, font *Font) *CustomFont {
 		Family:      CustomFontFamilyPrefix + id,
 		Weight:      weight,
 		DisplayName: font.DisplayName,
+		Aliases:     mergeFontAliases(nil, append(append([]string(nil), font.Aliases...), font.Family), font.DisplayName),
 		URL:         "/custom-fonts/" + id,
 		path:        fontPath,
 	}
@@ -368,5 +373,6 @@ func cloneCustomFonts(fonts []*CustomFont) (ret []*CustomFont) {
 
 func cloneCustomFont(font *CustomFont) *CustomFont {
 	ret := *font
+	ret.Aliases = append([]string(nil), font.Aliases...)
 	return &ret
 }

@@ -25,6 +25,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/ConradIrwin/font/sfnt"
 	"github.com/flopp/go-findfont"
@@ -33,6 +35,7 @@ import (
 
 var (
 	sysFonts     []*Font
+	sysFontsLang string
 	sysFontsLock = sync.Mutex{}
 )
 
@@ -40,12 +43,13 @@ func LoadSysFonts() []*Font {
 	sysFontsLock.Lock()
 	defer sysFontsLock.Unlock()
 
-	if 0 < len(sysFonts) {
+	if 0 < len(sysFonts) && sysFontsLang == Lang {
 		return sysFonts
 	}
 
 	start := time.Now()
 	sysFonts = loadFonts()
+	sysFontsLang = Lang
 
 	sort.Slice(sysFonts, func(i, j int) bool {
 		return sysFonts[i].DisplayName < sysFonts[j].DisplayName
@@ -56,9 +60,45 @@ func LoadSysFonts() []*Font {
 }
 
 type Font struct {
-	Family      string `json:"family"`      // 对应 CSS font-family
-	Weight      int    `json:"weight"`      // 对应 CSS font-weight
-	DisplayName string `json:"displayName"` // 给人看的名称 (Family + Subfamily)
+	Family      string   `json:"family"`            // 对应 CSS font-family
+	Weight      int      `json:"weight"`            // 对应 CSS font-weight
+	DisplayName string   `json:"displayName"`       // 给人看的名称 (Family + Subfamily)
+	Aliases     []string `json:"aliases,omitempty"` // 用于字体搜索的本地化名称和内部名称
+}
+
+type fontLanguage struct {
+	PlatformID sfnt.PlatformID
+	LanguageID sfnt.PlatformLanguageID
+}
+
+var microsoftFontLanguageIDs = map[string][]sfnt.PlatformLanguageID{
+	"ar":    {0x0401},
+	"de":    {0x0407},
+	"en":    {0x0409},
+	"es":    {0x0c0a, 0x040a},
+	"fr":    {0x040c},
+	"he":    {0x040d},
+	"hi":    {0x0439},
+	"id":    {0x0421},
+	"it":    {0x0410},
+	"ja":    {0x0411},
+	"ko":    {0x0412},
+	"nl":    {0x0413},
+	"pl":    {0x0415},
+	"pt-BR": {0x0416},
+	"ru":    {0x0419},
+	"sk":    {0x041b},
+	"th":    {0x041e},
+	"tr":    {0x041f},
+	"uk":    {0x0422},
+	"zh-CN": {0x0804, 0x1004},
+	"zh-TW": {0x0404, 0x0c04, 0x1404},
+}
+
+var macFontLanguageIDs = map[string]sfnt.PlatformLanguageID{
+	"ar": 12, "de": 2, "en": 0, "es": 6, "fr": 1, "he": 10, "hi": 21, "id": 81,
+	"it": 3, "ja": 11, "ko": 23, "nl": 4, "pl": 25, "pt-BR": 8, "ru": 32, "sk": 39,
+	"th": 22, "tr": 17, "uk": 45, "zh-CN": 33, "zh-TW": 19,
 }
 
 func loadFonts() (ret []*Font) {
@@ -67,34 +107,34 @@ func loadFonts() (ret []*Font) {
 		if strings.HasSuffix(strings.ToLower(fontPath), ".ttc") {
 			families := parseTTCFontFamily(fontPath)
 			for _, f := range families {
-				if existFont(f, ret) {
-					continue
-				}
-
-				ret = append(ret, f)
+				ret = addFont(ret, f)
 				//LogInfof("[%s] [%s]", fontPath, family)
 			}
 		} else if strings.HasSuffix(strings.ToLower(fontPath), ".otf") || strings.HasSuffix(strings.ToLower(fontPath), ".ttf") {
 			for _, f := range parseTTFFontFamily(fontPath) {
-				if existFont(f, ret) {
-					continue
-				}
-
-				ret = append(ret, f)
+				ret = addFont(ret, f)
 				//logging.LogInfof("[%s] [%s]", fontPath, family)
 			}
 		}
 	}
+	for _, font := range loadPlatformFonts() {
+		ret = addFont(ret, font)
+	}
 	return
 }
 
-func existFont(f *Font, fonts []*Font) bool {
+func addFont(fonts []*Font, f *Font) []*Font {
+	if nil == f || "" == f.Family {
+		return fonts
+	}
 	for _, font := range fonts {
 		if strings.EqualFold(f.Family, font.Family) && f.Weight == font.Weight {
-			return true
+			font.Aliases = mergeFontAliases(font.Aliases, f.Aliases, font.Family, font.DisplayName)
+			return fonts
 		}
 	}
-	return false
+	f.Aliases = mergeFontAliases(nil, f.Aliases, f.Family, f.DisplayName)
+	return append(fonts, f)
 }
 
 func parseTTCFontFamily(fontPath string) (ret []*Font) {
@@ -143,11 +183,11 @@ func parseFont(font *sfnt.Font) (ret []*Font) {
 		return nil
 	}
 	ret = append(ret, defaultFont)
-	ret = append(ret, parseFontVariations(font, defaultFont.Family)...)
+	ret = append(ret, parseFontVariations(font, defaultFont)...)
 	return
 }
 
-func parseFontVariations(font *sfnt.Font, family string) (ret []*Font) {
+func parseFontVariations(font *sfnt.Font, defaultFont *Font) (ret []*Font) {
 	defer logging.Recover()
 
 	// 可变字体通过 fvar 表声明字重等可变轴，named instances 提供了命名的字重实例
@@ -186,6 +226,10 @@ func parseFontVariations(font *sfnt.Font, family string) (ret []*Font) {
 		return nil
 	}
 	entries := t.List()
+	localizedFamily := selectLocalizedFontName(entries, sfnt.NamePreferredFamily, sfnt.NameFontFamily)
+	if "" == localizedFamily {
+		localizedFamily = defaultFont.Family
+	}
 	instancesBase := axesArrayOffset + axisCount*axisSize
 	for i := 0; i < instanceCount; i++ {
 		base := instancesBase + i*instanceSize
@@ -199,12 +243,23 @@ func parseFontVariations(font *sfnt.Font, family string) (ret []*Font) {
 		if "" == subfamily {
 			continue
 		}
-
-		displayName := family
-		if !strings.EqualFold(subfamily, "Regular") {
-			displayName = family + " " + subfamily
+		localizedSubfamily := selectLocalizedFontName(entries, sfnt.NameID(subfamilyNameID))
+		if "" == localizedSubfamily {
+			localizedSubfamily = subfamily
 		}
-		ret = append(ret, &Font{Family: family, Weight: weight, DisplayName: displayName})
+
+		displayName := localizedFamily
+		if !strings.EqualFold(subfamily, "Regular") {
+			displayName = localizedFamily + " " + localizedSubfamily
+		}
+		aliases := collectFontAliases(entries, sfnt.NameID(subfamilyNameID))
+		aliases = append(aliases, defaultFont.Aliases...)
+		ret = append(ret, &Font{
+			Family:      defaultFont.Family,
+			Weight:      weight,
+			DisplayName: displayName,
+			Aliases:     aliases,
+		})
 	}
 	return
 }
@@ -218,6 +273,14 @@ func parseFontInfo(font *sfnt.Font) (*Font, error) {
 	entries := t.List()
 	family := selectFontName(entries, sfnt.NamePreferredFamily, sfnt.NameFontFamily)
 	subfamily := selectFontName(entries, sfnt.NamePreferredSubfamily, sfnt.NameFontSubfamily)
+	localizedFamily := selectLocalizedFontName(entries, sfnt.NamePreferredFamily, sfnt.NameFontFamily)
+	localizedSubfamily := selectLocalizedFontName(entries, sfnt.NamePreferredSubfamily, sfnt.NameFontSubfamily)
+	if "" == localizedFamily {
+		localizedFamily = family
+	}
+	if "" == localizedSubfamily {
+		localizedSubfamily = subfamily
+	}
 
 	weight := 400
 	os2, err := font.OS2Table()
@@ -225,85 +288,75 @@ func parseFontInfo(font *sfnt.Font) (*Font, error) {
 		weight = int(os2.USWeightClass)
 	}
 
-	if weight == 400 && subfamily != "" {
-		s := strings.ToLower(subfamily)
-		// 自动匹配 W01-W09
-		for i := 1; i <= 9; i++ {
-			wStr := "w0" + strconv.Itoa(i)
-			if strings.Contains(s, wStr) {
-				weight = i * 100
-				break
-			}
-		}
-
-		// 自动匹配 W1-W9（部分字体使用不带前导零的缩写）
-		if weight == 400 {
-			for i := 1; i <= 9; i++ {
-				wStr := "w" + strconv.Itoa(i)
-				if strings.Contains(s, wStr) {
-					weight = i * 100
-					break
-				}
-			}
-		}
-
-		// 自动匹配标准关键词
-		if weight == 400 { // 如果 W 系列没匹配到
-			switch {
-			case strings.Contains(s, "thin"):
-				weight = 100
-			case strings.Contains(s, "light"):
-				weight = 300
-			case strings.Contains(s, "medium"):
-				weight = 500
-			case strings.Contains(s, "semibold") || strings.Contains(s, "demi"):
-				weight = 600
-			case strings.Contains(s, "bold"):
-				weight = 700
-			case strings.Contains(s, "black") || strings.Contains(s, "heavy"):
-				weight = 900
-			}
-		}
-	}
+	weight = inferFontWeight(weight, subfamily)
 
 	if family == "" || strings.HasPrefix(family, ".") {
 		return nil, errors.New("font family is empty")
 	}
 
-	displayName := family
+	displayName := localizedFamily
 	if subfamily != "" && !strings.EqualFold(subfamily, "Regular") {
-		displayName = family + " " + subfamily
+		displayName = localizedFamily + " " + localizedSubfamily
 	}
+	aliases := collectFontAliases(entries,
+		sfnt.NamePreferredFamily, sfnt.NameFontFamily, sfnt.NameWWSFamily,
+		sfnt.NamePreferredSubfamily, sfnt.NameFontSubfamily, sfnt.NameWWSSubfamily,
+		sfnt.NameFull, sfnt.NameCompatibleFull, sfnt.NamePostscript)
 
 	return &Font{
 		Family:      family,
 		Weight:      weight,
 		DisplayName: displayName,
+		Aliases:     aliases,
 	}, nil
 }
 
 func selectFontName(entries []*sfnt.NameEntry, nameIDs ...sfnt.NameID) string {
+	return selectFontNameWithLanguages(entries, []fontLanguage{
+		{PlatformID: sfnt.PlatformMicrosoft, LanguageID: sfnt.PlatformLanguageID(1033)},
+		{PlatformID: sfnt.PlatformMac, LanguageID: sfnt.PlatformLanguageID(0)},
+	}, nameIDs...)
+}
+
+func selectLocalizedFontName(entries []*sfnt.NameEntry, nameIDs ...sfnt.NameID) string {
+	for _, language := range preferredFontLanguages(Lang) {
+		for _, nameID := range nameIDs {
+			for _, entry := range entries {
+				if entry.NameID == nameID && entry.PlatformID == language.PlatformID &&
+					entry.LanguageID == language.LanguageID {
+					if value := fontNameValue(entry); "" != value {
+						return value
+					}
+				}
+			}
+		}
+	}
+	return selectFontName(entries, nameIDs...)
+}
+
+func selectFontNameWithLanguages(entries []*sfnt.NameEntry, languages []fontLanguage, nameIDs ...sfnt.NameID) string {
 	for _, nameID := range nameIDs {
 		var selected string
-		selectedScore := 4
+		selectedScore := len(languages) + 2
 		for _, entry := range entries {
 			if entry.NameID != nameID {
 				continue
 			}
 
-			value := strings.Trim(strings.TrimSpace(entry.String()), "\x00")
+			value := fontNameValue(entry)
 			if value == "" {
 				continue
 			}
 
-			score := 3
-			switch {
-			case entry.LanguageID == sfnt.PlatformLanguageID(1033):
-				score = 0
-			case entry.LanguageID == sfnt.PlatformLanguageID(2052):
-				score = 1
-			case entry.PlatformID == sfnt.PlatformUnicode:
-				score = 2
+			score := len(languages) + 1
+			for i, language := range languages {
+				if entry.PlatformID == language.PlatformID && entry.LanguageID == language.LanguageID {
+					score = i
+					break
+				}
+			}
+			if score == len(languages)+1 && entry.PlatformID == sfnt.PlatformUnicode {
+				score = len(languages)
 			}
 			if score < selectedScore {
 				selected = value
@@ -315,4 +368,148 @@ func selectFontName(entries []*sfnt.NameEntry, nameIDs ...sfnt.NameID) string {
 		}
 	}
 	return ""
+}
+
+func preferredFontLanguages(lang string) (ret []fontLanguage) {
+	lang = LangToBCP47(lang)
+	for _, languageID := range microsoftFontLanguageIDs[lang] {
+		ret = append(ret, fontLanguage{PlatformID: sfnt.PlatformMicrosoft, LanguageID: languageID})
+	}
+	if languageID, ok := macFontLanguageIDs[lang]; ok {
+		ret = append(ret, fontLanguage{PlatformID: sfnt.PlatformMac, LanguageID: languageID})
+	}
+	return
+}
+
+func fontNameValue(entry *sfnt.NameEntry) string {
+	value := strings.Trim(strings.TrimSpace(entry.String()), "\x00")
+	if "" == value || !utf8.ValidString(value) {
+		return ""
+	}
+	for _, r := range value {
+		if unicode.IsControl(r) && !unicode.IsSpace(r) {
+			return ""
+		}
+	}
+	return value
+}
+
+func collectFontAliases(entries []*sfnt.NameEntry, nameIDs ...sfnt.NameID) (ret []string) {
+	for _, entry := range entries {
+		matched := false
+		for _, nameID := range nameIDs {
+			if entry.NameID == nameID {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			continue
+		}
+		if value := fontNameValue(entry); "" != value {
+			ret = appendFontAlias(ret, value)
+		}
+	}
+	return
+}
+
+func mergeFontAliases(base, aliases []string, excluded ...string) (ret []string) {
+	for _, alias := range base {
+		ret = appendFontAlias(ret, alias)
+	}
+	for _, alias := range aliases {
+		ret = appendFontAlias(ret, alias)
+	}
+	filtered := ret[:0]
+	for _, alias := range ret {
+		exclude := false
+		for _, value := range excluded {
+			if strings.EqualFold(alias, value) {
+				exclude = true
+				break
+			}
+		}
+		if !exclude {
+			filtered = append(filtered, alias)
+		}
+	}
+	return filtered
+}
+
+func appendFontAlias(aliases []string, alias string) []string {
+	alias = strings.TrimSpace(alias)
+	if "" == alias {
+		return aliases
+	}
+	for _, existing := range aliases {
+		if strings.EqualFold(existing, alias) {
+			return aliases
+		}
+	}
+	return append(aliases, alias)
+}
+
+func inferFontWeight(weight int, subfamily string) int {
+	if weight != 400 || "" == subfamily {
+		return weight
+	}
+	s := strings.ToLower(subfamily)
+	// 自动匹配 W01-W09
+	for i := 1; i <= 9; i++ {
+		if strings.Contains(s, "w0"+strconv.Itoa(i)) {
+			return i * 100
+		}
+	}
+	// 自动匹配 W1-W9（部分字体使用不带前导零的缩写）
+	for i := 1; i <= 9; i++ {
+		if strings.Contains(s, "w"+strconv.Itoa(i)) {
+			return i * 100
+		}
+	}
+	// 自动匹配标准关键词
+	switch {
+	case strings.Contains(s, "thin") || strings.Contains(s, "hairline"):
+		return 100
+	case strings.Contains(s, "extra light") || strings.Contains(s, "extralight") || strings.Contains(s, "ultra light") || strings.Contains(s, "ultralight"):
+		return 200
+	case strings.Contains(s, "light"):
+		return 300
+	case strings.Contains(s, "medium"):
+		return 500
+	case strings.Contains(s, "semibold") || strings.Contains(s, "semi bold") || strings.Contains(s, "demi"):
+		return 600
+	case strings.Contains(s, "extra bold") || strings.Contains(s, "extrabold") || strings.Contains(s, "ultra bold") || strings.Contains(s, "ultrabold"):
+		return 800
+	case strings.Contains(s, "bold"):
+		return 700
+	case strings.Contains(s, "black"):
+		return 900
+	case strings.Contains(s, "heavy"):
+		return 900
+	}
+	return weight
+}
+
+func fontWeightFromNormalizedTrait(weight float64, style string) int {
+	if inferred := inferFontWeight(400, style); inferred != 400 {
+		return inferred
+	}
+	switch {
+	case weight <= -0.5:
+		return 100
+	case weight <= -0.25:
+		return 300
+	case weight < 0.15:
+		return 400
+	case weight < 0.28:
+		return 500
+	case weight < 0.35:
+		return 600
+	case weight < 0.5:
+		return 700
+	case weight < 0.6:
+		return 800
+	default:
+		return 900
+	}
 }

@@ -32,6 +32,11 @@ export const getAgentThinkingToolGroups = (steps: AgentHistoryThinkingStep[]): s
     return steps.map(step => (step.toolNames || []).filter(Boolean));
 };
 
+export const hasAgentThinkingStepDetails = (step: AgentHistoryThinkingStep): boolean => {
+    return !!step.content?.trim() || !!step.reasoningContent?.trim() ||
+        !!step.toolNames?.some(toolName => !!toolName.trim());
+};
+
 export const getAgentThinkingDisplaySeconds = (duration?: number): number | undefined => {
     if (duration === undefined || !Number.isFinite(duration) || duration <= 0) {
         return undefined;
@@ -452,7 +457,12 @@ const prepareAgentTurnPresentation = (entries: AgentHistoryEntry[]): AgentHistor
         prepared.splice(snapshotIndex, 1);
         prepared.splice(prepared.indexOf(anchorEntry) + 1, 0, snapshot);
     }
-    return prepared;
+    for (const entry of prepared) {
+        if (entry.type === "thinking") {
+            entry.steps = entry.steps?.filter(hasAgentThinkingStepDetails);
+        }
+    }
+    return prepared.filter(entry => entry.type !== "thinking" || !!entry.steps?.length);
 };
 
 // 将持久化协议消息投影为 UI 条目：reasoningContent 与工具调用归入思考卡片，

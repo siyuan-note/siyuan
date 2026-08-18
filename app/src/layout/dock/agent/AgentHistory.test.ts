@@ -8,6 +8,7 @@ import {
     getAgentThinkingToolGroups,
     hasAgentExecutedToolsAfter,
     hasAgentModelSpecificContext,
+    hasAgentThinkingStepDetails,
     isAgentAssistantContentFinalInTurn,
     isAgentRegenerateStateCurrent
 } from "./AgentHistory";
@@ -51,6 +52,14 @@ describe("AgentHistory", () => {
         assert.equal(getAgentThinkingDisplaySeconds(0.499), 1);
         assert.equal(getAgentThinkingDisplaySeconds(1.499), 1);
         assert.equal(getAgentThinkingDisplaySeconds(1.5), 2);
+    });
+
+    it("recognizes only thinking steps with visible details", () => {
+        assert.equal(hasAgentThinkingStepDetails({reasoning: "processing", roundID: "round-1"}), false);
+        assert.equal(hasAgentThinkingStepDetails({reasoningContent: "reasoning"}), true);
+        assert.equal(hasAgentThinkingStepDetails({toolNames: ["document"]}), true);
+        assert.equal(hasAgentThinkingStepDetails({content: "legacy content"}), true);
+        assert.equal(hasAgentThinkingStepDetails({reasoningContent: " ", toolNames: [""]}), false);
     });
 
     it("detects executed tools after the selected user entry", () => {
@@ -420,6 +429,62 @@ describe("AgentHistory", () => {
         ]);
     });
 
+    it("removes empty thinking steps split by confirmations and snapshots", () => {
+        const display = buildAgentPresentationEntries([
+            {id: "user-1", type: "user", content: "write"},
+            {
+                id: "thinking-visible-1",
+                type: "thinking",
+                steps: [{roundID: "round-1", reasoningContent: "create note", toolNames: ["dailynote"]}],
+            },
+            {id: "confirm-1", type: "confirm"},
+            {id: "snapshot-1", type: "snapshot", roundID: "round-1"},
+            {
+                id: "thinking-empty-1",
+                type: "thinking",
+                steps: [{roundID: "round-1", reasoning: "processing"}],
+            },
+            {
+                id: "thinking-visible-2",
+                type: "thinking",
+                steps: [
+                    {roundID: "round-2", reasoning: "processing", toolNames: ["dailynote"]},
+                    {roundID: "round-2", reasoning: "processing"},
+                ],
+            },
+            {id: "confirm-2", type: "confirm"},
+            {
+                id: "thinking-empty-2",
+                type: "thinking",
+                steps: [
+                    {roundID: "round-2", reasoning: "processing"},
+                    {roundID: "round-3", reasoning: "processing"},
+                ],
+            },
+            {
+                id: "assistant-1",
+                type: "assistant",
+                roundID: "round-1",
+                reasoningContent: "create note",
+                toolCalls: [{name: "dailynote"}],
+            },
+            {
+                id: "assistant-2",
+                type: "assistant",
+                roundID: "round-2",
+                toolCalls: [{name: "dailynote"}],
+            },
+            {id: "assistant-3", type: "assistant", roundID: "round-3", content: "Done"},
+        ]);
+
+        assert.equal(display.some(entry => entry.id === "thinking-empty-1"), false);
+        assert.equal(display.some(entry => entry.id === "thinking-empty-2"), false);
+        assert.equal(display.find(entry => entry.id === "thinking-visible-2")?.steps?.length, 1);
+        assert.equal(display.filter(entry => entry.type === "thinking")
+            .flatMap(entry => entry.steps || []).every(hasAgentThinkingStepDetails), true);
+        assert.equal(display.find(entry => entry.id === "assistant-3")?.content, "Done");
+    });
+
     it("places tool-round content before the next thinking card", () => {
         const display = buildAgentPresentationEntries([
             {id: "user-1", type: "user", content: "work"},
@@ -644,7 +709,11 @@ describe("AgentHistory", () => {
             {id: "thinking-1", type: "thinking", steps: [{roundID: "round-1", toolNames: ["write"]}]},
             {id: "confirm-1", type: "confirm"},
             {id: "snapshot-1", type: "snapshot", roundID: "round-1"},
-            {id: "thinking-2", type: "thinking", steps: [{roundID: "round-1"}]},
+            {
+                id: "thinking-2",
+                type: "thinking",
+                steps: [{roundID: "round-1", reasoningContent: "continue"}],
+            },
             {
                 id: "assistant-1",
                 type: "assistant",

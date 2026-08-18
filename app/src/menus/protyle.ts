@@ -73,6 +73,7 @@ import {
     isDefaultTableColumnWidth,
     TABLE_DEFAULT_COLUMN_WIDTH,
 } from "../protyle/util/tableColumnWidth";
+import {getParentDocumentID} from "../protyle/util/parentDocument";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -940,14 +941,19 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
 
 export const enterBack = (protyle: IProtyle, id: string) => {
     if (!protyle.block.showAll) {
-        const ids = protyle.path.split("/");
-        if (ids.length > 2) {
+        const parentDocumentID = getParentDocumentID({
+            path: protyle.path,
+            notebookID: protyle.notebookId,
+            rootID: protyle.block.rootID,
+            boxDocEnabled: window.siyuan.config.fileTree.boxDocEnabled,
+        });
+        if (parentDocumentID) {
             /// #if MOBILE
-            openMobileFileById(protyle.app, ids[ids.length - 2], [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
+            openMobileFileById(protyle.app, parentDocumentID, [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
             /// #else
             openFileById({
                 app: protyle.app,
-                id: ids[ids.length - 2],
+                id: parentDocumentID,
                 action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
             });
             /// #endif

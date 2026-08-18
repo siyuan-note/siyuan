@@ -49,6 +49,7 @@ func setupAttributeViewValidationTest(t *testing.T) {
 	}
 	Conf = NewAppConf()
 	Conf.Lang = "en"
+	Conf.FileTree = conf.NewFileTree()
 	Conf.Sync = conf.NewSync()
 	cache.ClearAVCache()
 	t.Cleanup(func() {

@@ -1743,6 +1743,13 @@ func IsSyncingFile(rootID string) (ret bool) {
 	return
 }
 
+func pushSyncDataSnapshotStatus(elapsed time.Duration) {
+	if util.StatusBarCfg.MsgSyncDataSnapshotDisabled {
+		return
+	}
+	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+}
+
 func syncRepoDownload() (err error) {
 	if 1 > len(Conf.Repo.Key) {
 		planSyncAfter(fixSyncInterval)
@@ -1808,7 +1815,7 @@ func syncRepoDownload() (err error) {
 		return
 	}
 
-	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+	pushSyncDataSnapshotStatus(elapsed)
 	Conf.Sync.Synced = util.CurrentTimeMillis()
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomFloor(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
@@ -1888,7 +1895,7 @@ func syncRepoUpload() (err error) {
 		return
 	}
 
-	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+	pushSyncDataSnapshotStatus(elapsed)
 	Conf.Sync.Synced = util.CurrentTimeMillis()
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
@@ -2132,7 +2139,7 @@ func syncIndexedRepo(repo *dejavu.Repo, exit, byHand bool, beforeIndex, afterInd
 
 	dataChanged = nil == beforeIndex || beforeIndex.ID != afterIndex.ID || mergeResult.DataChanged()
 
-	util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+	pushSyncDataSnapshotStatus(elapsed)
 	Conf.Sync.Synced = util.CurrentTimeMillis()
 	msg := fmt.Sprintf(Conf.Language(150), trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes+trafficStat.PeerDownloadBytes), 2))
 	msg = appendLANSyncTrafficStat(msg, trafficStat)
@@ -2514,7 +2521,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		}
 
 		time.Sleep(2 * time.Second)
-		util.PushStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
+		pushSyncDataSnapshotStatus(elapsed)
 
 		if 0 < len(mergeResult.Conflicts) {
 			syConflict := false

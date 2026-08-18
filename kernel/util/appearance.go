@@ -22,6 +22,7 @@ type StatusBar struct {
 	MsgTaskHistoryDatabaseIndexCommitDisabled bool `json:"msgTaskHistoryDatabaseIndexCommitDisabled"`
 	MsgTaskAssetDatabaseIndexCommitDisabled   bool `json:"msgTaskAssetDatabaseIndexCommitDisabled"`
 	MsgTaskHistoryGenerateFileDisabled        bool `json:"msgTaskHistoryGenerateFileDisabled"`
+	MsgSyncDataSnapshotDisabled               bool `json:"msgSyncDataSnapshotDisabled"`
 }
 
 var StatusBarCfg *StatusBar

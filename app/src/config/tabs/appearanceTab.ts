@@ -618,16 +618,29 @@ const bindFloatWindowModeVisibility = (root: HTMLElement) => {
 };
 /// #endif
 
-const STATUS_BAR_MSG_ITEMS: { key: keyof Config.IAppearanceStatusBar; taskKey: string }[] = [
-    {key: "msgTaskDatabaseIndexCommitDisabled", taskKey: "task.database.index.commit"},
-    {key: "msgTaskAssetDatabaseIndexCommitDisabled", taskKey: "task.asset.database.index.commit"},
-    {key: "msgTaskHistoryDatabaseIndexCommitDisabled", taskKey: "task.history.database.index.commit"},
-    {key: "msgTaskHistoryGenerateFileDisabled", taskKey: "task.history.generateFile"},
+const STATUS_BAR_MSG_ITEMS: { key: keyof Config.IAppearanceStatusBar; getLabel: () => string }[] = [
+    {
+        key: "msgTaskDatabaseIndexCommitDisabled",
+        getLabel: () => window.siyuan.languages._taskAction["task.database.index.commit"]
+    },
+    {
+        key: "msgTaskAssetDatabaseIndexCommitDisabled",
+        getLabel: () => window.siyuan.languages._taskAction["task.asset.database.index.commit"]
+    },
+    {
+        key: "msgTaskHistoryDatabaseIndexCommitDisabled",
+        getLabel: () => window.siyuan.languages._taskAction["task.history.database.index.commit"]
+    },
+    {
+        key: "msgTaskHistoryGenerateFileDisabled",
+        getLabel: () => window.siyuan.languages._taskAction["task.history.generateFile"]
+    },
+    {key: "msgSyncDataSnapshotDisabled", getLabel: () => window.siyuan.languages.statusBarMsgSyncDataSnapshot},
 ];
 
 const genStatusBarMsgDialogHtml = (): string => {
-    const listItems = STATUS_BAR_MSG_ITEMS.map(({key, taskKey}) =>
-        genListSwitchItemHtml(key, window.siyuan.languages._taskAction[taskKey], !window.siyuan.config.appearance.statusBar[key])
+    const listItems = STATUS_BAR_MSG_ITEMS.map(({key, getLabel}) =>
+        genListSwitchItemHtml(key, getLabel(), !window.siyuan.config.appearance.statusBar[key])
     ).join("");
     return `<div class="fn__hr"></div>
 <div class="b3-label">

@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -27,8 +27,9 @@ import (
 
 // ViewSort 描述了视图排序规则的结构。
 type ViewSort struct {
-	Column string    `json:"column"` // 字段（列）ID
-	Order  SortOrder `json:"order"`  // 排序顺序
+	Column       string       `json:"column"`                 // 字段（列）ID
+	Order        SortOrder    `json:"order"`                  // 排序顺序
+	DateEndpoint DateEndpoint `json:"dateEndpoint,omitempty"` // 日期端点
 }
 
 type SortOrder string
@@ -46,8 +47,9 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 	}
 
 	type FieldIndexSort struct {
-		Index int
-		Order SortOrder
+		Index        int
+		Order        SortOrder
+		DateEndpoint DateEndpoint
 	}
 
 	var fieldIndexSorts []*FieldIndexSort
@@ -55,7 +57,11 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 	for _, s := range sorts {
 		for i, c := range fields {
 			if c.GetID() == s.Column {
-				fieldIndexSorts = append(fieldIndexSorts, &FieldIndexSort{Index: i, Order: s.Order})
+				fieldIndexSorts = append(fieldIndexSorts, &FieldIndexSort{
+					Index:        i,
+					Order:        s.Order,
+					DateEndpoint: s.DateEndpoint,
+				})
 				break
 			}
 		}
@@ -128,19 +134,19 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 		for _, fieldIndexSort := range fieldIndexSorts {
 			val1 := editedItems[i].GetValues()[fieldIndexSort.Index]
 			val2 := editedItems[j].GetValues()[fieldIndexSort.Index]
-			if nil == val1 || val1.IsEmpty() {
-				if nil != val2 && !val2.IsEmpty() {
+			if isSortValueEmpty(val1, fieldIndexSort.DateEndpoint) {
+				if !isSortValueEmpty(val2, fieldIndexSort.DateEndpoint) {
 					return false
 				}
 				sorted = false
 				continue
 			} else {
-				if nil == val2 || val2.IsEmpty() {
+				if isSortValueEmpty(val2, fieldIndexSort.DateEndpoint) {
 					return true
 				}
 			}
 
-			result := val1.Compare(val2, optionSortByIndex[fieldIndexSort.Index])
+			result := val1.compare(val2, optionSortByIndex[fieldIndexSort.Index], fieldIndexSort.DateEndpoint)
 			if 0 == result {
 				sorted = false
 				continue
@@ -178,7 +184,22 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 	}
 }
 
+func isSortValueEmpty(value *Value, dateEndpoint DateEndpoint) bool {
+	if nil == value {
+		return true
+	}
+	if KeyTypeDate == value.Type {
+		_, isNotEmpty := value.Date.GetByEndpoint(dateEndpoint)
+		return !isNotEmpty
+	}
+	return value.IsEmpty()
+}
+
 func (value *Value) Compare(other *Value, optionSort map[string]int) int {
+	return value.compare(other, optionSort, DateEndpointStart)
+}
+
+func (value *Value) compare(other *Value, optionSort map[string]int, dateEndpoint DateEndpoint) int {
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil != value.Block && nil != other.Block {
@@ -234,13 +255,12 @@ func (value *Value) Compare(other *Value, optionSort map[string]int) int {
 		}
 	case KeyTypeDate:
 		if nil != value.Date && nil != other.Date {
-			if value.Date.IsNotEmpty {
-				if !other.Date.IsNotEmpty {
+			valueContent, valueIsNotEmpty := value.Date.GetByEndpoint(dateEndpoint)
+			otherContent, otherIsNotEmpty := other.Date.GetByEndpoint(dateEndpoint)
+			if valueIsNotEmpty {
+				if !otherIsNotEmpty {
 					return -1
 				}
-
-				valueContent := value.Date.Content
-				otherContent := other.Date.Content
 
 				if value.Date.IsNotTime {
 					v := time.UnixMilli(valueContent)
@@ -260,7 +280,7 @@ func (value *Value) Compare(other *Value, optionSort map[string]int) int {
 				return 0
 			}
 
-			if !other.Date.IsNotEmpty {
+			if !otherIsNotEmpty {
 				return 1
 			}
 			return 0
@@ -295,7 +315,7 @@ func (value *Value) Compare(other *Value, optionSort map[string]int) int {
 			vLen := len(value.MSelect)
 			oLen := len(other.MSelect)
 			if vLen <= oLen {
-				for i := 0; i < vLen; i++ {
+				for i := range vLen {
 					v := value.MSelect[i].Content
 					o := other.MSelect[i].Content
 					vSort := optionSort[v]
@@ -309,7 +329,7 @@ func (value *Value) Compare(other *Value, optionSort map[string]int) int {
 					}
 				}
 			} else {
-				for i := 0; i < oLen; i++ {
+				for i := range oLen {
 					v := value.MSelect[i].Content
 					o := other.MSelect[i].Content
 					vSort := optionSort[v]
@@ -363,20 +383,20 @@ func (value *Value) Compare(other *Value, optionSort map[string]int) int {
 		}
 	case KeyTypeMAsset:
 		if nil != value.MAsset && nil != other.MAsset {
-			var v1 string
+			var v1 strings.Builder
 			for _, v := range value.MAsset {
-				v1 += v.Content
+				v1.WriteString(v.Content)
 			}
 			var v2 string
 			for _, v := range other.MAsset {
 				v2 += v.Content
 			}
 
-			if 0 == strings.Compare(v1, v2) {
+			if 0 == strings.Compare(v1.String(), v2) {
 				return 0
 			}
 
-			if util.EmojiPinYinCompare(v1, v2) {
+			if util.EmojiPinYinCompare(v1.String(), v2) {
 				return -1
 			}
 			return 1

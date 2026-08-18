@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -23,8 +23,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/88250/gulu"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
+
+	"github.com/88250/gulu"
 )
 
 var FileTool = &Tool{
@@ -55,7 +57,7 @@ func init() {
 	register(FileTool)
 }
 
-func fileHandler(args map[string]interface{}) (CallToolResult, error) {
+func fileHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "list":
@@ -89,10 +91,29 @@ func resolvePath(rel string) (string, error) {
 	if !gulu.File.IsSubPath(util.WorkspaceDir, abs) {
 		return "", fmt.Errorf("path escapes workspace: %s", rel)
 	}
+	// 拒绝加密笔记本目录：MCP 文件工具不能读写加密 box 下的文件（防止密文泄漏或明文破坏加密格式）
+	if boxID, encrypted := rejectEncryptedPath(abs); encrypted {
+		return "", fmt.Errorf("path belongs to encrypted notebook [%s]: %s", boxID, rel)
+	}
+	// 防止 symlink 逃逸工作区：解析符号链接后再次检查
+	if resolved := util.ResolveLongestExistingParent(abs); resolved != abs && !gulu.File.IsSubPath(util.WorkspaceDir, resolved) {
+		return "", fmt.Errorf("symlink escapes workspace: %s", rel)
+	}
+	// 禁止访问敏感文件（conf/conf.json、data/snippets/conf.json、data/templates、data/.siyuan/publishAccess.json），
+	// 与 HTTP 文件 API 共用同一黑名单（见 kernel/util/path_guard.go 的 IsForbiddenAbsPath）
+	if util.IsForbiddenAbsPath(abs) {
+		return "", fmt.Errorf("access to sensitive workspace file is forbidden: %s", rel)
+	}
 	return abs, nil
 }
 
-func fileList(args map[string]interface{}) (CallToolResult, error) {
+// rejectEncryptedPath 检查路径是否属于加密笔记本（含 symlink 绕过），返回 boxID 和是否为加密 box。
+func rejectEncryptedPath(absPath string) (boxID string, encrypted bool) {
+	boxID = model.EncryptedRawPathBoxID(absPath)
+	return boxID, boxID != ""
+}
+
+func fileList(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
@@ -130,7 +151,7 @@ func fileList(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func getFloat64Arg(args map[string]interface{}, key string) float64 {
+func getFloat64Arg(args map[string]any, key string) float64 {
 	if v, ok := args[key]; ok {
 		if f, ok := v.(float64); ok {
 			return f
@@ -139,7 +160,7 @@ func getFloat64Arg(args map[string]interface{}, key string) float64 {
 	return 0
 }
 
-func resolveLimit(args map[string]interface{}, defaultLimit int) int {
+func resolveLimit(args map[string]any, defaultLimit int) int {
 	limit := int(getFloat64Arg(args, "limit"))
 	if limit <= 0 {
 		return defaultLimit
@@ -147,7 +168,7 @@ func resolveLimit(args map[string]interface{}, defaultLimit int) int {
 	return limit
 }
 
-func fileRead(args map[string]interface{}) (CallToolResult, error) {
+func fileRead(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
@@ -172,10 +193,7 @@ func fileRead(args map[string]interface{}) (CallToolResult, error) {
 	total := len(lines)
 
 	if offset < 0 {
-		offset = total + offset
-		if offset < 0 {
-			offset = 0
-		}
+		offset = max(total+offset, 0)
 	} else {
 		offset--
 		if offset < 0 {
@@ -185,10 +203,7 @@ func fileRead(args map[string]interface{}) (CallToolResult, error) {
 
 	end := total
 	if limit > 0 {
-		end = offset + limit
-		if end > total {
-			end = total
-		}
+		end = min(offset+limit, total)
 	}
 
 	if offset >= total {
@@ -199,7 +214,7 @@ func fileRead(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: result}}}, nil
 }
 
-func fileWrite(args map[string]interface{}) (CallToolResult, error) {
+func fileWrite(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	dataStr, _ := args["data"].(string)
 	if p == "" || dataStr == "" {
@@ -218,7 +233,7 @@ func fileWrite(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "file written: " + p}}}, nil
 }
 
-func fileDelete(args map[string]interface{}) (CallToolResult, error) {
+func fileDelete(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
@@ -242,7 +257,7 @@ func fileDelete(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "deleted: " + p}}}, nil
 }
 
-func fileRename(args map[string]interface{}) (CallToolResult, error) {
+func fileRename(args map[string]any) (CallToolResult, error) {
 	old, _ := args["old"].(string)
 	newP, _ := args["new"].(string)
 	if old == "" || newP == "" {
@@ -265,7 +280,7 @@ func fileRename(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("renamed: %s -> %s", old, newP)}}}, nil
 }
 
-func fileCopy(args map[string]interface{}) (CallToolResult, error) {
+func fileCopy(args map[string]any) (CallToolResult, error) {
 	src, _ := args["src"].(string)
 	dst, _ := args["dst"].(string)
 	if src == "" || dst == "" {
@@ -337,7 +352,7 @@ func typeLabel(isDir bool) string {
 	return "FILE"
 }
 
-func fileGrep(args map[string]interface{}) (CallToolResult, error) {
+func fileGrep(args map[string]any) (CallToolResult, error) {
 	pattern, _ := args["pattern"].(string)
 	if pattern == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "pattern is required"}}, IsError: true}, nil
@@ -379,7 +394,7 @@ func fileGrep(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func fileFind(args map[string]interface{}) (CallToolResult, error) {
+func fileFind(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil
@@ -474,13 +489,13 @@ func expandGlobBrace(pattern string) []string {
 	suffix := pattern[j+1:]
 
 	var result []string
-	for _, opt := range strings.Split(body, ",") {
+	for opt := range strings.SplitSeq(body, ",") {
 		result = append(result, expandGlobBrace(prefix+strings.TrimSpace(opt)+suffix)...)
 	}
 	return result
 }
 
-func fileStat(args map[string]interface{}) (CallToolResult, error) {
+func fileStat(args map[string]any) (CallToolResult, error) {
 	p, _ := args["path"].(string)
 	if p == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "path is required"}}, IsError: true}, nil

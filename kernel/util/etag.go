@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -41,7 +41,7 @@ func GetEtagByHandle(f io.Reader, size int64) (etag string, err error) {
 	} else { // file size > 4M
 		sha1Buf = append(sha1Buf, 0x96)
 		sha1BlockBuf := make([]byte, 0, blockCnt*20)
-		for i := 0; i < blockCnt; i++ {
+		for range blockCnt {
 			body := io.LimitReader(f, BLOCK_SIZE)
 			sha1BlockBuf, err = CalSha1(sha1BlockBuf, body)
 			if err != nil {

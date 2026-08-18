@@ -9,15 +9,14 @@ export const fetchPost = (
     url: string,
     data?: any,
     cb?: (response: IWebSocketData) => void,
-    headers?: IObject,
+    headers?: Record<string, string>,
     failCallback?: (response: IWebSocketData) => void,
     signal?: AbortSignal) => {
     const init: RequestInit = {
         method: "POST",
     };
     if (data) {
-        if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph",
-            "/api/block/getRecentUpdatedBlocks", "/api/search/fullTextSearchBlock"].includes(url)) {
+        if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph"].includes(url)) {
             window.siyuan.reqIds[url] = Date.now();
             if (data.type === "local" && url === "/api/graph/getLocalGraph") {
                 // 当打开文档A的关系图、关系图、文档A后刷新，由于防止请求重复处理，文档A关系图无法渲染。
@@ -42,7 +41,7 @@ export const fetchPost = (
         init.signal = signal;
     }
     let isGetFile202 = false;
-    fetch(url, init).then((response) => {
+    return fetch(url, init).then((response) => {
         switch (response.status) {
             case 403:
             case 404:
@@ -83,8 +82,7 @@ export const fetchPost = (
             }
             return;
         }
-        if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph",
-            "/api/block/getRecentUpdatedBlocks", "/api/search/fullTextSearchBlock"].includes(url)) {
+        if (["/api/search/searchRefBlock", "/api/graph/getGraph", "/api/graph/getLocalGraph"].includes(url)) {
             if (response.data.reqId && window.siyuan.reqIds[url] && window.siyuan.reqIds[url] > response.data.reqId) {
                 return;
             }
@@ -123,7 +121,7 @@ export const fetchPost = (
     });
 };
 
-export const fetchSyncPost = async (url: string, data?: any, headers?: Record<string, string>) => {
+export const fetchSyncPost = async (url: string, data?: any, headers?: Record<string, string>, process = true) => {
     const init: RequestInit = {
         method: "POST",
     };
@@ -139,7 +137,9 @@ export const fetchSyncPost = async (url: string, data?: any, headers?: Record<st
     }
     const res = await fetch(url, init);
     const res2 = await res.json() as IWebSocketData;
-    processMessage(res2);
+    if (process) {
+        processMessage(res2);
+    }
     return res2;
 };
 

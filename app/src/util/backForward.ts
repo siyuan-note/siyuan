@@ -13,8 +13,9 @@ import {zoomOut} from "../menus/protyle";
 import {showMessage} from "../dialog/message";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {getAllModels} from "../layout/getAll";
-import {App} from "../index";
+import type {App} from "../index";
 import {onGet} from "../protyle/util/onGet";
+import {isEncryptedBox} from "./pathName";
 
 let forwardStack: IBackStack[] = [];
 let previousIsBack = false;
@@ -39,7 +40,11 @@ const focusStack = async (app: App, stack: IBackStack) => {
             wnd = getWndByLayout(window.siyuan.layout.centerLayout);
         }
         if (wnd) {
-            const info = await fetchSyncPost("/api/block/getBlockInfo", {id: stack.id});
+            const blockInfoParam: IObject = {id: stack.id};
+            if (isEncryptedBox(stack.protyle.notebookId)) {
+                blockInfoParam.notebook = stack.protyle.notebookId;
+            }
+            const info = await fetchSyncPost("/api/block/getBlockInfo", blockInfoParam);
             if (info.code === 3) {
                 showMessage(info.msg);
                 return;
@@ -53,7 +58,9 @@ const focusStack = async (app: App, stack: IBackStack) => {
                     scrollAttr.focusId = stack.id;
                     scrollAttr.focusStart = stack.position.start;
                     scrollAttr.focusEnd = stack.position.end;
-                    window.siyuan.storage[Constants.LOCAL_FILEPOSITION][stack.protyle.block.rootID] = scrollAttr;
+                    if (!isEncryptedBox(stack.protyle.notebookId)) {
+                        window.siyuan.storage[Constants.LOCAL_FILEPOSITION][stack.protyle.block.rootID] = scrollAttr;
+                    }
                     const editor = new Editor({
                         app: app,
                         tab,
@@ -112,13 +119,26 @@ const focusStack = async (app: App, stack: IBackStack) => {
         }
     }
 
-    if (stack.protyle.block.rootID === stack.id) {
+    const currentZoomId = stack.protyle.block.showAll ? stack.protyle.block.id : undefined;
+    const focusTitle = () => {
         if (stack.protyle.title.editElement.getBoundingClientRect().height === 0) {
             // 切换 tab
             stack.protyle.model.parent.parent.switchTab(stack.protyle.model.parent.headElement);
             stack.protyle.toolbar.range = undefined;
         }
         focusByOffset(stack.protyle.title.editElement, stack.position.start, stack.position.end);
+    };
+    if (stack.protyle.block.rootID === stack.id) {
+        if (currentZoomId !== stack.zoomId) {
+            zoomOut({
+                protyle: stack.protyle,
+                id: stack.zoomId || stack.protyle.block.rootID,
+                isPushBack: false,
+                callback: focusTitle,
+            });
+        } else {
+            focusTitle();
+        }
         return true;
     }
     Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
@@ -129,7 +149,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
     });
     if (blockElement &&
         // 即使块存在，折叠的情况需要也需要 zoomOut，否则折叠块内的光标无法定位
-        (!stack.zoomId || (stack.zoomId && stack.zoomId === stack.protyle.block.id))
+        currentZoomId === stack.zoomId
     ) {
         if (blockElement.getBoundingClientRect().height === 0) {
             // 切换 tab
@@ -155,11 +175,15 @@ const focusStack = async (app: App, stack: IBackStack) => {
         }
         // 动态加载导致内容移除 https://github.com/siyuan-note/siyuan/issues/10692
         if (!blockElement && !stack.zoomId && !stack.protyle.scroll.element.classList.contains("fn__none")) {
-            fetchPost("/api/filetree/getDoc", {
+            const getDocParam: IObject = {
                 id: stack.id,
                 mode: 3,
                 size: window.siyuan.config.editor.dynamicLoadBlocks,
-            }, getResponse => {
+            };
+            if (isEncryptedBox(stack.protyle.notebookId)) {
+                getDocParam.notebook = stack.protyle.notebookId;
+            }
+            fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                 onGet({
                     data: getResponse,
                     protyle: stack.protyle,

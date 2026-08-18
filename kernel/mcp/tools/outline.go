@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -41,7 +41,7 @@ func init() {
 	register(OutlineTool)
 }
 
-func outlineHandler(args map[string]interface{}) (CallToolResult, error) {
+func outlineHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "get":
@@ -53,7 +53,7 @@ func outlineHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func outlineGet(args map[string]interface{}) (CallToolResult, error) {
+func outlineGet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil

@@ -1,10 +1,11 @@
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {processSync} from "../../dialog/processSystem";
 import {
     onSetaccount,
     updateAccountSwitchesVisibility,
 } from "./accountUi";
 import {
+    refreshLANSyncConfigItemVisibility,
     refreshSyncModeRelatedItems,
     refreshSyncTabPanels,
 } from "./syncUi";
@@ -22,6 +23,46 @@ export const mountSyncTabExtras = (root: HTMLElement) => {
     syncTabElement = root;
     refreshSyncTabPanels(root);
     updateAccountSwitchesVisibility(root);
+};
+
+export const refreshLANSyncStatus = (root: Element) => {
+    const statusElement = root.querySelector('[data-type="lanSyncStatus"]');
+    if (!statusElement) {
+        return;
+    }
+    if (!window.siyuan.config.sync.enabled) {
+        statusElement.textContent = "";
+        return;
+    }
+    fetchSyncPost("/api/sync/getSyncLANStatus", {}).then((response) => {
+        if (!window.siyuan.config.sync.enabled) {
+            statusElement.textContent = "";
+            return;
+        }
+        if (response.code === 0 && response.data) {
+            if (!response.data.active) {
+                statusElement.textContent = window.siyuan.languages.lanSyncInactive;
+                return;
+            }
+            const discovered = window.siyuan.languages.lanSyncDiscoveredPeers.replace(
+                "${count}", String(response.data.discoveredPeers ?? 0));
+            const connected = window.siyuan.languages.lanSyncConnectedPeers.replace(
+                "${count}", String(response.data.connectedPeers ?? 0));
+            statusElement.replaceChildren(discovered, document.createElement("br"), connected);
+        }
+    }).catch(() => {});
+};
+
+export const mountLANSyncStatus = (root: HTMLElement) => {
+    const poll = () => {
+        if (!root.isConnected) {
+            return;
+        }
+        refreshLANSyncStatus(root);
+        window.setTimeout(poll, 5000);
+    };
+    refreshLANSyncStatus(root);
+    window.setTimeout(poll, 5000);
 };
 
 /** 切换同步提供商等场景：刷新云空间相关区块并重置云目录列表 */
@@ -74,6 +115,10 @@ export const patchSyncConfig = (controlId: string, value: unknown) => {
             const enabled = Boolean(value) as Config.ISync["enabled"];
             fetchPost("/api/sync/setSyncEnable", {enabled}, () => {
                 window.siyuan.config.sync.enabled = enabled;
+                if (syncTabElement) {
+                    refreshLANSyncConfigItemVisibility(syncTabElement);
+                    refreshLANSyncStatus(syncTabElement);
+                }
                 processSync();
             });
             break;
@@ -108,6 +153,19 @@ export const patchSyncConfig = (controlId: string, value: unknown) => {
             fetchPost("/api/sync/setSyncPerception", {enabled: perception}, () => {
                 window.siyuan.config.sync.perception = perception;
                 processSync();
+            });
+            break;
+        }
+        case "sync.lan.enabled": {
+            const enabled = Boolean(value) as Config.ISyncLAN["enabled"];
+            fetchPost("/api/sync/setSyncLAN", {
+                enabled,
+                maxConcurrentReqs: window.siyuan.config.sync.lan.maxConcurrentReqs,
+            }, () => {
+                window.siyuan.config.sync.lan.enabled = enabled;
+                if (syncTabElement) {
+                    refreshLANSyncStatus(syncTabElement);
+                }
             });
             break;
         }

@@ -1,0 +1,719 @@
+{
+	"ID": "20260804171001-semnt01",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804171001-semnt01",
+		"title": "语义搜索",
+		"type": "doc",
+		"updated": "20260809232000"
+	},
+	"Children": [
+		{
+			"ID": "20260804170124-1802wd4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170124-1802wd4",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260804170125-lqsz38a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170125-lqsz38a",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "语义搜索通过比较文本向量查找含义相近的内容。普通全文搜索依赖关键词是否出现，语义搜索则可以找到措辞不同但主题相关的笔记。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170126-k37rp2l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170126-k37rp2l",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "配置方式"
+				}
+			]
+		},
+		{
+			"ID": "20260804170127-mgcq0zk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170127-mgcq0zk",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "嵌入模型"
+				}
+			]
+		},
+		{
+			"ID": "20260804170128-545qc2n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170128-545qc2n",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "嵌入模型"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中启用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "语义搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，并配置 API 基础地址、API 密钥、模型、向量维度和超时时间。配置完成后可使用连接测试确认模型是否可用。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170129-7wv1ug4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170129-7wv1ug4",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "向量维度设为 0 时使用模型默认值。仅在目标模型支持自定义向量维度时填写其他值；修改模型或向量维度后需要重建嵌入索引。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170130-pgr9zbg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170130-pgr9zbg",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重排模型"
+				}
+			]
+		},
+		{
+			"ID": "20260804170131-cc0e92n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170131-cc0e92n",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重排模型为可选配置。启用后，系统会对向量召回的候选内容再次评分，以提高结果排序的准确性。候选数量越大，通常越准确，但延迟和费用也会增加。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170132-55xn41q",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170132-55xn41q",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20260804170133-c5bjsps",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170133-c5bjsps",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打开全文搜索，在搜索菜单的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索方式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "语义搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，然后使用自然语言描述要查找的内容。笔记本、路径和内容块类型等过滤条件仍然有效。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170134-q71hecf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170134-q71hecf",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "嵌入索引"
+				}
+			]
+		},
+		{
+			"ID": "20260804170135-kphot9m",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170135-kphot9m",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "启用嵌入模型后，思源会在后台为符合条件的内容块生成向量。新增或修改内容时，对应向量会自动更新。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170136-ilgamzi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170136-ilgamzi",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "查看索引进度"
+				}
+			]
+		},
+		{
+			"ID": "20260804170137-h4kqcpr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170137-h4kqcpr",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "嵌入模型"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可以查看已索引、待索引、失败、因长度忽略和因配置忽略的内容块数量。首次建立索引可能需要较长时间。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170138-m2u7g7r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170138-m2u7g7r",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重试失败的内容块"
+				}
+			]
+		},
+		{
+			"ID": "20260804170139-hue5uqg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170139-hue5uqg",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "索引进度中出现失败内容块时，先检查嵌入模型配置和网络连接，然后单击重试失败的内容块。该操作不会重新处理已经成功生成向量的内容块。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170140-2828v5b",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170140-2828v5b",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重建嵌入索引"
+				}
+			]
+		},
+		{
+			"ID": "20260804170141-qa0j5x6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170141-qa0j5x6",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更换嵌入模型、修改向量维度或调整忽略规则后，应单击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重建嵌入索引"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。重建会清空已有向量并在后台重新计算，期间语义搜索结果可能不完整。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170142-l7xz360",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170142-l7xz360",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略内容"
+				}
+			]
+		},
+		{
+			"ID": "20260804170143-o5grfyt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170143-o5grfyt",
+				"updated": "20260809160000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如需排除部分文档，可在文件系统上创建或编辑 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空间/data/.siyuan/embeddingignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文本文件。每行填写一个忽略路径，支持 gitignore 语法。例如："
+				}
+			]
+		},
+		{
+			"ID": "20260809160000-91dea66",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809160000-91dea66",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804170144-6kwmdt9",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170144-6kwmdt9",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170145-35w7o3k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170145-35w7o3k",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170146-7hq3e3m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170146-7hq3e3m",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：忽略指定笔记本下的指定文档"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170147-0cbqwe3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170147-0cbqwe3",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170148-u1zk2i2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170148-u1zk2i2",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：忽略指定笔记本下的所有文档"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804170149-mf52qpn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170149-mf52qpn",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "保存配置文件后需要重建嵌入索引。该文件只影响嵌入向量，内容仍会编入普通全文索引；如需完全排除普通全文索引，请参阅 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "忽略索引",
+					"TextMarkBlockRefID": "20240119205452-o8xp4ve",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170150-77qg5c8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170150-77qg5c8",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20260804170151-yffwizq",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170151-yffwizq",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"ID": "20260804170152-j5gv84d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170152-j5gv84d",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170153-vp39ip0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170153-vp39ip0",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "建立索引时会将文档文本发送给嵌入模型提供商，执行查询时也会发送查询文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170154-prrr2d9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170154-prrr2d9",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170155-c49m7ko",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170155-c49m7ko",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "调用嵌入模型和重排模型可能产生费用，建立大型工作空间的索引可能耗时较长"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170156-tykeg1h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170156-tykeg1h",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170157-jcvtwb0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170157-jcvtwb0",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密笔记本不支持语义搜索"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170158-v9o3v8k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170158-v9o3v8k",
+						"updated": "20260804205607"
+					},
+					"Children": [
+						{
+							"ID": "20260804170159-vrkpb5k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170159-vrkpb5k",
+								"updated": "20260804205607"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "UTF-8 编码后少于 7 个字节或超过 12000 个字节的内容块不会生成嵌入向量"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170200-ne0uth6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170200-ne0uth6",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170201-diqi6fs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170201-diqi6fs",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "重排模型调用失败时，结果会回退为按向量相似度排序"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

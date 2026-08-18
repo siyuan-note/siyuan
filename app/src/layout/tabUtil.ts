@@ -3,7 +3,7 @@ import {getInstanceById, newModelByInitData, saveLayout} from "./util";
 import {getAllModels, getAllTabs, getAllWnds} from "./getAll";
 import {hideAllElements, hideElements} from "../protyle/ui/hideElements";
 import {pdfResize} from "../asset/renderAssets";
-import {App} from "../index";
+import type {App} from "../index";
 import {Model} from "./Model";
 import {Editor} from "../editor";
 import {Asset} from "../asset";
@@ -15,7 +15,6 @@ import {Bookmark} from "./dock/Bookmark";
 import {Tag} from "./dock/Tag";
 import {Search} from "../search";
 import {Custom} from "./dock/Custom";
-import {newCardModel} from "../card/newCardTab";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {openSearch} from "../search/spread";
 import {openRecentDocs} from "../business/openRecentDocs";
@@ -76,7 +75,7 @@ export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
 
             if (isWindowMode) {
                 if (headerRect.right === centerRect.right) {
-                    (headerElement.lastElementChild as HTMLElement).style.marginRight = document.querySelector(".toolbar__window").clientWidth + "px";
+                    (headerElement.lastElementChild as HTMLElement).style.marginRight = document.querySelector(".toolbar__window").clientWidth - 4 + "px";
                 }
             } else {
                 if (headerRect.right < toolbarDragRect.right && headerRect.right === centerRect.right) {
@@ -194,6 +193,7 @@ export const switchTabByIndex = (index: number) => {
 
 let resizeTimeout: number;
 export const resizeTabs = (isSaveLayout = true) => {
+    hideAllElements(["gutter"]);
     clearTimeout(resizeTimeout);
     //  .layout .fn__flex-shrink {width .15s cubic-bezier(0, 0, .2, 1) 0ms} 时需要再次计算 padding
     // PDF 避免分屏多次调用后，页码跳转到1 https://github.com/siyuan-note/siyuan/issues/5646
@@ -380,6 +380,7 @@ export const copyTab = (app: App, tab: Tab) => {
                     tab: newTab,
                     blockId: tab.model.blockId,
                     rootId: tab.model.rootId,
+                    notebookId: tab.model.notebookId,
                     type: tab.model.type,
                 });
             } else if (tab.model instanceof Files) {
@@ -392,6 +393,7 @@ export const copyTab = (app: App, tab: Tab) => {
                     app,
                     tab: newTab,
                     blockId: tab.model.blockId,
+                    notebookId: tab.model.notebookId,
                     type: tab.model.type,
                     isPreview: tab.model.isPreview
                 });
@@ -401,6 +403,7 @@ export const copyTab = (app: App, tab: Tab) => {
                     tab: newTab,
                     blockId: tab.model.blockId,
                     rootId: tab.model.rootId,
+                    notebookId: tab.model.notebookId,
                     type: tab.model.type
                 });
             } else if (tab.model instanceof Bookmark) {
@@ -415,23 +418,11 @@ export const copyTab = (app: App, tab: Tab) => {
                 });
             } else if (tab.model instanceof Custom) {
                 const custom = tab.model as Custom;
-                if (custom.type === "siyuan-card") {
-                    model = newCardModel({
-                        app,
-                        tab: newTab,
-                        data: custom.data
-                    });
-                } else {
-                    app.plugins.find(item => {
-                        if (item.models[custom.type]) {
-                            model = item.models[custom.type]({
-                                tab: newTab,
-                                data: custom.data
-                            });
-                            return true;
-                        }
-                    });
-                }
+                model = newModelByInitData(app, newTab, {
+                    instance: "Custom",
+                    customModelType: custom.type,
+                    customModelData: custom.data,
+                });
             } else if (!tab.model && tab.headElement) {
                 const initData = JSON.parse(tab.headElement.getAttribute("data-initdata") || "{}");
                 if (initData) {
@@ -470,7 +461,7 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
     if (type === "closeOthers") {
         for (let index = 0; index < tab.parent.children.length; index++) {
             const item = tab.parent.children[index];
-            if (item.id !== tab.id && !item.headElement.classList.contains("item--pin")) {
+            if (item.id !== tab.id && item.headElement && !item.headElement.classList.contains("item--pin")) {
                 pushRootID(rootIDs, item);
                 item.parent.removeTab(item.id, true, false);
                 index--;
@@ -479,7 +470,7 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
     } else if (type === "closeAll") {
         for (let index = 0; index < tab.parent.children.length; index++) {
             const item = tab.parent.children[index];
-            if (!item.headElement.classList.contains("item--pin")) {
+            if (item.headElement && !item.headElement.classList.contains("item--pin")) {
                 pushRootID(rootIDs, item);
                 item.parent.removeTab(item.id, true);
                 index--;
@@ -487,8 +478,9 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
         }
     } else if (tabs.length > 0) {
         for (let index = 0; index < tabs.length; index++) {
-            if (!tabs[index].headElement.classList.contains("item--pin")) {
-                tabs[index].parent.removeTab(tabs[index].id);
+            const item = tabs[index];
+            if (item.headElement && !item.headElement.classList.contains("item--pin")) {
+                item.parent.removeTab(item.id);
             }
         }
     }
@@ -496,9 +488,15 @@ export const closeTabByType = (tab: Tab, type: "closeOthers" | "closeAll" | "oth
     if (rootIDs.length > 0) {
         fetchPost("/api/storage/batchUpdateRecentDocCloseTime", {rootIDs});
     }
-    if (tab.headElement.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {
+    if (tab.headElement?.parentElement && !tab.headElement.parentElement.querySelector(".item--focus")) {
         tab.parent.switchTab(tab.headElement, true);
-    } else if (tab.parent.children.length > 0) {
-        tab.parent.switchTab(tab.parent.children[tab.parent.children.length - 1].headElement, true);
+    } else {
+        for (let index = tab.parent.children.length - 1; index >= 0; index--) {
+            const item = tab.parent.children[index];
+            if (item.headElement) {
+                tab.parent.switchTab(item.headElement, true);
+                break;
+            }
+        }
     }
 };

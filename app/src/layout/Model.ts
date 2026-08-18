@@ -17,6 +17,10 @@ interface IConnectOptions {
 export class Model {
     public ws: WebSocket;
     public reqId: number;
+    private mainMessageQueue: {
+        data: string,
+        callback: (data: IWebSocketData) => void
+    }[] = [];
 
     public parent:
 
@@ -32,6 +36,21 @@ export class Model {
         app: App,
     }) {
         this.app = options.app;
+    }
+
+    private processWebSocketMessage(data: string, callback: (data: IWebSocketData) => void) {
+        callback.call(this, processMessage(JSON.parse(data)));
+    }
+
+    public flushMainMessages() {
+        const messages = this.mainMessageQueue.splice(0);
+        messages.forEach((message) => {
+            try {
+                this.processWebSocketMessage(message.data, message.callback);
+            } catch (error) {
+                console.error("Failed to process queued WebSocket message:", error);
+            }
+        });
     }
 
     public connect(options: IConnectOptions) {
@@ -54,11 +73,19 @@ export class Model {
             }
         };
         ws.onmessage = (event) => {
-            if (options.msgCallback &&
-                // 等待 config 加载完成才接受推送 https://github.com/siyuan-note/siyuan/issues/17508
-                window.siyuan.config) {
-                const data = processMessage(JSON.parse(event.data));
-                options.msgCallback.call(this, data);
+            if (!options.msgCallback) {
+                return;
+            }
+            if (options.type === "main" && !window.siyuan.isReady) {
+                this.mainMessageQueue.push({
+                    data: event.data,
+                    callback: options.msgCallback,
+                });
+                return;
+            }
+            // 非主 WebSocket 在界面初始化后创建，保留配置保护以避免异常连接提前处理消息。
+            if (window.siyuan.config) {
+                this.processWebSocketMessage(event.data, options.msgCallback);
             }
         };
         ws.onclose = (ev) => {
@@ -90,7 +117,9 @@ export class Model {
     }
 
     public send(cmd: string, param: Record<string, unknown>, process = false) {
-        if (!this.ws) { // Inbox 无 ws
+        if (!this.ws ||
+            this.ws.readyState === WebSocket.CLOSING ||
+            this.ws.readyState === WebSocket.CLOSED) { // Inbox 无 WebSocket，关闭中的连接不能继续发送
             return;
         }
         this.reqId = process ? 0 : Date.now();
@@ -106,5 +135,9 @@ export class Model {
             // 5：单个应用内所有会话广播
             // 6：非自我应用主会话广播
         }));
+    }
+
+    public destroy() {
+        // 子类按需释放模型持有的资源。
     }
 }

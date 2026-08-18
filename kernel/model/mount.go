@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,9 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -45,17 +47,27 @@ func GetBoxByName(name string) (ret *Box) {
 	return
 }
 
+func getOpenedBox(boxID string) (ret *Box, err error) {
+	if ret = Conf.Box(boxID); nil != ret {
+		return
+	}
+	if nil != Conf.GetBox(boxID) {
+		return nil, ErrBoxClosed
+	}
+	return nil, ErrBoxNotFound
+}
+
 func CreateBox(name string) (id string, err error) {
-	name = util.RemoveInvalid(name)
+	return createBox(name, true)
+}
+
+func createBox(name string, initializeBoxDoc bool) (id string, err error) {
+	name = normalizeBoxName(name)
 	if 512 < utf8.RuneCountInString(name) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		err = errors.New(Conf.Language(106))
 		return
 	}
-	if "" == name {
-		name = Conf.language(105)
-	}
-
 	FlushTxQueue()
 
 	createDocLock.Lock()
@@ -65,7 +77,9 @@ func CreateBox(name string) (id string, err error) {
 	for i, b := range boxes {
 		c := b.GetConf()
 		c.Sort = i + 1
-		b.SaveConf(c)
+		if err := b.SaveConf(c); err != nil {
+			logging.LogErrorf("save box conf [%s] failed: %s", b.ID, err)
+		}
 	}
 
 	id = ast.NewNodeID()
@@ -78,7 +92,19 @@ func CreateBox(name string) (id string, err error) {
 	box := &Box{ID: id, Name: name}
 	boxConf := box.GetConf()
 	boxConf.Name = name
-	box.SaveConf(boxConf)
+	if err := box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box conf [%s] failed: %s", id, err)
+	}
+	if initializeBoxDoc {
+		if _, err = ensureBoxDoc0(id); err != nil {
+			treenode.RemoveBlockTreesByBoxID(id)
+			sql.DeleteBoxQueue(id)
+			if removeErr := filelock.Remove(boxLocalPath); nil != removeErr {
+				logging.LogErrorf("remove box [%s] after initializing box document failed: %s", id, removeErr)
+			}
+			return "", err
+		}
+	}
 	IncSync()
 	logging.LogInfof("created box [%s]", id)
 	return
@@ -90,34 +116,81 @@ func RenameBox(boxID, name string) (err error) {
 		return errors.New(Conf.Language(0))
 	}
 
+	name = normalizeBoxName(name)
 	if 512 < utf8.RuneCountInString(name) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		err = errors.New(Conf.Language(106))
 		return
 	}
 
-	if "" == name {
-		name = Conf.language(105)
-	}
-
 	boxConf := box.GetConf()
 	boxConf.Name = name
 	box.Name = name
-	box.SaveConf(boxConf)
+	if err = box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
+		return
+	}
+	if err = renameBoxDoc(boxID, name); err != nil {
+		logging.LogErrorf("rename box document [box=%s] failed: %s", boxID, err)
+		return
+	}
 	IncSync()
 	logging.LogInfof("renamed box [%s] to [%s]", boxID, name)
 	return
 }
 
-var boxLock = sync.Map{}
+func normalizeBoxName(name string) string {
+	name = normalizeDocTitle(name)
+	if "" == name {
+		name = normalizeDocTitle(Conf.language(105))
+	}
+	return name
+}
+
+var (
+	boxLock = sync.Map{}
+	// mountedEncryptedBoxes 只记录当前进程完成挂载的加密笔记本，不能从同步配置恢复。
+	mountedEncryptedBoxes = sync.Map{}
+)
+
+func isEncryptedBoxMounted(boxID string) bool {
+	_, mounted := mountedEncryptedBoxes.Load(boxID)
+	return mounted
+}
+
+// removeBoxDir 重试删除刚完成读写的笔记本目录，避免 Windows 延迟释放句柄导致瞬时失败。
+func removeBoxDir(p string) (err error) {
+	for i := 0; i < 5; i++ {
+		if err = filelock.RemoveWithoutFatal(p); nil == err {
+			return
+		}
+		if i < 4 {
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+	return
+}
+
+func collectBoxDeletedAttributeViewBlocks(boxID string) (ret map[string]map[string]struct{}, err error) {
+	rootIDs := treenode.GetRootBlockIDsByBoxID(boxID)
+	if 1 > len(rootIDs) {
+		return map[string]map[string]struct{}{}, nil
+	}
+	boundAVIDs, err := sql.QueryBoundBlockAVIDsInBox(nil, rootIDs, boxID)
+	if nil != err {
+		return nil, err
+	}
+	return groupDeletedAttributeViewBlocks(boundAVIDs), nil
+}
 
 func RemoveBox(boxID string) (err error) {
-	if _, ok := boxLock.Load(boxID); ok {
-		err = fmt.Errorf(Conf.language(239))
+	if !ast.IsNodeIDPattern(boxID) {
+		return errors.New("invalid notebook ID")
+	}
+	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
+		err = errors.New(Conf.language(239))
 		return
 	}
-
-	boxLock.Store(boxID, true)
 	defer boxLock.Delete(boxID)
 
 	if util.IsReservedFilename(boxID) {
@@ -125,16 +198,40 @@ func RemoveBox(boxID string) (err error) {
 	}
 
 	FlushTxQueue()
+	sql.FlushQueue()
+	// 索引和笔记本目录删除后无法再读取 custom-avs，需提前收集；实际删除成功后再清理绑定行。
+	deletedAttrViewBlockIDs, err := collectBoxDeletedAttributeViewBlocks(boxID)
+	if nil != err {
+		return fmt.Errorf("query database-bound blocks in notebook [%s] failed: %w", boxID, err)
+	}
 	isUserGuide := IsUserGuide(boxID)
-	createDocLock.Lock()
-	defer createDocLock.Unlock()
-
 	localPath := filepath.Join(util.DataDir, boxID)
 	if !filelock.IsExist(localPath) {
+		forgetRuntimeNormalBox(boxID)
+		removeMasterPasswordMigrationBox(boxID)
 		return
 	}
 	if !gulu.File.IsDir(localPath) {
 		return fmt.Errorf("can not remove [%s] caused by it is not a dir", boxID)
+	}
+
+	// 删目录前固定加密状态，确保后续历史、资源和索引清理始终使用同一个安全边界。
+	isEncrypted := IsEncryptedBox(boxID)
+	if isEncrypted {
+		// 加密索引先持有生命周期租约再获取索引锁，因此删除也必须先结束生命周期，保持锁顺序一致。
+		unmount0(boxID)
+	}
+
+	databaseIndexDataLock.Lock()
+	defer databaseIndexDataLock.Unlock()
+	createDocLock.Lock()
+	defer createDocLock.Unlock()
+	if !isEncrypted {
+		unmount0(boxID)
+	}
+	ClearRichClipboardBox(boxID)
+	if !isEncrypted {
+		unindex(boxID)
 	}
 
 	if !isUserGuide {
@@ -144,6 +241,7 @@ func RemoveBox(boxID string) (err error) {
 			logging.LogErrorf("get history dir failed: %s", err)
 			return
 		}
+		// 删除前备份到历史目录（密文原样拷贝，加密笔记本的整个目录保持密文）
 		p := strings.TrimPrefix(localPath, util.DataDir)
 		historyPath := filepath.Join(historyDir, p)
 		if err = filelock.Copy(localPath, historyPath); err != nil {
@@ -151,13 +249,37 @@ func RemoveBox(boxID string) (err error) {
 			return
 		}
 
-		copyBoxAssetsToDataAssets(boxID)
+		// 加密笔记本的 assets 不提升到全局 data/assets，避免密文污染全局或被全局索引
+		if !isEncrypted {
+			copyBoxAssetsToDataAssets(boxID)
+		}
 	}
 
-	unmount0(boxID)
-	if err = filelock.Remove(localPath); err != nil {
+	// 加密笔记本删除前先清理导出临时目录并撤销托管下载注册表。
+	// 必须在 filelock.Remove 之前执行：若 box 目录删除失败导致提前 return，导出清理仍已完成，
+	// 避免明文产物在 IsEncryptedBox 返回 false 后被 fail-open 下载
+	if isEncrypted {
+		if rmErr := os.RemoveAll(filepath.Join(util.TempDir, "export", boxID)); rmErr != nil {
+			logging.LogWarnf("remove export/[%s] dir failed: %s", boxID, rmErr)
+		}
+		RevokeManagedEncryptedExportsForBox(boxID)
+	}
+
+	if err = removeBoxDir(localPath); err != nil {
 		return
 	}
+	// 目录删除成功后再清理，避免删除失败时提前移除数据库条目。
+	flushDeletedAttributeViewBlocks(deletedAttrViewBlockIDs)
+	// 加密笔记本删除时清理其独立加密 db 文件（含 WAL/SHM），避免残留
+	if isEncrypted {
+		sql.RemoveEncryptedDBFile(boxID)
+		treenode.RemoveEncryptedBlockTreeDBFile(boxID)
+		removeEncryptedBoxLifecycle(boxID)
+		forgetRuntimeEncryptedBox(boxID)
+	} else {
+		forgetRuntimeNormalBox(boxID)
+	}
+	removeMasterPasswordMigrationBox(boxID)
 
 	if isUserGuide {
 		if avFiles, readAvErr := getUserGuideAVJSONFiles(boxID); nil == readAvErr {
@@ -179,6 +301,10 @@ func RemoveBox(boxID string) (err error) {
 }
 
 func Unmount(boxID string) {
+	if !ast.IsNodeIDPattern(boxID) {
+		logging.LogWarnf("refuse to unmount notebook with invalid ID [%s]", boxID)
+		return
+	}
 	FlushTxQueue()
 
 	unmount0(boxID)
@@ -196,27 +322,66 @@ func Unmount(boxID string) {
 		"box": boxID,
 	}
 	util.PushEvent(evt)
+	if cmdName == "removeBox" {
+		TriggerOnboardingIfEmpty()
+	}
+}
+
+// clearDEKIfUnlockedEncryptedBox 清除已解锁但未挂载的加密笔记本的 DEK。
+// unmount0 在 box 未挂载（Conf.Box 返回 nil）时调用，覆盖 unlockBox 解锁后未 mount 即 lock 的场景：
+// 此时 DEK 仍在内存，若不清除，锁定后认证 API 仍可读取明文。
+func clearDEKIfUnlockedEncryptedBox(boxID string) {
+	if IsEncryptedBox(boxID) && IsBoxUnlocked(boxID) {
+		ClearDEK(boxID)
+	}
 }
 
 func unmount0(boxID string) {
 	box := Conf.Box(boxID)
 	if nil == box {
+		// 笔记本未挂载（Closed）。若它是已解锁的加密笔记本（DEK 在内存），
+		// 仍需 ClearDEK 清除残留密钥材料，否则锁定后认证 API 仍可读取明文。
+		clearDEKIfUnlockedEncryptedBox(boxID)
+		return
+	}
+
+	if IsEncryptedBox(box.ID) {
+		// 先关闭生命周期准入并等待在途操作，再保存配置和历史，避免锁定准备期间继续产生明文响应或新写入。
+		lockBoxWithPreparation(boxID, func() {
+			boxConf := box.GetConf()
+			boxConf.Closed = true
+			if err := box.SaveConf(boxConf); err != nil {
+				logging.LogErrorf("save box conf [%s] failed: %s", box.ID, err)
+			}
+			GenerateFileHistoryForBox(box)
+		})
 		return
 	}
 
 	boxConf := box.GetConf()
 	boxConf.Closed = true
-	box.SaveConf(boxConf)
+	if err := box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box conf [%s] failed: %s", box.ID, err)
+	}
 	box.Unindex()
 }
 
 func Mount(boxID string) (alreadyMount bool, err error) {
-	if _, ok := boxLock.Load(boxID); ok {
-		err = fmt.Errorf(Conf.language(239))
+	if !ast.IsNodeIDPattern(boxID) {
+		return false, errors.New("invalid notebook ID")
+	}
+	if IsEncryptedBox(boxID) {
+		releaseTransition := holdEncryptedBoxTransition(boxID)
+		defer releaseTransition()
+	}
+	return mountBox(boxID)
+}
+
+func mountBox(boxID string) (alreadyMount bool, err error) {
+	if _, loaded := boxLock.LoadOrStore(boxID, true); loaded {
+		err = errors.New(Conf.language(239))
 		return
 	}
-
-	boxLock.Store(boxID, true)
 	defer boxLock.Delete(boxID)
 
 	FlushTxQueue()
@@ -225,6 +390,9 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	localPath := filepath.Join(util.DataDir, boxID)
 	var reMountGuide bool
 	if isUserGuide {
+		databaseIndexDataLock.Lock()
+		defer databaseIndexDataLock.Unlock()
+
 		// 重新挂载帮助文档
 
 		guideBox := Conf.Box(boxID)
@@ -232,8 +400,9 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			unmount0(guideBox.ID)
 			reMountGuide = true
 		}
+		unindex(boxID)
 
-		if err = filelock.Remove(localPath); err != nil {
+		if err = removeBoxDir(localPath); err != nil {
 			return
 		}
 
@@ -268,11 +437,6 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			box.SaveConf(boxConf)
 		}
 
-		if Conf.OpenHelp {
-			Conf.OpenHelp = false
-			Conf.Save()
-		}
-
 		task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushErrMsg, Conf.Language(244), 7000)
 		go func() {
 			// 每次打开帮助文档时自动检查版本更新并提醒 https://github.com/siyuan-note/siyuan/issues/5057
@@ -291,14 +455,31 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 		}
 	}
 
+	// 加密笔记本必须先通过 UnlockBox 解出 DEK，否则拒绝挂载。Mount 本身不接收密码，
+	// 前端流程为：先调 /api/notebook/unlockBox 解锁，再调 openNotebook 挂载。
+	// 使用 IsEncryptedBox 统一判定（含 backup fallback，不依赖 conf 完整性）。
+	if IsEncryptedBox(boxID) && !IsBoxUnlocked(boxID) {
+		return false, errors.New("encrypted notebook locked, please unlock it first")
+	}
+
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	boxConf.Closed = false
-	box.SaveConf(boxConf)
+	if err := box.SaveConf(boxConf); err != nil {
+		logging.LogErrorf("save box conf [%s] failed: %s", boxID, err)
+	}
+	if boxConf.Encrypted {
+		markRuntimeEncryptedBox(boxID)
+		mountedEncryptedBoxes.Store(boxID, true)
+	}
+	if _, ensureErr := EnsureBoxDoc(boxID); nil != ensureErr {
+		logging.LogErrorf("ensure box document [%s] failed: %s", boxID, ensureErr)
+	}
 
 	// 缓存根一级的文档树展开
 	files, _, _ := ListDocTree(box.ID, "/", util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
-	if 0 < len(files) {
+	box = Conf.Box(boxID)
+	if 0 < len(files) || (nil != box && box.Exist(boxDocPath(box.ID))) {
 		box.Index()
 	}
 

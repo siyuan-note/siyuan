@@ -1,4 +1,9 @@
 @media (max-width: 750px) {
+  #encryptedNotebookEnabledActions {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
   .config-about__motto {
     display: none;
   }
@@ -8,17 +13,17 @@
       & > .config__side {
         width: auto;
 
+        .config__tab-title {
+          margin-bottom: 0;
+        }
+
         .b3-list-item__text,
-        .b3-form__icon {
+        .config__tab-head .b3-text-field {
           display: none;
         }
 
-        .b3-list-item__graphic {
-          padding-right: 5px;
-        }
-
-        .config__tab-title {
-          height: 25px;
+        .b3-list-item {
+          width: 24px;
         }
       }
     }
@@ -33,8 +38,7 @@
       & > .b3-button,
       & > .b3-tooltips,
       & > .b3-form__icona,
-      &-line,
-      .searchByKeyLabel {
+      &-line {
         width: 100%;
         margin-top: 8px;
       }
@@ -129,6 +133,11 @@
         padding-bottom: 8px;
         width: auto !important;
         border-bottom: 1px solid var(--b3-border-color);
+
+        &.history__side--diff {
+          overflow: hidden;
+          padding-bottom: 0;
+        }
       }
     }
   }

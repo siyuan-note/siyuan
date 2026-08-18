@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@ func I18nTerm(language, key string) (ret string) {
 	if err != nil {
 		return
 	}
-	var m map[string]interface{}
+	var m map[string]any
 	if err = gulu.JSON.UnmarshalJSON(data, &m); err != nil {
 		return
 	}

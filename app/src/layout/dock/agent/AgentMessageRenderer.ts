@@ -1,4 +1,5 @@
 import {escapeHtml} from "../../../util/escape";
+import {processSiYuanUri} from "../../../util/uri";
 import {highlightRender} from "../../../protyle/render/highlightRender";
 import {mathRender} from "../../../protyle/render/mathRender";
 import {mermaidRender} from "../../../protyle/render/mermaidRender";
@@ -10,18 +11,28 @@ import {abcRender} from "../../../protyle/render/abcRender";
 import {plantumlRender} from "../../../protyle/render/plantumlRender";
 import {htmlRender} from "../../../protyle/render/htmlRender";
 import {showMessage} from "../../../dialog/message";
+import {openLink} from "../../../editor/openLink";
+import {previewImages} from "../../../protyle/preview/image";
+import {getDiagramBlock, previewDiagram} from "../../../protyle/preview/diagram";
+import {removeCompressURL} from "../../../util/image";
+import {writeClipboardData} from "../../../protyle/util/compatibility";
+/// #if !MOBILE
+import {openGlobalSearch} from "../../../search/util";
+/// #else
+import {popSearch} from "../../../mobile/menu/search";
+/// #endif
+
 import type {App} from "../../../index";
-import {processSiYuanUri} from "../../../editor/openLink";
 
 export const renderTodoList = (result: string): string => {
     const L = window.siyuan.languages;
     const lines = result.split("\n");
     let html = '<div class="agent-chat__tool-card agent-chat__tool-card--todo">' +
-    '<div class="agent-chat__todo-header">' +
+        '<div class="agent-chat__todo-header">' +
         '<svg class="agent-chat__tool-icon"><use xlink:href="#iconList"></use></svg>' +
         '<span class="agent-chat__tool-title">' + (L.agentTodoList || "Todo List") + "</span>" +
-    "</div>" +
-    '<div class="agent-chat__todo-items">';
+        "</div>" +
+        '<div class="agent-chat__todo-items">';
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i];
         if (line.startsWith("- [x]")) {
@@ -45,20 +56,20 @@ export const renderWelcomeHTML = (hasModel = true): string => {
         return '<div class="agent-welcome">' +
             '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
             '<div class="agent-welcome__no-model">' +
-                '<div class="agent-welcome__no-model-title">' + (L.agentNoModel || "No model configured") + "</div>" +
-                '<div class="agent-welcome__no-model-tip">' + (L.agentNoModelTip || "Please configure a provider and model in Settings - AI first.") + "</div>" +
-                '<button class="b3-button agent-welcome__go-setting" data-type="go-ai-setting">' + (L.agentGoToSetting || "Go to Settings") + "</button>" +
+            '<div class="agent-welcome__no-model-title">' + (L.agentNoModel || "No model configured") + "</div>" +
+            '<div class="agent-welcome__no-model-tip">' + L.agentNoModelTip + "</div>" +
+            '<button class="b3-button agent-welcome__go-setting" data-type="go-ai-setting">' + (L.agentGoToSetting || "Go to Settings") + "</button>" +
             "</div>" +
-        "</div>";
+            "</div>";
     }
     return '<div class="agent-welcome">' +
         '<div class="agent-welcome__greeting">' + (L.agentWelcomeGreeting || "Hello, I am SiYuan Agent") + "</div>" +
         '<div class="agent-welcome__examples">' +
-            '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + "</div>" +
-            '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + "</div>" +
-            '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample3 || "") + '">' + (L.agentExample3 || "") + "</div>" +
+        '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample1 || "") + '">' + (L.agentExample1 || "") + "</div>" +
+        '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample2 || "") + '">' + (L.agentExample2 || "") + "</div>" +
+        '<div class="agent-welcome__example" data-text="' + escapeHtml(L.agentExample3 || "") + '">' + (L.agentExample3 || "") + "</div>" +
         "</div>" +
-    "</div>";
+        "</div>";
 };
 
 export const renderQuestionCardHTML = (rawQuestions: Array<Record<string, unknown>>, questionID: string): string => {
@@ -105,22 +116,26 @@ export const renderQuestionCardHTML = (rawQuestions: Array<Record<string, unknow
     html += '<div class="agent-chat__question-submit">' +
         '<button class="b3-button b3-button--text agent-chat__question-submit-btn">' +
         (L.agentQuestionSubmit || "Submit") + "</button>" +
-    "</div></div>";
+        "</div></div>";
     return html;
 };
 
 export const renderRetryCardHTML = (attempt: number, maxRetries: number): string => {
+    const text = (window.siyuan.languages.agentRetrying || "Retrying (${attempt}/${maxRetries})...")
+        .replace("${attempt}", attempt.toString())
+        .replace("${maxRetries}", maxRetries.toString());
     return '<div class="agent-chat__thinking-card">' +
-    '<div class="agent-chat__thinking-header">' +
-        '<span class="agent-chat__thinking-text">' + escapeHtml("Retrying (" + attempt + "/" + maxRetries + ")...") + "</span>" +
-    "</div>" +
-"</div>";
+        '<div class="agent-chat__thinking-header">' +
+        '<span class="agent-chat__thinking-text">' + escapeHtml(text) + "</span>" +
+        "</div>" +
+        "</div>";
 };
 
-export const renderToolsLineHTML = (newTools: Array<{name: string}>): string => {
+export const renderToolsLineHTML = (newTools: Array<{ name: string; running?: boolean }>): string => {
     let detailLines = "<div class=\"agent-chat__thinking-tools-line\"><span class=\"agent-chat__thinking-summary\">Tool calls:</span>";
     for (let i = 0; i < newTools.length; i++) {
-        detailLines += '<span class="agent-chat__thinking-tool">' + escapeHtml(newTools[i].name) + "</span>";
+        const runningClass = newTools[i].running ? " agent-chat__thinking-tool--running" : "";
+        detailLines += '<span class="agent-chat__thinking-tool' + runningClass + '">' + escapeHtml(newTools[i].name) + "</span>";
     }
     detailLines += "</div>";
     return detailLines;
@@ -129,7 +144,12 @@ export const renderToolsLineHTML = (newTools: Array<{name: string}>): string => 
 // createThinkingCardElement 用于流式过程中的单个思考卡片。
 // 工具调用只接收名字列表（arguments/result 在 assistant entry 存一份）；
 // 标题文本由调用方传入（已通过 i18n 从 duration 生成）。
-export const createThinkingCardElement = (step: {reasoning: string; text: string; toolNames?: string[]; reasoningContent: string}): HTMLElement => {
+export const createThinkingCardElement = (step: {
+    reasoning: string;
+    text: string;
+    toolNames?: string[];
+    reasoningContent: string
+}): HTMLElement => {
     let detail = "";
     if (step.toolNames && step.toolNames.length > 0) {
         detail += '<div class="agent-chat__thinking-tools-line"><span class="agent-chat__thinking-summary">Tool calls:</span>';
@@ -145,26 +165,36 @@ export const createThinkingCardElement = (step: {reasoning: string; text: string
     const el = document.createElement("div");
     el.className = "agent-chat__msg agent-chat__msg--thinking agent-chat__msg--thinking-done";
     el.innerHTML = '<div class="agent-chat__thinking-card">' +
-    '<div class="agent-chat__thinking-header">' +
+        '<div class="agent-chat__thinking-header">' +
         '<span class="agent-chat__thinking-arrow">' +
-            '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
-            '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
+        '<svg class="agent-chat__thinking-arrow--expand"><use xlink:href="#iconExpand"></use></svg>' +
+        '<svg class="agent-chat__thinking-arrow--contract fn__none"><use xlink:href="#iconContract"></use></svg>' +
         "</span>" +
         '<span class="agent-chat__thinking-text">' + escapeHtml(step.text) + "</span>" +
-    "</div>" +
-    '<div class="agent-chat__thinking-body">' +
+        "</div>" +
+        '<div class="agent-chat__thinking-body">' +
         detail +
-    "</div>" +
-"</div>";
+        "</div>" +
+        "</div>";
     return el;
 };
 
-export const bindThinkingCardToggle = (el: HTMLElement): void => {
+export const bindThinkingCardToggle = (el: HTMLElement, onLayoutChange?: () => void): void => {
     const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
     const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
     const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
     const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
-    if (!header || !body || !expandIcon || !contractIcon) { return; }
+    const latestElement = el.querySelector(".agent-chat__thinking-latest") as HTMLElement | null;
+    if (!header || !body || !expandIcon || !contractIcon) {
+        return;
+    }
+    if (onLayoutChange) {
+        body.addEventListener("transitionend", (event) => {
+            if (event.target === body && event.propertyName === "max-height") {
+                onLayoutChange();
+            }
+        });
+    }
     header.addEventListener("click", () => {
         el.setAttribute("data-user-interacted", "true");
         const isExpanded = body.classList.contains("agent-chat__thinking-body--expanded");
@@ -188,15 +218,22 @@ export const bindThinkingCardToggle = (el: HTMLElement): void => {
                 body.classList.remove("agent-chat__thinking-body--expanded");
                 expandIcon.classList.remove("fn__none");
                 contractIcon.classList.add("fn__none");
+                latestElement?.classList.remove("fn__none");
+                if (latestElement) {
+                    latestElement.scrollLeft = latestElement.scrollWidth;
+                }
             } else if (isPreview) {
                 body.classList.remove("agent-chat__thinking-body--preview");
                 body.classList.add("agent-chat__thinking-body--expanded");
                 expandIcon.classList.add("fn__none");
                 contractIcon.classList.remove("fn__none");
+                latestElement?.classList.add("fn__none");
             } else {
                 body.classList.add("agent-chat__thinking-body--preview");
+                latestElement?.classList.add("fn__none");
             }
         }
+        onLayoutChange?.();
     });
 };
 
@@ -220,6 +257,18 @@ export const addCopyButtons = (container: HTMLElement): void => {
     });
 };
 
+export const copyAgentText = async (text: string) => {
+    const result = await writeClipboardData({textPlain: text});
+    if (result.error) {
+        console.log("Write Agent clipboard error:", result.error);
+    }
+    if (result.status === "failed") {
+        showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+        return;
+    }
+    showMessage(window.siyuan.languages.copied, 2000);
+};
+
 // 构建单个复制按钮，getText 返回要复制的文本。
 const createCopyButton = (getText: () => string): HTMLElement => {
     const btn = document.createElement("span");
@@ -229,19 +278,16 @@ const createCopyButton = (getText: () => string): HTMLElement => {
     btn.setAttribute("data-position", "4north");
     btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const text = getText();
-        navigator.clipboard.writeText(text).then(() => {
-            showMessage(window.siyuan.languages.copied, 2000);
-        }).catch(() => {
-            showMessage(window.siyuan.languages.copied, 2000);
-        });
+        void copyAgentText(getText());
     });
     return btn;
 };
 
-export const postRender = (container: HTMLElement, app?: App): void => {
+export const postRender = (container: HTMLElement, app?: App, onNavigate?: () => void): void => {
     container.querySelectorAll(".language-math").forEach((el) => {
-        if (el.hasAttribute("data-subtype")) { return; }
+        if (el.hasAttribute("data-subtype")) {
+            return;
+        }
         const content = el.textContent || "";
         const preParent = el.closest("pre");
         if (preParent) {
@@ -265,12 +311,27 @@ export const postRender = (container: HTMLElement, app?: App): void => {
             code.parentElement?.setAttribute("data-language", match[1]);
         }
     });
-    // Agent 内容由 ProtylePreview 生成，结构与官方 preview 一致，复用 highlightRender 渲染高亮。
-    // 容器自身可能是 b3-typography（流式更新），也可能外层包裹含 b3-typography 的后代，两种情况都需覆盖。
-    const typographyElements = container.classList.contains("b3-typography")
+    // Assistant 使用 b3-typography，用户消息使用只读 protyle-wysiwyg，两种结构都复用 highlightRender。
+    const contentSelector = ".b3-typography, .protyle-wysiwyg";
+    const contentElements = container.matches(contentSelector)
         ? [container as HTMLElement]
-        : Array.from(container.querySelectorAll<HTMLElement>(".b3-typography"));
-    typographyElements.forEach((item) => highlightRender(item));
+        : Array.from(container.querySelectorAll<HTMLElement>(contentSelector));
+    contentElements.forEach((item) => {
+        if (item.classList.contains("b3-typography")) {
+            item.querySelectorAll<HTMLTableElement>("table").forEach((table) => {
+                if (table.parentElement?.parentElement?.classList.contains("table")) {
+                    return;
+                }
+                const tableElement = document.createElement("div");
+                tableElement.className = "table";
+                const scrollElement = document.createElement("div");
+                table.before(tableElement);
+                tableElement.appendChild(scrollElement);
+                scrollElement.appendChild(table);
+            });
+        }
+        highlightRender(item);
+    });
     mathRender(container);
     mermaidRender(container);
     flowchartRender(container);
@@ -281,19 +342,98 @@ export const postRender = (container: HTMLElement, app?: App): void => {
     plantumlRender(container);
     htmlRender(container);
     addCopyButtons(container);
+    if (container.dataset.agentPreviewBound !== "true") {
+        container.dataset.agentPreviewBound = "true";
+        container.addEventListener("dblclick", (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            const img = target.closest("img:not(.emoji)") as HTMLImageElement;
+            if (!img || !container.contains(img)) {
+                const diagramElement = getDiagramBlock(target.closest("[data-subtype]") as HTMLElement);
+                if (diagramElement && container.contains(diagramElement)) {
+                    previewDiagram(diagramElement);
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                return;
+            }
+            const srcList = Array.from(container.querySelectorAll<HTMLImageElement>("img:not(.emoji)"))
+                .map((item) => removeCompressURL(item.dataset.src || item.getAttribute("src") || ""));
+            const currentSrc = removeCompressURL(img.dataset.src || img.getAttribute("src") || "");
+            if (currentSrc) {
+                previewImages(srcList, currentSrc);
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
+    }
     if (!app) {
         return;
     }
-    // MarkdownStr 渲染出的 siyuan:// 块链接只是普通 <a href>，需补全 data-type/data-href
-    // 才能接入全局 popover 浮窗系统；dock 内无 protyle 点击链路，需自行绑定点击打开块。
-    container.querySelectorAll<HTMLAnchorElement>('a[href^="siyuan://"]').forEach((a) => {
-        const href = a.getAttribute("href") || "";
-        a.setAttribute("data-type", "a");
-        a.setAttribute("data-href", href);
-        a.addEventListener("click", (event: MouseEvent) => {
+    container.querySelectorAll<HTMLAnchorElement>('a[href^="siyuan://"]').forEach((link) => {
+        const href = link.getAttribute("href") || "";
+        link.setAttribute("data-type", "a");
+        link.setAttribute("data-href", href);
+    });
+    if (container.dataset.agentLinkBound === "true") {
+        return;
+    }
+    container.dataset.agentLinkBound = "true";
+    // dock 内没有 Protyle WYSIWYG 的点击分派，使用事件委托覆盖流式及嵌入块异步插入的内容。
+    container.addEventListener("click", (event: MouseEvent) => {
+        if (event.defaultPrevented) {
+            return;
+        }
+        const target = event.target as HTMLElement;
+        const ref = target.closest('[data-type~="block-ref"]') as HTMLElement;
+        const refID = ref?.dataset.id;
+        if (refID && container.contains(ref)) {
             event.preventDefault();
             event.stopPropagation();
-            void processSiYuanUri(app, href);
-        });
+            onNavigate?.();
+            void processSiYuanUri(app, "siyuan://blocks/" + refID);
+            return;
+        }
+        const fileRef = target.closest('[data-type~="file-annotation-ref"][data-id]') as HTMLElement;
+        const fileID = fileRef?.dataset.id;
+        if (fileID && container.contains(fileRef)) {
+            event.preventDefault();
+            event.stopPropagation();
+            onNavigate?.();
+            openLink(app, fileID, event, event.ctrlKey || event.metaKey);
+            return;
+        }
+        const tag = target.closest('[data-type~="tag"]') as HTMLElement;
+        if (tag && container.contains(tag)) {
+            event.preventDefault();
+            event.stopPropagation();
+            onNavigate?.();
+            /// #if !MOBILE
+            openGlobalSearch(app, `#${tag.textContent}#`, true, {method: 0});
+            /// #else
+            popSearch(app, {
+                hasReplace: false,
+                method: 0,
+                hPath: "",
+                idPath: [],
+                k: `#${tag.textContent}#`,
+                r: "",
+                page: 1,
+            });
+            /// #endif
+            return;
+        }
+        const link = target.closest('[data-type~="a"][data-href], a[href]') as HTMLElement;
+        if (!link || !container.contains(link)) {
+            return;
+        }
+        const href = link.getAttribute("data-href") || link.getAttribute("href") || "";
+        if (href) {
+            event.preventDefault();
+            event.stopPropagation();
+            onNavigate?.();
+            if (!processSiYuanUri(app, href)) {
+                openLink(app, href, event, event.ctrlKey || event.metaKey);
+            }
+        }
     });
 };

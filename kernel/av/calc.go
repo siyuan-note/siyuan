@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -672,7 +672,9 @@ func calcFieldDate(collection Collection, field Field, fieldIndex int) {
 			}
 		}
 		if 0 != earliest {
-			calc.Result = &Value{Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}
+			date := NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)
+			date.FormatDate(field.GetDateFormat())
+			calc.Result = &Value{Date: date}
 		}
 	case CalcOperatorLatest:
 		latest := int64(0)
@@ -688,7 +690,9 @@ func calcFieldDate(collection Collection, field Field, fieldIndex int) {
 			}
 		}
 		if 0 != latest {
-			calc.Result = &Value{Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}
+			date := NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)
+			date.FormatDate(field.GetDateFormat())
+			calc.Result = &Value{Date: date}
 		}
 	case CalcOperatorRange:
 		earliest := int64(0)
@@ -1419,7 +1423,9 @@ func calcFieldCreated(collection Collection, field Field, fieldIndex int, attrVi
 				isNotTime = !key.Created.IncludeTime
 			}
 
-			calc.Result = &Value{Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone, isNotTime)}
+			created := NewFormattedValueCreated(earliest, 0, CreatedFormatNone, isNotTime)
+			created.FormatDate(field.GetDateFormat(), isNotTime)
+			calc.Result = &Value{Created: created}
 		}
 	case CalcOperatorLatest:
 		latest := int64(0)
@@ -1438,7 +1444,9 @@ func calcFieldCreated(collection Collection, field Field, fieldIndex int, attrVi
 				isNotTime = !key.Created.IncludeTime
 			}
 
-			calc.Result = &Value{Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone, isNotTime)}
+			created := NewFormattedValueCreated(latest, 0, CreatedFormatNone, isNotTime)
+			created.FormatDate(field.GetDateFormat(), isNotTime)
+			calc.Result = &Value{Created: created}
 		}
 	case CalcOperatorRange:
 		earliest := int64(0)
@@ -1567,7 +1575,9 @@ func calcFieldUpdated(collection Collection, field Field, fieldIndex int, attrVi
 				isNotTime = !key.Updated.IncludeTime
 			}
 
-			calc.Result = &Value{Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone, isNotTime)}
+			updated := NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone, isNotTime)
+			updated.FormatDate(field.GetDateFormat(), isNotTime)
+			calc.Result = &Value{Updated: updated}
 		}
 	case CalcOperatorLatest:
 		latest := int64(0)
@@ -1586,7 +1596,9 @@ func calcFieldUpdated(collection Collection, field Field, fieldIndex int, attrVi
 				isNotTime = !key.Updated.IncludeTime
 			}
 
-			calc.Result = &Value{Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone, isNotTime)}
+			updated := NewFormattedValueUpdated(latest, 0, UpdatedFormatNone, isNotTime)
+			updated.FormatDate(field.GetDateFormat(), isNotTime)
+			calc.Result = &Value{Updated: updated}
 		}
 	case CalcOperatorRange:
 		earliest := int64(0)

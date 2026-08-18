@@ -5,7 +5,7 @@ import {matchHotKey} from "../../protyle/util/hotKey";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {newFile} from "../../util/newFile";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {Dialog} from "../../dialog";
 import {getAllModels} from "../../layout/getAll";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
@@ -17,6 +17,7 @@ import {writeText} from "../../protyle/util/compatibility";
 import {getUnRefList} from "../../search/unRef";
 import {toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "../../search/toggleHistory";
 import {Protyle} from "../../protyle";
+import {getKeysByLiElement} from "../../search/menu";
 
 export const searchKeydown = (app: App, event: KeyboardEvent) => {
     if (getSelection().rangeCount === 0) {
@@ -107,6 +108,9 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                     }
                 },
                 openPosition: "right",
+                nodeType: currentList.dataset.nodeType,
+                method: config.method,
+                keywords: getKeysByLiElement(currentList),
             });
             return true;
         }
@@ -226,6 +230,9 @@ export const searchKeydown = (app: App, event: KeyboardEvent) => {
                             dialog.destroy({focus: "false"});
                         }
                     },
+                    nodeType: currentList.dataset.nodeType,
+                    method: config.method,
+                    keywords: getKeysByLiElement(currentList),
                 });
             }
         } else {

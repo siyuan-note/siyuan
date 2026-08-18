@@ -1,6 +1,7 @@
 import {Constants} from "../../constants";
 import {addScript} from "../util/addScript";
 import {fetchPost} from "../../util/fetch";
+import {isBrowserRenderableImagePath} from "../../util/imageURL";
 
 export const previewImages = (srcList: string[], currentSrc?: string, onHidden?: () => void) => {
     addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.11.7`, "protyleViewerScript").then(() => {
@@ -67,6 +68,6 @@ export const previewAttrViewImages = (currentSrc: string, avID: string, viewID: 
         viewID,
         query,
     }, (response) => {
-        previewImages(response.data, currentSrc);
+        previewImages(response.data.filter((item: string) => isBrowserRenderableImagePath(item)), currentSrc);
     });
 };

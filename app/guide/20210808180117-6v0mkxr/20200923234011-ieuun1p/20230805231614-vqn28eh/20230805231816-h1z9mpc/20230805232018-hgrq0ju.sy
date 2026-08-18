@@ -6,7 +6,7 @@
 		"id": "20230805232018-hgrq0ju",
 		"title": "Connect with third-party cloud storage",
 		"type": "doc",
-		"updated": "20260614133336"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -333,7 +333,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614133312-7558xic",
-				"updated": "20260614133336"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -347,12 +347,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614133312-64q99zl",
-				"updated": "20260614133312"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Select and configure in [Settings - Account & Sync - Cloud storage service provider]. Currently supported:"
+					"Data": "Select and configure in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Account & Sync"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Sync"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Cloud storage service provider"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​. Currently supported:"
 				}
 			]
 		},

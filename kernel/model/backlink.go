@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"path"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -44,7 +43,16 @@ func RefreshBacklink(id string) {
 }
 
 func refreshRefsByDefID(defID string) {
+	// 全局查 + 加密笔记本fallback
 	refs := sql.QueryRefsByDefID(defID, true)
+	if len(refs) == 0 {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encRefs := sql.QueryRefsByDefIDInBox(defID, true, encBoxID); len(encRefs) > 0 {
+				refs = encRefs
+				break
+			}
+		}
+	}
 	var rootIDs []string
 	for _, ref := range refs {
 		rootIDs = append(rootIDs, ref.RootID)
@@ -61,7 +69,77 @@ func refreshRefsByDefID(defID string) {
 	}
 }
 
+type refTreeLocation struct {
+	RootID string
+	BoxID  string
+}
+
+func refreshCrossTreeMoveRefs(refreshes []crossTreeMoveRefRefresh) {
+	if 1 > len(refreshes) {
+		return
+	}
+
+	// 先确保块索引已经反映移动后的文档归属，再按稳定的定义块 ID 重建引用方索引。
+	sql.FlushQueue()
+	movedDefIDsByBox := map[string][]string{}
+	rootIDs := []string{}
+	rootIDSet := map[string]struct{}{}
+	for _, refresh := range refreshes {
+		movedDefIDsByBox[refresh.BoxID] = append(movedDefIDsByBox[refresh.BoxID], refresh.MovedBlockIDs...)
+		for _, rootID := range []string{refresh.OldRootID, refresh.NewRootID} {
+			if "" == rootID {
+				continue
+			}
+			if _, ok := rootIDSet[rootID]; ok {
+				continue
+			}
+			rootIDSet[rootID] = struct{}{}
+			rootIDs = append(rootIDs, rootID)
+		}
+	}
+
+	refTreeLocations := []refTreeLocation{}
+	refTreeLocationSet := map[string]struct{}{}
+	affectedDefIDs := []string{}
+	affectedDefIDSet := map[string]struct{}{}
+	for boxID, movedDefIDs := range movedDefIDsByBox {
+		refs := sql.QueryRefsByDefIDsInBox(movedDefIDs, boxID)
+		for _, ref := range refs {
+			if _, ok := affectedDefIDSet[ref.DefBlockID]; !ok {
+				affectedDefIDSet[ref.DefBlockID] = struct{}{}
+				affectedDefIDs = append(affectedDefIDs, ref.DefBlockID)
+			}
+			locationKey := ref.Box + "\x00" + ref.RootID
+			if _, ok := refTreeLocationSet[locationKey]; ok {
+				continue
+			}
+			refTreeLocationSet[locationKey] = struct{}{}
+			refTreeLocations = append(refTreeLocations, refTreeLocation{RootID: ref.RootID, BoxID: ref.Box})
+		}
+	}
+
+	for _, location := range refTreeLocations {
+		refTree, err := loadTreeByBlockIDInBox(location.RootID, location.BoxID)
+		if nil != err {
+			logging.LogWarnf("load moved block ref tree [%s] in box [%s] failed: %s",
+				location.RootID, location.BoxID, err)
+			continue
+		}
+		sql.UpdateRefsTreeQueue(refTree)
+	}
+	sql.FlushQueue()
+
+	for _, rootID := range rootIDs {
+		refreshRefCount(rootID)
+	}
+	for _, defID := range affectedDefIDs {
+		refreshRefCount(defID)
+	}
+	ResetVirtualBlockRefCache()
+}
+
 type Backlink struct {
+	ID         string       `json:"id"`
 	DOM        string       `json:"dom"`
 	BlockPaths []*BlockPath `json:"blockPaths"`
 	Expand     bool         `json:"expand"`
@@ -142,11 +220,29 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 	ret = []*Backlink{}
 	sqlBlock := sql.GetBlock(defID)
 	if nil == sqlBlock {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encBlock := sql.GetBlockInBox(defID, encBoxID); nil != encBlock {
+				sqlBlock = encBlock
+				break
+			}
+		}
+	}
+	if nil == sqlBlock {
 		return
 	}
 	rootID := sqlBlock.RootID
 
 	tmpRefs := sql.QueryRefsByDefID(defID, containChildren)
+	var encBoxIDUsed string
+	if len(tmpRefs) == 0 {
+		for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+			if encRefs := sql.QueryRefsByDefIDInBox(defID, containChildren, encBoxID); len(encRefs) > 0 {
+				tmpRefs = encRefs
+				encBoxIDUsed = encBoxID
+				break
+			}
+		}
+	}
 	var refs []*sql.Ref
 	for _, ref := range tmpRefs {
 		if ref.RootID == refTreeID {
@@ -155,7 +251,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 	}
 	refs = removeDuplicatedRefs(refs)
 
-	linkRefs, _, _, originalRefBlockIDs := buildLinkRefs(rootID, refs, keywords)
+	linkRefs, _, _, originalRefBlockIDs := buildLinkRefsInBox(rootID, refs, keywords, encBoxIDUsed)
 	refTree, err := LoadTreeByBlockID(refTreeID)
 	if err != nil {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
@@ -172,6 +268,115 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 
 	sortBacklinks(ret, refTree)
 	filterBlockPaths(ret)
+	return
+}
+
+func GetBacklinkDocInBox(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string) (ret []*Backlink, keywords []string) {
+	keyword = strings.TrimSpace(keyword)
+	if "" != keyword {
+		keywords = strings.Split(keyword, " ")
+	}
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	if 1 > len(keywords) {
+		keywords = []string{}
+	}
+
+	ret = []*Backlink{}
+	sqlBlock := sql.GetBlockInBox(defID, boxID)
+	if nil == sqlBlock {
+		return
+	}
+	rootID := sqlBlock.RootID
+
+	tmpRefs := sql.QueryRefsByDefIDInBox(defID, containChildren, boxID)
+	var refs []*sql.Ref
+	for _, ref := range tmpRefs {
+		if ref.RootID == refTreeID {
+			refs = append(refs, ref)
+		}
+	}
+	refs = removeDuplicatedRefs(refs)
+
+	linkRefs, _, _, originalRefBlockIDs := buildLinkRefsInBox(rootID, refs, keywords, boxID)
+	refTree, err := loadTreeByBlockIDInBox(refTreeID, boxID)
+	if err != nil {
+		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
+		return
+	}
+
+	luteEngine := util.NewLute()
+	for _, linkRef := range linkRefs {
+		backlink := buildBacklink(linkRef.ID, refTree, originalRefBlockIDs, keywords, highlight, luteEngine)
+		if nil != backlink {
+			ret = append(ret, backlink)
+		}
+	}
+
+	sortBacklinks(ret, refTree)
+	filterBlockPaths(ret)
+	return
+}
+
+func GetBackmentionDocInBox(defID, refTreeID, keyword string, containChildren, highlight bool, boxID string) (ret []*Backlink, keywords []string) {
+	keyword = strings.TrimSpace(keyword)
+	if "" != keyword {
+		keywords = strings.Split(keyword, " ")
+	}
+	ret = []*Backlink{}
+	beforeLen := 12
+	sqlBlock := sql.GetBlockInBox(defID, boxID)
+	if nil == sqlBlock {
+		return
+	}
+	rootID := sqlBlock.RootID
+
+	refs := sql.QueryRefsByDefIDInBox(defID, containChildren, boxID)
+	refs = removeDuplicatedRefs(refs)
+
+	linkRefs, _, excludeBacklinkIDs, originalRefBlockIDs := buildLinkRefsInBox(rootID, refs, keywords, boxID)
+	tmpMentions, mentionKeywords := buildTreeBackmentionInBox(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen, boxID)
+	luteEngine := util.NewLute()
+	var mentions []*Block
+	for _, mention := range tmpMentions {
+		if mention.RootID == refTreeID {
+			mentions = append(mentions, mention)
+		}
+	}
+	var mentionBlockIDs []string
+	for _, mention := range mentions {
+		mentionBlockIDs = append(mentionBlockIDs, mention.ID)
+	}
+	mentionBlockIDs = gulu.Str.RemoveDuplicatedElem(mentionBlockIDs)
+
+	if "" != keyword {
+		mentionKeywords = append(mentionKeywords, strings.Split(keyword, " ")...)
+	}
+	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
+	keywords = append(keywords, mentionKeywords...)
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	if 1 > len(keywords) {
+		keywords = []string{}
+	}
+
+	var refTree *parse.Tree
+	for _, id := range mentionBlockIDs {
+		tree, loadErr := loadTreeByBlockIDInBox(id, boxID)
+		if loadErr != nil || tree == nil {
+			continue
+		}
+		backlink := buildBacklink(id, tree, originalRefBlockIDs, mentionKeywords, highlight, luteEngine)
+		if nil != backlink {
+			ret = append(ret, backlink)
+		}
+		if nil != tree && nil == refTree {
+			refTree = tree
+		}
+	}
+
+	if 0 < len(ret) {
+		sortBacklinks(ret, refTree)
+		filterBlockPaths(ret)
+	}
 	return
 }
 
@@ -237,9 +442,9 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 	}
 
 	// 反链面板中显示块引用计数 Display reference counts in the backlink panel https://github.com/siyuan-note/siyuan/issues/13618
-	fillBlockRefCount(renderNodes)
+	fillBlockRefCount(renderNodes, refTree.Box)
 
-	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
+	dom := renderVisibleBlockDOMByNodes(renderNodes, luteEngine)
 	var blockPaths []*BlockPath
 	if (nil != node.Parent && ast.NodeDocument != node.Parent.Type) || (ast.NodeHeading != node.Type && 0 < treenode.HeadingLevel(node)) {
 		blockPaths = buildBlockBreadcrumb(node, nil, false)
@@ -247,7 +452,7 @@ func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[st
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}
 	}
-	ret = &Backlink{DOM: dom, BlockPaths: blockPaths, Expand: expand, node: node}
+	ret = &Backlink{ID: refID, DOM: dom, BlockPaths: blockPaths, Expand: expand, node: node}
 	return
 }
 
@@ -288,13 +493,15 @@ func getBacklinkRenderNodes(n *ast.Node, originalRefBlockIDs map[string]string) 
 			return
 		}
 
-		for headingFirstSpan := c; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
-			if treenode.IsBlockRef(headingFirstSpan) {
-				continue
-			}
-			if "" != strings.TrimSpace(headingFirstSpan.Text()) {
-				expand = false
-				break
+		if "" == originalRefBlockIDs[n.ID] {
+			for headingFirstSpan := c; nil != headingFirstSpan; headingFirstSpan = headingFirstSpan.Next {
+				if treenode.IsBlockRef(headingFirstSpan) {
+					continue
+				}
+				if "" != strings.TrimSpace(headingFirstSpan.Text()) {
+					expand = false
+					break
+				}
 			}
 		}
 
@@ -308,6 +515,11 @@ func getBacklinkRenderNodes(n *ast.Node, originalRefBlockIDs map[string]string) 
 }
 
 func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
+	return GetBacklink2InBox(id, keyword, mentionKeyword, sortMode, mentionSortMode, containChildren, "")
+}
+
+// GetBacklink2InBox 与 GetBacklink2 一致，但按 boxID 路由到加密 db 或全局 db。
+func GetBacklink2InBox(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool, boxID string) (boxIDOut string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
 	keyword = strings.TrimSpace(keyword)
 	var keywords []string
 	if "" != keyword {
@@ -316,17 +528,17 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	mentionKeyword = strings.TrimSpace(mentionKeyword)
 	backlinks, backmentions = []*Path{}, []*Path{}
 
-	sqlBlock := sql.GetBlock(id)
+	sqlBlock := sql.GetBlockInBox(id, boxID)
 	if nil == sqlBlock {
 		return
 	}
 	rootID := sqlBlock.RootID
-	boxID = sqlBlock.Box
+	boxIDOut = sqlBlock.Box
 
-	refs := sql.QueryRefsByDefID(id, containChildren)
+	refs := sql.QueryRefsByDefIDInBox(id, containChildren, boxID)
 	refs = removeDuplicatedRefs(refs)
 
-	linkRefs, linkRefsCount, excludeBacklinkIDs, _ := buildLinkRefs(rootID, refs, keywords)
+	linkRefs, linkRefsCount, excludeBacklinkIDs, _ := buildLinkRefsInBox(rootID, refs, keywords, boxID)
 	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink", nil)
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
@@ -355,7 +567,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 		return backlinks[i].ID > backlinks[j].ID
 	})
 
-	mentionRefs, _ := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12)
+	mentionRefs, _ := buildTreeBackmentionInBox(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, 12, boxID)
 	tmpBackmentions := toFlatTree(mentionRefs, 0, "backlink", nil)
 	for _, l := range tmpBackmentions {
 		l.Blocks = nil
@@ -410,18 +622,23 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 }
 
 func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChildren bool) (boxID string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
+	return GetBacklinkInBox(id, keyword, mentionKeyword, beforeLen, containChildren, "")
+}
+
+// GetBacklinkInBox 与 GetBacklink 一致，但按 boxID 路由到加密 db 或全局 db。
+func GetBacklinkInBox(id, keyword, mentionKeyword string, beforeLen int, containChildren bool, boxID string) (boxIDOut string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
 	linkPaths = []*Path{}
 	mentionPaths = []*Path{}
 
-	sqlBlock := sql.GetBlock(id)
+	sqlBlock := sql.GetBlockInBox(id, boxID)
 	if nil == sqlBlock {
 		return
 	}
 	rootID := sqlBlock.RootID
-	boxID = sqlBlock.Box
+	boxIDOut = sqlBlock.Box
 
 	var links []*Block
-	refs := sql.QueryRefsByDefID(id, containChildren)
+	refs := sql.QueryRefsByDefIDInBox(id, containChildren, boxID)
 	refs = removeDuplicatedRefs(refs)
 
 	// 为了减少查询，组装好 IDs 后一次查出
@@ -433,7 +650,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 		queryBlockIDs = append(queryBlockIDs, ref.DefBlockID)
 		queryBlockIDs = append(queryBlockIDs, ref.BlockID)
 	}
-	querySQLBlocks := sql.GetBlocks(queryBlockIDs)
+	querySQLBlocks := sql.GetBlocksInBox(queryBlockIDs, boxID)
 	defSQLBlocksCache := map[string]*sql.Block{}
 	for _, defSQLBlock := range querySQLBlocks {
 		if nil != defSQLBlock && defSQLBlockIDs[defSQLBlock.ID] {
@@ -479,32 +696,30 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 	}
 
 	var linkRefs []*Block
-	processedParagraphs := hashset.New()
-	var paragraphParentIDs []string
+	var backlinkRefBlocks []*Block
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type {
-				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
-			}
+			backlinkRefBlocks = append(backlinkRefBlocks, ref)
 		}
 	}
-	paragraphParents := sql.GetBlocks(paragraphParentIDs)
-	for _, p := range paragraphParents {
-		if nil == p {
+	coveredRefIDs := map[string]bool{}
+	originalRefBlockIDs := map[string]string{}
+	for _, mapping := range buildBacklinkParentMappings(backlinkRefBlocks, boxID) {
+		parent := sql.GetBlockInBox(mapping.parent.ID, boxID)
+		if nil == parent {
 			continue
 		}
-
-		if "i" == p.Type || "h" == p.Type {
-			linkRefs = append(linkRefs, fromSQLBlock(p, keyword, beforeLen))
-			processedParagraphs.Add(p.ID)
+		originalRefBlockIDs[mapping.parent.ID] = mapping.refBlock.ID
+		for refID := range mapping.coveredRefIDs {
+			coveredRefIDs[refID] = true
 		}
+		linkRefsCount -= len(mapping.coveredRefIDs) - 1
+		linkRefs = append(linkRefs, fromSQLBlock(parent, keyword, beforeLen))
 	}
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type {
-				if processedParagraphs.Contains(ref.ParentID) {
-					continue
-				}
+			if coveredRefIDs[ref.ID] {
+				continue
 			}
 
 			ref.DefID = link.ID
@@ -518,15 +733,20 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 			linkRefs = append(linkRefs, ref)
 		}
 	}
-	linkPaths = toSubTree(linkRefs, keyword)
+	linkPaths = toSubTreeInBox(linkRefs, keyword, boxID, originalRefBlockIDs)
 
-	mentions, _ := buildTreeBackmention(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen)
+	mentions, _ := buildTreeBackmentionInBox(sqlBlock, linkRefs, mentionKeyword, excludeBacklinkIDs, beforeLen, boxID)
 	mentionsCount = len(mentions)
 	mentionPaths = toFlatTree(mentions, 0, "backlink", nil)
 	return
 }
 
 func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set, originalRefBlockIDs map[string]string) {
+	return buildLinkRefsInBox(defRootID, refs, keywords, "")
+}
+
+// buildLinkRefsInBox 与 buildLinkRefs 一致，但按 boxID 路由到加密 db 或全局 db。
+func buildLinkRefsInBox(defRootID string, refs []*sql.Ref, keywords []string, boxID string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set, originalRefBlockIDs map[string]string) {
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
 	var queryBlockIDs []string
@@ -537,7 +757,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 		queryBlockIDs = append(queryBlockIDs, ref.BlockID)
 	}
 	queryBlockIDs = gulu.Str.RemoveDuplicatedElem(queryBlockIDs)
-	querySQLBlocks := sql.GetBlocks(queryBlockIDs)
+	querySQLBlocks := sql.GetBlocksInBox(queryBlockIDs, boxID)
 	defSQLBlocksCache := map[string]*sql.Block{}
 	for _, defSQLBlock := range querySQLBlocks {
 		if nil != defSQLBlock && defSQLBlockIDs[defSQLBlock.ID] {
@@ -583,74 +803,36 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 		refsCount += len(link.Refs)
 	}
 
-	parentRefParagraphs := map[string]*Block{}
-	var paragraphParentIDs []string
+	var backlinkRefBlocks []*Block
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type {
-				parentRefParagraphs[ref.ParentID] = ref
-				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
-			}
+			backlinkRefBlocks = append(backlinkRefBlocks, ref)
 		}
 	}
-	refsCountDelta := len(paragraphParentIDs)
-	paragraphParentIDs = gulu.Str.RemoveDuplicatedElem(paragraphParentIDs)
-	refsCountDelta -= len(paragraphParentIDs)
-	refsCount -= refsCountDelta
-	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
-	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
-
-	luteEngine := util.NewLute()
 	originalRefBlockIDs = map[string]string{}
-	processedParagraphs := hashset.New()
-	for _, parent := range paragraphParents {
-		if nil == parent {
+	refBlocksByID := map[string]*Block{}
+	for _, refBlock := range backlinkRefBlocks {
+		refBlocksByID[refBlock.ID] = refBlock
+	}
+	coveredRefIDs := map[string]bool{}
+	for _, mapping := range buildBacklinkParentMappings(backlinkRefBlocks, boxID) {
+		originalRefBlockIDs[mapping.parent.ID] = mapping.refBlock.ID
+		for refID := range mapping.coveredRefIDs {
+			coveredRefIDs[refID] = true
+		}
+
+		if !matchBacklinkParentMapping(mapping, refBlocksByID, keywords, boxID) {
+			refsCount -= len(mapping.coveredRefIDs)
 			continue
 		}
 
-		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type || "NodeCallout" == parent.Type {
-			refBlock := parentRefParagraphs[parent.ID]
-			if nil == refBlock {
-				continue
-			}
-
-			paragraphUseParentLi := true
-			if "NodeListItem" == parent.Type && parent.FContent != refBlock.Content {
-				if inlineTree := parse.Inline("", []byte(refBlock.Markdown), luteEngine.ParseOptions); nil != inlineTree {
-					for c := inlineTree.Root.FirstChild.FirstChild; c != nil; c = c.Next {
-						if treenode.IsBlockRef(c) {
-							continue
-						}
-
-						if "" != strings.TrimSpace(c.Text()) {
-							paragraphUseParentLi = false
-							break
-						}
-					}
-				}
-			}
-
-			if paragraphUseParentLi {
-				processedParagraphs.Add(parent.ID)
-			}
-
-			originalRefBlockIDs[parent.ID] = refBlock.ID
-			if !matchBacklinkKeyword(parent, keywords) {
-				refsCount--
-				continue
-			}
-
-			if paragraphUseParentLi {
-				ret = append(ret, parent)
-			}
-		}
+		refsCount -= len(mapping.coveredRefIDs) - 1
+		ret = append(ret, mapping.parent)
 	}
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type {
-				if processedParagraphs.Contains(ref.ParentID) {
-					continue
-				}
+			if coveredRefIDs[ref.ID] {
+				continue
 			}
 
 			if !matchBacklinkKeyword(ref, keywords) {
@@ -670,7 +852,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 		var headingIDs []string
 		for _, link := range links {
 			for _, ref := range link.Refs {
-				if "NodeHeading" == ref.Type {
+				if "NodeHeading" == ref.Type && !coveredRefIDs[ref.ID] {
 					headingRefChildren[ref.ID] = ref
 					headingIDs = append(headingIDs, ref.ID)
 				}
@@ -678,7 +860,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 		}
 		var headingChildren []*Block
 		for _, headingID := range headingIDs {
-			sqlChildren := sql.GetChildBlocks(headingID, "", -1)
+			sqlChildren := sql.GetChildBlocksInBox(headingID, "", -1, boxID)
 			children := fromSQLBlocks(&sqlChildren, "", 12)
 			headingChildren = append(headingChildren, children...)
 		}
@@ -746,16 +928,21 @@ func removeDuplicatedRefs(refs []*sql.Ref) (ret []*sql.Ref) {
 }
 
 func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword string, excludeBacklinkIDs *hashset.Set, beforeLen int) (ret []*Block, mentionKeywords []string) {
+	return buildTreeBackmentionInBox(defSQLBlock, refBlocks, keyword, excludeBacklinkIDs, beforeLen, "")
+}
+
+// buildTreeBackmentionInBox 与 buildTreeBackmention 一致，但按 boxID 路由到加密 db 或全局 db。
+func buildTreeBackmentionInBox(defSQLBlock *sql.Block, refBlocks []*Block, keyword string, excludeBacklinkIDs *hashset.Set, beforeLen int, boxID string) (ret []*Block, mentionKeywords []string) {
 	ret = []*Block{}
 
 	var names, aliases []string
 	var fName, rootID string
 	if "d" == defSQLBlock.Type {
 		if Conf.Search.BacklinkMentionName {
-			names = sql.QueryBlockNamesByRootID(defSQLBlock.ID)
+			names = sql.QueryBlockNamesByRootIDInBox(defSQLBlock.ID, boxID)
 		}
 		if Conf.Search.BacklinkMentionAlias {
-			aliases = sql.QueryBlockAliases(defSQLBlock.ID)
+			aliases = sql.QueryBlockAliasesInBox(defSQLBlock.ID, boxID)
 		}
 		if Conf.Search.BacklinkMentionDoc {
 			fName = path.Base(defSQLBlock.HPath)
@@ -772,7 +959,10 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 				aliases = strings.Split(defSQLBlock.Alias, ",")
 			}
 		}
-		root := treenode.GetBlockTree(defSQLBlock.RootID)
+		root := treenode.GetBlockTreeInBox(defSQLBlock.RootID, boxID)
+		if nil == root {
+			return
+		}
 		rootID = root.ID
 	}
 
@@ -789,7 +979,7 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 
 	if Conf.Search.BacklinkMentionAnchor {
 		for _, refBlock := range refBlocks {
-			refs := sql.QueryRefsByDefIDRefID(refBlock.DefID, refBlock.ID)
+			refs := sql.QueryRefsByDefIDRefIDInBox(refBlock.DefID, refBlock.ID, boxID)
 			for _, ref := range refs {
 				set.Add(ref.Content)
 			}
@@ -800,46 +990,53 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 		mentionKeywords = append(mentionKeywords, v.(string))
 	}
 	mentionKeywords = prepareMarkKeywords(mentionKeywords)
-	mentionKeywords, ret = searchBackmention(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen)
+	mentionKeywords, ret = searchBackmentionInBox(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen, boxID)
 	return
 }
 
 func searchBackmention(mentionKeywords []string, keyword string, excludeBacklinkIDs *hashset.Set, rootID string, beforeLen int) (retMentionKeywords []string, ret []*Block) {
+	return searchBackmentionInBox(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen, "")
+}
+
+func quoteFTSPhrase(phrase string) string {
+	return "\"" + strings.ReplaceAll(phrase, "\"", "\"\"") + "\""
+}
+
+func buildBackmentionQuery(matchExpression, rootID string, limit int) (query string, args []any) {
+	query = "SELECT * FROM blocks_fts WHERE blocks_fts MATCH ? AND root_id != ?" +
+		" AND type IN ('d', 'h', 'p', 't') ORDER BY id DESC LIMIT ?"
+	args = []any{matchExpression, rootID, limit}
+	return
+}
+
+// searchBackmentionInBox 与 searchBackmention 一致，但按 boxID 路由到加密 db 或全局 db。
+func searchBackmentionInBox(mentionKeywords []string, keyword string, excludeBacklinkIDs *hashset.Set, rootID string, beforeLen int, boxID string) (retMentionKeywords []string, ret []*Block) {
 	ret = []*Block{}
 	if 1 > len(mentionKeywords) {
 		return
 	}
 
-	table := "blocks_fts"
-
 	buf := bytes.Buffer{}
-	buf.WriteString("SELECT * FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(")
+	buf.WriteString(columnFilter() + ":(")
 	for i, mentionKeyword := range mentionKeywords {
 		if Conf.Search.BacklinkMentionKeywordsLimit < i {
 			util.PushMsg(fmt.Sprintf(Conf.Language(38), len(mentionKeywords)), 5000)
-			mentionKeyword = strings.ReplaceAll(mentionKeyword, "\"", "\"\"")
-			buf.WriteString("\"" + mentionKeyword + "\"")
+			buf.WriteString(quoteFTSPhrase(mentionKeyword))
 			break
 		}
 
-		mentionKeyword = strings.ReplaceAll(mentionKeyword, "\"", "\"\"")
-		buf.WriteString("\"" + mentionKeyword + "\"")
+		buf.WriteString(quoteFTSPhrase(mentionKeyword))
 		if i < len(mentionKeywords)-1 {
 			buf.WriteString(" OR ")
 		}
 	}
 	buf.WriteString(")")
 	if "" != keyword {
-		keyword = strings.ReplaceAll(keyword, "\"", "\"\"")
-		buf.WriteString(" AND (\"" + keyword + "\")")
+		buf.WriteString(" AND (" + quoteFTSPhrase(keyword) + ")")
 	}
-	buf.WriteString("'")
-	buf.WriteString(" AND root_id != '" + rootID + "'") // 不在定义块所在文档中搜索
-	buf.WriteString(" AND type IN ('d', 'h', 'p', 't')")
-	buf.WriteString(" ORDER BY id DESC LIMIT " + strconv.Itoa(Conf.Search.Limit))
-	query := buf.String()
+	query, args := buildBackmentionQuery(buf.String(), rootID, Conf.Search.Limit)
 
-	sqlBlocks := sql.SelectBlocksRawStmt(query, 1, Conf.Search.Limit)
+	sqlBlocks := sql.SelectBlocksRawStmtArgsInBox(query, args, Conf.Search.Limit, boxID)
 	terms := mentionKeywords
 	if "" != keyword {
 		terms = append(terms, keyword)
@@ -871,11 +1068,11 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 			continue
 		}
 
-		newText := markReplaceSpanWithSplit(text, mentionKeywords, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
-		if text != newText {
+		newText, matched := markReplaceSpanWithSplit(text, mentionKeywords, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
+		if matched {
 			tmp = append(tmp, b)
 
-			k := gulu.Str.SubstringsBetween(newText, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
+			k := getMarkedTextContents(newText, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
 			retMentionKeywords = append(retMentionKeywords, k...)
 		} else {
 			// columnFilter 中的命名、别名和备注命中的情况

@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -54,16 +55,27 @@ var templateSearchCmd = &cobra.Command{
 				fmt.Println("No templates found.")
 				return nil
 			}
-			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-			fmt.Fprintln(w, "NAME\tPATH")
-			for _, r := range results {
-				fmt.Fprintf(w, "%s\t%s\n", r.Content, r.Path)
-			}
-			w.Flush()
-			fmt.Printf("\n%d template(s)\n", len(results))
+			return writeTemplateSearchResults(os.Stdout, results)
 		}
 		return nil
 	},
+}
+
+func writeTemplateSearchResults(output io.Writer, results []*model.TemplateSearchResult) error {
+	w := tabwriter.NewWriter(output, 0, 0, 2, ' ', 0)
+	if _, err := fmt.Fprintln(w, "NAME\tRELATIVE_PATH\tPATH"); err != nil {
+		return err
+	}
+	for _, result := range results {
+		if _, err := fmt.Fprintf(w, "%s\t%s\t%s\n", result.Content, result.RelativePath, result.Path); err != nil {
+			return err
+		}
+	}
+	if err := w.Flush(); err != nil {
+		return err
+	}
+	_, err := fmt.Fprintf(output, "\n%d template(s)\n", len(results))
+	return err
 }
 
 var templateGetCmd = &cobra.Command{

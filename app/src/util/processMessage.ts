@@ -62,6 +62,12 @@ export const processMessage = (response: IWebSocketData) => {
         }
         return false;
     }
+    if ("reloadpublishpage" === response.cmd) {
+        if (window.siyuan.isPublish) {
+            window.location.reload();
+        }
+        return false;
+    }
     if ("closepublishpage" === response.cmd) {
         handlePublishServiceClosed(response.msg);
         return false;

@@ -7,7 +7,7 @@
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
 		"type": "doc",
-		"updated": "20260614194452"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194439-k7n1m8a",
-				"updated": "20260614194439"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-ffn21hi",
-				"updated": "20260614194439"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "將內容塊設定為閃卡後，系統會通過間隔重複演算法 FSRS（github repo: open-spaced-repetition/free-spaced-repetition-scheduler）自動安排複習，在遺忘臨界點提醒複習，幫助將短期記憶轉化為長期記憶。"
+					"Data": "將內容區塊設定為閃卡後，系統會通過間隔重複演算法 FSRS（GitHub repo: open-spaced-repetition/go-fsrs）自動安排複習，在遺忘臨界點提醒複習，幫助將短期記憶轉化為長期記憶。"
 				}
 			]
 		},
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194439-91xd3o2",
-				"updated": "20260614194452"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194439-33ewrfo",
-				"updated": "20260614194452"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -109,12 +109,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614194439-xja26ei",
-								"updated": "20260614194452"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊中的 "
+									"Data": "內容區塊中的 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -146,12 +146,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614194439-g95rwrc",
-								"updated": "20260614194439"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果將超級塊設定為閃卡，則該超級塊的第一個子區塊會被視作問題，其餘子區塊會被視作答案"
+									"Data": "如果將超級區塊設定為閃卡，則該超級區塊的第一個子區塊會被視作問題，其餘子區塊會被視作答案"
 								}
 							]
 						}
@@ -202,12 +202,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614194439-01nxgir",
-								"updated": "20260614194439"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "如果將標題塊設定為閃卡，則該標題塊會被視作問題，其下方塊會被視作答案"
+									"Data": "如果將標題區塊設定為閃卡，則該標題區塊會被視作問題，其下方的區塊會被視作答案"
 								}
 							]
 						}
@@ -220,12 +220,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-xknxlzy",
-				"updated": "20260614194439"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "以上規則可以在 [設定 - 閃卡] 中調整。"
+					"Data": "以上規則可以在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "閃卡"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中調整。"
 				}
 			]
 		},
@@ -234,12 +252,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-zih3624",
-				"updated": "20260614194439"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "完成製卡：在塊標選單中選擇「快速製卡」。"
+					"Data": "完成製卡：在區塊標選單中選擇「快速製卡」。"
 				}
 			]
 		},
@@ -249,7 +267,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194439-dpit548",
-				"updated": "20260614194439"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -326,12 +344,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614194439-brh7nwo",
-								"updated": "20260614194439"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在編輯器中點擊文件塊標上的「閃卡 - 間隔重複」，複習範圍為當前文件及其子文件中的卡片"
+									"Data": "在編輯器中點擊文件區塊標上的「閃卡 - 間隔重複」，複習範圍為當前文件及其子文件中的卡片"
 								}
 							]
 						}
@@ -400,12 +418,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-vi1i5u5",
-				"updated": "20260614194439"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "進入複習後，介面會逐張展示待複習的卡片。每張卡片先展示問題面，點擊「顯示答案」或按空格/Enter 展示答案面，然後根據自己的掌握程度選擇評級："
+					"Data": "進入複習後，介面會逐張展示待複習的卡片。每張卡片先展示問題面，點擊「顯示答案」或按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "空格"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回車"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 展示答案面，然後根據自己的掌握程度選擇評級："
 				}
 			]
 		},
@@ -724,12 +760,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-mun0m8m",
-				"updated": "20260614194439"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "展示答案後，空格和 Enter 也可直接觸發「良好」評級。評級直接影響卡片的複習間隔——高評級延長下次複習時間，低評級縮短下次複習時間。系統使用 FSRS 演算法根據歷史評級資料自動最佳化每個人的複習安排。"
+					"Data": "展示答案後，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "空格"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回車"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 也可直接觸發「良好」評級。評級直接影響卡片的複習間隔——高評級延長下次複習時間，低評級縮短下次複習時間。系統使用 FSRS 演算法根據歷史評級資料自動最佳化每個人的複習安排。"
 				}
 			]
 		},
@@ -739,7 +793,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194439-dfoesdf",
-				"updated": "20260614194439"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -753,12 +807,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194439-02gn3hw",
-				"updated": "20260614194439"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 [設定 - 閃卡] 中可以調整閃卡相關的全域設定，其中"
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "閃卡"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中可以調整閃卡相關的全域設定，其中"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -925,12 +997,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614194439-j1e4fk4",
-								"updated": "20260614194439"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊被刪除（或者 ID 改變）後對應的閃卡會失效"
+									"Data": "內容區塊被刪除（或者 ID 改變）後對應的閃卡會失效"
 								}
 							]
 						}

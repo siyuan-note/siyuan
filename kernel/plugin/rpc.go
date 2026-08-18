@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -66,8 +66,8 @@ func (e *JsonRpcError) Error() string {
 type JsonRpcRequest struct {
 	JsonRpc string             `json:"jsonrpc"`
 	Method  string             `json:"method"`
-	Params  util.Optional[any] `json:"params,omitempty"`
-	ID      util.Optional[any] `json:"id,omitempty"`
+	Params  util.Optional[any] `json:"params"`
+	ID      util.Optional[any] `json:"id"`
 }
 
 func (r JsonRpcRequest) MarshalJSON() ([]byte, error) {
@@ -352,7 +352,12 @@ func HandleRpcWebSocket(c *gin.Context) {
 		}
 	}
 
-	upgrader := gws.NewUpgrader(h, &gws.ServerOption{})
+	upgrader := gws.NewUpgrader(h, &gws.ServerOption{
+		// 校验 Origin，防止跨站 WebSocket 劫持（CSWSH） https://github.com/siyuan-note/siyuan/security/advisories/GHSA-3cc2-h3v6-rqpq
+		Authorize: func(r *http.Request, _ gws.SessionStorage) bool {
+			return util.IsSessionOriginAllowed(r.Header.Get("Origin"), r.Host)
+		},
+	})
 	socket, err := upgrader.Upgrade(c.Writer, c.Request)
 	if err != nil {
 		logging.LogErrorf("[plugin:%s] RPC WebSocket upgrade failed: %s", name, err)

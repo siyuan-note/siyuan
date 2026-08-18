@@ -7,7 +7,7 @@
 		"id": "20240530101000-d31i9v5",
 		"title": "インポートとエクスポート",
 		"type": "doc",
-		"updated": "20260614201232"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-058gztf",
 				"id": "20240530101000-ouqp9ym",
-				"updated": "20240530101000"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -33,7 +33,7 @@
 			"Properties": {
 				"ID": "20240530101000-yv1nqub",
 				"id": "20240530101000-3sblps4",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -125,7 +125,7 @@
 			"Properties": {
 				"ID": "20240530101000-l9j58c3",
 				"id": "20240530101000-prvfsde",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -184,7 +184,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ の関連する Markdown 構文の項目を有効にしてください。"
+					"Data": " ​ の関連する Markdown 構文の項目を有効にしてください。"
 				}
 			]
 		},
@@ -195,7 +195,7 @@
 			"Properties": {
 				"ID": "20240530101000-m3iop7z",
 				"id": "20240530101000-ya71y3y",
-				"updated": "20260614201218"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -210,12 +210,12 @@
 			"Properties": {
 				"ID": "20240530101000-jmu8i9e",
 				"id": "20240530101000-742re4h",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "デスクトップ版では "
+					"Data": "デスクトップとモバイルのどちらでも、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -224,34 +224,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "エクスポート"
+					"TextMarkTextContent": "アプリ"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、モバイル版では右側のサイドバーの "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "情報"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ からデータのインポート/エクスポートができます。ここでのエクスポートは、"
+					"Data": " からデータをインポートおよびエクスポートできます。このエクスポートでは、"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "workspace/data/"
+					"TextMarkTextContent": "ワークスペース/data/"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ フォルダ全体をコピーして zip アーカイブにまとめる処理です。"
+					"Data": " フォルダー全体がコピーされ、ZIP アーカイブとして作成されます。"
 				}
 			]
 		},
@@ -419,7 +410,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614201218-j16bj6l",
-				"updated": "20260614201218"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -433,12 +424,35 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614201218-7jwr68y",
-				"updated": "20260614201218"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sy.zip"
+				},
+				{
 					"Type": "NodeText",
-					"Data": ".sy.zipは、他の思源ワークスペースからエクスポートされた個別のドキュメントをインポートするための思源ネイティブドキュメント形式です。.sy.zipファイルをドキュメントパネルに直接ドラッグ＆ドロップしてインポートできます。インポートされたドキュメントには、完全なコンテンツ、子ドキュメント、アセットファイル、ブロックプロパティが含まれます。"
+					"Data": " は SiYuan のネイティブドキュメント形式です。ドキュメントツリーで対象のノートブックまたはドキュメントを選択し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "インポート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "SiYuan .sy.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " からアーカイブを選択します。インポート後のドキュメントには、コンテンツ、設定で含めるよう指定したサブドキュメント、アセット、ブロック属性が保持されます。"
 				}
 			]
 		},
@@ -449,7 +463,7 @@
 			"Properties": {
 				"ID": "20240530101000-muh0lww",
 				"id": "20240530101000-jiji166",
-				"updated": "20250115150934"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -465,7 +479,7 @@
 			"Properties": {
 				"ID": "20240530101000-j0qj7jj",
 				"id": "20240530101000-76aygoj",
-				"updated": "20250115150934"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -512,7 +526,7 @@
 			"Properties": {
 				"ID": "20240530101000-v8rvgoz",
 				"id": "20240530101000-lft59vs",
-				"updated": "20240530101000"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -544,7 +558,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 選んでからコピーしてください。"
+					"Data": " ​ 選んでからコピーしてください。"
 				}
 			]
 		},
@@ -555,7 +569,7 @@
 			"Properties": {
 				"ID": "20240530101000-wqqvu5b",
 				"id": "20240530101000-4nyaeqm",
-				"updated": "20260614201232"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -762,12 +776,35 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614201227-7ux3rmo",
-				"updated": "20260614201232"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sy.zip"
+				},
+				{
 					"Type": "NodeText",
-					"Data": ".sy.zipは思源のネイティブ形式です。エクスポートされたファイルには、ドキュメントと子ドキュメントの完全なコンテンツ、アセットファイル、ブロックプロパティが含まれ、ワークスペース間のドキュメント移行や他の思源ユーザーとの共有に適しています。"
+					"Data": " 形式では、ドキュメントのコンテンツ、アセット、ブロック属性が保持されます。サブドキュメントと関連ドキュメントを含めるかどうかは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エクスポート"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の各オプションによって決まります。"
 				}
 			]
 		},
@@ -777,12 +814,12 @@
 			"Properties": {
 				"ID": "20240530101000-xxaupif",
 				"id": "20240530101000-9c8j2me",
-				"updated": "20240530101000"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "​ "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -800,7 +837,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ には、エクスポート処理を行うためのオプションがいくつか用意されています。詳細は画面上の案内をご覧ください。"
+					"Data": " ​ には、エクスポート処理を行うためのオプションがいくつか用意されています。詳細は画面上の案内をご覧ください。"
 				}
 			]
 		}

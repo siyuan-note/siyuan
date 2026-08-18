@@ -1,16 +1,16 @@
 import {Constants} from "../../constants";
 import {hideElements} from "../ui/hideElements";
-import {fetchPost} from "../../util/fetch";
-import {onGet} from "../util/onGet";
 import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {stickyRow} from "../render/av/row";
 import {trimAVRowsSync} from "../render/av/virtualScroll";
+import {pauseImageAnimationTemporarily} from "../util/imageAnimation";
 
 let getIndexTimeout: number;
 const avScrollPending = new WeakSet<HTMLElement>();
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     element.addEventListener("scroll", () => {
+        pauseImageAnimationTemporarily(protyle.wysiwyg.element, Constants.TIMEOUT_INPUT);
         const elementRect = element.getBoundingClientRect();
         if (!protyle.toolbar.element.classList.contains("fn__none")) {
             const initY = protyle.toolbar.element.getAttribute("data-inity").split(Constants.ZWSP);
@@ -80,51 +80,38 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             !protyle.wysiwyg.element.firstElementChild) {
             return;
         }
+        const firstElement = protyle.wysiwyg.element.firstElementChild;
+        const lastElement = protyle.wysiwyg.element.lastElementChild;
+        const firstId = firstElement.getAttribute("data-node-id");
+        const lastId = lastElement?.getAttribute("data-node-id");
         if (protyle.scroll.lastScrollTop > element.scrollTop) {
             if (element.scrollTop === 0) {
                 // 使用鼠标拖拽滚动条中无法准确获取 scrollTop，在此忽略
                 return;
             }
             if (element.scrollTop < element.clientHeight &&
-                protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "1") {
+                firstId && firstElement.getAttribute("data-eof") !== "1") {
                 // 禁用滚动时会产生抖动 https://ld246.com/article/1666717094418
-                protyle.contentElement.style.width = (protyle.contentElement.offsetWidth) + "px";
-                protyle.contentElement.style.overflow = "hidden";
-                protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
-                    mode: 1,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
+                const clearLoadingStyle = () => {
                     protyle.contentElement.style.overflow = "";
                     protyle.contentElement.style.width = "";
-                    onGet({
-                        data: getResponse,
-                        protyle,
-                        action: [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID],
-                    });
-                });
+                };
+                if (protyle.scroll.loadDynamic(protyle, 1, {
+                    beforeApply: clearLoadingStyle,
+                    onFinish: clearLoadingStyle,
+                })) {
+                    protyle.contentElement.style.width = (protyle.contentElement.offsetWidth) + "px";
+                    protyle.contentElement.style.overflow = "hidden";
+                }
             }
         } else if ((element.scrollTop > element.scrollHeight - element.clientHeight * 1.8) &&
-            protyle.wysiwyg.element.lastElementChild &&
-            protyle.wysiwyg.element.lastElementChild.getAttribute("data-eof") !== "2") {
+            lastElement && lastId && lastElement.getAttribute("data-eof") !== "2") {
             if (protyle.scroll.lastScrollTop > 768 && element.scrollTop > protyle.scroll.lastScrollTop * 2) {
                 // 使用鼠标拖拽滚动条时导致加载需进行矫正
                 element.scrollTop = protyle.scroll.lastScrollTop;
                 return;
             }
-            protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
-            fetchPost("/api/filetree/getDoc", {
-                id: protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"),
-                mode: 2,
-                size: window.siyuan.config.editor.dynamicLoadBlocks,
-            }, getResponse => {
-                onGet({
-                    data: getResponse,
-                    protyle,
-                    action: [Constants.CB_GET_APPEND, Constants.CB_GET_UNCHANGEID],
-                });
-            });
+            protyle.scroll.loadDynamic(protyle, 2);
         }
         protyle.scroll.lastScrollTop = Math.max(element.scrollTop, 0);
     }, {

@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -92,6 +92,14 @@ func IALStr(n *ast.Node) string {
 
 func RootChildIDs(rootID string) (ret []string) {
 	root := GetBlockTree(rootID)
+	if nil == root {
+		for _, encBoxID := range GetOpenedEncryptedBoxIDs() {
+			if encRoot := GetBlockTreeInBox(rootID, encBoxID); nil != encRoot {
+				root = encRoot
+				break
+			}
+		}
+	}
 	if nil == root {
 		return
 	}

@@ -41,13 +41,24 @@
   &__svg {
     position: relative;
     overflow: hidden !important;
+    touch-action: none;
+    user-select: none;
 
-    .vis-network {
-      outline: none;
+    .graph__canvas,
+    .graph__labels {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
     }
 
-    .vis-tooltip {
-      visibility: hidden;
+    .graph__labels {
+      pointer-events: none;
+    }
+
+    .graph__tooltip {
+      z-index: 1;
       pointer-events: none;
       position: absolute;
       border: 1px solid var(--b3-theme-surface-lighter);
@@ -56,7 +67,7 @@
       background-color: var(--b3-theme-surface);
       padding: 4px 8px;
       color: var(--b3-theme-on-surface);
-      max-width: 10vw;
+      max-width: min(320px, 50vw);
       white-space: break-spaces;
       @include mixin.text-clamp(3);
     }

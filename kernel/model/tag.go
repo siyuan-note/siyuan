@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -266,7 +266,9 @@ func BuildTags(ignoreMaxListHintArg bool, appID string, sortVal int) (ret *Tags)
 		*tmp = append(*tmp, tag)
 		countTag(tag, &total)
 		if Conf.FileTree.MaxListCount < total && !ignoreMaxListHintArg {
-			util.PushMsgWithApp(appID, fmt.Sprintf(Conf.Language(243), Conf.FileTree.MaxListCount), 7000)
+			if nil == util.NotificationsCfg || util.NotificationsCfg.TagMaxList {
+				util.PushMsgWithApp(appID, fmt.Sprintf(Conf.Language(243), Conf.FileTree.MaxListCount), 7000)
+			}
 			break
 		}
 	}

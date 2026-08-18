@@ -3,6 +3,21 @@ import {isWindow} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName, hasClosestByTag} from "../../protyle/util/hasClosest";
 import {getColIndex} from "../../protyle/util/table";
 
+export const getTableResizeBounds = (tableElement: HTMLTableElement) => {
+    const captionElement = tableElement.querySelector("caption");
+    let top = 0;
+    if (captionElement && captionElement.style.captionSide !== "bottom") {
+        const tableRect = tableElement.getBoundingClientRect();
+        top = Math.max(0, Math.min(tableRect.height,
+            captionElement.getBoundingClientRect().bottom - tableRect.top));
+    }
+    return {
+        top,
+        height: Math.max(0, Math.min(tableElement.querySelector("colgroup").clientHeight,
+            tableElement.clientHeight - top)),
+    };
+};
+
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let left = x + 34;
     let nodeElement = element;
@@ -38,7 +53,7 @@ const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     return nodeElement;
 };
 
-export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
+export const windowMouseMove = (event: MouseEvent) => {
     if (document.body.classList.contains("body--blur") || document.getElementById("progress")) {
         // 非激活状态下不执行 https://ld246.com/article/1693474547631
         return;
@@ -71,46 +86,55 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
     }
     const target = event.target as Element;
     // Dock
-    if (!mouseIsEnter &&
-        event.buttons === 0 &&  // 鼠标按键被按下时不触发
-        window.siyuan.layout.bottomDock &&
-        !isWindow()) {
-        if (event.clientX < Math.max(document.getElementById("dockLeft").clientWidth + 1, 16)) {
-            if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.clientWidth > 0 &&
+    if (window.siyuan.layout.bottomDock && !isWindow()) {
+        const docks = [
+            window.siyuan.layout.leftDock,
+            window.siyuan.layout.rightDock,
+            window.siyuan.layout.bottomDock
+        ];
+        const inDockOverlay = hasClosestByClassName(target, "b3-menu") ||
+            hasClosestByClassName(target, "tooltip") ||
+            hasClosestByClassName(target, "block__popover") ||
+            hasClosestByClassName(target, "protyle-hint--agent-overlay") ||
+            hasClosestByClassName(target, "b3-dialog", true);
+        if (event.buttons !== 0 || inDockOverlay) {
+            docks.forEach(dock => dock.clearDockHoverTimeout());
+        } else {
+            const toolbarHeight = document.getElementById("toolbar").clientHeight;
+            const statusHeight = document.getElementById("status").clientHeight;
+            const inYRange = event.clientY > toolbarHeight && event.clientY < window.innerHeight - statusHeight;
+            const canTrigger = !hasClosestByClassName(target, "layout--float") &&
+                !hasClosestByClassName(target, "protyle-toolbar") &&
+                !hasClosestByClassName(target, "protyle-util");
+            const leftDock = window.siyuan.layout.leftDock;
+            const leftTrigger = canTrigger && inYRange && !leftDock.pin && leftDock.layout.element.clientWidth > 0 &&
+                event.clientX < Math.max(document.getElementById("dockLeft").clientWidth + 1, 16) &&
                 // 隐藏停靠栏会导致点击两侧内容触发浮动面板弹出，因此需减小鼠标范围
-                (window.siyuan.layout.leftDock.elements[0].clientWidth > 0 || (window.siyuan.layout.leftDock.elements[0].clientWidth === 0 && event.clientX < 8))) {
-                if (event.clientY > document.getElementById("toolbar").clientHeight &&
-                    event.clientY < window.innerHeight - document.getElementById("status").clientHeight) {
-                    if (!hasClosestByClassName(target, "b3-menu") &&
-                        !hasClosestByClassName(target, "protyle-toolbar") &&
-                        !hasClosestByClassName(target, "protyle-util") &&
-                        !hasClosestByClassName(target, "b3-dialog", true) &&
-                        !hasClosestByClassName(target, "layout--float")) {
-                        window.siyuan.layout.leftDock.showDock();
-                    }
-                } else {
-                    window.siyuan.layout.leftDock.hideDock();
-                }
+                (leftDock.elements[0].clientWidth > 0 || event.clientX < 8);
+            if (leftTrigger || leftDock.layout.element.contains(target)) {
+                leftDock.showDockByHover();
+            } else {
+                leftDock.hideDockByHover();
             }
-        } else if (event.clientX > window.innerWidth - Math.max(document.getElementById("dockRight").clientWidth - 2, 16)) {
-            if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.clientWidth > 0 &&
-                (window.siyuan.layout.rightDock.elements[0].clientWidth > 0 || (window.siyuan.layout.rightDock.elements[0].clientWidth === 0 && event.clientX > window.innerWidth - 8))) {
-                if (event.clientY > document.getElementById("toolbar").clientHeight &&
-                    event.clientY < window.innerHeight - document.getElementById("status").clientHeight) {
-                    if (!hasClosestByClassName(target, "b3-menu") &&
-                        !hasClosestByClassName(target, "layout--float") &&
-                        !hasClosestByClassName(target, "protyle-toolbar") &&
-                        !hasClosestByClassName(target, "protyle-util") &&
-                        !hasClosestByClassName(target, "b3-dialog", true)) {
-                        window.siyuan.layout.rightDock.showDock();
-                    }
-                } else {
-                    window.siyuan.layout.rightDock.hideDock();
-                }
+
+            const rightDock = window.siyuan.layout.rightDock;
+            const rightTrigger = canTrigger && inYRange && !rightDock.pin && rightDock.layout.element.clientWidth > 0 &&
+                event.clientX > window.innerWidth - Math.max(document.getElementById("dockRight").clientWidth - 2, 16) &&
+                (rightDock.elements[0].clientWidth > 0 || event.clientX > window.innerWidth - 8);
+            if (rightTrigger || rightDock.layout.element.contains(target)) {
+                rightDock.showDockByHover();
+            } else {
+                rightDock.hideDockByHover();
             }
-        }
-        if (event.clientY > Math.min(window.innerHeight - 10, window.innerHeight - document.querySelector("#status").clientHeight)) {
-            window.siyuan.layout.bottomDock.showDock();
+
+            const bottomDock = window.siyuan.layout.bottomDock;
+            const bottomTrigger = canTrigger && !bottomDock.pin && bottomDock.layout.element.clientHeight > 0 &&
+                event.clientY > Math.min(window.innerHeight - 10, window.innerHeight - statusHeight);
+            if (bottomTrigger || bottomDock.layout.element.contains(target)) {
+                bottomDock.showDockByHover();
+            } else {
+                bottomDock.hideDockByHover();
+            }
         }
     }
 
@@ -242,28 +266,27 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
     if (blockElement && blockElement.style.cursor !== "col-resize" && !hasClosestByClassName(blockElement, "protyle-wysiwyg__embed")) {
         const cellElement = (hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD")) as HTMLTableCellElement;
         const tableElement = blockElement.querySelector("table");
-        if (cellElement && tableElement) {
-            const resizeElement = blockElement.querySelector(".table__resize");
+        const resizeElement = blockElement.querySelector(".table__resize");
+        const resizeActionElement = resizeElement?.parentElement;
+        if (cellElement && tableElement && resizeElement && resizeActionElement) {
             if (blockElement.style.textAlign === "center" || blockElement.style.textAlign === "right") {
-                resizeElement.parentElement.style.left = tableElement.offsetLeft + "px";
+                resizeActionElement.style.left = tableElement.offsetLeft + "px";
             } else {
-                resizeElement.parentElement.style.left = "";
+                resizeActionElement.style.left = "";
             }
 
             if (tableElement.getAttribute("contenteditable") === "true") {
-                const tableHeight = blockElement.querySelector("colgroup").clientHeight;
-                const captionElement = blockElement.querySelector("caption");
-                const captionHeight = (captionElement && captionElement.style.captionSide !== "bottom") ? captionElement.clientHeight : 0;
+                const resizeBounds = getTableResizeBounds(tableElement);
                 const rect = cellElement.getBoundingClientRect();
                 if (rect.right - event.clientX < 3 && rect.right - event.clientX > 0) {
                     resizeElement.setAttribute("data-col-index", (getColIndex(cellElement) + cellElement.colSpan - 1).toString());
                     // 记录基础 left（不含 scrollLeft），以便横向滚动后重新定位 https://github.com/siyuan-note/siyuan/issues/13828
                     resizeElement.setAttribute("data-left", (cellElement.offsetWidth + cellElement.offsetLeft - 3).toString());
-                    resizeElement.setAttribute("style", `top:${captionHeight}px;height:${tableHeight}px;left: ${Math.round(cellElement.offsetWidth + cellElement.offsetLeft - blockElement.firstElementChild.scrollLeft - 3)}px;display:block`);
+                    resizeElement.setAttribute("style", `top:${resizeBounds.top}px;height:${resizeBounds.height}px;left: ${Math.round(cellElement.offsetWidth + cellElement.offsetLeft - blockElement.firstElementChild.scrollLeft - 3)}px;display:block`);
                 } else if (event.clientX - rect.left < 3 && event.clientX - rect.left > 0 && cellElement.previousElementSibling) {
                     resizeElement.setAttribute("data-col-index", (getColIndex(cellElement) - 1).toString());
                     resizeElement.setAttribute("data-left", (cellElement.offsetLeft - 3).toString());
-                    resizeElement.setAttribute("style", `top:${captionHeight}px;height:${tableHeight}px;left: ${Math.round(cellElement.offsetLeft - blockElement.firstElementChild.scrollLeft - 3)}px;display:block`);
+                    resizeElement.setAttribute("style", `top:${resizeBounds.top}px;height:${resizeBounds.height}px;left: ${Math.round(cellElement.offsetLeft - blockElement.firstElementChild.scrollLeft - 3)}px;display:block`);
                 }
             }
         }

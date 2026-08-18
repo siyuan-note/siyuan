@@ -1,7 +1,7 @@
 import * as path from "path";
 import {fetchPost} from "./fetch";
 import {Dialog} from "../dialog";
-import {escapeHtml} from "./escape";
+import {escapeAriaLabel, escapeHtml} from "./escape";
 import {isMobile} from "./functions";
 import {focusByRange} from "../protyle/util/selection";
 import {unicode2Emoji} from "../emoji";
@@ -17,6 +17,7 @@ import {matchHotKey} from "../protyle/util/hotKey";
 import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {mergePathSegments} from "./mergePathSegments";
+import {expandFileTree} from "../layout/dock/fileTreeAnimation";
 
 export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     /// #if !BROWSER
@@ -59,10 +60,20 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
             return null;
         }
         if (uriObj.hostname === "blocks" && /^\/\d{14}-\w{7}/.test(uriObj.pathname)) {
+            const avItemID = uriObj.searchParams.get("avItemID") || undefined;
+            const avViewID = uriObj.searchParams.get("avViewID") || undefined;
+            const avGroupID = uriObj.searchParams.get("avGroupID") || undefined;
+            const isNodeID = (id?: string) => !id || /^\d{14}-\w{7}$/.test(id);
+            if (!isNodeID(avItemID) || !isNodeID(avViewID) || !isNodeID(avGroupID)) {
+                return null;
+            }
             return {
                 id: uriObj.pathname.substring(1, 1 + 22),
                 focus: uriObj.searchParams.get("focus") === "1",
                 fullscreen: uriObj.searchParams.get("fullscreen") === "1",
+                avItemID,
+                avViewID,
+                avGroupID,
             };
         }
         return null;
@@ -73,9 +84,8 @@ export const parseSiYuanUriInfo = (uri: URL | string | null | undefined): ISiYua
 
 export const parseUriInfo = (): ISiYuanUriBlockInfo => {
     const searchParams = new URLSearchParams(window.location.search);
-    const PWAURL = searchParams.get("url");
-    if (/^web\+siyuan:\/\/blocks\/\d{14}-\w{7}/.test(PWAURL)) {
-        const dataInfo = parseSiYuanUriInfo(PWAURL);
+    if (searchParams.has("url")) {
+        const dataInfo = parseSiYuanUriInfo(searchParams.get("url"));
         if (dataInfo != null) {
             window.siyuan.editorIsFullscreen = dataInfo.fullscreen;
             return dataInfo;
@@ -144,8 +154,17 @@ export const getDocDisplayName = (name: string, titleEmpty?: boolean, escape?: b
     return displayName;
 };
 
+export const getAssetPathWithoutQuery = (assetPath: string) => {
+    return assetPath.split("?", 1)[0];
+};
+
+export const getAssetExtension = (assetPath: string) => {
+    return pathPosix().extname(getAssetPathWithoutQuery(assetPath));
+};
+
 export const getAssetName = (assetPath: string) => {
-    return pathPosix().basename(assetPath, pathPosix().extname(assetPath)).replace(/-\d{14}-\w{7}/, "");
+    const pathWithoutQuery = getAssetPathWithoutQuery(assetPath);
+    return pathPosix().basename(pathWithoutQuery, getAssetExtension(pathWithoutQuery)).replace(/-\d{14}-\w{7}/, "");
 };
 
 export const isLocalPath = (link: string) => {
@@ -199,6 +218,18 @@ export const getTopPaths = (liElements: Element[]) => {
     return fromPaths;
 };
 
+export const isMoveTargetAllowed = (sourceNotebookIds: string[] = [], targetNotebookId: string) => {
+    const sourceIds = Array.from(new Set(sourceNotebookIds.filter(Boolean)));
+    if (sourceIds.length === 0) {
+        return true;
+    }
+    const encryptedSourceIds = sourceIds.filter(isEncryptedBox);
+    if (encryptedSourceIds.length > 0) {
+        return encryptedSourceIds.length === sourceIds.length && sourceIds.length === 1 && sourceIds[0] === targetNotebookId;
+    }
+    return !isEncryptedBox(targetNotebookId);
+};
+
 export const moveToPath = (fromPaths: string[], toNotebook: string, toPath: string) => {
     fetchPost("/api/filetree/moveDocs", {
         toNotebook,
@@ -214,6 +245,7 @@ export const movePathTo = (options: {
     title?: string,
     flashcard: boolean
     rootIDs?: string[],
+    sourceNotebookIds?: string[],
 }) => {
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector("#foldList")) {
@@ -234,7 +266,7 @@ export const movePathTo = (options: {
         <svg class="svg--mid"><use xlink:href="#iconSearch"></use></svg>
         <svg class="svg--smaller"><use xlink:href="#iconDown"></use></svg>
     </span>
-    <input class="b3-text-field fn__block" style="padding-left: 42px;" value="" placeholder="${window.siyuan.languages.search}">
+    <input class="b3-text-field fn__block" style="padding-left: 42px;" value="" placeholder="${window.siyuan.languages.searchPlaceholder}">
 </div>
 <ul id="foldList" class="fn__flex-1 fn__none b3-list b3-list--background${isMobile() ? " b3-list--mobile" : ""}" style="overflow: auto;position: relative"></ul>
 <div id="foldTree" class="fn__flex-1${isMobile() ? " b3-list--mobile" : ""}" style="overflow: auto;position: relative"></div>
@@ -263,7 +295,7 @@ export const movePathTo = (options: {
     setNoteBook((notebooks) => {
         let html = "";
         notebooks.forEach((item) => {
-            if (!item.closed) {
+            if (!item.closed && isMoveTargetAllowed(options.sourceNotebookIds, item.id)) {
                 let countHTML = "";
                 if (options.flashcard) {
                     countHTML = `<span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardNewCard}">${item.newFlashcardCount}</span>
@@ -698,7 +730,7 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
     ${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder), "b3-list-item__graphic", true)}
-    <span class="b3-list-item__text ariaLabel" data-position="parentE" aria-label="${getDocDisplayName(item.name, item.titleEmpty, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
+    <span class="b3-list-item__text ariaLabel" data-position="parentE" aria-label="${getDocDisplayName(item.name, item.titleEmpty, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + escapeAriaLabel(item.bookmark) : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + escapeAriaLabel(item.name1) : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + escapeAriaLabel(item.alias) : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + escapeAriaLabel(item.memo) : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
     ${countHTML}
 </li>`;
         });
@@ -706,15 +738,8 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
             return;
         }
         toggleElement.classList.add("b3-list-item__arrow--open");
-        liElement.insertAdjacentHTML("afterend", `<ul class="file-tree__sliderDown">${fileHTML}</ul>`);
-        const nextElement = liElement.nextElementSibling;
-        setTimeout(() => {
-            nextElement.setAttribute("style", `height:${nextElement.childElementCount * liElement.clientHeight}px;`);
-            setTimeout(() => {
-                nextElement.classList.remove("file-tree__sliderDown");
-                nextElement.removeAttribute("style");
-            }, 120);
-        }, 2);
+        liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
+        expandFileTree(liElement.nextElementSibling as HTMLElement);
     });
 };
 
@@ -760,16 +785,31 @@ export const getOpenNotebookCount = () => {
 };
 
 export const setNoteBook = (cb?: (notebook: INotebook[]) => void, flashcard = false) => {
-    fetchPost("/api/notebook/lsNotebooks", {
+    return fetchPost("/api/notebook/lsNotebooks", {
         flashcard
     }, (response) => {
         if (!flashcard) {
             window.siyuan.notebooks = response.data.notebooks;
+            if (window.siyuan.config?.fileTree) {
+                window.siyuan.config.fileTree.boxDocEnabled = response.data.boxDocEnabled;
+            }
         }
         if (cb) {
             cb(response.data.notebooks);
         }
     });
+};
+
+/**
+ * 返回指定 boxID 是否为加密笔记本。
+ * 用于前端在加密 box 上下文里给 getDoc / 反链 / 搜索请求带上 notebook 参数，
+ * 让内核走 InBox 版（查加密 blocktree + content db）。
+ */
+export const isEncryptedBox = (boxId: string): boolean => {
+    if (!boxId) {
+        return false;
+    }
+    return !!window.siyuan.notebooks?.find((item) => item.id === boxId && item.encrypted);
 };
 
 /**

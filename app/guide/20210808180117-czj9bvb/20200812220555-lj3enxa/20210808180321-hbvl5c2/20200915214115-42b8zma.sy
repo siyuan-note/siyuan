@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20250115152751"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-lr6v0s2",
-				"updated": "20250115152740"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -229,16 +229,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210512171633-u3iy2xx",
-				"updated": "20230505083901"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeImage",
 					"Data": "span",
-					"Properties": {
-						"parent-style": "display: block;",
-						"style": "display: block;"
-					},
 					"Children": [
 						{
 							"Type": "NodeBang"
@@ -271,10 +267,6 @@
 							"Type": "NodeCloseParen"
 						}
 					]
-				},
-				{
-					"Type": "NodeKramdownSpanIAL",
-					"Data": "{: style=\"display: block;\" parent-style=\"display: block;\"}"
 				}
 			]
 		},
@@ -307,7 +299,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210115222011-bzsftun",
-				"updated": "20241027164443"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -471,7 +463,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210115223610-ffnxstf",
-				"updated": "20241027164443"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -494,7 +486,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中可以一键清理未引用资源，如果需要找回被误删的文件，请通过"
+					"Data": " ​ 中可以一键清理未引用资源，如果需要找回被误删的文件，请通过"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -538,7 +530,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230604115545-plxx5iu",
-				"updated": "20250115152751"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -552,7 +544,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604115552-qqg9s4j",
-				"updated": "20250115152751"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -575,7 +567,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中可以查看丢失的资源，复制路径后可以在全局搜索中找到引用处。"
+					"Data": " ​ 中可以查看丢失的资源，复制路径后可以在全局搜索中找到引用处。"
 				}
 			]
 		},
@@ -584,7 +576,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604115950-hru51yy",
-				"updated": "20230604120815"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1273,12 +1265,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414202749-qbcnypq",
-				"updated": "20230414202900"
+				"updated": "20260720201253"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "调整完以后需要手动重建索引。"
+					"Data": "调整完以后需要手动重建资源文件索引。"
 				}
 			]
 		}

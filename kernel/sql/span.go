@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -50,6 +50,18 @@ type Span struct {
 }
 
 func SelectSpansRawStmt(stmt string, limit int) (ret []*Span) {
+	return selectSpansRawStmt(stmt, limit, func(stmt string) (*sql.Rows, error) {
+		return query(stmt)
+	})
+}
+
+func SelectSpansRawStmtInBox(stmt string, limit int, boxID string) (ret []*Span) {
+	return selectSpansRawStmt(stmt, limit, func(stmt string) (*sql.Rows, error) {
+		return queryForBox(boxID, stmt)
+	})
+}
+
+func selectSpansRawStmt(stmt string, limit int, queryFn func(string) (*sql.Rows, error)) (ret []*Span) {
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if err != nil {
 		//logging.LogErrorf("select [%s] failed: %s", stmt, err)
@@ -76,7 +88,7 @@ func SelectSpansRawStmt(stmt string, limit int) (ret []*Span) {
 	stmt = strings.ReplaceAll(stmt, "\\\"", "\"")
 	stmt = strings.ReplaceAll(stmt, "\\\\*", "\\*")
 	stmt = strings.ReplaceAll(stmt, "from dual", "")
-	rows, err := query(stmt)
+	rows, err := queryFn(stmt)
 	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
 			return

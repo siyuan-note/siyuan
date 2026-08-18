@@ -7,7 +7,7 @@
 		"id": "20240530101000-8m2dowc",
 		"title": "プラグイン",
 		"type": "doc",
-		"updated": "20250115152435"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -70,7 +70,7 @@
 			"Properties": {
 				"ID": "20240530101000-ofwsgnj",
 				"id": "20240530101000-qt554cl",
-				"updated": "20250115152435"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -84,7 +84,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240530101000-7g50y4t",
-				"updated": "20250115152435"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -134,7 +134,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ から行います。"
+					"Data": " ​ から行います。"
 				}
 			]
 		},
@@ -145,7 +145,7 @@
 			"Properties": {
 				"ID": "20240530101000-tfbnlkd",
 				"id": "20240530101000-yhkv0tv",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -160,13 +160,13 @@
 			"Properties": {
 				"ID": "20240530101000-r6csz4b",
 				"id": "20240530101000-e2jw7by",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "コミュニティマーケットプレイスのリポジトリ"
 				},
 				{

@@ -5,7 +5,7 @@ import {Constants} from "../constants";
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {escapeHtml} from "../util/escape";
-import {setStorageVal} from "../protyle/util/compatibility";
+import {isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
 import {getDefaultSubType} from "./getDefault";
@@ -411,6 +411,9 @@ const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
 export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                               criteriaData: Config.IUILayoutTabSearchConfig[],
                               element: Element) => {
+    if (isSensitiveSearchConfig(config)) {
+        return;
+    }
     const saveDialog = new Dialog({
         title: window.siyuan.languages.saveCriterion,
         content: `<div class="b3-dialog__content">
@@ -777,7 +780,7 @@ export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTab
     });
 };
 
-export const getKeyByLiElement = (element: HTMLElement) => {
+export const getKeysByLiElement = (element: HTMLElement) => {
     const keys: string[] = [];
     element.querySelectorAll(".b3-list-item__text mark").forEach(item => {
         keys.push(item.textContent);
@@ -787,5 +790,9 @@ export const getKeyByLiElement = (element: HTMLElement) => {
             keys.push(item.textContent);
         });
     }
-    return [...new Set(keys)].join(" ");
+    return [...new Set(keys)];
+};
+
+export const getKeyByLiElement = (element: HTMLElement) => {
+    return getKeysByLiElement(element).join(" ");
 };

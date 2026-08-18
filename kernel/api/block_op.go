@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,19 +18,33 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func parseBlockUpdateInput(arg map[string]any, ret *gulu.Result) (input model.BlockUpdateInput, ok bool) {
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", &input.ID, true, true),
+		util.BindJsonArg("data", &input.Data, true, false),
+		util.BindJsonArg("dataType", &input.DataType, true, true),
+		util.BindJsonArg("lockType", &input.LockType, false, false),
+	) {
+		return
+	}
+	if util.InvalidIDPattern(input.ID, ret) {
+		return input, false
+	}
+	return input, true
+}
 
 func buildUpdatedTaskListItemBlockDOM(id, marker string, luteEngine *lute.Lute) (data string, err error) {
 	block, err := model.GetBlock(id, nil)
@@ -839,93 +853,17 @@ func updateBlock(c *gin.Context) {
 		return
 	}
 
-	data := arg["data"].(string)
-	dataType := arg["dataType"].(string)
-	id := arg["id"].(string)
-	if util.InvalidIDPattern(id, ret) {
+	input, ok := parseBlockUpdateInput(arg, ret)
+	if !ok {
 		return
 	}
 
-	luteEngine := util.NewLute()
-	if "markdown" == dataType {
-		var err error
-		data, err = dataBlockDOM(data, luteEngine)
-		if err != nil {
-			ret.Code = -1
-			ret.Msg = "data block DOM failed: " + err.Error()
-			return
-		}
-	}
-	tree := luteEngine.BlockDOM2Tree(data)
-	if nil == tree || nil == tree.Root || nil == tree.Root.FirstChild {
-		ret.Code = -1
-		ret.Msg = "parse tree failed"
-		return
-	}
-
-	block, err := model.GetBlock(id, nil)
+	transactions, _, err := model.PerformBlockUpdates([]model.BlockUpdateInput{input})
 	if err != nil {
 		ret.Code = -1
-		ret.Msg = "get block failed: " + err.Error()
+		ret.Msg = err.Error()
 		return
 	}
-
-	var transactions []*model.Transaction
-	if "NodeDocument" == block.Type {
-		oldTree, err := filesys.LoadTree(block.Box, block.Path, luteEngine)
-		if err != nil {
-			ret.Code = -1
-			ret.Msg = "load tree failed: " + err.Error()
-			return
-		}
-		var toRemoves []*ast.Node
-		var ops []*model.Operation
-		for n := oldTree.Root.FirstChild; nil != n; n = n.Next {
-			toRemoves = append(toRemoves, n)
-			ops = append(ops, &model.Operation{Action: "delete", ID: n.ID, Data: map[string]any{
-				"createEmptyParagraph": false, // 清空文档后前端不要创建空段落
-			}})
-		}
-		for _, n := range toRemoves {
-			n.Unlink()
-		}
-		ops = append(ops, &model.Operation{Action: "appendInsert", Data: data, ParentID: id})
-		transactions = append(transactions, &model.Transaction{
-			DoOperations: ops,
-		})
-	} else {
-		if "NodeListItem" == block.Type && ast.NodeList == tree.Root.FirstChild.Type {
-			// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658
-			tree.Root.AppendChild(tree.Root.FirstChild.FirstChild) // 将列表下的第一个列表项移到文档结尾，移动以后根下面直接挂列表项，渲染器可以正常工作
-			tree.Root.FirstChild.Unlink()                          // 删除列表
-			if nil != tree.Root.FirstChild && ast.NodeKramdownBlockIAL == tree.Root.FirstChild.Type {
-				tree.Root.FirstChild.Unlink() // 继续删除列表 IAL
-			}
-		}
-
-		if nil != tree.Root.FirstChild {
-			tree.Root.FirstChild.SetIALAttr("id", id)
-		} else {
-			logging.LogWarnf("tree root has no child node, append empty paragraph node")
-			tree.Root.AppendChild(treenode.NewParagraph(id))
-		}
-
-		data = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
-		transactions = []*model.Transaction{
-			{
-				DoOperations: []*model.Operation{
-					{
-						Action: "update",
-						ID:     id,
-						Data:   data,
-					},
-				},
-			},
-		}
-	}
-
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -1020,105 +958,28 @@ func batchUpdateBlock(c *gin.Context) {
 		return
 	}
 
-	type updateBlockArg struct {
-		ID       string
-		Data     string
-		DataType string
-		Block    *model.Block
-		Tree     *parse.Tree
-	}
-
-	var blocks []*updateBlockArg
-	luteEngine := util.NewLute()
-	for _, blockArg := range blocksArg {
-		blockMap := blockArg.(map[string]any)
-		id := blockMap["id"].(string)
-		if util.InvalidIDPattern(id, ret) {
-			return
-		}
-
-		data := blockMap["data"].(string)
-		dataType := blockMap["dataType"].(string)
-		if "markdown" == dataType {
-			var err error
-			data, err = dataBlockDOM(data, luteEngine)
-			if err != nil {
-				ret.Code = -1
-				ret.Msg = "data block DOM failed: " + err.Error()
-				return
-			}
-		}
-		tree := luteEngine.BlockDOM2Tree(data)
-		if nil == tree || nil == tree.Root || nil == tree.Root.FirstChild {
+	inputs := make([]model.BlockUpdateInput, 0, len(blocksArg))
+	for i, blockArg := range blocksArg {
+		blockMap, isMap := blockArg.(map[string]any)
+		if !isMap {
 			ret.Code = -1
-			ret.Msg = "parse tree failed"
+			ret.Msg = fmt.Sprintf("Field [blocks[%d]] should be of type [Object]", i)
 			return
 		}
-
-		block, err := model.GetBlock(id, nil)
-		if err != nil {
-			ret.Code = -1
-			ret.Msg = "get block failed: " + err.Error()
+		input, parsed := parseBlockUpdateInput(blockMap, ret)
+		if !parsed {
+			ret.Msg = fmt.Sprintf("blocks[%d]: %s", i, ret.Msg)
 			return
 		}
-
-		blocks = append(blocks, &updateBlockArg{
-			ID:       id,
-			Data:     data,
-			DataType: dataType,
-			Block:    block,
-			Tree:     tree,
-		})
+		inputs = append(inputs, input)
 	}
 
-	var ops []*model.Operation
-	tx := &model.Transaction{}
-	transactions := []*model.Transaction{tx}
-	for _, upBlock := range blocks {
-		block := upBlock.Block
-		data := upBlock.Data
-		tree := upBlock.Tree
-		id := upBlock.ID
-		if "NodeDocument" == block.Type {
-			oldTree, err := filesys.LoadTree(block.Box, block.Path, luteEngine)
-			if err != nil {
-				ret.Code = -1
-				ret.Msg = "load tree failed: " + err.Error()
-				return
-			}
-			var toRemoves []*ast.Node
-
-			for n := oldTree.Root.FirstChild; nil != n; n = n.Next {
-				toRemoves = append(toRemoves, n)
-				ops = append(ops, &model.Operation{Action: "delete", ID: n.ID, Data: map[string]any{
-					"createEmptyParagraph": false, // 清空文档后前端不要创建空段落
-				}})
-			}
-			for _, n := range toRemoves {
-				n.Unlink()
-			}
-			ops = append(ops, &model.Operation{Action: "appendInsert", Data: data, ParentID: id})
-		} else {
-			if "NodeListItem" == block.Type && ast.NodeList == tree.Root.FirstChild.Type {
-				// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658
-				tree.Root.AppendChild(tree.Root.FirstChild.FirstChild) // 将列表下的第一个列表项移到文档结尾，移动以后根下面直接挂列表项，渲染器可以正常工作
-				tree.Root.FirstChild.Unlink()                          // 删除列表
-				tree.Root.FirstChild.Unlink()                          // 继续删除列表 IAL
-			}
-			tree.Root.FirstChild.SetIALAttr("id", id)
-
-			data = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
-			ops = append(ops, &model.Operation{
-				Action: "update",
-				ID:     id,
-				Data:   data,
-			})
-		}
+	transactions, _, err := model.PerformBlockUpdates(inputs)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
-
-	tx.DoOperations = ops
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -1162,34 +1023,5 @@ func broadcastTransactions(transactions []*model.Transaction) {
 }
 
 func dataBlockDOM(data string, luteEngine *lute.Lute) (ret string, err error) {
-	luteEngine.SetHTMLTag2TextMark(true) // API `/api/block/**` 无法使用 `<u>foo</u>` 与 `<kbd>bar</kbd>` 插入/更新行内元素 https://github.com/siyuan-note/siyuan/issues/6039
-
-	ret, tree := luteEngine.Md2BlockDOMTree(data, true)
-	if "" == ret {
-		// 使用 API 插入空字符串出现错误 https://github.com/siyuan-note/siyuan/issues/3931
-		blankParagraph := treenode.NewParagraph("")
-		ret = luteEngine.RenderNodeBlockDOM(blankParagraph)
-	}
-
-	invalidID := ""
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if "" != n.ID {
-			if !ast.IsNodeIDPattern(n.ID) {
-				invalidID = n.ID
-				return ast.WalkStop
-			}
-		}
-		return ast.WalkContinue
-	})
-
-	if "" != invalidID {
-		err = errors.New("found invalid ID [" + invalidID + "]")
-		ret = ""
-		return
-	}
-	return
+	return model.DataBlockDOM(data, luteEngine)
 }

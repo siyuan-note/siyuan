@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
@@ -371,57 +372,117 @@ var dataNodeIDPattern = regexp.MustCompile(`data-node-id="([^"]+)"`)
 var refcountAttrPattern = regexp.MustCompile(`\s*refcount="[^"]*"`)
 var refcountDivPattern = regexp.MustCompile(`<div class="protyle-attr--refcount[^"]*"[^>]*>.*?</div>`)
 
+func replaceReplayOperationID(operation *Operation, replacements map[string]string) (replaced bool) {
+	newID, replaced := replacements[operation.ID]
+	if !replaced {
+		return false
+	}
+	// insert 恢复的容器 ID 换新后，紧随其后的 update 也必须指向新容器；delete 仍保留旧 ID 以清理冲突块。
+	if "insert" == operation.Action || "update" == operation.Action {
+		operation.ID = newID
+	}
+	return true
+}
+
+func replayOperationBlockIndexes(operations []*Operation) (insertIndexes, deleteIndexes map[string]int) {
+	insertIndexes, deleteIndexes = map[string]int{}, map[string]int{}
+	recordFirstIndex := func(indexes map[string]int, id string, index int) {
+		if !ast.IsNodeIDPattern(id) {
+			return
+		}
+		if _, exists := indexes[id]; !exists {
+			indexes[id] = index
+		}
+	}
+	for index, operation := range operations {
+		switch operation.Action {
+		case "delete":
+			recordFirstIndex(deleteIndexes, operation.ID, index)
+		case "insert":
+			recordFirstIndex(insertIndexes, operation.ID, index)
+			data, ok := operation.Data.(string)
+			if !ok {
+				continue
+			}
+			for _, match := range dataNodeIDPattern.FindAllStringSubmatch(data, -1) {
+				recordFirstIndex(insertIndexes, match[1], index)
+			}
+		}
+	}
+	return
+}
+
+func replayBlockIDConflicts(node *ast.Node, insertIndex int, deleteIndexes map[string]int) bool {
+	for current := node; nil != current; current = current.Parent {
+		if deleteIndex, exists := deleteIndexes[current.ID]; exists && deleteIndex < insertIndex {
+			return false
+		}
+	}
+	return true
+}
+
+func existingReplayBlockIDs(insertIndexes, deleteIndexes map[string]int) map[string]bool {
+	ret := map[string]bool{}
+	ids := make([]string, 0, len(insertIndexes))
+	for id := range insertIndexes {
+		ids = append(ids, id)
+	}
+	blockTrees := treenode.GetBlockTrees(ids)
+	loadedTrees := map[string]*parse.Tree{}
+	loadFailed := map[string]bool{}
+	for _, id := range ids {
+		ret[id] = false
+		blockTree := blockTrees[id]
+		if nil == blockTree {
+			continue
+		}
+		key := blockTree.BoxID + "\x00" + blockTree.Path
+		tree, loaded := loadedTrees[key]
+		if !loaded && !loadFailed[key] {
+			var err error
+			tree, err = loadTreeByBlockTree(blockTree)
+			if nil != err || nil == tree {
+				// 无法读取时按存在处理，避免在不确定状态下引入重复 ID。
+				loadFailed[key] = true
+			} else {
+				loadedTrees[key] = tree
+			}
+		}
+		if loadFailed[key] {
+			ret[id] = true
+			continue
+		}
+		node := treenode.GetNodeInTree(tree, id)
+		ret[id] = nil != node && replayBlockIDConflicts(node, insertIndexes[id], deleteIndexes)
+	}
+	return ret
+}
+
 // ResolveReplayDuplicateIds 在 undo/redo 重放事务前解决块 ID 冲突。
 // 场景：剪切块 X 后粘贴到别处（保留原 ID），再撤销剪切会 insert X，而 X 已存在于粘贴处，产生重复 ID。
-// 这里对即将重放的 insert 操作做检查——若其引入的 ID 在块树中已存在，则在正反向操作及关联字段
-// （ID/ParentID/PreviousID/NextID 与 Data 内联 ID）上统一替换为新 ID。
-// 替换同时作用于 do/undo 两套操作：重放只执行 doOperations，但若不同步改 undoOperations，
-// 随后对同一 entry 的 redo 会沿用旧 ID 再次撞库。
+// 这里检查实际重放的 insert 操作；若其引入的 ID 在块树中已存在，且不会被前置 delete 清理，
+// 则在当前重放操作的 ID、ParentID、PreviousID、NextID 与 Data 内联 ID 中统一替换为新 ID。
 func ResolveReplayDuplicateIds(tx *Transaction) {
 	if nil == tx || !tx.isReplay {
 		return
 	}
 
-	// 收集所有 insert 操作引入的块 ID（op.ID + Data 内联的 data-node-id）
-	ids := map[string]struct{}{}
-	collect := func(ops []*Operation) {
-		for _, op := range ops {
-			if "insert" != op.Action {
-				continue
-			}
-			if "" != op.ID && ast.IsNodeIDPattern(op.ID) {
-				ids[op.ID] = struct{}{}
-			}
-			data, ok := op.Data.(string)
-			if !ok {
-				continue
-			}
-			for _, m := range dataNodeIDPattern.FindAllStringSubmatch(data, -1) {
-				if ast.IsNodeIDPattern(m[1]) {
-					ids[m[1]] = struct{}{}
-				}
-			}
-		}
-	}
-	collect(tx.DoOperations)
+	insertIndexes, deleteIndexes := replayOperationBlockIndexes(tx.DoOperations)
 	// 注意：只检测 DoOperations（实际执行的操作），不检测 UndoOperations。
 	// UndoOperations 在 redo 时会作为新的 DoOperations 再次过 ResolveReplayDuplicateIds。
 	// 若 undo 时也检测 UndoOperations 的 insert，会把 redo 用的 ID 换新，
 	// 污染 DoOperations 的对应 delete（do/undo 共享 replacements），导致撤销删除错误 ID。
-	if 0 == len(ids) {
+	if 0 == len(insertIndexes) {
 		return
 	}
 
-	idList := make([]string, 0, len(ids))
-	for id := range ids {
-		idList = append(idList, id)
-	}
-	exist := treenode.ExistBlockTrees(idList)
+	// blocktree 索引异步更新，立即撤销时可能仍残留已删除容器的记录，必须以当前 .sy 树为准。
+	exist := existingReplayBlockIDs(insertIndexes, deleteIndexes)
 
 	// 已存在的 ID 生成替换
 	replacements := map[string]string{}
-	for _, id := range idList {
-		if exist[id] {
+	for id, exists := range exist {
+		if exists {
 			replacements[id] = ast.NewNodeID()
 		}
 	}
@@ -429,14 +490,16 @@ func ResolveReplayDuplicateIds(tx *Transaction) {
 		return
 	}
 
-	// 对 do/undo 两套操作统一替换 ID 及关联字段
+	// 对实际重放的操作统一替换 ID 及关联字段
 	apply := func(ops []*Operation) {
 		for _, op := range ops {
-			// 记录本操作的 ID 是否被换新（在改 op.ID 之前判断，否则 replacements 的 key 是 oldID 查不到）
-			_, idReplaced := replacements[op.ID]
-			if newID, ok := replacements[op.ID]; ok {
-				op.ID = newID
-			}
+			// 记录本操作的 ID 是否被换新，以便清除引用角标。
+			idReplaced := replaceReplayOperationID(op, replacements)
+			// delete 操作声明的 ID 是待删除的旧块本身，若换为新 ID，
+			// doDelete 会找不到节点而静默跳过，导致旧块残留并在重放后产生重复块。
+			// 典型场景：列表转段落后撤销——undo 先 delete 扁平化出的子块，再 insert 原列表
+			// （HTML 内联同一批子块 ID），这些子块会被前置 delete 清理，本不该参与冲突替换。
+			// https://github.com/siyuan-note/siyuan/issues/18012
 			if newID, ok := replacements[op.ParentID]; ok {
 				op.ParentID = newID
 			}

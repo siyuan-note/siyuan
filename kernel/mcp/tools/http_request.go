@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@ package tools
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -31,6 +32,7 @@ import (
 var HTTPRequestTool = &Tool{
 	Name:        "http_request",
 	Description: "Send an HTTP request to a REST API and return the raw text response (JSON is kept as-is). action (HTTP method): get (default)/post/put/delete/patch. url (http/https), headers (object), body (string). Use this instead of web_fetch when you need POST, custom headers (e.g. Authorization), or raw JSON responses.",
+	EffectScope: EffectScopeExternal,
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
@@ -56,24 +58,30 @@ func init() {
 	register(HTTPRequestTool)
 }
 
-func httpRequestHandler(args map[string]interface{}) (CallToolResult, error) {
+func httpRequestHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	rawURL, _ := args["url"].(string)
 
 	headers := map[string]string{}
-	if hs, ok := args["headers"].(map[string]interface{}); ok {
+	if hs, ok := args["headers"].(map[string]any); ok {
 		for k, v := range hs {
 			headers[k] = fmt.Sprintf("%v", v)
 		}
 	}
 	body, _ := args["body"].(string)
 
-	// 对 url/headers/body 中的 {{secrets.NAME}}、{{vars.NAME}} 占位符插值，
-	// 密钥/变量明文只进入出站请求，不进入 LLM 上下文。
-	resolve := func(s string) string {
-		return conf.ResolveSecretsVars(model.Conf.Secrets, model.Conf.Variables, s)
+	// URL 只插值非敏感的 {{vars.NAME}} 变量，绝不插值 {{secrets.NAME}}：目标地址完全由
+	// 智能体/MCP 客户端控制，插值密钥会让明文被发送到任意公网主机。
+	// headers/body 中的密钥插值按目标主机限定（见 ResolveSecretsVarsForHost），
+	// 只有目标主机在密钥的允许主机列表内才插值，密钥明文只进入出站请求，不进入 LLM 上下文。
+	rawURL = model.Conf.Variables.Resolve(rawURL)
+	host := ""
+	if u, err := url.Parse(rawURL); err == nil {
+		host = u.Hostname()
 	}
-	rawURL = resolve(rawURL)
+	resolve := func(s string) string {
+		return conf.ResolveSecretsVarsForHost(model.Conf.Secrets, model.Conf.Variables, host, s)
+	}
 	for k, v := range headers {
 		headers[k] = resolve(v)
 	}

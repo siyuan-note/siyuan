@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,11 +19,15 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	mcpserver "github.com/siyuan-note/siyuan/kernel/mcp"
+	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -157,20 +161,19 @@ func setBazaar(c *gin.Context) {
 		return
 	}
 
-	if bazaar.PetalDisabled || !bazaar.Trust {
-		// disable all kernel plugins
-		if model.OnKernelPluginsStop != nil {
-			model.OnKernelPluginsStop()
-		}
-	} else {
-		// enable all kernel plugins
-		if model.OnKernelPluginsStart != nil {
-			model.OnKernelPluginsStart()
-		}
-	}
-
+	petalsEnabled := model.IsPetalsEnabled()
 	model.Conf.Bazaar = bazaar
 	model.Conf.Save()
+	newPetalsEnabled := model.IsPetalsEnabled()
+	if petalsEnabled != newPetalsEnabled {
+		if newPetalsEnabled {
+			if model.OnKernelPluginsStart != nil {
+				model.OnKernelPluginsStart()
+			}
+		} else if model.OnKernelPluginsStop != nil {
+			model.OnKernelPluginsStop()
+		}
+	}
 
 	ret.Data = bazaar
 }
@@ -197,13 +200,73 @@ func setAI(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if ai.MCP != nil {
+		for _, server := range ai.MCP.Servers {
+			if err = mcpclient.ValidateMCPServerEnvironment(server); err != nil {
+				ret.Code = -1
+				ret.Msg = "invalid MCP server environment: " + err.Error()
+				return
+			}
+		}
+	}
 
-	model.Conf.AI = ai
+	var oldServers []conf.MCPServer
+	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {
+		oldServers = append(oldServers, model.Conf.AI.MCP.Servers...)
+	}
+	if ai.MCP != nil {
+		preserveMCPServerIDs(oldServers, ai.MCP.Servers)
+	}
+	ai.Normalize()
+	ai.ReconcileModelIDs()
+	model.Conf.SetAI(ai)
+	mcpserver.RefreshToolExposure()
 
-	model.Conf.AI.Normalize()
-	model.Conf.Save()
+	// MCP 配置可能变更（开关切换、编辑、增删 server），异步重连让连接立即跟上。
+	if model.Conf.AI.MCP != nil {
+		newServers := model.Conf.AI.MCP.Servers
+		oldByID := make(map[string]conf.MCPServer, len(oldServers))
+		newByID := make(map[string]conf.MCPServer, len(newServers))
+		for _, server := range oldServers {
+			oldByID[server.ID] = server
+		}
+		for _, server := range newServers {
+			newByID[server.ID] = server
+		}
+
+		var interactiveServerIDs []string
+		for _, server := range newServers {
+			old, existed := oldByID[server.ID]
+			if server.Enabled && server.Type == "http" && (!existed || !reflect.DeepEqual(old, server)) {
+				interactiveServerIDs = append(interactiveServerIDs, server.ID)
+			}
+		}
+		for _, server := range oldServers {
+			updated, exists := newByID[server.ID]
+			if !exists || (server.Type == "http" && (updated.Type != "http" || updated.URL != server.URL)) {
+				if revokeErr := mcpclient.DisconnectMCPOAuth(server.ID); revokeErr != nil {
+					logging.LogWarnf("mcp oauth: disconnect server [%s] failed: %s", server.Name, revokeErr)
+				}
+			}
+		}
+		if !reflect.DeepEqual(oldServers, newServers) {
+			mcpclient.ReconnectMCPAsync(newServers, nil, interactiveServerIDs)
+		}
+	}
 
 	ret.Data = model.Conf.AI
+}
+
+func preserveMCPServerIDs(oldServers, newServers []conf.MCPServer) {
+	oldIDsByName := make(map[string]string, len(oldServers))
+	for _, server := range oldServers {
+		oldIDsByName[server.Name] = server.ID
+	}
+	for i := range newServers {
+		if newServers[i].ID == "" {
+			newServers[i].ID = oldIDsByName[newServers[i].Name]
+		}
+	}
 }
 
 func setSecrets(c *gin.Context) {
@@ -231,6 +294,7 @@ func setSecrets(c *gin.Context) {
 
 	model.Conf.Secrets = secrets
 	model.Conf.Save()
+	reconnectStdioMCPWithEnvironment()
 
 	ret.Data = model.Conf.Secrets
 }
@@ -260,8 +324,29 @@ func setVariables(c *gin.Context) {
 
 	model.Conf.Variables = variables
 	model.Conf.Save()
+	reconnectStdioMCPWithEnvironment()
 
 	ret.Data = model.Conf.Variables
+}
+
+func reconnectStdioMCPWithEnvironment() {
+	if model.Conf.AI == nil || model.Conf.AI.MCP == nil {
+		return
+	}
+	serverIDs := stdioMCPServerIDsWithEnvironment(model.Conf.AI.MCP.Servers)
+	if len(serverIDs) > 0 {
+		mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers, serverIDs, nil)
+	}
+}
+
+func stdioMCPServerIDsWithEnvironment(servers []conf.MCPServer) []string {
+	var serverIDs []string
+	for _, server := range servers {
+		if server.Enabled && server.Type == "stdio" && len(server.Env) > 0 {
+			serverIDs = append(serverIDs, server.ID)
+		}
+	}
+	return serverIDs
 }
 
 func setFlashcard(c *gin.Context) {
@@ -371,8 +456,7 @@ func setEditor(c *gin.Context) {
 	}
 
 	if nil == editor.FloatWindowDelay {
-		v := 620
-		editor.FloatWindowDelay = &v
+		editor.FloatWindowDelay = new(620)
 	} else {
 		*editor.FloatWindowDelay = max(0, min(2000, *editor.FloatWindowDelay))
 	}
@@ -430,27 +514,38 @@ func setExport(c *gin.Context) {
 		return
 	}
 
-	// 重置为空字符串表示恢复内置 Pandoc：先落盘清空自定义路径，再重新初始化并写回默认路径
-	if "" == export.PandocBin {
-		model.Conf.Export = export
-		model.Conf.Save()
-		util.InitPandoc()
-		export.PandocBin = util.PandocBinPath
-	}
-
+	previousPandocBin := model.Conf.Export.PandocBin
 	if "" != export.PandocBin {
 		if !util.IsValidPandocBin(export.PandocBin) {
 			util.PushErrMsg(fmt.Sprintf(model.Conf.Language(117), export.PandocBin), 5000)
-			export.PandocBin = util.PandocBinPath
-		} else {
-			util.PandocBinPath = export.PandocBin
+			export.PandocBin = previousPandocBin
 		}
 	}
 
 	model.Conf.Export = export
 	model.Conf.Save()
+	if previousPandocBin != export.PandocBin {
+		util.InitPandoc(export.PandocBin)
+	}
 
 	ret.Data = model.Conf.Export
+}
+
+func getPandocBin(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	pandocRuntime := util.GetPandocRuntime()
+	if !util.IsValidPandocBin(pandocRuntime.BinPath) {
+		util.InitPandoc(model.Conf.Export.PandocBin)
+		pandocRuntime = util.GetPandocRuntime()
+	}
+	if !util.IsValidPandocBin(pandocRuntime.BinPath) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(115)
+		return
+	}
+	ret.Data = pandocRuntime.BinPath
 }
 
 func setFiletree(c *gin.Context) {
@@ -462,6 +557,7 @@ func setFiletree(c *gin.Context) {
 		return
 	}
 
+	oldSortMode := model.Conf.FileTree.Sort
 	param, err := gulu.JSON.MarshalJSON(arg)
 	if err != nil {
 		ret.Code = -1
@@ -470,13 +566,23 @@ func setFiletree(c *gin.Context) {
 	}
 
 	fileTree := conf.NewFileTree()
+	fileTree.BoxDocEnabled = nil
 	if err = gulu.JSON.UnmarshalJSON(param, fileTree); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+	if nil == fileTree.BoxDocEnabled {
+		if nil != model.Conf.FileTree && nil != model.Conf.FileTree.BoxDocEnabled {
+			fileTree.BoxDocEnabled = model.Conf.FileTree.BoxDocEnabled
+		} else {
+			fileTree.BoxDocEnabled = new(bool)
+		}
+	}
+	oldBoxDocEnabled := model.IsBoxDocEnabled()
 
 	fileTree.DocCreateSavePath = util.TrimSpaceInPath(fileTree.DocCreateSavePath)
+	fileTree.DocCreateTemplatePath = util.NormalizeTemplatePath(fileTree.DocCreateTemplatePath)
 
 	fileTree.RefCreateSavePath = util.TrimSpaceInPath(fileTree.RefCreateSavePath)
 
@@ -493,6 +599,16 @@ func setFiletree(c *gin.Context) {
 	if 32 < fileTree.MaxOpenTabCount {
 		fileTree.MaxOpenTabCount = 32
 	}
+	if nil == fileTree.TabStartupMode {
+		fileTree.TabStartupMode = new(int)
+		if fileTree.CloseTabsOnStart {
+			*fileTree.TabStartupMode = 2
+		}
+	}
+	if 0 > *fileTree.TabStartupMode || 2 < *fileTree.TabStartupMode {
+		*fileTree.TabStartupMode = 0
+	}
+	fileTree.CloseTabsOnStart = 2 == *fileTree.TabStartupMode
 
 	if conf.MinFileTreeRecentDocsListCount > fileTree.RecentDocsMaxListCount {
 		fileTree.RecentDocsMaxListCount = conf.MinFileTreeRecentDocsListCount
@@ -503,6 +619,12 @@ func setFiletree(c *gin.Context) {
 
 	model.Conf.FileTree = fileTree
 	model.Conf.Save()
+	if oldSortMode != fileTree.Sort {
+		model.PushDocSortModeChanged("global", "", "", "/", &fileTree.Sort)
+	}
+	if oldBoxDocEnabled != model.IsBoxDocEnabled() {
+		model.RefreshBoxDocFeature()
+	}
 
 	util.UseSingleLineSave = model.Conf.FileTree.UseSingleLineSave
 	util.LargeFileWarningSize = model.Conf.FileTree.LargeFileWarningSize
@@ -624,15 +746,54 @@ func setAppearance(c *gin.Context) {
 		return
 	}
 
+	if nil == appearance.EntryVisibility {
+		appearance.EntryVisibility = model.Conf.Appearance.EntryVisibility
+	}
 	model.Conf.Appearance = appearance
 	util.StatusBarCfg = model.Conf.Appearance.StatusBar
+	if nil == util.StatusBarCfg {
+		util.StatusBarCfg = &util.StatusBar{}
+	}
+	if nil == model.Conf.Appearance.Notifications {
+		// 旧配置未迁移，按默认全部启用处理
+		model.Conf.Appearance.Notifications = util.NewNotifications()
+	}
+	util.NotificationsCfg = model.Conf.Appearance.Notifications
 	model.Conf.Lang = util.LangToBCP47(appearance.Lang) // 兼容历史下划线值，如 zh_CN → zh-CN
 	util.Lang = model.Conf.Lang
 	model.Conf.Save()
 	model.InitAppearance()
+	model.WatchThemes()
 
 	ret.Data = model.Conf.Appearance
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
+}
+
+func setEntryVisibility(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	param, err := gulu.JSON.MarshalJSON(arg)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	entryVisibility := &conf.EntryVisibility{}
+	if err = gulu.JSON.UnmarshalJSON(param, entryVisibility); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	entryVisibility = conf.NormalizeEntryVisibility(entryVisibility, conf.EntryVisibilityProfileFull)
+	model.Conf.Appearance.EntryVisibility = entryVisibility
+	model.Conf.Save()
+	ret.Data = entryVisibility
+	util.BroadcastByType("main", "setEntryVisibility", 0, "", entryVisibility)
 }
 
 func setIcon(c *gin.Context) {
@@ -709,6 +870,7 @@ func setTheme(c *gin.Context) {
 	}
 
 	model.InitAppearance()
+	model.WatchThemes()
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
 }
 
@@ -733,6 +895,40 @@ func setPublish(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
+	}
+
+	if nil == publish.Auth {
+		// 请求体缺省 auth（如 null）时保留现有认证配置，避免把 null 写入 conf.json 导致下次启动崩溃
+		// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rp9f-c2fj-h648
+		if nil != model.Conf.Publish.Auth {
+			publish.Auth = model.Conf.Publish.Auth
+		} else {
+			publish.Auth = conf.NewPublish().Auth
+		}
+	}
+
+	// 认证启用时校验发布服务账户：用户名非空且不重复、密码至少 8 位，
+	// 防止弱密码或无密码账户被暴力破解 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phg7-xcr4-q5wg
+	if publish.Auth.Enable {
+		usernames := map[string]bool{}
+		for _, account := range publish.Auth.Accounts {
+			if nil == account || "" == account.Username {
+				ret.Code = -1
+				ret.Msg = model.Conf.Language(361)
+				return
+			}
+			if usernames[account.Username] {
+				ret.Code = -1
+				ret.Msg = model.Conf.Language(362)
+				return
+			}
+			usernames[account.Username] = true
+			if 8 > len(account.Password) {
+				ret.Code = -1
+				ret.Msg = model.Conf.Language(363)
+				return
+			}
+		}
 	}
 
 	model.Conf.Publish = publish
@@ -827,15 +1023,10 @@ func setEmoji(c *gin.Context) {
 	}
 
 	argEmoji := arg["emoji"].([]any)
-	var emoji []string
+	emoji := make([]string, 0, len(argEmoji))
 	for _, ae := range argEmoji {
-		e := ae.(string)
-		if strings.Contains(e, ".") {
-			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-			e = util.FilterUploadEmojiFileName(e)
-		}
-		emoji = append(emoji, e)
+		emoji = append(emoji, ae.(string))
 	}
 
-	model.Conf.Editor.Emoji = emoji
+	model.Conf.Editor.Emoji = util.FilterRecentIconValues(emoji)
 }

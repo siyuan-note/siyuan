@@ -7,7 +7,7 @@
 		"id": "20240530101000-na9sys7",
 		"title": "サードパーティのクラウドストレージへの接続",
 		"type": "doc",
-		"updated": "20260614133508"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -334,7 +334,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614133407-xkmhxuy",
-				"updated": "20260614133508"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -348,12 +348,44 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614133407-5i7zu66",
-				"updated": "20260614133407"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
 					"Type": "NodeText",
-					"Data": "[設定 - アカウントと同期 - クラウドストレージサービスプロバイダー] で選択と設定を行います。現在サポートしているもの："
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アカウントと同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "クラウドストレージサービスプロバイダー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ で選択と設定を行います。現在サポートしているもの："
 				}
 			]
 		},

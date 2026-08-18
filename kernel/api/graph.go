@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -23,6 +23,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -47,6 +48,60 @@ func resetLocalGraph(c *gin.Context) {
 	model.Conf.Save()
 	ret.Data = map[string]any{
 		"conf": graph,
+	}
+}
+
+func setGraphConf(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var graphType string
+	var confArg map[string]any
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("type", &graphType, true, true),
+		util.BindJsonArg("conf", &confArg, true, false),
+	) {
+		return
+	}
+	graphConf, err := gulu.JSON.MarshalJSON(confArg)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	switch graphType {
+	case "global":
+		global := conf.NewGlobalGraph()
+		if err = gulu.JSON.UnmarshalJSON(graphConf, global); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
+			model.Conf.Graph.Global = global
+			model.Conf.Save()
+		}
+		ret.Data = global
+	case "local":
+		local := conf.NewLocalGraph()
+		if err = gulu.JSON.UnmarshalJSON(graphConf, local); err != nil {
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+		if model.IsAdminRoleContext(c) && !model.IsReadOnlyRoleContext(c) {
+			model.Conf.Graph.Local = local
+			model.Conf.Save()
+		}
+		ret.Data = local
+	default:
+		ret.Code = -1
 	}
 }
 
@@ -92,8 +147,7 @@ func getGraph(c *gin.Context) {
 	boxID, nodes, links := model.BuildGraph(query)
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
-		nodes, links = model.FilterGraphByPublishIgnore(publishIgnore, nodes, links)
+		nodes, links = model.FilterGraphByPublishAccess(c, publishAccess, nodes, links)
 	}
 	ret.Data = map[string]any{
 		"nodes": nodes,
@@ -102,7 +156,6 @@ func getGraph(c *gin.Context) {
 		"box":   boxID,
 		"reqId": reqId,
 	}
-	util.RandomSleep(200, 500)
 }
 
 func getLocalGraph(c *gin.Context) {
@@ -129,6 +182,17 @@ func getLocalGraph(c *gin.Context) {
 	) {
 		return
 	}
+	notebook, _ := arg["notebook"].(string)
+	if model.IsEncryptedBox(notebook) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		return
+	}
+	if bt := treenode.GetBlockTree(id); bt != nil && model.IsEncryptedBox(bt.BoxID) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		return
+	}
 
 	graphConf, err := gulu.JSON.MarshalJSON(confArg)
 	if err != nil {
@@ -152,8 +216,7 @@ func getLocalGraph(c *gin.Context) {
 	boxID, nodes, links := model.BuildTreeGraph(id, keyword)
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
-		nodes, links = model.FilterGraphByPublishIgnore(publishIgnore, nodes, links)
+		nodes, links = model.FilterGraphByPublishAccess(c, publishAccess, nodes, links)
 	}
 	ret.Data = map[string]any{
 		"id":    id,
@@ -163,5 +226,4 @@ func getLocalGraph(c *gin.Context) {
 		"conf":  local,
 		"reqId": reqId,
 	}
-	util.RandomSleep(200, 500)
 }

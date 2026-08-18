@@ -6,7 +6,7 @@
 		"id": "20230506211210-1roopyo",
 		"title": "插件",
 		"type": "doc",
-		"updated": "20250115152340"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -51,7 +51,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230512195251-z81h9wi",
-				"updated": "20230512195305"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -67,7 +67,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "而言，插件主要面向程序功能擴展，不面向內容塊擴展。"
+					"Data": "而言，插件主要面向程序功能擴展，不面向內容區塊擴展。"
 				}
 			]
 		},
@@ -77,7 +77,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506211224-q293o5x",
-				"updated": "20250115152340"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -91,7 +91,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506211224-uqq704u",
-				"updated": "20250115152340"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -141,7 +141,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中啟用或禁用插件。"
+					"Data": " ​ 中啟用或禁用插件。"
 				}
 			]
 		},
@@ -151,7 +151,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506211224-p7vkirt",
-				"updated": "20230506211224"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -165,7 +165,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506211224-n2giwy1",
-				"updated": "20230820184231"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -175,7 +175,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "社區集市倉庫"
 				},
 				{

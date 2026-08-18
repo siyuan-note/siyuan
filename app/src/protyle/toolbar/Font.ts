@@ -1,11 +1,36 @@
 import {setStorageVal, updateHotkeyTip} from "../util/compatibility";
 import {ToolbarItem} from "./ToolbarItem";
-import {setPosition} from "../../util/setPosition";
-import {focusByRange, getSelectionPosition} from "../util/selection";
+import {focusByRange} from "../util/selection";
 import {Constants} from "../../constants";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {updateBatchTransaction} from "../wysiwyg/transaction";
 import {lineNumberRender} from "../render/highlightRender";
+import {closeSubElement} from "./subElementLifecycle";
+
+const MAX_RECENT_FONT_STYLES = 14;
+
+export const limitRecentFontStyleRows = (element: HTMLElement) => {
+    const wrapElement = element.querySelector('[data-id="lastUsedWrap"]');
+    if (!wrapElement) {
+        return;
+    }
+    const itemElements = Array.from(wrapElement.children) as HTMLElement[];
+    let rowCount = 0;
+    let lastTop: number;
+    let overflowIndex = itemElements.length;
+    itemElements.find((item, index) => {
+        if (item.offsetTop !== lastTop) {
+            rowCount++;
+            lastTop = item.offsetTop;
+        }
+        if (rowCount > 2) {
+            overflowIndex = index;
+            return true;
+        }
+        return false;
+    });
+    itemElements.slice(overflowIndex).forEach(item => item.classList.add("fn__none"));
+};
 
 export class Font extends ToolbarItem {
     public element: HTMLElement;
@@ -13,24 +38,71 @@ export class Font extends ToolbarItem {
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
         super(protyle, menuItem);
         this.element.addEventListener("click", () => {
+            const triggerRect = this.element.getBoundingClientRect();
+            const visibleTriggerRect = triggerRect.width > 0 && triggerRect.height > 0 ? triggerRect : undefined;
             protyle.toolbar.element.classList.add("fn__none");
+            closeSubElement(protyle.toolbar);
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";
             protyle.toolbar.subElement.style.padding = "";
-            protyle.toolbar.subElement.append(appearanceMenu(protyle, getFontNodeElements(protyle)));
+            const appearanceElement = appearanceMenu(protyle, getFontNodeElements(protyle));
+            protyle.toolbar.subElement.append(appearanceElement);
             protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
             protyle.toolbar.subElement.classList.remove("fn__none");
-            protyle.toolbar.subElementCloseCB = undefined;
+            limitRecentFontStyleRows(appearanceElement);
             focusByRange(protyle.toolbar.range);
             /// #if !MOBILE
-            const position = getSelectionPosition(protyle.wysiwyg.element, protyle.toolbar.range);
-            setPosition(protyle.toolbar.subElement, position.left, position.top + 18, 26);
+            protyle.toolbar.setSelectionElementPosition(
+                protyle, protyle.toolbar.subElement, visibleTriggerRect, appearanceElement
+            );
             /// #endif
         });
     }
 }
 
-export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
+export const getFontSizeInfo = (protyle: IProtyle, nodeElements?: Element[]) => {
+    let textElement: HTMLElement;
+    let fontSizeElement: HTMLElement;
+    if (nodeElements && nodeElements.length > 0) {
+        textElement = nodeElements[0] as HTMLElement;
+        fontSizeElement = textElement;
+    } else {
+        textElement = hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "text") as HTMLElement;
+        if (!textElement) {
+            textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
+        }
+        const startContainer = protyle.toolbar.range.startContainer;
+        fontSizeElement = startContainer.nodeType === Node.ELEMENT_NODE ?
+            startContainer as HTMLElement : startContainer.parentElement;
+    }
+
+    let baseFontSize = window.siyuan.config.editor.fontSize;
+    const baseElement = textElement?.isConnected ? textElement.parentElement : fontSizeElement;
+    if (baseElement) {
+        baseFontSize = parseFloat(getComputedStyle(baseElement).fontSize) || baseFontSize;
+    }
+
+    let fontSize = textElement?.style.fontSize;
+    if (!fontSize && fontSizeElement) {
+        fontSize = getComputedStyle(fontSizeElement).fontSize;
+    }
+    return {
+        fontSize: fontSize || window.siyuan.config.editor.fontSize + "px",
+        baseFontSize,
+    };
+};
+
+export const convertFontSize = (fontSize: string, unit: "px" | "em", baseFontSize: number) => {
+    const value = parseFloat(fontSize);
+    const base = baseFontSize || window.siyuan.config.editor.fontSize;
+    if (unit === "em") {
+        return fontSize.endsWith("em") ? value + "em" : parseFloat((value / base).toFixed(2)) + "em";
+    }
+    return fontSize.endsWith("px") ? Math.round(value) + "px" : Math.round(value * base) + "px";
+};
+
+export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
+                               onChange?: (type: string, color?: string) => void) => {
     let colorHTML = "";
     ["", "var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
         "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
@@ -75,14 +147,14 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
                     lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.colorPrimary}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]}"` : ""} data-type="${lastFontStatus[0]}"></button>`;
                     break;
                 case "style2":
-                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>`;
+                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.hollow}" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">A</button>`;
                     break;
                 case "style4":
-                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>`;
+                    lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.shadow}" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">A</button>`;
                     break;
                 case "fontSize":
                     if (!disableFont) {
-                        lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style">${lastFontStatus[1]}</button>`;
+                        lastColorHTML += `<button data-type="${lastFontStatus[0]}" data-value="${lastFontStatus[1]}" class="protyle-font__style ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.fontSize} ${lastFontStatus[1]}">${lastFontStatus[1]}</button>`;
                     }
                     break;
                 case "style1":
@@ -95,19 +167,10 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         });
         lastColorHTML += "</div>";
     }
-    let textElement: HTMLElement;
-    let fontSize = window.siyuan.config.editor.fontSize + "px";
-    if (nodeElements && nodeElements.length > 0) {
-        textElement = nodeElements[0] as HTMLElement;
-    } else {
-        textElement = protyle.toolbar.range.cloneContents().querySelector('[data-type~="text"]') as HTMLElement;
-        if (!textElement) {
-            textElement = hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "text") as HTMLElement;
-        }
-    }
-    if (textElement) {
-        fontSize = textElement.style.fontSize || window.siyuan.config.editor.fontSize + "px";
-    }
+    const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
+    const applyFontStyle = (type: string, color?: string) => {
+        fontEvent(protyle, nodeElements, type, color, true, onChange);
+    };
     element.innerHTML = `${lastColorHTML}
 <div class="fn__hr"></div>
 <div data-id="color">${window.siyuan.languages.color}</div>
@@ -135,8 +198,8 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
 <div data-id="fontStyle">${window.siyuan.languages.fontStyle}</div>
 <div class="fn__hr--small"></div>
 <div data-id="fontStyleWrap" class="fn__flex">
-    <button data-type="style2" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>
-    <button data-type="style4" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>
+    <button data-type="style2" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.hollow}" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">A</button>
+    <button data-type="style4" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.shadow}" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">A</button>
 </div>
 <div class="fn__hr${disableFont ? " fn__none" : ""}"></div>
 <div data-id="fontSize" class="fn__flex${disableFont ? " fn__none" : ""}">
@@ -172,15 +235,15 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
             const dataType = target.getAttribute("data-type");
             if (target.tagName === "BUTTON") {
                 if (dataType === "style1") {
-                    fontEvent(protyle, nodeElements, dataType, target.style.backgroundColor + Constants.ZWSP + target.style.color);
+                    applyFontStyle(dataType, target.style.backgroundColor + Constants.ZWSP + target.style.color);
                 } else if (dataType === "fontSize") {
-                    fontEvent(protyle, nodeElements, dataType, target.textContent.trim());
+                    applyFontStyle(dataType, target.getAttribute("data-value"));
                 } else if (dataType === "backgroundColor") {
-                    fontEvent(protyle, nodeElements, dataType, target.style.backgroundColor);
+                    applyFontStyle(dataType, target.style.backgroundColor);
                 } else if (dataType === "color") {
-                    fontEvent(protyle, nodeElements, dataType, target.style.color);
+                    applyFontStyle(dataType, target.style.color);
                 } else {
-                    fontEvent(protyle, nodeElements, dataType);
+                    applyFontStyle(dataType);
                 }
                 break;
             }
@@ -192,29 +255,28 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     const fontSizeEMElement = element.querySelector("#fontSizeEM") as HTMLInputElement;
     switchElement.addEventListener("change", function () {
         if (switchElement.checked) {
-            // px -> em
-            const em = parseFloat((parseInt(fontSizePXElement.value) / 16).toFixed(2));
-            fontSizeEMElement.parentElement.setAttribute("aria-label", (em * 100).toString() + "%");
-            fontSizeEMElement.value = em.toString();
+            const em = convertFontSize(fontSizePXElement.value + "px", "em", baseFontSize);
+            fontSizeEMElement.parentElement.setAttribute("aria-label", (parseFloat(em) * 100).toFixed(0) + "%");
+            fontSizeEMElement.value = parseFloat(em).toString();
 
             fontSizePXElement.parentElement.classList.add("fn__none");
             fontSizeEMElement.parentElement.classList.remove("fn__none");
-            fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
+            applyFontStyle("fontSize", fontSizeEMElement.value + "em");
         } else {
-            const px = Math.round(parseFloat(fontSizeEMElement.value) * 16);
-            fontSizePXElement.parentElement.setAttribute("aria-label", px + "px");
-            fontSizePXElement.value = px.toString();
+            const px = convertFontSize(fontSizeEMElement.value + "em", "px", baseFontSize);
+            fontSizePXElement.parentElement.setAttribute("aria-label", px);
+            fontSizePXElement.value = parseFloat(px).toString();
 
             fontSizePXElement.parentElement.classList.remove("fn__none");
             fontSizeEMElement.parentElement.classList.add("fn__none");
-            fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
+            applyFontStyle("fontSize", fontSizePXElement.value + "px");
         }
     });
     fontSizePXElement.addEventListener("change", function () {
-        fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
+        applyFontStyle("fontSize", fontSizePXElement.value + "px");
     });
     fontSizeEMElement.addEventListener("change", function () {
-        fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
+        applyFontStyle("fontSize", fontSizeEMElement.value + "em");
     });
     fontSizePXElement.addEventListener("input", function () {
         fontSizePXElement.parentElement.setAttribute("aria-label", fontSizePXElement.value + "px");
@@ -225,14 +287,12 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     return element;
 };
 
-export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: string, color?: string) => {
+export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: string, color?: string,
+                          focusRange = true, onChange?: (type: string, color?: string) => void) => {
     let localFontStyles = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (type) {
-        localFontStyles.splice(0, 0, `${type}${Constants.ZWSP}${color}`);
-        localFontStyles = [...new Set(localFontStyles)];
-        if (localFontStyles.length > 8) {
-            localFontStyles.splice(8, 1);
-        }
+        localFontStyles = [...new Set([`${type}${Constants.ZWSP}${color}`, ...localFontStyles])]
+            .slice(0, MAX_RECENT_FONT_STYLES);
         window.siyuan.storage[Constants.LOCAL_FONTSTYLES] = localFontStyles;
         setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
     } else {
@@ -244,6 +304,10 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
             type = fontStyles.splice(0, 1)[0];
             color = fontStyles.join(Constants.ZWSP);
         }
+    }
+    if (onChange) {
+        onChange(type, color);
+        return;
     }
     if (nodeElements && nodeElements.length > 0) {
         updateBatchTransaction(nodeElements, protyle, (e: HTMLElement) => {
@@ -277,12 +341,14 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 lineNumberRender(e.querySelector(".hljs"));
             }
         });
-        focusByRange(protyle.toolbar.range);
+        if (focusRange) {
+            focusByRange(protyle.toolbar.range);
+        }
     } else {
         if (type === "clear") {
-            protyle.toolbar.setInlineMark(protyle, "clear", "range", {type: "text"});
+            protyle.toolbar.setInlineMark(protyle, "clear", "range", {type: "text"}, focusRange);
         } else {
-            protyle.toolbar.setInlineMark(protyle, "text", "range", {type, color});
+            protyle.toolbar.setInlineMark(protyle, "text", "range", {type, color}, focusRange);
         }
     }
 };

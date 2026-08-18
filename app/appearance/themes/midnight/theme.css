@@ -19,6 +19,7 @@
     --b3-theme-on-background: #dadada;
     --b3-theme-on-surface: #9aa0a6;
     --b3-theme-on-surface-light: #bababa;
+    --b3-theme-on-surface-lighter: #545454;
     --b3-theme-on-error: #fff;
 
     /* 字体 */
@@ -161,8 +162,8 @@
     --b3-graph-tag-line: #5f6b06;
     --b3-graph-tag-tag-line: #dbf32f;
     --b3-graph-asset-line: #037457;
-    --b3-graph-hl-point: #f3a92f;
-    --b3-graph-hl-line: #4285f4;
+    --b3-graph-hl-point: #f2c14e;
+    --b3-graph-hl-line: #d23f31;
 
     /* 代码片段背景 */
     --b3-protyle-code-background: rgba(240, 246, 252, .15);
@@ -180,16 +181,24 @@
     --b3-protyle-inline-fileref-color: var(--b3-theme-secondary);
 
     /* PDF */
-    --b3-pdf-selection: #779170;
+    --b3-pdf-selection: #d0e9c8;
+    --b3-pdf-selection-dark: #779170;
     --sidebar-width: 200px;
     --b3-pdf-offset: 0;
-    --b3-pdf-background1: var(--b3-theme-error);
-    --b3-pdf-background2: #f5822e;
-    --b3-pdf-background3: #FACA5A;
-    --b3-pdf-background4: #7CC868;
-    --b3-pdf-background5: #FC5C88;
-    --b3-pdf-background6: #69B0F2;
-    --b3-pdf-background7: #C885DA;
+    --b3-pdf-background1-light: #d23f31;
+    --b3-pdf-background1-dark: #d23f31;
+    --b3-pdf-background2-light: #f5822e;
+    --b3-pdf-background2-dark: #f5822e;
+    --b3-pdf-background3-light: #FACA5A;
+    --b3-pdf-background3-dark: #FACA5A;
+    --b3-pdf-background4-light: #7CC868;
+    --b3-pdf-background4-dark: #7CC868;
+    --b3-pdf-background5-light: #FC5C88;
+    --b3-pdf-background5-dark: #FC5C88;
+    --b3-pdf-background6-light: #69B0F2;
+    --b3-pdf-background6-dark: #69B0F2;
+    --b3-pdf-background7-light: #C885DA;
+    --b3-pdf-background7-dark: #C885DA;
     --b3-pdf-dark: #212224;
 
     /* callout */

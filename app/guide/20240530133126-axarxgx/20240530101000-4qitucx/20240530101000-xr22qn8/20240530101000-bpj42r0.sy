@@ -7,7 +7,7 @@
 		"id": "20240530101000-bpj42r0",
 		"title": "テーマ",
 		"type": "doc",
-		"updated": "20260614110343"
+		"updated": "20260810230450"
 	},
 	"Children": [
 		{
@@ -120,7 +120,7 @@
 			"Properties": {
 				"ID": "20240530101000-qlk99nz",
 				"id": "20240530101000-jscq707",
-				"updated": "20260614110343"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -137,7 +137,7 @@
 			},
 			"Properties": {
 				"id": "20240530101000-xcqie6f",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -151,7 +151,7 @@
 					},
 					"Properties": {
 						"id": "20240530101000-4wzco4a",
-						"updated": "20240530101000"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -159,12 +159,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-m6yns9u",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": ""
 								},
 								{
 									"Type": "NodeTextMark",
@@ -173,7 +173,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -182,16 +182,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を開き、"
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "コードスニペットの設定"
+									"TextMarkTextContent": "コードスニペット"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ をクリックして CSS タブを選択します"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を開き、CSS タブを選択します。"
 								}
 							]
 						}
@@ -643,7 +652,7 @@
 			"Properties": {
 				"ID": "20240530101000-75geurh",
 				"id": "20240530101000-e1rqa5t",
-				"updated": "20240530101000"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -674,7 +683,7 @@
 			"Properties": {
 				"ID": "20240530101000-pj2qt5j",
 				"id": "20240530101000-foh7a5f",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -696,7 +705,7 @@
 			"Properties": {
 				"ID": "20240530101000-4lh6wae",
 				"id": "20240530101000-c64pear",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -713,7 +722,7 @@
 					"Properties": {
 						"ID": "20240530101000-oc2opvc",
 						"id": "20240530101000-awu4146",
-						"updated": "20240530101000"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -722,13 +731,9 @@
 							"Properties": {
 								"ID": "20240530101000-26noejm",
 								"id": "20240530101000-41iytpk",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
@@ -736,7 +741,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -745,7 +750,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -754,7 +759,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ から、コミュニティの開発者が作成したテーマを閲覧できます"
+									"Data": " から、コミュニティの開発者が作成したテーマを閲覧できます。"
 								}
 							]
 						}
@@ -803,7 +808,7 @@
 			"Properties": {
 				"ID": "20240530101000-1gm1l6d",
 				"id": "20240530101000-ei4f29x",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -827,7 +832,7 @@
 			"Properties": {
 				"ID": "20240530101000-p5bs87t",
 				"id": "20240530101000-yenj3fj",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -882,7 +887,7 @@
 					"Properties": {
 						"ID": "20240530101000-ybolo9o",
 						"id": "20240530101000-2fp34g8",
-						"updated": "20240530101000"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -891,12 +896,12 @@
 							"Properties": {
 								"ID": "20240530101000-7lu4j3i",
 								"id": "20240530101000-n82uhqw",
-								"updated": "20240530101000"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -932,7 +937,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を選択します"
+									"Data": " ​ を選択します"
 								}
 							]
 						}
@@ -990,7 +995,7 @@
 					"Properties": {
 						"ID": "20240530101000-p0arthv",
 						"id": "20240530101000-s7kf4bl",
-						"updated": "20240530101000"
+						"updated": "20260803170332"
 					},
 					"Children": [
 						{
@@ -999,7 +1004,7 @@
 							"Properties": {
 								"ID": "20240530101000-rkjqmwo",
 								"id": "20240530101000-96amlnm",
-								"updated": "20240530101000"
+								"updated": "20260803170332"
 							},
 							"Children": [
 								{
@@ -1031,7 +1036,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ からインストールしたテーマを選択します"
+									"Data": " ​ からインストールしたテーマを選択します"
 								}
 							]
 						}
@@ -1046,7 +1051,7 @@
 			"Properties": {
 				"ID": "20240530101000-m92cdqb",
 				"id": "20240530101000-dik7qz7",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -1062,7 +1067,7 @@
 			"Properties": {
 				"ID": "20240530101000-6pz8s9i",
 				"id": "20240530101000-9nkaihq",
-				"updated": "20240530101000"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1085,7 +1090,7 @@
 			"Properties": {
 				"ID": "20240530101000-w4ueh95",
 				"id": "20240530101000-bo6l8c1",
-				"updated": "20240530101000"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1148,7 +1153,7 @@
 					"Properties": {
 						"ID": "20240530101000-90dqhxu",
 						"id": "20240530101000-wqqdogy",
-						"updated": "20240530101000"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -1157,12 +1162,12 @@
 							"Properties": {
 								"ID": "20240530101000-xnvfvs5",
 								"id": "20240530101000-tru6zje",
-								"updated": "20240530101000"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1198,7 +1203,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を選択します"
+									"Data": " ​ を選択します"
 								}
 							]
 						}
@@ -1293,7 +1298,7 @@
 					"Properties": {
 						"ID": "20240530101000-9qze5c3",
 						"id": "20240530101000-rokr1na",
-						"updated": "20240530101000"
+						"updated": "20260810230450"
 					},
 					"Children": [
 						{
@@ -1302,21 +1307,39 @@
 							"Properties": {
 								"ID": "20240530101000-j9mw5mf",
 								"id": "20240530101000-0rok9l0",
-								"updated": "20240530101000"
+								"updated": "20260810230450"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "デベロッパーツールを使用してスタイルを特定・調整します。デベロッパーツールを開き、要素選択ツールを有効にして変更する UI 要素をクリックし、"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "theme.css"
+									"TextMarkTextContent": "Elements"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ファイルを開いてコーディングします"
+									"Data": " パネルで対応する "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTML"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を確認してから、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Styles"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " パネルでスタイルを調整します。調整内容を theme.css に反映して保存します"
 								}
 							]
 						}
@@ -1338,7 +1361,7 @@
 					"Properties": {
 						"ID": "20240530101000-6b7a4gm",
 						"id": "20240530101000-dnbmqqq",
-						"updated": "20240530101000"
+						"updated": "20260803170332"
 					},
 					"Children": [
 						{
@@ -1347,7 +1370,7 @@
 							"Properties": {
 								"ID": "20240530101000-8x9fb4p",
 								"id": "20240530101000-88pwd3m",
-								"updated": "20240530101000"
+								"updated": "20260803170332"
 							},
 							"Children": [
 								{
@@ -1379,7 +1402,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ からインストールしたテーマを選択します"
+									"Data": " ​ からインストールしたテーマを選択します"
 								}
 							]
 						}
@@ -1394,7 +1417,7 @@
 			"Properties": {
 				"ID": "20240530101000-qiqvdvm",
 				"id": "20240530101000-8qf0tmt",
-				"updated": "20240530101000"
+				"updated": "20260810215424"
 			},
 			"Children": [
 				{
@@ -1410,7 +1433,7 @@
 			"Properties": {
 				"ID": "20240530101000-qopm0a9",
 				"id": "20240530101000-yvr3cee",
-				"updated": "20240530101000"
+				"updated": "20260810215424"
 			},
 			"Children": [
 				{
@@ -1459,7 +1482,7 @@
 					"Properties": {
 						"ID": "20240530101000-2a6ikrn",
 						"id": "20240530101000-lfl6x7c",
-						"updated": "20240530101000"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1468,21 +1491,12 @@
 							"Properties": {
 								"ID": "20240530101000-drsmu3g",
 								"id": "20240530101000-0ciov1o",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ":root{...}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ 内のカラースキームを変更します。⚠️デフォルトで設定されている変数は削除しないでください"
+									"Data": "カスタムテーマは組み込みテーマの変数を継承します。必要な変数だけを上書きし、SiYuan の更新時には変数の名前変更や削除を確認してください。"
 								}
 							]
 						}
@@ -1528,6 +1542,52 @@
 					]
 				},
 				{
+					"ID": "20260810212846-miipgg4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260810212846-miipgg4",
+						"updated": "20260810215424"
+					},
+					"Children": [
+						{
+							"ID": "20260810212846-86xeeqj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260810212846-86xeeqj",
+								"updated": "20260810215424"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デベロッパーツールの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Network"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " タブを開き、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Disable cache"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を有効にします"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20240530101000-66su770",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -1537,7 +1597,7 @@
 					"Properties": {
 						"ID": "20240530101000-cgxqpe3",
 						"id": "20240530101000-66su770",
-						"updated": "20240530101000"
+						"updated": "20260810215424"
 					},
 					"Children": [
 						{
@@ -1546,72 +1606,48 @@
 							"Properties": {
 								"ID": "20240530101000-pyzfcam",
 								"id": "20240530101000-xil54hs",
-								"updated": "20240530101000"
+								"updated": "20260810215424"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Chrome の開発者ツールで "
+									"Data": "通常、theme.css の変更は自動的に検出されて更新されます。自動更新されない場合は、"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Network"
+									"TextMarkTextContent": "設定"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ タブの "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Disable cache"
+									"TextMarkTextContent": "アプリ"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ にチェックを入れ "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "window.location.reload()"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "メンテナンス"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を実行して最終的な結果を確認します\n​"
+									"Data": " - "
 								},
 								{
-									"Type": "NodeImage",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeBang"
-										},
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "custom-theme2.png"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "assets/custom-theme2-20210512172321-1qkspzd.png"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "UI を更新"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " を使用してください"
 								}
 							]
 						}
@@ -1626,7 +1662,7 @@
 			"Properties": {
 				"ID": "20240530101000-hg6ub7x",
 				"id": "20240530101000-n914h99",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1641,13 +1677,13 @@
 			"Properties": {
 				"ID": "20240530101000-nab9u3u",
 				"id": "20240530101000-v3uk4ec",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "コミュニティマーケットプレイスのリポジトリ"
 				},
 				{

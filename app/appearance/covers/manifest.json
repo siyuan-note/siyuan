@@ -1,0 +1,650 @@
+[
+  {
+    "file": "cover_001.webp",
+    "category": "coverNature",
+    "photographer": "Marek Piwnicki",
+    "photographer_url": "https://www.pexels.com/@marek-piwnicki-3907296",
+    "pexels_url": "https://www.pexels.com/photo/aerial-photography-of-mountains-under-the-cloudy-sky-13695383/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_002.webp",
+    "category": "coverNature",
+    "photographer": "Louis",
+    "photographer_url": "https://www.pexels.com/@suissounet",
+    "pexels_url": "https://www.pexels.com/photo/stunning-aerial-view-of-swiss-alps-in-obwald-34090343/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_003.webp",
+    "category": "coverNature",
+    "photographer": "ning wong",
+    "photographer_url": "https://www.pexels.com/@ning-wong-2150169289",
+    "pexels_url": "https://www.pexels.com/photo/dramatic-mountain-peaks-engulfed-in-clouds-31050108/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_004.webp",
+    "category": "coverNature",
+    "photographer": "Alina Chernii",
+    "photographer_url": "https://www.pexels.com/@alina-chernii-682289345",
+    "pexels_url": "https://www.pexels.com/photo/majestic-mountain-peak-emerging-through-clouds-30186408/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_005.webp",
+    "category": "coverCityNight",
+    "photographer": "Shlok Rana",
+    "photographer_url": "https://www.pexels.com/@shlok-rana-2150773572",
+    "pexels_url": "https://www.pexels.com/photo/urban-skyline-at-dusk-with-reflective-water-34232700/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_006.webp",
+    "category": "coverCityNight",
+    "photographer": "zhou shen",
+    "photographer_url": "https://www.pexels.com/@fatinmark",
+    "pexels_url": "https://www.pexels.com/photo/city-lighting-at-night-18834566/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_007.webp",
+    "category": "coverCityNight",
+    "photographer": "Acres of Film",
+    "photographer_url": "https://www.pexels.com/@acres-of-film-698445032",
+    "pexels_url": "https://www.pexels.com/photo/skyscrapers-in-hangzhou-in-china-at-dusk-20856160/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_008.webp",
+    "category": "coverCityNight",
+    "photographer": "Irina Iriser",
+    "photographer_url": "https://www.pexels.com/@iriser",
+    "pexels_url": "https://www.pexels.com/photo/cityscape-under-dramatic-blue-night-sky-38169655/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_009.webp",
+    "category": "coverClassicalArchitecture",
+    "photographer": "Frank Barning",
+    "photographer_url": "https://www.pexels.com/@frank-barning-744539",
+    "pexels_url": "https://www.pexels.com/photo/low-angle-symmetrical-view-of-a-church-ceiling-7353335/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_010.webp",
+    "category": "coverClassicalArchitecture",
+    "photographer": "Photo Wallpapers",
+    "photographer_url": "https://www.pexels.com/@photo-wallpapers-1419414",
+    "pexels_url": "https://www.pexels.com/photo/cathedral-facade-under-a-bright-blue-sky-in-pisa-34049335/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_011.webp",
+    "category": "coverClassicalArchitecture",
+    "photographer": "Efrem  Efre",
+    "photographer_url": "https://www.pexels.com/@efrem-efre-2786187",
+    "pexels_url": "https://www.pexels.com/photo/window-of-a-historic-building-15218615/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_012.webp",
+    "category": "coverClassicalArchitecture",
+    "photographer": "DΛVΞ GΛRCIΛ",
+    "photographer_url": "https://www.pexels.com/@davegarcia",
+    "pexels_url": "https://www.pexels.com/photo/gothic-cathedral-with-elaborate-architecture-37244775/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_013.webp",
+    "category": "coverReadingNook",
+    "photographer": "eat kubba",
+    "photographer_url": "https://www.pexels.com/@eat-kubba-15863701",
+    "pexels_url": "https://www.pexels.com/photo/a-ceramic-cup-on-the-top-of-books-7167831/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_014.webp",
+    "category": "coverReadingNook",
+    "photographer": "Leeloo The First",
+    "photographer_url": "https://www.pexels.com/@leeloothefirst",
+    "pexels_url": "https://www.pexels.com/photo/close-up-shot-of-a-cup-of-coffee-beside-a-book-5264687/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_015.webp",
+    "category": "coverReadingNook",
+    "photographer": "Rahime Gül",
+    "photographer_url": "https://www.pexels.com/@rahimegul",
+    "pexels_url": "https://www.pexels.com/photo/cozy-evening-setup-with-candlelight-and-book-35342046/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_016.webp",
+    "category": "coverReadingNook",
+    "photographer": "ROMAN ODINTSOV",
+    "photographer_url": "https://www.pexels.com/@roman-odintsov",
+    "pexels_url": "https://www.pexels.com/photo/lit-candles-and-and-incense-in-bundles-lying-on-a-table-6205910/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_017.webp",
+    "category": "coverZenMinimal",
+    "photographer": "cottonbro studio",
+    "photographer_url": "https://www.pexels.com/@cottonbro",
+    "pexels_url": "https://www.pexels.com/photo/overhead-shot-of-a-person-using-a-mini-zen-garden-7418086/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_018.webp",
+    "category": "coverZenMinimal",
+    "photographer": "Ayyeee Ayyeee",
+    "photographer_url": "https://www.pexels.com/@ayyeee-ayyeee-434363205",
+    "pexels_url": "https://www.pexels.com/photo/minimalist-photo-of-tree-against-white-wall-35401719/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_019.webp",
+    "category": "coverZenMinimal",
+    "photographer": "Rafael Minguet Delgado",
+    "photographer_url": "https://www.pexels.com/@thales13",
+    "pexels_url": "https://www.pexels.com/photo/serene-zen-stones-on-patterned-sand-background-36134595/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_020.webp",
+    "category": "coverZenMinimal",
+    "photographer": "christian hembert",
+    "photographer_url": "https://www.pexels.com/@christian-hembert-1081250355",
+    "pexels_url": "https://www.pexels.com/photo/serene-zen-garden-with-raked-sand-and-rocks-35298174/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_021.webp",
+    "category": "coverLightGeometry",
+    "photographer": "Murun. E",
+    "photographer_url": "https://www.pexels.com/@murun-e-2158048371",
+    "pexels_url": "https://www.pexels.com/photo/modern-architectural-abstract-with-shadows-36150844/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_022.webp",
+    "category": "coverLightGeometry",
+    "photographer": "女子 正真",
+    "photographer_url": "https://www.pexels.com/@1433506698",
+    "pexels_url": "https://www.pexels.com/photo/abstract-shadows-on-red-metal-staircase-33614902/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_023.webp",
+    "category": "coverLightGeometry",
+    "photographer": "Kaan  Keskin",
+    "photographer_url": "https://www.pexels.com/@depthofraw",
+    "pexels_url": "https://www.pexels.com/photo/holes-on-concrete-wall-12800839/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_024.webp",
+    "category": "coverLightGeometry",
+    "photographer": "Jan van der Wolf",
+    "photographer_url": "https://www.pexels.com/@jan-van-der-wolf-11680885",
+    "pexels_url": "https://www.pexels.com/photo/triangular-shelf-on-yellow-wall-11688129/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_025.webp",
+    "category": "coverRoadAhead",
+    "photographer": "David Brown",
+    "photographer_url": "https://www.pexels.com/@ninobur",
+    "pexels_url": "https://www.pexels.com/photo/man-riding-on-a-motorbike-among-hills-17304189/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_026.webp",
+    "category": "coverRoadAhead",
+    "photographer": "Mikhail Nilov",
+    "photographer_url": "https://www.pexels.com/@mikhail-nilov",
+    "pexels_url": "https://www.pexels.com/photo/top-view-of-road-in-forest-8322801/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_027.webp",
+    "category": "coverRoadAhead",
+    "photographer": "FAYSAL KHAN",
+    "photographer_url": "https://www.pexels.com/@faysal9",
+    "pexels_url": "https://www.pexels.com/photo/leading-line-rule-of-thirds-in-photography-27778745/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_028.webp",
+    "category": "coverRoadAhead",
+    "photographer": "Deva Darshan",
+    "photographer_url": "https://www.pexels.com/@darshan394",
+    "pexels_url": "https://www.pexels.com/photo/aerial-photography-of-road-beside-forest-1064129/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_029.webp",
+    "category": "coverAutumnLeaves",
+    "photographer": "Bastian Riccardi",
+    "photographer_url": "https://www.pexels.com/@shutter-speed",
+    "pexels_url": "https://www.pexels.com/photo/autumn-leaves-14313781/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_030.webp",
+    "category": "coverAutumnLeaves",
+    "photographer": "Francesco Ungaro",
+    "photographer_url": "https://www.pexels.com/@francesco-ungaro",
+    "pexels_url": "https://www.pexels.com/photo/vibrant-autumn-leaves-in-sunlight-29512273/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_031.webp",
+    "category": "coverAutumnLeaves",
+    "photographer": "Rufina Rusakova",
+    "photographer_url": "https://www.pexels.com/@ranevskaja",
+    "pexels_url": "https://www.pexels.com/photo/colorful-autumn-leaves-scattered-on-grass-34183651/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_032.webp",
+    "category": "coverAutumnLeaves",
+    "photographer": "Emrah AYVALI",
+    "photographer_url": "https://www.pexels.com/@emrahayvali",
+    "pexels_url": "https://www.pexels.com/photo/aerial-photography-of-trees-6198224/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_033.webp",
+    "category": "coverNeonNights",
+    "photographer": "dp singh Bhullar",
+    "photographer_url": "https://www.pexels.com/@dpsinghbhullar",
+    "pexels_url": "https://www.pexels.com/photo/raindrops-on-window-with-blurred-city-lights-28993172/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_034.webp",
+    "category": "coverNeonNights",
+    "photographer": "Lensmagicians",
+    "photographer_url": "https://www.pexels.com/@lensmagicians-3311383",
+    "pexels_url": "https://www.pexels.com/photo/a-neon-signage-inside-a-bar-7089757/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_035.webp",
+    "category": "coverNeonNights",
+    "photographer": "Alex Gem",
+    "photographer_url": "https://www.pexels.com/@alex-gem-3927447",
+    "pexels_url": "https://www.pexels.com/photo/close-up-of-a-wet-street-reflecting-city-lights-at-night-6196502/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_036.webp",
+    "category": "coverNeonNights",
+    "photographer": "Suguru Kagamifuchi",
+    "photographer_url": "https://www.pexels.com/@amresarse",
+    "pexels_url": "https://www.pexels.com/photo/abstract-lights-in-city-at-night-18182846/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_037.webp",
+    "category": "coverDesert",
+    "photographer": "MART  PRODUCTION",
+    "photographer_url": "https://www.pexels.com/@mart-production",
+    "pexels_url": "https://www.pexels.com/photo/photo-of-sand-dunes-in-a-desert-8869381/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_038.webp",
+    "category": "coverDesert",
+    "photographer": "Lucy Du Preez",
+    "photographer_url": "https://www.pexels.com/@lucy-du-preez-1311861197",
+    "pexels_url": "https://www.pexels.com/photo/majestic-sand-dunes-of-swakopmund-namibia-35972428/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_039.webp",
+    "category": "coverDesert",
+    "photographer": "光曦 刘",
+    "photographer_url": "https://www.pexels.com/@liuguangxi",
+    "pexels_url": "https://www.pexels.com/photo/desert-landscape-16908875/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_040.webp",
+    "category": "coverDesert",
+    "photographer": "K",
+    "photographer_url": "https://www.pexels.com/@kelly",
+    "pexels_url": "https://www.pexels.com/photo/scenic-view-of-a-desert-9229398/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_041.webp",
+    "category": "coverAurora",
+    "photographer": "Oliver Schröder",
+    "photographer_url": "https://www.pexels.com/@olivers",
+    "pexels_url": "https://www.pexels.com/photo/nordlichter-28237726/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_042.webp",
+    "category": "coverAurora",
+    "photographer": "Aedrian Salazar",
+    "photographer_url": "https://www.pexels.com/@aedrian",
+    "pexels_url": "https://www.pexels.com/photo/stunning-aurora-borealis-in-night-sky-28920480/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_043.webp",
+    "category": "coverAurora",
+    "photographer": "Victor Lucas",
+    "photographer_url": "https://www.pexels.com/@victorlucss",
+    "pexels_url": "https://www.pexels.com/photo/long-exposure-of-a-pink-and-green-aurora-borealis-23995635/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_044.webp",
+    "category": "coverAurora",
+    "photographer": "J. L. Fizzell",
+    "photographer_url": "https://www.pexels.com/@j-l-fizzell-94536920",
+    "pexels_url": "https://www.pexels.com/photo/vibrant-aurora-borealis-night-sky-display-28882039/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_045.webp",
+    "category": "coverMistyMorning",
+    "photographer": "kf zhou",
+    "photographer_url": "https://www.pexels.com/@kf-zhou-609625381",
+    "pexels_url": "https://www.pexels.com/photo/landscape-of-foggy-mountains-at-dawn-19582155/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_046.webp",
+    "category": "coverMistyMorning",
+    "photographer": "Samuele Galiazzo",
+    "photographer_url": "https://www.pexels.com/@samuele-galiazzo",
+    "pexels_url": "https://www.pexels.com/photo/foggy-landscape-at-dawn-10786346/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_047.webp",
+    "category": "coverMistyMorning",
+    "photographer": "Quang Nguyen Vinh",
+    "photographer_url": "https://www.pexels.com/@quang-nguyen-vinh-222549",
+    "pexels_url": "https://www.pexels.com/photo/green-grass-covered-mountain-under-white-clouds-11334345/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_048.webp",
+    "category": "coverMistyMorning",
+    "photographer": "Jan Brndiar",
+    "photographer_url": "https://www.pexels.com/@jan-brndiar-809427026",
+    "pexels_url": "https://www.pexels.com/photo/majestic-mountain-range-with-cloudy-valleys-view-29634579/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_049.webp",
+    "category": "coverCountryside",
+    "photographer": "Sergej  *****",
+    "photographer_url": "https://www.pexels.com/@strannik-sk",
+    "pexels_url": "https://www.pexels.com/photo/serene-rural-landscape-with-trees-and-clouds-33086241/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_050.webp",
+    "category": "coverCountryside",
+    "photographer": "Dan Hamill",
+    "photographer_url": "https://www.pexels.com/@dan-hamill-144328",
+    "pexels_url": "https://www.pexels.com/photo/farmland-under-a-cloudy-sky-13795986/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_051.webp",
+    "category": "coverCountryside",
+    "photographer": "Mark Stebnicki",
+    "photographer_url": "https://www.pexels.com/@nc-farm-bureau-mark",
+    "pexels_url": "https://www.pexels.com/photo/tranquil-farm-landscape-with-red-barn-in-summer-33777987/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_052.webp",
+    "category": "coverCountryside",
+    "photographer": "Sergej  *****",
+    "photographer_url": "https://www.pexels.com/@strannik-sk",
+    "pexels_url": "https://www.pexels.com/photo/golden-wheat-field-under-cloudy-sky-32602161/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_053.webp",
+    "category": "coverTeaCeremony",
+    "photographer": "Sóc Năng Động",
+    "photographer_url": "https://www.pexels.com/@soc-nang-d-ng-2150345854",
+    "pexels_url": "https://www.pexels.com/photo/traditional-chinese-calligraphy-set-with-decor-36171312/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_054.webp",
+    "category": "coverTeaCeremony",
+    "photographer": "Feng Zou",
+    "photographer_url": "https://www.pexels.com/@ferezou",
+    "pexels_url": "https://www.pexels.com/photo/antique-holder-for-pens-5907801/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_055.webp",
+    "category": "coverTeaCeremony",
+    "photographer": "betül nur akyürek",
+    "photographer_url": "https://www.pexels.com/@cileklipalet",
+    "pexels_url": "https://www.pexels.com/photo/cozy-table-setting-with-calligraphy-and-candle-36792009/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_056.webp",
+    "category": "coverTeaCeremony",
+    "photographer": "Ron Lach",
+    "photographer_url": "https://www.pexels.com/@ron-lach",
+    "pexels_url": "https://www.pexels.com/photo/table-in-apartment-with-books-and-typewriter-7970681/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_057.webp",
+    "category": "coverStillWater",
+    "photographer": "Andrey Vasilev",
+    "photographer_url": "https://www.pexels.com/@andrey-vasilev-1225587",
+    "pexels_url": "https://www.pexels.com/photo/body-of-water-2340720/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_058.webp",
+    "category": "coverStillWater",
+    "photographer": "Frank Stübery",
+    "photographer_url": "https://www.pexels.com/@scoob",
+    "pexels_url": "https://www.pexels.com/photo/overcast-over-lake-5076376/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_059.webp",
+    "category": "coverStillWater",
+    "photographer": "Tommes Frites",
+    "photographer_url": "https://www.pexels.com/@tommes-frites-1141358642",
+    "pexels_url": "https://www.pexels.com/photo/serene-misty-lake-with-reflections-and-bare-trees-35175938/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_060.webp",
+    "category": "coverStillWater",
+    "photographer": "Henrik Pfitzenmaier",
+    "photographer_url": "https://www.pexels.com/@hammyx",
+    "pexels_url": "https://www.pexels.com/photo/reflection-of-the-ocean-and-the-sky-6915303/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_061.webp",
+    "category": "coverChineseGarden",
+    "photographer": "utsukushii 1226",
+    "photographer_url": "https://www.pexels.com/@utsukushii-1226-1782112013",
+    "pexels_url": "https://www.pexels.com/photo/serene-chinese-pavilion-reflected-in-garden-pond-33885918/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_062.webp",
+    "category": "coverChineseGarden",
+    "photographer": "Serhii Barkanov",
+    "photographer_url": "https://www.pexels.com/@serhii-barkanov-2144469453",
+    "pexels_url": "https://www.pexels.com/photo/serene-chinese-pavilion-in-warsaw-park-35038978/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_063.webp",
+    "category": "coverChineseGarden",
+    "photographer": "Muhamad Guruh Budi Hartono",
+    "photographer_url": "https://www.pexels.com/@muhamad-guruh-budi-hartono-430167744",
+    "pexels_url": "https://www.pexels.com/photo/traditional-chinese-pavilion-surrounded-by-lush-greenery-30219927/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_064.webp",
+    "category": "coverChineseGarden",
+    "photographer": "强 王",
+    "photographer_url": "https://www.pexels.com/@2148460223",
+    "pexels_url": "https://www.pexels.com/photo/serene-traditional-garden-pavilion-in-summer-34742978/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_065.webp",
+    "category": "coverInkWashLandscape",
+    "photographer": "Sunrain L",
+    "photographer_url": "https://www.pexels.com/@sunrain-l-2152144246",
+    "pexels_url": "https://www.pexels.com/photo/misty-zhangjiajie-mountains-in-morning-light-37621083/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_066.webp",
+    "category": "coverInkWashLandscape",
+    "photographer": "fishshoto",
+    "photographer_url": "https://www.pexels.com/@fishshoto-1077807092",
+    "pexels_url": "https://www.pexels.com/photo/view-of-mountains-21843562/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_067.webp",
+    "category": "coverInkWashLandscape",
+    "photographer": "YFS Visuals",
+    "photographer_url": "https://www.pexels.com/@yfs-visuals-921252577",
+    "pexels_url": "https://www.pexels.com/photo/people-on-boats-on-sea-coast-with-forest-and-rock-formations-around-19966000/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_068.webp",
+    "category": "coverInkWashLandscape",
+    "photographer": "thanhhoa tran",
+    "photographer_url": "https://www.pexels.com/@thanhhoa-tran-640546",
+    "pexels_url": "https://www.pexels.com/photo/river-beside-hills-6200231/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_069.webp",
+    "category": "coverWildlife",
+    "photographer": "Péter Kövesi",
+    "photographer_url": "https://www.pexels.com/@peter-kovesi-421914941",
+    "pexels_url": "https://www.pexels.com/photo/wild-foxes-walking-on-path-in-green-nature-17437537/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_070.webp",
+    "category": "coverWildlife",
+    "photographer": "Yvon Gallant",
+    "photographer_url": "https://www.pexels.com/@yvon-gallant-81432586",
+    "pexels_url": "https://www.pexels.com/photo/brown-fox-walking-on-green-grass-8858856/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_071.webp",
+    "category": "coverWildlife",
+    "photographer": "Ben Jones",
+    "photographer_url": "https://www.pexels.com/@ben-jones-2147994942",
+    "pexels_url": "https://www.pexels.com/photo/deer-and-crow-in-natural-setting-outdoors-29865732/",
+    "width": 2400,
+    "height": 800
+  },
+  {
+    "file": "cover_072.webp",
+    "category": "coverWildlife",
+    "photographer": "Edward Roets",
+    "photographer_url": "https://www.pexels.com/@edward-roets-1638191127",
+    "pexels_url": "https://www.pexels.com/photo/moody-blue-27626067/",
+    "width": 2400,
+    "height": 800
+  }
+]

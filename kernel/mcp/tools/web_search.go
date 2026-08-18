@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@ func init() {
 	register(WebSearchTool)
 }
 
-func webSearchHandler(args map[string]interface{}) (CallToolResult, error) {
+func webSearchHandler(args map[string]any) (CallToolResult, error) {
 	query, _ := args["query"].(string)
 
 	result, err := util.WebSearch(query, "")

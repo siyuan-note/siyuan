@@ -8,7 +8,7 @@
 		"title": "Formatting elements",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260616224215"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -1016,12 +1016,103 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210604225720-p4ywemu",
-				"updated": "20220312123245"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
 					"Data": "Heading block"
+				}
+			]
+		},
+		{
+			"ID": "20260730103436-f9q2v5b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260730103436-f9q2v5b",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Click the triangle to the left of a heading to fold or expand the current heading; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "-click ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "-click on macOS) the triangle to fold or expand its direct subheadings; "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "-click ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌥"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "-click on macOS) the block icon to fold or expand sibling headings. You can also use “Fold/expand direct subheadings” and “Fold/expand sibling headings” in the block icon menu."
+				}
+			]
+		},
+		{
+			"ID": "20260730103436-r4m7z1k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260730103436-r4m7z1k",
+				"updated": "20260803171606"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The shortcuts for these two operations are unassigned by default and can be configured in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Keymap"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
 				}
 			]
 		},
@@ -2093,7 +2184,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091509-yzs0dlz",
-				"updated": "20260616224215"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -2271,7 +2362,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260616221442-2iocv82",
-				"updated": "20260616224215"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -2305,7 +2396,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " syntax. When exporting, the code block is not exported as a code block, but converted to plain paragraph text instead."
+					"Data": " syntax. When exporting as a template, the code block is not exported as a code block, but converted to plain paragraph text instead."
 				}
 			]
 		},
@@ -3453,7 +3544,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091509-j6xq9xm",
-				"updated": "20210415201006"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -3535,12 +3626,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211213121948-zo8q9wp",
-				"updated": "20230820185102"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Please refer to abcjs (github repo: paulrosen/abcjs) for the syntax."
+					"Data": "Please refer to abcjs (GitHub repo: paulrosen/abcjs) for the syntax."
 				}
 			]
 		},

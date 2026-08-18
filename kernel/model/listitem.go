@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -28,6 +28,7 @@ import (
 )
 
 func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, toTop bool) (srcRootBlockID, newTargetPath string, err error) {
+	targetPath = normalizeBoxDocTarget(targetBoxID, targetPath)
 	FlushTxQueue()
 
 	srcTree, _ := LoadTreeByBlockID(srcListItemID)
@@ -110,7 +111,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 	listItemNode.SetIALAttr("type", "doc")
 	listItemNode.SetIALAttr("id", srcListItemID)
 	listItemNode.SetIALAttr("title", listItemText)
-	listItemNode.RemoveIALAttr("fold")
+	treenode.SetSelfFolded(listItemNode, false)
 	listItemNode.RemoveIALAttr(DocHiddenAttr)
 	newTree.Root.KramdownIAL = listItemNode.KramdownIAL
 	srcLiParent := listItemNode.Parent
@@ -122,7 +123,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string, t
 	if nil == srcTree.Root.FirstChild {
 		srcTree.Root.AppendChild(treenode.NewParagraph(""))
 	}
-	treenode.RemoveBlockTreesByRootID(srcTree.ID)
+	treenode.RemoveBlockTreesByRootID(srcTree.Box, srcTree.ID)
 	if err = indexWriteTreeUpsertQueue(srcTree); err != nil {
 		return "", "", err
 	}

@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20250115152709"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"Properties": {
 				"ID": "20240530101000-o6et1uc",
 				"id": "20240530101000-m11xu1w",
-				"updated": "20250115152709"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -235,16 +235,12 @@
 			"Properties": {
 				"ID": "20240530101000-v13sz9b",
 				"id": "20240530101000-ev9oag3",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeImage",
 					"Data": "span",
-					"Properties": {
-						"parent-style": "display: block;",
-						"style": "display: block;"
-					},
 					"Children": [
 						{
 							"Type": "NodeBang"
@@ -277,10 +273,6 @@
 							"Type": "NodeCloseParen"
 						}
 					]
-				},
-				{
-					"Type": "NodeKramdownSpanIAL",
-					"Data": "{: style=\"display: block;\" parent-style=\"display: block;\"}"
 				}
 			]
 		},
@@ -315,7 +307,7 @@
 			"Properties": {
 				"ID": "20240530101000-ta4h1wk",
 				"id": "20240530101000-m2u22gy",
-				"updated": "20241027164357"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -488,12 +480,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240530101000-vt936mb",
-				"updated": "20240530101000"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "​ "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -511,7 +503,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ から未参照のアセットファイルを一括削除できます。誤って削除したファイルを復元するには"
+					"Data": " ​ から未参照のアセットファイルを一括削除できます。誤って削除したファイルを復元するには"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -557,7 +549,7 @@
 			"Properties": {
 				"ID": "20240530101000-9ybzlvk",
 				"id": "20240530101000-dl9pwqt",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -572,12 +564,12 @@
 			"Properties": {
 				"ID": "20240530101000-132d6d5",
 				"id": "20240530101000-1h6xzu1",
-				"updated": "20240530101000"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "​ "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -595,7 +587,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ から不足しているアセットを確認でき、パスをコピーしてグローバル検索から参照箇所を見つけられます。"
+					"Data": " ​ から不足しているアセットを確認でき、パスをコピーしてグローバル検索から参照箇所を見つけられます。"
 				}
 			]
 		},
@@ -605,7 +597,7 @@
 			"Properties": {
 				"ID": "20240530101000-xy6c9gw",
 				"id": "20240530101000-z96h4jo",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -655,7 +647,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ が有効である必要があります。"
+					"Data": " ​ が有効である必要があります。"
 				}
 			]
 		},
@@ -1328,12 +1320,12 @@
 			"Properties": {
 				"ID": "20240530101000-ys1z20f",
 				"id": "20240530101000-rq0etyj",
-				"updated": "20240530101000"
+				"updated": "20260720201253"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "調整後は手動でインデックスを再構築する必要があります。"
+					"Data": "調整後は手動でアセットコンテンツインデックスを再構築する必要があります。"
 				}
 			]
 		},

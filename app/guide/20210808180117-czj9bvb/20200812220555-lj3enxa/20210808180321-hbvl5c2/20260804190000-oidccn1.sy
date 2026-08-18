@@ -1,0 +1,1290 @@
+{
+	"ID": "20260804190000-oidccn1",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804190000-oidccn1",
+		"title": "OIDC 登录",
+		"type": "doc",
+		"updated": "20260804211500"
+	},
+	"Children": [
+		{
+			"ID": "20260804100000-cn00001",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804100000-cn00001",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260804100001-cn00002",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804100001-cn00002",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC（OpenID Connect）登录可以让思源通过已有的身份提供商完成单点登录，并与浏览器锁屏密码配合使用。支持的提供商包括 Custom、Google、Microsoft 和 GitHub。"
+				}
+			]
+		},
+		{
+			"ID": "20260804100002-cn00003",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804100002-cn00003",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通过 OIDC 准入规则的身份都会获得当前工作空间的管理员权限。OIDC 不提供多用户权限隔离或角色映射，启用前应严格限制允许登录的身份。"
+				}
+			]
+		},
+		{
+			"ID": "20260804100003-cn00004",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804100003-cn00004",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用前准备"
+				}
+			]
+		},
+		{
+			"ID": "20260804100004-cn00005",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804100004-cn00005",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804100005-cn00006",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100005-cn00006",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100006-cn00007",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100006-cn00007",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在身份提供商中注册应用，取得客户端 ID，并按提供商要求创建客户端密钥"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100007-cn00008",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100007-cn00008",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100008-cn00009",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100008-cn00009",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "确定需要使用的浏览器、桌面端和移动端回调地址，并在身份提供商中逐一注册"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100009-cn0000a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100009-cn0000a",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100010-cn0000b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100010-cn0000b",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "保留一个可用的浏览器锁屏密码或本地访问方式，避免错误配置导致远程访问被锁定"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804100011-cn0000c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804100011-cn0000c",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "配置方式"
+				}
+			]
+		},
+		{
+			"ID": "20260804100012-cn0000d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804100012-cn0000d",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鉴权"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OIDC 登录"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中填写配置并启用 OIDC 登录。"
+				}
+			]
+		},
+		{
+			"ID": "20260804100013-cn0000e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804100013-cn0000e",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提供商和凭据"
+				}
+			]
+		},
+		{
+			"ID": "20260804100014-cn0000f",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804100014-cn0000f",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804100015-cn0000g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100015-cn0000g",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100016-cn0000h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100016-cn0000h",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Custom：填写符合 OpenID Connect Discovery 的签发者地址和客户端 ID，并按提供商要求填写客户端密钥"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100017-cn0000i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100017-cn0000i",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100018-cn0000j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100018-cn0000j",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Google：填写 Google OAuth 客户端 ID 和客户端密钥，签发者地址由思源自动使用 Google 的固定地址"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100019-cn0000k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100019-cn0000k",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100020-cn0000l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100020-cn0000l",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Microsoft：填写租户专属的签发者地址、客户端 ID，并按应用配置填写客户端密钥"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100021-cn0000m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100021-cn0000m",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100022-cn0000n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100022-cn0000n",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "GitHub：填写 OAuth App 的客户端 ID 和客户端密钥；思源会自动调整默认授权范围"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804100023-cn0000o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804100023-cn0000o",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "创建应用和注册回调地址时，可参阅 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Google OpenID Connect 文档",
+					"TextMarkAHref": "https://developers.google.com/identity/openid-connect/openid-connect"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Microsoft Entra 应用注册文档",
+					"TextMarkAHref": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "GitHub OAuth App 文档",
+					"TextMarkAHref": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。提供商控制台的具体界面可能变化，请以其当前文档为准。"
+				}
+			]
+		},
+		{
+			"ID": "20260804100024-cn0000p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804100024-cn0000p",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "回调地址"
+				}
+			]
+		},
+		{
+			"ID": "20260804100025-cn0000q",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804100025-cn0000q",
+				"updated": "20260804211500"
+			},
+			"Children": [
+				{
+					"ID": "20260804100026-cn0000r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100026-cn0000r",
+						"updated": "20260804211500"
+					},
+					"Children": [
+						{
+							"ID": "20260804100027-cn0000s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100027-cn0000s",
+								"updated": "20260804211500"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "本机浏览器和桌面端：回调地址使用思源当前本机访问协议；启用 HTTPS 时为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://127.0.0.1:<端口>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，未启用 HTTPS 时为 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "http://127.0.0.1:<端口>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。身份提供商中登记的地址必须与实际协议、主机、端口、路径和斜线完全一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100028-cn0000t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100028-cn0000t",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100029-cn0000u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100029-cn0000u",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "远程浏览器：在 OIDC 回调地址中填写公开 HTTPS 地址，路径必须恰好是 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，不能包含查询参数、片段或用户信息"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100030-cn0000v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100030-cn0000v",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100031-cn0000w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100031-cn0000w",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "原生移动端：固定使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan:/oidc-callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "；需要在身份提供商中原样登记。Google 不接受该回调格式，因此 Google 登录仅支持浏览器和桌面端"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804100032-cn0000x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804100032-cn0000x",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "授权范围"
+				}
+			]
+		},
+		{
+			"ID": "20260804100033-cn0000y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804100033-cn0000y",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "默认授权范围是 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "openid profile email"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。一般无需修改；自定义范围前应确认提供商返回的身份声明仍能满足准入规则。GitHub 会将默认范围转换为读取用户和已验证邮箱所需的权限。"
+				}
+			]
+		},
+		{
+			"ID": "20260804100034-cn0000z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804100034-cn0000z",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "准入规则"
+				}
+			]
+		},
+		{
+			"ID": "20260804100035-cn00010",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804100035-cn00010",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "关闭“授予所有已认证用户管理员权限”后，必须至少配置一条准入规则。规则使用 JSON 数组：同一规则的多个 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "values"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 是“或”关系，不同规则之间是“与”关系；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "operator"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 支持 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "equals"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "contains"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260804100036-cn00011",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260804100036-cn00011",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "[\n  {\n    \"claim\": \"email\",\n    \"operator\": \"equals\",\n    \"values\": [\"alice@example.com\", \"bob@example.com\"]\n  },\n  {\n    \"claim\": \"email_verified\",\n    \"operator\": \"equals\",\n    \"values\": [\"true\"]\n  }\n]\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804100037-cn00012",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804100037-cn00012",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "以上示例只允许两个指定邮箱登录，并要求提供商确认邮箱已经验证。若提供商使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "groups"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 等数组声明，可以使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "contains"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 匹配其中的组名。规则名称和值必须与提供商实际返回的声明完全对应。"
+				}
+			]
+		},
+		{
+			"ID": "20260804100038-cn00013",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804100038-cn00013",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "验证并保存"
+				}
+			]
+		},
+		{
+			"ID": "20260804100039-cn00014",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804100039-cn00014",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "启用 OIDC 后单击 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "验证并保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。思源会打开系统浏览器，只有完成一次真实登录并通过准入规则后才会激活新配置；验证失败时原配置继续生效。修改 OIDC 配置会使已有 OIDC 会话失效，用户需要重新登录。"
+				}
+			]
+		},
+		{
+			"ID": "20260804100040-cn00015",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804100040-cn00015",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各客户端登录"
+				}
+			]
+		},
+		{
+			"ID": "20260804100041-cn00016",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804100041-cn00016",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804100042-cn00017",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100042-cn00017",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100043-cn00018",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100043-cn00018",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "浏览器：在登录页选择使用 OIDC 登录，认证完成后返回原访问地址"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100044-cn00019",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100044-cn00019",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100045-cn0001a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100045-cn0001a",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端：通过系统浏览器完成认证，思源会等待并接收登录结果"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100046-cn0001b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100046-cn0001b",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100047-cn0001c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100047-cn0001c",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "移动端：通过系统浏览器认证后使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan:/oidc-callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 返回思源；身份提供商必须支持该自定义回调"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804100048-cn0001d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804100048-cn0001d",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Docker 配置"
+				}
+			]
+		},
+		{
+			"ID": "20260804100049-cn0001e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804100049-cn0001e",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Docker 部署可以通过以下环境变量覆盖工作空间中的 OIDC 配置。至少需要启用 OIDC、选择提供商并配置客户端 ID；其他变量按提供商、回调地址和准入策略填写。"
+				}
+			]
+		},
+		{
+			"ID": "20260804100050-cn0001f",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "dGV4dA==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260804100050-cn0001f",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGV4dA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "SIYUAN_OIDC_ENABLED\nSIYUAN_OIDC_PROVIDER\nSIYUAN_OIDC_ISSUER_URL\nSIYUAN_OIDC_CLIENT_ID\nSIYUAN_OIDC_CLIENT_SECRET\nSIYUAN_OIDC_SCOPES\nSIYUAN_OIDC_REDIRECT_URL\nSIYUAN_OIDC_ALLOW_ALL\nSIYUAN_OIDC_CLAIM_RULES\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804100051-cn0001g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804100051-cn0001g",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "环境变量在内核启动时生效。远程 Docker 部署还必须保留浏览器锁屏密码、有效 OIDC 配置或明确启用认证绕过，否则思源会拒绝启动，以免工作空间在无认证状态下暴露。"
+				}
+			]
+		},
+		{
+			"ID": "20260804100052-cn0001h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804100052-cn0001h",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "常见问题"
+				}
+			]
+		},
+		{
+			"ID": "20260804100053-cn0001i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804100053-cn0001i",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"ID": "20260804100054-cn0001j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100054-cn0001j",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100055-cn0001k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100055-cn0001k",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "redirect_uri mismatch"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：检查身份提供商登记的回调地址是否与实际协议、主机、端口、路径和末尾斜线完全一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100056-cn0001l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100056-cn0001l",
+						"updated": "20260804205607"
+					},
+					"Children": [
+						{
+							"ID": "20260804100057-cn0001m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100057-cn0001m",
+								"updated": "20260804205607"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "身份提供商发现失败：检查 Custom 或 Microsoft 的签发者地址是否正确、是否使用 HTTPS，以及思源能否访问 Discovery 地址"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100058-cn0001n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100058-cn0001n",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100059-cn0001o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100059-cn0001o",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "交换授权码失败：检查客户端 ID、客户端密钥和回调地址"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100100-cn0001p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100100-cn0001p",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100101-cn0001q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100101-cn0001q",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "登录后被拒绝：检查身份提供商实际返回的声明、数据类型以及准入规则中的名称、运算符和值"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804100102-cn0001r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804100102-cn0001r",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20260804100103-cn0001s",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804100103-cn0001s",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804100104-cn0001t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100104-cn0001t",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100105-cn0001u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100105-cn0001u",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不要在没有准入规则的情况下向不受信任的身份提供商开放所有用户登录"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100106-cn0001v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100106-cn0001v",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100107-cn0001w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100107-cn0001w",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "按邮箱准入时，建议同时要求 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "email_verified"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 等于 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "true"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100108-cn0001x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100108-cn0001x",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100109-cn0001y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100109-cn0001y",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "客户端密钥属于敏感信息，不要写入公开文档、日志或可公开读取的部署文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804100110-cn0001z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804100110-cn0001z",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804100111-cn00020",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804100111-cn00020",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "OIDC 只负责身份认证；通过认证的用户拥有管理员权限，不能用它实现不同用户的数据隔离"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

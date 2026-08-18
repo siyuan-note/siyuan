@@ -1,0 +1,1256 @@
+{
+	"ID": "20260804171000-aiagt01",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804171000-aiagt01",
+		"title": "AI 智能体",
+		"type": "doc",
+		"updated": "20260816130653"
+	},
+	"Children": [
+		{
+			"ID": "20260804170023-42gz89p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170023-42gz89p",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260804170024-gjy30mg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170024-gjy30mg",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AI 智能体不仅可以回答问题，还可以调用思源内置工具、技能、MCP 服务和插件能力，搜索、读取并操作知识库。它会根据任务分步骤执行，并在需要修改数据时请求确认。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170025-0kg9iaq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170025-0kg9iaq",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "配置方式"
+				}
+			]
+		},
+		{
+			"ID": "20260804170026-31i2vtp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170026-31i2vtp",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API 提供商"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中配置并启用 API 提供商和模型，然后在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "智能体"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中选择智能体使用的模型。建议使用支持工具调用且上下文窗口足够大的模型。"
+				}
+			]
+		},
+		{
+			"ID": "20260804180000-imgzh01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804180000-imgzh01",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "智能体可以分析文档中的图片，图片理解能力取决于当前模型。如需生成图片，请在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "图片生成"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中配置支持图片输出的模型。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170027-76js6ua",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170027-76js6ua",
+				"updated": "20260816114944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20260804170028-lvsc01j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170028-lvsc01j",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "打开智能体"
+				}
+			]
+		},
+		{
+			"ID": "20260804170029-xkd3vsh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170029-xkd3vsh",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端单击右侧停靠栏中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "智能体"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，在移动端通过主菜单中的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "智能体"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 打开面板。可以新建会话，也可以从会话管理中搜索并继续历史会话。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170030-jzsus39",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170030-jzsus39",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提供上下文"
+				}
+			]
+		},
+		{
+			"ID": "20260804170031-fcmaus3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170031-fcmaus3",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "发送消息时，智能体会感知当前文档、聚焦内容块、选中的内容块和视口内可见的内容块，并按需读取相关内容。需要明确指定材料时，可以使用以下方式添加内容块引用："
+				}
+			]
+		},
+		{
+			"ID": "20260804170032-rufuhmu",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20260804170032-rufuhmu",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170033-o2aw78y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20260804170033-o2aw78y",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170034-aqfuxpp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170034-aqfuxpp",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "将内容块拖拽到智能体输入框"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170035-quujuzi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260804170035-quujuzi",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170036-z22h6rp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170036-z22h6rp",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在输入框中输入 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[["
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 并搜索内容块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170037-wt46qwb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 3,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260804170037-wt46qwb",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170038-rdor04f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170038-rdor04f",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "选择内容块后，通过块标菜单中的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "添加到智能体会话"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 添加"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804170039-6hkjcgx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170039-6hkjcgx",
+				"updated": "20260816114944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "发送和停止任务"
+				}
+			]
+		},
+		{
+			"ID": "20260804170040-qf65tjk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170040-qf65tjk",
+				"updated": "20260816114944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "输入需求后默认按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " + "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 发送，也可以自定义快捷键。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "智能体运行时可以单击停止按钮中止当前任务。描述目标、范围和期望输出位置越明确，执行结果通常越稳定。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170041-tqg42zs",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170041-tqg42zs",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "确认操作"
+				}
+			]
+		},
+		{
+			"ID": "20260804170042-39b79if",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170042-39b79if",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "读取和搜索通常直接执行。创建、修改、移动、删除或导入数据等操作会显示确认卡片，并标明可能产生的本地写入、数据外发和外部费用。可以确认执行、拒绝，或选择 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "会话允许"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 在当前会话中不再询问任何操作。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170043-17l9f9p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170043-17l9f9p",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "会话允许"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 前应确认当前任务范围和所用工具可信，因为后续写入操作将不再逐项确认。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170044-eh59up7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170044-eh59up7",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "会话管理"
+				}
+			]
+		},
+		{
+			"ID": "20260804170045-ubzsbxu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170045-ubzsbxu",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "智能体支持新建、搜索、切换、重命名和删除会话。会话会保存消息、引用、工具调用和执行结果，可在不同实例间同步查看。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170046-970uh7p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170046-970uh7p",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以编辑已经发送的消息并重新发送，也可以让智能体重新回答。重新发送会删除该消息之后的对话记录，但不会撤销已经执行的操作；如需恢复数据，请使用对应的数据快照。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170047-8e3z8dy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170047-8e3z8dy",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "模型和思考强度"
+				}
+			]
+		},
+		{
+			"ID": "20260804170048-bwsd8ah",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170048-bwsd8ah",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以在输入框下方切换已启用的模型，并为支持的模型选择思考强度。包含推理或工具调用的会话在切换模型后，回答质量和工具调用连续性可能下降。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170049-7p6ngv7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170049-7p6ngv7",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上下文用量按钮会显示当前会话使用的上下文比例及分类明细。上下文接近模型上限时，智能体会尝试压缩较早的对话内容。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170050-qxi11l2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170050-qxi11l2",
+				"updated": "20260816130653"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "技能"
+				}
+			]
+		},
+		{
+			"ID": "20260804170051-rx34vtk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170051-rx34vtk",
+				"updated": "20260816130653"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "技能是一组可复用的任务说明，用于约束流程、格式或领域规则。每个技能使用一个独立目录并包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，保存在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空间/data/storage/ai/agent/skills/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。也可以逐个启用用户主目录 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/.agents/skills/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 下的只读技能。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170052-1z6d5mn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170052-1z6d5mn",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可以在 YAML Front Matter 中定义 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "name"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "description"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，正文用于说明智能体应遵循的步骤和要求。输入 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可以搜索并选择已经安装的技能。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170053-wp08ijl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170053-wp08ijl",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以直接要求智能体列出、创建、更新、重命名或删除技能。安装技能时，可提供 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、完整的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "npx skills add owner/repo -g"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 命令、GitHub 地址、原始 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 地址或 ZIP 地址。技能会影响智能体的执行方式，请只安装和使用可信来源的内容。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170054-w5eqebc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170054-w5eqebc",
+				"updated": "20260812170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP 服务"
+				}
+			]
+		},
+		{
+			"ID": "20260804170055-qbwm9vb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170055-qbwm9vb",
+				"updated": "20260812170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP 服务可以向智能体提供外部工具。在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "智能体 MCP 服务"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可以添加 stdio 或 HTTP 服务，配置命令、参数、环境变量、地址、HTTP 标头和超时时间，并查看连接状态和工具数量。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "这里配置的是供智能体调用的外部 MCP 服务；如果要让外部 MCP 客户端连接思源，请参阅 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804223000-mcpsv01",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "MCP 服务"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170056-3aqvrqh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170056-3aqvrqh",
+				"updated": "20260812170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "stdio 服务只会继承用户勾选的内核环境变量，并在每次启动时读取当前值；还可以在环境变量条目中引用密钥和变量。引用密钥会将其明文提供给该程序及其子进程，直接填写的值会以明文存储。需要授权的 HTTP 服务会引导完成 OAuth 授权。密钥和可复用参数可以在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "密钥和变量"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中统一管理，具体说明请参阅 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804185000-secvr01",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "密钥和变量"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。调用外部 MCP 工具可能发送本地数据、修改外部系统或产生费用，应根据确认卡片核对具体影响。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170057-2aewd90",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170057-2aewd90",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用示例"
+				}
+			]
+		},
+		{
+			"ID": "20260804170058-liczbf7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170058-liczbf7",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170059-xb67h4s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170059-xb67h4s",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170100-sop3vuk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170100-sop3vuk",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "搜索最近的会议记录，归纳待办事项，并写入指定项目文档"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170101-kuagvvz",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170101-kuagvvz",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170102-cygloha",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170102-cygloha",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "根据当前选中的内容块整理一份结构化摘要，保留原文中的关键结论"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170103-lahek9m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170103-lahek9m",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170104-oy07fuf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170104-oy07fuf",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "创建今天的日记，并加入今天需要完成的三项任务"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170105-lmfv7pg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170105-lmfv7pg",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170106-jp0j4v4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170106-jp0j4v4",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "整理当前文档的图片内容，为每张图片生成简短说明"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170107-rj49y8d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170107-rj49y8d",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170108-4wv0w0b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170108-4wv0w0b",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "根据我的写作规范技能检查当前文档，并列出需要修改的内容"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804170109-njpec5z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170109-njpec5z",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "数据快照和回滚"
+				}
+			]
+		},
+		{
+			"ID": "20260804170110-sllx4qx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170110-sllx4qx",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "智能体在一轮任务中首次写入工作空间数据前会自动创建数据快照，每轮最多创建一次。确认修改结果不符合预期时，可以在会话中的快照提示上执行回滚。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170111-597sudj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170111-597sudj",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "快照覆盖工作空间数据，但不覆盖外部 MCP 服务或插件对外部系统所做的修改。重新回答、停止任务或删除会话也不会自动撤销已完成的写入操作。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170112-otd84u5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170112-otd84u5",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20260804170113-crs4khp",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170113-crs4khp",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170114-iy8sqic",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170114-iy8sqic",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170115-8apxqe6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170115-8apxqe6",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "智能体不可用于发布服务和只读模式"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170116-8bxlx5i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170116-8bxlx5i",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170117-8j76czl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170117-8j76czl",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "模型需要正确支持工具调用；不同模型的工具调用、推理和图片理解能力可能不同"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170118-l01sliw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170118-l01sliw",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170119-wdsnsun",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170119-wdsnsun",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文档或图片数据可能发送给 API 提供商或外部 MCP 服务，并可能产生费用"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170120-6vf6yxi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170120-6vf6yxi",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170121-oxpqu99",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170121-oxpqu99",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "智能体可能误解需求或生成不准确内容，执行重要修改前应核对确认卡片，执行后应检查结果"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170122-jcsr6kd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170122-jcsr6kd",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170123-w5oa5au",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170123-w5oa5au",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不要在消息、技能或 MCP 配置中暴露不必要的密码和 API 密钥"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

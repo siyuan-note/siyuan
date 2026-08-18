@@ -6,7 +6,7 @@
 		"id": "20260613155453-sgecaav",
 		"title": "Field Types",
 		"type": "doc",
-		"updated": "20260613194210"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -1602,7 +1602,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-6df7phn",
-				"updated": "20260613155453"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1641,7 +1641,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-c1c1f0s",
-				"updated": "20260613155453"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1694,7 +1694,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-iak54ph",
-						"updated": "20260613155453"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1702,7 +1702,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-gkly2lg",
-								"updated": "20260613155453"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -1716,8 +1716,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Shift+Enter"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -4697,7 +4706,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-o7g7a51",
-				"updated": "20260613155453"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -4736,7 +4745,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-ofn8y2q",
-				"updated": "20260613155453"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -4872,7 +4881,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-9ctn9dv",
-						"updated": "20260613155453"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -4880,7 +4889,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-uwspv67",
-								"updated": "20260613155453"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
@@ -4890,7 +4899,43 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Unlike \"Template Snippets\", this template only applies to default value population of database entries"
+									"Data": ": Unlike \"Template Snippets\", this template only applies to default value population of database entries. HTML content in template fields is sanitized by default. To execute scripts, enable "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Advanced"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Allow execution of scripts in HTML content"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, but only after confirming that the code is safe to avoid cross-site scripting (XSS) attacks."
 								}
 							]
 						}

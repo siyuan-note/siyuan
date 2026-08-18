@@ -7,7 +7,7 @@
 		"id": "20240113102857-c63dmo5",
 		"title": "移动端 App",
 		"type": "doc",
-		"updated": "20260613181406"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -347,7 +347,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113104101-rz1z8en",
-				"updated": "20240113104140"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -375,7 +375,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113104506-ko5m727",
-				"updated": "20240113104506"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -773,7 +773,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174109-kf9rdvq",
-				"updated": "20260613174109"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -894,7 +894,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174109-f6x4sin",
-				"updated": "20260613174109"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -908,12 +908,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613174109-mq2h4ye",
-				"updated": "20260613174109"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 [设置 - 文档 - 新建闪念速记的默认存放路径] 中配置闪念速记的存放位置："
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建文档"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建闪念速记的默认存放路径"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中配置闪念速记的存放位置："
 				}
 			]
 		},

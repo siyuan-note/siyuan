@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,12 +17,15 @@
 package model
 
 import (
+	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"slices"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/88250/gulu"
@@ -32,37 +35,461 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+type AttributeViewRenderTarget struct {
+	Status   string `json:"status"`
+	ItemID   string `json:"itemID"`
+	GroupID  string `json:"groupID,omitempty"`
+	Index    int    `json:"index"`
+	Offset   int    `json:"offset"`
+	PageSize int    `json:"pageSize"`
+}
+
+type AttributeViewSearchTarget struct {
+	AvID            string   `json:"avID"`
+	DatabaseBlockID string   `json:"databaseBlockID"`
+	NotebookID      string   `json:"notebookID"`
+	ItemID          string   `json:"itemID"`
+	ValueID         string   `json:"valueID"`
+	MatchedValueID  string   `json:"matchedValueID"`
+	MatchedKeyID    string   `json:"matchedKeyID"`
+	Title           string   `json:"title"`
+	BoundBlockID    string   `json:"boundBlockID"`
+	IsDetached      bool     `json:"isDetached"`
+	Keywords        []string `json:"keywords"`
+}
+
+type attributeViewSearchMatch struct {
+	valueID string
+	keyID   string
+}
+
+func GetAttributeViewSearchTarget(blockID string, keywords []string) (ret *AttributeViewSearchTarget) {
 	waitForSyncingStorages()
 
-	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
+	node, tree, _ := getNodeByBlockID(nil, blockID)
+	if nil == node || nil == tree || ast.NodeAttributeView != node.Type || "" == node.AttributeViewID {
+		return
+	}
+
+	var attrView *av.AttributeView
+	var err error
+	if IsEncryptedBox(tree.Box) {
+		attrView, err = av.ParseAttributeViewInBox(node.AttributeViewID, tree.Box)
+	} else {
+		attrView, err = av.ParseAttributeView(node.AttributeViewID)
+	}
+	if nil == attrView {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", node.AttributeViewID, err)
+		return
+	}
+
+	keywords = normalizeAttributeViewSearchKeywords(keywords)
+	if 1 > len(keywords) {
+		return
+	}
+	matches := getAttributeViewSearchMatches(attrView, keywords)
+	if 1 > len(matches) {
+		return
+	}
+
+	var orderedItemIDs []string
+	blockValues := attrView.GetBlockKeyValues()
+	pageSize := len(matches) + 1
+	if nil != blockValues && len(blockValues.Values) >= pageSize {
+		pageSize = len(blockValues.Values) + 1
+	}
+	viewable, renderErr := renderAttributeView(attrView, blockID, "", "", "", 1, pageSize, nil, false, false, nil, "")
+	if nil == renderErr {
+		orderedItemIDs = appendAttributeViewSearchItemIDs(orderedItemIDs, viewable, false)
+		orderedItemIDs = appendAttributeViewSearchItemIDs(orderedItemIDs, viewable, true)
+	} else {
+		logging.LogWarnf("render attribute view [%s] for search target failed: %s", attrView.ID, renderErr)
+	}
+	if nil != blockValues {
+		for _, value := range blockValues.Values {
+			if nil != value {
+				orderedItemIDs = append(orderedItemIDs, value.BlockID)
+			}
+		}
+	}
+
+	visited := map[string]bool{}
+	for _, itemID := range orderedItemIDs {
+		if visited[itemID] {
+			continue
+		}
+		visited[itemID] = true
+		match := matches[itemID]
+		if nil == match {
+			continue
+		}
+		blockValue := attrView.GetBlockValue(itemID)
+		if nil == blockValue || nil == blockValue.Block {
+			continue
+		}
+		ret = &AttributeViewSearchTarget{
+			AvID:            attrView.ID,
+			DatabaseBlockID: blockID,
+			NotebookID:      tree.Box,
+			ItemID:          itemID,
+			ValueID:         blockValue.ID,
+			MatchedValueID:  match.valueID,
+			MatchedKeyID:    match.keyID,
+			Title:           blockValue.String(true),
+			BoundBlockID:    blockValue.Block.ID,
+			IsDetached:      blockValue.IsDetached || "" == blockValue.Block.ID,
+			Keywords:        keywords,
+		}
+		return
+	}
+	return
+}
+
+func normalizeAttributeViewSearchKeywords(keywords []string) (ret []string) {
+	added := map[string]bool{}
+	for _, keyword := range keywords {
+		keyword = strings.TrimSpace(keyword)
+		if "" == keyword || added[keyword] {
+			continue
+		}
+		added[keyword] = true
+		ret = append(ret, keyword)
+	}
+	return
+}
+
+func getAttributeViewSearchMatches(attrView *av.AttributeView, keywords []string) (ret map[string]*attributeViewSearchMatch) {
+	ret = map[string]*attributeViewSearchMatch{}
+	for _, keyValues := range attrView.KeyValues {
+		if nil == keyValues || nil == keyValues.Key {
+			continue
+		}
+		for _, value := range keyValues.Values {
+			if nil == value || "" == value.BlockID || nil != ret[value.BlockID] {
+				continue
+			}
+			content := value.String(true)
+			for _, keyword := range keywords {
+				if strings.Contains(content, keyword) {
+					ret[value.BlockID] = &attributeViewSearchMatch{valueID: value.ID, keyID: keyValues.Key.ID}
+					break
+				}
+			}
+		}
+	}
+	return
+}
+
+func appendAttributeViewSearchItemIDs(itemIDs []string, viewable av.Viewable, hiddenGroups bool) []string {
+	if nil == viewable {
+		return itemIDs
+	}
+	baseInstance := getAttributeViewBaseInstance(viewable)
+	if nil != baseInstance && 0 < len(baseInstance.Groups) {
+		for _, group := range baseInstance.Groups {
+			if (0 != group.GetGroupHidden()) != hiddenGroups {
+				continue
+			}
+			if collection, ok := group.(av.Collection); ok {
+				for _, item := range collection.GetItems() {
+					itemIDs = append(itemIDs, item.GetID())
+				}
+			}
+		}
+		return itemIDs
+	}
+	if hiddenGroups {
+		return itemIDs
+	}
+	if collection, ok := viewable.(av.Collection); ok {
+		for _, item := range collection.GetItems() {
+			itemIDs = append(itemIDs, item.GetID())
+		}
+	}
+	return itemIDs
+}
+
+func GetAttributeViewItemStatuses(blockID, avID, viewID, query string, itemIDs []string) (ret map[string]string, err error) {
+	viewable, attrView, _, err := RenderAttributeViewWithTarget(blockID, avID, viewID, query, 1, math.MaxInt, nil, "", false, false, "", "")
+	if nil != err {
+		return nil, err
+	}
+	return getAttributeViewItemStatuses(attrView, viewable, itemIDs), nil
+}
+
+func getAttributeViewItemStatuses(attrView *av.AttributeView, viewable av.Viewable, itemIDs []string) (ret map[string]string) {
+	ret = map[string]string{}
+	requested := map[string]bool{}
+	for _, itemID := range itemIDs {
+		if "" == itemID || requested[itemID] {
+			continue
+		}
+		requested[itemID] = true
+		ret[itemID] = "itemNotFound"
+	}
+	if blockValues := attrView.GetBlockKeyValues(); nil != blockValues {
+		for _, value := range blockValues.Values {
+			if nil != value && requested[value.BlockID] {
+				ret[value.BlockID] = "filtered"
+			}
+		}
+	}
+	for _, itemID := range appendAttributeViewSearchItemIDs(nil, viewable, true) {
+		if requested[itemID] && "filtered" == ret[itemID] {
+			ret[itemID] = "groupHidden"
+		}
+	}
+	for _, itemID := range appendAttributeViewSearchItemIDs(nil, viewable, false) {
+		if requested[itemID] {
+			ret[itemID] = "visible"
+		}
+	}
+	return
+}
+
+func getAttributeViewBaseInstance(viewable av.Viewable) (ret *av.BaseInstance) {
+	switch instance := viewable.(type) {
+	case *av.Table:
+		ret = instance.BaseInstance
+	case *av.Gallery:
+		ret = instance.BaseInstance
+	case *av.Kanban:
+		ret = instance.BaseInstance
+	}
+	return
+}
+
+func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, createIfNotExist, ignoreRows bool) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	viewable, attrView, _, err = RenderAttributeViewWithTarget(blockID, avID, viewID, query, page, pageSize, groupPaging, "", createIfNotExist, ignoreRows, "", "")
+	return
+}
+
+// GetAttributeViewPasteRows 返回当前表格视图中从指定条目开始的连续行和可安全推断类型的空字段，供粘贴扩充行列。
+func GetAttributeViewPasteRows(blockID, avID, viewID, groupID, query, startItemID string, count int) (
+	table *av.Table, inferableKeyIDs []string, err error,
+) {
+	viewable, attrView, err := RenderAttributeView(blockID, avID, viewID, query, 1, math.MaxInt, nil, false, false)
+	if nil != err {
+		return nil, nil, err
+	}
+
+	table, ok := viewable.(*av.Table)
+	if !ok {
+		return nil, nil, fmt.Errorf("attribute view [%s] is not a table", avID)
+	}
+	if "" != groupID {
+		var groupTable *av.Table
+		for _, group := range table.Groups {
+			if group.GetID() == groupID {
+				groupTable, _ = group.(*av.Table)
+				break
+			}
+		}
+		if nil == groupTable {
+			return nil, nil, fmt.Errorf("attribute view group [%s] not found", groupID)
+		}
+		table = groupTable
+	}
+
+	rows, err := getAttributeViewPasteRowsFromTable(table, startItemID, count)
+	if nil != err {
+		return nil, nil, err
+	}
+	table.Rows = rows
+	return table, getPasteInferableAttributeViewKeyIDs(attrView, getDependentRollupKeyIDs(attrView.ID)), nil
+}
+
+func getPasteInferableAttributeViewKeyIDs(attrView *av.AttributeView, dependentRollupKeyIDs map[string]struct{}) (ret []string) {
+	unsafeKeyIDs := dependentRollupKeyIDs
+	if nil == unsafeKeyIDs {
+		unsafeKeyIDs = map[string]struct{}{}
+	}
+	for _, itemTemplate := range attrView.NewItemTemplates {
+		if nil == itemTemplate {
+			continue
+		}
+		for keyID := range itemTemplate.FieldValues {
+			unsafeKeyIDs[keyID] = struct{}{}
+		}
+	}
+	for _, view := range attrView.Views {
+		if nil != view && nil != view.Group && "" != view.Group.Field {
+			unsafeKeyIDs[view.Group.Field] = struct{}{}
+		}
+	}
+	for _, keyValues := range attrView.KeyValues {
+		if nil == keyValues || nil == keyValues.Key {
+			continue
+		}
+		if _, unsafe := unsafeKeyIDs[keyValues.Key.ID]; unsafe {
+			continue
+		}
+		empty := true
+		for _, value := range keyValues.Values {
+			if !value.IsEmpty() {
+				empty = false
+				break
+			}
+		}
+		if empty {
+			ret = append(ret, keyValues.Key.ID)
+		}
+	}
+	return
+}
+
+func getDependentRollupKeyIDs(avID string) map[string]struct{} {
+	var relatedAttrViews []*av.AttributeView
+	for _, relatedAvID := range av.GetSrcAvIDs(avID) {
+		relatedAv, _ := av.ParseAttributeView(relatedAvID)
+		if nil == relatedAv {
+			continue
+		}
+		relatedAttrViews = append(relatedAttrViews, relatedAv)
+	}
+	return collectDependentRollupKeyIDs(relatedAttrViews)
+}
+
+func collectDependentRollupKeyIDs(attrViews []*av.AttributeView) (ret map[string]struct{}) {
+	ret = map[string]struct{}{}
+	for _, attrView := range attrViews {
+		if nil == attrView {
+			continue
+		}
+		for _, keyValues := range attrView.KeyValues {
+			if nil == keyValues || nil == keyValues.Key || av.KeyTypeRollup != keyValues.Key.Type ||
+				nil == keyValues.Key.Rollup || "" == keyValues.Key.Rollup.KeyID {
+				continue
+			}
+			ret[keyValues.Key.Rollup.KeyID] = struct{}{}
+		}
+	}
+	return
+}
+
+func getAttributeViewPasteRowsFromTable(table *av.Table, startItemID string, count int) (rows []*av.TableRow, err error) {
+	if count < 1 {
+		return nil, fmt.Errorf("invalid paste row count [%d]", count)
+	}
+	start := -1
+	for i, row := range table.Rows {
+		if row.ID == startItemID {
+			start = i
+			break
+		}
+	}
+	if 0 > start {
+		return nil, fmt.Errorf("attribute view item [%s] not found", startItemID)
+	}
+	end := start + min(count, len(table.Rows)-start)
+	return table.Rows[start:end], nil
+}
+
+func RenderAttributeViewWithTarget(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, initialLayout av.LayoutType, createIfNotExist, ignoreRows bool, targetItemID, targetGroupID string) (viewable av.Viewable, attrView *av.AttributeView, target *AttributeViewRenderTarget, err error) {
+	if !ast.IsNodeIDPattern(avID) {
+		err = ErrInvalidID
+		return
+	}
+
+	waitForSyncingStorages()
+
+	// 加密笔记本的 AV 定义存笔记本级路径，通过 blockID 反查 boxID
+	avBoxID := ""
+	if "" != blockID {
+		bt := treenode.GetBlockTree(blockID)
+		if nil == bt {
+			for _, encBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+				if encBT := treenode.GetBlockTreeInBox(blockID, encBoxID); nil != encBT {
+					bt = encBT
+					break
+				}
+			}
+		}
+		if nil != bt && IsEncryptedBox(bt.BoxID) {
+			avBoxID = bt.BoxID
+		}
+	}
+
+	// 通过 fallback 查找 AV 定义路径（普通 box 全局，加密笔记本笔记本级）
+	// 已知 box 时直接用 InBox 查找，避免全局 pending 映射被并发覆盖
+	var existPath string
+	if avBoxID != "" {
+		existPath, _ = av.FindAttributeViewPathInBox(avID, avBoxID)
+	} else {
+		existPath, _ = av.FindAttributeViewPath(avID)
+	}
+	if "" == existPath {
+		if avBoxID != "" {
+			existPath = filepath.Join(util.DataDir, avBoxID, "storage", "av", avID+".json")
+		} else {
+			// fallback 找不到时按全局路径检查（首次创建场景）
+			existPath = av.GetAttributeViewDataPath(avID)
+		}
+	}
+	if !filelock.IsExist(existPath) {
 		if !createIfNotExist {
 			err = av.ErrAttributeViewNotFound
 			return
 		}
 
-		if !ast.IsNodeIDPattern(avID) {
-			err = ErrInvalidID
-			return
+		// 加密笔记本首次创建：仅设置 pending 用于 SaveAttributeView 路径路由，创建后立即清除
+		if avBoxID != "" {
+			av.SetAVBoxID(avID, avBoxID)
+			defer av.SetAVBoxID(avID, "") // 创建完成立即清除，避免污染后续路由
 		}
-
-		attrView = av.NewAttributeView(avID)
+		attrView = newAttributeViewWithLayout(avID, initialLayout)
 		if err = av.SaveAttributeView(attrView); err != nil {
 			logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 			return
 		}
+		if blockID != "" {
+			av.UpsertBlockRel(avID, blockID)
+		}
 	}
 
-	attrView, err = av.ParseAttributeView(avID)
+	// 已知 box 时直接用 InBox 解析，不依赖全局 pending 状态
+	if avBoxID != "" {
+		attrView, err = av.ParseAttributeViewInBox(avID, avBoxID)
+	} else {
+		attrView, err = av.ParseAttributeView(avID)
+	}
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}
+	if targetItemID != "" {
+		target = &AttributeViewRenderTarget{Status: "itemNotFound", ItemID: targetItemID}
+		if nil != attrView.GetBlockValue(targetItemID) {
+			target.Status = "filtered"
+		}
+	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, ignoreRows)
+	// 诊断：AV 解析后的数据量
+	blockKV := attrView.GetBlockKeyValues()
+	if nil != blockKV {
+	} else {
+	}
+
+	viewable, err = renderAttributeView(attrView, blockID, viewID, "", query, page, pageSize, groupPaging, ignoreRows, true, target, targetGroupID)
+	return
+}
+
+func newAttributeViewWithLayout(avID string, initialLayout av.LayoutType) (ret *av.AttributeView) {
+	ret = av.NewAttributeView(avID)
+	switch initialLayout {
+	case av.LayoutTypeGallery, av.LayoutTypeKanban:
+	default:
+		return
+	}
+
+	if err := changeAttrViewLayout(ret, ret.Views[0], initialLayout); err != nil {
+		return av.NewAttributeView(avID)
+	}
+	regenAttrViewGroups(ret)
 	return
 }
 
@@ -74,41 +501,74 @@ const (
 	groupValueNext7Days, groupValueNext30Days                = "_@next7Days@_", "_@next30Days@_"
 )
 
-func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows bool) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, ignoreRows, writable bool, target *AttributeViewRenderTarget, targetGroupID string) (viewable av.Viewable, err error) {
 	// 获取待渲染的视图
-	view, err := getRenderAttributeViewView(attrView, viewID, nodeID)
+	view, err := getRenderAttributeViewView(attrView, viewID, carrierViewID, nodeID, writable)
 	if nil != err {
 		return
 	}
 
 	// 做一些数据兼容和订正处理
-	checkAttrView(attrView, view)
-	upgradeAttributeViewSpec(attrView)
+	changed := checkAttrView(attrView, view)
+	changed = upgradeAttributeViewSpec(attrView) || changed
+	if !ignoreRows {
+		changed = normalizeAttributeViewBlockRefSubtypes(attrView) || changed
+	}
+	if writable && changed {
+		if err = av.SaveAttributeView(attrView); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+			return
+		}
+	}
 
 	// 渲染视图
 	viewable = sql.RenderView(attrView, view, query, ignoreRows)
-	err = renderViewableInstance(viewable, view, attrView, page, pageSize, ignoreRows)
+	var groupRenderSource *sql.GroupViewRenderSource
+	if !ignoreRows && view.IsGroupView() {
+		// 在父视图分页前保存完整行索引，分组表格复用已经生成的字段值。
+		groupRenderSource = sql.NewGroupViewRenderSource(viewable, query)
+	}
+	renderTargetItemID := targetItemID(target)
+	if view.IsGroupView() || view.LayoutType == av.LayoutTypeKanban {
+		renderTargetItemID = ""
+	}
+	var targetIndex, targetOffset int
+	targetIndex, targetOffset, err = renderViewableInstance(viewable, view, attrView, page, pageSize, ignoreRows, renderTargetItemID)
 	if nil != err {
 		return
+	}
+	if nil != target && targetIndex >= 0 && !view.IsGroupView() && view.LayoutType != av.LayoutTypeKanban {
+		setAttributeViewRenderTarget(target, "", targetIndex, targetOffset, view.PageSize)
 	}
 
 	// 渲染分组视图。当 ignoreRows 时若有已生成的分组则渲染元数据供面板使用，无分组则跳过（生成分组需要行数据）
 	if !ignoreRows || len(view.Groups) > 0 {
-		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, ignoreRows)
+		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, groupRenderSource,
+			ignoreRows, writable, target, targetGroupID)
+	}
+	if writable && nil == err && attrView.HasCardCoverPositionChanges() {
+		if err = av.SaveAttributeView(attrView); nil != err {
+			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+			return
+		}
 	}
 	return
 }
 
-func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]any, ignoreRows bool) (err error) {
+func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page,
+	pageSize int, groupPaging map[string]any, groupRenderSource *sql.GroupViewRenderSource, ignoreRows, writable bool,
+	target *AttributeViewRenderTarget, targetGroupID string) (err error) {
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
 		if view.LayoutType == av.LayoutTypeKanban {
 			preferredGroupKey := getKanbanPreferredGroupKey(attrView)
 			group := &av.ViewGroup{Field: preferredGroupKey.ID}
 			setAttributeViewGroup(attrView, view, group)
-			if err = av.SaveAttributeView(attrView); err != nil {
-				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
-				return
+			if writable {
+				if err = av.SaveAttributeView(attrView); err != nil {
+					logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+					return
+				}
 			}
 			groupKey = view.GetGroupKey(attrView)
 			if nil == groupKey {
@@ -125,9 +585,11 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		createdDate := time.UnixMilli(view.GroupCreated).Format("2006-01-02")
 		if time.Now().Format("2006-01-02") != createdDate {
 			genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
-			if err = av.SaveAttributeView(attrView); err != nil {
-				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
-				return
+			if writable {
+				if err = av.SaveAttributeView(attrView); err != nil {
+					logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+					return
+				}
 			}
 		}
 	}
@@ -136,9 +598,11 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	// ignoreRows 时跳过重新生成（需要行数据），沿用已保存的分组。
 	if !ignoreRows && isGroupByTemplate(attrView, view) {
 		genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
-		if err = av.SaveAttributeView(attrView); err != nil {
-			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
-			return
+		if writable {
+			if err = av.SaveAttributeView(attrView); err != nil {
+				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+				return
+			}
 		}
 	}
 
@@ -148,9 +612,11 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 			return
 		}
 		genAttrViewGroups(view, attrView)
-		if err = av.SaveAttributeView(attrView); err != nil {
-			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
-			return
+		if writable {
+			if err = av.SaveAttributeView(attrView); err != nil {
+				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
+				return
+			}
 		}
 	}
 
@@ -179,10 +645,11 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	}
 
 	sortGroupViews(attrView, view)
+	targetGroupID = resolveAttributeViewTargetGroupID(view, target, targetGroupID)
 
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
-		groupViewable := sql.RenderGroupView(attrView, view, groupView, query)
+		groupViewable := sql.RenderGroupViewWithSource(attrView, view, groupView, query, groupRenderSource, ignoreRows)
 
 		groupPage, groupPageSize := page, pageSize
 		if nil != groupPaging {
@@ -197,14 +664,31 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 			}
 		}
 
-		err = renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize, ignoreRows)
+		groupTargetItemID := ""
+		if nil != target {
+			if (targetGroupID != "" && groupView.ID == targetGroupID) || (targetGroupID == "" && target.Status != "visible") {
+				groupTargetItemID = target.ItemID
+			}
+		}
+		targetIndex, targetOffset, renderErr := renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize, ignoreRows, groupTargetItemID)
+		err = renderErr
 		if nil != err {
 			return
 		}
-
 		if !ignoreRows {
 			hideEmptyGroupViews(view, groupViewable)
 		}
+		if nil != target && targetIndex >= 0 {
+			if groupViewable.GetGroupHidden() == 0 {
+				if target.Status != "visible" || groupView.ID == targetGroupID {
+					setAttributeViewRenderTarget(target, groupView.ID, targetIndex, targetOffset, view.PageSize)
+				}
+			} else if target.Status != "visible" {
+				target.Status = "groupHidden"
+				target.GroupID = groupView.ID
+			}
+		}
+
 		groups = append(groups, groupViewable)
 
 		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
@@ -409,7 +893,8 @@ func isGroupByTemplate(attrView *av.AttributeView, view *av.View) bool {
 	return av.KeyTypeTemplate == groupKey.Type
 }
 
-func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int, ignoreRows bool) (err error) {
+func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int, ignoreRows bool, targetItemID string) (targetIndex, targetOffset int, err error) {
+	targetIndex = -1
 	if nil == viewable {
 		err = av.ErrViewNotFound
 		logging.LogErrorf("render attribute view [%s] failed", attrView.ID)
@@ -431,85 +916,215 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 	switch viewable.GetType() {
 	case av.LayoutTypeTable:
 		table := viewable.(*av.Table)
+		targetIndex = findAttributeViewTargetIndex(targetItemID, len(table.Rows), func(index int) string { return table.Rows[index].ID })
 		table.RowCount = len(table.Rows)
 		table.PageSize = view.PageSize
 		if 1 > pageSize {
 			pageSize = table.PageSize
 		}
-		start := (page - 1) * pageSize
-		end := start + pageSize
-		if len(table.Rows) < end {
-			end = len(table.Rows)
+		start, end := getAttributeViewRenderRange(page, pageSize, targetIndex, table.PageSize, len(table.Rows))
+		if targetIndex >= 0 {
+			targetOffset = start
 		}
 		table.Rows = table.Rows[start:end]
 	case av.LayoutTypeGallery:
 		gallery := viewable.(*av.Gallery)
+		targetIndex = findAttributeViewTargetIndex(targetItemID, len(gallery.Cards), func(index int) string { return gallery.Cards[index].ID })
 		gallery.CardCount = len(gallery.Cards)
 		gallery.PageSize = view.PageSize
 		if 1 > pageSize {
 			pageSize = gallery.PageSize
 		}
-		start := (page - 1) * pageSize
-		end := start + pageSize
-		if len(gallery.Cards) < end {
-			end = len(gallery.Cards)
+		start, end := getAttributeViewRenderRange(page, pageSize, targetIndex, gallery.PageSize, len(gallery.Cards))
+		if targetIndex >= 0 {
+			targetOffset = start
 		}
 		gallery.Cards = gallery.Cards[start:end]
 	case av.LayoutTypeKanban:
 		kanban := viewable.(*av.Kanban)
+		targetIndex = findAttributeViewTargetIndex(targetItemID, len(kanban.Cards), func(index int) string { return kanban.Cards[index].ID })
 		kanban.CardCount = len(kanban.Cards)
 		kanban.PageSize = view.PageSize
 		if 1 > pageSize {
 			pageSize = kanban.PageSize
 		}
-		start := (page - 1) * pageSize
-		end := start + pageSize
-		if len(kanban.Cards) < end {
-			end = len(kanban.Cards)
+		start, end := getAttributeViewRenderRange(page, pageSize, targetIndex, kanban.PageSize, len(kanban.Cards))
+		if targetIndex >= 0 {
+			targetOffset = start
 		}
 		kanban.Cards = kanban.Cards[start:end]
 	}
 	return
 }
 
-func getRenderAttributeViewView(attrView *av.AttributeView, viewID, nodeID string) (ret *av.View, err error) {
-	if 1 > len(attrView.Views) {
+func targetItemID(target *AttributeViewRenderTarget) string {
+	if nil == target {
+		return ""
+	}
+	return target.ItemID
+}
+
+func findAttributeViewTargetIndex(targetItemID string, length int, getID func(index int) string) int {
+	if targetItemID == "" {
+		return -1
+	}
+	for i := 0; i < length; i++ {
+		if getID(i) == targetItemID {
+			return i
+		}
+	}
+	return -1
+}
+
+func getAttributeViewRenderRange(page, pageSize, targetIndex, defaultPageSize, length int) (start, end int) {
+	if 1 > defaultPageSize {
+		defaultPageSize = av.ViewDefaultPageSize
+	}
+	if 1 > pageSize {
+		pageSize = defaultPageSize
+	}
+	if targetIndex < 0 {
+		start = min(length, max(0, (page-1)*pageSize))
+		end = min(length, start+pageSize)
+		return
+	}
+
+	windowSize := min(length, max(defaultPageSize, av.ViewDefaultPageSize*4))
+	start = max(0, targetIndex-windowSize/2)
+	end = min(length, start+windowSize)
+	start = max(0, end-windowSize)
+	return
+}
+
+func resolveAttributeViewTargetGroupID(view *av.View, target *AttributeViewRenderTarget, targetGroupID string) string {
+	if targetGroupID == "" || nil == target {
+		return targetGroupID
+	}
+	targetGroup := view.GetGroupByID(targetGroupID)
+	if nil == targetGroup || !gulu.Str.Contains(target.ItemID, targetGroup.GroupItemIDs) {
+		return ""
+	}
+	return targetGroupID
+}
+
+func setAttributeViewRenderTarget(target *AttributeViewRenderTarget, groupID string, index, offset, pageSize int) {
+	target.Status = "visible"
+	target.GroupID = groupID
+	target.Index = index
+	target.Offset = offset
+	target.PageSize = pageSize
+}
+
+func getRenderAttributeViewView(attrView *av.AttributeView, viewID, carrierViewID, nodeID string, writable bool) (ret *av.View, err error) {
+	if _, firstViewErr := attrView.GetFirstView(); nil != firstViewErr {
 		view, _, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
-		attrView.ViewID = view.ID
-		if err = av.SaveAttributeView(attrView); err != nil {
-			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
-			return
-		}
-	}
-
-	if "" == viewID && "" != nodeID {
-		node, _, _ := getNodeByBlockID(nil, nodeID)
-		if nil != node {
-			viewID = node.IALAttr(av.NodeAttrView)
-		}
-	}
-
-	if "" != viewID {
-		ret, _ = attrView.GetCurrentView(viewID)
-		if nil != ret && ret.ID != attrView.ViewID {
-			attrView.ViewID = ret.ID
+		if writable {
 			if err = av.SaveAttributeView(attrView); err != nil {
 				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
 				return
 			}
 		}
-	} else {
-		ret = attrView.GetView(attrView.ViewID)
 	}
-
-	if nil == ret {
-		ret = attrView.Views[0]
-	}
-	return
+	return resolveAttributeViewView(attrView, viewID, carrierViewID, nodeID)
 }
 
-func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+// avBoxIDFromRepoPath 从快照文件路径反查 boxID。
+// 全局路径 /storage/av/<avID>.json 返回空串；加密笔记本路径 /<boxID>/storage/av/<avID>.json 返回 boxID。
+func avBoxIDFromRepoPath(repoPath string) string {
+	parts := strings.Split(repoPath, "/")
+	// 全局路径: ["", "storage", "av", "xxx.json"] → parts[1]=="storage"
+	// 加密 box: ["", "<boxID>", "storage", "av", "xxx.json"] → parts[1]=="<boxID>"
+	if len(parts) >= 4 && parts[2] == "storage" {
+		return parts[1]
+	}
+	return ""
+}
+
+// ResolveRepoSnapshotAttributeViewBoxID 返回快照属性视图的唯一加密笔记本上下文。
+func ResolveRepoSnapshotAttributeViewBoxID(indexID, avID string) (string, error) {
+	if !ast.IsNodeIDPattern(avID) {
+		return "", ErrInvalidID
+	}
+	repo, err := newRepository()
+	if err != nil {
+		return "", err
+	}
+	index, err := repo.GetIndex(indexID)
+	if err != nil {
+		return "", err
+	}
+	files, err := repo.GetFiles(index)
+	if err != nil {
+		return "", err
+	}
+	var matches []*entity.File
+	for _, file := range files {
+		if strings.HasSuffix(file.Path, "/storage/av/"+avID+".json") {
+			matches = append(matches, file)
+		}
+	}
+	if len(matches) == 0 {
+		return "", av.ErrAttributeViewNotFound
+	}
+	if len(matches) != 1 {
+		return "", fmt.Errorf("attribute view snapshot context is ambiguous [%s]", avID)
+	}
+	boxID := avBoxIDFromRepoPath(matches[0].Path)
+	if IsEncryptedBox(boxID) {
+		return boxID, nil
+	}
+	return "", nil
+}
+
+// ResolveHistoryAttributeViewBoxID 返回历史属性视图的唯一加密笔记本上下文。
+func ResolveHistoryAttributeViewBoxID(avID, created string) (string, error) {
+	if !ast.IsNodeIDPattern(avID) {
+		return "", ErrInvalidID
+	}
+	createdUnix, err := strconv.ParseInt(created, 10, 64)
+	if err != nil {
+		return "", fmt.Errorf("parse created [%s] failed: %w", created, err)
+	}
+	dirPrefix := time.Unix(createdUnix, 0).Format("2006-01-02-150405")
+	matches, err := filepath.Glob(filepath.Join(util.HistoryDir, dirPrefix+"*"))
+	if err != nil {
+		return "", err
+	}
+	var boxIDs []string
+	for _, historyDir := range matches {
+		if gulu.File.IsExist(filepath.Join(historyDir, "storage", "av", avID+".json")) {
+			boxIDs = append(boxIDs, "")
+		}
+		entries, _ := os.ReadDir(historyDir)
+		for _, entry := range entries {
+			if !entry.IsDir() || !ast.IsNodeIDPattern(entry.Name()) {
+				continue
+			}
+			candidate := filepath.Join(historyDir, entry.Name(), "storage", "av", avID+".json")
+			if gulu.File.IsExist(candidate) {
+				boxIDs = append(boxIDs, entry.Name())
+			}
+		}
+	}
+	if len(boxIDs) == 0 {
+		return "", av.ErrAttributeViewNotFound
+	}
+	if len(boxIDs) != 1 {
+		return "", fmt.Errorf("attribute view history context is ambiguous [%s]", avID)
+	}
+	if IsEncryptedBox(boxIDs[0]) {
+		return boxIDs[0], nil
+	}
+	return "", nil
+}
+
+func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	if !ast.IsNodeIDPattern(avID) {
+		err = ErrInvalidID
+		return
+	}
+
 	repo, err := newRepository()
 	if err != nil {
 		return
@@ -524,24 +1139,24 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 	if err != nil {
 		return
 	}
-	var avFile *entity.File
+	var avFiles []*entity.File
 	for _, f := range files {
-		if "/storage/av/"+avID+".json" == f.Path {
-			avFile = f
-			break
+		// 匹配全局 /storage/av/<avID>.json 或加密笔记本/<boxID>/storage/av/<avID>.json
+		if strings.HasSuffix(f.Path, "/storage/av/"+avID+".json") {
+			avFiles = append(avFiles, f)
 		}
 	}
 
-	if nil == avFile {
-		if !ast.IsNodeIDPattern(avID) {
-			err = ErrInvalidID
-			return
-		}
-
+	if len(avFiles) == 0 {
 		attrView = av.NewAttributeView(avID)
 		err = av.ErrAttributeViewNotFound
 		return
 	}
+	if len(avFiles) != 1 {
+		err = fmt.Errorf("attribute view snapshot context is ambiguous [%s]", avID)
+		return
+	}
+	avFile := avFiles[0]
 
 	data, readErr := repo.OpenFile(avFile)
 	if nil != readErr {
@@ -550,8 +1165,9 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		return
 	}
 
-	if !ast.IsNodeIDPattern(avID) {
-		err = ErrInvalidID
+	data, err = decryptHistoricalAttributeView(avBoxIDFromRepoPath(avFile.Path), avID, data)
+	if err != nil {
+		logging.LogErrorf("decrypt snapshot attribute view [%s] failed: %s", avID, err)
 		return
 	}
 
@@ -560,12 +1176,20 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 		return
 	}
+	if err = av.CheckSpec(attrView); nil != err {
+		return
+	}
 
-	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil, false)
+	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, "", 1, -1, nil, false, false, nil, "")
 	return
 }
 
-func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]any, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page, pageSize int, groupPaging map[string]any, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	if !ast.IsNodeIDPattern(avID) {
+		err = ErrInvalidID
+		return
+	}
+
 	createdUnix, parseErr := strconv.ParseInt(created, 10, 64)
 	if nil != parseErr {
 		logging.LogErrorf("parse created [%s] failed: %s", created, parseErr)
@@ -585,33 +1209,47 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		return
 	}
 
-	historyDir := matches[0]
-	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
-	if !gulu.File.IsExist(avJSONPath) {
-		logging.LogWarnf("attribute view [%s] not found in history data [%s], use current data instead", avID, historyDir)
-		avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
+	type historyAttributeViewSource struct {
+		path  string
+		boxID string
 	}
-	if !gulu.File.IsExist(avJSONPath) {
-		logging.LogWarnf("attribute view [%s] not found in current data", avID)
-		if !ast.IsNodeIDPattern(avID) {
-			err = ErrInvalidID
-			return
+	var sources []historyAttributeViewSource
+	for _, historyDir := range matches {
+		globalPath := filepath.Join(historyDir, "storage", "av", avID+".json")
+		if gulu.File.IsExist(globalPath) {
+			sources = append(sources, historyAttributeViewSource{path: globalPath})
 		}
-
+		entries, _ := os.ReadDir(historyDir)
+		for _, entry := range entries {
+			if entry.IsDir() && ast.IsNodeIDPattern(entry.Name()) {
+				candidate := filepath.Join(historyDir, entry.Name(), "storage", "av", avID+".json")
+				if gulu.File.IsExist(candidate) {
+					sources = append(sources, historyAttributeViewSource{path: candidate, boxID: entry.Name()})
+				}
+			}
+		}
+	}
+	if len(sources) == 0 {
 		attrView = av.NewAttributeView(avID)
 		err = av.ErrAttributeViewNotFound
 		return
 	}
+	if len(sources) != 1 {
+		err = fmt.Errorf("attribute view history context is ambiguous [%s]", avID)
+		return
+	}
+	source := sources[0]
 
-	data, readErr := os.ReadFile(avJSONPath)
+	data, readErr := os.ReadFile(source.path)
 	if nil != readErr {
 		logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
 		err = readErr
 		return
 	}
 
-	if !ast.IsNodeIDPattern(avID) {
-		err = ErrInvalidID
+	data, err = decryptHistoricalAttributeView(source.boxID, avID, data)
+	if err != nil {
+		logging.LogErrorf("decrypt history attribute view [%s] failed: %s", avID, err)
 		return
 	}
 
@@ -620,7 +1258,30 @@ func RenderHistoryAttributeView(blockID, avID, viewID, query string, page, pageS
 		logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 		return
 	}
+	if err = av.CheckSpec(attrView); nil != err {
+		return
+	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging, false)
+	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, query, page, pageSize, groupPaging, false, false, nil, "")
 	return
+}
+
+func decryptHistoricalAttributeView(boxID, avID string, data []byte) ([]byte, error) {
+	ciphertext := util.IsCiphertext(data)
+	if boxID == "" {
+		if ciphertext {
+			return nil, errors.New("encrypted attribute view snapshot is missing notebook context")
+		}
+		return data, nil
+	}
+	if !IsEncryptedBox(boxID) {
+		if ciphertext {
+			return nil, fmt.Errorf("encrypted attribute view snapshot has no matching notebook [%s]", boxID)
+		}
+		return data, nil
+	}
+	if !ciphertext {
+		return nil, fmt.Errorf("encrypted notebook attribute view snapshot is plaintext [%s]", boxID)
+	}
+	return av.DecryptAVData(boxID, avID, data)
 }

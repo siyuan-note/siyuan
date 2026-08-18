@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20210331200042-94gs1hh",
-		"title": "超链接",
+		"title": "块超链接",
 		"type": "doc",
-		"updated": "20250115153419"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210331200221-h942rq7",
-				"updated": "20210331200305"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -94,12 +94,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220312232623-xhnu1dy",
-				"updated": "20220312232838"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "加入查询字符串参数 "
+					"Data": "支持的查询参数包括："
 				},
 				{
 					"Type": "NodeTextMark",
@@ -108,16 +108,52 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " （"
+					"Data": " 表示聚焦打开，"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan://blocks/{id}?focus=1"
+					"TextMarkTextContent": "fullscreen=1"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "）表示聚焦打开。"
+					"Data": " 表示全屏打开。数据库条目超链接还可包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "avItemID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "avViewID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "avGroupID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，这些参数通常由 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "复制条目超链接"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 自动生成。"
 				}
 			]
 		},
@@ -127,7 +163,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210331200402-sk21ug4",
-				"updated": "20250115153419"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -146,7 +182,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210331200839-18k56cs",
-				"updated": "20250115153419"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -432,7 +468,7 @@
 					},
 					"Properties": {
 						"id": "20210331201016-h8i10b1",
-						"updated": "20250115153419"
+						"updated": "20260803165036"
 					},
 					"Children": [
 						{
@@ -440,12 +476,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210331201016-k6nnbcd",
-								"updated": "20250115153419"
+								"updated": "20260803165036"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -472,7 +508,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " ​"
 								}
 							]
 						}

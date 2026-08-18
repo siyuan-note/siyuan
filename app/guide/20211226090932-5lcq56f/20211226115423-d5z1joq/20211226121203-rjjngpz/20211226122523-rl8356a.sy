@@ -6,7 +6,7 @@
 		"id": "20211226122523-rl8356a",
 		"title": "在瀏覽器上使用",
 		"type": "doc",
-		"updated": "20221025093344"
+		"updated": "20260804193000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122545-a65v8e1",
-				"updated": "20211225220755"
+				"updated": "20260804165002"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221025093315-nlguzfi",
-				"updated": "20221025093344"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -70,7 +70,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 後就可以直接在瀏覽器上使用了，如果需要在區域網內使用，將 "
+					"Data": " ​ 後就可以直接在瀏覽器上使用了，如果需要在區域網內使用，將 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -230,6 +230,46 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中可配置瀏覽器鎖屏密碼，留空表示不啟用。這在開放網絡（比如辦公場所和公網）會比較有用，只有密碼驗證通過後才能進入工作空間。"
+				}
+			]
+		},
+		{
+			"ID": "20260804120201-oidclog",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804120201-oidclog",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC 登入"
+				}
+			]
+		},
+		{
+			"ID": "20260804190501-oidcrf2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190501-oidcrf2",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有關提供者、回呼位址、准入規則、多端登入、Docker 設定和疑難排解的完整說明，請參閱 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190001-oidctw1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC 登入"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		}

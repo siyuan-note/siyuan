@@ -1,14 +1,26 @@
 import {genEmptyElement, genHeadingElement, insertEmptyBlock} from "../../block/util";
-import {focusByRange, focusByWbr, getSelectionOffset, setLastNodeRange} from "../util/selection";
+import {focusByRange, focusByWbr, getSelectionOffset, getUndoFocusContext, setLastNodeRange} from "../util/selection";
 import {
     getContenteditableElement, getParentBlock,
+    getEmbedChildOperationContext,
+    getEmbedChildOperationParentID,
+    getPreviousBlockSibling,
     getTopEmptyElement,
     hasNextSibling,
     hasPreviousSibling,
-    isNotEditBlock
+    isNotEditBlock,
+    IEmbedChildOperationContext
 } from "./getBlock";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
-import {breakList, genListItemElement, listOutdent, updateListOrder} from "./list";
+import {
+    breakList,
+    genListItemElement,
+    getFocusedOrderedListInsertOperations,
+    getFocusedParentOrderedList,
+    getOrderedListStart,
+    listOutdent,
+    updateListOrder
+} from "./list";
 import {highlightRender} from "../render/highlightRender";
 import {Constants} from "../../constants";
 import {scrollCenter} from "../../util/highlightById";
@@ -21,7 +33,9 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
 
 export const enter = async (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
-    if (hasClosestByClassName(blockElement, "protyle-wysiwyg__embed") && !blockElement.classList.contains("code-block")) {
+    const embedResultElement = hasClosestByClassName(blockElement, "protyle-wysiwyg__embed");
+    const embedContext = getEmbedChildOperationContext(blockElement);
+    if (embedResultElement && !embedContext && !blockElement.classList.contains("code-block")) {
         return;
     }
     const disableElement = isNotEditBlock(blockElement);
@@ -55,11 +69,18 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
 
     const trimStartHTML = editableElement.innerHTML.trimStart();
     const trimStartText = editableElement.textContent.trimStart();
-    if (trimStartHTML.startsWith("```") || trimStartHTML.startsWith("···") || trimStartHTML.startsWith("~~~") ||
-        (trimStartHTML.indexOf("\n```") > -1 && trimStartText.indexOf("\n```") > -1) ||
-        (trimStartHTML.indexOf("\n~~~") > -1 && trimStartText.indexOf("\n~~~") > -1) ||
-        (trimStartHTML.indexOf("\n···") > -1 && trimStartText.indexOf("\n···") > -1)) {
-        if (trimStartHTML.indexOf("\n") === -1 && trimStartHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+    const enableCodeBlockMiddleDot = window.siyuan.config.editor.markdown.codeBlockMiddleDot !== false;
+    const codeBlockMarkerRegExp = enableCodeBlockMiddleDot ? /·|~/g : /~/g;
+    const codeBlockFenceStartRegExp = enableCodeBlockMiddleDot ? /^(~|·|`){3,}/g : /^(~|`){3,}/g;
+    const codeBlockFenceLineRegExp = enableCodeBlockMiddleDot ? /\n(~|·|`){3,}/g : /\n(~|`){3,}/g;
+    const hasCodeBlockFence = (html: string, text: string) => html.startsWith("```") || html.startsWith("~~~") ||
+        (html.indexOf("\n```") > -1 && text.indexOf("\n```") > -1) ||
+        (html.indexOf("\n~~~") > -1 && text.indexOf("\n~~~") > -1) ||
+        (enableCodeBlockMiddleDot && (html.startsWith("···") ||
+            (html.indexOf("\n···") > -1 && text.indexOf("\n···") > -1)));
+    if (hasCodeBlockFence(trimStartHTML, trimStartText)) {
+        if (trimStartHTML.indexOf("\n") === -1 &&
+            trimStartHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else if (blockElement.classList.contains("p")) { // https://github.com/siyuan-note/siyuan/issues/6953
             range.insertNode(document.createElement("wbr"));
@@ -69,7 +90,9 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             const wbrElement = document.createElement("wbr");
             range.insertNode(wbrElement);
             wbrElement.after(document.createTextNode("\n"));
-            let replaceInnerHTML = editableElement.innerHTML.replace(/\n(~|·|`){3,}/g, "\n```").trim().replace(/^(~|·|`){3,}/g, "```");
+            let replaceInnerHTML = editableElement.innerHTML
+                .replace(codeBlockFenceLineRegExp, "\n```").trim()
+                .replace(codeBlockFenceStartRegExp, "```");
             if (!replaceInnerHTML.endsWith("\n```")) {
                 replaceInnerHTML += "\n```";
             }
@@ -127,8 +150,11 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         ((blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") &&
                 blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") ||
             (blockElement.parentElement.classList.contains("callout-content") && !blockElement.nextElementSibling))) {
+        if (embedContext && !embedContext.boundaryElement.contains(getParentBlock(blockElement).parentElement)) {
+            return;
+        }
         range.insertNode(document.createElement("wbr"));
-        const topElement = getTopEmptyElement(blockElement);
+        const topElement = getTopEmptyElement(blockElement, embedContext?.boundaryElement);
         const blockId = blockElement.getAttribute("data-node-id");
         const topId = topElement.getAttribute("data-node-id");
         const doInsert: IOperation = {
@@ -147,8 +173,9 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             undoInsert.previousID = blockElement.previousElementSibling.getAttribute("data-node-id");
             parentBlockElement.after(blockElement);
         } else {
-            doInsert.previousID = topElement.previousElementSibling ? topElement.previousElementSibling.getAttribute("data-node-id") : undefined;
-            doInsert.parentID = topElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID;
+            doInsert.previousID = getPreviousBlockSibling(topElement)?.getAttribute("data-node-id");
+            doInsert.parentID = getEmbedChildOperationParentID(topElement, embedContext) ||
+                getParentBlock(topElement).getAttribute("data-node-id") || protyle.block.parentID;
             undoInsert.previousID = doInsert.previousID;
             undoInsert.parentID = doInsert.parentID;
             topElement.after(blockElement);
@@ -189,36 +216,60 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
             (blockElement.nextElementSibling.classList.contains("list") && blockElement.previousElementSibling?.classList.contains("protyle-action")) ||
             (position.start === 0 && blockElement.previousElementSibling.classList.contains("protyle-action")) ||
             blockElement.parentElement.getAttribute("fold") === "1"
-        ) && listEnter(protyle, blockElement, range)
-    ) {
-        return true;
+        )) {
+        const embedListEnterMode = embedContext ? getEmbedListEnterMode(blockElement, embedContext) : "list";
+        if ("none" === embedListEnterMode) {
+            return;
+        }
+        if ("list" === embedListEnterMode && await listEnter(protyle, blockElement, range)) {
+            return true;
+        }
     }
 
     // 段首换行
     if (editableElement.textContent !== "" && range.toString() === "" && position.start === 0) {
+        const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range);
         let newElement;
-        if (blockElement.previousElementSibling &&
-            blockElement.previousElementSibling.getAttribute("data-type") === "NodeHeading" &&
-            blockElement.previousElementSibling.getAttribute("fold") === "1") {
-            newElement = genHeadingElement(blockElement.previousElementSibling, false, true) as HTMLDivElement;
+        const previousBlockElement = getPreviousBlockSibling(blockElement);
+        if (previousBlockElement?.getAttribute("data-type") === "NodeHeading" &&
+            previousBlockElement.getAttribute("fold") === "1") {
+            newElement = genHeadingElement(previousBlockElement, false, true) as HTMLDivElement;
         } else {
             newElement = genEmptyElement(false, true);
         }
         blockElement.insertAdjacentElement("beforebegin", newElement);
         const newId = newElement.getAttribute("data-node-id");
-        transaction(protyle, [{
+        const doOperations: IOperation[] = [{
             action: "insert",
             data: newElement.outerHTML,
             id: newId,
             nextID: blockElement.getAttribute("data-node-id"),
-        }], [{
+        }];
+        const undoOperations: IOperation[] = [{
             action: "delete",
             id: newId,
-        }]);
+            context: undoFocusContext,
+        }];
+        if (blockElement.parentElement.classList.contains("sb") &&
+            blockElement.parentElement.getAttribute("data-sb-layout") === "col") {
+            const mergeOperations = await turnsIntoOneTransaction({
+                protyle,
+                selectsElement: [newElement, blockElement],
+                type: "BlocksMergeSuperBlock",
+                level: "row",
+                unfocus: true,
+                getOperations: true,
+                widthSourceElement: blockElement,
+            });
+            doOperations.push(...mergeOperations.doOperations);
+            undoOperations.splice(0, 0, ...mergeOperations.undoOperations);
+        }
+        transaction(protyle, doOperations, undoOperations);
         newElement.querySelector("wbr").remove();
         removeEmptyNode(newElement);
         return true;
     }
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range);
     range.insertNode(document.createElement("wbr"));
     const html = blockElement.outerHTML;
     const parentHTML = getParentBlock(blockElement).outerHTML;
@@ -257,14 +308,14 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
     const newHTML = newEditableElement.innerHTML.trimStart();
     const newText = newEditableElement.textContent.trimStart();
     // https://github.com/siyuan-note/siyuan/issues/10759
-    if (newHTML.startsWith("```") || newHTML.startsWith("···") || newHTML.startsWith("~~~") ||
-        (newHTML.indexOf("\n```") > -1 && newText.indexOf("\n```") > -1) ||
-        (newHTML.indexOf("\n~~~") > -1 && newText.indexOf("\n~~~") > -1) ||
-        (newHTML.indexOf("\n···") > -1 && newText.indexOf("\n···") > -1)) {
-        if (newHTML.indexOf("\n") === -1 && newHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+    if (hasCodeBlockFence(newHTML, newText)) {
+        if (newHTML.indexOf("\n") === -1 &&
+            newHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else {
-            let replaceNewHTML = newEditableElement.innerHTML.replace(/\n(~|·|`){3,}/g, "\n```").trim().replace(/^(~|·|`){3,}/g, "```");
+            let replaceNewHTML = newEditableElement.innerHTML
+                .replace(codeBlockFenceLineRegExp, "\n```").trim()
+                .replace(codeBlockFenceStartRegExp, "```");
             if (!replaceNewHTML.endsWith("\n```")) {
                 replaceNewHTML += "\n```";
             }
@@ -299,6 +350,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
                 action: "update",
                 data: html,
                 id,
+                context: undoFocusContext,
             });
         } else {
             doOperation.push({
@@ -388,7 +440,24 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
     return true;
 };
 
-const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
+const getEmbedListEnterMode = (blockElement: HTMLElement, embedContext: IEmbedChildOperationContext) => {
+    const listItemElement = blockElement.parentElement;
+    // 单独查询列表项时外层列表是渲染器补充的，回车只能在目标列表项内部创建普通子块。
+    if (listItemElement === embedContext.targetElement) {
+        return "block";
+    }
+    const listElement = listItemElement.parentElement;
+    const editableElement = getContenteditableElement(blockElement);
+    const exitsList = ["", "\n"].includes(editableElement.textContent) &&
+        blockElement.previousElementSibling.classList.contains("protyle-action") &&
+        !blockElement.querySelector("img");
+    if (exitsList && listElement.parentElement === embedContext.resultElement) {
+        return "none";
+    }
+    return embedContext.boundaryElement.contains(exitsList ? listElement.parentElement : listElement) ? "list" : "none";
+};
+
+const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
     const listItemElement = blockElement.parentElement;
     const editableElement = getContenteditableElement(blockElement);
     if (// \n 是因为 https://github.com/siyuan-note/siyuan/issues/3846
@@ -397,11 +466,11 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         !blockElement.querySelector("img") // https://ld246.com/article/1651820644238
     ) {
         if (listItemElement.nextElementSibling?.classList.contains("protyle-attr")) {
-            listOutdent(protyle, [blockElement.parentElement], range);
+            await listOutdent(protyle, [blockElement.parentElement], range);
             return true;
         } else if (!listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
             // 打断列表
-            breakList(protyle, blockElement, range);
+            await breakList(protyle, blockElement, range);
             return true;
         }
     }
@@ -417,7 +486,9 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         // https://github.com/siyuan-note/siyuan/issues/8935
         const wbrElement = document.createElement("wbr");
         range.insertNode(wbrElement);
-        const html = listItemElement.parentElement.outerHTML;
+        const listElement = listItemElement.parentElement;
+        const html = listElement.outerHTML;
+        const listStart = getOrderedListStart(listElement);
         wbrElement.remove();
         let newElement = genListItemElement(listItemElement, -1, true);
         if (!blockElement.previousElementSibling.classList.contains("protyle-action")) {
@@ -434,15 +505,25 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             listItemElement.insertAdjacentElement("beforebegin", newElement);
         }
         if (listItemElement.getAttribute("data-subtype") === "o") {
-            updateListOrder(listItemElement.parentElement);
+            updateListOrder(listElement, listStart);
         }
-        updateTransaction(protyle, listItemElement.parentElement, html);
+        updateTransaction(protyle, listElement, html);
         focusByWbr(newElement, range);
         scrollCenter(protyle);
         removeEmptyNode(newElement);
         return true;
     }
 
+    const shouldUpdateParentList = listItemElement.getAttribute("data-subtype") === "o" &&
+        listItemElement.parentElement.classList.contains("protyle-wysiwyg");
+    const focusedParentListElement = shouldUpdateParentList ?
+        await getFocusedParentOrderedList(protyle, listItemElement.parentElement) : undefined;
+    if (shouldUpdateParentList && !focusedParentListElement) {
+        return true;
+    }
+    if (!listItemElement.isConnected) {
+        return true;
+    }
     const subListElement = listItemElement.querySelector(".list");
     let newElement;
     if (subListElement && listItemElement.getAttribute("fold") !== "1" &&
@@ -455,11 +536,12 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             // 段末换行，在子列表中插入
             range.insertNode(document.createElement("wbr"));
             const html = listItemElement.outerHTML;
+            const listStart = getOrderedListStart(subListElement);
             blockElement.querySelector("wbr").remove();
             newElement = genListItemElement(subListElement.firstElementChild, -1, true);
             subListElement.firstElementChild.before(newElement);
             if (subListElement.getAttribute("data-subtype") === "o") {
-                updateListOrder(subListElement);
+                updateListOrder(subListElement, listStart);
             }
             updateTransaction(protyle, listItemElement, html);
             focusByWbr(listItemElement, range);
@@ -497,6 +579,9 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
                 updateListOrder(listItemElement.parentElement);
             }
             if (listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
+                const orderOperations = focusedParentListElement ?
+                    getFocusedOrderedListInsertOperations(focusedParentListElement, listItemElement, newElement) :
+                    {doOperations: [], undoOperations: []};
                 listItemElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
                 transaction(protyle, [{
                     action: "update",
@@ -507,14 +592,14 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
                     id: newElement.getAttribute("data-node-id"),
                     data: newElement.outerHTML,
                     previousID: listItemElement.getAttribute("data-node-id")
-                }], [{
+                }, ...orderOperations.doOperations], [{
                     action: "delete",
                     id: newElement.getAttribute("data-node-id"),
                 }, {
                     action: "update",
                     data: listItemHTML,
                     id: listItemElement.getAttribute("data-node-id")
-                }]);
+                }, ...orderOperations.undoOperations]);
             } else {
                 updateTransaction(protyle, listItemElement.parentElement, html);
             }
@@ -586,6 +671,9 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         updateListOrder(listItemElement.parentElement);
     }
     if (listItemElement.parentElement.classList.contains("protyle-wysiwyg")) {
+        const orderOperations = focusedParentListElement ?
+            getFocusedOrderedListInsertOperations(focusedParentListElement, listItemElement, newElement) :
+            {doOperations: [], undoOperations: []};
         listItemElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
         transaction(protyle, [{
             action: "update",
@@ -596,14 +684,14 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             id: newElement.getAttribute("data-node-id"),
             data: newElement.outerHTML,
             previousID: listItemElement.getAttribute("data-node-id")
-        }], [{
+        }, ...orderOperations.doOperations], [{
             action: "delete",
             id: newElement.getAttribute("data-node-id"),
         }, {
             action: "update",
             id: listItemElement.getAttribute("data-node-id"),
             data: listItemHTML
-        }]);
+        }, ...orderOperations.undoOperations]);
     } else {
         updateTransaction(protyle, listItemElement.parentElement, oldHTML);
     }

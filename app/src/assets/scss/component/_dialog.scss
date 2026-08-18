@@ -91,13 +91,14 @@
   &__close {
     position: absolute;
     cursor: pointer;
-    top: -2px;
-    right: -36px;
+    top: 4px;
+    right: 4px;
     height: 18px;
     width: 18px;
     opacity: .68;
     color: var(--b3-theme-on-surface);
     padding: 8px;
+    z-index: 1;
 
     &:hover {
       opacity: 1;

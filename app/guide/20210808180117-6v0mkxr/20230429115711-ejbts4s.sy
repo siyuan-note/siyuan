@@ -7,7 +7,7 @@
 		"id": "20230429115711-ejbts4s",
 		"title": "Glossary",
 		"type": "doc",
-		"updated": "20260614111257"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -68,7 +68,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429115740-s72e6yy",
-				"updated": "20230429115745"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -560,7 +560,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111229-xhhdmql",
-				"updated": "20260614111229"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -602,12 +602,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111229-2a1poix",
-				"updated": "20260614111229"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In SiYuan, virtual references automatically detect potential connections based on content block names, aliases, and anchor text, displayed with dashed underlines in the editor. Hovering shows a preview of the corresponding content block; clicking converts it to a formal block reference. Can be toggled in [Settings - Editor - Virtual Reference]."
+					"Data": "In SiYuan, virtual references automatically detect potential connections based on content block names, aliases, and anchor text, displayed with dashed underlines in the editor. Hovering shows a preview of the corresponding content block; clicking converts it to a formal block reference. Can be toggled in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Bidirectional Links"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Virtual Reference"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
 				}
 			]
 		},
@@ -1139,7 +1175,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111245-do79b2w",
-				"updated": "20260614111245"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1181,12 +1217,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111245-ts4nqpv",
-				"updated": "20260614111245"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In SiYuan, the Bazaar is the entry point for browsing and installing community extensions, including five types: themes, icons, plugins, widgets, and templates. Users can search, install, and update directly within the app."
+					"Data": "In SiYuan, the Bazaar is the entry point for browsing and installing community extensions, including plugins, themes, icons, templates, and widgets. You can search, install, and update them directly in the application."
 				}
 			]
 		},
@@ -1310,7 +1346,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111245-ejrp4c3",
-				"updated": "20260614111245"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1352,7 +1388,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111245-8viirmm",
-				"updated": "20260614111245"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1361,8 +1397,26 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "Ctrl+Shift+P"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "P"
 				},
 				{
 					"Type": "NodeText",

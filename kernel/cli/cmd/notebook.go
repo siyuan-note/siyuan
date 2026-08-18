@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -77,10 +78,23 @@ var notebookCreateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		if _, err = model.Mount(id); err != nil {
+			return fmt.Errorf("notebook [%s] was created but could not be opened: %w", id, err)
+		}
 		model.AppendPushReloadFiletreeEntry()
 		fmt.Println(id)
 		return nil
 	},
+}
+
+func formatNotebookWriteError(boxID string, err error) error {
+	if errors.Is(err, model.ErrBoxClosed) {
+		return fmt.Errorf("notebook [%s] is closed; run `notebook open --id %s` first", boxID, boxID)
+	}
+	if errors.Is(err, model.ErrBoxNotFound) {
+		return fmt.Errorf("notebook [%s] not found", boxID)
+	}
+	return err
 }
 
 var notebookRemoveCmd = &cobra.Command{
@@ -198,7 +212,7 @@ func printNotebookTable(boxes []*model.Box) {
 }
 
 // notebookSetIconCmd 设置笔记本图标。
-// icon 取值格式：emoji hex 码点（如 "1f4ca"）、emoji 字符、自定义图片路径或动态图标 URL。
+// icon 取值格式：emoji hex 码点（如 "1f4ca"）、emoji 字符、自定义图片路径、网络图片 URL 或动态图标 URL。
 var notebookSetIconCmd = &cobra.Command{
 	Use:   "set-icon --id <id> --icon <icon>",
 	Short: "Set a notebook icon",
@@ -235,7 +249,6 @@ var notebookSetIconCmd = &cobra.Command{
 
 		// SetBoxIcon 内部对自定义图片名做 XSS 过滤。
 		model.SetBoxIcon(id, icon)
-		util.PushReloadFiletree()
 
 		switch outputFormat {
 		case "json":
@@ -302,7 +315,6 @@ var notebookRandomIconCmd = &cobra.Command{
 		for _, c := range changes {
 			model.SetBoxIcon(c.ID, c.NewIcon)
 		}
-		util.PushReloadFiletree()
 
 		switch outputFormat {
 		case "json":
@@ -381,7 +393,7 @@ func init() {
 	notebookOpenCmd.Flags().String("id", "", "notebook ID")
 	notebookCloseCmd.Flags().String("id", "", "notebook ID")
 	notebookSetIconCmd.Flags().String("id", "", "notebook ID")
-	notebookSetIconCmd.Flags().String("icon", "", "notebook icon: emoji hex codepoint like \"1f4ca\", emoji character like \"📊\", custom image path like \"1/b3log.png\", or dynamic icon URL like \"api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx\"")
+	notebookSetIconCmd.Flags().String("icon", "", "notebook icon: emoji hex codepoint like \"1f4ca\", emoji character like \"📊\", custom image path like \"1/b3log.png\", network image URL like \"https://example.com/icon.png\", or dynamic icon URL like \"api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx\"")
 	notebookRandomIconCmd.Flags().String("id", "", "notebook ID (optional; omit to update all notebooks)")
 
 	rootCmd.AddCommand(notebookCmd)

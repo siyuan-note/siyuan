@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,8 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -25,6 +27,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 
@@ -33,6 +36,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -76,10 +80,29 @@ func listDocTree(c *gin.Context) {
 		return
 	}
 
+	// 加密笔记本锁定时拒绝直接列举磁盘目录，防止泄漏文档 ID、层级和数量
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
+
 	p := arg["path"].(string)
 	p = strings.TrimSuffix(p, ".sy")
+	// 越界校验：拒绝 ..，确保路径位于 <data>/<notebook>/ 内。
+	// 无需 filepath.IsAbs —— notebook 路径全为 notebook 内相对路径，且跨 OS 对 "/" 判定不一致。
+	if found := strings.Contains(p, ".."); found {
+		ret.Code = -1
+		ret.Msg = "path must not contain '..'"
+		return
+	}
 	var doctree []*DocFile
 	root := filepath.Join(util.WorkspaceDir, "data", notebook, p)
+	if !gulu.File.IsSubPath(filepath.Join(util.WorkspaceDir, "data", notebook), root) {
+		ret.Code = -1
+		ret.Msg = "path escapes notebook directory"
+		return
+	}
 	dir, err := os.ReadDir(root)
 	if err != nil {
 		ret.Code = -1
@@ -238,6 +261,14 @@ func heading2Doc(c *gin.Context) {
 
 	srcHeadingID := arg["srcHeadingID"].(string)
 	targetNotebook := arg["targetNoteBook"].(string)
+
+	// 禁止跨加密笔记本移动块：加密笔记本是孤岛
+	if bt := treenode.GetBlockTree(srcHeadingID); bt != nil && model.IsEncryptedBox(bt.BoxID) && bt.BoxID != targetNotebook {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
 	var targetPath string
 	if arg["targetPath"] != nil {
 		targetPath = arg["targetPath"].(string)
@@ -281,6 +312,15 @@ func li2Doc(c *gin.Context) {
 
 	srcListItemID := arg["srcListItemID"].(string)
 	targetNotebook := arg["targetNoteBook"].(string)
+
+	// 禁止跨加密笔记本移动块：加密笔记本是孤岛
+	if bt := treenode.GetBlockTree(srcListItemID); bt != nil && model.IsEncryptedBox(bt.BoxID) && bt.BoxID != targetNotebook {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+
 	var targetPath string
 	if arg["targetPath"] != nil {
 		targetPath = arg["targetPath"].(string)
@@ -335,6 +375,15 @@ func getHPathByPath(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if p != "/" && model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		id := util.GetTreeID(p)
+		if !model.CheckBlockIdMetadataAccessableByPublishAccessInBox(c, publishAccess, id, notebook) {
+			ret.Code = -1
+			ret.Msg = model.ErrBlockNotFound.Error()
+			return
+		}
+	}
 	ret.Data = hPath
 }
 
@@ -352,6 +401,7 @@ func getHPathsByPaths(c *gin.Context) {
 	for _, p := range pathsArg {
 		paths = append(paths, p.(string))
 	}
+	paths = filterFileTreePathsByPublishMetadataAccess(c, paths)
 	hPath, err := model.GetHPathsByPaths(paths)
 	if err != nil {
 		ret.Code = -1
@@ -381,6 +431,14 @@ func getHPathByID(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		if !model.CheckBlockIdMetadataAccessableByPublishAccess(c, publishAccess, id) {
+			ret.Code = -1
+			ret.Msg = model.ErrTreeNotFound.Error()
+			return
+		}
+	}
 	ret.Data = hPath
 }
 
@@ -393,7 +451,10 @@ func getPathByID(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
 	if util.InvalidIDPattern(id, ret) {
 		return
 	}
@@ -403,6 +464,14 @@ func getPathByID(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
+	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		if !model.CheckBlockIdMetadataAccessableByPublishAccessInBox(c, publishAccess, id, notebook) {
+			ret.Code = -1
+			ret.Msg = model.ErrTreeNotFound.Error()
+			return
+		}
 	}
 	ret.Data = map[string]any{
 		"path":     p,
@@ -423,11 +492,22 @@ func getFullHPathByID(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
 	hPath, err := model.GetFullHPathByID(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
+	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		if !model.CheckBlockIdMetadataAccessableByPublishAccess(c, publishAccess, id) {
+			ret.Code = -1
+			ret.Msg = model.ErrTreeNotFound.Error()
+			return
+		}
 	}
 	ret.Data = hPath
 }
@@ -459,7 +539,44 @@ func getIDsByHPath(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	ids = filterFileTreeBlockIDsByPublishDiscoverability(c, ids, notebook)
 	ret.Data = ids
+}
+
+func filterFileTreePathsByPublishMetadataAccess(c *gin.Context, paths []string) (ret []string) {
+	if !model.IsReadOnlyRoleContext(c) {
+		return paths
+	}
+
+	ids := make([]string, 0, len(paths))
+	for _, p := range paths {
+		ids = append(ids, util.GetTreeID(p))
+	}
+	blockTrees := treenode.GetBlockTrees(ids)
+	publishAccess := model.GetPublishAccess()
+	ret = make([]string, 0, len(paths))
+	for i, p := range paths {
+		if model.CheckBlockTreeMetadataAccessableByPublishAccess(c, publishAccess, blockTrees[ids[i]]) {
+			ret = append(ret, p)
+		}
+	}
+	return
+}
+
+func filterFileTreeBlockIDsByPublishDiscoverability(c *gin.Context, ids []string, boxID string) (ret []string) {
+	if !model.IsReadOnlyRoleContext(c) {
+		return ids
+	}
+
+	blockTrees := treenode.GetBlockTreesInBox(ids, boxID)
+	publishAccess := model.GetPublishAccess()
+	ret = make([]string, 0, len(ids))
+	for _, id := range ids {
+		if model.CheckBlockTreeDiscoverableByPublishAccess(publishAccess, blockTrees[id]) {
+			ret = append(ret, id)
+		}
+	}
+	return
 }
 
 func moveDocs(c *gin.Context) {
@@ -572,7 +689,10 @@ func removeDoc(c *gin.Context) {
 	}
 
 	p := arg["path"].(string)
-	model.RemoveDoc(notebook, p)
+	if err := model.RemoveDoc(notebook, p); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }
 
 func removeDocByID(c *gin.Context) {
@@ -584,12 +704,15 @@ func removeDocByID(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
 	if util.InvalidIDPattern(id, ret) {
 		return
 	}
 
-	tree, err := model.LoadTreeByBlockID(id)
+	p, notebook, err := model.GetPathByID(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -597,7 +720,10 @@ func removeDocByID(c *gin.Context) {
 		return
 	}
 
-	model.RemoveDoc(tree.Box, tree.Path)
+	if err = model.RemoveDoc(notebook, p); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }
 
 func removeDocs(c *gin.Context) {
@@ -614,7 +740,10 @@ func removeDocs(c *gin.Context) {
 	for _, path := range pathsArg {
 		paths = append(paths, path.(string))
 	}
-	model.RemoveDocs(paths)
+	if err := model.RemoveDocs(paths); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }
 
 func renameDoc(c *gin.Context) {
@@ -871,28 +1000,13 @@ func getDocCreateSavePath(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
-	box := model.Conf.Box(notebook)
-	var docCreateSaveBox string
-	docCreateSavePathTpl := model.Conf.FileTree.DocCreateSavePath
-	if nil != box {
+	docCreateSaveBox, docCreateSavePathTpl := model.ResolveDocCreateSaveLocation(notebook)
+	docCreateTemplatePath := model.Conf.FileTree.DocCreateTemplatePath
+	if box := model.Conf.Box(notebook); nil != box {
 		boxConf := box.GetConf()
-		docCreateSaveBox = boxConf.DocCreateSaveBox
-		docCreateSavePathTpl = boxConf.DocCreateSavePath
-	}
-	if "" == docCreateSaveBox && "" == docCreateSavePathTpl {
-		docCreateSaveBox = model.Conf.FileTree.DocCreateSaveBox
-	}
-	if "" != docCreateSaveBox {
-		if nil == model.Conf.Box(docCreateSaveBox) {
-			// 如果配置的笔记本未打开或者不存在，则使用当前笔记本
-			docCreateSaveBox = notebook
+		if "" != boxConf.DocCreateTemplatePath {
+			docCreateTemplatePath = boxConf.DocCreateTemplatePath
 		}
-	}
-	if "" == docCreateSaveBox {
-		docCreateSaveBox = notebook
-	}
-	if "" == docCreateSavePathTpl {
-		docCreateSavePathTpl = model.Conf.FileTree.DocCreateSavePath
 	}
 	docCreateSavePathTpl = strings.TrimSpace(docCreateSavePathTpl)
 
@@ -903,7 +1017,7 @@ func getDocCreateSavePath(c *gin.Context) {
 		}
 	}
 
-	docCreateSavePath, err := model.RenderGoTemplate(docCreateSavePathTpl)
+	docCreateSavePath, err := model.RenderGoTemplateInBox(docCreateSavePathTpl, docCreateSaveBox)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -911,8 +1025,9 @@ func getDocCreateSavePath(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"box":  docCreateSaveBox,
-		"path": docCreateSavePath,
+		"box":                   docCreateSaveBox,
+		"path":                  docCreateSavePath,
+		"docCreateTemplatePath": docCreateTemplatePath,
 	}
 }
 
@@ -957,7 +1072,7 @@ func getRefCreateSavePath(c *gin.Context) {
 		}
 	}
 
-	refCreateSavePath, err := model.RenderGoTemplate(refCreateSavePathTpl)
+	refCreateSavePath, err := model.RenderGoTemplateInBox(refCreateSavePathTpl, refCreateSaveBox)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -993,7 +1108,7 @@ func getShorthandSavePath(c *gin.Context) {
 		}
 	}
 
-	shorthandSavePath, err := model.RenderGoTemplate(shorthandSavePathTpl)
+	shorthandSavePath, err := model.RenderGoTemplateInBox(shorthandSavePathTpl, shorthandSaveBox)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -1023,6 +1138,114 @@ func changeSort(c *gin.Context) {
 	model.ChangeFileTreeSort(notebook, paths)
 }
 
+type sortRequestItem struct {
+	ID   string `json:"id"`
+	Sort *int   `json:"sort"`
+}
+
+func setSort(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	request := &struct {
+		NotebookSorts []*sortRequestItem `json:"notebookSorts"`
+		DocSorts      []*sortRequestItem `json:"docSorts"`
+	}{}
+	if err := c.ShouldBindJSON(request); err != nil {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf("Parses request [%s] failed: %s", c.Request.URL.Path, err)
+		return
+	}
+	if 1 > len(request.NotebookSorts)+len(request.DocSorts) {
+		ret.Code = -1
+		ret.Msg = "Fields [notebookSorts] and [docSorts] must not both be empty"
+		return
+	}
+	notebookSorts, ok := parseSortItems("notebookSorts", request.NotebookSorts, ret)
+	if !ok {
+		return
+	}
+	docSorts, ok := parseSortItems("docSorts", request.DocSorts, ret)
+	if !ok {
+		return
+	}
+
+	result, err := model.SetFileTreeSort(notebookSorts, docSorts)
+	ret.Data = result
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
+}
+
+func setDocSortMode(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	request := &struct {
+		ID       string          `json:"id"`
+		SortMode json.RawMessage `json:"sortMode"`
+	}{}
+	if err := c.ShouldBindJSON(request); nil != err {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf("Parses request [%s] failed: %s", c.Request.URL.Path, err)
+		return
+	}
+	if util.InvalidIDPattern(request.ID, ret) {
+		return
+	}
+	if 0 == len(request.SortMode) {
+		ret.Code = -1
+		ret.Msg = "Field [sortMode] is required"
+		return
+	}
+
+	var sortMode *int
+	if !bytes.Equal(bytes.TrimSpace(request.SortMode), []byte("null")) {
+		value := 0
+		if err := json.Unmarshal(request.SortMode, &value); nil != err {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [sortMode] must be an integer or null: %s", err)
+			return
+		}
+		sortMode = &value
+	}
+
+	result, err := model.SetDocSortMode(request.ID, sortMode)
+	ret.Data = result
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
+}
+
+func parseSortItems(field string, items []*sortRequestItem, ret *gulu.Result) (retItems []*model.SortItem, ok bool) {
+	ids := map[string]struct{}{}
+	for i, item := range items {
+		if nil == item {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [%s][%d] must not be null", field, i)
+			return
+		}
+		if util.InvalidIDPattern(item.ID, ret) {
+			return
+		}
+		if nil == item.Sort {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [%s][%d].sort is required", field, i)
+			return
+		}
+		if _, ok := ids[item.ID]; ok {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [%s] contains duplicate ID [%s]", field, item.ID)
+			return nil, false
+		}
+		ids[item.ID] = struct{}{}
+		retItems = append(retItems, &model.SortItem{ID: item.ID, Sort: *item.Sort})
+	}
+	return retItems, true
+}
+
 func searchDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -1046,7 +1269,12 @@ func searchDocs(c *gin.Context) {
 	}
 
 	k := arg["k"].(string)
-	ret.Data = model.SearchDocs(k, flashcard, excludeIDs)
+	docs := model.SearchDocs(k, flashcard, excludeIDs)
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		docs = model.FilterSearchDocsByPublishAccess(c, publishAccess, docs)
+	}
+	ret.Data = docs
 }
 
 func listDocsByPath(c *gin.Context) {
@@ -1060,10 +1288,38 @@ func listDocsByPath(c *gin.Context) {
 
 	notebook := arg["notebook"].(string)
 	p := arg["path"].(string)
+
+	// 越界校验：拒绝 ..，确保路径位于 <data>/<notebook>/ 内
+	if strings.Contains(p, "..") {
+		ret.Code = -1
+		ret.Msg = "path must not contain '..' and must be relative"
+		return
+	}
+
+	if isEncryptedNotebookDeniedForPublish(c, notebook) {
+		ret.Data = map[string]any{
+			"box":               notebook,
+			"path":              p,
+			"files":             []*model.File{},
+			"effectiveSortMode": model.Conf.FileTree.Sort,
+		}
+		return
+	}
+
 	sortParam := arg["sort"]
 	sortMode := util.SortModeUnassigned
 	if nil != sortParam {
 		sortMode = int(sortParam.(float64))
+	}
+	effectiveSortMode := sortMode
+	if util.SortModeUnassigned == effectiveSortMode {
+		var resolveErr error
+		effectiveSortMode, resolveErr = model.ResolveDocTreeSortMode(notebook, p)
+		if nil != resolveErr {
+			ret.Code = -1
+			ret.Msg = resolveErr.Error()
+			return
+		}
 	}
 	flashcard := false
 	if arg["flashcard"] != nil {
@@ -1082,7 +1338,7 @@ func listDocsByPath(c *gin.Context) {
 		showHidden = arg["showHidden"].(bool)
 	}
 
-	files, totals, err := model.ListDocTree(notebook, p, sortMode, flashcard, showHidden, maxListCount)
+	files, totals, err := model.ListDocTree(notebook, p, effectiveSortMode, flashcard, showHidden, maxListCount)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -1091,10 +1347,12 @@ func listDocsByPath(c *gin.Context) {
 	// 过滤掉发布不可见的文件
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		publishIgnore := model.GetInvisiblePublishAccess(publishAccess)
+		publishInvisible := model.GetInvisiblePublishAccess(publishAccess)
+		publishDisable := model.GetDisablePublishAccess(publishAccess)
 		tempFiles := []*model.File{}
 		for _, file := range files {
-			if model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishIgnore) {
+			if model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishInvisible) &&
+				model.CheckPathAccessableByPublishIgnore(notebook, file.Path, publishDisable) {
 				tempFiles = append(tempFiles, file)
 			}
 		}
@@ -1108,14 +1366,17 @@ func listDocsByPath(c *gin.Context) {
 			if nil != arg["app"] {
 				app = arg["app"].(string)
 			}
-			util.PushMsgWithApp(app, fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
+			if nil == util.NotificationsCfg || util.NotificationsCfg.DocTreeMaxList {
+				util.PushMsgWithApp(app, fmt.Sprintf(model.Conf.Language(48), len(files)), 7000)
+			}
 		}
 	}
 
 	ret.Data = map[string]any{
-		"box":   notebook,
-		"path":  p,
-		"files": files,
+		"box":               notebook,
+		"path":              p,
+		"files":             files,
+		"effectiveSortMode": effectiveSortMode,
 	}
 }
 
@@ -1128,7 +1389,29 @@ func getDoc(c *gin.Context) {
 		return
 	}
 
-	id := arg["id"].(string)
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+	requestedNotebook, _ := arg["notebook"].(string)
+	if model.IsReadOnlyRoleContext(c) &&
+		((requestedNotebook != "" && model.IsEncryptedBoxDeniedByPublishAccess(requestedNotebook)) ||
+			model.IsEncryptedPublishRuntimeTarget(id)) {
+		ret.Code = 3
+		return
+	}
+	if err := holdEncryptedBoxRequest(c, requestedNotebook); err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	includeDocInfo, _ := arg["includeDocInfo"].(bool)
+	if includeDocInfo && model.IsReadOnlyRoleContext(c) {
+		includeDocInfo = isBlockPublishAccessible(c, id, requestedNotebook)
+	}
 	idx := arg["index"]
 	index := 0
 	if nil != idx {
@@ -1198,8 +1481,23 @@ func getDoc(c *gin.Context) {
 		highlight = highlightArg.(bool)
 	}
 
-	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, err :=
-		model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight)
+	var blockCount int
+	var content, parentID, parent2ID, rootID, typ string
+	var eof, scroll bool
+	var boxID, docPath string
+	var isBacklinkExpand bool
+	var keywords []string
+	var headingNumbers map[string]string
+	var docInfo *model.BlockInfo
+	var err error
+	// 加密笔记本的打开文档走 InBox 版（查加密 blocktree + content db）
+	if requestedNotebook != "" && model.IsEncryptedBox(requestedNotebook) {
+		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, docInfo, err =
+			model.GetDocInBox(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo, requestedNotebook)
+	} else {
+		blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, headingNumbers, docInfo, err =
+			model.GetDoc(startID, endID, id, index, query, queryTypes, querySubTypes, queryMethod, mode, size, isBacklink, originalRefBlockIDs, highlight, includeDocInfo)
+	}
 	if errors.Is(err, model.ErrBlockNotFound) {
 		ret.Code = 3
 		return
@@ -1214,33 +1512,49 @@ func getDoc(c *gin.Context) {
 	// 判断是否正在同步中 https://github.com/siyuan-note/siyuan/issues/6290
 	isSyncing := model.IsSyncingFile(rootID)
 
+	publishAccessRequired := false
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		newContent := model.FilterContentByPublishAccess(c, publishAccess, boxID, docPath, content, false)
+		newContent, publishAccessStatus := model.FilterContentByPublishAccessWithStatus(c, publishAccess, boxID, docPath, content, false)
+		publishAccessRequired = publishAccessStatus == model.PublishAccessPasswordRequired
 		if newContent != content {
 			content = newContent
+			headingNumbers = nil
 			scroll = false // 避免长页面可通过滚动无限刷出多个锁
+		}
+		if nil != docInfo {
+			if publishAccessRequired {
+				docInfo = nil
+			} else {
+				docInfo = model.FilterBlockInfoByPublishAccess(c, publishAccess, docInfo)
+			}
 		}
 	}
 
-	ret.Data = map[string]any{
-		"id":               id,
-		"mode":             mode,
-		"parentID":         parentID,
-		"parent2ID":        parent2ID,
-		"rootID":           rootID,
-		"type":             typ,
-		"content":          content,
-		"blockCount":       blockCount,
-		"eof":              eof,
-		"scroll":           scroll,
-		"box":              boxID,
-		"path":             docPath,
-		"isSyncing":        isSyncing,
-		"isBacklinkExpand": isBacklinkExpand,
-		"keywords":         keywords,
-		"reqId":            arg["reqId"],
+	data := map[string]any{
+		"id":                    id,
+		"mode":                  mode,
+		"parentID":              parentID,
+		"parent2ID":             parent2ID,
+		"rootID":                rootID,
+		"type":                  typ,
+		"content":               content,
+		"blockCount":            blockCount,
+		"eof":                   eof,
+		"scroll":                scroll,
+		"box":                   boxID,
+		"path":                  docPath,
+		"isSyncing":             isSyncing,
+		"isBacklinkExpand":      isBacklinkExpand,
+		"keywords":              keywords,
+		"headingNumbers":        headingNumbers,
+		"publishAccessRequired": publishAccessRequired,
+		"reqId":                 arg["reqId"],
 	}
+	if nil != docInfo {
+		data["docInfo"] = docInfo
+	}
+	ret.Data = data
 }
 
 func setPublishAccess(c *gin.Context) {
@@ -1254,6 +1568,11 @@ func setPublishAccess(c *gin.Context) {
 
 	publishAccess := model.GetPublishAccess()
 	ID := arg["id"].(string)
+	if model.IsEncryptedPublishAccessTarget(ID) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		return
+	}
 	visible := arg["visible"].(bool)
 	password := arg["password"].(string)
 	disable := arg["disable"].(bool)
@@ -1310,7 +1629,13 @@ func getPublishAccess(c *gin.Context) {
 
 	var IDs []string
 	for _, ID := range arg["ids"].([]any) {
-		IDs = append(IDs, ID.(string))
+		id := ID.(string)
+		if model.IsEncryptedPublishAccessTarget(id) {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(313)
+			return
+		}
+		IDs = append(IDs, id)
 	}
 
 	publishAccess := model.GetPublishAccess()
@@ -1341,28 +1666,57 @@ func getPublishAccess(c *gin.Context) {
 
 func authFilePublishAccess(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
+		c.JSON(http.StatusOK, ret)
 		return
 	}
 
 	ID := arg["id"].(string)
 	if util.InvalidIDPattern(ID, ret) {
+		c.JSON(http.StatusOK, ret)
 		return
 	}
 	password := arg["password"].(string)
 
+	ret.Code = -1
+	ret.Msg = model.Conf.Language(285)
+	if model.IsEncryptedPublishRuntimeTarget(ID) {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	// 按来源 IP 对发布密码认证进行限流，防止无限次暴力破解密码 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-v362-968x-gp2v
+	ip := c.ClientIP()
+	if retryAfter := util.AuthThrottleCheck(ip); 0 < retryAfter {
+		// 锁定期间持续记录失败，不断延长锁定时间
+		util.AuthThrottleFail(ip)
+		c.Header("Retry-After", strconv.Itoa(retryAfter))
+		ret.Msg = model.Conf.Language(354)
+		c.JSON(http.StatusTooManyRequests, ret)
+		return
+	}
+
 	publishAccess := model.GetPublishAccess()
 	for _, item := range publishAccess {
-		if item.ID == ID {
-			if item.Password == password {
-				model.SetPublishAuthCookie(c, ID, password)
-			} else {
-				ret.Msg = model.Conf.Language(285)
-			}
-			break
+		if item.ID != ID {
+			continue
 		}
+		if item.Disable || item.Password == "" || !util.AuthCodeEquals(item.Password, password) {
+			// 恒定时间比较，避免通过响应时间差异猜测密码
+			util.AuthThrottleFail(ip)
+			c.JSON(http.StatusOK, ret)
+			return
+		}
+		util.AuthThrottleReset(ip)
+		model.SetPublishAuthCookie(c, ID, password)
+		ret.Code = 0
+		ret.Msg = ""
+		c.JSON(http.StatusOK, ret)
+		return
 	}
+
+	// 目标 ID 不在发布配置中，同样记录失败以限制尝试次数
+	util.AuthThrottleFail(ip)
+	c.JSON(http.StatusOK, ret)
 }

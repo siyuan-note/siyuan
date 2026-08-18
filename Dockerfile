@@ -23,7 +23,7 @@ mv appearance stage guide /artifacts/
 if [ -d changelogs ]; then mv changelogs /artifacts/; fi
 EORUN
 
-FROM golang:1.25-alpine AS go-build
+FROM golang:1.26-alpine AS go-build
 
 RUN <<EORUN
 #!/bin/sh -e
@@ -39,7 +39,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/g
 
 ADD kernel/ .
 RUN --mount=type=cache,target=/root/.cache/go-build --mount=type=cache,target=/go/pkg \
-    go build -tags fts5 -ldflags "-s -w"
+    go build -tags "fts5 sqlcipher" -ldflags "-s -w"
 
 FROM alpine:latest
 LABEL maintainer="Liang Ding<845765@qq.com>"
@@ -54,6 +54,7 @@ EXPOSE 6806
 WORKDIR /opt/siyuan/
 COPY --from=go-build --chmod=755 /kernel/kernel /kernel/entrypoint.sh .
 COPY --from=node-build /artifacts .
+COPY LICENSE THIRD_PARTY_NOTICES.md .
 
 ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]
 # 默认启动伺服。若通过 `docker run` / `command:` 传额外参数，需自行带上 `serve` 子命令，

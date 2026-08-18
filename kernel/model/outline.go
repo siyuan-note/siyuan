@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -156,10 +156,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		}
 
 		diffLevel := heading.HeadingLevel - parentHeading.HeadingLevel - 1
-		heading.HeadingLevel = parentHeading.HeadingLevel + 1
-		if 6 < heading.HeadingLevel {
-			heading.HeadingLevel = 6
-		}
+		heading.HeadingLevel = min(6, parentHeading.HeadingLevel+1)
 
 		for i := len(headingChildren) - 1; i >= 0; i-- {
 			child := headingChildren[i]
@@ -191,7 +188,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		heading.HeadingLevel = firstHeading.HeadingLevel
 
 		firstHeading.InsertBefore(heading)
-		for i := 0; i < len(headingChildren); i++ {
+		for i := range headingChildren {
 			child := headingChildren[i]
 			if ast.NodeHeading == child.Type {
 				child.HeadingLevel -= diffLevel
@@ -203,17 +200,30 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		}
 	}
 
+	tx.markStructureCheck(heading)
+	for _, child := range headingChildren {
+		tx.markStructureCheck(child)
+	}
 	tx.writeTree(tree)
 	return
 }
 
 func Outline(rootID string, preview bool) (ret []*Path, err error) {
+	return OutlineInBox(rootID, preview, "")
+}
+
+// OutlineInBox 与 Outline 一致，但按 boxID 路由 blocktree 查询到加密 db 或全局 db。
+func OutlineInBox(rootID string, preview bool, boxID string) (ret []*Path, err error) {
 	FlushTxQueue()
 
 	ret = []*Path{}
-	tree, _ := LoadTreeByBlockID(rootID)
+	tree, _ := loadTreeByBlockIDInBox(rootID, boxID)
 	if nil == tree {
 		return
+	}
+	headingNumbers := map[string]string{}
+	if headingNumberEnabled(tree, Conf.Editor.HeadingNumber) {
+		headingNumbers = headingNumberLabels(tree, Conf.Editor.HeadingNumberFormat)
 	}
 
 	if preview && Conf.Export.AddTitle {
@@ -235,6 +245,7 @@ func Outline(rootID string, preview bool) (ret []*Path, err error) {
 	}
 
 	ret = outline(tree)
+	applyOutlineHeadingNumbers(ret, headingNumbers)
 
 	storage, _ := GetOutlineStorage(rootID)
 	if nil == storage || 0 == len(storage) {
@@ -302,25 +313,21 @@ func walkChildren(b *Block, expandIDs []string) {
 func outline(tree *parse.Tree) (ret []*Path) {
 	luteEngine := NewLute()
 	var headings []*Block
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if entering && ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
-			n.Box, n.Path = tree.Box, tree.Path
-			block := &Block{
-				RootID:  tree.Root.ID,
-				Depth:   n.HeadingLevel,
-				Box:     n.Box,
-				Path:    n.Path,
-				ID:      n.ID,
-				Content: renderOutline(n, luteEngine),
-				Type:    n.Type.String(),
-				SubType: treenode.SubTypeAbbr(n),
-				Folded:  true,
-			}
-			headings = append(headings, block)
-			return ast.WalkSkipChildren
+	for _, n := range collectOutlineHeadings(tree) {
+		n.Box, n.Path = tree.Box, tree.Path
+		block := &Block{
+			RootID:  tree.Root.ID,
+			Depth:   n.HeadingLevel,
+			Box:     n.Box,
+			Path:    n.Path,
+			ID:      n.ID,
+			Content: renderOutline(n, luteEngine),
+			Type:    n.Type.String(),
+			SubType: treenode.SubTypeAbbr(n),
+			Folded:  true,
 		}
-		return ast.WalkContinue
-	})
+		headings = append(headings, block)
+	}
 
 	if 1 > len(headings) {
 		return
@@ -369,6 +376,21 @@ func outline(tree *parse.Tree) (ret []*Path) {
 		}
 	}
 	return
+}
+
+func applyOutlineHeadingNumbers(paths []*Path, numbers map[string]string) {
+	for _, path := range paths {
+		path.Number = numbers[path.ID]
+		applyBlockHeadingNumbers(path.Blocks, numbers)
+		applyOutlineHeadingNumbers(path.Children, numbers)
+	}
+}
+
+func applyBlockHeadingNumbers(blocks []*Block, numbers map[string]string) {
+	for _, block := range blocks {
+		block.Number = numbers[block.ID]
+		applyBlockHeadingNumbers(block.Children, numbers)
+	}
 }
 
 func resetDepth(b *Block, depth int) {

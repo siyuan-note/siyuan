@@ -4,19 +4,24 @@ import {Dialog} from "../dialog";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {focusByRange} from "../protyle/util/selection";
 import {genSearch, updateConfig} from "./util";
-import {App} from "../index";
+import type {App} from "../index";
+import {cancelSearchRequest} from "./request";
 
 export const openSearch = async (options: {
     app: App,
     hotkey: string,
     key?: string,
     notebookId?: string,
+    notebookIds?: string[],
     searchPath?: string
 }) => {
     const localData = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
     let hPath = "";
     let idPath: string[] = [];
-    if (options.notebookId) {
+    if (options.notebookIds?.length) {
+        idPath = [...options.notebookIds];
+        hPath = options.notebookIds.map((notebookId) => getNotebookName(notebookId)).join(" ");
+    } else if (options.notebookId) {
         hPath = getNotebookName(options.notebookId);
         idPath.push(options.notebookId);
         if (options.searchPath && options.searchPath !== "/") {
@@ -24,6 +29,9 @@ export const openSearch = async (options: {
                 notebook: options.notebookId,
                 path: options.searchPath.endsWith(".sy") ? options.searchPath : options.searchPath + ".sy"
             });
+            if (response.code !== 0 || typeof response.data !== "string") {
+                return;
+            }
             hPath = pathPosix().join(hPath, response.data);
             idPath[0] = pathPosix().join(idPath[0], options.searchPath);
         }
@@ -62,7 +70,12 @@ export const openSearch = async (options: {
                 cloneData.k = selectText;
             }
             item.element.setAttribute("data-key", options.hotkey);
-            if (options.hotkey === Constants.DIALOG_REPLACE) {
+            if (options.notebookId || options.notebookIds?.length) {
+                cloneData.hasReplace = options.hotkey === Constants.DIALOG_REPLACE;
+                cloneData.hPath = hPath;
+                cloneData.idPath = [...idPath];
+                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+            } else if (options.hotkey === Constants.DIALOG_REPLACE) {
                 cloneData.hasReplace = true;
                 item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
             } else if (options.hotkey === Constants.DIALOG_GLOBALSEARCH) {
@@ -74,6 +87,9 @@ export const openSearch = async (options: {
                 cloneData.hasReplace = false;
                 const toPath = item.editors.edit.protyle.path;
                 fetchPost("/api/filetree/getHPathsByPaths", {paths: [toPath]}, (response) => {
+                    if (!Array.isArray(response.data) || typeof response.data[0] !== "string") {
+                        return;
+                    }
                     cloneData.idPath = [pathPosix().join(item.editors.edit.protyle.notebookId, toPath)];
                     cloneData.hPath = response.data[0];
                     item.data.idPath = cloneData.idPath;
@@ -100,6 +116,7 @@ export const openSearch = async (options: {
             if (range && !options) {
                 focusByRange(range);
             }
+            cancelSearchRequest(dialog.element.querySelector(".b3-dialog__body"));
             dialog.editors.edit.destroy();
             dialog.editors.unRefEdit.destroy();
         },

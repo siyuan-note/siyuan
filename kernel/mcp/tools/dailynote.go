@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -43,7 +43,7 @@ func init() {
 	register(DailynoteTool)
 }
 
-func dailynoteHandler(args map[string]interface{}) (CallToolResult, error) {
+func dailynoteHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "create":
@@ -59,7 +59,7 @@ func dailynoteHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func dailynoteCreate(args map[string]interface{}) (CallToolResult, error) {
+func dailynoteCreate(args map[string]any) (CallToolResult, error) {
 	notebook, _ := args["notebook"].(string)
 	if notebook == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "notebook is required"}}, IsError: true}, nil
@@ -82,7 +82,7 @@ func dailynoteCreate(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("daily note %s: %s (path: %s)", status, id, p)}}}, nil
 }
 
-func dailynoteAppend(args map[string]interface{}) (CallToolResult, error) {
+func dailynoteAppend(args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -120,7 +120,7 @@ func dailynoteAppend(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("block appended to daily note: %s", parentID)}}}, nil
 }
 
-func dailynotePrepend(args map[string]interface{}) (CallToolResult, error) {
+func dailynotePrepend(args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil

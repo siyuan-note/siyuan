@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -146,5 +146,52 @@ func TestSecretsLookup(t *testing.T) {
 	}
 	if _, ok := s.lookup("missing"); ok {
 		t.Error("lookup(missing) should be not ok")
+	}
+}
+
+// TestSecretsResolveForHost 验证按目标主机限制的密钥插值：仅当 host 命中 AllowedHosts
+// 时才替换，未配置允许主机列表或未命中时保留原文。
+func TestSecretsResolveForHost(t *testing.T) {
+	s := &Secrets{Items: []*Secret{
+		{Name: "KEY", Value: "k1", AllowedHosts: []string{"api.example.com"}},
+		{Name: "UNBOUND", Value: "u1"},
+	}}
+	cases := []struct{ in, host, want string }{
+		{"{{secrets.KEY}}", "api.example.com", "k1"},
+		{"{{secrets.KEY}}", "API.EXAMPLE.COM", "k1"},                       // 大小写不敏感
+		{"{{secrets.KEY}}", "evil.example.com", "{{secrets.KEY}}"},         // 未命中保留原文
+		{"{{secrets.KEY}}", "api.example.com.evil.com", "{{secrets.KEY}}"}, // 后缀拼接不隐式放行
+		{"{{secrets.UNBOUND}}", "api.example.com", "{{secrets.UNBOUND}}"},  // 无允许主机列表 = 全部拒绝
+		{"{{secrets.KEY}}", "", "{{secrets.KEY}}"},                         // host 为空拒绝
+		{"$KEY", "api.example.com", "k1"},                                  // shell 风格同样受限
+		{"$KEY", "evil.example.com", "$KEY"},
+		{"plain text", "api.example.com", "plain text"},
+	}
+	for _, c := range cases {
+		if got := s.ResolveForHost(c.in, c.host); got != c.want {
+			t.Errorf("ResolveForHost(%q, %q) = %q, want %q", c.in, c.host, got, c.want)
+		}
+	}
+}
+
+// TestResolveSecretsVarsForHost 验证组合解析时变量不受主机限制、密钥受限。
+func TestResolveSecretsVarsForHost(t *testing.T) {
+	secrets := &Secrets{Items: []*Secret{
+		{Name: "KEY", Value: "k1", AllowedHosts: []string{"api.example.com"}},
+	}}
+	vars := &Variables{Items: []*Variable{{Name: "VAR", Value: "v1"}}}
+	if got := ResolveSecretsVarsForHost(secrets, vars, "api.example.com", "{{secrets.KEY}}-{{vars.VAR}}"); got != "k1-v1" {
+		t.Errorf("ResolveSecretsVarsForHost(allowed) = %q, want k1-v1", got)
+	}
+	if got := ResolveSecretsVarsForHost(secrets, vars, "evil.example.com", "{{secrets.KEY}}-{{vars.VAR}}"); got != "{{secrets.KEY}}-v1" {
+		t.Errorf("ResolveSecretsVarsForHost(denied) = %q, want {{secrets.KEY}}-v1", got)
+	}
+	// 变量不受主机限制，$VAR 仍可解析；密钥受限时保留原文
+	if got := ResolveSecretsVarsForHost(secrets, vars, "evil.example.com", "$KEY-$VAR"); got != "$KEY-v1" {
+		t.Errorf("ResolveSecretsVarsForHost(dollar) = %q, want $KEY-v1", got)
+	}
+	// nil 安全
+	if got := ResolveSecretsVarsForHost(nil, nil, "api.example.com", "$X"); got != "$X" {
+		t.Errorf("ResolveSecretsVarsForHost(nil,nil) = %q, want $X", got)
 	}
 }

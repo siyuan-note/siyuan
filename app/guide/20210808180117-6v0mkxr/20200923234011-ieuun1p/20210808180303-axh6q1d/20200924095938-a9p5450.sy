@@ -6,7 +6,7 @@
 		"id": "20200924095938-a9p5450",
 		"title": "Theme",
 		"type": "doc",
-		"updated": "20260614110310"
+		"updated": "20260810230450"
 	},
 	"Children": [
 		{
@@ -111,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220806105232-qhlgs5w",
-				"updated": "20260614110310"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -128,7 +128,7 @@
 			},
 			"Properties": {
 				"id": "20230417141558-see765c",
-				"updated": "20230417141811"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -142,7 +142,7 @@
 					},
 					"Properties": {
 						"id": "20230417141558-d8vl4m7",
-						"updated": "20230417141558"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -150,12 +150,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230417141558-f6keda3",
-								"updated": "20230417141653"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Go to "
+									"Data": "Open "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -164,7 +164,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -173,7 +173,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ and click  "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -182,7 +182,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, select CSS tab"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " and select the CSS tab."
 								}
 							]
 						}
@@ -624,7 +633,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225174048-t626xpi",
-				"updated": "20230418093157"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -653,7 +662,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201225221416-enetgqg",
-				"updated": "20230418085213"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -674,7 +683,7 @@
 			},
 			"Properties": {
 				"id": "20201225221416-chyd31p",
-				"updated": "20230418094552"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -690,7 +699,7 @@
 					},
 					"Properties": {
 						"id": "20201225221416-fwq6l32",
-						"updated": "20230418094552"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -698,12 +707,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162108-dtskbvb",
-								"updated": "20230418094552"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "In "
+									"Data": "Browse themes contributed by community developers in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -712,16 +721,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Appearance"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -730,7 +730,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -739,7 +739,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, browse online themes contributed by community developers"
+									"Data": "."
 								}
 							]
 						}
@@ -783,7 +783,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225221416-aotw0re",
-				"updated": "20230418093526"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -805,7 +805,8 @@
 				"Num": 1
 			},
 			"Properties": {
-				"id": "20201225221416-5jel77s"
+				"id": "20201225221416-5jel77s",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -947,7 +948,8 @@
 						"Num": 4
 					},
 					"Properties": {
-						"id": "20201225221416-i8ic233"
+						"id": "20201225221416-i8ic233",
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -955,12 +957,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162108-133g70d",
-								"updated": "20210512161506"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Restart, select the desired theme in "
+									"Data": "After restarting, select the desired theme in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1011,7 +1013,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201225174048-3qumvw6"
+				"id": "20201225174048-3qumvw6",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1037,7 +1040,7 @@
 			},
 			"Properties": {
 				"id": "20201225174048-zqtzaox",
-				"updated": "20230821210921"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1152,7 +1155,7 @@
 					},
 					"Properties": {
 						"id": "20201225174048-92haint",
-						"updated": "20230821210921"
+						"updated": "20260804235500"
 					},
 					"Children": [
 						{
@@ -1160,7 +1163,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20201225174048-fh16r64",
-								"updated": "20230821210921"
+								"updated": "20260804235500"
 							},
 							"Children": [
 								{
@@ -1201,7 +1204,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, for specific examples, please refer to github repo: siyuan-note/theme-sample\n"
+									"Data": "​, for specific examples, please refer to GitHub repo: siyuan-note/theme-sample\n"
 								}
 							]
 						}
@@ -1262,7 +1265,8 @@
 						"Num": 5
 					},
 					"Properties": {
-						"id": "20201225174048-sw6gvxg"
+						"id": "20201225174048-sw6gvxg",
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1270,12 +1274,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20201225174048-xii3128",
-								"updated": "20210512161645"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Restart, select the installed theme in "
+									"Data": "After restarting, select the installed theme in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1311,7 +1315,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201225174048-5e5cg0p"
+				"id": "20201225174048-5e5cg0p",
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1330,7 +1335,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201225174048-g8oxi84",
-				"updated": "20210318104313"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1377,7 +1382,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20201225174048-1ocyqbk"
+						"id": "20201225174048-1ocyqbk",
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1385,21 +1391,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162108-nh3eyq7",
-								"updated": "20210318104316"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Modify the color scheme in "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ":root{...}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ". ⚠️ The variable items inherent in the official cannot be deleted"
+									"Data": "Custom themes inherit variables from the built-in themes. Override only the variables you need, and review renamed or removed variables when SiYuan is updated."
 								}
 							]
 						}
@@ -1413,7 +1410,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20201225174048-c3hch71"
+						"id": "20201225174048-c3hch71",
+						"updated": "20260810230450"
 					},
 					"Children": [
 						{
@@ -1421,41 +1419,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162108-0cl55js",
-								"updated": "20210512172253"
+								"updated": "20260810230450"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Continue to modify according to steps 1-4 in the figure\n"
+									"Data": "Use the developer tools to locate and adjust styles: open the developer tools, enable the element picker, click the UI element to modify, inspect the corresponding "
 								},
 								{
-									"Type": "NodeImage",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeBang"
-										},
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "custom-theme1.png"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "assets/custom-theme1-20210512172253-eqdgnkd.png"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTML"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Elements"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " panel, and adjust its styles in the "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Styles"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " panel"
 								}
 							]
 						}
@@ -1497,36 +1493,28 @@
 					]
 				},
 				{
-					"ID": "20201225174048-k5l65hd",
+					"ID": "20260810212846-c2or5gq",
 					"Type": "NodeListItem",
 					"ListData": {
 						"BulletChar": 42,
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20201225174048-k5l65hd"
+						"id": "20260810212846-c2or5gq",
+						"updated": "20260810215424"
 					},
 					"Children": [
 						{
-							"ID": "20210131162108-ibds25b",
+							"ID": "20260810212846-7znazcw",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210131162108-ibds25b",
-								"updated": "20210512172321"
+								"id": "20260810212846-7znazcw",
+								"updated": "20260810215424"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Check the "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Disable cache"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " in "
+									"Data": "In the developer tools, open the "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1535,45 +1523,72 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " and run "
+									"Data": " tab and enable "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "window.location.reload()"
+									"TextMarkTextContent": "Disable cache"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201225174048-k5l65hd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20201225174048-k5l65hd",
+						"updated": "20260810215424"
+					},
+					"Children": [
+						{
+							"ID": "20210131162108-ibds25b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210131162108-ibds25b",
+								"updated": "20260810215424"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Changes to theme.css are normally detected and refreshed automatically. If they are not, use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " to see the final result\n"
+									"Data": " - "
 								},
 								{
-									"Type": "NodeImage",
-									"Data": "span",
-									"Children": [
-										{
-											"Type": "NodeBang"
-										},
-										{
-											"Type": "NodeOpenBracket"
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "custom-theme2.png"
-										},
-										{
-											"Type": "NodeCloseBracket"
-										},
-										{
-											"Type": "NodeOpenParen"
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "assets/custom-theme2-20210512172321-1qkspzd.png"
-										},
-										{
-											"Type": "NodeCloseParen"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "App"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Maintenance"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Refresh UI"
 								}
 							]
 						}
@@ -1587,7 +1602,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225222754-u4sica8",
-				"updated": "20230418085639"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1601,7 +1616,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173346-65wavr3",
-				"updated": "20230820184056"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1611,7 +1626,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "Community marketplace repo"
 				},
 				{

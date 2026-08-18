@@ -1,0 +1,1256 @@
+{
+	"ID": "20260804171004-aiagt03",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804171004-aiagt03",
+		"title": "AI Agent",
+		"type": "doc",
+		"updated": "20260816130653"
+	},
+	"Children": [
+		{
+			"ID": "20260804170023-pg7sen9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170023-pg7sen9",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20260804170024-uta8c8r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170024-uta8c8r",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The AI agent can do more than answer questions. It can use SiYuan's built-in tools, skills, MCP services, and plugin capabilities to search, read, and operate on the knowledge base. It works through tasks step by step and requests confirmation before changing data."
+				}
+			]
+		},
+		{
+			"ID": "20260804170025-2kdbnc8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170025-2kdbnc8",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Configuration"
+				}
+			]
+		},
+		{
+			"ID": "20260804170026-740jokv",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170026-740jokv",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Configure and enable an API provider and model in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API Provider"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", then select the model used by the agent in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Agent"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". A model with reliable tool calling and a sufficiently large context window is recommended."
+				}
+			]
+		},
+		{
+			"ID": "20260804180002-imgen01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804180002-imgen01",
+				"updated": "20260804180002"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The agent can analyze images in documents; image understanding depends on the current model. To generate images, configure a model that supports image output in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Image Generation"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260804170027-iffmsq0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170027-iffmsq0",
+				"updated": "20260816114944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20260804170028-snww0dx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170028-snww0dx",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open the agent"
+				}
+			]
+		},
+		{
+			"ID": "20260804170029-ruv8qrs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170029-ruv8qrs",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On desktop, select "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Agent"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in the right dock. On mobile, open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Agent"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " from the main menu. You can start a new session or search for and continue a previous session from session management."
+				}
+			]
+		},
+		{
+			"ID": "20260804170030-erx2voe",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170030-erx2voe",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Provide context"
+				}
+			]
+		},
+		{
+			"ID": "20260804170031-pgeawhn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170031-pgeawhn",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When a message is sent, the agent receives information about the active document, focused block, selected blocks, and visible blocks, and reads relevant content as needed. To explicitly provide source blocks, use any of the following methods:"
+				}
+			]
+		},
+		{
+			"ID": "20260804170032-9kyaxol",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20260804170032-9kyaxol",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170033-k16ss3h",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20260804170033-k16ss3h",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170034-czfr9ay",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170034-czfr9ay",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Drag blocks into the agent input"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170035-vkgqkou",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260804170035-vkgqkou",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170036-mm91b4d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170036-mm91b4d",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Type "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[["
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the input and search for blocks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170037-v65eccs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 3,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260804170037-v65eccs",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170038-uxo3g1l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170038-uxo3g1l",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select blocks and choose "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Add to Agent Chat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " from the block menu"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804170039-x813t3f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170039-x813t3f",
+				"updated": "20260816114944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Send and stop tasks"
+				}
+			]
+		},
+		{
+			"ID": "20260804170040-oce2o3k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170040-oce2o3k",
+				"updated": "20260816114944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "By default, press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " + "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to send. You can also customize the shortcut. "
+				},
+				{
+					"Type": "NodeText",
+					"Data": "While the agent is running, select the stop button to interrupt the current task. Results are generally more reliable when the goal, scope, and destination are explicit."
+				}
+			]
+		},
+		{
+			"ID": "20260804170041-m6wpz84",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170041-m6wpz84",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Confirm operations"
+				}
+			]
+		},
+		{
+			"ID": "20260804170042-d73n5cg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170042-d73n5cg",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Read and search operations usually run immediately. Operations that create, modify, move, delete, or import data display a confirmation card that identifies possible local writes, data egress, and external charges. You can approve, reject, or select "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Session Allow"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to stop asking for confirmation in the current session."
+				}
+			]
+		},
+		{
+			"ID": "20260804170043-8c898qc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170043-8c898qc",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before using "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Session Allow"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", confirm that the task scope and tools are trusted because subsequent write operations will no longer be confirmed individually."
+				}
+			]
+		},
+		{
+			"ID": "20260804170044-lg8yc4o",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170044-lg8yc4o",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Session management"
+				}
+			]
+		},
+		{
+			"ID": "20260804170045-hc1s8m8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170045-hc1s8m8",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The agent supports creating, searching, switching, renaming, and deleting sessions. Sessions preserve messages, references, tool calls, and results and can be viewed across synchronized instances."
+				}
+			]
+		},
+		{
+			"ID": "20260804170046-rk4155k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170046-rk4155k",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can edit and resend a previous message or regenerate an answer. Resending removes the later conversation, but it does not undo operations that have already run. Use the corresponding data snapshot when recovery is required."
+				}
+			]
+		},
+		{
+			"ID": "20260804170047-unq4mnq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170047-unq4mnq",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Models and reasoning effort"
+				}
+			]
+		},
+		{
+			"ID": "20260804170048-vcywigy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170048-vcywigy",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Use the controls below the input to switch between enabled models and select reasoning effort for supported models. Switching models in a session that contains reasoning or tool calls may reduce answer quality and tool-call continuity."
+				}
+			]
+		},
+		{
+			"ID": "20260804170049-rnf9cl8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170049-rnf9cl8",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The context usage control shows the percentage and category breakdown of the current context. When the context approaches the model limit, the agent attempts to compact earlier conversation content."
+				}
+			]
+		},
+		{
+			"ID": "20260804170050-oqdi4d2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170050-oqdi4d2",
+				"updated": "20260816130653"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Skills"
+				}
+			]
+		},
+		{
+			"ID": "20260804170051-g7pwyzt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170051-g7pwyzt",
+				"updated": "20260816130653"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A skill is a reusable set of task instructions that defines a workflow, format, or domain rule. Each skill has its own directory containing "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " under "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/data/storage/ai/agent/skills/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". You can also individually enable read-only skills from the user directory "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/.agents/skills/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260804170052-wac267v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170052-wac267v",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " can define "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "name"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "description"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in YAML Front Matter, followed by the instructions the agent should follow. Type "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to search for and select installed skills."
+				}
+			]
+		},
+		{
+			"ID": "20260804170053-2qtiajj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170053-2qtiajj",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "You can ask the agent to list, create, update, rename, or remove skills. To install a skill, provide "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", a complete "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "npx skills add owner/repo -g"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " command, a GitHub URL, a raw "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " URL, or a ZIP URL. Skills affect how the agent operates, so install and use content only from trusted sources."
+				}
+			]
+		},
+		{
+			"ID": "20260804170054-1c4wqjk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170054-1c4wqjk",
+				"updated": "20260812170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP services"
+				}
+			]
+		},
+		{
+			"ID": "20260804170055-xr887qs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170055-xr887qs",
+				"updated": "20260812170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP services provide external tools to the agent. Add stdio or HTTP services in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Agent MCP Service"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", configure commands, arguments, environment variables, URLs, HTTP headers, and timeouts, and review connection status and tool count."
+				},
+				{
+					"Type": "NodeText",
+					"Data": " This setting is for external MCP services called by the agent. To connect an external MCP client to SiYuan, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804223002-mcpsv03",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "MCP Service"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260804170056-8tp1qi0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170056-8tp1qi0",
+				"updated": "20260812170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A stdio service inherits only the kernel environment variables selected by the user and reads their current values whenever it starts. Its environment variable entries can also reference secrets and variables. Referencing a secret provides its plaintext value to the program and its child processes; directly entered values are stored in plaintext. HTTP services that require authorization guide you through OAuth. Store reusable secrets and parameters in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Secrets and Variables"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". For details, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804185002-secvr03",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "Secrets and Variables"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". External MCP tools may send local data, change external systems, or incur charges; review the effects shown on confirmation cards."
+				}
+			]
+		},
+		{
+			"ID": "20260804170057-8amo72d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170057-8amo72d",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Examples"
+				}
+			]
+		},
+		{
+			"ID": "20260804170058-j5x2ifw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170058-j5x2ifw",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170059-3y3lb5z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170059-3y3lb5z",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170100-bj6cr8i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170100-bj6cr8i",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Search recent meeting notes, summarize the action items, and write them to the specified project document"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170101-miajwkl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170101-miajwkl",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170102-q3nbeyq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170102-q3nbeyq",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create a structured summary from the selected blocks while preserving the key conclusions"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170103-61f1wna",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170103-61f1wna",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170104-vjgg5qe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170104-vjgg5qe",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create today's daily note and add three tasks for today"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170105-t9vxrzb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170105-t9vxrzb",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170106-657jrfr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170106-657jrfr",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Review the images in the current document and write a short description for each one"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170107-7eio0wk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170107-7eio0wk",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170108-8j31k9r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170108-8j31k9r",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Check the current document using my writing-guidelines skill and list the required changes"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804170109-sbl6g5j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170109-sbl6g5j",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Data snapshots and rollback"
+				}
+			]
+		},
+		{
+			"ID": "20260804170110-f3ewu2w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170110-f3ewu2w",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before the first write to workspace data in a task turn, the agent automatically creates a data snapshot, with at most one snapshot per turn. If the result is not acceptable, use the rollback action on the snapshot notice in the session."
+				}
+			]
+		},
+		{
+			"ID": "20260804170111-loi92zi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170111-loi92zi",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The snapshot covers workspace data, but not changes made to external systems by external MCP services or plugins. Regenerating an answer, stopping a task, or deleting a session also does not automatically undo completed write operations."
+				}
+			]
+		},
+		{
+			"ID": "20260804170112-w9zbdxl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170112-w9zbdxl",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Note"
+				}
+			]
+		},
+		{
+			"ID": "20260804170113-5l896il",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170113-5l896il",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170114-22zfdnd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170114-22zfdnd",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170115-wf1ytsf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170115-wf1ytsf",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The agent is unavailable in Publish Service and read-only mode"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170116-qlvpohs",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170116-qlvpohs",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170117-o7bxiri",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170117-o7bxiri",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The model must correctly support tool calling; tool calling, reasoning, and image understanding vary between models"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170118-zyjcbh5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170118-zyjcbh5",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170119-i8htajw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170119-i8htajw",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Document or image data may be sent to API providers or external MCP services and may incur charges"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170120-in91thh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170120-in91thh",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170121-24ajw75",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170121-24ajw75",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The agent may misunderstand requests or generate inaccurate content; review confirmation cards before important changes and verify the results afterward"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170122-mc89cix",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170122-mc89cix",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170123-hngsqb6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170123-hngsqb6",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Do not expose unnecessary passwords or API keys in messages, skills, or MCP configuration"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

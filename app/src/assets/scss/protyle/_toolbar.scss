@@ -1,7 +1,8 @@
 .protyle {
   &-toolbar {
     background-color: var(--b3-theme-background);
-    z-index: 5; // higher than .layout__resize--lr
+    // 需高于 .layout__resize
+    z-index: 7;
     position: fixed;
     box-shadow: var(--b3-dialog-shadow);
     border-radius: var(--b3-border-radius);
@@ -30,11 +31,21 @@
         height: 16px;
       }
 
+      &[data-type="format-painter"] svg {
+        width: 14px;
+        height: 14px;
+      }
+
       &--current {
         color: var(--b3-theme-primary);
       }
 
-      &:hover {
+      &:disabled {
+        opacity: .38;
+        cursor: not-allowed;
+      }
+
+      &:hover:not(:disabled) {
         background-color: var(--b3-list-hover);
       }
 
@@ -51,6 +62,7 @@
       border-left: 1px solid var(--b3-theme-surface-lighter);
       margin: 6px 4px;
     }
+
   }
 
   &-hint {
@@ -59,7 +71,7 @@
     box-shadow: var(--b3-dialog-shadow);
     border: 1px solid var(--b3-theme-surface-lighter);
     background-color: var(--b3-menu-background);
-    z-index: 5;
+    z-index: 7;
     overflow: auto;
     max-height: min(402px, 40vh);
     // 不能使用，否则 hint emoji 出现双滚动条 box-sizing: border-box;
@@ -86,6 +98,19 @@
       left: 0;
       width: 100vw;
     }
+
+    // 行号栏与文本域共同的滚动容器，二者同高，由父层统一滚动，避免 JS 同步滚动
+    &__scroll {
+      overflow: auto;
+      width: 100%;
+      border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
+    }
+
+    .protyle-linenumber__rows {
+      line-height: 20px;
+      padding: 4px 8px;
+      position: static;
+    }
   }
 
   &-font {
@@ -94,7 +119,6 @@
     max-width: 248px;
     overflow: auto;
     max-height: calc(80vh - 24px);
-    scrollbar-gutter: stable;
 
     &__style {
       background-color: var(--b3-theme-background);

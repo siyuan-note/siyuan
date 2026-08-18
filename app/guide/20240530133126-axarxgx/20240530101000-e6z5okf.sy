@@ -8,7 +8,7 @@
 		"id": "20240530101000-e6z5okf",
 		"title": "モバイルアプリ",
 		"type": "doc",
-		"updated": "20260613181400"
+		"updated": "20260803170332"
 	},
 	"Children": [
 		{
@@ -48,7 +48,7 @@
 			"Properties": {
 				"ID": "20240530101000-2lg2mb6",
 				"id": "20240530101000-tylg3qg",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -78,7 +78,7 @@
 			"Properties": {
 				"ID": "20240530101000-4ppspg1",
 				"id": "20240530101000-2ydz6oj",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -92,7 +92,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​- "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -110,7 +110,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ を有効にして、デスクトップブラウザから設定にアクセスしてください。"
+					"Data": " ​ を有効にして、デスクトップブラウザから設定にアクセスしてください。"
 				}
 			]
 		},
@@ -487,7 +487,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174259-xwu9036",
-				"updated": "20260613174259"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -608,7 +608,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174259-9bcdyay",
-				"updated": "20260613174259"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -622,12 +622,44 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613174259-etenqd8",
-				"updated": "20260613174259"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
 					"Type": "NodeText",
-					"Data": "[設定 - ドキュメント - クイックメモのデフォルト保存場所] でショートハンドの保存先を設定します："
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ドキュメント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新規ドキュメント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "クイックメモのデフォルト保存場所"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ でショートハンドの保存先を設定します："
 				}
 			]
 		},

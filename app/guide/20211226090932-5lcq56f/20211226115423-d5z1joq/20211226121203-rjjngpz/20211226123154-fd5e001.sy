@@ -6,7 +6,7 @@
 		"id": "20211226123154-fd5e001",
 		"title": "日記",
 		"type": "doc",
-		"updated": "20260614204949"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613181022-74zgp84",
-				"updated": "20260613181022"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613181022-p6wso87",
-				"updated": "20260613181022"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613181022-o9qpabe",
-				"updated": "20260613181022"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20260613181022-kb5zu2x",
-						"updated": "20260613181022"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -79,7 +79,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613181022-u0se3jv",
-								"updated": "20260613181022"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -93,8 +93,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Alt+5"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "5"
 								},
 								{
 									"Type": "NodeText",
@@ -102,8 +111,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "⌃5"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌃"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "5"
 								},
 								{
 									"Type": "NodeText",
@@ -187,7 +205,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613181022-txx9v8s",
-				"updated": "20260614204949"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -201,12 +219,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613181022-rroumoc",
-				"updated": "20260613181022"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在筆記本右鍵選單中打開「設定」，在新建日記設定中設定："
+					"Data": "在筆記本右鍵選單中打開 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​，在新建日記設定中設定："
 				}
 			]
 		},
@@ -500,7 +527,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613181022-wnnyyw0",
-								"updated": "20260613181056"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -517,11 +544,11 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120508-yzh70eh",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "嵌入塊"
+									"TextMarkTextContent": "嵌入區塊"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，可以彙總待辦事項或需要每日查看的內容塊"
+									"Data": "，可以彙總待辦事項或需要每日查看的內容區塊"
 								}
 							]
 						}

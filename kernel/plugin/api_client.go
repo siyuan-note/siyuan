@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -79,12 +79,12 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					if argErr == nil {
 						if b := initObj.Get("body"); isJsValueNotNull(b) {
 							if goja.IsString(b) {
-								bodyString = lo.ToPtr(b.String())
+								bodyString = new(b.String())
 							} else {
 								body := b.Export()
 								if arrayBuffer, ok := body.(goja.ArrayBuffer); ok {
 									src := arrayBuffer.Bytes()
-									bodyBytes = lo.ToPtr(src)
+									bodyBytes = new(src)
 								}
 							}
 						}
@@ -210,7 +210,7 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 		if argErr == nil {
 			if proto := call.Argument(1); isJsValueNotNull(proto) {
 				if protoObj := proto.ToObject(rt); protoObj != nil && protoObj.ClassName() == "Array" {
-					if arr, ok := proto.Export().([]interface{}); ok {
+					if arr, ok := proto.Export().([]any); ok {
 						for _, v := range arr {
 							protocols = append(protocols, fmt.Sprintf("%v", v))
 						}
@@ -282,8 +282,37 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			h.BindOnMessage(manager)
 
 			var openOnce sync.Once
+			var openPromises []Promise
+
+			addOpenPromise := func(resolve, reject func(reason interface{}) error) {
+				// nil slice 也可以直接 append
+				openPromises = append(openPromises, Promise{Resolve: resolve, Reject: reject})
+			}
+
+			resolveOpenPromises := func(rt *goja.Runtime) {
+				if openPromises != nil {
+					for _, promise := range openPromises {
+						if resolveErr := promise.Resolve(nil); resolveErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
+						}
+					}
+					openPromises = nil
+				}
+			}
+
+			rejectOpenPromises := func(rt *goja.Runtime, err error) {
+				if openPromises != nil {
+					for _, promise := range openPromises {
+						if rejectErr := promise.Reject(rt.NewGoError(err)); rejectErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.open reject: %v", p.Name, rejectErr)
+						}
+					}
+					openPromises = nil
+				}
+			}
 
 			ctx, cancel := context.WithCancel(p.context)
+
 			var closeOnce sync.Once
 			doClose := func() {
 				closeOnce.Do(func() {
@@ -294,10 +323,24 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 			ws_open := rt.ToValue(func(openCall goja.FunctionCall, rt *goja.Runtime) goja.Value {
 				openPromise, openResolve, openReject := rt.NewPromise()
 
-				openRunErr := p.worker.Run(func(rt *goja.Runtime) (opening any, err error) {
-					opening = false
+				openRunErr := p.worker.Run(func(rt *goja.Runtime) (_ any, err error) {
+					state := WebSocketState(readyState.Load())
+					switch state {
+					case WebSocketReadyStateOpen:
+						if resolveErr := openResolve(nil); resolveErr != nil {
+							logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
+						}
+						return
+					case WebSocketReadyStateClosing:
+						err = fmt.Errorf("WebSocket is closing")
+						return
+					case WebSocketReadyStateClosed:
+						err = fmt.Errorf("WebSocket is closed")
+						return
+					}
+
+					addOpenPromise(openResolve, openReject)
 					openOnce.Do(func() {
-						opening = true
 						go func() {
 							conn, _, dialErr := gws.NewClient(h, &gws.ClientOption{
 								Addr:          wsURL,
@@ -305,21 +348,27 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							})
 							if dialErr != nil {
 								p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+									setReadyState(rt, WebSocketReadyStateClosed)
+
 									event := rt.NewObject()
 									event.Set("type", rt.ToValue("error"))
 									event.Set("error", rt.NewGoError(dialErr))
 									invokeHook(rt, "onerror", event)
+
+									rejectOpenPromises(rt, dialErr)
 									return
 								}, nil)
-								p.worker.Run(func(rt *goja.Runtime) (_ any, dialErr2 error) {
-									dialErr2 = dialErr
-									return
-								}, func(rt *goja.Runtime, _ any, dialErr2 error) {
-									if rejectErr := openReject(rt.NewGoError(dialErr2)); rejectErr != nil {
-										logging.LogErrorf("[plugin:%s] siyuan.client.socket.open reject: %v", p.Name, rejectErr)
-									}
-								})
 								doClose()
+								return
+							}
+							if ctx.Err() != nil {
+								// close-before-open
+								conn.NetConn().Close()
+								p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
+									setReadyState(rt, WebSocketReadyStateClosed)
+									rejectOpenPromises(rt, ctx.Err())
+									return
+								}, nil)
 								return
 							}
 							gwsConn.Store(conn)
@@ -330,23 +379,17 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 							// Resolve the open promise before starting ReadLoop so the caller
 							// can await open() and then rely on onopen for additional setup.
 							p.worker.Run(func(rt *goja.Runtime) (_ any, _ error) {
-								if resolveErr := openResolve(nil); resolveErr != nil {
-									logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
-								}
+								resolveOpenPromises(rt)
 								return
 							}, nil)
+
 							conn.ReadLoop()
 							doClose()
 						}()
 					})
 					return
-				}, func(rt *goja.Runtime, result any, err error) {
+				}, func(rt *goja.Runtime, _ any, err error) {
 					if lo.IsNil(err) {
-						if opening, ok := result.(bool); !ok || !opening {
-							if resolveErr := openResolve(nil); resolveErr != nil {
-								logging.LogErrorf("[plugin:%s] siyuan.client.socket.open resolve: %v", p.Name, resolveErr)
-							}
-						}
 					} else {
 						if rejectErr := openReject(rt.NewGoError(err)); rejectErr != nil {
 							logging.LogErrorf("[plugin:%s] siyuan.client.socket.open reject: %v", p.Name, rejectErr)
@@ -508,7 +551,10 @@ func injectClient(p *KernelPlugin, rt *goja.Runtime, siyuan *goja.Object) (err e
 					if c := gwsConn.Load(); c != nil {
 						setReadyState(rt, WebSocketReadyStateClosing)
 						err = c.WriteClose(code, reason)
+					} else {
+						setReadyState(rt, WebSocketReadyStateClosed)
 					}
+					doClose()
 					return
 				}, func(rt *goja.Runtime, result any, err error) {
 					if lo.IsNil(err) {

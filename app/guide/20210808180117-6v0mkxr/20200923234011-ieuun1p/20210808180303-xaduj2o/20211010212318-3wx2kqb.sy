@@ -6,7 +6,7 @@
 		"id": "20211010212318-3wx2kqb",
 		"title": "Virtual reference",
 		"type": "doc",
-		"updated": "20240228164101"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -100,7 +100,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211010212319-oy401ib",
-				"updated": "20211010212319"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -128,7 +128,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240228164044-aohxrm3",
-				"updated": "20240228164101"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -170,7 +170,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20221003214846-p9q1wvx",
-				"updated": "20221003214853"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -186,7 +186,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20221003214937-bqvm7yz",
-				"updated": "20221003214948"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -198,7 +198,7 @@
 					},
 					"Properties": {
 						"id": "20221003214937-hfdshei",
-						"updated": "20221003214948"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -206,21 +206,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221003214937-w913xwl",
-								"updated": "20221003214948"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "For performance reasons, virtual references do not take effect immediately. If they are not displayed, you can try to refresh the current document via "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "F5"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
+									"Data": "Virtual references are not updated immediately. Wait for the search index to finish, then refresh or reopen the document. Rebuild the index only when the keywords still do not update."
 								}
 							]
 						}

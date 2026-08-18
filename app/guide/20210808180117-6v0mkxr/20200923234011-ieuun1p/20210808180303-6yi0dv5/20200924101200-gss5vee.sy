@@ -6,7 +6,7 @@
 		"id": "20200924101200-gss5vee",
 		"title": "Navigate in the Content Block",
 		"type": "doc",
-		"updated": "20250115164053"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -14,7 +14,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091546-1flsvp0"
+				"id": "20210104091546-1flsvp0",
+				"updated": "20260809160000"
 			},
 			"Children": [
 				{
@@ -145,16 +146,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210428225947-bkizd86",
-				"updated": "20210428225952"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "Zoom focus"
+					"Data": "Focus"
 				}
 			]
 		},
@@ -170,7 +167,7 @@
 			},
 			"Properties": {
 				"id": "20210428225949-bxqb5mb",
-				"updated": "20220312233028"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -186,7 +183,7 @@
 					},
 					"Properties": {
 						"id": "20210428225949-q8mwfo8",
-						"updated": "20220312233028"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -194,12 +191,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210428225949-m2e7vgq",
-								"updated": "20220312233028"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After selecting focus in the right-click drop-down menu on the block icon, the editor will focus on the content block"
+									"Data": "Select Focus from the block menu to focus the editor on that content block"
 								}
 							]
 						}
@@ -305,7 +302,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20200924101210-3qfiiat"
+				"id": "20200924101210-3qfiiat",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -322,12 +320,40 @@
 			"ID": "20210106204930-m073dyq",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210106204930-m073dyq"
+				"id": "20210106204930-m073dyq",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Backlinks are document-level, listing the blocks in the current document where content blocks are quoted and mentioned."
+					"Data": "Backlinks are calculated at the document level and list the blocks that reference or mention content blocks in the current document. Whether child blocks are included is controlled by "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Editor"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Do backlinks contain child blocks"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},
@@ -337,7 +363,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091546-2gmpeq4",
-				"updated": "20210104091546"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -352,7 +378,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210908144725-sfn6vd8",
-				"updated": "20210908144757"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -364,7 +390,7 @@
 					},
 					"Properties": {
 						"id": "20210908144725-so6cwba",
-						"updated": "20210908144757"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -372,12 +398,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210908144725-cgcu1ut",
-								"updated": "20210908144757"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Hovering the mouse over the reference block icon will pop up a preview floating window"
+									"Data": "Hover over a source document or the block icon of backlink content in the backlink list to preview it"
 								}
 							]
 						}
@@ -392,7 +418,7 @@
 					},
 					"Properties": {
 						"id": "20210908144725-sg5v7te",
-						"updated": "20210908144735"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -400,12 +426,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210908144725-q0swjhw",
-								"updated": "20210908144735"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Click the reference block in the backlink list to jump"
+									"Data": "Click a source document to expand its context, then click a referenced block in the context to jump to it"
 								}
 							]
 						}
@@ -418,7 +444,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210106204950-gjw62fp"
+				"id": "20210106204950-gjw62fp",
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -436,7 +463,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210106204954-rpwfh3i",
-				"updated": "20221026221426"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{

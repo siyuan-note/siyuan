@@ -1,0 +1,23 @@
+{
+	"ID": "20210808180117-6v0mkxr",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"custom-hidden": "true",
+		"icon": "1f4d4",
+		"id": "20210808180117-6v0mkxr",
+		"title": "SiYuan User Guide",
+		"type": "doc",
+		"updated": "20210808180117"
+	},
+	"Children": [
+		{
+			"ID": "20260722113840-ab93cmj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260722113840-ab93cmj",
+				"updated": "20260722113840"
+			}
+		}
+	]
+}

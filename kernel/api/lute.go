@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,9 @@
 package api
 
 import (
+	"html"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -26,13 +28,16 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// maxSpinBlockDOMBytes 限制 spinBlockDOM 输入 DOM 的最大字节数。
+const maxSpinBlockDOMBytes = 1024 * 1024
 
 func copyStdMarkdown(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -88,10 +93,41 @@ func html2BlockDOM(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("dom", &dom, true, false)) {
 		return
 	}
+	// 可选 notebook 参数：指定目标加密笔记本时资源写入 box 内并加密
+	boxID := ""
+	if notebook, ok := arg["notebook"].(string); ok && notebook != "" {
+		if model.IsEncryptedBox(notebook) {
+			boxID = notebook
+		}
+	}
+	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	text, _ := arg["text"].(string)
+	mathML, _ := arg["mathML"].(string)
+	office, _ := arg["office"].(string)
+	officeMathHTML, _ := arg["officeMathHTML"].(string)
+	wps, _ := arg["wps"].(string)
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
-	tree, _ := model.HTML2Tree(dom, luteEngine)
+	// 将 Word 和 WPS 公式转换为可编辑公式 https://github.com/siyuan-note/siyuan/issues/18747
+	if markdown, converted := convertClipboardMath(mathML, office, wps); converted {
+		luteEngine.SetInlineMath(true)
+		ret.Data = luteEngine.Md2BlockDOM(markdown, false)
+		return
+	}
+	if markdown, converted := convertOfficeHTMLClipboardMath(officeMathHTML); converted {
+		luteEngine.SetInlineMath(true)
+		ret.Data = luteEngine.Md2BlockDOM(markdown, false)
+		return
+	}
+	// 将 Word 和 WPS 批注转换为行级备注 https://github.com/siyuan-note/siyuan/issues/18748
+	dom = normalizeWPSComments(dom, text, wps)
+	dom = normalizeMSWordComments(dom)
+	tree, _ := model.HTML2Tree(dom, luteEngine, boxID)
 	if nil == tree {
 		ret.Data = "Failed to convert"
 		return
@@ -171,17 +207,35 @@ func html2BlockDOM(c *gin.Context) {
 				logging.LogWarnf("skip copying asset [%s] due to sensitive path", localPath)
 				return ast.WalkContinue
 			}
+			if encryptedBoxID := model.EncryptedRawPathBoxID(localPath); encryptedBoxID != "" {
+				logging.LogWarnf("skip copying asset [%s] from encrypted notebook [%s]", localPath, encryptedBoxID)
+				return ast.WalkContinue
+			}
 
 			name := filepath.Base(localPath)
 			ext := filepath.Ext(name)
 			name = name[0 : len(name)-len(ext)]
 			name = name + "-" + ast.NewNodeID() + ext
-			targetPath := filepath.Join(util.DataDir, "assets", name)
-			if err := filelock.Copy(localPath, targetPath); err != nil {
-				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", localPath, targetPath, err)
+
+			data, readErr := os.ReadFile(localPath)
+			if readErr != nil {
+				logging.LogErrorf("read asset [%s] failed: %s", localPath, readErr)
 				return ast.WalkStop
 			}
-			n.Tokens = gulu.Str.ToBytes("assets/" + name)
+			assetsDir := filepath.Join(util.DataDir, "assets")
+			if boxID != "" {
+				assetsDir = filepath.Join(util.DataDir, boxID, "assets")
+			}
+			storedName, storeErr := model.StoreAssetForBox(boxID, assetsDir, name, data)
+			if storeErr != nil {
+				logging.LogErrorf("store asset [%s] failed: %s", localPath, storeErr)
+				return ast.WalkStop
+			}
+			assetURL := "assets/" + storedName
+			if boxID != "" {
+				assetURL += "?box=" + boxID
+			}
+			n.Tokens = gulu.Str.ToBytes(assetURL)
 			return ast.WalkContinue
 		})
 	}
@@ -201,6 +255,83 @@ func html2BlockDOM(c *gin.Context) {
 	ret.Data = gulu.Str.FromBytes(output)
 }
 
+func normalizeMSWordComments(dom string) string {
+	if !strings.Contains(dom, "mso-comment") && !strings.Contains(dom, "MsoComment") && !strings.Contains(dom, "msocom") {
+		return dom
+	}
+
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(dom))
+	if err != nil {
+		return dom
+	}
+
+	comments := map[string]string{}
+	doc.Find(`[id^="_com_"]`).Each(func(_ int, comment *goquery.Selection) {
+		id, _ := comment.Attr("id")
+		var paragraphs []string
+		comment.Find(".MsoCommentText").Each(func(_ int, paragraph *goquery.Selection) {
+			paragraph = paragraph.Clone()
+			paragraph.Find(".MsoCommentReference, .msocomoff").Remove()
+			if text := strings.TrimSpace(paragraph.Text()); text != "" {
+				paragraphs = append(paragraphs, text)
+			}
+		})
+		if 0 < len(paragraphs) {
+			comments[strings.TrimPrefix(id, "_com_")] = strings.Join(paragraphs, "\n")
+		}
+	})
+
+	doc.Find("a[style]").Each(func(_ int, anchor *goquery.Selection) {
+		style, _ := anchor.Attr("style")
+		if !strings.Contains(strings.ToLower(style), "mso-comment-reference:") {
+			return
+		}
+		if href, exists := anchor.Attr("href"); exists && href != "" {
+			return
+		}
+
+		content, err := anchor.Html()
+		if err != nil {
+			return
+		}
+		comment := comments[msWordCommentID(anchor, style)]
+		if comment == "" {
+			anchor.ReplaceWithHtml(content)
+			return
+		}
+		anchor.ReplaceWithHtml(`<span title="` + html.EscapeString(comment) + `">` + content + `</span>`)
+	})
+
+	doc.Find(".MsoCommentReference, .msocomanchor, .msocomoff").Remove()
+	doc.Find("[style]").Each(func(_ int, selection *goquery.Selection) {
+		style, _ := selection.Attr("style")
+		if strings.Contains(strings.ToLower(style), "mso-element:comment-list") {
+			selection.Remove()
+		}
+	})
+
+	ret, err := doc.Find("body").Html()
+	if err != nil {
+		return dom
+	}
+	return ret
+}
+
+func msWordCommentID(anchor *goquery.Selection, style string) string {
+	if href, exists := anchor.Next().Find(`a[href^="#_msocom_"]`).First().Attr("href"); exists {
+		return strings.TrimPrefix(href, "#_msocom_")
+	}
+
+	style = style[strings.Index(strings.ToLower(style), "mso-comment-reference:")+len("mso-comment-reference:"):]
+	if semicolon := strings.IndexByte(style, ';'); 0 <= semicolon {
+		style = style[:semicolon]
+	}
+	if underscore := strings.LastIndexByte(style, '_'); 0 <= underscore {
+		return strings.TrimSpace(style[underscore+1:])
+	}
+	return ""
+}
+
 func spinBlockDOM(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -212,6 +343,12 @@ func spinBlockDOM(c *gin.Context) {
 
 	var dom string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("dom", &dom, true, false)) {
+		return
+	}
+	if len(dom) > maxSpinBlockDOMBytes {
+		// 限制输入大小，避免解析超大 DOM 导致资源消耗
+		ret.Code = http.StatusRequestEntityTooLarge
+		ret.Msg = "dom input exceeds the maximum permitted size"
 		return
 	}
 	luteEngine := model.NewLute()

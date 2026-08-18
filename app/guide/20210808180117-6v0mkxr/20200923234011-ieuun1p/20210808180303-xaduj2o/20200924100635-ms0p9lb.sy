@@ -6,7 +6,7 @@
 		"id": "20200924100635-ms0p9lb",
 		"title": "Bookmark and Tag",
 		"type": "doc",
-		"updated": "20250115152004"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091414-c8862yg",
-				"updated": "20250115152001"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -47,7 +47,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091414-b6lifws",
-				"updated": "20250115152001"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -70,12 +70,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ / "
+					"Data": " / "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌃3"
+					"TextMarkTextContent": "⌃"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "3"
 				},
 				{
 					"Type": "NodeText",
@@ -89,7 +98,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091414-qp10fn0",
-				"updated": "20250115152004"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -169,7 +178,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091414-s3vdbdu",
-				"updated": "20250115152004"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -192,12 +201,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ / "
+					"Data": " / "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌃4"
+					"TextMarkTextContent": "⌃"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "4"
 				},
 				{
 					"Type": "NodeText",
@@ -303,7 +321,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;"
+					"TextMarkTextContent": "&lt;"
 				},
 				{
 					"Type": "NodeText",
@@ -312,7 +330,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026gt;"
+					"TextMarkTextContent": "&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -321,7 +339,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026amp;"
+					"TextMarkTextContent": "&amp;"
 				},
 				{
 					"Type": "NodeText",

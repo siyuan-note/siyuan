@@ -7,7 +7,7 @@
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
 		"type": "doc",
-		"updated": "20250518103355"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -439,7 +439,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220808181824-pwnc2gx",
-				"updated": "20250518103355"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -507,7 +507,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220619172140-cq7i3di",
-				"updated": "20220619172140"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -519,7 +519,7 @@
 					},
 					"Properties": {
 						"id": "20220619172140-8tsb58k",
-						"updated": "20220619172140"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -527,7 +527,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619172140-fk0wiay",
-								"updated": "20220619172140"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
@@ -559,7 +559,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -583,7 +583,7 @@
 					},
 					"Properties": {
 						"id": "20220619172140-s4joicq",
-						"updated": "20220619172140"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -591,7 +591,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619172140-9qv0epp",
-								"updated": "20220619172140"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
@@ -623,7 +623,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -689,7 +689,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220909100912-0495w3d",
-				"updated": "20220909100912"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -825,7 +825,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100912-rvyxrtl",
-				"updated": "20230820182924"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -857,7 +857,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中 "
+					"Data": " ​ 中 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -886,12 +886,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501231338-vlg2lgm",
-				"updated": "20220501231338"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "有的塊（比如在列表項中的段落塊）找不到塊標怎麼辦？"
+					"Data": "有的區塊（比如在列表項中的段落區塊）找不到區塊標怎麼辦？"
 				}
 			]
 		},
@@ -900,21 +900,161 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220501231338-vs50rai",
-				"updated": "20220501231338"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在列表項下的第一個子塊是省略塊標的。可以將游標移到這個塊中，然後通過 "
+					"Data": "當內容區塊的區塊標未顯示時，可將游標置於該內容區塊中，多次按 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+/"
+					"TextMarkTextContent": "Shift"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 觸發它的塊標菜單。"
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選中該內容區塊，再按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 打開區塊標選單；macOS 使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-a1s2e3w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260807094000-a1s2e3w",
+				"updated": "20260809170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "刪除筆記中的圖片或文件後，為什麼資料文件仍然保留？"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqtw01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqtw01",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "筆記中插入的圖片或文件是對資料文件的引用。刪除筆記中的內容只會刪除目前位置的引用，不會同時刪除對應的資料文件，因為同一資料文件還可能被其他文件、資料庫、題頭圖或 HTML 等內容引用。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqtw02",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqtw02",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "要確認一個資料文件是否已完全不再使用，需要檢查整個工作空間。如果每次刪除引用時都進行檢查，會影響編輯效能；同時，自動刪除資料文件也會使內容撤銷和多端同步變得不可靠，並可能導致誤刪。因此，思源不會在刪除內容引用時自動刪除資料文件，也不提供自動刪除選項。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqtw03",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqtw03",
+				"updated": "20260809170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "確認不再需要這些文件後，可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資料"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "未引用的資料文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中檢查並清理。清理操作會產生"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20211226122707-8cr09co",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "資料歷史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，如果發生誤刪，可在資料歷史中選擇資料文件進行回復。"
 				}
 			]
 		},

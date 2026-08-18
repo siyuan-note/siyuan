@@ -1,0 +1,26 @@
+{
+	"ID": "20260804223000-mcpsv01",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804223000-mcpsv01",
+		"title": "MCP 服务",
+		"type": "doc",
+		"updated": "20260804230000"
+	},
+	"Children": [
+		{"ID": "20260804223001-mcpcn01", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223001-mcpcn01", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "概述"}]},
+		{"ID": "20260804223002-mcpcn02", "Type": "NodeParagraph", "Properties": {"id": "20260804223002-mcpcn02", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "思源内置 MCP 服务端，外部 MCP 客户端可以通过它发现并调用思源提供的工具，以搜索、读取和操作当前工作空间。该服务与 AI 智能体中配置的外部 MCP 服务方向相反：前者由外部客户端连接思源，后者由思源智能体连接外部服务。"}]},
+		{"ID": "20260804223003-mcpcn03", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223003-mcpcn03", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "连接服务"}]},
+		{"ID": "20260804223004-mcpcn04", "Type": "NodeParagraph", "Properties": {"id": "20260804223004-mcpcn04", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "请先确保思源正在运行，并且 MCP 客户端能够访问思源的网络地址。服务使用 Streamable HTTP 传输，端点固定为 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "/mcp"}, {"Type": "NodeText", "Data": "，本机默认地址通常为 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "http://127.0.0.1:6806/mcp"}, {"Type": "NodeText", "Data": "。远程连接时请将主机和端口替换为实际可访问的思源地址。"}]},
+		{"ID": "20260804223005-mcpcn05", "Type": "NodeParagraph", "Properties": {"id": "20260804223005-mcpcn05", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "在 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "设置"}, {"Type": "NodeText", "Data": " - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "鉴权"}, {"Type": "NodeText", "Data": " - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "API token"}, {"Type": "NodeText", "Data": " 中查看或设置 API token，然后在客户端请求头中设置 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "Authorization: Token {Your API Token}"}, {"Type": "NodeText", "Data": "。"}]},
+		{"ID": "20260804223006-mcpcn06", "Type": "NodeCodeBlock", "IsFencedCodeBlock": true, "CodeBlockFenceChar": 96, "CodeBlockFenceLen": 3, "CodeBlockOpenFence": "YGBg", "CodeBlockInfo": "anNvbg==", "CodeBlockCloseFence": "YGBg", "Properties": {"id": "20260804223006-mcpcn06", "updated": "20260804230000"}, "Children": [{"Type": "NodeCodeBlockFenceOpenMarker", "Data": "```", "CodeBlockFenceLen": 3}, {"Type": "NodeCodeBlockFenceInfoMarker", "CodeBlockInfo": "anNvbg=="}, {"Type": "NodeCodeBlockCode", "Data": "{\n  \"mcpServers\": {\n    \"siyuan\": {\n      \"url\": \"http://127.0.0.1:6806/mcp\",\n      \"headers\": {\n        \"Authorization\": \"Token {Your API Token}\"\n      }\n    }\n  }\n}\n"}, {"Type": "NodeCodeBlockFenceCloseMarker", "Data": "```", "CodeBlockFenceLen": 3}]},
+		{"ID": "20260804223007-mcpcn07", "Type": "NodeParagraph", "Properties": {"id": "20260804223007-mcpcn07", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "以上是通用配置示例，不同 MCP 客户端使用的配置文件位置和字段名称可能不同，请以客户端文档为准。核心配置是 Streamable HTTP 地址和鉴权请求头。"}]},
+		{"ID": "20260804223008-mcpcn08", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223008-mcpcn08", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "工具能力"}]},
+		{"ID": "20260804223009-mcpcn09", "Type": "NodeParagraph", "Properties": {"id": "20260804223009-mcpcn09", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "连接成功后，客户端会动态发现当前可用工具。内置工具覆盖搜索、文档、内容块、笔记本、数据库、资源文件、历史、导入导出和同步等能力。工具集合可能随思源版本和运行环境变化，应以客户端实际发现的结果为准。"}]},
+		{"ID": "20260804223010-mcpcn10", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804223010-mcpcn10", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "权限和安全"}]},
+		{"ID": "20260804223011-mcpcn11", "Type": "NodeParagraph", "Properties": {"id": "20260804223011-mcpcn11", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "MCP 端点仅允许通过鉴权的管理员访问。API token 代表工作空间的管理员权限，连接的客户端可以读取数据，也可能修改或删除数据、访问工作空间文件、执行 SQL 或触发同步等操作，因此只应连接可信客户端。"}]},
+		{"ID": "20260804223012-mcpcn12", "Type": "NodeParagraph", "Properties": {"id": "20260804223012-mcpcn12", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "只读模式会拒绝 MCP 的 POST 和 DELETE 请求，因而无法正常调用工具。不要直接将思源服务端口暴露到不可信网络；远程使用时应配置 HTTPS、反向代理或防火墙，并在 token 泄露后立即更换。"}]},
+		{"ID": "20260804223013-mcpcn13", "Type": "NodeParagraph", "Properties": {"id": "20260804223013-mcpcn13", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "若要直接通过 HTTP 接口操作思源，请参阅 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20201227194925-7ipoiv6", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "内核 API"}, {"Type": "NodeText", "Data": "；若要为思源 AI 智能体配置外部 MCP 服务，请参阅 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20260804171000-aiagt01", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "AI 智能体"}, {"Type": "NodeText", "Data": "。"}]}
+	]
+}

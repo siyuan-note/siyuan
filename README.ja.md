@@ -1,7 +1,7 @@
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
-<em>あなたの思考をリファクタリングする</em>
+<em>思考から洞察へ、エージェントとともに</em>
 <br><br>
 <a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=9CF"></a>
@@ -18,8 +18,7 @@
 <a title="GitHub Commits" target="_blank" href="https://github.com/siyuan-note/siyuan/commits/master"><img src="https://img.shields.io/github/commit-activity/m/siyuan-note/siyuan.svg?style=flat-square"></a>
 <a title="Last Commit" target="_blank" href="https://github.com/siyuan-note/siyuan/commits/master"><img src="https://img.shields.io/github/last-commit/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <br><br>
-<a title="Twitter" target="_blank" href="https://twitter.com/b3logos"><img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/b3logos?label=Follow&style=social"></a>
-<a title="Discord" target="_blank" href="https://discord.gg/dmMbCqVX7G"><img alt="Chat on Discord" src="https://img.shields.io/discord/808152298789666826?label=Discord&logo=Discord&style=social"></a>
+<a title="X" target="_blank" href="https://x.com/b3logos"><img alt="X Follow" src="https://img.shields.io/twitter/follow/b3logos?label=Follow&style=social"></a>
 <br><br>
 <a href="https://trendshift.io/repositories/3949" target="_blank"><img src="https://trendshift.io/api/badge/repositories/3949" alt="siyuan-note%2Fsiyuan | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
@@ -38,7 +37,6 @@
 - [💡 紹介](#-紹介)
 - [🔮 特徴](#-特徴)
 - [🏗️ アーキテクチャとエコシステム](#️-アーキテクチャとエコシステム)
-- [🌟 スター履歴](#-スター履歴)
 - [🗺️ ロードマップ](#️-ロードマップ)
 - [🚀 ダウンロードとセットアップ](#-ダウンロードとセットアップ)
   - [アプリマーケット](#アプリマーケット)
@@ -47,7 +45,7 @@
   - [Docker ホスティング](#docker-ホスティング)
   - [Unraid ホスティング](#unraid-ホスティング)
   - [TrueNAS ホスティング](#truenas-ホスティング)
-  - [インサイダープレビュー](#インサイダープレビュー)
+  - [テストチャンネル](#テストチャンネル)
 - [⌨️ コマンドラインインターフェース](#-コマンドラインインターフェース)
 - [🏘️ コミュニティ](#️-コミュニティ)
 - [🛠️ 開発ガイド](#️-開発ガイド)
@@ -68,13 +66,11 @@
 
 SiYuanは、プライバシーを最優先とする個人の知識管理システムであり、細かいブロックレベルの参照とMarkdown WYSIWYGをサポートしています。
 
-詳細については、[SiYuan英語ディスカッションフォーラム](https://liuyun.io)をご覧ください。
+![feature0.png](screenshots/feature0.png)
 
-オンラインユーザーガイド：[English](https://siyuan-en.b3log.org/)
+![feature5-1.png](screenshots/feature5-1.png)
 
-![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
-
-![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
+詳細については、[オンラインユーザーガイド](https://siyuan-en.b3log.org/)をご覧いただくか、[SiYuan英語ディスカッションフォーラム](https://liuyun.io)をご利用ください。
 
 ## 🔮 特徴
 
@@ -109,14 +105,14 @@ SiYuanは、プライバシーを最優先とする個人の知識管理シス�
 - JavaScript/CSSスニペット
 - Android/iOS/HarmonyOSアプリ
 - Dockerデプロイメント
-- [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
+- [API](https://github.com/siyuan-note/siyuan/blob/master/docs/API.md)
 - コミュニティマーケットプレイス
 
 一部の機能は有料会員のみ利用可能です。詳細については[価格](https://b3log.org/siyuan/en/pricing.html)をご覧ください。
 
 ## 🏗️ アーキテクチャとエコシステム
 
-![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
+![SiYuan Arch](screenshots/SiYuan_Arch.png "SiYuan Arch")
 
 | プロジェクト                                                   | 説明              | フォーク                                                                           | スター                                                                                | 
 |----------------------------------------------------------|-----------------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
@@ -129,16 +125,6 @@ SiYuanは、プライバシーを最優先とする個人の知識管理シス�
 | [ios](https://github.com/siyuan-note/siyuan-ios)         | iOSアプリ          | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-ios)     | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-ios)     |
 | [harmony](https://github.com/siyuan-note/siyuan-harmony)     | HarmonyOSアプリ    | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-harmony)     | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-harmony)     |
 | [riff](https://github.com/siyuan-note/riff)              | 間隔反復            | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/riff)           | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/riff)           |
-
-## 🌟 スター履歴
-
-<a href="https://star-history.com/#siyuan-note/siyuan&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
- </picture>
-</a>
 
 ## 🗺️ ロードマップ
 
@@ -365,9 +351,9 @@ services:
 
 </details>
 
-### インサイダープレビュー
+### テストチャンネル
 
-主要な更新前にインサイダープレビューをリリースします。詳細は[https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider)をご覧ください。
+プレリリースを受信するには、`設定 - 情報 - 更新チャンネル`で Beta または Alpha を選択します。Beta チャンネルでは正式版、RC、Beta 版を受信し、Alpha チャンネルではすべての版を受信します。テストチャンネルの利用には GitHub へのアクセスが必要です。
 
 ## ⌨️ コマンドラインインターフェース
 
@@ -378,6 +364,9 @@ services:
 ```bash
 siyuan notebook list -w ~/SiYuan
 siyuan search "keyword" -w ~/SiYuan -f json
+# アセットファイル内を検索（PDF/Word/Excel/txt など）
+siyuan search "フレーズ" --asset -w ~/SiYuan
+siyuan search "フレーズ" --asset --ext pdf --ext docx -w ~/SiYuan
 siyuan export md --id <block-id> -w ~/SiYuan
 ```
 
@@ -388,9 +377,9 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | ノートと文書 | `notebook`, `document`, `dailynote` — CRUD とデイリーノート |
 | コンテンツ | `block`, `attr`, `outline` — ブロックの読み書き、属性、アウトライン |
 | メタデータ | `tag`, `bookmark`, `template` — タグ、ブックマーク、テンプレートスニペット |
-| クエリ | `search`, `sql` — 全文検索と SQL |
+| クエリ | `search`, `sql` — 全文・セマンティック・アセット内・SQL 検索 |
 | 参照 | `ref` — バックリンクと言及 |
-| インポート/エクスポート | `export`, `import` — Markdown, HTML, preview, Word, .sy.zip, Data |
+| インポート/エクスポート | `export`, `import`, `inbox` — Markdown, HTML, preview, Word, .sy.zip, Data, クラウド受信トレイ |
 | データ管理 | `repo`, `history`, `sync` — スナップショット、履歴、クラウド同期 |
 | ユーティリティ | `asset`, `file` — リソースとファイルシステム |
 | データベース | `database` — 属性ビュー管理 |
@@ -445,11 +434,6 @@ ln -s /インストール先/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bi
 
 サードパーティの同期ディスクをサポートしていない場合でも、サードパーティのクラウドストレージと接続することはサポートされています（会員特典）。
 
-また、データのエクスポートとインポートを手動で行うことでデータ同期を実現することもできます：
-
-- デスクトップ：<kbd>設定</kbd> - <kbd>エクスポート</kbd> - <kbd>データのエクスポート</kbd> / <kbd>データのインポート</kbd>
-- モバイル：<kbd>右カラム</kbd> - <kbd>情報</kbd> - <kbd>データのエクスポート</kbd> / <kbd>データのインポート</kbd>
-
 ### SiYuanはオープンソースですか？
 
 SiYuanは完全にオープンソースであり、貢献を歓迎します：
@@ -465,7 +449,7 @@ SiYuanは完全にオープンソースであり、貢献を歓迎します：
 ### 新しいバージョンにアップグレードするにはどうすればよいですか？
 
 - アプリストアからインストールした場合は、アプリストアから更新してください
-- デスクトップでインストールパッケージを使用してインストールした場合は、<kbd>設定</kbd> - <kbd>情報</kbd> - <kbd>自動的に更新インストールパッケージをダウンロード</kbd> オプションを開くことができます。これにより、SiYuanは最新バージョンのインストールパッケージを自動的にダウンロードし、インストールを促します
+- Windows または macOS のデスクトップ版をインストールパッケージでインストールした場合は、<kbd>設定</kbd> - <kbd>情報</kbd> - <kbd>自動的に更新インストールパッケージをダウンロード</kbd> オプションを開くことができます。これにより、SiYuanは最新バージョンのインストールパッケージを自動的にダウンロードし、インストールを促します
 - 手動でインストールパッケージを使用してインストールした場合は、再度インストールパッケージをダウンロードしてインストールしてください
 
 <kbd>設定</kbd> - <kbd>情報</kbd> - <kbd>現在のバージョン</kbd> で <kbd>更新を確認</kbd> できます。また、[公式ダウンロード](https://b3log.org/siyuan/en/download.html) または [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) をフォローして新しいバージョンを入手することもできます。
@@ -476,11 +460,11 @@ SiYuanは完全にオープンソースであり、貢献を歓迎します：
 
 ### データリポジトリキーを紛失した場合はどうすればよいですか？
 
-- データリポジトリキーが以前に複数のデバイスで正しく初期化されている場合、キーはすべてのデバイスで同じであり、<kbd>設定</kbd> - <kbd>情報</kbd> - <kbd>データリポジトリキー</kbd> - <kbd>キー文字列をコピー</kbd> で見つけることができます
+- データリポジトリキーが以前に複数のデバイスで正しく初期化されている場合、キーはすべてのデバイスで同じであり、<kbd>設定</kbd> - <kbd>アカウントと同期</kbd> - <kbd>ローカルデータリポジトリ</kbd> - <kbd>データリポジトリキー</kbd> - <kbd>キー文字列をコピー</kbd> で見つけることができます
 - 以前に正しく構成されていない場合（たとえば、複数のデバイスでキーが一致しない場合）またはすべてのデバイスが使用できず、キー文字列を取得できない場合は、以下の手順でキーをリセットできます：
 
   1. データを手動でバックアップします。<kbd>データのエクスポート</kbd> を使用するか、ファイルシステム上で <kbd>ワークスペース/data/</kbd> フォルダーをコピーします
-  2. <kbd>設定</kbd> - <kbd>情報</kbd> - <kbd>データリポジトリキー</kbd> - <kbd>データリポジトリをリセット</kbd>
+  2. <kbd>設定</kbd> - <kbd>アカウントと同期</kbd> - <kbd>ローカルデータリポジトリ</kbd> - <kbd>データリポジトリキー</kbd> - <kbd>データリポジトリをリセット</kbd>
   3. データリポジトリキーを再初期化します。1台のデバイスでキーを初期化した後、他のデバイスでキーをインポートします
   4. クラウドは新しい同期ディレクトリを使用します。古い同期ディレクトリは使用できなくなり、削除できます
   5. 既存のクラウドスナップショットは使用できなくなり、削除できます

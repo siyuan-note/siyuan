@@ -4,12 +4,12 @@ import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
 import {escapeAriaLabel, escapeHtml} from "../util/escape";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
 import {MenuItem} from "../menus/Menu";
-import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix, useShell} from "../util/pathName";
+import {getDisplayName, getNotebookIcon, getNotebookName, isEncryptedBox, movePathTo, pathPosix, useShell} from "../util/pathName";
 import {Protyle} from "../protyle";
 import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
@@ -21,13 +21,14 @@ import {newFile} from "../util/newFile";
 import {
     filterMenu,
     getKeyByLiElement,
+    getKeysByLiElement,
     initCriteriaMenu,
     moreMenu,
     queryMenu,
     replaceFilterMenu,
     saveCriterion
 } from "./menu";
-import {App} from "../index";
+import type {App} from "../index";
 import {
     assetFilterMenu,
     assetInputEvent,
@@ -48,10 +49,19 @@ import {highlightById} from "../util/highlightById";
 import {getSelectionOffset} from "../protyle/util/selection";
 import {electronUndo} from "../protyle/undo";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
+import {IDatabaseRowOpenData, openDatabaseRowByData} from "../protyle/render/av/openDatabaseRow";
+import {scheduleSearchRequest} from "./request";
 
 export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
     text = text.trim();
+    const sensitive = searchData?.sensitive || getAllModels().editor.some((item) =>
+        isEncryptedBox(item.editor.protyle.notebookId) &&
+        item.parent.headElement?.classList.contains("item--focus") &&
+        item.parent.parent.element.classList.contains("layout__wnd--active"));
     const searchModel = getAllModels().search.find((item) => {
+        if (sensitive) {
+            item.config.sensitive = true;
+        }
         item.parent.parent.switchTab(item.parent.headElement);
         item.updateSearch(text, replace);
         return true;
@@ -63,6 +73,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
     openFile({
         app,
         searchData: {
+            sensitive,
             k: text,
             r: "",
             hasReplace: false,
@@ -815,15 +826,23 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     /// #endif
                     if (isClick) {
                         clickTimeout = window.setTimeout(() => {
+                            const activeElement = document.activeElement;
+                            const shouldRestoreFocus = (inputElement: HTMLInputElement) =>
+                                !activeElement || activeElement === document.body ||
+                                activeElement === inputElement || target.contains(activeElement);
                             if (searchType === "asset") {
                                 if (!target.classList.contains("b3-list-item--focus")) {
                                     assetsElement.querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
                                     target.classList.add("b3-list-item--focus");
                                     renderPreview(element.querySelector("#searchAssetPreview"), target.dataset.id, searchAssetInputElement.value, window.siyuan.storage[Constants.LOCAL_SEARCHASSET].method);
-                                    searchAssetInputElement.focus();
+                                    if (shouldRestoreFocus(searchAssetInputElement)) {
+                                        searchAssetInputElement.focus();
+                                    }
                                 } else if (target.classList.contains("b3-list-item--focus")) {
                                     renderNextAssetMark(element.querySelector("#searchAssetPreview"));
-                                    searchAssetInputElement.focus();
+                                    if (shouldRestoreFocus(searchAssetInputElement)) {
+                                        searchAssetInputElement.focus();
+                                    }
                                 }
                             } else {
                                 if (event.altKey) {
@@ -833,6 +852,9 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                         id: target.getAttribute("data-node-id"),
                                         cb: closeCB,
                                         openPosition: "right",
+                                        nodeType: target.dataset.nodeType,
+                                        method: config.method,
+                                        keywords: getKeysByLiElement(target),
                                     });
                                 } else if (!target.classList.contains("b3-list-item--focus")) {
                                     (searchType === "doc" ? searchPanelElement : unRefPanelElement).querySelector(".b3-list-item--focus").classList.remove("b3-list-item--focus");
@@ -843,14 +865,18 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                         config: searchType === "doc" ? config : null,
                                         value: searchType === "doc" ? searchInputElement.value : null,
                                     });
-                                    searchInputElement.focus();
+                                    if (shouldRestoreFocus(searchInputElement)) {
+                                        searchInputElement.focus();
+                                    }
                                 } else if (searchType === "doc" && target.classList.contains("b3-list-item--focus")) {
                                     renderNextSearchMark({
                                         edit,
                                         id: target.getAttribute("data-node-id"),
                                         target,
                                     });
-                                    searchInputElement.focus();
+                                    if (shouldRestoreFocus(searchInputElement)) {
+                                        searchInputElement.focus();
+                                    }
                                 }
                             }
                         }, Constants.TIMEOUT_DBLCLICK);
@@ -865,7 +891,10 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                                 rootId: target.getAttribute("data-root-id"),
                                 protyle: edit.protyle,
                                 id: target.getAttribute("data-node-id"),
-                                cb: closeCB
+                                cb: closeCB,
+                                nodeType: target.dataset.nodeType,
+                                method: config.method,
+                                keywords: getKeysByLiElement(target),
                             });
                         }
                     }
@@ -902,7 +931,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = JSON.parse(JSON.stringify(config));
             setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         }
-        saveKeyList("keys", searchInputElement.value);
+        saveKeyList("keys", searchInputElement.value, config);
     });
     searchInputElement.addEventListener("keydown", (event) => {
         electronUndo(event);
@@ -916,7 +945,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         height: searchInputElement.clientHeight,
         clearCB() {
             config.page = 1;
-            inputEvent(element, config, edit);
+            inputEvent(element, config, edit, true);
         }
     });
     addClearButton({
@@ -928,12 +957,45 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     return {edit, unRefEdit};
 };
 
-export const openSearchEditor = (options: {
+export const openSearchEditor = async (options: {
     protyle: IProtyle,
     openPosition?: string,
     id: string,
     rootId: string,
-    cb: () => void
+    cb: () => void,
+    nodeType?: string,
+    method?: number,
+    keywords?: string[],
+}) => {
+    if (options.nodeType === "NodeAttributeView" && typeof options.method === "number" && [0, 1, 3].includes(options.method) &&
+        options.keywords?.length > 0) {
+        try {
+            const response = await fetchSyncPost("/api/av/getAttributeViewSearchTarget", {
+                id: options.id,
+                keywords: options.keywords,
+            });
+            if (response.code === 0 && response.data) {
+                const opened = await openDatabaseRowByData(options.protyle, response.data as IDatabaseRowOpenData, {
+                    position: options.openPosition,
+                });
+                if (opened) {
+                    options.cb?.();
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn("Resolve attribute view search target failed:", e);
+        }
+    }
+    openSearchBlockEditor(options);
+};
+
+const openSearchBlockEditor = (options: {
+    protyle: IProtyle,
+    openPosition?: string,
+    id: string,
+    rootId: string,
+    cb: () => void,
 }) => {
     let currentRange = (options.rootId === options.protyle.block.rootID && options.id === options.protyle.block.id) ?
         options.protyle.highlight.ranges[options.protyle.highlight.rangeIndex] : null;
@@ -954,7 +1016,9 @@ export const openSearchEditor = (options: {
                 zoomInId: options.protyle.block.showAll ? options.protyle.block.id : undefined,
                 scrollTop: options.protyle.contentElement.scrollTop,
             };
-            window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.protyle.block.rootID] = scrollAttr;
+            if (!isEncryptedBox(options.protyle.notebookId)) {
+                window.siyuan.storage[Constants.LOCAL_FILEPOSITION][options.protyle.block.rootID] = scrollAttr;
+            }
             if (offset.start === offset.end) {
                 currentRange = null;
             }
@@ -1151,13 +1215,17 @@ export const getArticle = (options: {
         }
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
-        fetchPost("/api/block/getDocInfo", {
+        const docInfoParam: IObject = {
             id: options.id,
-        }, (response) => {
+        };
+        if (isEncryptedBox(options.edit.protyle.notebookId)) {
+            docInfoParam.notebook = options.edit.protyle.notebookId;
+        }
+        fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
             if (articleId !== options.id) {
                 return;
             }
-            fetchPost("/api/filetree/getDoc", {
+            const getDocParam: Record<string, any> = {
                 id: options.id,
                 query: options.value || null,
                 queryMethod: options.config?.method || null,
@@ -1167,7 +1235,11 @@ export const getArticle = (options: {
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 zoom: zoomIn,
                 highlight: !isSupportCSSHL(),
-            }, getResponse => {
+            };
+            if (isEncryptedBox(options.edit.protyle.notebookId)) {
+                getDocParam.notebook = options.edit.protyle.notebookId;
+            }
+            fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                 if (articleId !== options.id) {
                     return;
                 }
@@ -1247,7 +1319,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
     if (!loadElement.classList.contains("fn__none")) {
         return;
     }
-    saveKeyList("replaceKeys", replaceInputElement.value);
+    saveKeyList("replaceKeys", replaceInputElement.value, config);
     const currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
     if (!currentList || currentList.dataset.type === "search-new") {
         return;
@@ -1307,91 +1379,119 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                                currentId?: string,
                                newId?: string
                            }) => {
-    let inputTimeout = parseInt(element.getAttribute("data-timeout") || "0");
-    clearTimeout(inputTimeout);
-    inputTimeout = window.setTimeout(() => {
-        if (rmCurrentCriteria) {
-            element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
-        }
-        const listElement = element.querySelector("#searchList") as HTMLElement;
-        const loadingElement = element.querySelector(".fn__loading") as HTMLElement;
-        loadingElement.classList.remove("fn__none");
-        loadingElement.style.top = listElement.offsetTop + "px";
-        const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
-        config.query = searchInputElement.value;
-        listElement.scrollTo(0, 0);
-        const previousElement = element.querySelector('[data-type="previous"]');
-        const nextElement = element.querySelector('[data-type="next"]');
-        edit.protyle?.app.plugins.forEach(item => {
-            item.eventBus.emit("input-search", {
-                protyle: edit,
-                config,
-                searchElement: searchInputElement,
-            });
-        });
-        const searchResultElement = element.querySelector("#searchResult");
-        if (config.query === "" && (!config.idPath || config.idPath.length === 0)) {
-            fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
-                if (window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] && window.siyuan.reqIds["/api/search/fullTextSearchBlock"] &&
-                    window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] < window.siyuan.reqIds["/api/search/fullTextSearchBlock"]) {
-                    return;
-                }
-                onSearch(response.data, edit, element, config);
+    if (rmCurrentCriteria) {
+        element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
+        element.querySelector("#searchList").innerHTML = "";
+        element.querySelector("#searchResult").innerHTML = "";
+        element.querySelector('[data-type="previous"]').setAttribute("disabled", "disabled");
+        element.querySelector('[data-type="next"]').setAttribute("disabled", "disabled");
+        edit.protyle.element.classList.add("fn__none");
+        element.querySelector(".search__drag").classList.add("fn__none");
+    }
+    const loadingElement = element.querySelector(".fn__loading") as HTMLElement;
+    loadingElement.classList.remove("fn__none");
+    scheduleSearchRequest({
+        element,
+        delay: Constants.TIMEOUT_INPUT,
+        onIdle: () => {
+            if (element.isConnected) {
                 loadingElement.classList.add("fn__none");
-                searchResultElement.innerHTML = "";
-                previousElement.setAttribute("disabled", "true");
-                nextElement.setAttribute("disabled", "true");
+            }
+        },
+        createTask(version) {
+            const listElement = element.querySelector("#searchList") as HTMLElement;
+            loadingElement.style.top = listElement.offsetTop + "px";
+            const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
+            config.query = searchInputElement.value;
+            if (!config.page) {
+                config.page = 1;
+            }
+            listElement.scrollTo(0, 0);
+            const previousElement = element.querySelector('[data-type="previous"]');
+            const nextElement = element.querySelector('[data-type="next"]');
+            edit.protyle?.app.plugins.forEach(item => {
+                item.eventBus.emit("input-search", {
+                    protyle: edit,
+                    config,
+                    searchElement: searchInputElement,
+                });
             });
-        } else {
-            if (config.page > 1) {
+            const requestConfig = JSON.parse(JSON.stringify(config)) as Config.IUILayoutTabSearchConfig;
+            const requestFocusId = focusId ? Object.assign({}, focusId) : undefined;
+            const searchResultElement = element.querySelector("#searchResult");
+            if (requestConfig.query === "" && (!requestConfig.idPath || requestConfig.idPath.length === 0)) {
+                return {
+                    method: requestConfig.method,
+                    version,
+                    run(signal: AbortSignal, isCurrent: () => boolean) {
+                        return fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
+                            if (!isCurrent()) {
+                                return;
+                            }
+                            onSearch(response.data, edit, element, requestConfig);
+                            searchResultElement.innerHTML = "";
+                            previousElement.setAttribute("disabled", "true");
+                            nextElement.setAttribute("disabled", "true");
+                        }, undefined, undefined, signal);
+                    }
+                };
+            }
+            if (requestConfig.page > 1) {
                 previousElement.removeAttribute("disabled");
             } else {
                 previousElement.setAttribute("disabled", "disabled");
             }
-            const endpoint = config.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
-            fetchPost(endpoint, {
-                query: config.query,
-                method: config.method,
-                types: config.types,
-                subTypes: config.subTypes,
-                paths: config.idPath || [],
-                groupBy: config.group,
-                orderBy: config.sort,
-                page: config.page || 1,
+            const endpoint = requestConfig.method === 4 ? "/api/search/semanticSearchBlock" : "/api/search/fullTextSearchBlock";
+            const searchParam: Record<string, any> = {
+                query: requestConfig.query,
+                method: requestConfig.method,
+                types: requestConfig.types,
+                subTypes: requestConfig.subTypes,
+                paths: requestConfig.idPath || [],
+                groupBy: requestConfig.group,
+                orderBy: requestConfig.sort,
+                page: requestConfig.page || 1,
                 pageSize: 32,
-            }, (response) => {
-                const searchReqId = config.method === 4
-                    ? window.siyuan.reqIds["/api/search/semanticSearchBlock"]
-                    : window.siyuan.reqIds["/api/search/fullTextSearchBlock"];
-                if (window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] && searchReqId &&
-                    window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] > searchReqId) {
-                    return;
+                searchHPath: !requestConfig.hasReplace,
+            };
+            // 限定在单个加密 box 内搜索时带 notebook，让内核走加密 db；跨 box 或全局搜索走原函数
+            const idPaths = requestConfig.idPath || [];
+            if (idPaths.length > 0) {
+                const box = idPaths[0].split("/")[0];
+                if (isEncryptedBox(box) && idPaths.every(p => p.split("/")[0] === box)) {
+                    searchParam.notebook = box;
                 }
-                if (!config.page) {
-                    config.page = 1;
-                }
-                if (config.page < response.data.pageCount) {
-                    nextElement.removeAttribute("disabled");
-                } else {
-                    nextElement.setAttribute("disabled", "disabled");
-                }
-                onSearch(response.data.blocks, edit, element, config, focusId);
-                if (response.data.matchedBlockCount > 0) {
-                    let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
-                    if (response.data.docMode) {
-                        text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);
-                    }
-                    searchResultElement.innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
+            }
+            return {
+                method: requestConfig.method,
+                version,
+                run(signal: AbortSignal, isCurrent: () => boolean) {
+                    return fetchPost(endpoint, searchParam, (response) => {
+                        if (!isCurrent()) {
+                            return;
+                        }
+                        if (requestConfig.page < response.data.pageCount) {
+                            nextElement.removeAttribute("disabled");
+                        } else {
+                            nextElement.setAttribute("disabled", "disabled");
+                        }
+                        onSearch(response.data.blocks, edit, element, requestConfig, requestFocusId);
+                        if (response.data.matchedBlockCount > 0) {
+                            let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
+                            if (response.data.docMode) {
+                                text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);
+                            }
+                            searchResultElement.innerHTML = `${requestConfig.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
 <span class="ft__on-surface">${text}</span>`;
-                } else {
-                    searchResultElement.innerHTML = "";
+                        } else {
+                            searchResultElement.innerHTML = "";
+                        }
+                        searchResultElement.setAttribute("data-pagecount", response.data.pageCount || 1);
+                    }, undefined, undefined, signal);
                 }
-                loadingElement.classList.add("fn__none");
-                searchResultElement.setAttribute("data-pagecount", response.data.pageCount || 1);
-            });
+            };
         }
-    }, Constants.TIMEOUT_INPUT);
-    element.setAttribute("data-timeout", inputTimeout.toString());
+    });
 };
 
 export const getAttr = (block: IBlock) => {
@@ -1439,7 +1539,7 @@ ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOC
                 if (childItem.refCount) {
                     countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.ref}">${childItem.refCount}</span>`;
                 }
-                resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}">
+                resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}" data-node-type="${childItem.type || ""}">
 <svg class="b3-list-item__graphic popover__block" data-id="${childItem.id}"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
 ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${childItem.content}</span>
@@ -1461,7 +1561,7 @@ ${countHTML}
             if (item.refCount) {
                 countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.ref}">${item.refCount}</span>`;
             }
-            resultHTML += `<div data-type="search-item" class="b3-list-item" data-node-id="${item.id}" data-root-id="${item.rootID}">
+            resultHTML += `<div data-type="search-item" class="b3-list-item" data-node-id="${item.id}" data-root-id="${item.rootID}" data-node-type="${item.type || ""}">
 <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
 ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content}</span>

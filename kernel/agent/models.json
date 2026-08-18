@@ -1,26 +1,29 @@
 {
   "_meta": {
     "source": "https://openrouter.ai/api/v1/models",
-    "fetchedAt": "2026-06-22",
+    "fetchedAt": "2026-07-30",
     "format": "OpenRouter: key 为模型 id 最后一段（provider 前缀已去除）；火山引擎豆包/零一/百川/InternLM/星火/盘古: key 为完整模型 id 或 OpenAI 兼容 model 名。contextLength 取同名模型最大值；已过滤 :free 后缀、末段等于 free、context_length 为 null/0 的条目。",
-    "totalCount": 340,
+    "totalCount": 367,
     "nullFiltered": 0,
     "zeroFiltered": 0,
-    "outputCount": 362
-  },
-  "aion-1.0": {
-    "contextLength": 131072
-  },
-  "aion-1.0-mini": {
-    "contextLength": 131072
+    "outputCount": 398
   },
   "aion-2.0": {
+    "contextLength": 131072
+  },
+  "aion-3.0": {
+    "contextLength": 131072
+  },
+  "aion-3.0-mini": {
     "contextLength": 131072
   },
   "aion-rp-llama-3.1-8b": {
     "contextLength": 32768
   },
   "auto": {
+    "contextLength": 2000000
+  },
+  "auto-beta": {
     "contextLength": 2000000
   },
   "baichuan-m3-plus": {
@@ -56,10 +59,16 @@
   "claude-fable-5": {
     "contextLength": 1000000
   },
+  "claude-fable-5:batch": {
+    "contextLength": 1000000
+  },
   "claude-fable-latest": {
     "contextLength": 1000000
   },
   "claude-haiku-4.5": {
+    "contextLength": 200000
+  },
+  "claude-haiku-4.5:batch": {
     "contextLength": 200000
   },
   "claude-haiku-latest": {
@@ -71,13 +80,19 @@
   "claude-opus-4.1": {
     "contextLength": 200000
   },
+  "claude-opus-4.1:batch": {
+    "contextLength": 200000
+  },
   "claude-opus-4.5": {
+    "contextLength": 200000
+  },
+  "claude-opus-4.5:batch": {
     "contextLength": 200000
   },
   "claude-opus-4.6": {
     "contextLength": 1000000
   },
-  "claude-opus-4.6-fast": {
+  "claude-opus-4.6:batch": {
     "contextLength": 1000000
   },
   "claude-opus-4.7": {
@@ -86,10 +101,22 @@
   "claude-opus-4.7-fast": {
     "contextLength": 1000000
   },
+  "claude-opus-4.7:batch": {
+    "contextLength": 1000000
+  },
   "claude-opus-4.8": {
     "contextLength": 1000000
   },
   "claude-opus-4.8-fast": {
+    "contextLength": 1000000
+  },
+  "claude-opus-4.8:batch": {
+    "contextLength": 1000000
+  },
+  "claude-opus-5": {
+    "contextLength": 1000000
+  },
+  "claude-opus-5-fast": {
     "contextLength": 1000000
   },
   "claude-opus-latest": {
@@ -101,14 +128,20 @@
   "claude-sonnet-4.5": {
     "contextLength": 1000000
   },
+  "claude-sonnet-4.5:batch": {
+    "contextLength": 1000000
+  },
   "claude-sonnet-4.6": {
+    "contextLength": 1000000
+  },
+  "claude-sonnet-5": {
+    "contextLength": 1000000
+  },
+  "claude-sonnet-5:batch": {
     "contextLength": 1000000
   },
   "claude-sonnet-latest": {
     "contextLength": 1000000
-  },
-  "coder-large": {
-    "contextLength": 32768
   },
   "codestral-2508": {
     "contextLength": 256000
@@ -132,7 +165,7 @@
     "contextLength": 131072
   },
   "deepseek-chat": {
-    "contextLength": 131072
+    "contextLength": 163840
   },
   "deepseek-chat-v3-0324": {
     "contextLength": 163840
@@ -147,13 +180,13 @@
     "contextLength": 163840
   },
   "deepseek-r1-distill-llama-70b": {
-    "contextLength": 128000
+    "contextLength": 8192
   },
   "deepseek-v3.1-terminus": {
     "contextLength": 163840
   },
   "deepseek-v3.2": {
-    "contextLength": 131072
+    "contextLength": 163840
   },
   "deepseek-v3.2-exp": {
     "contextLength": 163840
@@ -166,6 +199,9 @@
   },
   "devstral-2512": {
     "contextLength": 262144
+  },
+  "dolphin-mistral-24b-venice-edition": {
+    "contextLength": 128000
   },
   "doubao-1-5-lite-32k-250115": {
     "contextLength": 32768
@@ -222,7 +258,10 @@
     "contextLength": 262144
   },
   "ernie-4.5-vl-424b-a47b": {
-    "contextLength": 131072
+    "contextLength": 123000
+  },
+  "fugu-ultra": {
+    "contextLength": 1000000
   },
   "fusion": {
     "contextLength": 1000000
@@ -236,7 +275,10 @@
   "gemini-2.5-flash-lite": {
     "contextLength": 1048576
   },
-  "gemini-2.5-flash-lite-preview-09-2025": {
+  "gemini-2.5-flash-lite:batch": {
+    "contextLength": 1048576
+  },
+  "gemini-2.5-flash:batch": {
     "contextLength": 1048576
   },
   "gemini-2.5-pro": {
@@ -248,11 +290,17 @@
   "gemini-2.5-pro-preview-05-06": {
     "contextLength": 1048576
   },
+  "gemini-2.5-pro:batch": {
+    "contextLength": 1048576
+  },
   "gemini-3-flash-preview": {
     "contextLength": 1048576
   },
+  "gemini-3-flash-preview:batch": {
+    "contextLength": 1048576
+  },
   "gemini-3-pro-image": {
-    "contextLength": 65536
+    "contextLength": 131072
   },
   "gemini-3-pro-image-preview": {
     "contextLength": 65536
@@ -261,21 +309,45 @@
     "contextLength": 131072
   },
   "gemini-3.1-flash-image-preview": {
-    "contextLength": 131072
+    "contextLength": 65536
   },
   "gemini-3.1-flash-lite": {
     "contextLength": 1048576
   },
+  "gemini-3.1-flash-lite-image": {
+    "contextLength": 65536
+  },
   "gemini-3.1-flash-lite-preview": {
+    "contextLength": 1048576
+  },
+  "gemini-3.1-flash-lite:batch": {
     "contextLength": 1048576
   },
   "gemini-3.1-pro-preview": {
     "contextLength": 1048576
   },
   "gemini-3.1-pro-preview-customtools": {
-    "contextLength": 1048756
+    "contextLength": 1048576
+  },
+  "gemini-3.1-pro-preview:batch": {
+    "contextLength": 1048576
   },
   "gemini-3.5-flash": {
+    "contextLength": 1048576
+  },
+  "gemini-3.5-flash-lite": {
+    "contextLength": 1048576
+  },
+  "gemini-3.5-flash-lite:batch": {
+    "contextLength": 1048576
+  },
+  "gemini-3.5-flash:batch": {
+    "contextLength": 1048576
+  },
+  "gemini-3.6-flash": {
+    "contextLength": 1048576
+  },
+  "gemini-3.6-flash:batch": {
     "contextLength": 1048576
   },
   "gemini-flash-latest": {
@@ -291,7 +363,7 @@
     "contextLength": 131072
   },
   "gemma-3-27b-it": {
-    "contextLength": 131072
+    "contextLength": 262144
   },
   "gemma-3-4b-it": {
     "contextLength": 131072
@@ -330,13 +402,16 @@
     "contextLength": 200000
   },
   "glm-5-turbo": {
-    "contextLength": 262144
+    "contextLength": 202752
   },
   "glm-5.1": {
     "contextLength": 200000
   },
   "glm-5.2": {
     "contextLength": 1048576
+  },
+  "glm-5v-turbo": {
+    "contextLength": 202752
   },
   "gpt-3.5-turbo": {
     "contextLength": 16385
@@ -386,17 +461,8 @@
   "gpt-4o-mini-2024-07-18": {
     "contextLength": 128000
   },
-  "gpt-4o-mini-search-preview": {
-    "contextLength": 128000
-  },
-  "gpt-4o-search-preview": {
-    "contextLength": 128000
-  },
   "gpt-5": {
     "contextLength": 400000
-  },
-  "gpt-5-chat": {
-    "contextLength": 128000
   },
   "gpt-5-codex": {
     "contextLength": 400000
@@ -410,7 +476,13 @@
   "gpt-5-mini": {
     "contextLength": 400000
   },
+  "gpt-5-mini:batch": {
+    "contextLength": 400000
+  },
   "gpt-5-nano": {
+    "contextLength": 400000
+  },
+  "gpt-5-nano:batch": {
     "contextLength": 400000
   },
   "gpt-5-pro": {
@@ -431,6 +503,9 @@
   "gpt-5.1-codex-mini": {
     "contextLength": 400000
   },
+  "gpt-5.1:batch": {
+    "contextLength": 400000
+  },
   "gpt-5.2": {
     "contextLength": 400000
   },
@@ -441,6 +516,9 @@
     "contextLength": 400000
   },
   "gpt-5.2-pro": {
+    "contextLength": 400000
+  },
+  "gpt-5.2:batch": {
     "contextLength": 400000
   },
   "gpt-5.3-chat": {
@@ -458,10 +536,19 @@
   "gpt-5.4-mini": {
     "contextLength": 400000
   },
+  "gpt-5.4-mini:batch": {
+    "contextLength": 400000
+  },
   "gpt-5.4-nano": {
     "contextLength": 400000
   },
+  "gpt-5.4-nano:batch": {
+    "contextLength": 400000
+  },
   "gpt-5.4-pro": {
+    "contextLength": 1050000
+  },
+  "gpt-5.4:batch": {
     "contextLength": 1050000
   },
   "gpt-5.5": {
@@ -469,6 +556,30 @@
   },
   "gpt-5.5-pro": {
     "contextLength": 1050000
+  },
+  "gpt-5.5:batch": {
+    "contextLength": 1050000
+  },
+  "gpt-5.6-luna": {
+    "contextLength": 1050000
+  },
+  "gpt-5.6-luna-pro": {
+    "contextLength": 1050000
+  },
+  "gpt-5.6-sol": {
+    "contextLength": 1050000
+  },
+  "gpt-5.6-sol-pro": {
+    "contextLength": 1050000
+  },
+  "gpt-5.6-terra": {
+    "contextLength": 1050000
+  },
+  "gpt-5.6-terra-pro": {
+    "contextLength": 1050000
+  },
+  "gpt-5:batch": {
+    "contextLength": 400000
   },
   "gpt-audio": {
     "contextLength": 128000
@@ -509,8 +620,14 @@
   "grok-4.3": {
     "contextLength": 1000000
   },
+  "grok-4.5": {
+    "contextLength": 500000
+  },
   "grok-build-0.1": {
     "contextLength": 256000
+  },
+  "grok-latest": {
+    "contextLength": 500000
   },
   "hermes-3-llama-3.1-405b": {
     "contextLength": 131072
@@ -527,17 +644,14 @@
   "hunyuan-a13b-instruct": {
     "contextLength": 131072
   },
+  "hy3": {
+    "contextLength": 262144
+  },
   "hy3-preview": {
     "contextLength": 262144
   },
-  "inflection-3-pi": {
-    "contextLength": 8000
-  },
-  "inflection-3-productivity": {
-    "contextLength": 8000
-  },
-  "intellect-3": {
-    "contextLength": 131072
+  "inkling": {
+    "contextLength": 1048576
   },
   "internlm2-latest": {
     "contextLength": 204800
@@ -551,7 +665,13 @@
   "jamba-large-1.7": {
     "contextLength": 256000
   },
+  "kat-coder-air-v2.5": {
+    "contextLength": 256000
+  },
   "kat-coder-pro-v2": {
+    "contextLength": 262144
+  },
+  "kat-coder-pro-v2.5": {
     "contextLength": 256000
   },
   "kimi-k2": {
@@ -572,14 +692,14 @@
   "kimi-k2.7-code": {
     "contextLength": 262144
   },
+  "kimi-k3": {
+    "contextLength": 1048576
+  },
   "kimi-latest": {
-    "contextLength": 262144
+    "contextLength": 1048576
   },
   "l3-lunaris-8b": {
     "contextLength": 8192
-  },
-  "l3.1-70b-hanami-x1": {
-    "contextLength": 16000
   },
   "l3.1-euryale-70b": {
     "contextLength": 131072
@@ -587,14 +707,11 @@
   "l3.3-euryale-70b": {
     "contextLength": 131072
   },
-  "laguna-m.1": {
-    "contextLength": 262144
+  "laguna-s-2.1": {
+    "contextLength": 1048576
   },
-  "laguna-xs.2": {
+  "laguna-xs-2.1": {
     "contextLength": 262144
-  },
-  "lfm-2-24b-a2b": {
-    "contextLength": 128000
   },
   "ling-2.6-1t": {
     "contextLength": 262144
@@ -602,20 +719,14 @@
   "ling-2.6-flash": {
     "contextLength": 262144
   },
-  "llama-3-8b-instruct": {
-    "contextLength": 8192
-  },
   "llama-3.1-70b-instruct": {
     "contextLength": 131072
   },
   "llama-3.1-8b-instruct": {
     "contextLength": 131072
   },
-  "llama-3.2-11b-vision-instruct": {
-    "contextLength": 131072
-  },
   "llama-3.2-1b-instruct": {
-    "contextLength": 131072
+    "contextLength": 60000
   },
   "llama-3.2-3b-instruct": {
     "contextLength": 131072
@@ -623,17 +734,17 @@
   "llama-3.3-70b-instruct": {
     "contextLength": 131072
   },
-  "llama-3.3-nemotron-super-49b-v1.5": {
-    "contextLength": 131072
-  },
   "llama-4-maverick": {
     "contextLength": 1048576
   },
   "llama-4-scout": {
-    "contextLength": 10000000
+    "contextLength": 1310720
   },
   "llama-guard-4-12b": {
-    "contextLength": 163840
+    "contextLength": 1048576
+  },
+  "longcat-2.0": {
+    "contextLength": 1048756
   },
   "lyria-3-clip-preview": {
     "contextLength": 1048576
@@ -642,16 +753,16 @@
     "contextLength": 1048576
   },
   "magnum-v4-72b": {
-    "contextLength": 32768
+    "contextLength": 16384
   },
   "mercury-2": {
     "contextLength": 128000
   },
   "mimo-v2.5": {
-    "contextLength": 1048576
+    "contextLength": 1050000
   },
   "mimo-v2.5-pro": {
-    "contextLength": 1048576
+    "contextLength": 1050000
   },
   "minimax-01": {
     "contextLength": 1000000
@@ -676,6 +787,9 @@
   },
   "minimax-m3": {
     "contextLength": 1048576
+  },
+  "minimax-m3:batch": {
+    "contextLength": 524288
   },
   "ministral-14b-2512": {
     "contextLength": 262144
@@ -720,7 +834,7 @@
     "contextLength": 128000
   },
   "mistral-small-3.2-24b-instruct": {
-    "contextLength": 128000
+    "contextLength": 256000
   },
   "mixtral-8x22b-instruct": {
     "contextLength": 65536
@@ -731,8 +845,11 @@
   "morph-v3-large": {
     "contextLength": 262144
   },
+  "muse-spark-1.1": {
+    "contextLength": 1048576
+  },
   "mythomax-l2-13b": {
-    "contextLength": 4096
+    "contextLength": 8192
   },
   "nemotron-3-nano-30b-a3b": {
     "contextLength": 262144
@@ -741,7 +858,10 @@
     "contextLength": 1000000
   },
   "nemotron-3-ultra-550b-a55b": {
-    "contextLength": 1000000
+    "contextLength": 512288
+  },
+  "nex-n2-mini": {
+    "contextLength": 262144
   },
   "nex-n2-pro": {
     "contextLength": 262144
@@ -794,9 +914,6 @@
   "olmo-3-32b-think": {
     "contextLength": 65536
   },
-  "owl-alpha": {
-    "contextLength": 1048756
-  },
   "palmyra-x5": {
     "contextLength": 1040000
   },
@@ -812,17 +929,14 @@
   "phi-4": {
     "contextLength": 16384
   },
-  "phi-4-mini-instruct": {
-    "contextLength": 131072
-  },
   "qwen-2.5-72b-instruct": {
-    "contextLength": 131072
+    "contextLength": 32768
   },
   "qwen-2.5-7b-instruct": {
-    "contextLength": 131072
+    "contextLength": 32768
   },
   "qwen-2.5-coder-32b-instruct": {
-    "contextLength": 128000
+    "contextLength": 32768
   },
   "qwen-plus": {
     "contextLength": 1000000
@@ -834,7 +948,7 @@
     "contextLength": 1000000
   },
   "qwen2.5-vl-72b-instruct": {
-    "contextLength": 131072
+    "contextLength": 128000
   },
   "qwen3-14b": {
     "contextLength": 131072
@@ -852,10 +966,10 @@
     "contextLength": 131072
   },
   "qwen3-30b-a3b-instruct-2507": {
-    "contextLength": 131072
+    "contextLength": 262144
   },
   "qwen3-30b-a3b-thinking-2507": {
-    "contextLength": 131072
+    "contextLength": 81920
   },
   "qwen3-32b": {
     "contextLength": 131072
@@ -864,10 +978,10 @@
     "contextLength": 131072
   },
   "qwen3-coder": {
-    "contextLength": 1048576
+    "contextLength": 262144
   },
   "qwen3-coder-30b-a3b-instruct": {
-    "contextLength": 160000
+    "contextLength": 262144
   },
   "qwen3-coder-flash": {
     "contextLength": 1000000
@@ -900,16 +1014,16 @@
     "contextLength": 262144
   },
   "qwen3-vl-30b-a3b-thinking": {
-    "contextLength": 131072
-  },
-  "qwen3-vl-32b-instruct": {
     "contextLength": 262144
   },
+  "qwen3-vl-32b-instruct": {
+    "contextLength": 131072
+  },
   "qwen3-vl-8b-instruct": {
-    "contextLength": 256000
+    "contextLength": 262144
   },
   "qwen3-vl-8b-thinking": {
-    "contextLength": 256000
+    "contextLength": 131072
   },
   "qwen3.5-122b-a10b": {
     "contextLength": 262144
@@ -921,7 +1035,7 @@
     "contextLength": 262144
   },
   "qwen3.5-397b-a17b": {
-    "contextLength": 256000
+    "contextLength": 262144
   },
   "qwen3.5-9b": {
     "contextLength": 262144
@@ -950,6 +1064,9 @@
   "qwen3.6-plus": {
     "contextLength": 1000000
   },
+  "qwen3.7-flash": {
+    "contextLength": 1000000
+  },
   "qwen3.7-max": {
     "contextLength": 1000000
   },
@@ -974,14 +1091,8 @@
   "ring-2.6-1t": {
     "contextLength": 262144
   },
-  "rnj-1-instruct": {
-    "contextLength": 32768
-  },
   "rocinante-12b": {
-    "contextLength": 32768
-  },
-  "router": {
-    "contextLength": 131072
+    "contextLength": 65536
   },
   "seed-1.6": {
     "contextLength": 262144
@@ -1044,13 +1155,10 @@
     "contextLength": 262144
   },
   "step-3.7-flash": {
-    "contextLength": 256000
+    "contextLength": 262144
   },
   "trinity-large-thinking": {
     "contextLength": 262144
-  },
-  "trinity-mini": {
-    "contextLength": 131072
   },
   "ui-tars-1.5-7b": {
     "contextLength": 128000
@@ -1068,7 +1176,7 @@
     "contextLength": 8000
   },
   "wizardlm-2-8x22b": {
-    "contextLength": 65536
+    "contextLength": 65535
   },
   "yi-large": {
     "contextLength": 32768

@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -216,21 +216,19 @@ var blockInsertCmd = &cobra.Command{
 		}
 
 		dom := markdownToBlockDOM(data)
-		transactions := []*model.Transaction{{
-			DoOperations: []*model.Operation{{
-				Action:     "insert",
-				Data:       dom,
-				ParentID:   parentID,
-				PreviousID: previousID,
-			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		operation := &model.Operation{
+			Action:     "insert",
+			Data:       dom,
+			ParentID:   parentID,
+			PreviousID: previousID,
+		}
+		if err = model.PerformTxSync(&model.Transaction{DoOperations: []*model.Operation{operation}}); err != nil {
+			return err
+		}
 		if bt := treenode.GetBlockTree(parentID); bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)
 		}
-		fmt.Println("ok")
-		return nil
+		return printBlockWriteResult(operation.ID)
 	},
 }
 
@@ -259,20 +257,18 @@ var blockAppendCmd = &cobra.Command{
 		}
 
 		dom := markdownToBlockDOM(data)
-		transactions := []*model.Transaction{{
-			DoOperations: []*model.Operation{{
-				Action:   "appendInsert",
-				Data:     dom,
-				ParentID: parentID,
-			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		operation := &model.Operation{
+			Action:   "appendInsert",
+			Data:     dom,
+			ParentID: parentID,
+		}
+		if err = model.PerformTxSync(&model.Transaction{DoOperations: []*model.Operation{operation}}); err != nil {
+			return err
+		}
 		if bt := treenode.GetBlockTree(parentID); bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)
 		}
-		fmt.Println("ok")
-		return nil
+		return printBlockWriteResult(operation.ID)
 	},
 }
 
@@ -301,21 +297,39 @@ var blockPrependCmd = &cobra.Command{
 		}
 
 		dom := markdownToBlockDOM(data)
-		transactions := []*model.Transaction{{
-			DoOperations: []*model.Operation{{
-				Action:   "prependInsert",
-				Data:     dom,
-				ParentID: parentID,
-			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		operation := &model.Operation{
+			Action:   "prependInsert",
+			Data:     dom,
+			ParentID: parentID,
+		}
+		if err = model.PerformTxSync(&model.Transaction{DoOperations: []*model.Operation{operation}}); err != nil {
+			return err
+		}
 		if bt := treenode.GetBlockTree(parentID); bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)
 		}
-		fmt.Println("ok")
-		return nil
+		return printBlockWriteResult(operation.ID)
 	},
+}
+
+func printBlockWriteResult(id string) error {
+	return writeBlockWriteResult(os.Stdout, id)
+}
+
+func writeBlockWriteResult(output io.Writer, id string) error {
+	if id == "" {
+		return fmt.Errorf("block write failed: empty block ID")
+	}
+	if outputFormat == "json" {
+		data, err := json.MarshalIndent(map[string]string{"id": id}, "", "  ")
+		if err != nil {
+			return err
+		}
+		_, err = fmt.Fprintln(output, string(data))
+		return err
+	}
+	_, err := fmt.Fprintln(output, id)
+	return err
 }
 
 var blockUpdateCmd = &cobra.Command{
@@ -336,26 +350,27 @@ var blockUpdateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		lockType, _ := cmd.Flags().GetBool("lock-type")
 
-		dom := markdownToBlockDOM(data)
-		transactions := []*model.Transaction{{
-			DoOperations: []*model.Operation{{
-				Action: "update",
-				Data:   dom,
-				ID:     id,
-			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
-		if bt := treenode.GetBlockTree(id); bt != nil {
-			model.AppendPushReloadProtyleEntry(bt.RootID)
+		_, rootIDs, err := model.PerformBlockUpdates([]model.BlockUpdateInput{{
+			ID:       id,
+			Data:     data,
+			DataType: "markdown",
+			LockType: lockType,
+		}})
+		if err != nil {
+			return err
+		}
+
+		for _, rootID := range rootIDs {
+			model.AppendPushReloadProtyleEntry(rootID)
 		}
 		fmt.Println("ok")
 		return nil
 	},
 }
 
-	var blockDeleteCmd = &cobra.Command{
+var blockDeleteCmd = &cobra.Command{
 	Use:   "delete --id <id>",
 	Short: "Delete block",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -399,6 +414,10 @@ var blockMoveCmd = &cobra.Command{
 			return fmt.Errorf("--id and --parent are required")
 		}
 
+		if err := validateBlockMove(id, parentID, previousID); err != nil {
+			return err
+		}
+
 		if dryRun {
 			fmt.Printf("[dry-run] Would move block %s to parent %s\n", id, parentID)
 			if previousID != "" {
@@ -407,32 +426,48 @@ var blockMoveCmd = &cobra.Command{
 			return nil
 		}
 
-		// 仅靠 parentID 定位目标时（无 previousID），目标必须是容器块，否则非法嵌套
-		if previousID == "" {
-			if err := treenode.CheckListItemNesting(parentID, id); err != nil {
-				return err
-			}
-			if err := treenode.CheckContainerParent(parentID); err != nil {
-				return err
-			}
-		}
-
-		transactions := []*model.Transaction{{
+		transaction := &model.Transaction{
 			DoOperations: []*model.Operation{{
 				Action:     "move",
 				ID:         id,
 				ParentID:   parentID,
 				PreviousID: previousID,
 			}},
-		}}
-		model.PerformTransactions(&transactions)
-		model.FlushTxQueue()
+		}
+		if err := model.PerformTxSync(transaction); err != nil {
+			return err
+		}
 		if bt := treenode.GetBlockTree(id); bt != nil {
 			model.AppendPushReloadProtyleEntry(bt.RootID)
 		}
 		fmt.Println("ok")
 		return nil
 	},
+}
+
+func validateBlockMove(id, parentID, previousID string) error {
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return fmt.Errorf("block not found: %s", id)
+	}
+	if "d" == bt.Type {
+		return fmt.Errorf("document block [%s] cannot be moved with block move; use document move instead", id)
+	}
+
+	if "" != previousID {
+		previousBt := treenode.GetBlockTree(previousID)
+		if nil == previousBt {
+			return fmt.Errorf("previous block not found: %s", previousID)
+		}
+		if "d" == previousBt.Type {
+			return fmt.Errorf("document block [%s] cannot be used as a previous sibling; use it as --parent instead", previousID)
+		}
+		return nil
+	}
+	if err := treenode.CheckListItemNesting(parentID, id); err != nil {
+		return err
+	}
+	return treenode.CheckContainerParent(parentID)
 }
 
 var blockBatchGetCmd = &cobra.Command{
@@ -584,6 +619,7 @@ func init() {
 	blockUpdateCmd.Flags().String("id", "", "block ID")
 	blockUpdateCmd.Flags().String("data", "", "markdown content")
 	blockUpdateCmd.Flags().String("file", "", "read content from file path (- for stdin)")
+	blockUpdateCmd.Flags().Bool("lock-type", false, "reject update when the parsed block type differs from the existing block type")
 
 	blockDeleteCmd.Flags().String("id", "", "block ID")
 

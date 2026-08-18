@@ -6,7 +6,7 @@
 		"id": "20260614104322-shrqj15",
 		"title": "網路代理",
 		"type": "doc",
-		"updated": "20260614104332"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104332-ojj5e46",
-				"updated": "20260614104332"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -58,12 +58,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614104332-ai09rt7",
-				"updated": "20260614104332"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 [設定 - 應用 - 網路代理] 中設定："
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "應用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一般"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "網路代理"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中設定："
 				}
 			]
 		},

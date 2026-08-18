@@ -1,7 +1,7 @@
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
-<em>重构你的思维</em>
+<em>从思考到洞见，与智能体同行</em>
 <br><br>
 <a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
 <a title="Releases" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=9CF"></a>
@@ -18,8 +18,7 @@
 <a title="GitHub Commits" target="_blank" href="https://github.com/siyuan-note/siyuan/commits/master"><img src="https://img.shields.io/github/commit-activity/m/siyuan-note/siyuan.svg?style=flat-square"></a>
 <a title="Last Commit" target="_blank" href="https://github.com/siyuan-note/siyuan/commits/master"><img src="https://img.shields.io/github/last-commit/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <br><br>
-<a title="Twitter" target="_blank" href="https://twitter.com/b3logos"><img alt="Twitter Follow" src="https://img.shields.io/twitter/follow/b3logos?label=Follow&style=social"></a>
-<a title="Discord" target="_blank" href="https://discord.gg/dmMbCqVX7G"><img alt="Chat on Discord" src="https://img.shields.io/discord/808152298789666826?label=Discord&logo=Discord&style=social"></a>
+<a title="X" target="_blank" href="https://x.com/b3logos"><img alt="X Follow" src="https://img.shields.io/twitter/follow/b3logos?label=Follow&style=social"></a>
 <br><br>
 <a href="https://trendshift.io/repositories/3949" target="_blank"><img src="https://trendshift.io/api/badge/repositories/3949" alt="siyuan-note%2Fsiyuan | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
@@ -38,7 +37,6 @@
 - [💡 简介](#-简介)
 - [🔮 特性](#-特性)
 - [🏗️ 架构和生态](#️-架构和生态)
-- [🌟 星标历史](#-星标历史)
 - [🗺️ 路线图](#️-路线图)
 - [🚀 下载安装](#-下载安装)
   - [应用市场](#应用市场)
@@ -46,11 +44,11 @@
   - [包管理器](#包管理器)
   - [Docker 部署](#docker-部署)
   - [Unraid 部署](#unraid-部署)
-  - [TrueNAS 部署](#trueNAS-部署)
+  - [TrueNAS 部署](#truenas-部署)
   - [宝塔面板部署](#宝塔面板部署)
   - [小皮面板部署](#小皮面板部署)
   - [1Panel 面板部署](#1Panel-面板部署)
-  - [内部预览版](#内部预览版)
+  - [测试通道](#测试通道)
 - [⌨️ 命令行接口](#-命令行接口)
 - [🏘️ 社区](#️-社区)
 - [🛠️ 开发指南](#️-开发指南)
@@ -71,15 +69,11 @@
 
 思源笔记是一款隐私优先的个人知识管理系统，支持细粒度块级引用和 Markdown 所见即所得。
 
-![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
+![feature0.png](screenshots/feature0.png)
 
-![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
+![feature5-1.png](screenshots/feature5-1.png)
 
-欢迎到[思源笔记官方讨论区](https://ld246.com/domain/siyuan)了解更多。同时也欢迎关注 B3log 开源社区微信公众号 `B3log开源`：
-
-在线用户指南：[中文](https://siyuan-cn.b3log.org/)
-
-![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
+如需了解更多，请阅读[在线用户指南](https://siyuan-cn.b3log.org/)或前往[思源笔记官方讨论区](https://ld246.com/domain/siyuan)交流。
 
 ## 🔮 特性
 
@@ -113,14 +107,14 @@
 - JavaScript/CSS 代码片段
 - Android/iOS/鸿蒙 App
 - Docker 部署
-- [API](API.zh-CN.md)
+- [API](docs/API.zh-CN.md)
 - 社区集市
 
 部分功能需要付费会员才能使用，更多细节请参考[定价](https://b3log.org/siyuan/pricing.html)。
 
 ## 🏗️ 架构和生态
 
-![思源笔记架构设计](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "思源笔记架构设计")
+![思源笔记架构设计](screenshots/SiYuan_Arch.png "思源笔记架构设计")
 
 | Project                                                  | Description  | Forks                                                                           | Stars                                                                                | 
 |----------------------------------------------------------|--------------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
@@ -133,16 +127,6 @@
 | [ios](https://github.com/siyuan-note/siyuan-ios)         | iOS App      | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-ios)     | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-ios)     |
 | [harmony](https://github.com/siyuan-note/siyuan-harmony)         | 鸿蒙 App       | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-harmony)     | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-harmony)     |
 | [riff](https://github.com/siyuan-note/riff)              | 间隔重复         | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/riff)           | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/riff)           |
-
-## 🌟 星标历史
-
-<a href="https://star-history.com/#siyuan-note/siyuan&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
- </picture>
-</a>
 
 ## 🗺️ 路线图
 
@@ -462,9 +446,9 @@ services:
 
 </details>
 
-### 内部预览版
+### 测试通道
 
-我们会在有重大更新前发布内部预览版，请访问 [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider)。
+可在`设置 - 关于 - 更新通道`中选择 Beta 或 Alpha 以接收预发布版本。Beta 通道接收正式版、RC 和 Beta，Alpha 通道接收全部版本。测试通道需要能够访问 GitHub。
 
 ## ⌨️ 命令行接口
 
@@ -479,6 +463,10 @@ siyuan notebook list -w ~/SiYuan
 # 全文搜索（JSON 输出）
 siyuan search "关键词" -w ~/SiYuan -f json
 
+# 搜索资源文件内容（PDF/Word/Excel/txt 等）
+siyuan search "关键词" --asset -w ~/SiYuan
+siyuan search "关键词" --asset --ext pdf --ext docx -w ~/SiYuan
+
 # 导出文档为 Markdown
 siyuan export md --id <block-id> -w ~/SiYuan
 ```
@@ -490,9 +478,9 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | 笔记本与文档 | `notebook`、`document`、`dailynote` — 增删改查、每日笔记 |
 | 内容 | `block`、`attr`、`outline` — 块读写、自定义属性、大纲 |
 | 元数据 | `tag`、`bookmark`、`template` — 标签、书签、模板片段 |
-| 查询 | `search`、`sql` — 全文和 SQL 查询 |
+| 查询 | `search`、`sql` — 全文、语义、资源文件内容、SQL 查询 |
 | 引用 | `ref` — 反向链接和提及 |
-| 导入导出 | `export`、`import` — Markdown、HTML、preview、Word、.sy.zip、Data |
+| 导入导出 | `export`、`import`、`inbox` — Markdown、HTML、preview、Word、.sy.zip、Data、云端收集箱 |
 | 数据管理 | `repo`、`history`、`sync` — 快照、历史、云端同步 |
 | 工具 | `asset`、`file` — 资源与文件系统 |
 | 数据库 | `database` — 属性视图管理 |
@@ -501,19 +489,36 @@ siyuan export md --id <block-id> -w ~/SiYuan
 
 运行 `siyuan --help` 查看完整命令树。使用 `-f json`（默认 `-f table`）获得适合脚本处理的输出。大多数写命令还支持 `--dry-run`，可预览将要发生的改动而不实际执行。
 
-### 设置
+### 安装
 
-CLI 二进制为 `<安装目录>/resources/kernel/SiYuan-Kernel`。
-Windows 安装程序自动将内核目录添加到 PATH。
-macOS/Linux 下需要手动创建软链接：
+CLI 可执行文件为 `<安装目录>/resources/kernel/SiYuan-Kernel`，可通过 `siyuan` 命令调用。
 
-```bash
-# macOS
-ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
-
-# Linux
-ln -s /安装路径/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
-```
+- **Windows**：安装程序自动将内核目录加入 `PATH`，可直接使用 `siyuan`。微软商店版运行在 MSIX 沙箱中，无法自动修改 `PATH`；可部署一个 `siyuan.cmd` 转发器（一次性，商店版更新后依然有效）：
+  ```powershell
+  # 仅适用于微软商店版 —— 在 PowerShell 中运行一次
+  $shimDir = "$env:LOCALAPPDATA\Microsoft\WindowsApps"   # 该目录默认已在 PATH 中
+  @(
+      '@echo off'
+      'setlocal'
+      'set "ROOT="'
+      'for /f "delims=" %%i in (''powershell -NoProfile -Command "(Get-AppxPackage *SiYuan*).InstallLocation"'') do set "ROOT=%%i"'
+      'if not defined ROOT goto :noshim'
+      '"%ROOT%\app\resources\kernel\SiYuan-Kernel.exe" %*'
+      'exit /b %ERRORLEVEL%'
+      ':noshim'
+      '1>&2 echo siyuan: 未找到微软商店版'
+      'exit /b 1'
+  ) | Set-Content "$shimDir\siyuan.cmd"
+  ```
+  卸载商店版时如需清理：`Remove-Item "$env:LOCALAPPDATA\Microsoft\WindowsApps\siyuan.cmd"`。
+- **macOS**：安装后创建软链接：
+  ```bash
+  ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+  ```
+- **Linux**：安装后创建软链接：
+  ```bash
+  ln -s <安装目录>/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+  ```
 
 ## 🏘️ 社区
 
@@ -547,11 +552,6 @@ ln -s /安装路径/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
 
 虽然不支持第三方同步盘，但是支持对接第三方云端存储（会员特权）。
 
-另外，也可以考虑手动导出导入 Data 实现数据同步：
-
-- 桌面端：<kbd>设置</kbd> - <kbd>导出</kbd> - <kbd>导出 Data</kbd> / <kbd>导入 Data</kbd>
-- 移动端：<kbd>右侧栏</kbd> - <kbd>关于</kbd> - <kbd>导出 Data</kbd> / <kbd>导入 Data</kbd>
-
 ### 思源是开源的吗？
 
 思源笔记是完全开源的，欢迎参与贡献：
@@ -567,7 +567,7 @@ ln -s /安装路径/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
 ### 如何升级到新版本？
 
 - 如果是通过应用商店安装的，请通过应用商店更新
-- 如果是桌面端通过安装包安装的，可打开 <kbd>设置</kbd> - <kbd>关于</kbd> - <kbd>自动下载更新安装包</kbd> 选项，这样思源会自动下载最新版安装包并提示安装
+- 如果是 Windows 或 macOS 桌面端通过安装包安装的，可打开 <kbd>设置</kbd> - <kbd>关于</kbd> - <kbd>自动下载更新安装包</kbd> 选项，这样思源会自动下载最新版安装包并提示安装
 - 如果是通过手动安装包安装的，请再次下载安装包安装
 
 可在 <kbd>设置</kbd> - <kbd>关于</kbd> - <kbd>当前版本</kbd> 中 <kbd>检查更新</kbd>，也可以通过关注[官方下载](https://b3log.org/siyuan/download.html)或者 [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) 来获取新版本。
@@ -580,11 +580,11 @@ ln -s /安装路径/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
 
 ### 数据仓库密钥遗失怎么办？
 
-- 如果之前在多个设备上正确初始化过数据仓库密钥的话，那么该密钥在所有设备上都是相同的，可以在 <kbd>设置</kbd> - <kbd>关于</kbd> - <kbd>数据仓库密钥</kbd> - <kbd>复制密钥字符串</kbd> 找回
+- 如果之前在多个设备上正确初始化过数据仓库密钥的话，那么该密钥在所有设备上都是相同的，可以在 <kbd>设置</kbd> - <kbd>账号与同步</kbd> - <kbd>本地数据仓库</kbd> - <kbd>数据仓库密钥</kbd> - <kbd>复制密钥字符串</kbd> 找回
 - 如果之前没有正确配置（比如多个设备上密钥不一致）或者所有设备均不可用，已经无法获得密钥字符串，则可通过如下步骤重置密钥：
 
   1. 手动备份好数据，可通过 <kbd>导出 Data</kbd> 或者直接在文件系统上复制 <kbd>工作空间/data/</kbd> 文件夹
-  2. <kbd>设置</kbd> - <kbd>关于</kbd> - <kbd>数据仓库密钥</kbd> - <kbd>重置数据仓库</kbd>
+  2. <kbd>设置</kbd> - <kbd>账号与同步</kbd> - <kbd>本地数据仓库</kbd> - <kbd>数据仓库密钥</kbd> - <kbd>重置数据仓库</kbd>
   3. 重新初始化数据仓库密钥，在一台设备上初始化密钥以后，其他设备导入密钥
   4. 云端使用新的同步目录，旧的同步目录已经无法使用，可以删除
   5. 已有的云端快照已经无法使用，可以删除

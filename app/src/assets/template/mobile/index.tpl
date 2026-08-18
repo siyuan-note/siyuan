@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>SiYuan</title>
-    <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, height=device-height, interactive-widget=overlays-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 </head>
 <body class="fn__flex-column">
@@ -15,10 +15,15 @@
     <svg id="toolbarFile" class="toolbar__icon">
         <use xlink:href="#iconMenu"></use>
     </svg>
-    <input class="toolbar__title fn__hidden" id="toolbarName">
+    <input class="toolbar__title fn__hidden" id="toolbarName" autocomplete="off">
+    <span class="toolbar__title toolbar__title--readonly fn__hidden fn__none" id="toolbarNameReadonly"></span>
     <svg id="toolbarSync" class="toolbar__icon toolbar__icon-deactivate fn__none">
         <use xlink:href="#iconCloudSucc"></use>
     </svg>
+    <button id="toolbarTabs" class="toolbar__tabs" type="button">
+        <svg><use xlink:href="#iconLayoutGrid"></use></svg>
+        <span class="toolbar__tabs-count">0</span>
+    </button>
     <svg id="toolbarMore" class="toolbar__icon">
         <use xlink:href="#iconSettings"></use>
     </svg>
@@ -27,14 +32,15 @@
 <div id="empty" class="b3-list--mobile"></div>
 <div id="sidebar" class="side-panel fn__flex-column">
     <div class="toolbar toolbar--border" style="-webkit-user-select: none">
-        <svg data-type="sidebar-file-tab" class="toolbar__icon toolbar__icon--active"><use xlink:href="#iconFiles"></use></svg>
-        <svg data-type="sidebar-outline-tab" class="toolbar__icon"><use xlink:href="#iconOutline"></use></svg>
-        <svg data-type="sidebar-bookmark-tab" class="toolbar__icon"><use xlink:href="#iconBookmark"></use></svg>
-        <svg data-type="sidebar-tag-tab" class="toolbar__icon"><use xlink:href="#iconTag"></use></svg>
-        <svg data-type="sidebar-backlink-tab" class="toolbar__icon"><use xlink:href="#iconLink"></use></svg>
-        <svg data-type="sidebar-inbox-tab" class="toolbar__icon"><use xlink:href="#iconInbox"></use></svg>
-        <svg data-menu="true" data-type="sidebar-plugin-tab" class="toolbar__icon"><use xlink:href="#iconPlugin"></use></svg>
-        <span class="fn__flex-1"></span>
+        <div class="toolbar__scroll">
+            <svg data-type="sidebar-file-tab" class="toolbar__icon toolbar__icon--active"><use xlink:href="#iconFiles"></use></svg>
+            <svg data-type="sidebar-outline-tab" class="toolbar__icon"><use xlink:href="#iconOutline"></use></svg>
+            <svg data-type="sidebar-bookmark-tab" class="toolbar__icon"><use xlink:href="#iconBookmark"></use></svg>
+            <svg data-type="sidebar-tag-tab" class="toolbar__icon"><use xlink:href="#iconTag"></use></svg>
+            <svg data-type="sidebar-backlink-tab" class="toolbar__icon"><use xlink:href="#iconLink"></use></svg>
+            <svg data-type="sidebar-inbox-tab" class="toolbar__icon"><use xlink:href="#iconInbox"></use></svg>
+            <svg data-menu="true" data-type="sidebar-plugin-tab" class="toolbar__icon fn__none"><use xlink:href="#iconPlugin"></use></svg>
+        </div>
         <svg class="toolbar__icon"><use xlink:href="#iconRight"></use></svg>
     </div>
     <div class="fn__flex-1 b3-list--mobile">
@@ -58,6 +64,7 @@
     </div>
     <div id="modelMain" class="fn__flex-1"></div>
 </div>
+<div id="commonMenuScrim" class="b3-menu__scrim fn__none" aria-hidden="true"></div>
 <div id="commonMenu" class="b3-menu fn__none">
     <div class="b3-menu__title fn__none">
         <svg class="b3-menu__icon"><use xlink:href="#iconLeft"></use></svg>

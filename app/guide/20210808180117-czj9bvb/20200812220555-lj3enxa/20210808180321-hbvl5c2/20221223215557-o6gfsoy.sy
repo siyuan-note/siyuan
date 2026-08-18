@@ -7,7 +7,7 @@
 		"id": "20221223215557-o6gfsoy",
 		"title": "闪卡",
 		"type": "doc",
-		"updated": "20260614194227"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194151-5atwbsj",
-				"updated": "20260614194151"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -30,12 +30,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194151-4z6xzmg",
-				"updated": "20260614194151"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "将内容块设置为闪卡后，系统会通过间隔重复算法 FSRS (github repo: open-spaced-repetition/free-spaced-repetition-scheduler) 自动安排复习，在遗忘临界点提醒复习，帮助将短期记忆转化为长期记忆。"
+					"Data": "将内容块设置为闪卡后，系统会通过间隔重复算法 FSRS (GitHub repo: open-spaced-repetition/go-fsrs) 自动安排复习，在遗忘临界点提醒复习，帮助将短期记忆转化为长期记忆。"
 				}
 			]
 		},
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194151-667efp1",
-				"updated": "20260614194227"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194151-l3dy84x",
-				"updated": "20260614194227"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -220,12 +220,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194151-of1pv7p",
-				"updated": "20260614194151"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "以上规则可以在 [设置 - 闪卡] 中调整。"
+					"Data": "以上规则可以在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "闪卡"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中调整。"
 				}
 			]
 		},
@@ -249,7 +267,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614194151-6msabwl",
-				"updated": "20260614194151"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
@@ -400,12 +418,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194151-0bh9rx5",
-				"updated": "20260614194151"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "进入复习后，界面会逐张展示待复习的卡片。每张卡片先展示问题面，点击「显示答案」或按空格/回车展示答案面，然后根据自己的掌握程度选择评级："
+					"Data": "进入复习后，界面会逐张展示待复习的卡片。每张卡片先展示问题面，点击「显示答案」或按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "空格"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 展示答案面，然后根据自己的掌握程度选择评级："
 				}
 			]
 		},
@@ -724,12 +760,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194151-gu6khf3",
-				"updated": "20260614194151"
+				"updated": "20260804230000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "展示答案后，空格和回车也可直接触发「良好」评级。评级直接影响卡片的复习间隔——高评级延长下次复习时间，低评级缩短下次复习时间。系统使用 FSRS 算法根据历史评级数据自动优化每个人的复习安排。"
+					"Data": "展示答案后，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "空格"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 也可直接触发「良好」评级。评级直接影响卡片的复习间隔——高评级延长下次复习时间，低评级缩短下次复习时间。系统使用 FSRS 算法根据历史评级数据自动优化每个人的复习安排。"
 				}
 			]
 		},
@@ -739,7 +793,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614194151-4s6qhj0",
-				"updated": "20260614194151"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -753,12 +807,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614194151-ic45461",
-				"updated": "20260614194151"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 [设置 - 闪卡] 中可以调整闪卡相关的全局配置，其中"
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "闪卡"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中可以调整闪卡相关的全局配置，其中"
 				},
 				{
 					"Type": "NodeTextMark",

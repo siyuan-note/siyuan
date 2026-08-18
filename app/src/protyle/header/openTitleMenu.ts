@@ -2,7 +2,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, openFileWechatNotify,} from "../../menus/commonMenuItem";
 import {deleteFile} from "../../editor/deleteFile";
-import {encodeBase64, updateHotkeyTip} from "../util/compatibility";
+import {updateHotkeyTip, writeClipboardData} from "../util/compatibility";
 /// #if !MOBILE
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 import * as path from "path";
@@ -12,7 +12,7 @@ import {openMobileFileById} from "../../mobile/editor";
 import {Constants} from "../../constants";
 import {openCardByData} from "../../card/openCard";
 import {viewCards} from "../../card/viewCards";
-import {getDisplayName, getNotebookName, pathPosix, useShell} from "../../util/pathName";
+import {getDisplayName, getNotebookName, isEncryptedBox, pathPosix, useShell} from "../../util/pathName";
 import {makeCard, quickMakeCard} from "../../card/makeCard";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import * as dayjs from "dayjs";
@@ -26,7 +26,8 @@ import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {openFileById} from "../../editor/util";
 import {hasTopClosestByClassName} from "../util/hasClosest";
 import {showMessage} from "../../dialog/message";
-import {removeZWJ} from "../util/normalizeText";
+import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
+import {buildWebClipboardHTML} from "../util/clipboardData";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
     hideTooltip();
@@ -35,21 +36,30 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
         window.siyuan.menus.menu.remove();
         return;
     }
-    fetchPost("/api/block/getDocInfo", {
+    const docInfoParam: IObject = {
         id: protyle.block.rootID
-    }, (response) => {
+    };
+    if (isEncryptedBox(protyle.notebookId)) {
+        docInfoParam.notebook = protyle.notebookId;
+    }
+    fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_TITLE);
+        const isBoxDoc = protyle.notebookId === protyle.block.rootID;
         const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
         window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover-" + from : "app-" + from);
         const submenu = copySubMenu([protyle.block.rootID], true, undefined, protyle.block.showAll ? protyle.block.id : protyle.block.rootID);
         submenu.push({
+            id: "copyDoc",
             iconHTML: "",
             label: window.siyuan.languages.copyDoc,
             accelerator: undefined,
             click: async () => {
                 const [responseHTML, responseText] = await Promise.all([
-                    fetchSyncPost("/api/block/getBlockDOM", {id: protyle.block.rootID}),
+                    fetchSyncPost("/api/block/getBlockDOM", {
+                        id: protyle.block.rootID,
+                        notebook: protyle.notebookId,
+                    }),
                     fetchSyncPost("/api/export/exportMdContent", {
                         id: protyle.block.rootID,
                         refMode: 3,
@@ -60,13 +70,18 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     })
                 ]);
 
-                const textHTML = `<!--data-siyuan='${encodeBase64(responseHTML.data.dom)}'-->${removeZWJ(responseHTML.data.dom)}`;
-                await navigator.clipboard.write([
-                    new ClipboardItem({
-                        "text/plain": new Blob([responseText.data.content], {type: "text/plain"}),
-                        "text/html": new Blob([textHTML], {type: "text/html"}),
-                    })
-                ]);
+                const {textHTML, textSiyuan} = buildBlockDOMClipboardRichData(protyle.lute, responseHTML.data.dom);
+                const result = await writeClipboardData({
+                    textPlain: responseText.data.content,
+                    textHTML: buildWebClipboardHTML(textHTML, textSiyuan),
+                });
+                if (result.error) {
+                    console.log("Write document clipboard error:", result.error);
+                }
+                if (result.status === "failed") {
+                    showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
+                    return;
+                }
 
                 showMessage(window.siyuan.languages.copied);
             }
@@ -79,7 +94,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             submenu,
         }).element);
         if (!protyle.disabled) {
-            window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));
+            if (!isBoxDoc) {
+                window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));
+            }
             const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "addToDatabase",
@@ -90,14 +107,16 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     addEditorToDatabase(protyle, range, "title");
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                id: "delete",
-                icon: "iconTrashcan",
-                label: window.siyuan.languages.delete,
-                click: () => {
-                    deleteFile(protyle.notebookId, protyle.path);
-                }
-            }).element);
+            if (!isBoxDoc) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "delete",
+                    icon: "iconTrashcan",
+                    label: window.siyuan.languages.delete,
+                    click: () => {
+                        deleteFile(protyle.notebookId, protyle.path);
+                    }
+                }).element);
+            }
         }
         /// #if !MOBILE
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
@@ -110,6 +129,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                 openOutline({
                     app: protyle.app,
                     rootId: protyle.block.rootID,
+                    notebookId: protyle.notebookId,
                     title: protyle.options.render.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : "",
                     isPreview: !protyle.preview.element.classList.contains("fn__none")
                 });
@@ -125,6 +145,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     app: protyle.app,
                     blockId: protyle.block.id,
                     rootId: protyle.block.rootID,
+                    notebookId: protyle.notebookId,
                     useBlockId: protyle.block.showAll,
                     title: protyle.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null
                 });
@@ -140,6 +161,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                     app: protyle.app,
                     blockId: protyle.block.id,
                     rootId: protyle.block.rootID,
+                    notebookId: protyle.notebookId,
                     useBlockId: protyle.block.showAll,
                     title: protyle.title ? (protyle.title.editElement.textContent || window.siyuan.languages.untitled) : null
                 });
@@ -168,6 +190,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                 }).element);
             }
             const isCardMade = !!response.data.ial[Constants.CUSTOM_RIFF_DECKS];
+            if (!isEncryptedBox(protyle.notebookId)) {
             const riffCardMenu: IMenu[] = [{
                 id: "spaceRepetition",
                 iconHTML: "",
@@ -221,6 +244,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
                 icon: "iconRiffCard",
                 submenu: riffCardMenu,
             }).element);
+            }
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "search",
@@ -228,16 +252,19 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
             icon: "iconSearch",
             accelerator: window.siyuan.config.keymap.general.search.custom,
             async click() {
-                const searchPath = getDisplayName(protyle.path, false, true);
+                const searchPath = isBoxDoc ? "" : getDisplayName(protyle.path, false, true);
                 /// #if MOBILE
-                const pathResponse = await fetchSyncPost("/api/filetree/getHPathByPath", {
-                    notebook: protyle.notebookId,
-                    path: searchPath + ".sy"
-                });
+                const pathResponse = isBoxDoc ? undefined : await fetchSyncPost("/api/filetree/getHPathByPath", {
+                        notebook: protyle.notebookId,
+                        path: searchPath + ".sy"
+                    });
+                if (!isBoxDoc && (pathResponse?.code !== 0 || typeof pathResponse?.data !== "string")) {
+                    return;
+                }
                 popSearch(protyle.app, {
                     hasReplace: false,
-                    hPath: pathPosix().join(getNotebookName(protyle.notebookId), pathResponse.data),
-                    idPath: [pathPosix().join(protyle.notebookId, searchPath)],
+                    hPath: isBoxDoc ? getNotebookName(protyle.notebookId) : pathPosix().join(getNotebookName(protyle.notebookId), pathResponse.data),
+                    idPath: [isBoxDoc ? protyle.notebookId : pathPosix().join(protyle.notebookId, searchPath)],
                     page: 1,
                 });
                 /// #else
@@ -293,7 +320,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "fileHistory",
-                label: window.siyuan.languages.fileHistory,
+                label: window.siyuan.languages.dataHistory,
                 icon: "iconHistory",
                 click() {
                     openDocHistory({

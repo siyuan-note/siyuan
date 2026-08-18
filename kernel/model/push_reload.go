@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,8 +18,10 @@ package model
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/go-humanize"
@@ -81,6 +83,9 @@ func PushReloadPlugin(uninstallPluginNameSet, unloadPluginNameSet, reloadPluginS
 		"reloadPlugins":     slices[2], // 插件启用，或插件代码变更
 		"dataChangePlugins": slices[3], // 插件存储数据变更
 	}
+	if 0 < len(slices[0])+len(slices[1])+len(slices[2]) {
+		util.ReloadPublishServiceSessions()
+	}
 
 	if "" == excludeApp {
 		util.BroadcastByType("main", "reloadPlugin", 0, "", payload)
@@ -95,6 +100,14 @@ func refreshDocInfo(tree *parse.Tree) {
 	}
 
 	refreshDocInfoWithSize(tree, filesys.TreeSize(tree))
+}
+
+func refreshDocInfoWithoutParent(tree *parse.Tree) {
+	if nil == tree {
+		return
+	}
+
+	refreshDocInfo0(tree, filesys.TreeSize(tree))
 }
 
 func refreshDocInfoWithSize(tree *parse.Tree, size uint64) {
@@ -125,6 +138,31 @@ func refreshParentDocInfo(tree *parse.Tree) {
 	refreshDocInfo0(parentTree, uint64(len(data)))
 }
 
+func refreshBoxDocInfo(tree *parse.Tree) {
+	if nil == tree || path.Dir(tree.Path) != "/" || IsBoxDoc(tree.Box, tree.ID) {
+		return
+	}
+	refreshBoxDocInfoByBoxID(tree.Box)
+}
+
+func refreshBoxDocInfoByBoxID(boxID string) {
+	if !IsBoxDocEnabled() {
+		return
+	}
+	box := Conf.Box(boxID)
+	if nil == box {
+		return
+	}
+	util.BroadcastByType("filetree", "reloadNotebookInfo", 0, "", boxID)
+}
+
+func pushNotebookIconChanged(boxID, icon string) {
+	util.BroadcastByType("filetree", "notebookIconChanged", 0, "", map[string]any{
+		"boxID": boxID,
+		"icon":  icon,
+	})
+}
+
 func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	cTime, _ := time.ParseInLocation("20060102150405", tree.ID[:14], time.Local)
 	mTime := cTime
@@ -135,7 +173,9 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	}
 
 	subFileCount := 0
-	if "true" != tree.Root.IALAttr(DocHiddenAttr) {
+	if IsBoxDoc(tree.Box, tree.ID) {
+		subFileCount = BoxDocSubFileCount(tree.Box)
+	} else if "true" != tree.Root.IALAttr(DocHiddenAttr) {
 		subDir := filepath.Join(util.DataDir, tree.Box, strings.TrimSuffix(tree.Path, ".sy"))
 		subFiles, err := os.ReadDir(subDir)
 		if err == nil {
@@ -154,6 +194,7 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	}
 
 	docInfo := map[string]any{
+		"box":          tree.Box,
 		"rootID":       tree.ID,
 		"name":         tree.Root.IALAttr("title"),
 		"alias":        tree.Root.IALAttr("alias"),
@@ -230,17 +271,17 @@ func refreshRefCount(blockID string) {
 	isDoc := bt.ID == bt.RootID
 	var rootRefIDs []string
 	var refCount, rootRefCount int
-	refIDs := sql.QueryRefIDsByDefID(bt.ID, isDoc)
+	refIDs := sql.QueryRefIDsByDefIDInBox(bt.ID, isDoc, bt.BoxID)
 	if isDoc {
 		rootRefIDs = refIDs
 	} else {
-		rootRefIDs = sql.QueryRefIDsByDefID(bt.RootID, true)
+		rootRefIDs = sql.QueryRefIDsByDefIDInBox(bt.RootID, true, bt.BoxID)
 	}
 	refCount = len(refIDs)
 	rootRefCount = len(rootRefIDs)
 	var defIDs []string
 	if isDoc {
-		defIDs = sql.QueryChildDefIDsByRootDefID(bt.ID)
+		defIDs = sql.QueryChildDefIDsByRootDefIDInBox(bt.ID, bt.BoxID)
 	} else {
 		defIDs = append(defIDs, bt.ID)
 	}
@@ -263,7 +304,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 		changedRootIDs = append(changedRootIDs, t)
 	}
 
-	for i := 0; i < 7; i++ {
+	for range 7 {
 		updatedRefNodes, updatedRefTrees := refreshDynamicRefTexts0(updatedDefNodes, updatedTrees)
 		if 1 > len(updatedRefNodes) {
 			break
@@ -288,7 +329,8 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 	var changedNodes []*ast.Node
 	var refs []*sql.Ref
 	for _, updateNode := range updatedDefNodes {
-		refs, changedNodes = getRefsCacheByDefNode(updateNode)
+		boxID := updatedNodeBoxID(updateNode, updatedTrees)
+		refs, changedNodes = getRefsCacheByDefNode(updateNode, boxID)
 		for _, ref := range refs {
 			if refIDs, ok := treeRefNodeIDs[ref.RootID]; !ok {
 				refIDs = hashset.New()
@@ -333,7 +375,7 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 				for _, defNode := range changedDefNodes {
 					switch defNode.refType {
 					case "ref-d":
-						task.AppendAsyncTaskWithDelay(task.SetRefDynamicText, 200*time.Millisecond, util.PushSetRefDynamicText, refTreeID, n.ID, defNode.id, defNode.refText)
+						appendSetRefDynamicTextTask(refTreeID, n.ID, defNode.id, defNode.refText, refTree.Box)
 					}
 				}
 				return ast.WalkContinue
@@ -357,6 +399,44 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 	return
 }
 
+func updatedNodeBoxID(updateNode *ast.Node, updatedTrees map[string]*parse.Tree) string {
+	rootID := treenode.TreeRoot(updateNode).ID
+	if updatedTree := updatedTrees[rootID]; nil != updatedTree {
+		return updatedTree.Box
+	}
+	return updateNode.Box
+}
+
+var (
+	setRefDynamicTextTaskLock     sync.Mutex
+	setRefDynamicTextTaskSequence uint64
+	setRefDynamicTextLatestTasks  = map[string]uint64{}
+)
+
+func appendSetRefDynamicTextTask(rootID, blockID, defBlockID, refText, boxID string) {
+	key := rootID + "\x00" + blockID + "\x00" + defBlockID
+	setRefDynamicTextTaskLock.Lock()
+	setRefDynamicTextTaskSequence++
+	sequence := setRefDynamicTextTaskSequence
+	setRefDynamicTextLatestTasks[key] = sequence
+	setRefDynamicTextTaskLock.Unlock()
+
+	task.AppendAsyncTaskWithDelay(task.SetRefDynamicText, 200*time.Millisecond, pushLatestRefDynamicText,
+		key, sequence, rootID, blockID, defBlockID, refText, boxID)
+}
+
+func pushLatestRefDynamicText(key string, sequence uint64, rootID, blockID, defBlockID, refText, boxID string) {
+	setRefDynamicTextTaskLock.Lock()
+	latest := setRefDynamicTextLatestTasks[key] == sequence
+	if latest {
+		delete(setRefDynamicTextLatestTasks, key)
+	}
+	setRefDynamicTextTaskLock.Unlock()
+	if latest {
+		util.PushSetRefDynamicText(rootID, blockID, defBlockID, refText, boxID)
+	}
+}
+
 func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 	var parents []*ast.Node
 	for _, updatedDefNode := range updatedDefNodes {
@@ -374,8 +454,8 @@ func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 			continue
 		}
 
-		avIDs := strings.Split(avs, ",")
-		for _, avID := range avIDs {
+		avIDs := strings.SplitSeq(avs, ",")
+		for avID := range avIDs {
 			attrView, parseErr := av.ParseAttributeView(avID)
 			if nil != parseErr {
 				continue
@@ -390,12 +470,17 @@ func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 			for _, blockValue := range blockValues.Values {
 				if blockValue.Block.ID == updatedDefNode.ID {
 					newIcon, newContent := getNodeAvBlockText(updatedDefNode, avID)
+					newRefSubtype := getNodeAvBlockRefSubtype(updatedDefNode, avID)
 					if newIcon != blockValue.Block.Icon {
 						blockValue.Block.Icon = newIcon
 						changedAv = true
 					}
 					if newContent != blockValue.Block.Content {
 						blockValue.Block.Content = util.UnescapeHTML(newContent)
+						changedAv = true
+					}
+					if newRefSubtype != blockValue.Block.RefSubtype {
+						blockValue.Block.RefSubtype = newRefSubtype
 						changedAv = true
 					}
 					break

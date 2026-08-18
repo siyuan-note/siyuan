@@ -11,7 +11,7 @@ import {Tab} from "../layout/Tab";
 /// #endif
 import {saveExportFile, updateHotkeyTip} from "../protyle/util/compatibility";
 import * as platformUtils from "./platformUtils";
-import {App} from "../index";
+import type {App} from "../index";
 import {Constants} from "../constants";
 import {Setting} from "./Setting";
 import {Menu} from "./Menu";
@@ -204,7 +204,7 @@ const getModelByDockType = (type: TDock | string) => {
 };
 
 const openAttributePanel = (options: {
-    data?: IObject  // 块属性值
+    data?: Record<string, string>  // 块属性值
     nodeElement?: HTMLElement,  // 块元素
     focusName: "bookmark" | "name" | "alias" | "memo" | "av" | "custom",    // av 为数据库页签，custom 为自定义页签，其余为内置输入框
     protyle?: IProtyle, // 有数据库时需要传入 protyle
@@ -238,7 +238,8 @@ const getActiveEditor = (wndActive = true) => {
     const allEditor = getAllEditor();
     if (range) {
         editor = allEditor.find(item => {
-            if (item.protyle.element.contains(range.startContainer)) {
+            if (!item.protyle.element.classList.contains("fn__none") &&
+                item.protyle.element.contains(range.startContainer)) {
                 return true;
             }
         });
@@ -326,6 +327,7 @@ const openEmoji = (options: {
     dynamicIconURL?: string
     hideDynamicIcon?: boolean
     hideCustomIcon?: boolean
+    targetID?: string
 }) => {
     let dynamicImgElement: HTMLImageElement;
     if (options.dynamicIconURL) {
@@ -334,7 +336,8 @@ const openEmoji = (options: {
     }
     openEmojiPanel("", "av", options.position, options.selectedCB, dynamicImgElement, {
         dynamic: options.hideDynamicIcon,
-        custom: options.hideCustomIcon
+        custom: options.hideCustomIcon,
+        targetID: options.targetID,
     });
 };
 

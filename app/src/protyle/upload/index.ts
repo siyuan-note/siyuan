@@ -2,8 +2,9 @@ import {insertHTML} from "../util/insertHTML";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {Constants} from "../../constants";
 import {destroy} from "../util/destroy";
+import {escapeHtml} from "../../util/escape";
 import {fetchPost} from "../../util/fetch";
-import {getEditorRange} from "../util/selection";
+import {getEditorRange, restoreFocusContext} from "../util/selection";
 import {pathPosix} from "../../util/pathName";
 import {genAssetHTML} from "../../asset/renderAssets";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
@@ -14,9 +15,18 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {filesize} from "filesize";
 import {transaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
+import {getAVSelectedCells} from "../render/av/selectionState";
+import {getAVSelectedTableCells} from "../render/av/virtualScroll";
+import {isUploadInsertPositionAvailable} from "./insertPosition";
+import type {IUploadInsertPosition} from "./insertPosition";
 
 interface FileWithPath extends File {
     path: string;
+}
+
+export interface IUploadInsertOptions {
+    htmlAsIframe?: boolean;
+    insertPosition?: IUploadInsertPosition;
 }
 
 export class Upload {
@@ -45,7 +55,7 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
         }
 
         if (file.size > protyle.options.upload.max) {
-            errorTip += `<li>${file.name} ${window.siyuan.languages.over} ${protyle.options.upload.max / 1024 / 1024}M</li>`;
+            errorTip += `<li>${escapeHtml(file.name)} ${window.siyuan.languages.over} ${protyle.options.upload.max / 1024 / 1024}M</li>`;
             validate = false;
         }
 
@@ -69,14 +79,14 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
             });
 
             if (!isAccept) {
-                errorTip += `<li>${file.name} ${window.siyuan.languages.fileTypeError}</li>`;
+                errorTip += `<li>${escapeHtml(file.name)} ${window.siyuan.languages.fileTypeError}</li>`;
                 validate = false;
             }
         }
 
         if (validate) {
             uploadFileList.push(file);
-            uploadingStr += `<li>${filename} ${window.siyuan.languages.uploading}</li>`;
+            uploadingStr += `<li>${escapeHtml(filename)} ${window.siyuan.languages.uploading}</li>`;
         }
     }
     let msgId;
@@ -87,12 +97,12 @@ const validateFile = (protyle: IProtyle, files: File[]) => {
     return {files: uploadFileList, msgId};
 };
 
-const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
+const genUploadedLabel = async (responseText: string, protyle: IProtyle, options?: IUploadInsertOptions) => {
     const response = JSON.parse(responseText);
     let errorTip = "";
 
     if (response.code === 1) {
-        errorTip = `${response.msg}`;
+        errorTip = `${escapeHtml(String(response.msg))}`;
     }
 
     if (response.data.errFiles && response.data.errFiles.length > 0) {
@@ -100,7 +110,7 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
         response.data.errFiles.forEach((data: string) => {
             const lastIndex = data.lastIndexOf(".");
             const filename = lastIndex === -1 ? data : (protyle.options.upload.filename(data.substr(0, lastIndex)) + data.substr(lastIndex));
-            errorTip += `<li>${filename} ${window.siyuan.languages.uploadError}</li>`;
+            errorTip += `<li>${escapeHtml(filename)} ${window.siyuan.languages.uploadError}</li>`;
         });
         errorTip += "</ul>";
     }
@@ -109,7 +119,7 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
         showMessage(errorTip);
     }
     let insertBlock = true;
-    const range = getEditorRange(protyle.wysiwyg.element);
+    const range = getUploadInsertRange(protyle, options?.insertPosition);
     if (range.toString() === "" && range.startContainer.nodeType === 3 && protyle.toolbar.getCurrentType(range).length > 0) {
         // 防止链接插入其他元素中 https://ld246.com/article/1676003478664
         range.setEndAfter(range.startContainer.parentElement);
@@ -145,7 +155,7 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
             content: path,
             name: name
         });
-        successFileText += genAssetHTML(type, path, name, filename);
+        successFileText += genAssetHTML(type, path, name, filename, options?.htmlAsIframe);
         if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
             keys.length - 1 !== index) {
             if (nodeElement && nodeElement.classList.contains("table")) {
@@ -187,6 +197,9 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
             return;
         }
     } else if (nodeElement && nodeElement.classList.contains("av")) {
+        const selectedCells = getAVSelectedCells(nodeElement);
+        const stableCellCandidates = (selectedCells.length > 0 ? selectedCells :
+            getAVSelectedTableCells(nodeElement)).filter(item => item.column.type === "mAsset");
         const cellElements: HTMLElement[] = [];
         nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
             item.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
@@ -196,22 +209,28 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
             });
         });
         if (cellElements.length === 0) {
-            protyle.wysiwyg.element.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+            nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                 if (getTypeByCellElement(item) === "mAsset") {
                     cellElements.push(item);
                 }
             });
         }
-        if (cellElements.length === 1) {
-            updateCellsValue(protyle, nodeElement, avAssets, cellElements);
-        } else if (cellElements.length > 1) {
+        const stableCells = stableCellCandidates.length > cellElements.length ? stableCellCandidates : [];
+        if (stableCells.length === 1 || cellElements.length === 1) {
+            updateCellsValue(protyle, nodeElement, avAssets, cellElements, undefined, undefined,
+                false, false, false, stableCells);
+        } else if (stableCells.length > 1 || cellElements.length > 1) {
             const doOperations: IOperation[] = [];
             const undoOperations: IOperation[] = [];
             let currentRowElement;
-            const colId = cellElements[0].getAttribute("data-col-id");
+            const colId = cellElements[0]?.getAttribute("data-col-id");
             for (let i = 0; i < avAssets.length; i++) {
+                const selectedCell = stableCells[i];
+                if (stableCells.length > 0 && !selectedCell) {
+                    break;
+                }
                 let cellElement = cellElements[i];
-                if (!cellElement) {
+                if (!cellElement && stableCells.length === 0) {
                     if (!currentRowElement) {
                         currentRowElement = hasClosestByClassName(cellElements[i - 1], "av__row") as HTMLElement;
                     }
@@ -222,11 +241,12 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
                         }
                     }
                 }
-                if (!cellElement) {
+                if (!cellElement && !selectedCell) {
                     break;
                 }
                 const operations = await updateCellsValue(protyle, nodeElement,
-                    [avAssets[i]], [cellElement], null, null, true);
+                    [avAssets[i]], cellElement ? [cellElement] : undefined, undefined, undefined,
+                    true, false, false, selectedCell ? [selectedCell] : undefined);
                 doOperations.push(...operations.doOperations);
                 undoOperations.push(...operations.undoOperations);
             }
@@ -248,19 +268,35 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle) => {
         return;
     }
     // 避免插入代码块中，其次因为都要独立成块 https://github.com/siyuan-note/siyuan/issues/7607
-    insertHTML(successFileText, protyle, insertBlock);
+    if (options?.insertPosition) {
+        protyle.toolbar.range = range;
+        insertHTML(successFileText, protyle, insertBlock, true);
+    } else {
+        insertHTML(successFileText, protyle, insertBlock);
+    }
     // 粘贴图片后定位不准确 https://github.com/siyuan-note/siyuan/issues/13336
     setTimeout(() => {
         scrollCenter(protyle, undefined, "nearest", "smooth");
     }, hasImage ? 0 : Constants.TIMEOUT_LOAD);
 };
 
-export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUpload: boolean) => {
+export const getUploadInsertRange = (protyle: IProtyle, position?: IUploadInsertPosition) => {
+    if (isUploadInsertPositionAvailable(protyle.wysiwyg.element, position)) {
+        return position.range.cloneRange();
+    }
+    if (position?.context && restoreFocusContext(protyle, position.context)) {
+        return getEditorRange(protyle.wysiwyg.element).cloneRange();
+    }
+    return getEditorRange(protyle.wysiwyg.element);
+};
+
+export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUpload: boolean,
+                                 options?: IUploadInsertOptions) => {
     let msg = "";
     const assetPaths: string[] = [];
     files.forEach(item => {
         if (item.size && Constants.SIZE_UPLOAD_TIP_SIZE <= item.size) {
-            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", item.path).replace("${y}", filesize(item.size, {standard: "iec"})) + "<br>";
+            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", escapeHtml(item.path)).replace("${y}", filesize(item.size, {standard: "iec"})) + "<br>";
         }
         assetPaths.push(item.path);
     });
@@ -280,14 +316,16 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
                 }
             });
             if (tip) {
-                showMessage(window.siyuan.languages.dndFolderTip.replace("${x}", `<b>${tip.substring(0, tip.length - 2)}</b>`));
+                showMessage(window.siyuan.languages.dndFolderTip.replace("${x}", `<b>${escapeHtml(tip.substring(0, tip.length - 2))}</b>`));
             }
-            genUploadedLabel(JSON.stringify(response), protyle);
+            genUploadedLabel(JSON.stringify(response), protyle, options);
         });
     });
 };
 
-export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferItemList | File[], element?: HTMLInputElement, successCB?: (res: string) => void) => {
+export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferItemList | File[], element?: HTMLInputElement,
+                            successCB?: (res: string) => void, completeCB?: (succeeded: boolean) => void,
+                            options?: IUploadInsertOptions) => {
     // FileList | DataTransferItemList | File[] => File[]
     let fileList = [];
     for (let i = 0; i < files.length; i++) {
@@ -307,8 +345,10 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         const isValidate = protyle.options.upload.handler(fileList);
         if (typeof isValidate === "string") {
             showMessage(isValidate);
+            completeCB?.(false);
             return;
         }
+        completeCB?.(true);
         return;
     }
 
@@ -317,6 +357,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
             element.value = "";
         }
         showMessage("please config: options.upload.url");
+        completeCB?.(false);
         return;
     }
 
@@ -328,6 +369,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         const isValidate = protyle.options.upload.validate(fileList);
         if (typeof isValidate === "string") {
             showMessage(isValidate);
+            completeCB?.(false);
             return;
         }
     }
@@ -338,6 +380,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         if (element) {
             element.value = "";
         }
+        completeCB?.(false);
         return;
     }
 
@@ -351,11 +394,14 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
     for (let i = 0, iMax = validateResult.files.length; i < iMax; i++) {
         formData.append(protyle.options.upload.fieldName, validateResult.files[i]);
         if (Constants.SIZE_UPLOAD_TIP_SIZE <= validateResult.files[i].size) {
-            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", validateResult.files[i].name).replace("${y}", filesize(validateResult.files[i].size, {standard: "iec"})) + "<br>";
+            msg += window.siyuan.languages.uploadFileTooLarge.replace("${x}", escapeHtml(validateResult.files[i].name)).replace("${y}", filesize(validateResult.files[i].size, {standard: "iec"})) + "<br>";
         }
     }
-
-    formData.append("id", protyle.block.rootID);
+    if (protyle.lite) {
+        formData.append("assetsDirPath", "/assets/");
+    } else {
+        formData.append("id", protyle.block?.rootID);
+    }
     confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", protyle.options.upload.url);
@@ -373,6 +419,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
                 if (!document.body.contains(protyle.element)) {
                     // 网络较慢时，页签已经关闭
                     destroy(protyle);
+                    completeCB?.(false);
                     return;
                 }
                 if (xhr.status === 200) {
@@ -386,16 +433,30 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
                         if (protyle.options.upload.format) {
                             responseText = protyle.options.upload.format(files as File [], xhr.responseText);
                         }
-                        genUploadedLabel(responseText, protyle);
+                        genUploadedLabel(responseText, protyle, options);
                     }
+                    let succeeded = true;
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.data?.succMap) {
+                            succeeded = validateResult.files.every((file) => response.data.succMap[file.name]);
+                        } else if (typeof response.code === "number") {
+                            succeeded = response.code === 0;
+                        }
+                    } catch (error) {
+                        // 自定义上传接口不一定返回 JSON，HTTP 200 仍视为成功。
+                    }
+                    completeCB?.(succeeded);
                 } else if (xhr.status === 0) {
                     showMessage(window.siyuan.languages["_kernel"][28]);
+                    completeCB?.(false);
                 } else {
                     if (protyle.options.upload.error) {
                         protyle.options.upload.error(xhr.responseText);
                     } else {
                         showMessage(xhr.responseText);
                     }
+                    completeCB?.(false);
                 }
                 if (element) {
                     element.value = "";
@@ -415,5 +476,6 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         xhr.send(formData);
     }, () => {
         hideMessage(validateResult.msgId);
+        completeCB?.(false);
     });
 };

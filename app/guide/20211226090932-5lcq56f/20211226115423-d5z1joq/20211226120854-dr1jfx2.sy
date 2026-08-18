@@ -7,7 +7,7 @@
 		"id": "20211226120854-dr1jfx2",
 		"title": "編輯器",
 		"type": "doc",
-		"updated": "20240508002750"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226120929-w3xe2c2",
-				"updated": "20211228134934"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -39,7 +39,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "基於內容塊的編輯排版"
+									"Data": "基於內容區塊的編輯排版"
 								}
 							]
 						}
@@ -81,19 +81,21 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211226120929-ix7bsgq"
+						"id": "20211226120929-ix7bsgq",
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
 							"ID": "20211226120929-j8rvpt2",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20211226120929-j8rvpt2"
+								"id": "20211226120929-j8rvpt2",
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊縮放，即每個內容塊都可以放大進入聚焦"
+									"Data": "內容區塊聚焦，即將編輯器聚焦到單個內容區塊"
 								}
 							]
 						}
@@ -145,7 +147,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "通過拖拽塊標進行橫向排版"
+									"Data": "通過拖拽區塊標進行橫向排版"
 								}
 							]
 						}
@@ -192,7 +194,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240508002750-46n6fhm",
-				"updated": "20240508002750"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -200,7 +202,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20221016213639-1nag9jj",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "通過標題列表概述"
+					"TextMarkTextContent": "標題與列表混合排版"
 				}
 			]
 		}

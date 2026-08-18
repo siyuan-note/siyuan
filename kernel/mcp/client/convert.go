@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,8 @@
 package client
 
 import (
+	"maps"
+
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 )
 
@@ -31,6 +33,7 @@ func convertMCPSchema(inputSchema any) tools.ToolSchema {
 	if !ok {
 		return schema
 	}
+	schema.Raw = maps.Clone(m)
 
 	if t, ok := m["type"].(string); ok && t != "" {
 		schema.Type = t

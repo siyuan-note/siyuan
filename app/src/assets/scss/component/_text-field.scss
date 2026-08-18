@@ -1,23 +1,26 @@
 .b3-text-field {
   border: 0;
   border-radius: var(--b3-border-radius);
-  box-shadow: inset 0 0 0 1px var(--b3-border-color);
+  outline: 1px solid var(--b3-border-color);
+  outline-offset: -1px;
+  box-shadow: none;
   padding: 4px 8px;
   line-height: 20px;
   box-sizing: border-box;
   color: var(--b3-theme-on-background);
-  transition: box-shadow 120ms 0ms cubic-bezier(0, 0, .2, 1);
+  transition: box-shadow 120ms 0ms cubic-bezier(0, 0, .2, 1), outline-color 120ms 0ms cubic-bezier(0, 0, .2, 1);
   background-color: var(--b3-theme-background);
   -webkit-appearance: none;
   font-variant-ligatures: none;
   font-size: 14px;
 
   &:not(.b3-text-field--text):hover {
-    box-shadow: inset 0 0 0 1px var(--b3-border-color), 0 0 0 .6px var(--b3-border-color);
+    box-shadow: 0 0 0 .6px var(--b3-border-color);
   }
 
   &:not(.b3-text-field--text):focus {
-    box-shadow: inset 0 0 0 1px var(--b3-theme-primary-light), 0 0 0 .6px var(--b3-theme-primary-lighter);
+    outline-color: var(--b3-theme-primary-light);
+    box-shadow: 0 0 0 .6px var(--b3-theme-primary-lighter);
   }
 
   &[type="color"] {
@@ -35,6 +38,7 @@
   }
 
   &--text {
+    outline: none;
     box-shadow: 0 0 0;
   }
 }

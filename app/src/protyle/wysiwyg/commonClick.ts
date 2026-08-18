@@ -5,10 +5,12 @@ import {openGlobalSearch} from "../../search/util";
 /// #endif
 import {isMobile} from "../../util/functions";
 import {isOnlyMeta} from "../util/compatibility";
+import {hasClosestBlock} from "../util/hasClosest";
+import {zoomOut} from "../../menus/protyle";
 
 export const commonClick = (event: MouseEvent & {
     target: HTMLElement
-}, protyle: IProtyle, data?: IObject) => {
+}, protyle: IProtyle, data?: Record<string, string>) => {
     const isM = isMobile();
     const attrBookmarkElement = hasClosestByClassName(event.target, "protyle-attr--bookmark");
     if (attrBookmarkElement) {
@@ -46,10 +48,39 @@ export const commonClick = (event: MouseEvent & {
 
     const avElement = hasClosestByClassName(event.target, "protyle-attr--av");
     if (avElement) {
-        if (data) {
-            openFileAttr(data, "av", protyle);
+        const avIDElement = event.target.closest("[data-av-id]") as HTMLElement;
+        const avID = avIDElement && avElement.contains(avIDElement) ? avIDElement.dataset.avId : "";
+        const databaseAttributePanel = window.siyuan.config.editor.databaseAttrShow &&
+            window.siyuan.config.editor.databaseAttrClickMode === 0 &&
+            protyle.databaseAttributePanel;
+        if (!databaseAttributePanel) {
+            if (data) {
+                openFileAttr(data, "av", protyle);
+            } else {
+                openAttr(avElement.parentElement.parentElement, "av", protyle);
+            }
+        } else if (data) {
+            if (avID) {
+                databaseAttributePanel.expand(avID, true);
+            } else {
+                databaseAttributePanel.toggle();
+            }
         } else {
-            openAttr(avElement.parentElement.parentElement, "av", protyle);
+            const blockElement = hasClosestBlock(avElement);
+            const blockID = blockElement ? blockElement.getAttribute("data-node-id") : "";
+            if (blockID && protyle.block.showAll && blockID === protyle.block.id) {
+                if (avID) {
+                    databaseAttributePanel.expand(avID, true);
+                } else {
+                    databaseAttributePanel.toggle();
+                }
+            } else if (blockID) {
+                zoomOut({
+                    protyle,
+                    id: blockID,
+                    callback: avID ? () => databaseAttributePanel.expand(avID, true) : undefined,
+                });
+            }
         }
         event.stopPropagation();
         return true;

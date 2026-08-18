@@ -5,6 +5,7 @@
   justify-self: end;
   font-size: var(--b3-font-size);
   pointer-events: auto;
+  app-region: no-drag;
 
   &:not(:first-child) {
     margin-top: 16px;
@@ -30,8 +31,13 @@
       transform: translate3d(0, 0, 0) !important;
     }
 
-    & > .fn__flex-1::-webkit-scrollbar {
-      display: none;
+    & > .fn__flex-1 {
+      margin: -8px -8px -10px;
+      padding: 8px 8px 10px;
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
     }
   }
 

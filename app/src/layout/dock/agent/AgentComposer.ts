@@ -1,430 +1,385 @@
-import {Editor} from "@tiptap/core";
-import Document from "@tiptap/extension-document";
-import Paragraph from "@tiptap/extension-paragraph";
-import Text from "@tiptap/extension-text";
-import HardBreak from "@tiptap/extension-hard-break";
-import Mention from "@tiptap/extension-mention";
-import {Placeholder} from "@tiptap/extension-placeholder";
-import {History} from "@tiptap/extension-history";
-import {getIconByType} from "../../../editor/getIcon";
+import {Protyle} from "../../../protyle";
+import {Constants} from "../../../constants";
+import type {App} from "../../../index";
 import {escapeHtml} from "../../../util/escape";
+import {fetchPost} from "../../../util/fetch";
+import {hintRef} from "../../../protyle/hint/extend";
+import {genEmptyElement} from "../../../block/util";
+import {blockRender} from "../../../protyle/render/blockRender";
+import {focusBlock} from "../../../protyle/util/selection";
+import {matchHotKey} from "../../../protyle/util/hotKey";
+import {isSkillHintRequestActive, shouldYieldSkillHint} from "./agentHintState";
 
-interface BlockHit {
-    id: string;
-    label: string;
-    icon: string;
-    hPath: string;
+export interface AgentComposerData {
+    text: string;
+    blockHTML: string;
+    references: { id: string; title: string }[];
 }
 
 interface ComposerHandle {
-    focus: () => void;
+    focus: (toEnd?: boolean) => void;
     destroy: () => void;
-    getSendData: () => {text: string; references: {id: string; title: string}[]};
+    getSendData: () => AgentComposerData;
     clear: () => void;
     pushHistory: (text: string) => void;
     getHistory: () => string[];
     clearHistory: () => void;
     restoreHistory: (h: string[]) => void;
     insertMention: (id: string, label: string) => void;
-    insertMentions: (mentions: Array<{id: string; label: string}>) => void;
+    insertMentions: (mentions: Array<{ id: string; label: string }>) => void;
+    renderBlockHTML: (element: HTMLElement, onEmbedRender: () => void) => void;
 }
 
-// 内容变化回调（含用户输入、IME、程序化 clearContent 等所有 doc 变更）。
-// 用于发送按钮启用/禁用等需要感知输入框内容的外部逻辑。
 type OnChangeCallback = () => void;
 
-export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: OnChangeCallback): ComposerHandle {
+const AGENT_HINT_OVERLAY_CLASS = "protyle-hint--agent-overlay";
+const skillHintRequestIDs = new WeakMap<IProtyle, number>();
+
+interface ComposerOptions {
+    initialContent?: string;
+    initialBlockHTML?: string;
+    placeholder?: string;
+    onCancel?: () => void;
+    enableHistory?: boolean;
+}
+
+const resetEmbedBlocks = (element: HTMLElement) => {
+    element.querySelectorAll<HTMLElement>('[data-type="NodeBlockQueryEmbed"]').forEach((embedElement) => {
+        embedElement.removeAttribute("data-render");
+        embedElement.style.height = "";
+        Array.from(embedElement.children).forEach((child) => {
+            if (child.classList.contains("protyle-wysiwyg__embed")) {
+                child.remove();
+            }
+        });
+    });
+};
+
+const prepareAgentHint = (protyle: IProtyle) => {
+    if (protyle.hint.element.classList.contains("fn__none")) {
+        protyle.hint.element.style.zIndex = (++window.siyuan.zIndex).toString();
+    }
+};
+
+const hintAgentRef = (key: string, protyle: IProtyle, source: THintSource): IHintData[] => {
+    prepareAgentHint(protyle);
+    return hintRef(key, protyle, source);
+};
+
+// / 技能菜单：异步拉取 lsSkills，选中后把技能名作为纯文本插入（value 即技能名）。
+// 返回 [] 占位，数据在 fetch 回调里通过 protyle.hint.genHTML 填充（与 hintRef 异步模式一致）。
+const hintSkill = (key: string, protyle: IProtyle): IHintData[] => {
+    const requestID = (skillHintRequestIDs.get(protyle) || 0) + 1;
+    skillHintRequestIDs.set(protyle, requestID);
+    if (shouldYieldSkillHint(key, protyle.options.hint.extend.map((item) => item.key))) {
+        protyle.hint.enableExtend = false;
+        protyle.hint.genHTML([], protyle, true, "hint");
+        return [];
+    }
+    prepareAgentHint(protyle);
+    protyle.hint.genLoading(protyle);
+    fetchPost("/api/ai/agent/lsSkills", {}, (response) => {
+        // 异步响应返回时输入状态可能已变化，避免 Esc 或其他提示触发后重新打开旧菜单。
+        if (!isSkillHintRequestActive({
+            requestID,
+            currentRequestID: skillHintRequestIDs.get(protyle),
+            enableExtend: protyle.hint.enableExtend,
+            enableSlash: protyle.hint.enableSlash,
+            splitChar: protyle.hint.splitChar,
+            hidden: protyle.hint.element.classList.contains("fn__none"),
+            connected: protyle.hint.element.isConnected,
+        })) {
+            return;
+        }
+        const rawSkills = (response && response.data) ? response.data : [];
+        const q = key.toLowerCase();
+        const dataList: IHintData[] = rawSkills
+            .filter((s: Record<string, string>) => !q ||
+                (s.name || "").toLowerCase().includes(q) || (s.description || "").toLowerCase().includes(q))
+            .map((s: Record<string, string>) => ({
+                value: s.name + " ",
+                html: '<div class="b3-list-item__first"><span class="b3-list-item__text">' +
+                    escapeHtml(s.name) + "</span></div>" +
+                    (s.description ? '<div class="b3-list-item__meta b3-list-item__showall">' + escapeHtml(s.description) + "</div>" : ""),
+            }));
+        if (dataList.length === 0) {
+            dataList.push({value: "", html: window.siyuan.languages.emptyContent});
+        }
+        protyle.hint.genHTML(dataList, protyle, false, "hint");
+    });
+    return [];
+};
+
+// 已发送消息历史（↑↓ 翻阅），独立于 protyle 的 undo/redo。
+class ComposerHistory {
+    private items: string[] = [];
+    private idx = -1;       // -1 表示未在浏览历史（正在编辑草稿）
+    private savedDraft = "";
+
+    push(text: string) {
+        if (!text || this.items[this.items.length - 1] === text) {
+            return;
+        }
+        this.items.push(text);
+        if (this.items.length > 50) {
+            this.items.shift();
+        }
+        this.idx = -1;
+    }
+
+    get(): string[] {
+        return this.items.slice();
+    }
+
+    clear() {
+        this.items = [];
+        this.idx = -1;
+    }
+
+    restore(h: string[]) {
+        this.items = [];
+        this.items.push(...h);
+        this.idx = -1;
+    }
+
+    has(): boolean {
+        return this.items.length > 0;
+    }
+
+    isBrowsing(): boolean {
+        return this.idx !== -1;
+    }
+
+    resetCursor() {
+        this.idx = -1;
+    }
+
+    beginBrowsing(currentDraft: string): string {
+        this.savedDraft = currentDraft;
+        this.idx = this.items.length - 1;
+        return this.items[this.idx];
+    }
+
+    navigateUp(): string {
+        if (this.idx > 0) {
+            this.idx--;
+        }
+        return this.items[this.idx];
+    }
+
+    navigateDown(): string {
+        this.idx++;
+        if (this.idx >= this.items.length) {
+            this.idx = -1;
+            return this.savedDraft;
+        }
+        return this.items[this.idx];
+    }
+}
+
+export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: OnChangeCallback,
+                              options: ComposerOptions = {}): ComposerHandle {
+    const history = new ComposerHistory();
     const L = window.siyuan.languages;
+    const enableHistory = options.enableHistory !== false;
 
-    let suggestionMenu: HTMLElement | null = null;
-    let selectedIndex = 0;
-    let suggestionCommand: ((item: BlockHit) => void) | null = null;
-    let suggestionItems: BlockHit[] = [];
-
-    const closeMenu = () => {
-        if (suggestionMenu) {
-            suggestionMenu.remove();
-            suggestionMenu = null;
-        }
-        selectedIndex = 0;
-        suggestionCommand = null;
-        suggestionItems = [];
-    };
-
-    const history: string[] = [];
-    let historyIdx = -1;
-    let savedDraft = "";
-
-    let slashActive = false;
-    let slashRange: {from: number; to: number} | null = null;
-
-    const updateHighlight = () => {
-        if (!suggestionMenu) { return; }
-        const items = suggestionMenu.querySelectorAll(".b3-list-item");
-        for (let i = 0; i < items.length; i++) {
-            items[i].classList.toggle("b3-list-item--focus", i === selectedIndex);
-        }
-    };
-
-    const openMenu = (items: BlockHit[], command: (item: BlockHit) => void, clientRect?: () => DOMRect) => {
-        closeMenu();
-        if (items.length === 0) { return; }
-
-        suggestionMenu = document.createElement("div");
-        suggestionMenu.className = "b3-list b3-list--background agent-mention-menu protyle-hint";
-        suggestionMenu.innerHTML = '<div style="flex: 1;overflow:auto;"></div>';
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i];
-            const row = document.createElement("div");
-            row.className = "b3-list-item b3-list-item--two";
-            row.setAttribute("data-index", i.toString());
-            const iconSvg = item.icon ? '<svg class="b3-list-item__graphic"><use xlink:href="#' + item.icon + '"></use></svg>' : "";
-            const hPathText = item.hPath ? '<span class="b3-list-item__meta b3-list-item__showall">' + escapeHtml(item.hPath) + "</span>" : "";
-            row.innerHTML = '<div class="b3-list-item__first">' + iconSvg + '<span class="b3-list-item__text">' + escapeHtml(item.label) + "</span></div>" + hPathText;
-            row.addEventListener("mousedown", function (hit: BlockHit) {
-                return function (e: MouseEvent) { e.preventDefault(); command(hit); };
-            }(item));
-            suggestionMenu.firstElementChild.appendChild(row);
-        }
-
-        document.body.appendChild(suggestionMenu);
-        suggestionCommand = command;
-        suggestionItems = items;
-        selectedIndex = 0;
-        updateHighlight();
-        if (clientRect) {
-            const rect = clientRect();
-            let top = rect.top + rect.height + 4;
-            let left = rect.left;
-            const menuHeight = suggestionMenu.offsetHeight;
-            if (top + menuHeight > window.innerHeight && rect.top > menuHeight + 4) {
-                top = rect.top - menuHeight - 4;
-            }
-            const menuWidth = suggestionMenu.offsetWidth;
-            if (left + menuWidth > window.innerWidth) {
-                left = window.innerWidth - menuWidth - 8;
-            }
-            suggestionMenu.style.top = top + "px";
-            suggestionMenu.style.left = left + "px";
-        }
-    };
-
-    const editor = new Editor({
-        element: host,
-        extensions: [
-            Document,
-            Paragraph,
-            Text,
-            HardBreak,
-            History,
-            Placeholder.configure({
-                placeholder: L.agentInputPlaceholder || "输入消息，@引用文档...",
-            }),
-            Mention.configure({
-                HTMLAttributes: {class: "agent-mention-chip"},
-                renderText: ({node}) => {
-                    const label = node.attrs.label || node.attrs.id || "";
-                    return "@" + label;
-                },
-                suggestion: {
-                    char: "@",
-                    allowToIncludeChar: true,
-                    allowedPrefixes: null,
-                    items: async function ({query}): Promise<BlockHit[]> {
-                        try {
-                            const resp = await fetch("/api/search/searchRefBlock", {
-                                method: "POST",
-                                headers: {"Content-Type": "application/json"},
-                                body: JSON.stringify({k: query, id: "", rootID: "", beforeLen: 48, isDatabase: false, isSquareBrackets: true}),
-                            });
-                            const data = await resp.json();
-                            const blocks = (data && data.data && data.data.blocks) ? data.data.blocks : [];
-                            return blocks.slice(0, 10).map(function (b: Record<string, unknown>) {
-                                const id = String(b.id || "");
-                                const raw = String(b.content || b.refText || b.name || id);
-                                // 内核返回的 content 已做 HTML 转义并可能含 <mark> 标签，先剥离标签再反转为纯文本，
-                                // 否则 escapeHtml 会再次转义导致显示成 "&lt;" 等字面量。
-                                const plain = Lute.UnEscapeHTMLStr(raw.replace(/<[^>]+>/g, "")).trim() || id;
-                                const type = String(b.type || "NodeParagraph");
-                                const sub = b.subType ? String(b.subType) : "";
-                                return {
-                                    id: id,
-                                    label: plain.slice(0, 80),
-                                    icon: getIconByType(type, sub),
-                                    hPath: Lute.UnEscapeHTMLStr(String(b.hPath || "")),
-                                };
-                            });
-                        } catch (e) {
-                            return [];
-                        }
-                    },
-                    command: function ({editor: ed, range, props}) {
-                        const hit = props as BlockHit;
-                        ed.chain().focus().insertContentAt(range, [
-                            {type: "mention", attrs: {id: hit.id, label: hit.label}},
-                            {type: "text", text: " "},
-                        ]).run();
-                    },
-                    render: function () {
-                        return {
-                            onStart: function (props) {
-                                suggestionCommand = function (item) { props.command(item); };
-                                openMenu(props.items as BlockHit[], suggestionCommand!, props.clientRect?.bind(props));
-                            },
-                            onUpdate: function (props) {
-                                suggestionCommand = function (item) { props.command(item); };
-                                openMenu(props.items as BlockHit[], suggestionCommand!, props.clientRect?.bind(props));
-                            },
-                            onExit: function () { closeMenu(); },
-                            onKeyDown: function (props) {
-                                if (!suggestionMenu) { return false; }
-                                if (props.event.key === "ArrowDown") {
-                                    props.event.preventDefault();
-                                    const items = suggestionMenu.querySelectorAll(".b3-list-item");
-                                    if (items.length > 0) {
-                                        selectedIndex = (selectedIndex + 1) % items.length;
-                                        updateHighlight();
-                                    }
-                                    return true;
-                                }
-                                if (props.event.key === "ArrowUp") {
-                                    props.event.preventDefault();
-                                    const items = suggestionMenu.querySelectorAll(".b3-list-item");
-                                    if (items.length > 0) {
-                                        selectedIndex = (selectedIndex - 1 + items.length) % items.length;
-                                        updateHighlight();
-                                    }
-                                    return true;
-                                }
-                                if (props.event.key === "Enter") {
-                                    props.event.preventDefault();
-                                    if (suggestionItems.length > 0 && suggestionCommand) {
-                                        const idx = selectedIndex;
-                                        if (idx >= 0 && idx < suggestionItems.length) {
-                                            suggestionCommand(suggestionItems[idx]);
-                                        }
-                                    }
-                                    return true;
-                                }
-                                if (props.event.key === "Escape") {
-                                    closeMenu();
-                                    return true;
-                                }
-                                return false;
-                            },
-                        };
-                    },
-                },
-            }),
-        ],
-        editorProps: {
-            attributes: {class: "agent-composer__pm"},
-            handleKeyDown: function (_view, event) {
-                // 阻止撤销/重做快捷键冒泡到全局处理器，避免影响文档编辑器
-                if ((event.ctrlKey || event.metaKey) && !event.altKey) {
-                    if (!event.shiftKey && (event.key === "z" || event.key === "Z")) {
-                        // Ctrl+Z / Cmd+Z (undo)
-                        event.stopPropagation();
-                        return false;  // 让 TipTap History 扩展继续处理
-                    }
-                    if (event.shiftKey && (event.key === "z" || event.key === "Z")) {
-                        // Ctrl+Shift+Z / Cmd+Shift+Z (redo)
-                        event.stopPropagation();
-                        return false;
-                    }
-                    if (!event.shiftKey && (event.key === "y" || event.key === "Y")) {
-                        // Ctrl+Y / Cmd+Y (redo on Windows/Linux)
-                        event.stopPropagation();
-                        return false;
-                    }
-                }
-                if (suggestionMenu && slashActive) {
-                    if (event.key === "ArrowDown") {
-                        event.preventDefault();
-                        const items = suggestionMenu.querySelectorAll(".b3-list-item");
-                        if (items.length > 0) {
-                            selectedIndex = (selectedIndex + 1) % items.length;
-                            updateHighlight();
-                        }
-                        return true;
-                    }
-                    if (event.key === "ArrowUp") {
-                        event.preventDefault();
-                        const items = suggestionMenu.querySelectorAll(".b3-list-item");
-                        if (items.length > 0) {
-                            selectedIndex = (selectedIndex - 1 + items.length) % items.length;
-                            updateHighlight();
-                        }
-                        return true;
-                    }
-                    if (event.key === "Enter") {
-                        event.preventDefault();
-                        if (suggestionItems.length > 0 && suggestionCommand) {
-                            const idx = selectedIndex;
-                            if (idx >= 0 && idx < suggestionItems.length) {
-                                suggestionCommand(suggestionItems[idx]);
-                            }
-                        }
-                        return true;
-                    }
-                    if (event.key === "Escape") {
-                        event.preventDefault();
-                        closeMenu();
-                        slashActive = false;
-                        slashRange = null;
-                        return true;
-                    }
-                    return false;
-                }
-                if (event.key === "Enter" && !event.shiftKey && !suggestionMenu) {
-                    event.preventDefault();
-                    onSend();
-                    return true;
-                }
-                if (event.key === "ArrowUp" && !suggestionMenu) {
-                    const navigating = historyIdx >= 0;
-                    const isEmpty = _view.state.doc.childCount === 1 &&
-                        _view.state.doc.firstChild?.childCount === 0;
-                    if ((navigating || isEmpty) && history.length > 0) {
-                        event.preventDefault();
-                        if (historyIdx === -1) {
-                            savedDraft = editor.state.doc.textContent;
-                            historyIdx = history.length - 1;
-                        } else if (historyIdx > 0) { historyIdx--; }
-                        if (historyIdx >= 0) {
-                            editor.commands.setContent(history[historyIdx]);
-                        }
-                        return true;
-                    }
-                }
-                if (event.key === "ArrowDown" && !suggestionMenu && historyIdx >= 0) {
-                    event.preventDefault();
-                    historyIdx++;
-                    if (historyIdx >= history.length) {
-                        historyIdx = -1;
-                        editor.commands.setContent(savedDraft || "");
-                        savedDraft = "";
-                    } else {
-                        editor.commands.setContent(history[historyIdx]);
-                    }
-                    return true;
-                }
-                if (historyIdx >= 0 && event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
-                    historyIdx = -1;
-                    savedDraft = "";
-                }
-                return false;
-            },
+    const app: App = window.siyuan.ws.app;
+    const protyle = new Protyle(app, host, {
+        lite: true,
+        blockId: "",
+        render: {
+            gutter: false,
+            breadcrumb: false,
+            scroll: false,
+            background: false,
+            title: false,
+        },
+        hint: {
+            // / 技能菜单（覆盖默认的块插入菜单 hintSlash）；[[ 块引用由 protyle 默认 extend 提供
+            extend: [{
+                key: "((",
+                hint: hintAgentRef,
+            }, {
+                key: "【【",
+                hint: hintAgentRef,
+            }, {
+                key: "（（",
+                hint: hintAgentRef,
+            }, {
+                key: "[[",
+                hint: hintAgentRef,
+            }, {
+                key: "/",
+                hint: hintSkill,
+            }, {
+                key: "、",
+                hint: hintSkill,
+            }],
         },
     });
 
-    editor.on("update", function () {
-        // 通知外部内容已变更（无论是否涉及 slash 命令处理）。
-        if (onChange) { onChange(); }
-        if (suggestionMenu && !slashActive) { return; }
-        const {$from} = editor.state.selection;
-        const textBefore = $from.parent.textBetween(0, $from.parentOffset);
-        const match = textBefore.match(/(?:^|\s)\/(\S*)$/);
-        if (match) {
-            const query = match[1];
-            const slashPos = $from.pos - query.length - 1;
-            slashActive = true;
-            slashRange = {from: slashPos, to: $from.pos};
-            const slashCoords = editor.view.coordsAtPos($from.pos);
-            const slashClientRect = function () {
-                return {
-                    left: slashCoords.left,
-                    top: slashCoords.top,
-                    right: slashCoords.right,
-                    bottom: slashCoords.bottom,
-                    width: slashCoords.right - slashCoords.left,
-                    height: slashCoords.bottom - slashCoords.top,
-                } as DOMRect;
-            };
+    // Protyle 实例的 protyle 属性才是 IProtyle（持有 wysiwyg/hint/lute 等）。
+    // 类方法（focus/insert/destroy）在 Protyle 实例上，内部数据属性在 IProtyle 上。
+    const p = protyle.protyle;
+    const wysiwyg = p.wysiwyg!;
+    const hintElement = p.hint.element;
+    // Hint 使用视口坐标定位，挂到顶层可避免受浮动 Dock 的变换坐标系和裁剪影响。
+    hintElement.classList.add(AGENT_HINT_OVERLAY_CLASS);
+    document.body.appendChild(hintElement);
+    wysiwyg.element.setAttribute("data-readonly", "false");
 
-            const filterAndOpen = function (skills: BlockHit[]) {
-                const q = query.toLowerCase();
-                const filtered = !q ? skills : skills.filter(function (s) {
-                    return s.label.toLowerCase().includes(q) || s.hPath.toLowerCase().includes(q);
-                });
-                suggestionCommand = function (item: BlockHit) {
-                    editor.chain().focus().deleteRange({from: slashRange!.from, to: slashRange!.to}).insertContent(item.label + " ").run();
-                    closeMenu();
-                    slashActive = false;
-                    slashRange = null;
-                };
-                openMenu(filtered, suggestionCommand!, slashClientRect);
-            };
+    const setEmptyContent = () => {
+        wysiwyg.element.innerHTML = "";
+        const emptyElement = genEmptyElement(false, false);
+        emptyElement.firstElementChild.classList.add("protyle-wysiwyg--empty");
+        emptyElement.firstElementChild.setAttribute("placeholder", options.placeholder || L.agentInputPlaceholder);
+        wysiwyg.element.appendChild(emptyElement);
+    };
+    if (options.initialBlockHTML) {
+        wysiwyg.element.innerHTML = options.initialBlockHTML;
+        resetEmbedBlocks(wysiwyg.element);
+        blockRender(p, wysiwyg.element);
+    } else if (options.initialContent) {
+        wysiwyg.element.innerHTML = p.lute.Md2BlockDOM(options.initialContent);
+        blockRender(p, wysiwyg.element);
+    } else {
+        setEmptyContent();
+    }
 
-            // 每次打开 / 菜单都重新拉取 skill 列表，确保 install/remove/save/rename 后立即反映变化。
-            fetch("/api/ai/agent/lsSkills", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-            }).then(function (r) { return r.json(); }).then(function (data) {
-                const rawSkills = (data && data.data) ? data.data : [];
-                const items: BlockHit[] = rawSkills.map(function (s: Record<string, string>) {
-                    return {
-                        id: s.name,
-                        label: s.name,
-                        icon: "",
-                        hPath: s.description || "",
-                    };
-                });
-                filterAndOpen(items);
-            }).catch(function () {
-                closeMenu();
-                slashActive = false;
-                slashRange = null;
-            });
-        } else if (slashActive) {
-            closeMenu();
-            slashActive = false;
-            slashRange = null;
+    const updatePlaceholder = () => {
+        const isEmpty = (wysiwyg.element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim() === "";
+        wysiwyg.element.classList.toggle("agent-composer--empty", isEmpty);
+    };
+    updatePlaceholder();
+
+    // Protyle 的粘贴、块删除和程序化插入会直接修改 DOM，不一定派发 input，需以实际 DOM 变化为准刷新状态。
+    const contentObserver = new MutationObserver(() => {
+        updatePlaceholder();
+        if (onChange) {
+            onChange();
         }
     });
+    contentObserver.observe(wysiwyg.element, {childList: true, characterData: true, subtree: true});
+
+    // capture 阶段拦截 hint 选择、发送快捷键、历史翻页；undo/redo 交给 protyle 的 keydown（调 LocalUndo）。
+    wysiwyg.element.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        // hint 面板可见时，Enter/方向键主动调 hint.select 完成选择，避免 capture 与冒泡的时序问题。
+        const hintEl = p.hint?.element;
+        if (hintEl && !hintEl.classList.contains("fn__none")) {
+            if (event.key === "Enter" || event.key.indexOf("Arrow") > -1) {
+                if (p.hint!.select(event, p)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            }
+            return;
+        }
+
+        if (matchHotKey(window.siyuan.config.keymap.general.agentSend.custom, event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            onSend();
+            return;
+        }
+        if (event.key === "Escape" && options.onCancel) {
+            event.preventDefault();
+            event.stopPropagation();
+            options.onCancel();
+            return;
+        }
+
+        // ↑ 翻历史：仅在空输入或已处于历史浏览时触发
+        if (enableHistory && event.key === "ArrowUp" && !event.shiftKey) {
+            const isEmpty = (wysiwyg.element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim() === "";
+            if ((history.isBrowsing() || isEmpty) && history.has()) {
+                event.preventDefault();
+                event.stopPropagation();
+                const target = history.isBrowsing() ?
+                    history.navigateUp() : history.beginBrowsing(wysiwyg.element.innerHTML);
+                wysiwyg.element.innerHTML = p.lute.Md2BlockDOM(target);
+                return;
+            }
+        }
+        // ↓ 翻历史：仅浏览中触发
+        if (enableHistory && event.key === "ArrowDown" && history.isBrowsing()) {
+            event.preventDefault();
+            event.stopPropagation();
+            const target = history.navigateDown();
+            if (history.isBrowsing()) {
+                p.wysiwyg.element.innerHTML = p.lute.Md2BlockDOM(target);
+            } else {
+                wysiwyg.element.innerHTML = target;
+            }
+            return;
+        }
+
+        // 用户开始新输入时退出历史浏览
+        if (enableHistory && history.isBrowsing() && event.key.length === 1 &&
+            !event.ctrlKey && !event.metaKey && !event.altKey) {
+            history.resetCursor();
+        }
+    }, true);
+
+    const getMarkdown = (): string => {
+        return p.lute.BlockDOM2StdMd(wysiwyg.element.innerHTML).trim();
+    };
+
+    const getBlockHTML = (): string => {
+        const clone = wysiwyg.element.cloneNode(true) as HTMLElement;
+        resetEmbedBlocks(clone);
+        return clone.innerHTML;
+    };
 
     return {
-        focus: function () { editor.commands.focus(); },
-        destroy: function () { closeMenu(); editor.destroy(); },
-        getSendData: function () {
-            const refs: {id: string; title: string}[] = [];
-            const textParts: string[] = [];
-            editor.state.doc.descendants(function (node) {
-                if (node.type.name === "mention") {
-                    refs.push({id: node.attrs.id, title: node.attrs.label});
-                    textParts.push("@" + (node.attrs.label || node.attrs.id));
-                } else if (node.isText && node.text) {
-                    textParts.push(node.text);
-                }
+        focus: (toEnd = false) => {
+            if (!toEnd || !focusBlock(wysiwyg.element.lastElementChild, wysiwyg.element, false)) {
+                protyle.focus();
+            }
+        },
+        destroy: () => {
+            contentObserver.disconnect();
+            protyle.destroy();
+            hintElement.remove();
+        },
+        getSendData: () => {
+            const references: { id: string; title: string }[] = [];
+            wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach((ref) => {
+                references.push({
+                    id: ref.getAttribute("data-id") || "",
+                    title: ref.textContent || "",
+                });
             });
-            return {text: textParts.join("").trim(), references: refs};
+            return {text: getMarkdown(), blockHTML: getBlockHTML(), references};
         },
-        clear: function () { editor.commands.clearContent(); },
-        pushHistory: function (text: string) {
-            if (!text || history[history.length - 1] === text) { return; }
-            history.push(text);
-            if (history.length > 50) { history.shift(); }
-            historyIdx = -1;
+        clear: () => {
+            setEmptyContent();
+            p.undo.clear();
+            updatePlaceholder();
+            history.resetCursor();
         },
-        getHistory: function () { return history.slice(); },
-        clearHistory: function () { history.length = 0; historyIdx = -1; },
-        restoreHistory: function (h: string[]) { history.length = 0; history.push(...h); historyIdx = -1; },
-        insertMention: function (id: string, label: string) {
-            editor.chain().focus().insertContent([
-                {type: "mention", attrs: {id, label}},
-                {type: "text", text: " "},
-            ]).run();
+        pushHistory: (text: string) => history.push(text),
+        getHistory: () => history.get(),
+        clearHistory: () => history.clear(),
+        restoreHistory: (h: string[]) => history.restore(h),
+        insertMention: (id: string, label: string) => {
+            protyle.insert('<span data-type="block-ref" data-id="' + id + '" data-subtype="d">' +
+                escapeHtml(label) + "</span>" + Constants.ZWSP);
         },
-        insertMentions: function (mentions: Array<{id: string; label: string}>) {
-            // 批量插入多个 mention chip，一次性 insertContent 避免多次 focus/选择重置。
-            const nodes: Array<Record<string, unknown>> = [];
-            for (const m of mentions) {
-                nodes.push({type: "mention", attrs: {id: m.id, label: m.label}});
-                nodes.push({type: "text", text: " "});
+        insertMentions: (mentions: Array<{ id: string; label: string }>) => {
+            const html = mentions.map((m) =>
+                '<span data-type="block-ref" data-id="' + m.id + '" data-subtype="d">' +
+                escapeHtml(m.label) + "</span>" + Constants.ZWSP + " "
+            ).join("");
+            if (html) {
+                protyle.insert(html);
             }
-            if (nodes.length) {
-                editor.chain().focus().insertContent(nodes).run();
-            }
+        },
+        renderBlockHTML: (element, onEmbedRender) => {
+            resetEmbedBlocks(element);
+            blockRender(p, element, undefined, onEmbedRender);
         },
     };
 }

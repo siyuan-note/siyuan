@@ -67,20 +67,20 @@ export const registerAccountGroup = (tab: SettingTabBuilder) => {
         afterMount: bindAccountPaymentEvent,
     });
     if (!isMobile()) {
-        group.switch("account.displayTitle", {
-            title: window.siyuan.languages.accountDisplayTitle,
-            save: (value) => patchSyncConfig("account.displayTitle", value),
-        });
         group.switch("account.displayVIP", {
             title: window.siyuan.languages.accountDisplayVIP,
             save: (value) => patchSyncConfig("account.displayVIP", value),
+        });
+        group.switch("account.displayTitle", {
+            title: window.siyuan.languages.accountDisplayTitle,
+            save: (value) => patchSyncConfig("account.displayTitle", value),
         });
     }
 };
 
 const genAccountMainHTML = () => {
     if (!window.siyuan.user) {
-        return `<div id="configAccountMain" class="b3-label config-item fn__flex-column config-account--login">${genAccountAuthHTML("login")}</div>`;
+        return `<div id="configAccountMain" class="b3-label b3-label--noborder config-item fn__flex-column config-account--login">${genAccountAuthHTML("login")}</div>`;
     }
 
     const isIOS = isInIOS();
@@ -97,7 +97,7 @@ const genAccountMainHTML = () => {
         }).join("")}</div>`
         : "";
 
-    return `<div id="configAccountMain" class="fn__flex b3-label config-item config-wrap">
+    return `<div id="configAccountMain" class="b3-label--noborder fn__flex b3-label config-item config-wrap">
     <div class="fn__flex fn__flex-1 config-account__profile">
     <a href="${getCloudURL("settings/avatar")}" class="config-account__profile-avatar" style="background-image: url(${window.siyuan.user.userAvatarURL})" target="_blank"></a>
     <span class="fn__space"></span>
@@ -299,7 +299,7 @@ const genAccountPaymentHTML = () => {
         const actionsHtmlParts: string[] = [];
         const daysLeft = Math.max(0, Math.floor((expireTime - Date.now()) / (24 * 60 * 60 * 1000)));
         // 剩余天数
-        actionsHtmlParts.push(`<div class="ft__on-surface">${window.siyuan.languages.account6} ${daysLeft} ${window.siyuan.languages.day}</div><span class="fn__space"></span>`);
+        actionsHtmlParts.push(`<div class="ft__on-surface config-account__payment-remaining">${window.siyuan.languages.account6} ${daysLeft} ${window.siyuan.languages.day}</div><span class="fn__space"></span>`);
         // 续费订阅
         actionsHtmlParts.push(isIOS
             ? `<button type="button" class="b3-button b3-button--text" data-action="iOSPay" data-type="subscribe">${window.siyuan.languages.clickMeToRenew}</button>`
@@ -307,10 +307,10 @@ const genAccountPaymentHTML = () => {
         );
         if (!isOnetimePaid) {
             // 购买功能特性
-            actionsHtmlParts.push(isIOS
+            const onepayAction = isIOS
                 ? `<button type="button" class="b3-button b3-button--text" data-action="iOSPay" data-type="function">${window.siyuan.languages.onepay}</button>`
-                : `<a class="b3-button b3-button--text" href="${getIndexURL("pricing.html")}" target="_blank">${window.siyuan.languages.onepay}</a>`
-            );
+                : `<a class="b3-button b3-button--text" href="${getIndexURL("pricing.html")}" target="_blank">${window.siyuan.languages.onepay}</a>`;
+            actionsHtmlParts.push(`<span class="fn__space"></span>${onepayAction}`);
         }
         actionsHTML = actionsHtmlParts.join("");
     } else if (window.siyuan.user.userSiYuanSubscriptionStatus === 2) {
@@ -415,6 +415,7 @@ const bindAccountAuthForm = (
                 renderAccount(accountSettingsRoot!);
                 onSetaccount();
                 refreshSyncCloudSpaceGroup(accountSettingsRoot!);
+                window.dispatchEvent(new CustomEvent("siyuan-login-success"));
             });
         } else if (mode === "deactivate") {
             confirmDeactivateAccount();
@@ -506,32 +507,45 @@ export const onSetaccount = () => {
     if (!toolbarVIPEl) {
         return;
     }
-    if (!window.siyuan.user || window.siyuan.user.userSiYuanSubscriptionStatus === -1) {
-        toolbarVIPEl.innerHTML = window.siyuan.config.account.displayVIP ? genToolbarItemHTML(window.siyuan.languages.freeSub, genVIPIconHTML("ft__error")) : "";
-        return;
-    }
     const parts: string[] = [];
     if (window.siyuan.config.account.displayVIP) {
-        if (window.siyuan.user.userSiYuanProExpireTime === -1) {
-            parts.push(genToolbarItemHTML(window.siyuan.languages.account12, Constants.SIYUAN_IMAGE_VIP));
-        } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
-            if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
-                parts.push(genToolbarItemHTML(window.siyuan.languages.account3, genVIPIconHTML()));
-            } else {
-                parts.push(genToolbarItemHTML(window.siyuan.languages.account10, genVIPIconHTML("ft__secondary")));
+        if (!window.siyuan.user) {
+            // 未登录
+            parts.push(genToolbarItemHTML(window.siyuan.languages.freeSub, genVIPIconHTML("ft__error")));
+        } else {
+            const isOneTimePay = window.siyuan.user.userSiYuanOneTimePayStatus === 1;
+            if (window.siyuan.user.userSiYuanProExpireTime === -1) {
+                // 终身会员
+                parts.push(genToolbarItemHTML(window.siyuan.languages.account12, Constants.SIYUAN_IMAGE_VIP));
+            } else if (window.siyuan.user.userSiYuanProExpireTime > 0) {
+                // 订阅有效（未过期）
+                if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
+                    // 试用订阅
+                    parts.push(genToolbarItemHTML(window.siyuan.languages.account3, genVIPIconHTML()));
+                } else {
+                    // 付费订阅
+                    parts.push(genToolbarItemHTML(window.siyuan.languages.account10, genVIPIconHTML("ft__secondary")));
+                }
+            } else if (window.siyuan.user.userSiYuanSubscriptionStatus === 2 && !isOneTimePay) {
+                // 订阅过期
+                parts.push(genToolbarItemHTML(window.siyuan.languages.accountSubscriptionExpired, genVIPIconHTML("ft__error")));
+            } else if (window.siyuan.user.userSiYuanSubscriptionStatus === -1 && !isOneTimePay) {
+                // 未订阅过
+                parts.push(genToolbarItemHTML(window.siyuan.languages.freeSub, genVIPIconHTML("ft__error")));
             }
-        } else if (window.siyuan.user.userSiYuanSubscriptionStatus === 2) {
-            parts.push(genToolbarItemHTML(window.siyuan.languages.accountSubscriptionExpired, genVIPIconHTML("ft__error")));
-        }
-        if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
-            parts.push(genToolbarItemHTML(window.siyuan.languages.onepay, genVIPIconHTML("ft__success")));
+            if (isOneTimePay) {
+                // 功能特性已付费
+                parts.push(genToolbarItemHTML(window.siyuan.languages.onepay, genVIPIconHTML("ft__success")));
+            }
         }
     }
-    if (window.siyuan.config.account.displayTitle) {
+
+    if (window.siyuan.config.account.displayTitle && window.siyuan.user) {
         window.siyuan.user.userTitles.forEach(item => {
             parts.push(genToolbarItemHTML(`${item.name}：${item.desc}`, item.icon));
         });
     }
+
     toolbarVIPEl.innerHTML = parts.join("");
     /// #endif
 };

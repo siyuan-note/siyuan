@@ -6,9 +6,21 @@
   width: 80vw;
 }
 
-.fn__flex-column[data-type="sidebar-file"] {
+.protyle-breadcrumb {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.protyle-preview__title {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.fn__flex-column[data-type="sidebar-file"],
+.fn__flex-column[data-type="sidebar-outline"] {
   .b3-list-item {
     -webkit-user-select: none;
+    -webkit-touch-callout: none;
   }
 }
 
@@ -31,6 +43,7 @@
       font-size: 18px;
       line-height: 32px;
       height: auto;
+      width: 20px;
 
       &:hover {
         background-color: transparent;
@@ -71,12 +84,6 @@
   }
 }
 
-.file-tree__sliderDown {
-  height: 0;
-  overflow: hidden;
-  transition: var(--b3-transition);
-}
-
 .counter {
   margin-left: 4px;
   padding: 0 8px;
@@ -94,6 +101,8 @@
   align-items: center;
   max-width: 100vw;
   background: var(--b3-theme-background);
+  -webkit-user-select: none;
+  user-select: none;
 
   &--border {
     border-bottom: .5px solid var(--b3-theme-background-light);
@@ -142,6 +151,19 @@
     border: 0;
     background-color: transparent;
     color: var(--b3-theme-on-background);
+
+    &:not(.toolbar__title--readonly) {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    &--readonly {
+      -webkit-user-select: none;
+      user-select: none;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
   }
 
   &__text {
@@ -151,6 +173,129 @@
     min-height: 30px;
     line-height: 30px;
   }
+
+  &__tabs {
+    -webkit-appearance: none;
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: var(--b3-border-radius);
+    color: var(--b3-theme-on-surface);
+    background: transparent;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    &:active,
+    &:focus-visible {
+      background-color: var(--b3-list-hover);
+    }
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--b3-list-hover);
+      }
+    }
+  }
+
+  &__tabs-count {
+    min-width: 14px;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+  }
+}
+
+.mobile-tabs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &__list {
+    flex: 1;
+    min-height: 0;
+    padding: 12px;
+    overflow: auto;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    margin-bottom: 8px;
+    padding: 4px 6px 4px 12px;
+    border: 1px solid var(--b3-border-color);
+    border-radius: var(--b3-border-radius-b);
+    background-color: var(--b3-theme-background);
+
+    &--active {
+      border-color: var(--b3-theme-primary);
+      box-shadow: 0 0 0 1px var(--b3-theme-primary-lightest);
+    }
+  }
+
+  &__item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-right: 10px;
+    color: var(--b3-theme-on-surface-light);
+    font-size: 18px;
+    line-height: 18px;
+  }
+
+  &__item-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__close {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
+
+  &__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 12px max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    border-top: 1px solid var(--b3-border-color);
+
+    .b3-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+  }
+}
+
+#model > .toolbar > .toolbar__icon.fn__none + .toolbar__text {
+  padding-left: 12px;
 }
 
 .side-panel {
@@ -163,7 +308,23 @@
   transition: transform .15s cubic-bezier(0, 0, .2, 1) 0ms;
 
   &--all {
-    transform: translateY(-200vh);
+    transform: translateX(100vw);
+  }
+
+  // 窄屏下 dock 图标过多时左侧可横向滚动，关闭按钮固定在右侧始终可触达
+  & > .toolbar--border > .toolbar__scroll {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    scrollbar-width: none;
   }
 }
 
@@ -182,17 +343,61 @@
 #model {
   box-sizing: border-box;
 
-  .toolbar__text {
-    min-height: 48px;
-    line-height: 48px;
+  .mobile-setting-menu {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+
+    &__search {
+      background-color: var(--b3-theme-surface);
+      display: flex;
+      flex-shrink: 0;
+      padding: 8px 16px;
+    }
+
+    &__groups {
+      flex: 1;
+      height: auto;
+      min-height: 0;
+    }
+  }
+
+  .config--mobile {
+    box-sizing: border-box;
+    height: 100%;
+    overflow: auto;
+
+    &:has(> .config-group) {
+      background-color: var(--b3-theme-surface);
+      padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+    }
   }
 
   .config-group {
-    margin: 24px 0;
+    margin: 0 0 16px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 
   .config-title {
-    margin: 24px 24px 16px 24px;
+    color: var(--b3-theme-on-surface);
+    font-size: 13px;
+    font-weight: normal;
+    line-height: 20px;
+    margin: 0;
+    padding: 8px;
+  }
+
+  .config-items {
+    background-color: var(--b3-theme-background);
+
+    .b3-label:not(.b3-label--inner) {
+      margin: 0 16px;
+      padding: 16px 0;
+    }
   }
 
   .config-assets {
@@ -225,11 +430,11 @@
   transform: translateX(100vw);
   top: 0;
 
-  // for plugin
+  // 兼容插件直接插入的图标
   .b3-menu__item > svg:not(.b3-menu__icon) {
-    height: 17px;
-    width: 17px;
-    margin: 0 16px 0 8px;
+    height: 18px !important;
+    width: 18px !important;
+    margin: 0 12px 0 8px !important;
     border-radius: var(--b3-border-radius);
     align-self: center;
     color: var(--b3-theme-on-surface);
@@ -349,10 +554,39 @@
       font-size: 20px;
       text-align: center;
       line-height: 20px;
+      font-variant-emoji: emoji;
     }
 
     &-text {
       margin-left: 6px;
+    }
+  }
+
+  &__font-size {
+    align-items: center;
+    box-sizing: border-box;
+    display: flex;
+    min-height: 48px;
+    padding-right: 8px;
+    width: 100%;
+
+    .b3-slider {
+      height: 32px;
+    }
+
+    [data-type="fontSizeValue"] {
+      flex-shrink: 0;
+      text-align: right;
+      width: 48px;
+    }
+
+    &-toggle {
+      align-items: center;
+      box-sizing: border-box;
+      display: flex;
+      min-height: 40px;
+      padding-right: 8px;
+      width: 100%;
     }
   }
 }
@@ -383,7 +617,8 @@
   }
 }
 
-#historyContainer {
+#historyContainer,
+#docHistoryContainer {
   & > div {
     flex-direction: column;
 
@@ -412,6 +647,12 @@
 .protyle {
   &-font {
     font-size: 14px;
+  }
+
+  // 属性中的零宽空格不参与跨块文本选择
+  &-wysiwyg .protyle-attr {
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   // iPhone 右上角属性中对不齐
@@ -444,9 +685,78 @@
   .protyle-wysiwyg [data-node-id].sb[data-sb-layout="col"] {
     flex-direction: column;
     flex-wrap: initial;
+    // 桌面端纵向对齐使用内联样式，移动端堆叠时需恢复拉伸
+    align-items: stretch !important;
 
     & > div {
       margin-right: 0;
+      // 桌面端拖拽后子块带内联 calc(%) 宽度，移动端垂直堆叠时需重置以铺满
+      width: auto !important;
+      flex: 0 1 auto;
     }
+  }
+
+}
+
+.protyle-db-attr__toggle {
+  min-height: 40px;
+}
+
+.protyle-db-attr__edit {
+  justify-content: center;
+  min-height: 40px;
+  min-width: 40px;
+}
+
+.av__row-actions {
+  .av__row-action {
+    height: 28px;
+    width: 28px;
+
+    svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
+}
+
+.av__cell[data-dtype="block"]:not(.av__cell--header) {
+  padding-right: 77px;
+
+  & > .av__row-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  &[data-align="center"] {
+    padding-left: 77px;
+  }
+
+  &[data-align="right"] {
+    padding-left: 77px;
+    padding-right: 8px;
+  }
+}
+
+.av__cell:not([data-dtype="block"]) .av__row-actions {
+  display: none;
+}
+
+.b3-dialog__container--database-row {
+  background-color: var(--b3-theme-background);
+  border: 0;
+  border-radius: 0;
+  max-width: none;
+}
+
+.protyle-db-row--mobile {
+  min-height: 100%;
+
+  .protyle-db-row__title {
+    padding: 24px 48px 8px 16px;
+  }
+
+  .protyle-db-row__body {
+    margin: 8px;
   }
 }

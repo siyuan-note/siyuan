@@ -9,8 +9,8 @@ import {writeText} from "../../protyle/util/compatibility";
 import {bindSyncCloudListEvent, renderSyncCloudList, setKey} from "../../sync/syncGuide";
 import {Dialog} from "../../dialog";
 import {genConfigItemMainHtml, genConfigItemName} from "../render/fragments";
-import {getSyncProviderConfigKeywords} from "./syncUi";
-import {patchSyncConfig} from "./syncRuntime";
+import {getLANSyncSearchAvailability, getSyncProviderConfigKeywords} from "./syncUi";
+import {mountLANSyncStatus, patchSyncConfig} from "./syncRuntime";
 import {openHistory} from "../../history/history";
 
 const registerSyncGroup = (tab: SettingTabBuilder) => {
@@ -38,7 +38,7 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
         html: () => '<div id="cloudSpace" class="b3-label config-item"></div>',
     });
     group.switch("sync.enabled", {
-        title: window.siyuan.languages.openSyncTip1,
+        title: window.siyuan.languages.cloudSync,
         desc: window.siyuan.languages.openSyncTip2,
         save: (value) => patchSyncConfig("sync.enabled", value),
     });
@@ -69,6 +69,13 @@ const registerSyncGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.syncPerception,
         desc: window.siyuan.languages.syncPerceptionTip,
         save: (value) => patchSyncConfig("sync.perception", value),
+    });
+    group.switch("sync.lan.enabled", {
+        title: window.siyuan.languages.lanSync,
+        desc: `${window.siyuan.languages.lanSyncTip}<div data-type="lanSyncStatus"></div>`,
+        save: (value) => patchSyncConfig("sync.lan.enabled", value),
+        afterMount: mountLANSyncStatus,
+        searchAvailability: getLANSyncSearchAvailability,
     });
     group.slot({
         key: "syncCloudDir",
@@ -210,7 +217,7 @@ const mountRepoKey = (root: HTMLElement) => {
         const passwordDialog = new Dialog({
             title: "🔑 " + window.siyuan.languages.key,
             content: `<div class="b3-dialog__content">
-    <textarea spellcheck="false" style="resize: vertical;" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}"></textarea>
+    <input type="text" spellcheck="false" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.keyPlaceholder}">
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -219,14 +226,14 @@ const mountRepoKey = (root: HTMLElement) => {
             width: "520px",
         });
         passwordDialog.element.setAttribute("data-key", Constants.DIALOG_PASSWORD);
-        const textAreaElement = passwordDialog.element.querySelector("textarea");
-        textAreaElement.focus();
+        const inputElement = passwordDialog.element.querySelector("input");
+        inputElement.focus();
         const btnsElement = passwordDialog.element.querySelectorAll(".b3-button");
         btnsElement[0].addEventListener("click", () => {
             passwordDialog.destroy();
         });
         btnsElement[1].addEventListener("click", () => {
-            fetchPost("/api/repo/importRepoKey", {key: textAreaElement.value}, (response) => {
+            fetchPost("/api/repo/importRepoKey", {key: inputElement.value}, (response) => {
                 window.siyuan.config.repo.key = response.data.key;
                 toggleRepoKeyActions();
                 passwordDialog.destroy();

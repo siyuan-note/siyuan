@@ -1,0 +1,719 @@
+{
+	"ID": "20260804171003-semnt02",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804171003-semnt02",
+		"title": "語意搜尋",
+		"type": "doc",
+		"updated": "20260809232000"
+	},
+	"Children": [
+		{
+			"ID": "20260804170124-lsx5zup",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170124-lsx5zup",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260804170125-oxdxid2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170125-oxdxid2",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "語意搜尋透過比較文字向量尋找含義相近的內容。一般全文搜尋依賴關鍵字是否出現，語意搜尋則可以找到措辭不同但主題相關的筆記。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170126-8749zd5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170126-8749zd5",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定方式"
+				}
+			]
+		},
+		{
+			"ID": "20260804170127-a8c9zop",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170127-a8c9zop",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "嵌入模型"
+				}
+			]
+		},
+		{
+			"ID": "20260804170128-ing3tl6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170128-ing3tl6",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "嵌入模型"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中啟用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "語意搜尋"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，並設定 API 基礎位址、API 金鑰、模型、向量維度和逾時時間。設定完成後可使用連線測試確認模型是否可用。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170129-7fit0vr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170129-7fit0vr",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "向量維度設為 0 時使用模型預設值。僅在目標模型支援自訂向量維度時填寫其他值；修改模型或向量維度後需要重建嵌入索引。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170130-wwn24t7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170130-wwn24t7",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重排模型"
+				}
+			]
+		},
+		{
+			"ID": "20260804170131-2bkcw7d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170131-2bkcw7d",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重排模型為選用設定。啟用後，系統會對向量召回的候選內容再次評分，以提高結果排序的準確性。候選數量越大，通常越準確，但延遲和費用也會增加。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170132-sxaeb6u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170132-sxaeb6u",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用方式"
+				}
+			]
+		},
+		{
+			"ID": "20260804170133-d2hod00",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170133-d2hod00",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開啟全文搜尋，在搜尋選單的 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索方式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中選擇 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "語意搜尋"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，然後使用自然語言描述要尋找的內容。筆記本、路徑和區塊類型等篩選條件仍然有效。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170134-7c8jjnb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170134-7c8jjnb",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "嵌入索引"
+				}
+			]
+		},
+		{
+			"ID": "20260804170135-wf9t67n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170135-wf9t67n",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "啟用嵌入模型後，思源會在背景為符合條件的區塊產生向量。新增或修改內容時，對應向量會自動更新。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170136-katy0i0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170136-katy0i0",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "檢視索引進度"
+				}
+			]
+		},
+		{
+			"ID": "20260804170137-ocxpd0x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170137-ocxpd0x",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "人工智能"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "嵌入模型"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中可以檢視已索引、待索引、失敗、因長度忽略和因設定忽略的區塊數量。首次建立索引可能需要較長時間。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170138-xjlg79l",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170138-xjlg79l",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重試失敗的區塊"
+				}
+			]
+		},
+		{
+			"ID": "20260804170139-kgq6d7b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170139-kgq6d7b",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "索引進度中出現失敗區塊時，先檢查嵌入模型設定和網路連線，然後點選重試失敗的區塊。該操作不會重新處理已成功產生向量的區塊。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170140-2vyn82x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170140-2vyn82x",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "重建嵌入索引"
+				}
+			]
+		},
+		{
+			"ID": "20260804170141-prbt5gl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170141-prbt5gl",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更換嵌入模型、修改向量維度或調整忽略規則後，應點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "重建嵌入索引"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。重建會清空已有向量並在背景重新計算，期間語意搜尋結果可能不完整。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170142-5q0v08u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170142-5q0v08u",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "忽略內容"
+				}
+			]
+		},
+		{
+			"ID": "20260804170143-zw7lm5z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170143-zw7lm5z",
+				"updated": "20260809160000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如需排除部分文件，可在檔案系統上建立或編輯 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "工作空間/data/.siyuan/embeddingignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 文字檔案。每行填寫一個忽略路徑，支援 gitignore 語法。例如："
+				}
+			]
+		},
+		{
+			"ID": "20260809160000-8ad33a4",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809160000-8ad33a4",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804170144-e17ryvz",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170144-e17ryvz",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170145-tah5i1k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170145-tah5i1k",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170146-f6aztcn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170146-f6aztcn",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：忽略指定筆記本下的指定文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170147-fetrcgd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170147-fetrcgd",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170148-9avnqdx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170148-9avnqdx",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：忽略指定筆記本下的所有文件"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804170149-4zz5cii",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170149-4zz5cii",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "儲存設定檔後需要重建嵌入索引。該檔案只影響嵌入向量，內容仍會編入一般全文索引；如需完全排除一般全文索引，請參閱 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "忽略索引",
+					"TextMarkBlockRefID": "20240119210914-a2tm8c4",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170150-jzf9x5u",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170150-jzf9x5u",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20260804170151-nasyjhs",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170151-nasyjhs",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"ID": "20260804170152-38gc4mm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170152-38gc4mm",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170153-mlvdom1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170153-mlvdom1",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "建立索引時會將文件文字傳送給嵌入模型提供商，執行查詢時也會傳送查詢文字"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170154-r1yh18t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170154-r1yh18t",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170155-0n4rs9w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170155-0n4rs9w",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "呼叫嵌入模型和重排模型可能產生費用，建立大型工作空間的索引可能耗時較長"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170156-smicrj3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170156-smicrj3",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170157-ye7asmt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170157-ye7asmt",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "加密筆記本不支援語意搜尋"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170158-4y9az7z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170158-4y9az7z",
+						"updated": "20260804205607"
+					},
+					"Children": [
+						{
+							"ID": "20260804170159-bpjyo41",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170159-bpjyo41",
+								"updated": "20260804205607"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "UTF-8 編碼後少於 7 個位元組或超過 12000 個位元組的區塊不會產生嵌入向量"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170200-ibk2dyg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170200-ibk2dyg",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170201-hz1x39q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170201-hz1x39q",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "重排模型呼叫失敗時，結果會回退為依向量相似度排序"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

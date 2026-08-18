@@ -8,7 +8,7 @@
 		"id": "20240530101000-jp793ic",
 		"title": "よくある質問",
 		"type": "doc",
-		"updated": "20250518103515"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -495,7 +495,7 @@
 			"Properties": {
 				"ID": "20240530101000-kzr1stl",
 				"id": "20240530101000-kibjam5",
-				"updated": "20250518103515"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -551,7 +551,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-dc55vlo",
-				"updated": "20240530101000"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -563,7 +563,7 @@
 					},
 					"Properties": {
 						"id": "20240530101000-zgsohz6",
-						"updated": "20240530101000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -571,7 +571,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-qf51d1d",
-								"updated": "20240530101000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
@@ -608,7 +608,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -632,7 +632,7 @@
 					},
 					"Properties": {
 						"id": "20240530101000-fgvjudu",
-						"updated": "20240530101000"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -640,7 +640,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-jjauibs",
-								"updated": "20240530101000"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
@@ -677,7 +677,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -766,7 +766,7 @@
 			"Properties": {
 				"ID": "20240530101000-zzi4hcc",
 				"id": "20240530101000-koxcm1m",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -792,7 +792,7 @@
 			"Properties": {
 				"ID": "20240530101000-e74hr3y",
 				"id": "20240530101000-m9hbtpx",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -835,7 +835,7 @@
 					"Properties": {
 						"ID": "20240530101000-ytqityo",
 						"id": "20240530101000-8s9aebg",
-						"updated": "20240530101000"
+						"updated": "20260803170332"
 					},
 					"Children": [
 						{
@@ -844,7 +844,7 @@
 							"Properties": {
 								"ID": "20240530101000-fzsf35i",
 								"id": "20240530101000-h7rotnf",
-								"updated": "20240530101000"
+								"updated": "20260803170332"
 							},
 							"Children": [
 								{
@@ -876,7 +876,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を有効にすると、最新バージョンが公開されるとインストールパッケージを自動的にダウンロードしてインストールを促します。"
+									"Data": " ​ を有効にすると、最新バージョンが公開されるとインストールパッケージを自動的にダウンロードしてインストールを促します。"
 								}
 							]
 						}
@@ -946,7 +946,7 @@
 			"Properties": {
 				"ID": "20240530101000-owjuw7q",
 				"id": "20240530101000-1u51q5t",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -971,21 +971,161 @@
 			"Properties": {
 				"ID": "20240530101000-lvkbcyv",
 				"id": "20240530101000-iryhc7k",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "リスト項目の最初のサブブロックはブロックアイコンが省略されています。カーソルをこのブロックに移動して、"
+					"Data": "ブロックアイコンが表示されていない場合は、そのブロックにカーソルを置き、"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+/"
+					"TextMarkTextContent": "Shift"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ でブロックメニューを呼び出してください。"
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を複数回押してブロックを選択してから、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でブロックメニューを開きます。macOS では "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-a1s2e3j",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260807094000-a1s2e3j",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ノート内の画像やファイルを削除しても、アセットが残るのはなぜですか？"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqja01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqja01",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ノートに挿入された画像やファイルは、アセットへの参照です。ノート内のコンテンツを削除しても、その場所の参照だけが削除され、対応するアセットは削除されません。同じアセットがほかのドキュメント、データベース、ドキュメントのタイトル画像、HTML などから参照されている可能性があるためです。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqja02",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqja02",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アセットが完全に使用されていないことを確認するには、ワークスペース全体を検査する必要があります。参照を削除するたびに検査すると、編集パフォーマンスに影響します。また、アセットの自動削除は、元に戻す操作や複数デバイス間の同期を不安定にし、誤削除につながる可能性があります。そのため、SiYuan はコンテンツ内の参照を削除してもアセットを自動では削除せず、自動削除を有効にするオプションも提供していません。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqja03",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqja03",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "これらのファイルが不要であることを確認したら、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "参照されていないアセット"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で確認してクリーンアップできます。クリーンアップ操作は"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-txrc7z1",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "データ履歴"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "に記録されます。誤って削除した場合は、データ履歴でアセットを選択してロールバックできます。"
 				}
 			]
 		},
@@ -996,7 +1136,7 @@
 			"Properties": {
 				"ID": "20240530101000-xkwaw8d",
 				"id": "20240530101000-r8dsete",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -1017,7 +1157,7 @@
 			"Properties": {
 				"ID": "20240530101000-86x5uzc",
 				"id": "20240530101000-uqxlw8g",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -1033,7 +1173,7 @@
 					"Properties": {
 						"ID": "20240530101000-19bohb0",
 						"id": "20240530101000-qwvljpb",
-						"updated": "20240530101000"
+						"updated": "20260803170332"
 					},
 					"Children": [
 						{
@@ -1042,7 +1182,7 @@
 							"Properties": {
 								"ID": "20240530101000-l1h5udu",
 								"id": "20240530101000-sa4zw1a",
-								"updated": "20240530101000"
+								"updated": "20260803170332"
 							},
 							"Children": [
 								{
@@ -1083,7 +1223,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ から取得できます。"
+									"Data": " ​ から取得できます。"
 								}
 							]
 						}
@@ -1103,7 +1243,7 @@
 					"Properties": {
 						"ID": "20240530101000-508zmqc",
 						"id": "20240530101000-idjxzo9",
-						"updated": "20240530101000"
+						"updated": "20260803163243"
 					},
 					"Children": [
 						{
@@ -1136,7 +1276,7 @@
 							"Properties": {
 								"ID": "20240530101000-kiyyp29",
 								"id": "20240530101000-bkcq3ah",
-								"updated": "20240530101000"
+								"updated": "20260803163243"
 							},
 							"Children": [
 								{
@@ -1155,7 +1295,7 @@
 									"Properties": {
 										"ID": "20240530101000-m67unc5",
 										"id": "20240530101000-j626kwo",
-										"updated": "20240530101000"
+										"updated": "20260803163243"
 									},
 									"Children": [
 										{
@@ -1164,12 +1304,12 @@
 											"Properties": {
 												"ID": "20240530101000-l0xrhri",
 												"id": "20240530101000-f7nk7ay",
-												"updated": "20240530101000"
+												"updated": "20260803163243"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "​"
+													"Data": "​ "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1196,7 +1336,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ からデータをバックアップするか、ファイルシステムの "
+													"Data": " ​ からデータをバックアップするか、ファイルシステムの "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1227,7 +1367,7 @@
 									"Properties": {
 										"ID": "20240530101000-y8ykhvp",
 										"id": "20240530101000-nbh4zn7",
-										"updated": "20240530101000"
+										"updated": "20260803163243"
 									},
 									"Children": [
 										{
@@ -1236,12 +1376,12 @@
 											"Properties": {
 												"ID": "20240530101000-zl7ne0h",
 												"id": "20240530101000-2bzatij",
-												"updated": "20240530101000"
+												"updated": "20260803163243"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "​"
+													"Data": "​ "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1268,7 +1408,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ からデータリポジトリのリセットを実行します。"
+													"Data": " ​ からデータリポジトリのリセットを実行します。"
 												}
 											]
 										}

@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -225,6 +225,7 @@ const (
 	ReloadFiletree                    = "task.reload.filetree"                      // 重新加载文档树面板
 	SetRefDynamicText                 = "task.ref.setDynamicText"                   // 设置引用的动态锚文本
 	SetDefRefCount                    = "task.def.setRefCount"                      // 设置定义的引用计数
+	RefreshCrossTreeMoveRefs          = "task.ref.refreshCrossTreeMove"             // 刷新跨文档移动块的引用索引
 	UpdateIDs                         = "task.update.ids"                           // 更新 ID
 	PushMsg                           = "task.push.msg"                             // 推送消息
 )
@@ -250,6 +251,7 @@ var uniqueActions = []string{
 	ReloadFiletree,
 	SetRefDynamicText,
 	SetDefRefCount,
+	RefreshCrossTreeMoveRefs,
 	UpdateIDs,
 }
 

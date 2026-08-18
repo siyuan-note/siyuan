@@ -1,4 +1,4 @@
-import {App} from "../index";
+import type {App} from "../index";
 import {Constants} from "../constants";
 import { ipcRenderer } from "electron";
 
@@ -10,7 +10,11 @@ export const closeWindow = async (app: App) => {
         } catch (e) {
             console.error(e);
         }
-        await plugin.kernel.destroy();
+        try {
+            await plugin.kernel?.destroy();
+        } catch (e) {
+            console.error(e);
+        }
     }
     ipcRenderer.send(Constants.SIYUAN_CMD, "destroy");
 };

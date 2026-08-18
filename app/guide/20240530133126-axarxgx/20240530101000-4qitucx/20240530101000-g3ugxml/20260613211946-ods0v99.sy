@@ -6,7 +6,7 @@
 		"id": "20260613211946-ods0v99",
 		"title": "コンテンツ統計",
 		"type": "doc",
-		"updated": "20260613212017"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613212017-hxtimtq",
-				"updated": "20260613212017"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613212017-iyml10t",
-				"updated": "20260613212017"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ドキュメントを開くと、エディタ下部のステータスバーとドキュメント詳細メニューで統計情報を確認できます。"
+					"Data": "デスクトップでは、ドキュメントを開くと、エディタ下部のステータスバーとドキュメント詳細メニューで統計情報を確認できます。"
 				}
 			]
 		},
@@ -201,7 +201,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613212017-6xc2pah",
-				"updated": "20260613212017"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613212017-hiyv7rq",
-				"updated": "20260613212017"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -224,7 +224,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "︙"
 				},
 				{

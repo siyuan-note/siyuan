@@ -1,7 +1,7 @@
 import {editorConfigApi} from "../tabs/editorRuntime";
 import {fileConfigApi} from "../tabs/fileRuntime";
 import {flashcardConfigApi} from "../tabs/flashcardRuntime";
-import {aiConfigApi} from "../tabs/aiRuntime";
+import {aiConfigApi} from "../tabs/ai/aiRuntime";
 import {secretsConfigApi} from "../tabs/secretsVariablesRuntime";
 import {exportConfigApi} from "../tabs/exportRuntime";
 import {searchConfigApi} from "../tabs/searchRuntime";
@@ -14,14 +14,11 @@ import {collectBazaarTabSearchStrings, mountBazaarTab} from "../bazaar";
 import {collectKeymapTabSearchStrings, mountKeymapTab} from "../tabs/keymapUi";
 /// #endif
 import {isHuawei, isInHarmony} from "../../protyle/util/compatibility";
-/// #if MOBILE
-import {isDisabledFeature} from "../../protyle/util/compatibility";
-/// #endif
 import {SettingBuilder, type SettingTab} from "./builder";
 import {registerEditorTab} from "../tabs/editorTab";
 import {registerFileTab} from "../tabs/fileTab";
 import {registerFlashcardTab} from "../tabs/flashcardTab";
-import {registerAiTab} from "../tabs/aiTab";
+import {registerAiTab} from "../tabs/ai/aiTab";
 import {registerSecretsVariablesTab} from "../tabs/secretsVariablesTab";
 import {registerExportTab} from "../tabs/exportTab";
 import {registerSearchTab} from "../tabs/searchTab";
@@ -72,9 +69,6 @@ const settingTabs = {
         icon: "iconSparkles",
         title: () => window.siyuan.languages.ai,
         defaultSave: aiConfigApi.patch,
-        /// #if MOBILE
-        hidden: () => isHuawei() || isDisabledFeature("ai"),
-        /// #endif
     }, registerAiTab),
     secretsVariables: setting.tab({
         id: "secretsVariables",

@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@
 package util
 
 import (
+	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -40,6 +41,10 @@ const (
 	TLSCAKeyFilename  = "ca.key"
 	TLSCertFilename   = "cert.pem"
 	TLSKeyFilename    = "key.pem"
+
+	tlsCertRenewBefore = 7 * 24 * time.Hour
+	tlsCertBackdate    = 5 * time.Minute
+	tlsServerCertValid = 365 * 24 * time.Hour
 )
 
 // GetOrCreateTLSCert returns paths to existing TLS certificates or generates new ones signed by a local CA.
@@ -49,6 +54,11 @@ func GetOrCreateTLSCert() (certPath, keyPath string, err error) {
 	keyPath = filepath.Join(ConfDir, TLSKeyFilename)
 	caCertPath := filepath.Join(ConfDir, TLSCACertFilename)
 	caKeyPath := filepath.Join(ConfDir, TLSCAKeyFilename)
+
+	if hasTLSCertManager(certPath, keyPath) {
+		logging.LogInfof("using active TLS certificate manager for [%s]", ConfDir)
+		return certPath, keyPath, nil
+	}
 
 	if !gulu.File.IsExist(caCertPath) || !gulu.File.IsExist(caKeyPath) {
 		logging.LogInfof("generating local CA for TLS...")
@@ -100,7 +110,7 @@ func validateCert(certPath string) bool {
 	}
 
 	// Check if certificate is still valid, with 7 day buffer
-	if !time.Now().Add(7 * 24 * time.Hour).Before(cert.NotAfter) {
+	if !time.Now().Add(tlsCertRenewBefore).Before(cert.NotAfter) {
 		return false
 	}
 
@@ -170,26 +180,32 @@ func generateServerCert(certPath, keyPath string, caCert *x509.Certificate, caKe
 		return err
 	}
 
-	serialNumber, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
+	var existingIPs []net.IP
+	var existingDNSNames []string
+	if existingCert, loadErr := loadX509Certificate(certPath); loadErr == nil {
+		existingIPs = existingCert.IPAddresses
+		existingDNSNames = existingCert.DNSNames
+	}
+
+	ipAddresses := collectServerCertificateIPs(existingIPs, nil)
+	dnsNames := collectServerCertificateDNSNames(existingDNSNames)
+	certDER, _, err := createServerCertificate(caCert, caKey, privateKey, ipAddresses, dnsNames)
 	if err != nil {
 		return err
 	}
 
-	notBefore := time.Now()
-	notAfter := notBefore.Add(365 * 24 * time.Hour)
+	return writeCertAndKey(certPath, keyPath, certDER, privateKey)
+}
 
-	ipAddresses := []net.IP{
-		net.ParseIP("127.0.0.1"),
-		net.IPv6loopback,
+func createServerCertificate(caCert *x509.Certificate, caKey any, privateKey crypto.Signer, ipAddresses []net.IP,
+	dnsNames []string) (certDER []byte, cert *x509.Certificate, err error) {
+	serialNumber, err := rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 128))
+	if err != nil {
+		return nil, nil, err
 	}
 
-	localIPs := extractIPsFromServerAddrs()
-	for _, ipStr := range localIPs {
-		ipStr = trimIPv6Brackets(ipStr)
-		if ip := net.ParseIP(ipStr); ip != nil {
-			ipAddresses = append(ipAddresses, ip)
-		}
-	}
+	notBefore := time.Now().Add(-tlsCertBackdate)
+	notAfter := notBefore.Add(tlsServerCertValid)
 
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
@@ -202,16 +218,33 @@ func generateServerCert(certPath, keyPath string, caCert *x509.Certificate, caKe
 		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		BasicConstraintsValid: true,
-		DNSNames:              []string{"localhost"},
+		DNSNames:              dnsNames,
 		IPAddresses:           ipAddresses,
 	}
 
-	certDER, err := x509.CreateCertificate(rand.Reader, &template, caCert, &privateKey.PublicKey, caKey)
+	certDER, err = x509.CreateCertificate(rand.Reader, &template, caCert, privateKey.Public(), caKey)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	return writeCertAndKey(certPath, keyPath, certDER, privateKey)
+	cert, err = x509.ParseCertificate(certDER)
+	if err != nil {
+		return nil, nil, err
+	}
+	return certDER, cert, nil
+}
+
+func loadX509Certificate(certPath string) (*x509.Certificate, error) {
+	certPEM, err := os.ReadFile(certPath)
+	if err != nil {
+		return nil, err
+	}
+
+	block, _ := pem.Decode(certPEM)
+	if block == nil {
+		return nil, fmt.Errorf("failed to decode certificate PEM")
+	}
+	return x509.ParseCertificate(block.Bytes)
 }
 
 // Loads the CA certificate and private key from files

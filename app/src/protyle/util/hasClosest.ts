@@ -116,8 +116,9 @@ export const isBlockElement = (nodeElement: Element) => {
     return nodeElement && nodeElement.tagName !== "BUTTON" && nodeElement.getAttribute("data-type")?.startsWith("Node");
 };
 
-export const isInEmbedBlock = (element: Element) => {
-    const embedElement = hasTopClosestByAttribute(element, "data-type", "NodeBlockQueryEmbed");
+export const isInEmbedBlock = (element: Element, top = true) => {
+    const embedElement = top ? hasTopClosestByAttribute(element, "data-type", "NodeBlockQueryEmbed") :
+        hasClosestByAttribute(element, "data-type", "NodeBlockQueryEmbed");
     if (embedElement) {
         if (embedElement === element) {
             return false;

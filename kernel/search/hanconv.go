@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@ package search
 
 import (
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -30,7 +30,7 @@ func init() {
 		hanSimpToTrads[s] = append(hanSimpToTrads[s], t)
 	}
 	for _, ts := range hanSimpToTrads {
-		sort.Slice(ts, func(i, j int) bool { return ts[i] < ts[j] })
+		slices.Sort(ts)
 	}
 }
 
@@ -63,4 +63,20 @@ func hanInsensitiveRegexp(k string) string {
 		b.WriteString("]")
 	}
 	return b.String()
+}
+
+// NormalizeSearchText 按搜索设置归一化文本，用于全文索引之外的文本匹配。
+func NormalizeSearchText(text string, caseSensitive, hanSensitive bool) string {
+	if !hanSensitive {
+		text = strings.Map(func(r rune) rune {
+			if simplified, ok := hanTradToSimp[r]; ok {
+				return simplified
+			}
+			return r
+		}, text)
+	}
+	if !caseSensitive {
+		text = strings.ToLower(text)
+	}
+	return text
 }

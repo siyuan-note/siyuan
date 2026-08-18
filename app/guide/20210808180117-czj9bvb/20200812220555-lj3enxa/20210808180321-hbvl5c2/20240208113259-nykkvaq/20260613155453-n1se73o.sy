@@ -6,7 +6,7 @@
 		"id": "20260613155453-n1se73o",
 		"title": "字段类型",
 		"type": "doc",
-		"updated": "20260613194225"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -1602,7 +1602,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-r1eaue4",
-				"updated": "20260613155453"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1641,7 +1641,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-ruxy5mq",
-				"updated": "20260613155453"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1694,7 +1694,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-mg0ergn",
-						"updated": "20260613155453"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1702,7 +1702,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-lf0ybif",
-								"updated": "20260613155453"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -1716,8 +1716,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Shift+回车"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "回车"
 								},
 								{
 									"Type": "NodeText",
@@ -4697,7 +4706,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613155453-eo92b8h",
-				"updated": "20260613155453"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -4736,7 +4745,7 @@
 			},
 			"Properties": {
 				"id": "20260613155453-pixtc5s",
-				"updated": "20260613155453"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -4872,7 +4881,7 @@
 					},
 					"Properties": {
 						"id": "20260613155453-oqnhrcm",
-						"updated": "20260613155453"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -4880,7 +4889,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613155453-bf3j5d9",
-								"updated": "20260613155453"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
@@ -4890,7 +4899,43 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：与「模板片段」不同，此模板仅作用于数据库条目默认值填充"
+									"Data": "：与「模板片段」不同，此模板仅作用于数据库条目默认值填充。模板字段中的 HTML 内容默认会进行安全过滤；如需执行脚本，请开启 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "编辑器"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "高级"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "允许执行 HTML 内容中的脚本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，但请确认代码安全后再开启，以免遭遇跨站脚本攻击（XSS）"
 								}
 							]
 						}

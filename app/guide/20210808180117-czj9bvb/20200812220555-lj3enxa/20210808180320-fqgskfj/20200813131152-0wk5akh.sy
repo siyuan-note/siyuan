@@ -6,7 +6,7 @@
 		"id": "20200813131152-0wk5akh",
 		"title": "在内容块中遨游",
 		"type": "doc",
-		"updated": "20250115164127"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -14,7 +14,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104090757-ig8gk5o"
+				"id": "20210104090757-ig8gk5o",
+				"updated": "20260809160000"
 			},
 			"Children": [
 				{
@@ -133,16 +134,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210428224949-wtjqkhb",
-				"updated": "20210428224956"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "缩放聚焦"
+					"Data": "聚焦"
 				}
 			]
 		},
@@ -158,7 +155,7 @@
 			},
 			"Properties": {
 				"id": "20210428224957-oo7psl0",
-				"updated": "20220312233009"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -174,7 +171,7 @@
 					},
 					"Properties": {
 						"id": "20210428225914-90sbntd",
-						"updated": "20220312233009"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -182,12 +179,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210428225914-t100jk1",
-								"updated": "20220312233009"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在块标上右键下拉菜单中选择聚焦后，编辑器会聚焦到该内容块上"
+									"Data": "在块标菜单中选择聚焦后，编辑器会聚焦到该内容块"
 								}
 							]
 						}
@@ -287,7 +284,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20200920194146-psjundj"
+				"id": "20200920194146-psjundj",
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -304,12 +302,40 @@
 			"ID": "20210106201752-1nedfs6",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210106201752-1nedfs6"
+				"id": "20210106201752-1nedfs6",
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "反向链接是文档级的，列出当前文档中内容块被引用和被提及所在的块。"
+					"Data": "反向链接按文档计算，列出引用或提及当前文档中内容块的块。是否包含子块由 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "反向链接包含子块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 控制。"
 				}
 			]
 		},
@@ -318,7 +344,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210106201308-l8nlq6w"
+				"id": "20210106201308-l8nlq6w",
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -343,7 +370,7 @@
 			},
 			"Properties": {
 				"id": "20210104090757-g5onw59",
-				"updated": "20210908144139"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -359,7 +386,7 @@
 					},
 					"Properties": {
 						"id": "20210104090757-pb550rg",
-						"updated": "20210908144139"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -367,12 +394,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210205172718-90wokcr",
-								"updated": "20210908144139"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "鼠标悬浮块引用前面的标识会弹出预览浮窗"
+									"Data": "将鼠标悬浮在反链列表的来源文档或反链内容的块标上可进行预览"
 								}
 							]
 						}
@@ -391,7 +418,7 @@
 					},
 					"Properties": {
 						"id": "20210104090757-91fwrlj",
-						"updated": "20210908144057"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -399,12 +426,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210205172718-s191x9n",
-								"updated": "20210908144057"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "单击反链列表中的块引用进行跳转"
+									"Data": "单击来源文档可展开上下文，再单击上下文中的引用块进行跳转"
 								}
 							]
 						}
@@ -417,7 +444,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210106201736-oyu11fw"
+				"id": "20210106201736-oyu11fw",
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -435,7 +463,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210106201743-z1iz0ce",
-				"updated": "20221026221118"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -467,7 +495,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中设置搜索范围），搜索结果为包含这些关键字的内容块。"
+					"Data": " ​ 中设置搜索范围），搜索结果为包含这些关键字的内容块。"
 				}
 			]
 		},

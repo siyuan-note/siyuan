@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -26,6 +26,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/spf13/cobra"
@@ -41,6 +42,9 @@ func absPath(rel string) (string, error) {
 	abs := filepath.Join(util.WorkspaceDir, rel)
 	if !gulu.File.IsSubPath(util.WorkspaceDir, abs) {
 		return "", fmt.Errorf("path escapes workspace: %s", rel)
+	}
+	if boxID := model.EncryptedRawPathBoxID(abs); boxID != "" {
+		return "", fmt.Errorf("path belongs to encrypted notebook [%s]: %s", boxID, rel)
 	}
 	return abs, nil
 }
@@ -436,7 +440,7 @@ func expandGlobBrace(pattern string) []string {
 	body := pattern[i+1 : j]
 	suffix := pattern[j+1:]
 	var result []string
-	for _, opt := range strings.Split(body, ",") {
+	for opt := range strings.SplitSeq(body, ",") {
 		result = append(result, expandGlobBrace(prefix+strings.TrimSpace(opt)+suffix)...)
 	}
 	return result

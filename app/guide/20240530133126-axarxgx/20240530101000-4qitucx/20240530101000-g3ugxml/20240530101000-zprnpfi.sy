@@ -5,9 +5,9 @@
 	"Properties": {
 		"ID": "20240530101000-qx6a010",
 		"id": "20240530101000-zprnpfi",
-		"title": "ハイパーリンク",
+		"title": "ブロックハイパーリンク",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"Properties": {
 				"ID": "20240530101000-s870g9d",
 				"id": "20240530101000-atz1u4t",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -96,12 +96,12 @@
 			"Properties": {
 				"ID": "20240530101000-y7kv4lp",
 				"id": "20240530101000-ttimz1h",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "クエリ文字列にパラメータ "
+					"Data": "対応するクエリパラメータには、フォーカスして開く "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -110,16 +110,52 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ ("
+					"Data": " と、全画面で開く "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan://blocks/{id}?focus=1"
+					"TextMarkTextContent": "fullscreen=1"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​) を追加すると、フォーカスされた状態で開きます。"
+					"Data": " があります。データベース項目のハイパーリンクには "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "avItemID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "avViewID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "avGroupID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " も含まれます。これらは通常、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "項目のハイパーリンクをコピー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " によって自動生成されます。"
 				}
 			]
 		},
@@ -130,7 +166,7 @@
 			"Properties": {
 				"ID": "20240530101000-hjna0sl",
 				"id": "20240530101000-7tdwl9i",
-				"updated": "20240530101000"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -146,7 +182,7 @@
 			"Properties": {
 				"ID": "20240530101000-x3tl5bx",
 				"id": "20240530101000-s94kv5d",
-				"updated": "20240530101000"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -459,7 +495,7 @@
 					"Properties": {
 						"ID": "20240530101000-oqj9m0v",
 						"id": "20240530101000-1cgvrp3",
-						"updated": "20240530101000"
+						"updated": "20260803165036"
 					},
 					"Children": [
 						{
@@ -468,12 +504,12 @@
 							"Properties": {
 								"ID": "20240530101000-95qb9b9",
 								"id": "20240530101000-dxmqbet",
-								"updated": "20240530101000"
+								"updated": "20260803165036"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -500,7 +536,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ でリンクをコピーします"
+									"Data": " ​ でリンクをコピーします"
 								}
 							]
 						}

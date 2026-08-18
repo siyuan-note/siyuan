@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -75,8 +75,11 @@ var documentCreateCmd = &cobra.Command{
 		if title == "" {
 			return fmt.Errorf("--title is required")
 		}
-		if dir == "" {
-			dir = "/"
+		dir = normalizeDocumentCreateParentPath(dir)
+		id := ast.NewNodeID()
+		docPath := path.Join(dir, id+".sy")
+		if err := model.ValidateCreateDoc(notebook, docPath, title); err != nil {
+			return formatNotebookWriteError(notebook, err)
 		}
 
 		if dryRun {
@@ -84,16 +87,21 @@ var documentCreateCmd = &cobra.Command{
 			return nil
 		}
 
-		id := ast.NewNodeID()
-		docPath := path.Join(dir, id+".sy")
 		_, err := model.CreateDocByMd(notebook, docPath, title, markdown, nil, nil)
 		if err != nil {
-			return err
+			return formatNotebookWriteError(notebook, err)
 		}
 		model.AppendPushCreateEntry(notebook, docPath)
 		fmt.Println(id)
 		return nil
 	},
+}
+
+func normalizeDocumentCreateParentPath(parentPath string) string {
+	if "" == parentPath {
+		return "/"
+	}
+	return strings.TrimSuffix(path.Clean(parentPath), ".sy")
 }
 
 var documentGetCmd = &cobra.Command{
@@ -124,19 +132,12 @@ var documentGetCmd = &cobra.Command{
 			fmt.Println(string(data))
 		default:
 			fmt.Printf("ID:       %s\n", block.ID)
-			fmt.Printf("Title:    %s\n", block.Name)
+			fmt.Printf("Title:    %s\n", block.Content)
 			fmt.Printf("Type:     %s\n", block.Type)
 			fmt.Printf("Box:      %s\n", block.Box)
 			fmt.Printf("HPath:    %s\n", block.HPath)
 			fmt.Printf("Created:  %s\n", block.Created)
 			fmt.Printf("Updated:  %s\n", block.Updated)
-			if block.Content != "" {
-				preview := block.Content
-				if len(preview) > 200 {
-					preview = preview[:200] + "..."
-				}
-				fmt.Printf("Content:  %s\n", preview)
-			}
 		}
 		return nil
 	},
@@ -160,7 +161,9 @@ var documentRemoveCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		model.RemoveDoc(tree.Box, tree.Path)
+		if err = model.RemoveDoc(tree.Box, tree.Path); err != nil {
+			return err
+		}
 		model.AppendPushRemoveEntry(tree.Box, tree.Path, id)
 		parentPath := path.Dir(tree.Path) + ".sy"
 		if parentPath != "/.sy" {
@@ -214,16 +217,21 @@ var documentMoveCmd = &cobra.Command{
 			return fmt.Errorf("--id and --notebook are required")
 		}
 
+		tree, err := model.LoadTreeByBlockID(id)
+		if err != nil {
+			return err
+		}
+		targetPath, err := resolveDocumentMovePath(toNotebook, toPath, hpath, tree.HPath)
+		if err != nil {
+			return err
+		}
+
 		if dryRun {
 			fmt.Printf("[dry-run] Would move document %s to notebook %s\n", id, toNotebook)
 			return nil
 		}
 
-		tree, err := model.LoadTreeByBlockID(id)
-		if err != nil {
-			return err
-		}
-		if err := model.MoveDocs([]string{tree.Path}, toNotebook, resolvePath(toNotebook, toPath, hpath), nil); err != nil {
+		if err := model.MoveDocs([]string{tree.Path}, toNotebook, targetPath, nil); err != nil {
 			return err
 		}
 		model.AppendPushReloadFiletreeEntry()
@@ -276,7 +284,7 @@ var documentInfoCmd = &cobra.Command{
 		default:
 			fmt.Printf("ID:           %s\n", info.ID)
 			fmt.Printf("RootID:       %s\n", info.RootID)
-			fmt.Printf("Name:         %s\n", info.Name)
+			fmt.Printf("Title:        %s\n", info.Name)
 			fmt.Printf("RefCount:     %d\n", info.RefCount)
 			fmt.Printf("SubFileCount: %d\n", info.SubFileCount)
 		}
@@ -294,6 +302,46 @@ func resolvePath(boxID, userPath, hpath string) string {
 		}
 	}
 	return "/"
+}
+
+func resolveDocumentMovePath(boxID, userPath, hpath, sourceHPath string) (string, error) {
+	return resolveDocumentMovePathWithLookup(userPath, hpath, sourceHPath, func(targetHPath string) (string, bool) {
+		bt := treenode.GetBlockTreeRootByHPath(boxID, targetHPath)
+		if nil == bt {
+			return "", false
+		}
+		return bt.Path, true
+	})
+}
+
+func resolveDocumentMovePathWithLookup(
+	userPath, hpath, sourceHPath string,
+	lookup func(string) (string, bool),
+) (string, error) {
+	if "" != userPath {
+		return userPath, nil
+	}
+	if "" == hpath {
+		return "/", nil
+	}
+
+	targetHPath := path.Clean("/" + strings.TrimPrefix(hpath, "/"))
+	if "/" == targetHPath {
+		return "/", nil
+	}
+
+	sourceTitle := path.Base(path.Clean(sourceHPath))
+	if sourceTitle == path.Base(targetHPath) {
+		targetHPath = path.Dir(targetHPath)
+		if "/" == targetHPath {
+			return "/", nil
+		}
+	}
+
+	if targetPath, found := lookup(targetHPath); found {
+		return targetPath, nil
+	}
+	return "", fmt.Errorf("target human-readable path not found: %s", targetHPath)
 }
 
 var documentSearchCmd = &cobra.Command{
@@ -316,15 +364,24 @@ var documentSearchCmd = &cobra.Command{
 				return nil
 			}
 			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-			fmt.Fprintln(w, "NAME\tID\tHPATH")
+			fmt.Fprintln(w, "TYPE\tID\tNAME\tHPATH")
 			for _, d := range docs {
-				fmt.Fprintf(w, "%s\t%s\t%s\n", d["name"], d["id"], d["hPath"])
+				typ, id, name := documentSearchDisplayFields(d)
+				fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", typ, id, name, d["hPath"])
 			}
 			w.Flush()
 			fmt.Printf("\n%d document(s)\n", len(docs))
 		}
 		return nil
 	},
+}
+
+func documentSearchDisplayFields(doc map[string]string) (typ, id, name string) {
+	hPath := strings.TrimSuffix(doc["hPath"], "/")
+	if "/" == doc["path"] {
+		return "NOTEBOOK", doc["box"], path.Base(hPath)
+	}
+	return "DOCUMENT", strings.TrimSuffix(path.Base(doc["path"]), ".sy"), path.Base(hPath)
 }
 
 func printDocumentTable(files []*model.File) {
@@ -370,5 +427,3 @@ func init() {
 	documentCmd.AddCommand(documentInfoCmd)
 	documentCmd.AddCommand(documentSearchCmd)
 }
-
-

@@ -1,6 +1,7 @@
 import {Constants} from "../../constants";
 import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
+import {openMobileOnboarding} from "../../onboarding";
 import {validateName} from "../../editor/rename";
 import {getEventName} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
@@ -18,12 +19,14 @@ import {MobileTags} from "../dock/MobileTags";
 import {activeBlur, initKeyboardToolbar} from "./keyboardToolbar";
 import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {MobileCustom} from "../dock/MobileCustom";
 import {Menu} from "../../plugin/Menu";
 import {showMessage} from "../../dialog/message";
 import {setTitle} from "../../util/processTitle";
+import {activateQueuedAVLocate, queueAVLocateRequest} from "../../protyle/render/av/locate";
+import {MobileTabs} from "../tabs/MobileTabs";
 
 let custom: MobileCustom;
 const openDockMenu = (app: App) => {
@@ -58,9 +61,9 @@ const openDockMenu = (app: App) => {
     }
 };
 
-export const initFramework = (app: App, isStart: boolean) => {
+export const initFramework = async (app: App, isStart: boolean) => {
     setInlineStyle();
-    renderSnippet();
+    const snippetReady = renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD);
     initKeyboardToolbar();
     const sidebarElement = document.getElementById("sidebar");
     // 不能使用 getEventName，否则点击返回会展开右侧栏
@@ -102,12 +105,7 @@ export const initFramework = (app: App, isStart: boolean) => {
                             isPreview: window.siyuan.mobile.editor ? !window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none") : false
                         });
                     } else {
-                        fetchPost("/api/outline/getDocOutline", {
-                            id: window.siyuan.mobile.editor.protyle.block.rootID,
-                            preview: window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")
-                        }, response => {
-                            window.siyuan.mobile.docks.outline.update(response);
-                        });
+                        window.siyuan.mobile.docks.outline.reload();
                     }
                 } else if (type === "sidebar-backlink-tab") {
                     if (!window.siyuan.mobile.docks.backlink) {
@@ -145,6 +143,7 @@ export const initFramework = (app: App, isStart: boolean) => {
             }
         });
     });
+    await snippetReady;
     window.siyuan.mobile.docks.file = new MobileFiles(app);
     document.getElementById("toolbarFile").addEventListener("click", () => {
         if (getCurrentEditor()?.protyle.toolbar.isMultiSelectMode()) {
@@ -154,12 +153,7 @@ export const initFramework = (app: App, isStart: boolean) => {
         sidebarElement.style.transform = "translateX(0px)";
         const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");
         if (type === "sidebar-outline-tab") {
-            fetchPost("/api/outline/getDocOutline", {
-                id: window.siyuan.mobile.editor.protyle.block.rootID,
-                preview: window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")
-            }, response => {
-                window.siyuan.mobile.docks.outline.update(response);
-            });
+            window.siyuan.mobile.docks.outline.reload();
         } else if (type === "sidebar-backlink-tab") {
             window.siyuan.mobile.docks.backlink.update();
         } else if (type === "sidebar-bookmark-tab") {
@@ -178,23 +172,52 @@ export const initFramework = (app: App, isStart: boolean) => {
     document.getElementById("modelClose").addEventListener("click", () => {
         closeModel();
     });
+    window.siyuan.mobile.tabs = new MobileTabs(app);
+    const toolbarTabsElement = document.getElementById("toolbarTabs");
+    toolbarTabsElement.setAttribute("aria-label", window.siyuan.languages.mobileTabs);
+    toolbarTabsElement.addEventListener("click", () => {
+        activeBlur();
+        window.siyuan.mobile.tabs.openOverview();
+    });
     initEditorName();
+    if (isStart && window.siyuan.config.fileTree.tabStartupMode === 2) {
+        window.siyuan.mobile.tabs.closeAll();
+    } else {
+        await window.siyuan.mobile.tabs.removeMissingTabs();
+    }
     if (getOpenNotebookCount() > 0) {
         if (window.JSAndroid && window.openFileByURL(window.JSAndroid.getBlockURL())) {
             return;
         }
         const info = parseUriInfo();
         if (info.id) {
-            openMobileFileById(app, info.id,
-                info.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+            if (info.avItemID) {
+                queueAVLocateRequest(info.id, {
+                    itemID: info.avItemID,
+                    viewID: info.avViewID,
+                    groupID: info.avGroupID,
+                });
+            }
+            openMobileFileById(app, info.id, info.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
+                (info.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]),
+            undefined, undefined, info.avItemID ? (protyle) => activateQueuedAVLocate(protyle, info.id) : undefined);
             return;
         }
-        if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {
-            setEmpty(app);
+        if (openMobileOnboarding(app)) {
+            return;
+        }
+        if (isStart && window.siyuan.config.fileTree.tabStartupMode === 1) {
+            window.siyuan.mobile.tabs.activateStartupBlank();
+            return;
+        }
+        if (isStart && window.siyuan.config.fileTree.tabStartupMode === 2) {
+            return;
+        }
+        if (await window.siyuan.mobile.tabs.restore()) {
             return;
         }
         const localDoc = window.siyuan.storage[Constants.LOCAL_DOCINFO];
-        fetchPost("/api/block/checkBlockExist", {id: localDoc.id}, existResponse => {
+        fetchPost("/api/block/checkBlockExist", {id: localDoc?.id}, existResponse => {
             if (existResponse.data) {
                 openMobileFileById(app, localDoc.id, [Constants.CB_GET_SCROLL]);
             } else {
@@ -211,7 +234,11 @@ export const initFramework = (app: App, isStart: boolean) => {
         });
         return;
     }
-    setEmpty(app);
+    if (isStart && window.siyuan.config.fileTree.tabStartupMode === 1) {
+        window.siyuan.mobile.tabs.activateStartupBlank();
+    } else {
+        setEmpty(app);
+    }
 };
 
 const initEditorName = () => {

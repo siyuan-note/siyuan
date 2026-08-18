@@ -1,7 +1,7 @@
 <p align="center">
 <img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
 <br>
-<em>Düşünceni Yeniden Şekillendir</em>
+<em>Düşünceden içgörüye, ajanlarla birlikte</em>
 <br><br>
 <a title="Derleme Durumu" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
 <a title="Sürümler" target="_blank" href="https://github.com/siyuan-note/siyuan/releases"><img src="https://img.shields.io/github/release/siyuan-note/siyuan.svg?style=flat-square&color=9CF"></a>
@@ -18,8 +18,7 @@
 <a title="GitHub Commit'leri" target="_blank" href="https://github.com/siyuan-note/siyuan/commits/master"><img src="https://img.shields.io/github/commit-activity/m/siyuan-note/siyuan.svg?style=flat-square"></a>
 <a title="Son Commit" target="_blank" href="https://github.com/siyuan-note/siyuan/commits/master"><img src="https://img.shields.io/github/last-commit/siyuan-note/siyuan.svg?style=flat-square&color=FF9900"></a>
 <br><br>
-<a title="Twitter" target="_blank" href="https://twitter.com/b3logos"><img alt="Twitter Takip" src="https://img.shields.io/twitter/follow/b3logos?label=Takip%20Et&style=social"></a>
-<a title="Discord" target="_blank" href="https://discord.gg/dmMbCqVX7G"><img alt="Discord'da Sohbet Et" src="https://img.shields.io/discord/808152298789666826?label=Discord&logo=Discord&style=social"></a>
+<a title="X" target="_blank" href="https://x.com/b3logos"><img alt="X Takip" src="https://img.shields.io/twitter/follow/b3logos?label=Takip%20Et&style=social"></a>
 <br><br>
 <a href="https://trendshift.io/repositories/3949" target="_blank"><img src="https://trendshift.io/api/badge/repositories/3949" alt="siyuan-note%2Fsiyuan | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
 </p>
@@ -38,7 +37,6 @@
 - [💡 Giriş](#-giriş)
 - [🔮 Özellikler](#-özellikler)
 - [🏗️ Mimari ve Ekosistem](#-mimari-ve-ekosistem)
-- [🌟 Yıldız Geçmişi](#-yıldız-geçmişi)
 - [🗺️ Yol Haritası](#️-yol-haritası)
 - [🚀 İndirme ve Kurulum](#-indirme-ve-kurulum)
   - [Uygulama Mağazası](#uygulama-mağazası)
@@ -47,7 +45,7 @@
   - [Docker Barındırma](#docker-barındırma)
   - [Unraid Barındırma](#unraid-barındırma)
   - [TrueNAS Barındırma](#truenas-barındırma)
-  - [Erken Önizleme (Insider Preview)](#erken-önizleme-insider-preview)
+  - [Test Kanalları](#test-kanalları)
 - [⌨️ Komut Satırı Arayüzü](#-komut-satırı-arayüzü)
 - [🏘️ Topluluk](#️-topluluk)
 - [🛠️ Geliştirme Rehberi](#️-geliştirme-rehberi)
@@ -69,13 +67,11 @@
 SiYuan, gizliliği ön planda tutan kişisel bir bilgi yönetim sistemidir.  
 Blok düzeyinde referansları ve Markdown WYSIWYG düzenlemeyi destekler.
 
-Daha fazla bilgi için [SiYuan İngilizce Tartışma Forumu](https://liuyun.io)’na katılabilirsin.
+![feature0.png](screenshots/feature0.png)
 
-Çevrimiçi kullanıcı rehberi: [English](https://siyuan-en.b3log.org/)
+![feature5-1.png](screenshots/feature5-1.png)
 
-![feature0.png](https://b3logfile.com/file/2025/11/feature0-GfbhEqf.png)
-
-![feature51.png](https://b3logfile.com/file/2025/11/feature5-1-7DJSfEP.png)
+Daha fazla bilgi için [çevrimiçi kullanıcı rehberini](https://siyuan-en.b3log.org/) inceleyebilir veya [SiYuan İngilizce Tartışma Forumu](https://liuyun.io)’na katılabilirsin.
 
 ## 🔮 Özellikler
 
@@ -110,14 +106,14 @@ Daha fazla bilgi için [SiYuan İngilizce Tartışma Forumu](https://liuyun.io)�
 - JavaScript/CSS kod parçacıkları
 - Android / iOS / HarmonyOS uygulamaları
 - Docker dağıtımı
-- [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
+- [API](https://github.com/siyuan-note/siyuan/blob/master/docs/API.md)
 - Topluluk pazaryeri
 
 Bazı özellikler yalnızca ücretli üyeler için geçerlidir. Detaylar için [Fiyatlandırma](https://b3log.org/siyuan/en/pricing.html) sayfasına göz atabilirsin.
 
 ## 🏗️ Mimari ve Ekosistem
 
-![SiYuan Arch](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "SiYuan Arch")
+![SiYuan Arch](screenshots/SiYuan_Arch.png "SiYuan Arch")
 
 | Proje                                                    | Açıklama              | Çatallama (Forks)                                                              | Yıldız (Stars)                                                                     |
 |----------------------------------------------------------|-----------------------|--------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
@@ -130,16 +126,6 @@ Bazı özellikler yalnızca ücretli üyeler için geçerlidir. Detaylar için [
 | [ios](https://github.com/siyuan-note/siyuan-ios)         | iOS uygulaması        | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-ios)    | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-ios)   |
 | [harmony](https://github.com/siyuan-note/siyuan-harmony) | HarmonyOS uygulaması  | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-harmony)| ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-harmony)|
 | [riff](https://github.com/siyuan-note/riff)              | Aralıklı tekrar motoru| ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/riff)          | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/riff)         |
-
-## 🌟 Yıldız Geçmişi
-
-<a href="https://star-history.com/#siyuan-note/siyuan&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
-   <img alt="Yıldız Geçmişi Grafiği" src="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
- </picture>
-</a>
 
 ## 🗺️ Yol Haritası
 
@@ -366,9 +352,9 @@ services:
 
 </details>
 
-### Erken Önizleme (Insider Preview)
+### Test Kanalları
 
-Büyük güncellemelerden önce erken erişim (Insider Preview) sürümlerini yayınlıyoruz. Lütfen [https://github.com/siyuan-note/insider](https://github.com/siyuan-note/insider) adresini ziyaret edin.
+Ön sürümleri almak için `Ayarlar - Hakkında - Güncelleme kanalı` altında Beta veya Alpha seçeneğini belirleyin. Beta kanalı kararlı, RC ve Beta sürümlerini; Alpha kanalı ise tüm sürümleri alır. Test kanalları GitHub erişimi gerektirir.
 
 ## ⌨️ Komut Satırı Arayüzü
 
@@ -379,6 +365,9 @@ Yerleşik CLI ile sunucu başlatmadan çalışma alanı verilerine doğrudan eri
 ```bash
 siyuan notebook list -w ~/SiYuan
 siyuan search "keyword" -w ~/SiYuan -f json
+# Varlık dosyalarının içinde ara (PDF/Word/Excel/txt vb.)
+siyuan search "ifade" --asset -w ~/SiYuan
+siyuan search "ifade" --asset --ext pdf --ext docx -w ~/SiYuan
 siyuan export md --id <block-id> -w ~/SiYuan
 ```
 
@@ -389,9 +378,9 @@ siyuan export md --id <block-id> -w ~/SiYuan
 | Defterler ve Belgeler | `notebook`, `document`, `dailynote` — CRUD ve günlük notlar |
 | İçerik | `block`, `attr`, `outline` — blok okuma/yazma, nitelikler, ana hat |
 | Meta Veri | `tag`, `bookmark`, `template` — etiketler, yer imleri, şablon parçacıkları |
-| Sorgular | `search`, `sql` — tam metin ve SQL sorguları |
+| Sorgular | `search`, `sql` — tam metin, anlamsal, varlık içeriği ve SQL sorguları |
 | Referanslar | `ref` — geri bağlantılar ve bahsetmeler |
-| İçe/Dışa Aktarma | `export`, `import` — Markdown, HTML, preview, Word, .sy.zip, Data |
+| İçe/Dışa Aktarma | `export`, `import`, `inbox` — Markdown, HTML, preview, Word, .sy.zip, Data, bulut gelen kutusu |
 | Veri Yönetimi | `repo`, `history`, `sync` — anlık görüntüler, sürümler, bulut senkronizasyonu |
 | Araçlar | `asset`, `file` — kaynaklar ve dosya sistemi |
 | Veritabanı | `database` — öznitelik görünümü yönetimi |
@@ -451,11 +440,6 @@ Veriler, çalışma alanı klasöründeki `data` klasöründe saklanır:
 
 Bununla birlikte, üyelik avantajları kapsamında **üçüncü taraf bulut depolama hizmetleriyle bağlantı** desteklenmektedir.
 
-Alternatif olarak, verileri **elle dışa aktarıp içe aktararak** senkronizasyon sağlayabilirsin:
-
-- Masaüstü: <kbd>Ayarlar</kbd> → <kbd>Dışa Aktar</kbd> → <kbd>Verileri Dışa Aktar / Verileri İçe Aktar</kbd>  
-- Mobil: <kbd>Sağ panel</kbd> → <kbd>Hakkında</kbd> → <kbd>Verileri Dışa Aktar / Verileri İçe Aktar</kbd>
-
 ### SiYuan açık kaynak mı?
 
 Evet, SiYuan tamamen açık kaynaklıdır ve katkılara açıktır:
@@ -471,7 +455,7 @@ Daha fazla bilgi için [Geliştirme Rehberi](https://github.com/siyuan-note/siyu
 ### Yeni bir sürüme nasıl yükseltilir?
 
 - Uygulama mağazası üzerinden kurduysanız, güncellemeyi yine uygulama mağazası üzerinden yapın.  
-- Masaüstü kurulum paketiyle yüklediyseniz, <kbd>Ayarlar</kbd> → <kbd>Hakkında</kbd> → <kbd>Güncelleme kurulum paketini otomatik indir</kbd> seçeneğini etkinleştirin. Böylece SiYuan, en son sürüm kurulum paketini otomatik indirip yükleme uyarısı gösterecektir.  
+- Windows veya macOS'te masaüstü kurulum paketiyle yüklediyseniz, <kbd>Ayarlar</kbd> → <kbd>Hakkında</kbd> → <kbd>Güncelleme kurulum paketini otomatik indir</kbd> seçeneğini etkinleştirin. Böylece SiYuan, en son sürüm kurulum paketini otomatik indirip yükleme uyarısı gösterecektir.
 - Manuel yükleme yaptıysanız, en son kurulum paketini indirip yeniden yüklemeniz gerekir.
 
 Ayrıca, <kbd>Ayarlar</kbd> → <kbd>Hakkında</kbd> → <kbd>Geçerli Sürüm</kbd> sekmesinden <kbd>Güncellemeyi kontrol et</kbd> seçeneğini kullanabilir veya [Resmî İndirme Sayfası](https://b3log.org/siyuan/en/download.html) ya da [GitHub Sürümleri](https://github.com/siyuan-note/siyuan/releases) sayfalarını takip edebilirsiniz.
@@ -483,12 +467,12 @@ Liste öğesinin altındaki ilk alt blok, blok simgesi görünmeyen bloktur. İm
 ### Veri deposu anahtarı (data repo key) kaybolursa ne yapmalıyım?
 
 - Eğer daha önce birden fazla cihazda doğru şekilde başlatıldıysa, tüm cihazlarda aynı anahtar kullanılır. Bu durumda anahtarı şu adımlarla kopyalayabilirsin:
-  <kbd>Ayarlar</kbd> → <kbd>Hakkında</kbd> → <kbd>Veri deposu anahtarı</kbd> → <kbd>Anahtar dizgesini kopyala</kbd>  
+  <kbd>Ayarlar</kbd> → <kbd>Hesap ve Senkronizasyon</kbd> → <kbd>Yerel Veri Deposu</kbd> → <kbd>Veri deposu anahtarı</kbd> → <kbd>Anahtar dizgesini kopyala</kbd>
 
 - Eğer cihazlar arasında farklı anahtarlar kullanılmışsa veya hiçbiri erişilebilir değilse, aşağıdaki adımlarla yeni bir anahtar oluşturabilirsin:
 
   1. Verilerini manuel olarak yedekle (<kbd>Verileri Dışa Aktar</kbd> seçeneğiyle veya dosya sisteminde `workspace/data/` klasörünü kopyalayarak).  
-  2. <kbd>Ayarlar</kbd> → <kbd>Hakkında</kbd> → <kbd>Veri deposu anahtarı</kbd> → <kbd>Veri deposunu sıfırla</kbd>.  
+  2. <kbd>Ayarlar</kbd> → <kbd>Hesap ve Senkronizasyon</kbd> → <kbd>Yerel Veri Deposu</kbd> → <kbd>Veri deposu anahtarı</kbd> → <kbd>Veri deposunu sıfırla</kbd>.
   3. Anahtarı yeniden başlat. Bir cihazda oluşturduktan sonra diğer cihazlara bu anahtarı aktar.  
   4. Bulutta yeni senkronizasyon dizinini kullan; eski dizin artık erişilemez ve silinebilir.  
   5. Mevcut bulut anlık görüntüleri (snapshot) artık geçerli değildir, bunlar da silinebilir.

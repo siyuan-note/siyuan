@@ -4,9 +4,10 @@ import {fetchPost} from "../../util/fetch";
 import {sendGlobalShortcut} from "./keydown";
 import {ipcRenderer} from "electron";
 /// #endif
-import {App} from "../../index";
+import type {App} from "../../index";
 import {isMac, isNotCtrl, isOnlyMeta} from "../../protyle/util/compatibility";
 import {showPopover} from "../../block/popover";
+import {clearDisallowedKeymapItems} from "../../util/hotKeyPolicy";
 
 const matchKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -95,6 +96,21 @@ const hasKeymap = (keymap: Record<string, IKeymapItem>, key1: "general" | "edito
     return match;
 };
 
+const clearDisallowedKeymap = () => {
+    let changed = clearDisallowedKeymapItems(window.siyuan.config.keymap.general);
+    Object.values(window.siyuan.config.keymap.editor).forEach((keymap) => {
+        if (clearDisallowedKeymapItems(keymap)) {
+            changed = true;
+        }
+    });
+    Object.values(window.siyuan.config.keymap.plugin || {}).forEach((keymap) => {
+        if (clearDisallowedKeymapItems(keymap, true)) {
+            changed = true;
+        }
+    });
+    return changed;
+};
+
 export const correctHotkey = (app: App) => {
     if (!["darwin", "ios"].includes(window.siyuan.config.system.os)) {
         ["fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
@@ -103,6 +119,10 @@ export const correctHotkey = (app: App) => {
                 Constants.SIYUAN_KEYMAP.general[key].default.replace("⌃", "⌥");
         });
         Constants.SIYUAN_KEYMAP.editor.general.redo.custom = Constants.SIYUAN_KEYMAP.editor.general.redo.default = "⌘Y";
+        Constants.SIYUAN_KEYMAP.editor.general.selectToPageStart.custom =
+            Constants.SIYUAN_KEYMAP.editor.general.selectToPageStart.default = "⇧⌘Home";
+        Constants.SIYUAN_KEYMAP.editor.general.selectToPageEnd.custom =
+            Constants.SIYUAN_KEYMAP.editor.general.selectToPageEnd.default = "⇧⌘End";
     }
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");
@@ -117,9 +137,11 @@ export const correctHotkey = (app: App) => {
     const hasKeymap4 = hasKeymap(Constants.SIYUAN_KEYMAP.editor.heading, "editor", "heading");
     const hasKeymap5 = hasKeymap(Constants.SIYUAN_KEYMAP.editor.list, "editor", "list");
     const hasKeymap6 = hasKeymap(Constants.SIYUAN_KEYMAP.editor.table, "editor", "table");
+    const clearedDisallowedKeymap = clearDisallowedKeymap();
     if (!window.siyuan.config.readonly &&
         (!matchKeymap1 || !matchKeymap2 || !matchKeymap3 || !matchKeymap4 || !matchKeymap5 || !matchKeymap6 ||
-            !hasKeymap1 || !hasKeymap2 || !hasKeymap3 || !hasKeymap4 || !hasKeymap5 || !hasKeymap6)) {
+            !hasKeymap1 || !hasKeymap2 || !hasKeymap3 || !hasKeymap4 || !hasKeymap5 || !hasKeymap6 ||
+            clearedDisallowedKeymap)) {
         /// #if !BROWSER
         ipcRenderer.send(Constants.SIYUAN_CMD, {
             cmd: "writeLog",
@@ -145,6 +167,7 @@ export const filterHotkey = (event: KeyboardEvent, app: App) => {
     // 点击最近的文档列表会 dispatch keydown 的 Enter https://github.com/siyuan-note/siyuan/issues/12967
     if (event.isTrusted && isNotCtrl(event) && !event.shiftKey && !event.altKey &&
         !["INPUT", "TEXTAREA"].includes(target.tagName) &&
+        !target.isContentEditable &&
         ["0", "1", "2", "3", "4", "j", "k", "l", ";", "s", " ", "p", "enter", "a", "s", "d", "f", "q", "x"].includes(event.key.toLowerCase())) {
         let cardElement: Element;
         window.siyuan.dialogs.find(item => {

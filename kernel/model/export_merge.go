@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,8 +24,42 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
+const (
+	MergeDocHeadingModeFlat         = "flat"
+	MergeDocHeadingModeTree         = "tree"
+	MergeContentHeadingModePreserve = "preserve"
+	MergeContentHeadingModeDemote   = "demote"
+)
+
+type MergeHeadingOptions struct {
+	DocHeadingMode     string
+	ContentHeadingMode string
+}
+
+func mergeHeadingOptionsOrDefault(options []MergeHeadingOptions) (ret MergeHeadingOptions) {
+	if 0 < len(options) {
+		ret = options[0]
+	}
+
+	switch ret.DocHeadingMode {
+	case MergeDocHeadingModeFlat, MergeDocHeadingModeTree:
+	default:
+		ret.DocHeadingMode = ""
+	}
+	switch ret.ContentHeadingMode {
+	case MergeContentHeadingModeDemote:
+	default:
+		ret.ContentHeadingMode = MergeContentHeadingModePreserve
+	}
+	return
+}
+
+func mergeSubDocs(rootTree *parse.Tree, options MergeHeadingOptions, addRootTitle bool) (ret *parse.Tree, err error) {
 	ret = rootTree
+	if MergeContentHeadingModeDemote == options.ContentHeadingMode && addRootTitle {
+		demoteMergedContentHeadings(rootTree, 1)
+	}
+
 	rootBlock := &Block{Box: rootTree.Box, ID: rootTree.ID, Path: rootTree.Path, HPath: rootTree.HPath}
 	if err = buildBlockChildren(rootBlock); err != nil {
 		return
@@ -53,7 +87,7 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 
 	for {
 		i := 0
-		if err = walkBlock(insertPoint, rootBlock, i); err != nil {
+		if err = walkBlock(insertPoint, rootBlock, i, options, addRootTitle); err != nil {
 			return
 		}
 		if nil == rootBlock.Children {
@@ -69,15 +103,15 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 	return
 }
 
-func walkBlock(insertPoint *ast.Node, block *Block, level int) (err error) {
+func walkBlock(insertPoint *ast.Node, block *Block, level int, options MergeHeadingOptions, addRootTitle bool) (err error) {
 	level++
 	for i := len(block.Children) - 1; i >= 0; i-- {
 		c := block.Children[i]
-		if err = walkBlock(insertPoint, c, level); err != nil {
+		if err = walkBlock(insertPoint, c, level, options, addRootTitle); err != nil {
 			return
 		}
 
-		nodes, loadErr := loadTreeNodes(c.Box, c.Path, level)
+		nodes, loadErr := loadTreeNodes(c.Box, c.Path, level, options, addRootTitle)
 		if nil != loadErr {
 			return
 		}
@@ -97,16 +131,16 @@ func walkBlock(insertPoint *ast.Node, block *Block, level int) (err error) {
 	return
 }
 
-func loadTreeNodes(box string, p string, level int) (ret []*ast.Node, err error) {
+func loadTreeNodes(box string, p string, level int, options MergeHeadingOptions, addRootTitle bool) (ret []*ast.Node, err error) {
 	luteEngine := NewLute()
 	tree, err := filesys.LoadTree(box, p, luteEngine)
 	if err != nil {
 		return
 	}
 
-	hLevel := level
-	if 6 < level {
-		hLevel = 6
+	hLevel := mergedDocHeadingLevel(level, options.DocHeadingMode, addRootTitle)
+	if MergeContentHeadingModeDemote == options.ContentHeadingMode {
+		demoteMergedContentHeadings(tree, hLevel)
 	}
 
 	heading := &ast.Node{ID: tree.Root.ID, Type: ast.NodeHeading, HeadingLevel: hLevel}
@@ -118,8 +152,46 @@ func loadTreeNodes(box string, p string, level int) (ret []*ast.Node, err error)
 	return
 }
 
+func mergedDocHeadingLevel(depth int, mode string, addRootTitle bool) int {
+	level := depth
+	switch mode {
+	case MergeDocHeadingModeFlat:
+		level = 1
+	case MergeDocHeadingModeTree:
+		if addRootTitle {
+			level++
+		}
+	}
+	return min(6, max(1, level))
+}
+
+func demoteMergedContentHeadings(tree *parse.Tree, docHeadingLevel int) {
+	headings := collectOutlineHeadings(tree)
+	topLevel := 7
+	for _, heading := range headings {
+		if 0 < heading.HeadingLevel && heading.HeadingLevel < topLevel {
+			topLevel = heading.HeadingLevel
+		}
+	}
+	if 6 < topLevel {
+		return
+	}
+
+	delta := docHeadingLevel + 1 - topLevel
+	if delta <= 0 {
+		return
+	}
+	for _, heading := range headings {
+		heading.HeadingLevel = min(6, heading.HeadingLevel+delta)
+	}
+}
+
 func buildBlockChildren(block *Block) (err error) {
-	files, _, err := ListDocTree(block.Box, block.Path, util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
+	listPath := block.Path
+	if IsBoxDoc(block.Box, block.ID) {
+		listPath = "/"
+	}
+	files, _, err := ListDocTree(block.Box, listPath, util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
 	if err != nil {
 		return
 	}

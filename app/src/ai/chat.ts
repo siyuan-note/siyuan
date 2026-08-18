@@ -1,12 +1,12 @@
 import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
-import {fetchPost} from "../util/fetch";
-import {fillContent} from "./actions";
+import {clearAIEditorHistory, startAIWriting} from "./editor";
+import {showMessage} from "../dialog/message";
 
-export const AIChat = (protyle: IProtyle, element: Element) => {
+export const AIChat = (protyle: IProtyle, element: HTMLElement) => {
     const dialog = new Dialog({
         title: "✨ " + window.siyuan.languages.aiWriting,
-        content: `<div class="b3-dialog__content"><textarea class="b3-text-field fn__block"></textarea></div>
+        content: `<div class="b3-dialog__content fn__flex"><textarea class="b3-text-field fn__flex-1" style="resize:none"></textarea></div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
@@ -23,19 +23,17 @@ export const AIChat = (protyle: IProtyle, element: Element) => {
         dialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
-        let inputValue = inputElement.value;
-        fetchPost("/api/ai/chatGPT", {
-            msg: inputValue,
-        }, (response) => {
-            dialog.destroy();
-            let respContent = "";
-            if (response.data && "" !== response.data) {
-                respContent = "\n\n" + response.data;
-            }
-            if (inputValue === "Clear context") {
-                inputValue = "";
-            }
-            fillContent(protyle, `${inputValue}${respContent}`, [element]);
-        });
+        const inputValue = inputElement.value;
+        if (!inputValue.trim()) {
+            showMessage(window.siyuan.languages["_kernel"][142]);
+            return;
+        }
+        dialog.destroy();
+        if (inputValue === "Clear context") {
+            clearAIEditorHistory(protyle);
+            showMessage(window.siyuan.languages.clearContextSucc);
+            return;
+        }
+        startAIWriting(protyle, element, inputValue);
     });
 };

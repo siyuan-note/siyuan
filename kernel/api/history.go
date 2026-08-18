@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,8 @@ package api
 
 import (
 	"net/http"
+	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/88250/gulu"
@@ -161,6 +163,9 @@ func getDocHistoryContent(c *gin.Context) {
 		}
 		highlight = highlightVal
 	}
+	if !holdHistoryRequest(c, historyPath, ret) {
+		return
+	}
 	id, rootID, content, isLargeDoc, err := model.GetDocHistoryContent(historyPath, keyword, highlight)
 	if err != nil {
 		ret.Code = -1
@@ -176,6 +181,82 @@ func getDocHistoryContent(c *gin.Context) {
 	}
 }
 
+func diffDocVersions(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	leftArg, ok := arg["left"].(map[string]interface{})
+	if !ok {
+		ret.Code = -1
+		ret.Msg = "left document version is required"
+		return
+	}
+	rightArg, ok := arg["right"].(map[string]interface{})
+	if !ok {
+		ret.Code = -1
+		ret.Msg = "right document version is required"
+		return
+	}
+	left, ok := parseDocVersionRef(leftArg, ret)
+	if !ok {
+		return
+	}
+	right, ok := parseDocVersionRef(rightArg, ret)
+	if !ok {
+		return
+	}
+	boxIDs := map[string]struct{}{}
+	for _, ref := range []*model.DocVersionRef{left, right} {
+		boxID, resolveErr := model.ResolveDocVersionBoxID(ref)
+		if resolveErr != nil {
+			ret.Code = -1
+			ret.Msg = resolveErr.Error()
+			return
+		}
+		if boxID != "" {
+			boxIDs[boxID] = struct{}{}
+		}
+	}
+	sortedBoxIDs := make([]string, 0, len(boxIDs))
+	for boxID := range boxIDs {
+		sortedBoxIDs = append(sortedBoxIDs, boxID)
+	}
+	sort.Strings(sortedBoxIDs)
+	for _, boxID := range sortedBoxIDs {
+		if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+			ret.Code = -1
+			ret.Msg = model.Conf.Language(314)
+			return
+		}
+	}
+
+	diff, err := model.DiffDocVersions(left, right)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = diff
+}
+
+func parseDocVersionRef(arg map[string]interface{}, ret *gulu.Result) (ref *model.DocVersionRef, ok bool) {
+	var typ, id, path, snapshot string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("type", &typ, true, true),
+		util.BindJsonArg("id", &id, false, false),
+		util.BindJsonArg("path", &path, false, false),
+		util.BindJsonArg("snapshot", &snapshot, false, false),
+	) {
+		return nil, false
+	}
+	return &model.DocVersionRef{Type: typ, ID: id, Path: path, Snapshot: snapshot}, true
+}
+
 func rollbackDocHistory(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -189,6 +270,9 @@ func rollbackDocHistory(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret,
 		util.BindJsonArg("historyPath", &historyPath, true, true),
 	) {
+		return
+	}
+	if !holdHistoryRequest(c, historyPath, ret) {
 		return
 	}
 	err := model.RollbackDocHistory(historyPath)
@@ -210,6 +294,9 @@ func rollbackAssetsHistory(c *gin.Context) {
 
 	var historyPath string
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", &historyPath, true, true)) {
+		return
+	}
+	if !holdHistoryRequest(c, historyPath, ret) {
 		return
 	}
 	err := model.RollbackAssetsHistory(historyPath)
@@ -254,12 +341,26 @@ func rollbackAttributeViewHistory(c *gin.Context) {
 	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("historyPath", &historyPath, true, true)) {
 		return
 	}
+	if !holdHistoryRequest(c, historyPath, ret) {
+		return
+	}
 	err := model.RollbackAttributeViewHistory(historyPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
+}
+
+func holdHistoryRequest(c *gin.Context, historyPath string, ret *gulu.Result) bool {
+	absolutePath := filepath.Join(util.WorkspaceDir, historyPath)
+	boxID := model.ExtractBoxIDFromHistoryPath(absolutePath)
+	if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return false
+	}
+	return true
 }
 
 func createDocHistory(c *gin.Context) {
@@ -279,6 +380,30 @@ func createDocHistory(c *gin.Context) {
 	}
 
 	err := model.CreateDocHistory(id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func createAssetHistory(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var assetPath string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("path", &assetPath, true, true),
+	) {
+		return
+	}
+
+	err := model.CreateAssetHistory(assetPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

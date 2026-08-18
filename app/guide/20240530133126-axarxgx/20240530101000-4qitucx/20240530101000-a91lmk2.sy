@@ -8,7 +8,7 @@
 		"id": "20240530101000-a91lmk2",
 		"title": "高度な検索",
 		"type": "doc",
-		"updated": "20260613193509"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -46,7 +46,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193509-avyxr38",
-				"updated": "20260613193509"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -60,12 +60,35 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193509-k9kj9ol",
-				"updated": "20260613193509"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
 					"Type": "NodeText",
-					"Data": "設定 - 検索 - 大文字/小文字を区別 で設定できます。デフォルトはオフで、"
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "検索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "大文字/小文字を区別"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ で設定できます。デフォルトはオフで、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -93,7 +116,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193509-eeostl9",
-				"updated": "20260613193509"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -107,12 +130,35 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193509-703emtd",
-				"updated": "20260613193509"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
 					"Type": "NodeText",
-					"Data": "設定 - 検索 - 繁簡を区別 で設定できます。デフォルトはオンで、「经济」を検索しても「經濟」には一致しません。オフにすると、「经济」の検索で「经济」と「經濟」の両方に一致します。このオプションを切り替えた後、インデックスの再構築が完了するまで有効になりません。"
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "検索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "繁簡を区別"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ で設定できます。デフォルトはオンで、「经济」を検索しても「經濟」には一致しません。オフにすると、「经济」の検索で「经济」と「經濟」の両方に一致します。このオプションを切り替えた後、インデックスの再構築が完了するまで有効になりません。"
 				}
 			]
 		},
@@ -122,7 +168,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193509-byuidqn",
-				"updated": "20260613193509"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -151,7 +197,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613193509-i2in6rr",
-				"updated": "20260613193509"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -163,7 +209,7 @@
 					},
 					"Properties": {
 						"id": "20260613193509-01mcz0t",
-						"updated": "20260613193509"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -171,7 +217,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193509-3a19rho",
-								"updated": "20260613193509"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -185,8 +231,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+P"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "P"
 								},
 								{
 									"Type": "NodeText",
@@ -338,7 +393,7 @@
 					},
 					"Properties": {
 						"id": "20260613193509-xvgjid2",
-						"updated": "20260613193509"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -346,7 +401,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193509-x2zxtbc",
-								"updated": "20260613193509"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -360,8 +415,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Z"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Z"
 								},
 								{
 									"Type": "NodeText",

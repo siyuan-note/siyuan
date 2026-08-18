@@ -1,10 +1,11 @@
-import {getTopAloneElement} from "./getBlock";
+import {getNextBlockSibling, getParentBlock, getPreviousBlockSibling, getTopAloneElement} from "./getBlock";
 import {hasClosestByAttribute} from "../util/hasClosest";
 import {updateListOrder} from "./list";
 import {transaction, updateTransaction} from "./transaction";
 import {preventScroll} from "../scroll/preventScroll";
 import {scrollCenter} from "../../util/highlightById";
 import {focusByWbr} from "../util/selection";
+import {refreshSbResize} from "../../block/util";
 
 export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Range) => {
     let previousElement: Element;
@@ -88,10 +89,10 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         scrollCenter(protyle);
         return;
     }
-    if (!sourceElements[0].previousElementSibling || sourceElements[0].previousElementSibling?.classList.contains("protyle-action")) {
+    previousElement = getPreviousBlockSibling(sourceElements[0]);
+    if (!previousElement) {
         return;
     }
-    previousElement = sourceElements[0].previousElementSibling;
     if (sourceElements[0].getAttribute("data-subtype") === "o" && type === "NodeListItem") {
         const html = sourceElements[0].parentElement.outerHTML;
         const orderIndex = parseInt(sourceElements[0].parentElement.firstElementChild.getAttribute("data-marker"));
@@ -107,10 +108,11 @@ export const moveToUp = (protyle: IProtyle, nodeElement: HTMLElement, range: Ran
         }], [{
             action: "move",
             id,
-            previousID: previousElement.previousElementSibling?.getAttribute("data-node-id"),
-            parentID: previousElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+            previousID: getPreviousBlockSibling(previousElement)?.getAttribute("data-node-id"),
+            parentID: getParentBlock(previousElement).getAttribute("data-node-id") || protyle.block.parentID
         }]);
         sourceElements[sourceElements.length - 1].after(previousElement);
+        refreshSbResize(sourceElements[0].parentElement);
     }
     preventScroll(protyle);
     scrollCenter(protyle);
@@ -191,10 +193,10 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         scrollCenter(protyle);
         return;
     }
-    if (!sourceElements[sourceElements.length - 1].nextElementSibling || sourceElements[sourceElements.length - 1].nextElementSibling?.classList.contains("protyle-attr")) {
+    nextElement = getNextBlockSibling(sourceElements[sourceElements.length - 1]);
+    if (!nextElement) {
         return;
     }
-    nextElement = sourceElements[sourceElements.length - 1].nextElementSibling;
     if (nextElement.getAttribute("data-subtype") === "o" && nextElement.getAttribute("data-type") === "NodeListItem") {
         const html = nextElement.parentElement.outerHTML;
         const orderIndex = parseInt(sourceElements[0].parentElement.firstElementChild.getAttribute("data-marker"));
@@ -206,14 +208,15 @@ export const moveToDown = (protyle: IProtyle, nodeElement: HTMLElement, range: R
         transaction(protyle, [{
             action: "move",
             id,
-            previousID: sourceElements[0].previousElementSibling?.getAttribute("data-node-id"),
-            parentID: nextElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+            previousID: getPreviousBlockSibling(sourceElements[0])?.getAttribute("data-node-id"),
+            parentID: getParentBlock(nextElement).getAttribute("data-node-id") || protyle.block.parentID
         }], [{
             action: "move",
             id,
             previousID: sourceElements[sourceElements.length - 1].getAttribute("data-node-id"),
         }]);
         sourceElements[0].before(nextElement);
+        refreshSbResize(sourceElements[0].parentElement);
     }
     preventScroll(protyle);
     scrollCenter(protyle);

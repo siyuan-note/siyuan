@@ -24,7 +24,6 @@ body {
   font-family: var(--b3-font-family);
   color: var(--b3-theme-on-background);
   background-color: var(--b3-body-background);
-  -webkit-font-smoothing: antialiased;
   -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: var(--b3-list-hover);
   height: 100%;
@@ -64,9 +63,7 @@ body {
   }
 
   &.body--win32 {
-    --b3-toolbar-left-mac: 0;
-    -webkit-font-smoothing: auto;
-
+    --b3-toolbar-left-mac: 8px;
     .toolbar {
       padding: 0 0 0 5px;
     }
@@ -74,7 +71,6 @@ body {
     .fullscreen {
       & > .protyle-breadcrumb,
       & > .block__icons {
-        padding-left: 10px;
         padding-right: 126px;
       }
 
@@ -99,10 +95,6 @@ body {
       }
     }
 
-    &.body--blur .layout-tab-bar {
-      opacity: .38;
-    }
-
     .layout__center {
       border-radius: 0;
     }
@@ -123,16 +115,29 @@ body {
     }
   }
 
+  &:not(.body--toolbar-hide):not(.body--window) {
+    .fullscreen > .protyle-breadcrumb,
+    .fullscreen > .block__icons {
+      min-height: 32px;
+    }
+  }
+
   &.body--toolbar-hide {
 
     #dockLeft, #dockRight {
-      padding-top: 42px;
+      height: calc(100% - 42px);
+      margin-top: 42px;
     }
 
     .toolbar {
       height: 42px;
       position: absolute;
       width: 100%;
+
+      & > :not(#drag) {
+        position: relative;
+        z-index: 7;
+      }
     }
 
     .layout__dockl:not(.layout--float),
@@ -149,7 +154,7 @@ body {
     }
 
     .layout__wnd--center .layout-tab-bar .item {
-      margin: 7px 4px 6px 4px;
+      margin: 6px 4px;
     }
 
     .toolbar #drag {
@@ -176,7 +181,8 @@ body {
       }
     }
 
-    .fullscreen > .protyle-breadcrumb, .fullscreen > .block__icons {
+    .fullscreen > .protyle-breadcrumb,
+    .fullscreen > .block__icons {
       padding-left: var(--b3-toolbar-left-mac);
     }
 
@@ -334,10 +340,6 @@ svg {
 
 line, circle {
   transition: fill .15s ease-in-out;
-}
-
-circle {
-  cursor: pointer;
 }
 
 blockquote {

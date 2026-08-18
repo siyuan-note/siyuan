@@ -1,0 +1,711 @@
+{
+	"ID": "20260804171007-semnt04",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804171007-semnt04",
+		"title": "意味検索",
+		"type": "doc",
+		"updated": "20260809232000"
+	},
+	"Children": [
+		{
+			"ID": "20260804170124-c8e8pdp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170124-c8e8pdp",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20260804170125-uicyqp6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170125-uicyqp6",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "意味検索はテキストベクトルを比較して、意味が近いコンテンツを検索します。全文検索はキーワードの有無に依存しますが、意味検索では表現が異なっていても関連する話題のノートを見つけられます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170126-emdywyo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170126-emdywyo",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定方法"
+				}
+			]
+		},
+		{
+			"ID": "20260804170127-50f1cex",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170127-50f1cex",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "埋め込みモデル"
+				}
+			]
+		},
+		{
+			"ID": "20260804170128-o0m387c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170128-o0m387c",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "埋め込みモデル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "意味検索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を有効にし、API ベース URL、API キー、モデル、ベクトル次元、タイムアウトを設定します。接続テストでモデルが利用できることを確認してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170129-zepo081",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170129-zepo081",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ベクトル次元を 0 にするとモデルの既定値を使用します。対象モデルがカスタム次元をサポートしている場合のみ別の値を指定してください。モデルまたは次元を変更した後は埋め込みインデックスを再構築します。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170130-aiyeaxg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170130-aiyeaxg",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リランキングモデル"
+				}
+			]
+		},
+		{
+			"ID": "20260804170131-19vozgg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170131-19vozgg",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リランキングモデルは任意です。有効にすると、ベクトル検索で取得した候補を再評価して結果の順序を改善します。候補数を増やすと精度が向上する場合がありますが、遅延と費用も増加します。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170132-t2kahtl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170132-t2kahtl",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20260804170133-g0xn3ei",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170133-g0xn3ei",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "全文検索を開き、検索メニューの "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "検索方法"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "意味検索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択し、検索したい内容を自然言語で入力します。ノートブック、パス、ブロックタイプなどのフィルターも利用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170134-0fq3luk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170134-0fq3luk",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "埋め込みインデックス"
+				}
+			]
+		},
+		{
+			"ID": "20260804170135-i61b30z",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170135-i61b30z",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "埋め込みモデルを有効にすると、SiYuan は対象となるブロックのベクトルをバックグラウンドで生成します。コンテンツを作成または変更すると、対応するベクトルも自動的に更新されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170136-18c3kbx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170136-18c3kbx",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "インデックス作成状況を確認する"
+				}
+			]
+		},
+		{
+			"ID": "20260804170137-hmmujnk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170137-hmmujnk",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "埋め込みモデル"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で、インデックス済み、保留中、失敗、長さにより除外、設定により除外されたブロック数を確認できます。最初のインデックス作成には時間がかかる場合があります。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170138-vqsocu3",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170138-vqsocu3",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "失敗したブロックを再試行する"
+				}
+			]
+		},
+		{
+			"ID": "20260804170139-oxczp6f",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170139-oxczp6f",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "失敗したブロックがある場合は、埋め込みモデルの設定とネットワーク接続を確認してから再試行します。正常にベクトルが生成されたブロックは再処理されません。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170140-103ntvb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170140-103ntvb",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "埋め込みインデックスを再構築する"
+				}
+			]
+		},
+		{
+			"ID": "20260804170141-n27sd8v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170141-n27sd8v",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "埋め込みモデル、ベクトル次元、除外ルールを変更した後は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "埋め込みインデックスを再構築"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択します。既存のベクトルが消去され、バックグラウンドで再計算されるため、完了するまで意味検索の結果が不完全になる場合があります。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170142-zvvrgcn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170142-zvvrgcn",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテンツを除外する"
+				}
+			]
+		},
+		{
+			"ID": "20260804170143-8vgqo3h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170143-8vgqo3h",
+				"updated": "20260809160000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントを除外するには、ファイルシステム上で "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/data/.siyuan/embeddingignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を作成または編集します。gitignore 構文で 1 行に 1 つの除外パスを記述します。例："
+				}
+			]
+		},
+		{
+			"ID": "20260809160000-e9f4024",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809160000-e9f4024",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804170144-xzrz8av",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170144-xzrz8av",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170145-41bzhfa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170145-41bzhfa",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170146-2no7zvq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170146-2no7zvq",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：指定したノートブック内の 1 つのドキュメントを除外します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170147-820a9zo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170147-820a9zo",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170148-m5a8mfb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170148-m5a8mfb",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：指定したノートブック内のすべてのドキュメントを除外します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804170149-kvdqvm5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170149-kvdqvm5",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ファイルを保存した後、埋め込みインデックスを再構築してください。このファイルは埋め込みベクトルだけに影響し、コンテンツは通常の全文インデックスには残ります。通常のインデックスから完全に除外する方法については "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "インデックスから除外",
+					"TextMarkBlockRefID": "20240530101000-mrlr6e9",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170150-exvr4wl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170150-exvr4wl",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20260804170151-uh7xhwv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170151-uh7xhwv",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"ID": "20260804170152-8jif08m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170152-8jif08m",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170153-xmznbuy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170153-xmznbuy",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "インデックス作成時にドキュメントのテキストが埋め込みモデルのプロバイダーに送信され、検索時には検索テキストも送信されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170154-32d5hy7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170154-32d5hy7",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170155-amc29iy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170155-amc29iy",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "埋め込みモデルとリランキングモデルの API 呼び出しには料金が発生する場合があり、大きなワークスペースのインデックス作成には時間がかかる場合があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170156-tm4s106",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170156-tm4s106",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170157-nzgtsz4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170157-nzgtsz4",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "暗号化されたノートブックでは意味検索を使用できません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170158-9opcrm9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170158-9opcrm9",
+						"updated": "20260804205607"
+					},
+					"Children": [
+						{
+							"ID": "20260804170159-llclpib",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170159-llclpib",
+								"updated": "20260804205607"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "UTF-8 エンコード後に 7 バイト未満または 12000 バイトを超えるブロックには埋め込みベクトルが生成されません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170200-4k329p7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170200-4k329p7",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170201-719t8tm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170201-719t8tm",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リランキングに失敗した場合、結果はベクトル類似度の順序に戻ります"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

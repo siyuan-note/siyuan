@@ -6,7 +6,7 @@
 		"id": "20201227194925-7ipoiv6",
 		"title": "内核 API",
 		"type": "doc",
-		"updated": "20230820185829"
+		"updated": "20260804235500"
 	},
 	"Children": [
 		{
@@ -14,12 +14,37 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210822163618-m0zvvbe",
-				"updated": "20230820185829"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "请浏览 API 文档 (github repo: siyuan-note/siyuan)。"
+					"Data": "请浏览 API 文档 (GitHub repo: siyuan-note/siyuan)。"
+				}
+			]
+		},
+		{
+			"ID": "20260804225001-apicn01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804225001-apicn01",
+				"updated": "20260804230000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "思源还通过 MCP 向外部客户端提供工具，连接方式和权限说明请参阅 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804223000-mcpsv01",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "MCP 服务"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		}

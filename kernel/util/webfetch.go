@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
-	"github.com/siyuan-note/httpclient"
 )
 
 const (
@@ -51,7 +50,7 @@ func WebFetch(rawURL, format string) (string, error) {
 		return "", err
 	}
 
-	resp, err := httpclient.NewBrowserRequest().Get(rawURL)
+	resp, err := ssrfSafeClient.Get(rawURL)
 	if err != nil {
 		return "", errors.New("fetch failed: " + err.Error())
 	}

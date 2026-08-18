@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -57,7 +57,7 @@ func init() {
 }
 
 // questionHandler is intercepted by agent.go; this is a fallback.
-func questionHandler(args map[string]interface{}) (CallToolResult, error) {
+func questionHandler(args map[string]any) (CallToolResult, error) {
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: "question tool: should be intercepted by agent loop"}},
 	}, nil

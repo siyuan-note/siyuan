@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -45,8 +45,8 @@ type Asset struct {
 
 func docTagSpans(n *ast.Node) (ret []*Span) {
 	if tagsVal := n.IALAttr("tags"); "" != tagsVal {
-		tags := strings.Split(tagsVal, ",")
-		for _, tag := range tags {
+		tags := strings.SplitSeq(tagsVal, ",")
+		for tag := range tags {
 			escaped := util.EscapeHTML(tag)
 			markdown := "#" + escaped + "#"
 			span := &Span{

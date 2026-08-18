@@ -11,6 +11,7 @@ import {isInAndroid, isInHarmony, isInMobileApp, isIPad, setStorageVal, writeTex
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
+import {getDockHotkey} from "../layout/dock/hotkey";
 import {exportLayout, getAllLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
 import {exitSiYuan, lockScreen} from "../dialog/processSystem";
@@ -22,11 +23,12 @@ import {viewCards} from "../card/viewCards";
 import {Dialog} from "../dialog";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {App} from "../index";
+import type {App} from "../index";
 import {isBrowser} from "../util/functions";
 import {openRecentDocs} from "../business/openRecentDocs";
 import * as dayjs from "dayjs";
 import {upDownHint} from "../util/upDownHint";
+import {openDataMigration} from "./dataMigration";
 
 const editLayout = (layoutName?: string) => {
     const dialog = new Dialog({
@@ -124,11 +126,12 @@ const editLayout = (layoutName?: string) => {
     });
 };
 
-const togglePinDock = (id: string, dock: Dock, pinIcon: string, unpinIcon: string) => {
+const togglePinDock = (id: "switchLeftDock" | "switchRightDock" | "switchBottomDock", dock: Dock, pinIcon: string, unpinIcon: string) => {
     return {
         id,
         label: `${dock.pin ? window.siyuan.languages.switchToFloatingLayout : window.siyuan.languages.switchToFixedLayout}`,
         icon: `${dock.pin ? unpinIcon : pinIcon}`,
+        accelerator: window.siyuan.config.keymap.general[id].custom,
         current: !dock.pin,
         click() {
             dock.togglePin();
@@ -161,7 +164,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             dockMenu.push({
                 id: item.type,
                 icon: item.icon,
-                accelerator: item.hotkey,
+                accelerator: getDockHotkey(item),
                 label: item.title,
                 click() {
                     getDockByType(item.type).toggleModel(item.type);
@@ -170,9 +173,9 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         });
         if (!window.siyuan.config.readonly) {
             dockMenu.push({id: "separator_1", type: "separator"});
-            dockMenu.push(togglePinDock("leftDock", window.siyuan.layout.leftDock, "iconPanelLeft", "iconPanelLeftDashed"));
-            dockMenu.push(togglePinDock("rightDock", window.siyuan.layout.rightDock, "iconPanelRight", "iconPanelRightDashed"));
-            dockMenu.push(togglePinDock("bottomDock", window.siyuan.layout.bottomDock, "iconPanelBottom", "iconPanelBottomDashed"));
+            dockMenu.push(togglePinDock("switchLeftDock", window.siyuan.layout.leftDock, "iconPanelLeft", "iconPanelLeftDashed"));
+            dockMenu.push(togglePinDock("switchRightDock", window.siyuan.layout.rightDock, "iconPanelRight", "iconPanelRightDashed"));
+            dockMenu.push(togglePinDock("switchBottomDock", window.siyuan.layout.bottomDock, "iconPanelBottom", "iconPanelBottomDashed"));
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "panels",
@@ -341,7 +344,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             layoutSubMenu.push({
                 iconHTML: "",
                 type: "empty",
-                label: `<input class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">
+                label: `<input class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.searchPlaceholder}">
 <div class="b3-list b3-list--background" style="width: 220px"></div>`,
                 bind(menuElement) {
                     const genListHTML = (isInit = false) => {
@@ -533,6 +536,16 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     openHistory(app);
                 }
             }).element);
+            if (!window.siyuan.config.readonly) {
+                window.siyuan.menus.menu.append(new MenuItem({
+                    id: "dataMigration",
+                    label: window.siyuan.languages.dataMigration,
+                    icon: "iconDatabaseBackup",
+                    click: () => {
+                        openDataMigration();
+                    }
+                }).element);
+            }
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({

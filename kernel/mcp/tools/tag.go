@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -44,7 +44,7 @@ func init() {
 	register(TagTool)
 }
 
-func tagHandler(args map[string]interface{}) (CallToolResult, error) {
+func tagHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "list":
@@ -60,7 +60,7 @@ func tagHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func tagList(args map[string]interface{}) (CallToolResult, error) {
+func tagList(args map[string]any) (CallToolResult, error) {
 	keyword, _ := args["keyword"].(string)
 	tags := model.SearchTags(keyword)
 
@@ -76,7 +76,7 @@ func tagList(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func tagRename(args map[string]interface{}) (CallToolResult, error) {
+func tagRename(args map[string]any) (CallToolResult, error) {
 	oldLabel, _ := args["old"].(string)
 	newLabel, _ := args["new"].(string)
 	if oldLabel == "" || newLabel == "" {
@@ -86,11 +86,12 @@ func tagRename(args map[string]interface{}) (CallToolResult, error) {
 	if err := model.RenameTag(oldLabel, newLabel); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "rename tag failed: " + err.Error()}}, IsError: true}, nil
 	}
+	model.ReloadTag()
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "tag renamed: #" + oldLabel + " -> #" + newLabel}}}, nil
 }
 
-func tagRemove(args map[string]interface{}) (CallToolResult, error) {
+func tagRemove(args map[string]any) (CallToolResult, error) {
 	label, _ := args["label"].(string)
 	if label == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "label is required"}}, IsError: true}, nil
@@ -99,6 +100,7 @@ func tagRemove(args map[string]interface{}) (CallToolResult, error) {
 	if err := model.RemoveTag(label); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "remove tag failed: " + err.Error()}}, IsError: true}, nil
 	}
+	model.ReloadTag()
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "tag removed: #" + label}}}, nil
 }

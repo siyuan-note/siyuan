@@ -7,7 +7,7 @@
 		"id": "20211226120933-vnjgwwh",
 		"title": "搜索進階",
 		"type": "doc",
-		"updated": "20260613193945"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193945-7pjioog",
-				"updated": "20260613193945"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -59,12 +59,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193945-f8wb78d",
-				"updated": "20260613193945"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "可在 設定 - 搜尋 - 區分大小寫 中設定。預設關閉，即搜尋 "
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜尋"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區分大小寫"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中設定。預設關閉，即搜尋 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -92,7 +119,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193945-pk2v0po",
-				"updated": "20260613193945"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -106,12 +133,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193945-sftcfdo",
-				"updated": "20260613193945"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "可在 設定 - 搜尋 - 區分繁簡 中設定。預設開啟，即搜尋\"經濟\"不會匹配\"經濟\"。關閉後搜尋\"經濟\"將同時匹配\"經濟\"和\"經濟\"。切換該選項後需等待索引重建完成方可生效。"
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜尋"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "區分繁簡"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中設定。預設開啟，即搜尋\"經濟\"不會匹配\"經濟\"。關閉後搜尋\"經濟\"將同時匹配\"經濟\"和\"經濟\"。切換該選項後需等待索引重建完成方可生效。"
 				}
 			]
 		},
@@ -121,7 +175,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193945-4wxkgoj",
-				"updated": "20260613193945"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -150,7 +204,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613193945-4hfyr20",
-				"updated": "20260613193945"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -162,7 +216,7 @@
 					},
 					"Properties": {
 						"id": "20260613193945-0ha8zyc",
-						"updated": "20260613193945"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -170,7 +224,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193945-o4p9q8d",
-								"updated": "20260613193945"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -184,8 +238,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+P"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "P"
 								},
 								{
 									"Type": "NodeText",
@@ -312,7 +375,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193945-wf0i28v",
-								"updated": "20260613193945"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -322,7 +385,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：點擊替換過濾器可選擇替換範圍（內容塊文字、命名、別名、備註等）"
+									"Data": "：點擊替換過濾器可選擇替換範圍（內容區塊文字、命名、別名、備註等）"
 								}
 							]
 						}
@@ -337,7 +400,7 @@
 					},
 					"Properties": {
 						"id": "20260613193945-iabr67h",
-						"updated": "20260613193945"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -345,7 +408,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193945-a1m8biq",
-								"updated": "20260613193945"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -359,8 +422,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Z"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Z"
 								},
 								{
 									"Type": "NodeText",

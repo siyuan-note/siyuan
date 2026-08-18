@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20250518102608"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -443,7 +443,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210918114843-6xo7hmr",
-				"updated": "20250518102608"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -505,7 +505,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220619171630-l6d80j9",
-				"updated": "20220619172004"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -517,7 +517,7 @@
 					},
 					"Properties": {
 						"id": "20220619171640-j9yl9en",
-						"updated": "20220619171858"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -525,7 +525,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619171640-gqfe61q",
-								"updated": "20220619171858"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
@@ -557,7 +557,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -581,7 +581,7 @@
 					},
 					"Properties": {
 						"id": "20220619171850-ldv3f31",
-						"updated": "20220619172004"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -589,7 +589,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619171850-jx3xl19",
-								"updated": "20220619172004"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
@@ -621,7 +621,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -687,7 +687,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220909095627-1vhq1bl",
-				"updated": "20220909095639"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -821,7 +821,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100742-liorixq",
-				"updated": "20230820182913"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -853,7 +853,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中 "
+					"Data": " ​ 中 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -882,7 +882,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501230739-whydmx1",
-				"updated": "20220501231230"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -896,21 +896,161 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220501230748-wvrcnzu",
-				"updated": "20220501231314"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在列表项下的第一个子块是省略块标的。可以将光标移到这个块中，然后通过 "
+					"Data": "当内容块的块标未显示时，可将光标置于该内容块中，多次按 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+/"
+					"TextMarkTextContent": "Shift"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 触发它的块标菜单。"
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 选中该内容块，再按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 打开块标菜单；macOS 使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-a1s2e3t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260807094000-a1s2e3t",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "删除笔记中的图片或文件后，为什么资源文件仍然保留？"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqcn01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqcn01",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "笔记中插入的图片或文件是对资源文件的引用。删除笔记中的内容只会删除当前位置的引用，不会同时删除对应的资源文件，因为同一资源还可能被其他文档、数据库、题头图或 HTML 等内容引用。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqcn02",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqcn02",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "要确认一个资源文件是否已完全不再使用，需要检查整个工作空间。如果每次删除引用时都进行检查，会影响编辑性能；同时，自动删除资源文件也会使内容撤销和多端同步变得不可靠，并可能导致误删。因此，思源不会在删除内容引用时自动删除资源文件，也不提供自动删除选项。"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqcn03",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqcn03",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "确认不再需要这些文件后，可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "资源"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "未引用的资源文件"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中检查并清理。清理操作会生成"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210615211733-v6rzowm",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "数据历史"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，如果发生误删，可在数据历史中选择资源文件进行回滚。"
 				}
 			]
 		},

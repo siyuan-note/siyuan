@@ -5,21 +5,35 @@ import {updateHotkeyTip} from "../util/compatibility";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {goEnd, goHome} from "../wysiwyg/commonHotkey";
 import {showTooltip} from "../../dialog/tooltip";
+import {isEncryptedBox} from "../../util/pathName";
+import {updateScrollVisibility} from "./visibility";
+import {hideMessage, showMessage} from "../../dialog/message";
+import {isDocumentBoundaryLoaded, markDocumentBoundaryLoaded} from "../util/documentRange";
+import {isDocumentBlockCountCovered, loadUntilDocumentBoundary} from "./loadAll";
+import {
+    DynamicLoadState,
+    type IDynamicLoadRequest,
+    type TDynamicLoadMode
+} from "./dynamicLoadState";
 
 export class Scroll {
     public element: HTMLElement;
     private parentElement: HTMLElement;
     private inputElement: HTMLInputElement;
+    private dynamicLoadState = new DynamicLoadState();
+    private dynamicLoadAbortController?: AbortController;
+    private dynamicLoadFinish?: (success: boolean) => void;
+    private loadingAll = false;
     public lastScrollTop: number;
-    public keepLazyLoad: boolean;   // 保持加载内容
+    public keepLoadedContent: boolean;   // 保持加载内容
 
     constructor(protyle: IProtyle) {
         this.parentElement = document.createElement("div");
-        this.parentElement.classList.add("protyle-scroll");
+        this.parentElement.classList.add("protyle-scroll", "fn__none");
         this.parentElement.innerHTML = `<div class="protyle-scroll__up ariaLabel" data-position="north" aria-label="${updateHotkeyTip("⌘Home")}">
     <svg><use xlink:href="#iconUp"></use></svg>
 </div>
-<div class="fn__none protyle-scroll__bar ariaLabel" data-position="2west" aria-label="Blocks 1/1">
+<div class="protyle-scroll__bar ariaLabel" data-position="2west" aria-label="Blocks 1/1">
     <input class="b3-slider" type="range" max="1" min="1" step="1" value="1" />
 </div>
 <div class="protyle-scroll__down ariaLabel" aria-label="${updateHotkeyTip("⌘End")}">
@@ -27,10 +41,8 @@ export class Scroll {
 </div>`;
 
         this.element = this.parentElement.querySelector(".protyle-scroll__bar");
-        this.keepLazyLoad = false;
-        if (!protyle.options.render.scroll) {
-            this.parentElement.classList.add("fn__none");
-        }
+        this.element.classList.add("fn__none");
+        this.keepLoadedContent = window.siyuan.config.editor.keepLoadedContent;
         this.lastScrollTop = 0;
         this.inputElement = this.element.firstElementChild as HTMLInputElement;
         this.inputElement.addEventListener("input", () => {
@@ -62,18 +74,162 @@ export class Scroll {
         }, {passive: true});
     }
 
+    public loadDynamic(protyle: IProtyle, mode: TDynamicLoadMode, options?: {
+        beforeApply?: () => void,
+        onFinish?: (success: boolean) => void,
+        size?: number,
+    }) {
+        const anchorElement = mode === 1 ?
+            protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
+        const anchorID = anchorElement?.getAttribute("data-node-id");
+        const rootID = protyle.block.rootID;
+        const eof = mode === 1 ? anchorElement?.getAttribute("data-eof") === "1" :
+            protyle.wysiwyg.element.hasAttribute("data-bottom-eof");
+        if (!anchorID || !rootID || eof) {
+            return false;
+        }
+        // 同一编辑器的动态加载需要串行，避免相同边界响应被重复追加 https://github.com/siyuan-note/siyuan/issues/18459
+        const request = this.dynamicLoadState.begin(rootID, anchorID, mode);
+        if (!request) {
+            return false;
+        }
+
+        const abortController = new AbortController();
+        this.dynamicLoadAbortController = abortController;
+        this.dynamicLoadFinish = options?.onFinish;
+        protyle.wysiwyg.element.setAttribute("data-top", protyle.contentElement.scrollTop.toString());
+        const getDocParam: IObject = {
+            id: anchorID,
+            mode,
+            size: options?.size || window.siyuan.config.editor.dynamicLoadBlocks,
+        };
+        if (isEncryptedBox(protyle.notebookId)) {
+            getDocParam.notebook = protyle.notebookId;
+        }
+        let success = false;
+        void fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
+            const currentAnchor = mode === 1 ?
+                protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
+            const currentAnchorID = currentAnchor?.getAttribute("data-node-id");
+            if (!protyle.element.isConnected ||
+                !this.dynamicLoadState.isCurrent(request, protyle.block.rootID, currentAnchorID)) {
+                return;
+            }
+            options?.beforeApply?.();
+            onGet({
+                data: getResponse,
+                protyle,
+                action: [
+                    mode === 1 ? Constants.CB_GET_BEFORE : Constants.CB_GET_APPEND,
+                    Constants.CB_GET_UNCHANGEID
+                ],
+            });
+            success = getResponse.code === 0;
+        }, undefined, undefined, abortController.signal).finally(() => {
+            this.finishDynamicLoad(request, protyle, success);
+        });
+        return true;
+    }
+
+    public async loadAll(protyle: IProtyle) {
+        const rootID = protyle.block.rootID;
+        if (this.loadingAll || !rootID || protyle.block.showAll || !protyle.block.scroll) {
+            return false;
+        }
+
+        this.loadingAll = true;
+        this.invalidateDynamicLoad(protyle);
+        const messageID = showMessage(window.siyuan.languages.loading, -1);
+        const size = Math.max(
+            window.siyuan.config.editor.dynamicLoadBlocks,
+            protyle.block.blockCount || 0
+        );
+        try {
+            const topLoaded = await this.loadUntilBoundary(protyle, rootID, 1, size);
+            const bottomLoaded = topLoaded && await this.loadUntilBoundary(protyle, rootID, 2, size);
+            if (!bottomLoaded || protyle.block.rootID !== rootID || !protyle.element.isConnected) {
+                return false;
+            }
+            protyle.block.scroll = false;
+            this.update(protyle);
+            return true;
+        } finally {
+            this.loadingAll = false;
+            if (messageID) {
+                hideMessage(messageID);
+            }
+        }
+    }
+
+    public shouldKeepLoadedContent() {
+        return this.keepLoadedContent || this.loadingAll;
+    }
+
+    public invalidateDynamicLoad(protyle: IProtyle) {
+        if (!this.dynamicLoadState.invalidate()) {
+            return;
+        }
+        const abortController = this.dynamicLoadAbortController;
+        const onFinish = this.dynamicLoadFinish;
+        this.dynamicLoadAbortController = undefined;
+        this.dynamicLoadFinish = undefined;
+        protyle.wysiwyg.element.removeAttribute("data-top");
+        onFinish?.(false);
+        abortController?.abort();
+    }
+
+    private finishDynamicLoad(request: IDynamicLoadRequest, protyle: IProtyle, success: boolean) {
+        if (!this.dynamicLoadState.finish(request)) {
+            return;
+        }
+        const onFinish = this.dynamicLoadFinish;
+        this.dynamicLoadAbortController = undefined;
+        this.dynamicLoadFinish = undefined;
+        protyle.wysiwyg.element.removeAttribute("data-top");
+        onFinish?.(success);
+    }
+
+    private async loadUntilBoundary(protyle: IProtyle, rootID: string, mode: TDynamicLoadMode, size: number) {
+        const position = mode === 1 ? "before" : "after";
+        return loadUntilDocumentBoundary({
+            isCurrent: () => protyle.block.rootID === rootID && protyle.element.isConnected,
+            isBoundaryLoaded: () => isDocumentBoundaryLoaded(protyle.wysiwyg.element, position),
+            getBoundaryID: () => {
+                const boundaryElement = mode === 1 ?
+                    protyle.wysiwyg.element.firstElementChild : protyle.wysiwyg.element.lastElementChild;
+                return boundaryElement?.getAttribute("data-node-id");
+            },
+            load: () => new Promise<boolean>((resolve) => {
+                const requestSize = Math.max(size, protyle.block.blockCount || 0);
+                const onFinish = (success: boolean) => {
+                    if (success && isDocumentBlockCountCovered(requestSize, protyle.block.blockCount)) {
+                        markDocumentBoundaryLoaded(protyle.wysiwyg.element, position);
+                    }
+                    resolve(success);
+                };
+                if (!this.loadDynamic(protyle, mode, {size: requestSize, onFinish})) {
+                    resolve(false);
+                }
+            }),
+        });
+    }
+
     private setIndex(protyle: IProtyle) {
         if (protyle.wysiwyg.element.getAttribute("data-top")) {
             return;
         }
         protyle.wysiwyg.element.setAttribute("data-top", protyle.wysiwyg.element.scrollTop.toString());
         protyle.contentElement.style.overflow = "hidden";
-        fetchPost("/api/filetree/getDoc", {
+        const getDocParam: IObject = {
             index: parseInt(this.inputElement.value),
             id: protyle.block.parentID,
             mode: 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
+        };
+        if (isEncryptedBox(protyle.notebookId)) {
+            getDocParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
             onGet({
                 data: getResponse,
                 protyle,
@@ -107,14 +263,9 @@ export class Scroll {
             this.inputElement.setAttribute("max", protyle.block.blockCount.toString());
             this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
         }
-        if (protyle.block.showAll) {
-            this.element.classList.add("fn__none");
-        } else {
-            if (protyle.block.scroll && !protyle.contentElement.classList.contains("fn__none")) {
-                this.element.classList.remove("fn__none");
-            } else {
-                this.element.classList.add("fn__none");
-            }
-        }
+        const containerVisible = protyle.options.render.scroll &&
+            !protyle.contentElement.classList.contains("fn__none");
+        const barVisible = containerVisible && !protyle.block.showAll && protyle.block.scroll;
+        updateScrollVisibility(this.parentElement, this.element, containerVisible, barVisible);
     }
 }

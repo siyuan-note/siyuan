@@ -2,14 +2,17 @@ import {Constants} from "../constants";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 /// #endif
-import {pathPosix} from "../util/pathName";
+import {getAssetExtension} from "../util/pathName";
 import * as dayjs from "dayjs";
+import {escapeAttr} from "../util/escape";
+import {getHTMLAssetIFrameSrc, isHTMLFilePath} from "./html";
+import {isBrowserRenderableImagePath} from "../util/imageURL";
 
 export const renderAssetsPreview = (pathString: string) => {
     if (!pathString) {
         return "";
     }
-    const type = pathPosix().extname(pathString).toLowerCase();
+    const type = getAssetExtension(pathString).toLowerCase();
     if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
         return `<img style="max-height: 100%" src="${pathString}">`;
     } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
@@ -59,11 +62,14 @@ export const pdfResize = () => {
     /// #endif
 };
 
-export const genAssetHTML = (type: string, pathString: string, imgName: string, linkName: string) => {
+export const genAssetHTML = (type: string, pathString: string, imgName: string, linkName: string, htmlAsIframe = false) => {
     let html = "";
-    if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
+    if (htmlAsIframe && isHTMLFilePath(linkName)) {
+        const iframeSrc = escapeAttr(getHTMLAssetIFrameSrc(pathString));
+        html = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeIFrame" class="iframe" updated="${dayjs().format("YYYYMMDDHHmmss")}"><div class="iframe-content">${Constants.ZWSP}<iframe sandbox="allow-scripts" src="${iframeSrc}" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe><span class="protyle-action__drag" contenteditable="false"></span></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+    } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
         html = `<div data-node-id="${Lute.NewNodeID()}" data-type="NodeAudio" class="iframe" updated="${dayjs().format("YYYYMMDDHHmmss")}"><div class="iframe-content"><audio controls="controls" src="${pathString}"></audio>${Constants.ZWSP}</div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
-    } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
+    } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(type) && isBrowserRenderableImagePath(pathString)) {
         let netHTML = "";
         if (!pathString.startsWith("assets/")) {
             netHTML = '<span class="img__net"><svg><use xlink:href="#iconGlobe"></use></svg></span>';

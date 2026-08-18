@@ -6,7 +6,7 @@
 		"id": "20260613212028-gozdm4e",
 		"title": "Content Statistics",
 		"type": "doc",
-		"updated": "20260613212056"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613212037-3unkz3i",
-				"updated": "20260613212037"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613212037-s0f023a",
-				"updated": "20260613212037"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "When a document is open, you can view its statistics in the status bar at the bottom of the editor and in the document details menu."
+					"Data": "On desktop, after opening a document, you can view its statistics in the status bar at the bottom of the editor and in the document details menu."
 				}
 			]
 		},
@@ -201,7 +201,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613212037-w3f5b5t",
-				"updated": "20260613212037"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613212037-gnhm9wu",
-				"updated": "20260613212037"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -224,7 +224,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "︙"
 				},
 				{

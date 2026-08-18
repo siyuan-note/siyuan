@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -25,7 +25,7 @@ type Variable struct {
 }
 
 // Variables 是全局变量库，与 Secrets 对应：Secrets 加密存储敏感数据，Variables 明文存储非敏感数据。
-// 两者以 {{vars.NAME}} 形式被智能体工具、MCP 服务等引用。
+// 两者以 {{vars.NAME}} 形式被智能体工具、MCP 服务请求头和 stdio 环境变量等引用。
 type Variables struct {
 	Items []*Variable `json:"items"`
 }

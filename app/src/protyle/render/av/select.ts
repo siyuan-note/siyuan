@@ -5,14 +5,16 @@ import {confirmDialog} from "../../../dialog/confirmDialog";
 import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getColId, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
-import {genAVValueHTML, isCustomAttr} from "./blockAttr";
+import {isCustomAttr} from "./blockAttr";
+import {genAVValueHTML} from "./attributeValue";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
-import {genCellValueByElement, getTypeByCellElement} from "./cell";
+import {genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements} from "./cell";
 import * as dayjs from "dayjs";
 import {getFieldsByData} from "./view";
 import {getFieldIdByCellElement} from "./row";
 import {Constants} from "../../../constants";
 import {setPosition} from "../../../util/setPosition";
+import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
 
 let cellValues: IAVCellValue[];
 
@@ -35,10 +37,10 @@ const filterSelectHTML = (key: string, options: {
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
                 const airaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>` : "";
-                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${currentName === item.name ? " b3-menu__item--current" : ""}" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${item.color}">
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${currentName === item.name ? " b3-menu__item--current" : ""}" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${escapeAttr(item.color)}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${airaLabel}">
-        <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
+        <span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
     </div>
@@ -79,6 +81,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     const undoOperations: IOperation[] = [];
     let mSelectValue: IAVCellSelectValue[];
     const avID = blockElement.getAttribute("data-av-id");
+    const batchMode = getAVBatchEditMode(cellElements[0]);
     cellElements.forEach((item, elementIndex) => {
         const rowID = getFieldIdByCellElement(item, viewType);
         if (!rowID) {
@@ -92,9 +95,13 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
                 item = cellElements[elementIndex] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`)) as HTMLElement;
             }
         }
-        const cellValue: IAVCellValue = cellValues[elementIndex];
+        const cellValue: IAVCellValue = batchMode === "replace" ?
+            cellValues[elementIndex] :
+            getAVBatchSourceValue(item, cellValues[elementIndex]);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
-        if (elementIndex === 0) {
+        if (batchMode !== "replace") {
+            cellValue.mSelect = cellValue.mSelect?.filter(option => option.content !== target.dataset.content) || [];
+        } else if (elementIndex === 0) {
             cellValue.mSelect?.find((item, index) => {
                 if (item.content === target.dataset.content) {
                     cellValue.mSelect.splice(index, 1);
@@ -105,6 +112,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
         } else {
             cellValue.mSelect = mSelectValue;
         }
+        cellValues[elementIndex] = cellValue;
         doOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,
@@ -126,6 +134,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
         } else {
             updateAttrViewCellAnimation(item, cellValue);
         }
+        updateAttrViewCellInOtherElements(protyle, avID, rowID, colId, cellValue, item);
     });
     doOperations.push({
         action: "doUpdateUpdated",
@@ -148,17 +157,19 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
     }
 };
 
-export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, isCustomAttr: boolean, cellElements?: HTMLElement[]) => {
+export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, blockElement: Element, isCustomAttr: boolean,
+                             cellElements?: HTMLElement[], keepMenuOpen = false) => {
     const menuElement = hasClosestByClassName(target, "b3-menu");
-    if (!menuElement) {
+    const optionElement = target.closest("[data-name]") as HTMLElement;
+    if (!menuElement || !optionElement) {
         return;
     }
     const blockID = blockElement.getAttribute("data-node-id");
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     const colId = (cellElements && cellElements[0]) ? getColId(cellElements[0], viewType) : menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
-    let name = target.parentElement.dataset.name;
-    let desc = target.parentElement.dataset.desc;
-    let color = target.parentElement.dataset.color;
+    let name = optionElement.dataset.name;
+    let desc = optionElement.dataset.desc;
+    let color = optionElement.dataset.color;
     const fields = getFieldsByData(data);
     const menu = new Menu(Constants.MENU_AV_COL_OPTION, () => {
         if ((name === inputElement.value && desc === descElement.value) || !inputElement.value) {
@@ -219,11 +230,13 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         } else {
             cellElements.forEach((cellElement: HTMLElement, index) => {
                 const rowID = getFieldIdByCellElement(cellElement, viewType);
-                if (viewType === "table" || isCustomAttr) {
-                    cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                        blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
-                } else {
-                    cellElement = cellElements[index] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                if (!blockElement.contains(cellElement)) {
+                    if (viewType === "table" || isCustomAttr) {
+                        cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
+                            blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
+                    } else {
+                        cellElement = cellElements[index] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                    }
                 }
 
                 cellValues[index].mSelect.find((item) => {
@@ -237,6 +250,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 } else {
                     updateAttrViewCellAnimation(cellElement, cellValues[index]);
                 }
+                updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId, cellValues[index], cellElement);
             });
             menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
             bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
@@ -247,7 +261,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             const cellRect = cellElements[cellElements.length - 1].getBoundingClientRect();
             setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height, 0, true);
         }
-    });
+    }, keepMenuOpen);
     if (menu.isOpen) {
         return;
     }
@@ -340,11 +354,13 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 } else {
                     cellElements.forEach((cellElement: HTMLElement, index) => {
                         const rowID = getFieldIdByCellElement(cellElement, viewType);
-                        if (viewType === "table" || isCustomAttr) {
-                            cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                                blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
-                        } else {
-                            cellElement = cellElements[index] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                        if (!blockElement.contains(cellElement)) {
+                            if (viewType === "table" || isCustomAttr) {
+                                cellElement = cellElements[index] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
+                                    blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
+                            } else {
+                                cellElement = cellElements[index] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                            }
                         }
                         cellValues[index].mSelect.find((item, selectIndex) => {
                             if (item.content === newName) {
@@ -357,6 +373,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         } else {
                             updateAttrViewCellAnimation(cellElement, cellValues[index]);
                         }
+                        updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId,
+                            cellValues[index], cellElement);
                     });
                     menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
                     bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
@@ -433,11 +451,13 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     } else {
                         cellElements.forEach((cellElement: HTMLElement, cellIndex) => {
                             const rowID = getFieldIdByCellElement(cellElement, viewType);
-                            if (viewType === "table") {
-                                cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                                    blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
-                            } else {
-                                cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                            if (!blockElement.contains(cellElement)) {
+                                if (viewType === "table" || isCustomAttr) {
+                                    cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
+                                        blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
+                                } else {
+                                    cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`)) as HTMLElement;
+                                }
                             }
                             cellValues[cellIndex].mSelect.find((item) => {
                                 if (item.content === name) {
@@ -451,6 +471,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                             } else {
                                 updateAttrViewCellAnimation(cellElement, cellValues[cellIndex]);
                             }
+                            updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId,
+                                cellValues[cellIndex], cellElement);
                         });
                         menuElement.innerHTML = getSelectHTML(fields, cellElements, false, blockElement);
                         bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
@@ -473,9 +495,9 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         w: rect.width,
         h: rect.height,
     });
-    const inputElement = window.siyuan.menus.menu.element.querySelector("input");
+    const inputElement = menu.element.querySelector("input");
     inputElement.select();
-    const descElement = window.siyuan.menus.menu.element.querySelector("textarea");
+    const descElement = menu.element.querySelector("textarea");
 };
 
 export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, cellElements: HTMLElement[], blockElement: Element) => {
@@ -562,14 +584,30 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
     let mSelectValue: IAVCellSelectValue[];
+    const batchMode = getAVBatchEditMode(cellElements[0]);
     cellElements.forEach((item, index) => {
         const rowID = getFieldIdByCellElement(item, data.viewType);
         if (!rowID) {
             return;
         }
-        const cellValue: IAVCellValue = cellValues[index];
+        const cellValue: IAVCellValue = batchMode === "replace" ?
+            cellValues[index] :
+            getAVBatchSourceValue(item, cellValues[index]);
         const oldValue = JSON.parse(JSON.stringify(cellValue));
-        if (index === 0) {
+        if (batchMode === "remove") {
+            cellValue.mSelect = cellValue.mSelect?.filter(option =>
+                option.content !== currentElement.dataset.name) || [];
+        } else if (batchMode === "add") {
+            if (!cellValue.mSelect?.some(option => option.content === currentElement.dataset.name)) {
+                if (!cellValue.mSelect) {
+                    cellValue.mSelect = [];
+                }
+                cellValue.mSelect.push({
+                    color: currentElement.dataset.color,
+                    content: currentElement.dataset.name
+                });
+            }
+        } else if (index === 0) {
             if (colData.type === "mSelect") {
                 let hasOption = false;
                 cellValue.mSelect.find((item) => {
@@ -594,6 +632,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         } else {
             cellValue.mSelect = mSelectValue;
         }
+        cellValues[index] = cellValue;
         cellDoOperations.push({
             action: "updateAttrViewCell",
             id: cellValue.id,
@@ -615,6 +654,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         } else {
             updateAttrViewCellAnimation(item, cellValue);
         }
+        updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId, cellValue, item);
     });
 
     if (currentElement.querySelector(".b3-menu__accelerator")) {
@@ -648,7 +688,9 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         transaction(protyle, cellDoOperations, cellUndoOperations);
     }
     if (colData.type === "select") {
-        blockElement.setAttribute("data-rendering", "true");
+        if (blockElement.classList.contains("av")) {
+            blockElement.setAttribute("data-rendering", "true");
+        }
         menuElement.parentElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
     } else {
         const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
@@ -680,9 +722,13 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
     });
     let selectedHTML = "";
     const selected: string[] = [];
-    cellValues[0].mSelect?.forEach((item) => {
+    const batchMode = getAVBatchEditMode(cellElements[0]);
+    const visibleValues = batchMode === "replace" ? cellValues[0].mSelect : [];
+    const canSort = colData.type === "mSelect" && visibleValues?.length > 1;
+    visibleValues?.forEach((item) => {
+        const option = colData.options?.find((colOption) => colOption.name === item.content);
         selected.push(item.content);
-        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(item.content)}" style="white-space: nowrap;max-width:100%;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconClose"></use></svg></div>`;
+        selectedHTML += `<div class="b3-chip b3-chip--middle${canSort ? " fn__grab" : " b3-chip--pointer"}" data-content="${escapeAttr(item.content)}" data-name="${escapeAttr(item.content)}" data-desc="${escapeAttr(option?.desc || "")}" data-color="${escapeAttr(option?.color || item.color)}" data-value-color="${escapeAttr(item.color)}" style="white-space: nowrap;max-width:100%;background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconClose"></use></svg></div>`;
     });
 
     return `<div class="b3-menu__items" style="display: flex;flex-direction: column;flex: 1;">

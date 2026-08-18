@@ -1,0 +1,1248 @@
+{
+	"ID": "20260804171006-aiagt04",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804171006-aiagt04",
+		"title": "AI エージェント",
+		"type": "doc",
+		"updated": "20260816130653"
+	},
+	"Children": [
+		{
+			"ID": "20260804170023-1x6ifkw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170023-1x6ifkw",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20260804170024-9lvjy1x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170024-9lvjy1x",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AI エージェントは質問に答えるだけでなく、SiYuan の組み込みツール、スキル、MCP サービス、プラグイン機能を利用してナレッジベースを検索、読み取り、操作できます。タスクを段階的に実行し、データを変更する前に確認を求めます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170025-r2m4o0b",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170025-r2m4o0b",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定方法"
+				}
+			]
+		},
+		{
+			"ID": "20260804170026-vh2f8ng",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170026-vh2f8ng",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "API プロバイダー"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で API プロバイダーとモデルを設定して有効にし、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エージェント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " でエージェントが使用するモデルを選択します。ツール呼び出しを安定して実行でき、十分なコンテキストウィンドウを持つモデルを推奨します。"
+				}
+			]
+		},
+		{
+			"ID": "20260804180003-imgja01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804180003-imgja01",
+				"updated": "20260804180003"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エージェントはドキュメント内の画像を分析できます。画像理解の能力は現在のモデルによって異なります。画像を生成するには、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "画像生成"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で画像出力に対応するモデルを設定します。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170027-2jaadkf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170027-2jaadkf",
+				"updated": "20260816114944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20260804170028-3m7byvz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170028-3m7byvz",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エージェントを開く"
+				}
+			]
+		},
+		{
+			"ID": "20260804170029-w19ke9r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170029-w19ke9r",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デスクトップでは右側のドックにある "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エージェント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択します。モバイルではメインメニューから "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エージェント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を開きます。新しいセッションを開始するか、セッション管理から過去のセッションを検索して続行できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170030-0i7g7hj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170030-0i7g7hj",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテキストを提供する"
+				}
+			]
+		},
+		{
+			"ID": "20260804170031-zf4yu7x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170031-zf4yu7x",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "メッセージを送信すると、エージェントは現在のドキュメント、フォーカス中のブロック、選択したブロック、表示中のブロックを認識し、必要に応じて関連コンテンツを読み取ります。参照元のブロックを明示するには、次の方法を使用します。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170032-ynp1yag",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20260804170032-ynp1yag",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170033-42ym4a9",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20260804170033-42ym4a9",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170034-l7w7nbu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170034-l7w7nbu",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ブロックをエージェントの入力欄にドラッグします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170035-plyrm10",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260804170035-plyrm10",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170036-6nh0i14",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170036-6nh0i14",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "入力欄に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "[["
+								},
+								{
+									"Type": "NodeText",
+									"Data": " と入力してブロックを検索します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170037-cxc5kmu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 3,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260804170037-cxc5kmu",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170038-j9x6ajz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170038-j9x6ajz",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ブロックを選択し、ブロックメニューから "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エージェント会話に追加"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を選択します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804170039-9kcdqv4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170039-9kcdqv4",
+				"updated": "20260816114944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "タスクを送信、停止する"
+				}
+			]
+		},
+		{
+			"ID": "20260804170040-m2zcmhf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170040-m2zcmhf",
+				"updated": "20260816114944"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "デフォルトでは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " + "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " / "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で送信します。ショートカットはカスタマイズできます。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "エージェントの実行中は停止ボタンで現在のタスクを中断できます。目的、範囲、出力先を明確に指定すると、通常はより安定した結果が得られます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170041-sri5ln6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170041-sri5ln6",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "操作を確認する"
+				}
+			]
+		},
+		{
+			"ID": "20260804170042-fuwjiju",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170042-fuwjiju",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "読み取りと検索は通常そのまま実行されます。データの作成、変更、移動、削除、インポートを行う操作では確認カードが表示され、ローカルへの書き込み、データ送信、外部料金などの影響が示されます。実行、拒否、または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "セッション許可"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170043-c3mrdfs",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170043-c3mrdfs",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "セッション許可"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用すると、現在のセッションでは以降の書き込み操作が個別に確認されません。使用する前に、タスクの範囲とツールが信頼できることを確認してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170044-0dekacs",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170044-0dekacs",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "セッション管理"
+				}
+			]
+		},
+		{
+			"ID": "20260804170045-86n1950",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170045-86n1950",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "セッションの作成、検索、切り替え、名前変更、削除ができます。メッセージ、参照、ツール呼び出し、実行結果はセッションに保存され、同期された別のインスタンスからも確認できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170046-2kcx5sj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170046-2kcx5sj",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "送信済みのメッセージを編集して再送信したり、回答を再生成したりできます。再送信すると後続の会話は削除されますが、実行済みの操作は元に戻りません。復元が必要な場合は、対応するデータスナップショットを使用してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170047-d4bjmew",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170047-d4bjmew",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "モデルと思考強度"
+				}
+			]
+		},
+		{
+			"ID": "20260804170048-km5oy76",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170048-km5oy76",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "入力欄の下で有効なモデルを切り替え、対応するモデルでは思考強度を選択できます。推論やツール呼び出しを含むセッションでモデルを切り替えると、回答品質やツール呼び出しの連続性が低下する場合があります。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170049-vtr56ro",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170049-vtr56ro",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテキスト使用量では、現在使用しているコンテキストの割合と分類別の内訳を確認できます。モデルの上限に近づくと、エージェントは以前の会話内容を圧縮しようとします。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170050-7cf4sou",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170050-7cf4sou",
+				"updated": "20260816130653"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スキル"
+				}
+			]
+		},
+		{
+			"ID": "20260804170051-4l1ozje",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170051-4l1ozje",
+				"updated": "20260816130653"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スキルは、ワークフロー、形式、分野固有のルールを定義する再利用可能なタスク手順です。各スキルは独立したディレクトリを使用し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/data/storage/ai/agent/skills/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の下に配置します。ユーザーディレクトリ "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "~/.agents/skills/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の読み取り専用スキルを個別に有効にすることもできます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170052-ecqhexr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170052-ecqhexr",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " では YAML Front Matter に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "name"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "description"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を定義し、その後にエージェントが従う手順を記述できます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " と入力すると、インストール済みのスキルを検索して選択できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170053-2kk8p7q",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170053-2kk8p7q",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エージェントに、スキルの一覧表示、作成、更新、名前変更、削除を依頼できます。インストール元には "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "owner/repo"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、完全な "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "npx skills add owner/repo -g"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " コマンド、GitHub URL、未加工の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SKILL.md"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " URL、ZIP URL を指定できます。スキルはエージェントの動作に影響するため、信頼できる提供元だけを使用してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170054-qfoixg9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170054-qfoixg9",
+				"updated": "20260812170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP サービス"
+				}
+			]
+		},
+		{
+			"ID": "20260804170055-a7wg3um",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170055-a7wg3um",
+				"updated": "20260812170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP サービスはエージェントに外部ツールを提供します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "AI を呼び出す"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "エージェント MCP サービス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で stdio または HTTP サービスを追加し、コマンド、引数、環境変数、URL、HTTP ヘッダー、タイムアウトを設定して、接続状態とツール数を確認できます。"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "ここで設定するのは、エージェントが呼び出す外部 MCP サービスです。外部 MCP クライアントを SiYuan に接続する方法については、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804223003-mcpsv04",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "MCP サービス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170056-7d7fak1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170056-7d7fak1",
+				"updated": "20260812170000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "stdio サービスは、ユーザーが選択したカーネル環境変数だけを継承し、起動するたびに現在の値を読み取ります。環境変数の各項目ではシークレットと変数も参照できます。シークレットを参照すると、その平文がこのプログラムと子プロセスに渡され、直接入力した値は平文で保存されます。認証が必要な HTTP サービスでは OAuth 認証が案内されます。再利用するシークレットとパラメーターは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "シークレットと変数"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で管理できます。詳しくは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804185003-secvr04",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "シークレットと変数"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。外部 MCP ツールはローカルデータの送信、外部システムの変更、料金の発生を伴う場合があるため、確認カードの影響を確認してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170057-6r79kj4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170057-6r79kj4",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用例"
+				}
+			]
+		},
+		{
+			"ID": "20260804170058-kur73rx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170058-kur73rx",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170059-09y62yn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170059-09y62yn",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170100-4h7xr3m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170100-4h7xr3m",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "最近の会議ノートを検索し、アクション項目をまとめて指定したプロジェクトドキュメントに書き込む"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170101-pzpqqki",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170101-pzpqqki",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170102-pp4v4gu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170102-pp4v4gu",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "選択したブロックから、重要な結論を残した構造化された要約を作成する"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170103-skmx4c3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170103-skmx4c3",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170104-rxb80ei",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170104-rxb80ei",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "今日のデイリーノートを作成し、今日行う 3 つのタスクを追加する"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170105-xvyeufw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170105-xvyeufw",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170106-ckbelam",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170106-ckbelam",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "現在のドキュメント内の画像を確認し、それぞれに短い説明を作成する"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170107-q8tyerj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170107-q8tyerj",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170108-sdv277r",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170108-sdv277r",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "文章作成ガイドラインのスキルで現在のドキュメントを確認し、必要な変更を列挙する"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804170109-yrnzqjt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170109-yrnzqjt",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データスナップショットとロールバック"
+				}
+			]
+		},
+		{
+			"ID": "20260804170110-e38e283",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170110-e38e283",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各ターンで最初にワークスペースのデータへ書き込む前に、エージェントはデータスナップショットを自動作成します。作成されるスナップショットは 1 ターンにつき最大 1 つです。結果が適切でない場合は、セッション内のスナップショット通知からロールバックできます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170111-8dl6p54",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170111-8dl6p54",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スナップショットはワークスペースのデータを対象としますが、外部 MCP サービスやプラグインが外部システムに加えた変更は対象外です。回答の再生成、タスクの停止、セッションの削除でも、完了済みの書き込み操作は自動的に元に戻りません。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170112-d15eula",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170112-d15eula",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20260804170113-f5ktrez",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170113-f5ktrez",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170114-bvfhqb8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170114-bvfhqb8",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170115-dty3okp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170115-dty3okp",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "公開サービスと読み取り専用モードではエージェントを使用できません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170116-xq18zqa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170116-xq18zqa",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170117-du503kw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170117-du503kw",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "モデルがツール呼び出しを正しくサポートしている必要があります。ツール呼び出し、推論、画像理解の能力はモデルによって異なります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170118-ial705z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170118-ial705z",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170119-pgnedk0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170119-pgnedk0",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ドキュメントや画像のデータが API プロバイダーまたは外部 MCP サービスに送信され、料金が発生する場合があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170120-0gnyivm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170120-0gnyivm",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170121-73qjkk8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170121-73qjkk8",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "エージェントが要求を誤解したり、不正確な内容を生成したりする場合があります。重要な変更の前に確認カードを確認し、実行後に結果を検証してください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170122-2p4fm0d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170122-2p4fm0d",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170123-m3or9r8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170123-m3or9r8",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "メッセージ、スキル、MCP 設定に不要なパスワードや API キーを含めないでください"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

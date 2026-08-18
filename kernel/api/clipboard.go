@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,8 +17,10 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/88250/clipboard"
 	"github.com/88250/gulu"
@@ -70,11 +72,17 @@ func writeFilePath(c *gin.Context) {
 		return
 	}
 
-	absPath, err := model.GetAssetAbsPath(pathArg)
+	absPath, err := model.GetAssetAbsPathInBox(pathArg, "")
 	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", pathArg, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+	if model.IsEncryptedAssetPath(absPath) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
@@ -86,4 +94,90 @@ func writeFilePath(c *gin.Context) {
 		ret.Data = map[string]any{"closeTimeout": 5000}
 		return
 	}
+}
+
+func prepareRichText(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	assetsArg, ok := util.ParseJsonArg[[]any]("assets", arg, ret, true, true)
+	if !ok {
+		return
+	}
+
+	assets := make([]model.RichClipboardAsset, 0, len(assetsArg))
+	for i, rawAsset := range assetsArg {
+		assetArg, typeOK := rawAsset.(map[string]any)
+		if !typeOK {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [assets.%d] should be of type [Object]", i)
+			return
+		}
+
+		index, indexOK := assetArg["index"].(float64)
+		path, pathOK := assetArg["path"].(string)
+		if !indexOK || index < 0 || index != float64(int(index)) || !pathOK || strings.TrimSpace(path) == "" {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Invalid rich clipboard asset at index [%d]", i)
+			return
+		}
+
+		box := ""
+		if boxArg, exists := assetArg["box"]; exists {
+			box, typeOK = boxArg.(string)
+			if !typeOK {
+				ret.Code = -1
+				ret.Msg = fmt.Sprintf("Field [assets.%d.box] should be of type [String]", i)
+				return
+			}
+		}
+		assets = append(assets, model.RichClipboardAsset{
+			Index: int(index),
+			Path:  strings.TrimSpace(path),
+			Box:   strings.TrimSpace(box),
+		})
+	}
+
+	prepared, err := model.PrepareRichClipboardAssets(assets)
+	if err != nil {
+		logging.LogWarnf("prepare rich clipboard assets failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = prepared
+}
+
+func cleanupRichText(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	batch, ok := util.ParseJsonArg[string]("batch", arg, ret, true, true)
+	if !ok {
+		return
+	}
+	groupsArg, ok := util.ParseJsonArg[[]any]("groups", arg, ret, true, true)
+	if !ok {
+		return
+	}
+
+	groups := make([]string, 0, len(groupsArg))
+	for i, rawGroup := range groupsArg {
+		group, typeOK := rawGroup.(string)
+		if !typeOK {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [groups.%d] should be of type [String]", i)
+			return
+		}
+		groups = append(groups, group)
+	}
+	model.CleanupRichClipboardBatch(batch, groups)
 }

@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@ package api
 
 import (
 	"net/http"
+	"path/filepath"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -86,6 +87,13 @@ func renderTemplate(c *gin.Context) {
 		return
 	}
 
+	// 模板路径必须限定在 <data>/templates/ 目录内，防止通过工作空间内任意路径读取敏感文件（如 conf/conf.json）
+	if !isPathInTemplatesDir(p) {
+		ret.Code = -1
+		ret.Msg = "Path [" + p + "] is not in templates directory"
+		return
+	}
+
 	preview := false
 	if previewArg := arg["preview"]; nil != previewArg {
 		preview = previewArg.(bool)
@@ -102,4 +110,23 @@ func renderTemplate(c *gin.Context) {
 		"path":    p,
 		"content": content,
 	}
+}
+
+// isPathInTemplatesDir 校验绝对路径是否位于 <data>/templates/ 目录内，解析符号链接后再次校验，
+// 防止通过符号链接指向模板目录外的敏感文件
+func isPathInTemplatesDir(p string) bool {
+	abs := filepath.Clean(p)
+	templatesRoot := filepath.Clean(filepath.Join(util.DataDir, "templates"))
+	if !gulu.File.IsSubPath(templatesRoot, abs) {
+		return false
+	}
+	realRoot, err := filepath.EvalSymlinks(templatesRoot)
+	if nil != err {
+		return false
+	}
+	realPath, err := filepath.EvalSymlinks(abs)
+	if nil != err {
+		return false
+	}
+	return gulu.File.IsSubPath(realRoot, realPath)
 }

@@ -10,8 +10,10 @@ import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {highlightRender, lineNumberRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
-import {saveExportFile, setStorageVal} from "../util/compatibility";
+import {isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
 import {useShell} from "../../util/pathName";
+
+const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
@@ -86,24 +88,43 @@ export const exportImage = (id: string) => {
                 objectElement.remove();
             }
         }
-        previewElement.querySelectorAll(".protyle-linenumber__rows span").forEach((item, index) => {
-            item.textContent = (index + 1).toString();
+        previewElement.querySelectorAll(".protyle-linenumber__rows").forEach((rowsElement) => {
+            // 每个代码块的行号都需要从 1 开始计数，不能跨代码块累加
+            rowsElement.querySelectorAll("span").forEach((item, index) => {
+                item.textContent = (index + 1).toString();
+            });
         });
+        const exportBlob = (blob: Blob) => {
+            const formData = new FormData();
+            formData.append("file", blob, btnsElement[1].getAttribute("data-title"));
+            formData.append("type", "image/png");
+            fetchPost("/api/export/exportAsFile", formData, (response) => {
+                saveExportFile(response.data.file, msgId);
+            });
+            exportDialog.destroy();
+        };
         setTimeout(() => {
-            // modern-screenshot is used instead of html-to-image because the latter clones every
-            // node and copies its full computed style one property at a time, which is O(nodes) with
-            // a huge constant on WebKit/WKWebView (~15s for a mid-size doc on iOS vs ~3s on desktop).
-            // modern-screenshot caches default styles per tag and only writes differing properties,
-            // and it renders correctly in a single pass, so the old 3x Safari re-render hack is gone.
-            addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js`, "protyleModernScreenshot").then(async () => {
-                const blob = await window.modernScreenshot.domToBlob(contentElement, {type: "image/png"});
-                const formData = new FormData();
-                formData.append("file", blob, btnsElement[1].getAttribute("data-title"));
-                formData.append("type", "image/png");
-                fetchPost("/api/export/exportAsFile", formData, (response) => {
-                    saveExportFile(response.data.file, msgId);
+            if (isIPhone() || isSafari()) {
+                // html-to-image clones every node and copies its full computed style one property at
+                // a time, which is O(nodes) with a huge constant on WebKit/WKWebView (~45s for a
+                // mid-size doc), and it needs to be run 4 times there before the fonts/images settle.
+                // modern-screenshot caches default styles per tag, only writes the differing
+                // properties and renders correctly in a single pass (~8s for the same doc).
+                addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.6.6`, "protyleModernScreenshot").then(async () => {
+                    exportBlob(await window.modernScreenshot.domToBlob(contentElement, {
+                        type: "image/png",
+                        fetch: {placeholderImage: IMAGE_PLACEHOLDER}
+                    }));
                 });
-                exportDialog.destroy();
+                return;
+            }
+            addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image").then(async () => {
+                exportBlob(await window.htmlToImage.toBlob(contentElement, {
+                    imagePlaceholder: IMAGE_PLACEHOLDER,
+                    onImageErrorHandler: (event: Event) => {
+                        (event.target as HTMLImageElement).src = IMAGE_PLACEHOLDER;
+                    }
+                }));
             });
         }, Constants.TIMEOUT_LOAD);
     });

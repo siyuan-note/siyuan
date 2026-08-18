@@ -1,0 +1,85 @@
+.ai-editor-panel {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(520px, calc(100% - 32px));
+  max-height: min(480px, 60%);
+  overflow: hidden;
+  background: var(--b3-theme-background);
+  border: 1px solid var(--b3-theme-surface-lighter);
+  border-radius: var(--b3-border-radius-b);
+  box-shadow: var(--b3-dialog-shadow);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+    padding: 4px 8px 4px 12px;
+    border-bottom: 1px solid var(--b3-border-color);
+    color: var(--b3-theme-on-background);
+    font-size: 13px;
+  }
+
+  &__status {
+    overflow: hidden;
+    color: var(--b3-theme-on-surface-light);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__model {
+    margin-inline-start: 4px;
+    color: var(--b3-theme-on-surface-light);
+    font-weight: normal;
+  }
+
+  &__body.protyle-wysiwyg {
+    box-sizing: border-box;
+    min-height: 36px;
+    padding: 6px 8px;
+    overflow: auto;
+    color: var(--b3-theme-on-background);
+    font-size: var(--b3-font-size);
+    line-height: 1.6;
+    user-select: text;
+    word-break: break-word;
+  }
+
+  &__body--streaming {
+    white-space: pre-wrap;
+  }
+
+  &__thinking {
+    flex-shrink: 0;
+    padding: 2px 8px;
+
+    .agent-chat__thinking-body--expanded {
+      max-height: 240px;
+      overflow-y: auto;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 8px;
+    border-top: 1px solid var(--b3-border-color);
+  }
+
+  &--mobile {
+    top: auto !important;
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    left: max(8px, env(safe-area-inset-left)) !important;
+    width: auto;
+    max-height: 55%;
+
+    .ai-editor-panel__actions .b3-button {
+      min-height: 36px;
+    }
+  }
+}

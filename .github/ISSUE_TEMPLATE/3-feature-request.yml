@@ -1,32 +1,41 @@
 name: ✨ Request new features
 description: Come up with the features you expected
-title: "Please enter the title of the feature request"
 body:
+  - type: markdown
+    attributes:
+      value: |
+        > [!IMPORTANT]
+        > We are currently not accepting new graph-related feature requests.
+  - type: checkboxes
+    attributes:
+      label: Before submitting
+      description: |
+        Please complete all of the following confirmations.
+      options:
+        - label: I have searched the existing issues
+          required: true
+        - label: This issue contains only one feature request
+          required: true
+        - label: This request is not related to graph features
+          required: true
   - type: textarea
     attributes:
-      label: In what scenarios do you need this feature?
+      label: What problem does this feature solve?
       description: |
-        Please describe the functions and application scenarios you expect as clearly and accurately as possible.
+        Please describe the problem and its application scenarios as clearly and accurately as possible.
     validations:
       required: true
   - type: textarea
     attributes:
-      label: Describe the optimal solution
+      label: Describe the expected result or proposed solution
       description: |
-        Please try to describe the best solution. There may be similar software that implements this feature. Please also list it for our reference.
+        Please describe the expected result or your proposed solution. If other software provides a similar feature, please list it for our reference.
     validations:
       required: true
-  - type: textarea
-    attributes:
-      label: Describe the candidate solution
-      description: |
-        Please describe the candidate solutions you can accept as clearly and accurately as possible.
-    validations:
-      required: false
   - type: textarea
     attributes:
       label: Other information
       description: |
-        Please provide any additional information about this feature suggestion.
+        Please provide any additional context, screenshots, links, or related issues.
     validations:
       required: false

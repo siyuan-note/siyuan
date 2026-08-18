@@ -22,6 +22,10 @@
     align-items: center;
     border-radius: 0 0 var(--b3-border-radius-b) var(--b3-border-radius-b);
 
+    &-icon {
+      font-variant-emoji: emoji;
+    }
+
     &--space {
       padding: 16px;
     }
@@ -69,6 +73,7 @@
     display: block;
     line-height: 46px;
     margin-bottom: 4px;
+    font-variant-emoji: emoji;
   }
 
   &__block {
@@ -93,6 +98,14 @@
     }
 
     &--hidesb .protyle-wysiwyg > .sb[custom-riff-decks] > div:nth-of-type(n+2):not(.protyle-attr) {
+      display: none;
+    }
+
+    &--hidebq .protyle-wysiwyg > .bq[custom-riff-decks] > [data-node-id] ~ [data-node-id] {
+      display: none;
+    }
+
+    &--hidecallout .protyle-wysiwyg > .callout[custom-riff-decks] > .callout-content {
       display: none;
     }
 

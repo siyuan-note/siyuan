@@ -67,6 +67,10 @@ func getUnOCRAssetsAbsPaths() (ret []string) {
 			continue
 		}
 		absPath := filepath.Join(assetsPath, strings.TrimPrefix(asset.Path, "assets"))
+		// 加密笔记本的 asset 是密文，跳过 OCR（避免密文图片产出垃圾文本污染搜索索引）
+		if IsEncryptedAssetPath(absPath) {
+			continue
+		}
 		ret = append(ret, absPath)
 	}
 	return

@@ -16,6 +16,20 @@ import {assetMenu} from "../../menus/protyle";
 import {previewImages} from "../preview/image";
 import {Menu} from "../../plugin/Menu";
 import {escapeHtml} from "../../util/escape";
+import {fetchCoverData, getCategoryLabel} from "./coverData";
+/// #if !MOBILE
+import {openDocTagMenu} from "./openDocTagMenu";
+/// #endif
+
+const bindPopoverDialog = (dialog: Dialog, ownerElement: HTMLElement) => {
+    const popoverElement = ownerElement.closest<HTMLElement>(".block__popover");
+    const popoverOID = popoverElement?.dataset.oid;
+    const popoverLevel = popoverElement?.dataset.level;
+    if (popoverOID && popoverLevel) {
+        dialog.element.dataset.popoverOid = popoverOID;
+        dialog.element.dataset.popoverLevel = popoverLevel;
+    }
+};
 
 const bgs = [
     "background:radial-gradient(black 3px, transparent 4px),radial-gradient(black 3px, transparent 4px),linear-gradient(#fff 4px, transparent 0),linear-gradient(45deg, transparent 74px, transparent 75px, #a4a4a4 75px, #a4a4a4 76px, transparent 77px, transparent 109px),linear-gradient(-45deg, transparent 75px, transparent 76px, #a4a4a4 76px, #a4a4a4 77px, transparent 78px, transparent 109px),#fff;background-size: 109px 109px, 109px 109px,100% 6px, 109px 109px, 109px 109px;background-position: 54px 55px, 0px 0px, 0px 0px, 0px 0px, 0px 0px;",
@@ -96,7 +110,7 @@ const bgs = [
 
 export class Background {
     public element: HTMLElement;
-    public ial: IObject;
+    public ial: Record<string, string>;
     private imgElement: HTMLImageElement;
     private iconElement: HTMLElement;
     private actionElements: NodeListOf<Element>;
@@ -260,43 +274,142 @@ export class Background {
                         y: rect.bottom,
                         h: rect.height,
                         w: rect.width
-                    }, undefined, target.querySelector("img"));
+                    }, undefined, target.querySelector("img"), {ownerElement: protyle.element});
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "show-random" && !protyle.disabled) {
-                    let html = "";
-                    bgs.forEach((item: string, index: number) => {
-                        html += `<div data-index="${index}" style="height: 128px;${item}" class="b3-card"></div>`;
-                    });
+                    window.siyuan.menus.menu.remove();
+                    // 内置题头图对话框：优先展示封面图片，加载失败时回退到 CSS 图案
                     const dialog = new Dialog({
                         title: window.siyuan.languages.builtIn,
-                        content: `<div class="b3-cards" style="padding: 16px">${html}</div>`,
+                        content: `<div class="b3-cards" style="padding:16px;justify-content:center;align-items:center;min-height:200px">
+            <img src="/stage/loading-pure.svg" style="width:64px;height:64px">
+        </div>`,
                         width: isMobile() ? "92vw" : "912px",
                         height: isMobile() ? "80vh" : "70vh",
                     });
                     dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDRANDOM);
-                    dialog.element.addEventListener("click", (event) => {
-                        const target = event.target as HTMLElement;
-                        if (target.classList.contains("b3-card")) {
-                            this.ial["title-img"] = bgs[parseInt(target.getAttribute("data-index"))];
+                    bindPopoverDialog(dialog, protyle.element);
+
+                    const renderCSSPatterns = (d: Dialog) => {
+                        let html = "";
+                        bgs.forEach((item: string, index: number) => {
+                            html += `<div data-index="${index}" style="height: 128px;${item}" class="b3-card"></div>`;
+                        });
+                        const bodyEl = d.element.querySelector(".b3-dialog__body");
+                        if (bodyEl) {
+                            bodyEl.innerHTML = `<div class="b3-cards" style="padding: 16px">${html}</div>`;
+                        }
+                        d.element.addEventListener("click", (event) => {
+                            const target = event.target as HTMLElement;
+                            if (target.classList.contains("b3-card")) {
+                                this.ial["title-img"] = bgs[parseInt(target.getAttribute("data-index"))];
+                                this.render(this.ial, protyle.block.rootID);
+                                fetchPost("/api/attr/setBlockAttrs", {
+                                    id: protyle.block.rootID,
+                                    attrs: {"title-img": this.ial["title-img"]}
+                                });
+                                d.destroy();
+                            }
+                        });
+                    };
+
+                    fetchCoverData().then((coverData) => {
+                        if (!coverData) {
+                            renderCSSPatterns(dialog);
+                            return;
+                        }
+                        const { categories, coversByCategory, allCovers } = coverData;
+
+                        const buildCards = (category: string): string => {
+                            const covers = category === "all" ? allCovers : (coversByCategory.get(category) || []);
+                            return covers.map(c => {
+                                const url = `/appearance/covers/${c.file}`;
+                                return `<div class="b3-card b3-cover__card" data-name="${c.file}"><img src="${url}" loading="lazy"></div>`;
+                            }).join("");
+                        };
+
+                        const buildTabs = (activeCategory: string): string => {
+                            let tabs = `<span class="b3-chip b3-chip--hover${activeCategory === "all" ? " b3-chip--current" : ""}" data-category="all">${window.siyuan.languages.coverAll}</span>`;
+                            for (const cat of categories) {
+                                tabs += `<span class="b3-chip b3-chip--hover${activeCategory === cat ? " b3-chip--current" : ""}" data-category="${cat}">${getCategoryLabel(cat)}</span>`;
+                            }
+                            return `<div class="b3-cover__tabs">${tabs}</div>`;
+                        };
+
+                        let activeCategory = "all";
+
+                        const renderContent = (): void => {
+                            const bodyEl = dialog.element.querySelector(".b3-dialog__body");
+                            if (bodyEl) {
+                                bodyEl.innerHTML = `${buildTabs(activeCategory)}
+        <div class="b3-cards b3-cover__cards" style="padding:16px">${buildCards(activeCategory)}</div>`;
+                            }
+                        };
+
+                        renderContent();
+
+                        // 点击事件委托
+                        dialog.element.querySelector(".b3-dialog__body")!.addEventListener("click", (event) => {
+                            const target = event.target as HTMLElement;
+                            const chip = target.closest(".b3-chip") as HTMLElement;
+                            if (chip && chip.hasAttribute("data-category")) {
+                                activeCategory = chip.getAttribute("data-category") || "all";
+                                renderContent();
+                                dialog.element.querySelector(".b3-dialog__body")!.scrollTop = 0;
+                            } else if (target.closest(".b3-cover__card")) {
+                                const card = target.closest(".b3-cover__card") as HTMLElement;
+                                const name = card.getAttribute("data-name");
+                                fetchPost("/api/asset/insertCover", {
+                                    id: protyle.block.rootID,
+                                    name
+                                }, (response) => {
+                                    const succMap = response.data.succMap;
+                                    const url = succMap[Object.keys(succMap)[0]];
+                                    this.ial["title-img"] = `background-image:url("${url}")`;
+                                    this.render(this.ial, protyle.block.rootID);
+                                    fetchPost("/api/attr/setBlockAttrs", {
+                                        id: protyle.block.rootID,
+                                        attrs: {"title-img": this.ial["title-img"]}
+                                    });
+                                });
+                                dialog.destroy();
+                            }
+                        });
+                    }).catch(() => {
+                        renderCSSPatterns(dialog);
+                    });
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "random" && !protyle.disabled) {
+                    // 随机题头图：优先使用图片封面，加载失败时回退到 CSS 图案
+                    fetchCoverData().then((coverData) => {
+                        if (coverData && coverData.allCovers.length > 0) {
+                            const randomCover = coverData.allCovers[getRandom(0, coverData.allCovers.length - 1)];
+                            fetchPost("/api/asset/insertCover", {
+                                id: protyle.block.rootID,
+                                name: randomCover.file
+                            }, (response) => {
+                                const succMap = response.data.succMap;
+                                const url = succMap[Object.keys(succMap)[0]];
+                                this.ial["title-img"] = `background-image:url("${url}")`;
+                                this.render(this.ial, protyle.block.rootID);
+                                fetchPost("/api/attr/setBlockAttrs", {
+                                    id: protyle.block.rootID,
+                                    attrs: {"title-img": this.ial["title-img"]}
+                                });
+                            });
+                        } else {
+                            this.ial["title-img"] = bgs[getRandom(0, bgs.length - 1)];
                             this.render(this.ial, protyle.block.rootID);
                             fetchPost("/api/attr/setBlockAttrs", {
                                 id: protyle.block.rootID,
                                 attrs: {"title-img": this.ial["title-img"]}
                             });
-                            dialog.destroy();
                         }
-                    });
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (type === "random" && !protyle.disabled) {
-                    this.ial["title-img"] = bgs[getRandom(0, bgs.length - 1)];
-                    this.render(this.ial, protyle.block.rootID);
-                    fetchPost("/api/attr/setBlockAttrs", {
-                        id: protyle.block.rootID,
-                        attrs: {"title-img": this.ial["title-img"]}
                     });
                     event.preventDefault();
                     event.stopPropagation();
@@ -350,7 +463,7 @@ export class Background {
                             y: rect.bottom,
                             h: rect.height,
                             w: rect.width
-                        });
+                        }, undefined, undefined, {ownerElement: protyle.element});
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -373,6 +486,7 @@ export class Background {
 </div>`,
                     });
                     dialog.element.setAttribute("data-key", Constants.DIALOG_BACKGROUNDLINK);
+                    bindPopoverDialog(dialog, protyle.element);
                     const btnsElement = dialog.element.querySelectorAll(".b3-button");
                     btnsElement[0].addEventListener("click", () => {
                         dialog.destroy();
@@ -419,12 +533,37 @@ export class Background {
             }
         });
 
+        /// #if !MOBILE
+        this.tagsElement.addEventListener("contextmenu", (event: MouseEvent) => {
+            if (event.shiftKey || protyle.disabled) {
+                return;
+            }
+            const tagElement = (event.target as HTMLElement).closest(".b3-chip") as HTMLElement;
+            if (!tagElement || !this.tagsElement.contains(tagElement)) {
+                return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            const tagName = tagElement.textContent.trim();
+            openDocTagMenu({
+                protyle,
+                tagElement,
+                position: {x: event.clientX, y: event.clientY},
+                update: (tag) => {
+                    this.updateTag(protyle, tagName, tag);
+                },
+                remove: () => {
+                    this.removeTagByName(protyle, tagName);
+                }
+            });
+        });
+        /// #endif
+
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
             this.dragOccurred = false;
-            if (protyle.disabled) return;
+            if (protyle.disabled || event.button !== 0) return;
 
             const target = event.target as HTMLElement;
-            const isCloseBtn = !!target.closest(".b3-chip__close");
             let chipElement = target.closest(".b3-chip") as HTMLElement;
 
             // 自动定位最近的标签逻辑
@@ -463,7 +602,8 @@ export class Background {
 
                 // 阈值判断：移动超过 5 像素才视为拖拽，防止手抖误操作
                 if (!isDragging) {
-                    if (Math.abs(deltaX) < 5 && Math.abs(deltaY) < 5) return;
+                    if (Math.abs(deltaX) < Constants.SIZE_DRAG_THRESHOLD &&
+                        Math.abs(deltaY) < Constants.SIZE_DRAG_THRESHOLD) return;
                     isDragging = true;
 
                     // 创建克隆体
@@ -538,9 +678,6 @@ export class Background {
                             attrs: {"tags": tagsString}
                         });
                     }
-                } else if (isCloseBtn) {
-                    // 如果没拖拽且点在关闭按钮上
-                    target.closest(".b3-chip__close").dispatchEvent(new MouseEvent("click", {bubbles: true}));
                 }
             };
 
@@ -550,24 +687,51 @@ export class Background {
     }
 
     private removeTag(protyle: IProtyle, cb?: () => void) {
+        this.updateTags(protyle, this.getTags(), cb);
+    }
+
+    private removeTagByName(protyle: IProtyle, tagName: string) {
+        this.updateTags(protyle, this.getTags().filter((tag) => tag !== tagName));
+    }
+
+    private updateTag(protyle: IProtyle, oldTag: string, newTag: string) {
+        if (oldTag === newTag) {
+            return;
+        }
         const tags = this.getTags();
+        const index = tags.indexOf(oldTag);
+        if (index === -1) {
+            return;
+        }
+        if (newTag) {
+            tags[index] = newTag;
+        } else {
+            tags.splice(index, 1);
+        }
+        this.updateTags(protyle, Array.from(new Set(tags)));
+    }
+
+    private updateTags(protyle: IProtyle, tags: string[], cb?: () => void) {
+        const tagsString = tags.toString();
+        if (tagsString === (this.ial.tags || "")) {
+            cb?.();
+            return;
+        }
         fetchPost("/api/attr/setBlockAttrs", {
             id: protyle.block.rootID,
-            attrs: {"tags": tags.toString()}
+            attrs: {"tags": tagsString}
         }, () => {
-            if (cb) {
-                cb();
-            }
+            cb?.();
         });
         if (tags.length === 0) {
             delete this.ial.tags;
         } else {
-            this.ial.tags = tags.toString();
+            this.ial.tags = tagsString;
         }
         this.render(this.ial, protyle.block.rootID);
     }
 
-    public render(ial: IObject, rootId: string) {
+    public render(ial: Record<string, string>, rootId: string) {
         const img = ial["title-img"];
         const icon = ial.icon;
         const tags = ial.tags;
@@ -725,7 +889,7 @@ export class Background {
         const itemsElement = menu.element.querySelector(".b3-menu__items");
         itemsElement.setAttribute("style", "overflow: initial");
         /// #if MOBILE
-        menu.fullscreen();
+        menu.fullscreen("bottom");
         itemsElement.firstElementChild.setAttribute("style", "padding: 0 8px;height: 100%;");
         /// #else
         const rect = target.getBoundingClientRect();

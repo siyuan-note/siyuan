@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -40,11 +41,10 @@ var databaseSearchCmd = &cobra.Command{
 	Short: "Search databases by name",
 	Args:  cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		results := model.SearchAttributeView(args[0], nil)
+		results := model.SearchAttributeView(args[0], nil, "", "")
 		switch outputFormat {
 		case "json":
-			data, _ := json.MarshalIndent(results, "", "  ")
-			fmt.Println(string(data))
+			return printJSON(results)
 		default:
 			printAvSearchResults(results)
 		}
@@ -66,13 +66,9 @@ var databaseGetCmd = &cobra.Command{
 		}
 		switch outputFormat {
 		case "json":
-			data, _ := json.MarshalIndent(attrView, "", "  ")
-			fmt.Println(string(data))
+			return printJSON(model.NewAttributeViewMetadata(attrView))
 		default:
-			fmt.Printf("ID:    %s\n", attrView.ID)
-			fmt.Printf("Name:  %s\n", attrView.Name)
-			fmt.Printf("Keys:  %d  Views: %d\n\n", len(attrView.KeyValues), len(attrView.Views))
-			printDatabaseTable(attrView)
+			printDatabaseMetadata(attrView)
 		}
 		return nil
 	},
@@ -97,17 +93,16 @@ var databaseRenderCmd = &cobra.Command{
 			size = 50
 		}
 
-		_, attrView, err := model.RenderAttributeView("", avID, viewID, query, page, size, nil, false, false)
+		viewable, attrView, err := model.RenderAttributeView("", avID, viewID, query, page, size, nil, false, false)
 		if err != nil {
 			return err
 		}
 
 		switch outputFormat {
 		case "json":
-			data, _ := json.MarshalIndent(attrView, "", "  ")
-			fmt.Println(string(data))
+			return printJSON(model.NewAttributeViewRenderData(attrView, viewable, query, page, size))
 		default:
-			printDatabaseTable(attrView)
+			printRenderedDatabase(attrView, viewable)
 		}
 		return nil
 	},
@@ -127,12 +122,7 @@ var databaseKeysCmd = &cobra.Command{
 		}
 		switch outputFormat {
 		case "json":
-			var keys []*av.Key
-			for _, kv := range attrView.KeyValues {
-				keys = append(keys, kv.Key)
-			}
-			data, _ := json.MarshalIndent(keys, "", "  ")
-			fmt.Println(string(data))
+			return printJSON(model.NewAttributeViewKeys(attrView))
 		default:
 			printKeyTable(attrView)
 		}
@@ -164,7 +154,7 @@ var databaseKeyAddCmd = &cobra.Command{
 		}
 
 		keyID := ast.NewNodeID()
-		if err := model.AddAttributeViewKey(avID, keyID, name, keyType, icon, prev); err != nil {
+		if err := model.AddAttributeViewKey(avID, "", keyID, name, keyType, icon, prev, av.DateDisplayFormatFull); err != nil {
 			return err
 		}
 		model.AppendPushReloadAttrViewEntry(avID)
@@ -205,8 +195,7 @@ var databaseUnusedCmd = &cobra.Command{
 		items := model.UnusedAttributeViews(true)
 		switch outputFormat {
 		case "json":
-			data, _ := json.MarshalIndent(items, "", "  ")
-			fmt.Println(string(data))
+			return printJSON(map[string]any{"count": len(items), "items": items})
 		default:
 			printUnusedItems(items)
 		}
@@ -280,7 +269,7 @@ var databaseItemAddCmd = &cobra.Command{
 		}
 		srcs := []map[string]any{src}
 
-		if err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, viewID, groupID, previousID, ignoreFill); err != nil {
+		if err := model.AddAttributeViewBlock(nil, srcs, avID, "", viewID, groupID, previousID, ignoreFill); err != nil {
 			return err
 		}
 		model.AppendPushReloadAttrViewEntry(avID)
@@ -363,9 +352,13 @@ func printUnusedItems(items []*model.UnusedItem) {
 
 func printKeyTable(attrView *av.AttributeView) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tNAME\tTYPE\tICON")
+	fmt.Fprintln(w, "ID\tNAME\tTYPE\tICON\tOPTIONS")
 	for _, kv := range attrView.KeyValues {
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", kv.Key.ID, kv.Key.Name, kv.Key.Type, kv.Key.Icon)
+		if nil == kv || nil == kv.Key {
+			continue
+		}
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", kv.Key.ID, kv.Key.Name, kv.Key.Type, kv.Key.Icon,
+			strings.Join(databaseOptionNames(kv.Key.Options), ", "))
 	}
 	w.Flush()
 }
@@ -383,109 +376,148 @@ func printAvSearchResults(results []*model.AvSearchResult) {
 	w.Flush()
 }
 
-func printDatabaseTable(attrView *av.AttributeView) {
-	if len(attrView.KeyValues) == 0 {
+func printJSON(value any) error {
+	data, err := json.MarshalIndent(value, "", "  ")
+	if nil != err {
+		return err
+	}
+	fmt.Println(string(data))
+	return nil
+}
+
+func printDatabaseMetadata(attrView *av.AttributeView) {
+	fmt.Printf("ID:    %s\n", attrView.ID)
+	fmt.Printf("Name:  %s\n", attrView.Name)
+	fmt.Printf("Keys:  %d  Views: %d\n\n", len(attrView.KeyValues), len(attrView.Views))
+	printKeyTable(attrView)
+
+	if 0 == len(attrView.Views) {
+		return
+	}
+	fmt.Println()
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "VIEW_ID\tNAME\tTYPE\tPAGE_SIZE")
+	for _, view := range attrView.Views {
+		if nil != view {
+			fmt.Fprintf(w, "%s\t%s\t%s\t%d\n", view.ID, view.Name, view.LayoutType, view.PageSize)
+		}
+	}
+	w.Flush()
+}
+
+func databaseOptionNames(options []*av.SelectOption) (ret []string) {
+	for _, option := range options {
+		if nil != option {
+			ret = append(ret, option.Name)
+		}
+	}
+	return
+}
+
+func printRenderedDatabase(attrView *av.AttributeView, viewable av.Viewable) {
+	if nil == attrView || nil == viewable {
 		fmt.Println("(empty)")
 		return
 	}
 
-	fmt.Println(attrView.Name)
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	for _, kv := range attrView.KeyValues {
-		fmt.Fprintf(w, "%s\t", kv.Key.Name)
-	}
-	fmt.Fprintln(w)
-
-	rowCount := 0
-	for _, kv := range attrView.KeyValues {
-		if len(kv.Values) > rowCount {
-			rowCount = len(kv.Values)
-		}
-	}
-
-	for i := 0; i < rowCount; i++ {
-		for _, kv := range attrView.KeyValues {
-			if i < len(kv.Values) {
-				fmt.Fprintf(w, "%s\t", formatValue(kv.Values[i]))
-			} else {
-				fmt.Fprintf(w, "%s\t", "")
-			}
-		}
-		fmt.Fprintln(w)
-	}
-	w.Flush()
-
-	fmt.Printf("\n%d row(s)\n", rowCount)
+	fmt.Printf("%s (%s)\n", attrView.Name, viewable.GetType())
+	count := writeRenderedView(os.Stdout, attrView, viewable, false)
+	fmt.Printf("\n%d item(s)\n", count)
 }
 
-func formatValue(v *av.Value) string {
-	if v == nil {
-		return ""
+func writeRenderedView(writer io.Writer, attrView *av.AttributeView, viewable av.Viewable, grouped bool) (count int) {
+	base := databaseViewBase(viewable)
+	if nil != base && 0 < len(base.Groups) {
+		for _, group := range base.Groups {
+			if nil == group || 0 != group.GetGroupHidden() {
+				continue
+			}
+			groupBase := databaseViewBase(group)
+			groupName := group.GetID()
+			if nil != groupBase && "" != groupBase.Name {
+				groupName = groupBase.Name
+			}
+			fmt.Fprintf(writer, "\n[%s]\n", groupName)
+			count += writeRenderedView(writer, attrView, group, true)
+		}
+		return
 	}
-	switch v.Type {
-	case av.KeyTypeBlock:
-		if v.Block != nil {
-			return truncate(v.Block.Content, 40)
-		}
-		return v.BlockID
-	case av.KeyTypeText:
-		return v.Text.Content
-	case av.KeyTypeNumber:
-		if v.Number != nil && v.Number.FormattedContent != "" {
-			return v.Number.FormattedContent
-		}
-		return fmt.Sprintf("%v", v.Number.Content)
-	case av.KeyTypeSelect, av.KeyTypeMSelect:
-		var parts []string
-		for _, s := range v.MSelect {
-			parts = append(parts, s.Content)
-		}
-		return strings.Join(parts, ", ")
-	case av.KeyTypeCheckbox:
-		if v.Checkbox.Checked {
-			return "☑"
-		}
-		return "☐"
-	case av.KeyTypeDate:
-		if v.Date != nil && v.Date.FormattedContent != "" {
-			return v.Date.FormattedContent
-		}
-		return ""
-	case av.KeyTypeURL:
-		return v.URL.Content
-	case av.KeyTypeEmail:
-		return v.Email.Content
-	case av.KeyTypePhone:
-		return v.Phone.Content
-	case av.KeyTypeTemplate:
-		return truncate(v.Template.Content, 40)
-	case av.KeyTypeCreated:
-		if v.Created != nil && v.Created.FormattedContent != "" {
-			return v.Created.FormattedContent
-		}
-		return ""
-	case av.KeyTypeUpdated:
-		if v.Updated != nil && v.Updated.FormattedContent != "" {
-			return v.Updated.FormattedContent
-		}
-		return ""
-	case av.KeyTypeMAsset:
-		var parts []string
-		for _, a := range v.MAsset {
-			parts = append(parts, a.Name)
-		}
-		return strings.Join(parts, ", ")
-	case av.KeyTypeRelation:
-		return fmt.Sprintf("%d ref(s)", len(v.Relation.BlockIDs))
-	case av.KeyTypeRollup:
-		if len(v.Rollup.Contents) > 0 && v.Rollup.Contents[0] != nil {
-			return formatValue(v.Rollup.Contents[0])
-		}
-		return ""
-	default:
-		return ""
+
+	collection, ok := viewable.(av.Collection)
+	if !ok {
+		return
 	}
+	fields := visibleDatabaseFields(collection.GetFields())
+	w := tabwriter.NewWriter(writer, 0, 0, 2, ' ', 0)
+	fmt.Fprint(w, "ITEM_ID\t")
+	for _, field := range fields {
+		fmt.Fprintf(w, "%s\t", databaseFieldName(attrView, field))
+	}
+	fmt.Fprintln(w)
+	for _, item := range collection.GetItems() {
+		if nil == item {
+			continue
+		}
+		fmt.Fprintf(w, "%s\t", item.GetID())
+		for _, field := range fields {
+			fmt.Fprintf(w, "%s\t", databaseDisplayValue(item.GetValue(field.GetID())))
+		}
+		fmt.Fprintln(w)
+		count++
+	}
+	w.Flush()
+	if grouped && 0 == count {
+		fmt.Fprintln(writer, "(empty)")
+	}
+	return
+}
+
+func databaseViewBase(viewable av.Viewable) (ret *av.BaseInstance) {
+	switch view := viewable.(type) {
+	case *av.Table:
+		ret = view.BaseInstance
+	case *av.Gallery:
+		ret = view.BaseInstance
+	case *av.Kanban:
+		ret = view.BaseInstance
+	}
+	return
+}
+
+func visibleDatabaseFields(fields []av.Field) (ret []av.Field) {
+	for _, field := range fields {
+		if nil != field && !databaseFieldHidden(field) {
+			ret = append(ret, field)
+		}
+	}
+	return
+}
+
+func databaseFieldHidden(field av.Field) bool {
+	switch typed := field.(type) {
+	case *av.TableColumn:
+		return typed.Hidden
+	case *av.GalleryField:
+		return typed.Hidden
+	case *av.KanbanField:
+		return typed.Hidden
+	}
+	return false
+}
+
+func databaseFieldName(attrView *av.AttributeView, field av.Field) string {
+	if nil != attrView {
+		if key, err := attrView.GetKey(field.GetID()); nil == err && nil != key && "" != key.Name {
+			return key.Name
+		}
+	}
+	return field.GetID()
+}
+
+func databaseDisplayValue(value *av.Value) string {
+	content := value.String(true)
+	content = strings.NewReplacer("\t", " ", "\r", " ", "\n", " ").Replace(content)
+	return truncate(content, 80)
 }
 
 func init() {
@@ -501,7 +533,7 @@ func init() {
 
 	databaseKeyAddCmd.Flags().String("av", "", "attribute view ID (required)")
 	databaseKeyAddCmd.Flags().String("name", "", "key name (required)")
-	databaseKeyAddCmd.Flags().String("type", "", "key type (required): block/text/number/date/select/mSelect/url/email/phone/mAsset/template/created/updated/checkbox/relation/rollup/lineNumber")
+	databaseKeyAddCmd.Flags().String("type", "", "key type (required): text/number/date/select/mSelect/url/email/phone/mAsset/template/created/updated/checkbox/relation/rollup/lineNumber")
 	databaseKeyAddCmd.Flags().String("icon", "", "key icon (optional)")
 	databaseKeyAddCmd.Flags().String("prev", "", "previous key ID for ordering (optional)")
 

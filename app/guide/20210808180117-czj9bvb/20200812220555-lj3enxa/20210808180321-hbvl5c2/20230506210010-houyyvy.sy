@@ -6,7 +6,7 @@
 		"id": "20230506210010-houyyvy",
 		"title": "插件",
 		"type": "doc",
-		"updated": "20250115152320"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -77,7 +77,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506210021-04aesus",
-				"updated": "20250115152320"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -91,7 +91,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210021-tk7w2m5",
-				"updated": "20250115152320"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -141,7 +141,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中启用或禁用插件。"
+					"Data": " ​ 中启用或禁用插件。"
 				}
 			]
 		},
@@ -151,7 +151,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506210021-f12gucj",
-				"updated": "20230506210911"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -165,7 +165,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210021-jimdgxy",
-				"updated": "20230820184204"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -175,7 +175,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "社区集市仓库"
 				},
 				{

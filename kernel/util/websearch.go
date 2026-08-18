@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -28,20 +28,20 @@ import (
 )
 
 const (
-	defaultExaURL      = "https://mcp.exa.ai/mcp"
-	maxWebSearchChars  = 50000
+	defaultExaURL     = "https://mcp.exa.ai/mcp"
+	maxWebSearchChars = 50000
 )
 
 type mcpRequest struct {
-	JSONRPC string      `json:"jsonrpc"`
-	ID      int         `json:"id"`
-	Method  string      `json:"method"`
-	Params  mcpParams   `json:"params"`
+	JSONRPC string    `json:"jsonrpc"`
+	ID      int       `json:"id"`
+	Method  string    `json:"method"`
+	Params  mcpParams `json:"params"`
 }
 
 type mcpParams struct {
-	Name      string                 `json:"name"`
-	Arguments map[string]interface{} `json:"arguments"`
+	Name      string         `json:"name"`
+	Arguments map[string]any `json:"arguments"`
 }
 
 type mcpResponse struct {
@@ -69,7 +69,7 @@ func WebSearch(query, exaApiKey string) (string, error) {
 		Method:  "tools/call",
 		Params: mcpParams{
 			Name: "web_search_exa",
-			Arguments: map[string]interface{}{
+			Arguments: map[string]any{
 				"query":      query,
 				"type":       "auto",
 				"numResults": 8,
@@ -109,7 +109,7 @@ func parseMcpResponse(body string) string {
 		return text
 	}
 
-	for _, line := range strings.Split(body, "\n") {
+	for line := range strings.SplitSeq(body, "\n") {
 		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "data:") {
 			payload := strings.TrimSpace(line[5:])

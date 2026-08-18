@@ -49,11 +49,11 @@ export class Dialog {
             }
         }
         this.element.innerHTML = `<div class="b3-dialog" style="z-index: ${++window.siyuan.zIndex};${typeof left === "string" ? "display:block" : ""}">
-<div class="b3-dialog__scrim"${options.transparent ? 'style="background-color:transparent"' : ""}></div>
+<div class="b3-dialog__scrim"${options.transparent ? ' style="background-color:transparent"' : ""}></div>
 <div class="b3-dialog__container ${options.containerClassName || ""}" style="width:${options.width || "auto"};height:${options.height || "auto"};
 left:${left || "auto"};top:${top || "auto"}">
-  <svg ${(isMobile() && options.title) ? 'style="top:0;right:0;"' : ""} class="b3-dialog__close${(this.disableClose || options.hideCloseIcon) ? " fn__none" : ""}"><use xlink:href="#iconCloseRound"></use></svg>
-  <div class="resize__move b3-dialog__header${options.title ? "" : " fn__none"}" onselectstart="return false;">${options.title || ""}</div>
+  <svg class="b3-dialog__close${(!isMobile() || this.disableClose || options.hideCloseIcon) ? " fn__none" : ""}"><use xlink:href="#iconCloseRound"></use></svg>
+  <div class="resize__move b3-dialog__header${options.title ? "" : " fn__none"}" ${(isMobile() &&options.title) ? 'style="padding-right: 38px;"' : ""} onselectstart="return false;">${options.title || ""}</div>
   <div class="b3-dialog__body">${options.content}</div>
   <div class="resize__rd"></div><div class="resize__ld"></div><div class="resize__lt"></div><div class="resize__rt"></div><div class="resize__r"></div><div class="resize__d"></div><div class="resize__t"></div><div class="resize__l"></div>
 </div></div>`;

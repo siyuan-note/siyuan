@@ -24,15 +24,15 @@ func ServeMultiplexed(ln net.Listener, handler http.Handler, certPath, keyPath s
 	tlsL := m.Match(cmux.TLS())
 	httpL := m.Match(cmux.Any())
 
-	cert, err := tls.LoadX509KeyPair(certPath, keyPath)
+	certManager, err := getTLSCertManager(certPath, keyPath)
 	if err != nil {
 		logging.LogErrorf("failed to load TLS cert for multiplexing: %s", err)
 		return nil, nil, err
 	}
 
 	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		NextProtos:   []string{"h2", "http/1.1"},
+		GetCertificate: certManager.GetCertificate,
+		NextProtos:     []string{"h2", "http/1.1"},
 	}
 
 	tlsListener := tls.NewListener(tlsL, tlsConfig)

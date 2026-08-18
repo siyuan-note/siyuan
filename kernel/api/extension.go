@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
-	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -47,11 +46,22 @@ func extensionCopy(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	dom := form.Value["dom"][0]
 	assets := filepath.Join(util.DataDir, "assets")
+	targetBoxID := ""
+	encryptedBoxID := ""
 	if notebookVal := form.Value["notebook"]; 0 < len(notebookVal) {
-		assets = filepath.Join(util.DataDir, notebookVal[0], "assets")
-		if !gulu.File.IsDir(assets) {
-			assets = filepath.Join(util.DataDir, "assets")
+		nb := notebookVal[0]
+		if ast.IsNodeIDPattern(nb) {
+			targetBoxID = nb
+			assets = model.GetImportAssetsDir(targetBoxID, "")
+			if model.IsEncryptedBox(targetBoxID) {
+				encryptedBoxID = targetBoxID
+			}
 		}
+	}
+	if err := holdEncryptedBoxRequest(c, encryptedBoxID); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
 
 	if err := os.MkdirAll(assets, 0755); err != nil {
@@ -159,15 +169,19 @@ func extensionCopy(c *gin.Context) {
 			fName += ext
 		}
 
-		fName = util.AssetName(fName, ast.NewNodeID())
-		writePath := filepath.Join(assets, fName)
-		if err = filelock.WriteFile(writePath, data); err != nil {
+		// 统一通过 storeAssetForBox 写入，加密 box 自动脱敏 + 加密落盘 + 追加 ?box=
+		storedName, storeErr := model.StoreAssetForBox(targetBoxID, assets, fName, data)
+		if storeErr != nil {
 			ret.Code = -1
-			ret.Msg = err.Error()
+			ret.Msg = storeErr.Error()
 			break
 		}
 
-		uploaded[unescaped] = "assets/" + fName
+		assetURL := "assets/" + storedName
+		if encryptedBoxID != "" {
+			assetURL += "?box=" + encryptedBoxID
+		}
+		uploaded[unescaped] = assetURL
 	}
 
 	luteEngine := util.NewLute()
@@ -190,6 +204,7 @@ func extensionCopy(c *gin.Context) {
 			md = string(bodyData)
 			luteEngine.SetIndentCodeBlock(true) // 链滴支持缩进代码块，因此需要开启
 			tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+			tree.Box = targetBoxID
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if ast.NodeInlineMath == n.Type {
 					withMath = true
@@ -234,7 +249,7 @@ func extensionCopy(c *gin.Context) {
 			return s
 		})
 
-		tree, withMath = model.HTML2Tree(dom, luteEngine)
+		tree, withMath = model.HTML2Tree(dom, luteEngine, targetBoxID)
 	} else {
 		tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	}

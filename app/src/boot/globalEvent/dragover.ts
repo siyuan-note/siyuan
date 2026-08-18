@@ -27,7 +27,8 @@ export const cancelDrag = () => {
 const dragoverScroll: {
     animationId?: number,
     element?: Element,
-    space?: number // -1 向上；1 向下
+    space?: number, // -1 向上或向左；1 向下或向右
+    direction?: "x" | "y",
     lastTime?: number
 } = {};
 
@@ -37,6 +38,7 @@ export const stopScrollAnimation = () => {
         dragoverScroll.animationId = null;
         dragoverScroll.element = null;
         dragoverScroll.space = null;
+        dragoverScroll.direction = null;
         dragoverScroll.lastTime = null;
     }
 };
@@ -45,22 +47,32 @@ const scrollAnimation = (timestamp: number) => {
     if (!dragoverScroll.lastTime) {
         dragoverScroll.lastTime = timestamp - 8;
     }
-    dragoverScroll.element.scroll({
-        top: dragoverScroll.element.scrollTop + (timestamp - dragoverScroll.lastTime) * dragoverScroll.space / 64
-    });
+    const distance = (timestamp - dragoverScroll.lastTime) * dragoverScroll.space / 64;
+    if (dragoverScroll.direction === "x") {
+        dragoverScroll.element.scroll({left: dragoverScroll.element.scrollLeft + distance});
+    } else {
+        dragoverScroll.element.scroll({top: dragoverScroll.element.scrollTop + distance});
+    }
     // 使用 requestAnimationFrame 继续动画
     dragoverScroll.animationId = requestAnimationFrame(scrollAnimation);
     dragoverScroll.lastTime = timestamp;
 };
 
-export const dragOverScroll = (moveEvent: MouseEvent, contentRect: DOMRect, element: Element) => {
-    const dragToUp = moveEvent.clientY < contentRect.top + Constants.SIZE_SCROLL_TB;
-    if (dragToUp ||
-        moveEvent.clientY > contentRect.bottom - Constants.SIZE_SCROLL_TB) {
-        dragoverScroll.space = dragToUp ? moveEvent.clientY - contentRect.top - Constants.SIZE_SCROLL_TB :
-            moveEvent.clientY - contentRect.bottom + Constants.SIZE_SCROLL_TB;
+export const dragOverScroll = (moveEvent: MouseEvent, contentRect: DOMRect, element: Element, direction: "x" | "y" = "y") => {
+    const clientPosition = direction === "x" ? moveEvent.clientX : moveEvent.clientY;
+    const start = direction === "x" ? contentRect.left : contentRect.top;
+    const end = direction === "x" ? contentRect.right : contentRect.bottom;
+    const dragToStart = clientPosition < start + Constants.SIZE_SCROLL_TB;
+    if (dragToStart || clientPosition > end - Constants.SIZE_SCROLL_TB) {
+        if (dragoverScroll.animationId &&
+            (dragoverScroll.element !== element || dragoverScroll.direction !== direction)) {
+            stopScrollAnimation();
+        }
+        dragoverScroll.space = dragToStart ? clientPosition - start - Constants.SIZE_SCROLL_TB :
+            clientPosition - end + Constants.SIZE_SCROLL_TB;
         if (!dragoverScroll.animationId) {
             dragoverScroll.element = element;
+            dragoverScroll.direction = direction;
             dragoverScroll.animationId = requestAnimationFrame(scrollAnimation);
         }
     } else {

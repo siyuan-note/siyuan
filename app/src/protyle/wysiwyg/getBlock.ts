@@ -1,5 +1,63 @@
-import {hasClosestBlock, isInEmbedBlock} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
+
+export interface IEmbedOperationContext {
+    resultElement: HTMLElement;
+    targetID: string;
+    targetElement?: Element;
+    boundaryElement: Element;
+    allowChildOperation: boolean;
+}
+
+export interface IEmbedChildOperationContext extends IEmbedOperationContext {
+    allowChildOperation: true;
+}
+
+const getEmbedOperationContext = (element: Node): IEmbedOperationContext | undefined => {
+    const resultElement = hasClosestByClassName(element, "protyle-wysiwyg__embed");
+    if (!resultElement) {
+        return;
+    }
+
+    const targetID = resultElement.getAttribute("data-id");
+    if (!targetID) {
+        return;
+    }
+    // 单独查询列表项时，渲染器会在目标外补充一个无 ID 的列表节点。
+    const targetElement = Array.from(resultElement.querySelectorAll(`[data-node-id="${targetID}"]`)).find(item =>
+        item.getAttribute("data-type")?.startsWith("Node") &&
+        hasClosestByClassName(item, "protyle-wysiwyg__embed") === resultElement);
+    return {
+        resultElement,
+        targetID,
+        targetElement,
+        // 文档块不会渲染自身节点，查询结果容器就是它的子块边界。
+        boundaryElement: targetElement || resultElement,
+        allowChildOperation: resultElement.getAttribute("data-allow-child-operation") === "true",
+    };
+};
+
+export const getEmbedChildOperationContext = (element: Node): IEmbedChildOperationContext | undefined => {
+    const context = getEmbedOperationContext(element);
+    return context?.allowChildOperation ? context as IEmbedChildOperationContext : undefined;
+};
+
+export const getEmbedGutterOperationContext = (element: Node): IEmbedOperationContext | undefined => {
+    const context = getEmbedOperationContext(element);
+    if (!context) {
+        return;
+    }
+    const blockElement = hasClosestBlock(element);
+    if (context.allowChildOperation || context.targetElement === blockElement) {
+        return context;
+    }
+};
+
+export const getEmbedChildOperationParentID = (element: Element, context = getEmbedChildOperationContext(element)) => {
+    if (context && !context.targetElement && element.parentElement === context.resultElement) {
+        return context.targetID;
+    }
+};
 
 export const getParentBlock = (element: Element) => {
     if (element.parentElement.classList.contains("callout-content") ||
@@ -24,6 +82,10 @@ export const getPreviousBlock = (element: Element) => {
         if (previous) {
             return previous;
         }
+        if (parentElement.parentElement?.classList.contains("protyle-wysiwyg__embed") &&
+            parentElement.parentElement.getAttribute("data-allow-child-operation") === "true") {
+            return false;
+        }
         const pElement = hasClosestBlock(parentElement.parentElement);
         if (pElement) {
             parentElement = pElement;
@@ -42,6 +104,14 @@ export const getPreviousBlockSibling = (element: Element): Element => {
         previous = previous.previousElementSibling;
     }
     return previous;
+};
+
+export const getNextBlockSibling = (element: Element): Element => {
+    let next = element.nextElementSibling;
+    while (next && !next.getAttribute("data-node-id")) {
+        next = next.nextElementSibling;
+    }
+    return next;
 };
 
 export const getLastBlock = (element: Element) => {
@@ -75,6 +145,10 @@ export const getNextBlock = (element: Element) => {
         }
         if (next) {
             return next as HTMLElement;
+        }
+        if (parentElement.parentElement?.classList.contains("protyle-wysiwyg__embed") &&
+            parentElement.parentElement.getAttribute("data-allow-child-operation") === "true") {
+            return false;
         }
         const pElement = hasClosestBlock(parentElement.parentElement);
         if (pElement) {
@@ -152,9 +226,10 @@ export const isNotEditBlock = (element: Element) => {
         (element.getAttribute("data-type") === "NodeCodeBlock" && element.classList.contains("render-node"));
 };
 
-export const getTopEmptyElement = (element: Element) => {
+export const getTopEmptyElement = (element: Element, boundaryElement?: Element) => {
     let topElement = element;
-    while (topElement.parentElement && !topElement.parentElement.classList.contains("protyle-wysiwyg")) {
+    while (topElement.parentElement && topElement.parentElement !== boundaryElement &&
+        !topElement.parentElement.classList.contains("protyle-wysiwyg")) {
         if (!topElement.parentElement.getAttribute("data-node-id") && !topElement.parentElement.classList.contains("callout-content")) {
             topElement = topElement.parentElement;
         } else {
@@ -165,8 +240,7 @@ export const getTopEmptyElement = (element: Element) => {
                     return true;
                 }
             });
-            if (hasText || topElement.previousElementSibling?.getAttribute("data-node-id") ||
-                topElement.nextElementSibling?.getAttribute("data-node-id")) {
+            if (hasText || getPreviousBlockSibling(topElement) || getNextBlockSibling(topElement)) {
                 break;
             } else {
                 topElement = topElement.parentElement;
@@ -342,4 +416,32 @@ export const getPreviousFileLi = (current: Element) => {
         }
     }
     return false;
+};
+
+// 相邻标签之间插入空格区隔，避免 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
+export const fixAdjacentTags = (editableElement: Element) => {
+    if (!editableElement) {
+        return;
+    }
+    let node: Node = editableElement.firstChild;
+    while (node) {
+        const next: Node = node.nextSibling;
+        if (node.nodeType !== 3) {
+            const tagSpan = node as HTMLElement;
+            if (tagSpan.tagName === "SPAN" &&
+                (tagSpan.getAttribute("data-type") || "").split(" ").includes("tag")) {
+                // 向后查找跳过 ZWSP 文本节点和 <wbr> 后的下一个节点
+                let after = next;
+                while (after && ((after.nodeType === 3 && after.textContent === Constants.ZWSP) ||
+                    (after.nodeType === 1 && (after as HTMLElement).tagName === "WBR"))) {
+                    after = after.nextSibling;
+                }
+                if (after && after.nodeType !== 3 && (after as HTMLElement).tagName === "SPAN" &&
+                    ((after as HTMLElement).getAttribute("data-type") || "").split(" ").includes("tag")) {
+                    tagSpan.after(" ");
+                }
+            }
+        }
+        node = next;
+    }
 };

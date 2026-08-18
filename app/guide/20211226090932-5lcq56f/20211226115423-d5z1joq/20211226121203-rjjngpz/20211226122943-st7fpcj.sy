@@ -454,17 +454,17 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614112630-oxuoqvb",
-								"updated": "20260614112630"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "strong",
-									"TextMarkTextContent": "關聯塊"
+									"TextMarkTextContent": "關聯區塊"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：點擊關聯按鈕，輸入已有塊 ID，可手動建立標註與文件塊的關聯關係"
+									"Data": "：點擊關聯按鈕，輸入已有區塊 ID，可手動建立標註與文件區塊的關聯關係"
 								}
 							]
 						}
@@ -602,7 +602,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260614112630-twvhq4x",
-								"updated": "20260614112630"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -612,7 +612,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：在 PDF 頁面上滑鼠懸浮或點擊標註，可查看文件中引用了該標註的塊列表"
+									"Data": "：在 PDF 頁面上滑鼠懸浮或點擊標註，可查看文件中引用了該標註的區塊列表"
 								}
 							]
 						}

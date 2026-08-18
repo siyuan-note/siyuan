@@ -1,4 +1,4 @@
-import {App} from "../index";
+import type {App} from "../index";
 import {Menu} from "./Menu";
 import {isHuawei, setStorageVal} from "../protyle/util/compatibility";
 /// #if !MOBILE
@@ -85,13 +85,10 @@ export const openTopBarMenu = (app: App, target?: Element) => {
                 type: "submenu",
                 submenu
             };
-            if (item.querySelector("use")) {
-                menuOption.icon = item.querySelector("use").getAttribute("xlink:href").replace("#", "");
-            } else {
-                const svgElement = item.querySelector("svg").cloneNode(true) as HTMLElement;
-                svgElement.classList.add("b3-menu__icon");
-                menuOption.iconHTML = svgElement.outerHTML;
-            }
+            const customIconElement = item.querySelector(":scope > .b3-menu__icon--custom");
+            const iconElement = (customIconElement || item.querySelector("svg")).cloneNode(true) as HTMLElement;
+            iconElement.classList.add("b3-menu__icon");
+            menuOption.iconHTML = iconElement.outerHTML;
             menu.addItem(menuOption);
             hasPlugin = true;
             hasTopBar = true;

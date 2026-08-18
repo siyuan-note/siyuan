@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,8 +20,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
-	"io"
-	"io/fs"
+	"net/url"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -41,6 +40,10 @@ import (
 )
 
 var DisabledFeatures []string
+
+// CLILogLevel 在 CLI 子命令通过 --log-level 显式指定日志级别时被设置，model.InitConf 末尾据此跳过对
+// logging.SetLogLevel 的覆盖，使命令行参数优先于 conf.json 的 system.logLevel。
+var CLILogLevel string
 
 func DisableFeature(feature string) {
 	DisabledFeatures = append(DisabledFeatures, feature)
@@ -89,7 +92,7 @@ var MobileOSVer string
 // DatabaseVer 数据库版本。
 // 格式：yyyyMMddHHmm。修改表结构时需要更新此值，启动时会检测版本变化，
 // 若不一致则自动移除旧数据库文件并重建表结构，同时触发全量重建索引。
-const DatabaseVer = "202606122207"
+const DatabaseVer = "202607031200"
 
 func logBootInfo() {
 	plat := GetOSPlatform()
@@ -121,7 +124,9 @@ func logBootInfo() {
 				WaitForUILoaded()
 				time.Sleep(3 * time.Second)
 			}
-			PushErrMsg(Langs[Lang][278], 15000)
+			if nil == NotificationsCfg || NotificationsCfg.WorkspaceNotSSD {
+				PushErrMsg(Langs[Lang][278], 15000)
+			}
 		}
 	}()
 }
@@ -205,21 +210,86 @@ func GetDeviceName() string {
 	return ret
 }
 
-func SetNetworkProxy(proxyURL string) {
-	if err := os.Setenv("HTTPS_PROXY", proxyURL); err != nil {
-		logging.LogErrorf("set env [HTTPS_PROXY] failed: %s", err)
-	}
-	if err := os.Setenv("HTTP_PROXY", proxyURL); err != nil {
-		logging.LogErrorf("set env [HTTP_PROXY] failed: %s", err)
+func SetNetworkProxy(proxyURL string, useSystem bool) {
+	if useSystem {
+		restoreSystemNetworkProxyEnvironment()
+		systemProxy, err := loadSystemNetworkProxy()
+		if err != nil {
+			logging.LogWarnf("load system network proxy failed: %s", err)
+		} else if nil != systemProxy {
+			setNetworkProxyEnvironment(networkProxyHTTPEnvironmentNames, systemProxy.HTTPProxy)
+			setNetworkProxyEnvironment(networkProxyHTTPSEnvironmentNames, systemProxy.HTTPSProxy)
+			setNetworkProxyEnvironment(networkProxyBypassEnvironmentNames, systemProxy.NoProxy)
+		}
+	} else {
+		setNetworkProxyEnvironment(networkProxyHTTPEnvironmentNames, proxyURL)
+		setNetworkProxyEnvironment(networkProxyHTTPSEnvironmentNames, proxyURL)
+		restoreNetworkProxyEnvironment(networkProxyBypassEnvironmentNames)
 	}
 
-	if "" != proxyURL {
-		logging.LogInfof("use network proxy [%s]", proxyURL)
-	} else {
+	if useSystem {
 		logging.LogInfof("use network proxy [system]")
+	} else if "" != proxyURL {
+		logging.LogInfof("use network proxy [%s]", networkProxyLogValue(proxyURL))
+	} else {
+		logging.LogInfof("use network proxy [direct]")
 	}
 
 	httpclient.CloseIdleConnections()
+	closeOpenAIIdleConnections()
+}
+
+var (
+	networkProxyHTTPEnvironmentNames   = []string{"HTTP_PROXY", "http_proxy"}
+	networkProxyHTTPSEnvironmentNames  = []string{"HTTPS_PROXY", "https_proxy"}
+	networkProxyBypassEnvironmentNames = []string{"NO_PROXY", "no_proxy"}
+	networkProxyEnvironmentNames       = []string{"HTTP_PROXY", "http_proxy", "HTTPS_PROXY", "https_proxy", "NO_PROXY", "no_proxy"}
+)
+
+type networkProxyEnvironmentValue struct {
+	value string
+	set   bool
+}
+
+var systemNetworkProxyEnvironment = func() map[string]networkProxyEnvironmentValue {
+	ret := make(map[string]networkProxyEnvironmentValue, len(networkProxyEnvironmentNames))
+	for _, name := range networkProxyEnvironmentNames {
+		value, set := os.LookupEnv(name)
+		ret[name] = networkProxyEnvironmentValue{value: value, set: set}
+	}
+	return ret
+}()
+
+func restoreSystemNetworkProxyEnvironment() {
+	restoreNetworkProxyEnvironment(networkProxyEnvironmentNames)
+}
+
+func restoreNetworkProxyEnvironment(names []string) {
+	for _, name := range names {
+		value := systemNetworkProxyEnvironment[name]
+		if value.set {
+			setNetworkProxyEnvironment([]string{name}, value.value)
+		} else if err := os.Unsetenv(name); err != nil {
+			logging.LogErrorf("unset env [%s] failed: %s", name, err)
+		}
+	}
+}
+
+func setNetworkProxyEnvironment(names []string, value string) {
+	for _, name := range names {
+		if err := os.Setenv(name, value); err != nil {
+			logging.LogErrorf("set env [%s] failed: %s", name, err)
+		}
+	}
+}
+
+func networkProxyLogValue(rawURL string) string {
+	proxyURL, err := url.Parse(rawURL)
+	if err != nil {
+		return "configured"
+	}
+	proxyURL.User = nil
+	return proxyURL.String()
 }
 
 const (
@@ -289,7 +359,7 @@ func checkFileSysStatus() {
 		return
 	}
 
-	for i := 0; i < 7; i++ {
+	for range 7 {
 		tmp := filepath.Join(dir, "check_consistency")
 		data := make([]byte, 1024*4)
 		_, err := rand.Read(data)
@@ -305,7 +375,7 @@ func checkFileSysStatus() {
 
 		time.Sleep(5 * time.Second)
 
-		for j := 0; j < 32; j++ {
+		for range 32 {
 			renamed := tmp + "_renamed"
 			if err = os.Rename(tmp, renamed); err != nil {
 				ReportFileSysFatalError(err)
@@ -388,28 +458,69 @@ func isKnownCloudDrivePath(workspaceAbsPath string) bool {
 		strings.Contains(workspaceAbsPathLower, "天翼云")
 }
 
-func isICloudPath(workspaceAbsPath string) (ret bool) {
-	if !gulu.OS.IsDarwin() {
+func isICloudPath(workspaceAbsPath string) bool {
+	if !gulu.OS.IsDarwin() || !filepath.IsAbs(workspaceAbsPath) {
 		return false
 	}
 
-	workspaceAbsPathLower := strings.ToLower(workspaceAbsPath)
+	workspacePath := ResolveLongestExistingParent(workspaceAbsPath)
+	if existingPath := longestExistingPath(workspacePath); "" != existingPath {
+		isUbiquitous, err := isUbiquitousItem(existingPath)
+		if nil != err {
+			logging.LogDebugf("check iCloud status for path [%s] failed: %s", existingPath, err)
+		} else if isUbiquitous {
+			logging.LogWarnf("workspace [%s] is in iCloud path [%s], detected by system metadata", workspaceAbsPath, existingPath)
+			return true
+		}
+	}
 
 	// macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
 	iCloudRoot := filepath.Join(HomeDir, "Library", "Mobile Documents")
-	WalkWithSymlinks(iCloudRoot, func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() {
-			return nil
+	if resolvedRoot, matched := matchICloudRoot(HomeDir, iCloudRoot, workspacePath); matched {
+		logging.LogWarnf("workspace [%s] is in iCloud path [%s]", workspaceAbsPath, resolvedRoot)
+		return true
+	}
+	return false
+}
+
+func longestExistingPath(path string) string {
+	path = filepath.Clean(path)
+	for {
+		if _, err := os.Stat(path); nil == err {
+			return path
 		}
 
-		if strings.HasPrefix(workspaceAbsPathLower, strings.ToLower(path)) {
-			ret = true
-			logging.LogWarnf("workspace [%s] is in iCloud path [%s]", workspaceAbsPath, path)
-			return io.EOF
+		parent := filepath.Dir(path)
+		if parent == path {
+			return ""
 		}
-		return nil
-	})
-	return
+		path = parent
+	}
+}
+
+func matchICloudRoot(homeDir, iCloudRoot, workspacePath string) (resolvedRoot string, matched bool) {
+	resolvedHome, err := filepath.EvalSymlinks(filepath.Clean(homeDir))
+	if nil != err || !filepath.IsAbs(resolvedHome) {
+		return
+	}
+
+	resolvedRoot, err = filepath.EvalSymlinks(filepath.Clean(iCloudRoot))
+	if nil != err || !filepath.IsAbs(resolvedRoot) || IsPartitionRootPath(resolvedRoot) || resolvedHome == resolvedRoot ||
+		!gulu.File.IsSubPath(resolvedHome, resolvedRoot) {
+		return "", false
+	}
+
+	resolvedWorkspace := ResolveLongestExistingParent(workspacePath)
+	if !filepath.IsAbs(resolvedWorkspace) {
+		return "", false
+	}
+	return resolvedRoot, isSameOrSubPath(resolvedRoot, resolvedWorkspace)
+}
+
+func isSameOrSubPath(root, target string) bool {
+	root = filepath.Clean(root)
+	target = filepath.Clean(target)
+	return root == target || gulu.File.IsSubPath(root, target)
 }
 
 func existAvailabilityStatus(workspaceAbsPath string) bool {
@@ -496,8 +607,6 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 }
 
 const (
-	EvtConfPandocInitialized = "conf.pandoc.initialized"
-
 	EvtSQLHistoryRebuild      = "sql.history.rebuild"
 	EvtSQLAssetContentRebuild = "sql.assetContent.rebuild"
 )

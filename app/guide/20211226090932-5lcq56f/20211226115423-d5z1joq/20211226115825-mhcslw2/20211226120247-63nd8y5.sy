@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226120247-63nd8y5",
-		"title": "引用内容塊",
+		"title": "引用内容區塊",
 		"type": "doc",
-		"updated": "20250311195912"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220623200737-sx458du",
-				"updated": "20250311195846"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -43,12 +43,12 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 後將觸發內容塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後回車就可以完成內容塊的引用了。建立好內容塊引用後，鼠標懸浮在錨文字上後將彈出預覽浮層，展現被引用的內容塊（定義塊）。"
+					"Data": "​ 後將觸發內容區塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後回車就可以完成內容區塊的引用了。建立好內容區塊引用後，鼠標懸浮在錨文字上後將彈出預覽浮層，展現被引用的內容區塊（定義區塊）。"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
-					"TextMarkTextContent": "內容塊/引用"
+					"TextMarkTextContent": "內容區塊/引用"
 				},
 				{
 					"Type": "NodeText",
@@ -97,12 +97,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120337-97ez2pg",
-								"updated": "20211226153322"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "正向連結（Forwardlink），即當前內容塊使用了哪些其他內容塊"
+									"Data": "正向連結（Forwardlink），即當前內容區塊使用了哪些其他內容區塊"
 								}
 							]
 						}
@@ -125,12 +125,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120337-1ss1org",
-								"updated": "20211226153324"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "反向連結（Backlink），即當前內容塊被那些其他內容塊使用了"
+									"Data": "反向連結（Backlink），即當前內容區塊被那些其他內容區塊使用了"
 								}
 							]
 						}
@@ -143,12 +143,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120337-toyoo9f",
-				"updated": "20211228131019"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "正向連結包含在當前塊的內容中，我們可以很直觀的看到。反向連結需要在其他文檔中搜索才能知道，而恰恰是這些訊息對我們比較有價值。我們可以通過以下兩種方式來幫助我們更好的掌握知識點或者發散思路："
+					"Data": "正向連結包含在當前區塊的內容中，我們可以很直觀的看到。反向連結需要在其他文檔中搜索才能知道，而恰恰是這些訊息對我們比較有價值。我們可以通過以下兩種方式來幫助我們更好的掌握知識點或者發散思路："
 				}
 			]
 		},
@@ -178,7 +178,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120337-eq78a5a",
-								"updated": "20211227210417"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -190,7 +190,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：瀏覽內容塊之間的正向和反向連結關系"
+									"Data": "：瀏覽內容區塊之間的正向和反向連結關系"
 								}
 							]
 						}
@@ -213,7 +213,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120337-ajml6vu",
-								"updated": "20211227210423"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -225,7 +225,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：以文本列表的方式展現當前內容塊的反向連結"
+									"Data": "：以文本列表的方式展現當前內容區塊的反向連結"
 								}
 							]
 						}
@@ -288,12 +288,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220623200754-c8pnbo0",
-								"updated": "20220623200754"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "靜態錨文字：不會跟隨定義塊內容變化，即固定展現指定的內容"
+									"Data": "靜態錨文字：不會跟隨定義區塊內容變化，即固定展現指定的內容"
 								}
 							]
 						}
@@ -316,12 +316,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220623200754-4srcm5t",
-								"updated": "20220623200754"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "動態錨文字：跟隨定義塊內容變化，最大長度可在 "
+									"Data": "動態錨文字：跟隨定義區塊內容變化，最大長度可在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -344,7 +344,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "塊引動態錨文字最大長度"
+									"TextMarkTextContent": "區塊引用動態錨文字最大長度"
 								},
 								{
 									"Type": "NodeText",
@@ -656,7 +656,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230420123224-22gd6st",
-				"updated": "20230420123224"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -670,7 +670,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230518100654-6zhp6jh",
-				"updated": "20230518100713"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -693,7 +693,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中啟用 "
+					"Data": " ​ 中啟用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -732,7 +732,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420123224-fo6o8dw",
-								"updated": "20230820102844"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -753,7 +753,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120147-ib6yy3i",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "所有類型的塊"
+									"TextMarkTextContent": "所有類型的區塊"
 								},
 								{
 									"Type": "NodeText",
@@ -780,7 +780,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420123224-okegooe",
-								"updated": "20230820102920"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -801,7 +801,7 @@
 									"TextMarkType": "block-ref",
 									"TextMarkBlockRefID": "20211226120227-ub34qwj",
 									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "文檔塊"
+									"TextMarkTextContent": "文檔區塊"
 								}
 							]
 						}

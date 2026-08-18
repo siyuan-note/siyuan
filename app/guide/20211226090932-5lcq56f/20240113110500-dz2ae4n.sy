@@ -7,7 +7,7 @@
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
 		"type": "doc",
-		"updated": "20260613181357"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -347,7 +347,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110513-f0ouee1",
-				"updated": "20240113110513"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -375,7 +375,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113110513-bta55b6",
-				"updated": "20240113110550"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -774,7 +774,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174315-dz9gat0",
-				"updated": "20260613174315"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -895,7 +895,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174315-uerjb05",
-				"updated": "20260613174315"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -909,12 +909,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613174315-nlwy3go",
-				"updated": "20260613174315"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 [設定 - 文檔 - 新建閃念速記的默認存放路徑] 中設定速記的存放位置："
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "文檔"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建文檔"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "新建閃念速記的默認存放路徑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中設定速記的存放位置："
 				}
 			]
 		},

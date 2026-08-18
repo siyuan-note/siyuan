@@ -6,7 +6,7 @@
 		"id": "20200822191536-rm6hwid",
 		"title": "窗口和页签",
 		"type": "doc",
-		"updated": "20260613204557"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613204349-c97d9sh",
-				"updated": "20260613204349"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -29,22 +29,37 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613204349-a1gj5q8",
-				"updated": "20260613204349"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源支持多窗口和多页签，方便进行文档编辑和查看。"
+					"Data": "思源在桌面端和移动端均支持多页签。桌面端还支持分屏和多窗口，移动端则提供适合触控操作的页签概览。"
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-d150748",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260809170000-d150748",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端"
 				}
 			]
 		},
 		{
 			"ID": "20260613204349-f3c4f3q",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204349-f3c4f3q",
-				"updated": "20260613204349"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -59,7 +74,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204349-j3v5olp",
-				"updated": "20260613204349"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -104,7 +119,7 @@
 					},
 					"Properties": {
 						"id": "20260613204349-dqwyk48",
-						"updated": "20260613204349"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -112,26 +127,44 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204349-fliru9e",
-								"updated": "20260613204349"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "关闭"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：右键页签选择「关闭」，或使用快捷键 "
+									"Data": "关闭：右键页签选择「关闭」，或使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+W"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "W"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "W"
 								}
 							]
 						}
@@ -146,7 +179,7 @@
 					},
 					"Properties": {
 						"id": "20260613204349-lqpzno3",
-						"updated": "20260613204349"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -154,26 +187,66 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204349-hqw8gh2",
-								"updated": "20260613204349"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "恢复"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：使用 "
+									"Data": "恢复：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Shift+T"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 重新打开最近关闭的页签"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "T"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "T"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 可重新打开最近关闭的页签"
 								}
 							]
 						}
@@ -188,7 +261,7 @@
 					},
 					"Properties": {
 						"id": "20260613204349-s6cbn11",
-						"updated": "20260613204349"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -196,44 +269,156 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204349-w4ny52c",
-								"updated": "20260613204349"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "切换"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "："
+									"Data": "切换：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Shift+["
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
+									"Data": "+"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Shift+]"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 切换到上一个/下一个页签，"
+									"Data": "+"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+1~9"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "["
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 跳转到指定页签"
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 切换到上一个页签，使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 切换到下一个页签；使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "1-9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "1-9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 跳转到第 1 至第 9 个页签"
 								}
 							]
 						}
@@ -277,10 +462,10 @@
 		{
 			"ID": "20260613204349-81ggat5",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204349-81ggat5",
-				"updated": "20260613204349"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -309,7 +494,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204349-ccpeaot",
-				"updated": "20260613204349"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -387,7 +572,7 @@
 					},
 					"Properties": {
 						"id": "20260613204349-373m2pl",
-						"updated": "20260613204349"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -395,7 +580,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204349-h1dccfo",
-								"updated": "20260613204349"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -405,7 +590,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：右键页签选择「取消分屏」，或在设置-快捷键中为取消分屏配置快捷键"
+									"Data": "：右键页签选择「取消分屏」，或在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快捷键"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中为取消分屏配置快捷键"
 								}
 							]
 						}
@@ -449,10 +652,10 @@
 		{
 			"ID": "20260613204349-1dbfz13",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204349-1dbfz13",
-				"updated": "20260613204349"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -541,10 +744,10 @@
 		{
 			"ID": "20260613204349-qlvuia3",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204349-qlvuia3",
-				"updated": "20260613204557"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -559,7 +762,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204349-ep9y21l",
-				"updated": "20260613204349"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -604,7 +807,7 @@
 					},
 					"Properties": {
 						"id": "20260613204349-2pnsf77",
-						"updated": "20260613204349"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -612,26 +815,48 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204349-hhl97pv",
-								"updated": "20260613204349"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "最近的文档"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：通过 "
+									"Data": "最近的文档：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+E"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 打开最近文档列表，快速定位最近打开的文档"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "E"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "E"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 打开最近文档列表"
 								}
 							]
 						}
@@ -679,7 +904,7 @@
 					},
 					"Properties": {
 						"id": "20260613204349-la3uhjb",
-						"updated": "20260613204349"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -687,26 +912,200 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204349-9x6jtfx",
-								"updated": "20260613204349"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "页签切换"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：通过 "
+									"Data": "页签切换：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Tab"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 跳转到下一个编辑页签"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌃"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 切换到下一个编辑页签"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-705decd",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260809170000-705decd",
+				"updated": "20260810212846"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移动端"
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-ab8f6ff",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260809170000-ab8f6ff",
+				"updated": "20260810212846"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "移动端同样支持多页签。点击屏幕顶部的页签按钮可打开页签概览。"
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-b19592f",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260809170000-b19592f",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"ID": "20260809170000-213e271",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-213e271",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-b169958",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-b169958",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切换：在概览中点击页签即可切换"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260809170000-cb4e820",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-cb4e820",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-86c5866",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-86c5866",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "导航：使用概览中的后退和前进按钮在浏览记录间跳转"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260809170000-c42f69e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-c42f69e",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-efb8941",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-efb8941",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "新建：使用概览中的新建文档按钮创建并打开文档"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260809170000-d7bd53c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-d7bd53c",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-bc79e05",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-bc79e05",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "关闭：可在页签卡片上关闭单个页签，也可通过菜单关闭全部页签"
 								}
 							]
 						}

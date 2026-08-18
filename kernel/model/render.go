@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -145,7 +145,7 @@ func renderBlockText(node *ast.Node, excludeTypes []string, removeLineBreak bool
 	return
 }
 
-func fillBlockRefCount(nodes []*ast.Node) {
+func fillBlockRefCount(nodes []*ast.Node, boxID string) {
 	var defIDs []string
 	for _, n := range nodes {
 		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -160,7 +160,7 @@ func fillBlockRefCount(nodes []*ast.Node) {
 		})
 	}
 	defIDs = gulu.Str.RemoveDuplicatedElem(defIDs)
-	refCount := sql.QueryRefCount(defIDs)
+	refCount := sql.QueryRefCountInBox(defIDs, boxID)
 	for _, n := range nodes {
 		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || !n.IsBlock() {
@@ -173,6 +173,80 @@ func fillBlockRefCount(nodes []*ast.Node) {
 			return ast.WalkContinue
 		})
 	}
+}
+
+func cloneRenderNode(node *ast.Node) *ast.Node {
+	if nil == node {
+		return nil
+	}
+
+	cloned := *node
+	cloned.Parent = nil
+	cloned.Previous = nil
+	cloned.Next = nil
+	cloned.FirstChild = nil
+	cloned.LastChild = nil
+	cloned.Children = nil
+	cloned.Tokens = bytes.Clone(node.Tokens)
+	if nil != node.KramdownIAL {
+		cloned.KramdownIAL = make([][]string, 0, len(node.KramdownIAL))
+		for _, attr := range node.KramdownIAL {
+			cloned.KramdownIAL = append(cloned.KramdownIAL, append([]string{}, attr...))
+		}
+	}
+	if nil != node.Properties {
+		cloned.Properties = make(map[string]string, len(node.Properties))
+		for name, value := range node.Properties {
+			cloned.Properties[name] = value
+		}
+	}
+
+	for child := node.FirstChild; nil != child; child = child.Next {
+		cloned.AppendChild(cloneRenderNode(child))
+	}
+	return &cloned
+}
+
+func cleanRenderNodes(nodes []*ast.Node, visibleOnly bool) (ret []*ast.Node) {
+	root := &ast.Node{Type: ast.NodeDocument}
+	for _, node := range nodes {
+		if cloned := cloneRenderNode(node); nil != cloned {
+			root.AppendChild(cloned)
+		}
+	}
+
+	ast.Walk(root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if entering && node.IsBlock() {
+			treenode.ClearLegacyHeadingFold(node)
+		}
+		return ast.WalkContinue
+	})
+	if visibleOnly {
+		for _, node := range treenode.CollectFoldHiddenNodes(root) {
+			node.Unlink()
+		}
+	}
+
+	for node := root.FirstChild; nil != node; node = node.Next {
+		ret = append(ret, node)
+	}
+	return
+}
+
+func cleanRenderNode(node *ast.Node, visibleOnly bool) *ast.Node {
+	nodes := cleanRenderNodes([]*ast.Node{node}, visibleOnly)
+	if 0 == len(nodes) {
+		return nil
+	}
+	return nodes[0]
+}
+
+func renderCleanBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
+	return renderBlockDOMByNodes(cleanRenderNodes(nodes, false), luteEngine)
+}
+
+func renderVisibleBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
+	return renderBlockDOMByNodes(cleanRenderNodes(nodes, true), luteEngine)
 }
 
 func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
@@ -327,21 +401,15 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 						hChildren = append(hChildren, h)
 					} else if 2 == blockHeadingMode {
 						// 仅显示标题下方的块（默认行为）
-						if "1" != h.IALAttr("fold") {
-							children := treenode.HeadingChildren(h)
-							for _, c := range children {
-								if "1" == c.IALAttr("heading-fold") {
-									// 嵌入块包含折叠标题时不应该显示其下方块 https://github.com/siyuan-note/siyuan/issues/4765
-									continue
-								}
-								hChildren = append(hChildren, c)
-							}
+						if !treenode.IsSelfFolded(h) {
+							hChildren = append(hChildren, treenode.HeadingChildren(h)...)
 						}
 					} else {
 						// 0: 显示标题与下方的块
 						hChildren = append(hChildren, h)
 						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
 					}
+					hChildren = cleanRenderNodes(hChildren, true)
 					if 0 == blockEmbedMode {
 						embedTopLevel := 0
 						for _, hChild := range hChildren {
@@ -432,20 +500,33 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 	return
 }
 
-func renderBlockMarkdownR(id string, rendered *[]string) (ret []*ast.Node) {
-	if gulu.Str.Contains(id, *rendered) {
+func renderBlockMarkdownR(id string, rendered *[]string, boxIDs ...string) (ret []*ast.Node) {
+	boxID := ""
+	if len(boxIDs) > 0 {
+		boxID = boxIDs[0]
+	}
+	renderedID := id
+	if boxID != "" {
+		renderedID = boxID + "\x00" + id
+	}
+	if gulu.Str.Contains(renderedID, *rendered) {
 		return
 	}
-	*rendered = append(*rendered, id)
+	*rendered = append(*rendered, renderedID)
 
-	b := treenode.GetBlockTree(id)
+	b := treenode.GetBlockTreeInBox(id, boxID)
 	if nil == b {
 		return
 	}
 
 	var err error
 	var t *parse.Tree
-	if t, err = LoadTreeByBlockID(b.ID); err != nil {
+	if boxID == "" {
+		t, err = LoadTreeByBlockID(b.ID)
+	} else {
+		t, err = LoadTreeByBlockIDInExactBox(b.ID, boxID)
+	}
+	if err != nil {
 		return
 	}
 	node := treenode.GetNodeInTree(t, b.ID)
@@ -476,9 +557,14 @@ func renderBlockMarkdownR(id string, rendered *[]string) (ret []*ast.Node) {
 				stmt := n.ChildByType(ast.NodeBlockQueryEmbedScript).TokensStr()
 				stmt = html.UnescapeString(stmt)
 				stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
-				sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+				var sqlBlocks []*sql.Block
+				if boxID != "" && IsEncryptedBox(boxID) {
+					sqlBlocks = sql.SelectBlocksRawStmtInBox(stmt, 1, Conf.Search.Limit, boxID)
+				} else {
+					sqlBlocks = sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+				}
 				for _, sqlBlock := range sqlBlocks {
-					subNodes := renderBlockMarkdownR(sqlBlock.ID, rendered)
+					subNodes := renderBlockMarkdownR(sqlBlock.ID, rendered, boxID)
 					for _, subNode := range subNodes {
 						inserts = append(inserts, subNode)
 					}

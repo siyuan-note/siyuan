@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -50,7 +50,7 @@ func init() {
 	register(TodoWriteTool)
 }
 
-func todoWriteHandler(args map[string]interface{}) (CallToolResult, error) {
+func todoWriteHandler(args map[string]any) (CallToolResult, error) {
 	rawTodos, ok := args["todos"]
 	if !ok {
 		return CallToolResult{
@@ -59,7 +59,7 @@ func todoWriteHandler(args map[string]interface{}) (CallToolResult, error) {
 		}, nil
 	}
 
-	items, ok := rawTodos.([]interface{})
+	items, ok := rawTodos.([]any)
 	if !ok {
 		return CallToolResult{
 			Content: []ContentItem{{Type: "text", Text: "todo_write error: 'todos' must be an array"}},
@@ -69,7 +69,7 @@ func todoWriteHandler(args map[string]interface{}) (CallToolResult, error) {
 
 	todos := make([]model.AgentTodoItem, 0, len(items))
 	for _, item := range items {
-		obj, ok := item.(map[string]interface{})
+		obj, ok := item.(map[string]any)
 		if !ok {
 			continue
 		}

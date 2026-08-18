@@ -6,7 +6,7 @@
 		"id": "20201004194026-s8h2cog",
 		"title": "Use on browser",
 		"type": "doc",
-		"updated": "20231022211844"
+		"updated": "20260804235500"
 	},
 	"Children": [
 		{
@@ -14,7 +14,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091447-8iiuxlt"
+				"id": "20210104091447-8iiuxlt",
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -28,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221025092947-gd0wmbi",
-				"updated": "20221025093054"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -180,12 +181,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091447-br9zpri",
-				"updated": "20230820191236"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Before embarking on these two solutions, please start with understanding SiYuan Technical Architecture (github repo: siyuan-note/siyuan)."
+					"Data": "Before embarking on these two solutions, please start with understanding SiYuan Technical Architecture (GitHub repo: siyuan-note/siyuan)."
 				}
 			]
 		},
@@ -194,7 +195,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104091447-dluat0m"
+				"id": "20210104091447-dluat0m",
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -212,7 +214,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091447-3vmymbk",
-				"updated": "20210522214406"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -245,6 +247,46 @@
 			"Properties": {
 				"id": "20210117211053-tq2km4f"
 			}
+		},
+		{
+			"ID": "20260804120101-oidclog",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804120101-oidclog",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC login"
+				}
+			]
+		},
+		{
+			"ID": "20260804190502-oidcrf3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190502-oidcrf3",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For complete guidance on providers, callback URLs, claim rules, client sign-in, Docker configuration, and troubleshooting, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190002-oidcen1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC login"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
 		}
 	]
 }

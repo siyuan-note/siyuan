@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@ package main
 
 import (
 	"C"
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"os"
@@ -32,22 +33,105 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/job"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin"
 	"github.com/siyuan-note/siyuan/kernel/server"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// LANSyncDiscoveryInfo 返回原生 MDNS 发现需要发布的服务信息。
+//
+//export LANSyncDiscoveryInfo
+func LANSyncDiscoveryInfo() *C.char {
+	info := model.GetLANSyncDiscoveryInfo()
+	if nil == info {
+		return nil
+	}
+	data, err := json.Marshal(info)
+	if nil != err {
+		return nil
+	}
+	return C.CString(string(data))
+}
+
+// AddLANSyncPeer 将原生 MDNS 发现的设备交给内核验证。
+//
+//export AddLANSyncPeer
+func AddLANSyncPeer(instance, address *C.char, port int, txtJSON *C.char) bool {
+	txt := map[string]string{}
+	if err := json.Unmarshal([]byte(C.GoString(txtJSON)), &txt); nil != err {
+		return false
+	}
+	return model.AddLANSyncPeer(C.GoString(instance), C.GoString(address), port, txt)
+}
+
+// RemoveLANSyncPeer 将原生 MDNS 移除的设备从内核中删除。
+//
+//export RemoveLANSyncPeer
+func RemoveLANSyncPeer(instance *C.char) bool {
+	return model.RemoveLANSyncPeer(C.GoString(instance))
+}
+
+// LANSyncActive 返回局域网同步服务是否正在运行。
+//
+//export LANSyncActive
+func LANSyncActive() bool {
+	return model.LANSyncActive()
+}
+
+// UpdateLocalIPs 更新原生容器提供的局域网地址并刷新局域网同步服务。
+//
+//export UpdateLocalIPs
+func UpdateLocalIPs(localIPs *C.char) {
+	util.SetLocalIPs(strings.Split(C.GoString(localIPs), ","))
+	model.RefreshLANSyncNetwork()
+}
+
+//export AcquireExportFile
+func AcquireExportFile(exportPath *C.char) *C.char {
+	pathStr := C.GoString(exportPath)
+	lease, err := model.AcquireMobileExportLease(pathStr)
+	if err != nil {
+		logging.LogErrorf("acquire export file [%s] failed: %s", pathStr, err)
+		return nil
+	}
+	data, err := json.Marshal(lease)
+	if err != nil {
+		model.ReleaseMobileExportLease(lease.ID)
+		return nil
+	}
+	return C.CString(string(data))
+}
+
+//export ReleaseExportFile
+func ReleaseExportFile(leaseID *C.char) {
+	model.ReleaseMobileExportLease(C.GoString(leaseID))
+}
+
+// GetExportFileName 返回普通导出的资源名称；加密导出应读取 AcquireExportFile 返回的 Name。
+//
+//export GetExportFileName
+func GetExportFileName(exportPath *C.char) *C.char {
+	name := model.GetMobileExportName(C.GoString(exportPath))
+	if name == "" {
+		return nil
+	}
+	return C.CString(name)
+}
+
 //export StartKernelFast
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs *C.char) {
+	model.InitJwtKey()
 	go server.Serve(true, model.Conf.CookieKey)
 }
 
 //export StartKernel
 func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer *C.char) {
+	model.InitJwtKey()
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
 	util.MobileOSVer = C.GoString(osVer)
-	util.LocalIPs = strings.Split(C.GoString(localIPs), ",")
+	util.SetLocalIPs(strings.Split(C.GoString(localIPs), ","))
 	util.BootMobile(C.GoString(container), C.GoString(appDir), C.GoString(workspaceBaseDir), C.GoString(lang))
 
 	model.InitConf()
@@ -71,6 +155,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 		job.StartCron()
 		go model.AutoGenerateFileHistory()
 		go cache.LoadAssets()
+		go plugin.InitManager()
 	}()
 }
 
@@ -171,6 +256,11 @@ func GetExportFilePath(exportPath *C.char) *C.char {
 		fileName = filepath.Clean(fileName)
 		if strings.HasPrefix(fileName, "..") {
 			logging.LogWarnf("get export file path [%s] blocked: path traversal attempt [%s]", pathStr, fileName)
+			return nil
+		}
+		// 加密导出需要持有覆盖原生复制过程的租约，旧路径解析接口不再返回其明文地址。
+		if model.IsManagedEncryptedExportPath(fileName) {
+			logging.LogWarnf("get export file path [%s] blocked: use AcquireExportFile for encrypted exports", pathStr)
 			return nil
 		}
 		absPath = filepath.Join(util.TempDir, "export", fileName)

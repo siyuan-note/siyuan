@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -48,6 +48,21 @@ func TestHanInsensitiveRegexp(t *testing.T) {
 	// 无繁简变体的字符保持原样
 	if got := hanInsensitiveRegexp("中a1"); "中a1" != got {
 		t.Errorf("hanInsensitiveRegexp(中a1) = %q，应为原样", got)
+	}
+}
+
+func TestNormalizeSearchText(t *testing.T) {
+	if result := NormalizeSearchText("詩經 ABC", true, true); "詩經 ABC" != result {
+		t.Fatalf("区分大小写和繁简时不应转换文本：%q", result)
+	}
+	if result := NormalizeSearchText("詩經 ABC", false, true); "詩經 abc" != result {
+		t.Fatalf("忽略大小写时转换错误：%q", result)
+	}
+	if result := NormalizeSearchText("詩經 ABC", true, false); "诗经 ABC" != result {
+		t.Fatalf("忽略繁简时转换错误：%q", result)
+	}
+	if result := NormalizeSearchText("詩經 ABC", false, false); "诗经 abc" != result {
+		t.Fatalf("同时忽略大小写和繁简时转换错误：%q", result)
 	}
 }
 

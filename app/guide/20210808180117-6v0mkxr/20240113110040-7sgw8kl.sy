@@ -7,7 +7,7 @@
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
 		"type": "doc",
-		"updated": "20260613181402"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -347,7 +347,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110114-ekanw3f",
-				"updated": "20240113110213"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -375,7 +375,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113110114-5cymxj6",
-				"updated": "20240113110322"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -398,7 +398,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ and access the configuration on your desktop browser."
+					"Data": " ​ and access the configuration on your desktop browser."
 				}
 			]
 		},
@@ -770,7 +770,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613174243-53h143k",
-				"updated": "20260613174243"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -891,7 +891,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613174243-tm05xft",
-				"updated": "20260613174243"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -905,12 +905,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613174243-2fim9a2",
-				"updated": "20260613174243"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Configure the shorthand save location in [Settings - Documents - Default shorthand save path]:"
+					"Data": "Configure the shorthand save location in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Documents"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "New Document"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Default shorthand save path"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
 				}
 			]
 		},

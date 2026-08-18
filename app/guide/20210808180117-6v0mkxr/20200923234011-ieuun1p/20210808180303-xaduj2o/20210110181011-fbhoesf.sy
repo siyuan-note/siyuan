@@ -6,7 +6,7 @@
 		"id": "20210110181011-fbhoesf",
 		"title": "Daily notes",
 		"type": "doc",
-		"updated": "20260614204928"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613180619-15jwt8e",
-				"updated": "20260613180619"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180619-njydei7",
-				"updated": "20260613180619"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613180619-y24gzqt",
-				"updated": "20260613180619"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20260613180619-jeorm2w",
-						"updated": "20260613180619"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -79,7 +79,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613180619-a3cmnuj",
-								"updated": "20260613180619"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -93,8 +93,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Alt+5"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "5"
 								},
 								{
 									"Type": "NodeText",
@@ -102,8 +111,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "⌃5"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌃"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "5"
 								},
 								{
 									"Type": "NodeText",
@@ -187,7 +205,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613180619-9fh070b",
-				"updated": "20260614204928"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -201,12 +219,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613180619-om57ubp",
-				"updated": "20260613180619"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Right-click a notebook and open \"Settings\", then configure under the new diary settings:"
+					"Data": "Right-click a notebook and open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, then configure under the new diary settings:"
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20200910201551-h4twhas",
 		"title": "书签和标签",
 		"type": "doc",
-		"updated": "20250115151954"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091316-ltmnzg9",
-				"updated": "20250115151951"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -47,12 +47,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091316-5vwheuz",
-				"updated": "20250115151951"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "所有收藏过的内容块会在书签页签（ "
+					"Data": "所有收藏过的内容块会在书签页签（"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -70,12 +70,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ / "
+					"Data": " / "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌃3"
+					"TextMarkTextContent": "⌃"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "3"
 				},
 				{
 					"Type": "NodeText",
@@ -89,7 +98,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091316-zxotarc",
-				"updated": "20250115151954"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -169,7 +178,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091316-gt0utcz",
-				"updated": "20250115151954"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -192,12 +201,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ / "
+					"Data": " / "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌃4"
+					"TextMarkTextContent": "⌃"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "4"
 				},
 				{
 					"Type": "NodeText",
@@ -303,7 +321,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;"
+					"TextMarkTextContent": "&lt;"
 				},
 				{
 					"Type": "NodeText",
@@ -312,7 +330,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026gt;"
+					"TextMarkTextContent": "&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -321,7 +339,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026amp;"
+					"TextMarkTextContent": "&amp;"
 				},
 				{
 					"Type": "NodeText",

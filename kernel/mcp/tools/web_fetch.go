@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -38,7 +38,7 @@ func init() {
 	register(WebFetchTool)
 }
 
-func webFetchHandler(args map[string]interface{}) (CallToolResult, error) {
+func webFetchHandler(args map[string]any) (CallToolResult, error) {
 	rawURL, _ := args["url"].(string)
 	format, _ := args["format"].(string)
 	if format == "" {

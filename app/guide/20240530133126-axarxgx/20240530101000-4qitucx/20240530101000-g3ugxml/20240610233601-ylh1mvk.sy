@@ -6,7 +6,7 @@
 		"id": "20240610233601-ylh1mvk",
 		"title": "サービスを公開",
 		"type": "doc",
-		"updated": "20260613195435"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260315160203-l0m0q2g",
-				"updated": "20260613195435"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260315160203-kmbr9ic",
-				"updated": "20260427075628"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20260315160203-ugghh1z",
-						"updated": "20260315160458"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -79,12 +79,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260315160203-zxnr2s3",
-								"updated": "20260315160458"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -93,7 +93,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ \u003e "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -102,7 +102,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を開き、公開サービスの設定パネルにアクセスします"
+									"Data": " ​ を開き、公開サービスの設定パネルにアクセスします"
 								}
 							]
 						}

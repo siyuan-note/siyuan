@@ -28,19 +28,27 @@
     background-color: var(--b3-theme-primary-lightest);
   }
 
-  &--disabled {
-    opacity: .68;
-    pointer-events: none;
-  }
-
   &__img {
     margin: 16px 0 16px 16px;
 
-    img {
+    img, span {
       height: 74px;
       object-fit: cover;
       border-radius: var(--b3-border-radius);
       width: 74px;
+    }
+
+    span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: var(--b3-theme-primary);
+    }
+
+    .b3-card__icon {
+      height: 36px;
+      width: 36px;
     }
   }
 
@@ -83,6 +91,33 @@
       .block__icon {
         margin-left: 8px;
       }
+    }
+  }
+}
+
+// 题头图封面选择
+.b3-cover {
+
+  &__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 16px 16px 0;
+    gap: 8px;
+  }
+
+  &__card {
+    aspect-ratio: 3 / 1;
+    min-height: 100px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    &:hover {
+      opacity: 0.86;
     }
   }
 }

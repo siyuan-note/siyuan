@@ -1,0 +1,27 @@
+{
+	"ID": "20260804185000-secvr01",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804185000-secvr01",
+		"title": "密钥和变量",
+		"type": "doc",
+		"updated": "20260812170000"
+	},
+	"Children": [
+		{"ID": "20260804224001-seccn01", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804224001-seccn01", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "概述"}]},
+		{"ID": "20260804224002-seccn02", "Type": "NodeParagraph", "Properties": {"id": "20260804224002-seccn02", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "密钥和变量用于集中管理 Skill、MCP 服务、智能体工具和插件使用的可复用值。密钥适合保存密码和 API token 等敏感数据，其值会加密存储，并且不会进入 AI 对话；变量适合保存地址、名称和其他非敏感参数，其值以明文存储，并且可以进入 AI 对话。"}]},
+		{"ID": "20260804224003-seccn03", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804224003-seccn03", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "配置"}]},
+		{"ID": "20260804224004-seccn04", "Type": "NodeParagraph", "Properties": {"id": "20260804224004-seccn04", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "在 "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "设置"}, {"Type": "NodeText", "Data": " - "}, {"Type": "NodeTextMark", "TextMarkType": "kbd", "TextMarkTextContent": "密钥和变量"}, {"Type": "NodeText", "Data": " 中可以分别添加、编辑和删除密钥或变量。每项由名称和值组成；为了兼容所有引用方式，名称建议使用英文字母、数字和下划线，并且不要以数字开头。"}]},
+		{"ID": "20260804224005-seccn05", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804224005-seccn05", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "引用方式"}]},
+		{"ID": "20260804224006-seccn06", "Type": "NodeParagraph", "Properties": {"id": "20260804224006-seccn06", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "可以使用简写 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "$NAME"}, {"Type": "NodeText", "Data": " 或 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "${NAME}"}, {"Type": "NodeText", "Data": "，也可以使用带命名空间的 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "{{secrets.NAME}}"}, {"Type": "NodeText", "Data": " 和 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "{{vars.NAME}}"}, {"Type": "NodeText", "Data": "。带命名空间的写法含义更明确，适合在共享配置和 Skill 中使用。"}]},
+		{"ID": "20260804224007-seccn07", "Type": "NodeParagraph", "Properties": {"id": "20260804224007-seccn07", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "如果密钥和变量存在相同名称，在同时支持两者的引用位置使用简写时会优先取密钥；使用带命名空间的写法可以明确指定。找不到对应名称时，占位符会保留原文，便于发现尚未配置的项目。"}]},
+		{"ID": "20260804224008-seccn08", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804224008-seccn08", "updated": "20260812170000"}, "Children": [{"Type": "NodeText", "Data": "使用示例"}]},
+		{"ID": "20260804224009-seccn09", "Type": "NodeParagraph", "Properties": {"id": "20260804224009-seccn09", "updated": "20260812170000"}, "Children": [{"Type": "NodeText", "Data": "例如，添加名为 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "API_TOKEN"}, {"Type": "NodeText", "Data": " 的密钥和名为 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "WORKSPACE"}, {"Type": "NodeText", "Data": " 的变量后，可以在智能体 MCP 服务的 HTTP 标头或 stdio 环境变量中这样引用："}]},
+		{"ID": "20260804224010-seccn10", "Type": "NodeCodeBlock", "IsFencedCodeBlock": true, "CodeBlockFenceChar": 96, "CodeBlockFenceLen": 3, "CodeBlockOpenFence": "YGBg", "CodeBlockInfo": "anNvbg==", "CodeBlockCloseFence": "YGBg", "Properties": {"id": "20260804224010-seccn10", "updated": "20260804230000"}, "Children": [{"Type": "NodeCodeBlockFenceOpenMarker", "Data": "```", "CodeBlockFenceLen": 3}, {"Type": "NodeCodeBlockFenceInfoMarker", "CodeBlockInfo": "anNvbg=="}, {"Type": "NodeCodeBlockCode", "Data": "{\n  \"Authorization\": \"Bearer {{secrets.API_TOKEN}}\",\n  \"X-Workspace\": \"{{vars.WORKSPACE}}\"\n}\n"}, {"Type": "NodeCodeBlockFenceCloseMarker", "Data": "```", "CodeBlockFenceLen": 3}]},
+		{"ID": "20260804224011-seccn11", "Type": "NodeParagraph", "Properties": {"id": "20260804224011-seccn11", "updated": "20260812170000"}, "Children": [{"Type": "NodeText", "Data": "stdio MCP 服务只会继承用户勾选的内核环境变量，其环境变量条目也可以使用上述引用；引用密钥会将其明文提供给该程序及其子进程。智能体内置 HTTP 请求工具也会在网址、HTTP 标头和请求正文中替换密钥与变量，例如可以将网址写为 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "{{vars.API_BASE}}/v1/items"}, {"Type": "NodeText", "Data": "。Skill 正文和对话消息可以使用变量；密钥占位符不会在 AI 对话中展开，只会在支持密钥的工具或 MCP 配置真正发起请求时替换。"}]},
+		{"ID": "20260804224012-seccn12", "Type": "NodeParagraph", "Properties": {"id": "20260804224012-seccn12", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "插件也可以通过接口读取或解析密钥和变量。安装插件前应确认其来源和权限，因为能够访问密钥的插件可以取得运行时明文。"}]},
+		{"ID": "20260804224013-seccn13", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260804224013-seccn13", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "安全建议"}]},
+		{"ID": "20260804224014-seccn14", "Type": "NodeParagraph", "Properties": {"id": "20260804224014-seccn14", "updated": "20260804230000"}, "Children": [{"Type": "NodeText", "Data": "不要将密码、访问 token 或私钥保存为变量，也不要在对话消息、Skill 正文或普通配置中直接写入敏感值。删除或更换密钥后，应同时检查使用它的 Skill、MCP 服务和插件配置。有关智能体使用这些配置的方式，请参阅 "}, {"Type": "NodeTextMark", "TextMarkType": "block-ref", "TextMarkBlockRefID": "20260804171000-aiagt01", "TextMarkBlockRefSubtype": "s", "TextMarkTextContent": "AI 智能体"}, {"Type": "NodeText", "Data": "。"}]}
+	]
+}

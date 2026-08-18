@@ -10,9 +10,18 @@ type SettingItemBase = {
     groupId: string;
     /** 条目检索串（注册时 normalize） */
     searchIndex: readonly string[];
+    /** 搜索结果中展示的条目标题 */
+    searchTitle?: string;
+    /** 搜索时动态判断条目是否可用；不可用且无原因时不展示搜索结果 */
+    searchAvailability?: () => SettingItemSearchAvailability;
     readValue?: (el: HTMLElement) => unknown;
     save?: (value: unknown) => void | Promise<void>;
     afterMount?: (root: HTMLElement) => void | Promise<void>;
+};
+
+export type SettingItemSearchAvailability = {
+    available: boolean;
+    reason?: string;
 };
 
 /** 标准控件行：由 rowParts 描述整行 UI，参与 mount、save、搜索 */

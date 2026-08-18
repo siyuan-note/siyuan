@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -56,7 +56,7 @@ var importMdCmd = &cobra.Command{
 		}
 
 		if err := model.ImportFromLocalPath(notebook, absPath, resolvePath(notebook, toPath, hpath)); err != nil {
-			return err
+			return formatNotebookWriteError(notebook, err)
 		}
 		model.AppendPushReloadFiletreeEntry()
 		fmt.Println("ok")

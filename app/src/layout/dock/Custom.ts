@@ -1,6 +1,6 @@
 import {Tab} from "../Tab";
 import {Model} from "../Model";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {Protyle} from "../../protyle";
 
 export class Custom extends Model {
@@ -36,7 +36,9 @@ export class Custom extends Model {
         this.data = options.data;
         this.type = options.type;
         this.init = options.init;
-        this.destroy = options.destroy;
+        if (typeof options.destroy === "function") {
+            this.destroy = options.destroy;
+        }
         this.beforeDestroy = options.beforeDestroy;
         this.resize = options.resize;
         this.update = options.update;

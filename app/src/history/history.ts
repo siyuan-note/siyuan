@@ -10,15 +10,17 @@ import {fetchPost} from "../util/fetch";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {showDiff} from "./diff";
-import {saveExportFile, setStorageVal} from "../protyle/util/compatibility";
+import {setStorageVal} from "../protyle/util/compatibility";
 import {openModel} from "../mobile/menu/model";
 import {closeModel} from "../mobile/util/closePanel";
-import {App} from "../index";
+import type {App} from "../index";
 import {resizeSide} from "./resizeSide";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
-import {pathPosix} from "../util/pathName";
+import {renderRepoFile, renderRepoFileList, rollbackRepoFile, saveRepoFile} from "./repoFile";
+import {openDocHistory} from "./doc";
 
 let historyEditor: Protyle;
+const repoHistoryEditors = new WeakMap<Element, Protyle>();
 
 const renderDoc = (element: HTMLElement, currentPage: number) => {
     const previousElement = element.querySelector('[data-type="docprevious"]');
@@ -111,7 +113,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
 
 const renderRepoItem = (response: IWebSocketData, element: Element, type: string) => {
     if (response.data.snapshots.length === 0) {
-        element.lastElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
+        element.querySelector('[data-type="repoList"]').innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
         return;
     }
     let actionHTML = "";
@@ -265,85 +267,54 @@ ${actionHTML}
 </li>`;
         /// #endif
     });
-    element.lastElementChild.innerHTML = `${repoHTML}`;
+    element.querySelector('[data-type="repoList"]').innerHTML = `${repoHTML}`;
+};
+
+const clearRepoPreview = (element: Element) => {
+    const previewElement = element.querySelector('[data-type="repoPreviewPanel"]');
+    repoHistoryEditors.get(element)?.destroy();
+    repoHistoryEditors.delete(element);
+    element.querySelector('[data-type="repoPreview"] .protyle-title__input').classList.add("fn__none");
+    previewElement.classList.add("fn__none");
+    previewElement.removeAttribute("data-request-id");
+    previewElement.innerHTML = "";
+};
+
+const setRepoSearchLayout = (element: Element, enabled: boolean) => {
+    const listElement = element.querySelector('[data-type="repoList"]') as HTMLElement;
+    const resizeElement = element.querySelector(".history__resize");
+    const previewElement = element.querySelector('[data-type="repoPreview"]');
+    clearRepoPreview(element);
+    if (enabled) {
+        listElement.classList.remove("fn__flex-1");
+        listElement.classList.add("history__side");
+        if (!isMobile()) {
+            listElement.style.width = window.siyuan.storage[Constants.LOCAL_HISTORY].sideWidth;
+        }
+        resizeElement.classList.remove("fn__none");
+        previewElement.classList.remove("fn__none");
+    } else {
+        listElement.classList.add("fn__flex-1");
+        listElement.classList.remove("history__side");
+        listElement.style.width = "";
+        resizeElement.classList.add("fn__none");
+        previewElement.classList.add("fn__none");
+    }
 };
 
 const renderRepoSearchResult = (response: IWebSocketData, element: Element) => {
-    if (response.data.files.length === 0) {
-        element.lastElementChild.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
-        return;
-    }
-    let html = "";
-    response.data.files.forEach((item: {
-        fileID: string,
-        indexID: string,
-        title: string,
-        hPath: string,
-        path: string,
-        hSize: string,
-        updated: number
-    }) => {
-        /// #if MOBILE
-        html += `<li class="b3-list-item" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}">
-    <div class="fn__flex-1">
-        <div style="padding-top:8px" class="b3-list-item__text">${escapeHtml(item.title)}</div>
-        <div class="b3-list-item__meta">
-            ${item.hSize}
-            <span class="fn__space"></span>
-            ${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}
-        </div>
-        <div class="fn__flex" style="height: 26px">
-            <span class="fn__flex-1"></span>
-            <span class="b3-list-item__action" data-type="view">
-                <svg><use xlink:href="#iconEye"></use></svg>
-                <span class="fn__space"></span>${window.siyuan.languages.cardPreview}
-            </span>
-            <span class="fn__space"></span>
-            <span class="b3-list-item__action" data-type="saveAs">
-                <svg><use xlink:href="#iconDownload"></use></svg>
-                <span class="fn__space"></span>${window.siyuan.languages.saveAs}
-            </span>
-            <span class="fn__space"></span>
-            <span class="b3-list-item__action" data-type="rollback">
-                <svg><use xlink:href="#iconUndo"></use></svg>
-                <span class="fn__space"></span> ${window.siyuan.languages.rollback}
-            </span>
-        </div>
-    </div>
-</li>`;
-        /// #else
-        html += `<li class="b3-list-item b3-list-item--hide-action" data-type="searchFileItem" data-id="${item.fileID}" data-snapshot="${item.indexID}" data-created="${item.updated}">
-    <div class="fn__flex-1">
-        <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
-        <div class="b3-list-item__meta">
-            ${escapeHtml(item.hPath)}
-            <span class="fn__space"></span>
-            ${item.hSize}
-            <span class="fn__space"></span>
-            ${dayjs(item.updated).format("YYYY-MM-DD HH:mm:ss")}
-        </div>
-    </div>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="view" aria-label="${window.siyuan.languages.cardPreview}">
-        <svg><use xlink:href="#iconEye"></use></svg>
-    </span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="saveAs" aria-label="${window.siyuan.languages.saveAs}">
-        <svg><use xlink:href="#iconDownload"></use></svg>
-    </span>
-    <span class="b3-list-item__action b3-tooltips b3-tooltips__w" data-type="rollback" aria-label="${window.siyuan.languages.rollback}">
-        <svg><use xlink:href="#iconUndo"></use></svg>
-    </span>
-</li>`;
-        /// #endif
-    });
-    element.lastElementChild.innerHTML = html;
+    renderRepoFileList(response.data.files, element.querySelector('[data-type="repoList"]'), true);
 };
 
 const renderRepo = (element: Element, currentPage: number) => {
     const selectElement = element.querySelector(".b3-select") as HTMLSelectElement;
     const selectValue = selectElement.value;
+    const searchInputElement = element.querySelector("input") as HTMLInputElement;
+    const keyword = searchInputElement.value.trim();
 
     selectElement.disabled = true;
-    element.lastElementChild.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
+    setRepoSearchLayout(element, Boolean(keyword && selectValue === "getRepoSnapshots"));
+    element.querySelector('[data-type="repoList"]').innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
     const pageBtn = element.querySelector('button[data-type="jumpRepoPage"]');
     pageBtn.textContent = `${currentPage}`;
 
@@ -352,13 +323,11 @@ const renderRepo = (element: Element, currentPage: number) => {
     const pageElement = nextElement.nextElementSibling.nextElementSibling;
     element.setAttribute("data-init", "true");
 
-    const searchInputElement = element.querySelector("input") as HTMLInputElement;
     if (selectValue === "getRepoSnapshots") {
         searchInputElement.parentElement.classList.remove("fn__none");
     } else {
         searchInputElement.parentElement.classList.add("fn__none");
     }
-    const keyword = searchInputElement.value.trim();
     if (keyword && selectValue === "getRepoSnapshots") {
         const searchBtnElement = searchInputElement.nextElementSibling as HTMLButtonElement;
         searchBtnElement.disabled = true;
@@ -495,7 +464,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                     <div class="fn__flex-1"></div>
                     <div class="b3-form__icon">
                         <svg class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
-                        <input class="b3-text-field b3-form__icon-input ${isMobile() ? "fn__size96" : "fn__size200"}" placeholder="${window.siyuan.languages.search}">
+                        <input class="b3-text-field b3-form__icon-input ${isMobile() ? "fn__size96" : "fn__size200"}" placeholder="${window.siyuan.languages.searchPlaceholder}">
                     </div>
                     <span class="fn__space"></span>
                     <select data-type="typeselect" class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">
@@ -520,7 +489,7 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                         ${notebookSelectHTML}
                     </select>
                     <span class="fn__space"></span>
-                    <button data-type="rebuildIndex" class="b3-button b3-button--outline">${window.siyuan.languages.rebuildIndex}</button>
+                    <button data-type="rebuildIndex" class="b3-button b3-button--outline">${window.siyuan.languages.rebuildHistoryIndex}</button>
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
@@ -569,9 +538,16 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
                     </button>
                 </div>    
             </div>
-            <ul class="b3-list b3-list--background fn__flex-1" style="padding: 8px 0">
-                <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
-            </ul>
+            <div class="fn__flex fn__flex-1 history__panel">
+                <ul data-type="repoList" class="b3-list b3-list--background fn__flex-1" style="padding: 8px 0">
+                    <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
+                </ul>
+                <div class="history__resize fn__none"></div>
+                <div data-type="repoPreview" class="fn__flex-1 fn__flex-column fn__none">
+                    <div class="protyle-title__input fn__none ft__center ft__breakword"></div>
+                    <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="repoPreviewPanel"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>`;
@@ -597,6 +573,9 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
             containerClassName: "b3-dialog__container--theme",
             destroyCallback() {
                 historyEditor = undefined;
+                const repoElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
+                repoHistoryEditors.get(repoElement)?.destroy();
+                repoHistoryEditors.delete(repoElement);
             }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORY);
@@ -606,7 +585,10 @@ export const openHistory = (app: App, tab: "doc" | "notebook" | "repo" = "doc") 
         } else {
             dialog.element.querySelector("input").focus();
         }
-        resizeSide(dialog.element.querySelector(".history__resize"), dialog.element.querySelector(".history__side"), "sideWidth");
+        const docPanelElement = dialog.element.querySelector('#historyContainer [data-type="doc"]');
+        const repoPanelElement = dialog.element.querySelector('#historyContainer [data-type="repo"]');
+        resizeSide(docPanelElement.querySelector(".history__resize"), docPanelElement.querySelector(".history__side"), "sideWidth");
+        resizeSide(repoPanelElement.querySelector(".history__resize"), repoPanelElement.querySelector('[data-type="repoList"]'), "sideWidth");
     }
 };
 
@@ -647,6 +629,20 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
     disabledProtyle(historyEditor.protyle);
     const repoElement = element.querySelector('#historyContainer [data-type="repo"]');
     const historyElement = element.querySelector('#historyContainer [data-type="doc"]');
+    const previewRepoFile = (itemElement: Element) => {
+        const previewElement = repoElement.querySelector('[data-type="repoPreviewPanel"]');
+        const previewTitleElement = repoElement.querySelector('[data-type="repoPreview"] .protyle-title__input');
+        repoHistoryEditors.get(repoElement)?.destroy();
+        repoHistoryEditors.delete(repoElement);
+        previewTitleElement.textContent = itemElement.querySelector(".b3-list-item__text").textContent.trim();
+        previewTitleElement.classList.remove("fn__none");
+        previewElement.classList.remove("fn__none");
+        renderRepoFile(app, itemElement, previewElement, (editor) => {
+            repoHistoryEditors.set(repoElement, editor);
+        });
+        itemElement.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+        itemElement.classList.add("b3-list-item--focus");
+    };
     const repoSelectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
     const searchFileElement = repoElement.querySelector(".b3-text-field") as HTMLInputElement;
     repoSelectElement.addEventListener("change", () => {
@@ -691,9 +687,26 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (target.classList.contains("b3-list-item__action") && type === "compare") {
+                const itemElement = target.closest(".b3-list-item");
+                openDocHistory({
+                    app,
+                    id: itemElement.getAttribute("data-id"),
+                    notebookId: itemElement.getAttribute("data-notebook-id"),
+                    pathString: itemElement.querySelector(".b3-list-item__text").textContent.trim(),
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                break;
             } else if (target.classList.contains("b3-list-item__action") && type === "rollback" && !window.siyuan.config.readonly) {
                 const liElement = target.closest(".b3-list-item");
                 const dataType = target.parentElement.getAttribute("data-type") || liElement.getAttribute("data-type");
+                if (dataType === "searchFileItem") {
+                    rollbackRepoFile(liElement);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                }
                 let name;
                 let time;
                 if (dataType === "notebook") {
@@ -702,12 +715,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 } else if (dataType === "repoitem") {
                     name = window.siyuan.languages.workspaceData;
                     time = (isMobile() ? target.parentElement.parentElement : target.parentElement).querySelector("span[data-type='hCreated']").textContent.trim();
-                } else if (dataType === "searchFileItem") {
-                    name = liElement.querySelector(".b3-list-item__text").textContent.trim();
-                    time = dayjs(parseInt(liElement.getAttribute("data-created"))).format("YYYY-MM-DD HH:mm:ss");
                 } else {
-                    name = target.previousElementSibling.previousElementSibling.textContent.trim();
-                    time = dayjs(parseInt(target.parentElement.getAttribute("data-created")) * 1000).format("YYYY-MM-DD HH:mm:ss");
+                    name = liElement.querySelector(".b3-list-item__text").textContent.trim();
+                    time = dayjs(parseInt(liElement.getAttribute("data-created")) * 1000).format("YYYY-MM-DD HH:mm:ss");
                 }
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback,
                     window.siyuan.languages.rollbackConfirm.replace("${name}", name).replace("${time}", time),
@@ -728,10 +738,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             fetchPost("/api/history/rollbackNotebookHistory", {
                                 historyPath: target.parentElement.getAttribute("data-path")
                             });
-                        } else if (dataType === "searchFileItem") {
-                            fetchPost("/api/repo/rollbackRepoSnapshotFile", {
-                                id: liElement.getAttribute("data-id")
-                            });
                         } else {
                             fetchPost("/api/repo/checkoutRepo", {
                                 id: target.parentElement.getAttribute("data-id")
@@ -742,55 +748,13 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (type === "saveAs") {
-                const liElement = target.closest(".b3-list-item") as HTMLElement;
-                const fileId = liElement.getAttribute("data-id");
-                fetchPost("/api/repo/exportRepoFile", {id: fileId}, (response) => {
-                    saveExportFile(response.data.path);
-                });
+                saveRepoFile(target.closest(".b3-list-item"));
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "view") {
-                const liElement = target.closest(".b3-list-item");
-                const snapshotId = liElement.getAttribute("data-snapshot") || "";
-                const dialog = new Dialog({
-                    title: liElement.querySelector(".b3-list-item__text").textContent.trim(),
-                    content: '<div class="b3-dialog__content"><div style="border-radius: var(--b3-border-radius-b);"></div></div>',
-                    width: isMobile() ? "100vw" : "80vw",
-                    height: isMobile() ? "100dvh" : "70vh",
-                    disableAnimation: true,
-                });
-                const contentElement = dialog.element.querySelector(".b3-dialog__content");
-                fetchPost("/api/repo/openRepoSnapshotFile", {id: liElement.getAttribute("data-id")}, (response) => {
-                    const type = pathPosix().extname(response.data.content).toLowerCase();
-                    if (Constants.SIYUAN_ASSETS_IMAGE.concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(type)) {
-                        contentElement.firstElementChild.innerHTML = renderAssetsPreview(response.data.content);
-                    } else if (response.data.displayInText) {
-                        contentElement.innerHTML = '<textarea readonly class="b3-text-field fn__block" style="height: 100%"></textarea>';
-                        (contentElement.firstElementChild as HTMLTextAreaElement).value = response.data.content || response.data.title;
-                    } else {
-                        const viewEditor = new Protyle(app, contentElement.firstElementChild as HTMLElement, {
-                            blockId: "",
-                            action: [Constants.CB_GET_HISTORY],
-                            history: {
-                                snapshot: snapshotId
-                            },
-                            render: {
-                                background: false,
-                                gutter: false,
-                                breadcrumb: false,
-                                breadcrumbDocName: false,
-                            },
-                            typewriterMode: false
-                        });
-                        disabledProtyle(viewEditor.protyle);
-                        onGet({
-                            data: response,
-                            protyle: viewEditor.protyle,
-                            action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
-                        });
-                    }
-                });
+            } else if (target.classList.contains("b3-list-item") &&
+                target.getAttribute("data-type") === "searchFileItem") {
+                previewRepoFile(target);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -827,6 +791,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             let html = "";
                             let ariaLabel = "";
                             response.data.items.forEach((docItem: {
+                                id: string,
                                 title: string,
                                 path: string,
                                 op: string,
@@ -855,10 +820,15 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                     chipClass += "b3-chip--warning ";
                                     ariaLabel = window.siyuan.languages.historyOutline;
                                 }
-                                html += `<li data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${typeElement.value === "4" ? "av" : (typeElement.value === "2" ? "assets" : "doc")}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
+                                const itemType = typeElement.value === "4" ? "av" : (typeElement.value === "2" ? "assets" : "doc");
+                                const compareHTML = itemType === "doc" && docItem.op !== "delete" ? `<span class="b3-list-item__action ariaLabel" data-type="compare" data-position="6south" aria-label="${window.siyuan.languages.compare}">
+        <svg><use xlink:href="#iconSplitLR"></use></svg>
+    </span>` : "";
+                                html += `<li data-id="${docItem.id}" data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${itemType}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
     <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}ariaLabel" data-position="6south" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
     <span class="b3-list-item__text" title="${escapeAttr(docItem.title)}">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
+    ${compareHTML}
     <span class="b3-list-item__action ariaLabel" data-type="rollback" data-position="6south" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>

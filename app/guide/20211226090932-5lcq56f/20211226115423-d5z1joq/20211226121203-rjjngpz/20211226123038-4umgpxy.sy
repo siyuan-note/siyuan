@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20250115152754"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -53,7 +53,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-ddr3yub",
-				"updated": "20250115152732"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -225,15 +225,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123051-2p8rbm4",
-				"updated": "20220824172748"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeImage",
 					"Data": "span",
-					"Properties": {
-						"parent-style": "display: block;"
-					},
 					"Children": [
 						{
 							"Type": "NodeBang"
@@ -266,10 +263,6 @@
 							"Type": "NodeCloseParen"
 						}
 					]
-				},
-				{
-					"Type": "NodeKramdownSpanIAL",
-					"Data": "{: parent-style=\"display: block;\"}"
 				}
 			]
 		},
@@ -523,7 +516,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230604120454-cxz64oc",
-				"updated": "20250115152754"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -537,7 +530,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604120454-k7wee90",
-				"updated": "20250115152754"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -560,7 +553,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​中可以查看丟失的資源，複製路徑後可以在全域搜索中找到引用處。"
+					"Data": " ​中可以查看丟失的資源，複製路徑後可以在全域搜索中找到引用處。"
 				}
 			]
 		},
@@ -569,7 +562,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604120454-m6jtopr",
-				"updated": "20230604120825"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1257,12 +1250,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230414203058-pvk5pnz",
-				"updated": "20230414203058"
+				"updated": "20260720201253"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "調整完以後需要手動重建索引。"
+					"Data": "調整完以後需要手動重建資源檔案索引。"
 				}
 			]
 		}

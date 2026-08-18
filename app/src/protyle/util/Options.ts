@@ -93,6 +93,7 @@ export class Options {
         toolbar: isMobile() ? [
             "block-ref",
             "a",
+            "ai",
             "|",
             "text",
             "strong",
@@ -107,6 +108,7 @@ export class Options {
         ] : [
             "block-ref",
             "a",
+            "ai",
             "|",
             "text",
             "strong",
@@ -116,13 +118,14 @@ export class Options {
             "mark",
             "sup",
             "sub",
-            "clear",
-            "|",
             "code",
             "kbd",
             "tag",
             "inline-math",
             "inline-memo",
+            "|",
+            "format-painter",
+            {name: "clear", icon: "iconEraser"},
         ],
         typewriterMode: false,
         upload: {

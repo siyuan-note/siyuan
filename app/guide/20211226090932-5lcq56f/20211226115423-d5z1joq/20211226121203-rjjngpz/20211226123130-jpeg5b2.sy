@@ -6,7 +6,7 @@
 		"id": "20211226123130-jpeg5b2",
 		"title": "書籤和標籤",
 		"type": "doc",
-		"updated": "20250115152010"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123145-atmx4pn",
-				"updated": "20250115152008"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123145-786ipku",
-				"updated": "20211226013955"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果你需要“收藏”內容塊，請通過塊標菜單打開屬性面板，然後就可以在屬性面板中設置書簽了。"
+					"Data": "如果你需要“收藏”內容區塊，請通過區塊標菜單打開屬性面板，然後就可以在屬性面板中設置書簽了。"
 				}
 			]
 		},
@@ -43,12 +43,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123145-3rhy0b6",
-				"updated": "20250115152008"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "所有收藏過的內容塊會在書簽分頁（ "
+					"Data": "所有收藏過的內容區塊會在書簽分頁（"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -66,16 +66,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ / "
+					"Data": " / "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌃3"
+					"TextMarkTextContent": "⌃"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​）中列出。如果要取消收藏，在該內容塊標識下拉菜單中選擇刪除即可。"
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "3"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​）中列出。如果要取消收藏，在該內容區塊標識下拉菜單中選擇刪除即可。"
 				}
 			]
 		},
@@ -85,7 +94,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123145-fgyfo0x",
-				"updated": "20250115152010"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -99,12 +108,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123145-nxlldt1",
-				"updated": "20211226013955"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "標簽用於在內容塊中對該塊進行標記。語法是通過一前一後兩個 "
+					"Data": "標簽用於在內容區塊中對該區塊進行標記。語法是通過一前一後兩個 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -131,12 +140,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123145-fvftrvl",
-				"updated": "20211228134927"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "標簽支援層級，這樣可以更方便地對內容塊進行分類整理。不同層級之間使用 "
+					"Data": "標簽支援層級，這樣可以更方便地對內容區塊進行分類整理。不同層級之間使用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -163,12 +172,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123145-ucilhpd",
-				"updated": "20250115152010"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "所有打過標簽的內容塊會在標簽分頁（"
+					"Data": "所有打過標簽的內容區塊會在標簽分頁（"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -186,16 +195,25 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ / "
+					"Data": " / "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌃4"
+					"TextMarkTextContent": "⌃"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​）中列出。如果需要取消標簽，在內容塊中刪掉該標簽即可。"
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "4"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​）中列出。如果需要取消標簽，在內容區塊中刪掉該標簽即可。"
 				}
 			]
 		},
@@ -301,7 +319,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;"
+					"TextMarkTextContent": "&lt;"
 				},
 				{
 					"Type": "NodeText",
@@ -310,7 +328,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026gt;"
+					"TextMarkTextContent": "&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -319,7 +337,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026amp;"
+					"TextMarkTextContent": "&amp;"
 				},
 				{
 					"Type": "NodeText",

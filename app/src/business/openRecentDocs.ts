@@ -5,6 +5,7 @@ import {escapeHtml} from "../util/escape";
 import {isWindow} from "../util/functions";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {getAllDocks} from "../layout/getAll";
+import {getDockHotkey} from "../layout/dock/hotkey";
 import {Dialog} from "../dialog";
 import {focusByRange} from "../protyle/util/selection";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -34,7 +35,9 @@ const renderRecentDocsContent = async (data: {
         const pathResponse = await fetchSyncPost("/api/filetree/getFullHPathByID", {
             id: data[0].rootID // 过滤后的第一个文档 ID
         });
-        switchPath = escapeHtml(pathResponse.data);
+        if (pathResponse.code === 0 && typeof pathResponse.data === "string") {
+            switchPath = escapeHtml(pathResponse.data);
+        }
     }
     let dockHtml = "";
     if (!isWindow()) {
@@ -55,7 +58,7 @@ const renderRecentDocsContent = async (data: {
                 dockHtml += `<li data-type="${item.type}" data-index="${docIndex}" class="b3-list-item${!switchPath ? " b3-list-item--focus" : ""}">
     <svg class="b3-list-item__graphic"><use xlink:href="#${item.icon}"></use></svg>
     <span class="b3-list-item__text">${item.title}</span>
-    <span class="b3-list-item__meta">${updateHotkeyTip(item.hotkey)}</span>
+    <span class="b3-list-item__meta">${updateHotkeyTip(getDockHotkey(item))}</span>
 </li>`;
                 if (!switchPath) {
                     switchPath = item.title;
@@ -95,7 +98,7 @@ export const openRecentDocs = () => {
             title: `<div class="fn__flex">
 <div class="fn__flex-center">${window.siyuan.languages.recentDocs}</div>
 <div class="fn__flex-1"></div>
-<input placeholder="${window.siyuan.languages.search}" class="b3-text-field fn__size200">
+<input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__size200">
 <span class="fn__space"></span>
 <div class="fn__flex-center">
     <select class="b3-select" id="recentDocsSort">

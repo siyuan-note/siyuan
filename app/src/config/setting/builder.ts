@@ -11,7 +11,12 @@ import {
     type SettingControl,
 } from "./control";
 import {registerSettingGroup} from "./group";
-import {registerSettingItem, type RegisterSettingItem, removeSettingTabItems} from "./item";
+import {
+    registerSettingItem,
+    type RegisterSettingItem,
+    removeSettingTabItems,
+    type SettingItemSearchAvailability,
+} from "./item";
 import {scanSettingTabSearch} from "../search/scan";
 import {buildSearchIndex, normalizeSearchText} from "../search/normalize";
 import {applySettingTabSearchVisibility, mountSettingTab} from "./mount";
@@ -43,6 +48,8 @@ type ControlSpecBase = {
     desc?: string;
     save?: SaveFn;
     afterMount?: (root: HTMLElement) => void | Promise<void>;
+    /** 搜索时动态判断条目是否可用 */
+    searchAvailability?: () => SettingItemSearchAvailability;
     /** 省略时按控件 id 从 config 读取；嵌套 / 派生项需显式传入 */
     readConfig?: () => unknown;
 };
@@ -134,6 +141,7 @@ type ButtonSpec = {
     desc?: string;
     label: string;
     icon: string;
+    keywords?: string[];
     afterMount?: (root: HTMLElement) => void | Promise<void>;
 };
 
@@ -244,6 +252,8 @@ class SettingGroupBuilder<TId extends string> {
             groupId: this.groupId,
             kind: "full",
             rowParts,
+            searchTitle: spec.title,
+            searchAvailability: spec.searchAvailability,
             readValue: (el) => control.readValue(el),
             save: spec.save ?? this.tab.defaultSave?.bind(null, id),
             afterMount,
@@ -328,7 +338,8 @@ class SettingGroupBuilder<TId extends string> {
     button(spec: ButtonSpec) {
         this.slot({
             key: `button_${spec.id}`,
-            keywords: [spec.title, spec.desc, spec.label].filter((s): s is string => Boolean(s)),
+            keywords: [spec.title, spec.desc, spec.label, ...(spec.keywords ?? [])]
+                .filter((s): s is string => Boolean(s)),
             html: () => genButtonRowHtml(spec.id, spec.title, spec.desc, spec.label, spec.icon),
             afterMount: spec.afterMount,
         });
@@ -419,13 +430,20 @@ export interface SettingTabSearchResult {
     matches: boolean;
     visibleItemIds?: Set<string>;
     visibleGroupIds?: Set<string>;
+    unavailableItems?: Map<string, SettingSearchUnavailableItem>;
 }
+
+export type SettingSearchUnavailableItem = {
+    title: string;
+    reason: string;
+};
 
 /** mount 时的搜索上下文（`keywords` 由壳层持有，与扫描结果在调用处拼装） */
 export interface SettingTabMountContext {
     keywords: string;
     visibleItemIds?: Set<string>;
     visibleGroupIds?: Set<string>;
+    unavailableItems?: Map<string, SettingSearchUnavailableItem>;
 }
 
 export type SettingTab = SettingTabShell & {
@@ -457,7 +475,7 @@ export class SettingBuilder {
         return {
             ...shell,
             mount: async (root, search, app, rebuild) => {
-                const {visibleItemIds, visibleGroupIds} = search ?? {};
+                const {visibleItemIds, visibleGroupIds, unavailableItems} = search ?? {};
                 if (rebuild) {
                     removeSettingTabItems(options.id);
                     registered = false;
@@ -469,7 +487,7 @@ export class SettingBuilder {
                     await afterMount?.(root, app);
                 }
                 if (visibleItemIds && visibleGroupIds) {
-                    applySettingTabSearchVisibility(root, visibleItemIds, visibleGroupIds);
+                    applySettingTabSearchVisibility(root, visibleItemIds, visibleGroupIds, unavailableItems);
                 }
             },
             scanSearch: (keywords) => {

@@ -4,11 +4,14 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {setEmpty} from "../mobile/util/setEmpty";
 import {fetchPost} from "./fetch";
 import {Constants} from "../constants";
-import {getDocDisplayName, setNoteBook} from "./pathName";
+import {getDocDisplayName, isEncryptedBox, setNoteBook} from "./pathName";
 import {getAllModels} from "../layout/getAll";
 import {setStorageVal} from "../protyle/util/compatibility";
 import type {Tab} from "../layout/Tab";
 import {setTitle} from "./processTitle";
+/// #if !MOBILE
+import {removeBlockPanelEditors} from "../block/panelRemoval";
+/// #endif
 
 export const reloadSync = (
     app: App,
@@ -30,29 +33,46 @@ export const reloadSync = (
             window.siyuan.mobile.popEditor.reload(false, updateReadonly);
         }
     }
+    window.siyuan.mobile.tabs?.removeRoots(data.removeRootIDs);
     if (document.getElementById("empty").classList.contains("fn__none") &&
         window.siyuan.mobile.editor && window.siyuan.mobile.editor.protyle) {
         if (data.removeRootIDs.includes(window.siyuan.mobile.editor.protyle.block.rootID)) {
-            setEmpty(app);
+            if (!window.siyuan.mobile.tabs) {
+                setEmpty(app);
+            }
         } else {
             window.siyuan.mobile.editor.reload(false, updateReadonly);
-            fetchPost("/api/block/getDocInfo", {
+            const docInfoParam: IObject = {
                 id: window.siyuan.mobile.editor.protyle.block.rootID
-            }, (response) => {
+            };
+            if (isEncryptedBox(window.siyuan.mobile.editor.protyle.notebookId)) {
+                docInfoParam.notebook = window.siyuan.mobile.editor.protyle.notebookId;
+            }
+            fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
                 setTitle(response.data.name);
                 window.siyuan.mobile.editor.protyle.title.setTitle(response.data.name, response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
             });
+            // 同步刷新移动端大纲，避免大纲与重载后的编辑器数据不一致
+            const outline = window.siyuan.mobile.docks.outline;
+            if (outline) {
+                outline.reload();
+            }
         }
     }
     setNoteBook(() => {
-        window.siyuan.mobile.docks.file.init(false);
+        window.siyuan.mobile.docks.file?.init(false);
     });
     /// #else
+    removeBlockPanelEditors({rootIDs: data.removeRootIDs});
     const allModels = getAllModels();
     const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
-        fetchPost("/api/block/getDocInfo", {
+        const docInfoParam: IObject = {
             id: rootID
-        }, (response) => {
+        };
+        if (protyle && isEncryptedBox(protyle.notebookId)) {
+            docInfoParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
             const titleEmpty = response.data.ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true";
             tab.updateTitle(getDocDisplayName(response.data.name, titleEmpty));
             if (protyle && protyle.title) {
@@ -62,9 +82,13 @@ export const reloadSync = (
     };
     allModels.editor.forEach(item => {
         if (data.upsertRootIDs.includes(item.editor.protyle.block.rootID)) {
-            fetchPost("/api/block/getDocInfo", {
+            const docInfoParam: IObject = {
                 id: item.editor.protyle.block.rootID,
-            }, (response) => {
+            };
+            if (isEncryptedBox(item.editor.protyle.notebookId)) {
+                docInfoParam.notebook = item.editor.protyle.notebookId;
+            }
+            fetchPost("/api/block/getDocInfo", docInfoParam, (response) => {
                 item.editor.protyle.wysiwyg.renderCustom(response.data.ial);
                 item.editor.reload(false, updateReadonly);
                 updateTitle(item.editor.protyle.block.rootID, item.parent, item.editor.protyle);
@@ -89,10 +113,22 @@ export const reloadSync = (
         if (item.type === "local" && data.removeRootIDs.includes(item.blockId)) {
             item.parent.parent.removeTab(item.parent.id, false, false);
         } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)) {
-            fetchPost("/api/outline/getDocOutline", {
+            const outlineParam: IObject = {
                 id: item.blockId,
                 preview: item.isPreview
-            }, response => {
+            };
+            // 解析大纲面板所属 box：按 blockId 在已打开的编辑器里查找
+            let notebookId: string;
+            allModels.editor.some(editorItem => {
+                if (editorItem.editor.protyle.block.rootID === item.blockId) {
+                    notebookId = editorItem.editor.protyle.notebookId;
+                    return true;
+                }
+            });
+            if (isEncryptedBox(notebookId)) {
+                outlineParam.notebook = notebookId;
+            }
+            fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                 item.update(response);
             });
             if (item.type === "local") {
@@ -101,6 +137,11 @@ export const reloadSync = (
         }
     });
     allModels.backlink.forEach(item => {
+        if (item.type === "bottom") {
+            item.markDirty();
+            item.refreshIfVisible();
+            return;
+        }
         if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
             item.parent.parent.removeTab(item.parent.id, false, false);
         } else {

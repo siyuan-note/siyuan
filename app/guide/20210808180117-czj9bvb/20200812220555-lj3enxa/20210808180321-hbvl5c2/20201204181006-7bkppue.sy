@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20260619110354"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -153,17 +153,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "（"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://docs.siyuan-note.club/zh-Hans/reference/template/sprig/",
-					"TextMarkTextContent": "中文版"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "）。"
+					"Data": "。"
 				}
 			]
 		},
@@ -1805,7 +1795,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210131162925-p51ey8q"
+				"id": "20210131162925-p51ey8q",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1819,7 +1810,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114172717-fu9oalt",
-				"updated": "20230820184212"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1829,7 +1820,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "社区集市仓库"
 				},
 				{

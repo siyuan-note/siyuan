@@ -2,13 +2,26 @@ import {hasClosestBlock, hasClosestByClassName} from "../../../util/hasClosest";
 import {Constants} from "../../../../constants";
 import {fetchSyncPost} from "../../../../util/fetch";
 import {focusBlock} from "../../../util/selection";
+import {getPendingBlockFocusMode} from "../../../util/focusRestore";
 import {avRender, genTabHeaderHTML, getGroupTitleHTML, updateSearch} from "../render";
 import {bindAvSearch} from "../search";
 import {processRender} from "../../../util/processCode";
 import {getPageSize} from "../groups";
 import {renderKanban} from "../kanban/render";
-import {initVirtualScroll} from "../virtualScroll";
-import {getRowHTML} from "../row";
+import {getAVSelectedItemPoints, getBodyVirtualData, initVirtualScroll, setAVData} from "../virtualScroll";
+import {getRowHTML, stickyRow, updateAVSelectionStatus, updateHeader} from "../row";
+import {
+    applyAVRenderContext,
+    beginAVRender,
+    failAVRender,
+    finishAVLocate,
+    getAVLocateParams,
+    isCurrentAVRender,
+    persistAVLocateView,
+    prepareAVLocate
+} from "../locate";
+import {getCardStyle} from "./style";
+import {setGroupFoldedStates} from "../groupFold";
 
 interface IIds {
     groupId: string,
@@ -37,23 +50,27 @@ interface ITableOptions {
 const getGalleryHTML = (data: IAVGallery, e: HTMLElement, virtualData: IAVVirtualData) => {
     let galleryHTML = "";
     // body
-    data.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
-        if (virtualData && virtualData.renderedEnd) {
+    data.cards.find((item: IAVGalleryItem, rowIndex: number) => {
+        if (virtualData && typeof virtualData.renderedEnd === "number") {
             if (rowIndex === 0) {
                 e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             }
-            if (rowIndex > virtualData.renderedEnd || rowIndex < virtualData.renderedStart) {
+            if (rowIndex > virtualData.renderedEnd) {
+                return true;
+            }
+            if (rowIndex < virtualData.renderedStart) {
                 return;
             }
         } else if (data.pageSize > 100 && rowIndex > 99) {
             e.setAttribute(Constants.ATTRIBUTE_V_SCROLL, "true");
             return true;
         }
-        galleryHTML += getRowHTML({data, row: item, rowIndex, type: "gallery"});
+        galleryHTML += getRowHTML({data, row: item, rowIndex: rowIndex + (virtualData?.rowOffset || 0), type: "gallery"});
+        return false;
     });
     galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.newRow}</div>`;
-    return `<div class="av__gallery${data.cardSize === 0 ? " av__gallery--small" : (data.cardSize === 2 ? " av__gallery--big" : "")}">
-    ${galleryHTML}
+    return `<div class="av__gallery${data.cardSize === 0 ? " av__gallery--small" : (data.cardSize === 2 ? " av__gallery--big" : "")}" style="${getCardStyle(data)}">
+    ${virtualData?.topSpacerHeight ? `<div class="av__spacer" style="height: ${virtualData.topSpacerHeight}px;"></div>` : ""}${galleryHTML}
 </div>
 <div class="av__gallery-load${data.cardCount > data.cards.length ? "" : " fn__none"}">
     <button class="b3-button av__button" data-type="av-load-more">
@@ -65,6 +82,7 @@ const getGalleryHTML = (data: IAVGallery, e: HTMLElement, virtualData: IAVVirtua
 };
 
 const renderGroupGallery = (options: ITableOptions) => {
+    setGroupFoldedStates(options.blockElement, options.data.view.groups);
     const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
     const isSearching = searchInputElement && document.activeElement === searchInputElement;
     const query = searchInputElement?.textContent || "";
@@ -73,12 +91,12 @@ const renderGroupGallery = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
             avBodyHTML += `${getGroupTitleHTML(group, group.cardCount)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${Lute.EscapeHTMLStr(group.groupValue.text?.content || "")}"${options.resetData.virtualData[group.id]?.locate ? ' data-av-locate-window="true"' : ""} class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.blockElement, options.resetData.virtualData[group.id])}</div>`;
         }
     });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
-    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled)}
+    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled, options.blockElement)}
     <div>
         ${avBodyHTML}
     </div>
@@ -91,15 +109,18 @@ const renderGroupGallery = (options: ITableOptions) => {
 };
 
 export const afterRenderGallery = (options: ITableOptions) => {
+    setAVData(options.blockElement, options.data);
     const view = options.data.view as IAVGallery;
+    options.blockElement.classList.toggle("av--display-empty-fields", view.displayEmptyFields);
     if (view.coverFrom === 1 || view.coverFrom === 3) {
         processRender(options.blockElement);
     }
     if (typeof options.resetData.oldOffset === "number") {
         options.protyle.contentElement.scrollTop = options.resetData.oldOffset;
     }
-    if (options.blockElement.getAttribute("data-need-focus") === "true") {
-        focusBlock(options.blockElement);
+    const pendingFocusMode = getPendingBlockFocusMode(options.blockElement.getAttribute("data-need-focus"));
+    if (pendingFocusMode) {
+        focusBlock(options.blockElement, undefined, true, pendingFocusMode === "zoom");
         options.blockElement.removeAttribute("data-need-focus");
     }
     options.blockElement.setAttribute("data-render", "true");
@@ -118,16 +139,23 @@ export const afterRenderGallery = (options: ITableOptions) => {
             itemElement.classList.add("av__gallery-item--select");
         }
     });
-    options.resetData.editIds.find(selectId => {
-        let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
-        if (!itemElement) {
-            itemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
-        }
-        if (itemElement) {
-            itemElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
-            itemElement.querySelector('.protyle-icon[data-type="av-gallery-edit"]').setAttribute("aria-label", window.siyuan.languages.hideEmptyFields);
-        }
-    });
+    // 重渲后恢复的选中态需刷新计数器显示
+    const restoredItem = options.blockElement.querySelector(".av__gallery-item--select") as HTMLElement;
+    if (restoredItem) {
+        updateHeader(restoredItem);
+    }
+    if (!view.displayEmptyFields) {
+        options.resetData.editIds.find(selectId => {
+            let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+            if (!itemElement) {
+                itemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+            }
+            if (itemElement) {
+                itemElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
+                itemElement.querySelector('.protyle-icon[data-type="av-gallery-edit"]')?.setAttribute("aria-label", window.siyuan.languages.hideEmptyFields);
+            }
+        });
+    }
     Object.keys(options.resetData.pageSizes).forEach((groupId) => {
         const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${groupId === "unGroup" ? "" : groupId}"]`) as HTMLElement;
         if (bodyElement) {
@@ -144,20 +172,35 @@ export const afterRenderGallery = (options: ITableOptions) => {
             }
         }
     }
-    options.blockElement.querySelector(".layout-tab-bar").scrollLeft = (options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft - 30;
+    const focusViewElement = options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement;
+    if (focusViewElement) {
+        options.blockElement.querySelector(".layout-tab-bar").scrollLeft = focusViewElement.offsetLeft - 30;
+    }
     if (options.cb) {
         options.cb(options.data);
     }
+    initVirtualScroll({
+        ...options,
+        selectedItemPoints: options.resetData.selectItemIds.map(item => ({
+            groupID: item.groupId,
+            itemID: item.fieldId,
+        })),
+    });
+    updateAVSelectionStatus(options.blockElement);
     if (!options.renderAll) {
+        finishAVLocate(options.blockElement, options.protyle, options.data);
         return;
     }
+    setTimeout(() => {
+        stickyRow(options.blockElement, options.protyle.contentElement, "top");
+    }, Constants.TIMEOUT_LOAD);
     bindAvSearch({
         blockElement: options.blockElement,
         query: options.resetData.query,
         isSearching: options.resetData.isSearching,
         onChange: () => updateSearch(options.blockElement, options.protyle),
     });
-    initVirtualScroll(options);
+    finishAVLocate(options.blockElement, options.protyle, options.data);
 };
 
 export const renderGallery = async (options: {
@@ -167,6 +210,7 @@ export const renderGallery = async (options: {
     renderAll: boolean,
     data?: IAV,
 }) => {
+    const renderToken = beginAVRender(options.blockElement);
     const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]');
     const editIds: IIds[] = [];
     options.blockElement.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
@@ -175,28 +219,28 @@ export const renderGallery = async (options: {
             fieldId: item.parentElement.getAttribute("data-id"),
         });
     });
-    const selectItemIds: IIds[] = [];
-    options.blockElement.querySelectorAll(".av__gallery-item--select").forEach(galleryItem => {
-        const fieldId = galleryItem.getAttribute("data-id");
-        if (fieldId) {
-            selectItemIds.push({
-                groupId: (hasClosestByClassName(galleryItem, "av__body") as HTMLElement).dataset.groupId || "",
-                fieldId
-            });
-        }
-    });
+    const selectItemIds: IIds[] = getAVSelectedItemPoints(options.blockElement).map(item => ({
+        groupId: item.groupID,
+        fieldId: item.itemID,
+    }));
     const pageSizes: { [key: string]: string } = {};
     const virtualData: { [key: string]: IAVVirtualData } = {};
     options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
         pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
+        if (item.dataset.avLocateWindow === "true") {
+            return;
+        }
         if (!item.querySelector(".av__gallery-item") || options.blockElement.getAttribute(Constants.ATTRIBUTE_V_SCROLL) !== "true") {
             return;
         }
-        virtualData[item.getAttribute("data-group-id") || "all"] = ({
-            renderedStart: parseInt(item.querySelector(".av__gallery-item").getAttribute("data-index")),
-            renderedEnd: parseInt(item.querySelector(".av__gallery-add").previousElementSibling.getAttribute("data-index")),
-            topSpacerHeight: item.querySelector(".av__spacer")?.clientHeight || 0,
-        });
+        // 守卫只保证至少 1 个 .av__gallery-item，但首行索引用 :not([data-type=ghost]) 过滤。
+        // body 内全是 ghost 占位行（插入动画进行中）时查询返回 null，需跳过避免解引用 null.getAttribute
+        const firstItem = item.querySelector(".av__gallery-item:not([data-type=ghost])") as HTMLElement;
+        if (!firstItem) {
+            return;
+        }
+        const firstItemIndex = parseInt(firstItem.getAttribute("data-index"));
+        virtualData[item.getAttribute("data-group-id") || "all"] = getBodyVirtualData(item, ".av__gallery-add", firstItemIndex);
     });
     const resetData = {
         isSearching: searchInputElement && document.activeElement === searchInputElement,
@@ -222,24 +266,44 @@ export const renderGallery = async (options: {
     let data: IAV = options.data;
     if (!data) {
         const avPageSize = getPageSize(options.blockElement);
+        const locateParams = getAVLocateParams(options.blockElement, !created && !snapshot);
+        const historical = !!created || !!snapshot;
         const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
             id: options.blockElement.getAttribute("data-av-id"),
             created,
             snapshot,
             pageSize: avPageSize.unGroupPageSize,
             groupPaging: avPageSize.groupPageSize,
-            viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
-            query: resetData.query.trim()
-        });
+            viewID: locateParams?.viewID || "",
+            ...(historical ? {carrierViewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || ""} : {}),
+            query: resetData.query.trim(),
+            blockID: options.blockElement.getAttribute("data-node-id"),
+            initialLayout: options.blockElement.getAttribute("data-av-type"),
+            targetItemID: locateParams?.targetItemID || "",
+            targetGroupID: locateParams?.targetGroupID || "",
+        }, undefined, false);
+        if (!isCurrentAVRender(options.blockElement, renderToken)) {
+            return;
+        }
+        if (response.code !== 0) {
+            failAVRender(options.blockElement, response);
+            return;
+        }
         data = response.data;
     }
+    if (!isCurrentAVRender(options.blockElement, renderToken)) {
+        return;
+    }
+    if (persistAVLocateView(options.blockElement, options.protyle, data)) {
+        return;
+    }
+    applyAVRenderContext(options.blockElement, data);
+    prepareAVLocate(options.blockElement, data, resetData);
     if (data.viewType === "table") {
-        options.blockElement.setAttribute("data-av-type", data.viewType);
         avRender(options.blockElement, options.protyle, options.cb, options.renderAll, data);
         return;
     }
     if (data.viewType === "kanban") {
-        options.blockElement.setAttribute("data-av-type", data.viewType);
         renderKanban({
             blockElement: options.blockElement,
             protyle: options.protyle,
@@ -264,9 +328,9 @@ export const renderGallery = async (options: {
     const bodyHTML = getGalleryHTML(view, options.blockElement, virtualData.all);
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
-    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled)}
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled, options.blockElement)}
     <div>
-        <div class="av__body" data-group-id="" data-page-size="${view.pageSize}">
+        <div class="av__body" data-group-id="" data-page-size="${view.pageSize}"${virtualData.all?.locate ? ' data-av-locate-window="true"' : ""}>
             ${bodyHTML}
         </div>
     </div>
@@ -276,6 +340,11 @@ export const renderGallery = async (options: {
         const bodyElement = options.blockElement.querySelector(".av__body") as HTMLElement;
         bodyElement.innerHTML = bodyHTML;
         bodyElement.dataset.pageSize = view.pageSize.toString();
+        if (virtualData.all?.locate) {
+            bodyElement.dataset.avLocateWindow = "true";
+        } else {
+            bodyElement.removeAttribute("data-av-locate-window");
+        }
     }
     afterRenderGallery({
         resetData,

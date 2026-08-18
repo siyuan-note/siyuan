@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,15 +17,56 @@
 package api
 
 import (
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	mcpclient "github.com/siyuan-note/siyuan/kernel/mcp/client"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+type aiEditorChatReq struct {
+	TaskID  string                  `json:"taskID"`
+	IDs     []string                `json:"ids"`
+	Input   string                  `json:"input"`
+	Action  string                  `json:"action"`
+	History []model.AIEditorMessage `json:"history"`
+}
+
+func resolveAIProvider(arg map[string]any) (*conf.Provider, error) {
+	if providerConfig, ok := arg["providerConfig"]; ok && providerConfig != nil {
+		data, err := gulu.JSON.MarshalJSON(providerConfig)
+		if err != nil {
+			return nil, err
+		}
+		provider := &conf.Provider{}
+		if err = gulu.JSON.UnmarshalJSON(data, provider); err != nil {
+			return nil, err
+		}
+		if strings.TrimSpace(provider.BaseURL) == "" {
+			return nil, errors.New("provider base URL is required")
+		}
+		ai := &conf.AI{Providers: []*conf.Provider{provider}}
+		ai.Normalize()
+		if len(ai.Providers) != 1 {
+			return nil, errors.New("invalid provider config")
+		}
+		return ai.Providers[0], nil
+	}
+
+	providerID, _ := arg["provider"].(string)
+	for _, provider := range model.Conf.AI.Providers {
+		if provider != nil && provider.ID == providerID {
+			return provider, nil
+		}
+	}
+	return nil, errors.New("provider not found")
+}
 
 func chatGPT(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -61,9 +102,157 @@ func chatGPTWithAction(c *gin.Context) {
 	ret.Data = model.ChatGPTWithAction(ids, action)
 }
 
-// testModel 测试 AI 模型可用性。用该 Provider 已保存的 baseURL/APIKey/超时，
+func aiEditorChat(c *gin.Context) {
+	if !model.Conf.AI.HasAnyProvider() {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(193)
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	req := &aiEditorChatReq{}
+	if err := c.ShouldBindJSON(req); nil != err {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = "invalid request: " + err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	stream, err := model.NewAIEditorChatStream(c.Request.Context(), req.IDs, req.Input, req.Action, req.History)
+	if nil != err {
+		ret := gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+	defer stream.Close()
+
+	flusher, ok := c.Writer.(http.Flusher)
+	if !ok {
+		return
+	}
+	c.Header("Content-Type", "text/event-stream")
+	c.Header("Cache-Control", "no-cache")
+	c.Header("Connection", "keep-alive")
+	c.Header("X-Accel-Buffering", "no")
+	if err = writeSSEEvent(c, "start", map[string]string{"taskID": req.TaskID}); nil != err {
+		return
+	}
+	flusher.Flush()
+
+	finishReason := "stop"
+	for {
+		response, recvErr := stream.Recv()
+		if nil != recvErr {
+			if model.IsAIEditorStreamDone(recvErr) {
+				writeSSEEvent(c, "done", map[string]string{"finishReason": finishReason})
+				flusher.Flush()
+				return
+			}
+			if nil != c.Request.Context().Err() {
+				return
+			}
+			logging.LogErrorf("receive AI editor stream failed: %s", recvErr)
+			writeSSEError(c, recvErr.Error())
+			flusher.Flush()
+			return
+		}
+		for _, choice := range response.Choices {
+			if "" != choice.Delta.ReasoningContent {
+				if err = writeSSEEvent(c, "reasoning", map[string]string{"token": choice.Delta.ReasoningContent}); nil != err {
+					return
+				}
+				flusher.Flush()
+			}
+			if "" != choice.Delta.Content {
+				if err = writeSSEEvent(c, "content", map[string]string{"token": choice.Delta.Content}); nil != err {
+					return
+				}
+				flusher.Flush()
+			}
+			if "" == choice.FinishReason {
+				continue
+			}
+			finishReason = string(choice.FinishReason)
+			if "length" == finishReason {
+				writeSSEEvent(c, "truncated", map[string]string{"message": model.Conf.Language(297)})
+				flusher.Flush()
+			}
+			writeSSEEvent(c, "done", map[string]string{"finishReason": finishReason})
+			flusher.Flush()
+			return
+		}
+	}
+}
+
+func lsAIEditorActions(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	actions, err := model.GetAIEditorActions()
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = actions
+}
+
+func saveAIEditorAction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id, name, action string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("id", &id, false, false),
+		util.BindJsonArg("name", &name, true, false),
+		util.BindJsonArg("action", &action, true, false),
+	) {
+		return
+	}
+
+	saved, err := model.SaveAIEditorAction(&model.AIEditorAction{
+		ID:     id,
+		Name:   name,
+		Action: action,
+	})
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = saved
+}
+
+func removeAIEditorAction(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var id string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("id", &id, true, true)) {
+		return
+	}
+	if err := model.RemoveAIEditorAction(id); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
+}
+
+// testModel 测试 AI 模型可用性。使用已保存的 Provider 或详情页草稿中的 baseURL/APIKey/超时，
 // 校验指定模型是否可用。优先通过 ListModels 拉取可用模型清单精确匹配，
-// 若该端点不可用则回退到极简 Chat Completion 验证连通性。
+// 若该端点不可用则按 Provider 协议回退到极简文本生成请求验证连通性。
 func testModel(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -73,29 +262,23 @@ func testModel(c *gin.Context) {
 		return
 	}
 
-	var providerID, modelName string
+	var modelName string
 	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("provider", &providerID, true, true),
 		util.BindJsonArg("model", &modelName, true, true),
 	) {
 		return
 	}
 
-	// 按 ID 查找 Provider（不限制启用状态，便于测试尚未启用的配置）
-	var provider *conf.Provider
-	for _, p := range model.Conf.AI.Providers {
-		if p != nil && p.ID == providerID {
-			provider = p
-			break
-		}
-	}
-	if nil == provider {
+	// 支持已保存的 Provider ID 和详情页尚未保存的草稿配置。
+	provider, err := resolveAIProvider(arg)
+	if err != nil {
 		ret.Code = -1
-		ret.Msg = "provider not found"
+		ret.Msg = err.Error()
 		return
 	}
 
-	available, matched, err := util.TestModel(provider.APIKey, provider.BaseURL, modelName, provider.RequestTimeout)
+	available, matched, err := util.TestModel(
+		provider.APIKey, provider.BaseURL, provider.Protocol, modelName, provider.RequestTimeout)
 	// 可用模型清单裁剪到前 50 条，避免响应体过大
 	if 50 < len(available) {
 		available = available[:50]
@@ -115,6 +298,72 @@ func testModel(c *gin.Context) {
 	ret.Data = result
 }
 
+// testEmbeddingModel 测试嵌入模型可用性。直接读取已保存的 Embedding 配置，
+// 发送极简文本 embedding 请求验证连通性与鉴权，并返回向量维度便于核对。
+func testEmbeddingModel(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	embedding := model.Conf.AI.Embedding
+	if nil == embedding || "" == embedding.APIKey || "" == embedding.BaseURL || "" == embedding.Name {
+		// 配置不完整时统一以 code=0 返回，把信息放在 data 中由前端控制展示，
+		// 避免返回 code=-1 触发统一错误提示且令前端按钮无法恢复
+		ret.Data = map[string]any{
+			"matched": false,
+			"msg":     "embedding model not configured",
+		}
+		return
+	}
+
+	matched, dims, err := util.TestEmbeddingModel(embedding.APIKey, embedding.BaseURL, embedding.Name, embedding.Dimensions, embedding.Timeout)
+	// 测试结果统一以 code=0 返回，具体成败信息放在 data 中由前端控制展示，
+	// 避免触发统一的错误消息提示导致按钮状态无法恢复
+	result := map[string]any{
+		"matched":    matched,
+		"dimensions": dims,
+	}
+	if nil != err {
+		result["msg"] = err.Error()
+		logging.LogErrorf("test embedding model [%s] failed: %s", embedding.Name, err)
+	}
+	ret.Data = result
+}
+
+// testRerankModel 测试重排模型可用性。直接读取已保存的 Rerank 配置，
+// 用极简 query+documents 发一次重排请求验证连通性与鉴权。
+func testRerankModel(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	rerank := model.Conf.AI.Rerank
+	if nil == rerank || "" == rerank.APIKey || "" == rerank.Endpoint || "" == rerank.Name {
+		// 配置不完整时统一以 code=0 返回，把信息放在 data 中由前端控制展示，
+		// 避免返回 code=-1 触发统一错误提示且令前端按钮无法恢复
+		ret.Data = map[string]any{
+			"matched": false,
+			"msg":     "rerank model not configured",
+		}
+		return
+	}
+
+	matched, err := util.TestRerankModel(util.RerankOptions{
+		APIKey:        rerank.APIKey,
+		Endpoint:      rerank.Endpoint,
+		Model:         rerank.Name,
+		RequestFormat: rerank.RequestFormat,
+		Timeout:       rerank.Timeout,
+	})
+	// 测试结果统一以 code=0 返回，具体成败信息放在 data 中由前端控制展示
+	result := map[string]any{
+		"matched": matched,
+	}
+	if nil != err {
+		result["msg"] = err.Error()
+		logging.LogErrorf("test rerank model [%s] failed: %s", rerank.Name, err)
+	}
+	ret.Data = result
+}
+
 // listModels 拉取指定 Provider 的可用模型清单（GET /v1/models），用于填充前端模型名称下拉框。
 // 不支持该端点的服务会返回错误，由前端回退为手动输入。
 func listModels(c *gin.Context) {
@@ -126,29 +375,27 @@ func listModels(c *gin.Context) {
 		return
 	}
 
-	var providerID string
-	if !util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("provider", &providerID, true, true),
-	) {
+	provider, err := resolveAIProvider(arg)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
 		return
 	}
 
-	var provider *conf.Provider
-	for _, p := range model.Conf.AI.Providers {
-		if p != nil && p.ID == providerID {
-			provider = p
-			break
+	metadata, err := util.ListAvailableModelsWithContext(provider.APIKey, provider.BaseURL, provider.RequestTimeout)
+	models := make([]string, 0, len(metadata))
+	contextLengths := map[string]int{}
+	for _, item := range metadata {
+		models = append(models, item.ID)
+		if 0 < item.ContextLength {
+			if current := contextLengths[item.ID]; current < item.ContextLength {
+				contextLengths[item.ID] = item.ContextLength
+			}
 		}
 	}
-	if nil == provider {
-		ret.Code = -1
-		ret.Msg = "provider not found"
-		return
-	}
-
-	models, err := util.ListAvailableModels(provider.APIKey, provider.BaseURL, provider.RequestTimeout)
 	result := map[string]any{
-		"models": models,
+		"models":         models,
+		"contextLengths": contextLengths,
 	}
 	if nil != err {
 		result["msg"] = err.Error()
@@ -161,6 +408,89 @@ func embeddingStat(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 	ret.Data = model.GetEmbeddingStat()
+}
+
+// mcpStatus 返回所有已配置 MCP server 的连接状态，供设置页轮询展示。
+func mcpStatus(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	ret.Data = mcpclient.MCPStatus()
+}
+
+// mcpEnvironmentVariables 返回当前内核拥有的环境变量名称，供 stdio MCP 设置选择。
+func mcpEnvironmentVariables(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	names, defaults := mcpclient.MCPEnvironmentVariables()
+	ret.Data = map[string]any{
+		"names":    names,
+		"defaults": defaults,
+	}
+}
+
+func mcpOAuthAuthorize(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	serverID, _ := arg["id"].(string)
+	if model.Conf.AI == nil || model.Conf.AI.MCP == nil {
+		ret.Code = -1
+		ret.Msg = "MCP server not found"
+		return
+	}
+	for _, server := range model.Conf.AI.MCP.Servers {
+		if server.ID == serverID && server.Enabled && server.Type == "http" {
+			mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers, []string{serverID}, []string{serverID})
+			return
+		}
+	}
+	ret.Code = -1
+	ret.Msg = "MCP server not found"
+}
+
+func mcpOAuthDisconnect(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	serverID, _ := arg["id"].(string)
+	if err := mcpclient.DisconnectMCPOAuth(serverID); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
+	if model.Conf.AI != nil && model.Conf.AI.MCP != nil {
+		mcpclient.ReconnectMCPAsync(model.Conf.AI.MCP.Servers, []string{serverID}, nil)
+	}
+}
+
+func mcpOAuthCallback(c *gin.Context) {
+	if !model.IsLocalRequest(c) {
+		c.String(http.StatusForbidden, "Forbidden")
+		return
+	}
+	c.Header("Cache-Control", "no-store")
+	c.Header("Referrer-Policy", "no-referrer")
+	c.Header("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; frame-ancestors 'none'")
+	callbackError := c.Query("error")
+	if err := mcpclient.CompleteMCPOAuth(c.Param("flowID"), c.Query("code"), c.Query("state"), callbackError, c.Query("iss")); err != nil {
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", util.RenderOAuthCallbackPage(
+			util.LangToBCP47(model.Conf.Lang), model.Conf.Language(327), model.Conf.Language(328), false))
+		return
+	}
+	if callbackError != "" {
+		c.Data(http.StatusOK, "text/html; charset=utf-8", util.RenderOAuthCallbackPage(
+			util.LangToBCP47(model.Conf.Lang), model.Conf.Language(327), model.Conf.Language(328), false))
+		return
+	}
+	c.Data(http.StatusOK, "text/html; charset=utf-8", util.RenderOAuthCallbackPage(
+		util.LangToBCP47(model.Conf.Lang), model.Conf.Language(325), model.Conf.Language(326), true))
 }
 
 // reindexEmbedding 清空嵌入向量表并触发后台索引器重新计算所有块，异步执行。

@@ -6,7 +6,7 @@
 		"id": "20201004184819-nj8ibyg",
 		"title": "在浏览器上使用",
 		"type": "doc",
-		"updated": "20221025093126"
+		"updated": "20260804193000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090909-6pyfjgx",
-				"updated": "20210501194730"
+				"updated": "20260804165001"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221025092410-jsrv6gc",
-				"updated": "20221025092711"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -70,7 +70,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 后就可以直接在浏览器上使用了，如果需要在局域网内使用，将 "
+					"Data": " ​ 后就可以直接在浏览器上使用了，如果需要在局域网内使用，将 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -244,6 +244,46 @@
 				{
 					"Type": "NodeText",
 					"Data": " 中可配置浏览器锁屏密码，留空表示不启用。这在开放网络（比如办公场所和公网）会比较有用，只有密码验证通过后才能进入工作空间。"
+				}
+			]
+		},
+		{
+			"ID": "20260804120001-oidclog",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804120001-oidclog",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC 登录"
+				}
+			]
+		},
+		{
+			"ID": "20260804190500-oidcrf1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190500-oidcrf1",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "有关提供商、回调地址、准入规则、多端登录、Docker 配置和排障的完整说明，请参阅 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190000-oidccn1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC 登录"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
 				}
 			]
 		}

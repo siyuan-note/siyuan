@@ -7,7 +7,7 @@
 		"id": "20240530101000-40hohog",
 		"title": "ブラウザ",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20260804193000"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-vn1tvf6",
 				"id": "20240530101000-yllodqo",
-				"updated": "20240530101000"
+				"updated": "20260804165003"
 			},
 			"Children": [
 				{
@@ -32,12 +32,12 @@
 			"Properties": {
 				"ID": "20240530101000-geiuqut",
 				"id": "20240530101000-jea0mtn",
-				"updated": "20240530101000"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "​ "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -73,7 +73,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ からブラウザで SiYuan を直接使用できます。LAN で使用する場合は、"
+					"Data": " ​ からブラウザで SiYuan を直接使用できます。LAN で使用する場合は、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -219,7 +219,7 @@
 			"Properties": {
 				"ID": "20240530101000-zvy840s",
 				"id": "20240530101000-b6ssy52",
-				"updated": "20240530101000"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -234,12 +234,12 @@
 			"Properties": {
 				"ID": "20240530101000-irzzx5o",
 				"id": "20240530101000-xf6aq6t",
-				"updated": "20240530101000"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "​ "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -257,7 +257,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ からブラウザ画面ロック用のパスワードを設定できます。空欄のままにするとロックは有効になりません。これは、オフィスや公衆ネットワークなどのオープンなネットワークで役に立ち、パスワード認証を通過した場合のみワークスペースにアクセスできます。"
+					"Data": " ​ からブラウザ画面ロック用のパスワードを設定できます。空欄のままにするとロックは有効になりません。これは、オフィスや公衆ネットワークなどのオープンなネットワークで役に立ち、パスワード認証を通過した場合のみワークスペースにアクセスできます。"
 				}
 			]
 		},
@@ -268,6 +268,46 @@
 				"ID": "20240530101000-83ekc6g",
 				"id": "20240530101000-4ocdywp"
 			}
+		},
+		{
+			"ID": "20260804120301-oidclog",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804120301-oidclog",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC ログイン"
+				}
+			]
+		},
+		{
+			"ID": "20260804190503-oidcrf4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190503-oidcrf4",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プロバイダー、コールバック URL、クレームルール、各クライアントでのログイン、Docker 設定、トラブルシューティングについては、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260804190003-oidcja1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "OIDC ログイン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
+				}
+			]
 		}
 	]
 }

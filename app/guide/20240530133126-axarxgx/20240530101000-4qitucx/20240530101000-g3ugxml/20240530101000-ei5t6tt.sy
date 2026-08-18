@@ -3,21 +3,19 @@
 	"Spec": "2",
 	"Type": "NodeDocument",
 	"Properties": {
-		"ID": "20240530101000-9hsymiv",
 		"id": "20240530101000-ei5t6tt",
 		"title": "人工知能",
 		"type": "doc",
-		"updated": "20250115153833"
+		"updated": "20260813120000"
 	},
 	"Children": [
 		{
-			"ID": "20240530101000-btov157",
+			"ID": "20260804170000-bsl73zy",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-noa17yw",
-				"id": "20240530101000-btov157",
-				"updated": "20240530101000"
+				"id": "20260804170000-bsl73zy",
+				"updated": "20260804180000"
 			},
 			"Children": [
 				{
@@ -27,118 +25,84 @@
 			]
 		},
 		{
-			"ID": "20240530101000-7kshm3d",
+			"ID": "20260804170001-0a6ujuy",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-nvrrjbc",
-				"id": "20240530101000-7kshm3d",
-				"updated": "20240530101000"
+				"id": "20260804170001-0a6ujuy",
+				"updated": "20260804180000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": " "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://openai.com/",
-					"TextMarkTextContent": "OpenAI"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " の Chat API を通じたテキスト対話をサポートしています。"
+					"Data": "SiYuan では、AI 編集、AI エージェント、意味検索を利用できます。使用する前に、用途に応じた API プロバイダーとモデルを設定してください。"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-78iawbc",
+			"ID": "20260804170002-b4z0hyu",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-9rofw67",
-				"id": "20240530101000-78iawbc",
-				"updated": "20250115153833"
+				"id": "20260804170002-b4z0hyu",
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "使い方"
+					"Data": "AI 編集"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-ag9sb0b",
+			"ID": "20260804170003-20kw3md",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170003-20kw3md",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AI 編集は、文章の続きを書く、要約する、翻訳する、推敲するなど、指定したテキストを処理します。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170004-pwxfq0o",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"ID": "20240530101000-1kqjrxs",
-				"id": "20240530101000-ag9sb0b",
-				"updated": "20250115153833"
+				"id": "20260804170004-pwxfq0o",
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
-					"ID": "20240530101000-vy4hzw5",
+					"ID": "20260804170005-eemd2o6",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
 						"Delimiter": 46,
+						"Padding": 3,
 						"Marker": "MS4=",
 						"Num": 1
 					},
 					"Properties": {
-						"ID": "20240530101000-14wce04",
-						"id": "20240530101000-vy4hzw5",
-						"updated": "20240530101000"
+						"id": "20260804170005-eemd2o6",
+						"updated": "20260804180000"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-obqaeh6",
+							"ID": "20260804170006-ycljsm4",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-jadulwq",
-								"id": "20240530101000-obqaeh6",
-								"updated": "20240530101000"
+								"id": "20260804170006-ycljsm4",
+								"updated": "20260804180000"
 							},
 							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "OpenAI アカウントを登録して API キーを作成します"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20240530101000-vnybgmg",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
-					},
-					"Properties": {
-						"ID": "20240530101000-jjn6r2u",
-						"id": "20240530101000-vnybgmg",
-						"updated": "20240530101000"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-pr2uplh",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-n02ui98",
-								"id": "20240530101000-pr2uplh",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
@@ -146,97 +110,128 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "AI"
+									"TextMarkTextContent": "AI を呼び出す"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ で設定を行います"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "API プロバイダー"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で API プロバイダーとモデルを設定して有効にします"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-qtjo1bc",
+					"ID": "20260804170007-p50zns2",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
 						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260804170007-p50zns2",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170008-mpgjfmj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170008-mpgjfmj",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "AI を呼び出す"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エディタ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " でエディターが使用するモデルを選択します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170009-bubnkd1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 3,
+						"Delimiter": 46,
+						"Padding": 3,
 						"Marker": "My4=",
 						"Num": 3
 					},
 					"Properties": {
-						"ID": "20240530101000-omszf90",
-						"id": "20240530101000-qtjo1bc",
-						"updated": "20250115153833"
+						"id": "20260804170009-bubnkd1",
+						"updated": "20260813120000"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-ntri2px",
+							"ID": "20260804170010-5uzk823",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20240530101000-ntri2px",
-								"updated": "20250115153833"
+								"id": "20260804170010-5uzk823",
+								"updated": "20260813120000"
 							},
 							"Children": [
 								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "/AIライティング"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ でダイアログボックスを呼び出し、質問や要求を入力して確認します"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20240530101000-p5zjqep",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "NC4=",
-						"Num": 4
-					},
-					"Properties": {
-						"ID": "20240530101000-et4k52w",
-						"id": "20240530101000-p5zjqep",
-						"updated": "20240530101000"
-					},
-					"Children": [
-						{
-							"ID": "20240530101000-hjqke28",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"ID": "20240530101000-4awt4up",
-								"id": "20240530101000-hjqke28",
-								"updated": "20240530101000"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "ブロックメニューの "
+									"Data": " でライティングダイアログを開きます。AI 編集では、テキストを選択して選択ツールバーの "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "AI"
+									"TextMarkTextContent": "AI Edit"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を通じてさらに多くの操作を実行できます"
+									"Data": " を使うか、ブロックメニューから AI Edit を選びます。結果はパネルにストリーミング表示され、置換、挿入、コピー、再試行、停止、破棄ができます。置換できるのは、単一ブロック内の対応した選択範囲だけです。ブロックをまたぐ選択範囲、複雑な元データ、生成中に変更された元データには、引き続き挿入を使用できます。"
 								}
 							]
 						}
@@ -245,109 +240,243 @@
 			]
 		},
 		{
-			"ID": "20240530101000-qklo4ox",
+			"ID": "20260804170011-l78fgec",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-9jssmuw",
-				"id": "20240530101000-qklo4ox",
-				"updated": "20240530101000"
+				"id": "20260804170011-l78fgec",
+				"updated": "20260804180000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "AI エージェント"
+				}
+			]
+		},
+		{
+			"ID": "20260804170012-a3xh59b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170012-a3xh59b",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AI エージェントは、現在のエディターコンテキストとツールを組み合わせ、ナレッジベースの検索、整理、作成、変更を行います。使用方法については "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意事項"
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "AI エージェント",
+					"TextMarkBlockRefID": "20260804171006-aiagt04",
+					"TextMarkBlockRefSubtype": "s"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": " を参照してください。"
 				}
 			]
 		},
 		{
-			"ID": "20240530101000-agtro2w",
-			"Type": "NodeList",
-			"ListData": {},
+			"ID": "20260804170013-8jjszzo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
 			"Properties": {
-				"ID": "20240530101000-j0lewas",
-				"id": "20240530101000-agtro2w",
-				"updated": "20240530101000"
+				"id": "20260804170013-8jjszzo",
+				"updated": "20260804180000"
 			},
 			"Children": [
 				{
-					"ID": "20240530101000-7mvxcr7",
+					"Type": "NodeText",
+					"Data": "意味検索"
+				}
+			]
+		},
+		{
+			"ID": "20260804170014-lqjf1yr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170014-lqjf1yr",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "意味検索はテキストの意味に基づいて関連コンテンツを検索し、表現が異なっていても同じ話題を扱うノートを見つけられます。設定と使用方法については "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "意味検索",
+					"TextMarkBlockRefID": "20260804171007-semnt04",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804233230-mcpjah1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804233230-mcpjah1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP サービス"
+				}
+			]
+		},
+		{
+			"ID": "20260804233231-mcpjap1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804233231-mcpjap1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP サービスを使用すると、MCP 対応クライアントから標準プロトコル経由で SiYuan が提供するツールを呼び出せます。設定方法と使用方法については、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "MCP サービス",
+					"TextMarkBlockRefID": "20260804223003-mcpsv04",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804170015-wj99wzy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170015-wj99wzy",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20260804170016-oix5luw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170016-oix5luw",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170017-5udrpl6",
 					"Type": "NodeListItem",
 					"ListData": {
+						"Tight": true,
 						"BulletChar": 42,
-						"Marker": "Kg=="
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
 					},
 					"Properties": {
-						"ID": "20240530101000-2qe774o",
-						"id": "20240530101000-7mvxcr7",
-						"updated": "20240530101000"
+						"id": "20260804170017-5udrpl6",
+						"updated": "20260804180000"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-tpk7vd2",
+							"ID": "20260804170018-hzeva3m",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-k0zlxbg",
-								"id": "20240530101000-tpk7vd2",
-								"updated": "20240530101000"
+								"id": "20260804170018-hzeva3m",
+								"updated": "20260804180000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "この機能は関連するテキストを OpenAI に送信します"
+									"Data": "ドキュメントのテキスト、画像、検索内容が設定済みの API プロバイダーに送信される場合があります"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20240530101000-2crq67r",
+					"ID": "20260804170019-k89bugi",
 					"Type": "NodeListItem",
 					"ListData": {
+						"Tight": true,
 						"BulletChar": 42,
-						"Marker": "Kg=="
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
 					},
 					"Properties": {
-						"ID": "20240530101000-vtgzi5k",
-						"id": "20240530101000-2crq67r",
-						"updated": "20240530101000"
+						"id": "20260804170019-k89bugi",
+						"updated": "20260804180000"
 					},
 					"Children": [
 						{
-							"ID": "20240530101000-zsn95lz",
+							"ID": "20260804170020-82xi9at",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-niw2moo",
-								"id": "20240530101000-zsn95lz",
-								"updated": "20240530101000"
+								"id": "20260804170020-82xi9at",
+								"updated": "20260804180000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "OpenAI API の呼び出しには使用料がかかります"
+									"Data": "外部 API の呼び出しに料金が発生する場合があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170021-buh2f6f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170021-buh2f6f",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170022-j2ehqkn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170022-j2ehqkn",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "API キーを安全に管理し、AI が生成した変更を適用する前に対象と内容を確認してください"
 								}
 							]
 						}
 					]
 				}
 			]
-		},
-		{
-			"ID": "20240530101000-kpjptzi",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-pqeyvgu",
-				"id": "20240530101000-kpjptzi"
-			}
 		}
 	]
 }

@@ -3,8 +3,9 @@ import {Tab} from "../layout/Tab";
 import {Protyle} from "../protyle";
 import {genSearch} from "./util";
 import {setPanelFocus} from "../layout/util";
-import {App} from "../index";
+import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
+import {cancelSearchRequest} from "./request";
 
 export class Search extends Model {
     public element: HTMLElement;
@@ -47,5 +48,11 @@ export class Search extends Model {
         inputElement.value = text;
         inputElement.select();
         inputElement.dispatchEvent(new CustomEvent("input"));
+    }
+
+    public destroy() {
+        cancelSearchRequest(this.element);
+        this.editors.edit.destroy();
+        this.editors.unRefEdit.destroy();
     }
 }

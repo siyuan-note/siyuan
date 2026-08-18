@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/fs"
 	"path/filepath"
@@ -45,6 +46,9 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+// databaseIndexDataLock 用于避免索引任务读取正在被替换或删除的笔记本目录。
+var databaseIndexDataLock sync.Mutex
 
 func UpsertIndexes(paths []string) {
 	var syFiles []string
@@ -128,21 +132,41 @@ func (box *Box) Index() {
 }
 
 func removeBoxRefs(boxID string) {
+	if IsEncryptedBox(boxID) {
+		if err := AcquireEncryptedBoxOperation(boxID); err != nil {
+			return
+		}
+		defer ReleaseEncryptedBoxOperation(boxID)
+	}
 	sql.DeleteBoxRefsQueue(boxID)
 }
 
 func indexBox(boxID string) {
+	encrypted := IsEncryptedBox(boxID)
+	if encrypted {
+		if err := AcquireEncryptedBoxOperation(boxID); err != nil {
+			logging.LogWarnf("skip indexing encrypted notebook [%s]: %s", boxID, err)
+			return
+		}
+		defer ReleaseEncryptedBoxOperation(boxID)
+		if !isEncryptedBoxMounted(boxID) {
+			return
+		}
+	}
+
+	databaseIndexDataLock.Lock()
+	defer databaseIndexDataLock.Unlock()
+
 	box := Conf.Box(boxID)
 	if nil == box {
 		return
 	}
+	// 全量索引使用纯 INSERT，开始前必须清理该笔记本的旧数据，避免重复任务叠加相同行。
+	sql.DeleteBoxQueue(boxID)
 
-	util.SetBootDetails("Listing files...")
+	util.SetBootDetails(Conf.Language(303))
 	files := box.ListFiles("/")
-	boxLen := len(Conf.GetOpenedBoxes())
-	if 1 > boxLen {
-		boxLen = 1
-	}
+	boxLen := max(1, len(Conf.GetOpenedBoxes()))
 	bootProgressPart := int32(30.0 / float64(boxLen) / float64(len(files)))
 
 	start := time.Now()
@@ -184,7 +208,7 @@ func indexBox(boxID string) {
 		avNodes = append(avNodes, tree.Root.ChildrenByType(ast.NodeAttributeView)...)
 		lock.Unlock()
 
-		cache.PutDocIAL(file.path, docIAL)
+		cache.PutDocIALInBox(file.path, tree.Box, docIAL)
 		treenode.IndexBlockTree(tree)
 		sql.IndexTreeQueue(tree)
 		util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(92), util.ShortPathForBootingDisplay(tree.Path)))
@@ -223,33 +247,62 @@ func indexBox(boxID string) {
 }
 
 func IndexRefs() {
+	boxes := Conf.GetOpenedBoxes()
+	boxIDs := make([]string, 0, len(boxes))
+	for _, box := range boxes {
+		boxIDs = append(boxIDs, box.ID)
+	}
+	release, err := AcquireEncryptedBoxOperations(context.Background(), boxIDs)
+	if err != nil {
+		logging.LogWarnf("skip resolving references while an encrypted notebook is unavailable: %s", err)
+		return
+	}
+	defer release()
+
+	databaseIndexDataLock.Lock()
+	defer databaseIndexDataLock.Unlock()
+
 	start := time.Now()
-	util.SetBootDetails("Resolving refs...")
+	util.SetBootDetails(Conf.Language(304))
 	util.PushStatusBar(Conf.Language(54))
-	util.SetBootDetails("Indexing refs...")
+	util.SetBootDetails(Conf.Language(305))
 
 	var defBlockIDs []string
+	defBlockBoxes := map[string]string{} // defBlockID -> boxID，加密笔记本下需按 box 路由后续加载
 	luteEngine := util.NewLute()
-	boxes := Conf.GetOpenedBoxes()
 	for _, box := range boxes {
+		encryptedBox := IsEncryptedBox(box.ID)
 		pages := pagedPaths(filepath.Join(util.DataDir, box.ID), 32)
 		for _, paths := range pages {
 			for _, treeAbsPath := range paths {
-				data, readErr := filelock.ReadFile(treeAbsPath)
-				if nil != readErr {
-					logging.LogWarnf("get data [path=%s] failed: %s", treeAbsPath, readErr)
-					continue
-				}
-
-				if !bytes.Contains(data, []byte("TextMarkBlockRefID")) && !bytes.Contains(data, []byte("TextMarkFileAnnotationRefID")) {
-					continue
-				}
-
 				p := filepath.ToSlash(strings.TrimPrefix(treeAbsPath, filepath.Join(util.DataDir, box.ID)))
-				tree, parseErr := filesys.LoadTreeByData(data, box.ID, p, luteEngine)
-				if nil != parseErr {
-					logging.LogWarnf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
-					continue
+
+				// 加密笔记本的 .sy 是密文，必须走 filesys.LoadTree 透明解密；无法用 bytes.Contains 预检
+				var tree *parse.Tree
+				if encryptedBox {
+					loadTree, loadErr := filesys.LoadTree(box.ID, p, luteEngine)
+					if nil != loadErr {
+						logging.LogWarnf("load encrypted box [%s] tree [%s] failed: %s", box.ID, treeAbsPath, loadErr)
+						continue
+					}
+					tree = loadTree
+				} else {
+					data, readErr := filelock.ReadFile(treeAbsPath)
+					if nil != readErr {
+						logging.LogWarnf("get data [path=%s] failed: %s", treeAbsPath, readErr)
+						continue
+					}
+
+					if !bytes.Contains(data, []byte("TextMarkBlockRefID")) && !bytes.Contains(data, []byte("TextMarkFileAnnotationRefID")) {
+						continue
+					}
+
+					parseTree, parseErr := filesys.LoadTreeByData(data, box.ID, p, luteEngine)
+					if nil != parseErr {
+						logging.LogWarnf("parse json to tree [%s] failed: %s", treeAbsPath, parseErr)
+						continue
+					}
+					tree = parseTree
 				}
 
 				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -259,6 +312,7 @@ func IndexRefs() {
 
 					if treenode.IsBlockRef(n) || treenode.IsFileAnnotationRef(n) {
 						defBlockIDs = append(defBlockIDs, tree.Root.ID)
+						defBlockBoxes[tree.Root.ID] = box.ID
 					}
 					return ast.WalkContinue
 				})
@@ -274,12 +328,19 @@ func IndexRefs() {
 		bootProgressPart := int32(10.0 / float64(size))
 
 		for _, defBlockID := range defBlockIDs {
-			defTree, loadErr := LoadTreeByBlockID(defBlockID)
+			// 加密笔记本的 defBlock 在加密 blocktree db，需按 box 路由加载
+			var defTree *parse.Tree
+			var loadErr error
+			if boxID, ok := defBlockBoxes[defBlockID]; ok && IsEncryptedBox(boxID) {
+				defTree, loadErr = loadTreeByBlockIDInBox(defBlockID, boxID)
+			} else {
+				defTree, loadErr = LoadTreeByBlockID(defBlockID)
+			}
 			if nil != loadErr {
 				continue
 			}
 
-			util.IncBootProgress(bootProgressPart, "Indexing ref "+defTree.ID)
+			util.IncBootProgress(bootProgressPart, fmt.Sprintf(Conf.Language(306), defTree.ID))
 			sql.UpdateRefsTreeQueue(defTree)
 			if 1 < i && 0 == i%64 {
 				util.PushStatusBar(fmt.Sprintf(Conf.Language(55), i))
@@ -303,6 +364,9 @@ func autoIndexEmbedBlock() {
 	defer indexEmbedBlockLock.Unlock()
 
 	embedBlocks := sql.QueryEmptyContentEmbedBlocks()
+	for _, boxID := range treenode.GetOpenedEncryptedBoxIDs() {
+		embedBlocks = append(embedBlocks, sql.QueryEmptyContentEmbedBlocksInBox(boxID)...)
+	}
 	for i, embedBlock := range embedBlocks {
 		markdown := strings.TrimSpace(embedBlock.Markdown)
 		markdown = strings.TrimPrefix(markdown, "{{")
@@ -324,7 +388,12 @@ func autoIndexEmbedBlock() {
 			continue
 		}
 
-		queryResultBlocks := sql.SelectBlocksRawStmtNoParse(stmt, 102400)
+		var queryResultBlocks []*sql.Block
+		if IsEncryptedBox(embedBlock.Box) {
+			queryResultBlocks = sql.SelectBlocksRawStmtNoParseInBox(stmt, 102400, embedBlock.Box)
+		} else {
+			queryResultBlocks = sql.SelectBlocksRawStmtNoParse(stmt, 102400)
+		}
 		for _, block := range queryResultBlocks {
 			embedBlock.Content += block.Content
 		}
@@ -339,8 +408,12 @@ func autoIndexEmbedBlock() {
 	}
 }
 
-func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBlock) {
-	embedBlock := sql.GetBlock(embedBlockID)
+func updateEmbedBlockContent(embedBlockID string, queryResultBlocks []*EmbedBlock, boxIDs ...string) {
+	boxID := ""
+	if len(boxIDs) > 0 {
+		boxID = boxIDs[0]
+	}
+	embedBlock := sql.GetBlockInBox(embedBlockID, boxID)
 	if nil == embedBlock {
 		return
 	}

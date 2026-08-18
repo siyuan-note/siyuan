@@ -6,7 +6,7 @@
 		"id": "20260614104204-staofnm",
 		"title": "Network Proxy",
 		"type": "doc",
-		"updated": "20260614104245"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104245-1vghukz",
-				"updated": "20260614104245"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -58,12 +58,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614104245-ubfypqu",
-				"updated": "20260614104245"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Configure in [Settings - App - Network Proxy]:"
+					"Data": "Configure in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "App"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "General"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Network Proxy"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
 				}
 			]
 		},

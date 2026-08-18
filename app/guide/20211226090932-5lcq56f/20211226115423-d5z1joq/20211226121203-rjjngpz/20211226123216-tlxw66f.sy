@@ -6,7 +6,7 @@
 		"id": "20211226123216-tlxw66f",
 		"title": "視窗和分頁",
 		"type": "doc",
-		"updated": "20260613204621"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613204619-x6o27tc",
-				"updated": "20260613204619"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -29,22 +29,37 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613204619-lzdgxda",
-				"updated": "20260613204619"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源支援多視窗和多分頁，方便進行文件編輯和檢視。"
+					"Data": "思源在桌面端和行動端均支援多分頁。桌面端還支援分畫面和多視窗，行動端則提供適合觸控操作的分頁概覽。"
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-3a8f750",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260809170000-3a8f750",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "桌面端"
 				}
 			]
 		},
 		{
 			"ID": "20260613204619-fm69hhx",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204619-fm69hhx",
-				"updated": "20260613204619"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -59,7 +74,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204619-avdhx8g",
-				"updated": "20260613204619"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -104,7 +119,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-dgvepju",
-						"updated": "20260613204619"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -112,26 +127,44 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-z9ce3ch",
-								"updated": "20260613204619"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "關閉"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：右鍵分頁選擇「關閉」，或使用快捷鍵 "
+									"Data": "關閉：右鍵分頁選擇「關閉」，或使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+W"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "W"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "W"
 								}
 							]
 						}
@@ -146,7 +179,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-sq6chxr",
-						"updated": "20260613204619"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -154,26 +187,66 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-j0j2sby",
-								"updated": "20260613204619"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "恢復"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：使用 "
+									"Data": "恢復：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Shift+T"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 重新打開最近關閉的分頁"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "T"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "T"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 可重新開啟最近關閉的分頁"
 								}
 							]
 						}
@@ -188,7 +261,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-cs620vb",
-						"updated": "20260613204619"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -196,44 +269,156 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-t85dnxq",
-								"updated": "20260613204619"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "切換"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "："
+									"Data": "切換：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Shift+["
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
+									"Data": "+"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Shift+]"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 切換到上一個/下一個分頁，"
+									"Data": "+"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+1~9"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "["
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 跳轉到指定分頁"
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 切換到上一個分頁，使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 切換到下一個分頁；使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "1-9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "1-9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 跳轉到第 1 至第 9 個分頁"
 								}
 							]
 						}
@@ -277,10 +462,10 @@
 		{
 			"ID": "20260613204619-zxxpmfp",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204619-zxxpmfp",
-				"updated": "20260613204619"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -309,7 +494,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204619-uc4u28l",
-				"updated": "20260613204619"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -387,7 +572,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-v0p5kx2",
-						"updated": "20260613204619"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -395,7 +580,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-84luntq",
-								"updated": "20260613204619"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -405,7 +590,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：右鍵分頁選擇「取消分畫面」，或在設定-快捷鍵中為取消分畫面設定快捷鍵"
+									"Data": "：右鍵分頁選擇「取消分畫面」，或在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "快捷鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 中為取消分畫面設定快捷鍵"
 								}
 							]
 						}
@@ -428,7 +631,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-tj1jzbr",
-								"updated": "20260613204619"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -438,7 +641,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：開啟的所有分頁是即時同步內容的。同一份文件在多分頁中編輯儲存後，其他分頁會自動同步最新內容，避免髒資料覆蓋。除了內容同步，關聯渲染也會同步更新，內容塊預覽和關係圖即時更新"
+									"Data": "：開啟的所有分頁是即時同步內容的。同一份文件在多分頁中編輯儲存後，其他分頁會自動同步最新內容，避免髒資料覆蓋。除了內容同步，關聯渲染也會同步更新，內容區塊預覽和關係圖即時更新"
 								}
 							]
 						}
@@ -449,10 +652,10 @@
 		{
 			"ID": "20260613204619-deweyk0",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204619-deweyk0",
-				"updated": "20260613204619"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -541,10 +744,10 @@
 		{
 			"ID": "20260613204619-dyapikx",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204619-dyapikx",
-				"updated": "20260613204621"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -559,7 +762,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204619-y78l7pj",
-				"updated": "20260613204619"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -604,7 +807,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-baro1m1",
-						"updated": "20260613204619"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -612,26 +815,48 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-05nm3h1",
-								"updated": "20260613204619"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "最近的文件"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：透過 "
+									"Data": "最近的文件：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+E"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 打開最近文件列表，快速定位最近打開的文件"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "E"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "E"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 開啟最近文件列表"
 								}
 							]
 						}
@@ -679,7 +904,7 @@
 					},
 					"Properties": {
 						"id": "20260613204619-bvod7rf",
-						"updated": "20260613204619"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -687,26 +912,200 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204619-js52gyc",
-								"updated": "20260613204619"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "分頁切換"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：透過 "
+									"Data": "分頁切換：使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Tab"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 跳轉到下一個編輯分頁"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌃"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 切換到下一個編輯分頁"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-c8ab2a7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260809170000-c8ab2a7",
+				"updated": "20260810212846"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "行動端"
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-5ab3282",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260809170000-5ab3282",
+				"updated": "20260810212846"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "行動端同樣支援多分頁。點擊螢幕頂部的分頁按鈕可開啟分頁概覽。"
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-c2c9721",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260809170000-c2c9721",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"ID": "20260809170000-fcf539e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-fcf539e",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-74bdfbb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-74bdfbb",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "切換：在概覽中點擊分頁即可切換"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260809170000-b459399",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-b459399",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-1dbeee7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-1dbeee7",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "導航：使用概覽中的後退和前進按鈕在瀏覽記錄間跳轉"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260809170000-6ee1fc1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-6ee1fc1",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-0e3e0fe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-0e3e0fe",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "新建：使用概覽中的新建文件按鈕建立並開啟文件"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260809170000-75a2ef0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-75a2ef0",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-f7d192c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-f7d192c",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "關閉：可在分頁卡片上關閉單個分頁，也可透過選單關閉全部分頁"
 								}
 							]
 						}

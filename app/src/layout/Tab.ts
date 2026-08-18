@@ -3,7 +3,7 @@ import {genUUID} from "../util/genID";
 import type {Model} from "./Model";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
-import {escapeHtml} from "../util/escape";
+import {escapeHtml, escapeAttr} from "../util/escape";
 import {unicode2Emoji} from "../emoji";
 import {hideTooltip} from "../dialog/tooltip";
 /// #if !BROWSER
@@ -12,6 +12,48 @@ import {ipcRenderer} from "electron";
 /// #endif
 import {layoutToJSON, saveLayout} from "./util";
 import {setTitle} from "../util/processTitle";
+import {clearTabDragPreview} from "./tabDrag";
+
+type TTabHeaderOptions = Pick<ITab, "title" | "icon" | "docIcon"> & {
+    id?: string,
+    draggable?: boolean,
+    focus?: boolean,
+    pin?: boolean,
+    unupdate?: boolean,
+};
+
+export const createTabHeaderElement = (options: TTabHeaderOptions) => {
+    const element = document.createElement("li");
+    element.setAttribute("data-type", "tab-header");
+    if (options.draggable) {
+        element.setAttribute("draggable", "true");
+    }
+    if (options.id) {
+        element.setAttribute("data-id", options.id);
+    }
+    element.classList.add("item");
+    if (options.focus) {
+        element.classList.add("item--focus");
+    }
+    if (options.pin) {
+        element.classList.add("item--pin");
+    }
+    if (options.unupdate) {
+        element.classList.add("item--unupdate");
+    }
+    let iconHTML = "";
+    if (options.icon) {
+        iconHTML = `<svg class="item__graphic"><use xlink:href="#${escapeAttr(escapeHtml(options.icon))}"></use></svg>`;
+    } else if (options.docIcon) {
+        iconHTML = `<span class="item__icon">${unicode2Emoji(options.docIcon)}</span>`;
+    }
+    element.innerHTML = `${iconHTML}<span class="item__text">${escapeHtml(options.title || "")}</span>
+<span class="item__close"><svg><use xlink:href="#iconClose"></use></svg></span>`;
+    if (options.pin && (options.icon || options.docIcon)) {
+        element.querySelector(".item__text").classList.add("fn__none");
+    }
+    return element;
+};
 
 export class Tab {
     public parent: Wnd;
@@ -31,31 +73,49 @@ export class Tab {
             this.title = options.title;
             this.icon = options.icon;
             this.docIcon = options.docIcon;
-            this.headElement = document.createElement("li");
-            this.headElement.setAttribute("data-type", "tab-header");
-            this.headElement.setAttribute("draggable", "true");
-            this.headElement.setAttribute("data-id", this.id);
-            this.headElement.classList.add("item", "item--focus");
-            let iconHTML = "";
-            if (options.icon) {
-                iconHTML = `<svg class="item__graphic"><use xlink:href="#${options.icon}"></use></svg>`;
-            } else if (options.docIcon) {
-                iconHTML = `<span class="item__icon">${unicode2Emoji(options.docIcon)}</span>`;
-            }
-            this.headElement.innerHTML = `${iconHTML}<span class="item__text">${escapeHtml(options.title)}</span>
-<span class="item__close"><svg><use xlink:href="#iconClose"></use></svg></span>`;
+            this.headElement = createTabHeaderElement({
+                id: this.id,
+                title: options.title,
+                icon: options.icon,
+                docIcon: options.docIcon,
+                draggable: true,
+                focus: true,
+            });
             this.headElement.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
                 window.getSelection().removeAllRanges();
                 hideTooltip();
                 const tabElement = hasClosestByTag(event.target, "LI");
                 if (tabElement) {
                     event.dataTransfer.setData("text/html", tabElement.outerHTML);
-                    const modeJSON = {id: this.id};
+                    const modeJSON = {id: this.id} as ILayoutJSON & {id: string};
                     layoutToJSON(this, modeJSON);
                     event.dataTransfer.setData(Constants.SIYUAN_DROP_TAB, JSON.stringify(modeJSON));
+                    const editorJSON = Array.isArray(modeJSON.children) ? undefined : modeJSON.children;
+                    delete tabElement.dataset.dragDocumentId;
+                    if (editorJSON?.instance === "Editor" && editorJSON.rootId) {
+                        event.dataTransfer.setData(Constants.SIYUAN_DROP_DOCUMENT_TAB, JSON.stringify({
+                            rootId: editorJSON.rootId,
+                            tabId: this.id,
+                            title: this.title,
+                        }));
+                        tabElement.dataset.dragDocumentId = editorJSON.rootId;
+                        window.siyuan.dragTitle = this.title;
+                    }
                     event.dataTransfer.dropEffect = "move";
                     tabElement.style.opacity = "0.38";
                     window.siyuan.dragElement = this.headElement;
+                    const dragTabData: ITabDragData = {
+                        title: this.title,
+                        icon: this.icon,
+                        docIcon: this.docIcon,
+                        pin: tabElement.classList.contains("item--pin"),
+                        focus: tabElement.classList.contains("item--focus"),
+                        unupdate: tabElement.classList.contains("item--unupdate"),
+                    };
+                    window.siyuan.dragTab = dragTabData;
+                    /// #if !BROWSER
+                    ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "setTabDragData", data: dragTabData});
+                    /// #endif
                 }
                 /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "removeRegionStyle"});
@@ -65,6 +125,7 @@ export class Tab {
                 const tabElement = hasClosestByTag(event.target, "LI");
                 if (tabElement) {
                     tabElement.style.opacity = "1";
+                    delete tabElement.dataset.dragDocumentId;
                 }
                 /// #if !BROWSER
                 // 拖拽到屏幕外
@@ -75,27 +136,13 @@ export class Tab {
                     }
                 }, Constants.TIMEOUT_LOAD); // 等待主进程发送关闭消息
                 ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "rmDragStyle"});
-                /// #else
-                document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
-                    item.classList.remove("layout-tab-bars--drag");
-                });
-                document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(tabItem => {
-                    tabItem.remove();
-                });
                 /// #endif
+                clearTabDragPreview();
+                window.siyuan.dragTab = undefined;
                 window.siyuan.dragElement = undefined;
                 if (event.dataTransfer.dropEffect === "none") {
                     // 按 esc 取消的时候应该还原在 dragover 时交换的 tab
-                    this.parent.children.forEach((item, index) => {
-                        const currentElement = this.headElement.parentElement.children[index];
-                        if (item.headElement !== currentElement) {
-                            if (index === 0) {
-                                this.headElement.parentElement.firstElementChild.before(item.headElement);
-                            } else {
-                                this.headElement.parentElement.children[index - 1].after(item.headElement);
-                            }
-                        }
-                    });
+                    this.restoreHeadElementOrder();
                 }
                 /// #if !BROWSER
                 ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "addRegionStyle"});
@@ -107,6 +154,23 @@ export class Tab {
         this.panelElement.classList.add("fn__flex-1");
         this.panelElement.innerHTML = options.panel || "";
         this.panelElement.setAttribute("data-id", this.id);
+    }
+
+    public restoreHeadElementOrder() {
+        const headersElement = this.headElement?.parentElement;
+        if (!headersElement) {
+            return;
+        }
+        this.parent.children.forEach((item, index) => {
+            const currentElement = headersElement.children[index];
+            if (item.headElement !== currentElement) {
+                if (index === 0) {
+                    headersElement.firstElementChild.before(item.headElement);
+                } else {
+                    headersElement.children[index - 1].after(item.headElement);
+                }
+            }
+        });
     }
 
     public updateTitle(title: string) {

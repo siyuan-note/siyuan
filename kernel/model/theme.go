@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -94,7 +94,7 @@ func resolveNestedCSSVar(themeStyles map[string]string, varName string) string {
 	maxDepth := 10                   // 防止无限嵌套
 
 	currentName := varName
-	for depth := 0; depth < maxDepth; depth++ {
+	for range maxDepth {
 		if visited[currentName] {
 			return ""
 		}

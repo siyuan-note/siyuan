@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -89,4 +89,12 @@ func GetModelContextLimit(model string) int {
 		}
 	}
 	return 0
+}
+
+// ResolveModelContextLimit 优先使用具体 Provider 模型配置中的上下文窗口，未配置时回退到内置表。
+func ResolveModelContextLimit(model string, configured int) int {
+	if 0 < configured {
+		return configured
+	}
+	return GetModelContextLimit(model)
 }

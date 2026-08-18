@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20260619110430"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -385,7 +385,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240921122413-hrexuif",
-								"updated": "20240921122732"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -399,7 +399,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：該函數用於傳回塊 ID 對應塊的可讀路徑"
+									"Data": "​：該函數用於傳回區塊 ID 對應區塊的可讀路徑"
 								}
 							]
 						}
@@ -487,7 +487,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250331163425-6fe2kvm",
-								"updated": "20250331163515"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -501,7 +501,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：函數用於根據塊 ID 查詢資料庫，傳回值為 block"
+									"Data": "​：函數用於根據區塊 ID 查詢資料庫，傳回值為 block"
 								}
 							]
 						},
@@ -681,7 +681,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241212102021-54wv84h",
-								"updated": "20241212164010"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -695,7 +695,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：此函數用於統計塊內容"
+									"Data": "​：此函數用於統計區塊內容"
 								}
 							]
 						},
@@ -1534,7 +1534,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612205426-mqjochz",
-								"updated": "20260612205426"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -1548,7 +1548,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 將 Markdown 格式的欄位值轉為內容文字（保留程式碼、公式等，塊級節點間插入換行）"
+									"Data": "​ 將 Markdown 格式的欄位值轉為內容文字（保留程式碼、公式等，區塊級節點間插入換行）"
 								}
 							]
 						}
@@ -1770,7 +1770,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-4ihq4sa",
-				"updated": "20221114173626"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1784,7 +1784,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173549-5ie5uaj",
-				"updated": "20230820184235"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1794,7 +1794,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "社區集市倉庫"
 				},
 				{

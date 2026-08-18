@@ -12,22 +12,36 @@ import {Model} from "../layout/Model";
 import "../assets/scss/mobile.scss";
 import {Menus} from "../menus";
 import {addBaseURL, parseSiYuanUriInfo, setNoteBook} from "../util/pathName";
-import {handleTouchEnd, handleTouchMove, handleTouchStart, handleTouchUp} from "./util/touch";
+import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
+import {
+    handleTouchEnd,
+    handleTouchMove,
+    handleTouchSelectionChange,
+    handleTouchStart,
+    handleTouchUp,
+} from "./util/touch";
 import {fetchGet, fetchPost} from "../util/fetch";
 import {initFramework} from "./util/initFramework";
 import {initAssets} from "../util/assets";
 import {bootSync, lockScreen} from "../dialog/processSystem";
 import {initMessage, showMessage} from "../dialog/message";
 import {goBack} from "./util/MobileBackFoward";
-import {activeBlur, hideKeyboardToolbar, showKeyboardToolbar} from "./util/keyboardToolbar";
-import {getLocalStorage, isChromeBrowser, isInMobileApp, writeText} from "../protyle/util/compatibility";
+import {activeBlur, hideKeyboardToolbarByApp, showKeyboardToolbar} from "./util/keyboardToolbar";
+import {
+    getLocalStorage,
+    initWindowOpenOverride,
+    isChromeBrowser,
+    isInIOS,
+    isInMobileApp,
+    writeText
+} from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
+import {ensureOnboarding} from "../onboarding";
 import {checkPublishServiceClosed} from "../util/processMessage";
 import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
 import {registerServiceWorker} from "../util/serviceWorker";
 import {loadPlugins} from "../plugin/loader";
-import {saveScroll} from "../protyle/scroll/saveScroll";
 import {removeBlock} from "../protyle/wysiwyg/remove";
 import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
 import {updateCardHV} from "../card/util";
@@ -35,10 +49,12 @@ import {mobileKeydown} from "./util/keydown";
 import {correctHotkey} from "../boot/globalEvent/commonHotkey";
 import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 import {nbsp2space} from "../protyle/util/normalizeText";
-import {callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
+import {armKeyboardLock, callMobileAppShowKeyboard, canInput, setWebViewFocusable} from "./util/mobileAppUtil";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {initTouchDragBridge} from "../util/touchDragBridge";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
+import {openByMobile} from "../editor/openLink";
+import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -50,6 +66,7 @@ class App {
         }
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         addBaseURL();
+        initHarmonyTextSelectionMenu();
         this.appId = Constants.SIYUAN_APPID;
 
         const mainWs = new Model({app: this});
@@ -66,6 +83,7 @@ class App {
 
         window.siyuan = {
             zIndex: 10,
+            isReady: false,
             notebooks: [],
             reqIds: {},
             backStack: [],
@@ -86,8 +104,9 @@ class App {
         };
         // 不能使用 touchstart，否则会被 event.stopImmediatePropagation() 阻塞
         window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
-            if (!window.siyuan.menus.menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
-                window.siyuan.menus.menu.remove();
+            const menu = window.siyuan.menus?.menu;
+            if (menu && !menu.element.contains(event.target) && !hasClosestByAttribute(event.target, "data-menu", "true")) {
+                menu.remove();
             }
             const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
             if (copyElement) {
@@ -97,23 +116,28 @@ class App {
                 showMessage(window.siyuan.languages.copied, 2000);
                 event.preventDefault();
             }
-            if (["INPUT", "TEXTAREA"].includes(event.target.tagName)) {
+            const editableElement = canInput(event.target);
+            if (editableElement && ["INPUT", "TEXTAREA"].includes(editableElement.tagName)) {
                 setTimeout(() => {
-                    event.target.scrollIntoView({
+                    editableElement.scrollIntoView({
                         block: "center",
                     });
                 }, Constants.TIMEOUT_TRANSITION);
             }
-            if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
-                if (canInput(event.target)) {
+            if (editableElement) {
+                // 原生 App 通过桥接主动唤起键盘；移动端浏览器没有桥接，但点击可编辑区域后也会立刻触发 resize，
+                // 进而调用 activeBlur 关闭键盘（比如三星键盘 https://github.com/siyuan-note/siyuan/issues/18078），所以此处也需要上锁
+                if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
                     callMobileAppShowKeyboard();
+                } else {
+                    armKeyboardLock();
                 }
             }
             if (document.contains(event.target) && !hasClosestByClassName(event.target as Element, "protyle-util")) {
                 hideAllElements(["util"]);
             }
         });
-        if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
+        {
             const __siyuan_original_focus = HTMLElement.prototype.focus;
             HTMLElement.prototype.focus = function (this: HTMLElement, ...args) {
                 try {
@@ -124,15 +148,20 @@ class App {
                     console.error("Error in focus event:", e);
                 }
                 if (canInput(this)) {
-                    callMobileAppShowKeyboard();
+                    // 原生 App 通过桥接主动唤起键盘；移动端浏览器没有桥接，仅上锁以阻止 focus 后立即触发的 activeBlur 关闭键盘
+                    if (window.JSAndroid && window.JSAndroid.showKeyboard || window.JSHarmony && window.JSHarmony.showKeyboard) {
+                        callMobileAppShowKeyboard();
+                    } else {
+                        armKeyboardLock();
+                    }
                 }
             };
         }
         window.addEventListener("beforeunload", () => {
-            saveScroll(window.siyuan.mobile.editor.protyle);
+            window.siyuan.mobile.tabs?.save();
         }, false);
         window.addEventListener("pagehide", () => {
-            saveScroll(window.siyuan.mobile.editor.protyle);
+            window.siyuan.mobile.tabs?.save();
         }, false);
         // 判断手机横竖屏状态
         window.matchMedia("(orientation:portrait)").addEventListener("change", () => {
@@ -158,19 +187,31 @@ class App {
                     if (!isInMobileApp()) {
                         if (isChromeBrowser()) {
                             document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
-                        } else if (!window.siyuan.config.readonly && !window.siyuan.isPublish) {
-                            showMessage(window.siyuan.languages.useChrome, 0, "error");
+                        } else {
+                            document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-visual, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
+                            if (!window.siyuan.config.readonly && !window.siyuan.isPublish
+                                && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
+                                showMessage(window.siyuan.languages.useChrome, 0, "error");
+                            }
                         }
+                    } else if (!isInIOS()) {
+                        document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-visual, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
                     }
-                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
                         window.siyuan.user = userResponse.data;
-                        fetchPost("/api/system/getEmojiConf", {}, emojiResponse => {
+                        await ensureOnboarding();
+                        fetchPost("/api/system/getEmojiConf", {}, async emojiResponse => {
                             window.siyuan.emojis = emojiResponse.data as IEmoji[];
-                            setNoteBook(() => {
-                                initFramework(this, confResponse.data.start);
+                            await setNoteBook();
+                            try {
+                                await initFramework(this, confResponse.data.start);
                                 initRightMenu(this);
                                 openChangelog();
-                            });
+                                window.siyuan.isReady = true;
+                                mainWs.flushMainMessages();
+                            } catch (error) {
+                                console.error("Failed to initialize mobile framework:", error);
+                            }
                         });
                     });
                 });
@@ -179,6 +220,7 @@ class App {
             document.addEventListener("touchmove", handleTouchMove, false);
             document.addEventListener("touchend", handleTouchEnd, false);
             document.addEventListener("touchcancel", handleTouchEnd, false);
+            document.addEventListener("selectionchange", handleTouchSelectionChange, true);
             window.addEventListener("nativePhysicalTouchUp", handleTouchUp, false);
             window.addEventListener("keyup", () => {
                 window.siyuan.ctrlIsPressed = false;
@@ -215,6 +257,7 @@ class App {
 
 const siyuanApp = new App();
 
+initWindowOpenOverride(siyuanApp, openByMobile);
 // https://github.com/siyuan-note/siyuan/issues/8441
 window.reconnectWebSocket = () => {
     // 后台唤醒时任一 socket 可能仍在 CONNECTING，调用 send 会抛 InvalidStateError，
@@ -235,7 +278,7 @@ window.reconnectWebSocket = () => {
     tryPing(window.siyuan.mobile.popEditor?.protyle.ws);
 };
 window.lockscreenByMode = () => {
-    if (window.siyuan.config.system.lockScreenMode === 1) {
+    if (window.siyuan.config?.system.lockScreenMode === 1) {
         lockScreen(siyuanApp);
     }
 };
@@ -243,12 +286,20 @@ window.goBack = goBack;
 window.showMessage = showMessage;
 window.processIOSPurchaseResponse = processIOSPurchaseResponse;
 window.showKeyboardToolbar = showKeyboardToolbar;
-window.hideKeyboardToolbar = hideKeyboardToolbar;
+window.hideKeyboardToolbar = hideKeyboardToolbarByApp;
 window.openFileByURL = (openURL) => {
     const blockInfo = parseSiYuanUriInfo(openURL);
     if (blockInfo != null) {
-        openMobileFileById(siyuanApp, blockInfo.id,
-            blockInfo.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+        if (blockInfo.avItemID) {
+            queueAVLocateRequest(blockInfo.id, {
+                itemID: blockInfo.avItemID,
+                viewID: blockInfo.avViewID,
+                groupID: blockInfo.avGroupID,
+            });
+        }
+        openMobileFileById(siyuanApp, blockInfo.id, blockInfo.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
+            (blockInfo.focus ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]),
+        undefined, undefined, blockInfo.avItemID ? (protyle) => activateQueuedAVLocate(protyle, blockInfo.id) : undefined);
         return true;
     }
     return false;

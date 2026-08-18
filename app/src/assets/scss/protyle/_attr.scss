@@ -8,7 +8,12 @@
   font-weight: normal;
   align-items: center;
   line-height: 16px;
-  // 会导致 https://github.com/siyuan-note/siyuan/issues/16829 先移除 user-select: none;
+  // 排除跨块划选中的属性占位 https://github.com/siyuan-note/siyuan/issues/18745
+  user-select: none;
+
+  & > div {
+    user-select: none;
+  }
 
   &--av span:hover {
     color: var(--b3-protyle-inline-blockref-color);
@@ -65,4 +70,9 @@
   &:empty {
     display: none;
   }
+}
+
+// 三击时恢复属性容器可选，以保留浏览器的整段选择行为 https://github.com/siyuan-note/siyuan/issues/16829
+.protyle-wysiwyg--select-attr .protyle-attr {
+  user-select: auto;
 }

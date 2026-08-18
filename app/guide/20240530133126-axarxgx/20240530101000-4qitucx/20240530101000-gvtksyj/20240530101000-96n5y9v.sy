@@ -7,7 +7,7 @@
 		"id": "20240530101000-96n5y9v",
 		"title": "コンテンツブロックの紹介",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -147,7 +147,7 @@
 			"Properties": {
 				"ID": "20240530101000-7b4udkk",
 				"id": "20240530101000-qqf6y4r",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -162,38 +162,23 @@
 			"Properties": {
 				"ID": "20240530101000-wu8n3rj",
 				"id": "20240530101000-m226k80",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "ドキュメントは基本単位となるいくつかのコンテンツブロックの組み合わせであり、さまざまなモジュールを組み合わせることができるレゴブロックのようなものです。"
+					"Data": "ドキュメントは複数のコンテンツブロックで構成されます。一部のコンテンツブロックは他のブロックを含められるため、コンテナブロックと呼ばれます。種類と包含規則の一覧については、"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意事項"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-35bbvcx",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "コンテンツブロックの種類"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​: ドキュメント自体も一種のコンテンツブロックです。具体的には、ドキュメントブロック、リストブロック、"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "ブロック引用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "の 3 つのコンテンツブロックは、他の種類のコンテンツブロックを含めることができるコンテナブロックです。"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "コンテンツブロック/組み合わせ"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​"
+					"Data": "。"
 				}
 			]
 		},
@@ -230,12 +215,12 @@
 			"Properties": {
 				"ID": "20240530101000-8pqai5f",
 				"id": "20240530101000-48s3dyy",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "名前とメモ"
+					"Data": "名前、エイリアス、メモ"
 				}
 			]
 		},
@@ -272,12 +257,12 @@
 			"Properties": {
 				"ID": "20240530101000-vh9kuvt",
 				"id": "20240530101000-m064mpu",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": ""
 				},
 				{
 					"Type": "NodeTextMark",
@@ -286,7 +271,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -295,16 +280,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "ブックマーク、名前、エイリアス、メモ、参照数を表示"
+					"TextMarkTextContent": "コンテンツブロックのコーナーアイコン"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ オプションを ON にすると、名前が付けられたコンテンツブロックの右上にマークが表示されます。ドキュメントブロックに名前とメモを付けてドキュメントツリーにマウスカーソルを合わせると、関連する名前とメモが表示されます。"
+					"Data": " を有効にすると、名前、エイリアス、メモがエディタに表示されます。ドキュメントブロックに名前またはメモを設定すると、ドキュメントツリーでそのドキュメントにマウスカーソルを合わせて確認できます。"
 				}
 			]
 		},

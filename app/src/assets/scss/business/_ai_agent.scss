@@ -104,6 +104,7 @@
   font-weight: 600;
   color: var(--b3-theme-on-surface);
   margin-bottom: 4px;
+  white-space: pre-line;
 }
 
 .agent-welcome__desc {
@@ -206,6 +207,26 @@
   box-sizing: border-box;
 }
 
+.agent-chat__msg--editing .agent-chat__body {
+  width: min(100%, 560px);
+}
+
+.agent-chat__edit-editor {
+  background-color: transparent;
+  max-height: 40vh;
+  min-height: 96px;
+  width: 100%;
+}
+
+.agent-chat__edit-editor .protyle-wysiwyg {
+  min-height: 96px;
+}
+
+.agent-chat__msg--editing .agent-chat__msg-actions {
+  margin-top: 4px;
+  opacity: 1;
+}
+
 .agent-chat__msg-meta {
   font-size: 13px;
   color: var(--b3-theme-on-surface-light);
@@ -228,7 +249,7 @@
   width: 100%;
   justify-content: flex-end;
   opacity: 0;
-  transition: var(--b3-transition);
+  transition: opacity .2s cubic-bezier(0, 0, .2, 1) 0ms;
 }
 
 .agent-chat__msg--ai:hover .agent-chat__msg-actions,
@@ -256,9 +277,10 @@
   }
 }
 
-// 覆盖 b3-typography 的基础字号：b3-typography 默认用 --b3-font-size-editor（跟随编辑器字号，默认 16px），
+// 覆盖消息排版的基础字号：b3-typography 和 protyle-wysiwyg 默认使用编辑器字号，
 // 在 dock 面板里偏大。压回面板级 14px，与大纲/书签等其他 dock 面板对齐。
-// 排版（行高、段落间距等）仍沿用 b3-typography 全局规范。
+// 行高、段落间距等仍沿用各自的全局排版规范。
+.agent-chat__msg--user .agent-chat__body.protyle-wysiwyg,
 .agent-chat__body.b3-typography,
 .agent-chat__thinking-chat.b3-typography {
   font-size: var(--b3-font-size);
@@ -302,6 +324,10 @@
 
 .agent-chat__body .protyle-icons {
   display: flex;
+}
+
+.agent-chat__msg--user .agent-chat__body .protyle-icons {
+  display: none;
 }
 
 // hover 显隐：对齐原 agent-chat__copy-wrap 行为，opacity 渐显。
@@ -404,13 +430,22 @@
   align-items: center;
   gap: 6px;
   padding: 4px 0;
+  font-size: 13px;
   cursor: pointer;
   color: var(--b3-theme-on-surface-light);
   user-select: none;
 }
 
 .agent-chat__thinking-text {
+  flex-shrink: 0;
+}
+
+.agent-chat__thinking-latest {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--b3-theme-on-surface);
+  white-space: nowrap;
 }
 
 .agent-chat__thinking-arrow {
@@ -425,6 +460,7 @@
 }
 
 .agent-chat__thinking-body {
+  font-size: var(--b3-font-size);
   max-height: 0;
   overflow: hidden;
   contain: layout paint;
@@ -440,7 +476,7 @@
 .agent-chat__thinking-body--preview {
   max-height: 120px;
   overflow-y: auto;
-  contain: none;  // 覆盖 base 的 contain:layout paint，该值会阻止 JS 设置 scrollTop 生效
+  contain: none; // 覆盖 base 的 contain:layout paint，该值会阻止 JS 设置 scrollTop 生效
 
   // 隐藏滚动条，保持预览态视觉干净（内容通过 JS 自动滚到底部）。
   scrollbar-width: none;
@@ -502,6 +538,33 @@
   white-space: nowrap;
 }
 
+.agent-chat__thinking-tool--running::after {
+  content: "...";
+  display: inline-block;
+  width: 1.2em;
+  margin-left: 3px;
+  overflow: hidden;
+  vertical-align: bottom;
+  animation: agent-tool-running 1.2s steps(4, end) infinite;
+}
+
+@keyframes agent-tool-running {
+  0% {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-chat__thinking-tool--running::after {
+    animation: none;
+    opacity: 0.65;
+  }
+}
+
 .agent-chat__confirm-card {
   font-size: 13px;
 }
@@ -536,6 +599,16 @@
   max-height: 120px;
   overflow-y: auto;
   border-top: 1px solid var(--b3-border-color);
+}
+
+.agent-chat__confirm-effects {
+  margin: 0;
+  padding: 8px 12px 8px 30px;
+  border-top: 1px solid var(--b3-border-color);
+  background: color-mix(in srgb, var(--b3-theme-warning) 10%, transparent);
+  color: var(--b3-theme-on-background);
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .agent-chat__confirm-actions {
@@ -599,6 +672,97 @@
   display: flex;
   gap: 8px;
   margin-top: 8px;
+  min-width: 0;
+}
+
+.agent-chat__button-options {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  min-width: 0;
+  overflow: auto;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.agent-chat__send,
+.agent-chat__stop {
+  flex-shrink: 0;
+}
+
+.agent-chat__model-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background-image: none;
+  white-space: nowrap;
+  flex: 0 1 auto;
+  min-width: 30px;
+
+  &-icon {
+    height: 14px;
+    width: 14px;
+    color: var(--b3-theme-on-surface);
+    flex-shrink: 0;
+  }
+
+  &-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+}
+
+.agent-chat__permission {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background-image: none;
+  white-space: nowrap;
+  flex: 0 1 auto;
+  min-width: 30px;
+
+  &-icon {
+    height: 14px;
+    width: 14px;
+    color: var(--b3-theme-on-surface);
+    flex-shrink: 0;
+  }
+
+  &-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+}
+
+// 思考强度：使用菜单按钮，避免底部原生 select 向视口外展开。
+.agent-chat__reasoning-effort {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  background-image: none;
+  white-space: nowrap;
+  flex: 0 1 auto;
+  min-width: 30px;
+
+  &-icon {
+    height: 14px;
+    width: 14px;
+    color: var(--b3-theme-on-surface);
+    flex-shrink: 0;
+  }
+
+  &-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
 }
 
 // 停止按钮：常显悬浮背景色，图标主色填充。
@@ -837,15 +1001,6 @@
   border-top: 1px solid var(--b3-border-color);
 }
 
-.agent-chat__preview-notice {
-  font-size: 12px;
-  text-align: center;
-  padding: 4px 12px;
-  color: var(--b3-card-warning-color);
-  background: var(--b3-card-warning-background);
-  flex-shrink: 0;
-}
-
 .agent-chat__nav-rail {
   position: absolute;
   right: 4px;
@@ -958,37 +1113,140 @@
   }
 }
 
-.agent-composer__pm {
+// 发送框和历史消息编辑器复用相同排版，尺寸和滚动按使用场景分别约束。
+.agent-chat__composer-host .protyle-wysiwyg,
+.agent-chat__edit-editor .protyle-wysiwyg {
   outline: none;
-  font-size: 14px;
+  font-size: var(--b3-font-size);
   line-height: 1.6;
   color: var(--b3-theme-on-background);
+  padding: 0;
+}
+
+.agent-chat__composer-host .protyle-wysiwyg {
   min-height: 24px;
   max-height: 120px;
   overflow-y: auto;
 }
 
-.agent-composer__pm p {
-  margin: 0;
+.protyle-hint--agent-overlay {
+  font-size: var(--b3-font-size);
 }
 
-.agent-composer__pm p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  color: var(--b3-theme-on-surface-light);
-  pointer-events: none;
-  float: left;
-  height: 0;
+#model.model--agent {
+  > .toolbar {
+    display: none;
+  }
+
+  #modelMain {
+    min-height: 0;
+    overflow: hidden;
+  }
 }
 
-.agent-mention-chip {
-  display: inline;
-  padding: 1px 4px;
-  margin: 0 2px;
-  background: var(--b3-theme-primary-lightest);
-  color: var(--b3-theme-primary);
-  border-radius: var(--b3-border-radius);
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  user-select: all;
+.sy__agentChat--mobile {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  background: var(--b3-theme-background);
+
+  .block__icons {
+    min-height: 48px;
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(4px, env(safe-area-inset-right));
+    border-bottom: .5px solid var(--b3-theme-background-light);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .agent-chat__title {
+    min-height: 30px;
+    font-size: 17px;
+    font-weight: normal;
+    line-height: 30px;
+  }
+
+  .block__icon {
+    box-sizing: border-box;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+    opacity: 1;
+  }
+
+  .agent-chat__messages {
+    padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
+    scrollbar-gutter: auto;
+  }
+
+  .agent-chat__msg-actions {
+    opacity: 1;
+  }
+
+  .agent-chat__body .protyle-icons {
+    opacity: .86;
+  }
+
+  .agent-chat__nav-rail {
+    display: none;
+  }
+
+  .agent-chat__input-area {
+    margin: 0 max(8px, env(safe-area-inset-right)) max(16px, calc(env(safe-area-inset-bottom) + 8px)) max(8px, env(safe-area-inset-left));
+  }
+
+  .agent-chat__composer-host {
+    max-height: min(120px, 30vh);
+  }
+
+  .agent-chat__button-options {
+    gap: 4px;
+  }
+
+  .agent-chat__confirm-actions,
+  .agent-chat__question-submit {
+    flex-wrap: wrap;
+
+    .b3-button {
+      min-height: 40px;
+    }
+  }
+
+  .agent-session-popup--mobile {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    width: auto;
+    max-width: none;
+    height: auto;
+    max-height: none;
+    z-index: 20;
+    background: var(--b3-theme-background);
+
+    .agent-session-popup__search {
+      margin: 8px;
+      min-height: 36px;
+    }
+
+    .agent-session-popup__close {
+      width: 16px;
+      height: 16px;
+      padding: 12px;
+    }
+
+    .b3-list-item {
+      min-height: 44px;
+    }
+
+    > .b3-list {
+      min-height: 0;
+      overflow-y: auto;
+    }
+  }
+}
+
+.agent-menu-status--warning {
+  color: var(--b3-theme-error);
 }

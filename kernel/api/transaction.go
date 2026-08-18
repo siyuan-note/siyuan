@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,12 +19,15 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -71,6 +74,16 @@ func performTransactions(c *gin.Context) {
 		ret.Msg = "parses request failed"
 		return
 	}
+	if err = model.ValidateFlashcardTransactions(transactions); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if err = holdTransactionEncryptedBoxRequests(c, transactions); err != nil {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(314)
+		return
+	}
 	for _, transaction := range transactions {
 		transaction.Timestamp = timestamp
 		transaction.MarkFromAPI() // 标记来自 HTTP 入口，供全局撤销日志捕获判别
@@ -92,14 +105,77 @@ func performTransactions(c *gin.Context) {
 	c.Header("Server-Timing", fmt.Sprintf("total;dur=%d", elapsed))
 }
 
+func holdTransactionEncryptedBoxRequests(c *gin.Context, transactions []*model.Transaction) error {
+	boxIDs := map[string]struct{}{}
+	addBoxID := func(boxID string) {
+		if boxID != "" && model.IsEncryptedBox(boxID) {
+			boxIDs[boxID] = struct{}{}
+		}
+	}
+	addBlockID := func(blockID string) {
+		if blockID == "" {
+			return
+		}
+		if block := treenode.GetBlockTree(blockID); block != nil {
+			addBoxID(block.BoxID)
+			return
+		}
+		addBoxID(blockID)
+	}
+	for _, transaction := range transactions {
+		for _, operation := range transaction.DoOperations {
+			if operation == nil {
+				continue
+			}
+			for _, id := range []string{
+				operation.ID, operation.RootID, operation.ParentID, operation.PreviousID, operation.NextID, operation.BlockID,
+			} {
+				addBlockID(id)
+			}
+			for _, id := range operation.BlockIDs {
+				addBlockID(id)
+			}
+			for _, id := range operation.SrcIDs {
+				addBlockID(id)
+			}
+			for _, src := range operation.Srcs {
+				if id, ok := src["id"].(string); ok {
+					addBlockID(id)
+				}
+			}
+			if operation.Tree != nil {
+				addBoxID(operation.Tree.Box)
+			}
+			if _, boxID := av.FindAttributeViewPath(operation.AvID); boxID != "" {
+				addBoxID(boxID)
+			}
+			for _, key := range []string{"notebook", "box", "boxID", "rootID", "blockID"} {
+				if id, ok := operation.Context[key].(string); ok {
+					addBlockID(id)
+				}
+			}
+		}
+	}
+
+	sortedBoxIDs := make([]string, 0, len(boxIDs))
+	for boxID := range boxIDs {
+		sortedBoxIDs = append(sortedBoxIDs, boxID)
+	}
+	sort.Strings(sortedBoxIDs)
+	for _, boxID := range sortedBoxIDs {
+		if err := holdEncryptedBoxRequest(c, boxID); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func pushTransactions(app, session string, transactions []*model.Transaction) {
 	pushMode := util.PushModeBroadcastExcludeSelf
 	if 0 < len(transactions) && 0 < len(transactions[0].DoOperations) {
 		model.FlushTxQueue() // 等待文件写入完成，后续渲染才能读取到最新的数据
 
-		action := transactions[0].DoOperations[0].Action
-		isAttrViewTx := strings.Contains(strings.ToLower(action), "attrview")
-		if isAttrViewTx && "setAttrViewName" != action {
+		if shouldBroadcastAttrViewTransactions(transactions) {
 			pushMode = util.PushModeBroadcast
 		}
 	}
@@ -310,9 +386,9 @@ func clearHistory(c *gin.Context) {
 	}
 
 	var rootID string
-	util.ParseJsonArgs(arg, ret,
-		util.BindJsonArg("rootID", &rootID, false, false),
-	)
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
+		return
+	}
 
 	model.GlobalUndoLog.Clear(rootID)
 }
@@ -328,9 +404,7 @@ func pushUndoTransactions(app, session string, transactions []*model.Transaction
 		pushMode = util.PushModeBroadcast
 	}
 	if !includeSelf && 0 < len(transactions) && 0 < len(transactions[0].DoOperations) {
-		action := transactions[0].DoOperations[0].Action
-		isAttrViewTx := strings.Contains(strings.ToLower(action), "attrview")
-		if isAttrViewTx && "setAttrViewName" != action {
+		if shouldBroadcastAttrViewTransactions(transactions) {
 			pushMode = util.PushModeBroadcast
 		}
 	}
@@ -364,4 +438,15 @@ func pushUndoTransactions(app, session string, transactions []*model.Transaction
 		tx.WaitForCommit()
 	}
 	util.PushEvent(evt)
+}
+
+func shouldBroadcastAttrViewTransactions(transactions []*model.Transaction) bool {
+	for _, tx := range transactions {
+		for _, operation := range tx.DoOperations {
+			if nil != operation && "setAttrViewName" != operation.Action && strings.Contains(strings.ToLower(operation.Action), "attrview") {
+				return true
+			}
+		}
+	}
+	return false
 }

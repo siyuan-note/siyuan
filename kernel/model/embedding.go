@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -141,17 +141,18 @@ func processPendingEmbeddings() {
 	workCh := make(chan embeddingJob, embeddingMaxConcurrency*2)
 
 	var workersWg sync.WaitGroup
-	for i := 0; i < embeddingMaxConcurrency; i++ {
-		workersWg.Add(1)
-		go func() {
-			defer workersWg.Done()
+	for range embeddingMaxConcurrency {
+		workersWg.Go(func() {
 			for job := range workCh {
 				if embeddingStop.Load() {
+					// 本轮已熔断（其它 worker 处理失败触发），这些积压 job 里的块不能直接丢弃，
+					// 否则它们仍为 e.id IS NULL，下轮被反复捞出却永远不被写行。按失败处理写占位行。
+					recordFailedEmbedding(job.blocks, "round stopped due to earlier failure in this round")
 					continue
 				}
 				doEmbedAndStore(job.texts, job.blocks)
 			}
-		}()
+		})
 	}
 
 	go func() {
@@ -236,16 +237,10 @@ func processPendingEmbeddings() {
 			// 本轮没有提交任何 job，且全部是被退避跳过的块：这些块状态没变，下轮 SQL 还会捞出同样的块，
 			// 直接进下一轮会 CPU 忙等 + 高频 DB 查询。sleep 到最近的到期时间再继续，期间检查熔断以便及时退出。
 			if !anySubmitted && backoffSkipped > 0 {
-				wait := time.Duration(minRemaining) * time.Second
-				if wait < time.Second {
-					wait = time.Second
-				}
+				wait := max(time.Duration(minRemaining)*time.Second, time.Second)
 				// 分段 sleep，每秒检查一次 embeddingStop，熔断时尽快退出
 				for wait > 0 && !embeddingStop.Load() {
-					step := wait
-					if step > time.Second {
-						step = time.Second
-					}
+					step := min(wait, time.Second)
 					time.Sleep(step)
 					wait -= step
 				}
@@ -274,10 +269,9 @@ func embeddingBackoffFor(failCount int) time.Duration {
 	if failCount < 1 {
 		return time.Duration(embeddingBackoffBase) * time.Second
 	}
-	shift := failCount - 1
-	if shift > 20 {
-		shift = 20 // 防溢出
-	}
+	shift := min(failCount-1,
+		// 防溢出
+		20)
 	d := embeddingBackoffBase << uint(shift)
 	if d > embeddingBackoffMax || d < 0 {
 		return time.Duration(embeddingBackoffMax) * time.Second
@@ -300,31 +294,42 @@ func decodeVector(b []byte) []float32 {
 	return unsafe.Slice((*float32)(unsafe.Pointer(&b[0])), len(b)/embeddingVectorDim)
 }
 
+// recordFailedEmbedding 把一批块标记为失败（fail_count+1，写空 embedding），并熔断本轮 + 提示用户。
+// 用于 API 调用出错或返回向量数与输入不匹配时的统一失败处理。
+func recordFailedEmbedding(blocks []map[string]any, reason string) {
+	embeddingStop.Store(true)
+	logging.LogErrorf("create embeddings failed (%s), stop this round", reason)
+	// 多个 worker 可能并发失败，用 CAS 保证本轮只向用户提示一次
+	if embeddingErrNotified.CompareAndSwap(false, true) {
+		util.PushErrMsg("Embedding request failed, indexing paused. Please check AI embedding config.", 5000)
+	}
+
+	now := time.Now().Unix()
+	for _, row := range blocks {
+		id, _ := row["id"].(string)
+		rootID, _ := row["root_id"].(string)
+		box, _ := row["box"].(string)
+		path, _ := row["path"].(string)
+		updated, _ := row["updated"].(string)
+		// 先确保占位行存在（INSERT OR IGNORE 不覆盖已有行），再累加失败计数
+		sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried, ignored_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)",
+			id, rootID, box, path, []byte{}, embeddingModel(), 0, updated)
+		sql.Exec("UPDATE block_embeddings SET fail_count = fail_count + 1, last_tried = ?, embedding = ?, model = ?, content_len = 0, ignored_type = 0 WHERE id = ?",
+			now, []byte{}, embeddingModel(), id)
+	}
+}
+
 func doEmbedAndStore(texts []string, blocks []map[string]any) {
-	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingTimeout())
+	vectors, err := util.BatchGetEmbeddings(texts, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingDimensions(), embeddingTimeout())
 	if err != nil {
 		// 任何 API 错误（含模型不存在/鉴权失败/限流/网络异常）都熔断本轮，避免连接风暴
-		embeddingStop.Store(true)
-		logging.LogErrorf("create embeddings failed, stop this round: %s", err)
-		// 多个 worker 可能并发失败，用 CAS 保证本轮只向用户提示一次
-		if embeddingErrNotified.CompareAndSwap(false, true) {
-			util.PushErrMsg("Embedding request failed, indexing paused. Please check AI embedding config.", 5000)
-		}
+		recordFailedEmbedding(blocks, err.Error())
+		return
+	}
 
-		// 失败块记录 fail_count/last_tried，使其进入按各自退避节奏的重试队列，而非被反复无界重试
-		now := time.Now().Unix()
-		for _, row := range blocks {
-			id, _ := row["id"].(string)
-			rootID, _ := row["root_id"].(string)
-			box, _ := row["box"].(string)
-			path, _ := row["path"].(string)
-			updated, _ := row["updated"].(string)
-			// 先确保占位行存在（INSERT OR IGNORE 不覆盖已有行），再累加失败计数
-			sql.Exec("INSERT OR IGNORE INTO block_embeddings (id, root_id, box, path, embedding, model, content_len, updated, fail_count, last_tried, ignored_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0)",
-				id, rootID, box, path, []byte{}, embeddingModel(), 0, updated)
-			sql.Exec("UPDATE block_embeddings SET fail_count = fail_count + 1, last_tried = ?, embedding = ?, model = ?, content_len = 0, ignored_type = 0 WHERE id = ?",
-				now, []byte{}, embeddingModel(), id)
-		}
+	// 部分 OpenAI 兼容 API 会对重复输入去重，返回少于输入数量的向量。此时无法对齐，整批按失败处理，避免越界 panic
+	if len(vectors) != len(blocks) {
+		recordFailedEmbedding(blocks, fmt.Sprintf("count mismatch: requested %d but got %d", len(blocks), len(vectors)))
 		return
 	}
 
@@ -359,16 +364,15 @@ func getEmbeddingIgnoreMatcher() *ignore.GitIgnore {
 		return embeddingIgnoreMatcher
 	}
 
-	embeddingIgnoreLoaded = true
 	embeddingIgnorePath := filepath.Join(util.DataDir, ".siyuan", "embeddingignore")
 	if !gulu.File.IsExist(embeddingIgnorePath) {
-		return nil
+		return nil // 文件不存在时不置 loaded 标志，允许用户后续创建后重新加载
 	}
 
 	data, err := os.ReadFile(embeddingIgnorePath)
 	if err != nil {
 		logging.LogErrorf("read embeddingignore [%s] failed: %s", embeddingIgnorePath, err)
-		return nil
+		return nil // 读取失败时也不置标志，下次调用会重试
 	}
 
 	dataStr := string(data)
@@ -376,7 +380,15 @@ func getEmbeddingIgnoreMatcher() *ignore.GitIgnore {
 	lines := strings.Split(dataStr, "\n")
 
 	embeddingIgnoreMatcher = ignore.CompileIgnoreLines(lines...)
+	embeddingIgnoreLoaded = true // 成功加载后才置标志，避免文件后建却永不加载
 	return embeddingIgnoreMatcher
+}
+
+func resetEmbeddingIgnoreMatcher() {
+	embeddingIgnoreLock.Lock()
+	defer embeddingIgnoreLock.Unlock()
+	embeddingIgnoreLoaded = false
+	embeddingIgnoreMatcher = nil
 }
 
 func cosineSimilarity(a, b []float32) float32 {
@@ -426,25 +438,27 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		return
 	}
 
-	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingTimeout())
+	vectors, err := util.BatchGetEmbeddings([]string{query}, embeddingKey(), embeddingBaseURL(), embeddingModel(), embeddingDimensions(), embeddingTimeout())
 	if err != nil || 1 > len(vectors) {
 		logging.LogErrorf("get query embedding failed")
 		return
 	}
 	queryVec := vectors[0]
 
-	boxFilter := buildBoxesFilter(boxes, "be.")
-	pathFilter := buildPathsFilter(paths, "be.")
+	boxFilter, boxArgs := buildBoxesFilter(boxes, "be.")
+	pathFilter, pathArgs := buildPathsFilter(paths, "be.")
+	boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs(), "b.")
 	typeFilter := buildTypeFilter(types, subTypes, "b.")
-	hasFilter := 0 < len(boxes) || 0 < len(paths) || 0 < len(types)
+	hasFilter := 0 < len(boxes) || 0 < len(paths) || 0 < len(types) || "" != boxDocFilter
 	hasTypeFilter := 0 < len(types)
 
-	numWorkers := runtime.GOMAXPROCS(0)
-	if numWorkers < 1 {
-		numWorkers = 1
-	}
+	numWorkers := max(runtime.GOMAXPROCS(0), 1)
 
+	// 向量召回候选数：启用重排时固定召回 candidateCount 条，保证所有分页基于同一候选集；否则只取当前页所需。
 	topK := page * pageSize
+	if isRerankEnabled() {
+		topK = rerankCandidateCount()
+	}
 	h := &scoredHeap{}
 	heap.Init(h)
 
@@ -453,17 +467,20 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 
 	for {
 		var q string
+		var args []any
 		if hasFilter {
 			q = fmt.Sprintf("SELECT be.rowid, be.id, be.embedding FROM block_embeddings be JOIN blocks b ON be.id = b.id WHERE be.embedding IS NOT NULL AND length(be.embedding) > 0 AND be.rowid > %d", cursor)
 			if hasTypeFilter {
 				q += " AND " + typeFilter
 			}
-			q += boxFilter + pathFilter
+			q += boxFilter + pathFilter + boxDocFilter
+			// 过滤值通过绑定参数传递，避免 SQL 拼接注入
+			args = append(append(append([]any{}, boxArgs...), pathArgs...), boxDocArgs...)
 			q += fmt.Sprintf(" ORDER BY be.rowid LIMIT %d", scanSize)
 		} else {
 			q = fmt.Sprintf("SELECT rowid, id, embedding FROM block_embeddings WHERE embedding IS NOT NULL AND length(embedding) > 0 AND rowid > %d ORDER BY rowid LIMIT %d", cursor, scanSize)
 		}
-		rows, qErr := sql.QueryNoLimit(q)
+		rows, qErr := sql.QueryNoLimitArgs(q, args...)
 		if qErr != nil {
 			logging.LogErrorf("query embeddings for search failed: %s", qErr)
 			break
@@ -483,10 +500,7 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 
 		for w := 0; w < numWorkers; w++ {
 			start := w * chunkSize
-			end := start + chunkSize
-			if end > len(rows) {
-				end = len(rows)
-			}
+			end := min(start+chunkSize, len(rows))
 			if start >= end {
 				continue
 			}
@@ -537,25 +551,30 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 		result[i] = heap.Pop(h).(scoredBlock)
 	}
 
+	// 按向量相似度降序取出全部候选块 ID。重排启用时 result 已是固定的 candidateCount；
+	// 未启用时 result 即当前页所需，后续分页逻辑统一处理。
+	var candidateIDs []string
+	for _, s := range result {
+		candidateIDs = append(candidateIDs, s.id)
+	}
+
+	sqlBlocks := sql.GetBlocks(candidateIDs)
+
+	// 重排：对 query 与候选块文本逐对精排，失败则降级保留向量相似度原序，不阻断搜索。
+	// 注意 GetBlocks 的返回顺序未必与 candidateIDs 一致，重排以返回的 sqlBlocks 为准。
+	sqlBlocks = rerankSqlBlocks(query, sqlBlocks)
+
 	offset := (page - 1) * pageSize
-	if offset >= len(result) {
+	if offset >= len(sqlBlocks) {
 		pageCount = (matchedBlockCount + pageSize - 1) / pageSize
 		return
 	}
 
-	end := offset + pageSize
-	if end > len(result) {
-		end = len(result)
-	}
+	end := min(offset+pageSize, len(sqlBlocks))
 
-	var topIDs []string
-	for i := offset; i < end; i++ {
-		topIDs = append(topIDs, result[i].id)
-	}
-
-	sqlBlocks := sql.GetBlocks(topIDs)
 	rootIDSet := map[string]bool{}
-	for _, b := range sqlBlocks {
+	for i := offset; i < end; i++ {
+		b := sqlBlocks[i]
 		rootIDSet[b.RootID] = true
 		blocks = append(blocks, fromSQLBlock(b, "", 36))
 	}
@@ -567,6 +586,54 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 
 func isEmbeddingEnabled() bool {
 	return nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && len(Conf.AI.Embedding.APIKey) > 0
+}
+
+// rerankSqlBlocks 用重排模型对候选块按 query 逐对精排。未启用或调用失败时原样返回（降级为向量相似度排序）。
+// 重排服务以块的 Content（嵌入向量所代表的纯文本）作为文档文本，跨页排序一致：rerank 对每个
+// query-doc 对独立打分，分数不随候选集大小变化。
+func rerankSqlBlocks(query string, sqlBlocks []*sql.Block) []*sql.Block {
+	if !isRerankEnabled() || len(sqlBlocks) < 2 {
+		return sqlBlocks
+	}
+
+	documents := make([]string, len(sqlBlocks))
+	for i, b := range sqlBlocks {
+		documents[i] = b.Content
+	}
+
+	// topN=0 表示不传 top_n，要求服务端返回全部文档评分，避免被服务端 top_n 上限截断
+	indices, _, err := util.Rerank(query, documents, util.RerankOptions{
+		APIKey:        rerankKey(),
+		Endpoint:      rerankEndpoint(),
+		Model:         rerankModel(),
+		RequestFormat: rerankRequestFormat(),
+		Timeout:       rerankTimeout(),
+	})
+	if nil != err {
+		logging.LogErrorf("rerank failed, fallback to vector similarity order: %s", err)
+		return sqlBlocks
+	}
+	if len(indices) != len(sqlBlocks) {
+		// 服务端返回数量与输入不符，按原序降级，避免错位
+		logging.LogErrorf("rerank returned %d indices for %d documents, fallback", len(indices), len(sqlBlocks))
+		return sqlBlocks
+	}
+
+	// 防御重复 index：服务端不应返回重复下标，但若出现则降级，避免某些块丢失、某些块重复
+	seen := make(map[int]bool, len(indices))
+	for _, idx := range indices {
+		if seen[idx] {
+			logging.LogErrorf("rerank returned duplicate index %d, fallback", idx)
+			return sqlBlocks
+		}
+		seen[idx] = true
+	}
+
+	reranked := make([]*sql.Block, len(indices))
+	for i, idx := range indices {
+		reranked[i] = sqlBlocks[idx]
+	}
+	return reranked
 }
 
 // ReindexEmbedding 清空嵌入向量表并触发后台索引器重新计算所有块。异步执行：只入队任务后立即返回。
@@ -586,6 +653,7 @@ func fullReindexEmbedding() {
 		logging.LogWarnf("block_embeddings table not available, skip reindex")
 		return
 	}
+	resetEmbeddingIgnoreMatcher()
 	if err := sql.Exec("DELETE FROM block_embeddings"); err != nil {
 		logging.LogErrorf("clear block_embeddings failed: %s", err)
 		return
@@ -717,6 +785,15 @@ func embeddingTimeout() int {
 		return Conf.AI.Embedding.Timeout
 	}
 	return 30
+}
+
+// embeddingDimensions 返回配置的输出向量维度。0 表示用模型默认维度（不传 dimensions 参数给 API），
+// 仅 text-embedding-3 及以上模型支持自定义维度。文档向量与查询向量必须用相同维度，否则相似度计算会维度不匹配。
+func embeddingDimensions() int {
+	if nil != Conf.AI.Embedding && Conf.AI.Embedding.Enabled && 0 < Conf.AI.Embedding.Dimensions {
+		return Conf.AI.Embedding.Dimensions
+	}
+	return 0
 }
 
 func embeddingModel() string {

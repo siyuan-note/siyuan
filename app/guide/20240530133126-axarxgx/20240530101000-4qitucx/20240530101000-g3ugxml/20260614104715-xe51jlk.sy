@@ -6,7 +6,7 @@
 		"id": "20260614104715-xe51jlk",
 		"title": "ネットワークプロキシ",
 		"type": "doc",
-		"updated": "20260614104730"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614104730-7u2gg5k",
-				"updated": "20260614104730"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -58,12 +58,44 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614104730-tbz888i",
-				"updated": "20260614104730"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
 					"Type": "NodeText",
-					"Data": "[設定 - アプリ - ネットワークプロキシ] で設定します："
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アプリ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "一般"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ネットワークプロキシ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ で設定します："
 				}
 			]
 		},

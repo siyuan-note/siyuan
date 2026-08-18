@@ -13,6 +13,7 @@ import {
     progressBackgroundTask,
     progressLoading,
     progressStatus,
+    processBacklinkIndexCommit,
     setDefRefCount,
     setRefDynamicText,
     transactionError
@@ -26,9 +27,12 @@ import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {renderSnippet} from "../config/util/snippets";
-import {setBodyHighlight} from "../util/assets";
+import {refreshThemeStyle, setBodyHighlight} from "../util/assets";
 import {reloadSync} from "../util/reloadSync";
 import {setTitle} from "../util/processTitle";
+import {ensureUILayout} from "../util/ensureUILayout";
+import {applyEntryVisibility} from "../config/entryVisibility/runtime";
+import {removeBlockPanelEditors} from "../block/panelRemoval";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -54,12 +58,18 @@ class App {
                             case "setAppearance":
                                 appearanceConfigApi.apply(data.data);
                                 break;
+                            case "setEntryVisibility":
+                                applyEntryVisibility(data.data);
+                                break;
                             case "setSnippet":
                                 window.siyuan.config.snippet = data.data;
                                 renderSnippet();
                                 break;
                             case "setDefRefCount":
                                 setDefRefCount(data.data);
+                                break;
+                            case "databaseIndexCommit":
+                                processBacklinkIndexCommit(data.data);
                                 break;
                             case "setRefDynamicText":
                                 setRefDynamicText(data.data);
@@ -119,6 +129,7 @@ class App {
                                 break;
                             case "closeBox":
                             case "removeBox":
+                                removeBlockPanelEditors({notebookId: data.data.box});
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {
                                         const initTab = tab.headElement.getAttribute("data-initdata");
@@ -132,6 +143,7 @@ class App {
                                 });
                                 break;
                             case "removeDoc":
+                                removeBlockPanelEditors({rootIDs: data.data.ids});
                                 getAllTabs().forEach((tab) => {
                                     if (tab.headElement) {
                                         const initTab = tab.headElement.getAttribute("data-initdata");
@@ -157,11 +169,7 @@ class App {
                                 progressBackgroundTask(data.data.tasks);
                                 break;
                             case "refreshtheme":
-                                if ((window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark !== "midnight") || (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight !== "daylight")) {
-                                    (document.getElementById("themeStyle") as HTMLLinkElement).href = data.data.theme;
-                                } else {
-                                    (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = data.data.theme;
-                                }
+                                refreshThemeStyle(data.data.theme);
                                 break;
                             case "openFileById":
                                 openFileById({app: this, id: data.data.id, action: [Constants.CB_GET_FOCUS]});
@@ -173,6 +181,8 @@ class App {
 
         window.siyuan = {
             zIndex: 10,
+            isReady: false,
+            notebooks: [],
             reqIds: {},
             backStack: [],
             layout: {},
@@ -183,27 +193,31 @@ class App {
             altIsPressed: false,
             ws: mainWs,
         };
+        const notebookPromise = setNoteBook();
         fetchPost("/api/system/getConf", {}, async (response) => {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
+            ensureUILayout();
             setBodyHighlight();
             window.siyuan.isPublish = response.data.isPublish;
+            await notebookPromise;
             await loadPlugins(this);
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
                     window.siyuan.menus = new Menus(this);
-                    fetchPost("/api/setting/getCloudUser", {}, userResponse => {
+                    fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
                         window.siyuan.user = userResponse.data;
-                        init(this);
+                        await init(this);
                         setTitle("", true);
                         initMessage();
+                        window.siyuan.isReady = true;
+                        mainWs.flushMainMessages();
                     });
                 });
             });
         });
-        setNoteBook();
         initBlockPopover(this);
     }
 }

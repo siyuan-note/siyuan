@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@ package av
 
 import (
 	"testing"
+	"time"
 )
 
 // leaf 构造一个叶子过滤节点。
@@ -121,6 +122,258 @@ func TestEvalNode_GroupSemantics(t *testing.T) {
 	}
 }
 
+func TestIsRollupFilterValueEmpty(t *testing.T) {
+	filter := &ViewFilter{
+		Value: &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{Contents: []*Value{{Type: KeyTypeDate}}}},
+	}
+	if !isRollupFilterValueEmpty(filter) {
+		t.Fatalf("rollup filter without an absolute value should be empty")
+	}
+
+	filter.RelativeDate = &RelativeDate{Unit: RelativeDateUnitDay, Direction: RelativeDateDirectionThis}
+	if isRollupFilterValueEmpty(filter) {
+		t.Fatalf("rollup filter with a relative date should not be empty")
+	}
+
+	filter.RelativeDate = nil
+	filter.Value.Rollup.Contents[0].Date = &ValueDate{Content: 1, IsNotEmpty: true}
+	if isRollupFilterValueEmpty(filter) {
+		t.Fatalf("rollup filter with an absolute date should not be empty")
+	}
+
+	filter.RelativeDate = &RelativeDate{Unit: RelativeDateUnitDay, Direction: RelativeDateDirectionThis}
+	filter.Value.Rollup.Contents[0] = &Value{Type: KeyTypeNumber}
+	if !isRollupFilterValueEmpty(filter) {
+		t.Fatalf("relative date should not configure a non-date rollup filter")
+	}
+}
+
+func TestRollupRelativeDateFilter(t *testing.T) {
+	relationKey := NewKey("relation", "关联", "", KeyTypeRelation)
+	relationKey.Relation = &Relation{AvID: "target"}
+	rollupKey := NewKey("rollup", "汇总", "", KeyTypeRollup)
+	rollupKey.Rollup = &Rollup{RelationKeyID: relationKey.ID, KeyID: "date"}
+	attrView := &AttributeView{KeyValues: []*KeyValues{
+		{Key: relationKey, Values: []*Value{{
+			KeyID: relationKey.ID, BlockID: "source-item", Type: KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"target-item"}},
+		}}},
+		{Key: rollupKey},
+	}}
+
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	targetDate := &Value{
+		KeyID: "date", BlockID: "target-item", Type: KeyTypeDate,
+		Date: &ValueDate{Content: today.AddDate(0, 0, -1).UnixMilli(), IsNotEmpty: true},
+	}
+	targetView := &AttributeView{KeyValues: []*KeyValues{{Key: NewKey("date", "日期", "", KeyTypeDate), Values: []*Value{targetDate}}}}
+	value := &Value{KeyID: rollupKey.ID, BlockID: "source-item", Type: KeyTypeRollup, Rollup: &ValueRollup{}}
+	filter := &ViewFilter{
+		Qualifier:    FilterQuantifierAny,
+		Operator:     FilterOperatorIsLess,
+		Value:        &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{Contents: []*Value{{Type: KeyTypeDate}}}},
+		RelativeDate: &RelativeDate{Count: 1, Unit: RelativeDateUnitDay, Direction: RelativeDateDirectionThis},
+	}
+
+	if !value.Filter(filter, attrView, "source-item", map[string]*RollupRenderContext{}, map[string]*AttributeView{"target": targetView}) {
+		t.Fatalf("rollup date before today should pass the relative date filter")
+	}
+	targetDate.Date.Content = today.AddDate(0, 0, 1).UnixMilli()
+	if value.Filter(filter, attrView, "source-item", map[string]*RollupRenderContext{}, map[string]*AttributeView{"target": targetView}) {
+		t.Fatalf("future rollup date should not pass the before-today filter")
+	}
+}
+
+func TestRollupFilterUsesEligibleRelationCount(t *testing.T) {
+	relationKey := NewKey("relation", "关联", "", KeyTypeRelation)
+	relationKey.Relation = &Relation{AvID: "target"}
+	rollupKey := NewKey("rollup", "汇总", "", KeyTypeRollup)
+	rollupKey.Rollup = &Rollup{RelationKeyID: relationKey.ID, KeyID: "text"}
+	attrView := &AttributeView{KeyValues: []*KeyValues{
+		{Key: relationKey, Values: []*Value{{
+			KeyID: relationKey.ID, BlockID: "source-item", Type: KeyTypeRelation,
+			Relation: &ValueRelation{
+				BlockIDs: []string{"target-a", "target-b"},
+				Contents: []*Value{
+					{BlockID: "target-a", Type: KeyTypeBlock, Block: &ValueBlock{Content: "A"}},
+					{BlockID: "target-b", Type: KeyTypeBlock, Block: &ValueBlock{Content: "B"}},
+				},
+			},
+		}}},
+		{Key: rollupKey},
+	}}
+	targetView := &AttributeView{KeyValues: []*KeyValues{{
+		Key: NewKey("text", "文本", "", KeyTypeText),
+		Values: []*Value{{
+			KeyID: "text", BlockID: "target-a", Type: KeyTypeText, Text: &ValueText{Content: "value"},
+		}},
+	}}}
+	value := &Value{KeyID: rollupKey.ID, BlockID: "source-item", Type: KeyTypeRollup, Rollup: &ValueRollup{}}
+	filter := &ViewFilter{
+		Qualifier: FilterQuantifierAll,
+		Operator:  FilterOperatorIsNotEmpty,
+		Value:     &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{}},
+	}
+	contexts := map[string]*RollupRenderContext{
+		rollupKey.ID: {EligibleItemIDs: map[string]bool{"target-a": true}},
+	}
+
+	if !value.Filter(filter, attrView, "source-item", contexts, map[string]*AttributeView{"target": targetView}) {
+		t.Fatal("excluded relation items should not be treated as empty rollup values")
+	}
+}
+
+func TestDateEndpointFilter(t *testing.T) {
+	start := time.Date(2025, time.August, 10, 12, 0, 0, 0, time.Local)
+	end := time.Date(2025, time.August, 12, 12, 0, 0, 0, time.Local)
+	value := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{
+			Content:     start.UnixMilli(),
+			IsNotEmpty:  true,
+			Content2:    end.UnixMilli(),
+			IsNotEmpty2: true,
+			HasEndDate:  true,
+		},
+	}
+	startFilterValue := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true},
+	}
+	endFilterValue := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true},
+	}
+
+	if !value.filter(startFilterValue, nil, nil, FilterOperatorIsEqual, DateEndpointStart) {
+		t.Fatalf("start endpoint should match the start date")
+	}
+	if value.filter(startFilterValue, nil, nil, FilterOperatorIsEqual, DateEndpointEnd) {
+		t.Fatalf("end endpoint should not match the start date")
+	}
+	if !value.filter(endFilterValue, nil, nil, FilterOperatorIsEqual, DateEndpointEnd) {
+		t.Fatalf("end endpoint should match the end date")
+	}
+	if !value.filter(startFilterValue, nil, nil, FilterOperatorIsEqual, DateEndpoint("")) {
+		t.Fatalf("missing endpoint should default to the start date")
+	}
+
+	value.Date.HasEndDate = false
+	if !value.filter(startFilterValue, nil, nil, FilterOperatorIsEqual, DateEndpointEnd) {
+		t.Fatalf("end endpoint should fall back to the start date when the end date is disabled")
+	}
+
+	value.Date.HasEndDate = true
+	value.Date.IsNotEmpty2 = false
+	value.Date.Content2 = 0
+	if value.filter(startFilterValue, nil, nil, FilterOperatorIsNotEqual, DateEndpointEnd) {
+		t.Fatalf("an enabled but empty end date should not participate in ordinary comparisons")
+	}
+}
+
+func TestDateEndpointRelativeAndBetweenFilter(t *testing.T) {
+	now := time.Now()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 12, 0, 0, 0, now.Location())
+	yesterday := today.AddDate(0, 0, -1)
+	value := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{
+			Content:     yesterday.UnixMilli(),
+			IsNotEmpty:  true,
+			Content2:    today.UnixMilli(),
+			IsNotEmpty2: true,
+			HasEndDate:  true,
+		},
+	}
+	relativeDate := &RelativeDate{Count: 1, Unit: RelativeDateUnitDay, Direction: RelativeDateDirectionThis}
+	if value.filter(&Value{Type: KeyTypeDate}, relativeDate, nil, FilterOperatorIsEqual, DateEndpointStart) {
+		t.Fatalf("yesterday's start date should not match today")
+	}
+	if !value.filter(&Value{Type: KeyTypeDate}, relativeDate, nil, FilterOperatorIsEqual, DateEndpointEnd) {
+		t.Fatalf("today's end date should match the relative today filter")
+	}
+
+	betweenValue := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{
+			Content:     today.AddDate(0, 0, -2).UnixMilli(),
+			IsNotEmpty:  true,
+			Content2:    today.AddDate(0, 0, 2).UnixMilli(),
+			IsNotEmpty2: true,
+			HasEndDate:  true,
+		},
+	}
+	betweenFilterValue := &Value{
+		Type: KeyTypeDate,
+		Date: &ValueDate{
+			Content:     today.AddDate(0, 0, 1).UnixMilli(),
+			IsNotEmpty:  true,
+			Content2:    today.AddDate(0, 0, 3).UnixMilli(),
+			IsNotEmpty2: true,
+			HasEndDate:  true,
+		},
+	}
+	if betweenValue.filter(betweenFilterValue, nil, nil, FilterOperatorIsBetween, DateEndpointStart) {
+		t.Fatalf("start endpoint should be outside the comparison boundaries")
+	}
+	if !betweenValue.filter(betweenFilterValue, nil, nil, FilterOperatorIsBetween, DateEndpointEnd) {
+		t.Fatalf("end endpoint should be inside the comparison boundaries")
+	}
+}
+
+func TestRollupDateEndpointFilter(t *testing.T) {
+	relationKey := NewKey("relation", "关联", "", KeyTypeRelation)
+	relationKey.Relation = &Relation{AvID: "target"}
+	rollupKey := NewKey("rollup", "汇总", "", KeyTypeRollup)
+	rollupKey.Rollup = &Rollup{RelationKeyID: relationKey.ID, KeyID: "date"}
+	attrView := &AttributeView{KeyValues: []*KeyValues{
+		{Key: relationKey, Values: []*Value{{
+			KeyID: relationKey.ID, BlockID: "source-item", Type: KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"target-item"}},
+		}}},
+		{Key: rollupKey},
+	}}
+
+	start := time.Date(2025, time.August, 10, 12, 0, 0, 0, time.Local)
+	end := time.Date(2025, time.August, 12, 12, 0, 0, 0, time.Local)
+	targetDate := &Value{
+		KeyID: "date", BlockID: "target-item", Type: KeyTypeDate,
+		Date: &ValueDate{
+			Content:     start.UnixMilli(),
+			IsNotEmpty:  true,
+			Content2:    end.UnixMilli(),
+			IsNotEmpty2: true,
+			HasEndDate:  true,
+		},
+	}
+	targetView := &AttributeView{KeyValues: []*KeyValues{{Key: NewKey("date", "日期", "", KeyTypeDate), Values: []*Value{targetDate}}}}
+
+	for _, test := range []struct {
+		qualifier FilterQuantifier
+		expected  bool
+	}{
+		{qualifier: FilterQuantifierAny, expected: true},
+		{qualifier: FilterQuantifierAll, expected: true},
+		{qualifier: FilterQuantifierNone, expected: false},
+	} {
+		value := &Value{KeyID: rollupKey.ID, BlockID: "source-item", Type: KeyTypeRollup, Rollup: &ValueRollup{}}
+		filter := &ViewFilter{
+			Qualifier:    test.qualifier,
+			Operator:     FilterOperatorIsEqual,
+			DateEndpoint: DateEndpointEnd,
+			Value: &Value{Type: KeyTypeRollup, Rollup: &ValueRollup{Contents: []*Value{{
+				Type: KeyTypeDate,
+				Date: &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true},
+			}}}},
+		}
+		actual := value.Filter(filter, attrView, "source-item", map[string]*RollupRenderContext{}, map[string]*AttributeView{"target": targetView})
+		if actual != test.expected {
+			t.Fatalf("unexpected %s rollup endpoint result: expected %t, got %t", test.qualifier, test.expected, actual)
+		}
+	}
+}
+
 func TestRemoveFiltersByColumn(t *testing.T) {
 	// 树结构：root(AND) → [leaf(c1), group(OR) → [leaf(c2), leaf(c1)]]
 	root := group(FilterCombinationAnd, leaf("c1"), group(FilterCombinationOr, leaf("c2"), leaf("c1")))
@@ -150,7 +403,7 @@ func TestRemoveFiltersByColumn(t *testing.T) {
 
 func TestRemoveSelectOptionFromFilters(t *testing.T) {
 	sel := &ViewFilter{Column: "c1", Operator: FilterOperatorContains, Value: &Value{
-		Type:   KeyTypeSelect,
+		Type:    KeyTypeSelect,
 		MSelect: []*ValueSelect{{Content: "A", Color: "1"}, {Content: "B", Color: "2"}},
 	}}
 	root := group(FilterCombinationAnd, sel)
@@ -171,9 +424,300 @@ func TestRemoveSelectOptionFromFilters(t *testing.T) {
 	}
 }
 
+func TestSelectFilterWithMultipleOptions(t *testing.T) {
+	filter := &ViewFilter{
+		Value: &Value{
+			Type:    KeyTypeSelect,
+			MSelect: []*ValueSelect{{Content: "A"}, {Content: "B"}},
+		},
+	}
+	tests := []struct {
+		name     string
+		operator FilterOperator
+		content  string
+		expected bool
+	}{
+		{name: "contains first option", operator: FilterOperatorContains, content: "A", expected: true},
+		{name: "contains second option", operator: FilterOperatorContains, content: "B", expected: true},
+		{name: "contains no option", operator: FilterOperatorContains, content: "C", expected: false},
+		{name: "does not contain first option", operator: FilterOperatorDoesNotContain, content: "A", expected: false},
+		{name: "does not contain second option", operator: FilterOperatorDoesNotContain, content: "B", expected: false},
+		{name: "does not contain any option", operator: FilterOperatorDoesNotContain, content: "C", expected: true},
+		{name: "legacy equal operator", operator: FilterOperatorIsEqual, content: "B", expected: true},
+		{name: "legacy not equal operator", operator: FilterOperatorIsNotEqual, content: "C", expected: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			filter.Operator = test.operator
+			value := &Value{
+				Type:    KeyTypeSelect,
+				MSelect: []*ValueSelect{{Content: test.content}},
+			}
+			if actual := value.Filter(filter, nil, "", nil, nil); test.expected != actual {
+				t.Fatalf("unexpected filter result: got %t, want %t", actual, test.expected)
+			}
+		})
+	}
+}
+
+func TestExactRelationFilter(t *testing.T) {
+	value := &Value{
+		Type: KeyTypeRelation,
+		Relation: &ValueRelation{
+			BlockIDs: []string{"row-a", "row-b"},
+			Contents: []*Value{{Type: KeyTypeBlock, Block: &ValueBlock{Content: "同名主键"}}},
+		},
+	}
+	filter := &ViewFilter{
+		Operator: FilterOperatorContainsAnyItem,
+		Value: &Value{
+			Type:     KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"row-b", "row-c"}},
+		},
+	}
+	if !value.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("relation containing a selected row ID should pass")
+	}
+
+	filter.Operator = FilterOperatorDoesNotContainAnyItem
+	if value.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("relation containing a selected row ID should fail the negative operator")
+	}
+
+	filter.Value.Relation.BlockIDs = []string{"row-c"}
+	if !value.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("relation without selected row IDs should pass the negative operator")
+	}
+
+	filter.Operator = FilterOperatorContainsAnyItem
+	if value.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("relation without selected row IDs should fail the positive operator")
+	}
+
+	filter.Value.Relation.BlockIDs = nil
+	if !value.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("an unconfigured exact relation filter should be ignored")
+	}
+
+	filter.Value.Relation.BlockIDs = []string{"row-c"}
+	filter.Operator = FilterOperatorDoesNotContainAnyItem
+	emptyValue := &Value{Type: KeyTypeRelation}
+	if !emptyValue.Filter(filter, nil, "", nil, nil) {
+		t.Fatalf("an empty relation should pass the negative exact operator")
+	}
+}
+
+func TestExactRelationFilterWithMissingCell(t *testing.T) {
+	filter := &ViewFilter{
+		Column:   "relation",
+		Operator: FilterOperatorDoesNotContainAnyItem,
+		Value: &Value{
+			Type:     KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"row-a"}},
+		},
+	}
+	columnIndexes := map[string]int{"relation": 0}
+	if !evalNode(filter, []*Value{nil}, columnIndexes, nil, "", nil, nil) {
+		t.Fatalf("a missing relation cell should pass the negative exact operator")
+	}
+	if !evalNode(filter, nil, columnIndexes, nil, "", nil, nil) {
+		t.Fatalf("an absent relation value should pass the negative exact operator")
+	}
+
+	filter.Operator = FilterOperatorContainsAnyItem
+	if evalNode(filter, []*Value{nil}, columnIndexes, nil, "", nil, nil) {
+		t.Fatalf("a missing relation cell should fail the positive exact operator")
+	}
+
+	filter.Value.Relation.BlockIDs = nil
+	if !evalNode(filter, []*Value{nil}, columnIndexes, nil, "", nil, nil) {
+		t.Fatalf("an unconfigured exact filter should be ignored for a missing relation cell")
+	}
+}
+
+func TestViewFilterGetAffectValueRelation(t *testing.T) {
+	key := &Key{ID: "relation", Type: KeyTypeRelation}
+	filter := &ViewFilter{
+		Operator: FilterOperatorContainsAnyItem,
+		Value: &Value{
+			Type:     KeyTypeRelation,
+			Relation: &ValueRelation{BlockIDs: []string{"row-a", "row-b"}},
+		},
+	}
+
+	value, allowNearItem := filter.GetAffectValue(key, "new-row")
+	if allowNearItem || nil == value || nil == value.Relation ||
+		1 != len(value.Relation.BlockIDs) || "row-a" != value.Relation.BlockIDs[0] {
+		t.Fatalf("exact relation filter should fill the first selected item, got %#v", value)
+	}
+
+	filter.Operator = FilterOperatorDoesNotContainAnyItem
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("negative exact relation filter should not fill or use a near item")
+	}
+
+	filter.Operator = FilterOperatorContains
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || !allowNearItem {
+		t.Fatalf("keyword relation filter should use a near item")
+	}
+
+	filter.Operator = FilterOperatorDoesNotContain
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("negative keyword relation filter should not fill or use a near item")
+	}
+
+	filter.Operator = FilterOperatorIsEmpty
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("empty relation filter should leave the relation unset")
+	}
+
+	filter.Operator = FilterOperatorIsNotEmpty
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || !allowNearItem {
+		t.Fatalf("non-empty relation filter should use a near item")
+	}
+}
+
+func TestViewFilterGetAffectValueDate(t *testing.T) {
+	location, err := time.LoadLocation("America/New_York")
+	if nil != err {
+		t.Skipf("load time zone failed: %s", err)
+	}
+	originalLocal := time.Local
+	time.Local = location
+	defer func() {
+		time.Local = originalLocal
+	}()
+
+	start := time.Date(2026, time.March, 8, 0, 0, 0, 0, location)
+	key := &Key{ID: "date", Type: KeyTypeDate, Date: &Date{FillSpecificTime: false}}
+	filter := &ViewFilter{
+		Operator: FilterOperatorIsGreater,
+		Value: &Value{
+			Type: KeyTypeDate,
+			Date: &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true},
+		},
+	}
+
+	value, allowNearItem := filter.GetAffectValue(key, "new-row")
+	expected := start.AddDate(0, 0, 1)
+	if allowNearItem || nil == value || nil == value.Date || expected.UnixMilli() != value.Date.Content {
+		t.Fatalf("greater date filter should fill the next calendar day, got %#v", value)
+	}
+	if !value.Date.IsNotTime {
+		t.Fatalf("date default should follow the field-specific time setting")
+	}
+
+	key.Date.FillSpecificTime = true
+	value, _ = filter.GetAffectValue(key, "new-row")
+	if value.Date.IsNotTime {
+		t.Fatalf("date default should include time when configured")
+	}
+
+	filter.Operator = FilterOperatorIsNotEqual
+	value, allowNearItem = filter.GetAffectValue(key, "new-row")
+	if nil != value || allowNearItem {
+		t.Fatalf("not-equal date filter should not fill or use a near item")
+	}
+}
+
+func TestRemoveRelationItemsFromFilters(t *testing.T) {
+	exact := func(column string, operator FilterOperator, blockIDs ...string) *ViewFilter {
+		return &ViewFilter{
+			Column:   column,
+			Operator: operator,
+			Value: &Value{
+				Type:     KeyTypeRelation,
+				Relation: &ValueRelation{BlockIDs: blockIDs},
+			},
+		}
+	}
+	keyword := exact("relation", FilterOperatorContains, "同名主键")
+	root := group(FilterCombinationAnd,
+		exact("relation", FilterOperatorContainsAnyItem, "row-a", "row-b"),
+		group(FilterCombinationOr, exact("relation", FilterOperatorDoesNotContainAnyItem, "row-a")),
+		keyword,
+	)
+
+	got, changed := RemoveRelationItemsFromFilters([]*ViewFilter{root}, "relation", []string{"row-a"})
+	if !changed || 1 != len(got) || 2 != len(got[0].Filters) {
+		t.Fatalf("expected the deleted row ID and emptied nested group to be pruned")
+	}
+	remaining := got[0].Filters[0].Value.Relation.BlockIDs
+	if 1 != len(remaining) || "row-b" != remaining[0] {
+		t.Fatalf("unexpected remaining exact relation IDs: %v", remaining)
+	}
+	if got[0].Filters[1] != keyword {
+		t.Fatalf("keyword relation filter should remain unchanged")
+	}
+}
+
+func TestRemoveExactRelationFiltersByColumn(t *testing.T) {
+	exact := &ViewFilter{
+		Column:   "relation",
+		Operator: FilterOperatorContainsAnyItem,
+		Value:    &Value{Type: KeyTypeRelation, Relation: &ValueRelation{BlockIDs: []string{"row-a"}}},
+	}
+	keyword := &ViewFilter{
+		Column:   "relation",
+		Operator: FilterOperatorContains,
+		Value:    &Value{Type: KeyTypeRelation, Relation: &ValueRelation{BlockIDs: []string{"主键"}}},
+	}
+	got, changed := RemoveExactRelationFiltersByColumn(
+		[]*ViewFilter{group(FilterCombinationAnd, exact, keyword)}, "relation")
+	if !changed || 1 != len(got) || 1 != len(got[0].Filters) || got[0].Filters[0] != keyword {
+		t.Fatalf("only exact filters for the retargeted relation column should be removed")
+	}
+}
+
+func TestAttributeViewRemoveRelationFilterItems(t *testing.T) {
+	exact := func(column string, blockIDs ...string) *ViewFilter {
+		return &ViewFilter{
+			Column:   column,
+			Operator: FilterOperatorContainsAnyItem,
+			Value: &Value{
+				Type:     KeyTypeRelation,
+				Relation: &ValueRelation{BlockIDs: blockIDs},
+			},
+		}
+	}
+	attrView := &AttributeView{
+		KeyValues: []*KeyValues{
+			{Key: &Key{ID: "target-relation", Type: KeyTypeRelation, Relation: &Relation{AvID: "target"}}},
+			{Key: &Key{ID: "other-relation", Type: KeyTypeRelation, Relation: &Relation{AvID: "other"}}},
+		},
+		Views: []*View{
+			{Filters: []*ViewFilter{group(FilterCombinationAnd,
+				exact("target-relation", "row-a"),
+				exact("other-relation", "row-a"),
+			)}},
+		},
+	}
+	if !attrView.RemoveRelationFilterItems("target", []string{"row-a"}) {
+		t.Fatalf("removing a selected target row should report a filter change")
+	}
+	filters := attrView.Views[0].Filters
+	if 1 != len(filters) || 1 != len(filters[0].Filters) ||
+		"other-relation" != filters[0].Filters[0].Column {
+		t.Fatalf("only filters for relation columns pointing to the target database should change")
+	}
+
+	if !attrView.RemoveRelationFilterItems("other", []string{"row-a"}) {
+		t.Fatalf("removing the final selected row should report a filter change")
+	}
+	if 1 != len(attrView.Views[0].Filters) || !attrView.Views[0].Filters[0].IsGroup() ||
+		0 != len(attrView.Views[0].Filters[0].Filters) {
+		t.Fatalf("an emptied filter tree should retain an empty AND root group")
+	}
+}
+
 func TestRenameSelectOptionInFilters(t *testing.T) {
 	sel := &ViewFilter{Column: "c1", Operator: FilterOperatorContains, Value: &Value{
-		Type:   KeyTypeMSelect,
+		Type:    KeyTypeMSelect,
 		MSelect: []*ValueSelect{{Content: "old", Color: "1"}},
 	}}
 	nestedSel := &ViewFilter{Column: "c1", Value: &Value{Type: KeyTypeSelect, MSelect: []*ValueSelect{{Content: "old", Color: "1"}}}}
@@ -189,7 +733,9 @@ func TestRenameSelectOptionInFilters(t *testing.T) {
 }
 
 func TestCloneFilters(t *testing.T) {
-	original := []*ViewFilter{group(FilterCombinationAnd, leaf("c1"), group(FilterCombinationOr, leaf("c2")))}
+	endpointLeaf := leaf("c1")
+	endpointLeaf.DateEndpoint = DateEndpointEnd
+	original := []*ViewFilter{group(FilterCombinationAnd, endpointLeaf, group(FilterCombinationOr, leaf("c2")))}
 	cloned := CloneFilters(original)
 	if len(cloned) != len(original) {
 		t.Fatalf("clone length mismatch")
@@ -202,6 +748,9 @@ func TestCloneFilters(t *testing.T) {
 	// 嵌套分组也应深拷贝
 	if len(cloned[0].Filters[1].Filters) != 1 {
 		t.Fatalf("nested group children not cloned")
+	}
+	if DateEndpointEnd != cloned[0].Filters[0].DateEndpoint {
+		t.Fatalf("date endpoint not cloned")
 	}
 }
 
@@ -234,6 +783,16 @@ func TestPruneInvalidColumnFilters(t *testing.T) {
 	if len(got) != 0 || !changed {
 		t.Fatalf("fully-invalid root should be dropped")
 	}
+
+	// 原本就是空的根组（无筛选条件视图的合法状态）不应报告 changed，否则会误触发保存
+	emptyRoot := group(FilterCombinationAnd) // Filters 为 nil
+	got, changed = PruneInvalidColumnFilters([]*ViewFilter{emptyRoot}, valid)
+	if changed {
+		t.Fatalf("originally empty group should not report changed")
+	}
+	if len(got) != 0 {
+		t.Fatalf("empty group should be pruned, got %d", len(got))
+	}
 }
 
 func TestRemapFilterColumns(t *testing.T) {
@@ -252,8 +811,8 @@ func TestUpgradeSpec5(t *testing.T) {
 	// spec 4 + 扁平叶子 → 包装成根组
 	av4 := &AttributeView{Spec: 4, Views: []*View{{Filters: []*ViewFilter{leaf("c1"), leaf("c2")}}}}
 	UpgradeSpec(av4)
-	if av4.Spec != 5 {
-		t.Fatalf("spec should be upgraded to 5, got %d", av4.Spec)
+	if av4.Spec != CurrentSpec {
+		t.Fatalf("spec should be upgraded to %d, got %d", CurrentSpec, av4.Spec)
 	}
 	filters := av4.Views[0].Filters
 	if len(filters) != 1 || !filters[0].IsGroup() || FilterCombinationAnd != filters[0].Combination {

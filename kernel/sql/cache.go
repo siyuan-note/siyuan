@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,7 @@ package sql
 
 import (
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/lute/ast"
@@ -43,14 +44,44 @@ var blockCache, _ = ristretto.NewCache(&ristretto.Config{
 	NumCounters: 100000,
 	MaxCost:     10240,
 	BufferItems: 64,
+	OnExit: func(value any) {
+		if entry, ok := value.(*blockCacheEntry); ok {
+			removeBlockCacheKey(entry.block.ID, entry.key)
+		}
+	},
 })
+
+var blockCacheKeys = map[string]map[string]struct{}{}
+var blockCacheKeysMu sync.Mutex
+
+type blockCacheEntry struct {
+	key   string
+	block *Block
+}
+
+func encryptedBoxCacheUnavailable(boxID string) bool {
+	return IsEncryptedBoxFn != nil && IsEncryptedBoxFn(boxID) &&
+		(IsBoxUnlockedFn == nil || !IsBoxUnlockedFn(boxID))
+}
+
+// blockCacheKey 为加密笔记本使用 box 维度缓存键；普通笔记本保持原有全局键，避免影响既有查询路径。
+func blockCacheKey(id, boxID string) string {
+	if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(boxID) {
+		return boxID + "\x00" + id
+	}
+	return id
+}
 
 func ClearCache() {
 	blockCache.Clear()
+	blockCacheKeysMu.Lock()
+	blockCacheKeys = map[string]map[string]struct{}{}
+	blockCacheKeysMu.Unlock()
+	clearRefCache()
 }
 
 func putBlockCache(block *Block) {
-	if cacheDisabled {
+	if cacheDisabled || encryptedBoxCacheUnavailable(block.Box) {
 		return
 	}
 
@@ -61,40 +92,94 @@ func putBlockCache(block *Block) {
 	}
 	cloned.Content = strings.ReplaceAll(cloned.Content, search.SearchMarkLeft, "")
 	cloned.Content = strings.ReplaceAll(cloned.Content, search.SearchMarkRight, "")
-	blockCache.Set(cloned.ID, cloned, 1)
+	key := blockCacheKey(cloned.ID, cloned.Box)
+	addBlockCacheKey(cloned.ID, key)
+	if !blockCache.Set(key, &blockCacheEntry{key: key, block: cloned}, 1) {
+		removeBlockCacheKey(cloned.ID, key)
+	}
 }
 
 func getBlockCache(id string) (ret *Block) {
-	if cacheDisabled {
+	return getBlockCacheInBox(id, "")
+}
+
+func getBlockCacheInBox(id, boxID string) (ret *Block) {
+	if cacheDisabled || encryptedBoxCacheUnavailable(boxID) {
 		return
 	}
 
-	b, _ := blockCache.Get(id)
+	b, _ := blockCache.Get(blockCacheKey(id, boxID))
 	if nil != b {
-		ret = b.(*Block)
+		if entry, ok := b.(*blockCacheEntry); ok {
+			ret = entry.block
+		}
 	}
 	return
 }
 
 func removeBlockCache(id string) {
-	blockCache.Del(id)
+	blockCacheKeysMu.Lock()
+	keys := blockCacheKeys[id]
+	delete(blockCacheKeys, id)
+	blockCacheKeysMu.Unlock()
+	for key := range keys {
+		blockCache.Del(key)
+	}
 	removeRefCacheByDefID(id)
 }
 
-var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute) // [defBlockID]map[refBlockID]*Ref
+func addBlockCacheKey(id, key string) {
+	blockCacheKeysMu.Lock()
+	defer blockCacheKeysMu.Unlock()
+	keys := blockCacheKeys[id]
+	if keys == nil {
+		keys = map[string]struct{}{}
+		blockCacheKeys[id] = keys
+	}
+	keys[key] = struct{}{}
+}
+
+func removeBlockCacheKey(id, key string) {
+	blockCacheKeysMu.Lock()
+	defer blockCacheKeysMu.Unlock()
+	if keys := blockCacheKeys[id]; keys != nil {
+		delete(keys, key)
+		if len(keys) == 0 {
+			delete(blockCacheKeys, id)
+		}
+	}
+}
+
+var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute)
+
+func refCacheKey(defBlockID, boxID string) string {
+	return boxID + "\x00" + defBlockID
+}
 
 func GetRefsCacheByDefID(defID string) (ret []*Ref) {
-	for defBlockID, refs := range defIDRefsCache.Items() {
-		if defBlockID == defID {
+	return GetRefsCacheByDefIDInBox(defID, "")
+}
+
+func GetRefsCacheByDefIDInBox(defID, boxID string) (ret []*Ref) {
+	if encryptedBoxCacheUnavailable(boxID) {
+		return
+	}
+	key := refCacheKey(defID, boxID)
+	for k, refs := range defIDRefsCache.Items() {
+		if k == key {
 			for _, ref := range refs.Object.(map[string]*Ref) {
 				ret = append(ret, ref)
 			}
 		}
 	}
 	if 1 > len(ret) {
-		ret = QueryRefsByDefID(defID, false)
-		for _, ref := range ret {
-			putRefCache(ref)
+		allRefs := QueryRefsByDefIDInBox(defID, false, boxID)
+		for _, ref := range allRefs {
+			// 按 box 过滤：boxID 非空时只选同 box 的 Ref，boxID 为空时全部保留
+			if boxID == "" || ref.Box == boxID {
+				ret = append(ret, ref)
+				putRefCache(boxID, ref)
+			}
 		}
 	}
 	return
@@ -102,18 +187,26 @@ func GetRefsCacheByDefID(defID string) (ret []*Ref) {
 
 func CacheRef(tree *parse.Tree, refNode *ast.Node) {
 	ref := buildRef(tree, refNode)
-	putRefCache(ref)
+	putRefCache(tree.Box, ref)
 }
 
-func putRefCache(ref *Ref) {
-	defBlockRefs, ok := defIDRefsCache.Get(ref.DefBlockID)
+func putRefCache(boxID string, ref *Ref) {
+	if encryptedBoxCacheUnavailable(boxID) {
+		return
+	}
+	key := refCacheKey(ref.DefBlockID, boxID)
+	defBlockRefs, ok := defIDRefsCache.Get(key)
 	if !ok {
 		defBlockRefs = map[string]*Ref{}
 	}
 	defBlockRefs.(map[string]*Ref)[ref.BlockID] = ref
-	defIDRefsCache.SetDefault(ref.DefBlockID, defBlockRefs)
+	defIDRefsCache.SetDefault(key, defBlockRefs)
 }
 
 func removeRefCacheByDefID(defID string) {
-	defIDRefsCache.Delete(defID)
+	defIDRefsCache.Delete(refCacheKey(defID, ""))
+}
+
+func clearRefCache() {
+	defIDRefsCache.Flush()
 }

@@ -2,18 +2,28 @@
 
 .protyle-wysiwyg {
   padding: 16px 16px 16px 24px;
-  cursor: text;
   box-sizing: border-box;
+  // 移除三击无法选中整个 https://github.com/siyuan-note/siyuan/issues/8511
   user-select: auto;
   overflow-x: clip;
+
+  &.protyle--image-animation-paused,
+  .protyle--image-animation-paused & {
+    image-animation: paused;
+  }
 
   &--empty:empty::before {
     color: var(--b3-empty-color);
     content: attr(placeholder);
+    cursor: text;
   }
 
   .protyle-breadcrumb__bar {
     font-size: 14px;
+  }
+
+  .sy__backlink & > .protyle-breadcrumb__bar {
+    user-select: none;
   }
 
   &:focus {
@@ -22,6 +32,16 @@
 
   [data-node-id] {
     position: relative;
+
+    &[data-type="NodeHeading"] {
+      & > .protyle-heading-number__measure {
+        position: absolute;
+        visibility: hidden;
+        white-space: pre;
+        color: var(--b3-theme-on-surface-light);
+        pointer-events: none;
+      }
+    }
 
     &.dragover {
       &__left::after,
@@ -189,7 +209,6 @@
         word-break: keep-all;
         height: calc(1.625em + 8px);
         line-height: calc(1.625em + 8px);
-        touch-action: none;
 
         & ~ [data-type="NodeHeading"] {
           &.h1 {
@@ -226,23 +245,24 @@
           position: absolute;
           top: 50%;
           left: 50%;
-          height: max(14px, 1em);
-          width: max(14px, 1em);
-          margin: min(-7px, -.5em) 0 0 min(-7px, -.5em);
+          height: max(18px, 1em);
+          width: max(18px, 1em);
+          margin: min(-9px, -0.5em) 0 0 min(-9px, -0.5em);
           border-radius: 50%;
           transition: var(--b3-transition);
         }
 
         svg {
           width: 34px;
-          height: max(14px, 1em - 8px);
+          height: max(14px, 1em - 4px);
           display: block;
           z-index: 1;
           position: relative;
           pointer-events: none;
         }
 
-        &--order::after {
+        &--order::after,
+        &--task::after {
           border-radius: var(--b3-border-radius);
         }
       }
@@ -543,24 +563,27 @@
     &.table[custom-pinthead="true"] {
       table {
         max-height: 50vh;
+        overflow: auto;
+        border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
+        box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
+
+        &::-webkit-scrollbar-track:vertical,
+        &::-webkit-scrollbar-corner {
+          background-color: var(--b3-parent-background);
+        }
       }
 
       thead {
         position: sticky;
-        top: 1px;
+        top: 0;
         z-index: 2;
-        box-shadow: 0 -1px 0 var(--b3-border-color) inset, 0 -1px 0 0 var(--b3-border-color);
+        box-shadow: 0 -1px 0 var(--b3-border-color) inset;
         background-color: var(--b3-parent-background);
 
         th {
           border-top: 0;
         }
       }
-    }
-
-    &.table table {
-      display: inline-block;
-      vertical-align: top;
     }
 
     .img {
@@ -646,6 +669,8 @@
           -webkit-user-modify: read-only;
         }
       }
+
+      user-select: none;
 
       &--drag {
         .iframe-content::after {
@@ -784,55 +809,46 @@
   [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
     @include mixin.text-clamp(1);
     opacity: .38;
-    font-size: 16px;
-    height: 26px;
-    line-height: 26px;
+
+    // 隐藏容器块的后续子块，避免光标移入折叠内容带来的一系列问题
+    &.bq > [data-node-id] ~ [data-node-id],
+    &.callout > .callout-content > [data-node-id] ~ [data-node-id] {
+      display: none;
+    }
 
     .protyle-attr {
       opacity: 0;
     }
 
-    &.list {
-      height: 34px;
-
-      .li:first-child {
-        overflow: hidden;
-        height: 34px;
-      }
-    }
-
-    &[data-type="NodeBlockQueryEmbed"] {
-      height: 42px;
-
-      .protyle-wysiwyg__embed {
-        height: 34px;
-        overflow: hidden;
-      }
-    }
-
     &.av {
-      height: 109px;
+      height: 4.8em;
     }
 
-    &.sb,
     &.table {
-      height: 36px;
+      height: calc(1.625em + 6px);
     }
 
-    &.bq {
-      height: 42px;
+    &.sb {
+      height: calc(1.625em + 12px);
+      display: flex;
+    }
 
-      & > div:first-child {
-        font-size: 16px;
-        height: 26px;
-        line-height: 26px;
-        overflow: hidden;
-      }
+    &.list {
+      height: calc(1.625em + 12px);
+    }
+
+    &.callout {
+      height: calc(1.625em * 2.14 + 8px);
+    }
+
+    &[data-type="NodeBlockQueryEmbed"],
+    &.bq {
+      height: calc(1.625em + 8px);
     }
 
     &.code-block {
       line-height: 1.625;
-      height: 25px;
+      height: 1.625em;
 
       .protyle-action__language {
         opacity: .86;
@@ -843,6 +859,10 @@
       .protyle-action__menu {
         margin-top: -2px;
       }
+    }
+
+    .protyle-wysiwyg__embed {
+      overflow: hidden;
     }
   }
 }
@@ -869,6 +889,28 @@
   }
 }
 
+body[data-format-painter] .protyle-wysiwyg[data-readonly="false"] {
+  cursor: text;
+}
+
+.protyle-format-painter__cursor {
+  position: fixed;
+  z-index: 9;
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--b3-theme-on-background);
+  pointer-events: none;
+  will-change: transform;
+
+  svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+  }
+}
+
 // 在思源中，不论只读模式还是预览点击图片都可以进行预览
 .protyle .img > span:nth-child(2) {
   cursor: pointer;
@@ -876,6 +918,15 @@
 
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[data-readonly="false"] {
+  &[contenteditable="true"] [data-node-id].table {
+    padding-right: 30px;
+    padding-bottom: 30px;
+  }
+
+  caption {
+    cursor: pointer;
+  }
+
   span[data-type~="inline-math"],
   .protyle-action__language,
   .render-node:not([data-type="NodeBlockQueryEmbed"]) {
@@ -980,7 +1031,7 @@
       }
     }
 
-    .av__row .av__cell[data-dtype="block"] > .block__icon[data-type="copy"] {
+    .av__row .av__cell[data-dtype="block"] > .av__cell-action[data-type="copy"] {
       display: flex;
     }
   }

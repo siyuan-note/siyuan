@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/parse"
+	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -68,7 +69,7 @@ func RemoveBookmark(bookmark string) (err error) {
 
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == bookmark {
 				node.RemoveIALAttr("bookmark")
-				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+				cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 				changed = true
 			}
 		}
@@ -123,7 +124,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 	if nil != err {
 		return
 	}
-	
+
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
 		tree, e := LoadTreeByBlockID(treeID)
@@ -140,7 +141,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 
 			if bookmarkAttrVal := node.IALAttr("bookmark"); bookmarkAttrVal == oldBookmark {
 				node.SetIALAttr("bookmark", newBookmark)
-				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
+				cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 				changed = true
 			}
 		}
@@ -183,6 +184,35 @@ func (s Bookmarks) Less(i, j int) bool { return s[i].Name < s[j].Name }
 
 func BookmarkLabels() (ret []string) {
 	ret = sql.QueryBookmarkLabels()
+	return
+}
+
+func BookmarkLabelsByPublishAccess(c *gin.Context, publishAccess PublishAccess) (ret []string) {
+	return filterBookmarkLabelsByPublishAccess(c, publishAccess, sql.QueryBookmarkLabelBlocks())
+}
+
+func filterBookmarkLabelsByPublishAccess(c *gin.Context, publishAccess PublishAccess, blocks []*sql.BookmarkLabelBlock) (ret []string) {
+	ret = []string{}
+	publishInvisible := GetInvisiblePublishAccess(publishAccess)
+	publishDisable := GetDisablePublishAccess(publishAccess)
+	labels := map[string]bool{}
+	for _, block := range blocks {
+		if block == nil || block.Label == "" ||
+			!CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishInvisible) ||
+			!CheckPathAccessableByPublishIgnore(block.Box, block.Path, publishDisable) {
+			continue
+		}
+		passwordID, password := GetPathPasswordByPublishAccess(block.Box, block.Path, publishAccess)
+		if password != "" && !CheckPublishAuthCookie(c, passwordID, password) {
+			continue
+		}
+		labels[block.Label] = true
+	}
+
+	for label := range labels {
+		ret = append(ret, label)
+	}
+	sort.Strings(ret)
 	return
 }
 

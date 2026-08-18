@@ -177,8 +177,12 @@
       color: var(--b3-callout-note);
     }
 
-    .callout-icon:empty {
-      display: none;
+    .callout-icon {
+      font-variant-emoji: emoji;
+
+      &:empty {
+        display: none;
+      }
     }
 
     &[data-subtype="WARNING"] {
@@ -326,21 +330,64 @@
   }
 
   table {
-    border-collapse: collapse;
+    --b3-table-border-radius-top-left: var(--b3-border-radius-s);
+    --b3-table-border-radius-top-right: var(--b3-border-radius-s);
+    --b3-table-border-radius-bottom-right: var(--b3-border-radius-s);
+    --b3-table-border-radius-bottom-left: var(--b3-border-radius-s);
+    border-collapse: separate;
     empty-cells: show;
     margin: 0;
-    overflow: auto;
     border-spacing: 0;
     width: max-content;
 
-    tr:nth-child(even) td {
-      background-color: var(--b3-table-even-background);
+    thead,
+    tbody {
+      position: relative;
+
+      &::after {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        border-right: 1px solid var(--b3-theme-surface-lighter);
+        border-left: 1px solid var(--b3-theme-surface-lighter);
+        box-sizing: border-box;
+        content: "";
+        pointer-events: none;
+      }
+    }
+
+    thead::after {
+      border-top: 1px solid var(--b3-theme-surface-lighter);
+      border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) 0 0;
+    }
+
+    tbody:last-of-type::after {
+      border-bottom: 1px solid var(--b3-theme-surface-lighter);
+      border-radius: 0 0 var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
+    }
+
+    thead > tr:first-child > :first-child {
+      border-top-left-radius: var(--b3-table-border-radius-top-left);
+    }
+
+    thead > tr:first-child > :nth-last-child(1 of :not(.fn__none)) {
+      border-top-right-radius: var(--b3-table-border-radius-top-right);
+    }
+
+    tbody:last-of-type > tr:last-child > :first-child {
+      border-bottom-left-radius: var(--b3-table-border-radius-bottom-left);
+    }
+
+    tbody:last-of-type > tr:last-child > :nth-last-child(1 of :not(.fn__none)) {
+      border-bottom-right-radius: var(--b3-table-border-radius-bottom-right);
     }
 
     td,
     th {
       padding: 4px 8px;
-      border: 1px solid var(--b3-theme-surface-lighter);
+      border: 0;
+      border-right: 1px solid var(--b3-theme-surface-lighter);
+      border-bottom: 1px solid var(--b3-theme-surface-lighter);
       box-sizing: border-box;
       max-width: 620px;
       word-wrap: break-word;
@@ -352,6 +399,11 @@
       }
     }
 
+    th:not([align]),
+    th[align=""] {
+      text-align: start;
+    }
+
     thead th,
     thead td {
       font-weight: 600;
@@ -361,6 +413,22 @@
     tbody td {
       font-weight: normal;
     }
+  }
+
+  [data-type="NodeTable"][custom-sy-table-header-row="false"] thead th,
+  [data-type="NodeTable"][custom-sy-table-header-row="false"] thead td {
+    font-weight: normal;
+  }
+
+  [data-type="NodeTable"]:not([custom-sy-table-header-row="false"]) thead th,
+  [data-type="NodeTable"]:not([custom-sy-table-header-row="false"]) thead td {
+    background-color: var(--b3-table-even-background);
+  }
+
+  [data-type="NodeTable"][custom-sy-table-header-column="true"] tr > th:first-child,
+  [data-type="NodeTable"][custom-sy-table-header-column="true"] tr > td:first-child {
+    font-weight: 600;
+    background-color: var(--b3-table-even-background);
   }
 
   code:not(.hljs),
@@ -593,11 +661,15 @@
       word-break: break-word;
       white-space: break-spaces;
       line-height: normal;
-      padding: 4px 0;
 
       & > span {
         flex-grow: 1;
         width: 0;
+        padding: 4px 0;
+
+        &:empty {
+          display: none;
+        }
       }
     }
   }
@@ -610,6 +682,18 @@
       max-width: 100%;
     }
   }
+}
+
+.protyle-wysiwyg .table > div:first-child,
+.b3-typography .table > div:first-child {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.protyle-wysiwyg [data-node-id].table table,
+.b3-typography .table table {
+  display: inline-block;
+  vertical-align: top;
 }
 
 .b3-typography {
@@ -802,10 +886,6 @@
       margin: 0;
       width: 1em;
     }
-  }
-
-  &-wysiwyg .table > div:first-child {
-    overflow: auto;
   }
 }
 

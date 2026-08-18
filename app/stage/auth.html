@@ -105,6 +105,7 @@
             position: fixed;
             top: 0;
             z-index: 502;
+            app-region: no-drag;
             transform: translate3d(0, -100px, 0);
             opacity: 0;
             transition: opacity 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms, transform 0.15s cubic-bezier(0, 0, 0.2, 1) 0ms;
@@ -173,26 +174,38 @@
             font-size: 12px;
             margin: 16px 0;
         }
+
+        .auth-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .auth-actions > .b3-button {
+            margin: 16px 0 0;
+        }
     </style>
 </head>
 <body>
 <div style="-webkit-app-region: drag;height: 32px;width: 100%;position: absolute;top: 0;"></div>
 <div style="position: relative;z-index: 2;text-align: center">
     <h1 style="margin-bottom: 48px;color:var(--b3-theme-on-background)">{{.workspace}}</h1>
-    <input class="b3-text-field" id="authCode" type="password" placeholder="{{.l0}}"/><br>
-    <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
-        <img id="captchaImg" style="top: 1px;position: absolute;height: 26px;right: 1px;cursor: pointer">
-        <input id="captcha" class="b3-text-field" placeholder="{{.l3}}">
+    <div id="authCodePanel"{{if not .accessAuthCodeEnabled}} style="display: none"{{end}}>
+        <input class="b3-text-field" id="authCode" type="password" placeholder="{{.l0}}"/><br>
+        <div style="position: relative;width: 240px;margin: 8px auto 0;display: none">
+            <img id="captchaImg" style="top: 1px;position: absolute;height: 26px;right: 1px;cursor: pointer">
+            <input id="captcha" class="b3-text-field" placeholder="{{.l3}}">
+        </div>
     </div>
-    <div style="width: 240px; margin: 8px auto; text-align: left; display: flex; align-items: center;">
-        <input type="checkbox" id="rememberMe" style="margin-right: 8px;">
-        <label for="rememberMe" style="color: var(--b3-theme-on-surface); font-size: 14px;">{{.l10}}</label>
+    <div class="auth-actions">
+        {{if .accessAuthCodeEnabled}}<button class="b3-button" onclick="submitAuth()">{{.l1}}</button>{{end}}
+        {{if .oidcEnabled}}<button class="b3-button" id="oidcLogin" onclick="startOIDC()">{{.l12}}</button>{{end}}
+        <div style="width: 240px; margin: 8px auto; text-align: left; display: flex; align-items: center;">
+            <input type="checkbox" id="rememberMe" style="margin-right: 8px;">
+            <label for="rememberMe" style="color: var(--b3-theme-on-surface); font-size: 14px;">{{.l10}}</label>
+        </div>
+        <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
     </div>
-    <button class="b3-button" onclick="submitAuth()">{{.l1}}</button>
-    <div class="ft__on-surface">
-        {{.l2}}
-    </div>
-    <button class="b3-button b3-button--white" onclick="exitSiYuan()">{{.l5}}</button>
     <div class="ft__on-surface">
         {{.l7}}
     </div>
@@ -496,6 +509,108 @@
         }, 6000)
     }
 
+    const showOIDCError = (message) => {
+        const messageElement = document.querySelector('#message')
+        messageElement.classList.add('b3-snackbar--show')
+        messageElement.firstElementChild.textContent = String(message || '{{.l13}}')
+        setTimeout(() => {
+            messageElement.classList.remove('b3-snackbar--show')
+            messageElement.firstElementChild.textContent = ''
+        }, 6000)
+    }
+    window.handleOIDCAuthError = showOIDCError
+
+    let oidcPollTimer
+    const pollOIDC = (pollToken) => {
+        clearInterval(oidcPollTimer)
+        oidcPollTimer = setInterval(() => {
+            fetch('/api/system/oidc/poll', {
+                method: 'POST',
+                body: JSON.stringify({pollToken}),
+            }).then((response) => response.json()).then((response) => {
+                if (response.code !== 0) {
+                    clearInterval(oidcPollTimer)
+                    showOIDCError(response.msg)
+                    return
+                }
+                if (response.data.status === 'completed') {
+                    clearInterval(oidcPollTimer)
+                    window.location.href = response.data.to || toPath
+                }
+            }).catch(() => {
+                clearInterval(oidcPollTimer)
+                showOIDCError('{{.l13}}')
+            })
+        }, 1000)
+    }
+
+    const handleOIDCCallback = (callbackURL, retryCount = 0) => {
+        fetch('/api/system/oidc/mobileCallback', {
+            method: 'POST',
+            body: JSON.stringify({callbackURL}),
+        }).then((response) => response.json()).then((response) => {
+            if (response.code === 0) {
+                window.location.href = response.data.to || toPath
+            } else {
+                showOIDCError(response.msg)
+            }
+        }).catch(() => {
+            if (retryCount < 4) {
+                setTimeout(() => handleOIDCCallback(callbackURL, retryCount + 1), 1000 * (retryCount + 1))
+                return
+            }
+            showOIDCError('{{.l13}}')
+        })
+    }
+    window.handleOIDCCallback = handleOIDCCallback
+    window.handleOidcCallbackLink = handleOIDCCallback
+
+    const startOIDC = () => {
+        let flow = 'web'
+        if (window.JSAndroid || window.JSHarmony || window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openAuthURL) {
+            flow = 'mobile'
+        } else {
+            try {
+                if (require('electron')) {
+                    flow = 'desktop'
+                }
+            } catch (e) {
+                // 浏览器使用当前页面完成回调
+            }
+        }
+        const button = document.getElementById('oidcLogin')
+        button.disabled = true
+        fetch('/api/system/oidc/start', {
+            method: 'POST',
+            body: JSON.stringify({flow, to: toPath, rememberMe: document.getElementById('rememberMe').checked}),
+        }).then((response) => response.json()).then((response) => {
+            button.disabled = false
+            if (response.code !== 0) {
+                showOIDCError(response.msg)
+                return
+            }
+            if (flow === 'mobile') {
+                if (window.JSAndroid) {
+                    window.JSAndroid.openAuthURL(response.data.authURL)
+                } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.openAuthURL) {
+                    window.webkit.messageHandlers.openAuthURL.postMessage(response.data.authURL)
+                } else {
+                    window.JSHarmony.openAuthURL(response.data.authURL)
+                }
+                return
+            }
+            if (flow === 'desktop') {
+                require('electron').shell.openExternal(response.data.authURL)
+                pollOIDC(response.data.pollToken)
+                return
+            }
+            window.location.href = response.data.authURL
+        }).catch(() => {
+            button.disabled = false
+            showOIDCError('{{.l13}}')
+        })
+    }
+
     const submitAuth = () => {
         const inputElement = document.getElementById('authCode')
         const captchaElement = document.getElementById('captcha')
@@ -540,8 +655,14 @@
     }
 
     const init = async () => {
+        let isDark = false
         if ({{.appearanceModeOS}} && window.matchMedia('(prefers-color-scheme: dark)').matches || {{.appearanceMode}} ===1) {
             document.body.classList.add('dark')
+            isDark = true
+        }
+        // 同步外观到原生壳：让 iOS 顶/底条与认证页背景一致
+        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.changeStatusBar) {
+            window.webkit.messageHandlers.changeStatusBar.postMessage((isDark ? "#1e1e1e" : "#fff") + " " + (isDark ? 1 : 0))
         }
         if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
             document.querySelector('.b3-button--white').remove()
@@ -566,6 +687,18 @@
             });
         } catch (e) {
             // console.log(e)
+        }
+        if (window.JSAndroid && window.JSAndroid.getOIDCCallback) {
+            const callbackURL = window.JSAndroid.getOIDCCallback()
+            if (callbackURL) {
+                handleOIDCCallback(callbackURL)
+            }
+        }
+        if (window.JSHarmony && window.JSHarmony.getOIDCCallback) {
+            const callbackURL = window.JSHarmony.getOIDCCallback()
+            if (callbackURL) {
+                handleOIDCCallback(callbackURL)
+            }
         }
 
         const inputElement = document.getElementById('authCode')

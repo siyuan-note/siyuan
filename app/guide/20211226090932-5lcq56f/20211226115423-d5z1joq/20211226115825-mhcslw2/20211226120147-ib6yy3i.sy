@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226120147-ib6yy3i",
-		"title": "內容塊類型",
+		"title": "內容區塊類型",
 		"type": "doc",
-		"updated": "20260425180526"
+		"updated": "20260803171606"
 	},
 	"Children": [
 		{
@@ -15,12 +15,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-2s70boj",
-				"updated": "20260425180132"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "內容塊類型簡述"
+					"Data": "內容區塊類型簡述"
 				}
 			]
 		},
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-dhw60l6",
-				"updated": "20211228134745"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "滑鼠懸浮在內容塊上左側會出現該內容塊對應的圖示。"
+					"Data": "滑鼠懸浮在內容區塊上左側會出現該內容區塊對應的圖示。"
 				}
 			]
 		},
@@ -49,7 +49,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226120227-nx8tlf5",
-				"updated": "20260425180132"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -150,7 +150,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "段落塊"
+									"Data": "段落區塊"
 								}
 							]
 						},
@@ -160,7 +160,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "葉子塊"
+									"Data": "葉子區塊"
 								}
 							]
 						}
@@ -219,7 +219,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "標題塊"
+									"Data": "標題區塊"
 								}
 							]
 						},
@@ -229,7 +229,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "葉子塊"
+									"Data": "葉子區塊"
 								}
 							]
 						}
@@ -288,7 +288,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "數學公式塊"
+									"Data": "數學公式區塊"
 								}
 							]
 						},
@@ -298,7 +298,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "葉子塊"
+									"Data": "葉子區塊"
 								}
 							]
 						}
@@ -357,7 +357,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "代碼塊"
+									"Data": "代碼區塊"
 								}
 							]
 						},
@@ -367,7 +367,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "葉子塊"
+									"Data": "葉子區塊"
 								}
 							]
 						}
@@ -430,7 +430,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "塊"
+									"Data": "區塊"
 								}
 							]
 						},
@@ -440,7 +440,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "葉子塊"
+									"Data": "葉子區塊"
 								}
 							]
 						}
@@ -499,7 +499,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "嵌入塊"
+									"Data": "嵌入區塊"
 								}
 							]
 						},
@@ -509,7 +509,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "葉子塊"
+									"Data": "葉子區塊"
 								}
 							]
 						}
@@ -568,7 +568,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "HTML 塊"
+									"Data": "HTML 區塊"
 								}
 							]
 						},
@@ -578,7 +578,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "葉子塊"
+									"Data": "葉子區塊"
 								}
 							]
 						}
@@ -637,7 +637,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "資料庫塊"
+									"Data": "資料庫區塊"
 								}
 							]
 						},
@@ -647,7 +647,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "葉子塊"
+									"Data": "葉子區塊"
 								}
 							]
 						}
@@ -714,7 +714,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "塊"
+									"Data": "區塊"
 								}
 							]
 						},
@@ -724,7 +724,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "容器塊"
+									"Data": "容器區塊"
 								}
 							]
 						}
@@ -791,7 +791,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "塊"
+									"Data": "區塊"
 								}
 							]
 						},
@@ -801,7 +801,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "容器塊"
+									"Data": "容器區塊"
 								}
 							]
 						}
@@ -868,7 +868,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "塊"
+									"Data": "區塊"
 								}
 							]
 						},
@@ -878,7 +878,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "容器塊"
+									"Data": "容器區塊"
 								}
 							]
 						}
@@ -941,7 +941,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "項塊"
+									"Data": "項區塊"
 								}
 							]
 						},
@@ -951,7 +951,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "容器塊"
+									"Data": "容器區塊"
 								}
 							]
 						}
@@ -1014,7 +1014,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "塊"
+									"Data": "區塊"
 								}
 							]
 						},
@@ -1024,7 +1024,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "容器塊"
+									"Data": "容器區塊"
 								}
 							]
 						}
@@ -1083,7 +1083,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "提示塊"
+									"Data": "提示區塊"
 								}
 							]
 						},
@@ -1093,7 +1093,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "容器塊"
+									"Data": "容器區塊"
 								}
 							]
 						}
@@ -1152,7 +1152,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "超級塊"
+									"Data": "超級區塊"
 								}
 							]
 						},
@@ -1162,7 +1162,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "容器塊"
+									"Data": "容器區塊"
 								}
 							]
 						}
@@ -1221,7 +1221,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "文檔塊"
+									"Data": "文檔區塊"
 								}
 							]
 						},
@@ -1231,7 +1231,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "容器塊"
+									"Data": "容器區塊"
 								}
 							]
 						}
@@ -1245,12 +1245,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-esm6f20",
-				"updated": "20260425180326"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "內容塊類型詳解"
+					"Data": "內容區塊類型詳解"
 				}
 			]
 		},
@@ -1259,17 +1259,17 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-nq5xnob",
-				"updated": "20211225225419"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "下面我們分別介紹一下這些內容塊類型的細節。"
+					"Data": "下面我們分別介紹一下這些內容區塊類型的細節。"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "tag",
-					"TextMarkTextContent": "內容塊/類型"
+					"TextMarkTextContent": "內容區塊/類型"
 				}
 			]
 		},
@@ -1279,12 +1279,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-qeoy4vu",
-				"updated": "20260425180326"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "段落塊"
+					"Data": "段落區塊"
 				}
 			]
 		},
@@ -1331,12 +1331,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-itzspnv",
-				"updated": "20260425180333"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "標題塊"
+					"Data": "標題區塊"
 				}
 			]
 		},
@@ -1345,12 +1345,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-9otz7cc",
-				"updated": "20211228134939"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "以上就是標題塊，支援一級到六級。"
+					"Data": "以上就是標題區塊，支援一級到六級。"
 				}
 			]
 		},
@@ -1382,7 +1382,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240513102059-ttfrx4f",
-				"updated": "20240513102142"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1414,7 +1414,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 後，整體的標題層級在匯出時才符合正常邏輯。"
+					"Data": " ​ 後，整體的標題層級在匯出時才符合正常邏輯。"
 				}
 			]
 		},
@@ -1424,12 +1424,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-qntcfuy",
-				"updated": "20260425180340"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "數學公式塊"
+					"Data": "數學公式區塊"
 				}
 			]
 		},
@@ -1463,12 +1463,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-qnm1gay",
-				"updated": "20260425180346"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "代碼塊"
+					"Data": "代碼區塊"
 				}
 			]
 		},
@@ -1509,7 +1509,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-fe8klj7",
-				"updated": "20260425180354"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -1518,7 +1518,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "塊"
+					"Data": "區塊"
 				}
 			]
 		},
@@ -1625,12 +1625,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240818174341-f6miv80",
-				"updated": "20240818175952"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如果需要在表格塊中使用 "
+					"Data": "如果需要在表格區塊中使用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1713,12 +1713,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250330183637-4bl34no",
-				"updated": "20260425180402"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "嵌入塊"
+					"Data": "嵌入區塊"
 				}
 			]
 		},
@@ -1727,7 +1727,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20250330183622-7rrv78a",
-				"updated": "20250330183634"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -1739,7 +1739,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226120508-yzh70eh",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "嵌入內容塊"
+					"TextMarkTextContent": "嵌入內容區塊"
 				},
 				{
 					"Type": "NodeText",
@@ -1753,12 +1753,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220429114938-37kksd9",
-				"updated": "20260425180409"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "HTML 塊"
+					"Data": "HTML 區塊"
 				}
 			]
 		},
@@ -1800,7 +1800,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240427230732-snprakd",
-				"updated": "20241018105334"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -1812,7 +1812,7 @@
 					},
 					"Properties": {
 						"id": "20240427230732-tgvmt21",
-						"updated": "20241018105334"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -1820,12 +1820,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427230732-p75fah5",
-								"updated": "20241018105334"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "使用 HTML 塊時預設會對其中的程式碼進行安全過濾，如果不需要過濾，請開啟 "
+									"Data": "使用 HTML 區塊時預設會對其中的程式碼進行安全過濾，如果不需要過濾，請開啟 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1848,7 +1848,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "允許執行 HTML 塊內腳本"
+									"TextMarkTextContent": "允許執行 HTML 內容中的腳本"
 								},
 								{
 									"Type": "NodeText",
@@ -1875,12 +1875,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427230732-an8u8ps",
-								"updated": "20241018105314"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "因為 Markdown 規範對 HTML 塊解析規則較為複雜，建議使用 "
+									"Data": "因為 Markdown 規範對 HTML 區塊解析規則較為複雜，建議使用 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1903,7 +1903,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20251230141742-xyhhm1l",
-				"updated": "20260425180418"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -1912,7 +1912,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "塊"
+					"Data": "區塊"
 				}
 			]
 		},
@@ -1965,7 +1965,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-icf8aai",
-				"updated": "20260425180439"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -1978,7 +1978,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "塊"
+					"Data": "區塊"
 				}
 			]
 		},
@@ -2050,19 +2050,19 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-hebwu8o",
-				"updated": "20211226125713"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "無序列表塊是一種"
+					"Data": "無序列表區塊是一種"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226120227-3jdgfm5",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "容器塊"
+					"TextMarkTextContent": "容器區塊"
 				},
 				{
 					"Type": "NodeText",
@@ -2075,12 +2075,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240510235226-7fqokpj",
-				"updated": "20240510235233"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "無序列表塊只能包含列表項塊，相鄰的無序列表塊間距較大。"
+					"Data": "無序列表區塊只能包含列表項區塊，相鄰的無序列表區塊間距較大。"
 				}
 			]
 		},
@@ -2090,7 +2090,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-h6hyct1",
-				"updated": "20260425180450"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -2103,7 +2103,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "塊"
+					"Data": "區塊"
 				}
 			]
 		},
@@ -2181,19 +2181,19 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-avlfrzp",
-				"updated": "20211226125702"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "有序列表塊是一種"
+					"Data": "有序列表區塊是一種"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226120227-3jdgfm5",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "容器塊"
+					"TextMarkTextContent": "容器區塊"
 				},
 				{
 					"Type": "NodeText",
@@ -2206,12 +2206,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240510235224-yj7efu2",
-				"updated": "20240510235237"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "有序列表塊只能包含列表項塊，相鄰的有序列表塊間距較大。"
+					"Data": "有序列表區塊只能包含列表項區塊，相鄰的有序列表區塊間距較大。"
 				}
 			]
 		},
@@ -2221,7 +2221,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-16ew3ez",
-				"updated": "20260425180456"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -2234,7 +2234,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "塊"
+					"Data": "區塊"
 				}
 			]
 		},
@@ -2319,19 +2319,19 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-w0ufz2t",
-				"updated": "20211226125654"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "任務列表塊是一種"
+					"Data": "任務列表區塊是一種"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226120227-3jdgfm5",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "容器塊"
+					"TextMarkTextContent": "容器區塊"
 				},
 				{
 					"Type": "NodeText",
@@ -2344,12 +2344,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240510235222-wwcw8cn",
-				"updated": "20240510235243"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "任務列表塊只能包含列表項塊，相鄰的任務列表塊間距較大。"
+					"Data": "任務列表區塊只能包含列表項區塊，相鄰的任務列表區塊間距較大。"
 				}
 			]
 		},
@@ -2359,7 +2359,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-ot6klof",
-				"updated": "20260425180502"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -2368,7 +2368,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "項塊"
+					"Data": "項區塊"
 				}
 			]
 		},
@@ -2377,19 +2377,19 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-cegwec6",
-				"updated": "20211228140800"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "通過列表項塊可以實作大綱式筆記的基本用法，列表項塊是一種"
+					"Data": "通過列表項區塊可以實作大綱式筆記的基本用法，列表項區塊是一種"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226120227-3jdgfm5",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "容器塊"
+					"TextMarkTextContent": "容器區塊"
 				},
 				{
 					"Type": "NodeText",
@@ -2402,12 +2402,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240510235159-gjhzzj5",
-				"updated": "20240510235159"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "列表項塊被包含在列表塊內，相鄰的列表項塊間距較小。"
+					"Data": "列表項區塊被包含在列表區塊內，相鄰的列表項區塊間距較小。"
 				}
 			]
 		},
@@ -2463,7 +2463,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-7tg2ytf",
-				"updated": "20260425180508"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -2472,7 +2472,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "塊"
+					"Data": "區塊"
 				}
 			]
 		},
@@ -2493,12 +2493,12 @@
 					"Type": "NodeParagraph",
 					"Properties": {
 						"id": "20211226120227-ujfxv1r",
-						"updated": "20211225225659"
+						"updated": "20260730184353"
 					},
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "注意不是內容塊引用，而是引述塊（Blockquote）。"
+							"Data": "注意不是內容區塊引用，而是引述區塊（Blockquote）。"
 						}
 					]
 				}
@@ -2509,19 +2509,19 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-xobjp6x",
-				"updated": "20211226125634"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "引述塊是一種"
+					"Data": "引述區塊是一種"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226120227-3jdgfm5",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "容器塊"
+					"TextMarkTextContent": "容器區塊"
 				},
 				{
 					"Type": "NodeText",
@@ -2535,12 +2535,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20251209211414-k61h1ws",
-				"updated": "20260425180516"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "提示塊"
+					"Data": "提示區塊"
 				}
 			]
 		},
@@ -2577,12 +2577,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-hqosjsi",
-				"updated": "20260425180522"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "超級塊"
+					"Data": "超級區塊"
 				}
 			]
 		},
@@ -2591,23 +2591,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-9thlaul",
-				"updated": "20211228135315"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "超級塊是一種"
+					"Data": "超級區塊是一種"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226120227-3jdgfm5",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "容器塊"
+					"TextMarkTextContent": "容器區塊"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。可用於組合文檔內連續的內容塊，也用於支援橫向排版。"
+					"Data": "。可用於組合文檔內連續的內容區塊，也用於支援橫向排版。"
 				}
 			]
 		},
@@ -2617,12 +2617,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-ub34qwj",
-				"updated": "20260425180526"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "文檔塊"
+					"Data": "文檔區塊"
 				}
 			]
 		},
@@ -2631,19 +2631,19 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-5rgcx6a",
-				"updated": "20211226125621"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "整個文檔是一個塊，文檔塊是一種"
+					"Data": "整個文檔是一個區塊，文檔區塊是一種"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20211226120227-3jdgfm5",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "容器塊"
+					"TextMarkTextContent": "容器區塊"
 				},
 				{
 					"Type": "NodeText",
@@ -2657,12 +2657,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120227-3jdgfm5",
-				"updated": "20251209211409"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "內容塊元類型"
+					"Data": "內容區塊元類型"
 				}
 			]
 		},
@@ -2671,12 +2671,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120227-imjh1e8",
-				"updated": "20211225225419"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "內容塊在邏輯上分為葉子塊和容器塊，葉子塊不能包含其他塊，容器塊可以包含其他塊："
+					"Data": "內容區塊在邏輯上分為葉子區塊和容器區塊，葉子區塊不能包含其他區塊，容器區塊可以包含其他區塊："
 				}
 			]
 		},
@@ -2706,7 +2706,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120227-3yh1s5d",
-								"updated": "20211226120227"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -2715,7 +2715,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "塊：只能包含"
+									"Data": "區塊：只能包含"
 								},
 								{
 									"Type": "NodeText",
@@ -2723,7 +2723,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "項塊"
+									"Data": "項區塊"
 								}
 							]
 						}
@@ -2746,7 +2746,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120227-v2a9i1u",
-								"updated": "20211226120227"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
@@ -2755,7 +2755,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "項塊：可以包含任意非文檔塊"
+									"Data": "項區塊：可以包含任意非文檔區塊"
 								}
 							]
 						}
@@ -2778,12 +2778,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120227-6g0cn8z",
-								"updated": "20211226120227"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引述塊：可以包含任意非文檔塊"
+									"Data": "引述區塊：可以包含任意非文檔區塊"
 								}
 							]
 						}
@@ -2806,12 +2806,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20251209211358-rnxj20h",
-								"updated": "20251209211409"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "提示塊：可以包含任意非文檔塊"
+									"Data": "提示區塊：可以包含任意非文檔區塊"
 								}
 							]
 						}
@@ -2834,12 +2834,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120227-m58y7ii",
-								"updated": "20211226120227"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "超級塊：可以包含任意非文檔塊"
+									"Data": "超級區塊：可以包含任意非文檔區塊"
 								}
 							]
 						}
@@ -2862,12 +2862,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226120227-yksb3ck",
-								"updated": "20211226120227"
+								"updated": "20260730184353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "文檔塊：可以包含任意非文檔塊"
+									"Data": "文檔區塊：可以包含任意非文檔區塊"
 								}
 							]
 						}

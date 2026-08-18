@@ -6,16 +6,16 @@
 		"id": "20230304000547-ibldj1z",
 		"title": "Artificial Intelligence",
 		"type": "doc",
-		"updated": "20250115153814"
+		"updated": "20260813120000"
 	},
 	"Children": [
 		{
-			"ID": "20230308213723-d3esro1",
+			"ID": "20260804170000-qss2syl",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230308213723-d3esro1",
-				"updated": "20230308213723"
+				"id": "20260804170000-qss2syl",
+				"updated": "20260804180000"
 			},
 			"Children": [
 				{
@@ -25,110 +25,87 @@
 			]
 		},
 		{
-			"ID": "20230308213723-q8a5kbd",
+			"ID": "20260804170001-q67ffe4",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230308213723-q8a5kbd",
-				"updated": "20230324161738"
+				"id": "20260804170001-q67ffe4",
+				"updated": "20260804180000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Supports text dialogue through "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "a",
-					"TextMarkAHref": "https://openai.com/",
-					"TextMarkTextContent": "OpenAI"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " Chat API."
+					"Data": "SiYuan provides AI editing, an AI agent, and semantic search. Before using them, configure the API providers and models required for your use case."
 				}
 			]
 		},
 		{
-			"ID": "20230308213723-gznor89",
+			"ID": "20260804170002-24z0hpx",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230308213723-gznor89",
-				"updated": "20250115153814"
+				"id": "20260804170002-24z0hpx",
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "How to use"
+					"Data": "AI editing"
 				}
 			]
 		},
 		{
-			"ID": "20230308213723-r46h6mw",
+			"ID": "20260804170003-yv7k3qb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170003-yv7k3qb",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "AI editing processes selected text for tasks such as continuation, summarization, translation, and polishing."
+				}
+			]
+		},
+		{
+			"ID": "20260804170004-9yg5i8j",
 			"Type": "NodeList",
 			"ListData": {
 				"Typ": 1
 			},
 			"Properties": {
-				"id": "20230308213723-r46h6mw",
-				"updated": "20250115153814"
+				"id": "20260804170004-9yg5i8j",
+				"updated": "20260813120000"
 			},
 			"Children": [
 				{
-					"ID": "20230308213723-9yri7ka",
+					"ID": "20260804170005-ettxhgz",
 					"Type": "NodeListItem",
 					"ListData": {
 						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
 						"Delimiter": 46,
+						"Padding": 3,
 						"Marker": "MS4=",
 						"Num": 1
 					},
 					"Properties": {
-						"id": "20230308213723-9yri7ka",
-						"updated": "20230308213723"
+						"id": "20260804170005-ettxhgz",
+						"updated": "20260804180000"
 					},
 					"Children": [
 						{
-							"ID": "20230308213723-wgq5x45",
+							"ID": "20260804170006-lso6hde",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230308213723-wgq5x45",
-								"updated": "20230308213723"
+								"id": "20260804170006-lso6hde",
+								"updated": "20260804180000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Register an OpenAI account and create an API Key"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230308213723-obctww8",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "Mi4=",
-						"Num": 2
-					},
-					"Properties": {
-						"id": "20230308213723-obctww8",
-						"updated": "20230324161801"
-					},
-					"Children": [
-						{
-							"ID": "20230308213723-rerhr3p",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230308213723-rerhr3p",
-								"updated": "20230324161801"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Configure in "
+									"Data": "Configure and enable an API provider and model in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -137,85 +114,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "AI"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230308213723-5m7aqfs",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "My4=",
-						"Num": 3
-					},
-					"Properties": {
-						"id": "20230308213723-5m7aqfs",
-						"updated": "20250115153814"
-					},
-					"Children": [
-						{
-							"ID": "20230308213723-i5y2zf5",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230308213723-i5y2zf5",
-								"updated": "20250115153814"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Use "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "/AI writing"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ to call up the dialog box, enter a question or demand and confirm"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20230308213723-la05np0",
-					"Type": "NodeListItem",
-					"ListData": {
-						"Typ": 1,
-						"Delimiter": 46,
-						"Marker": "NC4=",
-						"Num": 4
-					},
-					"Properties": {
-						"id": "20230308213723-la05np0",
-						"updated": "20230324161818"
-					},
-					"Children": [
-						{
-							"ID": "20230308213723-mjv4wg6",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20230308213723-mjv4wg6",
-								"updated": "20230324161818"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "Perform more operations through the block menu "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -224,7 +123,119 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "API Provider"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170007-dt1vz1z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20260804170007-dt1vz1z",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170008-nqia67b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170008-nqia67b",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Select the model used by the editor in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Artificial Intelligence"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Editor"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170009-l87zz79",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 3,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"id": "20260804170009-l87zz79",
+						"updated": "20260813120000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170010-wxcjvxu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170010-wxcjvxu",
+								"updated": "20260813120000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/AI writing"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to open the writing dialog. For AI editing, select text and choose "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "AI Edit"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " in the selection toolbar, or choose it from the block menu. The result streams into a panel where you can replace or insert it, copy it, retry, stop, or discard it. Replacement is available only for a supported selection within one block. Cross-block selections, complex sources, and sources changed while generating can still use insertion."
 								}
 							]
 						}
@@ -233,85 +244,237 @@
 			]
 		},
 		{
-			"ID": "20230308213723-50hrqrb",
+			"ID": "20260804170011-apv9hp7",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20230308213723-50hrqrb",
-				"updated": "20230308213745"
+				"id": "20260804170011-apv9hp7",
+				"updated": "20260804180000"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "Note"
-				},
-				{
 					"Type": "NodeText",
-					"Data": "​"
+					"Data": "AI agent"
 				}
 			]
 		},
 		{
-			"ID": "20230308213723-ji4g66t",
-			"Type": "NodeList",
-			"ListData": {},
+			"ID": "20260804170012-jfizfny",
+			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20230308213723-ji4g66t",
-				"updated": "20230308213723"
+				"id": "20260804170012-jfizfny",
+				"updated": "20260804180000"
 			},
 			"Children": [
 				{
-					"ID": "20230308213723-5vbcwdu",
+					"Type": "NodeText",
+					"Data": "The AI agent combines the current editor context with tools to search, organize, create, and modify knowledge base content. See "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "AI Agent",
+					"TextMarkBlockRefID": "20260804171004-aiagt03",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for instructions."
+				}
+			]
+		},
+		{
+			"ID": "20260804170013-83h5rhn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170013-83h5rhn",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Semantic search"
+				}
+			]
+		},
+		{
+			"ID": "20260804170014-l77yxmp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170014-l77yxmp",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Semantic search finds related content by meaning and is useful when notes use different wording for similar topics. See "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Semantic Search",
+					"TextMarkBlockRefID": "20260804171005-semnt03",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " for configuration and usage."
+				}
+			]
+		},
+		{
+			"ID": "20260804233220-mcpenh1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804233220-mcpenh1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "MCP Service"
+				}
+			]
+		},
+		{
+			"ID": "20260804233221-mcpenp1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804233221-mcpenp1",
+				"updated": "20260804233000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The MCP service allows MCP-compatible clients to call tools provided by SiYuan through the standard protocol. For configuration and usage, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "MCP Service",
+					"TextMarkBlockRefID": "20260804223002-mcpsv03",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260804170015-z4c0bhs",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170015-z4c0bhs",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Note"
+				}
+			]
+		},
+		{
+			"ID": "20260804170016-pam6xty",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170016-pam6xty",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170017-q91bhac",
 					"Type": "NodeListItem",
 					"ListData": {
+						"Tight": true,
 						"BulletChar": 42,
-						"Marker": "Kg=="
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
 					},
 					"Properties": {
-						"id": "20230308213723-5vbcwdu",
-						"updated": "20230308213723"
+						"id": "20260804170017-q91bhac",
+						"updated": "20260804180000"
 					},
 					"Children": [
 						{
-							"ID": "20230308213723-ekc7o7y",
+							"ID": "20260804170018-zmt2yvz",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230308213723-ekc7o7y",
-								"updated": "20230308213723"
+								"id": "20260804170018-zmt2yvz",
+								"updated": "20260804180000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "This function will send the relevant text to OpenAI"
+									"Data": "Document text, images, or queries may be sent to the configured API provider"
 								}
 							]
 						}
 					]
 				},
 				{
-					"ID": "20230308213723-7su9wm3",
+					"ID": "20260804170019-w8bodih",
 					"Type": "NodeListItem",
 					"ListData": {
+						"Tight": true,
 						"BulletChar": 42,
-						"Marker": "Kg=="
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
 					},
 					"Properties": {
-						"id": "20230308213723-7su9wm3",
-						"updated": "20230308213723"
+						"id": "20260804170019-w8bodih",
+						"updated": "20260804180000"
 					},
 					"Children": [
 						{
-							"ID": "20230308213723-yb9xt3u",
+							"ID": "20260804170020-dm5734f",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20230308213723-yb9xt3u",
-								"updated": "20230308213723"
+								"id": "20260804170020-dm5734f",
+								"updated": "20260804180000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "There will be a fee for calling the OpenAI API"
+									"Data": "External API calls may incur charges"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170021-ap0ekfa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170021-ap0ekfa",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170022-oo2oq10",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170022-oo2oq10",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Keep API keys secure and verify the target and content before applying AI-generated changes"
 								}
 							]
 						}

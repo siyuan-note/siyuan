@@ -11,6 +11,7 @@ import {ipcRenderer} from "electron";
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {escapeAriaLabel} from "../util/escape";
 
 export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
@@ -31,8 +32,8 @@ export const initStatus = (isWindow = false) => {
     <svg><use xlink:href="#iconHelp"></use></svg>
 </div>`;
     document.querySelector("#status").addEventListener("click", (event) => {
-        let target = event.target as HTMLElement;
-        while (target.id !== "status") {
+        let target = event.target as HTMLElement | null;
+        while (target && target.id !== "status") {
             if (target.id === "barDock") {
                 toggleDockBar(target.firstElementChild.firstElementChild);
                 event.stopPropagation();
@@ -139,23 +140,26 @@ let lastRootId: string;
 
 const scheduleStatusStat = (rootID: string, content?: string, ids?: string[]) => {
     clearTimeout(countTimeout);
+    if (countAbortController) {
+        countAbortController.abort();
+        countAbortController = null;
+    }
     countTimeout = window.setTimeout(() => {
-        if (countAbortController) {
-            countAbortController.abort();
-            countAbortController = null;
-        }
         countAbortController = new AbortController();
         const signal = countAbortController.signal;
         const capturedController = countAbortController;
 
+        const finishRequest = () => {
+            if (countAbortController === capturedController) {
+                countAbortController = null;
+            }
+        };
         const onFetched = (response: IWebSocketData) => {
             if (signal.aborted) {
                 return;
             }
             renderStatusbarCounter(response.data.stat);
-            if (countAbortController === capturedController) {
-                countAbortController = null;
-            }
+            finishRequest();
         };
 
         if (content) {
@@ -166,9 +170,30 @@ const scheduleStatusStat = (rootID: string, content?: string, ids?: string[]) =>
             lastRootId = null;
         } else if (rootID && lastRootId !== rootID) {
             lastRootId = rootID;
-            fetchPost("/api/block/getTreeStat", {id: rootID}, onFetched, undefined, undefined, signal);
+            fetchPost("/api/block/getTreeStat", {id: rootID}, (response) => {
+                if (signal.aborted) {
+                    return;
+                }
+                renderStatusbarCounter(response.data.stat);
+                if (!response.data.containsEmbed) {
+                    finishRequest();
+                    return;
+                }
+                fetchPost("/api/block/getTreeStat", {id: rootID, includeEmbed: true}, (embedResponse) => {
+                    if (signal.aborted) {
+                        return;
+                    }
+                    renderStatusbarCounter(
+                        embedResponse.data.stat,
+                        embedResponse.data.statWithEmbed,
+                        embedResponse.data.embedStat
+                    );
+                    finishRequest();
+                }, undefined, undefined, signal);
+            }, undefined, undefined, signal);
         } else {
             lastRootId = null;
+            finishRequest();
         }
     }, Constants.TIMEOUT_COUNT);
 };
@@ -213,19 +238,41 @@ export const clearCounter = () => {
     document.querySelector("#status .status__counter").innerHTML = "";
 };
 
-export const renderStatusbarCounter = (stat: {
-    runeCount: number,
-    wordCount: number,
-    linkCount: number,
-    imageCount: number,
-    refCount: number,
-    blockCount: number,
-}) => {
+export interface IBlockStat {
+    runeCount: number;
+    wordCount: number;
+    linkCount: number;
+    imageCount: number;
+    refCount: number;
+    blockCount: number;
+}
+
+export interface IEmbedStat {
+    complete: boolean;
+    queryEmbedCount: number;
+    jsEmbedCount: number;
+    resultCount: number;
+    failedQueryCount: number;
+    failedResultCount: number;
+    truncatedQueryCount: number;
+    cycleCount: number;
+    depthLimitCount: number;
+}
+
+export const genEmbedStatTip = (label: string, value: number, embedStat?: IEmbedStat) => {
+    const prefix = embedStat && !embedStat.complete ? "≈" : "";
+    const incompleteTip = embedStat && !embedStat.complete ? ` ${window.siyuan.languages.embedStatIncomplete}` : "";
+    return `${prefix}${label} ${value}${incompleteTip}`;
+};
+
+export const renderStatusbarCounter = (stat: IBlockStat, statWithEmbed?: IBlockStat, embedStat?: IEmbedStat) => {
     if (!stat) {
         return;
     }
-    let html = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>
-<span class="ft__on-surface">${window.siyuan.languages.wordCount}</span>&nbsp;${stat.wordCount}<span class="fn__space"></span>`;
+    const runeEmbedAttrs = statWithEmbed ? ` class="ft__on-surface ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.runeCountWithEmbed, statWithEmbed.runeCount, embedStat))}"` : " class=\"ft__on-surface\"";
+    const wordEmbedAttrs = statWithEmbed ? ` class="ft__on-surface ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.wordCountWithEmbed, statWithEmbed.wordCount, embedStat))}"` : " class=\"ft__on-surface\"";
+    let html = `<span${runeEmbedAttrs}>${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>
+<span${wordEmbedAttrs}>${window.siyuan.languages.wordCount}</span>&nbsp;${stat.wordCount}<span class="fn__space"></span>`;
     if (0 < stat.linkCount) {
         html += `<span class="ft__on-surface">${window.siyuan.languages.linkCount}</span>&nbsp;${stat.linkCount}<span class="fn__space"></span>`;
     }

@@ -1,0 +1,1290 @@
+{
+	"ID": "20260804190001-oidctw1",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804190001-oidctw1",
+		"title": "OIDC 登入",
+		"type": "doc",
+		"updated": "20260804211501"
+	},
+	"Children": [
+		{
+			"ID": "20260804130000-tw00001",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804130000-tw00001",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概述"
+				}
+			]
+		},
+		{
+			"ID": "20260804130001-tw00002",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804130001-tw00002",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC（OpenID Connect）登入可以讓思源透過既有的身分提供者完成單一登入，並與瀏覽器鎖屏密碼配合使用。支援的提供者包括 Custom、Google、Microsoft 和 GitHub。"
+				}
+			]
+		},
+		{
+			"ID": "20260804130002-tw00003",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804130002-tw00003",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通過 OIDC 准入規則的身分都會取得目前工作空間的管理員權限。OIDC 不提供多使用者權限隔離或角色對應，啟用前應嚴格限制允許登入的身分。"
+				}
+			]
+		},
+		{
+			"ID": "20260804130003-tw00004",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804130003-tw00004",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使用前準備"
+				}
+			]
+		},
+		{
+			"ID": "20260804130004-tw00005",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804130004-tw00005",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804130005-tw00006",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130005-tw00006",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130006-tw00007",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130006-tw00007",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在身分提供者中註冊應用程式，取得用戶端 ID，並依提供者要求建立用戶端密鑰"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130007-tw00008",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130007-tw00008",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130008-tw00009",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130008-tw00009",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "確定需要使用的瀏覽器、桌面端和行動端回呼位址，並在身分提供者中逐一註冊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130009-tw0000a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130009-tw0000a",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130010-tw0000b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130010-tw0000b",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "保留一個可用的瀏覽器鎖屏密碼或本機存取方式，避免錯誤設定導致遠端存取被鎖定"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804130011-tw0000c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804130011-tw0000c",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定方式"
+				}
+			]
+		},
+		{
+			"ID": "20260804130012-tw0000d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804130012-tw0000d",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "鑑權"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OIDC 登入"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中填寫設定並啟用 OIDC 登入。"
+				}
+			]
+		},
+		{
+			"ID": "20260804130013-tw0000e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804130013-tw0000e",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "提供者和憑證"
+				}
+			]
+		},
+		{
+			"ID": "20260804130014-tw0000f",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804130014-tw0000f",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804130015-tw0000g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130015-tw0000g",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130016-tw0000h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130016-tw0000h",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Custom：填寫符合 OpenID Connect Discovery 的簽發者位址和用戶端 ID，並依提供者要求填寫用戶端密鑰"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130017-tw0000i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130017-tw0000i",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130018-tw0000j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130018-tw0000j",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Google：填寫 Google OAuth 用戶端 ID 和用戶端密鑰，簽發者位址由思源自動使用 Google 的固定位址"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130019-tw0000k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130019-tw0000k",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130020-tw0000l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130020-tw0000l",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Microsoft：填寫租戶專屬的簽發者位址、用戶端 ID，並依應用程式設定填寫用戶端密鑰"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130021-tw0000m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130021-tw0000m",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130022-tw0000n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130022-tw0000n",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "GitHub：填寫 OAuth App 的用戶端 ID 和用戶端密鑰；思源會自動調整預設授權範圍"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804130023-tw0000o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804130023-tw0000o",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "建立應用程式和註冊回呼位址時，可參閱 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Google OpenID Connect 說明文件",
+					"TextMarkAHref": "https://developers.google.com/identity/openid-connect/openid-connect"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Microsoft Entra 應用程式註冊說明文件",
+					"TextMarkAHref": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "GitHub OAuth App 說明文件",
+					"TextMarkAHref": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。提供者主控台的具體介面可能變更，請以其目前文件為準。"
+				}
+			]
+		},
+		{
+			"ID": "20260804130024-tw0000p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804130024-tw0000p",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "回呼位址"
+				}
+			]
+		},
+		{
+			"ID": "20260804130025-tw0000q",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804130025-tw0000q",
+				"updated": "20260804211501"
+			},
+			"Children": [
+				{
+					"ID": "20260804130026-tw0000r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130026-tw0000r",
+						"updated": "20260804211501"
+					},
+					"Children": [
+						{
+							"ID": "20260804130027-tw0000s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130027-tw0000s",
+								"updated": "20260804211501"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "本機瀏覽器和桌面端：回呼位址使用思源目前的本機存取通訊協定；啟用 HTTPS 時為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://127.0.0.1:<連接埠>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，未啟用 HTTPS 時為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "http://127.0.0.1:<連接埠>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "。身分提供者中登記的位址必須與實際通訊協定、主機、連接埠、路徑和斜線完全一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130028-tw0000t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130028-tw0000t",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130029-tw0000u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130029-tw0000u",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "遠端瀏覽器：在 OIDC 回呼位址中填寫公開 HTTPS 位址，路徑必須恰好是 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，不能包含查詢參數、片段或使用者資訊"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130030-tw0000v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130030-tw0000v",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130031-tw0000w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130031-tw0000w",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "原生行動端：固定使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan:/oidc-callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "；需要在身分提供者中原樣登記。Google 不接受此回呼格式，因此 Google 登入僅支援瀏覽器和桌面端"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804130032-tw0000x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804130032-tw0000x",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "授權範圍"
+				}
+			]
+		},
+		{
+			"ID": "20260804130033-tw0000y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804130033-tw0000y",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "預設授權範圍是 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "openid profile email"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。一般不需要修改；自訂範圍前應確認提供者回傳的身分宣告仍能滿足准入規則。GitHub 會將預設範圍轉換為讀取使用者和已驗證電子郵件所需的權限。"
+				}
+			]
+		},
+		{
+			"ID": "20260804130034-tw0000z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804130034-tw0000z",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "准入規則"
+				}
+			]
+		},
+		{
+			"ID": "20260804130035-tw00010",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804130035-tw00010",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "關閉「授予所有已驗證使用者管理員權限」後，必須至少設定一條准入規則。規則使用 JSON 陣列：同一規則的多個 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "values"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 是「或」關係，不同規則之間是「與」關係；"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "operator"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 支援 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "equals"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "contains"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
+			"ID": "20260804130036-tw00011",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260804130036-tw00011",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "[\n  {\n    \"claim\": \"email\",\n    \"operator\": \"equals\",\n    \"values\": [\"alice@example.com\", \"bob@example.com\"]\n  },\n  {\n    \"claim\": \"email_verified\",\n    \"operator\": \"equals\",\n    \"values\": [\"true\"]\n  }\n]\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804130037-tw00012",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804130037-tw00012",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "以上範例只允許兩個指定電子郵件登入，並要求提供者確認電子郵件已經驗證。若提供者使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "groups"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 等陣列宣告，可以使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "contains"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 比對其中的群組名稱。規則名稱和值必須與提供者實際回傳的宣告完全對應。"
+				}
+			]
+		},
+		{
+			"ID": "20260804130038-tw00013",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804130038-tw00013",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "驗證並儲存"
+				}
+			]
+		},
+		{
+			"ID": "20260804130039-tw00014",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804130039-tw00014",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "啟用 OIDC 後點選 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "驗證並儲存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。思源會開啟系統瀏覽器，只有完成一次真實登入並通過准入規則後才會啟用新設定；驗證失敗時原設定繼續生效。修改 OIDC 設定會使既有 OIDC 會話失效，使用者需要重新登入。"
+				}
+			]
+		},
+		{
+			"ID": "20260804130040-tw00015",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804130040-tw00015",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各用戶端登入"
+				}
+			]
+		},
+		{
+			"ID": "20260804130041-tw00016",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804130041-tw00016",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804130042-tw00017",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130042-tw00017",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130043-tw00018",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130043-tw00018",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "瀏覽器：在登入頁選擇使用 OIDC 登入，驗證完成後返回原存取位址"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130044-tw00019",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130044-tw00019",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130045-tw0001a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130045-tw0001a",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "桌面端：透過系統瀏覽器完成驗證，思源會等待並接收登入結果"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130046-tw0001b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130046-tw0001b",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130047-tw0001c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130047-tw0001c",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "行動端：透過系統瀏覽器驗證後使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan:/oidc-callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 返回思源；身分提供者必須支援此自訂回呼"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804130048-tw0001d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804130048-tw0001d",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Docker 設定"
+				}
+			]
+		},
+		{
+			"ID": "20260804130049-tw0001e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804130049-tw0001e",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Docker 部署可以透過以下環境變數覆寫工作空間中的 OIDC 設定。至少需要啟用 OIDC、選擇提供者並設定用戶端 ID；其他變數依提供者、回呼位址和准入策略填寫。"
+				}
+			]
+		},
+		{
+			"ID": "20260804130050-tw0001f",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "dGV4dA==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260804130050-tw0001f",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGV4dA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "SIYUAN_OIDC_ENABLED\nSIYUAN_OIDC_PROVIDER\nSIYUAN_OIDC_ISSUER_URL\nSIYUAN_OIDC_CLIENT_ID\nSIYUAN_OIDC_CLIENT_SECRET\nSIYUAN_OIDC_SCOPES\nSIYUAN_OIDC_REDIRECT_URL\nSIYUAN_OIDC_ALLOW_ALL\nSIYUAN_OIDC_CLAIM_RULES\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804130051-tw0001g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804130051-tw0001g",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "環境變數在核心啟動時生效。遠端 Docker 部署還必須保留瀏覽器鎖屏密碼、有效 OIDC 設定或明確啟用驗證繞過，否則思源會拒絕啟動，以免工作空間在無驗證狀態下暴露。"
+				}
+			]
+		},
+		{
+			"ID": "20260804130052-tw0001h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804130052-tw0001h",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "常見問題"
+				}
+			]
+		},
+		{
+			"ID": "20260804130053-tw0001i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804130053-tw0001i",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"ID": "20260804130054-tw0001j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130054-tw0001j",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130055-tw0001k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130055-tw0001k",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "redirect_uri mismatch"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：檢查身分提供者登記的回呼位址是否與實際通訊協定、主機、連接埠、路徑和結尾斜線完全一致"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130056-tw0001l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130056-tw0001l",
+						"updated": "20260804205607"
+					},
+					"Children": [
+						{
+							"ID": "20260804130057-tw0001m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130057-tw0001m",
+								"updated": "20260804205607"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "身分提供者探索失敗：檢查 Custom 或 Microsoft 的簽發者位址是否正確、是否使用 HTTPS，以及思源能否存取 Discovery 位址"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130058-tw0001n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130058-tw0001n",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130059-tw0001o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130059-tw0001o",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "交換授權碼失敗：檢查用戶端 ID、用戶端密鑰和回呼位址"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130100-tw0001p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130100-tw0001p",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130101-tw0001q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130101-tw0001q",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "登入後被拒絕：檢查身分提供者實際回傳的宣告、資料類型以及准入規則中的名稱、運算子和值"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804130102-tw0001r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804130102-tw0001r",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20260804130103-tw0001s",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804130103-tw0001s",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804130104-tw0001t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130104-tw0001t",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130105-tw0001u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130105-tw0001u",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "不要在沒有准入規則的情況下向不受信任的身分提供者開放所有使用者登入"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130106-tw0001v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130106-tw0001v",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130107-tw0001w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130107-tw0001w",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "依電子郵件准入時，建議同時要求 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "email_verified"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 等於 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "true"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130108-tw0001x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130108-tw0001x",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130109-tw0001y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130109-tw0001y",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "用戶端密鑰屬於敏感資訊，不要寫入公開文件、日誌或可公開讀取的部署檔案"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804130110-tw0001z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804130110-tw0001z",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804130111-tw00020",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804130111-tw00020",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "OIDC 只負責身分驗證；通過驗證的使用者擁有管理員權限，不能用它實作不同使用者的資料隔離"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

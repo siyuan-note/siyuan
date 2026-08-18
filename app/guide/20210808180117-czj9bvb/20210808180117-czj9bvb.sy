@@ -1,0 +1,23 @@
+{
+	"ID": "20210808180117-czj9bvb",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"custom-hidden": "true",
+		"icon": "1f4d4",
+		"id": "20210808180117-czj9bvb",
+		"title": "思源笔记用户指南",
+		"type": "doc",
+		"updated": "20210808180117"
+	},
+	"Children": [
+		{
+			"ID": "20260722113904-24g72fp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260722113904-24g72fp",
+				"updated": "20260722113904"
+			}
+		}
+	]
+}

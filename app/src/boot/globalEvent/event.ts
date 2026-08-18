@@ -1,24 +1,49 @@
-import {App} from "../../index";
-import {windowMouseMove} from "./mousemove";
+import type {App} from "../../index";
+import {getTableResizeBounds, windowMouseMove} from "./mousemove";
 import {windowKeyUp} from "./keyup";
 import {windowKeyDown} from "./keydown";
 import {globalClick} from "./click";
 import {goBack, goForward} from "../../util/backForward";
 import {Constants} from "../../constants";
-import {isIPad} from "../../protyle/util/compatibility";
-import {hasClosestByClassName, isInEmbedBlock} from "../../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName, isInEmbedBlock} from "../../protyle/util/hasClosest";
 import {hideTooltip} from "../../dialog/tooltip";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {dragOverScroll, stopScrollAnimation} from "./dragover";
 import {setWebViewFocusable} from "../../mobile/util/mobileAppUtil";
-import {initTouchDragBridge} from "../../util/touchDragBridge";
+import {cancelManualTouch, initTouchDragBridge, isLastPointerMouse} from "../../util/touchDragBridge";
+import {isWindow} from "../../util/functions";
+import {getDockByType} from "../../layout/tabUtil";
+import {fetchPost} from "../../util/fetch";
+import {initHarmonyTextSelectionMenu} from "../../util/harmonyTextSelectionMenu";
+import {clearDragTipGhost, hideDragTip} from "../../protyle/util/dragTip";
+import {formatPainter} from "../../protyle/toolbar/FormatPainter";
+import {pauseImageAnimation, resumeImageAnimation} from "../../protyle/util/imageAnimation";
+
+const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`.toLowerCase();
 
 export const initWindowEvent = (app: App) => {
+    initHarmonyTextSelectionMenu();
+    let lastEncryptedNotebookTouch = 0;
+    const touchEncryptedNotebooks = () => {
+        if (window.siyuan.isPublish) {
+            return;
+        }
+        const now = Date.now();
+        if (now - lastEncryptedNotebookTouch < 30000) {
+            return;
+        }
+        lastEncryptedNotebookTouch = now;
+        fetchPost("/api/notebook/touchEncryptedNotebooks", {});
+    };
+    window.addEventListener("pointerdown", touchEncryptedNotebooks, {passive: true});
+    window.addEventListener("keydown", touchEncryptedNotebooks);
+    document.addEventListener("touchstart", touchEncryptedNotebooks, {passive: true});
+
     document.body.addEventListener("mouseleave", () => {
         if (window.siyuan.layout.leftDock) {
-            window.siyuan.layout.leftDock.hideDock();
-            window.siyuan.layout.rightDock.hideDock();
-            window.siyuan.layout.bottomDock.hideDock();
+            window.siyuan.layout.leftDock.hideDockByHover();
+            window.siyuan.layout.rightDock.hideDockByHover();
+            window.siyuan.layout.bottomDock.hideDockByHover();
         }
         document.querySelectorAll(".protyle-gutters").forEach(item => {
             item.classList.add("fn__none");
@@ -26,28 +51,31 @@ export const initWindowEvent = (app: App) => {
         });
         hideTooltip();
     });
-    let mouseIsEnter = false;
-    document.body.addEventListener("mouseenter", () => {
-        if (window.siyuan.layout.leftDock) {
-            mouseIsEnter = true;
-            setTimeout(() => {
-                mouseIsEnter = false;
-            }, Constants.TIMEOUT_TRANSITION);
-        }
-    });
 
     window.addEventListener("mousemove", (event: MouseEvent & { target: HTMLElement }) => {
-        windowMouseMove(event, mouseIsEnter);
+        windowMouseMove(event);
     });
+    window.addEventListener("pointerdown", () => {
+        if (window.siyuan.layout.leftDock) {
+            window.siyuan.layout.leftDock.clearDockHoverTimeout();
+            window.siyuan.layout.rightDock.clearDockHoverTimeout();
+            window.siyuan.layout.bottomDock.clearDockHoverTimeout();
+        }
+    }, {passive: true});
 
-    // 横向滚动表格时重新定位表格列宽调整手柄 https://github.com/siyuan-note/siyuan/issues/13828
+    // 滚动表格时重新定位表格列宽调整手柄 https://github.com/siyuan-note/siyuan/issues/13828
     window.addEventListener("scroll", (event: Event) => {
         const scrollElement = event.target as HTMLElement;
-        // 仅处理表格内容容器（.table 块的 firstElementChild）的滚动
-        if (!scrollElement.parentElement || !scrollElement.parentElement.classList.contains("table")) {
+        const tableBlockElement = hasClosestByClassName(scrollElement, "table");
+        if (!tableBlockElement) {
             return;
         }
-        const resizeElement = scrollElement.parentElement.querySelector(".table__resize") as HTMLElement;
+        const tableElement = tableBlockElement.querySelector("table") as HTMLTableElement;
+        if (!tableElement ||
+            (scrollElement !== tableBlockElement.firstElementChild && scrollElement !== tableElement)) {
+            return;
+        }
+        const resizeElement = tableBlockElement.querySelector(".table__resize") as HTMLElement;
         if (!resizeElement) {
             return;
         }
@@ -56,17 +84,87 @@ export const initWindowEvent = (app: App) => {
         if (baseLeft === null || !style || style.indexOf("display:block") === -1) {
             return;
         }
-        const left = parseInt(baseLeft) - scrollElement.scrollLeft;
-        resizeElement.setAttribute("style", style.replace(/left: ?-?\d+px;/, `left: ${Math.round(left)}px;`));
+        const left = parseInt(baseLeft) - (tableBlockElement.firstElementChild as HTMLElement).scrollLeft;
+        const resizeBounds = getTableResizeBounds(tableElement);
+        resizeElement.setAttribute("style", style
+            .replace(/top:-?\d+(?:\.\d+)?px;/, `top:${resizeBounds.top}px;`)
+            .replace(/height:-?\d+(?:\.\d+)?px;/, `height:${resizeBounds.height}px;`)
+            .replace(/left: ?-?\d+px;/, `left: ${Math.round(left)}px;`));
     }, true);
 
     let scrollTarget: HTMLElement | false;
+    window.addEventListener("dragstart", () => {
+        clearDragTipGhost();
+        hideTooltip();
+    }, true);
     window.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
+        const isDocumentTab = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENT_TAB);
+        const tabBarElement = hasClosestByClassName(event.target, "layout-tab-bar");
+        if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB) && (!isDocumentTab || tabBarElement)) {
+            if (!tabBarElement) {
+                stopScrollAnimation();
+            }
+            return;
+        }
+        if (event.dataTransfer.types.some(type => type.startsWith(KANBAN_GROUP_DRAG_TYPE))) {
+            const kanbanElement = hasClosestByClassName(event.target, "av__kanban");
+            if (kanbanElement) {
+                dragOverScroll(event, kanbanElement.getBoundingClientRect(), kanbanElement, "x");
+            } else {
+                stopScrollAnimation();
+            }
+            return;
+        }
         if (event.dataTransfer.types.includes("text/plain")) {
             return;
         }
+        // 拖拽文档页签或标题/列表项块标时，按浮窗模型控制文档树所在浮动 dock 的显隐：
+        // 鼠标在边缘触发区或面板内则展开，离开则收起 https://github.com/siyuan-note/siyuan/issues/18043
+        if (!isWindow() &&
+            (!window.siyuan.layout.leftDock.pin || !window.siyuan.layout.rightDock.pin || !window.siyuan.layout.bottomDock.pin)) {
+            const fileDock = getDockByType("file");
+            // 文档树所在 dock 为浮动且文档树图标激活时才处理
+            if (fileDock && !fileDock.pin &&
+                document.querySelector('.dock__items > .dock__item--active[data-type="file"]')) {
+                let gutterBlockType = "";
+                for (const itemType of event.dataTransfer.types) {
+                    if (itemType.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
+                        gutterBlockType = itemType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP)[0];
+                        break;
+                    }
+                }
+                if (isDocumentTab || ["nodeheading", "nodelistitem"].includes(gutterBlockType)) {
+                    const statusHeight = document.getElementById("status")?.clientHeight || 0;
+                    const toolbarHeight = document.getElementById("toolbar")?.clientHeight || 0;
+                    const inYRange = event.clientY > toolbarHeight && event.clientY < window.innerHeight - statusHeight;
+                    // 通过 dock 容器类名判断位置，避免访问私有属性 position
+                    const dockElement = fileDock.layout.element;
+                    let onEdge = false;
+                    if (dockElement.classList.contains("layout__dockl")) {
+                        onEdge = inYRange &&
+                            (fileDock.elements[0].clientWidth > 0 ? event.clientX < Math.max((document.getElementById("dockLeft")?.clientWidth || 0) + 1, 16) : event.clientX < 8);
+                    } else if (dockElement.classList.contains("layout__dockr")) {
+                        onEdge = inYRange &&
+                            (fileDock.elements[0].clientWidth > 0 ? event.clientX > window.innerWidth - Math.max((document.getElementById("dockRight")?.clientWidth || 0) - 2, 16) : event.clientX > window.innerWidth - 8);
+                    } else if (dockElement.classList.contains("layout__dockb")) {
+                        onEdge = event.clientY > Math.min(window.innerHeight - 10, window.innerHeight - statusHeight);
+                    }
+                    const rect = dockElement.getBoundingClientRect();
+                    if (onEdge ||
+                        (event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom)) {
+                        fileDock.showDock();
+                    } else {
+                        fileDock.hideDock();
+                    }
+                }
+            }
+        }
         const fileElement = hasClosestByClassName(event.target, "sy__file");
         const protyleElement = hasClosestByClassName(event.target, "protyle", true);
+        if (isDocumentTab && !fileElement) {
+            stopScrollAnimation();
+            return;
+        }
         // 光标不在编辑器也不在文档树内时，隐藏拖拽提示（避免卡在无效区域）
         if (!fileElement && !protyleElement) {
             document.querySelector(".drag-tip")?.remove();
@@ -83,8 +181,7 @@ export const initWindowEvent = (app: App) => {
         } else if (scrollTarget && scrollTarget.classList.contains("protyle") && fileElement) {
             scrollTarget = fileElement;
         }
-        if (hasClosestByClassName(event.target, "layout-tab-container__drag") ||
-            event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
+        if (hasClosestByClassName(event.target, "layout-tab-container__drag")) {
             stopScrollAnimation();
             return;
         }
@@ -108,7 +205,8 @@ export const initWindowEvent = (app: App) => {
     });
     window.addEventListener("dragend", () => {
         stopScrollAnimation();
-        document.querySelector(".drag-tip")?.remove();
+        hideDragTip();
+        clearDragTipGhost();
         window.siyuan.dragTitle = "";
     });
     window.addEventListener("dragleave", () => {
@@ -125,7 +223,19 @@ export const initWindowEvent = (app: App) => {
         }
     });
 
-    window.addEventListener("mousedown", (event) => {
+    window.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
+        formatPainter.deactivateByPointer(event.target);
+        const tabBarElement = hasClosestByClassName(event.target, "layout-tab-bar", true);
+        const isWindowTabBar = tabBarElement && Array.from(tabBarElement.parentElement.children).some((item) =>
+            item.classList.contains("layout-tab-bar--readonly"));
+        // 避免从融合顶栏或页签空白处拖动时跨区域选中编辑器内容
+        if (event.button === 0 && (
+            hasClosestByClassName(event.target, "toolbar", true) ||
+            hasClosestByClassName(event.target, "toolbar__window", true) ||
+            (isWindowTabBar && !hasClosestByAttribute(event.target, "data-type", "tab-header", true))
+        )) {
+            event.preventDefault();
+        }
         // protyle.toolbar 点击空白处时进行隐藏
         if (!hasClosestByClassName(event.target as Element, "protyle-toolbar")) {
             hideAllElements(["toolbar"]);
@@ -141,6 +251,7 @@ export const initWindowEvent = (app: App) => {
     });
 
     window.addEventListener("blur", () => {
+        pauseImageAnimation(document.body);
         window.siyuan.ctrlIsPressed = false;
         window.siyuan.shiftIsPressed = false;
         window.siyuan.altIsPressed = false;
@@ -150,13 +261,21 @@ export const initWindowEvent = (app: App) => {
         /// #endif
     });
 
+    window.addEventListener("focus", () => {
+        resumeImageAnimation(document.body, Constants.TIMEOUT_INPUT);
+    });
+
     window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
         globalClick(event);
     });
 
     let time = 0;
+    let startX = 0;
+    let startY = 0;
     document.addEventListener("touchstart", (event) => {
         time = Date.now();
+        startX = event.touches[0].clientX;
+        startY = event.touches[0].clientY;
         // https://github.com/siyuan-note/siyuan/issues/6328
         const target = event.target as HTMLElement;
         if (hasClosestByClassName(target, "protyle-icons") ||
@@ -172,12 +291,16 @@ export const initWindowEvent = (app: App) => {
     }, false);
 
     document.addEventListener("touchend", (event) => {
+        // 无条件前置取消手动桥接：触发各组件（如 Outline.bindSort）注册的 mouseup 清理回调，复位 document.onmousemove 等状态
+        cancelManualTouch();
         if (window.siyuan.touchDragActive) {
             return;
         }
-        // pad 端长按事件
-        const currentTime = Date.now();
-        if (isIPad() && currentTime - time > 900 && currentTime - time < 2000) {
+        if (Math.abs(startX - event.changedTouches[0].clientX) < Constants.SIZE_DRAG_THRESHOLD &&
+            Math.abs(startY - event.changedTouches[0].clientY) < Constants.SIZE_DRAG_THRESHOLD &&
+            Date.now() - time > Constants.TIMEOUT_LONGPRESS &&
+            // 鼠标长按不应合成右键菜单：触屏长按出菜单是手指专属手势，鼠标菜单由右键触发
+            !isLastPointerMouse()) {
             event.target.dispatchEvent(new MouseEvent("contextmenu", {
                 bubbles: true,
                 cancelable: true,

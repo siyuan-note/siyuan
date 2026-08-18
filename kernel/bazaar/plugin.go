@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ func ParseInstalledPlugin(name, frontend string) (found bool, version, displayNa
 		}
 
 		plugin, parseErr := ParsePackageJSON(filepath.Join(util.DataDir, "plugins", dirName, "plugin.json"))
-		if nil != parseErr || nil == plugin {
+		if nil != parseErr || !IsValidInstalledPackage(plugin, dirName) {
 			return
 		}
 

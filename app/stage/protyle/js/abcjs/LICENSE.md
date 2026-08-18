@@ -1,4 +1,4 @@
-Copyright (c) 2009-2024 Paul Rosen and Gregory Dyke
+Copyright (c) 2009-2026 Paul Rosen and Gregory Dyke
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

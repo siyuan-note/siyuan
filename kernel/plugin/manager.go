@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"sync"
 	"sync/atomic"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/siyuan-note/logging"
@@ -44,6 +45,9 @@ type PluginManager struct {
 
 	context context.Context   // Context for managing plugin manager lifecycle
 	watcher *fsnotify.Watcher // watcher for kernel plugin source file changes, to trigger hot reload
+
+	sourceWatch     pluginSourceWatchState
+	sourceWatchMode pluginSourceWatchMode
 
 	plugins   sync.Map // map[string]*KernelPlugin
 	pluginsMu sync.Map // map[string]*sync.Mutex, one per plugin name, to serialize start/stop of the same plugin while allowing concurrent start/stop of different plugins
@@ -79,11 +83,40 @@ func InitManager() {
 func GetManager() *PluginManager {
 	managerOnce.Do(func() {
 		context := context.Background()
+		sourceWatchMode := currentPluginSourceWatchMode()
 
-		watcher, err := fsnotify.NewWatcher()
-		if err != nil {
-			logging.LogErrorf("failed to create kernel plugin source file watcher: %s", err)
-		} else if watcher != nil {
+		var watcher *fsnotify.Watcher
+		if sourceWatchMode == pluginSourceWatchEvents {
+			var err error
+			watcher, err = fsnotify.NewWatcher()
+			if err != nil {
+				logging.LogErrorf("failed to create kernel plugin source file watcher: %s", err)
+			}
+		}
+
+		manager = &PluginManager{
+			state: PluginManagerStateStopped,
+
+			pluginsDir: filepath.Join(util.DataDir, "plugins"),
+
+			context:         context,
+			watcher:         watcher,
+			sourceWatchMode: sourceWatchMode,
+		}
+		manager.sourceWatch = newPluginSourceWatchState(func(name string) {
+			petal := model.GetPetalByName(name)
+			if petal == nil || !petal.Enabled {
+				return
+			}
+			logging.LogInfof("[plugin:%s] source file kernel.js changed, reloading plugin", petal.Name)
+			model.SetPetalEnabled(petal.Name, petal.Enabled)
+		})
+
+		switch sourceWatchMode {
+		case pluginSourceWatchEvents:
+			if watcher == nil {
+				return
+			}
 			go func() {
 				defer watcher.Close()
 
@@ -95,19 +128,7 @@ func GetManager() *PluginManager {
 						if !ok {
 							return
 						}
-
-						pluginDir, fileName := filepath.Split(event.Name)
-						pluginName := filepath.Base(pluginDir)
-						if fileName == "kernel.js" {
-							switch event.Op {
-							case fsnotify.Create, fsnotify.Write:
-								petal := model.GetPetalByName(pluginName)
-								if petal != nil && petal.Enabled {
-									logging.LogInfof("[plugin:%s] source file kernel.js changed, reloading plugin", petal.Name)
-									go model.SetPetalEnabled(petal.Name, petal.Enabled)
-								}
-							}
-						}
+						manager.handlePluginSourceEvent(event)
 					case err, ok := <-watcher.Errors:
 						if !ok {
 							return
@@ -116,15 +137,8 @@ func GetManager() *PluginManager {
 					}
 				}
 			}()
-		}
-
-		manager = &PluginManager{
-			state: PluginManagerStateStopped,
-
-			pluginsDir: filepath.Join(util.DataDir, "plugins"),
-
-			context: context,
-			watcher: watcher,
+		case pluginSourceWatchPolling:
+			go manager.pollPluginSources(context)
 		}
 	})
 	return manager
@@ -150,7 +164,7 @@ func (m *PluginManager) Start() {
 		return
 	}
 
-	if model.Conf.Bazaar.PetalDisabled || !model.Conf.Bazaar.Trust {
+	if !model.IsPetalsEnabled() {
 		logging.LogInfof("kernel plugins are disabled by configuration, skipping start")
 		return
 	}
@@ -229,7 +243,7 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) (ok bool) {
 		}
 	}()
 
-	if model.Conf.Bazaar.PetalDisabled || !model.Conf.Bazaar.Trust {
+	if !model.IsPetalsEnabled() {
 		ok = false
 		return
 	}
@@ -246,14 +260,14 @@ func (m *PluginManager) StartPlugin(petal *model.Petal) (ok bool) {
 	// Stop any running instance inside the same lock so that concurrent hot-reload goroutines queue here and each one sees the instance started by the previous.
 	m.stopLocked(petal.Name)
 
-	m.addPluginSourceWatch(petal.Name)
-
 	p := NewKernelPlugin(m.context, petal)
 
 	m.plugins.Store(p.Name, p)
 
-	if err := p.start(); err != nil {
-		logging.LogErrorf("[plugin:%s] start failed: %s", p.Name, err)
+	startErr := p.start()
+	m.addPluginSourceWatch(petal.Name, petal.Kernel.JS)
+	if startErr != nil {
+		logging.LogErrorf("[plugin:%s] start failed: %s", p.Name, startErr)
 		ok = false
 		return
 	}
@@ -341,23 +355,46 @@ func (m *PluginManager) GetLoadedPluginsInfo() (plugins []*PluginInfo) {
 	return plugins
 }
 
-// addPluginSourceWatch adds the plugin's base directory to the fsnotify watcher to watch for source file changes for hot reload.
-func (m *PluginManager) addPluginSourceWatch(name string) {
-	if m.watcher == nil {
+// addPluginSourceWatch 注册插件源码监听，用于 kernel.js 热重载。
+func (m *PluginManager) addPluginSourceWatch(name, source string) {
+	if m.sourceWatchMode == pluginSourceWatchDisabled {
 		return
 	}
 	path := filepath.Join(m.pluginsDir, name)
-	if err := m.watcher.Add(path); err != nil {
-		logging.LogErrorf("failed to add kernel plugin source path [%s] to watcher: %s", path, err)
+	if m.sourceWatchMode == pluginSourceWatchEvents {
+		if m.watcher == nil {
+			return
+		}
+		if err := m.watcher.Add(path); err != nil {
+			logging.LogErrorf("failed to add kernel plugin source path [%s] to watcher: %s", path, err)
+			return
+		}
 	}
+	m.sourceWatch.register(name, filepath.Join(path, "kernel.js"), source)
 }
 
-// removePluginSourceWatch removes the plugin's base directory from the fsnotify watcher when the plugin is stopped.
+// removePluginSourceWatch 在插件停止时移除源码监听。
 func (m *PluginManager) removePluginSourceWatch(name string) (err error) {
-	if m.watcher == nil {
+	m.sourceWatch.unregister(name)
+	if m.sourceWatchMode != pluginSourceWatchEvents || m.watcher == nil {
 		return
 	}
 	path := filepath.Join(m.pluginsDir, name)
 	err = m.watcher.Remove(path)
 	return
+}
+
+// pollPluginSources 在 macOS 上集中轮询已注册的 kernel.js。
+func (m *PluginManager) pollPluginSources(ctx context.Context) {
+	ticker := time.NewTicker(pluginSourcePollInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-ticker.C:
+			m.sourceWatch.scan()
+		}
+	}
 }

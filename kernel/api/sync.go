@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -468,6 +468,9 @@ func performSync(c *gin.Context) {
 		return
 	}
 	if mobileSwitch {
+		if !util.IsBooted() {
+			return
+		}
 		if nil == model.Conf.GetUser() || !model.Conf.Sync.Enabled {
 			return
 		}
@@ -622,6 +625,32 @@ func setSyncPerception(c *gin.Context) {
 		return
 	}
 	model.SetSyncPerception(enabled)
+}
+
+func setSyncLAN(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var enabled bool
+	var maxConcurrentReqs float64
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("enabled", &enabled, true, false),
+		util.BindJsonArg("maxConcurrentReqs", &maxConcurrentReqs, false, false)) {
+		return
+	}
+	model.SetSyncLAN(enabled, int(maxConcurrentReqs))
+	ret.Data = model.GetSyncLANStatus()
+}
+
+func getSyncLANStatus(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	ret.Data = model.GetSyncLANStatus()
 }
 
 func setSyncMode(c *gin.Context) {

@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -78,4 +78,33 @@ func setPetalEnabled(c *gin.Context) {
 		unloadPluginSet := hashset.New(packageName)
 		model.PushReloadPlugin(nil, unloadPluginSet, nil, nil, app)
 	}
+}
+
+func setPetalPublishEnabled(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var packageName string
+	var enabled bool
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("packageName", &packageName, true, true),
+		util.BindJsonArg("enabled", &enabled, true, false),
+	) {
+		return
+	}
+
+	data, err := model.SetPetalPublishEnabled(packageName, enabled)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = data
+	util.ReloadPublishServiceSessions()
 }

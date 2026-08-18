@@ -438,7 +438,7 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
     /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
         iconHTML: "",
-        label: window.siyuan.languages.rebuildIndex,
+        label: window.siyuan.languages.rebuildAssetContentIndex,
         click() {
             const loadingElement = element.parentElement.querySelector(".fn__loading") as HTMLElement;
             loadingElement.classList.remove("fn__none");

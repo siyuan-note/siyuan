@@ -6,7 +6,7 @@
 		"id": "20200813004931-q4cu8na",
 		"title": "什么是内容块",
 		"type": "doc",
-		"updated": "20260426175538"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -140,7 +140,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104090752-qxk7yz6"
+				"id": "20210104090752-qxk7yz6",
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -157,26 +158,24 @@
 			"ID": "20210104090752-cg21nhc",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090752-cg21nhc"
+				"id": "20210104090752-cg21nhc",
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "一篇文档是一些内容块的组合，内容块是基本单位。这就好比乐高积木，可以使用不同的基本模块进行组合。"
+					"Data": "一篇文档由多个内容块组成。部分内容块可以包含其他内容块，因此称为容器块。完整的类型和包含规则请参考"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "注意"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200905090211-2vixtlf",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "内容块类型"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：文档本身也是一种内容块，更准确地说，文档块、列表块、引述块这三种内容块是容器块，他们可以包含其他任意类型的内容块。"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "内容块/组合"
+					"Data": "。"
 				}
 			]
 		},
@@ -210,16 +209,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210118101911-tbt6kkp",
-				"updated": "20260426175538"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "命名和备注"
+					"Data": "命名、别名和备注"
 				}
 			]
 		},
@@ -254,12 +249,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118102327-mybetkv",
-				"updated": "20260426175538"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 "
+					"Data": "启用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -268,7 +263,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -277,7 +272,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中打开显示书签、命名、别名标识选项后，被命名的内容块在编辑器中会被加上外框显示。如果对文档块进行命名和备注，则当鼠标悬浮文档面板文档上时将浮出该文档的相关命名和备注信息。"
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "内容块角标"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 后，可在编辑器中显示命名、别名和备注。文档块设置命名或备注后，将鼠标悬浮在文档树中的文档上可查看这些信息。"
 				}
 			]
 		},

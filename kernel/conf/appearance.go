@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -19,24 +19,26 @@ package conf
 import "github.com/siyuan-note/siyuan/kernel/util"
 
 type Appearance struct {
-	Mode                int                `json:"mode"`                // 模式：0：明亮，1：暗黑
-	ModeOS              bool               `json:"modeOS"`              // 模式是否跟随系统
-	DarkThemes          []*AppearanceTheme `json:"darkThemes"`          // 暗黑模式外观主题列表
-	LightThemes         []*AppearanceTheme `json:"lightThemes"`         // 明亮模式外观主题列表
-	ThemeDark           string             `json:"themeDark"`           // 选择的暗黑模式外观主题
-	ThemeLight          string             `json:"themeLight"`          // 选择的明亮模式外观主题
-	ThemeVer            string             `json:"themeVer"`            // 选择的主题版本
-	Icons               []*AppearanceIcon  `json:"icons"`               // 图标列表
-	Icon                string             `json:"icon"`                // 选择的图标
-	IconVer             string             `json:"iconVer"`             // 选择的图标版本
-	CodeBlockThemeLight string             `json:"codeBlockThemeLight"` // 明亮模式下代码块主题
-	CodeBlockThemeDark  string             `json:"codeBlockThemeDark"`  // 暗黑模式下代码块主题
-	Lang                string             `json:"lang"`                // 选择的界面语言，同 AppConf.Lang
-	ThemeJS             bool               `json:"themeJS"`             // 是否启用了主题 JavaScript
-	CloseButtonBehavior int                `json:"closeButtonBehavior"` // 关闭按钮行为，0：退出，1：最小化到托盘
-	HideToolbar         bool               `json:"hideToolbar"`         // 是否隐藏顶栏工具栏
-	HideStatusBar       bool               `json:"hideStatusBar"`       // 是否隐藏底部状态栏
-	StatusBar           *util.StatusBar    `json:"statusBar"`           // 底部状态栏配置
+	Mode                int                 `json:"mode"`                // 模式：0：明亮，1：暗黑
+	ModeOS              bool                `json:"modeOS"`              // 模式是否跟随系统
+	DarkThemes          []*AppearanceTheme  `json:"darkThemes"`          // 暗黑模式外观主题列表
+	LightThemes         []*AppearanceTheme  `json:"lightThemes"`         // 明亮模式外观主题列表
+	ThemeDark           string              `json:"themeDark"`           // 选择的暗黑模式外观主题
+	ThemeLight          string              `json:"themeLight"`          // 选择的明亮模式外观主题
+	ThemeVer            string              `json:"themeVer"`            // 选择的主题版本
+	Icons               []*AppearanceIcon   `json:"icons"`               // 图标列表
+	Icon                string              `json:"icon"`                // 选择的图标
+	IconVer             string              `json:"iconVer"`             // 选择的图标版本
+	CodeBlockThemeLight string              `json:"codeBlockThemeLight"` // 明亮模式下代码块主题
+	CodeBlockThemeDark  string              `json:"codeBlockThemeDark"`  // 暗黑模式下代码块主题
+	Lang                string              `json:"lang"`                // 选择的界面语言，同 AppConf.Lang
+	ThemeJS             bool                `json:"themeJS"`             // 是否启用了主题 JavaScript
+	CloseButtonBehavior int                 `json:"closeButtonBehavior"` // 关闭按钮行为，0：退出，1：最小化到托盘
+	HideToolbar         bool                `json:"hideToolbar"`         // 是否隐藏顶栏工具栏
+	HideStatusBar       bool                `json:"hideStatusBar"`       // 是否隐藏底部状态栏
+	StatusBar           *util.StatusBar     `json:"statusBar"`           // 底部状态栏配置
+	Notifications       *util.Notifications `json:"notifications"`       // 外观通知开关配置
+	EntryVisibility     *EntryVisibility    `json:"entryVisibility"`     // 桌面端入口可见性配置
 }
 
 func NewAppearance() *Appearance {
@@ -53,12 +55,82 @@ func NewAppearance() *Appearance {
 		HideToolbar:         true,
 		HideStatusBar:       false,
 		StatusBar:           &util.StatusBar{},
+		Notifications:       util.NewNotifications(),
+		EntryVisibility:     NewEntryVisibility(EntryVisibilityProfileSimple),
 	}
 }
 
+const (
+	EntryVisibilityVersion       = 3
+	EntryVisibilityProfileSimple = "simple"
+	EntryVisibilityProfileFull   = "full"
+)
+
+type EntryVisibility struct {
+	Version  int                       `json:"version"`
+	Active   string                    `json:"active"`
+	Profiles []*EntryVisibilityProfile `json:"profiles"`
+}
+
+type EntryVisibilityProfile struct {
+	ID      string              `json:"id"`
+	Name    string              `json:"name"`
+	Entries map[string]bool     `json:"entries"`
+	Orders  map[string][]string `json:"orders"`
+}
+
+func NewEntryVisibility(active string) *EntryVisibility {
+	if active != EntryVisibilityProfileSimple && active != EntryVisibilityProfileFull {
+		active = EntryVisibilityProfileFull
+	}
+	return &EntryVisibility{
+		Version:  EntryVisibilityVersion,
+		Active:   active,
+		Profiles: []*EntryVisibilityProfile{},
+	}
+}
+
+func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string) *EntryVisibility {
+	if nil == entryVisibility {
+		return NewEntryVisibility(fallback)
+	}
+	entryVisibility.Version = EntryVisibilityVersion
+	if nil == entryVisibility.Profiles {
+		entryVisibility.Profiles = []*EntryVisibilityProfile{}
+	}
+
+	profileIDs := map[string]bool{}
+	profiles := make([]*EntryVisibilityProfile, 0, len(entryVisibility.Profiles))
+	for _, profile := range entryVisibility.Profiles {
+		if nil == profile || "" == profile.ID || "" == profile.Name || profile.ID == EntryVisibilityProfileSimple ||
+			profile.ID == EntryVisibilityProfileFull || profileIDs[profile.ID] {
+			continue
+		}
+		if nil == profile.Entries {
+			profile.Entries = map[string]bool{}
+		}
+		if nil == profile.Orders {
+			profile.Orders = map[string][]string{}
+		}
+		profileIDs[profile.ID] = true
+		profiles = append(profiles, profile)
+	}
+	entryVisibility.Profiles = profiles
+	if entryVisibility.Active != EntryVisibilityProfileSimple && entryVisibility.Active != EntryVisibilityProfileFull &&
+		!profileIDs[entryVisibility.Active] {
+		entryVisibility.Active = fallback
+	}
+	if entryVisibility.Active != EntryVisibilityProfileSimple && entryVisibility.Active != EntryVisibilityProfileFull &&
+		!profileIDs[entryVisibility.Active] {
+		entryVisibility.Active = EntryVisibilityProfileFull
+	}
+	return entryVisibility
+}
+
 type AppearanceTheme struct {
-	Name  string `json:"name"`  // daylight
-	Label string `json:"label"` // i18n display name
+	Name      string   `json:"name"`                // daylight
+	Label     string   `json:"label"`               // i18n display name
+	Frontends []string `json:"frontends,omitempty"` // 支持的前端
 }
 
 type AppearanceIcon struct {

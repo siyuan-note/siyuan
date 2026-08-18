@@ -6,7 +6,7 @@
 		"id": "20200924100906-0u4zfq3",
 		"title": "Window and Tab",
 		"type": "doc",
-		"updated": "20260613204604"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613204526-iql8y2x",
-				"updated": "20260613204526"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -29,22 +29,37 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613204526-elo1esx",
-				"updated": "20260613204526"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan supports multiple windows and tabs for convenient document editing and viewing."
+					"Data": "SiYuan provides tabs on both desktop and mobile. Desktop also supports split views and multiple windows, while mobile provides a tab overview adapted to touch operation."
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-fdf0e30",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260809170000-fdf0e30",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Desktop"
 				}
 			]
 		},
 		{
 			"ID": "20260613204526-advo9ec",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204526-advo9ec",
-				"updated": "20260613204526"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -59,7 +74,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204526-0sc1qhb",
-				"updated": "20260613204526"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -104,7 +119,7 @@
 					},
 					"Properties": {
 						"id": "20260613204526-hfumoz5",
-						"updated": "20260613204526"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -112,26 +127,44 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204526-5ckrdhz",
-								"updated": "20260613204526"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Close"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": Right-click a tab and select \"Close\", or use "
+									"Data": "Close: Right-click a tab and select \"Close\", or use "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+W"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "W"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "W"
 								}
 							]
 						}
@@ -146,7 +179,7 @@
 					},
 					"Properties": {
 						"id": "20260613204526-lwpyh8t",
-						"updated": "20260613204526"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -154,26 +187,66 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204526-hvbm473",
-								"updated": "20260613204526"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Reopen"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": Use "
+									"Data": "Reopen: Use "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Shift+T"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to reopen the most recently closed tab"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "T"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "T"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to reopen the most recently closed tab"
 								}
 							]
 						}
@@ -188,7 +261,7 @@
 					},
 					"Properties": {
 						"id": "20260613204526-07fob1g",
-						"updated": "20260613204526"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -196,44 +269,156 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204526-t8vdi56",
-								"updated": "20260613204526"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Switch"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": "
+									"Data": "Switch: Use "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Shift+["
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
+									"Data": "+"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Shift+]"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to switch to the previous/next tab, "
+									"Data": "+"
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+1~9"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "["
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to jump to a specific tab"
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "["
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to switch to the previous tab, and use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⇧"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to switch to the next tab; use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "1-9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "1-9"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to jump to tabs 1 through 9"
 								}
 							]
 						}
@@ -277,10 +462,10 @@
 		{
 			"ID": "20260613204526-buhhsds",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204526-buhhsds",
-				"updated": "20260613204526"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -309,7 +494,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204526-wdd1lbj",
-				"updated": "20260613204526"
+				"updated": "20260803161608"
 			},
 			"Children": [
 				{
@@ -387,7 +572,7 @@
 					},
 					"Properties": {
 						"id": "20260613204526-swad9qh",
-						"updated": "20260613204526"
+						"updated": "20260803161608"
 					},
 					"Children": [
 						{
@@ -395,7 +580,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204526-d85bynq",
-								"updated": "20260613204526"
+								"updated": "20260803161608"
 							},
 							"Children": [
 								{
@@ -405,7 +590,21 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Right-click a tab and select \"Unsplit\", or configure a shortcut for unsplit in Settings - Keymap"
+									"Data": ": Right-click a tab and select \"Unsplit\", or configure a shortcut for unsplit in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Keymap"
 								}
 							]
 						}
@@ -449,10 +648,10 @@
 		{
 			"ID": "20260613204526-3udxrs0",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204526-3udxrs0",
-				"updated": "20260613204526"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -541,10 +740,10 @@
 		{
 			"ID": "20260613204526-tboolrb",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204526-tboolrb",
-				"updated": "20260613204604"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -559,7 +758,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204526-ufgq4p7",
-				"updated": "20260613204526"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -604,7 +803,7 @@
 					},
 					"Properties": {
 						"id": "20260613204526-19js40n",
-						"updated": "20260613204526"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -612,26 +811,48 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204526-8srns6n",
-								"updated": "20260613204526"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Recent Documents"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": Use "
+									"Data": "Recent Documents: Use "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+E"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to open the recent documents list and quickly locate recently opened documents"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "E"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "E"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to open the recent documents list"
 								}
 							]
 						}
@@ -679,7 +900,7 @@
 					},
 					"Properties": {
 						"id": "20260613204526-12wa0f9",
-						"updated": "20260613204526"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -687,26 +908,200 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613204526-thzdfc0",
-								"updated": "20260613204526"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Tab Switch"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": Use "
+									"Data": "Tab Switch: Use "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Tab"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ to jump to the next editing tab"
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌃"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Tab"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to switch to the next editing tab"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-6df6960",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260809170000-6df6960",
+				"updated": "20260810212846"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mobile"
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-d10393b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260809170000-d10393b",
+				"updated": "20260810212846"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mobile also supports multiple tabs. Tap the tabs button at the top of the screen to open the tab overview."
+				}
+			]
+		},
+		{
+			"ID": "20260809170000-38f6e49",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260809170000-38f6e49",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"ID": "20260809170000-06e5aff",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-06e5aff",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-9f07708",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-9f07708",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Switch: Tap a tab in the overview to switch to it"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260809170000-bae31e3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-bae31e3",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-5174759",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-5174759",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Navigate: Use the back and forward buttons in the overview to move through browsing history"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260809170000-a2b0569",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-a2b0569",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-dafbedb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-dafbedb",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create: Use the new-document button in the overview to create and open a document"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260809170000-45979e8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260809170000-45979e8",
+						"updated": "20260809232000"
+					},
+					"Children": [
+						{
+							"ID": "20260809170000-5ebb86a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260809170000-5ebb86a",
+								"updated": "20260809232000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Close: Close an individual tab from its card, or use the menu to close all tabs"
 								}
 							]
 						}

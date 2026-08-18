@@ -1,19 +1,29 @@
 import {Tree} from "../../util/Tree";
 import {fetchPost} from "../../util/fetch";
+import {confirmBlockRef} from "../../util/checkBlockRef";
 import {hasClosestBlock, hasClosestByClassName} from "../../protyle/util/hasClosest";
-import {isInAndroid, isInHarmony, setStorageVal, writeText} from "../../protyle/util/compatibility";
+import {setStorageVal, writeBlockDOMClipboard} from "../../protyle/util/compatibility";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {transaction, turnsIntoTransaction} from "../../protyle/wysiwyg/transaction";
 import {mathRender} from "../../protyle/render/mathRender";
 import {genEmptyElement} from "../../block/util";
-import {focusBlock, focusByWbr} from "../../protyle/util/selection";
+import {focusBlock} from "../../protyle/util/selection";
 import {openMobileFileById} from "../editor";
 import {Model} from "../../layout/Model";
 import {genUUID} from "../../util/genID";
+import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
+import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
+import {escapeHtml} from "../../util/escape";
+import {unicode2Emoji} from "../../emoji";
+import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
+import {
+    operationsMayChangeOutline,
+    transactionsMayChangeRootHeadingNumberSetting
+} from "../../protyle/util/headingNumberCore";
 
 export class MobileOutline extends Model {
     public tree: Tree;
@@ -21,6 +31,16 @@ export class MobileOutline extends Model {
     public blockId: string;
     public isPreview: boolean;
     private preFilterExpandIds: string[] | null = null;
+    private reloadId = 0;
+    private touchDragState: {
+        selectedElement: HTMLElement;
+        startX: number;
+        startY: number;
+        isDragging: boolean;
+        ghostElement: HTMLElement;
+        startTime: number;
+        selectItem: HTMLElement;
+    };
 
     constructor(options: {
         app: App,
@@ -50,6 +70,7 @@ export class MobileOutline extends Model {
     <svg data-type="expand" class="toolbar__icon"><use xlink:href="#iconExpand"></use></svg>
     <svg data-type="collapse" class="toolbar__icon"><use xlink:href="#iconContract"></use></svg>
 </div>
+<div class="b3-list-item fn__none" data-type="doc-title"></div>
 <div class="fn__flex-1" style="padding: 3px 0 8px"></div>`;
         const inputElement = this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement;
         inputElement.addEventListener("blur", () => {
@@ -61,16 +82,13 @@ export class MobileOutline extends Model {
             } else {
                 filterIconElement.classList.remove("toolbar__icon--active");
             }
-            if (inputElement.dataset.value !== value) {
+        });
+        inputElement.addEventListener("input", (event: InputEvent) => {
+            if (!event.isComposing) {
                 this.setFilter();
             }
         });
-        inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (!event.isComposing && event.key === "Enter") {
-                inputElement.dataset.value = inputElement.value;
-                this.setFilter();
-            }
-        });
+        inputElement.addEventListener("compositionend", () => this.setFilter());
         this.tree = new Tree({
             element: this.element.lastElementChild as HTMLElement,
             data: null,
@@ -119,6 +137,7 @@ export class MobileOutline extends Model {
                 this.saveExpendIds();
             },
             blockExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
+            topExtHTML: window.siyuan.config.readonly ? undefined : '<span class="b3-list-item__action"><svg><use xlink:href="#iconMore"></use></svg></span>',
         });
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
@@ -183,19 +202,240 @@ export class MobileOutline extends Model {
             }
         });
 
-        fetchPost("/api/outline/getDocOutline", {
-            id: this.blockId,
-            preview: this.isPreview
-        }, response => {
-            this.update(response);
+        this.bindSort();
+        this.element.querySelector('[data-type="doc-title"]').addEventListener("click", () => {
+            openMobileFileById(this.app, this.blockId);
         });
+        this.reload();
     }
+
+    // 大纲拖拽排序：原生触摸事件实现，长按门槛避免与列表滚动冲突，排序逻辑对齐桌面端 Outline.bindSort
+    private bindSort() {
+        // 滚动容器为列表本体（不含顶部工具栏），否则边缘滚动判定会把工具栏算进可视区导致拖到列表顶/底部不滚动
+        const scrollElement = this.tree.element;
+        const contentRect = () => scrollElement.getBoundingClientRect();
+        this.element.addEventListener("touchstart", (event: TouchEvent) => {
+            if (window.siyuan.config.readonly) return;
+            if (this.element.getAttribute("data-loading") === "true") return;
+            if (event.touches.length !== 1) return;
+            // 仅当触摸到当前文档对应的编辑器时才允许拖拽排序
+            const editor = window.siyuan.mobile.editor?.protyle;
+            if (!editor || editor.disabled || editor.block.rootID !== this.blockId) return;
+
+            const touch = event.touches[0];
+            const liElement = hasClosestByClassName(touch.target as HTMLElement, "b3-list-item") as HTMLElement;
+            if (!liElement || liElement.tagName !== "LI") return;
+
+            this.touchDragState = {
+                selectedElement: liElement,
+                startX: touch.clientX,
+                startY: touch.clientY,
+                isDragging: false,
+                ghostElement: null,
+                startTime: Date.now() - (isMousePointerTouchEvent(event) ? Constants.TIMEOUT_LONGPRESS : 0),
+                selectItem: null,
+            };
+            if (!isMousePointerTouchEvent(event)) {
+                const state = this.touchDragState;
+                window.setTimeout(() => {
+                    if (this.touchDragState !== state) {
+                        return;
+                    }
+                    this.startTouchDrag(state, state.startX, state.startY, true);
+                }, Constants.TIMEOUT_LONGPRESS);
+            }
+        }, {passive: false});
+
+        this.element.addEventListener("touchmove", (event: TouchEvent) => {
+            const state = this.touchDragState;
+            if (!state) return;
+            const touch = event.touches[0];
+
+            // 长按门槛：未达到长按时间就移动则视为滚动，放弃拖拽
+            if (!state.isDragging) {
+                if (Date.now() - state.startTime < Constants.TIMEOUT_LONGPRESS &&
+                    (Math.abs(touch.clientX - state.startX) > Constants.SIZE_DRAG_THRESHOLD ||
+                        Math.abs(touch.clientY - state.startY) > Constants.SIZE_DRAG_THRESHOLD)) {
+                    this.touchDragState = null;
+                    return;
+                }
+                if (Math.abs(touch.clientX - state.startX) < Constants.SIZE_DRAG_THRESHOLD &&
+                    Math.abs(touch.clientY - state.startY) < Constants.SIZE_DRAG_THRESHOLD) return;
+                this.startTouchDrag(state, touch.clientX, touch.clientY, !isMousePointerTouchEvent(event));
+            }
+
+            // 进入拖拽后阻止原生滚动，避免列表伴随手指滚动
+            event.preventDefault();
+            event.stopPropagation();
+            state.ghostElement.style.top = touch.clientY + "px";
+            state.ghostElement.style.left = touch.clientX + "px";
+            dragOverScroll({clientY: touch.clientY} as MouseEvent, contentRect(), scrollElement);
+
+            // 通过 elementFromPoint 定位手指下的目标项
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            const selectItem = target?.closest(".b3-list-item") as HTMLElement;
+            if (!selectItem || selectItem.tagName !== "LI" || !scrollElement.contains(selectItem)) {
+                this.clearDragIndicators();
+                state.selectItem = null;
+                return;
+            }
+
+            this.clearDragIndicators();
+            if (selectItem === state.selectedElement) {
+                selectItem.classList.add("dragover__current");
+                return;
+            }
+            const selectRect = selectItem.getBoundingClientRect();
+            const dragHeight = selectRect.height * .2;
+            if (touch.clientY > selectRect.bottom - dragHeight) {
+                selectItem.classList.add("dragover__bottom");
+            } else if (touch.clientY < selectRect.top + dragHeight) {
+                selectItem.classList.add("dragover__top");
+            } else {
+                selectItem.classList.add("dragover");
+            }
+            state.selectItem = selectItem;
+        }, {passive: false});
+
+        this.element.addEventListener("touchend", () => {
+            const state = this.touchDragState;
+            if (!state) return;
+            stopScrollAnimation();
+            state.selectedElement.style.opacity = "";
+            const item = state.selectedElement;
+
+            if (state.isDragging) {
+                state.ghostElement?.remove();
+                let selectItem = state.selectItem;
+                if (!selectItem) {
+                    selectItem = this.element.querySelector(".dragover__top, .dragover__bottom, .dragover") as HTMLElement;
+                }
+                const editor = window.siyuan.mobile.editor?.protyle;
+                let hasChange = true;
+                if (selectItem && editor &&
+                    (selectItem.classList.contains("dragover__top") || selectItem.classList.contains("dragover__bottom") || selectItem.classList.contains("dragover"))) {
+                    let previousID;
+                    let parentID;
+                    const undoPreviousID = (item.previousElementSibling && item.previousElementSibling.tagName === "UL") ? item.previousElementSibling.previousElementSibling.getAttribute("data-node-id") : item.previousElementSibling?.getAttribute("data-node-id");
+                    const undoParentID = item.parentElement.previousElementSibling?.getAttribute("data-node-id");
+                    if (selectItem.classList.contains("dragover")) {
+                        parentID = selectItem.getAttribute("data-node-id");
+                        if (selectItem.nextElementSibling && selectItem.nextElementSibling.tagName === "UL") {
+                            selectItem.nextElementSibling.insertAdjacentElement("afterbegin", item);
+                        } else {
+                            selectItem.insertAdjacentHTML("afterend", `<ul>${item.outerHTML}</ul>`);
+                            item.remove();
+                        }
+                    } else if (selectItem.classList.contains("dragover__top")) {
+                        parentID = selectItem.parentElement.previousElementSibling?.getAttribute("data-node-id");
+                        if (selectItem.previousElementSibling && selectItem.previousElementSibling.tagName === "UL") {
+                            previousID = selectItem.previousElementSibling.previousElementSibling.getAttribute("data-node-id");
+                        } else {
+                            previousID = selectItem.previousElementSibling?.getAttribute("data-node-id");
+                        }
+                        if (previousID === item.dataset.nodeId || parentID === item.dataset.nodeId) {
+                            hasChange = false;
+                        } else {
+                            selectItem.before(item);
+                        }
+                    } else if (selectItem.classList.contains("dragover__bottom")) {
+                        previousID = selectItem.getAttribute("data-node-id");
+                        if (previousID === item.previousElementSibling?.getAttribute("data-node-id")) {
+                            hasChange = false;
+                        } else {
+                            selectItem.after(item);
+                        }
+                    }
+                    if (hasChange) {
+                        this.element.setAttribute("data-loading", "true");
+
+                        transaction(editor, [{
+                            action: "moveOutlineHeading",
+                            id: item.dataset.nodeId,
+                            previousID,
+                            parentID,
+                        }], [{
+                            action: "moveOutlineHeading",
+                            id: item.dataset.nodeId,
+                            previousID: undoPreviousID,
+                            parentID: undoParentID,
+                        }]);
+
+                        // https://github.com/siyuan-note/siyuan/issues/10828#issuecomment-2044099675
+                        editor.wysiwyg.element.querySelectorAll('[data-type="NodeHeading"] [contenteditable="true"][spellcheck]').forEach(headingItem => {
+                            headingItem.setAttribute("contenteditable", "false");
+                        });
+                    }
+                }
+                this.clearDragIndicators();
+            }
+            this.touchDragState = null;
+        });
+
+        const cancelTouchDrag = () => {
+            stopScrollAnimation();
+            if (this.touchDragState?.ghostElement) {
+                this.touchDragState.ghostElement.remove();
+            }
+            if (this.touchDragState?.selectedElement) {
+                this.touchDragState.selectedElement.style.opacity = "";
+            }
+            this.clearDragIndicators();
+            this.touchDragState = null;
+        };
+        this.element.addEventListener("touchcancel", cancelTouchDrag);
+        this.element.addEventListener("pointercancel", cancelTouchDrag);
+        window.addEventListener("blur", cancelTouchDrag);
+        bindMousePointerTouchBridge(this.element);
+    }
+
+    private startTouchDrag(state: MobileOutline["touchDragState"], clientX: number, clientY: number, vibrate = false) {
+        if (state.isDragging) {
+            return;
+        }
+        state.isDragging = true;
+        state.selectedElement.style.opacity = "0.38";
+        const ghostElement = state.selectedElement.cloneNode(true) as HTMLElement;
+        ghostElement.setAttribute("id", "dragGhost");
+        ghostElement.firstElementChild.setAttribute("style", "padding-left:4px");
+        ghostElement.setAttribute("style", `border-radius: var(--b3-border-radius);background-color: var(--b3-list-hover);pointer-events:none;position: fixed; top: ${clientY}px; left: ${clientX}px; z-index:999997;`);
+        document.body.append(ghostElement);
+        state.ghostElement = ghostElement;
+        if (vibrate) {
+            if (window.webkit?.messageHandlers.vibrate) {
+                window.webkit.messageHandlers.vibrate.postMessage("");
+            } else if (navigator.vibrate) {
+                navigator.vibrate(Constants.TIMEOUT_VIBRATION_DURATION);
+            }
+        }
+    }
+
+    // 清理拖拽指示线
+    private clearDragIndicators = () => {
+        this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover, .dragover__current").forEach(item => {
+            item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__current");
+        });
+    };
 
     private handleMsgCallback(data: IWebSocketData) {
         if (data) {
             switch (data.cmd) {
                 case "savedoc":
                     this.onTransaction(data);
+                    break;
+                case "transactions":
+                    if (transactionsMayChangeRootHeadingNumberSetting(data.data, this.blockId)) {
+                        this.reload();
+                    }
+                    break;
+                case "rename":
+                    if (this.blockId === data.data.id) {
+                        this.updateDocTitle({
+                            title: data.data.title,
+                            icon: Constants.ZWSP,
+                            [Constants.CUSTOM_SY_TITLE_EMPTY]: data.data.empty ? "true" : "false"
+                        }, -1);
+                    }
                     break;
             }
         }
@@ -205,7 +445,9 @@ export class MobileOutline extends Model {
         if (!nodeElement) {
             return;
         }
-        if (nodeElement.getAttribute("data-type") === "NodeHeading") {
+        if (nodeElement.getAttribute("data-type") === "NodeHeading" &&
+            !hasClosestByClassName(nodeElement, "bq") &&
+            !hasClosestByClassName(nodeElement, "callout-content")) {
             this.setCurrentById(nodeElement.getAttribute("data-node-id"));
         } else {
             let previousElement = getPreviousBlock(nodeElement);
@@ -219,10 +461,15 @@ export class MobileOutline extends Model {
             if (previousElement) {
                 this.setCurrentById(previousElement.getAttribute("data-node-id"));
             } else {
-                fetchPost("/api/block/getBlockBreadcrumb", {
+                const breadcrumbParam: Record<string, any> = {
                     id: nodeElement.getAttribute("data-node-id"),
                     excludeTypes: []
-                }, (response) => {
+                };
+                const mobileProtyle = window.siyuan.mobile.editor?.protyle;
+                if (mobileProtyle && mobileProtyle.block.rootID === this.blockId && isEncryptedBox(mobileProtyle.notebookId)) {
+                    breadcrumbParam.notebook = mobileProtyle.notebookId;
+                }
+                fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
                     response.data.reverse().find((item: IBreadcrumb) => {
                         if (item.type === "NodeHeading") {
                             this.setCurrentById(item.id);
@@ -256,6 +503,9 @@ export class MobileOutline extends Model {
             item.classList.remove("b3-list-item--focus");
         });
         let currentElement = this.element.querySelector(`.b3-list-item[data-node-id="${id}"]`) as HTMLElement;
+        if (!currentElement) {
+            return;
+        }
         if (window.siyuan.storage[Constants.LOCAL_OUTLINE].keepCurrentExpand) {
             let ulElement = currentElement.parentElement;
             while (ulElement && !ulElement.classList.contains("b3-list") && ulElement.tagName === "UL") {
@@ -271,33 +521,63 @@ export class MobileOutline extends Model {
         }
         if (currentElement) {
             currentElement.classList.add("b3-list-item--focus");
-            const elementRect = this.element.getBoundingClientRect();
-            this.element.scrollTop = this.element.scrollTop + (currentElement.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
+            const elementRect = this.tree.element.getBoundingClientRect();
+            this.tree.element.scrollTop += currentElement.getBoundingClientRect().top -
+                (elementRect.top + elementRect.height / 2);
         }
     }
 
-    public update(data: IWebSocketData, callbackId?: string) {
+    public reload(callback?: () => void) {
+        const protyle = window.siyuan.mobile.editor?.protyle;
+        const blockId = protyle?.block.rootID || this.blockId;
+        if (!blockId) {
+            return;
+        }
+        const isPreview = protyle ? !protyle.preview.element.classList.contains("fn__none") : this.isPreview;
+        if (blockId !== this.blockId) {
+            this.tree.updateData(null);
+            this.updateDocTitle();
+            this.tree.element.scrollTop = 0;
+        }
+        this.blockId = blockId;
+        this.isPreview = isPreview;
+        const reloadId = ++this.reloadId;
+        const outlineParam: IObject = {
+            id: blockId,
+            preview: isPreview
+        };
+        if (protyle && isEncryptedBox(protyle.notebookId)) {
+            outlineParam.notebook = protyle.notebookId;
+        }
+        fetchPost("/api/outline/getDocOutline", outlineParam, response => {
+            if (reloadId !== this.reloadId || window.siyuan.mobile.editor?.protyle.block.rootID !== blockId) {
+                return;
+            }
+            this.update(response);
+            this.updateDocTitle(protyle?.background?.ial, response.data?.length || 0);
+            callback?.();
+        });
+    }
+
+    public update(data: IWebSocketData) {
         let currentElement = this.element.querySelector(".b3-list-item--focus");
         let currentId;
         if (currentElement) {
             currentId = currentElement.getAttribute("data-node-id");
         }
-        const scrollTop = this.element.scrollTop;
-        if (typeof callbackId !== "undefined") {
-            this.blockId = callbackId;
-        }
+        const scrollTop = this.tree.element.scrollTop;
         this.tree.updateData(data.data);
 
         if (this.isPreview) {
             this.tree.element.querySelectorAll(".popover__block").forEach(item => {
                 item.classList.remove("popover__block");
             });
-            this.element.scrollTop = scrollTop;
+            this.tree.element.scrollTop = scrollTop;
         } else if (this.blockId) {
             if ((this.element.querySelector("input.b3-text-field.search__label") as HTMLInputElement).value) {
                 this.setFilter();
             }
-            this.element.scrollTop = scrollTop;
+            this.tree.element.scrollTop = scrollTop;
         }
         if (currentId) {
             currentElement = this.element.querySelector(`[data-node-id="${currentId}"]`);
@@ -306,6 +586,35 @@ export class MobileOutline extends Model {
             }
         }
         this.element.removeAttribute("data-loading");
+    }
+
+    private updateDocTitle(ial?: Record<string, string>, count?: number) {
+        const docTitleElement = this.element.querySelector('[data-type="doc-title"]') as HTMLElement;
+        if (this.isPreview || !ial) {
+            docTitleElement.classList.add("fn__none");
+            return;
+        }
+        let iconHTML = unicode2Emoji(ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file,
+            "b3-list-item__graphic", true);
+        if (ial.icon === Constants.ZWSP && docTitleElement.firstElementChild) {
+            iconHTML = docTitleElement.firstElementChild.outerHTML;
+        }
+        const title = getDocDisplayName(ial.title, ial[Constants.CUSTOM_SY_TITLE_EMPTY] === "true");
+        docTitleElement.innerHTML = `${iconHTML}<span class="b3-list-item__text">${escapeHtml(title)}</span>${docTitleElement.querySelector(".counter")?.outerHTML || ""}`;
+        docTitleElement.setAttribute("title", title);
+        docTitleElement.classList.remove("fn__none");
+        if (typeof count === "number" && count !== -1) {
+            const counterElement = docTitleElement.querySelector(".counter") as HTMLElement;
+            if (count > 0) {
+                if (counterElement) {
+                    counterElement.textContent = count.toString();
+                } else {
+                    docTitleElement.insertAdjacentHTML("beforeend", `<span class="counter">${count.toString()}</span>`);
+                }
+            } else {
+                counterElement?.remove();
+            }
+        }
     }
 
     public saveExpendIds() {
@@ -436,6 +745,8 @@ export class MobileOutline extends Model {
             });
         }
         this.saveExpendIds();
+        window.siyuan.storage[Constants.LOCAL_OUTLINE].expandLevel = targetLevel;
+        setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
     }
 
     /**
@@ -449,6 +760,7 @@ export class MobileOutline extends Model {
                 id: `heading${i}`,
                 icon: `iconH${i}`,
                 label: window.siyuan.languages[`heading${i}`],
+                current: window.siyuan.storage[Constants.LOCAL_OUTLINE].expandLevel === i,
                 click: () => this.expandToLevel(i)
             }).element);
         }
@@ -514,39 +826,14 @@ export class MobileOutline extends Model {
         if (data.data.rootID !== this.blockId) {
             return;
         }
-        let needReload = false;
         const ops = data.data.sources[0];
-        ops.doOperations.find((item: IOperation) => {
-            if (item.action === "update" &&
-                (this.element.querySelector(`.b3-list-item[data-node-id="${item.id}"]`) || item.data.indexOf('data-type="NodeHeading"') > -1)) {
-                needReload = true;
-                return true;
-            } else if (item.action === "insert" && item.data.indexOf('data-type="NodeHeading"') > -1) {
-                needReload = true;
-                return true;
-            } else if (item.action === "delete" || item.action === "move") {
-                needReload = true;
-                return true;
-            }
-        });
-        if (!needReload && ops.undoOperations) {
-            ops.undoOperations.find((item: IOperation) => {
-                if (item.action === "update" && item.data?.indexOf('data-type="NodeHeading"') > -1) {
-                    needReload = true;
-                    return true;
-                }
-            });
-        }
+        const headingIDs = new Set(Array.from(this.element.querySelectorAll<HTMLElement>(
+            ".b3-list-item[data-node-id]"
+        )).map(item => item.dataset.nodeId!));
+        const needReload = operationsMayChangeOutline(ops.doOperations, headingIDs) ||
+            operationsMayChangeOutline(ops.undoOperations, headingIDs);
         if (needReload) {
-            fetchPost("/api/outline/getDocOutline", {
-                id: this.blockId,
-                preview: this.isPreview
-            }, response => {
-                // 文档切换后不再更新原有推送 https://github.com/siyuan-note/siyuan/issues/13409
-                if (data.data.rootID !== this.blockId) {
-                    return;
-                }
-                this.update(response);
+            this.reload(() => {
                 // https://github.com/siyuan-note/siyuan/issues/8372
                 if (getSelection().rangeCount > 0) {
                     const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
@@ -579,11 +866,13 @@ export class MobileOutline extends Model {
                     click: () => {
                         const data = this.getProtyleAndBlockElement(element);
                         if (data) {
+                            getSelection()?.removeAllRanges();
                             turnsIntoTransaction({
                                 protyle: data.protyle,
                                 selectsElement: [data.blockElement],
                                 type: "Blocks2Hs",
-                                level: currentLevel - 1
+                                level: currentLevel - 1,
+                                unfocus: true,
                             });
                         }
                     }
@@ -599,11 +888,13 @@ export class MobileOutline extends Model {
                     click: () => {
                         const data = this.getProtyleAndBlockElement(element);
                         if (data) {
+                            getSelection()?.removeAllRanges();
                             turnsIntoTransaction({
                                 protyle: data.protyle,
                                 selectsElement: [data.blockElement],
                                 type: "Blocks2Hs",
-                                level: currentLevel + 1
+                                level: currentLevel + 1,
+                                unfocus: true,
                             });
                         }
                     }
@@ -649,21 +940,25 @@ export class MobileOutline extends Model {
                 label: window.siyuan.languages.insertSameLevelHeadingBefore,
                 click: () => {
                     const data = this.getProtyleAndBlockElement(element);
+                    if (!data) {
+                        return;
+                    }
                     const newId = Lute.NewNodeID();
                     const html = `<div data-subtype="h${currentLevel}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                    const previousID = data.blockElement.previousElementSibling?.getAttribute("data-node-id");
+                    data.blockElement.insertAdjacentHTML("beforebegin", html);
+                    const newElement = data.blockElement.previousElementSibling;
+                    this.focusInsertedHeading(newElement);
                     transaction(data.protyle, [{
                         action: "insert",
                         data: html,
                         id: newId,
-                        previousID: data.blockElement.previousElementSibling?.getAttribute("data-node-id"),
+                        previousID,
                         parentID: data.blockElement.parentElement.getAttribute("data-node-id") || data.protyle.block.parentID,
                     }], [{
                         action: "delete",
                         id: newId
                     }]);
-                    data.blockElement.insertAdjacentHTML("beforebegin", html);
-                    data.blockElement.previousElementSibling.scrollIntoView();
-                    focusByWbr(data.blockElement.previousElementSibling, document.createRange());
                 }
             }).element);
 
@@ -673,14 +968,29 @@ export class MobileOutline extends Model {
                 icon: "iconAfter",
                 label: window.siyuan.languages.insertSameLevelHeadingAfter,
                 click: () => {
+                    const data = this.getProtyleAndBlockElement(element);
+                    if (!data) {
+                        return;
+                    }
+                    const rootID = data.protyle.block.rootID;
+                    focusBlock(data.blockElement);
                     fetchPost("/api/block/getHeadingDeleteTransaction", {
                         id,
                     }, (deleteResponse) => {
-                        const data = this.getProtyleAndBlockElement(element);
+                        if (window.siyuan.mobile.editor?.protyle !== data.protyle || this.blockId !== rootID ||
+                            !deleteResponse.data?.doOperations?.length) {
+                            return;
+                        }
                         const previousID = deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id;
 
                         const newId = Lute.NewNodeID();
                         const html = `<div data-subtype="h${currentLevel}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                        const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
+                        if (previousElement) {
+                            previousElement.insertAdjacentHTML("afterend", html);
+                            const newElement = previousElement.nextElementSibling;
+                            this.focusInsertedHeading(newElement);
+                        }
                         transaction(data.protyle, [{
                             action: "insert",
                             data: html,
@@ -690,12 +1000,6 @@ export class MobileOutline extends Model {
                             action: "delete",
                             id: newId
                         }]);
-                        const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
-                        if (previousElement) {
-                            previousElement.insertAdjacentHTML("afterend", html);
-                            previousElement.nextElementSibling.scrollIntoView();
-                            focusByWbr(previousElement.nextElementSibling, document.createRange());
-                        }
                     });
                 }
             }).element);
@@ -707,22 +1011,35 @@ export class MobileOutline extends Model {
                     icon: "iconAdd",
                     label: window.siyuan.languages.addChildHeading,
                     click: () => {
+                        const data = this.getProtyleAndBlockElement(element);
+                        if (!data) {
+                            return;
+                        }
+                        const rootID = data.protyle.block.rootID;
+                        focusBlock(data.blockElement);
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
                         }, (deleteResponse) => {
+                            if (window.siyuan.mobile.editor?.protyle !== data.protyle || this.blockId !== rootID ||
+                                !deleteResponse.data?.doOperations?.length || !deleteResponse.data?.undoOperations) {
+                                return;
+                            }
                             let previousID = deleteResponse.data.doOperations[deleteResponse.data.doOperations.length - 1].id;
                             deleteResponse.data.undoOperations.find((operationsItem: IOperation, index: number) => {
                                 const startIndex = operationsItem.data.indexOf(' data-subtype="h');
-                                if (startIndex > -1 && startIndex < 260 && parseInt(operationsItem.data.substring(startIndex + 16, startIndex + 17)) === currentLevel + 1) {
+                                if (index > 0 && startIndex > -1 && startIndex < 260 && parseInt(operationsItem.data.substring(startIndex + 16, startIndex + 17)) === currentLevel + 1) {
                                     previousID = deleteResponse.data.undoOperations[index - 1].id;
                                     return true;
                                 }
                             });
-
-
-                            const data = this.getProtyleAndBlockElement(element);
                             const newId = Lute.NewNodeID();
                             const html = `<div data-subtype="h${currentLevel + 1}" data-node-id="${newId}" data-type="NodeHeading" class="h${currentLevel + 1}"><div contenteditable="true" spellcheck="false"><wbr></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div></div>`;
+                            const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
+                            if (previousElement) {
+                                previousElement.insertAdjacentHTML("afterend", html);
+                                const newElement = previousElement.nextElementSibling;
+                                this.focusInsertedHeading(newElement);
+                            }
                             transaction(data.protyle, [{
                                 action: "insert",
                                 data: html,
@@ -732,12 +1049,6 @@ export class MobileOutline extends Model {
                                 action: "delete",
                                 id: newId
                             }]);
-                            const previousElement = data.protyle.wysiwyg.element.querySelector(`[data-node-id="${previousID}"]`);
-                            if (previousElement) {
-                                previousElement.insertAdjacentHTML("afterend", html);
-                                previousElement.nextElementSibling.scrollIntoView();
-                                focusByWbr(previousElement.nextElementSibling, document.createRange());
-                            }
                         });
                     }
                 }).element);
@@ -755,15 +1066,9 @@ export class MobileOutline extends Model {
                 const data = this.getProtyleAndBlockElement(element);
                 fetchPost("/api/block/getHeadingChildrenDOM", {
                     id,
-                    removeFoldAttr: data.blockElement.getAttribute("fold") !== "1"
-                }, (response) => {
-                    if (isInAndroid()) {
-                        window.JSAndroid.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                    } else if (isInHarmony()) {
-                        window.JSHarmony.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                    } else {
-                        writeText(response.data + Constants.ZWSP);
-                    }
+                    removeFoldAttr: false
+                }, async (response) => {
+                    await writeBlockDOMClipboard(data.protyle.lute, response.data);
                 });
             }
         }).element);
@@ -778,18 +1083,30 @@ export class MobileOutline extends Model {
                     const data = this.getProtyleAndBlockElement(element);
                     fetchPost("/api/block/getHeadingChildrenDOM", {
                         id,
-                        removeFoldAttr: data.blockElement.getAttribute("fold") !== "1"
+                        removeFoldAttr: false
                     }, (response) => {
-                        if (isInAndroid()) {
-                            window.JSAndroid.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                        } else if (isInHarmony()) {
-                            window.JSHarmony.writeHTMLClipboard(data.protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
-                        } else {
-                            writeText(response.data + Constants.ZWSP);
-                        }
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
-                        }, (deleteResponse) => {
+                        }, async (deleteResponse) => {
+                            const deletedIDs = deleteResponse.data.doOperations.map(
+                                (operation: IOperation) => operation.id);
+                            if (!await confirmBlockRef({
+                                scope: "blocks",
+                                ids: deletedIDs,
+                                deletedIDs,
+                                notebook: data.protyle.notebookId,
+                            }, data.protyle)) {
+                                return;
+                            }
+                            if (!data.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
+                                return;
+                            }
+                            if (!await writeBlockDOMClipboard(data.protyle.lute, response.data)) {
+                                return;
+                            }
+                            if (!data.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
+                                return;
+                            }
                             deleteResponse.data.doOperations.forEach((operation: IOperation) => {
                                 data.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                     itemElement.remove();
@@ -826,7 +1143,19 @@ export class MobileOutline extends Model {
                     const data = this.getProtyleAndBlockElement(element);
                     fetchPost("/api/block/getHeadingDeleteTransaction", {
                         id,
-                    }, (response) => {
+                    }, async (response) => {
+                        const deletedIDs = response.data.doOperations.map((operation: IOperation) => operation.id);
+                        if (!await confirmBlockRef({
+                            scope: "blocks",
+                            ids: deletedIDs,
+                            deletedIDs,
+                            notebook: data.protyle.notebookId,
+                        }, data.protyle)) {
+                            return;
+                        }
+                        if (!data.protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`)) {
+                            return;
+                        }
                         response.data.doOperations.forEach((operation: IOperation) => {
                             data.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                                 itemElement.remove();
@@ -930,6 +1259,13 @@ export class MobileOutline extends Model {
         };
     }
 
+    private focusInsertedHeading(element: Element) {
+        element.scrollIntoView();
+        element.querySelector("wbr")?.remove();
+        (element.querySelector('[contenteditable="true"]') as HTMLElement)?.focus({preventScroll: true});
+        focusBlock(element);
+    }
+
     /**
      * 生成标题级别转换菜单项
      */
@@ -941,13 +1277,19 @@ export class MobileOutline extends Model {
             label: window.siyuan.languages["heading" + level],
             click: () => {
                 const protyle = window.siyuan.mobile.editor?.protyle;
-                if (!protyle) {
+                if (!protyle || !this.tree.element.querySelector(`[data-node-id="${id}"]`)) {
                     return;
                 }
+                const rootID = protyle.block.rootID;
+                getSelection()?.removeAllRanges();
                 fetchPost("/api/block/getHeadingLevelTransaction", {
                     id,
                     level
                 }, (response) => {
+                    if (window.siyuan.mobile.editor?.protyle !== protyle || this.blockId !== rootID ||
+                        !response.data?.doOperations || !response.data?.undoOperations) {
+                        return;
+                    }
                     response.data.doOperations.forEach((operation: any, index: number) => {
                         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach((itemElement: HTMLElement) => {
                             itemElement.outerHTML = operation.data;

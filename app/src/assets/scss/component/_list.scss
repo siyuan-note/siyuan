@@ -1,4 +1,5 @@
 @use "../util/mixin";
+@use "../util/function";
 
 .b3-list {
   mark {
@@ -91,6 +92,84 @@
     color: var(--b3-theme-on-background);
     margin: 1px 8px;
 
+    &[data-treetype="outline"] > .b3-list-item__text {
+      span[data-type~="sup"],
+      span[data-type~="sub"] {
+        position: relative;
+        font-size: 75%;
+        line-height: 0;
+        vertical-align: baseline;
+      }
+
+      span[data-type~="sup"] {
+        top: -.5em;
+      }
+
+      span[data-type~="sub"] {
+        bottom: -.25em;
+      }
+
+      span[data-type~="em"] {
+        color: var(--b3-protyle-inline-em-color);
+        font-style: italic;
+      }
+
+      span[data-type~="s"] {
+        color: var(--b3-protyle-inline-s-color);
+        text-decoration: line-through;
+      }
+
+      span[data-type~="strong"] {
+        color: var(--b3-protyle-inline-strong-color);
+        font-weight: bold;
+      }
+
+      span[data-type~="code"] {
+        @extend .fn__code;
+        tab-size: 4;
+      }
+
+      span[data-type~="kbd"] {
+        @extend .fn__kbd;
+      }
+
+      span[data-type~="u"] {
+        border-bottom: 1px solid;
+        color: var(--b3-protyle-inline-u-color);
+      }
+
+      span[data-type~="inline-memo"] {
+        background-color: var(--b3-card-info-background);
+        border-bottom: 2px solid var(--b3-card-info-color);
+      }
+
+      span[data-type~="mark"] {
+        background-color: var(--b3-protyle-inline-mark-background);
+        color: var(--b3-protyle-inline-mark-color);
+      }
+
+      span[data-type~="tag"] {
+        padding-right: 1px;
+        padding-left: 1px;
+        border-bottom: 1px solid;
+        color: var(--b3-protyle-inline-tag-color);
+      }
+
+      span[data-type~="a"] {
+        color: var(--b3-protyle-inline-link-color);
+      }
+
+      span[data-type~="block-ref"],
+      span[data-type~="file-annotation-ref"] {
+        color: var(--b3-protyle-inline-blockref-color);
+        opacity: .86;
+      }
+
+      span[data-type~="file-annotation-ref"] {
+        color: var(--b3-protyle-inline-fileref-color);
+      }
+    }
+
     &[draggable="true"]:active {
       cursor: grabbing;
     }
@@ -143,9 +222,23 @@
       transition: var(--b3-transition);
       border-radius: var(--b3-border-radius);
 
-      &--hl:hover {
-        color: var(--b3-theme-on-background);
-        background-color: var(--b3-list-icon-hover);
+      &--hl {
+        position: relative;
+
+        // 扩展点击命中范围到 li 的左侧和上下边缘，视觉 hover 高亮区域保持不变
+        &::before {
+          content: "";
+          position: absolute;
+          top: -3px;
+          bottom: -3px;
+          left: -4px;
+          right: 0;
+        }
+
+        &:hover {
+          color: var(--b3-theme-on-background);
+          background-color: var(--b3-list-icon-hover);
+        }
       }
     }
 
@@ -167,10 +260,12 @@
       text-align: center;
       font-size: 14px;
       font-family: var(--b3-font-family-emoji);
+      font-variant-emoji: emoji;
       margin-right: 4px;
       line-height: 22px;
       transition: var(--b3-transition);
       height: 22px;
+      width: 16px;
       padding: 0 4px;
       flex-shrink: 0;
       border-radius: var(--b3-border-radius);
@@ -209,6 +304,7 @@
       line-height: 16px;
       font-size: 12px;
       font-family: var(--b3-font-family-emoji);
+      font-variant-emoji: emoji;
 
       // doc icon in the bookmark panel
       svg {
@@ -244,6 +340,18 @@
         width: 14px;
         float: left;
         margin-top: 7px;
+      }
+    }
+
+    &__number {
+      flex-shrink: 0;
+      margin-inline-end: 4px;
+      color: var(--b3-theme-on-surface-light);
+      unicode-bidi: isolate;
+      user-select: none;
+
+      &--no-spacing {
+        margin-inline-end: 0;
       }
     }
 

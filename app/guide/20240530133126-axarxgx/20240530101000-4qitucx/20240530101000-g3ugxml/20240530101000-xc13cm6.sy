@@ -7,7 +7,7 @@
 		"id": "20240530101000-xc13cm6",
 		"title": "ブックマークとタグ",
 		"type": "doc",
-		"updated": "20250115151944"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-pvnwpym",
 				"id": "20240530101000-hprjkt6",
-				"updated": "20250115151931"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -46,7 +46,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240530101000-knmtutw",
-				"updated": "20250115151931"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -69,12 +69,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ / "
+					"Data": " / "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌃3"
+					"TextMarkTextContent": "⌃"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "3"
 				},
 				{
 					"Type": "NodeText",
@@ -89,7 +98,7 @@
 			"Properties": {
 				"ID": "20240530101000-jxde0hd",
 				"id": "20240530101000-hm4v83l",
-				"updated": "20250115151944"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -104,7 +113,7 @@
 			"Properties": {
 				"ID": "20240530101000-qec15ab",
 				"id": "20240530101000-3km22xj",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -136,7 +145,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ の Markdown インラインタグ構文が有効である有効である必要があります)。"
+					"Data": " ​ の Markdown インラインタグ構文が有効である有効である必要があります)。"
 				}
 			]
 		},
@@ -178,7 +187,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240530101000-hyy7lip",
-				"updated": "20250115151944"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -201,12 +210,21 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ / "
+					"Data": " / "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⌃4"
+					"TextMarkTextContent": "⌃"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "4"
 				},
 				{
 					"Type": "NodeText",
@@ -318,7 +336,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026lt;"
+					"TextMarkTextContent": "&lt;"
 				},
 				{
 					"Type": "NodeText",
@@ -327,7 +345,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026gt;"
+					"TextMarkTextContent": "&gt;"
 				},
 				{
 					"Type": "NodeText",
@@ -336,7 +354,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "\u0026amp;"
+					"TextMarkTextContent": "&amp;"
 				},
 				{
 					"Type": "NodeText",

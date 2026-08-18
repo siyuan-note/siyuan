@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@ import (
 	"io"
 	"io/fs"
 	"mime"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -35,6 +36,12 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 )
+
+// IsOfficeTempFile 判断是否为 Office（Word/Excel/PowerPoint/WPS）打开文档时生成的临时文件。
+// 这些文件名以 `~$` 开头，且被宿主程序独占，尝试读取会触发 filelock 的致命错误，需跳过。
+func IsOfficeTempFile(assetAbsPath string) bool {
+	return strings.HasPrefix(filepath.Base(assetAbsPath), "~$")
+}
 
 func GetFilePathsByExts(dirPath string, exts []string) (ret []string) {
 	filelock.Walk(dirPath, func(path string, d fs.DirEntry, err error) error {
@@ -156,7 +163,7 @@ func RemoveID(name string) string {
 }
 
 var commonSuffixes = []string{
-	".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".tif", ".tiff",
+	".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".tif", ".tiff", ".heic", ".heif",
 	".txt", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".md", ".rtf",
 	".zip", ".rar", ".7z", ".tar", ".gz", ".bz2",
 	".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a",
@@ -208,6 +215,93 @@ func LastID(p string) (name, id string) {
 
 func IsValidUploadFileName(name string) bool {
 	return name == FilterUploadFileName(name)
+}
+
+func IsNetworkIconURL(icon string) bool {
+	u, err := url.Parse(icon)
+	return nil == err && "" != u.Host && ("http" == strings.ToLower(u.Scheme) || "https" == strings.ToLower(u.Scheme))
+}
+
+func FilterIconValue(icon string) (ret string, valid bool) {
+	ret = strings.TrimSpace(icon)
+	if strings.HasPrefix(ret, "api/icon/") || IsNetworkIconURL(ret) {
+		return ret, true
+	}
+
+	u, err := url.Parse(ret)
+	if strings.HasPrefix(ret, "//") || (nil == err && "" != u.Scheme) {
+		return "", false
+	}
+	if strings.Contains(ret, ".") {
+		ret = FilterUploadEmojiFileName(ret)
+	}
+	if !strings.ContainsAny(ret, "./") && !IsValidIconUnicode(ret) {
+		return "", false
+	}
+	return ret, true
+}
+
+// IsValidIconUnicode 校验图标值是否为合法的十六进制码点序列（连字符分隔）：
+// 解码后不允许包含 HTML 元字符，防止图标值被渲染为可执行标记
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-vx5w-qrvp-mmcq
+func IsValidIconUnicode(icon string) bool {
+	parts := strings.Split(icon, "-")
+	if 32 < len(parts) {
+		return false
+	}
+	isHexSequence := true
+	for _, part := range parts {
+		if "" == part || 6 < len(part) {
+			return false
+		}
+		if _, parseErr := strconv.ParseUint(part, 16, 32); nil != parseErr {
+			isHexSequence = false
+			break
+		}
+	}
+	if !isHexSequence {
+		// 不是十六进制码点序列，比如直接存储的 emoji 字符，保持原有行为
+		return true
+	}
+	for _, part := range parts {
+		n, _ := strconv.ParseUint(part, 16, 32)
+		if 0x10FFFF < n || (0xD800 <= n && 0xDFFF >= n) {
+			return false
+		}
+		r := rune(n)
+		if '<' == r || '>' == r || '"' == r || '\'' == r || '&' == r {
+			return false
+		}
+	}
+	return true
+}
+
+func FilterRecentIconValue(icon string) (ret string, valid bool) {
+	ret, valid = FilterIconValue(icon)
+	if !valid || !strings.HasPrefix(ret, "api/icon/getDynamicIcon") {
+		return
+	}
+
+	u, err := url.Parse(ret)
+	if nil != err {
+		return "", false
+	}
+	query := u.Query()
+	query.Del("id")
+	u.RawQuery = query.Encode()
+	return u.String(), true
+}
+
+func FilterRecentIconValues(icons []string) (ret []string) {
+	ret = make([]string, 0, len(icons))
+	seen := map[string]bool{}
+	for _, icon := range icons {
+		if icon, valid := FilterRecentIconValue(icon); valid && !seen[icon] {
+			ret = append(ret, icon)
+			seen[icon] = true
+		}
+	}
+	return
 }
 
 func FilterUploadEmojiFileName(name string) string {
@@ -397,60 +491,4 @@ func CeilSize(size int64) int64 {
 
 func IsReservedFilename(baseName string) bool {
 	return "assets" == baseName || "templates" == baseName || "widgets" == baseName || "emojis" == baseName || ".siyuan" == baseName || strings.HasPrefix(baseName, ".")
-}
-
-func WalkWithSymlinks(root string, fn fs.WalkDirFunc) error {
-	// 感谢 https://github.com/edwardrf/symwalk/blob/main/symwalk.go
-
-	rr, err := filepath.EvalSymlinks(root) // Find real base if there is any symlinks in the path
-	if err != nil {
-		return err
-	}
-
-	visitedDirs := make(map[string]struct{})
-	return filelock.Walk(rr, getWalkFn(visitedDirs, fn))
-}
-
-func getWalkFn(visitedDirs map[string]struct{}, fn fs.WalkDirFunc) fs.WalkDirFunc {
-	return func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return fn(path, d, err)
-		}
-
-		if d.IsDir() {
-			if _, ok := visitedDirs[path]; ok {
-				return filepath.SkipDir
-			}
-			visitedDirs[path] = struct{}{}
-		}
-
-		if err := fn(path, d, err); err != nil {
-			return err
-		}
-
-		info, err := d.Info()
-		if nil != err {
-			return err
-		}
-		if info.Mode()&os.ModeSymlink == 0 {
-			return nil
-		}
-
-		// path is a symlink
-		rp, err := filepath.EvalSymlinks(path)
-		if err != nil {
-			return err
-		}
-
-		ri, err := os.Stat(rp)
-		if err != nil {
-			return err
-		}
-
-		if ri.IsDir() {
-			return filelock.Walk(rp, getWalkFn(visitedDirs, fn))
-		}
-
-		return nil
-	}
 }

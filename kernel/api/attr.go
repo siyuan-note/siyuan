@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -32,7 +32,11 @@ func getBookmarkLabels(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	ret.Data = model.BookmarkLabels()
+	if model.IsReadOnlyRoleContext(c) {
+		ret.Data = model.BookmarkLabelsByPublishAccess(c, model.GetPublishAccess())
+	} else {
+		ret.Data = model.BookmarkLabels()
+	}
 }
 
 func batchGetBlockAttrs(c *gin.Context) {
@@ -50,6 +54,7 @@ func batchGetBlockAttrs(c *gin.Context) {
 		idList = append(idList, id.(string))
 	}
 
+	idList = filterBlockIDsByPublishAccess(c, idList, "")
 	ret.Data = sql.BatchGetBlockAttrs(idList)
 }
 
@@ -64,6 +69,9 @@ func getBlockAttrs(c *gin.Context) {
 
 	id := arg["id"].(string)
 	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+	if !checkBlockPublishAccess(c, id, ret) {
 		return
 	}
 

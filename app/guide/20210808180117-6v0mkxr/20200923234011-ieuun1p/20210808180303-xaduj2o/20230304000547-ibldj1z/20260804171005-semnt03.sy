@@ -1,0 +1,719 @@
+{
+	"ID": "20260804171005-semnt03",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804171005-semnt03",
+		"title": "Semantic Search",
+		"type": "doc",
+		"updated": "20260809232000"
+	},
+	"Children": [
+		{
+			"ID": "20260804170124-fq78c5k",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170124-fq78c5k",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20260804170125-j1n3peq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170125-j1n3peq",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Semantic search finds content with similar meaning by comparing text vectors. Full-text search depends on the presence of keywords, while semantic search can find notes that use different wording for related topics."
+				}
+			]
+		},
+		{
+			"ID": "20260804170126-6x70vu9",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170126-6x70vu9",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Configuration"
+				}
+			]
+		},
+		{
+			"ID": "20260804170127-3fpyace",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170127-3fpyace",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Embedding model"
+				}
+			]
+		},
+		{
+			"ID": "20260804170128-jeg9t7v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170128-jeg9t7v",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enable "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Semantic Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embedding Model"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", then configure the API base URL, API key, model, vector dimensions, and timeout. Use the connection test to verify the model."
+				}
+			]
+		},
+		{
+			"ID": "20260804170129-j6gqedu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170129-j6gqedu",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Set vector dimensions to 0 to use the model default. Specify another value only when the target model supports custom dimensions. Rebuild the embedding index after changing the model or dimensions."
+				}
+			]
+		},
+		{
+			"ID": "20260804170130-y6xqvqi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170130-y6xqvqi",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rerank model"
+				}
+			]
+		},
+		{
+			"ID": "20260804170131-56r9zeg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170131-56r9zeg",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The rerank model is optional. When enabled, it scores the candidates retrieved by vector search again to improve result ordering. A larger candidate count can improve accuracy but also increases latency and cost."
+				}
+			]
+		},
+		{
+			"ID": "20260804170132-b16r2xu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170132-b16r2xu",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "How to use"
+				}
+			]
+		},
+		{
+			"ID": "20260804170133-5hntadu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170133-5hntadu",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open full-text search, select "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Semantic Search"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " under "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Search Method"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and describe the content in natural language. Notebook, path, and block-type filters remain available."
+				}
+			]
+		},
+		{
+			"ID": "20260804170134-hmpxo2z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170134-hmpxo2z",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Embedding index"
+				}
+			]
+		},
+		{
+			"ID": "20260804170135-ebuv3e8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170135-ebuv3e8",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After the embedding model is enabled, SiYuan generates vectors for eligible blocks in the background. Vectors are updated automatically when content is created or changed."
+				}
+			]
+		},
+		{
+			"ID": "20260804170136-m922dhz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170136-m922dhz",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "View indexing progress"
+				}
+			]
+		},
+		{
+			"ID": "20260804170137-jfn7qwf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170137-jfn7qwf",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Artificial Intelligence"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Embedding Model"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to view indexed, pending, failed, ignored by length, and ignored by configuration counts. Building the initial index may take a long time."
+				}
+			]
+		},
+		{
+			"ID": "20260804170138-dctalg4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170138-dctalg4",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Retry failed blocks"
+				}
+			]
+		},
+		{
+			"ID": "20260804170139-vxbv2b4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170139-vxbv2b4",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If failed blocks appear, check the embedding model configuration and network connection, then retry the failed blocks. Successfully indexed blocks are not processed again."
+				}
+			]
+		},
+		{
+			"ID": "20260804170140-cxca235",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170140-cxca235",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rebuild the embedding index"
+				}
+			]
+		},
+		{
+			"ID": "20260804170141-qw152gp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170141-qw152gp",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After changing the embedding model, vector dimensions, or ignore rules, select "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Rebuild embedding index"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Rebuilding clears existing vectors and recalculates them in the background, so semantic search results may be incomplete until it finishes."
+				}
+			]
+		},
+		{
+			"ID": "20260804170142-y3lke9w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804170142-y3lke9w",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Ignore content"
+				}
+			]
+		},
+		{
+			"ID": "20260804170143-b24yz44",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170143-b24yz44",
+				"updated": "20260809160000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "To exclude documents, create or edit "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/data/.siyuan/embeddingignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " on the file system. Enter one ignored path per line using gitignore syntax. For example:"
+				}
+			]
+		},
+		{
+			"ID": "20260809160000-bb1738e",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260809160000-bb1738e",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804170144-y672jlt",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170144-y672jlt",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"ID": "20260804170145-xkbllii",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170145-xkbllii",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170146-8c2yg7i",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170146-8c2yg7i",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ignore one document in the specified notebook"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170147-hamvupb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170147-hamvupb",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170148-nmib51y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170148-nmib51y",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": ignore all documents in the specified notebook"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804170149-ng2ljkf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804170149-ng2ljkf",
+				"updated": "20260804180000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Rebuild the embedding index after saving the file. This file affects only embedding vectors; the content remains in the regular full-text index. To exclude content from the regular index entirely, see "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkTextContent": "Ignore indexing",
+					"TextMarkBlockRefID": "20240119211017-1vbbt95",
+					"TextMarkBlockRefSubtype": "s"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260804170150-wvw9ksq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804170150-wvw9ksq",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Note"
+				}
+			]
+		},
+		{
+			"ID": "20260804170151-jscczjw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804170151-jscczjw",
+				"updated": "20260804205607"
+			},
+			"Children": [
+				{
+					"ID": "20260804170152-ec6x47u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170152-ec6x47u",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170153-n3jnw6b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170153-n3jnw6b",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Document text is sent to the embedding provider while indexing, and query text is sent when searching"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170154-imu1ey7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170154-imu1ey7",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170155-f2ewneh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170155-f2ewneh",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Embedding and rerank API calls may incur charges, and indexing a large workspace may take a long time"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170156-zs7d1vu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170156-zs7d1vu",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170157-94ygxt1",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170157-94ygxt1",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Semantic search is unavailable for encrypted notebooks"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170158-o82u7dm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170158-o82u7dm",
+						"updated": "20260804205607"
+					},
+					"Children": [
+						{
+							"ID": "20260804170159-vvzba62",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170159-vvzba62",
+								"updated": "20260804205607"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Blocks shorter than 7 bytes or longer than 12000 bytes after UTF-8 encoding are not embedded"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804170200-w0ctfbf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804170200-w0ctfbf",
+						"updated": "20260804180000"
+					},
+					"Children": [
+						{
+							"ID": "20260804170201-9ac1zff",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804170201-9ac1zff",
+								"updated": "20260804180000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "If reranking fails, results fall back to vector-similarity order"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

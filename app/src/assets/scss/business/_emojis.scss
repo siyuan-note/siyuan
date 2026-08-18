@@ -1,5 +1,7 @@
 
 .emojis {
+  --emojis-background: var(--b3-theme-surface);
+
   word-break: break-all;
   white-space: normal;
   display: flex;
@@ -46,8 +48,10 @@
   }
 
   &__item {
+    box-sizing: border-box;
     font-size: 19px;
     font-family: var(--b3-font-family-emoji);
+    font-variant-emoji: emoji;
     text-align: center;
     height: 32px;
     padding: 4px;
@@ -74,14 +78,160 @@
   }
 
   &__title {
+    position: sticky;
+    z-index: 1;
+    top: 0;
     color: var(--b3-theme-on-surface);
+    background-color: var(--emojis-background);
     padding: 8px 4px 4px 4px;
+  }
+
+  &__section {
+    position: relative;
+
+    &:first-child > .emojis__title {
+      padding-top: 0;
+    }
   }
 
   &__panel {
     flex: 1;
     overflow: auto;
-    padding: 0 8px;
+    margin-right: 4px;
+    padding: 0 4px 0 8px;
+  }
+
+  &__link {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    height: 100%;
+    outline: none;
+    padding: 16px;
+
+    &-empty,
+    &-input,
+    &-detail {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    &-empty {
+      &-content {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+      }
+    }
+
+    &-source {
+      align-self: center;
+      margin-top: 12px;
+    }
+
+    &-upload {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 120px;
+      border: 0;
+      border-radius: var(--b3-border-radius-b);
+      background-color: var(--b3-theme-surface-lighter);
+      color: var(--b3-theme-on-surface);
+      cursor: pointer;
+      font-size: 16px;
+
+      svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      &:hover,
+      &:focus-visible {
+        background-color: var(--b3-list-hover);
+      }
+    }
+
+    &-tip {
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    &-value {
+      textarea {
+        height: 120px;
+        margin-top: 4px;
+        resize: none;
+        word-break: break-all;
+      }
+    }
+
+    &-preview {
+      display: flex;
+      align-items: center;
+      flex: 0 0 120px;
+      flex-direction: column;
+      justify-content: center;
+      border-radius: var(--b3-border-radius-b);
+      background-color: var(--b3-theme-surface-lighter);
+    }
+
+    &-samples {
+      display: flex;
+      gap: 8px;
+    }
+
+    &-sample {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      border: 1px solid var(--b3-border-color);
+      border-radius: var(--b3-border-radius-b);
+
+      &--light {
+        background-color: #fff;
+      }
+
+      &--dark {
+        background-color: #1e1e1e;
+      }
+
+      img {
+        width: 56px;
+        height: 56px;
+        object-fit: contain;
+      }
+    }
+
+    &-name {
+      margin-top: 16px;
+
+      .b3-text-field {
+        margin-top: 4px;
+      }
+    }
+
+    &-footer {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding-top: 16px;
+
+      &--choice {
+        flex-wrap: wrap;
+      }
+    }
+
+    &-choice-back {
+      margin-right: auto;
+    }
   }
 
   &__content {
@@ -89,21 +239,38 @@
     flex-wrap: wrap;
   }
 
+  &__chunk {
+    overflow: hidden;
+    contain: layout paint;
+  }
+
+  &__types {
+    display: flex;
+    flex-shrink: 0;
+    gap: 2px;
+    padding: 4px 8px 0;
+  }
+
   &__type {
     cursor: pointer;
-    flex: 1;
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
     height: 28px;
-    line-height: 28px;
+    line-height: 1;
     transition: var(--b3-list-hover);
     font-size: 16px;
     background-color: transparent;
     border: 0;
+    border-radius: var(--b3-border-radius);
     padding: 0;
     font-family: var(--b3-font-family-emoji);
+    font-variant-emoji: emoji;
 
+    &--current,
     &:hover {
       background-color: var(--b3-theme-surface-lighter);
     }
@@ -113,4 +280,8 @@
       width: 16px;
     }
   }
+}
+
+.protyle-hint .emojis {
+  --emojis-background: var(--b3-menu-background);
 }

@@ -2,7 +2,7 @@ import {getSettingTab, type TSettingTab} from "../setting/tabs";
 import type {SettingTabMountContext} from "../setting/builder";
 import {clearSettingTabSearch} from "../setting/mount";
 import {getSearchKeywordsLower} from "./normalize";
-import {App} from "../../index";
+import type {App} from "../../index";
 import {isPhablet} from "../../protyle/util/compatibility";
 
 /** @param visibleInSidebar 为 true 时，侧栏项被搜索过滤隐藏（`display: none`）则视为无 focus */
@@ -40,8 +40,8 @@ export const switchSettingTab = (
     if (!search) {
         const keywords = getSearchKeywordsLower(dialogElement);
         if (keywords) {
-            const {visibleItemIds, visibleGroupIds} = getSettingTab(tabId).scanSearch(keywords);
-            search = {keywords, visibleItemIds, visibleGroupIds};
+            const {visibleItemIds, visibleGroupIds, unavailableItems} = getSettingTab(tabId).scanSearch(keywords);
+            search = {keywords, visibleItemIds, visibleGroupIds, unavailableItems};
         }
     }
     void getSettingTab(tabId).mount(containerElement, search, app);
@@ -62,14 +62,15 @@ const syncSettingSearch = (dialogElement: HTMLElement, app: App) => {
     }
 
     const focusedTabId = getFocusedTabId(dialogElement, true);
-    let currentMatch: ({tabId: TSettingTab} & Pick<SettingTabMountContext, "visibleItemIds" | "visibleGroupIds">) | undefined;
+    let currentMatch: ({tabId: TSettingTab} & Pick<SettingTabMountContext,
+        "visibleItemIds" | "visibleGroupIds" | "unavailableItems">) | undefined;
     for (const item of dialogElement.querySelectorAll<HTMLElement>(".config__side .b3-list-item")) {
         const tabId = item.getAttribute("data-name") as TSettingTab | null;
         if (!tabId) {
             item.style.display = "none";
             continue;
         }
-        const {matches, visibleItemIds, visibleGroupIds} = getSettingTab(tabId).scanSearch(keywords);
+        const {matches, visibleItemIds, visibleGroupIds, unavailableItems} = getSettingTab(tabId).scanSearch(keywords);
         if (!matches) {
             item.style.display = "none";
             continue;
@@ -77,7 +78,7 @@ const syncSettingSearch = (dialogElement: HTMLElement, app: App) => {
         item.style.display = "";
         // 优先使用当前标签页；若当前标签页已不在命中集合，则切到侧栏顺序中的第一个命中项
         if (tabId === focusedTabId || !currentMatch) {
-            currentMatch = {tabId, visibleItemIds, visibleGroupIds};
+            currentMatch = {tabId, visibleItemIds, visibleGroupIds, unavailableItems};
         }
     }
 
@@ -86,6 +87,7 @@ const syncSettingSearch = (dialogElement: HTMLElement, app: App) => {
             keywords,
             visibleItemIds: currentMatch.visibleItemIds,
             visibleGroupIds: currentMatch.visibleGroupIds,
+            unavailableItems: currentMatch.unavailableItems,
         });
     } else {
         dialogElement.querySelectorAll(".config__tab-container").forEach((item) => {

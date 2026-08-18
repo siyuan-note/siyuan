@@ -1,0 +1,23 @@
+{
+	"ID": "20240530133126-axarxgx",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"custom-hidden": "true",
+		"icon": "1f4d4",
+		"id": "20240530133126-axarxgx",
+		"title": "SiYuan ユーザーガイド",
+		"type": "doc",
+		"updated": "20240530133126"
+	},
+	"Children": [
+		{
+			"ID": "20260722113934-k7o1x52",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260722113934-k7o1x52",
+				"updated": "20260722113934"
+			}
+		}
+	]
+}

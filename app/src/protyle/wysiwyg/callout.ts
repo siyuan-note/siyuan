@@ -20,7 +20,7 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
             ${window.siyuan.languages.icon}
         </div>
         <span class="fn__space"></span>
-        <div class="protyle-wysiwyg" style="padding: 0" data-readonly="false">
+        <div class="protyle-wysiwyg" style="padding: 0;font-size: 16px" data-readonly="false">
             <span class="callout-icon">${blockCalloutElement.innerHTML}</span>
         </div>
     </label>
@@ -117,14 +117,7 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
             h: emojiRect.height,
             w: emojiRect.width
         }, (unicode) => {
-            let emojiHTML;
-            if (unicode.startsWith("api/icon/getDynamicIcon")) {
-                emojiHTML = `<img class="callout-img" src="${unicode}"/>`;
-            } else if (unicode.indexOf(".") > -1) {
-                emojiHTML = `<img class="callout-img" src="/emojis/${unicode}">`;
-            } else {
-                emojiHTML = unicode2Emoji(unicode);
-            }
+            let emojiHTML = unicode2Emoji(unicode, "callout-img");
             if (unicode === "") {
                 if (textElements[0].value === "NOTE") {
                     emojiHTML = "✏️";
@@ -139,7 +132,10 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
                 }
             }
             dialogCalloutIconElement.innerHTML = emojiHTML;
-        }, dialogCalloutIconElement.querySelector("img"));
+        }, dialogCalloutIconElement.querySelector("img"), {
+            ownerElement: protyle.element,
+            targetID: blockElements[0].dataset.nodeId,
+        });
     });
     dialog.element.querySelector(".b3-form__icona-icon").addEventListener("click", (event) => {
         const menu = new Menu(Constants.MENU_CALLOUT_SELECT, () => {

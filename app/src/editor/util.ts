@@ -1,11 +1,11 @@
 import {Tab} from "../layout/Tab";
 import {Editor} from "./index";
 import {Wnd} from "../layout/Wnd";
-import {getInstanceById, getWndByLayout, pdfIsLoading, setPanelFocus} from "../layout/util";
+import {getInstanceById, getWndByLayout, newModelByInitData, pdfIsLoading, setPanelFocus} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
-import {getDisplayName, getDocDisplayName, pathPosix, useShell} from "../util/pathName";
+import {getAssetExtension, getDisplayName, getDocDisplayName, isEncryptedBox, useShell} from "../util/pathName";
 import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
@@ -29,12 +29,22 @@ import {showMessage} from "../dialog/message";
 import {objEquals} from "../util/functions";
 import {resize} from "../protyle/util/resize";
 import {Search} from "../search";
-import {App} from "../index";
-import {newCardModel} from "../card/newCardTab";
+import type {App} from "../index";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {clearOBG} from "../layout/dock/util";
 import {Model} from "../layout/Model";
 import {hideElements} from "../protyle/ui/hideElements";
+import {isBrowserRenderableImagePath} from "../util/imageURL";
+
+const isSameCustomTab = (type: string, data: any, options: IOpenFileOptions) => {
+    if (!options.custom || (options.custom.id && options.custom.id !== type)) {
+        return false;
+    }
+    if (type === "siyuan-database-row") {
+        return data?.avID === options.custom.data?.avID && data?.itemID === options.custom.data?.itemID;
+    }
+    return objEquals(data, options.custom.data);
+};
 
 export const openFileById = async (options: {
     app: App,
@@ -46,6 +56,7 @@ export const openFileById = async (options: {
     zoomIn?: boolean
     removeCurrentTab?: boolean
     openNewTab?: boolean
+    keepAVPanel?: boolean
     afterOpen?: (model: Model) => void,
     scrollPosition?: ScrollLogicalPosition
 }) => {
@@ -57,6 +68,7 @@ export const openFileById = async (options: {
         showMessage(response.msg);
         return;
     }
+    const zoomIn = options.zoomIn === true && options.id !== response.data.rootID;
 
     return openFile({
         app: options.app,
@@ -68,18 +80,19 @@ export const openFileById = async (options: {
         position: options.position,
         mode: options.mode,
         action: options.action,
-        zoomIn: options.zoomIn,
+        zoomIn,
         keepCursor: options.keepCursor,
         removeCurrentTab: options.removeCurrentTab,
         afterOpen: options.afterOpen,
         openNewTab: options.openNewTab,
+        keepAVPanel: options.keepAVPanel,
         scrollPosition: options.scrollPosition,
     });
 };
 
 export const openAsset = (app: App, assetPath: string, page: number | string, position?: string) => {
-    const suffix = pathPosix().extname(assetPath).split("?")[0];
-    if (!Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
+    const suffix = getAssetExtension(assetPath).toLowerCase();
+    if (!Constants.SIYUAN_ASSETS_EXTS.includes(suffix) || !isBrowserRenderableImagePath(assetPath)) {
         return;
     }
     openFile({
@@ -96,9 +109,11 @@ export const openFile = async (options: IOpenFileOptions) => {
         options.removeCurrentTab = true;
     }
     // https://github.com/siyuan-note/siyuan/issues/10168
-    document.querySelectorAll(".av__panel, .av__mask").forEach(item => {
-        item.remove();
-    });
+    if (!options.keepAVPanel) {
+        document.querySelectorAll(".av__panel, .av__mask").forEach(item => {
+            item.remove();
+        });
+    }
     // 打开 PDF 时移除文档光标
     if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
@@ -125,8 +140,8 @@ export const openFile = async (options: IOpenFileOptions) => {
         }
     } else if (options.custom) {
         clearOBG();
-        const custom = allModels.custom.find((item) => {
-            if (objEquals(item.data, options.custom.data) && (!options.custom.id || options.custom.id === item.type)) {
+        const custom = !options.openNewTab && allModels.custom.find((item) => {
+            if (isSameCustomTab(item.type, item.data, options)) {
                 if (!pdfIsLoading(item.parent.parent.element)) {
                     item.parent.parent.switchTab(item.parent.headElement);
                     item.parent.parent.showHeading();
@@ -140,7 +155,7 @@ export const openFile = async (options: IOpenFileOptions) => {
             }
             return custom.parent;
         }
-        const hasModel = getUnInitTab(options);
+        const hasModel = !options.openNewTab && getUnInitTab(options);
         if (hasModel) {
             if (options.afterOpen) {
                 options.afterOpen(hasModel.model);
@@ -210,11 +225,15 @@ export const openFile = async (options: IOpenFileOptions) => {
                 optionsClone[key] = JSON.parse(JSON.stringify(options[key]));
             }
         });
-        hasMatch = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
-            cmd: Constants.SIYUAN_OPEN_FILE,
-            options: JSON.stringify(optionsClone),
-            port: location.port,
-        });
+        try {
+            hasMatch = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
+                cmd: Constants.SIYUAN_OPEN_FILE,
+                options: JSON.stringify(optionsClone),
+                port: location.port,
+            });
+        } catch (e) {
+            console.warn("Check opened file window error:", e);
+        }
         if (hasMatch) {
             if (options.afterOpen) {
                 options.afterOpen();
@@ -263,14 +282,14 @@ export const openFile = async (options: IOpenFileOptions) => {
                     return;
                 }
                 // 在右侧/下侧打开已有页签将进行页签切换 https://github.com/siyuan-note/siyuan/issues/5366
-                let hasEditor = targetWnd.children.find(item => {
+                let hasEditor = !options.openNewTab && targetWnd.children.find(item => {
                     if (item.model && item.model instanceof Editor && item.model.editor.protyle.block.rootID === options.rootID) {
                         switchEditor(item.model, options, allModels);
                         return true;
                     }
                 });
                 if (!hasEditor) {
-                    hasEditor = getUnInitTab(options);
+                    hasEditor = !options.openNewTab && getUnInitTab(options);
                     createdTab = hasEditor;
                 }
                 if (!hasEditor) {
@@ -345,7 +364,7 @@ const getUnInitTab = (options: IOpenFileOptions) => {
                 item.headElement.setAttribute("data-initdata", JSON.stringify(initObj));
                 item.parent.switchTab(item.headElement);
                 return true;
-            } else if (initObj.instance === "Custom" && options.custom && objEquals(initObj.customModelData, options.custom.data)) {
+            } else if (initObj.instance === "Custom" && isSameCustomTab(initObj.customModelType, initObj.customModelData, options)) {
                 item.parent.switchTab(item.headElement);
                 return true;
             }
@@ -375,11 +394,15 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
         }
     });
     if ((!nodeElement || nodeElement?.clientHeight === 0) && options.id !== options.rootID) {
-        fetchPost("/api/filetree/getDoc", {
+        const getDocParam: IObject = {
             id: options.id,
             mode: (options.action && options.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: window.siyuan.config.editor.dynamicLoadBlocks,
-        }, getResponse => {
+        };
+        if (isEncryptedBox(editor.editor.protyle.notebookId)) {
+            getDocParam.notebook = editor.editor.protyle.notebookId;
+        }
+        fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
             onGet({
                 data: getResponse,
                 protyle: editor.editor.protyle,
@@ -414,7 +437,8 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                 } else {
                     scrollCenter(editor.editor.protyle, (editor.editor.protyle.disabled || options.scrollPosition) ? nodeElement : null, options.scrollPosition);
                 }
-                editor.editor.protyle.observerLoad = new ResizeObserver(() => {
+                const userScrollAbort = new AbortController();
+                const observerLoad = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
                         if (typeof scrollTop === "number") {
                             editor.editor.protyle.contentElement.scrollTop = scrollTop;
@@ -423,10 +447,36 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                         }
                     }
                 });
+                const stopObserve = () => {
+                    userScrollAbort.abort();
+                    observerLoad.disconnect();
+                };
+                const onUserScroll = () => stopObserve();
+                editor.editor.protyle.contentElement.addEventListener("wheel", onUserScroll, {
+                    capture: true,
+                    passive: true,
+                    signal: userScrollAbort.signal
+                });
+                editor.editor.protyle.contentElement.addEventListener("touchstart", onUserScroll, {
+                    capture: true,
+                    passive: true,
+                    signal: userScrollAbort.signal
+                });
+                editor.editor.protyle.contentElement.addEventListener("touchmove", onUserScroll, {
+                    capture: true,
+                    passive: true,
+                    signal: userScrollAbort.signal
+                });
+                editor.editor.protyle.contentElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                    if (["PageUp", "PageDown", "Home", "End", "ArrowUp", "ArrowDown", " "].includes(event.key)) {
+                        stopObserve();
+                    }
+                }, {capture: true, signal: userScrollAbort.signal});
+                editor.editor.protyle.observerLoad = observerLoad;
                 setTimeout(() => {
-                    editor.editor.protyle.observerLoad.disconnect();
+                    stopObserve();
                 }, 1000 * 3);
-                editor.editor.protyle.observerLoad.observe(editor.editor.protyle.wysiwyg.element);
+                observerLoad.observe(editor.editor.protyle.wysiwyg.element);
             } else if (editor.editor.protyle.block.rootID === options.id) {
                 // 由于 https://github.com/siyuan-note/siyuan/issues/5420，移除定位
             } else if (editor.editor.protyle.toolbar.range) {
@@ -446,8 +496,9 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
 const newTab = (options: IOpenFileOptions) => {
     let tab: Tab;
     if (options.assetPath) {
-        const suffix = pathPosix().extname(options.assetPath).split("?")[0];
-        if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
+        const suffix = getAssetExtension(options.assetPath).toLowerCase();
+        if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix) &&
+            isBrowserRenderableImagePath(options.assetPath)) {
             let icon = "iconPDF";
             if (Constants.SIYUAN_ASSETS_IMAGE.includes(suffix)) {
                 icon = "iconImage";
@@ -476,22 +527,13 @@ const newTab = (options: IOpenFileOptions) => {
             title: options.custom.title,
             callback(tab) {
                 if (options.custom.id) {
-                    if (options.custom.id === "siyuan-card") {
-                        tab.addModel(newCardModel({
-                            app: options.app,
-                            tab,
-                            data: options.custom.data
-                        }));
-                    } else {
-                        options.app.plugins.find(p => {
-                            if (p.models[options.custom.id]) {
-                                tab.addModel(p.models[options.custom.id]({
-                                    tab,
-                                    data: options.custom.data
-                                }));
-                                return true;
-                            }
-                        });
+                    const model = newModelByInitData(options.app, tab, {
+                        instance: "Custom",
+                        customModelType: options.custom.id,
+                        customModelData: options.custom.data,
+                    });
+                    if (model) {
+                        tab.addModel(model);
                     }
                 } else {
                     // plugin 0.8.3 历史兼容
@@ -637,16 +679,20 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
                 return;
             }
 
-            fetchPost("/api/outline/getDocOutline", {
+            const outlineParam: IObject = {
                 id: blockId,
                 preview: !protyle.preview.element.classList.contains("fn__none")
-            }, response => {
+            };
+            if (protyle && isEncryptedBox(protyle.notebookId)) {
+                outlineParam.notebook = protyle.notebookId;
+            }
+            fetchPost("/api/outline/getDocOutline", outlineParam, response => {
                 if (!reload && (!isCurrentEditor(blockId) || item.blockId === blockId) &&
                     item.isPreview !== protyle.preview.element.classList.contains("fn__none")) {
                     return;
                 }
                 item.isPreview = !protyle.preview.element.classList.contains("fn__none");
-                item.update(response, blockId);
+                item.update(response, blockId, protyle?.notebookId || "");
                 if (protyle) {
                     item.updateDocTitle(protyle.background.ial, response.data?.length || 0);
                     if (getSelection().rangeCount > 0) {
@@ -684,13 +730,32 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
             if (protyle && protyle.block) {
                 blockId = protyle.block.showAll ? protyle.block.id : protyle.block.parentID;
             }
-            if (blockId === item.blockId) {
+            const notebookId = protyle?.notebookId || "";
+            if (blockId === item.blockId && notebookId === item.notebookId) {
                 return;
             }
+            item.notebookId = notebookId;
             item.searchGraph(true, blockId);
         }
     });
     models.backlink.forEach(item => {
+        if (item.type === "bottom") {
+            if (!protyle || item.ownerProtyle !== protyle) {
+                return;
+            }
+            const blockId = protyle.block.showAll ? protyle.block.id : (protyle.block.parentID || protyle.block.rootID);
+            if (blockId === item.blockId) {
+                return;
+            }
+            const backlinkKeyword = item.inputsElement[0].value;
+            const backmentionKeyword = item.inputsElement[1].value;
+            item.prepareForBlock(blockId, protyle.block.rootID);
+            item.inputsElement[0].value = backlinkKeyword;
+            item.inputsElement[1].value = backmentionKeyword;
+            item.markDirty();
+            item.refreshIfVisible(true);
+            return;
+        }
         if (item.type === "local" && item.rootId !== protyle?.block?.rootID) {
             return;
         }
@@ -701,22 +766,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
         if (blockId === item.blockId) {
             return;
         }
-        item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.add("fn__rotate");
-        fetchPost("/api/ref/getBacklink2", {
-            sort: item.status[blockId] ? item.status[blockId].sort.toString() : window.siyuan.config.editor.backlinkSort.toString(),
-            mSort: item.status[blockId] ? item.status[blockId].mSort.toString() : window.siyuan.config.editor.backmentionSort.toString(),
-            id: blockId || "",
-            k: item.inputsElement[0].value,
-            mk: item.inputsElement[1].value,
-        }, response => {
-            if (!isCurrentEditor(blockId) || item.blockId === blockId) {
-                item.element.querySelector('.block__icon[data-type="refresh"] svg').classList.remove("fn__rotate");
-                return;
-            }
-            item.saveStatus();
-            item.blockId = blockId;
-            item.render(response.data);
-        });
+        item.switchBlock(blockId, protyle?.block?.rootID || "", protyle?.notebookId || "");
     });
 };
 

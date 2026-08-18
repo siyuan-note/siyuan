@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,6 +17,7 @@
 package mobile
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -34,11 +35,75 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/job"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/plugin"
 	"github.com/siyuan-note/siyuan/kernel/server"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	_ "golang.org/x/mobile/bind"
 )
+
+// AcquireExportFile 获取移动端导出租约，返回 JSON 格式的路径、名称和租约 ID。
+func AcquireExportFile(exportPath string) string {
+	lease, err := model.AcquireMobileExportLease(exportPath)
+	if err != nil {
+		logging.LogErrorf("acquire export file [%s] failed: %s", exportPath, err)
+		return ""
+	}
+	data, err := json.Marshal(lease)
+	if err != nil {
+		model.ReleaseMobileExportLease(lease.ID)
+		return ""
+	}
+	return string(data)
+}
+
+// ReleaseExportFile 释放 AcquireExportFile 返回的租约。
+func ReleaseExportFile(leaseID string) {
+	model.ReleaseMobileExportLease(leaseID)
+}
+
+// LANSyncDiscoveryInfo 返回原生 Bonjour 发现需要发布的服务信息。
+func LANSyncDiscoveryInfo() string {
+	info := model.GetLANSyncDiscoveryInfo()
+	if nil == info {
+		return ""
+	}
+	data, err := json.Marshal(info)
+	if nil != err {
+		return ""
+	}
+	return string(data)
+}
+
+// AddLANSyncPeer 将原生 Bonjour 发现的设备交给内核验证。
+func AddLANSyncPeer(instance, address string, port int, txtJSON string) bool {
+	txt := map[string]string{}
+	if err := json.Unmarshal([]byte(txtJSON), &txt); nil != err {
+		return false
+	}
+	return model.AddLANSyncPeer(instance, address, port, txt)
+}
+
+// RemoveLANSyncPeer 将原生 Bonjour 移除的设备从内核中删除。
+func RemoveLANSyncPeer(instance string) bool {
+	return model.RemoveLANSyncPeer(instance)
+}
+
+// LANSyncActive 返回局域网同步服务是否正在运行。
+func LANSyncActive() bool {
+	return model.LANSyncActive()
+}
+
+// UpdateLocalIPs 更新原生容器提供的局域网地址并刷新局域网同步服务。
+func UpdateLocalIPs(localIPs string) {
+	util.SetLocalIPs(strings.Split(localIPs, ","))
+	model.RefreshLANSyncNetwork()
+}
+
+// GetExportFileName 返回普通导出的资源名称；加密导出应读取 AcquireExportFile 返回的 Name。
+func GetExportFileName(exportPath string) string {
+	return model.GetMobileExportName(exportPath)
+}
 
 // VerifyAppStoreTransaction 用于验证苹果 App Store 交易。
 //
@@ -68,21 +133,21 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if "" == accountToken || "" == transactionID {
 		retCode = -6
 		retMsg = "invalid parameters"
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
 	if 36 != len(accountToken) {
 		retCode = -6
 		retMsg = fmt.Sprintf("invalid accountToken [%s]", accountToken)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
 	if util.ContainerIOS != util.Container {
 		retCode = -3
 		retMsg = fmt.Sprintf("invalid container [%s]", util.Container)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
@@ -90,7 +155,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if nil == user || "" == user.UserToken {
 		retCode = -4
 		retMsg = "account not logged in"
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
@@ -98,7 +163,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if "0" != cloudRegionArg && "1" != cloudRegionArg {
 		retCode = -1
 		retMsg = fmt.Sprintf("invalid cloud region [%s]", cloudRegionArg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
@@ -106,7 +171,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if util.CurrentCloudRegion != cloudRegion {
 		retCode = -1
 		retMsg = fmt.Sprintf("invalid cloud region [cloudRegionArg=%s, currentRegion=%d]", cloudRegionArg, util.CurrentCloudRegion)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
@@ -114,7 +179,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if user.UserId != userID {
 		retCode = -5
 		retMsg = fmt.Sprintf("invalid user [userID=%s, accountToken=%s]", user.UserId, accountToken)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
@@ -126,86 +191,88 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	if nil != reqErr {
 		retCode = -2
 		retMsg = fmt.Sprintf("verify app store transaction failed: %s", reqErr)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if http.StatusUnauthorized == resp.StatusCode || http.StatusForbidden == resp.StatusCode {
 		retCode = -4
 		retMsg = fmt.Sprintf("verify app store transaction failed [sc=%d]", resp.StatusCode)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if http.StatusOK != resp.StatusCode {
 		retCode = -2
 		retMsg = fmt.Sprintf("verify app store transaction failed [sc=%d]", resp.StatusCode)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
 	if -1 == result.Code {
 		retCode = -5
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -3 == result.Code {
 		retCode = -6
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -2 == result.Code {
 		retCode = -8
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -4 == result.Code {
 		retCode = -8
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -5 == result.Code {
 		retCode = -7
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -6 == result.Code {
 		retCode = -9
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if -64 == result.Code {
 		retCode = -2
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 	if 0 != result.Code {
 		retCode = -2
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
-		logging.LogErrorf(retMsg)
+		logging.LogErrorf("%s", retMsg)
 		return
 	}
 
 	retCode = 0
 	retMsg = fmt.Sprintf("verify app store transaction [%s] success", transactionID)
-	logging.LogInfof(retMsg)
+	logging.LogInfof("%s", retMsg)
 	return
 }
 
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs string) {
+	model.InitJwtKey()
 	go server.Serve(true, model.Conf.CookieKey)
 }
 
 func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer string) {
+	model.InitJwtKey()
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
 	util.MobileOSVer = osVer
-	util.LocalIPs = strings.Split(localIPs, ",")
+	util.SetLocalIPs(strings.Split(localIPs, ","))
 	util.BootMobile(container, appDir, workspaceBaseDir, lang)
 
 	model.InitConf()
@@ -229,6 +296,7 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 		job.StartCron()
 		go model.AutoGenerateFileHistory()
 		go cache.LoadAssets()
+		go plugin.InitManager()
 		go model.StartEmbeddingIndexer()
 	}()
 }
@@ -312,14 +380,19 @@ func Unzip(zipFilePath, destination string) {
 // 解析失败返回空字符串。
 func GetExportFilePath(exportPath string) (ret string) {
 	var absPath string
-	if strings.HasPrefix(exportPath, "/export/") {
-		fileName := strings.TrimPrefix(exportPath, "/export/")
+	if after, ok := strings.CutPrefix(exportPath, "/export/"); ok {
+		fileName := after
 		if decoded, err := url.PathUnescape(fileName); err == nil {
 			fileName = decoded
 		}
 		fileName = filepath.Clean(fileName)
 		if strings.HasPrefix(fileName, "..") {
 			logging.LogWarnf("get export file path [%s] blocked: path traversal attempt [%s]", exportPath, fileName)
+			return
+		}
+		// 加密导出需要持有覆盖原生复制过程的租约，旧路径解析接口不再返回其明文地址。
+		if model.IsManagedEncryptedExportPath(fileName) {
+			logging.LogWarnf("get export file path [%s] blocked: use AcquireExportFile for encrypted exports", exportPath)
 			return
 		}
 		absPath = filepath.Join(util.TempDir, "export", fileName)

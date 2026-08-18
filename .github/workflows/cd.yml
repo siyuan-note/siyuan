@@ -8,7 +8,6 @@ on:
       - '*-rc*'
   workflow_dispatch:
 
-# ref https://docs.github.com/zh/actions/learn-github-actions/variables
 env:
   package_json: "app/package.json"
 
@@ -19,6 +18,7 @@ jobs:
     outputs:
       release_title: ${{ steps.release_info.outputs.release_title }}
       version: ${{ steps.version.outputs.value }}
+      android_ref: ${{ steps.android_version.outputs.ref }}
       packageManager: ${{ steps.packageManager.outputs.value }}
       release_body: ${{ steps.release_info.outputs.release_body }}
     steps:
@@ -42,6 +42,44 @@ jobs:
         id: version
         run: |
           echo "value=$(jq .version ${{ env.package_json }} -r)" >> $GITHUB_OUTPUT
+
+      - name: Checkout siyuan-android
+        uses: actions/checkout@v6
+        with:
+          repository: siyuan-note/siyuan-android
+          ref: main
+          path: ${{ github.workspace }}/siyuan-android
+
+      - name: Verify siyuan-android version
+        id: android_version
+        # Android 的 siyuanVersionName 必须与 package.json 版本一致，否则在打包前终止整个流程。
+        run: |
+          ANDROID_VERSION=$(sed -nE 's/^[[:space:]]*siyuanVersionName[[:space:]]*=[[:space:]]*"([^"]+)"[[:space:]]*$/\1/p' build.gradle)
+          VERSION="${{ steps.version.outputs.value }}"
+          if [ -z "$ANDROID_VERSION" ]; then
+            echo "Unable to read siyuanVersionName from siyuan-android/build.gradle, stopping"
+            exit 1
+          fi
+          if [ "$ANDROID_VERSION" != "$VERSION" ]; then
+            echo "siyuan-android version ($ANDROID_VERSION) does not match package.json version ($VERSION), stopping"
+            exit 1
+          fi
+          echo "siyuan-android version matches: $ANDROID_VERSION"
+          echo "ref=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+        working-directory: ${{ github.workspace }}/siyuan-android
+
+      - name: Verify tag matches package.json version
+        # 仅 tag 推送触发时校验：去掉 tag 前导 v 后与 package.json 中的版本号比对，
+        # 不一致说明开发者推 tag 前忘记同步版本号，直接终止整个流程。
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION="${{ steps.version.outputs.value }}"
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "Tag (v$TAG) does not match version in package.json ($VERSION), stopping"
+            exit 1
+          fi
+          echo "Tag matches version: $TAG"
 
       - name: Extract electronVersion from package.json
         id: electronVersion
@@ -71,6 +109,8 @@ jobs:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.name }}
     needs: [prepare]
+    env:
+      SIYUAN_E2E_SHARDS: ${{ matrix.config.e2e_shards }}
     strategy:
       matrix:
         config:
@@ -83,6 +123,7 @@ jobs:
             goos: "linux"
             goarch: "amd64"
             suffix: "linux"
+            e2e_shards: ""
           - os: macos-latest
             name: macos build mac.dmg
             kernel_path: "../app/kernel-darwin/SiYuan-Kernel"
@@ -92,6 +133,7 @@ jobs:
             goos: "darwin"
             goarch: "amd64"
             suffix: "mac.dmg"
+            e2e_shards: "main:6806"
           - os: macos-latest
             name: macos build mac-arm64.dmg
             kernel_path: "../app/kernel-darwin-arm64/SiYuan-Kernel"
@@ -101,6 +143,7 @@ jobs:
             goos: "darwin"
             goarch: "arm64"
             suffix: "mac-arm64.dmg"
+            e2e_shards: "editor:6807"
           - os: windows-latest
             name: windows build win.exe
             kernel_path: "../app/kernel/SiYuan-Kernel.exe"
@@ -112,6 +155,7 @@ jobs:
             mingwsys: "MINGW64"
             goarch: "amd64"
             suffix: "win.exe"
+            e2e_shards: "attribute-view:6808"
 
     steps:
       - uses: actions/checkout@v6
@@ -183,7 +227,7 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
 
       - name: Building Kernel
-        run: go build -tags fts5 -o "${{ matrix.config.kernel_path }}" -ldflags "${{ matrix.config.build_args_prefix }} github.com/${{ github.repository }}/kernel/util.${{ matrix.config.build_args_suffix }}"
+        run: go build -tags "fts5 sqlcipher" -o "${{ matrix.config.kernel_path }}" -ldflags "${{ matrix.config.build_args_prefix }} github.com/${{ github.repository }}/kernel/util.${{ matrix.config.build_args_suffix }}"
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
         env:
           GO111MODULE: on
@@ -192,6 +236,178 @@ jobs:
           GOPATH: ${{ github.workspace }}/go
           GOARCH: ${{ matrix.config.goarch }}
 
+      - name: Checkout siyuan-testing
+        if: matrix.config.e2e_shards != ''
+        continue-on-error: true
+        uses: actions/checkout@v6
+        with:
+          repository: siyuan-note/siyuan-testing
+          ref: main
+          path: ${{ github.workspace }}/siyuan-testing
+
+      - name: Install End-to-End Test Dependencies
+        if: matrix.config.e2e_shards != ''
+        continue-on-error: true
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ github.workspace }}/siyuan-testing
+
+      - name: Validate End-to-End Test Shards
+        if: matrix.config.e2e_shards != ''
+        shell: bash
+        run: |
+          pnpm run typecheck
+          # 每个 E2E job 只配置自己的 shard，校验脚本需要全量 shard 列表
+          # 才能验证三个 shard 的并集覆盖全部测试且无重复
+          unset SIYUAN_E2E_SHARDS
+          pnpm run test:shards
+        working-directory: ${{ github.workspace }}/siyuan-testing
+
+      - name: Start Kernel for End-to-End Tests
+        if: matrix.config.e2e_shards != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          APP_DIR="${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app"
+          KERNEL_PATH="${{ matrix.config.kernel_path }}"
+          for shard_config in ${SIYUAN_E2E_SHARDS}; do
+            shard="${shard_config%:*}"
+            port="${shard_config#*:}"
+            workspace="${USERPROFILE:-${HOME}}/SiYuan-Testing"
+            mkdir -p "${workspace}"
+            "${KERNEL_PATH}" --workspace="${workspace}" serve --wd="${APP_DIR}" --port="${port}" \
+              > "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel-console.log" 2>&1 &
+            echo "$!" > "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel.pid"
+          done
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
+
+      - name: Wait for End-to-End Test Kernels
+        if: matrix.config.e2e_shards != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          wait_for_kernel() {
+            local pid="$1"
+            local port="$2"
+            local log_path="$3"
+            local boot_progress_path="${RUNNER_TEMP}/siyuan-e2e-${port}-boot-progress.json"
+            for attempt in {1..60}; do
+              if curl --fail --silent --output "${boot_progress_path}" --request POST \
+                "http://127.0.0.1:${port}/api/system/bootProgress" && \
+                node -e 'try { const data = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")); process.exit(data.data?.progress >= 100 ? 0 : 1); } catch { process.exit(1); }' \
+                  "${boot_progress_path}"; then
+                rm -f "${boot_progress_path}"
+                return
+              fi
+              if ! kill -0 "${pid}" 2>/dev/null; then
+                cat "${log_path}"
+                return 1
+              fi
+              sleep 1
+            done
+            cat "${log_path}"
+            if [ -f "${boot_progress_path}" ]; then
+              cat "${boot_progress_path}"
+            fi
+            return 1
+          }
+          for shard_config in ${SIYUAN_E2E_SHARDS}; do
+            shard="${shard_config%:*}"
+            port="${shard_config#*:}"
+            pid="$(cat "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel.pid")"
+            wait_for_kernel "${pid}" "${port}" \
+              "${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel-console.log"
+          done
+
+      - name: Run End-to-End Tests
+        if: matrix.config.e2e_shards != ''
+        continue-on-error: true
+        timeout-minutes: 30
+        shell: bash
+        run: |
+          TEST_PIDS=()
+          TEST_SHARDS=()
+          for shard_config in ${SIYUAN_E2E_SHARDS}; do
+            shard="${shard_config%:*}"
+            port="${shard_config#*:}"
+            (
+              SIYUAN_BASE_URL="http://127.0.0.1:${port}" \
+              SIYUAN_E2E_SHARD="${shard}" \
+              SIYUAN_TEST_RESULTS_DIR="test-results-${shard}" \
+              PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report-${shard}" \
+              pnpm exec playwright test --config=playwright.focused.config.ts \
+                --global-timeout=900000 --reporter=line,html --output="test-results-${shard}"
+            ) &
+            TEST_PID=$!
+            TEST_PIDS+=("${TEST_PID}")
+            TEST_SHARDS+=("${shard}")
+          done
+          TEST_STATUS=0
+          set +e
+          for index in "${!TEST_PIDS[@]}"; do
+            wait "${TEST_PIDS[${index}]}"
+            shard_status=$?
+            if [ "${shard_status}" -ne 0 ]; then
+              echo "::error title=End-to-End shard failed::${TEST_SHARDS[${index}]} exited with ${shard_status}"
+              TEST_STATUS=1
+            fi
+          done
+          set -e
+          exit "${TEST_STATUS}"
+        working-directory: ${{ github.workspace }}/siyuan-testing
+
+      - name: Stop End-to-End Test Kernels
+        if: always() && matrix.config.e2e_shards != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          stop_kernel() {
+            local pid="$1"
+            if [ -z "${pid}" ] || ! kill -0 "${pid}" 2>/dev/null; then
+              return
+            fi
+            kill -TERM "${pid}"
+            for attempt in {1..30}; do
+              if ! kill -0 "${pid}" 2>/dev/null; then
+                return
+              fi
+              sleep 1
+            done
+            kill -KILL "${pid}"
+          }
+          for shard_config in ${SIYUAN_E2E_SHARDS}; do
+            shard="${shard_config%:*}"
+            pid_path="${RUNNER_TEMP}/siyuan-e2e-${shard}-kernel.pid"
+            if [ -f "${pid_path}" ]; then
+              stop_kernel "$(cat "${pid_path}")"
+            fi
+          done
+
+      - name: Collect End-to-End Test Logs
+        if: always() && matrix.config.e2e_shards != ''
+        continue-on-error: true
+        shell: bash
+        run: |
+          log_dir="${{ github.workspace }}/siyuan-testing/kernel-logs"
+          mkdir -p "${log_dir}"
+          cp "${RUNNER_TEMP}"/siyuan-e2e-*-kernel-console.log "${log_dir}/" 2>/dev/null || true
+          workspace="${USERPROFILE:-${HOME}}/SiYuan-Testing"
+          if [ -f "${workspace}/temp/siyuan.log" ]; then
+            cp "${workspace}/temp/siyuan.log" "${log_dir}/siyuan.log"
+          fi
+
+      - name: Upload End-to-End Test Results
+        if: always() && matrix.config.e2e_shards != ''
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: siyuan-e2e-${{ matrix.config.suffix }}
+          path: |
+            ${{ github.workspace }}/siyuan-testing/playwright-report-*
+            ${{ github.workspace }}/siyuan-testing/test-results-*
+            ${{ github.workspace }}/siyuan-testing/kernel-logs
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Install RPM build tools
         if: matrix.config.goos == 'linux'
         run: sudo apt-get install -y rpm
@@ -199,6 +415,20 @@ jobs:
       - name: Building Electron App
         run: pnpm run ${{ matrix.config.electron_args }}
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+
+      - name: Verify RPM Package Contents
+        if: matrix.config.goos == 'linux'
+        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
+        run: |
+          for package in build/*.rpm; do
+            test -f "$package"
+            build_id_entries="$(rpm -qpl "$package" | awk '/^\/usr\/lib\/\.build-id(\/|$)/')"
+            if [ -n "$build_id_entries" ]; then
+              echo "Unexpected build-id entries in $package:"
+              echo "$build_id_entries"
+              exit 1
+            fi
+          done
 
       - name: Upload Build Artifacts (Non-Linux)
         if: matrix.config.goos != 'linux'
@@ -301,7 +531,7 @@ jobs:
           GOPATH: ${{ github.workspace }}/go
 
       - name: Building Android Kernel
-        run: gomobile bind -tags fts5 -ldflags "-s -w" -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/
+        run: gomobile bind -tags "fts5 sqlcipher" -ldflags "-s -w" -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/kernel
         env:
           GOPATH: ${{ github.workspace }}/go
@@ -312,7 +542,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: siyuan-note/siyuan-android
-          ref: main
+          ref: ${{ needs.prepare.outputs.android_ref }}
           path: ${{ github.workspace }}/siyuan-android
 
       - name: Patch siyuan-android Repositories
@@ -333,6 +563,7 @@ jobs:
           cd ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app
           node scripts/trimChangelogs.js
           zip -r app.zip appearance guide stage $([ -d changelogs ] && echo changelogs)
+          zip -j app.zip ../LICENSE ../THIRD_PARTY_NOTICES.md
           mkdir -p ${{ github.workspace }}/siyuan-android/app/src/main/assets
           cp app.zip ${{ github.workspace }}/siyuan-android/app/src/main/assets/app.zip
 
@@ -384,28 +615,110 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v8
 
+      - name: Prepare Release Assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.prepare.outputs.version }}"
+          mkdir -p release-assets
+          cp "siyuan-linux/siyuan-${VERSION}-linux.AppImage" release-assets/
+          cp "siyuan-linux/siyuan-${VERSION}-linux.tar.gz" release-assets/
+          cp "siyuan-linux/siyuan-${VERSION}-linux.deb" release-assets/
+          cp "siyuan-linux/siyuan-${VERSION}-linux.rpm" release-assets/
+          cp "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg" release-assets/
+          cp "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg" release-assets/
+          cp "siyuan-win.exe/siyuan-${VERSION}-win.exe" release-assets/
+          cp "siyuan-android/siyuan-${VERSION}.apk" release-assets/
+
+          EXPECTED_ASSETS=(
+            "siyuan-${VERSION}-linux.AppImage"
+            "siyuan-${VERSION}-linux.tar.gz"
+            "siyuan-${VERSION}-linux.deb"
+            "siyuan-${VERSION}-linux.rpm"
+            "siyuan-${VERSION}-mac.dmg"
+            "siyuan-${VERSION}-mac-arm64.dmg"
+            "siyuan-${VERSION}-win.exe"
+            "siyuan-${VERSION}.apk"
+          )
+          for asset in "${EXPECTED_ASSETS[@]}"; do
+            test -s "release-assets/${asset}"
+          done
+          (
+            cd release-assets
+            sha256sum "${EXPECTED_ASSETS[@]}" > SHA256SUMS.txt
+            sha256sum --check SHA256SUMS.txt
+          )
+
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           name: ${{ needs.prepare.outputs.release_title }}
-          tag: ${{ github.ref }}
+          tag: ${{ github.ref_name }}
           body: ${{ needs.prepare.outputs.release_body }}
-          draft: false
+          draft: true
           prerelease: true
+          allowUpdates: true
+          omitDraftDuringUpdate: true
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify Release Is Draft
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          test "$(gh release view "${{ github.ref_name }}" --json isDraft --jq '.isDraft')" = "true"
 
       - name: Upload Release Assets
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
-          VERSION=${{ needs.prepare.outputs.version }}
-          gh release upload ${{ github.ref_name }} \
-            "siyuan-linux/siyuan-${VERSION}-linux.AppImage#siyuan-${VERSION}-linux.AppImage" \
-            "siyuan-linux/siyuan-${VERSION}-linux.tar.gz#siyuan-${VERSION}-linux.tar.gz" \
-            "siyuan-linux/siyuan-${VERSION}-linux.deb#siyuan-${VERSION}-linux.deb" \
-            "siyuan-linux/siyuan-${VERSION}-linux.rpm#siyuan-${VERSION}-linux.rpm" \
-            "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg#siyuan-${VERSION}-mac.dmg" \
-            "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg#siyuan-${VERSION}-mac-arm64.dmg" \
-            "siyuan-win.exe/siyuan-${VERSION}-win.exe#siyuan-${VERSION}-win.exe" \
-            "siyuan-android/siyuan-${VERSION}.apk#siyuan-${VERSION}.apk"
+          gh release upload "${{ github.ref_name }}" release-assets/* --clobber
+
+      - name: Validate and Publish Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ needs.prepare.outputs.version }}"
+          TAG="${{ github.ref_name }}"
+          RELEASE_ID="$(gh release view "${TAG}" --json databaseId --jq '.databaseId')"
+          EXPECTED_ASSETS=(
+            "siyuan-${VERSION}-linux.AppImage"
+            "siyuan-${VERSION}-linux.tar.gz"
+            "siyuan-${VERSION}-linux.deb"
+            "siyuan-${VERSION}-linux.rpm"
+            "siyuan-${VERSION}-mac.dmg"
+            "siyuan-${VERSION}-mac-arm64.dmg"
+            "siyuan-${VERSION}-win.exe"
+            "siyuan-${VERSION}.apk"
+            "SHA256SUMS.txt"
+          )
+          declare -A EXPECTED_DIGESTS
+          for asset in "${EXPECTED_ASSETS[@]}"; do
+            EXPECTED_DIGESTS["${asset}"]="sha256:$(sha256sum "release-assets/${asset}" | awk '{print $1}')"
+          done
+
+          for attempt in {1..12}; do
+            ASSETS="$(gh api -H "X-GitHub-Api-Version: 2022-11-28" \
+              "repos/${GH_REPO}/releases/${RELEASE_ID}/assets?per_page=100")"
+            READY=true
+            for asset in "${EXPECTED_ASSETS[@]}"; do
+              REMOTE_DIGEST="$(jq -r --arg name "${asset}" \
+                '.[] | select(.name == $name and .state == "uploaded") | .digest // empty' <<< "${ASSETS}")"
+              if [ "${REMOTE_DIGEST}" != "${EXPECTED_DIGESTS[$asset]}" ]; then
+                READY=false
+                break
+              fi
+            done
+            if [ "${READY}" = true ]; then
+              gh release edit "${TAG}" --draft=false --prerelease
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "Release assets or SHA-256 digests are incomplete"
+          exit 1

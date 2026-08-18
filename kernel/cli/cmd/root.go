@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -21,11 +21,13 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"slices"
 	"strings"
 
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/spf13/cobra"
@@ -35,6 +37,7 @@ var (
 	workspacePath string
 	outputFormat  string
 	dryRun        bool
+	logLevel      string
 )
 
 var rootCmd = &cobra.Command{
@@ -93,6 +96,16 @@ var rootCmd = &cobra.Command{
 		logging.SetLogPath(filepath.Join(util.TempDir, "siyuan-cli.log"))
 		logging.SetLogToStdout(false)
 
+		// CLI 单次命令默认 warn 级别（siyuan-cli.log 只保留警告及以上），避免内核初始化的大量 Info/Debug 日志噪声；
+		// 用户可通过 --log-level 显式覆盖。把级别记入 util.CLILogLevel，使随后的 model.InitConf 不再用 conf.json 覆盖。
+		// 注意 serve 子命令走自己的 PersistentPreRunE，不受此默认值影响，仍跟随 conf.json 的 system.logLevel。
+		effectiveLevel := logLevel
+		if "" == effectiveLevel {
+			effectiveLevel = "warn"
+		}
+		logging.SetLogLevel(effectiveLevel)
+		util.CLILogLevel = effectiveLevel
+
 		model.InitConf()
 		sql.InitDatabase(false)
 		sql.InitHistoryDatabase(false)
@@ -101,8 +114,114 @@ var rootCmd = &cobra.Command{
 		sql.SetIndexAssetPath(model.Conf.Search.IndexAssetPath)
 		// 让 CLI 一次性命令（如 search -m 4）也能命中语义搜索：StartEmbeddingIndexer 是死循环不能用于会立即退出的进程，这里只把开关置真
 		model.PrepareEmbeddingSearch()
+		if err := rejectEncryptedNotebookCLI(cmd, args); err != nil {
+			return err
+		}
 		return nil
 	},
+}
+
+// rejectEncryptedNotebookCLI 拒绝 CLI 对加密笔记本及其块的操作。
+// 加密笔记本只能通过应用内专用流程解锁和操作，避免 CLI 进程成为明文或密文文件的旁路入口。
+func rejectEncryptedNotebookCLI(cmd *cobra.Command, args []string) error {
+	if cmd == serveCmd {
+		return nil
+	}
+	if (cmd == notebookRandomIconCmd && !cmd.Flags().Changed("id")) || cmd == exportDataCmd {
+		boxID, err := firstEncryptedNotebookID()
+		if err != nil {
+			return err
+		}
+		if boxID != "" {
+			return fmt.Errorf("CLI does not support encrypted notebook [%s]", boxID)
+		}
+	}
+
+	var encryptedTarget string
+	checkID := func(id string) bool {
+		if id == "" {
+			return false
+		}
+		if model.IsEncryptedBox(id) {
+			encryptedTarget = id
+			return true
+		}
+		if bt := treenode.GetBlockTree(id); bt != nil && model.IsEncryptedBox(bt.BoxID) {
+			encryptedTarget = bt.BoxID
+			return true
+		}
+		return false
+	}
+
+	for _, flagName := range []string{"notebook", "box", "id", "ids", "parent", "previous", "block"} {
+		flag := cmd.Flags().Lookup(flagName)
+		if flag == nil {
+			continue
+		}
+		values := []string{flag.Value.String()}
+		if flag.Value.Type() == "stringArray" {
+			values, _ = cmd.Flags().GetStringArray(flagName)
+		}
+		for _, value := range values {
+			for id := range strings.SplitSeq(value, ",") {
+				if checkID(strings.TrimSpace(id)) {
+					return fmt.Errorf("CLI does not support encrypted notebook [%s]", encryptedTarget)
+				}
+			}
+		}
+	}
+
+	if cmd.Parent() == fileCmd {
+		if slices.ContainsFunc(args, isEncryptedNotebookWorkspacePath) {
+			return fmt.Errorf("CLI does not support files in encrypted notebooks")
+		}
+		if pathFlag := cmd.Flags().Lookup("path"); pathFlag != nil && pathFlag.Value.String() != "" && isEncryptedNotebookWorkspacePath(pathFlag.Value.String()) {
+			return fmt.Errorf("CLI does not support files in encrypted notebooks")
+		}
+	}
+	if cmd.Parent() == assetCmd {
+		if pathFlag := cmd.Flags().Lookup("path"); pathFlag != nil && pathFlag.Value.String() != "" {
+			assetPath := pathFlag.Value.String()
+			if !filepath.IsAbs(assetPath) {
+				assetPath = filepath.Join("data", assetPath)
+			}
+			if isEncryptedNotebookWorkspacePath(assetPath) {
+				return fmt.Errorf("CLI does not support files in encrypted notebooks")
+			}
+		}
+	}
+	return nil
+}
+
+func firstEncryptedNotebookID() (string, error) {
+	boxes, err := model.ListNotebooks()
+	if err != nil {
+		return "", err
+	}
+	for _, box := range boxes {
+		if model.IsEncryptedBox(box.ID) {
+			return box.ID, nil
+		}
+	}
+	return "", nil
+}
+
+// isEncryptedNotebookWorkspacePath 判断工作区内路径是否位于加密笔记本目录。
+func isEncryptedNotebookWorkspacePath(p string) bool {
+	return isEncryptedNotebookWorkspacePathWith(p, util.WorkspaceDir, util.DataDir, model.IsEncryptedBox)
+}
+
+func isEncryptedNotebookWorkspacePathWith(p, workspaceDir, dataDir string, isEncryptedBox func(string) bool) bool {
+	abs := p
+	if !filepath.IsAbs(abs) {
+		abs = filepath.Join(workspaceDir, p)
+	}
+	rel, err := filepath.Rel(dataDir, filepath.Clean(abs))
+	if err != nil || rel == "." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) || rel == ".." {
+		return false
+	}
+	boxID := strings.Split(rel, string(filepath.Separator))[0]
+	return isEncryptedBox(boxID)
 }
 
 // resolveWorkingDir 从内核可执行文件路径出发，探测若干候选目录，返回首个包含 appearance/langs 的目录作为
@@ -144,6 +263,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&workspacePath, "workspace", "w", "", "workspace path")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "format", "f", "table", "output format: table | json")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "dry run mode: validate and print what would happen without making changes")
+	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "v", "", "log level: off | trace | debug | info | warn | error | fatal (defaults to conf.json system.logLevel)")
 }
 
 func Execute() error {

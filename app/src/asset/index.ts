@@ -13,9 +13,10 @@ import {onPageNumberChanged} from "./pdf/app";
 /// #endif
 import {fetchPost} from "../util/fetch";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
-import {App} from "../index";
+import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
 import {getDisplayName} from "../util/pathName";
+import {PdfLoadState} from "./pdfLoadState";
 
 export class Asset extends Model {
     public path: string;
@@ -23,6 +24,7 @@ export class Asset extends Model {
     private pdfId: number | string;
     private pdfPage: number;
     public pdfObject: any;
+    private pdfLoadState = new PdfLoadState();
 
     constructor(options: { app: App, tab: Tab, path: string, page?: number | string }) {
         super({app: options.app});
@@ -60,6 +62,9 @@ export class Asset extends Model {
         fetchPost("/api/asset/getFileAnnotation", {
             path: this.path + ".sya",
         }, (response) => {
+            if (this.pdfLoadState.isDestroyed) {
+                return;
+            }
             if (response.code !== 1) {
                 const config = JSON.parse(response.data.data);
                 if (config[this.pdfId]) {
@@ -93,18 +98,25 @@ export class Asset extends Model {
     }
 
     private render(isInit = true) {
+        if (this.pdfLoadState.isDestroyed) {
+            return;
+        }
+        this.pdfLoadState.clearPending();
+        if (!isInit && this.pdfObject) {
+            void this.pdfObject.close();
+            this.pdfObject = undefined;
+        }
         const type = this.path.substr(this.path.lastIndexOf(".")).toLowerCase().split("?")[0];
+        // 对资源路径进行 HTML 转义后再拼入 src 属性，避免路径中包含 " 等字符导致属性逃逸引发 XSS
+        const src = Lute.EscapeHTMLStr(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path);
         if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-            this.element.innerHTML = `<div class="asset"><img src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></div>`;
+            this.element.innerHTML = `<div class="asset"><img src="${src}"></div>`;
         } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
-            this.element.innerHTML = `<div class="asset"><audio controls="controls" src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></audio></div>`;
+            this.element.innerHTML = `<div class="asset"><audio controls="controls" src="${src}"></audio></div>`;
         } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
-            this.element.innerHTML = `<div class="asset"><video controls="controls" src="${this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path}"></video></div>`;
+            this.element.innerHTML = `<div class="asset"><video controls="controls" src="${src}"></video></div>`;
         } else if (type === ".pdf") {
             /// #if !MOBILE
-            if (!isInit) {
-                this.pdfObject.close();
-            }
             this.element.innerHTML = `<div class="pdf__outer" id="outerContainer">
       <div id="sidebarContainer">
         <div id="toolbarSidebar">
@@ -145,7 +157,7 @@ export class Asset extends Model {
       </div>
       <div id="mainContainer">
         <div class="findbar b3-menu fn__hidden doorHanger" id="findbar">
-            <input id="findInput" class="toolbarField b3-text-field" placeholder="${window.siyuan.languages.search}">
+            <input id="findInput" class="toolbarField b3-text-field" placeholder="${window.siyuan.languages.searchPlaceholder}">
             <div class="fn__space"></div>
             <button id="findPreviousButton" class="toolbarButton findPrevious b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.previous}">
                 <svg><use xlink:href="#iconUp"></use></svg>
@@ -297,6 +309,12 @@ export class Asset extends Model {
                 <input type="number" id="pageNumber" class="toolbarField pageNumber b3-text-field" value="1" size="4" min="1" autocomplete="off">
                 <span id="numPages"></span>
                 <div class="fn__flex-1"></div>
+                <button id="pdfHistoryBack" class="toolbarButton b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.goBack}" disabled>
+                  <svg><use xlink:href="#iconBack"></use></svg>
+                </button>
+                <button id="pdfHistoryForward" class="toolbarButton b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.goForward}" disabled>
+                  <svg><use xlink:href="#iconForward"></use></svg>
+                </button>
                 <span id="scaleSelectContainer" class="dropdownToolbarButton">
                   <select id="scaleSelect" class="b3-select">
                     <option id="pageAutoOption" value="auto" selected="selected">${window.siyuan.languages.pageScaleAuto}</option>
@@ -515,25 +533,47 @@ export class Asset extends Model {
                 setStorageVal(Constants.LOCAL_PDFTHEME, window.siyuan.storage[Constants.LOCAL_PDFTHEME]);
             });
             // 初始化完成后需等待页签是否显示设置完成，才可以判断 pdf 是否能进行渲染
-            setTimeout(() => {
+            this.pdfLoadState.setTimeout(window.setTimeout(() => {
+                if (!this.pdfLoadState.consumeTimeout() || !this.element.isConnected) {
+                    return;
+                }
                 if (this.element.clientWidth === 0) {
                     const observer = new MutationObserver(() => {
-                        this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
-                            this.element, this.pdfPage, this.pdfId);
-                        this.element.setAttribute("data-loading", "true");
-                        observer.disconnect();
+                        if (!this.pdfLoadState.consumeObserver()) {
+                            return;
+                        }
+                        this.loadPdf();
                     });
-                    observer.observe(this.element, {attributeFilter: ["class"]});
+                    if (this.pdfLoadState.setObserver(observer)) {
+                        observer.observe(this.element, {attributeFilter: ["class"]});
+                    }
                 } else {
-                    this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
-                        this.element, this.pdfPage, this.pdfId);
-                    this.element.setAttribute("data-loading", "true");
+                    this.loadPdf();
                 }
                 /// #if !BROWSER
                 setModelsHash();
                 /// #endif
-            }, Constants.TIMEOUT_LOAD);
+            }, Constants.TIMEOUT_LOAD));
             /// #endif
         }
+    }
+
+    private loadPdf() {
+        if (this.pdfLoadState.isDestroyed || !this.element.isConnected) {
+            return;
+        }
+        this.pdfObject = webViewerLoad(this.path.startsWith("file") ? this.path : document.getElementById("baseURL").getAttribute("href") + "/" + this.path,
+            this.element, this.pdfPage, this.pdfId);
+        this.element.setAttribute("data-loading", "true");
+    }
+
+    public destroy() {
+        if (!this.pdfLoadState.destroy()) {
+            return;
+        }
+        if (this.pdfObject?.pdfLoadingTask) {
+            void this.pdfObject.pdfLoadingTask.destroy();
+        }
+        this.pdfObject = undefined;
     }
 }

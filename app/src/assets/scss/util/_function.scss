@@ -180,6 +180,10 @@
       background-size: 50px 50px;
     }
   }
+
+  &__pointer-none iframe {
+    pointer-events: none;
+  }
 }
 
 .ft {

@@ -8,9 +8,20 @@ import {processSync} from "../dialog/processSystem";
 /// #if !MOBILE
 import {openSetting} from "../config";
 /// #endif
-import {App} from "../index";
+import type {App} from "../index";
 import {Constants} from "../constants";
 import {getCloudURL} from "../config/util/about";
+
+const openSyncSetting = (app?: App) => {
+    if (!app) {
+        return;
+    }
+    /// #if MOBILE
+    void import("../mobile/menu").then(({openMobileSetting}) => openMobileSetting(app, "sync"));
+    /// #else
+    openSetting(app, "sync");
+    /// #endif
+};
 
 export const addCloudName = (cloudListElement: Element) => {
     const dialog = new Dialog({
@@ -157,20 +168,16 @@ export const syncGuide = (app?: App) => {
         return;
     }
     if (window.siyuan.config.sync.provider === 0 && needSubscribe()) {
-        /// #if !MOBILE
-        if (app) {
-            openSetting(app, "sync");
-        }
-        /// #endif
+        openSyncSetting(app);
         showMessage(window.siyuan.languages._kernel[29].replaceAll("${accountServer}", getCloudURL("")));
         return;
     } else if (!isPaidUser()) {
-        /// #if !MOBILE
-        if (app) {
-            openSetting(app, "sync");
-        }
-        /// #endif
+        openSyncSetting(app);
         showMessage(window.siyuan.languages._kernel[214].replaceAll("${accountServer}", getCloudURL("")));
+        return;
+    }
+    if (!window.siyuan.config.sync.enabled && window.siyuan.config.sync.provider !== 0) {
+        openSyncSetting(app);
         return;
     }
     if (!window.siyuan.config.repo.key) {

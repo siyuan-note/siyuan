@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-const CurrentSpec = 5
+const CurrentSpec = 7
 
 const MaxFilterNestingDepth = 3
 
@@ -38,15 +38,47 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec3(av)
 	upgradeSpec4(av)
 	upgradeSpec5(av)
+	upgradeSpec6(av)
+	upgradeSpec7(av)
 }
 
 func CheckSpec(av *AttributeView) (err error) {
 	if CurrentSpec < av.Spec {
-		logging.LogErrorf("attribute view spec [%d] is newer than current [%d]", av.Spec, CurrentSpec)
+		logging.LogErrorf("attribute view [%s] spec [%d] is newer than current [%d]", av.ID, av.Spec, CurrentSpec)
 		err = ErrSpecTooNew
 		return
 	}
 	return
+}
+
+// upgradeSpec7 移除数据库级当前视图，当前视图由数据库块属性或调用上下文决定。
+// https://github.com/siyuan-note/siyuan/issues/18539
+func upgradeSpec7(av *AttributeView) {
+	if 7 <= av.Spec {
+		return
+	}
+
+	av.Spec = 7
+}
+
+// upgradeSpec6 将卡片和看板的预设尺寸转换为可连续调节的实际宽度和宽高比。
+func upgradeSpec6(av *AttributeView) {
+	if 6 <= av.Spec {
+		return
+	}
+
+	for _, view := range av.Views {
+		if nil != view.Gallery {
+			view.Gallery.CardWidth = CardWidthBySize(view.Gallery.CardSize)
+			view.Gallery.CardAspectRatioValue = CardAspectRatioValueByPreset(view.Gallery.CardAspectRatio)
+		}
+		if nil != view.Kanban {
+			view.Kanban.CardWidth = CardWidthBySize(view.Kanban.CardSize)
+			view.Kanban.CardAspectRatioValue = CardAspectRatioValueByPreset(view.Kanban.CardAspectRatio)
+		}
+	}
+
+	av.Spec = 6
 }
 
 // upgradeSpec5 将旧的扁平过滤规则数组包装为单个隐式 AND 根组，支持递归嵌套分组。

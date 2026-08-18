@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -18,10 +18,12 @@ package model
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha1"
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"sort"
 	"strconv"
@@ -33,10 +35,10 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/Xuanwo/go-locale"
-	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/heif"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -49,41 +51,45 @@ var Conf *AppConf
 
 // AppConf 维护应用元数据，保存在 ~/.siyuan/conf.json。
 type AppConf struct {
-	LogLevel       string           `json:"logLevel"`       // 日志级别：off, trace, debug, info, warn, error, fatal
-	Appearance     *conf.Appearance `json:"appearance"`     // 外观
-	Langs          []*conf.Lang     `json:"langs"`          // 界面语言列表
-	Lang           string           `json:"lang"`           // 选择的界面语言，同 Appearance.Lang
-	FileTree       *conf.FileTree   `json:"fileTree"`       // 文档面板
-	Tag            *conf.Tag        `json:"tag"`            // 标签面板
-	Editor         *conf.Editor     `json:"editor"`         // 编辑器配置
-	Export         *conf.Export     `json:"export"`         // 导出配置
-	Graph          *conf.Graph      `json:"graph"`          // 关系图配置
-	UILayout       *conf.UILayout   `json:"uiLayout"`       // 界面布局。不要直接使用，使用 GetUILayout() 和 SetUILayout() 方法
-	UserData       string           `json:"userData"`       // 社区用户信息，对 User 加密存储
-	User           *conf.User       `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
-	Account        *conf.Account    `json:"account"`        // 帐号配置
-	ReadOnly       bool             `json:"readonly"`       // 是否是以只读模式运行
-	ServerAddrs    []string         `json:"serverAddrs"`    // 本地服务器地址列表
-	AccessAuthCode string           `json:"accessAuthCode"` // 锁屏密码
-	System         *conf.System     `json:"system"`         // 系统配置
-	Keymap         *conf.Keymap     `json:"keymap"`         // 快捷键配置
-	Sync           *conf.Sync       `json:"sync"`           // 同步配置
-	Search         *conf.Search     `json:"search"`         // 搜索配置
-	Flashcard      *conf.Flashcard  `json:"flashcard"`      // 闪卡配置
-	AI             *conf.AI         `json:"ai"`             // 人工智能配置
-	Secrets        *conf.Secrets    `json:"secrets"`        // 全局密钥库
-	Variables      *conf.Variables  `json:"variables"`      // 全局变量库
-	Bazaar         *conf.Bazaar     `json:"bazaar"`         // 集市配置
-	Stat           *conf.Stat       `json:"stat"`           // 统计
-	Api            *conf.API        `json:"api"`            // API
-	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
-	Publish        *conf.Publish    `json:"publish"`        // 发布服务
-	OpenHelp       bool             `json:"openHelp"`       // 启动后是否需要打开用户指南
-	ShowChangelog  bool             `json:"showChangelog"`  // 是否显示版本更新日志
-	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
-	Snippet        *conf.Snpt       `json:"snippet"`        // 代码片段
-	DataIndexState int              `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
-	CookieKey      string           `json:"cookieKey"`      // 用于加密 Cookie 的密钥
+	LogLevel       string               `json:"logLevel"`       // 日志级别：off, trace, debug, info, warn, error, fatal
+	Appearance     *conf.Appearance     `json:"appearance"`     // 外观
+	Langs          []*conf.Lang         `json:"langs"`          // 界面语言列表
+	Lang           string               `json:"lang"`           // 选择的界面语言，同 Appearance.Lang
+	FileTree       *conf.FileTree       `json:"fileTree"`       // 文档面板
+	Tag            *conf.Tag            `json:"tag"`            // 标签面板
+	Editor         *conf.Editor         `json:"editor"`         // 编辑器配置
+	Export         *conf.Export         `json:"export"`         // 导出配置
+	Graph          *conf.Graph          `json:"graph"`          // 关系图配置
+	UILayout       *conf.UILayout       `json:"uiLayout"`       // 界面布局。不要直接使用，使用 GetUILayout() 和 SetUILayout() 方法
+	UserData       string               `json:"userData"`       // 社区用户信息，对 User 加密存储
+	User           *conf.User           `json:"-"`              // 社区用户内存结构，不持久化。不要直接使用，使用 GetUser() 和 SetUser() 方法
+	Account        *conf.Account        `json:"account"`        // 帐号配置
+	ReadOnly       bool                 `json:"readonly"`       // 是否是以只读模式运行
+	ServerAddrs    []string             `json:"serverAddrs"`    // 本地服务器地址列表
+	AccessAuthCode string               `json:"accessAuthCode"` // 锁屏密码
+	OIDC           *conf.OIDC           `json:"oidc"`           // OpenID Connect 登录
+	System         *conf.System         `json:"system"`         // 系统配置
+	Keymap         *conf.Keymap         `json:"keymap"`         // 快捷键配置
+	Sync           *conf.Sync           `json:"sync"`           // 同步配置
+	Search         *conf.Search         `json:"search"`         // 搜索配置
+	Flashcard      *conf.Flashcard      `json:"flashcard"`      // 闪卡配置
+	AI             *conf.AI             `json:"ai"`             // 人工智能配置
+	Secrets        *conf.Secrets        `json:"secrets"`        // 全局密钥库
+	Variables      *conf.Variables      `json:"variables"`      // 全局变量库
+	Bazaar         *conf.Bazaar         `json:"bazaar"`         // 集市配置
+	Stat           *conf.Stat           `json:"stat"`           // 统计
+	Api            *conf.API            `json:"api"`            // API
+	Repo           *conf.Repo           `json:"repo"`           // 数据仓库
+	NotebookCrypto *conf.NotebookCrypto `json:"notebookCrypto"` // 加密笔记本密钥管理
+	Publish        *conf.Publish        `json:"publish"`        // 发布服务
+	Onboarding     *conf.Onboarding     `json:"onboarding"`     // 首次使用引导
+	ShowChangelog  bool                 `json:"showChangelog"`  // 是否显示版本更新日志
+	CloudRegion    int                  `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
+	Snippet        *conf.Snpt           `json:"snippet"`        // 代码片段
+	DataIndexState int                  `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
+	CookieKey      string               `json:"cookieKey"`      // 用于加密 Cookie 的密钥
+
+	MCPOAuth string `json:"mcpOAuth"` // MCP OAuth 凭据密文
 
 	m        *sync.RWMutex // 配置数据锁
 	userLock *sync.RWMutex // 用户数据独立锁，避免与配置保存操作竞争
@@ -92,9 +98,119 @@ type AppConf struct {
 func NewAppConf() *AppConf {
 	return &AppConf{
 		LogLevel: "debug",
+		OIDC:     conf.NewOIDC(),
 		m:        &sync.RWMutex{},
 		userLock: &sync.RWMutex{},
 	}
+}
+
+func applyOIDCEnvironment(config *conf.OIDC) {
+	if config == nil {
+		return
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_ENABLED"); ok {
+		config.Enabled, _ = strconv.ParseBool(value)
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_PROVIDER"); ok {
+		config.Provider = value
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_ISSUER_URL"); ok {
+		config.IssuerURL = value
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_CLIENT_ID"); ok {
+		config.ClientID = value
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_CLIENT_SECRET"); ok {
+		config.ClientSecret = value
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_SCOPES"); ok {
+		config.Scopes = strings.FieldsFunc(value, func(r rune) bool { return r == ',' || r == ' ' })
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_REDIRECT_URL"); ok {
+		config.RedirectURL = value
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_ALLOW_ALL"); ok {
+		config.AllowAll, _ = strconv.ParseBool(value)
+	}
+	if value, ok := os.LookupEnv("SIYUAN_OIDC_CLAIM_RULES"); ok {
+		rules := []*conf.OIDCClaimRule{}
+		if err := gulu.JSON.UnmarshalJSON([]byte(value), &rules); err != nil {
+			config.ClaimRules = nil
+			logging.LogErrorf("parse SIYUAN_OIDC_CLAIM_RULES failed: %s", err)
+		} else {
+			config.ClaimRules = rules
+		}
+	}
+}
+
+func (conf *AppConf) GetMCPOAuth() string {
+	conf.m.RLock()
+	defer conf.m.RUnlock()
+	return conf.MCPOAuth
+}
+
+func (conf *AppConf) SetMCPOAuth(value string) {
+	conf.m.Lock()
+	conf.MCPOAuth = value
+	conf.m.Unlock()
+	conf.Save()
+}
+
+func (appConf *AppConf) GetOIDC() *conf.OIDC {
+	appConf.m.RLock()
+	defer appConf.m.RUnlock()
+	if appConf.OIDC == nil {
+		return conf.NewOIDC()
+	}
+	ret := *appConf.OIDC
+	ret.Scopes = append([]string{}, appConf.OIDC.Scopes...)
+	ret.ClaimRules = make([]*conf.OIDCClaimRule, 0, len(appConf.OIDC.ClaimRules))
+	for _, rule := range appConf.OIDC.ClaimRules {
+		if rule == nil {
+			ret.ClaimRules = append(ret.ClaimRules, nil)
+			continue
+		}
+		clonedRule := *rule
+		clonedRule.Values = append([]string{}, rule.Values...)
+		ret.ClaimRules = append(ret.ClaimRules, &clonedRule)
+	}
+	return &ret
+}
+
+func (appConf *AppConf) SetOIDC(config *conf.OIDC) {
+	appConf.m.Lock()
+	appConf.OIDC = config
+	appConf.m.Unlock()
+	appConf.Save()
+}
+
+// CompareAndSetOIDC 仅在当前配置版本仍与预期一致时写入 OIDC 配置。
+func (appConf *AppConf) CompareAndSetOIDC(expectedVersion string, config *conf.OIDC) (changed, swapped bool) {
+	appConf.m.Lock()
+	current := appConf.OIDC
+	if current == nil {
+		current = conf.NewOIDC()
+	}
+	if oidcConfigurationVersionWithKey(appConf.CookieKey, current) != expectedVersion {
+		appConf.m.Unlock()
+		return false, false
+	}
+	changed = !reflect.DeepEqual(current, config)
+	if changed {
+		appConf.OIDC = config
+	}
+	appConf.m.Unlock()
+	if changed {
+		appConf.Save()
+	}
+	return changed, true
+}
+
+func (conf *AppConf) SetAI(ai *conf.AI) {
+	conf.m.Lock()
+	conf.AI = ai
+	conf.m.Unlock()
+	conf.Save()
 }
 
 func (conf *AppConf) GetUILayout() *conf.UILayout {
@@ -125,17 +241,24 @@ func InitConf() {
 	initLang()
 
 	Conf = NewAppConf()
+	clearEncryptedExportTempOnBoot()
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	if gulu.File.IsExist(confPath) {
+	confFileExists := gulu.File.IsExist(confPath)
+	entryVisibilityConfigured := false
+	if confFileExists {
 		if data, err := os.ReadFile(confPath); err != nil {
 			logging.LogErrorf("load conf [%s] failed: %s", confPath, err)
 		} else {
+			entryVisibilityConfigured = bytes.Contains(data, []byte(`"entryVisibility"`))
 			// 解析失败时保留已成功写入的字段；未导出字段（m、userLock）与未触及的导出字段保持 NewAppConf() 初值。
 			if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
 				logging.LogWarnf("parse conf failed, parsed fields retained: %s", err)
 			} else {
 				logging.LogInfof("loaded conf [%s]", confPath)
 			}
+
+			// 启动时检测并完成中断的改密迁移
+			recoverMasterPasswordMigration()
 
 			if conf.NeedsAIMigration(data) {
 				Conf.AI = conf.MigrateAI(data)
@@ -211,6 +334,14 @@ func InitConf() {
 	if nil == Conf.Appearance {
 		Conf.Appearance = conf.NewAppearance()
 	}
+	entryVisibilityFallback := conf.EntryVisibilityProfileSimple
+	if confFileExists {
+		entryVisibilityFallback = conf.EntryVisibilityProfileFull
+	}
+	if confFileExists && !entryVisibilityConfigured {
+		Conf.Appearance.EntryVisibility = nil
+	}
+	Conf.Appearance.EntryVisibility = conf.NormalizeEntryVisibility(Conf.Appearance.EntryVisibility, entryVisibilityFallback)
 	var langOK bool
 	for _, l := range Conf.Langs {
 		if Conf.Lang == l.Name {
@@ -263,6 +394,10 @@ func InitConf() {
 		Conf.Appearance.StatusBar = &util.StatusBar{}
 	}
 	util.StatusBarCfg = Conf.Appearance.StatusBar
+	if nil == Conf.Appearance.Notifications {
+		Conf.Appearance.Notifications = util.NewNotifications()
+	}
+	util.NotificationsCfg = Conf.Appearance.Notifications
 	if nil == Conf.FileTree {
 		Conf.FileTree = conf.NewFileTree()
 	}
@@ -275,7 +410,18 @@ func InitConf() {
 	if 32 < Conf.FileTree.MaxOpenTabCount {
 		Conf.FileTree.MaxOpenTabCount = 32
 	}
+	if nil == Conf.FileTree.TabStartupMode {
+		Conf.FileTree.TabStartupMode = new(int)
+		if Conf.FileTree.CloseTabsOnStart {
+			*Conf.FileTree.TabStartupMode = 2
+		}
+	}
+	if 0 > *Conf.FileTree.TabStartupMode || 2 < *Conf.FileTree.TabStartupMode {
+		*Conf.FileTree.TabStartupMode = 0
+	}
+	Conf.FileTree.CloseTabsOnStart = 2 == *Conf.FileTree.TabStartupMode
 	Conf.FileTree.DocCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.DocCreateSavePath)
+	Conf.FileTree.DocCreateTemplatePath = util.NormalizeTemplatePath(Conf.FileTree.DocCreateTemplatePath)
 	Conf.FileTree.RefCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.RefCreateSavePath)
 	Conf.FileTree.ShorthandSavePath = util.TrimSpaceInPath(Conf.FileTree.ShorthandSavePath)
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
@@ -284,7 +430,11 @@ func InitConf() {
 	}
 	util.LargeFileWarningSize = Conf.FileTree.LargeFileWarningSize
 	if nil == Conf.FileTree.CreateDocAtTop { // v3.4.0 之前的版本没有该字段，设置默认值为 true，即在顶部创建新文档，不改变用户习惯
-		Conf.FileTree.CreateDocAtTop = func() *bool { b := true; return &b }()
+		Conf.FileTree.CreateDocAtTop = new(true)
+	}
+	if nil == Conf.FileTree.BoxDocEnabled {
+		// 配置缺失时默认关闭顶层笔记本文档。
+		Conf.FileTree.BoxDocEnabled = new(bool)
 	}
 
 	if conf.MinFileTreeRecentDocsListCount > Conf.FileTree.RecentDocsMaxListCount {
@@ -312,16 +462,13 @@ func InitConf() {
 	if nil == Conf.Editor.BackmentionSort {
 		Conf.Editor.BackmentionSort = defaultEditor.BackmentionSort
 	}
-	if 1 > len(Conf.Editor.Emoji) {
-		Conf.Editor.Emoji = []string{}
+	if nil == Conf.Editor.DatabaseAttrShow {
+		Conf.Editor.DatabaseAttrShow = defaultEditor.DatabaseAttrShow
 	}
-	for i, emoji := range Conf.Editor.Emoji {
-		if strings.Contains(emoji, ".") {
-			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-			emoji = util.FilterUploadEmojiFileName(emoji)
-			Conf.Editor.Emoji[i] = emoji
-		}
+	if nil == Conf.Editor.DatabaseAttrUseTabs {
+		Conf.Editor.DatabaseAttrUseTabs = defaultEditor.DatabaseAttrUseTabs
 	}
+	Conf.Editor.Emoji = util.FilterRecentIconValues(Conf.Editor.Emoji)
 	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
 		Conf.Editor.FontSize = 16
 	}
@@ -344,8 +491,7 @@ func InitConf() {
 		Conf.Editor.HistoryRetentionDays = 3650
 	}
 	if nil == Conf.Editor.FloatWindowDelay {
-		v := 620
-		Conf.Editor.FloatWindowDelay = &v
+		Conf.Editor.FloatWindowDelay = new(620)
 	} else {
 		*Conf.Editor.FloatWindowDelay = max(0, min(2000, *Conf.Editor.FloatWindowDelay))
 	}
@@ -355,14 +501,19 @@ func InitConf() {
 	if 1 > len(Conf.Editor.SpellcheckLanguages) {
 		Conf.Editor.SpellcheckLanguages = []string{"en-US"}
 	}
-	if 0 > Conf.Editor.BacklinkExpandCount {
-		Conf.Editor.BacklinkExpandCount = 0
-	}
-	if -1 > Conf.Editor.BackmentionExpandCount {
-		Conf.Editor.BackmentionExpandCount = -1
+	Conf.Editor.BacklinkExpandCount = conf.NormalizeBacklinkExpandCount(Conf.Editor.BacklinkExpandCount)
+	Conf.Editor.BackmentionExpandCount = conf.NormalizeBacklinkExpandCount(Conf.Editor.BackmentionExpandCount)
+	if "" == Conf.Editor.HeadingNumberFormat {
+		Conf.Editor.HeadingNumberFormat = conf.DefaultHeadingNumberFormat
 	}
 	if nil == Conf.Editor.Markdown {
 		Conf.Editor.Markdown = &util.Markdown{}
+	}
+	if nil == Conf.Editor.Markdown.CodeBlockMiddleDot {
+		Conf.Editor.Markdown.CodeBlockMiddleDot = defaultEditor.Markdown.CodeBlockMiddleDot
+	}
+	if nil == Conf.Editor.Markdown.BlockFullWidthTaskList {
+		Conf.Editor.Markdown.BlockFullWidthTaskList = defaultEditor.Markdown.BlockFullWidthTaskList
 	}
 	util.MarkdownSettings = Conf.Editor.Markdown
 
@@ -374,17 +525,15 @@ func InitConf() {
 		// 锚点哈希模式和脚注模式合并 https://github.com/siyuan-note/siyuan/issues/13331
 		Conf.Export.BlockRefMode = 4 // 改为脚注+锚点哈希
 	}
-	if "" == Conf.Export.PandocBin {
-		Conf.Export.PandocBin = util.PandocBinPath
-	}
-
 	if nil == Conf.Graph || nil == Conf.Graph.Local || nil == Conf.Graph.Global {
 		Conf.Graph = conf.NewGraph()
+	} else {
+		Conf.Graph.NormalizeMaxBlocks()
 	}
 
-	if nil == Conf.System {
+	isNewWorkspace := nil == Conf.System
+	if isNewWorkspace {
 		Conf.System = conf.NewSystem()
-		Conf.OpenHelp = true
 	} else {
 		cmp := semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion)
 		if 0 < cmp {
@@ -395,7 +544,13 @@ func InitConf() {
 		}
 
 		Conf.System.KernelVersion = util.Ver
-		Conf.System.IsInsider = util.IsInsider
+	}
+	Conf.System.UpdateChannel = loadGlobalUpdateChannel()
+	if nil == Conf.Onboarding {
+		Conf.Onboarding = &conf.Onboarding{State: conf.OnboardingCompleted}
+	}
+	if boxes, listErr := ListNotebooks(); listErr == nil {
+		prepareOnboardingForEmptyWorkspace(Conf.Onboarding, util.ReadOnly, len(boxes))
 	}
 	if nil == Conf.System.NetworkProxy {
 		Conf.System.NetworkProxy = &conf.NetworkProxy{}
@@ -441,6 +596,9 @@ func InitConf() {
 		Conf.Export.DocxTemplate = ""
 		Conf.Save()
 	}
+	if migratePandocConfig(Conf.Export) {
+		Conf.Save()
+	}
 
 	if nil == Conf.Snippet {
 		Conf.Snippet = conf.NewSnpt()
@@ -483,6 +641,15 @@ func InitConf() {
 	Conf.Sync.Local.Endpoint = util.NormalizeLocalPath(Conf.Sync.Local.Endpoint)
 	Conf.Sync.Local.Timeout = util.NormalizeTimeout(Conf.Sync.Local.Timeout)
 	Conf.Sync.Local.ConcurrentReqs = util.NormalizeConcurrentReqs(Conf.Sync.Local.ConcurrentReqs, conf.ProviderLocal)
+	if nil == Conf.Sync.LAN {
+		Conf.Sync.LAN = &conf.LANSync{MaxConcurrentReqs: 16}
+	}
+	if 1 > Conf.Sync.LAN.MaxConcurrentReqs {
+		Conf.Sync.LAN.MaxConcurrentReqs = 16
+	}
+	if 128 < Conf.Sync.LAN.MaxConcurrentReqs {
+		Conf.Sync.LAN.MaxConcurrentReqs = 128
+	}
 
 	if util.ContainerDocker == util.Container {
 		Conf.Sync.Perception = false
@@ -499,10 +666,6 @@ func InitConf() {
 	if nil == Conf.Publish {
 		Conf.Publish = conf.NewPublish()
 	}
-	if Conf.OpenHelp && Conf.Publish.Enable {
-		Conf.OpenHelp = false
-	}
-
 	if nil == Conf.Repo {
 		Conf.Repo = conf.NewRepo()
 	}
@@ -524,6 +687,16 @@ func InitConf() {
 	if 0 < len(Conf.Repo.Key) {
 		logging.LogInfof("repo key [%x]", sha1.Sum(Conf.Repo.Key))
 	}
+
+	if nil == Conf.NotebookCrypto {
+		Conf.NotebookCrypto = conf.NewNotebookCrypto()
+	}
+
+	// 注意：此处不在启动时为已启用但备份缺失的情形回填密钥备份。无 KEK 生成的备份 KEKMAC 必为空，
+	// 而 deriveKEK/恢复路径强制要求 KEKMAC 有效，回填会导致该机永远无法解锁（自相矛盾）。
+	// 当前格式备份必须由主密码验证后生成（见 EnableEncryptedNotebook / tryRestoreNotebookCryptoFromBackupLocked）。
+	// Enabled=true 但备份缺失/无效属配置不完整，解锁时由 deriveKEK 返回恢复提示（Language 315），
+	// 引导用户导入匹配的备份文件后重新验证主密码。
 
 	if nil == Conf.Search {
 		Conf.Search = conf.NewSearch()
@@ -575,7 +748,7 @@ func InitConf() {
 		}()
 	}
 	isInvalidFlashcardWeights := false
-	for _, w := range strings.Split(Conf.Flashcard.Weights, ",") {
+	for w := range strings.SplitSeq(Conf.Flashcard.Weights, ",") {
 		if _, err := strconv.ParseFloat(strings.TrimSpace(w), 64); err != nil {
 			isInvalidFlashcardWeights = true
 			break
@@ -598,6 +771,15 @@ func InitConf() {
 		Conf.AI.DecryptAPIKeys()
 	}
 	Conf.AI.Normalize()
+	Conf.AI.ReconcileModelIDs()
+
+	if nil == Conf.OIDC {
+		Conf.OIDC = conf.NewOIDC()
+	} else {
+		Conf.OIDC.DecryptClientSecret()
+	}
+	applyOIDCEnvironment(Conf.OIDC)
+	Conf.OIDC.Normalize()
 
 	if nil == Conf.Secrets {
 		Conf.Secrets = conf.NewSecrets()
@@ -610,11 +792,11 @@ func InitConf() {
 	}
 
 	for _, p := range Conf.AI.Providers {
-		if p == nil || len(p.APIKey) == 0 {
+		if p == nil || !p.Enabled {
 			continue
 		}
 		for _, m := range p.Models {
-			if m.Name == "" {
+			if m == nil || m.Name == "" || !m.Enabled {
 				continue
 			}
 			logging.LogInfof("AI provider enabled\n"+
@@ -665,6 +847,15 @@ func InitConf() {
 		writeCookieKey(Conf.CookieKey)
 	}
 
+	if util.ContainerDocker == util.Container && Conf.AccessAuthCode == "" && !util.SiYuanAccessAuthCodeBypass {
+		if err := ValidateOIDCConfigurationChange(context.Background(), Conf.OIDC, true, false, false); err != nil {
+			fmt.Println("the access authorization code or a valid OIDC configuration must be set when deploying via Docker")
+			fmt.Println("set SIYUAN_ACCESS_AUTH_CODE, configure OIDC, or explicitly set SIYUAN_ACCESS_AUTH_CODE_BYPASS=true")
+			logging.LogErrorf("Docker access authentication configuration is invalid: %s", err)
+			os.Exit(logging.ExitCodeSecurityRisk)
+		}
+	}
+
 	Conf.Save()
 
 	// 安全模式：渲染进程崩溃恢复后由桌面端主进程通过 --safe-mode 注入。
@@ -684,11 +875,15 @@ func InitConf() {
 		logging.LogInfof("booted in safe mode")
 	}
 
-	logging.SetLogLevel(Conf.LogLevel)
+	// CLI 子命令通过 --log-level 显式指定日志级别时（util.CLILogLevel 非空），优先使用命令行级别，
+	// 不再用 conf.json 的 system.logLevel 覆盖，使命令行参数在初始化早期即生效。
+	if "" == util.CLILogLevel {
+		logging.SetLogLevel(Conf.LogLevel)
+	}
 
-	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
+	util.SetNetworkProxy(Conf.System.NetworkProxy.String(), Conf.System.NetworkProxy.IsSystem())
 
-	go util.InitPandoc()
+	go util.InitPandoc(Conf.Export.PandocBin)
 	go util.InitTesseract()
 }
 
@@ -791,11 +986,11 @@ var exitLock = sync.Mutex{}
 //
 // setCurrentWorkspace：是否将当前工作空间放到工作空间列表的最后一个
 //
-// execInstallPkg：是否执行新版本安装包
+// execInstallPkg：是否返回新版本安装包
 //
 //	0：默认按照设置项 System.DownloadInstallPkg 检查并推送提示
-//	1：不执行新版本安装
-//	2：执行新版本安装
+//	1：不返回新版本安装包
+//	2：返回新版本安装包路径并退出，由桌面宿主执行安装
 //
 // 返回值 exitCode：
 //
@@ -803,12 +998,14 @@ var exitLock = sync.Mutex{}
 //	1：同步执行失败
 //	2：提示新安装包
 //
-// 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且同步失败并且新版本安装版已经准备就绪时，执行新版本安装 https://github.com/siyuan-note/siyuan/issues/10288
-func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
+// 当 force 为 true（强制退出）并且 execInstallPkg 为 0（默认检查更新）并且新版本安装包已经准备就绪时，将安装包路径返回给桌面宿主
+// https://github.com/siyuan-note/siyuan/issues/10288
+func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, installPkgPath string) {
 	exitLock.Lock()
 	defer exitLock.Unlock()
 
 	logging.LogInfof("exiting kernel [force=%v, setCurrentWorkspace=%v, execInstallPkg=%d]", force, setCurrentWorkspace, execInstallPkg)
+	defer stopLANSyncManager()
 
 	util.PushMsg(Conf.Language(95), 10000*60)
 	FlushTxQueue()
@@ -825,6 +1022,9 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 			syncData(true, false)
 			if 0 != ExitSyncSucc {
 				exitCode = 1
+				if 1 != execInstallPkg && !skipNewVerInstallPkg() {
+					installPkgPath = getNewVerInstallPkgPath()
+				}
 				return
 			}
 		}
@@ -837,16 +1037,13 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	sql.FlushQueue()
 
 	util.IsExiting.Store(true)
-	waitSecondForExecInstallPkg := false
 	newVerInstallPkgPath := getNewVerInstallPkgPath()
 	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
-		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 执行新版本安装
-			waitSecondForExecInstallPkg = true
-			if gulu.OS.IsWindows() {
-				util.PushMsg(Conf.Language(130), 1000*30)
-			}
-			go execNewVerInstallPkg(newVerInstallPkgPath)
+		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 将新版本安装包交给桌面宿主执行
+			installPkgPath = newVerInstallPkgPath
+			logging.LogInfof("the new version install pkg is ready for the desktop host [%s]", newVerInstallPkgPath)
 		} else if 0 == execInstallPkg { // 新版本安装包已经准备就绪
+			installPkgPath = newVerInstallPkgPath
 			exitCode = 2
 			logging.LogInfof("the new version install pkg is ready [%s], waiting for the user's next instruction", newVerInstallPkgPath)
 			return
@@ -854,10 +1051,19 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	}
 
 	Conf.Close()
+	// 退出前关闭已打开的加密笔记本并推送 closeBox，让前端关闭对应的明文文档标签页，避免重启后泄密。
+	// 走 Unmount：落盘 Closed=true + 生成历史 + 锁定清 DEK + 广播 closeBox。
+	// 排除用户指南：Unmount 对用户指南会触发 RemoveBox（mount.go:208-214）。
+	// 放在 BroadcastByType("exit")（第 933 行）之前推送，随后的 time.Sleep(500ms) 留给前端处理事件。
+	for _, box := range Conf.GetOpenedBoxes() {
+		if IsEncryptedBox(box.ID) && !IsUserGuide(box.ID) {
+			Unmount(box.ID)
+		}
+	}
 	sql.CloseDatabase()
 	closePushQueue()
 	util.SaveAssetsTexts()
-	clearWorkspaceTemp()
+	clearWorkspaceTemp("" != installPkgPath)
 	clearCorruptedNotebooks()
 	clearPortJSON()
 
@@ -878,14 +1084,6 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	util.UnlockWorkspace()
 
 	time.Sleep(500 * time.Millisecond)
-	if waitSecondForExecInstallPkg {
-		// 桌面端退出拉起更新安装时有时需要重启两次 https://github.com/siyuan-note/siyuan/issues/6544
-		// 这里多等待一段时间，等待安装程序启动
-		if gulu.OS.IsWindows() {
-			time.Sleep(30 * time.Second)
-		}
-	}
-
 	closeSyncWebSocket()
 
 	go func() {
@@ -949,26 +1147,40 @@ func (conf *AppConf) Save() {
 		return
 	}
 
-	Conf.m.Lock()
-	defer Conf.m.Unlock()
+	conf.m.Lock()
+	defer conf.m.Unlock()
 
-	if nil != Conf.AI {
-		Conf.AI.EncryptAPIKeys()
-		defer Conf.AI.DecryptAPIKeys()
+	plainData, err := gulu.JSON.MarshalJSON(conf)
+	if err != nil {
+		logging.LogErrorf("marshal conf failed: %s", err)
+		return
 	}
-
-	if nil != Conf.Secrets {
-		Conf.Secrets.Encrypt()
-		defer Conf.Secrets.Decrypt()
+	snapshot := NewAppConf()
+	if err = gulu.JSON.UnmarshalJSON(plainData, snapshot); err != nil {
+		logging.LogErrorf("copy conf failed: %s", err)
+		return
 	}
-
+	if snapshot.AI != nil {
+		snapshot.AI.EncryptAPIKeys()
+	}
+	if snapshot.OIDC != nil {
+		snapshot.OIDC.EncryptClientSecret()
+	}
+	if snapshot.Secrets != nil {
+		snapshot.Secrets.Encrypt()
+	}
 	// safeMode 是纯运行时状态（由 --safe-mode 注入），不随 conf.json 持久化，避免跨启动残留。
-	// 序列化写盘时临时清零，写完恢复内存值（供 getConf 等运行时读取）。
-	safeMode := Conf.System.SafeMode
-	Conf.System.SafeMode = false
-	defer func() { Conf.System.SafeMode = safeMode }()
+	if snapshot.System != nil {
+		snapshot.System.SafeMode = false
+		// 更新通道由用户目录下的全局配置持久化，不写入工作空间配置。
+		snapshot.System.UpdateChannel = ""
+	}
 
-	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
+	newData, err := gulu.JSON.MarshalIndentJSON(snapshot, "", "  ")
+	if err != nil {
+		logging.LogErrorf("marshal conf snapshot failed: %s", err)
+		return
+	}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	oldData, err := filelock.ReadFile(confPath)
 	if err != nil {
@@ -1040,7 +1252,8 @@ func (conf *AppConf) GetBoxes() (ret []*Box) {
 		id := notebook.ID
 		name := notebook.Name
 		closed := notebook.Closed
-		box := &Box{ID: id, Name: name, Closed: closed}
+		encrypted := IsEncryptedBox(id) // 使用 IsEncryptedBox 统一判定（含 backup fallback）
+		box := &Box{ID: id, Name: name, Closed: closed, Encrypted: encrypted}
 		ret = append(ret, box)
 	}
 	return
@@ -1095,6 +1308,9 @@ func InitBoxes() {
 	blockCount := treenode.CountBlocks()
 	initialized := 0 < blockCount
 	for _, box := range Conf.GetOpenedBoxes() {
+		if _, err := EnsureBoxDoc(box.ID); nil != err {
+			logging.LogErrorf("ensure box document [%s] failed: %s", box.ID, err)
+		}
 		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 
 		if !initialized {
@@ -1144,6 +1360,8 @@ func GetMaskedConf() (ret *AppConf, err error) {
 	}
 
 	ret.UserData = MaskedUserData
+	ret.MCPOAuth = ""
+	ret.CookieKey = ""
 	if "" != ret.AccessAuthCode {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
@@ -1154,7 +1372,13 @@ func GetMaskedConf() (ret *AppConf, err error) {
 // REF: https://github.com/siyuan-note/siyuan/issues/11364
 func HideConfSecret(c *AppConf) {
 	c.AI = &conf.AI{}
+	c.OIDC = &conf.OIDC{}
+	c.MCPOAuth = ""
+	c.CookieKey = ""
 	c.Api = &conf.API{}
+	if nil != c.Export {
+		c.Export.PandocBin = ""
+	}
 	c.Flashcard = &conf.Flashcard{}
 	c.ServerAddrs = []string{}
 	c.Publish = &conf.Publish{}
@@ -1162,12 +1386,27 @@ func HideConfSecret(c *AppConf) {
 	c.Sync = &conf.Sync{}
 	c.Secrets = &conf.Secrets{}
 	c.Variables = &conf.Variables{}
+	if nil != c.NotebookCrypto {
+		enabled := c.NotebookCrypto.Enabled && notebookCryptoConfigurationComplete(c.NotebookCrypto)
+		c.NotebookCrypto = &conf.NotebookCrypto{
+			Enabled:         enabled,
+			AutoLockMinutes: c.NotebookCrypto.AutoLockMinutes,
+		}
+	}
 	c.System.AppDir = ""
 	c.System.ConfDir = ""
 	c.System.DataDir = ""
 	c.System.HomeDir = ""
+	c.System.WorkspaceDir = ""
 	c.System.Name = ""
 	c.System.NetworkProxy = &conf.NetworkProxy{}
+}
+
+// HideBoxConfSecret 隐藏笔记本配置中的密钥材料。
+func HideBoxConfSecret(c *conf.BoxConf) {
+	if nil != c {
+		c.BoxCrypt = nil
+	}
 }
 
 func clearPortJSON() {
@@ -1228,18 +1467,23 @@ func clearCorruptedNotebooks() {
 	}
 }
 
-func clearWorkspaceTemp() {
+func clearWorkspaceTemp(preserveInstallPkgs bool) {
+	heif.ClearMemoryCache("")
+	os.RemoveAll(filepath.Join(util.TempDir, "assets-cache"))
 	os.RemoveAll(filepath.Join(util.TempDir, "bazaar"))
 	os.RemoveAll(filepath.Join(util.TempDir, "export"))
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
 	os.RemoveAll(filepath.Join(util.TempDir, "convert"))
+	os.RemoveAll(filepath.Join(util.TempDir, "pandoc"))
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
+	ClearRichClipboard()
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
 	os.RemoveAll(filepath.Join(util.TempDir, "base64"))
+	os.RemoveAll(filepath.Join(util.TempDir, "ai"))
 
 	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
 	install := filepath.Join(util.TempDir, "install")
-	if gulu.File.IsDir(install) {
+	if !preserveInstallPkgs && gulu.File.IsDir(install) {
 		monthAgo := time.Now().Add(-time.Hour * 24 * 7)
 		entries, err := os.ReadDir(install)
 		if err != nil {
@@ -1248,8 +1492,9 @@ func clearWorkspaceTemp() {
 			for _, entry := range entries {
 				info, _ := entry.Info()
 				if nil != info && !info.IsDir() && info.ModTime().Before(monthAgo) {
-					if err = os.RemoveAll(filepath.Join(install, entry.Name())); err != nil {
-						logging.LogErrorf("remove old install pkg [%s] failed: %s", filepath.Join(install, entry.Name()), err)
+					installPkgPath := filepath.Join(install, entry.Name())
+					if err = os.RemoveAll(installPkgPath); err != nil {
+						logging.LogErrorf("remove old install pkg [%s] failed: %s", installPkgPath, err)
 					}
 				}
 			}
@@ -1293,6 +1538,7 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "queue.wal"))
 	os.RemoveAll(filepath.Join(util.TempDir, "queue.wal.lock"))
 	os.RemoveAll(filepath.Join(util.DataDir, "storage", "ai", "agent", "todos"))
+	os.RemoveAll(filepath.Join(util.DataDir, "storage", "ai", "agent", "operations", "image"))
 
 	logging.LogInfof("cleared workspace temp")
 }
@@ -1372,24 +1618,13 @@ func closeUserGuide() {
 	}
 }
 
-func init() {
-	subscribeConfEvents()
-}
-
-func subscribeConfEvents() {
-	eventbus.Subscribe(util.EvtConfPandocInitialized, func() {
-		logging.LogInfof("pandoc initialized, set pandoc bin to [%s]", util.PandocBinPath)
-		Conf.Export.PandocBin = util.PandocBinPath
-
-		params := util.RemoveInvalid(Conf.Export.PandocParams)
-		if !strings.Contains(params, "--reference-doc") && "" != util.PandocTemplatePath && !Conf.System.IsMicrosoftStore {
-			params += " --reference-doc"
-			params += " \"" + util.PandocTemplatePath + "\""
-			Conf.Export.PandocParams = strings.TrimSpace(params)
-		}
-
-		logging.LogInfof("pandoc params set to [%s]", Conf.Export.PandocParams)
-		logging.LogInfof("pandoc resources [%s, %s]", util.PandocTemplatePath, util.PandocColorFilterPath)
-		Conf.Save()
-	})
+// NotebookCryptoEnabled 返回加密笔记本功能是否处于可用的启用状态（线程安全）。
+func NotebookCryptoEnabled() bool {
+	Conf.m.RLock()
+	defer Conf.m.RUnlock()
+	if nil == Conf.NotebookCrypto {
+		return false
+	}
+	notebookCrypto := *Conf.NotebookCrypto
+	return notebookCrypto.Enabled && notebookCryptoConfigurationComplete(&notebookCrypto)
 }

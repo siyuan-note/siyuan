@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -296,6 +296,13 @@ type RecentDoc struct {
 
 var recentDocLock = sync.Mutex{}
 
+// canPersistRecentDoc 仅允许全局块树中可确认属于普通笔记本的文档进入明文最近文档存储。
+// 加密笔记本使用独立块树，未知 ID 也按敏感数据处理，避免锁定时因无法解析归属而写入明文。
+func canPersistRecentDoc(rootID string) bool {
+	bt := treenode.GetBlockTree(rootID)
+	return bt != nil && !IsEncryptedBox(bt.BoxID)
+}
+
 func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
@@ -304,6 +311,9 @@ func GetRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 
 // UpdateRecentDocOpenTime 更新文档打开时间（只在第一次从文档树加载到页签时调用）
 func UpdateRecentDocOpenTime(rootID string) (err error) {
+	if !canPersistRecentDoc(rootID) {
+		return
+	}
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
@@ -341,6 +351,9 @@ func UpdateRecentDocOpenTime(rootID string) (err error) {
 
 // UpdateRecentDocViewTime 更新文档浏览时间
 func UpdateRecentDocViewTime(rootID string) (err error) {
+	if !canPersistRecentDoc(rootID) {
+		return
+	}
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
@@ -383,6 +396,16 @@ func UpdateRecentDocCloseTime(rootID string) (err error) {
 
 // BatchUpdateRecentDocCloseTime 批量更新文档关闭时间
 func BatchUpdateRecentDocCloseTime(rootIDs []string) (err error) {
+	if len(rootIDs) == 0 {
+		return
+	}
+	filteredRootIDs := make([]string, 0, len(rootIDs))
+	for _, rootID := range rootIDs {
+		if canPersistRecentDoc(rootID) {
+			filteredRootIDs = append(filteredRootIDs, rootID)
+		}
+	}
+	rootIDs = filteredRootIDs
 	if len(rootIDs) == 0 {
 		return
 	}
@@ -480,7 +503,6 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 			changed = true
 			continue
 		}
-
 		// 文档块可能已经转换成标题块 https://github.com/siyuan-note/siyuan/pull/16727#issuecomment-3810081850
 		if doc.RootID != bt.RootID {
 			changed = true
@@ -510,7 +532,9 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	for rootID, doc := range mergedDocs {
 		if ial, ok := attrs[rootID]; ok {
 			if icon, ok := ial["icon"]; ok && icon != "" {
-				doc.Icon = icon
+				if filteredIcon, valid := util.FilterIconValue(icon); valid {
+					doc.Icon = filteredIcon
+				}
 			}
 		}
 		ret = append(ret, doc)
@@ -521,12 +545,30 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 			logging.LogErrorf("update storage [recent-doc] failed in getRecentDocs: %s", errSet)
 		}
 	}
+	if !IsBoxDocEnabled() {
+		filtered := make([]*RecentDoc, 0, len(ret))
+		for _, doc := range ret {
+			bt := bts[doc.RootID]
+			if nil == bt || !IsBoxDoc(bt.BoxID, bt.RootID) {
+				filtered = append(filtered, doc)
+			}
+		}
+		ret = filtered
+	}
 
 	// 根据排序参数进行排序
 	switch sortBy {
 	case "updated": // 按更新时间排序
 		// 从数据库查询最近修改的文档
-		sqlBlocks := sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC", 1, Conf.FileTree.RecentDocsMaxListCount)
+		boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs())
+		var sqlBlocks []*sql.Block
+		if "" == boxDocFilter {
+			sqlBlocks = sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC", 1, Conf.FileTree.RecentDocsMaxListCount)
+		} else {
+			stmt := "SELECT * FROM blocks WHERE type = 'd'" + boxDocFilter + " ORDER BY updated DESC" +
+				fmt.Sprintf(" LIMIT %d", Conf.FileTree.RecentDocsMaxListCount)
+			sqlBlocks = sql.SelectBlocksRawStmtArgs(stmt, boxDocArgs, Conf.FileTree.RecentDocsMaxListCount)
+		}
 		ret = []*RecentDoc{}
 		if 1 > len(sqlBlocks) {
 			return
@@ -620,6 +662,9 @@ func normalizeRecentDocs(recentDocs []*RecentDoc) []*RecentDoc {
 	seen := make(map[string]struct{}, len(recentDocs))
 	deduplicated := make([]*RecentDoc, 0, len(recentDocs))
 	for _, doc := range recentDocs {
+		if doc == nil || !canPersistRecentDoc(doc.RootID) {
+			continue
+		}
 		if _, ok := seen[doc.RootID]; !ok {
 			seen[doc.RootID] = struct{}{}
 			deduplicated = append(deduplicated, doc)
@@ -710,6 +755,98 @@ func setRecentDocs(recentDocs []*RecentDoc) (err error) {
 	err = filelock.WriteFile(lsPath, data)
 	if err != nil {
 		logging.LogErrorf("write storage [recent-doc] failed: %s", err)
+		return
+	}
+	return
+}
+
+var refUsedLock = sync.Mutex{}
+
+// refUsedMaxCount 限制最近引用记录的最大条数，超出时淘汰最旧的记录，防止文件无限膨胀。
+const refUsedMaxCount = 512
+
+// TouchRefUsed 在用户真实插入引用时刷新目标块的最近引用时间。该时间独立于 refs 表的重建机制，
+// 仅在事务处理（真实编辑）时写入，用于稳定块引"最近引用"排序。
+func TouchRefUsed(defBlockIDs []string) {
+	if 1 > len(defBlockIDs) {
+		return
+	}
+
+	refUsedLock.Lock()
+	defer refUsedLock.Unlock()
+
+	used := loadRefUsed()
+	now := time.Now().Unix()
+	for _, defBlockID := range defBlockIDs {
+		used[defBlockID] = now
+	}
+	if refUsedMaxCount < len(used) {
+		// 超出上限时按时间戳淘汰最旧的记录
+		type entry struct {
+			id string
+			ts int64
+		}
+		entries := make([]entry, 0, len(used))
+		for id, ts := range used {
+			entries = append(entries, entry{id, ts})
+		}
+		sort.Slice(entries, func(i, j int) bool {
+			return entries[i].ts > entries[j].ts
+		})
+		used = map[string]int64{}
+		for i := 0; i < refUsedMaxCount && i < len(entries); i++ {
+			used[entries[i].id] = entries[i].ts
+		}
+	}
+	setRefUsed(used)
+}
+
+// GetRefUsed 返回目标块→最近引用时间戳映射，供块引排序使用。
+func GetRefUsed() (ret map[string]int64) {
+	refUsedLock.Lock()
+	defer refUsedLock.Unlock()
+	ret = loadRefUsed()
+	return
+}
+
+func loadRefUsed() (ret map[string]int64) {
+	ret = map[string]int64{}
+	dataPath := filepath.Join(util.DataDir, "storage/ref-used.json")
+	if !filelock.IsExist(dataPath) {
+		return
+	}
+
+	data, err := filelock.ReadFile(dataPath)
+	if err != nil {
+		logging.LogErrorf("read storage [ref-used] failed: %s", err)
+		return
+	}
+
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
+		logging.LogErrorf("unmarshal storage [ref-used] failed: %s", err)
+		ret = map[string]int64{}
+		return
+	}
+	return
+}
+
+func setRefUsed(used map[string]int64) (err error) {
+	dirPath := filepath.Join(util.DataDir, "storage")
+	if err = os.MkdirAll(dirPath, 0755); err != nil {
+		logging.LogErrorf("create storage [ref-used] dir failed: %s", err)
+		return
+	}
+
+	data, err := gulu.JSON.MarshalIndentJSON(used, "", "  ")
+	if err != nil {
+		logging.LogErrorf("marshal storage [ref-used] failed: %s", err)
+		return
+	}
+
+	dataPath := filepath.Join(dirPath, "ref-used.json")
+	err = filelock.WriteFile(dataPath, data)
+	if err != nil {
+		logging.LogErrorf("write storage [ref-used] failed: %s", err)
 		return
 	}
 	return

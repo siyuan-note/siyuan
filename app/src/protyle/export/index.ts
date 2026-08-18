@@ -11,8 +11,9 @@ import {getThemeMode, setInlineStyle} from "../../util/assets";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
-import {getScreenWidth, isInMobileApp, setStorageVal} from "../util/compatibility";
+import {getScreenWidth, isInMobileApp, saveExportFile, setStorageVal} from "../util/compatibility";
 import {getFrontend} from "../../util/functions";
+import {isEncryptedBox} from "../../util/pathName";
 
 const getPluginStyle = async () => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
@@ -33,6 +34,7 @@ const getIconScript = (servePath: string) => {
 export const saveExport = (option: IExportOptions) => {
     /// #if BROWSER
     if (["html", "htmlmd"].includes(option.type)) {
+        const startExport = () => {
         const msgId = showMessage(window.siyuan.languages.exporting, -1);
         // 浏览器环境：先调用 API 生成资源文件，再在前端生成完整的 HTML
         const url = option.type === "htmlmd" ? "/api/export/exportMdHTML" : "/api/export/exportHTML";
@@ -49,14 +51,22 @@ export const saveExport = (option: IExportOptions) => {
                 html: html,
                 name: exportResponse.data.name
             }, zipResponse => {
-                hideMessage(msgId);
                 if (zipResponse.code === -1) {
+                    hideMessage(msgId);
                     showMessage(window.siyuan.languages._kernel[14].replace("%s", zipResponse.msg), 0, "error");
                     return;
                 }
-                window.open(zipResponse.data.zip);
-                showMessage(window.siyuan.languages.exported);
+                // 与导出 .sy.zip/markdown.zip/图片一致，统一走 saveExportFile，以便移动端原生 App 调用 JSAndroid.saveExportFile 等接口保存到本地
+                saveExportFile(zipResponse.data.zip, msgId);
             });
+        });
+        };
+        fetchPost("/api/block/getBlockInfo", {id: option.id}, (response) => {
+            if (response.code === 0 && isEncryptedBox(response.data.box)) {
+                confirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, startExport);
+                return;
+            }
+            startExport();
         });
         return;
     }
@@ -88,6 +98,26 @@ export const saveExport = (option: IExportOptions) => {
         <span class="fn__space"></span>
         <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>
     </label>
+    <label class="fn__flex b3-label merge-heading-option${localData.mergeSubdocs ? "" : " fn__none"}">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.mergeDocHeadingMode}
+        </div>
+        <span class="fn__space"></span>
+        <select id="mergeDocHeadingMode" class="b3-select">
+            <option value="flat" ${localData.mergeDocHeadingMode === "flat" ? "selected" : ""}>${window.siyuan.languages.mergeDocHeadingFlat}</option>
+            <option value="tree" ${localData.mergeDocHeadingMode === "tree" ? "selected" : ""}>${window.siyuan.languages.mergeDocHeadingTree}</option>
+        </select>
+    </label>
+    <label class="fn__flex b3-label merge-heading-option${localData.mergeSubdocs ? "" : " fn__none"}">
+        <div class="fn__flex-1">
+            ${window.siyuan.languages.mergeContentHeadingMode}
+        </div>
+        <span class="fn__space"></span>
+        <select id="mergeContentHeadingMode" class="b3-select">
+            <option value="preserve" ${localData.mergeContentHeadingMode === "preserve" ? "selected" : ""}>${window.siyuan.languages.mergeContentHeadingPreserve}</option>
+            <option value="demote" ${localData.mergeContentHeadingMode === "demote" ? "selected" : ""}>${window.siyuan.languages.mergeContentHeadingDemote}</option>
+        </select>
+    </label>
 </div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
@@ -96,16 +126,29 @@ export const saveExport = (option: IExportOptions) => {
             width: "520px",
         });
         wordDialog.element.setAttribute("data-key", Constants.DIALOG_EXPORTWORD);
+        const mergeSubdocsElement = wordDialog.element.querySelector("#mergeSubdocs") as HTMLInputElement;
+        mergeSubdocsElement.addEventListener("change", () => {
+            wordDialog.element.querySelectorAll(".merge-heading-option").forEach((item) => {
+                item.classList.toggle("fn__none", !mergeSubdocsElement.checked);
+            });
+        });
         const btnsElement = wordDialog.element.querySelectorAll(".b3-button");
         btnsElement[0].addEventListener("click", () => {
             wordDialog.destroy();
         });
         btnsElement[1].addEventListener("click", () => {
             const removeAssets = (wordDialog.element.querySelector("#removeAssets") as HTMLInputElement).checked;
-            const mergeSubdocs = (wordDialog.element.querySelector("#mergeSubdocs") as HTMLInputElement).checked;
-            window.siyuan.storage[Constants.LOCAL_EXPORTWORD] = {removeAssets, mergeSubdocs};
+            const mergeSubdocs = mergeSubdocsElement.checked;
+            const mergeDocHeadingMode = (wordDialog.element.querySelector("#mergeDocHeadingMode") as HTMLSelectElement).value;
+            const mergeContentHeadingMode = (wordDialog.element.querySelector("#mergeContentHeadingMode") as HTMLSelectElement).value;
+            window.siyuan.storage[Constants.LOCAL_EXPORTWORD] = {
+                removeAssets,
+                mergeSubdocs,
+                mergeDocHeadingMode,
+                mergeContentHeadingMode,
+            };
             setStorageVal(Constants.LOCAL_EXPORTWORD, window.siyuan.storage[Constants.LOCAL_EXPORTWORD]);
-            getExportPath(option, removeAssets, mergeSubdocs);
+            getExportPath(option, removeAssets, mergeSubdocs, mergeDocHeadingMode, mergeContentHeadingMode);
             wordDialog.destroy();
         });
     } else {
@@ -173,7 +216,7 @@ const renderPDF = async (id: string) => {
         }
         
         #action {
-          width: 232px;
+          width: 280px;
           background-color: var(--b3-theme-background);
           padding: 12px 0;
           position: fixed;
@@ -192,16 +235,28 @@ const renderPDF = async (id: string) => {
             margin-left: 14px;
         }
         
+        #previewContainer {
+          position: fixed;
+          top: 0;
+          right: 280px;
+          bottom: 0;
+          left: 0;
+          overflow: auto;
+        }
+
         #preview {
           max-width: 800px;
           margin: 24px auto;
-          position: absolute;
-          right: 232px;
-          left: 0;
+          position: relative;
           min-height: calc(100% - 48px);
           box-sizing: border-box;
           background-color: var(--b3-theme-background);
           box-shadow: var(--b3-dialog-shadow);
+        }
+
+        .exporting #previewContainer {
+          position: inherit;
+          overflow: visible;
         }
         
         .exporting #preview {
@@ -236,9 +291,32 @@ const renderPDF = async (id: string) => {
         .b3-label:last-child {
             border-bottom: none;
         }
+
+        #mergeHeadingOptions .b3-label:last-child {
+            border-bottom: 1px solid var(--b3-theme-surface-lighter);
+        }
         
         #preview .render-node[data-subtype="plantuml"] object {
             max-width: 100%;
+        }
+
+        #preview a.pdf-embedded-asset {
+            position: relative;
+            padding-right: 1em !important;
+        }
+
+        #preview .pdf-embedded-asset__icon {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 1em;
+            height: 1em;
+            color: currentColor;
+            pointer-events: none;
+        }
+
+        .exporting #preview .pdf-embedded-asset__icon {
+            visibility: hidden;
         }
         ${await setInlineStyle(false, servePath)}
         ${await getPluginStyle()}
@@ -344,6 +422,28 @@ const renderPDF = async (id: string) => {
             <span class="fn__hr"></span>
             <input id="mergeSubdocs" class="b3-switch" type="checkbox" ${localData.mergeSubdocs ? "checked" : ""}>
         </label>
+        <div id="mergeHeadingOptions" class="${localData.mergeSubdocs ? "" : "fn__none"}">
+            <label class="b3-label">
+                <div>
+                    ${window.siyuan.languages.mergeDocHeadingMode}
+                </div>
+                <span class="fn__hr"></span>
+                <select class="b3-select" id="mergeDocHeadingMode">
+                    <option value="flat" ${localData.mergeDocHeadingMode === "flat" ? "selected" : ""}>${window.siyuan.languages.mergeDocHeadingFlat}</option>
+                    <option value="tree" ${localData.mergeDocHeadingMode === "tree" ? "selected" : ""}>${window.siyuan.languages.mergeDocHeadingTree}</option>
+                </select>
+            </label>
+            <label class="b3-label">
+                <div>
+                    ${window.siyuan.languages.mergeContentHeadingMode}
+                </div>
+                <span class="fn__hr"></span>
+                <select class="b3-select" id="mergeContentHeadingMode">
+                    <option value="preserve" ${localData.mergeContentHeadingMode === "preserve" ? "selected" : ""}>${window.siyuan.languages.mergeContentHeadingPreserve}</option>
+                    <option value="demote" ${localData.mergeContentHeadingMode === "demote" ? "selected" : ""}>${window.siyuan.languages.mergeContentHeadingDemote}</option>
+                </select>
+            </label>
+        </div>
         <label class="b3-label">
             <div>
                 ${window.siyuan.languages.export27}
@@ -366,38 +466,51 @@ const renderPDF = async (id: string) => {
       <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
     </div>
 </div>
-<div style="zoom:${localData.scale || 1}" id="preview">
-    <div class="fn__loading" style="left:0;height:100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>
+<div id="previewContainer">
+    <div style="zoom:${localData.scale || 1}" id="preview">
+        <div class="fn__loading" style="left:0;height:100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>
+    </div>
 </div>
 ${getIconScript(servePath)}
 <script src="${servePath}stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}stage/protyle/js/lute/lute.min.js?${Constants.SIYUAN_VERSION}"></script>    
 <script>
     const previewElement = document.getElementById('preview');
-    const fixBlockWidth = () => {
+    const fixBlockWidth = async () => {
         const isLandscape = document.querySelector("#landscape").checked;
         let width = 800
+        let height = 1131
         switch (document.querySelector("#action #pageSize").value) {
             case "A3":
-              width = isLandscape ? 1587.84 : 1122.24 
+              width = isLandscape ? 1587.84 : 1122.24
+              height = isLandscape ? 1122.24 : 1587.84
               break;
             case "A4":
               width = isLandscape ? 1122.24 : 793.92
+              height = isLandscape ? 793.92 : 1122.24
               break;
             case "A5":
               width = isLandscape ? 793.92 : 559.68
+              height = isLandscape ? 559.68 : 793.92
               break;
             case "Legal":
-              width = isLandscape ? 1344: 816 
+              width = isLandscape ? 1344: 816
+              height = isLandscape ? 816 : 1344
               break;
             case "Letter":
               width = isLandscape ? 1056 : 816
+              height = isLandscape ? 816 : 1056
               break;
             case "Tabloid":
               width = isLandscape ? 1632 : 1056
+              height = isLandscape ? 1056 : 1632
               break;
         }
-        width = width / parseFloat(document.querySelector("#scale").value);
+        const scale = parseFloat(document.querySelector("#scale").value);
+        width = width / scale;
+        height = (height -
+            (parseFloat(document.querySelector("#marginsTop").value) +
+                parseFloat(document.querySelector("#marginsBottom").value)) * 96) / scale;
         previewElement.style.width = width + "px";
         width = width - parseFloat(previewElement.style.paddingLeft) * 96 * 2;
         // 为保持代码块宽度一致，全部都进行宽度设定 https://github.com/siyuan-note/siyuan/issues/7692 
@@ -415,9 +528,9 @@ ${getIconScript(servePath)}
             item.removeAttribute('data-render');
         })
         previewElement.querySelectorAll('[data-type="NodeCodeBlock"][data-subtype="mermaid"] svg').forEach((item) => {
-            item.style.maxHeight = width * 1.414 + "px";
+            item.style.maxHeight = height + "px";
         })
-        Protyle.mathRender(previewElement, "${servePath}stage/protyle", true);
+        await Protyle.mathRender(previewElement, "${servePath}stage/protyle", true);
         previewElement.querySelectorAll("table").forEach(item => {
             if (item.clientWidth > item.parentElement.clientWidth) {
                 item.style.zoom = (item.parentElement.clientWidth / item.clientWidth).toFixed(2) - 0.01;
@@ -515,6 +628,8 @@ ${getIconScript(servePath)}
         id: "${id}",
         keepFold: ${localData.keepFold},
         merge: ${localData.mergeSubdocs},
+        mergeDocHeadingMode: "${localData.mergeDocHeadingMode}",
+        mergeContentHeadingMode: "${localData.mergeContentHeadingMode}",
     }, response => {
         if (response.code !== 0) {
             alert(response.msg)
@@ -565,9 +680,20 @@ ${getIconScript(servePath)}
             refreshPreview();
         });
         const mergeSubdocsElement = actionElement.querySelector('#mergeSubdocs');
+        const mergeHeadingOptionsElement = actionElement.querySelector('#mergeHeadingOptions');
+        const mergeDocHeadingModeElement = actionElement.querySelector('#mergeDocHeadingMode');
+        const mergeContentHeadingModeElement = actionElement.querySelector('#mergeContentHeadingMode');
         mergeSubdocsElement.addEventListener('change', () => {
+            mergeHeadingOptionsElement.classList.toggle('fn__none', !mergeSubdocsElement.checked);
             refreshPreview();
         });
+        mergeDocHeadingModeElement.addEventListener('change', () => {
+            refreshPreview();
+        });
+        mergeContentHeadingModeElement.addEventListener('change', () => {
+            refreshPreview();
+        });
+        const removeAssetsElement = actionElement.querySelector("#removeAssets");
         const  watermarkElement = actionElement.querySelector('#watermark');
         const refreshPreview = () => {
             previewElement.innerHTML = '<div class="fn__loading" style="left:0;height: 100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>'
@@ -575,6 +701,8 @@ ${getIconScript(servePath)}
                 id: "${id}",
                 keepFold: keepFoldElement.checked,
                 merge: mergeSubdocsElement.checked,
+                mergeDocHeadingMode: mergeDocHeadingModeElement.value,
+                mergeContentHeadingMode: mergeContentHeadingModeElement.value,
             }, response2 => {
                 if (response2.code !== 0) {
                     alert(response2.msg)
@@ -582,6 +710,7 @@ ${getIconScript(servePath)}
                 }
                 setPadding();
                 renderPreview(response2.data);
+                reserveEmbeddedAssetSpace(removeAssetsElement.checked);
             })
         };
 
@@ -643,17 +772,64 @@ ${getIconScript(servePath)}
                 pageSize,
                 keepFold: keepFoldElement.checked,
                 mergeSubdocs: mergeSubdocsElement.checked,
+                mergeDocHeadingMode: mergeDocHeadingModeElement.value,
+                mergeContentHeadingMode: mergeContentHeadingModeElement.value,
                 watermark: watermarkElement.checked,
-                removeAssets: actionElement.querySelector("#removeAssets").checked,
+                removeAssets: removeAssetsElement.checked,
                 paged: !unPagedPageSize,
                 rootId: "${id}",
                 rootTitle: response.data.name,
                 parentWindowId: ${currentWindowId},
             };
         };
-        actionElement.querySelector('.b3-button--text').addEventListener('click', () => {
+        const reserveEmbeddedAssetSpace = (enabled) => {
+            // 为内嵌附件注解预留空间，避免覆盖后续文本。
+            previewElement.querySelectorAll("a[href]").forEach((item) => {
+                const url = new URL(item.href);
+                const embedded = enabled && url.hostname === "127.0.0.1" && url.pathname.includes("/assets/");
+                item.classList.toggle("pdf-embedded-asset", embedded);
+                const iconElement = item.querySelector(".pdf-embedded-asset__icon");
+                if (embedded && !iconElement) {
+                    item.insertAdjacentHTML("beforeend", '<svg aria-hidden="true" class="pdf-embedded-asset__icon"><use xlink:href="#iconPaperclip"></use></svg>');
+                } else if (!embedded) {
+                    iconElement?.remove();
+                }
+            });
+        };
+        removeAssetsElement.addEventListener("change", () => {
+            reserveEmbeddedAssetSpace(removeAssetsElement.checked);
+        });
+        const waitForImages = () => Promise.all(Array.from(previewElement.querySelectorAll("img")).map((image) => {
+            image.loading = "eager";
+            if (image.complete) {
+                return Promise.resolve();
+            }
+            return new Promise((resolve) => {
+                const finish = () => {
+                    clearTimeout(timeout);
+                    image.removeEventListener("load", finish);
+                    image.removeEventListener("error", finish);
+                    resolve();
+                };
+                const timeout = setTimeout(finish, 30000);
+                image.addEventListener("load", finish, {once: true});
+                image.addEventListener("error", finish, {once: true});
+            });
+        }));
+        actionElement.querySelector('.b3-button--text').addEventListener('click', async () => {
             const {ipcRenderer}  = require("electron");
+            const result = await ipcRenderer.invoke("${Constants.SIYUAN_GET}", {
+                cmd: "showOpenDialog",
+                title: "${window.siyuan.languages.export} PDF",
+                properties: ["createDirectory", "openDirectory"],
+            });
+            if (result.canceled || result.filePaths.length === 0) {
+                return;
+            }
+            reserveEmbeddedAssetSpace(removeAssetsElement.checked);
+            await waitForImages();
             const isPaged = actionElement.querySelector("#paged").checked;
+            let exportConfig;
             if (!isPaged) {
                 const getPageSizeDimensions = () => {
                     // https://github.com/electron/electron/blob/3df3a6a736b93e0d69fa3b0c403b33f201287780/lib/browser/api/web-contents.ts#L89-L101
@@ -668,24 +844,27 @@ ${getIconScript(servePath)}
                     return pageSizes[actionElement.querySelector("#pageSize").value];
                 };
                 const previewHeight = Math.max(previewElement.scrollHeight / 96 - (parseFloat(document.querySelector("#marginsTop").value) || 0) - (parseFloat(document.querySelector("#marginsBottom").value) || 0), getPageSizeDimensions().height);
-                ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", buildExportConfig(actionElement.querySelector("#landscape").checked ? {
+                exportConfig = buildExportConfig(actionElement.querySelector("#landscape").checked ? {
                     height: getPageSizeDimensions().height,
                     width: previewHeight,
                 } : {
                     width: getPageSizeDimensions().width,
                     height: previewHeight,
-                }));
+                });
             } else {
-                ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", buildExportConfig());
+                exportConfig = buildExportConfig();
             }
+            exportConfig.filePaths = result.filePaths;
             document.body.classList.add("exporting");
             previewElement.style.zoom = "";
             previewElement.style.padding = "6px 0 0 0";
-            fixBlockWidth();
+            await fixBlockWidth();
             actionElement.remove();
+            ipcRenderer.send("${Constants.SIYUAN_EXPORT_PDF}", exportConfig);
         });
         setPadding();
         renderPreview(response.data);
+        reserveEmbeddedAssetSpace(removeAssetsElement.checked);
         window.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {
                 const {ipcRenderer}  = require("electron");
@@ -697,17 +876,30 @@ ${getIconScript(servePath)}
 </script>
 ${getSnippetJS()}
 </body></html>`;
-    fetchPost("/api/export/exportTempContent", {content: html}, (response) => {
+	    fetchPost("/api/export/exportTempContent", {content: html, id}, (response) => {
         ipcRenderer.send(Constants.SIYUAN_EXPORT_NEWWINDOW, response.data.url);
     });
 };
 
-const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubdocs?: boolean) => {
+const getExportPath = (
+    option: IExportOptions,
+    removeAssets?: boolean,
+    mergeSubdocs?: boolean,
+    mergeDocHeadingMode?: string,
+    mergeContentHeadingMode?: string,
+    confirmed = false,
+) => {
     fetchPost("/api/block/getBlockInfo", {
         id: option.id
     }, async (response) => {
         if (response.code === 3) {
             showMessage(response.msg);
+            return;
+        }
+        if (!confirmed && isEncryptedBox(response.data.box)) {
+            confirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, () => {
+                getExportPath(option, removeAssets, mergeSubdocs, mergeDocHeadingMode, mergeContentHeadingMode, true);
+            });
             return;
         }
         let exportType = "HTML (SiYuan)";
@@ -746,6 +938,8 @@ const getExportPath = (option: IExportOptions, removeAssets?: boolean, mergeSubd
                 pdf: option.type === "pdf",
                 removeAssets: removeAssets,
                 merge: mergeSubdocs,
+                mergeDocHeadingMode,
+                mergeContentHeadingMode,
                 savePath
             }, exportResponse => {
                 if (option.type === "word") {

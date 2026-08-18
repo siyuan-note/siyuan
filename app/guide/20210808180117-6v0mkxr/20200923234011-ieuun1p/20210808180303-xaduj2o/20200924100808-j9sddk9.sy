@@ -6,7 +6,7 @@
 		"id": "20200924100808-j9sddk9",
 		"title": "Import and Export",
 		"type": "doc",
-		"updated": "20220317224017"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220317223639-oaxmz7d",
-				"updated": "20220317223642"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -30,7 +30,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185728-as165rt",
-				"updated": "20220511185730"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -119,7 +119,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240426184519-mwc558q",
-				"updated": "20240426184519"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -187,7 +187,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ related switches."
+					"Data": " ​ related switches."
 				}
 			]
 		},
@@ -197,7 +197,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185726-nlnhhsh",
-				"updated": "20260614201131"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -211,12 +211,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220511185726-fsg9r0c",
-				"updated": "20220511185757"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "You can import and export data in "
+					"Data": "On both desktop and mobile, data can be imported and exported from "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -234,16 +234,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " on the desktop-end and "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "App"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " on the right sidebar on the mobile-end. The export here will completely copy and pack the "
+					"Data": ". This export copies and packages the complete "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -252,7 +243,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " folder into a zip archive."
+					"Data": " directory as a ZIP archive."
 				}
 			]
 		},
@@ -412,7 +403,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614201131-zgav44f",
-				"updated": "20260614201131"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -426,12 +417,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614201131-kkxt385",
-				"updated": "20260614201131"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": ".sy.zip is SiYuan's native document format for importing individual documents exported from other SiYuan workspaces. You can directly drag and drop .sy.zip files into the doc tree to complete the import. The imported document includes complete content, child documents, asset files, and block properties."
+					"Data": "A "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sy.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " file is SiYuan's native document format. Select the target notebook or document in the document tree, then use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Import"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "SiYuan .sy.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to choose the archive. The imported document retains its content, included subdocuments, assets, and block attributes."
 				}
 			]
 		},
@@ -544,7 +562,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223639-8217o1r",
-				"updated": "20220317224017"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -750,12 +768,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614201156-jt25t7h",
-				"updated": "20260614201157"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": ".sy.zip is SiYuan's native format. The exported file contains the complete content, child documents, asset files, and block properties of the document, suitable for migrating documents between workspaces or sharing with other SiYuan users."
+					"Data": "The "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sy.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " format preserves document content, assets, and block attributes. Whether subdocuments and related documents are included depends on the corresponding options in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Export"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

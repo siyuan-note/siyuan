@@ -6,7 +6,7 @@
 		"id": "20200922102318-oz84yu3",
 		"title": "主题",
 		"type": "doc",
-		"updated": "20260614110216"
+		"updated": "20260810230450"
 	},
 	"Children": [
 		{
@@ -111,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220806104349-3cpwtum",
-				"updated": "20260614110216"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -128,7 +128,7 @@
 			},
 			"Properties": {
 				"id": "20220806104355-9smwbwz",
-				"updated": "20230417141231"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -142,7 +142,7 @@
 					},
 					"Properties": {
 						"id": "20220806104408-dzqx5tq",
-						"updated": "20230417141231"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -150,12 +150,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220806104408-6buoa98",
-								"updated": "20230417141231"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "打开  "
+									"Data": "打开 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -164,7 +164,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -173,16 +173,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ ，点击 "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "代码片段设置"
+									"TextMarkTextContent": "代码片段"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​，选中 CSS 页签"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，选择 CSS 页签。"
 								}
 							]
 						}
@@ -648,7 +657,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225202158-ujxvje1",
-				"updated": "20230418093345"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -677,7 +686,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201225215903-j4268ow",
-				"updated": "20230418093422"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -698,7 +707,7 @@
 			},
 			"Properties": {
 				"id": "20201225215906-gvitxza",
-				"updated": "20230418094522"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -714,7 +723,7 @@
 					},
 					"Properties": {
 						"id": "20201225215955-syy5xzl",
-						"updated": "20230418094522"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -722,7 +731,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131160321-j0wwiky",
-								"updated": "20230418094522"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -736,16 +745,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "外观"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -754,7 +754,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -763,7 +763,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中在线浏览社区开发者贡献的主题"
+									"Data": " 中在线浏览社区开发者贡献的主题。"
 								}
 							]
 						}
@@ -1040,7 +1040,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201225202158-upmhxlh"
+				"id": "20201225202158-upmhxlh",
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -1067,7 +1068,7 @@
 			},
 			"Properties": {
 				"id": "20201225202158-gbr4pfn",
-				"updated": "20230821210751"
+				"updated": "20260804235500"
 			},
 			"Children": [
 				{
@@ -1183,7 +1184,7 @@
 					},
 					"Properties": {
 						"id": "20201225202158-cz8s9wp",
-						"updated": "20230821210751"
+						"updated": "20260804235500"
 					},
 					"Children": [
 						{
@@ -1191,7 +1192,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20201225202158-z2lern7",
-								"updated": "20230821210751"
+								"updated": "20260804235500"
 							},
 							"Children": [
 								{
@@ -1232,7 +1233,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 文件，具体示例请参考 github repo: siyuan-note/theme-sample"
+									"Data": "​ 文件，具体示例请参考 GitHub repo: siyuan-note/theme-sample"
 								}
 							]
 						}
@@ -1346,7 +1347,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201225202158-kmavboj"
+				"id": "20201225202158-kmavboj",
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1371,7 +1373,7 @@
 			},
 			"Properties": {
 				"id": "20201225202158-jnsfuj4",
-				"updated": "20201225202158"
+				"updated": "20260810230450"
 			},
 			"Children": [
 				{
@@ -1426,7 +1428,8 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20201225202158-cjlci55"
+						"id": "20201225202158-cjlci55",
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -1434,21 +1437,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131160321-mb1upgc",
-								"updated": "20210318104227"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "修改 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": ":root{...}"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 中的配色。⚠️ 不可删除官方中原有的变量项"
+									"Data": "自定义主题会继承内置主题变量，只需覆盖需要调整的变量；思源升级后应检查变量是否发生重命名或移除。"
 								}
 							]
 						}
@@ -1466,7 +1460,8 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20201225202158-1ege8ss"
+						"id": "20201225202158-1ege8ss",
+						"updated": "20260810230450"
 					},
 					"Children": [
 						{
@@ -1474,49 +1469,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131160321-kd1yoes",
-								"updated": "20210512172221"
+								"updated": "20260810230450"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "按照图中 1-4 步不断进行修改"
+									"Data": "使用开发者工具定位并调整样式：打开开发者工具，启用元素选择器并点击需要修改的界面元素，在 "
 								},
 								{
-									"Type": "NodeSoftBreak",
-									"Data": "\n"
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Elements"
 								},
 								{
-									"Type": "NodeImage",
-									"Children": [
-										{
-											"Type": "NodeBang",
-											"Data": "!"
-										},
-										{
-											"Type": "NodeOpenBracket",
-											"Data": "["
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "custom-theme1.png"
-										},
-										{
-											"Type": "NodeCloseBracket",
-											"Data": "]"
-										},
-										{
-											"Type": "NodeOpenParen",
-											"Data": "("
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "assets/custom-theme1-20210512172221-x541iq1.png"
-										},
-										{
-											"Type": "NodeCloseParen",
-											"Data": ")"
-										}
-									]
+									"Type": "NodeText",
+									"Data": " 面板中查看对应的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "HTML"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，然后在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Styles"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " 面板中调整样式"
 								}
 							]
 						}
@@ -1562,6 +1547,56 @@
 					]
 				},
 				{
+					"ID": "20260810212846-hqmlhsy",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260810212846-hqmlhsy",
+						"updated": "20260810222021"
+					},
+					"Children": [
+						{
+							"ID": "20260810212846-vmik7ig",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260810212846-vmik7ig",
+								"updated": "20260810222021"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在开发者工具的 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Network"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "（网络）页签中勾选 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Disable cache"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "（停用缓存）"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20201225202158-gfmyvql",
 					"Type": "NodeListItem",
 					"Data": "*",
@@ -1573,7 +1608,8 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20201225202158-gfmyvql"
+						"id": "20201225202158-gfmyvql",
+						"updated": "20260810215424"
 					},
 					"Children": [
 						{
@@ -1581,76 +1617,44 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131160321-nytjm59",
-								"updated": "20210512172239"
+								"updated": "20260810215424"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在 "
+									"Data": "内核通常会监听 theme.css 的修改并自动刷新；如果没有自动刷新，请使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Network"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 中勾选 "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Disable cache"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "应用"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 后运行 "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "window.location.reload()"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "维护"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 以查看最终效果"
+									"Data": " - "
 								},
 								{
-									"Type": "NodeSoftBreak",
-									"Data": "\n"
-								},
-								{
-									"Type": "NodeImage",
-									"Children": [
-										{
-											"Type": "NodeBang",
-											"Data": "!"
-										},
-										{
-											"Type": "NodeOpenBracket",
-											"Data": "["
-										},
-										{
-											"Type": "NodeLinkText",
-											"Data": "custom-theme2.png"
-										},
-										{
-											"Type": "NodeCloseBracket",
-											"Data": "]"
-										},
-										{
-											"Type": "NodeOpenParen",
-											"Data": "("
-										},
-										{
-											"Type": "NodeLinkDest",
-											"Data": "assets/custom-theme2-20210512172239-pcnzes0.png"
-										},
-										{
-											"Type": "NodeCloseParen",
-											"Data": ")"
-										}
-									]
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "刷新界面"
 								}
 							]
 						}
@@ -1664,7 +1668,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201225212401-ru1scjs",
-				"updated": "20201225212401"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1678,7 +1682,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114172704-ke0r60p",
-				"updated": "20230820185914"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1688,7 +1692,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "社区集市仓库"
 				},
 				{

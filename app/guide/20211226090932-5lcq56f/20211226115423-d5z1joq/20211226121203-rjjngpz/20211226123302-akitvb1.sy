@@ -6,7 +6,7 @@
 		"id": "20211226123302-akitvb1",
 		"title": "導入和導出",
 		"type": "doc",
-		"updated": "20260614201259"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220317223850-m1y2b2z",
-				"updated": "20250115150844"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -30,7 +30,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185953-vjaca7x",
-				"updated": "20250115150844"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -119,7 +119,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240426184604-4ldk0w4",
-				"updated": "20250115150844"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -187,7 +187,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 相關開關。"
+					"Data": " ​ 相關開關。"
 				}
 			]
 		},
@@ -197,7 +197,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185951-ewyusg9",
-				"updated": "20260614201247"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -211,12 +211,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220511185951-brwja06",
-				"updated": "20250115150840"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在桌面端 "
+					"Data": "桌面端和行動端均可在 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -225,7 +225,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -234,16 +234,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​、移動端右側欄 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "應用"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ 中可以進行資料導入和導出。這裡的導出會將 "
+					"Data": " 中進行資料導入和導出。該導出會完整複製 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -252,7 +243,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 文件夾完整複製並打包為 zip 壓縮檔。"
+					"Data": " 資料夾並打包為 ZIP 壓縮檔。"
 				}
 			]
 		},
@@ -408,7 +399,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614201247-kregnjm",
-				"updated": "20260614201247"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -422,12 +413,35 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614201247-kjiv7qf",
-				"updated": "20260614201247"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sy.zip"
+				},
+				{
 					"Type": "NodeText",
-					"Data": ".sy.zip 是思源原生文件格式，用於匯入從其他思源工作空間匯出的單個文件。支援直接拖拽 .sy.zip 檔案到文件面板中完成匯入，匯入後的文件包含完整的內容、子文件、資源檔案以及區塊屬性。"
+					"Data": " 是思源原生文檔格式。在文檔樹中選擇目標筆記本或文檔後，使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "導入"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "SiYuan .sy.zip"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 選擇壓縮檔。導入後的文檔會保留內容、設定中指定包含的子文檔、資源文件和區塊屬性。"
 				}
 			]
 		},
@@ -540,7 +554,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223850-k4b4s53",
-				"updated": "20260614201259"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -746,12 +760,35 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614201258-xrk25st",
-				"updated": "20260614201259"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".sy.zip"
+				},
+				{
 					"Type": "NodeText",
-					"Data": "其中 .sy.zip 是思源原生格式，匯出後包含文件及其子文件的完整內容、資源檔案和區塊屬性，適合在不同工作空間之間遷移文件或分享給其他思源使用者。"
+					"Data": " 格式會保留文檔內容、資源文件和區塊屬性。是否包含子文檔和關聯文檔取決於 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "導出"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中的對應選項。"
 				}
 			]
 		},

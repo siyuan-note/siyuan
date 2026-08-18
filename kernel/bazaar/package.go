@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -39,8 +39,21 @@ type Funding struct {
 	Custom         []string `json:"custom"`
 }
 
+// PackageRating 描述集市包的公开评分汇总。
+type PackageRating struct {
+	Average      float64  `json:"average"`
+	Count        int64    `json:"count"`
+	Distribution [5]int64 `json:"distribution"`
+}
+
+func clearBazaarPackageRating(pkg *Package) {
+	pkg.RatingAvailable = false
+	pkg.Rating = nil
+}
+
 // Package 描述了集市包元数据和传递给前端的其他信息。
-//   - 集市包新增元数据字段需要同步修改 bazaar 的工作流，参考 https://github.com/siyuan-note/bazaar/commit/aa36d0003139c52d8e767c6e18a635be006323e2
+//   - 集市包新增元数据字段需要同步修改 bazaar 的工作流，参考
+//     https://github.com/siyuan-note/bazaar/commit/aa36d0003139c52d8e767c6e18a635be006323e2
 type Package struct {
 	Author            string        `json:"author"`
 	URL               string        `json:"url"`
@@ -77,18 +90,58 @@ type Package struct {
 	HSize                   string `json:"hSize"`
 	InstallSize             int64  `json:"installSize"`
 	HInstallSize            string `json:"hInstallSize"`
+	InstallTime             int64  `json:"installTime"`
+	UpdateTime              int64  `json:"updateTime"`
 	HInstallDate            string `json:"hInstallDate"`
 	HUpdated                string `json:"hUpdated"`
 	Downloads               int    `json:"downloads"`
 	DisallowInstall         bool   `json:"disallowInstall"`
 	DisallowUpdate          bool   `json:"disallowUpdate"`
 	UpdateRequiredMinAppVer string `json:"updateRequiredMinAppVer,omitempty"` // 升级目标要求的最小应用版本
+	InvalidReason           string `json:"invalidReason,omitempty"`           // 本地安装包异常原因
+
+	RatingAvailable bool           `json:"ratingAvailable"`  // 在线集市公开评分是否可用
+	Rating          *PackageRating `json:"rating,omitempty"` // 在线集市公开评分
 
 	// 专用字段，nil 时不序列化
-	InstalledIncompatible *bool     `json:"installedIncompatible,omitempty"` // Plugin：本地已安装版本是否不兼容
-	BazaarIncompatible    *bool     `json:"bazaarIncompatible,omitempty"`    // Plugin：在线集市版本是否不兼容
+	InstalledIncompatible *bool     `json:"installedIncompatible,omitempty"` // 插件/主题：本地已安装版本是否不兼容
+	BazaarIncompatible    *bool     `json:"bazaarIncompatible,omitempty"`    // 插件/主题：在线集市版本是否不兼容
 	Enabled               *bool     `json:"enabled,omitempty"`               // Plugin：是否启用
+	UserDisabledInPublish *bool     `json:"userDisabledInPublish,omitempty"` // Plugin：是否由用户在发布服务中禁用
 	Modes                 *[]string `json:"modes,omitempty"`                 // Theme：支持的模式列表
+}
+
+const (
+	PackageInvalidReasonMissingManifest = "missing-manifest"
+	PackageInvalidReasonInvalidManifest = "invalid-manifest"
+	PackageInvalidReasonNameMismatch    = "name-mismatch"
+)
+
+var reservedPackageNames = map[string]bool{
+	"CON": true, "PRN": true, "AUX": true, "NUL": true,
+	"COM1": true, "COM2": true, "COM3": true, "COM4": true, "COM5": true,
+	"COM6": true, "COM7": true, "COM8": true, "COM9": true,
+	"LPT1": true, "LPT2": true, "LPT3": true, "LPT4": true, "LPT5": true,
+	"LPT6": true, "LPT7": true, "LPT8": true, "LPT9": true,
+}
+
+// IsValidPackageName 判断包名是否可以安全地用作跨平台目录名。
+func IsValidPackageName(packageName string) bool {
+	if len(packageName) < 1 || len(packageName) > 255 || packageName[0] == '.' || packageName[0] == ' ' ||
+		packageName[len(packageName)-1] == '.' || packageName[len(packageName)-1] == ' ' || strings.Contains(packageName, "..") {
+		return false
+	}
+	for _, char := range []byte(packageName) {
+		if char < 0x20 || char > 0x7E || strings.ContainsRune(`<>&'":/\|?*`, rune(char)) {
+			return false
+		}
+	}
+	return !reservedPackageNames[strings.ToUpper(packageName)]
+}
+
+// IsValidInstalledPackage 判断本地集市包的清单名是否与安装目录完全一致。
+func IsValidInstalledPackage(pkg *Package, dirName string) bool {
+	return pkg != nil && pkg.Name == dirName && IsValidPackageName(pkg.Name)
 }
 
 type StageRepo struct {
@@ -195,14 +248,39 @@ func getPreferredFunding(funding *Funding) string {
 	if v := normalizeFundingURL(funding.GitHub, "https://github.com/sponsors/"); "" != v {
 		return v
 	}
-	if 0 < len(funding.Custom) {
-		v := funding.Custom[0]
-		if strings.HasPrefix(v, "https://") || strings.HasPrefix(v, "http://") || strings.HasPrefix(v, "mailto:") {
+	for _, v := range funding.Custom {
+		if !unsafeFundingURI(v) && "" != strings.TrimSpace(v) {
 			return v
 		}
-		return ""
 	}
 	return ""
+}
+
+// unsafeFundingURI 判断自定义赞助信息是否包含危险或不受支持的 URI 协议。
+func unsafeFundingURI(s string) bool {
+	s = strings.TrimSpace(strings.ToLower(s))
+	if "" == s || strings.HasPrefix(s, "https://") || strings.HasPrefix(s, "http://") || strings.HasPrefix(s, "mailto:") {
+		return false
+	}
+
+	i := strings.IndexByte(s, ':')
+	if i <= 0 {
+		return false
+	}
+	scheme := s[:i]
+	for _, r := range scheme {
+		if (r < 'a' || r > 'z') && (r < '0' || r > '9') && r != '+' && r != '-' && r != '.' {
+			return false
+		}
+	}
+	if scheme[0] < 'a' || scheme[0] > 'z' {
+		return false
+	}
+	switch scheme {
+	case "javascript", "data", "file", "vbscript", "blob":
+		return true
+	}
+	return strings.HasPrefix(s[i:], "://")
 }
 
 func normalizeFundingURL(s, base string) string {
@@ -235,8 +313,8 @@ func getSearchKeywords(query string) (ret []string) {
 	if "" == query {
 		return
 	}
-	keywords := strings.Split(query, " ")
-	for _, k := range keywords {
+	keywords := strings.SplitSeq(query, " ")
+	for k := range keywords {
 		if "" != k {
 			ret = append(ret, strings.ToLower(k))
 		}

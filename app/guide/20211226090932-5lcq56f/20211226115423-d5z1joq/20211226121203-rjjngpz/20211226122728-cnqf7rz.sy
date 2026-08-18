@@ -4,9 +4,9 @@
 	"Type": "NodeDocument",
 	"Properties": {
 		"id": "20211226122728-cnqf7rz",
-		"title": "超連結",
+		"title": "區塊超連結",
 		"type": "doc",
-		"updated": "20250115153431"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -53,7 +53,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122740-42passj",
-				"updated": "20211226152057"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -67,7 +67,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226122740-4qaa4jj",
-				"updated": "20211226122740"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -77,7 +77,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "：直接打開內容塊，需要該塊所在筆記本已經處於打開狀態。"
+					"Data": "：直接打開內容區塊，需要該區塊所在筆記本已經處於打開狀態。"
 				}
 			]
 		},
@@ -86,12 +86,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220312232908-01dtfft",
-				"updated": "20220312232908"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "加入查詢字符串參數 "
+					"Data": "支援的查詢參數包括："
 				},
 				{
 					"Type": "NodeTextMark",
@@ -100,16 +100,52 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " （"
+					"Data": " 表示聚焦開啟，"
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "siyuan://blocks/{id}?focus=1"
+					"TextMarkTextContent": "fullscreen=1"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "）表示聚焦打開。"
+					"Data": " 表示全螢幕開啟。資料庫條目超連結還可包含 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "avItemID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "avViewID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "avGroupID"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "，這些參數通常由 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "複製條目超連結"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 自動生成。"
 				}
 			]
 		},
@@ -119,7 +155,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122740-u3u7oza",
-				"updated": "20250115153431"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -134,7 +170,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226122740-ndxef8x",
-				"updated": "20250115153431"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -416,7 +452,7 @@
 					},
 					"Properties": {
 						"id": "20211226122740-32793j4",
-						"updated": "20250115153431"
+						"updated": "20260803165036"
 					},
 					"Children": [
 						{
@@ -424,17 +460,17 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226122740-0ub46as",
-								"updated": "20250115153431"
+								"updated": "20260803165036"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "塊標菜單"
+									"TextMarkTextContent": "區塊標菜單"
 								},
 								{
 									"Type": "NodeText",
@@ -452,11 +488,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "複製塊超連結"
+									"TextMarkTextContent": "複製區塊超連結"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": " ​"
 								}
 							]
 						}

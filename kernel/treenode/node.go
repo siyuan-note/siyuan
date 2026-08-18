@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -66,43 +66,47 @@ func GetEmbedBlockRef(embedNode *ast.Node) (blockRefID string) {
 		return
 	}
 
-	stmt := scriptNode.TokensStr()
+	return GetEmbedBlockRefID(scriptNode.TokensStr())
+}
+
+func GetEmbedBlockRefID(stmt string) (blockRefID string) {
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if err != nil {
 		return
 	}
 
-	switch parsedStmt.(type) {
-	case *sqlparser.Select:
-		slct := parsedStmt.(*sqlparser.Select)
-		if nil == slct.Where || nil == slct.Where.Expr {
-			return
-		}
+	slct, ok := parsedStmt.(*sqlparser.Select)
+	if !ok || nil == slct.Where || nil == slct.Where.Expr {
+		return
+	}
 
-		switch slct.Where.Expr.(type) {
-		case *sqlparser.ComparisonExpr: // WHERE id = '20060102150405-1a2b3c4'
-			comp := slct.Where.Expr.(*sqlparser.ComparisonExpr)
-			switch comp.Left.(type) {
-			case *sqlparser.ColName:
-				col := comp.Left.(*sqlparser.ColName)
-				if nil == col || "id" != col.Name.Lowered() {
-					return
-				}
-			}
-			switch comp.Right.(type) {
-			case *sqlparser.SQLVal:
-				val := comp.Right.(*sqlparser.SQLVal)
-				if nil == val || sqlparser.StrVal != val.Type {
-					return
-				}
-
-				idVal := string(val.Val)
-				if !ast.IsNodeIDPattern(idVal) {
-					return
-				}
-				blockRefID = idVal
-			}
+	expr := slct.Where.Expr
+	for {
+		paren, isParen := expr.(*sqlparser.ParenExpr)
+		if !isParen {
+			break
 		}
+		expr = paren.Expr
+	}
+
+	comp, ok := expr.(*sqlparser.ComparisonExpr) // 仅匹配 WHERE id = '20060102150405-1a2b3c4'
+	if !ok || sqlparser.EqualStr != comp.Operator {
+		return
+	}
+
+	col, ok := comp.Left.(*sqlparser.ColName)
+	if !ok || nil == col || "id" != col.Name.Lowered() {
+		return
+	}
+
+	val, ok := comp.Right.(*sqlparser.SQLVal)
+	if !ok || nil == val || sqlparser.StrVal != val.Type {
+		return
+	}
+
+	idVal := string(val.Val)
+	if ast.IsNodeIDPattern(idVal) {
+		blockRefID = idVal
 	}
 	return
 }
@@ -196,9 +200,9 @@ func IsNodeOCRed(node *ast.Node) (ret bool) {
 func GetNodeSrcTokens(n *ast.Node) (ret string) {
 	if index := bytes.Index(n.Tokens, []byte("src=\"")); 0 < index {
 		src := n.Tokens[index+len("src=\""):]
-		if index = bytes.Index(src, []byte("\"")); 0 < index {
-			src = src[:bytes.Index(src, []byte("\""))]
-			ret = strings.TrimSpace(string(src))
+		if before, _, ok := bytes.Cut(src, []byte("\"")); ok {
+			// src 为空时闭合引号紧随其后，closeQuote 为 0 也是合法情况
+			ret = strings.TrimSpace(string(before))
 			return
 		}
 
@@ -228,7 +232,7 @@ func CountBlockNodes(node *ast.Node) (ret int) {
 			return ast.WalkContinue
 		}
 
-		if "1" == n.IALAttr("fold") {
+		if IsSelfFolded(n) {
 			ret++
 			return ast.WalkSkipChildren
 		}
@@ -359,6 +363,9 @@ func GetDocTitleImgPath(root *ast.Node) (ret string) {
 
 	start := strings.Index(titleImg, background) + len(background)
 	end := strings.LastIndex(titleImg, ")")
+	if end < start {
+		return
+	}
 	ret = titleImg[start:end]
 	ret = strings.TrimPrefix(ret, "\"")
 	ret = strings.TrimPrefix(ret, "'")
@@ -452,6 +459,10 @@ func SubTypeAbbr(n *ast.Node) string {
 
 var DynamicRefTexts = sync.Map{}
 
+func dynamicRefTextsKey(defBlockID, boxID string) string {
+	return boxID + "\x00" + defBlockID
+}
+
 func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
 	if !IsBlockRef(blockRef) {
 		return
@@ -474,7 +485,38 @@ func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
 	blockRef.TextMarkTextContent = refText
 
 	// 偶发编辑文档标题后引用处的动态锚文本不更新 https://github.com/siyuan-note/siyuan/issues/5891
-	DynamicRefTexts.Store(blockRef.TextMarkBlockRefID, refText)
+	defID := blockRef.TextMarkBlockRefID
+	DynamicRefTexts.Store(defID, refText)
+	// 同时以 box-aware key 存储（如果节点有 box 上下文）
+	if blockRef.Box != "" {
+		DynamicRefTexts.Store(dynamicRefTextsKey(defID, blockRef.Box), refText)
+	}
+}
+
+func GetDynamicRefText(defBlockID, boxID string) string {
+	if boxID != "" {
+		if v, ok := DynamicRefTexts.Load(dynamicRefTextsKey(defBlockID, boxID)); ok {
+			return v.(string)
+		}
+	}
+	// 回退到无 boxID 的旧 key（兼容旧数据/无 box 上下文的调用）
+	if v, ok := DynamicRefTexts.Load(defBlockID); ok {
+		return v.(string)
+	}
+	return ""
+}
+
+// RemoveDynamicRefTexts 删除指定 box 的所有动态引用锚文本缓存。
+func RemoveDynamicRefTexts(boxID string) {
+	prefix := boxID + "\x00"
+	DynamicRefTexts.Range(func(k, _ any) bool {
+		if key, ok := k.(string); ok {
+			if strings.HasPrefix(key, prefix) {
+				DynamicRefTexts.Delete(k)
+			}
+		}
+		return true
+	})
 }
 
 func IsChartCodeBlockCode(code *ast.Node) bool {

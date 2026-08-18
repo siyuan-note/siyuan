@@ -6,7 +6,7 @@
 		"id": "20260613211020-87z3rss",
 		"title": "内容统计",
 		"type": "doc",
-		"updated": "20260613211912"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613211910-dnwtgp6",
-				"updated": "20260613211910"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -29,12 +29,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613211910-hlp90d0",
-				"updated": "20260613211910"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "打开文档后，可以在编辑器底部状态栏和文档详情菜单中查看当前文档的统计信息。"
+					"Data": "在桌面端打开文档后，可以在编辑器底部状态栏和文档详情菜单中查看当前文档的统计信息。"
 				}
 			]
 		},
@@ -201,7 +201,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613211910-4ymndg5",
-				"updated": "20260613211910"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613211910-oilvssw",
-				"updated": "20260613211910"
+				"updated": "20260803160439"
 			},
 			"Children": [
 				{
@@ -224,7 +224,7 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "︙"
 				},
 				{

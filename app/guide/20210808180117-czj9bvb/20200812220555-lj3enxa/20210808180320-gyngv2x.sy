@@ -7,7 +7,7 @@
 		"id": "20210808180320-gyngv2x",
 		"title": "搜索进阶",
 		"type": "doc",
-		"updated": "20260613193351"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193351-4der7qg",
-				"updated": "20260613193351"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -59,12 +59,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193351-wl9s0lb",
-				"updated": "20260613193351"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "可在 设置 - 搜索 - 区分大小写 中配置。默认关闭，即搜索 "
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "区分大小写"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中配置。默认关闭，即搜索 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -92,7 +119,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193351-ficr182",
-				"updated": "20260613193351"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -106,12 +133,39 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260613193351-bmbm91y",
-				"updated": "20260613193351"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "可在 设置 - 搜索 - 区分繁简 中配置。默认开启，即搜索\"经济\"不会匹配\"經濟\"。关闭后搜索\"经济\"将同时匹配\"经济\"和\"經濟\"。切换该选项后需等待索引重建完成方可生效。"
+					"Data": "可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "搜索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "区分繁简"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中配置。默认开启，即搜索\"经济\"不会匹配\"經濟\"。关闭后搜索\"经济\"将同时匹配\"经济\"和\"經濟\"。切换该选项后需等待索引重建完成方可生效。"
 				}
 			]
 		},
@@ -121,7 +175,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260613193351-plms286",
-				"updated": "20260613193351"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -150,7 +204,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613193351-ucgzev5",
-				"updated": "20260613193351"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -162,7 +216,7 @@
 					},
 					"Properties": {
 						"id": "20260613193351-o9uponf",
-						"updated": "20260613193351"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -170,7 +224,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193351-0teytuj",
-								"updated": "20260613193351"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -184,8 +238,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+P"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "P"
 								},
 								{
 									"Type": "NodeText",
@@ -337,7 +400,7 @@
 					},
 					"Properties": {
 						"id": "20260613193351-2ykewgm",
-						"updated": "20260613193351"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -345,7 +408,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260613193351-0iq5ns5",
-								"updated": "20260613193351"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -359,8 +422,17 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "Ctrl+Z"
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Z"
 								},
 								{
 									"Type": "NodeText",

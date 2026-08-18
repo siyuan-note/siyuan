@@ -4,7 +4,7 @@ import {bindCardEvent, genCardHTML} from "./openCard";
 import {fetchPost} from "../util/fetch";
 import {Protyle} from "../protyle";
 import {setPanelFocus} from "../layout/util";
-import {App} from "../index";
+import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
 
 export const newCardModel = (options: {

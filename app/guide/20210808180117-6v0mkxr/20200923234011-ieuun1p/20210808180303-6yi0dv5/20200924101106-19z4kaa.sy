@@ -6,7 +6,7 @@
 		"id": "20200924101106-19z4kaa",
 		"title": "What is a Content Block",
 		"type": "doc",
-		"updated": "20260426180016"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -139,7 +139,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091535-sbufc1h"
+				"id": "20210104091535-sbufc1h",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -157,26 +158,23 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091535-2ybzqz1",
-				"updated": "20220623201418"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "A document is a combination of some content blocks, and the content block is the basic unit. This is like Lego bricks, which can be combined using different basic modules. "
+					"Data": "A document is composed of content blocks. Some content blocks can contain other blocks and are therefore called container blocks. For the complete list and containment rules, see "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "Note"
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20200924101225-k254i8g",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Content Block Type"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ": the document itself is also a kind of content block. More precisely, the three content blocks of document block, list block, and block reference block are container blocks, and they can contain any other types of content blocks. "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "tag",
-					"TextMarkTextContent": "Content Block/Combine"
+					"Data": "."
 				}
 			]
 		},
@@ -210,16 +208,12 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210118104710-tmyyac4",
-				"updated": "20260426180016"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
-					"Type": "NodeHeadingC8hMarker",
-					"Data": "## "
-				},
-				{
 					"Type": "NodeText",
-					"Data": "Naming and memo"
+					"Data": "Names, aliases, and memos"
 				}
 			]
 		},
@@ -253,12 +247,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210118104710-2sb91b3",
-				"updated": "20260426180016"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After opening the options for displaying bookmarks, naming, and alias identification in the "
+					"Data": "Enable "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -267,7 +261,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -276,7 +270,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​, the named content block will be displayed with a frame in the editor. If you name and memo the document block, when the mouse is hovering over the doc in the document panel, the relevant naming and memo of the document will appear."
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Content block corner icon"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to display names, aliases, and memos in the editor. When a document block has a name or memo, hovering over it in the document tree displays that information."
 				}
 			]
 		},

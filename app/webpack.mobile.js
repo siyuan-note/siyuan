@@ -55,6 +55,9 @@ module.exports = (env, argv) => {
                             loader: "esbuild-loader",
                             options: {
                                 target: "es6",
+                                supported: {
+                                    "import-meta": true,
+                                },
                                 sourcemap: argv.mode !== "production",
                             }
                         },

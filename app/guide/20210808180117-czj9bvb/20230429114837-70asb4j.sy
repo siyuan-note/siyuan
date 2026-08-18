@@ -7,7 +7,7 @@
 		"id": "20230429114837-70asb4j",
 		"title": "术语表",
 		"type": "doc",
-		"updated": "20260614111125"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -94,7 +94,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230429114837-ua8g2lw",
-				"updated": "20230428204250"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -592,7 +592,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111005-6sdm2sp",
-				"updated": "20260614111005"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
@@ -634,12 +634,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111005-4emt0wz",
-				"updated": "20260614111005"
+				"updated": "20260803163243"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，虚拟引用基于内容块的命名、别名和锚文本进行自动探测，在编辑器中以虚线下划线标识。鼠标悬浮可预览对应的内容块，点击可转换为正式的块引用。可在 [设置 - 编辑器 - 虚拟引用] 中开启或关闭。"
+					"Data": "在思源中，虚拟引用基于内容块的命名、别名和锚文本进行自动探测，在编辑器中以虚线下划线标识。鼠标悬浮可预览对应的内容块，点击可转换为正式的块引用。可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "编辑器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "双向链接"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "虚拟引用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中开启或关闭。"
 				}
 			]
 		},
@@ -1189,7 +1225,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111026-m6i3oiu",
-				"updated": "20260614111026"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1231,12 +1267,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111026-uvaw8ee",
-				"updated": "20260614111026"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在思源中，集市是浏览和安装社区扩展的入口，包括主题、图标、插件、挂件和模板五种类型。用户可直接在应用内搜索、安装和更新。"
+					"Data": "在思源中，集市是浏览和安装社区扩展的入口，包括插件、主题、图标、模板和挂件。用户可直接在应用内搜索、安装和更新。"
 				}
 			]
 		},
@@ -1360,7 +1396,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260614111026-6d10qhl",
-				"updated": "20260614111026"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1402,7 +1438,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614111026-l60fd37",
-				"updated": "20260614111026"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1411,8 +1447,26 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "Ctrl+Shift+P"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "P"
 				},
 				{
 					"Type": "NodeText",

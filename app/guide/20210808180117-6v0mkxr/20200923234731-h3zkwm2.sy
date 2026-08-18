@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20250518103440"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -442,7 +442,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220808181753-3ligpvz",
-				"updated": "20250518103440"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -510,7 +510,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220619172044-z4myy48",
-				"updated": "20220619172044"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -522,7 +522,7 @@
 					},
 					"Properties": {
 						"id": "20220619172044-451fqpf",
-						"updated": "20220619172044"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -530,7 +530,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619172044-bx4v3iz",
-								"updated": "20220619172044"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
@@ -562,7 +562,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -586,7 +586,7 @@
 					},
 					"Properties": {
 						"id": "20220619172044-r6xfdvm",
-						"updated": "20220619172044"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -594,7 +594,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220619172044-ccusmko",
-								"updated": "20220619172044"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
@@ -626,7 +626,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ / "
+									"Data": " / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -692,7 +692,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220909100946-x94gyft",
-				"updated": "20220909100946"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -707,7 +707,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220909100946-nieof3y",
-				"updated": "20220909101032"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -747,7 +747,7 @@
 					},
 					"Properties": {
 						"id": "20220909100946-ej9yi4j",
-						"updated": "20220909101032"
+						"updated": "20260803171606"
 					},
 					"Children": [
 						{
@@ -755,7 +755,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220909100946-n3d5619",
-								"updated": "20220909101032"
+								"updated": "20260803171606"
 							},
 							"Children": [
 								{
@@ -828,7 +828,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220909100946-9eyc3uh",
-				"updated": "20230820182932"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -889,7 +889,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501231348-sx3l5qp",
-				"updated": "20220501231357"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -903,21 +903,161 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220501231348-bfslmf5",
-				"updated": "20220501231419"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The first sub-block under the list item is the block icon omitted. You can move the cursor into this block and trigger its block menu with "
+					"Data": "Move the caret into the target block and press "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+/"
+					"TextMarkTextContent": "Shift"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " ."
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " repeatedly to select the block. Then use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to open the block menu; on macOS, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "⌘"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-a1s2e3n",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260807094000-a1s2e3n",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Why are assets retained after I delete images or files from a document?"
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqen01",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqen01",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Images and files inserted into a document are references to assets. Deleting content from a document removes only the reference at that location, not the corresponding asset, because the same asset may also be referenced by other documents, databases, document title images, or HTML."
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqen02",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqen02",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Determining whether an asset is completely unused requires scanning the entire workspace. Performing this check every time a reference is deleted would affect editing performance. Automatically deleting assets would also make undo and multi-device synchronization unreliable and could cause accidental data loss. Therefore, SiYuan does not automatically delete assets when content references are removed and does not provide an option to enable this behavior."
+				}
+			]
+		},
+		{
+			"ID": "20260807094000-faqen03",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260807094000-faqen03",
+				"updated": "20260807094000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After confirming that these files are no longer needed, review and clean them in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Unreferenced assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Cleanup operations are recorded in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210615213222-vs5tzbd",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Data history"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". If an asset is deleted by mistake, select Assets in Data History and roll it back."
 				}
 			]
 		},
@@ -1289,7 +1429,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20230805231614-vqn28eh",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "Member\u0026apos;s privileges"
+					"TextMarkTextContent": "Member&apos;s privileges"
 				},
 				{
 					"Type": "NodeText",

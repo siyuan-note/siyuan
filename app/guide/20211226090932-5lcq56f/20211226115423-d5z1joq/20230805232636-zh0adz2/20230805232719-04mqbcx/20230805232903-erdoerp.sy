@@ -6,7 +6,7 @@
 		"id": "20230805232903-erdoerp",
 		"title": "對接第三方雲端存儲",
 		"type": "doc",
-		"updated": "20260614133503"
+		"updated": "20260803163402"
 	},
 	"Children": [
 		{
@@ -333,7 +333,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260614133445-cca54fs",
-				"updated": "20260614133503"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -347,12 +347,48 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260614133445-uinovva",
-				"updated": "20260614133445"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在 [設定 - 帳號與同步 - 雲端存儲服務提供商] 中進行選擇和設定，目前已經支援："
+					"Data": "在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "帳號與同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "同步"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "雲端存儲服務提供商"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " ​ 中進行選擇和設定，目前已經支援："
 				}
 			]
 		},

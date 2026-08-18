@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -45,8 +45,9 @@ var virtualBlockRefCache, _ = ristretto.NewCache(&ristretto.Config{
 	BufferItems: 64,
 })
 
-func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
-	val, ok := virtualBlockRefCache.Get(root.ID)
+func getBlockVirtualRefKeywords(root *ast.Node, boxID string) (ret []string) {
+	key := boxID + "\x00" + root.ID
+	val, ok := virtualBlockRefCache.Get(key)
 	if !ok {
 		buf := bytes.Buffer{}
 		ast.Walk(root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -60,15 +61,15 @@ func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
 			return ast.WalkContinue
 		})
 		content := buf.String()
-		ret = putBlockVirtualRefKeywords(content, root)
+		ret = putBlockVirtualRefKeywords(content, root, boxID)
 		return
 	}
 	ret = val.([]string)
 	return
 }
 
-func putBlockVirtualRefKeywords(blockContent string, root *ast.Node) (ret []string) {
-	keywords := getVirtualRefKeywords(root)
+func putBlockVirtualRefKeywords(blockContent string, root *ast.Node, boxID string) (ret []string) {
+	keywords := getVirtualRefKeywords(root, boxID)
 	if 1 > len(keywords) {
 		return
 	}
@@ -98,7 +99,8 @@ func putBlockVirtualRefKeywords(blockContent string, root *ast.Node) (ret []stri
 	}
 
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	virtualBlockRefCache.SetWithTTL(root.ID, ret, 1, 10*time.Minute)
+	key := boxID + "\x00" + root.ID
+	virtualBlockRefCache.SetWithTTL(key, ret, 1, 10*time.Minute)
 	return
 }
 
@@ -111,6 +113,9 @@ func CacheVirtualBlockRefJob() {
 
 func ResetVirtualBlockRefCache() {
 	virtualBlockRefCache.Clear()
+	if nil == Conf {
+		return
+	}
 	if !Conf.Editor.VirtualBlockRef {
 		return
 	}
@@ -119,6 +124,10 @@ func ResetVirtualBlockRefCache() {
 	refSearchIgnoreLines := getRefSearchIgnoreLines()
 	keywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines)
 	virtualBlockRefCache.Set("virtual_ref", keywords, 1)
+	for _, boxID := range treenode.GetOpenedEncryptedBoxIDs() {
+		boxKeywords := sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias, Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxID)
+		virtualBlockRefCache.Set(boxID+"\x00virtual_ref", boxKeywords, 1)
+	}
 }
 
 // addNewKeywords 将新关键字添加到虚拟引用关键字列表中，如果不存在则追加，保留空白字符
@@ -209,8 +218,8 @@ func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeyword
 		return false
 	}
 
-	newContent := markReplaceSpanWithSplit(content, virtualBlockRefKeywords, search.GetMarkSpanStart(search.VirtualBlockRefDataType), search.GetMarkSpanEnd())
-	if content != newContent {
+	newContent, matched := markReplaceSpanWithSplit(content, virtualBlockRefKeywords, search.GetMarkSpanStart(search.VirtualBlockRefDataType), search.GetMarkSpanEnd())
+	if matched {
 		// 虚拟引用排除命中自身块命名和别名的情况 https://github.com/siyuan-note/siyuan/issues/3185
 		var blockKeys []string
 		if name := parentBlock.IALAttr("name"); "" != name {
@@ -220,7 +229,7 @@ func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeyword
 			blockKeys = append(blockKeys, alias)
 		}
 		if 0 < len(blockKeys) {
-			keys := gulu.Str.SubstringsBetween(newContent, search.GetMarkSpanStart(search.VirtualBlockRefDataType), search.GetMarkSpanEnd())
+			keys := getMarkedTextContents(newContent, search.GetMarkSpanStart(search.VirtualBlockRefDataType), search.GetMarkSpanEnd())
 			for _, k := range keys {
 				if gulu.Str.Contains(k, blockKeys) {
 					return true
@@ -267,13 +276,23 @@ func parseKeywords(keywordsStr string) (keywords []string) {
 	return
 }
 
-func getVirtualRefKeywords(root *ast.Node) (ret []string) {
+func getVirtualRefKeywords(root *ast.Node, boxIDs ...string) (ret []string) {
 	if !Conf.Editor.VirtualBlockRef {
 		return
 	}
 
-	if val, ok := virtualBlockRefCache.Get("virtual_ref"); ok {
+	key := "virtual_ref"
+	if len(boxIDs) > 0 && boxIDs[0] != "" {
+		key = boxIDs[0] + "\x00virtual_ref"
+	}
+	if val, ok := virtualBlockRefCache.Get(key); ok {
 		ret = val.([]string)
+	} else {
+		searchIgnoreLines := getSearchIgnoreLines()
+		refSearchIgnoreLines := getRefSearchIgnoreLines()
+		ret = sql.QueryVirtualRefKeywords(Conf.Search.VirtualRefName, Conf.Search.VirtualRefAlias,
+			Conf.Search.VirtualRefAnchor, Conf.Search.VirtualRefDoc, searchIgnoreLines, refSearchIgnoreLines, boxIDs...)
+		virtualBlockRefCache.Set(key, ret, 1)
 	}
 
 	includes := parseKeywords(Conf.Editor.VirtualBlockRefInclude)
@@ -320,7 +339,7 @@ func getVirtualRefKeywords(root *ast.Node) (ret []string) {
 		ret = gulu.Str.ExcludeElem(ret, []string{name})
 	}
 	if alias := root.IALAttr("alias"); "" != alias {
-		for _, a := range strings.Split(alias, ",") {
+		for a := range strings.SplitSeq(alias, ",") {
 			ret = gulu.Str.ExcludeElem(ret, []string{a})
 		}
 	}

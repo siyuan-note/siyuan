@@ -8,17 +8,17 @@
 
 ## NPM 依赖
 
-安装 pnpm：`npm install -g pnpm@11.9.0`
+安装 pnpm：`npm install -g pnpm@11.18.0`
 
 <details>
 <summary>适用于中国大陆</summary>
 
 设置 Electron 镜像环境变量并安装 Electron：
 
-* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@42.5.0 -D`
+* macOS/Linux：`ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@42.9.2 -D`
 * Windows：
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@42.5.0 -D`
+  * `pnpm install electron@42.9.2 -D`
 
 NPM 镜像：
 
@@ -28,7 +28,7 @@ NPM 镜像：
 
 进入 app 文件夹执行：
 
-* `pnpm install electron@42.5.0 -D`
+* `pnpm install electron@42.9.2 -D`
 * `pnpm run install:electron`
 * `pnpm run dev`
 * `pnpm run start`
@@ -41,12 +41,16 @@ NPM 镜像：
 
 1. 安装最新版 [golang](https://go.dev/)
 2. 打开 CGO 支持，即配置环境变量 `CGO_ENABLED=1`
+3. Windows 下需将 `go env GOBIN` 输出的目录添加到 `PATH`；如果输出为空，则添加 `go env GOPATH` 目录下的 `bin` 子目录
 
 ### 桌面端
 
 * `cd kernel`
-* Windows: `go build -tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
-* Linux/macOS: `go build -tags "fts5" -o "../app/kernel/SiYuan-Kernel"`
+* Windows：
+  * `go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest`
+  * `goversioninfo -platform-specific=true -icon=resource/icon.ico -manifest=resource/goversioninfo.exe.manifest`
+  * `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel.exe"`
+* Linux/macOS: `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel"`
 * `cd ../app/kernel`
 * Windows: `./SiYuan-Kernel.exe serve --mode=dev`
 * Linux/macOS: `./SiYuan-Kernel serve --mode=dev`
@@ -54,14 +58,14 @@ NPM 镜像：
 ### iOS
 
 * `cd kernel`
-* `gomobile bind -tags fts5 -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
+* `gomobile bind -tags "fts5 sqlcipher" -ldflags '-s -w' -v -o ./ios/iosk.xcframework -target=ios ./mobile/`
 * https://github.com/siyuan-note/siyuan-ios
 
 ### Android
 
 * `cd kernel`
 * `set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8`
-* `gomobile bind -tags fts5 -ldflags "-s -w"  -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/`
+* `gomobile bind -tags "fts5 sqlcipher" -ldflags "-s -w"  -v -o kernel.aar -target android/arm64 -androidapi 26 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 ### Harmony
@@ -92,3 +96,9 @@ NPM 镜像：
    `C.size_t(len(b))` 改为 `C.socklen_t(len(b))`
 
 其他细节请参考 https://github.com/siyuan-note/siyuan/issues/13184
+
+## Issue 流程
+
+* 已关闭且连续 30 天无新动态的 issue 和 PR 会被自动锁定，以保持 issue 列表聚焦在尚未解决的问题上
+* 如果你遇到的问题与某个已锁定 issue 类似，请新开一个 issue 并附上原 issue 的链接，不要在已关闭的旧 issue 下追加回复——这会让过时的上下文重新浮现，并打扰所有历史参与者
+* 一个带有清晰复现步骤并引用原 issue 的新 issue，远比在几个月前的讨论下追加一条评论更容易被处理

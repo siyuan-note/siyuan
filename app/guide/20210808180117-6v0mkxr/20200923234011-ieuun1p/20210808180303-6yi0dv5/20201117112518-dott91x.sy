@@ -6,7 +6,7 @@
 		"id": "20201117112518-dott91x",
 		"title": "Embed Content Block",
 		"type": "doc",
-		"updated": "20260612202529"
+		"updated": "20260810212846"
 	},
 	"Children": [
 		{
@@ -370,7 +370,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201224120448-vagdm2b"
+				"id": "20201224120448-vagdm2b",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -387,30 +388,13 @@
 			"ID": "20201224120448-9gbg6ot",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20201224120448-9gbg6ot"
+				"id": "20201224120448-9gbg6ot",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "The query contains paragraph blocks of both "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "In SiYuan"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " and "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "core concept"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " text, and excludes the current document (otherwise the paragraph block will also be included in the result set, because the current paragraph also contains these two texts. The following case is similar):"
+					"Data": "Query the seven most recently updated nonempty paragraph blocks:"
 				}
 			]
 		},
@@ -420,7 +404,7 @@
 			"Properties": {
 				"id": "20210111231445-gwfrxnl",
 				"style": "height: 1120px;",
-				"updated": "20240508085416"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -431,7 +415,7 @@
 				},
 				{
 					"Type": "NodeBlockQueryEmbedScript",
-					"Data": "SELECT * FROM blocks WHERE content LIKE '%In SiYuan%' AND content LIKE '%core concept%' AND type = 'p' AND hpath NOT LIKE '%Embed Content Block%'"
+					"Data": "SELECT * FROM blocks WHERE type = 'p' AND content != '' ORDER BY updated DESC LIMIT 7"
 				},
 				{
 					"Type": "NodeCloseBrace"
@@ -829,7 +813,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "(url, data, callback?) =\u0026gt; void"
+									"TextMarkTextContent": "(url, data, callback?) =&gt; void"
 								},
 								{
 									"Type": "NodeText",
@@ -991,7 +975,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "number \u0026#124; undefined"
+									"TextMarkTextContent": "number &#124; undefined"
 								},
 								{
 									"Type": "NodeText",
@@ -1088,7 +1072,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "// Synchronous return\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n\n// Asynchronous return (Promise will be automatically await'd)\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"todo\" })\n    .then(r =\u003e r.data.blocks.map(b =\u003e b.id));\n"
+					"Data": "// Synchronous return\nreturn [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"];\n\n// Asynchronous return (Promise will be automatically await'd)\nreturn fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"todo\" })\n    .then(r => r.data.blocks.map(b => b.id));\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1116,7 +1100,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202529-tm04p7m",
-				"updated": "20260612202529"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -1130,13 +1114,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202529-n6xesmj",
-				"updated": "20260612202529"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "strong",
-					"TextMarkTextContent": "Embed a fixed set of blocks:"
+					"Type": "NodeText",
+					"Data": "Embed a fixed set of blocks:"
 				}
 			]
 		},
@@ -1146,7 +1129,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202529-prxsrxp",
-				"updated": "20260612202529"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1159,7 +1142,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nreturn [\n    \"20240601150405-a1b2c3d\",\n    \"20240601150405-e4f5g6h\"\n];\n}}\n"
+					"Data": "//!js\nreturn [\n    \"20240601150405-a1b2c3d\",\n    \"20240601150405-e4f5g6h\"\n];\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1172,13 +1155,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202529-mqqlrsl",
-				"updated": "20260612202529"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "strong",
-					"TextMarkTextContent": "Dynamically fetch via full-text search:"
+					"Type": "NodeText",
+					"Data": "Dynamically fetch via full-text search:"
 				}
 			]
 		},
@@ -1188,7 +1170,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202529-jid9olh",
-				"updated": "20260612202529"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1201,7 +1183,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"todo\" });\nreturn resp.data.blocks.map(b =\u003e b.id);\n}}\n"
+					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/search/fulltextSearch\", { query: \"todo\" });\nreturn resp.data.blocks.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1214,13 +1196,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202529-7oe7nua",
-				"updated": "20260612202529"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "strong",
-					"TextMarkTextContent": "Get all child blocks of the current document:"
+					"Type": "NodeText",
+					"Data": "Get all child blocks of the current document:"
 				}
 			]
 		},
@@ -1230,7 +1211,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202529-hnj4v12",
-				"updated": "20260612202529"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1243,7 +1224,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b =\u003e b.id);\n}}\n"
+					"Data": "//!js\nconst docID = protyle.block.rootID;\nconst resp = fetchSyncPost(\"/api/block/getChildBlocks\", { id: docID });\nreturn resp.data.blocks.map(b => b.id);\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1256,13 +1237,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260612202529-ovpa5wl",
-				"updated": "20260612202529"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "strong",
-					"TextMarkTextContent": "Filter by custom attributes:"
+					"Type": "NodeText",
+					"Data": "Filter by custom attributes:"
 				}
 			]
 		},
@@ -1272,7 +1252,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20260612202529-8as8rn5",
-				"updated": "20260612202529"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1285,7 +1265,7 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "{{ //!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) =\u003e attrs[\"custom-tag\"] === \"important\")\n    .map(([id]) =\u003e id);\nreturn filtered;\n}}\n"
+					"Data": "//!js\nconst resp = fetchSyncPost(\"/api/attr/batchGetBlockAttrs\", {\n    ids: [\"20240601150405-a1b2c3d\", \"20240601150405-e4f5g6h\"]\n});\nconst filtered = Object.entries(resp.data)\n    .filter(([id, attrs]) => attrs[\"custom-tag\"] === \"important\")\n    .map(([id]) => id);\nreturn filtered;\n"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
@@ -1299,7 +1279,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260612202529-f1btjt3",
-				"updated": "20260612202529"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -1316,7 +1296,7 @@
 			},
 			"Properties": {
 				"id": "20260612202529-xxa1lw6",
-				"updated": "20260612202529"
+				"updated": "20260810212846"
 			},
 			"Children": [
 				{
@@ -1330,7 +1310,7 @@
 					},
 					"Properties": {
 						"id": "20260612202529-0wxcq3g",
-						"updated": "20260612202529"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -1338,13 +1318,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202529-d7yq1k9",
-								"updated": "20260612202529"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "No automatic indexing"
+									"Type": "NodeText",
+									"Data": "No automatic indexing"
 								},
 								{
 									"Type": "NodeText",
@@ -1365,7 +1344,7 @@
 					},
 					"Properties": {
 						"id": "20260612202529-qs5d5rg",
-						"updated": "20260612202529"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -1373,13 +1352,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202529-ywzi343",
-								"updated": "20260612202529"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Maximum 4 levels of nesting"
+									"Type": "NodeText",
+									"Data": "Maximum 4 levels of nesting"
 								},
 								{
 									"Type": "NodeText",
@@ -1400,7 +1378,7 @@
 					},
 					"Properties": {
 						"id": "20260612202529-ra1leyg",
-						"updated": "20260612202529"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -1408,13 +1386,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202529-4k96j6t",
-								"updated": "20260612202529"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "No self-type nesting"
+									"Type": "NodeText",
+									"Data": "No self-type nesting"
 								},
 								{
 									"Type": "NodeText",
@@ -1444,7 +1421,7 @@
 					},
 					"Properties": {
 						"id": "20260612202529-2ju81sc",
-						"updated": "20260612202529"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -1452,13 +1429,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202529-itlebo8",
-								"updated": "20260612202529"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Error display"
+									"Type": "NodeText",
+									"Data": "Error display"
 								},
 								{
 									"Type": "NodeText",
@@ -1479,7 +1455,7 @@
 					},
 					"Properties": {
 						"id": "20260612202529-vtu370m",
-						"updated": "20260612202529"
+						"updated": "20260810212846"
 					},
 					"Children": [
 						{
@@ -1487,13 +1463,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20260612202529-pyx0zis",
-								"updated": "20260612202529"
+								"updated": "20260810212846"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "Security"
+									"Type": "NodeText",
+									"Data": "Security"
 								},
 								{
 									"Type": "NodeText",
@@ -1502,7 +1477,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "\u0026lt;script\u0026gt;"
+									"TextMarkTextContent": "&lt;script&gt;"
 								},
 								{
 									"Type": "NodeText",

@@ -8,7 +8,7 @@ import {viewCards} from "./viewCards";
 import {Constants} from "../constants";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {transaction} from "../protyle/wysiwyg/transaction";
-import {App} from "../index";
+import type {App} from "../index";
 
 export const genCardItem = (item: ICardPackage) => {
     return `<li data-id="${item.id}" data-name="${escapeAttr(item.name)}" class="b3-list-item b3-list-item--narrow${isMobile() ? "" : " b3-list-item--hide-action"}">
@@ -223,6 +223,3 @@ export const quickMakeCard = (protyle: IProtyle, nodeElement: Element[]) => {
         }]);
     }
 };
-
-
-

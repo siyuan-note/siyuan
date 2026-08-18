@@ -7,7 +7,7 @@
 		"id": "20240530101000-hq9sn3k",
 		"title": "アイコン",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-opc5fld",
 				"id": "20240530101000-zxczszi",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -48,7 +48,7 @@
 			"Properties": {
 				"ID": "20240530101000-epqfxh3",
 				"id": "20240530101000-76iu5iz",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -64,7 +64,7 @@
 			"Properties": {
 				"ID": "20240530101000-s01ojo2",
 				"id": "20240530101000-0np5anz",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -77,7 +77,7 @@
 					"Properties": {
 						"ID": "20240530101000-lvsdta7",
 						"id": "20240530101000-pmqoe3u",
-						"updated": "20240530101000"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -86,13 +86,9 @@
 							"Properties": {
 								"ID": "20240530101000-48kkche",
 								"id": "20240530101000-8uwd9k0",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "​"
-								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
@@ -100,7 +96,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -109,7 +105,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -118,7 +114,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ から、コミュニティの開発者が作成したアイコンを閲覧できます"
+									"Data": " から、コミュニティの開発者が作成したアイコンを閲覧できます。"
 								}
 							]
 						}
@@ -163,7 +159,7 @@
 			"Properties": {
 				"ID": "20240530101000-u7lghjh",
 				"id": "20240530101000-b7c3qgh",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -187,7 +183,7 @@
 			"Properties": {
 				"ID": "20240530101000-yd2qoxp",
 				"id": "20240530101000-2ko3w3m",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -242,7 +238,7 @@
 					"Properties": {
 						"ID": "20240530101000-euecoer",
 						"id": "20240530101000-46ic1lt",
-						"updated": "20240530101000"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -251,12 +247,12 @@
 							"Properties": {
 								"ID": "20240530101000-hz7vact",
 								"id": "20240530101000-g0f1qn3",
-								"updated": "20240530101000"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -292,7 +288,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を選択します"
+									"Data": " ​ を選択します"
 								}
 							]
 						}
@@ -350,7 +346,7 @@
 					"Properties": {
 						"ID": "20240530101000-8f9v2kl",
 						"id": "20240530101000-wnvu72r",
-						"updated": "20240530101000"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -359,12 +355,12 @@
 							"Properties": {
 								"ID": "20240530101000-hmi5bgo",
 								"id": "20240530101000-xlw3b5j",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "SiYuan を再起動し、"
+									"Data": "SiYuan を再起動した後、"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -391,7 +387,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ からインストールしたアイコンを選択します"
+									"Data": " ​ からインストールしたアイコンを選択します"
 								}
 							]
 						}
@@ -406,7 +402,7 @@
 			"Properties": {
 				"ID": "20240530101000-0arkvyy",
 				"id": "20240530101000-yzw65g2",
-				"updated": "20240530101000"
+				"updated": "20260803170332"
 			},
 			"Children": [
 				{
@@ -422,7 +418,7 @@
 			"Properties": {
 				"ID": "20240530101000-w83jkho",
 				"id": "20240530101000-ig8iq3f",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -445,7 +441,7 @@
 			"Properties": {
 				"ID": "20240530101000-kvhl3gf",
 				"id": "20240530101000-vgjcaki",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -508,7 +504,7 @@
 					"Properties": {
 						"ID": "20240530101000-5uxfs0f",
 						"id": "20240530101000-igefuuj",
-						"updated": "20240530101000"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -517,12 +513,12 @@
 							"Properties": {
 								"ID": "20240530101000-vtw0n09",
 								"id": "20240530101000-h498ila",
-								"updated": "20240530101000"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "​ "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -558,7 +554,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を選択します"
+									"Data": " ​ を選択します"
 								}
 							]
 						}
@@ -698,7 +694,7 @@
 					"Properties": {
 						"ID": "20240530101000-03qmv6a",
 						"id": "20240530101000-ue909p4",
-						"updated": "20240530101000"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -707,12 +703,12 @@
 							"Properties": {
 								"ID": "20240530101000-l0p1xa8",
 								"id": "20240530101000-uqproib",
-								"updated": "20240530101000"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "SiYuan を再起動し、"
+									"Data": "SiYuan を再起動した後、"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -739,7 +735,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ からインストールしたアイコンを選択します"
+									"Data": " ​ からインストールしたアイコンを選択します"
 								}
 							]
 						}
@@ -754,7 +750,7 @@
 			"Properties": {
 				"ID": "20240530101000-iv74gkd",
 				"id": "20240530101000-rdo6n3x",
-				"updated": "20240530101000"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -770,7 +766,7 @@
 			"Properties": {
 				"ID": "20240530101000-1hx01rf",
 				"id": "20240530101000-rpp4jhf",
-				"updated": "20240530101000"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -1303,7 +1299,7 @@
 					"Properties": {
 						"ID": "20240530101000-hsq7xf9",
 						"id": "20240530101000-pswp01d",
-						"updated": "20240530101000"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -1328,7 +1324,7 @@
 							"Properties": {
 								"ID": "20240530101000-cd1ikcv",
 								"id": "20240530101000-8skzmut",
-								"updated": "20240530101000"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
@@ -1469,7 +1465,7 @@
 									"Properties": {
 										"ID": "20240530101000-y0sqdlr",
 										"id": "20240530101000-rmdghsz",
-										"updated": "20240530101000"
+										"updated": "20260803163402"
 									},
 									"Children": [
 										{
@@ -1478,7 +1474,7 @@
 											"Properties": {
 												"ID": "20240530101000-9h5llqm",
 												"id": "20240530101000-15usdci",
-												"updated": "20240530101000"
+												"updated": "20260803163402"
 											},
 											"Children": [
 												{
@@ -1510,7 +1506,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ で開発したアイコンを選択して確認します"
+													"Data": " ​ で開発したアイコンを選択して確認します"
 												}
 											]
 										}
@@ -1529,7 +1525,7 @@
 			"Properties": {
 				"ID": "20240530101000-57m4og9",
 				"id": "20240530101000-jo4oflk",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1544,13 +1540,13 @@
 			"Properties": {
 				"ID": "20240530101000-y31e26q",
 				"id": "20240530101000-9ph0up4",
-				"updated": "20240530101000"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "コミュニティマーケットプレイスのリポジトリ"
 				},
 				{

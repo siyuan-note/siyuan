@@ -1,0 +1,23 @@
+name: Lock closed issues and PRs
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # 每天 UTC 00:00（北京时间 08:00）运行一次
+  workflow_dispatch: # 允许手动触发
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dessant/lock-threads@v6
+        with:
+          # 不设置 issue-comment / pr-comment：评论会通知所有历史参与者并触发邮件，
+          # 仅靠 CONTRIBUTING 中的「Issue 流程」小节说明锁定策略即可。
+          issue-inactive-days: "30"
+          issue-lock-reason: "resolved"
+          pr-inactive-days: "30"
+          pr-lock-reason: "resolved"

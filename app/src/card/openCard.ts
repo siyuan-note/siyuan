@@ -18,7 +18,7 @@ import {ipcRenderer} from "electron";
 /// #endif
 import * as dayjs from "dayjs";
 import {getDisplayName, movePathTo} from "../util/pathName";
-import {App} from "../index";
+import type {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {focusByRange} from "../protyle/util/selection";
@@ -26,6 +26,16 @@ import {updateCardHV} from "./util";
 import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {transaction} from "../protyle/wysiwyg/transaction";
+import {
+    beginFlashcardLoad,
+    createFlashcardRevealState,
+    hasFlashcardAnswer,
+    hideFlashcardAnswer,
+    isCurrentFlashcardLoad,
+    revealFlashcardAfterUnfold,
+    showFlashcardAnswer
+} from "./flashcardMode";
+import {setFold} from "../protyle/util/blockFold";
 
 const genCardCount = (cardsData: ICardData, allIndex = 0) => {
     let newIndex = 0;
@@ -96,7 +106,7 @@ export const genCardHTML = (options: {
     ${iconsHTML}
     <div class="card__block fn__flex-1 ${options.cardsData.cards.length === 0 ? "fn__none" : ""}" data-type="render"></div>
     <div class="card__empty card__empty--space${options.cardsData.cards.length === 0 ? "" : " fn__none"}" data-type="empty">
-        <div>🔮</div>
+        <div class="card__empty-icon">🔮</div>
         ${window.siyuan.languages.noDueCard}
     </div>
     <div class="fn__flex card__action fn__none">
@@ -155,77 +165,68 @@ export const genCardHTML = (options: {
 </div>`;
 };
 
+const flashcardRevealStates = new WeakMap<IProtyle, ReturnType<typeof createFlashcardRevealState>>();
+
+const getFlashcardRevealState = (protyle: IProtyle) => {
+    let state = flashcardRevealStates.get(protyle);
+    if (!state) {
+        state = createFlashcardRevealState();
+        flashcardRevealStates.set(protyle, state);
+    }
+    return state;
+};
+
+const showRatingActions = (actionElements: NodeListOf<Element>, currentCard: ICard) => {
+    actionElements[0].classList.add("fn__none");
+    actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
+        if (btnIndex < 2) {
+            return;
+        }
+        element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+    });
+    actionElements[1].classList.remove("fn__none");
+};
+
 const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard: ICard) => {
+    const revealState = getFlashcardRevealState(protyle);
+    const generation = beginFlashcardLoad(revealState);
+    const actionElements = element.querySelectorAll(".card__action");
+    actionElements.forEach(item => item.classList.add("fn__none"));
+    actionElements[0].querySelectorAll('button[data-type="-1"], button[data-type="-3"]').forEach(item => {
+        item.removeAttribute("disabled");
+    });
     fetchPost("/api/block/getDocInfo", {
         id,
     }, (docResponse) => {
+        if (!isCurrentFlashcardLoad(revealState, generation)) {
+            return;
+        }
         protyle.wysiwyg.renderCustom(docResponse.data.ial);
         fetchPost("/api/filetree/getDoc", {
             id,
             mode: 0,
             size: Constants.SIZE_GET_MAX
         }, (response) => {
+            if (!isCurrentFlashcardLoad(revealState, generation)) {
+                return;
+            }
             onGet({
                 updateReadonly: true,
                 data: response,
                 protyle,
                 action: response.data.rootID === response.data.id ? [] : [Constants.CB_GET_ALL],
                 afterCB: () => {
-                    if (protyle.element.classList.contains("fn__none")) {
+                    if (!isCurrentFlashcardLoad(revealState, generation) ||
+                        protyle.element.classList.contains("fn__none")) {
                         return;
                     }
-                    let hasHide = false;
-                    if (!window.siyuan.config.flashcard.superBlock &&
-                        !window.siyuan.config.flashcard.heading &&
-                        !window.siyuan.config.flashcard.list &&
-                        !window.siyuan.config.flashcard.mark) {
-                        hasHide = false;
-                    } else {
-                        if (window.siyuan.config.flashcard.superBlock) {
-                            if (protyle.wysiwyg.element.querySelector(":scope > .sb")) {
-                                hasHide = true;
-                            }
-                        }
-                        if (window.siyuan.config.flashcard.heading) {
-                            if (protyle.wysiwyg.element.querySelector(':scope > [data-type="NodeHeading"]')) {
-                                hasHide = true;
-                            }
-                        }
-                        if (window.siyuan.config.flashcard.list) {
-                            if (protyle.wysiwyg.element.querySelector(".list, .li")) {
-                                hasHide = true;
-                            }
-                        }
-                        if (window.siyuan.config.flashcard.mark) {
-                            if (protyle.wysiwyg.element.querySelector('span[data-type~="mark"]')) {
-                                hasHide = true;
-                            }
-                        }
-                    }
-                    const actionElements = element.querySelectorAll(".card__action");
+                    const hasHide = hasFlashcardAnswer(protyle.wysiwyg.element, window.siyuan.config.flashcard);
                     if (!hasHide) {
-                        protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hideh");
-                        actionElements[0].classList.add("fn__none");
-                        actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
-                            if (btnIndex < 2) {
-                                return;
-                            }
-                            element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+                        revealFlashcardAnswer(protyle, () => {
+                            showRatingActions(actionElements, currentCard);
                         });
-                        actionElements[1].classList.remove("fn__none");
                     } else {
-                        if (window.siyuan.config.flashcard.superBlock) {
-                            protyle.element.classList.add("card__block--hidesb");
-                        }
-                        if (window.siyuan.config.flashcard.heading) {
-                            protyle.element.classList.add("card__block--hideh");
-                        }
-                        if (window.siyuan.config.flashcard.list) {
-                            protyle.element.classList.add("card__block--hideli");
-                        }
-                        if (window.siyuan.config.flashcard.mark) {
-                            protyle.element.classList.add("card__block--hidemark");
-                        }
+                        hideFlashcardAnswer(protyle.element, window.siyuan.config.flashcard);
                         actionElements[0].classList.remove("fn__none");
                         actionElements[1].classList.add("fn__none");
                     }
@@ -234,6 +235,30 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
         });
     });
 
+};
+
+const revealFlashcardAnswer = (protyle: IProtyle, callback: () => void) => {
+    const revealState = getFlashcardRevealState(protyle);
+    const generation = revealState.generation;
+    const cardElement = protyle.wysiwyg.element.querySelector(
+        `[data-node-id="${protyle.block.id}"][fold="1"]`
+    );
+    revealFlashcardAfterUnfold({
+        state: revealState,
+        generation,
+        unfold: cardElement ? (done) => {
+            const foldData = setFold(protyle, cardElement, true, false, true, true);
+            if (!foldData.doOperations?.length) {
+                done();
+                return;
+            }
+            transaction(protyle, foldData.doOperations, foldData.undoOperations, {callback: done});
+        } : undefined,
+        reveal: () => {
+            showFlashcardAnswer(protyle.element);
+            callback();
+        }
+    });
 };
 
 export const bindCardEvent = async (options: {
@@ -679,6 +704,12 @@ export const bindCardEvent = async (options: {
         if (!type || !currentCard) {
             return;
         }
+        const revealState = getFlashcardRevealState(editor.protyle);
+        if (revealState.pendingGeneration === revealState.generation) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         event.preventDefault();
         event.stopPropagation();
         hideElements(["toolbar", "hint", "util", "gutter"], editor.protyle);
@@ -686,16 +717,16 @@ export const bindCardEvent = async (options: {
             if (actionElements[0].classList.contains("fn__none")) {
                 type = "3";
             } else {
-                editor.protyle.element.classList.remove("card__block--hidemark", "card__block--hideli", "card__block--hidesb", "card__block--hideh");
-                actionElements[0].classList.add("fn__none");
-                actionElements[1].querySelectorAll("button.b3-button").forEach((element, btnIndex) => {
-                    if (btnIndex < 2) {
-                        return;
-                    }
-                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
+                revealFlashcardAnswer(editor.protyle, () => {
+                    showRatingActions(actionElements, currentCard);
+                    emitEvent(options.app, currentCard, type);
                 });
-                actionElements[1].classList.remove("fn__none");
-                emitEvent(options.app, currentCard, type);
+                const currentRevealState = getFlashcardRevealState(editor.protyle);
+                if (currentRevealState.pendingGeneration === currentRevealState.generation) {
+                    actionElements[0].querySelectorAll("button").forEach(item => {
+                        item.setAttribute("disabled", "disabled");
+                    });
+                }
                 return;
             }
         } else if (type === "-2") {    // 上一步
@@ -811,6 +842,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
         cardsData = await app.plugins[i].updateCards(cardsData);
     }
     const dialog = new Dialog({
+        hideCloseIcon: true,
         positionId: Constants.DIALOG_OPENCARD,
         content: genCardHTML({id, cardType, cardsData, isTab: false}),
         width: isMobile() ? "100vw" : "80vw",
@@ -885,7 +917,7 @@ const allDone = (countElement: Element, editor: Protyle, actionElements: NodeLis
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
-    emptyElement.innerHTML = `<div>🔮</div>${window.siyuan.languages.noDueCard}`;
+    emptyElement.innerHTML = `<div class="card__empty-icon">🔮</div>${window.siyuan.languages.noDueCard}`;
     emptyElement.classList.remove("fn__none");
     actionElements[0].classList.add("fn__none");
     actionElements[1].classList.add("fn__none");
@@ -898,7 +930,7 @@ const newRound = (countElement: Element, editor: Protyle, actionElements: NodeLi
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
-    emptyElement.innerHTML = `<div>♻️ </div>
+    emptyElement.innerHTML = `<div class="card__empty-icon">♻️ </div>
 <span>${window.siyuan.languages.continueReview2.replace("${count}", unreviewedCount)}</span>
 <div class="fn__hr"></div>
 <button data-type="newround" class="b3-button fn__size200">${window.siyuan.languages.continueReview1}</button>`;

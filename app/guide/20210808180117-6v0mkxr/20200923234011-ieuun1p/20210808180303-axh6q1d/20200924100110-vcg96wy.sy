@@ -6,7 +6,7 @@
 		"id": "20200924100110-vcg96wy",
 		"title": "Icon",
 		"type": "doc",
-		"updated": "20230821210709"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230418095541-fpmceu9",
-				"updated": "20230418095541"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230418095541-bsc11b6",
-				"updated": "20230418095545"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230418095541-k9npqv9",
-				"updated": "20230418095622"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20230418095541-l3xbikd",
-						"updated": "20230418095622"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -79,12 +79,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230418095541-uia79kk",
-								"updated": "20230418095622"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Browse icons contributed by community developers online in "
+									"Data": "Browse icons contributed by community developers in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -93,16 +93,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Appearance"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -111,16 +102,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Icons"
+									"TextMarkTextContent": "Icon"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
+									"Data": "."
 								}
 							]
 						}
@@ -162,7 +153,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104091404-emngxx4",
-				"updated": "20230418095635"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -184,7 +175,8 @@
 				"Num": 1
 			},
 			"Properties": {
-				"id": "20210104091404-5mpe4db"
+				"id": "20210104091404-5mpe4db",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -325,19 +317,21 @@
 						"Num": 4
 					},
 					"Properties": {
-						"id": "20210104091404-gcbhyp5"
+						"id": "20210104091404-gcbhyp5",
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
 							"ID": "20210302223515-lg2ramr",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210302223515-lg2ramr"
+								"id": "20210302223515-lg2ramr",
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Restart, select the installed icon in "
+									"Data": "After restarting, select the installed icon in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -391,7 +385,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104091404-5ele7ot"
+				"id": "20210104091404-5ele7ot",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -417,7 +412,7 @@
 			},
 			"Properties": {
 				"id": "20210104091404-07yula4",
-				"updated": "20230821210709"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -531,7 +526,7 @@
 					},
 					"Properties": {
 						"id": "20210104091404-wdwknqi",
-						"updated": "20230821210709"
+						"updated": "20260804235500"
 					},
 					"Children": [
 						{
@@ -539,7 +534,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210104091404-0errb7b",
-								"updated": "20230821210709"
+								"updated": "20260804235500"
 							},
 							"Children": [
 								{
@@ -580,7 +575,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​, for specific examples, please refer to github repo: siyuan-note/icon-sample"
+									"Data": "​, for specific examples, please refer to GitHub repo: siyuan-note/icon-sample"
 								}
 							]
 						}
@@ -641,19 +636,21 @@
 						"Num": 5
 					},
 					"Properties": {
-						"id": "20210104091404-ivd5l04"
+						"id": "20210104091404-ivd5l04",
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
 							"ID": "20210104091404-9c6o5ow",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210104091404-9c6o5ow"
+								"id": "20210104091404-9c6o5ow",
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Restart, select the installed icon in "
+									"Data": "After restarting, select the installed icon in "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1417,7 +1414,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210601103837-057w6ot",
-				"updated": "20230418085722"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1431,7 +1428,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173333-rfx8ewj",
-				"updated": "20230820184044"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1441,7 +1438,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "Community marketplace repo"
 				},
 				{

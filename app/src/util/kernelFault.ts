@@ -26,7 +26,7 @@ export const kernelError = () => {
     <div><strong>${window.siyuan.languages.kernelFault3}</strong></div>
     <div class="fn__hr"></div>
     <ol class="fn__list">
-    ${(!isKernelInContainer()
+    ${(isKernelInContainer()
         ? [
             [window.siyuan.languages.kernelFault4, window.siyuan.languages.kernelFault5],
             [window.siyuan.languages.kernelFault6, window.siyuan.languages.kernelFault7],

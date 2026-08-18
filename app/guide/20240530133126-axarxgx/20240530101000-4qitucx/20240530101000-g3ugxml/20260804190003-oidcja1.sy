@@ -1,0 +1,1290 @@
+{
+	"ID": "20260804190003-oidcja1",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804190003-oidcja1",
+		"title": "OIDC ログイン",
+		"type": "doc",
+		"updated": "20260804211503"
+	},
+	"Children": [
+		{
+			"ID": "20260804190000-ja00001",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804190000-ja00001",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20260804190001-ja00002",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190001-ja00002",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC（OpenID Connect）ログインを使用すると、既存の ID プロバイダーによるシングルサインオンを、ブラウザの画面ロックパスワードと併用できます。Custom、Google、Microsoft、GitHub に対応しています。"
+				}
+			]
+		},
+		{
+			"ID": "20260804190002-ja00003",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190002-ja00003",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC のクレームルールで許可された ID には、現在のワークスペースの管理者権限が付与されます。OIDC はユーザーごとの権限分離やロールマッピングを提供しないため、ログインを許可する ID を厳密に制限してください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804190003-ja00004",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804190003-ja00004",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "事前準備"
+				}
+			]
+		},
+		{
+			"ID": "20260804190004-ja00005",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804190004-ja00005",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804190005-ja00006",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190005-ja00006",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190006-ja00007",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190006-ja00007",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ID プロバイダーにアプリケーションを登録し、クライアント ID と、必要な場合はクライアントシークレットを取得します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190007-ja00008",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190007-ja00008",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190008-ja00009",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190008-ja00009",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "使用するブラウザ、デスクトップ、モバイルのコールバック URL を決め、ID プロバイダーにそれぞれ登録します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190009-ja0000a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190009-ja0000a",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190010-ja0000b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190010-ja0000b",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "設定ミスによるリモートからのロックアウトを防ぐため、有効な画面ロックパスワードまたはローカルアクセス手段を残します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804190011-ja0000c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804190011-ja0000c",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定方法"
+				}
+			]
+		},
+		{
+			"ID": "20260804190012-ja0000d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190012-ja0000d",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "認証"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OIDC ログイン"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で必要な項目を入力し、OIDC ログインを有効にします。"
+				}
+			]
+		},
+		{
+			"ID": "20260804190013-ja0000e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804190013-ja0000e",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プロバイダーと認証情報"
+				}
+			]
+		},
+		{
+			"ID": "20260804190014-ja0000f",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804190014-ja0000f",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804190015-ja0000g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190015-ja0000g",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190016-ja0000h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190016-ja0000h",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Custom：OpenID Connect Discovery に対応する発行者 URL とクライアント ID を入力し、プロバイダーが必要とする場合はクライアントシークレットも入力します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190017-ja0000i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190017-ja0000i",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190018-ja0000j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190018-ja0000j",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Google：Google OAuth のクライアント ID とクライアントシークレットを入力します。発行者 URL には Google の固定 URL が自動的に使用されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190019-ja0000k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190019-ja0000k",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190020-ja0000l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190020-ja0000l",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Microsoft：テナント固有の発行者 URL とクライアント ID、およびアプリケーションに設定したクライアントシークレットを入力します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190021-ja0000m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190021-ja0000m",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190022-ja0000n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190022-ja0000n",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "GitHub：OAuth App のクライアント ID とクライアントシークレットを入力します。既定のスコープは思源が自動的に調整します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804190023-ja0000o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190023-ja0000o",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アプリケーションとコールバックの登録については、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Google OpenID Connect ドキュメント",
+					"TextMarkAHref": "https://developers.google.com/identity/openid-connect/openid-connect"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Microsoft Entra アプリ登録ドキュメント",
+					"TextMarkAHref": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "GitHub OAuth App ドキュメント",
+					"TextMarkAHref": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。プロバイダーの管理画面は変更される場合があるため、最新の公式ドキュメントに従ってください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804190024-ja0000p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804190024-ja0000p",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コールバック URL"
+				}
+			]
+		},
+		{
+			"ID": "20260804190025-ja0000q",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804190025-ja0000q",
+				"updated": "20260804211503"
+			},
+			"Children": [
+				{
+					"ID": "20260804190026-ja0000r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190026-ja0000r",
+						"updated": "20260804211503"
+					},
+					"Children": [
+						{
+							"ID": "20260804190027-ja0000s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190027-ja0000s",
+								"updated": "20260804211503"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ローカルブラウザとデスクトップ：コールバックには SiYuan への現在のローカルアクセスと同じスキームを使用します。HTTPS が有効な場合は "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://127.0.0.1:<ポート>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "、HTTPS が無効な場合は "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "http://127.0.0.1:<ポート>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を使用します。登録 URL は実際のスキーム、ホスト、ポート、パス、スラッシュと完全に一致する必要があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190028-ja0000t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190028-ja0000t",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190029-ja0000u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190029-ja0000u",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リモートブラウザ：OIDC リダイレクト URL に公開 HTTPS URL を入力します。パスは "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " と完全に一致し、クエリ、フラグメント、ユーザー情報を含めることはできません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190030-ja0000v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190030-ja0000v",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190031-ja0000w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190031-ja0000w",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ネイティブモバイル：常に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan:/oidc-callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を使用します。プロバイダーにそのまま登録してください。Google はこの形式を受け付けないため、Google ログインはブラウザとデスクトップでのみ使用できます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804190032-ja0000x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804190032-ja0000x",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "スコープ"
+				}
+			]
+		},
+		{
+			"ID": "20260804190033-ja0000y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190033-ja0000y",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "既定のスコープは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "openid profile email"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " です。通常は変更する必要はありません。カスタムスコープを使用する場合は、アクセスルールに必要なクレームが引き続き返されることを確認してください。GitHub では、ユーザー情報と検証済みメールアドレスの取得に必要な権限へ自動的に変換されます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804190034-ja0000z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804190034-ja0000z",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クレームルール"
+				}
+			]
+		},
+		{
+			"ID": "20260804190035-ja00010",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190035-ja00010",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "「認証済みのすべてのユーザーに管理者権限を付与」を無効にした場合、1 つ以上のクレームルールが必要です。ルールは JSON 配列で記述します。同じルール内の複数の "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "values"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " は OR、異なるルール間は AND として評価されます。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "operator"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " には "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "equals"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " または "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "contains"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20260804190036-ja00011",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260804190036-ja00011",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "[\n  {\n    \"claim\": \"email\",\n    \"operator\": \"equals\",\n    \"values\": [\"alice@example.com\", \"bob@example.com\"]\n  },\n  {\n    \"claim\": \"email_verified\",\n    \"operator\": \"equals\",\n    \"values\": [\"true\"]\n  }\n]\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804190037-ja00012",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190037-ja00012",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "この例では、指定した 2 つのメールアドレスだけを許可し、プロバイダーがメールアドレスを検証済みとして返すことも要求します。"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "groups"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " などの配列クレームでは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "contains"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用してグループ名を照合できます。クレーム名と値は、プロバイダーの実際の応答と一致させてください。"
+				}
+			]
+		},
+		{
+			"ID": "20260804190038-ja00013",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804190038-ja00013",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "検証して保存"
+				}
+			]
+		},
+		{
+			"ID": "20260804190039-ja00014",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190039-ja00014",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC を有効にした後、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "検証して保存"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を選択します。システムブラウザで実際のログインを完了し、クレームルールを満たした場合にのみ新しい設定が有効になります。検証に失敗した場合は以前の設定が維持されます。OIDC 設定を変更すると既存の OIDC セッションは無効になり、再ログインが必要です。"
+				}
+			]
+		},
+		{
+			"ID": "20260804190040-ja00015",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804190040-ja00015",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "各クライアントでのログイン"
+				}
+			]
+		},
+		{
+			"ID": "20260804190041-ja00016",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804190041-ja00016",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804190042-ja00017",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190042-ja00017",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190043-ja00018",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190043-ja00018",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ブラウザ：ログイン画面で OIDC ログインを選択し、認証後に元のアドレスへ戻ります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190044-ja00019",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190044-ja00019",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190045-ja0001a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190045-ja0001a",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デスクトップ：システムブラウザで認証し、思源が結果を待って受け取ります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190046-ja0001b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190046-ja0001b",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190047-ja0001c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190047-ja0001c",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "モバイル：システムブラウザでの認証後、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan:/oidc-callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で思源へ戻ります。プロバイダーがこのカスタムコールバックに対応している必要があります"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804190048-ja0001d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804190048-ja0001d",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Docker の設定"
+				}
+			]
+		},
+		{
+			"ID": "20260804190049-ja0001e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190049-ja0001e",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Docker では、以下の環境変数でワークスペースの OIDC 設定を上書きできます。少なくとも OIDC の有効化、プロバイダー、クライアント ID が必要です。その他の変数はプロバイダー、コールバック、アクセス方針に応じて設定します。"
+				}
+			]
+		},
+		{
+			"ID": "20260804190050-ja0001f",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "dGV4dA==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260804190050-ja0001f",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGV4dA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "SIYUAN_OIDC_ENABLED\nSIYUAN_OIDC_PROVIDER\nSIYUAN_OIDC_ISSUER_URL\nSIYUAN_OIDC_CLIENT_ID\nSIYUAN_OIDC_CLIENT_SECRET\nSIYUAN_OIDC_SCOPES\nSIYUAN_OIDC_REDIRECT_URL\nSIYUAN_OIDC_ALLOW_ALL\nSIYUAN_OIDC_CLAIM_RULES\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804190051-ja0001g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804190051-ja0001g",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "環境変数はカーネル起動時に適用されます。リモートの Docker 配置では、画面ロックパスワード、有効な OIDC 設定、または明示的な認証バイパスのいずれかも必要です。いずれもない場合、認証なしでワークスペースが公開されることを防ぐため、思源は起動を拒否します。"
+				}
+			]
+		},
+		{
+			"ID": "20260804190052-ja0001h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804190052-ja0001h",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "トラブルシューティング"
+				}
+			]
+		},
+		{
+			"ID": "20260804190053-ja0001i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804190053-ja0001i",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804190054-ja0001j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190054-ja0001j",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190055-ja0001k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190055-ja0001k",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "redirect_uri mismatch"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：登録したコールバックと実際のスキーム、ホスト、ポート、パス、末尾のスラッシュが完全に一致するか確認します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190056-ja0001l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190056-ja0001l",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190057-ja0001m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190057-ja0001m",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "プロバイダーの検出に失敗する：Custom または Microsoft の発行者 URL、HTTPS の使用、思源から Discovery エンドポイントへ接続できるかを確認します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190058-ja0001n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190058-ja0001n",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190059-ja0001o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190059-ja0001o",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "認可コードの交換に失敗する：クライアント ID、クライアントシークレット、コールバック URL を確認します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190100-ja0001p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190100-ja0001p",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190101-ja0001q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190101-ja0001q",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ログイン後に拒否される：プロバイダーが返す実際のクレームとデータ型を確認し、アクセスルールのクレーム名、演算子、値を見直します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804190102-ja0001r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804190102-ja0001r",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "注意"
+				}
+			]
+		},
+		{
+			"ID": "20260804190103-ja0001s",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804190103-ja0001s",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804190104-ja0001t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190104-ja0001t",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190105-ja0001u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190105-ja0001u",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クレームルールを設定せず、信頼できない ID プロバイダーのすべてのユーザーにアクセスを許可しないでください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190106-ja0001v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190106-ja0001v",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190107-ja0001w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190107-ja0001w",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "メールアドレスで許可する場合は、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "email_verified"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " が "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "true"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " であることも要求してください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190108-ja0001x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190108-ja0001x",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190109-ja0001y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190109-ja0001y",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クライアントシークレットは機密情報です。公開ドキュメント、ログ、公開読み取り可能なデプロイファイルに記載しないでください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804190110-ja0001z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804190110-ja0001z",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804190111-ja00020",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804190111-ja00020",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "OIDC は認証のみを提供します。認証されたすべてのユーザーは管理者になるため、ユーザー間のデータ分離には使用できません"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

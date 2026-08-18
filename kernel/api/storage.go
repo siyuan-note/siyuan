@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -31,8 +31,7 @@ func getLocalStorage(c *gin.Context) {
 
 	data := model.GetLocalStorage()
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		data = model.FilterLocalStorageByPublishAccess(publishAccess, data)
+		data = model.FilterLocalStorageByPublishAccess(data)
 	}
 	ret.Data = data
 }
@@ -53,8 +52,7 @@ func getLocalStorageVal(c *gin.Context) {
 
 	data := model.GetLocalStorage()
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		data = model.FilterLocalStorageByPublishAccess(publishAccess, data)
+		data = model.FilterLocalStorageByPublishAccess(data)
 	}
 	ret.Data = data[key]
 }
@@ -91,8 +89,7 @@ func getLocalStorageVals(c *gin.Context) {
 
 	data := model.GetLocalStorage()
 	if model.IsReadOnlyRoleContext(c) {
-		publishAccess := model.GetPublishAccess()
-		data = model.FilterLocalStorageByPublishAccess(publishAccess, data)
+		data = model.FilterLocalStorageByPublishAccess(data)
 	}
 	out := map[string]any{}
 	for _, k := range keys {
@@ -247,6 +244,10 @@ func getCriteria(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	data := model.GetCriteria()
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		data = model.FilterCriteriaByPublishAccess(c, publishAccess, data)
+	}
 	ret.Data = data
 }
 
@@ -348,7 +349,10 @@ func updateRecentDocOpenTime(c *gin.Context) {
 	}
 
 	var rootID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, true, true)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
+		return
+	}
+	if "" == rootID {
 		return
 	}
 
@@ -374,7 +378,10 @@ func updateRecentDocViewTime(c *gin.Context) {
 	}
 
 	var rootID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, true, true)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
+		return
+	}
+	if "" == rootID {
 		return
 	}
 
@@ -400,7 +407,10 @@ func updateRecentDocCloseTime(c *gin.Context) {
 	}
 
 	var rootID string
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, true, true)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootID", &rootID, false, false)) {
+		return
+	}
+	if "" == rootID {
 		return
 	}
 
@@ -426,7 +436,7 @@ func batchUpdateRecentDocCloseTime(c *gin.Context) {
 	}
 
 	var rootIDsArg []any
-	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootIDs", &rootIDsArg, true, true)) {
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("rootIDs", &rootIDsArg, false, false)) {
 		return
 	}
 
@@ -434,16 +444,15 @@ func batchUpdateRecentDocCloseTime(c *gin.Context) {
 	for _, id := range rootIDsArg {
 		str, elemOk := id.(string)
 		if !elemOk {
-			ret.Code = -1
-			ret.Msg = "Field [rootIDs]: each element should be of type [String]"
-			return
+			continue
 		}
-		if str == "" {
-			ret.Code = -1
-			ret.Msg = "Field [rootIDs]: each element must not be empty"
-			return
+		if "" == str {
+			continue
 		}
 		rootIDs = append(rootIDs, str)
+	}
+	if 0 == len(rootIDs) {
+		return
 	}
 
 	err := model.BatchUpdateRecentDocCloseTime(rootIDs)

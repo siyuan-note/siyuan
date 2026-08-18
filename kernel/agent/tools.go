@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,62 +17,197 @@
 package agent
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
+	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
 )
 
-func convertMCPToolsToOpenAI() []openai.Tool {
-	allTools := tools.GetAllTools()
-	result := make([]openai.Tool, 0, len(allTools))
-	for _, t := range allTools {
-		result = append(result, openai.Tool{
-			Type: openai.ToolTypeFunction,
-			Function: &openai.FunctionDefinition{
-				Name:        t.Name,
-				Description: t.Description,
-				Parameters:  convertSchema(t.InputSchema),
-			},
-		})
+type executedToolResult struct {
+	Text             string
+	ModelAttachments []tools.ModelAttachment
+	IsError          bool
+	ExecutionUnknown bool
+}
+
+// validateToolCallInput 在确认和快照之前校验工具调用，避免无效调用被误判为写操作。
+func validateToolCallInput(ctx context.Context, toolName string, args map[string]any) (*tools.Tool, *tools.ToolValidator, error) {
+	t, validator := tools.LookupToolWithValidator(toolName)
+	if t == nil {
+		return nil, nil, fmt.Errorf("unknown tool: %s", toolName)
 	}
-	return result
+	if t.ContextHandler == nil && t.Handler == nil {
+		return nil, nil, fmt.Errorf("tool handler unavailable: %s", toolName)
+	}
+	if ctx.Err() != nil {
+		return nil, nil, fmt.Errorf("tool execution was cancelled before it started")
+	}
+	if err := validator.ValidateInputContext(ctx, args); err != nil {
+		return nil, nil, fmt.Errorf("invalid tool arguments: %w", err)
+	}
+	return t, validator, nil
+}
+
+func validateCapabilityCall(ctx context.Context, registration *capabilityRegistration, args map[string]any) error {
+	if registration == nil {
+		return fmt.Errorf("capability was not exposed in this model round")
+	}
+	if !capabilityStillExecutable(registration, args) {
+		return fmt.Errorf("capability is disabled or no longer available: %s", registration.ID)
+	}
+	if ctx.Err() != nil {
+		return fmt.Errorf("capability execution was cancelled before it started")
+	}
+	if registration.Validator == nil {
+		return fmt.Errorf("capability validator unavailable: %s", registration.ID)
+	}
+	if err := registration.Validator.ValidateInputContext(ctx, args); err != nil {
+		return fmt.Errorf("invalid capability arguments: %w", err)
+	}
+	if !registration.isBrowser() &&
+		(registration.Tool == nil || registration.Tool.ContextHandler == nil && registration.Tool.Handler == nil) {
+		return fmt.Errorf("capability handler unavailable: %s", registration.ID)
+	}
+	return nil
 }
 
 // executeTool 执行单次工具调用。
-// 返回值：结果文本（已展平为字符串），isErr 表示工具是否返回错误结果。
-func executeTool(tc openai.ToolCall, sessionID string) (string, bool) {
-	t := tools.GetTool(tc.Function.Name)
-	if t == nil {
-		return "unknown tool: " + tc.Function.Name, true
+func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) executedToolResult {
+	tool, validator := tools.LookupToolWithValidator(tc.Function.Name)
+	if tool == nil {
+		return executedToolResult{Text: "unknown tool: " + tc.Function.Name, IsError: true}
 	}
+	return executeCapability(ctx, tc, sessionID, &capabilityRegistration{
+		ID:        tools.CapabilityIDForTool(tool),
+		ModelName: tool.Name,
+		Source:    tool.Source,
+		Runtime:   tool.Runtime,
+		Tool:      tool,
+		Validator: validator,
+	})
+}
 
+func executeCapability(ctx context.Context, tc openai.ToolCall, sessionID string,
+	registration *capabilityRegistration) executedToolResult {
 	args := parseToolArgs(tc.Function.Arguments)
-	// _sessionID 是原生工具（如 todo_write）专用的内部字段，用于关联会话状态。
+	if err := validateCapabilityCall(ctx, registration, args); err != nil {
+		return executedToolResult{Text: err.Error(), IsError: true}
+	}
+	t := registration.Tool
+	validator := registration.Validator
+	// _sessionID 和 _toolCallID 是原生工具专用的内部字段，用于关联会话状态和实现幂等操作。
 	// 仅注入给原生工具；MCP/插件工具的参数会原样转发给外部服务端，
 	// 严格校验（additionalProperties:false）的服务端（如 Flomo MCP）会因这个多余字段报错。
 	// https://github.com/siyuan-note/siyuan/issues/17927
 	if t.Source == "native" || t.Source == "" {
 		args["_sessionID"] = sessionID
+		args["_toolCallID"] = tc.ID
 	}
-	result, err := t.Handler(args)
+	type executionResult struct {
+		result tools.CallToolResult
+		err    error
+	}
+	executionCh := make(chan executionResult, 1)
+	executionLifetimeDone := make(chan struct{})
+	defer close(executionLifetimeDone)
+	go func() {
+		var result tools.CallToolResult
+		var err error
+		releaseBoxLeases := func() {}
+		if t.BoxLeaseResolver != nil {
+			releaseBoxLeases, err = kernelModel.AcquireEncryptedBoxOperations(ctx, t.BoxLeaseResolver(args))
+			if err != nil {
+				executionCh <- executionResult{
+					result: tools.CallToolResult{
+						Content: []tools.ContentItem{{Type: "text", Text: "encrypted notebook is locked, please unlock it first"}},
+						IsError: true,
+					},
+				}
+				return
+			}
+		}
+		defer releaseBoxLeases()
+		if t.ContextHandler != nil {
+			result, err = t.ContextHandler(ctx, args)
+		} else {
+			result, err = t.Handler(args)
+		}
+		executionCh <- executionResult{result: result, err: err}
+		<-executionLifetimeDone
+	}()
+
+	var execution executionResult
+	select {
+	case execution = <-executionCh:
+	case <-ctx.Done():
+		return executedToolResult{
+			Text:             "tool execution was interrupted; execution result is unknown and must not be retried automatically",
+			IsError:          true,
+			ExecutionUnknown: true,
+		}
+	}
+	result, err := execution.result, execution.err
 	if err != nil {
-		return "tool execution error: " + err.Error(), true
+		if ctx.Err() != nil {
+			return executedToolResult{
+				Text:             "tool execution was interrupted; execution result is unknown and must not be retried automatically",
+				IsError:          true,
+				ExecutionUnknown: true,
+			}
+		}
+		return executedToolResult{Text: "tool execution error: " + err.Error(), IsError: true}
+	}
+	if err = validator.ValidateOutputContext(ctx, result); err != nil {
+		return executedToolResult{
+			Text: "invalid tool output after execution; execution result may have side effects and must not be retried automatically: " +
+				err.Error(),
+			IsError:          true,
+			ExecutionUnknown: true,
+		}
 	}
 
-	return resultToString(result), result.IsError
+	return executedToolResult{
+		Text:             resultToString(result),
+		ModelAttachments: result.ModelAttachments,
+		IsError:          result.IsError,
+		ExecutionUnknown: result.ExecutionUnknown,
+	}
 }
 
 func convertSchema(schema tools.ToolSchema) any {
+	if schema.Raw != nil {
+		return maps.Clone(schema.Raw)
+	}
+
+	// 根级 anyOf 常见于 Zod 生成的 schema，取第一个 object 变体展开。
+	if schema.Type == "" && len(schema.AnyOf) > 0 {
+		for _, variant := range schema.AnyOf {
+			if variant.Type == "object" || len(variant.Properties) > 0 {
+				return convertSchema(variant)
+			}
+		}
+	}
+
 	props := make(map[string]any)
 	for name, prop := range schema.Properties {
 		props[name] = convertProperty(prop)
 	}
 
+	schemaType := schema.Type
+	if schemaType == "" && len(props) > 0 {
+		schemaType = "object"
+	}
+
 	schemaMap := map[string]any{
-		"type":       schema.Type,
 		"properties": props,
+	}
+	if schemaType != "" {
+		schemaMap["type"] = schemaType
 	}
 	if len(schema.Required) > 0 {
 		reqVals := make([]any, len(schema.Required))
@@ -85,8 +220,16 @@ func convertSchema(schema tools.ToolSchema) any {
 }
 
 func convertProperty(prop tools.Property) map[string]any {
-	p := map[string]any{
-		"type": prop.Type,
+	// Zod 可选字段常生成 anyOf: [{type: T}, {type: null}]，简化为单一类型即可。
+	if prop.Type == "" && len(prop.AnyOf) > 0 {
+		if simplified := simplifyNullUnionProp(prop); simplified != nil {
+			return simplified
+		}
+	}
+
+	p := map[string]any{}
+	if prop.Type != "" {
+		p["type"] = prop.Type
 	}
 	if prop.Description != "" {
 		p["description"] = prop.Description
@@ -115,7 +258,52 @@ func convertProperty(prop tools.Property) map[string]any {
 		}
 		p["required"] = reqVals
 	}
+	if len(prop.AnyOf) > 0 {
+		p["anyOf"] = convertPropArray(prop.AnyOf)
+	}
+	if len(prop.OneOf) > 0 {
+		p["oneOf"] = convertPropArray(prop.OneOf)
+	}
+	if len(prop.AllOf) > 0 {
+		p["allOf"] = convertPropArray(prop.AllOf)
+	}
 	return p
+}
+
+// simplifyNullUnionProp 将 anyOf: [T, null] 形式的 Zod 可选字段简化为 T。
+func simplifyNullUnionProp(prop tools.Property) map[string]any {
+	var candidate *tools.Property
+	for i := range prop.AnyOf {
+		p := &prop.AnyOf[i]
+		if p.Type == "null" {
+			continue
+		}
+		if len(p.OneOf) > 0 || len(p.AnyOf) > 0 || len(p.AllOf) > 0 {
+			return nil
+		}
+		if candidate != nil {
+			return nil
+		}
+		candidate = p
+	}
+	if candidate == nil {
+		return nil
+	}
+	result := convertProperty(*candidate)
+	if prop.Description != "" {
+		if _, ok := result["description"]; !ok {
+			result["description"] = prop.Description
+		}
+	}
+	return result
+}
+
+func convertPropArray(props []tools.Property) []any {
+	result := make([]any, len(props))
+	for i, prop := range props {
+		result[i] = convertProperty(prop)
+	}
+	return result
 }
 
 func resultToString(result tools.CallToolResult) string {
@@ -123,16 +311,25 @@ func resultToString(result tools.CallToolResult) string {
 	for _, item := range result.Content {
 		if item.Type == "text" {
 			parts = append(parts, item.Text)
+			continue
+		}
+		if data, err := json.Marshal(item); err == nil {
+			parts = append(parts, string(data))
 		}
 	}
-	if len(parts) == 0 {
-		return "(empty result)"
+	if joined := strings.Join(parts, "\n"); joined != "" {
+		return joined
 	}
-	return strings.Join(parts, "\n")
+	if result.HasStructuredContent() {
+		if data, err := json.Marshal(result.StructuredContent); err == nil {
+			return string(data)
+		}
+	}
+	return "(empty result)"
 }
 
-func parseToolArgs(argsJSON string) map[string]interface{} {
-	args := map[string]interface{}{}
+func parseToolArgs(argsJSON string) map[string]any {
+	args := map[string]any{}
 	if argsJSON == "" {
 		return args
 	}

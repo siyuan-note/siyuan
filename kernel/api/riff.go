@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -39,6 +39,11 @@ func getRiffCardsByBlockIDs(c *gin.Context) {
 	var blockIDs []string
 	for _, blockID := range blockIDsArg {
 		blockIDs = append(blockIDs, blockID.(string))
+	}
+	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
 
 	blocks := model.GetFlashcardsByBlockIDs(blockIDs)
@@ -92,7 +97,10 @@ func resetRiffCards(c *gin.Context) {
 		}
 	}
 
-	model.ResetFlashcards(typ, id, deckID, blockIDs)
+	if err := model.ResetFlashcards(typ, id, deckID, blockIDs); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }
 
 func getNotebookRiffCards(c *gin.Context) {
@@ -105,6 +113,11 @@ func getNotebookRiffCards(c *gin.Context) {
 	}
 
 	notebookID := arg["id"].(string)
+	if model.IsEncryptedBox(notebookID) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(313)
+		return
+	}
 	page := int(arg["page"].(float64))
 	pageSize := 20
 	if nil != arg["pageSize"] {
@@ -128,6 +141,11 @@ func getTreeRiffCards(c *gin.Context) {
 	}
 
 	rootID := arg["id"].(string)
+	if err := model.ValidateFlashcardBlockIDs([]string{rootID}); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	page := int(arg["page"].(float64))
 	pageSize := 20
 	if nil != arg["pageSize"] {
@@ -311,6 +329,11 @@ func removeRiffCards(c *gin.Context) {
 	for _, blockID := range blockIDsArg {
 		blockIDs = append(blockIDs, blockID.(string))
 	}
+	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 
 	transactions := []*model.Transaction{
 		{
@@ -348,6 +371,11 @@ func addRiffCards(c *gin.Context) {
 	var blockIDs []string
 	for _, blockID := range blockIDsArg {
 		blockIDs = append(blockIDs, blockID.(string))
+	}
+	if err := model.ValidateFlashcardBlockIDs(blockIDs); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
 
 	transactions := []*model.Transaction{
@@ -444,7 +472,7 @@ func deckData(deck *riff.Deck) map[string]any {
 	return map[string]any{
 		"id":      deck.ID,
 		"name":    deck.Name,
-		"size":    deck.CountCards(),
+		"size":    model.CountSupportedFlashcards(deck),
 		"created": time.UnixMilli(deck.Created).Format("2006-01-02 15:04:05"),
 		"updated": time.UnixMilli(deck.Updated).Format("2006-01-02 15:04:05"),
 	}

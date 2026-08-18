@@ -13,10 +13,12 @@ import (
 )
 
 func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView, ignoreRows bool) (ret *av.Kanban) {
-	viewable := attrView.RenderedViewables[view.ID]
-	if nil != viewable {
-		ret = viewable.(*av.Kanban)
-		return
+	if !ignoreRows {
+		viewable := attrView.RenderedViewables[view.ID]
+		if nil != viewable {
+			ret = viewable.(*av.Kanban)
+			return
+		}
 	}
 
 	ret = &av.Kanban{
@@ -24,9 +26,13 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 		CoverFrom:              view.Kanban.CoverFrom,
 		CoverFromAssetKeyID:    view.Kanban.CoverFromAssetKeyID,
 		CardAspectRatio:        view.Kanban.CardAspectRatio,
+		CardAspectRatioValue:   view.Kanban.CardAspectRatioValue,
 		CardSize:               view.Kanban.CardSize,
+		CardWidth:              view.Kanban.CardWidth,
+		CardLayout:             view.Kanban.CardLayout,
 		FitImage:               view.Kanban.FitImage,
 		DisplayFieldName:       view.Kanban.DisplayFieldName,
+		DisplayEmptyFields:     view.Kanban.DisplayEmptyFields,
 		FillColBackgroundColor: view.Kanban.FillColBackgroundColor,
 		Fields:                 []*av.KanbanField{},
 		Cards:                  []*av.KanbanCard{},
@@ -55,6 +61,7 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 				Calc:         field.Calc,
 				Options:      key.Options,
 				NumberFormat: key.NumberFormat,
+				DateFormat:   key.DateFormat,
 				Template:     key.Template,
 				Relation:     key.Relation,
 				Rollup:       key.Rollup,
@@ -62,6 +69,7 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 				Created:      key.Created,
 				Updated:      key.Updated,
 			},
+			FullRow: field.FullRow,
 		})
 	}
 
@@ -121,11 +129,14 @@ func RenderAttributeViewKanban(attrView *av.AttributeView, view *av.View, query 
 			if nil != field.Date {
 				filedDateIsTime = field.Date.FillSpecificTime
 			}
-			fillAttributeViewBaseValue(fieldValue.BaseValue, field.ID, cardID, field.NumberFormat, field.Template, filedDateIsTime)
+			fillAttributeViewBaseValue(fieldValue.BaseValue, field.ID, cardID, field.NumberFormat, field.DateFormat,
+				field.Template, filedDateIsTime)
 			kanbanCard.Values = append(kanbanCard.Values, fieldValue)
 		}
 
 		fillAttributeViewKanbanCardCover(attrView, view, cardValues, &kanbanCard, cardID, luteEngine, boundTrees)
+		kanbanCard.CoverPosition = attrView.GetCardCoverPosition(cardID,
+			av.CardCoverSource(view.Kanban.CoverFrom, view.Kanban.CoverFromAssetKeyID), kanbanCard.CoverURL)
 		ret.Cards = append(ret.Cards, &kanbanCard)
 	}
 

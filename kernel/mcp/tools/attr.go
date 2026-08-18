@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -34,7 +34,7 @@ var AttrTool = &Tool{
 			"action": {Type: "string", Description: "Operation", Enum: []string{"get", "set", "batch-get"}},
 			"id":     {Type: "string", Description: "Block ID"},
 			"ids":    {Type: "string", Description: "Comma-separated block IDs (for batch-get)"},
-			"attrs":  {Type: "object", Description: "Attribute key-value pairs (for set).\nCommon attributes:\n- icon: emoji hex codepoint like \"1f4ca\", emoji character like \"📊\", custom image path like \"1/b3log.png\", or dynamic icon URL like \"api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx\"\n- title-img: CSS format like 'background-image:url(\"assets/example.jpg\")', NOT a bare asset path\n- tags: comma-separated tag names"},
+			"attrs":  {Type: "object", Description: "Attribute key-value pairs (for set).\nCommon attributes:\n- icon: emoji hex codepoint like \"1f4ca\", emoji character like \"📊\", custom image path like \"1/b3log.png\", network image URL like \"https://example.com/icon.png\", or dynamic icon URL like \"api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx\"\n- title-img: CSS format like 'background-image:url(\"assets/example.jpg\")', NOT a bare asset path\n- tags: comma-separated tag names"},
 		},
 		Required: []string{"action"},
 	},
@@ -45,7 +45,7 @@ func init() {
 	register(AttrTool)
 }
 
-func attrHandler(args map[string]interface{}) (CallToolResult, error) {
+func attrHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "get":
@@ -61,7 +61,7 @@ func attrHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func attrGet(args map[string]interface{}) (CallToolResult, error) {
+func attrGet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -80,13 +80,13 @@ func attrGet(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func attrSet(args map[string]interface{}) (CallToolResult, error) {
+func attrSet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 
-	attrsArg, ok := args["attrs"].(map[string]interface{})
+	attrsArg, ok := args["attrs"].(map[string]any)
 	if !ok || len(attrsArg) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "attrs (key-value object) is required"}}, IsError: true}, nil
 	}
@@ -104,7 +104,7 @@ func attrSet(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "attributes set for: " + id}}}, nil
 }
 
-func attrBatchGet(args map[string]interface{}) (CallToolResult, error) {
+func attrBatchGet(args map[string]any) (CallToolResult, error) {
 	idsStr, _ := args["ids"].(string)
 	if idsStr == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids (comma-separated) is required"}}, IsError: true}, nil

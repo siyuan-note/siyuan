@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,10 +17,10 @@
 package tools
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -29,15 +29,17 @@ import (
 
 var BlockTool = &Tool{
 	Name:        "block",
-	Description: "Block operations. Actions: get(id), get_kramdown(id), get_children(id), tree_stat(id, by document), dom(id), insert(data, dataType, parentID?, nextID?, previousID?), append(data, dataType, parentID) / prepend(...) add a NEW child — use after block.update when both modifying and adding, update(id, data, dataType) replaces ONE block only (no append), delete(id), move(id, parentID, previousID?), breadcrumb(id), batch_get(ids) / batch_kramdown(ids) where ids is comma-separated.",
+	Description: "Block operations. Actions: get(id), get_kramdown(id), get_children(id), tree_stat(id, by document), dom(id), insert(data, dataType, parentID?, nextID?, previousID?), append(data, dataType, parentID) / prepend(...) add a NEW child and return its ID — use after block.update when both modifying and adding, update(id, data, dataType, lockType?) replaces ONE block only (no append), delete(id), move(id, parentID, previousID?), breadcrumb(id), batch_get(ids) / batch_kramdown(ids) where ids is comma-separated.",
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
 			"action":     {Type: "string", Description: "Operation", Enum: []string{"get", "get_kramdown", "get_children", "tree_stat", "dom", "insert", "append", "prepend", "update", "delete", "move", "breadcrumb", "batch_get", "batch_kramdown"}},
+			"notebook":   {Type: "string", Description: "Notebook ID that owns the target blocks; required for encrypted notebooks"},
 			"id":         {Type: "string", Description: "Block ID"},
 			"ids":        {Type: "string", Description: "Comma-separated block IDs (for batch_get, batch_kramdown)"},
-			"data":       {Type: "string", Description: "Content (markdown or dom)"},
+			"data":       {Type: "string", Description: "Content (markdown or dom). Markdown block references use ((blockID \"anchor text\")); never [[blockID]]"},
 			"dataType":   {Type: "string", Description: "Content type: markdown or dom", Enum: []string{"markdown", "dom"}},
+			"lockType":   {Type: "boolean", Description: "Reject update when the parsed block type differs from the existing block type; defaults to false"},
 			"parentID":   {Type: "string", Description: "Parent block ID"},
 			"nextID":     {Type: "string", Description: "Next sibling block ID (for insert)"},
 			"previousID": {Type: "string", Description: "Previous sibling block ID (for insert)"},
@@ -51,7 +53,7 @@ func init() {
 	register(BlockTool)
 }
 
-func blockHandler(args map[string]interface{}) (CallToolResult, error) {
+func blockHandler(args map[string]any) (CallToolResult, error) {
 	action, _ := args["action"].(string)
 	switch action {
 	case "get":
@@ -89,13 +91,25 @@ func blockHandler(args map[string]interface{}) (CallToolResult, error) {
 	}, nil
 }
 
-func blockGet(args map[string]interface{}) (CallToolResult, error) {
+func blockGet(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 
-	b, err := model.GetBlock(id, nil)
+	boxID, release, scopeErr := beginBlockToolScope(args, false, id)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
+
+	var b *model.Block
+	var err error
+	if boxID != "" {
+		b, err = model.GetBlockInBox(id, boxID)
+	} else {
+		b, err = model.GetBlock(id, nil)
+	}
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("get block failed: %s", err)}}, IsError: true}, nil
 	}
@@ -109,13 +123,19 @@ func blockGet(args map[string]interface{}) (CallToolResult, error) {
 	)}}}, nil
 }
 
-func blockGetKramdown(args map[string]interface{}) (CallToolResult, error) {
+func blockGetKramdown(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 
-	kramdown := model.GetBlockKramdown(id, "md")
+	boxID, release, scopeErr := beginBlockToolScope(args, false, id)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
+
+	kramdown := model.GetBlockKramdownInBox(id, "md", boxID)
 	if kramdown == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block not found or empty: " + id}}, IsError: true}, nil
 	}
@@ -123,13 +143,19 @@ func blockGetKramdown(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: kramdown}}}, nil
 }
 
-func blockGetChildren(args map[string]interface{}) (CallToolResult, error) {
+func blockGetChildren(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 
-	children := model.GetChildBlocks(id)
+	boxID, release, scopeErr := beginBlockToolScope(args, false, id)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
+
+	children := model.GetChildBlocksInBox(id, boxID)
 	if len(children) == 0 {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no child blocks found"}}}, nil
 	}
@@ -148,7 +174,7 @@ func blockGetChildren(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func blockInsert(args map[string]interface{}) (CallToolResult, error) {
+func blockInsert(args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -164,6 +190,14 @@ func blockInsert(args map[string]interface{}) (CallToolResult, error) {
 	if v, ok := args["nextID"].(string); ok {
 		nextID = v
 	}
+	if parentID == "" && previousID == "" && nextID == "" {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parentID, previousID, or nextID is required"}}, IsError: true}, nil
+	}
+	boxID, release, scopeErr := beginBlockToolScope(args, true, parentID, previousID, nextID)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
 
 	// 仅靠 parentID 定位目标时，目标必须是容器块，否则非法嵌套
 	if parentID != "" && previousID == "" && nextID == "" {
@@ -180,18 +214,18 @@ func blockInsert(args map[string]interface{}) (CallToolResult, error) {
 		}
 	}
 
-	transactions := []*model.Transaction{{
-		DoOperations: []*model.Operation{{
-			Action:     "insert",
-			Data:       data,
-			ParentID:   parentID,
-			PreviousID: previousID,
-			NextID:     nextID,
-		}},
-	}}
+	operation := &model.Operation{
+		Action:     "insert",
+		Data:       data,
+		ParentID:   parentID,
+		PreviousID: previousID,
+		NextID:     nextID,
+	}
+	transaction := &model.Transaction{DoOperations: []*model.Operation{operation}}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTxSync(transaction); err != nil {
+		return blockToolError("insert block failed: " + err.Error())
+	}
 
 	reloadID := nextID
 	if reloadID == "" {
@@ -201,15 +235,15 @@ func blockInsert(args map[string]interface{}) (CallToolResult, error) {
 		reloadID = parentID
 	}
 	if reloadID != "" {
-		if bt := treenode.GetBlockTree(reloadID); bt != nil {
+		if bt := treenode.GetBlockTreeInExactBox(reloadID, boxID); bt != nil {
 			util.PushReloadProtyle(bt.RootID)
 		}
 	}
 
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block inserted"}}}, nil
+	return blockWriteSuccess("insert", operation.ID)
 }
 
-func blockAppend(args map[string]interface{}) (CallToolResult, error) {
+func blockAppend(args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -218,6 +252,11 @@ func blockAppend(args map[string]interface{}) (CallToolResult, error) {
 	if parentID == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parentID is required"}}, IsError: true}, nil
 	}
+	boxID, release, scopeErr := beginBlockToolScope(args, true, parentID)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
 	// append 只用 parentID 定位目标，目标必须是容器块，否则非法嵌套
 	if err := treenode.CheckContainerParent(parentID); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
@@ -231,24 +270,24 @@ func blockAppend(args map[string]interface{}) (CallToolResult, error) {
 		}
 	}
 
-	transactions := []*model.Transaction{{
-		DoOperations: []*model.Operation{{
-			Action:   "appendInsert",
-			Data:     data,
-			ParentID: parentID,
-		}},
-	}}
+	operation := &model.Operation{
+		Action:   "appendInsert",
+		Data:     data,
+		ParentID: parentID,
+	}
+	transaction := &model.Transaction{DoOperations: []*model.Operation{operation}}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTxSync(transaction); err != nil {
+		return blockToolError("append block failed: " + err.Error())
+	}
 
-	if bt := treenode.GetBlockTree(parentID); bt != nil {
+	if bt := treenode.GetBlockTreeInExactBox(parentID, boxID); bt != nil {
 		util.PushReloadProtyle(bt.RootID)
 	}
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block appended"}}}, nil
+	return blockWriteSuccess("append", operation.ID)
 }
 
-func blockPrepend(args map[string]interface{}) (CallToolResult, error) {
+func blockPrepend(args map[string]any) (CallToolResult, error) {
 	data, dataType := getBlockData(args)
 	if data == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
@@ -257,6 +296,11 @@ func blockPrepend(args map[string]interface{}) (CallToolResult, error) {
 	if parentID == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parentID is required"}}, IsError: true}, nil
 	}
+	boxID, release, scopeErr := beginBlockToolScope(args, true, parentID)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
 	// prepend 只用 parentID 定位目标，目标必须是容器块，否则非法嵌套
 	if err := treenode.CheckContainerParent(parentID); err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
@@ -270,107 +314,100 @@ func blockPrepend(args map[string]interface{}) (CallToolResult, error) {
 		}
 	}
 
-	transactions := []*model.Transaction{{
-		DoOperations: []*model.Operation{{
-			Action:   "prependInsert",
-			Data:     data,
-			ParentID: parentID,
-		}},
-	}}
+	operation := &model.Operation{
+		Action:   "prependInsert",
+		Data:     data,
+		ParentID: parentID,
+	}
+	transaction := &model.Transaction{DoOperations: []*model.Operation{operation}}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTxSync(transaction); err != nil {
+		return blockToolError("prepend block failed: " + err.Error())
+	}
 
-	if bt := treenode.GetBlockTree(parentID); bt != nil {
+	if bt := treenode.GetBlockTreeInExactBox(parentID, boxID); bt != nil {
 		util.PushReloadProtyle(bt.RootID)
 	}
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block prepended"}}}, nil
+	return blockWriteSuccess("prepend", operation.ID)
 }
 
-func blockUpdate(args map[string]interface{}) (CallToolResult, error) {
+type blockWriteOutput struct {
+	Action string `json:"action"`
+	ID     string `json:"id"`
+}
+
+func blockWriteSuccess(action, id string) (CallToolResult, error) {
+	if id == "" {
+		return blockToolError(action + " block failed: empty block ID")
+	}
+	output := &blockWriteOutput{Action: action, ID: id}
+	serialized, err := json.Marshal(output)
+	if err != nil {
+		return CallToolResult{}, err
+	}
+	return CallToolResult{
+		Content:              []ContentItem{{Type: "text", Text: string(serialized)}},
+		StructuredContent:    output,
+		StructuredContentSet: true,
+	}, nil
+}
+
+func blockUpdate(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 	data, dataType := getBlockData(args)
-	if data == "" {
+	if _, exists := args["data"]; !exists {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "data is required"}}, IsError: true}, nil
 	}
+	lockType, _ := args["lockType"].(bool)
+	_, release, scopeErr := beginBlockToolScope(args, true, id)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
 
-	// markdown 转 DOM 时 Lute 会给块生成全新的随机 ID，update 前必须把原块 id 钉回去，
-	// 否则块 ID 每次更新都会变，后续按原 id 操作会报 block not found
-	data = pinBlockID(data, dataType, id)
+	_, rootIDs, err := model.PerformBlockUpdates([]model.BlockUpdateInput{{
+		ID:       id,
+		Data:     data,
+		DataType: dataType,
+		LockType: lockType,
+	}})
+	if err != nil {
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: err.Error()}}, IsError: true}, nil
+	}
 
-	transactions := []*model.Transaction{{
-		DoOperations: []*model.Operation{{
-			Action: "update",
-			ID:     id,
-			Data:   data,
-		}},
-	}}
-
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
-
-	if bt := treenode.GetBlockTree(id); bt != nil {
-		util.PushReloadProtyle(bt.RootID)
+	for _, rootID := range rootIDs {
+		util.PushReloadProtyle(rootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block updated"}}}, nil
 }
 
-// pinBlockID 把原块 id 钉回 markdown/dom 数据，保证 update 不改变块 ID。
-// 参照 HTTP API /api/block/updateBlock 的 id 复位逻辑（block_op.go updateBlock 非 Document 分支）。
-func pinBlockID(data, dataType, id string) string {
-	luteEngine := util.NewLute()
-	if dataType == "markdown" {
-		var err error
-		data, err = markdownToBlockDOM(data)
-		if err != nil {
-			return data
-		}
-	}
-
-	tree := luteEngine.BlockDOM2Tree(data)
-	if nil == tree || nil == tree.Root || nil == tree.Root.FirstChild {
-		return data
-	}
-
-	// 更新列表项时 markdown 会渲染成 NodeList>ListItem，需要先把列表项提升到根下，渲染器才能正常工作
-	// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658
-	if ast.NodeList == tree.Root.FirstChild.Type {
-		tree.Root.AppendChild(tree.Root.FirstChild.FirstChild) // 将列表下的第一个列表项移到文档结尾
-		tree.Root.FirstChild.Unlink()                          // 删除列表
-		if nil != tree.Root.FirstChild && ast.NodeKramdownBlockIAL == tree.Root.FirstChild.Type {
-			tree.Root.FirstChild.Unlink() // 继续删除列表 IAL
-		}
-	}
-
-	if nil != tree.Root.FirstChild {
-		tree.Root.FirstChild.SetIALAttr("id", id)
-	} else {
-		tree.Root.AppendChild(treenode.NewParagraph(id))
-	}
-
-	return luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
-}
-
-func blockDelete(args map[string]interface{}) (CallToolResult, error) {
+func blockDelete(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 
-	bt := treenode.GetBlockTree(id)
+	boxID, release, scopeErr := beginBlockToolScope(args, true, id)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
 
-	transactions := []*model.Transaction{{
+	bt := treenode.GetBlockTreeInExactBox(id, boxID)
+
+	transaction := &model.Transaction{
 		DoOperations: []*model.Operation{{
 			Action: "delete",
 			ID:     id,
 		}},
-	}}
+	}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTxSync(transaction); err != nil {
+		return blockToolError("delete block failed: " + err.Error())
+	}
 
 	if bt != nil {
 		util.PushReloadProtyle(bt.RootID)
@@ -378,7 +415,7 @@ func blockDelete(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block deleted: " + id}}}, nil
 }
 
-func getBlockData(args map[string]interface{}) (data, dataType string) {
+func getBlockData(args map[string]any) (data, dataType string) {
 	data, _ = args["data"].(string)
 	dataType, _ = args["dataType"].(string)
 	if dataType == "" {
@@ -397,7 +434,7 @@ func markdownToBlockDOM(md string) (string, error) {
 	return result, nil
 }
 
-func blockMove(args map[string]interface{}) (CallToolResult, error) {
+func blockMove(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
@@ -407,6 +444,11 @@ func blockMove(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "parentID is required"}}, IsError: true}, nil
 	}
 	previousID, _ := args["previousID"].(string)
+	boxID, release, scopeErr := beginBlockToolScope(args, true, id, parentID, previousID)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
 
 	// 仅靠 parentID 定位目标时（无 previousID），目标必须是容器块，否则 doMove parent-only 分支会形成非法嵌套
 	if previousID == "" {
@@ -418,31 +460,38 @@ func blockMove(args map[string]interface{}) (CallToolResult, error) {
 		}
 	}
 
-	transactions := []*model.Transaction{{
+	transaction := &model.Transaction{
 		DoOperations: []*model.Operation{{
 			Action:     "move",
 			ID:         id,
 			ParentID:   parentID,
 			PreviousID: previousID,
 		}},
-	}}
+	}
 
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if err := model.PerformTxSync(transaction); err != nil {
+		return blockToolError("move block failed: " + err.Error())
+	}
 
-	if bt := treenode.GetBlockTree(id); bt != nil {
+	if bt := treenode.GetBlockTreeInExactBox(id, boxID); bt != nil {
 		util.PushReloadProtyle(bt.RootID)
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block moved: " + id}}}, nil
 }
 
-func blockBreadcrumb(args map[string]interface{}) (CallToolResult, error) {
+func blockBreadcrumb(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
 
-	paths, err := model.BuildBlockBreadcrumb(id, nil)
+	boxID, release, scopeErr := beginBlockToolScope(args, false, id)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
+
+	paths, err := model.BuildBlockBreadcrumbInBox(id, nil, boxID)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "breadcrumb failed: " + err.Error()}}, IsError: true}, nil
 	}
@@ -454,12 +503,18 @@ func blockBreadcrumb(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func blockTreeStat(args map[string]interface{}) (CallToolResult, error) {
+func blockTreeStat(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
-	stat := filesys.StatTree(id)
+	boxID, release, scopeErr := beginBlockToolScope(args, false, id)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
+
+	stat := filesys.StatTreeInBox(id, boxID)
 	if stat == nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "document not found or empty"}}, IsError: true}, nil
 	}
@@ -468,19 +523,25 @@ func blockTreeStat(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: text}}}, nil
 }
 
-func blockDom(args map[string]interface{}) (CallToolResult, error) {
+func blockDom(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "id is required"}}, IsError: true}, nil
 	}
-	dom := model.GetBlockDOM(id)
+	boxID, release, scopeErr := beginBlockToolScope(args, false, id)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
+
+	dom := model.GetBlockDOMInBox(id, boxID)
 	if dom == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "block not found or empty: " + id}}, IsError: true}, nil
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: dom}}}, nil
 }
 
-func blockBatchGet(args map[string]interface{}) (CallToolResult, error) {
+func blockBatchGet(args map[string]any) (CallToolResult, error) {
 	idsStr, _ := args["ids"].(string)
 	if idsStr == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids is required (comma-separated)"}}, IsError: true}, nil
@@ -495,7 +556,23 @@ func blockBatchGet(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no valid IDs provided"}}, IsError: true}, nil
 	}
 
-	infos := model.GetDocsInfo(ids, false, false)
+	boxID, release, scopeErr := beginBlockToolScope(args, false, ids...)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
+
+	var infos []*model.BlockInfo
+	if boxID == "" {
+		infos = model.GetDocsInfo(ids, false, false)
+	} else {
+		for _, id := range ids {
+			info, err := model.GetDocInfoInBox(id, boxID)
+			if err == nil && info != nil {
+				infos = append(infos, info)
+			}
+		}
+	}
 
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Batch get %d blocks (found %d):\n\n", len(ids), len(infos)))
@@ -518,7 +595,7 @@ func blockBatchGet(args map[string]interface{}) (CallToolResult, error) {
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }
 
-func blockBatchKramdown(args map[string]interface{}) (CallToolResult, error) {
+func blockBatchKramdown(args map[string]any) (CallToolResult, error) {
 	idsStr, _ := args["ids"].(string)
 	if idsStr == "" {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "ids is required (comma-separated)"}}, IsError: true}, nil
@@ -533,7 +610,13 @@ func blockBatchKramdown(args map[string]interface{}) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no valid IDs provided"}}, IsError: true}, nil
 	}
 
-	kramdowns := model.GetBlockKramdowns(ids, "md")
+	boxID, release, scopeErr := beginBlockToolScope(args, false, ids...)
+	if scopeErr != nil {
+		return blockToolError(scopeErr.Error())
+	}
+	defer release()
+
+	kramdowns := model.GetBlockKramdownsInBox(ids, "md", boxID)
 
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Batch kramdown %d blocks (found %d):\n\n", len(ids), len(kramdowns)))
@@ -546,4 +629,61 @@ func blockBatchKramdown(args map[string]interface{}) (CallToolResult, error) {
 	}
 
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+func beginBlockToolScope(args map[string]any, mutation bool, ids ...string) (boxID string, release func(), err error) {
+	release = func() {}
+	notebook, _ := args["notebook"].(string)
+	notebook = strings.TrimSpace(notebook)
+	encrypted := notebook != "" && model.IsEncryptedBox(notebook)
+	if encrypted {
+		model.HoldBoxReadLock(notebook)
+		if !model.IsBoxUnlocked(notebook) {
+			model.ReleaseBoxReadLock(notebook)
+			return "", release, fmt.Errorf("encrypted notebook is locked, please unlock it first")
+		}
+		release = func() {
+			model.ReleaseBoxReadLock(notebook)
+		}
+		boxID = notebook
+	}
+
+	fail := func(format string, values ...any) (string, func(), error) {
+		release()
+		return "", func() {}, fmt.Errorf(format, values...)
+	}
+	for _, id := range ids {
+		if id == "" {
+			continue
+		}
+		queryBoxID := ""
+		if encrypted {
+			queryBoxID = notebook
+		}
+		bt := treenode.GetBlockTreeInExactBox(id, queryBoxID)
+		if bt == nil || (notebook != "" && bt.BoxID != notebook) {
+			if notebook == "" {
+				return fail("block %s was not found in a normal notebook; provide notebook for encrypted targets", id)
+			}
+			return fail("block %s does not belong to notebook %s", id, notebook)
+		}
+		if mutation && encrypted {
+			if treenode.GetBlockTreeInExactBox(id, "") != nil {
+				return fail("block ID %s is ambiguous across notebook boundaries", id)
+			}
+			for _, openedBoxID := range treenode.GetOpenedEncryptedBoxIDs() {
+				if openedBoxID != notebook && treenode.GetBlockTreeInExactBox(id, openedBoxID) != nil {
+					return fail("block ID %s is ambiguous across notebook boundaries", id)
+				}
+			}
+		}
+	}
+	return
+}
+
+func blockToolError(message string) (CallToolResult, error) {
+	return CallToolResult{
+		Content: []ContentItem{{Type: "text", Text: message}},
+		IsError: true,
+	}, nil
 }

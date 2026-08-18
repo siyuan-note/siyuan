@@ -6,7 +6,7 @@
 		"id": "20230506205948-yah52eb",
 		"title": "Plugins",
 		"type": "doc",
-		"updated": "20250115152404"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -69,7 +69,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506210937-yel1yei",
-				"updated": "20250115152404"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -83,7 +83,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210937-v1ki1ir",
-				"updated": "20250115152404"
+				"updated": "20260803171606"
 			},
 			"Children": [
 				{
@@ -143,7 +143,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506210937-jxzxwz7",
-				"updated": "20230506211146"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -157,7 +157,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210937-i9vqw4g",
-				"updated": "20230820184257"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -167,7 +167,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "Community marketplace repo"
 				},
 				{

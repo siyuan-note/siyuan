@@ -1,8 +1,10 @@
 import {Constants} from "../../constants";
 import {Dialog} from "../../dialog";
+import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {isMobile} from "../../util/functions";
+import {isEncryptedBox} from "../../util/pathName";
 import {saveExportFile} from "../util/compatibility";
 
 // 导出参数对话框 https://github.com/siyuan-note/siyuan/issues/17031
@@ -18,6 +20,7 @@ interface IExportMdOptions {
     id?: string;
     ids?: string[];
     notebook?: string;
+    notebooks?: string[];
 }
 
 // openExportOptionsDialog 渲染「通用 + Markdown 专属」两组开关，确认时回调 onConfirm 传出全部 13 项。
@@ -137,27 +140,39 @@ interface IExportMdOptionsPayload {
     removeAssetsID: boolean;
 }
 
-// exportMarkdownZip 为 Markdown .zip 导出入口：弹参数对话框，确认后按 id/ids/notebook 调对应 API。
+// exportMarkdownZip 为 Markdown .zip 导出入口：弹参数对话框，确认后按文档、文档集合或笔记本集合调用对应 API。
 // 单文档时先查询文档信息，若无子文档/关联文档则隐藏对应配置项，减少干扰。
 export const exportMarkdownZip = async(options: IExportMdOptions) => {
     let showSubDocs = true;
     let showRelatedDocs = true;
+    let encrypted = false;
     if (options.id) {
         // 查询文档是否有子文档、引用及绑定的数据库，无则隐藏对应配置项 #17031
         const docInfo = await fetchSyncPost("/api/block/getDocInfo", {id: options.id});
         const data = docInfo.data;
         showSubDocs = 0 < data.subFileCount;
         showRelatedDocs = 0 < (data.refCount || 0) || 0 < (data.attrViews?.length || 0);
+        const blockInfo = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
+        encrypted = blockInfo.code === 0 && isEncryptedBox(blockInfo.data.box);
     }
     openExportOptionsDialog(params => {
-        const msgId = showMessage(window.siyuan.languages.exporting, -1);
-        const cb = (response: IWebSocketData) => saveExportFile(response.data.zip, msgId);
-        if (options.id) {
-            fetchPost("/api/export/exportMd", {id: options.id, ...params}, cb);
-        } else if (options.ids) {
-            fetchPost("/api/export/exportMds", {ids: options.ids, ...params}, cb);
-        } else {
-            fetchPost("/api/export/exportNotebookMd", {notebook: options.notebook, ...params}, cb);
+        const exportMarkdown = () => {
+            const msgId = showMessage(window.siyuan.languages.exporting, -1);
+            const cb = (response: IWebSocketData) => saveExportFile(response.data.zip, msgId);
+            if (options.notebooks?.length) {
+                fetchPost("/api/export/exportNotebooksMd", {notebooks: options.notebooks, ...params}, cb);
+            } else if (options.id) {
+                fetchPost("/api/export/exportMd", {id: options.id, ...params}, cb);
+            } else if (options.ids) {
+                fetchPost("/api/export/exportMds", {ids: options.ids, ...params}, cb);
+            } else {
+                fetchPost("/api/export/exportNotebookMd", {notebook: options.notebook, ...params}, cb);
+            }
+        };
+        if (encrypted) {
+            confirmDialog("⚠️ " + window.siyuan.languages.export, window.siyuan.languages.encryptedExportRiskTip, exportMarkdown);
+            return;
         }
+        exportMarkdown();
     }, showSubDocs, showRelatedDocs);
 };

@@ -40,5 +40,9 @@ export const addScript = (path: string, id: string) => {
             scriptElement.id = id;
             resolve(true);
         };
+        scriptElement.onerror = () => {
+            scriptElement.remove();
+            resolve(false);
+        };
     });
 };

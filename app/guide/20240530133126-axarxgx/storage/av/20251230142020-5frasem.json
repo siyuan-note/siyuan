@@ -1,0 +1,78 @@
+{
+	"spec": 5,
+	"id": "20251230142020-5frasem",
+	"name": "",
+	"keyValues": [
+		{
+			"key": {
+				"id": "20251230142020-key0001",
+				"name": "プライマリキー",
+				"type": "block",
+				"icon": "",
+				"desc": "",
+				"numberFormat": "",
+				"template": ""
+			}
+		},
+		{
+			"key": {
+				"id": "20251230142020-sel0001",
+				"name": "選択",
+				"type": "select",
+				"icon": "",
+				"desc": "",
+				"numberFormat": "",
+				"template": ""
+			}
+		}
+	],
+	"keyIDs": null,
+	"viewID": "20251230142020-srwlylx",
+	"views": [
+		{
+			"id": "20251230142020-srwlylx",
+			"icon": "",
+			"name": "テーブル",
+			"hideAttrViewName": false,
+			"desc": "",
+			"filters": [
+				{
+					"column": "",
+					"operator": "",
+					"value": null,
+					"combination": "and"
+				}
+			],
+			"pageSize": 50,
+			"type": "table",
+			"table": {
+				"spec": 0,
+				"id": "20251230142020-tbl0001",
+				"showIcon": true,
+				"wrapField": false,
+				"columns": [
+					{
+						"id": "20251230142020-key0001",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					},
+					{
+						"id": "20251230142020-sel0001",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					}
+				],
+				"rowIds": null
+			},
+			"groupCreated": 0,
+			"groupItemIds": null,
+			"groupFolded": false,
+			"groupHidden": 0,
+			"groupSort": 0
+		}
+	]
+}

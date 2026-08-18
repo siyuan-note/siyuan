@@ -6,7 +6,7 @@
 		"id": "20211010211311-ffz0wbu",
 		"title": "虚拟引用",
 		"type": "doc",
-		"updated": "20240228163846"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -100,7 +100,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211010211708-0qn8cpl",
-				"updated": "20211010211737"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -128,7 +128,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240228163645-zvlgahq",
-				"updated": "20240228163846"
+				"updated": "20260803163440"
 			},
 			"Children": [
 				{
@@ -160,7 +160,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 中调整关键字搜索范围。"
+					"Data": " ​ 中调整关键字搜索范围。"
 				}
 			]
 		},
@@ -170,7 +170,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20221003214348-710vren",
-				"updated": "20221003214410"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -186,7 +186,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20221003214411-d3c0jte",
-				"updated": "20221003214924"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -198,7 +198,7 @@
 					},
 					"Properties": {
 						"id": "20221003214412-j7wcb07",
-						"updated": "20221003214924"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -206,21 +206,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20221003214412-uixysyj",
-								"updated": "20221003214924"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "出于性能考虑，虚拟引用并不是即时生效的，如果没有显示，可以尝试通过 "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "F5"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ 刷新当前文档"
+									"Data": "虚拟引用不会即时更新。请等待搜索索引完成后刷新或重新打开文档；如果关键词仍未更新，再尝试重建索引。"
 								}
 							]
 						}

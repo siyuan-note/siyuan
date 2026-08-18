@@ -7,7 +7,7 @@
 		"id": "20210808180303-h361q1i",
 		"title": "Editor",
 		"type": "doc",
-		"updated": "20240508004216"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -21,7 +21,8 @@
 				"Num": -1
 			},
 			"Properties": {
-				"id": "20210419175558-p7doxbn"
+				"id": "20210419175558-p7doxbn",
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -96,19 +97,21 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20210419175558-oorcy24"
+						"id": "20210419175558-oorcy24",
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
 							"ID": "20210419175558-7s6a7wb",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210419175558-7s6a7wb"
+								"id": "20210419175558-7s6a7wb",
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Content block zoom, that is, each content block can be zoomed into focus"
+									"Data": "Content block focusing, which lets you focus the editor on an individual content block"
 								}
 							]
 						}
@@ -216,7 +219,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240508004216-4uhl2nh",
-				"updated": "20240508004216"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -224,7 +227,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20221016204105-qx2aq0g",
 					"TextMarkBlockRefSubtype": "d",
-					"TextMarkTextContent": "Outline by Heading and List"
+					"TextMarkTextContent": "Heading and list layout"
 				}
 			]
 		}

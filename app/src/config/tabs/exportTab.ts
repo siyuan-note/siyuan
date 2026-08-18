@@ -5,6 +5,7 @@ import {useShell} from "../../util/pathName";
 import type {SettingTabBuilder} from "../setting/builder";
 import {Constants} from "../../constants";
 import {exportConfigApi} from "./exportRuntime";
+import {fetchPost} from "../../util/fetch";
 
 const registerExportReferencesGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("references", window.siyuan.languages.configGroupReferences);
@@ -146,7 +147,9 @@ const registerExportPandocGroup = (tab: SettingTabBuilder) => {
         ],
         afterMount: mountExportPandocStack,
     }, (stack) => {
-        stack.title(`${window.siyuan.languages.export19}<span class="fn__space"></span><a href="javascript:void(0)" id="pandocBinPathDisplay" style="word-break: break-all">${Lute.EscapeHTMLStr(window.siyuan.config.export.pandocBin)}</a>`);
+        const pandocBinLabel = window.siyuan.config.export.pandocBin ?
+            Lute.EscapeHTMLStr(window.siyuan.config.export.pandocBin) : `${window.siyuan.languages.builtIn} Pandoc`;
+        stack.title(`${window.siyuan.languages.export19}<span class="fn__space"></span><a href="javascript:void(0)" id="pandocBinPathDisplay" style="word-break: break-all">${pandocBinLabel}</a>`);
         stack.button({
             id: "pandocBinReset",
             label: window.siyuan.languages.reset,
@@ -173,7 +176,13 @@ const mountExportPandocStack = (root: HTMLElement) => {
     root.querySelector("#pandocBinPathDisplay")?.addEventListener("click", () => {
         if (window.siyuan.config.export.pandocBin) {
             useShell("showItemInFolder", window.siyuan.config.export.pandocBin);
+            return;
         }
+        fetchPost("/api/setting/getPandocBin", {}, (response) => {
+            if (response.data) {
+                useShell("showItemInFolder", response.data);
+            }
+        });
     });
     root.querySelector("#pandocBinChooser")?.addEventListener("click", async () => {
         const localPath = await ipcRenderer.invoke(Constants.SIYUAN_GET, {

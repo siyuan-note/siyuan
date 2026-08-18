@@ -1,7 +1,6 @@
 import {genCellValue, getTypeByCellElement, renderCell, renderCellAttr} from "../cell";
 import {fetchPost} from "../../../../util/fetch";
 import {setPage} from "../row";
-import {Constants} from "../../../../constants";
 import {clearSelect} from "../../../util/clear";
 
 export const insertGalleryItemAnimation = (options: {
@@ -42,14 +41,16 @@ export const insertGalleryItemAnimation = (options: {
 data-field-id="${item.dataset.fieldId}" 
 data-wrap="${item.dataset.wrap}" 
 data-dtype="${item.dataset.dtype}" 
-${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber, false, type)}</div>`;
+data-date-format="${item.dataset.dateFormat || ""}"
+${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber,
+    false, type, undefined, item.dataset.dateFormat as TAVDateFormat)}</div>`;
         if (item.previousElementSibling.classList.contains("av__gallery-name")) {
-            cellsHTML += `<div class="av__gallery-field av__gallery-field--name" data-empty="${item.parentElement.dataset.empty}">
+            cellsHTML += `<div class="${item.parentElement.className}" data-empty="${item.parentElement.dataset.empty}">
     ${item.previousElementSibling.outerHTML}
     ${cellHTML}
 </div>`;
         } else {
-            cellsHTML += `<div class="av__gallery-field" data-empty="${item.parentElement.dataset.empty}">
+            cellsHTML += `<div class="${item.parentElement.className}" data-empty="${item.parentElement.dataset.empty}">
     ${item.previousElementSibling.outerHTML}
     ${cellHTML}
 </div>`;
@@ -58,10 +59,13 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
     clearSelect(["galleryItem"], options.blockElement);
     let html = "";
     const coverClass = sideItemElement?.querySelector(".av__gallery-cover")?.className || "fn__none";
+    const fieldsClass = sideItemElement?.querySelector(".av__gallery-fields")?.className || "av__gallery-fields";
+    const emptyClass = coverClass === "fn__none" && fieldsClass.includes("fn__none") ?
+        " av__gallery-item--empty" : "";
     options.srcIDs.forEach(() => {
-        html += `<div class="av__gallery-item" data-type="ghost">
+        html += `<div class="av__gallery-item${emptyClass}" data-type="ghost">
     <div class="${coverClass}"><span style="width: 100%;height: 100%;border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;" class="av__pulse"></span></div>
-    <div class="av__gallery-fields">${cellsHTML}</div>
+    <div class="${fieldsClass}">${cellsHTML}</div>
 </div>`;
     });
     if (sideItemElement) {
@@ -71,7 +75,7 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
     }
     fetchPost("/api/av/getAttributeViewAddingBlockDefaultValues", {
         avID: options.blockElement.getAttribute("data-av-id"),
-        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+        blockID: options.blockElement.dataset.nodeId,
         groupID: options.groupID,
         previousID: options.previousId,
     }, (response) => {
@@ -88,7 +92,8 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
                         if (cellValue.type === "checkbox" && cellItem.parentElement.querySelector(".av__gallery-tip")) {
                             cellValue.checkbox.content = cellItem.getAttribute("aria-label").split('<div class="ft__on-surface">')[0];
                         }
-                        cellItem.innerHTML = renderCell(cellValue, undefined, false, type);
+                        cellItem.innerHTML = renderCell(cellValue, undefined, false, type, undefined,
+                            cellItem.dataset.dateFormat as TAVDateFormat);
                         renderCellAttr(cellItem, cellValue);
                     }
                 });

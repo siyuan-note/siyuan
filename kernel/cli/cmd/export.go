@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/siyuan/kernel/model"
 
 	"github.com/spf13/cobra"
@@ -130,7 +131,7 @@ var exportDocxCmd = &cobra.Command{
 }
 
 var exportSYCmd = &cobra.Command{
-	Use:   "sy --id <id> [--output <dir>]",
+	Use:   "sy --id <id> [--output <file>]",
 	Short: "Export as .sy.zip",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		id, _ := cmd.Flags().GetString("id")
@@ -149,15 +150,14 @@ var exportSYCmd = &cobra.Command{
 		}
 
 		_, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".sy")
-		if output == "" {
-			fmt.Println(zipPath)
-			return nil
-		}
-		data, err := os.ReadFile(zipPath)
+		resultPath, err := materializeExportArtifact(zipPath, output)
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(output, data, 0644)
+		if output == "" {
+			fmt.Println(resultPath)
+		}
+		return nil
 	},
 }
 
@@ -181,15 +181,14 @@ var exportMdZipCmd = &cobra.Command{
 		}
 
 		_, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".md")
-		if output == "" {
-			fmt.Println(zipPath)
-			return nil
-		}
-		data, err := os.ReadFile(zipPath)
+		resultPath, err := materializeExportArtifact(zipPath, output)
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(output, data, 0644)
+		if output == "" {
+			fmt.Println(resultPath)
+		}
+		return nil
 	},
 }
 
@@ -211,16 +210,34 @@ var exportDataCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if output == "" {
-			fmt.Println(zipPath)
-			return nil
-		}
-		data, err := os.ReadFile(zipPath)
+		resultPath, err := materializeExportArtifact(zipPath, output)
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(output, data, 0644)
+		if output == "" {
+			fmt.Println(resultPath)
+		}
+		return nil
 	},
+}
+
+func materializeExportArtifact(exportPath, output string) (resultPath string, err error) {
+	if exportPath == "" {
+		return "", fmt.Errorf("export failed: empty artifact path")
+	}
+	lease, err := model.AcquireExportArtifactLease(exportPath)
+	if err != nil {
+		return "", err
+	}
+	defer model.ReleaseExportArtifactLease(lease.ID)
+
+	if output == "" {
+		return lease.Path, nil
+	}
+	if err = filelock.Copy(lease.Path, output); err != nil {
+		return "", err
+	}
+	return output, nil
 }
 
 func init() {

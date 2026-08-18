@@ -1,0 +1,1290 @@
+{
+	"ID": "20260804190002-oidcen1",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260804190002-oidcen1",
+		"title": "OIDC login",
+		"type": "doc",
+		"updated": "20260804211502"
+	},
+	"Children": [
+		{
+			"ID": "20260804160000-en00001",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804160000-en00001",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Overview"
+				}
+			]
+		},
+		{
+			"ID": "20260804160001-en00002",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804160001-en00002",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "OIDC (OpenID Connect) login lets SiYuan use an existing identity provider for single sign-on alongside the browser lock screen password. Supported providers are Custom, Google, Microsoft, and GitHub."
+				}
+			]
+		},
+		{
+			"ID": "20260804160002-en00003",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804160002-en00003",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Every identity accepted by the OIDC claim rules receives administrator access to the current workspace. OIDC does not provide per-user permissions or role mapping, so restrict the identities that can sign in."
+				}
+			]
+		},
+		{
+			"ID": "20260804160003-en00004",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804160003-en00004",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Before you begin"
+				}
+			]
+		},
+		{
+			"ID": "20260804160004-en00005",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804160004-en00005",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804160005-en00006",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160005-en00006",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160006-en00007",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160006-en00007",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Register an application with the identity provider, obtain a client ID, and create a client secret when required"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160007-en00008",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160007-en00008",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160008-en00009",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160008-en00009",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Determine the browser, desktop, and mobile callback URLs you need and register each one with the identity provider"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160009-en0000a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160009-en0000a",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160010-en0000b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160010-en0000b",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Keep a working browser lock screen password or local access method so an incorrect configuration cannot lock you out remotely"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804160011-en0000c",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804160011-en0000c",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Configuration"
+				}
+			]
+		},
+		{
+			"ID": "20260804160012-en0000d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804160012-en0000d",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Authentication"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "OIDC login"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", complete the configuration, and enable OIDC login."
+				}
+			]
+		},
+		{
+			"ID": "20260804160013-en0000e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804160013-en0000e",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Provider and credentials"
+				}
+			]
+		},
+		{
+			"ID": "20260804160014-en0000f",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804160014-en0000f",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804160015-en0000g",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160015-en0000g",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160016-en0000h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160016-en0000h",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Custom: enter an issuer URL that supports OpenID Connect Discovery and a client ID, plus a client secret when required by the provider"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160017-en0000i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160017-en0000i",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160018-en0000j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160018-en0000j",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Google: enter the Google OAuth client ID and client secret; SiYuan uses Google's fixed issuer URL automatically"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160019-en0000k",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160019-en0000k",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160020-en0000l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160020-en0000l",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Microsoft: enter a tenant-specific issuer URL and client ID, plus the client secret configured for the application"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160021-en0000m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160021-en0000m",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160022-en0000n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160022-en0000n",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "GitHub: enter the OAuth App client ID and client secret; SiYuan adapts the default scopes automatically"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804160023-en0000o",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804160023-en0000o",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "For application and callback registration, see the "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Google OpenID Connect documentation",
+					"TextMarkAHref": "https://developers.google.com/identity/openid-connect/openid-connect"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "Microsoft Entra application registration documentation",
+					"TextMarkAHref": "https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkTextContent": "GitHub OAuth App documentation",
+					"TextMarkAHref": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". Provider consoles may change, so follow their current documentation."
+				}
+			]
+		},
+		{
+			"ID": "20260804160024-en0000p",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804160024-en0000p",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Callback URLs"
+				}
+			]
+		},
+		{
+			"ID": "20260804160025-en0000q",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804160025-en0000q",
+				"updated": "20260804211502"
+			},
+			"Children": [
+				{
+					"ID": "20260804160026-en0000r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160026-en0000r",
+						"updated": "20260804211502"
+					},
+					"Children": [
+						{
+							"ID": "20260804160027-en0000s",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160027-en0000s",
+								"updated": "20260804211502"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Local browser and desktop: the callback uses SiYuan's current local access scheme. With HTTPS enabled, use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://127.0.0.1:<port>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "; without HTTPS, use "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "http://127.0.0.1:<port>/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". The registered URL must exactly match the actual scheme, host, port, path, and slashes"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160028-en0000t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160028-en0000t",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160029-en0000u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160029-en0000u",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Remote browser: enter a public HTTPS URL in OIDC redirect URL. Its path must be exactly "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "/api/system/oidc/callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ", with no query, fragment, or user information"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160030-en0000v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160030-en0000v",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160031-en0000w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160031-en0000w",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Native mobile: always uses "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan:/oidc-callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ". Register it exactly with the provider. Google does not accept this callback form, so Google login is limited to browser and desktop clients"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804160032-en0000x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804160032-en0000x",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Scopes"
+				}
+			]
+		},
+		{
+			"ID": "20260804160033-en0000y",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804160033-en0000y",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "The default scopes are "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "openid profile email"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". They normally need no changes. Before using custom scopes, confirm that the provider still returns the claims required by your access rules. GitHub converts the default scopes to permissions needed to read the user and verified email addresses."
+				}
+			]
+		},
+		{
+			"ID": "20260804160034-en0000z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804160034-en0000z",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Claim rules"
+				}
+			]
+		},
+		{
+			"ID": "20260804160035-en00010",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804160035-en00010",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When “Grant administrator access to all authenticated users” is disabled, at least one claim rule is required. Rules use a JSON array. Multiple "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "values"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " within one rule are OR conditions, while separate rules are AND conditions. Supported "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "operator"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " values are "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "equals"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "contains"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
+				}
+			]
+		},
+		{
+			"ID": "20260804160036-en00011",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "anNvbg==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260804160036-en00011",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "anNvbg=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "[\n  {\n    \"claim\": \"email\",\n    \"operator\": \"equals\",\n    \"values\": [\"alice@example.com\", \"bob@example.com\"]\n  },\n  {\n    \"claim\": \"email_verified\",\n    \"operator\": \"equals\",\n    \"values\": [\"true\"]\n  }\n]\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804160037-en00012",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804160037-en00012",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "This example permits only the two listed email addresses and requires the provider to report that the address is verified. For array claims such as "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "groups"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ", "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "contains"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " can match a group name. Claim names and values must match the provider's actual response."
+				}
+			]
+		},
+		{
+			"ID": "20260804160038-en00013",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260804160038-en00013",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Verify and save"
+				}
+			]
+		},
+		{
+			"ID": "20260804160039-en00014",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804160039-en00014",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After enabling OIDC, select "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Verify and save"
+				},
+				{
+					"Type": "NodeText",
+					"Data": ". SiYuan opens the system browser and activates the new configuration only after a real login satisfies the claim rules. The previous configuration remains active if verification fails. Changing the OIDC configuration invalidates existing OIDC sessions and requires users to sign in again."
+				}
+			]
+		},
+		{
+			"ID": "20260804160040-en00015",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804160040-en00015",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Client sign-in"
+				}
+			]
+		},
+		{
+			"ID": "20260804160041-en00016",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804160041-en00016",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804160042-en00017",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160042-en00017",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160043-en00018",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160043-en00018",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Browser: select OIDC sign-in on the login page; after authentication, SiYuan returns to the original address"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160044-en00019",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160044-en00019",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160045-en0001a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160045-en0001a",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Desktop: authentication runs in the system browser while SiYuan waits for the result"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160046-en0001b",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160046-en0001b",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160047-en0001c",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160047-en0001c",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mobile: after system-browser authentication, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan:/oidc-callback"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " returns to SiYuan; the provider must support this custom callback"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804160048-en0001d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804160048-en0001d",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Docker configuration"
+				}
+			]
+		},
+		{
+			"ID": "20260804160049-en0001e",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804160049-en0001e",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Docker deployments can override workspace OIDC settings with the following environment variables. At minimum, enable OIDC, select a provider, and set the client ID. Configure the remaining variables as required by the provider, callback, and access policy."
+				}
+			]
+		},
+		{
+			"ID": "20260804160050-en0001f",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"CodeBlockFenceChar": 96,
+			"CodeBlockFenceLen": 3,
+			"CodeBlockOpenFence": "YGBg",
+			"CodeBlockInfo": "dGV4dA==",
+			"CodeBlockCloseFence": "YGBg",
+			"Properties": {
+				"id": "20260804160050-en0001f",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "dGV4dA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "SIYUAN_OIDC_ENABLED\nSIYUAN_OIDC_PROVIDER\nSIYUAN_OIDC_ISSUER_URL\nSIYUAN_OIDC_CLIENT_ID\nSIYUAN_OIDC_CLIENT_SECRET\nSIYUAN_OIDC_SCOPES\nSIYUAN_OIDC_REDIRECT_URL\nSIYUAN_OIDC_ALLOW_ALL\nSIYUAN_OIDC_CLAIM_RULES\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```",
+					"CodeBlockFenceLen": 3
+				}
+			]
+		},
+		{
+			"ID": "20260804160051-en0001g",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260804160051-en0001g",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Environment variables take effect when the kernel starts. A remote Docker deployment must also retain a browser lock screen password, a valid OIDC configuration, or an explicit authentication bypass. Otherwise, SiYuan refuses to start to avoid exposing the workspace without authentication."
+				}
+			]
+		},
+		{
+			"ID": "20260804160052-en0001h",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804160052-en0001h",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Troubleshooting"
+				}
+			]
+		},
+		{
+			"ID": "20260804160053-en0001i",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804160053-en0001i",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804160054-en0001j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160054-en0001j",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160055-en0001k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160055-en0001k",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "redirect_uri mismatch"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": verify that the registered callback exactly matches the actual scheme, host, port, path, and trailing slash"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160056-en0001l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160056-en0001l",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160057-en0001m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160057-en0001m",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Provider discovery failure: check the Custom or Microsoft issuer URL, HTTPS usage, and whether SiYuan can reach the Discovery endpoint"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160058-en0001n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160058-en0001n",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160059-en0001o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160059-en0001o",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Authorization code exchange failure: check the client ID, client secret, and callback URL"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160100-en0001p",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160100-en0001p",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160101-en0001q",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160101-en0001q",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Access denied after sign-in: inspect the provider's actual claims and data types, then check the claim names, operators, and values in the access rules"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20260804160102-en0001r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260804160102-en0001r",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Note"
+				}
+			]
+		},
+		{
+			"ID": "20260804160103-en0001s",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20260804160103-en0001s",
+				"updated": "20260804193000"
+			},
+			"Children": [
+				{
+					"ID": "20260804160104-en0001t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160104-en0001t",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160105-en0001u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160105-en0001u",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Do not grant every user access through an untrusted identity provider without claim rules"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160106-en0001v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160106-en0001v",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160107-en0001w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160107-en0001w",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "For email-based access, also require "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "email_verified"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " to equal "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "true"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160108-en0001x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160108-en0001x",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160109-en0001y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160109-en0001y",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Client secrets are sensitive; do not place them in public documents, logs, or publicly readable deployment files"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260804160110-en0001z",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"id": "20260804160110-en0001z",
+						"updated": "20260804193000"
+					},
+					"Children": [
+						{
+							"ID": "20260804160111-en00020",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260804160111-en00020",
+								"updated": "20260804193000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "OIDC provides authentication only. Every authenticated user is an administrator, so it cannot isolate data between users"
+								}
+							]
+						}
+					]
+				}
+			]
+		}
+	]
+}

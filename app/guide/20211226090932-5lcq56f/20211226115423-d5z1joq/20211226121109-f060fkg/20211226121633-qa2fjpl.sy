@@ -6,7 +6,7 @@
 		"id": "20211226121633-qa2fjpl",
 		"title": "圖示",
 		"type": "doc",
-		"updated": "20230821210641"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230418094656-xyftj25",
-				"updated": "20230418094656"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230418094656-t7xqmab",
-				"updated": "20230418094656"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230418094656-bz4b34z",
-				"updated": "20230418095512"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20230418094656-xzkir4a",
-						"updated": "20230418095512"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -79,7 +79,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230418094656-b60gk4h",
-								"updated": "20230418095512"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
@@ -93,16 +93,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "外觀"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -111,7 +102,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ - "
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -120,7 +111,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中在線瀏覽社區開發者貢獻的圖示"
+									"Data": " 中在線瀏覽社區開發者貢獻的圖示。"
 								}
 							]
 						}
@@ -162,7 +153,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226121706-w851d2z",
-				"updated": "20230418094733"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -179,7 +170,7 @@
 			},
 			"Properties": {
 				"id": "20211226121706-viwqv34",
-				"updated": "20211228132256"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -311,7 +302,7 @@
 					},
 					"Properties": {
 						"id": "20211226121706-p79zg01",
-						"updated": "20211228132121"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -319,12 +310,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226121706-6c40bbw",
-								"updated": "20211228132121"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "重啟後在 "
+									"Data": "重新啟動後在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -380,7 +371,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226121706-wle01ma",
-				"updated": "20211226003711"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -397,7 +388,7 @@
 			},
 			"Properties": {
 				"id": "20211226121706-eq30hv9",
-				"updated": "20230821210641"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -504,7 +495,7 @@
 					},
 					"Properties": {
 						"id": "20211226121706-cxvhk6a",
-						"updated": "20230821210641"
+						"updated": "20260804235500"
 					},
 					"Children": [
 						{
@@ -512,7 +503,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226121706-v9ibyud",
-								"updated": "20230821210641"
+								"updated": "20260804235500"
 							},
 							"Children": [
 								{
@@ -553,7 +544,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 文件，具體示例請參考 github repo: siyuan-note/icon-sample"
+									"Data": "​ 文件，具體示例請參考 GitHub repo: siyuan-note/icon-sample"
 								}
 							]
 						}
@@ -609,7 +600,7 @@
 					},
 					"Properties": {
 						"id": "20211226121706-o93muxl",
-						"updated": "20211228132107"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -617,12 +608,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226121706-1nrmdby",
-								"updated": "20211228132107"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "重啟 "
+									"Data": "重新啟動後在 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1377,7 +1368,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121706-yo7ar0b",
-				"updated": "20221114173643"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1391,7 +1382,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20221114173532-no1mtxr",
-				"updated": "20230820184008"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -1401,7 +1392,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
-					"TextMarkAHref": "https://b3log.org/siyuan/community.html",
+					"TextMarkAHref": "https://github.com/siyuan-note/bazaar",
 					"TextMarkTextContent": "社區集市倉庫"
 				},
 				{

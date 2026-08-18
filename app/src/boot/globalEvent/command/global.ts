@@ -1,6 +1,6 @@
 import {newDailyNote} from "../../../util/mount";
 import {openHistory} from "../../../history/history";
-import {Editor} from "../../../editor";
+import type {Editor} from "../../../editor";
 /// #if MOBILE
 import {openDock} from "../../../mobile/dock/util";
 import {popMenu} from "../../../mobile/menu";
@@ -15,7 +15,7 @@ import {isWindow} from "../../../util/functions";
 import {openRecentDocs} from "../../../business/openRecentDocs";
 import {openSearch} from "../../../search/spread";
 import {goBack, goForward} from "../../../util/backForward";
-import {getAllTabs, getAllWnds} from "../../../layout/getAll";
+import {getAllTabs} from "../../../layout/getAll";
 import {getInstanceById} from "../../../layout/util";
 import {
     closeTabByType,
@@ -31,18 +31,17 @@ import {Tab} from "../../../layout/Tab";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
-import {App} from "../../../index";
+import type {App} from "../../../index";
 import {Constants} from "../../../constants";
 import {editorConfigApi} from "../../../config/tabs/editorRuntime";
 import {lockScreen} from "../../../dialog/processSystem";
 import {newFile} from "../../../util/newFile";
 import {openCard} from "../../../card/openCard";
 import {syncGuide} from "../../../sync/syncGuide";
-import {Wnd} from "../../../layout/Wnd";
-import {unsplitWnd} from "../../../menus/tab";
+import {unsplitCurrentWnd, unsplitWnd} from "../../../menus/tab";
 import {openFile} from "../../../editor/util";
 import {fetchPost} from "../../../util/fetch";
-import {setStorageVal} from "../../../protyle/util/compatibility";
+import {sanitizeClosedTabs, setStorageVal} from "../../../protyle/util/compatibility";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -151,7 +150,13 @@ export const globalCommand = (command: string, app: App) => {
         case "recentDocs":
             openRecentDocs();
             return true;
-        case "recentClosed":
+        case "recentClosed": {
+            const closedTabsLength = window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length;
+            window.siyuan.storage[Constants.LOCAL_CLOSED_TABS] =
+                sanitizeClosedTabs(window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
+            if (closedTabsLength !== window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length) {
+                setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
+            }
             if (window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].length > 0) {
                 const closeData = window.siyuan.storage[Constants.LOCAL_CLOSED_TABS].pop();
                 setStorageVal(Constants.LOCAL_CLOSED_TABS, window.siyuan.storage[Constants.LOCAL_CLOSED_TABS]);
@@ -215,6 +220,7 @@ export const globalCommand = (command: string, app: App) => {
                                 app,
                                 blockId: childData.blockId,
                                 rootId: childData.rootId,
+                                notebookId: childData.notebookId,
                                 title: closeData.title,
                             });
                         } else if (childData.instance === "Graph") {
@@ -222,12 +228,14 @@ export const globalCommand = (command: string, app: App) => {
                                 app,
                                 blockId: childData.blockId,
                                 rootId: childData.rootId,
+                                notebookId: childData.notebookId,
                                 title: closeData.title
                             });
                         } else if (childData.instance === "Outline") {
                             openOutline({
                                 app,
                                 rootId: childData.blockId,
+                                notebookId: childData.notebookId,
                                 title: closeData.title,
                                 isPreview: childData.isPreview
                             });
@@ -236,8 +244,18 @@ export const globalCommand = (command: string, app: App) => {
                 });
             }
             return true;
+        }
         case "toggleDock":
             toggleDockBar(document.querySelector("#barDock use"));
+            return true;
+        case "switchLeftDock":
+            window.siyuan.layout.leftDock.togglePin();
+            return true;
+        case "switchRightDock":
+            window.siyuan.layout.rightDock.togglePin();
+            return true;
+        case "switchBottomDock":
+            window.siyuan.layout.bottomDock.togglePin();
             return true;
         case "toggleWin":
             /// #if !BROWSER
@@ -298,24 +316,13 @@ export const globalCommand = (command: string, app: App) => {
         return true;
     }
     if (command === "unsplitAll") {
-        unsplitWnd(window.siyuan.layout.centerLayout, window.siyuan.layout.centerLayout, false);
+        unsplitWnd(window.siyuan.layout.centerLayout, window.siyuan.layout.centerLayout);
         return true;
     }
     if (command === "unsplit") {
         const tab = getActiveTab(false);
         if (tab) {
-            let wndsTemp: Wnd[] = [];
-            let layout = tab.parent.parent;
-            while (layout.id !== window.siyuan.layout.centerLayout.id) {
-                wndsTemp = [];
-                getAllWnds(layout, wndsTemp);
-                if (wndsTemp.length > 1) {
-                    break;
-                } else {
-                    layout = layout.parent;
-                }
-            }
-            unsplitWnd(tab.parent.parent.children[0], layout, true);
+            unsplitCurrentWnd(tab.parent);
             resizeTabs();
         }
         return true;

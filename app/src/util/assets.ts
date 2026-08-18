@@ -1,8 +1,10 @@
 import {Constants} from "../constants";
 import {addScript} from "../protyle/util/addScript";
 import {addStyle} from "../protyle/util/addStyle";
+import {getAllEditor, getAllModels} from "../layout/getAll";
+import {invalidateHeadingNumberMeasurements} from "../protyle/util/headingNumberCore";
+import {renderHeadingNumbers} from "../protyle/util/headingNumber";
 /// #if !MOBILE
-import {getAllModels} from "../layout/getAll";
 import {exportLayout} from "../layout/util";
 /// #endif
 import {fetchPost} from "./fetch";
@@ -19,8 +21,76 @@ import {
 import {setCodeTheme} from "../protyle/render/util";
 import {getBackend, getFrontend} from "./functions";
 import {getWorkspaceName} from "./processTitle";
+import {ensureSelectedCustomFont} from "./customFont";
+import {isCurrentThemeSupported, shouldUnloadThemeScript} from "./themeCompatibility";
+
+let headingNumberMeasurementRefreshTimer: number;
+const DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE = "U+25fd-25fe, U+2614-2615, U+2648-2653, U+267f, U+2693, U+26a1, " +
+    "U+26aa-26ab, U+1f0cf, U+1f311-1f318, U+1f42d-1f42e, U+1f431, U+1f435, U+1f600-1f64f";
+
+export const refreshHeadingNumberMeasurements = () => {
+    invalidateHeadingNumberMeasurements();
+    getAllEditor().forEach(item => renderHeadingNumbers(item.protyle));
+};
+
+const scheduleHeadingNumberMeasurementRefresh = (styleElements: HTMLLinkElement[]) => {
+    const schedule = (delay = 0) => {
+        window.clearTimeout(headingNumberMeasurementRefreshTimer);
+        headingNumberMeasurementRefreshTimer = window.setTimeout(refreshHeadingNumberMeasurements, delay);
+    };
+    styleElements.forEach(item => {
+        item.addEventListener("load", () => schedule(), {once: true});
+        item.addEventListener("error", () => schedule(), {once: true});
+    });
+    schedule(styleElements.length > 0 ? Constants.TIMEOUT_LOAD : 0);
+};
+
+const getThemeScriptElements = () => Array.from(document.querySelectorAll<HTMLScriptElement>(
+    "script[src*='/appearance/themes/'][src*='/theme.js']"
+));
+
+const removeThemeScriptElements = () => {
+    getThemeScriptElements().forEach((item) => item.remove());
+};
+
+export const unloadThemeScript = async () => {
+    const themeScriptElement = document.getElementById("themeScript");
+    const themeScriptElements = getThemeScriptElements();
+    if (!themeScriptElement && !window.destroyTheme) {
+        themeScriptElements.forEach((item) => item.remove());
+        return true;
+    }
+    if (!window.destroyTheme) {
+        return false;
+    }
+    try {
+        await window.destroyTheme();
+        window.destroyTheme = undefined;
+        themeScriptElement?.remove();
+        removeThemeScriptElements();
+        return true;
+    } catch (error) {
+        console.error("destroyTheme error: " + error);
+        return false;
+    }
+};
+
+export const refreshThemeStyle = (themeAddress: string) => {
+    const appearance = window.siyuan.config.appearance;
+    if (!isCurrentThemeSupported(appearance, getFrontend())) {
+        return;
+    }
+    const isCustomTheme = (appearance.mode === 1 && appearance.themeDark !== "midnight") ||
+        (appearance.mode === 0 && appearance.themeLight !== "daylight");
+    const styleElement = document.getElementById(isCustomTheme ? "themeStyle" : "themeDefaultStyle") as HTMLLinkElement;
+    if (styleElement) {
+        styleElement.href = themeAddress;
+    }
+};
 
 export const loadAssets = (data: Config.IAppearance) => {
+    const changedThemeStyleElements: HTMLLinkElement[] = [];
+    let themeStylesChanged = false;
     const htmlElement = document.getElementsByTagName("html")[0];
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
     htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
@@ -41,6 +111,8 @@ export const loadAssets = (data: Config.IAppearance) => {
     if (defaultStyleElement) {
         if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress)) {
             const newStyleElement = document.createElement("link");
+            changedThemeStyleElements.push(newStyleElement);
+            themeStylesChanged = true;
             // 等待新样式表加载完成再移除旧样式表
             new Promise((resolve) => {
                 newStyleElement.rel = "stylesheet";
@@ -54,19 +126,31 @@ export const loadAssets = (data: Config.IAppearance) => {
         }
     } else {
         addStyle(defaultThemeAddress, "themeDefaultStyle");
+        changedThemeStyleElements.push(document.getElementById("themeDefaultStyle") as HTMLLinkElement);
+        themeStylesChanged = true;
     }
     const styleElement = document.getElementById("themeStyle");
-    if ((data.mode === 1 && data.themeDark !== "midnight") || (data.mode === 0 && data.themeLight !== "daylight")) {
+    const themeSupported = isCurrentThemeSupported(data, getFrontend());
+    if (themeSupported && ((data.mode === 1 && data.themeDark !== "midnight") ||
+        (data.mode === 0 && data.themeLight !== "daylight"))) {
         const themeAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.css?v=${data.themeVer}`;
         if (styleElement) {
             if (!styleElement.getAttribute("href").startsWith(themeAddress)) {
+                changedThemeStyleElements.push(styleElement as HTMLLinkElement);
+                themeStylesChanged = true;
                 styleElement.setAttribute("href", themeAddress);
             }
         } else {
             addStyle(themeAddress, "themeStyle");
+            changedThemeStyleElements.push(document.getElementById("themeStyle") as HTMLLinkElement);
+            themeStylesChanged = true;
         }
     } else if (styleElement) {
         styleElement.remove();
+        themeStylesChanged = true;
+    }
+    if (themeStylesChanged) {
+        scheduleHeadingNumberMeasurementRefresh(changedThemeStyleElements);
     }
     /// #if !MOBILE
     getAllModels().graph.forEach(item => {
@@ -97,14 +181,13 @@ export const loadAssets = (data: Config.IAppearance) => {
     /// #endif
     setCodeTheme();
 
-    const themeScriptElement = document.getElementById("themeScript");
     const themeScriptAddress = `/appearance/themes/${data.mode === 1 ? data.themeDark : data.themeLight}/theme.js?v=${data.themeVer}`;
-    if (themeScriptElement) {
-        if (!themeScriptElement.getAttribute("src").startsWith(themeScriptAddress)) {
-            themeScriptElement.remove();
-            addScript(themeScriptAddress, "themeScript");
-        }
-    } else {
+    const themeScriptURL = new URL(themeScriptAddress, window.location.href).href;
+    const themeScriptElements = getThemeScriptElements();
+    if (!data.themeJS || !themeSupported) {
+        removeThemeScriptElements();
+    } else if (!themeScriptElements.some((item) => item.src === themeScriptURL)) {
+        removeThemeScriptElements();
         addScript(themeScriptAddress, "themeScript");
     }
 
@@ -165,36 +248,31 @@ export const initAssets = () => {
         fetchPost("/api/system/setAppearanceMode", {
             mode: OSTheme === "light" ? 0 : 1
         }, async response => {
-            if (window.siyuan.config.appearance.themeJS) {
-                if (window.destroyTheme) {
-                    try {
-                        await window.destroyTheme();
-                        window.destroyTheme = undefined;
-                        document.getElementById("themeScript").remove();
-                    } catch (e) {
-                        console.error("destroyTheme error: " + e);
-                    }
-                } else {
-                    /// #if !MOBILE
-                    exportLayout({
-                        cb() {
-                            window.location.reload();
-                        },
-                        errorExit: false,
-                    });
-                    /// #else
-                    window.location.reload();
-                    /// #endif
-                    return;
-                }
+            const nextAppearance = response.data.appearance as Config.IAppearance;
+            if (shouldUnloadThemeScript(window.siyuan.config.appearance, nextAppearance, getFrontend()) &&
+                !await unloadThemeScript()) {
+                /// #if !MOBILE
+                exportLayout({
+                    cb() {
+                        window.location.reload();
+                    },
+                    errorExit: false,
+                });
+                /// #else
+                window.location.reload();
+                /// #endif
+                return;
             }
-            window.siyuan.config.appearance = response.data.appearance;
-            loadAssets(response.data.appearance);
+            window.siyuan.config.appearance = nextAppearance;
+            loadAssets(nextAppearance);
         });
     });
 };
 
 export const setInlineStyle = async (set = true, servePath = "../../../") => {
+    if (set) {
+        await ensureSelectedCustomFont(window.siyuan.config.editor.fontFamily, window.siyuan.config.editor.fontWeight);
+    }
     let style;
     // Emojis Reset: 字体中包含了 emoji，需重置
     // Emojis Additional： 苹果/win11 字体中没有的 emoji
@@ -212,7 +290,8 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   unicode-range: U+21a9, U+21aa, U+2122, U+2194-2199, U+23cf, U+25b6, U+25c0, U+25fb, U+25fc, U+25aa, U+25ab, U+2600-2603,
   U+260e, U+2611, U+261d, U+2639, U+263a, U+2640, U+2642, U+2660, U+2663, U+2665, U+2666, U+2668, U+267b, U+26aa, U+26ab, 
   U+2702, U+2708, U+2934, U+2935, U+1f170, U+1f171, U+1f17e, U+1f17f, U+1f202, U+1f21a, U+1f22f, U+1f232-1f23a, U+1f250, 
-  U+1f251, U+1fae4, U+2049, U+203c, U+3030, U+303d, U+24c2, U+26a0, U+26a1, U+26be, U+27a1, U+2b05-2b07, U+3297, U+3299, U+a9, U+ae;
+  U+1f251, U+1fae4, U+2049, U+203c, U+3030, U+303d, U+24c2, U+26a0, U+26a1, U+26be, U+27a1, U+2b05-2b07, U+3297, U+3299, U+a9, U+ae,
+  ${DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE};
   size-adjust: 115%;
 }
 @font-face {
@@ -235,8 +314,8 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   font-family: "Emojis Reset";
   src: local("Segoe UI Emoji"),
   local("Segoe UI Symbol");
-  unicode-range: U+263a, U+21a9, U+2642, U+303d, U+2197, U+2198, U+2199, U+2196, U+2195, U+2194, U+2660, U+2665, U+2666, 
-  U+2663, U+3030, U+21aa, U+25b6, U+25c0, U+2640, U+203c, U+a9, U+ae, U+2122;
+  unicode-range: U+263a, U+21a9, U+2642, U+303d, U+2197, U+2198, U+2199, U+2196, U+2195, U+2194, U+2660, U+2665, U+2666,
+  U+2663, U+3030, U+21aa, U+25b6, U+25c0, U+2640, U+203c, U+a9, U+ae, U+2122, ${DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE};
   size-adjust: 85%;
 }
 @font-face {
@@ -250,8 +329,8 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
   font-family: "Emojis Reset";
   src: url(${servePath}appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1f170-1f171, U+1f17e, U+1f17f, U+1f21a, U+1f22f, U+1f232-1f23a, U+1f250, U+1f251, U+1f32b, U+1f3bc,
-  U+1f411, U+1f42d, U+1f42e, U+1f431, U+1f435, U+1f441, U+1f4a8, U+1f4ab, U+1f525, U+1f600-1f60d, U+1f60f-1f623,
-  U+1f625-1f62b, U+1f62d-1f63f, U+1F643, U+1F640, U+1f79, U+1f8f, U+1fa79, U+1fae4, U+1fae9, U+1fac6, U+1fabe, U+1fadf,
+  U+1f411, U+1f42d, U+1f42e, U+1f431, U+1f435, U+1f441, U+1f4a8, U+1f4ab, U+1f525, ${DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE},
+  U+1f79, U+1f8f, U+1fa79, U+1fae4, U+1fae9, U+1fac6, U+1fabe, U+1fadf,
   U+200d, U+203c, U+2049, U+2122, U+2139, U+2194-2199, U+21a9, U+21aa, U+23cf, U+25aa, U+25ab, U+25b6, U+25c0, U+25fb-25fe,
   U+2611, U+2615, U+2618, U+261d, U+2620, U+2622, U+2623, U+2626, U+262a, U+262e, U+2638-263a, U+2640, U+2642, U+2648-2653,
   U+265f, U+2660, U+2663, U+2665, U+2666, U+267b, U+267e, U+267f, U+2692-2697, U+2699, U+269b, U+269c, U+26a0, U+26a1,
@@ -275,7 +354,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
     style += `\n:root { --b3-font-size-editor: ${window.siyuan.config.editor.fontSize}px }
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }${window.siyuan.config.editor.justify ? "\n.protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
     if (window.siyuan.config.editor.fontFamily) {
-        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${window.siyuan.config.editor.fontWeight ? `font-weight: ${window.siyuan.config.editor.fontWeight};` : ""}font-family: "Emojis Additional", "Emojis Reset", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
+        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${window.siyuan.config.editor.fontWeight ? `font-weight: ${window.siyuan.config.editor.fontWeight};` : ""}font-family: "Emojis Additional", "Emojis Reset", ${CSS.escape(window.siyuan.config.editor.fontFamily)}, var(--b3-font-family)}`;
     }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {
@@ -310,32 +389,37 @@ export const setMode = (modeElementValue: number) => {
     /// #endif
 };
 
-const rgba2hex = (rgba: string) => {
-    if (rgba.startsWith("#")) {
-        return rgba;
-    }
-    let a: any;
-    const rgb: any = rgba.replace(/\s/g, "").match(/^rgba?\((\d+),(\d+),(\d+),?([^,\s)]+)?/i);
-    const alpha = (rgb && rgb[4] || "").trim();
-    let hex = rgb ?
-        (rgb[1] | 1 << 8).toString(16).slice(1) +
-        (rgb[2] | 1 << 8).toString(16).slice(1) +
-        (rgb[3] | 1 << 8).toString(16).slice(1) : rgba;
+const padHex = (n: number) => (n | 256).toString(16).slice(1);
 
-    if (alpha !== "") {
-        a = alpha;
-    } else {
-        a = 0o1;
+const rgbaToHex = (rgba: string) => {
+    const rgb = rgba.replace(/\s/g, "").match(/^rgba?\((\d+),(\d+),(\d+)(?:,([^)]+))?\)$/i);
+    if (!rgb) {
+        return "";
     }
-    a = ((a * 255) | 1 << 8).toString(16).slice(1);
-    hex = hex + a;
-    return hex;
+    const alpha = rgb[4] !== undefined ? parseFloat(rgb[4]) : 1;
+    if (alpha === 0) {
+        return "";
+    }
+    return "#" +
+        padHex(parseInt(rgb[1], 10)) +
+        padHex(parseInt(rgb[2], 10)) +
+        padHex(parseInt(rgb[3], 10)) +
+        padHex(Math.round(alpha * 255));
+};
+
+const cssVarToRgba = (varName: string) => {
+    const probe = document.createElement("div");
+    probe.style.display = "none";
+    probe.style.backgroundColor = `var(${varName})`;
+    document.documentElement.appendChild(probe);
+    const rgba = getComputedStyle(probe).backgroundColor;
+    probe.remove();
+    return rgba;
 };
 
 const updateMobileTheme = (OSTheme: string) => {
     if (isInMobileApp()) {
         setTimeout(() => {
-            const backgroundColor = rgba2hex(getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim());
             let mode = window.siyuan.config.appearance.mode;
             if (window.siyuan.config.appearance.modeOS) {
                 if (OSTheme === "dark") {
@@ -344,8 +428,11 @@ const updateMobileTheme = (OSTheme: string) => {
                     mode = 0;
                 }
             }
+            const fallback = mode === 0 ? "#ffffffff" : "#1e1e1eff";
+            const backgroundColor = rgbaToHex(cssVarToRgba("--b3-theme-background")) || fallback;
+            // 统一传 #RRGGBBAA：iOS 按 #RRGGBBAA 解析，Android / Harmony 将 #RRGGBBAA 转为 #AARRGGBB
             if (isInIOS()) {
-                window.webkit.messageHandlers.changeStatusBar.postMessage((backgroundColor || (mode === 0 ? "#fff" : "#1e1e1e")) + " " + mode);
+                window.webkit.messageHandlers.changeStatusBar.postMessage(backgroundColor + " " + mode);
             } else if (isInAndroid()) {
                 window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
             } else if (isInHarmony()) {

@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -127,7 +127,7 @@ func execHistoryOp(op *historyDBQueueOperation, tx *sql.Tx, context map[string]a
 		err = deleteOutdatedHistories(tx, op.before)
 	default:
 		msg := fmt.Sprintf("unknown history operation [%s]", op.action)
-		logging.LogErrorf(msg)
+		logging.LogErrorf("%s", msg)
 		err = errors.New(msg)
 	}
 	return

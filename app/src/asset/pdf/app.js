@@ -75,6 +75,7 @@ import {PDFDocumentProperties} from "./pdf_document_properties";
 import {PDFFindBar} from "./pdf_find_bar";
 import {PDFFindController} from "./pdf_find_controller.js";
 import {PDFHistory} from "./pdf_history.js";
+import {PDFNavigationHistory} from "./navigationHistory";
 import {PDFLayerViewer} from "./pdf_layer_viewer";
 import {PDFOutlineViewer} from "./pdf_outline_viewer";
 import {PDFPresentationMode} from "./pdf_presentation_mode";
@@ -301,7 +302,7 @@ class PDFViewerApplication {
 
                 if (typeof PDFJSDev === "undefined") {
                     // NOTE
-                    globalThis.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.mjs?v=4.7.85`);
+                    globalThis.pdfjsWorker = await import(`${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.min.mjs?v=4.8.69`);
                 } else {
                     await __non_webpack_import__(PDFWorker.workerSrc);
                 }
@@ -514,9 +515,15 @@ class PDFViewerApplication {
             pdfRenderingQueue.setThumbnailViewer(this.pdfThumbnailViewer);
         }
 
-        // The browsing history is only enabled when the viewer is standalone,
-        // i.e. not when it is embedded in a web page.
-        if (!this.isViewerEmbedded && !AppOptions.get("disableHistory")) {
+        // 嵌入式阅读器使用实例级历史，避免多个 PDF 页签共享浏览器历史
+        if (this.isViewerEmbedded && !AppOptions.get("disableHistory")) {
+            this.pdfHistory = new PDFNavigationHistory({
+                linkService: pdfLinkService,
+                eventBus,
+                limit: Constants.SIZE_UNDO,
+            });
+            pdfLinkService.setHistory(this.pdfHistory);
+        } else if (!AppOptions.get("disableHistory")) {
             this.pdfHistory = new PDFHistory({
                 linkService: pdfLinkService,
                 eventBus,
@@ -1329,6 +1336,9 @@ class PDFViewerApplication {
                     let scrollMode = AppOptions.get("scrollModeOnLoad");
                     let spreadMode = AppOptions.get("spreadModeOnLoad");
                     // NOTE
+                    if (this.pdfId && stored.page) {
+                        this.pdfHistory?.seedPreviousPosition?.(stored);
+                    }
                     stored.page = this.pdfId || stored.page;
                     if (stored?.page && viewOnLoad !== ViewOnLoad.INITIAL) {
                         hash =
@@ -1946,6 +1956,9 @@ class PDFViewerApplication {
         eventBus._on("lastpage", () => (this.page = this.pagesCount), {signal});
         eventBus._on("nextpage", () => pdfViewer.nextPage(), {signal});
         eventBus._on("previouspage", () => pdfViewer.previousPage(), {signal});
+        eventBus._on("pdfhistoryback", () => this.pdfHistory?.back(), {signal});
+        eventBus._on("pdfhistoryforward", () => this.pdfHistory?.forward(), {signal});
+        eventBus._on("pdfhistorystatechanged", onPDFHistoryStateChanged.bind(this), {signal});
         eventBus._on("zoomin", this.zoomIn.bind(this), {signal});
         eventBus._on("zoomout", this.zoomOut.bind(this), {signal});
         eventBus._on("zoomreset", this.zoomReset.bind(this), {signal});
@@ -2485,6 +2498,10 @@ function onPageNumberChanged(evt) {
             pdfViewer.currentPageLabel
         );
     }
+}
+
+function onPDFHistoryStateChanged({canGoBack, canGoForward}) {
+    this.toolbar?.setHistoryState(canGoBack, canGoForward);
 }
 
 function onImageAltTextSettings() {

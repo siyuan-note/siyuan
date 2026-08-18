@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -49,7 +49,23 @@ func getDocOutline(c *gin.Context) {
 		return
 	}
 
-	headings, err := model.Outline(rootID, preview)
+	notebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, notebook) {
+		ret.Data = []*model.Path{}
+		return
+	}
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	var headings []*model.Path
+	var err error
+	if notebook != "" && model.IsEncryptedBox(notebook) {
+		headings, err = model.OutlineInBox(rootID, preview, notebook)
+	} else {
+		headings, err = model.Outline(rootID, preview)
+	}
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
@@ -70,4 +86,60 @@ func getDocOutline(c *gin.Context) {
 		}
 	}
 	ret.Data = headings
+}
+
+func getDocHeadingNumbers(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	rootID, ok := arg["id"].(string)
+	if !ok || util.InvalidIDPattern(rootID, ret) {
+		return
+	}
+
+	notebook, _ := arg["notebook"].(string)
+	if isEncryptedNotebookDeniedForPublish(c, notebook) {
+		ret.Data = map[string]string{}
+		return
+	}
+	if err := holdEncryptedBoxRequest(c, notebook); err != nil {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	numbers := map[string]string{}
+	var err error
+	if notebook != "" && model.IsEncryptedBox(notebook) {
+		numbers, err = model.GetHeadingNumbers(rootID, notebook)
+	} else {
+		numbers, err = model.GetHeadingNumbers(rootID, "")
+	}
+	if nil != err {
+		ret.Code = 1
+		ret.Msg = err.Error()
+		return
+	}
+	if model.IsReadOnlyRoleContext(c) {
+		publishAccess := model.GetPublishAccess()
+		bt := treenode.GetBlockTree(rootID)
+		if nil == bt {
+			numbers = map[string]string{}
+		} else {
+			passwordID, password := model.GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
+			if "" != password && !model.CheckPublishAuthCookie(c, passwordID, password) {
+				numbers = map[string]string{}
+			}
+			publishIgnore := model.GetDisablePublishAccess(publishAccess)
+			if !model.CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishIgnore) {
+				numbers = map[string]string{}
+			}
+		}
+	}
+
+	ret.Data = numbers
 }

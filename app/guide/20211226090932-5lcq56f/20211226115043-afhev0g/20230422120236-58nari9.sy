@@ -6,7 +6,7 @@
 		"id": "20230422120236-58nari9",
 		"title": "資料可用性保障",
 		"type": "doc",
-		"updated": "20230630141949"
+		"updated": "20260803165036"
 	},
 	"Children": [
 		{
@@ -223,7 +223,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230422120301-a1yj8y4",
-				"updated": "20230422120301"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -263,7 +263,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230422120301-4tinfy7",
-				"updated": "20230422120445"
+				"updated": "20260803165036"
 			},
 			"Children": [
 				{
@@ -303,7 +303,7 @@
 					},
 					"Properties": {
 						"id": "20230422120301-c2hgawf",
-						"updated": "20230422120426"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -326,7 +326,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20230422120301-2sx5b7x",
-								"updated": "20230422120426"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
@@ -366,7 +366,7 @@
 									},
 									"Properties": {
 										"id": "20230422120301-z8l8tpp",
-										"updated": "20230422120426"
+										"updated": "20260803163402"
 									},
 									"Children": [
 										{
@@ -374,7 +374,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20230422120301-a82nm5r",
-												"updated": "20230422120426"
+												"updated": "20260803163402"
 											},
 											"Children": [
 												{
@@ -397,7 +397,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ 中開啟 "
+													"Data": " ​ 中開啟 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -425,7 +425,7 @@
 					},
 					"Properties": {
 						"id": "20230422120301-he36u56",
-						"updated": "20230422120445"
+						"updated": "20260803165036"
 					},
 					"Children": [
 						{
@@ -433,7 +433,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230422120301-uqcd85n",
-								"updated": "20230422120445"
+								"updated": "20260803165036"
 							},
 							"Children": [
 								{
@@ -465,7 +465,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 中瀏覽和下載雲端快照"
+									"Data": " ​ 中瀏覽和下載雲端快照"
 								}
 							]
 						}

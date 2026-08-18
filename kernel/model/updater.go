@@ -1,4 +1,4 @@
-// SiYuan - Refactor your thinking
+// SiYuan - From thought to insight, with agents
 // Copyright (c) 2020-present, b3log.org
 //
 // This program is free software: you can redistribute it and/or modify
@@ -17,16 +17,14 @@
 package model
 
 import (
-	"bufio"
 	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -37,26 +35,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
 )
-
-func execNewVerInstallPkg(newVerInstallPkgPath string) {
-	logging.LogInfof("installing the new version [%s]", newVerInstallPkgPath)
-	var cmd *exec.Cmd
-	if gulu.OS.IsWindows() {
-		cmd = exec.Command(newVerInstallPkgPath)
-	} else if gulu.OS.IsDarwin() {
-		exec.Command("chmod", "+x", newVerInstallPkgPath).CombinedOutput()
-		cmd = exec.Command("open", newVerInstallPkgPath)
-	} else {
-		logging.LogErrorf("unsupported platform for auto-installing package")
-		return
-	}
-	gulu.CmdAttr(cmd)
-	cmdErr := cmd.Run()
-	if nil != cmdErr {
-		logging.LogErrorf("exec install new version failed: %s", cmdErr)
-		return
-	}
-}
 
 func getNewVerInstallPkgPath() string {
 	if skipNewVerInstallPkg() {
@@ -78,8 +56,9 @@ func getNewVerInstallPkgPath() string {
 }
 
 var checkDownloadInstallPkgLock = sync.Mutex{}
+var errUpdatePackageUnavailable = errors.New("update package is unavailable")
 
-func checkDownloadInstallPkg() {
+func checkDownloadInstallPkg(notifyPackageUnavailable bool) {
 	defer logging.Recover()
 
 	if skipNewVerInstallPkg() {
@@ -93,6 +72,11 @@ func checkDownloadInstallPkg() {
 
 	downloadPkgURLs, checksum, err := getUpdatePkg()
 	if err != nil {
+		if notifyPackageUnavailable && errors.Is(err, errUpdatePackageUnavailable) {
+			if release, releaseErr := getUpdateRelease(false); nil == releaseErr && !isVersionUpToDate(release.Version) {
+				pushNewVersionNotification(release)
+			}
+		}
 		return
 	}
 
@@ -120,62 +104,38 @@ func checkDownloadInstallPkg() {
 }
 
 func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
-	defer logging.Recover()
-	result, err := util.GetRhyResult(context.TODO(), false)
+	release, err := getUpdateRelease(false)
 	if err != nil {
 		return
 	}
 
-	ver := result["ver"].(string)
-	if isVersionUpToDate(ver) {
+	if isVersionUpToDate(release.Version) {
 		err = fmt.Errorf("version is up to date")
 		return
 	}
 
-	var suffix string
-	if gulu.OS.IsWindows() {
-		if "arm64" == runtime.GOARCH {
-			suffix = "win-arm64.exe"
-		} else {
-			suffix = "win.exe"
-		}
-	} else if gulu.OS.IsDarwin() {
-		if "arm64" == runtime.GOARCH {
-			suffix = "mac-arm64.dmg"
-		} else {
-			suffix = "mac.dmg"
-		}
-	}
-	pkg := "siyuan-" + ver + "-" + suffix
-
-	b3logURL := "https://release.b3log.org/siyuan/" + pkg
-	liuyunURL := "https://release.liuyun.io/siyuan/" + pkg
-	githubURL := "https://github.com/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
-	ghproxyURL := "https://ghfast.top/" + githubURL
-	if util.IsChinaCloud() {
-		downloadPkgURLs = append(downloadPkgURLs, b3logURL)
-		downloadPkgURLs = append(downloadPkgURLs, liuyunURL)
-		downloadPkgURLs = append(downloadPkgURLs, ghproxyURL)
-		downloadPkgURLs = append(downloadPkgURLs, githubURL)
-	} else {
-		downloadPkgURLs = append(downloadPkgURLs, b3logURL)
-		downloadPkgURLs = append(downloadPkgURLs, liuyunURL)
-		downloadPkgURLs = append(downloadPkgURLs, githubURL)
-		downloadPkgURLs = append(downloadPkgURLs, ghproxyURL)
-	}
-
-	checksums := result["checksums"].(map[string]any)
-	checksum = checksums[pkg].(string)
-
-	if "" == checksum {
-		err = fmt.Errorf("checksum is empty")
+	pkgName := currentInstallPackageName(release.Version)
+	if "" == pkgName {
+		err = fmt.Errorf("%w for the current platform", errUpdatePackageUnavailable)
 		return
 	}
+	pkg := release.Packages[pkgName]
+	if nil == pkg || 0 == len(pkg.URLs) {
+		err = fmt.Errorf("%w: [%s]", errUpdatePackageUnavailable, pkgName)
+		return
+	}
+	if "" == pkg.Checksum {
+		err = fmt.Errorf("%w: [%s] checksum is unavailable", errUpdatePackageUnavailable, pkgName)
+		return
+	}
+	downloadPkgURLs = append(downloadPkgURLs, pkg.URLs...)
+	checksum = pkg.Checksum
 	return
 }
 
 func downloadInstallPkg(pkgURL, checksum string) (err error) {
 	if "" == pkgURL || "" == checksum {
+		err = errors.New("update package URL or checksum is empty")
 		return
 	}
 
@@ -195,7 +155,7 @@ func downloadInstallPkg(pkgURL, checksum string) (err error) {
 	}
 
 	logging.LogInfof("downloading install package [%s]", pkgURL)
-	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute).DisableInsecureSkipVerify()
+	client := req.C().SetTLSHandshakeTimeout(7 * time.Second).SetTimeout(10 * time.Minute).DisableInsecureSkipVerify().SetUserAgent(util.UserAgent)
 	callback := func(info req.DownloadInfo) {
 		progress := fmt.Sprintf("%.2f%%", float64(info.DownloadedSize)/float64(info.Response.ContentLength)*100.0)
 		// logging.LogDebugf("downloading install package [%s %s]", pkgURL, progress)
@@ -204,12 +164,19 @@ func downloadInstallPkg(pkgURL, checksum string) (err error) {
 	_, err = client.R().SetOutputFile(savePath).SetDownloadCallbackWithInterval(callback, 1*time.Second).Get(pkgURL)
 	if err != nil {
 		logging.LogErrorf("download install package [%s] failed: %s", pkgURL, err)
+		if removeErr := os.Remove(savePath); nil != removeErr && !os.IsNotExist(removeErr) {
+			logging.LogErrorf("remove incomplete install package [%s] failed: %s", savePath, removeErr)
+		}
 		return
 	}
 
 	localChecksum, _ := sha256Hash(savePath)
 	if checksum != localChecksum {
-		logging.LogErrorf("verify checksum failed, download install package [%s] checksum [%s] not equal to downloaded [%s] checksum [%s]", pkgURL, checksum, savePath, localChecksum)
+		err = fmt.Errorf("verify checksum failed, download install package [%s] checksum [%s] not equal to downloaded [%s] checksum [%s]", pkgURL, checksum, savePath, localChecksum)
+		logging.LogError(err.Error())
+		if removeErr := os.Remove(savePath); nil != removeErr && !os.IsNotExist(removeErr) {
+			logging.LogErrorf("remove invalid install package [%s] failed: %s", savePath, removeErr)
+		}
 		return
 	}
 	logging.LogInfof("downloaded install package [%s] to [%s]", pkgURL, savePath)
@@ -225,18 +192,10 @@ func sha256Hash(filename string) (ret string, err error) {
 	defer file.Close()
 
 	hash := sha256.New()
-	reader := bufio.NewReader(file)
-	buf := make([]byte, 1024*1024*4)
-	for {
-		switch n, readErr := reader.Read(buf); readErr {
-		case nil:
-			hash.Write(buf[:n])
-		case io.EOF:
-			return fmt.Sprintf("%x", hash.Sum(nil)), nil
-		default:
-			return "", err
-		}
+	if _, err = io.Copy(hash, file); err != nil {
+		return "", err
 	}
+	return fmt.Sprintf("%x", hash.Sum(nil)), nil
 }
 
 type Announcement struct {
@@ -279,29 +238,25 @@ func CheckUpdate(showMsg bool) {
 		return
 	}
 
-	result, err := util.GetRhyResult(context.TODO(), showMsg)
+	release, err := getUpdateRelease(showMsg)
 	if err != nil {
 		return
 	}
 
-	ver := result["ver"].(string)
-	releaseLang := result["release"].(string)
-	if releaseLangArg := result["release_"+Conf.Lang]; nil != releaseLangArg {
-		releaseLang = releaseLangArg.(string)
-	} else if releaseLangArg := result["release_"+util.LangToLegacy(Conf.Lang)]; nil != releaseLangArg {
-		// 兼容云端 JSON 数据中历史下划线 key（release_zh_CN 等）
-		releaseLang = releaseLangArg.(string)
-	}
-
-	if isVersionUpToDate(ver) {
+	if isVersionUpToDate(release.Version) {
 		util.PushUpdateMsg("update-notify", Conf.Language(10), 3000)
 	} else {
-		util.PushUpdateMsg("update-notify", fmt.Sprintf(Conf.Language(9), "<a href=\""+releaseLang+"\">"+releaseLang+"</a>"), 15000)
+		pushNewVersionNotification(release)
 	}
 	go func() {
 		defer logging.Recover()
-		checkDownloadInstallPkg()
+		checkDownloadInstallPkg(false)
 	}()
+}
+
+func pushNewVersionNotification(release *updateRelease) {
+	releaseLink := "<a href=\"" + release.ReleaseURL + "\">" + release.ReleaseURL + "</a>"
+	util.PushUpdateMsg("update-notify", fmt.Sprintf(Conf.Language(9), releaseLink), 15000)
 }
 
 func isVersionUpToDate(releaseVer string) bool {

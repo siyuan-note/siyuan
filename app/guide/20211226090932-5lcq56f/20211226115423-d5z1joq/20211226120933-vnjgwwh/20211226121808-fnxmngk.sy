@@ -6,16 +6,108 @@
 		"id": "20211226121808-fnxmngk",
 		"title": "資料庫表",
 		"type": "doc",
-		"updated": "20251219204957"
+		"updated": "20260810212846"
 	},
 	"Children": [
+		{
+			"ID": "20211226121831-umbkur3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226121831-umbkur3",
+				"updated": "20260809232000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "公開查詢表包括 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "blocks"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（內容區塊）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "spans"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（行級元素）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "assets"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（資源文件引用）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "attributes"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（區塊屬性）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "refs"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（區塊引用）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "和"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "file_annotation_refs"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "（資源文件標註引用）"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。下方列出了 blocks 表結構，其他表可透過同一 SQL 查詢介面使用。"
+				}
+			]
+		},
 		{
 			"ID": "20211226121831-ppl9gr8",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121831-ppl9gr8",
-				"updated": "20211225234715"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -30,20 +122,6 @@
 			]
 		},
 		{
-			"ID": "20211226121831-umbkur3",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226121831-umbkur3",
-				"updated": "20211228141039"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "該表用於存儲內容塊資料。"
-				}
-			]
-		},
-		{
 			"ID": "20211226121831-s0emrpw",
 			"Type": "NodeTable",
 			"TableAligns": [
@@ -53,7 +131,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20211226121831-s0emrpw",
-				"updated": "20221014133129"
+				"updated": "20260730184353"
 			},
 			"Children": [
 				{
@@ -110,7 +188,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊 ID"
+									"Data": "內容區塊 ID"
 								}
 							]
 						}
@@ -137,7 +215,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "父塊的 ID，如果內容塊是文檔塊則該欄位為空"
+									"Data": "父區塊的 ID，如果內容區塊是文檔區塊則該欄位為空"
 								}
 							]
 						}
@@ -164,7 +242,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "根塊 ID，即文檔塊 ID"
+									"Data": "根區塊 ID，即文檔區塊 ID"
 								}
 							]
 						}
@@ -245,7 +323,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊所在文檔路徑"
+									"Data": "內容區塊所在文檔路徑"
 								}
 							]
 						}
@@ -272,7 +350,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "人類可讀的內容塊所在文檔路徑"
+									"Data": "人類可讀的內容區塊所在文檔路徑"
 								}
 							]
 						}
@@ -299,7 +377,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊名稱"
+									"Data": "內容區塊名稱"
 								}
 							]
 						}
@@ -326,7 +404,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊別名"
+									"Data": "內容區塊別名"
 								}
 							]
 						}
@@ -353,7 +431,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊備註"
+									"Data": "內容區塊備註"
 								}
 							]
 						}
@@ -407,7 +485,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "第一個子塊去除了 Markdown 標記符的文字"
+									"Data": "第一個子區塊去除了 Markdown 標記符的文字"
 								}
 							]
 						}
@@ -497,7 +575,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊類型，參考"
+									"Data": "內容區塊類型，參考"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -531,7 +609,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "內容塊子類型，參考"
+									"Data": "內容區塊子類型，參考"
 								},
 								{
 									"Type": "NodeTextMark",
@@ -570,7 +648,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "{: name=\u0026quot;value\u0026quot;}"
+									"TextMarkTextContent": "{: name=&quot;value&quot;}"
 								},
 								{
 									"Type": "NodeText",
@@ -687,7 +765,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121831-zvnhouv",
-				"updated": "20251219204957"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -702,7 +780,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226121831-oj726eb",
-				"updated": "20251219204957"
+				"updated": "20260803163402"
 			},
 			"Children": [
 				{
@@ -714,7 +792,7 @@
 					},
 					"Properties": {
 						"id": "20211226121831-pk3bq3y",
-						"updated": "20230630110035"
+						"updated": "20260803163402"
 					},
 					"Children": [
 						{
@@ -722,7 +800,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226121831-6cm01kl",
-								"updated": "20230630110035"
+								"updated": "20260803163402"
 							},
 							"Children": [
 								{
@@ -763,7 +841,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 進行調整"
+									"Data": " ​ 進行調整"
 								}
 							]
 						}
@@ -830,12 +908,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226121831-f2bpy1c",
-												"updated": "20211226121831"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "標題塊："
+													"Data": "標題區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -867,12 +945,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226121831-x6nehx4",
-												"updated": "20220312005811"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "段落塊："
+													"Data": "段落區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -904,12 +982,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226121831-4j702is",
-												"updated": "20220312005817"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "代碼塊："
+													"Data": "代碼區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -941,12 +1019,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226121831-gm9gxxq",
-												"updated": "20220312005823"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "數學公式塊："
+													"Data": "數學公式區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -978,7 +1056,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226121831-x0e87cg",
-												"updated": "20220312005829"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
@@ -987,7 +1065,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "塊："
+													"Data": "區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1019,12 +1097,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220312005431-n8fa5kh",
-												"updated": "20220312005442"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "HTML塊："
+													"Data": "HTML 區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1056,7 +1134,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226121831-kdypk2a",
-												"updated": "20220312005839"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
@@ -1065,7 +1143,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "塊："
+													"Data": "區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1097,7 +1175,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226121831-e7zsjd2",
-												"updated": "20220312005842"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
@@ -1106,7 +1184,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "項塊："
+													"Data": "項區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1138,12 +1216,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226121831-nnlawsk",
-												"updated": "20220312005846"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "引述塊："
+													"Data": "引述區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1175,12 +1253,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20251219204951-gdvwekm",
-												"updated": "20251219204957"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "提示塊："
+													"Data": "提示區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1212,12 +1290,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226121831-tjjqrlu",
-												"updated": "20220312005849"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "超級塊："
+													"Data": "超級區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1249,12 +1327,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20241024001004-wu134y6",
-												"updated": "20241024001020"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "資料庫塊："
+													"Data": "資料庫區塊："
 												},
 												{
 													"Type": "NodeTextMark",
@@ -1286,12 +1364,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20241024001004-wtbxwea",
-												"updated": "20241024010548"
+												"updated": "20260730184353"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "文檔塊："
+													"Data": "文檔區塊："
 												},
 												{
 													"Type": "NodeTextMark",

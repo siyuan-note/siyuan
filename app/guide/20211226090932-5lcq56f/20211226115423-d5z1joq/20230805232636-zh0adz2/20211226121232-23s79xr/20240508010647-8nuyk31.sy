@@ -6,7 +6,7 @@
 		"id": "20240508010647-8nuyk31",
 		"title": "收集箱",
 		"type": "doc",
-		"updated": "20240508011412"
+		"updated": "20260809232000"
 	},
 	"Children": [
 		{
@@ -73,7 +73,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20240508010825-saua2mg",
-				"updated": "20240508010826"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -90,7 +90,7 @@
 			},
 			"Properties": {
 				"id": "20240508010825-zwyfsd0",
-				"updated": "20240508011210"
+				"updated": "20260809232000"
 			},
 			"Children": [
 				{
@@ -290,7 +290,7 @@
 					},
 					"Properties": {
 						"id": "20240508010825-o51n5ay",
-						"updated": "20240508010825"
+						"updated": "20260809232000"
 					},
 					"Children": [
 						{
@@ -298,12 +298,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240508010825-eqcdlnq",
-								"updated": "20240508010825"
+								"updated": "20260809232000"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "在思源中打開收集箱面板（Alt+6）"
+									"Data": "在思源中打開收集箱面板（"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Alt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "6"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "）"
 								}
 							]
 						}

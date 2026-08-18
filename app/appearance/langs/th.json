@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "ใช้พร็อกซีของระบบ",
+	"statusBarMsgDataSync": "การซิงค์ข้อมูล",
+	"entryDocumentStatistics": "สถิติเอกสาร",
+	"entryTabMenu": "เมนูแท็บ",
+	"entrySingleBlock": "บล็อกเดียว",
+	"entryMultipleBlocks": "หลายบล็อก",
+	"entryPixelWidth": "ความกว้างเป็นพิกเซล",
+	"entryPercentageWidth": "ความกว้างเป็นเปอร์เซ็นต์",
+	"entryPixelHeight": "ความสูงเป็นพิกเซล",
+	"entryPercentageHeight": "ความสูงเป็นเปอร์เซ็นต์",
+	"dragTipSelectedNotebooks": "เลือกสมุด ${count} เล่ม",
+	"formatPainterDoubleClickTip": "คัดลอกรูปแบบ; ดับเบิลคลิกเพื่อใช้งานต่อเนื่อง",
+	"dragTipSelectedDocs": "เลือกเอกสาร ${count} ฉบับ",
+	"entrySlashMenu": "เมนูสแลช",
+	"importNotebook": "นำเข้าสมุดบันทึก",
+	"distributeSelectedColWidths": "กระจายความกว้างของคอลัมน์ที่เลือกให้เท่ากัน",
+	"useDefaultWidthForAllColumns": "ใช้ความกว้างเริ่มต้นสำหรับทุกคอลัมน์",
 	"closeTabOnDoubleClick": "ใช้การดับเบิลคลิกเพื่อปิดแท็บ",
 	"closeTabOnDoubleClickTip": "เมื่อเปิดใช้ ให้ดับเบิลคลิกแท็บเพื่อปิด",
 	"sortByParent": "ใช้กฎการเรียงลำดับของระดับบน",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "เมนูย่อย",
 	"splitMergedCellTip": "ต้องแยกเซลล์ที่ผสานก่อน",
 	"entryVisibility": "เมนูและแถบเชื่อมต่อ",
-	"entryVisibilityTip": "เลือกรายการเมนูและไอคอนแถบเชื่อมต่อในตัวที่จะแสดงบนเดสก์ท็อป",
+	"entryVisibilityTip": "กำหนดการแสดงผลและลำดับของรายการเมนูเดสก์ท็อปในตัว ตลอดจนการแสดงผลของไอคอนแถบเชื่อมต่อ",
 	"entrySimple": "เรียบง่าย",
 	"entryFull": "ครบถ้วน",
 	"entrySimpleTip": "แสดงรายการที่ใช้บ่อยเพื่อช่วยให้ผู้ใช้ใหม่เริ่มต้นได้อย่างรวดเร็ว",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "อ้างอิงจาก",
 	"entryCustomProfile": "โปรไฟล์กำหนดเอง",
 	"entryCreateProfile": "สร้างโปรไฟล์",
-	"entryRestoreBase": "คืนค่าเป็น [${x}]",
-	"entryRestoreBaseConfirm": "คืนค่ารายการทั้งหมดในโปรไฟล์นี้เป็น [${x}] หรือไม่?",
 	"entryImportInvalid": "ไฟล์โปรไฟล์เมนูและแถบเชื่อมต่อไม่ถูกต้อง",
 	"mobileMenuQuickActions": "การดำเนินการด่วน",
 	"mobileMenuCreate": "สร้าง",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "รอคำตอบ",
 	"agentNewSession": "เซสชันใหม่",
 	"agentInputPlaceholder": "พิมพ์ข้อความ, /ทักษะ...",
-	"agentSend": "ส่ง",
+	"agentSend": "ส่งให้เอเจนต์",
 	"agentStop": "หยุด",
 	"editorFontSize": "ขนาดตัวอักษรตัวแก้ไข",
 	"configGroupBehavior": "พฤติกรรม",
@@ -2648,6 +2663,7 @@
 		"369": "การกำหนดค่า OIDC ไม่ถูกต้อง",
 		"370": "ปริมาณการรับส่งข้อมูลที่เร่งผ่าน LAN %s",
 		"371": "มีสมุดนี้อยู่แล้ว",
-		"372": "กู้คืนสมุดแล้วและยังคงปิดอยู่"
+		"372": "กู้คืนสมุดแล้วและยังคงปิดอยู่",
+		"373": "ไฟล์บีบอัดนี้มีข้อมูลสมุดบันทึก โปรดนำเข้าจาก [แผนผังเอกสาร - เพิ่มเติม - นำเข้าสมุดบันทึก]"
 	}
-	}
+}

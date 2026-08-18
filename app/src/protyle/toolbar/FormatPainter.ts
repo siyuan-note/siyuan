@@ -1,6 +1,5 @@
 import {Constants} from "../../constants";
 import {showMessage} from "../../dialog/message";
-import {MenuItem} from "../../menus/Menu";
 import {getBlockRanges} from "../util/selection";
 import {
     FORMAT_PAINTER_TYPES,
@@ -193,33 +192,29 @@ export const formatPainter = new FormatPainterController();
 
 export class FormatPainter {
     public element: HTMLElement;
+    private clickTimeout?: number;
 
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
         this.element = document.createElement("button");
         this.element.className = "protyle-toolbar__item b3-tooltips b3-tooltips__n";
         this.element.setAttribute("data-type", menuItem.name);
-        this.element.setAttribute("data-menu", "true");
-        this.element.setAttribute("aria-label", window.siyuan.languages.formatPainter);
+        this.element.setAttribute("aria-label", window.siyuan.languages.formatPainterDoubleClickTip);
         this.element.innerHTML = '<svg><use xlink:href="#iconPaintRoller"></use></svg>';
         this.element.addEventListener("mousedown", event => event.preventDefault());
         this.element.addEventListener("click", event => {
             event.preventDefault();
-            window.siyuan.menus.menu.remove();
-            const items: {label: string, mode: TFormatPainterMode}[] = [
-                {label: window.siyuan.languages.formatPainter, mode: "once"},
-                {label: window.siyuan.languages.formatPainterContinuous, mode: "continuous"},
-            ];
-            items.forEach(item => {
-                window.siyuan.menus.menu.append(new MenuItem({
-                    iconHTML: "",
-                    label: item.label,
-                    click: () => {
-                        formatPainter.activate(protyle, item.mode);
-                    },
-                }).element);
-            });
-            const rect = this.element.getBoundingClientRect();
-            window.siyuan.menus.menu.popup({x: rect.left, y: rect.bottom, h: rect.height});
+            clearTimeout(this.clickTimeout);
+            if (event.detail > 1) {
+                this.clickTimeout = undefined;
+                formatPainter.activate(protyle, "continuous");
+            } else if (event.detail === 0) {
+                formatPainter.activate(protyle, "once");
+            } else {
+                this.clickTimeout = window.setTimeout(() => {
+                    this.clickTimeout = undefined;
+                    formatPainter.activate(protyle, "once");
+                }, Constants.TIMEOUT_DBLCLICK);
+            }
         });
     }
 }

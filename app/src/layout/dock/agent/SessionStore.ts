@@ -88,7 +88,12 @@ export interface AgentSession {
             arguments?: Record<string, unknown>;
             argumentsJSON?: string;
             result?: string;
-            state?: string
+            state?: string;
+            providerData?: {
+                google?: {
+                    thoughtSignature?: string
+                }
+            }
         }>;
         duration?: number;
         timestamp?: number;

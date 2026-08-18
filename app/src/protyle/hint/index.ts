@@ -60,7 +60,12 @@ import {updateAttrViewCellAnimation} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {getIconValueKind} from "../../emoji/iconValue";
 import {getCreateTargetContext, isSameCreateTargetContext} from "./createTargetContext";
-import {endsWithMultiCharHintPrefix, getBlockHintTriggerOffset, getBlockRefStaticText} from "./blockHintRange";
+import {
+    endsWithMultiCharHintPrefix,
+    getBlockHintTriggerOffset,
+    getBlockRefStaticText,
+    shouldIgnoreHintTrigger,
+} from "./blockHintRange";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -274,6 +279,10 @@ export class Hint {
         // https://github.com/siyuan-note/siyuan/issues/5083
         if (this.splitChar === "/" || this.splitChar === "、") {
             clearTimeout(this.timeId);
+            const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
+            if (!this.enableSlash || !blockElement || isInEmbedBlock(blockElement)) {
+                return;
+            }
             if (protyle.lite) {
                 protyle.options.hint.extend.find((item) => {
                     if (item.key === "/" && item.hint) {
@@ -281,28 +290,25 @@ export class Hint {
                         return true;
                     }
                 });
-            } else {
-                const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
-                if (this.enableSlash && !isMobile() && blockElement && !isInEmbedBlock(blockElement)) {
-                    const slashData = hintSlash(key, protyle);
-                    if (slashData.length === 0) {
-                        if (endsWithMultiCharHintPrefix(key, protyle.options.hint.extend.map((item) => item.key))) {
-                            this.enableExtend = false;
+            } else if (!isMobile()) {
+                const slashData = hintSlash(key, protyle);
+                if (slashData.length === 0) {
+                    if (endsWithMultiCharHintPrefix(key, protyle.options.hint.extend.map((item) => item.key))) {
+                        this.enableExtend = false;
+                    }
+                    this.genHTML(slashData, protyle, true, "hint");
+                    return;
+                }
+                const createTarget = this.prepareCreateTarget(protyle, "doc");
+                if (createTarget.result !== undefined) {
+                    this.genHTML(hintSlash(key, protyle, createTarget.result), protyle, true, "hint");
+                } else {
+                    this.genLoading(protyle);
+                    createTarget.promise.then((isCurrentSubDoc) => {
+                        if (createTarget.isCurrent()) {
+                            this.genHTML(hintSlash(key, protyle, isCurrentSubDoc), protyle, true, "hint");
                         }
-                        this.genHTML(slashData, protyle, true, "hint");
-                        return;
-                    }
-                    const createTarget = this.prepareCreateTarget(protyle, "doc");
-                    if (createTarget.result !== undefined) {
-                        this.genHTML(hintSlash(key, protyle, createTarget.result), protyle, true, "hint");
-                    } else {
-                        this.genLoading(protyle);
-                        createTarget.promise.then((isCurrentSubDoc) => {
-                            if (createTarget.isCurrent()) {
-                                this.genHTML(hintSlash(key, protyle, isCurrentSubDoc), protyle, true, "hint");
-                            }
-                        });
-                    }
+                    });
                 }
             }
             return;
@@ -1189,8 +1195,10 @@ ${genHintItemHTML(item)}
                     Constants.BLOCK_HINT_CLOSE_KEYS[item.key]);
             }
             if (this.lastIndex < currentLastIndex) {
-                this.splitChar = item.key;
-                this.lastIndex = currentLastIndex;
+                if (!shouldIgnoreHintTrigger(this.splitChar, item.key, Constants.BLOCK_HINT_KEYS)) {
+                    this.splitChar = item.key;
+                    this.lastIndex = currentLastIndex;
+                }
             }
         });
         if (this.lastIndex === -1) {

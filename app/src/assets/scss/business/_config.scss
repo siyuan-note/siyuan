@@ -939,8 +939,38 @@
       box-sizing: border-box;
       margin: 0;
       min-height: 40px;
-      padding: 6px 12px;
+      padding: 6px 8px 6px 12px;
       width: 100%;
+
+      > .b3-list-item__text,
+      &-navigate > .b3-list-item__text {
+        color: inherit;
+      }
+
+      &-navigate {
+        align-items: center;
+        align-self: stretch;
+        background-color: transparent;
+        border: 0;
+        color: inherit;
+        cursor: pointer;
+        display: flex;
+        flex: 1;
+        font: inherit;
+        min-width: 0;
+        padding: 0;
+        text-align: left;
+      }
+
+      &-arrow {
+        color: inherit;
+        flex-shrink: 0;
+      }
+
+      > .b3-switch {
+        flex-shrink: 0;
+        margin-left: 8px;
+      }
 
       &--current {
         background-color: var(--b3-theme-primary-lightest);

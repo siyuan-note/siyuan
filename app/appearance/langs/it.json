@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Usa proxy di sistema",
+	"statusBarMsgDataSync": "Sincronizzazione dei dati",
+	"entryDocumentStatistics": "Statistiche del documento",
+	"entryTabMenu": "Menu delle schede",
+	"entrySingleBlock": "Blocco singolo",
+	"entryMultipleBlocks": "Più blocchi",
+	"entryPixelWidth": "Larghezza in pixel",
+	"entryPercentageWidth": "Larghezza percentuale",
+	"entryPixelHeight": "Altezza in pixel",
+	"entryPercentageHeight": "Altezza percentuale",
+	"dragTipSelectedNotebooks": "${count} taccuini selezionati",
+	"formatPainterDoubleClickTip": "Copia formato; fai doppio clic per l'uso continuo",
+	"dragTipSelectedDocs": "${count} documenti selezionati",
+	"entrySlashMenu": "Menu slash",
+	"importNotebook": "Importa taccuino",
+	"distributeSelectedColWidths": "Distribuisci uniformemente la larghezza delle colonne selezionate",
+	"useDefaultWidthForAllColumns": "Usa la larghezza predefinita per tutte le colonne",
 	"closeTabOnDoubleClick": "Usa il doppio clic per chiudere le schede",
 	"closeTabOnDoubleClickTip": "Quando l'opzione è attiva, fai doppio clic su una scheda per chiuderla",
 	"sortByParent": "Usa le regole di ordinamento dell'elemento padre",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Sottomenu",
 	"splitMergedCellTip": "Prima dividi le celle unite",
 	"entryVisibility": "Menu e barra di ancoraggio",
-	"entryVisibilityTip": "Scegli quali voci di menu e icone della barra di ancoraggio mostrare sul desktop",
+	"entryVisibilityTip": "Configura la visibilità e l'ordine delle voci integrate dei menu desktop, nonché la visibilità delle icone della barra di ancoraggio",
 	"entrySimple": "Semplice",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Mostra le voci usate più spesso per iniziare rapidamente",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Basato su",
 	"entryCustomProfile": "Profilo personalizzato",
 	"entryCreateProfile": "Crea profilo",
-	"entryRestoreBase": "Ripristina a [${x}]",
-	"entryRestoreBaseConfirm": "Ripristinare tutte le voci di questo profilo a [${x}]?",
 	"entryImportInvalid": "File del profilo di menu e barra di ancoraggio non valido",
 	"mobileMenuQuickActions": "Azioni rapide",
 	"mobileMenuCreate": "Crea",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "In attesa di risposta",
 	"agentNewSession": "Nuova sessione",
 	"agentInputPlaceholder": "Digita un messaggio, /abilità...",
-	"agentSend": "Invia",
+	"agentSend": "Invia all'agente",
 	"agentStop": "Ferma",
 	"editorFontSize": "Dimensione del font dell'editor",
 	"configGroupBehavior": "Comportamento",
@@ -2648,6 +2663,7 @@
 		"369": "Configurazione OIDC non valida",
 		"370": "traffico accelerato LAN %s",
 		"371": "Il taccuino esiste già",
-		"372": "Il taccuino è stato ripristinato e rimane chiuso"
+		"372": "Il taccuino è stato ripristinato e rimane chiuso",
+		"373": "Questo archivio contiene dati di un taccuino. Importalo da [Albero dei documenti - Altro - Importa taccuino]"
 	}
-	}
+}

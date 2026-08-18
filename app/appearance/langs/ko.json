@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "시스템 프록시 사용",
+	"statusBarMsgDataSync": "데이터 동기화",
+	"entryDocumentStatistics": "문서 통계",
+	"entryTabMenu": "탭 메뉴",
+	"entrySingleBlock": "단일 블록",
+	"entryMultipleBlocks": "여러 블록",
+	"entryPixelWidth": "픽셀 너비",
+	"entryPercentageWidth": "백분율 너비",
+	"entryPixelHeight": "픽셀 높이",
+	"entryPercentageHeight": "백분율 높이",
+	"dragTipSelectedNotebooks": "노트북 ${count}개 선택됨",
+	"formatPainterDoubleClickTip": "서식 복사; 연속 사용하려면 두 번 클릭",
+	"dragTipSelectedDocs": "문서 ${count}개 선택됨",
+	"entrySlashMenu": "슬래시 메뉴",
+	"importNotebook": "노트북 가져오기",
+	"distributeSelectedColWidths": "선택한 열 너비를 균등하게 분배",
+	"useDefaultWidthForAllColumns": "모든 열에 기본 너비 사용",
 	"closeTabOnDoubleClick": "두 번 클릭하여 탭 닫기",
 	"closeTabOnDoubleClickTip": "활성화하면 탭을 두 번 클릭하여 닫습니다",
 	"sortByParent": "상위 항목의 정렬 규칙 사용",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "하위 메뉴",
 	"splitMergedCellTip": "먼저 병합된 셀을 분할해야 합니다",
 	"entryVisibility": "메뉴 및 도크",
-	"entryVisibilityTip": "데스크톱에 표시할 기본 메뉴 항목과 도크 아이콘을 선택합니다",
+	"entryVisibilityTip": "데스크톱 기본 메뉴 항목의 표시 여부 및 순서와 도크 아이콘의 표시 여부를 설정합니다",
 	"entrySimple": "간단",
 	"entryFull": "전체",
 	"entrySimpleTip": "자주 사용하는 항목을 표시해 새 사용자가 빠르게 시작할 수 있도록 함",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "기준",
 	"entryCustomProfile": "사용자 지정 프로필",
 	"entryCreateProfile": "프로필 만들기",
-	"entryRestoreBase": "[${x}](으)로 복원",
-	"entryRestoreBaseConfirm": "이 프로필의 모든 항목을 [${x}](으)로 복원하시겠습니까?",
 	"entryImportInvalid": "메뉴 및 도크 프로필 파일이 올바르지 않습니다",
 	"mobileMenuQuickActions": "빠른 작업",
 	"mobileMenuCreate": "만들기",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "답변 대기 중",
 	"agentNewSession": "새 세션",
 	"agentInputPlaceholder": "메시지를 입력하고, /스킬...",
-	"agentSend": "보내기",
+	"agentSend": "에이전트에게 보내기",
 	"agentStop": "중지",
 	"editorFontSize": "편집기 글꼴 크기",
 	"configGroupBehavior": "동작",
@@ -2648,6 +2663,7 @@
 		"369": "잘못된 OIDC 구성",
 		"370": "LAN 가속 트래픽 %s",
 		"371": "노트북이 이미 존재합니다",
-		"372": "노트북이 복원되었으며 닫힌 상태로 유지됩니다"
+		"372": "노트북이 복원되었으며 닫힌 상태로 유지됩니다",
+		"373": "이 압축 파일에는 노트북 데이터가 포함되어 있습니다. [문서 트리 - 더보기 - 노트북 가져오기]에서 가져오세요"
 	}
-	}
+}

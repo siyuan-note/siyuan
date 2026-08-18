@@ -16,7 +16,11 @@
 
 package conf
 
-import "testing"
+import (
+	"bytes"
+	"encoding/json"
+	"testing"
+)
 
 func TestNormalizeEntryVisibilityDefaults(t *testing.T) {
 	entryVisibility := NormalizeEntryVisibility(nil, EntryVisibilityProfileSimple)
@@ -36,7 +40,7 @@ func TestNormalizeEntryVisibilityProfiles(t *testing.T) {
 			nil,
 			{ID: "", Name: "missing-id"},
 			{ID: EntryVisibilityProfileSimple, Name: "Reserved"},
-			{ID: "custom", Name: "Custom", Base: "invalid", Entries: map[string]bool{"future.entry": false},
+			{ID: "custom", Name: "Custom", Entries: map[string]bool{"future.entry": false},
 				Orders: map[string][]string{"future": {"entry"}}},
 			{ID: "custom", Name: "Duplicate"},
 		},
@@ -49,7 +53,7 @@ func TestNormalizeEntryVisibilityProfiles(t *testing.T) {
 		t.Fatalf("unexpected profiles: %+v", entryVisibility.Profiles)
 	}
 	profile := entryVisibility.Profiles[0]
-	if profile.Base != EntryVisibilityProfileFull || profile.Entries["future.entry"] {
+	if profile.Entries["future.entry"] {
 		t.Fatalf("unexpected normalized profile: %+v", profile)
 	}
 	if len(profile.Orders["future"]) != 1 || profile.Orders["future"][0] != "entry" {
@@ -61,7 +65,7 @@ func TestNormalizeEntryVisibilityActiveCustomProfile(t *testing.T) {
 	entryVisibility := NormalizeEntryVisibility(&EntryVisibility{
 		Active: "custom",
 		Profiles: []*EntryVisibilityProfile{
-			{ID: "custom", Name: "Custom", Base: EntryVisibilityProfileSimple},
+			{ID: "custom", Name: "Custom"},
 		},
 	}, EntryVisibilityProfileFull)
 
@@ -70,5 +74,26 @@ func TestNormalizeEntryVisibilityActiveCustomProfile(t *testing.T) {
 	}
 	if nil == entryVisibility.Profiles[0].Orders {
 		t.Fatal("profile orders should be initialized")
+	}
+}
+
+func TestNormalizeEntryVisibilityRemovesLegacyBase(t *testing.T) {
+	legacy := []byte(`{"version":2,"active":"custom","profiles":[{"id":"custom","name":"Custom","base":"simple","entries":{"future.entry":false},"orders":{}}]}`)
+	entryVisibility := &EntryVisibility{}
+	if err := json.Unmarshal(legacy, entryVisibility); nil != err {
+		t.Fatalf("unmarshal legacy config failed: %v", err)
+	}
+
+	entryVisibility = NormalizeEntryVisibility(entryVisibility, EntryVisibilityProfileFull)
+	data, err := json.Marshal(entryVisibility)
+	if nil != err {
+		t.Fatalf("marshal normalized config failed: %v", err)
+	}
+	if bytes.Contains(data, []byte(`"base"`)) {
+		t.Fatalf("legacy base should not be persisted: %s", data)
+	}
+	if entryVisibility.Version != EntryVisibilityVersion || entryVisibility.Active != "custom" ||
+		entryVisibility.Profiles[0].Entries["future.entry"] {
+		t.Fatalf("unexpected normalized legacy config: %+v", entryVisibility)
 	}
 }

@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Użyj systemowego serwera proxy",
+	"statusBarMsgDataSync": "Synchronizacja danych",
+	"entryDocumentStatistics": "Statystyki dokumentu",
+	"entryTabMenu": "Menu kart",
+	"entrySingleBlock": "Pojedynczy blok",
+	"entryMultipleBlocks": "Wiele bloków",
+	"entryPixelWidth": "Szerokość w pikselach",
+	"entryPercentageWidth": "Szerokość procentowa",
+	"entryPixelHeight": "Wysokość w pikselach",
+	"entryPercentageHeight": "Wysokość procentowa",
+	"dragTipSelectedNotebooks": "Wybrane notesy: ${count}",
+	"formatPainterDoubleClickTip": "Malarz formatów; kliknij dwukrotnie, aby używać w trybie ciągłym",
+	"dragTipSelectedDocs": "Wybrane dokumenty: ${count}",
+	"entrySlashMenu": "Menu poleceń z ukośnikiem",
+	"importNotebook": "Importuj notatnik",
+	"distributeSelectedColWidths": "Rozłóż równomiernie szerokość wybranych kolumn",
+	"useDefaultWidthForAllColumns": "Użyj domyślnej szerokości dla wszystkich kolumn",
 	"closeTabOnDoubleClick": "Zamykanie kart podwójnym kliknięciem",
 	"closeTabOnDoubleClickTip": "Po włączeniu kliknij kartę dwukrotnie, aby ją zamknąć",
 	"sortByParent": "Użyj reguł sortowania elementu nadrzędnego",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Podmenu",
 	"splitMergedCellTip": "Najpierw podziel scalone komórki",
 	"entryVisibility": "Menu i dok",
-	"entryVisibilityTip": "Wybierz wbudowane pozycje menu i ikony doku wyświetlane na komputerze",
+	"entryVisibilityTip": "Skonfiguruj widoczność i kolejność wbudowanych elementów menu pulpitu, a także widoczność ikon doku",
 	"entrySimple": "Prosty",
 	"entryFull": "Pełny",
 	"entrySimpleTip": "Wyświetla często używane pozycje, aby ułatwić szybki start",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Na podstawie",
 	"entryCustomProfile": "Profil niestandardowy",
 	"entryCreateProfile": "Utwórz profil",
-	"entryRestoreBase": "Przywróć do [${x}]",
-	"entryRestoreBaseConfirm": "Przywrócić wszystkie pozycje tego profilu do [${x}]?",
 	"entryImportInvalid": "Nieprawidłowy plik profilu menu i doku",
 	"mobileMenuQuickActions": "Szybkie działania",
 	"mobileMenuCreate": "Utwórz",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Oczekiwanie na odpowiedź",
 	"agentNewSession": "Nowa sesja",
 	"agentInputPlaceholder": "Wpisz wiadomość, /umiejętność...",
-	"agentSend": "Wyślij",
+	"agentSend": "Wyślij do agenta",
 	"agentStop": "Zatrzymaj",
 	"editorFontSize": "Rozmiar czcionki edytora",
 	"configGroupBehavior": "Zachowanie",
@@ -2648,6 +2663,7 @@
 		"369": "Nieprawidłowa konfiguracja OIDC",
 		"370": "ruch przyspieszony przez LAN %s",
 		"371": "Notatnik już istnieje",
-		"372": "Notatnik został przywrócony i pozostaje zamknięty"
+		"372": "Notatnik został przywrócony i pozostaje zamknięty",
+		"373": "To archiwum zawiera dane notatnika. Zaimportuj je z [Drzewo dokumentów - Więcej - Importuj notatnik]"
 	}
-	}
+}

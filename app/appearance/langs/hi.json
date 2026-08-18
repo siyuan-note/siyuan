@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "सिस्टम प्रॉक्सी का उपयोग करें",
+	"statusBarMsgDataSync": "डेटा सिंक्रोनाइज़ेशन",
+	"entryDocumentStatistics": "दस्तावेज़ के आँकड़े",
+	"entryTabMenu": "टैब मेनू",
+	"entrySingleBlock": "एक ब्लॉक",
+	"entryMultipleBlocks": "कई ब्लॉक",
+	"entryPixelWidth": "पिक्सेल में चौड़ाई",
+	"entryPercentageWidth": "प्रतिशत में चौड़ाई",
+	"entryPixelHeight": "पिक्सेल में ऊंचाई",
+	"entryPercentageHeight": "प्रतिशत में ऊंचाई",
+	"dragTipSelectedNotebooks": "${count} नोटबुक चयनित",
+	"formatPainterDoubleClickTip": "फ़ॉर्मैट पेंटर; लगातार उपयोग के लिए डबल-क्लिक करें",
+	"dragTipSelectedDocs": "${count} दस्तावेज़ चयनित",
+	"entrySlashMenu": "स्लैश मेनू",
+	"importNotebook": "नोटबुक आयात करें",
+	"distributeSelectedColWidths": "चयनित स्तंभों की चौड़ाई समान रूप से बाँटें",
+	"useDefaultWidthForAllColumns": "सभी स्तंभों के लिए डिफ़ॉल्ट चौड़ाई का उपयोग करें",
 	"closeTabOnDoubleClick": "टैब बंद करने के लिए डबल-क्लिक का उपयोग करें",
 	"closeTabOnDoubleClickTip": "सक्षम होने पर, किसी टैब को बंद करने के लिए उस पर डबल-क्लिक करें",
 	"sortByParent": "ऊपरी स्तर के क्रमबद्धता नियमों का उपयोग करें",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "उपमेनू",
 	"splitMergedCellTip": "पहले मर्ज किए गए सेल विभाजित करें",
 	"entryVisibility": "मेनू और डॉक",
-	"entryVisibilityTip": "डेस्कटॉप पर दिखाए जाने वाले अंतर्निहित मेनू आइटम और डॉक आइकन चुनें",
+	"entryVisibilityTip": "डेस्कटॉप के अंतर्निहित मेनू आइटम की दृश्यता व क्रम तथा डॉक आइकन की दृश्यता कॉन्फ़िगर करें",
 	"entrySimple": "सरल",
 	"entryFull": "पूर्ण",
 	"entrySimpleTip": "नए उपयोगकर्ताओं को जल्दी शुरू करने के लिए आम तौर पर उपयोग की जाने वाली प्रविष्टियाँ दिखाता है",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "इस पर आधारित",
 	"entryCustomProfile": "कस्टम प्रोफ़ाइल",
 	"entryCreateProfile": "प्रोफ़ाइल बनाएँ",
-	"entryRestoreBase": "[${x}] पर पुनर्स्थापित करें",
-	"entryRestoreBaseConfirm": "क्या इस प्रोफ़ाइल की सभी प्रविष्टियाँ [${x}] पर पुनर्स्थापित करनी हैं?",
 	"entryImportInvalid": "मेनू और डॉक प्रोफ़ाइल फ़ाइल अमान्य है",
 	"mobileMenuQuickActions": "त्वरित कार्रवाइयाँ",
 	"mobileMenuCreate": "बनाएँ",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "उत्तर की प्रतीक्षा",
 	"agentNewSession": "नया सत्र",
 	"agentInputPlaceholder": "संदेश लिखें, /कौशल...",
-	"agentSend": "भेजें",
+	"agentSend": "एजेंट को भेजें",
 	"agentStop": "रोकें",
 	"editorFontSize": "संपादक फ़ॉन्ट आकार",
 	"configGroupBehavior": "व्यवहार",
@@ -2648,6 +2663,7 @@
 		"369": "OIDC कॉन्फ़िगरेशन अमान्य है",
 		"370": "LAN त्वरित ट्रैफ़िक %s",
 		"371": "नोटबुक पहले से मौजूद है",
-		"372": "नोटबुक पुनर्स्थापित हो गई है और बंद रहेगी"
+		"372": "नोटबुक पुनर्स्थापित हो गई है और बंद रहेगी",
+		"373": "इस संग्रह में नोटबुक डेटा है। कृपया इसे [दस्तावेज़ ट्री - अधिक - नोटबुक आयात करें] से आयात करें"
 	}
-	}
+}

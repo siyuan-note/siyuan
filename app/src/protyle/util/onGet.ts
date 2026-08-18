@@ -31,6 +31,7 @@ import {disabledWYSIWYG} from "./disabledWYSIWYG";
 import {getEmbeddedDocInfoResponse} from "./docInfo";
 import {updateWidgetCacheVersion} from "./widgetCache";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
+import {hasFocusOffsets} from "./focusRestore";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -45,6 +46,7 @@ export const onGet = (options: {
     afterCB?: () => void,
     dataDocType?: string,
     isValid?: () => boolean,
+    focusAfterZoom?: boolean,
 }) => {
     if (options.isValid && !options.isValid()) {
         return;
@@ -135,7 +137,8 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
-            scrollPosition: options.scrollPosition
+            scrollPosition: options.scrollPosition,
+            focusAfterZoom: options.focusAfterZoom
         }, options.protyle);
         removeLoading(options.protyle);
         return;
@@ -152,7 +155,8 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
-            scrollPosition: options.scrollPosition
+            scrollPosition: options.scrollPosition,
+            focusAfterZoom: options.focusAfterZoom
         }, options.protyle);
         removeLoading(options.protyle);
         return;
@@ -182,7 +186,8 @@ export const onGet = (options: {
             isSyncing: options.data.data.isSyncing,
             refreshHeadingNumbers,
             afterCB: options.afterCB,
-            scrollPosition: options.scrollPosition
+            scrollPosition: options.scrollPosition,
+            focusAfterZoom: options.focusAfterZoom
         }, options.protyle);
         removeLoading(options.protyle);
     };
@@ -211,7 +216,8 @@ const setHTML = (options: {
     scrollAttr?: IScrollAttr,
     scrollPosition?: ScrollLogicalPosition,
     refreshHeadingNumbers?: boolean,
-    afterCB?: () => void
+    afterCB?: () => void,
+    focusAfterZoom?: boolean,
 }, protyle: IProtyle) => {
     if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
         return;
@@ -359,7 +365,7 @@ const setHTML = (options: {
         }
     }
 
-    focusElementById(protyle, options.action, options.scrollAttr, options.scrollPosition);
+    focusElementById(protyle, options.action, options.scrollAttr, options.scrollPosition, options.focusAfterZoom);
 
     if (options.action.includes(Constants.CB_GET_SETID) ||
         (protyle.model && !protyle.block.showAll)) {
@@ -530,7 +536,8 @@ export const enableProtyle = (protyle: IProtyle) => {
     hideTooltip();
 };
 
-const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScrollAttr, scrollPosition?: ScrollLogicalPosition) => {
+const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScrollAttr,
+                          scrollPosition?: ScrollLogicalPosition, focusAfterZoom = false) => {
     let focusElement: Element;
     if (scrollAttr && scrollAttr.focusId) {
         focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${scrollAttr.focusId}"]`);
@@ -559,10 +566,11 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
     if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
         setTimeout(() => {
             let range: Range;
-            if (scrollAttr && scrollAttr.focusId) {
+            if (hasFocusOffsets(scrollAttr)) {
                 range = focusByOffset(focusElement, scrollAttr.focusStart, scrollAttr.focusEnd) as Range;
             } else {
-                range = focusBlock(focusElement, undefined, !action.includes(Constants.CB_GET_OUTLINE)) as Range;
+                range = focusBlock(focusElement, undefined, !action.includes(Constants.CB_GET_OUTLINE),
+                    focusAfterZoom) as Range;
             }
             /// #if !MOBILE
             if (!action.includes(Constants.CB_GET_UNUNDO)) {

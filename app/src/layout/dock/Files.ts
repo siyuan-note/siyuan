@@ -7,6 +7,7 @@ import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
 import {newFileInTree} from "../../util/newFile";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
+import {isDocTreeDragSelectionAllowed} from "../../menus/navigationSelection";
 import {MenuItem} from "../../menus/Menu";
 import {showMessage} from "../../dialog/message";
 import {
@@ -16,7 +17,7 @@ import {
 } from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
-import {newEncryptedNotebook, newNotebook, openEncryptedNotebook} from "../../util/mount";
+import {importNotebook, newEncryptedNotebook, newNotebook, openEncryptedNotebook} from "../../util/mount";
 import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {
@@ -53,8 +54,11 @@ import {
 import {
     FILE_TREE_CHILDREN_SORT_MODE,
     FILE_TREE_EFFECTIVE_SORT_MODE,
+    getFileTreeSortRefreshTargets,
+    getMovedFileTreeSortRefreshTargets,
     getResponseEffectiveSortMode,
     isCustomFileTreeList,
+    reorderFileTreeNotebooks,
     type IDocSortModeChanged,
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
@@ -67,6 +71,7 @@ export class Files extends Model {
     private actionsElement: HTMLElement;
     private reloadNotebookInfoTimeout: number;
     private docSortModeRefreshTimeout: number;
+    private docSortModeChanges = new Map<string, IDocSortModeChanged>();
     private movedExpandedDocIDs = new Set<string>();
 
     constructor(options: { tab: Tab, app: App }) {
@@ -452,7 +457,6 @@ export class Files extends Model {
             hideTooltip();
             const liElement = hasClosestByTag(event.target, "LI");
             if (liElement) {
-                this.parent.panelElement.classList.add("sy__file--disablehover");
                 let selectElements: Element[] = Array.from(this.element.querySelectorAll(".b3-list-item--focus"));
                 if (!liElement.classList.contains("b3-list-item--focus")) {
                     selectElements.forEach((item) => {
@@ -461,6 +465,11 @@ export class Files extends Model {
                     liElement.classList.add("b3-list-item--focus");
                     selectElements = [liElement];
                 }
+                if (!isDocTreeDragSelectionAllowed(selectElements)) {
+                    event.preventDefault();
+                    return;
+                }
+                this.parent.panelElement.classList.add("sy__file--disablehover");
                 let ids = "";
                 const ghostElement = document.createElement("ul");
                 selectElements.forEach((item: HTMLElement, index) => {
@@ -490,7 +499,17 @@ export class Files extends Model {
                 }
                 event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, ids);
                 event.dataTransfer.dropEffect = "move";
-                window.siyuan.dragTitle = (selectElements[0] as HTMLElement)?.querySelector(".b3-list-item__text")?.textContent?.trim() || "";
+                let selectionTitle = "";
+                if (selectElements.length > 1) {
+                    if (selectElements.every((item) => item.getAttribute("data-type") === "navigation-file")) {
+                        selectionTitle = window.siyuan.languages.dragTipSelectedDocs;
+                    } else if (selectElements.every((item) => item.getAttribute("data-type") === "navigation-root")) {
+                        selectionTitle = window.siyuan.languages.dragTipSelectedNotebooks;
+                    }
+                    selectionTitle = selectionTitle.replace("${count}", selectElements.length.toString());
+                }
+                window.siyuan.dragTitle = selectionTitle ||
+                    (selectElements[0] as HTMLElement)?.querySelector(".b3-list-item__text")?.textContent?.trim() || "";
                 window.siyuan.dragElement = document.createElement("div");
                 window.siyuan.dragElement.innerText = ids;
             }
@@ -1522,11 +1541,43 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         });
     }
 
-    public onDocSortModeChanged(data?: IDocSortModeChanged) {
-        updateFileTreeSortMode(data);
+    public onDocSortModeChanged(data: IDocSortModeChanged) {
+        updateFileTreeSortMode(data, this.element);
+        this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
         window.clearTimeout(this.docSortModeRefreshTimeout);
         this.docSortModeRefreshTimeout = window.setTimeout(() => {
-            this.init(false);
+            const changes = Array.from(this.docSortModeChanges.values());
+            this.docSortModeChanges.clear();
+            const refreshLists = () => {
+                getFileTreeSortRefreshTargets(this.element, changes).forEach((target) => {
+                    const notebookElement = Array.from(this.element.children).find((item) =>
+                        item.getAttribute("data-url") === target.notebookId
+                    );
+                    const liElement = Array.from(notebookElement?.querySelectorAll("li[data-path]") || []).find((item) =>
+                        item.getAttribute("data-path") === target.path
+                    );
+                    if (liElement) {
+                        this.getLeaf(liElement, target.notebookId, true);
+                    }
+                });
+            };
+            if (changes.some((item) => item.scope === "global")) {
+                setNoteBook((notebooks) => {
+                    reorderFileTreeNotebooks(this.element, this.closeElement.lastElementChild, notebooks);
+                    this.element.querySelectorAll<HTMLElement>(
+                        ":scope > ul[data-url] > li[data-type=\"navigation-root\"]"
+                    ).forEach((item) => {
+                        if (window.siyuan.config.fileTree.sort === 6) {
+                            item.setAttribute("draggable", "true");
+                        } else {
+                            item.removeAttribute("draggable");
+                        }
+                    });
+                    refreshLists();
+                });
+            } else {
+                refreshLists();
+            }
         }, 100);
     }
 
@@ -1541,7 +1592,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
 
     private onMove(response: IWebSocketData) {
         const moves = response.data.moves as IFileTreeMove[];
-        const needsSortModeRefresh = moves.some((move) =>
+        const hasParentChange = moves.some((move) =>
             move.fromNotebook !== move.toNotebook ||
             pathPosix().dirname(move.fromPath) !== pathPosix().dirname(move.newPath));
         const refreshTargets = new Map<string, { element: HTMLElement, notebookId: string }>();
@@ -1635,16 +1686,25 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                 });
             }
         });
-        if (needsSortModeRefresh) {
+        if (hasParentChange) {
             this.getOpenPaths();
-            this.onDocSortModeChanged();
-            return;
         }
         if (response.callback !== Constants.CB_MOVE_NOLIST) {
             refreshTargets.forEach((target) => {
                 this.getLeaf(target.element, target.notebookId, true);
             });
         }
+        getMovedFileTreeSortRefreshTargets(this.element, moves).forEach((target) => {
+            const notebookElement = Array.from(this.element.children).find((item) =>
+                item.getAttribute("data-url") === target.notebookId
+            );
+            const liElement = Array.from(notebookElement?.querySelectorAll("li[data-path]") || []).find((item) =>
+                item.getAttribute("data-path") === target.path
+            );
+            if (liElement) {
+                this.getLeaf(liElement, target.notebookId, true);
+            }
+        });
     }
 
     private restoreMovedExpandedItems(listElement: Element, notebookId: string) {
@@ -1671,6 +1731,16 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
             // 文件展开时，刷新
             const tempElement = document.createElement("template");
             tempElement.innerHTML = fileHTML;
+            const focusedIDs = Array.from(nextElement.querySelectorAll(":scope > .b3-list-item--focus")).map((item) =>
+                item.getAttribute("data-node-id")
+            );
+            const lastSelectedID = nextElement.contains(this.lastSelectedElement) ?
+                this.lastSelectedElement.getAttribute("data-node-id") : "";
+            focusedIDs.forEach((id) => {
+                Array.from(tempElement.content.children).find((item) =>
+                    item.getAttribute("data-node-id") === id
+                )?.classList.add("b3-list-item--focus");
+            });
             // 保持文件夹展开状态
             nextElement.querySelectorAll(":scope > .b3-list-item > .b3-list-item__toggle> .b3-list-item__arrow--open").forEach(item => {
                 const openLiElement = hasClosestByClassName(item, "b3-list-item");
@@ -1683,6 +1753,11 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                 }
             });
             nextElement.innerHTML = tempElement.innerHTML;
+            if (lastSelectedID) {
+                this.lastSelectedElement = Array.from(nextElement.querySelectorAll("[data-node-id]")).find((item) =>
+                    item.getAttribute("data-node-id") === lastSelectedID
+                ) || null;
+            }
             nextElement.setAttribute(FILE_TREE_EFFECTIVE_SORT_MODE, effectiveSortMode.toString());
             this.restoreMovedExpandedItems(nextElement, data.box);
             if (typeof scrollTop === "number") {
@@ -1962,6 +2037,20 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                     }
                 }).element);
             }
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "importNotebook",
+                icon: "iconDownload",
+                label: `${window.siyuan.languages.importNotebook}<input class="b3-form__upload" type="file" accept="application/zip">`,
+                bind: (element) => {
+                    element.querySelector<HTMLInputElement>(".b3-form__upload").addEventListener("change", (event) => {
+                        const file = (event.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                            window.siyuan.menus.menu.remove();
+                            importNotebook(file);
+                        }
+                    });
+                },
+            }).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({
             id: "rebuildDataIndex",
@@ -1986,9 +2075,16 @@ aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}
                     ...window.siyuan.config.fileTree,
                     sort,
                 }, (response) => {
+                    if (response.code !== 0) {
+                        return;
+                    }
                     window.siyuan.config.fileTree = response.data;
-                    setNoteBook(() => {
-                        this.init(false);
+                    this.onDocSortModeChanged({
+                        scope: "global",
+                        box: "",
+                        id: "",
+                        path: "/",
+                        sortMode: sort,
                     });
                 });
             });

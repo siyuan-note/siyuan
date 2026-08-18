@@ -272,6 +272,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (!blockElement) {
         return false;
     }
+    if (hasClosestByClassName(event.target, "av__title")) {
+        clearSelect(["av"], blockElement);
+    }
 
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     let target = event.target;

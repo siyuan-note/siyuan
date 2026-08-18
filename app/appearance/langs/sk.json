@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Použiť systémový proxy server",
+	"statusBarMsgDataSync": "Synchronizácia údajov",
+	"entryDocumentStatistics": "Štatistiky dokumentu",
+	"entryTabMenu": "Ponuka kariet",
+	"entrySingleBlock": "Jeden blok",
+	"entryMultipleBlocks": "Viac blokov",
+	"entryPixelWidth": "Šírka v pixeloch",
+	"entryPercentageWidth": "Šírka v percentách",
+	"entryPixelHeight": "Výška v pixeloch",
+	"entryPercentageHeight": "Výška v percentách",
+	"dragTipSelectedNotebooks": "Vybrané zápisníky: ${count}",
+	"formatPainterDoubleClickTip": "Kopírovať formát; dvojklikom zapnete nepretržité použitie",
+	"dragTipSelectedDocs": "Vybrané dokumenty: ${count}",
+	"entrySlashMenu": "Ponuka príkazov s lomkou",
+	"importNotebook": "Importovať zápisník",
+	"distributeSelectedColWidths": "Rovnomerne rozložiť šírku vybraných stĺpcov",
+	"useDefaultWidthForAllColumns": "Použiť predvolenú šírku pre všetky stĺpce",
 	"closeTabOnDoubleClick": "Zatvárať karty dvojitým kliknutím",
 	"closeTabOnDoubleClickTip": "Po povolení zatvoríte kartu dvojitým kliknutím",
 	"sortByParent": "Použiť pravidlá radenia nadradenej položky",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Podponuka",
 	"splitMergedCellTip": "Najprv rozdeľte zlúčené bunky",
 	"entryVisibility": "Ponuky a dok",
-	"entryVisibilityTip": "Vyberte vstavané položky ponuky a ikony doku zobrazované na počítači",
+	"entryVisibilityTip": "Nastavte viditeľnosť a poradie vstavaných položiek ponúk na pracovnej ploche, ako aj viditeľnosť ikon doku",
 	"entrySimple": "Jednoduchý",
 	"entryFull": "Úplný",
 	"entrySimpleTip": "Zobrazuje často používané položky na rýchle začatie práce",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Založené na",
 	"entryCustomProfile": "Vlastný profil",
 	"entryCreateProfile": "Vytvoriť profil",
-	"entryRestoreBase": "Obnoviť na [${x}]",
-	"entryRestoreBaseConfirm": "Obnoviť všetky položky tohto profilu na [${x}]?",
 	"entryImportInvalid": "Neplatný súbor profilu ponúk a doku",
 	"mobileMenuQuickActions": "Rýchle akcie",
 	"mobileMenuCreate": "Vytvoriť",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Čaká sa na odpoveď",
 	"agentNewSession": "Nová relácia",
 	"agentInputPlaceholder": "Napíšte správu, /zručnosť...",
-	"agentSend": "Odoslať",
+	"agentSend": "Odoslať agentovi",
 	"agentStop": "Zastaviť",
 	"editorFontSize": "Veľkosť písma editora",
 	"configGroupBehavior": "Správanie",
@@ -2648,6 +2663,7 @@
 		"369": "Neplatná konfigurácia OIDC",
 		"370": "prevádzka zrýchlená cez LAN %s",
 		"371": "Zápisník už existuje",
-		"372": "Zápisník bol obnovený a zostáva zatvorený"
+		"372": "Zápisník bol obnovený a zostáva zatvorený",
+		"373": "Tento archív obsahuje údaje zápisníka. Importujte ho cez [Strom dokumentov - Viac - Importovať zápisník]"
 	}
-	}
+}

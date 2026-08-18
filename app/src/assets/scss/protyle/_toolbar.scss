@@ -31,6 +31,11 @@
         height: 16px;
       }
 
+      &[data-type="format-painter"] svg {
+        width: 14px;
+        height: 14px;
+      }
+
       &--current {
         color: var(--b3-theme-primary);
       }

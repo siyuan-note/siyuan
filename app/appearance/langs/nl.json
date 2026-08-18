@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Systeemproxy gebruiken",
+	"statusBarMsgDataSync": "Gegevenssynchronisatie",
+	"entryDocumentStatistics": "Documentstatistieken",
+	"entryTabMenu": "Tabbladmenu",
+	"entrySingleBlock": "Eén blok",
+	"entryMultipleBlocks": "Meerdere blokken",
+	"entryPixelWidth": "Breedte in pixels",
+	"entryPercentageWidth": "Breedte in procenten",
+	"entryPixelHeight": "Hoogte in pixels",
+	"entryPercentageHeight": "Hoogte in procenten",
+	"dragTipSelectedNotebooks": "${count} notitieboeken geselecteerd",
+	"formatPainterDoubleClickTip": "Opmaak kopiëren; dubbelklik voor doorlopend gebruik",
+	"dragTipSelectedDocs": "${count} documenten geselecteerd",
+	"entrySlashMenu": "Slashmenu",
+	"importNotebook": "Notitieboek importeren",
+	"distributeSelectedColWidths": "Geselecteerde kolombreedtes gelijkmatig verdelen",
+	"useDefaultWidthForAllColumns": "Standaardbreedte voor alle kolommen gebruiken",
 	"closeTabOnDoubleClick": "Tabs sluiten door te dubbelklikken",
 	"closeTabOnDoubleClickTip": "Dubbelklik op een tab om deze te sluiten wanneer deze optie is ingeschakeld",
 	"sortByParent": "Sorteerregels van bovenliggend item gebruiken",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Splits eerst de samengevoegde cellen",
 	"entryVisibility": "Menu's en dock",
-	"entryVisibilityTip": "Kies welke ingebouwde menu-items en dockpictogrammen op het bureaublad worden getoond",
+	"entryVisibilityTip": "Configureer de zichtbaarheid en volgorde van ingebouwde desktopmenu-items en de zichtbaarheid van dockpictogrammen",
 	"entrySimple": "Eenvoudig",
 	"entryFull": "Volledig",
 	"entrySimpleTip": "Toont veelgebruikte items om snel aan de slag te gaan",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Gebaseerd op",
 	"entryCustomProfile": "Aangepast profiel",
 	"entryCreateProfile": "Profiel maken",
-	"entryRestoreBase": "Herstellen naar [${x}]",
-	"entryRestoreBaseConfirm": "Alle items in dit profiel herstellen naar [${x}]?",
 	"entryImportInvalid": "Ongeldig profielbestand voor menu's en dock",
 	"mobileMenuQuickActions": "Snelle acties",
 	"mobileMenuCreate": "Maken",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Wacht op antwoord",
 	"agentNewSession": "Nieuwe sessie",
 	"agentInputPlaceholder": "Typ een bericht, /vaardigheid...",
-	"agentSend": "Verzenden",
+	"agentSend": "Naar agent verzenden",
 	"agentStop": "Stoppen",
 	"editorFontSize": "Editorlettergrootte",
 	"configGroupBehavior": "Gedrag",
@@ -2648,6 +2663,7 @@
 		"369": "Ongeldige OIDC-configuratie",
 		"370": "LAN-versneld verkeer %s",
 		"371": "Het notitieboek bestaat al",
-		"372": "Het notitieboek is hersteld en blijft gesloten"
+		"372": "Het notitieboek is hersteld en blijft gesloten",
+		"373": "Dit archief bevat notitieboekgegevens. Importeer het via [Documentboom - Meer - Notitieboek importeren]"
 	}
-	}
+}

@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "使用系统代理",
+	"statusBarMsgDataSync": "数据同步",
+	"entryDocumentStatistics": "文档统计",
+	"entryTabMenu": "页签菜单",
+	"entrySingleBlock": "单个块",
+	"entryMultipleBlocks": "多个块",
+	"entryPixelWidth": "像素宽度",
+	"entryPercentageWidth": "百分比宽度",
+	"entryPixelHeight": "像素高度",
+	"entryPercentageHeight": "百分比高度",
+	"dragTipSelectedNotebooks": "选中 ${count} 个笔记本",
+	"formatPainterDoubleClickTip": "格式刷，双击可连续使用",
+	"dragTipSelectedDocs": "选中 ${count} 个文档",
+	"entrySlashMenu": "斜杠菜单",
+	"importNotebook": "导入笔记本",
+	"distributeSelectedColWidths": "均分所选列宽",
+	"useDefaultWidthForAllColumns": "所有列使用默认列宽",
 	"closeTabOnDoubleClick": "使用双击关闭页签",
 	"closeTabOnDoubleClickTip": "启用后，双击页签将其关闭",
 	"sortByParent": "使用父级排序规则",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "子菜单",
 	"splitMergedCellTip": "需要先拆分合并的单元格",
 	"entryVisibility": "菜单与停靠栏",
-	"entryVisibilityTip": "配置桌面端内置菜单项和停靠栏图标是否显示",
+	"entryVisibilityTip": "配置桌面端内置菜单项的显隐与排序，以及停靠栏图标的显隐",
 	"entrySimple": "简洁方案",
 	"entryFull": "完整方案",
 	"entrySimpleTip": "显示常用入口，适合新用户快速上手",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "基于",
 	"entryCustomProfile": "自定义方案",
 	"entryCreateProfile": "新建方案",
-	"entryRestoreBase": "恢复为 [${x}]",
-	"entryRestoreBaseConfirm": "确定将此方案的所有入口恢复为 [${x}] 吗？",
 	"entryImportInvalid": "菜单与停靠栏方案文件无效",
 	"mobileMenuQuickActions": "快捷操作",
 	"mobileMenuCreate": "创建",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "待回答",
 	"agentNewSession": "新会话",
 	"agentInputPlaceholder": "输入消息，/技能...",
-	"agentSend": "发送",
+	"agentSend": "智能体发送",
 	"agentStop": "停止",
 	"editorFontSize": "编辑器字号",
 	"configGroupBehavior": "行为",
@@ -2648,6 +2663,7 @@
 		"369": "OIDC 配置无效",
 		"370": "局域网加速流量 %s",
 		"371": "笔记本已存在",
-		"372": "笔记本已回滚并保持关闭状态"
+		"372": "笔记本已回滚并保持关闭状态",
+		"373": "该压缩包包含笔记本数据，请从 [文档树 - 更多 - 导入笔记本] 中导入"
 	}
-	}
+}

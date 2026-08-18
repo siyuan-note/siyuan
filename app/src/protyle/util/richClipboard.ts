@@ -1,4 +1,5 @@
 import {Constants} from "../../constants";
+import {looseJsonParse} from "../../util/functions";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -44,6 +45,8 @@ const richClipboardImageExts = new Set([
 const richClipboardAttributes = new Set([
     "align",
     "alt",
+    "cellpadding",
+    "cellspacing",
     "checked",
     "colspan",
     "controls",
@@ -84,7 +87,250 @@ const richClipboardTextMarkTags = new Map([
     ["u", "u"],
 ]);
 
+const getRichClipboardImageURL = (imageElement: HTMLImageElement) => {
+    const src = imageElement.getAttribute("src")?.trim();
+    if (!src) {
+        return "";
+    }
+    try {
+        return new URL(src, window.location.href).href;
+    } catch {
+        return src;
+    }
+};
+
+const getRichClipboardPixelWidth = (width: string | null | undefined) => {
+    if (!width || (!/^\d+(?:\.\d+)?(?:px)?$/i.test(width.trim()))) {
+        return 0;
+    }
+    return parseFloat(width);
+};
+
+const normalizeRichClipboardImages = (template: HTMLTemplateElement) => {
+    const sourceImages = new Map<string, HTMLImageElement[]>();
+    Array.from(document.images).forEach(imageElement => {
+        const rect = imageElement.getBoundingClientRect();
+        const url = getRichClipboardImageURL(imageElement);
+        if (!url || rect.width <= 0 || rect.height <= 0) {
+            return;
+        }
+        const images = sourceImages.get(url) || [];
+        images.push(imageElement);
+        sourceImages.set(url, images);
+    });
+
+    let normalized = false;
+    template.content.querySelectorAll<HTMLImageElement>("img[src]:not(.emoji)").forEach(imageElement => {
+        const parentWidth = imageElement.parentElement?.style.width || "";
+        let width = getRichClipboardPixelWidth(imageElement.style.width) ||
+            getRichClipboardPixelWidth(imageElement.getAttribute("width")) ||
+            getRichClipboardPixelWidth(parentWidth);
+        if (!width) {
+            const candidates = sourceImages.get(getRichClipboardImageURL(imageElement)) || [];
+            const sourceImage = candidates.find(candidate => candidate.parentElement?.style.width === parentWidth) ||
+                candidates[0];
+            width = sourceImage?.getBoundingClientRect().width || 0;
+        }
+
+        imageElement.style.maxWidth = "600px";
+        imageElement.style.height = "auto";
+        imageElement.removeAttribute("height");
+        if (width > 0) {
+            const normalizedWidth = Math.min(600, Math.round(width));
+            imageElement.style.width = `${normalizedWidth}px`;
+            imageElement.setAttribute("width", normalizedWidth.toString());
+        }
+        normalized = true;
+    });
+    return normalized;
+};
+
+const getRichClipboardTableColumnCount = (tableElement: HTMLTableElement) => {
+    const firstRow = tableElement.rows[0];
+    if (!firstRow) {
+        return 0;
+    }
+    return Array.from(firstRow.cells).reduce((count, cell) => {
+        return count + Math.max(1, parseInt(cell.getAttribute("colspan") || "1"));
+    }, 0);
+};
+
+const normalizeRichClipboardTableSize = (tableElement: HTMLTableElement) => {
+    const columnCount = getRichClipboardTableColumnCount(tableElement);
+    if (columnCount === 0) {
+        return;
+    }
+
+    let colgroupElement = tableElement.querySelector<HTMLTableColElement>(":scope > colgroup");
+    if (!colgroupElement) {
+        colgroupElement = document.createElement("colgroup");
+        tableElement.prepend(colgroupElement);
+    }
+    const columnElements = Array.from(colgroupElement.querySelectorAll<HTMLTableColElement>(":scope > col"));
+    while (columnElements.length < columnCount) {
+        const columnElement = document.createElement("col");
+        colgroupElement.append(columnElement);
+        columnElements.push(columnElement);
+    }
+
+    const columnWidths = columnElements.slice(0, columnCount).map(columnElement => {
+        const width = parseFloat(columnElement.style.width || columnElement.style.minWidth ||
+            columnElement.getAttribute("width") || "");
+        return Math.max(80, Number.isFinite(width) ? width : 80);
+    });
+    const sourceWidth = columnWidths.reduce((width, columnWidth) => width + columnWidth, 0);
+    const targetWidth = Math.min(540, Math.max(360, sourceWidth));
+    const scale = targetWidth / sourceWidth;
+    const normalizedWidths = columnWidths.map(columnWidth => Math.round(columnWidth * scale));
+
+    columnElements.slice(0, columnCount).forEach((columnElement, index) => {
+        const width = normalizedWidths[index];
+        columnElement.style.width = `${width}px`;
+        columnElement.style.minWidth = "";
+        columnElement.setAttribute("width", width.toString());
+    });
+    let columnIndex = 0;
+    Array.from(tableElement.rows[0].cells).forEach(cellElement => {
+        const colspan = Math.max(1, parseInt(cellElement.getAttribute("colspan") || "1"));
+        const width = normalizedWidths.slice(columnIndex, columnIndex + colspan)
+            .reduce((cellWidth, columnWidth) => cellWidth + columnWidth, 0);
+        cellElement.style.width = `${width}px`;
+        cellElement.setAttribute("width", width.toString());
+        columnIndex += colspan;
+    });
+
+    tableElement.setAttribute("width", "100%");
+    tableElement.setAttribute("cellpadding", "0");
+    tableElement.setAttribute("cellspacing", "0");
+    tableElement.style.tableLayout = "fixed";
+    tableElement.style.fontSize = "14px";
+    tableElement.style.lineHeight = "1.5";
+};
+
+const normalizeRichClipboardTableBorders = (template: HTMLTemplateElement) => {
+    let normalized = false;
+    template.content.querySelectorAll<HTMLTableElement>("table").forEach(tableElement => {
+        normalizeRichClipboardTableSize(tableElement);
+        tableElement.setAttribute("border", "1");
+        tableElement.style.borderCollapse = "collapse";
+        tableElement.style.border = "1px solid #000";
+        tableElement.querySelectorAll<HTMLElement>("th, td").forEach(cellElement => {
+            cellElement.style.border = "1px solid #000";
+            cellElement.style.boxSizing = "border-box";
+            cellElement.style.height = "28px";
+            cellElement.style.padding = "4px 8px";
+            cellElement.style.verticalAlign = "middle";
+        });
+        normalized = true;
+    });
+    return normalized;
+};
+
+const normalizeRichClipboardFontColors = (template: HTMLTemplateElement) => {
+    const elements = Array.from(template.content.querySelectorAll<HTMLElement>("[style]"))
+        .filter(element => element.style.color.includes("var("));
+    if (elements.length === 0 || !document.body) {
+        return false;
+    }
+
+    const probeElement = document.createElement("span");
+    probeElement.style.position = "fixed";
+    probeElement.style.visibility = "hidden";
+    probeElement.style.pointerEvents = "none";
+    document.body.append(probeElement);
+    elements.forEach(element => {
+        probeElement.style.color = "";
+        probeElement.style.color = element.style.color;
+        const color = getComputedStyle(probeElement).color;
+        if (color) {
+            element.style.color = color;
+        }
+    });
+    probeElement.remove();
+    return true;
+};
+
+const convertRichClipboardMath = (template: HTMLTemplateElement) => {
+    if (typeof window.katex?.renderToString !== "function") {
+        return false;
+    }
+
+    let macros = {};
+    try {
+        macros = looseJsonParse(window.siyuan.config.editor.katexMacros || "{}");
+    } catch (e) {
+        console.warn("KaTex macros is not JSON", e);
+    }
+
+    let converted = false;
+    template.content.querySelectorAll<HTMLElement>(
+        '[data-subtype="math"][data-content], span.language-math, div.language-math'
+    ).forEach(element => {
+        if (!template.content.contains(element)) {
+            return;
+        }
+        const math = element.getAttribute("data-content") || element.textContent;
+        if (!math) {
+            return;
+        }
+        const displayMode = element.tagName === "DIV";
+        try {
+            const mathTemplate = document.createElement("template");
+            mathTemplate.innerHTML = window.katex.renderToString(math, {
+                displayMode,
+                output: "mathml",
+                macros,
+                trust: true,
+                strict: (errorCode) => errorCode === "unicodeTextInMathMode" ? "ignore" : "warn",
+            });
+            const mathElement = mathTemplate.content.querySelector("math");
+            if (!mathElement) {
+                return;
+            }
+            const semanticsElement = mathElement.firstElementChild;
+            if (semanticsElement?.localName === "semantics" && semanticsElement.firstElementChild) {
+                semanticsElement.replaceWith(semanticsElement.firstElementChild);
+            }
+            if (displayMode) {
+                mathElement.setAttribute("display", "block");
+            }
+            element.replaceWith(mathElement);
+            converted = true;
+        } catch (e) {
+            console.warn("Convert rich clipboard math error:", e);
+        }
+    });
+    return converted;
+};
+
+export const prepareExternalClipboardHTML = (html: string) => {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    const textMarksConverted = convertRichClipboardTextMarks(template);
+    const mathConverted = convertRichClipboardMath(template);
+    const imagesNormalized = normalizeRichClipboardImages(template);
+    const tableBordersNormalized = normalizeRichClipboardTableBorders(template);
+    const fontColorsNormalized = normalizeRichClipboardFontColors(template);
+    return textMarksConverted || mathConverted || imagesNormalized || tableBordersNormalized || fontColorsNormalized ?
+        template.innerHTML : html;
+};
+
+export const hasRichClipboardMath = (html: string) => {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    return Boolean(template.content.querySelector(
+        '[data-subtype="math"][data-content], span.language-math, div.language-math'
+    ));
+};
+
+export const hasRichClipboardTables = (html: string) => {
+    const template = document.createElement("template");
+    template.innerHTML = html;
+    return Boolean(template.content.querySelector("table"));
+};
+
 const convertRichClipboardTextMarks = (template: HTMLTemplateElement) => {
+    let converted = false;
     template.content.querySelectorAll<HTMLElement>("span[data-type]").forEach(element => {
         const tags = element.dataset.type.split(/\s+/)
             .map(type => richClipboardTextMarkTags.get(type))
@@ -114,7 +360,9 @@ const convertRichClipboardTextMarks = (template: HTMLTemplateElement) => {
             replacement.setAttribute("style", style);
         }
         element.replaceWith(replacement);
+        converted = true;
     });
+    return converted;
 };
 
 const getTableSourceLines = (tableElement: HTMLTableElement) => {
@@ -191,7 +439,13 @@ export const prepareRichClipboardHTML = (html: string) => {
     const template = document.createElement("template");
     template.innerHTML = html;
     convertRichClipboardTextMarks(template);
+    normalizeRichClipboardImages(template);
+    const source = getRichClipboardSourceLines(template.content).join("\n");
+    convertRichClipboardMath(template);
     template.content.querySelectorAll("*").forEach(element => {
+        if (element.closest("math")) {
+            return;
+        }
         Array.from(element.attributes).forEach(attribute => {
             if (!richClipboardAttributes.has(attribute.name) &&
                 !(attribute.name === "class" && attribute.value.split(/\s+/).every(item => item.startsWith("language-")))) {
@@ -199,9 +453,11 @@ export const prepareRichClipboardHTML = (html: string) => {
             }
         });
     });
+    normalizeRichClipboardTableBorders(template);
+    normalizeRichClipboardFontColors(template);
     return {
         html: template.innerHTML.trim(),
-        source: getRichClipboardSourceLines(template.content).join("\n"),
+        source,
     };
 };
 

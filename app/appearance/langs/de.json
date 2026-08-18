@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Systemproxy verwenden",
+	"statusBarMsgDataSync": "Datensynchronisierung",
+	"entryDocumentStatistics": "Dokumentstatistik",
+	"entryTabMenu": "Tab-Menü",
+	"entrySingleBlock": "Einzelner Block",
+	"entryMultipleBlocks": "Mehrere Blöcke",
+	"entryPixelWidth": "Breite in Pixeln",
+	"entryPercentageWidth": "Breite in Prozent",
+	"entryPixelHeight": "Höhe in Pixeln",
+	"entryPercentageHeight": "Höhe in Prozent",
+	"dragTipSelectedNotebooks": "${count} Notizbücher ausgewählt",
+	"formatPainterDoubleClickTip": "Format übertragen; für fortlaufende Verwendung doppelklicken",
+	"dragTipSelectedDocs": "${count} Dokumente ausgewählt",
+	"entrySlashMenu": "Slash-Menü",
+	"importNotebook": "Notizbuch importieren",
+	"distributeSelectedColWidths": "Ausgewählte Spaltenbreiten gleichmäßig verteilen",
+	"useDefaultWidthForAllColumns": "Standardbreite für alle Spalten verwenden",
 	"closeTabOnDoubleClick": "Tabs per Doppelklick schließen",
 	"closeTabOnDoubleClickTip": "Wenn aktiviert, wird ein Tab durch Doppelklicken geschlossen",
 	"sortByParent": "Sortierregeln des übergeordneten Elements verwenden",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Untermenü",
 	"splitMergedCellTip": "Zusammengeführte Zellen müssen zuerst geteilt werden",
 	"entryVisibility": "Menüs und Dock",
-	"entryVisibilityTip": "Wählen Sie, welche integrierten Menüeinträge und Dock-Symbole auf dem Desktop angezeigt werden",
+	"entryVisibilityTip": "Konfigurieren Sie die Sichtbarkeit und Reihenfolge integrierter Desktop-Menüeinträge sowie die Sichtbarkeit der Dock-Symbole",
 	"entrySimple": "Einfach",
 	"entryFull": "Vollständig",
 	"entrySimpleTip": "Zeigt häufig verwendete Einträge für einen schnellen Einstieg",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Basierend auf",
 	"entryCustomProfile": "Benutzerdefiniertes Profil",
 	"entryCreateProfile": "Profil erstellen",
-	"entryRestoreBase": "Auf [${x}] zurücksetzen",
-	"entryRestoreBaseConfirm": "Alle Einträge dieses Profils auf [${x}] zurücksetzen?",
 	"entryImportInvalid": "Ungültige Menü- und Dock-Profildatei",
 	"mobileMenuQuickActions": "Schnellaktionen",
 	"mobileMenuCreate": "Erstellen",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Wartet auf Antwort",
 	"agentNewSession": "Neue Sitzung",
 	"agentInputPlaceholder": "Nachricht eingeben, /Skill...",
-	"agentSend": "Senden",
+	"agentSend": "An Agenten senden",
 	"agentStop": "Stopp",
 	"editorFontSize": "Editor-Schriftgröße",
 	"configGroupBehavior": "Verhalten",
@@ -2648,6 +2663,7 @@
 		"369": "Ungültige OIDC-Konfiguration",
 		"370": "LAN-beschleunigter Datenverkehr %s",
 		"371": "Das Notizbuch ist bereits vorhanden",
-		"372": "Das Notizbuch wurde wiederhergestellt und bleibt geschlossen"
+		"372": "Das Notizbuch wurde wiederhergestellt und bleibt geschlossen",
+		"373": "Dieses Archiv enthält Notizbuchdaten. Bitte importieren Sie es über [Dokumentenbaum - Mehr - Notizbuch importieren]"
 	}
-	}
+}

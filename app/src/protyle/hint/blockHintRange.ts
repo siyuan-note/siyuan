@@ -12,6 +12,13 @@ export const getBlockRefStaticText = (selectedText: string, splitChar: string, i
     return includesTrigger ? selectedText.substring(splitChar.length) : selectedText;
 };
 
+export const shouldIgnoreHintTrigger = (activeHint: string, candidateHint: string, blockHintKeys: string[]) => {
+    if (blockHintKeys.includes(activeHint) && [":", "#", "/", "、"].includes(candidateHint)) {
+        return true;
+    }
+    return activeHint === "#" && ["/", "、"].includes(candidateHint);
+};
+
 export const endsWithMultiCharHintPrefix = (key: string, hintKeys: string[]) => {
     return hintKeys.some((hintKey) => hintKey.length > 1 && key.endsWith(hintKey.substring(0, 1)));
 };

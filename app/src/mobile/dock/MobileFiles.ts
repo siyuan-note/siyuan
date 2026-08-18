@@ -40,8 +40,11 @@ import {
 import {
     FILE_TREE_CHILDREN_SORT_MODE,
     FILE_TREE_EFFECTIVE_SORT_MODE,
+    getFileTreeSortRefreshTargets,
+    getMovedFileTreeSortRefreshTargets,
     getResponseEffectiveSortMode,
     isCustomFileTreeList,
+    reorderFileTreeNotebooks,
     type IDocSortModeChanged,
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
@@ -52,6 +55,7 @@ export class MobileFiles extends Model {
     private closeElement: HTMLElement;
     private reloadNotebookInfoTimeout: number;
     private docSortModeRefreshTimeout: number;
+    private docSortModeChanges = new Map<string, IDocSortModeChanged>();
     private movedExpandedDocIDs = new Set<string>();
     private touchDragState: {
         selectedElement: HTMLElement;
@@ -712,9 +716,16 @@ export class MobileFiles extends Model {
                 ...window.siyuan.config.fileTree,
                 sort,
             }, (response) => {
+                if (response.code !== 0) {
+                    return;
+                }
                 window.siyuan.config.fileTree = response.data;
-                setNoteBook(() => {
-                    this.init(false);
+                this.onDocSortModeChanged({
+                    scope: "global",
+                    box: "",
+                    id: "",
+                    path: "/",
+                    sortMode: sort,
                 });
             });
         });
@@ -906,7 +917,7 @@ export class MobileFiles extends Model {
 
     private onMove(response: IWebSocketData) {
         const moves = response.data.moves as IFileTreeMove[];
-        const needsSortModeRefresh = moves.some((move) =>
+        const hasParentChange = moves.some((move) =>
             move.fromNotebook !== move.toNotebook ||
             pathPosix().dirname(move.fromPath) !== pathPosix().dirname(move.newPath));
         const refreshTargets = new Map<string, { element: HTMLElement, notebookId: string }>();
@@ -1000,16 +1011,25 @@ export class MobileFiles extends Model {
                 });
             }
         });
-        if (needsSortModeRefresh) {
+        if (hasParentChange) {
             this.getOpenPaths();
-            this.onDocSortModeChanged();
-            return;
         }
         if (response.callback !== Constants.CB_MOVE_NOLIST) {
             refreshTargets.forEach((target) => {
                 this.getLeaf(target.element, target.notebookId, true);
             });
         }
+        getMovedFileTreeSortRefreshTargets(this.element, moves).forEach((target) => {
+            const notebookElement = Array.from(this.element.children).find((item) =>
+                item.getAttribute("data-url") === target.notebookId
+            );
+            const liElement = Array.from(notebookElement?.querySelectorAll("li[data-path]") || []).find((item) =>
+                item.getAttribute("data-path") === target.path
+            );
+            if (liElement) {
+                this.getLeaf(liElement, target.notebookId, true);
+            }
+        });
     }
 
     private restoreMovedExpandedItems(listElement: Element, notebookId: string) {
@@ -1112,11 +1132,34 @@ export class MobileFiles extends Model {
         });
     }
 
-    public onDocSortModeChanged(data?: IDocSortModeChanged) {
-        updateFileTreeSortMode(data);
+    public onDocSortModeChanged(data: IDocSortModeChanged) {
+        updateFileTreeSortMode(data, this.element);
+        this.docSortModeChanges.set(`${data.scope}:${data.box}:${data.id}:${data.path}`, data);
         window.clearTimeout(this.docSortModeRefreshTimeout);
         this.docSortModeRefreshTimeout = window.setTimeout(() => {
-            this.init(false);
+            const changes = Array.from(this.docSortModeChanges.values());
+            this.docSortModeChanges.clear();
+            const refreshLists = () => {
+                getFileTreeSortRefreshTargets(this.element, changes).forEach((target) => {
+                    const notebookElement = Array.from(this.element.children).find((item) =>
+                        item.getAttribute("data-url") === target.notebookId
+                    );
+                    const liElement = Array.from(notebookElement?.querySelectorAll("li[data-path]") || []).find((item) =>
+                        item.getAttribute("data-path") === target.path
+                    );
+                    if (liElement) {
+                        this.getLeaf(liElement, target.notebookId, true);
+                    }
+                });
+            };
+            if (changes.some((item) => item.scope === "global")) {
+                setNoteBook((notebooks) => {
+                    reorderFileTreeNotebooks(this.element, this.closeElement.lastElementChild, notebooks);
+                    refreshLists();
+                });
+            } else {
+                refreshLists();
+            }
         }, 100);
     }
 
@@ -1190,6 +1233,14 @@ export class MobileFiles extends Model {
             // 文件展开时，刷新
             const tempElement = document.createElement("template");
             tempElement.innerHTML = fileHTML;
+            const focusedIDs = Array.from(nextElement.querySelectorAll(":scope > .b3-list-item--focus")).map((item) =>
+                item.getAttribute("data-node-id")
+            );
+            focusedIDs.forEach((id) => {
+                Array.from(tempElement.content.children).find((item) =>
+                    item.getAttribute("data-node-id") === id
+                )?.classList.add("b3-list-item--focus");
+            });
             // 保持文件夹展开状态
             nextElement.querySelectorAll(":scope > .b3-list-item > .b3-list-item__toggle> .b3-list-item__arrow--open").forEach(item => {
                 const openLiElement = hasClosestByClassName(item, "b3-list-item");

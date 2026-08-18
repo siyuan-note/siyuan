@@ -68,6 +68,13 @@ import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
 import {isEncryptedBox} from "../util/pathName";
 import {getHTMLAssetIFrameSrc} from "../asset/html";
+import {
+    getDistributedTableColumnWidth,
+    isDefaultTableColumnWidth,
+    TABLE_DEFAULT_COLUMN_WIDTH,
+} from "../protyle/util/tableColumnWidth";
+import {getParentDocumentID} from "../protyle/util/parentDocument";
+import {shouldFocusAfterZoom} from "../protyle/util/focusRestore";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -935,14 +942,19 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
 
 export const enterBack = (protyle: IProtyle, id: string) => {
     if (!protyle.block.showAll) {
-        const ids = protyle.path.split("/");
-        if (ids.length > 2) {
+        const parentDocumentID = getParentDocumentID({
+            path: protyle.path,
+            notebookID: protyle.notebookId,
+            rootID: protyle.block.rootID,
+            boxDocEnabled: window.siyuan.config.fileTree.boxDocEnabled,
+        });
+        if (parentDocumentID) {
             /// #if MOBILE
-            openMobileFileById(protyle.app, ids[ids.length - 2], [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
+            openMobileFileById(protyle.app, parentDocumentID, [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]);
             /// #else
             openFileById({
                 app: protyle.app,
-                id: ids[ids.length - 2],
+                id: parentDocumentID,
                 action: [Constants.CB_GET_FOCUS, Constants.CB_GET_SCROLL]
             });
             /// #endif
@@ -990,7 +1002,7 @@ export const zoomOut = (options: {
         }
         const focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId || options.id}"]`);
         if (focusElement) {
-            focusBlock(focusElement);
+            focusBlock(focusElement, undefined, true, true);
             focusElement.scrollIntoView();
             return;
         }
@@ -1019,7 +1031,13 @@ export const zoomOut = (options: {
         if (options.id !== options.protyle.block.rootID) {
             action.push(Constants.CB_GET_ALL);
         }
-        if (options.focusId) {
+        const focusAfterZoom = shouldFocusAfterZoom({
+            focusId: options.focusId,
+            id: options.id,
+            rootID: options.protyle.block.rootID,
+            isPushBack: options.isPushBack,
+        });
+        if (focusAfterZoom) {
             action.push(Constants.CB_GET_FOCUS);
         }
         onGet({
@@ -1033,6 +1051,7 @@ export const zoomOut = (options: {
             scrollPosition: options.focusId ? "start" : undefined,
             afterCB: options.callback,
             dataDocType: options.dataDocType,
+            focusAfterZoom,
         });
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (options.focusId) {
@@ -1054,7 +1073,7 @@ export const zoomOut = (options: {
                 } else {
                     showElement = getFirstBlock(showElement);
                 }
-                focusBlock(showElement);
+                focusBlock(showElement, undefined, true, true);
             } else if (!options.focusId) {
                 const getDocParam: IObject = {
                     id: options.protyle.block.rootID,
@@ -1069,6 +1088,7 @@ export const zoomOut = (options: {
                         protyle: options.protyle,
                         action: options.isPushBack ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO],
                         dataDocType: options.dataDocType,
+                        focusAfterZoom: true,
                     });
                 });
                 return;
@@ -1091,6 +1111,7 @@ export const zoomOut = (options: {
                             focusId: options.focusId
                         },
                         dataDocType: options.dataDocType,
+                        focusAfterZoom: true,
                     });
                 });
                 return;
@@ -2255,15 +2276,49 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             }
         });
     }
-    const thMatchElement = nodeElement.querySelectorAll("col")[colIndex];
-    if (thMatchElement && (thMatchElement.style.width || thMatchElement.style.minWidth !== "60px")) {
+    const columns = Array.from(tableElement.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col"));
+    const thMatchElement = columns[colIndex];
+    if (thMatchElement) {
         otherMenus.push({
             id: "useDefaultWidth",
             label: window.siyuan.languages.useDefaultWidth,
+            disabled: isDefaultTableColumnWidth(thMatchElement.style.width, thMatchElement.style.minWidth),
             click: () => {
                 const html = nodeElement.outerHTML;
                 thMatchElement.style.width = "";
-                thMatchElement.style.minWidth = "60px";
+                thMatchElement.style.minWidth = `${TABLE_DEFAULT_COLUMN_WIDTH}px`;
+                updateTransaction(protyle, nodeElement, html);
+            }
+        });
+    }
+    if (alignWholeTable) {
+        otherMenus.push({
+            id: "distributeAllColWidths",
+            icon: "iconScale",
+            label: window.siyuan.languages.distributeAllColWidths,
+            disabled: columns.length < 2,
+            click: () => {
+                const html = nodeElement.outerHTML;
+                const width = getDistributedTableColumnWidth(columns.map(column =>
+                    column.getBoundingClientRect().width || TABLE_DEFAULT_COLUMN_WIDTH));
+                columns.forEach(column => {
+                    column.style.width = `${width}px`;
+                    column.style.removeProperty("min-width");
+                });
+                updateTransaction(protyle, nodeElement, html);
+            }
+        });
+        otherMenus.push({
+            id: "useDefaultWidthForAllColumns",
+            label: window.siyuan.languages.useDefaultWidthForAllColumns,
+            disabled: columns.length === 0 || columns.every(column =>
+                isDefaultTableColumnWidth(column.style.width, column.style.minWidth)),
+            click: () => {
+                const html = nodeElement.outerHTML;
+                columns.forEach(column => {
+                    column.style.width = "";
+                    column.style.minWidth = `${TABLE_DEFAULT_COLUMN_WIDTH}px`;
+                });
                 updateTransaction(protyle, nodeElement, html);
             }
         });

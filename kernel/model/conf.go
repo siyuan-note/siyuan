@@ -881,7 +881,7 @@ func InitConf() {
 		logging.SetLogLevel(Conf.LogLevel)
 	}
 
-	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
+	util.SetNetworkProxy(Conf.System.NetworkProxy.String(), Conf.System.NetworkProxy.IsSystem())
 
 	go util.InitPandoc(Conf.Export.PandocBin)
 	go util.InitTesseract()

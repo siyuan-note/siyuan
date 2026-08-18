@@ -21,6 +21,15 @@ import {genAssetHTML} from "../../asset/renderAssets";
 import {unicode2Emoji} from "../../emoji";
 import {avRender} from "../render/av/render";
 import {addWidgetCacheVersion} from "../util/widgetCache";
+import {
+    getEntryCatalogNode,
+    getPluginSlashEntryKey,
+    getSlashMenuEntryPath,
+    refreshSlashMenuCatalog,
+    SLASH_MENU_ROOT_PATH,
+} from "../../config/entryVisibility/catalog";
+import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
+import {resolveSlashMenuItems, TSlashMenuItem} from "./slashMenu";
 
 const getHotkeyOrMarker = (hotkey: string, marker: string) => {
     if (hotkey) {
@@ -31,9 +40,8 @@ const getHotkeyOrMarker = (hotkey: string, marker: string) => {
     return "";
 };
 
-export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
-    const hideConfiguredCreate = typeof sourceOrHideConfiguredCreate === "boolean" && sourceOrHideConfiguredCreate;
-    const allList: IHintData[] = [{
+export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
+    return [{
         filter: [window.siyuan.languages.template, "template", "模板", "moban", "muban", "mb"],
         id: "template",
         value: Constants.ZWSP,
@@ -375,12 +383,27 @@ export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfigured
         id: "separator_6",
         html: "separator",
     }];
+};
+
+export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfiguredCreate: THintSource | boolean = false) => {
+    const enabled = isEntryVisible(SLASH_MENU_ROOT_PATH);
+    if (!enabled) {
+        return [];
+    }
+    const hideConfiguredCreate = typeof sourceOrHideConfiguredCreate === "boolean" && sourceOrHideConfiguredCreate;
+    const builtinList = getBuiltinSlashMenuItems(protyle);
+    const allList = builtinList.map<TSlashMenuItem>((item) => ({
+        ...item,
+        entryKey: item.id || "",
+    }));
     let hasPlugin = false;
     protyle.app.plugins.forEach((plugin) => {
         plugin.protyleSlash.forEach(slash => {
             allList.push({
                 filter: slash.filter,
                 id: slash.id,
+                entryKey: getPluginSlashEntryKey(plugin.name, slash.id,
+                    slash.html === "separator" ? "separator" : "entry"),
                 value: `plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
                 html: slash.html
             });
@@ -390,24 +413,14 @@ export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfigured
     if (!hasPlugin) {
         allList.pop();
     }
-    const visibleList = hideConfiguredCreate ? allList.filter((item) => item.id !== "newFileRef") : allList;
-    if (key === "") {
-        return visibleList;
-    }
-    return visibleList.filter((item) => {
-        if (!item.filter) {
-            return false;
-        }
-        const match = item.filter.find((filter) => {
-            if (filter.toLowerCase().indexOf(key.toLowerCase()) > -1) {
-                return true;
-            }
-        });
-        if (match) {
-            return true;
-        } else {
-            return false;
-        }
+    refreshSlashMenuCatalog(protyle.app.plugins);
+    return resolveSlashMenuItems(allList.filter((item) =>
+        getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey))), {
+        enabled,
+        hideConfiguredCreate,
+        key,
+        order: getEntryOrder(SLASH_MENU_ROOT_PATH),
+        visible: (entryKey) => isEntryVisible(getSlashMenuEntryPath(entryKey)),
     });
 };
 

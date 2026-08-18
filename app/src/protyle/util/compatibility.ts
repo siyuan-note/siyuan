@@ -12,6 +12,7 @@ import type {App} from "../../index";
 import {genUUID} from "../../util/genID";
 import {buildBlockDOMClipboardData} from "./blockDOMClipboard";
 import {buildWebClipboardHTML, getTextSiyuanFromTextHTML} from "./clipboardData";
+import {prepareExternalClipboardHTML} from "./richClipboard";
 
 export {encodeBase64, getTextSiyuanFromTextHTML} from "./clipboardData";
 
@@ -460,7 +461,11 @@ export const writeClipboardData = async (data: IClipboardWriteData, options: ICl
 
 export const writeBlockDOMClipboard = async (lute: Lute, blockDOM: string) => {
     const {textPlain, textHTML, textSiyuan} = buildBlockDOMClipboardData(lute, blockDOM);
-    const result = await writeClipboardData({textPlain, textHTML, textSiyuan});
+    const result = await writeClipboardData({
+        textPlain,
+        textHTML: prepareExternalClipboardHTML(textHTML),
+        textSiyuan,
+    });
     if (result.error) {
         console.log("Write block DOM clipboard error:", result.error);
     }

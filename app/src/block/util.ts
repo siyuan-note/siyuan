@@ -17,15 +17,31 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
 import {mathRender} from "../protyle/render/mathRender";
+import {buildCancelSuperBlockOperations} from "./cancelSuperBlock";
 
 export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range) => {
-    const doOperations: IOperation[] = [];
-    const undoOperations: IOperation[] = [];
     let previousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id");
     nodeElement.classList.remove("protyle-wysiwyg--select");
     nodeElement.removeAttribute("select-start");
     nodeElement.removeAttribute("select-end");
     const id = nodeElement.getAttribute("data-node-id");
+    const visibleChildElements = Array.from(nodeElement.children).filter(item => item.hasAttribute("data-node-id"));
+    let operationChildElements = visibleChildElements;
+    if (visibleChildElements.some(item => item.getAttribute("data-type") === "NodeHeading" &&
+        item.getAttribute("fold") === "1")) {
+        const response = await fetchSyncPost("/api/block/getBlockDOM", {
+            id,
+            notebook: protyle.notebookId,
+        });
+        const template = document.createElement("template");
+        template.innerHTML = response.data?.dom || "";
+        const fullSuperBlockElement = template.content.querySelector(`[data-node-id="${id}"]`);
+        if (!fullSuperBlockElement) {
+            return {doOperations: [], undoOperations: [], previousId};
+        }
+        operationChildElements = Array.from(fullSuperBlockElement.children).filter(item =>
+            item.hasAttribute("data-node-id"));
+    }
     // 先清理拖拽手柄，避免手柄被克隆进撤销用的 SB 副本，导致恢复后残留多余手柄
     nodeElement.querySelectorAll(".sb__resize").forEach(handle => handle.remove());
     const sbElement = nodeElement.cloneNode() as HTMLElement;
@@ -44,46 +60,28 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
             parentID = protyle.block.rootID;
         }
     }
-    undoOperations.push({
-        action: "insert",
+    const operationData = buildCancelSuperBlockOperations({
         id,
         data: sbElement.outerHTML,
+        childIDs: operationChildElements.map(item => item.getAttribute("data-node-id")),
+        foldedHeadingIDs: operationChildElements.filter(item =>
+            item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1"
+        ).map(item => item.getAttribute("data-node-id")),
         previousID: previousId,
         parentID,
     });
-    Array.from(nodeElement.children).forEach((item, index) => {
-        if (index === nodeElement.childElementCount - 1) {
-            doOperations.push({
-                action: "delete",
-                id,
-            });
-            if (range) {
-                getContenteditableElement(nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
-            }
-            nodeElement.lastElementChild.remove();
-            nodeElement.replaceWith(...nodeElement.children);
-            if (range) {
-                focusByWbr(protyle.wysiwyg.element, range);
-            }
-            return;
-        }
-        doOperations.push({
-            action: "move",
-            id: item.getAttribute("data-node-id"),
-            previousID: previousId,
-            parentID,
-        });
-        undoOperations.push({
-            action: "move",
-            id: item.getAttribute("data-node-id"),
-            previousID: getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
-            parentID: id
-        });
-        previousId = item.getAttribute("data-node-id");
-    });
+    const focusId = visibleChildElements[visibleChildElements.length - 1]?.getAttribute("data-node-id") || previousId;
+    if (range) {
+        getContenteditableElement(nodeElement)?.insertAdjacentHTML("afterbegin", "<wbr>");
+    }
+    nodeElement.lastElementChild.remove();
+    nodeElement.replaceWith(...nodeElement.children);
+    if (range) {
+        focusByWbr(protyle.wysiwyg.element, range);
+    }
     mathRender(protyle.wysiwyg.element);
     // 超级块内嵌入块无面包屑，需重新渲染 https://github.com/siyuan-note/siyuan/issues/7574
-    doOperations.forEach(item => {
+    operationData.doOperations.forEach(item => {
         const element = protyle.wysiwyg.element.querySelector(`[data-node-id="${item.id}"]`);
         if (element && element.getAttribute("data-type") === "NodeBlockQueryEmbed") {
             element.removeAttribute("data-render");
@@ -91,7 +89,8 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
         }
     });
     return {
-        doOperations, undoOperations, previousId
+        ...operationData,
+        previousId: focusId
     };
 };
 

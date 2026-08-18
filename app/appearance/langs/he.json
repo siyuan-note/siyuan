@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "שימוש בשרת ה-Proxy של המערכת",
+	"statusBarMsgDataSync": "סנכרון נתונים",
+	"entryDocumentStatistics": "סטטיסטיקות מסמך",
+	"entryTabMenu": "תפריט כרטיסיות",
+	"entrySingleBlock": "בלוק יחיד",
+	"entryMultipleBlocks": "בלוקים מרובים",
+	"entryPixelWidth": "רוחב בפיקסלים",
+	"entryPercentageWidth": "רוחב באחוזים",
+	"entryPixelHeight": "גובה בפיקסלים",
+	"entryPercentageHeight": "גובה באחוזים",
+	"dragTipSelectedNotebooks": "נבחרו ${count} מחברות",
+	"formatPainterDoubleClickTip": "מברשת עיצוב; לחיצה כפולה לשימוש רציף",
+	"dragTipSelectedDocs": "נבחרו ${count} מסמכים",
+	"entrySlashMenu": "תפריט לוכסן",
+	"importNotebook": "ייבוא מחברת",
+	"distributeSelectedColWidths": "פזר את רוחב העמודות שנבחרו באופן שווה",
+	"useDefaultWidthForAllColumns": "השתמש ברוחב ברירת המחדל עבור כל העמודות",
 	"closeTabOnDoubleClick": "השתמש בלחיצה כפולה כדי לסגור כרטיסיות",
 	"closeTabOnDoubleClickTip": "כאשר האפשרות מופעלת, לחץ פעמיים על כרטיסייה כדי לסגור אותה",
 	"sortByParent": "השתמש בכללי המיון של פריט האב",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "תפריט משנה",
 	"splitMergedCellTip": "יש לפצל תחילה תאים ממוזגים",
 	"entryVisibility": "תפריטים וסרגל עגינה",
-	"entryVisibilityTip": "בחירת פריטי התפריט וסמלי סרגל העגינה המובנים שיוצגו במחשב",
+	"entryVisibilityTip": "הגדרת הנראות והסדר של פריטי תפריט שולחן העבודה המובנים והנראות של סמלי סרגל העגינה",
 	"entrySimple": "פשוט",
 	"entryFull": "מלא",
 	"entrySimpleTip": "מציג פריטים נפוצים כדי לעזור למשתמשים חדשים להתחיל במהירות",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "מבוסס על",
 	"entryCustomProfile": "פרופיל מותאם אישית",
 	"entryCreateProfile": "יצירת פרופיל",
-	"entryRestoreBase": "שחזור אל [${x}]",
-	"entryRestoreBaseConfirm": "לשחזר את כל הפריטים בפרופיל זה אל [${x}]?",
 	"entryImportInvalid": "קובץ פרופיל התפריטים וסרגל העגינה אינו תקין",
 	"mobileMenuQuickActions": "פעולות מהירות",
 	"mobileMenuCreate": "יצירה",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "ממתין לתשובה",
 	"agentNewSession": "הפעלה חדשה",
 	"agentInputPlaceholder": "הקלד הודעה, /מיומנות...",
-	"agentSend": "שלח",
+	"agentSend": "שליחה לסוכן",
 	"agentStop": "עצור",
 	"editorFontSize": "גודל גופן העורך",
 	"configGroupBehavior": "התנהגות",
@@ -2648,6 +2663,7 @@
 		"369": "תצורת OIDC אינה תקינה",
 		"370": "תעבורה מואצת ברשת המקומית %s",
 		"371": "המחברת כבר קיימת",
-		"372": "המחברת שוחזרה ונשארה סגורה"
+		"372": "המחברת שוחזרה ונשארה סגורה",
+		"373": "ארכיון זה מכיל נתוני מחברת. יש לייבא אותו מתוך [עץ המסמכים - עוד - ייבוא מחברת]"
 	}
-	}
+}

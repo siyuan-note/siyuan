@@ -53,6 +53,9 @@ func TestCustomFontLifecycle(t *testing.T) {
 	if font.DisplayName == "" || font.Weight < 1 {
 		t.Fatalf("unexpected custom font metadata: %+v", font)
 	}
+	if len(font.Aliases) == 0 {
+		t.Fatalf("custom font aliases are missing: %+v", font)
+	}
 
 	fonts := LoadCustomFonts()
 	if len(fonts) != 1 || fonts[0].ID != font.ID {
@@ -192,6 +195,7 @@ func resetCustomFontCache() {
 	customFontsLock.Lock()
 	customFonts = nil
 	customFontsLoaded = false
+	customFontsLang = ""
 	customFontTemps = map[string]struct{}{}
 	customFontsLock.Unlock()
 }

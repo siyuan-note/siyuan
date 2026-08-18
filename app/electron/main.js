@@ -345,10 +345,14 @@ const windowNavigate = (currentWindow, windowType) => {
     });
 };
 
-const setProxy = (proxyURL, webContents) => {
-    if (proxyURL.startsWith("://")) {
+const setProxy = (proxyURL, webContents, proxyMode) => {
+    if (proxyMode === "system" || (!proxyMode && proxyURL.startsWith("://"))) {
         console.log("network proxy [system]");
         return webContents.session.setProxy({mode: "system"});
+    }
+    if (proxyMode === "direct") {
+        console.log("network proxy [direct]");
+        return webContents.session.setProxy({mode: "direct"});
     }
     console.log("network proxy [" + proxyURL + "]");
     return webContents.session.setProxy({proxyRules: proxyURL});
@@ -1075,7 +1079,9 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
     net.fetch(getServer(currentKernelPort) + "/api/system/getNetwork", {method: "POST"}).then((response) => {
         return response.json();
     }).then((response) => {
-        const setProxyDone = setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`, currentWindow.webContents);
+        const proxyMode = response.data.proxy.scheme === "system" ? "system" : response.data.proxy.scheme === "" ? "direct" : "fixed_servers";
+        const setProxyDone = setProxy(`${response.data.proxy.scheme}://${response.data.proxy.host}:${response.data.proxy.port}`,
+            currentWindow.webContents, proxyMode);
         Promise.race([
             Promise.resolve(setProxyDone),
             new Promise((resolve) => setTimeout(resolve, 5000)), // setProxy 永久 pending 时的超时兜底
@@ -1796,7 +1802,7 @@ app.whenReady().then(() => {
             return event.sender.session.availableSpellCheckerLanguages;
         }
         if (data.cmd === "setProxy") {
-            return setProxy(data.proxyURL, event.sender);
+            return setProxy(data.proxyURL, event.sender, data.proxyMode);
         }
         if (data.cmd === "showSaveDialog") {
             return dialog.showSaveDialog(data);

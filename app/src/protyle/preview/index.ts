@@ -11,7 +11,13 @@ import {Constants} from "../../constants";
 import {getSearch, isMobile} from "../../util/functions";
 /// #if !BROWSER
 import {shell} from "electron";
-import {enhanceRichClipboard, hasRichClipboardImages} from "../util/richClipboard";
+import {
+    enhanceRichClipboard,
+    hasRichClipboardImages,
+    hasRichClipboardMath,
+    hasRichClipboardTables,
+    prepareExternalClipboardHTML,
+} from "../util/richClipboard";
 /// #endif
 /// #if !MOBILE
 import {openAsset, openBy} from "../../editor/util";
@@ -97,20 +103,27 @@ export class Preview {
             const copyElement = document.createElement("div");
             copyElement.appendChild(range.cloneContents());
             const copiedHTML = copyElement.innerHTML;
-            if (!hasRichClipboardImages(copiedHTML)) {
+            const hasImages = hasRichClipboardImages(copiedHTML);
+            const hasMath = hasRichClipboardMath(copiedHTML);
+            const hasTables = hasRichClipboardTables(copiedHTML);
+            if (!hasImages && !hasMath && !hasTables) {
                 return;
             }
+            const clipboardHTML = hasMath || hasTables ?
+                prepareExternalClipboardHTML(copiedHTML) : copiedHTML;
 
             const marker = `<!--siyuan-rich-clipboard='${Lute.NewNodeID()}'-->`;
             const text = selection.toString();
-            const html = marker + copiedHTML;
+            const html = marker + clipboardHTML;
             event.preventDefault();
             event.clipboardData.setData("text/plain", text);
             event.clipboardData.setData("text/html", html);
-            enhanceRichClipboard(text, html, protyle.notebookId, {
-                marker,
-                removeMarker: true,
-            });
+            if (hasImages) {
+                enhanceRichClipboard(text, html, protyle.notebookId, {
+                    marker,
+                    removeMarker: true,
+                });
+            }
         };
         document.addEventListener("copy", this.copyEventHandler);
         /// #endif

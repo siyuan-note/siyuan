@@ -24,7 +24,6 @@ body {
   font-family: var(--b3-font-family);
   color: var(--b3-theme-on-background);
   background-color: var(--b3-body-background);
-  -webkit-font-smoothing: antialiased;
   -webkit-overflow-scrolling: touch;
   -webkit-tap-highlight-color: var(--b3-list-hover);
   height: 100%;
@@ -65,8 +64,6 @@ body {
 
   &.body--win32 {
     --b3-toolbar-left-mac: 8px;
-    -webkit-font-smoothing: auto;
-
     .toolbar {
       padding: 0 0 0 5px;
     }

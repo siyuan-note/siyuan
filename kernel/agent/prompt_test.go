@@ -158,6 +158,9 @@ func TestAssistantContextSurvivesCheckpointRoundTrip(t *testing.T) {
 			ArgumentsJSON: argumentsJSON,
 			Result:        "search result",
 			State:         "finished",
+			ProviderData: &AgentToolCallProviderData{
+				Google: &AgentGoogleToolCallProviderData{ThoughtSignature: "thought-signature"},
+			},
 		}},
 	}}
 
@@ -167,8 +170,15 @@ func TestAssistantContextSurvivesCheckpointRoundTrip(t *testing.T) {
 		t.Fatalf("assistant reasoning was not restored into checkpoint: %#v", checkpoint)
 	}
 	if len(checkpoint[0].ToolCalls) != 1 || checkpoint[0].ToolCalls[0].ID != "call-original" ||
-		checkpoint[0].ToolCalls[0].ArgumentsJSON != argumentsJSON {
+		checkpoint[0].ToolCalls[0].ArgumentsJSON != argumentsJSON ||
+		checkpoint[0].ToolCalls[0].ProviderData == nil || checkpoint[0].ToolCalls[0].ProviderData.Google == nil ||
+		checkpoint[0].ToolCalls[0].ProviderData.Google.ThoughtSignature != "thought-signature" {
 		t.Fatalf("assistant tool call was not restored exactly: %#v", checkpoint[0].ToolCalls)
+	}
+	state := util.NewGeminiThoughtSignatureState()
+	restoreGeminiThoughtSignatures(state, checkpoint)
+	if got := state.Get("call-original"); got != "thought-signature" {
+		t.Fatalf("thought signature was not restored into request state: %q", got)
 	}
 
 	messages := checkpointMessagesToOpenAI(checkpoint, "English", nil)
@@ -189,7 +199,9 @@ func TestAssistantContextSurvivesCheckpointRoundTrip(t *testing.T) {
 	if len(roundTripped) != 1 || roundTripped[0].ReasoningCont != entries[0].ReasoningCont ||
 		roundTripped[0].RoundID != entries[0].RoundID ||
 		len(roundTripped[0].ToolCalls) != 1 || roundTripped[0].ToolCalls[0].ID != "call-original" ||
-		roundTripped[0].ToolCalls[0].ArgumentsJSON != argumentsJSON {
+		roundTripped[0].ToolCalls[0].ArgumentsJSON != argumentsJSON ||
+		roundTripped[0].ToolCalls[0].ProviderData == nil || roundTripped[0].ToolCalls[0].ProviderData.Google == nil ||
+		roundTripped[0].ToolCalls[0].ProviderData.Google.ThoughtSignature != "thought-signature" {
 		t.Fatalf("assistant context changed during checkpoint round trip: %#v", roundTripped)
 	}
 }

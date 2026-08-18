@@ -108,12 +108,18 @@ func html2BlockDOM(c *gin.Context) {
 	text, _ := arg["text"].(string)
 	mathML, _ := arg["mathML"].(string)
 	office, _ := arg["office"].(string)
+	officeMathHTML, _ := arg["officeMathHTML"].(string)
 	wps, _ := arg["wps"].(string)
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
 	// 将 Word 和 WPS 公式转换为可编辑公式 https://github.com/siyuan-note/siyuan/issues/18747
 	if markdown, converted := convertClipboardMath(mathML, office, wps); converted {
+		luteEngine.SetInlineMath(true)
+		ret.Data = luteEngine.Md2BlockDOM(markdown, false)
+		return
+	}
+	if markdown, converted := convertOfficeHTMLClipboardMath(officeMathHTML); converted {
 		luteEngine.SetInlineMath(true)
 		ret.Data = luteEngine.Md2BlockDOM(markdown, false)
 		return

@@ -17,6 +17,7 @@
 package api
 
 import (
+	archivezip "archive/zip"
 	"bytes"
 	"encoding/base64"
 	"errors"
@@ -107,6 +108,29 @@ func TestNormalizeClipboardMathML(t *testing.T) {
 	}
 	if _, ok = normalizeClipboardMathML(`<html><math/></html>`); ok {
 		t.Fatal("non-MathML root was accepted")
+	}
+}
+
+func TestOfficeHTMLClipboardMathInput(t *testing.T) {
+	fragment := `<m:oMathPara xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"><m:oMath><m:r><span>SNR&nbsp;(dB)=20×</span></m:r><m:sSub><m:e><m:r><span>log</span></m:r></m:e><m:sub><m:r><span>10</span></m:r></m:sub></m:sSub><m:d><m:e><m:f><m:num><m:r><span>&#119878;</span></m:r></m:num><m:den><m:r><span>&#119873;</span></m:r></m:den></m:f></m:e></m:d></m:oMath></m:oMathPara>`
+	normalized, ok := normalizeOfficeHTMLOMML(fragment)
+	if !ok || !strings.Contains(normalized, `<m:t xml:space="preserve">SNR (dB)=20×</m:t>`) ||
+		!strings.Contains(normalized, `<m:sSub>`) || !strings.Contains(normalized, `<m:f>`) ||
+		strings.Contains(normalized, "<span") || !strings.Contains(normalized, "<m:oMathPara>") {
+		t.Fatalf("unexpected normalized Office HTML math: normalized=%q ok=%v", normalized, ok)
+	}
+	docx, ok := officeHTMLClipboardMathInput(fragment)
+	if !ok || !isClipboardMathDOCX(docx) {
+		t.Fatal("Office HTML math was not converted to a valid DOCX payload")
+	}
+	archive, err := archivezip.NewReader(bytes.NewReader(docx), int64(len(docx)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	documentXML, err := readWPSClipboardFile(archive, "word/document.xml")
+	if err != nil || !bytes.Contains(documentXML, []byte(`<m:oMath>`)) ||
+		!bytes.Contains(documentXML, []byte(docxOMMLNamespace)) {
+		t.Fatalf("unexpected generated document.xml: xml=%q err=%v", documentXML, err)
 	}
 }
 

@@ -163,14 +163,14 @@ export class Toolbar {
             "mark",
             "sup",
             "sub",
-            "clear",
-            "format-painter",
-            "|",
             "code",
             "kbd",
             "tag",
             "inline-math",
             "inline-memo",
+            "|",
+            "format-painter",
+            {name: "clear", icon: "iconEraser"},
         ]);
         protyle.app.plugins.forEach(item => {
             const pluginToolbar = filterPluginToolbar(item.updateProtyleToolbar(protyle.options.toolbar), protyle.lite);

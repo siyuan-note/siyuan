@@ -109,6 +109,24 @@ func TestExportNotebooksSYKeepsCrossNotebookReferences(t *testing.T) {
 	writeExportRelatedTestTree(t, targetTree)
 
 	exportPath := ExportNotebooksSY([]string{sourceBoxID, targetBoxID})
+	exportAbsPath, err := exportedFilePath(exportPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if !isSYNotebookBundle(exportAbsPath) {
+		t.Fatal("exported archive was not detected as a notebook bundle")
+	}
+	if err = ImportSY(exportAbsPath, sourceBoxID, "/"); nil == err {
+		t.Fatal("notebook bundle should not be imported into a document")
+	}
+	singleExportPath := ExportNotebookSY(sourceBoxID)
+	singleExportAbsPath, err := exportedFilePath(singleExportPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if err = ImportSY(singleExportAbsPath, targetBoxID, "/"); nil == err {
+		t.Fatal("notebook archive should not be imported into a document")
+	}
 	syArchive := openExportArchive(t, exportPath)
 	syRoot := "Notebook-2"
 	sourceArchivePath := filepath.ToSlash(filepath.Join(syRoot, "notebooks", "Notebook.sy.zip"))
@@ -141,6 +159,38 @@ func TestExportNotebooksSYKeepsCrossNotebookReferences(t *testing.T) {
 	targetArchive := openNestedArchive(t, syArchive, targetArchivePath)
 	if findArchiveFile(targetArchive.File, filepath.ToSlash(filepath.Join("Notebook", targetDocID+".sy"))) == nil {
 		t.Fatal("target document is missing from its notebook archive")
+	}
+}
+
+func TestImportNotebooksSYKeepsEmptyNotebooks(t *testing.T) {
+	const (
+		firstBoxID  = "20260817000100-box0001"
+		secondBoxID = "20260817000101-box0002"
+	)
+	setupExportRelatedTest(t, firstBoxID, secondBoxID)
+	for _, boxID := range []string{firstBoxID, secondBoxID} {
+		box := &Box{ID: boxID}
+		boxConf := box.GetConf()
+		boxConf.Name = boxID
+		if err := box.SaveConf(boxConf); nil != err {
+			t.Fatal(err)
+		}
+	}
+
+	exportPath := ExportNotebooksSY([]string{firstBoxID, secondBoxID})
+	exportAbsPath, err := exportedFilePath(exportPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	boxIDs, bundle, err := ImportSYNotebookBundle(exportAbsPath)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if !bundle {
+		t.Fatal("exported archive was not detected as a notebook bundle")
+	}
+	if len(boxIDs) != 2 {
+		t.Fatalf("imported %d notebooks, want 2", len(boxIDs))
 	}
 }
 

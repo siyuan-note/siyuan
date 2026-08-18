@@ -51,7 +51,7 @@ import {dropEvent} from "../util/editorCommonEvent";
 import {beforeBlockquoteInput, input} from "./input";
 import {
     getContenteditableElement,
-    getEmbedChildOperationContext,
+    getEmbedGutterOperationContext,
     getFirstBlock,
     getLastBlock,
     getNextBlock,
@@ -167,7 +167,7 @@ import {setFold} from "../util/blockFold";
 import {BlockPanel} from "../../block/Panel";
 import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
-import {enhanceRichClipboard, prepareRichClipboardHTML} from "../util/richClipboard";
+import {enhanceRichClipboard, prepareExternalClipboardHTML, prepareRichClipboardHTML} from "../util/richClipboard";
 import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
@@ -193,6 +193,7 @@ import {
 import {isCrossBlockTextRange} from "../gutter/multiSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldOpenListItemAttr} from "./listContext";
+import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -210,7 +211,7 @@ const refreshGutterByPointer = (protyle: IProtyle, pointerElement: Element | nul
     }
     if (gutterElement) {
         const embedElement = isInEmbedBlock(gutterElement);
-        if (embedElement && !getEmbedChildOperationContext(gutterElement)) {
+        if (embedElement && !getEmbedGutterOperationContext(gutterElement)) {
             gutterElement = embedElement;
         }
     }
@@ -219,6 +220,35 @@ const refreshGutterByPointer = (protyle: IProtyle, pointerElement: Element | nul
     } else {
         hideElements(["gutter"], protyle);
     }
+};
+
+const focusTextBlockEdgeByPoint = (blockElement: HTMLElement, x: number, y: number,
+                                   contentLeft: number, contentRight: number) => {
+    const editableElement = getContenteditableElement(blockElement) as HTMLElement;
+    if (!editableElement || !blockElement.contains(editableElement) ||
+        editableElement.getAttribute("contenteditable") !== "true") {
+        return false;
+    }
+    const editableBlockElement = hasClosestBlock(editableElement);
+    if (!editableBlockElement ||
+        !["NodeParagraph", "NodeHeading"].includes(editableBlockElement.getAttribute("data-type"))) {
+        return false;
+    }
+    const caret = getBlockEdgeCaretRange(x, y, contentLeft, contentRight,
+        editableElement.getBoundingClientRect(), editableElement,
+        (pointX, pointY) => document.caretRangeFromPoint(pointX, pointY));
+    if (!caret) {
+        return false;
+    }
+    focusByRange(caret.range);
+    // Range 可能吸附到目标行的另一端，由浏览器按视觉行移动到点击侧的行边界
+    const selection = getSelection();
+    selection.modify("move", caret.lineBoundaryDirection, "lineboundary");
+    const movedRange = selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+    if (!isCaretRangeInsideElement(movedRange, editableElement)) {
+        return false;
+    }
+    return true;
 };
 
 const getShiftClickBlockByPoint = (wysiwygElement: HTMLElement, startElement: HTMLElement, x: number, y: number) => {
@@ -982,6 +1012,8 @@ export class WYSIWYG {
                     const prepared = prepareRichClipboardHTML(exportedHTML);
                     exportedHTML = prepared.html;
                     clipboardText = prepared.source;
+                } else {
+                    exportedHTML = prepareExternalClipboardHTML(exportedHTML);
                 }
                 const clipboardHTML = (nestedListPaste ? NESTED_LIST_PASTE_MARKER : "") + exportedHTML;
                 const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${clipboardHTML}`;
@@ -2439,7 +2471,11 @@ export class WYSIWYG {
                         const blockPoint = getShiftClickBlockByPoint(this.element, nodeElement,
                             mouseUpEvent.clientX, mouseUpEvent.clientY);
                         if (blockPoint) {
-                            focusBlock(blockPoint.blockElement, undefined, blockPoint.toStart);
+                            // 多行文本块左右空白点击需保留纵坐标 https://github.com/siyuan-note/siyuan/issues/18789
+                            if (!focusTextBlockEdgeByPoint(blockPoint.blockElement, mouseUpEvent.clientX,
+                                mouseUpEvent.clientY, mostLeft, mostRight)) {
+                                focusBlock(blockPoint.blockElement, undefined, blockPoint.toStart);
+                            }
                         } else {
                             focusBlock(nodeElement, undefined, mouseUpEvent.clientX < mostLeft);
                         }
@@ -3295,9 +3331,9 @@ export class WYSIWYG {
                     event.clipboardData.setData("text/siyuan", textSiyuan);
                 }
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const exportedHTML = blockDOMClipboardRichData?.textHTML ??
+                const exportedHTML = prepareExternalClipboardHTML(blockDOMClipboardRichData?.textHTML ??
                     removeZWJ((selectTableElement || selectTableRange) ? html :
-                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
                 const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${exportedHTML}`;
                 if (!cutClipboardWritten) {
                     event.clipboardData.setData("text/html", textHTML);

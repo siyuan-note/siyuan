@@ -1,16 +1,21 @@
 import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
 
-export interface IEmbedChildOperationContext {
+export interface IEmbedOperationContext {
     resultElement: HTMLElement;
     targetID: string;
     targetElement?: Element;
     boundaryElement: Element;
+    allowChildOperation: boolean;
 }
 
-export const getEmbedChildOperationContext = (element: Node): IEmbedChildOperationContext | undefined => {
+export interface IEmbedChildOperationContext extends IEmbedOperationContext {
+    allowChildOperation: true;
+}
+
+const getEmbedOperationContext = (element: Node): IEmbedOperationContext | undefined => {
     const resultElement = hasClosestByClassName(element, "protyle-wysiwyg__embed");
-    if (!resultElement || resultElement.getAttribute("data-allow-child-operation") !== "true") {
+    if (!resultElement) {
         return;
     }
 
@@ -28,7 +33,24 @@ export const getEmbedChildOperationContext = (element: Node): IEmbedChildOperati
         targetElement,
         // 文档块不会渲染自身节点，查询结果容器就是它的子块边界。
         boundaryElement: targetElement || resultElement,
+        allowChildOperation: resultElement.getAttribute("data-allow-child-operation") === "true",
     };
+};
+
+export const getEmbedChildOperationContext = (element: Node): IEmbedChildOperationContext | undefined => {
+    const context = getEmbedOperationContext(element);
+    return context?.allowChildOperation ? context as IEmbedChildOperationContext : undefined;
+};
+
+export const getEmbedGutterOperationContext = (element: Node): IEmbedOperationContext | undefined => {
+    const context = getEmbedOperationContext(element);
+    if (!context) {
+        return;
+    }
+    const blockElement = hasClosestBlock(element);
+    if (context.allowChildOperation || context.targetElement === blockElement) {
+        return context;
+    }
 };
 
 export const getEmbedChildOperationParentID = (element: Element, context = getEmbedChildOperationContext(element)) => {

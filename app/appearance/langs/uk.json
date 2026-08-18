@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Використовувати системний проксі",
+	"statusBarMsgDataSync": "Синхронізація даних",
+	"entryDocumentStatistics": "Статистика документа",
+	"entryTabMenu": "Меню вкладок",
+	"entrySingleBlock": "Один блок",
+	"entryMultipleBlocks": "Кілька блоків",
+	"entryPixelWidth": "Ширина в пікселях",
+	"entryPercentageWidth": "Ширина у відсотках",
+	"entryPixelHeight": "Висота в пікселях",
+	"entryPercentageHeight": "Висота у відсотках",
+	"dragTipSelectedNotebooks": "Вибрано блокнотів: ${count}",
+	"formatPainterDoubleClickTip": "Формат за зразком; двічі клацніть для безперервного використання",
+	"dragTipSelectedDocs": "Вибрано документів: ${count}",
+	"entrySlashMenu": "Слеш-меню",
+	"importNotebook": "Імпортувати блокнот",
+	"distributeSelectedColWidths": "Рівномірно розподілити ширину вибраних стовпців",
+	"useDefaultWidthForAllColumns": "Використовувати типову ширину для всіх стовпців",
 	"closeTabOnDoubleClick": "Закривати вкладки подвійним клацанням",
 	"closeTabOnDoubleClickTip": "Якщо ввімкнено, двічі клацніть вкладку, щоб закрити її",
 	"sortByParent": "Використовувати правила сортування батьківського елемента",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Підменю",
 	"splitMergedCellTip": "Спочатку розділіть об’єднані комірки",
 	"entryVisibility": "Меню та док-панель",
-	"entryVisibilityTip": "Виберіть вбудовані пункти меню та піктограми док-панелі, що відображаються на комп'ютері",
+	"entryVisibilityTip": "Налаштуйте видимість і порядок вбудованих пунктів меню робочого столу, а також видимість піктограм док-панелі",
 	"entrySimple": "Простий",
 	"entryFull": "Повний",
 	"entrySimpleTip": "Показує часто використовувані пункти, щоб швидше почати роботу",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "На основі",
 	"entryCustomProfile": "Користувацький профіль",
 	"entryCreateProfile": "Створити профіль",
-	"entryRestoreBase": "Відновити до [${x}]",
-	"entryRestoreBaseConfirm": "Відновити всі елементи цього профілю до [${x}]?",
 	"entryImportInvalid": "Недійсний файл профілю меню та док-панелі",
 	"mobileMenuQuickActions": "Швидкі дії",
 	"mobileMenuCreate": "Створення",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Очікує відповіді",
 	"agentNewSession": "Нова сесія",
 	"agentInputPlaceholder": "Введіть повідомлення, /навичка...",
-	"agentSend": "Надіслати",
+	"agentSend": "Надіслати агенту",
 	"agentStop": "Зупинити",
 	"editorFontSize": "Розмір шрифту редактора",
 	"configGroupBehavior": "Поведінка",
@@ -2648,6 +2663,7 @@
 		"369": "Недійсна конфігурація OIDC",
 		"370": "трафік, прискорений локальною мережею %s",
 		"371": "Блокнот уже існує",
-		"372": "Блокнот відновлено й залишено закритим"
+		"372": "Блокнот відновлено й залишено закритим",
+		"373": "Цей архів містить дані блокнота. Імпортуйте його через [Дерево документів - Більше - Імпортувати блокнот]"
 	}
-	}
+}

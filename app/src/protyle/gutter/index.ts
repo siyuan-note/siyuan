@@ -42,7 +42,7 @@ import {highlightRender} from "../render/highlightRender";
 import {blockRender} from "../render/blockRender";
 import {
     getContenteditableElement,
-    getEmbedChildOperationContext,
+    getEmbedGutterOperationContext,
     getNextBlockSibling,
     getParentBlock,
     getTopAloneElement,
@@ -104,6 +104,7 @@ import {
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
 import {getBacklinkGutterContentTop, getFixedGutterPosition, getGutterMarginHeight} from "./layout";
 import {closeSubElement} from "../toolbar/subElementLifecycle";
+import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -732,6 +733,11 @@ export class Gutter {
             const id = buttonElement.getAttribute("data-node-id");
             // 情况C：非有效块标（折叠箭头、数据库行等）→ 隐藏框线与+号
             if (type === "fold" || type === "NodeAttributeViewRow" || type === "NodeAttributeViewRowMenu" || !id) {
+                hideInsert();
+                return;
+            }
+            // 嵌入内容中的块不允许在当前查询结果边界外插入相邻块。
+            if (!canShowGutterInsert(buttonElement.dataset.embedId)) {
                 hideInsert();
                 return;
             }
@@ -1477,7 +1483,7 @@ export class Gutter {
             const embedElement = isInEmbedBlock(item, false);
             if (embedID) {
                 return embedElement && embedElement.getAttribute("data-node-id") === embedID &&
-                    !!getEmbedChildOperationContext(item);
+                    !!getEmbedGutterOperationContext(item);
             }
             return !embedElement;
         });
@@ -1503,7 +1509,7 @@ export class Gutter {
         if (range) {
             focusByRange(range);
         }
-        const embedContext = getEmbedChildOperationContext(nodeElement);
+        const embedContext = getEmbedGutterOperationContext(nodeElement);
         const selectsElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
         if (!embedContext && selectsElement.length > 1) {
             window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BLOCK_MULTI);
@@ -1521,9 +1527,9 @@ export class Gutter {
         }
 
         const isEmbedMenu = !!embedContext;
-        // 查询目标容器自身只允许非结构操作，子块可以在目标边界内转换、插入、复制和删除。
+        // 查询目标自身只允许非结构操作；允许子块操作的查询结果可在目标边界内转换、插入、复制和删除。
         const allowStructuralMutation = !protyle.disabled &&
-            (!embedContext || embedContext.targetElement !== nodeElement);
+            (!embedContext || embedContext.allowChildOperation && embedContext.targetElement !== nodeElement);
         const isOnlyTargetListItem = embedContext?.targetElement?.getAttribute("data-type") === "NodeList" &&
             nodeElement.getAttribute("data-type") === "NodeListItem" &&
             nodeElement.parentElement === embedContext.targetElement &&
@@ -3443,7 +3449,7 @@ export class Gutter {
         let index = 0;
         let listItem;
         let hideParent = false;
-        const embedContext = getEmbedChildOperationContext(nodeElement);
+        const embedContext = getEmbedGutterOperationContext(nodeElement);
         const embedElement = embedContext ? isInEmbedBlock(nodeElement, false) : false;
         const embedID = embedElement ? embedElement.getAttribute("data-node-id") : undefined;
         while (nodeElement) {
@@ -3546,12 +3552,16 @@ export class Gutter {
                 if (protyle.options.backlinkData) {
                     popoverHTML = `class="popover__block" data-id="${dataNodeId}"`;
                 }
-                const embedHTML = embedID ? ` data-embed-id="${embedID}"` : "";
-                const buttonHTML = type ? `<button class="ariaLabel" data-delay="500" data-position="parentW" aria-label="${gutterTip}"
-data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${dataNodeId}"${embedHTML}>
-    <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
-    <span ${popoverHTML} ${protyle.disabled || embedContext ? "" : 'draggable="true"'}></span>
-</button>` : "";
+                const buttonHTML = type ? genGutterBlockButtonHTML({
+                    ariaLabel: gutterTip,
+                    type,
+                    subtype: nodeElement.getAttribute("data-subtype"),
+                    nodeID: dataNodeId,
+                    icon: getIconByType(type, nodeElement.getAttribute("data-subtype")),
+                    embedID,
+                    popoverHTML,
+                    draggable: !protyle.disabled && !embedContext,
+                }) : "";
                 if (!hideParent) {
                     html = buttonHTML + html;
                 }
@@ -3606,11 +3616,31 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                 break;
             }
         }
+        // 嵌入内容块标左侧同时保留外层嵌入块块标，避免内外块标争用狭窄的悬浮区域。
+        // https://github.com/siyuan-note/siyuan/issues/18800
+        if (embedContext && embedElement) {
+            const type = embedElement.getAttribute("data-type");
+            let gutterTip = (protyle.options.backlinkData ? this.gutterTipBacklink : this.gutterTip)
+                .replace("${x}", () => getBlockTypeName(type));
+            if (protyle.disabled) {
+                gutterTip = gutterTip.split("<br>").splice(0, 2).join("<br>");
+            }
+            html = genGutterBlockButtonHTML({
+                ariaLabel: gutterTip,
+                type,
+                subtype: embedElement.getAttribute("data-subtype"),
+                nodeID: embedElement.getAttribute("data-node-id"),
+                icon: getIconByType(type, embedElement.getAttribute("data-subtype")),
+                popoverHTML: protyle.options.backlinkData ?
+                    `class="popover__block" data-id="${embedElement.getAttribute("data-node-id")}"` : "",
+                draggable: !protyle.disabled,
+            }) + html;
+        }
         if (isMultiSelect && !html) {
             hideElements(["gutter"], protyle);
             return;
         }
-        const shouldRenderInsert = !embedContext && !isMultiSelect;
+        const shouldRenderInsert = !isMultiSelect;
         const insertElementCount = this.element.querySelectorAll(".protyle-gutters__line, .protyle-gutters__plus").length;
         const renderKey = `${shouldRenderInsert ? "1" : "0"}${html}`;
         let shouldRenderContent = this.renderKey !== renderKey || this.element.childElementCount === 0 ||

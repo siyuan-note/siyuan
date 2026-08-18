@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Use system proxy",
+	"statusBarMsgDataSync": "Data synchronization",
+	"entryDocumentStatistics": "Document statistics",
+	"entryTabMenu": "Tab menu",
+	"entrySingleBlock": "Single block",
+	"entryMultipleBlocks": "Multiple blocks",
+	"entryPixelWidth": "Pixel width",
+	"entryPercentageWidth": "Percentage width",
+	"entryPixelHeight": "Pixel height",
+	"entryPercentageHeight": "Percentage height",
+	"dragTipSelectedNotebooks": "Selected ${count} notebooks",
+	"formatPainterDoubleClickTip": "Format Painter; double-click for continuous use",
+	"dragTipSelectedDocs": "Selected ${count} documents",
+	"entrySlashMenu": "Slash menu",
+	"importNotebook": "Import Notebook",
+	"distributeSelectedColWidths": "Distribute selected column widths evenly",
+	"useDefaultWidthForAllColumns": "Use default width for all columns",
 	"closeTabOnDoubleClick": "Use double-click to close tabs",
 	"closeTabOnDoubleClickTip": "When enabled, double-click a tab to close it",
 	"sortByParent": "Use parent sorting rules",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Split merged cells first",
 	"entryVisibility": "Menus and dock",
-	"entryVisibilityTip": "Choose which built-in menu items and dock icons are shown on desktop",
+	"entryVisibilityTip": "Configure the visibility and order of built-in desktop menu items, and the visibility of dock icons",
 	"entrySimple": "Simple",
 	"entryFull": "Full",
 	"entrySimpleTip": "Shows commonly used entries for getting started quickly",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Based on",
 	"entryCustomProfile": "Custom profile",
 	"entryCreateProfile": "Create profile",
-	"entryRestoreBase": "Restore to [${x}]",
-	"entryRestoreBaseConfirm": "Restore all entries in this profile to [${x}]?",
 	"entryImportInvalid": "Invalid menu and dock profile file",
 	"mobileMenuQuickActions": "Quick actions",
 	"mobileMenuCreate": "Create",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Awaiting answer",
 	"agentNewSession": "New Session",
 	"agentInputPlaceholder": "Type a message, /skill...",
-	"agentSend": "Send",
+	"agentSend": "Agent Send",
 	"agentStop": "Stop",
 	"editorFontSize": "Editor Font Size",
 	"configGroupBehavior": "Behavior",
@@ -2648,6 +2663,7 @@
 		"369": "Invalid OIDC configuration",
 		"370": "LAN accelerated traffic %s",
 		"371": "The notebook already exists",
-		"372": "The notebook has been restored and remains closed"
+		"372": "The notebook has been restored and remains closed",
+		"373": "This archive contains notebook data. Please import it from [Document Tree - More - Import Notebook]"
 	}
-	}
+}

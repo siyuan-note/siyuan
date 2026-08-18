@@ -215,17 +215,24 @@ func (t *extraBodyTransport) Do(req *http.Request) (*http.Response, error) {
 	return t.base.Do(req)
 }
 
-// NewOpenAIClientWithModel 创建 OpenAI client，并按模型名匹配内置清单注入额外请求参数。
-// 绝大多数模型无匹配，走 NewOpenAIClient 老路径（不包中间件，零开销）；
-// 命中清单的模型（如 MiniMax）会注入厂商专属参数（如 reasoning_split）。
+// NewOpenAIClientWithModel 创建 OpenAI client，并按模型与端点启用兼容适配。
+// 绝大多数模型走 NewOpenAIClient 路径；命中清单的模型会注入额外参数，官方 Gemini 端点会保留工具调用签名。
 func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string) *openai.Client {
 	extra := ExtraBodyForModel(model)
-	if len(extra) == 0 {
+	geminiThoughtSignatures := isGoogleGeminiOpenAICompatibleEndpoint(apiBaseURL, model)
+	if len(extra) == 0 && !geminiThoughtSignatures {
 		return NewOpenAIClient(apiKey, apiBaseURL)
 	}
 	config := openai.DefaultConfig(apiKey)
 	config.BaseURL = apiBaseURL
-	config.HTTPClient = &extraBodyTransport{base: httpclient.NewUserAgentClient(nil), extraBody: extra}
+	var transport openai.HTTPDoer = httpclient.NewUserAgentClient(nil)
+	if len(extra) > 0 {
+		transport = &extraBodyTransport{base: transport, extraBody: extra}
+	}
+	if geminiThoughtSignatures {
+		transport = WrapGeminiThoughtSignatureTransport(transport)
+	}
+	config.HTTPClient = transport
 	return openai.NewClientWithConfig(config)
 }
 
@@ -898,7 +905,7 @@ func downloadGeneratedImage(ctx context.Context, rawURL string) ([]byte, error) 
 func generatedImageHTTPClient() *http.Client {
 	return &http.Client{
 		Transport: &http.Transport{
-			Proxy:       http.ProxyFromEnvironment,
+			Proxy:       httpclient.ProxyFromEnvironment,
 			DialContext: generatedImageDialer().DialContext,
 		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {

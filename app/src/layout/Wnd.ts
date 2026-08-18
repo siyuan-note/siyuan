@@ -177,7 +177,7 @@ export class Wnd {
             if (!tabElement || !this.headersElement.contains(tabElement)) {
                 return;
             }
-            if (window.siyuan.config.appearance.closeTabOnDoubleClick) {
+            if (window.siyuan.config.fileTree.closeTabOnDoubleClick) {
                 this.removeTab(tabElement.getAttribute("data-id"));
             } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
                 tabElement.classList.remove("item--unupdate");

@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Использовать системный прокси",
+	"statusBarMsgDataSync": "Синхронизация данных",
+	"entryDocumentStatistics": "Статистика документа",
+	"entryTabMenu": "Меню вкладок",
+	"entrySingleBlock": "Один блок",
+	"entryMultipleBlocks": "Несколько блоков",
+	"entryPixelWidth": "Ширина в пикселях",
+	"entryPercentageWidth": "Ширина в процентах",
+	"entryPixelHeight": "Высота в пикселях",
+	"entryPercentageHeight": "Высота в процентах",
+	"dragTipSelectedNotebooks": "Выбрано блокнотов: ${count}",
+	"formatPainterDoubleClickTip": "Формат по образцу; дважды щёлкните для непрерывного использования",
+	"dragTipSelectedDocs": "Выбрано документов: ${count}",
+	"entrySlashMenu": "Слэш-меню",
+	"importNotebook": "Импортировать блокнот",
+	"distributeSelectedColWidths": "Равномерно распределить ширину выбранных столбцов",
+	"useDefaultWidthForAllColumns": "Использовать ширину по умолчанию для всех столбцов",
 	"closeTabOnDoubleClick": "Закрывать вкладки двойным щелчком",
 	"closeTabOnDoubleClickTip": "Если включено, дважды щёлкните вкладку, чтобы закрыть её",
 	"sortByParent": "Использовать правила сортировки родительского элемента",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Подменю",
 	"splitMergedCellTip": "Сначала разделите объединённые ячейки",
 	"entryVisibility": "Меню и док-панель",
-	"entryVisibilityTip": "Выберите встроенные пункты меню и значки док-панели, отображаемые на компьютере",
+	"entryVisibilityTip": "Настройте видимость и порядок встроенных пунктов меню рабочего стола, а также видимость значков док-панели",
 	"entrySimple": "Простой",
 	"entryFull": "Полный",
 	"entrySimpleTip": "Показывает часто используемые пункты, чтобы быстрее начать работу",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "На основе",
 	"entryCustomProfile": "Пользовательский профиль",
 	"entryCreateProfile": "Создать профиль",
-	"entryRestoreBase": "Восстановить до [${x}]",
-	"entryRestoreBaseConfirm": "Восстановить все элементы этого профиля до [${x}]?",
 	"entryImportInvalid": "Недопустимый файл профиля меню и док-панели",
 	"mobileMenuQuickActions": "Быстрые действия",
 	"mobileMenuCreate": "Создание",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Ожидает ответа",
 	"agentNewSession": "Новая сессия",
 	"agentInputPlaceholder": "Введите сообщение, /навык...",
-	"agentSend": "Отправить",
+	"agentSend": "Отправить агенту",
 	"agentStop": "Остановить",
 	"editorFontSize": "Размер шрифта редактора",
 	"configGroupBehavior": "Поведение",
@@ -2648,6 +2663,7 @@
 		"369": "Недопустимая конфигурация OIDC",
 		"370": "трафик с ускорением по локальной сети %s",
 		"371": "Блокнот уже существует",
-		"372": "Блокнот восстановлен и остаётся закрытым"
+		"372": "Блокнот восстановлен и остаётся закрытым",
+		"373": "Этот архив содержит данные блокнота. Импортируйте его через [Дерево документов - Ещё - Импортировать блокнот]"
 	}
-	}
+}

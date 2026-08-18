@@ -221,6 +221,9 @@ func HeadingChildren(heading *ast.Node) (ret []*ast.Node) {
 
 	currentLevel := heading.HeadingLevel
 	for n := start; nil != n; n = n.Next {
+		if ast.NodeSuperBlockCloseMarker == n.Type {
+			break
+		}
 		if ast.NodeHeading == n.Type {
 			if currentLevel >= n.HeadingLevel {
 				break

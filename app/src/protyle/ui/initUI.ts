@@ -8,7 +8,7 @@ import {fetchPost} from "../../util/fetch";
 import {lineNumberRender} from "../render/highlightRender";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {genUUID} from "../../util/genID";
-import {getContenteditableElement, getEmbedChildOperationContext, getLastBlock} from "../wysiwyg/getBlock";
+import {getContenteditableElement, getEmbedGutterOperationContext, getLastBlock} from "../wysiwyg/getBlock";
 import {genEmptyElement, genHeadingElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {focusByRange} from "../util/selection";
@@ -287,7 +287,7 @@ export const initUI = (protyle: IProtyle) => {
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
                 protyle.gutter.render(protyle,
-                    getEmbedChildOperationContext(nodeElement) ? nodeElement : embedElement, event.target);
+                    getEmbedGutterOperationContext(nodeElement) ? nodeElement : embedElement, event.target);
                 return;
             }
             protyle.gutter.render(protyle, nodeElement, event.target);

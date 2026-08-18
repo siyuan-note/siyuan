@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Gunakan proksi sistem",
+	"statusBarMsgDataSync": "Sinkronisasi data",
+	"entryDocumentStatistics": "Statistik dokumen",
+	"entryTabMenu": "Menu tab",
+	"entrySingleBlock": "Blok tunggal",
+	"entryMultipleBlocks": "Beberapa blok",
+	"entryPixelWidth": "Lebar piksel",
+	"entryPercentageWidth": "Lebar persentase",
+	"entryPixelHeight": "Tinggi piksel",
+	"entryPercentageHeight": "Tinggi persentase",
+	"dragTipSelectedNotebooks": "${count} buku catatan dipilih",
+	"formatPainterDoubleClickTip": "Salin format; klik dua kali untuk penggunaan berkelanjutan",
+	"dragTipSelectedDocs": "${count} dokumen dipilih",
+	"entrySlashMenu": "Menu garis miring",
+	"importNotebook": "Impor buku catatan",
+	"distributeSelectedColWidths": "Distribusikan lebar kolom yang dipilih secara merata",
+	"useDefaultWidthForAllColumns": "Gunakan lebar default untuk semua kolom",
 	"closeTabOnDoubleClick": "Gunakan klik dua kali untuk menutup tab",
 	"closeTabOnDoubleClickTip": "Jika diaktifkan, klik dua kali tab untuk menutupnya",
 	"sortByParent": "Gunakan aturan pengurutan induk",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Pisahkan sel yang digabungkan terlebih dahulu",
 	"entryVisibility": "Menu dan dok",
-	"entryVisibilityTip": "Pilih item menu bawaan dan ikon dok yang ditampilkan di desktop",
+	"entryVisibilityTip": "Atur visibilitas dan urutan item menu desktop bawaan, serta visibilitas ikon dok",
 	"entrySimple": "Sederhana",
 	"entryFull": "Lengkap",
 	"entrySimpleTip": "Menampilkan entri yang umum digunakan agar pengguna baru dapat memulai dengan cepat",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Berdasarkan",
 	"entryCustomProfile": "Profil kustom",
 	"entryCreateProfile": "Buat profil",
-	"entryRestoreBase": "Pulihkan ke [${x}]",
-	"entryRestoreBaseConfirm": "Pulihkan semua entri dalam profil ini ke [${x}]?",
 	"entryImportInvalid": "Berkas profil menu dan dok tidak valid",
 	"mobileMenuQuickActions": "Tindakan cepat",
 	"mobileMenuCreate": "Buat",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Menunggu jawaban",
 	"agentNewSession": "Sesi baru",
 	"agentInputPlaceholder": "Ketik pesan, /keterampilan...",
-	"agentSend": "Kirim",
+	"agentSend": "Kirim ke agen",
 	"agentStop": "Berhenti",
 	"editorFontSize": "Ukuran Font Editor",
 	"configGroupBehavior": "Perilaku",
@@ -2648,6 +2663,7 @@
 		"369": "Konfigurasi OIDC tidak valid",
 		"370": "lalu lintas akselerasi LAN %s",
 		"371": "Buku catatan sudah ada",
-		"372": "Buku catatan telah dipulihkan dan tetap ditutup"
+		"372": "Buku catatan telah dipulihkan dan tetap ditutup",
+		"373": "Arsip ini berisi data buku catatan. Impor dari [Pohon dokumen - Lainnya - Impor buku catatan]"
 	}
-	}
+}

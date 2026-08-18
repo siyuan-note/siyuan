@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Sistem proxy'sini kullan",
+	"statusBarMsgDataSync": "Veri senkronizasyonu",
+	"entryDocumentStatistics": "Belge istatistikleri",
+	"entryTabMenu": "Sekme menüsü",
+	"entrySingleBlock": "Tek blok",
+	"entryMultipleBlocks": "Birden fazla blok",
+	"entryPixelWidth": "Piksel genişliği",
+	"entryPercentageWidth": "Yüzde genişliği",
+	"entryPixelHeight": "Piksel yüksekliği",
+	"entryPercentageHeight": "Yüzde yüksekliği",
+	"dragTipSelectedNotebooks": "${count} not defteri seçildi",
+	"formatPainterDoubleClickTip": "Biçim Boyacısı; sürekli kullanım için çift tıklayın",
+	"dragTipSelectedDocs": "${count} belge seçildi",
+	"entrySlashMenu": "Eğik çizgi menüsü",
+	"importNotebook": "Not defteri içe aktar",
+	"distributeSelectedColWidths": "Seçili sütun genişliklerini eşit dağıt",
+	"useDefaultWidthForAllColumns": "Tüm sütunlar için varsayılan genişliği kullan",
 	"closeTabOnDoubleClick": "Sekmeleri çift tıklayarak kapat",
 	"closeTabOnDoubleClickTip": "Etkinleştirildiğinde bir sekmeyi kapatmak için çift tıklayın",
 	"sortByParent": "Üst öğenin sıralama kurallarını kullan",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Alt menü",
 	"splitMergedCellTip": "Önce birleştirilmiş hücreleri bölün",
 	"entryVisibility": "Menüler ve yuva",
-	"entryVisibilityTip": "Masaüstünde gösterilecek yerleşik menü öğelerini ve yuva simgelerini seçin",
+	"entryVisibilityTip": "Yerleşik masaüstü menü öğelerinin görünürlüğünü ve sırasını, ayrıca yuva simgelerinin görünürlüğünü yapılandırın",
 	"entrySimple": "Basit",
 	"entryFull": "Tam",
 	"entrySimpleTip": "Yeni kullanıcıların hızlıca başlayabilmesi için sık kullanılan öğeleri gösterir",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Temel alınan",
 	"entryCustomProfile": "Özel profil",
 	"entryCreateProfile": "Profil oluştur",
-	"entryRestoreBase": "[${x}] durumuna geri yükle",
-	"entryRestoreBaseConfirm": "Bu profildeki tüm öğeler [${x}] durumuna geri yüklensin mi?",
 	"entryImportInvalid": "Menü ve yuva profil dosyası geçersiz",
 	"mobileMenuQuickActions": "Hızlı işlemler",
 	"mobileMenuCreate": "Oluştur",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Cevap bekleniyor",
 	"agentNewSession": "Yeni oturum",
 	"agentInputPlaceholder": "Mesaj yazın, /beceri...",
-	"agentSend": "Gönder",
+	"agentSend": "Ajana gönder",
 	"agentStop": "Durdur",
 	"editorFontSize": "Editör yazı boyutu",
 	"configGroupBehavior": "Davranış",
@@ -2648,6 +2663,7 @@
 		"369": "Geçersiz OIDC yapılandırması",
 		"370": "LAN hızlandırılmış trafik %s",
 		"371": "Defter zaten mevcut",
-		"372": "Defter geri yüklendi ve kapalı kalacak"
+		"372": "Defter geri yüklendi ve kapalı kalacak",
+		"373": "Bu arşiv not defteri verileri içeriyor. [Belge ağacı - Diğer - Not defteri içe aktar] menüsünden içe aktarın"
 	}
-	}
+}

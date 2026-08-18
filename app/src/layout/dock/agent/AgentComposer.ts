@@ -8,6 +8,7 @@ import {genEmptyElement} from "../../../block/util";
 import {blockRender} from "../../../protyle/render/blockRender";
 import {focusBlock} from "../../../protyle/util/selection";
 import {matchHotKey} from "../../../protyle/util/hotKey";
+import {isSkillHintRequestActive, shouldYieldSkillHint} from "./agentHintState";
 
 export interface AgentComposerData {
     text: string;
@@ -32,6 +33,7 @@ interface ComposerHandle {
 type OnChangeCallback = () => void;
 
 const AGENT_HINT_OVERLAY_CLASS = "protyle-hint--agent-overlay";
+const skillHintRequestIDs = new WeakMap<IProtyle, number>();
 
 interface ComposerOptions {
     initialContent?: string;
@@ -67,9 +69,28 @@ const hintAgentRef = (key: string, protyle: IProtyle, source: THintSource): IHin
 // / 技能菜单：异步拉取 lsSkills，选中后把技能名作为纯文本插入（value 即技能名）。
 // 返回 [] 占位，数据在 fetch 回调里通过 protyle.hint.genHTML 填充（与 hintRef 异步模式一致）。
 const hintSkill = (key: string, protyle: IProtyle): IHintData[] => {
+    const requestID = (skillHintRequestIDs.get(protyle) || 0) + 1;
+    skillHintRequestIDs.set(protyle, requestID);
+    if (shouldYieldSkillHint(key, protyle.options.hint.extend.map((item) => item.key))) {
+        protyle.hint.enableExtend = false;
+        protyle.hint.genHTML([], protyle, true, "hint");
+        return [];
+    }
     prepareAgentHint(protyle);
     protyle.hint.genLoading(protyle);
     fetchPost("/api/ai/agent/lsSkills", {}, (response) => {
+        // 异步响应返回时输入状态可能已变化，避免 Esc 或其他提示触发后重新打开旧菜单。
+        if (!isSkillHintRequestActive({
+            requestID,
+            currentRequestID: skillHintRequestIDs.get(protyle),
+            enableExtend: protyle.hint.enableExtend,
+            enableSlash: protyle.hint.enableSlash,
+            splitChar: protyle.hint.splitChar,
+            hidden: protyle.hint.element.classList.contains("fn__none"),
+            connected: protyle.hint.element.isConnected,
+        })) {
+            return;
+        }
         const rawSkills = (response && response.data) ? response.data : [];
         const q = key.toLowerCase();
         const dataList: IHintData[] = rawSkills

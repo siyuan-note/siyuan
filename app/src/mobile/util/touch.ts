@@ -7,12 +7,12 @@ import {
 } from "../../protyle/util/hasClosest";
 import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
-import {activeBlur} from "./keyboardToolbar";
+import {activeBlur, resetAndroidBoundedSelectionGesture} from "./keyboardToolbar";
 import {isChromeBrowser, isInAndroid, isInHarmony, isIPhone} from "../../protyle/util/compatibility";
 import {getRangeByPoint} from "../../protyle/util/selection";
 import {getCurrentEditor} from "../editor";
 import {Constants} from "../../constants";
-import {getEmbedChildOperationContext} from "../../protyle/wysiwyg/getBlock";
+import {getEmbedGutterOperationContext} from "../../protyle/wysiwyg/getBlock";
 import {backModel} from "../menu/model";
 import {hasVisibleSelectionText, shouldRestoreLongPressSelection} from "./touchSelection";
 import {getTouchAxis} from "./touchGesture";
@@ -98,6 +98,7 @@ const restoreInvisibleLongPressSelection = () => {
 };
 
 export const handleTouchUp = () => {
+    resetAndroidBoundedSelectionGesture();
     if (Date.now() - time < Constants.TIMEOUT_MULTIPLE_SELECT) {
         clearLongPress();
     }
@@ -173,7 +174,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement) {
                 editor.protyle.gutter.render(editor.protyle,
-                    getEmbedChildOperationContext(nodeElement) ? nodeElement : embedElement, target);
+                    getEmbedGutterOperationContext(nodeElement) ? nodeElement : embedElement, target);
                 return;
             }
             editor.protyle.gutter.render(editor.protyle, nodeElement, target);

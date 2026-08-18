@@ -24,6 +24,11 @@ import {
 } from "./tableResize";
 import {applyTableCellStyleHotkey, getTableCellTextStyleMenus} from "../toolbar/tableCell";
 import {getTableCellsInRectangle, getTableDragEdge} from "./tableSelection";
+import {
+    getDistributedTableColumnWidth,
+    isDefaultTableColumnWidth,
+    TABLE_DEFAULT_COLUMN_WIDTH,
+} from "./tableColumnWidth";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -279,7 +284,6 @@ const TABLE_HANDLE_THICKNESS = 16;
 const TABLE_ADD_CONTROL_THICKNESS = 16;
 const TABLE_ADD_CONTROL_GAP = 10;
 const TABLE_EDGE_CONTROL_TRIGGER_SIZE = 8;
-const TABLE_DEFAULT_COLUMN_WIDTH = 60;
 const TABLE_RESIZE_DRAG_THRESHOLD = 4;
 const TABLE_NON_TEXT_CONTENT_SELECTOR = "img, audio, video, iframe, canvas, svg, math, input, textarea, select, button, object, embed";
 
@@ -1438,6 +1442,7 @@ export class TableControl {
                     }).element);
                 }
                 if (this.selection.mode === "column") {
+                    const columns = this.getSelectedColumns();
                     menu.append(new MenuItem({
                         id: "autoFitColWidth",
                         icon: "iconWidth",
@@ -1445,9 +1450,17 @@ export class TableControl {
                         click: () => this.setSelectedColumnWidth(),
                     }).element);
                     menu.append(new MenuItem({
+                        id: "distributeSelectedColWidths",
+                        icon: "iconScale",
+                        label: window.siyuan.languages.distributeSelectedColWidths,
+                        disabled: columns.length < 2,
+                        click: () => this.distributeSelectedColumnWidths(),
+                    }).element);
+                    menu.append(new MenuItem({
                         id: "useDefaultWidth",
-                        icon: "iconRefresh",
                         label: window.siyuan.languages.useDefaultWidth,
+                        disabled: columns.length === 0 || columns.every(column =>
+                            isDefaultTableColumnWidth(column.style.width, column.style.minWidth)),
                         click: () => this.setSelectedColumnWidth(TABLE_DEFAULT_COLUMN_WIDTH),
                     }).element);
                 }
@@ -1778,12 +1791,7 @@ export class TableControl {
             return;
         }
         const oldHTML = this.selection.node.outerHTML;
-        const columns = this.selection.table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col");
-        this.selection.indexes.forEach(index => {
-            const column = columns[index];
-            if (!column) {
-                return;
-            }
+        this.getSelectedColumns().forEach(column => {
             column.style.removeProperty("width");
             if (minWidth === undefined) {
                 column.style.removeProperty("min-width");
@@ -1794,8 +1802,42 @@ export class TableControl {
                 column.removeAttribute("style");
             }
         });
-        updateTransaction(this.protyle, this.selection.node, oldHTML);
+        if (this.selection.node.outerHTML !== oldHTML) {
+            updateTransaction(this.protyle, this.selection.node, oldHTML);
+        }
         this.scheduleRender();
+    }
+
+    private distributeSelectedColumnWidths() {
+        if (!this.selection || this.selection.mode !== "column") {
+            return;
+        }
+        const columns = this.getSelectedColumns();
+        if (columns.length < 2) {
+            return;
+        }
+        const grid = this.selectionGrid || buildTableGrid(this.selection.table);
+        const widths = Array.from(this.selection.indexes).sort((a, b) => a - b).map(index =>
+            this.getColumnRect(this.selection.table, grid, index)?.width || TABLE_DEFAULT_COLUMN_WIDTH);
+        const width = getDistributedTableColumnWidth(widths);
+        const oldHTML = this.selection.node.outerHTML;
+        columns.forEach(column => {
+            column.style.width = `${width}px`;
+            column.style.removeProperty("min-width");
+        });
+        if (this.selection.node.outerHTML !== oldHTML) {
+            updateTransaction(this.protyle, this.selection.node, oldHTML);
+        }
+        this.scheduleRender();
+    }
+
+    private getSelectedColumns() {
+        if (!this.selection || this.selection.mode !== "column") {
+            return [];
+        }
+        const columns = this.selection.table.querySelectorAll<HTMLTableColElement>(":scope > colgroup > col");
+        return Array.from(this.selection.indexes).sort((a, b) => a - b)
+            .map(index => columns[index]).filter((column): column is HTMLTableColElement => !!column);
     }
 
     private clearCells() {

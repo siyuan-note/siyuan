@@ -7,6 +7,7 @@ export interface ICustomFont {
     family: string;
     weight: number;
     displayName: string;
+    aliases?: string[];
     url: string;
 }
 

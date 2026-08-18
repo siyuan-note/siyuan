@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Usar proxy del sistema",
+	"statusBarMsgDataSync": "Sincronización de datos",
+	"entryDocumentStatistics": "Estadísticas del documento",
+	"entryTabMenu": "Menú de pestañas",
+	"entrySingleBlock": "Bloque individual",
+	"entryMultipleBlocks": "Varios bloques",
+	"entryPixelWidth": "Ancho en píxeles",
+	"entryPercentageWidth": "Ancho en porcentaje",
+	"entryPixelHeight": "Alto en píxeles",
+	"entryPercentageHeight": "Alto en porcentaje",
+	"dragTipSelectedNotebooks": "${count} cuadernos de notas seleccionados",
+	"formatPainterDoubleClickTip": "Copiar formato; haz doble clic para usarlo continuamente",
+	"dragTipSelectedDocs": "${count} documentos seleccionados",
+	"entrySlashMenu": "Menú slash",
+	"importNotebook": "Importar cuaderno",
+	"distributeSelectedColWidths": "Distribuir uniformemente el ancho de las columnas seleccionadas",
+	"useDefaultWidthForAllColumns": "Usar el ancho predeterminado para todas las columnas",
 	"closeTabOnDoubleClick": "Usar doble clic para cerrar pestañas",
 	"closeTabOnDoubleClickTip": "Cuando esté activado, haz doble clic en una pestaña para cerrarla",
 	"sortByParent": "Usar las reglas de ordenación del elemento superior",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Submenú",
 	"splitMergedCellTip": "Primero hay que dividir las celdas combinadas",
 	"entryVisibility": "Menús y panel acoplable",
-	"entryVisibilityTip": "Elige qué elementos de menú e iconos del panel acoplable se muestran en el escritorio",
+	"entryVisibilityTip": "Configura la visibilidad y el orden de los elementos integrados de los menús de escritorio, así como la visibilidad de los iconos del panel acoplable",
 	"entrySimple": "Sencillo",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Muestra las entradas más utilizadas para empezar rápidamente",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Basado en",
 	"entryCustomProfile": "Perfil personalizado",
 	"entryCreateProfile": "Crear perfil",
-	"entryRestoreBase": "Restaurar a [${x}]",
-	"entryRestoreBaseConfirm": "¿Restaurar todas las entradas de este perfil a [${x}]?",
 	"entryImportInvalid": "El archivo de perfil de menús y panel acoplable no es válido",
 	"mobileMenuQuickActions": "Acciones rápidas",
 	"mobileMenuCreate": "Crear",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Esperando respuesta",
 	"agentNewSession": "Nueva sesión",
 	"agentInputPlaceholder": "Escribe un mensaje, /habilidad...",
-	"agentSend": "Enviar",
+	"agentSend": "Enviar al agente",
 	"agentStop": "Detener",
 	"editorFontSize": "Tamaño de fuente del editor",
 	"configGroupBehavior": "Comportamiento",
@@ -2648,6 +2663,7 @@
 		"369": "Configuración OIDC no válida",
 		"370": "tráfico acelerado por LAN %s",
 		"371": "El cuaderno ya existe",
-		"372": "El cuaderno se ha restaurado y permanece cerrado"
+		"372": "El cuaderno se ha restaurado y permanece cerrado",
+		"373": "Este archivo contiene datos de cuadernos. Impórtelo desde [Árbol de documentos - Más - Importar cuaderno]"
 	}
-	}
+}

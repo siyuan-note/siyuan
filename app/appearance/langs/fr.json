@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Utiliser le proxy système",
+	"statusBarMsgDataSync": "Synchronisation des données",
+	"entryDocumentStatistics": "Statistiques du document",
+	"entryTabMenu": "Menu des onglets",
+	"entrySingleBlock": "Bloc unique",
+	"entryMultipleBlocks": "Plusieurs blocs",
+	"entryPixelWidth": "Largeur en pixels",
+	"entryPercentageWidth": "Largeur en pourcentage",
+	"entryPixelHeight": "Hauteur en pixels",
+	"entryPercentageHeight": "Hauteur en pourcentage",
+	"dragTipSelectedNotebooks": "${count} carnets de notes sélectionnés",
+	"formatPainterDoubleClickTip": "Reproduire la mise en forme ; double-cliquez pour une utilisation continue",
+	"dragTipSelectedDocs": "${count} documents sélectionnés",
+	"entrySlashMenu": "Menu de commandes slash",
+	"importNotebook": "Importer un carnet",
+	"distributeSelectedColWidths": "Répartir uniformément la largeur des colonnes sélectionnées",
+	"useDefaultWidthForAllColumns": "Utiliser la largeur par défaut pour toutes les colonnes",
 	"closeTabOnDoubleClick": "Fermer les onglets par un double-clic",
 	"closeTabOnDoubleClickTip": "Lorsque cette option est activée, double-cliquez sur un onglet pour le fermer",
 	"sortByParent": "Utiliser les règles de tri de l’élément parent",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Sous-menu",
 	"splitMergedCellTip": "Les cellules fusionnées doivent d'abord être fractionnées",
 	"entryVisibility": "Menus et barre d'ancrage",
-	"entryVisibilityTip": "Choisissez les éléments de menu et les icônes de la barre d'ancrage affichés sur ordinateur",
+	"entryVisibilityTip": "Configurez la visibilité et l’ordre des éléments intégrés des menus de bureau, ainsi que la visibilité des icônes de la barre d’ancrage",
 	"entrySimple": "Simple",
 	"entryFull": "Complet",
 	"entrySimpleTip": "Affiche les entrées courantes pour démarrer rapidement",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Basé sur",
 	"entryCustomProfile": "Profil personnalisé",
 	"entryCreateProfile": "Créer un profil",
-	"entryRestoreBase": "Restaurer vers [${x}]",
-	"entryRestoreBaseConfirm": "Restaurer toutes les entrées de ce profil vers [${x}] ?",
 	"entryImportInvalid": "Fichier de profil des menus et de la barre d'ancrage non valide",
 	"mobileMenuQuickActions": "Actions rapides",
 	"mobileMenuCreate": "Créer",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "En attente de réponse",
 	"agentNewSession": "Nouvelle session",
 	"agentInputPlaceholder": "Tapez un message, /compétence...",
-	"agentSend": "Envoyer",
+	"agentSend": "Envoyer à l’agent",
 	"agentStop": "Arrêter",
 	"editorFontSize": "Taille de la police de l'éditeur",
 	"configGroupBehavior": "Comportement",
@@ -2648,6 +2663,7 @@
 		"369": "Configuration OIDC non valide",
 		"370": "trafic accéléré par le réseau local %s",
 		"371": "Le carnet existe déjà",
-		"372": "Le carnet a été restauré et reste fermé"
+		"372": "Le carnet a été restauré et reste fermé",
+		"373": "Cette archive contient des données de carnet. Veuillez l’importer depuis [Arborescence des documents - Plus - Importer un carnet]"
 	}
-	}
+}

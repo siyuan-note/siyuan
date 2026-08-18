@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "استخدام وكيل النظام",
+	"statusBarMsgDataSync": "مزامنة البيانات",
+	"entryDocumentStatistics": "إحصاءات المستند",
+	"entryTabMenu": "قائمة علامات التبويب",
+	"entrySingleBlock": "كتلة واحدة",
+	"entryMultipleBlocks": "كتل متعددة",
+	"entryPixelWidth": "العرض بالبكسل",
+	"entryPercentageWidth": "العرض بالنسبة المئوية",
+	"entryPixelHeight": "الارتفاع بالبكسل",
+	"entryPercentageHeight": "الارتفاع بالنسبة المئوية",
+	"dragTipSelectedNotebooks": "تم تحديد ${count} من دفاتر الملاحظات",
+	"formatPainterDoubleClickTip": "نسخ التنسيق؛ انقر نقرًا مزدوجًا للاستخدام المستمر",
+	"dragTipSelectedDocs": "تم تحديد ${count} من المستندات",
+	"entrySlashMenu": "قائمة الشرطة المائلة",
+	"importNotebook": "استيراد دفتر ملاحظات",
+	"distributeSelectedColWidths": "توزيع عرض الأعمدة المحددة بالتساوي",
+	"useDefaultWidthForAllColumns": "استخدام العرض الافتراضي لجميع الأعمدة",
 	"closeTabOnDoubleClick": "استخدام النقر المزدوج لإغلاق علامات التبويب",
 	"closeTabOnDoubleClickTip": "عند التمكين، انقر نقرًا مزدوجًا فوق علامة تبويب لإغلاقها",
 	"sortByParent": "استخدام قواعد الفرز للمستوى الأعلى",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "قائمة فرعية",
 	"splitMergedCellTip": "يجب تقسيم الخلايا المدمجة أولاً",
 	"entryVisibility": "القوائم وشريط الإرساء",
-	"entryVisibilityTip": "اختر عناصر القوائم المضمنة وأيقونات شريط الإرساء التي تظهر على سطح المكتب",
+	"entryVisibilityTip": "اضبط إظهار وترتيب عناصر قوائم سطح المكتب المضمنة، واضبط إظهار أيقونات شريط الإرساء",
 	"entrySimple": "مبسّط",
 	"entryFull": "كامل",
 	"entrySimpleTip": "يعرض العناصر شائعة الاستخدام لمساعدة المستخدمين الجدد على البدء بسرعة",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "استنادًا إلى",
 	"entryCustomProfile": "ملف تعريف مخصص",
 	"entryCreateProfile": "إنشاء ملف تعريف",
-	"entryRestoreBase": "استعادة إلى [${x}]",
-	"entryRestoreBaseConfirm": "هل تريد استعادة جميع عناصر هذا الملف إلى [${x}]؟",
 	"entryImportInvalid": "ملف تعريف القوائم وشريط الإرساء غير صالح",
 	"mobileMenuQuickActions": "إجراءات سريعة",
 	"mobileMenuCreate": "إنشاء",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "بانتظار الرد",
 	"agentNewSession": "جلسة جديدة",
 	"agentInputPlaceholder": "اكتب رسالة، /مهارة...",
-	"agentSend": "إرسال",
+	"agentSend": "إرسال إلى الوكيل",
 	"agentStop": "إيقاف",
 	"editorFontSize": "حجم خط المحرر",
 	"configGroupBehavior": "السلوك",
@@ -2648,6 +2663,7 @@
 		"369": "تكوين OIDC غير صالح",
 		"370": "حركة تسريع الشبكة المحلية %s",
 		"371": "المفكرة موجودة بالفعل",
-		"372": "تمت استعادة المفكرة وستظل مغلقة"
+		"372": "تمت استعادة المفكرة وستظل مغلقة",
+		"373": "تحتوي هذه الحزمة المضغوطة على بيانات دفتر ملاحظات. يرجى استيرادها من [شجرة المستندات - المزيد - استيراد دفتر ملاحظات]"
 	}
-	}
+}

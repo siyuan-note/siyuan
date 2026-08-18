@@ -1,4 +1,21 @@
 {
+	"useSystemProxy": "Usar proxy do sistema",
+	"statusBarMsgDataSync": "Sincronização de dados",
+	"entryDocumentStatistics": "Estatísticas do documento",
+	"entryTabMenu": "Menu de abas",
+	"entrySingleBlock": "Bloco único",
+	"entryMultipleBlocks": "Vários blocos",
+	"entryPixelWidth": "Largura em pixels",
+	"entryPercentageWidth": "Largura percentual",
+	"entryPixelHeight": "Altura em pixels",
+	"entryPercentageHeight": "Altura percentual",
+	"dragTipSelectedNotebooks": "${count} blocos de notas selecionados",
+	"formatPainterDoubleClickTip": "Pincel de formatação; clique duas vezes para uso contínuo",
+	"dragTipSelectedDocs": "${count} documentos selecionados",
+	"entrySlashMenu": "Menu slash",
+	"importNotebook": "Importar caderno",
+	"distributeSelectedColWidths": "Distribuir uniformemente a largura das colunas selecionadas",
+	"useDefaultWidthForAllColumns": "Usar a largura padrão para todas as colunas",
 	"closeTabOnDoubleClick": "Usar clique duplo para fechar abas",
 	"closeTabOnDoubleClickTip": "Quando ativado, clique duas vezes em uma aba para fechá-la",
 	"sortByParent": "Usar regras de ordenação do item pai",
@@ -239,7 +256,7 @@
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Divida primeiro as células mescladas",
 	"entryVisibility": "Menus e dock",
-	"entryVisibilityTip": "Escolha quais itens de menu e ícones do dock integrados são exibidos no computador",
+	"entryVisibilityTip": "Configure a visibilidade e a ordem dos itens integrados dos menus da área de trabalho, bem como a visibilidade dos ícones do dock",
 	"entrySimple": "Simples",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Mostra os itens mais usados para começar rapidamente",
@@ -249,8 +266,6 @@
 	"entryBasedOn": "Baseado em",
 	"entryCustomProfile": "Perfil personalizado",
 	"entryCreateProfile": "Criar perfil",
-	"entryRestoreBase": "Restaurar para [${x}]",
-	"entryRestoreBaseConfirm": "Restaurar todas as entradas deste perfil para [${x}]?",
 	"entryImportInvalid": "Arquivo de perfil de menus e dock inválido",
 	"mobileMenuQuickActions": "Ações rápidas",
 	"mobileMenuCreate": "Criar",
@@ -722,7 +737,7 @@
 	"agentQuestionPending": "Aguardando resposta",
 	"agentNewSession": "Nova sessão",
 	"agentInputPlaceholder": "Digite uma mensagem, /habilidade...",
-	"agentSend": "Enviar",
+	"agentSend": "Enviar ao agente",
 	"agentStop": "Parar",
 	"editorFontSize": "Tamanho da Fonte do Editor",
 	"configGroupBehavior": "Comportamento",
@@ -2648,6 +2663,7 @@
 		"369": "Configuração OIDC inválida",
 		"370": "tráfego acelerado pela LAN %s",
 		"371": "O caderno já existe",
-		"372": "O caderno foi restaurado e permanece fechado"
+		"372": "O caderno foi restaurado e permanece fechado",
+		"373": "Este arquivo contém dados de caderno. Importe-o em [Árvore de documentos - Mais - Importar caderno]"
 	}
-	}
+}

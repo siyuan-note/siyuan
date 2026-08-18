@@ -108,6 +108,12 @@ export const mountHelp = () => {
     });
 };
 
+export const importNotebook = (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    fetchPost("/api/import/importSYNotebook", formData);
+};
+
 export const newNotebook = () => {
     let nativeImportHTML = "";
     /// #if !BROWSER
@@ -194,10 +200,8 @@ export const newNotebook = () => {
         if (!event.target.files?.[0]) {
             return;
         }
-        const formData = new FormData();
-        formData.append("file", event.target.files[0]);
         dialog.destroy();
-        fetchPost("/api/import/importSYNotebook", formData);
+        importNotebook(event.target.files[0]);
     });
     dialog.element.querySelector('[data-type="import-markdown-zip"] .b3-form__upload').addEventListener("change", (event: InputEvent & {
         target: HTMLInputElement

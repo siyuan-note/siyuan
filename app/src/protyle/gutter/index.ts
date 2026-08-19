@@ -2269,6 +2269,7 @@ export class Gutter {
                     });
                 }
             }).element);
+            /// #if !BROWSER
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "showDatabaseInFolder",
                 icon: "iconFolder",
@@ -2283,6 +2284,7 @@ export class Gutter {
                     useShell("showItemInFolder", path.join(avDir, avId) + ".json");
                 }
             }).element);
+            /// #endif
         } else if ((type === "NodeVideo" || type === "NodeAudio") && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_VideoOrAudio", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({

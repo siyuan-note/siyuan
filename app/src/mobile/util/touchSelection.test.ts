@@ -5,6 +5,7 @@ import {
     hasFixedSelectionEndpointChanged,
     hasVisibleSelectionText,
     isTableCellSelectAll,
+    shouldHideKeyboardAfterResize,
     shouldRestoreLongPressSelection,
     shouldPreserveTableCellSelectAll,
 } from "./touchSelection";
@@ -30,6 +31,12 @@ describe("mobile touch selection", () => {
         assert.equal(shouldPreserveTableCellSelectAll(1500, 1499), true);
         assert.equal(shouldPreserveTableCellSelectAll(1500, 1500), true);
         assert.equal(shouldPreserveTableCellSelectAll(1500, 1501), false);
+    });
+
+    it("does not enqueue another keyboard hide while preserving table cell select all", () => {
+        assert.equal(shouldHideKeyboardAfterResize(false, true), false);
+        assert.equal(shouldHideKeyboardAfterResize(true, false), false);
+        assert.equal(shouldHideKeyboardAfterResize(false, false), true);
     });
 
     it("restores invisible cross-block selections involving the long-pressed block", () => {

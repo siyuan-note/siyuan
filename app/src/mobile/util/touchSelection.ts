@@ -11,6 +11,9 @@ export const isTableCellSelectAll = (selectionText: string, cellText: string) =>
 
 export const shouldPreserveTableCellSelectAll = (expiresAt: number, now: number) => expiresAt >= now;
 
+export const shouldHideKeyboardAfterResize = (isInputFocused: boolean, preserveTableCellSelectAll: boolean) =>
+    !isInputFocused && !preserveTableCellSelectAll;
+
 export const getMovingSelectionEndpoint = (
     movingEndpoint: TSelectionEndpoint | undefined,
     anchorChanged: boolean,

@@ -14,7 +14,7 @@ import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
 import {isInAndroid, isInEdge, isInHarmony, isInMobileApp} from "../../protyle/util/compatibility";
 import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
-import {callMobileAppShowKeyboard, canInput, keyboardLockUntil} from "./mobileAppUtil";
+import {armKeyboardLock, callMobileAppShowKeyboard, canInput, keyboardLockUntil} from "./mobileAppUtil";
 import {isNotEditBlock} from "../../protyle/wysiwyg/getBlock";
 import {getMirror, getUndoRootID, hasUndoStateMirror, initMirror} from "../../protyle/undo/globalUndo";
 import {getMobilePluginToolbarItems} from "./pluginToolbar";
@@ -23,6 +23,7 @@ import {
     hasFixedSelectionEndpointChanged,
     hasVisibleSelectionText,
     isTableCellSelectAll,
+    shouldHideKeyboardAfterResize,
     shouldPreserveTableCellSelectAll,
     type TSelectionEndpoint,
 } from "./touchSelection";
@@ -124,16 +125,20 @@ const rememberAndroidTableCellSelectAll = () => {
     };
 };
 
+const hasRecentAndroidTableCellSelectAll = (pendingSelection = pendingAndroidTableCellSelectAll) =>
+    !!pendingSelection && shouldPreserveTableCellSelectAll(pendingSelection.expiresAt, Date.now()) &&
+    pendingSelection.cell.isConnected && pendingSelection.editableElement.isConnected &&
+    pendingSelection.range.startContainer.isConnected && pendingSelection.range.endContainer.isConnected;
+
 const restoreRecentAndroidTableCellSelectAll = () => {
     const pendingSelection = pendingAndroidTableCellSelectAll;
     pendingAndroidTableCellSelectAll = undefined;
-    if (!pendingSelection || !shouldPreserveTableCellSelectAll(pendingSelection.expiresAt, Date.now()) ||
-        !pendingSelection.cell.isConnected || !pendingSelection.editableElement.isConnected ||
-        !pendingSelection.range.startContainer.isConnected || !pendingSelection.range.endContainer.isConnected) {
+    if (!pendingSelection || !hasRecentAndroidTableCellSelectAll(pendingSelection)) {
         return false;
     }
     restoringAndroidTableCellSelectAll = true;
     try {
+        armKeyboardLock();
         pendingSelection.editableElement.focus({preventScroll: true});
         const selection = getSelection();
         selection.removeAllRanges();
@@ -988,7 +993,7 @@ export const initKeyboardToolbar = () => {
                     const isInputFocused = document.activeElement && (
                         ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ||
                         (document.activeElement as HTMLElement).isContentEditable);
-                    if (!isInputFocused) {
+                    if (shouldHideKeyboardAfterResize(isInputFocused, hasRecentAndroidTableCellSelectAll())) {
                         activeBlur();
                     }
                 } else if (!preventRender) {
@@ -1011,7 +1016,7 @@ export const initKeyboardToolbar = () => {
                     const isInputFocused = document.activeElement && (
                         ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ||
                         (document.activeElement as HTMLElement).isContentEditable);
-                    if (!isInputFocused) {
+                    if (shouldHideKeyboardAfterResize(isInputFocused, hasRecentAndroidTableCellSelectAll())) {
                         activeBlur();
                     }
                 } else if (!preventRender) {

@@ -25,7 +25,8 @@ import (
 )
 
 // TestIsForbiddenAbsPath 覆盖 HTTP 文件 API 与 MCP 文件工具共用的敏感路径黑名单：
-// conf/conf.json、data/snippets/conf.json、data/templates 目录以及 data/.siyuan/publishAccess.json。
+// conf 目录下的 conf.json 与 TLS 密钥材料、data/snippets/conf.json、data/templates 目录以及
+// data/.siyuan/publishAccess.json。
 func TestIsForbiddenAbsPath(t *testing.T) {
 	tmpWorkspace := t.TempDir()
 	origWorkspace, origConf, origData := WorkspaceDir, ConfDir, DataDir
@@ -39,6 +40,10 @@ func TestIsForbiddenAbsPath(t *testing.T) {
 		rel  string // 相对工作空间的路径
 	}{
 		{"conf", filepath.Join("conf", "conf.json")},
+		{"tls ca cert", filepath.Join("conf", TLSCACertFilename)},
+		{"tls ca key", filepath.Join("conf", TLSCAKeyFilename)},
+		{"tls cert", filepath.Join("conf", TLSCertFilename)},
+		{"tls key", filepath.Join("conf", TLSKeyFilename)},
 		{"snippets conf", filepath.Join("data", "snippets", "conf.json")},
 		{"templates dir", filepath.Join("data", "templates")},
 		{"templates file", filepath.Join("data", "templates", "a.txt")},
@@ -80,6 +85,10 @@ func TestIsForbiddenAbsPathCaseInsensitive(t *testing.T) {
 	// 模拟 MCP 工具输入的大小写变体路径（Windows 上 CONF.JSON 与 conf.json 指向同一文件）。
 	cases := []string{
 		filepath.Join(tmpWorkspace, "CONF", "CONF.JSON"),
+		filepath.Join(tmpWorkspace, "CONF", strings.ToUpper(TLSCACertFilename)),
+		filepath.Join(tmpWorkspace, "CONF", strings.ToUpper(TLSCAKeyFilename)),
+		filepath.Join(tmpWorkspace, "CONF", strings.ToUpper(TLSCertFilename)),
+		filepath.Join(tmpWorkspace, "CONF", strings.ToUpper(TLSKeyFilename)),
 		filepath.Join(tmpWorkspace, "DATA", "SNIPPETS", "CONF.JSON"),
 		filepath.Join(tmpWorkspace, "DATA", ".SIYUAN", "PUBLISHACCESS.JSON"),
 		strings.ToUpper(filepath.Join(tmpWorkspace, "data", "templates")),
@@ -120,6 +129,22 @@ func TestIsForbiddenAbsPathSymlinkBypass(t *testing.T) {
 	// 链接自身路径不命中黑名单，但解析后指向敏感文件，应被拒绝。
 	if got := IsForbiddenAbsPath(link); !got {
 		t.Errorf("IsForbiddenAbsPath(symlink -> publishAccess.json) = false, want true")
+	}
+
+	// 同样验证指向 TLS 私钥的符号链接无法绕过黑名单。
+	tlsKey := filepath.Join(tmpWorkspace, "conf", TLSKeyFilename)
+	if err := os.MkdirAll(filepath.Dir(tlsKey), 0755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+	if err := os.WriteFile(tlsKey, []byte("-----BEGIN EC PRIVATE KEY-----\n"), 0600); err != nil {
+		t.Fatalf("write tls key: %v", err)
+	}
+	tlsKeyLink := filepath.Join(tmpWorkspace, "data", "assets", "leak.pem")
+	if err := os.Symlink(tlsKey, tlsKeyLink); err != nil {
+		t.Skipf("symlink not supported on this platform: %v", err)
+	}
+	if got := IsForbiddenAbsPath(tlsKeyLink); !got {
+		t.Errorf("IsForbiddenAbsPath(symlink -> key.pem) = false, want true")
 	}
 }
 

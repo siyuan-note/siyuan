@@ -532,7 +532,8 @@ func getFile(c *gin.Context) {
 }
 
 func refuseToAccess(c *gin.Context, fileAbsPath string, ret *gulu.Result) bool {
-	// 禁止访问敏感文件（conf/conf.json、data/snippets/conf.json、data/templates、data/.siyuan/publishAccess.json），
+	// 禁止访问敏感文件（conf 目录下的 conf.json 与 TLS 密钥材料、data/snippets/conf.json、
+	// data/templates、data/.siyuan/publishAccess.json），
 	// 规范化与符号链接解析见 util.NormalizeAndResolve，防止通过大小写或符号链接绕过
 	if util.IsForbiddenAbsPath(fileAbsPath) {
 		ret.Code = http.StatusForbidden

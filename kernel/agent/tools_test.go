@@ -105,6 +105,125 @@ func TestConvertSchemaPreservesRawJSONSchema(t *testing.T) {
 	}
 }
 
+func TestParseCapabilityArgsRepairsObjectArrayOpeners(t *testing.T) {
+	args, err := parseCapabilityArgs(
+		`{"questions":[header":"Test","question":"Continue?","options":[label":"Yes","description":"Continue now"}]}]}`,
+		tools.QuestionTool.InputSchema,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	questions, ok := args["questions"].([]any)
+	if !ok || len(questions) != 1 {
+		t.Fatalf("unexpected questions: %#v", args["questions"])
+	}
+	question, ok := questions[0].(map[string]any)
+	if !ok || question["header"] != "Test" {
+		t.Fatalf("unexpected question: %#v", questions[0])
+	}
+	options, ok := question["options"].([]any)
+	if !ok || len(options) != 1 {
+		t.Fatalf("unexpected options: %#v", question["options"])
+	}
+}
+
+func TestParseCapabilityArgsUnwrapsArgumentsObject(t *testing.T) {
+	args, err := parseCapabilityArgs(
+		`{"arguments":"{\"todos\":[{\"content\":\"Task\",\"status\":\"in_progress\"}]}"}`,
+		tools.TodoWriteTool.InputSchema,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, exists := args["arguments"]; exists {
+		t.Fatalf("wrapped arguments were not removed: %#v", args)
+	}
+	todos, ok := args["todos"].([]any)
+	if !ok || len(todos) != 1 {
+		t.Fatalf("unexpected todos: %#v", args["todos"])
+	}
+}
+
+func TestParseCapabilityArgsDecodesSchemaStructuredStrings(t *testing.T) {
+	schema := tools.ToolSchema{
+		Type: "object",
+		Properties: map[string]tools.Property{
+			"items": {
+				Type: "array",
+				Items: &tools.Property{
+					Type: "object",
+					Properties: map[string]tools.Property{
+						"name": {Type: "string"},
+					},
+				},
+			},
+			"enabled": {Type: "boolean"},
+			"count":   {Type: "number"},
+			"payload": {Type: "object"},
+			"text":    {Type: "string"},
+		},
+	}
+	args, err := parseCapabilityArgs(
+		`{"items":"[{\"name\":\"A\"}]","enabled":"true","count":"2","payload":"{\"value\":1}","text":"{\"keep\":true}"}`,
+		schema,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := args["items"].([]any); !ok {
+		t.Fatalf("items were not decoded: %#v", args["items"])
+	}
+	if args["enabled"] != true || args["count"] != float64(2) {
+		t.Fatalf("primitive values were not decoded: %#v", args)
+	}
+	if _, ok := args["payload"].(map[string]any); !ok {
+		t.Fatalf("payload was not decoded: %#v", args["payload"])
+	}
+	if args["text"] != `{"keep":true}` {
+		t.Fatalf("string value was modified: %#v", args["text"])
+	}
+}
+
+func TestParseCapabilityArgsPreservesDeclaredArgumentsProperty(t *testing.T) {
+	schema := tools.ToolSchema{
+		Type: "object",
+		Properties: map[string]tools.Property{
+			"arguments": {Type: "string"},
+		},
+	}
+	args, err := parseCapabilityArgs(`{"arguments":"{\"value\":1}"}`, schema)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if args["arguments"] != `{"value":1}` {
+		t.Fatalf("declared arguments property was modified: %#v", args)
+	}
+}
+
+func TestParseCapabilityArgsRejectsInvalidJSON(t *testing.T) {
+	if _, err := parseCapabilityArgs(`{"questions":[`, tools.QuestionTool.InputSchema); err == nil {
+		t.Fatal("invalid JSON was accepted")
+	}
+	if _, err := parseCapabilityArgs(`{"arguments":"not JSON"}`, tools.QuestionTool.InputSchema); err == nil {
+		t.Fatal("invalid wrapped JSON was accepted")
+	}
+}
+
+func TestDoomLoopTracksFailedQuestionCalls(t *testing.T) {
+	var tracker doomLoopTracker
+	for i := 0; i < doomLoopStopThreshold; i++ {
+		tracker.record("question", "", map[string]any{}, true)
+	}
+	if tracker.count != doomLoopStopThreshold || tracker.prevName != "question" {
+		t.Fatalf("failed question calls were not tracked: %#v", tracker)
+	}
+
+	tracker.record("question", "", map[string]any{}, false)
+	if tracker.count != 0 || tracker.prevSig != "" || tracker.prevName != "" {
+		t.Fatalf("successful question call did not reset tracker: %#v", tracker)
+	}
+}
+
 func TestResultToStringUsesStructuredContent(t *testing.T) {
 	result := resultToString(tools.CallToolResult{
 		StructuredContent: map[string]any{"status": "ok"},
@@ -386,7 +505,7 @@ func TestQuestionEventIncludesRoundID(t *testing.T) {
 	events := make(chan AgentEvent, 1)
 	resultCh := make(chan string, 1)
 	go func() {
-		resultCh <- handleQuestion(context.Background(), `{"questions":[]}`, roundID, events, time.Second)
+		resultCh <- handleQuestion(context.Background(), map[string]any{"questions": []any{}}, roundID, events, time.Second)
 	}()
 
 	event := <-events
@@ -457,7 +576,7 @@ func TestBrowserCapabilityValidatesStructuredOutput(t *testing.T) {
 	go func() {
 		resultCh <- handleBrowserCapability(context.Background(), openai.ToolCall{
 			Function: openai.FunctionCall{Name: validationTool.Name, Arguments: `{}`},
-		}, registration, events, time.Second)
+		}, registration, map[string]any{}, events, time.Second)
 	}()
 	event := <-events
 	if event.Type != "browser_capability_call" {

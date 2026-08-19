@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "กรองแหล่งที่มาของลิงก์ย้อนกลับ",
+	"excludeSelfBacklink": "ไม่รวมลิงก์ย้อนกลับจากเอกสารปัจจุบัน",
+	"nonDailyNote": "บันทึกที่ไม่ใช่รายวัน",
 	"backlinkMentionExclude": "รายการยกเว้นคำสำคัญสำหรับการกล่าวถึงลิงก์ย้อนกลับ",
 	"entryToolbar": "แถบเครื่องมือ",
 	"appMenuAbout": "เกี่ยวกับ SiYuan",

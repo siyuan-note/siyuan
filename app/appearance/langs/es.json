@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "Filtrar fuentes de enlaces inversos",
+	"excludeSelfBacklink": "Excluir enlaces inversos del documento actual",
+	"nonDailyNote": "Notas no diarias",
 	"backlinkMentionExclude": "Lista de exclusión de palabras clave de menciones de enlaces inversos",
 	"entryToolbar": "Barra de herramientas",
 	"appMenuAbout": "Acerca de SiYuan",

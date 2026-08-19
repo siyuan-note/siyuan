@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "Rückverweisquellen filtern",
+	"excludeSelfBacklink": "Rückverweise aus dem aktuellen Dokument ausschließen",
+	"nonDailyNote": "Nicht tägliche Notizen",
 	"backlinkMentionExclude": "Ausschlussliste für Schlüsselwörter in Backlink-Erwähnungen",
 	"entryToolbar": "Symbolleiste",
 	"appMenuAbout": "Über SiYuan",

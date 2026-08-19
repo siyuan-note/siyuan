@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "Filtrovať zdroje spätných odkazov",
+	"excludeSelfBacklink": "Vylúčiť spätné odkazy z aktuálneho dokumentu",
+	"nonDailyNote": "Poznámky mimo denníka",
 	"backlinkMentionExclude": "Zoznam vylúčených kľúčových slov zmienok o spätných odkazoch",
 	"entryToolbar": "Panel s nástrojmi",
 	"appMenuAbout": "O aplikácii SiYuan",

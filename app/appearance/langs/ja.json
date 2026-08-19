@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "バックリンク元を絞り込む",
+	"excludeSelfBacklink": "現在の文書からのバックリンクを除外",
+	"nonDailyNote": "日記以外",
 	"backlinkMentionExclude": "バックリンク言及キーワード除外リスト",
 	"entryToolbar": "ツールバー",
 	"appMenuAbout": "SiYuan について",

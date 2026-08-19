@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "تصفية مصادر الروابط الخلفية",
+	"excludeSelfBacklink": "استبعاد الروابط الخلفية من المستند الحالي",
+	"nonDailyNote": "ملاحظات غير يومية",
 	"backlinkMentionExclude": "قائمة استبعاد الكلمات المفتاحية لإشارات الروابط الخلفية",
 	"entryToolbar": "شريط الأدوات",
 	"appMenuAbout": "حول SiYuan",

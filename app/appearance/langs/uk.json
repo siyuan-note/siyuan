@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "Фільтрувати джерела зворотних посилань",
+	"excludeSelfBacklink": "Виключити зворотні посилання з поточного документа",
+	"nonDailyNote": "Не щоденні нотатки",
 	"backlinkMentionExclude": "Список виключень ключових слів для згадок зворотних посилань",
 	"entryToolbar": "Панель інструментів",
 	"appMenuAbout": "Про SiYuan",

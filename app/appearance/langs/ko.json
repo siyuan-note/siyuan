@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "백링크 출처 필터",
+	"excludeSelfBacklink": "현재 문서의 백링크 제외",
+	"nonDailyNote": "일일 노트 아님",
 	"backlinkMentionExclude": "백링크 언급 키워드 제외 목록",
 	"entryToolbar": "도구 모음",
 	"appMenuAbout": "SiYuan 정보",

@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "बैकलिंक स्रोत फ़िल्टर करें",
+	"excludeSelfBacklink": "वर्तमान दस्तावेज़ के बैकलिंक बाहर रखें",
+	"nonDailyNote": "गैर-दैनिक नोट्स",
 	"backlinkMentionExclude": "बैकलिंक उल्लेख कीवर्ड बहिष्करण सूची",
 	"entryToolbar": "टूलबार",
 	"appMenuAbout": "SiYuan के बारे में",

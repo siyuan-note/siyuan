@@ -29,6 +29,14 @@ import {
     expandHeight,
     isHeightAnimating
 } from "../../util/heightAnimation";
+import {
+    createBacklinkSourceFilter,
+    getBacklinkSourceFilterParam,
+    type IBacklinkSourceFilter,
+    normalizeBacklinkSourceFilter,
+    type TBacklinkDailyNoteFilter
+} from "./backlinkSourceFilter";
+import {escapeHtml} from "../../util/escape";
 
 interface IBacklinkItemRecord {
     revision: string,
@@ -108,6 +116,7 @@ export class Backlink extends Model {
     private visibilityObserver?: IntersectionObserver;
     private empty = false;
     private emptyChange?: (empty: boolean) => void;
+    private sourceFilter = createBacklinkSourceFilter();
 
     constructor(options: {
         app: App,
@@ -174,6 +183,8 @@ export class Backlink extends Model {
     ${this.type === "bottom" ? "" : `<span data-type="refresh" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.refresh}"><svg><use xlink:href='#iconRefresh'></use></svg></span>
     <span class="fn__space"></span>`}
     <span data-type="search" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.filter}"><svg><use xlink:href='#iconFilter'></use></svg></span>
+    <span class="fn__space"></span>
+    <span data-type="sourceFilter" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.backlinkSourceFilter}"><svg><use xlink:href='#iconListFilterPlus'></use></svg></span>
     <span class="fn__space"></span>
     <span data-type="sort" data-sort="${backlinkSort}" class="block__icon ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sort}"><svg><use xlink:href='#iconSort'></use></svg></span>
     <span class="fn__space"></span>
@@ -392,6 +403,10 @@ export class Backlink extends Model {
                         case "mSort":
                             this.showSortMenu(type, target.getAttribute("data-sort"));
                             window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
+                            event.stopPropagation();
+                            break;
+                        case "sourceFilter":
+                            this.showSourceFilterMenu(event);
                             event.stopPropagation();
                             break;
                         case "layout":
@@ -636,6 +651,86 @@ export class Backlink extends Model {
                 clickEvent("3");
             }
         }).element);
+    }
+
+    private applySourceFilter(filter: IBacklinkSourceFilter) {
+        this.sourceFilter = normalizeBacklinkSourceFilter(filter);
+        this.element.querySelector('[data-type="sourceFilter"]')?.classList.toggle(
+            "block__icon--active",
+            Boolean(getBacklinkSourceFilterParam(this.sourceFilter)),
+        );
+        this.searchBacklinks();
+    }
+
+    private showSourceFilterMenu(event: MouseEvent) {
+        const dailyNoteSubmenu = ([
+            ["all", window.siyuan.languages.all],
+            ["only", window.siyuan.languages.dailyNote],
+            ["exclude", window.siyuan.languages.nonDailyNote],
+        ] as Array<[TBacklinkDailyNoteFilter, string]>).map(([value, label]) => ({
+            checked: this.sourceFilter.dailyNote === value,
+            iconHTML: "",
+            label,
+            click: () => {
+                this.applySourceFilter({...this.sourceFilter, dailyNote: value});
+            }
+        }));
+        const notebookSubmenu: IMenu[] = [{
+            checked: this.sourceFilter.excludedNotebookIDs.length === 0,
+            iconHTML: "",
+            label: window.siyuan.languages.allNotebooks,
+            click: () => {
+                this.applySourceFilter({...this.sourceFilter, excludedNotebookIDs: []});
+            }
+        }, {type: "separator"}];
+        (window.siyuan.notebooks || []).filter(item => !item.closed).forEach(item => {
+            notebookSubmenu.push({
+                checked: !this.sourceFilter.excludedNotebookIDs.includes(item.id),
+                iconHTML: "",
+                label: escapeHtml(item.name),
+                click: () => {
+                    const excludedNotebookIDs = new Set(this.sourceFilter.excludedNotebookIDs);
+                    if (excludedNotebookIDs.has(item.id)) {
+                        excludedNotebookIDs.delete(item.id);
+                    } else {
+                        excludedNotebookIDs.add(item.id);
+                    }
+                    this.applySourceFilter({...this.sourceFilter, excludedNotebookIDs: Array.from(excludedNotebookIDs)});
+                }
+            });
+        });
+
+        window.siyuan.menus.menu.remove();
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconCalendar",
+            label: window.siyuan.languages.dailyNote,
+            type: "submenu",
+            submenu: dailyNoteSubmenu,
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            icon: "iconFiles",
+            label: window.siyuan.languages.allNotebooks,
+            type: "submenu",
+            submenu: notebookSubmenu,
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            checked: this.sourceFilter.excludeSelf,
+            iconHTML: "",
+            label: window.siyuan.languages.excludeSelfBacklink,
+            click: () => {
+                this.applySourceFilter({...this.sourceFilter, excludeSelf: !this.sourceFilter.excludeSelf});
+            }
+        }).element);
+        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({
+            disabled: !getBacklinkSourceFilterParam(this.sourceFilter),
+            icon: "iconUndo",
+            label: window.siyuan.languages.reset,
+            click: () => {
+                this.applySourceFilter(createBacklinkSourceFilter());
+            }
+        }).element);
+        window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
     }
 
     private toggleItem(liElement: HTMLElement, isMention: boolean) {
@@ -1154,13 +1249,26 @@ export class Backlink extends Model {
                 }
             });
         }
-        const param: IObject = {
+        const param: {
+            sort: string,
+            mSort: string,
+            k: string,
+            mk: string,
+            id: string,
+            sourceFilter?: IBacklinkSourceFilter,
+            notebook?: string,
+            knownRevision?: string,
+        } = {
             sort: parseInt(this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').getAttribute("data-sort")).toString(),
             mSort: parseInt(this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').getAttribute("data-sort")).toString(),
             k: this.inputsElement[0].value,
             mk: this.inputsElement[1].value,
             id: this.blockId,
         };
+        const sourceFilter = getBacklinkSourceFilterParam(this.sourceFilter);
+        if (sourceFilter) {
+            param.sourceFilter = sourceFilter;
+        }
         const blockId = this.blockId;
         if (isEncryptedBox(notebookId)) {
             param.notebook = notebookId;

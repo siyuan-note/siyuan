@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "Filter backlink sources",
+	"excludeSelfBacklink": "Exclude backlinks from the current document",
+	"nonDailyNote": "Non-daily notes",
 	"backlinkMentionExclude": "Backlink mention keyword exclusion list",
 	"entryToolbar": "Toolbar",
 	"appMenuAbout": "About SiYuan",

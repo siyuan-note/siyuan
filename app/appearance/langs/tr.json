@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "Geri bağlantı kaynaklarını filtrele",
+	"excludeSelfBacklink": "Geçerli belgeden gelen geri bağlantıları hariç tut",
+	"nonDailyNote": "Günlük olmayan notlar",
 	"backlinkMentionExclude": "Geri bağlantı bahsi anahtar kelime hariç tutma listesi",
 	"entryToolbar": "Araç çubuğu",
 	"appMenuAbout": "SiYuan Hakkında",

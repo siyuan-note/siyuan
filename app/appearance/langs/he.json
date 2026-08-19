@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "סינון מקורות קישורים חוזרים",
+	"excludeSelfBacklink": "החרגת קישורים חוזרים מהמסמך הנוכחי",
+	"nonDailyNote": "הערות שאינן יומיות",
 	"backlinkMentionExclude": "רשימת אי-הכללה של מילות מפתח לאזכורי קישורים חוזרים",
 	"entryToolbar": "סרגל כלים",
 	"appMenuAbout": "אודות SiYuan",

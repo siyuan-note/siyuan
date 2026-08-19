@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "Filtruj źródła linków zwrotnych",
+	"excludeSelfBacklink": "Wyklucz linki zwrotne z bieżącego dokumentu",
+	"nonDailyNote": "Notatki inne niż dzienne",
 	"backlinkMentionExclude": "Lista wykluczeń słów kluczowych wzmianek o linkach zwrotnych",
 	"entryToolbar": "Pasek narzędzi",
 	"appMenuAbout": "O programie SiYuan",

@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "Filter sumber backlink",
+	"excludeSelfBacklink": "Kecualikan backlink dari dokumen saat ini",
+	"nonDailyNote": "Catatan nonharian",
 	"backlinkMentionExclude": "Daftar pengecualian kata kunci penyebutan backlink",
 	"entryToolbar": "Bilah alat",
 	"appMenuAbout": "Tentang SiYuan",

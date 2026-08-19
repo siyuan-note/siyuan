@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "Backlinkbronnen filteren",
+	"excludeSelfBacklink": "Backlinks uit het huidige document uitsluiten",
+	"nonDailyNote": "Niet-dagelijkse notities",
 	"backlinkMentionExclude": "Uitsluitingslijst voor trefwoorden in backlinkvermeldingen",
 	"entryToolbar": "Werkbalk",
 	"appMenuAbout": "Over SiYuan",

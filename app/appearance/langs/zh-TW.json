@@ -1,4 +1,7 @@
 {
+	"backlinkSourceFilter": "篩選反向連結來源",
+	"excludeSelfBacklink": "排除目前文件的反向連結",
+	"nonDailyNote": "非日記",
 	"backlinkMentionExclude": "反連提及關鍵字排除列表",
 	"entryToolbar": "工具列",
 	"appMenuAbout": "關於思源筆記",

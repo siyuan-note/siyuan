@@ -1,5 +1,5 @@
 import {focusByWbr, getEditorRange, getUndoFocusContext} from "../protyle/util/selection";
-import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {
     getContenteditableElement,
     getEmbedChildOperationParentID,
@@ -18,6 +18,7 @@ import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
 import {mathRender} from "../protyle/render/mathRender";
 import {buildCancelSuperBlockOperations} from "./cancelSuperBlock";
+import {shouldFocusJumpTarget} from "./jumpToParent";
 
 export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range) => {
     let previousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id");
@@ -203,15 +204,30 @@ export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "par
         if (!targetId) {
             return;
         }
-        /// #if !MOBILE
-        openFileById({
-            app: protyle.app,
+        fetchPost("/api/block/checkBlockFold", {
             id: targetId,
-            action: targetId !== protyle.block.rootID && protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]
+            notebook: protyle.notebookId,
+        }, (foldResponse) => {
+            const targetElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${targetId}"]`))
+                .find(item => !isInEmbedBlock(item));
+            const shouldFocus = shouldFocusJumpTarget({
+                isRoot: targetId === protyle.block.rootID,
+                showAll: protyle.block.showAll,
+                isFolded: foldResponse.data.isFolded,
+                isHidden: !targetElement || targetElement.clientHeight === 0,
+            });
+            const action: TProtyleAction[] = shouldFocus ?
+                [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS];
+            /// #if !MOBILE
+            openFileById({
+                app: protyle.app,
+                id: targetId,
+                action
+            });
+            /// #else
+            openMobileFileById(protyle.app, targetId, action);
+            /// #endif
         });
-        /// #else
-        openMobileFileById(protyle.app, targetId, targetId !== protyle.block.rootID && protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]);
-        /// #endif
     });
 };
 

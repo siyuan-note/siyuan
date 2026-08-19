@@ -408,6 +408,23 @@
       }
     }
 
+    &__filter-row {
+      align-items: center;
+      flex: 1 1 240px;
+      gap: 8px;
+      min-width: 0;
+
+      > .b3-text-field {
+        flex: 1;
+        min-width: 0;
+      }
+
+      > .counter {
+        flex-shrink: 0;
+        margin-left: 0;
+      }
+    }
+
     &__tabs,
     &__tools {
       align-items: center;

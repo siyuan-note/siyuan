@@ -515,16 +515,8 @@
           min-width: 0;
         }
 
-        > .b3-text-field {
-          box-sizing: border-box;
-          flex: 1 1 0;
-          min-width: 0;
-          order: 2;
-        }
-
-        > .counter {
-          flex-shrink: 0;
-          margin-left: auto;
+        > .config-bazaar__filter-row {
+          flex-basis: 100%;
           order: 2;
         }
       }

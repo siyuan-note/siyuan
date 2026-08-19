@@ -272,10 +272,10 @@ export const bazaar = {
                 <option value="1">${window.siyuan.languages.themeDark}</option>
             </select>
             <div class="fn__space"></div>
-            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            <div class="fn__space"></div>
-            <div class="fn__flex-1"></div>
-            <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="fn__flex config-bazaar__filter-row">
+                <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
+                <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+            </div>
         </div>
         <div id="configBazaarTheme" class="config-bazaar__content">
             ${loadingHTML}
@@ -294,10 +294,10 @@ export const bazaar = {
                 <option ${localSort.template === "5" ? "selected" : ""} value="5">${window.siyuan.languages.sortByRatingAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            <div class="fn__space"></div>
-            <div class="fn__flex-1"></div>
-            <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="fn__flex config-bazaar__filter-row">
+                <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
+                <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+            </div>
         </div>
         <div id="configBazaarTemplate" class="config-bazaar__content">
             ${loadingHTML}
@@ -316,10 +316,10 @@ export const bazaar = {
                 <option ${localSort.plugin === "5" ? "selected" : ""} value="5">${window.siyuan.languages.sortByRatingAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            <div class="fn__space"></div>
-            <div class="fn__flex-1"></div>
-            <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="fn__flex config-bazaar__filter-row">
+                <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
+                <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+            </div>
         </div>
         <div id="configBazaarPlugin" class="config-bazaar__content">
             ${loadingHTML}
@@ -338,10 +338,10 @@ export const bazaar = {
                 <option ${localSort.icon === "5" ? "selected" : ""} value="5">${window.siyuan.languages.sortByRatingAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            <div class="fn__space"></div>
-            <div class="fn__flex-1"></div>
-            <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="fn__flex config-bazaar__filter-row">
+                <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
+                <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+            </div>
         </div>
         <div id="configBazaarIcon" class="config-bazaar__content">
             ${loadingHTML}
@@ -360,10 +360,10 @@ export const bazaar = {
                 <option ${localSort.widget === "5" ? "selected" : ""} value="5">${window.siyuan.languages.sortByRatingAsc}</option>
             </select>
             <div class="fn__space"></div>
-            <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
-            <div class="fn__space"></div>
-            <div class="fn__flex-1"></div>
-            <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+            <div class="fn__flex config-bazaar__filter-row">
+                <input class="b3-text-field" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
+                <div class="counter counter--bg fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
+            </div>
         </div>
         <div id="configBazaarWidget" class="config-bazaar__content">
             ${loadingHTML}

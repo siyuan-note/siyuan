@@ -126,9 +126,15 @@
     }
 
     &--active,
-    &:not(.toolbar__icon-deactivate):focus,
-    &:not(.toolbar__icon-deactivate):hover {
+    &:not(.toolbar__icon-deactivate):active,
+    &:not(.toolbar__icon-deactivate):focus-visible {
       background-color: var(--b3-list-hover);
+    }
+
+    @media (hover: hover) {
+      &:not(.toolbar__icon-deactivate):hover {
+        background-color: var(--b3-list-hover);
+      }
     }
 
     &--history {

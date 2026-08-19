@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "Panel s nástrojmi",
 	"appMenuAbout": "O aplikácii SiYuan",
 	"appMenuServices": "Služby",
 	"appMenuHide": "Skryť SiYuan",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "Ponuka vnorených prvkov",
 	"entrySubmenu": "Podponuka",
 	"splitMergedCellTip": "Najprv rozdeľte zlúčené bunky",
-	"entryVisibility": "Ponuky a dok",
-	"entryVisibilityTip": "Nastavte viditeľnosť a poradie vstavaných položiek ponúk na pracovnej ploche, ako aj viditeľnosť ikon doku",
+	"entryVisibility": "Ponuky, panel s nástrojmi a dok",
+	"entryVisibilityTip": "Nastavte viditeľnosť a poradie vstavaných položiek ponúk a panela s nástrojmi na pracovnej ploche, ako aj viditeľnosť ikon doku",
 	"entrySimple": "Jednoduchý",
 	"entryFull": "Úplný",
 	"entrySimpleTip": "Zobrazuje často používané položky na rýchle začatie práce",

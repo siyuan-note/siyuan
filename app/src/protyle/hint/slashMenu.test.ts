@@ -44,6 +44,12 @@ test("slash menu removes empty groups after visibility filtering", () => {
     assert.deepEqual(resolve(items, {visible: () => false}), []);
 });
 
+test("slash menu applies configured visibility to separators", () => {
+    const items = [entry("a"), separator("separator_1"), entry("b")];
+    assert.deepEqual(resolve(items, {visible: (entryKey) => entryKey !== "separator_1"})
+        .map((item) => item.entryKey), ["a", "b"]);
+});
+
 test("slash menu search and document-create conditions keep hidden entries out", () => {
     const items = [entry("newFileRef", ["document"]), separator("separator_1"),
         entry("visible", ["document"]), entry("other", ["other"])];

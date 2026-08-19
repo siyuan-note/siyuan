@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "סרגל כלים",
 	"appMenuAbout": "אודות SiYuan",
 	"appMenuServices": "שירותים",
 	"appMenuHide": "הסתר את SiYuan",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "תפריט רכיבים בשורה",
 	"entrySubmenu": "תפריט משנה",
 	"splitMergedCellTip": "יש לפצל תחילה תאים ממוזגים",
-	"entryVisibility": "תפריטים וסרגל עגינה",
-	"entryVisibilityTip": "הגדרת הנראות והסדר של פריטי תפריט שולחן העבודה המובנים והנראות של סמלי סרגל העגינה",
+	"entryVisibility": "תפריטים, סרגל כלים וסרגל עגינה",
+	"entryVisibilityTip": "הגדרת הנראות והסדר של פריטי התפריט וסרגל הכלים המובנים בשולחן העבודה, והנראות של סמלי סרגל העגינה",
 	"entrySimple": "פשוט",
 	"entryFull": "מלא",
 	"entrySimpleTip": "מציג פריטים נפוצים כדי לעזור למשתמשים חדשים להתחיל במהירות",

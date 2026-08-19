@@ -2,6 +2,7 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 import test from "node:test";
+import {DESKTOP_TOOLBAR_ENTRIES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {
     entryCatalog,
     getEntryCatalogChildren,
@@ -94,9 +95,7 @@ test("entry catalog paths are unique and indexed", () => {
     const visit = (prefix: string, nodes: typeof entryCatalog[number]["children"]) => {
         nodes.forEach((item) => {
             const path = `${prefix}.${item.key}`;
-            if (item.type === "entry") {
-                paths.push(path);
-            }
+            paths.push(path);
             assert.equal(getEntryCatalogNode(path), item);
             assert.equal(getEntryParentPath(path), prefix);
             if (item.children) {
@@ -107,6 +106,13 @@ test("entry catalog paths are unique and indexed", () => {
     entryCatalog.forEach((section) => visit(section.key, section.children));
     assert.equal(new Set(paths).size, paths.length);
     assert.deepEqual(new Set(getEntryPaths()), new Set(paths));
+});
+
+test("toolbar catalog follows the default toolbar declaration", () => {
+    const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH);
+    assert.deepEqual(children.map((item) => item.key), DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key));
+    assert.equal(children.filter((item) => item.type === "separator").length, 2);
+    assert.equal(children.every((item) => item.simple), true);
 });
 
 test("slash menu catalog follows the built-in hint order", () => {
@@ -263,6 +269,7 @@ test("entry order sortability follows its section and parent entry", () => {
     assert.equal(isEntryOrderSortable("missing"), false);
     assert.equal(getEntryOrderParents().includes("editor.slash"), false);
     assert.equal(getEntryOrderParents().includes(SLASH_MENU_ROOT_PATH), true);
+    assert.equal(getEntryOrderParents().includes(TOOLBAR_ENTRY_ROOT_PATH), true);
 });
 
 test("conditional block resource menus have distinct configuration labels", () => {

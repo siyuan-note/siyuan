@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "Bilah alat",
 	"appMenuAbout": "Tentang SiYuan",
 	"appMenuServices": "Layanan",
 	"appMenuHide": "Sembunyikan SiYuan",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "Menu elemen sebaris",
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Pisahkan sel yang digabungkan terlebih dahulu",
-	"entryVisibility": "Menu dan dok",
-	"entryVisibilityTip": "Atur visibilitas dan urutan item menu desktop bawaan, serta visibilitas ikon dok",
+	"entryVisibility": "Menu, bilah alat, dan dok",
+	"entryVisibilityTip": "Atur visibilitas dan urutan item menu dan bilah alat desktop bawaan, serta visibilitas ikon dok",
 	"entrySimple": "Sederhana",
 	"entryFull": "Lengkap",
 	"entrySimpleTip": "Menampilkan entri yang umum digunakan agar pengguna baru dapat memulai dengan cepat",

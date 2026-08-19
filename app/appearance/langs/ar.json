@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "شريط الأدوات",
 	"appMenuAbout": "حول SiYuan",
 	"appMenuServices": "الخدمات",
 	"appMenuHide": "إخفاء SiYuan",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "قائمة العناصر السطرية",
 	"entrySubmenu": "قائمة فرعية",
 	"splitMergedCellTip": "يجب تقسيم الخلايا المدمجة أولاً",
-	"entryVisibility": "القوائم وشريط الإرساء",
-	"entryVisibilityTip": "اضبط إظهار وترتيب عناصر قوائم سطح المكتب المضمنة، واضبط إظهار أيقونات شريط الإرساء",
+	"entryVisibility": "القوائم وشريط الأدوات وشريط الإرساء",
+	"entryVisibilityTip": "اضبط إظهار وترتيب عناصر قوائم سطح المكتب وشريط الأدوات المضمنة، واضبط إظهار أيقونات شريط الإرساء",
 	"entrySimple": "مبسّط",
 	"entryFull": "كامل",
 	"entrySimpleTip": "يعرض العناصر شائعة الاستخدام لمساعدة المستخدمين الجدد على البدء بسرعة",

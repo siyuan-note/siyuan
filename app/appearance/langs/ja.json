@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "ツールバー",
 	"appMenuAbout": "SiYuan について",
 	"appMenuServices": "サービス",
 	"appMenuHide": "SiYuan を隠す",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "インライン要素メニュー",
 	"entrySubmenu": "サブメニュー",
 	"splitMergedCellTip": "先に結合セルを分割する必要があります",
-	"entryVisibility": "メニューとドック",
-	"entryVisibilityTip": "デスクトップの組み込みメニュー項目の表示と順序、およびドックアイコンの表示を設定します",
+	"entryVisibility": "メニュー、ツールバー、ドック",
+	"entryVisibilityTip": "デスクトップの組み込みメニュー項目とツールバー項目の表示と順序、およびドックアイコンの表示を設定します",
 	"entrySimple": "シンプル",
 	"entryFull": "完全",
 	"entrySimpleTip": "よく使う項目を表示し、すぐに使い始められる構成",

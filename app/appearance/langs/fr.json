@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "Barre d’outils",
 	"appMenuAbout": "À propos de SiYuan",
 	"appMenuServices": "Services",
 	"appMenuHide": "Masquer SiYuan",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "Menu des éléments en ligne",
 	"entrySubmenu": "Sous-menu",
 	"splitMergedCellTip": "Les cellules fusionnées doivent d'abord être fractionnées",
-	"entryVisibility": "Menus et barre d'ancrage",
-	"entryVisibilityTip": "Configurez la visibilité et l’ordre des éléments intégrés des menus de bureau, ainsi que la visibilité des icônes de la barre d’ancrage",
+	"entryVisibility": "Menus, barre d’outils et barre d’ancrage",
+	"entryVisibilityTip": "Configurez la visibilité et l’ordre des éléments intégrés des menus et de la barre d’outils du bureau, ainsi que la visibilité des icônes de la barre d’ancrage",
 	"entrySimple": "Simple",
 	"entryFull": "Complet",
 	"entrySimpleTip": "Affiche les entrées courantes pour démarrer rapidement",

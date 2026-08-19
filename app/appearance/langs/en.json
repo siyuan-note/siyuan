@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "Toolbar",
 	"appMenuAbout": "About SiYuan",
 	"appMenuServices": "Services",
 	"appMenuHide": "Hide SiYuan",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "Inline element menu",
 	"entrySubmenu": "Submenu",
 	"splitMergedCellTip": "Split merged cells first",
-	"entryVisibility": "Menus and dock",
-	"entryVisibilityTip": "Configure the visibility and order of built-in desktop menu items, and the visibility of dock icons",
+	"entryVisibility": "Menus, toolbar and dock",
+	"entryVisibilityTip": "Configure the visibility and order of built-in desktop menu and toolbar items, and the visibility of dock icons",
 	"entrySimple": "Simple",
 	"entryFull": "Full",
 	"entrySimpleTip": "Shows commonly used entries for getting started quickly",

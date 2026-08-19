@@ -1,4 +1,5 @@
 import {CODE_TAB_SPACE_VALUES} from "../../protyle/wysiwyg/codeBlockUtil";
+import {DESKTOP_TOOLBAR_ENTRIES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 
 export interface IEntryCatalogNode {
     key: string;
@@ -412,6 +413,10 @@ const gutterSingle = () => [
 
 export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
 
+const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => item.separator
+    ? separator(item.key)
+    : node(item.key, lang(item.lang)));
+
 const slashMenuBuiltinChildren = [
     node("template", lang("template")),
     node("widget", lang("widget")),
@@ -668,6 +673,11 @@ export const entryCatalog: IEntryCatalogSection[] = [
         ],
     },
     {
+        key: TOOLBAR_ENTRY_ROOT_PATH,
+        label: location(lang("editor"), lang("entryToolbar")),
+        children: toolbarBuiltinChildren,
+    },
+    {
         key: "editor.slash",
         label: location(lang("editor"), lang("entrySlashMenu")),
         sortable: false,
@@ -902,9 +912,7 @@ rebuildCatalogIndexes();
 
 export const getEntryCatalogNode = (path: string) => entryMap.get(path);
 export const getEntryParentPath = (path: string) => parentMap.get(path);
-export const getEntryPaths = () => Array.from(entryMap.entries())
-    .filter(([, item]) => item.type === "entry")
-    .map(([path]) => path);
+export const getEntryPaths = () => Array.from(entryMap.keys());
 export const getEntryCatalogSection = (key: string) => sectionMap.get(key);
 export const getEntryCatalogChildren = (path: string) => childrenMap.get(path);
 export const isEntryOrderSortable = (parentPath: string) => {

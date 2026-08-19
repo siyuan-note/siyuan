@@ -1004,7 +1004,7 @@
       &--toggleable {
         cursor: pointer;
 
-        &:has([data-entry-readonly]),
+        &.config-entry-visibility__row--readonly,
         &.config-entry-visibility__row--disabled {
           cursor: not-allowed;
         }

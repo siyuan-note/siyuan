@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "Barra de herramientas",
 	"appMenuAbout": "Acerca de SiYuan",
 	"appMenuServices": "Servicios",
 	"appMenuHide": "Ocultar SiYuan",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "Menú de elementos en línea",
 	"entrySubmenu": "Submenú",
 	"splitMergedCellTip": "Primero hay que dividir las celdas combinadas",
-	"entryVisibility": "Menús y panel acoplable",
-	"entryVisibilityTip": "Configura la visibilidad y el orden de los elementos integrados de los menús de escritorio, así como la visibilidad de los iconos del panel acoplable",
+	"entryVisibility": "Menús, barra de herramientas y panel acoplable",
+	"entryVisibilityTip": "Configura la visibilidad y el orden de los elementos integrados de los menús y la barra de herramientas del escritorio, así como la visibilidad de los iconos del panel acoplable",
 	"entrySimple": "Sencillo",
 	"entryFull": "Completo",
 	"entrySimpleTip": "Muestra las entradas más utilizadas para empezar rápidamente",

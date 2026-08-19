@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "Symbolleiste",
 	"appMenuAbout": "Über SiYuan",
 	"appMenuServices": "Dienste",
 	"appMenuHide": "SiYuan ausblenden",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "Inline-Element-Menü",
 	"entrySubmenu": "Untermenü",
 	"splitMergedCellTip": "Zusammengeführte Zellen müssen zuerst geteilt werden",
-	"entryVisibility": "Menüs und Dock",
-	"entryVisibilityTip": "Konfigurieren Sie die Sichtbarkeit und Reihenfolge integrierter Desktop-Menüeinträge sowie die Sichtbarkeit der Dock-Symbole",
+	"entryVisibility": "Menüs, Symbolleiste und Dock",
+	"entryVisibilityTip": "Konfigurieren Sie die Sichtbarkeit und Reihenfolge integrierter Desktop-Menü- und Symbolleisteneinträge sowie die Sichtbarkeit der Dock-Symbole",
 	"entrySimple": "Einfach",
 	"entryFull": "Vollständig",
 	"entrySimpleTip": "Zeigt häufig verwendete Einträge für einen schnellen Einstieg",

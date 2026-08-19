@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "Araç çubuğu",
 	"appMenuAbout": "SiYuan Hakkında",
 	"appMenuServices": "Hizmetler",
 	"appMenuHide": "SiYuan'ı Gizle",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "Satır içi öğe menüsü",
 	"entrySubmenu": "Alt menü",
 	"splitMergedCellTip": "Önce birleştirilmiş hücreleri bölün",
-	"entryVisibility": "Menüler ve yuva",
-	"entryVisibilityTip": "Yerleşik masaüstü menü öğelerinin görünürlüğünü ve sırasını, ayrıca yuva simgelerinin görünürlüğünü yapılandırın",
+	"entryVisibility": "Menüler, araç çubuğu ve yuva",
+	"entryVisibilityTip": "Yerleşik masaüstü menü ve araç çubuğu öğelerinin görünürlüğünü ve sırasını, ayrıca yuva simgelerinin görünürlüğünü yapılandırın",
 	"entrySimple": "Basit",
 	"entryFull": "Tam",
 	"entrySimpleTip": "Yeni kullanıcıların hızlıca başlayabilmesi için sık kullanılan öğeleri gösterir",

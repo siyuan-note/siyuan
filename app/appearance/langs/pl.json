@@ -1,4 +1,5 @@
 {
+	"entryToolbar": "Pasek narzędzi",
 	"appMenuAbout": "O programie SiYuan",
 	"appMenuServices": "Usługi",
 	"appMenuHide": "Ukryj SiYuan",
@@ -194,8 +195,8 @@
 	"entryInlineMenu": "Menu elementów wbudowanych",
 	"entrySubmenu": "Podmenu",
 	"splitMergedCellTip": "Najpierw podziel scalone komórki",
-	"entryVisibility": "Menu i dok",
-	"entryVisibilityTip": "Skonfiguruj widoczność i kolejność wbudowanych elementów menu pulpitu, a także widoczność ikon doku",
+	"entryVisibility": "Menu, pasek narzędzi i dok",
+	"entryVisibilityTip": "Skonfiguruj widoczność i kolejność wbudowanych elementów menu i paska narzędzi pulpitu, a także widoczność ikon doku",
 	"entrySimple": "Prosty",
 	"entryFull": "Pełny",
 	"entrySimpleTip": "Wyświetla często używane pozycje, aby ułatwić szybki start",

@@ -60,6 +60,8 @@ import {FormatPainter} from "./FormatPainter";
 import {IFormatPainterSnapshot} from "./formatPainterCore";
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 import {closeSubElement} from "./subElementLifecycle";
+import {getDefaultToolbar, getToolbarEntryId} from "./defaults";
+import {applyToolbarEntryVisibility} from "../../config/entryVisibility/runtime";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -128,6 +130,7 @@ export class Toolbar {
             const itemElement = this.genItem(protyle, menuItem);
             this.element.appendChild(itemElement);
         });
+        applyToolbarEntryVisibility(this.element);
         /// #if MOBILE
         updateMobilePluginToolbar(protyle);
         /// #endif
@@ -135,43 +138,7 @@ export class Toolbar {
 
     public update(protyle: IProtyle) {
         this.element.innerHTML = "";
-        protyle.options.toolbar = toolbarKeyToMenu(isMobile() ? [
-            "block-ref",
-            "a",
-            "ai",
-            "|",
-            "text",
-            "strong",
-            "em",
-            "u",
-            "clear",
-            "|",
-            "code",
-            "tag",
-            "inline-math",
-            "inline-memo",
-        ] : [
-            "block-ref",
-            "a",
-            "ai",
-            "|",
-            "text",
-            "strong",
-            "em",
-            "u",
-            "s",
-            "mark",
-            "sup",
-            "sub",
-            "code",
-            "kbd",
-            "tag",
-            "inline-math",
-            "inline-memo",
-            "|",
-            "format-painter",
-            {name: "clear", icon: "iconEraser"},
-        ]);
+        protyle.options.toolbar = toolbarKeyToMenu(getDefaultToolbar(isMobile()));
         protyle.app.plugins.forEach(item => {
             const pluginToolbar = filterPluginToolbar(item.updateProtyleToolbar(protyle.options.toolbar), protyle.lite);
             pluginToolbar.forEach(toolbarItem => {
@@ -192,6 +159,7 @@ export class Toolbar {
             const itemElement = this.genItem(protyle, menuItem);
             this.element.appendChild(itemElement);
         });
+        applyToolbarEntryVisibility(this.element);
         /// #if MOBILE
         updateMobilePluginToolbar(protyle);
         /// #endif
@@ -250,7 +218,7 @@ export class Toolbar {
         const endCellElement = hasClosestByTag(range.endContainer, "TD") ||
             hasClosestByTag(range.endContainer, "TH");
         const isCrossCell = !!startCellElement && !!endCellElement && startCellElement !== endCellElement;
-        if (isMobile() || !nodeElement || protyle.disabled || (!isCrossBlock && (
+        if (this.element.hasAttribute("data-entry-empty") || isMobile() || !nodeElement || protyle.disabled || (!isCrossBlock && (
             nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
             nodeElement.classList.contains("av") ||
             hasClosestByTag(range.startContainer, "CAPTION")
@@ -2285,6 +2253,10 @@ export class Toolbar {
         }
         if (!menuItemObj) {
             return;
+        }
+        const entryId = getToolbarEntryId(menuItem);
+        if (entryId) {
+            menuItemObj.element.dataset.id = entryId;
         }
         return menuItemObj.element;
     }

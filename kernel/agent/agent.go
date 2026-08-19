@@ -78,7 +78,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 
 ## Formatting
 - Inline formatting uses standard markdown: **bold**, *italic*, ~~strikethrough~~, ==mark==, and "code" (backticks).
-- Block references in markdown must use ((<blockID> "<anchor text>")); never use [[<blockID>]], which is not block-reference syntax.
+- In markdown written to SiYuan blocks, block references must include anchor text. Use ((<blockID> "<static anchor text>")) for fixed text, or ((<blockID> '<dynamic anchor text>')) for text that follows the target block's content. Never use ((<blockID>)) or [[<blockID>]]. These forms are for note content; in chat responses use [title](siyuan://blocks/<blockID>).
 - For text styling that markdown cannot express (color, background, font size), use SiYuan text marks.
   The syntax requires a leading data-type="text" attribute — WITHOUT it the HTML is escaped and shown as literal text:
   - Text color:      <span data-type="text" style="color: #ff0000;">red text</span>

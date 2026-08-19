@@ -111,6 +111,67 @@ func TestRemoveWorkspaceDirPhysicallyProtectsBaseDir(t *testing.T) {
 	}
 }
 
+func TestRemoveWorkspaceDirPhysicallyRemovesRegisteredWorkspace(t *testing.T) {
+	rootDir := t.TempDir()
+	homeDir := filepath.Join(rootDir, "home")
+	workspaceConfDir := filepath.Join(homeDir, ".config", "siyuan")
+	currentWorkspaceDir := filepath.Join(rootDir, "current")
+	targetWorkspaceDir := filepath.Join(rootDir, "target")
+	for _, dir := range []string{workspaceConfDir, filepath.Join(targetWorkspaceDir, "conf")} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.WriteFile(filepath.Join(targetWorkspaceDir, "conf", "conf.json"), []byte(`{"kernelVersion":"test"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	originalContainer, originalHomeDir, originalWorkspaceDir := util.Container, util.HomeDir, util.WorkspaceDir
+	util.Container = util.ContainerStd
+	util.HomeDir = homeDir
+	util.WorkspaceDir = currentWorkspaceDir
+	t.Cleanup(func() {
+		util.Container, util.HomeDir, util.WorkspaceDir = originalContainer, originalHomeDir, originalWorkspaceDir
+	})
+	if err := util.WriteWorkspacePaths([]string{targetWorkspaceDir}); err != nil {
+		t.Fatal(err)
+	}
+
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	engine.POST("/api/system/removeWorkspaceDirPhysically", removeWorkspaceDirPhysically)
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/api/system/removeWorkspaceDirPhysically",
+		strings.NewReader(`{"path":"`+filepath.ToSlash(targetWorkspaceDir)+`"}`))
+	request.Header.Set("Content-Type", "application/json")
+	engine.ServeHTTP(recorder, request)
+
+	response := &struct {
+		Code int `json:"code"`
+	}{}
+	if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+		t.Fatalf("unmarshal removeWorkspaceDirPhysically response failed: %s", err)
+	}
+	if 0 != response.Code {
+		t.Fatalf("removeWorkspaceDirPhysically failed: %s", recorder.Body.String())
+	}
+	if _, err := os.Stat(targetWorkspaceDir); !os.IsNotExist(err) {
+		t.Fatalf("workspace directory should be removed: %v", err)
+	}
+
+	workspacePathsData, err := os.ReadFile(filepath.Join(workspaceConfDir, "workspace.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var workspacePaths []string
+	if err = json.Unmarshal(workspacePathsData, &workspacePaths); err != nil {
+		t.Fatal(err)
+	}
+	if slices.Contains(workspacePaths, targetWorkspaceDir) {
+		t.Fatalf("removed workspace should be unregistered: %v", workspacePaths)
+	}
+}
+
 func prepareMobileWorkspaceBaseDirTest(t *testing.T) (packageDir, workspaceBaseDir string) {
 	t.Helper()
 	packageDir = t.TempDir()

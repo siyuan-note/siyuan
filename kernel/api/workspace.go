@@ -21,7 +21,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -189,9 +188,9 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 	if rejectMobileWorkspaceBaseDir(ret, cleanPath) {
 		return
 	}
-	if cleanPath == util.WorkspaceDir {
+	if util.IsWorkspaceLocked(cleanPath) || cleanPath == util.WorkspaceDir {
 		ret.Code = -1
-		ret.Msg = "cannot remove current workspace"
+		ret.Msg = "cannot remove opened workspace"
 		return
 	}
 	if !util.IsWorkspaceDir(cleanPath) {
@@ -205,8 +204,8 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	isKnown := slices.Contains(knownPaths, cleanPath)
-	if !isKnown {
+	remainingPaths := util.RemoveWorkspacePath(knownPaths, cleanPath)
+	if len(remainingPaths) == len(knownPaths) {
 		ret.Code = -1
 		ret.Msg = "path is not a registered workspace"
 		return
@@ -217,11 +216,13 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if err = util.WriteWorkspacePaths(remainingPaths); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 
 	logging.LogInfof("removed workspace [%s] physically", path)
-	if util.WorkspaceDir == path {
-		os.Exit(logging.ExitCodeOk)
-	}
 }
 
 type Workspace struct {

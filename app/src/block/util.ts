@@ -1,4 +1,4 @@
-import {focusByWbr, getEditorRange, getUndoFocusContext} from "../protyle/util/selection";
+import {focusByRange, focusByWbr, getEditorRange, getUndoFocusContext} from "../protyle/util/selection";
 import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {
     getContenteditableElement,
@@ -18,7 +18,9 @@ import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
 import {mathRender} from "../protyle/render/mathRender";
 import {buildCancelSuperBlockOperations} from "./cancelSuperBlock";
-import {shouldFocusJumpTarget} from "./jumpToParent";
+import {shouldFocusJumpTarget, shouldFocusParentDocumentTitle} from "./jumpToParent";
+import {zoomOut} from "../menus/protyle";
+import {pushBack} from "../util/backForward";
 
 export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range) => {
     let previousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id");
@@ -196,12 +198,41 @@ export const refreshSbAndPersistWidth = (sbElement: Element,
 };
 
 export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "parent" | "next" | "previous") => {
+    const previousRange = getEditorRange(nodeElement);
     fetchPost("/api/block/getBlockSiblingID", {
         id: nodeElement.getAttribute("data-node-id"),
         notebook: protyle.notebookId,
     }, (response) => {
         const targetId = response.data[type];
         if (!targetId) {
+            return;
+        }
+        const titleElement = protyle.title?.editElement;
+        if (shouldFocusParentDocumentTitle({
+            isRoot: targetId === protyle.block.rootID,
+            hasTitle: Boolean(titleElement),
+            isBacklink: Boolean(protyle.options.backlinkData),
+        })) {
+            const focusTitle = () => {
+                const range = titleElement.ownerDocument.createRange();
+                range.selectNodeContents(titleElement);
+                range.collapse(false);
+                focusByRange(range);
+                protyle.toolbar.range = range;
+                protyle.contentElement.scrollTop = 0;
+                pushBack(protyle, range, titleElement);
+            };
+            pushBack(protyle, previousRange);
+            if (protyle.block.showAll) {
+                zoomOut({
+                    protyle,
+                    id: protyle.block.rootID,
+                    callback: focusTitle,
+                    reload: true,
+                });
+            } else {
+                focusTitle();
+            }
             return;
         }
         fetchPost("/api/block/checkBlockFold", {

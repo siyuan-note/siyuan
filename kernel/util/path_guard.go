@@ -25,10 +25,16 @@ import (
 
 // IsForbiddenAbsPath 判断绝对路径是否为敏感路径，HTTP 文件 API（kernel/api/file.go 的 refuseToAccess）
 // 与 MCP 文件工具（kernel/mcp/tools/file.go 的 resolvePath）共用同一黑名单：
-// conf 目录下的 conf.json 与 TLS 密钥材料、data/snippets/conf.json、data/templates 目录以及
-// data/.siyuan/publishAccess.json。
+// conf 目录下的 conf.json 与 TLS 密钥材料、data/snippets/conf.json、data/templates 目录、
+// data/.siyuan/publishAccess.json 以及 temp 目录下的 siyuan.log 日志文件。
 func IsForbiddenAbsPath(abs string) bool {
 	fileNorm := NormalizeAndResolve(abs)
+
+	// 禁止访问日志文件 siyuan.log：Timing 中间件可能把含 API token 的查询串写入日志（如慢查询告警），
+	// 日志被任意已认证用户读取即等于泄露管理员凭据，因此即使日志不再记录查询串也保持拦截
+	if "" != LogPath && fileNorm == NormalizeAndResolve(LogPath) {
+		return true
+	}
 
 	// 禁止访问 conf 目录下的敏感文件：conf.json（含 accessAuthCode/api.token/cookieKey 等明文凭据）
 	// 以及 TLS 私钥与证书（见 GetOrCreateTLSCert，私钥被读取可导致 HTTPS 流量被解密或证书被伪造）

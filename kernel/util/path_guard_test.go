@@ -25,15 +25,19 @@ import (
 )
 
 // TestIsForbiddenAbsPath 覆盖 HTTP 文件 API 与 MCP 文件工具共用的敏感路径黑名单：
-// conf 目录下的 conf.json 与 TLS 密钥材料、data/snippets/conf.json、data/templates 目录以及
-// data/.siyuan/publishAccess.json。
+// conf 目录下的 conf.json 与 TLS 密钥材料、data/snippets/conf.json、data/templates 目录、
+// data/.siyuan/publishAccess.json 以及 temp 目录下的 siyuan.log 日志文件。
 func TestIsForbiddenAbsPath(t *testing.T) {
 	tmpWorkspace := t.TempDir()
-	origWorkspace, origConf, origData := WorkspaceDir, ConfDir, DataDir
+	origWorkspace, origConf, origData, origTemp, origLog := WorkspaceDir, ConfDir, DataDir, TempDir, LogPath
 	WorkspaceDir = tmpWorkspace
 	ConfDir = filepath.Join(tmpWorkspace, "conf")
 	DataDir = filepath.Join(tmpWorkspace, "data")
-	t.Cleanup(func() { WorkspaceDir, ConfDir, DataDir = origWorkspace, origConf, origData })
+	TempDir = filepath.Join(tmpWorkspace, "temp")
+	LogPath = filepath.Join(TempDir, "siyuan.log")
+	t.Cleanup(func() {
+		WorkspaceDir, ConfDir, DataDir, TempDir, LogPath = origWorkspace, origConf, origData, origTemp, origLog
+	})
 
 	cases := []struct {
 		name string
@@ -48,6 +52,7 @@ func TestIsForbiddenAbsPath(t *testing.T) {
 		{"templates dir", filepath.Join("data", "templates")},
 		{"templates file", filepath.Join("data", "templates", "a.txt")},
 		{"publish access", filepath.Join("data", ".siyuan", "publishAccess.json")},
+		{"log", filepath.Join("temp", "siyuan.log")},
 	}
 	for _, c := range cases {
 		abs := filepath.Join(tmpWorkspace, c.rel)
@@ -76,11 +81,15 @@ func TestIsForbiddenAbsPathCaseInsensitive(t *testing.T) {
 		t.Skip("case-insensitive comparison only on windows/darwin")
 	}
 	tmpWorkspace := t.TempDir()
-	origWorkspace, origConf, origData := WorkspaceDir, ConfDir, DataDir
+	origWorkspace, origConf, origData, origTemp, origLog := WorkspaceDir, ConfDir, DataDir, TempDir, LogPath
 	WorkspaceDir = tmpWorkspace
 	ConfDir = filepath.Join(tmpWorkspace, "conf")
 	DataDir = filepath.Join(tmpWorkspace, "data")
-	t.Cleanup(func() { WorkspaceDir, ConfDir, DataDir = origWorkspace, origConf, origData })
+	TempDir = filepath.Join(tmpWorkspace, "temp")
+	LogPath = filepath.Join(TempDir, "siyuan.log")
+	t.Cleanup(func() {
+		WorkspaceDir, ConfDir, DataDir, TempDir, LogPath = origWorkspace, origConf, origData, origTemp, origLog
+	})
 
 	// 模拟 MCP 工具输入的大小写变体路径（Windows 上 CONF.JSON 与 conf.json 指向同一文件）。
 	cases := []string{
@@ -92,6 +101,7 @@ func TestIsForbiddenAbsPathCaseInsensitive(t *testing.T) {
 		filepath.Join(tmpWorkspace, "DATA", "SNIPPETS", "CONF.JSON"),
 		filepath.Join(tmpWorkspace, "DATA", ".SIYUAN", "PUBLISHACCESS.JSON"),
 		strings.ToUpper(filepath.Join(tmpWorkspace, "data", "templates")),
+		strings.ToUpper(filepath.Join(tmpWorkspace, "temp", "siyuan.log")),
 	}
 	for _, p := range cases {
 		if got := IsForbiddenAbsPath(p); !got {

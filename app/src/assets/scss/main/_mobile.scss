@@ -596,12 +596,20 @@
       &__readme {
         border-radius: 0;
         flex-direction: column;
-        overflow-y: auto;
-        overscroll-behavior: contain;
+        overflow: hidden;
         padding: 0;
-        -webkit-overflow-scrolling: touch;
 
         .item {
+          &__body {
+            display: block;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+          }
+
           &__header {
             background-color: var(--b3-theme-background);
             box-sizing: border-box;
@@ -636,6 +644,16 @@
 
           &__actions {
             padding: 8px 0 16px;
+
+            &--mobile {
+              background-color: var(--b3-theme-background);
+              box-shadow: 0 -1px 0 var(--b3-theme-surface-lighter);
+              box-sizing: border-box;
+              flex-shrink: 0;
+              padding: 8px max(16px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+              width: 100%;
+              z-index: 2;
+            }
           }
 
           &__main {
@@ -650,16 +668,6 @@
           &__preview {
             height: min(50vw, 180px);
             margin-bottom: 16px;
-
-            &.item__preview--fullscreen {
-              border-radius: 0;
-              height: 100%;
-              inset: 0;
-              margin: 0;
-              position: fixed;
-              width: 100%;
-              z-index: 8;
-            }
           }
 
           &__readme {

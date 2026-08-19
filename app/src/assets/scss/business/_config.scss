@@ -636,6 +636,10 @@
       padding: 16px 16px 16px 0;
 
       .item {
+        &__body {
+          display: contents;
+        }
+
         &__side {
           text-align: center;
           width: 260px;

@@ -48,6 +48,7 @@ import {
     sortBazaarPackagesByRating,
 } from "../util/bazaarPackage";
 import {Dialog} from "../dialog";
+import {previewImages} from "../protyle/preview/image";
 
 interface IBazaarMountSnapshot {
     element: HTMLElement;
@@ -1177,7 +1178,11 @@ type="checkbox">
         <svg class="b3-list-item__graphic"><use xlink:href="#iconLeft"></use></svg>
         <span class="b3-list-item__text ft__breakword">${navTitles[bazaarType]}</span>
     </div>`;
-        readmeElement.innerHTML = `${isMobile() ? backHeaderHTML : ""}<div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
+        const readmeActionsHTML = `<div class="item__actions${isMobile() ? " item__actions--mobile" : ""}">
+        ${bazaar._genReadmeActionsHTML(bazaarType, installed, available)}
+        ${bazaar._genReadmeUpdateButtonHTML(available, bazaarType, Boolean(installed))}
+    </div>`;
+        readmeElement.innerHTML = `${isMobile() ? backHeaderHTML : ""}<div class="item__body"><div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
     ${isMobile() ? "" : backHeaderHTML}
     <div class="fn__flex-1">
         <img class="item__img" src="${displayData.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'">
@@ -1202,13 +1207,10 @@ type="checkbox">
         </div>
         <div class="fn__hr--b"></div>
     </div>
-    <div class="item__actions">
-        ${bazaar._genReadmeActionsHTML(bazaarType, installed, available)}
-        ${bazaar._genReadmeUpdateButtonHTML(available, bazaarType, Boolean(installed))}
-    </div>
+    ${isMobile() ? "" : readmeActionsHTML}
 </div>
 <div class="item__main">
-    <div class="item__preview" style="background-image: url(${displayData.previewURL})"></div>
+    <div class="item__preview" data-preview-url="${escapeAttr(displayData.previewURL)}" style="background-image: url(${displayData.previewURL})"></div>
     <div class="b3-typography${displayData.preferredDesc ? "" : " fn__none"}">
         <blockquote>
             <p>
@@ -1219,7 +1221,7 @@ type="checkbox">
     <div class="item__readme b3-typography b3-typography--default">
         <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
     </div>
-</div>`;
+</div></div>${isMobile() ? readmeActionsHTML : ""}`;
         const isInstalledReadme = from === "downloaded";
         if (isInstalledReadme) {
             const mdElement = readmeElement.querySelector(".item__readme");
@@ -2686,7 +2688,14 @@ type="checkbox">
                     event.stopPropagation();
                     break;
                 } else if (target.classList.contains("item__preview")) {
-                    target.classList.toggle("item__preview--fullscreen");
+                    if (isMobile()) {
+                        const previewURL = target.dataset.previewUrl;
+                        if (previewURL) {
+                            previewImages([previewURL], previewURL);
+                        }
+                    } else {
+                        target.classList.toggle("item__preview--fullscreen");
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     break;

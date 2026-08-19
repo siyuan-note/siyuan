@@ -178,7 +178,7 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 
 	path := arg["path"].(string)
 
-	// 硬边界：只允许删除已登记的工作空间目录，禁止删除当前工作空间和任意路径
+	// 硬边界：只允许删除已登记的工作空间目录或新建的空目录，禁止删除当前工作空间和任意路径
 	cleanPath, absErr := filepath.Abs(path)
 	if absErr != nil {
 		ret.Code = -1
@@ -193,11 +193,6 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 		ret.Msg = "cannot remove opened workspace"
 		return
 	}
-	if !util.IsWorkspaceDir(cleanPath) {
-		ret.Code = -1
-		ret.Msg = "path is not a workspace directory"
-		return
-	}
 	knownPaths, err := util.ReadWorkspacePaths()
 	if err != nil {
 		ret.Code = -1
@@ -209,6 +204,19 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 		ret.Code = -1
 		ret.Msg = "path is not a registered workspace"
 		return
+	}
+	if !util.IsWorkspaceDir(cleanPath) {
+		entries, readErr := os.ReadDir(cleanPath)
+		if readErr != nil {
+			ret.Code = -1
+			ret.Msg = readErr.Error()
+			return
+		}
+		if 0 < len(entries) {
+			ret.Code = -1
+			ret.Msg = "path is not a workspace directory"
+			return
+		}
 	}
 
 	if err := os.RemoveAll(cleanPath); err != nil {

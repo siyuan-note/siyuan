@@ -511,7 +511,7 @@ export class SettingBuilder {
             // panel 型 Tab 不支持 rebuild（无注册项可清），忽略该参数以对齐 SettingTab.mount 签名
             mount: async (root, {keywords} = {}, app, _rebuild) => {
                 void _rebuild;
-                mount(root, keywords, app);
+                await mount(root, keywords, app);
             },
             scanSearch: (keywords) => {
                 if (tabSearchTitle === undefined) {

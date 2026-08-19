@@ -366,6 +366,11 @@
       flex: 1;
       height: auto;
       min-height: 0;
+
+      &--bazaar {
+        overflow: hidden;
+        padding: 0;
+      }
     }
   }
 
@@ -377,6 +382,267 @@
     &:has(> .config-group) {
       background-color: var(--b3-theme-surface);
       padding: 8px 16px max(16px, env(safe-area-inset-bottom));
+    }
+
+    > .config-bazaar,
+    > .config-bazaar__trust {
+      height: 100%;
+      min-height: 0;
+    }
+
+    > .config-bazaar__trust {
+      box-sizing: border-box;
+      margin: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left)) !important;
+      overflow-y: auto;
+      padding: 8px 0 max(16px, env(safe-area-inset-bottom));
+      -webkit-overflow-scrolling: touch;
+
+      > .fn__flex-1 {
+        display: none;
+      }
+    }
+
+    .config-bazaar {
+      min-width: 0;
+      overflow: hidden;
+
+      &__main {
+        min-height: 0;
+
+        > .layout-tab-bar {
+          flex-shrink: 0;
+          overflow-x: auto;
+          overscroll-behavior-x: contain;
+          padding-left: max(12px, env(safe-area-inset-left));
+          padding-right: max(12px, env(safe-area-inset-right));
+          scroll-padding-left: max(12px, env(safe-area-inset-left));
+          scroll-padding-right: max(12px, env(safe-area-inset-right));
+          scroll-snap-type: x proximity;
+          -webkit-overflow-scrolling: touch;
+
+          .item {
+            flex: 0 0 auto;
+            scroll-snap-align: start;
+
+            > .fn__flex-1 {
+              display: none;
+            }
+          }
+        }
+
+        > .fn__flex-1 {
+          min-height: 0;
+          overflow: hidden;
+        }
+      }
+
+      &__panel {
+        overscroll-behavior: contain;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        -webkit-overflow-scrolling: touch;
+      }
+
+      &__title {
+        padding: 12px max(12px, env(safe-area-inset-right)) 12px max(12px, env(safe-area-inset-left));
+      }
+
+      &__title--downloaded {
+        display: block;
+
+        .config-bazaar__tabs {
+          flex-wrap: nowrap;
+          overflow-x: auto;
+          overscroll-behavior-x: contain;
+          padding: 8px 0 12px;
+          -webkit-overflow-scrolling: touch;
+
+          > .b3-button {
+            flex: 0 0 auto;
+          }
+        }
+
+        .config-bazaar__tools {
+          display: grid;
+          gap: 8px;
+          grid-template-columns: minmax(0, 1fr) auto;
+          width: 100%;
+        }
+
+        .config-bazaar__sort {
+          grid-column: 1 / -1;
+          min-width: 0;
+
+          .b3-select {
+            min-width: 0;
+            width: 100%;
+          }
+        }
+
+        .config-bazaar__filter {
+          box-sizing: border-box;
+          grid-column: 1;
+          grid-row: 2;
+          min-width: 0;
+          width: 100%;
+        }
+
+        .config-bazaar__actions {
+          flex-wrap: nowrap;
+          gap: 4px;
+          grid-column: 2;
+          grid-row: 2;
+          margin-left: 0;
+          min-width: 0;
+
+          > .counter {
+            margin-left: 0;
+            order: -1;
+          }
+        }
+      }
+
+      &__panel:not([data-type="downloaded"]) > .config-bazaar__title {
+        align-items: center;
+        gap: 8px;
+
+        > .fn__space,
+        > .fn__flex-1 {
+          display: none;
+        }
+
+        > .b3-select {
+          flex: 1 1 132px;
+          min-width: 0;
+        }
+
+        > .b3-text-field {
+          box-sizing: border-box;
+          flex: 1 1 0;
+          min-width: 0;
+          order: 2;
+        }
+
+        > .counter {
+          flex-shrink: 0;
+          margin-left: auto;
+          order: 2;
+        }
+      }
+
+      &__content {
+        margin: 1px max(12px, env(safe-area-inset-right)) 1px max(12px, env(safe-area-inset-left));
+
+        .b3-card {
+          min-width: 0;
+
+          &__img {
+            margin: 12px 0 12px 12px;
+
+            img,
+            span {
+              height: 56px;
+              width: 56px;
+            }
+          }
+
+          &__info {
+            min-width: 0;
+            padding: 12px 8px 0;
+
+            &--left {
+              padding-bottom: 12px;
+            }
+          }
+
+          &__actions--right {
+            flex: 0 1 auto;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            max-width: 120px;
+            padding-right: 8px;
+            row-gap: 4px;
+          }
+        }
+      }
+
+      &__readme {
+        border-radius: 0;
+        flex-direction: column;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 0;
+        -webkit-overflow-scrolling: touch;
+
+        .item {
+          &__header {
+            background-color: var(--b3-theme-background);
+            box-sizing: border-box;
+            flex-shrink: 0;
+            height: auto;
+            margin: 0;
+            min-height: 44px;
+            padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));
+            position: sticky;
+            top: 0;
+            width: 100%;
+            z-index: 2;
+          }
+
+          &__side {
+            box-sizing: border-box;
+            flex: none;
+            height: auto;
+            overflow: visible;
+            padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+            width: 100%;
+
+            > .fn__flex-1 {
+              flex: none;
+              padding: 0;
+            }
+          }
+
+          &__img {
+            margin-top: 16px;
+          }
+
+          &__actions {
+            padding: 8px 0 16px;
+          }
+
+          &__main {
+            box-sizing: border-box;
+            flex: none;
+            margin-left: 0;
+            overflow: visible;
+            padding: 0 max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+            width: 100%;
+          }
+
+          &__preview {
+            height: min(50vw, 180px);
+            margin-bottom: 16px;
+
+            &.item__preview--fullscreen {
+              border-radius: 0;
+              height: 100%;
+              inset: 0;
+              margin: 0;
+              position: fixed;
+              width: 100%;
+              z-index: 8;
+            }
+          }
+
+          &__readme {
+            margin-top: 16px;
+
+            table {
+              overflow-x: auto;
+            }
+          }
+        }
+      }
     }
   }
 

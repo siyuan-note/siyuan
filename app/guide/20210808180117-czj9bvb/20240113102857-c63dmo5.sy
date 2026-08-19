@@ -7,7 +7,7 @@
 		"id": "20240113102857-c63dmo5",
 		"title": "移动端 App",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260819122705"
 	},
 	"Children": [
 		{
@@ -347,7 +347,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113104101-rz1z8en",
-				"updated": "20260803171606"
+				"updated": "20260819122705"
 			},
 			"Children": [
 				{
@@ -361,12 +361,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113104141-5jvccmj",
-				"updated": "20240113104506"
+				"updated": "20260819122705"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "因为应用商店审核原因，目前无法直接在 App 上提供集市。"
+					"Data": "部分应用商店版本可能因审核要求不在 App 内提供集市；App 内移动端集市首版暂不提供主题。"
 				}
 			]
 		},
@@ -375,12 +375,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113104506-ko5m727",
-				"updated": "20260803171606"
+				"updated": "20260819114702"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "如需使用集市，请启用 "
+					"Data": "受限版本仍可使用集市，请启用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -389,7 +389,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ - "
+					"Data": " - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -398,7 +398,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​，然后在桌面端浏览器上访问配置。"
+					"Data": "，然后使用桌面端浏览器访问思源。"
 				}
 			]
 		},

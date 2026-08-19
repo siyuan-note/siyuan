@@ -10,9 +10,12 @@ import {fetchPost} from "./fetch";
 import {checkFold} from "./noRelyPCFunction";
 import {openMobileFileById} from "../mobile/editor";
 import {isValidBazaarPackageName} from "./bazaarPackage";
+import {isBazaarAvailable, isBazaarPackageTypeAvailable} from "./bazaarAvailability";
 
 import type {App} from "../index";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
+
+const bazaarTypes = new Set<TBazaarType>(["plugins", "themes", "icons", "templates", "widgets"]);
 
 const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
     const blockInfo = parseSiYuanUriInfo(uriObj);
@@ -122,10 +125,18 @@ const processSiYuanUriPlugins = (app: App, uriObj: URL): boolean => {
 };
 
 const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
-    /// #if !MOBILE
+    if (!isBazaarAvailable()) {
+        return false;
+    }
     const [, _type, _name, target] = uriObj.pathname.split("/");
     if (!_type || !_name) return false;
+    if (!bazaarTypes.has(_type as TBazaarType)) {
+        return false;
+    }
     const resourceType = _type as TBazaarType;
+    if (!isBazaarPackageTypeAvailable(resourceType)) {
+        return false;
+    }
     let resourceName: string;
     try {
         resourceName = decodeURIComponent(_name);
@@ -150,7 +161,6 @@ const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
         default:
             break;
     }
-    /// #endif
     return false;
 };
 

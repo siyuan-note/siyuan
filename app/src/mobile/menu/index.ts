@@ -21,6 +21,7 @@ import {getCurrentEditor} from "../editor";
 import {openDataMigration} from "../../menus/dataMigration";
 import {normalizeSearchText} from "../../config/search/normalize";
 import type {SettingTabSearchResult} from "../../config/setting/builder";
+import {unmountBazaarTab} from "../../config/bazaarTab";
 
 const getSettingTabFromMenuTarget = (target: HTMLElement): ISettingTabShell<TSettingTab> | undefined => {
     const item = target.closest(".b3-menu__item") as HTMLElement | null;
@@ -58,16 +59,29 @@ const filterSettingTabsMenu = (element: HTMLElement, keywords: string) => {
 };
 
 const openSettingTab = (app: App, settingTabDef: ISettingTabShell<TSettingTab>, returnCallback?: () => void) => {
+    let root: HTMLElement | undefined;
     openModel({
         title: settingTabDef.title,
         icon: "iconLeft",
         html: `<div class="config${isMobile() ? " config--mobile" : ""}"></div>`,
         bindEvent(modelMainElement: HTMLElement) {
-            const root = modelMainElement.firstElementChild as HTMLElement;
+            root = modelMainElement.firstElementChild as HTMLElement;
             bindSettingSaveDelegation(root);
             void getSettingTab(settingTabDef.id).mount(root, undefined, app);
         },
+        destroyCallback() {
+            if (settingTabDef.id === "bazaar" && root) {
+                unmountBazaarTab(root);
+            }
+        },
         backCallback() {
+            if (settingTabDef.id === "bazaar") {
+                const readmeElement = root?.querySelector("#configBazaarReadme.config__view--show");
+                if (readmeElement) {
+                    readmeElement.classList.remove("config__view--show");
+                    return false;
+                }
+            }
             if (returnCallback) {
                 returnCallback();
             } else {
@@ -83,6 +97,7 @@ const openSettingMenu = (
     transition?: "back",
     returnCallback?: () => void,
 ) => {
+    let settingMenuElement: HTMLElement | undefined;
     openModel({
         title: window.siyuan.languages.config,
         icon: "iconLeft",
@@ -99,9 +114,12 @@ const openSettingMenu = (
     </div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {
+            settingMenuElement = modelMainElement;
             const searchElement = modelMainElement.querySelector("input") as HTMLInputElement;
+            const groupsElement = modelMainElement.querySelector(".mobile-setting-menu__groups") as HTMLElement;
             let selectedTabId: TSettingTab | undefined;
             const showSearchResult = (keywords: string, tabId: TSettingTab, result: SettingTabSearchResult) => {
+                groupsElement.classList.toggle("mobile-setting-menu__groups--bazaar", tabId === "bazaar");
                 modelMainElement.querySelectorAll<HTMLElement>(".mobile-setting-menu__result").forEach((item) => {
                     item.classList.toggle("fn__none", item.dataset.name !== tabId);
                 });
@@ -122,6 +140,7 @@ const openSettingMenu = (
                 const matches = filterSettingTabsMenu(modelMainElement, keywords);
                 if (!keywords || matches.size === 0) {
                     selectedTabId = undefined;
+                    groupsElement.classList.remove("mobile-setting-menu__groups--bazaar");
                     modelMainElement.querySelectorAll(".mobile-setting-menu__result").forEach((item) => {
                         item.classList.add("fn__none");
                     });
@@ -164,6 +183,12 @@ const openSettingMenu = (
             });
             syncSearch();
         },
+        destroyCallback() {
+            const root = settingMenuElement?.querySelector('.mobile-setting-menu__result[data-name="bazaar"]') as HTMLElement | null;
+            if (root) {
+                unmountBazaarTab(root);
+            }
+        },
         backCallback() {
             if (returnCallback) {
                 returnCallback();
@@ -177,8 +202,11 @@ const openSettingMenu = (
 
 export const openMobileSetting = (app: App, tab?: TSettingTab, returnCallback?: () => void) => {
     activeBlur();
-    const settingTabDef = tab ? getSettingTabDefs().find(def => def.id === tab) : undefined;
-    if (settingTabDef) {
+    if (tab) {
+        const settingTabDef = getSettingTabDefs().find(def => def.id === tab);
+        if (!settingTabDef || settingTabDef.hidden) {
+            return;
+        }
         openSettingTab(app, settingTabDef, returnCallback);
         return;
     }

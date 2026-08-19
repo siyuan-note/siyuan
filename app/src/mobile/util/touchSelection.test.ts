@@ -4,7 +4,9 @@ import {
     getMovingSelectionEndpoint,
     hasFixedSelectionEndpointChanged,
     hasVisibleSelectionText,
+    isTableCellSelectAll,
     shouldRestoreLongPressSelection,
+    shouldPreserveTableCellSelectAll,
 } from "./touchSelection";
 
 describe("mobile touch selection", () => {
@@ -15,6 +17,19 @@ describe("mobile touch selection", () => {
 
     it("preserves selections containing visible text", () => {
         assert.equal(hasVisibleSelectionText("\u200b内容\u200b"), true);
+    });
+
+    it("identifies table cell select all while ignoring placeholders", () => {
+        assert.equal(isTableCellSelectAll("段落块", "段落块"), true);
+        assert.equal(isTableCellSelectAll("\u200b段落块\u200b", "段落块"), true);
+        assert.equal(isTableCellSelectAll("段落", "段落块"), false);
+        assert.equal(isTableCellSelectAll("\u200b", "\u200b"), false);
+    });
+
+    it("preserves recent table cell select all once the keyboard state changes", () => {
+        assert.equal(shouldPreserveTableCellSelectAll(1500, 1499), true);
+        assert.equal(shouldPreserveTableCellSelectAll(1500, 1500), true);
+        assert.equal(shouldPreserveTableCellSelectAll(1500, 1501), false);
     });
 
     it("restores invisible cross-block selections involving the long-pressed block", () => {

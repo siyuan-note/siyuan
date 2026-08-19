@@ -22,6 +22,8 @@ import {
     getMovingSelectionEndpoint,
     hasFixedSelectionEndpointChanged,
     hasVisibleSelectionText,
+    isTableCellSelectAll,
+    shouldPreserveTableCellSelectAll,
     type TSelectionEndpoint,
 } from "./touchSelection";
 
@@ -33,6 +35,15 @@ type TAndroidBoundedSelection = {
     focusOffset: number,
 };
 
+type TAndroidTableCellSelectAll = {
+    cell: HTMLTableCellElement,
+    editableElement: HTMLElement,
+    expiresAt: number,
+    range: Range,
+};
+
+const ANDROID_TABLE_CELL_SELECT_ALL_TIMEOUT = 2000;
+
 let renderKeyboardToolbarTimeout: number;
 let scrollSelectionIntoViewTimeout: number;
 let clearRenderGutterAfterScroll: () => void;
@@ -42,6 +53,8 @@ let preventRenderTimeout: number;
 let restoringAndroidBoundedSelection = false;
 let lastAndroidBoundedSelection: TAndroidBoundedSelection | undefined;
 let androidMovingSelectionEndpoint: TSelectionEndpoint | undefined;
+let pendingAndroidTableCellSelectAll: TAndroidTableCellSelectAll | undefined;
+let restoringAndroidTableCellSelectAll = false;
 
 export const updateMobilePluginToolbar = (protyle: IProtyle) => {
     const currentProtyle = getCurrentEditor()?.protyle;
@@ -75,6 +88,62 @@ const clearAndroidBoundedSelection = () => {
 
 export const resetAndroidBoundedSelectionGesture = () => {
     androidMovingSelectionEndpoint = undefined;
+};
+
+const rememberAndroidTableCellSelectAll = () => {
+    if (!isInAndroid() || restoringAndroidTableCellSelectAll) {
+        return;
+    }
+    const selection = getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+        return;
+    }
+    const range = selection.getRangeAt(0);
+    const startCell = (hasClosestByTag(range.startContainer, "TD") ||
+        hasClosestByTag(range.startContainer, "TH")) as HTMLTableCellElement;
+    const endCell = (hasClosestByTag(range.endContainer, "TD") ||
+        hasClosestByTag(range.endContainer, "TH")) as HTMLTableCellElement;
+    if (!startCell || startCell !== endCell || !isTableCellSelectAll(range.toString(), startCell.textContent)) {
+        if (pendingAndroidTableCellSelectAll && startCell && startCell !== pendingAndroidTableCellSelectAll.cell) {
+            pendingAndroidTableCellSelectAll = undefined;
+        }
+        return;
+    }
+    const editor = getCurrentEditor();
+    const editableElement = (canInput(document.activeElement) ||
+        hasClosestByAttribute(range.startContainer, "contenteditable", "true", true)) as HTMLElement;
+    if (!editor || !editableElement || !editor.protyle.wysiwyg.element.contains(startCell) ||
+        !(editableElement === startCell || editableElement.contains(startCell) || startCell.contains(editableElement))) {
+        return;
+    }
+    pendingAndroidTableCellSelectAll = {
+        cell: startCell,
+        editableElement,
+        expiresAt: Date.now() + ANDROID_TABLE_CELL_SELECT_ALL_TIMEOUT,
+        range: range.cloneRange(),
+    };
+};
+
+const restoreRecentAndroidTableCellSelectAll = () => {
+    const pendingSelection = pendingAndroidTableCellSelectAll;
+    pendingAndroidTableCellSelectAll = undefined;
+    if (!pendingSelection || !shouldPreserveTableCellSelectAll(pendingSelection.expiresAt, Date.now()) ||
+        !pendingSelection.cell.isConnected || !pendingSelection.editableElement.isConnected ||
+        !pendingSelection.range.startContainer.isConnected || !pendingSelection.range.endContainer.isConnected) {
+        return false;
+    }
+    restoringAndroidTableCellSelectAll = true;
+    try {
+        pendingSelection.editableElement.focus({preventScroll: true});
+        const selection = getSelection();
+        selection.removeAllRanges();
+        selection.addRange(pendingSelection.range);
+    } finally {
+        window.setTimeout(() => {
+            restoringAndroidTableCellSelectAll = false;
+        });
+    }
+    return true;
 };
 
 const getAndroidBoundedSelection = (selection: Selection, container: HTMLElement): TAndroidBoundedSelection => ({
@@ -817,26 +886,30 @@ export const hideKeyboardToolbar = () => {
     }
 };
 
-export const hideKeyboardToolbarByApp = () => {
+export const hideKeyboardToolbarByApp = (preserveTableCellSelectAll = false) => {
+    if (preserveTableCellSelectAll && restoreRecentAndroidTableCellSelectAll()) {
+        return true;
+    }
     preventKeyboardToolbarRender();
     hideKeyboardToolbar();
     const editor = getCurrentEditor();
     const selection = getSelection();
     if (!editor) {
-        return;
+        return false;
     }
     hideElements(["util"], editor.protyle);
     if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-        return;
+        return false;
     }
     const range = selection.getRangeAt(0);
     if (!hasVisibleSelectionText(range.toString()) ||
         !editor.protyle.wysiwyg.element.contains(range.startContainer) ||
         !editor.protyle.wysiwyg.element.contains(range.endContainer)) {
-        return;
+        return false;
     }
     (document.activeElement as HTMLElement)?.blur();
     selection.removeAllRanges();
+    return false;
 };
 
 export const activeBlur = () => {
@@ -873,6 +946,7 @@ export const initKeyboardToolbar = () => {
         viewportHandler();
     }
     document.addEventListener("selectionchange", () => {
+        rememberAndroidTableCellSelectAll();
         if (preserveAndroidBoundedSelection()) {
             return;
         }

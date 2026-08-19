@@ -340,8 +340,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  color: var(--b3-theme-error);
-  background: var(--b3-theme-error-light);
+  color: var(--b3-card-error-color);
+  background: var(--b3-card-error-background);
   word-break: break-word;
   padding: 4px 0;
   border-radius: var(--b3-border-radius);
@@ -605,7 +605,7 @@
   margin: 0;
   padding: 8px 12px 8px 30px;
   border-top: 1px solid var(--b3-border-color);
-  background: color-mix(in srgb, var(--b3-theme-warning) 10%, transparent);
+  background: color-mix(in srgb, var(--b3-card-warning-color) 10%, transparent);
   color: var(--b3-theme-on-background);
   font-size: 12px;
   line-height: 1.6;

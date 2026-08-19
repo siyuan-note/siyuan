@@ -43,11 +43,11 @@ The component list is informational and does not replace the license terms. Copy
 | KaTeX | 0.16.9 | MIT | [upstream](https://github.com/KaTeX/KaTeX) | app/stage/protyle/js/katex/ |
 | KaTeX fonts | 0.16.9 | OFL-1.1 | [upstream](https://github.com/KaTeX/KaTeX/tree/v0.16.9/fonts) | app/stage/protyle/js/katex/fonts/ |
 | MathJax | 3.1.2 | Apache-2.0 | [upstream](https://github.com/mathjax/MathJax-src) | app/stage/protyle/js/mathjax/ |
-| Mermaid | 11.13.0 | MIT | [upstream](https://github.com/mermaid-js/mermaid) | app/stage/protyle/js/mermaid/mermaid.min.js; bundled notices are retained in the file |
-| DOMPurify | 3.3.1 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | Bundled by Mermaid 11.13.0 |
-| js-yaml | 4.1.1 | MIT | [upstream](https://github.com/nodeca/js-yaml) | Bundled by Mermaid 11.13.0 |
-| lodash-es and Underscore-derived code | Bundled snapshot | MIT | [upstream](https://github.com/lodash/lodash) | Bundled by Mermaid 11.13.0 |
-| Cytoscape.js and retained embedded utilities | Bundled snapshot | MIT | [upstream](https://github.com/cytoscape/cytoscape.js) | Bundled by Mermaid 11.13.0 |
+| Mermaid | 11.16.1 | MIT | [upstream](https://github.com/mermaid-js/mermaid) | app/stage/protyle/js/mermaid/mermaid.min.js; bundled notices are retained in the file |
+| DOMPurify | 3.4.0 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | Bundled by Mermaid 11.16.1 |
+| js-yaml | 4.1.1 | MIT | [upstream](https://github.com/nodeca/js-yaml) | Bundled by Mermaid 11.16.1 |
+| lodash-es and Underscore-derived code | Bundled snapshot | MIT | [upstream](https://github.com/lodash/lodash) | Bundled by Mermaid 11.16.1 |
+| Cytoscape.js and retained embedded utilities | Bundled snapshot | MIT | [upstream](https://github.com/cytoscape/cytoscape.js) | Bundled by Mermaid 11.16.1 |
 | @mermaid-js/layout-tidy-tree | 0.2.1 | MIT | [upstream](https://github.com/mermaid-js/mermaid-layouts) | app/stage/protyle/js/mermaid/mermaid-layout-tidy-tree.min.js |
 | non-layered-tidy-tree-layout | 2.0.2 | MIT | [upstream](https://github.com/zlluGitHub/non-layered-tidy-tree-layout) | Bundled by @mermaid-js/layout-tidy-tree |
 | @zenuml/core and bundled dependencies | Bundled snapshot | MIT AND (Apache-2.0 OR MPL-2.0) | [upstream](https://github.com/ZenUml/core) | app/stage/protyle/js/mermaid/mermaid-zenuml.min.js; bundled notices are retained in the file |
@@ -5093,8 +5093,22 @@ Expat https://libexpat.github.io
 ```text
 /*! Bundled license information:
 
+lodash-es/lodash.js:
+  (**
+   * @license
+   * Lodash (Custom Build) <https://lodash.com/>
+   * Build: `lodash modularize exports="es" -o ./`
+   * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
+   * Released under MIT license <https://lodash.com/license>
+   * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+   * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+   *)
+*/
+
+/*! Bundled license information:
+
 dompurify/dist/purify.es.mjs:
-  (*! @license DOMPurify 3.3.1 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.3.1/LICENSE *)
+  (*! @license DOMPurify 3.4.0 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.4.0/LICENSE *)
 
 js-yaml/dist/js-yaml.mjs:
   (*! js-yaml 4.1.1 https://github.com/nodeca/js-yaml @license MIT *)
@@ -5103,7 +5117,7 @@ lodash-es/lodash.js:
   (**
    * @license
    * Lodash (Custom Build) <https://lodash.com/>
-   * Build: `lodash modularize exports="es" -o ./`
+   * Build: `lodash modularize exports="es" --repo lodash/lodash#4.18.1 -o ./`
    * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
    * Released under MIT license <https://lodash.com/license>
    * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>

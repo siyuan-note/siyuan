@@ -518,6 +518,14 @@
         > .config-bazaar__filter-row {
           flex-basis: 100%;
           order: 2;
+
+          > .b3-text-field {
+            max-width: none;
+          }
+
+          > .counter {
+            margin-left: 0;
+          }
         }
       }
 
@@ -553,6 +561,34 @@
             max-width: 120px;
             padding-right: 8px;
             row-gap: 4px;
+          }
+        }
+      }
+
+      &__panel[data-type="downloaded"] .config-bazaar__content .b3-card {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+
+        > .b3-card__img {
+          grid-column: 1;
+          grid-row: 1;
+        }
+
+        > .fn__flex-1 {
+          grid-column: 2;
+          grid-row: 1;
+        }
+
+        > .b3-card__actions--right {
+          grid-column: 1 / -1;
+          grid-row: 2;
+          max-width: none;
+          min-height: 36px;
+          padding: 4px 8px 8px 12px;
+          width: 100%;
+
+          > .config-bazaar__publish-switch {
+            margin-right: auto;
           }
         }
       }

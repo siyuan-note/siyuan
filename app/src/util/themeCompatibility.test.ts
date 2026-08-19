@@ -19,11 +19,12 @@ const appearance = (overrides: Partial<Config.IAppearance> = {}) => ({
 } as Config.IAppearance);
 
 describe("theme frontend compatibility", () => {
-    it("treats missing, empty, and all frontends as supported", () => {
-        assert.equal(isThemeFrontendSupported(undefined, "mobile"), true);
-        assert.equal(isThemeFrontendSupported(null, "mobile"), true);
-        assert.equal(isThemeFrontendSupported([], "mobile"), true);
+    it("requires mobile themes to declare compatible frontends", () => {
+        assert.equal(isThemeFrontendSupported(undefined, "mobile"), false);
+        assert.equal(isThemeFrontendSupported(null, "browser-mobile"), false);
+        assert.equal(isThemeFrontendSupported([], "mobile"), false);
         assert.equal(isThemeFrontendSupported(["all"], "mobile"), true);
+        assert.equal(isThemeFrontendSupported(undefined, "desktop"), true);
     });
 
     it("matches frontends exactly", () => {
@@ -37,8 +38,9 @@ describe("theme frontend compatibility", () => {
         assert.equal(getCurrentAppearanceTheme(appearance({mode: 1}))?.name, "dark-theme");
     });
 
-    it("falls back to supported when theme metadata is unavailable", () => {
-        assert.equal(isCurrentThemeSupported(appearance({lightThemes: []}), "mobile"), true);
+    it("falls back according to the current frontend when theme metadata is unavailable", () => {
+        assert.equal(isCurrentThemeSupported(appearance({lightThemes: []}), "mobile"), false);
+        assert.equal(isCurrentThemeSupported(appearance({lightThemes: []}), "desktop"), true);
     });
 
     it("uses each mode's frontend declaration", () => {

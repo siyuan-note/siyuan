@@ -12,7 +12,7 @@ import {fetchSyncPost} from "../util/fetch";
 import {getFrontend} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {escapeHtml} from "../util/escape";
-import {isBazaarAvailable, isBazaarPackageTypeAvailable} from "../util/bazaarAvailability";
+import {isBazaarAvailable} from "../util/bazaarAvailability";
 import {getSettingTabDefs} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
 import {clearSyncTabElement} from "./tabs/syncRuntime";
@@ -97,7 +97,7 @@ export const openSetting = (app: App, tab?: TSettingTab) => {
 };
 
 export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemName: string, from: "bazaar" | "downloaded") => {
-    if (!isBazaarAvailable() || !isBazaarPackageTypeAvailable(bazaarType)) {
+    if (!isBazaarAvailable()) {
         return;
     }
     if (!window.siyuan.config.bazaar.trust) {

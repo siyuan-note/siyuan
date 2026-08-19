@@ -26,7 +26,9 @@ func TestBuildBazaarThemeCompatibility(t *testing.T) {
 		wantIncompatible   bool
 		wantDisallowAction bool
 	}{
-		{name: "missing field", frontend: "mobile"},
+		{name: "missing field on mobile", frontend: "mobile", wantIncompatible: true, wantDisallowAction: true},
+		{name: "missing field on browser mobile", frontend: "browser-mobile", wantIncompatible: true, wantDisallowAction: true},
+		{name: "missing field on desktop", frontend: "desktop"},
 		{name: "all frontends", frontends: []string{"all"}, frontend: "mobile"},
 		{name: "supported frontend", frontends: []string{"desktop", "mobile"}, frontend: "mobile"},
 		{name: "unsupported frontend", frontends: []string{"desktop"}, frontend: "mobile", wantIncompatible: true, wantDisallowAction: true},

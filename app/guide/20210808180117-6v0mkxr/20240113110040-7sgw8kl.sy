@@ -7,7 +7,7 @@
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
 		"type": "doc",
-		"updated": "20260819122705"
+		"updated": "20260819224004"
 	},
 	"Children": [
 		{
@@ -361,12 +361,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113110114-54bc1f8",
-				"updated": "20260819122705"
+				"updated": "20260819224004"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Some app store versions may not provide the marketplace in the app due to review requirements. Themes are not available in the initial in-app mobile marketplace release."
+					"Data": "Some app store versions may not provide the marketplace in the app due to review requirements."
 				}
 			]
 		},

@@ -416,12 +416,13 @@
 
       > .b3-text-field {
         flex: 1;
+        max-width: 240px;
         min-width: 0;
       }
 
       > .counter {
         flex-shrink: 0;
-        margin-left: 0;
+        margin-left: auto;
       }
     }
 

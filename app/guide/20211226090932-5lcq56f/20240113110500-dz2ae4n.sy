@@ -7,7 +7,7 @@
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
 		"type": "doc",
-		"updated": "20260819122705"
+		"updated": "20260819224004"
 	},
 	"Children": [
 		{
@@ -361,12 +361,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113110513-1zlx78j",
-				"updated": "20260819122705"
+				"updated": "20260819224004"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "部分應用程式商店版本可能因審核要求不在 App 內提供集市；App 內行動端集市首版暫不提供主題。"
+					"Data": "部分應用程式商店版本可能因審核要求不在 App 內提供集市。"
 				}
 			]
 		},

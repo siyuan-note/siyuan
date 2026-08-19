@@ -10,7 +10,7 @@ import {fetchPost} from "./fetch";
 import {checkFold} from "./noRelyPCFunction";
 import {openMobileFileById} from "../mobile/editor";
 import {isValidBazaarPackageName} from "./bazaarPackage";
-import {isBazaarAvailable, isBazaarPackageTypeAvailable} from "./bazaarAvailability";
+import {isBazaarAvailable} from "./bazaarAvailability";
 
 import type {App} from "../index";
 import {openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
@@ -129,9 +129,6 @@ const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
         return false;
     }
     const resourceType = _type as TBazaarType;
-    if (!isBazaarPackageTypeAvailable(resourceType)) {
-        return false;
-    }
     let resourceName: string;
     try {
         resourceName = decodeURIComponent(_name);

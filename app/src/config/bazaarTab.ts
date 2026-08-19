@@ -1,5 +1,4 @@
 import type {App} from "../index";
-import {isBazaarPackageTypeAvailable} from "../util/bazaarAvailability";
 
 type BazaarModule = typeof import("./bazaar");
 
@@ -20,7 +19,7 @@ export const collectBazaarTabSearchStrings = (): string[] => [
     window.siyuan.languages.downloaded,
     window.siyuan.languages.update,
     window.siyuan.languages.plugin,
-    ...(isBazaarPackageTypeAvailable("themes") ? [window.siyuan.languages.theme] : []),
+    window.siyuan.languages.theme,
     window.siyuan.languages.icon,
     window.siyuan.languages.template,
     window.siyuan.languages.widget,

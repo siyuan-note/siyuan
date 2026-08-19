@@ -5,15 +5,7 @@ export const isBazaarAvailableForFrontend = (
     disabledFeatures: readonly string[] | undefined,
 ): boolean => frontend !== "mobile" || !disabledFeatures?.includes("bazaar");
 
-export const isBazaarPackageTypeAvailableForFrontend = (
-    bazaarType: TBazaarType,
-    frontend: string,
-): boolean => frontend !== "mobile" || bazaarType !== "themes";
-
 export const isBazaarAvailable = (): boolean => isBazaarAvailableForFrontend(
     getFrontend(),
     window.siyuan.config.system.disabledFeatures,
 );
-
-export const isBazaarPackageTypeAvailable = (bazaarType: TBazaarType): boolean =>
-    isBazaarPackageTypeAvailableForFrontend(bazaarType, getFrontend());

@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "백링크 언급 키워드 제외 목록",
 	"entryToolbar": "도구 모음",
 	"appMenuAbout": "SiYuan 정보",
 	"appMenuServices": "서비스",

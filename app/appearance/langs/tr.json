@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "Geri bağlantı bahsi anahtar kelime hariç tutma listesi",
 	"entryToolbar": "Araç çubuğu",
 	"appMenuAbout": "SiYuan Hakkında",
 	"appMenuServices": "Hizmetler",

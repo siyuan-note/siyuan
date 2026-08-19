@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "反链提及关键字排除列表",
 	"entryToolbar": "工具栏",
 	"appMenuAbout": "关于思源笔记",
 	"appMenuServices": "服务",

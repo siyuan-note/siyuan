@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "Daftar pengecualian kata kunci penyebutan backlink",
 	"entryToolbar": "Bilah alat",
 	"appMenuAbout": "Tentang SiYuan",
 	"appMenuServices": "Layanan",

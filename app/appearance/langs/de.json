@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "Ausschlussliste für Schlüsselwörter in Backlink-Erwähnungen",
 	"entryToolbar": "Symbolleiste",
 	"appMenuAbout": "Über SiYuan",
 	"appMenuServices": "Dienste",

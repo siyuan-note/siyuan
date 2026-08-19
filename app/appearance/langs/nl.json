@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "Uitsluitingslijst voor trefwoorden in backlinkvermeldingen",
 	"entryToolbar": "Werkbalk",
 	"appMenuAbout": "Over SiYuan",
 	"appMenuServices": "Voorzieningen",

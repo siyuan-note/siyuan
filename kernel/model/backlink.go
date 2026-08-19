@@ -989,6 +989,7 @@ func buildTreeBackmentionInBox(defSQLBlock *sql.Block, refBlocks []*Block, keywo
 	for _, v := range set.Values() {
 		mentionKeywords = append(mentionKeywords, v.(string))
 	}
+	mentionKeywords = excludeKeywords(mentionKeywords, Conf.Editor.BacklinkMentionExclude)
 	mentionKeywords = prepareMarkKeywords(mentionKeywords)
 	mentionKeywords, ret = searchBackmentionInBox(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen, boxID)
 	return

@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "Список исключений ключевых слов для упоминаний обратных ссылок",
 	"entryToolbar": "Панель инструментов",
 	"appMenuAbout": "О программе SiYuan",
 	"appMenuServices": "Службы",

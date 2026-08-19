@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "バックリンク言及キーワード除外リスト",
 	"entryToolbar": "ツールバー",
 	"appMenuAbout": "SiYuan について",
 	"appMenuServices": "サービス",

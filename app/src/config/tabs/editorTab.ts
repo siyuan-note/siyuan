@@ -233,6 +233,11 @@ const registerEditorBidirectionalGroup = (tab: SettingTabBuilder) => {
         desc: window.siyuan.languages.md41,
         mode: "textarea",
     });
+    group.textBlock("editor.backlinkMentionExclude", {
+        title: window.siyuan.languages.backlinkMentionExclude,
+        desc: window.siyuan.languages.md41,
+        mode: "textarea",
+    });
     group.switch("editor.backlinkContainChildren", {
         title: window.siyuan.languages.backlinkContainChildren,
         desc: window.siyuan.languages.backlinkContainChildrenTip,

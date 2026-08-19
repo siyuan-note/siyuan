@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "Список виключень ключових слів для згадок зворотних посилань",
 	"entryToolbar": "Панель інструментів",
 	"appMenuAbout": "Про SiYuan",
 	"appMenuServices": "Служби",

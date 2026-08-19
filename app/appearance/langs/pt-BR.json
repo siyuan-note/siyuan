@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "Lista de exclusão de palavras-chave de menções de backlinks",
 	"entryToolbar": "Barra de ferramentas",
 	"appMenuAbout": "Sobre o SiYuan",
 	"appMenuServices": "Serviços",

@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "Lista wykluczeń słów kluczowych wzmianek o linkach zwrotnych",
 	"entryToolbar": "Pasek narzędzi",
 	"appMenuAbout": "O programie SiYuan",
 	"appMenuServices": "Usługi",

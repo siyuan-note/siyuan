@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "Lista de exclusión de palabras clave de menciones de enlaces inversos",
 	"entryToolbar": "Barra de herramientas",
 	"appMenuAbout": "Acerca de SiYuan",
 	"appMenuServices": "Servicios",

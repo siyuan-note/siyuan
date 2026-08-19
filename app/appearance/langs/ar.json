@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "قائمة استبعاد الكلمات المفتاحية لإشارات الروابط الخلفية",
 	"entryToolbar": "شريط الأدوات",
 	"appMenuAbout": "حول SiYuan",
 	"appMenuServices": "الخدمات",

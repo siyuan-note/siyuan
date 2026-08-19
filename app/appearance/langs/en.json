@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "Backlink mention keyword exclusion list",
 	"entryToolbar": "Toolbar",
 	"appMenuAbout": "About SiYuan",
 	"appMenuServices": "Services",

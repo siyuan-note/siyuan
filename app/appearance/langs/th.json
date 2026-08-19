@@ -1,4 +1,5 @@
 {
+	"backlinkMentionExclude": "รายการยกเว้นคำสำคัญสำหรับการกล่าวถึงลิงก์ย้อนกลับ",
 	"entryToolbar": "แถบเครื่องมือ",
 	"appMenuAbout": "เกี่ยวกับ SiYuan",
 	"appMenuServices": "บริการ",

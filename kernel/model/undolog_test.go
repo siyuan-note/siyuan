@@ -47,6 +47,25 @@ func TestReplaceReplayOperationID(t *testing.T) {
 	}
 }
 
+func TestCloneOperationsCopiesMoveMetadata(t *testing.T) {
+	original := &Operation{
+		Action:   "move",
+		ID:       "heading",
+		BlockIDs: []string{"child"},
+		Context:  map[string]any{moveGroupIDContextKey: "group"},
+	}
+	cloned := cloneOperations([]*Operation{original})[0]
+	cloned.BlockIDs[0] = "changed"
+	cloned.Context[moveGroupIDContextKey] = "changed"
+
+	if "child" != original.BlockIDs[0] {
+		t.Fatal("cloning operations should isolate move block IDs")
+	}
+	if "group" != original.Context[moveGroupIDContextKey] {
+		t.Fatal("cloning operations should isolate move context")
+	}
+}
+
 func TestReplayOperationBlockIndexes(t *testing.T) {
 	containerID := "20260803120000-contain"
 	childID := "20260803120001-childid"

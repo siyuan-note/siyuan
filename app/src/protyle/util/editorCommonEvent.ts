@@ -43,6 +43,7 @@ import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import * as dayjs from "dayjs";
 import {zoomOut} from "../../menus/protyle";
+import {isFoldedHeading, shouldUnfoldMovedHeading} from "./foldHeadingMove";
 /// #if !BROWSER
 import {webUtils} from "electron";
 import {dragUpload} from "../render/av/asset";
@@ -107,10 +108,6 @@ const getTargetListItem = (targetElement: Element, isBottom: boolean) => {
         return (isBottom ? listItems[listItems.length - 1] : listItems[0]) as HTMLElement;
     }
     return targetElement.closest(".li") as HTMLElement;
-};
-
-const isFoldedHeading = (element: Element) => {
-    return element.getAttribute("data-type") === "NodeHeading" && element.getAttribute("fold") === "1";
 };
 
 type TDragSourcePosition = {
@@ -283,6 +280,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
 
         let copyElement;
         let undoMoveOperation: IOperation;
+        const moveGroupID = Lute.NewNodeID();
         if (isCopy) {
             undoOperations.push({
                 action: "delete",
@@ -296,6 +294,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                 id,
                 previousID: srcPos.previousID,
                 parentID: srcPos.parentID,
+                context: {moveGroupID},
             };
             undoOperations.push(undoMoveOperation);
         }
@@ -394,6 +393,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     action: "move",
                     id,
                     parentID: newListId,
+                    context: {moveGroupID},
                 });
             } else {
                 tempTargetElement.insertAdjacentElement(position, item);
@@ -402,6 +402,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
                     id,
                     previousID: position === "afterbegin" ? null : (position === "afterend" ? targetId : getPreviousBlockSibling(item)?.getAttribute("data-node-id")), // 不能使用常量，移动后会被修改
                     parentID: position === "afterbegin" ? targetId : (getParentBlock(item)?.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID),
+                    context: {moveGroupID},
                 });
                 newSourceElements.push(item);
             }
@@ -663,10 +664,12 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         });
     }
     const undoOperations: IOperation[] = [];
+    const targetMoveGroupID = Lute.NewNodeID();
     const targetMoveUndo: IOperation = {
         action: "move",
         context: {
-            removeFold: "true"
+            removeFold: "true",
+            moveGroupID: targetMoveGroupID,
         },
         id: targetElement.getAttribute("data-node-id"),
         previousID: getPreviousBlockSibling(targetElement)?.getAttribute("data-node-id"),
@@ -725,14 +728,16 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         targetOperations.push({
             action: "move",
             id: targetElement.getAttribute("data-node-id"),
-            parentID: sbElement.getAttribute("data-node-id")
+            parentID: sbElement.getAttribute("data-node-id"),
+            context: {moveGroupID: targetMoveGroupID},
         });
     } else {
         sbElement.lastElementChild.insertAdjacentElement("beforebegin", targetElement);
         targetOperations.push({
             action: "move",
             id: targetElement.getAttribute("data-node-id"),
-            previousID: sourcePreviousID
+            previousID: sourcePreviousID,
+            context: {moveGroupID: targetMoveGroupID},
         });
     }
     doOperations.splice(removeIndex, 0, ...targetOperations);
@@ -861,24 +866,36 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     }
     undoOperations.push(...wrapUndoOperations);
     const newSourceParentElement = moveToResult.newSourceElements;
-    let foldData;
     const previousBlockElement = getPreviousBlockSibling(targetElement);
+    const unfoldHeadingElements = new Set<Element>();
     if (!isColumnDrop && isBottom &&
         targetElement.getAttribute("data-type") === "NodeHeading" &&
         targetElement.getAttribute("fold") === "1") {
-        foldData = setFold(protyle, targetElement, true, false, false, true);
+        unfoldHeadingElements.add(targetElement);
     } else if (!isColumnDrop && !isBottom &&
         previousBlockElement?.getAttribute("data-type") === "NodeHeading" &&
         previousBlockElement.getAttribute("fold") === "1") {
-        foldData = setFold(protyle, previousBlockElement, true, false, false, true);
+        unfoldHeadingElements.add(previousBlockElement);
     }
-    if (foldData) {
+    if (!isColumnDrop) {
+        // 同一落点可由相邻块的上方或下方命中，统一展开会吸收目标内容的源标题。
+        newSourceParentElement.forEach(item => {
+            if (shouldUnfoldMovedHeading(item, getNextBlockSibling(item))) {
+                unfoldHeadingElements.add(item);
+            }
+        });
+    }
+    unfoldHeadingElements.forEach(item => {
+        const foldData = setFold(protyle, item, true, false, false, true);
+        if (!foldData.doOperations) {
+            return;
+        }
         foldData.doOperations[0].context = {
             focusId: sourceElements[0].getAttribute("data-node-id"),
         };
         doOperations.push(...foldData.doOperations);
         undoOperations.push(...foldData.undoOperations);
-    }
+    });
     if (targetElement.getAttribute("data-type") === "NodeListItem" &&
         targetElement.getAttribute("data-subtype") === "o") {
         // https://github.com/siyuan-note/insider/issues/536

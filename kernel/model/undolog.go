@@ -353,16 +353,22 @@ func removeEntryByID(stack []*UndoEntry, id string) []*UndoEntry {
 	return stack
 }
 
-// cloneOperations 深拷贝操作切片（值拷贝每个 Operation），使日志条目与后续事务解耦。
-// performTx 的 doInsert0 等会原地改写 operation.ID/Action 等标量字段，若浅拷贝指针会导致
-// 已记录的条目被改写、redo 重放时 ID 失效。值拷贝复制标量字段，Data(any) 共享引用（performTx 不改其内容）。
+// cloneOperations 复制操作及重放期间可能改写的引用字段，使日志条目与后续事务解耦。
+// Data(any) 共享引用，事务执行只会替换 Data 本身，不会修改其内部内容。
 func cloneOperations(ops []*Operation) []*Operation {
 	if nil == ops {
 		return nil
 	}
 	ret := make([]*Operation, len(ops))
 	for i, op := range ops {
-		cloned := *op // 值拷贝标量字段（ID/Action/ParentID/PreviousID/NextID/AvID 等）
+		cloned := *op
+		cloned.BlockIDs = cloneOperationBlockIDs(op.BlockIDs)
+		if nil != op.Context {
+			cloned.Context = make(map[string]any, len(op.Context))
+			for key, value := range op.Context {
+				cloned.Context[key] = value
+			}
+		}
 		ret[i] = &cloned
 	}
 	return ret
@@ -461,7 +467,7 @@ func existingReplayBlockIDs(insertIndexes, deleteIndexes map[string]int) map[str
 // ResolveReplayDuplicateIds 在 undo/redo 重放事务前解决块 ID 冲突。
 // 场景：剪切块 X 后粘贴到别处（保留原 ID），再撤销剪切会 insert X，而 X 已存在于粘贴处，产生重复 ID。
 // 这里检查实际重放的 insert 操作；若其引入的 ID 在块树中已存在，且不会被前置 delete 清理，
-// 则在当前重放操作的 ID、ParentID、PreviousID、NextID 与 Data 内联 ID 中统一替换为新 ID。
+// 则在当前重放操作的 ID、ParentID、PreviousID、NextID、BlockIDs 与 Data 内联 ID 中统一替换为新 ID。
 func ResolveReplayDuplicateIds(tx *Transaction) {
 	if nil == tx || !tx.isReplay {
 		return
@@ -508,6 +514,11 @@ func ResolveReplayDuplicateIds(tx *Transaction) {
 			}
 			if newID, ok := replacements[op.NextID]; ok {
 				op.NextID = newID
+			}
+			for i, blockID := range op.BlockIDs {
+				if newID, ok := replacements[blockID]; ok {
+					op.BlockIDs[i] = newID
+				}
 			}
 			data, ok := op.Data.(string)
 			if !ok {

@@ -964,6 +964,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let kanbanGroupDragoverElement: HTMLElement;
     let kanbanGroupDragoverPosition: "left" | "right";
     let kanbanGroupDragHeight = "";
+    const isLiteTabDrag = (event: DragEvent) => protyle.lite &&
+        event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB);
     const clearKanbanGroupDragover = () => {
         if (kanbanGroupDragoverElement) {
             kanbanGroupDragoverElement.classList.remove("dragover__left", "dragover__right");
@@ -1306,8 +1308,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         counter = 0;
         hideDragTip();
         window.siyuan.dragTitle = "";
-        if (protyle.disabled || event.dataTransfer.getData(Constants.SIYUAN_DROP_EDITOR)) {
-            // 只读模式/编辑器内选中文字拖拽
+        if (protyle.disabled || isLiteTabDrag(event) || event.dataTransfer.getData(Constants.SIYUAN_DROP_EDITOR)) {
+            // 只读模式、lite 模式中的页签拖拽或编辑器内选中文字拖拽
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -2235,7 +2237,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     let cachedTargetText = "";
     let cachedIsCol = false;
     editorElement.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
-        if (protyle.disabled || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
+        if (protyle.disabled || isLiteTabDrag(event) ||
+            event.dataTransfer.types.includes(Constants.SIYUAN_DROP_EDITOR)) {
             event.preventDefault();
             event.stopPropagation();
             event.dataTransfer.dropEffect = "none";

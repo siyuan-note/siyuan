@@ -19,8 +19,6 @@ import {openMobileFileById} from "../mobile/editor";
 import {mathRender} from "../protyle/render/mathRender";
 import {buildCancelSuperBlockOperations} from "./cancelSuperBlock";
 import {shouldFocusJumpTarget, shouldFocusParentDocumentTitle} from "./jumpToParent";
-import {zoomOut} from "../menus/protyle";
-import {pushBack} from "../util/backForward";
 
 export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range) => {
     let previousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id");
@@ -198,11 +196,13 @@ export const refreshSbAndPersistWidth = (sbElement: Element,
 };
 
 export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "parent" | "next" | "previous") => {
+    /// #if !MOBILE
     const previousRange = getEditorRange(nodeElement);
+    /// #endif
     fetchPost("/api/block/getBlockSiblingID", {
         id: nodeElement.getAttribute("data-node-id"),
         notebook: protyle.notebookId,
-    }, (response) => {
+    }, async (response) => {
         const targetId = response.data[type];
         if (!targetId) {
             return;
@@ -213,6 +213,14 @@ export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "par
             hasTitle: Boolean(titleElement),
             isBacklink: Boolean(protyle.options.backlinkData),
         })) {
+            /// #if !MOBILE
+            let pushBack: typeof import("../util/backForward").pushBack | undefined;
+            try {
+                ({pushBack} = await import("../util/backForward"));
+            } catch (error) {
+                console.error("Failed to load the back-forward module", error);
+            }
+            /// #endif
             const focusTitle = () => {
                 const range = titleElement.ownerDocument.createRange();
                 range.selectNodeContents(titleElement);
@@ -220,10 +228,15 @@ export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "par
                 focusByRange(range);
                 protyle.toolbar.range = range;
                 protyle.contentElement.scrollTop = 0;
-                pushBack(protyle, range, titleElement);
+                /// #if !MOBILE
+                pushBack?.(protyle, range, titleElement);
+                /// #endif
             };
-            pushBack(protyle, previousRange);
+            /// #if !MOBILE
+            pushBack?.(protyle, previousRange);
+            /// #endif
             if (protyle.block.showAll) {
+                const {zoomOut} = await import("../menus/protyle");
                 zoomOut({
                     protyle,
                     id: protyle.block.rootID,

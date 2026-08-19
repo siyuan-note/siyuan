@@ -6,3 +6,8 @@ export const getTouchAxis = (xDiff: number, yDiff: number, threshold: number): T
     }
     return Math.abs(xDiff) > Math.abs(yDiff) ? "x" : "y";
 };
+
+export const shouldEnterLongPressMultiSelect = (
+    commonMenuOpen: boolean,
+    toolbarSubElementOpen: boolean,
+) => !commonMenuOpen && !toolbarSubElementOpen;

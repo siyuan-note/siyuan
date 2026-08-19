@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getTouchAxis} from "./touchGesture";
+import {getTouchAxis, shouldEnterLongPressMultiSelect} from "./touchGesture";
 
 describe("mobile touch gesture", () => {
     it("waits for the drag threshold before locking the gesture axis", () => {
@@ -11,5 +11,12 @@ describe("mobile touch gesture", () => {
     it("locks gestures to their dominant axis", () => {
         assert.equal(getTouchAxis(12, 4, 5), "x");
         assert.equal(getTouchAxis(4, 12, 5), "y");
+    });
+
+    it("does not enter multi-select while another long-press action is open", () => {
+        assert.equal(shouldEnterLongPressMultiSelect(true, false), false);
+        assert.equal(shouldEnterLongPressMultiSelect(false, true), false);
+        assert.equal(shouldEnterLongPressMultiSelect(true, true), false);
+        assert.equal(shouldEnterLongPressMultiSelect(false, false), true);
     });
 });

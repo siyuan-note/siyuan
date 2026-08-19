@@ -853,23 +853,29 @@ func setAssetsAttachmentDisposition(c *gin.Context, pathForBaseName string) {
 	c.Header("Content-Disposition", formatContentDispositionAttachment(filepath.Base(pathForBaseName)))
 }
 
-// assetScriptCapableExts 为可执行脚本的资产扩展名，禁止浏览器内联渲染，必须强制以附件形式返回
-// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-mjf3-jwmf-r6wf
-var assetScriptCapableExts = map[string]bool{
-	".cjs": true, ".htm": true, ".html": true, ".js": true, ".mjs": true,
-	".shtml": true, ".svg": true, ".xhtml": true, ".xml": true,
-}
-
 const htmlAssetIFrameCSP = "sandbox allow-scripts; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'"
 
-// isAssetInlineUnsafe 判断资产是否禁止浏览器内联渲染：
-// 可执行脚本的扩展名，或标准库无法识别 Content-Type 的扩展名（http.ServeFile 会内容嗅探，可能识别为 text/html 执行脚本）
+// isAssetInlineUnsafe 判断资产是否禁止浏览器内联渲染，采用媒体类型白名单策略：
+// 仅图片、音视频、PDF 和纯文本允许内联渲染；白名单之外的任何类型（包括所有 text/html、
+// text/xml 及 +xml 类型，以及无法识别 Content-Type 的扩展名）一律强制以附件形式下载。
+// 无法识别的类型可能被 http.ServeFile 内容嗅探识别为 text/html，因此同样视为不安全
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-7h8j-qw37-w46g
 func isAssetInlineUnsafe(absPath string) bool {
 	ext := strings.ToLower(filepath.Ext(absPath))
-	if assetScriptCapableExts[ext] {
+	mediaType := mime.TypeByExtension(ext)
+	if mediaType == "" {
 		return true
 	}
-	return mime.TypeByExtension(ext) == ""
+	mediaType, _, _ = mime.ParseMediaType(mediaType)
+	switch {
+	case strings.HasPrefix(mediaType, "image/") && "image/svg+xml" != mediaType:
+		return false
+	case strings.HasPrefix(mediaType, "audio/"), strings.HasPrefix(mediaType, "video/"):
+		return false
+	case "application/pdf" == mediaType, "text/plain" == mediaType:
+		return false
+	}
+	return true
 }
 
 // secureAssetContentHeaders 统一为资产响应设置安全头：

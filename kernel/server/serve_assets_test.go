@@ -153,11 +153,17 @@ func TestIsValidResolvedAssetPath(t *testing.T) {
 func TestSecureAssetContentHeadersForcesAttachmentOnScriptCapableAssets(t *testing.T) {
 	// 可执行脚本的资产必须强制附件下载，禁止浏览器同源内联渲染
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-mjf3-jwmf-r6wf
+	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-7h8j-qw37-w46g
 	cases := map[string]string{
 		"test.html":  "<script>fetch('/api/system/getConf')</script>",
 		"test.xhtml": "<script>fetch('/api/system/getConf')</script>",
 		"test.js":    "fetch('/api/system/getConf')",
 		"test.svg":   "<svg xmlns='http://www.w3.org/2000/svg'><script>fetch('/api/system/getConf')</script></svg>",
+		"test.xht":   "<script>fetch('/api/system/getConf')</script>",
+		"test.ehtml": "<script>fetch('/api/system/getConf')</script>",
+		"test.xsl":   "<script>fetch('/api/system/getConf')</script>",
+		"test.xbl":   "<script>fetch('/api/system/getConf')</script>",
+		"test.rdf":   "<script>fetch('/api/system/getConf')</script>",
 	}
 	for name, content := range cases {
 		recorder := httptest.NewRecorder()
@@ -173,6 +179,25 @@ func TestSecureAssetContentHeadersForcesAttachmentOnScriptCapableAssets(t *testi
 		}
 		if recorder.Header().Get("X-Content-Type-Options") != "nosniff" {
 			t.Fatalf("asset [%s] missing X-Content-Type-Options header", name)
+		}
+	}
+}
+
+func TestSecureAssetContentHeadersForcesAttachmentOnNonAllowListedTypes(t *testing.T) {
+	// 白名单之外的类型即使 Content-Type 可识别也必须强制附件下载，未知类型默认禁止内联
+	cases := []string{"test.json", "test.css", "test.md", "test.zip", "test.wasm"}
+	for _, name := range cases {
+		recorder := httptest.NewRecorder()
+		context, _ := gin.CreateTestContext(recorder)
+		context.Request = httptest.NewRequest(http.MethodGet, "/assets/"+name, nil)
+		assetPath := filepath.Join(t.TempDir(), name)
+		if err := os.WriteFile(assetPath, []byte("test"), 0644); err != nil {
+			t.Fatalf("write test asset failed: %v", err)
+		}
+		secureAssetContentHeaders(context, assetPath, assetPath)
+		if !strings.HasPrefix(recorder.Header().Get("Content-Disposition"), "attachment") {
+			t.Fatalf("non allow-listed asset [%s] must be forced to download, got Content-Disposition %q",
+				name, recorder.Header().Get("Content-Disposition"))
 		}
 	}
 }

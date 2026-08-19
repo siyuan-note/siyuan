@@ -1,4 +1,4 @@
-const toolbarEntryId = Symbol("toolbarEntryId");
+const toolbarEntryMetadata = Symbol("toolbarEntryMetadata");
 
 interface IToolbarEntry {
     key: string;
@@ -9,7 +9,10 @@ interface IToolbarEntry {
 }
 
 type TConfigurableToolbarItem = IMenuItem & {
-    [toolbarEntryId]?: string;
+    [toolbarEntryMetadata]?: {
+        id: string;
+        label?: string;
+    };
 };
 
 export const TOOLBAR_ENTRY_ROOT_PATH = "editor.toolbar";
@@ -101,10 +104,14 @@ const desktopToolbarEntryKeys = new Map(DESKTOP_TOOLBAR_ENTRIES
     .filter((item) => !item.separator)
     .map((item) => [item.name, item.key]));
 
+const setToolbarEntryMetadata = (item: IMenuItem, id: string, label?: string) => {
+    (item as TConfigurableToolbarItem)[toolbarEntryMetadata] = {id, label};
+    return item;
+};
+
 const toolbarSeparator = (entryId: string): IMenuItem => {
     const item: TConfigurableToolbarItem = {name: "|"};
-    item[toolbarEntryId] = entryId;
-    return item;
+    return setToolbarEntryMetadata(item, entryId);
 };
 
 export const getDefaultToolbar = (mobile: boolean): Array<string | IMenuItem> => {
@@ -137,6 +144,38 @@ export const getDefaultToolbar = (mobile: boolean): Array<string | IMenuItem> =>
     });
 };
 
-export const getToolbarEntryId = (item: IMenuItem) => item.name === "|"
-    ? (item as TConfigurableToolbarItem)[toolbarEntryId]
-    : desktopToolbarEntryKeys.get(item.name);
+export const getToolbarEntryId = (item: IMenuItem) =>
+    (item as TConfigurableToolbarItem)[toolbarEntryMetadata]?.id || desktopToolbarEntryKeys.get(item.name);
+
+export const getToolbarEntryLabel = (item: IMenuItem) =>
+    (item as TConfigurableToolbarItem)[toolbarEntryMetadata]?.label;
+
+const encodeToolbarEntryKeyPart = (value: string) => encodeURIComponent(value).replace(/\./g, "%2E");
+
+export const getPluginToolbarEntryKey = (pluginName: string, itemName: string,
+                                         type: "entry" | "separator" = "entry") =>
+    `${type === "separator" ? "plugin-separator" : "plugin"}:${encodeToolbarEntryKeyPart(pluginName)}:${encodeToolbarEntryKeyPart(itemName)}`;
+
+export const markPluginToolbarEntries = (previous: Array<string | IMenuItem>, updated: Array<string | IMenuItem>,
+                                          pluginName: string, getLabel: (item: IMenuItem) => string) => {
+    const previousItems = new Set(previous.filter((item): item is IMenuItem => typeof item !== "string"));
+    let separatorIndex = 0;
+    return updated.map((item) => {
+        if (typeof item === "string") {
+            if (item !== "|") {
+                return item;
+            }
+            separatorIndex++;
+            return toolbarSeparator(getPluginToolbarEntryKey(pluginName, separatorIndex.toString(), "separator"));
+        }
+        if (getToolbarEntryId(item) || previousItems.has(item)) {
+            return item;
+        }
+        if (item.name === "|") {
+            separatorIndex++;
+            return setToolbarEntryMetadata(item,
+                getPluginToolbarEntryKey(pluginName, separatorIndex.toString(), "separator"));
+        }
+        return setToolbarEntryMetadata(item, getPluginToolbarEntryKey(pluginName, item.name), getLabel(item));
+    });
+};

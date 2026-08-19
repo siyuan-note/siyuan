@@ -60,8 +60,9 @@ import {FormatPainter} from "./FormatPainter";
 import {IFormatPainterSnapshot} from "./formatPainterCore";
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 import {closeSubElement} from "./subElementLifecycle";
-import {getDefaultToolbar, getToolbarEntryId} from "./defaults";
+import {getDefaultToolbar, getToolbarEntryId, markPluginToolbarEntries} from "./defaults";
 import {applyToolbarEntryVisibility} from "../../config/entryVisibility/runtime";
+import {refreshToolbarCatalog} from "../../config/entryVisibility/catalog";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -78,6 +79,33 @@ const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) 
         const next = filtered[index + 1];
         return previous && next && (typeof previous === "string" ? previous : previous.name) !== "|";
     });
+};
+
+const applyPluginToolbar = (toolbar: Array<string | IMenuItem>, protyle: IProtyle) => {
+    let result = toolbar;
+    protyle.app.plugins.forEach((plugin) => {
+        const previous = [...result];
+        result = markPluginToolbarEntries(previous, plugin.updateProtyleToolbar(result), plugin.name, (item) => {
+            const pluginName = plugin.displayName?.trim() || plugin.name;
+            const label = item.tip || (item.lang ? window.siyuan.languages[item.lang] : "") || item.name;
+            return `${pluginName} - ${label}`;
+        });
+        result = filterPluginToolbar(result, protyle.lite);
+        result.forEach((toolbarItem) => {
+            if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
+                return;
+            }
+            if (typeof toolbarItem.hotkey !== "string") {
+                toolbarItem.hotkey = "";
+            }
+            if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[plugin.name] && window.siyuan.config.keymap.plugin[plugin.name][toolbarItem.name]) {
+                toolbarItem.hotkey = window.siyuan.config.keymap.plugin[plugin.name][toolbarItem.name].custom;
+            }
+            toolbarItem.hotkey = clearDisallowedTextInputHotkey(toolbarItem.hotkey);
+        });
+        result = toolbarKeyToMenu(result);
+    });
+    return result as IMenuItem[];
 };
 
 interface IToolbarRangePosition {
@@ -110,22 +138,10 @@ export class Toolbar {
         this.subElement.className = "protyle-util fn__none";
         /// #endif
         this.toolbarHeight = 29;
-        protyle.app.plugins.forEach(item => {
-            const pluginToolbar = filterPluginToolbar(item.updateProtyleToolbar(options.toolbar), protyle.lite);
-            pluginToolbar.forEach(toolbarItem => {
-                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
-                    return;
-                }
-                if (typeof toolbarItem.hotkey !== "string") {
-                    toolbarItem.hotkey = "";
-                }
-                if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
-                    toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
-                }
-                toolbarItem.hotkey = clearDisallowedTextInputHotkey(toolbarItem.hotkey);
-            });
-            options.toolbar = toolbarKeyToMenu(pluginToolbar);
-        });
+        options.toolbar = applyPluginToolbar(options.toolbar, protyle);
+        if (!isMobile() && !protyle.lite) {
+            refreshToolbarCatalog(options.toolbar);
+        }
         options.toolbar.forEach((menuItem: IMenuItem) => {
             const itemElement = this.genItem(protyle, menuItem);
             this.element.appendChild(itemElement);
@@ -139,22 +155,10 @@ export class Toolbar {
     public update(protyle: IProtyle) {
         this.element.innerHTML = "";
         protyle.options.toolbar = toolbarKeyToMenu(getDefaultToolbar(isMobile()));
-        protyle.app.plugins.forEach(item => {
-            const pluginToolbar = filterPluginToolbar(item.updateProtyleToolbar(protyle.options.toolbar), protyle.lite);
-            pluginToolbar.forEach(toolbarItem => {
-                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
-                    return;
-                }
-                if (typeof toolbarItem.hotkey !== "string") {
-                    toolbarItem.hotkey = "";
-                }
-                if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
-                    toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
-                }
-                toolbarItem.hotkey = clearDisallowedTextInputHotkey(toolbarItem.hotkey);
-            });
-            protyle.options.toolbar = toolbarKeyToMenu(pluginToolbar);
-        });
+        protyle.options.toolbar = applyPluginToolbar(protyle.options.toolbar, protyle);
+        if (!isMobile() && !protyle.lite) {
+            refreshToolbarCatalog(protyle.options.toolbar);
+        }
         protyle.options.toolbar.forEach((menuItem: IMenuItem) => {
             const itemElement = this.genItem(protyle, menuItem);
             this.element.appendChild(itemElement);

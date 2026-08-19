@@ -1,5 +1,11 @@
 import {CODE_TAB_SPACE_VALUES} from "../../protyle/wysiwyg/codeBlockUtil";
-import {DESKTOP_TOOLBAR_ENTRIES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {
+    DESKTOP_TOOLBAR_ENTRIES,
+    getToolbarEntryId,
+    getToolbarEntryLabel,
+    TOOLBAR_ENTRY_ROOT_PATH,
+} from "../../protyle/toolbar/defaults";
+import {mergeEntryOrderPreservingUnknown} from "./order";
 
 export interface IEntryCatalogNode {
     key: string;
@@ -416,6 +422,7 @@ export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
 const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => item.separator
     ? separator(item.key)
     : node(item.key, lang(item.lang)));
+const toolbarBuiltinNodeMap = new Map(toolbarBuiltinChildren.map((item) => [item.key, item]));
 
 const slashMenuBuiltinChildren = [
     node("template", lang("template")),
@@ -491,6 +498,12 @@ const slashMenuBuiltinChildren = [
 const slashMenuRoot = {
     ...node("menu", lang("entrySlashMenu"), true, [...slashMenuBuiltinChildren], true),
     displayChildrenDirectly: true,
+};
+
+const toolbarCatalogSection: IEntryCatalogSection = {
+    key: TOOLBAR_ENTRY_ROOT_PATH,
+    label: location(lang("editor"), lang("entryToolbar")),
+    children: toolbarBuiltinChildren,
 };
 
 export const entryCatalog: IEntryCatalogSection[] = [
@@ -672,11 +685,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("docInfo", lang("entryDocumentStatistics"), false),
         ],
     },
-    {
-        key: TOOLBAR_ENTRY_ROOT_PATH,
-        label: location(lang("editor"), lang("entryToolbar")),
-        children: toolbarBuiltinChildren,
-    },
+    toolbarCatalogSection,
     {
         key: "editor.slash",
         label: location(lang("editor"), lang("entrySlashMenu")),
@@ -936,6 +945,58 @@ export const getEntryCatalogPathChain = (sectionKey: string, path: string) => {
         current = getEntryParentPath(current);
     }
     return current === sectionKey ? chain : [];
+};
+
+const normalizeToolbarCatalogSeparators = (nodes: IEntryCatalogNode[]) => {
+    const result: IEntryCatalogNode[] = [];
+    nodes.forEach((item) => {
+        if (item.type === "separator" && (result.length === 0 || result[result.length - 1].type === "separator")) {
+            return;
+        }
+        result.push(item);
+    });
+    if (result[result.length - 1]?.type === "separator") {
+        result.pop();
+    }
+    return result;
+};
+
+const toolbarCatalogNodeSignature = (item: IEntryCatalogNode, pluginLabels: Map<string, string>) => [
+    item.key,
+    item.type,
+    pluginLabels.get(item.key) || "",
+];
+
+let toolbarCatalogSignature = JSON.stringify(toolbarBuiltinChildren.map((item) =>
+    toolbarCatalogNodeSignature(item, new Map())));
+
+export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
+    const nodes = new Map(toolbarBuiltinNodeMap);
+    const pluginLabels = new Map<string, string>();
+    const actualOrder: string[] = [];
+    items.forEach((item) => {
+        const menuItem = typeof item === "string" ? {name: item} : item;
+        const key = getToolbarEntryId(menuItem);
+        if (!key || actualOrder.includes(key)) {
+            return;
+        }
+        actualOrder.push(key);
+        if (nodes.has(key)) {
+            return;
+        }
+        const label = getToolbarEntryLabel(menuItem) || menuItem.tip || menuItem.name;
+        pluginLabels.set(key, label);
+        nodes.set(key, menuItem.name === "|" ? separator(key) : node(key, literal(label)));
+    });
+    const order = mergeEntryOrderPreservingUnknown(toolbarBuiltinChildren.map((item) => item.key), actualOrder);
+    const children = normalizeToolbarCatalogSeparators(order.flatMap((key) => nodes.get(key) || []));
+    const signature = JSON.stringify(children.map((item) => toolbarCatalogNodeSignature(item, pluginLabels)));
+    if (signature === toolbarCatalogSignature) {
+        return;
+    }
+    toolbarCatalogSection.children = children;
+    toolbarCatalogSignature = signature;
+    rebuildCatalogIndexes();
 };
 
 interface ISlashMenuCatalogPlugin {

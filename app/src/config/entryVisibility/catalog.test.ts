@@ -2,7 +2,13 @@ import * as assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 import test from "node:test";
-import {DESKTOP_TOOLBAR_ENTRIES, TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {
+    DESKTOP_TOOLBAR_ENTRIES,
+    getDefaultToolbar,
+    getPluginToolbarEntryKey,
+    markPluginToolbarEntries,
+    TOOLBAR_ENTRY_ROOT_PATH,
+} from "../../protyle/toolbar/defaults";
 import {
     entryCatalog,
     getEntryCatalogChildren,
@@ -16,6 +22,7 @@ import {
     getSlashMenuEntryPath,
     isEntryOrderSortable,
     refreshSlashMenuCatalog,
+    refreshToolbarCatalog,
     SLASH_MENU_ROOT_PATH,
 } from "./catalog";
 
@@ -113,6 +120,33 @@ test("toolbar catalog follows the default toolbar declaration", () => {
     assert.deepEqual(children.map((item) => item.key), DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key));
     assert.equal(children.filter((item) => item.type === "separator").length, 2);
     assert.equal(children.every((item) => item.simple), true);
+});
+
+test("toolbar catalog follows plugin insertion slots and removes unloaded plugin entries", () => {
+    const defaults = getDefaultToolbar(false).map((item) => typeof item === "string" ? {name: item} : item);
+    const pluginItem = {name: "shared.item"};
+    const pluginKey = getPluginToolbarEntryKey("plugin.name", pluginItem.name);
+    const pluginSeparatorKey = getPluginToolbarEntryKey("plugin.name", "1", "separator");
+    try {
+        const toolbar = markPluginToolbarEntries(defaults,
+            [defaults[0], pluginItem, "|", ...defaults.slice(1)], "plugin.name", () => "Plugin Name - Shared Item")
+            .map((item) => typeof item === "string" ? {name: item} : item);
+        refreshToolbarCatalog(toolbar);
+        const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH);
+        assert.deepEqual(children.slice(0, 4).map((item) => item.key), [
+            DESKTOP_TOOLBAR_ENTRIES[0].key,
+            pluginKey,
+            pluginSeparatorKey,
+            DESKTOP_TOOLBAR_ENTRIES[1].key,
+        ]);
+        assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`)?.label(),
+            "Plugin Name - Shared Item");
+        assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginSeparatorKey}`)?.type, "separator");
+        assert.equal(getEntryParentPath(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`), TOOLBAR_ENTRY_ROOT_PATH);
+    } finally {
+        refreshToolbarCatalog(defaults);
+    }
+    assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`), undefined);
 });
 
 test("slash menu catalog follows the built-in hint order", () => {

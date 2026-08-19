@@ -49,7 +49,7 @@ import {highlightById} from "../util/highlightById";
 import {getSelectionOffset} from "../protyle/util/selection";
 import {electronUndo} from "../protyle/undo";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
-import {IDatabaseRowOpenData, openDatabaseRowByData} from "../protyle/render/av/openDatabaseRow";
+import {IDatabaseItemOpenData, openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
 import {scheduleSearchRequest} from "./request";
 
 export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
@@ -975,7 +975,7 @@ export const openSearchEditor = async (options: {
                 keywords: options.keywords,
             });
             if (response.code === 0 && response.data) {
-                const opened = await openDatabaseRowByData(options.protyle, response.data as IDatabaseRowOpenData, {
+                const opened = await openDatabaseItem(options.protyle.app, response.data as IDatabaseItemOpenData, {
                     position: options.openPosition,
                 });
                 if (opened) {

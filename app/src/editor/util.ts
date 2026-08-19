@@ -49,6 +49,7 @@ const isSameCustomTab = (type: string, data: any, options: IOpenFileOptions) => 
 export const openFileById = async (options: {
     app: App,
     id: string,
+    notebookId?: string,
     position?: string,
     mode?: TEditorMode,
     action?: TProtyleAction[]
@@ -60,7 +61,7 @@ export const openFileById = async (options: {
     afterOpen?: (model: Model) => void,
     scrollPosition?: ScrollLogicalPosition
 }) => {
-    const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
+    const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id, notebook: options.notebookId});
     if (response.code === -1) {
         return;
     }
@@ -77,6 +78,7 @@ export const openFileById = async (options: {
         rootIcon: response.data.rootIcon,
         rootID: response.data.rootID,
         id: options.id,
+        notebookId: options.notebookId,
         position: options.position,
         mode: options.mode,
         action: options.action,
@@ -354,6 +356,7 @@ const getUnInitTab = (options: IOpenFileOptions) => {
             if (initObj.instance === "Editor" &&
                 (initObj.rootId === options.rootID || initObj.blockId === options.rootID)) {
                 initObj.blockId = options.id;
+                initObj.notebookId = options.notebookId;
                 initObj.mode = options.mode;
                 if (options.zoomIn) {
                     initObj.action = [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS];
@@ -571,6 +574,7 @@ const newTab = (options: IOpenFileOptions) => {
                         tab,
                         blockId: options.id,
                         rootId: options.rootID,
+                        notebookId: options.notebookId,
                         action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS],
                         scrollPosition: options.scrollPosition,
                     });
@@ -580,6 +584,7 @@ const newTab = (options: IOpenFileOptions) => {
                         tab,
                         blockId: options.id,
                         rootId: options.rootID,
+                        notebookId: options.notebookId,
                         mode: options.mode,
                         action: options.action,
                         scrollPosition: options.scrollPosition,

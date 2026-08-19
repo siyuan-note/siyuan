@@ -52,6 +52,8 @@ type AttributeViewSearchTarget struct {
 	AvID            string   `json:"avID"`
 	DatabaseBlockID string   `json:"databaseBlockID"`
 	NotebookID      string   `json:"notebookID"`
+	ViewID          string   `json:"viewID,omitempty"`
+	GroupID         string   `json:"groupID,omitempty"`
 	ItemID          string   `json:"itemID"`
 	ValueID         string   `json:"valueID"`
 	MatchedValueID  string   `json:"matchedValueID"`
@@ -65,6 +67,11 @@ type AttributeViewSearchTarget struct {
 type attributeViewSearchMatch struct {
 	valueID string
 	keyID   string
+}
+
+type attributeViewSearchItem struct {
+	itemID  string
+	groupID string
 }
 
 func GetAttributeViewSearchTarget(blockID string, keywords []string) (ret *AttributeViewSearchTarget) {
@@ -96,38 +103,40 @@ func GetAttributeViewSearchTarget(blockID string, keywords []string) (ret *Attri
 		return
 	}
 
-	var orderedItemIDs []string
+	var orderedItems []attributeViewSearchItem
+	viewID := ""
 	blockValues := attrView.GetBlockKeyValues()
 	pageSize := len(matches) + 1
 	if nil != blockValues && len(blockValues.Values) >= pageSize {
 		pageSize = len(blockValues.Values) + 1
 	}
 	viewable, renderErr := renderAttributeView(attrView, blockID, "", "", "", 1, pageSize, nil, false, false, nil, "")
-	if nil == renderErr {
-		orderedItemIDs = appendAttributeViewSearchItemIDs(orderedItemIDs, viewable, false)
-		orderedItemIDs = appendAttributeViewSearchItemIDs(orderedItemIDs, viewable, true)
-	} else {
+	if nil == renderErr && nil != viewable {
+		viewID = viewable.GetID()
+		orderedItems = appendAttributeViewSearchItems(orderedItems, viewable, false)
+		orderedItems = appendAttributeViewSearchItems(orderedItems, viewable, true)
+	} else if nil != renderErr {
 		logging.LogWarnf("render attribute view [%s] for search target failed: %s", attrView.ID, renderErr)
 	}
 	if nil != blockValues {
 		for _, value := range blockValues.Values {
 			if nil != value {
-				orderedItemIDs = append(orderedItemIDs, value.BlockID)
+				orderedItems = append(orderedItems, attributeViewSearchItem{itemID: value.BlockID})
 			}
 		}
 	}
 
 	visited := map[string]bool{}
-	for _, itemID := range orderedItemIDs {
-		if visited[itemID] {
+	for _, item := range orderedItems {
+		if visited[item.itemID] {
 			continue
 		}
-		visited[itemID] = true
-		match := matches[itemID]
+		visited[item.itemID] = true
+		match := matches[item.itemID]
 		if nil == match {
 			continue
 		}
-		blockValue := attrView.GetBlockValue(itemID)
+		blockValue := attrView.GetBlockValue(item.itemID)
 		if nil == blockValue || nil == blockValue.Block {
 			continue
 		}
@@ -135,7 +144,9 @@ func GetAttributeViewSearchTarget(blockID string, keywords []string) (ret *Attri
 			AvID:            attrView.ID,
 			DatabaseBlockID: blockID,
 			NotebookID:      tree.Box,
-			ItemID:          itemID,
+			ViewID:          viewID,
+			GroupID:         item.groupID,
+			ItemID:          item.itemID,
 			ValueID:         blockValue.ID,
 			MatchedValueID:  match.valueID,
 			MatchedKeyID:    match.keyID,
@@ -184,9 +195,9 @@ func getAttributeViewSearchMatches(attrView *av.AttributeView, keywords []string
 	return
 }
 
-func appendAttributeViewSearchItemIDs(itemIDs []string, viewable av.Viewable, hiddenGroups bool) []string {
+func appendAttributeViewSearchItems(items []attributeViewSearchItem, viewable av.Viewable, hiddenGroups bool) []attributeViewSearchItem {
 	if nil == viewable {
-		return itemIDs
+		return items
 	}
 	baseInstance := getAttributeViewBaseInstance(viewable)
 	if nil != baseInstance && 0 < len(baseInstance.Groups) {
@@ -196,21 +207,21 @@ func appendAttributeViewSearchItemIDs(itemIDs []string, viewable av.Viewable, hi
 			}
 			if collection, ok := group.(av.Collection); ok {
 				for _, item := range collection.GetItems() {
-					itemIDs = append(itemIDs, item.GetID())
+					items = append(items, attributeViewSearchItem{itemID: item.GetID(), groupID: group.GetID()})
 				}
 			}
 		}
-		return itemIDs
+		return items
 	}
 	if hiddenGroups {
-		return itemIDs
+		return items
 	}
 	if collection, ok := viewable.(av.Collection); ok {
 		for _, item := range collection.GetItems() {
-			itemIDs = append(itemIDs, item.GetID())
+			items = append(items, attributeViewSearchItem{itemID: item.GetID()})
 		}
 	}
-	return itemIDs
+	return items
 }
 
 func GetAttributeViewItemStatuses(blockID, avID, viewID, query string, itemIDs []string) (ret map[string]string, err error) {
@@ -238,14 +249,14 @@ func getAttributeViewItemStatuses(attrView *av.AttributeView, viewable av.Viewab
 			}
 		}
 	}
-	for _, itemID := range appendAttributeViewSearchItemIDs(nil, viewable, true) {
-		if requested[itemID] && "filtered" == ret[itemID] {
-			ret[itemID] = "groupHidden"
+	for _, item := range appendAttributeViewSearchItems(nil, viewable, true) {
+		if requested[item.itemID] && "filtered" == ret[item.itemID] {
+			ret[item.itemID] = "groupHidden"
 		}
 	}
-	for _, itemID := range appendAttributeViewSearchItemIDs(nil, viewable, false) {
-		if requested[itemID] {
-			ret[itemID] = "visible"
+	for _, item := range appendAttributeViewSearchItems(nil, viewable, false) {
+		if requested[item.itemID] {
+			ret[item.itemID] = "visible"
 		}
 	}
 	return

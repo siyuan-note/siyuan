@@ -836,6 +836,7 @@ interface IOpenFileOptions {
     rootIcon?: string, // 文档图标
     id?: string,  // file 必填
     rootID?: string, // file 必填
+    notebookId?: string,
     position?: string, // file 或者 asset，打开位置
     page?: number | string, // asset
     mode?: TEditorMode // file

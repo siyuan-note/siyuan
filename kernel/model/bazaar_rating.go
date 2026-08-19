@@ -32,12 +32,15 @@ import (
 var (
 	bazaarRatingCloudServer           = util.GetCloudServer
 	bazaarRatingValidatePackage       = validateBazaarPackageRatingRequest0
+	bazaarRatingUserToken             = getBazaarRatingUserToken
 	bazaarRatingInstalledPackageInfos = GetInstalledPackageInfos
 	bazaarRatingExistingPackageNames  = bazaar.GetExistingBazaarPackageNames
 	bazaarRatingPublicPackageRatings  = bazaar.GetBazaarPackageRatings
 	bazaarRatingAfterUpdate           = bazaar.GetBazaarPackageRatingAfterUpdate
 	bazaarRatingSetMu                 sync.Mutex
 )
+
+const bazaarPackageRatingBatchSize = 1024
 
 type bazaarRatingCloudResult[T any] struct {
 	Code int    `json:"code"`
@@ -47,6 +50,10 @@ type bazaarRatingCloudResult[T any] struct {
 
 type bazaarPackageUserRatingData struct {
 	Rating int `json:"rating"`
+}
+
+type bazaarPackageUserRatingsData struct {
+	UserRatings map[string]int `json:"userRatings"`
 }
 
 type bazaarPackageSetRatingData struct {
@@ -62,49 +69,62 @@ var ErrBazaarRatingRateLimited = errors.New("bazaar rating rate limited")
 // GetInstalledBazaarPackageRatings 获取指定已安装包的公开评分。
 func GetInstalledBazaarPackageRatings(ctx context.Context, pkgType string,
 	packageNames []string) (ratings map[string]*bazaar.PackageRating, eligiblePackageNames []string, err error) {
-	if !isValidBazaarPackageType(pkgType) {
-		return nil, nil, errors.New("invalid package type")
-	}
-
-	installedInfos, _, _, err := bazaarRatingInstalledPackageInfos(pkgType)
-	if nil != err {
-		return nil, nil, err
-	}
-	installed := make(map[string]bool, len(installedInfos))
-	for _, info := range installedInfos {
-		if "" == info.Pkg.InvalidReason {
-			installed[info.Pkg.Name] = true
-		}
-	}
-
-	names := make([]string, 0, len(packageNames))
-	seen := make(map[string]bool, len(packageNames))
-	for _, packageName := range packageNames {
-		if !bazaar.IsValidPackageName(packageName) {
-			return nil, nil, fmt.Errorf("invalid package name: %s", packageName)
-		}
-		if !installed[packageName] || seen[packageName] {
-			continue
-		}
-		seen[packageName] = true
-		names = append(names, packageName)
-	}
-	if 0 == len(names) {
-		return map[string]*bazaar.PackageRating{}, []string{}, nil
-	}
-
-	eligiblePackageNames, err = bazaarRatingExistingPackageNames(ctx, pkgType, names)
+	eligiblePackageNames, err = getInstalledOfficialBazaarPackageNames(ctx, pkgType, packageNames)
 	if nil != err {
 		return nil, nil, err
 	}
 	if 0 == len(eligiblePackageNames) {
-		return map[string]*bazaar.PackageRating{}, eligiblePackageNames, nil
+		return map[string]*bazaar.PackageRating{}, []string{}, nil
 	}
 	ratings, available := bazaarRatingPublicPackageRatings(ctx, eligiblePackageNames)
 	if !available {
 		return nil, nil, errors.New("marketplace package ratings are unavailable")
 	}
 	return ratings, eligiblePackageNames, nil
+}
+
+// GetInstalledBazaarPackageUserRatings 获取指定已安装官方包的当前用户评分。
+func GetInstalledBazaarPackageUserRatings(ctx context.Context, pkgType string,
+	packageNames []string) (userRatings map[string]int, eligiblePackageNames []string, err error) {
+	if !isValidBazaarPackageType(pkgType) {
+		return nil, nil, errors.New("invalid package type")
+	}
+	if bazaarPackageRatingBatchSize < len(packageNames) {
+		return nil, nil, errors.New("too many package names")
+	}
+	token, err := bazaarRatingUserToken()
+	if nil != err {
+		return nil, nil, err
+	}
+	eligiblePackageNames, err = getInstalledOfficialBazaarPackageNames(ctx, pkgType, packageNames)
+	if nil != err {
+		return nil, nil, err
+	}
+	if 0 == len(eligiblePackageNames) {
+		return map[string]int{}, []string{}, nil
+	}
+
+	data := bazaarPackageUserRatingsData{}
+	err = requestBazaarPackageRating(ctx, "/apis/siyuan/bazaar/getBazaarPackageUserRatings", map[string]any{
+		"token":        token,
+		"packageNames": eligiblePackageNames,
+	}, &data)
+	if nil != err {
+		return nil, nil, err
+	}
+	if len(data.UserRatings) != len(eligiblePackageNames) {
+		return nil, nil, errors.New("incomplete user ratings returned by cloud server")
+	}
+	for _, packageName := range eligiblePackageNames {
+		rating, ok := data.UserRatings[packageName]
+		if !ok {
+			return nil, nil, errors.New("incomplete user ratings returned by cloud server")
+		}
+		if 0 > rating || 5 < rating {
+			return nil, nil, errors.New("invalid user rating returned by cloud server")
+		}
+	}
+	return data.UserRatings, eligiblePackageNames, nil
 }
 
 // GetBazaarPackageRating 获取已安装官方包的公开评分和当前用户评分。
@@ -214,9 +234,9 @@ func validateBazaarPackageRatingRequest0(ctx context.Context, pkgType, packageNa
 	if !bazaar.IsValidPackageName(packageName) {
 		return "", errors.New("invalid package name")
 	}
-	user := Conf.GetUser()
-	if nil == user || "" == user.UserToken {
-		return "", errors.New(Conf.Language(31))
+	token, err = bazaarRatingUserToken()
+	if nil != err {
+		return "", err
 	}
 
 	installedInfos, _, _, err := GetInstalledPackageInfos(pkgType)
@@ -241,7 +261,49 @@ func validateBazaarPackageRatingRequest0(ctx context.Context, pkgType, packageNa
 	if !exists {
 		return "", errors.New("official marketplace package not found")
 	}
+	return token, nil
+}
+
+func getBazaarRatingUserToken() (string, error) {
+	user := Conf.GetUser()
+	if nil == user || "" == user.UserToken {
+		return "", errors.New(Conf.Language(31))
+	}
 	return user.UserToken, nil
+}
+
+func getInstalledOfficialBazaarPackageNames(ctx context.Context, pkgType string,
+	packageNames []string) ([]string, error) {
+	if !isValidBazaarPackageType(pkgType) {
+		return nil, errors.New("invalid package type")
+	}
+	installedInfos, _, _, err := bazaarRatingInstalledPackageInfos(pkgType)
+	if nil != err {
+		return nil, err
+	}
+	installed := make(map[string]bool, len(installedInfos))
+	for _, info := range installedInfos {
+		if "" == info.Pkg.InvalidReason {
+			installed[info.Pkg.Name] = true
+		}
+	}
+
+	names := make([]string, 0, len(packageNames))
+	seen := make(map[string]bool, len(packageNames))
+	for _, packageName := range packageNames {
+		if !bazaar.IsValidPackageName(packageName) {
+			return nil, fmt.Errorf("invalid package name: %s", packageName)
+		}
+		if !installed[packageName] || seen[packageName] {
+			continue
+		}
+		seen[packageName] = true
+		names = append(names, packageName)
+	}
+	if 0 == len(names) {
+		return []string{}, nil
+	}
+	return bazaarRatingExistingPackageNames(ctx, pkgType, names)
 }
 
 func requestBazaarPackageRating[T any](ctx context.Context, endpoint string, body map[string]any, data *T) error {

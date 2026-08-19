@@ -111,6 +111,63 @@ func TestBazaarPackageRatingsResponseEligibility(t *testing.T) {
 	}
 }
 
+func TestGetBazaarPackageUserRatings(t *testing.T) {
+	oldGetUserRatings := getBazaarPackageUserRatingsModel
+	t.Cleanup(func() { getBazaarPackageUserRatingsModel = oldGetUserRatings })
+	getBazaarPackageUserRatingsModel = func(_ context.Context, pkgType string,
+		packageNames []string) (map[string]int, []string, error) {
+		if "plugins" != pkgType || !slices.Equal([]string{"rated", "unrated"}, packageNames) {
+			t.Fatalf("unexpected request: type=%s names=%v", pkgType, packageNames)
+		}
+		return map[string]int{"rated": 4, "unrated": 0}, []string{"rated", "unrated"}, nil
+	}
+
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	engine.POST("/rating", getBazaarPackageUserRatings)
+	body, err := json.Marshal(map[string]any{
+		"packageType":  "plugins",
+		"packageNames": []string{"rated", "unrated"},
+	})
+	if nil != err {
+		t.Fatal(err)
+	}
+	response := performBazaarRatingRequest(t, engine, body)
+	if 0 != response.Code {
+		t.Fatalf("unexpected response: %+v", response)
+	}
+	encoded, err := json.Marshal(response.Data)
+	if nil != err {
+		t.Fatal(err)
+	}
+	var data struct {
+		UserRatings          map[string]int `json:"userRatings"`
+		EligiblePackageNames []string       `json:"eligiblePackageNames"`
+	}
+	if err = json.Unmarshal(encoded, &data); nil != err {
+		t.Fatal(err)
+	}
+	if !slices.Equal([]string{"rated", "unrated"}, data.EligiblePackageNames) ||
+		4 != data.UserRatings["rated"] || 0 != data.UserRatings["unrated"] {
+		t.Fatalf("unexpected response data: %+v", data)
+	}
+}
+
+func TestGetBazaarPackageUserRatingsRequiresPackageNames(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	engine.POST("/rating", getBazaarPackageUserRatings)
+
+	body, err := json.Marshal(map[string]any{"packageType": "plugins"})
+	if nil != err {
+		t.Fatal(err)
+	}
+	response := performBazaarRatingRequest(t, engine, body)
+	if 0 == response.Code {
+		t.Fatal("missing packageNames should be rejected")
+	}
+}
+
 func TestBazaarPackageRatingResponseAvailability(t *testing.T) {
 	for _, test := range []struct {
 		name            string

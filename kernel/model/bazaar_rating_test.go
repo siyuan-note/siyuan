@@ -107,6 +107,122 @@ func TestGetInstalledBazaarPackageRatingsSkipsRatingsWithoutEligiblePackages(t *
 	}
 }
 
+func TestGetInstalledBazaarPackageUserRatings(t *testing.T) {
+	oldServer := bazaarRatingCloudServer
+	oldUserToken := bazaarRatingUserToken
+	oldInstalledPackageInfos := bazaarRatingInstalledPackageInfos
+	oldExistingPackageNames := bazaarRatingExistingPackageNames
+	t.Cleanup(func() {
+		bazaarRatingCloudServer = oldServer
+		bazaarRatingUserToken = oldUserToken
+		bazaarRatingInstalledPackageInfos = oldInstalledPackageInfos
+		bazaarRatingExistingPackageNames = oldExistingPackageNames
+	})
+	bazaarRatingUserToken = func() (string, error) { return "secret", nil }
+	bazaarRatingInstalledPackageInfos = func(string) ([]installedPackageInfo, string, string, error) {
+		return []installedPackageInfo{
+			{Pkg: &bazaar.Package{Name: "rated"}},
+			{Pkg: &bazaar.Package{Name: "unrated"}},
+			{Pkg: &bazaar.Package{Name: "local-zip"}},
+		}, "", "", nil
+	}
+	bazaarRatingExistingPackageNames = func(_ context.Context, pkgType string, packageNames []string) ([]string, error) {
+		if "plugins" != pkgType || !slices.Equal([]string{"rated", "unrated", "local-zip"}, packageNames) {
+			t.Fatalf("unexpected package filter: type=%s names=%v", pkgType, packageNames)
+		}
+		return []string{"rated", "unrated"}, nil
+	}
+
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path != "/apis/siyuan/bazaar/getBazaarPackageUserRatings" {
+			t.Fatalf("unexpected path: %s", request.URL.Path)
+		}
+		var body struct {
+			Token        string   `json:"token"`
+			PackageNames []string `json:"packageNames"`
+		}
+		if err := json.NewDecoder(request.Body).Decode(&body); nil != err {
+			t.Fatal(err)
+		}
+		if "secret" != body.Token || !slices.Equal([]string{"rated", "unrated"}, body.PackageNames) {
+			t.Fatalf("unexpected request body: %+v", body)
+		}
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"code":0,"msg":"","data":{"userRatings":{"rated":4,"unrated":0}}}`))
+	}))
+	defer server.Close()
+	bazaarRatingCloudServer = func() string { return server.URL }
+
+	userRatings, eligiblePackageNames, err := GetInstalledBazaarPackageUserRatings(context.Background(), "plugins",
+		[]string{"rated", "unrated", "local-zip", "missing", "rated"})
+	if nil != err {
+		t.Fatal(err)
+	}
+	if !slices.Equal([]string{"rated", "unrated"}, eligiblePackageNames) ||
+		4 != userRatings["rated"] || 0 != userRatings["unrated"] {
+		t.Fatalf("unexpected user ratings: ratings=%v eligible=%v", userRatings, eligiblePackageNames)
+	}
+}
+
+func TestGetInstalledBazaarPackageUserRatingsRejectsInvalidCloudData(t *testing.T) {
+	oldServer := bazaarRatingCloudServer
+	oldUserToken := bazaarRatingUserToken
+	oldInstalledPackageInfos := bazaarRatingInstalledPackageInfos
+	oldExistingPackageNames := bazaarRatingExistingPackageNames
+	t.Cleanup(func() {
+		bazaarRatingCloudServer = oldServer
+		bazaarRatingUserToken = oldUserToken
+		bazaarRatingInstalledPackageInfos = oldInstalledPackageInfos
+		bazaarRatingExistingPackageNames = oldExistingPackageNames
+	})
+	bazaarRatingUserToken = func() (string, error) { return "secret", nil }
+	bazaarRatingInstalledPackageInfos = func(string) ([]installedPackageInfo, string, string, error) {
+		return []installedPackageInfo{
+			{Pkg: &bazaar.Package{Name: "rated"}},
+			{Pkg: &bazaar.Package{Name: "unrated"}},
+		}, "", "", nil
+	}
+	bazaarRatingExistingPackageNames = func(context.Context, string, []string) ([]string, error) {
+		return []string{"rated", "unrated"}, nil
+	}
+
+	for _, response := range []string{
+		`{"code":0,"msg":"","data":{"userRatings":{"rated":4}}}`,
+		`{"code":0,"msg":"","data":{"userRatings":{"rated":4,"extra":0}}}`,
+		`{"code":0,"msg":"","data":{"userRatings":{"rated":6,"unrated":0}}}`,
+	} {
+		server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
+			writer.Header().Set("Content-Type", "application/json")
+			_, _ = writer.Write([]byte(response))
+		}))
+		bazaarRatingCloudServer = func() string { return server.URL }
+		if _, _, err := GetInstalledBazaarPackageUserRatings(context.Background(), "plugins",
+			[]string{"rated", "unrated"}); nil == err {
+			server.Close()
+			t.Fatalf("expected invalid cloud response to fail: %s", response)
+		}
+		server.Close()
+	}
+}
+
+func TestGetInstalledBazaarPackageUserRatingsRejectsOversizedBatch(t *testing.T) {
+	oldUserToken := bazaarRatingUserToken
+	t.Cleanup(func() { bazaarRatingUserToken = oldUserToken })
+	called := false
+	bazaarRatingUserToken = func() (string, error) {
+		called = true
+		return "secret", nil
+	}
+
+	packageNames := make([]string, bazaarPackageRatingBatchSize+1)
+	if _, _, err := GetInstalledBazaarPackageUserRatings(context.Background(), "plugins", packageNames); nil == err {
+		t.Fatal("expected oversized batch to fail")
+	}
+	if called {
+		t.Fatal("oversized batch should fail before loading the user token")
+	}
+}
+
 func TestRequestBazaarPackageRating(t *testing.T) {
 	oldServer := bazaarRatingCloudServer
 	t.Cleanup(func() { bazaarRatingCloudServer = oldServer })

@@ -165,6 +165,35 @@ export const normalizeBazaarPackageRatingsResponse = (
     return result;
 };
 
+export const normalizeBazaarPackageUserRatingsResponse = (
+    packageNames: string[],
+    data: {eligiblePackageNames?: unknown, userRatings?: unknown} | null | undefined,
+) => {
+    if (!Array.isArray(data?.eligiblePackageNames) ||
+        data.eligiblePackageNames.some((packageName) => typeof packageName !== "string") ||
+        !data.userRatings || typeof data.userRatings !== "object" || Array.isArray(data.userRatings)) {
+        return;
+    }
+    const requestedPackageNames = new Set(packageNames);
+    const eligiblePackageNames = new Set(data.eligiblePackageNames as string[]);
+    const userRatings = data.userRatings as Record<string, unknown>;
+    if (eligiblePackageNames.size !== data.eligiblePackageNames.length ||
+        Array.from(eligiblePackageNames).some((packageName) => !requestedPackageNames.has(packageName)) ||
+        Object.keys(userRatings).length !== eligiblePackageNames.size ||
+        Object.keys(userRatings).some((packageName) => !eligiblePackageNames.has(packageName))) {
+        return;
+    }
+    const result = new Map<string, number>();
+    for (const packageName of eligiblePackageNames) {
+        const rating = normalizeBazaarUserRating(userRatings[packageName]);
+        if (rating === undefined) {
+            return;
+        }
+        result.set(packageName, rating);
+    }
+    return result;
+};
+
 export const normalizeBazaarUserRating = (rating: unknown) => {
     if (!Number.isInteger(rating)) {
         return;

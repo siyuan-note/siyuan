@@ -42,6 +42,7 @@ import {
     isBazaarRatingMutationVersionCurrent,
     normalizeBazaarPackageRatingResponse,
     normalizeBazaarPackageRatingsResponse,
+    normalizeBazaarPackageUserRatingsResponse,
     normalizeBazaarRating,
     normalizeBazaarUserRating,
     sortBazaarPackagesByRating,
@@ -533,6 +534,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             bazaar._data.userRatingKeys.clear();
             bazaar._data.userRatingLoadingKeys.clear();
             bazaar._data.userRatingSubmitRequestIDs.clear();
+            bazaar._data.userRatingBatchRequestIDs.clear();
             return true;
         }
         return false;
@@ -556,6 +558,13 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         const from = sideElement?.getAttribute("data-from") as "downloaded" | "updated" | "bazaar";
         if (bazaarType && packageName && from) {
             bazaar._loadReadmeRating(bazaarType, packageName, from);
+        }
+        if (window.siyuan.user) {
+            if (bazaar._isUpdatePanelActive()) {
+                bazaar._loadUpdatedRatings();
+            } else if (bazaar._data.downloadedType) {
+                bazaar._loadDownloadedUserRatings(bazaar._data.downloadedType, bazaar._data.downloadedDefault);
+            }
         }
     },
     _bindRatingUserChange() {
@@ -607,8 +616,12 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     <span>${escapeHtml(average || "")}</span>
 </span>`;
     },
-    _genRatePackageActionHTML(loaded: boolean) {
-        return `<span data-rating-card-slot data-position="north" data-type="rate-package" class="ariaLabel block__icon block__icon--show${loaded ? "" : " fn__none"}" aria-label="${escapeAttr(window.siyuan.languages.bazaarRatePackage)}">
+    _genRatePackageActionHTML(loaded: boolean, rating?: unknown) {
+        const userRating = normalizeBazaarUserRating(rating);
+        const rated = userRating !== undefined && userRating > 0;
+        const ariaLabel = rated ? window.siyuan.languages.bazaarYourRatingValue.replace("${rating}", userRating.toString()) :
+            window.siyuan.languages.bazaarRatePackage;
+        return `<span data-rating-card-slot data-position="north" data-type="rate-package"${rated ? ` data-user-rating="${userRating}"` : ""} class="ariaLabel block__icon block__icon--show${loaded ? "" : " fn__none"}" aria-label="${escapeAttr(ariaLabel)}">
     <svg aria-hidden="true"><use xlink:href="#iconStar"></use></svg>
 </span>`;
     },
@@ -753,8 +766,8 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     _genUpdateItemHTML(item: IUpdatedBazaarItem, bazaarType: TBazaarType) {
         const installed = item.installed;
         const available = item.available;
-        const ratingLoaded = isBazaarPackageRatingLoaded("updated", bazaar._data.downloadedRatingKeys.has(
-            bazaar._getRatingKey(bazaarType, installed.name)));
+        const ratingKey = bazaar._getRatingKey(bazaarType, installed.name);
+        const ratingLoaded = isBazaarPackageRatingLoaded("updated", bazaar._data.downloadedRatingKeys.has(ratingKey));
         return `<div class="b3-card" data-name="${escapeAttr(installed.name)}" data-package-type="${bazaarType}" data-package-source="updated">
     <div class="b3-card__img"><img src="${installed.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
@@ -770,7 +783,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genUpdateButtonHTML(available, bazaarType)}
-        ${bazaar._genRatePackageActionHTML(ratingLoaded)}
+        ${bazaar._genRatePackageActionHTML(ratingLoaded, bazaar._data.userRatings.get(ratingKey))}
     </div>
 </div>`;
     },
@@ -951,6 +964,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                     const showPublishSwitch = bazaarType === "plugins" && window.siyuan.config.publish.enable;
                     const publishEnabled = isBazaarPluginEnabledInPublish(bazaarItem);
                     const available = bazaar._getUpdatedItem(bazaarType, bazaarItem.name)?.available;
+                    const ratingKey = bazaar._getRatingKey(bazaarType, bazaarItem.name);
                     return `<div data-name="${escapeAttr(bazaarItem.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}">
     <div class="b3-card__img"><img src="${bazaarItem.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
@@ -967,7 +981,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         ${bazaar._genUpdateButtonHTML(available, bazaarType, true)}
-        ${bazaar._genRatePackageActionHTML(bazaar._data.downloadedRatingKeys.has(bazaar._getRatingKey(bazaarType, bazaarItem.name)))}
+        ${bazaar._genRatePackageActionHTML(bazaar._data.downloadedRatingKeys.has(ratingKey), bazaar._data.userRatings.get(ratingKey))}
         ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed", bazaarType)}
         ${bazaar._genFundingHTML(bazaarItem.preferredFunding, false)}
         ${hasSetting ? `<span data-position="north" class="ariaLabel block__icon block__icon--show${window.siyuan.config.bazaar.petalDisabled ? " fn__none" : ""}" data-type="setting" aria-label="${window.siyuan.languages.config}">
@@ -1003,6 +1017,7 @@ type="checkbox">
             bazaar._data.downloadedType = bazaarType;
             contentElement.innerHTML = html ? html : `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
             bazaar._loadDownloadedRatings(bazaarType, response.data.packages);
+            bazaar._loadDownloadedUserRatings(bazaarType, response.data.packages);
             const sideElement = bazaar.element.querySelector("#configBazaarReadme.config__view--show .item__side");
             // 仅刷新「已下载」详情，避免通过 URI 打开的在线详情被本地数据覆盖
             if (sideElement?.getAttribute("data-from") === "downloaded" &&
@@ -1037,6 +1052,7 @@ type="checkbox">
         userRatingLoadingKeys: new Set<string>(),
         userRatingSubmittingKeys: new Set<string>(),
         userRatingSubmitRequestIDs: new Map<string, number>(),
+        userRatingBatchRequestIDs: new Map<string, number>(),
         ratingBatchRequestIDs: new Map<TBazaarType, number>(),
         ratingMutationVersions: new Map<string, number>(),
         details: new Map<string, IBazaarPackageDetail>(),
@@ -1472,6 +1488,16 @@ type="checkbox">
                     }
                 } else {
                     slot.classList.toggle("fn__none", !loaded);
+                    const userRating = bazaar._data.userRatingKeys.has(key) ?
+                        normalizeBazaarUserRating(bazaar._data.userRatings.get(key)) : undefined;
+                    if (userRating !== undefined && userRating > 0) {
+                        slot.dataset.userRating = userRating.toString();
+                        slot.setAttribute("aria-label", window.siyuan.languages.bazaarYourRatingValue
+                            .replace("${rating}", userRating.toString()));
+                    } else {
+                        slot.removeAttribute("data-user-rating");
+                        slot.setAttribute("aria-label", window.siyuan.languages.bazaarRatePackage);
+                    }
                 }
             }
         });
@@ -1524,15 +1550,77 @@ type="checkbox">
             });
         });
     },
+    _loadDownloadedUserRatings(bazaarType: TBazaarType, packages: IBazaarItem[]) {
+        bazaar._syncRatingUser();
+        if (!window.siyuan.user) {
+            return;
+        }
+        const requestedUserID = bazaar._ratingUserID;
+        const packageNames = Array.from(new Set(packages.filter((item) => !item.invalidReason).map((item) => item.name)))
+            .filter((packageName) => {
+                const key = bazaar._getRatingKey(bazaarType, packageName);
+                return !bazaar._data.userRatingKeys.has(key) &&
+                    !bazaar._data.userRatingLoadingKeys.has(`${requestedUserID}|${key}`);
+            });
+        if (packageNames.length === 0) {
+            return;
+        }
+        const requestKey = `${requestedUserID}|${bazaarType}|${JSON.stringify(packageNames)}`;
+        const requestID = (bazaar._data.userRatingBatchRequestIDs.get(requestKey) || 0) + 1;
+        bazaar._data.userRatingBatchRequestIDs.set(requestKey, requestID);
+        const loadingKeys = packageNames.map((packageName) => {
+            const loadingKey = `${requestedUserID}|${bazaar._getRatingKey(bazaarType, packageName)}`;
+            bazaar._data.userRatingLoadingKeys.add(loadingKey);
+            return loadingKey;
+        });
+        const mutationVersions = new Map(packageNames.map((packageName) => {
+            const key = bazaar._getRatingKey(bazaarType, packageName);
+            return [packageName, getBazaarRatingMutationVersion(bazaar._data.ratingMutationVersions, key)];
+        }));
+        const mount = bazaar._captureMount();
+        fetchPost("/api/bazaar/getBazaarPackageUserRatings", {
+            packageType: bazaarType,
+            packageNames,
+        }, response => {
+            bazaar._syncRatingUser();
+            if (response.code !== 0 || requestedUserID !== bazaar._ratingUserID ||
+                bazaar._data.userRatingBatchRequestIDs.get(requestKey) !== requestID ||
+                !bazaar._isMountCurrent(mount) || !bazaar.element?.isConnected) {
+                return;
+            }
+            const userRatings = normalizeBazaarPackageUserRatingsResponse(packageNames, response.data);
+            if (!userRatings) {
+                return;
+            }
+            userRatings.forEach((userRating, packageName) => {
+                const key = bazaar._getRatingKey(bazaarType, packageName);
+                if (isBazaarRatingMutationVersionCurrent(bazaar._data.ratingMutationVersions, key,
+                    mutationVersions.get(packageName) || 0)) {
+                    bazaar._data.userRatings.set(key, userRating);
+                    bazaar._data.userRatingKeys.add(key);
+                    bazaar._refreshRatingUI(bazaarType, packageName);
+                }
+            });
+        }).finally(() => {
+            loadingKeys.forEach((loadingKey) => bazaar._data.userRatingLoadingKeys.delete(loadingKey));
+            if (bazaar._data.userRatingBatchRequestIDs.get(requestKey) === requestID) {
+                bazaar._data.userRatingBatchRequestIDs.delete(requestKey);
+            }
+        });
+    },
     _loadUpdatedRatings() {
         (["plugins", "themes", "icons", "templates", "widgets"] as TBazaarType[]).forEach((bazaarType) => {
             if (!isBazaarPackageTypeAvailable(bazaarType)) {
                 return;
             }
             const items = bazaar._data.update[bazaarType];
+            const installed = items.map((item) => item.installed);
             if (items.length && !items.every((item) => bazaar._data.downloadedRatingKeys.has(
                 bazaar._getRatingKey(bazaarType, item.installed.name)))) {
-                bazaar._loadDownloadedRatings(bazaarType, items.map((item) => item.installed));
+                bazaar._loadDownloadedRatings(bazaarType, installed);
+            }
+            if (items.length && window.siyuan.user) {
+                bazaar._loadDownloadedUserRatings(bazaarType, installed);
             }
         });
     },

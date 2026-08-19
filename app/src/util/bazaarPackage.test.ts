@@ -22,6 +22,7 @@ import {
     isValidBazaarPackageName,
     normalizeBazaarPackageRatingResponse,
     normalizeBazaarPackageRatingsResponse,
+    normalizeBazaarPackageUserRatingsResponse,
     normalizeBazaarRating,
     normalizeBazaarUserRating,
     sortBazaarPackagesByRating,
@@ -289,6 +290,37 @@ describe("normalizeBazaarPackageRatingsResponse", () => {
             eligiblePackageNames: ["package"],
             ratings: {package: {average: 5, count: 2, distribution: [0, 0, 0, 0, 1]}},
         }), new Map([["package", {ratingAvailable: false}]]));
+    });
+});
+
+describe("normalizeBazaarPackageUserRatingsResponse", () => {
+    it("preserves rated and explicitly unrated official packages", () => {
+        assert.deepEqual(normalizeBazaarPackageUserRatingsResponse(["rated", "unrated", "local"], {
+            eligiblePackageNames: ["rated", "unrated"],
+            userRatings: {rated: 4, unrated: 0},
+        }), new Map([
+            ["rated", 4],
+            ["unrated", 0],
+        ]));
+    });
+
+    it("rejects incomplete, unexpected, and malformed user ratings", () => {
+        assert.equal(normalizeBazaarPackageUserRatingsResponse(["rated", "unrated"], {
+            eligiblePackageNames: ["rated", "unrated"],
+            userRatings: {rated: 4},
+        }), undefined);
+        assert.equal(normalizeBazaarPackageUserRatingsResponse(["rated"], {
+            eligiblePackageNames: ["rated"],
+            userRatings: {rated: 4, extra: 0},
+        }), undefined);
+        assert.equal(normalizeBazaarPackageUserRatingsResponse(["rated"], {
+            eligiblePackageNames: ["rated"],
+            userRatings: {rated: 6},
+        }), undefined);
+        assert.equal(normalizeBazaarPackageUserRatingsResponse(["rated"], {
+            eligiblePackageNames: ["rated", "extra"],
+            userRatings: {rated: 4, extra: 0},
+        }), undefined);
     });
 });
 

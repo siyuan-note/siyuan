@@ -17,7 +17,6 @@ import {fetchPost} from "../../util/fetch";
 import {initHarmonyTextSelectionMenu} from "../../util/harmonyTextSelectionMenu";
 import {clearDragTipGhost, hideDragTip} from "../../protyle/util/dragTip";
 import {formatPainter} from "../../protyle/toolbar/FormatPainter";
-import {pauseImageAnimation, resumeImageAnimation} from "../../protyle/util/imageAnimation";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`.toLowerCase();
 
@@ -251,7 +250,6 @@ export const initWindowEvent = (app: App) => {
     });
 
     window.addEventListener("blur", () => {
-        pauseImageAnimation(document.body);
         window.siyuan.ctrlIsPressed = false;
         window.siyuan.shiftIsPressed = false;
         window.siyuan.altIsPressed = false;
@@ -259,10 +257,6 @@ export const initWindowEvent = (app: App) => {
         /// #if BROWSER
         setWebViewFocusable();
         /// #endif
-    });
-
-    window.addEventListener("focus", () => {
-        resumeImageAnimation(document.body, Constants.TIMEOUT_INPUT);
     });
 
     window.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {

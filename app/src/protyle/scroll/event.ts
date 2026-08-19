@@ -4,13 +4,11 @@ import {isMobile} from "../../util/functions";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
 import {stickyRow} from "../render/av/row";
 import {trimAVRowsSync} from "../render/av/virtualScroll";
-import {pauseImageAnimationTemporarily} from "../util/imageAnimation";
 
 let getIndexTimeout: number;
 const avScrollPending = new WeakSet<HTMLElement>();
 export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
     element.addEventListener("scroll", () => {
-        pauseImageAnimationTemporarily(protyle.wysiwyg.element, Constants.TIMEOUT_INPUT);
         const elementRect = element.getBoundingClientRect();
         if (!protyle.toolbar.element.classList.contains("fn__none")) {
             const initY = protyle.toolbar.element.getAttribute("data-inity").split(Constants.ZWSP);

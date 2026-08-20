@@ -432,13 +432,14 @@ export const bazaar = {
         const reason = item.preferredDeprecatedReason || window.siyuan.languages.bazaarDeprecatedTip;
         const alternatives = Array.isArray(item.alternatives) ? item.alternatives.filter((name) =>
             typeof name === "string" && name.length > 0) : [];
-        const alternativesHTML = alternatives.map((name) => `<button type="button" data-type="bazaar-alternative" data-package-type="${bazaarType}" data-package-name="${escapeAttr(name)}" class="b3-chip b3-chip--small b3-chip--pointer">${escapeHtml(name)}</button>`).join('<span class="fn__space--small"></span>');
-        return `<section class="item__meta-section">
-    <div class="item__meta-title">${bazaar._genDeprecatedChipHTML(item, false)}</div>
-    <div class="ft__on-surface">${escapeHtml(reason)}</div>
-    ${alternativesHTML ? `<div class="fn__hr--b"></div>
-    <div>${window.siyuan.languages.bazaarAlternatives}</div>
-    <div class="fn__flex fn__flex-wrap">${alternativesHTML}</div>` : ""}
+        const alternativesHTML = alternatives.map((name) => `<button type="button" data-type="bazaar-alternative" data-package-type="${bazaarType}" data-package-name="${escapeAttr(name)}" class="b3-chip b3-chip--small b3-chip--pointer config-bazaar__deprecated-button">${escapeHtml(name)}</button>`).join("");
+        return `<section class="config-bazaar__deprecated">
+    <div class="config-bazaar__deprecated-title">${escapeHtml(window.siyuan.languages.bazaarDeprecated)}</div>
+    <div class="config-bazaar__deprecated-reason">${escapeHtml(reason)}</div>
+    ${alternativesHTML ? `<div class="config-bazaar__deprecated-alternatives">
+        <span class="config-bazaar__deprecated-label">${window.siyuan.languages.bazaarAlternatives}</span>
+        <div class="config-bazaar__deprecated-list">${alternativesHTML}</div>
+    </div>` : ""}
 </section>`;
     },
     _getInvalidPackageTip(reason: IBazaarItem["invalidReason"]) {

@@ -365,15 +365,6 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             tempElement.innerHTML = html;
         }
     }
-    const tempEditElement = getContenteditableElement(tempElement.content.firstElementChild);
-    // 全选删除会一并移除零宽空格，补回后光标才能通过上下键进入空段落。
-    // https://github.com/siyuan-note/siyuan/issues/18862
-    if (tempElement.content.childElementCount === 1 &&
-        tempElement.content.firstElementChild.getAttribute("data-type") === "NodeParagraph" &&
-        tempEditElement?.innerHTML === "<wbr>") {
-        tempEditElement.insertAdjacentText("afterbegin", Constants.ZWSP);
-        html = tempElement.innerHTML;
-    }
     if (needRender && (
             getContenteditableElement(tempElement.content.firstElementChild)?.innerHTML !== getContenteditableElement(blockElement).innerHTML ||
             // 内容删空后使用上下键，光标无法到达 https://github.com/siyuan-note/siyuan/issues/4167 https://ld246.com/article/1636256333803

@@ -838,6 +838,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     (toNext ? getNextBlock(nodeElement) : undefined);
                 if (adjacentElement) {
                     adjacentElement = toPrevious ? getLastBlock(adjacentElement) : getFirstBlock(adjacentElement);
+                    // 显式聚焦空段落，避免浏览器跨越容器边界时跳过该块。
+                    // https://github.com/siyuan-note/siyuan/issues/18862
+                    if ((event.key === "ArrowUp" || event.key === "ArrowDown") && isEmptyParagraph(adjacentElement)) {
+                        focusBlock(adjacentElement, undefined, event.key === "ArrowDown");
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    }
                     if (adjacentElement.classList.contains("av") &&
                         focusAVByArrow(protyle, adjacentElement as HTMLElement, event.key)) {
                         event.stopPropagation();

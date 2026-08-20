@@ -20,6 +20,99 @@ const MAX_CANVAS_SIZE = 16384;
 
 const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
+// ⚠️ TEMPORARY BENCHMARK — remove before merging. ⚠️
+// Rasterizes the document with *both* libraries on every platform and logs the timings to the
+// devtools console, so the html-to-image / modern-screenshot comparison can be made on a real
+// device instead of from estimates. Set to false to restore normal single-library behaviour.
+const BENCHMARK_EXPORT_IMAGE = true;
+// The library that runs second benefits from fonts/images the first one already warmed, so flip
+// this and re-run the same document to see how much of the gap is just ordering.
+const BENCHMARK_MODERN_FIRST = true;
+
+const benchLog = (...args: unknown[]) => {
+    console.log("%c[export-image bench]", "color:#3182f6;font-weight:bold", ...args);
+};
+
+const benchDescribeBlob = async (blob: Blob) => {
+    const size = `${(blob.size / 1024 / 1024).toFixed(2)}MB`;
+    try {
+        // 实际像素尺寸，用来验证 scale 与 maximumCanvasSize 是否生效
+        const bitmap = await createImageBitmap(blob);
+        const dimensions = `${bitmap.width}x${bitmap.height}`;
+        bitmap.close();
+        return `${dimensions} ${size}`;
+    } catch (e) {
+        return `<undecodable: ${e}> ${size}`;
+    }
+};
+
+// 复刻上游在 WebKit 上的真实路径：对同一个 .b3-dialog__content 连跑 5 次
+const benchHtmlToImage = async (contentElement: HTMLElement) => {
+    const options = {
+        imagePlaceholder: IMAGE_PLACEHOLDER,
+        onImageErrorHandler: (event: Event) => {
+            (event.target as HTMLImageElement).src = IMAGE_PLACEHOLDER;
+        }
+    };
+    const start = performance.now();
+    let blob = await window.htmlToImage.toBlob(contentElement, options);
+    benchLog(`html-to-image      pass 1 (warmup)  ${(performance.now() - start).toFixed(0)}ms`);
+    for (let i = 0; i < 4; i++) {
+        const passStart = performance.now();
+        blob = await window.htmlToImage.toBlob(contentElement, options);
+        benchLog(`html-to-image      pass ${i + 2}           ${(performance.now() - passStart).toFixed(0)}ms`);
+    }
+    const total = performance.now() - start;
+    benchLog(`html-to-image      TOTAL 5 passes   ${total.toFixed(0)}ms   ${await benchDescribeBlob(blob)}`);
+    return {blob, total};
+};
+
+const benchModernScreenshot = async (contentElement: HTMLElement) => {
+    const start = performance.now();
+    const blob = await window.modernScreenshot.domToBlob(contentElement, {
+        type: "image/png",
+        scale: window.devicePixelRatio || 1,
+        maximumCanvasSize: MAX_CANVAS_SIZE,
+        fetch: {placeholderImage: IMAGE_PLACEHOLDER}
+    });
+    const total = performance.now() - start;
+    benchLog(`modern-screenshot  TOTAL 1 pass     ${total.toFixed(0)}ms   ${await benchDescribeBlob(blob)}`);
+    return {blob, total};
+};
+
+const benchmarkRasterizers = async (contentElement: HTMLElement) => {
+    // 两个库都先加载完再计时，避免把网络请求算进第一个跑的库
+    await Promise.all([
+        addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.6.6`, "protyleModernScreenshot"),
+        addScript(`${Constants.PROTYLE_CDN}/js/html-to-image.min.js?v=1.11.13`, "protyleHtml2image"),
+    ]);
+    const scale = window.devicePixelRatio || 1;
+    const isWebKitPath = isIPhone() || isIPad() || isSafari();
+    benchLog("env", {
+        devicePixelRatio: scale,
+        webKitPath: isWebKitPath,
+        modernFirst: BENCHMARK_MODERN_FIRST,
+        cssSize: `${contentElement.scrollWidth}x${contentElement.scrollHeight}`,
+        unclampedCanvas: `${Math.floor(contentElement.scrollWidth * scale)}x${Math.floor(contentElement.scrollHeight * scale)}`,
+        maxCanvasSize: MAX_CANVAS_SIZE,
+        userAgent: navigator.userAgent,
+    });
+
+    let modern;
+    let legacy;
+    if (BENCHMARK_MODERN_FIRST) {
+        modern = await benchModernScreenshot(contentElement);
+        legacy = await benchHtmlToImage(contentElement);
+    } else {
+        legacy = await benchHtmlToImage(contentElement);
+        modern = await benchModernScreenshot(contentElement);
+    }
+    benchLog(`==> modern-screenshot is ${(legacy.total / modern.total).toFixed(2)}x the speed of the 5-pass html-to-image path (${(legacy.total - modern.total).toFixed(0)}ms saved)`);
+    // 导出的仍然是当前逻辑会选用的那个库的结果，保证基准测试期间文件依然正确
+    return isWebKitPath ? modern.blob : legacy.blob;
+};
+// ⚠️ END TEMPORARY BENCHMARK ⚠️
+
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
     showMessage(`${window.siyuan.languages.exported} ${escapeHtml(exportPath)}
@@ -109,6 +202,10 @@ export const exportImage = (id: string) => {
             exportDialog.destroy();
         };
         setTimeout(() => {
+            if (BENCHMARK_EXPORT_IMAGE) {
+                benchmarkRasterizers(contentElement).then(exportBlob);
+                return;
+            }
             if (isIPhone() || isIPad() || isSafari()) {
                 // html-to-image clones every node and copies its full computed style one property at
                 // a time, which is O(nodes) with a huge constant on WebKit/WKWebView (~45s for a

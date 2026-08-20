@@ -3,6 +3,7 @@ import {escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByClassName} from "../../../protyle/util/hasClosest";
 import {upDownHint} from "../../../util/upDownHint";
+import type {AgentSessionRunStatus} from "./AgentSessionRuns";
 /// #if !BROWSER
 import * as path from "path";
 import {useShell} from "../../../util/pathName";
@@ -28,6 +29,7 @@ export class AgentSessionPanel {
             onSwitch: (id: string) => Promise<void>;
             onDelete: (id: string) => Promise<void>;
             onRename: (id: string, title: string) => Promise<void>;
+            getStatus?: (id: string) => AgentSessionRunStatus | undefined;
             onClose?: () => void;
         },
         private mobile = false,
@@ -184,8 +186,14 @@ export class AgentSessionPanel {
             for (let i = 0; i < listItems.length; i++) {
                 const s = listItems[i];
                 const isActive = s.id === currentId;
+                const status = this.callbacks.getStatus?.(s.id) || (s.agentRunning ? "running" : undefined);
+                const statusLabel = status === "running" ? (L.agentThinking || "Thinking") :
+                    (L.agentNotifyDone || "Agent response completed");
+                const statusHTML = status ? '<span class="agent-session-status agent-session-status--' + status +
+                    ' ariaLabel" aria-label="' + escapeHtml(statusLabel) + '"></span>' : "";
                 html += '<div class="b3-list-item' + (this.mobile ? "" : " b3-list-item--hide-action") +
                     (isActive ? " b3-list-item--focus" : "") + '" data-id="' + s.id + '">' +
+                    statusHTML +
                     '<span class="b3-list-item__text ariaLabel" data-position="parentW" aria-label="' + escapeHtml(s.title || defaultTitle) + '">' + escapeHtml(s.title || defaultTitle) + "</span>" +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.rename + '"><svg><use xlink:href="#iconEdit"></use></svg></span>' +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw agent-session-more" data-id="' + s.id + '" aria-label="' + (L.more || "More") + '">' +

@@ -36,6 +36,7 @@ export interface SessionIndexItem {
     title: string;
     createdAt: number;
     updatedAt: number;
+    agentRunning?: boolean;
 }
 
 export interface SessionListResult {

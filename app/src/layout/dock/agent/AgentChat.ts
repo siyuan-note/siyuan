@@ -48,6 +48,7 @@ import {isEncryptedBox} from "../../../util/pathName";
 import {Menu} from "../../../plugin/Menu";
 import {getAgentDefaultModelID, getUsableAgentModels} from "./agentModel";
 import {AgentScrollStateMode, resolveAgentScrollState} from "./AgentScrollState";
+import {AgentSessionRun, AgentSessionRuns} from "./AgentSessionRuns";
 
 // 限制注入用户轮次上下文的可见块 ID 数量，以控制 token 开销。
 // 与 kernel/agent/agent.go 中的 maxVisibleBlockIDs 保持一致。
@@ -69,6 +70,7 @@ export interface AgentChatHost {
 
 type EntryBase = { id?: string };
 type AgentReference = { id: string; title: string };
+type PendingAgentInteraction = Extract<ISSEResult, {type: "confirm" | "question"}>;
 type UserEntry = EntryBase & {
     type: "user";
     content: string;
@@ -178,6 +180,7 @@ export class AgentChat extends Model {
     }> = [];
     private toolCallStartedAt = new Map<string, number>();
     private abortController: AbortController | null = null;
+    private sessionRuns = new AgentSessionRuns<PendingAgentInteraction>();
     private currentThinkingText = "";
     private currentThinkingReasoning = "";
     private currentThinkingReasoningContent = "";
@@ -413,6 +416,7 @@ export class AgentChat extends Model {
                     }
                     await SessionStore.rename(id, title);
                 },
+                getStatus: (id) => this.sessionRuns.resolveStatus(id),
                 onClose: this.host.mobile ? this.host.close : undefined,
             },
             !!this.host.mobile,
@@ -676,45 +680,48 @@ export class AgentChat extends Model {
                     this.rebuildNavMarkers();
                     this.tryGenerateTitle();
                     this.setStreaming(true);
-                    try {
-                        await this.saveSession();
-                    } catch (e) {
-                        this.rollbackUserEntry(userEntryId);
-                        this.setStreaming(false);
-                        await this.reloadFromDisk();
-                        return;
-                    }
-                    this.abortController = new AbortController();
-                    const requestSessionId = this.sessionId;
                     this.requestStartTime = Date.now();
                     this.currentThinkingDuration = 0;
                     this.currentTurnID = "";
                     this.currentRoundID = "";
-                    await fetchAgentSSE(text, window.siyuan.config.appearance.lang, [],
-                        (event: ISSEResult) => {
-                            if (this.sessionId !== requestSessionId) {
-                                return;
-                            }
-                            return this.handleSSEEvent(event);
-                        },
-                        (err: Error) => {
-                            if (this.sessionId !== requestSessionId) {
-                                return;
-                            }
-                            if (err instanceof AgentHttpError && err.status === 409) {
-                                return this.handleConflictReject();
-                            }
-                            return this.handleConfigError(err, userEntryId);
-                        },
-                        this.abortController.signal,
-                        this.sessionId,
-                        this.getSelectedModel(),
-                        this.selectedReasoningEffort,
-                        undefined,
-                        undefined,
-                        undefined,
-                        userEntryId,
-                        SessionStore.getRevision(this.sessionId));
+                    const selectedModel = this.getSelectedModel();
+                    const reasoningEffort = this.selectedReasoningEffort;
+                    const run = this.beginSessionRun();
+                    try {
+                        await this.saveSession();
+                    } catch (e) {
+                        this.discardSessionRun(run);
+                        if (this.sessionId === run.sessionID) {
+                            this.rollbackUserEntry(userEntryId);
+                            await this.reloadFromDisk();
+                        }
+                        return;
+                    }
+                    void this.sessionPanel?.refresh();
+                    try {
+                        await fetchAgentSSE(text, window.siyuan.config.appearance.lang, [],
+                            (event: ISSEResult) => this.handleSessionRunEvent(run, event),
+                            (err: Error) => {
+                                if (run.detached || this.sessionId !== run.sessionID) {
+                                    return;
+                                }
+                                if (err instanceof AgentHttpError && err.status === 409) {
+                                    return this.handleConflictReject();
+                                }
+                                return this.handleConfigError(err, userEntryId);
+                            },
+                            run.controller.signal,
+                            run.sessionID,
+                            selectedModel,
+                            reasoningEffort,
+                            undefined,
+                            undefined,
+                            undefined,
+                            userEntryId,
+                            SessionStore.getRevision(run.sessionID));
+                    } finally {
+                        await this.finishSessionRun(run);
+                    }
                 }
             });
         });
@@ -961,6 +968,170 @@ export class AgentChat extends Model {
         return result.session ?? null;
     }
 
+    private beginSessionRun(): AgentSessionRun<PendingAgentInteraction> {
+        const run = this.sessionRuns.begin(this.sessionId);
+        this.abortController = run.controller;
+        this.sessionRuns.markRead(this.sessionId);
+        this.updateHostRunStatus();
+        this.updateSendButtonState();
+        void this.sessionPanel?.refresh();
+        return run;
+    }
+
+    private detachSessionRun(sessionID: string): boolean {
+        const run = this.sessionRuns.get(sessionID);
+        if (!run) {
+            return false;
+        }
+        this.sessionRuns.detach(sessionID);
+        this.pendingRecoverySessionIDs.add(sessionID);
+        if (this.abortController === run.controller) {
+            this.abortController = null;
+        }
+        this.updateHostRunStatus();
+        this.updateSendButtonState();
+        void this.sessionPanel?.refresh();
+        return true;
+    }
+
+    private interactionKey(event: PendingAgentInteraction): string {
+        return event.type === "confirm" ? `confirm:${event.confirmID}` : `question:${event.questionID}`;
+    }
+
+    private queueRunInteraction(run: AgentSessionRun<PendingAgentInteraction>, event: PendingAgentInteraction,
+                                notify = true) {
+        const key = this.interactionKey(event);
+        if (!run.pendingInteractions.some(item => this.interactionKey(item) === key)) {
+            run.pendingInteractions.push(event);
+            if (notify) {
+                if (this.host.notify) {
+                    this.host.notify("confirm");
+                } else if (!document.hasFocus() || document.hidden) {
+                    const L = window.siyuan.languages;
+                    sendNotification({title: L.agentNotifyConfirm, body: "", timeoutType: "default"});
+                }
+            }
+        }
+    }
+
+    private removeRunInteraction(sessionID: string, type: PendingAgentInteraction["type"], id: string) {
+        const run = this.sessionRuns.get(sessionID);
+        if (!run) {
+            return;
+        }
+        const key = `${type}:${id}`;
+        run.pendingInteractions = run.pendingInteractions.filter(item => this.interactionKey(item) !== key);
+        run.renderedInteractionKeys.delete(key);
+    }
+
+    private async renderRunInteraction(run: AgentSessionRun<PendingAgentInteraction>, event: PendingAgentInteraction) {
+        if (this.sessionId !== run.sessionID || !run.interactionViewReady) {
+            return;
+        }
+        const key = this.interactionKey(event);
+        if (run.renderedInteractionKeys.has(key)) {
+            return;
+        }
+        run.renderedInteractionKeys.add(key);
+        this.removeMirrorPlaceholder();
+        if (event.type === "confirm") {
+            await this.appendConfirm(event.name, event.arguments, event.confirmID, event.effects, event.forced, false);
+        } else {
+            this.appendQuestion(event.questionID, event.arguments, event.roundID);
+        }
+    }
+
+    private async renderPendingRunInteractions(run: AgentSessionRun<PendingAgentInteraction>) {
+        for (const event of run.pendingInteractions) {
+            await this.renderRunInteraction(run, event);
+        }
+    }
+
+    private async handleSessionRunEvent(run: AgentSessionRun<PendingAgentInteraction>, event: ISSEResult) {
+        if (event.type === "turn") {
+            run.turnID = event.turnID;
+        }
+        if (!run.detached && this.sessionId === run.sessionID) {
+            if (event.type === "confirm" || event.type === "question") {
+                this.queueRunInteraction(run, event, false);
+                run.renderedInteractionKeys.add(this.interactionKey(event));
+            }
+            await this.handleSSEEvent(event);
+            return;
+        }
+        if (event.type === "browser_capability_call") {
+            await this.handleBrowserCapabilityCall(event.callID, event.capabilityID, event.generation, event.arguments);
+            return;
+        }
+        if (event.type === "confirm" || event.type === "question") {
+            this.queueRunInteraction(run, event);
+            await this.renderRunInteraction(run, event);
+            return;
+        }
+        if (event.type === "permission" && this.sessionId === run.sessionID) {
+            this.applyPermissionMode(event.permissionMode);
+        }
+    }
+
+    private async finishSessionRun(run: AgentSessionRun<PendingAgentInteraction>) {
+        const current = this.sessionId === run.sessionID;
+        const detached = run.detached;
+        if (!this.sessionRuns.complete(run, detached && !current)) {
+            return;
+        }
+        if (this.abortController === run.controller) {
+            this.abortController = null;
+        }
+        this.updateHostRunStatus();
+        this.updateSendButtonState();
+        void this.sessionPanel?.refresh();
+        if (!detached) {
+            return;
+        }
+        this.pendingRecoverySessionIDs.add(run.sessionID);
+        if (current) {
+            this.currentTurnID = run.turnID;
+            this.setStreaming(false);
+            this.removeMirrorPlaceholder();
+            void this.recoverInterruptedTurn(run.sessionID, run.turnID);
+        } else if (this.host.notify) {
+            this.host.notify("done");
+        } else if (!document.hasFocus() || document.hidden) {
+            const L = window.siyuan.languages;
+            sendNotification({title: L.agentNotifyDone, timeoutType: "default"});
+        }
+    }
+
+    private discardSessionRun(run: AgentSessionRun<PendingAgentInteraction>) {
+        this.sessionRuns.complete(run, false);
+        if (this.abortController === run.controller) {
+            this.abortController = null;
+        }
+        if (this.sessionId === run.sessionID) {
+            this.setStreaming(false);
+        }
+        this.updateHostRunStatus();
+        this.updateSendButtonState();
+        void this.sessionPanel?.refresh();
+    }
+
+    private attachSessionRun(run: AgentSessionRun<PendingAgentInteraction>) {
+        run.interactionViewReady = true;
+        this.abortController = run.controller;
+        this.currentTurnID = run.turnID;
+        this.setStreaming(true);
+        this.showMirrorPlaceholder(true);
+        void this.renderPendingRunInteractions(run);
+    }
+
+    private updateHostRunStatus() {
+        this.host.onStatusChange?.(this.isStreaming || this.sessionRuns.hasRunning() ? "running" : "idle");
+    }
+
+    private isCurrentSessionRunning(): boolean {
+        return this.isStreaming || this.mirrorLocked || !!this.sessionRuns.get(this.sessionId);
+    }
+
     // 处理 ws 推送的跨实例会话变更通知。核心时序控制：
     // - streamStart：其他实例开始流式。立即从磁盘拉取一次（发起者发消息时已把 user 消息落盘），
     //   让本轮用户新消息尽快可见，然后进入占位锁定显示"AI 回复生成中"。
@@ -1001,6 +1172,7 @@ export class AgentChat extends Model {
                 // 标记处于其他实例流式中，reloadFromDisk 重绘后会据此保留占位条。
                 this.mirrorLocked = true;
                 this.updateRegenerateButtons();
+                this.updateSendButtonState();
                 // 立即拉取一次：发起者发消息时已 saveSession 写入 user 消息，让本轮新消息尽快可见。
                 void this.reloadFromDisk();
                 break;
@@ -1008,6 +1180,7 @@ export class AgentChat extends Model {
                 // 流结束，解除占位锁定并移除占位条。不重绘——完整内容由随后的 update 广播驱动。
                 this.mirrorLocked = false;
                 this.updateRegenerateButtons();
+                this.updateSendButtonState();
                 this.removeMirrorPlaceholder();
                 this.restorePendingEditDraft();
                 break;
@@ -1023,23 +1196,26 @@ export class AgentChat extends Model {
                 break;
             case "delete":
                 this.mirrorLocked = false;
+                this.updateSendButtonState();
                 this.handleCurrentSessionDeleted();
                 break;
         }
     }
 
     // 显示"其他实例正在对话中…"只读占位条。不进入 setStreaming 态（不切换 stop 按钮、不置灰 composer）。
-    private showMirrorPlaceholder() {
+    private showMirrorPlaceholder(localRun = false) {
         if (this.mirrorPlaceholderEl) {
             return;
         }
         this.removeMirrorPlaceholder();
         const L = window.siyuan.languages;
+        const message = localRun ? (L.agentThinking || "Thinking") :
+            (L.agentMirrorStreaming || "Another instance is chatting...");
         const el = document.createElement("div");
         el.className = "agent-chat__msg agent-chat__msg--mirror";
         el.innerHTML = '<div class="agent-chat__body agent-chat__body--mirror">' +
             '<span class="agent-chat__mirror-spinner"></span>' +
-            "<span>" + escapeHtml(L.agentMirrorStreaming || "Another instance is chatting...") + "</span>" +
+            "<span>" + escapeHtml(message) + "</span>" +
             "</div>";
         this.messagesContainer.appendChild(el);
         this.mirrorPlaceholderEl = el;
@@ -1256,14 +1432,15 @@ export class AgentChat extends Model {
         this.destroyEditingComposer();
         this.pendingEditDraft = null;
         const previousSessionID = this.sessionId;
-        const hadActiveTurn = this.isStreaming || !!this.currentTurnID;
+        const previousRun = this.sessionRuns.get(previousSessionID);
+        const hadActiveTurn = !!previousRun || this.isStreaming || !!this.currentTurnID;
         if (hadActiveTurn) {
             this.pendingRecoverySessionIDs.add(previousSessionID);
-            if (this.abortController) {
-                this.abortController.abort();
-                this.abortController = null;
-            }
         }
+        if (previousRun) {
+            this.detachSessionRun(previousSessionID);
+        }
+        this.abortController = null;
         this.setStreaming(false);
         this.mirrorLocked = false;
         this.removeMirrorPlaceholder();
@@ -1274,11 +1451,18 @@ export class AgentChat extends Model {
         }
         const session = await SessionStore.load(id);
         if (!session) {
+            if (previousRun) {
+                this.attachSessionRun(previousRun);
+            }
             return;
         }
         this.sessionId = session.id;
-        this.currentTurnID = "";
+        this.sessionRuns.markRead(session.id);
+        void this.sessionPanel?.refresh();
+        const sessionRun = this.sessionRuns.get(session.id);
+        this.currentTurnID = sessionRun?.turnID || "";
         this.currentRoundID = "";
+        this.mirrorLocked = !!session.agentRunning && !sessionRun;
         if (session.recoveryTurnID) {
             this.recoveryCommitTurnIDs.set(session.id, session.recoveryTurnID);
         } else {
@@ -1295,8 +1479,20 @@ export class AgentChat extends Model {
         this.entries = this.buildEntriesFromSession(session);
         this.hasTitled = session.titled !== false;
         this.currentAIElement = null;
+        this.currentAssistantEntryId = "";
+        this.currentThinkingEntryId = "";
         this.currentContent = "";
         this.fullContent = "";
+        this.currentToolCalls = [];
+        this.pendingConfirms = [];
+        this.currentThinkingSteps = [];
+        this.currentThinkingText = "";
+        this.currentThinkingReasoning = "";
+        this.currentThinkingReasoningContent = "";
+        this.currentThinkingDuration = 0;
+        this.lastStepToolCount = 0;
+        this.renderedToolNames = {};
+        this.hasInterveningCard = false;
         this.contextTokens = session.contextTokens ?? 0;
         this.contextTokenBreakdown = session.contextTokenBreakdown ?? {};
         this.contextCachedTokens = session.contextCachedTokens ?? 0;
@@ -1310,6 +1506,9 @@ export class AgentChat extends Model {
         }
         this.messagesContainer.classList.add("agent-chat__messages--switching");
         this.messagesContainer.addEventListener("transitionend", () => {
+            if (this.sessionId !== session.id) {
+                return;
+            }
             this.messagesContainer.innerHTML = "";
             this.titleElement.textContent = session.title;
             this.renderLoadedSession(session);
@@ -1321,8 +1520,18 @@ export class AgentChat extends Model {
                 this.scrollToBottom(true);
             }
             this.messagesContainer.classList.remove("agent-chat__messages--switching");
-            if (this.pendingRecoverySessionIDs.has(session.id)) {
+            const activeRun = this.sessionRuns.get(session.id);
+            if (activeRun) {
+                this.attachSessionRun(activeRun);
+            } else if (this.mirrorLocked) {
+                this.showMirrorPlaceholder();
+            } else {
+                this.setStreaming(false);
+            }
+            if (!activeRun && this.pendingRecoverySessionIDs.has(session.id)) {
                 void this.recoverInterruptedTurn(session.id);
+            } else if (!activeRun && session.agentRunning && !this.mirrorLocked) {
+                void this.reloadFromDisk(true);
             }
         }, {once: true});
     }
@@ -1624,14 +1833,15 @@ export class AgentChat extends Model {
         this.destroyEditingComposer();
         this.pendingEditDraft = null;
         const previousSessionID = this.sessionId;
-        const hadActiveTurn = this.isStreaming || !!this.currentTurnID;
+        const previousRun = this.sessionRuns.get(previousSessionID);
+        const hadActiveTurn = !!previousRun || this.isStreaming || !!this.currentTurnID;
         if (hadActiveTurn) {
             this.pendingRecoverySessionIDs.add(previousSessionID);
         }
-        if (this.abortController) {
-            this.abortController.abort();
-            this.abortController = null;
+        if (previousRun) {
+            this.detachSessionRun(previousSessionID);
         }
+        this.abortController = null;
         this.setStreaming(false);
         this.mirrorLocked = false;
         this.removeMirrorPlaceholder();
@@ -1641,6 +1851,7 @@ export class AgentChat extends Model {
             await this.saveSession();
         }
         this.sessionId = SessionStore.newSessionId();
+        this.sessionRuns.markRead(this.sessionId);
         this.currentTurnID = "";
         this.currentRoundID = "";
         this.sessionCreatedAt = Date.now();
@@ -1685,8 +1896,8 @@ export class AgentChat extends Model {
     }
 
     private async deleteSession(id: string) {
-        if (id === this.sessionId && (this.isStreaming || !!this.currentTurnID ||
-            this.pendingRecoverySessionIDs.has(id))) {
+        if (this.sessionRuns.get(id) || (id === this.sessionId && (this.isStreaming || !!this.currentTurnID ||
+            this.pendingRecoverySessionIDs.has(id)))) {
             const L = window.siyuan.languages;
             showMessage(L.agentChatBusy || "This session is busy in another instance", 3000);
             return;
@@ -1722,7 +1933,7 @@ export class AgentChat extends Model {
         const refs = sendData.references;
         const editorContext = this.captureEditorContext();
         const frontendCapabilities = listCapabilityManifests();
-        if (!text || this.isStreaming || this.modelOptions.length === 0) {
+        if (!text || this.isCurrentSessionRunning() || this.modelOptions.length === 0) {
             return;
         }
         if (!await this.prepareForNewTurn()) {
@@ -1734,6 +1945,8 @@ export class AgentChat extends Model {
         this.hasInterveningCard = false;
         this.currentRoundID = "";
         this.composer.clear();
+        const selectedModel = this.getSelectedModel();
+        const reasoningEffort = this.selectedReasoningEffort;
 
         const userEntryId = SessionStore.newSessionId();
         this.entries.push({
@@ -1754,54 +1967,53 @@ export class AgentChat extends Model {
         if (this.composer) {
             this.composer.pushHistory(text);
         }
-        try {
-            await this.saveSession();
-        } catch (e) {
-            this.rollbackUserEntry(userEntryId);
-            this.setStreaming(false);
-            await this.reloadFromDisk();
-            return;
-        }
-
         this.requestStartTime = Date.now();
         this.currentThinkingDuration = 0;
         this.currentTurnID = "";
         this.currentRoundID = "";
+        const run = this.beginSessionRun();
+        try {
+            await this.saveSession();
+        } catch (e) {
+            this.discardSessionRun(run);
+            if (this.sessionId === run.sessionID) {
+                this.rollbackUserEntry(userEntryId);
+                await this.reloadFromDisk();
+            }
+            return;
+        }
+        void this.sessionPanel?.refresh();
 
-        this.abortController = new AbortController();
-        const requestSessionId = this.sessionId;
-
-        await fetchAgentSSE(
-            text,
-            window.siyuan.config.appearance.lang,
-            refs,
-            (event: ISSEResult) => {
-                if (this.sessionId !== requestSessionId) {
-                    return;
-                }
-                return this.handleSSEEvent(event);
-            },
-            (err: Error) => {
-                if (this.sessionId !== requestSessionId) {
-                    return;
-                }
-                // 409：该会话正在其他实例对话中（实例级互斥）。重载磁盘权威状态，不进入流式。
-                if (err instanceof AgentHttpError && err.status === 409) {
-                    this.handleConflictReject();
-                    return;
-                }
-                return this.handleConfigError(err, userEntryId);
-            },
-            this.abortController.signal,
-            this.sessionId,
-            this.getSelectedModel(),
-            this.selectedReasoningEffort,
-            undefined,
-            editorContext,
-            frontendCapabilities,
-            userEntryId,
-            SessionStore.getRevision(this.sessionId),
-        );
+        try {
+            await fetchAgentSSE(
+                text,
+                window.siyuan.config.appearance.lang,
+                refs,
+                (event: ISSEResult) => this.handleSessionRunEvent(run, event),
+                (err: Error) => {
+                    if (run.detached || this.sessionId !== run.sessionID) {
+                        return;
+                    }
+                    // 409：该会话正在其他实例对话中（实例级互斥）。重载磁盘权威状态，不进入流式。
+                    if (err instanceof AgentHttpError && err.status === 409) {
+                        this.handleConflictReject();
+                        return;
+                    }
+                    return this.handleConfigError(err, userEntryId);
+                },
+                run.controller.signal,
+                run.sessionID,
+                selectedModel,
+                reasoningEffort,
+                undefined,
+                editorContext,
+                frontendCapabilities,
+                userEntryId,
+                SessionStore.getRevision(run.sessionID),
+            );
+        } finally {
+            await this.finishSessionRun(run);
+        }
     }
 
     // 实例级互斥被拒（409）说明另一实例已在本轮保存之后抢先启动。此时磁盘可能已有对方的新消息，
@@ -2248,7 +2460,7 @@ export class AgentChat extends Model {
         const edit = (force = false) => {
             const selection = window.getSelection();
             const selectingMessageText = selection && !selection.isCollapsed && el.contains(selection.anchorNode);
-            if (!entryId || this.isStreaming || this.mirrorLocked || (!force && selectingMessageText)) {
+            if (!entryId || this.isCurrentSessionRunning() || (!force && selectingMessageText)) {
                 return;
             }
             this.beginEditUserMessage(entryId, el);
@@ -2284,7 +2496,7 @@ export class AgentChat extends Model {
     }
 
     private beginEditUserMessage(entryID: string, el: HTMLElement, initialData?: AgentComposerData) {
-        if (this.editingUserEntryID || this.isStreaming || this.mirrorLocked) {
+        if (this.editingUserEntryID || this.isCurrentSessionRunning()) {
             return;
         }
         const entry = this.entries.find((item): item is UserEntry => item.type === "user" && item.id === entryID);
@@ -2720,13 +2932,13 @@ export class AgentChat extends Model {
             this.regenerateResponse(this.findUserEntryIDBeforeElement(el));
         });
         actions.appendChild(regenBtn);
-        regenBtn.classList.toggle("fn__none", this.isStreaming || this.mirrorLocked);
+        regenBtn.classList.toggle("fn__none", this.isCurrentSessionRunning());
 
         el.appendChild(actions);
     }
 
     private updateRegenerateButtons() {
-        const hidden = this.isStreaming || this.mirrorLocked;
+        const hidden = this.isCurrentSessionRunning();
         this.messagesContainer.querySelectorAll(".agent-chat__regenerate").forEach((element) => {
             element.classList.toggle("fn__none", hidden);
         });
@@ -2755,7 +2967,7 @@ export class AgentChat extends Model {
     }
 
     private async regenerateResponse(userEntryID?: string, editedData?: AgentComposerData) {
-        if (this.isStreaming || this.mirrorLocked || this.modelOptions.length === 0) {
+        if (this.isCurrentSessionRunning() || this.modelOptions.length === 0) {
             return;
         }
         if (editedData !== undefined && userEntryID) {
@@ -2846,39 +3058,37 @@ export class AgentChat extends Model {
         const editorContext = this.captureEditorContext();
         lastUserEntry.editorContext = editorContext;
         const frontendCapabilities = listCapabilityManifests();
-        this.abortController = new AbortController();
-        const requestSessionId = this.sessionId;
-        await fetchAgentSSE(
-            lastUserText,
-            window.siyuan.config.appearance.lang,
-            lastUserEntry.references || [],
-            (event: ISSEResult) => {
-                if (this.sessionId !== requestSessionId) {
-                    return;
-                }
-                return this.handleSSEEvent(event);
-            },
-            (err: Error) => {
-                if (this.sessionId !== requestSessionId) {
-                    return;
-                }
-                // 409：该会话正在其他实例对话中（实例级互斥），不进入流式。
-                if (err instanceof AgentHttpError && err.status === 409) {
-                    return this.handleConflictReject();
-                }
-                return this.handleConfigError(err, undefined, true);
-            },
-            this.abortController.signal,
-            this.sessionId,
-            this.getSelectedModel(),
-            this.selectedReasoningEffort,
-            true,
-            editorContext,
-            frontendCapabilities,
-            lastUserEntry.id,
-            SessionStore.getRevision(this.sessionId),
-            editedData?.blockHTML,
-        );
+        const run = this.beginSessionRun();
+        try {
+            await fetchAgentSSE(
+                lastUserText,
+                window.siyuan.config.appearance.lang,
+                lastUserEntry.references || [],
+                (event: ISSEResult) => this.handleSessionRunEvent(run, event),
+                (err: Error) => {
+                    if (run.detached || this.sessionId !== run.sessionID) {
+                        return;
+                    }
+                    // 409：该会话正在其他实例对话中（实例级互斥），不进入流式。
+                    if (err instanceof AgentHttpError && err.status === 409) {
+                        return this.handleConflictReject();
+                    }
+                    return this.handleConfigError(err, undefined, true);
+                },
+                run.controller.signal,
+                run.sessionID,
+                this.getSelectedModel(),
+                this.selectedReasoningEffort,
+                true,
+                editorContext,
+                frontendCapabilities,
+                lastUserEntry.id,
+                SessionStore.getRevision(run.sessionID),
+                editedData?.blockHTML,
+            );
+        } finally {
+            await this.finishSessionRun(run);
+        }
     }
 
     // 流式结束时把 currentAIElement 的 body 从纯文本一次性转为富渲染（Lute + postRender）。
@@ -3072,7 +3282,10 @@ export class AgentChat extends Model {
                 language: window.siyuan.config.appearance.lang
             }),
         }).then((resp) => resp.json()).then((data) => {
-            if (this.sessionId === requestSessionID && data.code === 0 && data.data && data.data !== this.sessionTitle) {
+            if (data.code !== 0 || !data.data) {
+                return;
+            }
+            if (this.sessionId === requestSessionID && data.data !== this.sessionTitle) {
                 this.sessionTitle = data.data;
                 this.pendingSessionTitle = data.data;
                 this.titleElement.textContent = data.data;
@@ -3081,6 +3294,10 @@ export class AgentChat extends Model {
                 if (!this.isStreaming && !this.currentTurnID) {
                     void this.saveSession();
                 }
+            } else if (this.sessionId !== requestSessionID) {
+                void SessionStore.rename(requestSessionID, data.data)
+                    .then(() => this.sessionPanel?.refresh())
+                    .catch((e) => console.error("save background agent title failed:", e));
             }
         }).catch((e) => {
             console.error("agent title request error:", e);
@@ -3164,6 +3381,27 @@ export class AgentChat extends Model {
     }
 
     private async stopGeneration() {
+        const sessionID = this.sessionId;
+        const sessionRun = this.sessionRuns.get(sessionID);
+        if (sessionRun?.detached) {
+            this.sessionRuns.abort(sessionID);
+            if (this.abortController === sessionRun.controller) {
+                this.abortController = null;
+            }
+            this.currentTurnID = sessionRun.turnID;
+            this.pendingRecoverySessionIDs.add(sessionID);
+            this.setStreaming(false);
+            this.removeMirrorPlaceholder();
+            try {
+                await this.reloadFromDisk(true);
+            } catch (e) {
+                console.error("reload background agent session after stop failed:", e);
+            }
+            if (this.sessionId === sessionID) {
+                void this.recoverInterruptedTurn(sessionID, sessionRun.turnID);
+            }
+            return;
+        }
         if (this.abortController) {
             this.abortController.abort();
             this.abortController = null;
@@ -3219,7 +3457,6 @@ export class AgentChat extends Model {
         }
         this.updateTokenDisplay();
         this.setStreaming(false);
-        const sessionID = this.sessionId;
         const turnID = this.currentTurnID;
         // abort 只中断前端连接；外部工具可能仍在返回途中。不能在这里直接保存并清除 runtime，
         // 等后端写完 interrupted 检查点后再恢复并提交。turn 事件可能尚未到达，因此空 ID 也要轮询。
@@ -3264,7 +3501,7 @@ export class AgentChat extends Model {
     }
 
     private async appendConfirm(name: string, args: Record<string, unknown>, confirmID: string, effects?: IToolEffects,
-                                forced = false) {
+                                forced = false, notify = true) {
         this.finishActiveThinking();
         this.flushThinkingStep();
         const L = window.siyuan.languages;
@@ -3337,10 +3574,12 @@ export class AgentChat extends Model {
         this.insertBeforeAI(el);
         this.scrollToBottom(true);
         this.hasInterveningCard = true;
-        if (this.host.notify) {
-            this.host.notify("confirm");
-        } else if (!document.hasFocus() || document.hidden) {
-            sendNotification({title: L.agentNotifyConfirm, body: "", timeoutType: "default"});
+        if (notify) {
+            if (this.host.notify) {
+                this.host.notify("confirm");
+            } else if (!document.hasFocus() || document.hidden) {
+                sendNotification({title: L.agentNotifyConfirm, body: "", timeoutType: "default"});
+            }
         }
     }
 
@@ -3365,6 +3604,7 @@ export class AgentChat extends Model {
             console.error("agent confirm request error:", e);
             return false;
         }
+        this.removeRunInteraction(sessionID, "confirm", confirmID);
         if (this.sessionId !== sessionID) {
             return true;
         }
@@ -3380,6 +3620,10 @@ export class AgentChat extends Model {
             await this.saveSession();
         } catch (e) {
             console.error("save agent confirmation state failed:", e);
+        }
+        const run = this.sessionRuns.get(sessionID);
+        if (run?.detached && this.sessionId === sessionID) {
+            this.showMirrorPlaceholder(true);
         }
         return true;
     }
@@ -3557,6 +3801,7 @@ export class AgentChat extends Model {
             console.error("agent question request error:", e);
             return false;
         }
+        this.removeRunInteraction(sessionID, "question", questionID);
         if (this.sessionId !== sessionID) {
             return true;
         }
@@ -3571,6 +3816,10 @@ export class AgentChat extends Model {
             await this.saveSession();
         } catch (e) {
             console.error("save agent question state failed:", e);
+        }
+        const run = this.sessionRuns.get(sessionID);
+        if (run?.detached && this.sessionId === sessionID) {
+            this.showMirrorPlaceholder(true);
         }
         return true;
     }
@@ -3936,7 +4185,7 @@ export class AgentChat extends Model {
     private setStreaming(streaming: boolean) {
         this.isStreaming = streaming;
         this.updateRegenerateButtons();
-        this.host.onStatusChange?.(streaming ? "running" : "idle");
+        this.updateHostRunStatus();
         this.sendBtn.classList.toggle("fn__none", streaming);
         this.stopBtn.classList.toggle("fn__none", !streaming);
         this.updateSendButtonState();
@@ -3945,7 +4194,8 @@ export class AgentChat extends Model {
     // 根据"是否流式中"、"是否有可用模型"、"输入框是否有内容"综合决定发送按钮与输入框可用性。
     // 无模型时一并禁用发送按钮与输入框（attr disabled + 灰样式 + composer-host 禁用态），从源头阻止无效请求。
     private updateSendButtonState() {
-        const disabled = this.isStreaming || this.modelOptions.length === 0 || !this.hasComposerInput();
+        const sessionRunning = this.isCurrentSessionRunning();
+        const disabled = sessionRunning || this.modelOptions.length === 0 || !this.hasComposerInput();
         if (disabled) {
             this.sendBtn.setAttribute("disabled", "disabled");
         } else {
@@ -3954,7 +4204,7 @@ export class AgentChat extends Model {
         if (this.composerHost) {
             // 复用流式时已有的禁用态样式（灰显 + 阻止交互）。
             // 注意：仅流式 / 无模型时禁用 composer；输入为空不禁用 composer（用户仍可正常编辑）。
-            const composerDisabled = this.isStreaming || this.modelOptions.length === 0;
+            const composerDisabled = sessionRunning || this.modelOptions.length === 0;
             this.composerHost.classList.toggle("agent-chat__composer-host--disabled", composerDisabled);
         }
     }

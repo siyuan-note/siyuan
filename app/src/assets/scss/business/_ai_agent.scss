@@ -848,6 +848,33 @@
   margin: 0 8px 4px;
 }
 
+@keyframes agent-session-status-pulse {
+  0%, 100% {
+    opacity: .35;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.agent-session-status {
+  width: 7px;
+  height: 7px;
+  margin: 0 7px 0 3px;
+  border-radius: 50%;
+  background-color: var(--b3-theme-primary);
+  flex-shrink: 0;
+
+  &--running {
+    animation: 1.2s ease-in-out infinite agent-session-status-pulse;
+  }
+
+  &--unread {
+    background-color: var(--b3-theme-secondary);
+  }
+}
+
 // 会话条目"更多"按钮的子菜单定位：使用 position: fixed（默认），位置由 JS 动态计算。
 .agent-session-more {
   position: relative;

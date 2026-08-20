@@ -55,6 +55,13 @@ export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     };
 };
 
+export const isBazaarPackageEnableDisabled = (
+    packageType: string,
+    item: {installedIncompatible?: boolean, enabled?: boolean, current?: boolean},
+) => item.installedIncompatible === true && (
+    packageType === "plugins" ? item.enabled !== true : packageType === "themes" && item.current !== true
+);
+
 export const isBazaarPluginEnabledInPublish = (item: {
     disabledInPublish?: boolean;
     userDisabledInPublish?: boolean;

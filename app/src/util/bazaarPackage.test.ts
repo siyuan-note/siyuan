@@ -15,6 +15,7 @@ import {
     getBazaarRatingErrorLanguageKey,
     getBazaarRatingMutationVersion,
     getBazaarThemeModeLabels,
+    isBazaarPackageEnableDisabled,
     isBazaarPackageRatingEditable,
     isBazaarPackageRatingLoaded,
     isBazaarPluginEnabledInPublish,
@@ -132,6 +133,23 @@ describe("getBazaarCompatibilityFieldVisibility", () => {
                 modes: false,
             });
         });
+    });
+});
+
+describe("isBazaarPackageEnableDisabled", () => {
+    it("disables enabling incompatible plugins and themes", () => {
+        assert.equal(isBazaarPackageEnableDisabled("plugins", {installedIncompatible: true, enabled: false}), true);
+        assert.equal(isBazaarPackageEnableDisabled("themes", {installedIncompatible: true, current: false}), true);
+    });
+
+    it("keeps disabling an active incompatible package available", () => {
+        assert.equal(isBazaarPackageEnableDisabled("plugins", {installedIncompatible: true, enabled: true}), false);
+        assert.equal(isBazaarPackageEnableDisabled("themes", {installedIncompatible: true, current: true}), false);
+    });
+
+    it("does not disable compatible or unsupported package types", () => {
+        assert.equal(isBazaarPackageEnableDisabled("plugins", {installedIncompatible: false, enabled: false}), false);
+        assert.equal(isBazaarPackageEnableDisabled("icons", {installedIncompatible: true, current: false}), false);
     });
 });
 

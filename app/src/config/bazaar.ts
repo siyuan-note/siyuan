@@ -36,6 +36,7 @@ import {
     getBazaarRatingErrorLanguageKey,
     getBazaarRatingMutationVersion,
     getBazaarThemeModeLabels,
+    isBazaarPackageEnableDisabled,
     isBazaarPackageRatingEditable,
     isBazaarPackageRatingLoaded,
     isBazaarPluginEnabledInPublish,
@@ -561,10 +562,11 @@ export const bazaar = {
         }
 
         let primaryAction = "";
+        const enableDisabled = isBazaarPackageEnableDisabled(bazaarType, installed) ? " disabled" : "";
         if (bazaarType === "plugins") {
-            primaryAction = `<button class="b3-button fn__block" data-type="${installed.enabled ? "package-disable" : "package-enable"}">${installed.enabled ? window.siyuan.languages.disable : window.siyuan.languages.enable}</button>`;
+            primaryAction = `<button${enableDisabled} class="b3-button fn__block" data-type="${installed.enabled ? "package-disable" : "package-enable"}">${installed.enabled ? window.siyuan.languages.disable : window.siyuan.languages.enable}</button>`;
         } else if (["themes", "icons"].includes(bazaarType)) {
-            primaryAction = `<button class="b3-button fn__block" data-type="${installed.current ? "package-disable" : "package-enable"}">${installed.current ? window.siyuan.languages.disable : window.siyuan.languages.use}</button>`;
+            primaryAction = `<button${enableDisabled} class="b3-button fn__block" data-type="${installed.current ? "package-disable" : "package-enable"}">${installed.current ? window.siyuan.languages.disable : window.siyuan.languages.use}</button>`;
         }
 
         return `${primaryAction}

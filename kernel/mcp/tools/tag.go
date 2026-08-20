@@ -18,6 +18,7 @@ package tools
 
 import (
 	"fmt"
+	"html"
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -71,9 +72,15 @@ func tagList(args map[string]any) (CallToolResult, error) {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Tags (%d):\n\n", len(tags)))
 	for _, t := range tags {
-		sb.WriteString(fmt.Sprintf("- #%s\n", t))
+		sb.WriteString("- ")
+		sb.WriteString(formatTagTextMark(t))
+		sb.WriteByte('\n')
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+}
+
+func formatTagTextMark(label string) string {
+	return `<span data-type="tag">` + html.EscapeString(label) + `</span>`
 }
 
 func tagRename(args map[string]any) (CallToolResult, error) {
@@ -88,7 +95,10 @@ func tagRename(args map[string]any) (CallToolResult, error) {
 	}
 	model.ReloadTag()
 
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "tag renamed: #" + oldLabel + " -> #" + newLabel}}}, nil
+	return CallToolResult{Content: []ContentItem{{
+		Type: "text",
+		Text: "tag renamed: " + formatTagTextMark(oldLabel) + " -> " + formatTagTextMark(newLabel),
+	}}}, nil
 }
 
 func tagRemove(args map[string]any) (CallToolResult, error) {
@@ -102,5 +112,5 @@ func tagRemove(args map[string]any) (CallToolResult, error) {
 	}
 	model.ReloadTag()
 
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "tag removed: #" + label}}}, nil
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: "tag removed: " + formatTagTextMark(label)}}}, nil
 }

@@ -284,6 +284,19 @@
 .agent-chat__body.b3-typography,
 .agent-chat__thinking-chat.b3-typography {
   font-size: var(--b3-font-size);
+
+  span[data-type~="tag"] {
+    padding-left: 1px;
+    padding-right: 1px;
+    border-bottom: 1px solid;
+    color: var(--b3-protyle-inline-tag-color);
+    transition: var(--b3-transition);
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--b3-theme-surface-lighter);
+    }
+  }
 }
 
 // 消息正文复用全局 b3-typography 排版（与导出预览/编辑器预览一致），

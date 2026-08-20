@@ -66,6 +66,18 @@ func TestSystemPromptDocumentsBlockReferenceSyntax(t *testing.T) {
 	}
 }
 
+func TestSystemPromptDocumentsTagRendering(t *testing.T) {
+	for _, instruction := range []string{
+		`render its exact label as <span data-type="tag">label</span>`,
+		`including a leading $, inside the span`,
+		`Never prefix the label with # or use #label# in chat`,
+	} {
+		if !strings.Contains(systemPrompt, instruction) {
+			t.Fatalf("system prompt is missing the tag rendering instruction %q", instruction)
+		}
+	}
+}
+
 func TestSystemPromptOmitsUnavailableSkillInstructions(t *testing.T) {
 	capabilities := &capabilitySet{registrations: map[string]*capabilityRegistration{}}
 	prompt := buildSystemPrompt("English", capabilities)

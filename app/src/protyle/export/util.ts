@@ -110,11 +110,7 @@ export const exportImage = (id: string) => {
         };
         setTimeout(() => {
             if (isIPhone() || isIPad() || isSafari()) {
-                // html-to-image 会克隆每一个节点，并逐一复制其完整的计算样式（computed style）；
-                // 在 WebKit/WKWebView 环境下，该操作的时间复杂度虽为 O(n)（n 为节点数），
-                // 但常数项极大（处理中等规模文档耗时约 45 秒），且需执行 4 次以确保字体和图像正确加载。 
-                // 相比之下，modern-screenshot 会按标签缓存默认样式，仅写入差异属性，
-                // 并能通过单次遍历实现正确渲染（处理同一文档仅需约 8 秒）。
+                // modern-screenshot 通过缓存默认样式提高 WebKit/WKWebView 环境下的导出性能。
                 addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.6.6`, "protyleModernScreenshot").then(async () => {
                     exportBlob(await window.modernScreenshot.domToBlob(contentElement, {
                         type: "image/png",

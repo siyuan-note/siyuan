@@ -22,12 +22,14 @@ import {useShell} from "../util/pathName";
 import {switchSettingPanelSubTab} from "./setting/mount";
 import {isThemeFrontendSupported} from "../util/themeCompatibility";
 import {
+    applyBazaarPackageDeprecation,
     applyBazaarPackageRatingToItem,
     beginBazaarRatingSubmission,
     beginBazaarRatingRequest,
     getBazaarBackendSystemLabels,
     getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
+    getBazaarDeprecationData,
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
@@ -118,6 +120,9 @@ export const bazaar = {
     _invalidateMount() {
         this._mountGeneration++;
         this._updateRequestID++;
+        this._data.deprecationMetadata.clear();
+        this._data.deprecationTypesLoaded.clear();
+        this._data.deprecationTypesLoading.clear();
         if (this._ratingUserChangeHandler) {
             window.removeEventListener("siyuan-login-success", this._ratingUserChangeHandler);
             this._ratingUserChangeHandler = undefined;
@@ -412,6 +417,30 @@ export const bazaar = {
         const tooltipClass = bazaarType === "themes" ? "" : " ariaLabel";
         return `<span class="fn__space"></span><span${tooltip} class="fn__flex-center${tooltipClass} b3-chip b3-chip--error b3-chip--small">${window.siyuan.languages.incompatible}</span>`;
     },
+    _genDeprecatedChipHTML(item: IBazaarItem, reserveSpace = true) {
+        if (!item.deprecated) {
+            return "";
+        }
+        const space = reserveSpace ? '<span class="fn__space"></span>' : "";
+        const tip = item.preferredDeprecatedReason || window.siyuan.languages.bazaarDeprecatedTip;
+        return `${space}<span data-position="north" aria-label="${escapeAttr(tip)}" class="fn__flex-center ariaLabel b3-chip b3-chip--warning b3-chip--small">${escapeHtml(window.siyuan.languages.bazaarDeprecated)}</span>`;
+    },
+    _genDeprecatedDetailHTML(item: IBazaarItem, bazaarType: TBazaarType) {
+        if (!item.deprecated) {
+            return "";
+        }
+        const reason = item.preferredDeprecatedReason || window.siyuan.languages.bazaarDeprecatedTip;
+        const alternatives = Array.isArray(item.alternatives) ? item.alternatives.filter((name) =>
+            typeof name === "string" && name.length > 0) : [];
+        const alternativesHTML = alternatives.map((name) => `<button type="button" data-type="bazaar-alternative" data-package-type="${bazaarType}" data-package-name="${escapeAttr(name)}" class="b3-chip b3-chip--small b3-chip--pointer">${escapeHtml(name)}</button>`).join('<span class="fn__space--small"></span>');
+        return `<section class="item__meta-section">
+    <div class="item__meta-title">${bazaar._genDeprecatedChipHTML(item, false)}</div>
+    <div class="ft__on-surface">${escapeHtml(reason)}</div>
+    ${alternativesHTML ? `<div class="fn__hr--b"></div>
+    <div>${window.siyuan.languages.bazaarAlternatives}</div>
+    <div class="fn__flex fn__flex-wrap">${alternativesHTML}</div>` : ""}
+</section>`;
+    },
     _getInvalidPackageTip(reason: IBazaarItem["invalidReason"]) {
         return window.siyuan.languages[getBazaarPackageInvalidLanguageKey(reason)];
     },
@@ -459,6 +488,22 @@ export const bazaar = {
             const detail = response.data as IBazaarPackageDetail;
             bazaar._setPackageDetail(bazaarType, packageName, detail);
             callback(detail);
+        });
+    },
+    _openBazaarAlternative(bazaarType: TBazaarType, packageName: string) {
+        const detail = bazaar._getPackageDetail(bazaarType, packageName);
+        const cached = detail?.available || bazaar._data[bazaarType].find((item) => item.name === packageName) ||
+            bazaar._data.deprecationMetadata.get(bazaarType)?.get(packageName);
+        if (cached) {
+            bazaar._renderReadme(bazaarType, "bazaar", cached, detail);
+            return;
+        }
+        bazaar._fetchPackageDetail(bazaarType, packageName, (packageDetail) => {
+            if (packageDetail.available) {
+                bazaar._renderReadme(bazaarType, "bazaar", packageDetail.available, packageDetail);
+                return;
+            }
+            showMessage(window.siyuan.languages.bazaarPackageNotFound.replace("${name}", escapeHtml(packageName)));
         });
     },
     _genReadmeMetaRow(label: string, value: string, valueHTML = false) {
@@ -711,6 +756,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             </span>
             ${bazaar._genFundingHTML(item.preferredFunding)}
             ${bazaar._genIncompatibleChipHTML(item, "bazaar", bazaarType)}
+            ${bazaar._genDeprecatedChipHTML(item)}
             <span class="fn__space--small"></span>
             <div class="fn__flex-1"></div>
             <div class="fn__space--small${showSwitch ? "" : " fn__none"}"></div>
@@ -780,6 +826,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     </div>
     <div class="b3-card__actions b3-card__actions--right">
         ${bazaar._genIncompatibleChipHTML(available, "bazaar", bazaarType)}
+        ${bazaar._genDeprecatedChipHTML(available, false)}
         ${bazaar._genFundingHTML(installed.preferredFunding, false)}
         <span data-position="north" class="ariaLabel block__icon block__icon--show${isBrowser() ? " fn__none" : ""}" data-type="open" aria-label="${window.siyuan.languages.showInFolder}">
             <svg><use xlink:href="#iconFolder"></use></svg>
@@ -898,6 +945,56 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             }
         }
     },
+    _cacheBazaarDeprecations(bazaarType: TBazaarType, packages: IBazaarItem[]) {
+        const metadata = new Map<string, IBazaarItem>();
+        packages.forEach((item) => {
+            metadata.set(item.name, item);
+        });
+        bazaar._data.deprecationMetadata.set(bazaarType, metadata);
+        bazaar._data.deprecationTypesLoaded.add(bazaarType);
+    },
+    _applyDownloadedDeprecations(bazaarType: TBazaarType, packages: IBazaarItem[]) {
+        if (!bazaar._data.deprecationTypesLoaded.has(bazaarType)) {
+            return;
+        }
+        const metadata = bazaar._data.deprecationMetadata.get(bazaarType);
+        packages.forEach((item) => {
+            applyBazaarPackageDeprecation(item, metadata?.get(item.name));
+        });
+    },
+    _loadDownloadedDeprecations(bazaarType: TBazaarType, app: App) {
+        if (bazaar._data.deprecationTypesLoaded.has(bazaarType) ||
+            bazaar._data.deprecationTypesLoading.has(bazaarType)) {
+            return;
+        }
+        const bazaarAPI: Record<TBazaarType, string> = {
+            plugins: "/api/bazaar/getBazaarPlugin",
+            themes: "/api/bazaar/getBazaarTheme",
+            icons: "/api/bazaar/getBazaarIcon",
+            templates: "/api/bazaar/getBazaarTemplate",
+            widgets: "/api/bazaar/getBazaarWidget",
+        };
+        const mount = bazaar._captureMount();
+        bazaar._data.deprecationTypesLoading.add(bazaarType);
+        const requestData = ["plugins", "themes"].includes(bazaarType) ? {frontend: getFrontend()} : {};
+        fetchPost(bazaarAPI[bazaarType], requestData, response => {
+            bazaar._data.deprecationTypesLoading.delete(bazaarType);
+            if (!bazaar._isMountCurrent(mount) || response.code !== 0 || !Array.isArray(response.data?.packages)) {
+                return;
+            }
+            bazaar._cacheBazaarDeprecations(bazaarType, response.data.packages);
+            if (bazaar._data.downloadedType !== bazaarType) {
+                return;
+            }
+            const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
+            const activeBtn = contentElement?.previousElementSibling?.querySelector(
+                '.b3-button[data-type^="my"]:not(.b3-button--outline)'
+            ) as HTMLElement;
+            if (activeBtn?.getAttribute("data-type") === bazaar._type2myType(bazaarType)) {
+                bazaar._genMyHTML(bazaarType, app, true);
+            }
+        });
+    },
     _genMyHTML(bazaarType: TBazaarType, app: App, preserveOrder = false) {
         const contentElement = bazaar.element.querySelector("#configBazaarDownloaded");
         const myType = bazaar._type2myType(bazaarType);
@@ -934,10 +1031,12 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             if (activeBtn?.getAttribute("data-type") !== myType) {
                 return;
             }
+            const packageItems = response.data.packages as IBazaarItem[];
+            bazaar._applyDownloadedDeprecations(bazaarType, packageItems);
             const currentSortValue = bazaar._getDownloadedSortValue(bazaarType);
             const packages = preserveOrder && initialSortValue === currentSortValue ?
-                bazaar._preserveDownloadedOrder(response.data.packages) :
-                bazaar._sortDownloadedPackages(response.data.packages, currentSortValue);
+                bazaar._preserveDownloadedOrder(packageItems) :
+                bazaar._sortDownloadedPackages(packageItems, currentSortValue);
             let html = "";
             const counterElement = contentElement.previousElementSibling.querySelector(".counter");
             if (packages.length === 0) {
@@ -980,6 +1079,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         ${bazaar._genUpdateButtonHTML(available, bazaarType, true)}
         ${bazaar._genRatePackageActionHTML(bazaar._data.downloadedRatingKeys.has(ratingKey), bazaar._data.userRatings.get(ratingKey))}
         ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed", bazaarType)}
+        ${bazaar._genDeprecatedChipHTML(bazaarItem, false)}
         ${bazaar._genFundingHTML(bazaarItem.preferredFunding, false)}
         ${hasSetting ? `<span data-position="north" class="ariaLabel block__icon block__icon--show${window.siyuan.config.bazaar.petalDisabled ? " fn__none" : ""}" data-type="setting" aria-label="${window.siyuan.languages.config}">
             <svg><use xlink:href="#iconSettings"></use></svg>
@@ -1009,12 +1109,13 @@ type="checkbox">
 </div>`;
                 }).join("");
             }
-            bazaar._data.downloadedDefault = response.data.packages;
+            bazaar._data.downloadedDefault = packageItems;
             bazaar._data.downloaded = packages;
             bazaar._data.downloadedType = bazaarType;
             contentElement.innerHTML = html ? html : `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
-            bazaar._loadDownloadedRatings(bazaarType, response.data.packages);
-            bazaar._loadDownloadedUserRatings(bazaarType, response.data.packages);
+            bazaar._loadDownloadedRatings(bazaarType, packageItems);
+            bazaar._loadDownloadedUserRatings(bazaarType, packageItems);
+            bazaar._loadDownloadedDeprecations(bazaarType, app);
             const sideElement = bazaar.element.querySelector("#configBazaarReadme.config__view--show .item__side");
             // 仅刷新「已下载」详情，避免通过 URI 打开的在线详情被本地数据覆盖
             if (sideElement?.getAttribute("data-from") === "downloaded" &&
@@ -1042,6 +1143,9 @@ type="checkbox">
         downloadedDefault: [] as IBazaarItem[],
         downloaded: [] as IBazaarItem[],
         downloadedType: undefined as TBazaarType | undefined,
+        deprecationMetadata: new Map<TBazaarType, Map<string, IBazaarItem>>(),
+        deprecationTypesLoaded: new Set<TBazaarType>(),
+        deprecationTypesLoading: new Set<TBazaarType>(),
         downloadedRatingKeys: new Set<string>(),
         ratings: new Map<string, IBazaarRating>(),
         userRatings: new Map<string, number>(),
@@ -1112,6 +1216,7 @@ type="checkbox">
             }
         }
         const compatibilityData = getBazaarCompatibilityData(from, installed, available, data);
+        const deprecationData = getBazaarDeprecationData(installed, available, data);
         const resourceData = available || displayData;
         bazaar._setPackageDetail(bazaarType, data.name, {installed, available});
         const urls = resourceData.repoURL.split("/");
@@ -1190,6 +1295,7 @@ type="checkbox">
             <span class="item__title">${escapeHtml(displayData.preferredName)}</span>
         </div>
         <div class="item__meta">
+            ${bazaar._genDeprecatedDetailHTML(deprecationData, bazaarType)}
             ${packageSection}
             ${installSection}
             ${marketSection}
@@ -2354,6 +2460,15 @@ type="checkbox">
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "bazaar-alternative") {
+                    const alternativeType = target.getAttribute("data-package-type") as TBazaarType;
+                    const alternativeName = target.getAttribute("data-package-name");
+                    if (alternativeType && alternativeName) {
+                        bazaar._openBazaarAlternative(alternativeType, alternativeName);
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "open" && (installedItem || pkgItem) && pkgType) {
                     const item = installedItem || pkgItem;
                     /// #if !BROWSER
@@ -2855,6 +2970,7 @@ type="checkbox">
             return;
         }
         bazaar._data[bazaarType] = response.data.packages;
+        bazaar._cacheBazaarDeprecations(bazaarType, response.data.packages);
         const sortValue = window.siyuan.storage[Constants.LOCAL_BAZAAR][bazaar._type2tabType(bazaarType)];
         const packages = sortValue && sortValue !== "0" ? bazaar._sortPackages(response.data.packages, sortValue) : response.data.packages;
         bazaar._renderBazaarCards(element, packages, bazaarType,

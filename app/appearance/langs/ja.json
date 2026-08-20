@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "非推奨",
+	"bazaarDeprecatedTip": "このパッケージは非推奨で、今後の使用は推奨されません",
+	"bazaarAlternatives": "代替パッケージ",
+	"bazaarPackageNotFound": "パッケージが見つかりません：${name}",
 	"backlinkSourceFilter": "バックリンク元を絞り込む",
 	"excludeSelfBacklink": "現在の文書からのバックリンクを除外",
 	"nonDailyNote": "日記以外",

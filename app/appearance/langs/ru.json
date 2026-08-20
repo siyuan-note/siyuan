@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "Устарел",
+	"bazaarDeprecatedTip": "Этот пакет устарел и больше не рекомендуется",
+	"bazaarAlternatives": "Альтернативы",
+	"bazaarPackageNotFound": "Пакет не найден: ${name}",
 	"backlinkSourceFilter": "Фильтровать источники обратных ссылок",
 	"excludeSelfBacklink": "Исключить обратные ссылки из текущего документа",
 	"nonDailyNote": "Не ежедневные заметки",

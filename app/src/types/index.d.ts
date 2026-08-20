@@ -1054,6 +1054,10 @@ interface IBazaarItem {
     keywords: string[];
     preferredDesc: string;
     preferredReadme: string;
+    deprecated?: boolean;
+    deprecatedReason?: Record<string, string>;
+    preferredDeprecatedReason?: string;
+    alternatives?: string[];
     iconURL: string;
     stars: number;
     author: string;

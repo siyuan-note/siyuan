@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "เลิกใช้แล้ว",
+	"bazaarDeprecatedTip": "แพ็กเกจนี้เลิกใช้แล้วและไม่แนะนำให้ใช้อีกต่อไป",
+	"bazaarAlternatives": "ทางเลือก",
+	"bazaarPackageNotFound": "ไม่พบแพ็กเกจ: ${name}",
 	"backlinkSourceFilter": "กรองแหล่งที่มาของลิงก์ย้อนกลับ",
 	"excludeSelfBacklink": "ไม่รวมลิงก์ย้อนกลับจากเอกสารปัจจุบัน",
 	"nonDailyNote": "บันทึกที่ไม่ใช่รายวัน",

@@ -1,12 +1,14 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    applyBazaarPackageDeprecation,
     applyBazaarPackageRatingToItem,
     beginBazaarRatingSubmission,
     beginBazaarRatingRequest,
     getBazaarBackendSystemLabels,
     getBazaarCompatibilityData,
     getBazaarCompatibilityFieldVisibility,
+    getBazaarDeprecationData,
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
@@ -46,6 +48,54 @@ describe("getBazaarCompatibilityData", () => {
         assert.equal(getBazaarCompatibilityData("downloaded", undefined, available, fallback), fallback);
         assert.equal(getBazaarCompatibilityData("updated", installed, undefined, fallback), installed);
         assert.equal(getBazaarCompatibilityData("bazaar", undefined, undefined, fallback), fallback);
+    });
+});
+
+describe("bazaar package deprecation metadata", () => {
+    it("prefers online metadata for every detail source", () => {
+        const installed = {name: "installed"};
+        const available = {name: "available"};
+        const fallback = {name: "fallback"};
+        assert.equal(getBazaarDeprecationData(installed, available, fallback), available);
+        assert.equal(getBazaarDeprecationData(installed, undefined, fallback), installed);
+        assert.equal(getBazaarDeprecationData(undefined, undefined, fallback), fallback);
+    });
+
+    it("copies online deprecation fields onto an installed package", () => {
+        const installed: {
+            deprecated?: boolean;
+            deprecatedReason?: Record<string, string>;
+            preferredDeprecatedReason?: string;
+            alternatives?: string[];
+        } = {};
+        const deprecatedReason = {default: "No longer maintained"};
+        const alternatives = ["replacement"];
+        applyBazaarPackageDeprecation(installed, {
+            deprecated: true,
+            deprecatedReason,
+            preferredDeprecatedReason: "No longer maintained",
+            alternatives,
+        });
+        assert.equal(installed.deprecated, true);
+        assert.deepEqual(installed.deprecatedReason, deprecatedReason);
+        assert.notEqual(installed.deprecatedReason, deprecatedReason);
+        assert.equal(installed.preferredDeprecatedReason, "No longer maintained");
+        assert.deepEqual(installed.alternatives, alternatives);
+        assert.notEqual(installed.alternatives, alternatives);
+    });
+
+    it("clears stale fields when the online package is active or missing", () => {
+        const installed = {
+            deprecated: true as boolean | undefined,
+            deprecatedReason: {default: "Stale"} as Record<string, string> | undefined,
+            preferredDeprecatedReason: "Stale" as string | undefined,
+            alternatives: ["stale"] as string[] | undefined,
+        };
+        applyBazaarPackageDeprecation(installed, {deprecated: false});
+        assert.equal(installed.deprecated, undefined);
+        assert.equal(installed.deprecatedReason, undefined);
+        assert.equal(installed.preferredDeprecatedReason, undefined);
+        assert.equal(installed.alternatives, undefined);
     });
 });
 

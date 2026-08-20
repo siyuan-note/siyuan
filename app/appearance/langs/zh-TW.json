@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "已棄用",
+	"bazaarDeprecatedTip": "此市集套件已棄用，不再建議使用",
+	"bazaarAlternatives": "替代套件",
+	"bazaarPackageNotFound": "找不到市集套件：${name}",
 	"backlinkSourceFilter": "篩選反向連結來源",
 	"excludeSelfBacklink": "排除目前文件的反向連結",
 	"nonDailyNote": "非日記",

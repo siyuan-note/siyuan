@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "مهملة",
+	"bazaarDeprecatedTip": "هذه الحزمة مهملة ولم يعد يُنصح باستخدامها",
+	"bazaarAlternatives": "البدائل",
+	"bazaarPackageNotFound": "تعذر العثور على الحزمة: ${name}",
 	"backlinkSourceFilter": "تصفية مصادر الروابط الخلفية",
 	"excludeSelfBacklink": "استبعاد الروابط الخلفية من المستند الحالي",
 	"nonDailyNote": "ملاحظات غير يومية",

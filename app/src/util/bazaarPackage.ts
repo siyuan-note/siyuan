@@ -11,6 +11,38 @@ export const getBazaarCompatibilityData = <T extends object>(
     fallback: T,
 ) => source === "downloaded" ? installed ?? fallback : available ?? installed ?? fallback;
 
+type TBazaarDeprecationFields = {
+    deprecated?: boolean;
+    deprecatedReason?: Record<string, string>;
+    preferredDeprecatedReason?: string;
+    alternatives?: string[];
+};
+
+export const getBazaarDeprecationData = <T extends object>(
+    installed: T | undefined,
+    available: T | undefined,
+    fallback: T,
+) => available ?? installed ?? fallback;
+
+export const applyBazaarPackageDeprecation = <T extends TBazaarDeprecationFields>(
+    installed: T,
+    available?: TBazaarDeprecationFields,
+) => {
+    if (available?.deprecated !== true) {
+        delete installed.deprecated;
+        delete installed.deprecatedReason;
+        delete installed.preferredDeprecatedReason;
+        delete installed.alternatives;
+        return;
+    }
+    installed.deprecated = true;
+    installed.deprecatedReason = available.deprecatedReason ? {...available.deprecatedReason} : {};
+    installed.preferredDeprecatedReason = typeof available.preferredDeprecatedReason === "string" ?
+        available.preferredDeprecatedReason : "";
+    installed.alternatives = Array.isArray(available.alternatives) ?
+        available.alternatives.filter((item): item is string => typeof item === "string") : [];
+};
+
 export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     const isPlugin = packageType === "plugins";
     const isTheme = packageType === "themes";

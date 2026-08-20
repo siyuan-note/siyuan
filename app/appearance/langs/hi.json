@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "अप्रचलित",
+	"bazaarDeprecatedTip": "यह पैकेज अप्रचलित है और अब अनुशंसित नहीं है",
+	"bazaarAlternatives": "विकल्प",
+	"bazaarPackageNotFound": "पैकेज नहीं मिला: ${name}",
 	"backlinkSourceFilter": "बैकलिंक स्रोत फ़िल्टर करें",
 	"excludeSelfBacklink": "वर्तमान दस्तावेज़ के बैकलिंक बाहर रखें",
 	"nonDailyNote": "गैर-दैनिक नोट्स",

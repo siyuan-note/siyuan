@@ -136,7 +136,7 @@ export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemNa
 
     const resource = (response.data.packages as IBazaarItem[]).find((item: IBazaarItem) => item.name === itemName);
     if (!resource) {
-        showMessage(`Package not found: ${escapeHtml(itemName)}`);
+        showMessage(window.siyuan.languages.bazaarPackageNotFound.replace("${name}", escapeHtml(itemName)));
         return;
     }
 

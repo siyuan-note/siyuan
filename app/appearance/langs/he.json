@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "הוצא משימוש",
+	"bazaarDeprecatedTip": "חבילה זו הוצאה משימוש ואינה מומלצת עוד",
+	"bazaarAlternatives": "חלופות",
+	"bazaarPackageNotFound": "החבילה לא נמצאה: ${name}",
 	"backlinkSourceFilter": "סינון מקורות קישורים חוזרים",
 	"excludeSelfBacklink": "החרגת קישורים חוזרים מהמסמך הנוכחי",
 	"nonDailyNote": "הערות שאינן יומיות",

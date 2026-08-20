@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "Deprecato",
+	"bazaarDeprecatedTip": "Questo pacchetto è deprecato e non è più consigliato",
+	"bazaarAlternatives": "Alternative",
+	"bazaarPackageNotFound": "Pacchetto non trovato: ${name}",
 	"backlinkSourceFilter": "Filtra le origini dei backlink",
 	"excludeSelfBacklink": "Escludi i backlink dal documento corrente",
 	"nonDailyNote": "Note non giornaliere",

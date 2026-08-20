@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "已弃用",
+	"bazaarDeprecatedTip": "此集市包已弃用，不再建议使用",
+	"bazaarAlternatives": "替代包",
+	"bazaarPackageNotFound": "未找到集市包：${name}",
 	"backlinkSourceFilter": "筛选反链来源",
 	"excludeSelfBacklink": "排除当前文档反链",
 	"nonDailyNote": "非日记",

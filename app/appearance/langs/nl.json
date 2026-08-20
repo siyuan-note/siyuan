@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "Verouderd",
+	"bazaarDeprecatedTip": "Dit pakket is verouderd en wordt niet langer aanbevolen",
+	"bazaarAlternatives": "Alternatieven",
+	"bazaarPackageNotFound": "Pakket niet gevonden: ${name}",
 	"backlinkSourceFilter": "Backlinkbronnen filteren",
 	"excludeSelfBacklink": "Backlinks uit het huidige document uitsluiten",
 	"nonDailyNote": "Niet-dagelijkse notities",

@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "사용 중단 권고",
+	"bazaarDeprecatedTip": "이 패키지는 더 이상 권장되지 않습니다",
+	"bazaarAlternatives": "대체 패키지",
+	"bazaarPackageNotFound": "패키지를 찾을 수 없습니다: ${name}",
 	"backlinkSourceFilter": "백링크 출처 필터",
 	"excludeSelfBacklink": "현재 문서의 백링크 제외",
 	"nonDailyNote": "일일 노트 아님",

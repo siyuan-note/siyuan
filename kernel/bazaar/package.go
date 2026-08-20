@@ -68,11 +68,15 @@ type Package struct {
 	Readme            LocaleStrings `json:"readme"`
 	Funding           *Funding      `json:"funding"`
 	Keywords          []string      `json:"keywords"`
+	Deprecated        bool          `json:"deprecated,omitempty"`
+	DeprecatedReason  LocaleStrings `json:"deprecatedReason,omitempty"`
+	Alternatives      []string      `json:"alternatives,omitempty"`
 
-	PreferredFunding string `json:"preferredFunding"`
-	PreferredName    string `json:"preferredName"`
-	PreferredDesc    string `json:"preferredDesc"`
-	PreferredReadme  string `json:"preferredReadme"`
+	PreferredFunding          string `json:"preferredFunding"`
+	PreferredName             string `json:"preferredName"`
+	PreferredDesc             string `json:"preferredDesc"`
+	PreferredReadme           string `json:"preferredReadme"`
+	PreferredDeprecatedReason string `json:"preferredDeprecatedReason,omitempty"`
 
 	Name       string `json:"name"`    // 包名，不一定是仓库名
 	RepoURL    string `json:"repoURL"` // 形式为 https://github.com/owner/repo
@@ -180,7 +184,19 @@ func ParsePackageJSON(filePath string) (ret *Package, err error) {
 	}
 
 	ret.URL = strings.TrimSuffix(ret.URL, "/")
+	clearPackageDeprecationMetadata(ret)
 	return
+}
+
+// clearPackageDeprecationMetadata 清除只能由在线集市索引生成的弃用元数据。
+func clearPackageDeprecationMetadata(pkg *Package) {
+	if pkg == nil {
+		return
+	}
+	pkg.Deprecated = false
+	pkg.DeprecatedReason = nil
+	pkg.Alternatives = nil
+	pkg.PreferredDeprecatedReason = ""
 }
 
 // unescapePackageDisplayStrings 将在线 stage 中已 HTML 转义的展示字段还原为原文，与本地 JSON 一致。
@@ -197,6 +213,9 @@ func unescapePackageDisplayStrings(pkg *Package) {
 	for k, v := range pkg.Description {
 		pkg.Description[k] = html.UnescapeString(v)
 	}
+	for k, v := range pkg.DeprecatedReason {
+		pkg.DeprecatedReason[k] = html.UnescapeString(v)
+	}
 	if pkg.Funding != nil {
 		pkg.Funding.OpenCollective = html.UnescapeString(pkg.Funding.OpenCollective)
 		pkg.Funding.Patreon = html.UnescapeString(pkg.Funding.Patreon)
@@ -208,6 +227,29 @@ func unescapePackageDisplayStrings(pkg *Package) {
 	for i, kw := range pkg.Keywords {
 		pkg.Keywords[i] = html.UnescapeString(kw)
 	}
+}
+
+// setPreferredPackageDeprecationMetadata 计算弃用原因并防御性过滤无效替代包。
+func setPreferredPackageDeprecationMetadata(pkg *Package) {
+	if pkg == nil || !pkg.Deprecated {
+		clearPackageDeprecationMetadata(pkg)
+		return
+	}
+	pkg.PreferredDeprecatedReason = GetPreferredLocaleString(pkg.DeprecatedReason, "")
+	alternatives := make([]string, 0, len(pkg.Alternatives))
+	seen := make(map[string]struct{}, len(pkg.Alternatives))
+	for _, alternative := range pkg.Alternatives {
+		identity := strings.ToLower(alternative)
+		if !IsValidPackageName(alternative) || strings.EqualFold(alternative, pkg.Name) {
+			continue
+		}
+		if _, duplicate := seen[identity]; duplicate {
+			continue
+		}
+		seen[identity] = struct{}{}
+		alternatives = append(alternatives, alternative)
+	}
+	pkg.Alternatives = alternatives
 }
 
 // GetPreferredLocaleString 从 LocaleStrings 中按当前语种取值，无则回退 default、en、en_US（历史命名兼容），再回退 fallback。

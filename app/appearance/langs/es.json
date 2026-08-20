@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "En desuso",
+	"bazaarDeprecatedTip": "Este paquete está en desuso y ya no se recomienda",
+	"bazaarAlternatives": "Alternativas",
+	"bazaarPackageNotFound": "Paquete no encontrado: ${name}",
 	"backlinkSourceFilter": "Filtrar fuentes de enlaces inversos",
 	"excludeSelfBacklink": "Excluir enlaces inversos del documento actual",
 	"nonDailyNote": "Notas no diarias",

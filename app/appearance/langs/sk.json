@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "Zastarané",
+	"bazaarDeprecatedTip": "Tento balík je zastaraný a už sa neodporúča",
+	"bazaarAlternatives": "Alternatívy",
+	"bazaarPackageNotFound": "Balík sa nenašiel: ${name}",
 	"backlinkSourceFilter": "Filtrovať zdroje spätných odkazov",
 	"excludeSelfBacklink": "Vylúčiť spätné odkazy z aktuálneho dokumentu",
 	"nonDailyNote": "Poznámky mimo denníka",

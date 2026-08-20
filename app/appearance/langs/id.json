@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "Tidak digunakan lagi",
+	"bazaarDeprecatedTip": "Paket ini tidak digunakan lagi dan tidak direkomendasikan",
+	"bazaarAlternatives": "Alternatif",
+	"bazaarPackageNotFound": "Paket tidak ditemukan: ${name}",
 	"backlinkSourceFilter": "Filter sumber backlink",
 	"excludeSelfBacklink": "Kecualikan backlink dari dokumen saat ini",
 	"nonDailyNote": "Catatan nonharian",

@@ -93,6 +93,7 @@ func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*baz
 	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
 	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
+	setPreferredPackageDeprecationMetadata(&pkg)
 
 	// 更新信息
 	disallowVer := isBelowRequiredAppVersion(&pkg)

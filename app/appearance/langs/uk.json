@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "Застарілий",
+	"bazaarDeprecatedTip": "Цей пакунок застарів і більше не рекомендується",
+	"bazaarAlternatives": "Альтернативи",
+	"bazaarPackageNotFound": "Пакунок не знайдено: ${name}",
 	"backlinkSourceFilter": "Фільтрувати джерела зворотних посилань",
 	"excludeSelfBacklink": "Виключити зворотні посилання з поточного документа",
 	"nonDailyNote": "Не щоденні нотатки",

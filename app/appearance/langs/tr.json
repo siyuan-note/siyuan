@@ -1,4 +1,8 @@
 {
+	"bazaarDeprecated": "Kullanımdan kaldırıldı",
+	"bazaarDeprecatedTip": "Bu paket kullanımdan kaldırılmıştır ve artık önerilmemektedir",
+	"bazaarAlternatives": "Alternatifler",
+	"bazaarPackageNotFound": "Paket bulunamadı: ${name}",
 	"backlinkSourceFilter": "Geri bağlantı kaynaklarını filtrele",
 	"excludeSelfBacklink": "Geçerli belgeden gelen geri bağlantıları hariç tut",
 	"nonDailyNote": "Günlük olmayan notlar",

@@ -2257,6 +2257,9 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         undoOperations: IOperation[],
         context?: Record<string, string>,
     }) => {
+    if (element.getAttribute("data-type") === "NodeSuperBlock") {
+        refreshSbResize(element);
+    }
     const id = element.getAttribute("data-node-id");
     const newHTML = cleanHeadingNumberHTML(element.outerHTML);
     const cleanOldHTML = cleanHeadingNumberHTML(oldHTML);

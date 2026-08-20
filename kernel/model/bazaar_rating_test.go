@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"slices"
@@ -134,21 +135,25 @@ func TestGetInstalledBazaarPackageUserRatings(t *testing.T) {
 	}
 
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		if request.URL.Path != "/apis/siyuan/bazaar/getBazaarPackageUserRatings" {
+		if request.URL.Path != "/apis/siyuan/bazaar/getBazaarPackageRating" {
 			t.Fatalf("unexpected path: %s", request.URL.Path)
 		}
 		var body struct {
-			Token        string   `json:"token"`
-			PackageNames []string `json:"packageNames"`
+			Token       string `json:"token"`
+			PackageName string `json:"packageName"`
 		}
 		if err := json.NewDecoder(request.Body).Decode(&body); nil != err {
 			t.Fatal(err)
 		}
-		if "secret" != body.Token || !slices.Equal([]string{"rated", "unrated"}, body.PackageNames) {
+		if "secret" != body.Token || ("rated" != body.PackageName && "unrated" != body.PackageName) {
 			t.Fatalf("unexpected request body: %+v", body)
 		}
 		writer.Header().Set("Content-Type", "application/json")
-		_, _ = writer.Write([]byte(`{"code":0,"msg":"","data":{"userRatings":{"rated":4,"unrated":0}}}`))
+		rating := 0
+		if "rated" == body.PackageName {
+			rating = 4
+		}
+		_, _ = fmt.Fprintf(writer, `{"code":0,"msg":"","data":{"rating":%d}}`, rating)
 	}))
 	defer server.Close()
 	bazaarRatingCloudServer = func() string { return server.URL }
@@ -177,19 +182,15 @@ func TestGetInstalledBazaarPackageUserRatingsRejectsInvalidCloudData(t *testing.
 	})
 	bazaarRatingUserToken = func() (string, error) { return "secret", nil }
 	bazaarRatingInstalledPackageInfos = func(string) ([]installedPackageInfo, string, string, error) {
-		return []installedPackageInfo{
-			{Pkg: &bazaar.Package{Name: "rated"}},
-			{Pkg: &bazaar.Package{Name: "unrated"}},
-		}, "", "", nil
+		return []installedPackageInfo{{Pkg: &bazaar.Package{Name: "rated"}}}, "", "", nil
 	}
 	bazaarRatingExistingPackageNames = func(context.Context, string, []string) ([]string, error) {
-		return []string{"rated", "unrated"}, nil
+		return []string{"rated"}, nil
 	}
 
 	for _, response := range []string{
-		`{"code":0,"msg":"","data":{"userRatings":{"rated":4}}}`,
-		`{"code":0,"msg":"","data":{"userRatings":{"rated":4,"extra":0}}}`,
-		`{"code":0,"msg":"","data":{"userRatings":{"rated":6,"unrated":0}}}`,
+		`{"code":0,"msg":"","data":{"rating":-1}}`,
+		`{"code":0,"msg":"","data":{"rating":6}}`,
 	} {
 		server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, _ *http.Request) {
 			writer.Header().Set("Content-Type", "application/json")
@@ -197,7 +198,7 @@ func TestGetInstalledBazaarPackageUserRatingsRejectsInvalidCloudData(t *testing.
 		}))
 		bazaarRatingCloudServer = func() string { return server.URL }
 		if _, _, err := GetInstalledBazaarPackageUserRatings(context.Background(), "plugins",
-			[]string{"rated", "unrated"}); nil == err {
+			[]string{"rated"}); nil == err {
 			server.Close()
 			t.Fatalf("expected invalid cloud response to fail: %s", response)
 		}

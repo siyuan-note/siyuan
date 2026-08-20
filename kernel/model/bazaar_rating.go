@@ -27,6 +27,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/sync/errgroup"
 )
 
 var (
@@ -40,7 +41,10 @@ var (
 	bazaarRatingSetMu                 sync.Mutex
 )
 
-const bazaarPackageRatingBatchSize = 1024
+const (
+	bazaarPackageRatingBatchSize       = 1024
+	bazaarPackageUserRatingConcurrency = 8
+)
 
 type bazaarRatingCloudResult[T any] struct {
 	Code int    `json:"code"`
@@ -50,10 +54,6 @@ type bazaarRatingCloudResult[T any] struct {
 
 type bazaarPackageUserRatingData struct {
 	Rating int `json:"rating"`
-}
-
-type bazaarPackageUserRatingsData struct {
-	UserRatings map[string]int `json:"userRatings"`
 }
 
 type bazaarPackageSetRatingData struct {
@@ -104,27 +104,11 @@ func GetInstalledBazaarPackageUserRatings(ctx context.Context, pkgType string,
 		return map[string]int{}, []string{}, nil
 	}
 
-	data := bazaarPackageUserRatingsData{}
-	err = requestBazaarPackageRating(ctx, "/apis/siyuan/bazaar/getBazaarPackageUserRatings", map[string]any{
-		"token":        token,
-		"packageNames": eligiblePackageNames,
-	}, &data)
+	userRatings, err = requestBazaarPackageUserRatings(ctx, token, eligiblePackageNames)
 	if nil != err {
 		return nil, nil, err
 	}
-	if len(data.UserRatings) != len(eligiblePackageNames) {
-		return nil, nil, errors.New("incomplete user ratings returned by cloud server")
-	}
-	for _, packageName := range eligiblePackageNames {
-		rating, ok := data.UserRatings[packageName]
-		if !ok {
-			return nil, nil, errors.New("incomplete user ratings returned by cloud server")
-		}
-		if 0 > rating || 5 < rating {
-			return nil, nil, errors.New("invalid user rating returned by cloud server")
-		}
-	}
-	return data.UserRatings, eligiblePackageNames, nil
+	return userRatings, eligiblePackageNames, nil
 }
 
 // GetBazaarPackageRating 获取已安装官方包的公开评分和当前用户评分。
@@ -304,6 +288,52 @@ func getInstalledOfficialBazaarPackageNames(ctx context.Context, pkgType string,
 		return []string{}, nil
 	}
 	return bazaarRatingExistingPackageNames(ctx, pkgType, names)
+}
+
+// requestBazaarPackageUserRatings 使用有限并发聚合单包查询，避免大量已安装包同时占用云端连接。
+func requestBazaarPackageUserRatings(ctx context.Context, token string, packageNames []string) (map[string]int, error) {
+	userRatings := make(map[string]int, len(packageNames))
+	jobs := make(chan string, len(packageNames))
+	for _, packageName := range packageNames {
+		jobs <- packageName
+	}
+	close(jobs)
+
+	group, groupCtx := errgroup.WithContext(ctx)
+	workerCount := min(bazaarPackageUserRatingConcurrency, len(packageNames))
+	var resultMu sync.Mutex
+	for range workerCount {
+		group.Go(func() error {
+			for {
+				select {
+				case <-groupCtx.Done():
+					return groupCtx.Err()
+				case packageName, ok := <-jobs:
+					if !ok {
+						return nil
+					}
+					data := bazaarPackageUserRatingData{}
+					err := requestBazaarPackageRating(groupCtx, "/apis/siyuan/bazaar/getBazaarPackageRating", map[string]any{
+						"token":       token,
+						"packageName": packageName,
+					}, &data)
+					if nil != err {
+						return err
+					}
+					if 0 > data.Rating || 5 < data.Rating {
+						return errors.New("invalid user rating returned by cloud server")
+					}
+					resultMu.Lock()
+					userRatings[packageName] = data.Rating
+					resultMu.Unlock()
+				}
+			}
+		})
+	}
+	if err := group.Wait(); nil != err {
+		return nil, err
+	}
+	return userRatings, nil
 }
 
 func requestBazaarPackageRating[T any](ctx context.Context, endpoint string, body map[string]any, data *T) error {

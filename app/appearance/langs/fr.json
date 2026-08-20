@@ -7,7 +7,7 @@
 	"assetOpenCtrlClick": "Ctrl+clic / ⌘clic",
 	"assetOpenAltClick": "Alt+clic",
 	"assetOpenShiftClick": "Maj+clic",
-	"assetOpenFollowTab": "Suivre le réglage d’écran partagé",
+	"assetOpenFollowTab": "Suivre le réglage « Documents - Comportement - Ne pas scinder l'écran à l'ouverture d'un onglet »",
 	"assetOpenCurrent": "Ouvrir dans le volet actuel",
 	"bazaarDeprecated": "Obsolète",
 	"bazaarDeprecatedTip": "Ce paquet est obsolète et n’est plus recommandé",

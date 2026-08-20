@@ -7,7 +7,7 @@
 	"assetOpenCtrlClick": "Ctrl+клацання / ⌘клацання",
 	"assetOpenAltClick": "Alt+клацання",
 	"assetOpenShiftClick": "Shift+клацання",
-	"assetOpenFollowTab": "Використовувати налаштування розділення екрана",
+	"assetOpenFollowTab": "Використовувати налаштування «Документи - Поведінка - Не ділити екран під час відкриття вкладок»",
 	"assetOpenCurrent": "Відкрити в поточній області",
 	"bazaarDeprecated": "Застарілий",
 	"bazaarDeprecatedTip": "Цей пакунок застарів і більше не рекомендується",

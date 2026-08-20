@@ -7,7 +7,7 @@
 	"assetOpenCtrlClick": "Strg+Klick / ⌘Klick",
 	"assetOpenAltClick": "Alt+Klick",
 	"assetOpenShiftClick": "Umschalt+Klick",
-	"assetOpenFollowTab": "Splitscreen-Einstellung übernehmen",
+	"assetOpenFollowTab": "Einstellung „Dokumente - Verhalten - Beim Öffnen von Tabs nicht in den Splitscreen wechseln“ übernehmen",
 	"assetOpenCurrent": "Im aktuellen Bereich öffnen",
 	"bazaarDeprecated": "Veraltet",
 	"bazaarDeprecatedTip": "Dieses Paket ist veraltet und wird nicht mehr empfohlen",

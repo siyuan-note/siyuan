@@ -7,7 +7,7 @@
 	"assetOpenCtrlClick": "Ctrl+щелчок / ⌘щелчок",
 	"assetOpenAltClick": "Alt+щелчок",
 	"assetOpenShiftClick": "Shift+щелчок",
-	"assetOpenFollowTab": "Следовать настройке разделения экрана",
+	"assetOpenFollowTab": "Следовать настройке «Документы - Поведение - Не разделять экран при открытии вкладки»",
 	"assetOpenCurrent": "Открыть в текущей области",
 	"bazaarDeprecated": "Устарел",
 	"bazaarDeprecatedTip": "Этот пакет устарел и больше не рекомендуется",

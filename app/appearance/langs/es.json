@@ -7,7 +7,7 @@
 	"assetOpenCtrlClick": "Ctrl+clic / ⌘clic",
 	"assetOpenAltClick": "Alt+clic",
 	"assetOpenShiftClick": "Mayús+clic",
-	"assetOpenFollowTab": "Seguir ajuste de pantalla dividida",
+	"assetOpenFollowTab": "Seguir el ajuste «Documentos - Comportamiento - No dividir pantalla al abrir pestañas»",
 	"assetOpenCurrent": "Abrir en el panel actual",
 	"bazaarDeprecated": "En desuso",
 	"bazaarDeprecatedTip": "Este paquete está en desuso y ya no se recomienda",

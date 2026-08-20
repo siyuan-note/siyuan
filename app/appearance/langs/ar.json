@@ -7,7 +7,7 @@
 	"assetOpenCtrlClick": "Ctrl+نقرة / ⌘نقرة",
 	"assetOpenAltClick": "Alt+نقرة",
 	"assetOpenShiftClick": "Shift+نقرة",
-	"assetOpenFollowTab": "اتباع إعداد تقسيم الشاشة",
+	"assetOpenFollowTab": "اتباع إعداد «المستندات - السلوك - لا تقسم الشاشة عند فتح التبويب»",
 	"assetOpenCurrent": "فتح في الجزء الحالي",
 	"bazaarDeprecated": "مهملة",
 	"bazaarDeprecatedTip": "هذه الحزمة مهملة ولم يعد يُنصح باستخدامها",

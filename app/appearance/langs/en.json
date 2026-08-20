@@ -7,7 +7,7 @@
 	"assetOpenCtrlClick": "Ctrl+click / ⌘click",
 	"assetOpenAltClick": "Alt+click",
 	"assetOpenShiftClick": "Shift+click",
-	"assetOpenFollowTab": "Follow split-screen setting",
+	"assetOpenFollowTab": "Follow the “Documents - Behavior - Don't split the screen when opening tabs” setting",
 	"assetOpenCurrent": "Open in current pane",
 	"bazaarDeprecated": "Deprecated",
 	"bazaarDeprecatedTip": "This package is deprecated and is no longer recommended",

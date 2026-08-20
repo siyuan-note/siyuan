@@ -7,7 +7,7 @@
 	"assetOpenCtrlClick": "Ctrl+클릭 / ⌘클릭",
 	"assetOpenAltClick": "Alt+클릭",
 	"assetOpenShiftClick": "Shift+클릭",
-	"assetOpenFollowTab": "분할 화면 설정 따르기",
+	"assetOpenFollowTab": "“문서 - 동작 - 탭 열기 시 분할 화면 사용 안 함” 설정 따르기",
 	"assetOpenCurrent": "현재 영역에서 열기",
 	"bazaarDeprecated": "사용 중단 권고",
 	"bazaarDeprecatedTip": "이 패키지는 더 이상 권장되지 않습니다",

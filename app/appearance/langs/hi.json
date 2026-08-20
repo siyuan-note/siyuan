@@ -7,7 +7,7 @@
 	"assetOpenCtrlClick": "Ctrl+क्लिक / ⌘क्लिक",
 	"assetOpenAltClick": "Alt+क्लिक",
 	"assetOpenShiftClick": "Shift+क्लिक",
-	"assetOpenFollowTab": "स्प्लिट-स्क्रीन सेटिंग का पालन करें",
+	"assetOpenFollowTab": "“दस्तावेज़ - व्यवहार - टैब खोलने पर स्क्रीन विभाजित न करें” सेटिंग का पालन करें",
 	"assetOpenCurrent": "वर्तमान फलक में खोलें",
 	"bazaarDeprecated": "अप्रचलित",
 	"bazaarDeprecatedTip": "यह पैकेज अप्रचलित है और अब अनुशंसित नहीं है",

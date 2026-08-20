@@ -760,6 +760,8 @@ interface IHtmlToImageOptions {
 interface IModernScreenshotOptions {
     [key: string]: unknown;
     type?: string;
+    scale?: number;
+    maximumCanvasSize?: number;
     fetch?: {
         placeholderImage?: string;
     };

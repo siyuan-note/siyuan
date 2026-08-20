@@ -10,8 +10,13 @@ import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {highlightRender, lineNumberRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
-import {isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
+import {isIPad, isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
 import {useShell} from "../../util/pathName";
+
+// WebKit/Chromium reject canvases whose width or height exceeds this, producing a blank
+// image. html-to-image clamps to it by default, modern-screenshot does not (maximumCanvasSize
+// defaults to 0 = unlimited), so long documents need it passed explicitly.
+const MAX_CANVAS_SIZE = 16384;
 
 const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
@@ -104,7 +109,7 @@ export const exportImage = (id: string) => {
             exportDialog.destroy();
         };
         setTimeout(() => {
-            if (isIPhone() || isSafari()) {
+            if (isIPhone() || isIPad() || isSafari()) {
                 // html-to-image clones every node and copies its full computed style one property at
                 // a time, which is O(nodes) with a huge constant on WebKit/WKWebView (~45s for a
                 // mid-size doc), and it needs to be run 4 times there before the fonts/images settle.
@@ -113,6 +118,9 @@ export const exportImage = (id: string) => {
                 addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.6.6`, "protyleModernScreenshot").then(async () => {
                     exportBlob(await window.modernScreenshot.domToBlob(contentElement, {
                         type: "image/png",
+                        // 默认为 1，会导致高清屏上导出的图片比 html-to-image 模糊
+                        scale: window.devicePixelRatio || 1,
+                        maximumCanvasSize: MAX_CANVAS_SIZE,
                         fetch: {placeholderImage: IMAGE_PLACEHOLDER}
                     }));
                 });

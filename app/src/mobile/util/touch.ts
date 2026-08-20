@@ -19,6 +19,7 @@ import {
     shouldRestoreLongPressSelection,
 } from "./touchSelection";
 import {getTouchAxis, shouldStartLongPressMultiSelect} from "./touchGesture";
+import {getMobileBlockSelectionElement} from "./blockSelection";
 
 let clientX: number;
 let clientY: number;
@@ -136,8 +137,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
             // 多选模式
             window.getSelection()?.removeAllRanges();
             activeBlur();
-            const blockElement = hasClosestBlock(target);
-            if (blockElement) {
+            const touchedBlockElement = hasClosestBlock(target);
+            if (touchedBlockElement) {
+                const blockElement = getMobileBlockSelectionElement(touchedBlockElement as HTMLElement);
                 // 本次按压已在按住期间触发多选，松手时不切换选中态，仅消费该手势
                 blockElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                     item.classList.remove("protyle-wysiwyg--select");
@@ -378,9 +380,10 @@ export const handleTouchStart = (event: TouchEvent) => {
                     }
                 }
                 window.getSelection()?.removeAllRanges();
-                editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);
+                const selectionBlockElement = getMobileBlockSelectionElement(blockElement as HTMLElement);
+                editor.protyle.toolbar.showMultiSelectMode(editor.protyle, selectionBlockElement);
                 if (editor.protyle.options.render.gutter) {
-                    editor.protyle.gutter.render(editor.protyle, blockElement, target);
+                    editor.protyle.gutter.render(editor.protyle, selectionBlockElement, target);
                 }
             }, Constants.TIMEOUT_MULTIPLE_SELECT);
         }

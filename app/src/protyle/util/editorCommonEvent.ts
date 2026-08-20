@@ -887,7 +887,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     }
     unfoldHeadingElements.forEach(item => {
         const foldData = setFold(protyle, item, true, false, false, true);
-        if (!foldData.doOperations) {
+        if (!foldData.doOperations?.length) {
             return;
         }
         foldData.doOperations[0].context = {

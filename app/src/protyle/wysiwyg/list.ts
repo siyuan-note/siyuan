@@ -41,7 +41,7 @@ const getLastChildBlock = (element: Element) => {
 const unfoldElements = (protyle: IProtyle, elements: Element[]) => {
     elements.forEach(item => {
         if (item.getAttribute("fold") === "1") {
-            setFold(protyle, item, true);
+            setFold(protyle, item, true, false, false, false, false);
         }
     });
 };

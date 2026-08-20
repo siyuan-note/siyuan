@@ -1184,11 +1184,11 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         const previousBlockElement = getPreviousBlockSibling(blockElement);
         if (previousBlockElement?.getAttribute("data-type") === "NodeHeading" &&
             previousBlockElement.getAttribute("fold") === "1") {
-            setFold(protyle, previousBlockElement, true, false, false);
+            setFold(protyle, previousBlockElement, true, false, false, false, false);
         }
         if (blockType === "NodeHeading" &&
             blockElement.getAttribute("fold") === "1") {
-            setFold(protyle, blockElement, true, false, false);
+            setFold(protyle, blockElement, true, false, false, false, false);
         }
         turnsIntoTransaction({
             protyle: protyle,

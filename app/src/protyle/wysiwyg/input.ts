@@ -374,7 +374,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     ) {
         if (blockElement.getAttribute("data-type") === "NodeHeading" && blockElement.getAttribute("fold") === "1" &&
             tempElement.content.firstElementChild.getAttribute("data-subtype") !== blockElement.dataset.subtype) {
-            setFold(protyle, blockElement, undefined, undefined, false);
+            setFold(protyle, blockElement, undefined, undefined, false, false, false);
             html = html.replace(' fold="1"', "");
             protyle.wysiwyg.lastHTMLs[id] = blockElement.outerHTML;
         }

@@ -982,9 +982,20 @@ func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 		return
 	}
 
-	nodes := append([]*ast.Node{}, heading)
 	children := treenode.HeadingChildren(heading)
-	nodes = append(nodes, children...)
+	nodes := prepareHeadingChildrenDOMNodes(heading, children, removeFoldAttr)
+
+	luteEngine := util.NewLute()
+	ret = renderBlockDOMByNodes(nodes, luteEngine)
+	return
+}
+
+func prepareHeadingChildrenDOMNodes(heading *ast.Node, children []*ast.Node, removeFoldAttr bool) (ret []*ast.Node) {
+	ret = append(ret, heading)
+	ret = append(ret, children...)
+	ret = cleanRenderNodes(ret, false)
+	heading = ret[0]
+	children = ret[1:]
 
 	for _, child := range children {
 		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -1002,7 +1013,7 @@ func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 		if removeFoldAttr {
 			child.RemoveIALAttr("parent-heading")
 		} else {
-			child.SetIALAttr("parent-heading", id)
+			child.SetIALAttr("parent-heading", heading.ID)
 		}
 	}
 
@@ -1010,9 +1021,6 @@ func GetHeadingChildrenDOM(id string, removeFoldAttr bool) (ret string) {
 		heading.RemoveIALAttr("fold")
 		heading.RemoveIALAttr("heading-fold")
 	}
-
-	luteEngine := util.NewLute()
-	ret = renderCleanBlockDOMByNodes(nodes, luteEngine)
 	return
 }
 

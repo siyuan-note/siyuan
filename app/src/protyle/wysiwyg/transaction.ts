@@ -50,6 +50,14 @@ import {getPartialUpdateCleanupElements, shouldDeferCodeBlockCaretRestore} from 
 import {getMoveAffectedEmbedElements, shouldSyncMoveCopies} from "./transactionEmbed";
 import {cloneMoveElements, getVisibleMoveElements} from "./transactionMove";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
+import {
+    applyViewFoldStates,
+    handleViewFoldSourceOperation,
+    hasViewFoldContext,
+    invalidateViewFoldRequests,
+    prepareViewFoldTransaction,
+    setViewFoldTransient,
+} from "../util/viewFold";
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -478,6 +486,7 @@ const promiseTransaction = (options: {
             undoOperations: options.undoOperations,// 目前用于 ws 推送更新大纲
         }]
     }, (response) => {
+        invalidateViewFoldRequests(protyle);
         const ids: string[] = [];
         protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
             ids.push(item.getAttribute("data-node-id"));
@@ -485,6 +494,9 @@ const promiseTransaction = (options: {
         countBlockWord(ids, protyle.block.rootID, true);
         if (!options.skipSync) {
             response.data[0].doOperations.forEach((operation: IOperation) => {
+                if (handleViewFoldSourceOperation(protyle, operation)) {
+                    return;
+                }
                 if (operation.action === "unfoldHeading" || operation.action === "foldHeading") {
                     processFold(operation, protyle);
                     return;
@@ -509,6 +521,7 @@ const promiseTransaction = (options: {
             }
         });
         queueHeadingNumberRefresh(protyle, response.data[0].doOperations);
+        void applyViewFoldStates(protyle);
         options.callback?.();
     }));
 };
@@ -659,6 +672,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     if (protyle.wysiwyg.element.firstElementChild?.classList.contains("protyle-password")) {
         return;
     }
+    invalidateViewFoldRequests(protyle);
     const undoFocusContext = isUndo ? operations.find(item => item.context?.undoFocusId)?.context : undefined;
     const undoFocusEmbedElement = undoFocusContext?.undoFocusEmbedId ? protyle.wysiwyg.element.querySelector(
         `[data-type="NodeBlockQueryEmbed"][data-node-id="${undoFocusContext.undoFocusEmbedId}"]`
@@ -666,6 +680,9 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
     const deferUndoFocus = !!undoFocusContext?.undoFocusEmbedId;
     const pendingUndoEmbedElements = new Set<Element>();
     operations.forEach(operation => {
+        if (handleViewFoldSourceOperation(protyle, operation)) {
+            return;
+        }
         const updateElements: Element[] = [];
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
             updateElements.push(item);
@@ -1284,6 +1301,7 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             return;
         }
     });
+    void applyViewFoldStates(protyle);
     pendingUndoEmbedElements.forEach(item => {
         if (!item.isConnected) {
             return;
@@ -1817,6 +1835,14 @@ const unfoldListHeadings = async (protyle: IProtyle, nodeElements: Element[]) =>
         }
         const itemId = foldedHeading.getAttribute("data-node-id");
         unfoldedIds.add(itemId);
+        if (hasViewFoldContext(protyle)) {
+            await setViewFoldTransient(protyle, foldedHeading, false);
+            foldOperations.push({
+                action: "foldHeading",
+                id: itemId,
+            });
+            continue;
+        }
         foldedHeading.removeAttribute("fold");
         const response = await fetchSyncPost("/api/transactions", {
             session: protyle.id,
@@ -1948,18 +1974,24 @@ export const turnListsRecursively = async (options: {
     const undoFoldOperations = foldOperations.map((operation) => ({...operation}));
     if (doOperations.length === 0) {
         if (doFoldOperations.length > 0) {
-            await fetchSyncPost("/api/transactions", {
-                session: options.protyle.id,
-                app: Constants.SIYUAN_APPID,
-                transactions: [{
-                    doOperations: doFoldOperations
-                }]
-            });
+            if (hasViewFoldContext(options.protyle)) {
+                transaction(options.protyle, doFoldOperations, undoFoldOperations);
+            } else {
+                await fetchSyncPost("/api/transactions", {
+                    session: options.protyle.id,
+                    app: Constants.SIYUAN_APPID,
+                    transactions: [{
+                        doOperations: doFoldOperations
+                    }]
+                });
+            }
         }
     } else {
         transaction(options.protyle, doOperations.concat(doFoldOperations), undoOperations.concat(undoFoldOperations));
     }
-    onTransaction(options.protyle, doFoldOperations, false);
+    if (!hasViewFoldContext(options.protyle)) {
+        onTransaction(options.protyle, doFoldOperations, false);
+    }
     focusByWbr(options.protyle.wysiwyg.element, getEditorRange(options.protyle.wysiwyg.element));
     options.protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
         if (item.textContent === "") {
@@ -2081,7 +2113,13 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                                 skipSync?: boolean,
                                 callback?: () => void,
                             }) => {
+    if (protyle) {
+        const prepared = prepareViewFoldTransaction(protyle, doOperations, undoOperations);
+        doOperations = prepared.doOperations;
+        undoOperations = prepared.undoOperations;
+    }
     if (doOperations.length === 0) {
+        options?.callback?.();
         return;
     }
     cleanHeadingNumberOperations(doOperations);

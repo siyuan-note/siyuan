@@ -1494,9 +1494,11 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             const childrenIDs: string[] = response.data;
             const previousId = (childrenIDs && childrenIDs.length > 0) ? childrenIDs[childrenIDs.length - 1] : blockElement.getAttribute("data-node-id");
             foldData = setFold(protyle, blockElement, true, false, false, true);
-            foldData.doOperations[0].context = {
-                focusId: lastElement?.getAttribute("data-node-id"),
-            };
+            if (foldData.doOperations.length > 0) {
+                foldData.doOperations[0].context = {
+                    focusId: lastElement?.getAttribute("data-node-id"),
+                };
+            }
             doOperation.forEach(item => {
                 if (item.action === "insert") {
                     item.previousID = previousId;

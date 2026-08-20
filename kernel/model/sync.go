@@ -905,6 +905,9 @@ func getSyncIgnoreLines() (ret []string) {
 	ret = append(ret, "20210808180117-czj9bvb/**/*")
 	ret = append(ret, "20211226090932-5lcq56f/**/*")
 	ret = append(ret, "20240530133126-axarxgx/**/*")
+	// 视图状态仅在当前设备使用，不参与数据同步。
+	ret = append(ret, "/storage/view-state.json")
+	ret = append(ret, "/storage/view-state-corrupted-*.json")
 	// 忽略用户指南的数据库 JSON 文件
 	for _, avName := range getAllUserGuideAVJSONFiles() {
 		ret = append(ret, "/storage/av/"+avName)

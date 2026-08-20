@@ -111,6 +111,7 @@ import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util
 import {getBacklinkGutterContentTop, getFixedGutterPosition, getGutterMarginHeight} from "./layout";
 import {closeSubElement} from "../toolbar/subElementLifecycle";
 import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
+import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFold} from "../util/viewFold";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -401,33 +402,46 @@ export class Gutter {
                             }
                         }
                     });
-                    const doOperations: IOperation[] = [];
-                    const undoOperations: IOperation[] = [];
-                    Array.from(foldElement.children).forEach((ulElement) => {
-                        if (ulElement.classList.contains("list")) {
-                            Array.from(ulElement.children).forEach((listItemElement) => {
-                                if (listItemElement.classList.contains("li")) {
-                                    if (hasFold) {
-                                        listItemElement.removeAttribute("fold");
-                                    } else if (listItemElement.childElementCount > 3) {
-                                        listItemElement.setAttribute("fold", "1");
+                    if (hasViewFoldContext(protyle)) {
+                        Array.from(foldElement.children).forEach(ulElement => {
+                            if (ulElement.classList.contains("list")) {
+                                Array.from(ulElement.children).forEach(listItemElement => {
+                                    if (listItemElement.classList.contains("li") &&
+                                        (hasFold || listItemElement.childElementCount > 3)) {
+                                        setViewFold(protyle, listItemElement, !hasFold);
                                     }
-                                    const listId = listItemElement.getAttribute("data-node-id");
-                                    doOperations.push({
-                                        action: "setAttrs",
-                                        id: listId,
-                                        data: JSON.stringify({fold: hasFold ? "" : "1"})
-                                    });
-                                    undoOperations.push({
-                                        action: "setAttrs",
-                                        id: listId,
-                                        data: JSON.stringify({fold: hasFold ? "1" : ""})
-                                    });
-                                }
-                            });
-                        }
-                    });
-                    transaction(protyle, doOperations, undoOperations);
+                                });
+                            }
+                        });
+                    } else {
+                        const doOperations: IOperation[] = [];
+                        const undoOperations: IOperation[] = [];
+                        Array.from(foldElement.children).forEach((ulElement) => {
+                            if (ulElement.classList.contains("list")) {
+                                Array.from(ulElement.children).forEach((listItemElement) => {
+                                    if (listItemElement.classList.contains("li")) {
+                                        if (hasFold) {
+                                            listItemElement.removeAttribute("fold");
+                                        } else if (listItemElement.childElementCount > 3) {
+                                            listItemElement.setAttribute("fold", "1");
+                                        }
+                                        const listId = listItemElement.getAttribute("data-node-id");
+                                        doOperations.push({
+                                            action: "setAttrs",
+                                            id: listId,
+                                            data: JSON.stringify({fold: hasFold ? "" : "1"})
+                                        });
+                                        undoOperations.push({
+                                            action: "setAttrs",
+                                            id: listId,
+                                            data: JSON.stringify({fold: hasFold ? "1" : ""})
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                        transaction(protyle, doOperations, undoOperations);
+                    }
                     buttonElement.removeAttribute("disabled");
                 } else {
                     foldStatus = setFold(protyle, foldElement).fold;
@@ -570,29 +584,38 @@ export class Gutter {
                     if (arrowElement) {
                         arrowElement.style.transform = hasFold ? "rotate(90deg)" : "";
                     }
-                    const doOperations: IOperation[] = [];
-                    const undoOperations: IOperation[] = [];
-                    Array.from(foldElement.parentElement.children).find((listItemElement) => {
-                        if (listItemElement.classList.contains("li")) {
-                            if (hasFold) {
-                                listItemElement.removeAttribute("fold");
-                            } else if (listItemElement.childElementCount > 3) {
-                                listItemElement.setAttribute("fold", "1");
+                    if (hasViewFoldContext(protyle)) {
+                        Array.from(foldElement.parentElement.children).forEach(listItemElement => {
+                            if (listItemElement.classList.contains("li") &&
+                                (hasFold || listItemElement.childElementCount > 3)) {
+                                setViewFold(protyle, listItemElement, !hasFold);
                             }
-                            const listId = listItemElement.getAttribute("data-node-id");
-                            doOperations.push({
-                                action: "setAttrs",
-                                id: listId,
-                                data: JSON.stringify({fold: hasFold ? "" : "1"})
-                            });
-                            undoOperations.push({
-                                action: "setAttrs",
-                                id: listId,
-                                data: JSON.stringify({fold: hasFold ? "1" : ""})
-                            });
-                        }
-                    });
-                    transaction(protyle, doOperations, undoOperations);
+                        });
+                    } else {
+                        const doOperations: IOperation[] = [];
+                        const undoOperations: IOperation[] = [];
+                        Array.from(foldElement.parentElement.children).find((listItemElement) => {
+                            if (listItemElement.classList.contains("li")) {
+                                if (hasFold) {
+                                    listItemElement.removeAttribute("fold");
+                                } else if (listItemElement.childElementCount > 3) {
+                                    listItemElement.setAttribute("fold", "1");
+                                }
+                                const listId = listItemElement.getAttribute("data-node-id");
+                                doOperations.push({
+                                    action: "setAttrs",
+                                    id: listId,
+                                    data: JSON.stringify({fold: hasFold ? "" : "1"})
+                                });
+                                undoOperations.push({
+                                    action: "setAttrs",
+                                    id: listId,
+                                    data: JSON.stringify({fold: hasFold ? "1" : ""})
+                                });
+                            }
+                        });
+                        transaction(protyle, doOperations, undoOperations);
+                    }
                 } else {
                     const hasFold = setFold(protyle, foldElement).fold;
                     const foldArrowElement = buttonElement.parentElement.querySelector("[data-type='fold'] > svg") as HTMLElement;
@@ -1482,8 +1505,12 @@ export class Gutter {
             return;
         }
         const embedID = (element as HTMLElement).dataset.embedId;
+        const viewOccurrenceID = (element as HTMLElement).dataset.viewOccurrenceId;
         return Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
             if (!this.isMatchNode(item)) {
+                return false;
+            }
+            if (viewOccurrenceID && encodeURIComponent(getViewFoldOccurrenceID(protyle, item)) !== viewOccurrenceID) {
                 return false;
             }
             const embedElement = isInEmbedBlock(item, false);
@@ -3579,6 +3606,8 @@ export class Gutter {
                 if (protyle.options.backlinkData) {
                     popoverHTML = `class="popover__block" data-id="${dataNodeId}"`;
                 }
+                const viewOccurrenceID = hasViewFoldContext(protyle) ?
+                    getViewFoldOccurrenceID(protyle, nodeElement) : "";
                 const buttonHTML = type ? genGutterBlockButtonHTML({
                     ariaLabel: gutterTip,
                     type,
@@ -3586,6 +3615,7 @@ export class Gutter {
                     nodeID: dataNodeId,
                     icon: getIconByType(type, nodeElement.getAttribute("data-subtype")),
                     embedID,
+                    viewOccurrenceID,
                     popoverHTML,
                     draggable: !protyle.disabled && !embedContext,
                 }) : "";
@@ -3596,7 +3626,7 @@ export class Gutter {
                 if (type === "NodeListItem" && nodeElement.childElementCount > 3 || type === "NodeHeading") {
                     const fold = nodeElement.getAttribute("fold");
                     foldHTML = `<button class="ariaLabel" data-delay="500" data-position="parentW" aria-label="${window.siyuan.languages.fold}"
-data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold === "1" ? "" : "transform:rotate(90deg)"}"><use xlink:href="#iconPlay"></use></svg></button>`;
+data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURIComponent(viewOccurrenceID)}"` : ""} style="cursor:inherit;"><svg style="width: 10px;${fold && fold === "1" ? "" : "transform:rotate(90deg)"}"><use xlink:href="#iconPlay"></use></svg></button>`;
                 }
                 if (type === "NodeListItem" || type === "NodeList") {
                     listItem = nodeElement;
@@ -3658,6 +3688,8 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px;${fold && fold 
                 subtype: embedElement.getAttribute("data-subtype"),
                 nodeID: embedElement.getAttribute("data-node-id"),
                 icon: getIconByType(type, embedElement.getAttribute("data-subtype")),
+                viewOccurrenceID: hasViewFoldContext(protyle) ?
+                    getViewFoldOccurrenceID(protyle, embedElement) : "",
                 popoverHTML: protyle.options.backlinkData ?
                     `class="popover__block" data-id="${embedElement.getAttribute("data-node-id")}"` : "",
                 draggable: !protyle.disabled,

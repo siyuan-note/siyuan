@@ -153,6 +153,7 @@ import {escapeAttr, escapeHtml} from "../../util/escape";
 import {openLink} from "../../editor/openLink";
 import {mathRender} from "../render/mathRender";
 import {editAssetItem} from "../render/av/asset";
+import {hasViewFoldContext, sanitizeViewFoldHTML, setViewFold} from "../util/viewFold";
 import {img3115} from "../../boot/compatibleVersion";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {globalClickHideMenu} from "../../boot/globalEvent/click";
@@ -671,14 +672,15 @@ export class WYSIWYG {
         }));
         const textPlain = clipboardData.getData("text/plain");
         const parsedHTML = getTextSiyuanFromTextHTML(clipboardData.getData("text/html"));
-        const textSiyuan = clipboardData.getData("text/siyuan") || parsedHTML.textSiyuan;
+        const textHTML = sanitizeViewFoldHTML(parsedHTML.textHtml);
+        const textSiyuan = sanitizeViewFoldHTML(clipboardData.getData("text/siyuan") || parsedHTML.textSiyuan);
         if (!textPlain && !parsedHTML.textHtml) {
             showMessage(window.siyuan.languages.clipboardPermissionDenied, 7000, "error");
             return false;
         }
         const result = await writeClipboardData({
             textPlain,
-            textHTML: parsedHTML.textHtml,
+            textHTML,
             textSiyuan,
         }, {fallbackToPlainText: false});
         if (result.status === "failed") {
@@ -900,7 +902,9 @@ export class WYSIWYG {
                             textPlain = textWithoutAttr;
                         }
                         // https://github.com/siyuan-note/siyuan/issues/13232
-                        headingElement.removeAttribute("fold");
+                        if (!hasViewFoldContext(protyle)) {
+                            headingElement.removeAttribute("fold");
+                        }
                     } else if (!["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                         // 复制行内元素 https://github.com/siyuan-note/insider/issues/191
                         tempElement.append(range.startContainer.parentElement.cloneNode(true));
@@ -989,6 +993,7 @@ export class WYSIWYG {
                     }
                 }
             }
+            html = sanitizeViewFoldHTML(html);
             if (protyle.disabled) {
                 html = getEnableHTML(html);
             }
@@ -3326,6 +3331,7 @@ export class WYSIWYG {
             }
 
             if (!isInCodeBlock) {
+                html = sanitizeViewFoldHTML(html);
                 enableLuteMarkdownSyntax(protyle);
                 const blockDOMClipboardRichData = useBlockDOMClipboardRichData ?
                     buildBlockDOMClipboardRichData(protyle.lute, html) : undefined;
@@ -4633,7 +4639,7 @@ export class WYSIWYG {
                             setFold(protyle, actionElement.parentElement);
                         } else {
                             let hasFold = true;
-                            const oldHTML = actionElement.parentElement.parentElement.outerHTML;
+                            const listElement = actionElement.parentElement.parentElement;
                             Array.from(actionElement.parentElement.parentElement.children).find((listItemElement) => {
                                 if (listItemElement.classList.contains("li")) {
                                     if (listItemElement.getAttribute("fold") !== "1" && listItemElement.childElementCount > 3) {
@@ -4642,6 +4648,18 @@ export class WYSIWYG {
                                     }
                                 }
                             });
+                            if (hasViewFoldContext(protyle)) {
+                                Array.from(listElement.children).forEach(listItemElement => {
+                                    if (listItemElement.classList.contains("li") &&
+                                        (hasFold || listItemElement.childElementCount > 3)) {
+                                        setViewFold(protyle, listItemElement, !hasFold);
+                                    }
+                                });
+                                hideElements(["gutter"], protyle);
+                                event.stopPropagation();
+                                return;
+                            }
+                            const oldHTML = listElement.outerHTML;
                             Array.from(actionElement.parentElement.parentElement.children).find((listItemElement) => {
                                 if (listItemElement.classList.contains("li")) {
                                     if (hasFold) {
@@ -4651,7 +4669,7 @@ export class WYSIWYG {
                                     }
                                 }
                             });
-                            updateTransaction(protyle, actionElement.parentElement.parentElement, oldHTML);
+                            updateTransaction(protyle, listElement, oldHTML);
                         }
                         hideElements(["gutter"], protyle);
                     } else if (shouldOpenListItemAttr(event.shiftKey, protyle.disabled, actionElement)) {

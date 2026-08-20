@@ -29,6 +29,15 @@ describe("genGutterBlockButtonHTML", () => {
         assert.match(html, /data-embed-id="20260817120001-embed"/);
         assert.doesNotMatch(html, /draggable="true"/);
     });
+
+    it("keeps repeated view occurrences distinct", () => {
+        const html = genGutterBlockButtonHTML({
+            ...baseOptions,
+            viewOccurrenceID: "fragment/second",
+        });
+
+        assert.match(html, /data-view-occurrence-id="fragment%2Fsecond"/);
+    });
 });
 
 describe("canShowGutterInsert", () => {

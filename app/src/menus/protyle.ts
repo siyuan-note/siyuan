@@ -9,6 +9,7 @@ import {
 import {MenuItem} from "./Menu";
 import {getTableCellVerticalAlignmentMenus, setTableCellStyle} from "../protyle/util/tableControl";
 import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
+import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFoldTransient} from "../protyle/util/viewFold";
 import {
     deleteColumn,
     deleteRow,
@@ -2691,6 +2692,21 @@ export const setFoldById = (data: {
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.id}"]`)).find((item: Element) => {
         if (!isInEmbedBlock(item)) {
             const operations = setFold(protyle, item, true, false, true, true);
+            if (hasViewFoldContext(protyle)) {
+                const occurrenceID = getViewFoldOccurrenceID(protyle, item);
+                void setViewFoldTransient(protyle, item, false, undefined, true).then(() => {
+                    const focusElement = Array.from(protyle.wysiwyg.element.querySelectorAll(
+                        `[data-node-id="${data.currentNodeID}"]`
+                    )).find(element => getViewFoldOccurrenceID(protyle, element) === occurrenceID);
+                    if (focusElement) {
+                        focusBlock(focusElement);
+                    }
+                }).catch(error => console.error(error));
+                return true;
+            }
+            if (operations.doOperations.length === 0) {
+                return true;
+            }
             operations.doOperations[0].context = {
                 focusId: data.currentNodeID,
             };

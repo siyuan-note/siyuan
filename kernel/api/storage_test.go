@@ -216,3 +216,246 @@ func TestGetOutlineStorageByRole(t *testing.T) {
 		})
 	}
 }
+
+func TestGetViewStateByRole(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+	})
+
+	const viewKey = "backlink:dock:20260820000000-host"
+	if _, err := model.PatchViewState(viewKey, map[string]any{
+		"fold:20260820000000-block": true,
+	}, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	roles := []struct {
+		name       string
+		role       model.Role
+		statusCode int
+	}{
+		{name: "administrator", role: model.RoleAdministrator, statusCode: http.StatusOK},
+		{name: "reader", role: model.RoleReader, statusCode: http.StatusForbidden},
+	}
+	for _, role := range roles {
+		t.Run(role.name, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(func(c *gin.Context) {
+				c.Set(model.RoleContextKey, role.role)
+				c.Next()
+			})
+			ServeAPI(engine)
+
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(
+				http.MethodPost,
+				"/api/storage/getViewState",
+				strings.NewReader(`{"key":"`+viewKey+`"}`),
+			)
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			if recorder.Code != role.statusCode {
+				t.Fatalf("unexpected status code: got %d, want %d", recorder.Code, role.statusCode)
+			}
+			if role.role == model.RoleReader {
+				if strings.Contains(recorder.Body.String(), "20260820000000-block") {
+					t.Fatalf("reader received administrator view state: %s", recorder.Body.String())
+				}
+				return
+			}
+			if !strings.Contains(recorder.Body.String(), "20260820000000-block") {
+				t.Fatalf("administrator did not receive view state: %s", recorder.Body.String())
+			}
+		})
+	}
+}
+
+func TestMutateViewStateByRoleAndReadonly(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+	})
+
+	const (
+		viewKey = "backlink:dock:20260820000000-host"
+		field   = "fold:20260820000000-block"
+	)
+	if _, err := model.PatchViewState(viewKey, map[string]any{field: true}, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, path := range []string{"/api/storage/patchViewState", "/api/storage/removeViewState"} {
+		engine := newViewStateAPIEngine(model.RoleReader)
+		body := `{"key":"` + viewKey + `"}`
+		if strings.HasSuffix(path, "patchViewState") {
+			body = `{"key":"` + viewKey + `","values":{"` + field + `":false}}`
+		}
+		recorder := performViewStateAPIRequest(engine, path, body)
+		if recorder.Code != http.StatusForbidden {
+			t.Fatalf("reader mutation returned status %d for %s: %s", recorder.Code, path, recorder.Body.String())
+		}
+	}
+	state, err := model.GetViewState(viewKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if folded, ok := state[field].(bool); !ok || !folded {
+		t.Fatalf("reader changed view state: %#v", state)
+	}
+
+	oldReadOnly := util.ReadOnly
+	oldConf := model.Conf
+	t.Cleanup(func() {
+		util.ReadOnly = oldReadOnly
+		model.Conf = oldConf
+	})
+	util.ReadOnly = true
+	model.Conf = &model.AppConf{Lang: "en"}
+	readOnlyRecorder := performViewStateAPIRequest(
+		newViewStateAPIEngine(model.RoleAdministrator),
+		"/api/storage/patchViewState",
+		`{"key":"`+viewKey+`","values":{"`+field+`":false}}`,
+	)
+	util.ReadOnly = oldReadOnly
+	model.Conf = oldConf
+	if responseCode(t, readOnlyRecorder) != -1 {
+		t.Fatalf("read-only mutation was not rejected: %s", readOnlyRecorder.Body.String())
+	}
+	state, err = model.GetViewState(viewKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if folded, ok := state[field].(bool); !ok || !folded {
+		t.Fatalf("read-only request changed view state: %#v", state)
+	}
+
+	adminEngine := newViewStateAPIEngine(model.RoleAdministrator)
+	patchRecorder := performViewStateAPIRequest(
+		adminEngine,
+		"/api/storage/patchViewState",
+		`{"key":"`+viewKey+`","values":{"`+field+`":false}}`,
+	)
+	if responseCode(t, patchRecorder) != 0 {
+		t.Fatalf("administrator patch failed: %s", patchRecorder.Body.String())
+	}
+	state, err = model.GetViewState(viewKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if folded, ok := state[field].(bool); !ok || folded {
+		t.Fatalf("administrator patch was not persisted: %#v", state)
+	}
+
+	removeRecorder := performViewStateAPIRequest(
+		adminEngine,
+		"/api/storage/removeViewState",
+		`{"key":"`+viewKey+`"}`,
+	)
+	if responseCode(t, removeRecorder) != 0 {
+		t.Fatalf("administrator removal failed: %s", removeRecorder.Body.String())
+	}
+	state, err = model.GetViewState(viewKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if 0 != len(state) {
+		t.Fatalf("administrator removal was not persisted: %#v", state)
+	}
+}
+
+func TestViewStateAPIRejectsInvalidArguments(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+	})
+
+	tests := []struct {
+		name string
+		path string
+		body string
+		msg  string
+	}{
+		{name: "missing key", path: "/api/storage/getViewState", body: `{}`, msg: "Field [key] is required"},
+		{name: "empty key", path: "/api/storage/removeViewState", body: `{"key":" "}`, msg: "Field [key] must not be empty"},
+		{
+			name: "values is not an object",
+			path: "/api/storage/patchViewState",
+			body: `{"key":"view","values":[]}`,
+			msg:  "Field [values]: should be of type [Object]",
+		},
+		{
+			name: "remove keys is not an array",
+			path: "/api/storage/patchViewState",
+			body: `{"key":"view","removeKeys":"field"}`,
+			msg:  "Field [removeKeys]: each element should be a non-empty String",
+		},
+		{
+			name: "remove key is empty",
+			path: "/api/storage/patchViewState",
+			body: `{"key":"view","removeKeys":[""]}`,
+			msg:  "Field [removeKeys]: each element should be a non-empty String",
+		},
+		{
+			name: "remove key is whitespace",
+			path: "/api/storage/patchViewState",
+			body: `{"key":"view","removeKeys":[" "]}`,
+			msg:  "Field [removeKeys]: each element should be a non-empty String",
+		},
+	}
+	engine := newViewStateAPIEngine(model.RoleAdministrator)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			recorder := performViewStateAPIRequest(engine, test.path, test.body)
+			response := &struct {
+				Code int    `json:"code"`
+				Msg  string `json:"msg"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if response.Code != -1 || !strings.Contains(response.Msg, test.msg) {
+				t.Fatalf("unexpected invalid argument response: %s", recorder.Body.String())
+			}
+		})
+	}
+}
+
+func newViewStateAPIEngine(role model.Role) *gin.Engine {
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(model.RoleContextKey, role)
+		c.Next()
+	})
+	ServeAPI(engine)
+	return engine
+}
+
+func performViewStateAPIRequest(engine *gin.Engine, path, body string) *httptest.ResponseRecorder {
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+	engine.ServeHTTP(recorder, request)
+	return recorder
+}
+
+func responseCode(t *testing.T, recorder *httptest.ResponseRecorder) int {
+	t.Helper()
+	response := &struct {
+		Code int `json:"code"`
+	}{}
+	if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+		t.Fatalf("unmarshal response failed: %v", err)
+	}
+	return response.Code
+}

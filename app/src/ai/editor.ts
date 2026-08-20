@@ -18,6 +18,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeAriaLabel, escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
+import {bindThinkingCardToggle} from "./thinkingCard";
 
 type TAIEditorSourceKind = "selection" | "blocks" | "writing";
 type TAIEditorTaskStatus = "streaming" | "done" | "stopped" | "error";
@@ -639,32 +640,7 @@ const createTask = (protyle: IProtyle, source: IAIEditorSource) => {
         updatePosition: () => undefined,
     };
     (panel.querySelector(".ai-editor-panel__close") as HTMLButtonElement).addEventListener("click", () => cleanupTask(task));
-    const thinkingHeader = task.thinkingElement.querySelector(".agent-chat__thinking-header") as HTMLElement;
-    const expandIcon = task.thinkingElement.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
-    const contractIcon = task.thinkingElement.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
-    thinkingHeader.addEventListener("click", () => {
-        task.thinkingElement.setAttribute("data-user-interacted", "true");
-        const expanded = task.thinkingBody.classList.contains("agent-chat__thinking-body--expanded");
-        const preview = task.thinkingBody.classList.contains("agent-chat__thinking-body--preview");
-        if (expanded) {
-            task.thinkingBody.classList.remove("agent-chat__thinking-body--expanded");
-            expandIcon.classList.remove("fn__none");
-            contractIcon.classList.add("fn__none");
-            if (!task.thinkingElement.classList.contains("agent-chat__msg--thinking-done")) {
-                task.thinkingLatestElement.classList.remove("fn__none");
-                task.thinkingLatestElement.scrollLeft = task.thinkingLatestElement.scrollWidth;
-            }
-        } else if (preview || task.thinkingElement.classList.contains("agent-chat__msg--thinking-done")) {
-            task.thinkingBody.classList.remove("agent-chat__thinking-body--preview");
-            task.thinkingBody.classList.add("agent-chat__thinking-body--expanded");
-            expandIcon.classList.add("fn__none");
-            contractIcon.classList.remove("fn__none");
-            task.thinkingLatestElement.classList.add("fn__none");
-        } else {
-            task.thinkingBody.classList.add("agent-chat__thinking-body--preview");
-            task.thinkingLatestElement.classList.add("fn__none");
-        }
-    });
+    bindThinkingCardToggle(task.thinkingElement);
     task.updatePosition = () => {
         if (!task.panel.isConnected || task.panel.classList.contains("ai-editor-panel--mobile")) {
             return;

@@ -31,7 +31,6 @@ import {
     isAgentRegenerateStateCurrent
 } from "./AgentHistory";
 import {
-    bindThinkingCardToggle,
     copyAgentText,
     createThinkingCardElement,
     postRender,
@@ -41,6 +40,7 @@ import {
     renderToolsLineHTML,
     renderWelcomeHTML
 } from "./AgentMessageRenderer";
+import {bindThinkingCardToggle} from "../../../ai/thinkingCard";
 import {getAgentReasoningEffortOptions} from "./AgentReasoning";
 import {mountGroupedModelPicker, type IGroupedModelPicker} from "../../../config/tabs/ai/aiProviderUi";
 import {AI_CONFIG_CHANGED_EVENT} from "../../../config/tabs/ai/aiRuntime";

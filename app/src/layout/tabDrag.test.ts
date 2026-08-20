@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {findNextTabId, reorderTabItems} from "./tabDrag";
+import {
+    clearTabHoverSwitch,
+    findNextTabId,
+    reorderTabItems,
+    scheduleTabHoverSwitch
+} from "./tabDrag";
 
 const createItems = () => [
     {id: "a"},
@@ -42,5 +47,57 @@ describe("tab drag ordering", () => {
 
         assert.equal(reorderTabItems(items, {id: "missing"}, "b"), false);
         assert.deepEqual(items.map((item) => item.id), ["a", "b", "c", "d"]);
+    });
+});
+
+describe("tab hover switching", () => {
+    it("keeps the original delay when hovering the same tab", () => {
+        let callback: () => void;
+        let scheduleCount = 0;
+        let switchCount = 0;
+        const scheduler = (nextCallback: () => void): (() => void) => {
+            callback = nextCallback;
+            scheduleCount++;
+            return () => undefined;
+        };
+
+        scheduleTabHoverSwitch("a", () => switchCount++, 500, scheduler);
+        scheduleTabHoverSwitch("a", () => switchCount++, 500, scheduler);
+        callback();
+
+        assert.equal(scheduleCount, 1);
+        assert.equal(switchCount, 1);
+        clearTabHoverSwitch();
+    });
+
+    it("switches only the last hovered tab", () => {
+        const callbacks: Array<() => void> = [];
+        const switchedTabs: string[] = [];
+        const scheduler = (callback: () => void): (() => void) => {
+            callbacks.push(callback);
+            return () => undefined;
+        };
+
+        scheduleTabHoverSwitch("a", () => switchedTabs.push("a"), 500, scheduler);
+        scheduleTabHoverSwitch("b", () => switchedTabs.push("b"), 500, scheduler);
+        callbacks.forEach((callback) => callback());
+
+        assert.deepEqual(switchedTabs, ["b"]);
+        clearTabHoverSwitch();
+    });
+
+    it("does not switch after clearing the hover", () => {
+        let callback: () => void;
+        let switchCount = 0;
+        const scheduler = (nextCallback: () => void): (() => void) => {
+            callback = nextCallback;
+            return () => undefined;
+        };
+
+        scheduleTabHoverSwitch("a", () => switchCount++, 500, scheduler);
+        clearTabHoverSwitch();
+        callback();
+
+        assert.equal(switchCount, 0);
     });
 });

@@ -1033,6 +1033,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 window.siyuan.dragTitle = getContenteditableElement(target.parentElement)?.textContent?.trim() || "";
 
                 window.siyuan.dragElement = protyle.wysiwyg.element;
+                event.dataTransfer.setData(Constants.SIYUAN_DROP_BLOCK, Constants.SIYUAN_DROP_BLOCK);
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeListItem${Constants.ZWSP}${target.parentElement.getAttribute("data-subtype")}${Constants.ZWSP}${[target.parentElement.getAttribute("data-node-id")]}`,
                     protyle.wysiwyg.element.innerHTML);
                 return;

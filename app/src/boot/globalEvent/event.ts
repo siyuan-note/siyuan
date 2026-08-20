@@ -9,6 +9,7 @@ import {hasClosestByAttribute, hasClosestByClassName, isInEmbedBlock} from "../.
 import {hideTooltip} from "../../dialog/tooltip";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {dragOverScroll, stopScrollAnimation} from "./dragover";
+import {clearTabHoverSwitch} from "../../layout/tabDrag";
 import {setWebViewFocusable} from "../../mobile/util/mobileAppUtil";
 import {cancelManualTouch, initTouchDragBridge, isLastPointerMouse} from "../../util/touchDragBridge";
 import {isWindow} from "../../util/functions";
@@ -99,6 +100,9 @@ export const initWindowEvent = (app: App) => {
     window.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
         const isDocumentTab = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENT_TAB);
         const tabBarElement = hasClosestByClassName(event.target, "layout-tab-bar");
+        if (!tabBarElement && event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK)) {
+            clearTabHoverSwitch();
+        }
         if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB) && (!isDocumentTab || tabBarElement)) {
             if (!tabBarElement) {
                 stopScrollAnimation();
@@ -203,6 +207,7 @@ export const initWindowEvent = (app: App) => {
         }
     });
     window.addEventListener("dragend", () => {
+        clearTabHoverSwitch();
         stopScrollAnimation();
         hideDragTip();
         clearDragTipGhost();

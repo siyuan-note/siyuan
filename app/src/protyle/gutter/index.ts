@@ -294,6 +294,7 @@ export class Gutter {
                 });
             }
             if (isBlockDrag) {
+                event.dataTransfer.setData(Constants.SIYUAN_DROP_BLOCK, Constants.SIYUAN_DROP_BLOCK);
                 const text = getContenteditableElement(selectElements[0] as HTMLElement)?.textContent?.trim() || "";
                 // 数据库块若无标题，优先用当前视图名，最后兜底为"数据库"
                 let title = text;

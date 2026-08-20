@@ -14,6 +14,7 @@ import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openFileAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {
     copyPlainText,
+    isHuawei,
     isMac,
     isOnlyMeta,
     saveExportFile,
@@ -1390,8 +1391,8 @@ export class Gutter {
                     addEditorToDatabase(protyle, getEditorRange(selectsElement[0]));
                 }
             }).element);
-            // 加密笔记本中的块不暴露该菜单：避免把受保护内容引入智能体会话。
-            if (!isEncryptedBox(protyle.notebookId)) {
+            // 加密笔记本和华为渠道不暴露该菜单：避免受保护内容外泄，并确保渠道包不提供智能体入口。
+            if (!isEncryptedBox(protyle.notebookId) && !isHuawei()) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "addToAgent",
                     icon: "iconSend",
@@ -1967,8 +1968,8 @@ export class Gutter {
         }
         this.appendAddToDatabaseMenu(protyle, nodeElement);
         if (!protyle.disabled) {
-            // 加密笔记本中的块不暴露该菜单：避免把受保护内容引入智能体会话。
-            if (!isEncryptedBox(protyle.notebookId)) {
+            // 加密笔记本和华为渠道不暴露该菜单：避免受保护内容外泄，并确保渠道包不提供智能体入口。
+            if (!isEncryptedBox(protyle.notebookId) && !isHuawei()) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "addToAgent",
                     icon: "iconSend",

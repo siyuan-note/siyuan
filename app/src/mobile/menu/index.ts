@@ -8,7 +8,7 @@ import {openCard} from "../../card/openCard";
 import {activeBlur} from "../util/keyboardToolbar";
 import {getRecentDocs} from "./getRecentDocs";
 import type {App} from "../../index";
-import {isInMobileApp} from "../../protyle/util/compatibility";
+import {isHuawei, isInMobileApp} from "../../protyle/util/compatibility";
 import {newFile} from "../../util/newFile";
 import {afterLayoutReady} from "../../plugin/loader";
 import {commandPanel} from "../../boot/globalEvent/command/panel";
@@ -237,7 +237,7 @@ export const initRightMenu = (app: App) => {
             <div id="menuSearch" class="b3-menu__item">
                 <svg class="b3-menu__icon"><use xlink:href="#iconSearch"></use></svg><span class="b3-menu__label">${window.siyuan.languages.search}</span>
             </div>
-            <div id="menuAgentChat" class="b3-menu__item${window.siyuan.config.readonly || window.siyuan.isPublish ? " fn__none" : ""}">
+            <div id="menuAgentChat" class="b3-menu__item${window.siyuan.config.readonly || window.siyuan.isPublish || isHuawei() ? " fn__none" : ""}">
                 <svg class="b3-menu__icon"><use xlink:href="#iconSparkles"></use></svg>
                 <span class="b3-menu__label">${window.siyuan.languages.agentChat}</span>
                 <span data-type="agent-status" class="b3-menu__accelerator fn__none"></span>

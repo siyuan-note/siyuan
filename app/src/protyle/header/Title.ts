@@ -31,6 +31,7 @@ import {enableLuteMarkdownSyntax, restoreLuteMarkdownSyntax} from "../util/paste
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {focusAVByArrow} from "../render/av/focus";
 import {getParentDocumentID} from "../util/parentDocument";
+import {getTextSiyuanFromClipboardData} from "../util/clipboardData";
 
 export class Title {
     public element: HTMLElement;
@@ -54,7 +55,7 @@ export class Title {
                 event.stopPropagation();
                 event.preventDefault();
                 // 不能使用 range.insertNode，否则无法撤销
-                let text = event.clipboardData.getData("text/siyuan");
+                let text = getTextSiyuanFromClipboardData(event.clipboardData);
                 if (text) {
                     try {
                         JSON.parse(text);

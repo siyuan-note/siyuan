@@ -565,6 +565,33 @@
         }
       }
 
+      &__panel:not([data-type="downloaded"]) .config-bazaar__content .b3-card {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+
+        > .b3-card__img {
+          grid-column: 1;
+          grid-row: 1;
+        }
+
+        > .fn__flex-1 {
+          display: contents;
+
+          > .b3-card__info {
+            grid-column: 2;
+            grid-row: 1;
+          }
+
+          > .b3-card__actions {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            min-width: 0;
+            padding: 4px 8px 8px 12px;
+            width: 100%;
+          }
+        }
+      }
+
       &__panel[data-type="downloaded"] .config-bazaar__content .b3-card {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr);

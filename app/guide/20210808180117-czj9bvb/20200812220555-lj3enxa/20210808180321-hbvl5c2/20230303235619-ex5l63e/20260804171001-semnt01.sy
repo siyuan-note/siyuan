@@ -6,7 +6,7 @@
 		"id": "20260804171001-semnt01",
 		"title": "语义搜索",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260820190627"
 	},
 	"Children": [
 		{
@@ -214,7 +214,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170134-q71hecf",
-				"updated": "20260804180000"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -299,7 +299,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170138-m2u7g7r",
-				"updated": "20260804180000"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -313,12 +313,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170139-hue5uqg",
-				"updated": "20260804180000"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "索引进度中出现失败内容块时，先检查嵌入模型配置和网络连接，然后单击重试失败的内容块。该操作不会重新处理已经成功生成向量的内容块。"
+					"Data": "索引进度中出现失败内容块时，先检查嵌入模型配置和网络连接，然后点击重试失败的内容块。该操作不会重新处理已经成功生成向量的内容块。"
 				}
 			]
 		},
@@ -328,7 +328,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170140-2828v5b",
-				"updated": "20260804180000"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -342,12 +342,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170141-qa0j5x6",
-				"updated": "20260804180000"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "更换嵌入模型、修改向量维度或调整忽略规则后，应单击 "
+					"Data": "更换嵌入模型、修改向量维度或调整忽略规则后，应点击 "
 				},
 				{
 					"Type": "NodeTextMark",

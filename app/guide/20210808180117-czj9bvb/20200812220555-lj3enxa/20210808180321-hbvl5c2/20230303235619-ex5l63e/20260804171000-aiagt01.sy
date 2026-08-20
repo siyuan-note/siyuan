@@ -6,7 +6,7 @@
 		"id": "20260804171000-aiagt01",
 		"title": "AI 智能体",
 		"type": "doc",
-		"updated": "20260816130653"
+		"updated": "20260820190627"
 	},
 	"Children": [
 		{
@@ -168,7 +168,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804170027-76js6ua",
-				"updated": "20260816114944"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -183,7 +183,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170028-lvsc01j",
-				"updated": "20260804180000"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -197,12 +197,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170029-xkd3vsh",
-				"updated": "20260804180000"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在桌面端单击右侧停靠栏中的 "
+					"Data": "在桌面端点击右侧停靠栏中的 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -389,7 +389,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804170039-6hkjcgx",
-				"updated": "20260816114944"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -403,7 +403,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804170040-qf65tjk",
-				"updated": "20260816114944"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -439,7 +439,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "智能体运行时可以单击停止按钮中止当前任务。描述目标、范围和期望输出位置越明确，执行结果通常越稳定。"
+					"Data": "智能体运行时可以点击停止按钮中止当前任务。描述目标、范围和期望输出位置越明确，执行结果通常越稳定。"
 				}
 			]
 		},

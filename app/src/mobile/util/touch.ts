@@ -18,7 +18,7 @@ import {
     hasVisibleSelectionText,
     shouldRestoreLongPressSelection,
 } from "./touchSelection";
-import {getTouchAxis, shouldEnterLongPressMultiSelect} from "./touchGesture";
+import {getTouchAxis, shouldStartLongPressMultiSelect} from "./touchGesture";
 
 let clientX: number;
 let clientY: number;
@@ -349,7 +349,13 @@ export const handleTouchStart = (event: TouchEvent) => {
     clearLongPress();
     if (clientX && clientY && editor && !editor.protyle.toolbar.isMultiSelectMode()) {
         const blockElement = hasClosestBlock(target);
-        if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
+        if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement) &&
+            shouldStartLongPressMultiSelect(
+                target.tagName,
+                target.dataset.type,
+                !!hasClosestByAttribute(target, "data-type", "inline-math"),
+                target.tagName === "IMG" && !!hasClosestByClassName(target, "img"),
+            )) {
             longPressBlockElement = blockElement;
             const touchRange = getRangeByPoint(event.touches[0].clientX, event.touches[0].clientY);
             const touchRangeElement = touchRange.startContainer.nodeType === Node.ELEMENT_NODE ?
@@ -360,13 +366,6 @@ export const handleTouchStart = (event: TouchEvent) => {
                 longPressTouchRange.collapse(true);
             }
             longPressTimer = window.setTimeout(() => {
-                if (!shouldEnterLongPressMultiSelect(
-                    !window.siyuan.menus.menu.element.classList.contains("fn__none"),
-                    !editor.protyle.toolbar.subElement.classList.contains("fn__none"),
-                )) {
-                    longPressTimer = undefined;
-                    return;
-                }
                 clearInvisibleEditorSelection();
                 const selection = window.getSelection();
                 if (selection?.rangeCount > 0) {

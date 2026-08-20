@@ -47,19 +47,19 @@ func TestNormalizeAssetOpen(t *testing.T) {
 	}
 
 	assetOpen := NormalizeAssetOpen(&AssetOpen{
-		Click:      AssetOpenActionNewWindow,
+		Click:      AssetOpenActionBottom,
 		CtrlClick:  "invalid",
-		AltClick:   AssetOpenActionRight,
+		AltClick:   AssetOpenActionBackground,
 		ShiftClick: "",
 	})
-	if assetOpen.Click != AssetOpenActionNewWindow {
-		t.Fatalf("expected new window action, got %q", assetOpen.Click)
+	if assetOpen.Click != AssetOpenActionBottom {
+		t.Fatalf("expected bottom action, got %q", assetOpen.Click)
 	}
 	if assetOpen.CtrlClick != AssetOpenActionFolder {
 		t.Fatalf("expected folder fallback, got %q", assetOpen.CtrlClick)
 	}
-	if assetOpen.AltClick != AssetOpenActionRight {
-		t.Fatalf("expected right action, got %q", assetOpen.AltClick)
+	if assetOpen.AltClick != AssetOpenActionBackground {
+		t.Fatalf("expected background action, got %q", assetOpen.AltClick)
 	}
 	if assetOpen.ShiftClick != AssetOpenActionApp {
 		t.Fatalf("expected app fallback, got %q", assetOpen.ShiftClick)

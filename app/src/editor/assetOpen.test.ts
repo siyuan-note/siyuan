@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     DEFAULT_ASSET_OPEN,
+    getAssetOpenGestures,
     normalizeAssetOpenConfig,
     resolveAssetOpenAction,
     resolveAssetOpenGesture,
@@ -40,19 +41,38 @@ describe("asset opening", () => {
             previewable: false,
             noSplitScreen: false,
         }), "folder");
+        assert.equal(resolveExecutableAssetOpenAction("bottom", {
+            previewable: true,
+            noSplitScreen: false,
+        }), "bottom");
+        assert.equal(resolveExecutableAssetOpenAction("background", {
+            previewable: true,
+            noSplitScreen: false,
+        }), "background");
     });
 
     it("normalizes each invalid action independently", () => {
         assert.deepEqual(normalizeAssetOpenConfig({
             click: "invalid" as Config.TAssetOpenAction,
-            ctrlClick: "new-window",
+            ctrlClick: "background",
             altClick: "invalid" as Config.TAssetOpenAction,
-            shiftClick: "right",
+            shiftClick: "bottom",
         }), {
             click: "follow-tab",
-            ctrlClick: "new-window",
+            ctrlClick: "background",
             altClick: "current",
-            shiftClick: "right",
+            shiftClick: "bottom",
         });
+    });
+
+    it("keeps each gesture separate when actions degrade to the default app", () => {
+        assert.deepEqual(getAssetOpenGestures(undefined, "app", {
+            previewable: false,
+            noSplitScreen: false,
+        }), ["click", "altClick", "shiftClick"]);
+        assert.deepEqual(getAssetOpenGestures(undefined, "folder", {
+            previewable: false,
+            noSplitScreen: false,
+        }), ["ctrlClick"]);
     });
 });

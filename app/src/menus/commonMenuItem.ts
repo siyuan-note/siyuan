@@ -10,6 +10,7 @@ import {
     isInIOS,
     isInMobileApp,
     saveExportFile,
+    updateHotkeyTip,
     writeText
 } from "../protyle/util/compatibility";
 import {openByMobile, openLink} from "../editor/openLink";
@@ -18,7 +19,7 @@ import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
 /// #if !MOBILE
-import {openAsset, openBy} from "../editor/util";
+import {openAsset, openAssetInBackground, openBy} from "../editor/util";
 /// #endif
 import {rename, replaceFileName} from "../editor/rename";
 import * as dayjs from "dayjs";
@@ -35,8 +36,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
 import {
     DEFAULT_ASSET_OPEN,
-    normalizeAssetOpenConfig,
-    resolveExecutableAssetOpenAction,
+    getAssetOpenGestures,
     type TAssetOpenGesture,
 } from "../editor/assetOpen";
 
@@ -867,20 +867,20 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             if (!showAccelerator || !src.startsWith("assets/")) {
                 return "";
             }
-            let config = normalizeAssetOpenConfig(window.siyuan.config.editor.assetOpen);
+            let config = window.siyuan.config.editor.assetOpen;
             /// #if BROWSER
             config = DEFAULT_ASSET_OPEN;
             /// #endif
-            const gestures: {key: TAssetOpenGesture, label: string}[] = [
-                {key: "click", label: window.siyuan.languages.click},
-                {key: "ctrlClick", label: "⌘" + window.siyuan.languages.click},
-                {key: "altClick", label: "⌥" + window.siyuan.languages.click},
-                {key: "shiftClick", label: "⇧" + window.siyuan.languages.click},
-            ];
-            return gestures.filter((gesture) => resolveExecutableAssetOpenAction(config[gesture.key], {
+            const gestureLabels: Record<TAssetOpenGesture, string> = {
+                click: window.siyuan.languages.click,
+                ctrlClick: "⌘" + window.siyuan.languages.click,
+                altClick: "⌥" + window.siyuan.languages.click,
+                shiftClick: "⇧" + window.siyuan.languages.click,
+            };
+            return getAssetOpenGestures(config, action, {
                 previewable,
                 noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
-            }) === action).map((gesture) => gesture.label).join(" / ");
+            }).map((gesture) => updateHotkeyTip(gestureLabels[gesture])).join(" / ");
         };
         if (previewable) {
             submenu.push({
@@ -899,6 +899,24 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 accelerator: getAccelerator("current"),
                 click() {
                     openAsset(app, src.trim(), parseInt(getSearch("page", src)));
+                }
+            });
+            submenu.push({
+                id: "openByBackground",
+                label: window.siyuan.languages.refTab,
+                icon: "iconEyeoff",
+                accelerator: getAccelerator("background"),
+                click() {
+                    openAssetInBackground(app, src.trim(), parseInt(getSearch("page", src)));
+                }
+            });
+            submenu.push({
+                id: "insertBottom",
+                icon: "iconLayoutBottom",
+                label: window.siyuan.languages.insertBottom,
+                accelerator: getAccelerator("bottom"),
+                click() {
+                    openAsset(app, src.trim(), parseInt(getSearch("page", src)), "bottom");
                 }
             });
             /// #if !BROWSER

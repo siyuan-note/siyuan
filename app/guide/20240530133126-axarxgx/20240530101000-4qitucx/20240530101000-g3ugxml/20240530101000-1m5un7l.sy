@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20260820101323"
+		"updated": "20260820133158"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-you29ty",
 				"id": "20240530101000-penh301",
-				"updated": "20260820101323"
+				"updated": "20260820133158"
 			},
 			"Children": [
 				{
@@ -55,7 +55,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260820101323-b5x9rtd",
-				"updated": "20260820101323"
+				"updated": "20260820133158"
 			},
 			"Children": [
 				{
@@ -74,7 +74,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "ドキュメント"
+					"TextMarkTextContent": "エディタ"
 				},
 				{
 					"Type": "NodeText",
@@ -96,7 +96,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " で、クリック、Ctrl / ⌘ + クリック、Alt + クリック、Shift + クリック時のリソースの開き方を設定できます。"
+					"Data": " で、クリック、Ctrl+クリック / ⌘クリック、Alt+クリック、Shift+クリック時のリソースの開き方を設定できます。"
 				}
 			]
 		},

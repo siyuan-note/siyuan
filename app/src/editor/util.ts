@@ -92,7 +92,15 @@ export const openFileById = async (options: {
     });
 };
 
-export const openAsset = (app: App, assetPath: string, page: number | string, position?: string) => {
+const openAssetWithOptions = (
+    app: App,
+    assetPath: string,
+    page: number | string,
+    options: {
+        position?: string,
+        keepCursor?: boolean,
+    } = {},
+) => {
     const suffix = getAssetExtension(assetPath).toLowerCase();
     if (!Constants.SIYUAN_ASSETS_EXTS.includes(suffix) || !isBrowserRenderableImagePath(assetPath)) {
         return;
@@ -101,9 +109,18 @@ export const openAsset = (app: App, assetPath: string, page: number | string, po
         app,
         assetPath,
         page,
-        position,
+        position: options.position,
+        keepCursor: options.keepCursor,
         removeCurrentTab: true
     });
+};
+
+export const openAsset = (app: App, assetPath: string, page: number | string, position?: string) => {
+    openAssetWithOptions(app, assetPath, page, {position});
+};
+
+export const openAssetInBackground = (app: App, assetPath: string, page: number | string) => {
+    openAssetWithOptions(app, assetPath, page, {keepCursor: true});
 };
 
 export const openFile = async (options: IOpenFileOptions) => {
@@ -127,8 +144,10 @@ export const openFile = async (options: IOpenFileOptions) => {
         const asset = allModels.asset.find((item) => {
             if (item.path == options.assetPath) {
                 if (!pdfIsLoading(item.parent.parent.element)) {
-                    item.parent.parent.switchTab(item.parent.headElement);
-                    item.parent.parent.showHeading();
+                    if (!options.keepCursor) {
+                        item.parent.parent.switchTab(item.parent.headElement);
+                        item.parent.parent.showHeading();
+                    }
                     item.goToPage(options.page);
                 }
                 return true;
@@ -316,7 +335,9 @@ export const openFile = async (options: IOpenFileOptions) => {
         }
         if (options.keepCursor && wnd.children[0].headElement) {
             createdTab = newTab(options);
-            createdTab.headElement.setAttribute("keep-cursor", options.id);
+            if (options.id) {
+                createdTab.headElement.setAttribute("keep-cursor", options.id);
+            }
             wnd.addTab(createdTab, options.keepCursor);
         } else if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             let unUpdateTab: Tab;
@@ -520,7 +541,9 @@ const newTab = (options: IOpenFileOptions) => {
                         path: options.assetPath,
                         page: options.page,
                     }));
-                    setPanelFocus(tab.panelElement.parentElement.parentElement);
+                    if (!options.keepCursor) {
+                        setPanelFocus(tab.panelElement.parentElement.parentElement);
+                    }
                 }
             });
         }

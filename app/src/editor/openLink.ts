@@ -6,7 +6,7 @@ import {getSearch} from "../util/functions";
 import {Constants} from "../constants";
 import {processSiYuanUri} from "../util/uri";
 /// #if !MOBILE
-import {openAsset, openBy} from "./util";
+import {openAsset, openAssetInBackground, openBy} from "./util";
 /// #endif
 import {showMessage} from "../dialog/message";
 import {isInIOS, isInAndroid, isInHarmony} from "../protyle/util/compatibility";
@@ -46,6 +46,10 @@ export const openAssetByAction = (
         openAsset(app, assetPath, page);
     } else if (resolvedAction === "right") {
         openAsset(app, assetPath, page, "right");
+    } else if (resolvedAction === "bottom") {
+        openAsset(app, assetPath, page, "bottom");
+    } else if (resolvedAction === "background") {
+        openAssetInBackground(app, assetPath, page);
     } else if (resolvedAction === "new-window") {
         /// #if !BROWSER
         openAssetNewWindow(assetPath, {}, page);

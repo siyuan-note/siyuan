@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20260820101322"
+		"updated": "20260820133158"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-arn57f1",
-				"updated": "20260820101322"
+				"updated": "20260820133158"
 			},
 			"Children": [
 				{
@@ -52,7 +52,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260820101322-k3v7qem",
-				"updated": "20260820101322"
+				"updated": "20260820133158"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "文件"
+					"TextMarkTextContent": "編輯器"
 				},
 				{
 					"Type": "NodeText",
@@ -93,7 +93,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中設定單擊、Ctrl / ⌘ + 單擊、Alt + 單擊和 Shift + 單擊資源檔案時的開啟方式。"
+					"Data": " 中設定按一下、Ctrl+按一下 / ⌘按一下、Alt+按一下和 Shift+按一下資源檔案時的開啟方式。"
 				}
 			]
 		},

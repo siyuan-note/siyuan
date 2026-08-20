@@ -9,12 +9,16 @@ const ASSET_OPEN_ACTIONS: Config.TAssetOpenAction[] = [
     "follow-tab",
     "current",
     "right",
+    "bottom",
+    "background",
     "new-window",
     "app",
     "folder",
 ];
 
 export type TAssetOpenGesture = keyof Config.IAssetOpen;
+
+const ASSET_OPEN_GESTURES: TAssetOpenGesture[] = ["click", "ctrlClick", "altClick", "shiftClick"];
 
 export const normalizeAssetOpenConfig = (config?: Config.IAssetOpen): Config.IAssetOpen => ({
     click: normalizeAssetOpenAction(config?.click, DEFAULT_ASSET_OPEN.click),
@@ -69,4 +73,17 @@ export const resolveExecutableAssetOpenAction = (
         return options.noSplitScreen ? "current" : "right";
     }
     return action;
+};
+
+export const getAssetOpenGestures = (
+    config: Config.IAssetOpen | undefined,
+    action: Config.TAssetOpenAction,
+    options: {
+        previewable: boolean,
+        noSplitScreen: boolean,
+    },
+) => {
+    const normalizedConfig = normalizeAssetOpenConfig(config);
+    return ASSET_OPEN_GESTURES.filter((gesture) =>
+        resolveExecutableAssetOpenAction(normalizedConfig[gesture], options) === action);
 };

@@ -19,12 +19,14 @@ package conf
 import "github.com/siyuan-note/siyuan/kernel/util"
 
 const (
-	AssetOpenActionFollowTab = "follow-tab"
-	AssetOpenActionCurrent   = "current"
-	AssetOpenActionRight     = "right"
-	AssetOpenActionNewWindow = "new-window"
-	AssetOpenActionApp       = "app"
-	AssetOpenActionFolder    = "folder"
+	AssetOpenActionFollowTab  = "follow-tab"
+	AssetOpenActionCurrent    = "current"
+	AssetOpenActionRight      = "right"
+	AssetOpenActionBottom     = "bottom"
+	AssetOpenActionBackground = "background"
+	AssetOpenActionNewWindow  = "new-window"
+	AssetOpenActionApp        = "app"
+	AssetOpenActionFolder     = "folder"
 )
 
 type AssetOpen struct {
@@ -124,8 +126,8 @@ func NormalizeAssetOpen(assetOpen *AssetOpen) *AssetOpen {
 
 func normalizeAssetOpenAction(action, fallback string) string {
 	switch action {
-	case AssetOpenActionFollowTab, AssetOpenActionCurrent, AssetOpenActionRight, AssetOpenActionNewWindow,
-		AssetOpenActionApp, AssetOpenActionFolder:
+	case AssetOpenActionFollowTab, AssetOpenActionCurrent, AssetOpenActionRight, AssetOpenActionBottom,
+		AssetOpenActionBackground, AssetOpenActionNewWindow, AssetOpenActionApp, AssetOpenActionFolder:
 		return action
 	default:
 		return fallback

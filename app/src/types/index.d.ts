@@ -841,7 +841,7 @@ interface IOpenFileOptions {
     page?: number | string, // asset
     mode?: TEditorMode // file
     action?: TProtyleAction[]
-    keepCursor?: boolean // file，是否跳转到新 tab 上
+    keepCursor?: boolean // file 或 asset，是否跳转到新 tab 上
     zoomIn?: boolean // 是否缩放
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
     openNewTab?: boolean // 使用新页签打开

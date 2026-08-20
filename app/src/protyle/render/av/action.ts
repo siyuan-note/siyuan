@@ -100,47 +100,67 @@ const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement?: HTMLElement, 
     };
 };
 
-const unbindDatabaseRow = (protyle: IProtyle, blockElement: HTMLElement, rowID: string,
-                           primaryInfo: NonNullable<ReturnType<typeof getPrimaryRowInfo>>) => {
-    if (primaryInfo.cellElement) {
-        updateCellsValue(protyle, blockElement, {content: primaryInfo.content}, [primaryInfo.cellElement]);
-        return;
+const unbindDatabaseRows = async (protyle: IProtyle, blockElement: HTMLElement, rows: Array<{
+    rowID: string,
+    primaryInfo: NonNullable<ReturnType<typeof getPrimaryRowInfo>>,
+}>) => {
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    for (const row of rows) {
+        const primaryInfo = row.primaryInfo;
+        if (primaryInfo.isDetached) {
+            continue;
+        }
+        if (primaryInfo.cellElement) {
+            const operations = await updateCellsValue(protyle, blockElement, {content: primaryInfo.content},
+                [primaryInfo.cellElement], undefined, undefined, true);
+            doOperations.push(...operations.doOperations);
+            undoOperations.push(...operations.undoOperations);
+            continue;
+        }
+        if (!primaryInfo.fieldID || !primaryInfo.valueID) {
+            continue;
+        }
+        const value: IAVCellValue = {
+            type: "block",
+            id: primaryInfo.valueID,
+            isDetached: true,
+            block: {
+                content: primaryInfo.content,
+            },
+        };
+        doOperations.push({
+            action: "updateAttrViewCell",
+            id: primaryInfo.valueID,
+            avID: blockElement.dataset.avId,
+            keyID: primaryInfo.fieldID,
+            rowID: row.rowID,
+            data: value,
+        });
+        undoOperations.push({
+            action: "updateAttrViewCell",
+            id: primaryInfo.valueID,
+            avID: blockElement.dataset.avId,
+            keyID: primaryInfo.fieldID,
+            rowID: row.rowID,
+            data: primaryInfo.value,
+        });
     }
-    if (!primaryInfo.fieldID || !primaryInfo.valueID) {
+    if (doOperations.length === 0) {
         return;
     }
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-    const value: IAVCellValue = {
-        type: "block",
-        id: primaryInfo.valueID,
-        isDetached: true,
-        block: {
-            content: primaryInfo.content,
-        },
-    };
-    transaction(protyle, [{
-        action: "updateAttrViewCell",
-        id: primaryInfo.valueID,
-        avID: blockElement.dataset.avId,
-        keyID: primaryInfo.fieldID,
-        rowID,
-        data: value,
-    }, {
+    doOperations.push({
         action: "doUpdateUpdated",
         id: blockElement.dataset.nodeId,
         data: newUpdated,
-    }], [{
-        action: "updateAttrViewCell",
-        id: primaryInfo.valueID,
-        avID: blockElement.dataset.avId,
-        keyID: primaryInfo.fieldID,
-        rowID,
-        data: primaryInfo.value,
-    }, {
+    });
+    undoOperations.push({
         action: "doUpdateUpdated",
         id: blockElement.dataset.nodeId,
         data: blockElement.getAttribute("updated"),
-    }]);
+    });
+    transaction(protyle, doOperations, undoOperations);
     blockElement.setAttribute("updated", newUpdated);
 };
 
@@ -1160,21 +1180,23 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                 }
             });
             menu.addSeparator({id: "separator_2"});
-            if (!primaryRows[0].isDetached) {
-                menu.addItem({
-                    id: "unbindBlock",
-                    label: window.siyuan.languages.unbindBlock,
-                    icon: "iconLinkOff",
-                    click() {
-                        unbindDatabaseRow(
-                            protyle,
-                            blockElement,
-                            selectedItemInfos[0].itemID,
-                            primaryRows[0]
-                        );
-                    }
-                });
-            }
+        }
+        if (hasBlock) {
+            menu.addItem({
+                id: "unbindBlock",
+                label: window.siyuan.languages.unbindBlock,
+                icon: "iconLinkOff",
+                click() {
+                    unbindDatabaseRows(
+                        protyle,
+                        blockElement,
+                        selectedItemInfos.map((item, index) => ({
+                            rowID: item.itemID,
+                            primaryInfo: primaryRows[index],
+                        }))
+                    );
+                }
+            });
         }
         menu.addItem({
             id: "delete",

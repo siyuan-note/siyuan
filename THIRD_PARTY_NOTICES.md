@@ -23,6 +23,7 @@ The component list is informational and does not replace the license terms. Copy
 | Electron | 42.7.1 | MIT | [upstream](https://github.com/electron/electron) | Desktop runtime; Electron also ships LICENSES.chromium.html for Chromium and its dependencies |
 | DOMPurify | 3.3.3 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | app/stage/protyle/js/protyle-html.js |
 | html-to-image | 1.11.13 | MIT | [upstream](https://github.com/bubkoo/html-to-image) | app/stage/protyle/js/html-to-image.min.js |
+| modern-screenshot | 4.6.6 | MIT | [upstream](https://github.com/qq15725/modern-screenshot) | app/stage/protyle/js/modern-screenshot.min.js |
 | abcjs | 6.7.0 | MIT | [upstream](https://github.com/paulrosen/abcjs) | app/stage/protyle/js/abcjs/ |
 | Apache ECharts | 5.3.2 | Apache-2.0 | [upstream](https://github.com/apache/echarts) | app/stage/protyle/js/echarts/echarts.min.js |
 | ZRender | 5.3.0 | BSD-3-Clause | [upstream](https://github.com/ecomfe/zrender) | Bundled by Apache ECharts |

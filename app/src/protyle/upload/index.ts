@@ -24,7 +24,7 @@ import {
     type IAssetUploadTask,
     prepareAssetUpload,
 } from "./pluginEvent";
-import {getAssetUploadResult} from "./uploadResult";
+import {getAssetUploadResult, getAssetUploadSuccesses} from "./uploadResult";
 
 interface FileWithPath extends File {
     path: string;
@@ -141,7 +141,7 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
         range.setEndAfter(range.startContainer.parentElement);
         range.collapse(false);
     }
-    const keys = Object.keys(response.data.succMap);
+    const successes = getAssetUploadSuccesses(response.data);
     // https://github.com/siyuan-note/siyuan/issues/7624
     const nodeElement = hasClosestBlock(range.startContainer);
     if (nodeElement) {
@@ -150,30 +150,29 @@ const genUploadedLabel = async (responseText: string, protyle: IProtyle, options
         } else {
             const editableElement = getContenteditableElement(nodeElement);
             if (editableElement && nodeElement.classList.contains("p") &&
-                (editableElement.textContent !== "" || keys.length < 2)) {
+                (editableElement.textContent !== "" || successes.length < 2)) {
                 insertBlock = false;
             }
         }
     }
     let successFileText = "";
     // 插入多个资源文件时按文件名自然升序排列 Use natural ascending order when inserting multiple assets https://github.com/siyuan-note/siyuan/issues/14643
-    keys.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+    successes.sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}) || a.index - b.index);
     const avAssets: IAVCellAssetValue[] = [];
     let hasImage = false;
-    keys.forEach((key, index) => {
-        const path = response.data.succMap[key];
-        const type = pathPosix().extname(key).toLowerCase();
-        const filename = protyle.options.upload.filename(key);
+    successes.forEach((success, index) => {
+        const type = pathPosix().extname(success.name).toLowerCase();
+        const filename = protyle.options.upload.filename(success.name);
         const name = filename.substring(0, filename.length - type.length);
         hasImage = Constants.SIYUAN_ASSETS_IMAGE.includes(type);
         avAssets.push({
             type: Constants.SIYUAN_ASSETS_IMAGE.includes(type) ? "image" : "file",
-            content: path,
+            content: success.path,
             name: name
         });
-        successFileText += genAssetHTML(type, path, name, filename, options?.htmlAsIframe);
+        successFileText += genAssetHTML(type, success.path, name, filename, options?.htmlAsIframe);
         if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
-            keys.length - 1 !== index) {
+            successes.length - 1 !== index) {
             if (nodeElement && nodeElement.classList.contains("table")) {
                 successFileText += "<br>";
             } else if (insertBlock) {
@@ -431,9 +430,9 @@ const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "loc
                     return;
                 }
                 let tip = "";
-                Object.keys(response.data.succMap).forEach(name => {
-                    if (response.data.succMap[name].startsWith("file:")) {
-                        tip += name + ", ";
+                getAssetUploadSuccesses(response.data).forEach(success => {
+                    if (success.path.startsWith("file:")) {
+                        tip += success.name + ", ";
                     }
                 });
                 if (tip) {

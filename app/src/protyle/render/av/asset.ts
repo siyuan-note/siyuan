@@ -24,6 +24,7 @@ import {getFieldIdByCellElement} from "./row";
 import {base64ToURL, getCompressURL, removeCompressURL} from "../../../util/image";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {genNetworkImageAssetValue} from "./assetValue";
+import {getAssetUploadSuccesses} from "../../upload/uploadResult";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -40,11 +41,11 @@ export const bindAssetEvent = (options: {
         uploadFiles(options.protyle, event.target.files, event.target, (res) => {
             const resData = JSON.parse(res);
             const value: IAVCellAssetValue[] = [];
-            Object.keys(resData.data.succMap).forEach((key) => {
+            getAssetUploadSuccesses(resData.data).forEach((success) => {
                 value.push({
-                    name: key,
-                    content: resData.data.succMap[key],
-                    type: Constants.SIYUAN_ASSETS_IMAGE.includes(getAssetExtension(resData.data.succMap[key]).toLowerCase()) ? "image" : "file"
+                    name: success.name,
+                    content: success.path,
+                    type: Constants.SIYUAN_ASSETS_IMAGE.includes(getAssetExtension(success.path).toLowerCase()) ? "image" : "file"
                 });
             });
             updateAssetCell({
@@ -496,20 +497,20 @@ export const dragUpload = (files: ILocalFiles[], protyle: IProtyle, cellElement:
             return;
         }
         const addValue: IAVCellAssetValue[] = [];
-        Object.keys(response.data.succMap).forEach(key => {
-            const type = getAssetExtension(key).toLowerCase();
-            const name = key.substring(0, key.length - type.length);
+        getAssetUploadSuccesses(response.data).forEach(success => {
+            const type = getAssetExtension(success.name).toLowerCase();
+            const name = success.name.substring(0, success.name.length - type.length);
             if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
                 addValue.push({
                     type: "image",
                     name,
-                    content: response.data.succMap[key],
+                    content: success.path,
                 });
             } else {
                 addValue.push({
                     type: "file",
                     name,
-                    content: response.data.succMap[key],
+                    content: success.path,
                 });
             }
         });

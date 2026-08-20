@@ -207,15 +207,15 @@ func assetUpload(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "invalid asset path: " + err.Error()}}, IsError: true}, nil
 	}
 
-	succMap, err := model.InsertLocalAssets(id, fileList, true)
+	_, succFiles, err := model.InsertLocalAssets(id, fileList, true)
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "upload assets failed: " + err.Error()}}, IsError: true}, nil
 	}
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Uploaded %d file(s):\n\n", len(succMap)))
-	for k, v := range succMap {
-		sb.WriteString(fmt.Sprintf("- %s -> %v\n", k, v))
+	sb.WriteString(fmt.Sprintf("Uploaded %d file(s):\n\n", len(succFiles)))
+	for _, result := range succFiles {
+		sb.WriteString(fmt.Sprintf("- %s -> %s\n", result.Name, result.Path))
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
 }

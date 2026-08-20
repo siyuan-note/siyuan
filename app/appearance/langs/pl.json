@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "Wstaw kolumnę po lewej",
+	"insertSuperBlockRight": "Wstaw kolumnę po prawej",
 	"assetOpen": "Otwieranie zasobów",
 	"assetOpenTip": "Skonfiguruj sposób otwierania plików PDF, obrazów, dźwięku, wideo i innych zasobów z podglądem",
 	"assetOpenClick": "Kliknięcie",

@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "Insert column to the left",
+	"insertSuperBlockRight": "Insert column to the right",
 	"assetOpen": "Resource opening",
 	"assetOpenTip": "Configure how PDF, images, audio, video, and other previewable resources are opened",
 	"assetOpenClick": "Click",

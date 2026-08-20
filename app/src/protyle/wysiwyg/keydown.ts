@@ -86,7 +86,7 @@ import {
     type TListSubtype
 } from "./listContext";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
-import {cancelSB, insertEmptyBlock, jumpToParent} from "../../block/util";
+import {cancelSB, insertEmptyBlock, insertEmptySuperBlockColumn, jumpToParent} from "../../block/util";
 import {isEncryptedBox, isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
@@ -2179,6 +2179,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             !isInEmbedBlock(nodeElement)) {
             nodeElement.querySelector(".img--select")?.classList.remove("img--select");
             insertEmptyBlock(protyle, "afterend");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertSuperBlockLeft.custom, event) &&
+            !isInEmbedBlock(nodeElement)) {
+            insertEmptySuperBlockColumn(protyle, "left");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertSuperBlockRight.custom, event) &&
+            !isInEmbedBlock(nodeElement)) {
+            insertEmptySuperBlockColumn(protyle, "right");
             event.preventDefault();
             event.stopPropagation();
             return true;

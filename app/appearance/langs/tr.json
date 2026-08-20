@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "Sola sütun ekle",
+	"insertSuperBlockRight": "Sağa sütun ekle",
 	"assetOpen": "Kaynakları açma",
 	"assetOpenTip": "PDF, görsel, ses, video ve önizlenebilir diğer kaynakların nasıl açılacağını yapılandırın",
 	"assetOpenClick": "Tıklama",

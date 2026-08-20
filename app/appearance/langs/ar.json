@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "إدراج عمود إلى اليسار",
+	"insertSuperBlockRight": "إدراج عمود إلى اليمين",
 	"assetOpen": "فتح الموارد",
 	"assetOpenTip": "اضبط كيفية فتح ملفات PDF والصور والصوت والفيديو والموارد الأخرى القابلة للمعاينة",
 	"assetOpenClick": "نقرة",

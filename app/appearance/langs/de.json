@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "Spalte links einfügen",
+	"insertSuperBlockRight": "Spalte rechts einfügen",
 	"assetOpen": "Ressourcen öffnen",
 	"assetOpenTip": "Konfigurieren, wie PDF-Dateien, Bilder, Audio-, Video- und andere in der Vorschau anzeigbare Ressourcen geöffnet werden",
 	"assetOpenClick": "Klicken",

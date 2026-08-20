@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "Inserir coluna à esquerda",
+	"insertSuperBlockRight": "Inserir coluna à direita",
 	"assetOpen": "Abertura de recursos",
 	"assetOpenTip": "Configure como PDFs, imagens, áudios, vídeos e outros recursos visualizáveis são abertos",
 	"assetOpenClick": "Clique",

@@ -571,6 +571,8 @@ export abstract class Constants {
                 preview: {default: "⌥⌘9", custom: "⌥⌘9"},
                 insertBefore: {default: "⇧⌘B", custom: "⇧⌘B"},
                 insertAfter: {default: "⇧⌘A", custom: "⇧⌘A"},
+                insertSuperBlockLeft: {default: "", custom: ""},
+                insertSuperBlockRight: {default: "", custom: ""},
                 jumpToParentNext: {default: "⇧⌘N", custom: "⇧⌘N"},
                 jumpToParentPrev: {default: "⇧⌘M", custom: "⇧⌘M"},
                 jumpToParent: {default: "⇧⌘J", custom: "⇧⌘J"},

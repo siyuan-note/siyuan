@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "左側插入分欄",
+	"insertSuperBlockRight": "右側插入分欄",
 	"assetOpen": "資源開啟方式",
 	"assetOpenTip": "設定 PDF、圖片、音訊、影片等可預覽資源的開啟方式",
 	"assetOpenClick": "按一下",

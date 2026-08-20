@@ -394,6 +394,8 @@ const gutterSingle = () => [
     node("enterBack", lang("enterBack"), false),
     node("insertBefore", lang("insertBefore")),
     node("insertAfter", lang("insertAfter")),
+    node("insertSuperBlockLeft", lang("insertSuperBlockLeft")),
+    node("insertSuperBlockRight", lang("insertSuperBlockRight")),
     node("jumpTo", lang("jumpTo"), false, [
         node("jumpToParentPrev", lang("jumpToParentPrev"), false),
         node("jumpToParentNext", lang("jumpToParentNext"), false),

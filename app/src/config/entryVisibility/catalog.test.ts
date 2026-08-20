@@ -388,6 +388,17 @@ test("super block actions and vertical alignment use their respective menu group
     assert.equal(getEntryCatalogChildren("gutter.multi.layout").some((item) => item.key === "alignTop"), false);
 });
 
+test("super block column insertion actions follow block insertion actions", () => {
+    const keys = getEntryCatalogChildren("gutter.single").map((item) => item.key);
+    const insertBeforeIndex = keys.indexOf("insertBefore");
+    assert.deepEqual(keys.slice(insertBeforeIndex, insertBeforeIndex + 4), [
+        "insertBefore",
+        "insertAfter",
+        "insertSuperBlockLeft",
+        "insertSuperBlockRight",
+    ]);
+});
+
 test("table block width actions keep current-column and whole-table scopes together", () => {
     assert.deepEqual(getEntryCatalogChildren("gutter.single.table").slice(0, 3).map((item) => item.key), [
         "useDefaultWidth",

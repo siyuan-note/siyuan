@@ -19,6 +19,7 @@ import {openMobileFileById} from "../mobile/editor";
 import {mathRender} from "../protyle/render/mathRender";
 import {buildCancelSuperBlockOperations} from "./cancelSuperBlock";
 import {shouldFocusJumpTarget, shouldFocusParentDocumentTitle} from "./jumpToParent";
+import {getHorizontalSuperBlockChild} from "./superBlock";
 
 export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range) => {
     let previousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id");
@@ -371,6 +372,48 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
     }
     focusByWbr(protyle.wysiwyg.element, range);
     scrollCenter(protyle);
+};
+
+export const insertEmptySuperBlockColumn = (protyle: IProtyle, position: "left" | "right", target?: Element) => {
+    const range = getEditorRange(protyle.wysiwyg.element);
+    let blockElement = target;
+    if (!blockElement) {
+        const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+        if (selectElements.length > 0) {
+            blockElement = position === "left" ? selectElements[0] : selectElements[selectElements.length - 1];
+        } else {
+            blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
+        }
+    }
+    const columnElement = getHorizontalSuperBlockChild(blockElement, protyle.wysiwyg.element);
+    if (!columnElement) {
+        return false;
+    }
+
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range);
+    hideElements(["select"], protyle);
+    const newElement = genEmptyElement(false, true);
+    const newID = newElement.getAttribute("data-node-id");
+    const doOperations: IOperation[] = [{
+        action: "insert",
+        data: newElement.outerHTML,
+        id: newID,
+        parentID: columnElement.parentElement.getAttribute("data-node-id"),
+        nextID: position === "left" ? columnElement.getAttribute("data-node-id") : undefined,
+        previousID: position === "right" ? columnElement.getAttribute("data-node-id") : undefined,
+    }];
+    const undoOperations: IOperation[] = [{
+        action: "delete",
+        id: newID,
+        context: undoFocusContext,
+    }];
+    protyle.observerLoad?.disconnect();
+    columnElement.insertAdjacentElement(position === "left" ? "beforebegin" : "afterend", newElement);
+    refreshSbAndPersistWidth(columnElement.parentElement, doOperations, undoOperations);
+    transaction(protyle, doOperations, undoOperations);
+    focusByWbr(protyle.wysiwyg.element, range);
+    scrollCenter(protyle);
+    return true;
 };
 
 export const genEmptyBlock = (zwsp = true, wbr = true, string?: string) => {

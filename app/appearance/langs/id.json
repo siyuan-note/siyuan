@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "Sisipkan kolom di sebelah kiri",
+	"insertSuperBlockRight": "Sisipkan kolom di sebelah kanan",
 	"assetOpen": "Pembukaan sumber daya",
 	"assetOpenTip": "Atur cara membuka PDF, gambar, audio, video, dan sumber daya lain yang dapat dipratinjau",
 	"assetOpenClick": "Klik",

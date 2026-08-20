@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "Kolom links invoegen",
+	"insertSuperBlockRight": "Kolom rechts invoegen",
 	"assetOpen": "Bronnen openen",
 	"assetOpenTip": "Configureer hoe pdf's, afbeeldingen, audio, video en andere bronnen met voorbeeldweergave worden geopend",
 	"assetOpenClick": "Klik",

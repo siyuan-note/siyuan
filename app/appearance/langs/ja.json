@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "左側に列を挿入",
+	"insertSuperBlockRight": "右側に列を挿入",
 	"assetOpen": "リソースの開き方",
 	"assetOpenTip": "PDF、画像、音声、動画などプレビュー可能なリソースの開き方を設定します",
 	"assetOpenClick": "クリック",

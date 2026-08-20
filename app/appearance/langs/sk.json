@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "Vložiť stĺpec vľavo",
+	"insertSuperBlockRight": "Vložiť stĺpec vpravo",
 	"assetOpen": "Otváranie zdrojov",
 	"assetOpenTip": "Nastavte spôsob otvárania PDF, obrázkov, zvuku, videa a ďalších zdrojov s náhľadom",
 	"assetOpenClick": "Kliknutie",

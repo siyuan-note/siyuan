@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "แทรกคอลัมน์ทางซ้าย",
+	"insertSuperBlockRight": "แทรกคอลัมน์ทางขวา",
 	"assetOpen": "การเปิดทรัพยากร",
 	"assetOpenTip": "กำหนดวิธีเปิด PDF รูปภาพ เสียง วิดีโอ และทรัพยากรอื่นที่แสดงตัวอย่างได้",
 	"assetOpenClick": "คลิก",

@@ -1,4 +1,6 @@
 {
+	"insertSuperBlockLeft": "הוספת עמודה משמאל",
+	"insertSuperBlockRight": "הוספת עמודה מימין",
 	"assetOpen": "פתיחת משאבים",
 	"assetOpenTip": "הגדר כיצד ייפתחו קובצי PDF, תמונות, שמע, וידאו ומשאבים אחרים שניתנים לתצוגה מקדימה",
 	"assetOpenClick": "לחיצה",

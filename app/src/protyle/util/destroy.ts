@@ -1,11 +1,13 @@
 import {hideElements} from "../ui/hideElements";
 import {isSupportCSSHL} from "../render/searchMarkRender";
 import {destroyAIEditor} from "../../ai/editor";
+import {cancelAssetUploads} from "../upload/pluginEvent";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
         return;
     }
+    cancelAssetUploads(protyle);
     hideElements(["util"], protyle, true);
     destroyAIEditor(protyle);
     protyle.hint?.destroy();

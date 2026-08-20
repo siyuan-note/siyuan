@@ -387,6 +387,7 @@ interface ILocalFiles {
 type TAssetUploadSource = "paste" | "drop" | "file-picker" | "programmatic"
 type TAssetUploadTarget = "editor" | "av-cell" | "background"
 type TAssetUploadStatus = "success" | "partial" | "failed" | "canceled"
+type TAssetUploadRejectionReason = "name-empty" | "size-limit" | "type-not-accepted"
 
 interface IAssetUploadPosition {
     x: number,
@@ -408,16 +409,27 @@ type IAssetUploadDecision = {
     action: "cancel"
 }
 
+interface IAssetUploadRejection {
+    index: number,
+    name: string,
+    reasons: TAssetUploadRejectionReason[]
+}
+
 interface IAssetUploadResult {
     requestId: string,
     status: TAssetUploadStatus,
+    /** 插件链处理结束后的完整输入。 */
     input: IAssetUploadInput,
+    /** 通过前端校验并实际提交上传的输入。 */
+    acceptedInput?: IAssetUploadInput,
+    /** 被前端校验拒绝的文件及其在完整输入中的位置。 */
+    rejected?: IAssetUploadRejection[],
     succMap?: Record<string, string>,
     errFiles?: string[],
     error?: string
 }
 
-/** 在事件对象上调用 `preventDefault()` 可立即取消本次上传。 */
+/** 不得在该事件上调用 `preventDefault()`，取消上传应使用 `respondWith({action: "cancel"})`。 */
 interface IBeforeUploadAssetsDetail {
     requestId: string,
     protyle: IProtyle,
@@ -425,9 +437,11 @@ interface IBeforeUploadAssetsDetail {
     target: TAssetUploadTarget,
     position?: IAssetUploadPosition,
     input: IAssetUploadInput,
-    /** 返回替换后的输入或取消上传，每次事件只允许调用一次。 */
+    /** 插件处理的取消信号，编辑器销毁、插件卸载或处理超时时触发。 */
+    signal: AbortSignal,
+    /** 必须同步调用且每次事件只允许调用一次，异步处理应将 Promise 作为参数传入，默认 120 秒超时。 */
     respondWith(response: IAssetUploadDecision | PromiseLike<IAssetUploadDecision>): void,
-    /** 注册上传结束回调，成功、失败或取消时执行一次。 */
+    /** 必须同步注册，资源目录写入成功、失败或取消时执行一次，不包含正文或属性视图写入。 */
     onComplete(callback: (result: IAssetUploadResult) => void): void
 }
 

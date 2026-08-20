@@ -1,26 +1,20 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {prepareAssetUpload} from "./pluginEvent";
+import {EventBus} from "../../plugin/EventBusCore";
+import {cancelAssetUploads, cancelAssetUploadsByPlugin, prepareAssetUpload} from "./pluginEvent";
 
 type TListener = (event: CustomEvent<IBeforeUploadAssetsDetail>) => void;
 
 const createPlugin = (listener: TListener) => ({
-    eventBus: {
-        emit(type: TEventBus, detail: IBeforeUploadAssetsDetail) {
-            assert.equal(type, "before-upload-assets");
-            let canceled = false;
-            listener({
-                detail,
-                preventDefault() {
-                    canceled = true;
-                },
-            } as CustomEvent<IBeforeUploadAssetsDetail>);
-            return !canceled;
-        },
-    },
+    name: "test-plugin",
+    eventBus: (() => {
+        const eventBus = new EventBus<IBeforeUploadAssetsDetail>("", new EventTarget());
+        eventBus.on("before-upload-assets", listener);
+        return eventBus;
+    })(),
 });
 
-const createFile = (name: string) => ({name}) as File;
+const createFile = (name: string) => new File(["content"], name, {type: "image/png"});
 const protyle = {} as IProtyle;
 const context = {source: "paste", target: "editor"} as const;
 
@@ -81,7 +75,7 @@ describe("asset upload plugin event", () => {
         let laterPluginCalled = false;
         const prepared = await prepareAssetUpload({
             plugins: [
-                createPlugin(event => event.preventDefault()),
+                createPlugin(event => event.detail.respondWith({action: "cancel"})),
                 createPlugin(() => {
                     laterPluginCalled = true;
                 }),
@@ -93,6 +87,20 @@ describe("asset upload plugin event", () => {
 
         assert.equal(prepared.state, "canceled");
         assert.equal(laterPluginCalled, false);
+    });
+
+    it("rejects preventDefault as a protocol error", async () => {
+        const prepared = await prepareAssetUpload({
+            plugins: [createPlugin(event => event.preventDefault())],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        assert.equal(prepared.state, "failed");
+        if (prepared.state === "failed") {
+            assert.match(prepared.error, /must use respondWith/);
+        }
     });
 
     it("supports asynchronous cancellation", async () => {
@@ -131,12 +139,40 @@ describe("asset upload plugin event", () => {
         prepared.task.complete({status: "success", succMap: {"a.jpg": "assets/a.jpg"}});
         prepared.task.complete({status: "failed"});
 
-        assert.deepEqual(results, [{
-            requestId: "request-2",
-            status: "success",
-            input: {kind: "files", files: [createFile("a.jpg")]},
-            succMap: {"a.jpg": "assets/a.jpg"},
-        }]);
+        assert.equal(results.length, 1);
+        assert.equal(results[0].requestId, "request-2");
+        assert.equal(results[0].status, "success");
+        assert.equal(results[0].input.kind, "files");
+        assert.equal((results[0].input.files[0] as File).name, "a.jpg");
+        assert.deepEqual(results[0].succMap, {"a.jpg": "assets/a.jpg"});
+    });
+
+    it("preserves the full input when only an accepted subset is uploaded", async () => {
+        const results: IAssetUploadResult[] = [];
+        const acceptedFile = createFile("a.jpg");
+        const rejectedFile = createFile("b.exe");
+        const prepared = await prepareAssetUpload({
+            plugins: [createPlugin(event => {
+                event.detail.onComplete(result => results.push(result));
+                event.detail.respondWith({
+                    action: "replace",
+                    input: {kind: "files", files: [acceptedFile, rejectedFile]},
+                });
+            })],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        prepared.task.complete({
+            status: "partial",
+            acceptedInput: {kind: "files", files: [acceptedFile]},
+            rejected: [{index: 1, name: rejectedFile.name, reasons: ["type-not-accepted"]}],
+        });
+
+        assert.equal(results[0].input.files.length, 2);
+        assert.equal(results[0].acceptedInput.files.length, 1);
+        assert.equal(results[0].rejected[0].index, 1);
     });
 
     it("reports rejected processing as a failure", async () => {
@@ -157,5 +193,169 @@ describe("asset upload plugin event", () => {
         }
         assert.equal(results[0].status, "failed");
         assert.equal(results[0].error, "compression failed");
+    });
+
+    it("fails closed when a listener throws synchronously", async () => {
+        let laterPluginCalled = false;
+        const prepared = await prepareAssetUpload({
+            plugins: [
+                createPlugin(() => {
+                    throw new Error("compression crashed");
+                }),
+                createPlugin(() => {
+                    laterPluginCalled = true;
+                }),
+            ],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        assert.equal(prepared.state, "failed");
+        assert.equal(laterPluginCalled, false);
+        if (prepared.state === "failed") {
+            assert.match(prepared.error, /test-plugin.*compression crashed/);
+        }
+    });
+
+    it("rejects an async listener that does not claim the request synchronously", async () => {
+        const originalConsoleError = console.error;
+        console.error = () => undefined;
+        try {
+            const prepared = await prepareAssetUpload({
+                plugins: [createPlugin(async event => {
+                    await Promise.resolve();
+                    event.detail.respondWith({action: "cancel"});
+                })],
+                protyle,
+                input: {kind: "files", files: [createFile("a.png")]},
+                context,
+            });
+
+            assert.equal(prepared.state, "failed");
+            if (prepared.state === "failed") {
+                assert.match(prepared.error, /must call respondWith synchronously/);
+            }
+            await new Promise(resolve => setTimeout(resolve, 0));
+        } finally {
+            console.error = originalConsoleError;
+        }
+    });
+
+    it("times out plugin processing and aborts its signal", async () => {
+        let signal: AbortSignal;
+        const results: IAssetUploadResult[] = [];
+        const prepared = await prepareAssetUpload({
+            plugins: [createPlugin(event => {
+                signal = event.detail.signal;
+                event.detail.onComplete(result => results.push(result));
+                event.detail.respondWith(new Promise(() => undefined));
+            })],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+            timeout: 10,
+        });
+
+        assert.equal(prepared.state, "failed");
+        assert.equal(signal.aborted, true);
+        assert.equal(results[0].status, "failed");
+        assert.match(results[0].error, /timed out/);
+    });
+
+    it("cancels pending processing when the editor is destroyed", async () => {
+        let signal: AbortSignal;
+        const pending = prepareAssetUpload({
+            plugins: [createPlugin(event => {
+                signal = event.detail.signal;
+                event.detail.respondWith(new Promise(() => undefined));
+            })],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        cancelAssetUploads(protyle);
+        const prepared = await pending;
+        assert.equal(prepared.state, "canceled");
+        assert.equal(signal.aborted, true);
+    });
+
+    it("cancels pending processing when the active plugin is unloaded", async () => {
+        let signal: AbortSignal;
+        const plugin = createPlugin(event => {
+            signal = event.detail.signal;
+            event.detail.respondWith(new Promise(() => undefined));
+        });
+        const pending = prepareAssetUpload({
+            plugins: [plugin],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        cancelAssetUploadsByPlugin(plugin);
+        const prepared = await pending;
+        assert.equal(prepared.state, "canceled");
+        assert.equal(signal.aborted, true);
+    });
+
+    it("cancels pending processing when a queued plugin is unloaded", async () => {
+        const activePlugin = createPlugin(event => {
+            event.detail.respondWith(new Promise(() => undefined));
+        });
+        const queuedPlugin = createPlugin(() => undefined);
+        const pending = prepareAssetUpload({
+            plugins: [activePlugin, queuedPlugin],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        cancelAssetUploadsByPlugin(queuedPlugin);
+        const prepared = await pending;
+        assert.equal(prepared.state, "canceled");
+    });
+
+    it("rejects invalid replacement elements with the plugin name and index", async () => {
+        const prepared = await prepareAssetUpload({
+            plugins: [createPlugin(event => event.detail.respondWith({
+                action: "replace",
+                input: {kind: "local-files", files: [null]} as unknown as IAssetUploadInput,
+            }))],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        assert.equal(prepared.state, "failed");
+        if (prepared.state === "failed") {
+            assert.match(prepared.error, /test-plugin.*input\.files\[0]/);
+        }
+    });
+
+    it("uses a stable plugin snapshot while awaiting a response", async () => {
+        let resolveDecision: (decision: IAssetUploadDecision) => void;
+        let laterPluginCalled = false;
+        const plugins = [
+            createPlugin(event => event.detail.respondWith(new Promise(resolve => {
+                resolveDecision = resolve;
+            }))),
+            createPlugin(() => {
+                laterPluginCalled = true;
+            }),
+        ];
+        const pending = prepareAssetUpload({
+            plugins,
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        plugins.splice(1, 1);
+        resolveDecision({action: "replace", input: {kind: "files", files: [createFile("b.jpg")]}});
+        const prepared = await pending;
+        assert.equal(prepared.state, "ready");
+        assert.equal(laterPluginCalled, true);
     });
 });

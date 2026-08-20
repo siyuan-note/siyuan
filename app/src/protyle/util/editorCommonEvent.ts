@@ -37,6 +37,7 @@ import {updatePanelByEditor} from "../../editor/util";
 import {blockRender} from "../render/blockRender";
 /// #else
 import {uploadFiles, uploadLocalFiles} from "../upload";
+import {getLocalDropFiles} from "../upload/localDropFiles";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
@@ -2085,25 +2086,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (!avElement) {
                 focusByRange(getRangeByPoint(event.clientX, event.clientY));
                 if (event.dataTransfer.types.includes("Files") && !isBrowser()) {
-                    const files: ILocalFiles[] = [];
-                    for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                        const filePath = webUtils.getPathForFile(event.dataTransfer.files[i]);
-                        if (filePath) {
-                            files.push({
-                                path: filePath,
-                                size: event.dataTransfer.files[i].size,
-                                isDir: event.dataTransfer.files[i].size === 0 &&
-                                    event.dataTransfer.files[i].type === "" &&
-                                    !event.dataTransfer.files[i].name.includes("."),
-                            });
-                        } else {
-                            paste(protyle, event, {
-                                htmlAsIframe: window.siyuan.config.editor.dragHTMLFileToIframe && !event.altKey,
-                            });
-                            break;
-                        }
-                    }
-                    if (files.length > 0) {
+                    const files = getLocalDropFiles(event.dataTransfer.files, file => webUtils.getPathForFile(file));
+                    if (!files) {
+                        paste(protyle, event, {
+                            htmlAsIframe: window.siyuan.config.editor.dragHTMLFileToIframe && !event.altKey,
+                        });
+                    } else if (files.length > 0) {
                         uploadLocalFiles(files, protyle, !event.altKey, {
                             htmlAsIframe: window.siyuan.config.editor.dragHTMLFileToIframe && !event.altKey,
                             source: "drop",
@@ -2123,17 +2111,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (cellElement) {
                     if (getTypeByCellElement(cellElement) === "mAsset" && event.dataTransfer.types[0] === "Files") {
                         /// #if !BROWSER
-                        const files: ILocalFiles[] = [];
-                        for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                            files.push({
-                                path: webUtils.getPathForFile(event.dataTransfer.files[i]),
-                                size: event.dataTransfer.files[i].size,
-                                isDir: event.dataTransfer.files[i].size === 0 &&
-                                    event.dataTransfer.files[i].type === "" &&
-                                    !event.dataTransfer.files[i].name.includes("."),
+                        const files = getLocalDropFiles(event.dataTransfer.files,
+                            file => webUtils.getPathForFile(file));
+                        if (!files) {
+                            focusBlock(hasClosestBlock(cellElement) as HTMLElement);
+                            uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
+                                source: "drop",
+                                target: "av-cell",
+                                position: {x: event.clientX, y: event.clientY},
                             });
+                        } else {
+                            dragUpload(files, protyle, cellElement, {x: event.clientX, y: event.clientY});
                         }
-                        dragUpload(files, protyle, cellElement, {x: event.clientX, y: event.clientY});
                         /// #else
                         focusBlock(hasClosestBlock(cellElement) as HTMLElement);
                         uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {

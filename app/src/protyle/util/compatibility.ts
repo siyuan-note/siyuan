@@ -622,8 +622,12 @@ export const updateHotkeyAfterTip = (hotkey: string, split = " ") => {
 
 // Mac，Windows 快捷键展示
 export const updateHotkeyTip = (hotkey: string) => {
-    if (!hotkey || isMac()) {
+    if (!hotkey) {
         return hotkey;
+    }
+    if (isMac()) {
+        // 为 Return 字符指定文本呈现，避免 macOS 使用彩色 emoji 字形。
+        return hotkey.replace(/↩(?!\uFE0E)/g, "↩\uFE0E");
     }
     const keys = [];
     if ((hotkey.indexOf("⌘") > -1 || hotkey.indexOf("⌃") > -1)) keys.push("Ctrl");

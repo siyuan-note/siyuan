@@ -12,9 +12,80 @@ import {showMessage} from "../dialog/message";
 import {isInIOS, isInAndroid, isInHarmony} from "../protyle/util/compatibility";
 import type {App} from "../index";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
+import {
+    DEFAULT_ASSET_OPEN,
+    resolveAssetOpenAction,
+    resolveExecutableAssetOpenAction,
+} from "./assetOpen";
+/// #if !MOBILE
+import {openAssetNewWindow} from "../window/openNewWindow";
+/// #endif
+
+const isPreviewableAsset = (assetPath: string) => {
+    const extension = getAssetExtension(assetPath).toLowerCase();
+    return Constants.SIYUAN_ASSETS_EXTS.includes(extension) &&
+        isBrowserRenderableImagePath(assetPath) &&
+        (extension !== ".pdf" || assetPath.startsWith("assets/"));
+};
+
+const emitOpenAsset = (
+    app: App,
+    path: string,
+    action: Config.TAssetOpenAction,
+    event?: MouseEvent,
+) => {
+    let open = true;
+    app.plugins.forEach((plugin) => {
+        if (!plugin.eventBus.emit("open-asset", {path, action, event})) {
+            open = false;
+        }
+    });
+    return open;
+};
+
+export const openAssetByAction = (
+    app: App,
+    assetPath: string,
+    page: number | string,
+    action: Config.TAssetOpenAction,
+) => {
+    /// #if MOBILE
+    openByMobile(assetPath);
+    /// #else
+    const resolvedAction = resolveExecutableAssetOpenAction(action, {
+        previewable: isPreviewableAsset(assetPath),
+        noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
+    });
+    if (resolvedAction === "current") {
+        openAsset(app, assetPath, page);
+    } else if (resolvedAction === "right") {
+        openAsset(app, assetPath, page, "right");
+    } else if (resolvedAction === "new-window") {
+        /// #if !BROWSER
+        openAssetNewWindow(assetPath, {}, page);
+        /// #else
+        openByMobile(assetPath);
+        /// #endif
+    } else if (resolvedAction === "folder") {
+        /// #if !BROWSER
+        openBy(assetPath, "folder");
+        /// #else
+        openByMobile(assetPath);
+        /// #endif
+    } else {
+        /// #if !BROWSER
+        openBy(assetPath, "app");
+        /// #else
+        openByMobile(assetPath);
+        /// #endif
+    }
+    /// #endif
+};
 
 export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPressed = false) => {
     let linkAddress = Lute.UnEscapeHTMLStr(aLink);
+    const originalLinkAddress = linkAddress;
+    const isAsset = linkAddress.startsWith("assets/");
     let pdfParams;
     if (isLocalPath(linkAddress) && !linkAddress.startsWith("file://") && linkAddress.indexOf(".pdf") > -1) {
         const pdfAddress = linkAddress.split("/");
@@ -26,6 +97,33 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
             linkAddress = linkAddress.split("?page")[0];
         }
     }
+    let assetOpenConfig = isAsset ? window.siyuan.config.editor.assetOpen : DEFAULT_ASSET_OPEN;
+    /// #if BROWSER
+    assetOpenConfig = DEFAULT_ASSET_OPEN;
+    /// #endif
+    const configuredAction = resolveAssetOpenAction(
+        assetOpenConfig,
+        {
+            altKey: event?.altKey,
+            shiftKey: event?.shiftKey,
+            ctrlKey: ctrlIsPressed,
+        },
+    );
+    let action = resolveExecutableAssetOpenAction(configuredAction, {
+        previewable: isPreviewableAsset(linkAddress),
+        noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
+    });
+    /// #if BROWSER
+    if (action === "folder" || action === "new-window") {
+        action = "app";
+    }
+    /// #endif
+    /// #if MOBILE
+    action = "app";
+    /// #endif
+    if (isAsset && !emitOpenAsset(app, originalLinkAddress, action, event)) {
+        return;
+    }
     if (processSiYuanUri(app, linkAddress)) {
         return;
     }
@@ -33,43 +131,7 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
     openByMobile(linkAddress);
     /// #else
     if (isLocalPath(linkAddress)) {
-        const extension = getAssetExtension(linkAddress).toLowerCase();
-        if (Constants.SIYUAN_ASSETS_EXTS.includes(extension) &&
-            isBrowserRenderableImagePath(linkAddress) &&
-            (
-                extension !== ".pdf" ||
-                // 本地 pdf 仅 assets/ 开头的才使用 siyuan 打开
-                (extension === ".pdf" && linkAddress.startsWith("assets/"))
-            )
-        ) {
-            if (event && event.altKey) {
-                openAsset(app, linkAddress, pdfParams);
-            } else if (event && event.shiftKey) {
-                /// #if !BROWSER
-                openBy(linkAddress, "app");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
-            } else if (ctrlIsPressed) {
-                /// #if !BROWSER
-                openBy(linkAddress, "folder");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
-            } else {
-                openAsset(app, linkAddress, pdfParams, !window.siyuan.config.fileTree.noSplitScreenWhenOpenTab ? "right" : null);
-            }
-        } else {
-            /// #if !BROWSER
-            if (ctrlIsPressed) {
-                openBy(linkAddress, "folder");
-            } else {
-                openBy(linkAddress, "app");
-            }
-            /// #else
-            openByMobile(linkAddress);
-            /// #endif
-        }
+        openAssetByAction(app, linkAddress, pdfParams, action);
     } else if (linkAddress) {
         if (0 > linkAddress.indexOf(":")) {
             // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075

@@ -1,4 +1,12 @@
 {
+	"assetOpen": "Bronnen openen",
+	"assetOpenTip": "Configureer hoe pdf's, afbeeldingen, audio, video en andere bronnen met voorbeeldweergave worden geopend",
+	"assetOpenClick": "Klik",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + klik",
+	"assetOpenAltClick": "Alt + klik",
+	"assetOpenShiftClick": "Shift + klik",
+	"assetOpenFollowTab": "Instelling voor het openen van tabbladen volgen",
+	"assetOpenCurrent": "Openen in huidig deelvenster",
 	"bazaarDeprecated": "Verouderd",
 	"bazaarDeprecatedTip": "Dit pakket is verouderd en wordt niet langer aanbevolen",
 	"bazaarAlternatives": "Alternatieven",

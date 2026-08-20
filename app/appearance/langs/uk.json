@@ -1,4 +1,12 @@
 {
+	"assetOpen": "Відкриття ресурсів",
+	"assetOpenTip": "Налаштуйте спосіб відкриття PDF, зображень, аудіо, відео та інших ресурсів із попереднім переглядом",
+	"assetOpenClick": "Клацання",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + клацання",
+	"assetOpenAltClick": "Alt + клацання",
+	"assetOpenShiftClick": "Shift + клацання",
+	"assetOpenFollowTab": "Використовувати налаштування відкриття вкладок",
+	"assetOpenCurrent": "Відкрити в поточній області",
 	"bazaarDeprecated": "Застарілий",
 	"bazaarDeprecatedTip": "Цей пакунок застарів і більше не рекомендується",
 	"bazaarAlternatives": "Альтернативи",

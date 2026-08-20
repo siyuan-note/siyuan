@@ -18,6 +18,22 @@ package conf
 
 import "github.com/siyuan-note/siyuan/kernel/util"
 
+const (
+	AssetOpenActionFollowTab = "follow-tab"
+	AssetOpenActionCurrent   = "current"
+	AssetOpenActionRight     = "right"
+	AssetOpenActionNewWindow = "new-window"
+	AssetOpenActionApp       = "app"
+	AssetOpenActionFolder    = "folder"
+)
+
+type AssetOpen struct {
+	Click      string `json:"click"`      // 单击资源的打开方式
+	CtrlClick  string `json:"ctrlClick"`  // Ctrl 或 Command 加单击资源的打开方式
+	AltClick   string `json:"altClick"`   // Alt 加单击资源的打开方式
+	ShiftClick string `json:"shiftClick"` // Shift 加单击资源的打开方式
+}
+
 type Editor struct {
 	AllowSVGScript                  bool           `json:"allowSVGScript"`                  // 允许执行 SVG 内脚本
 	AllowHTMLBLockScript            bool           `json:"allowHTMLBLockScript"`            // 允许执行 HTML 内容中的脚本
@@ -44,6 +60,7 @@ type Editor struct {
 	VirtualBlockRefExclude          string         `json:"virtualBlockRefExclude"`          // 虚拟引用关键字排除列表
 	VirtualBlockRefInclude          string         `json:"virtualBlockRefInclude"`          // 虚拟引用关键字包含列表
 	BlockRefDynamicAnchorTextMaxLen int            `json:"blockRefDynamicAnchorTextMaxLen"` // 块引动态锚文本最大长度
+	AssetOpen                       *AssetOpen     `json:"assetOpen"`                       // 资源打开方式
 	PlantUMLServePath               string         `json:"plantUMLServePath"`               // PlantUML 伺服地址
 	FullWidth                       bool           `json:"fullWidth"`                       // 是否使用最大宽度
 	KaTexMacros                     string         `json:"katexMacros"`                     // KeTex 宏定义
@@ -84,6 +101,37 @@ func NormalizeBacklinkExpandCount(count int) int {
 	return max(-1, count)
 }
 
+func NewAssetOpen() *AssetOpen {
+	return &AssetOpen{
+		Click:      AssetOpenActionFollowTab,
+		CtrlClick:  AssetOpenActionFolder,
+		AltClick:   AssetOpenActionCurrent,
+		ShiftClick: AssetOpenActionApp,
+	}
+}
+
+func NormalizeAssetOpen(assetOpen *AssetOpen) *AssetOpen {
+	defaults := NewAssetOpen()
+	if nil == assetOpen {
+		return defaults
+	}
+	assetOpen.Click = normalizeAssetOpenAction(assetOpen.Click, defaults.Click)
+	assetOpen.CtrlClick = normalizeAssetOpenAction(assetOpen.CtrlClick, defaults.CtrlClick)
+	assetOpen.AltClick = normalizeAssetOpenAction(assetOpen.AltClick, defaults.AltClick)
+	assetOpen.ShiftClick = normalizeAssetOpenAction(assetOpen.ShiftClick, defaults.ShiftClick)
+	return assetOpen
+}
+
+func normalizeAssetOpenAction(action, fallback string) string {
+	switch action {
+	case AssetOpenActionFollowTab, AssetOpenActionCurrent, AssetOpenActionRight, AssetOpenActionNewWindow,
+		AssetOpenActionApp, AssetOpenActionFolder:
+		return action
+	default:
+		return fallback
+	}
+}
+
 func NewEditor() *Editor {
 	return &Editor{
 		FontSize:                        16,
@@ -104,6 +152,7 @@ func NewEditor() *Editor {
 		Emoji:                           []string{},
 		VirtualBlockRef:                 false,
 		BlockRefDynamicAnchorTextMaxLen: 96,
+		AssetOpen:                       NewAssetOpen(),
 		PlantUMLServePath:               "https://www.plantuml.com/plantuml/svg/~1",
 		FullWidth:                       true,
 		KaTexMacros:                     "{}",

@@ -1,4 +1,12 @@
 {
+	"assetOpen": "פתיחת משאבים",
+	"assetOpenTip": "הגדר כיצד ייפתחו קובצי PDF, תמונות, שמע, וידאו ומשאבים אחרים שניתנים לתצוגה מקדימה",
+	"assetOpenClick": "לחיצה",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + לחיצה",
+	"assetOpenAltClick": "Alt + לחיצה",
+	"assetOpenShiftClick": "Shift + לחיצה",
+	"assetOpenFollowTab": "שימוש בהגדרת פתיחת הכרטיסיות",
+	"assetOpenCurrent": "פתיחה בחלונית הנוכחית",
 	"bazaarDeprecated": "הוצא משימוש",
 	"bazaarDeprecatedTip": "חבילה זו הוצאה משימוש ואינה מומלצת עוד",
 	"bazaarAlternatives": "חלופות",

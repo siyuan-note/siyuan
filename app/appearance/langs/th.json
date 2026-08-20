@@ -1,4 +1,12 @@
 {
+	"assetOpen": "การเปิดทรัพยากร",
+	"assetOpenTip": "กำหนดวิธีเปิด PDF รูปภาพ เสียง วิดีโอ และทรัพยากรอื่นที่แสดงตัวอย่างได้",
+	"assetOpenClick": "คลิก",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + คลิก",
+	"assetOpenAltClick": "Alt + คลิก",
+	"assetOpenShiftClick": "Shift + คลิก",
+	"assetOpenFollowTab": "ใช้การตั้งค่าการเปิดแท็บ",
+	"assetOpenCurrent": "เปิดในบานหน้าต่างปัจจุบัน",
 	"bazaarDeprecated": "เลิกใช้แล้ว",
 	"bazaarDeprecatedTip": "แพ็กเกจนี้เลิกใช้แล้วและไม่แนะนำให้ใช้อีกต่อไป",
 	"bazaarAlternatives": "ทางเลือก",

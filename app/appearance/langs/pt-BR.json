@@ -1,4 +1,12 @@
 {
+	"assetOpen": "Abertura de recursos",
+	"assetOpenTip": "Configure como PDFs, imagens, áudios, vídeos e outros recursos visualizáveis são abertos",
+	"assetOpenClick": "Clique",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + clique",
+	"assetOpenAltClick": "Alt + clique",
+	"assetOpenShiftClick": "Shift + clique",
+	"assetOpenFollowTab": "Seguir a configuração de abertura de abas",
+	"assetOpenCurrent": "Abrir no painel atual",
 	"bazaarDeprecated": "Obsoleto",
 	"bazaarDeprecatedTip": "Este pacote está obsoleto e não é mais recomendado",
 	"bazaarAlternatives": "Alternativas",

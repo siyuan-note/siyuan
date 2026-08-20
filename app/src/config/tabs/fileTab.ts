@@ -6,7 +6,8 @@ import {fileConfigApi} from "./fileRuntime";
 import type {SettingTabBuilder} from "../setting/builder";
 import {controlNumber, controlSelect, controlString} from "../setting/control";
 import {genConfigItemName} from "../render/fragments";
-import {genButtonHtml, genNumberInputHtml} from "../render/render";
+import {genButtonHtml, genNumberInputHtml, genStackHtml} from "../render/render";
+import type {StackLine} from "../render/parts";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 /// #endif
@@ -69,6 +70,59 @@ const registerFileTreeBehaviorGroup = (tab: SettingTabBuilder) => {
         title: window.siyuan.languages.noSplitScreenWhenOpenTab,
         desc: window.siyuan.languages.noSplitScreenWhenOpenTabTip,
     });
+    /// #if !BROWSER
+    const assetOpenOptions = [
+        {value: "follow-tab", label: window.siyuan.languages.assetOpenFollowTab},
+        {value: "current", label: window.siyuan.languages.assetOpenCurrent},
+        {value: "right", label: window.siyuan.languages.insertRight},
+        {value: "new-window", label: window.siyuan.languages.openByNewWindow},
+        {value: "app", label: window.siyuan.languages.useDefault},
+        {value: "folder", label: window.siyuan.languages.showInFolder},
+    ];
+    const assetOpenControls = [
+        {
+            key: "click",
+            label: window.siyuan.languages.assetOpenClick,
+            control: controlSelect("editor.assetOpen.click", {options: assetOpenOptions}),
+        },
+        {
+            key: "ctrlClick",
+            label: window.siyuan.languages.assetOpenCtrlClick,
+            control: controlSelect("editor.assetOpen.ctrlClick", {options: assetOpenOptions}),
+        },
+        {
+            key: "altClick",
+            label: window.siyuan.languages.assetOpenAltClick,
+            control: controlSelect("editor.assetOpen.altClick", {options: assetOpenOptions}),
+        },
+        {
+            key: "shiftClick",
+            label: window.siyuan.languages.assetOpenShiftClick,
+            control: controlSelect("editor.assetOpen.shiftClick", {options: assetOpenOptions}),
+        },
+    ];
+    group.composite({
+        key: "assetOpen",
+        keywords: [
+            window.siyuan.languages.assetOpen,
+            window.siyuan.languages.assetOpenTip,
+            ...assetOpenControls.map((item) => item.label),
+            ...assetOpenOptions.map((item) => item.label),
+        ],
+        html: () => genStackHtml([
+            {left: {kind: "title", text: window.siyuan.languages.assetOpen}},
+            {left: {kind: "desc", text: window.siyuan.languages.assetOpenTip}},
+            ...assetOpenControls.map((item) => ({
+                left: {kind: "desc" as const, text: item.label},
+                right: item.control,
+            })),
+        ] as StackLine[]),
+        controls: assetOpenControls.map((item) => ({
+            control: item.control,
+            save: (value) => editorConfigApi.patch(`assetOpen.${item.key}`, value),
+        })),
+    });
+    /// #endif
 };
 /// #endif
 

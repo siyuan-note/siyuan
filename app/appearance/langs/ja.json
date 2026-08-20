@@ -1,4 +1,12 @@
 {
+	"assetOpen": "リソースの開き方",
+	"assetOpenTip": "PDF、画像、音声、動画などプレビュー可能なリソースの開き方を設定します",
+	"assetOpenClick": "クリック",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + クリック",
+	"assetOpenAltClick": "Alt + クリック",
+	"assetOpenShiftClick": "Shift + クリック",
+	"assetOpenFollowTab": "タブを開く設定に従う",
+	"assetOpenCurrent": "現在のペインで開く",
 	"bazaarDeprecated": "非推奨",
 	"bazaarDeprecatedTip": "このパッケージは非推奨で、今後の使用は推奨されません",
 	"bazaarAlternatives": "代替パッケージ",

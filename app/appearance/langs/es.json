@@ -1,4 +1,12 @@
 {
+	"assetOpen": "Apertura de recursos",
+	"assetOpenTip": "Configura cómo se abren los PDF, las imágenes, el audio, el vídeo y otros recursos con vista previa",
+	"assetOpenClick": "Clic",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + clic",
+	"assetOpenAltClick": "Alt + clic",
+	"assetOpenShiftClick": "Mayús + clic",
+	"assetOpenFollowTab": "Seguir la configuración de apertura de pestañas",
+	"assetOpenCurrent": "Abrir en el panel actual",
 	"bazaarDeprecated": "En desuso",
 	"bazaarDeprecatedTip": "Este paquete está en desuso y ya no se recomienda",
 	"bazaarAlternatives": "Alternativas",

@@ -4154,7 +4154,14 @@ export class WYSIWYG {
             }
             const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
                 hasClosestByClassName(event.target, "protyle-action"));
-            if (event.shiftKey && !openListItemAttrByShift) {
+            const shiftAssetElement = hasClosestByAttribute(event.target, "data-type", "file-annotation-ref") ||
+                hasClosestByAttribute(event.target, "data-type", "a") ||
+                hasClosestByClassName(event.target, "av__celltext--url");
+            const shiftAssetLink = shiftAssetElement ? shiftAssetElement.getAttribute("data-id") ||
+                shiftAssetElement.getAttribute("data-href") || shiftAssetElement.dataset.url ||
+                (shiftAssetElement.classList.contains("av__celltext--url") ? shiftAssetElement.textContent.trim() : "") : "";
+            const shiftOpenAsset = event.shiftKey && shiftAssetLink.startsWith("assets/");
+            if (event.shiftKey && !openListItemAttrByShift && !shiftOpenAsset) {
                 const selection = getSelection();
                 const focusElement = selection.focusNode && hasClosestBlock(selection.focusNode) as HTMLElement;
                 // mousedown 未命中块间空白时，浏览器会先生成跨块文字选区，在 click 阶段将其转换为块选区

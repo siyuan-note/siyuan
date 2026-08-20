@@ -1,4 +1,12 @@
 {
+	"assetOpen": "Открытие ресурсов",
+	"assetOpenTip": "Настройте способ открытия PDF, изображений, аудио, видео и других ресурсов с предварительным просмотром",
+	"assetOpenClick": "Щелчок",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + щелчок",
+	"assetOpenAltClick": "Alt + щелчок",
+	"assetOpenShiftClick": "Shift + щелчок",
+	"assetOpenFollowTab": "Следовать настройке открытия вкладок",
+	"assetOpenCurrent": "Открыть в текущей области",
 	"bazaarDeprecated": "Устарел",
 	"bazaarDeprecatedTip": "Этот пакет устарел и больше не рекомендуется",
 	"bazaarAlternatives": "Альтернативы",

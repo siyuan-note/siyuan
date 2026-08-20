@@ -76,7 +76,11 @@ export const openNewWindowById = async (id: string | string[], options: windowOp
     /// #endif
 };
 
-export const openAssetNewWindow = (assetPath: string, options: windowOptions = {}) => {
+export const openAssetNewWindow = (
+    assetPath: string,
+    options: windowOptions = {},
+    page?: number | string,
+) => {
     /// #if !BROWSER
     const suffix = getAssetExtension(assetPath).toLowerCase();
     if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix) &&
@@ -98,7 +102,7 @@ export const openAssetNewWindow = (assetPath: string, options: windowOptions = {
             action: "Tab",
             children: {
                 path: assetPath,
-                page: parseInt(getSearch("page", assetPath)),
+                page: page ?? parseInt(getSearch("page", assetPath)),
                 instance: "Asset",
             }
         }];

@@ -37,6 +37,12 @@ import {Protyle} from "../protyle";
 import {getAllEditor} from "../layout/getAll";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
+import {
+    DEFAULT_ASSET_OPEN,
+    normalizeAssetOpenConfig,
+    resolveExecutableAssetOpenAction,
+    type TAssetOpenGesture,
+} from "../editor/assetOpen";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -857,16 +863,35 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     /// #else
     if (isLocalPath(src)) {
         const extension = getAssetExtension(src).toLowerCase();
-        if (Constants.SIYUAN_ASSETS_EXTS.includes(extension) &&
+        const previewable = Constants.SIYUAN_ASSETS_EXTS.includes(extension) &&
             isBrowserRenderableImagePath(src) &&
             (extension !== ".pdf" ||
-                (extension === ".pdf" && !src.startsWith("file://")))
-        ) {
+                (extension === ".pdf" && !src.startsWith("file://")));
+        const getAccelerator = (action: Config.TAssetOpenAction) => {
+            if (!showAccelerator || !src.startsWith("assets/")) {
+                return "";
+            }
+            let config = normalizeAssetOpenConfig(window.siyuan.config.editor.assetOpen);
+            /// #if BROWSER
+            config = DEFAULT_ASSET_OPEN;
+            /// #endif
+            const gestures: {key: TAssetOpenGesture, label: string}[] = [
+                {key: "click", label: window.siyuan.languages.click},
+                {key: "ctrlClick", label: "⌘" + window.siyuan.languages.click},
+                {key: "altClick", label: "⌥" + window.siyuan.languages.click},
+                {key: "shiftClick", label: "⇧" + window.siyuan.languages.click},
+            ];
+            return gestures.filter((gesture) => resolveExecutableAssetOpenAction(config[gesture.key], {
+                previewable,
+                noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
+            }) === action).map((gesture) => gesture.label).join(" / ");
+        };
+        if (previewable) {
             submenu.push({
                 id: "insertRight",
                 icon: "iconLayoutRight",
                 label: window.siyuan.languages.insertRight,
-                accelerator: showAccelerator ? window.siyuan.languages.click : "",
+                accelerator: getAccelerator("right"),
                 click() {
                     openAsset(app, src.trim(), parseInt(getSearch("page", src)), "right");
                 }
@@ -875,7 +900,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 id: "openBy",
                 label: window.siyuan.languages.openBy,
                 icon: "iconOpen",
-                accelerator: showAccelerator ? "⌥" + window.siyuan.languages.click : "",
+                accelerator: getAccelerator("current"),
                 click() {
                     openAsset(app, src.trim(), parseInt(getSearch("page", src)));
                 }
@@ -885,6 +910,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 id: "openByNewWindow",
                 label: window.siyuan.languages.openByNewWindow,
                 icon: "iconOpenWindow",
+                accelerator: getAccelerator("new-window"),
                 click() {
                     openAssetNewWindow(src.trim());
                 }
@@ -893,7 +919,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 id: "showInFolder",
                 icon: "iconFolder",
                 label: window.siyuan.languages.showInFolder,
-                accelerator: showAccelerator ? "⌘" + window.siyuan.languages.click : "",
+                accelerator: getAccelerator("folder"),
                 click: () => {
                     openBy(src, "folder");
                 }
@@ -901,7 +927,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             submenu.push({
                 id: "useDefault",
                 label: window.siyuan.languages.useDefault,
-                accelerator: showAccelerator ? "⇧" + window.siyuan.languages.click : "",
+                accelerator: getAccelerator("app"),
                 click() {
                     openBy(src, "app");
                 }
@@ -912,7 +938,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             submenu.push({
                 id: "useDefault",
                 label: window.siyuan.languages.useDefault,
-                accelerator: showAccelerator ? window.siyuan.languages.click : "",
+                accelerator: getAccelerator("app"),
                 click() {
                     openBy(src, "app");
                 }
@@ -921,7 +947,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 id: "showInFolder",
                 icon: "iconFolder",
                 label: window.siyuan.languages.showInFolder,
-                accelerator: showAccelerator ? "⌘" + window.siyuan.languages.click : "",
+                accelerator: getAccelerator("folder"),
                 click: () => {
                     openBy(src, "folder");
                 }

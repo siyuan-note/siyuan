@@ -1,4 +1,12 @@
 {
+	"assetOpen": "संसाधन खोलना",
+	"assetOpenTip": "PDF, चित्र, ऑडियो, वीडियो और पूर्वावलोकन योग्य अन्य संसाधनों को खोलने का तरीका कॉन्फ़िगर करें",
+	"assetOpenClick": "क्लिक",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + क्लिक",
+	"assetOpenAltClick": "Alt + क्लिक",
+	"assetOpenShiftClick": "Shift + क्लिक",
+	"assetOpenFollowTab": "टैब खोलने की सेटिंग का पालन करें",
+	"assetOpenCurrent": "वर्तमान फलक में खोलें",
 	"bazaarDeprecated": "अप्रचलित",
 	"bazaarDeprecatedTip": "यह पैकेज अप्रचलित है और अब अनुशंसित नहीं है",
 	"bazaarAlternatives": "विकल्प",

@@ -1,4 +1,12 @@
 {
+	"assetOpen": "فتح الموارد",
+	"assetOpenTip": "اضبط كيفية فتح ملفات PDF والصور والصوت والفيديو والموارد الأخرى القابلة للمعاينة",
+	"assetOpenClick": "نقرة",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + نقرة",
+	"assetOpenAltClick": "Alt + نقرة",
+	"assetOpenShiftClick": "Shift + نقرة",
+	"assetOpenFollowTab": "اتباع إعداد فتح علامات التبويب",
+	"assetOpenCurrent": "فتح في الجزء الحالي",
 	"bazaarDeprecated": "مهملة",
 	"bazaarDeprecatedTip": "هذه الحزمة مهملة ولم يعد يُنصح باستخدامها",
 	"bazaarAlternatives": "البدائل",

@@ -1,4 +1,12 @@
 {
+	"assetOpen": "Otwieranie zasobów",
+	"assetOpenTip": "Skonfiguruj sposób otwierania plików PDF, obrazów, dźwięku, wideo i innych zasobów z podglądem",
+	"assetOpenClick": "Kliknięcie",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + kliknięcie",
+	"assetOpenAltClick": "Alt + kliknięcie",
+	"assetOpenShiftClick": "Shift + kliknięcie",
+	"assetOpenFollowTab": "Zgodnie z ustawieniem otwierania kart",
+	"assetOpenCurrent": "Otwórz w bieżącym panelu",
 	"bazaarDeprecated": "Przestarzały",
 	"bazaarDeprecatedTip": "Ten pakiet jest przestarzały i nie jest już zalecany",
 	"bazaarAlternatives": "Alternatywy",

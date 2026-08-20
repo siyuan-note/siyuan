@@ -1,4 +1,12 @@
 {
+	"assetOpen": "Pembukaan sumber daya",
+	"assetOpenTip": "Atur cara membuka PDF, gambar, audio, video, dan sumber daya lain yang dapat dipratinjau",
+	"assetOpenClick": "Klik",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + klik",
+	"assetOpenAltClick": "Alt + klik",
+	"assetOpenShiftClick": "Shift + klik",
+	"assetOpenFollowTab": "Ikuti pengaturan pembukaan tab",
+	"assetOpenCurrent": "Buka di panel saat ini",
 	"bazaarDeprecated": "Tidak digunakan lagi",
 	"bazaarDeprecatedTip": "Paket ini tidak digunakan lagi dan tidak direkomendasikan",
 	"bazaarAlternatives": "Alternatif",

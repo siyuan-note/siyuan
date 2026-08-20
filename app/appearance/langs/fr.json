@@ -1,4 +1,12 @@
 {
+	"assetOpen": "Ouverture des ressources",
+	"assetOpenTip": "Configurer l’ouverture des PDF, images, fichiers audio, vidéos et autres ressources prévisualisables",
+	"assetOpenClick": "Clic",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + clic",
+	"assetOpenAltClick": "Alt + clic",
+	"assetOpenShiftClick": "Maj + clic",
+	"assetOpenFollowTab": "Suivre le réglage d’ouverture des onglets",
+	"assetOpenCurrent": "Ouvrir dans le volet actuel",
 	"bazaarDeprecated": "Obsolète",
 	"bazaarDeprecatedTip": "Ce paquet est obsolète et n’est plus recommandé",
 	"bazaarAlternatives": "Alternatives",

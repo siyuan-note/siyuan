@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260820101320"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210503095708-2g6bgl4",
-				"updated": "20210503095731"
+				"updated": "20260820101320"
 			},
 			"Children": [
 				{
@@ -48,6 +48,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " folder by default."
+				}
+			]
+		},
+		{
+			"ID": "20260820101320-r6m4aop",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260820101320-r6m4aop",
+				"updated": "20260820101320"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On the desktop, you can configure click, Ctrl / ⌘ + click, Alt + click, and Shift + click resource opening behavior in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Documents"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Behavior"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Resource opening"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "."
 				}
 			]
 		},

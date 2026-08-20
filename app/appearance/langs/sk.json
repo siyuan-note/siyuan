@@ -1,4 +1,12 @@
 {
+	"assetOpen": "Otváranie zdrojov",
+	"assetOpenTip": "Nastavte spôsob otvárania PDF, obrázkov, zvuku, videa a ďalších zdrojov s náhľadom",
+	"assetOpenClick": "Kliknutie",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + kliknutie",
+	"assetOpenAltClick": "Alt + kliknutie",
+	"assetOpenShiftClick": "Shift + kliknutie",
+	"assetOpenFollowTab": "Použiť nastavenie otvárania kariet",
+	"assetOpenCurrent": "Otvoriť v aktuálnom paneli",
 	"bazaarDeprecated": "Zastarané",
 	"bazaarDeprecatedTip": "Tento balík je zastaraný a už sa neodporúča",
 	"bazaarAlternatives": "Alternatívy",

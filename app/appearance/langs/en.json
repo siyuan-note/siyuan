@@ -1,4 +1,12 @@
 {
+	"assetOpen": "Resource opening",
+	"assetOpenTip": "Configure how PDF, images, audio, video, and other previewable resources are opened",
+	"assetOpenClick": "Click",
+	"assetOpenCtrlClick": "Ctrl / ⌘ + click",
+	"assetOpenAltClick": "Alt + click",
+	"assetOpenShiftClick": "Shift + click",
+	"assetOpenFollowTab": "Follow tab opening setting",
+	"assetOpenCurrent": "Open in current pane",
 	"bazaarDeprecated": "Deprecated",
 	"bazaarDeprecatedTip": "This package is deprecated and is no longer recommended",
 	"bazaarAlternatives": "Alternatives",

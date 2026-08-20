@@ -884,15 +884,6 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         };
         if (previewable) {
             submenu.push({
-                id: "insertRight",
-                icon: "iconLayoutRight",
-                label: window.siyuan.languages.insertRight,
-                accelerator: getAccelerator("right"),
-                click() {
-                    openAsset(app, src.trim(), parseInt(getSearch("page", src)), "right");
-                }
-            });
-            submenu.push({
                 id: "openBy",
                 label: window.siyuan.languages.openBy,
                 icon: "iconOpen",
@@ -902,12 +893,12 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 }
             });
             submenu.push({
-                id: "openByBackground",
-                label: window.siyuan.languages.refTab,
-                icon: "iconEyeoff",
-                accelerator: getAccelerator("background"),
+                id: "insertRight",
+                icon: "iconLayoutRight",
+                label: window.siyuan.languages.insertRight,
+                accelerator: getAccelerator("right"),
                 click() {
-                    openAssetInBackground(app, src.trim(), parseInt(getSearch("page", src)));
+                    openAsset(app, src.trim(), parseInt(getSearch("page", src)), "right");
                 }
             });
             submenu.push({
@@ -917,6 +908,15 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 accelerator: getAccelerator("bottom"),
                 click() {
                     openAsset(app, src.trim(), parseInt(getSearch("page", src)), "bottom");
+                }
+            });
+            submenu.push({
+                id: "openByBackground",
+                label: window.siyuan.languages.refTab,
+                icon: "iconEyeoff",
+                accelerator: getAccelerator("background"),
+                click() {
+                    openAssetInBackground(app, src.trim(), parseInt(getSearch("page", src)));
                 }
             });
             /// #if !BROWSER
@@ -930,20 +930,20 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 }
             });
             submenu.push({
+                id: "useDefault",
+                label: window.siyuan.languages.useDefault,
+                accelerator: getAccelerator("app"),
+                click() {
+                    openBy(src, "app");
+                }
+            });
+            submenu.push({
                 id: "showInFolder",
                 icon: "iconFolder",
                 label: window.siyuan.languages.showInFolder,
                 accelerator: getAccelerator("folder"),
                 click: () => {
                     openBy(src, "folder");
-                }
-            });
-            submenu.push({
-                id: "useDefault",
-                label: window.siyuan.languages.useDefault,
-                accelerator: getAccelerator("app"),
-                click() {
-                    openBy(src, "app");
                 }
             });
             /// #endif

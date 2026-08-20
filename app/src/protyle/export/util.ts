@@ -13,9 +13,9 @@ import {processRender} from "../util/processCode";
 import {isIPad, isIPhone, isSafari, saveExportFile, setStorageVal} from "../util/compatibility";
 import {useShell} from "../../util/pathName";
 
-// WebKit/Chromium reject canvases whose width or height exceeds this, producing a blank
-// image. html-to-image clamps to it by default, modern-screenshot does not (maximumCanvasSize
-// defaults to 0 = unlimited), so long documents need it passed explicitly.
+// WebKit/Chromium 会拒绝宽度或高度超过此限制的 canvas，导致生成空白图像。
+// html-to-image 默认会进行限制，而 modern-screenshot 不会（maximumCanvasSize
+// 默认为 0，即无限制），因此处理长文档时需要显式传入该参数。
 const MAX_CANVAS_SIZE = 16384;
 
 const IMAGE_PLACEHOLDER = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
@@ -110,11 +110,11 @@ export const exportImage = (id: string) => {
         };
         setTimeout(() => {
             if (isIPhone() || isIPad() || isSafari()) {
-                // html-to-image clones every node and copies its full computed style one property at
-                // a time, which is O(nodes) with a huge constant on WebKit/WKWebView (~45s for a
-                // mid-size doc), and it needs to be run 4 times there before the fonts/images settle.
-                // modern-screenshot caches default styles per tag, only writes the differing
-                // properties and renders correctly in a single pass (~8s for the same doc).
+                // html-to-image 会克隆每一个节点，并逐一复制其完整的计算样式（computed style）；
+                // 在 WebKit/WKWebView 环境下，该操作的时间复杂度虽为 O(n)（n 为节点数），
+                // 但常数项极大（处理中等规模文档耗时约 45 秒），且需执行 4 次以确保字体和图像正确加载。 
+                // 相比之下，modern-screenshot 会按标签缓存默认样式，仅写入差异属性，
+                // 并能通过单次遍历实现正确渲染（处理同一文档仅需约 8 秒）。
                 addScript(`${Constants.PROTYLE_CDN}/js/modern-screenshot.min.js?v=4.6.6`, "protyleModernScreenshot").then(async () => {
                     exportBlob(await window.modernScreenshot.domToBlob(contentElement, {
                         type: "image/png",

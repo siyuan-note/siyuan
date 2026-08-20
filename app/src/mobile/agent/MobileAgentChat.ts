@@ -8,7 +8,7 @@ import {openModel} from "../menu/model";
 import {closeModel, closePanel} from "../util/closePanel";
 import {showMessage} from "../../dialog/message";
 import {sendNotification} from "../../plugin/platformUtils";
-import {isHuawei} from "../../protyle/util/compatibility";
+import {isDisabledFeature} from "../../protyle/util/compatibility";
 
 let app: App | undefined;
 let agentChat: AgentChat | undefined;
@@ -92,7 +92,7 @@ const ensureAgentChat = (currentApp: App) => {
 };
 
 export const openMobileAgent = (currentApp: App) => {
-    if (isHuawei()) {
+    if (isDisabledFeature("ai")) {
         return;
     }
     ensureAgentChat(currentApp);
@@ -132,7 +132,7 @@ export const handleMobileAgentBack = () => {
 };
 
 export const insertMobileAgentMentions = (currentApp: App, mentions: Array<{id: string; label: string}>) => {
-    if (mentions.length === 0 || isHuawei()) {
+    if (mentions.length === 0 || isDisabledFeature("ai")) {
         return;
     }
     openMobileAgent(currentApp);

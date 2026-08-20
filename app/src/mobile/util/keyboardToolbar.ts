@@ -12,7 +12,13 @@ import {getCurrentEditor} from "../editor";
 import {convertFontSize, fontEvent, getFontNodeElements, getFontSizeInfo} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
-import {isInAndroid, isInEdge, isInHarmony, isInMobileApp} from "../../protyle/util/compatibility";
+import {
+    isDisabledFeature,
+    isInAndroid,
+    isInEdge,
+    isInHarmony,
+    isInMobileApp,
+} from "../../protyle/util/compatibility";
 import {tabCodeBlock} from "../../protyle/wysiwyg/codeBlock";
 import {armKeyboardLock, callMobileAppShowKeyboard, canInput, keyboardLockUntil} from "./mobileAppUtil";
 import {isNotEditBlock} from "../../protyle/wysiwyg/getBlock";
@@ -559,7 +565,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem(Constants.ZWSP + 2, "iconImage", window.siyuan.languages.assets)}
     ${getSlashItem("((", "iconRef", window.siyuan.languages.ref, "true")}
     ${getSlashItem("{{", "iconSQL", window.siyuan.languages.blockEmbed, "true")}
-    ${getSlashItem(Constants.ZWSP + 5, "iconSparkles", window.siyuan.languages.aiWriting)}
+    ${isDisabledFeature("ai") ? "" : getSlashItem(Constants.ZWSP + 5, "iconSparkles", window.siyuan.languages.aiWriting)}
     ${getSlashItem('<div data-type="NodeAttributeView" data-av-type="table"></div>', "iconDatabase", window.siyuan.languages.database, "true")}
     ${getSlashItem(Constants.ZWSP + 6, "iconFile", window.siyuan.languages.newSubDocRef)}
 </div>

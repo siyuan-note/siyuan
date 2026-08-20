@@ -14,7 +14,7 @@ import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openFileAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {
     copyPlainText,
-    isHuawei,
+    isDisabledFeature,
     isMac,
     isOnlyMeta,
     saveExportFile,
@@ -1279,7 +1279,7 @@ export class Gutter {
                 }).element);
             }
         }
-        if (!protyle.disabled) {
+        if (!protyle.disabled && !isDisabledFeature("ai")) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "ai",
                 icon: "iconSparkles",
@@ -1391,8 +1391,8 @@ export class Gutter {
                     addEditorToDatabase(protyle, getEditorRange(selectsElement[0]));
                 }
             }).element);
-            // 加密笔记本和华为渠道不暴露该菜单：避免受保护内容外泄，并确保渠道包不提供智能体入口。
-            if (!isEncryptedBox(protyle.notebookId) && !isHuawei()) {
+            // 加密笔记本和禁用人工智能的渠道不暴露该菜单：避免受保护内容外泄，并确保渠道包不提供智能体入口。
+            if (!isEncryptedBox(protyle.notebookId) && !isDisabledFeature("ai")) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "addToAgent",
                     icon: "iconSend",
@@ -1925,7 +1925,8 @@ export class Gutter {
                 submenu: turnIntoSubmenu
             }).element);
         }
-        if (!isEmbedMenu && !protyle.disabled && !nodeElement.classList.contains("hr")) {
+        if (!isEmbedMenu && !protyle.disabled && !nodeElement.classList.contains("hr") &&
+            !isDisabledFeature("ai")) {
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "ai",
                 icon: "iconSparkles",
@@ -1968,8 +1969,8 @@ export class Gutter {
         }
         this.appendAddToDatabaseMenu(protyle, nodeElement);
         if (!protyle.disabled) {
-            // 加密笔记本和华为渠道不暴露该菜单：避免受保护内容外泄，并确保渠道包不提供智能体入口。
-            if (!isEncryptedBox(protyle.notebookId) && !isHuawei()) {
+            // 加密笔记本和禁用人工智能的渠道不暴露该菜单：避免受保护内容外泄，并确保渠道包不提供智能体入口。
+            if (!isEncryptedBox(protyle.notebookId) && !isDisabledFeature("ai")) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "addToAgent",
                     icon: "iconSend",

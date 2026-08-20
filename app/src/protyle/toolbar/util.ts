@@ -1,7 +1,7 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {focusByRange, focusByWbr} from "../util/selection";
-import {writeText} from "../util/compatibility";
+import {isDisabledFeature, writeText} from "../util/compatibility";
 import {isArrayEqual} from "../../util/functions";
 import {hasSameTextStyle} from "./Font";
 import {AIActions} from "../../ai/actions";
@@ -263,6 +263,9 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
                 return true;
             }
         });
+        if (isDisabledFeature("ai") && currentMenuItem.name === "ai") {
+            return;
+        }
         toolbarResult.push(currentMenuItem);
     });
     return toolbarResult;

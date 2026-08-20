@@ -27,7 +27,7 @@ import {registerSyncTab} from "../tabs/syncTab";
 import {registerAccessTab} from "../tabs/accessTab";
 import {registerAppTab} from "../tabs/appTab";
 import {registerAboutTab} from "../tabs/aboutTab";
-import {isHuawei} from "../../protyle/util/compatibility";
+import {isDisabledFeature} from "../../protyle/util/compatibility";
 
 const setting = new SettingBuilder();
 const settingTabs = {
@@ -67,7 +67,7 @@ const settingTabs = {
         id: "ai",
         icon: "iconSparkles",
         title: () => window.siyuan.languages.ai,
-        hidden: isHuawei,
+        hidden: () => isDisabledFeature("ai"),
         defaultSave: aiConfigApi.patch,
     }, registerAiTab),
     secretsVariables: setting.tab({

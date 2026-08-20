@@ -29,7 +29,12 @@ import {newDatabaseRowModel} from "../editor/databaseRow";
 import type {App} from "../index";
 import {afterLayoutReady} from "../plugin/loader";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
-import {isSensitiveLayoutData, isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibility";
+import {
+    isDisabledFeature,
+    isSensitiveLayoutData,
+    isSensitiveSearchConfig,
+    setStorageVal,
+} from "../protyle/util/compatibility";
 import {adjustDockPadding} from "./dock/util";
 import {setTitle} from "../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
@@ -306,7 +311,8 @@ const ensureAgentChatDock = (layout: Pick<Config.IUiLayout, "left" | "right" | "
 
 const initInternalDock = (dockItem: Config.IUILayoutDockTab[]) => {
     dockItem.forEach((existSubItem, index) => {
-        if (window.siyuan.isPublish && (existSubItem.type === "inbox" || existSubItem.type === "agentChat")) {
+        if ((window.siyuan.isPublish && (existSubItem.type === "inbox" || existSubItem.type === "agentChat")) ||
+            (isDisabledFeature("ai") && existSubItem.type === "agentChat")) {
             dockItem.splice(index, 1);
             return;
         }

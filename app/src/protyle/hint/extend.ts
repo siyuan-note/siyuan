@@ -1,7 +1,7 @@
 import {fetchPost} from "../../util/fetch";
 import {insertHTML} from "../util/insertHTML";
 import {getIconByType} from "../../editor/getIcon";
-import {updateHotkeyTip} from "../util/compatibility";
+import {isDisabledFeature, updateHotkeyTip} from "../util/compatibility";
 import {blockRender} from "../render/blockRender";
 import {Constants} from "../../constants";
 import {processRender} from "../util/processCode";
@@ -66,12 +66,12 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
         id: "blockEmbed",
         value: "{{",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSQL"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.blockEmbed}</span><span class="b3-list-item__meta">{{</span></div>`,
-    }, {
+    }, ...(isDisabledFeature("ai") ? [] : [{
         filter: [window.siyuan.languages.aiWriting, "ai writing", "ai编写", "aibianxie", "aibx", "人工智能", "rengongzhineng", "rgzn"],
         id: "aiWriting",
         value: Constants.ZWSP + 5,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.aiWriting}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.general.aiWriting.custom, "")}</div>`,
-    }, {
+    }]), {
         filter: [window.siyuan.languages.database, "database", "db", "数据库", "shujuku", "sjk", "视图", "view"],
         id: "database",
         value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',

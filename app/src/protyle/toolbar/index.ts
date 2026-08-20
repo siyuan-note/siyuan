@@ -2122,6 +2122,11 @@ export class Toolbar {
             html += '<button class="keyboard__action" data-action="more"><svg><use xlink:href="#iconMore"></use></svg></button>';
         }
         this.subElement.innerHTML = `<div class="fn__flex">${html}</div>`;
+        const setContentPosition = () => {
+            const rangePosition = getSelectionPosition(nodeElement, range);
+            setPosition(this.subElement, rangePosition.left,
+                rangePosition.top - this.subElement.clientHeight - 8, this.LINE_HEIGHT);
+        };
         this.subElement.lastElementChild.addEventListener("pointerdown", (event) => {
             if (hasClosestByClassName(event.target as HTMLElement, "keyboard__action")) {
                 // 避免操作按钮获取焦点导致编辑器失焦和软键盘收起。
@@ -2181,6 +2186,7 @@ export class Toolbar {
                 this.subElement.classList.add("fn__none");
             } else if (action === "back") {
                 this.subElement.lastElementChild.innerHTML = html;
+                setContentPosition();
             } else if (action === "plugin") {
                 window.siyuan.menus.menu.remove();
                 pluginMenus.forEach(item => window.siyuan.menus.menu.addItem({...item, index: undefined}));
@@ -2200,14 +2206,13 @@ export class Toolbar {
 <button class="keyboard__action${protyle.disabled ? " fn__none" : ""}" data-action="pasteEscaped"><span>${window.siyuan.languages.pasteEscaped}</span></button>
 <div class="keyboard__split${protyle.disabled ? " fn__none" : ""}"></div>
 <button class="keyboard__action" data-action="back"><svg><use xlink:href="#iconBack"></use></svg></button>`;
-                setPosition(this.subElement, rangePosition.left, rangePosition.top + 28, this.LINE_HEIGHT);
+                setContentPosition();
             }
         });
         this.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
         this.subElement.classList.remove("fn__none");
         this.element.classList.add("fn__none");
-        const rangePosition = getSelectionPosition(nodeElement, range);
-        setPosition(this.subElement, rangePosition.left, rangePosition.top - this.subElement.clientHeight - 8, this.LINE_HEIGHT);
+        setContentPosition();
     }
 
     public isMultiSelectMode() {

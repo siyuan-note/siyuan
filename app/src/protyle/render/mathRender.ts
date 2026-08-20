@@ -23,20 +23,21 @@ const fitMathWidth = (mathElement: HTMLElement, blockElement: HTMLElement | fals
 };
 
 export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWidth = false) => {
-    let mathElements: Element[] | NodeListOf<Element> = [];
-    if (element.getAttribute("data-subtype") === "math" && element.getAttribute("data-render") !== "true") {
-        mathElements = [element];
-    } else {
-        mathElements = element.querySelectorAll('[data-subtype="math"]:not([data-render="true"])');
-    }
+    const mathElements = element.getAttribute("data-subtype") === "math" ?
+        [element] : Array.from(element.querySelectorAll('[data-subtype="math"]'));
     if (mathElements.length === 0) {
         return;
     }
     addStyle(`${cdn}/js/katex/katex.min.css?v=0.16.9`, "protyleKatexStyle");
+    const unrenderedMathElements = mathElements.filter(mathElement =>
+        mathElement.getAttribute("data-render") !== "true");
+    if (unrenderedMathElements.length === 0) {
+        return;
+    }
     return addScript(`${cdn}/js/katex/katex.min.js?v=0.16.9`, "protyleKatexScript").then(() => {
         return addScript(`${cdn}/js/katex/mhchem.min.js?v=0.16.9`, "protyleKatexMhchemScript").then(() => {
             const resizePromises: Promise<void>[] = [];
-            mathElements.forEach((mathElement: HTMLElement) => {
+            unrenderedMathElements.forEach((mathElement: HTMLElement) => {
                 mathElement.setAttribute("data-render", "true");
                 let macros = {};
                 try {

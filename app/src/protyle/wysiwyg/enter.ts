@@ -31,6 +31,7 @@ import {isMobile} from "../../util/functions";
 import {processRender} from "../util/processCode";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
+import {isCodeBlockFenceBeforeCaret} from "./codeBlockEnter";
 
 export const enter = async (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
     const embedResultElement = hasClosestByClassName(blockElement, "protyle-wysiwyg__embed");
@@ -67,6 +68,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         return true;
     }
 
+    const position = getSelectionOffset(editableElement, protyle.wysiwyg.element, range);
     const trimStartHTML = editableElement.innerHTML.trimStart();
     const trimStartText = editableElement.textContent.trimStart();
     const enableCodeBlockMiddleDot = window.siyuan.config.editor.markdown.codeBlockMiddleDot !== false;
@@ -78,7 +80,9 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         (html.indexOf("\n~~~") > -1 && text.indexOf("\n~~~") > -1) ||
         (enableCodeBlockMiddleDot && (html.startsWith("···") ||
             (html.indexOf("\n···") > -1 && text.indexOf("\n···") > -1)));
-    if (hasCodeBlockFence(trimStartHTML, trimStartText)) {
+    // 光标位于代码块围栏之前或内部时按普通换行处理 https://github.com/siyuan-note/siyuan/issues/18873
+    if (hasCodeBlockFence(trimStartHTML, trimStartText) &&
+        isCodeBlockFenceBeforeCaret(editableElement.textContent, position.start, enableCodeBlockMiddleDot)) {
         if (trimStartHTML.indexOf("\n") === -1 &&
             trimStartHTML.replace(codeBlockMarkerRegExp, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
@@ -209,7 +213,6 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
         return true;
     }
 
-    const position = getSelectionOffset(editableElement, protyle.wysiwyg.element, range);
     if (blockElement.parentElement.getAttribute("data-type") === "NodeListItem" &&
         (
             blockElement.nextElementSibling.classList.contains("protyle-attr") ||

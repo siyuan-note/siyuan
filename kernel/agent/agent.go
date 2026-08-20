@@ -1144,12 +1144,7 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 				parseErrors := make([]error, len(aggregatedToolCalls))
 				var roundAttachments []AgentAttachment
 				for i, tc := range aggregatedToolCalls {
-					registration := roundCapabilities.registration(tc.Function.Name)
-					var schema mcptools.ToolSchema
-					if registration != nil {
-						schema = registration.InputSchema
-					}
-					args, parseErr := parseCapabilityArgs(tc.Function.Arguments, schema)
+					args, parseErr := parseToolArgs(tc.Function.Arguments)
 					parsedArgs[i] = args
 					parseErrors[i] = parseErr
 					checkpointMsg.ToolCalls = append(checkpointMsg.ToolCalls, AgentToolCall{

@@ -105,107 +105,50 @@ func TestConvertSchemaPreservesRawJSONSchema(t *testing.T) {
 	}
 }
 
-func TestParseCapabilityArgsRepairsObjectArrayOpeners(t *testing.T) {
-	args, err := parseCapabilityArgs(
-		`{"questions":[header":"Test","question":"Continue?","options":[label":"Yes","description":"Continue now"}]}]}`,
-		tools.QuestionTool.InputSchema,
+func TestParseToolArgsPreservesNestedValues(t *testing.T) {
+	args, err := parseToolArgs(
+		`{"todos":[{"content":"Task","status":"in_progress"}],"enabled":true,"count":2}`,
 	)
 	if err != nil {
 		t.Fatal(err)
-	}
-	questions, ok := args["questions"].([]any)
-	if !ok || len(questions) != 1 {
-		t.Fatalf("unexpected questions: %#v", args["questions"])
-	}
-	question, ok := questions[0].(map[string]any)
-	if !ok || question["header"] != "Test" {
-		t.Fatalf("unexpected question: %#v", questions[0])
-	}
-	options, ok := question["options"].([]any)
-	if !ok || len(options) != 1 {
-		t.Fatalf("unexpected options: %#v", question["options"])
-	}
-}
-
-func TestParseCapabilityArgsUnwrapsArgumentsObject(t *testing.T) {
-	args, err := parseCapabilityArgs(
-		`{"arguments":"{\"todos\":[{\"content\":\"Task\",\"status\":\"in_progress\"}]}"}`,
-		tools.TodoWriteTool.InputSchema,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, exists := args["arguments"]; exists {
-		t.Fatalf("wrapped arguments were not removed: %#v", args)
 	}
 	todos, ok := args["todos"].([]any)
 	if !ok || len(todos) != 1 {
 		t.Fatalf("unexpected todos: %#v", args["todos"])
 	}
-}
-
-func TestParseCapabilityArgsDecodesSchemaStructuredStrings(t *testing.T) {
-	schema := tools.ToolSchema{
-		Type: "object",
-		Properties: map[string]tools.Property{
-			"items": {
-				Type: "array",
-				Items: &tools.Property{
-					Type: "object",
-					Properties: map[string]tools.Property{
-						"name": {Type: "string"},
-					},
-				},
-			},
-			"enabled": {Type: "boolean"},
-			"count":   {Type: "number"},
-			"payload": {Type: "object"},
-			"text":    {Type: "string"},
-		},
-	}
-	args, err := parseCapabilityArgs(
-		`{"items":"[{\"name\":\"A\"}]","enabled":"true","count":"2","payload":"{\"value\":1}","text":"{\"keep\":true}"}`,
-		schema,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, ok := args["items"].([]any); !ok {
-		t.Fatalf("items were not decoded: %#v", args["items"])
+	todo, ok := todos[0].(map[string]any)
+	if !ok || todo["content"] != "Task" || todo["status"] != "in_progress" {
+		t.Fatalf("unexpected todo: %#v", todos[0])
 	}
 	if args["enabled"] != true || args["count"] != float64(2) {
-		t.Fatalf("primitive values were not decoded: %#v", args)
-	}
-	if _, ok := args["payload"].(map[string]any); !ok {
-		t.Fatalf("payload was not decoded: %#v", args["payload"])
-	}
-	if args["text"] != `{"keep":true}` {
-		t.Fatalf("string value was modified: %#v", args["text"])
+		t.Fatalf("unexpected primitive values: %#v", args)
 	}
 }
 
-func TestParseCapabilityArgsPreservesDeclaredArgumentsProperty(t *testing.T) {
-	schema := tools.ToolSchema{
-		Type: "object",
-		Properties: map[string]tools.Property{
-			"arguments": {Type: "string"},
-		},
-	}
-	args, err := parseCapabilityArgs(`{"arguments":"{\"value\":1}"}`, schema)
+func TestParseToolArgsDoesNotRewriteValidStrings(t *testing.T) {
+	args, err := parseToolArgs(`{"arguments":"{\"value\":1}","enabled":"true"}`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if args["arguments"] != `{"value":1}` {
-		t.Fatalf("declared arguments property was modified: %#v", args)
+	if args["arguments"] != `{"value":1}` || args["enabled"] != "true" {
+		t.Fatalf("string values were rewritten: %#v", args)
+	}
+
+	empty, err := parseToolArgs(" ")
+	if err != nil || len(empty) != 0 {
+		t.Fatalf("empty arguments were not accepted: %#v, %v", empty, err)
 	}
 }
 
-func TestParseCapabilityArgsRejectsInvalidJSON(t *testing.T) {
-	if _, err := parseCapabilityArgs(`{"questions":[`, tools.QuestionTool.InputSchema); err == nil {
+func TestParseToolArgsRejectsInvalidJSON(t *testing.T) {
+	if _, err := parseToolArgs(`{"questions":[`); err == nil {
 		t.Fatal("invalid JSON was accepted")
 	}
-	if _, err := parseCapabilityArgs(`{"arguments":"not JSON"}`, tools.QuestionTool.InputSchema); err == nil {
-		t.Fatal("invalid wrapped JSON was accepted")
+	if _, err := parseToolArgs(`null`); err == nil {
+		t.Fatal("null arguments were accepted")
+	}
+	if _, err := parseToolArgs(`[]`); err == nil {
+		t.Fatal("array arguments were accepted")
 	}
 }
 

@@ -20,7 +20,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"html"
 	"maps"
 	"strings"
 
@@ -95,7 +94,7 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) exec
 
 func executeCapability(ctx context.Context, tc openai.ToolCall, sessionID string,
 	registration *capabilityRegistration) executedToolResult {
-	args, err := parseCapabilityArgs(tc.Function.Arguments, registration.InputSchema)
+	args, err := parseToolArgs(tc.Function.Arguments)
 	if err != nil {
 		return executedToolResult{Text: "invalid capability arguments: " + err.Error(), IsError: true}
 	}
@@ -332,216 +331,18 @@ func resultToString(result tools.CallToolResult) string {
 	return "(empty result)"
 }
 
-// parseCapabilityArgs 根据能力 schema 解析并规范化模型返回的参数。
-func parseCapabilityArgs(argsJSON string, schema tools.ToolSchema) (map[string]any, error) {
+// parseToolArgs 在流结束后解析完整的工具参数，避免把损坏的 JSON 误报为缺少 schema 字段。
+func parseToolArgs(argsJSON string) (map[string]any, error) {
 	if strings.TrimSpace(argsJSON) == "" {
 		return map[string]any{}, nil
 	}
 
-	schemaMap, _ := convertSchema(schema).(map[string]any)
-	args, err := decodeCapabilityArgsObject(argsJSON, schemaMap)
-	if err != nil {
-		return map[string]any{}, err
-	}
-
-	// 部分兼容接口会把完整参数对象放入唯一的 arguments 字段中。
-	// 仅当 schema 本身没有该字段时解包，避免改变合法工具的参数语义。
-	if len(args) == 1 && !schemaDefinesProperty(schemaMap, "arguments") {
-		if wrapped, ok := args["arguments"]; ok {
-			switch value := wrapped.(type) {
-			case map[string]any:
-				args = value
-			case string:
-				decoded, decodeErr := decodeCapabilityArgsObject(unwrapStructuredString(value), schemaMap)
-				if decodeErr != nil {
-					return map[string]any{}, fmt.Errorf("wrapped tool arguments are invalid: %w", decodeErr)
-				}
-				args = decoded
-			default:
-				return map[string]any{}, fmt.Errorf("wrapped tool arguments must be a JSON object or object string")
-			}
-		}
-	}
-
-	normalized := normalizeCapabilityValue(args, schemaMap)
-	if normalizedArgs, ok := normalized.(map[string]any); ok {
-		return normalizedArgs, nil
-	}
-	return args, nil
-}
-
-func decodeCapabilityArgsObject(raw string, schema map[string]any) (map[string]any, error) {
 	var args map[string]any
-	if err := json.Unmarshal([]byte(raw), &args); err == nil && args != nil {
-		return args, nil
-	}
-
-	repaired := repairMissingArrayObjectOpeners(raw, schema)
-	if repaired != raw {
-		if err := json.Unmarshal([]byte(repaired), &args); err == nil && args != nil {
-			return args, nil
-		}
-	}
-
-	if err := json.Unmarshal([]byte(raw), &args); err != nil {
+	if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
 		return nil, fmt.Errorf("tool arguments are not valid JSON: %w", err)
 	}
-	return nil, fmt.Errorf("tool arguments must be a JSON object")
-}
-
-func schemaDefinesProperty(schema map[string]any, name string) bool {
-	properties, _ := schema["properties"].(map[string]any)
-	_, ok := properties[name]
-	return ok
-}
-
-func normalizeCapabilityValue(value any, schema map[string]any) any {
-	if text, ok := value.(string); ok && schemaType(schema) != "string" {
-		if decoded, matched := decodeStructuredSchemaValue(text, schema); matched {
-			value = decoded
-		}
+	if args == nil {
+		return nil, fmt.Errorf("tool arguments must be a JSON object")
 	}
-
-	switch typed := value.(type) {
-	case map[string]any:
-		properties, _ := schema["properties"].(map[string]any)
-		for name, child := range typed {
-			childSchema, _ := properties[name].(map[string]any)
-			if childSchema != nil {
-				typed[name] = normalizeCapabilityValue(child, childSchema)
-			}
-		}
-	case []any:
-		itemSchema, _ := schema["items"].(map[string]any)
-		if itemSchema != nil {
-			for i := range typed {
-				typed[i] = normalizeCapabilityValue(typed[i], itemSchema)
-			}
-		}
-	}
-	return value
-}
-
-func decodeStructuredSchemaValue(value string, schema map[string]any) (any, bool) {
-	for _, candidate := range []string{unwrapStructuredString(value), html.UnescapeString(unwrapStructuredString(value))} {
-		var decoded any
-		if json.Unmarshal([]byte(candidate), &decoded) == nil && capabilityValueMatchesSchema(decoded, schema) {
-			return normalizeCapabilityValue(decoded, schema), true
-		}
-	}
-	return nil, false
-}
-
-func unwrapStructuredString(value string) string {
-	trimmed := strings.TrimSpace(value)
-	if strings.HasPrefix(trimmed, "<![CDATA[") && strings.HasSuffix(trimmed, "]]>") {
-		return strings.TrimSuffix(strings.TrimPrefix(trimmed, "<![CDATA["), "]]>")
-	}
-	return trimmed
-}
-
-func capabilityValueMatchesSchema(value any, schema map[string]any) bool {
-	switch schemaType(schema) {
-	case "array":
-		_, ok := value.([]any)
-		return ok
-	case "object":
-		_, ok := value.(map[string]any)
-		return ok
-	case "boolean":
-		_, ok := value.(bool)
-		return ok
-	case "number", "integer":
-		_, ok := value.(float64)
-		return ok
-	case "null":
-		return value == nil
-	case "":
-		return false
-	default:
-		return false
-	}
-}
-
-func schemaType(schema map[string]any) string {
-	value, _ := schema["type"].(string)
-	return value
-}
-
-// repairMissingArrayObjectOpeners 修复兼容接口偶发丢失对象数组首个 {" 的参数。
-func repairMissingArrayObjectOpeners(raw string, schema map[string]any) string {
-	keys := map[string]struct{}{}
-	collectArrayObjectPropertyNames(schema, keys)
-	if len(keys) == 0 {
-		return raw
-	}
-
-	type insertion struct {
-		position int
-		text     string
-	}
-	var insertions []insertion
-	for i := 0; i < len(raw); i++ {
-		if raw[i] != '[' {
-			continue
-		}
-		position := i + 1
-		for position < len(raw) && (raw[position] == ' ' || raw[position] == '\t' || raw[position] == '\r' || raw[position] == '\n') {
-			position++
-		}
-		for key := range keys {
-			if strings.HasPrefix(raw[position:], key+`":`) {
-				insertions = append(insertions, insertion{position: position, text: `{"`})
-				break
-			}
-			if strings.HasPrefix(raw[position:], `"`+key+`":`) {
-				insertions = append(insertions, insertion{position: position, text: `{`})
-				break
-			}
-		}
-	}
-	if len(insertions) == 0 {
-		return raw
-	}
-
-	var builder strings.Builder
-	start := 0
-	for _, item := range insertions {
-		builder.WriteString(raw[start:item.position])
-		builder.WriteString(item.text)
-		start = item.position
-	}
-	builder.WriteString(raw[start:])
-	return builder.String()
-}
-
-func collectArrayObjectPropertyNames(schema map[string]any, keys map[string]struct{}) {
-	if schemaType(schema) == "array" {
-		if items, ok := schema["items"].(map[string]any); ok {
-			if schemaType(items) == "object" {
-				if properties, propertiesOK := items["properties"].(map[string]any); propertiesOK {
-					for name := range properties {
-						keys[name] = struct{}{}
-					}
-				}
-			}
-			collectArrayObjectPropertyNames(items, keys)
-		}
-	}
-	if properties, ok := schema["properties"].(map[string]any); ok {
-		for _, property := range properties {
-			if child, childOK := property.(map[string]any); childOK {
-				collectArrayObjectPropertyNames(child, keys)
-			}
-		}
-	}
-	for _, keyword := range []string{"anyOf", "oneOf", "allOf"} {
-		if variants, ok := schema[keyword].([]any); ok {
-			for _, variant := range variants {
-				if child, childOK := variant.(map[string]any); childOK {
-					collectArrayObjectPropertyNames(child, keys)
-				}
-			}
-		}
-	}
+	return args, nil
 }

@@ -37,7 +37,7 @@ var BlockTool = &Tool{
 			"notebook":   {Type: "string", Description: "Notebook ID that owns the target blocks; required for encrypted notebooks"},
 			"id":         {Type: "string", Description: "Block ID"},
 			"ids":        {Type: "string", Description: "Comma-separated block IDs (for batch_get, batch_kramdown)"},
-			"data":       {Type: "string", Description: "Content (markdown or dom). Markdown block references use ((blockID \"anchor text\")); never [[blockID]]"},
+			"data":       {Type: "string", Description: "Content in markdown or block DOM. Prefer markdown. A horizontal super-block uses {{{col with blank-line-separated child blocks and }}} on its own line; col is horizontal and row is vertical. Raw super-block DOM uses data-type=\"NodeSuperBlock\" and data-sb-layout, never data-layout, and every child needs an explicit data-type. Markdown block references use ((blockID \"anchor text\")); never [[blockID]]"},
 			"dataType":   {Type: "string", Description: "Content type: markdown or dom", Enum: []string{"markdown", "dom"}},
 			"lockType":   {Type: "boolean", Description: "Reject update when the parsed block type differs from the existing block type; defaults to false"},
 			"parentID":   {Type: "string", Description: "Parent block ID"},

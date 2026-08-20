@@ -50,6 +50,18 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 - Container blocks (can hold child blocks): document, blockquote, list, list-item, super-block, callout. Leaf blocks (cannot hold children): heading, paragraph, code-block, math-block, table, HTML-block, thematic-break, video, audio, widget, iframe, attribute-view, block-query-embed.
 - Heading hierarchy: headings (h1-h6) are leaf blocks. Blocks that appear "under" a heading in the UI are its *following siblings* in the AST, not its children. To place a block below a heading, pass the heading's ID (or the ID of the last block currently below it) as previousID, not as parentID.
 - Nested lists: a list-item cannot directly contain another list-item. To nest lists, create a list (NodeList) as a child of the outer list-item, then add list-items to that inner list. The parent of a list-item must always be a list (NodeList).
+- Super-block layouts: despite the token names, "row" means a vertical layout with child blocks stacked top-to-bottom, while "col" means a horizontal layout with child blocks placed side-by-side. Never infer the visual direction from the English token alone.
+- To create a super-block, prefer block.insert/append/prepend with dataType "markdown" and Kramdown. For example, a horizontal super-block containing two paragraphs is:
+
+{{{col
+
+first paragraph
+
+second paragraph
+
+}}}
+
+  Use {{{row for a vertical super-block. Never use data-layout in raw block DOM. If raw DOM is unavoidable, the outer block must use data-type="NodeSuperBlock" and data-sb-layout="row" or data-sb-layout="col", and every child must be complete block DOM with an explicit data-type; otherwise content may become an HTML block.
 - Notebook: a top-level container holding documents. Use notebook.list to enumerate; pass notebook ID when creating documents.
 - hPath (human-readable path): the title-based path shown in the document tree, e.g. "/Diary/2024/June". The "path" parameter in document.create/move/list refers to hPath, not the internal ID-based filesystem path. A rename changes hPath but not the ID.
 - Document vs block move: document.move relocates an entire document (and children) to a new hPath within a notebook — needs id, notebook (from document.get field "Box"), and path. block.move repositions a single content block under a new parent block.

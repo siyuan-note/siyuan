@@ -302,7 +302,7 @@ The table lists the five built-in types and their defaults. Custom `CalloutType`
   ] }
 ```
 
-> `NodeSuperBlockLayoutMarker.Data` can only be `"row"` (horizontal) or `"col"` (vertical). A canonical super block contains the open marker, layout marker, at least one content block, and close marker — at least four children total. It may contain multiple content blocks, can nest, and is the only container that can hold any block (including itself).
+> `NodeSuperBlockLayoutMarker.Data` can only be `"row"` (vertical) or `"col"` (horizontal). A canonical super block contains the open marker, layout marker, at least one content block, and close marker — at least four children total. It may contain multiple content blocks, can nest, and is the only container that can hold any block (including itself).
 
 ### 5.9 Embed block (five-part structure `{{ ... }}`)
 

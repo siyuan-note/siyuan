@@ -10,8 +10,40 @@ package tools
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 )
+
+func TestBlockToolDocumentsSuperBlockSyntax(t *testing.T) {
+	description := BlockTool.InputSchema.Properties["data"].Description
+	for _, instruction := range []string{
+		"{{{col",
+		"col is horizontal and row is vertical",
+		"data-sb-layout",
+		"never data-layout",
+		"every child needs an explicit data-type",
+	} {
+		if !strings.Contains(description, instruction) {
+			t.Fatalf("block data description is missing the super-block instruction %q", instruction)
+		}
+	}
+}
+
+func TestMarkdownToBlockDOMCreatesHorizontalSuperBlock(t *testing.T) {
+	dom, err := markdownToBlockDOM("{{{col\n\nfirst paragraph\n\nsecond paragraph\n\n}}}")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(dom, `data-type="NodeSuperBlock"`) || !strings.Contains(dom, `data-sb-layout="col"`) {
+		t.Fatalf("horizontal super-block was not preserved in block DOM: %s", dom)
+	}
+	if count := strings.Count(dom, `data-type="NodeParagraph"`); count != 2 {
+		t.Fatalf("expected two paragraph blocks, got %d: %s", count, dom)
+	}
+	if strings.Contains(dom, `data-type="NodeHTMLBlock"`) {
+		t.Fatalf("super-block children became HTML blocks: %s", dom)
+	}
+}
 
 func TestBlockWriteSuccess(t *testing.T) {
 	const id = "20260818000000-abcdefg"

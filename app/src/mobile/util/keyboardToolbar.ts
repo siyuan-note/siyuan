@@ -19,10 +19,12 @@ import {isNotEditBlock} from "../../protyle/wysiwyg/getBlock";
 import {getMirror, getUndoRootID, hasUndoStateMirror, initMirror} from "../../protyle/undo/globalUndo";
 import {getMobilePluginToolbarItems} from "./pluginToolbar";
 import {
+    getKeyboardHideResult,
     getMovingSelectionEndpoint,
     hasFixedSelectionEndpointChanged,
     hasVisibleSelectionText,
     isTableCellSelectAll,
+    KeyboardHideResult,
     shouldHideKeyboardAfterResize,
     shouldPreserveTableCellSelectAll,
     type TSelectionEndpoint,
@@ -891,30 +893,30 @@ export const hideKeyboardToolbar = () => {
     }
 };
 
-export const hideKeyboardToolbarByApp = (preserveTableCellSelectAll = false) => {
-    if (preserveTableCellSelectAll && restoreRecentAndroidTableCellSelectAll()) {
-        return true;
+export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
+    const tableCellSelectionRestored = preserveSelection && restoreRecentAndroidTableCellSelectAll();
+    if (tableCellSelectionRestored) {
+        return KeyboardHideResult.RestoreTableCellSelection;
     }
     preventKeyboardToolbarRender();
     hideKeyboardToolbar();
     const editor = getCurrentEditor();
     const selection = getSelection();
     if (!editor) {
-        return false;
+        return KeyboardHideResult.Cleanup;
     }
     hideElements(["util"], editor.protyle);
-    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-        return false;
-    }
-    const range = selection.getRangeAt(0);
-    if (!hasVisibleSelectionText(range.toString()) ||
-        !editor.protyle.wysiwyg.element.contains(range.startContainer) ||
-        !editor.protyle.wysiwyg.element.contains(range.endContainer)) {
-        return false;
+    const range = selection?.rangeCount > 0 && !selection.isCollapsed ? selection.getRangeAt(0) : undefined;
+    const hasVisibleEditorSelection = !!range && hasVisibleSelectionText(range.toString()) &&
+        editor.protyle.wysiwyg.element.contains(range.startContainer) &&
+        editor.protyle.wysiwyg.element.contains(range.endContainer);
+    const result = getKeyboardHideResult(preserveSelection, tableCellSelectionRestored, hasVisibleEditorSelection);
+    if (result === KeyboardHideResult.PreserveSelection || !hasVisibleEditorSelection) {
+        return result;
     }
     (document.activeElement as HTMLElement)?.blur();
-    selection.removeAllRanges();
-    return false;
+    selection?.removeAllRanges();
+    return result;
 };
 
 export const activeBlur = () => {

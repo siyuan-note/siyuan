@@ -5,6 +5,7 @@ export interface AgentSessionRun<TInteraction = unknown> {
     controller: AbortController;
     turnID: string;
     detached: boolean;
+    view?: DocumentFragment;
     pendingInteractions: TInteraction[];
     renderedInteractionKeys: Set<string>;
     interactionViewReady: boolean;
@@ -42,7 +43,6 @@ export class AgentSessionRuns<TInteraction = unknown> {
         if (run) {
             run.detached = true;
             run.interactionViewReady = false;
-            run.renderedInteractionKeys.clear();
         }
     }
 

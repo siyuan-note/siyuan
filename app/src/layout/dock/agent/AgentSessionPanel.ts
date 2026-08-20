@@ -30,6 +30,7 @@ export class AgentSessionPanel {
             onDelete: (id: string) => Promise<void>;
             onRename: (id: string, title: string) => Promise<void>;
             getStatus?: (id: string) => AgentSessionRunStatus | undefined;
+            getTitle?: (id: string) => string | undefined;
             onClose?: () => void;
         },
         private mobile = false,
@@ -191,10 +192,11 @@ export class AgentSessionPanel {
                     (L.agentNotifyDone || "Agent response completed");
                 const statusHTML = status ? '<span class="agent-session-status agent-session-status--' + status +
                     ' ariaLabel" aria-label="' + escapeHtml(statusLabel) + '"></span>' : "";
+                const title = this.callbacks.getTitle?.(s.id) || s.title || defaultTitle;
                 html += '<div class="b3-list-item' + (this.mobile ? "" : " b3-list-item--hide-action") +
                     (isActive ? " b3-list-item--focus" : "") + '" data-id="' + s.id + '">' +
                     statusHTML +
-                    '<span class="b3-list-item__text ariaLabel" data-position="parentW" aria-label="' + escapeHtml(s.title || defaultTitle) + '">' + escapeHtml(s.title || defaultTitle) + "</span>" +
+                    '<span class="b3-list-item__text ariaLabel" data-position="parentW" aria-label="' + escapeHtml(title) + '">' + escapeHtml(title) + "</span>" +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" data-id="' + s.id + '" aria-label="' + window.siyuan.languages.rename + '"><svg><use xlink:href="#iconEdit"></use></svg></span>' +
                     '<span class="b3-list-item__action b3-tooltips b3-tooltips__nw agent-session-more" data-id="' + s.id + '" aria-label="' + (L.more || "More") + '">' +
                         '<svg><use xlink:href="#iconMore"></use></svg>' +

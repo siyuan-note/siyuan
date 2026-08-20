@@ -144,6 +144,8 @@ export class AgentChat extends Model {
     private sessionId = "";
     private sessionTitle = "";
     private pendingSessionTitle: string | null = null;
+    private pendingSessionTitles = new Map<string, string>();
+    private sessionTitleSaveInFlight = new Set<string>();
     private entries: SessionEntry[] = [];
     private hasTitled = false;
     private isStreaming = false;
@@ -404,19 +406,26 @@ export class AgentChat extends Model {
                 onSwitch: (id) => this.switchSession(id),
                 onDelete: (id) => this.deleteSession(id),
                 onRename: async (id, title) => {
+                    const sessionRunning = !!this.sessionRuns.get(id);
                     if (id === this.sessionId) {
                         this.sessionTitle = title;
                         this.titleElement.textContent = title;
                         // 当前轮次开始前后都依赖同一个内容修订号。流式中只更新本地标题，
                         // 由终止提交一并落盘，避免元数据保存抢先递增修订号。
-                        if (this.isStreaming || this.currentTurnID) {
+                        if (sessionRunning || this.isStreaming || this.currentTurnID) {
                             this.pendingSessionTitle = title;
+                            this.pendingSessionTitles.set(id, title);
                             return;
                         }
+                    } else if (sessionRunning) {
+                        this.pendingSessionTitles.set(id, title);
+                        return;
                     }
+                    this.pendingSessionTitles.delete(id);
                     await SessionStore.rename(id, title);
                 },
                 getStatus: (id) => this.sessionRuns.resolveStatus(id),
+                getTitle: (id) => this.pendingSessionTitles.get(id),
                 onClose: this.host.mobile ? this.host.close : undefined,
             },
             !!this.host.mobile,
@@ -947,6 +956,9 @@ export class AgentChat extends Model {
             session.commitTurnID = turnID;
         }
         const result = await SessionStore.save(session);
+        if (this.pendingSessionTitles.get(sessionID) === session.title) {
+            this.pendingSessionTitles.delete(sessionID);
+        }
         if (turnID && this.recoveryCommitTurnIDs.get(sessionID) === turnID) {
             this.recoveryCommitTurnIDs.delete(sessionID);
         }
@@ -992,6 +1004,49 @@ export class AgentChat extends Model {
         this.updateSendButtonState();
         void this.sessionPanel?.refresh();
         return true;
+    }
+
+    private captureSessionRunView(run: AgentSessionRun<PendingAgentInteraction>) {
+        const view = document.createDocumentFragment();
+        this.observeStickTarget(null);
+        while (this.messagesContainer.firstChild) {
+            view.appendChild(this.messagesContainer.firstChild);
+        }
+        run.view = view;
+    }
+
+    private restoreSessionRunView(run: AgentSessionRun<PendingAgentInteraction>): boolean {
+        if (!run.view?.hasChildNodes()) {
+            return false;
+        }
+        this.observeStickTarget(null);
+        this.messagesContainer.innerHTML = "";
+        this.messagesContainer.appendChild(run.view);
+        run.view = undefined;
+        this.rebuildNavMarkers();
+        return true;
+    }
+
+    private persistPendingSessionTitle(sessionID: string) {
+        const title = this.pendingSessionTitles.get(sessionID);
+        if (!title || this.sessionTitleSaveInFlight.has(sessionID)) {
+            return;
+        }
+        this.sessionTitleSaveInFlight.add(sessionID);
+        void SessionStore.rename(sessionID, title).then(() => {
+            if (this.pendingSessionTitles.get(sessionID) === title) {
+                this.pendingSessionTitles.delete(sessionID);
+            }
+            return this.sessionPanel?.refresh();
+        }).catch((e) => {
+            console.error("save background agent title failed:", e);
+        }).finally(() => {
+            this.sessionTitleSaveInFlight.delete(sessionID);
+            const nextTitle = this.pendingSessionTitles.get(sessionID);
+            if (nextTitle && nextTitle !== title) {
+                this.persistPendingSessionTitle(sessionID);
+            }
+        });
     }
 
     private interactionKey(event: PendingAgentInteraction): string {
@@ -1090,15 +1145,34 @@ export class AgentChat extends Model {
         }
         this.pendingRecoverySessionIDs.add(run.sessionID);
         if (current) {
+            const pendingTitle = this.pendingSessionTitles.get(run.sessionID);
+            if (pendingTitle) {
+                this.sessionTitle = pendingTitle;
+                this.pendingSessionTitle = pendingTitle;
+                this.titleElement.textContent = pendingTitle;
+            }
             this.currentTurnID = run.turnID;
             this.setStreaming(false);
             this.removeMirrorPlaceholder();
-            void this.recoverInterruptedTurn(run.sessionID, run.turnID);
-        } else if (this.host.notify) {
-            this.host.notify("done");
-        } else if (!document.hasFocus() || document.hidden) {
-            const L = window.siyuan.languages;
-            sendNotification({title: L.agentNotifyDone, timeoutType: "default"});
+            void this.recoverInterruptedTurn(run.sessionID, run.turnID).then(() => {
+                if (!this.pendingSessionTitles.has(run.sessionID)) {
+                    return;
+                }
+                if (this.sessionId === run.sessionID && !this.isCurrentSessionRunning() &&
+                    !this.pendingRecoverySessionIDs.has(run.sessionID) && !this.currentTurnID) {
+                    void this.saveSession();
+                } else if (this.sessionId !== run.sessionID) {
+                    this.persistPendingSessionTitle(run.sessionID);
+                }
+            });
+        } else {
+            this.persistPendingSessionTitle(run.sessionID);
+            if (this.host.notify) {
+                this.host.notify("done");
+            } else if (!document.hasFocus() || document.hidden) {
+                const L = window.siyuan.languages;
+                sendNotification({title: L.agentNotifyDone, timeoutType: "default"});
+            }
         }
     }
 
@@ -1116,6 +1190,7 @@ export class AgentChat extends Model {
     }
 
     private attachSessionRun(run: AgentSessionRun<PendingAgentInteraction>) {
+        this.restoreSessionRunView(run);
         run.interactionViewReady = true;
         this.abortController = run.controller;
         this.currentTurnID = run.turnID;
@@ -1415,6 +1490,7 @@ export class AgentChat extends Model {
         this.applyPermissionMode("confirm");
         this.pendingRecoverySessionIDs.delete(deletedSessionID);
         this.recoveryCommitTurnIDs.delete(deletedSessionID);
+        this.pendingSessionTitles.delete(deletedSessionID);
         this.hasTitled = false;
         this.currentAIElement = null;
         this.currentContent = "";
@@ -1460,6 +1536,11 @@ export class AgentChat extends Model {
         this.sessionRuns.markRead(session.id);
         void this.sessionPanel?.refresh();
         const sessionRun = this.sessionRuns.get(session.id);
+        const pendingTitle = this.pendingSessionTitles.get(session.id);
+        if (pendingTitle) {
+            session.title = pendingTitle;
+            session.titled = true;
+        }
         this.currentTurnID = sessionRun?.turnID || "";
         this.currentRoundID = "";
         this.mirrorLocked = !!session.agentRunning && !sessionRun;
@@ -1474,7 +1555,7 @@ export class AgentChat extends Model {
         }
         this.sessionCreatedAt = session.createdAt || Date.now();
         this.sessionTitle = session.title;
-        this.pendingSessionTitle = null;
+        this.pendingSessionTitle = pendingTitle || null;
         this.titleElement.textContent = session.title || this.defaultTitle;
         this.entries = this.buildEntriesFromSession(session);
         this.hasTitled = session.titled !== false;
@@ -1508,6 +1589,9 @@ export class AgentChat extends Model {
         this.messagesContainer.addEventListener("transitionend", () => {
             if (this.sessionId !== session.id) {
                 return;
+            }
+            if (previousRun) {
+                this.captureSessionRunView(previousRun);
             }
             this.messagesContainer.innerHTML = "";
             this.titleElement.textContent = session.title;
@@ -1878,6 +1962,9 @@ export class AgentChat extends Model {
         if (this.tokenDisplayEl) {
             this.tokenDisplayEl.classList.add("fn__none");
         }
+        if (previousRun) {
+            this.captureSessionRunView(previousRun);
+        }
         this.messagesContainer.innerHTML = "";
         this.currentThinkingSteps = [];
         this.pendingConfirms = [];
@@ -1921,6 +2008,7 @@ export class AgentChat extends Model {
         }
         this.pendingRecoverySessionIDs.delete(id);
         this.recoveryCommitTurnIDs.delete(id);
+        this.pendingSessionTitles.delete(id);
     }
 
     private async sendMessage() {
@@ -3285,19 +3373,20 @@ export class AgentChat extends Model {
             if (data.code !== 0 || !data.data) {
                 return;
             }
-            if (this.sessionId === requestSessionID && data.data !== this.sessionTitle) {
-                this.sessionTitle = data.data;
-                this.pendingSessionTitle = data.data;
-                this.titleElement.textContent = data.data;
+            const generatedTitle = data.data as string;
+            this.pendingSessionTitles.set(requestSessionID, generatedTitle);
+            void this.sessionPanel?.refresh();
+            if (this.sessionId === requestSessionID) {
+                this.sessionTitle = generatedTitle;
+                this.pendingSessionTitle = generatedTitle;
+                this.titleElement.textContent = generatedTitle;
                 // 流式结束时的统一提交会包含最新标题；流式中单独保存会改变内容修订号，
                 // 使尚未创建的 runtime turn 被误判为旧请求。
-                if (!this.isStreaming && !this.currentTurnID) {
+                if (!this.isCurrentSessionRunning() && !this.currentTurnID) {
                     void this.saveSession();
                 }
-            } else if (this.sessionId !== requestSessionID) {
-                void SessionStore.rename(requestSessionID, data.data)
-                    .then(() => this.sessionPanel?.refresh())
-                    .catch((e) => console.error("save background agent title failed:", e));
+            } else if (!this.sessionRuns.get(requestSessionID)) {
+                this.persistPendingSessionTitle(requestSessionID);
             }
         }).catch((e) => {
             console.error("agent title request error:", e);
@@ -3392,11 +3481,6 @@ export class AgentChat extends Model {
             this.pendingRecoverySessionIDs.add(sessionID);
             this.setStreaming(false);
             this.removeMirrorPlaceholder();
-            try {
-                await this.reloadFromDisk(true);
-            } catch (e) {
-                console.error("reload background agent session after stop failed:", e);
-            }
             if (this.sessionId === sessionID) {
                 void this.recoverInterruptedTurn(sessionID, sessionRun.turnID);
             }

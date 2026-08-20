@@ -6,12 +6,14 @@ test("keeps session runs independent", () => {
     const runs = new AgentSessionRuns();
     const first = runs.begin("first");
     const second = runs.begin("second");
+    first.renderedInteractionKeys.add("confirm:first");
 
     runs.detach("first");
     runs.abort("second");
 
     assert.equal(first.detached, true);
     assert.equal(first.controller.signal.aborted, false);
+    assert.equal(first.renderedInteractionKeys.has("confirm:first"), true);
     assert.equal(second.controller.signal.aborted, true);
     assert.equal(runs.resolveStatus("first"), "running");
     assert.equal(runs.resolveStatus("second"), "running");

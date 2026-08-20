@@ -709,7 +709,7 @@ export class Backlink extends Model {
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconFiles",
-            label: window.siyuan.languages.allNotebooks,
+            label: window.siyuan.languages.agentCatNotebook,
             type: "submenu",
             submenu: notebookSubmenu,
         }).element);

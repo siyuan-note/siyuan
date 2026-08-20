@@ -9,7 +9,7 @@
 		"title": "書式要素",
 		"title-img": "background-color:#269;background-image: linear-gradient(white 2px, transparent 2px),linear-gradient(90deg, white 2px, transparent 2px),linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px;",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260820124102"
 	},
 	"Children": [
 		{
@@ -3479,6 +3479,157 @@
 					"Type": "NodeTextMark",
 					"TextMarkType": "a",
 					"TextMarkAHref": "https://mermaid.js.org/syntax/entityRelationshipDiagram.html",
+					"TextMarkTextContent": "Mermaid の公式ドキュメント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "をご覧ください。"
+				}
+			]
+		},
+		{
+			"ID": "20260820124102-zenumlj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260820124102-zenumlj",
+				"updated": "20260820124102"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ZenUML シーケンス図"
+				}
+			]
+		},
+		{
+			"ID": "20260820124102-zenjpn1",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20260820124102-zenjpn1",
+				"updated": "20260820124102"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "bWVybWFpZA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "zenuml\ntitle Order Service\nCustomer-&gt;OrderService: Submit order\nOrderService-&gt;Database: Save order\nDatabase-&gt;OrderService: Order saved\nOrderService-&gt;Customer: Order confirmed\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260820124102-zenjpn2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260820124102-zenjpn2",
+				"updated": "20260820124102"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "構文の詳細については、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://mermaid.js.org/syntax/zenuml",
+					"TextMarkTextContent": "Mermaid の公式ドキュメント"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "をご覧ください。"
+				}
+			]
+		},
+		{
+			"ID": "20260820124102-tidyjp1",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260820124102-tidyjp1",
+				"updated": "20260820124102"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Tidy Tree レイアウト"
+				}
+			]
+		},
+		{
+			"ID": "20260820124102-tidyjp2",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"custom-mermaid-layout": "tidy-tree",
+				"id": "20260820124102-tidyjp2",
+				"updated": "20260820124102"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker",
+					"CodeBlockInfo": "bWVybWFpZA=="
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "mindmap\n  root((Project))\n    Requirements\n      Research\n      Scope\n    Design\n      Prototype\n      Review\n    Development\n      Frontend\n      Backend\n    Release\n      Testing\n      Launch\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20260820124102-tidyjp3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260820124102-tidyjp3",
+				"updated": "20260820124102"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "この例では、コードブロックのカスタム属性 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "mermaid-layout"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "tidy-tree"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ に設定しています。レイアウトの説明については、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://mermaid.js.org/config/layouts",
 					"TextMarkTextContent": "Mermaid の公式ドキュメント"
 				},
 				{

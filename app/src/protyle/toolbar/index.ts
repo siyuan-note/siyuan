@@ -2122,6 +2122,12 @@ export class Toolbar {
             html += '<button class="keyboard__action" data-action="more"><svg><use xlink:href="#iconMore"></use></svg></button>';
         }
         this.subElement.innerHTML = `<div class="fn__flex">${html}</div>`;
+        this.subElement.lastElementChild.addEventListener("pointerdown", (event) => {
+            if (hasClosestByClassName(event.target as HTMLElement, "keyboard__action")) {
+                // 避免操作按钮获取焦点导致编辑器失焦和软键盘收起。
+                event.preventDefault();
+            }
+        });
         this.subElement.lastElementChild.addEventListener("click", async (event) => {
             const btnElemen = hasClosestByClassName(event.target as HTMLElement, "keyboard__action");
             if (!btnElemen) {

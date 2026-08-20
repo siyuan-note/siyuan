@@ -301,6 +301,9 @@ interface Window {
         toCanvas: (element: Element, options?: IHtmlToImageOptions) => Promise<HTMLCanvasElement>
         toBlob: (element: Element, options?: IHtmlToImageOptions) => Promise<Blob>
     };
+    modernScreenshot: {
+        domToBlob: (element: Element, options?: IModernScreenshotOptions) => Promise<Blob>
+    };
     siyuan: ISiyuan;
     JSAndroid: {
         openAuthURL(url: string): void
@@ -752,6 +755,16 @@ interface IHtmlToImageOptions {
     [key: string]: unknown;
     imagePlaceholder?: string;
     onImageErrorHandler?: (event: Event) => void;
+}
+
+interface IModernScreenshotOptions {
+    [key: string]: unknown;
+    type?: string;
+    scale?: number;
+    maximumCanvasSize?: number;
+    fetch?: {
+        placeholderImage?: string;
+    };
 }
 
 interface ILayoutJSON extends ILayoutOptions {

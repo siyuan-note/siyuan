@@ -194,6 +194,7 @@ import {isCrossBlockTextRange} from "../gutter/multiSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
+import {LargeListVirtualizer} from "./listVirtualization";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -345,6 +346,7 @@ export class WYSIWYG {
     private inputTimeout: number;
     private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
     public tableControl: TableControl;
+    private largeListVirtualizer?: LargeListVirtualizer;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -462,8 +464,19 @@ export class WYSIWYG {
         if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
             return;
         }
+        if (!isMobile() && !protyle.options.backlinkData && !protyle.lite) {
+            this.largeListVirtualizer = new LargeListVirtualizer(protyle.element, this.element, protyle.id);
+        }
         keydown(protyle, this.element);
         dropEvent(protyle, this.element);
+    }
+
+    public destroy() {
+        this.largeListVirtualizer?.destroy();
+    }
+
+    public prepareLargeListVirtualization(contentElement: Element, replace: boolean) {
+        this.largeListVirtualizer?.prepare(contentElement, replace);
     }
 
     public renderCustom(ial: Record<string, string>) {

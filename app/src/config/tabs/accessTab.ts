@@ -9,7 +9,7 @@ import {showMessage} from "../../dialog/message";
 import {shell} from "electron";
 /// #endif
 import {isInAndroid, isInHarmony, isInIOS, isInMobileApp, saveExportFile} from "../../protyle/util/compatibility";
-import {openByMobile} from "../../editor/openLink";
+import {openByMobile, openLink} from "../../editor/openLink";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../render/fragments";
 import {
     genServerAddressesHTML,
@@ -547,11 +547,7 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
         afterMount: (root) => {
             root.querySelector("#openLocalServer")?.addEventListener("click", () => {
                 const url = `http://127.0.0.1:${location.port}`;
-                /// #if !BROWSER
-                void shell.openExternal(url);
-                /// #else
-                openByMobile(url);
-                /// #endif
+                openLink(window.siyuan.ws.app, url);
             });
         },
     }, (stack) => {

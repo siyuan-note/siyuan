@@ -29,6 +29,7 @@ import {openRecentDocs} from "../business/openRecentDocs";
 import * as dayjs from "dayjs";
 import {upDownHint} from "../util/upDownHint";
 import {openDataMigration} from "./dataMigration";
+import {openLink} from "../editor/openLink";
 
 const editLayout = (layoutName?: string) => {
     const dialog = new Dialog({
@@ -567,9 +568,9 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             icon: "iconFeedback",
             click: () => {
                 if ("zh-CN" === window.siyuan.config.lang) {
-                    window.open("https://ld246.com/article/1649901726096");
+                    openLink(app, "https://ld246.com/article/1649901726096");
                 } else {
-                    window.open("https://liuyun.io/article/1686530886208");
+                    openLink(app, "https://liuyun.io/article/1686530886208");
                 }
             }
         }).element);

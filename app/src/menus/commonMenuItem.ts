@@ -1,6 +1,3 @@
-/// #if !BROWSER
-import {shell} from "electron";
-/// #endif
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile, isValidCustomAttrName} from "../util/functions";
 import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
@@ -15,8 +12,7 @@ import {
     saveExportFile,
     writeText
 } from "../protyle/util/compatibility";
-import {openByMobile} from "../editor/openLink";
-import {processSiYuanUri} from "../util/uri";
+import {openByMobile, openLink} from "../editor/openLink";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -975,12 +971,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             label: window.siyuan.languages.useDefault,
             accelerator: showAccelerator ? window.siyuan.languages.click : "",
             click: () => {
-                if (processSiYuanUri(app, src)) {
-                    return;
-                }
-                shell.openExternal(src).catch((e) => {
-                    showMessage(e);
-                });
+                openLink(app, src);
             }
         });
         /// #else
@@ -989,7 +980,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
             accelerator: showAccelerator ? window.siyuan.languages.click : "",
             click: () => {
-                openByMobile(src);
+                openLink(app, src);
             }
         });
         /// #endif

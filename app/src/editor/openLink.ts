@@ -17,6 +17,7 @@ import {
     resolveAssetOpenAction,
     resolveExecutableAssetOpenAction,
 } from "./assetOpen";
+import {emitOpenAsset, emitOpenLink, resolveOpenLinkEvent} from "./openLinkEvent";
 /// #if !MOBILE
 import {openAssetNewWindow} from "../window/openNewWindow";
 /// #endif
@@ -26,21 +27,6 @@ const isPreviewableAsset = (assetPath: string) => {
     return Constants.SIYUAN_ASSETS_EXTS.includes(extension) &&
         isBrowserRenderableImagePath(assetPath) &&
         (extension !== ".pdf" || assetPath.startsWith("assets/"));
-};
-
-const emitOpenAsset = (
-    app: App,
-    path: string,
-    action: Config.TAssetOpenAction,
-    event?: MouseEvent,
-) => {
-    let open = true;
-    app.plugins.forEach((plugin) => {
-        if (!plugin.eventBus.emit("open-asset", {path, action, event})) {
-            open = false;
-        }
-    });
-    return open;
 };
 
 export const openAssetByAction = (
@@ -121,8 +107,22 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
     /// #if MOBILE
     action = "app";
     /// #endif
-    if (isAsset && !emitOpenAsset(app, originalLinkAddress, action, event)) {
-        return;
+    const openLinkEvent = resolveOpenLinkEvent({
+        href: linkAddress,
+        originalHref: aLink,
+        isAsset,
+        isLocal: isLocalPath(linkAddress),
+        event,
+    });
+    if (isAsset) {
+        if (!emitOpenAsset(app, originalLinkAddress, action, event)) {
+            return;
+        }
+    } else if (openLinkEvent) {
+        linkAddress = openLinkEvent.href;
+        if (!emitOpenLink(app, openLinkEvent)) {
+            return;
+        }
     }
     if (processSiYuanUri(app, linkAddress)) {
         return;
@@ -133,11 +133,6 @@ export const openLink = (app: App, aLink: string, event?: MouseEvent, ctrlIsPres
     if (isLocalPath(linkAddress)) {
         openAssetByAction(app, linkAddress, pdfParams, action);
     } else if (linkAddress) {
-        if (0 > linkAddress.indexOf(":")) {
-            // 使用 : 判断，不使用 :// 判断 Open external application protocol invalid https://github.com/siyuan-note/siyuan/issues/10075
-            // Support click to open hyperlinks like `www.foo.com` https://github.com/siyuan-note/siyuan/issues/9986
-            linkAddress = `https://${linkAddress}`;
-        }
         /// #if !BROWSER
         shell.openExternal(linkAddress).catch((e) => {
             showMessage(e);

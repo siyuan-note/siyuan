@@ -11,7 +11,13 @@ import {shell} from "electron";
 import {isInAndroid, isInHarmony, isInIOS, isInMobileApp, saveExportFile} from "../../protyle/util/compatibility";
 import {openByMobile} from "../../editor/openLink";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../render/fragments";
-import {renderPublishAuthAccounts, savePublish, sendAccessSetting, updatePublishConfig} from "./accessRuntime";
+import {
+    genServerAddressesHTML,
+    renderPublishAuthAccounts,
+    savePublish,
+    sendAccessSetting,
+    updatePublishConfig
+} from "./accessRuntime";
 import {sendAppSetting} from "./appRuntime";
 import zxcvbn = require("zxcvbn");
 
@@ -556,16 +562,7 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
             icon: "iconLink",
         });
         stack.desc(window.siyuan.languages.about3.replace("${port}", location.port));
-        stack.desc((() => {
-            const parts: string[] = [];
-            for (const serverAddr of window.siyuan.config.serverAddrs) {
-                if (!serverAddr.trim()) {
-                    break;
-                }
-                parts.push(`<code class="fn__code">${serverAddr}</code>`);
-            }
-            return parts.join(" ");
-        })());
+        stack.desc(`<span id="serverAddresses">${genServerAddressesHTML(window.siyuan.config.serverAddrs)}</span>`);
         stack.desc(window.siyuan.languages.about18);
     });
 };

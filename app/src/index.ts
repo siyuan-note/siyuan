@@ -40,6 +40,7 @@ import {loadPlugins, reloadPlugin} from "./plugin/loader";
 import "./assets/scss/base.scss";
 import {reloadEmoji} from "./emoji";
 import {processIOSPurchaseResponse} from "./util/iOSPurchase";
+import {updateServerAddresses} from "./config/tabs/accessRuntime";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -123,6 +124,9 @@ export class App {
                             break;
                         case "setConf":
                             window.siyuan.config = data.data;
+                            break;
+                        case "setServerAddrs":
+                            updateServerAddresses(data.data);
                             break;
                         case "setPublish":
                             window.siyuan.config.publish = data.data;

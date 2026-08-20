@@ -4,6 +4,7 @@ import {
     endsWithMultiCharHintPrefix,
     getBlockHintTriggerOffset,
     getBlockRefStaticText,
+    shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
 } from "./blockHintRange";
 
@@ -83,6 +84,24 @@ describe("shouldIgnoreHintTrigger", () => {
         assert.equal(shouldIgnoreHintTrigger("", "、", blockHintKeys), false);
         assert.equal(shouldIgnoreHintTrigger("#", "、", blockHintKeys), true);
         assert.equal(shouldIgnoreHintTrigger("、", "[[", blockHintKeys), false);
+    });
+});
+
+describe("shouldCaptureHintUndoFocus", () => {
+    const blockHintKeys = ["((", "[[", "（（", "【【"];
+
+    it("captures block hint focus in all editors", () => {
+        assert.equal(shouldCaptureHintUndoFocus("[[", blockHintKeys, false), true);
+    });
+
+    it("captures slash hint focus in lite editors", () => {
+        assert.equal(shouldCaptureHintUndoFocus("/", blockHintKeys, true), true);
+        assert.equal(shouldCaptureHintUndoFocus("、", blockHintKeys, true), true);
+    });
+
+    it("does not change regular editor slash hint focus handling", () => {
+        assert.equal(shouldCaptureHintUndoFocus("/", blockHintKeys, false), false);
+        assert.equal(shouldCaptureHintUndoFocus("#", blockHintKeys, true), false);
     });
 });
 

@@ -64,6 +64,7 @@ import {
     endsWithMultiCharHintPrefix,
     getBlockHintTriggerOffset,
     getBlockRefStaticText,
+    shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
 } from "./blockHintRange";
 
@@ -701,7 +702,7 @@ ${genHintItemHTML(item)}
             id = nodeElement.getAttribute("data-node-id");
         }
         const html = nodeElement.outerHTML;
-        const undoContext = Constants.BLOCK_HINT_KEYS.includes(this.splitChar) ?
+        const undoContext = shouldCaptureHintUndoFocus(this.splitChar, Constants.BLOCK_HINT_KEYS, protyle.lite) ?
             getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
         // 自顶向下法新建文档后光标定位问题 https://github.com/siyuan-note/siyuan/issues/299
         if (this.lastIndex > -1) {
@@ -786,7 +787,7 @@ ${genHintItemHTML(item)}
             return;
         } else if (this.splitChar === "/" || this.splitChar === "、") {
             if (protyle.lite) {
-                insertHTML(value, protyle);
+                insertHTML(value, protyle, false, false, false, undefined, undoContext);
             } else if (value === "((" || value === "{{") {
                 this.enableExtend = true;
                 if (value === "((") {

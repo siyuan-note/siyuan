@@ -900,7 +900,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 在开头粘贴块则插入上方
                            insertByCursor = false,
                            // 根据块级拖拽指示线强制插入方向
-                           insertPosition?: "before" | "after") => {
+                           insertPosition?: "before" | "after",
+                           undoContext?: Record<string, string>) => {
     if (html === "") {
         return;
     }
@@ -1271,10 +1272,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             // 相邻标签之间插入空格区隔，避免后续 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
             fixAdjacentTags(getContenteditableElement(blockElement));
             protyle.wysiwyg.lastHTMLs[id] = oldHTML;
-            input(protyle, blockElement as HTMLElement, range, true, undefined, isCrossBlockRange ? {
+            input(protyle, blockElement as HTMLElement, range, true, undefined, isCrossBlockRange || undoContext ? {
                 doOperations: crossBlockDoOperations,
                 undoOperations: crossBlockUndoOperations,
-                undoContext: crossBlockUndoFocusContext,
+                undoContext: crossBlockUndoFocusContext || undoContext,
             } : undefined);
             return;
         }

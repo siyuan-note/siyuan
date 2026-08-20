@@ -195,7 +195,7 @@ func semanticSearch(args map[string]any) (CallToolResult, error) {
 	)
 
 	if matchedCount == 0 {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "No semantic search results. Make sure AI embedding is configured in SiYuan settings."}}}, nil
+		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "No semantic search results. Make sure AI embedding is configured in Jitang Notes settings."}}}, nil
 	}
 
 	var sb strings.Builder

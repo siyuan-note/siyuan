@@ -1,7 +1,7 @@
 {
-    "name": "SiYuan",
-    "short_name": "siyuan",
-    "description": "SiYuan is a privacy-first personal knowledge management system, support fine-grained block-level reference and Markdown WYSIWYG.",
+    "name": "鸡汤笔记",
+    "short_name": "鸡汤笔记",
+    "description": "Jitang Notes is a privacy-first personal knowledge management system based on SiYuan.",
     "lang": "en",
     "id": "/",
     "start_url": "/",
@@ -29,8 +29,8 @@
     ],
     "shortcuts": [
         {
-            "name": "SiYuan Desktop",
-            "description": "Desktop web side for SiYuan",
+            "name": "Jitang Notes Desktop",
+            "description": "Desktop web interface for Jitang Notes",
             "url": "/stage/build/desktop/",
             "icons": [
                 {
@@ -41,8 +41,8 @@
             ]
         },
         {
-            "name": "SiYuan Mobile",
-            "description": "Mobile web side for SiYuan",
+            "name": "Jitang Notes Mobile",
+            "description": "Mobile web interface for Jitang Notes",
             "url": "/stage/build/mobile/",
             "icons": [
                 {
@@ -51,21 +51,6 @@
                     "sizes": "512x512"
                 }
             ]
-        }
-    ],
-    "related_applications": [
-        {
-            "platform": "windows",
-            "url": "https://apps.microsoft.com/store/detail/siyuan/9P7HPMXP73K4"
-        },
-        {
-            "platform": "play",
-            "url": "https://play.google.com/store/apps/details?id=org.b3log.siyuan",
-            "id": "org.b3log.siyuan"
-        },
-        {
-            "platform": "itunes",
-            "url": "https://itunes.apple.com/app/siyuan/id1583226508"
         }
     ],
     "protocol_handlers": [

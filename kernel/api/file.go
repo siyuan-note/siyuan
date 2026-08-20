@@ -38,7 +38,7 @@ import (
 )
 
 // errMsgSeeKernelLog 接在 API 错误提示末尾，引导用户查看内核日志以获取完整信息（避免在 Msg 暴露工作空间绝对路径）。
-const errMsgSeeKernelLog = ". For details, see the SiYuan kernel log."
+const errMsgSeeKernelLog = ". For details, see the Jitang Notes kernel log."
 
 // rejectEncryptedBoxPath 检查 absPath 是否落在加密笔记本目录下（含 symlink 绕过），是则返回 true。
 // 原始文件 API（getFile/putFile/copyFile/renameFile/removeFile）是绕过加密层的逃生口，

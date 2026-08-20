@@ -313,7 +313,7 @@ func Serve(fastMode bool, cookieKey string) {
 }
 
 func rewritePortJSON(pid, port string) {
-	portJSON := filepath.Join(util.HomeDir, ".config", "siyuan", "port.json")
+	portJSON := filepath.Join(util.HomeDir, ".config", "jitang-notes", "port.json")
 	pidPorts := map[string]string{}
 	var data []byte
 	var err error

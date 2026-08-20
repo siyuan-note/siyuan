@@ -128,7 +128,7 @@ export const newNotebook = () => {
     <div class="fn__hr"></div>
     <div class="b3-label__text fn__pointer fn__flex" style="align-items: center;gap: 4px" data-type="toggle-import" role="button" tabindex="0" aria-expanded="false"><svg class="b3-list-item__arrow" style="display: block;flex: none;height: 14px;width: 14px" data-type="import-arrow"><use xlink:href="#iconRight"></use></svg><span style="line-height: 20px">${window.siyuan.languages.importFromMoreApps}</span></div>
     <div class="b3-list--background fn__none" data-type="import-options" style="padding-top: 8px">
-        <label class="b3-list-item fn__pointer" data-type="import-sy"><svg class="b3-list-item__graphic"><use xlink:href="#iconSiYuan"></use></svg><span class="b3-list-item__text">SiYuan .sy.zip</span><input class="b3-form__upload" type="file" accept="application/zip"></label>
+        <label class="b3-list-item fn__pointer" data-type="import-sy"><svg class="b3-list-item__graphic"><use xlink:href="#iconSiYuan"></use></svg><span class="b3-list-item__text">Jitang Notes .sy.zip</span><input class="b3-form__upload" type="file" accept="application/zip"></label>
         <label class="b3-list-item fn__pointer" data-type="import-markdown-zip"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">Markdown .zip</span><input class="b3-form__upload" type="file" accept="application/zip"></label>
         ${nativeImportHTML}
     </div>

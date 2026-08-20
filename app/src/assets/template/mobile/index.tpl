@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>SiYuan</title>
+    <title>Jitang Notes</title>
     <meta name="viewport" content="width=device-width, height=device-height, interactive-widget=overlays-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
     <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
 </head>

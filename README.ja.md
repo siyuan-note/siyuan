@@ -1,6 +1,8 @@
+<h1 align="center">Jitang Notes · 鸡汤笔记</h1>
+
+> Jitang Notes は [SiYuan](https://github.com/siyuan-note/siyuan) を基にした AGPL-3.0 のフォークであり、SiYuan の公式版ではありません。
+
 <p align="center">
-<img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
-<br>
 <em>思考から洞察へ、エージェントとともに</em>
 <br><br>
 <a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
@@ -390,16 +392,16 @@ siyuan export md --id <block-id> -w ~/SiYuan
 
 ### セットアップ
 
-CLI バイナリは `<インストール先>/resources/kernel/SiYuan-Kernel` です。
+CLI バイナリは `<インストール先>/resources/kernel/Jitang-Notes-Kernel` です。
 Windows インストーラーが自動で PATH に追加します。
 macOS/Linux では手動でシンボリックリンクを作成してください。
 
 ```bash
 # macOS
-ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+ln -s "/Applications/Jitang Notes.app/Contents/Resources/kernel/Jitang-Notes-Kernel" /usr/local/bin/jitang-notes
 
 # Linux
-ln -s /インストール先/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+ln -s "/インストール先/Jitang Notes/resources/kernel/Jitang-Notes-Kernel" /usr/local/bin/jitang-notes
 ```
 
 ## 🏘️ コミュニティ

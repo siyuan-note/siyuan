@@ -39,8 +39,8 @@ import (
 )
 
 const (
-	githubReleasesURL            = "https://api.github.com/repos/siyuan-note/siyuan/releases?per_page=100"
-	githubReleaseURLPrefix       = "https://github.com/siyuan-note/siyuan/releases/tag/v"
+	githubReleasesURL            = "https://api.github.com/repos/jitang-open/jitang-notes/releases?per_page=100"
+	githubReleaseURLPrefix       = "https://github.com/jitang-open/jitang-notes/releases/tag/v"
 	githubAPIReleaseCacheSeconds = int64(6 * 60 * 60)
 	maxChecksumManifestSize      = int64(1024 * 1024)
 )
@@ -80,9 +80,6 @@ var (
 
 func getUpdateRelease(force bool) (*updateRelease, error) {
 	channel := Conf.System.UpdateChannel
-	if conf.UpdateChannelStable == channel {
-		return getStableUpdateRelease(force)
-	}
 	if !isValidUpdateChannel(channel) {
 		return nil, errors.New("update channel is invalid")
 	}
@@ -148,14 +145,8 @@ func getStablePackageChecksum(result map[string]any, pkgName string) string {
 }
 
 func getStablePackageURLs(version, pkgName string) []string {
-	b3logURL := "https://release.b3log.org/siyuan/" + pkgName
-	liuyunURL := "https://release.liuyun.io/siyuan/" + pkgName
-	githubURL := "https://github.com/siyuan-note/siyuan/releases/download/v" + strings.TrimPrefix(version, "v") + "/" + pkgName
-	ghproxyURL := "https://ghfast.top/" + githubURL
-	if util.IsChinaCloud() {
-		return []string{b3logURL, liuyunURL, ghproxyURL, githubURL}
-	}
-	return []string{b3logURL, liuyunURL, githubURL, ghproxyURL}
+	githubURL := "https://github.com/jitang-open/jitang-notes/releases/download/v" + strings.TrimPrefix(version, "v") + "/" + pkgName
+	return []string{githubURL}
 }
 
 func getGitHubUpdateRelease(channel string, force bool) (*updateRelease, error) {
@@ -324,7 +315,7 @@ func currentInstallPackageName(version string) string {
 	if "" == suffix {
 		return ""
 	}
-	return "siyuan-" + strings.TrimPrefix(version, "v") + "-" + suffix
+	return "jitang-notes-" + strings.TrimPrefix(version, "v") + "-" + suffix
 }
 
 func currentInstallPackageSuffix() string {

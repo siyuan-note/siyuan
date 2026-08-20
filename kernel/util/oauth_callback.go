@@ -32,6 +32,6 @@ func RenderOAuthCallbackPage(lang, title, message string, success bool) []byte {
 		`.mark{display:grid;place-items:center;width:56px;height:56px;margin:0 auto 24px;border-radius:50%;background:#2e7d32;color:#fff;font-size:32px}.mark--error{background:#c62828}` +
 		`h1{margin:0 0 12px;font-size:24px;font-weight:600}p{margin:0;color:#5f6368;font-size:15px;line-height:1.7}` +
 		`@media(prefers-color-scheme:dark){body{background:#171717;color:#eee}main{background:#242424;border-color:#3c3c3c;box-shadow:none}p{color:#bbb}}</style>` +
-		`</head><body><main><div class="brand">SiYuan</div><div class="mark` + markClass + `" aria-hidden="true">` + mark + `</div><h1>` + html.EscapeString(title) +
+		`</head><body><main><div class="brand">Jitang Notes</div><div class="mark` + markClass + `" aria-hidden="true">` + mark + `</div><h1>` + html.EscapeString(title) +
 		`</h1><p>` + html.EscapeString(message) + `</p></main></body></html>`)
 }

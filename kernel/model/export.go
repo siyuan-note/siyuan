@@ -507,7 +507,7 @@ func ExportSystemLog() (zipPath string) {
 		return
 	}
 
-	appLog := filepath.Join(util.HomeDir, ".config", "siyuan", "app.log")
+	appLog := filepath.Join(util.HomeDir, ".config", "jitang-notes", "app.log")
 	if gulu.File.IsExist(appLog) {
 		to := filepath.Join(exportFolder, "app.log")
 		if err := filelock.Copy(appLog, to); err != nil {
@@ -515,7 +515,7 @@ func ExportSystemLog() (zipPath string) {
 		}
 	}
 
-	kernelLog := filepath.Join(util.HomeDir, ".config", "siyuan", "kernel.log")
+	kernelLog := filepath.Join(util.HomeDir, ".config", "jitang-notes", "kernel.log")
 	if gulu.File.IsExist(kernelLog) {
 		to := filepath.Join(exportFolder, "kernel.log")
 		if err := filelock.Copy(kernelLog, to); err != nil {
@@ -1599,7 +1599,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool, mergeHeadingO
 		}
 
 		api.DisableConfigDir()
-		font.UserFontDir = filepath.Join(util.HomeDir, ".config", "siyuan", "fonts")
+		font.UserFontDir = filepath.Join(util.HomeDir, ".config", "jitang-notes", "fonts")
 		if mkdirErr := os.MkdirAll(font.UserFontDir, 0755); nil != mkdirErr {
 			logging.LogErrorf("mkdir [%s] failed: %s", font.UserFontDir, mkdirErr)
 			return nil
@@ -1619,7 +1619,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool, mergeHeadingO
 		processPDFWatermark(pdfCtx, watermark)
 
 		pdfcpuVer := model.VersionStr
-		model.VersionStr = "SiYuan v" + util.Ver + " (pdfcpu " + pdfcpuVer + ")"
+		model.VersionStr = "Jitang Notes v" + util.Ver + " (pdfcpu " + pdfcpuVer + ")"
 		if writeErr := api.WriteContextFile(pdfCtx, p); nil != writeErr {
 			logging.LogErrorf("write pdf context failed: %s", writeErr)
 			return nil
@@ -1933,7 +1933,7 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 		}
 
 		fn := filepath.Base(AssetPathWithoutQuery(sourceURI))
-		fileSpecDict, newErr := pdfCtx.XRefTable.NewFileSpecDict(fn, fn, "attached by SiYuan", *ir)
+		fileSpecDict, newErr := pdfCtx.XRefTable.NewFileSpecDict(fn, fn, "attached by Jitang Notes", *ir)
 		if nil != newErr {
 			logging.LogWarnf("new file spec dict failed: %s", newErr)
 			continue

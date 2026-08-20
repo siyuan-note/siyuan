@@ -82,7 +82,7 @@ func SetPetalEnabled(name string, enabled bool) (ret *Petal, err error) {
 		}
 
 		if enabled && disallowInstall {
-			return fmt.Errorf("require upgrade SiYuan to use this plugin [%s]", name)
+			return fmt.Errorf("require upgrading Jitang Notes to use this plugin [%s]", name)
 		}
 		return nil
 	})
@@ -236,7 +236,7 @@ func loadPetals(frontend string, isPublish, isKernel bool) (ret []*Petal) {
 		}
 
 		if petal.DisallowInstall {
-			// disallow install plugin (require upgrade SiYuan), auto disable it to avoid potential issues, and skip loading
+			// Disallow installing the plugin when Jitang Notes must be upgraded; disable it automatically and skip loading.
 			SetPetalEnabled(petal.Name, false)
 			logging.LogInfof("plugin [%s] disallowed install, auto disabled", petal.Name)
 			continue

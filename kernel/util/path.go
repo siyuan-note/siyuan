@@ -35,7 +35,7 @@ import (
 
 var (
 	SSL       = false
-	UserAgent = "SiYuan/" + Ver
+	UserAgent = "JitangNotes/" + Ver
 
 	// invisibleCharsReplacer 用于 NormalizeEndpoint：去除复制粘贴易带入的零宽字符。
 	invisibleCharsReplacer = strings.NewReplacer(

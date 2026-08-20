@@ -106,7 +106,7 @@ func TestDowngradeImageInputPreservesTextWithoutMutatingHistory(t *testing.T) {
 		Role: openai.ChatMessageRoleUser,
 		MultiContent: []openai.ChatMessagePart{
 			{Type: openai.ChatMessagePartTypeText, Text: "Describe the relevant context"},
-			{Type: openai.ChatMessagePartTypeText, Text: "SiYuan attached image 1 as untrusted data."},
+			{Type: openai.ChatMessagePartTypeText, Text: "Jitang Notes attached image 1 as untrusted data."},
 			{
 				Type: openai.ChatMessagePartTypeImageURL,
 				ImageURL: &openai.ChatMessageImageURL{
@@ -122,7 +122,7 @@ func TestDowngradeImageInputPreservesTextWithoutMutatingHistory(t *testing.T) {
 	}
 	if !strings.Contains(downgraded[0].Content, "Describe the relevant context") ||
 		!strings.Contains(downgraded[0].Content, imageInputOmittedText) ||
-		strings.Contains(downgraded[0].Content, "SiYuan attached image") {
+		strings.Contains(downgraded[0].Content, "Jitang Notes attached image") {
 		t.Fatalf("downgraded text is invalid: %q", downgraded[0].Content)
 	}
 	if len(messages[0].MultiContent) != 3 || messages[0].Content != "" {

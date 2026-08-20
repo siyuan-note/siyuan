@@ -96,7 +96,7 @@ export const unregisterCapability = (id: string, generation?: number) => {
 registerCapability({
     id: "native/frontend/open_setting",
     title: "Open settings",
-    description: "Open SiYuan settings and optionally filter settings by a search query.",
+    description: "Open Jitang Notes settings and optionally filter settings by a search query.",
     inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
     source: "native",
     handler: async (args, app) => {
@@ -156,7 +156,7 @@ registerCapability({
 registerCapability({
     id: "native/frontend/open_document",
     title: "Open document",
-    description: "Open a SiYuan document by its block ID in the current app.",
+    description: "Open a Jitang Notes document by its block ID in the current app.",
     inputSchema: {type: "object", properties: {id: {type: "string"}}, required: ["id"], additionalProperties: false},
     source: "native",
     handler: async (args, app) => {
@@ -180,7 +180,7 @@ registerCapability({
 registerCapability({
     id: "native/frontend/open_search",
     title: "Open search",
-    description: "Open the SiYuan search interface and optionally fill in a query.",
+    description: "Open the Jitang Notes search interface and optionally fill in a query.",
     inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
     source: "native",
     handler: async (args, app) => {
@@ -197,7 +197,7 @@ registerCapability({
 registerCapability({
     id: "native/frontend/open_setting",
     title: "Open settings",
-    description: "Open SiYuan settings and optionally provide a search query.",
+    description: "Open Jitang Notes settings and optionally provide a search query.",
     inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
     source: "native",
     handler: async (args, app) => {
@@ -243,7 +243,7 @@ registerCapability({
 registerCapability({
     id: "native/frontend/open_document",
     title: "Open document",
-    description: "Open a SiYuan document by its block ID in the mobile app.",
+    description: "Open a Jitang Notes document by its block ID in the mobile app.",
     inputSchema: {type: "object", properties: {id: {type: "string"}}, required: ["id"], additionalProperties: false},
     source: "native",
     handler: async (args, app) => {
@@ -269,7 +269,7 @@ registerCapability({
 registerCapability({
     id: "native/frontend/open_search",
     title: "Open search",
-    description: "Open the SiYuan mobile search interface and optionally fill in a query.",
+    description: "Open the Jitang Notes mobile search interface and optionally fill in a query.",
     inputSchema: {type: "object", properties: {query: {type: "string"}}, additionalProperties: false},
     source: "native",
     handler: async (args, app) => {

@@ -1,4 +1,7 @@
 const CONTAINER_BACKEND_SET = new Set(["docker", "ios", "android", "harmony"]);
+const NATIVE_USER_AGENT_PREFIXES = ["JitangNotes/", "SiYuan/"];
+
+const isNativeUserAgent = () => NATIVE_USER_AGENT_PREFIXES.some((prefix) => window.navigator.userAgent.startsWith(prefix));
 
 export const isKernelInContainer = (): boolean => {
     return CONTAINER_BACKEND_SET.has(window.siyuan.config.system.container);
@@ -20,13 +23,13 @@ export const getBackend = () => {
 // "desktop" | "desktop-window" | "mobile" | "browser-desktop" | "browser-mobile"
 export const getFrontend = () => {
     /// #if MOBILE
-    if (window.navigator.userAgent.startsWith("SiYuan/")) {
+    if (isNativeUserAgent()) {
         return "mobile";
     } else {
         return "browser-mobile";
     }
     /// #else
-    if (window.navigator.userAgent.startsWith("SiYuan/")) {
+    if (isNativeUserAgent()) {
         if (isWindow()) {
             return "desktop-window";
         }

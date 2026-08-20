@@ -1,6 +1,8 @@
+<h1 align="center">Jitang Notes · 鸡汤笔记</h1>
+
+> Jitang Notes is an AGPL-3.0 fork of [SiYuan](https://github.com/siyuan-note/siyuan), maintained by `jitang-open`. It is not an official SiYuan release; SiYuan trademarks, official cloud services, and upstream copyrights remain with their respective owners.
+
 <p align="center">
-<img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
-<br>
 <em>From thought to insight, with agents</em>
 <br><br>
 <a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
@@ -64,14 +66,13 @@
 
 ## 💡 Introduction
 
-SiYuan is a privacy-first personal knowledge management system, supporting fine-grained block-level reference and Markdown
-WYSIWYG.
+Jitang Notes is a local-first personal knowledge management system for Chinese individual users. It is based on SiYuan and supports fine-grained block-level references and Markdown WYSIWYG.
 
 ![feature0.png](screenshots/feature0.png)
 
 ![feature5-1.png](screenshots/feature5-1.png)
 
-To learn more, read the [online user guide](https://siyuan-en.b3log.org/) or join the [SiYuan English Discussion Forum](https://liuyun.io).
+The current user guide and community resources are inherited from upstream SiYuan. Read the [SiYuan online user guide](https://siyuan-en.b3log.org/) or visit the [SiYuan English Discussion Forum](https://liuyun.io) for information about the underlying features.
 
 ## 🔮 Features
 
@@ -400,7 +401,7 @@ Run `siyuan --help` for the full command tree. Use `-f json` (default is `-f tab
 
 ### Installation
 
-The CLI binary is `<install-dir>/resources/kernel/SiYuan-Kernel`, invoked via the `siyuan` command.
+The CLI binary is `<install-dir>/resources/kernel/Jitang-Notes-Kernel`, invoked via the `jitang-notes` command.
 
 - **Windows**: the installer automatically adds the kernel directory to `PATH`, so `siyuan` works out of the box. The Microsoft Store edition runs in an MSIX sandbox and cannot modify `PATH`; deploy a `siyuan.cmd` shim once (survives Store updates):
   ```powershell
@@ -412,7 +413,7 @@ The CLI binary is `<install-dir>/resources/kernel/SiYuan-Kernel`, invoked via th
       'set "ROOT="'
       'for /f "delims=" %%i in (''powershell -NoProfile -Command "(Get-AppxPackage *SiYuan*).InstallLocation"'') do set "ROOT=%%i"'
       'if not defined ROOT goto :noshim'
-      '"%ROOT%\app\resources\kernel\SiYuan-Kernel.exe" %*'
+      '"%ROOT%\app\resources\kernel\Jitang-Notes-Kernel.exe" %*'
       'exit /b %ERRORLEVEL%'
       ':noshim'
       '1>&2 echo siyuan: Microsoft Store edition not found'
@@ -422,11 +423,11 @@ The CLI binary is `<install-dir>/resources/kernel/SiYuan-Kernel`, invoked via th
   To remove on uninstall: `Remove-Item "$env:LOCALAPPDATA\Microsoft\WindowsApps\siyuan.cmd"`.
 - **macOS**: create a symlink after installing:
   ```bash
-  ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+  ln -s "/Applications/Jitang Notes.app/Contents/Resources/kernel/Jitang-Notes-Kernel" /usr/local/bin/jitang-notes
   ```
 - **Linux**: create a symlink after installing:
   ```bash
-  ln -s <install-dir>/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+  ln -s <install-dir>/resources/kernel/Jitang-Notes-Kernel /usr/local/bin/jitang-notes
   ```
 
 ## 🏘️ Community

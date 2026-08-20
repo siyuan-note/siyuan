@@ -442,7 +442,7 @@ func TestWriteOIDCCallbackPageUsesSharedOAuthStyle(t *testing.T) {
 	writeOIDCCallbackPage(context, false, "登录失败<script>")
 
 	page := recorder.Body.String()
-	for _, expected := range []string{`lang="zh-CN"`, `class="brand">SiYuan</div>`, `class="mark mark--error"`, "登录失败&lt;script&gt;"} {
+	for _, expected := range []string{`lang="zh-CN"`, `class="brand">Jitang Notes</div>`, `class="mark mark--error"`, "登录失败&lt;script&gt;"} {
 		if !strings.Contains(page, expected) {
 			t.Fatalf("OIDC callback page does not contain %q: %s", expected, page)
 		}

@@ -629,7 +629,7 @@ func InstallLocalBazaarPackage(archivePath, frontend string, overwrite bool) (re
 		return result, errors.New("built-in marketplace package cannot be overwritten")
 	}
 	if bazaar.IsBelowRequiredAppVersion(pkg) {
-		return result, fmt.Errorf("%w: SiYuan %s or later is required", ErrLocalBazaarPackageIncompatible, pkg.MinAppVersion)
+		return result, fmt.Errorf("%w: Jitang Notes %s or later is required", ErrLocalBazaarPackageIncompatible, pkg.MinAppVersion)
 	}
 	if (pkgType == "plugins" && bazaar.IsIncompatiblePlugin(pkg, frontend)) ||
 		(pkgType == "themes" && bazaar.IsIncompatibleTheme(pkg, frontend)) {

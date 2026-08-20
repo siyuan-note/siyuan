@@ -1,4 +1,4 @@
-name: CD For SiYuan
+name: CD For Jitang Notes
 
 on:
   push:
@@ -94,7 +94,7 @@ jobs:
       - name: Gather Release Information
         id: release_info
         run: |
-          echo "release_title=SiYuan v${{ steps.version.outputs.value }}" >> $GITHUB_OUTPUT
+          echo "release_title=Jitang Notes v${{ steps.version.outputs.value }}" >> $GITHUB_OUTPUT
           changelog_header=$(python scripts/parse-changelog-HEAD.py -t ${{ github.ref }} -b ${{ steps.thisLatestRelease.outputs.release }} -e ${{ steps.electronVersion.outputs.value }} ${{ github.repository }})
           changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} ${{ github.repository }})
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
@@ -116,7 +116,7 @@ jobs:
         config:
           - os: ubuntu-24.04
             name: ubuntu build linux
-            kernel_path: "../app/kernel-linux/SiYuan-Kernel"
+            kernel_path: "../app/kernel-linux/Jitang-Notes-Kernel"
             build_args_prefix: "-s -w -X"
             build_args_suffix: "Mode=prod"
             electron_args: "dist-linux"
@@ -126,7 +126,7 @@ jobs:
             e2e_shards: ""
           - os: macos-latest
             name: macos build mac.dmg
-            kernel_path: "../app/kernel-darwin/SiYuan-Kernel"
+            kernel_path: "../app/kernel-darwin/Jitang-Notes-Kernel"
             build_args_prefix: "-s -w -X"
             build_args_suffix: "Mode=prod"
             electron_args: "dist-darwin"
@@ -136,7 +136,7 @@ jobs:
             e2e_shards: "main:6806"
           - os: macos-latest
             name: macos build mac-arm64.dmg
-            kernel_path: "../app/kernel-darwin-arm64/SiYuan-Kernel"
+            kernel_path: "../app/kernel-darwin-arm64/Jitang-Notes-Kernel"
             build_args_prefix: "-s -w -X"
             build_args_suffix: "Mode=prod"
             electron_args: "dist-darwin-arm64"
@@ -146,7 +146,7 @@ jobs:
             e2e_shards: "editor:6807"
           - os: windows-latest
             name: windows build win.exe
-            kernel_path: "../app/kernel/SiYuan-Kernel.exe"
+            kernel_path: "../app/kernel/Jitang-Notes-Kernel.exe"
             build_args_prefix: "-s -w -X"
             build_args_suffix: "Mode=prod"
             electron_args: "dist"
@@ -434,19 +434,19 @@ jobs:
         if: matrix.config.goos != 'linux'
         uses: actions/upload-artifact@v7
         with:
-          name: siyuan-${{ matrix.config.suffix }}
-          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-${{ matrix.config.suffix }}
+          name: jitang-notes-${{ matrix.config.suffix }}
+          path: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/jitang-notes-*-${{ matrix.config.suffix }}
 
       - name: Upload Build Artifacts (Linux)
         if: matrix.config.goos == 'linux'
         uses: actions/upload-artifact@v7
         with:
-          name: siyuan-linux
+          name: jitang-notes-linux
           path: |
-            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.AppImage
-            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.tar.gz
-            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.deb
-            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/siyuan-*-linux.rpm
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/jitang-notes-*-linux.AppImage
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/jitang-notes-*-linux.tar.gz
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/jitang-notes-*-linux.deb
+            ${{ github.workspace }}/go/src/github.com/${{ github.repository }}/app/build/jitang-notes-*-linux.rpm
 
   build_android:
     runs-on: ubuntu-latest
@@ -621,23 +621,23 @@ jobs:
           set -euo pipefail
           VERSION="${{ needs.prepare.outputs.version }}"
           mkdir -p release-assets
-          cp "siyuan-linux/siyuan-${VERSION}-linux.AppImage" release-assets/
-          cp "siyuan-linux/siyuan-${VERSION}-linux.tar.gz" release-assets/
-          cp "siyuan-linux/siyuan-${VERSION}-linux.deb" release-assets/
-          cp "siyuan-linux/siyuan-${VERSION}-linux.rpm" release-assets/
-          cp "siyuan-mac.dmg/siyuan-${VERSION}-mac.dmg" release-assets/
-          cp "siyuan-mac-arm64.dmg/siyuan-${VERSION}-mac-arm64.dmg" release-assets/
-          cp "siyuan-win.exe/siyuan-${VERSION}-win.exe" release-assets/
+          cp "jitang-notes-linux/jitang-notes-${VERSION}-linux.AppImage" release-assets/
+          cp "jitang-notes-linux/jitang-notes-${VERSION}-linux.tar.gz" release-assets/
+          cp "jitang-notes-linux/jitang-notes-${VERSION}-linux.deb" release-assets/
+          cp "jitang-notes-linux/jitang-notes-${VERSION}-linux.rpm" release-assets/
+          cp "jitang-notes-mac.dmg/jitang-notes-${VERSION}-mac.dmg" release-assets/
+          cp "jitang-notes-mac-arm64.dmg/jitang-notes-${VERSION}-mac-arm64.dmg" release-assets/
+          cp "jitang-notes-win.exe/jitang-notes-${VERSION}-win.exe" release-assets/
           cp "siyuan-android/siyuan-${VERSION}.apk" release-assets/
 
           EXPECTED_ASSETS=(
-            "siyuan-${VERSION}-linux.AppImage"
-            "siyuan-${VERSION}-linux.tar.gz"
-            "siyuan-${VERSION}-linux.deb"
-            "siyuan-${VERSION}-linux.rpm"
-            "siyuan-${VERSION}-mac.dmg"
-            "siyuan-${VERSION}-mac-arm64.dmg"
-            "siyuan-${VERSION}-win.exe"
+            "jitang-notes-${VERSION}-linux.AppImage"
+            "jitang-notes-${VERSION}-linux.tar.gz"
+            "jitang-notes-${VERSION}-linux.deb"
+            "jitang-notes-${VERSION}-linux.rpm"
+            "jitang-notes-${VERSION}-mac.dmg"
+            "jitang-notes-${VERSION}-mac-arm64.dmg"
+            "jitang-notes-${VERSION}-win.exe"
             "siyuan-${VERSION}.apk"
           )
           for asset in "${EXPECTED_ASSETS[@]}"; do
@@ -686,13 +686,13 @@ jobs:
           TAG="${{ github.ref_name }}"
           RELEASE_ID="$(gh release view "${TAG}" --json databaseId --jq '.databaseId')"
           EXPECTED_ASSETS=(
-            "siyuan-${VERSION}-linux.AppImage"
-            "siyuan-${VERSION}-linux.tar.gz"
-            "siyuan-${VERSION}-linux.deb"
-            "siyuan-${VERSION}-linux.rpm"
-            "siyuan-${VERSION}-mac.dmg"
-            "siyuan-${VERSION}-mac-arm64.dmg"
-            "siyuan-${VERSION}-win.exe"
+            "jitang-notes-${VERSION}-linux.AppImage"
+            "jitang-notes-${VERSION}-linux.tar.gz"
+            "jitang-notes-${VERSION}-linux.deb"
+            "jitang-notes-${VERSION}-linux.rpm"
+            "jitang-notes-${VERSION}-mac.dmg"
+            "jitang-notes-${VERSION}-mac-arm64.dmg"
+            "jitang-notes-${VERSION}-win.exe"
             "siyuan-${VERSION}.apk"
             "SHA256SUMS.txt"
           )

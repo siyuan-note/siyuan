@@ -852,7 +852,7 @@ def render_notices(runtime_packages, go_modules):
     lines = [
         "# Third-party notices",
         "",
-        "SiYuan includes third-party software, fonts, data, and other resources. This document records components that are distributed with SiYuan or incorporated into its executable and browser bundles. Build-only and test-only tools are not part of this notice unless their output embeds the tool or its licensed material.",
+        "Jitang Notes includes third-party software, fonts, data, and other resources. This document records components that are distributed with Jitang Notes or incorporated into its executable and browser bundles. Build-only and test-only tools are not part of this notice unless their output embeds the tool or its licensed material.",
         "",
         "The component list is informational and does not replace the license terms. Copyright notices, license texts, and upstream NOTICE files reproduced below remain the property of their respective owners. Source links identify the corresponding upstream projects; availability of a link does not alter the applicable license.",
         "",
@@ -876,7 +876,7 @@ def render_notices(runtime_packages, go_modules):
             "",
             "## Go standard library and runtime",
             "",
-            "The SiYuan kernel includes the Go standard library and runtime under the Go BSD-style license. The applicable license text is reproduced below.",
+            "The Jitang Notes kernel includes the Go standard library and runtime under the Go BSD-style license. The applicable license text is reproduced below.",
             "",
             "## Go modules incorporated into the kernel",
             "",
@@ -954,7 +954,7 @@ def render_notices(runtime_packages, go_modules):
         [
             "## License and attribution comments retained in bundled files",
             "",
-            "The following comments are extracted verbatim from the JavaScript and CSS artifacts that are distributed with SiYuan. This includes bundled dependency notices and per-theme copyright and license declarations.",
+            "The following comments are extracted verbatim from the JavaScript and CSS artifacts that are distributed with Jitang Notes. This includes bundled dependency notices and per-theme copyright and license declarations.",
             "",
         ]
     )

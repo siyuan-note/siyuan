@@ -470,8 +470,8 @@ export const setBodyHighlight = () => {
 
     let hue, saturation, lightness;
 
-    if (name === "SiYuan") {
-        // SiYuan 专用：更艳丽的紫色
+    if (name === "Jitang Notes" || name === "鸡汤笔记") {
+        // 鸡汤笔记默认工作空间：使用更艳丽的紫色
         hue = 280;
         saturation = 85;
         lightness = 48;

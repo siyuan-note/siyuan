@@ -47,7 +47,7 @@ type Tool struct {
 	OutputSchema *ToolSchema `json:"outputSchema,omitempty"`
 	// CapabilityID 是能力使用与对外暴露策略共用的稳定标识，不随模型函数名或显示标题变化。
 	CapabilityID string `json:"capabilityId,omitempty"`
-	// Source 标记工具来源："native"（SiYuan 内置）、"plugin"（插件注册）、"mcp"（外部 MCP 服务）。
+	// Source 标记工具来源："native"（鸡汤笔记内置）、"plugin"（插件注册）、"mcp"（外部 MCP 服务）。
 	// 用于 token 分类统计按来源拆分。空值按 "native" 处理（兼容旧调用方）。
 	Source string `json:"source,omitempty"`
 	// OwnerID 和 OwnerName 标识提供能力的插件或 MCP 服务，内置能力留空。

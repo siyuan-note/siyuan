@@ -63,7 +63,7 @@ var attrSetCmd = &cobra.Command{
 
 Common attributes:
   icon       Emoji hex codepoint (e.g. "1f4ca"), emoji character (e.g. "📊"), custom image path (e.g. "1/b3log.png"), network image URL (e.g.
-             "https://example.com/icon.png"), or dynamic icon URL (e.g. "api/icon/getDynamicIcon?type=8&color=%23d23f31&content=SiYuan&id=xxx").
+             "https://example.com/icon.png"), or dynamic icon URL (e.g. "api/icon/getDynamicIcon?type=8&color=%23d23f31&content=Jitang%20Notes&id=xxx").
   title-img  CSS background-image format (e.g. 'background-image:url("assets/example.jpg")').
              DO NOT use a bare asset path.
   tags       Comma-separated tag names.

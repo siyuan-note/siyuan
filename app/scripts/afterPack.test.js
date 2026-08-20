@@ -15,7 +15,7 @@ test("extractPackagedPandoc extracts the executable and removes the archive", as
     await fs.mkdir(resourcesDir, {recursive: true});
     await fs.writeFile(path.join(resourcesDir, "pandoc.zip"), Buffer.from(PANDOC_ZIP, "base64"));
 
-    await extractPackagedPandoc(appOutDir, {appInfo: {productFilename: "SiYuan"}}, "win32", Arch.x64);
+    await extractPackagedPandoc(appOutDir, {appInfo: {productFilename: "Jitang Notes"}}, "win32", Arch.x64);
 
     assert.equal(await fs.readFile(path.join(resourcesDir, "pandoc", "bin", "pandoc.exe"), "utf8"), "test-pandoc");
     assert.equal(await fs.readFile(path.join(resourcesDir, "pandoc", "COPYRIGHT.txt"), "utf8"), "copyright");
@@ -29,7 +29,7 @@ test("extractPackagedPandoc skips Windows ARM64 without an archive", async () =>
   const appOutDir = await fs.mkdtemp(path.join(os.tmpdir(), "siyuan-after-pack-"));
   try {
     await fs.mkdir(path.join(appOutDir, "resources"), {recursive: true});
-    await extractPackagedPandoc(appOutDir, {appInfo: {productFilename: "SiYuan"}}, "win32", Arch.arm64);
+    await extractPackagedPandoc(appOutDir, {appInfo: {productFilename: "Jitang Notes"}}, "win32", Arch.arm64);
   } finally {
     await fs.rm(appOutDir, {force: true, recursive: true});
   }
@@ -40,7 +40,7 @@ test("extractPackagedPandoc rejects a missing archive for supported targets", as
   try {
     await fs.mkdir(path.join(appOutDir, "resources"), {recursive: true});
     await assert.rejects(
-      extractPackagedPandoc(appOutDir, {appInfo: {productFilename: "SiYuan"}}, "win32", Arch.x64),
+      extractPackagedPandoc(appOutDir, {appInfo: {productFilename: "Jitang Notes"}}, "win32", Arch.x64),
       /Packaged Pandoc archive not found/
     );
   } finally {

@@ -20,7 +20,7 @@ Function AppendInstallLog
 
     ${GetTime} "" "L" $0 $1 $2 $3 $4 $5 $6
     ClearErrors
-    FileOpen $7 "$TEMP\SiYuan-install.log" a
+    FileOpen $7 "$TEMP\Jitang-Notes-install.log" a
     IfErrors installLogDone
     FileSeek $7 0 END
     FileWrite $7 "$2-$1-$0 $4:$5:$6 $R9$\r$\n"
@@ -43,17 +43,17 @@ FunctionEnd
     SetOutPath "$TEMP"
     ${IfNot} ${AtLeastWin10}
         !insertmacro WriteInstallLog "installer-rejected-unsupported-windows version=${VERSION}"
-        MessageBox MB_ICONEXCLAMATION "非常抱歉，思源笔记无法在低于 Windows 10 的系统上进行安装$\n$\n\
-            Sorry, SiYuan cannot be installed on systems below Windows 10$\n"
+        MessageBox MB_ICONEXCLAMATION "非常抱歉，鸡汤笔记无法在低于 Windows 10 的系统上进行安装$\n$\n\
+            Sorry, Jitang Notes cannot be installed on systems below Windows 10$\n"
         Quit
     ${EndIf}
 
     !insertmacro WriteInstallLog "installer-start version=${VERSION} package=$EXEPATH"
     Push $R8
     Push $R7
-    nsExec::Exec '"$SYSDIR\taskkill.exe" /F /IM "SiYuan.exe"'
+    nsExec::Exec '"$SYSDIR\taskkill.exe" /F /IM "Jitang Notes.exe"'
     Pop $R8
-    nsExec::Exec '"$SYSDIR\taskkill.exe" /F /IM "SiYuan-Kernel.exe"'
+    nsExec::Exec '"$SYSDIR\taskkill.exe" /F /IM "Jitang-Notes-Kernel.exe"'
     Pop $R7
     !insertmacro WriteInstallLog "process-cleanup-complete version=${VERSION} app-result=$R8 kernel-result=$R7"
     Pop $R7
@@ -82,8 +82,8 @@ FunctionEnd
 
 !macro customInstall
     !insertmacro WriteInstallLog "payload-extracted version=${VERSION} target=$INSTDIR"
-    RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
-    nsExec::ExecToLog '"$SYSDIR\cmd.exe" /c mklink /H "$INSTDIR\resources\kernel\siyuan.exe" "$INSTDIR\resources\kernel\SiYuan-Kernel.exe" 2>nul || ver>nul'
+    RMDir /r "$PROFILE\AppData\Local\jitang-notes-updater"
+    nsExec::ExecToLog '"$SYSDIR\cmd.exe" /c mklink /H "$INSTDIR\resources\kernel\jitang-notes.exe" "$INSTDIR\resources\kernel\Jitang-Notes-Kernel.exe" 2>nul || ver>nul'
     ${If} $installMode == "all"
         nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\");if((-not $p) -or -not ($p.Split(\";\") -contains $k)){$p=\"$k;$p\";[Environment]::SetEnvironmentVariable(\"Path\",$p,\"Machine\")}else{Write-Host \"already in PATH\"}"'
     ${Else}
@@ -94,28 +94,28 @@ FunctionEnd
 
 !macro customUnInstall
     ${IfNot} ${isUpdated}
-        IfFileExists "$PROFILE\.config\siyuan\*.*" 0 skipConfigDelete
-            MessageBox MB_YESNO "是否需要彻底删除全局配置（$PROFILE\.config\siyuan\）？$\n$\n\
-                Do you want to delete the global configuration ($PROFILE\.config\siyuan\)?$\n" \
+        IfFileExists "$PROFILE\.config\jitang-notes\*.*" 0 skipConfigDelete
+            MessageBox MB_YESNO "是否需要彻底删除全局配置（$PROFILE\.config\jitang-notes\）？$\n$\n\
+                Do you want to delete the global configuration ($PROFILE\.config\jitang-notes\)?$\n" \
                 /SD IDYES IDYES AcceptedRMConf IDNO SkippedRMConf
                 AcceptedRMConf:
-                    RMDir /r "$PROFILE\.config\siyuan\"
+                    RMDir /r "$PROFILE\.config\jitang-notes\"
                 SkippedRMConf:
         skipConfigDelete:
     ${EndIf}
 
     ${IfNot} ${isUpdated}
-        IfFileExists "$PROFILE\SiYuan\*.*" 0 skipWorkspaceDelete
-            MessageBox MB_YESNO "是否需要彻底删除默认工作空间（$PROFILE\SiYuan\）？$\n$\n\
-                Do you want to completely delete the default workspace ($PROFILE\SiYuan\)?$\n" \
+        IfFileExists "$PROFILE\Jitang Notes\*.*" 0 skipWorkspaceDelete
+            MessageBox MB_YESNO "是否需要彻底删除默认工作空间（$PROFILE\Jitang Notes\）？$\n$\n\
+                Do you want to completely delete the default workspace ($PROFILE\Jitang Notes\)?$\n" \
                 /SD IDNO IDYES AcceptedRMWorkspace IDNO SkippedRMWrokspace
                 AcceptedRMWorkspace:
-                    RMDir /r "$PROFILE\SiYuan\"
+                    RMDir /r "$PROFILE\Jitang Notes\"
                 SkippedRMWrokspace:
         skipWorkspaceDelete:
     ${EndIf}
 
-    RMDir /r "$PROFILE\AppData\Local\siyuan-updater"
+    RMDir /r "$PROFILE\AppData\Local\jitang-notes-updater"
     ${If} $installMode == "all"
         nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -Command "$k=\"$INSTDIR\resources\kernel\";$p=[Environment]::GetEnvironmentVariable(\"Path\",\"Machine\");if($p){$a=$p.Split(\";\") | ?{$_ -and ($_ -ne $k)};$p=[string]::Join(\";\",$a);[Environment]::SetEnvironmentVariable(\"Path\",$p,\"Machine\")}"'
     ${Else}

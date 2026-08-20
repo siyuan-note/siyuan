@@ -944,7 +944,7 @@ export const initNativeDialogOverride = () => {
     window.confirm = function (message: string): boolean {
         try {
             const buttonIndex = ipcRenderer.sendSync(Constants.SIYUAN_CONFIRM_DIALOG, {
-                title: window.siyuan?.languages?.siyuanNote || "SiYuan",
+                title: window.siyuan?.languages?.siyuanNote || "Jitang Notes",
                 message,
                 buttons: [window.siyuan?.languages?.cancel || "Cancel", window.siyuan?.languages?.confirm || "OK"],
                 cancelId: 0,

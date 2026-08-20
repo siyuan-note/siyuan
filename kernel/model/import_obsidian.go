@@ -578,7 +578,7 @@ func validateObsidianVaultRoot(localPath string) (string, error) {
 	}
 	workspace, _ := filepath.Abs(filepath.Clean(util.WorkspaceDir))
 	if sameObsidianPath(abs, workspace) || gulu.File.IsSubPath(workspace, abs) || gulu.File.IsSubPath(abs, workspace) {
-		return "", fmt.Errorf("%w: Vault root and SiYuan workspace contain each other", errObsidianVaultUnsafePath)
+		return "", fmt.Errorf("%w: Vault root and Jitang Notes workspace contain each other", errObsidianVaultUnsafePath)
 	}
 	configPath := filepath.Join(abs, ".obsidian")
 	configInfo, statErr := os.Lstat(configPath)

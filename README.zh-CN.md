@@ -1,6 +1,8 @@
+<h1 align="center">鸡汤笔记 · Jitang Notes</h1>
+
+> 鸡汤笔记是基于 [SiYuan](https://github.com/siyuan-note/siyuan) 的 AGPL-3.0 开源分支，由 `jitang-open` 维护；它不是思源官方版本，思源商标、官方云服务和上游版权均归原权利人所有。
+
 <p align="center">
-<img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
-<br>
 <em>从思考到洞见，与智能体同行</em>
 <br><br>
 <a title="Build Status" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
@@ -67,13 +69,13 @@
 
 ## 💡 简介
 
-思源笔记是一款隐私优先的个人知识管理系统，支持细粒度块级引用和 Markdown 所见即所得。
+鸡汤笔记是一款面向中文个人用户的本地优先知识管理工具，基于思源笔记构建，支持细粒度块级引用和 Markdown 所见即所得。
 
 ![feature0.png](screenshots/feature0.png)
 
 ![feature5-1.png](screenshots/feature5-1.png)
 
-如需了解更多，请阅读[在线用户指南](https://siyuan-cn.b3log.org/)或前往[思源笔记官方讨论区](https://ld246.com/domain/siyuan)交流。
+当前用户指南和社区资料继承自上游思源笔记；可阅读[思源在线用户指南](https://siyuan-cn.b3log.org/)或前往[思源官方讨论区](https://ld246.com/domain/siyuan)了解底层功能。
 
 ## 🔮 特性
 
@@ -491,7 +493,7 @@ siyuan export md --id <block-id> -w ~/SiYuan
 
 ### 安装
 
-CLI 可执行文件为 `<安装目录>/resources/kernel/SiYuan-Kernel`，可通过 `siyuan` 命令调用。
+CLI 可执行文件为 `<安装目录>/resources/kernel/Jitang-Notes-Kernel`，可通过 `jitang-notes` 命令调用。
 
 - **Windows**：安装程序自动将内核目录加入 `PATH`，可直接使用 `siyuan`。微软商店版运行在 MSIX 沙箱中，无法自动修改 `PATH`；可部署一个 `siyuan.cmd` 转发器（一次性，商店版更新后依然有效）：
   ```powershell
@@ -503,7 +505,7 @@ CLI 可执行文件为 `<安装目录>/resources/kernel/SiYuan-Kernel`，可通�
       'set "ROOT="'
       'for /f "delims=" %%i in (''powershell -NoProfile -Command "(Get-AppxPackage *SiYuan*).InstallLocation"'') do set "ROOT=%%i"'
       'if not defined ROOT goto :noshim'
-      '"%ROOT%\app\resources\kernel\SiYuan-Kernel.exe" %*'
+      '"%ROOT%\app\resources\kernel\Jitang-Notes-Kernel.exe" %*'
       'exit /b %ERRORLEVEL%'
       ':noshim'
       '1>&2 echo siyuan: 未找到微软商店版'
@@ -513,11 +515,11 @@ CLI 可执行文件为 `<安装目录>/resources/kernel/SiYuan-Kernel`，可通�
   卸载商店版时如需清理：`Remove-Item "$env:LOCALAPPDATA\Microsoft\WindowsApps\siyuan.cmd"`。
 - **macOS**：安装后创建软链接：
   ```bash
-  ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+  ln -s "/Applications/Jitang Notes.app/Contents/Resources/kernel/Jitang-Notes-Kernel" /usr/local/bin/jitang-notes
   ```
 - **Linux**：安装后创建软链接：
   ```bash
-  ln -s <安装目录>/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+  ln -s <安装目录>/resources/kernel/Jitang-Notes-Kernel /usr/local/bin/jitang-notes
   ```
 
 ## 🏘️ 社区

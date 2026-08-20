@@ -1,10 +1,10 @@
-productName: "SiYuan"
-appId: "org.b3log.siyuan"
+productName: "Jitang Notes"
+appId: "io.github.jitang-open.jitang-notes"
 publish: null
 asar: false
 compression: "normal"
-copyright: "© 2020-present Yunnan Liandi Technology Co., Ltd."
-artifactName: "siyuan-${version}-${os}-arm64.${ext}"
+copyright: "© 2020-present SiYuan contributors; Jitang Notes modifications © 2026 jitang-open"
+artifactName: "jitang-notes-${version}-${os}-arm64.${ext}"
 extraMetadata:
   main: "electron/main.js"
 directories:
@@ -19,8 +19,7 @@ extraFiles:
     to: "Resources/THIRD_PARTY_NOTICES.md"
 
 mac:
-  identity: "Yunnan Liandi Technology Co., Ltd."
-  provisioningProfile: "../../SiYuan.provisionprofile"
+  identity: null
   icon: "src/assets/icon.icns"
   gatekeeperAssess: false
   hardenedRuntime: true
@@ -30,7 +29,7 @@ mac:
   entitlementsInherit: "../../entitlements.mas.plist"
   minimumSystemVersion: "12.0.0"
   protocols:
-    - name: "SiYuan"
+    - name: "Jitang Notes"
       schemes:
         - "siyuan"
   extraResources:

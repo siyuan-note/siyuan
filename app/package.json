@@ -1,9 +1,9 @@
 {
-  "name": "SiYuan",
-  "desktopName": "org.b3log.siyuan",
+  "name": "jitang-notes",
+  "desktopName": "io.github.jitang-open.jitang-notes",
   "version": "3.8.1",
-  "description": "From thought to insight, with agents",
-  "homepage": "https://b3log.org/siyuan",
+  "description": "Notes that nourish your mind",
+  "homepage": "https://github.com/jitang-open/jitang-notes",
   "main": "./electron/main.js",
   "packageManager": "pnpm@11.22.0",
   "scripts": {
@@ -37,9 +37,8 @@
     "notebook"
   ],
   "author": {
-    "name": "Yunnan Liandi Technology Co., Ltd.",
-    "email": "845765@qq.com",
-    "url": "https://ld246.com"
+    "name": "jitang-open",
+    "url": "https://github.com/jitang-open"
   },
   "maintainers": [
     {

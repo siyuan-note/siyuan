@@ -299,7 +299,7 @@ func (h *mcpOAuthHandler) Authorize(ctx context.Context, req *http.Request, resp
 			TokenEndpointAuthMethod: tokenAuthMethod,
 			GrantTypes:              grantTypes,
 			ResponseTypes:           []string{"code"},
-			ClientName:              "SiYuan",
+			ClientName:              "Jitang Notes",
 			Scope:                   strings.Join(scopes, " "),
 			ApplicationType:         "native",
 		}, h.client)

@@ -41,7 +41,7 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:     "SiYuan-Kernel",
+	Use:     "Jitang-Notes-Kernel",
 	Version: util.Ver,
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
 		// CLI 单次命令没有后台 cron 周期性 flush SQL 队列（server 模式才有 job.StartCron），进程在 main 返回后
@@ -80,7 +80,7 @@ var rootCmd = &cobra.Command{
 			workspacePath = os.Getenv("SIYUAN_WORKSPACE_PATH")
 		}
 		if workspacePath == "" {
-			workspacePath = filepath.Join(util.HomeDir, "SiYuan")
+			workspacePath = filepath.Join(util.HomeDir, "Jitang Notes")
 		}
 
 		if _, err := os.Stat(workspacePath); os.IsNotExist(err) {
@@ -257,8 +257,8 @@ func resolveWorkingDir() string {
 
 func init() {
 	rootCmd.Use = strings.TrimSuffix(filepath.Base(os.Args[0]), ".exe")
-	rootCmd.Short = "SiYuan Kernel v" + util.Ver
-	rootCmd.Long = "SiYuan Kernel v" + util.Ver + ". Manage workspace data directly or start the HTTP server."
+	rootCmd.Short = "Jitang Notes Kernel v" + util.Ver
+	rootCmd.Long = "Jitang Notes Kernel v" + util.Ver + ". Manage workspace data directly or start the HTTP server."
 
 	rootCmd.PersistentFlags().StringVarP(&workspacePath, "workspace", "w", "", "workspace path")
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "format", "f", "table", "output format: table | json")

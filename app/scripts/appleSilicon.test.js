@@ -7,19 +7,20 @@ const {
 } = require("../electron/appleSilicon");
 
 describe("Apple silicon download URL", () => {
-    it("uses the Liuyun mirror for stable releases", () => {
+    it("uses the Jitang Notes GitHub release for stable releases", () => {
         assert.equal(
             getAppleSiliconDownloadURL("3.7.3"),
-            "https://release.liuyun.io/siyuan/siyuan-3.7.3-mac-arm64.dmg",
+            "https://github.com/jitang-open/jitang-notes/releases/download/v3.7.3/" +
+            "jitang-notes-3.7.3-mac-arm64.dmg",
         );
     });
 
-    it("uses GitHub for prereleases", () => {
+    it("uses the Jitang Notes GitHub release for prereleases", () => {
         for (const version of ["3.8.0-alpha.1", "3.8.0-beta.3", "3.8.0-rc1"]) {
             assert.equal(
                 getAppleSiliconDownloadURL(version),
-                `https://github.com/siyuan-note/siyuan/releases/download/v${version}/` +
-                `siyuan-${version}-mac-arm64.dmg`,
+                `https://github.com/jitang-open/jitang-notes/releases/download/v${version}/` +
+                `jitang-notes-${version}-mac-arm64.dmg`,
             );
         }
     });

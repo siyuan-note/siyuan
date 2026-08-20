@@ -845,7 +845,7 @@ export const openEmojiPanel = (
         date: dayjs().format("YYYY-MM-DD"),
         weekdayType: "1",
         type: "1",
-        content: "SiYuan",
+        content: "Jitang Notes",
     };
     if (dynamicImgElement && dynamicImgElement.getAttribute("src").startsWith(dynamicURL)) {
         const dynamicCurrentUrl = new URLSearchParams(dynamicImgElement.getAttribute("src").replace(dynamicURL, ""));
@@ -858,7 +858,7 @@ export const openEmojiPanel = (
         dynamicCurrentObj.date = dynamicCurrentUrl.get("date") || "";
         dynamicCurrentObj.weekdayType = dynamicCurrentUrl.get("weekdayType") || "1";
         dynamicCurrentObj.type = dynamicCurrentUrl.get("type") || "1";
-        dynamicCurrentObj.content = dynamicCurrentUrl.get("content") || "SiYuan";
+        dynamicCurrentObj.content = dynamicCurrentUrl.get("content") || "Jitang Notes";
     }
     const dynamicTextURL = bindDynamicIconTarget(
         `${dynamicURL}type=8&color=${encodeURIComponent(dynamicCurrentObj.color)}&content=${encodeURIComponent(dynamicCurrentObj.content)}`,

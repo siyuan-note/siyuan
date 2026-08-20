@@ -1,6 +1,8 @@
+<h1 align="center">Jitang Notes · 鸡汤笔记</h1>
+
+> Jitang Notes, [SiYuan](https://github.com/siyuan-note/siyuan) tabanlı AGPL-3.0 lisanslı bir çataldır ve resmi bir SiYuan sürümü değildir.
+
 <p align="center">
-<img alt="SiYuan" src="https://b3log.org/images/brand/siyuan-128.png">
-<br>
 <em>Düşünceden içgörüye, ajanlarla birlikte</em>
 <br><br>
 <a title="Derleme Durumu" target="_blank" href="https://github.com/siyuan-note/siyuan/actions/workflows/cd.yml"><img src="https://img.shields.io/github/actions/workflow/status/siyuan-note/siyuan/cd.yml?style=flat-square"></a>
@@ -391,18 +393,18 @@ Ayrıntılar için `siyuan --help` komutunu çalıştırın. Betik dostu çıkt�
 
 ### Kurulum
 
-CLI ikili dosyası `<kurulum>/resources/kernel/SiYuan-Kernel` konumundadır.
+CLI ikili dosyası `<kurulum>/resources/kernel/Jitang-Notes-Kernel` konumundadır.
 Windows yükleyici otomatik olarak PATH\'e ekler.
 macOS/Linux\'ta manuel olarak sembolik bağlantı oluşturun.
 
 ```bash
 # macOS
-ln -s /Applications/SiYuan.app/Contents/Resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+ln -s "/Applications/Jitang Notes.app/Contents/Resources/kernel/Jitang-Notes-Kernel" /usr/local/bin/jitang-notes
 
 # Linux
-ln -s /kurulum/SiYuan/resources/kernel/SiYuan-Kernel /usr/local/bin/siyuan
+ln -s "/kurulum/Jitang Notes/resources/kernel/Jitang-Notes-Kernel" /usr/local/bin/jitang-notes
 ```
-<kurulum>/resources/kernel/SiYuan-Kernel (takma ad: siyuan)
+<kurulum>/resources/kernel/Jitang-Notes-Kernel (takma ad: jitang-notes)
 Windows: yükleyici otomatik olarak PATH'e ekler
 macOS/Linux: manuel olarak sembolik bağlantı oluşturun, örn. macOS:
 ln -s /Applications/SiYuan.app/Contents/Resources/kernel/siyuan /usr/local/bin/siyuan

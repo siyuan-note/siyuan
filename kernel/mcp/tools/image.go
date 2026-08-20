@@ -38,7 +38,7 @@ import (
 var ImageTool = &Tool{
 	Name:  "image",
 	Title: "Document images",
-	Description: "List and understand local images referenced by a SiYuan document, or generate an image asset. " +
+	Description: "List and understand local images referenced by a Jitang Notes document, or generate an image asset. " +
 		"Use list before analyze. analyze attaches the selected image to the current Agent model. " +
 		"generate creates a reusable image asset in the target document's notebook.",
 	InputSchema: ToolSchema{

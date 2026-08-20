@@ -626,7 +626,7 @@ func connectHTTP(ctx context.Context, client *mcp.Client, server conf.MCPServer,
 		oauthHandler = newMCPOAuthHandler(server, interactive)
 		transport.OAuthHandler = oauthHandler
 	}
-	// 所有 MCP HTTP 出站请求统一带上 SiYuan UA，便于第三方 MCP server 识别客户端身份
+	// 所有 MCP HTTP 出站请求统一带上鸡汤笔记 UA，便于第三方 MCP server 识别客户端身份
 	uaBase := httpclient.NewUserAgentRoundTripper(http.DefaultTransport)
 	if len(server.Headers) > 0 {
 		transport.HTTPClient = &http.Client{

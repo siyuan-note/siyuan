@@ -77,12 +77,12 @@ func TestSelectGitHubRelease(t *testing.T) {
 
 func TestParseChecksumManifest(t *testing.T) {
 	checksum := strings.Repeat("A", 64)
-	manifest := checksum + " *nested\\siyuan-3.7.4-alpha.1-win.exe\n"
-	got := parseChecksumManifest(manifest, "siyuan-3.7.4-alpha.1-win.exe")
+	manifest := checksum + " *nested\\jitang-notes-3.7.4-alpha.1-win.exe\n"
+	got := parseChecksumManifest(manifest, "jitang-notes-3.7.4-alpha.1-win.exe")
 	if strings.ToLower(checksum) != got {
 		t.Fatalf("unexpected checksum: %q", got)
 	}
-	if "" != parseChecksumManifest(manifest, "siyuan-3.7.4-alpha.1-win-arm64.exe") {
+	if "" != parseChecksumManifest(manifest, "jitang-notes-3.7.4-alpha.1-win-arm64.exe") {
 		t.Fatal("unexpected checksum for missing package")
 	}
 }

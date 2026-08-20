@@ -1745,7 +1745,7 @@ func prepareExecInsertTx(tx *sql.Tx, stmtSQL string, args []any) (err error) {
 			util.RemoveDatabaseFile(util.DBPath)
 			time.Sleep(time.Second)
 			initDatabase(true)
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmtSQL, args)
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart the Jitang Notes kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmtSQL, args)
 		}
 		return
 	}
@@ -1762,7 +1762,7 @@ func execStmtTx(tx *sql.Tx, stmt string, args ...any) (err error) {
 			util.RemoveDatabaseFile(util.DBPath)
 			time.Sleep(time.Second)
 			initDatabase(true)
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmt, args)
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart the Jitang Notes kernel to rebuild it\n\t%s\n\t%v", util.DBPath, stmt, args)
 		}
 		return
 	}

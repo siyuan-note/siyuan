@@ -194,7 +194,7 @@ func getGitHubJSON(ctx context.Context, client *http.Client, endpoint string, ta
 	}
 	request.Header.Set("Accept", "application/vnd.github+json")
 	request.Header.Set("X-GitHub-Api-Version", "2022-11-28")
-	request.Header.Set("User-Agent", "SiYuan")
+	request.Header.Set("User-Agent", "JitangNotes")
 	response, err := client.Do(request)
 	if err != nil {
 		return err

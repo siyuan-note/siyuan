@@ -49,11 +49,11 @@ NPM 镜像：
 * Windows：
   * `go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo@latest`
   * `goversioninfo -platform-specific=true -icon=resource/icon.ico -manifest=resource/goversioninfo.exe.manifest`
-  * `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel.exe"`
-* Linux/macOS: `go build -tags "fts5 sqlcipher" -o "../app/kernel/SiYuan-Kernel"`
+  * `go build -tags "fts5 sqlcipher" -o "../app/kernel/Jitang-Notes-Kernel.exe"`
+* Linux/macOS: `go build -tags "fts5 sqlcipher" -o "../app/kernel/Jitang-Notes-Kernel"`
 * `cd ../app/kernel`
-* Windows: `./SiYuan-Kernel.exe serve --mode=dev`
-* Linux/macOS: `./SiYuan-Kernel serve --mode=dev`
+* Windows: `./Jitang-Notes-Kernel.exe serve --mode=dev`
+* Linux/macOS: `./Jitang-Notes-Kernel serve --mode=dev`
 
 ### iOS
 

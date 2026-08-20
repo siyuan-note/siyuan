@@ -820,7 +820,7 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 			closeDatabase()
 			util.RemoveDatabaseFile(util.BlockTreeDBPath)
 			initDatabase(true)
-			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
+			logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart the Jitang Notes kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
 		}
 		return
 	}
@@ -842,7 +842,7 @@ func execInsertBlocktrees(tx *sql.Tx, tree *parse.Tree, changedNodes []*ast.Node
 				closeDatabase()
 				util.RemoveDatabaseFile(util.BlockTreeDBPath)
 				initDatabase(true)
-				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart SiYuan kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
+				logging.LogFatalf(logging.ExitCodeUnavailableDatabase, "database disk image [%s] is malformed, please restart the Jitang Notes kernel to rebuild it\n\t%s", util.BlockTreeDBPath, err)
 			}
 			return
 		}

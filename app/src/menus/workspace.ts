@@ -29,6 +29,7 @@ import {openRecentDocs} from "../business/openRecentDocs";
 import * as dayjs from "dayjs";
 import {upDownHint} from "../util/upDownHint";
 import {openDataMigration} from "./dataMigration";
+import {openLink} from "../editor/openLink";
 
 const editLayout = (layoutName?: string) => {
     const dialog = new Dialog({
@@ -302,11 +303,15 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             if (hasClosestByClassName(event.target as Element, "b3-menu__action")) {
                                 event.preventDefault();
                                 event.stopPropagation();
-                                fetchPost("/api/system/removeWorkspaceDir", {path: item.path}, () => {
-                                    confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", item.path), () => {
-                                        fetchPost("/api/system/removeWorkspaceDirPhysically", {path: item.path});
-                                    }, undefined, true);
-                                });
+                                if (item.path === window.siyuan.config.system.workspaceDir) {
+                                    fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
+                                    return;
+                                }
+                                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", item.path), () => {
+                                    fetchPost("/api/system/removeWorkspaceDirPhysically", {path: item.path});
+                                }, () => {
+                                    fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
+                                }, true);
                                 return;
                             }
                             confirmDialog(window.siyuan.languages.confirm, `${pathPosix().basename(window.siyuan.config.system.workspaceDir)} -> ${pathPosix().basename(item.path)}?`, () => {
@@ -563,9 +568,9 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             icon: "iconFeedback",
             click: () => {
                 if ("zh-CN" === window.siyuan.config.lang) {
-                    window.open("https://ld246.com/article/1649901726096");
+                    openLink(app, "https://ld246.com/article/1649901726096");
                 } else {
-                    window.open("https://liuyun.io/article/1686530886208");
+                    openLink(app, "https://liuyun.io/article/1686530886208");
                 }
             }
         }).element);

@@ -1585,8 +1585,8 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         if (window.siyuan.config.fileTree.sort !== 6) {
             return;
         }
-        setNoteBook(() => {
-            this.init(false);
+        setNoteBook((notebooks) => {
+            reorderFileTreeNotebooks(this.element, this.closeElement.lastElementChild, notebooks);
         });
     }
 

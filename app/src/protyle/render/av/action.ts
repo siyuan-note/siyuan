@@ -64,6 +64,9 @@ import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValu
 import {isMobile} from "../../../util/functions";
 import {getAVCurrentViewID} from "./viewVisibility";
 import {formatAVItemLinks, genAVItemLink} from "./itemLink";
+/// #if MOBILE
+import {activeBlur} from "../../../mobile/util/keyboardToolbar";
+/// #endif
 
 const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
     return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
@@ -626,6 +629,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (target.classList.contains("item") && target.parentElement.classList.contains("layout-tab-bar")) {
+            /// #if MOBILE
+            activeBlur();
+            /// #endif
             if (target.classList.contains("item--focus")) {
                 openViewMenu({protyle, blockElement, element: target});
             } else if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {

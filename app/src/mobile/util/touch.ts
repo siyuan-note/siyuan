@@ -14,8 +14,11 @@ import {getCurrentEditor} from "../editor";
 import {Constants} from "../../constants";
 import {getEmbedGutterOperationContext} from "../../protyle/wysiwyg/getBlock";
 import {backModel} from "../menu/model";
-import {hasVisibleSelectionText, shouldRestoreLongPressSelection} from "./touchSelection";
-import {getTouchAxis} from "./touchGesture";
+import {
+    hasVisibleSelectionText,
+    shouldRestoreLongPressSelection,
+} from "./touchSelection";
+import {getTouchAxis, shouldEnterLongPressMultiSelect} from "./touchGesture";
 
 let clientX: number;
 let clientY: number;
@@ -357,6 +360,13 @@ export const handleTouchStart = (event: TouchEvent) => {
                 longPressTouchRange.collapse(true);
             }
             longPressTimer = window.setTimeout(() => {
+                if (!shouldEnterLongPressMultiSelect(
+                    !window.siyuan.menus.menu.element.classList.contains("fn__none"),
+                    !editor.protyle.toolbar.subElement.classList.contains("fn__none"),
+                )) {
+                    longPressTimer = undefined;
+                    return;
+                }
                 clearInvisibleEditorSelection();
                 const selection = window.getSelection();
                 if (selection?.rangeCount > 0) {

@@ -94,7 +94,10 @@ func executeTool(ctx context.Context, tc openai.ToolCall, sessionID string) exec
 
 func executeCapability(ctx context.Context, tc openai.ToolCall, sessionID string,
 	registration *capabilityRegistration) executedToolResult {
-	args := parseToolArgs(tc.Function.Arguments)
+	args, err := parseToolArgs(tc.Function.Arguments)
+	if err != nil {
+		return executedToolResult{Text: "invalid capability arguments: " + err.Error(), IsError: true}
+	}
 	if err := validateCapabilityCall(ctx, registration, args); err != nil {
 		return executedToolResult{Text: err.Error(), IsError: true}
 	}
@@ -328,22 +331,18 @@ func resultToString(result tools.CallToolResult) string {
 	return "(empty result)"
 }
 
-func parseToolArgs(argsJSON string) map[string]any {
-	args := map[string]any{}
-	if argsJSON == "" {
-		return args
+// parseToolArgs 在流结束后解析完整的工具参数，避免把损坏的 JSON 误报为缺少 schema 字段。
+func parseToolArgs(argsJSON string) (map[string]any, error) {
+	if strings.TrimSpace(argsJSON) == "" {
+		return map[string]any{}, nil
 	}
 
-	dec := json.NewDecoder(strings.NewReader(argsJSON))
-	dec.UseNumber()
-	_ = dec.Decode(&args)
-
-	for k, v := range args {
-		if num, ok := v.(json.Number); ok {
-			if f, err := num.Float64(); err == nil {
-				args[k] = f
-			}
-		}
+	var args map[string]any
+	if err := json.Unmarshal([]byte(argsJSON), &args); err != nil {
+		return nil, fmt.Errorf("tool arguments are not valid JSON: %w", err)
 	}
-	return args
+	if args == nil {
+		return nil, fmt.Errorf("tool arguments must be a JSON object")
+	}
+	return args, nil
 }

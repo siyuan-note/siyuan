@@ -120,6 +120,219 @@ func TestCancelFoldedHeadingSuperBlockKeepsUndoBoundary(t *testing.T) {
 	assertCancelledFoldedSuperBlock(t, fixture.sourceID, superBlockID, headingID, paragraphID, outsideID)
 }
 
+func TestReplayFoldedHeadingMoveUsesOriginalChildren(t *testing.T) {
+	const (
+		anchorID    = "20260819000000-anchor0"
+		listID      = "20260819000001-list001"
+		itemID      = "20260819000002-item001"
+		itemBlockID = "20260819000003-itemblk"
+		headingID   = "20260819000004-heading"
+		firstID     = "20260819000005-first00"
+		secondID    = "20260819000006-second0"
+	)
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	anchor := treenode.NewParagraph(anchorID)
+	list := &ast.Node{Type: ast.NodeList, ID: listID, ListData: &ast.ListData{Typ: 1}}
+	list.SetIALAttr("id", listID)
+	item := &ast.Node{Type: ast.NodeListItem, ID: itemID, ListData: &ast.ListData{Typ: 1}}
+	item.SetIALAttr("id", itemID)
+	item.AppendChild(treenode.NewParagraph(itemBlockID))
+	list.AppendChild(item)
+	heading := newFoldMoveTestHeading(headingID, 2)
+	writeFoldMoveTestTree(t, fixture.sourceID, anchor, list, heading, treenode.NewParagraph(firstID),
+		treenode.NewParagraph(secondID))
+
+	moveGroupID := "fold-heading-list"
+	forward := &Transaction{
+		DoOperations: []*Operation{{
+			Action:     "move",
+			ID:         headingID,
+			PreviousID: anchorID,
+			ParentID:   fixture.sourceID,
+			Context:    map[string]any{moveGroupIDContextKey: moveGroupID},
+		}},
+		UndoOperations: []*Operation{{
+			Action:     "move",
+			ID:         headingID,
+			PreviousID: listID,
+			ParentID:   fixture.sourceID,
+			Context:    map[string]any{moveGroupIDContextKey: moveGroupID},
+		}},
+	}
+	if err := PerformTxSync(forward); nil != err {
+		t.Fatalf("move folded heading before list failed: %s", err)
+	}
+	wantGroup := []string{firstID, secondID}
+	if !slices.Equal(forward.DoOperations[0].BlockIDs, wantGroup) ||
+		!slices.Equal(forward.UndoOperations[0].BlockIDs, wantGroup) {
+		t.Fatalf("folded heading move group was not stored in both directions: do=%v undo=%v",
+			forward.DoOperations[0].BlockIDs, forward.UndoOperations[0].BlockIDs)
+	}
+	assertFoldMoveState(t, fixture.sourceID, []string{anchorID, headingID, firstID, secondID, listID}, headingID, true)
+
+	undo := &Transaction{DoOperations: cloneOperations(forward.UndoOperations)}
+	undo.MarkReplay()
+	if err := PerformTxSync(undo); nil != err {
+		t.Fatalf("undo folded heading list move failed: %s", err)
+	}
+	assertFoldMoveState(t, fixture.sourceID, []string{anchorID, listID, headingID, firstID, secondID}, headingID, true)
+
+	redo := &Transaction{DoOperations: cloneOperations(forward.DoOperations)}
+	redo.MarkReplay()
+	if err := PerformTxSync(redo); nil != err {
+		t.Fatalf("redo folded heading list move failed: %s", err)
+	}
+	assertFoldMoveState(t, fixture.sourceID, []string{anchorID, headingID, firstID, secondID, listID}, headingID, true)
+}
+
+func TestReplayUnfoldedHeadingMoveUsesStoredChildren(t *testing.T) {
+	const (
+		paragraphID = "20260819000100-paragr0"
+		headingID   = "20260819000101-heading"
+		childID     = "20260819000102-child00"
+	)
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	writeFoldMoveTestTree(t, fixture.sourceID, treenode.NewParagraph(paragraphID),
+		newFoldMoveTestHeading(headingID, 2), treenode.NewParagraph(childID))
+
+	moveGroupID := "fold-heading-paragraph"
+	forward := &Transaction{
+		DoOperations: []*Operation{
+			{
+				Action:   "move",
+				ID:       headingID,
+				ParentID: fixture.sourceID,
+				Context:  map[string]any{moveGroupIDContextKey: moveGroupID},
+			},
+			{Action: "unfoldHeading", ID: headingID},
+		},
+		UndoOperations: []*Operation{
+			{
+				Action:     "move",
+				ID:         headingID,
+				PreviousID: paragraphID,
+				ParentID:   fixture.sourceID,
+				Context:    map[string]any{moveGroupIDContextKey: moveGroupID},
+			},
+			{Action: "foldHeading", ID: headingID},
+		},
+	}
+	if err := PerformTxSync(forward); nil != err {
+		t.Fatalf("move and unfold heading failed: %s", err)
+	}
+	assertFoldMoveState(t, fixture.sourceID, []string{headingID, childID, paragraphID}, headingID, false)
+
+	undo := &Transaction{DoOperations: cloneOperations(forward.UndoOperations)}
+	undo.MarkReplay()
+	if err := PerformTxSync(undo); nil != err {
+		t.Fatalf("undo unfolded heading move failed: %s", err)
+	}
+	assertFoldMoveState(t, fixture.sourceID, []string{paragraphID, headingID, childID}, headingID, true)
+
+	redo := &Transaction{DoOperations: cloneOperations(forward.DoOperations)}
+	redo.MarkReplay()
+	if err := PerformTxSync(redo); nil != err {
+		t.Fatalf("redo unfolded heading move failed: %s", err)
+	}
+	assertFoldMoveState(t, fixture.sourceID, []string{headingID, childID, paragraphID}, headingID, false)
+}
+
+func TestReplayEmptyFoldedHeadingMoveGroup(t *testing.T) {
+	const (
+		anchorID   = "20260819000200-anchor0"
+		headingID  = "20260819000201-heading"
+		boundaryID = "20260819000202-boundry"
+	)
+	fixture := setupStructureTransactionTest(t)
+	setupFoldTransactionDatabase(t, fixture)
+	writeFoldMoveTestTree(t, fixture.sourceID, treenode.NewParagraph(anchorID),
+		newFoldMoveTestHeading(headingID, 2), newFoldMoveTestHeading(boundaryID, 2))
+
+	moveGroupID := "empty-fold-heading"
+	forward := &Transaction{
+		DoOperations: []*Operation{{
+			Action:   "move",
+			ID:       headingID,
+			ParentID: fixture.sourceID,
+			Context:  map[string]any{moveGroupIDContextKey: moveGroupID},
+		}},
+		UndoOperations: []*Operation{{
+			Action:     "move",
+			ID:         headingID,
+			PreviousID: anchorID,
+			ParentID:   fixture.sourceID,
+			Context:    map[string]any{moveGroupIDContextKey: moveGroupID},
+		}},
+	}
+	if err := PerformTxSync(forward); nil != err {
+		t.Fatalf("move empty folded heading failed: %s", err)
+	}
+	if nil == forward.DoOperations[0].BlockIDs || 0 != len(forward.DoOperations[0].BlockIDs) ||
+		nil == forward.UndoOperations[0].BlockIDs {
+		t.Fatal("an empty folded heading move group should be stored as an explicit empty slice")
+	}
+
+	undo := &Transaction{DoOperations: cloneOperations(forward.UndoOperations)}
+	undo.MarkReplay()
+	if err := PerformTxSync(undo); nil != err {
+		t.Fatalf("undo empty folded heading move failed: %s", err)
+	}
+	assertFoldMoveState(t, fixture.sourceID, []string{anchorID, headingID, boundaryID}, headingID, true)
+}
+
+func newFoldMoveTestHeading(id string, level int) *ast.Node {
+	heading := &ast.Node{Type: ast.NodeHeading, ID: id, HeadingLevel: level}
+	heading.SetIALAttr("id", id)
+	heading.SetIALAttr("fold", "1")
+	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("Heading")})
+	return heading
+}
+
+func writeFoldMoveTestTree(t *testing.T, rootID string, nodes ...*ast.Node) {
+	t.Helper()
+	tree, err := LoadTreeByBlockID(rootID)
+	if nil != err {
+		t.Fatalf("load folded heading move tree failed: %s", err)
+	}
+	for child := tree.Root.FirstChild; nil != child; {
+		next := child.Next
+		child.Unlink()
+		child = next
+	}
+	for _, node := range nodes {
+		tree.Root.AppendChild(node)
+	}
+	if _, err = filesys.WriteTree(tree); nil != err {
+		t.Fatalf("write folded heading move tree failed: %s", err)
+	}
+	treenode.UpsertBlockTree(tree)
+	sql.IndexTreeQueue(tree)
+	sql.FlushQueue()
+}
+
+func assertFoldMoveState(t *testing.T, rootID string, wantIDs []string, headingID string, folded bool) {
+	t.Helper()
+	tree, err := LoadTreeByBlockID(rootID)
+	if nil != err {
+		t.Fatalf("load folded heading move state failed: %s", err)
+	}
+	var gotIDs []string
+	for child := tree.Root.FirstChild; nil != child; child = child.Next {
+		if child.IsBlock() && ast.NodeKramdownBlockIAL != child.Type {
+			gotIDs = append(gotIDs, child.ID)
+		}
+	}
+	if !slices.Equal(gotIDs, wantIDs) {
+		t.Fatalf("unexpected top-level block order: got %v, want %v", gotIDs, wantIDs)
+	}
+	heading := treenode.GetNodeInTree(tree, headingID)
+	if nil == heading || treenode.IsSelfFolded(heading) != folded {
+		t.Fatalf("unexpected heading fold state: got %v, want %v", nil != heading && treenode.IsSelfFolded(heading), folded)
+	}
+}
+
 func setupFoldTransactionDatabase(t *testing.T, fixture *fileOperationTestFixture) {
 	t.Helper()
 	Conf.Editor = conf.NewEditor()

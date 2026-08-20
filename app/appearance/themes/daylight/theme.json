@@ -3,6 +3,9 @@
   "author": "Vanessa",
   "url": "https://github.com/Vanessa219",
   "version": "1.1.2",
+  "frontends": [
+    "all"
+  ],
   "modes": [
     "light"
   ]

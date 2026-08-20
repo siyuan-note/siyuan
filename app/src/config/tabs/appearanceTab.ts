@@ -9,11 +9,11 @@ import {resetLayout} from "../../layout/util";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 /// #endif
 import {desktopModeCookie} from "../../util/cookie";
-import {isBrowser, isMobile, objEquals} from "../../util/functions";
+import {getFrontend, isBrowser, isMobile, objEquals} from "../../util/functions";
 import {exitSiYuan} from "../../dialog/processSystem";
 import {isInMobileApp} from "../../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {openByMobile} from "../../editor/openLink";
+import {openLink} from "../../editor/openLink";
 import {openSnippets} from "../util/snippets";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {Dialog} from "../../dialog";
@@ -25,6 +25,7 @@ import {controlBoolean} from "../setting/control";
 import {editorConfigApi} from "./editorRuntime";
 import {appearanceThemeModeValue, saveThemeMode} from "./appearanceRuntime";
 import {upDownHint} from "../../util/upDownHint";
+import {isThemeFrontendSupported} from "../../util/themeCompatibility";
 import {
     ICustomFont,
     invalidateCustomFonts,
@@ -393,14 +394,16 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
         /// #endif
         stack.select("appearance.themeLight", {
             desc: window.siyuan.languages.theme11,
-            options: window.siyuan.config.appearance.lightThemes.map((item) => ({
+            options: window.siyuan.config.appearance.lightThemes.filter((item) =>
+                isThemeFrontendSupported(item.frontends, getFrontend())).map((item) => ({
                 value: item.name,
                 label: item.label,
             })),
         });
         stack.select("appearance.themeDark", {
             desc: window.siyuan.languages.theme12,
-            options: window.siyuan.config.appearance.darkThemes.map((item) => ({
+            options: window.siyuan.config.appearance.darkThemes.filter((item) =>
+                isThemeFrontendSupported(item.frontends, getFrontend())).map((item) => ({
                 value: item.name,
                 label: item.label,
             })),
@@ -792,7 +795,7 @@ const registerAppearancePersonalizationGroup = (tab: SettingTabBuilder) => {
 
 const mountAppearanceCodeSnippet = (root: HTMLElement) => {
     root.querySelector("#codeSnippetCommunityShare")?.addEventListener("click", () => {
-        openByMobile("https://ld246.com/tag/code-snippet");
+        openLink(window.siyuan.ws.app, "https://ld246.com/tag/code-snippet");
     });
     root.querySelector("#codeSnippet")?.addEventListener("click", () => {
         openSnippets();

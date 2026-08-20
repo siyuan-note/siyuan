@@ -49,7 +49,7 @@ import {highlightById} from "../util/highlightById";
 import {getSelectionOffset} from "../protyle/util/selection";
 import {electronUndo} from "../protyle/undo";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
-import {IDatabaseRowOpenData, openDatabaseRowByData} from "../protyle/render/av/openDatabaseRow";
+import {IDatabaseItemOpenData, openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
 import {scheduleSearchRequest} from "./request";
 
 export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
@@ -208,7 +208,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         <kbd>${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</kbd> ${window.siyuan.languages.new}
         <kbd>${window.siyuan.languages.enterKey}/${window.siyuan.languages.doubleClick}</kbd> ${window.siyuan.languages.searchTip2}
         <kbd>${window.siyuan.languages.click}</kbd> ${window.siyuan.languages.searchTip3}
-        <kbd>${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}/${updateHotkeyTip("⌥" + window.siyuan.languages.click)}</kbd> ${window.siyuan.languages.searchTip4}
+        <kbd>${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}${window.siyuan.config.keymap.editor.general.insertRight.custom ? "/" : ""}${updateHotkeyTip("⌥" + window.siyuan.languages.click)}</kbd> ${window.siyuan.languages.searchTip4}
         <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
     </div>
 </div>
@@ -238,7 +238,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     <div class="search__tip${closeCB ? "" : " fn__none"}">
         <kbd>↑/↓/PageUp/PageDown</kbd> ${window.siyuan.languages.searchTip1}
         <kbd>${window.siyuan.languages.enterKey}/${window.siyuan.languages.doubleClick}</kbd> ${window.siyuan.languages.searchTip2}
-        <kbd>${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}/${updateHotkeyTip("⌥" + window.siyuan.languages.click)}</kbd> ${window.siyuan.languages.searchTip4}
+        <kbd>${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}${window.siyuan.config.keymap.editor.general.insertRight.custom ? "/" : ""}${updateHotkeyTip("⌥" + window.siyuan.languages.click)}</kbd> ${window.siyuan.languages.searchTip4}
         <kbd>Esc</kbd> ${window.siyuan.languages.searchTip5}
     </div>
 </div>
@@ -975,7 +975,7 @@ export const openSearchEditor = async (options: {
                 keywords: options.keywords,
             });
             if (response.code === 0 && response.data) {
-                const opened = await openDatabaseRowByData(options.protyle, response.data as IDatabaseRowOpenData, {
+                const opened = await openDatabaseItem(options.protyle.app, response.data as IDatabaseItemOpenData, {
                     position: options.openPosition,
                 });
                 if (opened) {

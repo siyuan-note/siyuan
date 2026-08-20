@@ -212,6 +212,7 @@ func getBacklink2(c *gin.Context) {
 	if val, ok := arg["containChildren"]; ok {
 		containChildren = val.(bool)
 	}
+	sourceFilter := parseBacklinkSourceFilter(arg)
 	var boxID string
 	var backlinks, backmentions []*model.Path
 	var linkRefsCount, mentionsCount int
@@ -224,9 +225,9 @@ func getBacklink2(c *gin.Context) {
 			return
 		}
 		if notebook != "" && model.IsEncryptedBox(notebook) {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBox(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook)
+			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2InBoxWithFilter(id, keyword, mentionKeyword, sort, mentionSort, containChildren, notebook, sourceFilter)
 		} else {
-			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2(id, keyword, mentionKeyword, sort, mentionSort, containChildren)
+			boxID, backlinks, backmentions, linkRefsCount, mentionsCount = model.GetBacklink2WithFilter(id, keyword, mentionKeyword, sort, mentionSort, containChildren, sourceFilter)
 		}
 	}
 	if model.IsReadOnlyRoleContext(c) {
@@ -255,6 +256,7 @@ func getBacklink2(c *gin.Context) {
 		MentionSort     int
 		ContainChildren bool
 		Notebook        string
+		SourceFilter    *model.BacklinkSourceFilter
 		Backlinks       []string
 		LinkRefsCount   int
 		Backmentions    []string
@@ -268,6 +270,7 @@ func getBacklink2(c *gin.Context) {
 		mentionSort,
 		containChildren,
 		notebook,
+		sourceFilter,
 		backlinkPathRevisions(backlinkResponses),
 		linkRefsCount,
 		backlinkPathRevisions(backmentionResponses),
@@ -279,6 +282,25 @@ func getBacklink2(c *gin.Context) {
 		return
 	}
 	ret.Data = response
+}
+
+func parseBacklinkSourceFilter(arg map[string]any) *model.BacklinkSourceFilter {
+	filterArg, ok := arg["sourceFilter"].(map[string]any)
+	if !ok {
+		return nil
+	}
+
+	filter := &model.BacklinkSourceFilter{}
+	filter.DailyNote, _ = filterArg["dailyNote"].(string)
+	filter.ExcludeSelf, _ = filterArg["excludeSelf"].(bool)
+	if notebookIDs, ok := filterArg["excludedNotebookIDs"].([]any); ok {
+		for _, notebookID := range notebookIDs {
+			if id, ok := notebookID.(string); ok {
+				filter.ExcludedNotebookIDs = append(filter.ExcludedNotebookIDs, id)
+			}
+		}
+	}
+	return model.NormalizeBacklinkSourceFilter(filter)
 }
 
 func getBacklink(c *gin.Context) {

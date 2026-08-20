@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260820133158"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-arn57f1",
-				"updated": "20211226013452"
+				"updated": "20260820133158"
 			},
 			"Children": [
 				{
@@ -44,6 +44,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " 文件夾下。"
+				}
+			]
+		},
+		{
+			"ID": "20260820101322-k3v7qem",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260820101322-k3v7qem",
+				"updated": "20260820133158"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在桌面端，可在 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "編輯器"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "行為"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "資源開啟方式"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 中設定按一下、Ctrl+按一下 / ⌘按一下、Alt+按一下和 Shift+按一下資源檔案時的開啟方式。"
 				}
 			]
 		},

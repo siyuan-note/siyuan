@@ -179,64 +179,6 @@ export const createThinkingCardElement = (step: {
     return el;
 };
 
-export const bindThinkingCardToggle = (el: HTMLElement, onLayoutChange?: () => void): void => {
-    const header = el.querySelector(".agent-chat__thinking-header") as HTMLElement;
-    const body = el.querySelector(".agent-chat__thinking-body") as HTMLElement;
-    const expandIcon = el.querySelector(".agent-chat__thinking-arrow--expand") as HTMLElement;
-    const contractIcon = el.querySelector(".agent-chat__thinking-arrow--contract") as HTMLElement;
-    const latestElement = el.querySelector(".agent-chat__thinking-latest") as HTMLElement | null;
-    if (!header || !body || !expandIcon || !contractIcon) {
-        return;
-    }
-    if (onLayoutChange) {
-        body.addEventListener("transitionend", (event) => {
-            if (event.target === body && event.propertyName === "max-height") {
-                onLayoutChange();
-            }
-        });
-    }
-    header.addEventListener("click", () => {
-        el.setAttribute("data-user-interacted", "true");
-        const isExpanded = body.classList.contains("agent-chat__thinking-body--expanded");
-        const isDone = el.classList.contains("agent-chat__msg--thinking-done");
-        if (isDone) {
-            // 思考完成后：两态 toggle（折叠↔完全展开），不经过预览中间态。
-            if (isExpanded) {
-                body.classList.remove("agent-chat__thinking-body--expanded");
-                expandIcon.classList.remove("fn__none");
-                contractIcon.classList.add("fn__none");
-            } else {
-                body.classList.remove("agent-chat__thinking-body--preview");
-                body.classList.add("agent-chat__thinking-body--expanded");
-                expandIcon.classList.add("fn__none");
-                contractIcon.classList.remove("fn__none");
-            }
-        } else {
-            // 流式中：三态循环（完全折叠 → 预览 → 完全展开 → 完全折叠）。
-            const isPreview = body.classList.contains("agent-chat__thinking-body--preview");
-            if (isExpanded) {
-                body.classList.remove("agent-chat__thinking-body--expanded");
-                expandIcon.classList.remove("fn__none");
-                contractIcon.classList.add("fn__none");
-                latestElement?.classList.remove("fn__none");
-                if (latestElement) {
-                    latestElement.scrollLeft = latestElement.scrollWidth;
-                }
-            } else if (isPreview) {
-                body.classList.remove("agent-chat__thinking-body--preview");
-                body.classList.add("agent-chat__thinking-body--expanded");
-                expandIcon.classList.add("fn__none");
-                contractIcon.classList.remove("fn__none");
-                latestElement?.classList.add("fn__none");
-            } else {
-                body.classList.add("agent-chat__thinking-body--preview");
-                latestElement?.classList.add("fn__none");
-            }
-        }
-        onLayoutChange?.();
-    });
-};
-
 // 为容器内所有代码块（pre）和公式块（div[data-subtype=math]）注入复制按钮。
 export const addCopyButtons = (container: HTMLElement): void => {
     // 代码块复制 code 文本；公式块复制 data-content（KaTeX 渲染前的原始 LaTeX）。

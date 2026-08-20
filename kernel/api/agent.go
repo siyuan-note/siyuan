@@ -416,6 +416,11 @@ func lsSessions(c *gin.Context) {
 	}
 
 	result := agent.ListSessions(req.Page, req.PageSize, req.Keyword)
+	sessionsMu.Lock()
+	for _, session := range result.Sessions {
+		_, session.AgentRunning = runningSessions[session.ID]
+	}
+	sessionsMu.Unlock()
 	ret := gulu.Ret.NewResult()
 	ret.Data = result
 	c.JSON(http.StatusOK, ret)

@@ -14,6 +14,25 @@ export const mountAccessTab = (root: HTMLElement) => {
     accessTabElement = root;
 };
 
+export const genServerAddressesHTML = (serverAddrs: string[]) => {
+    const parts: string[] = [];
+    for (const serverAddr of serverAddrs) {
+        if (!serverAddr.trim()) {
+            break;
+        }
+        parts.push(`<code class="fn__code">${serverAddr}</code>`);
+    }
+    return parts.join(" ");
+};
+
+export const updateServerAddresses = (serverAddrs: string[]) => {
+    window.siyuan.config.serverAddrs = serverAddrs;
+    const serverAddressesElement = accessTabElement?.querySelector("#serverAddresses");
+    if (serverAddressesElement) {
+        serverAddressesElement.innerHTML = genServerAddressesHTML(serverAddrs);
+    }
+};
+
 export const savePublish = (
     reloadAccounts: boolean,
     overrides?: {

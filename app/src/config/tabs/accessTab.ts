@@ -9,9 +9,15 @@ import {showMessage} from "../../dialog/message";
 import {shell} from "electron";
 /// #endif
 import {isInAndroid, isInHarmony, isInIOS, isInMobileApp, saveExportFile} from "../../protyle/util/compatibility";
-import {openByMobile} from "../../editor/openLink";
+import {openByMobile, openLink} from "../../editor/openLink";
 import {bindPasswordIconaToggle, genConfigItemMainHtml} from "../render/fragments";
-import {renderPublishAuthAccounts, savePublish, sendAccessSetting, updatePublishConfig} from "./accessRuntime";
+import {
+    genServerAddressesHTML,
+    renderPublishAuthAccounts,
+    savePublish,
+    sendAccessSetting,
+    updatePublishConfig
+} from "./accessRuntime";
 import {sendAppSetting} from "./appRuntime";
 import zxcvbn = require("zxcvbn");
 
@@ -541,11 +547,7 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
         afterMount: (root) => {
             root.querySelector("#openLocalServer")?.addEventListener("click", () => {
                 const url = `http://127.0.0.1:${location.port}`;
-                /// #if !BROWSER
-                void shell.openExternal(url);
-                /// #else
-                openByMobile(url);
-                /// #endif
+                openLink(window.siyuan.ws.app, url);
             });
         },
     }, (stack) => {
@@ -556,16 +558,7 @@ const registerAccessServerGroup = (tab: SettingTabBuilder) => {
             icon: "iconLink",
         });
         stack.desc(window.siyuan.languages.about3.replace("${port}", location.port));
-        stack.desc((() => {
-            const parts: string[] = [];
-            for (const serverAddr of window.siyuan.config.serverAddrs) {
-                if (!serverAddr.trim()) {
-                    break;
-                }
-                parts.push(`<code class="fn__code">${serverAddr}</code>`);
-            }
-            return parts.join(" ");
-        })());
+        stack.desc(`<span id="serverAddresses">${genServerAddressesHTML(window.siyuan.config.serverAddrs)}</span>`);
         stack.desc(window.siyuan.languages.about18);
     });
 };

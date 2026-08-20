@@ -468,6 +468,7 @@ func InitConf() {
 	if nil == Conf.Editor.DatabaseAttrUseTabs {
 		Conf.Editor.DatabaseAttrUseTabs = defaultEditor.DatabaseAttrUseTabs
 	}
+	Conf.Editor.AssetOpen = conf.NormalizeAssetOpen(Conf.Editor.AssetOpen)
 	Conf.Editor.Emoji = util.FilterRecentIconValues(Conf.Editor.Emoji)
 	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
 		Conf.Editor.FontSize = 16
@@ -1366,6 +1367,20 @@ func GetMaskedConf() (ret *AppConf, err error) {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
 	return
+}
+
+// UpdateServerAddrs 更新当前可用的本地服务器地址，返回地址是否发生变化。
+func UpdateServerAddrs(serverAddrs []string) bool {
+	if nil == Conf {
+		return false
+	}
+	Conf.m.Lock()
+	defer Conf.m.Unlock()
+	if reflect.DeepEqual(Conf.ServerAddrs, serverAddrs) {
+		return false
+	}
+	Conf.ServerAddrs = append([]string(nil), serverAddrs...)
+	return true
 }
 
 // HideConfSecret 隐藏设置中的秘密信息

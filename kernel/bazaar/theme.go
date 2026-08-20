@@ -22,6 +22,10 @@ func IsIncompatibleTheme(theme *Package, frontend string) bool {
 	if "" == frontend {
 		return false
 	}
+	// 移动端主题需要显式声明兼容性，避免旧主题破坏移动端界面
+	if len(theme.Frontends) == 0 && ("mobile" == frontend || "browser-mobile" == frontend) {
+		return true
+	}
 
 	return !IsTargetSupported(theme.Frontends, frontend)
 }

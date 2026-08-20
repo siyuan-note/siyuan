@@ -93,9 +93,6 @@ func mergeStreamedToolCallArguments(existing, fragment string) string {
 	if strings.HasPrefix(fragment, existing) {
 		return fragment
 	}
-	if strings.HasPrefix(existing, fragment) {
-		return existing
-	}
 	if isCompleteToolCallArguments(existing) && isCompleteToolCallArguments(fragment) {
 		return fragment
 	}

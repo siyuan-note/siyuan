@@ -6,12 +6,13 @@ import {bindSettingSaveDelegation} from "./setting/save";
 import {Dialog} from "../dialog";
 import {Constants} from "../constants";
 import {focusByRange} from "../protyle/util/selection";
-import {bazaar, renderReadme} from "./bazaar";
+/// #endif
+import {unmountBazaarTab, withMountedBazaar} from "./bazaarTab";
 import {fetchSyncPost} from "../util/fetch";
 import {getFrontend} from "../util/functions";
 import {showMessage} from "../dialog/message";
 import {escapeHtml} from "../util/escape";
-/// #endif
+import {isBazaarAvailable} from "../util/bazaarAvailability";
 import {getSettingTabDefs} from "./setting/tabs";
 import {clearAccessTabElement} from "./tabs/accessRuntime";
 import {clearSyncTabElement} from "./tabs/syncRuntime";
@@ -32,6 +33,7 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
         tabListItems.push(`<li data-name="${def.id}" class="b3-list-item${isActive ? " b3-list-item--focus" : ""}${def.hidden ? " fn__none" : ""}"><svg class="b3-list-item__graphic"><use xlink:href="#${def.icon}"></use></svg><span class="b3-list-item__text">${def.title}</span></li>`);
         tabPanels.push(`<div class="config__tab-container${isActive ? "" : " fn__none"}" data-name="${def.id}"></div>`);
     }
+    const settingDialogRef: {element?: HTMLElement} = {};
     const dialog = new Dialog({
         content: `<div class="fn__flex-1 fn__flex config__panel" style="overflow: hidden;position: relative">
     <div class="config__side b3-list b3-list--background">
@@ -53,6 +55,10 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
         width: "max(70vw, min(90vw, 900px))",
         height: "90vh",
         destroyCallback() {
+            const bazaarRoot = settingDialogRef.element?.querySelector('.config__tab-container[data-name="bazaar"]') as HTMLElement | null;
+            if (bazaarRoot) {
+                unmountBazaarTab(bazaarRoot);
+            }
             clearSyncTabElement();
             clearAccessTabElement();
             if (range) {
@@ -60,6 +66,7 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
             }
         },
     });
+    settingDialogRef.element = dialog.element;
     dialog.element.setAttribute("data-key", Constants.DIALOG_SETTING);
 
     const tabWrap = dialog.element.querySelector(".config__tab-wrap") as HTMLElement;
@@ -79,6 +86,9 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
 /// #endif
 
 export const openSetting = (app: App, tab?: TSettingTab) => {
+    if (tab === "bazaar" && !isBazaarAvailable()) {
+        return;
+    }
     /// #if MOBILE
     openMobileSetting(app, tab);
     /// #else
@@ -87,9 +97,11 @@ export const openSetting = (app: App, tab?: TSettingTab) => {
 };
 
 export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemName: string, from: "bazaar" | "downloaded") => {
-    /// #if !MOBILE
+    if (!isBazaarAvailable()) {
+        return;
+    }
     if (!window.siyuan.config.bazaar.trust) {
-        openSettingDialog(app, "bazaar");
+        openSetting(app, "bazaar");
         return;
     }
 
@@ -124,12 +136,13 @@ export const openBazaarReadme = async (app: App, bazaarType: TBazaarType, itemNa
 
     const resource = (response.data.packages as IBazaarItem[]).find((item: IBazaarItem) => item.name === itemName);
     if (!resource) {
-        showMessage(`Package not found: ${escapeHtml(itemName)}`);
+        showMessage(window.siyuan.languages.bazaarPackageNotFound.replace("${name}", escapeHtml(itemName)));
         return;
     }
 
-    openSettingDialog(app, "bazaar");
-    bazaar.switchBazaarTab(app, bazaarType, from);
-    renderReadme(bazaarType, from, resource);
-    /// #endif
+    openSetting(app, "bazaar");
+    await withMountedBazaar(({bazaar, renderReadme}) => {
+        bazaar.switchBazaarTab(app, bazaarType, from);
+        renderReadme(bazaarType, from, resource);
+    });
 };

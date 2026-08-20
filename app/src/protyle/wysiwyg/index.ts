@@ -194,6 +194,7 @@ import {isCrossBlockTextRange} from "../gutter/multiSelect";
 import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
+import {LargeListVirtualizer} from "./listVirtualization";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -345,6 +346,7 @@ export class WYSIWYG {
     private inputTimeout: number;
     private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
     public tableControl: TableControl;
+    private largeListVirtualizer?: LargeListVirtualizer;
 
     private scheduleInput(callback: () => void | Promise<void>, delay = 0, replace = true) {
         if (replace && this.inputTimeout) {
@@ -462,8 +464,19 @@ export class WYSIWYG {
         if (protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
             return;
         }
+        if (!isMobile() && !protyle.options.backlinkData && !protyle.lite) {
+            this.largeListVirtualizer = new LargeListVirtualizer(protyle.element, this.element, protyle.id);
+        }
         keydown(protyle, this.element);
         dropEvent(protyle, this.element);
+    }
+
+    public destroy() {
+        this.largeListVirtualizer?.destroy();
+    }
+
+    public prepareLargeListVirtualization(contentElement: Element, replace: boolean) {
+        this.largeListVirtualizer?.prepare(contentElement, replace);
     }
 
     public renderCustom(ial: Record<string, string>) {
@@ -4154,7 +4167,14 @@ export class WYSIWYG {
             }
             const openListItemAttrByShift = shouldOpenListItemAttr(event.shiftKey, protyle.disabled,
                 hasClosestByClassName(event.target, "protyle-action"));
-            if (event.shiftKey && !openListItemAttrByShift) {
+            const shiftAssetElement = hasClosestByAttribute(event.target, "data-type", "file-annotation-ref") ||
+                hasClosestByAttribute(event.target, "data-type", "a") ||
+                hasClosestByClassName(event.target, "av__celltext--url");
+            const shiftAssetLink = shiftAssetElement ? shiftAssetElement.getAttribute("data-id") ||
+                shiftAssetElement.getAttribute("data-href") || shiftAssetElement.dataset.url ||
+                (shiftAssetElement.classList.contains("av__celltext--url") ? shiftAssetElement.textContent.trim() : "") : "";
+            const shiftOpenAsset = event.shiftKey && shiftAssetLink.startsWith("assets/");
+            if (event.shiftKey && !openListItemAttrByShift && !shiftOpenAsset) {
                 const selection = getSelection();
                 const focusElement = selection.focusNode && hasClosestBlock(selection.focusNode) as HTMLElement;
                 // mousedown 未命中块间空白时，浏览器会先生成跨块文字选区，在 click 阶段将其转换为块选区

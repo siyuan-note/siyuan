@@ -2,7 +2,10 @@ export const isThemeFrontendSupported = (
     frontends: string[] | null | undefined,
     frontend: string,
 ) => {
-    if (!frontends?.length || frontends.includes("all")) {
+    if (!frontends?.length) {
+        return !["mobile", "browser-mobile"].includes(frontend);
+    }
+    if (frontends.includes("all")) {
         return true;
     }
     return frontends.includes(frontend);

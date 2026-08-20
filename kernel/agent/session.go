@@ -48,10 +48,11 @@ func sessionsDir() string {
 }
 
 type SessionIndexItem struct {
-	ID        string `json:"id"`
-	Title     string `json:"title"`
-	CreatedAt int64  `json:"createdAt"`
-	UpdatedAt int64  `json:"updatedAt"`
+	ID           string `json:"id"`
+	Title        string `json:"title"`
+	CreatedAt    int64  `json:"createdAt"`
+	UpdatedAt    int64  `json:"updatedAt"`
+	AgentRunning bool   `json:"agentRunning,omitempty"`
 }
 
 type SessionListResult struct {

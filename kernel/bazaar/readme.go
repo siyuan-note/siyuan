@@ -107,7 +107,7 @@ func getInstalledPackageREADME(installPath, linkBase string, readme LocaleString
 
 // renderPackageREADME 渲染 README Markdown 为 HTML。
 func renderPackageREADME(linkBase string, mdData []byte) (ret string) {
-	mdData = bytes.TrimPrefix(mdData, []byte("\xef\xbb\xbf")) // 移除文件开头的 BOM
+	mdData = bytes.Clone(bytes.TrimPrefix(mdData, []byte("\xef\xbb\xbf"))) // 移除文件开头的 BOM 并隔离解析缓冲区
 	luteEngine := lute.New()
 	luteEngine.SetSanitize(true)
 	luteEngine.SetSoftBreak2HardBreak(false)

@@ -13,6 +13,7 @@ import {renderSnippet} from "../../config/util/snippets";
 import {redirectToCheckAuth} from "../../util/pathName";
 import {reloadSync} from "../../util/reloadSync";
 import {activateOnboarding} from "../../onboarding";
+import {updateServerAddresses} from "../../config/tabs/accessRuntime";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;
@@ -63,6 +64,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setConf":
                 window.siyuan.config = data.data;
+                break;
+            case "setServerAddrs":
+                updateServerAddresses(data.data);
                 break;
             case "setPublish":
                 window.siyuan.config.publish = data.data;

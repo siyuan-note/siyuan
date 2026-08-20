@@ -168,7 +168,7 @@ func IsPetalsEnabled() bool {
 	}
 
 	if !Conf.Bazaar.Trust {
-		// 移动端没有集市模块，所以要默认开启，桌面端和 Docker 容器需要用户手动确认过信任后才能开启
+		// 移动端为了兼容通过同步获得的已有插件，不要求先确认集市信任；桌面端和 Docker 容器仍需用户手动确认
 		if util.Container == util.ContainerStd || util.Container == util.ContainerDocker {
 			return false
 		}

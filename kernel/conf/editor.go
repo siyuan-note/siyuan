@@ -18,6 +18,24 @@ package conf
 
 import "github.com/siyuan-note/siyuan/kernel/util"
 
+const (
+	AssetOpenActionFollowTab  = "follow-tab"
+	AssetOpenActionCurrent    = "current"
+	AssetOpenActionRight      = "right"
+	AssetOpenActionBottom     = "bottom"
+	AssetOpenActionBackground = "background"
+	AssetOpenActionNewWindow  = "new-window"
+	AssetOpenActionApp        = "app"
+	AssetOpenActionFolder     = "folder"
+)
+
+type AssetOpen struct {
+	Click      string `json:"click"`      // 单击资源的打开方式
+	CtrlClick  string `json:"ctrlClick"`  // Ctrl 或 Command 加单击资源的打开方式
+	AltClick   string `json:"altClick"`   // Alt 加单击资源的打开方式
+	ShiftClick string `json:"shiftClick"` // Shift 加单击资源的打开方式
+}
+
 type Editor struct {
 	AllowSVGScript                  bool           `json:"allowSVGScript"`                  // 允许执行 SVG 内脚本
 	AllowHTMLBLockScript            bool           `json:"allowHTMLBLockScript"`            // 允许执行 HTML 内容中的脚本
@@ -44,6 +62,7 @@ type Editor struct {
 	VirtualBlockRefExclude          string         `json:"virtualBlockRefExclude"`          // 虚拟引用关键字排除列表
 	VirtualBlockRefInclude          string         `json:"virtualBlockRefInclude"`          // 虚拟引用关键字包含列表
 	BlockRefDynamicAnchorTextMaxLen int            `json:"blockRefDynamicAnchorTextMaxLen"` // 块引动态锚文本最大长度
+	AssetOpen                       *AssetOpen     `json:"assetOpen"`                       // 资源打开方式
 	PlantUMLServePath               string         `json:"plantUMLServePath"`               // PlantUML 伺服地址
 	FullWidth                       bool           `json:"fullWidth"`                       // 是否使用最大宽度
 	KaTexMacros                     string         `json:"katexMacros"`                     // KeTex 宏定义
@@ -62,6 +81,7 @@ type Editor struct {
 	OnlySearchForDoc                bool           `json:"onlySearchForDoc"`                // 是否启用 [[ 仅搜索文档块
 	BacklinkExpandCount             int            `json:"backlinkExpandCount"`             // 反向链接默认展开数量
 	BackmentionExpandCount          int            `json:"backmentionExpandCount"`          // 反链提及默认展开数量
+	BacklinkMentionExclude          string         `json:"backlinkMentionExclude"`          // 反链提及关键字排除列表
 	BacklinkContainChildren         bool           `json:"backlinkContainChildren"`         // 反向链接是否包含子块进行计算
 	BacklinkShowBottom              bool           `json:"backlinkShowBottom"`              // 是否在文档底部显示反向链接
 	BacklinkSort                    *int           `json:"backlinkSort"`                    // 反向链接排序方式
@@ -81,6 +101,37 @@ const (
 
 func NormalizeBacklinkExpandCount(count int) int {
 	return max(-1, count)
+}
+
+func NewAssetOpen() *AssetOpen {
+	return &AssetOpen{
+		Click:      AssetOpenActionFollowTab,
+		CtrlClick:  AssetOpenActionFolder,
+		AltClick:   AssetOpenActionCurrent,
+		ShiftClick: AssetOpenActionApp,
+	}
+}
+
+func NormalizeAssetOpen(assetOpen *AssetOpen) *AssetOpen {
+	defaults := NewAssetOpen()
+	if nil == assetOpen {
+		return defaults
+	}
+	assetOpen.Click = normalizeAssetOpenAction(assetOpen.Click, defaults.Click)
+	assetOpen.CtrlClick = normalizeAssetOpenAction(assetOpen.CtrlClick, defaults.CtrlClick)
+	assetOpen.AltClick = normalizeAssetOpenAction(assetOpen.AltClick, defaults.AltClick)
+	assetOpen.ShiftClick = normalizeAssetOpenAction(assetOpen.ShiftClick, defaults.ShiftClick)
+	return assetOpen
+}
+
+func normalizeAssetOpenAction(action, fallback string) string {
+	switch action {
+	case AssetOpenActionFollowTab, AssetOpenActionCurrent, AssetOpenActionRight, AssetOpenActionBottom,
+		AssetOpenActionBackground, AssetOpenActionNewWindow, AssetOpenActionApp, AssetOpenActionFolder:
+		return action
+	default:
+		return fallback
+	}
 }
 
 func NewEditor() *Editor {
@@ -103,6 +154,7 @@ func NewEditor() *Editor {
 		Emoji:                           []string{},
 		VirtualBlockRef:                 false,
 		BlockRefDynamicAnchorTextMaxLen: 96,
+		AssetOpen:                       NewAssetOpen(),
 		PlantUMLServePath:               "https://www.plantuml.com/plantuml/svg/~1",
 		FullWidth:                       true,
 		KaTexMacros:                     "{}",

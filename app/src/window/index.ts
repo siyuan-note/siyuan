@@ -33,6 +33,7 @@ import {setTitle} from "../util/processTitle";
 import {ensureUILayout} from "../util/ensureUILayout";
 import {applyEntryVisibility} from "../config/entryVisibility/runtime";
 import {removeBlockPanelEditors} from "../block/panelRemoval";
+import {updateServerAddresses} from "../config/tabs/accessRuntime";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -92,6 +93,9 @@ class App {
                                 break;
                             case "setConf":
                                 window.siyuan.config = data.data;
+                                break;
+                            case "setServerAddrs":
+                                updateServerAddresses(data.data);
                                 break;
                             case "progress":
                                 progressLoading(data);

@@ -38,3 +38,30 @@ func TestNormalizeBacklinkExpandCount(t *testing.T) {
 		})
 	}
 }
+
+func TestNormalizeAssetOpen(t *testing.T) {
+	defaults := NormalizeAssetOpen(nil)
+	if defaults.Click != AssetOpenActionFollowTab || defaults.CtrlClick != AssetOpenActionFolder ||
+		defaults.AltClick != AssetOpenActionCurrent || defaults.ShiftClick != AssetOpenActionApp {
+		t.Fatalf("unexpected defaults: %+v", defaults)
+	}
+
+	assetOpen := NormalizeAssetOpen(&AssetOpen{
+		Click:      AssetOpenActionBottom,
+		CtrlClick:  "invalid",
+		AltClick:   AssetOpenActionBackground,
+		ShiftClick: "",
+	})
+	if assetOpen.Click != AssetOpenActionBottom {
+		t.Fatalf("expected bottom action, got %q", assetOpen.Click)
+	}
+	if assetOpen.CtrlClick != AssetOpenActionFolder {
+		t.Fatalf("expected folder fallback, got %q", assetOpen.CtrlClick)
+	}
+	if assetOpen.AltClick != AssetOpenActionBackground {
+		t.Fatalf("expected background action, got %q", assetOpen.AltClick)
+	}
+	if assetOpen.ShiftClick != AssetOpenActionApp {
+		t.Fatalf("expected app fallback, got %q", assetOpen.ShiftClick)
+	}
+}

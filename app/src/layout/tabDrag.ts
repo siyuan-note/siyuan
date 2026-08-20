@@ -36,3 +36,38 @@ export const findNextTabId = <T extends { id: string }>(items: T[], candidateIds
     const existingIds = new Set(items.map((item) => item.id));
     return candidateIds.find((id) => existingIds.has(id));
 };
+
+type TTabHoverScheduler = (callback: () => void, delay: number) => () => void;
+
+let tabHoverId: string;
+let cancelTabHover: () => void;
+let tabHoverGeneration = 0;
+
+const defaultTabHoverScheduler: TTabHoverScheduler = (callback, delay) => {
+    const timeoutId = setTimeout(callback, delay);
+    return () => clearTimeout(timeoutId);
+};
+
+export const clearTabHoverSwitch = () => {
+    tabHoverGeneration++;
+    cancelTabHover?.();
+    cancelTabHover = undefined;
+    tabHoverId = undefined;
+};
+
+export const scheduleTabHoverSwitch = (tabId: string, callback: () => void, delay: number,
+                                        scheduler = defaultTabHoverScheduler) => {
+    if (tabHoverId === tabId) {
+        return;
+    }
+    clearTabHoverSwitch();
+    tabHoverId = tabId;
+    const generation = tabHoverGeneration;
+    cancelTabHover = scheduler(() => {
+        if (generation !== tabHoverGeneration || tabHoverId !== tabId) {
+            return;
+        }
+        cancelTabHover = undefined;
+        callback();
+    }, delay);
+};

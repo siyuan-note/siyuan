@@ -48,7 +48,7 @@ const highlightLocatedItem = (blockElement: HTMLElement, protyle: IProtyle, view
     clearLocatedHighlight(blockElement);
     const token = Symbol();
     highlightTokens.set(blockElement, token);
-    const className = viewType === "table" ? "av__row--locate" : "av__gallery-item--locate";
+    const className = "protyle-wysiwyg--hl";
     const targetQuery = viewType === "table" ? `.av__row[data-id="${itemID}"]` : `.av__gallery-item[data-id="${itemID}"]`;
     requestAnimationFrame(() => {
         if (!blockElement.isConnected || highlightTokens.get(blockElement) !== token) {
@@ -136,7 +136,11 @@ export const queueAVLocateRequest = (blockID: string, request: IAVLocateRequest)
     if (previous) {
         window.clearTimeout(previous.timer);
     }
-    const locateRequest = {...request, select: true, highlight: true};
+    const locateRequest = {
+        ...request,
+        select: request.select ?? false,
+        highlight: request.highlight ?? true,
+    };
     const timer = window.setTimeout(() => {
         if (queuedLocateRequests.get(blockID)?.request === locateRequest) {
             queuedLocateRequests.delete(blockID);

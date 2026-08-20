@@ -44,8 +44,8 @@ export const resolveSlashMenuItems = (items: TSlashMenuItem[], options: IResolve
         return true;
     });
     const orderedItems = reorderEntrySlots(uniqueItems, options.order, (item) => item.entryKey);
-    const visibleItems = orderedItems.filter((item) => isSeparator(item) ||
-        (options.visible(item.entryKey) && !(options.hideConfiguredCreate && item.entryKey === "newFileRef")));
+    const visibleItems = orderedItems.filter((item) => options.visible(item.entryKey) &&
+        !(options.hideConfiguredCreate && item.entryKey === "newFileRef"));
     const filteredItems = options.key === "" ? visibleItems : visibleItems.filter((item) => item.filter?.some((filter) =>
         filter.toLowerCase().includes(options.key.toLowerCase())));
     return normalizeSlashMenuSeparators(filteredItems);

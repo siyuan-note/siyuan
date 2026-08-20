@@ -26,6 +26,7 @@ export abstract class Constants {
     // drop 事件
     public static readonly SIYUAN_DROP_FILE: string = "application/siyuan-file";
     public static readonly SIYUAN_DROP_GUTTER: string = "application/siyuan-gutter";
+    public static readonly SIYUAN_DROP_BLOCK: string = "application/siyuan-block";
     public static readonly SIYUAN_DROP_BLOCK_REF: string = "application/siyuan-block-ref";
     public static readonly SIYUAN_DROP_TAB: string = "application/siyuan-tab";
     public static readonly SIYUAN_DROP_DOCUMENT_TAB: string = "application/siyuan-document-tab";
@@ -330,6 +331,7 @@ export abstract class Constants {
     public static readonly TIMEOUT_RESIZE = 200;
     public static readonly TIMEOUT_INPUT = 256;
     public static readonly TIMEOUT_LOAD = 300;
+    public static readonly TIMEOUT_TAB_SWITCH = 500;
     public static readonly TIMEOUT_SNIPPET_LOAD = 5000;
     public static readonly TIMEOUT_LONGPRESS = 460;
     public static readonly TIMEOUT_VIBRATION_DURATION = 20;
@@ -569,6 +571,8 @@ export abstract class Constants {
                 preview: {default: "⌥⌘9", custom: "⌥⌘9"},
                 insertBefore: {default: "⇧⌘B", custom: "⇧⌘B"},
                 insertAfter: {default: "⇧⌘A", custom: "⇧⌘A"},
+                insertSuperBlockLeft: {default: "", custom: ""},
+                insertSuperBlockRight: {default: "", custom: ""},
                 jumpToParentNext: {default: "⇧⌘N", custom: "⇧⌘N"},
                 jumpToParentPrev: {default: "⇧⌘M", custom: "⇧⌘M"},
                 jumpToParent: {default: "⇧⌘J", custom: "⇧⌘J"},

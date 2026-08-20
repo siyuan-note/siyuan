@@ -234,6 +234,10 @@ const setHTML = (options: {
     });
     normalizeHTMLAssetIFrameSources(doc);
     updateWidgetCacheVersion(doc, Constants.SIYUAN_VERSION);
+    protyle.wysiwyg.prepareLargeListVirtualization(
+        doc.body,
+        !options.action.includes(Constants.CB_GET_APPEND) && !options.action.includes(Constants.CB_GET_BEFORE)
+    );
     options.content = doc.body.innerHTML;
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;
     const updateReadonly = typeof options.updateReadonly === "undefined" ? protyle.wysiwyg.element.innerHTML === "" : options.updateReadonly;

@@ -271,17 +271,17 @@ func refreshRefCount(blockID string) {
 	isDoc := bt.ID == bt.RootID
 	var rootRefIDs []string
 	var refCount, rootRefCount int
-	refIDs := sql.QueryRefIDsByDefID(bt.ID, isDoc)
+	refIDs := sql.QueryRefIDsByDefIDInBox(bt.ID, isDoc, bt.BoxID)
 	if isDoc {
 		rootRefIDs = refIDs
 	} else {
-		rootRefIDs = sql.QueryRefIDsByDefID(bt.RootID, true)
+		rootRefIDs = sql.QueryRefIDsByDefIDInBox(bt.RootID, true, bt.BoxID)
 	}
 	refCount = len(refIDs)
 	rootRefCount = len(rootRefIDs)
 	var defIDs []string
 	if isDoc {
-		defIDs = sql.QueryChildDefIDsByRootDefID(bt.ID)
+		defIDs = sql.QueryChildDefIDsByRootDefIDInBox(bt.ID, bt.BoxID)
 	} else {
 		defIDs = append(defIDs, bt.ID)
 	}

@@ -17,6 +17,7 @@
 package agent
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/sashabaranov/go-openai"
@@ -110,5 +111,62 @@ func TestToolCallStreamAccumulatorCumulativeArguments(t *testing.T) {
 	calls := accumulator.ToolCalls()
 	if len(calls) != 1 || calls[0].Function.Arguments != `{"action":"list"}` {
 		t.Fatalf("cumulative arguments were duplicated: %#v", calls)
+	}
+}
+
+func TestMergeStreamedToolCallArgumentsKeepsPrefixLikeFragment(t *testing.T) {
+	got := mergeStreamedToolCallArguments(`{"todos":[`, `{"`)
+	want := `{"todos":[{"`
+	if got != want {
+		t.Fatalf("prefix-like fragment was dropped: got %q, want %q", got, want)
+	}
+}
+
+func TestToolCallStreamAccumulatorFineGrainedArguments(t *testing.T) {
+	fragments := []string{
+		"{", `"`, "t", "odos", `"`, ": ", "[", `{"`, "content",
+		`":`, ` "`, "a", `"}]`, "}",
+	}
+	want := strings.Join(fragments, "")
+
+	var accumulator toolCallStreamAccumulator
+	index := 0
+	for _, fragment := range fragments {
+		accumulator.Add([]openai.ToolCall{{
+			Index: &index,
+			Type:  openai.ToolTypeFunction,
+			Function: openai.FunctionCall{
+				Arguments: fragment,
+			},
+		}})
+	}
+
+	calls := accumulator.ToolCalls()
+	if len(calls) != 1 || calls[0].Function.Arguments != want {
+		t.Fatalf("fine-grained arguments were corrupted: got %#v, want %q", calls, want)
+	}
+}
+
+func TestToolCallStreamAccumulatorArbitraryNestedObject(t *testing.T) {
+	fragments := []string{
+		`{"action":"item_update","value":`, `{"`, `mSelect":[`, `{"`, `content":"low"}]}}`,
+	}
+	want := strings.Join(fragments, "")
+
+	var accumulator toolCallStreamAccumulator
+	index := 0
+	for _, fragment := range fragments {
+		accumulator.Add([]openai.ToolCall{{
+			Index: &index,
+			Type:  openai.ToolTypeFunction,
+			Function: openai.FunctionCall{
+				Arguments: fragment,
+			},
+		}})
+	}
+
+	calls := accumulator.ToolCalls()
+	if len(calls) != 1 || calls[0].Function.Arguments != want {
+		t.Fatalf("nested arguments were corrupted: got %#v, want %q", calls, want)
 	}
 }

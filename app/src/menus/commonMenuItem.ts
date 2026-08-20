@@ -1,6 +1,3 @@
-/// #if !BROWSER
-import {shell} from "electron";
-/// #endif
 import {confirmDialog} from "../dialog/confirmDialog";
 import {getSearch, isMobile, isValidCustomAttrName} from "../util/functions";
 import {getAssetExtension, isEncryptedBox, isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
@@ -13,16 +10,16 @@ import {
     isInIOS,
     isInMobileApp,
     saveExportFile,
+    updateHotkeyTip,
     writeText
 } from "../protyle/util/compatibility";
-import {openByMobile} from "../editor/openLink";
-import {processSiYuanUri} from "../util/uri";
+import {openByMobile, openLink} from "../editor/openLink";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {focusBlock, focusByRange, getEditorRange} from "../protyle/util/selection";
 /// #if !MOBILE
-import {openAsset, openBy} from "../editor/util";
+import {openAsset, openAssetInBackground, openBy} from "../editor/util";
 /// #endif
 import {rename, replaceFileName} from "../editor/rename";
 import * as dayjs from "dayjs";
@@ -37,6 +34,11 @@ import {Protyle} from "../protyle";
 import {getAllEditor} from "../layout/getAll";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
+import {
+    DEFAULT_ASSET_OPEN,
+    getAssetOpenGestures,
+    type TAssetOpenGesture,
+} from "../editor/assetOpen";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -857,16 +859,35 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     /// #else
     if (isLocalPath(src)) {
         const extension = getAssetExtension(src).toLowerCase();
-        if (Constants.SIYUAN_ASSETS_EXTS.includes(extension) &&
+        const previewable = Constants.SIYUAN_ASSETS_EXTS.includes(extension) &&
             isBrowserRenderableImagePath(src) &&
             (extension !== ".pdf" ||
-                (extension === ".pdf" && !src.startsWith("file://")))
-        ) {
+                (extension === ".pdf" && !src.startsWith("file://")));
+        const getAccelerator = (action: Config.TAssetOpenAction) => {
+            if (!showAccelerator || !src.startsWith("assets/")) {
+                return "";
+            }
+            let config = window.siyuan.config.editor.assetOpen;
+            /// #if BROWSER
+            config = DEFAULT_ASSET_OPEN;
+            /// #endif
+            const gestureLabels: Record<TAssetOpenGesture, string> = {
+                click: window.siyuan.languages.click,
+                ctrlClick: "⌘" + window.siyuan.languages.click,
+                altClick: "⌥" + window.siyuan.languages.click,
+                shiftClick: "⇧" + window.siyuan.languages.click,
+            };
+            return getAssetOpenGestures(config, action, {
+                previewable,
+                noSplitScreen: window.siyuan.config.fileTree.noSplitScreenWhenOpenTab,
+            }).map((gesture) => updateHotkeyTip(gestureLabels[gesture])).join(" / ");
+        };
+        if (previewable) {
             submenu.push({
                 id: "insertRight",
                 icon: "iconLayoutRight",
                 label: window.siyuan.languages.insertRight,
-                accelerator: showAccelerator ? window.siyuan.languages.click : "",
+                accelerator: getAccelerator("right"),
                 click() {
                     openAsset(app, src.trim(), parseInt(getSearch("page", src)), "right");
                 }
@@ -875,9 +896,27 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 id: "openBy",
                 label: window.siyuan.languages.openBy,
                 icon: "iconOpen",
-                accelerator: showAccelerator ? "⌥" + window.siyuan.languages.click : "",
+                accelerator: getAccelerator("current"),
                 click() {
                     openAsset(app, src.trim(), parseInt(getSearch("page", src)));
+                }
+            });
+            submenu.push({
+                id: "openByBackground",
+                label: window.siyuan.languages.refTab,
+                icon: "iconEyeoff",
+                accelerator: getAccelerator("background"),
+                click() {
+                    openAssetInBackground(app, src.trim(), parseInt(getSearch("page", src)));
+                }
+            });
+            submenu.push({
+                id: "insertBottom",
+                icon: "iconLayoutBottom",
+                label: window.siyuan.languages.insertBottom,
+                accelerator: getAccelerator("bottom"),
+                click() {
+                    openAsset(app, src.trim(), parseInt(getSearch("page", src)), "bottom");
                 }
             });
             /// #if !BROWSER
@@ -885,6 +924,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 id: "openByNewWindow",
                 label: window.siyuan.languages.openByNewWindow,
                 icon: "iconOpenWindow",
+                accelerator: getAccelerator("new-window"),
                 click() {
                     openAssetNewWindow(src.trim());
                 }
@@ -893,7 +933,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 id: "showInFolder",
                 icon: "iconFolder",
                 label: window.siyuan.languages.showInFolder,
-                accelerator: showAccelerator ? "⌘" + window.siyuan.languages.click : "",
+                accelerator: getAccelerator("folder"),
                 click: () => {
                     openBy(src, "folder");
                 }
@@ -901,7 +941,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             submenu.push({
                 id: "useDefault",
                 label: window.siyuan.languages.useDefault,
-                accelerator: showAccelerator ? "⇧" + window.siyuan.languages.click : "",
+                accelerator: getAccelerator("app"),
                 click() {
                     openBy(src, "app");
                 }
@@ -912,7 +952,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             submenu.push({
                 id: "useDefault",
                 label: window.siyuan.languages.useDefault,
-                accelerator: showAccelerator ? window.siyuan.languages.click : "",
+                accelerator: getAccelerator("app"),
                 click() {
                     openBy(src, "app");
                 }
@@ -921,7 +961,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 id: "showInFolder",
                 icon: "iconFolder",
                 label: window.siyuan.languages.showInFolder,
-                accelerator: showAccelerator ? "⌘" + window.siyuan.languages.click : "",
+                accelerator: getAccelerator("folder"),
                 click: () => {
                     openBy(src, "folder");
                 }
@@ -949,12 +989,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             label: window.siyuan.languages.useDefault,
             accelerator: showAccelerator ? window.siyuan.languages.click : "",
             click: () => {
-                if (processSiYuanUri(app, src)) {
-                    return;
-                }
-                shell.openExternal(src).catch((e) => {
-                    showMessage(e);
-                });
+                openLink(app, src);
             }
         });
         /// #else
@@ -963,7 +998,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
             accelerator: showAccelerator ? window.siyuan.languages.click : "",
             click: () => {
-                openByMobile(src);
+                openLink(app, src);
             }
         });
         /// #endif

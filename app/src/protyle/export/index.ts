@@ -299,6 +299,25 @@ const renderPDF = async (id: string) => {
         #preview .render-node[data-subtype="plantuml"] object {
             max-width: 100%;
         }
+
+        #preview a.pdf-embedded-asset {
+            position: relative;
+            padding-right: 1em !important;
+        }
+
+        #preview .pdf-embedded-asset__icon {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 1em;
+            height: 1em;
+            color: currentColor;
+            pointer-events: none;
+        }
+
+        .exporting #preview .pdf-embedded-asset__icon {
+            visibility: hidden;
+        }
         ${await setInlineStyle(false, servePath)}
         ${await getPluginStyle()}
     </style>
@@ -674,6 +693,7 @@ ${getIconScript(servePath)}
         mergeContentHeadingModeElement.addEventListener('change', () => {
             refreshPreview();
         });
+        const removeAssetsElement = actionElement.querySelector("#removeAssets");
         const  watermarkElement = actionElement.querySelector('#watermark');
         const refreshPreview = () => {
             previewElement.innerHTML = '<div class="fn__loading" style="left:0;height: 100vh"><img width="48px" src="${servePath}stage/loading-pure.svg"></div>'
@@ -690,6 +710,7 @@ ${getIconScript(servePath)}
                 }
                 setPadding();
                 renderPreview(response2.data);
+                reserveEmbeddedAssetSpace(removeAssetsElement.checked);
             })
         };
 
@@ -754,13 +775,30 @@ ${getIconScript(servePath)}
                 mergeDocHeadingMode: mergeDocHeadingModeElement.value,
                 mergeContentHeadingMode: mergeContentHeadingModeElement.value,
                 watermark: watermarkElement.checked,
-                removeAssets: actionElement.querySelector("#removeAssets").checked,
+                removeAssets: removeAssetsElement.checked,
                 paged: !unPagedPageSize,
                 rootId: "${id}",
                 rootTitle: response.data.name,
                 parentWindowId: ${currentWindowId},
             };
         };
+        const reserveEmbeddedAssetSpace = (enabled) => {
+            // 为内嵌附件注解预留空间，避免覆盖后续文本。
+            previewElement.querySelectorAll("a[href]").forEach((item) => {
+                const url = new URL(item.href);
+                const embedded = enabled && url.hostname === "127.0.0.1" && url.pathname.includes("/assets/");
+                item.classList.toggle("pdf-embedded-asset", embedded);
+                const iconElement = item.querySelector(".pdf-embedded-asset__icon");
+                if (embedded && !iconElement) {
+                    item.insertAdjacentHTML("beforeend", '<svg aria-hidden="true" class="pdf-embedded-asset__icon"><use xlink:href="#iconPaperclip"></use></svg>');
+                } else if (!embedded) {
+                    iconElement?.remove();
+                }
+            });
+        };
+        removeAssetsElement.addEventListener("change", () => {
+            reserveEmbeddedAssetSpace(removeAssetsElement.checked);
+        });
         const waitForImages = () => Promise.all(Array.from(previewElement.querySelectorAll("img")).map((image) => {
             image.loading = "eager";
             if (image.complete) {
@@ -788,6 +826,7 @@ ${getIconScript(servePath)}
             if (result.canceled || result.filePaths.length === 0) {
                 return;
             }
+            reserveEmbeddedAssetSpace(removeAssetsElement.checked);
             await waitForImages();
             const isPaged = actionElement.querySelector("#paged").checked;
             let exportConfig;
@@ -825,6 +864,7 @@ ${getIconScript(servePath)}
         });
         setPadding();
         renderPreview(response.data);
+        reserveEmbeddedAssetSpace(removeAssetsElement.checked);
         window.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {
                 const {ipcRenderer}  = require("electron");

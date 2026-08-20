@@ -43,18 +43,19 @@ The component list is informational and does not replace the license terms. Copy
 | KaTeX | 0.16.9 | MIT | [upstream](https://github.com/KaTeX/KaTeX) | app/stage/protyle/js/katex/ |
 | KaTeX fonts | 0.16.9 | OFL-1.1 | [upstream](https://github.com/KaTeX/KaTeX/tree/v0.16.9/fonts) | app/stage/protyle/js/katex/fonts/ |
 | MathJax | 3.1.2 | Apache-2.0 | [upstream](https://github.com/mathjax/MathJax-src) | app/stage/protyle/js/mathjax/ |
-| Mermaid | 11.13.0 | MIT | [upstream](https://github.com/mermaid-js/mermaid) | app/stage/protyle/js/mermaid/mermaid.min.js; bundled notices are retained in the file |
-| DOMPurify | 3.3.1 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | Bundled by Mermaid 11.13.0 |
-| js-yaml | 4.1.1 | MIT | [upstream](https://github.com/nodeca/js-yaml) | Bundled by Mermaid 11.13.0 |
-| lodash-es and Underscore-derived code | Bundled snapshot | MIT | [upstream](https://github.com/lodash/lodash) | Bundled by Mermaid 11.13.0 |
-| Cytoscape.js and retained embedded utilities | Bundled snapshot | MIT | [upstream](https://github.com/cytoscape/cytoscape.js) | Bundled by Mermaid 11.13.0 |
-| @mermaid-js/layout-tidy-tree | 0.2.1 | MIT | [upstream](https://github.com/mermaid-js/mermaid-layouts) | app/stage/protyle/js/mermaid/mermaid-layout-tidy-tree.min.js |
+| Mermaid | 11.16.1 | MIT | [upstream](https://github.com/mermaid-js/mermaid) | app/stage/protyle/js/mermaid/mermaid.min.js; bundled notices are retained in the file |
+| DOMPurify | 3.4.0 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | Bundled by Mermaid 11.16.1 |
+| js-yaml | 4.1.1 | MIT | [upstream](https://github.com/nodeca/js-yaml) | Bundled by Mermaid 11.16.1 |
+| lodash-es and Underscore-derived code | Bundled snapshot | MIT | [upstream](https://github.com/lodash/lodash) | Bundled by Mermaid 11.16.1 |
+| Cytoscape.js and retained embedded utilities | Bundled snapshot | MIT | [upstream](https://github.com/cytoscape/cytoscape.js) | Bundled by Mermaid 11.16.1 |
+| @mermaid-js/layout-tidy-tree | 0.2.2 | MIT | [upstream](https://github.com/mermaid-js/mermaid-layouts) | app/stage/protyle/js/mermaid/mermaid-layout-tidy-tree.min.js |
 | non-layered-tidy-tree-layout | 2.0.2 | MIT | [upstream](https://github.com/zlluGitHub/non-layered-tidy-tree-layout) | Bundled by @mermaid-js/layout-tidy-tree |
-| @zenuml/core and bundled dependencies | Bundled snapshot | MIT AND (Apache-2.0 OR MPL-2.0) | [upstream](https://github.com/ZenUml/core) | app/stage/protyle/js/mermaid/mermaid-zenuml.min.js; bundled notices are retained in the file |
-| React, ReactDOM, and Scheduler | Bundled snapshot | MIT | [upstream](https://github.com/facebook/react) | Bundled by @zenuml/core |
-| codepointat | 0.2.0 | MIT | [upstream](https://github.com/mathiasbynens/codepointat) | Bundled by @zenuml/core |
-| fromcodepoint | 0.2.1 | MIT | [upstream](https://github.com/mathiasbynens/fromcodepoint) | Bundled by @zenuml/core |
-| DOMPurify | 3.2.5 | Apache-2.0 OR MPL-2.0 | [upstream](https://github.com/cure53/DOMPurify) | Bundled by @zenuml/core |
+| @mermaid-js/mermaid-zenuml | 0.2.3 | MIT | [upstream](https://github.com/mermaid-js/mermaid/tree/develop/packages/mermaid-zenuml) | Lightweight SiYuan bundle in app/stage/protyle/js/mermaid/mermaid-zenuml.min.js |
+| @zenuml/core native SVG renderer | 3.50.1 | MIT | [upstream](https://github.com/mermaid-js/zenuml-core) | Bundled without the React-based editor; output is sanitized by SiYuan's shared DOMPurify 3.3.3 |
+| ANTLR 4 JavaScript runtime | 4.11.0 | BSD-3-Clause | [upstream](https://github.com/antlr/antlr4) | Bundled by @zenuml/core |
+| marked | 4.3.0 | MIT AND BSD-3-Clause | [upstream](https://github.com/markedjs/marked) | Bundled by @zenuml/core for Markdown comments |
+| codepointat | 0.2.0 | MIT | [upstream](https://github.com/mathiasbynens/codepointat) | Bundled by the ANTLR 4 JavaScript runtime |
+| fromcodepoint | 0.2.1 | MIT | [upstream](https://github.com/mathiasbynens/fromcodepoint) | Bundled by the ANTLR 4 JavaScript runtime |
 | PDF.js | 4.8.69 | Apache-2.0 | [upstream](https://github.com/mozilla/pdf.js) | app/stage/protyle/js/pdf/ |
 | Adobe CMap resources | Bundled snapshot | BSD-3-Clause | [upstream](https://github.com/adobe-type-tools/cmap-resources) | app/stage/protyle/js/pdf/cmaps/ |
 | PDFium Foxit fonts | Bundled snapshot | BSD-3-Clause | [upstream](https://pdfium.googlesource.com/pdfium/) | app/stage/protyle/js/pdf/standard_fonts/ |
@@ -70,7 +71,7 @@ The component list is informational and does not replace the license terms. Copy
 | PDFium WebAssembly | 7323 | BSD-3-Clause AND Apache-2.0 | [upstream](https://pdfium.googlesource.com/pdfium/+/refs/heads/chromium/7323/) | Embedded by github.com/klippa-app/go-pdfium |
 | Color Icon | 0.0.4 | MIT | [upstream](https://github.com/Glaube-TY/color-icon) | app/appearance/icons/color-icon/ |
 | Simple Icons | 16.21.0 and 16.27.0 | CC0-1.0 | [upstream](https://github.com/simple-icons/simple-icons) | Selected AI provider logos in app/stage/images/ai-providers/ |
-| SVG Logos (@iconify-json/logos) | 1.2.9 | CC0-1.0 | [upstream](https://github.com/gilbarbara/logos) | app/stage/protyle/js/mermaid/icons.json; depicted marks remain subject to trademark rights |
+| SVG Logos (@iconify-json/logos) | 1.2.13 | CC0-1.0 | [upstream](https://github.com/gilbarbara/logos) | app/stage/protyle/js/mermaid/icons.json; depicted marks remain subject to trademark rights |
 | theSVG | Snapshot aa0605996b4ad4fdda98502f84021b3c3a64847d | MIT | [upstream](https://github.com/glincker/thesvg) | Volcengine logo in app/stage/images/ai-providers/ |
 | AI provider brand assets | Bundled snapshots | Upstream brand and trademark terms | [upstream](https://github.com/siyuan-note/siyuan/blob/master/app/stage/images/ai-providers/README.md) | OpenAI, Zhipu AI, SiliconFlow, and other provider marks; exact sources and terms are recorded below |
 | Unicode CLDR emoji annotations | Bundled snapshot | Unicode-3.0 | [upstream](https://github.com/unicode-org/cldr) | Localized names and search keywords in app/appearance/emojis/conf.json |
@@ -5034,67 +5035,38 @@ Expat https://libexpat.github.io
 ### app/stage/protyle/js/mermaid/mermaid-zenuml.min.js
 
 ```text
+/*! @license SiYuan lightweight ZenUML bundle | @mermaid-js/mermaid-zenuml 0.2.3 and @zenuml/core 3.50.1 (MIT); antlr4 4.11.0 (BSD-3-Clause); marked 4.3.0 (MIT); codepointat 0.2.0 and fromcodepoint 0.2.1 (MIT) */
+
 /*! Bundled license information:
 
-@zenuml/core/dist/zenuml.esm.mjs:
-  (**
-   * @license React
-   * react-jsx-runtime.production.js
-   *
-   * Copyright (c) Meta Platforms, Inc. and affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   *)
-  (**
-   * @license React
-   * react.production.js
-   *
-   * Copyright (c) Meta Platforms, Inc. and affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   *)
+antlr4/src/antlr4/polyfills/codepointat.js:
   (*! https://mths.be/codepointat v0.2.0 by @mathias *)
+
+antlr4/src/antlr4/polyfills/fromcodepoint.js:
   (*! https://mths.be/fromcodepoint v0.2.1 by @mathias *)
-  (**
-   * @license React
-   * react-dom.production.js
-   *
-   * Copyright (c) Meta Platforms, Inc. and affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   *)
-  (*! @license DOMPurify 3.2.5 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.2.5/LICENSE *)
-  (**
-   * @license React
-   * scheduler.production.js
-   *
-   * Copyright (c) Meta Platforms, Inc. and affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   *)
-  (**
-   * @license React
-   * react-dom-client.production.js
-   *
-   * Copyright (c) Meta Platforms, Inc. and affiliates.
-   *
-   * This source code is licensed under the MIT license found in the
-   * LICENSE file in the root directory of this source tree.
-   *)
 */
 ```
-
 ### app/stage/protyle/js/mermaid/mermaid.min.js
 
 ```text
 /*! Bundled license information:
 
+lodash-es/lodash.js:
+  (**
+   * @license
+   * Lodash (Custom Build) <https://lodash.com/>
+   * Build: `lodash modularize exports="es" -o ./`
+   * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
+   * Released under MIT license <https://lodash.com/license>
+   * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+   * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+   *)
+*/
+
+/*! Bundled license information:
+
 dompurify/dist/purify.es.mjs:
-  (*! @license DOMPurify 3.3.1 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.3.1/LICENSE *)
+  (*! @license DOMPurify 3.4.0 | (c) Cure53 and other contributors | Released under the Apache license 2.0 and Mozilla Public License 2.0 | github.com/cure53/DOMPurify/blob/3.4.0/LICENSE *)
 
 js-yaml/dist/js-yaml.mjs:
   (*! js-yaml 4.1.1 https://github.com/nodeca/js-yaml @license MIT *)
@@ -5103,7 +5075,7 @@ lodash-es/lodash.js:
   (**
    * @license
    * Lodash (Custom Build) <https://lodash.com/>
-   * Build: `lodash modularize exports="es" -o ./`
+   * Build: `lodash modularize exports="es" --repo lodash/lodash#4.18.1 -o ./`
    * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
    * Released under MIT license <https://lodash.com/license>
    * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
@@ -5127,7 +5099,6 @@ cytoscape/dist/cytoscape.esm.mjs:
   (*! Runge-Kutta spring physics function generator. Adapted from Framer.js, copyright Koen Bok. MIT License: http://en.wikipedia.org/wiki/MIT_License *)
 */
 ```
-
 ### app/stage/protyle/js/protyle-html.js
 
 ```text

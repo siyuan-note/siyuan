@@ -2218,17 +2218,19 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		trafficStat.UploadFileCount, trafficStat.DownloadFileCount, trafficStat.UploadChunkCount, trafficStat.DownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.UploadBytes), 2), humanize.BytesCustomCeil(uint64(trafficStat.DownloadBytes), 2),
 		trafficStat.PeerDownloadFileCount, trafficStat.PeerDownloadChunkCount, humanize.BytesCustomCeil(uint64(trafficStat.PeerDownloadBytes), 2), trafficStat.PeerFallbackCount,
 		elapsed.Seconds(),
-		len(mergeResult.Conflicts), len(mergeResult.Upserts), len(mergeResult.Removes))
+		mergeResult.ConflictCount(), len(mergeResult.Upserts), len(mergeResult.Removes))
 
 	//logSyncMergeResult(mergeResult)
 
 	var needReloadFiletree bool
-	if 0 < len(mergeResult.Conflicts) {
+	conflictCount := mergeResult.ConflictCount()
+	if 0 < conflictCount || mergeResult.HasHistory() {
 		luteEngine := util.NewLute()
-		if Conf.Sync.GenerateConflictDoc {
+		if 0 < conflictCount && Conf.Sync.GenerateConflictDoc {
 			// 云端同步发生冲突时生成副本 https://github.com/siyuan-note/siyuan/issues/5687
 
-			for _, file := range mergeResult.Conflicts {
+			conflictCopyFiles := mergeResult.ConflictCopyFiles()
+			for _, file := range conflictCopyFiles {
 				if !strings.HasSuffix(file.Path, ".sy") {
 					continue
 				}
@@ -2274,14 +2276,16 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				}
 			}
 
-			needReloadFiletree = true
+			needReloadFiletree = 0 < len(conflictCopyFiles)
 		}
 
-		historyDir := filepath.Join(util.HistoryDir, mergeResult.Time.Format("2006-01-02-150405")+"-sync")
-		indexHistoryDir(filepath.Base(historyDir), luteEngine)
+		if mergeResult.HasHistory() {
+			historyDir := filepath.Join(util.HistoryDir, mergeResult.Time.Format("2006-01-02-150405")+"-sync")
+			indexHistoryDir(filepath.Base(historyDir), luteEngine)
+		}
 	}
 
-	if 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) && 1 > len(mergeResult.Conflicts) { // 没有数据变更
+	if !mergeResult.DataChanged() { // 没有数据变更
 		syncSameCount.Add(1)
 		if 10 < syncSameCount.Load() {
 			syncSameCount.Store(5)
@@ -2536,10 +2540,10 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		time.Sleep(2 * time.Second)
 		pushSyncStatusBar(fmt.Sprintf(Conf.Language(149), elapsed.Seconds()))
 
-		if 0 < len(mergeResult.Conflicts) {
+		if 0 < mergeResult.ConflictCount() {
 			syConflict := false
-			for _, file := range mergeResult.Conflicts {
-				if strings.HasSuffix(file.Path, ".sy") {
+			for _, path := range mergeResult.ConflictPaths() {
+				if strings.HasSuffix(path, ".sy") {
 					syConflict = true
 					break
 				}
@@ -2585,16 +2589,17 @@ func removeLANSyncTrafficStat(message string) string {
 }
 
 func logSyncMergeResult(mergeResult *dejavu.MergeResult) {
-	if 1 > len(mergeResult.Conflicts) && 1 > len(mergeResult.Upserts) && 1 > len(mergeResult.Removes) {
+	if !mergeResult.DataChanged() {
 		return
 	}
 
-	if 0 < len(mergeResult.Conflicts) {
+	conflictPaths := mergeResult.ConflictPaths()
+	if 0 < len(conflictPaths) {
 		logBuilder := bytes.Buffer{}
-		for i, f := range mergeResult.Conflicts {
+		for i, path := range conflictPaths {
 			logBuilder.WriteString("  ")
-			logBuilder.WriteString(f.Path)
-			if i < len(mergeResult.Conflicts)-1 {
+			logBuilder.WriteString(path)
+			if i < len(conflictPaths)-1 {
 				logBuilder.WriteString("\n")
 			}
 		}

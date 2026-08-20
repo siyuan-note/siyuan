@@ -319,8 +319,7 @@
     }
 
     &--select,
-    &--hl,
-    &--locate {
+    &--hl {
       &:not(.av__row--header) .av__cell,
       &:not(.av__row--header) .av__firstcol {
         background-color: var(--b3-theme-primary-lightest);
@@ -329,16 +328,6 @@
       .av__firstcol svg {
         opacity: 1;
       }
-    }
-
-    &--locate::before {
-      border: 2px solid var(--b3-theme-primary-lighter);
-      border-radius: var(--b3-border-radius-s);
-      content: '';
-      inset: 1px;
-      pointer-events: none;
-      position: absolute;
-      z-index: 4;
     }
 
     &--header {
@@ -466,7 +455,7 @@
       }
 
       &:hover {
-        &:not(.av__gallery-item--select):not(.av__gallery-item--locate)::before {
+        &:not(.av__gallery-item--select)::before {
           background-color: var(--b3-theme-surface-light);
         }
 
@@ -475,8 +464,7 @@
         }
       }
 
-      &--select::before,
-      &--locate::before {
+      &--select::before {
         background-color: var(--b3-theme-primary-lightest) !important;
         opacity: 1 !important;
       }
@@ -1881,7 +1869,7 @@
           opacity: 0.26;
         }
 
-        &:hover:not(.av__gallery-item--select):not(.av__gallery-item--locate)::before {
+        &:hover:not(.av__gallery-item--select)::before {
           background-color: var(--b3-av-kanban-background);
           opacity: 0.38;
         }

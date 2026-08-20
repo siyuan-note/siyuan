@@ -12,6 +12,7 @@ import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
 import {updateHotkeyTip} from "../protyle/util/compatibility";
 import {escapeAriaLabel} from "../util/escape";
+import {openLink} from "../editor/openLink";
 
 export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
@@ -77,10 +78,10 @@ export const initStatus = (isWindow = false) => {
                     label: window.siyuan.languages.feedback,
                     icon: "iconFeedback",
                     click: () => {
-                        if ("zh-CN" === window.siyuan.config.lang || "zh-TW" === window.siyuan.config.lang) {
-                            window.open("https://ld246.com/article/1649901726096");
+                        if ("zh-CN" === window.siyuan.config.lang) {
+                            openLink(window.siyuan.ws.app, "https://ld246.com/article/1649901726096");
                         } else {
-                            window.open("https://liuyun.io/article/1686530886208");
+                            openLink(window.siyuan.ws.app, "https://liuyun.io/article/1686530886208");
                         }
                     }
                 }).element);
@@ -89,7 +90,7 @@ export const initStatus = (isWindow = false) => {
                     label: window.siyuan.languages.debug,
                     icon: "iconBug",
                     click: () => {
-                        ipcRenderer.send(Constants.SIYUAN_CMD, "openDevTools");
+                        ipcRenderer.send(Constants.SIYUAN_CMD, "toggleDevTools");
                     }
                 }).element);
                 /// #endif
@@ -97,14 +98,14 @@ export const initStatus = (isWindow = false) => {
                     label: window.siyuan.languages["_trayMenu"].officialWebsite,
                     icon: "iconSiYuan",
                     click: () => {
-                        window.open("https://b3log.org/siyuan");
+                        openLink(window.siyuan.ws.app, "https://b3log.org/siyuan");
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages["_trayMenu"].openSource,
                     icon: "iconGithub",
                     click: () => {
-                        window.open("https://github.com/siyuan-note/siyuan");
+                        openLink(window.siyuan.ws.app, "https://github.com/siyuan-note/siyuan");
                     }
                 }).element);
                 const rect = target.getBoundingClientRect();

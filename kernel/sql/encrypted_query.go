@@ -138,6 +138,52 @@ func QueryRefsByDefIDInBox(defBlockID string, containChildren bool, boxID string
 	return
 }
 
+const queryRefsByDefIDsBatchSize = 512
+
+// QueryRefsByDefIDsInBox 按一组定义块 ID 查询引用，按 boxID 路由。
+func QueryRefsByDefIDsInBox(defBlockIDs []string, boxID string) (ret []*Ref) {
+	uniqueDefIDs := make([]string, 0, len(defBlockIDs))
+	seenDefIDs := map[string]struct{}{}
+	for _, defID := range defBlockIDs {
+		if "" == defID {
+			continue
+		}
+		if _, ok := seenDefIDs[defID]; ok {
+			continue
+		}
+		seenDefIDs[defID] = struct{}{}
+		uniqueDefIDs = append(uniqueDefIDs, defID)
+	}
+
+	for start := 0; start < len(uniqueDefIDs); start += queryRefsByDefIDsBatchSize {
+		end := min(start+queryRefsByDefIDsBatchSize, len(uniqueDefIDs))
+		batch := uniqueDefIDs[start:end]
+		placeholders := strings.TrimSuffix(strings.Repeat("?,", len(batch)), ",")
+		args := make([]any, 0, len(batch))
+		for _, defID := range batch {
+			args = append(args, defID)
+		}
+
+		rows, err := queryForBox(boxID, "SELECT * FROM refs WHERE def_block_id IN ("+placeholders+")", args...)
+		if err != nil {
+			logging.LogErrorf("sql query failed: %s", err)
+			return
+		}
+		for rows.Next() {
+			if ref := scanRefRows(rows); nil != ref {
+				ret = append(ret, ref)
+			}
+		}
+		if err = rows.Err(); nil != err {
+			logging.LogErrorf("query rows failed: %s", err)
+			rows.Close()
+			return
+		}
+		rows.Close()
+	}
+	return
+}
+
 // QueryRootChildrenRefCountInBox 按 defRootID 在指定 box 的 db 里查询根文档下各块的引用计数。
 func QueryRootChildrenRefCountInBox(defRootID, boxID string) (ret map[string]int) {
 	ret = map[string]int{}
@@ -496,6 +542,25 @@ func QueryChildRefDefIDsByRootDefIDInBox(rootDefID, boxID string) (ret map[strin
 		} else {
 			ret[defID] = append(ret[defID], refID)
 		}
+	}
+	return
+}
+
+// QueryChildDefIDsByRootDefIDInBox 按定义文档根 ID 查询存在引用的子定义块，按 boxID 路由。
+func QueryChildDefIDsByRootDefIDInBox(rootDefID, boxID string) (ret []string) {
+	rows, err := queryForBox(boxID, "SELECT DISTINCT(def_block_id) FROM refs WHERE def_block_root_id = ?", rootDefID)
+	if err != nil {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id string
+		if err = rows.Scan(&id); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		ret = append(ret, id)
 	}
 	return
 }

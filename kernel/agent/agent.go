@@ -70,6 +70,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 ## Response Guidelines
 - Reply in the language configured in SiYuan's appearance settings.
 - When mentioning documents/blocks the user can open, format them as markdown links: [title](siyuan://blocks/<blockID>). Only use block IDs actually returned by a tool call (block.get/get_children/breadcrumb/batch_get/search); never fabricate IDs. For general mentions without a specific block, plain text is fine.
+- When displaying a SiYuan tag name in chat, render its exact label as <span data-type="tag">label</span>. Keep every label character, including a leading $, inside the span and HTML-escape the label text. Never prefix the label with # or use #label# in chat.
 - Be concise: summarize rather than repeat large content.
 - For choices (which notebook/document/action), use the question tool — never a plain text list.
 - Use markdown; for code blocks always specify the language (e.g. python, go); use $...$ for inline and $...$ for block formulas.
@@ -78,7 +79,7 @@ const systemPrompt = `You are a SiYuan AI assistant. You help users manage their
 
 ## Formatting
 - Inline formatting uses standard markdown: **bold**, *italic*, ~~strikethrough~~, ==mark==, and "code" (backticks).
-- Block references in markdown must use ((<blockID> "<anchor text>")); never use [[<blockID>]], which is not block-reference syntax.
+- In markdown written to SiYuan blocks, block references must include anchor text. Use ((<blockID> "<static anchor text>")) for fixed text, or ((<blockID> '<dynamic anchor text>')) for text that follows the target block's content. Never use ((<blockID>)) or [[<blockID>]]. These forms are for note content; in chat responses use [title](siyuan://blocks/<blockID>).
 - For text styling that markdown cannot express (color, background, font size), use SiYuan text marks.
   The syntax requires a leading data-type="text" attribute — WITHOUT it the HTML is escaped and shown as literal text:
   - Text color:      <span data-type="text" style="color: #ff0000;">red text</span>
@@ -207,6 +208,27 @@ func buildDoomSignature(name, action string, args map[string]any) string {
 		}
 	}
 	return sig.String()
+}
+
+func (tracker *doomLoopTracker) record(name, action string, args map[string]any, failed bool) {
+	if name == "frontend" {
+		return
+	}
+	if !failed {
+		tracker.prevSig = ""
+		tracker.prevName = ""
+		tracker.count = 0
+		return
+	}
+
+	sig := buildDoomSignature(name, action, args)
+	if sig == tracker.prevSig && tracker.prevSig != "" {
+		tracker.count++
+		return
+	}
+	tracker.prevSig = sig
+	tracker.prevName = name
+	tracker.count = 1
 }
 
 var confirmChannelsMu sync.Mutex
@@ -1120,10 +1142,12 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 					RoundID:              roundID,
 				}
 				parsedArgs := make([]map[string]any, len(aggregatedToolCalls))
+				parseErrors := make([]error, len(aggregatedToolCalls))
 				var roundAttachments []AgentAttachment
 				for i, tc := range aggregatedToolCalls {
-					args := parseToolArgs(tc.Function.Arguments)
+					args, parseErr := parseToolArgs(tc.Function.Arguments)
 					parsedArgs[i] = args
+					parseErrors[i] = parseErr
 					checkpointMsg.ToolCalls = append(checkpointMsg.ToolCalls, AgentToolCall{
 						ID:            tc.ID,
 						Name:          tc.Function.Name,
@@ -1170,7 +1194,12 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 						Arguments:  args,
 					})
 
-					toolInputErr := validateCapabilityCall(ctx, registration, args)
+					toolInputErr := parseErrors[i]
+					if toolInputErr != nil {
+						toolInputErr = fmt.Errorf("invalid capability arguments: %w", toolInputErr)
+					} else {
+						toolInputErr = validateCapabilityCall(ctx, registration, args)
+					}
 					requiresConfirm, forcedConfirm := false, false
 					if toolInputErr == nil {
 						requiresConfirm, forcedConfirm = capabilityConfirmRequirement(
@@ -1374,9 +1403,9 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 						resultStr = toolInputErr.Error()
 						isErr = true
 					} else if tc.Function.Name == "question" {
-						resultStr = handleQuestion(ctx, tc.Function.Arguments, roundID, ch, 5*time.Minute)
+						resultStr = handleQuestion(ctx, args, roundID, ch, 5*time.Minute)
 					} else if registration.isBrowser() {
-						executed := handleBrowserCapability(ctx, tc, registration, ch, confirmTimeout)
+						executed := handleBrowserCapability(ctx, tc, registration, args, ch, confirmTimeout)
 						resultStr = executed.Text
 						isErr = executed.IsError
 						executionUnknown = executed.ExecutionUnknown
@@ -1432,26 +1461,10 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 						return
 					}
 
-					// 死循环检测：只有 question/frontend 之外的普通工具参与，
-					// 且仅当本次调用失败或无返回（即"卡住反复重试"的真死循环特征）时才累加计数。
+					// 死循环检测：只有 frontend 之外的工具参与，且仅当本次调用失败或无返回
+					// （即“卡住反复重试”的真死循环特征）时才累加计数。
 					// 成功的工具调用一定产生了有用的副作用，不应计入。
-					if tc.Function.Name != "question" && tc.Function.Name != "frontend" {
-						if isErr || strings.TrimSpace(rawResult) == "" {
-							sig := buildDoomSignature(tc.Function.Name, action, args)
-							if sig == doomLoop.prevSig && doomLoop.prevSig != "" {
-								doomLoop.count++
-							} else {
-								doomLoop.prevSig = sig
-								doomLoop.prevName = tc.Function.Name
-								doomLoop.count = 1
-							}
-						} else {
-							// 成功调用：重置基准，避免误把后续合理调用连成"重复"。
-							doomLoop.prevSig = ""
-							doomLoop.prevName = ""
-							doomLoop.count = 0
-						}
-					}
+					doomLoop.record(tc.Function.Name, action, args, isErr || strings.TrimSpace(rawResult) == "")
 				}
 				if len(roundAttachments) > 0 {
 					// 历史图片的文字分析仍保留在上下文中，只携带最近一轮图片，避免请求体随会话无限增长。
@@ -1712,8 +1725,7 @@ func needsLocalSnapshot(toolName, action string) bool {
 	}
 }
 
-func handleQuestion(ctx context.Context, argsJSON, roundID string, ch chan<- AgentEvent, timeout time.Duration) string {
-	args := parseToolArgs(argsJSON)
+func handleQuestion(ctx context.Context, args map[string]any, roundID string, ch chan<- AgentEvent, timeout time.Duration) string {
 	questionID := ast.NewNodeID()
 	ch2 := make(chan QuestionAnswer, 1)
 	questionChannelsMu.Lock()
@@ -1795,11 +1807,10 @@ func finishConfirmWait(confirmID string, ch chan confirmResult) (confirmResult, 
 
 // handleBrowserCapability 通过 SSE 把前端能力调用发送到浏览器，并等待浏览器回传结果。
 func handleBrowserCapability(ctx context.Context, tc openai.ToolCall, registration *capabilityRegistration,
-	ch chan<- AgentEvent, timeout time.Duration) executedToolResult {
-	if !capabilityStillExecutable(registration, parseToolArgs(tc.Function.Arguments)) {
+	args map[string]any, ch chan<- AgentEvent, timeout time.Duration) executedToolResult {
+	if !capabilityStillExecutable(registration, args) {
 		return executedToolResult{Text: "Browser capability is disabled or no longer available.", IsError: true}
 	}
-	args := parseToolArgs(tc.Function.Arguments)
 	callID := ast.NewNodeID()
 	ch2 := make(chan browserCapabilityResult, 1)
 	browserCapabilityChannelsMu.Lock()

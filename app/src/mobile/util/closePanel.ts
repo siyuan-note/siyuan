@@ -1,7 +1,9 @@
 import {activeBlur} from "./keyboardToolbar";
 import {Constants} from "../../constants";
+import {destroyModel} from "../menu/model";
 
 export const closePanel = () => {
+    destroyModel();
     document.getElementById("menu").style.transform = "";
     document.getElementById("sidebar").style.transform = "";
     document.getElementById("model").style.transform = "";
@@ -15,5 +17,6 @@ export const closePanel = () => {
 
 export const closeModel = () => {
     activeBlur();
+    destroyModel();
     document.getElementById("model").style.transform = "";
 };

@@ -48,11 +48,33 @@ func TestTurnContextStaysInUserMessage(t *testing.T) {
 }
 
 func TestSystemPromptDocumentsBlockReferenceSyntax(t *testing.T) {
-	if !strings.Contains(systemPrompt, `((<blockID> "<anchor text>"))`) {
-		t.Fatal("system prompt is missing the SiYuan block-reference syntax")
+	if !strings.Contains(systemPrompt, `((<blockID> "<static anchor text>"))`) {
+		t.Fatal("system prompt is missing the static SiYuan block-reference syntax")
 	}
-	if !strings.Contains(systemPrompt, `never use [[<blockID>]]`) {
-		t.Fatal("system prompt does not reject bracketed block IDs")
+	if !strings.Contains(systemPrompt, `((<blockID> '<dynamic anchor text>'))`) {
+		t.Fatal("system prompt is missing the dynamic SiYuan block-reference syntax")
+	}
+	if !strings.Contains(systemPrompt, `for fixed text`) ||
+		!strings.Contains(systemPrompt, `for text that follows the target block's content`) {
+		t.Fatal("system prompt does not explain static and dynamic block-reference behavior")
+	}
+	if !strings.Contains(systemPrompt, `Never use ((<blockID>)) or [[<blockID>]]`) {
+		t.Fatal("system prompt does not reject block references without anchor text or bracketed block IDs")
+	}
+	if !strings.Contains(systemPrompt, `in chat responses use [title](siyuan://blocks/<blockID>)`) {
+		t.Fatal("system prompt does not distinguish note-content block references from chat-response links")
+	}
+}
+
+func TestSystemPromptDocumentsTagRendering(t *testing.T) {
+	for _, instruction := range []string{
+		`render its exact label as <span data-type="tag">label</span>`,
+		`including a leading $, inside the span`,
+		`Never prefix the label with # or use #label# in chat`,
+	} {
+		if !strings.Contains(systemPrompt, instruction) {
+			t.Fatalf("system prompt is missing the tag rendering instruction %q", instruction)
+		}
 	}
 }
 

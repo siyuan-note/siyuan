@@ -86,7 +86,7 @@ import {
     type TListSubtype
 } from "./listContext";
 import {newFileContentBySelect, rename, replaceFileName} from "../../editor/rename";
-import {cancelSB, insertEmptyBlock, jumpToParent} from "../../block/util";
+import {cancelSB, insertEmptyBlock, insertEmptySuperBlockColumn, jumpToParent} from "../../block/util";
 import {isEncryptedBox, isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
@@ -838,6 +838,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     (toNext ? getNextBlock(nodeElement) : undefined);
                 if (adjacentElement) {
                     adjacentElement = toPrevious ? getLastBlock(adjacentElement) : getFirstBlock(adjacentElement);
+                    // 显式聚焦空段落，避免浏览器跨越容器边界时跳过该块。
+                    // https://github.com/siyuan-note/siyuan/issues/18862
+                    if ((event.key === "ArrowUp" || event.key === "ArrowDown") && isEmptyParagraph(adjacentElement)) {
+                        focusBlock(adjacentElement, undefined, event.key === "ArrowDown");
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    }
                     if (adjacentElement.classList.contains("av") &&
                         focusAVByArrow(protyle, adjacentElement as HTMLElement, event.key)) {
                         event.stopPropagation();
@@ -2171,6 +2179,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             !isInEmbedBlock(nodeElement)) {
             nodeElement.querySelector(".img--select")?.classList.remove("img--select");
             insertEmptyBlock(protyle, "afterend");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertSuperBlockLeft.custom, event) &&
+            !isInEmbedBlock(nodeElement)) {
+            insertEmptySuperBlockColumn(protyle, "left");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.insertSuperBlockRight.custom, event) &&
+            !isInEmbedBlock(nodeElement)) {
+            insertEmptySuperBlockColumn(protyle, "right");
             event.preventDefault();
             event.stopPropagation();
             return true;

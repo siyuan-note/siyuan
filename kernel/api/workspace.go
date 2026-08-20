@@ -21,7 +21,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -179,7 +178,7 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 
 	path := arg["path"].(string)
 
-	// 硬边界：只允许删除已登记的工作空间目录，禁止删除当前工作空间和任意路径
+	// 硬边界：只允许删除已登记的工作空间目录或新建的空目录，禁止删除当前工作空间和任意路径
 	cleanPath, absErr := filepath.Abs(path)
 	if absErr != nil {
 		ret.Code = -1
@@ -189,14 +188,9 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 	if rejectMobileWorkspaceBaseDir(ret, cleanPath) {
 		return
 	}
-	if cleanPath == util.WorkspaceDir {
+	if util.IsWorkspaceLocked(cleanPath) || cleanPath == util.WorkspaceDir {
 		ret.Code = -1
-		ret.Msg = "cannot remove current workspace"
-		return
-	}
-	if !util.IsWorkspaceDir(cleanPath) {
-		ret.Code = -1
-		ret.Msg = "path is not a workspace directory"
+		ret.Msg = "cannot remove opened workspace"
 		return
 	}
 	knownPaths, err := util.ReadWorkspacePaths()
@@ -205,11 +199,24 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	isKnown := slices.Contains(knownPaths, cleanPath)
-	if !isKnown {
+	remainingPaths := util.RemoveWorkspacePath(knownPaths, cleanPath)
+	if len(remainingPaths) == len(knownPaths) {
 		ret.Code = -1
 		ret.Msg = "path is not a registered workspace"
 		return
+	}
+	if !util.IsWorkspaceDir(cleanPath) {
+		entries, readErr := os.ReadDir(cleanPath)
+		if readErr != nil {
+			ret.Code = -1
+			ret.Msg = readErr.Error()
+			return
+		}
+		if 0 < len(entries) {
+			ret.Code = -1
+			ret.Msg = "path is not a workspace directory"
+			return
+		}
 	}
 
 	if err := os.RemoveAll(cleanPath); err != nil {
@@ -217,11 +224,13 @@ func removeWorkspaceDirPhysically(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if err = util.WriteWorkspacePaths(remainingPaths); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 
 	logging.LogInfof("removed workspace [%s] physically", path)
-	if util.WorkspaceDir == path {
-		os.Exit(logging.ExitCodeOk)
-	}
 }
 
 type Workspace struct {

@@ -1,5 +1,5 @@
-import {focusByWbr, getEditorRange, getUndoFocusContext} from "../protyle/util/selection";
-import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
+import {focusByRange, focusByWbr, getEditorRange, getUndoFocusContext} from "../protyle/util/selection";
+import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {
     getContenteditableElement,
     getEmbedChildOperationParentID,
@@ -18,6 +18,8 @@ import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
 import {mathRender} from "../protyle/render/mathRender";
 import {buildCancelSuperBlockOperations} from "./cancelSuperBlock";
+import {shouldFocusJumpTarget, shouldFocusParentDocumentTitle} from "./jumpToParent";
+import {getHorizontalSuperBlockChild} from "./superBlock";
 
 export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range) => {
     let previousId = getPreviousBlockSibling(nodeElement)?.getAttribute("data-node-id");
@@ -195,23 +197,82 @@ export const refreshSbAndPersistWidth = (sbElement: Element,
 };
 
 export const jumpToParent = (protyle: IProtyle, nodeElement: Element, type: "parent" | "next" | "previous") => {
+    /// #if !MOBILE
+    const previousRange = getEditorRange(nodeElement);
+    /// #endif
     fetchPost("/api/block/getBlockSiblingID", {
         id: nodeElement.getAttribute("data-node-id"),
         notebook: protyle.notebookId,
-    }, (response) => {
+    }, async (response) => {
         const targetId = response.data[type];
         if (!targetId) {
             return;
         }
-        /// #if !MOBILE
-        openFileById({
-            app: protyle.app,
+        const titleElement = protyle.title?.editElement;
+        if (shouldFocusParentDocumentTitle({
+            isRoot: targetId === protyle.block.rootID,
+            hasTitle: Boolean(titleElement),
+            isBacklink: Boolean(protyle.options.backlinkData),
+        })) {
+            /// #if !MOBILE
+            let pushBack: typeof import("../util/backForward").pushBack | undefined;
+            try {
+                ({pushBack} = await import("../util/backForward"));
+            } catch (error) {
+                console.error("Failed to load the back-forward module", error);
+            }
+            /// #endif
+            const focusTitle = () => {
+                const range = titleElement.ownerDocument.createRange();
+                range.selectNodeContents(titleElement);
+                range.collapse(false);
+                focusByRange(range);
+                protyle.toolbar.range = range;
+                protyle.contentElement.scrollTop = 0;
+                /// #if !MOBILE
+                pushBack?.(protyle, range, titleElement);
+                /// #endif
+            };
+            /// #if !MOBILE
+            pushBack?.(protyle, previousRange);
+            /// #endif
+            if (protyle.block.showAll) {
+                const {zoomOut} = await import("../menus/protyle");
+                zoomOut({
+                    protyle,
+                    id: protyle.block.rootID,
+                    callback: focusTitle,
+                    reload: true,
+                });
+            } else {
+                focusTitle();
+            }
+            return;
+        }
+        fetchPost("/api/block/checkBlockFold", {
             id: targetId,
-            action: targetId !== protyle.block.rootID && protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]
+            notebook: protyle.notebookId,
+        }, (foldResponse) => {
+            const targetElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${targetId}"]`))
+                .find(item => !isInEmbedBlock(item));
+            const shouldFocus = shouldFocusJumpTarget({
+                isRoot: targetId === protyle.block.rootID,
+                showAll: protyle.block.showAll,
+                isFolded: foldResponse.data.isFolded,
+                isHidden: !targetElement || targetElement.clientHeight === 0,
+            });
+            const action: TProtyleAction[] = shouldFocus ?
+                [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS];
+            /// #if !MOBILE
+            openFileById({
+                app: protyle.app,
+                id: targetId,
+                action
+            });
+            /// #else
+            openMobileFileById(protyle.app, targetId, action);
+            /// #endif
         });
-        /// #else
-        openMobileFileById(protyle.app, targetId, targetId !== protyle.block.rootID && protyle.block.showAll ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS]);
-        /// #endif
     });
 };
 
@@ -311,6 +372,48 @@ export const insertEmptyBlock = async (protyle: IProtyle, position: InsertPositi
     }
     focusByWbr(protyle.wysiwyg.element, range);
     scrollCenter(protyle);
+};
+
+export const insertEmptySuperBlockColumn = (protyle: IProtyle, position: "left" | "right", target?: Element) => {
+    const range = getEditorRange(protyle.wysiwyg.element);
+    let blockElement = target;
+    if (!blockElement) {
+        const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+        if (selectElements.length > 0) {
+            blockElement = position === "left" ? selectElements[0] : selectElements[selectElements.length - 1];
+        } else {
+            blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
+        }
+    }
+    const columnElement = getHorizontalSuperBlockChild(blockElement, protyle.wysiwyg.element);
+    if (!columnElement) {
+        return false;
+    }
+
+    const undoFocusContext = getUndoFocusContext(protyle.wysiwyg.element, range);
+    hideElements(["select"], protyle);
+    const newElement = genEmptyElement(false, true);
+    const newID = newElement.getAttribute("data-node-id");
+    const doOperations: IOperation[] = [{
+        action: "insert",
+        data: newElement.outerHTML,
+        id: newID,
+        parentID: columnElement.parentElement.getAttribute("data-node-id"),
+        nextID: position === "left" ? columnElement.getAttribute("data-node-id") : undefined,
+        previousID: position === "right" ? columnElement.getAttribute("data-node-id") : undefined,
+    }];
+    const undoOperations: IOperation[] = [{
+        action: "delete",
+        id: newID,
+        context: undoFocusContext,
+    }];
+    protyle.observerLoad?.disconnect();
+    columnElement.insertAdjacentElement(position === "left" ? "beforebegin" : "afterend", newElement);
+    refreshSbAndPersistWidth(columnElement.parentElement, doOperations, undoOperations);
+    transaction(protyle, doOperations, undoOperations);
+    focusByWbr(protyle.wysiwyg.element, range);
+    scrollCenter(protyle);
+    return true;
 };
 
 export const genEmptyBlock = (zwsp = true, wbr = true, string?: string) => {

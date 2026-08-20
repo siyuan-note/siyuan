@@ -105,6 +105,68 @@ func TestConvertSchemaPreservesRawJSONSchema(t *testing.T) {
 	}
 }
 
+func TestParseToolArgsPreservesNestedValues(t *testing.T) {
+	args, err := parseToolArgs(
+		`{"todos":[{"content":"Task","status":"in_progress"}],"enabled":true,"count":2}`,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	todos, ok := args["todos"].([]any)
+	if !ok || len(todos) != 1 {
+		t.Fatalf("unexpected todos: %#v", args["todos"])
+	}
+	todo, ok := todos[0].(map[string]any)
+	if !ok || todo["content"] != "Task" || todo["status"] != "in_progress" {
+		t.Fatalf("unexpected todo: %#v", todos[0])
+	}
+	if args["enabled"] != true || args["count"] != float64(2) {
+		t.Fatalf("unexpected primitive values: %#v", args)
+	}
+}
+
+func TestParseToolArgsDoesNotRewriteValidStrings(t *testing.T) {
+	args, err := parseToolArgs(`{"arguments":"{\"value\":1}","enabled":"true"}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if args["arguments"] != `{"value":1}` || args["enabled"] != "true" {
+		t.Fatalf("string values were rewritten: %#v", args)
+	}
+
+	empty, err := parseToolArgs(" ")
+	if err != nil || len(empty) != 0 {
+		t.Fatalf("empty arguments were not accepted: %#v, %v", empty, err)
+	}
+}
+
+func TestParseToolArgsRejectsInvalidJSON(t *testing.T) {
+	if _, err := parseToolArgs(`{"questions":[`); err == nil {
+		t.Fatal("invalid JSON was accepted")
+	}
+	if _, err := parseToolArgs(`null`); err == nil {
+		t.Fatal("null arguments were accepted")
+	}
+	if _, err := parseToolArgs(`[]`); err == nil {
+		t.Fatal("array arguments were accepted")
+	}
+}
+
+func TestDoomLoopTracksFailedQuestionCalls(t *testing.T) {
+	var tracker doomLoopTracker
+	for i := 0; i < doomLoopStopThreshold; i++ {
+		tracker.record("question", "", map[string]any{}, true)
+	}
+	if tracker.count != doomLoopStopThreshold || tracker.prevName != "question" {
+		t.Fatalf("failed question calls were not tracked: %#v", tracker)
+	}
+
+	tracker.record("question", "", map[string]any{}, false)
+	if tracker.count != 0 || tracker.prevSig != "" || tracker.prevName != "" {
+		t.Fatalf("successful question call did not reset tracker: %#v", tracker)
+	}
+}
+
 func TestResultToStringUsesStructuredContent(t *testing.T) {
 	result := resultToString(tools.CallToolResult{
 		StructuredContent: map[string]any{"status": "ok"},
@@ -386,7 +448,7 @@ func TestQuestionEventIncludesRoundID(t *testing.T) {
 	events := make(chan AgentEvent, 1)
 	resultCh := make(chan string, 1)
 	go func() {
-		resultCh <- handleQuestion(context.Background(), `{"questions":[]}`, roundID, events, time.Second)
+		resultCh <- handleQuestion(context.Background(), map[string]any{"questions": []any{}}, roundID, events, time.Second)
 	}()
 
 	event := <-events
@@ -457,7 +519,7 @@ func TestBrowserCapabilityValidatesStructuredOutput(t *testing.T) {
 	go func() {
 		resultCh <- handleBrowserCapability(context.Background(), openai.ToolCall{
 			Function: openai.FunctionCall{Name: validationTool.Name, Arguments: `{}`},
-		}, registration, events, time.Second)
+		}, registration, map[string]any{}, events, time.Second)
 	}()
 	event := <-events
 	if event.Type != "browser_capability_call" {

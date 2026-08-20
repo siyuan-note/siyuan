@@ -471,12 +471,15 @@ export const addAssetLink = (protyle: IProtyle, cellElements: HTMLElement[], tar
         iconHTML: "",
         type: "readonly",
         label: assetType === "image" ? `${window.siyuan.languages.insertImgURL}
-<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px;resize: vertical;" class="b3-text-field"></textarea>` : `${window.siyuan.languages.link}
-<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px;resize: vertical;" class="b3-text-field"></textarea>
+<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"};resize: vertical;" class="b3-text-field"></textarea>` : `${window.siyuan.languages.link}
+<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"};resize: vertical;" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
 ${window.siyuan.languages.title}
-<textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;resize: vertical;" rows="1" class="b3-text-field"></textarea>`,
+<textarea style="width: ${isMobile() ? "100%" : "360px"};margin: 4px 0;resize: vertical;" rows="1" class="b3-text-field"></textarea>`,
     });
+    /// #if MOBILE
+    menu.fullscreen();
+    /// #else
     const rect = target.getBoundingClientRect();
     menu.open({
         x: rect.right,
@@ -484,6 +487,7 @@ ${window.siyuan.languages.title}
         w: target.parentElement.clientWidth + 8,
         h: rect.height,
     });
+    /// #endif
     menu.element.querySelector("textarea").focus();
 };
 

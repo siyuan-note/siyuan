@@ -481,7 +481,7 @@ func Timing(c *gin.Context) {
 	c.Next()
 	elapsed := int(time.Now().UnixMilli() - now)
 	if timing < elapsed {
-		logging.LogWarnf("[%s] elapsed [%dms]", c.Request.RequestURI, elapsed)
+		logging.LogWarnf("[%s] elapsed [%dms]", p, elapsed)
 		util.PushMsg(Conf.Language(tip), 7000)
 	}
 }

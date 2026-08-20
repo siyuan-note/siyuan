@@ -489,9 +489,13 @@ func TestPublishReaderCannotBrowseEncryptedNotebook(t *testing.T) {
 		docID = "20260726000001-encrypt"
 	)
 	oldDataDir := util.DataDir
+	oldConf := model.Conf
 	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.FileTree = conf.NewFileTree()
 	t.Cleanup(func() {
 		util.DataDir = oldDataDir
+		model.Conf = oldConf
 	})
 
 	boxConf := conf.NewBoxConf()

@@ -237,13 +237,17 @@
 
       &__items {
         min-height: 0;
-        overscroll-behavior: contain;
       }
 
       &__submenu {
         top: 56px;
         left: 100%;
       }
+    }
+
+    & > .b3-menu__items,
+    & .b3-menu__submenu {
+      overscroll-behavior: contain;
     }
 
     & .b3-menu__submenu .b3-menu__submenu {

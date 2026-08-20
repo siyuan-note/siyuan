@@ -408,6 +408,24 @@
       }
     }
 
+    &__filter-row {
+      align-items: center;
+      flex: 1 1 240px;
+      gap: 8px;
+      min-width: 0;
+
+      > .b3-text-field {
+        flex: 1;
+        max-width: 240px;
+        min-width: 0;
+      }
+
+      > .counter {
+        flex-shrink: 0;
+        margin-left: auto;
+      }
+    }
+
     &__tabs,
     &__tools {
       align-items: center;
@@ -476,6 +494,10 @@
       &--outline {
         --b3-icon-star-fill: none;
       }
+    }
+
+    [data-type="rate-package"][data-user-rating] > svg {
+      --b3-icon-star-fill: currentColor;
     }
 
     &__rating-stars {
@@ -613,7 +635,64 @@
     &__readme {
       padding: 16px 16px 16px 0;
 
+      .config-bazaar__deprecated {
+        background-color: var(--b3-card-warning-background);
+        border-radius: var(--b3-border-radius);
+        margin: 8px 0;
+        padding: 10px 12px;
+        text-align: left;
+
+        &-title {
+          color: var(--b3-card-warning-color);
+          font-size: 14px;
+          font-weight: 600;
+          line-height: 20px;
+        }
+
+        &-reason {
+          color: var(--b3-theme-on-background);
+          line-height: 20px;
+          margin-top: 4px;
+          overflow-wrap: anywhere;
+        }
+
+        &-alternatives {
+          align-items: center;
+          display: flex;
+          gap: 8px;
+          margin-top: 8px;
+        }
+
+        &-label {
+          color: var(--b3-theme-on-surface);
+          flex-shrink: 0;
+          font-size: 12px;
+          line-height: 20px;
+        }
+
+        &-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          min-width: 0;
+        }
+
+        &-button {
+          appearance: none;
+          border: 0;
+          font-family: inherit;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+
       .item {
+        &__body {
+          display: contents;
+        }
+
         &__side {
           text-align: center;
           width: 260px;
@@ -1004,7 +1083,7 @@
       &--toggleable {
         cursor: pointer;
 
-        &:has([data-entry-readonly]),
+        &.config-entry-visibility__row--readonly,
         &.config-entry-visibility__row--disabled {
           cursor: not-allowed;
         }

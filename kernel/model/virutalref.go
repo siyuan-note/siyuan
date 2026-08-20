@@ -301,35 +301,7 @@ func getVirtualRefKeywords(root *ast.Node, boxIDs ...string) (ret []string) {
 		ret = gulu.Str.RemoveDuplicatedElem(ret)
 	}
 
-	excludes := parseKeywords(Conf.Editor.VirtualBlockRefExclude)
-	if 0 < len(excludes) {
-		var tmp, regexps []string
-		for _, e := range excludes {
-			if strings.HasPrefix(e, "/") && strings.HasSuffix(e, "/") {
-				regexps = append(regexps, e[1:len(e)-1])
-			} else {
-				tmp = append(tmp, e)
-			}
-		}
-		excludes = tmp
-		ret = gulu.Str.ExcludeElem(ret, excludes)
-		if 0 < len(regexps) {
-			tmp = nil
-			for _, str := range ret {
-				matchExclude := false
-				for _, re := range regexps {
-					if ok, _ := regexp.MatchString(re, str); ok {
-						matchExclude = true
-						break
-					}
-				}
-				if !matchExclude {
-					tmp = append(tmp, str)
-				}
-			}
-			ret = tmp
-		}
-	}
+	ret = excludeKeywords(ret, Conf.Editor.VirtualBlockRefExclude)
 
 	// 虚拟引用排除当前文档名 https://github.com/siyuan-note/siyuan/issues/4537
 	// Virtual references exclude the name and aliases from the current document https://github.com/siyuan-note/siyuan/issues/9204
@@ -345,6 +317,43 @@ func getVirtualRefKeywords(root *ast.Node, boxIDs ...string) (ret []string) {
 	}
 
 	ret = prepareMarkKeywords(ret)
+	return
+}
+
+func excludeKeywords(keywords []string, excludesStr string) (ret []string) {
+	excludes := parseKeywords(excludesStr)
+	if 0 < len(excludes) {
+		var tmp []string
+		var regexps []*regexp.Regexp
+		for _, e := range excludes {
+			if 2 <= len(e) && strings.HasPrefix(e, "/") && strings.HasSuffix(e, "/") {
+				if re, err := regexp.Compile(e[1 : len(e)-1]); nil == err {
+					regexps = append(regexps, re)
+				}
+			} else {
+				tmp = append(tmp, e)
+			}
+		}
+		excludes = tmp
+		keywords = gulu.Str.ExcludeElem(keywords, excludes)
+		if 0 < len(regexps) {
+			tmp = nil
+			for _, str := range keywords {
+				matchExclude := false
+				for _, re := range regexps {
+					if re.MatchString(str) {
+						matchExclude = true
+						break
+					}
+				}
+				if !matchExclude {
+					tmp = append(tmp, str)
+				}
+			}
+			keywords = tmp
+		}
+	}
+	ret = keywords
 	return
 }
 

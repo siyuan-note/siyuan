@@ -11,6 +11,38 @@ export const getBazaarCompatibilityData = <T extends object>(
     fallback: T,
 ) => source === "downloaded" ? installed ?? fallback : available ?? installed ?? fallback;
 
+type TBazaarDeprecationFields = {
+    deprecated?: boolean;
+    deprecatedReason?: Record<string, string>;
+    preferredDeprecatedReason?: string;
+    alternatives?: string[];
+};
+
+export const getBazaarDeprecationData = <T extends object>(
+    installed: T | undefined,
+    available: T | undefined,
+    fallback: T,
+) => available ?? installed ?? fallback;
+
+export const applyBazaarPackageDeprecation = <T extends TBazaarDeprecationFields>(
+    installed: T,
+    available?: TBazaarDeprecationFields,
+) => {
+    if (available?.deprecated !== true) {
+        delete installed.deprecated;
+        delete installed.deprecatedReason;
+        delete installed.preferredDeprecatedReason;
+        delete installed.alternatives;
+        return;
+    }
+    installed.deprecated = true;
+    installed.deprecatedReason = available.deprecatedReason ? {...available.deprecatedReason} : {};
+    installed.preferredDeprecatedReason = typeof available.preferredDeprecatedReason === "string" ?
+        available.preferredDeprecatedReason : "";
+    installed.alternatives = Array.isArray(available.alternatives) ?
+        available.alternatives.filter((item): item is string => typeof item === "string") : [];
+};
+
 export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     const isPlugin = packageType === "plugins";
     const isTheme = packageType === "themes";
@@ -162,6 +194,35 @@ export const normalizeBazaarPackageRatingsResponse = (
             ...(normalized.rating ? {rating: normalized.rating} : {}),
         } : {ratingAvailable: false});
     });
+    return result;
+};
+
+export const normalizeBazaarPackageUserRatingsResponse = (
+    packageNames: string[],
+    data: {eligiblePackageNames?: unknown, userRatings?: unknown} | null | undefined,
+) => {
+    if (!Array.isArray(data?.eligiblePackageNames) ||
+        data.eligiblePackageNames.some((packageName) => typeof packageName !== "string") ||
+        !data.userRatings || typeof data.userRatings !== "object" || Array.isArray(data.userRatings)) {
+        return;
+    }
+    const requestedPackageNames = new Set(packageNames);
+    const eligiblePackageNames = new Set(data.eligiblePackageNames as string[]);
+    const userRatings = data.userRatings as Record<string, unknown>;
+    if (eligiblePackageNames.size !== data.eligiblePackageNames.length ||
+        Array.from(eligiblePackageNames).some((packageName) => !requestedPackageNames.has(packageName)) ||
+        Object.keys(userRatings).length !== eligiblePackageNames.size ||
+        Object.keys(userRatings).some((packageName) => !eligiblePackageNames.has(packageName))) {
+        return;
+    }
+    const result = new Map<string, number>();
+    for (const packageName of eligiblePackageNames) {
+        const rating = normalizeBazaarUserRating(userRatings[packageName]);
+        if (rating === undefined) {
+            return;
+        }
+        result.set(packageName, rating);
+    }
     return result;
 };
 

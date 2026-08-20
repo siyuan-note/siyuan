@@ -194,9 +194,12 @@ const orderEntryNodes = (profile: Config.IEntryVisibilityProfile, parentPath: st
 };
 
 const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string, item: IEntryCatalogNode,
-                           parentEnabled: boolean, readOnly: boolean) => `<input class="b3-switch" type="checkbox"
-    aria-label="${escapeAttr(item.label())}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
+                           parentEnabled: boolean, readOnly: boolean) => {
+    const label = item.type === "separator" ? window.siyuan.languages.entrySeparator : item.label();
+    return `<input class="b3-switch" type="checkbox"
+    aria-label="${escapeAttr(label)}" data-entry-path="${escapeAttr(path)}"${readOnly ? ' data-entry-readonly aria-disabled="true"' : ""}
     ${!parentEnabled && !readOnly ? " disabled" : ""}${getProfileEntryVisibility(profile, path) ? " checked" : ""}>`;
+};
 
 const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
                            nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
@@ -210,17 +213,19 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
         const path = `${prefix}.${item.key}`;
         const draggable = sortable && parentEnabled;
         if (item.type === "separator") {
-            return `<div class="config-entry-visibility__row config-entry-visibility__row--separator"
+            return `<div class="config-entry-visibility__row config-entry-visibility__row--separator${parentEnabled ? "" : " config-entry-visibility__row--disabled"}${readOnly ? " config-entry-visibility__row--readonly" : ""}"
                 data-entry-row data-entry-key="${escapeAttr(item.key)}" data-entry-parent="${escapeAttr(prefix)}">
                 ${draggable ? '<span class="config-entry-visibility__drag" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></span>' : ""}
                 <span class="config-entry-visibility__label">${window.siyuan.languages.entrySeparator}</span>
+                ${renderEntrySwitch(profile, path, item, parentEnabled, readOnly)}
+                <span class="config-entry-visibility__arrow-space"></span>
             </div>`;
         }
         const label = item.label();
         const hasChildren = Boolean(item.children?.length);
         const selected = selectedPaths[depth] === path;
         const rowTag = hasChildren ? "div" : "label";
-        return `<${rowTag} class="config-entry-visibility__row config-entry-visibility__row--${hasChildren ? "navigable" : "toggleable"}${selected ? " config-entry-visibility__row--current" : ""}${parentEnabled ? "" : " config-entry-visibility__row--disabled"}"
+        return `<${rowTag} class="config-entry-visibility__row config-entry-visibility__row--${hasChildren ? "navigable" : "toggleable"}${selected ? " config-entry-visibility__row--current" : ""}${parentEnabled ? "" : " config-entry-visibility__row--disabled"}${readOnly ? " config-entry-visibility__row--readonly" : ""}"
             data-entry-row data-entry-key="${escapeAttr(item.key)}" data-entry-parent="${escapeAttr(prefix)}" data-entry-path-row="${escapeAttr(path)}"${hasChildren ? ` data-action="navigate-entry" data-entry-path="${escapeAttr(path)}" data-entry-depth="${depth}"` : ""}>
             ${draggable ? '<span class="config-entry-visibility__drag" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></span>' : ""}
             ${hasChildren ? `<button class="config-entry-visibility__navigate" data-action="navigate-entry"

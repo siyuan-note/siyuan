@@ -436,7 +436,9 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         id: "insertRight",
         label: window.siyuan.languages.insertRight,
         icon: "iconLayoutRight",
-        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/" + updateHotkeyTip("⌥" + window.siyuan.languages.click),
+        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom +
+            (window.siyuan.config.keymap.editor.general.insertRight.custom ? "/" : "") +
+            updateHotkeyTip("⌥" + window.siyuan.languages.click),
         click() {
             checkFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {

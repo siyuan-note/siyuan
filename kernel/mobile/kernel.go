@@ -97,6 +97,10 @@ func LANSyncActive() bool {
 // UpdateLocalIPs 更新原生容器提供的局域网地址并刷新局域网同步服务。
 func UpdateLocalIPs(localIPs string) {
 	util.SetLocalIPs(strings.Split(localIPs, ","))
+	serverAddrs := util.GetServerAddrs()
+	if model.UpdateServerAddrs(serverAddrs) {
+		util.BroadcastByType("main", "setServerAddrs", 0, "", serverAddrs)
+	}
 	model.RefreshLANSyncNetwork()
 }
 

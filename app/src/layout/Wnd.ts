@@ -42,7 +42,6 @@ import {hideAllElements} from "../protyle/ui/hideElements";
 import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 import {Custom} from "./dock/Custom";
 import type {App} from "../index";
-import {pauseImageAnimation, resumeImageAnimation} from "../protyle/util/imageAnimation";
 import {unicode2Emoji} from "../emoji";
 import {closeWindow} from "../window/closeWin";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
@@ -54,7 +53,13 @@ import {recordBeforeResizeTop} from "../protyle/util/resize";
 import {sanitizeClosedTabs, setStorageVal} from "../protyle/util/compatibility";
 import {setTitle} from "../util/processTitle";
 import {dragOverScroll} from "../boot/globalEvent/dragover";
-import {clearTabDragPreview, findNextTabId, reorderTabItems} from "./tabDrag";
+import {
+    clearTabDragPreview,
+    clearTabHoverSwitch,
+    findNextTabId,
+    reorderTabItems,
+    scheduleTabHoverSwitch
+} from "./tabDrag";
 
 const createDragTabPlaceholder = () => {
     const dragTab = window.siyuan.dragTab;
@@ -185,7 +190,9 @@ export class Wnd {
         });
         const tabHeadersElement = this.headersElement.parentElement;
         tabHeadersElement.addEventListener("dragleave", (event: DragEvent) => {
-            if (!event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
+            const isBlockDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK);
+            const isTabDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB);
+            if (!isBlockDrag && !isTabDrag) {
                 return;
             }
             const relatedTarget = event.relatedTarget;
@@ -195,13 +202,34 @@ export class Wnd {
             const rect = tabHeadersElement.getBoundingClientRect();
             if (event.clientX < rect.left || event.clientX > rect.right ||
                 event.clientY < rect.top || event.clientY > rect.bottom) {
-                clearTabDragPreview(tabHeadersElement);
+                if (isBlockDrag) {
+                    clearTabHoverSwitch();
+                }
+                if (isTabDrag) {
+                    clearTabDragPreview(tabHeadersElement);
+                }
             }
         });
-        tabHeadersElement.addEventListener("dragover", function (event: DragEvent & {
+        tabHeadersElement.addEventListener("dragover", (event: DragEvent & {
             target: HTMLElement
-        }) {
-            const it = this as HTMLElement;
+        }) => {
+            const it = event.currentTarget as HTMLElement;
+            if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK)) {
+                const tabHeaderElement = hasClosestByAttribute(event.target, "data-type", "tab-header");
+                if (!tabHeaderElement || !this.headersElement.contains(tabHeaderElement) ||
+                    tabHeaderElement.classList.contains("item--focus")) {
+                    clearTabHoverSwitch();
+                    return;
+                }
+                scheduleTabHoverSwitch(tabHeaderElement.dataset.id, () => {
+                    if (this.headersElement.contains(tabHeaderElement) &&
+                        !tabHeaderElement.classList.contains("item--focus") && !pdfIsLoading(this.element)) {
+                        this.switchTab(tabHeaderElement, true);
+                    }
+                }, Constants.TIMEOUT_TAB_SWITCH);
+                return;
+            }
+            clearTabHoverSwitch();
             const isFileDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE);
             const isTabDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB);
             if (!isFileDrag && !isTabDrag) {
@@ -276,6 +304,7 @@ export class Wnd {
         tabHeadersElement.addEventListener("drop", function (event: DragEvent & {
             target: HTMLElement
         }) {
+            clearTabHoverSwitch();
             const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 // 文档树拖拽
@@ -541,12 +570,10 @@ export class Wnd {
                         }
                     }
                     item.panelElement.classList.remove("fn__none");
-                    resumeImageAnimation(item.panelElement, Constants.TIMEOUT_INPUT);
                 }
                 currentTab = item;
             } else {
                 item.headElement?.classList.remove("item--focus");
-                pauseImageAnimation(item.panelElement);
                 if (!item.panelElement.classList.contains("fn__none")) {
                     // 必须现判断，否则会触发 observer.observe(this.element, {attributeFilter: ["class"]}); 导致 https://ld246.com/article/1641198819303
                     item.panelElement.classList.add("fn__none");

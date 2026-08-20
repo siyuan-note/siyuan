@@ -3,6 +3,13 @@ import {readFileSync} from "node:fs";
 import {resolve} from "node:path";
 import test from "node:test";
 import {
+    DESKTOP_TOOLBAR_ENTRIES,
+    getDefaultToolbar,
+    getPluginToolbarEntryKey,
+    markPluginToolbarEntries,
+    TOOLBAR_ENTRY_ROOT_PATH,
+} from "../../protyle/toolbar/defaults";
+import {
     entryCatalog,
     getEntryCatalogChildren,
     getEntryCatalogNode,
@@ -15,6 +22,7 @@ import {
     getSlashMenuEntryPath,
     isEntryOrderSortable,
     refreshSlashMenuCatalog,
+    refreshToolbarCatalog,
     SLASH_MENU_ROOT_PATH,
 } from "./catalog";
 
@@ -94,9 +102,7 @@ test("entry catalog paths are unique and indexed", () => {
     const visit = (prefix: string, nodes: typeof entryCatalog[number]["children"]) => {
         nodes.forEach((item) => {
             const path = `${prefix}.${item.key}`;
-            if (item.type === "entry") {
-                paths.push(path);
-            }
+            paths.push(path);
             assert.equal(getEntryCatalogNode(path), item);
             assert.equal(getEntryParentPath(path), prefix);
             if (item.children) {
@@ -107,6 +113,40 @@ test("entry catalog paths are unique and indexed", () => {
     entryCatalog.forEach((section) => visit(section.key, section.children));
     assert.equal(new Set(paths).size, paths.length);
     assert.deepEqual(new Set(getEntryPaths()), new Set(paths));
+});
+
+test("toolbar catalog follows the default toolbar declaration", () => {
+    const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH);
+    assert.deepEqual(children.map((item) => item.key), DESKTOP_TOOLBAR_ENTRIES.map((item) => item.key));
+    assert.equal(children.filter((item) => item.type === "separator").length, 2);
+    assert.equal(children.every((item) => item.simple), true);
+});
+
+test("toolbar catalog follows plugin insertion slots and removes unloaded plugin entries", () => {
+    const defaults = getDefaultToolbar(false).map((item) => typeof item === "string" ? {name: item} : item);
+    const pluginItem = {name: "shared.item"};
+    const pluginKey = getPluginToolbarEntryKey("plugin.name", pluginItem.name);
+    const pluginSeparatorKey = getPluginToolbarEntryKey("plugin.name", "1", "separator");
+    try {
+        const toolbar = markPluginToolbarEntries(defaults,
+            [defaults[0], pluginItem, "|", ...defaults.slice(1)], "plugin.name", () => "Plugin Name - Shared Item")
+            .map((item) => typeof item === "string" ? {name: item} : item);
+        refreshToolbarCatalog(toolbar);
+        const children = getEntryCatalogChildren(TOOLBAR_ENTRY_ROOT_PATH);
+        assert.deepEqual(children.slice(0, 4).map((item) => item.key), [
+            DESKTOP_TOOLBAR_ENTRIES[0].key,
+            pluginKey,
+            pluginSeparatorKey,
+            DESKTOP_TOOLBAR_ENTRIES[1].key,
+        ]);
+        assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`)?.label(),
+            "Plugin Name - Shared Item");
+        assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginSeparatorKey}`)?.type, "separator");
+        assert.equal(getEntryParentPath(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`), TOOLBAR_ENTRY_ROOT_PATH);
+    } finally {
+        refreshToolbarCatalog(defaults);
+    }
+    assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`), undefined);
 });
 
 test("slash menu catalog follows the built-in hint order", () => {
@@ -263,6 +303,7 @@ test("entry order sortability follows its section and parent entry", () => {
     assert.equal(isEntryOrderSortable("missing"), false);
     assert.equal(getEntryOrderParents().includes("editor.slash"), false);
     assert.equal(getEntryOrderParents().includes(SLASH_MENU_ROOT_PATH), true);
+    assert.equal(getEntryOrderParents().includes(TOOLBAR_ENTRY_ROOT_PATH), true);
 });
 
 test("conditional block resource menus have distinct configuration labels", () => {
@@ -345,6 +386,17 @@ test("super block actions and vertical alignment use their respective menu group
         "separator_verticalAlign",
     ]);
     assert.equal(getEntryCatalogChildren("gutter.multi.layout").some((item) => item.key === "alignTop"), false);
+});
+
+test("super block column insertion actions follow block insertion actions", () => {
+    const keys = getEntryCatalogChildren("gutter.single").map((item) => item.key);
+    const insertBeforeIndex = keys.indexOf("insertBefore");
+    assert.deepEqual(keys.slice(insertBeforeIndex, insertBeforeIndex + 4), [
+        "insertBefore",
+        "insertAfter",
+        "insertSuperBlockLeft",
+        "insertSuperBlockRight",
+    ]);
 });
 
 test("table block width actions keep current-column and whole-table scopes together", () => {

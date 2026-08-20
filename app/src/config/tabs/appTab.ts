@@ -146,14 +146,21 @@ const mountAppWorkspaceSlot = (root: HTMLElement) => {
                 if (!removePath) {
                     break;
                 }
-                fetchPost("/api/system/removeWorkspaceDir", {path: removePath}, () => {
-                    renderWorkspaceList(workspaceDirElement);
-                    confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", removePath), () => {
-                        fetchPost("/api/system/removeWorkspaceDirPhysically", {path: removePath});
-                    }, undefined, true);
-                });
                 event.preventDefault();
                 event.stopPropagation();
+                if (removePath === window.siyuan.config.system.workspaceDir) {
+                    fetchPost("/api/system/removeWorkspaceDir", {path: removePath});
+                    break;
+                }
+                confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", removePath), () => {
+                    fetchPost("/api/system/removeWorkspaceDirPhysically", {path: removePath}, () => {
+                        renderWorkspaceList(workspaceDirElement);
+                    });
+                }, () => {
+                    fetchPost("/api/system/removeWorkspaceDir", {path: removePath}, () => {
+                        renderWorkspaceList(workspaceDirElement);
+                    });
+                }, true);
                 break;
             } else if (target.classList.contains("b3-list-item") && !target.classList.contains("b3-list-item--focus")) {
                 const workspacePath = target.getAttribute("data-path");

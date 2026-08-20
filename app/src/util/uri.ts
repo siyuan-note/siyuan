@@ -10,43 +10,41 @@ import {fetchPost} from "./fetch";
 import {checkFold} from "./noRelyPCFunction";
 import {openMobileFileById} from "../mobile/editor";
 import {isValidBazaarPackageName} from "./bazaarPackage";
+import {isBazaarAvailable} from "./bazaarAvailability";
 
 import type {App} from "../index";
-import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
+import {openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
+
+const bazaarTypes = new Set<TBazaarType>(["plugins", "themes", "icons", "templates", "widgets"]);
 
 const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
     const blockInfo = parseSiYuanUriInfo(uriObj);
     if (blockInfo != null) {
         const {id, focus} = blockInfo;
-        if (blockInfo.avItemID) {
-            queueAVLocateRequest(id, {
-                itemID: blockInfo.avItemID,
-                viewID: blockInfo.avViewID,
-                groupID: blockInfo.avGroupID,
-            });
-        }
         window.siyuan.editorIsFullscreen = blockInfo.fullscreen;
         fetchPost("/api/block/checkBlockExist", { id }, existResponse => {
             if (existResponse.data) {
                 checkFold(id, (zoomIn) => {
+                    if (blockInfo.avItemID) {
+                        void openDatabaseItem(app, {
+                            databaseBlockID: id,
+                            itemID: blockInfo.avItemID,
+                            viewID: blockInfo.avViewID,
+                            groupID: blockInfo.avGroupID,
+                        });
+                        return;
+                    }
                     /// #if !MOBILE
                     openFileById({
                         app,
                         id,
-                        action: blockInfo.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
-                            ((zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]),
-                        zoomIn: blockInfo.avItemID ? false : zoomIn || focus,
-                        afterOpen: (model) => {
-                            const protyle = (model as { editor?: { protyle?: IProtyle } })?.editor?.protyle;
-                            if (protyle) {
-                                activateQueuedAVLocate(protyle, id);
-                            }
-                        },
+                        action: (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
+                            [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                        zoomIn: zoomIn || focus,
                     });
                     /// #else
-                    openMobileFileById(app, id, blockInfo.avItemID ? [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL] :
-                        ((zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]),
-                    undefined, undefined, blockInfo.avItemID ? (protyle) => activateQueuedAVLocate(protyle, id) : undefined);
+                    openMobileFileById(app, id, (zoomIn || focus) ? [Constants.CB_GET_FOCUS, Constants.CB_GET_HL, Constants.CB_GET_ALL] :
+                        [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                     /// #endif
                 });
                 /// #if !BROWSER
@@ -122,9 +120,14 @@ const processSiYuanUriPlugins = (app: App, uriObj: URL): boolean => {
 };
 
 const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
-    /// #if !MOBILE
+    if (!isBazaarAvailable()) {
+        return false;
+    }
     const [, _type, _name, target] = uriObj.pathname.split("/");
     if (!_type || !_name) return false;
+    if (!bazaarTypes.has(_type as TBazaarType)) {
+        return false;
+    }
     const resourceType = _type as TBazaarType;
     let resourceName: string;
     try {
@@ -150,7 +153,6 @@ const processSiYuanUriBazaar = (app: App, uriObj: URL): boolean => {
         default:
             break;
     }
-    /// #endif
     return false;
 };
 

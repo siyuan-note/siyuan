@@ -86,13 +86,13 @@ func TestGetAttributeViewSearchMatches(t *testing.T) {
 	}
 }
 
-func TestAppendAttributeViewSearchItemIDs(t *testing.T) {
+func TestAppendAttributeViewSearchItems(t *testing.T) {
 	hiddenGroup := &av.Table{
-		BaseInstance: &av.BaseInstance{GroupHidden: 2},
+		BaseInstance: &av.BaseInstance{ID: "20260726000000-grouphid", GroupHidden: 2},
 		Rows:         []*av.TableRow{{ID: "20260726000000-hiddena"}},
 	}
 	visibleGroup := &av.Table{
-		BaseInstance: &av.BaseInstance{},
+		BaseInstance: &av.BaseInstance{ID: "20260726000000-groupvis"},
 		Rows: []*av.TableRow{
 			{ID: "20260726000000-visiblea"},
 			{ID: "20260726000000-visibleb"},
@@ -100,16 +100,29 @@ func TestAppendAttributeViewSearchItemIDs(t *testing.T) {
 	}
 	viewable := &av.Table{BaseInstance: &av.BaseInstance{Groups: []av.Viewable{hiddenGroup, visibleGroup}}}
 
-	itemIDs := appendAttributeViewSearchItemIDs(nil, viewable, false)
-	itemIDs = appendAttributeViewSearchItemIDs(itemIDs, viewable, true)
-	expected := []string{"20260726000000-visiblea", "20260726000000-visibleb", "20260726000000-hiddena"}
-	if len(expected) != len(itemIDs) {
-		t.Fatalf("unexpected item IDs: %+v", itemIDs)
+	items := appendAttributeViewSearchItems(nil, viewable, false)
+	items = appendAttributeViewSearchItems(items, viewable, true)
+	expected := []attributeViewSearchItem{
+		{itemID: "20260726000000-visiblea", groupID: "20260726000000-groupvis"},
+		{itemID: "20260726000000-visibleb", groupID: "20260726000000-groupvis"},
+		{itemID: "20260726000000-hiddena", groupID: "20260726000000-grouphid"},
 	}
-	for i, itemID := range itemIDs {
-		if expected[i] != itemID {
-			t.Fatalf("unexpected item IDs: %+v", itemIDs)
+	if len(expected) != len(items) {
+		t.Fatalf("unexpected items: %+v", items)
+	}
+	for i, item := range items {
+		if expected[i] != item {
+			t.Fatalf("unexpected items: %+v", items)
 		}
+	}
+
+	ungrouped := &av.Table{
+		BaseInstance: &av.BaseInstance{ID: "20260726000000-viewaaaa"},
+		Rows:         []*av.TableRow{{ID: "20260726000000-itemaaaa"}},
+	}
+	items = appendAttributeViewSearchItems(nil, ungrouped, false)
+	if 1 != len(items) || "20260726000000-itemaaaa" != items[0].itemID || "" != items[0].groupID {
+		t.Fatalf("unexpected ungrouped items: %+v", items)
 	}
 }
 

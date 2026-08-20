@@ -70,7 +70,9 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
         id: "insertRight",
         icon: "iconLayoutRight",
         label: window.siyuan.languages.insertRight,
-        accelerator: ids.length === 1 ? `${updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom)}/${updateHotkeyTip("⌥" + window.siyuan.languages.click)}` : undefined,
+        accelerator: ids.length === 1 ? updateHotkeyTip(window.siyuan.config.keymap.editor.general.insertRight.custom) +
+            (window.siyuan.config.keymap.editor.general.insertRight.custom ? "/" : "") +
+            updateHotkeyTip("⌥" + window.siyuan.languages.click) : undefined,
         click: () => {
             if (notebookId) {
                 openFileById({

@@ -1,10 +1,15 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    getKeyboardHideResult,
     getMovingSelectionEndpoint,
     hasFixedSelectionEndpointChanged,
     hasVisibleSelectionText,
+    isTableCellSelectAll,
+    KeyboardHideResult,
+    shouldHideKeyboardAfterResize,
     shouldRestoreLongPressSelection,
+    shouldPreserveTableCellSelectAll,
 } from "./touchSelection";
 
 describe("mobile touch selection", () => {
@@ -15,6 +20,37 @@ describe("mobile touch selection", () => {
 
     it("preserves selections containing visible text", () => {
         assert.equal(hasVisibleSelectionText("\u200b内容\u200b"), true);
+    });
+
+    it("identifies table cell select all while ignoring placeholders", () => {
+        assert.equal(isTableCellSelectAll("段落块", "段落块"), true);
+        assert.equal(isTableCellSelectAll("\u200b段落块\u200b", "段落块"), true);
+        assert.equal(isTableCellSelectAll("段落", "段落块"), false);
+        assert.equal(isTableCellSelectAll("\u200b", "\u200b"), false);
+    });
+
+    it("preserves recent table cell select all once the keyboard state changes", () => {
+        assert.equal(shouldPreserveTableCellSelectAll(1500, 1499), true);
+        assert.equal(shouldPreserveTableCellSelectAll(1500, 1500), true);
+        assert.equal(shouldPreserveTableCellSelectAll(1500, 1501), false);
+    });
+
+    it("does not enqueue another keyboard hide while preserving table cell select all", () => {
+        assert.equal(shouldHideKeyboardAfterResize(false, true), false);
+        assert.equal(shouldHideKeyboardAfterResize(true, false), false);
+        assert.equal(shouldHideKeyboardAfterResize(false, false), true);
+    });
+
+    it("preserves a visible editor selection after a passive keyboard hide", () => {
+        assert.equal(getKeyboardHideResult(true, false, true), KeyboardHideResult.PreserveSelection);
+        assert.equal(getKeyboardHideResult(true, false, false), KeyboardHideResult.Cleanup);
+        assert.equal(getKeyboardHideResult(false, false, true), KeyboardHideResult.Cleanup);
+    });
+
+    it("restores table cell selection before considering ordinary text selection", () => {
+        assert.equal(getKeyboardHideResult(true, true, true), KeyboardHideResult.RestoreTableCellSelection);
+        assert.equal(getKeyboardHideResult(true, true, false), KeyboardHideResult.RestoreTableCellSelection);
+        assert.equal(getKeyboardHideResult(false, true, true), KeyboardHideResult.Cleanup);
     });
 
     it("restores invisible cross-block selections involving the long-pressed block", () => {

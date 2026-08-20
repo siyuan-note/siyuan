@@ -1,16 +1,12 @@
 import {isOnlyMeta, writeText} from "../util/compatibility";
 import {focusByRange} from "../util/selection";
-import {openByMobile} from "../../editor/openLink";
+import {openLink} from "../../editor/openLink";
 import {showMessage} from "../../dialog/message";
-import {isLocalPath, pathPosix} from "../../util/pathName";
-import {processSiYuanUri} from "../../util/uri";
 import {previewDocImage} from "./image";
 import {getDiagramBlock, previewDiagram} from "./diagram";
 import {needSubscribe} from "../../util/needSubscribe";
 import {Constants} from "../../constants";
-import {getSearch, isMobile} from "../../util/functions";
 /// #if !BROWSER
-import {shell} from "electron";
 import {
     enhanceRichClipboard,
     hasRichClipboardImages,
@@ -20,7 +16,6 @@ import {
 } from "../util/richClipboard";
 /// #endif
 /// #if !MOBILE
-import {openAsset, openBy} from "../../editor/util";
 import {getAllModels} from "../../layout/getAll";
 /// #endif
 import {fetchPost} from "../../util/fetch";
@@ -32,7 +27,6 @@ import {getPadding} from "../ui/initUI";
 import {hasTopClosestByAttribute} from "../util/hasClosest";
 import {addScriptSync} from "../util/addScript";
 import {prepareWechatCopy, prepareZhihuCopy} from "./platformCopy";
-import {isHEIFPath, isBrowserRenderableImagePath} from "../../util/imageURL";
 
 export class Preview {
     public element: HTMLElement;
@@ -142,38 +136,9 @@ export class Preview {
                         break;
                     }
 
-                    if (isMobile()) {
-                        openByMobile(linkAddress);
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    }
                     event.stopPropagation();
                     event.preventDefault();
-                    if (isLocalPath(linkAddress)) {
-                        /// #if !MOBILE
-                        if (isOnlyMeta(event)) {
-                            openBy(linkAddress, "folder");
-                        } else if (event.shiftKey) {
-                            openBy(linkAddress, "app");
-                        } else if (isHEIFPath(linkAddress) && !isBrowserRenderableImagePath(linkAddress)) {
-                            openBy(linkAddress, "app");
-                        } else if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress).split("?")[0]).toLowerCase())) {
-                            openAsset(protyle.app, linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
-                        }
-                        /// #endif
-                    } else {
-                        if (processSiYuanUri(protyle.app, linkAddress)) {
-                            break;
-                        }
-                        /// #if !BROWSER
-                        shell.openExternal(linkAddress).catch((e) => {
-                            showMessage(e);
-                        });
-                        /// #else
-                        window.open(linkAddress);
-                        /// #endif
-                    }
+                    openLink(protyle.app, linkAddress, event, isOnlyMeta(event));
                     break;
                 } else if (target.tagName === "IMG") {
                     previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);

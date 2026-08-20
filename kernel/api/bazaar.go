@@ -39,7 +39,10 @@ var validPackageTypes = map[string]bool{
 	"widgets":   true,
 }
 
-var setBazaarPackageRatingModel = model.SetBazaarPackageRating
+var (
+	getBazaarPackageUserRatingsModel = model.GetInstalledBazaarPackageUserRatings
+	setBazaarPackageRatingModel      = model.SetBazaarPackageRating
+)
 
 func installLocalBazaarPackage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
@@ -311,6 +314,56 @@ func bazaarPackageRatingsResponseData(ratings map[string]*bazaar.PackageRating,
 	eligiblePackageNames []string) map[string]any {
 	return map[string]any{
 		"ratings":              ratings,
+		"eligiblePackageNames": eligiblePackageNames,
+	}
+}
+
+func getBazaarPackageUserRatings(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var pkgType string
+	var packageNamesArg []any
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("packageType", &pkgType, true, true),
+		util.BindJsonArg("packageNames", &packageNamesArg, true, false),
+	) {
+		return
+	}
+	if !validPackageTypes[pkgType] {
+		ret.Code = 1
+		ret.Msg = "Invalid package type"
+		return
+	}
+
+	packageNames := make([]string, 0, len(packageNamesArg))
+	for _, item := range packageNamesArg {
+		packageName, elemOK := item.(string)
+		if !elemOK {
+			ret.Code = -1
+			ret.Msg = "Field [packageNames]: each element should be of type [String]"
+			return
+		}
+		packageNames = append(packageNames, packageName)
+	}
+
+	userRatings, eligiblePackageNames, err := getBazaarPackageUserRatingsModel(
+		c.Request.Context(), pkgType, packageNames)
+	if nil != err {
+		setBazaarPackageRatingError(ret, err)
+		return
+	}
+	ret.Data = bazaarPackageUserRatingsResponseData(userRatings, eligiblePackageNames)
+}
+
+func bazaarPackageUserRatingsResponseData(userRatings map[string]int, eligiblePackageNames []string) map[string]any {
+	return map[string]any{
+		"userRatings":          userRatings,
 		"eligiblePackageNames": eligiblePackageNames,
 	}
 }

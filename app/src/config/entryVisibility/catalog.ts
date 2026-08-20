@@ -1,4 +1,11 @@
 import {CODE_TAB_SPACE_VALUES} from "../../protyle/wysiwyg/codeBlockUtil";
+import {
+    DESKTOP_TOOLBAR_ENTRIES,
+    getToolbarEntryId,
+    getToolbarEntryLabel,
+    TOOLBAR_ENTRY_ROOT_PATH,
+} from "../../protyle/toolbar/defaults";
+import {mergeEntryOrderPreservingUnknown} from "./order";
 
 export interface IEntryCatalogNode {
     key: string;
@@ -387,6 +394,8 @@ const gutterSingle = () => [
     node("enterBack", lang("enterBack"), false),
     node("insertBefore", lang("insertBefore")),
     node("insertAfter", lang("insertAfter")),
+    node("insertSuperBlockLeft", lang("insertSuperBlockLeft")),
+    node("insertSuperBlockRight", lang("insertSuperBlockRight")),
     node("jumpTo", lang("jumpTo"), false, [
         node("jumpToParentPrev", lang("jumpToParentPrev"), false),
         node("jumpToParentNext", lang("jumpToParentNext"), false),
@@ -411,6 +420,11 @@ const gutterSingle = () => [
 ];
 
 export const SLASH_MENU_ROOT_PATH = "editor.slash.menu";
+
+const toolbarBuiltinChildren = DESKTOP_TOOLBAR_ENTRIES.map((item) => item.separator
+    ? separator(item.key)
+    : node(item.key, lang(item.lang)));
+const toolbarBuiltinNodeMap = new Map(toolbarBuiltinChildren.map((item) => [item.key, item]));
 
 const slashMenuBuiltinChildren = [
     node("template", lang("template")),
@@ -486,6 +500,12 @@ const slashMenuBuiltinChildren = [
 const slashMenuRoot = {
     ...node("menu", lang("entrySlashMenu"), true, [...slashMenuBuiltinChildren], true),
     displayChildrenDirectly: true,
+};
+
+const toolbarCatalogSection: IEntryCatalogSection = {
+    key: TOOLBAR_ENTRY_ROOT_PATH,
+    label: location(lang("editor"), lang("entryToolbar")),
+    children: toolbarBuiltinChildren,
 };
 
 export const entryCatalog: IEntryCatalogSection[] = [
@@ -667,6 +687,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("docInfo", lang("entryDocumentStatistics"), false),
         ],
     },
+    toolbarCatalogSection,
     {
         key: "editor.slash",
         label: location(lang("editor"), lang("entrySlashMenu")),
@@ -902,9 +923,7 @@ rebuildCatalogIndexes();
 
 export const getEntryCatalogNode = (path: string) => entryMap.get(path);
 export const getEntryParentPath = (path: string) => parentMap.get(path);
-export const getEntryPaths = () => Array.from(entryMap.entries())
-    .filter(([, item]) => item.type === "entry")
-    .map(([path]) => path);
+export const getEntryPaths = () => Array.from(entryMap.keys());
 export const getEntryCatalogSection = (key: string) => sectionMap.get(key);
 export const getEntryCatalogChildren = (path: string) => childrenMap.get(path);
 export const isEntryOrderSortable = (parentPath: string) => {
@@ -928,6 +947,58 @@ export const getEntryCatalogPathChain = (sectionKey: string, path: string) => {
         current = getEntryParentPath(current);
     }
     return current === sectionKey ? chain : [];
+};
+
+const normalizeToolbarCatalogSeparators = (nodes: IEntryCatalogNode[]) => {
+    const result: IEntryCatalogNode[] = [];
+    nodes.forEach((item) => {
+        if (item.type === "separator" && (result.length === 0 || result[result.length - 1].type === "separator")) {
+            return;
+        }
+        result.push(item);
+    });
+    if (result[result.length - 1]?.type === "separator") {
+        result.pop();
+    }
+    return result;
+};
+
+const toolbarCatalogNodeSignature = (item: IEntryCatalogNode, pluginLabels: Map<string, string>) => [
+    item.key,
+    item.type,
+    pluginLabels.get(item.key) || "",
+];
+
+let toolbarCatalogSignature = JSON.stringify(toolbarBuiltinChildren.map((item) =>
+    toolbarCatalogNodeSignature(item, new Map())));
+
+export const refreshToolbarCatalog = (items: Array<string | IMenuItem>) => {
+    const nodes = new Map(toolbarBuiltinNodeMap);
+    const pluginLabels = new Map<string, string>();
+    const actualOrder: string[] = [];
+    items.forEach((item) => {
+        const menuItem = typeof item === "string" ? {name: item} : item;
+        const key = getToolbarEntryId(menuItem);
+        if (!key || actualOrder.includes(key)) {
+            return;
+        }
+        actualOrder.push(key);
+        if (nodes.has(key)) {
+            return;
+        }
+        const label = getToolbarEntryLabel(menuItem) || menuItem.tip || menuItem.name;
+        pluginLabels.set(key, label);
+        nodes.set(key, menuItem.name === "|" ? separator(key) : node(key, literal(label)));
+    });
+    const order = mergeEntryOrderPreservingUnknown(toolbarBuiltinChildren.map((item) => item.key), actualOrder);
+    const children = normalizeToolbarCatalogSeparators(order.flatMap((key) => nodes.get(key) || []));
+    const signature = JSON.stringify(children.map((item) => toolbarCatalogNodeSignature(item, pluginLabels)));
+    if (signature === toolbarCatalogSignature) {
+        return;
+    }
+    toolbarCatalogSection.children = children;
+    toolbarCatalogSignature = signature;
+    rebuildCatalogIndexes();
 };
 
 interface ISlashMenuCatalogPlugin {

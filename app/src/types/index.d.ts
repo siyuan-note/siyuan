@@ -101,7 +101,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" | "open-menu-inbox" |
-    "open-siyuan-url-plugin" | "open-siyuan-url-block" | "opened-notebook" |
+    "open-siyuan-url-plugin" | "open-siyuan-url-block" | "open-asset" | "open-link" | "opened-notebook" |
     "closed-notebook" |
     "paste" |
     "input-search" |
@@ -840,11 +840,12 @@ interface IOpenFileOptions {
     rootIcon?: string, // 文档图标
     id?: string,  // file 必填
     rootID?: string, // file 必填
+    notebookId?: string,
     position?: string, // file 或者 asset，打开位置
     page?: number | string, // asset
     mode?: TEditorMode // file
     action?: TProtyleAction[]
-    keepCursor?: boolean // file，是否跳转到新 tab 上
+    keepCursor?: boolean // file 或 asset，是否跳转到新 tab 上
     zoomIn?: boolean // 是否缩放
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
     openNewTab?: boolean // 使用新页签打开
@@ -1057,6 +1058,10 @@ interface IBazaarItem {
     keywords: string[];
     preferredDesc: string;
     preferredReadme: string;
+    deprecated?: boolean;
+    deprecatedReason?: Record<string, string>;
+    preferredDeprecatedReason?: string;
+    alternatives?: string[];
     iconURL: string;
     stars: number;
     author: string;

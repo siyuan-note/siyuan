@@ -10,6 +10,8 @@ import {
 import {reorderEntrySlots, resolveEntryOrder} from "./order";
 import {getDocTreeEntryScope} from "./docTreeScope";
 import {getProfileEntryVisibility} from "./profile";
+import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
+import {resolveToolbarItems} from "../../protyle/toolbar/entryVisibility";
 
 export const ENTRY_VISIBILITY_VERSION = 3;
 export const ENTRY_PROFILE_SIMPLE = "simple";
@@ -189,11 +191,17 @@ const sortMenuItems = (itemsElement: Element, prefix: string) => {
 
 const filterMenuItems = (itemsElement: Element, prefix: string) => {
     Array.from(itemsElement.children).forEach((item) => {
+        const id = item.getAttribute("data-id");
+        const path = id ? `${prefix}.${id}` : "";
+        if (item.classList.contains("b3-menu__separator")) {
+            if (path && getEntryCatalogNode(path) && !isEntryVisible(path)) {
+                item.remove();
+            }
+            return;
+        }
         if (!item.classList.contains("b3-menu__item")) {
             return;
         }
-        const id = item.getAttribute("data-id");
-        const path = id ? `${prefix}.${id}` : "";
         if (path && getEntryCatalogNode(path) && !isEntryVisible(path)) {
             item.remove();
             return;
@@ -240,11 +248,36 @@ export const applyDockEntryVisibility = () => {
     /// #endif
 };
 
+export const applyToolbarEntryVisibility = (toolbarElement: HTMLElement) => {
+    /// #if !MOBILE
+    const children = Array.from(toolbarElement.children) as HTMLElement[];
+    const resolveKey = (item: HTMLElement) => {
+        const id = item.dataset.id;
+        return id && getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${id}`) ? id : undefined;
+    };
+    const result = resolveToolbarItems(children, {
+        getKey: resolveKey,
+        isSeparator: (item) => item.classList.contains("protyle-toolbar__divider"),
+        isVisible: (key) => isEntryVisible(`${TOOLBAR_ENTRY_ROOT_PATH}.${key}`),
+        order: getEntryOrder(TOOLBAR_ENTRY_ROOT_PATH),
+    });
+    result.ordered.forEach((item) => toolbarElement.append(item));
+    const visibleItems = new Set(result.visible);
+    result.ordered.forEach((item) => item.classList.toggle("fn__none", !visibleItems.has(item)));
+    const empty = !result.visible.some((item) => item.classList.contains("protyle-toolbar__item"));
+    toolbarElement.toggleAttribute("data-entry-empty", empty);
+    if (empty) {
+        toolbarElement.classList.add("fn__none");
+    }
+    /// #endif
+};
+
 const applyEntryVisibilityLocal = (config: Config.IEntryVisibility) => {
     window.siyuan.config.appearance.entryVisibility = config;
     /// #if !MOBILE
     window.siyuan.menus?.menu?.remove();
     applyDockEntryVisibility();
+    document.querySelectorAll<HTMLElement>(".protyle-toolbar").forEach(applyToolbarEntryVisibility);
     window.dispatchEvent(new CustomEvent("siyuan-entry-visibility"));
     /// #endif
 };

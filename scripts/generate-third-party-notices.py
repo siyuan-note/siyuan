@@ -198,42 +198,42 @@ BUNDLED_COMPONENTS = [
     ),
     (
         "Mermaid",
-        "11.13.0",
+        "11.16.1",
         "MIT",
         "https://github.com/mermaid-js/mermaid",
         "app/stage/protyle/js/mermaid/mermaid.min.js; bundled notices are retained in the file",
     ),
     (
         "DOMPurify",
-        "3.3.1",
+        "3.4.0",
         "Apache-2.0 OR MPL-2.0",
         "https://github.com/cure53/DOMPurify",
-        "Bundled by Mermaid 11.13.0",
+        "Bundled by Mermaid 11.16.1",
     ),
     (
         "js-yaml",
         "4.1.1",
         "MIT",
         "https://github.com/nodeca/js-yaml",
-        "Bundled by Mermaid 11.13.0",
+        "Bundled by Mermaid 11.16.1",
     ),
     (
         "lodash-es and Underscore-derived code",
         "Bundled snapshot",
         "MIT",
         "https://github.com/lodash/lodash",
-        "Bundled by Mermaid 11.13.0",
+        "Bundled by Mermaid 11.16.1",
     ),
     (
         "Cytoscape.js and retained embedded utilities",
         "Bundled snapshot",
         "MIT",
         "https://github.com/cytoscape/cytoscape.js",
-        "Bundled by Mermaid 11.13.0",
+        "Bundled by Mermaid 11.16.1",
     ),
     (
         "@mermaid-js/layout-tidy-tree",
-        "0.2.1",
+        "0.2.2",
         "MIT",
         "https://github.com/mermaid-js/mermaid-layouts",
         "app/stage/protyle/js/mermaid/mermaid-layout-tidy-tree.min.js",
@@ -246,39 +246,46 @@ BUNDLED_COMPONENTS = [
         "Bundled by @mermaid-js/layout-tidy-tree",
     ),
     (
-        "@zenuml/core and bundled dependencies",
-        "Bundled snapshot",
-        "MIT AND (Apache-2.0 OR MPL-2.0)",
-        "https://github.com/ZenUml/core",
-        "app/stage/protyle/js/mermaid/mermaid-zenuml.min.js; bundled notices are retained in the file",
+        "@mermaid-js/mermaid-zenuml",
+        "0.2.3",
+        "MIT",
+        "https://github.com/mermaid-js/mermaid/tree/develop/packages/mermaid-zenuml",
+        "Lightweight SiYuan bundle in app/stage/protyle/js/mermaid/mermaid-zenuml.min.js",
     ),
     (
-        "React, ReactDOM, and Scheduler",
-        "Bundled snapshot",
+        "@zenuml/core native SVG renderer",
+        "3.50.1",
         "MIT",
-        "https://github.com/facebook/react",
+        "https://github.com/mermaid-js/zenuml-core",
+        "Bundled without the React-based editor; output is sanitized by SiYuan's shared DOMPurify 3.3.3",
+    ),
+    (
+        "ANTLR 4 JavaScript runtime",
+        "4.11.0",
+        "BSD-3-Clause",
+        "https://github.com/antlr/antlr4",
         "Bundled by @zenuml/core",
+    ),
+    (
+        "marked",
+        "4.3.0",
+        "MIT AND BSD-3-Clause",
+        "https://github.com/markedjs/marked",
+        "Bundled by @zenuml/core for Markdown comments",
     ),
     (
         "codepointat",
         "0.2.0",
         "MIT",
         "https://github.com/mathiasbynens/codepointat",
-        "Bundled by @zenuml/core",
+        "Bundled by the ANTLR 4 JavaScript runtime",
     ),
     (
         "fromcodepoint",
         "0.2.1",
         "MIT",
         "https://github.com/mathiasbynens/fromcodepoint",
-        "Bundled by @zenuml/core",
-    ),
-    (
-        "DOMPurify",
-        "3.2.5",
-        "Apache-2.0 OR MPL-2.0",
-        "https://github.com/cure53/DOMPurify",
-        "Bundled by @zenuml/core",
+        "Bundled by the ANTLR 4 JavaScript runtime",
     ),
     (
         "PDF.js",
@@ -387,7 +394,7 @@ BUNDLED_COMPONENTS = [
     ),
     (
         "SVG Logos (@iconify-json/logos)",
-        "1.2.9",
+        "1.2.13",
         "CC0-1.0",
         "https://github.com/gilbarbara/logos",
         "app/stage/protyle/js/mermaid/icons.json; depicted marks remain subject to trademark rights",
@@ -470,7 +477,10 @@ LICENSE_NAME_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-COMMENT_PATTERN = re.compile(r"/\*[\s\S]*?\*/")
+COMMENT_PATTERN = re.compile(
+    r"/\*\s*(?:!|\*|@license\b|@preserve\b|copyright\b|license(?:d)?\b)[\s\S]*?\*/",
+    re.IGNORECASE,
+)
 
 CLAYGL_LICENSE = """Copyright (c) 2014, Yi Shen
 All rights reserved.
@@ -616,10 +626,10 @@ def collect_retained_comments():
         content = path.read_text(encoding="utf-8", errors="replace")
         comments = []
         for comment in COMMENT_PATTERN.findall(content):
+            normalized = "\n".join(line.rstrip() for line in comment.strip().splitlines())
             lowered = comment.lower()
             if not any(marker in lowered for marker in ("license", "copyright", "@preserve")):
                 continue
-            normalized = comment.strip()
             if normalized not in comments:
                 comments.append(normalized)
         if comments:

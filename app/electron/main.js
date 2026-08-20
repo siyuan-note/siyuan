@@ -71,6 +71,9 @@ let bootWindow;
 let latestActiveWindow;
 let firstOpen = false;
 let workspaces = []; // workspaceDir, id, port, webContentsId, browserWindow, tray, hideShortcut
+const initEventId = [];
+const appMenuByWorkspaceDir = new Map();
+const appMenuWorkspaceByWebContentsId = new Map();
 let kernelPort = 6806;
 let resetWindowStateOnRestart = false;
 let openAsHidden = false;
@@ -378,6 +381,208 @@ const hotKey2Electron = (key) => {
     return electronKey + key.replace("⌘", "").replace("⇧", "").replace("⌥", "").replace("⌃", "")
         .replace("←", "Left").replace("→", "Right").replace("↑", "Up").replace("↓", "Down").replace(" ", "Space")
         .replace("+", "Plus").replace("⇥", "Tab").replace("⌫", "Backspace").replace("⌦", "Delete").replace("↩", "Return");
+};
+
+const getFeedbackUrl = (lang) => {
+    return "zh-CN" === lang
+        ? "https://ld246.com/article/1649901726096"
+        : "https://liuyun.io/article/1686530886208";
+};
+
+const withHotkey = (hotkey, overrideRoleDefault = false) => {
+    if (typeof hotkey !== "string" || !hotkey.length) {
+        // 空快捷键：自定义项不注册加速键；role 项需显式覆盖系统默认加速键
+        return overrideRoleDefault ? {accelerator: "", registerAccelerator: false} : {};
+    }
+    const acc = hotKey2Electron(hotkey);
+    return acc ? {accelerator: acc} : (overrideRoleDefault ? {accelerator: "", registerAccelerator: false} : {});
+};
+
+const forgetAppMenuWebContents = (webContentsId) => {
+    const workspaceDir = appMenuWorkspaceByWebContentsId.get(webContentsId);
+    appMenuWorkspaceByWebContentsId.delete(webContentsId);
+    const initIndex = initEventId.indexOf(webContentsId);
+    if (initIndex > -1) {
+        initEventId.splice(initIndex, 1);
+    }
+    if (!workspaceDir) {
+        return;
+    }
+    for (const mappedDir of appMenuWorkspaceByWebContentsId.values()) {
+        if (mappedDir === workspaceDir) {
+            return;
+        }
+    }
+    appMenuByWorkspaceDir.delete(workspaceDir);
+};
+
+const isInitializedAppWindow = (wnd) => {
+    return !!(wnd && !wnd.isDestroyed() && initEventId.includes(wnd.webContents.id));
+};
+
+const getAppWindow = () => {
+    const focused = BrowserWindow.getFocusedWindow();
+    if (isInitializedAppWindow(focused)) {
+        return focused;
+    }
+    if (isInitializedAppWindow(latestActiveWindow)) {
+        return latestActiveWindow;
+    }
+    const workspaceWindow = workspaces.find((item) => isInitializedAppWindow(item.browserWindow));
+    if (workspaceWindow) {
+        return workspaceWindow.browserWindow;
+    }
+    return BrowserWindow.getAllWindows().find(isInitializedAppWindow) || null;
+};
+
+const setNonDarwinApplicationMenu = () => {
+    const productName = "SiYuan";
+    const template = [{
+        label: productName, submenu: [{
+            label: `About ${productName}`, role: "about",
+        }, {type: "separator"}, {role: "services"}, {type: "separator"}, {
+            label: `Hide ${productName}`, role: "hide",
+        }, {role: "hideOthers"}, {role: "unhide"}, {type: "separator"}, {
+            label: `Quit ${productName}`, role: "quit",
+        },],
+    }, {
+        role: "editMenu", submenu: [{role: "cut"}, {role: "copy"}, {role: "paste"}, {role: "selectAll"}],
+    }, {
+        role: "windowMenu",
+        submenu: [{role: "minimize"}, {role: "zoom"}, {role: "togglefullscreen"}, {type: "separator"}, {role: "toggledevtools"}, {type: "separator"}, {role: "front"},],
+    },];
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+};
+
+const applyMacAppMenu = (sync) => {
+    if ("darwin" !== process.platform || !sync || !sync.i18n || typeof sync.i18n !== "object" ||
+        !sync.hotkey || typeof sync.hotkey !== "object") {
+        return;
+    }
+    /** @type {import("electron").MenuItemConstructorOptions[]} */
+    const template = [{
+        role: "appMenu",
+        label: app.name,
+        submenu: [
+            {role: "about", label: sync.i18n.about || "About SiYuan"},
+            ...(sync.readonly ? [] : [{
+                label: sync.i18n.config || "Settings",
+                click: () => {
+                    getAppWindow()?.webContents.send("siyuan-open-setting");
+                },
+                ...withHotkey(sync.hotkey.config),
+            }]),
+            {type: "separator"},
+            {role: "services", label: sync.i18n.services || "Services"},
+            {type: "separator"},
+            {
+                label: sync.i18n.toggleMainWindow || "Hide/Show Window",
+                click: () => {
+                    toggleMainWindow(getAppWindow());
+                },
+                ...withHotkey(sync.hotkey.toggleWin),
+            },
+            {role: "hide", label: sync.i18n.hide || "Hide SiYuan"},
+            {role: "hideOthers", label: sync.i18n.hideOthers || "Hide Others"},
+            {role: "unhide", label: sync.i18n.showAll || "Show All"},
+            {type: "separator"},
+            {role: "quit", label: sync.i18n.quit || "Quit SiYuan"},
+        ],
+    }, {
+        role: "editMenu",
+        label: sync.i18n.edit || "Edit",
+        submenu: [
+            {role: "undo", label: sync.i18n.undo || "Undo", ...withHotkey(sync.hotkey.undo, true)},
+            {role: "redo", label: sync.i18n.redo || "Redo", ...withHotkey(sync.hotkey.redo, true)},
+            {type: "separator"},
+            {role: "cut", label: sync.i18n.cut || "Cut"},
+            {role: "copy", label: sync.i18n.copy || "Copy"},
+            {role: "paste", label: sync.i18n.paste || "Paste"},
+            {role: "pasteAndMatchStyle", label: sync.i18n.pasteAndMatchStyle || "Paste and Match Style"},
+            {type: "separator"},
+            {role: "selectAll", label: sync.i18n.selectAll || "Select All"},
+        ],
+    }, {
+        role: "windowMenu",
+        label: sync.i18n.window || "Window",
+        submenu: [
+            {role: "minimize", label: sync.i18n.minimize || "Minimize"},
+            {role: "zoom", label: sync.i18n.zoom || "Zoom"},
+            {role: "togglefullscreen", label: sync.i18n.togglefullscreen || "Toggle Full Screen"},
+            {type: "separator"},
+            {
+                label: sync.i18n.bringAllToFront || "Bring All to Front",
+                click: () => {
+                    const windows = BrowserWindow.getAllWindows();
+                    windows.forEach(showWindow);
+                    const target = (latestActiveWindow && !latestActiveWindow.isDestroyed() && windows.includes(latestActiveWindow))
+                        ? latestActiveWindow
+                        : windows[0];
+                    target?.focus();
+                },
+            },
+        ],
+    }, {
+        role: "help",
+        label: sync.i18n.help || "Help",
+        submenu: [
+            ...(sync.readonly ? [] : [{
+                label: sync.i18n.userGuide || "User Guide",
+                click: () => {
+                    getAppWindow()?.webContents.send("siyuan-open-help");
+                },
+            }]),
+            {
+                label: sync.i18n.feedback || "Feedback",
+                click: () => {
+                    shell.openExternal(getFeedbackUrl(sync.lang));
+                },
+            },
+            {
+                label: sync.i18n.officialWebsite || "Visit official website",
+                click: () => {
+                    shell.openExternal("https://b3log.org/siyuan");
+                },
+            },
+            {
+                label: sync.i18n.openSource || "Visit project on GitHub",
+                click: () => {
+                    shell.openExternal("https://github.com/siyuan-note/siyuan");
+                },
+            },
+            {role: "toggledevtools", label: sync.i18n.debug || "Developer Tools"},
+        ],
+    }];
+    Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+};
+
+const applyMacAppMenuForWindow = (wnd) => {
+    if ("darwin" !== process.platform || !wnd || wnd.isDestroyed()) {
+        return;
+    }
+    const workspaceDir = appMenuWorkspaceByWebContentsId.get(wnd.webContents.id);
+    if (!workspaceDir) {
+        return;
+    }
+    applyMacAppMenu(appMenuByWorkspaceDir.get(workspaceDir));
+};
+
+const shouldApplyAppMenuFrom = (webContentsId, workspaceDir) => {
+    const focused = BrowserWindow.getFocusedWindow();
+    if (isInitializedAppWindow(focused)) {
+        if (focused.webContents.id === webContentsId) {
+            return true;
+        }
+        return appMenuWorkspaceByWebContentsId.get(focused.webContents.id) === workspaceDir;
+    }
+    if (isInitializedAppWindow(latestActiveWindow)) {
+        if (latestActiveWindow.webContents.id === webContentsId) {
+            return true;
+        }
+        const latestWorkspace = appMenuWorkspaceByWebContentsId.get(latestActiveWindow.webContents.id);
+        return !latestWorkspace || latestWorkspace === workspaceDir;
+    }
+    return true;
 };
 
 /**
@@ -1150,30 +1355,9 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
         }
     });
 
-    if (windowState.isDevToolsOpened) {
-        currentWindow.webContents.openDevTools({mode: "bottom"});
+    if ("darwin" !== process.platform) {
+        setNonDarwinApplicationMenu();
     }
-
-    // 菜单
-    const productName = "SiYuan";
-    const template = [{
-        label: productName, submenu: [{
-            label: `About ${productName}`, role: "about",
-        }, {type: "separator"}, {role: "services"}, {type: "separator"}, {
-            label: `Hide ${productName}`, role: "hide",
-        }, {role: "hideOthers"}, {role: "unhide"}, {type: "separator"}, {
-            label: `Quit ${productName}`, role: "quit",
-        },],
-    }, {
-        role: "editMenu", submenu: [{role: "cut"}, {role: "copy"}, {role: "paste"}, {
-            role: "pasteAndMatchStyle", accelerator: "CmdOrCtrl+Shift+C"
-        }, {role: "selectAll"},],
-    }, {
-        role: "windowMenu",
-        submenu: [{role: "minimize"}, {role: "zoom"}, {role: "togglefullscreen"}, {type: "separator"}, {role: "toggledevtools"}, {type: "separator"}, {role: "front"},],
-    },];
-    const menu = Menu.buildFromTemplate(template);
-    Menu.setApplicationMenu(menu);
     // 当前页面链接使用浏览器打开
     windowNavigate(currentWindow, "app");
     currentWindow.on("close", (event) => {
@@ -1209,6 +1393,9 @@ const initMainWindow = (currentKernelPort = kernelPort) => {
             } else {
                 currentWindow.unmaximize();
             }
+            if (windowState.isDevToolsOpened) {
+                currentWindow.webContents.openDevTools(); // 保证开发者工具窗口在前
+            }
         }
         if (bootWindow && !bootWindow.isDestroyed()) {
             bootWindow.destroy();
@@ -1225,6 +1412,33 @@ const showWindow = (wnd) => {
         wnd.restore();
     }
     wnd.show();
+};
+
+const hideWindow = (wnd) => {
+    // 通过 `Alt+M` 最小化后焦点回到先前的窗口 https://github.com/siyuan-note/siyuan/issues/7275
+    wnd.minimize();
+    // Mac 隐藏后无法再 Dock 中显示
+    if ("win32" === process.platform || "linux" === process.platform) {
+        wnd.hide();
+    }
+};
+
+const toggleMainWindow = (mainWindow) => {
+    if (!mainWindow || mainWindow.isDestroyed()) {
+        return;
+    }
+    if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+        mainWindow.show(); // 按 `Alt+M` 后隐藏窗口，再次按 `Alt+M` 显示窗口后会卡住不能编辑 https://github.com/siyuan-note/siyuan/issues/8456
+    } else if (mainWindow.isVisible()) {
+        if (!mainWindow.isFocused()) {
+            mainWindow.show();
+        } else {
+            hideWindow(mainWindow);
+        }
+    } else {
+        mainWindow.show();
+    }
 };
 
 const showAppleSiliconWarning = async (lang) => {
@@ -1474,6 +1688,11 @@ const initKernel = (workspace, port, lang, safeMode) => {
 };
 
 app.whenReady().then(() => {
+    if ("darwin" === process.platform) {
+        Menu.setApplicationMenu(Menu.buildFromTemplate([{role: "appMenu"}]));
+    } else {
+        setNonDarwinApplicationMenu();
+    }
     // Trust self-signed TLS certificates for local HTTPS server
     session.defaultSession.setCertificateVerifyProc((request, callback) => {
         if (request.hostname === "127.0.0.1" || request.hostname === "localhost") {
@@ -1565,14 +1784,6 @@ app.whenReady().then(() => {
         const contextMenu = Menu.buildFromTemplate(trayMenuTemplate);
         tray.setContextMenu(contextMenu);
     };
-    const hideWindow = (wnd) => {
-        // 通过 `Alt+M` 最小化后焦点回到先前的窗口 https://github.com/siyuan-note/siyuan/issues/7275
-        wnd.minimize();
-        // Mac 隐藏后无法再 Dock 中显示
-        if ("win32" === process.platform || "linux" === process.platform) {
-            wnd.hide();
-        }
-    };
     const showHideWindow = (tray, lang, mainWindow) => {
         if (!mainWindow || mainWindow.isDestroyed()) {
             return;
@@ -1589,6 +1800,23 @@ app.whenReady().then(() => {
 
         resetTrayMenu(tray, lang, mainWindow);
     };
+    // 由渲染进程同步 macOS 应用菜单的文案与快捷键
+    ipcMain.on("siyuan-sync-app-menu", (event, sync) => {
+        if ("darwin" !== process.platform) {
+            return;
+        }
+        if (!sync || !sync.i18n || typeof sync.i18n !== "object" || !sync.hotkey || typeof sync.hotkey !== "object") {
+            return;
+        }
+        const workspaceDir = (typeof sync.workspaceDir === "string" && sync.workspaceDir)
+            ? sync.workspaceDir
+            : ("webContents:" + event.sender.id);
+        appMenuByWorkspaceDir.set(workspaceDir, sync);
+        appMenuWorkspaceByWebContentsId.set(event.sender.id, workspaceDir);
+        if (shouldApplyAppMenuFrom(event.sender.id, workspaceDir)) {
+            applyMacAppMenu(sync);
+        }
+    });
 
     const getWindowByContentId = (id) => {
         return BrowserWindow.getAllWindows().find((win) => win.webContents.id === id);
@@ -1868,7 +2096,6 @@ app.whenReady().then(() => {
         }
     });
 
-    const initEventId = [];
     ipcMain.on("siyuan-event", (event) => {
         if (initEventId.includes(event.sender.id)) {
             return;
@@ -1879,9 +2106,15 @@ app.whenReady().then(() => {
             return;
         }
         latestActiveWindow = currentWindow;
+        applyMacAppMenuForWindow(currentWindow);
+        const webContentsId = currentWindow.webContents.id;
+        currentWindow.on("closed", () => {
+            forgetAppMenuWebContents(webContentsId);
+        });
         currentWindow.on("focus", () => {
             event.sender.send("siyuan-event", "focus");
             latestActiveWindow = currentWindow;
+            applyMacAppMenuForWindow(currentWindow);
         });
         currentWindow.on("blur", () => {
             event.sender.send("siyuan-event", "blur");
@@ -1936,8 +2169,23 @@ app.whenReady().then(() => {
             case "openPath":
                 shell.openPath(data.filePath);
                 break;
-            case "openDevTools":
-                event.sender.openDevTools({mode: "bottom"});
+            case "openDevTools": {
+                /** @type {import("electron").OpenDevToolsOptions} */
+                const options = {};
+                if (["left", "right", "bottom", "undocked", "detach"].includes(data.mode)) {
+                    options.mode = data.mode;
+                }
+                if (typeof data.activate === "boolean") {
+                    options.activate = data.activate;
+                }
+                if (typeof data.title === "string") {
+                    options.title = data.title;
+                }
+                event.sender.openDevTools(options);
+                break;
+            }
+            case "toggleDevTools":
+                event.sender.toggleDevTools();
                 break;
             case "unregisterGlobalShortcut":
                 if (data.accelerator) {
@@ -2252,20 +2500,7 @@ app.whenReady().then(() => {
                         return;
                     }
                     const mainWindow = currentWorkspace.browserWindow;
-                    if (mainWindow.isMinimized()) {
-                        mainWindow.restore();
-                        mainWindow.show(); // 按 `Alt+M` 后隐藏窗口，再次按 `Alt+M` 显示窗口后会卡住不能编辑 https://github.com/siyuan-note/siyuan/issues/8456
-                    } else {
-                        if (mainWindow.isVisible()) {
-                            if (!mainWindow.isFocused()) {
-                                mainWindow.show();
-                            } else {
-                                hideWindow(mainWindow);
-                            }
-                        } else {
-                            mainWindow.show();
-                        }
-                    }
+                    toggleMainWindow(mainWindow);
                     if ("win32" === process.platform || "linux" === process.platform) {
                         resetTrayMenu(currentWorkspace.tray, data.languages, mainWindow);
                     }

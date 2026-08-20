@@ -7,8 +7,14 @@ class TestEmbedElement {
     }
 
     querySelector(selector: string) {
-        const ids = Array.from(selector.matchAll(/\[data-node-id="([^"]+)"\]/g), match => match[1]);
-        return ids.some(id => this.nodeIDs.includes(id)) ? {} : null;
+        const id = selector.match(/\[data-node-id="([^"]+)"\]/)?.[1];
+        return id && this.nodeIDs.includes(id) ? {} : null;
+    }
+
+    querySelectorAll() {
+        return this.nodeIDs.map(id => ({
+            getAttribute: (name: string) => name === "data-node-id" ? id : null,
+        }));
     }
 }
 
@@ -35,6 +41,15 @@ describe("getMoveAffectedEmbedElements", () => {
         assert.deepEqual(getMoveAffectedEmbedElements(
             [embed],
             {id: "moved", previousID: "previous"},
+        ), [embed]);
+    });
+
+    it("matches visible members that move with a folded heading", () => {
+        const embed = asElement(new TestEmbedElement(["heading-child"]));
+
+        assert.deepEqual(getMoveAffectedEmbedElements(
+            [embed],
+            {id: "heading", blockIDs: ["heading-child"]},
         ), [embed]);
     });
 });

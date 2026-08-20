@@ -271,7 +271,7 @@ export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
     applyLuteMarkdownSyntax(protyle.lute, window.siyuan.config.editor.markdown);
 };
 
-const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[]) => {
+const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[], options?: IUploadInsertOptions) => {
     if (protyle && protyle.app && protyle.app.plugins) {
         for (let i = 0; i < protyle.app.plugins.length; i++) {
             const response: { localFiles: ILocalFiles[] } = await new Promise((resolve) => {
@@ -292,7 +292,7 @@ const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[]) => {
             }
         }
     }
-    uploadLocalFiles(localFiles, protyle, true);
+    uploadLocalFiles(localFiles, protyle, true, options);
 };
 
 export const convertPastedListItemSubtype = (listItemElement: HTMLElement, subtype: string) => {
@@ -520,6 +520,12 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         event.stopPropagation();
         event.preventDefault();
     }
+    const assetUploadOptions: IUploadInsertOptions = {
+        ...uploadOptions,
+        source: uploadOptions?.source || ("dataTransfer" in event ? "drop" : "paste"),
+        target: uploadOptions?.target || "editor",
+        position: uploadOptions?.position || ("dataTransfer" in event ? {x: event.clientX, y: event.clientY} : undefined),
+    };
     let textHTML: string;
     let textPlain: string;
     let siyuanHTML: string;
@@ -554,7 +560,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
     } else {
         if (event.localFiles?.length > 0) {
-            readLocalFile(protyle, event.localFiles);
+            readLocalFile(protyle, event.localFiles, assetUploadOptions);
             return;
         }
         textHTML = event.textHTML;
@@ -588,7 +594,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (!siyuanHTML && !textHTML && !textPlain && !wpsPresentation && ("clipboardData" in event)) {
         const localFiles: ILocalFiles[] = await getLocalFiles();
         if (localFiles.length > 0) {
-            readLocalFile(protyle, localFiles);
+            readLocalFile(protyle, localFiles, assetUploadOptions);
             return;
         }
     }
@@ -693,7 +699,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     }
     if (!nodeElement) {
         if (files && files.length > 0) {
-            uploadFiles(protyle, files, undefined, undefined, undefined, uploadOptions);
+            uploadFiles(protyle, files, undefined, undefined, undefined, assetUploadOptions);
         }
         return;
     }
@@ -903,7 +909,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
             const fallback = getWPSPresentationFallback(wpsPresentation.type, Boolean(files?.length));
             if (fallback === "files") {
-                uploadFiles(protyle, files, undefined, undefined, undefined, uploadOptions);
+                uploadFiles(protyle, files, undefined, undefined, undefined, assetUploadOptions);
                 return;
             }
             files = [];
@@ -1009,7 +1015,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             });
             return;
         } else if (files && files.length > 0) {
-            uploadFiles(protyle, files, undefined, undefined, undefined, uploadOptions);
+            uploadFiles(protyle, files, undefined, undefined, undefined, assetUploadOptions);
             return;
         } else if (textPlain.trim() !== "" && (files && files.length === 0 || !files)) {
             if (range.toString() !== "") {

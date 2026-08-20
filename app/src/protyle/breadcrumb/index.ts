@@ -555,7 +555,7 @@ ${padHTML}
                     return;
                 }
                 this.showRecordUploadRetry(uploadProtyle, file, rootID);
-            });
+            }, {source: "programmatic", target: "editor"});
         } catch (error) {
             this.uploadingRecordFiles.delete(file);
             this.showRecordUploadRetry(uploadProtyle, file, rootID);
@@ -680,7 +680,10 @@ ${padHTML}
                         if (event.target.files.length === 0) {
                             return;
                         }
-                        uploadFiles(protyle, event.target.files, event.target);
+                        uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
+                            source: "file-picker",
+                            target: "editor",
+                        });
                         window.siyuan.menus.menu.remove();
                     });
                     window.siyuan.menus.menu.append(imageUploadMenu);
@@ -696,7 +699,10 @@ ${padHTML}
                     if (event.target.files.length === 0) {
                         return;
                     }
-                    uploadFiles(protyle, event.target.files, event.target);
+                    uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
+                        source: "file-picker",
+                        target: "editor",
+                    });
                     window.siyuan.menus.menu.remove();
                 });
                 window.siyuan.menus.menu.append(uploadMenu);
@@ -711,7 +717,11 @@ ${padHTML}
                     if (event.target.files.length === 0) {
                         return;
                     }
-                    uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {htmlAsIframe: true});
+                    uploadFiles(protyle, event.target.files, event.target, undefined, undefined, {
+                        htmlAsIframe: true,
+                        source: "file-picker",
+                        target: "editor",
+                    });
                     window.siyuan.menus.menu.remove();
                 });
                 window.siyuan.menus.menu.append(htmlUploadMenu);

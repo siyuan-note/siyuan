@@ -2091,7 +2091,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         if (filePath) {
                             files.push({
                                 path: filePath,
-                                size: event.dataTransfer.files[i].size
+                                size: event.dataTransfer.files[i].size,
+                                isDir: event.dataTransfer.files[i].size === 0 &&
+                                    event.dataTransfer.files[i].type === "" &&
+                                    !event.dataTransfer.files[i].name.includes("."),
                             });
                         } else {
                             paste(protyle, event, {
@@ -2103,6 +2106,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (files.length > 0) {
                         uploadLocalFiles(files, protyle, !event.altKey, {
                             htmlAsIframe: window.siyuan.config.editor.dragHTMLFileToIframe && !event.altKey,
+                            source: "drop",
+                            target: "editor",
+                            position: {x: event.clientX, y: event.clientY},
                         });
                     }
                 } else {
@@ -2121,13 +2127,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         for (let i = 0; i < event.dataTransfer.files.length; i++) {
                             files.push({
                                 path: webUtils.getPathForFile(event.dataTransfer.files[i]),
-                                size: event.dataTransfer.files[i].size
+                                size: event.dataTransfer.files[i].size,
+                                isDir: event.dataTransfer.files[i].size === 0 &&
+                                    event.dataTransfer.files[i].type === "" &&
+                                    !event.dataTransfer.files[i].name.includes("."),
                             });
                         }
-                        dragUpload(files, protyle, cellElement);
+                        dragUpload(files, protyle, cellElement, {x: event.clientX, y: event.clientY});
                         /// #else
                         focusBlock(hasClosestBlock(cellElement) as HTMLElement);
-                        uploadFiles(protyle, event.dataTransfer.files, undefined);
+                        uploadFiles(protyle, event.dataTransfer.files, undefined, undefined, undefined, {
+                            source: "drop",
+                            target: "av-cell",
+                            position: {x: event.clientX, y: event.clientY},
+                        });
                         /// #endif
                     }
                 }

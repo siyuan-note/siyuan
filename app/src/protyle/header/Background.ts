@@ -174,6 +174,10 @@ export class Background {
                         id: protyle.block.rootID,
                         attrs: {"title-img": style}
                     });
+                }, undefined, {
+                    source: "drop",
+                    target: "background",
+                    position: {x: event.clientX, y: event.clientY},
                 });
             }
         });
@@ -217,7 +221,7 @@ export class Background {
                     id: protyle.block.rootID,
                     attrs: {"title-img": style}
                 });
-            });
+            }, undefined, {source: "file-picker", target: "background"});
         });
         this.element.addEventListener("click", (event) => {
             if (this.dragOccurred) {

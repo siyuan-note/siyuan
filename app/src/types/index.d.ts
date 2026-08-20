@@ -103,7 +103,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" | "open-menu-inbox" |
     "open-siyuan-url-plugin" | "open-siyuan-url-block" | "open-asset" | "open-link" | "opened-notebook" |
     "closed-notebook" |
-    "paste" |
+    "paste" | "before-upload-assets" |
     "input-search" |
     "loaded-protyle-dynamic" | "loaded-protyle-static" |
     "switch-protyle" | "switch-protyle-mode" |
@@ -380,7 +380,55 @@ interface Window {
 
 interface ILocalFiles {
     path: string,
-    size: number
+    size: number | null,
+    isDir?: boolean
+}
+
+type TAssetUploadSource = "paste" | "drop" | "file-picker" | "programmatic"
+type TAssetUploadTarget = "editor" | "av-cell" | "background"
+type TAssetUploadStatus = "success" | "partial" | "failed" | "canceled"
+
+interface IAssetUploadPosition {
+    x: number,
+    y: number
+}
+
+type IAssetUploadInput = {
+    kind: "files",
+    files: File[]
+} | {
+    kind: "local-files",
+    files: ILocalFiles[]
+}
+
+type IAssetUploadDecision = {
+    action: "replace",
+    input: IAssetUploadInput
+} | {
+    action: "cancel"
+}
+
+interface IAssetUploadResult {
+    requestId: string,
+    status: TAssetUploadStatus,
+    input: IAssetUploadInput,
+    succMap?: Record<string, string>,
+    errFiles?: string[],
+    error?: string
+}
+
+/** 在事件对象上调用 `preventDefault()` 可立即取消本次上传。 */
+interface IBeforeUploadAssetsDetail {
+    requestId: string,
+    protyle: IProtyle,
+    source: TAssetUploadSource,
+    target: TAssetUploadTarget,
+    position?: IAssetUploadPosition,
+    input: IAssetUploadInput,
+    /** 返回替换后的输入或取消上传，每次事件只允许调用一次。 */
+    respondWith(response: IAssetUploadDecision | PromiseLike<IAssetUploadDecision>): void,
+    /** 注册上传结束回调，成功、失败或取消时执行一次。 */
+    onComplete(callback: (result: IAssetUploadResult) => void): void
 }
 
 interface IClipboardData {

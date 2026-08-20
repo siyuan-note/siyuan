@@ -204,10 +204,13 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                             for (let i = 0; i < event.dataTransfer.files.length; i++) {
                                 files.push({
                                     path: webUtils.getPathForFile(event.dataTransfer.files[i]),
-                                    size: event.dataTransfer.files[i].size
+                                    size: event.dataTransfer.files[i].size,
+                                    isDir: event.dataTransfer.files[i].size === 0 &&
+                                        event.dataTransfer.files[i].type === "" &&
+                                        !event.dataTransfer.files[i].name.includes("."),
                                 });
                             }
-                            dragUpload(files, protyle, cellElement);
+                            dragUpload(files, protyle, cellElement, {x: event.clientX, y: event.clientY});
                         }
                     }
                 }
@@ -278,7 +281,10 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     event.preventDefault();
                     event.stopPropagation();
                     if (files && files.length > 0) {
-                        uploadFiles(protyle, files);
+                        uploadFiles(protyle, files, undefined, undefined, undefined, {
+                            source: "paste",
+                            target: "av-cell",
+                        });
                     } else {
                         const textPlain = event.clipboardData.getData("text/plain");
                         const blockElement = hasClosestBlock(assetCellElement);

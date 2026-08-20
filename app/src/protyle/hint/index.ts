@@ -383,6 +383,8 @@ export class Hint {
                     htmlAsIframe: event.target.dataset.uploadMode === "html-iframe",
                     insertPosition: createUploadInsertPosition(range,
                         getUndoFocusContext(protyle.wysiwyg.element, range, true)),
+                    source: "file-picker",
+                    target: "editor",
                 });
                 hideElements(["hint", "toolbar"], protyle);
             });

@@ -5,7 +5,7 @@
 	"assetOpenCtrlClick": "Ctrl / ⌘ + 单击",
 	"assetOpenAltClick": "Alt + 单击",
 	"assetOpenShiftClick": "Shift + 单击",
-	"assetOpenFollowTab": "跟随页签打开设置",
+	"assetOpenFollowTab": "跟随分屏设置",
 	"assetOpenCurrent": "在当前页签区打开",
 	"bazaarDeprecated": "已弃用",
 	"bazaarDeprecatedTip": "此集市包已弃用，不再建议使用",

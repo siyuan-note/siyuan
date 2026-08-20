@@ -5,7 +5,7 @@
 	"assetOpenCtrlClick": "Ctrl / ⌘ + clic",
 	"assetOpenAltClick": "Alt + clic",
 	"assetOpenShiftClick": "Mayús + clic",
-	"assetOpenFollowTab": "Seguir la configuración de apertura de pestañas",
+	"assetOpenFollowTab": "Seguir ajuste de pantalla dividida",
 	"assetOpenCurrent": "Abrir en el panel actual",
 	"bazaarDeprecated": "En desuso",
 	"bazaarDeprecatedTip": "Este paquete está en desuso y ya no se recomienda",

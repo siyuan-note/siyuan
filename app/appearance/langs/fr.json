@@ -5,7 +5,7 @@
 	"assetOpenCtrlClick": "Ctrl / ⌘ + clic",
 	"assetOpenAltClick": "Alt + clic",
 	"assetOpenShiftClick": "Maj + clic",
-	"assetOpenFollowTab": "Suivre le réglage d’ouverture des onglets",
+	"assetOpenFollowTab": "Suivre le réglage d’écran partagé",
 	"assetOpenCurrent": "Ouvrir dans le volet actuel",
 	"bazaarDeprecated": "Obsolète",
 	"bazaarDeprecatedTip": "Ce paquet est obsolète et n’est plus recommandé",

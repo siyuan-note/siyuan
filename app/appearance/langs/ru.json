@@ -5,7 +5,7 @@
 	"assetOpenCtrlClick": "Ctrl / ⌘ + щелчок",
 	"assetOpenAltClick": "Alt + щелчок",
 	"assetOpenShiftClick": "Shift + щелчок",
-	"assetOpenFollowTab": "Следовать настройке открытия вкладок",
+	"assetOpenFollowTab": "Следовать настройке разделения экрана",
 	"assetOpenCurrent": "Открыть в текущей области",
 	"bazaarDeprecated": "Устарел",
 	"bazaarDeprecatedTip": "Этот пакет устарел и больше не рекомендуется",

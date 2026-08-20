@@ -5,7 +5,7 @@
 	"assetOpenCtrlClick": "Strg / ⌘ + Klick",
 	"assetOpenAltClick": "Alt + Klick",
 	"assetOpenShiftClick": "Umschalt + Klick",
-	"assetOpenFollowTab": "Einstellung zum Öffnen von Tabs übernehmen",
+	"assetOpenFollowTab": "Splitscreen-Einstellung übernehmen",
 	"assetOpenCurrent": "Im aktuellen Bereich öffnen",
 	"bazaarDeprecated": "Veraltet",
 	"bazaarDeprecatedTip": "Dieses Paket ist veraltet und wird nicht mehr empfohlen",

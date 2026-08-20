@@ -5,7 +5,7 @@
 	"assetOpenCtrlClick": "Ctrl / ⌘ + クリック",
 	"assetOpenAltClick": "Alt + クリック",
 	"assetOpenShiftClick": "Shift + クリック",
-	"assetOpenFollowTab": "タブを開く設定に従う",
+	"assetOpenFollowTab": "分割表示設定に従う",
 	"assetOpenCurrent": "現在のペインで開く",
 	"bazaarDeprecated": "非推奨",
 	"bazaarDeprecatedTip": "このパッケージは非推奨で、今後の使用は推奨されません",

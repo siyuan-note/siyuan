@@ -5,7 +5,7 @@
 	"assetOpenCtrlClick": "Ctrl / ⌘ + клацання",
 	"assetOpenAltClick": "Alt + клацання",
 	"assetOpenShiftClick": "Shift + клацання",
-	"assetOpenFollowTab": "Використовувати налаштування відкриття вкладок",
+	"assetOpenFollowTab": "Використовувати налаштування розділення екрана",
 	"assetOpenCurrent": "Відкрити в поточній області",
 	"bazaarDeprecated": "Застарілий",
 	"bazaarDeprecatedTip": "Цей пакунок застарів і більше не рекомендується",

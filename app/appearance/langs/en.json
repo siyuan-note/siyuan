@@ -5,7 +5,7 @@
 	"assetOpenCtrlClick": "Ctrl / ⌘ + click",
 	"assetOpenAltClick": "Alt + click",
 	"assetOpenShiftClick": "Shift + click",
-	"assetOpenFollowTab": "Follow tab opening setting",
+	"assetOpenFollowTab": "Follow split-screen setting",
 	"assetOpenCurrent": "Open in current pane",
 	"bazaarDeprecated": "Deprecated",
 	"bazaarDeprecatedTip": "This package is deprecated and is no longer recommended",

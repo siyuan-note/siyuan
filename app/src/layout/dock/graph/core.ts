@@ -14,6 +14,37 @@ export const MIN_GRAPH_EDGE_WIDTH = 1;
 export const getGraphEdgeOpacity = (lineOpacity: number, highlighted: boolean) =>
     Math.max(0, Math.min(1, lineOpacity * (highlighted ? HIGHLIGHT_EDGE_OPACITY_FACTOR : 1)));
 
+export const getGraphArrowLength = (linkWidth: number, scale: number) =>
+    Math.max(7, linkWidth * scale * 2.2);
+
+export const getGraphArrowGeometry = (
+    sourceX: number,
+    sourceY: number,
+    targetX: number,
+    targetY: number,
+    targetRadius: number,
+    arrowLength: number,
+    lineWidth = 0,
+) => {
+    const deltaX = targetX - sourceX;
+    const deltaY = targetY - sourceY;
+    const distance = Math.max(0.001, Math.hypot(deltaX, deltaY));
+    const directionX = deltaX / distance;
+    const directionY = deltaY / distance;
+    const tipX = targetX - directionX * targetRadius;
+    const tipY = targetY - directionY * targetRadius;
+    return {
+        baseX: tipX - directionX * arrowLength,
+        baseY: tipY - directionY * arrowLength,
+        directionX,
+        directionY,
+        lineEndX: tipX - directionX * (arrowLength + lineWidth / 2),
+        lineEndY: tipY - directionY * (arrowLength + lineWidth / 2),
+        tipX,
+        tipY,
+    };
+};
+
 export const getGraphNodeSize = (baseSize: number, definitions: number) => {
     if (definitions < 1) {
         return baseSize;
@@ -445,5 +476,22 @@ export const fitGraphCamera = (
         scale,
         x: width / 2 - (minX + maxX) / 2 * scale,
         y: height / 2 - (minY + maxY) / 2 * scale,
+    };
+};
+
+export const centerGraphCamera = (
+    positions: Float32Array,
+    sizes: Float32Array,
+    width: number,
+    height: number,
+    scale: number,
+): IGraphCamera => {
+    const fitted = fitGraphCamera(positions, sizes, width, height);
+    const graphCenterX = (width / 2 - fitted.x) / fitted.scale;
+    const graphCenterY = (height / 2 - fitted.y) / fitted.scale;
+    return {
+        scale,
+        x: width / 2 - graphCenterX * scale,
+        y: height / 2 - graphCenterY * scale,
     };
 };

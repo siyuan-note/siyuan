@@ -336,7 +336,7 @@ export class Graph extends Model {
             item.addEventListener("input", () => {
                 item.setAttribute("aria-label", item.value);
                 if (item.getAttribute("data-type") === "minRefs") {
-                    this.scheduleGraphSearch();
+                    this.scheduleGraphSearch(true);
                 } else {
                     this.updateGraphOptions();
                 }
@@ -347,7 +347,7 @@ export class Graph extends Model {
                 if (item.getAttribute("data-type") === "arrow") {
                     this.updateGraphOptions();
                 } else {
-                    this.searchGraph(false);
+                    this.searchGraph(false, undefined, false, true);
                 }
             });
         });
@@ -440,10 +440,10 @@ export class Graph extends Model {
         (this.panelElement.querySelector("[data-type='blockquote']") as HTMLInputElement).checked = conf.type.blockquote;
         (this.panelElement.querySelector("[data-type='callout']") as HTMLInputElement).checked = conf.type.callout;
         (this.panelElement.querySelector("[data-type='code']") as HTMLInputElement).checked = conf.type.code;
-        this.searchGraph(false);
+        this.searchGraph(false, undefined, false, true);
     }
 
-    public searchGraph(focus: boolean, id?: string, refresh = false) {
+    public searchGraph(focus: boolean, id?: string, refresh = false, resetLayout = refresh) {
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
         if (element.classList.contains("fn__rotate") && refresh) {
             return;
@@ -471,7 +471,7 @@ export class Graph extends Model {
                 }
                 this.graphData = response.data;
                 window.siyuan.config.graph.global = response.data.conf;
-                this.onGraph(false, refresh);
+                this.onGraph(false, resetLayout);
                 element.classList.remove("fn__rotate");
             });
         } else {
@@ -511,7 +511,7 @@ export class Graph extends Model {
                 }
                 this.graphData = response.data;
                 window.siyuan.config.graph.local = response.data.conf;
-                this.onGraph(focus, refresh);
+                this.onGraph(focus, resetLayout);
             });
         }
     }
@@ -539,13 +539,13 @@ export class Graph extends Model {
         this.renderedGraphData = undefined;
     }
 
-    private scheduleGraphSearch() {
+    private scheduleGraphSearch(resetLayout = false) {
         if (this.searchTimeout) {
             window.clearTimeout(this.searchTimeout);
         }
         this.searchTimeout = window.setTimeout(() => {
             this.searchTimeout = 0;
-            this.searchGraph(false);
+            this.searchGraph(false, undefined, false, resetLayout);
         }, 160);
     }
 

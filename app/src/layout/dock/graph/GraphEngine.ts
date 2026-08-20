@@ -1,5 +1,6 @@
 import {GraphCanvasRenderer} from "./canvasRenderer";
 import {
+    centerGraphCamera,
     createInitialPositions,
     fitGraphCamera,
     getDraggedGraphPosition,
@@ -25,6 +26,8 @@ import {GraphWebGLRenderer} from "./webglRenderer";
 const MIN_SCALE = 0.02;
 const MAX_SCALE = 8;
 const CLICK_DISTANCE = 4;
+const WHEEL_ZOOM_SENSITIVITY = 0.0015;
+const TRACKPAD_PINCH_ZOOM_MULTIPLIER = 4;
 
 interface IPointerPosition {
     clientX: number;
@@ -260,6 +263,7 @@ export class GraphEngine {
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
         const wasHidden = this.width < 1 || this.height < 1;
+        const sizeChanged = width !== this.width || height !== this.height;
         this.width = width;
         this.height = height;
         if (width < 1 || height < 1) {
@@ -271,6 +275,9 @@ export class GraphEngine {
         }
         if (this.data && !this.cameraTouched && (wasHidden || this.autoFitPending)) {
             this.fit(false);
+        } else if (this.data && sizeChanged) {
+            this.focusAnimation++;
+            this.camera = centerGraphCamera(this.positions, this.data.sizes, width, height, this.camera.scale);
         }
         this.scheduleRender();
     }
@@ -704,7 +711,8 @@ export class GraphEngine {
         const y = event.clientY - rect.top;
         const anchor = screenToGraph(x, y, this.camera);
         const delta = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? event.deltaY * 16 : event.deltaY;
-        const scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, this.camera.scale * Math.exp(-delta * 0.0005)));
+        const sensitivity = WHEEL_ZOOM_SENSITIVITY * (event.ctrlKey ? TRACKPAD_PINCH_ZOOM_MULTIPLIER : 1);
+        const scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, this.camera.scale * Math.exp(-delta * sensitivity)));
         this.camera.scale = scale;
         this.camera.x = x - anchor.x * scale;
         this.camera.y = y - anchor.y * scale;

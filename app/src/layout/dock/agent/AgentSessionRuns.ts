@@ -1,30 +1,36 @@
 export type AgentSessionRunStatus = "running" | "unread";
 
-export interface AgentSessionRun<TInteraction = unknown> {
+export interface AgentSessionRun<TInteraction = unknown, TEvent = unknown, TViewState = unknown> {
     sessionID: string;
     controller: AbortController;
     turnID: string;
     detached: boolean;
-    view?: DocumentFragment;
+    replaying: boolean;
+    processingPromise?: Promise<void>;
+    replayPromise?: Promise<void>;
+    pendingEvents: TEvent[];
+    viewState?: TViewState;
     pendingInteractions: TInteraction[];
     renderedInteractionKeys: Set<string>;
     interactionViewReady: boolean;
 }
 
-export class AgentSessionRuns<TInteraction = unknown> {
-    private runs = new Map<string, AgentSessionRun<TInteraction>>();
+export class AgentSessionRuns<TInteraction = unknown, TEvent = unknown, TViewState = unknown> {
+    private runs = new Map<string, AgentSessionRun<TInteraction, TEvent, TViewState>>();
     private unread = new Set<string>();
 
-    begin(sessionID: string): AgentSessionRun<TInteraction> {
+    begin(sessionID: string): AgentSessionRun<TInteraction, TEvent, TViewState> {
         const current = this.runs.get(sessionID);
         if (current) {
             return current;
         }
-        const run: AgentSessionRun<TInteraction> = {
+        const run: AgentSessionRun<TInteraction, TEvent, TViewState> = {
             sessionID,
             controller: new AbortController(),
             turnID: "",
             detached: false,
+            replaying: false,
+            pendingEvents: [],
             pendingInteractions: [],
             renderedInteractionKeys: new Set<string>(),
             interactionViewReady: true,
@@ -34,8 +40,23 @@ export class AgentSessionRuns<TInteraction = unknown> {
         return run;
     }
 
-    get(sessionID: string): AgentSessionRun<TInteraction> | undefined {
+    get(sessionID: string): AgentSessionRun<TInteraction, TEvent, TViewState> | undefined {
         return this.runs.get(sessionID);
+    }
+
+    enqueue(run: AgentSessionRun<TInteraction, TEvent, TViewState>, event: TEvent): boolean {
+        if (this.runs.get(run.sessionID) !== run) {
+            return false;
+        }
+        run.pendingEvents.push(event);
+        return true;
+    }
+
+    drain(run: AgentSessionRun<TInteraction, TEvent, TViewState>): TEvent[] {
+        if (this.runs.get(run.sessionID) !== run || run.pendingEvents.length === 0) {
+            return [];
+        }
+        return run.pendingEvents.splice(0);
     }
 
     detach(sessionID: string) {
@@ -46,13 +67,13 @@ export class AgentSessionRuns<TInteraction = unknown> {
         }
     }
 
-    abort(sessionID: string): AgentSessionRun<TInteraction> | undefined {
+    abort(sessionID: string): AgentSessionRun<TInteraction, TEvent, TViewState> | undefined {
         const run = this.runs.get(sessionID);
         run?.controller.abort();
         return run;
     }
 
-    complete(run: AgentSessionRun<TInteraction>, unread: boolean): boolean {
+    complete(run: AgentSessionRun<TInteraction, TEvent, TViewState>, unread: boolean): boolean {
         if (this.runs.get(run.sessionID) !== run) {
             return false;
         }

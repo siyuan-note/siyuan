@@ -481,6 +481,7 @@
         opacity: 0;
         transition: var(--b3-transition);
         line-height: calc(1.625 / 0.85);
+        user-select: none;
       }
 
       .protyle-icon {

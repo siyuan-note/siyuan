@@ -17,6 +17,7 @@
 package util
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -127,6 +128,81 @@ func TestAuthThrottleExpiry(t *testing.T) {
 	authThrottleLock.Unlock()
 	if exists {
 		t.Fatal("expected expired throttle entry to be cleaned up")
+	}
+}
+
+// TestAuthThrottleSweep 验证定期清扫会删除窗口期已过的失败记录，即使 key 不再被访问。
+func TestAuthThrottleSweep(t *testing.T) {
+	staleKeys := make([]string, 0, 64)
+	for i := 0; i < 64; i++ {
+		key := fmt.Sprintf("TestAuthThrottleSweep-stale-%d", i)
+		AuthThrottleFail(key)
+		defer resetAuthThrottleForTest(key)
+		staleKeys = append(staleKeys, key)
+	}
+	authThrottleLock.Lock()
+	for _, key := range staleKeys {
+		authThrottles[key].LastFail = time.Now().Add(-authThrottleWindowSec * time.Second)
+	}
+	authThrottleLastSweep = time.Time{}
+	authThrottleLock.Unlock()
+
+	triggerKey := "TestAuthThrottleSweep-trigger"
+	defer resetAuthThrottleForTest(triggerKey)
+	AuthThrottleFail(triggerKey)
+
+	authThrottleLock.Lock()
+	defer authThrottleLock.Unlock()
+	for _, key := range staleKeys {
+		if _, exists := authThrottles[key]; exists {
+			t.Fatalf("expected stale throttle entry to be swept: %s", key)
+		}
+	}
+}
+
+// TestAuthThrottleSweepKeepsLocked 验证清扫不会删除仍在锁定中的条目。
+func TestAuthThrottleSweepKeepsLocked(t *testing.T) {
+	key := "TestAuthThrottleSweepKeepsLocked"
+	resetAuthThrottleForTest(key)
+	defer resetAuthThrottleForTest(key)
+	for i := 0; i < authThrottleMaxFail+1; i++ {
+		AuthThrottleFail(key)
+	}
+	authThrottleLock.Lock()
+	authThrottleLastSweep = time.Time{}
+	authThrottleLock.Unlock()
+
+	triggerKey := "TestAuthThrottleSweepKeepsLocked-trigger"
+	defer resetAuthThrottleForTest(triggerKey)
+	AuthThrottleFail(triggerKey)
+
+	authThrottleLock.Lock()
+	defer authThrottleLock.Unlock()
+	if _, exists := authThrottles[key]; !exists {
+		t.Fatal("expected locked throttle entry to survive sweep")
+	}
+}
+
+// TestAuthThrottleMaxEntries 验证限流记录条数不超过上限，防止唯一 key 无限增长内存。
+func TestAuthThrottleMaxEntries(t *testing.T) {
+	authThrottleLock.Lock()
+	authThrottleLastSweep = time.Now()
+	for key := range authThrottles {
+		delete(authThrottles, key)
+	}
+	authThrottleLock.Unlock()
+
+	for i := 0; i < authThrottleMaxEntries+50; i++ {
+		AuthThrottleFail(fmt.Sprintf("TestAuthThrottleMaxEntries-%d", i))
+	}
+	authThrottleLock.Lock()
+	count := len(authThrottles)
+	for key := range authThrottles {
+		delete(authThrottles, key)
+	}
+	authThrottleLock.Unlock()
+	if authThrottleMaxEntries < count {
+		t.Fatalf("throttle entries exceeded the cap: %d", count)
 	}
 }
 

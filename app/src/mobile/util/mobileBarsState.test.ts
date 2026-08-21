@@ -22,13 +22,13 @@ const update = (state: IMobileBarsState, action: MobileBarsAction) => {
 describe("mobile bars state", () => {
     it("uses asymmetric default thresholds to avoid flicker", () => {
         let state = createMobileBarsState();
-        state = reduceMobileBarsState(state, {type: "scroll", scrollTop: 31});
+        state = reduceMobileBarsState(state, {type: "scroll", scrollTop: 63});
         assert.equal(state.readingBarsVisible, true);
+        state = reduceMobileBarsState(state, {type: "scroll", scrollTop: 64});
+        assert.equal(state.readingBarsVisible, false);
+        state = reduceMobileBarsState(state, {type: "scroll", scrollTop: 33});
+        assert.equal(state.readingBarsVisible, false);
         state = reduceMobileBarsState(state, {type: "scroll", scrollTop: 32});
-        assert.equal(state.readingBarsVisible, false);
-        state = reduceMobileBarsState(state, {type: "scroll", scrollTop: 17});
-        assert.equal(state.readingBarsVisible, false);
-        state = reduceMobileBarsState(state, {type: "scroll", scrollTop: 16});
         assert.equal(state.readingBarsVisible, true);
     });
 
@@ -189,11 +189,39 @@ describe("mobile bars state", () => {
         assert.equal(state.readingBarsVisible, true);
     });
 
+    it("rebases layout-driven scrolling while the bars transition", () => {
+        let state = createMobileBarsState(100);
+        state = update(state, {type: "set-bars-transitioning", active: true, scrollTop: 100});
+        state = update(state, {type: "scroll", scrollTop: 180});
+        assert.equal(state.readingBarsVisible, true);
+        assert.equal(state.scrollTop, 180);
+
+        state = update(state, {type: "set-bars-transitioning", active: false, scrollTop: 180});
+        state = update(state, {type: "set-reading-bars", visible: false});
+        state = update(state, {type: "set-bars-transitioning", active: true, scrollTop: 100});
+        state = update(state, {type: "scroll", scrollTop: 40});
+
+        assert.equal(state.readingBarsVisible, false);
+        assert.equal(state.scrollTop, 40);
+        assert.equal(state.scrollDirection, undefined);
+        assert.equal(state.scrollDistance, 0);
+        assert.equal(getMobileBarsVisibility(state).scrollPaused, true);
+
+        state = update(state, {type: "set-bars-transitioning", active: false, scrollTop: 40});
+        assert.equal(state.readingBarsVisible, false);
+        assert.equal(getMobileBarsVisibility(state).scrollPaused, false);
+        state = update(state, {type: "scroll", scrollTop: 34});
+        assert.equal(state.readingBarsVisible, false);
+        state = update(state, {type: "scroll", scrollTop: 28});
+        assert.equal(state.readingBarsVisible, true);
+    });
+
     it("resets transient state when the document changes", () => {
         let state = createMobileBarsState(100);
         state = update(state, {type: "set-editing", active: true});
         state = update(state, {type: "set-panel-open", open: true});
         state = update(state, {type: "set-programmatic-scrolling", active: true});
+        state = update(state, {type: "set-bars-transitioning", active: true});
         state = update(state, {type: "document-changed", scrollTop: 12});
 
         assert.deepEqual(state, createMobileBarsState(12));

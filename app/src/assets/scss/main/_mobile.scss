@@ -4,6 +4,7 @@
 
 body {
   --mobile-bottom-bar-offset: calc(48px + env(safe-area-inset-bottom));
+  --mobile-editor-bottom-offset: calc(48px + env(safe-area-inset-bottom));
 }
 
 body.mobile-chrome--hidden {
@@ -12,6 +13,7 @@ body.mobile-chrome--hidden {
 
 body.mobile-keyboard--open {
   --mobile-bottom-bar-offset: 0px;
+  --mobile-editor-bottom-offset: 0px;
 }
 
 .block__popover {
@@ -274,7 +276,7 @@ body.mobile-keyboard--open {
   min-height: 48px;
   padding: 0 max(4px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
   flex-shrink: 0;
-  transition: margin-bottom 180ms cubic-bezier(.2, 0, 0, 1), opacity 180ms cubic-bezier(.2, 0, 0, 1), transform 180ms cubic-bezier(.2, 0, 0, 1), visibility 180ms;
+  transition: margin-bottom 240ms cubic-bezier(.2, 0, 0, 1), opacity 240ms cubic-bezier(.2, 0, 0, 1), transform 240ms cubic-bezier(.2, 0, 0, 1), visibility 240ms;
 }
 
 .mobile-bottom-bar {
@@ -290,7 +292,7 @@ body.mobile-keyboard--open {
   padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
   border-top: .5px solid var(--b3-theme-background-light);
   background-color: var(--b3-theme-background);
-  transition: opacity 180ms cubic-bezier(.2, 0, 0, 1), transform 180ms cubic-bezier(.2, 0, 0, 1), visibility 180ms;
+  transition: opacity 240ms cubic-bezier(.2, 0, 0, 1), transform 240ms cubic-bezier(.2, 0, 0, 1), visibility 240ms;
   -webkit-user-select: none;
   user-select: none;
 
@@ -411,7 +413,7 @@ body.mobile-keyboard--open {
 
 #editor {
   box-sizing: border-box;
-  padding-bottom: var(--mobile-bottom-bar-offset);
+  padding-bottom: var(--mobile-editor-bottom-offset);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -12,6 +12,7 @@ export interface IMobileBarsState {
     selecting: boolean,
     panelOpen: boolean,
     programmaticScrolling: boolean,
+    barsTransitioning: boolean,
     scrollTop: number,
     scrollDirection?: MobileBarsScrollDirection,
     scrollDistance: number,
@@ -46,13 +47,17 @@ export type MobileBarsAction = {
     active: boolean,
     scrollTop?: number,
 } | {
+    type: "set-bars-transitioning",
+    active: boolean,
+    scrollTop?: number,
+} | {
     type: "document-changed",
     scrollTop?: number,
 };
 
 export const MOBILE_BARS_SCROLL_OPTIONS: Readonly<IMobileBarsScrollOptions> = {
-    hideThreshold: 32,
-    showThreshold: 16,
+    hideThreshold: 64,
+    showThreshold: 32,
     topThreshold: 8,
 };
 
@@ -82,12 +87,13 @@ export const createMobileBarsState = (scrollTop = 0): IMobileBarsState => ({
     selecting: false,
     panelOpen: false,
     programmaticScrolling: false,
+    barsTransitioning: false,
     scrollTop: normalizeScrollTop(scrollTop),
     scrollDistance: 0,
 });
 
 export const isMobileBarsScrollPaused = (state: IMobileBarsState) => {
-    return state.editing || state.selecting || state.panelOpen || state.programmaticScrolling;
+    return state.editing || state.selecting || state.panelOpen || state.programmaticScrolling || state.barsTransitioning;
 };
 
 export const getMobileBarsVisibility = (state: IMobileBarsState): IMobileBarsVisibility => ({
@@ -147,6 +153,13 @@ export const reduceMobileBarsState = (
             nextState.readingBarsVisible = true;
         }
         return nextState;
+    }
+
+    if (action.type === "set-bars-transitioning") {
+        return {
+            ...resetScrollTracking(state, action.scrollTop),
+            barsTransitioning: action.active,
+        };
     }
 
     const scrollTop = normalizeScrollTop(action.scrollTop, state.scrollTop);

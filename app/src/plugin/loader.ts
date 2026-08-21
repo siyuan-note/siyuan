@@ -35,13 +35,14 @@ export const loadPlugins = async (app: App, names?: string[], init = true) => {
     for (let i = 0; i < response.data.length; i++) {
         const item = response.data[i] as IPluginData;
         if (!names || (names && names.includes(item.name))) {
+            // 先插入 CSS，避免 onload 里插入的 DOM 在样式生效前先按无样式排版
+            insertPluginCSS(item, pluginsStyle);
             if (init) {
                 // 初始化时为加快启动速度，已特殊处理，不进行 await
                 loadPluginJS(app, item);
             } else {
                 await loadPluginJS(app, item);
             }
-            insertPluginCSS(item, pluginsStyle);
         }
     }
 };
@@ -106,8 +107,8 @@ const insertPluginCSS = (item: IPluginData, pluginsStyle: HTMLElement) => {
 
 // 启用插件
 export const loadPlugin = async (app: App, item: IPluginData) => {
-    const plugin = await loadPluginJS(app, item);
     insertPluginCSS(item, getPluginsStyle());
+    const plugin = await loadPluginJS(app, item);
     afterLoadPlugin(plugin);
     saveLayout();
     getAllEditor().forEach(editor => {

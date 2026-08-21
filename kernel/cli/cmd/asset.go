@@ -60,7 +60,7 @@ var assetUploadCmd = &cobra.Command{
 			return nil
 		}
 
-		succMap, err := model.InsertLocalAssets(id, files, true)
+		succMap, _, err := model.InsertLocalAssets(id, files, true)
 		if err != nil {
 			return err
 		}

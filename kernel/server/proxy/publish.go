@@ -218,12 +218,11 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 			return publishAuthRejectResponse(request, http.StatusUnauthorized, 0), nil
 		}
 
-		// 按来源 IP 与账户名限流，防止暴力破解 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phg7-xcr4-q5wg
+		// 按来源 IP 限流，防止暴力破解与限流记录无限增长 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2x7j-p79w-7744
 		ip := util.GetRemoteAddr(request)
-		throttleKey := ip + ":" + username
-		if retryAfter := util.AuthThrottleCheck(throttleKey); 0 < retryAfter {
+		if retryAfter := util.AuthThrottleCheck(ip); 0 < retryAfter {
 			// 锁定期间持续记录失败，以延长锁定时间
-			util.AuthThrottleFail(throttleKey)
+			util.AuthThrottleFail(ip)
 			logging.LogWarnf("publish service auth throttled [ip=%s, username=%s]", ip, username)
 			return publishAuthRejectResponse(request, http.StatusTooManyRequests, retryAfter), nil
 		}
@@ -232,10 +231,10 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 		if account == nil ||
 			"" == account.Username || // 匿名用户
 			!util.AuthCodeEquals(account.Password, password) { // 恒定时间比较，避免时序侧信道 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-phg7-xcr4-q5wg
-			util.AuthThrottleFail(throttleKey)
+			util.AuthThrottleFail(ip)
 			return publishAuthRejectResponse(request, http.StatusUnauthorized, 0), nil
 		}
-		util.AuthThrottleReset(throttleKey)
+		util.AuthThrottleReset(ip)
 
 		// set session cookie
 		sessionID := model.GetNewSessionID()

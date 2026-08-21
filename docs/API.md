@@ -717,6 +717,13 @@ Move documents by `id`:
     "msg": "",
     "data": {
       "errFiles": [""],
+      "succFiles": [
+        {
+          "index": 0,
+          "name": "foo.png",
+          "path": "assets/foo-20210719092549-9j5y79r.png"
+        }
+      ],
       "succMap": {
         "foo.png": "assets/foo-20210719092549-9j5y79r.png"
       }
@@ -725,9 +732,8 @@ Move documents by `id`:
   ```
 
     * `errFiles`: List of filenames with errors in upload processing
-    * `succMap`: For successfully processed files, the key is the file name when uploading, and the value is
-      assets/foo-id.png, which is used to replace the asset link address in the existing Markdown content with the
-      uploaded address
+    * `succFiles`: Successfully processed files in input order. `index` is the file's index in `file[]`, `name` is its upload filename, and `path` is the uploaded asset path. Use this field when a batch can contain duplicate filenames
+    * `succMap`: Compatibility mapping for existing callers. The key is the upload filename and the value is assets/foo-id.png. When a batch contains duplicate filenames, only the last item with a given key remains in this map
 
 ## Blocks
 

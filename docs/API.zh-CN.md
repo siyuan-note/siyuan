@@ -715,6 +715,13 @@
     "msg": "",
     "data": {
       "errFiles": [""],
+      "succFiles": [
+        {
+          "index": 0,
+          "name": "foo.png",
+          "path": "assets/foo-20210719092549-9j5y79r.png"
+        }
+      ],
       "succMap": {
         "foo.png": "assets/foo-20210719092549-9j5y79r.png"
       }
@@ -723,7 +730,8 @@
   ```
 
     * `errFiles`：处理时遇到错误的文件名
-    * `succMap`：处理成功的文件，key 为上传时的文件名，value 为 assets/foo-id.png，用于将已有 Markdown 内容中的资源文件链接地址替换为上传后的地址
+    * `succFiles`：按输入顺序记录处理成功的文件，`index` 为文件在 `file[]` 中的索引，`name` 为上传时的文件名，`path` 为上传后的资源文件路径；同一批文件包含同名文件时应使用该字段
+    * `succMap`：为兼容现有调用方保留的成功文件映射，key 为上传时的文件名，value 为 assets/foo-id.png；同一批文件包含同名文件时，同名 key 仅保留最后一项
 
 ## 块
 

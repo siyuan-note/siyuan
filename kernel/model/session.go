@@ -548,6 +548,15 @@ func ControlConcurrency(c *gin.Context) {
 		return
 	}
 
+	// 仅对已注册的静态 /api/ 路径做并发控制：路由表有限，requesting map 不会无界增长；
+	// 未知路径与带参数通配路由直接放行 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-p59v-3q54-qq55
+	if !strings.HasPrefix(reqPath, "/api/") ||
+		"" == c.FullPath() ||
+		strings.ContainsAny(c.FullPath(), ":*") {
+		c.Next()
+		return
+	}
+
 	requestingLock.Lock()
 	mutex := requesting[reqPath]
 	if nil == mutex {

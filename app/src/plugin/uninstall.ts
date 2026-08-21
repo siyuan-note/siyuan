@@ -12,10 +12,12 @@ import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
 import {unregisterCapability} from "../layout/dock/agent/frontendCapabilities";
+import {cancelAssetUploadsByPlugin} from "../protyle/upload/pluginEvent";
 
 export const uninstall = (app: App, name: string, isReload: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {
         if (plugin.name === name) {
+            cancelAssetUploadsByPlugin(plugin);
             try {
                 plugin.onunload();
             } catch (e) {

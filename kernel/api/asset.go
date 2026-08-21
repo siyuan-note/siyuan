@@ -612,14 +612,15 @@ func insertLocalAssets(c *gin.Context) {
 		isUpload = isUploadArg.(bool)
 	}
 	id := arg["id"].(string)
-	succMap, err := model.InsertLocalAssets(id, assetPaths, isUpload)
+	succMap, succFiles, err := model.InsertLocalAssets(id, assetPaths, isUpload)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 	ret.Data = map[string]any{
-		"succMap": succMap,
+		"succFiles": succFiles,
+		"succMap":   succMap,
 	}
 }
 
@@ -654,7 +655,7 @@ func insertCover(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	succMap, err := model.InsertLocalAssets(id, []string{srcPath}, true)
+	succMap, succFiles, err := model.InsertLocalAssets(id, []string{srcPath}, true)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -662,6 +663,7 @@ func insertCover(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"succMap": succMap,
+		"succFiles": succFiles,
+		"succMap":   succMap,
 	}
 }

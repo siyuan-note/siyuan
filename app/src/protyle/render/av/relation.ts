@@ -17,7 +17,7 @@ import {showMessage} from "../../../dialog/message";
 import {writeText} from "../../util/compatibility";
 import {Constants} from "../../../constants";
 import {openDatabaseRowByData} from "./openDatabaseRow";
-import {getAVColumnTextMeasurer, getAVTableFitWidths} from "./columnWidth";
+import {getAVColumnTextMeasurer, getAVRelationColumnWidth, getAVTableFitWidths} from "./columnWidth";
 import {getSearchAVFocus} from "./searchAVFocus";
 
 interface IAVItem {
@@ -387,7 +387,7 @@ const getRelationGridTemplate = (columns: IAVColumn[], rows: IAVRow[],
     } as IAVTable, getCellValueText, measureText);
     return `32px ${columns.map((column, index) => {
         const width = widths[column.id] || "64px";
-        return index === 0 ? `${Math.max(240, parseFloat(width))}px` : width;
+        return getAVRelationColumnWidth(width, column.type, index === 0);
     }).join(" ")}`;
 };
 

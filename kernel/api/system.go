@@ -28,6 +28,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -1471,7 +1472,16 @@ func setNetworkProxy(c *gin.Context) {
 
 func addUIProcess(c *gin.Context) {
 	pid := c.Query("pid")
-	util.UIProcessIDs.Store(pid, true)
+	pidInt, err := strconv.Atoi(pid)
+	if err != nil || 0 >= pidInt {
+		return
+	}
+
+	// 限制注册表中的 UI 进程数，防止无界增长导致内存耗尽
+	if util.UIProcessCount() >= util.MaxUIProcessCount {
+		return
+	}
+	util.UIProcessIDs.Store(strconv.Itoa(pidInt), true)
 }
 
 func exit(c *gin.Context) {

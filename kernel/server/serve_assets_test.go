@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -145,6 +146,68 @@ func TestIsValidResolvedAssetPath(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			if got := isValidResolvedAssetPath(test.assetPath, test.requestBoxID); got != test.want {
 				t.Fatalf("isValidResolvedAssetPath(%q, %q) = %v, want %v", test.assetPath, test.requestBoxID, got, test.want)
+			}
+		})
+	}
+}
+
+func TestResolveAssetRequestPathByDataPath(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	const (
+		boxID          = "20260821000000-abcdefg"
+		docID          = "20260821000001-hijklmn"
+		encryptedBoxID = "20260821000002-opqrstu"
+	)
+	writeFile := func(filePath string) {
+		t.Helper()
+		if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filePath, []byte("asset"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeFile(filepath.Join(util.DataDir, boxID, ".siyuan", "conf.json"))
+	writeFile(filepath.Join(util.DataDir, encryptedBoxID, ".siyuan", "conf.json"))
+	if err := os.WriteFile(filepath.Join(util.DataDir, encryptedBoxID, ".siyuan", "conf.json"),
+		[]byte(`{"encrypted":true}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	documentAssetPath := filepath.Join(util.DataDir, boxID, docID, "assets", "video.mp4")
+	writeFile(documentAssetPath)
+	encryptedAssetPath := filepath.Join(util.DataDir, encryptedBoxID, "assets", "encrypted.mp4")
+	writeFile(encryptedAssetPath)
+
+	dataPath := path.Join(boxID, docID, "assets", "video.mp4")
+	resolvedPath, err := resolveAssetRequestPath("assets/video.mp4", "", dataPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resolvedPath != documentAssetPath {
+		t.Fatalf("resolve asset by data path: got %q, want %q", resolvedPath, documentAssetPath)
+	}
+
+	invalidRequests := []struct {
+		name      string
+		assetPath string
+		boxID     string
+		dataPath  string
+	}{
+		{name: "mismatched asset path", assetPath: "assets/other.mp4", dataPath: dataPath},
+		{name: "box and data path", assetPath: "assets/video.mp4", boxID: boxID, dataPath: dataPath},
+		{name: "non asset data path", assetPath: "assets/document.sy", dataPath: path.Join(boxID, docID+".sy")},
+		{name: "encrypted asset data path", assetPath: "assets/encrypted.mp4",
+			dataPath: path.Join(encryptedBoxID, "assets", "encrypted.mp4")},
+	}
+	for _, test := range invalidRequests {
+		t.Run(test.name, func(t *testing.T) {
+			if _, resolveErr := resolveAssetRequestPath(test.assetPath, test.boxID, test.dataPath); resolveErr == nil {
+				t.Fatalf("resolveAssetRequestPath(%q, %q, %q) should fail", test.assetPath, test.boxID, test.dataPath)
 			}
 		})
 	}

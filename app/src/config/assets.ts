@@ -309,7 +309,7 @@ const assets = {
             if (liElement && liElement.getAttribute("data-item") !== assetsListElement.nextElementSibling.getAttribute("data-item")) {
                 const item = liElement.getAttribute("data-item");
                 assetsListElement.nextElementSibling.setAttribute("data-item", item);
-                assetsListElement.nextElementSibling.innerHTML = renderAssetsPreview(item);
+                assetsListElement.nextElementSibling.innerHTML = renderAssetsPreview(liElement.getAttribute("data-path"), item);
             }
         });
         fetchPost("/api/asset/getUnusedAssets", {}, response => {
@@ -319,6 +319,7 @@ const assets = {
     _renderList: (data: {
         item: string,
         name: string,
+        path?: string,
         blockIDs?: string[]
     }[], element: Element, type: "unRefAV" | "unrefAssets" | "lostAssets") => {
         let html = "";
@@ -341,7 +342,7 @@ const assets = {
         <svg><use xlink:href="#iconPictureInPicture"></use></svg>
     </span>`
                 : "";
-            html += `<li data-tab-type="${type}" data-item="${item.item}"  class="b3-list-item${mobile ? "" : " b3-list-item--hide-action"}">
+            html += `<li data-tab-type="${type}" data-item="${escapeAttr(item.item)}" data-path="${escapeAttr(item.path || item.item)}" class="b3-list-item${mobile ? "" : " b3-list-item--hide-action"}">
     <span class="b3-list-item__text">${escapeHtml(item.name || item.item)}</span>
     ${blockPopoverHTML}
     <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${type === "unRefAV" ? window.siyuan.languages.copyMirror : window.siyuan.languages.copy}">

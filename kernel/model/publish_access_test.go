@@ -86,9 +86,9 @@ func TestAssetPathFromDataRelativePath(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			assetPath, actualBoxID, ok := assetPathFromDataRelativePath(test.relativePath)
+			assetPath, actualBoxID, ok := AssetPathFromDataRelativePath(test.relativePath)
 			if assetPath != test.wantAssetPath || actualBoxID != test.wantBoxID || ok != test.wantOK {
-				t.Fatalf("assetPathFromDataRelativePath(%q) = [%q, %q, %v], want [%q, %q, %v]",
+				t.Fatalf("AssetPathFromDataRelativePath(%q) = [%q, %q, %v], want [%q, %q, %v]",
 					test.relativePath, assetPath, actualBoxID, ok, test.wantAssetPath, test.wantBoxID, test.wantOK)
 			}
 		})

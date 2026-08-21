@@ -1693,6 +1693,7 @@ func replaceAttributeViewAssetPath(avJSONPath, avID, oldPath, newPath string) (u
 type UnusedItem struct {
 	Item     string    `json:"item"`
 	Name     string    `json:"name"`
+	Path     string    `json:"path,omitempty"`
 	BlockIDs []string  `json:"blockIDs,omitempty"`
 	ModTime  time.Time `json:"-"`
 	AbsPath  string    `json:"-"`
@@ -1897,7 +1898,7 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 			}
 		}
 
-		ret = append(ret, &UnusedItem{Item: p, Name: name, ModTime: modTime, AbsPath: assetAbsPath})
+		ret = append(ret, &UnusedItem{Item: p, Name: name, Path: dest, ModTime: modTime, AbsPath: assetAbsPath})
 	}
 
 	if sorted {

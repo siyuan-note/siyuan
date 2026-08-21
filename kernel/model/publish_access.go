@@ -474,7 +474,8 @@ func CheckPublishAuthCookie(c *gin.Context, ID string, password string) bool {
 	return err == nil && authCookie.Value == util.SHA256Hash([]byte(ID+password))
 }
 
-func assetPathFromDataRelativePath(relPath string) (assetPath, boxID string, ok bool) {
+// AssetPathFromDataRelativePath 从 data 相对路径提取文档中使用的资源路径和笔记本 ID。
+func AssetPathFromDataRelativePath(relPath string) (assetPath, boxID string, ok bool) {
 	pathParts := strings.Split(relPath, "/")
 	if 1 < len(pathParts) && pathParts[0] == "assets" {
 		return strings.Join(pathParts, "/"), "", true
@@ -510,7 +511,7 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 			return true
 		}
 
-		if assetPath, box, ok := assetPathFromDataRelativePath(relPath); ok {
+		if assetPath, box, ok := AssetPathFromDataRelativePath(relPath); ok {
 			return checkAssetPathAccessableByPublishAccess(c, publishAccess, assetPath, box)
 		}
 

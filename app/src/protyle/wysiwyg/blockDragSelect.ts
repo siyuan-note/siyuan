@@ -31,7 +31,17 @@ export const getBlockDragSelectBlock = (element: Element, boundaryElement: Eleme
     let parentElement = block.parentElement;
     while (parentElement && parentElement !== boundaryElement) {
         if (isContainerBlock(parentElement)) {
-            return isListItem(parentElement) ? parentElement : block;
+            if (!isListItem(parentElement)) {
+                return block;
+            }
+            // 列表项的首个直属块代表列表项主内容，其他子块可单独划选。
+            for (let i = 0; i < parentElement.children.length; i++) {
+                const childElement = parentElement.children[i];
+                if (getBlock(childElement) === childElement) {
+                    return childElement === block ? parentElement : block;
+                }
+            }
+            return parentElement;
         }
         parentElement = parentElement.parentElement;
     }

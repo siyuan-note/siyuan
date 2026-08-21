@@ -83,8 +83,10 @@ func IsForbiddenDataRelPath(rel string) bool {
 		return true
 	}
 
-	// 禁止访问 data/.siyuan/publishAccess.json（含发布模式明文访问密码）
-	if rel == "/.siyuan/publishaccess.json" {
+	// 禁止访问 data/.siyuan/publishAccess.json（含发布模式明文访问密码）。
+	// 磁盘上的真实文件名为驼峰 publishAccess.json：Windows/macOS 上路径已在上方转为小写，与小写常量比较即可；
+	// Linux 等大小写敏感平台需与真实名称精确比较，并对大小写变体做小写兜底比较，防止变体路径绕过黑名单
+	if rel == "/.siyuan/publishAccess.json" || strings.ToLower(rel) == "/.siyuan/publishaccess.json" {
 		return true
 	}
 	return false

@@ -1286,7 +1286,7 @@ type="checkbox">
         <svg class="b3-list-item__graphic"><use xlink:href="#iconLeft"></use></svg>
         <span class="b3-list-item__text ft__breakword">${navTitles[bazaarType]}</span>
     </div>`;
-        const readmeActionsHTML = `<div class="item__actions${isMobile() ? " item__actions--mobile" : ""}">
+        const readmeActionsHTML = `<div class="item__actions${isMobile() ? " item__actions--mobile" : ""}" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}">
         ${bazaar._genReadmeActionsHTML(bazaarType, installed, available)}
         ${bazaar._genReadmeUpdateButtonHTML(available, bazaarType, Boolean(installed))}
     </div>`;

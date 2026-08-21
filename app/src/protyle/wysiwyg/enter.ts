@@ -32,6 +32,7 @@ import {processRender} from "../util/processCode";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
 import {isCodeBlockFenceBeforeCaret} from "./codeBlockEnter";
+import {isEmptyListItemBlock, shouldCreateListItemChildOnEnter} from "./listContext";
 
 export const enter = async (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
     const embedResultElement = hasClosestByClassName(blockElement, "protyle-wysiwyg__embed");
@@ -451,9 +452,8 @@ const getEmbedListEnterMode = (blockElement: HTMLElement, embedContext: IEmbedCh
     }
     const listElement = listItemElement.parentElement;
     const editableElement = getContenteditableElement(blockElement);
-    const exitsList = ["", "\n"].includes(editableElement.textContent) &&
-        blockElement.previousElementSibling.classList.contains("protyle-action") &&
-        !blockElement.querySelector("img");
+    const exitsList = isEmptyListItemBlock(editableElement.textContent, !!blockElement.querySelector("img")) &&
+        blockElement.previousElementSibling.classList.contains("protyle-action");
     if (exitsList && listElement.parentElement === embedContext.resultElement) {
         return "none";
     }
@@ -463,10 +463,16 @@ const getEmbedListEnterMode = (blockElement: HTMLElement, embedContext: IEmbedCh
 const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Range) => {
     const listItemElement = blockElement.parentElement;
     const editableElement = getContenteditableElement(blockElement);
+    const isPrimaryBlock = blockElement.previousElementSibling.classList.contains("protyle-action");
+    const isEmptyBlock = isEmptyListItemBlock(editableElement.textContent, !!blockElement.querySelector("img"));
+    // 列表项的非空末尾子块按普通块处理，空子块再次回车时仍创建后续列表项。
+    if (shouldCreateListItemChildOnEnter(isPrimaryBlock,
+        blockElement.nextElementSibling.classList.contains("protyle-attr"), isEmptyBlock)) {
+        return false;
+    }
     if (// \n 是因为 https://github.com/siyuan-note/siyuan/issues/3846
-        ["", "\n"].includes(editableElement.textContent) &&
-        blockElement.previousElementSibling.classList.contains("protyle-action") &&
-        !blockElement.querySelector("img") // https://ld246.com/article/1651820644238
+        isEmptyBlock &&
+        isPrimaryBlock // https://ld246.com/article/1651820644238
     ) {
         if (listItemElement.nextElementSibling?.classList.contains("protyle-attr")) {
             await listOutdent(protyle, [blockElement.parentElement], range);
@@ -494,15 +500,15 @@ const listEnter = async (protyle: IProtyle, blockElement: HTMLElement, range: Ra
         const listStart = getOrderedListStart(listElement);
         wbrElement.remove();
         let newElement = genListItemElement(listItemElement, -1, true);
-        if (!blockElement.previousElementSibling.classList.contains("protyle-action")) {
+        if (!isPrimaryBlock) {
             // 列表项中有多个块，最后一个块为空，换行应进行缩进
-            if (getContenteditableElement(blockElement).textContent !== "") {
+            if (!isEmptyBlock) {
                 return false;
             }
             blockElement.remove();
             newElement = genListItemElement(listItemElement, -1, true);
             listItemElement.insertAdjacentElement("afterend", newElement);
-        } else if (getContenteditableElement(blockElement).textContent === "") {
+        } else if (isEmptyBlock) {
             listItemElement.insertAdjacentElement("afterend", newElement);
         } else {
             listItemElement.insertAdjacentElement("beforebegin", newElement);

@@ -288,7 +288,8 @@ func CheckAuth(c *gin.Context) {
 			c.Next()
 			return
 		}
-		if strings.HasPrefix(c.Request.RequestURI, "/api/system/exit") {
+		if strings.HasPrefix(c.Request.RequestURI, "/api/system/exit") ||
+			strings.HasPrefix(c.Request.RequestURI, "/api/system/uiproc") {
 			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return

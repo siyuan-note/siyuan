@@ -2,6 +2,7 @@ export interface IAssetUploadEventContext {
     source: TAssetUploadSource;
     target: TAssetUploadTarget;
     position?: IAssetUploadPosition;
+    requiredFileCount?: number;
 }
 
 export interface IAssetUploadTask {
@@ -52,7 +53,33 @@ const cloneInput = (input: IAssetUploadInput): IAssetUploadInput => {
     if (input.kind === "files") {
         return {kind: "files", files: Array.from(input.files)};
     }
-    return {kind: "local-files", files: Array.from(input.files)};
+    return {kind: "local-files", files: input.files.map(file => ({...file}))};
+};
+
+const cloneResult = (result: IAssetUploadResult): IAssetUploadResult => {
+    const cloned: IAssetUploadResult = {
+        ...result,
+        input: cloneInput(result.input),
+    };
+    if (result.acceptedInput) {
+        cloned.acceptedInput = cloneInput(result.acceptedInput);
+    }
+    if (result.rejected) {
+        cloned.rejected = result.rejected.map(item => ({...item, reasons: Array.from(item.reasons)}));
+    }
+    if (result.succFiles) {
+        cloned.succFiles = result.succFiles.map(item => ({...item}));
+    }
+    if (result.failedFiles) {
+        cloned.failedFiles = result.failedFiles.map(item => ({...item}));
+    }
+    if (result.succMap) {
+        cloned.succMap = {...result.succMap};
+    }
+    if (result.errFiles) {
+        cloned.errFiles = Array.from(result.errFiles);
+    }
+    return cloned;
 };
 
 const validateAssetUploadInput = (input: unknown) => {
@@ -97,6 +124,16 @@ const getErrorMessage = (error: unknown) => {
 };
 
 const getPluginLabel = (plugin: IAssetUploadPlugin, index: number) => plugin.name || `#${index + 1}`;
+
+const validateTargetInput = (input: IAssetUploadInput, context: IAssetUploadEventContext) => {
+    if (context.requiredFileCount !== undefined && input.files.length !== context.requiredFileCount) {
+        return `this upload requires exactly ${context.requiredFileCount} file(s)`;
+    }
+    if (context.target === "background" && input.files.length !== 1) {
+        return "background uploads require exactly one file";
+    }
+    return "";
+};
 
 class AssetUploadTask implements IAssetUploadTask {
     public readonly requestId: string;
@@ -169,7 +206,7 @@ class AssetUploadTask implements IAssetUploadTask {
         }
         this.callbacks.forEach(callback => {
             try {
-                const callbackResult = callback(detail);
+                const callbackResult = callback(cloneResult(detail));
                 if (callbackResult && typeof callbackResult.then === "function") {
                     void Promise.resolve(callbackResult).catch(error => console.error(error));
                 }
@@ -194,8 +231,7 @@ export const cancelAssetUploadsByPlugin = (plugin: IAssetUploadPlugin) => {
 };
 
 const waitForDecision = (response: PromiseLike<IAssetUploadDecision>, task: AssetUploadTask,
-                         pluginLabel: string, pendingPlugins: IAssetUploadPlugin[], deadline: number) => {
-    task.startWaiting(pendingPlugins);
+                         pluginLabel: string, timeout: number) => {
     return new Promise<IAssetUploadDecision>((resolve, reject) => {
         let settled = false;
         const finish = (callback: (value: any) => void, value: any) => {
@@ -205,14 +241,13 @@ const waitForDecision = (response: PromiseLike<IAssetUploadDecision>, task: Asse
             settled = true;
             clearTimeout(timeoutId);
             task.signal.removeEventListener("abort", onAbort);
-            task.stopWaiting();
             callback(value);
         };
         const onAbort = () => finish(reject, task.signal.reason instanceof Error ? task.signal.reason :
             new AssetUploadCanceledError("The upload was canceled"));
         const timeoutId = setTimeout(() => {
             task.abort(new AssetUploadTimeoutError(`Plugin ${pluginLabel} asset processing timed out`));
-        }, Math.max(0, deadline - Date.now()));
+        }, timeout);
         task.signal.addEventListener("abort", onAbort, {once: true});
         if (task.signal.aborted) {
             onAbort();
@@ -232,7 +267,7 @@ export const prepareAssetUpload = (options: {
 }): TPreparedAssetUpload | Promise<TPreparedAssetUpload> => {
     const task = new AssetUploadTask(options.input, options.requestId || genRequestId(), options.protyle);
     const plugins = Array.from(options.plugins);
-    const deadline = Date.now() + (options.timeout ?? ASSET_UPLOAD_PLUGIN_TIMEOUT);
+    const timeout = options.timeout ?? ASSET_UPLOAD_PLUGIN_TIMEOUT;
     const fail = (error: unknown): TPreparedAssetUpload => {
         const errorMessage = getErrorMessage(error);
         task.abort(error instanceof Error ? error : new Error(errorMessage));
@@ -244,8 +279,18 @@ export const prepareAssetUpload = (options: {
         task.complete({status: "canceled"});
         return {state: "canceled", task};
     };
+    const initialValidationError = validateTargetInput(task.input, options.context);
+    if (initialValidationError) {
+        return fail(initialValidationError);
+    }
+    task.startWaiting(plugins);
     const processPlugin = (index: number): TPreparedAssetUpload | Promise<TPreparedAssetUpload> => {
+        if (task.signal.aborted) {
+            const reason = task.signal.reason instanceof Error ? task.signal.reason.message : "The upload was canceled";
+            return cancel(reason);
+        }
         if (index >= plugins.length) {
+            task.stopWaiting();
             return {state: "ready", task};
         }
         const plugin = plugins[index];
@@ -266,7 +311,7 @@ export const prepareAssetUpload = (options: {
                 protyle: options.protyle,
                 source: options.context.source,
                 target: options.context.target,
-                position: options.context.position,
+                position: options.context.position ? {...options.context.position} : undefined,
                 input: cloneInput(task.input),
                 signal: task.signal,
                 respondWith(value) {
@@ -313,7 +358,7 @@ export const prepareAssetUpload = (options: {
         if (!response) {
             return processPlugin(index + 1);
         }
-        return waitForDecision(response, task, pluginLabel, plugins.slice(index), deadline).then(decision => {
+        return waitForDecision(response, task, pluginLabel, timeout).then(decision => {
             if (decision?.action === "cancel") {
                 return cancel();
             }
@@ -323,6 +368,10 @@ export const prepareAssetUpload = (options: {
             const validationError = validateAssetUploadInput(decision.input);
             if (validationError) {
                 throw new Error(`Plugin ${pluginLabel} returned invalid input: ${validationError}`);
+            }
+            const targetValidationError = validateTargetInput(decision.input, options.context);
+            if (targetValidationError) {
+                throw new Error(`Plugin ${pluginLabel} returned invalid input: ${targetValidationError}`);
             }
             task.input = cloneInput(decision.input);
             return processPlugin(index + 1);

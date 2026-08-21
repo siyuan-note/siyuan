@@ -25,6 +25,7 @@ import {
     isAVTemplateLink
 } from "./attributeValue";
 import {isLastPointerMouse} from "../../../util/touchDragBridge";
+import {hasDataTransferFiles} from "../../upload/localDropFiles";
 
 interface IAVAttributeTableData {
     avID: string;
@@ -196,10 +197,10 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                         }
                     }
                     targetElement.classList.remove("dragover__bottom", "dragover__top");
-                } else if (!window.siyuan.dragElement && event.dataTransfer.types[0] === "Files") {
+                } else if (!window.siyuan.dragElement && hasDataTransferFiles(event.dataTransfer.types)) {
                     const cellElement = element.querySelector(".custom-attr__avvalue--active") as HTMLElement;
                     if (cellElement) {
-                        if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
+                        if (hasDataTransferFiles(event.dataTransfer.types) && !isBrowser()) {
                             const files: ILocalFiles[] = [];
                             for (let i = 0; i < event.dataTransfer.files.length; i++) {
                                 files.push({

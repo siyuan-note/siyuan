@@ -37,7 +37,7 @@ import {updatePanelByEditor} from "../../editor/util";
 import {blockRender} from "../render/blockRender";
 /// #else
 import {uploadFiles, uploadLocalFiles} from "../upload";
-import {getLocalDropFiles} from "../upload/localDropFiles";
+import {getLocalDropFiles, hasDataTransferFiles} from "../upload/localDropFiles";
 import {insertHTML} from "./insertHTML";
 import {isBrowser} from "../../util/functions";
 import {hideElements} from "../ui/hideElements";
@@ -2109,7 +2109,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else {
                 const cellElement = hasClosestByClassName(event.target, "av__cell");
                 if (cellElement) {
-                    if (getTypeByCellElement(cellElement) === "mAsset" && event.dataTransfer.types[0] === "Files") {
+                    if (getTypeByCellElement(cellElement) === "mAsset" && hasDataTransferFiles(event.dataTransfer.types)) {
                         /// #if !BROWSER
                         const files = getLocalDropFiles(event.dataTransfer.files,
                             file => webUtils.getPathForFile(file));

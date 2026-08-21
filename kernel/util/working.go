@@ -276,6 +276,18 @@ var (
 	UIProcessIDs = sync.Map{} // UI 进程 ID
 )
 
+// MaxUIProcessCount UI 进程注册表条目数上限。
+const MaxUIProcessCount = 64
+
+// UIProcessCount 获取 UI 进程注册表条目数。
+func UIProcessCount() (ret int) {
+	UIProcessIDs.Range(func(_, _ any) bool {
+		ret++
+		return true
+	})
+	return
+}
+
 func initWorkspaceDir(workspaceArg string) {
 	userHomeConfDir := filepath.Join(HomeDir, ".config", "siyuan")
 	workspaceConf := filepath.Join(userHomeConfDir, "workspace.json")

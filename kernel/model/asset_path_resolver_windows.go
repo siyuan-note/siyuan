@@ -25,8 +25,8 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-// resolveAssetRealPath 使用文件句柄解析符号链接和目录联接，返回现有资源的最终绝对路径。
-func resolveAssetRealPath(path string) (string, error) {
+// ResolveRealPath 使用文件句柄解析符号链接和目录联接，返回现有文件的最终绝对路径。
+func ResolveRealPath(path string) (string, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return "", err

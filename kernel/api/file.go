@@ -471,6 +471,25 @@ func getFile(c *gin.Context) {
 		return
 	}
 
+	// 解析符号链接（Windows 下含目录联接）后再做授权判断，防止 reader 通过 data/assets
+	// 等目录下的链接读取工作空间外的文件（security advisory GHSA-g7gf-v79m-jwrm）
+	resolvedPath, err := model.ResolveRealPath(fileAbsPath)
+	if err != nil {
+		logging.LogErrorf("resolve symlinks for [%s] failed: %s", fileAbsPath, err)
+		ret.Code = http.StatusInternalServerError
+		ret.Msg = http.StatusText(http.StatusInternalServerError) + errMsgSeeKernelLog
+		c.JSON(http.StatusAccepted, ret)
+		return
+	}
+	// 符号链接指向加密笔记本时同样拒绝读取，防止密文泄漏
+	if rejectEncryptedBoxPath(resolvedPath) {
+		ret.Code = -3
+		ret.Msg = model.Conf.Language(321)
+		c.JSON(http.StatusAccepted, ret)
+		return
+	}
+	fileAbsPath = resolvedPath
+
 	info, err := os.Stat(fileAbsPath)
 	if os.IsNotExist(err) {
 		ret.Code = http.StatusNotFound
@@ -495,6 +514,14 @@ func getFile(c *gin.Context) {
 
 	// REF: https://github.com/siyuan-note/siyuan/issues/11364
 	if !model.IsAdminRoleContext(c) {
+		// 符号链接解析后的真实路径必须仍位于工作空间内（admin 不受此限制，兼容 assets
+		// 指向工作空间外目录的合法用法），发布权限与敏感路径检查也基于解析后的路径执行
+		if !gulu.File.IsSubPath(util.NormalizeAndResolve(util.WorkspaceDir), util.NormalizeAndResolve(fileAbsPath)) {
+			ret.Code = http.StatusForbidden
+			ret.Msg = http.StatusText(http.StatusForbidden)
+			c.JSON(http.StatusAccepted, ret)
+			return
+		}
 		if refuseToAccess(c, fileAbsPath, ret) {
 			return
 		}

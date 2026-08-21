@@ -421,6 +421,12 @@ interface IAssetUploadSuccess {
     path: string
 }
 
+interface IAssetUploadFailure {
+    index: number,
+    name: string,
+    error: string
+}
+
 interface IAssetUploadResult {
     requestId: string,
     status: TAssetUploadStatus,
@@ -432,6 +438,8 @@ interface IAssetUploadResult {
     rejected?: IAssetUploadRejection[],
     /** 按 acceptedInput 中的索引记录成功结果，可区分同名文件。 */
     succFiles?: IAssetUploadSuccess[],
+    /** 按 acceptedInput 中的索引记录失败结果。 */
+    failedFiles?: IAssetUploadFailure[],
     succMap?: Record<string, string>,
     errFiles?: string[],
     error?: string
@@ -447,7 +455,7 @@ interface IBeforeUploadAssetsDetail {
     input: IAssetUploadInput,
     /** 插件处理的取消信号，编辑器销毁、插件卸载或处理超时时触发。 */
     signal: AbortSignal,
-    /** 必须同步调用且每次事件只允许调用一次，异步处理应将 Promise 作为参数传入，默认 120 秒超时。 */
+    /** 必须同步调用且每次事件只允许调用一次，异步处理应将 Promise 作为参数传入，每个插件默认 120 秒超时。 */
     respondWith(response: IAssetUploadDecision | PromiseLike<IAssetUploadDecision>): void,
     /** 必须同步注册，资源目录写入成功、失败或取消时执行一次，不包含正文或属性视图写入。 */
     onComplete(callback: (result: IAssetUploadResult) => void): void

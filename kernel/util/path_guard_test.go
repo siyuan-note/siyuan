@@ -156,6 +156,15 @@ func TestIsForbiddenAbsPathSymlinkBypass(t *testing.T) {
 	if got := IsForbiddenAbsPath(tlsKeyLink); !got {
 		t.Errorf("IsForbiddenAbsPath(symlink -> key.pem) = false, want true")
 	}
+
+	// 符号链接指向的父目录同样无法绕过黑名单：经由链接目录访问 publishAccess.json 应被拦截。
+	parentLink := filepath.Join(tmpWorkspace, "data", "assets", "siyuan-link")
+	if err := os.Symlink(filepath.Join(DataDir, ".siyuan"), parentLink); err != nil {
+		t.Skipf("symlink not supported on this platform: %v", err)
+	}
+	if got := IsForbiddenAbsPath(filepath.Join(parentLink, "publishAccess.json")); !got {
+		t.Errorf("IsForbiddenAbsPath(symlinked parent -> publishAccess.json) = false, want true")
+	}
 }
 
 // TestIsForbiddenDataRelPath 覆盖 /history 与 /repo/diff 路由共用的数据相对路径片段匹配黑名单。
@@ -166,6 +175,8 @@ func TestIsForbiddenDataRelPath(t *testing.T) {
 		".siyuan/publishAccess.json",
 		"/.siyuan/publishAccess.json",
 		filepath.Join(".siyuan", "publishAccess.json"),
+		".siyuan/PUBLISHACCESS.JSON",
+		filepath.Join(".SIYUAN", "PublishAccess.json"),
 		"templates",
 		"/templates",
 		filepath.Join("templates", "a.md"),

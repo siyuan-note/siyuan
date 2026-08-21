@@ -3,12 +3,14 @@
 @use "../component/svg";
 
 body {
-  --mobile-bottom-bar-offset: calc(48px + env(safe-area-inset-bottom));
-  --mobile-editor-bottom-offset: calc(48px + env(safe-area-inset-bottom));
+  --mobile-bottom-bar-height: 56px;
+  --mobile-bottom-bar-safe-area: max(8px, env(safe-area-inset-bottom));
+  --mobile-bottom-bar-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-safe-area));
+  --mobile-editor-bottom-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-safe-area));
 }
 
 body.mobile-chrome--hidden {
-  --mobile-bottom-bar-offset: env(safe-area-inset-bottom);
+  --mobile-bottom-bar-offset: var(--mobile-bottom-bar-safe-area);
 }
 
 body.mobile-keyboard--open {
@@ -288,8 +290,8 @@ body.mobile-keyboard--open {
   box-sizing: border-box;
   display: flex;
   align-items: flex-start;
-  height: calc(48px + env(safe-area-inset-bottom));
-  padding: 0 max(4px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px, env(safe-area-inset-left));
+  height: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-safe-area));
+  padding: 0 max(4px, env(safe-area-inset-right)) var(--mobile-bottom-bar-safe-area) max(4px, env(safe-area-inset-left));
   border-top: .5px solid var(--b3-theme-background-light);
   background-color: var(--b3-theme-background);
   transition: opacity 240ms cubic-bezier(.2, 0, 0, 1), transform 240ms cubic-bezier(.2, 0, 0, 1), visibility 240ms;
@@ -306,7 +308,7 @@ body.mobile-keyboard--open {
     flex-direction: column;
     gap: 0;
     min-width: 48px;
-    height: 48px;
+    height: var(--mobile-bottom-bar-height);
     padding: 2px;
     overflow: hidden;
     border: 0;
@@ -315,8 +317,8 @@ body.mobile-keyboard--open {
     background: transparent;
 
     > svg {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       flex-shrink: 0;
     }
 
@@ -337,13 +339,13 @@ body.mobile-keyboard--open {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 22px;
-    height: 22px;
+    min-width: 24px;
+    height: 24px;
     padding: 0 3px;
     border: 1.5px solid currentColor;
-    border-radius: 4px;
+    border-radius: 5px;
     color: var(--b3-theme-on-surface-light);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: normal;
     line-height: 1;
     text-align: center;

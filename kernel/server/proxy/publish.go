@@ -236,15 +236,14 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 		}
 		util.AuthThrottleReset(ip)
 
-		// set session cookie
-		sessionID := model.GetNewSessionID()
+		// set session cookie，同一账户已有有效会话时复用其 ID，避免重复认证导致会话无限增长
+		sessionID := model.AddSession(username)
 		cookie := &http.Cookie{
 			Name:     model.SessionIdCookieName,
 			Value:    sessionID,
 			Path:     "/",
 			HttpOnly: true,
 		}
-		model.AddSession(sessionID, username)
 
 		// set JWT
 		request.Header.Set(model.XAuthTokenKey, account.Token)

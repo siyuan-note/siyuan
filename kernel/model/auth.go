@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -35,7 +36,13 @@ type Account struct {
 	Token    string
 }
 type AccountsMap map[string]*Account // username -> account
-type SessionsMap map[string]string   // sessionID -> username
+
+// PublishSession 发布服务会话，记录所属用户名与最近活跃时间。
+type PublishSession struct {
+	Username   string
+	LastActive time.Time
+}
+
 type ClaimsKeyType string
 
 const (
@@ -50,12 +57,19 @@ const (
 	kernelPluginAudience   = "siyuan-kernel-plugin"  // 内核插件 token 的受众
 
 	ClaimsKeyRole string = "role"
+
+	// publishSessionTTL 发布服务会话空闲过期时长，超过后需要重新认证
+	publishSessionTTL = 7 * 24 * time.Hour
+	// publishSessionGlobalCap 发布服务会话全局上限，超出后淘汰最久未活跃的会话
+	publishSessionGlobalCap = 4096
+	// publishSessionPerAccountCap 单账户会话上限，超出后淘汰该账户最久未活跃的会话
+	publishSessionPerAccountCap = 32
 )
 
 var (
 	accountsMap  = AccountsMap{}
 	accountsLock = sync.RWMutex{}
-	sessionsMap  = SessionsMap{}
+	sessionsMap  = map[string]*PublishSession{}
 	sessionLock  = sync.Mutex{}
 
 	jwtKey     = make([]byte, 32)
@@ -92,8 +106,24 @@ func GetBasicAuthAccount(username string) *Account {
 	return &accountCopy
 }
 
+// GetBasicAuthUsernameBySessionID 返回会话对应的用户名；会话不存在或已过期时返回空字符串。
 func GetBasicAuthUsernameBySessionID(sessionID string) string {
-	return sessionsMap[sessionID]
+	sessionLock.Lock()
+	defer sessionLock.Unlock()
+
+	session := sessionsMap[sessionID]
+	if nil == session {
+		return ""
+	}
+	if publishSessionTTL < time.Since(session.LastActive) {
+		// 会话空闲超时，删除并视为无效
+		delete(sessionsMap, sessionID)
+		return ""
+	}
+
+	// 刷新最近活跃时间，用于过期与淘汰判定
+	session.LastActive = time.Now()
+	return session.Username
 }
 
 func GetNewSessionID() string {
@@ -101,16 +131,91 @@ func GetNewSessionID() string {
 	return sessionID
 }
 
-func AddSession(sessionID, username string) {
+// AddSession 为指定用户注册发布服务会话并返回实际生效的会话 ID。
+// 同一用户已有有效会话时复用其 ID，避免重复认证导致会话无限增长
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-f4vj-ppp2-5hg4；
+// 同时按空闲时长清理过期会话，并在超出全局或单账户上限时淘汰最久未活跃的会话。
+func AddSession(username string) string {
 	sessionLock.Lock()
 	defer sessionLock.Unlock()
-	sessionsMap[sessionID] = username
+
+	now := time.Now()
+	purgeExpiredPublishSessions(now)
+
+	// 复用该用户已有的有效会话
+	for id, session := range sessionsMap {
+		if session.Username == username {
+			session.LastActive = now
+			return id
+		}
+	}
+
+	// 单账户会话数达到上限时，淘汰该账户最久未活跃的会话
+	if publishSessionPerAccountCap <= countPublishSessionsByUsername(username) {
+		evictOldestPublishSessionByUsername(username)
+	}
+
+	// 全局会话数达到上限时，淘汰最久未活跃的会话
+	if publishSessionGlobalCap <= len(sessionsMap) {
+		evictOldestPublishSession()
+	}
+
+	sessionID := GetNewSessionID()
+	sessionsMap[sessionID] = &PublishSession{Username: username, LastActive: now}
+	return sessionID
 }
 
 func DeleteSession(sessionID string) {
 	sessionLock.Lock()
 	defer sessionLock.Unlock()
 	delete(sessionsMap, sessionID)
+}
+
+// purgeExpiredPublishSessions 删除空闲超过 publishSessionTTL 的会话，调用方需持有 sessionLock。
+func purgeExpiredPublishSessions(now time.Time) {
+	for id, session := range sessionsMap {
+		if publishSessionTTL < now.Sub(session.LastActive) {
+			delete(sessionsMap, id)
+		}
+	}
+}
+
+// evictOldestPublishSession 淘汰最久未活跃的会话，调用方需持有 sessionLock。
+func evictOldestPublishSession() {
+	oldestID := ""
+	oldestTime := time.Time{}
+	for id, session := range sessionsMap {
+		if "" == oldestID || session.LastActive.Before(oldestTime) {
+			oldestID, oldestTime = id, session.LastActive
+		}
+	}
+	delete(sessionsMap, oldestID)
+}
+
+// evictOldestPublishSessionByUsername 淘汰指定账户最久未活跃的会话，调用方需持有 sessionLock。
+func evictOldestPublishSessionByUsername(username string) {
+	oldestID := ""
+	oldestTime := time.Time{}
+	for id, session := range sessionsMap {
+		if session.Username != username {
+			continue
+		}
+		if "" == oldestID || session.LastActive.Before(oldestTime) {
+			oldestID, oldestTime = id, session.LastActive
+		}
+	}
+	delete(sessionsMap, oldestID)
+}
+
+// countPublishSessionsByUsername 统计指定账户的会话数，调用方需持有 sessionLock。
+func countPublishSessionsByUsername(username string) int {
+	count := 0
+	for _, session := range sessionsMap {
+		if session.Username == username {
+			count++
+		}
+	}
+	return count
 }
 
 func InitPublishAccounts() {

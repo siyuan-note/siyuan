@@ -76,11 +76,13 @@ export const initBlockPopover = (app: App) => {
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo") ||
             hasClosestByClassName(event.target, "av__calc--ashow") ||
-            hasClosestByClassName(event.target, "av__relation-table-cell") ||
+            hasClosestByAttribute(event.target, "data-type", "setRelationCell", true) ||
             hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
             const aElementParent = aElement.parentElement;
             let tooltipClass = "";
+            let tooltipTarget = aElement as Element;
+            let tooltipPositionOverride = isListItemAction ? "north" : undefined;
             let tip = isListItemAction ? window.siyuan.languages.listItemActionTip :
                 aElement.getAttribute("aria-label") || "";
             if (aElement.classList.contains("av__cell") && !aElement.classList.contains("ariaLabel")) {
@@ -127,15 +129,15 @@ export const initBlockPopover = (app: App) => {
                 tooltipClass = "href";
             } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
                 tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
-            } else if (aElement.classList.contains("av__relation-table-cell") ||
-                aElement.getAttribute("data-type") === "setRelationCell") {
-                const cellElement = aElement.classList.contains("av__relation-table-cell") ? aElement :
-                    hasClosestByClassName(event.target, "av__relation-table-cell") || null;
+            } else if (aElement.getAttribute("data-type") === "setRelationCell") {
+                const cellElement = hasClosestByClassName(event.target, "av__relation-table-cell") || null;
                 const textElement = cellElement?.querySelector(".b3-menu__label, .av__celltext") as HTMLElement;
-                if (cellElement && hasClosestByAttribute(cellElement, "data-type", "setRelationCell", true) &&
-                    (cellElement.clientWidth + 0.5 < cellElement.scrollWidth ||
+                if (cellElement && (cellElement.clientWidth + 0.5 < cellElement.scrollWidth ||
                         (textElement && textElement.clientWidth + 0.5 < textElement.scrollWidth))) {
-                    tip = Lute.EscapeHTMLStr(getCellText(cellElement));
+                    tip = Lute.EscapeHTMLStr(cellElement.querySelector(".b3-menu__label")?.textContent ||
+                        getCellText(cellElement));
+                    tooltipTarget = cellElement;
+                    tooltipPositionOverride = "north";
                 }
             } else if (aElement.classList.contains("protyle-attr--memo")) {
                 tip = escapeHtml(tip);
@@ -247,12 +249,11 @@ export const initBlockPopover = (app: App) => {
             if (tip && !aElement.classList.contains("b3-tooltips")) {
                 // https://github.com/siyuan-note/siyuan/issues/11294
                 try {
-                    showTooltip(decodeURIComponent(tip), aElement, tooltipClass, event, tooltipSpace,
-                        isListItemAction ? "north" : undefined);
+                    showTooltip(decodeURIComponent(tip), tooltipTarget, tooltipClass, event, tooltipSpace,
+                        tooltipPositionOverride);
                 } catch (e) {
                     // https://ld246.com/article/1718235737991
-                    showTooltip(tip, aElement, tooltipClass, event, tooltipSpace,
-                        isListItemAction ? "north" : undefined);
+                    showTooltip(tip, tooltipTarget, tooltipClass, event, tooltipSpace, tooltipPositionOverride);
                 }
                 event.stopPropagation();
             } else {

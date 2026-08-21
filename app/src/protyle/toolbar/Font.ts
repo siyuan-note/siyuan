@@ -6,6 +6,21 @@ import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {updateBatchTransaction} from "../wysiwyg/transaction";
 import {lineNumberRender} from "../render/highlightRender";
 import {closeSubElement} from "./subElementLifecycle";
+import {escapeAttr} from "../../util/escape";
+import {
+    decodeStyle1,
+    encodeStyle1,
+    getInlineStyleByValue,
+    getInlineStyleIDFromValue,
+    getInlineStylePreview,
+    getInlineStylesCache,
+    getInlineStyleType,
+    getRecentInlineStyleKey,
+    INLINE_BACKGROUND_COLORS,
+    INLINE_FONT_COLORS,
+    TInlineStyleType,
+} from "./inlineStyle";
+import {openInlineStyleDialog} from "./inlineStyleDialog";
 
 const MAX_RECENT_FONT_STYLES = 14;
 
@@ -104,19 +119,33 @@ export const convertFontSize = (fontSize: string, unit: "px" | "em", baseFontSiz
 export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                                onChange?: (type: string, color?: string) => void) => {
     let colorHTML = "";
-    ["", "var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
-        "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
-        "var(--b3-font-color9)", "var(--b3-font-color10)", "var(--b3-font-color11)", "var(--b3-font-color12)",
-        "var(--b3-font-color13)"].forEach((item) => {
+    INLINE_FONT_COLORS.forEach((item) => {
         colorHTML += `<button ${item ? `class="color__square" style="color:${item}"` : `class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.default}"`} data-type="color">A</button>`;
     });
     let bgHTML = "";
-    ["", "var(--b3-font-background1)", "var(--b3-font-background2)", "var(--b3-font-background3)", "var(--b3-font-background4)",
-        "var(--b3-font-background5)", "var(--b3-font-background6)", "var(--b3-font-background7)", "var(--b3-font-background8)",
-        "var(--b3-font-background9)", "var(--b3-font-background10)", "var(--b3-font-background11)", "var(--b3-font-background12)",
-        "var(--b3-font-background13)"].forEach((item) => {
+    INLINE_BACKGROUND_COLORS.forEach((item) => {
         bgHTML += `<button ${item ? `class="color__square" style="background-color:${item}"` : `class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.default}"`} data-type="backgroundColor"></button>`;
     });
+    let customColorHTML = "";
+    let customBackgroundHTML = "";
+    let customStyleHTML = "";
+    getInlineStylesCache().styles.forEach(style => {
+        const type = getInlineStyleType(style);
+        if (!type) {
+            return;
+        }
+        const preview = getInlineStylePreview(style);
+        const html = `<button class="color__square ariaLabel" data-position="3south" aria-label="${escapeAttr(style.name)}" data-inline-style-id="${style.id}" data-type="${type}" style="${preview.color ? `color:${preview.color};` : ""}${preview.backgroundColor ? `background-color:${preview.backgroundColor};` : ""}">${type === "backgroundColor" ? "" : "A"}</button>`;
+        if (type === "color") {
+            customColorHTML += html;
+        } else if (type === "backgroundColor") {
+            customBackgroundHTML += html;
+        } else {
+            customStyleHTML += html;
+        }
+    });
+    const getManageHTML = (type: TInlineStyleType) => window.siyuan.config.readonly || window.siyuan.isPublish ? "" :
+        `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.manage}" data-action="manageInlineStyle" data-inline-style-type="${type}"><svg class="svg--mid"><use xlink:href="#iconAdd"></use></svg></button>`;
 
     const element = document.createElement("div");
     element.classList.add("protyle-font");
@@ -139,12 +168,15 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
 <div data-id="lastUsedWrap" class="fn__flex fn__flex-wrap" style="align-items: center">`;
         lastFonts.forEach((item: string) => {
             const lastFontStatus = item.split(Constants.ZWSP);
+            const customStyle = getInlineStyleByValue(item);
+            const customLabel = customStyle ? escapeAttr(customStyle.name) :
+                (getInlineStyleIDFromValue(item) ? window.siyuan.languages.custom : "");
             switch (lastFontStatus[0]) {
                 case "color":
-                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.colorFont}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="color:${lastFontStatus[1]}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
+                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${customLabel || window.siyuan.languages.colorFont + (lastFontStatus[1] ? "" : " " + window.siyuan.languages.default)}" ${lastFontStatus[1] ? `style="color:${lastFontStatus[1]}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
                     break;
                 case "backgroundColor":
-                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.colorPrimary}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]}"` : ""} data-type="${lastFontStatus[0]}"></button>`;
+                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${customLabel || window.siyuan.languages.colorPrimary + (lastFontStatus[1] ? "" : " " + window.siyuan.languages.default)}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]}"` : ""} data-type="${lastFontStatus[0]}"></button>`;
                     break;
                 case "style2":
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.hollow}" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">A</button>`;
@@ -158,7 +190,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                     }
                     break;
                 case "style1":
-                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.color}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
+                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${customLabel || window.siyuan.languages.color + (lastFontStatus[1] ? "" : " " + window.siyuan.languages.default)}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
                     break;
                 case "clear":
                     lastColorHTML += `<button style="height: 26px;display: flex;align-items: center;padding: 0 5px;" data-type="${lastFontStatus[0]}" class="protyle-font__style ariaLabel" aria-label="${window.siyuan.languages.clearFontStyle}"><svg class="svg--mid"><use xlink:href="#iconTrashcan"></use></svg></button>`;
@@ -181,18 +213,24 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
     <button class="color__square" data-type="style1" style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);">A</button>
     <button class="color__square" data-type="style1" style="color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);">A</button>
     <button class="color__square" data-type="style1" style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);">A</button>
+    ${customStyleHTML}
+    ${getManageHTML("style1")}
 </div>
 <div class="fn__hr"></div>
 <div data-id="colorFont">${window.siyuan.languages.colorFont}</div>
 <div class="fn__hr--small"></div>
 <div data-id="colorFontWrap" class="fn__flex fn__flex-wrap">
     ${colorHTML}
+    ${customColorHTML}
+    ${getManageHTML("color")}
 </div>
 <div class="fn__hr"></div>
 <div data-id="colorPrimary">${window.siyuan.languages.colorPrimary}</div>
 <div class="fn__hr--small"></div>
 <div data-id="colorPrimaryWrap" class="fn__flex fn__flex-wrap">
     ${bgHTML}
+    ${customBackgroundHTML}
+    ${getManageHTML("backgroundColor")}
 </div>
 <div class="fn__hr"></div>
 <div data-id="fontStyle">${window.siyuan.languages.fontStyle}</div>
@@ -234,8 +272,10 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
         while (target && !target.isEqualNode(element)) {
             const dataType = target.getAttribute("data-type");
             if (target.tagName === "BUTTON") {
-                if (dataType === "style1") {
-                    applyFontStyle(dataType, target.style.backgroundColor + Constants.ZWSP + target.style.color);
+                if (target.dataset.action === "manageInlineStyle") {
+                    openInlineStyleDialog(target.dataset.inlineStyleType as TInlineStyleType);
+                } else if (dataType === "style1") {
+                    applyFontStyle(dataType, encodeStyle1(target.style.backgroundColor, target.style.color));
                 } else if (dataType === "fontSize") {
                     applyFontStyle(dataType, target.getAttribute("data-value"));
                 } else if (dataType === "backgroundColor") {
@@ -291,14 +331,16 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                           focusRange = true, onChange?: (type: string, color?: string) => void) => {
     let localFontStyles = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (type) {
-        localFontStyles = [...new Set([`${type}${Constants.ZWSP}${color}`, ...localFontStyles])]
-            .slice(0, MAX_RECENT_FONT_STYLES);
+        const value = `${type}${Constants.ZWSP}${color}`;
+        const recentKey = getRecentInlineStyleKey(value);
+        localFontStyles = [value, ...localFontStyles.filter((item: string) =>
+            getRecentInlineStyleKey(item) !== recentKey)].slice(0, MAX_RECENT_FONT_STYLES);
         window.siyuan.storage[Constants.LOCAL_FONTSTYLES] = localFontStyles;
         setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
     } else {
         if (localFontStyles.length === 0) {
             type = "style1";
-            color = "var(--b3-card-error-color)" + Constants.ZWSP + "var(--b3-card-error-background)";
+            color = encodeStyle1("var(--b3-card-error-background)", "var(--b3-card-error-color)");
         } else {
             const fontStyles = localFontStyles[0].split(Constants.ZWSP);
             type = fontStyles.splice(0, 1)[0];
@@ -320,10 +362,10 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.fontSize = "";
                 e.style.removeProperty("--b3-parent-background");
             } else if (type === "style1") {
-                const colorList = color.split(Constants.ZWSP);
-                e.style.backgroundColor = colorList[0];
-                e.style.color = colorList[1];
-                e.style.setProperty("--b3-parent-background", colorList[0]);
+                const style = decodeStyle1(color);
+                e.style.backgroundColor = style.backgroundColor;
+                e.style.color = style.color;
+                e.style.setProperty("--b3-parent-background", style.backgroundColor);
             } else if (type === "style2") {
                 e.style.webkitTextStroke = "0.2px var(--b3-theme-on-background)";
                 e.style.webkitTextFillColor = "transparent";
@@ -397,10 +439,12 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
             case "backgroundColor":
                 textElement.style.backgroundColor = textOption.color;
                 break;
-            case "style1":
-                textElement.style.backgroundColor = textOption.color.split(Constants.ZWSP)[0];
-                textElement.style.color = textOption.color.split(Constants.ZWSP)[1];
+            case "style1": {
+                const style = decodeStyle1(textOption.color);
+                textElement.style.backgroundColor = style.backgroundColor;
+                textElement.style.color = style.color;
                 break;
+            }
             case "style2":
                 textElement.style.webkitTextStroke = "0.2px var(--b3-theme-on-background)";
                 textElement.style.webkitTextFillColor = "transparent";
@@ -485,8 +529,9 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             return textObj.color === sideElement.style.backgroundColor;
         }
         if (textObj.type === "style1") {
-            return textObj.color.split(Constants.ZWSP)[0] === sideElement.style.color &&
-                textObj.color.split(Constants.ZWSP)[1] === sideElement.style.backgroundColor;
+            const style = decodeStyle1(textObj.color);
+            return style.backgroundColor === sideElement.style.backgroundColor &&
+                style.color === sideElement.style.color;
         }
         if (textObj.type === "style2") {
             return "transparent" === sideElement.style.webkitTextFillColor &&

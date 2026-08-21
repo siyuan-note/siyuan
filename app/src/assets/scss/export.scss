@@ -58,6 +58,17 @@ svg {
 }
 
 @media print {
+  .b3-typography pre.code-block[style*="max-height:"],
+  .protyle-wysiwyg .code-block[data-type="NodeCodeBlock"]:not(.render-node):not(pre)[style*="max-height:"] {
+    max-height: none !important;
+    overflow: visible;
+
+    & > .hljs {
+      max-height: none !important;
+      overflow: visible !important;
+    }
+  }
+
   // 尽量避免块内分页
   .protyle-wysiwyg [data-node-id] {
     &[data-type=NodeAudio],

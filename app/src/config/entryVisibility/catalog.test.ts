@@ -388,6 +388,38 @@ test("super block actions and vertical alignment use their respective menu group
     assert.equal(getEntryCatalogChildren("gutter.multi.layout").some((item) => item.key === "alignTop"), false);
 });
 
+test("gutter height menus follow width and stay aligned across selection scopes", () => {
+    const expectedHeightOrder = [
+        "heightInput",
+        "height_25%",
+        "height_33%",
+        "height_50%",
+        "height_67%",
+        "height_75%",
+        "height_100%",
+        "separator_1",
+        "heightDrag",
+        "separator_2",
+        "default",
+    ];
+
+    ["gutter.single", "gutter.multi"].forEach((scope) => {
+        const scopeChildren = getEntryCatalogChildren(scope);
+        const widthIndex = scopeChildren.findIndex((item) => item.key === "width");
+        const width = getEntryCatalogNode(`${scope}.width`);
+        const height = getEntryCatalogNode(`${scope}.height`);
+
+        assert.ok(0 <= widthIndex, scope);
+        assert.equal(scopeChildren[widthIndex + 1]?.key, "height", scope);
+        assert.deepEqual(height?.children?.map((item) => item.key), expectedHeightOrder, scope);
+        assert.equal(height?.simple, width?.simple, scope);
+        assert.deepEqual(height?.children?.map((item) => item.simple),
+            width?.children?.map((item) => item.simple), scope);
+        assert.deepEqual(height?.children?.map((item) => item.type),
+            width?.children?.map((item) => item.type), scope);
+    });
+});
+
 test("super block column insertion actions follow block insertion actions", () => {
     const keys = getEntryCatalogChildren("gutter.single").map((item) => item.key);
     const insertBeforeIndex = keys.indexOf("insertBefore");
@@ -543,6 +575,7 @@ test("configuration labels distinguish block scopes and size controls", () => {
                     entryPercentageWidth: "Percentage width",
                     entryPixelHeight: "Pixel height",
                     entryPercentageHeight: "Percentage height",
+                    height: "Height",
                     entryDocumentStatistics: "Document statistics",
                 },
             },
@@ -555,6 +588,11 @@ test("configuration labels distinguish block scopes and size controls", () => {
             "Editor - Block icon menu - Multiple blocks");
         assert.equal(getEntryCatalogNode("gutter.single.width.widthInput")?.label(), "Pixel width");
         assert.equal(getEntryCatalogNode("gutter.single.width.widthDrag")?.label(), "Percentage width");
+        assert.equal(getEntryCatalogNode("gutter.single.height")?.label(), "Height");
+        assert.equal(getEntryCatalogNode("gutter.single.height.heightInput")?.label(), "Pixel height");
+        assert.equal(getEntryCatalogNode("gutter.single.height.heightDrag")?.label(), "Percentage height");
+        assert.equal(getEntryCatalogNode("gutter.multi.height.heightInput")?.label(), "Pixel height");
+        assert.equal(getEntryCatalogNode("gutter.multi.height.heightDrag")?.label(), "Percentage height");
         assert.equal(getEntryCatalogNode("inline.image.height.heightInput")?.label(), "Pixel height");
         assert.equal(getEntryCatalogNode("inline.image.height.heightDrag")?.label(), "Percentage height");
         assert.equal(getEntryCatalogNode("document.more.docInfo")?.label(), "Document statistics");

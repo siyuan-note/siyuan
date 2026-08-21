@@ -438,6 +438,18 @@
     border-radius: var(--b3-border-radius);
   }
 
+  pre.code-block[style*="max-height:"],
+  .code-block:not(pre)[data-type="NodeCodeBlock"]:not(.render-node)[style*="max-height:"] {
+    // 最大高度仅约束代码内容，操作区和属性区保持在滚动容器之外。
+    overflow: visible;
+
+    & > .hljs {
+      box-sizing: border-box;
+      max-height: inherit;
+      overflow-y: auto;
+    }
+  }
+
   .code-block:not(pre) {
     margin: 2px 0;
     box-sizing: border-box;

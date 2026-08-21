@@ -11,6 +11,8 @@ export const MOBILE_BOTTOM_BAR_ACTIONS = [
     "tag",
     "backlink",
     "inbox",
+    "agent",
+    "spacedRepetition",
     "command",
 ] as const;
 

@@ -110,6 +110,14 @@
         <svg><use xlink:href="#iconInbox"></use></svg>
         <span class="mobile-bottom-bar__label"></span>
     </button>
+    <button id="mobileBottomBarAgent" class="mobile-bottom-bar__item fn__none" data-action="agent" type="button">
+        <svg><use xlink:href="#iconSparkles"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="mobileBottomBarSpacedRepetition" class="mobile-bottom-bar__item fn__none" data-action="spacedRepetition" type="button">
+        <svg><use xlink:href="#iconRiffCard"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
     <button id="mobileBottomBarCommand" class="mobile-bottom-bar__item fn__none" data-action="command" type="button">
         <svg><use xlink:href="#iconTerminal"></use></svg>
         <span class="mobile-bottom-bar__label"></span>

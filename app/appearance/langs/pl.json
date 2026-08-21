@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "Nawigacja",
 	"mobileBottomBar": "Dolny pasek",
 	"insertSuperBlockLeft": "Wstaw kolumnę po lewej",
 	"insertSuperBlockRight": "Wstaw kolumnę po prawej",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "Profil niestandardowy",
 	"entryCreateProfile": "Utwórz profil",
 	"entryImportInvalid": "Nieprawidłowy plik profilu menu i doku",
-	"mobileMenuQuickActions": "Szybkie działania",
 	"mobileMenuCreate": "Utwórz",
 	"mobileMenuDataManagement": "Zarządzanie danymi",
 	"mobileMenuSettingsAndHelp": "Ustawienia i pomoc",

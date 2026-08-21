@@ -230,7 +230,7 @@ export const initRightMenu = (app: App) => {
 </div>
 <div class="b3-menu__items b3-menu__groups">
     <div class="b3-menu__group">
-        <div class="b3-menu__group-title">${window.siyuan.languages.mobileBottomBar}</div>
+        <div class="b3-menu__group-title">${window.siyuan.languages.mobileMenuNavigation}</div>
         <div class="b3-menu__group-items">
             <div id="menuDocuments" class="b3-menu__item">
                 <svg class="b3-menu__icon"><use xlink:href="#iconFiles"></use></svg><span class="b3-menu__label">${window.siyuan.languages.fileTree}</span>
@@ -253,11 +253,6 @@ export const initRightMenu = (app: App) => {
             <div id="menuInbox" class="b3-menu__item">
                 <svg class="b3-menu__icon"><use xlink:href="#iconInbox"></use></svg><span class="b3-menu__label">${window.siyuan.languages.inbox}</span>
             </div>
-        </div>
-    </div>
-    <div class="b3-menu__group">
-        <div class="b3-menu__group-title">${window.siyuan.languages.mobileMenuQuickActions}</div>
-        <div class="b3-menu__group-items">
             <div id="menuRecent" class="b3-menu__item">
                 <svg class="b3-menu__icon"><use xlink:href="#iconList"></use></svg><span class="b3-menu__label">${window.siyuan.languages.recentDocs}</span>
             </div>

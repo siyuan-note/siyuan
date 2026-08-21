@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "Navigation",
 	"mobileBottomBar": "Bottom bar",
 	"insertSuperBlockLeft": "Insert column to the left",
 	"insertSuperBlockRight": "Insert column to the right",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "Custom profile",
 	"entryCreateProfile": "Create profile",
 	"entryImportInvalid": "Invalid menu and dock profile file",
-	"mobileMenuQuickActions": "Quick actions",
 	"mobileMenuCreate": "Create",
 	"mobileMenuDataManagement": "Data management",
 	"mobileMenuSettingsAndHelp": "Settings and help",

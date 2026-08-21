@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "Navigation",
 	"mobileBottomBar": "Barre inférieure",
 	"insertSuperBlockLeft": "Insérer une colonne à gauche",
 	"insertSuperBlockRight": "Insérer une colonne à droite",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "Profil personnalisé",
 	"entryCreateProfile": "Créer un profil",
 	"entryImportInvalid": "Fichier de profil des menus et de la barre d'ancrage non valide",
-	"mobileMenuQuickActions": "Actions rapides",
 	"mobileMenuCreate": "Créer",
 	"mobileMenuDataManagement": "Gestion des données",
 	"mobileMenuSettingsAndHelp": "Paramètres et aide",

@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "Navigácia",
 	"mobileBottomBar": "Spodná lišta",
 	"insertSuperBlockLeft": "Vložiť stĺpec vľavo",
 	"insertSuperBlockRight": "Vložiť stĺpec vpravo",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "Vlastný profil",
 	"entryCreateProfile": "Vytvoriť profil",
 	"entryImportInvalid": "Neplatný súbor profilu ponúk a doku",
-	"mobileMenuQuickActions": "Rýchle akcie",
 	"mobileMenuCreate": "Vytvoriť",
 	"mobileMenuDataManagement": "Správa údajov",
 	"mobileMenuSettingsAndHelp": "Nastavenia a pomoc",

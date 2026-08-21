@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "Gezinme",
 	"mobileBottomBar": "Alt çubuk",
 	"insertSuperBlockLeft": "Sola sütun ekle",
 	"insertSuperBlockRight": "Sağa sütun ekle",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "Özel profil",
 	"entryCreateProfile": "Profil oluştur",
 	"entryImportInvalid": "Menü ve yuva profil dosyası geçersiz",
-	"mobileMenuQuickActions": "Hızlı işlemler",
 	"mobileMenuCreate": "Oluştur",
 	"mobileMenuDataManagement": "Veri yönetimi",
 	"mobileMenuSettingsAndHelp": "Ayarlar ve yardım",

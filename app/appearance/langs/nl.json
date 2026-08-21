@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "Navigatie",
 	"mobileBottomBar": "Onderste balk",
 	"insertSuperBlockLeft": "Kolom links invoegen",
 	"insertSuperBlockRight": "Kolom rechts invoegen",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "Aangepast profiel",
 	"entryCreateProfile": "Profiel maken",
 	"entryImportInvalid": "Ongeldig profielbestand voor menu's en dock",
-	"mobileMenuQuickActions": "Snelle acties",
 	"mobileMenuCreate": "Maken",
 	"mobileMenuDataManagement": "Gegevensbeheer",
 	"mobileMenuSettingsAndHelp": "Instellingen en hulp",

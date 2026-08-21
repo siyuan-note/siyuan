@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "Навигация",
 	"mobileBottomBar": "Нижняя панель",
 	"insertSuperBlockLeft": "Вставить столбец слева",
 	"insertSuperBlockRight": "Вставить столбец справа",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "Пользовательский профиль",
 	"entryCreateProfile": "Создать профиль",
 	"entryImportInvalid": "Недопустимый файл профиля меню и док-панели",
-	"mobileMenuQuickActions": "Быстрые действия",
 	"mobileMenuCreate": "Создание",
 	"mobileMenuDataManagement": "Управление данными",
 	"mobileMenuSettingsAndHelp": "Настройки и помощь",

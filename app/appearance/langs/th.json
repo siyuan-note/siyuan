@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "การนำทาง",
 	"mobileBottomBar": "แถบด้านล่าง",
 	"insertSuperBlockLeft": "แทรกคอลัมน์ทางซ้าย",
 	"insertSuperBlockRight": "แทรกคอลัมน์ทางขวา",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "โปรไฟล์กำหนดเอง",
 	"entryCreateProfile": "สร้างโปรไฟล์",
 	"entryImportInvalid": "ไฟล์โปรไฟล์เมนูและแถบเชื่อมต่อไม่ถูกต้อง",
-	"mobileMenuQuickActions": "การดำเนินการด่วน",
 	"mobileMenuCreate": "สร้าง",
 	"mobileMenuDataManagement": "การจัดการข้อมูล",
 	"mobileMenuSettingsAndHelp": "การตั้งค่าและความช่วยเหลือ",

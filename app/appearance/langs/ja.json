@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "ナビゲーション",
 	"mobileBottomBar": "下部バー",
 	"insertSuperBlockLeft": "左側に列を挿入",
 	"insertSuperBlockRight": "右側に列を挿入",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "カスタムプロファイル",
 	"entryCreateProfile": "プロファイルを作成",
 	"entryImportInvalid": "メニューとドックのプロファイルファイルが無効です",
-	"mobileMenuQuickActions": "クイック操作",
 	"mobileMenuCreate": "作成",
 	"mobileMenuDataManagement": "データ管理",
 	"mobileMenuSettingsAndHelp": "設定とヘルプ",

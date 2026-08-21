@@ -342,14 +342,19 @@ body.mobile-keyboard--open {
     position: absolute;
     top: -5px;
     left: 14px;
-    min-width: 13px;
-    padding: 0 2px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 14px;
+    height: 14px;
+    padding: 0 3px;
     border: 1px solid var(--b3-theme-background);
     border-radius: 8px;
     color: var(--b3-theme-on-primary);
     background-color: var(--b3-theme-primary);
     font-size: 9px;
-    line-height: 13px;
+    line-height: 1;
     text-align: center;
   }
 }

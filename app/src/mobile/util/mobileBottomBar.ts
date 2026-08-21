@@ -1,8 +1,9 @@
 import type {App} from "../../index";
 import {Constants} from "../../constants";
-import {setStorageVal} from "../../protyle/util/compatibility";
+import {isDisabledFeature, setStorageVal} from "../../protyle/util/compatibility";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {newFile} from "../../util/newFile";
+import {openCard} from "../../card/openCard";
 import {commandPanel} from "../../boot/globalEvent/command/panel";
 import {popSearch} from "../menu/search";
 import {getRecentDocs} from "../menu/getRecentDocs";
@@ -42,6 +43,10 @@ const getActionLabel = (action: MobileBottomBarAction) => {
             return window.siyuan.languages.backlinks;
         case "inbox":
             return window.siyuan.languages.inbox;
+        case "agent":
+            return window.siyuan.languages.agentChat;
+        case "spacedRepetition":
+            return window.siyuan.languages.spaceRepetition;
         case "command":
             return window.siyuan.languages.commandPanel;
     }
@@ -49,10 +54,22 @@ const getActionLabel = (action: MobileBottomBarAction) => {
 
 const getBottomBarConfig = () => {
     const config = normalizeMobileBottomBarConfig(window.siyuan.storage[Constants.LOCAL_MOBILE_BOTTOM_BAR]);
-    if (!window.siyuan.config.readonly && !window.siyuan.isPublish) {
+    const unavailableActions = new Set<MobileBottomBarAction>();
+    if (window.siyuan.config.readonly) {
+        unavailableActions.add("newDoc");
+        unavailableActions.add("agent");
+        unavailableActions.add("spacedRepetition");
+    } else if (window.siyuan.isPublish) {
+        unavailableActions.add("newDoc");
+        unavailableActions.add("agent");
+    }
+    if (isDisabledFeature("ai")) {
+        unavailableActions.add("agent");
+    }
+    if (unavailableActions.size === 0) {
         return config;
     }
-    return resolveMobileBottomBarAvailability(config, ["newDoc"]);
+    return resolveMobileBottomBarAvailability(config, [...unavailableActions]);
 };
 
 const setBottomBarConfig = (config: IMobileBottomBarConfig) => {
@@ -164,6 +181,21 @@ export const initMobileBottomBar = (app: App) => {
             openDock("inbox");
         }
     });
+    bindBottomBarAction("mobileBottomBarAgent", () => {
+        if (isMobileBlockSelecting()) {
+            return;
+        }
+        activeBlur();
+        void import("../agent/MobileAgentChat").then(({openMobileAgent}) => openMobileAgent(app));
+    });
+    bindBottomBarAction("mobileBottomBarSpacedRepetition", () => {
+        if (isMobileBlockSelecting()) {
+            return;
+        }
+        activeBlur();
+        openCard(app);
+        closePanel();
+    });
     bindBottomBarAction("mobileBottomBarCommand", () => {
         if (isMobileBlockSelecting()) {
             return;
@@ -175,7 +207,7 @@ export const initMobileBottomBar = (app: App) => {
 };
 
 const genBottomBarOptions = () => MOBILE_BOTTOM_BAR_ACTIONS.map((action) =>
-    `<option value="${action}">${escapeHtml(getActionLabel(action))}</option>`
+    `<option value="${action}"${action === "agent" && isDisabledFeature("ai") ? " disabled" : ""}>${escapeHtml(getActionLabel(action))}</option>`
 ).join("");
 
 export const genMobileBottomBarSettingHTML = () => {

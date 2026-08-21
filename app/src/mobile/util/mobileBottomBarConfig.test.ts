@@ -46,13 +46,13 @@ describe("mobile bottom bar config", () => {
         assert.deepEqual(config.actions, ["tabs", "search", "newDoc", "documents"]);
     });
 
-    it("supports inbox and backlinks as configurable actions", () => {
+    it("supports inbox, backlinks, the agent, and spaced repetition as configurable actions", () => {
         const config = normalizeMobileBottomBarConfig({
             version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
-            actions: ["inbox", "backlink", "bookmark", "tag"],
+            actions: ["inbox", "backlink", "agent", "spacedRepetition"],
         });
 
-        assert.deepEqual(config.actions, ["inbox", "backlink", "bookmark", "tag"]);
+        assert.deepEqual(config.actions, ["inbox", "backlink", "agent", "spacedRepetition"]);
     });
 
     it("replaces a slot when selecting an unused action", () => {
@@ -82,5 +82,23 @@ describe("mobile bottom bar config", () => {
 
         assert.deepEqual(config.actions, ["documents", "search", "recent", "tabs"]);
         assert.equal(config.actions.includes("newDoc"), false);
+    });
+
+    it("replaces the agent when AI is unavailable", () => {
+        const config = resolveMobileBottomBarAvailability({
+            version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
+            actions: ["documents", "agent", "newDoc", "tabs"],
+        }, ["agent"]);
+
+        assert.deepEqual(config.actions, ["documents", "search", "newDoc", "tabs"]);
+    });
+
+    it("replaces spaced repetition in read-only mode", () => {
+        const config = resolveMobileBottomBarAvailability({
+            version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
+            actions: ["documents", "spacedRepetition", "search", "tabs"],
+        }, ["spacedRepetition"]);
+
+        assert.deepEqual(config.actions, ["documents", "newDoc", "search", "tabs"]);
     });
 });

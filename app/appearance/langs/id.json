@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "Navigasi",
 	"mobileBottomBar": "Bilah bawah",
 	"insertSuperBlockLeft": "Sisipkan kolom di sebelah kiri",
 	"insertSuperBlockRight": "Sisipkan kolom di sebelah kanan",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "Profil kustom",
 	"entryCreateProfile": "Buat profil",
 	"entryImportInvalid": "Berkas profil menu dan dok tidak valid",
-	"mobileMenuQuickActions": "Tindakan cepat",
 	"mobileMenuCreate": "Buat",
 	"mobileMenuDataManagement": "Pengelolaan data",
 	"mobileMenuSettingsAndHelp": "Pengaturan dan bantuan",

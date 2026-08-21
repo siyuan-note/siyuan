@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "التنقل",
 	"mobileBottomBar": "الشريط السفلي",
 	"insertSuperBlockLeft": "إدراج عمود إلى اليسار",
 	"insertSuperBlockRight": "إدراج عمود إلى اليمين",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "ملف تعريف مخصص",
 	"entryCreateProfile": "إنشاء ملف تعريف",
 	"entryImportInvalid": "ملف تعريف القوائم وشريط الإرساء غير صالح",
-	"mobileMenuQuickActions": "إجراءات سريعة",
 	"mobileMenuCreate": "إنشاء",
 	"mobileMenuDataManagement": "إدارة البيانات",
 	"mobileMenuSettingsAndHelp": "الإعدادات والمساعدة",

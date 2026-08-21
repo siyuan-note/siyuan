@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "नेविगेशन",
 	"mobileBottomBar": "निचली पट्टी",
 	"insertSuperBlockLeft": "बाईं ओर कॉलम डालें",
 	"insertSuperBlockRight": "दाईं ओर कॉलम डालें",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "कस्टम प्रोफ़ाइल",
 	"entryCreateProfile": "प्रोफ़ाइल बनाएँ",
 	"entryImportInvalid": "मेनू और डॉक प्रोफ़ाइल फ़ाइल अमान्य है",
-	"mobileMenuQuickActions": "त्वरित कार्रवाइयाँ",
 	"mobileMenuCreate": "बनाएँ",
 	"mobileMenuDataManagement": "डेटा प्रबंधन",
 	"mobileMenuSettingsAndHelp": "सेटिंग्स और सहायता",

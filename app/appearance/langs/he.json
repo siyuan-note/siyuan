@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "ניווט",
 	"mobileBottomBar": "סרגל תחתון",
 	"insertSuperBlockLeft": "הוספת עמודה משמאל",
 	"insertSuperBlockRight": "הוספת עמודה מימין",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "פרופיל מותאם אישית",
 	"entryCreateProfile": "יצירת פרופיל",
 	"entryImportInvalid": "קובץ פרופיל התפריטים וסרגל העגינה אינו תקין",
-	"mobileMenuQuickActions": "פעולות מהירות",
 	"mobileMenuCreate": "יצירה",
 	"mobileMenuDataManagement": "ניהול נתונים",
 	"mobileMenuSettingsAndHelp": "הגדרות ועזרה",

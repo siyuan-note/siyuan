@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "Навігація",
 	"mobileBottomBar": "Нижня панель",
 	"insertSuperBlockLeft": "Вставити стовпець ліворуч",
 	"insertSuperBlockRight": "Вставити стовпець праворуч",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "Користувацький профіль",
 	"entryCreateProfile": "Створити профіль",
 	"entryImportInvalid": "Недійсний файл профілю меню та док-панелі",
-	"mobileMenuQuickActions": "Швидкі дії",
 	"mobileMenuCreate": "Створення",
 	"mobileMenuDataManagement": "Керування даними",
 	"mobileMenuSettingsAndHelp": "Налаштування та довідка",

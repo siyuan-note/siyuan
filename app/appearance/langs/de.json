@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "Navigation",
 	"mobileBottomBar": "Untere Leiste",
 	"insertSuperBlockLeft": "Spalte links einfügen",
 	"insertSuperBlockRight": "Spalte rechts einfügen",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "Benutzerdefiniertes Profil",
 	"entryCreateProfile": "Profil erstellen",
 	"entryImportInvalid": "Ungültige Menü- und Dock-Profildatei",
-	"mobileMenuQuickActions": "Schnellaktionen",
 	"mobileMenuCreate": "Erstellen",
 	"mobileMenuDataManagement": "Datenverwaltung",
 	"mobileMenuSettingsAndHelp": "Einstellungen und Hilfe",

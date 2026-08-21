@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "導航",
 	"mobileBottomBar": "底欄",
 	"insertSuperBlockLeft": "左側插入分欄",
 	"insertSuperBlockRight": "右側插入分欄",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "自訂方案",
 	"entryCreateProfile": "新增方案",
 	"entryImportInvalid": "選單與停靠欄方案檔案無效",
-	"mobileMenuQuickActions": "快速操作",
 	"mobileMenuCreate": "建立",
 	"mobileMenuDataManagement": "資料管理",
 	"mobileMenuSettingsAndHelp": "設定與幫助",

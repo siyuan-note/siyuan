@@ -1,4 +1,5 @@
 {
+	"mobileMenuNavigation": "내비게이션",
 	"mobileBottomBar": "하단 바",
 	"insertSuperBlockLeft": "왼쪽에 열 삽입",
 	"insertSuperBlockRight": "오른쪽에 열 삽입",
@@ -226,7 +227,6 @@
 	"entryCustomProfile": "사용자 지정 프로필",
 	"entryCreateProfile": "프로필 만들기",
 	"entryImportInvalid": "메뉴 및 도크 프로필 파일이 올바르지 않습니다",
-	"mobileMenuQuickActions": "빠른 작업",
 	"mobileMenuCreate": "만들기",
 	"mobileMenuDataManagement": "데이터 관리",
 	"mobileMenuSettingsAndHelp": "설정 및 도움말",

@@ -86,6 +86,11 @@
   z-index: 1;
   text-align: center;
 
+  // 横向超级块的块标需高于分栏宽度调节杆，避免重叠区域被调节杆截获点击
+  &--sb-column {
+    z-index: 6;
+  }
+
   &--dragging {
     opacity: 0;
     pointer-events: none;

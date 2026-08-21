@@ -60,6 +60,7 @@ import {
     insertEmptySuperBlockColumn,
     jumpToParent,
 } from "../../block/util";
+import {getHorizontalSuperBlockChild} from "../../block/superBlock";
 import {setDragTipGhost} from "../util/dragTip";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
@@ -3501,6 +3502,8 @@ export class Gutter {
         }
         let html = "";
         let nodeElement = selectedElement || element;
+        this.element.classList.toggle("protyle-gutters--sb-column",
+            !!getHorizontalSuperBlockChild(nodeElement, protyle.wysiwyg.element));
         let space = 0;
         let index = 0;
         let listItem;

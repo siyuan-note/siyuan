@@ -869,7 +869,7 @@ export class Dock {
         if (custom.parent) {
             custom.parent.parent.removeTab(custom.parent.id);
         }
-        if (this.elements[0].parentElement.querySelectorAll(".dock__item").length === 1) {
+        if (!this.elements[0].parentElement.querySelector(".dock__item[data-type]")) {
             this.elements[0].parentElement.classList.add("fn__none");
             adjustDockPadding();
         }

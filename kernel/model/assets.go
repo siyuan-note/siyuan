@@ -971,15 +971,15 @@ func ResolveDataAssetPath(assetPath string) (relativePath, absPath string, err e
 		return
 	}
 
-	resolvedRoot, evalErr := resolveAssetRealPath(assetRoot)
+	resolvedRoot, evalErr := ResolveRealPath(assetRoot)
 	if evalErr != nil {
 		err = fmt.Errorf("resolve assets directory [%s] failed: %w", assetRoot, evalErr)
 		return
 	}
 	if assetDirIndex > 0 {
 		notebookRoot := filepath.Join(util.DataDir, parts[0])
-		resolvedDataDir, dataEvalErr := resolveAssetRealPath(util.DataDir)
-		resolvedNotebookRoot, notebookEvalErr := resolveAssetRealPath(notebookRoot)
+		resolvedDataDir, dataEvalErr := ResolveRealPath(util.DataDir)
+		resolvedNotebookRoot, notebookEvalErr := ResolveRealPath(notebookRoot)
 		if dataEvalErr != nil || notebookEvalErr != nil ||
 			!gulu.File.IsSubPath(resolvedDataDir, resolvedNotebookRoot) ||
 			!gulu.File.IsSubPath(resolvedNotebookRoot, resolvedRoot) {
@@ -987,7 +987,7 @@ func ResolveDataAssetPath(assetPath string) (relativePath, absPath string, err e
 			return
 		}
 	}
-	resolvedPath, evalErr := resolveAssetRealPath(absPath)
+	resolvedPath, evalErr := ResolveRealPath(absPath)
 	if evalErr != nil {
 		err = fmt.Errorf("resolve asset [%s] failed: %w", absPath, evalErr)
 		return
@@ -1016,10 +1016,10 @@ func ResolveUnusedDataAssetPath(assetPath string) (relativePath, absPath string,
 }
 
 func unusedAssetsContainPath(relativePath, absPath string, items []*UnusedItem) bool {
-	resolvedPath, _ := resolveAssetRealPath(absPath)
+	resolvedPath, _ := ResolveRealPath(absPath)
 	for _, item := range items {
 		if item.AbsPath != "" {
-			resolvedItemPath, evalErr := resolveAssetRealPath(item.AbsPath)
+			resolvedItemPath, evalErr := ResolveRealPath(item.AbsPath)
 			samePath, relErr := filepath.Rel(resolvedPath, resolvedItemPath)
 			if resolvedPath != "" && evalErr == nil && relErr == nil && samePath == "." {
 				return true

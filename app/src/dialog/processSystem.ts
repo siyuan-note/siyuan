@@ -425,15 +425,16 @@ export const bootSync = () => {
 };
 
 export const downloadProgress = (data: { id: string, percent: number }) => {
-    const bazaarSideElement = document.querySelector("#configBazaarReadme .item__side");
+    const bazaarReadmeElement = document.querySelector("#configBazaarReadme");
+    const bazaarSideElement = bazaarReadmeElement?.querySelector(".item__side");
     if (!bazaarSideElement) {
         return;
     }
     if (data.id !== (bazaarSideElement.getAttribute("data-progress-id") || bazaarSideElement.getAttribute("data-repourl"))) {
         return;
     }
-    const installBtnElement = bazaarSideElement.querySelector('[data-type="install"]') as HTMLElement;
-    const updateBtnElement = bazaarSideElement.querySelector('[data-type="install-t"]') as HTMLElement;
+    const installBtnElement = bazaarReadmeElement.querySelector('[data-type="install"]') as HTMLElement;
+    const updateBtnElement = bazaarReadmeElement.querySelector('[data-type="install-t"]') as HTMLElement;
     if (!installBtnElement && !updateBtnElement) {
         return;
     }

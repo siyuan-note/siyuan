@@ -1000,6 +1000,12 @@ func getDocCreateSavePath(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
+	if model.IsReadOnlyRoleContext(c) && !isNotebookVisibleByPublishAccess(model.Conf.Box(notebook), model.GetPublishAccess()) {
+		ret.Code = -1
+		ret.Msg = "notebook [" + notebook + "] not found"
+		return
+	}
+
 	docCreateSaveBox, docCreateSavePathTpl := model.ResolveDocCreateSaveLocation(notebook)
 	docCreateTemplatePath := model.Conf.FileTree.DocCreateTemplatePath
 	if box := model.Conf.Box(notebook); nil != box {
@@ -1063,6 +1069,11 @@ func getRefCreateSavePath(c *gin.Context) {
 	}
 	if "" == refCreateSavePathTpl {
 		refCreateSavePathTpl = model.Conf.FileTree.RefCreateSavePath
+	}
+	if model.IsReadOnlyRoleContext(c) && !isNotebookVisibleByPublishAccess(model.Conf.Box(refCreateSaveBox), model.GetPublishAccess()) {
+		ret.Code = -1
+		ret.Msg = "notebook [" + refCreateSaveBox + "] not found"
+		return
 	}
 
 	if refCreateSaveBox != notebook {

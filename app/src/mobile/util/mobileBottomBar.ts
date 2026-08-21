@@ -78,13 +78,9 @@ const setBottomBarConfig = (config: IMobileBottomBarConfig) => {
     renderMobileBottomBar();
 };
 
-const updateActionText = (element: HTMLElement, label: string) => {
+const updateActionLabel = (element: HTMLElement, label: string) => {
     element.setAttribute("aria-label", label);
     element.setAttribute("title", label);
-    const labelElement = element.querySelector(".mobile-bottom-bar__label");
-    if (labelElement) {
-        labelElement.textContent = label;
-    }
 };
 
 export const renderMobileBottomBar = () => {
@@ -102,7 +98,7 @@ export const renderMobileBottomBar = () => {
         }
         element.classList.add("fn__none");
         element.removeAttribute("data-slot");
-        updateActionText(element, getActionLabel(action));
+        updateActionLabel(element, getActionLabel(action));
     });
     config.actions.forEach((action, slot) => {
         const element = bottomBarElement.querySelector<HTMLElement>(`[data-action="${action}"]`);
@@ -113,7 +109,7 @@ export const renderMobileBottomBar = () => {
         element.dataset.slot = slot.toString();
         bottomBarElement.insertBefore(element, moreElement);
     });
-    updateActionText(moreElement, window.siyuan.languages.more);
+    updateActionLabel(moreElement, window.siyuan.languages.more);
     bottomBarElement.setAttribute("aria-label", window.siyuan.languages.mobileBottomBar);
     (document.getElementById("mobileBottomBarNewDoc") as HTMLButtonElement).disabled =
         window.siyuan.config.readonly || window.siyuan.isPublish;

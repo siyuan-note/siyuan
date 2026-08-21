@@ -814,7 +814,7 @@ const readStatusBarMsgFromDialog = (root: HTMLElement): Config.IAppearanceStatus
     STATUS_BAR_MSG_ITEMS.reduce((acc, {key}) => {
         acc[key] = !(root.querySelector(`#${CSS.escape(key)}`) as HTMLInputElement).checked;
         return acc;
-    }, {} as Config.IAppearanceStatusBar);
+    }, {...window.siyuan.config.appearance.statusBar});
 
 const mountAppearanceSetStatusBar = (root: HTMLElement) => {
     root.querySelector("#statusBarSetting")?.addEventListener("click", () => {

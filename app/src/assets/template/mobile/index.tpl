@@ -69,62 +69,45 @@
 <div id="mobileBottomBar" class="mobile-bottom-bar" role="group" aria-hidden="false" data-prevent-swipe>
     <button id="toolbarFile" class="mobile-bottom-bar__item" data-action="documents" type="button">
         <svg><use xlink:href="#iconFiles"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="mobileBottomBarSearch" class="mobile-bottom-bar__item" data-action="search" type="button">
         <svg><use xlink:href="#iconSearch"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="mobileBottomBarNewDoc" class="mobile-bottom-bar__item" data-action="newDoc" type="button">
         <svg><use xlink:href="#iconAddDoc"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="toolbarTabs" class="mobile-bottom-bar__item" data-action="tabs" type="button">
-        <span class="mobile-bottom-bar__icon-with-count">
-            <svg><use xlink:href="#iconLayoutGrid"></use></svg>
-            <span class="toolbar__tabs-count">0</span>
-        </span>
-        <span class="mobile-bottom-bar__label"></span>
+        <span class="toolbar__tabs-count">0</span>
     </button>
     <button id="mobileBottomBarRecent" class="mobile-bottom-bar__item fn__none" data-action="recent" type="button">
         <svg><use xlink:href="#iconList"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="mobileBottomBarOutline" class="mobile-bottom-bar__item fn__none" data-action="outline" type="button">
         <svg><use xlink:href="#iconOutline"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="mobileBottomBarBookmark" class="mobile-bottom-bar__item fn__none" data-action="bookmark" type="button">
         <svg><use xlink:href="#iconBookmark"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="mobileBottomBarTag" class="mobile-bottom-bar__item fn__none" data-action="tag" type="button">
         <svg><use xlink:href="#iconTag"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="mobileBottomBarBacklink" class="mobile-bottom-bar__item fn__none" data-action="backlink" type="button">
         <svg><use xlink:href="#iconLink"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="mobileBottomBarInbox" class="mobile-bottom-bar__item fn__none" data-action="inbox" type="button">
         <svg><use xlink:href="#iconInbox"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="mobileBottomBarAgent" class="mobile-bottom-bar__item fn__none" data-action="agent" type="button">
         <svg><use xlink:href="#iconSparkles"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="mobileBottomBarSpacedRepetition" class="mobile-bottom-bar__item fn__none" data-action="spacedRepetition" type="button">
         <svg><use xlink:href="#iconRiffCard"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="mobileBottomBarCommand" class="mobile-bottom-bar__item fn__none" data-action="command" type="button">
         <svg><use xlink:href="#iconTerminal"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
     <button id="toolbarMore" class="mobile-bottom-bar__item" data-action="more" type="button">
         <svg><use xlink:href="#iconMore"></use></svg>
-        <span class="mobile-bottom-bar__label"></span>
     </button>
 </div>
 <div id="keyboardToolbar" class="keyboard fn__none"></div>

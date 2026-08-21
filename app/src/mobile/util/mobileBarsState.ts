@@ -91,7 +91,7 @@ export const isMobileBarsScrollPaused = (state: IMobileBarsState) => {
 };
 
 export const getMobileBarsVisibility = (state: IMobileBarsState): IMobileBarsVisibility => ({
-    readingBarsVisible: state.readingBarsVisible && !state.editing && !state.selecting && !state.panelOpen,
+    readingBarsVisible: state.readingBarsVisible && !state.editing && !state.selecting,
     editingBarVisible: state.editing,
     scrollPaused: isMobileBarsScrollPaused(state),
 });
@@ -117,7 +117,7 @@ export const reduceMobileBarsState = (
     if (action.type === "set-editing") {
         return {
             ...resetScrollTracking(state, action.scrollTop),
-            readingBarsVisible: !action.active,
+            readingBarsVisible: action.active ? false : state.editing ? true : state.readingBarsVisible,
             editing: action.active,
         };
     }
@@ -131,15 +131,10 @@ export const reduceMobileBarsState = (
     }
 
     if (action.type === "set-panel-open") {
-        const nextState = {
+        return {
             ...resetScrollTracking(state, action.scrollTop),
             panelOpen: action.open,
         };
-        if (!action.open && !nextState.editing && !nextState.programmaticScrolling &&
-            nextState.scrollTop <= scrollOptions.topThreshold) {
-            nextState.readingBarsVisible = true;
-        }
-        return nextState;
     }
 
     if (action.type === "set-programmatic-scrolling") {

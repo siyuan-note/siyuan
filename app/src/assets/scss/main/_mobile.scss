@@ -44,8 +44,7 @@ body.mobile-keyboard--open {
 
   .b3-list-item {
     font-size: 16px;
-    line-height: 36px;
-    min-height: 36px;
+    line-height: 40px;
 
     &:not(.b3-list-item--focus):hover {
       background-color: transparent !important;
@@ -75,11 +74,6 @@ body.mobile-keyboard--open {
       font-size: 18px;
       margin-right: 0;
       margin-inline-end: 8px;
-    }
-
-    &__text {
-      line-height: 20px;
-      transform: translateY(1px);
     }
 
     &__toggle {
@@ -318,10 +312,9 @@ body.mobile-keyboard--open {
     color: var(--b3-theme-on-surface-light);
     background: transparent;
 
-    > svg,
-    .mobile-bottom-bar__icon-with-count > svg {
-      width: 20px;
-      height: 20px;
+    > svg {
+      width: 22px;
+      height: 22px;
       flex-shrink: 0;
     }
 
@@ -337,32 +330,18 @@ body.mobile-keyboard--open {
 
   }
 
-  &__label {
-    max-width: 100%;
-    overflow: hidden;
-    font-size: 10px;
-    line-height: 11px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  &__icon-with-count {
-    position: relative;
-    display: flex;
-  }
-
   .toolbar__tabs-count {
-    position: absolute;
-    top: -5px;
-    left: 14px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 14px;
-    height: 14px;
-    padding: 1px 3px 0;
-    font-size: 9px;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 3px;
+    border: 2px solid currentColor;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
     line-height: 1;
     text-align: center;
   }
@@ -951,7 +930,7 @@ body.mobile-keyboard--open {
   .config-items {
     background-color: var(--b3-theme-background);
 
-    .b3-label:not(.b3-label--inner) {
+    .b3-label:not(.b3-label--inner):not(.config-account--login) {
       margin: 0 16px;
       padding: 16px 0;
     }

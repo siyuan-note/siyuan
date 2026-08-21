@@ -17,12 +17,43 @@
 package util
 
 // StatusBar 底部状态栏配置。https://github.com/siyuan-note/siyuan/issues/16236
+const StatusBarVersion = 1
+
 type StatusBar struct {
+	Version                                   int  `json:"version"`
 	MsgTaskDatabaseIndexCommitDisabled        bool `json:"msgTaskDatabaseIndexCommitDisabled"`
 	MsgTaskHistoryDatabaseIndexCommitDisabled bool `json:"msgTaskHistoryDatabaseIndexCommitDisabled"`
 	MsgTaskAssetDatabaseIndexCommitDisabled   bool `json:"msgTaskAssetDatabaseIndexCommitDisabled"`
 	MsgTaskHistoryGenerateFileDisabled        bool `json:"msgTaskHistoryGenerateFileDisabled"`
 	MsgDataSyncDisabled                       bool `json:"msgDataSyncDisabled"`
+}
+
+// NewStatusBar 创建适合当前容器的状态栏消息默认配置。
+func NewStatusBar(mobile bool) *StatusBar {
+	statusBar := &StatusBar{Version: StatusBarVersion}
+	if mobile {
+		statusBar.MsgTaskDatabaseIndexCommitDisabled = true
+		statusBar.MsgTaskHistoryDatabaseIndexCommitDisabled = true
+		statusBar.MsgTaskAssetDatabaseIndexCommitDisabled = true
+	}
+	return statusBar
+}
+
+// NormalizeStatusBar 一次性迁移状态栏消息配置，迁移完成后保留用户的手动设置。
+func NormalizeStatusBar(statusBar *StatusBar, mobile bool) *StatusBar {
+	if nil == statusBar {
+		return NewStatusBar(mobile)
+	}
+	if statusBar.Version >= StatusBarVersion {
+		return statusBar
+	}
+	if mobile {
+		statusBar.MsgTaskDatabaseIndexCommitDisabled = true
+		statusBar.MsgTaskHistoryDatabaseIndexCommitDisabled = true
+		statusBar.MsgTaskAssetDatabaseIndexCommitDisabled = true
+	}
+	statusBar.Version = StatusBarVersion
+	return statusBar
 }
 
 var StatusBarCfg *StatusBar

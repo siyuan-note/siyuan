@@ -112,6 +112,18 @@ describe("mobile bars state", () => {
         });
     });
 
+    it("preserves hidden reading bars when the keyboard is already closed", () => {
+        let state = createMobileBarsState(100);
+        state = update(state, {type: "set-reading-bars", visible: false});
+        state = update(state, {type: "set-editing", active: false, scrollTop: 100});
+
+        assert.deepEqual(getMobileBarsVisibility(state), {
+            readingBarsVisible: false,
+            editingBarVisible: false,
+            scrollPaused: false,
+        });
+    });
+
     it("gives selection priority and restores reading bars after selection", () => {
         let state = createMobileBarsState(100);
         state = update(state, {type: "set-selecting", active: true});
@@ -131,10 +143,11 @@ describe("mobile bars state", () => {
         });
     });
 
-    it("pauses scroll decisions while a panel is open and rebases when it closes", () => {
+    it("preserves visible reading bars while a panel opens and closes", () => {
         let state = createMobileBarsState(100);
         state = update(state, {type: "set-panel-open", open: true});
-        assert.equal(getMobileBarsVisibility(state).readingBarsVisible, false);
+        assert.equal(getMobileBarsVisibility(state).readingBarsVisible, true);
+        assert.equal(getMobileBarsVisibility(state).scrollPaused, true);
         state = update(state, {type: "scroll", scrollTop: 200});
         assert.equal(state.readingBarsVisible, true);
         assert.equal(state.scrollDistance, 0);
@@ -145,6 +158,18 @@ describe("mobile bars state", () => {
         assert.equal(state.readingBarsVisible, true);
         state = update(state, {type: "scroll", scrollTop: 231});
         assert.equal(state.readingBarsVisible, false);
+    });
+
+    it("preserves hidden reading bars while a panel opens and closes", () => {
+        let state = createMobileBarsState(100);
+        state = update(state, {type: "set-reading-bars", visible: false});
+        state = update(state, {type: "set-panel-open", open: true, scrollTop: 0});
+        assert.equal(getMobileBarsVisibility(state).readingBarsVisible, false);
+        assert.equal(getMobileBarsVisibility(state).scrollPaused, true);
+
+        state = update(state, {type: "set-panel-open", open: false, scrollTop: 0});
+        assert.equal(getMobileBarsVisibility(state).readingBarsVisible, false);
+        assert.equal(getMobileBarsVisibility(state).scrollPaused, false);
     });
 
     it("pauses programmatic scrolling and applies the top rule after resuming", () => {

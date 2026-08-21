@@ -338,10 +338,11 @@ body.mobile-keyboard--open {
     min-width: 24px;
     height: 24px;
     padding: 0 3px;
-    border: 2px solid currentColor;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
+    border: 1.7px solid currentColor;
+    border-radius: 5px;
+    color: var(--b3-theme-on-surface-light);
+    font-size: 12px;
+    font-weight: normal;
     line-height: 1;
     text-align: center;
   }

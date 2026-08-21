@@ -66,7 +66,7 @@
 <div id="message" class="b3-snackbars"></div>
 <div id="tooltip" class="tooltip fn__none"></div>
 <div id="status" class="status"></div>
-<div id="mobileBottomBar" class="mobile-bottom-bar" role="group" aria-hidden="false" data-prevent-swipe>
+<div id="mobileBottomBar" class="mobile-bottom-bar fn__none" role="group" aria-hidden="false" data-prevent-swipe>
     <button id="toolbarFile" class="mobile-bottom-bar__item" data-action="documents" type="button">
         <svg><use xlink:href="#iconFiles"></use></svg>
     </button>

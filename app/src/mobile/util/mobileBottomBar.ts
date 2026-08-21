@@ -129,6 +129,7 @@ export const initMobileBottomBar = (app: App) => {
     if (!bottomBarElement || bottomBarElement.dataset.bound === "true") {
         return;
     }
+    bottomBarElement.classList.remove("fn__none");
     bottomBarElement.dataset.bound = "true";
     bindBottomBarAction("mobileBottomBarSearch", () => {
         if (isMobileBlockSelecting()) {

@@ -23,6 +23,7 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	_ "image/gif"
 	"image/jpeg"
 	"image/png"
 	"io"
@@ -57,6 +58,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	_ "golang.org/x/image/bmp"
+	_ "golang.org/x/image/webp"
 )
 
 // GetImportAssetsDir 返回导入资源的落盘目录。普通笔记本复用已有本地目录，否则回退到全局目录。
@@ -1778,40 +1781,30 @@ func processHTMLBlockSvgImg(n *ast.Node, assetDirPath, boxID string) {
 }
 func processBase64Img(n *ast.Node, dest string, assetDirPath, boxID string) {
 	sep := strings.Index(dest, ";base64,")
+	typ := strings.TrimSpace(dest[5:sep])
+	if paramSep := strings.IndexByte(typ, ';'); 0 <= paramSep {
+		typ = typ[:paramSep]
+	}
+	typ = strings.ToLower(typ)
 	str := strings.TrimSpace(dest[sep+8:])
 	re := regexp.MustCompile(`(?i)%0A`)
 	str = re.ReplaceAllString(str, "\n")
 	var decodeErr error
 	unbased, decodeErr := base64.StdEncoding.DecodeString(str)
 	if nil != decodeErr {
-		logging.LogErrorf("decode base64 image failed: %s", decodeErr)
+		logging.LogErrorf("decode base64 image failed: declared type [%s], base64 length [%d]: %s", typ, len(str), decodeErr)
 		return
 	}
-	dataReader := bytes.NewReader(unbased)
-	var img image.Image
-	var ext string
-	typ := dest[5:sep]
-	switch typ {
-	case "image/png":
-		img, decodeErr = png.Decode(dataReader)
-		ext = ".png"
+	data := unbased
+	ext := ".svg"
+	if "image/svg+xml" != typ {
+		data, ext, decodeErr = normalizeBase64RasterImage(unbased)
 		if nil != decodeErr {
-			dataReader.Seek(0, 0)
-			img, decodeErr = jpeg.Decode(dataReader)
-			ext = ".jpg"
+			headerLen := min(len(unbased), 16)
+			logging.LogErrorf("decode base64 image failed: declared type [%s], data length [%d], header [%x]: %s",
+				typ, len(unbased), unbased[:headerLen], decodeErr)
+			return
 		}
-	case "image/jpeg":
-		img, decodeErr = jpeg.Decode(dataReader)
-		ext = ".jpg"
-	case "image/svg+xml":
-		ext = ".svg"
-	default:
-		logging.LogWarnf("unsupported base64 image type [%s]", typ)
-		return
-	}
-	if nil != decodeErr {
-		logging.LogErrorf("decode base64 image failed: %s", decodeErr)
-		return
 	}
 
 	name := "image" + ext
@@ -1820,29 +1813,6 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath, boxID string) {
 		name = alt.TokensStr() + ext
 	}
 	name = util.FilterUploadFileName(name)
-
-	var data []byte
-	switch typ {
-	case "image/svg+xml":
-		data = unbased
-	default:
-		var buf bytes.Buffer
-		switch typ {
-		case "image/png":
-			encodeErr := png.Encode(&buf, img)
-			if nil != encodeErr {
-				logging.LogErrorf("encode png image failed: %s", encodeErr)
-				return
-			}
-		case "image/jpeg":
-			encodeErr := jpeg.Encode(&buf, img, &jpeg.Options{Quality: 100})
-			if nil != encodeErr {
-				logging.LogErrorf("encode jpeg image failed: %s", encodeErr)
-				return
-			}
-		}
-		data = buf.Bytes()
-	}
 
 	diskName, err := storeAssetForBox(boxID, assetDirPath, name, data)
 	if err != nil {
@@ -1854,6 +1824,27 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath, boxID string) {
 		assetURL += "?box=" + boxID
 	}
 	n.Tokens = []byte(assetURL)
+}
+
+func normalizeBase64RasterImage(data []byte) (normalized []byte, ext string, err error) {
+	img, format, err := image.Decode(bytes.NewReader(data))
+	if nil != err {
+		return nil, "", err
+	}
+
+	var buf bytes.Buffer
+	switch format {
+	case "jpeg":
+		err = jpeg.Encode(&buf, img, &jpeg.Options{Quality: 100})
+		ext = ".jpg"
+	default:
+		err = png.Encode(&buf, img)
+		ext = ".png"
+	}
+	if nil != err {
+		return nil, "", err
+	}
+	return buf.Bytes(), ext, nil
 }
 
 // encryptBoxAVFiles 把临时目录中的 AV 定义文件加密写入加密笔记本级目录。

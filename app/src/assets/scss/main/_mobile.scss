@@ -335,13 +335,13 @@ body.mobile-keyboard--open {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px;
-    height: 24px;
+    min-width: 22px;
+    height: 22px;
     padding: 0 3px;
-    border: 1.7px solid currentColor;
-    border-radius: 5px;
+    border: 1.5px solid currentColor;
+    border-radius: 4px;
     color: var(--b3-theme-on-surface-light);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: normal;
     line-height: 1;
     text-align: center;

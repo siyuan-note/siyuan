@@ -44,7 +44,8 @@ body.mobile-keyboard--open {
 
   .b3-list-item {
     font-size: 16px;
-    line-height: 40px;
+    line-height: 36px;
+    min-height: 36px;
 
     &:not(.b3-list-item--focus):hover {
       background-color: transparent !important;
@@ -68,10 +69,17 @@ body.mobile-keyboard--open {
     }
 
     &__graphic {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
+      line-height: 18px;
+      font-size: 18px;
+      margin-right: 0;
+      margin-inline-end: 8px;
+    }
+
+    &__text {
       line-height: 20px;
-      font-size: 20px;
+      transform: translateY(1px);
     }
 
     &__toggle {
@@ -93,6 +101,11 @@ body.mobile-keyboard--open {
         height: 20px;
       }
     }
+  }
+
+  img.b3-list-item__graphic {
+    margin-inline-start: 2px;
+    margin-inline-end: 6px;
   }
 }
 
@@ -348,7 +361,7 @@ body.mobile-keyboard--open {
     justify-content: center;
     min-width: 14px;
     height: 14px;
-    padding: 0 3px;
+    padding: 1px 3px 0;
     border: 1px solid var(--b3-theme-background);
     border-radius: 8px;
     color: var(--b3-theme-on-primary);

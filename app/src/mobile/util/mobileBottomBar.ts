@@ -38,6 +38,10 @@ const getActionLabel = (action: MobileBottomBarAction) => {
             return window.siyuan.languages.bookmark;
         case "tag":
             return window.siyuan.languages.tag;
+        case "backlink":
+            return window.siyuan.languages.backlinks;
+        case "inbox":
+            return window.siyuan.languages.inbox;
         case "command":
             return window.siyuan.languages.commandPanel;
     }
@@ -148,6 +152,16 @@ export const initMobileBottomBar = (app: App) => {
     bindBottomBarAction("mobileBottomBarTag", () => {
         if (!isMobileBlockSelecting()) {
             openDock("tag");
+        }
+    });
+    bindBottomBarAction("mobileBottomBarBacklink", () => {
+        if (!isMobileBlockSelecting()) {
+            openDock("backlink");
+        }
+    });
+    bindBottomBarAction("mobileBottomBarInbox", () => {
+        if (!isMobileBlockSelecting()) {
+            openDock("inbox");
         }
     });
     bindBottomBarAction("mobileBottomBarCommand", () => {

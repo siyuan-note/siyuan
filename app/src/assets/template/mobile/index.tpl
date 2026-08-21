@@ -102,6 +102,14 @@
         <svg><use xlink:href="#iconTag"></use></svg>
         <span class="mobile-bottom-bar__label"></span>
     </button>
+    <button id="mobileBottomBarBacklink" class="mobile-bottom-bar__item fn__none" data-action="backlink" type="button">
+        <svg><use xlink:href="#iconLink"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="mobileBottomBarInbox" class="mobile-bottom-bar__item fn__none" data-action="inbox" type="button">
+        <svg><use xlink:href="#iconInbox"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
     <button id="mobileBottomBarCommand" class="mobile-bottom-bar__item fn__none" data-action="command" type="button">
         <svg><use xlink:href="#iconTerminal"></use></svg>
         <span class="mobile-bottom-bar__label"></span>

@@ -46,6 +46,15 @@ describe("mobile bottom bar config", () => {
         assert.deepEqual(config.actions, ["tabs", "search", "newDoc", "documents"]);
     });
 
+    it("supports inbox and backlinks as configurable actions", () => {
+        const config = normalizeMobileBottomBarConfig({
+            version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
+            actions: ["inbox", "backlink", "bookmark", "tag"],
+        });
+
+        assert.deepEqual(config.actions, ["inbox", "backlink", "bookmark", "tag"]);
+    });
+
     it("replaces a slot when selecting an unused action", () => {
         const config = reduceMobileBottomBarConfig(createDefaultMobileBottomBarConfig(), {
             type: "select-action",

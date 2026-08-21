@@ -9,6 +9,8 @@ export const MOBILE_BOTTOM_BAR_ACTIONS = [
     "outline",
     "bookmark",
     "tag",
+    "backlink",
+    "inbox",
     "command",
 ] as const;
 

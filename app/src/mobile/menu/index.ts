@@ -247,6 +247,12 @@ export const initRightMenu = (app: App) => {
             <div id="menuTag" class="b3-menu__item">
                 <svg class="b3-menu__icon"><use xlink:href="#iconTag"></use></svg><span class="b3-menu__label">${window.siyuan.languages.tag}</span>
             </div>
+            <div id="menuBacklink" class="b3-menu__item">
+                <svg class="b3-menu__icon"><use xlink:href="#iconLink"></use></svg><span class="b3-menu__label">${window.siyuan.languages.backlinks}</span>
+            </div>
+            <div id="menuInbox" class="b3-menu__item">
+                <svg class="b3-menu__icon"><use xlink:href="#iconInbox"></use></svg><span class="b3-menu__label">${window.siyuan.languages.inbox}</span>
+            </div>
         </div>
     </div>
     <div class="b3-menu__group">
@@ -357,7 +363,7 @@ export const initRightMenu = (app: App) => {
                 event.preventDefault();
                 event.stopPropagation();
                 break;
-            } else if (["menuOutline", "menuBookmark", "menuTag"].includes(target.id)) {
+            } else if (["menuOutline", "menuBookmark", "menuTag", "menuBacklink", "menuInbox"].includes(target.id)) {
                 closePanel();
                 openDock(target.id.replace("menu", "").toLowerCase());
                 event.preventDefault();

@@ -251,6 +251,20 @@
     flex: 1;
   }
 
+  &__plugin {
+    display: flex;
+    align-items: center;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   &__bar {
     align-items: center;
     flex-wrap: wrap;

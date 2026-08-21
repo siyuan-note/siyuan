@@ -39,6 +39,7 @@ import {decodeHTML, escapeAttr, escapeAriaLabel, escapeHtml, escapeSearchHighlig
 import {refreshUndoButtons} from "../undo/globalUndo";
 import {getAllEditor} from "../../layout/getAll";
 import {genEmbedStatTip, type IBlockStat, type IEmbedStat} from "../../layout/status";
+import {mountBreadcrumbButtons} from "../../plugin/breadcrumbButton";
 
 const genDocumentStatLabel = (stat: IBlockStat, statWithEmbed?: IBlockStat, embedStat?: IEmbedStat) => {
     const runeEmbedAttrs = statWithEmbed ? ` class="ariaLabel" data-position="north" aria-label="${escapeAriaLabel(genEmbedStatTip(window.siyuan.languages.runeCountWithEmbed, statWithEmbed.runeCount, embedStat))}"` : "";
@@ -75,6 +76,7 @@ export class Breadcrumb {
             `<button class="protyle-breadcrumb__icon" data-type="mobile-menu">${window.siyuan.languages.breadcrumb}</button>` :
             '<div class="protyle-breadcrumb__bar"></div>'}
 <span class="protyle-breadcrumb__space"></span>
+<div class="protyle-breadcrumb__plugin"></div>
 <button class="protyle-breadcrumb__icon fn__none ariaLabel" aria-label="${updateHotkeyTip(window.siyuan.config.keymap.editor.general.exitFocus.custom)}" data-type="exit-focus">${window.siyuan.languages.exitFocus}</button>
 ${padHTML}
 <button class="block__icon fn__flex-center ariaLabel${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.lockEdit}" data-type="readonly" data-subtype="unlock"><svg><use xlink:href="#iconUnlock"></use></svg></button>
@@ -82,8 +84,12 @@ ${padHTML}
 <button class="block__icon fn__flex-center ariaLabel" data-type="more" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></button>
 <button class="block__icon fn__flex-center fn__none ariaLabel" data-type="context" aria-label="${window.siyuan.languages.context}"><svg><use xlink:href="#iconAlignCenter"></use></svg></button>`;
         this.element = element.firstElementChild as HTMLElement;
+        mountBreadcrumbButtons(protyle, element.querySelector(".protyle-breadcrumb__plugin"));
         element.addEventListener("click", async (event) => {
             let target = event.target as HTMLElement;
+            if (event.composedPath().some(item => item instanceof HTMLElement && item.hasAttribute("data-plugin-name"))) {
+                return;
+            }
             const arrowElement = target.closest(".protyle-breadcrumb__arrow");
             if (arrowElement && this.element.contains(arrowElement)) {
                 const itemElement = arrowElement.previousElementSibling as HTMLElement;

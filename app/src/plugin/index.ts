@@ -25,6 +25,10 @@ import {normalizeStoragePath} from "../util/pathName";
 import {Kernel} from "./kernel";
 import {IAgentCapabilityEffects, registerCapability} from "../layout/dock/agent/frontendCapabilities";
 import {isDisallowedTextInputHotkey, normalizePluginHotkey} from "../util/hotKeyPolicy";
+import {
+    addBreadcrumbButton as addPluginBreadcrumbButton,
+    removeBreadcrumbButton as removePluginBreadcrumbButton,
+} from "./breadcrumbButton";
 
 const updatePluginKeymap = (pluginName: string, key: string, hotkey: unknown) => {
     if (!window.siyuan.config.keymap.plugin) {
@@ -250,6 +254,25 @@ export class Plugin {
         }
         /// #endif
         return iconElement;
+    }
+
+    public addBreadcrumbButton(options: {
+        id: string,
+        icon: string,
+        title: string,
+        callback: (event: MouseEvent, protyle: IProtyle) => void,
+    }) {
+        options.icon = options.icon.trim();
+        if (!options.icon.startsWith("icon") && !options.icon.startsWith("<svg")) {
+            console.error(`plugin ${this.name} addBreadcrumbButton error: icon must be svg id or svg tag`);
+            return options.id;
+        }
+        addPluginBreadcrumbButton(this.name, options);
+        return options.id;
+    }
+
+    public removeBreadcrumbButton(id: string) {
+        removePluginBreadcrumbButton(this.name, id);
     }
 
     public addStatusBar(options: {

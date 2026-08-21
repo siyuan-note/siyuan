@@ -15,6 +15,7 @@ import type {App} from "../index";
 import {initMirror} from "../protyle/undo/globalUndo";
 import {getDocByScroll, saveScroll} from "../protyle/scroll/saveScroll";
 import {isEncryptedBox} from "../util/pathName";
+import {bindMobileBarsScroll, pauseMobileBarsScroll} from "./util/mobileBars";
 
 export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -66,6 +67,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             return;
         }
         completed = true;
+        bindMobileBarsScroll(protyle.contentElement);
         afterOpen?.(protyle);
     };
     const fail = (invalid = false) => {
@@ -117,6 +119,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 updateRecentDocSwitchTime(createRecentDocUpdate(rootID, rootID));
             }
             complete(protyle);
+            pauseMobileBarsScroll();
             return;
         }
     }

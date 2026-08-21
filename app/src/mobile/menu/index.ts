@@ -22,6 +22,7 @@ import {openDataMigration} from "../../menus/dataMigration";
 import {normalizeSearchText} from "../../config/search/normalize";
 import type {SettingTabSearchResult} from "../../config/setting/builder";
 import {unmountBazaarTab} from "../../config/bazaarTab";
+import {openDock} from "../dock/util";
 
 const getSettingTabFromMenuTarget = (target: HTMLElement): ISettingTabShell<TSettingTab> | undefined => {
     const item = target.closest(".b3-menu__item") as HTMLElement | null;
@@ -229,6 +230,26 @@ export const initRightMenu = (app: App) => {
 </div>
 <div class="b3-menu__items b3-menu__groups">
     <div class="b3-menu__group">
+        <div class="b3-menu__group-title">${window.siyuan.languages.mobileBottomBar}</div>
+        <div class="b3-menu__group-items">
+            <div id="menuDocuments" class="b3-menu__item">
+                <svg class="b3-menu__icon"><use xlink:href="#iconFiles"></use></svg><span class="b3-menu__label">${window.siyuan.languages.fileTree}</span>
+            </div>
+            <div id="menuTabs" class="b3-menu__item">
+                <svg class="b3-menu__icon"><use xlink:href="#iconLayoutGrid"></use></svg><span class="b3-menu__label">${window.siyuan.languages.mobileTabs}</span>
+            </div>
+            <div id="menuOutline" class="b3-menu__item">
+                <svg class="b3-menu__icon"><use xlink:href="#iconOutline"></use></svg><span class="b3-menu__label">${window.siyuan.languages.outline}</span>
+            </div>
+            <div id="menuBookmark" class="b3-menu__item">
+                <svg class="b3-menu__icon"><use xlink:href="#iconBookmark"></use></svg><span class="b3-menu__label">${window.siyuan.languages.bookmark}</span>
+            </div>
+            <div id="menuTag" class="b3-menu__item">
+                <svg class="b3-menu__icon"><use xlink:href="#iconTag"></use></svg><span class="b3-menu__label">${window.siyuan.languages.tag}</span>
+            </div>
+        </div>
+    </div>
+    <div class="b3-menu__group">
         <div class="b3-menu__group-title">${window.siyuan.languages.mobileMenuQuickActions}</div>
         <div class="b3-menu__group-items">
             <div id="menuRecent" class="b3-menu__item">
@@ -302,6 +323,9 @@ export const initRightMenu = (app: App) => {
             <div class="b3-menu__item" id="menuSettings">
                 <svg class="b3-menu__icon"><use xlink:href="#iconSettings"></use></svg><span class="b3-menu__label">${window.siyuan.languages.config}</span>
             </div>
+            <div class="b3-menu__item" id="menuBottomBarConfig">
+                <svg class="b3-menu__icon"><use xlink:href="#iconMenu"></use></svg><span class="b3-menu__label">${window.siyuan.languages.mobileBottomBar}</span>
+            </div>
             <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHelp">
                 <svg class="b3-menu__icon"><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.userGuide}</span>
             </div>
@@ -321,6 +345,24 @@ export const initRightMenu = (app: App) => {
         while (target && !target.isEqualNode(menuElement)) {
             if (target.classList.contains("b3-menu__title")) {
                 closePanel();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuDocuments") {
+                closePanel();
+                openDock("file");
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuTabs") {
+                closePanel();
+                document.getElementById("toolbarTabs").dispatchEvent(new CustomEvent("click"));
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (["menuOutline", "menuBookmark", "menuTag"].includes(target.id)) {
+                closePanel();
+                openDock(target.id.replace("menu", "").toLowerCase());
                 event.preventDefault();
                 event.stopPropagation();
                 break;
@@ -403,6 +445,14 @@ export const initRightMenu = (app: App) => {
                 break;
             } else if (target.id === "menuSettings") {
                 openMobileSetting(app);
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuBottomBarConfig") {
+                openMobileSetting(app, "appearance");
+                window.setTimeout(() => {
+                    document.getElementById("mobileBottomBarSetting")?.scrollIntoView({block: "center"});
+                }, 100);
                 event.preventDefault();
                 event.stopPropagation();
                 break;

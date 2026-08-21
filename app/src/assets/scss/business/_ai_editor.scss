@@ -73,7 +73,7 @@
   &--mobile {
     top: auto !important;
     right: max(8px, env(safe-area-inset-right));
-    bottom: max(8px, env(safe-area-inset-bottom));
+    bottom: calc(var(--mobile-bottom-bar-offset, env(safe-area-inset-bottom)) + 8px);
     left: max(8px, env(safe-area-inset-left)) !important;
     width: auto;
     max-height: 55%;

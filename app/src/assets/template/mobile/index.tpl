@@ -11,22 +11,13 @@
     <div class="b3-dialog__scrim" style="background-color: #1e1e1e"></div>
     <img style="position: absolute;width: 24vh;" src="../../icon.svg">
 </div>
-<div class="toolbar toolbar--border">
-    <svg id="toolbarFile" class="toolbar__icon">
-        <use xlink:href="#iconMenu"></use>
-    </svg>
+<div class="mobile-safe-area"></div>
+<div id="mobileTopBar" class="toolbar toolbar--border mobile-topbar">
     <input class="toolbar__title fn__hidden" id="toolbarName" autocomplete="off">
     <span class="toolbar__title toolbar__title--readonly fn__hidden fn__none" id="toolbarNameReadonly"></span>
-    <svg id="toolbarSync" class="toolbar__icon toolbar__icon-deactivate fn__none">
-        <use xlink:href="#iconCloudSucc"></use>
-    </svg>
-    <button id="toolbarTabs" class="toolbar__tabs" type="button">
-        <svg><use xlink:href="#iconLayoutGrid"></use></svg>
-        <span class="toolbar__tabs-count">0</span>
+    <button id="toolbarSync" class="toolbar__button toolbar__icon-deactivate fn__none" type="button">
+        <svg><use xlink:href="#iconCloudSucc"></use></svg>
     </button>
-    <svg id="toolbarMore" class="toolbar__icon">
-        <use xlink:href="#iconSettings"></use>
-    </svg>
 </div>
 <div id="editor" class="fn__none fn__flex-1"></div>
 <div id="empty" class="b3-list--mobile"></div>
@@ -75,6 +66,51 @@
 <div id="message" class="b3-snackbars"></div>
 <div id="tooltip" class="tooltip fn__none"></div>
 <div id="status" class="status"></div>
+<div id="mobileBottomBar" class="mobile-bottom-bar" role="group" aria-hidden="false" data-prevent-swipe>
+    <button id="toolbarFile" class="mobile-bottom-bar__item" data-action="documents" type="button">
+        <svg><use xlink:href="#iconFiles"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="mobileBottomBarSearch" class="mobile-bottom-bar__item" data-action="search" type="button">
+        <svg><use xlink:href="#iconSearch"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="mobileBottomBarNewDoc" class="mobile-bottom-bar__item" data-action="newDoc" type="button">
+        <svg><use xlink:href="#iconAddDoc"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="toolbarTabs" class="mobile-bottom-bar__item" data-action="tabs" type="button">
+        <span class="mobile-bottom-bar__icon-with-count">
+            <svg><use xlink:href="#iconLayoutGrid"></use></svg>
+            <span class="toolbar__tabs-count">0</span>
+        </span>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="mobileBottomBarRecent" class="mobile-bottom-bar__item fn__none" data-action="recent" type="button">
+        <svg><use xlink:href="#iconList"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="mobileBottomBarOutline" class="mobile-bottom-bar__item fn__none" data-action="outline" type="button">
+        <svg><use xlink:href="#iconOutline"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="mobileBottomBarBookmark" class="mobile-bottom-bar__item fn__none" data-action="bookmark" type="button">
+        <svg><use xlink:href="#iconBookmark"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="mobileBottomBarTag" class="mobile-bottom-bar__item fn__none" data-action="tag" type="button">
+        <svg><use xlink:href="#iconTag"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="mobileBottomBarCommand" class="mobile-bottom-bar__item fn__none" data-action="command" type="button">
+        <svg><use xlink:href="#iconTerminal"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+    <button id="toolbarMore" class="mobile-bottom-bar__item" data-action="more" type="button">
+        <svg><use xlink:href="#iconMore"></use></svg>
+        <span class="mobile-bottom-bar__label"></span>
+    </button>
+</div>
 <div id="keyboardToolbar" class="keyboard fn__none"></div>
 <div class="side-mask fn__none"></div>
 </body>

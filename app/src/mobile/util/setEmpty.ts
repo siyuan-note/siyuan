@@ -6,9 +6,12 @@ import {getRecentDocs} from "../menu/getRecentDocs";
 import {openHistory} from "../../history/history";
 import type {App} from "../../index";
 import {setTitle} from "../../util/processTitle";
+import {clearMobileBarsScroll} from "./mobileBars";
 
 export const setEmpty = (app: App) => {
     setTitle("", true);
+    clearMobileBarsScroll();
+    document.getElementById("mobileTopBar").classList.add("fn__none");
     document.getElementById("toolbarName").classList.add("fn__hidden");
     document.getElementById("toolbarNameReadonly").classList.add("fn__hidden");
     document.getElementById("editor").classList.add("fn__none");
@@ -75,6 +78,7 @@ export const setEmpty = (app: App) => {
 };
 
 export const setEditor = () => {
+    document.getElementById("mobileTopBar").classList.remove("fn__none");
     const toolbarNameElement = document.getElementById("toolbarName") as HTMLInputElement;
     setTitle(toolbarNameElement.value);
     toolbarNameElement.classList.remove("fn__hidden");

@@ -323,9 +323,6 @@ export const initRightMenu = (app: App) => {
             <div class="b3-menu__item" id="menuSettings">
                 <svg class="b3-menu__icon"><use xlink:href="#iconSettings"></use></svg><span class="b3-menu__label">${window.siyuan.languages.config}</span>
             </div>
-            <div class="b3-menu__item" id="menuBottomBarConfig">
-                <svg class="b3-menu__icon"><use xlink:href="#iconMenu"></use></svg><span class="b3-menu__label">${window.siyuan.languages.mobileBottomBar}</span>
-            </div>
             <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuHelp">
                 <svg class="b3-menu__icon"><use xlink:href="#iconHelp"></use></svg><span class="b3-menu__label">${window.siyuan.languages.userGuide}</span>
             </div>
@@ -445,14 +442,6 @@ export const initRightMenu = (app: App) => {
                 break;
             } else if (target.id === "menuSettings") {
                 openMobileSetting(app);
-                event.preventDefault();
-                event.stopPropagation();
-                break;
-            } else if (target.id === "menuBottomBarConfig") {
-                openMobileSetting(app, "appearance");
-                window.setTimeout(() => {
-                    document.getElementById("mobileBottomBarSetting")?.scrollIntoView({block: "center"});
-                }, 100);
                 event.preventDefault();
                 event.stopPropagation();
                 break;

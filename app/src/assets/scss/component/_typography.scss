@@ -335,36 +335,14 @@
     --b3-table-border-radius-bottom-right: var(--b3-border-radius-s);
     --b3-table-border-radius-bottom-left: var(--b3-border-radius-s);
     border-collapse: separate;
+    border-top: 1px solid var(--b3-theme-surface-lighter);
+    border-left: 1px solid var(--b3-theme-surface-lighter);
+    border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right)
+      var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
     empty-cells: show;
     margin: 0;
     border-spacing: 0;
     width: max-content;
-
-    thead,
-    tbody {
-      position: relative;
-
-      &::after {
-        position: absolute;
-        inset: 0;
-        z-index: 1;
-        border-right: 1px solid var(--b3-theme-surface-lighter);
-        border-left: 1px solid var(--b3-theme-surface-lighter);
-        box-sizing: border-box;
-        content: "";
-        pointer-events: none;
-      }
-    }
-
-    thead::after {
-      border-top: 1px solid var(--b3-theme-surface-lighter);
-      border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) 0 0;
-    }
-
-    tbody:last-of-type::after {
-      border-bottom: 1px solid var(--b3-theme-surface-lighter);
-      border-radius: 0 0 var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
-    }
 
     thead > tr:first-child > :first-child {
       border-top-left-radius: var(--b3-table-border-radius-top-left);
@@ -693,7 +671,7 @@
 
 .protyle-wysiwyg [data-node-id].table table,
 .b3-typography .table table {
-  display: inline-block;
+  display: inline-table;
   vertical-align: top;
 }
 

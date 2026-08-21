@@ -33,6 +33,13 @@ export const getAVColumnFitWidth = (name: string, type: TAVCol, values: string[]
     return `${Math.ceil(Math.min(480, Math.max(64, headerWidth, contentWidth)))}px`;
 };
 
+export const getAVRelationColumnWidth = (fitWidth: string, type: TAVCol, primary: boolean) => {
+    const width = parseFloat(fitWidth) || 64;
+    const minWidth = primary ? 120 : 64;
+    const maxWidth = ["relation", "rollup", "mAsset"].includes(type) ? 200 : 160;
+    return `${Math.min(maxWidth, Math.max(minWidth, width))}px`;
+};
+
 export const getAVColumnResizeWidth = (width: number, previousWidth?: number, snapThreshold = 4) => {
     const limitedWidth = Math.max(Math.round(width), 25);
     const normalizedPreviousWidth = typeof previousWidth === "number" ? Math.round(previousWidth) : undefined;

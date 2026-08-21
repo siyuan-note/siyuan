@@ -108,6 +108,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/storage/setLocalStorageVals", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setLocalStorageVals)
 	ginServer.Handle("POST", "/api/storage/removeLocalStorageVal", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeLocalStorageVal)
 	ginServer.Handle("POST", "/api/storage/removeLocalStorageVals", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeLocalStorageVals)
+	ginServer.Handle("POST", "/api/storage/getInlineStyles", model.CheckAuth, getInlineStyles)
+	ginServer.Handle("POST", "/api/storage/setInlineStyles", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setInlineStyles)
 	ginServer.Handle("POST", "/api/storage/getCriteria", model.CheckAuth, getCriteria)
 	ginServer.Handle("POST", "/api/storage/setCriterion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setCriterion)
 	ginServer.Handle("POST", "/api/storage/removeCriterion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeCriterion)

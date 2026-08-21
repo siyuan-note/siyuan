@@ -1473,3 +1473,57 @@ func TestFilterAssetContentByPublishAccess(t *testing.T) {
 		t.Fatalf("unexpected authenticated asset contents: %+v", filtered)
 	}
 }
+
+// TestCheckAbsPathAccessableByPublishAccessKeepsHiddenNotebookAccessible 验证原始文件通道
+// 保持「仅隐藏」语义：显式隐藏（Visible:false）的笔记本不构成机密边界，
+// 普通文件与 .sy 文档仍可直接访问，禁用与密码保护照常生效。
+func TestCheckAbsPathAccessableByPublishAccessKeepsHiddenNotebookAccessible(t *testing.T) {
+	const (
+		boxID    = "20260821000005-visboxa"
+		docID    = "20260821000006-visdoca"
+		password = "password"
+	)
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	invalidateEncryptedPublishAccessCache()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+		invalidateEncryptedPublishAccessCache()
+	})
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	fileAbs := filepath.Join(util.DataDir, boxID, "private.txt")
+	docAbs := filepath.Join(util.DataDir, boxID, docID+".sy")
+
+	// 显式隐藏的笔记本保持可直接访问语义（与文档内容 API 一致）
+	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: false}}) {
+		t.Fatal("hidden notebook file should remain directly accessible")
+	}
+	if !CheckAbsPathAccessableByPublishAccess(c, docAbs, PublishAccess{{ID: boxID, Visible: false}}) {
+		t.Fatal("hidden notebook doc should remain directly accessible")
+	}
+
+	// 可见与未配置场景不受影响
+	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true}}) {
+		t.Fatal("visible notebook file should be accessible")
+	}
+	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{}) {
+		t.Fatal("unconfigured notebook file should be accessible")
+	}
+
+	// 禁用与密码保护仍构成访问控制
+	if CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Disable: true}}) {
+		t.Fatal("disabled notebook should be denied")
+	}
+	if CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Password: password}}) {
+		t.Fatal("password protected notebook should be denied without auth cookie")
+	}
+	c.Request.AddCookie(&http.Cookie{
+		Name:  "publish-auth-" + boxID,
+		Value: util.SHA256Hash([]byte(boxID + password)),
+	})
+	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Password: password}}) {
+		t.Fatal("password protected notebook should be accessible after authorization")
+	}
+}

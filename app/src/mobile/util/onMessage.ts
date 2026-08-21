@@ -14,6 +14,7 @@ import {redirectToCheckAuth} from "../../util/pathName";
 import {reloadSync} from "../../util/reloadSync";
 import {activateOnboarding} from "../../onboarding";
 import {updateServerAddresses} from "../../config/tabs/accessRuntime";
+import {reloadInlineStyles} from "../../util/assets";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;
@@ -39,6 +40,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setAppearance":
                 window.location.reload();
+                break;
+            case "reloadInlineStyles":
+                void reloadInlineStyles();
                 break;
             case "setSnippet":
                 window.siyuan.config.snippet = data.data;

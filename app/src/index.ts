@@ -49,7 +49,7 @@ import {Files} from "./layout/dock/Files";
 import {Tag} from "./layout/dock/Tag";
 import {appearanceConfigApi} from "./config/tabs/appearanceRuntime";
 import {renderSnippet} from "./config/util/snippets";
-import {refreshThemeStyle, setBodyHighlight} from "./util/assets";
+import {refreshThemeStyle, reloadInlineStyles, setBodyHighlight} from "./util/assets";
 import {reloadSync} from "./util/reloadSync";
 import {setTitle} from "./util/processTitle";
 import {ensureUILayout} from "./util/ensureUILayout";
@@ -84,6 +84,9 @@ export class App {
                             break;
                         case "setAppearance":
                             appearanceConfigApi.apply(data.data);
+                            break;
+                        case "reloadInlineStyles":
+                            void reloadInlineStyles();
                             break;
                         case "setEntryVisibility":
                             applyEntryVisibility(data.data);

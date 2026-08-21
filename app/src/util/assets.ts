@@ -23,6 +23,10 @@ import {getBackend, getFrontend} from "./functions";
 import {getWorkspaceName} from "./processTitle";
 import {ensureSelectedCustomFonts} from "./customFont";
 import {isCurrentThemeSupported, shouldUnloadThemeScript} from "./themeCompatibility";
+import {
+    getInlineStylesCSS,
+    loadInlineStyles
+} from "../protyle/toolbar/inlineStyle";
 
 let headingNumberMeasurementRefreshTimer: number;
 const DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE = "U+25fd-25fe, U+2614-2615, U+2648-2653, U+267f, U+2693, U+26a1, " +
@@ -271,6 +275,14 @@ export const initAssets = () => {
 
 export const setInlineStyle = async (set = true, servePath = "../../../") => {
     const editorFonts = window.siyuan.config.editor.fontFamilies || [];
+    let inlineStylesCSS = "";
+    try {
+        const inlineStyles = await loadInlineStyles();
+        inlineStylesCSS = getInlineStylesCSS(inlineStyles);
+    } catch (error) {
+        console.error("load inline styles error: " + error);
+        inlineStylesCSS = getInlineStylesCSS();
+    }
     if (set) {
         await ensureSelectedCustomFonts(editorFonts);
     }
@@ -363,6 +375,7 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
     if ("ontouchend" in document) {
         style += "\n.b3-menu .b3-menu__action {opacity: 0.68;}";
     }
+    style += inlineStylesCSS ? "\n" + inlineStylesCSS : "";
     if (set) {
         const siyuanStyle = document.getElementById("siyuanStyle");
         if (siyuanStyle) {
@@ -372,6 +385,15 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
         }
     }
     return style;
+};
+
+export const reloadInlineStyles = async () => {
+    try {
+        await loadInlineStyles(true);
+    } catch (error) {
+        console.error("reload inline styles error: " + error);
+    }
+    await setInlineStyle();
 };
 
 export const setMode = (modeElementValue: number) => {

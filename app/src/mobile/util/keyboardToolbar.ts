@@ -24,6 +24,19 @@ import {armKeyboardLock, callMobileAppShowKeyboard, canInput, keyboardLockUntil}
 import {isNotEditBlock} from "../../protyle/wysiwyg/getBlock";
 import {getMirror, getUndoRootID, hasUndoStateMirror, initMirror} from "../../protyle/undo/globalUndo";
 import {getMobilePluginToolbarItems} from "./pluginToolbar";
+import {escapeHtml} from "../../util/escape";
+import {
+    encodeStyle1,
+    getInlineStyleByValue,
+    getInlineStyleIDFromValue,
+    getInlineStylePreview,
+    getInlineStylesCache,
+    getInlineStyleType,
+    INLINE_BACKGROUND_COLORS,
+    INLINE_FONT_COLORS,
+    TInlineStyleType,
+} from "../../protyle/toolbar/inlineStyle";
+import {openInlineStyleDialog} from "../../protyle/toolbar/inlineStyleDialog";
 import {
     getKeyboardHideResult,
     getMovingSelectionEndpoint,
@@ -349,25 +362,45 @@ const getSlashItem = (value: string, icon: string, text: string, focus = "false"
 
 export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     let colorHTML = "";
-    ["", "var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
-        "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
-        "var(--b3-font-color9)", "var(--b3-font-color10)", "var(--b3-font-color11)", "var(--b3-font-color12)",
-        "var(--b3-font-color13)"].forEach((item, index) => {
+    INLINE_FONT_COLORS.forEach((item, index) => {
         colorHTML += `<button class="keyboard__slash-item" data-type="color">
     <span class="keyboard__slash-icon" ${item ? `style="color:${item}"` : ""}>A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${item ? index + 1 : window.siyuan.languages.default}</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${item ? index : window.siyuan.languages.default}</span>
 </button>`;
     });
     let bgHTML = "";
-    ["", "var(--b3-font-background1)", "var(--b3-font-background2)", "var(--b3-font-background3)", "var(--b3-font-background4)",
-        "var(--b3-font-background5)", "var(--b3-font-background6)", "var(--b3-font-background7)", "var(--b3-font-background8)",
-        "var(--b3-font-background9)", "var(--b3-font-background10)", "var(--b3-font-background11)", "var(--b3-font-background12)",
-        "var(--b3-font-background13)"].forEach((item, index) => {
+    INLINE_BACKGROUND_COLORS.forEach((item, index) => {
         bgHTML += `<button class="keyboard__slash-item" data-type="backgroundColor">
     <span class="keyboard__slash-icon" ${item ? `style="background-color:${item}"` : ""}>A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${item ? index + 1 : window.siyuan.languages.default}</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${item ? index : window.siyuan.languages.default}</span>
 </button>`;
     });
+    let customColorHTML = "";
+    let customBackgroundHTML = "";
+    let customStyleHTML = "";
+    getInlineStylesCache().styles.forEach(style => {
+        const type = getInlineStyleType(style);
+        if (!type) {
+            return;
+        }
+        const preview = getInlineStylePreview(style);
+        const html = `<button class="keyboard__slash-item" data-type="${type}" data-inline-style-id="${style.id}">
+    <span class="keyboard__slash-icon" style="${preview.color ? `color:${preview.color};` : ""}${preview.backgroundColor ? `background-color:${preview.backgroundColor};` : ""}">A</span>
+    <span class="keyboard__slash-text">${escapeHtml(style.name)}</span>
+</button>`;
+        if (type === "color") {
+            customColorHTML += html;
+        } else if (type === "backgroundColor") {
+            customBackgroundHTML += html;
+        } else {
+            customStyleHTML += html;
+        }
+    });
+    const getManageHTML = (type: TInlineStyleType) => window.siyuan.config.readonly || window.siyuan.isPublish ? "" :
+        `<button class="keyboard__slash-item" data-action="manageInlineStyle" data-inline-style-type="${type}">
+    <svg class="keyboard__slash-icon"><use xlink:href="#iconAdd"></use></svg>
+    <span class="keyboard__slash-text">${window.siyuan.languages.manage}</span>
+</button>`;
 
     const nodeElements = getFontNodeElements(protyle);
     let disableFont = false;
@@ -387,17 +420,21 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
 <div data-id="lastUsedWrap" class="keyboard__slash-block">`;
         lastFonts.forEach((item: string) => {
             const lastFontStatus = item.split(Constants.ZWSP);
+            const inlineStyleID = getInlineStyleIDFromValue(item);
+            const inlineStyle = getInlineStyleByValue(item);
+            const customLabel = inlineStyle ? escapeHtml(inlineStyle.name) :
+                (inlineStyleID ? window.siyuan.languages.custom : "");
             switch (lastFontStatus[0]) {
                 case "color":
                     lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
     <span class="keyboard__slash-icon" ${lastFontStatus[1] ? `style="color:${lastFontStatus[1]}"` : ""} >A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${lastFontStatus[1] ? parseInt(lastFontStatus[1].replace("var(--b3-font-color", "")) + 1 : window.siyuan.languages.default}</span>
+    <span class="keyboard__slash-text">${customLabel || window.siyuan.languages.colorFont + " " + (lastFontStatus[1]?.match(/^var\(--b3-font-color(\d+)\)$/)?.[1] || window.siyuan.languages.default)}</span>
 </button>`;
                     break;
                 case "backgroundColor":
                     lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
     <span class="keyboard__slash-icon" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]}"` : ""}>A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${lastFontStatus[1] ? parseInt(lastFontStatus[1].replace("var(--b3-font-background", "")) + 1 : window.siyuan.languages.default}</span>
+    <span class="keyboard__slash-text">${customLabel || window.siyuan.languages.colorPrimary + " " + (lastFontStatus[1]?.match(/^var\(--b3-font-background(\d+)\)$/)?.[1] || window.siyuan.languages.default)}</span>
 </button>`;
                     break;
                 case "style2":
@@ -419,9 +456,10 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
                     break;
                 case "style1":
                     if (lastFontStatus[1]) {
+                        const builtInStyle = lastFontStatus[2]?.match(/^var\(--b3-card-([a-z]+)-color\)$/)?.[1];
                         lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
     <span class="keyboard__slash-icon" style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}">A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages[lastFontStatus[2].replace("var(--b3-card-", "").replace("-color)", "") + "Style"]}</span>
+    <span class="keyboard__slash-text">${customLabel || (builtInStyle ? window.siyuan.languages[builtInStyle + "Style"] : window.siyuan.languages.color)}</span>
 </button>`;
                     } else {
                         lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
@@ -464,14 +502,20 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         <span class="keyboard__slash-icon" style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);">A</span>
         <span class="keyboard__slash-text">${window.siyuan.languages.successStyle}</span>
     </button>
+    ${customStyleHTML}
+    ${getManageHTML("style1")}
 </div>
 <div data-id="colorFont" class="keyboard__slash-title">${window.siyuan.languages.colorFont}</div>
 <div data-id="colorFontWrap" class="keyboard__slash-block">
     ${colorHTML}
+    ${customColorHTML}
+    ${getManageHTML("color")}
 </div>
 <div data-id="colorPrimary" class="keyboard__slash-title">${window.siyuan.languages.colorPrimary}</div>
 <div data-id="colorPrimaryWrap" class="keyboard__slash-block">
     ${bgHTML}
+    ${customBackgroundHTML}
+    ${getManageHTML("backgroundColor")}
 </div>
 <div data-id="fontStyle" class="keyboard__slash-title">${window.siyuan.languages.fontStyle}</div>
 <div data-id="fontStyleWrap" class="keyboard__slash-block">
@@ -1102,6 +1146,14 @@ export const initKeyboardToolbar = () => {
         const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
+        if (slashBtnElement && slashBtnElement.dataset.action === "manageInlineStyle") {
+            openInlineStyleDialog(slashBtnElement.dataset.inlineStyleType as TInlineStyleType, () => {
+                renderTextMenu(protyle, toolbarElement);
+            });
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if (slashBtnElement && !slashBtnElement.getAttribute("data-type")) {
             const dataValue = decodeURIComponent(slashBtnElement.getAttribute("data-value"));
             if (dataValue === Constants.ZWSP + 3) {
@@ -1136,7 +1188,7 @@ export const initKeyboardToolbar = () => {
             const focusRange = !buttonElement.classList.contains("keyboard__slash-item");
             if (type === "style1") {
                 fontEvent(protyle, nodeElements, type,
-                    itemElement.style.backgroundColor + Constants.ZWSP + itemElement.style.color, focusRange);
+                    encodeStyle1(itemElement.style.backgroundColor, itemElement.style.color), focusRange);
             } else if (type === "fontSize") {
                 fontEvent(protyle, nodeElements, type, itemElement.textContent.trim(), focusRange);
             } else if (type === "backgroundColor") {

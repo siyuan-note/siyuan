@@ -76,6 +76,7 @@ export const initBlockPopover = (app: App) => {
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo") ||
             hasClosestByClassName(event.target, "av__calc--ashow") ||
+            hasClosestByClassName(event.target, "av__relation-table-cell") ||
             hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
             const aElementParent = aElement.parentElement;
@@ -126,10 +127,15 @@ export const initBlockPopover = (app: App) => {
                 tooltipClass = "href";
             } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
                 tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
-            } else if (aElement.getAttribute("data-type") === "setRelationCell") {
-                const childElement = aElement.querySelector(".b3-menu__label");
-                if (childElement && childElement.clientWidth < childElement.scrollWidth) {
-                    tip = childElement.textContent;
+            } else if (aElement.classList.contains("av__relation-table-cell") ||
+                aElement.getAttribute("data-type") === "setRelationCell") {
+                const cellElement = aElement.classList.contains("av__relation-table-cell") ? aElement :
+                    hasClosestByClassName(event.target, "av__relation-table-cell") || null;
+                const textElement = cellElement?.querySelector(".b3-menu__label, .av__celltext") as HTMLElement;
+                if (cellElement && hasClosestByAttribute(cellElement, "data-type", "setRelationCell", true) &&
+                    (cellElement.clientWidth + 0.5 < cellElement.scrollWidth ||
+                        (textElement && textElement.clientWidth + 0.5 < textElement.scrollWidth))) {
+                    tip = Lute.EscapeHTMLStr(getCellText(cellElement));
                 }
             } else if (aElement.classList.contains("protyle-attr--memo")) {
                 tip = escapeHtml(tip);

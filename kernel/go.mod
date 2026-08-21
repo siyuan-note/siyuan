@@ -99,9 +99,10 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.8-0.20260816044801-e16e8e268504
+require github.com/88250/lute v1.7.8-0.20260821043618-a0c40f22628e
 
 require (
+	github.com/alecthomas/chroma/v2 v2.27.0 // indirect
 	github.com/clipperhouse/displaywidth v0.11.0 // indirect
 	github.com/dlclark/regexp2/v2 v2.6.0 // indirect
 	github.com/fatih/color v1.19.0 // indirect

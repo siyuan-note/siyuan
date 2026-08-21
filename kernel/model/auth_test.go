@@ -18,8 +18,10 @@ package model
 
 import (
 	"errors"
+	"strconv"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -37,6 +39,107 @@ func preserveAuthState(t *testing.T) {
 		accountsMap = originalAccounts
 		accountsLock.Unlock()
 	})
+}
+
+func resetPublishSessions(t *testing.T) {
+	t.Helper()
+	sessionLock.Lock()
+	original := sessionsMap
+	sessionsMap = map[string]*PublishSession{}
+	sessionLock.Unlock()
+	t.Cleanup(func() {
+		sessionLock.Lock()
+		sessionsMap = original
+		sessionLock.Unlock()
+	})
+}
+
+func TestAddPublishSessionReusesSessionForSameUsername(t *testing.T) {
+	resetPublishSessions(t)
+
+	first := AddSession("alice")
+	if second := AddSession("alice"); second != first {
+		t.Fatalf("session ID = %q, want reused %q", second, first)
+	}
+
+	sessionLock.Lock()
+	size := len(sessionsMap)
+	sessionLock.Unlock()
+	if 1 != size {
+		t.Fatalf("session registry size = %d, want 1", size)
+	}
+}
+
+func TestPublishSessionExpiresAfterInactivity(t *testing.T) {
+	resetPublishSessions(t)
+
+	sessionID := AddSession("alice")
+	sessionLock.Lock()
+	sessionsMap[sessionID].LastActive = time.Now().Add(-publishSessionTTL - time.Second)
+	sessionLock.Unlock()
+
+	if username := GetBasicAuthUsernameBySessionID(sessionID); "" != username {
+		t.Fatalf("expired session username = %q, want empty", username)
+	}
+
+	sessionLock.Lock()
+	_, exists := sessionsMap[sessionID]
+	sessionLock.Unlock()
+	if exists {
+		t.Fatal("expired session was not removed from the registry")
+	}
+}
+
+func TestPublishSessionGlobalCapEvictsOldest(t *testing.T) {
+	resetPublishSessions(t)
+
+	base := time.Now()
+	ids := make([]string, publishSessionGlobalCap)
+	for i := range ids {
+		ids[i] = AddSession("user-" + strconv.Itoa(i))
+	}
+	sessionLock.Lock()
+	for i, id := range ids {
+		sessionsMap[id].LastActive = base.Add(time.Duration(i) * time.Second)
+	}
+	sessionLock.Unlock()
+
+	newID := AddSession("overflow")
+	sessionLock.Lock()
+	defer sessionLock.Unlock()
+	if publishSessionGlobalCap != len(sessionsMap) {
+		t.Fatalf("session registry size = %d, want %d", len(sessionsMap), publishSessionGlobalCap)
+	}
+	if _, ok := sessionsMap[ids[0]]; ok {
+		t.Fatal("oldest session was not evicted when exceeding the global cap")
+	}
+	if _, ok := sessionsMap[ids[len(ids)-1]]; !ok {
+		t.Fatal("most recently active session was unexpectedly evicted")
+	}
+	if _, ok := sessionsMap[newID]; !ok {
+		t.Fatal("new session was not registered")
+	}
+}
+
+func TestPublishSessionPerAccountCapEvictsOldest(t *testing.T) {
+	resetPublishSessions(t)
+
+	base := time.Now()
+	sessionLock.Lock()
+	for i := 0; i < publishSessionPerAccountCap; i++ {
+		sessionsMap["id-"+strconv.Itoa(i)] = &PublishSession{
+			Username:   "alice",
+			LastActive: base.Add(time.Duration(i) * time.Second),
+		}
+	}
+	evictOldestPublishSessionByUsername("alice")
+	if publishSessionPerAccountCap-1 != len(sessionsMap) {
+		t.Fatalf("session registry size = %d, want %d", len(sessionsMap), publishSessionPerAccountCap-1)
+	}
+	if _, ok := sessionsMap["id-0"]; ok {
+		t.Fatal("oldest session of the account was not evicted")
+	}
+	sessionLock.Unlock()
 }
 
 func TestIsPublishServiceToken(t *testing.T) {

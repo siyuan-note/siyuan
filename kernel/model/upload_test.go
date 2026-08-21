@@ -16,7 +16,10 @@
 
 package model
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestRecordAssetUploadSuccessPreservesDuplicateNames(t *testing.T) {
 	succMap := map[string]any{}
@@ -35,5 +38,17 @@ func TestRecordAssetUploadSuccessPreservesDuplicateNames(t *testing.T) {
 	}
 	if succMap["image.png"] != "assets/image-second.png" {
 		t.Fatalf("legacy success map should retain the latest path, got %v", succMap["image.png"])
+	}
+}
+
+func TestRecordAssetUploadFailurePreservesInputIndex(t *testing.T) {
+	var failedFiles []AssetUploadFailure
+	recordAssetUploadFailure(&failedFiles, 2, "missing.png", errors.New("file not found"))
+
+	if len(failedFiles) != 1 {
+		t.Fatalf("expected one failed file, got %d", len(failedFiles))
+	}
+	if failedFiles[0].Index != 2 || failedFiles[0].Name != "missing.png" || failedFiles[0].Error != "file not found" {
+		t.Fatalf("unexpected failed file: %+v", failedFiles[0])
 	}
 }

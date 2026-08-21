@@ -69,6 +69,49 @@ describe("asset upload result", () => {
         assert.deepEqual(result.rejected, rejected);
     });
 
+    it("preserves successful and failed files from a partial kernel write", () => {
+        const input: IAssetUploadInput = {
+            kind: "local-files",
+            files: [{path: "a.png", size: 1}, {path: "missing.png", size: 1}],
+        };
+        const failedFiles: IAssetUploadFailure[] = [{
+            index: 1,
+            name: "missing.png",
+            error: "file not found",
+        }];
+        const result = getAssetUploadResult(JSON.stringify({
+            code: 0,
+            data: {
+                succFiles: [{index: 0, name: "a.png", path: "assets/a.png"}],
+                succMap: {"a.png": "assets/a.png"},
+                failedFiles,
+                errFiles: ["missing.png"],
+            },
+        }), input);
+
+        assert.equal(result.status, "partial");
+        assert.deepEqual(result.failedFiles, failedFiles);
+        assert.equal(result.succFiles[0].index, 0);
+    });
+
+    it("reports partial when an error response still contains successful files", () => {
+        const input: IAssetUploadInput = {
+            kind: "files",
+            files: [createFile("a.png"), createFile("b.png")],
+        };
+        const result = getAssetUploadResult(JSON.stringify({
+            code: -1,
+            msg: "second file failed",
+            data: {
+                succFiles: [{index: 0, name: "a.png", path: "assets/a.png"}],
+                succMap: {"a.png": "assets/a.png"},
+            },
+        }), input);
+
+        assert.equal(result.status, "partial");
+        assert.equal(result.error, "second file failed");
+    });
+
     it("preserves accepted and rejected details when the server fails", () => {
         const acceptedInput: IAssetUploadInput = {kind: "files", files: [createFile("a.png")]};
         const rejected: IAssetUploadRejection[] = [{

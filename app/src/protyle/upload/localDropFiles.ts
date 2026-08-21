@@ -1,3 +1,5 @@
+export const hasDataTransferFiles = (types: ArrayLike<string>) => Array.from(types).includes("Files");
+
 export const getLocalDropFiles = (files: FileList | File[], getPath: (file: File) => string) => {
     const localFiles: ILocalFiles[] = [];
     for (let index = 0; index < files.length; index++) {

@@ -12,12 +12,13 @@ import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
 import {hideElements} from "../ui/hideElements";
+import {showMessage} from "../../dialog/message";
 import {avRender} from "../render/av/render";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
-import {base64ToURL} from "../../util/image";
+import {base64ToURL} from "../upload/base64";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
@@ -34,9 +35,13 @@ import {
     type IWPSPresentationClipboard,
     shouldConvertWPSPresentation,
 } from "./wpsPresentation";
+import {hasDataTransferFiles} from "../upload/localDropFiles";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
+
+const PASTE_PLUGIN_TIMEOUT = 120_000;
+const PASTE_PLUGIN_TIMED_OUT = Symbol("paste-plugin-timed-out");
 
 export const beforePaste = (protyle: IProtyle, blockElement: HTMLElement) => {
     // 链接，备注，样式，引用，pdf标注粘贴 https://github.com/siyuan-note/siyuan/issues/11572
@@ -552,8 +557,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         vscodeEditorData = event.dataTransfer.getData("vscode-editor-data");
         wpsPresentation = extractWPSPresentationClipboard(event.dataTransfer.types,
             (type) => event.dataTransfer.getData(type));
-        if (event.dataTransfer.types[0] === "Files") {
-            files = event.dataTransfer.items;
+        if (hasDataTransferFiles(event.dataTransfer.types)) {
+            files = event.dataTransfer.files;
         } else if (wpsPresentation && Array.from(event.dataTransfer.types).some((type) => type.toLowerCase() === "files")) {
             // 混合的 DataTransferItemList 还包含字符串项，上传时仅保留文件
             files = event.dataTransfer.files;
@@ -642,20 +647,49 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     }
 
     if (protyle && protyle.app && protyle.app.plugins) {
-        for (let i = 0; i < protyle.app.plugins.length; i++) {
-            const response = await new Promise<IClipboardData | undefined>((resolve) => {
-                const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
+        const plugins = Array.from(protyle.app.plugins);
+        for (let i = 0; i < plugins.length; i++) {
+            const plugin = plugins[i];
+            const response = await new Promise<IClipboardData | undefined | typeof PASTE_PLUGIN_TIMED_OUT>((resolve,
+                                                                                                            reject) => {
+                let settled = false;
+                const finish = (value: IClipboardData | undefined | typeof PASTE_PLUGIN_TIMED_OUT) => {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    clearTimeout(timeoutId);
+                    resolve(value);
+                };
+                const resolveResponse = (value: IClipboardData | PromiseLike<IClipboardData | undefined> |
+                    undefined) => {
+                    void Promise.resolve(value).then(finish, error => {
+                        if (!settled) {
+                            settled = true;
+                            clearTimeout(timeoutId);
+                            reject(error);
+                        }
+                    });
+                };
+                const timeoutId = setTimeout(() => finish(PASTE_PLUGIN_TIMED_OUT), PASTE_PLUGIN_TIMEOUT);
+                const emitResult = plugin.eventBus.emit("paste", {
                     protyle,
-                    resolve,
+                    resolve: resolveResponse,
                     textHTML,
                     textPlain,
                     siyuanHTML,
                     files
                 });
                 if (emitResult) {
-                    resolve(undefined);
+                    finish(undefined);
                 }
             });
+
+            if (response === PASTE_PLUGIN_TIMED_OUT) {
+                console.error(new Error(`Plugin ${plugin.name || `#${i + 1}`} paste processing timed out`));
+                showMessage(window.siyuan.languages.uploadError);
+                return;
+            }
 
             if (response) {
                 // 插件返回的是完整的剪贴板文本载荷，文件字段仅在显式返回时替换
@@ -1066,7 +1100,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                         imgSrcList.push(item.getAttribute("data-src"));
                     }
                 });
-                const base64SrcList = await base64ToURL(imgSrcList);
+                const base64SrcList = await base64ToURL(imgSrcList, protyle, assetUploadOptions);
                 base64SrcList.forEach((item, index) => {
                     imageElements[index].setAttribute("src", item);
                     imageElements[index].setAttribute("data-src", item);

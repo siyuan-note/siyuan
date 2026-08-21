@@ -21,7 +21,8 @@ import {renameAsset} from "../../../editor/rename";
 import * as dayjs from "dayjs";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
-import {base64ToURL, getCompressURL, removeCompressURL} from "../../../util/image";
+import {getCompressURL, removeCompressURL} from "../../../util/image";
+import {base64ToURL} from "../../upload/base64";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {genNetworkImageAssetValue} from "./assetValue";
 import {getAssetUploadSuccesses} from "../../upload/uploadResult";
@@ -247,7 +248,10 @@ export const editAssetItem = (options: {
             return;
         }
         if (type === "image" && currentLink.startsWith("data:image/")) {
-            const base64Src = await base64ToURL([currentLink]);
+            const base64Src = await base64ToURL([currentLink], options.protyle, {
+                source: "programmatic",
+                target: "av-cell",
+            });
             currentLink = base64Src[0];
         }
 

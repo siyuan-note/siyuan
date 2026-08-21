@@ -60,9 +60,12 @@ var assetUploadCmd = &cobra.Command{
 			return nil
 		}
 
-		succMap, _, err := model.InsertLocalAssets(id, files, true)
+		succMap, _, failedFiles, err := model.InsertLocalAssets(id, files, true)
 		if err != nil {
 			return err
+		}
+		if 0 < len(failedFiles) {
+			return fmt.Errorf("upload asset %s failed: %s", failedFiles[0].Name, failedFiles[0].Error)
 		}
 
 		switch outputFormat {

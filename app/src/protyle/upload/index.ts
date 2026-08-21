@@ -36,6 +36,8 @@ export interface IUploadInsertOptions {
     source?: TAssetUploadSource;
     target?: TAssetUploadTarget;
     position?: IAssetUploadPosition;
+    /** 目标消费方要求的文件数量。 */
+    requiredFileCount?: number;
 }
 
 export class Upload {
@@ -316,6 +318,7 @@ const getAssetUploadContext = (options?: IUploadInsertOptions): IAssetUploadEven
     source: options?.source || "programmatic",
     target: options?.target || "editor",
     position: options?.position,
+    requiredFileCount: options?.requiredFileCount,
 });
 
 const captureUploadInsertPosition = (protyle: IProtyle, options?: IUploadInsertOptions): IUploadInsertOptions => {
@@ -422,7 +425,11 @@ const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "loc
                     id: protyle.block.rootID
                 });
                 hideMessage(msgId);
-                if (response.code !== 0 || !response.data?.succMap) {
+                const detached = !document.body.contains(protyle.element);
+                if (detached) {
+                    destroy(protyle);
+                }
+                if (!response.data?.succMap) {
                     finishUpload(task, callbacks, {
                         status: "failed",
                         error: String(response.msg || ""),
@@ -440,8 +447,12 @@ const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "loc
                         `<b>${escapeHtml(tip.substring(0, tip.length - 2))}</b>`));
                 }
                 const responseText = JSON.stringify(response);
-                finishSuccessfulUpload(task, callbacks, responseText, response, input,
-                    getAssetUploadResult(responseText, input));
+                const result = getAssetUploadResult(responseText, input);
+                if (result.status === "failed" || detached) {
+                    finishUpload(task, callbacks, result);
+                } else {
+                    finishSuccessfulUpload(task, callbacks, responseText, response, input, result);
+                }
             } catch (error) {
                 const errorMessage = getErrorMessage(error);
                 finishUpload(task, callbacks, {status: "failed", error: errorMessage});
@@ -464,18 +475,28 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
                              callbacks: IAssetUploadCallbacks, task: IAssetUploadTask) => {
     const fileList = input.files;
     if (protyle.options.upload.handler) {
-        try {
-            const isValidate = protyle.options.upload.handler(fileList);
-            if (typeof isValidate === "string") {
-                showMessage(isValidate);
-                finishUpload(task, callbacks, {status: "failed", error: isValidate});
+        const finishHandler = (result: string | null) => {
+            if (typeof result === "string") {
+                showMessage(result);
+                finishUpload(task, callbacks, {status: "failed", error: result});
                 return;
             }
             finishUpload(task, callbacks, {status: "success", acceptedInput: input});
-        } catch (error) {
+        };
+        const failHandler = (error: unknown) => {
             const errorMessage = getErrorMessage(error);
             finishUpload(task, callbacks, {status: "failed", error: errorMessage});
             showMessage(errorMessage || window.siyuan.languages.uploadError);
+        };
+        try {
+            const handlerResult = protyle.options.upload.handler(fileList);
+            if (typeof handlerResult === "string" || handlerResult === null || handlerResult === undefined) {
+                finishHandler(handlerResult as string | null);
+            } else {
+                void Promise.resolve(handlerResult).then(finishHandler, failHandler);
+            }
+        } catch (error) {
+            failHandler(error);
         }
         return;
     }
@@ -541,11 +562,10 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
                 try {
                     protyle.upload.isUploading = false;
                     hideMessage(validateResult.msgId);
-                    if (!document.body.contains(protyle.element)) {
+                    const detached = !document.body.contains(protyle.element);
+                    if (detached) {
                         // 网络较慢时，页签已经关闭
                         destroy(protyle);
-                        finishUpload(task, callbacks, {status: "canceled"});
-                        return;
                     }
                     if (xhr.status === 200) {
                         let response: IWebSocketData;
@@ -554,8 +574,12 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
                         } catch (error) {
                             response = undefined;
                         }
-                        finishSuccessfulUpload(task, callbacks, xhr.responseText, response, uploadedInput,
-                            getAssetUploadResult(xhr.responseText, uploadedInput, validateResult.rejected));
+                        const result = getAssetUploadResult(xhr.responseText, uploadedInput, validateResult.rejected);
+                        if (detached) {
+                            finishUpload(task, callbacks, result);
+                        } else {
+                            finishSuccessfulUpload(task, callbacks, xhr.responseText, response, uploadedInput, result);
+                        }
                     } else if (xhr.status === 0) {
                         showMessage(window.siyuan.languages["_kernel"][28]);
                         finishUpload(task, callbacks, {status: "failed"});

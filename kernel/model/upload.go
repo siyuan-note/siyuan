@@ -101,15 +101,27 @@ type AssetUploadSuccess struct {
 	Path  string `json:"path"`
 }
 
+// AssetUploadFailure 记录单个输入文件的上传失败结果。
+type AssetUploadFailure struct {
+	Index int    `json:"index"`
+	Name  string `json:"name"`
+	Error string `json:"error"`
+}
+
 func recordAssetUploadSuccess(succMap map[string]any, succFiles *[]AssetUploadSuccess, index int, name, assetPath string) {
 	succMap[name] = assetPath
 	*succFiles = append(*succFiles, AssetUploadSuccess{Index: index, Name: name, Path: assetPath})
 }
 
+func recordAssetUploadFailure(failedFiles *[]AssetUploadFailure, index int, name string, err error) {
+	*failedFiles = append(*failedFiles, AssetUploadFailure{Index: index, Name: name, Error: err.Error()})
+}
+
 func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]any,
-	succFiles []AssetUploadSuccess, err error) {
+	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
 	succMap = map[string]any{}
 	succFiles = make([]AssetUploadSuccess, 0, len(assetAbsPaths))
+	failedFiles = make([]AssetUploadFailure, 0)
 
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
@@ -150,19 +162,20 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 
 		fi, statErr := os.Stat(assetAbsPath)
 		if nil != statErr {
-			err = statErr
-			return
+			recordAssetUploadFailure(&failedFiles, index, baseName, statErr)
+			continue
 		}
 		f, openErr := os.Open(assetAbsPath)
 		if nil != openErr {
-			err = openErr
-			return
+			recordAssetUploadFailure(&failedFiles, index, baseName, openErr)
+			continue
 		}
 
 		hash, hashErr := util.GetEtagByHandle(f, fi.Size())
 		if nil != hashErr {
 			f.Close()
-			return
+			recordAssetUploadFailure(&failedFiles, index, baseName, hashErr)
+			continue
 		}
 
 		if 1 > fi.Size() {
@@ -189,13 +202,15 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 				fName = util.AssetName(fName, blockID)
 			}
 			writePath := filepath.Join(assetsDirPath, fName)
-			if _, err = f.Seek(0, io.SeekStart); err != nil {
+			if _, seekErr := f.Seek(0, io.SeekStart); seekErr != nil {
 				f.Close()
-				return
+				recordAssetUploadFailure(&failedFiles, index, baseName, seekErr)
+				continue
 			}
-			if err = writeAssetFile(writePath, f, bt.BoxID, baseName); err != nil {
+			if writeErr := writeAssetFile(writePath, f, bt.BoxID, baseName); writeErr != nil {
 				f.Close()
-				return
+				recordAssetUploadFailure(&failedFiles, index, baseName, writeErr)
+				continue
 			}
 			f.Close()
 
@@ -315,7 +330,7 @@ func Upload(c *gin.Context) {
 		hash, hashErr := util.GetEtagByHandle(f, file.Size)
 		if nil != hashErr {
 			errFiles = append(errFiles, fName)
-			ret.Msg = err.Error()
+			ret.Msg = hashErr.Error()
 			f.Close()
 			break
 		}

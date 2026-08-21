@@ -26,7 +26,8 @@ import (
 
 // TestIsForbiddenAbsPath 覆盖 HTTP 文件 API 与 MCP 文件工具共用的敏感路径黑名单：
 // conf 目录下的 conf.json 与 TLS 密钥材料、data/snippets/conf.json、data/templates 目录、
-// data/.siyuan/publishAccess.json 以及 temp 目录下的 siyuan.log 日志文件。
+// data/.siyuan/publishAccess.json、笔记本目录下的 .siyuan 内部文件以及 temp 目录下的
+// siyuan.log 日志文件。
 func TestIsForbiddenAbsPath(t *testing.T) {
 	tmpWorkspace := t.TempDir()
 	origWorkspace, origConf, origData, origTemp, origLog := WorkspaceDir, ConfDir, DataDir, TempDir, LogPath
@@ -52,6 +53,8 @@ func TestIsForbiddenAbsPath(t *testing.T) {
 		{"templates dir", filepath.Join("data", "templates")},
 		{"templates file", filepath.Join("data", "templates", "a.txt")},
 		{"publish access", filepath.Join("data", ".siyuan", "publishAccess.json")},
+		{"notebook conf", filepath.Join("data", "20210808180117-6v0mkxr", ".siyuan", "conf.json")},
+		{"notebook sort", filepath.Join("data", "20210808180117-6v0mkxr", ".siyuan", "sort.json")},
 		{"log", filepath.Join("temp", "siyuan.log")},
 	}
 	for _, c := range cases {
@@ -66,6 +69,8 @@ func TestIsForbiddenAbsPath(t *testing.T) {
 		filepath.Join(tmpWorkspace, "data", "assets", "image.png"),
 		filepath.Join(tmpWorkspace, "data", "snippets", "custom.css"),
 		filepath.Join(tmpWorkspace, "data", "plugins", "example", "main.js"),
+		filepath.Join(tmpWorkspace, "data", "20210808180117-6v0mkxr", "20240101.sy"),
+		filepath.Join(tmpWorkspace, "data", "20210808180117-6v0mkxr", "conf.json"),
 		filepath.Join(tmpWorkspace, "temp", "siyuan", "kernel.log"),
 	}
 	for _, p := range allowed {
@@ -100,6 +105,7 @@ func TestIsForbiddenAbsPathCaseInsensitive(t *testing.T) {
 		filepath.Join(tmpWorkspace, "CONF", strings.ToUpper(TLSKeyFilename)),
 		filepath.Join(tmpWorkspace, "DATA", "SNIPPETS", "CONF.JSON"),
 		filepath.Join(tmpWorkspace, "DATA", ".SIYUAN", "PUBLISHACCESS.JSON"),
+		strings.ToUpper(filepath.Join(tmpWorkspace, "data", "20210808180117-6v0mkxr", ".siyuan", "conf.json")),
 		strings.ToUpper(filepath.Join(tmpWorkspace, "data", "templates")),
 		strings.ToUpper(filepath.Join(tmpWorkspace, "temp", "siyuan.log")),
 	}
@@ -169,7 +175,8 @@ func TestIsForbiddenAbsPathSymlinkBypass(t *testing.T) {
 
 // TestIsForbiddenDataRelPath 覆盖 /history 与 /repo/diff 路由共用的数据相对路径片段匹配黑名单。
 // 历史快照副本位于 HistoryDir 等绝对路径下，无法用 IsForbiddenAbsPath 精确匹配，因此按数据目录下的
-// 相对位置拦截：data/snippets/conf.json、data/templates 目录以及 data/.siyuan/publishAccess.json。
+// 相对位置拦截：data/snippets/conf.json、data/templates 目录、data/.siyuan/publishAccess.json
+// 以及笔记本目录下的 .siyuan 内部文件。
 func TestIsForbiddenDataRelPath(t *testing.T) {
 	forbidden := []string{
 		".siyuan/publishAccess.json",
@@ -182,6 +189,11 @@ func TestIsForbiddenDataRelPath(t *testing.T) {
 		filepath.Join("templates", "a.md"),
 		"snippets/conf.json",
 		filepath.Join("snippets", "conf.json"),
+		filepath.Join("20210808180117-6v0mkxr", ".siyuan", "conf.json"),
+		filepath.Join("20210808180117-6v0mkxr", ".siyuan", "sort.json"),
+		filepath.Join("20210808180117-6v0mkxr", ".siyuan"),
+		filepath.Join("20210808180117-6v0mkxr", ".siyuan", "history", "2021-01-01-120000-x.sy"),
+		filepath.Join("20210808180117-6v0mkxr", ".siyuan", "publishAccess.json"),
 	}
 	for _, p := range forbidden {
 		if got := IsForbiddenDataRelPath(p); !got {
@@ -196,9 +208,9 @@ func TestIsForbiddenDataRelPath(t *testing.T) {
 		"assets/image.png",
 		filepath.Join("20210808180117-6v0mkxr", "templates", "a.sy"),
 		filepath.Join("20210808180117-6v0mkxr", "20240101.sy"),
+		filepath.Join("20210808180117-6v0mkxr", "conf.json"),
 		"plugins/example/main.js",
 		".siyuan/publishAccess.json.bak",
-		filepath.Join("20210808180117-6v0mkxr", ".siyuan", "publishAccess.json"),
 	}
 	for _, p := range allowed {
 		if got := IsForbiddenDataRelPath(p); got {
@@ -217,6 +229,7 @@ func TestIsForbiddenDataRelPathCaseInsensitive(t *testing.T) {
 		filepath.Join(".SIYUAN", "PUBLISHACCESS.JSON"),
 		strings.ToUpper(filepath.Join("templates", "A.MD")),
 		filepath.Join("SNIPPETS", "CONF.JSON"),
+		filepath.Join("20210808180117-6v0mkxr", ".SIYUAN", "CONF.JSON"),
 	}
 	for _, p := range cases {
 		if got := IsForbiddenDataRelPath(p); !got {

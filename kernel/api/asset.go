@@ -388,7 +388,7 @@ func getFileAnnotation(c *gin.Context) {
 	}
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		if !model.CheckAbsPathAccessableByPublishAccess(c, assetAbsPath, publishAccess) {
+		if !model.CheckAbsPathAccessableByPublishAccessForReadOnly(c, assetAbsPath, publishAccess) {
 			ret.Code = http.StatusForbidden
 			ret.Msg = http.StatusText(http.StatusForbidden)
 			return

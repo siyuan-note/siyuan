@@ -975,7 +975,13 @@ func serveAssets(ginServer *gin.Engine) {
 
 		if !model.IsAdminRoleContext(context) {
 			publishAccess := model.GetPublishAccess()
-			if !model.CheckAbsPathAccessableByPublishAccess(context, p, publishAccess) {
+			var accessible bool
+			if model.IsReadOnlyRoleContext(context) {
+				accessible = model.CheckAbsPathAccessableByPublishAccessForReadOnly(context, p, publishAccess)
+			} else {
+				accessible = model.CheckAbsPathAccessableByPublishAccess(context, p, publishAccess)
+			}
+			if !accessible {
 				context.Status(http.StatusForbidden)
 				return
 			}

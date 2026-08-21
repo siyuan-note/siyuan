@@ -529,7 +529,7 @@ func getFile(c *gin.Context) {
 
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
-		if !model.CheckAbsPathAccessableByPublishAccess(c, fileAbsPath, publishAccess) {
+		if !model.CheckAbsPathAccessableByPublishAccessForReadOnly(c, fileAbsPath, publishAccess) {
 			ret.Code = http.StatusForbidden
 			ret.Msg = http.StatusText(http.StatusForbidden)
 			c.JSON(http.StatusAccepted, ret)

@@ -491,6 +491,29 @@ func assetPathFromDataRelativePath(relPath string) (assetPath, boxID string, ok 
 }
 
 func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publishAccess PublishAccess) bool {
+	return checkAbsPathAccessableByPublishAccess(c, absPath, publishAccess, false)
+}
+
+// CheckAbsPathAccessableByPublishAccessForReadOnly 在只读角色（读者、访客）场景下检查绝对路径的
+// 发布访问权限：在禁用与密码之外，还要求所属笔记本未被显式隐藏（Visible:false）。
+// 用于原始文件通道（getFile 等），只读角色不通过其他内容 API 获取这些路径，
+// 显式隐藏的笔记本应被视为机密边界（security advisory GHSA-8ggq-wq3f-vxrw）。
+func CheckAbsPathAccessableByPublishAccessForReadOnly(c *gin.Context, absPath string, publishAccess PublishAccess) bool {
+	return checkAbsPathAccessableByPublishAccess(c, absPath, publishAccess, true)
+}
+
+// CheckNotebookVisibleByPublishAccess 判断笔记本在发布访问配置中是否被显式隐藏：
+// 未配置的笔记本默认可见，与 isNotebookVisibleByPublishAccess（kernel/api/notebook.go）保持一致。
+func CheckNotebookVisibleByPublishAccess(boxID string, publishAccess PublishAccess) bool {
+	for _, item := range publishAccess {
+		if item.ID == boxID {
+			return item.Visible
+		}
+	}
+	return true
+}
+
+func checkAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publishAccess PublishAccess, enforceNotebookVisible bool) bool {
 	absPath = filepath.Clean(absPath)
 
 	if gulu.File.IsSubPath(util.HistoryDir, absPath) {
@@ -516,6 +539,9 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 
 		if ast.IsNodeIDPattern(pathParts[0]) {
 			box := pathParts[0]
+			if enforceNotebookVisible && !CheckNotebookVisibleByPublishAccess(box, publishAccess) {
+				return false
+			}
 			blockPath := "/" + strings.Join(pathParts[1:], "/")
 			passwordID, password := GetPathPasswordByPublishAccess(box, blockPath, publishAccess)
 			publishIgnore := GetDisablePublishAccess(publishAccess)

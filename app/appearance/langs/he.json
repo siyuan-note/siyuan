@@ -1,4 +1,6 @@
 {
+	"manageCustomColors": "ניהול צבעים מותאמים אישית",
+	"deleteCustomColorTip": "לאחר המחיקה והשמירה, תוכן המשתמש בצבע המותאם אישית „${name}” יחזור לצבע שנשמר בעת החלתו ולא ישתנה עוד במעבר בין מצב בהיר לכהה. האם למחוק אותו?",
 	"mobileMenuNavigation": "ניווט",
 	"mobileBottomBar": "סרגל תחתון",
 	"insertSuperBlockLeft": "הוספת עמודה משמאל",

@@ -1,4 +1,6 @@
 {
+	"manageCustomColors": "管理自定義顏色",
+	"deleteCustomColorTip": "刪除並儲存後，文件中使用自定義顏色「${name}」的內容將回退到套用時儲存的顏色，且不再隨明亮模式和暗黑模式切換。確定要刪除嗎？",
 	"mobileMenuNavigation": "導航",
 	"mobileBottomBar": "底欄",
 	"insertSuperBlockLeft": "左側插入分欄",

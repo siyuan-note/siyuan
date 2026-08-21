@@ -16,6 +16,7 @@
   font-size: 16px;
   font-weight: 500;
   color: var(--b3-theme-on-background);
+  user-select: none;
 
   &--list {
     margin: 0 8px 0 0;

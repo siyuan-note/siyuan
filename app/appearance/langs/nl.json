@@ -1,4 +1,6 @@
 {
+	"manageCustomColors": "Aangepaste kleuren beheren",
+	"deleteCustomColorTip": "Na verwijderen en opslaan valt inhoud die de aangepaste kleur ‘${name}’ gebruikt terug op de kleur die bij het toepassen is opgeslagen en volgt deze niet langer wisselingen tussen de lichte en donkere modus. Weet je zeker dat je deze wilt verwijderen?",
 	"mobileMenuNavigation": "Navigatie",
 	"mobileBottomBar": "Onderste balk",
 	"insertSuperBlockLeft": "Kolom links invoegen",

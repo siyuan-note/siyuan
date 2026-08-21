@@ -1,4 +1,6 @@
 {
+	"manageCustomColors": "Gestisci colori personalizzati",
+	"deleteCustomColorTip": "Dopo l’eliminazione e il salvataggio, il contenuto che usa il colore personalizzato “${name}” tornerà al colore salvato al momento dell’applicazione e non seguirà più il cambio tra modalità chiara e scura. Vuoi davvero eliminarlo?",
 	"mobileMenuNavigation": "Navigazione",
 	"mobileBottomBar": "Barra inferiore",
 	"insertSuperBlockLeft": "Inserisci colonna a sinistra",

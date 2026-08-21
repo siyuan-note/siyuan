@@ -398,8 +398,8 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     });
     const getManageHTML = (type: TInlineStyleType) => window.siyuan.config.readonly || window.siyuan.isPublish ? "" :
         `<button class="keyboard__slash-item" data-action="manageInlineStyle" data-inline-style-type="${type}">
-    <svg class="keyboard__slash-icon"><use xlink:href="#iconAdd"></use></svg>
-    <span class="keyboard__slash-text">${window.siyuan.languages.manage}</span>
+    <svg class="keyboard__slash-icon"><use xlink:href="#iconSettings"></use></svg>
+    <span class="keyboard__slash-text">${window.siyuan.languages.manageCustomColors}</span>
 </button>`;
 
     const nodeElements = getFontNodeElements(protyle);

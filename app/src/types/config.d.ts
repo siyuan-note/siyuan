@@ -668,17 +668,13 @@ declare namespace Config {
          */
         floatWindowDelay: number;
         /**
-         * The font used in the editor
+         * 编辑器字体，按优先级从高到低排列
          */
-        fontFamily: string;
-        /**
-         * The font weight used in the editor, 0 means not set
-         */
-        fontWeight: number;
-        /**
-         * Label shown in Settings for the selected editor font (e.g. PostScript name + subfamily). May be empty; falls back to fontFamily in UI when empty.
-         */
-        fontFamilyDisplay: string;
+        fontFamilies: Array<{
+            family: string;
+            weight: number;
+            displayName: string;
+        }>;
         /**
          * The font size used in the editor
          */

@@ -472,11 +472,17 @@ func exportConf(c *gin.Context) {
 	}
 	if nil != clonedConf.Editor {
 		clonedConf.Editor.Emoji = []string{}
-		if strings.HasPrefix(clonedConf.Editor.FontFamily, util.CustomFontFamilyPrefix) {
-			clonedConf.Editor.FontFamily = ""
-			clonedConf.Editor.FontWeight = 400
-			clonedConf.Editor.FontFamilyDisplay = ""
+		fonts := make([]*conf.EditorFont, 0, len(clonedConf.Editor.FontFamilies))
+		for _, font := range clonedConf.Editor.FontFamilies {
+			if nil != font && !strings.HasPrefix(font.Family, util.CustomFontFamilyPrefix) {
+				fonts = append(fonts, font)
+			}
 		}
+		clonedConf.Editor.FontFamilies = fonts
+		clonedConf.Editor.FontFamily = ""
+		clonedConf.Editor.FontWeight = 400
+		clonedConf.Editor.FontFamilyDisplay = ""
+		clonedConf.Editor.NormalizeFontFamilies()
 	}
 	if nil != clonedConf.Export {
 		clonedConf.Export.PandocBin = ""
@@ -1100,10 +1106,18 @@ func removeCustomFont(c *gin.Context) {
 	}
 
 	var editor *conf.Editor
-	if model.Conf.Editor.FontFamily == font.Family {
+	fonts := make([]*conf.EditorFont, 0, len(model.Conf.Editor.FontFamilies))
+	for _, selectedFont := range model.Conf.Editor.FontFamilies {
+		if nil != selectedFont && selectedFont.Family != font.Family {
+			fonts = append(fonts, selectedFont)
+		}
+	}
+	if len(fonts) != len(model.Conf.Editor.FontFamilies) {
+		model.Conf.Editor.FontFamilies = fonts
 		model.Conf.Editor.FontFamily = ""
 		model.Conf.Editor.FontWeight = 400
 		model.Conf.Editor.FontFamilyDisplay = ""
+		model.Conf.Editor.NormalizeFontFamilies()
 		model.Conf.Save()
 		editor = model.Conf.Editor
 	}

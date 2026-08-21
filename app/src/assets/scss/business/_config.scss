@@ -96,6 +96,19 @@
     overflow: visible;
   }
 
+  &-font-family {
+    &__chip {
+      height: 24px;
+    }
+
+    &__text {
+      align-self: stretch;
+      align-items: center;
+      display: flex;
+      line-height: normal;
+    }
+  }
+
   &-cloud-space {
     position: relative;
     flex-wrap: wrap;

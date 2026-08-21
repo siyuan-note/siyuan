@@ -65,3 +65,46 @@ func TestNormalizeAssetOpen(t *testing.T) {
 		t.Fatalf("expected app fallback, got %q", assetOpen.ShiftClick)
 	}
 }
+
+func TestNormalizeFontFamiliesMigratesLegacyConfig(t *testing.T) {
+	editor := &Editor{
+		FontFamily:        "Inter",
+		FontWeight:        500,
+		FontFamilyDisplay: "Inter Medium",
+	}
+	editor.NormalizeFontFamilies()
+
+	if 1 != len(editor.FontFamilies) {
+		t.Fatalf("expected one migrated font, got %d", len(editor.FontFamilies))
+	}
+	font := editor.FontFamilies[0]
+	if "Inter" != font.Family || 500 != font.Weight || "Inter Medium" != font.DisplayName {
+		t.Fatalf("unexpected migrated font: %+v", font)
+	}
+}
+
+func TestNormalizeFontFamiliesPreservesOrderAndMirrorsFirstFont(t *testing.T) {
+	editor := &Editor{
+		FontFamilies: []*EditorFont{
+			{Family: "Source Han Sans", Weight: 0, DisplayName: "Source Han Sans"},
+			nil,
+			{Family: "Inter", Weight: 500, DisplayName: "Inter Medium"},
+			{Family: "Source Han Sans", Weight: 700, DisplayName: "Duplicate"},
+		},
+	}
+	editor.NormalizeFontFamilies()
+
+	if 2 != len(editor.FontFamilies) {
+		t.Fatalf("expected two normalized fonts, got %d", len(editor.FontFamilies))
+	}
+	if "Source Han Sans" != editor.FontFamilies[0].Family || "Inter" != editor.FontFamilies[1].Family {
+		t.Fatalf("unexpected font order: %+v", editor.FontFamilies)
+	}
+	if 400 != editor.FontFamilies[0].Weight {
+		t.Fatalf("expected invalid weight to use 400, got %d", editor.FontFamilies[0].Weight)
+	}
+	if editor.FontFamily != editor.FontFamilies[0].Family || editor.FontWeight != editor.FontFamilies[0].Weight ||
+		editor.FontFamilyDisplay != editor.FontFamilies[0].DisplayName {
+		t.Fatalf("legacy fields do not mirror the first font: %+v", editor)
+	}
+}

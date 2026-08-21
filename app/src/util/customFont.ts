@@ -102,6 +102,10 @@ export const ensureSelectedCustomFont = async (family: string, weight: number) =
     }
 };
 
+export const ensureSelectedCustomFonts = async (fonts: Array<{ family: string; weight: number }>) => {
+    await Promise.all(fonts.map((font) => ensureSelectedCustomFont(font.family, font.weight)));
+};
+
 const setCustomFontStyle = (font: ICustomFont) => {
     let styleElement = document.getElementById(`customFontStyle-${font.id}`) as HTMLStyleElement;
     if (!styleElement) {

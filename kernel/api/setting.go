@@ -439,6 +439,11 @@ func setEditor(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if _, ok = arg["fontFamilies"]; !ok && editor.FontFamily == model.Conf.Editor.FontFamily &&
+		editor.FontWeight == model.Conf.Editor.FontWeight {
+		editor.FontFamilies = model.Conf.Editor.FontFamilies
+	}
+	editor.NormalizeFontFamilies()
 
 	if "" == editor.PlantUMLServePath {
 		editor.PlantUMLServePath = "https://www.plantuml.com/plantuml/svg/~1"

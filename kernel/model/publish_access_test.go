@@ -25,6 +25,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -348,15 +349,14 @@ func TestFilterBlockAttributeViewKeysByPublishAccess(t *testing.T) {
 		disabledID = "20260730150003-disable"
 	)
 
-	oldDataDir := util.DataDir
 	oldBlockTreeDBPath := util.BlockTreeDBPath
+	setupAttributeViewValidationTest(t)
 	util.DataDir = t.TempDir()
 	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
 	treenode.InitBlockTree(true)
 	invalidateEncryptedPublishAccessCache()
 	t.Cleanup(func() {
 		treenode.CloseDatabase()
-		util.DataDir = oldDataDir
 		util.BlockTreeDBPath = oldBlockTreeDBPath
 		invalidateEncryptedPublishAccessCache()
 		if "" != oldBlockTreeDBPath {
@@ -369,13 +369,29 @@ func TestFilterBlockAttributeViewKeysByPublishAccess(t *testing.T) {
 		treenode.UpsertBlockTree(tree)
 	}
 
-	newKeys := func() []*BlockAttributeViewKeys {
-		return []*BlockAttributeViewKeys{
-			{AvID: "20260730150004-av0002", BlockIDs: []string{publicID}, KeyValues: []*av.KeyValues{{Key: &av.Key{ID: "20260730150005-key0001", Name: "Key 1"}}}},
-			{AvID: "20260730150006-av0003", BlockIDs: []string{hiddenID}, KeyValues: []*av.KeyValues{{Key: &av.Key{ID: "20260730150007-key0002", Name: "Key 2"}}}},
-			{AvID: "20260730150008-av0004", BlockIDs: []string{disabledID}, KeyValues: []*av.KeyValues{{Key: &av.Key{ID: "20260730150009-key0003", Name: "Key 3"}}}},
+	newKeys := func(avID, blockID string) *BlockAttributeViewKeys {
+		attrView := av.NewAttributeView(avID)
+		attrView.Name = avID
+		blockKey := attrView.GetBlockKey()
+		textKey := av.NewKey(ast.NewNodeID(), "Text", "", av.KeyTypeText)
+		rowID := ast.NewNodeID()
+		attrView.GetBlockKeyValues().Values = []*av.Value{{
+			ID: ast.NewNodeID(), KeyID: blockKey.ID, BlockID: rowID, Type: av.KeyTypeBlock,
+			Block: &av.ValueBlock{ID: blockID, Content: "row"},
+		}}
+		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{
+			Key: textKey,
+			Values: []*av.Value{{
+				ID: ast.NewNodeID(), KeyID: textKey.ID, BlockID: rowID, Type: av.KeyTypeText,
+				Text: &av.ValueText{Content: "text-" + blockID},
+			}},
+		})
+		if err := av.SaveAttributeView(attrView); nil != err {
+			t.Fatal(err)
 		}
+		return newTestBlockAttributeViewKeys(attrView, []string{blockID}, rowID)
 	}
+
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
 
@@ -386,22 +402,27 @@ func TestFilterBlockAttributeViewKeysByPublishAccess(t *testing.T) {
 	}{
 		{
 			name:          "public only",
-			expectedAvIDs: []string{"20260730150004-av0002", "20260730150006-av0003", "20260730150008-av0004"},
+			expectedAvIDs: []string{"20260730150004-aav0002", "20260730150006-aav0003", "20260730150008-aav0004"},
 		},
 		{
 			name:          "hidden filtered",
 			publishAccess: PublishAccess{{ID: hiddenID, Visible: false}},
-			expectedAvIDs: []string{"20260730150004-av0002", "20260730150008-av0004"},
+			expectedAvIDs: []string{"20260730150004-aav0002", "20260730150008-aav0004"},
 		},
 		{
 			name:          "disabled filtered",
 			publishAccess: PublishAccess{{ID: disabledID, Visible: true, Disable: true}},
-			expectedAvIDs: []string{"20260730150004-av0002", "20260730150006-av0003"},
+			expectedAvIDs: []string{"20260730150004-aav0002", "20260730150006-aav0003"},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			filtered := FilterBlockAttributeViewKeysByPublishAccess(c, test.publishAccess, newKeys())
+			input := []*BlockAttributeViewKeys{
+				newKeys("20260730150004-aav0002", publicID),
+				newKeys("20260730150006-aav0003", hiddenID),
+				newKeys("20260730150008-aav0004", disabledID),
+			}
+			filtered := FilterBlockAttributeViewKeysByPublishAccess(c, test.publishAccess, input)
 			if len(filtered) != len(test.expectedAvIDs) {
 				t.Fatalf("unexpected block attribute view keys: %+v", filtered)
 			}
@@ -409,8 +430,281 @@ func TestFilterBlockAttributeViewKeysByPublishAccess(t *testing.T) {
 				if blockAttributeViewKey.AvID != test.expectedAvIDs[i] {
 					t.Fatalf("unexpected block attribute view keys: %+v", filtered)
 				}
+				if 2 != len(blockAttributeViewKey.KeyValues) {
+					t.Fatalf("unexpected block attribute view key values: %+v", blockAttributeViewKey.KeyValues)
+				}
+				for _, keyValues := range blockAttributeViewKey.KeyValues {
+					if 1 != len(keyValues.Values) {
+						t.Fatalf("unexpected block attribute view key value count: %+v", keyValues)
+					}
+				}
 			}
 		})
+	}
+}
+
+func newTestBlockAttributeViewKeys(attrView *av.AttributeView, blockIDs []string, itemID string) *BlockAttributeViewKeys {
+	keyValues := []*av.KeyValues{}
+	for _, sourceKeyValues := range attrView.KeyValues {
+		itemKeyValues := &av.KeyValues{Key: sourceKeyValues.Key}
+		for _, value := range sourceKeyValues.Values {
+			if value.BlockID == itemID {
+				itemKeyValues.Values = append(itemKeyValues.Values, value)
+			}
+		}
+		if 0 < len(itemKeyValues.Values) {
+			keyValues = append(keyValues, itemKeyValues)
+		}
+	}
+	return &BlockAttributeViewKeys{
+		AvID:      attrView.ID,
+		AvName:    attrView.Name,
+		BlockIDs:  blockIDs,
+		KeyValues: keyValues,
+	}
+}
+
+func TestFilterBlockAttributeViewKeysByPublishAccessRemovesForbiddenRowValues(t *testing.T) {
+	const (
+		boxID                = "20260821000000-box0001"
+		avBlockID            = "20260821000001-avblock"
+		publicDocID          = "20260821000002-publicd"
+		forbiddenDocID       = "20260821000003-forbidd"
+		targetAvBlockID      = "20260821000004-tavbloc"
+		targetPublicDocID    = "20260821000005-tpubdoc"
+		targetForbiddenDocID = "20260821000006-tforbid"
+		sourceAvID           = "20260821000007-sourcea"
+		targetAvID           = "20260821000008-targeta"
+	)
+
+	oldBlockTreeDBPath := util.BlockTreeDBPath
+	setupAttributeViewValidationTest(t)
+	util.DataDir = t.TempDir()
+	util.BlockTreeDBPath = filepath.Join(util.DataDir, "blocktree.db")
+	treenode.InitBlockTree(true)
+	invalidateEncryptedPublishAccessCache()
+	t.Cleanup(func() {
+		treenode.CloseDatabase()
+		util.BlockTreeDBPath = oldBlockTreeDBPath
+		invalidateEncryptedPublishAccessCache()
+		if "" != oldBlockTreeDBPath {
+			treenode.InitBlockTree(false)
+		}
+	})
+
+	for _, id := range []string{avBlockID, publicDocID, forbiddenDocID, targetAvBlockID, targetPublicDocID, targetForbiddenDocID} {
+		tree := treenode.NewTree(boxID, "/"+id+".sy", "/"+id, id)
+		treenode.UpsertBlockTree(tree)
+	}
+
+	publicRowID := ast.NewNodeID()
+	forbiddenRowID := ast.NewNodeID()
+	detachedRowID := ast.NewNodeID()
+	targetPublicRowID := ast.NewNodeID()
+	targetForbiddenRowID := ast.NewNodeID()
+
+	// 目标数据库：包含公开行和禁止访问行
+	targetAttrView := av.NewAttributeView(targetAvID)
+	targetAttrView.Name = targetAvID
+	targetBlockKeyID := targetAttrView.GetBlockKey().ID
+	targetTextKeyID := ast.NewNodeID()
+	targetAttrView.GetBlockKeyValues().Values = []*av.Value{
+		{ID: ast.NewNodeID(), KeyID: targetBlockKeyID, BlockID: targetPublicRowID, Type: av.KeyTypeBlock,
+			Block: &av.ValueBlock{ID: targetPublicDocID, Content: "target public"}},
+		{ID: ast.NewNodeID(), KeyID: targetBlockKeyID, BlockID: targetForbiddenRowID, Type: av.KeyTypeBlock,
+			Block: &av.ValueBlock{ID: targetForbiddenDocID, Content: "target forbidden"}},
+	}
+	targetAttrView.KeyValues = append(targetAttrView.KeyValues, &av.KeyValues{
+		Key: av.NewKey(targetTextKeyID, "Target Text", "", av.KeyTypeText),
+		Values: []*av.Value{
+			{ID: ast.NewNodeID(), KeyID: targetTextKeyID, BlockID: targetPublicRowID, Type: av.KeyTypeText,
+				Text: &av.ValueText{Content: "target public text"}},
+			{ID: ast.NewNodeID(), KeyID: targetTextKeyID, BlockID: targetForbiddenRowID, Type: av.KeyTypeText,
+				Text: &av.ValueText{Content: "PRIVATE_TARGET_TEXT_CANARY"}},
+		},
+	})
+	if err := av.SaveAttributeView(targetAttrView); nil != err {
+		t.Fatal(err)
+	}
+	av.UpsertBlockRel(targetAvID, targetAvBlockID)
+
+	// 源数据库：公开行、禁止访问行和游离行，覆盖文本、数字、日期、URL、资源、关联和汇总等单元格类型
+	attrView := av.NewAttributeView(sourceAvID)
+	attrView.Name = sourceAvID
+	blockKeyID := attrView.GetBlockKey().ID
+	textKeyID := ast.NewNodeID()
+	numberKeyID := ast.NewNodeID()
+	dateKeyID := ast.NewNodeID()
+	urlKeyID := ast.NewNodeID()
+	assetKeyID := ast.NewNodeID()
+	relationKeyID := ast.NewNodeID()
+	rollupKeyID := ast.NewNodeID()
+	attrView.GetBlockKeyValues().Values = []*av.Value{
+		{ID: ast.NewNodeID(), KeyID: blockKeyID, BlockID: publicRowID, Type: av.KeyTypeBlock,
+			Block: &av.ValueBlock{ID: publicDocID, Content: "public row"}},
+		{ID: ast.NewNodeID(), KeyID: blockKeyID, BlockID: forbiddenRowID, Type: av.KeyTypeBlock,
+			Block: &av.ValueBlock{ID: forbiddenDocID, Content: "forbidden row"}},
+		{ID: ast.NewNodeID(), KeyID: blockKeyID, BlockID: detachedRowID, Type: av.KeyTypeBlock, IsDetached: true,
+			Block: &av.ValueBlock{Content: "detached row"}},
+	}
+	attrView.KeyValues = append(attrView.KeyValues,
+		&av.KeyValues{
+			Key: av.NewKey(textKeyID, "Text", "", av.KeyTypeText),
+			Values: []*av.Value{
+				{ID: ast.NewNodeID(), KeyID: textKeyID, BlockID: publicRowID, Type: av.KeyTypeText,
+					Text: &av.ValueText{Content: "PUBLIC_TEXT_CANARY"}},
+				{ID: ast.NewNodeID(), KeyID: textKeyID, BlockID: forbiddenRowID, Type: av.KeyTypeText,
+					Text: &av.ValueText{Content: "PRIVATE_TEXT_CANARY"}},
+				{ID: ast.NewNodeID(), KeyID: textKeyID, BlockID: detachedRowID, Type: av.KeyTypeText,
+					Text: &av.ValueText{Content: "DETACHED_TEXT_CANARY"}},
+			},
+		},
+		&av.KeyValues{
+			Key: av.NewKey(numberKeyID, "Number", "", av.KeyTypeNumber),
+			Values: []*av.Value{
+				{ID: ast.NewNodeID(), KeyID: numberKeyID, BlockID: publicRowID, Type: av.KeyTypeNumber,
+					Number: &av.ValueNumber{Content: 1}},
+				{ID: ast.NewNodeID(), KeyID: numberKeyID, BlockID: forbiddenRowID, Type: av.KeyTypeNumber,
+					Number: &av.ValueNumber{Content: 2}},
+				{ID: ast.NewNodeID(), KeyID: numberKeyID, BlockID: detachedRowID, Type: av.KeyTypeNumber,
+					Number: &av.ValueNumber{Content: 3}},
+			},
+		},
+		&av.KeyValues{
+			Key: av.NewKey(dateKeyID, "Date", "", av.KeyTypeDate),
+			Values: []*av.Value{
+				{ID: ast.NewNodeID(), KeyID: dateKeyID, BlockID: publicRowID, Type: av.KeyTypeDate,
+					Date: &av.ValueDate{Content: 1700000000000}},
+				{ID: ast.NewNodeID(), KeyID: dateKeyID, BlockID: forbiddenRowID, Type: av.KeyTypeDate,
+					Date: &av.ValueDate{Content: 1800000000000}},
+				{ID: ast.NewNodeID(), KeyID: dateKeyID, BlockID: detachedRowID, Type: av.KeyTypeDate,
+					Date: &av.ValueDate{Content: 1900000000000}},
+			},
+		},
+		&av.KeyValues{
+			Key: av.NewKey(urlKeyID, "URL", "", av.KeyTypeURL),
+			Values: []*av.Value{
+				{ID: ast.NewNodeID(), KeyID: urlKeyID, BlockID: publicRowID, Type: av.KeyTypeURL,
+					URL: &av.ValueURL{Content: "https://example.com/public"}},
+				{ID: ast.NewNodeID(), KeyID: urlKeyID, BlockID: forbiddenRowID, Type: av.KeyTypeURL,
+					URL: &av.ValueURL{Content: "https://example.com/PRIVATE_URL_CANARY"}},
+				{ID: ast.NewNodeID(), KeyID: urlKeyID, BlockID: detachedRowID, Type: av.KeyTypeURL,
+					URL: &av.ValueURL{Content: "https://example.com/detached"}},
+			},
+		},
+		&av.KeyValues{
+			Key: av.NewKey(assetKeyID, "Asset", "", av.KeyTypeMAsset),
+			Values: []*av.Value{
+				{ID: ast.NewNodeID(), KeyID: assetKeyID, BlockID: publicRowID, Type: av.KeyTypeMAsset,
+					MAsset: []*av.ValueAsset{{Type: av.AssetTypeImage, Name: "public.png", Content: "assets/public.png"}}},
+				{ID: ast.NewNodeID(), KeyID: assetKeyID, BlockID: forbiddenRowID, Type: av.KeyTypeMAsset,
+					MAsset: []*av.ValueAsset{{Type: av.AssetTypeImage, Name: "private.png", Content: "assets/PRIVATE_ASSET_CANARY.png"}}},
+				{ID: ast.NewNodeID(), KeyID: assetKeyID, BlockID: detachedRowID, Type: av.KeyTypeMAsset,
+					MAsset: []*av.ValueAsset{{Type: av.AssetTypeImage, Name: "detached.png", Content: "assets/detached.png"}}},
+			},
+		},
+		&av.KeyValues{
+			Key: &av.Key{ID: relationKeyID, Name: "Relation", Type: av.KeyTypeRelation, Relation: &av.Relation{AvID: targetAvID}},
+			Values: []*av.Value{
+				{ID: ast.NewNodeID(), KeyID: relationKeyID, BlockID: publicRowID, Type: av.KeyTypeRelation,
+					Relation: &av.ValueRelation{
+						BlockIDs: []string{targetPublicRowID, targetForbiddenRowID},
+						Contents: []*av.Value{
+							{KeyID: targetBlockKeyID, BlockID: targetPublicRowID, Type: av.KeyTypeBlock,
+								Block: &av.ValueBlock{ID: targetPublicDocID, Content: "target public"}},
+							{KeyID: targetBlockKeyID, BlockID: targetForbiddenRowID, Type: av.KeyTypeBlock,
+								Block: &av.ValueBlock{ID: targetForbiddenDocID, Content: "target forbidden"}},
+						},
+					}},
+				{ID: ast.NewNodeID(), KeyID: relationKeyID, BlockID: forbiddenRowID, Type: av.KeyTypeRelation,
+					Relation: &av.ValueRelation{
+						BlockIDs: []string{targetForbiddenRowID},
+						Contents: []*av.Value{
+							{KeyID: targetBlockKeyID, BlockID: targetForbiddenRowID, Type: av.KeyTypeBlock,
+								Block: &av.ValueBlock{ID: targetForbiddenDocID, Content: "target forbidden"}},
+						},
+					}},
+			},
+		},
+		&av.KeyValues{
+			Key: &av.Key{ID: rollupKeyID, Name: "Rollup", Type: av.KeyTypeRollup, Rollup: &av.Rollup{
+				RelationKeyID: relationKeyID, KeyID: targetTextKeyID,
+			}},
+			Values: []*av.Value{
+				{ID: ast.NewNodeID(), KeyID: rollupKeyID, BlockID: publicRowID, Type: av.KeyTypeRollup,
+					Rollup: &av.ValueRollup{Contents: []*av.Value{
+						{KeyID: targetTextKeyID, BlockID: targetPublicRowID, Type: av.KeyTypeText,
+							Text: &av.ValueText{Content: "target public text"}},
+						{KeyID: targetTextKeyID, BlockID: targetForbiddenRowID, Type: av.KeyTypeText,
+							Text: &av.ValueText{Content: "PRIVATE_TARGET_TEXT_CANARY"}},
+					}}},
+			},
+		},
+	)
+	if err := av.SaveAttributeView(attrView); nil != err {
+		t.Fatal(err)
+	}
+
+	publicKeys := newTestBlockAttributeViewKeys(attrView, []string{avBlockID}, publicRowID)
+	forbiddenKeys := newTestBlockAttributeViewKeys(attrView, []string{avBlockID}, forbiddenRowID)
+	detachedKeys := newTestBlockAttributeViewKeys(attrView, []string{avBlockID}, detachedRowID)
+	input := []*BlockAttributeViewKeys{forbiddenKeys, publicKeys, detachedKeys}
+
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	publishAccess := PublishAccess{
+		{ID: forbiddenDocID, Visible: true, Disable: true},
+		{ID: targetForbiddenDocID, Visible: true, Disable: true},
+	}
+
+	filtered := FilterBlockAttributeViewKeysByPublishAccess(c, publishAccess, input)
+	if 2 != len(filtered) {
+		t.Fatalf("unexpected block attribute view keys: %+v", filtered)
+	}
+	data, err := json.Marshal(filtered)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), "PRIVATE_") {
+		t.Fatalf("forbidden row values leaked to publish reader: %s", data)
+	}
+	if !strings.Contains(string(data), "PUBLIC_TEXT_CANARY") || !strings.Contains(string(data), "DETACHED_TEXT_CANARY") {
+		t.Fatalf("accessible row values should be kept: %s", data)
+	}
+
+	publicFiltered := filtered[0]
+	var relationValue, rollupValue *av.Value
+	for _, keyValues := range publicFiltered.KeyValues {
+		if av.KeyTypeRelation == keyValues.Key.Type {
+			relationValue = keyValues.Values[0]
+		}
+		if av.KeyTypeRollup == keyValues.Key.Type {
+			rollupValue = keyValues.Values[0]
+		}
+	}
+	if nil == relationValue || 1 != len(relationValue.Relation.BlockIDs) ||
+		targetPublicRowID != relationValue.Relation.BlockIDs[0] ||
+		1 != len(relationValue.Relation.Contents) {
+		t.Fatalf("unexpected filtered relation value: %+v", relationValue)
+	}
+	if nil == rollupValue || 0 != len(rollupValue.Rollup.Contents) {
+		t.Fatalf("rollup containing forbidden target rows should be cleared: %+v", rollupValue)
+	}
+	if 1 != len(filtered[1].KeyValues[0].Values) || !filtered[1].KeyValues[0].Values[0].IsDetached {
+		t.Fatalf("detached row should be kept: %+v", filtered[1])
+	}
+
+	// 过滤不修改输入，且禁止访问行的值不因过滤而丢失
+	if 3 != len(input) {
+		t.Fatalf("filter should not mutate the input: %+v", input)
+	}
+	originData, err := json.Marshal(input)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(originData), "PRIVATE_TEXT_CANARY") ||
+		!strings.Contains(string(originData), "PRIVATE_TARGET_TEXT_CANARY") {
+		t.Fatalf("filter should not mutate the input: %s", originData)
 	}
 }
 

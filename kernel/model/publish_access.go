@@ -1079,10 +1079,54 @@ func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess P
 				break
 			}
 		}
-		if accessable {
-			blockAttributeViewKey.ItemPositions = nil
-			ret = append(ret, blockAttributeViewKey)
+		if !accessable {
+			continue
 		}
+
+		// 仅返回绑定文档可发布访问的行值，避免通过键值接口泄漏绑定在禁止访问文档中的数据库内容
+		var attrView *av.AttributeView
+		filter := &attributeViewPublishAccessFilter{
+			c:               c,
+			publishAccess:   publishAccess,
+			attributeViews:  map[string]*av.AttributeView{},
+			attributeAccess: map[string]bool{},
+			itemAccess:      map[string]map[string]bool{},
+		}
+		blockID := ""
+		if 0 < len(blockAttributeViewKey.BlockIDs) {
+			blockID = blockAttributeViewKey.BlockIDs[0]
+		}
+		attrView, filter.boxID = parseAttributeViewForPublishAccess(blockAttributeViewKey.AvID, blockID)
+		if nil != attrView {
+			filter.attributeViews[attrView.ID] = attrView
+		}
+
+		keyValues := []*av.KeyValues{}
+		for _, sourceKeyValues := range blockAttributeViewKey.KeyValues {
+			itemKeyValues := &av.KeyValues{Key: sourceKeyValues.Key}
+			for _, value := range sourceKeyValues.Values {
+				if !filter.isItemAccessable(attrView, value.BlockID) {
+					// 行绑定的文档对发布读者不可访问，丢弃该行值
+					continue
+				}
+				filteredValue, _ := filter.filterValue(attrView, sourceKeyValues.Key, value, value.BlockID)
+				itemKeyValues.Values = append(itemKeyValues.Values, filteredValue)
+			}
+			if 0 < len(itemKeyValues.Values) {
+				keyValues = append(keyValues, itemKeyValues)
+			}
+		}
+		if 1 > len(keyValues) {
+			// 所有行均不可访问时不返回该数据库键值，避免暴露行是否存在
+			continue
+		}
+
+		ret = append(ret, &BlockAttributeViewKeys{
+			AvID:      blockAttributeViewKey.AvID,
+			AvName:    blockAttributeViewKey.AvName,
+			BlockIDs:  blockAttributeViewKey.BlockIDs,
+			KeyValues: keyValues,
+		})
 	}
 	return
 }

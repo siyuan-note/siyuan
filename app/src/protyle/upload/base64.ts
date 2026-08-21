@@ -1,10 +1,11 @@
 import {type IUploadInsertOptions, uploadFiles} from "./index";
-import {getAssetUploadSuccesses} from "./uploadResult";
+import {getAssetUploadPathsByInput} from "./uploadResult";
 
 export const base64ToURL = async (base64SrcList: string[], protyle: IProtyle,
                                   options?: IUploadInsertOptions) => {
     const files: File[] = [];
-    base64SrcList.forEach(item => {
+    const fileSourceIndices: number[] = [];
+    base64SrcList.forEach((item, sourceIndex) => {
         const srcPart = item.split(",");
         if (srcPart.length !== 2) return;
         // data URL 格式为 data:image/svg+xml;base64,XXX
@@ -22,29 +23,24 @@ export const base64ToURL = async (base64SrcList: string[], protyle: IProtyle,
             "image/gif": "gif",
             "image/svg+xml": "svg"
         }[mime] || "png"}`, {type: mime}));
+        fileSourceIndices.push(sourceIndex);
     });
+    const paths: Array<string | undefined> = new Array(base64SrcList.length).fill(undefined);
     if (files.length === 0) {
-        return [];
+        return paths;
     }
-    return new Promise<string[]>((resolve, reject) => {
+    return new Promise<Array<string | undefined>>((resolve) => {
         let settled = false;
-        uploadFiles(protyle, files, undefined, responseText => {
-            try {
-                const response = JSON.parse(responseText) as IWebSocketData;
-                const paths = getAssetUploadSuccesses(response.data).map(item => item.path);
-                if (paths.length !== files.length) {
-                    throw new Error("Asset upload did not return every requested file");
-                }
-                settled = true;
-                resolve(paths);
-            } catch (error) {
-                settled = true;
-                reject(error);
-            }
-        }, succeeded => {
+        uploadFiles(protyle, files, undefined, (_responseText, result) => {
+            getAssetUploadPathsByInput(files.length, result).forEach((path, fileIndex) => {
+                paths[fileSourceIndices[fileIndex]] = path;
+            });
+            settled = true;
+            resolve(paths);
+        }, () => {
             if (!settled) {
                 settled = true;
-                reject(new Error(succeeded ? "Asset upload returned no result" : "Asset upload failed"));
+                resolve(paths);
             }
         }, {...options, requiredFileCount: files.length});
     });

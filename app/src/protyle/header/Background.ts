@@ -19,6 +19,7 @@ import {escapeHtml} from "../../util/escape";
 import {fetchCoverData, getCategoryLabel} from "./coverData";
 import {getAssetUploadSuccesses} from "../upload/uploadResult";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
+import {showMessage} from "../../dialog/message";
 /// #if !MOBILE
 import {openDocTagMenu} from "./openDocTagMenu";
 /// #endif
@@ -375,21 +376,9 @@ export class Background {
                             } else if (target.closest(".b3-cover__card")) {
                                 const card = target.closest(".b3-cover__card") as HTMLElement;
                                 const name = card.getAttribute("data-name");
-                                fetchPost("/api/asset/insertCover", {
-                                    id: protyle.block.rootID,
-                                    name
-                                }, (response) => {
-                                    const url = getAssetUploadSuccesses(response.data)[0]?.path;
-                                    if (!url) {
-                                        return;
-                                    }
-                                    this.ial["title-img"] = `background-image:url("${url}")`;
-                                    this.render(this.ial, protyle.block.rootID);
-                                    fetchPost("/api/attr/setBlockAttrs", {
-                                        id: protyle.block.rootID,
-                                        attrs: {"title-img": this.ial["title-img"]}
-                                    });
-                                });
+                                if (name) {
+                                    this.uploadBuiltInCover(protyle, name);
+                                }
                                 dialog.destroy();
                             }
                         });
@@ -405,21 +394,7 @@ export class Background {
                     fetchCoverData().then((coverData) => {
                         if (coverData && coverData.allCovers.length > 0) {
                             const randomCover = coverData.allCovers[getRandom(0, coverData.allCovers.length - 1)];
-                            fetchPost("/api/asset/insertCover", {
-                                id: protyle.block.rootID,
-                                name: randomCover.file
-                            }, (response) => {
-                                const url = getAssetUploadSuccesses(response.data)[0]?.path;
-                                if (!url) {
-                                    return;
-                                }
-                                this.ial["title-img"] = `background-image:url("${url}")`;
-                                this.render(this.ial, protyle.block.rootID);
-                                fetchPost("/api/attr/setBlockAttrs", {
-                                    id: protyle.block.rootID,
-                                    attrs: {"title-img": this.ial["title-img"]}
-                                });
-                            });
+                            this.uploadBuiltInCover(protyle, randomCover.file);
                         } else {
                             this.ial["title-img"] = bgs[getRandom(0, bgs.length - 1)];
                             this.render(this.ial, protyle.block.rootID);
@@ -701,6 +676,34 @@ export class Background {
 
             document.onmousemove = (e) => onMouseMove(e as MouseEvent);
             document.onmouseup = (e) => onMouseUp(e as MouseEvent);
+        });
+    }
+
+    private uploadBuiltInCover(protyle: IProtyle, name: string) {
+        void fetch(`/appearance/covers/${encodeURIComponent(name)}`).then(async response => {
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+            const blob = await response.blob();
+            uploadFiles(protyle, [new File([blob], name, {type: blob.type})], undefined, responseText => {
+                const responseData = JSON.parse(responseText);
+                const url = getAssetUploadSuccesses(responseData.data)[0]?.path;
+                if (!url) {
+                    return;
+                }
+                this.ial["title-img"] = `background-image:url("${url}")`;
+                this.render(this.ial, protyle.block.rootID);
+                fetchPost("/api/attr/setBlockAttrs", {
+                    id: protyle.block.rootID,
+                    attrs: {"title-img": this.ial["title-img"]}
+                });
+            }, undefined, {
+                source: "programmatic",
+                target: "background",
+            });
+        }).catch(error => {
+            console.error(error);
+            showMessage(window.siyuan.languages.uploadError);
         });
     }
 

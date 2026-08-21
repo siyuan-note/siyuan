@@ -25,6 +25,7 @@ import {
     prepareAssetUpload,
 } from "./pluginEvent";
 import {getAssetUploadResult, getAssetUploadSuccesses} from "./uploadResult";
+import {AssetUploadHandlerTimeoutError, waitForUploadHandler} from "./uploadHandler";
 
 interface FileWithPath extends File {
     path: string;
@@ -38,6 +39,10 @@ export interface IUploadInsertOptions {
     position?: IAssetUploadPosition;
     /** 目标消费方要求的文件数量。 */
     requiredFileCount?: number;
+    /** 目标消费方支持的输入类型。 */
+    allowedInputKinds?: Array<IAssetUploadInput["kind"]>;
+    /** 本机 HTML 粘贴需要沿用内核的敏感路径校验。 */
+    fromHTMLPaste?: boolean;
 }
 
 export class Upload {
@@ -309,17 +314,23 @@ export const getUploadInsertRange = (protyle: IProtyle, position?: IUploadInsert
 
 interface IAssetUploadCallbacks {
     success(responseText: string, response: IWebSocketData | undefined,
-            input: IAssetUploadInput): void | PromiseLike<void>;
+            input: IAssetUploadInput,
+            result: Omit<IAssetUploadResult, "requestId" | "input">): void | PromiseLike<void>;
+    formatResponse?: (responseText: string, input: IAssetUploadInput) => string;
     complete?: (succeeded: boolean) => void;
     reset?: () => void;
 }
 
-const getAssetUploadContext = (options?: IUploadInsertOptions): IAssetUploadEventContext => ({
-    source: options?.source || "programmatic",
-    target: options?.target || "editor",
-    position: options?.position,
-    requiredFileCount: options?.requiredFileCount,
-});
+const getAssetUploadContext = (options?: IUploadInsertOptions): IAssetUploadEventContext => {
+    const target = options?.target || "editor";
+    return {
+        source: options?.source || "programmatic",
+        target,
+        position: options?.position,
+        requiredFileCount: options?.requiredFileCount ?? (target === "background" ? 1 : undefined),
+        allowedInputKinds: options?.allowedInputKinds,
+    };
+};
 
 const captureUploadInsertPosition = (protyle: IProtyle, options?: IUploadInsertOptions): IUploadInsertOptions => {
     const result = {...options};
@@ -375,7 +386,7 @@ const finishSuccessfulUpload = (task: IAssetUploadTask | undefined, callbacks: I
         return;
     }
     try {
-        const callbackResult = callbacks.success(responseText, response, input);
+        const callbackResult = callbacks.success(responseText, response, input, result);
         if (callbackResult && typeof callbackResult.then === "function") {
             void Promise.resolve(callbackResult).catch(error => {
                 console.error(error);
@@ -400,7 +411,7 @@ const finishSuccessfulUpload = (task: IAssetUploadTask | undefined, callbacks: I
 
 const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "local-files" }>,
                                   protyle: IProtyle, isUpload: boolean, callbacks: IAssetUploadCallbacks,
-                                  task?: IAssetUploadTask) => {
+                                  task?: IAssetUploadTask, options?: IUploadInsertOptions) => {
     let msg = "";
     const assetPaths: string[] = [];
     input.files.forEach(item => {
@@ -422,7 +433,8 @@ const uploadPreparedLocalFiles = (input: Extract<IAssetUploadInput, { kind: "loc
                 const response = await fetchSyncPost("/api/asset/insertLocalAssets", {
                     assetPaths,
                     isUpload,
-                    id: protyle.block.rootID
+                    id: protyle.block.rootID,
+                    fromHTMLPaste: options?.fromHTMLPaste,
                 });
                 hideMessage(msgId);
                 const detached = !document.body.contains(protyle.element);
@@ -484,16 +496,20 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
             finishUpload(task, callbacks, {status: "success", acceptedInput: input});
         };
         const failHandler = (error: unknown) => {
+            if (task.signal.aborted && !(error instanceof AssetUploadHandlerTimeoutError)) {
+                finishUpload(task, callbacks, {status: "canceled"});
+                return;
+            }
             const errorMessage = getErrorMessage(error);
             finishUpload(task, callbacks, {status: "failed", error: errorMessage});
             showMessage(errorMessage || window.siyuan.languages.uploadError);
         };
         try {
-            const handlerResult = protyle.options.upload.handler(fileList);
+            const handlerResult = protyle.options.upload.handler(fileList, {signal: task.signal});
             if (typeof handlerResult === "string" || handlerResult === null || handlerResult === undefined) {
                 finishHandler(handlerResult as string | null);
             } else {
-                void Promise.resolve(handlerResult).then(finishHandler, failHandler);
+                void waitForUploadHandler(handlerResult, task.signal).then(finishHandler, failHandler);
             }
         } catch (error) {
             failHandler(error);
@@ -568,17 +584,21 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
                         destroy(protyle);
                     }
                     if (xhr.status === 200) {
+                        let responseText = xhr.responseText;
+                        if (callbacks.formatResponse) {
+                            responseText = callbacks.formatResponse(responseText, uploadedInput);
+                        }
                         let response: IWebSocketData;
                         try {
-                            response = JSON.parse(xhr.responseText);
+                            response = JSON.parse(responseText);
                         } catch (error) {
                             response = undefined;
                         }
-                        const result = getAssetUploadResult(xhr.responseText, uploadedInput, validateResult.rejected);
+                        const result = getAssetUploadResult(responseText, uploadedInput, validateResult.rejected);
                         if (detached) {
                             finishUpload(task, callbacks, result);
                         } else {
-                            finishSuccessfulUpload(task, callbacks, xhr.responseText, response, uploadedInput, result);
+                            finishSuccessfulUpload(task, callbacks, responseText, response, uploadedInput, result);
                         }
                     } else if (xhr.status === 0) {
                         showMessage(window.siyuan.languages["_kernel"][28]);
@@ -633,7 +653,7 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
 };
 
 const startPreparedAssetUpload = (prepared: Awaited<ReturnType<typeof prepareAssetUpload>>, protyle: IProtyle,
-                                  callbacks: IAssetUploadCallbacks) => {
+                                  callbacks: IAssetUploadCallbacks, options: IUploadInsertOptions) => {
     if (prepared.state !== "ready") {
         finishCallbacks(callbacks, false);
         if (prepared.state === "failed") {
@@ -642,6 +662,7 @@ const startPreparedAssetUpload = (prepared: Awaited<ReturnType<typeof prepareAss
         return;
     }
     try {
+        prepared.task.startUpload();
         if (prepared.task.input.files.length === 0) {
             finishUpload(prepared.task, callbacks, {status: "canceled"});
             return;
@@ -653,7 +674,7 @@ const startPreparedAssetUpload = (prepared: Awaited<ReturnType<typeof prepareAss
         if (prepared.task.input.kind === "files") {
             uploadPreparedFiles(prepared.task.input, protyle, callbacks, prepared.task);
         } else {
-            uploadPreparedLocalFiles(prepared.task.input, protyle, true, callbacks, prepared.task);
+            uploadPreparedLocalFiles(prepared.task.input, protyle, true, callbacks, prepared.task, options);
         }
     } catch (error) {
         const errorMessage = getErrorMessage(error);
@@ -673,13 +694,13 @@ const startAssetUpload = (input: IAssetUploadInput, protyle: IProtyle, options: 
             context: getAssetUploadContext(options),
         });
         if (prepared instanceof Promise) {
-            void prepared.then(result => startPreparedAssetUpload(result, protyle, callbacks)).catch(error => {
+            void prepared.then(result => startPreparedAssetUpload(result, protyle, callbacks, options)).catch(error => {
                 console.error(error);
                 finishCallbacks(callbacks, false);
                 showMessage(getErrorMessage(error) || window.siyuan.languages.uploadError);
             });
         } else {
-            startPreparedAssetUpload(prepared, protyle, callbacks);
+            startPreparedAssetUpload(prepared, protyle, callbacks, options);
         }
     } catch (error) {
         console.error(error);
@@ -688,14 +709,62 @@ const startAssetUpload = (input: IAssetUploadInput, protyle: IProtyle, options: 
     }
 };
 
+export const uploadStandaloneAssetFiles = async (files: File[], options: {
+    source: TAssetUploadSource;
+    target: TAssetUploadTarget;
+    requiredFileCount?: number;
+    extraData?: Record<string, string | Blob>;
+}) => {
+    const prepared = await prepareAssetUpload({
+        plugins: [...(window.siyuan.ws?.app?.plugins || [])],
+        input: {kind: "files", files},
+        context: {
+            source: options.source,
+            target: options.target,
+            requiredFileCount: options.requiredFileCount,
+            allowedInputKinds: ["files"],
+        },
+    });
+    if (prepared.state !== "ready") {
+        if (prepared.state === "failed") {
+            showMessage(prepared.error || window.siyuan.languages.uploadError);
+        }
+        return;
+    }
+    prepared.task.startUpload();
+    if (prepared.task.input.kind !== "files" || prepared.task.input.files.length === 0) {
+        prepared.task.complete({status: "canceled"});
+        return;
+    }
+    const input = prepared.task.input;
+    const formData = new FormData();
+    input.files.forEach(file => formData.append("file[]", file));
+    Object.entries(options.extraData || {}).forEach(([key, value]) => formData.append(key, value));
+    try {
+        const response = await fetchSyncPost(Constants.UPLOAD_ADDRESS, formData);
+        const responseText = JSON.stringify(response);
+        const result = getAssetUploadResult(responseText, input);
+        prepared.task.complete(result);
+        if (getAssetUploadSuccesses(response.data).length === 0) {
+            return;
+        }
+        return response;
+    } catch (error) {
+        const errorMessage = getErrorMessage(error);
+        prepared.task.complete({status: "failed", error: errorMessage});
+        showMessage(errorMessage || window.siyuan.languages.uploadError);
+    }
+};
+
 export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUpload: boolean,
-                                 options?: IUploadInsertOptions, successCB?: (response: IWebSocketData) => void,
+                                 options?: IUploadInsertOptions, successCB?: (response: IWebSocketData,
+                                     result: Omit<IAssetUploadResult, "requestId" | "input">) => void,
                                  completeCB?: (succeeded: boolean) => void) => {
     const uploadOptions = captureUploadInsertPosition(protyle, options);
     const callbacks: IAssetUploadCallbacks = {
-        success(responseText, response) {
+        success(responseText, response, _input, result) {
             if (successCB) {
-                return successCB(response);
+                return successCB(response, result);
             } else {
                 return genUploadedLabel(responseText, protyle, uploadOptions);
             }
@@ -704,7 +773,7 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
     };
     const input: IAssetUploadInput = {kind: "local-files", files: Array.from(files)};
     if (!isUpload) {
-        uploadPreparedLocalFiles(input, protyle, false, callbacks);
+        uploadPreparedLocalFiles(input, protyle, false, callbacks, undefined, uploadOptions);
         return;
     }
     const linkedFiles = input.files.filter(item => {
@@ -717,7 +786,7 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
             success: callbacks.success,
             complete: assetFiles.length === 0 ? callbacks.complete : undefined,
             reset: assetFiles.length === 0 ? callbacks.reset : undefined,
-        });
+        }, undefined, uploadOptions);
     }
     if (assetFiles.length > 0) {
         startAssetUpload({kind: "local-files", files: assetFiles}, protyle, uploadOptions, callbacks);
@@ -725,7 +794,9 @@ export const uploadLocalFiles = (files: ILocalFiles[], protyle: IProtyle, isUplo
 };
 
 export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferItemList | File[], element?: HTMLInputElement,
-                            successCB?: (res: string) => void, completeCB?: (succeeded: boolean) => void,
+                            successCB?: (res: string,
+                                result: Omit<IAssetUploadResult, "requestId" | "input">) => void,
+                            completeCB?: (succeeded: boolean) => void,
                             options?: IUploadInsertOptions) => {
     const uploadOptions = captureUploadInsertPosition(protyle, options);
     let fileList: File[] = [];
@@ -772,18 +843,18 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
     }
 
     const callbacks: IAssetUploadCallbacks = {
-        success(responseText, response, input) {
+        success(responseText, response, input, result) {
             if (protyle.options.upload.success) {
                 return protyle.options.upload.success(protyle.wysiwyg.element, responseText);
             } else if (successCB) {
-                return successCB(responseText);
+                return successCB(responseText, result);
             } else {
-                if (protyle.options.upload.format && input.kind === "files") {
-                    responseText = protyle.options.upload.format(input.files, responseText);
-                }
                 return genUploadedLabel(responseText, protyle, uploadOptions);
             }
         },
+        formatResponse: !protyle.options.upload.success && !successCB && protyle.options.upload.format ?
+            (responseText, input) => input.kind === "files" ?
+                protyle.options.upload.format(input.files, responseText) : responseText : undefined,
         complete: completeCB,
         reset() {
             if (element) {

@@ -252,7 +252,7 @@ export const editAssetItem = (options: {
                 source: "programmatic",
                 target: "av-cell",
             });
-            currentLink = base64Src[0];
+            currentLink = base64Src[0] || currentLink;
         }
 
         updateAssetCell({

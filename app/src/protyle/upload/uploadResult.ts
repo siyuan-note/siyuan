@@ -8,6 +8,22 @@ export const getAssetUploadSuccesses = (data?: {
     return Object.entries(data?.succMap || {}).map(([name, path], index) => ({index, name, path}));
 };
 
+export const getAssetUploadPathsByInput = (inputCount: number,
+                                            result: Omit<IAssetUploadResult, "requestId" | "input">) => {
+    const paths: Array<string | undefined> = new Array(inputCount).fill(undefined);
+    const rejected = new Set((result.rejected || []).map(item => item.index));
+    const succeeded = new Map(getAssetUploadSuccesses(result).map(item => [item.index, item.path]));
+    let acceptedIndex = 0;
+    for (let inputIndex = 0; inputIndex < inputCount; inputIndex++) {
+        if (rejected.has(inputIndex)) {
+            continue;
+        }
+        paths[inputIndex] = succeeded.get(acceptedIndex);
+        acceptedIndex++;
+    }
+    return paths;
+};
+
 export const getAssetUploadResult = (responseText: string, acceptedInput: IAssetUploadInput,
                                      rejected: IAssetUploadRejection[] = []):
 Omit<IAssetUploadResult, "requestId" | "input"> => {

@@ -22,6 +22,8 @@ import {
     PDF_RECT_CAPTURE_SCALE,
     PDF_RECT_DISPLAY_SCALE,
 } from "./pdfRectCapture";
+import {uploadStandaloneAssetFiles} from "../protyle/upload";
+import {getAssetUploadSuccesses} from "../protyle/upload/uploadResult";
 
 const RECT_RESIZE_MIN_SIZE = 8;
 
@@ -935,14 +937,21 @@ const copyAnno = (idPath: string, fileName: string, pdf: any) => {
                         .replace("${y}", filesize(imageData.blob.size, {standard: "iec"}));
                 }
                 confirmDialog(msg ? window.siyuan.languages.upload : "", msg, () => {
-                    const formData = new FormData();
                     const imageName = getRectImageName(content, imageData.rotation, positionHash,
                         PDF_RECT_CAPTURE_PROFILE);
-                    formData.append("file[]", imageData.blob, imageName);
-                    formData.append("skipIfDuplicated", "true");
-                    fetchPost(Constants.UPLOAD_ADDRESS, formData, (response) => {
-                        writeText(`<<${idPath} "${content}">>
-![](${response.data.succMap[imageName]}){: style="width: ${imageData.displayWidth}px;"}`);
+                    void uploadStandaloneAssetFiles([
+                        new File([imageData.blob], imageName, {type: imageData.blob.type}),
+                    ], {
+                        source: "programmatic",
+                        target: "pdf-annotation",
+                        requiredFileCount: 1,
+                        extraData: {skipIfDuplicated: "true"},
+                    }).then(response => {
+                        const path = getAssetUploadSuccesses(response?.data)[0]?.path;
+                        if (path) {
+                            writeText(`<<${idPath} "${content}">>
+![](${path}){: style="width: ${imageData.displayWidth}px;"}`);
+                        }
                     });
                 });
             }).catch((error) => {

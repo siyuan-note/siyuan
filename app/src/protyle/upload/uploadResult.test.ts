@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getAssetUploadResult, getAssetUploadSuccesses} from "./uploadResult";
+import {getAssetUploadPathsByInput, getAssetUploadResult, getAssetUploadSuccesses} from "./uploadResult";
 
 const createFile = (name: string) => new File(["content"], name, {type: "image/png"});
 
@@ -67,6 +67,24 @@ describe("asset upload result", () => {
         assert.equal(result.status, "partial");
         assert.deepEqual(result.acceptedInput, acceptedInput);
         assert.deepEqual(result.rejected, rejected);
+    });
+
+    it("maps partial successes back to the original input indexes", () => {
+        const result = {
+            status: "partial" as const,
+            rejected: [{index: 1, name: "b.png", reasons: ["size-limit" as const]}],
+            succFiles: [
+                {index: 0, name: "a.png", path: "assets/a.png"},
+                {index: 2, name: "d.png", path: "assets/d.png"},
+            ],
+        };
+
+        assert.deepEqual(getAssetUploadPathsByInput(4, result), [
+            "assets/a.png",
+            undefined,
+            undefined,
+            "assets/d.png",
+        ]);
     });
 
     it("preserves successful and failed files from a partial kernel write", () => {

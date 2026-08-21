@@ -1474,10 +1474,10 @@ func TestFilterAssetContentByPublishAccess(t *testing.T) {
 	}
 }
 
-// TestCheckAbsPathAccessableByPublishAccessForReadOnly 验证只读角色的原始文件通道
-// 会将显式隐藏（Visible:false）的笔记本视为机密边界（security advisory GHSA-8ggq-wq3f-vxrw），
-// 而基础校验保持原有的未列出但可直接访问语义不变。
-func TestCheckAbsPathAccessableByPublishAccessForReadOnly(t *testing.T) {
+// TestCheckAbsPathAccessableByPublishAccessKeepsHiddenNotebookAccessible 验证原始文件通道
+// 保持「仅隐藏」语义：显式隐藏（Visible:false）的笔记本不构成机密边界，
+// 普通文件与 .sy 文档仍可直接访问，禁用与密码保护照常生效。
+func TestCheckAbsPathAccessableByPublishAccessKeepsHiddenNotebookAccessible(t *testing.T) {
 	const (
 		boxID    = "20260821000005-visboxa"
 		docID    = "20260821000006-visdoca"
@@ -1496,42 +1496,34 @@ func TestCheckAbsPathAccessableByPublishAccessForReadOnly(t *testing.T) {
 	fileAbs := filepath.Join(util.DataDir, boxID, "private.txt")
 	docAbs := filepath.Join(util.DataDir, boxID, docID+".sy")
 
-	// 基础校验：显式隐藏的笔记本仍保持可直接访问语义（与文档内容 API 一致）
+	// 显式隐藏的笔记本保持可直接访问语义（与文档内容 API 一致）
 	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: false}}) {
-		t.Fatal("base check should keep hidden notebook directly accessible")
+		t.Fatal("hidden notebook file should remain directly accessible")
+	}
+	if !CheckAbsPathAccessableByPublishAccess(c, docAbs, PublishAccess{{ID: boxID, Visible: false}}) {
+		t.Fatal("hidden notebook doc should remain directly accessible")
 	}
 
-	// 只读校验：显式隐藏的笔记本应被拒绝，普通文件与 .sy 文档均如此
-	if CheckAbsPathAccessableByPublishAccessForReadOnly(c, fileAbs, PublishAccess{{ID: boxID, Visible: false}}) {
-		t.Fatal("read-only check should deny file under hidden notebook")
+	// 可见与未配置场景不受影响
+	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true}}) {
+		t.Fatal("visible notebook file should be accessible")
 	}
-	if CheckAbsPathAccessableByPublishAccessForReadOnly(c, docAbs, PublishAccess{{ID: boxID, Visible: false}}) {
-		t.Fatal("read-only check should deny doc under hidden notebook")
+	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{}) {
+		t.Fatal("unconfigured notebook file should be accessible")
 	}
 
-	// 可见、未配置、禁用与密码保护场景应保持原有判定
-	if !CheckAbsPathAccessableByPublishAccessForReadOnly(c, fileAbs, PublishAccess{{ID: boxID, Visible: true}}) {
-		t.Fatal("read-only check should allow file under visible notebook")
+	// 禁用与密码保护仍构成访问控制
+	if CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Disable: true}}) {
+		t.Fatal("disabled notebook should be denied")
 	}
-	if !CheckAbsPathAccessableByPublishAccessForReadOnly(c, fileAbs, PublishAccess{}) {
-		t.Fatal("read-only check should allow file under unconfigured notebook")
-	}
-	if CheckAbsPathAccessableByPublishAccessForReadOnly(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Disable: true}}) {
-		t.Fatal("read-only check should deny disabled notebook")
-	}
-	if CheckAbsPathAccessableByPublishAccessForReadOnly(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Password: password}}) {
-		t.Fatal("read-only check should deny password protected notebook without auth cookie")
+	if CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Password: password}}) {
+		t.Fatal("password protected notebook should be denied without auth cookie")
 	}
 	c.Request.AddCookie(&http.Cookie{
 		Name:  "publish-auth-" + boxID,
 		Value: util.SHA256Hash([]byte(boxID + password)),
 	})
-	if !CheckAbsPathAccessableByPublishAccessForReadOnly(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Password: password}}) {
-		t.Fatal("read-only check should allow password protected notebook after authorization")
-	}
-
-	// 隐藏且带密码的笔记本应被隐藏判定直接拒绝，即使已通过密码授权
-	if CheckAbsPathAccessableByPublishAccessForReadOnly(c, fileAbs, PublishAccess{{ID: boxID, Visible: false, Password: password}}) {
-		t.Fatal("read-only check should deny hidden notebook even after password authorization")
+	if !CheckAbsPathAccessableByPublishAccess(c, fileAbs, PublishAccess{{ID: boxID, Visible: true, Password: password}}) {
+		t.Fatal("password protected notebook should be accessible after authorization")
 	}
 }

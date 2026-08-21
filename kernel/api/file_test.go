@@ -135,9 +135,10 @@ func TestGetFileAdminCanFollowAssetsSymlinkOutsideWorkspace(t *testing.T) {
 	}
 }
 
-// TestGetFileReaderDeniesHiddenNotebookFile 验证 reader 无法通过原始文件 API 读取
-// 显式隐藏（Visible:false）笔记本下的普通文件与 .sy 文档（security advisory GHSA-8ggq-wq3f-vxrw）。
-func TestGetFileReaderDeniesHiddenNotebookFile(t *testing.T) {
+// TestGetFileReaderCanReadHiddenNotebookFile 验证「仅隐藏」语义：reader 可通过原始文件 API
+// 直接读取显式隐藏（Visible:false）笔记本下的普通文件与 .sy 文档，
+// 隐藏仅控制发布文件树中的列出，不构成访问控制边界。
+func TestGetFileReaderCanReadHiddenNotebookFile(t *testing.T) {
 	workspaceDir := t.TempDir()
 	origWorkspaceDir, origDataDir := util.WorkspaceDir, util.DataDir
 	util.WorkspaceDir = workspaceDir
@@ -175,12 +176,12 @@ func TestGetFileReaderDeniesHiddenNotebookFile(t *testing.T) {
 		context.Request = request
 		getFile(context)
 
-		if recorder.Code == http.StatusOK {
-			t.Fatalf("reader must not read file [%s] under hidden notebook, got status %d: %s",
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("reader should read file [%s] under hidden notebook, got status %d: %s",
 				name, recorder.Code, recorder.Body.String())
 		}
-		if strings.Contains(recorder.Body.String(), string(canary)) {
-			t.Fatalf("hidden notebook file [%s] leaked to reader: %s", name, recorder.Body.String())
+		if !strings.Contains(recorder.Body.String(), string(canary)) {
+			t.Fatalf("hidden notebook file [%s] content missing: %s", name, recorder.Body.String())
 		}
 	}
 }

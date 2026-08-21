@@ -50,6 +50,22 @@ type PublishAccessItem struct {
 
 type PublishAccess []*PublishAccessItem
 
+// IsBoxVisibleByPublishAccess reports whether a notebook may be exposed to a
+// read-only publish context. An explicit publish-access entry is authoritative;
+// notebooks that are closed or encrypted are never visible to readers.
+func IsBoxVisibleByPublishAccess(box *Box, publishAccess PublishAccess) bool {
+	if nil == box || box.Closed || box.Encrypted {
+		return false
+	}
+
+	for _, item := range publishAccess {
+		if nil != item && item.ID == box.ID {
+			return item.Visible
+		}
+	}
+	return true
+}
+
 type PublishAccessStatus int
 
 const (
@@ -510,16 +526,22 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 			return true
 		}
 
-		if assetPath, box, ok := assetPathFromDataRelativePath(relPath); ok {
-			return checkAssetPathAccessableByPublishAccess(c, publishAccess, assetPath, box)
+		if assetPath, boxID, ok := assetPathFromDataRelativePath(relPath); ok {
+			if boxID != "" && !IsBoxVisibleByPublishAccess(Conf.Box(boxID), publishAccess) {
+				return false
+			}
+			return checkAssetPathAccessableByPublishAccess(c, publishAccess, assetPath, boxID)
 		}
 
 		if ast.IsNodeIDPattern(pathParts[0]) {
-			box := pathParts[0]
+			boxID := pathParts[0]
+			if !IsBoxVisibleByPublishAccess(Conf.Box(boxID), publishAccess) {
+				return false
+			}
 			blockPath := "/" + strings.Join(pathParts[1:], "/")
-			passwordID, password := GetPathPasswordByPublishAccess(box, blockPath, publishAccess)
+			passwordID, password := GetPathPasswordByPublishAccess(boxID, blockPath, publishAccess)
 			publishIgnore := GetDisablePublishAccess(publishAccess)
-			return CheckPathAccessableByPublishIgnore(box, blockPath, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
+			return CheckPathAccessableByPublishIgnore(boxID, blockPath, publishIgnore) && (password == "" || CheckPublishAuthCookie(c, passwordID, password))
 		}
 	}
 	return false
@@ -1022,12 +1044,7 @@ func clearAttributeViewSensitiveValue(value *av.Value) *av.Value {
 	return ret
 }
 
-func checkAttributeViewItemAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, item av.Item) bool {
-	if nil == item {
-		return false
-	}
-
-	blockValue := item.GetBlockValue()
+func checkAttributeViewValueAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockValue *av.Value) bool {
 	if nil == blockValue {
 		return false
 	}
@@ -1037,7 +1054,27 @@ func checkAttributeViewItemAccessableByPublishAccess(c *gin.Context, publishAcce
 	if nil == blockValue.Block || "" == blockValue.Block.ID {
 		return false
 	}
-	return CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockValue.Block.ID)
+
+	blockTree := treenode.GetBlockTree(blockValue.Block.ID)
+	if nil == blockTree || IsEncryptedBoxDeniedByPublishAccess(blockTree.BoxID) {
+		return false
+	}
+	if !CheckPathAccessableByPublishIgnore(blockTree.BoxID, blockTree.Path, filterDisablePublishAccess(publishAccess)) {
+		return false
+	}
+	if CheckPathAccessableByPublishIgnore(blockTree.BoxID, blockTree.Path, filterInvisiblePublishAccess(publishAccess)) {
+		return true
+	}
+
+	passwordID, password := GetPathPasswordByPublishAccess(blockTree.BoxID, blockTree.Path, publishAccess)
+	return password != "" && CheckPublishAuthCookie(c, passwordID, password)
+}
+
+func checkAttributeViewItemAccessableByPublishAccess(c *gin.Context, publishAccess PublishAccess, item av.Item) bool {
+	if nil == item {
+		return false
+	}
+	return checkAttributeViewValueAccessableByPublishAccess(c, publishAccess, item.GetBlockValue())
 }
 
 func checkAttributeViewItemIDAccessableByPublishAccess(
@@ -1060,7 +1097,7 @@ func checkAttributeViewItemIDAccessableByPublishAccess(
 	if nil == blockValue.Block || "" == blockValue.Block.ID {
 		return false
 	}
-	return CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockValue.Block.ID)
+	return CheckBlockIdMetadataAccessableByPublishAccess(c, publishAccess, blockValue.Block.ID)
 }
 
 func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockAttributeViewKeys []*BlockAttributeViewKeys) (ret []*BlockAttributeViewKeys) {
@@ -1068,9 +1105,16 @@ func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess P
 	publishDisable := GetDisablePublishAccess(publishAccess)
 	ret = []*BlockAttributeViewKeys{}
 	for _, blockAttributeViewKey := range blockAttributeViewKeys {
+		if nil == blockAttributeViewKey {
+			continue
+		}
+
 		accessable := false
 		bts := treenode.GetBlockTrees(blockAttributeViewKey.BlockIDs)
 		for _, bt := range bts {
+			if nil == bt {
+				continue
+			}
 			passwordID, password := GetPathPasswordByPublishAccess(bt.BoxID, bt.Path, publishAccess)
 			if (password == "" || CheckPublishAuthCookie(c, passwordID, password)) &&
 				CheckPathAccessableByPublishIgnore(bt.BoxID, bt.Path, publishInvisible) &&
@@ -1079,12 +1123,108 @@ func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess P
 				break
 			}
 		}
-		if accessable {
-			blockAttributeViewKey.ItemPositions = nil
-			ret = append(ret, blockAttributeViewKey)
+		if !accessable {
+			continue
+		}
+
+		filtered := filterBlockAttributeViewKeysByPublishAccess(c, publishAccess, blockAttributeViewKey)
+		if nil != filtered {
+			ret = append(ret, filtered)
 		}
 	}
 	return
+}
+
+func filterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess PublishAccess, blockAttributeViewKey *BlockAttributeViewKeys) *BlockAttributeViewKeys {
+	attrView, _ := av.ParseAttributeView(blockAttributeViewKey.AvID)
+	var blockKeyValues *av.KeyValues
+	if nil != attrView {
+		blockKeyValues = attrView.GetBlockKeyValues()
+	} else {
+		for _, keyValues := range blockAttributeViewKey.KeyValues {
+			if nil != keyValues && nil != keyValues.Key && av.KeyTypeBlock == keyValues.Key.Type {
+				blockKeyValues = keyValues
+				break
+			}
+		}
+	}
+	accessibleItemIDs := map[string]bool{}
+	if nil != blockKeyValues {
+		for _, value := range blockKeyValues.Values {
+			if nil == value || "" == value.BlockID {
+				continue
+			}
+			accessibleItemIDs[value.BlockID] = checkAttributeViewValueAccessableByPublishAccess(c, publishAccess, value)
+		}
+	}
+
+	var filter *attributeViewPublishAccessFilter
+	if nil != attrView {
+		filter = &attributeViewPublishAccessFilter{
+			c:               c,
+			publishAccess:   publishAccess,
+			attributeViews:  map[string]*av.AttributeView{attrView.ID: attrView},
+			attributeAccess: map[string]bool{},
+			itemAccess:      map[string]map[string]bool{},
+		}
+	}
+	filteredKeyValues := make([]*av.KeyValues, 0, len(blockAttributeViewKey.KeyValues))
+	for _, keyValues := range blockAttributeViewKey.KeyValues {
+		if nil == keyValues || nil == keyValues.Key {
+			continue
+		}
+		filteredKeyValues = append(filteredKeyValues, &av.KeyValues{Key: keyValues.Key})
+		filtered := filteredKeyValues[len(filteredKeyValues)-1]
+		for _, value := range keyValues.Values {
+			if nil == value || !accessibleItemIDs[value.BlockID] {
+				continue
+			}
+			filteredValue := value
+			if nil != filter {
+				filteredValue, _ = filter.filterValue(attrView, keyValues.Key, value, value.BlockID)
+			}
+			if nil != filteredValue {
+				filtered.Values = append(filtered.Values, filteredValue)
+			}
+		}
+	}
+
+	return &BlockAttributeViewKeys{
+		AvID:          blockAttributeViewKey.AvID,
+		AvName:        blockAttributeViewKey.AvName,
+		BlockIDs:      slices.Clone(blockAttributeViewKey.BlockIDs),
+		KeyValues:     filteredKeyValues,
+		ItemPositions: filterAttributeViewItemPositions(blockAttributeViewKey.ItemPositions, accessibleItemIDs),
+	}
+}
+
+func filterAttributeViewItemPositions(positions []*AttributeViewItemPosition, accessibleItemIDs map[string]bool) []*AttributeViewItemPosition {
+	if 0 == len(positions) {
+		return nil
+	}
+
+	ret := make([]*AttributeViewItemPosition, 0, len(positions))
+	for _, position := range positions {
+		if nil == position {
+			continue
+		}
+		filtered := &AttributeViewItemPosition{ViewID: position.ViewID, PreviousID: position.PreviousID}
+		if filtered.PreviousID != "" && !accessibleItemIDs[filtered.PreviousID] {
+			filtered.PreviousID = ""
+		}
+		for _, group := range position.Groups {
+			if nil == group {
+				continue
+			}
+			filteredGroup := &AttributeViewGroupItemPosition{GroupID: group.GroupID, PreviousID: group.PreviousID}
+			if filteredGroup.PreviousID != "" && !accessibleItemIDs[filteredGroup.PreviousID] {
+				filteredGroup.PreviousID = ""
+			}
+			filtered.Groups = append(filtered.Groups, filteredGroup)
+		}
+		ret = append(ret, filtered)
+	}
+	return ret
 }
 
 func FilterAttributeViewBacklinksByPublishAccess(c *gin.Context, publishAccess PublishAccess, backlinks *AttributeViewBacklinks) (ret *AttributeViewBacklinks) {

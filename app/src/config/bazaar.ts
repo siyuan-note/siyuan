@@ -202,7 +202,6 @@ export const bazaar = {
 </div>`;
         }
         const localSort = window.siyuan.storage[Constants.LOCAL_BAZAAR];
-        const localPackageAvailable = getFrontend() !== "mobile";
         const loadingHTML = `<div style="height: ${bazaar.element.clientHeight - 160}px;display: flex;align-items: center;justify-content: center;"><img src="/stage/loading-pure.svg"></div>`;
         return `<div class="config-bazaar fn__flex-column" style="height: 100%">
 <div class="config-bazaar__main fn__flex-column fn__flex-1">
@@ -244,7 +243,7 @@ export const bazaar = {
                 </div>
                 <input data-type="downloaded-filter" class="b3-text-field config-bazaar__filter" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.search}">
                 <div class="fn__flex config-bazaar__actions">
-                    <label class="block__icon block__icon--show config-bazaar__local-package ariaLabel${localPackageAvailable ? "" : " fn__none"}" data-type="install-local-package" data-position="north" aria-label="${window.siyuan.languages.installLocalBazaarPackage}">
+                    <label class="block__icon block__icon--show config-bazaar__local-package ariaLabel" data-type="install-local-package" data-position="north" aria-label="${window.siyuan.languages.installLocalBazaarPackage}">
                         <svg class="b3-button__icon"><use xlink:href="#iconUpload"></use></svg>
                         <input class="b3-form__upload" data-type="local-package-file" type="file" accept=".zip,application/zip">
                     </label>
@@ -2240,7 +2239,7 @@ type="checkbox">
         }
     },
     _installLocalPackage(file: File, app: App, mount: IBazaarMountSnapshot, overwrite = false) {
-        if (getFrontend() === "mobile" || bazaar._localPackageUploading) {
+        if (bazaar._localPackageUploading) {
             return;
         }
         bazaar._setLocalPackageUploading(true, mount);
@@ -2315,9 +2314,6 @@ type="checkbox">
         return files[0];
     },
     _bindLocalPackageEvent(app: App, mount: IBazaarMountSnapshot) {
-        if (getFrontend() === "mobile") {
-            return;
-        }
         const inputElement = mount.element.querySelector('[data-type="local-package-file"]') as HTMLInputElement;
         inputElement?.addEventListener("change", () => {
             const file = bazaar._getLocalPackageFile(inputElement.files);
@@ -2326,6 +2322,9 @@ type="checkbox">
                 bazaar._installLocalPackage(file, app, mount);
             }
         });
+        if (getFrontend() === "mobile") {
+            return;
+        }
 
         const dropTarget = mount.element.firstElementChild as HTMLElement;
         const dropElement = dropTarget.querySelector(".config-bazaar__drop");

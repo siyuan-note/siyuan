@@ -49,6 +49,7 @@ import {
 import * as dayjs from "dayjs";
 import {dropEvent} from "../util/editorCommonEvent";
 import {beforeBlockquoteInput, input} from "./input";
+import {getMultilineInputText} from "./multilineInput";
 import {
     getContenteditableElement,
     getEmbedGutterOperationContext,
@@ -3719,6 +3720,8 @@ export class WYSIWYG {
 
         // 输入法测试点 https://github.com/siyuan-note/siyuan/issues/3027
         let isComposition = false; // for iPhone
+        // 多行组合输入已按 Markdown 插入时，忽略其后到达的 compositionend，避免重复生成事务。
+        let multilineCompositionHandled = false;
         // 原生软换行在 input 触发前已经修改 DOM，需预存选区供撤销恢复。
         let lineBreakUndoContext: Record<string, string>;
         // 仅矫正从数据库外进入的占位光标，避免重置数据库内部的方向键导航。
@@ -3854,6 +3857,11 @@ export class WYSIWYG {
                 return;
             }
             isComposition = false;
+            if (multilineCompositionHandled) {
+                multilineCompositionHandled = false;
+                compositionRange = undefined;
+                return;
+            }
             const range = getEditorRange(this.element);
             const blockElement = hasClosestBlock(range.startContainer);
             if (!blockElement) {
@@ -3917,6 +3925,39 @@ export class WYSIWYG {
                     event.preventDefault();
                     event.stopPropagation();
                     return;
+                }
+            }
+            const multilineText = isMac() && event.cancelable ?
+                getMultilineInputText(event.inputType, event.data) : undefined;
+            if (multilineText !== undefined) {
+                const selection = getSelection();
+                if (selection.rangeCount > 0) {
+                    let range = selection.getRangeAt(0);
+                    const targetRange = event.getTargetRanges()[0];
+                    if (targetRange && this.element.contains(targetRange.startContainer) &&
+                        this.element.contains(targetRange.endContainer)) {
+                        range = document.createRange();
+                        range.setStart(targetRange.startContainer, targetRange.startOffset);
+                        range.setEnd(targetRange.endContainer, targetRange.endOffset);
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+                    const blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
+                    if (blockElement && getContenteditableElement(blockElement)) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        lineBreakUndoContext = undefined;
+                        if (event.isComposing || isComposition) {
+                            multilineCompositionHandled = true;
+                        }
+                        beforePaste(protyle, blockElement);
+                        await paste(protyle, {
+                            textHTML: "",
+                            textPlain: multilineText,
+                            target: event.target as HTMLElement,
+                        });
+                        return;
+                    }
                 }
             }
             if (!isComposition) {

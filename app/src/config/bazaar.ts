@@ -109,6 +109,7 @@ export const bazaar = {
     _updateState: "idle" as "idle" | "loading" | "loaded" | "error",
     _updateRequestID: 0,
     _localPackageUploading: false,
+    _pluginEnablePending: new Set<string>(),
     _ratingUserID: "",
     _ratingUserChangeHandler: undefined as (() => void) | undefined,
     _activateMount(element: HTMLElement, force = false) {
@@ -2063,7 +2064,32 @@ type="checkbox">
             bazaar._refreshReadmeDetail(bazaarType, packageName);
         }
     },
-    _setPluginEnabled(app: App, item: IBazaarItem, enabled: boolean, callback: () => void) {
+    _updateReadmePluginAction(packageName: string, enabled?: boolean, disabled = false) {
+        const readmeElement = bazaar.element?.querySelector("#configBazaarReadme.config__view--show");
+        const sideElement = readmeElement?.querySelector(".item__side");
+        if (sideElement?.getAttribute("data-package-type") !== "plugins" ||
+            sideElement.getAttribute("data-name") !== packageName) {
+            return;
+        }
+        const actionElement = readmeElement.querySelector(
+            '.item__actions [data-type="package-enable"], .item__actions [data-type="package-disable"]'
+        ) as HTMLButtonElement;
+        if (!actionElement) {
+            return;
+        }
+        if (typeof enabled === "boolean") {
+            actionElement.dataset.type = enabled ? "package-disable" : "package-enable";
+            actionElement.textContent = window.siyuan.languages[enabled ? "disable" : "enable"];
+        }
+        actionElement.toggleAttribute("disabled", disabled);
+    },
+    _setPluginEnabled(app: App, item: Pick<IBazaarItem, "name" | "enabled">, enabled: boolean, callback: () => void) {
+        if (bazaar._pluginEnablePending.has(item.name)) {
+            bazaar._updateReadmePluginAction(item.name, undefined, true);
+            return;
+        }
+        bazaar._pluginEnablePending.add(item.name);
+        bazaar._updateReadmePluginAction(item.name, undefined, true);
         fetchPost("/api/petal/setPetalEnabled", {
             packageName: item.name,
             enabled,
@@ -2071,21 +2097,36 @@ type="checkbox">
         }, response => {
             if (response.code !== 0) {
                 showMessage(response.msg);
+                bazaar._pluginEnablePending.delete(item.name);
+                bazaar._updateReadmePluginAction(item.name, item.enabled, false);
                 callback();
                 return;
             }
             item.enabled = enabled;
+            const installed = bazaar._getPackageDetail("plugins", item.name)?.installed;
+            if (installed) {
+                installed.enabled = enabled;
+            }
+            bazaar._updateReadmePluginAction(item.name, enabled, true);
+            const finish = () => {
+                bazaar._pluginEnablePending.delete(item.name);
+                bazaar._updateReadmePluginAction(item.name, enabled, false);
+                callback();
+            };
             if (!enabled) {
                 uninstall(app, item.name, true);
-                callback();
+                finish();
                 return;
             }
             if (window.siyuan.config.bazaar.petalDisabled) {
                 showMessage(window.siyuan.languages.pluginGlobalDisabledTip);
-                callback();
+                finish();
                 return;
             }
-            loadPlugin(app, response.data).then(callback);
+            loadPlugin(app, response.data).then(finish, (error) => {
+                console.error(error);
+                finish();
+            });
         });
     },
     _setPluginPublishEnabled(item: IBazaarItem, enabled: boolean, callback: () => void) {
@@ -2287,16 +2328,10 @@ type="checkbox">
                     confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
                 } else {
                     confirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
-                        fetchPost("/api/petal/setPetalEnabled", {
-                            packageName: data.packageName,
-                            enabled: true,
-                            app: Constants.SIYUAN_APPID,
-                        }, (enableResponse) => {
-                            loadPlugin(app, enableResponse.data).then(() => {
-                                if (bazaar._isMountCurrent(mount)) {
-                                    bazaar._genMyHTML("plugins", app, false);
-                                }
-                            });
+                        bazaar._setPluginEnabled(app, {name: data.packageName, enabled: false}, true, () => {
+                            if (bazaar._isMountCurrent(mount)) {
+                                bazaar._genMyHTML("plugins", app, false);
+                            }
                         });
                     });
                 }
@@ -2549,17 +2584,11 @@ type="checkbox">
                                     confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.enablePluginTip2);
                                 } else {
                                     confirmDialog("💡 " + window.siyuan.languages.enablePlugin, window.siyuan.languages.enablePluginTip, () => {
-                                        fetchPost("/api/petal/setPetalEnabled", {
-                                            packageName: installItem.name,
-                                            enabled: true,
-                                            app: Constants.SIYUAN_APPID,
-                                        }, (response) => {
-                                            loadPlugin(app, response.data).then(() => {
-                                                if (bazaar._isMountCurrent(mount)) {
-                                                    bazaar._genMyHTML(pkgType, app, false);
-                                                    bazaar._refreshReadmeDetail(pkgType, installItem.name);
-                                                }
-                                            });
+                                        bazaar._setPluginEnabled(app, installItem, true, () => {
+                                            if (bazaar._isMountCurrent(mount)) {
+                                                bazaar._genMyHTML(pkgType, app, false);
+                                                bazaar._refreshReadmeDetail(pkgType, installItem.name);
+                                            }
                                         });
                                     });
                                 }

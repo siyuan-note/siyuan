@@ -119,6 +119,16 @@ func recordAssetUploadFailure(failedFiles *[]AssetUploadFailure, index int, name
 
 func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]any,
 	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
+	return insertLocalAssets(id, assetAbsPaths, isUpload, false)
+}
+
+func InsertHTMLLocalAssets(id string, assetAbsPaths []string) (succMap map[string]any,
+	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
+	return insertLocalAssets(id, assetAbsPaths, true, true)
+}
+
+func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTMLPath bool) (succMap map[string]any,
+	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
 	succMap = map[string]any{}
 	succFiles = make([]AssetUploadSuccess, 0, len(assetAbsPaths))
 	failedFiles = make([]AssetUploadFailure, 0)
@@ -138,7 +148,14 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 	}
 
 	for index, assetAbsPath := range assetAbsPaths {
+		if strings.HasPrefix(strings.ToLower(assetAbsPath), "file://") {
+			assetAbsPath = util.FileURLToLocalPath(assetAbsPath)
+		}
 		baseName := filepath.Base(assetAbsPath)
+		if validateHTMLPath && (util.IsSensitivePath(assetAbsPath) || EncryptedRawPathBoxID(assetAbsPath) != "") {
+			recordAssetUploadFailure(&failedFiles, index, baseName, errors.New("local asset path is not allowed"))
+			continue
+		}
 		fName := baseName
 		fName = util.FilterUploadFileName(fName)
 		ext := filepath.Ext(fName)

@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "Özel renkleri yönet",
+	"deleteCustomColorTip": "Silip kaydettikten sonra “${name}” özel rengini kullanan içerik, uygulandığı sırada kaydedilen renge döner ve artık açık/koyu mod değişikliklerini izlemez. Silmek istediğinizden emin misiniz?",
+	"mobileMenuNavigation": "Gezinme",
+	"mobileBottomBar": "Alt çubuk",
 	"insertSuperBlockLeft": "Sola sütun ekle",
 	"insertSuperBlockRight": "Sağa sütun ekle",
 	"assetOpen": "Kaynakları açma",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "Özel profil",
 	"entryCreateProfile": "Profil oluştur",
 	"entryImportInvalid": "Menü ve yuva profil dosyası geçersiz",
-	"mobileMenuQuickActions": "Hızlı işlemler",
 	"mobileMenuCreate": "Oluştur",
 	"mobileMenuDataManagement": "Veri yönetimi",
 	"mobileMenuSettingsAndHelp": "Ayarlar ve yardım",

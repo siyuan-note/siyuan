@@ -612,7 +612,16 @@ func insertLocalAssets(c *gin.Context) {
 		isUpload = isUploadArg.(bool)
 	}
 	id := arg["id"].(string)
-	succMap, succFiles, failedFiles, err := model.InsertLocalAssets(id, assetPaths, isUpload)
+	fromHTMLPaste, _ := arg["fromHTMLPaste"].(bool)
+	var succMap map[string]any
+	var succFiles []model.AssetUploadSuccess
+	var failedFiles []model.AssetUploadFailure
+	var err error
+	if fromHTMLPaste {
+		succMap, succFiles, failedFiles, err = model.InsertHTMLLocalAssets(id, assetPaths)
+	} else {
+		succMap, succFiles, failedFiles, err = model.InsertLocalAssets(id, assetPaths, isUpload)
+	}
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

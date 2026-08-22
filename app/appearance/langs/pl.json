@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "Zarządzaj kolorami niestandardowymi",
+	"deleteCustomColorTip": "Po usunięciu i zapisaniu zawartość używająca niestandardowego koloru „${name}” powróci do koloru zapisanego podczas zastosowania i przestanie reagować na przełączanie trybu jasnego i ciemnego. Czy na pewno chcesz go usunąć?",
+	"mobileMenuNavigation": "Nawigacja",
+	"mobileBottomBar": "Dolny pasek",
 	"insertSuperBlockLeft": "Wstaw kolumnę po lewej",
 	"insertSuperBlockRight": "Wstaw kolumnę po prawej",
 	"assetOpen": "Otwieranie zasobów",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "Profil niestandardowy",
 	"entryCreateProfile": "Utwórz profil",
 	"entryImportInvalid": "Nieprawidłowy plik profilu menu i doku",
-	"mobileMenuQuickActions": "Szybkie działania",
 	"mobileMenuCreate": "Utwórz",
 	"mobileMenuDataManagement": "Zarządzanie danymi",
 	"mobileMenuSettingsAndHelp": "Ustawienia i pomoc",

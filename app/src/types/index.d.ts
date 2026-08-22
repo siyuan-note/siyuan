@@ -385,7 +385,7 @@ interface ILocalFiles {
 }
 
 type TAssetUploadSource = "paste" | "drop" | "file-picker" | "programmatic"
-type TAssetUploadTarget = "editor" | "av-cell" | "background"
+type TAssetUploadTarget = "editor" | "av-cell" | "background" | "pdf-annotation"
 type TAssetUploadStatus = "success" | "partial" | "failed" | "canceled"
 type TAssetUploadRejectionReason = "name-empty" | "size-limit" | "type-not-accepted"
 
@@ -448,16 +448,24 @@ interface IAssetUploadResult {
 /** 不得在该事件上调用 `preventDefault()`，取消上传应使用 `respondWith({action: "cancel"})`。 */
 interface IBeforeUploadAssetsDetail {
     requestId: string,
-    protyle: IProtyle,
+    /** PDF 标注等无编辑器上传场景不提供该字段。 */
+    protyle?: IProtyle,
     source: TAssetUploadSource,
     target: TAssetUploadTarget,
     position?: IAssetUploadPosition,
+    /** 替换输入必须保持的精确文件数量。 */
+    requiredFileCount?: number,
+    /** 当前目标支持的输入类型；未提供时支持 files 和 local-files。 */
+    allowedInputKinds?: Array<IAssetUploadInput["kind"]>,
     input: IAssetUploadInput,
     /** 插件处理的取消信号，编辑器销毁、插件卸载或处理超时时触发。 */
     signal: AbortSignal,
     /** 必须同步调用且每次事件只允许调用一次，异步处理应将 Promise 作为参数传入，每个插件默认 120 秒超时。 */
     respondWith(response: IAssetUploadDecision | PromiseLike<IAssetUploadDecision>): void,
-    /** 必须同步注册，资源目录写入成功、失败或取消时执行一次，不包含正文或属性视图写入。 */
+    /**
+     * 必须同步注册，经思源前端上传协调层发起的资源写入成功、失败或取消时执行一次。
+     * 不包含正文或属性视图写入，也不覆盖 HTTP API、CLI、MCP、同步、导入、历史恢复等内核写入。
+     */
     onComplete(callback: (result: IAssetUploadResult) => void): void
 }
 

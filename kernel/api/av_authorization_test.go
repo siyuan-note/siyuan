@@ -25,6 +25,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func TestAttributeViewEditorEndpointsRejectReader(t *testing.T) {
@@ -75,6 +76,58 @@ func TestAttributeViewEditorEndpointsRejectReader(t *testing.T) {
 			}
 			if response.Data["closeTimeout"] != float64(5000) {
 				t.Fatalf("reader request reached the handler: %s", recorder.Body.String())
+			}
+		})
+	}
+}
+
+func TestGetAttributeViewKeysByIDRespectsPublishAccess(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	previousConf := model.Conf
+	model.Conf = &model.AppConf{Lang: "en"}
+	previousDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		model.Conf = previousConf
+		util.DataDir = previousDataDir
+	})
+
+	roles := []struct {
+		name string
+		role model.Role
+		code int
+	}{
+		{name: "reader", role: model.RoleReader, code: -1},
+		{name: "editor", role: model.RoleEditor, code: 0},
+		{name: "administrator", role: model.RoleAdministrator, code: 0},
+	}
+	for _, role := range roles {
+		t.Run(role.name, func(t *testing.T) {
+			engine := gin.New()
+			engine.Use(func(c *gin.Context) {
+				c.Set(model.RoleContextKey, role.role)
+				c.Next()
+			})
+			engine.Handle(http.MethodPost, "/api/av/getAttributeViewKeysByID", getAttributeViewKeysByID)
+
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(
+				http.MethodPost,
+				"/api/av/getAttributeViewKeysByID",
+				strings.NewReader(`{"avID":"20260726000000-abcdefg","keyIDs":[]}`),
+			)
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			response := &struct {
+				Code int `json:"code"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if response.Code != role.code {
+				t.Fatalf("unexpected code: got %d, want %d: %s", response.Code, role.code, recorder.Body.String())
 			}
 		})
 	}

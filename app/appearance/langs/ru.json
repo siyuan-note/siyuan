@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "Управление пользовательскими цветами",
+	"deleteCustomColorTip": "После удаления и сохранения содержимое с пользовательским цветом «${name}» вернётся к цвету, сохранённому при применении, и больше не будет меняться при переключении светлого и тёмного режимов. Удалить этот цвет?",
+	"mobileMenuNavigation": "Навигация",
+	"mobileBottomBar": "Нижняя панель",
 	"insertSuperBlockLeft": "Вставить столбец слева",
 	"insertSuperBlockRight": "Вставить столбец справа",
 	"assetOpen": "Открытие ресурсов",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "Пользовательский профиль",
 	"entryCreateProfile": "Создать профиль",
 	"entryImportInvalid": "Недопустимый файл профиля меню и док-панели",
-	"mobileMenuQuickActions": "Быстрые действия",
 	"mobileMenuCreate": "Создание",
 	"mobileMenuDataManagement": "Управление данными",
 	"mobileMenuSettingsAndHelp": "Настройки и помощь",

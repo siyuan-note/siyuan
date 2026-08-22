@@ -389,6 +389,11 @@ func getAttributeViewKeysByID(c *gin.Context) {
 		return
 	}
 	avID := arg["avID"].(string)
+	if model.IsReadOnlyRoleContext(c) && !model.CheckAttributeViewAccessableByPublishAccess(c, model.GetPublishAccess(), avID) {
+		ret.Code = -1
+		ret.Msg = av.ErrAttributeViewNotFound.Error()
+		return
+	}
 	keyIDsArg := arg["keyIDs"].([]any)
 	var keyIDs []string
 	for _, v := range keyIDsArg {

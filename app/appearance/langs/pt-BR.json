@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "Gerenciar cores personalizadas",
+	"deleteCustomColorTip": "Após excluir e salvar, o conteúdo que usa a cor personalizada “${name}” voltará à cor salva quando ela foi aplicada e não acompanhará mais a alternância entre os modos claro e escuro. Tem certeza de que deseja excluí-la?",
+	"mobileMenuNavigation": "Navegação",
+	"mobileBottomBar": "Barra inferior",
 	"insertSuperBlockLeft": "Inserir coluna à esquerda",
 	"insertSuperBlockRight": "Inserir coluna à direita",
 	"assetOpen": "Abertura de recursos",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "Perfil personalizado",
 	"entryCreateProfile": "Criar perfil",
 	"entryImportInvalid": "Arquivo de perfil de menus e dock inválido",
-	"mobileMenuQuickActions": "Ações rápidas",
 	"mobileMenuCreate": "Criar",
 	"mobileMenuDataManagement": "Gerenciamento de dados",
 	"mobileMenuSettingsAndHelp": "Configurações e ajuda",

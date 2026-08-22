@@ -142,9 +142,16 @@ describe("isBazaarPackageEnableDisabled", () => {
         assert.equal(isBazaarPackageEnableDisabled("themes", {installedIncompatible: true, current: false}), true);
     });
 
+    it("disables packages that require a newer app version", () => {
+        assert.equal(isBazaarPackageEnableDisabled("plugins", {disallowInstall: true, enabled: false}), true);
+        assert.equal(isBazaarPackageEnableDisabled("themes", {disallowInstall: true, current: false}), true);
+    });
+
     it("keeps disabling an active incompatible package available", () => {
         assert.equal(isBazaarPackageEnableDisabled("plugins", {installedIncompatible: true, enabled: true}), false);
         assert.equal(isBazaarPackageEnableDisabled("themes", {installedIncompatible: true, current: true}), false);
+        assert.equal(isBazaarPackageEnableDisabled("plugins", {disallowInstall: true, enabled: true}), false);
+        assert.equal(isBazaarPackageEnableDisabled("themes", {disallowInstall: true, current: true}), false);
     });
 
     it("does not disable compatible or unsupported package types", () => {

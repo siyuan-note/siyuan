@@ -145,7 +145,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
         }
     });
     const getManageHTML = (type: TInlineStyleType) => window.siyuan.config.readonly || window.siyuan.isPublish ? "" :
-        `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.manage}" data-action="manageInlineStyle" data-inline-style-type="${type}"><svg class="svg--mid"><use xlink:href="#iconAdd"></use></svg></button>`;
+        `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.manageCustomColors}" data-action="manageInlineStyle" data-inline-style-type="${type}"><svg class="svg--mid"><use xlink:href="#iconSettings"></use></svg></button>`;
 
     const element = document.createElement("div");
     element.classList.add("protyle-font");

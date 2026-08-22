@@ -11,8 +11,10 @@ import {
     getOrderedListMaxStart,
     getPreviousListItemID,
     getListShortcutAction,
+    isEmptyListItemBlock,
     isListItemActionElement,
     parseOrderedListStart,
+    shouldCreateListItemChildOnEnter,
     shouldIgnoreListShortcut,
     shouldOpenListItemAttr,
     type TListSubtype
@@ -263,6 +265,30 @@ describe("getListShortcutAction", () => {
         const context = getListContext(asHTMLElement(heading), asHTMLElement(editor))!;
 
         assert.equal(getListShortcutAction(context, "u", false, false), "insertChildList");
+    });
+});
+
+describe("isEmptyListItemBlock", () => {
+    it("treats empty text and a single soft line as empty", () => {
+        assert.equal(isEmptyListItemBlock("", false), true);
+        assert.equal(isEmptyListItemBlock("\n", false), true);
+    });
+
+    it("treats text and images as content", () => {
+        assert.equal(isEmptyListItemBlock("content", false), false);
+        assert.equal(isEmptyListItemBlock("", true), false);
+    });
+});
+
+describe("shouldCreateListItemChildOnEnter", () => {
+    it("uses normal block creation for a non-empty trailing child", () => {
+        assert.equal(shouldCreateListItemChildOnEnter(false, true, false), true);
+    });
+
+    it("keeps list handling for primary, non-trailing, and empty blocks", () => {
+        assert.equal(shouldCreateListItemChildOnEnter(true, true, false), false);
+        assert.equal(shouldCreateListItemChildOnEnter(false, false, false), false);
+        assert.equal(shouldCreateListItemChildOnEnter(false, true, true), false);
     });
 });
 

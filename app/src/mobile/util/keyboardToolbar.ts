@@ -398,8 +398,8 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     });
     const getManageHTML = (type: TInlineStyleType) => window.siyuan.config.readonly || window.siyuan.isPublish ? "" :
         `<button class="keyboard__slash-item" data-action="manageInlineStyle" data-inline-style-type="${type}">
-    <svg class="keyboard__slash-icon"><use xlink:href="#iconAdd"></use></svg>
-    <span class="keyboard__slash-text">${window.siyuan.languages.manage}</span>
+    <svg class="keyboard__slash-icon"><use xlink:href="#iconSettings"></use></svg>
+    <span class="keyboard__slash-text">${window.siyuan.languages.manageCustomColors}</span>
 </button>`;
 
     const nodeElements = getFontNodeElements(protyle);
@@ -826,19 +826,24 @@ export const showKeyboardToolbar = () => {
         hideKeyboardToolbarUtil();
     }
     const toolbarElement = document.getElementById("keyboardToolbar");
-    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
     const selection = getSelection();
     if (selection.rangeCount > 0 &&
         hasClosestByClassName(selection.getRangeAt(0).startContainer, "agent-chat__composer-host", true)) {
         // 智能体发送框自带操作栏，不能显示会作用于下层文档的移动端编辑工具栏。
+        window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
         toolbarElement.classList.add("fn__none");
         document.getElementById("model").style.paddingBottom = "";
         return;
     }
-    if (!toolbarElement.classList.contains("fn__none") || getSelection().rangeCount === 0) {
+    if (!toolbarElement.classList.contains("fn__none")) {
+        window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
+        return;
+    }
+    if (selection.rangeCount === 0) {
         return;
     }
     toolbarElement.classList.remove("fn__none");
+    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: true}));
     toolbarElement.style.zIndex = (++window.siyuan.zIndex).toString();
     updateKeyboardToolbarPosition();
     const modelElement = document.getElementById("model");
@@ -920,7 +925,6 @@ export const hideKeyboardToolbar = () => {
     clearTimeout(renderKeyboardToolbarTimeout);
     clearTimeout(scrollSelectionIntoViewTimeout);
     clearRenderGutterAfterScroll?.();
-    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: false}));
     if (showUtil) {
         return;
     }
@@ -941,6 +945,7 @@ export const hideKeyboardToolbar = () => {
     if (modelElement.style.transform === "translateX(0px)") {
         modelElement.style.paddingBottom = "";
     }
+    window.dispatchEvent(new CustomEvent("siyuan-mobile-keyboard-change", {detail: false}));
 };
 
 export const hideKeyboardToolbarByApp = (preserveSelection = false) => {

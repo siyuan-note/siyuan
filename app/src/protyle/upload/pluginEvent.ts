@@ -3,12 +3,14 @@ export interface IAssetUploadEventContext {
     target: TAssetUploadTarget;
     position?: IAssetUploadPosition;
     requiredFileCount?: number;
+    allowedInputKinds?: Array<IAssetUploadInput["kind"]>;
 }
 
 export interface IAssetUploadTask {
     readonly requestId: string;
     readonly signal: AbortSignal;
     input: IAssetUploadInput;
+    startUpload(): void;
     complete(result: Omit<IAssetUploadResult, "requestId" | "input">): boolean;
 }
 
@@ -43,6 +45,7 @@ export const ASSET_UPLOAD_PLUGIN_TIMEOUT = 120_000;
 let requestSequence = 0;
 const waitingTasksByProtyle = new WeakMap<IProtyle, Set<AssetUploadTask>>();
 const waitingTasksByPlugin = new WeakMap<IAssetUploadPlugin, Set<AssetUploadTask>>();
+const activeTasksByProtyle = new WeakMap<IProtyle, Set<AssetUploadTask>>();
 
 const genRequestId = () => {
     requestSequence++;
@@ -126,11 +129,14 @@ const getErrorMessage = (error: unknown) => {
 const getPluginLabel = (plugin: IAssetUploadPlugin, index: number) => plugin.name || `#${index + 1}`;
 
 const validateTargetInput = (input: IAssetUploadInput, context: IAssetUploadEventContext) => {
-    if (context.requiredFileCount !== undefined && input.files.length !== context.requiredFileCount) {
-        return `this upload requires exactly ${context.requiredFileCount} file(s)`;
+    if (context.allowedInputKinds && !context.allowedInputKinds.includes(input.kind)) {
+        return `this upload only accepts ${context.allowedInputKinds.join(" or ")} input`;
     }
-    if (context.target === "background" && input.files.length !== 1) {
-        return "background uploads require exactly one file";
+    if (context.requiredFileCount !== undefined && input.files.length !== context.requiredFileCount) {
+        if (context.target === "background") {
+            return "background uploads require exactly one file";
+        }
+        return `this upload requires exactly ${context.requiredFileCount} file(s)`;
     }
     return "";
 };
@@ -142,10 +148,11 @@ class AssetUploadTask implements IAssetUploadTask {
     private completed = false;
     private readonly abortController = new AbortController();
     private readonly callbacks: Array<(result: IAssetUploadResult) => any> = [];
-    private readonly protyle: IProtyle;
+    private readonly protyle?: IProtyle;
     private waitingPlugins: IAssetUploadPlugin[] = [];
+    private uploadStarted = false;
 
-    constructor(input: IAssetUploadInput, requestId: string, protyle: IProtyle) {
+    constructor(input: IAssetUploadInput, requestId: string, protyle?: IProtyle) {
         this.input = cloneInput(input);
         this.requestId = requestId;
         this.protyle = protyle;
@@ -159,12 +166,14 @@ class AssetUploadTask implements IAssetUploadTask {
     public startWaiting(plugins: IAssetUploadPlugin[]) {
         this.stopWaiting();
         this.waitingPlugins = plugins;
-        let protyleTasks = waitingTasksByProtyle.get(this.protyle);
-        if (!protyleTasks) {
-            protyleTasks = new Set();
-            waitingTasksByProtyle.set(this.protyle, protyleTasks);
+        if (this.protyle) {
+            let protyleTasks = waitingTasksByProtyle.get(this.protyle);
+            if (!protyleTasks) {
+                protyleTasks = new Set();
+                waitingTasksByProtyle.set(this.protyle, protyleTasks);
+            }
+            protyleTasks.add(this);
         }
-        protyleTasks.add(this);
         plugins.forEach(plugin => {
             let pluginTasks = waitingTasksByPlugin.get(plugin);
             if (!pluginTasks) {
@@ -176,9 +185,24 @@ class AssetUploadTask implements IAssetUploadTask {
     }
 
     public stopWaiting() {
-        waitingTasksByProtyle.get(this.protyle)?.delete(this);
+        if (this.protyle) {
+            waitingTasksByProtyle.get(this.protyle)?.delete(this);
+        }
         this.waitingPlugins.forEach(plugin => waitingTasksByPlugin.get(plugin)?.delete(this));
         this.waitingPlugins = [];
+    }
+
+    public startUpload() {
+        if (this.uploadStarted || !this.protyle) {
+            return;
+        }
+        this.uploadStarted = true;
+        let tasks = activeTasksByProtyle.get(this.protyle);
+        if (!tasks) {
+            tasks = new Set();
+            activeTasksByProtyle.set(this.protyle, tasks);
+        }
+        tasks.add(this);
     }
 
     public abort(reason: Error) {
@@ -193,6 +217,9 @@ class AssetUploadTask implements IAssetUploadTask {
         }
         this.completed = true;
         this.stopWaiting();
+        if (this.protyle) {
+            activeTasksByProtyle.get(this.protyle)?.delete(this);
+        }
         const detail: IAssetUploadResult = {
             ...result,
             requestId: this.requestId,
@@ -224,6 +251,7 @@ const cancelWaitingTasks = (tasks: Set<AssetUploadTask> | undefined, reason: str
 
 export const cancelAssetUploads = (protyle: IProtyle) => {
     cancelWaitingTasks(waitingTasksByProtyle.get(protyle), "The editor was destroyed");
+    cancelWaitingTasks(activeTasksByProtyle.get(protyle), "The editor was destroyed");
 };
 
 export const cancelAssetUploadsByPlugin = (plugin: IAssetUploadPlugin) => {
@@ -259,7 +287,7 @@ const waitForDecision = (response: PromiseLike<IAssetUploadDecision>, task: Asse
 
 export const prepareAssetUpload = (options: {
     plugins: IAssetUploadPlugin[];
-    protyle: IProtyle;
+    protyle?: IProtyle;
     input: IAssetUploadInput;
     context: IAssetUploadEventContext;
     requestId?: string;
@@ -268,6 +296,11 @@ export const prepareAssetUpload = (options: {
     const task = new AssetUploadTask(options.input, options.requestId || genRequestId(), options.protyle);
     const plugins = Array.from(options.plugins);
     const timeout = options.timeout ?? ASSET_UPLOAD_PLUGIN_TIMEOUT;
+    const context = {
+        ...options.context,
+        requiredFileCount: options.context.requiredFileCount ??
+            (options.context.target === "background" ? 1 : undefined),
+    };
     const fail = (error: unknown): TPreparedAssetUpload => {
         const errorMessage = getErrorMessage(error);
         task.abort(error instanceof Error ? error : new Error(errorMessage));
@@ -279,7 +312,7 @@ export const prepareAssetUpload = (options: {
         task.complete({status: "canceled"});
         return {state: "canceled", task};
     };
-    const initialValidationError = validateTargetInput(task.input, options.context);
+    const initialValidationError = validateTargetInput(task.input, context);
     if (initialValidationError) {
         return fail(initialValidationError);
     }
@@ -309,9 +342,11 @@ export const prepareAssetUpload = (options: {
             emitResult = plugin.eventBus.emitWithErrors("before-upload-assets", {
                 requestId: task.requestId,
                 protyle: options.protyle,
-                source: options.context.source,
-                target: options.context.target,
-                position: options.context.position ? {...options.context.position} : undefined,
+                source: context.source,
+                target: context.target,
+                position: context.position ? {...context.position} : undefined,
+                requiredFileCount: context.requiredFileCount,
+                allowedInputKinds: context.allowedInputKinds ? Array.from(context.allowedInputKinds) : undefined,
                 input: cloneInput(task.input),
                 signal: task.signal,
                 respondWith(value) {
@@ -369,7 +404,7 @@ export const prepareAssetUpload = (options: {
             if (validationError) {
                 throw new Error(`Plugin ${pluginLabel} returned invalid input: ${validationError}`);
             }
-            const targetValidationError = validateTargetInput(decision.input, options.context);
+            const targetValidationError = validateTargetInput(decision.input, context);
             if (targetValidationError) {
                 throw new Error(`Plugin ${pluginLabel} returned invalid input: ${targetValidationError}`);
             }

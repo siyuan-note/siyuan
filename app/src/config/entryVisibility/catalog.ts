@@ -252,6 +252,20 @@ const gutterWidth = () => node("width", lang("width"), true, [
     node("default", lang("default")),
 ]);
 
+const gutterHeight = () => node("height", lang("height"), true, [
+    node("heightInput", lang("entryPixelHeight")),
+    node("height_25%", literal("25%")),
+    node("height_33%", literal("33%")),
+    node("height_50%", literal("50%")),
+    node("height_67%", literal("67%")),
+    node("height_75%", literal("75%")),
+    node("height_100%", literal("100%")),
+    separator("separator_1"),
+    node("heightDrag", lang("entryPercentageHeight")),
+    separator("separator_2"),
+    node("default", lang("default")),
+]);
+
 const gutterTable = () => node("table", lang("table"), true, [
     node("useDefaultWidth", lang("useDefaultWidth")),
     node("distributeAllColWidths", lang("distributeAllColWidths")),
@@ -309,6 +323,7 @@ const gutterMultiple = () => [
     node("appearance", lang("appearance")),
     gutterLayout(),
     gutterWidth(),
+    gutterHeight(),
     separator("separator_quickMakeCard"),
     node("quickMakeCard", lang("quickMakeCard"), false),
     node("removeCard", lang("removeCard"), false),
@@ -410,6 +425,7 @@ const gutterSingle = () => [
     node("appearance", lang("appearance")),
     gutterLayout(true),
     gutterWidth(),
+    gutterHeight(),
     separator("separator_4"),
     node("wechatReminder", lang("wechatReminder"), false),
     node("quickMakeCard", lang("quickMakeCard"), false),

@@ -19,6 +19,28 @@ const protyle = {} as IProtyle;
 const context = {source: "paste", target: "editor"} as const;
 
 describe("asset upload plugin event", () => {
+    it("exposes target constraints for uploads without an editor", async () => {
+        let detail: IBeforeUploadAssetsDetail;
+        const prepared = await prepareAssetUpload({
+            plugins: [createPlugin(event => {
+                detail = event.detail;
+            })],
+            input: {kind: "files", files: [createFile("annotation.png")]},
+            context: {
+                source: "programmatic",
+                target: "pdf-annotation",
+                requiredFileCount: 1,
+                allowedInputKinds: ["files"],
+            },
+        });
+
+        assert.equal(prepared.state, "ready");
+        assert.equal(detail.protyle, undefined);
+        assert.equal(detail.requiredFileCount, 1);
+        assert.deepEqual(detail.allowedInputKinds, ["files"]);
+        prepared.task.complete({status: "canceled"});
+    });
+
     it("preserves files when plugins do not respond", async () => {
         const input: IAssetUploadInput = {kind: "files", files: [createFile("a.png")]};
         const result = prepareAssetUpload({
@@ -361,6 +383,23 @@ describe("asset upload plugin event", () => {
         const prepared = await pending;
         assert.equal(prepared.state, "canceled");
         assert.equal(signal.aborted, true);
+    });
+
+    it("aborts the upload phase when the editor is destroyed", async () => {
+        const currentProtyle = {} as IProtyle;
+        const prepared = await prepareAssetUpload({
+            plugins: [],
+            protyle: currentProtyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+        assert.equal(prepared.state, "ready");
+        prepared.task.startUpload();
+
+        cancelAssetUploads(currentProtyle);
+
+        assert.equal(prepared.task.signal.aborted, true);
+        prepared.task.complete({status: "canceled"});
     });
 
     it("cancels pending processing when the active plugin is unloaded", async () => {

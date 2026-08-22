@@ -27,6 +27,8 @@ import {showMessage} from "../../dialog/message";
 import {setTitle} from "../../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../../protyle/render/av/locate";
 import {MobileTabs} from "../tabs/MobileTabs";
+import {initMobileBottomBar} from "./mobileBottomBar";
+import {initMobileBars} from "./mobileBars";
 
 let custom: MobileCustom;
 const openDockMenu = (app: App) => {
@@ -65,6 +67,8 @@ export const initFramework = async (app: App, isStart: boolean) => {
     setInlineStyle();
     const snippetReady = renderSnippet(Constants.TIMEOUT_SNIPPET_LOAD);
     initKeyboardToolbar();
+    initMobileBottomBar(app);
+    initMobileBars();
     const sidebarElement = document.getElementById("sidebar");
     // 不能使用 getEventName，否则点击返回会展开右侧栏
     const firstToolbarElement = sidebarElement.querySelector(".toolbar--border");
@@ -151,16 +155,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
         }
         activeBlur();
         sidebarElement.style.transform = "translateX(0px)";
-        const type = sidebarElement.querySelector(".toolbar--border .toolbar__icon--active").getAttribute("data-type");
-        if (type === "sidebar-outline-tab") {
-            window.siyuan.mobile.docks.outline.reload();
-        } else if (type === "sidebar-backlink-tab") {
-            window.siyuan.mobile.docks.backlink.update();
-        } else if (type === "sidebar-bookmark-tab") {
-            window.siyuan.mobile.docks.bookmark.update();
-        } else if (type === "sidebar-tag-tab") {
-            window.siyuan.mobile.docks.tag.update();
-        }
+        firstToolbarElement.dispatchEvent(new CustomEvent("click", {detail: "file"}));
     });
     // 用 touchstart 会导致键盘不收起
     document.getElementById("toolbarMore").addEventListener("click", () => {
@@ -169,6 +164,7 @@ export const initFramework = async (app: App, isStart: boolean) => {
     document.getElementById("toolbarSync").addEventListener(getEventName(), () => {
         syncGuide(app);
     });
+    document.getElementById("toolbarSync").setAttribute("aria-label", window.siyuan.languages.accountSync);
     document.getElementById("modelClose").addEventListener("click", () => {
         closeModel();
     });
@@ -176,6 +172,9 @@ export const initFramework = async (app: App, isStart: boolean) => {
     const toolbarTabsElement = document.getElementById("toolbarTabs");
     toolbarTabsElement.setAttribute("aria-label", window.siyuan.languages.mobileTabs);
     toolbarTabsElement.addEventListener("click", () => {
+        if (getCurrentEditor()?.protyle.toolbar.isMultiSelectMode()) {
+            return;
+        }
         activeBlur();
         window.siyuan.mobile.tabs.openOverview();
     });

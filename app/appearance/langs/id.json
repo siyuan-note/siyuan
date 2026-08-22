@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "Kelola warna kustom",
+	"deleteCustomColorTip": "Setelah dihapus dan disimpan, konten yang menggunakan warna kustom “${name}” akan kembali ke warna yang disimpan saat diterapkan dan tidak lagi mengikuti perubahan mode terang/gelap. Yakin ingin menghapusnya?",
+	"mobileMenuNavigation": "Navigasi",
+	"mobileBottomBar": "Bilah bawah",
 	"insertSuperBlockLeft": "Sisipkan kolom di sebelah kiri",
 	"insertSuperBlockRight": "Sisipkan kolom di sebelah kanan",
 	"assetOpen": "Pembukaan sumber daya",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "Profil kustom",
 	"entryCreateProfile": "Buat profil",
 	"entryImportInvalid": "Berkas profil menu dan dok tidak valid",
-	"mobileMenuQuickActions": "Tindakan cepat",
 	"mobileMenuCreate": "Buat",
 	"mobileMenuDataManagement": "Pengelolaan data",
 	"mobileMenuSettingsAndHelp": "Pengaturan dan bantuan",

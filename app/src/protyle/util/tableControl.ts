@@ -1121,6 +1121,7 @@ export class TableControl {
         const gridRect = this.getTableGridRect(state.table);
         const addColumnEdge = gridRect.right;
         const viewportRect = this.getTableGridViewportRect(state.table, gridRect);
+        const tableViewportRect = this.getTableViewportRect(state.table);
         const addRowEdge = this.getTableAddRowEdge(state.table);
         const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
         const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
@@ -1131,18 +1132,18 @@ export class TableControl {
         if (state.mode === "row" || state.mode === "both") {
             this.addRowButton.classList.remove("fn__none");
             this.addRowButton.classList.add("protyle-table-control__add--active");
-            this.addRowButton.style.width = `${Math.max(0, viewportRect.width)}px`;
+            this.addRowButton.style.width = `${Math.max(0, tableViewportRect.width)}px`;
             this.addRowButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2, rowControlCenter);
+            this.setPosition(this.addRowButton, tableViewportRect.left + tableViewportRect.width / 2, rowControlCenter);
         }
         if ((state.mode === "column" || state.mode === "both") && columnControlVisible) {
             this.addColumnButton.classList.remove("fn__none");
             this.addColumnButton.classList.add("protyle-table-control__add--active");
             this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-            this.addColumnButton.style.height = `${Math.max(0, viewportRect.height)}px`;
+            this.addColumnButton.style.height = `${Math.max(0, tableViewportRect.height)}px`;
             this.setPosition(this.addColumnButton,
                 addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
-                viewportRect.top + viewportRect.height / 2);
+                tableViewportRect.top + tableViewportRect.height / 2);
         }
         if (state.mode === "both" && columnControlVisible) {
             this.addBothButton.classList.remove("fn__none");
@@ -1225,6 +1226,7 @@ export class TableControl {
             const gridRect = this.getTableGridRect(table);
             const addColumnEdge = gridRect.right;
             const viewportRect = this.getTableGridViewportRect(table, gridRect);
+            const tableViewportRect = this.getTableViewportRect(table);
             const addRowEdge = this.getTableAddRowEdge(table);
             const contentRect = (this.protyle.contentElement || this.protyle.element).getBoundingClientRect();
             const rowControlCenter = getTableResizeControlCenter(addRowEdge, contentRect.top, contentRect.bottom,
@@ -1266,19 +1268,20 @@ export class TableControl {
             if ((this.hoverType === "add-row" || this.hoverType === "add-both") && viewportRect.width > 0 &&
                 addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1) {
                 this.addRowButton.classList.remove("fn__none");
-                this.addRowButton.style.width = `${viewportRect.width}px`;
+                this.addRowButton.style.width = `${tableViewportRect.width}px`;
                 this.addRowButton.style.height = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-                this.setPosition(this.addRowButton, viewportRect.left + viewportRect.width / 2, rowControlCenter);
+                this.setPosition(this.addRowButton, tableViewportRect.left + tableViewportRect.width / 2,
+                    rowControlCenter);
             }
             if ((this.hoverType === "add-column" || this.hoverType === "add-both") && viewportRect.height > 0 &&
                 columnControlVisible &&
                 addColumnEdge >= viewportRect.left) {
                 this.addColumnButton.classList.remove("fn__none");
                 this.addColumnButton.style.width = `${TABLE_ADD_CONTROL_THICKNESS}px`;
-                this.addColumnButton.style.height = `${viewportRect.height}px`;
+                this.addColumnButton.style.height = `${tableViewportRect.height}px`;
                 this.setPosition(this.addColumnButton,
                     addColumnEdge + TABLE_ADD_CONTROL_GAP + TABLE_ADD_CONTROL_THICKNESS / 2,
-                    viewportRect.top + viewportRect.height / 2);
+                    tableViewportRect.top + tableViewportRect.height / 2);
             }
             if (this.hoverType === "add-both" && columnControlVisible &&
                 addRowEdge >= contentRect.top && addRowEdge <= contentRect.bottom + 1) {

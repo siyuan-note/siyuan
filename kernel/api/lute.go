@@ -110,6 +110,7 @@ func html2BlockDOM(c *gin.Context) {
 	office, _ := arg["office"].(string)
 	officeMathHTML, _ := arg["officeMathHTML"].(string)
 	wps, _ := arg["wps"].(string)
+	skipLocalAssets, _ := arg["skipLocalAssets"].(bool)
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
@@ -179,7 +180,7 @@ func html2BlockDOM(c *gin.Context) {
 		}
 	}
 
-	if util.ContainerStd == model.Conf.System.Container {
+	if util.ContainerStd == model.Conf.System.Container && !skipLocalAssets {
 		// 处理本地资源文件复制
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || ast.NodeLinkDest != n.Type {

@@ -930,6 +930,27 @@ func isValidResolvedAssetPath(assetAbsPath, requestBoxID string) bool {
 	return err == nil && filepath.Clean(validatedAbsPath) == filepath.Clean(assetAbsPath)
 }
 
+func resolveAssetRequestPath(cleanPath, boxID, dataPath string) (string, error) {
+	if dataPath != "" {
+		if boxID != "" {
+			return "", errors.New("box and dataPath cannot be used together")
+		}
+		dataRelativePath, assetAbsPath, err := model.ResolveDataAssetPath(dataPath)
+		if err != nil {
+			return "", err
+		}
+		assetPath, _, ok := model.AssetPathFromDataRelativePath(dataRelativePath)
+		if !ok || assetPath != cleanPath {
+			return "", fmt.Errorf("asset path [%s] does not match data path [%s]", cleanPath, dataPath)
+		}
+		return assetAbsPath, nil
+	}
+	if boxID != "" {
+		return model.GetAssetAbsPathInBox(cleanPath, boxID)
+	}
+	return model.GetAssetAbsPath(cleanPath)
+}
+
 func serveAssets(ginServer *gin.Engine) {
 	ginServer.POST("/upload", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, model.Upload)
 
@@ -954,15 +975,14 @@ func serveAssets(ginServer *gin.Engine) {
 			return
 		}
 
-		// 解析 box 查询参数，加密 box 资源按 box 内精确查找（不全局搜索）
+		// dataPath 用于精确预览普通笔记本或文档下的未引用资源，仅管理员可用
 		boxID := context.Query("box")
-		var p string
-		var err error
-		if boxID != "" {
-			p, err = model.GetAssetAbsPathInBox(cleanPath, boxID)
-		} else {
-			p, err = model.GetAssetAbsPath(cleanPath)
+		dataPath := context.Query("dataPath")
+		if dataPath != "" && !model.IsAdminRoleContext(context) {
+			context.Status(http.StatusForbidden)
+			return
 		}
+		p, err := resolveAssetRequestPath(cleanPath, boxID, dataPath)
 		if err != nil || p == "" {
 			context.Status(http.StatusNotFound)
 			return

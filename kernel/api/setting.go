@@ -755,11 +755,9 @@ func setAppearance(c *gin.Context) {
 	if nil == appearance.EntryVisibility {
 		appearance.EntryVisibility = model.Conf.Appearance.EntryVisibility
 	}
+	appearance.StatusBar = util.NormalizeStatusBar(appearance.StatusBar, util.IsMobileContainer())
 	model.Conf.Appearance = appearance
 	util.StatusBarCfg = model.Conf.Appearance.StatusBar
-	if nil == util.StatusBarCfg {
-		util.StatusBarCfg = &util.StatusBar{}
-	}
 	if nil == model.Conf.Appearance.Notifications {
 		// 旧配置未迁移，按默认全部启用处理
 		model.Conf.Appearance.Notifications = util.NewNotifications()

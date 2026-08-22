@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "จัดการสีที่กำหนดเอง",
+	"deleteCustomColorTip": "หลังจากลบและบันทึก เนื้อหาที่ใช้สีที่กำหนดเอง “${name}” จะกลับไปใช้สีที่บันทึกไว้ตอนนำไปใช้ และจะไม่เปลี่ยนตามการสลับโหมดสว่าง/มืดอีกต่อไป คุณแน่ใจหรือไม่ว่าต้องการลบ?",
+	"mobileMenuNavigation": "การนำทาง",
+	"mobileBottomBar": "แถบด้านล่าง",
 	"insertSuperBlockLeft": "แทรกคอลัมน์ทางซ้าย",
 	"insertSuperBlockRight": "แทรกคอลัมน์ทางขวา",
 	"assetOpen": "การเปิดทรัพยากร",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "โปรไฟล์กำหนดเอง",
 	"entryCreateProfile": "สร้างโปรไฟล์",
 	"entryImportInvalid": "ไฟล์โปรไฟล์เมนูและแถบเชื่อมต่อไม่ถูกต้อง",
-	"mobileMenuQuickActions": "การดำเนินการด่วน",
 	"mobileMenuCreate": "สร้าง",
 	"mobileMenuDataManagement": "การจัดการข้อมูล",
 	"mobileMenuSettingsAndHelp": "การตั้งค่าและความช่วยเหลือ",

@@ -35,6 +35,9 @@ import {
     unregisterCustomFont
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
+/// #if MOBILE
+import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../mobile/util/mobileBottomBar";
+/// #endif
 /// #if !MOBILE
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
 /// #endif
@@ -597,6 +600,18 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
 const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("controls", window.siyuan.languages.configGroupControls);
 
+    /// #if MOBILE
+    group.slot({
+        key: "mobileBottomBar",
+        keywords: [
+            window.siyuan.languages.mobile,
+            window.siyuan.languages.mobileBottomBar,
+            window.siyuan.languages.reset,
+        ],
+        html: genMobileBottomBarSettingHTML,
+        afterMount: mountMobileBottomBarSetting,
+    });
+    /// #endif
     /// #if !MOBILE
     group.slot({
         key: "entryVisibility",
@@ -799,7 +814,7 @@ const readStatusBarMsgFromDialog = (root: HTMLElement): Config.IAppearanceStatus
     STATUS_BAR_MSG_ITEMS.reduce((acc, {key}) => {
         acc[key] = !(root.querySelector(`#${CSS.escape(key)}`) as HTMLInputElement).checked;
         return acc;
-    }, {} as Config.IAppearanceStatusBar);
+    }, {...window.siyuan.config.appearance.statusBar});
 
 const mountAppearanceSetStatusBar = (root: HTMLElement) => {
     root.querySelector("#statusBarSetting")?.addEventListener("click", () => {

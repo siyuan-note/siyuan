@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "إدارة الألوان المخصصة",
+	"deleteCustomColorTip": "بعد الحذف والحفظ، سيعود المحتوى الذي يستخدم اللون المخصص «${name}» إلى اللون المحفوظ عند تطبيقه، ولن يتغير بعد ذلك مع التبديل بين الوضعين الفاتح والداكن. هل أنت متأكد من حذفه؟",
+	"mobileMenuNavigation": "التنقل",
+	"mobileBottomBar": "الشريط السفلي",
 	"insertSuperBlockLeft": "إدراج عمود إلى اليسار",
 	"insertSuperBlockRight": "إدراج عمود إلى اليمين",
 	"assetOpen": "فتح الموارد",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "ملف تعريف مخصص",
 	"entryCreateProfile": "إنشاء ملف تعريف",
 	"entryImportInvalid": "ملف تعريف القوائم وشريط الإرساء غير صالح",
-	"mobileMenuQuickActions": "إجراءات سريعة",
 	"mobileMenuCreate": "إنشاء",
 	"mobileMenuDataManagement": "إدارة البيانات",
 	"mobileMenuSettingsAndHelp": "الإعدادات والمساعدة",

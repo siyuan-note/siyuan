@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "Administrar colores personalizados",
+	"deleteCustomColorTip": "Después de eliminar y guardar, el contenido que use el color personalizado «${name}» volverá al color guardado cuando se aplicó y dejará de adaptarse al cambio entre los modos claro y oscuro. ¿Seguro que quieres eliminarlo?",
+	"mobileMenuNavigation": "Navegación",
+	"mobileBottomBar": "Barra inferior",
 	"insertSuperBlockLeft": "Insertar columna a la izquierda",
 	"insertSuperBlockRight": "Insertar columna a la derecha",
 	"assetOpen": "Apertura de recursos",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "Perfil personalizado",
 	"entryCreateProfile": "Crear perfil",
 	"entryImportInvalid": "El archivo de perfil de menús y panel acoplable no es válido",
-	"mobileMenuQuickActions": "Acciones rápidas",
 	"mobileMenuCreate": "Crear",
 	"mobileMenuDataManagement": "Gestión de datos",
 	"mobileMenuSettingsAndHelp": "Configuración y ayuda",

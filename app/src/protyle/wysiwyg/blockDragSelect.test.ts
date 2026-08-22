@@ -97,16 +97,49 @@ describe("getBlockDragSelectBlock", () => {
     const isContainerBlock = (element: Element) => (element as unknown as TestElement).containerSurface;
     const isListItem = (element: Element) => (element as unknown as TestElement).name === "listItem";
 
-    it("selects a list item instead of its content block", () => {
+    it("selects a list item instead of its primary content block", () => {
         const editor = new TestElement("editor");
         const list = new TestElement("list", true, true);
         const listItem = new TestElement("listItem", true, true);
+        const action = new TestElement("action");
         const paragraph = new TestElement("paragraph", true);
         const content = new TestElement("content");
-        editor.append(list.append(listItem.append(paragraph.append(content))));
+        editor.append(list.append(listItem.append(action, paragraph.append(content))));
 
         assert.equal(getBlockDragSelectBlock(asElement(content), asElement(editor), getBlock,
             isContainerBlock, isListItem), asElement(listItem));
+    });
+
+    it("selects an additional list item child block independently", () => {
+        const editor = new TestElement("editor");
+        const list = new TestElement("list", true, true);
+        const listItem = new TestElement("listItem", true, true);
+        const action = new TestElement("action");
+        const paragraph = new TestElement("paragraph", true);
+        const childParagraph = new TestElement("childParagraph", true);
+        const childContent = new TestElement("childContent");
+        editor.append(list.append(listItem.append(action, paragraph, childParagraph.append(childContent))));
+
+        assert.equal(getBlockDragSelectBlock(asElement(childContent), asElement(editor), getBlock,
+            isContainerBlock, isListItem), asElement(childParagraph));
+    });
+
+    it("selects the inner list item for its primary content block", () => {
+        const editor = new TestElement("editor");
+        const outerList = new TestElement("list", true, true);
+        const outerListItem = new TestElement("listItem", true, true);
+        const outerParagraph = new TestElement("outerParagraph", true);
+        const innerList = new TestElement("list", true, true);
+        const innerListItem = new TestElement("listItem", true, true);
+        const innerAction = new TestElement("innerAction");
+        const innerParagraph = new TestElement("innerParagraph", true);
+        const content = new TestElement("content");
+        innerListItem.append(innerAction, innerParagraph.append(content));
+        outerListItem.append(outerParagraph, innerList.append(innerListItem));
+        editor.append(outerList.append(outerListItem));
+
+        assert.equal(getBlockDragSelectBlock(asElement(content), asElement(editor), getBlock,
+            isContainerBlock, isListItem), asElement(innerListItem));
     });
 
     it("does not cross another container to select an outer list item", () => {
@@ -185,6 +218,29 @@ describe("resolveBlockDragSelectStart", () => {
         list.append(listItem.append(paragraph.append(content)));
 
         assert.equal(resolve(new Map([[0, list], [4, list], [8, content]])), asElement(listItem));
+    });
+
+    it("switches from a list item surface to an additional child block", () => {
+        const editor = new TestElement("editor");
+        const list = new TestElement("list", true, true);
+        const listItem = new TestElement("listItem", true, true);
+        const paragraph = new TestElement("paragraph", true);
+        const childParagraph = new TestElement("childParagraph", true);
+        const childContent = new TestElement("childContent");
+        editor.append(list.append(listItem.append(paragraph, childParagraph.append(childContent))));
+        const isContainerBlock = (element: Element) => (element as unknown as TestElement).containerSurface;
+        const isListItem = (element: Element) => (element as unknown as TestElement).name === "listItem";
+        const getDragSelectBlock = (element: Element) => getBlockDragSelectBlock(element, asElement(editor),
+            getBlock, isContainerBlock, isListItem);
+
+        assert.equal(resolveBlockDragSelectStart({
+            x: 100,
+            top: 0,
+            bottom: 8,
+            elementFromPoint: (_x, y) => y < 8 ? asElement(listItem) : asElement(childContent),
+            getBlock: getDragSelectBlock,
+            isContainerSurface: (element) => (element as unknown as TestElement).containerSurface,
+        }), asElement(childParagraph));
     });
 
     ["blockquote", "callout", "superBlock"].forEach((name) => {

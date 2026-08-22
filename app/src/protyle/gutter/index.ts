@@ -60,6 +60,7 @@ import {
     insertEmptySuperBlockColumn,
     jumpToParent,
 } from "../../block/util";
+import {getHorizontalSuperBlockChild} from "../../block/superBlock";
 import {setDragTipGhost} from "../util/dragTip";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
@@ -1444,7 +1445,7 @@ export class Gutter {
             }
             this.genAlign(selectsElement, protyle);
             this.genWidths(selectsElement, protyle);
-            // this.genHeights(selectsElement, protyle);
+            this.genHeights(selectsElement, protyle);
         }
         if (!window.siyuan.config.readonly && !isEncryptedBox(protyle.notebookId)) {
             window.siyuan.menus.menu.append(new MenuItem({
@@ -2784,7 +2785,7 @@ export class Gutter {
             }
             this.genAlign([nodeElement], protyle);
             this.genWidths([nodeElement], protyle);
-            // this.genHeights([nodeElement], protyle);
+            this.genHeights([nodeElement], protyle);
         }
         if (type !== "NodeThematicBreak" || !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
@@ -3200,14 +3201,9 @@ export class Gutter {
         }).element);
     }
 
-    // TODO https://github.com/siyuan-note/siyuan/issues/11055
     private genHeights(nodeElements: Element[], protyle: IProtyle) {
-        const matchHeight = nodeElements.find(item => {
-            if (!item.classList.contains("p") && !item.classList.contains("code-block") && !item.classList.contains("render-node")) {
-                return true;
-            }
-        });
-        if (matchHeight) {
+        if (nodeElements.length === 0 ||
+            nodeElements.some(item => item.getAttribute("data-type") !== "NodeCodeBlock" || item.getAttribute("data-subtype"))) {
             return;
         }
         let rangeElement: HTMLInputElement;
@@ -3216,16 +3212,16 @@ export class Gutter {
             id: "heightInput",
             iconHTML: "",
             type: "readonly",
-            label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" value="${firstElement.style.height.endsWith("px") ? parseInt(firstElement.style.height) : ""}" type="number" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}"><span class="fn__flex-center">px</span></div>`,
+            label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" value="${firstElement.style.maxHeight.endsWith("px") ? parseInt(firstElement.style.maxHeight) : ""}" type="number" min="1" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}"><span class="fn__flex-center">px</span></div>`,
             bind: (element) => {
                 const inputElement = element.querySelector("input");
                 inputElement.addEventListener("input", () => {
+                    const maxHeight = inputElement.value ? inputElement.value + "px" : "";
                     nodeElements.forEach((item: HTMLElement) => {
-                        item.style.height = inputElement.value + "px";
-                        item.style.flex = "none";
+                        item.style.maxHeight = maxHeight;
                     });
                     rangeElement.value = "0";
-                    rangeElement.parentElement.setAttribute("aria-label", inputElement.value + "px");
+                    rangeElement.parentElement.setAttribute("aria-label", maxHeight || window.siyuan.languages.default);
                 });
                 this.updateNodeElements(nodeElements, protyle, inputElement);
             }
@@ -3237,8 +3233,7 @@ export class Gutter {
                 label: item,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        e.style.height = item;
-                        e.style.flex = "none";
+                        e.style.maxHeight = parseInt(item) + "vh";
                     });
                 }
             });
@@ -3247,20 +3242,20 @@ export class Gutter {
             id: "separator_1",
             type: "separator"
         });
-        const height = firstElement.style.height.endsWith("%") ? parseInt(firstElement.style.height) : 0;
+        const height = firstElement.style.maxHeight.endsWith("vh") ? parseInt(firstElement.style.maxHeight) : 0;
         window.siyuan.menus.menu.append(new MenuItem({
-            id: "heightDrag",
+            id: "height",
             label: window.siyuan.languages.height,
             submenu: styles.concat([{
+                id: "heightDrag",
                 iconHTML: "",
                 type: "readonly",
-                label: `<div style="margin: 4px 0;" aria-label="${firstElement.style.height.endsWith("px") ? firstElement.style.height : (firstElement.style.height || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n"><input style="box-sizing: border-box" value="${height}" class="b3-slider fn__block" max="100" min="1" step="1" type="range"></div>`,
+                label: `<div style="margin: 4px 0;" aria-label="${firstElement.style.maxHeight ? firstElement.style.maxHeight.replace("vh", "%") : window.siyuan.languages.default}" class="b3-tooltips b3-tooltips__n"><input style="box-sizing: border-box" value="${height}" class="b3-slider fn__block" max="100" min="1" step="1" type="range"></div>`,
                 bind: (element) => {
                     rangeElement = element.querySelector("input");
                     rangeElement.addEventListener("input", () => {
                         nodeElements.forEach((e: HTMLElement) => {
-                            e.style.height = rangeElement.value + "%";
-                            e.style.flex = "none";
+                            e.style.maxHeight = rangeElement.value + "vh";
                         });
                         rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
                     });
@@ -3275,9 +3270,8 @@ export class Gutter {
                 label: window.siyuan.languages.default,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
-                        if (e.style.height) {
-                            e.style.height = "";
-                            e.style.overflow = "";
+                        if (e.style.maxHeight) {
+                            e.style.maxHeight = "";
                         }
                     });
                 }
@@ -3501,6 +3495,8 @@ export class Gutter {
         }
         let html = "";
         let nodeElement = selectedElement || element;
+        this.element.classList.toggle("protyle-gutters--sb-column",
+            !!getHorizontalSuperBlockChild(nodeElement, protyle.wysiwyg.element));
         let space = 0;
         let index = 0;
         let listItem;

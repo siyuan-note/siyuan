@@ -1518,9 +1518,11 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     source: "programmatic",
                     target: "editor",
                 });
-                imgElement.setAttribute("src", base64Src[0]);
-                imgElement.setAttribute("data-src", base64Src[0]);
-                assetElement.querySelector(".img__net")?.remove();
+                if (base64Src[0]) {
+                    imgElement.setAttribute("src", base64Src[0]);
+                    imgElement.setAttribute("data-src", base64Src[0]);
+                    assetElement.querySelector(".img__net")?.remove();
+                }
             }
 
             const ocrElement = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement;

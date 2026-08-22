@@ -746,6 +746,10 @@ export const getLocalStorage = (cb: () => void) => {
             version: 1,
             tabs: [],
         };
+        defaultStorage[Constants.LOCAL_MOBILE_BOTTOM_BAR] = {
+            version: 1,
+            actions: ["documents", "search", "newDoc", "tabs"],
+        };
         defaultStorage[Constants.LOCAL_IMAGES] = {
             file: "1f4c4",
             note: "1f5c3",
@@ -778,6 +782,7 @@ export const getLocalStorage = (cb: () => void) => {
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_MOBILE_TABS,
+            Constants.LOCAL_MOBILE_BOTTOM_BAR,
             Constants.LOCAL_FONTSTYLES,
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS,
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,

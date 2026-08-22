@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "Spravovať vlastné farby",
+	"deleteCustomColorTip": "Po odstránení a uložení sa obsah používajúci vlastnú farbu „${name}“ vráti k farbe uloženej pri jej použití a prestane sa prispôsobovať prepínaniu svetlého a tmavého režimu. Naozaj ju chcete odstrániť?",
+	"mobileMenuNavigation": "Navigácia",
+	"mobileBottomBar": "Spodná lišta",
 	"insertSuperBlockLeft": "Vložiť stĺpec vľavo",
 	"insertSuperBlockRight": "Vložiť stĺpec vpravo",
 	"assetOpen": "Otváranie zdrojov",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "Vlastný profil",
 	"entryCreateProfile": "Vytvoriť profil",
 	"entryImportInvalid": "Neplatný súbor profilu ponúk a doku",
-	"mobileMenuQuickActions": "Rýchle akcie",
 	"mobileMenuCreate": "Vytvoriť",
 	"mobileMenuDataManagement": "Správa údajov",
 	"mobileMenuSettingsAndHelp": "Nastavenia a pomoc",

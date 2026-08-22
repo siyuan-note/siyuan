@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "ניהול צבעים מותאמים אישית",
+	"deleteCustomColorTip": "לאחר המחיקה והשמירה, תוכן המשתמש בצבע המותאם אישית „${name}” יחזור לצבע שנשמר בעת החלתו ולא ישתנה עוד במעבר בין מצב בהיר לכהה. האם למחוק אותו?",
+	"mobileMenuNavigation": "ניווט",
+	"mobileBottomBar": "סרגל תחתון",
 	"insertSuperBlockLeft": "הוספת עמודה משמאל",
 	"insertSuperBlockRight": "הוספת עמודה מימין",
 	"assetOpen": "פתיחת משאבים",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "פרופיל מותאם אישית",
 	"entryCreateProfile": "יצירת פרופיל",
 	"entryImportInvalid": "קובץ פרופיל התפריטים וסרגל העגינה אינו תקין",
-	"mobileMenuQuickActions": "פעולות מהירות",
 	"mobileMenuCreate": "יצירה",
 	"mobileMenuDataManagement": "ניהול נתונים",
 	"mobileMenuSettingsAndHelp": "הגדרות ועזרה",

@@ -1,4 +1,8 @@
 {
+	"manageCustomColors": "カスタム色を管理",
+	"deleteCustomColorTip": "削除して保存すると、カスタム色「${name}」を使用している内容は適用時に保存された色へ戻り、ライトモードとダークモードの切り替えに追従しなくなります。削除してもよろしいですか？",
+	"mobileMenuNavigation": "ナビゲーション",
+	"mobileBottomBar": "下部バー",
 	"insertSuperBlockLeft": "左側に列を挿入",
 	"insertSuperBlockRight": "右側に列を挿入",
 	"assetOpen": "リソースの開き方",
@@ -225,7 +229,6 @@
 	"entryCustomProfile": "カスタムプロファイル",
 	"entryCreateProfile": "プロファイルを作成",
 	"entryImportInvalid": "メニューとドックのプロファイルファイルが無効です",
-	"mobileMenuQuickActions": "クイック操作",
 	"mobileMenuCreate": "作成",
 	"mobileMenuDataManagement": "データ管理",
 	"mobileMenuSettingsAndHelp": "設定とヘルプ",

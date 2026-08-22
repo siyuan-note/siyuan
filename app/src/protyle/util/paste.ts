@@ -19,6 +19,8 @@ import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wys
 import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../upload/base64";
+import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets} from "../upload/htmlLocalAssets";
+import {getAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
@@ -1037,6 +1039,19 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 insertHTML(tempElement.innerHTML, protyle, false, false, true);
                 return;
             }
+            const localAssets = collectHTMLLocalAssets(tempElement);
+            if (localAssets.length > 0) {
+                await new Promise<void>(resolve => {
+                    uploadLocalFiles(localAssets.map(item => ({path: item.path, size: null})), protyle, true, {
+                        ...assetUploadOptions,
+                        requiredFileCount: localAssets.length,
+                        fromHTMLPaste: true,
+                    }, (_response, result) => {
+                        applyHTMLLocalAssetPaths(localAssets,
+                            getAssetUploadPathsByInput(localAssets.length, result));
+                    }, () => resolve());
+                });
+            }
             fetchPost("/api/lute/html2BlockDOM", {
                 dom: tempElement.innerHTML,
                 text: textPlain,
@@ -1044,6 +1059,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 office,
                 officeMathHTML,
                 wps,
+                skipLocalAssets: localAssets.length > 0,
             }, (response) => {
                 insertConvertedBlockDOM(protyle, response.data);
             });
@@ -1094,14 +1110,19 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 const tempElement = document.createElement("template");
                 tempElement.innerHTML = textPlainDom;
                 const imgSrcList: string[] = [];
-                const imageElements = tempElement.content.querySelectorAll("img");
-                imageElements.forEach((item) => {
-                    if (item.getAttribute("data-src").startsWith("data:image/")) {
-                        imgSrcList.push(item.getAttribute("data-src"));
+                const imageElements: HTMLImageElement[] = [];
+                tempElement.content.querySelectorAll("img").forEach((item) => {
+                    const dataSrc = item.getAttribute("data-src");
+                    if (dataSrc?.startsWith("data:image/")) {
+                        imgSrcList.push(dataSrc);
+                        imageElements.push(item);
                     }
                 });
                 const base64SrcList = await base64ToURL(imgSrcList, protyle, assetUploadOptions);
                 base64SrcList.forEach((item, index) => {
+                    if (!item) {
+                        return;
+                    }
                     imageElements[index].setAttribute("src", item);
                     imageElements[index].setAttribute("data-src", item);
                     imageElements[index].parentElement.querySelector(".img__net")?.remove();

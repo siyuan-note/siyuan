@@ -2,7 +2,7 @@ import {getIconByType} from "../../editor/getIcon";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
-import {fullscreen, net2LocalAssets, updateReadonly} from "./action";
+import {net2LocalAssets, updateReadonly} from "./action";
 import {openFileAttr} from "../../menus/commonMenuItem";
 import {setEditMode} from "../util/setEditMode";
 import {RecordMedia, RecordMediaInputEndedError} from "../util/RecordMedia";
@@ -31,7 +31,6 @@ import {openTitleMenu} from "../header/openTitleMenu";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid, isInHarmony, isIPad, isMac, updateHotkeyTip} from "../util/compatibility";
 import {isEncryptedBox} from "../../util/pathName";
-import {resize} from "../util/resize";
 import {listIndent, listOutdent} from "../wysiwyg/list";
 import {improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
 import {getCloudURL} from "../../config/util/about";
@@ -881,12 +880,12 @@ ${padHTML}
             /// #if !MOBILE
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "fullscreen",
-                icon: protyle.element.className.includes("fullscreen") ? "iconFullscreenExit" : "iconFullscreen",
+                icon: protyle.getInstance().isFullscreen() ? "iconFullscreenExit" : "iconFullscreen",
                 accelerator: window.siyuan.config.keymap.editor.general.fullscreen.custom,
                 label: window.siyuan.languages.fullscreen,
                 click: () => {
-                    fullscreen(protyle.element);
-                    resize(protyle);
+                    const editor = protyle.getInstance();
+                    editor.setFullscreen(!editor.isFullscreen());
                 }
             }).element);
             /// #endif

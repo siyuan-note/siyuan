@@ -60,6 +60,10 @@
     * [移除字段](#移除字段)
     * [设置全局字段排序](#设置全局字段排序)
     * [设置视图内字段排序](#设置视图内字段排序)
+* [搜索](#搜索)
+    * [获取已保存的搜索条件组](#获取已保存的搜索条件组)
+    * [保存搜索条件组](#保存搜索条件组)
+    * [移除搜索条件组](#移除搜索条件组)
 * [SQL](#SQL)
     * [执行 SQL 查询](#执行-SQL-查询)
     * [提交事务](#提交事务)
@@ -2554,6 +2558,102 @@
     * `viewID`: 目标视图。为空时使用第一个可用视图
     * `keyID`: 要移动的字段 ID
     * `previousKeyID`: `keyID` 应置于其后的字段 ID。为空字符串表示移动到首位
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+## 搜索
+
+已保存的搜索条件组使用以下字段：
+
+* `name`：条件组名称，同时也是条件组的唯一键
+* `sort`：结果排序方式，`0` 为按块类型，`1` 为按创建时间升序，`2` 为按创建时间降序，`3` 为按更新时间升序，`4` 为按更新时间降序，`5` 为按内容顺序，`6` 为按相关度升序，`7` 为按相关度降序
+* `group`：分组方式，`0` 为不分组，`1` 为按文档分组
+* `hasReplace`：是否启用替换
+* `method`：搜索方式，`0` 为关键字，`1` 为查询语法，`2` 为 SQL，`3` 为正则表达式，`4` 为语义搜索
+* `hPath`：人类可读的搜索范围路径
+* `idPath`：搜索范围路径数组
+* `k`：搜索关键字
+* `r`：替换关键字
+* `types`：块类型开关，支持 `mathBlock`、`table`、`blockquote`、`superBlock`、`paragraph`、`document`、`heading`、`list`、`listItem`、`codeBlock`、`htmlBlock`、`embedBlock`、`databaseBlock`、`audioBlock`、`videoBlock`、`iframeBlock`、`widgetBlock` 和 `callout`
+* `subTypes`：块子类型开关，`h1` 至 `h6` 表示标题级别，`o`、`u` 和 `t` 分别表示有序列表、无序列表和任务列表
+* `replaceTypes`：替换类型开关，支持 `text`、`imgText`、`imgTitle`、`imgSrc`、`aText`、`aTitle`、`aHref`、`code`、`em`、`strong`、`inlineMath`、`inlineMemo`、`blockRef`、`fileAnnotationRef`、`kbd`、`mark`、`s`、`sub`、`sup`、`tag`、`u`、`docTitle`、`codeBlock`、`mathBlock` 和 `htmlBlock`
+
+`types`、`subTypes` 或 `replaceTypes` 中省略的布尔开关按 `false` 处理。
+
+### 获取已保存的搜索条件组
+
+* `/api/storage/getCriteria`
+* 无参数
+* 返回值：`data` 为按保存顺序排列的搜索条件组数组；没有已保存的条件组时为空数组
+* 对于只读角色，条件组会根据发布访问权限进行过滤，并清空返回结果中的 `k` 和 `r`
+
+### 保存搜索条件组
+
+创建条件组或完整覆盖同名条件组。覆盖时保留原有位置，新增时追加到末尾。
+
+* `/api/storage/setCriterion`
+* 需要管理员角色，在只读模式下不可用
+* 参数
+
+  ```json
+  {
+    "criterion": {
+      "name": "公开笔记",
+      "sort": 0,
+      "group": 1,
+      "hasReplace": false,
+      "method": 0,
+      "hPath": "公开笔记",
+      "idPath": ["20210808180117-czj9bvb"],
+      "k": "",
+      "r": "",
+      "types": {
+        "document": true,
+        "paragraph": true
+      },
+      "subTypes": {
+        "h1": true
+      },
+      "replaceTypes": {
+        "text": true
+      }
+    }
+  }
+  ```
+
+    * `criterion`：要保存的完整搜索条件组
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### 移除搜索条件组
+
+移除指定名称的条件组。名称不存在时也视为成功。
+
+* `/api/storage/removeCriterion`
+* 需要管理员角色，在只读模式下不可用
+* 参数
+
+  ```json
+  {
+    "name": "公开笔记"
+  }
+  ```
+
+    * `name`：条件组名称
 * 返回值
 
   ```json

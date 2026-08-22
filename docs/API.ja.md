@@ -60,6 +60,10 @@
     * [フィールドを削除](#フィールドを削除)
     * [グローバルのフィールドソートを設定](#グローバルのフィールドソートを設定)
     * [ビュー内のフィールドソートを設定](#ビュー内のフィールドソートを設定)
+* [検索](#検索)
+    * [保存済みの検索条件グループを取得](#保存済みの検索条件グループを取得)
+    * [検索条件グループを保存](#検索条件グループを保存)
+    * [検索条件グループを削除](#検索条件グループを削除)
 * [SQL](#SQL)
     * [SQLクエリを実行](#SQLクエリを実行)
     * [トランザクションをフラッシュ](#トランザクションをフラッシュ)
@@ -2554,6 +2558,102 @@
     * `viewID`: ターゲットビュー。空の場合は最初に利用可能なビューを使用
     * `keyID`: 移動するフィールド ID
     * `previousKeyID`: `keyID` をその後に配置するフィールド ID。空文字列で先頭に移動
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+## 検索
+
+保存済みの検索条件グループは、次のフィールドを使用します。
+
+* `name`：条件グループ名。条件グループの一意なキーとしても使用されます
+* `sort`：結果の並べ替え方法。`0` はブロックタイプ、`1` は作成日時の昇順、`2` は作成日時の降順、`3` は更新日時の昇順、`4` は更新日時の降順、`5` は内容順、`6` は関連度の昇順、`7` は関連度の降順です
+* `group`：グループ化方法。`0` はグループ化なし、`1` はドキュメント単位です
+* `hasReplace`：置換を有効にするかどうか
+* `method`：検索方法。`0` はキーワード、`1` はクエリ構文、`2` は SQL、`3` は正規表現、`4` はセマンティック検索です
+* `hPath`：人間が読める検索範囲のパス
+* `idPath`：検索範囲のパス配列
+* `k`：検索キーワード
+* `r`：置換キーワード
+* `types`：ブロックタイプのフラグ。`mathBlock`、`table`、`blockquote`、`superBlock`、`paragraph`、`document`、`heading`、`list`、`listItem`、`codeBlock`、`htmlBlock`、`embedBlock`、`databaseBlock`、`audioBlock`、`videoBlock`、`iframeBlock`、`widgetBlock`、`callout` を使用できます
+* `subTypes`：ブロックサブタイプのフラグ。`h1` から `h6` は見出しレベルを、`o`、`u`、`t` はそれぞれ番号付きリスト、箇条書きリスト、タスクリストを示します
+* `replaceTypes`：置換タイプのフラグ。`text`、`imgText`、`imgTitle`、`imgSrc`、`aText`、`aTitle`、`aHref`、`code`、`em`、`strong`、`inlineMath`、`inlineMemo`、`blockRef`、`fileAnnotationRef`、`kbd`、`mark`、`s`、`sub`、`sup`、`tag`、`u`、`docTitle`、`codeBlock`、`mathBlock`、`htmlBlock` を使用できます
+
+`types`、`subTypes`、`replaceTypes` で省略された真偽値フラグは `false` として扱われます。
+
+### 保存済みの検索条件グループを取得
+
+* `/api/storage/getCriteria`
+* パラメータなし
+* 戻り値：`data` は保存順に並んだ検索条件グループの配列です。保存済みの条件グループがない場合は空の配列になります
+* 読み取り専用ロールでは、条件グループが公開アクセス権限に基づいてフィルタリングされ、戻り値の `k` と `r` は空になります
+
+### 検索条件グループを保存
+
+条件グループを作成するか、同じ `name` の既存条件グループを完全に置き換えます。置き換えた条件グループの位置は維持され、新しい条件グループは末尾に追加されます。
+
+* `/api/storage/setCriterion`
+* 管理者ロールが必要です。読み取り専用モードでは使用できません
+* パラメータ
+
+  ```json
+  {
+    "criterion": {
+      "name": "公開ノート",
+      "sort": 0,
+      "group": 1,
+      "hasReplace": false,
+      "method": 0,
+      "hPath": "公開ノート",
+      "idPath": ["20210808180117-czj9bvb"],
+      "k": "",
+      "r": "",
+      "types": {
+        "document": true,
+        "paragraph": true
+      },
+      "subTypes": {
+        "h1": true
+      },
+      "replaceTypes": {
+        "text": true
+      }
+    }
+  }
+  ```
+
+    * `criterion`：保存する完全な検索条件グループ
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### 検索条件グループを削除
+
+指定した名前の条件グループを削除します。存在しない名前を指定した場合も成功として扱われます。
+
+* `/api/storage/removeCriterion`
+* 管理者ロールが必要です。読み取り専用モードでは使用できません
+* パラメータ
+
+  ```json
+  {
+    "name": "公開ノート"
+  }
+  ```
+
+    * `name`：条件グループ名
 * 戻り値
 
   ```json

@@ -855,7 +855,7 @@ export const resizeTopBar = () => {
     }
 
     window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].forEach((id: string) => {
-        toolbarElement.querySelector("#" + id)?.classList.add("fn__none");
+        document.getElementById(id)?.classList.add("fn__none");
     });
 };
 

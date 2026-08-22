@@ -58,6 +58,7 @@ import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
 import {getAVFilteredTipContext} from "../render/av/filteredTip";
 import {getAVSelectedCells, IAVSelectedCell} from "../render/av/selectionState";
 import {getAVSelectedTableCells} from "../render/av/virtualScroll";
+import {resetCodeBlockRenderState} from "./codeBlockRenderState";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -1414,20 +1415,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             Array.from(item.querySelectorAll('[data-type="NodeHeading"][fold="1"]')).reverse().forEach(heading => {
                 removeFoldHeading(heading);
             });
-            const rendersElement = [];
-            if (item.classList.contains("render-node") && item.getAttribute("data-type") === "NodeCodeBlock") {
-                rendersElement.push(item);
-            } else {
-                rendersElement.push(...item.querySelectorAll('.render-node[data-type="NodeCodeBlock"]'));
-            }
-            rendersElement.forEach((renderItem) => {
-                renderItem.querySelector(".protyle-icons")?.remove();
-                const spinElement = renderItem.querySelector('[spin="1"]');
-                if (spinElement) {
-                    spinElement.innerHTML = "";
-                }
-                renderItem.removeAttribute("data-render");
-            });
+            resetCodeBlockRenderState(item);
             if (insertBefore) {
                 blockElement.before(item);
             } else {

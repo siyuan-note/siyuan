@@ -8,7 +8,7 @@ import {genRenderFrame} from "./util";
 import {isEncryptedBox} from "../../util/pathName";
 import {disabledWYSIWYG} from "../util/disabledWYSIWYG";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
-import {finishCustomEmbedRender, IEmbedRenderLoadingState} from "./embedRenderState";
+import {finishCustomEmbedRender, finishEmptyEmbedRender, IEmbedRenderLoadingState} from "./embedRenderState";
 
 /**
  * 渲染嵌入块
@@ -27,6 +27,8 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
     blockElements.forEach((item: HTMLElement) => {
         const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
         if (!content.trim()) {
+            genRenderFrame(item);
+            finishEmptyEmbedRender(item, onEmbedRender);
             return;
         }
         // 需置于请求返回前，否则快速滚动会导致重复加载 https://ld246.com/article/1666857862494?r=88250

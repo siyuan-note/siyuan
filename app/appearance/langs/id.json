@@ -1820,7 +1820,7 @@
 	"fontSizeTip": "Ukuran font default adalah <code class='fn__code'>16</code>, pengaturan ini memengaruhi tampilan ukuran font editor dan PDF/HTML yang diekspor",
 	"fontSizeScrollZoom": "Sesuaikan ukuran font editor dengan cepat",
 	"fontSizeScrollZoomTip": "Saat diaktifkan, tahan <code class='fn__code'>Ctrl</code> untuk menyesuaikan ukuran font dengan cepat melalui roda mouse atau gerakan cubit-perbesar trackpad",
-	"font1": "Pengaturan ini hanya memengaruhi tampilan keluarga font di editor, pilih <code class='fn__code'>Default</code> untuk menggunakan keluarga font tema",
+	"font1": "Pengaturan ini hanya memengaruhi tampilan font di editor; jika tidak ada font yang dipilih, font tema akan digunakan",
 	"newNameFile": "Nama sub-dokumen baru adalah",
 	"newNameSettingFile": "Nama dokumen baru adalah",
 	"newContentFile": "Konten dokumen baru adalah",

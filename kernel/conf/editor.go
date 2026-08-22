@@ -104,7 +104,7 @@ type Editor struct {
 
 // NormalizeFontFamilies 清理字体列表并同步兼容旧版本的首选字体字段。
 func (editor *Editor) NormalizeFontFamilies() {
-	if 1 > len(editor.FontFamilies) && "" != editor.FontFamily {
+	if nil == editor.FontFamilies && "" != editor.FontFamily {
 		editor.FontFamilies = []*EditorFont{{
 			Family:      editor.FontFamily,
 			Weight:      editor.FontWeight,

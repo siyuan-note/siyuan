@@ -83,6 +83,23 @@ func TestNormalizeFontFamiliesMigratesLegacyConfig(t *testing.T) {
 	}
 }
 
+func TestNormalizeFontFamiliesPreservesExplicitEmptyList(t *testing.T) {
+	editor := &Editor{
+		FontFamily:        "Inter",
+		FontWeight:        500,
+		FontFamilyDisplay: "Inter Medium",
+		FontFamilies:      []*EditorFont{},
+	}
+	editor.NormalizeFontFamilies()
+
+	if 0 != len(editor.FontFamilies) {
+		t.Fatalf("expected no selected fonts, got %d", len(editor.FontFamilies))
+	}
+	if "" != editor.FontFamily || 400 != editor.FontWeight || "" != editor.FontFamilyDisplay {
+		t.Fatalf("legacy fields should be reset: %+v", editor)
+	}
+}
+
 func TestNormalizeFontFamiliesPreservesOrderAndMirrorsFirstFont(t *testing.T) {
 	editor := &Editor{
 		FontFamilies: []*EditorFont{

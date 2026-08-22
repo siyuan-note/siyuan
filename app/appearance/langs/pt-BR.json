@@ -1820,7 +1820,7 @@
 	"fontSizeTip": "O tamanho padrão da fonte é <code class='fn__code'>16</code>, esta configuração afeta o editor e a exibição do tamanho da fonte em PDF/HTML exportados",
 	"fontSizeScrollZoom": "Ajuste rápido do tamanho da fonte do editor",
 	"fontSizeScrollZoomTip": "Quando ativado, pressione e segure <code class='fn__code'>Ctrl</code> para ajustar rapidamente o tamanho da fonte através da roda do mouse ou gesto de pinça no trackpad",
-	"font1": "Esta configuração afeta apenas a exibição da família de fontes no editor, escolha <code class='fn__code'>Padrão</code> para usar a família de fontes do tema",
+	"font1": "Esta configuração afeta apenas a exibição de fontes no editor; quando nenhuma fonte é selecionada, a fonte do tema é usada",
 	"newNameFile": "O nome do novo subdocumento é",
 	"newNameSettingFile": "O nome do novo documento é",
 	"newContentFile": "O conteúdo do novo documento é",

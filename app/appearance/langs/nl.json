@@ -1820,7 +1820,7 @@
 	"fontSizeTip": "Standaard <code class='fn__code'>16</code>; beinvloedt editor en PDF/HTML",
 	"fontSizeScrollZoom": "Editorlettergrootte snel aanpassen",
 	"fontSizeScrollZoomTip": "Ingeschakeld: houd <code class='fn__code'>Ctrl</code> ingedrukt en gebruik muiswiel of touchpad-knijpbeweging om lettergrootte snel aan te passen",
-	"font1": "Deze instelling heeft alleen invloed op de weergave van het lettertype in de editor; kies <code class='fn__code'>Standaard</code> om het lettertype van het thema te gebruiken",
+	"font1": "Deze instelling heeft alleen invloed op de lettertypeweergave in de editor; als er geen lettertype is geselecteerd, wordt het lettertype van het thema gebruikt",
 	"newNameFile": "Naam subdocument",
 	"newNameSettingFile": "Naam document",
 	"newContentFile": "Inhoud document",

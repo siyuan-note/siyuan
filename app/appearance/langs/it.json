@@ -1820,7 +1820,7 @@
 	"fontSizeTip": "La dimensione predefinita del font è <code class='fn__code'>16</code>, questa impostazione influisce sulla visualizzazione del font nell'editor e nei file PDF/HTML esportati",
 	"fontSizeScrollZoom": "Regola rapidamente la dimensione del font dell'editor",
 	"fontSizeScrollZoomTip": "Dopo l'abilitazione, tieni premuto <code class='fn__code'>Ctrl</code> per regolare rapidamente la dimensione del font usando la rotella del mouse o il gesto pinch-zoom sul trackpad",
-	"font1": "Questa impostazione influisce solo sul font dell'editor, scegli <code class='fn__code'>Predefinito</code> per usare il font del tema",
+	"font1": "Questa impostazione influisce solo sulla visualizzazione dei caratteri nell'editor; se non è selezionato alcun carattere, viene utilizzato quello del tema",
 	"newNameFile": "Il nome del nuovo sottodocumento è",
 	"newNameSettingFile": "Il nome del nuovo documento è",
 	"newContentFile": "Il contenuto del nuovo documento è",

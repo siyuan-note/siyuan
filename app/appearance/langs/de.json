@@ -1820,7 +1820,7 @@
 	"fontSizeTip": "Die Standard-Schriftgröße beträgt <code class='fn__code'>16</code>, diese Einstellung hat Einfluss auf die Schriftgröße im Editor und beim exportierten PDF/HTML.",
 	"fontSizeScrollZoom": "Editor-Schriftgröße schnell anpassen",
 	"fontSizeScrollZoomTip": "Nach der Aktivierung halten Sie <code class='fn__code'>Ctrl</code> und nutzen Sie das Mausrad oder die Trackpad-Zoomgeste, um die Schriftgröße schnell anzupassen.",
-	"font1": "Diese Einstellung hat nur Auswirkungen auf die Schriftfamilienanzeige im Editor, wählen Sie <code class='fn__code'>Standard</code>, um die Schriftfamilie des Themas zu verwenden.",
+	"font1": "Diese Einstellung wirkt sich nur auf die Schriftanzeige im Editor aus; wenn keine Schriftart ausgewählt ist, wird die Schriftart des Themes verwendet",
 	"newNameFile": "Der Name des neuen Unterdokuments lautet",
 	"newNameSettingFile": "Der Name des neuen Dokuments lautet",
 	"newContentFile": "Der Inhalt des neuen Dokuments ist",

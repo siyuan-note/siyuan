@@ -1820,7 +1820,7 @@
 	"fontSizeTip": "Varsayılan yazı boyutu <code class='fn__code'>16</code>. Bu ayar düzenleyici ve dışa aktarılan PDF/HTML yazı boyutunu etkiler",
 	"fontSizeScrollZoom": "Editör yazı boyutunu hızlı ayarla",
 	"fontSizeScrollZoomTip": "<code class='fn__code'>Ctrl</code> tuşunu basılı tutarak fare tekerleğiyle veya dokunmatik yüzeyle hızlıca yazı boyutunu ayarlayabilirsin",
-	"font1": "Bu ayar sadece düzenleyicideki yazı tipini etkiler. Tema yazı tipini kullanmak için <code class='fn__code'>Default</code> seç",
+	"font1": "Bu ayar yalnızca düzenleyicideki yazı tipi görünümünü etkiler; hiçbir yazı tipi seçilmediğinde tema yazı tipi kullanılır",
 	"newNameFile": "Yeni alt belgenin adı",
 	"newNameSettingFile": "Yeni belgenin adı",
 	"newContentFile": "Yeni belgenin içeriği",

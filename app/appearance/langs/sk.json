@@ -1820,7 +1820,7 @@
 	"fontSizeTip": "Predvolená veľkosť písma je <code class='fn__code'>16</code>, toto nastavenie ovplyvňuje editor a veľkosť písma exportovaného PDF/HTML",
 	"fontSizeScrollZoom": "Rýchla zmena veľkosti písma editora",
 	"fontSizeScrollZoomTip": "Po zapnutí podržte <code class='fn__code'>Ctrl</code> pre rýchle nastavenie veľkosti písma pomocou kolieska myši alebo gesta pinch-zoom na trackpade",
-	"font1": "Toto nastavenie ovplyvňuje iba zobrazenie rodiny písiem v editore, vyberte <code class='fn__code'>Default</code> pre použitie rodiny písem témy",
+	"font1": "Toto nastavenie ovplyvňuje iba zobrazenie písiem v editore; ak nie je vybraté žiadne písmo, použije sa písmo témy",
 	"newNameFile": "Názov nového poddokumentu",
 	"newNameSettingFile": "Názov nového dokumentu",
 	"newContentFile": "Obsah nového dokumentu",

@@ -66,6 +66,7 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
     <div class="fn__flex-1 config-item__main">
         <div class="config-name">${window.siyuan.languages.font}</div>
         <div class="b3-label__text">${window.siyuan.languages.font1}</div>
+        <div class="fn__hr--small"></div>
         <div class="b3-chips b3-chips__doctag${getEditorFonts(window.siyuan.config.editor).length === 0 ? " fn__none" : ""}" data-type="selected-fonts">${genSelectedFontListHtml(getEditorFonts(window.siyuan.config.editor))}</div>
     </div>
     <span class="fn__space"></span>

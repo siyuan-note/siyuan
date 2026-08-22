@@ -1820,7 +1820,7 @@
 	"fontSizeTip": "字號預設為 <code class='fn__code'>16</code>，該設置影響編輯器和導出 PDF/HTML 字體大小顯示",
 	"fontSizeScrollZoom": "快速調整編輯器字號",
 	"fontSizeScrollZoomTip": "啟用後按住 <code class='fn__code'>Ctrl</code> 通過鼠標滾輪或觸摸板雙指縮放手勢可快速調整字號",
-	"font1": "該設置僅影響編輯器內字體顯示，選擇 <code class='fn__code'>預設</code> 則使用主題自帶字體",
+	"font1": "該設定僅影響編輯器內字體顯示，未選擇任何字體時則使用主題自帶字體",
 	"newNameFile": "新建子文件名為",
 	"newNameSettingFile": "新建文件名為",
 	"newContentFile": "新建文件內容為",

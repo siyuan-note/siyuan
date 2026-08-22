@@ -1820,7 +1820,7 @@
 	"fontSizeTip": "Domyślny rozmiar czcionki to <code class='fn__code'>16</code>, to ustawienie wpływa na wyświetlanie rozmiaru czcionki w edytorze i wyeksportowanych plikach PDF/HTML",
 	"fontSizeScrollZoom": "Szybka regulacja rozmiaru czcionki edytora",
 	"fontSizeScrollZoomTip": "Po włączeniu, przytrzymaj <code class='fn__code'>Ctrl</code>, aby szybko dostosować rozmiar czcionki za pomocą kółka myszy lub gestu powiększenia gładzika",
-	"font1": "To ustawienie wpływa tylko na wyświetlanie rodziny czcionek w edytorze, wybierz <code class='fn__code'>Domyślne</code>, aby użyć rodziny czcionek motywu",
+	"font1": "To ustawienie wpływa tylko na wyświetlanie czcionek w edytorze; gdy nie wybrano żadnej czcionki, używana jest czcionka motywu",
 	"newNameFile": "Nazwa nowego poddokumentu to",
 	"newNameSettingFile": "Nazwa nowego dokumentu to",
 	"newContentFile": "Zawartość nowego dokumentu to",

@@ -1076,11 +1076,15 @@ export class WYSIWYG {
             const documentSelf = document;
             documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
+            const customElement = hasClosestByClassName(target, "protyle-custom");
             let nodeElement = hasClosestBlock(target) as HTMLElement;
-            let clickedTableNode = nodeElement && nodeElement.dataset.type === "NodeTable" ? nodeElement : undefined;
-            if (!nodeElement) {
+            let clickedTableNode = !customElement && nodeElement?.dataset.type === "NodeTable" ? nodeElement : undefined;
+            if (!nodeElement && !customElement) {
                 clickedTableNode = Array.from(this.element.querySelectorAll<HTMLElement>(
                     '[data-type="NodeTable"]')).find(item => {
+                    if (hasClosestByClassName(item, "protyle-custom")) {
+                        return false;
+                    }
                     const table = item.querySelector("table");
                     if (!table) {
                         return false;
@@ -1834,12 +1838,14 @@ export class WYSIWYG {
             }
             // table cell select
             let tableBlockElement: HTMLElement | false;
-            const targetCellElement = hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD");
+            const targetCellElement = !customElement &&
+                (hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD"));
             if (targetCellElement) {
                 target = targetCellElement;
             }
-            if (target.tagName === "TH" || target.tagName === "TD" || target.firstElementChild?.tagName === "TABLE" ||
-                target.classList.contains("table__resize") || target.classList.contains("table__select")) {
+            if (!customElement &&
+                (target.tagName === "TH" || target.tagName === "TD" || target.firstElementChild?.tagName === "TABLE" ||
+                    target.classList.contains("table__resize") || target.classList.contains("table__select"))) {
                 tableBlockElement = nodeElement;
                 if (tableBlockElement) {
                     tableBlockElement.querySelector(".table__select").removeAttribute("style");
@@ -1858,7 +1864,7 @@ export class WYSIWYG {
                 // 后续拖拽操作写在多选节点中
             }
             // table col resize
-            if (!protyle.disabled && target.classList.contains("table__resize")) {
+            if (!customElement && !protyle.disabled && target.classList.contains("table__resize")) {
                 if (!nodeElement) {
                     return;
                 }

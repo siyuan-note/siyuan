@@ -8,6 +8,7 @@ import {genRenderFrame} from "./util";
 import {isEncryptedBox} from "../../util/pathName";
 import {disabledWYSIWYG} from "../util/disabledWYSIWYG";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
+import {finishCustomEmbedRender, IEmbedRenderLoadingState} from "./embedRenderState";
 
 /**
  * 渲染嵌入块
@@ -31,8 +32,12 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number, o
         // 需置于请求返回前，否则快速滚动会导致重复加载 https://ld246.com/article/1666857862494?r=88250
         item.setAttribute("data-render", "true");
         genRenderFrame(item);
+        const loadingState: IEmbedRenderLoadingState = {
+            rotateElement: item.querySelector(":scope > .protyle-icons .protyle-action__reload .fn__rotate"),
+        };
         if (item.childElementCount > 3) {
-            item.style.height = (item.clientHeight - 4) + "px"; // 减少抖动 https://ld246.com/article/1668669380171
+            loadingState.height = (item.clientHeight - 4) + "px";
+            item.style.height = loadingState.height; // 减少抖动 https://ld246.com/article/1668669380171
             for (let i = 1; i < item.children.length - 1; i++) {
                 if (!item.children[i].classList.contains("protyle-cursor")) {
                     item.children[i].remove();
@@ -68,6 +73,7 @@ ${content}
 })();`)(fetchSyncPost, item, protyle, top);
                 includeIDsPromise.then((includeIDs: unknown) => {
                     if (!Array.isArray(includeIDs)) {
+                        finishCustomEmbedRender(item, loadingState, onEmbedRender);
                         return;
                     }
                     fetchPost("/api/search/getEmbedBlock", {

@@ -16,8 +16,8 @@ export class MobileBookmarks {
     private updating = false;
     private updatePending = false;
 
-    constructor(app: App) {
-        this.element = document.querySelector('#sidebar [data-type="sidebar-bookmark"]');
+    constructor(app: App, element: HTMLElement) {
+        this.element = element;
         this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">

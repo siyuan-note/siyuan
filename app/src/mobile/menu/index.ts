@@ -219,7 +219,10 @@ export const popMenu = () => {
         return;
     }
     activeBlur();
-    document.getElementById("menu").style.transform = "translateX(0px)";
+    closePanel();
+    const menuElement = document.getElementById("menu");
+    menuElement.style.zIndex = (++window.siyuan.zIndex).toString();
+    menuElement.classList.remove("fn__none");
 };
 
 export const initRightMenu = (app: App) => {

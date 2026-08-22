@@ -10,10 +10,11 @@ export class MobileBacklinks {
     private tree: Tree;
     private notebookId: string;
     private mTree: Tree;
+    private updateId = 0;
     public beforeLen = 10;
 
-    constructor(app: App) {
-        this.element = document.querySelector('#sidebar [data-type="sidebar-backlink"]');
+    constructor(app: App, element: HTMLElement) {
+        this.element = element;
         this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">
@@ -107,16 +108,28 @@ export class MobileBacklinks {
     }
 
     public update() {
+        const editor = window.siyuan.mobile.editor?.protyle;
+        const updateId = ++this.updateId;
+        if (!editor) {
+            this.tree.updateData([]);
+            this.mTree.updateData([]);
+            this.element.querySelectorAll(".listCount, .listMCount").forEach(item => item.classList.add("fn__none"));
+            return;
+        }
+        const blockId = editor.block.id;
         const param: IObject = {
-            id: window.siyuan.mobile.editor.protyle.block.id,
+            id: blockId,
             beforeLen: this.beforeLen,
             k: "",
             mk: "",
         };
-        if (isEncryptedBox(window.siyuan.mobile.editor.protyle.notebookId)) {
-            param.notebook = window.siyuan.mobile.editor.protyle.notebookId;
+        if (isEncryptedBox(editor.notebookId)) {
+            param.notebook = editor.notebookId;
         }
         fetchPost("/api/ref/getBacklink", param, response => {
+            if (updateId !== this.updateId || window.siyuan.mobile.editor?.protyle.block.id !== blockId) {
+                return;
+            }
             this.notebookId = response.data.box;
             this.tree.updateData(response.data.backlinks);
             this.mTree.updateData(response.data.backmentions);

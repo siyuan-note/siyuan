@@ -523,7 +523,11 @@ body.mobile-keyboard--open {
     transform: translateX(100vw);
   }
 
-  // 窄屏下 dock 图标过多时左侧可横向滚动，关闭按钮固定在右侧始终可触达
+  &--right {
+    transform: translateX(100vw);
+  }
+
+  // 窄屏下 Dock 图标过多时可横向滚动，关闭按钮固定在工具栏末端始终可触达
   & > .toolbar--border > .toolbar__scroll {
     flex: 1;
     min-width: 0;
@@ -968,8 +972,9 @@ body.mobile-keyboard--open {
 
 #menu {
   z-index: 7;
-  transform: translateX(100vw);
   top: 0;
+  transform: none;
+  transition: none;
 
   // 兼容插件直接插入的图标
   .b3-menu__item > svg:not(.b3-menu__icon) {

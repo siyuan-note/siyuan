@@ -37,6 +37,7 @@ import {
 import {showMessage} from "../../dialog/message";
 /// #if MOBILE
 import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../mobile/util/mobileBottomBar";
+import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../mobile/util/mobileSidePanelSetting";
 /// #endif
 /// #if !MOBILE
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
@@ -611,6 +612,18 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         ],
         html: genMobileBottomBarSettingHTML,
         afterMount: mountMobileBottomBarSetting,
+    });
+    group.slot({
+        key: "mobileSidePanel",
+        keywords: [
+            window.siyuan.languages.mobile,
+            window.siyuan.languages.leftRightLayout,
+            window.siyuan.languages.fileTree,
+            window.siyuan.languages.outline,
+            window.siyuan.languages.reset,
+        ],
+        html: genMobileSidePanelSettingHTML,
+        afterMount: mountMobileSidePanelSetting,
     });
     /// #endif
     /// #if !MOBILE

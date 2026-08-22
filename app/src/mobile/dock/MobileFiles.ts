@@ -66,14 +66,13 @@ export class MobileFiles extends Model {
         startTime: number;
     };
 
-    constructor(app: App) {
+    constructor(app: App, filesElement: HTMLElement) {
         super({app});
         this.connect({
             id: genUUID(),
             type: "filetree",
             msgCallback: this.handleMsgCallback.bind(this)
         });
-        const filesElement = document.querySelector('#sidebar [data-type="sidebar-file"]');
         filesElement.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">${window.siyuan.languages.fileTree}</div>

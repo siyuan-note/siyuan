@@ -70,18 +70,32 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         </label>
         <div class="b3-label b3-label--inner fn__flex" style="align-items:flex-start;gap:24px;flex-wrap:wrap">
             <div class="fn__flex-1" style="min-width:200px">
-                <div>${window.siyuan.languages.themeLight}</div>
-                <label class="fn__flex" data-property="color" style="align-items:center;margin-top:8px">
-                    <span class="fn__flex-1">${window.siyuan.languages.colorFont}</span>
-                    <input class="b3-text-field" data-field="lightColor" type="color">
-                </label>
-                <label class="fn__flex" data-property="backgroundColor" style="align-items:center;margin-top:8px">
-                    <span class="fn__flex-1">${window.siyuan.languages.colorPrimary}</span>
-                    <input class="b3-text-field" data-field="lightBackgroundColor" type="color">
-                </label>
+                <div class="fn__flex" style="align-items:center">
+                    <span>${window.siyuan.languages.themeLight}</span>
+                    <span class="color__square color__square--list" data-preview="light" style="margin:0 0 0 8px">A</span>
+                </div>
+                <div class="fn__flex" data-property="color" style="align-items:center;margin-top:8px">
+                    <label class="fn__flex fn__flex-1" style="align-items:center">
+                        <span class="fn__flex-1">${window.siyuan.languages.colorFont}</span>
+                        <input class="b3-text-field" data-field="lightColor" type="color">
+                    </label>
+                    <span class="fn__space--small"></span>
+                    <button class="block__icon block__icon--show ariaLabel" data-action="copyColor" data-position="north" aria-label="${window.siyuan.languages.copy}" type="button"><svg><use xlink:href="#${isMobile() ? "iconDown" : "iconRight"}"></use></svg></button>
+                </div>
+                <div class="fn__flex" data-property="backgroundColor" style="align-items:center;margin-top:8px">
+                    <label class="fn__flex fn__flex-1" style="align-items:center">
+                        <span class="fn__flex-1">${window.siyuan.languages.colorPrimary}</span>
+                        <input class="b3-text-field" data-field="lightBackgroundColor" type="color">
+                    </label>
+                    <span class="fn__space--small"></span>
+                    <button class="block__icon block__icon--show ariaLabel" data-action="copyBackgroundColor" data-position="north" aria-label="${window.siyuan.languages.copy}" type="button"><svg><use xlink:href="#${isMobile() ? "iconDown" : "iconRight"}"></use></svg></button>
+                </div>
             </div>
             <div class="fn__flex-1" style="min-width:200px">
-                <div>${window.siyuan.languages.themeDark}</div>
+                <div class="fn__flex" style="align-items:center">
+                    <span>${window.siyuan.languages.themeDark}</span>
+                    <span class="color__square color__square--list" data-preview="dark" style="margin:0 0 0 8px">A</span>
+                </div>
                 <label class="fn__flex" data-property="color" style="align-items:center;margin-top:8px">
                     <span class="fn__flex-1">${window.siyuan.languages.colorFont}</span>
                     <input class="b3-text-field" data-field="darkColor" type="color">
@@ -112,6 +126,8 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
     const darkColorElement = dialog.element.querySelector('[data-field="darkColor"]') as HTMLInputElement;
     const lightBackgroundElement = dialog.element.querySelector('[data-field="lightBackgroundColor"]') as HTMLInputElement;
     const darkBackgroundElement = dialog.element.querySelector('[data-field="darkBackgroundColor"]') as HTMLInputElement;
+    const lightPreviewElement = dialog.element.querySelector('[data-preview="light"]') as HTMLElement;
+    const darkPreviewElement = dialog.element.querySelector('[data-preview="dark"]') as HTMLElement;
 
     const renderList = () => {
         listElement.innerHTML = draft.styles.length === 0 ?
@@ -136,6 +152,17 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         dialog.element.querySelectorAll<HTMLElement>('[data-property="backgroundColor"]').forEach(item => {
             item.classList.toggle("fn__none", type === "color");
         });
+    };
+
+    const updatePreviews = () => {
+        const type = typeElement.value as TInlineStyleType;
+        const updatePreview = (previewElement: HTMLElement, colorElement: HTMLInputElement,
+                               backgroundElement: HTMLInputElement) => {
+            previewElement.style.color = type === "backgroundColor" ? "" : colorElement.value;
+            previewElement.style.backgroundColor = type === "color" ? "" : backgroundElement.value;
+        };
+        updatePreview(lightPreviewElement, lightColorElement, lightBackgroundElement);
+        updatePreview(darkPreviewElement, darkColorElement, darkBackgroundElement);
     };
 
     const setEditorActionMode = (editing: boolean) => {
@@ -163,6 +190,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         lightBackgroundElement.value = style?.light.backgroundColor || "#fff3cd";
         darkBackgroundElement.value = style?.dark.backgroundColor || "#554b00";
         updateColorVisibility();
+        updatePreviews();
         listPanel.classList.add("fn__none");
         editorPanel.classList.remove("fn__none");
         setEditorActionMode(true);
@@ -266,7 +294,13 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         clearDragStyles();
     });
 
-    typeElement.addEventListener("change", updateColorVisibility);
+    typeElement.addEventListener("change", () => {
+        updateColorVisibility();
+        updatePreviews();
+    });
+    [lightColorElement, darkColorElement, lightBackgroundElement, darkBackgroundElement].forEach(item => {
+        item.addEventListener("input", updatePreviews);
+    });
     dialog.element.addEventListener("click", async event => {
         const actionElement = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
         if (!actionElement || actionElement.hasAttribute("disabled")) {
@@ -298,6 +332,12 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
             } else {
                 removeStyle();
             }
+        } else if (action === "copyColor") {
+            darkColorElement.value = lightColorElement.value;
+            updatePreviews();
+        } else if (action === "copyBackgroundColor") {
+            darkBackgroundElement.value = lightBackgroundElement.value;
+            updatePreviews();
         } else if (action === "cancelEdit") {
             showList();
         } else if (action === "confirmEdit") {

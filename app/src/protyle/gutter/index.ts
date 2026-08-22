@@ -3245,6 +3245,7 @@ export class Gutter {
         const height = firstElement.style.maxHeight.endsWith("vh") ? parseInt(firstElement.style.maxHeight) : 0;
         window.siyuan.menus.menu.append(new MenuItem({
             id: "height",
+            icon: "iconHeight",
             label: window.siyuan.languages.height,
             submenu: styles.concat([{
                 id: "heightDrag",

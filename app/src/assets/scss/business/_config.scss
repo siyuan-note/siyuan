@@ -1271,12 +1271,12 @@
 }
 
 .data-migration__item:hover .data-migration__actions,
-.data-migration__item:has(:focus-visible) .data-migration__actions {
+.data-migration__item:focus-within .data-migration__actions {
   opacity: 1;
   pointer-events: auto;
 }
 
-@media (hover: none) {
+@media (hover: none), (any-pointer: coarse) {
   .data-migration__actions {
     opacity: 1;
     pointer-events: auto;

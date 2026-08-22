@@ -1078,7 +1078,8 @@ export class WYSIWYG {
             let target = event.target as HTMLElement;
             const customElement = hasClosestByClassName(target, "protyle-custom");
             let nodeElement = hasClosestBlock(target) as HTMLElement;
-            let clickedTableNode = !customElement && nodeElement?.dataset.type === "NodeTable" ? nodeElement : undefined;
+            let clickedTableNode = !customElement && nodeElement && nodeElement.dataset.type === "NodeTable" ?
+                nodeElement : undefined;
             if (!nodeElement && !customElement) {
                 clickedTableNode = Array.from(this.element.querySelectorAll<HTMLElement>(
                     '[data-type="NodeTable"]')).find(item => {

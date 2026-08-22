@@ -1,4 +1,5 @@
 {
+	"recentCreated": "Criados recentemente",
 	"manageCustomColors": "Gerenciar cores personalizadas",
 	"deleteCustomColorTip": "Após excluir e salvar, o conteúdo que usa a cor personalizada “${name}” voltará à cor salva quando ela foi aplicada e não acompanhará mais a alternância entre os modos claro e escuro. Tem certeza de que deseja excluí-la?",
 	"mobileMenuNavigation": "Navegação",

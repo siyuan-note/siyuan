@@ -1,4 +1,5 @@
 {
+	"recentCreated": "Nedávno vytvorené",
 	"manageCustomColors": "Spravovať vlastné farby",
 	"deleteCustomColorTip": "Po odstránení a uložení sa obsah používajúci vlastnú farbu „${name}“ vráti k farbe uloženej pri jej použití a prestane sa prispôsobovať prepínaniu svetlého a tmavého režimu. Naozaj ju chcete odstrániť?",
 	"mobileMenuNavigation": "Navigácia",

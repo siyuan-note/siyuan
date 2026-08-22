@@ -481,6 +481,17 @@ func loadRecentDocsRaw() (ret []*RecentDoc, err error) {
 	return
 }
 
+func buildRecentDocsByTimeStmt(sortBy string, hiddenRootIDs []string, limit int) (stmt string, args []any) {
+	orderBy := "updated"
+	if "created" == sortBy {
+		orderBy = "created"
+	}
+	boxDocFilter, args := buildRootIDExclusionFilter(hiddenRootIDs)
+	stmt = "SELECT * FROM blocks WHERE type = 'd'" + boxDocFilter + " ORDER BY " + orderBy + " DESC, id DESC" +
+		fmt.Sprintf(" LIMIT %d", limit)
+	return
+}
+
 func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	ret = []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
 	recentDocs, err := loadRecentDocsRaw()
@@ -558,17 +569,10 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 
 	// 根据排序参数进行排序
 	switch sortBy {
-	case "updated": // 按更新时间排序
-		// 从数据库查询最近修改的文档
-		boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs())
-		var sqlBlocks []*sql.Block
-		if "" == boxDocFilter {
-			sqlBlocks = sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC", 1, Conf.FileTree.RecentDocsMaxListCount)
-		} else {
-			stmt := "SELECT * FROM blocks WHERE type = 'd'" + boxDocFilter + " ORDER BY updated DESC" +
-				fmt.Sprintf(" LIMIT %d", Conf.FileTree.RecentDocsMaxListCount)
-			sqlBlocks = sql.SelectBlocksRawStmtArgs(stmt, boxDocArgs, Conf.FileTree.RecentDocsMaxListCount)
-		}
+	case "created", "updated": // 按创建时间或更新时间排序
+		// 从数据库查询最近创建或修改的文档
+		stmt, boxDocArgs := buildRecentDocsByTimeStmt(sortBy, hiddenBoxDocRootIDs(), Conf.FileTree.RecentDocsMaxListCount)
+		sqlBlocks := sql.SelectBlocksRawStmtArgs(stmt, boxDocArgs, Conf.FileTree.RecentDocsMaxListCount)
 		ret = []*RecentDoc{}
 		if 1 > len(sqlBlocks) {
 			return

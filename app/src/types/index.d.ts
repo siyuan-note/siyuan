@@ -155,7 +155,7 @@ type TAVFilterOperator =
     | "Is true"
     | "Is false"
 
-type TRecentDocsSort = "viewedAt" | "closedAt" | "openAt" | "updated"
+type TRecentDocsSort = "viewedAt" | "closedAt" | "openAt" | "created" | "updated"
 type TPublishAccessLevel = "public" | "protected" | "hidden" | "private" | "forbidden";
 
 /**

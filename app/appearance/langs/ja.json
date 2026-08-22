@@ -1,4 +1,5 @@
 {
+	"recentCreated": "最近作成",
 	"manageCustomColors": "カスタム色を管理",
 	"deleteCustomColorTip": "削除して保存すると、カスタム色「${name}」を使用している内容は適用時に保存された色へ戻り、ライトモードとダークモードの切り替えに追従しなくなります。削除してもよろしいですか？",
 	"mobileMenuNavigation": "ナビゲーション",

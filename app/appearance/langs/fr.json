@@ -1,4 +1,5 @@
 {
+	"recentCreated": "Récemment créés",
 	"manageCustomColors": "Gérer les couleurs personnalisées",
 	"deleteCustomColorTip": "Après la suppression et l’enregistrement, le contenu utilisant la couleur personnalisée « ${name} » reprendra la couleur enregistrée lors de son application et ne suivra plus les changements de mode clair/sombre. Voulez-vous vraiment la supprimer ?",
 	"mobileMenuNavigation": "Navigation",

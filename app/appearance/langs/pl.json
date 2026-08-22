@@ -1,4 +1,5 @@
 {
+	"recentCreated": "Ostatnio utworzone",
 	"manageCustomColors": "Zarządzaj kolorami niestandardowymi",
 	"deleteCustomColorTip": "Po usunięciu i zapisaniu zawartość używająca niestandardowego koloru „${name}” powróci do koloru zapisanego podczas zastosowania i przestanie reagować na przełączanie trybu jasnego i ciemnego. Czy na pewno chcesz go usunąć?",
 	"mobileMenuNavigation": "Nawigacja",

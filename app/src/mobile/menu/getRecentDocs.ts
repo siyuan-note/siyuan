@@ -40,6 +40,7 @@ export const getRecentDocs = (app: App) => {
         <span class="fn__space"></span>
         <select class="b3-select" id="recentDocsSort">
             <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
+            <option value="created">${window.siyuan.languages.recentCreated}</option>
             <option value="updated">${window.siyuan.languages.recentModified}</option>
             <option value="openAt">${window.siyuan.languages.recentOpened}</option>
             <option value="closedAt">${window.siyuan.languages.recentClosed}</option>

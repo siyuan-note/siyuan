@@ -1,4 +1,5 @@
 {
+	"recentCreated": "Kürzlich erstellt",
 	"manageCustomColors": "Benutzerdefinierte Farben verwalten",
 	"deleteCustomColorTip": "Nach dem Löschen und Speichern verwendet Inhalt mit der benutzerdefinierten Farbe „${name}“ wieder die beim Anwenden gespeicherte Farbe und folgt nicht mehr dem Wechsel zwischen hellem und dunklem Modus. Möchten Sie sie wirklich löschen?",
 	"mobileMenuNavigation": "Navigation",

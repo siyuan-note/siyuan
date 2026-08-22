@@ -103,6 +103,7 @@ export const openRecentDocs = () => {
 <div class="fn__flex-center">
     <select class="b3-select" id="recentDocsSort">
         <option value="viewedAt">${window.siyuan.languages.recentViewed}</option>
+        <option value="created">${window.siyuan.languages.recentCreated}</option>
         <option value="updated">${window.siyuan.languages.recentModified}</option>
         <option value="openAt">${window.siyuan.languages.recentOpened}</option>
         <option value="closedAt">${window.siyuan.languages.recentClosed}</option>

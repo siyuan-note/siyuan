@@ -1,4 +1,5 @@
 {
+	"recentCreated": "Yakın zamanda oluşturulanlar",
 	"manageCustomColors": "Özel renkleri yönet",
 	"deleteCustomColorTip": "Silip kaydettikten sonra “${name}” özel rengini kullanan içerik, uygulandığı sırada kaydedilen renge döner ve artık açık/koyu mod değişikliklerini izlemez. Silmek istediğinizden emin misiniz?",
 	"mobileMenuNavigation": "Gezinme",

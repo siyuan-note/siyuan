@@ -32,6 +32,7 @@ import {getEmbeddedDocInfoResponse} from "./docInfo";
 import {updateWidgetCacheVersion} from "./widgetCache";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
 import {hasFocusOffsets} from "./focusRestore";
+import {isIPhone} from "./compatibility";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -496,7 +497,7 @@ export const enableProtyle = (protyle: IProtyle) => {
         updateMobileTitleReadonly(protyle);
         /// #endif
     }
-    protyle.wysiwyg.element.setAttribute("contenteditable", "true");
+    protyle.wysiwyg.element.setAttribute("contenteditable", isIPhone() ? "false" : "true");
     protyle.wysiwyg.element.style.userSelect = "";
     // 用于区分移动端样式
     protyle.wysiwyg.element.setAttribute("data-readonly", "false");

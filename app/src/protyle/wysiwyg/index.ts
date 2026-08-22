@@ -95,6 +95,7 @@ import {
     getTextSiyuanFromTextHTML,
     isInAndroid,
     isInIOS,
+    isIPhone,
     isMac,
     isOnlyMeta,
     readClipboard,
@@ -453,7 +454,8 @@ export class WYSIWYG {
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
         this.element.setAttribute("spellcheck", "false");
-        this.element.setAttribute("contenteditable", "true");
+        // iPhone 根编辑宿主会绕过区块结构生成富文本 DOM，具体内容节点仍保持可编辑。
+        this.element.setAttribute("contenteditable", isIPhone() ? "false" : "true");
         if (window.siyuan.config.editor.displayBookmarkIcon) {
             this.element.classList.add("protyle-wysiwyg--attr");
         }

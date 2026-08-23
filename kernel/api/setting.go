@@ -1008,13 +1008,10 @@ func login2faCloudUser(c *gin.Context) {
 
 	token := arg["token"].(string)
 	code := arg["code"].(string)
-	data, err := model.Login2fa(token, code)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-	ret.Data = data
+	loginResult := model.Login2fa(token, code)
+	ret.Code = loginResult.Code
+	ret.Msg = loginResult.Msg
+	ret.Data = loginResult.Data
 }
 
 func setEmoji(c *gin.Context) {

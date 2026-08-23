@@ -389,9 +389,11 @@ const bindAccountAuthForm = (
 
     if (mode === "login") {
         const agreeLoginCheckbox = authFormRoot.querySelector("#agreeLogin") as HTMLInputElement;
-        agreeLoginCheckbox.addEventListener("click", () => {
-            loginBtn.disabled = !agreeLoginCheckbox.checked;
-        });
+        const updateLoginButton = () => {
+            loginBtn.disabled = !agreeLoginCheckbox.checked || userPasswordInput.value.length === 0;
+        };
+        agreeLoginCheckbox.addEventListener("change", updateLoginButton);
+        userPasswordInput.addEventListener("input", updateLoginButton);
         const cloudRegionSelect = authFormRoot.querySelector("#cloudRegion") as HTMLSelectElement;
         cloudRegionSelect.addEventListener("change", () => {
             window.siyuan.config.cloudRegion = parseInt(cloudRegionSelect.value);
@@ -404,6 +406,20 @@ const bindAccountAuthForm = (
     captchaImg.addEventListener("click", () => {
         refreshCaptchaImg();
     });
+
+    const bindEnter = (input: HTMLInputElement, button: HTMLButtonElement) => {
+        input.addEventListener("keydown", (event) => {
+            if (event.isComposing || event.repeat || event.key !== "Enter") {
+                return;
+            }
+            button.click();
+            event.preventDefault();
+        });
+    };
+    bindEnter(userNameInput, loginBtn);
+    bindEnter(userPasswordInput, loginBtn);
+    bindEnter(captchaInput, loginBtn);
+    bindEnter(twofactorAuthCodeInput, login2Btn);
 
     const completeLogin = (response: IWebSocketData) => {
         if (mode === "login") {
@@ -456,6 +472,11 @@ const bindAccountAuthForm = (
             code: twofactorAuthCodeInput.value,
             token,
         }, (faResponse) => {
+            if (faResponse.code !== 0) {
+                showMessage(faResponse.msg);
+                twofactorAuthCodeInput.select();
+                return;
+            }
             completeLogin(faResponse);
         });
     });

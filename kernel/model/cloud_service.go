@@ -694,7 +694,7 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 	return
 }
 
-func Login2fa(token, code string) (map[string]any, error) {
+func Login2fa(token, code string) (ret *gulu.Result) {
 	result := map[string]any{}
 	request := httpclient.NewCloudRequest30s()
 	_, err := request.
@@ -704,9 +704,21 @@ func Login2fa(token, code string) (map[string]any, error) {
 		Post(util.GetCloudServer() + "/apis/siyuan/login/2fa")
 	if err != nil {
 		logging.LogErrorf("login 2fa failed: %s", err)
-		return nil, errors.New(Conf.Language(18))
+		ret = gulu.Ret.NewResult()
+		ret.Code = -1
+		ret.Msg = Conf.Language(18)
+		return
 	}
-	return result, nil
+
+	ret = &gulu.Result{
+		Code: int(result["code"].(float64)),
+		Msg:  result["msg"].(string),
+		Data: result,
+	}
+	if -1 == ret.Code {
+		ret.Code = 1
+	}
+	return
 }
 
 func LogoutUser() {

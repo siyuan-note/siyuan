@@ -880,9 +880,7 @@ ${genHintItemHTML(item)}
                 protyle.toolbar.setInlineMark(protyle, value, "range");
                 return;
             } else if (value === "emoji") {
-                range.deleteContents();
-                range.collapse(false);
-                focusByRange(range);
+                // 保留斜杠命令选区，选择表情时由 insertHTML 作为一个事务替换，确保撤销恢复命令文本
                 this.openEmojiInsertPanel(protyle, range);
                 return;
             } else if (value.startsWith("style")) {

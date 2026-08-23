@@ -3,7 +3,7 @@
 @use "../component/svg";
 
 body {
-  --mobile-bottom-bar-height: 56px;
+  --mobile-bottom-bar-height: 48px;
   --mobile-bottom-bar-gap: 8px;
   --mobile-status-height: 24px;
   --mobile-bottom-bar-safe-area: max(8px, env(safe-area-inset-bottom));
@@ -300,12 +300,12 @@ body.mobile-keyboard--open {
   box-sizing: border-box;
   display: flex;
   align-items: flex-start;
-  width: min(80%, 480px);
+  width: min(72%, 420px);
   height: var(--mobile-bottom-bar-height);
   margin: 0 auto;
   padding: 0;
   border: .5px solid var(--b3-border-color);
-  border-radius: 28px;
+  border-radius: calc(var(--mobile-bottom-bar-height) / 2);
   background-color: var(--b3-theme-background);
   box-shadow: var(--b3-point-shadow);
   transition: opacity 240ms cubic-bezier(.2, 0, 0, 1), transform 240ms cubic-bezier(.2, 0, 0, 1), visibility 240ms;
@@ -321,7 +321,7 @@ body.mobile-keyboard--open {
     flex: 1 1 0;
     flex-direction: column;
     gap: 0;
-    min-width: 48px;
+    min-width: 40px;
     height: var(--mobile-bottom-bar-height);
     padding: 2px;
     overflow: hidden;
@@ -332,8 +332,8 @@ body.mobile-keyboard--open {
     -webkit-tap-highlight-color: transparent;
 
     > svg {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       flex-shrink: 0;
     }
 
@@ -353,13 +353,13 @@ body.mobile-keyboard--open {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px;
-    height: 24px;
-    padding: 0 3px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 2px;
     border: 1.5px solid currentColor;
-    border-radius: 5px;
+    border-radius: 4px;
     color: var(--b3-theme-on-surface-light);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: normal;
     line-height: 1;
     text-align: center;

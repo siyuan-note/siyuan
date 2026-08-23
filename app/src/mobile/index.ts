@@ -98,6 +98,7 @@ class App {
                     tag: null,
                     backlink: null,
                     inbox: null,
+                    agent: null,
                 }
             },
             ws: mainWs

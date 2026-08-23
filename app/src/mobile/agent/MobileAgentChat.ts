@@ -4,47 +4,49 @@ import {
     type AgentChatNotification,
     type AgentChatStatus,
 } from "../../layout/dock/agent/AgentChat";
-import {openModel} from "../menu/model";
-import {closeModel, closePanel} from "../util/closePanel";
+import {closePanel} from "../util/closePanel";
 import {showMessage} from "../../dialog/message";
 import {sendNotification} from "../../plugin/platformUtils";
 import {isDisabledFeature} from "../../protyle/util/compatibility";
+import {openDock} from "../dock/util";
 
 let app: App | undefined;
 let agentChat: AgentChat | undefined;
 let rootElement: HTMLElement | undefined;
 let detachedRoot: DocumentFragment | undefined;
-let visible = false;
 let running = false;
 let unread: AgentChatNotification | undefined;
 
 const updateMenuStatus = () => {
     const item = document.getElementById("menuAgentChat");
-    if (!item) {
-        return;
+    if (item) {
+        const icon = item.querySelector(".b3-menu__icon");
+        icon?.classList.toggle("fn__rotate", running);
+        const status = item.querySelector('[data-type="agent-status"]');
+        status?.classList.toggle("fn__none", !unread);
+        status?.classList.toggle("agent-menu-status--warning", unread === "confirm");
+        if (status) {
+            status.textContent = unread === "confirm" ? window.siyuan.languages.agentConfirmPending : "●";
+        }
     }
-    const icon = item.querySelector(".b3-menu__icon");
-    icon?.classList.toggle("fn__rotate", running);
-    const status = item.querySelector('[data-type="agent-status"]');
-    if (!status) {
-        return;
+    const tabElement = document.querySelector('[data-type="sidebar-agent-tab"]');
+    tabElement?.classList.toggle("fn__rotate", running);
+    tabElement?.classList.toggle("agent-menu-status--warning", unread === "confirm");
+    if (tabElement) {
+        const label = unread === "confirm" ? window.siyuan.languages.agentNotifyConfirm :
+            (unread === "done" ? window.siyuan.languages.agentNotifyDone : window.siyuan.languages.agentChat);
+        tabElement.setAttribute("aria-label", label);
     }
-    status.classList.toggle("fn__none", !unread);
-    status.classList.toggle("agent-menu-status--warning", unread === "confirm");
-    status.textContent = unread === "confirm" ? window.siyuan.languages.agentConfirmPending : "●";
 };
 
-const detach = () => {
-    visible = false;
-    document.getElementById("model")?.classList.remove("model--agent");
-    if (rootElement?.parentElement) {
-        detachedRoot = detachedRoot || document.createDocumentFragment();
-        detachedRoot.appendChild(rootElement);
-    }
+const isAgentSidebarVisible = () => {
+    const panelElement = rootElement?.closest('[data-type="sidebar-agent"]') as HTMLElement | null;
+    const sidebarElement = panelElement?.closest(".side-panel") as HTMLElement | null;
+    return Boolean(panelElement && !panelElement.classList.contains("fn__none") && sidebarElement?.style.transform);
 };
 
 const notify = (type: AgentChatNotification) => {
-    if (visible) {
+    if (isAgentSidebarVisible()) {
         return;
     }
     unread = type;
@@ -75,6 +77,7 @@ const ensureAgentChat = (currentApp: App) => {
     agentChat = new AgentChat(currentApp, {
         element: rootElement,
         mobile: true,
+        mobileSidebar: true,
         close: hideMobileAgent,
         openAiSetting: () => {
             hideMobileAgent();
@@ -85,43 +88,43 @@ const ensureAgentChat = (currentApp: App) => {
         onStatusChange: setStatus,
     });
     window.siyuan.mobile.agentChat = agentChat;
+    window.siyuan.mobile.docks.agent = agentChat;
     window.siyuan.mobile.agentChatController = {
         handleBack: handleMobileAgentBack,
         refreshStatus: updateMenuStatus,
     };
 };
 
-export const openMobileAgent = (currentApp: App) => {
-    if (isDisabledFeature("ai")) {
+export const activateMobileAgent = (currentApp: App, element: HTMLElement) => {
+    if (window.siyuan.config.readonly || window.siyuan.isPublish || isDisabledFeature("ai")) {
         return;
     }
     ensureAgentChat(currentApp);
-    closePanel();
-    openModel({
-        title: "",
-        html: "",
-        bindEvent(modelMainElement) {
-            modelMainElement.appendChild(rootElement!);
-        },
-        destroyCallback: detach,
-    });
-    document.getElementById("model").classList.add("model--agent");
-    visible = true;
+    if (rootElement?.parentElement !== element) {
+        element.appendChild(rootElement!);
+    }
     unread = undefined;
     updateMenuStatus();
 };
 
-export const hideMobileAgent = () => {
-    if (!visible) {
+export const openMobileAgent = (currentApp: App) => {
+    if (window.siyuan.config.readonly || window.siyuan.isPublish || isDisabledFeature("ai")) {
         return;
     }
-    visible = false;
-    document.getElementById("model")?.classList.remove("model--agent");
-    closeModel();
+    ensureAgentChat(currentApp);
+    closePanel();
+    openDock("agent");
+};
+
+export const hideMobileAgent = () => {
+    if (!isAgentSidebarVisible()) {
+        return;
+    }
+    closePanel();
 };
 
 export const handleMobileAgentBack = () => {
-    if (!visible) {
+    if (!isAgentSidebarVisible()) {
         return false;
     }
     if (agentChat?.back()) {
@@ -139,7 +142,7 @@ export const insertMobileAgentMentions = (currentApp: App, mentions: Array<{id: 
     agentChat?.insertBlockMentions(mentions);
 };
 
-export const isMobileAgentVisible = () => visible;
+export const isMobileAgentVisible = () => isAgentSidebarVisible();
 
 export const reopenMobileAgent = () => {
     if (app) {

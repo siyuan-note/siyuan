@@ -45,12 +45,14 @@
         <div class="toolbar__scroll">
             <svg data-type="sidebar-outline-tab" class="toolbar__icon toolbar__icon--active"><use xlink:href="#iconOutline"></use></svg>
             <svg data-type="sidebar-backlink-tab" class="toolbar__icon"><use xlink:href="#iconLink"></use></svg>
+            <svg data-type="sidebar-agent-tab" class="toolbar__icon fn__none"><use xlink:href="#iconSparkles"></use></svg>
         </div>
         <svg class="toolbar__icon"><use xlink:href="#iconLeft"></use></svg>
     </div>
     <div class="fn__flex-1 b3-list--mobile">
         <div class="fn__flex-column" data-type="sidebar-outline"></div>
         <div class="fn__flex-column fn__none" data-type="sidebar-backlink"></div>
+        <div class="fn__flex-column fn__none" data-type="sidebar-agent"></div>
     </div>
 </div>
 <div id="menu" class="b3-menu b3-menu--fullscreen fn__none"></div>

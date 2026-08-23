@@ -26,6 +26,7 @@ import {
     getSidebarOpeningOffset,
     type MobileSidebarSide,
     type MobileSwipeDirection,
+    shouldCloseGlobalMenu,
     shouldDragOpenSidebar,
 } from "./touchPanelGesture";
 
@@ -273,7 +274,11 @@ export const handleTouchEnd = (event: TouchEvent) => {
         return;
     }
 
-    if (hasClosestByAttribute(target, "id", "menu", true)) {
+    const menuElement = hasClosestByAttribute(target, "id", "menu", true);
+    if (menuElement) {
+        if (!scrollBlock && isXScroll && shouldCloseGlobalMenu(firstDirection, reversing)) {
+            closePanel();
+        }
         return;
     }
 
@@ -472,7 +477,8 @@ export const handleTouchMove = (event: TouchEvent) => {
         firstDirection = xDiff > 0 ? "toLeft" : "toRight";
         if (firstXY === "x") {
             const targetSidebar = getTargetSidebar(target);
-            if (hasClosestByAttribute(target, "id", "menu", true) ||
+            const menuElement = hasClosestByAttribute(target, "id", "menu", true);
+            if ((menuElement && !shouldCloseGlobalMenu(firstDirection, false)) ||
                 (targetSidebar && !shouldDragOpenSidebar(targetSidebar, firstDirection))) {
                 firstXY = "y";
                 yDiff = undefined;

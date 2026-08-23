@@ -6,6 +6,7 @@ import {
     getSidebarClosingDirection,
     getSidebarClosingOffset,
     getSidebarOpeningOffset,
+    shouldCloseGlobalMenu,
     shouldDragOpenSidebar,
 } from "./touchPanelGesture";
 
@@ -29,6 +30,12 @@ describe("mobile sidebar touch gesture", () => {
         assert.equal(getOpenSidebarReleaseAction("left", "toLeft", true), "open");
         assert.equal(getOpenSidebarReleaseAction("right", "toRight", false), "close");
         assert.equal(getOpenSidebarReleaseAction("right", "toRight", true), "open");
+    });
+
+    it("closes the global menu only for an unreversed swipe to the right", () => {
+        assert.equal(shouldCloseGlobalMenu("toRight", false), true);
+        assert.equal(shouldCloseGlobalMenu("toRight", true), false);
+        assert.equal(shouldCloseGlobalMenu("toLeft", false), false);
     });
 
     it("mirrors and clamps closing transforms", () => {

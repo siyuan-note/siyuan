@@ -16,6 +16,7 @@ import {
     IGraphEngineOptions,
     IGraphOptions,
     IGraphPalette,
+    IGraphSetDataOptions,
     IGraphSourceLink,
     IGraphSourceNode,
     TGraphLayoutRequest,
@@ -74,7 +75,6 @@ export class GraphEngine {
     private layoutWorker: Worker;
     private options: IGraphOptions;
     private palette: IGraphPalette;
-    private pendingFocusId = "";
     private readonly pendingNodeReleases = new Map<number, number>();
     private readonly pinnedNodes = new Map<number, [number, number]>();
     private pinchAction: IPinchAction;
@@ -116,14 +116,13 @@ export class GraphEngine {
         links: IGraphSourceLink[],
         options: IGraphOptions,
         palette: IGraphPalette,
-        focusId = "",
-        resetLayout = false,
+        setDataOptions: IGraphSetDataOptions = {},
     ) {
         if (this.destroyed) {
             return;
         }
         const previous = new Map<string, [number, number]>();
-        if (!resetLayout) {
+        if (!setDataOptions.resetLayout) {
             this.data?.nodes.forEach((node, index) => {
                 previous.set(node.id, [this.positions[index * 2], this.positions[index * 2 + 1]]);
             });
@@ -135,10 +134,9 @@ export class GraphEngine {
         this.geometryVersion++;
         this.positionVersion++;
         this.styleVersion++;
-        this.selected = -1;
+        this.selected = setDataOptions.selectedId ? this.data.indexById.get(setDataOptions.selectedId) ?? -1 : -1;
         this.hovered = -1;
         this.selectionVersion++;
-        this.pendingFocusId = focusId;
         this.autoFitPending = true;
         this.cameraTouched = false;
         this.focusAnimation++;
@@ -199,7 +197,6 @@ export class GraphEngine {
         }
         this.focusAnimation++;
         this.autoFitPending = false;
-        this.pendingFocusId = "";
         this.pendingNodeReleases.clear();
         this.pinnedNodes.clear();
         this.data = undefined;
@@ -213,8 +210,17 @@ export class GraphEngine {
         this.labelCanvas.height = 1;
     }
 
-    public hasNode(id: string) {
-        return this.data?.indexById.has(id) || false;
+    public selectNode(id: string) {
+        if (this.destroyed) {
+            return;
+        }
+        const selected = this.data?.indexById.get(id) ?? -1;
+        if (this.selected === selected) {
+            return;
+        }
+        this.selected = selected;
+        this.selectionVersion++;
+        this.scheduleRender();
     }
 
     public focusNode(id: string, animate = true) {
@@ -225,8 +231,7 @@ export class GraphEngine {
         if (index === undefined) {
             return;
         }
-        this.selected = index;
-        this.selectionVersion++;
+        this.selectNode(id);
         const targetX = this.width / 2 - this.positions[index * 2] * this.camera.scale;
         const targetY = this.height / 2 - this.positions[index * 2 + 1] * this.camera.scale;
         if (!animate) {
@@ -350,10 +355,6 @@ export class GraphEngine {
         this.pendingNodeReleases.forEach((_token, index) => this.pinnedNodes.delete(index));
         this.pendingNodeReleases.clear();
         if (!this.data || this.data.nodes.length < 2) {
-            if (this.pendingFocusId) {
-                this.focusNode(this.pendingFocusId);
-                this.pendingFocusId = "";
-            }
             this.autoFitPending = false;
             return;
         }
@@ -391,10 +392,7 @@ export class GraphEngine {
                 this.positionVersion++;
                 this.scheduleRender();
                 if (message.settled) {
-                    if (this.pendingFocusId) {
-                        this.focusNode(this.pendingFocusId);
-                        this.pendingFocusId = "";
-                    } else if (this.autoFitPending && !this.cameraTouched) {
+                    if (this.autoFitPending && !this.cameraTouched) {
                         this.fit(true);
                     }
                     this.autoFitPending = false;
@@ -405,10 +403,6 @@ export class GraphEngine {
                 worker.terminate();
                 if (this.layoutWorker === worker) {
                     this.layoutWorker = undefined;
-                }
-                if (this.pendingFocusId) {
-                    this.focusNode(this.pendingFocusId);
-                    this.pendingFocusId = "";
                 }
                 this.autoFitPending = false;
             };
@@ -443,10 +437,6 @@ export class GraphEngine {
         } catch (error) {
             console.warn("Unable to start graph layout worker", error);
             this.stopLayout();
-            if (this.pendingFocusId) {
-                this.focusNode(this.pendingFocusId);
-                this.pendingFocusId = "";
-            }
             this.autoFitPending = false;
         }
     }

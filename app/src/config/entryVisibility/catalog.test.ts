@@ -689,12 +689,24 @@ test("HTML file insertion follows general asset insertion", () => {
     assert.equal(children[insertAssetIndex + 1]?.key, "insertHTMLFile");
 });
 
+test("copy as PNG is available for documents and single blocks", () => {
+    const documentCopy = getEntryCatalogChildren("document.title.copy").map((item) => item.key);
+    const blockCopy = getEntryCatalogChildren("gutter.single.copy").map((item) => item.key);
+    assert.ok(getEntryCatalogNode("document.title.copy.copyAsPNG"));
+    assert.ok(getEntryCatalogNode("gutter.single.copy.copyAsPNG"));
+    assert.equal(getEntryCatalogNode("gutter.multi.copy.copyAsPNG"), undefined);
+    assert.equal(documentCopy[documentCopy.indexOf("copyMarkdown") + 1], "copyAsPNG");
+    assert.equal(blockCopy[blockCopy.indexOf("copyPlainText") + 1], "copyAsPNG");
+});
+
 test("simple profile follows the reviewed defaults", () => {
     const shown = [
         "document.title.copy.copyBlockEmbed",
+        "document.title.copy.copyAsPNG",
         "document.title.export.exportTemplate",
         "document.title.export.exportImage",
         "gutter.single.addToAgent",
+        "gutter.single.copy.copyAsPNG",
         "gutter.single.turnInto.code",
         "gutter.single.layout.alignTop",
         "gutter.single.layout.alignMiddle",

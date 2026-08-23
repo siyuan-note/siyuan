@@ -15,6 +15,12 @@ import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {GraphEngine} from "./graph/GraphEngine";
 import {IGraphNodeClick, IGraphSourceLink, IGraphSourceNode} from "./graph/types";
 
+interface IGraphSearchOptions {
+    id?: string;
+    refresh?: boolean;
+    resetLayout?: boolean;
+}
+
 export class Graph extends Model {
     public inputElement: HTMLInputElement;
     private countElement: HTMLElement;
@@ -294,7 +300,7 @@ export class Graph extends Model {
                         target.previousElementSibling.classList.remove("fn__none");
                         (target.previousElementSibling as HTMLInputElement).select();
                     } else if (dataType === "refresh") {
-                        this.searchGraph(false, undefined, true);
+                        this.searchGraph({refresh: true});
                     } else if (dataType === "fullscreen") {
                         fullscreen(this.element, target);
                         const minElement = this.element.querySelector('.block__icons .block__icon[data-type="min"]') as HTMLElement;
@@ -347,11 +353,11 @@ export class Graph extends Model {
                 if (item.getAttribute("data-type") === "arrow") {
                     this.updateGraphOptions();
                 } else {
-                    this.searchGraph(false, undefined, false, true);
+                    this.searchGraph({resetLayout: true});
                 }
             });
         });
-        this.searchGraph(options.type !== "global");
+        this.searchGraph();
     }
 
     private handleCallback() {
@@ -369,18 +375,18 @@ export class Graph extends Model {
             switch (data.cmd) {
                 case "mount":
                     if (this.type === "global" && data.code !== 1) {
-                        this.searchGraph(false);
+                        this.searchGraph();
                     }
                     break;
                 case "rename":
                     if (this.graphData && data.data.box === this.graphData.box && this.rootId === data.data.id) {
-                        this.searchGraph(false);
+                        this.searchGraph();
                         if (this.type === "local") {
                             this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                         }
                     }
                     if (this.type === "global") {
-                        this.searchGraph(false);
+                        this.searchGraph();
                     }
                     break;
                 case "closeBox":
@@ -440,10 +446,13 @@ export class Graph extends Model {
         (this.panelElement.querySelector("[data-type='blockquote']") as HTMLInputElement).checked = conf.type.blockquote;
         (this.panelElement.querySelector("[data-type='callout']") as HTMLInputElement).checked = conf.type.callout;
         (this.panelElement.querySelector("[data-type='code']") as HTMLInputElement).checked = conf.type.code;
-        this.searchGraph(false, undefined, false, true);
+        this.searchGraph({resetLayout: true});
     }
 
-    public searchGraph(focus: boolean, id?: string, refresh = false, resetLayout = refresh) {
+    public searchGraph(options: IGraphSearchOptions = {}) {
+        const refresh = options.refresh || false;
+        const resetLayout = options.resetLayout ?? refresh;
+        const id = options.id;
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
         if (element.classList.contains("fn__rotate") && refresh) {
             return;
@@ -471,7 +480,7 @@ export class Graph extends Model {
                 }
                 this.graphData = response.data;
                 window.siyuan.config.graph.global = response.data.conf;
-                this.onGraph(false, resetLayout);
+                this.onGraph(undefined, resetLayout);
                 element.classList.remove("fn__rotate");
             });
         } else {
@@ -488,7 +497,7 @@ export class Graph extends Model {
                 element.classList.remove("fn__rotate");
                 if (response.code !== 0) {
                     this.graphData = undefined;
-                    this.onGraph(false);
+                    this.onGraph();
                     return;
                 }
                 if (id) {
@@ -511,17 +520,13 @@ export class Graph extends Model {
                 }
                 this.graphData = response.data;
                 window.siyuan.config.graph.local = response.data.conf;
-                this.onGraph(focus, resetLayout);
+                this.onGraph(this.blockId, resetLayout);
             });
         }
     }
 
-    private hlNode(id: string) {
-        const graphEngine = this.graphEngine;
-        if (this.graphElement.clientHeight === 0 || !graphEngine?.hasNode(id)) {
-            return;
-        }
-        graphEngine.focusNode(id);
+    private selectNode(id: string) {
+        this.graphEngine?.selectNode(id);
     }
 
     public destroy() {
@@ -545,7 +550,7 @@ export class Graph extends Model {
         }
         this.searchTimeout = window.setTimeout(() => {
             this.searchTimeout = 0;
-            this.searchGraph(false, undefined, false, resetLayout);
+            this.searchGraph({resetLayout});
         }, 160);
     }
 
@@ -591,7 +596,7 @@ export class Graph extends Model {
         } else {
             window.siyuan.config.graph.local = conf;
         }
-        this.onGraph(false);
+        this.onGraph(this.type === "global" ? undefined : this.blockId);
         if (this.saveTimeout) {
             window.clearTimeout(this.saveTimeout);
         }
@@ -613,7 +618,7 @@ export class Graph extends Model {
         this.pendingGraphConf = undefined;
     }
 
-    public onGraph(hl: boolean, resetLayout = false) {
+    public onGraph(selectedId?: string, resetLayout = false) {
         this.updateNodeCount();
         const graphEngine = this.ensureGraphEngine();
         if (!this.graphData || !this.graphData.nodes || this.graphData.nodes.length === 0) {
@@ -647,13 +652,15 @@ export class Graph extends Model {
         };
         if (this.renderedGraphData !== this.graphData) {
             this.renderedGraphData = this.graphData;
-            graphEngine.setData(this.graphData.nodes, this.graphData.links, options, palette,
-                hl ? this.blockId : "", resetLayout);
+            graphEngine.setData(this.graphData.nodes, this.graphData.links, options, palette, {
+                resetLayout,
+                selectedId,
+            });
         } else {
             graphEngine.updateOptions(options, palette);
             graphEngine.resize();
-            if (hl) {
-                this.hlNode(this.blockId);
+            if (selectedId) {
+                this.selectNode(selectedId);
             }
         }
     }

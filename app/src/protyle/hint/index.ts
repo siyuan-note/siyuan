@@ -583,7 +583,7 @@ ${genHintItemHTML(item)}
         }
     }
 
-    private openEmojiInsertPanel(protyle: IProtyle, range: Range) {
+    private openEmojiInsertPanel(protyle: IProtyle, range: Range, undoContext?: Record<string, string>) {
         const targetElement = hasClosestBlock(range.startContainer);
         const targetID = targetElement ? targetElement.getAttribute("data-node-id") : protyle.block.rootID;
         const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
@@ -598,7 +598,8 @@ ${genHintItemHTML(item)}
                 return;
             }
             focusByRange(protyle.toolbar.range);
-            insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle, false, true);
+            insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle, false, true,
+                false, undefined, undoContext);
         }, undefined, {targetID});
     }
 
@@ -704,7 +705,7 @@ ${genHintItemHTML(item)}
             id = nodeElement.getAttribute("data-node-id");
         }
         const html = nodeElement.outerHTML;
-        const undoContext = shouldCaptureHintUndoFocus(this.splitChar, Constants.BLOCK_HINT_KEYS, protyle.lite) ?
+        const undoContext = shouldCaptureHintUndoFocus(this.splitChar, Constants.BLOCK_HINT_KEYS, protyle.lite, value) ?
             getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
         // 自顶向下法新建文档后光标定位问题 https://github.com/siyuan-note/siyuan/issues/299
         if (this.lastIndex > -1) {
@@ -880,10 +881,8 @@ ${genHintItemHTML(item)}
                 protyle.toolbar.setInlineMark(protyle, value, "range");
                 return;
             } else if (value === "emoji") {
-                range.deleteContents();
-                range.collapse(false);
-                focusByRange(range);
-                this.openEmojiInsertPanel(protyle, range);
+                // 保留斜杠命令选区，选择表情时由 insertHTML 作为一个事务替换，确保撤销恢复命令文本
+                this.openEmojiInsertPanel(protyle, range, undoContext);
                 return;
             } else if (value.startsWith("style")) {
                 range.deleteContents();

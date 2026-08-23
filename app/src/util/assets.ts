@@ -158,7 +158,7 @@ export const loadAssets = (data: Config.IAppearance) => {
     }
     /// #if !MOBILE
     getAllModels().graph.forEach(item => {
-        item.searchGraph(false);
+        item.searchGraph();
     });
     const pdfTheme = window.siyuan.config.appearance.mode === 0 ? window.siyuan.storage[Constants.LOCAL_PDFTHEME].light :
         window.siyuan.storage[Constants.LOCAL_PDFTHEME].dark;

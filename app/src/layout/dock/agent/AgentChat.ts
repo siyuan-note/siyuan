@@ -60,6 +60,7 @@ export type AgentChatNotification = "confirm" | "done";
 export interface AgentChatHost {
     element: HTMLElement;
     mobile?: boolean;
+    mobileSidebar?: boolean;
     close: () => void;
     focus?: () => void;
     openAiSetting?: () => void;
@@ -337,7 +338,7 @@ export class AgentChat extends Model {
 
         panel.innerHTML = '<div class="agent-chat fn__flex-column fn__flex-1">' +
             '<div class="block__icons fn__hidescrollbar">' +
-            (this.host.mobile ? '<span data-type="back" class="block__icon ariaLabel" aria-label="' + L.back + '">' +
+            (this.host.mobile && !this.host.mobileSidebar ? '<span data-type="back" class="block__icon ariaLabel" aria-label="' + L.back + '">' +
                 '<svg><use xlink:href="#iconLeft"></use></svg></span>' : "") +
             '<div class="block__logo fn__flex-1 agent-chat__title">' + (L.agentChat || "Agent") + "</div>" +
             '<span data-type="new-session" class="block__icon ariaLabel" data-position="north" aria-label="' + (L.agentNewSession || "New Session") + '">' +
@@ -348,11 +349,12 @@ export class AgentChat extends Model {
             '<svg><use xlink:href="#iconFolderClock"></use></svg>' +
             "</span>" +
             '<span class="fn__space"></span>' +
-            '<span data-type="' + (this.host.mobile ? "close" : "min") + '" class="block__icon ariaLabel" data-position="north" aria-label="' +
-            (this.host.mobile ? window.siyuan.languages.close : window.siyuan.languages.min +
-                updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)) + '">' +
-            '<svg><use xlink:href="#' + (this.host.mobile ? "iconCloseRound" : "iconMin") + '"></use></svg>' +
-            "</span>" +
+            (!this.host.mobile || !this.host.mobileSidebar ? '<span data-type="' + (this.host.mobile ? "close" : "min") +
+                '" class="block__icon ariaLabel" data-position="north" aria-label="' +
+                (this.host.mobile ? window.siyuan.languages.close : window.siyuan.languages.min +
+                    updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)) + '">' +
+                '<svg><use xlink:href="#' + (this.host.mobile ? "iconCloseRound" : "iconMin") + '"></use></svg>' +
+                "</span>" : "") +
             "</div>" +
             '<div class="agent-chat__messages-wrap">' +
             '<div class="agent-chat__messages fn__flex-1"></div>' +

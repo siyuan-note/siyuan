@@ -173,10 +173,11 @@ const docTreeMultiple = () => {
         separator("separator_2"), openBy, exportEntry];
 };
 
-const gutterCopyChildren = () => [
+const gutterCopyChildren = (includeCopyAsPNG = false) => [
     ...copyChildren(),
     node("copyRichText", lang("copyRichText")),
     node("copyPlainText", lang("copyPlainText")),
+    ...(includeCopyAsPNG ? [node("copyAsPNG", lang("copyAsPNG"))] : []),
     node("copyText", lang("copyText")),
     node("copy", lang("copy")),
     node("copyAVID", lang("copyAVID")),
@@ -309,7 +310,7 @@ const gutterBase = (multi: boolean) => [
         node("vLayout", lang("vLayout")),
     ])] : []),
     node("ai", lang("aiEdit")),
-    node("copy", lang("copy"), true, gutterCopyChildren()),
+    node("copy", lang("copy"), true, gutterCopyChildren(!multi)),
     node("cut", lang("cut")),
     node("move", lang("move")),
     node("addToDatabase", lang("addToDatabase"), false),
@@ -632,7 +633,8 @@ export const entryCatalog: IEntryCatalogSection[] = [
         key: "document.title",
         label: location(lang("editor"), lang("entryDocumentMenu")),
         children: [
-            node("copy", lang("copy"), true, [...copyChildren(), node("copyMarkdown", lang("copyMarkdown")), node("copyDoc", lang("copyDoc"), false)]),
+            node("copy", lang("copy"), true, [...copyChildren(), node("copyMarkdown", lang("copyMarkdown")),
+                node("copyAsPNG", lang("copyAsPNG")), node("copyDoc", lang("copyDoc"), false)]),
             node("move", lang("move")),
             node("addToDatabase", lang("addToDatabase"), false),
             node("delete", lang("delete")),

@@ -763,7 +763,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
                 return;
             }
             item.notebookId = notebookId;
-            item.searchGraph(true, blockId);
+            item.searchGraph({id: blockId});
         }
     });
     models.backlink.forEach(item => {

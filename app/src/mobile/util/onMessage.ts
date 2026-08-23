@@ -18,6 +18,7 @@ import {reloadInlineStyles} from "../../util/assets";
 import {renderMobileBottomBar} from "./mobileBottomBar";
 import {Constants} from "../../constants";
 import {MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT} from "./mobileSidePanelConfig";
+import {appearanceConfigApi} from "../../config/tabs/appearanceRuntime";
 import {applyCloudUserState} from "../../config/tabs/accountUi";
 
 let statusTimeout: number;
@@ -43,11 +44,11 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 } else {
                     clearTimeout(statusTimeout);
                     statusElement.innerHTML = `<div class="fn__flex">${data.data.tasks[0].action}<div class="fn__progress"><div></div></div>`;
-                    statusElement.style.bottom = "var(--mobile-bottom-bar-offset)";
+                    statusElement.style.bottom = "var(--mobile-bottom-bar-safe-area)";
                 }
                 break;
             case "setAppearance":
-                window.location.reload();
+                appearanceConfigApi.apply(data.data);
                 break;
             case "reloadInlineStyles":
                 void reloadInlineStyles();
@@ -179,7 +180,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 }
                 clearTimeout(statusTimeout);
                 statusElement.innerHTML = data.msg;
-                statusElement.style.bottom = "var(--mobile-bottom-bar-offset)";
+                statusElement.style.bottom = "var(--mobile-bottom-bar-safe-area)";
                 statusTimeout = window.setTimeout(() => {
                     statusElement.style.bottom = "";
                 }, 12000);

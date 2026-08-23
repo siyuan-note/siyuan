@@ -95,11 +95,12 @@ export const getAVColorGridHTML = (customColors: IAVCustomColor[], currentColor:
     const colorHTML = colors.map(item => {
         const reference = getColorReference(item);
         const index = normalizeAVColorIndex(reference.color);
-        return `<button data-color="${index}" class="color__square${currentIndex === index ?
+        return `<button type="button" data-color="${index}" class="color__square${currentIndex === index ?
             " color__square--current" : ""}" style="${getAVColorStyle(item)}">A</button>`;
     }).join("");
-    return colorHTML + `<button data-type="${AV_MANAGE_CUSTOM_COLORS_TYPE}" class="color__square ariaLabel" ` +
-        `aria-label="${escapeAttr(manageLabel)}"><svg><use xlink:href="#iconAdd"></use></svg></button>`;
+    return colorHTML + `<button type="button" data-type="${AV_MANAGE_CUSTOM_COLORS_TYPE}" ` +
+        `class="color__square ariaLabel" aria-label="${escapeAttr(manageLabel)}">` +
+        '<svg class="svg--mid"><use xlink:href="#iconSettings"></use></svg></button>';
 };
 
 const mountedPaletteIndexes = new WeakMap<HTMLElement, number[]>();

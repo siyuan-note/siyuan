@@ -63,8 +63,9 @@ describe("AV resolved colors", () => {
 
     it("renders multi-digit custom swatches and the management entry", () => {
         const html = getAVColorGridHTML([customColor], "15", "Manage");
-        assert.match(html, /data-color="15" class="color__square color__square--current"/);
+        assert.match(html, /type="button" data-color="15" class="color__square color__square--current"/);
         assert.match(html, /data-type="manageAVCustomColors"/);
+        assert.match(html, /<svg class="svg--mid"><use xlink:href="#iconSettings"><\/use><\/svg>/);
         assert.match(html, /light-dark\(#ddeeff, #223344\)/);
     });
 });

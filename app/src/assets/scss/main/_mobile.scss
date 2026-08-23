@@ -6,7 +6,6 @@ body {
   --mobile-bottom-bar-height: 56px;
   --mobile-bottom-bar-safe-area: max(8px, env(safe-area-inset-bottom));
   --mobile-bottom-bar-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-safe-area));
-  --mobile-editor-bottom-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-safe-area));
 }
 
 body.mobile-chrome--hidden {
@@ -15,7 +14,6 @@ body.mobile-chrome--hidden {
 
 body.mobile-keyboard--open {
   --mobile-bottom-bar-offset: 0px;
-  --mobile-editor-bottom-offset: 0px;
 }
 
 .block__popover {
@@ -415,7 +413,7 @@ body.mobile-keyboard--open {
 
 #editor {
   box-sizing: border-box;
-  padding-bottom: var(--mobile-editor-bottom-offset);
+  padding-bottom: var(--mobile-bottom-bar-offset);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -109,6 +109,51 @@ func setupFileOperationTest(t *testing.T) *fileOperationTestFixture {
 	}
 }
 
+func TestListDocTreeUsesPathIDForInvalidPropertiesID(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	ial := filesys.DocIAL(filepath.Join(util.DataDir, fixture.box.ID, fixture.sourcePath))
+	tests := []struct {
+		name string
+		id   string
+	}{
+		{name: "missing"},
+		{name: "short", id: "legacy"},
+		{name: "mismatch", id: "20260718000009-hijklmn"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			invalidIAL := make(map[string]string, len(ial))
+			for key, value := range ial {
+				invalidIAL[key] = value
+			}
+			if "" == test.id {
+				delete(invalidIAL, "id")
+			} else {
+				invalidIAL["id"] = test.id
+			}
+			cache.PutDocIALInBox(fixture.sourcePath, fixture.box.ID, invalidIAL)
+			t.Cleanup(func() {
+				cache.RemoveDocIALInBox(fixture.sourcePath, fixture.box.ID)
+			})
+
+			files, _, err := ListDocTree(fixture.box.ID, "/", util.SortModeNameASC, false, false, 128)
+			if nil != err {
+				t.Fatalf("list documents failed: %v", err)
+			}
+			for _, file := range files {
+				if fixture.sourceID == file.ID {
+					if 0 >= file.CTime {
+						t.Fatalf("invalid creation time for recovered document: %d", file.CTime)
+					}
+					return
+				}
+			}
+			t.Fatalf("document [%s] was not listed", fixture.sourceID)
+		})
+	}
+}
+
 func TestResolveDocTreeSortModeInheritance(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	Conf.FileTree.Sort = util.SortModeSizeDESC

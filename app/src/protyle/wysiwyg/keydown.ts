@@ -1853,7 +1853,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if ((!nodeElement.classList.contains("code-block") || isCrossBlock) && !event.repeat) {
             let findToolbar = false;
             protyle.options.toolbar.find((menuItem: IMenuItem) => {
-                if (!menuItem.hotkey) {
+                if (!menuItem.hotkey || menuItem.name === "ai") {
                     return false;
                 }
                 if (matchHotKey(menuItem.hotkey, event)) {

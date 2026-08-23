@@ -172,8 +172,15 @@ export const getNoContainerElement = (element: Element) => {
     return false;
 };
 
-export const getContenteditableElement = (element: Element): Element => {
+export const getContenteditableElement = (element: Element, target?: Node): Element => {
     if (!element) {
+        return element;
+    }
+    const calloutTitleElement = target && hasClosestByClassName(target, "callout-title");
+    if (calloutTitleElement && element.contains(calloutTitleElement)) {
+        return calloutTitleElement;
+    }
+    if (element.classList.contains("callout-title")) {
         return element;
     }
     if (element.classList.contains("protyle-title__input")) {

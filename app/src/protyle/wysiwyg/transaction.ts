@@ -1357,7 +1357,7 @@ export const turnsIntoOneTransaction = async (options: {
         parentElement.setAttribute("data-type", "NodeCallout");
         parentElement.setAttribute("contenteditable", "false");
         parentElement.setAttribute("data-subtype", "NOTE");
-        parentElement.innerHTML = `<div class="callout-info"><span class="callout-icon">✏️</span><span class="callout-title">Note</span></div><div class="callout-content"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
+        parentElement.innerHTML = `<div class="callout-info"><span class="callout-icon">✏️</span><span contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}" class="callout-title">Note</span></div><div class="callout-content"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
     } else if (options.type.endsWith("Ls")) {
         parentElement = document.createElement("div");
         parentElement.classList.add("list");

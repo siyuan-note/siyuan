@@ -306,6 +306,23 @@ test("entry order sortability follows its section and parent entry", () => {
     assert.equal(getEntryOrderParents().includes(TOOLBAR_ENTRY_ROOT_PATH), true);
 });
 
+test("callout presets stay aligned across block menu scopes", () => {
+    const presetKeys = [
+        "calloutNote",
+        "calloutTip",
+        "calloutImportant",
+        "calloutWarning",
+        "calloutCaution",
+        "calloutCustom",
+    ];
+    ["gutter.single.turnInto", "gutter.multi.turnInto"].forEach((path) => {
+        const keys = getEntryCatalogChildren(path).map(item => item.key);
+        const calloutIndex = keys.indexOf("callout");
+        assert.notEqual(calloutIndex, -1);
+        assert.deepEqual(keys.slice(calloutIndex + 1, calloutIndex + 1 + presetKeys.length), presetKeys);
+    });
+});
+
 test("conditional block resource menus have distinct configuration labels", () => {
     const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
     Object.defineProperty(globalThis, "window", {

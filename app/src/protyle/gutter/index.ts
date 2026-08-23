@@ -115,6 +115,7 @@ import {closeSubElement} from "../toolbar/subElementLifecycle";
 import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
 import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFold} from "../util/viewFold";
 import {exportImage} from "../export/util";
+import {CALLOUT_PRESETS, updateCalloutType, updateCustomCalloutType} from "../wysiwyg/callout";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -1002,6 +1003,30 @@ export class Gutter {
         };
     }
 
+    private calloutTypeMenus(protyle: IProtyle, blockElements: HTMLElement[]): IMenu[] {
+        const currentType = blockElements.every(item => item.dataset.subtype === blockElements[0].dataset.subtype) ?
+            blockElements[0].dataset.subtype : "";
+        const menus: IMenu[] = CALLOUT_PRESETS.map(item => ({
+            id: item.id,
+            iconHTML: `<span class="b3-menu__icon">${item.icon}</span>`,
+            label: `<span style="color: ${item.color}">${window.siyuan.languages.callout} - ${item.title}</span>`,
+            current: currentType === item.type,
+            click() {
+                updateCalloutType(blockElements, protyle, item);
+            },
+        }));
+        menus.push({
+            id: "calloutCustom",
+            icon: "iconEdit",
+            label: `${window.siyuan.languages.callout} - ${window.siyuan.languages.custom}...`,
+            current: !!currentType && !CALLOUT_PRESETS.some(item => item.type === currentType),
+            click() {
+                updateCustomCalloutType(blockElements, protyle);
+            },
+        });
+        return menus;
+    }
+
     private turnsInto(options: {
         menuId?: string,
         icon?: string,
@@ -1087,6 +1112,7 @@ export class Gutter {
 
     public renderMultipleMenu(protyle: IProtyle, selectsElement: Element[]) {
         let isList = false;
+        const isCallout = selectsElement.every(item => item.getAttribute("data-type") === "NodeCallout");
         const headingLevel = getSameContainerHeadingLevel(selectsElement);
         const selectsElementGroups: Element[][] = [];
         selectsElement.forEach((item) => {
@@ -1144,14 +1170,18 @@ export class Gutter {
                 selectsElementGroups,
                 type: "Blocks2Blockquote"
             }));
-            turnIntoSubmenu.push(this.turnsIntoGroups({
-                menuId: "callout",
-                icon: "iconCallout",
-                label: window.siyuan.languages.callout,
-                protyle,
-                selectsElementGroups,
-                type: "Blocks2Callout"
-            }));
+            if (isCallout) {
+                turnIntoSubmenu.push(...this.calloutTypeMenus(protyle, selectsElement as HTMLElement[]));
+            } else {
+                turnIntoSubmenu.push(this.turnsIntoGroups({
+                    menuId: "callout",
+                    icon: "iconCallout",
+                    label: window.siyuan.languages.callout,
+                    protyle,
+                    selectsElementGroups,
+                    type: "Blocks2Callout"
+                }));
+            }
             turnIntoSubmenu.push(this.turnsInto({
                 menuId: "paragraph",
                 icon: "iconParagraph",
@@ -1916,6 +1946,7 @@ export class Gutter {
                 nodeElement,
                 type: "Callout2Blockquote"
             }));
+            turnIntoSubmenu.push(...this.calloutTypeMenus(protyle, [nodeElement as HTMLElement]));
         }
         turnIntoSubmenu.push(...this.emptyParagraphTurnIntoMenu(protyle, [nodeElement]));
         if (turnIntoSubmenu.length > 0 && allowStructuralMutation) {

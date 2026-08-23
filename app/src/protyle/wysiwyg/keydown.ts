@@ -113,7 +113,6 @@ import {AIActions} from "../../ai/actions";
 import {openLink} from "../../editor/openLink";
 import {onlyProtyleCommand} from "../../boot/globalEvent/command/protyle";
 import {AIChat} from "../../ai/chat";
-import {updateCalloutType} from "./callout";
 import {tabCodeBlock} from "./codeBlock";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
 import {getAVTemplateInteractiveElement} from "../render/av/attributeValue";
@@ -278,6 +277,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!nodeElement) {
             return;
         }
+        const calloutTitleElement = hasClosestByClassName(range.startContainer, "callout-title");
 
         if (document.querySelector(".av__panel")) {
             return;
@@ -339,6 +339,35 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.key !== "Process") {
             setInsertWbrHTML(nodeElement, range, protyle);
             protyle.wysiwyg.preventKeyup = true;
+        }
+
+        if (calloutTitleElement && !event.isComposing) {
+            if (matchHotKey("⌘A", event)) {
+                range.selectNodeContents(calloutTitleElement);
+                focusByRange(range);
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            if (event.key === "Enter" || event.key === "Tab") {
+                focusBlock(nodeElement);
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            if (event.key === "Backspace" || event.key === "Delete") {
+                const offset = getSelectionOffset(calloutTitleElement, nodeElement, range);
+                if (range.collapsed && ((event.key === "Backspace" && offset.start === 0) ||
+                    (event.key === "Delete" && offset.end === calloutTitleElement.textContent.length))) {
+                    event.preventDefault();
+                }
+                event.stopPropagation();
+                return;
+            }
+            if (event.key.startsWith("Arrow") || event.key === "Home" || event.key === "End") {
+                event.stopPropagation();
+                return;
+            }
         }
 
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
@@ -1353,7 +1382,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // 代码块修改语言 https://github.com/siyuan-note/siyuan/issues/14126
         // 列表插入末尾子项 https://github.com/siyuan-note/siyuan/issues/11164
-        // 提示块修改类型和标题 https://github.com/siyuan-note/siyuan/issues/16678
         if (selectText === "" && matchHotKey("⌥↩", event) && !isIncludesHotKey("⌥↩")) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0) {
@@ -1361,22 +1389,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
 
             const languageElements: HTMLElement[] = [];
-            const calloutElements: HTMLElement[] = [];
             selectElements.forEach(item => {
                 if (item.classList.contains("code-block")) {
                     languageElements.push(item.querySelector(".protyle-action__language"));
-                } else {
-                    const calloutElement = hasClosestByClassName(item, "callout");
-                    const liElement = hasClosestByClassName(item, "li");
-                    if ((calloutElement && !liElement) || (calloutElement && liElement && liElement.contains(calloutElement))) {
-                        calloutElements.push(calloutElement);
-                    }
                 }
             });
             if (languageElements.length > 0) {
                 protyle.toolbar.showCodeLanguage(protyle, languageElements);
-            } else if (calloutElements.length > 0) {
-                updateCalloutType(calloutElements, protyle);
             } else {
                 addSubList(protyle, nodeElement, range);
             }

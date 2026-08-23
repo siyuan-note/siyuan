@@ -43,7 +43,7 @@ export const beforeBlockquoteInput = (protyle: IProtyle, event: InputEvent) => {
     if (!blockElement || blockElement.getAttribute("data-type") !== "NodeParagraph") {
         return false;
     }
-    const editElement = getContenteditableElement(blockElement) as HTMLElement;
+    const editElement = getContenteditableElement(blockElement, range.startContainer) as HTMLElement;
     const blockquoteContext = getBlockquoteContext(blockElement, protyle.wysiwyg.element);
     if (!editElement || !blockquoteContext || !editElement.contains(range.startContainer)) {
         return false;
@@ -109,7 +109,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         }
         return;
     }
-    const editElement = getContenteditableElement(blockElement) as HTMLElement;
+    const editElement = getContenteditableElement(blockElement, range.startContainer) as HTMLElement;
     const type = blockElement.getAttribute("data-type");
     if (!editElement) {
         // hr、嵌入块、数学公式、iframe、音频、视频、图表渲染块等不允许输入 https://github.com/siyuan-note/siyuan/issues/3958
@@ -179,6 +179,34 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             context: inputOperations.undoContext,
         }, ...inputOperations.undoOperations]
     } : undefined;
+    if (editElement.classList.contains("callout-title")) {
+        fixAdjacentTags(editElement);
+        let html = protyle.lute.SpinBlockDOM(blockElement.outerHTML);
+        hideElements(["util"], protyle, true);
+        const tempElement = document.createElement("template");
+        tempElement.innerHTML = html;
+        const renderedTitleElement = tempElement.content.firstElementChild.querySelector(".callout-title");
+        if (needRender && renderedTitleElement?.innerHTML !== editElement.innerHTML) {
+            blockElement.insertAdjacentHTML("afterend", html);
+            blockElement = blockElement.nextElementSibling as HTMLElement;
+            blockElement.previousElementSibling.remove();
+            blockElement.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+            mathRender(blockElement);
+            blockElement.querySelectorAll('[data-type~="block-ref"][data-subtype="d"]').forEach(refItem => {
+                if (refItem.textContent === "") {
+                    fetchPost("/api/block/getRefText", {id: refItem.getAttribute("data-id")}, (response) => {
+                        refItem.innerHTML = response.data;
+                    });
+                }
+            });
+            html = blockElement.outerHTML;
+        }
+        focusByWbr(protyle.wysiwyg.element, range);
+        protyle.hint.render(protyle);
+        hideElements(["gutter"], protyle);
+        updateInput(html, protyle, id, inputOperations);
+        return;
+    }
     if ((type !== "NodeCodeBlock" && type !== "NodeHeading") && // https://github.com/siyuan-note/siyuan/issues/11851
         (editElement.innerHTML.endsWith("\n<wbr>") || editElement.innerHTML.endsWith("\n<wbr>\n"))) {
         // 软换行

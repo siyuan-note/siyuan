@@ -321,7 +321,22 @@ body.mobile-keyboard--open {
     color: var(--b3-theme-on-surface-light);
     background: transparent;
 
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: transparent;
+      content: "";
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+    }
+
     > svg {
+      position: relative;
+      z-index: 1;
       width: 24px;
       height: 24px;
       flex-shrink: 0;
@@ -330,7 +345,10 @@ body.mobile-keyboard--open {
     &:active,
     &:focus-visible {
       color: var(--b3-theme-on-surface);
-      background-color: var(--b3-list-hover);
+
+      &::before {
+        background-color: var(--b3-list-hover);
+      }
     }
 
     &[disabled] {
@@ -341,6 +359,8 @@ body.mobile-keyboard--open {
 
   .toolbar__tabs-count {
     box-sizing: border-box;
+    position: relative;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: center;

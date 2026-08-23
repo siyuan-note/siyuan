@@ -770,7 +770,7 @@ export class Dock {
         resizeTabs(isSaveLayout);
         if (target.classList.contains("dock__item--active") && !removeDock && (type === "graph" || type === "globalGraph")) {
             const graph = this.data[type] as Graph;
-            graph.onGraph(false);
+            graph.onGraph();
         }
 
         // 等待 dock 面板动画结束

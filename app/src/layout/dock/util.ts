@@ -260,7 +260,7 @@ export const clearOBG = () => {
             }
             item.blockId = "";
             item.graphData = undefined;
-            item.onGraph(false);
+            item.onGraph();
         }
     });
     models.backlink.forEach(item => {

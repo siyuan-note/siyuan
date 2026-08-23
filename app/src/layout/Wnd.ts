@@ -596,7 +596,7 @@ export class Wnd {
 
         if (currentTab && target === currentTab.headElement) {
             if (currentTab.model instanceof Graph) {
-                currentTab.model.onGraph(false);
+                currentTab.model.onGraph();
             } else if (currentTab.model instanceof Asset && currentTab.model.pdfObject && currentTab.model.pdfObject.pdfViewer) {
                 // https://github.com/siyuan-note/siyuan/issues/5655
                 currentTab.model.pdfObject.pdfViewer.container.focus();

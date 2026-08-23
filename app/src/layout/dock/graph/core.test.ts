@@ -109,6 +109,11 @@ describe("graph data normalization", () => {
         assert.equal(camera.y, 100);
     });
 
+    it("does not enlarge sparse graphs above their natural scale", () => {
+        const camera = fitGraphCamera(new Float32Array([0, 0]), new Float32Array([15]), 400, 300);
+        assert.deepEqual(camera, {scale: 1, x: 200, y: 150});
+    });
+
     it("centers positions after resizing without changing the scale", () => {
         const camera = centerGraphCamera(
             new Float32Array([0, 0, 200, 100]),

@@ -9,6 +9,7 @@ import {
 
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 const HIGHLIGHT_EDGE_OPACITY_FACTOR = 2.5;
+const MAX_AUTO_FIT_SCALE = 1;
 export const MIN_GRAPH_EDGE_WIDTH = 1;
 
 export const getGraphEdgeOpacity = (lineOpacity: number, highlighted: boolean) =>
@@ -471,7 +472,8 @@ export const fitGraphCamera = (
     const contentHeight = Math.max(1, maxY - minY);
     const availableWidth = Math.max(1, width - padding * 2);
     const availableHeight = Math.max(1, height - padding * 2);
-    const scale = Math.max(0.02, Math.min(4, availableWidth / contentWidth, availableHeight / contentHeight));
+    const scale = Math.max(0.02, Math.min(MAX_AUTO_FIT_SCALE, availableWidth / contentWidth,
+        availableHeight / contentHeight));
     return {
         scale,
         x: width / 2 - (minX + maxX) / 2 * scale,

@@ -23,6 +23,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -36,6 +37,7 @@ import (
 
 var downloadPackageFlight singleflight.Group
 var bazaarDownloadCloudServer = util.GetCloudServer
+var packageInstallLock sync.Mutex
 
 // downloadBazaarFile 下载集市文件
 func downloadBazaarFile(repoURLHash string, pushProgress bool) (data []byte, err error) {
@@ -190,6 +192,9 @@ func installPackage(data []byte, installPath, pkgType, packageName string, updat
 // 先拷到安装目录同级的 staging，更新时再把旧目录 rename 成 backup，最后把 staging rename 成目标路径。
 // 这样新包已删除的文件不会残留，失败时也可以把 backup rename 回去。
 func replacePackageDirectory(sourcePath, installPath string, update bool) (err error) {
+	packageInstallLock.Lock()
+	defer packageInstallLock.Unlock()
+
 	if err = os.MkdirAll(filepath.Dir(installPath), 0755); err != nil {
 		return
 	}
@@ -207,13 +212,25 @@ func replacePackageDirectory(sourcePath, installPath string, update bool) (err e
 		return
 	}
 
-	if update {
+	entries, statErr := os.ReadDir(installPath)
+	targetExists := statErr == nil
+	if statErr != nil && !os.IsNotExist(statErr) {
+		return statErr
+	}
+	if targetExists && !update && 0 < len(entries) {
+		return errors.New("marketplace package install path already exists")
+	}
+	if update && !targetExists {
+		return os.ErrNotExist
+	}
+
+	if targetExists {
 		if err = os.Rename(installPath, backupPath); err != nil {
 			return
 		}
 	}
 	if err = os.Rename(stagingPath, installPath); err != nil {
-		if update {
+		if targetExists {
 			if rollbackErr := os.Rename(backupPath, installPath); rollbackErr != nil {
 				preserveOperationPath = true
 				return fmt.Errorf("install marketplace package failed: %w; rollback failed: %s", err, rollbackErr)
@@ -221,7 +238,7 @@ func replacePackageDirectory(sourcePath, installPath string, update bool) (err e
 		}
 		return
 	}
-	if update {
+	if targetExists {
 		if removeErr := os.RemoveAll(operationPath); removeErr != nil {
 			logging.LogWarnf("remove package backup [%s] failed: %s", backupPath, removeErr)
 		}
@@ -250,6 +267,9 @@ func InstallLocalPackage(sourcePath, installPath, pkgType, packageName string, u
 
 // UninstallPackage 卸载集市包
 func UninstallPackage(installPath string) (err error) {
+	packageInstallLock.Lock()
+	defer packageInstallLock.Unlock()
+
 	if err = os.RemoveAll(installPath); err != nil {
 		logging.LogErrorf("remove [%s] failed: %s", installPath, err)
 		return fmt.Errorf("remove community package [%s] failed", filepath.Base(installPath))

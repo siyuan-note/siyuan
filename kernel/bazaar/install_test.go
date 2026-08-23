@@ -198,6 +198,61 @@ func TestInstallPackageFreshInstall(t *testing.T) {
 	}
 }
 
+// TestInstallPackageFreshInstallReplacesEmptyDirectory 校验新安装可以替换已存在的空目标目录
+func TestInstallPackageFreshInstallReplacesEmptyDirectory(t *testing.T) {
+	oldTempDir := util.TempDir
+	util.TempDir = t.TempDir()
+	t.Cleanup(func() { util.TempDir = oldTempDir })
+
+	installPath := filepath.Join(t.TempDir(), "plugins", "sample")
+	if err := os.MkdirAll(installPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	data := buildInstallPackageArchive(t, map[string]string{
+		"plugin.json": `{"name":"sample","version":"1.0.0"}`,
+		"index.js":    "new",
+	})
+	if err := installPackage(data, installPath, "plugins", "sample", false); err != nil {
+		t.Fatalf("expected fresh install into empty directory to succeed: %s", err)
+	}
+	if _, err := os.Stat(filepath.Join(installPath, "index.js")); err != nil {
+		t.Fatalf("installed file is missing: %s", err)
+	}
+}
+
+// TestReplacePackageDirectoryRechecksNonEmptyTarget 校验目录交换前会重新拒绝覆盖非空目标目录
+func TestReplacePackageDirectoryRechecksNonEmptyTarget(t *testing.T) {
+	root := t.TempDir()
+	sourcePath := filepath.Join(root, "source")
+	installPath := filepath.Join(root, "plugins", "sample")
+	if err := os.MkdirAll(sourcePath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(installPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(sourcePath, "new.js"), []byte("new"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(installPath, "original.js"), []byte("original"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := replacePackageDirectory(sourcePath, installPath, false); err == nil {
+		t.Fatal("expected replacing a non-empty target without update to be rejected")
+	}
+	content, err := os.ReadFile(filepath.Join(installPath, "original.js"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != "original" {
+		t.Fatalf("existing package file was changed: %q", content)
+	}
+	if _, err = os.Stat(filepath.Join(installPath, "new.js")); !os.IsNotExist(err) {
+		t.Fatalf("new package file was written unexpectedly: %v", err)
+	}
+}
+
 // TestInstallPackageMissingManifest 校验下载包缺少清单文件时拒绝安装
 func TestInstallPackageMissingManifest(t *testing.T) {
 	oldTempDir := util.TempDir

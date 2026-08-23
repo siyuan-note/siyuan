@@ -4,8 +4,11 @@
 
 body {
   --mobile-bottom-bar-height: 56px;
+  --mobile-bottom-bar-gap: 8px;
+  --mobile-status-height: 24px;
   --mobile-bottom-bar-safe-area: max(8px, env(safe-area-inset-bottom));
-  --mobile-bottom-bar-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-safe-area));
+  --mobile-bottom-bar-bottom: calc(var(--mobile-status-height) + var(--mobile-bottom-bar-gap) + var(--mobile-bottom-bar-safe-area));
+  --mobile-bottom-bar-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-bottom));
 }
 
 body.mobile-chrome--hidden {
@@ -282,16 +285,20 @@ body.mobile-keyboard--open {
 .mobile-bottom-bar {
   position: fixed;
   right: 0;
-  bottom: 0;
+  bottom: var(--mobile-bottom-bar-bottom);
   left: 0;
   z-index: 3;
   box-sizing: border-box;
   display: flex;
   align-items: flex-start;
-  height: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-safe-area));
-  padding: 0 max(4px, env(safe-area-inset-right)) var(--mobile-bottom-bar-safe-area) max(4px, env(safe-area-inset-left));
-  border-top: .5px solid var(--b3-theme-background-light);
+  width: min(80%, 480px);
+  height: var(--mobile-bottom-bar-height);
+  margin: 0 auto;
+  padding: 0;
+  border: .5px solid var(--b3-border-color);
+  border-radius: 28px;
   background-color: var(--b3-theme-background);
+  box-shadow: var(--b3-point-shadow);
   transition: opacity 240ms cubic-bezier(.2, 0, 0, 1), transform 240ms cubic-bezier(.2, 0, 0, 1), visibility 240ms;
   -webkit-user-select: none;
   user-select: none;
@@ -1178,6 +1185,8 @@ body.mobile-keyboard--open {
 .status {
   position: fixed;
   bottom: -30px;
+  height: var(--mobile-status-height);
+  line-height: 16px;
   transition: var(--b3-transition);
   font-size: 12px;
   color: var(--b3-theme-on-surface);

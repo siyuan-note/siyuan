@@ -18,6 +18,7 @@ import {reloadInlineStyles} from "../../util/assets";
 import {renderMobileBottomBar} from "./mobileBottomBar";
 import {Constants} from "../../constants";
 import {MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT} from "./mobileSidePanelConfig";
+import {applyCloudUserState} from "../../config/tabs/accountUi";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;
@@ -75,6 +76,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setConf":
                 window.siyuan.config = data.data;
+                break;
+            case "setCloudUser":
+                applyCloudUserState(data.data.user, data.data.userName);
                 break;
             case "setServerAddrs":
                 updateServerAddresses(data.data);

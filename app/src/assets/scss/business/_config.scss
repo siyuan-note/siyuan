@@ -1208,6 +1208,10 @@
 }
 
 #configAccountMain.config-wrap {
+  .config-account__row-actions {
+    gap: 8px;
+  }
+
   @media (max-width: 750px) {
     .config-account__profile-meta {
       display: block;

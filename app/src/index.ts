@@ -3,7 +3,7 @@ import {Menus} from "./menus";
 import {Model} from "./layout/Model";
 import {onGetConfig} from "./boot/onGetConfig";
 import {initBlockPopover} from "./block/popover";
-import {onSetaccount} from "./config/tabs/accountUi";
+import {applyCloudUserState, onSetaccount} from "./config/tabs/accountUi";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
@@ -127,6 +127,9 @@ export class App {
                             break;
                         case "setConf":
                             window.siyuan.config = data.data;
+                            break;
+                        case "setCloudUser":
+                            applyCloudUserState(data.data.user, data.data.userName);
                             break;
                         case "setServerAddrs":
                             updateServerAddresses(data.data);

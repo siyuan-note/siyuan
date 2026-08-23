@@ -267,7 +267,14 @@ func refreshUser() {
 	if nil != Conf.GetUser() {
 		time.Sleep(2 * time.Minute)
 		if nil != Conf.GetUser() {
-			RefreshUser(Conf.GetUser().UserToken)
+			_, err := RefreshUser(Conf.GetUser().UserToken)
+			if nil != err {
+				msg := Conf.Language(18)
+				if IsInvalidUserRefresh(err) {
+					msg = Conf.Language(19)
+				}
+				util.PushErrMsg(msg, 5000)
+			}
 		}
 		subscriptionExpirationReminded = false
 	}
@@ -330,7 +337,7 @@ func refreshAnnouncement() {
 	}
 }
 
-func RefreshUser(token string) {
+func RefreshUser(token string) (ret *conf.User, err error) {
 	previousUserID := ""
 	if previousUser := Conf.GetUser(); nil != previousUser {
 		previousUserID = previousUser.UserId
@@ -355,44 +362,30 @@ func RefreshUser(token string) {
 		tokenExpireTime, err := strconv.ParseInt(user.UserTokenExpireTime+"000", 10, 64)
 		if err != nil {
 			logging.LogErrorf("convert token expire time [%s] failed: %s", user.UserTokenExpireTime, err)
-			util.PushErrMsg(Conf.Language(19), 5000)
-			return
+			return user, errRequestUserFailed
 		}
 
 		if threeDaysAfter > tokenExpireTime {
 			token = user.UserToken
 			goto Net
 		}
-		return
+		return user, nil
 	}
 
 Net:
 	start := time.Now()
 	user, err := getUser(token)
+	user, invalidUserName, invalid := resolveCloudUserRefresh(Conf.GetUser(), user, err)
 	if err != nil {
-		if nil == Conf.GetUser() || errors.Is(err, errInvalidUser) {
-			util.PushErrMsg(Conf.Language(19), 5000)
-			return
+		if invalid {
+			LogoutUser()
+			util.BroadcastByType("main", "setCloudUser", 0, "", map[string]any{
+				"user":     nil,
+				"userName": invalidUserName,
+			})
+			return nil, err
 		}
-
-		if errors.Is(err, errRequestUserFailed) {
-			util.PushErrMsg(Conf.Language(18), 5000)
-			return
-		}
-
-		var tokenExpireTime int64
-		tokenExpireTime, err = strconv.ParseInt(Conf.GetUser().UserTokenExpireTime+"000", 10, 64)
-		if err != nil {
-			logging.LogErrorf("convert token expire time [%s] failed: %s", Conf.GetUser().UserTokenExpireTime, err)
-			util.PushErrMsg(Conf.Language(19), 5000)
-			return
-		}
-
-		if threeDaysAfter > tokenExpireTime {
-			util.PushErrMsg(Conf.Language(19), 5000)
-			return
-		}
-		return
+		return user, err
 	}
 
 	Conf.SetUser(user)
@@ -402,10 +395,32 @@ Net:
 	if previousUserID != user.UserId {
 		refreshLANSyncManager()
 	}
+	util.BroadcastByType("main", "setCloudUser", 0, "", map[string]any{
+		"user":     user,
+		"userName": "",
+	})
 
 	if elapsed := time.Since(start).Milliseconds(); 3000 < elapsed {
 		logging.LogInfof("get cloud user elapsed [%dms]", elapsed)
 	}
+	return user, nil
+}
+
+func IsInvalidUserRefresh(err error) bool {
+	return errors.Is(err, errInvalidUser)
+}
+
+func resolveCloudUserRefresh(previous, refreshed *conf.User, refreshErr error) (user *conf.User, invalidUserName string, invalid bool) {
+	if nil == refreshErr {
+		return refreshed, "", false
+	}
+	if errors.Is(refreshErr, errInvalidUser) {
+		if nil != previous {
+			invalidUserName = previous.UserName
+		}
+		return nil, invalidUserName, true
+	}
+	return previous, "", false
 }
 
 func loadUserFromConf() *conf.User {
@@ -556,7 +571,7 @@ var (
 
 func getUser(token string) (*conf.User, error) {
 	result := map[string]any{}
-	request := httpclient.NewCloudRequest30s()
+	request := httpclient.NewCloudRequest30s().SetRetryCount(0)
 	resp, err := request.
 		SetSuccessResult(&result).
 		SetBody(map[string]string{"token": token}).

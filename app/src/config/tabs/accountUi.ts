@@ -14,9 +14,15 @@ import {closePanel} from "../../mobile/util/closePanel";
 /// #endif
 import md5 from "blueimp-md5";
 import type {SettingTabBuilder} from "../setting/builder";
-import {patchSyncConfig, refreshSyncCloudSpaceGroup} from "./syncRuntime";
+import {patchSyncConfig, refreshSyncCloudSpaceGroup, syncTabElement} from "./syncRuntime";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {bindAccountAuthEnter, isAccountLoginDisabled} from "./accountAuth";
+import {
+    getCloudLoginUserName,
+    resolveCloudUserRefresh,
+    setCloudUser,
+    type TCloudUser,
+} from "./cloudUser";
 
 /** 账号节：由 syncTab 注册 */
 export const registerAccountGroup = (tab: SettingTabBuilder) => {
@@ -128,7 +134,7 @@ const genAccountAuthHTML = (mode: "login" | "deactivate") => {
     return `<div class="b3-form__space--small" id="form1">
     <div class="b3-form__icon">
         <svg class="b3-form__icon-icon"><use xlink:href="#iconAccount"></use></svg>
-        <input id="userName" class="b3-text-field fn__block b3-form__icon-input" placeholder="${window.siyuan.languages.accountName}">
+        <input id="userName" class="b3-text-field fn__block b3-form__icon-input" value="${escapeAttr(getCloudLoginUserName())}" placeholder="${window.siyuan.languages.accountName}">
     </div>
     <div class="fn__hr--b"></div>
     <div class="b3-form__icon">
@@ -195,15 +201,23 @@ const bindAccountMainEvent = (accountSettingsRoot: Element) => {
             return;
         }
         refreshIcon?.classList.add("fn__rotate");
+        const previousUserName = window.siyuan.user?.userName || "";
         fetchPost("/api/setting/getCloudUser", {
             token: window.siyuan.user?.userToken || "",
         }, response => {
-            window.siyuan.user = response.data;
-            renderAccount(accountSettingsRoot);
+            const action = resolveCloudUserRefresh(response.code, response.data, previousUserName);
+            if (action.apply) {
+                applyCloudUserState(action.user, action.userName, accountSettingsRoot);
+            }
+            if (response.code !== 0) {
+                showMessage(response.msg);
+                return;
+            }
             showMessage(window.siyuan.languages.refreshUser, 3000);
-            onSetaccount();
-            processSync();
-            refreshSyncCloudSpaceGroup(accountSettingsRoot);
+        }, undefined, () => {
+            showMessage(window.siyuan.languages._kernel[18]);
+        }).finally(() => {
+            refreshIcon?.classList.remove("fn__rotate");
         });
     });
     if (accountMainEl.classList.contains("config-account--login")) {
@@ -215,11 +229,9 @@ const bindAccountMainEvent = (accountSettingsRoot: Element) => {
     accountMainEl.querySelector("#logout")?.addEventListener("click", () => {
         fetchPost("/api/setting/logoutCloudUser", {}, () => {
             fetchPost("/api/setting/getCloudUser", {}, response => {
-                window.siyuan.user = response.data;
-                renderAccount(accountSettingsRoot);
-                onSetaccount();
-                processSync();
-                refreshSyncCloudSpaceGroup(accountSettingsRoot);
+                if (response.code === 0) {
+                    applyCloudUserState(response.data, "", accountSettingsRoot);
+                }
             });
         });
     });
@@ -418,11 +430,14 @@ const bindAccountAuthForm = (
             fetchPost("/api/setting/getCloudUser", {
                 token: response.data.token,
             }, (userResponse) => {
-                window.siyuan.user = userResponse.data;
-                processSync();
-                renderAccount(accountSettingsRoot!);
-                onSetaccount();
-                refreshSyncCloudSpaceGroup(accountSettingsRoot!);
+                const action = resolveCloudUserRefresh(userResponse.code, userResponse.data, userNameInput.value.trim());
+                if (action.apply) {
+                    applyCloudUserState(action.user, action.userName, accountSettingsRoot);
+                }
+                if (userResponse.code !== 0) {
+                    showMessage(userResponse.msg);
+                    return;
+                }
                 window.dispatchEvent(new CustomEvent("siyuan-login-success"));
             });
         } else if (mode === "deactivate") {
@@ -506,6 +521,17 @@ const renderAccount = (accountSettingsRoot: Element) => {
     updateAccountSwitchesVisibility(accountSettingsRoot);
     bindAccountMainEvent(accountSettingsRoot);
     bindAccountPaymentEvent(accountSettingsRoot);
+};
+
+export const applyCloudUserState = (user: TCloudUser | null, userName = "", accountSettingsRoot?: Element) => {
+    setCloudUser(user, userName);
+    const root = accountSettingsRoot || syncTabElement;
+    if (root) {
+        renderAccount(root);
+        refreshSyncCloudSpaceGroup(root);
+    }
+    onSetaccount();
+    processSync();
 };
 
 const genVIPIconHTML = (className = "") =>

@@ -98,7 +98,7 @@ export const fetchPost = (
         if (e?.name === "AbortError") {
             return;
         }
-        if (failCallback && url === "/api/file/getFile") {
+        if (failCallback) {
             failCallback({
                 data: null,
                 msg: e.message,

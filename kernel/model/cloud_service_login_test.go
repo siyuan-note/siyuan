@@ -19,6 +19,8 @@ package model
 import (
 	"reflect"
 	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/conf"
 )
 
 func TestParseLogin2faResult(t *testing.T) {
@@ -71,5 +73,25 @@ func TestParseLogin2faResult(t *testing.T) {
 				t.Fatalf("response data was not preserved")
 			}
 		})
+	}
+}
+
+func TestResolveCloudUserRefresh(t *testing.T) {
+	previous := &conf.User{UserName: "alice"}
+	refreshed := &conf.User{UserName: "alice-updated"}
+
+	user, userName, invalid := resolveCloudUserRefresh(previous, refreshed, nil)
+	if user != refreshed || "" != userName || invalid {
+		t.Fatalf("unexpected successful refresh result [user=%+v, userName=%q, invalid=%t]", user, userName, invalid)
+	}
+
+	user, userName, invalid = resolveCloudUserRefresh(previous, nil, errRequestUserFailed)
+	if user != previous || "" != userName || invalid {
+		t.Fatalf("unexpected temporary failure result [user=%+v, userName=%q, invalid=%t]", user, userName, invalid)
+	}
+
+	user, userName, invalid = resolveCloudUserRefresh(previous, nil, errInvalidUser)
+	if nil != user || previous.UserName != userName || !invalid {
+		t.Fatalf("unexpected invalid user result [user=%+v, userName=%q, invalid=%t]", user, userName, invalid)
 	}
 }

@@ -34,6 +34,7 @@ import {ensureUILayout} from "../util/ensureUILayout";
 import {applyEntryVisibility} from "../config/entryVisibility/runtime";
 import {removeBlockPanelEditors} from "../block/panelRemoval";
 import {updateServerAddresses} from "../config/tabs/accessRuntime";
+import {applyCloudUserState} from "../config/tabs/accountUi";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -96,6 +97,9 @@ class App {
                                 break;
                             case "setConf":
                                 window.siyuan.config = data.data;
+                                break;
+                            case "setCloudUser":
+                                applyCloudUserState(data.data.user, data.data.userName);
                                 break;
                             case "setServerAddrs":
                                 updateServerAddresses(data.data);

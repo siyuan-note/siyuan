@@ -986,8 +986,19 @@ func getCloudUser(c *gin.Context) {
 	if nil != t {
 		token = t.(string)
 	}
-	model.RefreshUser(token)
-	ret.Data = model.Conf.GetUser()
+	user, err := model.RefreshUser(token)
+	ret.Data = user
+	if nil == err {
+		return
+	}
+	if model.IsInvalidUserRefresh(err) {
+		ret.Code = 255
+		ret.Msg = model.Conf.Language(19)
+		ret.Data = nil
+		return
+	}
+	ret.Code = 1
+	ret.Msg = model.Conf.Language(18)
 }
 
 func logoutCloudUser(c *gin.Context) {

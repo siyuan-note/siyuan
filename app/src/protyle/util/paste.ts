@@ -38,6 +38,7 @@ import {
     shouldConvertWPSPresentation,
 } from "./wpsPresentation";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
+import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -847,6 +848,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 return;
             }
         }
+        resetPastedQueryEmbedRenderState(tempElement);
         let isBlock = false;
         const pastedBlockElements = tempElement.querySelectorAll("[data-node-id]");
         if (pastedBlockElements.length > 0) {

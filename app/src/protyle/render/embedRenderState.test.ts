@@ -1,6 +1,10 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {finishCustomEmbedRender, finishEmptyEmbedRender} from "./embedRenderState";
+import {
+    finishCustomEmbedRender,
+    finishEmptyEmbedRender,
+    resetPastedQueryEmbedRenderState,
+} from "./embedRenderState";
 
 const createClassList = (...names: string[]) => {
     const classes = new Set(names);
@@ -12,6 +16,50 @@ const createClassList = (...names: string[]) => {
         },
     };
 };
+
+describe("resetPastedQueryEmbedRenderState", () => {
+    it("clears copied runtime content from root and nested query embeds", () => {
+        const createEmbed = (nested: Element[] = []) => {
+            const removedAttributes: string[] = [];
+            const children: ReturnType<typeof createClassList>[] = [];
+            const addChild = (className: string) => {
+                const child = {
+                    ...createClassList(className),
+                    remove() {
+                        children.splice(children.indexOf(child), 1);
+                    },
+                };
+                children.push(child);
+                return child;
+            };
+            const item = {
+                children,
+                getAttribute: (attribute: string) => attribute === "data-type" ? "NodeBlockQueryEmbed" : null,
+                querySelectorAll: () => nested,
+                removeAttribute: (attribute: string) => removedAttributes.push(attribute),
+                style: {height: "120px"},
+            } as unknown as HTMLElement;
+            return {addChild, children, item, removedAttributes};
+        };
+        const nested = createEmbed();
+        nested.addChild("protyle-icons");
+        const nestedAttr = nested.addChild("protyle-attr");
+        const root = createEmbed([nested.item]);
+        root.addChild("protyle-icons");
+        root.addChild("protyle-wysiwyg__embed");
+        root.addChild("custom-query-result");
+        const rootAttr = root.addChild("protyle-attr");
+
+        resetPastedQueryEmbedRenderState(root.item);
+
+        assert.deepEqual(root.removedAttributes, ["data-render"]);
+        assert.deepEqual(nested.removedAttributes, ["data-render"]);
+        assert.deepEqual(root.children, [rootAttr]);
+        assert.deepEqual(nested.children, [nestedAttr]);
+        assert.equal(root.item.style.height, "");
+        assert.equal(nested.item.style.height, "");
+    });
+});
 
 describe("finishEmptyEmbedRender", () => {
     it("clears rendered content and loading state while preserving the frame", () => {

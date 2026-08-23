@@ -3,6 +3,23 @@ export interface IEmbedRenderLoadingState {
     height?: string;
 }
 
+export const resetPastedQueryEmbedRenderState = (element: Element) => {
+    const embedElements: HTMLElement[] = [];
+    if (element.getAttribute("data-type") === "NodeBlockQueryEmbed") {
+        embedElements.push(element as HTMLElement);
+    }
+    embedElements.push(...element.querySelectorAll<HTMLElement>('[data-type="NodeBlockQueryEmbed"]'));
+    embedElements.forEach(item => {
+        item.removeAttribute("data-render");
+        item.style.height = "";
+        Array.from(item.children).forEach(child => {
+            if (!child.classList.contains("protyle-attr")) {
+                child.remove();
+            }
+        });
+    });
+};
+
 export const finishEmptyEmbedRender = (item: HTMLElement, onEmbedRender?: () => void) => {
     item.querySelector(":scope > .protyle-icons .protyle-action__reload .fn__rotate")?.classList.remove("fn__rotate");
     Array.from(item.children).forEach(child => {

@@ -688,7 +688,7 @@
 	"agentTimeout": "Batas waktu",
 	"agentTimeoutTip": "Batas waktu total sesi agen, 0 = tanpa batas",
 	"agentConfirmTimeout": "Batas waktu konfirmasi",
-	"agentConfirmTimeoutTip": "Tolak otomatis setelah waktu habis",
+	"agentConfirmTimeoutTip": "Tolak otomatis setelah waktu habis, 0 = tunggu tanpa batas",
 	"agentMaxRetries": "Percobaan maksimum",
 	"agentMaxRetriesTip": "Percobaan ulang API maksimum saat gagal",
 	"agentMaxToolCallRounds": "Maks. putaran panggilan alat",

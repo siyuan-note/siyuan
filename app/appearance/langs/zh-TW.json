@@ -688,7 +688,7 @@
 	"agentTimeout": "逾時時間",
 	"agentTimeoutTip": "智能體會話總超時時間，0 表示不限制",
 	"agentConfirmTimeout": "確認超時時間",
-	"agentConfirmTimeoutTip": "操作確認超時後自動拒絕",
+	"agentConfirmTimeoutTip": "操作確認超時後自動拒絕，0 表示一直等待",
 	"agentMaxRetries": "最大重試次數",
 	"agentMaxRetriesTip": "API 請求失敗時的最大重試次數",
 	"agentMaxToolCallRounds": "最大工具調用輪數",

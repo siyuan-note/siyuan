@@ -688,7 +688,7 @@
 	"agentTimeout": "시간 초과",
 	"agentTimeoutTip": "에이전트 세션 전체 시간 초과, 0 은 제한 없음",
 	"agentConfirmTimeout": "확인 시간 초과",
-	"agentConfirmTimeoutTip": "시간 초과 후 자동 거부",
+	"agentConfirmTimeoutTip": "시간 초과 후 자동 거부, 0 은 무제한 대기",
 	"agentMaxRetries": "최대 재시도 횟수",
 	"agentMaxRetriesTip": "API 요청 실패 시 최대 재시도 횟수",
 	"agentMaxToolCallRounds": "최대 도구 호출 라운드",

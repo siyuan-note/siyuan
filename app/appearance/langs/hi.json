@@ -688,7 +688,7 @@
 	"agentTimeout": "समय सीमा",
 	"agentTimeoutTip": "एजेंट सत्र की कुल समय सीमा, 0 = कोई सीमा नहीं",
 	"agentConfirmTimeout": "पुष्टि समय समाप्ति",
-	"agentConfirmTimeoutTip": "ऑपरेशन पुष्टिकरण समय समाप्त होने पर स्वचालित रूप से अस्वीकार कर दिया जाएगा",
+	"agentConfirmTimeoutTip": "ऑपरेशन पुष्टिकरण समय समाप्त होने पर स्वचालित रूप से अस्वीकार कर दिया जाएगा, 0 = असीमित प्रतीक्षा",
 	"agentMaxRetries": "अधिकतम पुनः प्रयास",
 	"agentMaxRetriesTip": "API अनुरोध विफल होने पर अधिकतम पुनः प्रयास की संख्या",
 	"agentMaxToolCallRounds": "अधिकतम टूल कॉल राउंड",

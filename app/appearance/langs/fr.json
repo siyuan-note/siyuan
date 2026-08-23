@@ -688,7 +688,7 @@
 	"agentTimeout": "Délai d'expiration",
 	"agentTimeoutTip": "Délai d'expiration total de la session de l'agent, 0 = sans limite",
 	"agentConfirmTimeout": "Délai de confirmation",
-	"agentConfirmTimeoutTip": "Rejet automatique après expiration",
+	"agentConfirmTimeoutTip": "Rejet automatique après expiration, 0 = attente illimitée",
 	"agentMaxRetries": "Nombre max. de tentatives",
 	"agentMaxRetriesTip": "Nombre max. de tentatives API en cas d'échec",
 	"agentMaxToolCallRounds": "Nombre max. de tours d'appels d'outils",

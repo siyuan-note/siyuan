@@ -688,7 +688,7 @@
 	"agentTimeout": "المهلة",
 	"agentTimeoutTip": "إجمالي مهلة جلسة الوكيل، 0 = بلا حد",
 	"agentConfirmTimeout": "مهلة التأكيد",
-	"agentConfirmTimeoutTip": "الرفض التلقائي بعد انتهاء المهلة",
+	"agentConfirmTimeoutTip": "الرفض التلقائي بعد انتهاء المهلة، 0 = انتظار بلا حد",
 	"agentMaxRetries": "الحد الأقصى للمحاولات",
 	"agentMaxRetriesTip": "الحد الأقصى لمحاولات إعادة طلب API عند الفشل",
 	"agentMaxToolCallRounds": "الحد الأقصى لجولات استدعاء الأدوات",

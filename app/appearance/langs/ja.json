@@ -688,7 +688,7 @@
 	"agentTimeout": "タイムアウト",
 	"agentTimeoutTip": "エージェント セッション全体のタイムアウト、0 は制限なし",
 	"agentConfirmTimeout": "確認タイムアウト",
-	"agentConfirmTimeoutTip": "タイムアウト後に自動的に拒否",
+	"agentConfirmTimeoutTip": "タイムアウト後に自動的に拒否、0 は無制限に待機",
 	"agentMaxRetries": "最大リトライ回数",
 	"agentMaxRetriesTip": "API リクエスト失敗時の最大リトライ回数",
 	"agentMaxToolCallRounds": "最大ツール呼び出しラウンド数",

@@ -688,7 +688,7 @@
 	"agentTimeout": "Časový limit",
 	"agentTimeoutTip": "Celkový časový limit relácie agenta, 0 = bez limitu",
 	"agentConfirmTimeout": "Časový limit potvrdenia",
-	"agentConfirmTimeoutTip": "Automatické odmietnutie po uplynutí času",
+	"agentConfirmTimeoutTip": "Automatické odmietnutie po uplynutí času, 0 = čakanie bez obmedzenia",
 	"agentMaxRetries": "Max. počet opakovaní",
 	"agentMaxRetriesTip": "Max. počet opakovaných pokusov API pri chybe",
 	"agentMaxToolCallRounds": "Max. počet kôl volania nástrojov",

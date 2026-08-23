@@ -688,7 +688,7 @@
 	"agentTimeout": "Tempo limite",
 	"agentTimeoutTip": "Tempo limite total da sessão do agente, 0 = sem limite",
 	"agentConfirmTimeout": "Tempo limite de confirmação",
-	"agentConfirmTimeoutTip": "Rejeição automática após expirar o tempo",
+	"agentConfirmTimeoutTip": "Rejeição automática após expirar o tempo, 0 = aguardar sem limite",
 	"agentMaxRetries": "Tentativas máximas",
 	"agentMaxRetriesTip": "Tentativas máximas da API em caso de falha",
 	"agentMaxToolCallRounds": "Máx. rodadas de chamadas de ferramentas",

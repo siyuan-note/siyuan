@@ -688,7 +688,7 @@
 	"agentTimeout": "Таймаут",
 	"agentTimeoutTip": "Загальний таймаут сесії агента, 0 = без обмежень",
 	"agentConfirmTimeout": "Таймаут підтвердження",
-	"agentConfirmTimeoutTip": "Автоматична відмова після спливу часу",
+	"agentConfirmTimeoutTip": "Автоматична відмова після спливу часу, 0 = очікування без обмежень",
 	"agentMaxRetries": "Макс. повторів",
 	"agentMaxRetriesTip": "Макс. повторних спроб API при збої",
 	"agentMaxToolCallRounds": "Макс. раундів виклику інструментів",

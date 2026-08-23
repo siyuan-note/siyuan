@@ -1279,7 +1279,7 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 								return
 							}
 							return
-						case <-time.After(confirmTimeout):
+						case <-optionalAgentDeadline(confirmTimeout):
 							if acceptedResult, accepted := finishConfirmWait(confirmID, ch2); accepted {
 								result = acceptedResult
 								break
@@ -1417,7 +1417,8 @@ func AgentChat(ctx context.Context, client *openai.Client, protocol, model, imag
 					} else if tc.Function.Name == "question" {
 						resultStr = handleQuestion(ctx, args, roundID, ch, 5*time.Minute)
 					} else if registration.isBrowser() {
-						executed := handleBrowserCapability(ctx, tc, registration, args, ch, confirmTimeout)
+						executed := handleBrowserCapability(ctx, tc, registration, args, ch,
+							resolveBrowserCapabilityTimeout(confirmTimeout))
 						resultStr = executed.Text
 						isErr = executed.IsError
 						executionUnknown = executed.ExecutionUnknown
@@ -1815,6 +1816,20 @@ func finishConfirmWait(confirmID string, ch chan confirmResult) (confirmResult, 
 	default:
 		return confirmResult{}, false
 	}
+}
+
+func optionalAgentDeadline(timeout time.Duration) <-chan time.Time {
+	if timeout <= 0 {
+		return nil
+	}
+	return time.After(timeout)
+}
+
+func resolveBrowserCapabilityTimeout(confirmTimeout time.Duration) time.Duration {
+	if confirmTimeout <= 0 {
+		return 120 * time.Second
+	}
+	return confirmTimeout
 }
 
 // handleBrowserCapability 通过 SSE 把前端能力调用发送到浏览器，并等待浏览器回传结果。

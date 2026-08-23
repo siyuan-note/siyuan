@@ -688,7 +688,7 @@
 	"agentTimeout": "Zaman aşımı",
 	"agentTimeoutTip": "Agent oturumu toplam zaman aşımı, 0 = sınırsız",
 	"agentConfirmTimeout": "Onay zaman aşımı",
-	"agentConfirmTimeoutTip": "Zaman aşımından sonra otomatik reddet",
+	"agentConfirmTimeoutTip": "Zaman aşımından sonra otomatik reddet, 0 = sınırsız bekle",
 	"agentMaxRetries": "Maks. yeniden deneme",
 	"agentMaxRetriesTip": "Hata durumunda maks. API yeniden deneme sayısı",
 	"agentMaxToolCallRounds": "Maks. araç çağrısı turu",

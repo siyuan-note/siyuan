@@ -688,7 +688,7 @@
 	"agentTimeout": "Time-out",
 	"agentTimeoutTip": "Totale time-out van de agentsessie, 0 = geen limiet",
 	"agentConfirmTimeout": "Bevestigingstime-out",
-	"agentConfirmTimeoutTip": "Automatisch afwijzen na time-out",
+	"agentConfirmTimeoutTip": "Automatisch afwijzen na time-out, 0 = onbeperkt wachten",
 	"agentMaxRetries": "Max. pogingen",
 	"agentMaxRetriesTip": "Max. API-herhalingspogingen bij fout",
 	"agentMaxToolCallRounds": "Max. toolaanroep-rondes",

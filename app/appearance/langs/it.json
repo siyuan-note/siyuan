@@ -688,7 +688,7 @@
 	"agentTimeout": "Timeout",
 	"agentTimeoutTip": "Timeout totale della sessione agente, 0 = nessun limite",
 	"agentConfirmTimeout": "Timeout conferma",
-	"agentConfirmTimeoutTip": "Rifiuto automatico dopo scadenza",
+	"agentConfirmTimeoutTip": "Rifiuto automatico dopo la scadenza, 0 = attesa illimitata",
 	"agentMaxRetries": "Tentativi massimi",
 	"agentMaxRetriesTip": "Tentativi massimi API in caso di errore",
 	"agentMaxToolCallRounds": "Massimo round di chiamate strumento",

@@ -8,7 +8,10 @@
 
 package api
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestNewAgentSessionDeadlineZeroHasNoLimit(t *testing.T) {
 	timer, deadline := newAgentSessionDeadline(0)
@@ -17,5 +20,17 @@ func TestNewAgentSessionDeadlineZeroHasNoLimit(t *testing.T) {
 			timer.Stop()
 		}
 		t.Fatalf("zero timeout created a deadline: timer=%v, deadline=%v", timer, deadline)
+	}
+}
+
+func TestResolveAgentConfirmTimeout(t *testing.T) {
+	if timeout := resolveAgentConfirmTimeout(0); timeout != 0 {
+		t.Fatalf("zero confirmation timeout was changed: %v", timeout)
+	}
+	if timeout := resolveAgentConfirmTimeout(30); timeout != 30*time.Second {
+		t.Fatalf("positive confirmation timeout was not preserved: %v", timeout)
+	}
+	if timeout := resolveAgentConfirmTimeout(-1); timeout != 120*time.Second {
+		t.Fatalf("negative confirmation timeout did not use the default: %v", timeout)
 	}
 }

@@ -688,7 +688,7 @@
 	"agentTimeout": "หมดเวลา",
 	"agentTimeoutTip": "หมดเวลารวมของเซสชันเอเจนต์, 0 = ไม่จำกัด",
 	"agentConfirmTimeout": "หมดเวลายืนยัน",
-	"agentConfirmTimeoutTip": "ปฏิเสธอัตโนมัติเมื่อหมดเวลา",
+	"agentConfirmTimeoutTip": "ปฏิเสธอัตโนมัติเมื่อหมดเวลา, 0 = รอไม่จำกัด",
 	"agentMaxRetries": "จำนวนครั้งสูงสุด",
 	"agentMaxRetriesTip": "จำนวนครั้งสูงสุดในการลอง API ใหม่เมื่อล้มเหลว",
 	"agentMaxToolCallRounds": "รอบการเรียกเครื่องมือสูงสุด",

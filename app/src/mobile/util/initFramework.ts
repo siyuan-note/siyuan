@@ -3,7 +3,7 @@ import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {openMobileOnboarding} from "../../onboarding";
 import {validateName} from "../../editor/rename";
-import {getEventName} from "../../protyle/util/compatibility";
+import {getEventName, isDisabledFeature} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
@@ -52,6 +52,8 @@ const getActiveDockId = (sidePanelElement: HTMLElement) => {
 };
 
 export const renderMobileSidePanelLayout = (config: IMobileSidePanelConfig = getMobileSidePanelConfig()) => {
+    getDockTabElement("agent").classList.toggle("fn__none",
+        window.siyuan.config.readonly || window.siyuan.isPublish || isDisabledFeature("ai"));
     const sidePanelElements = {
         left: document.getElementById("sidebar"),
         right: document.getElementById("sidebarRight"),
@@ -149,6 +151,10 @@ const updateDock = (app: App, type: MobileSidePanelDockId, element: HTMLElement,
         }
     } else if (type === "inbox" && !window.siyuan.mobile.docks.inbox) {
         window.siyuan.mobile.docks.inbox = new Inbox(app, element);
+    } else if (type === "agent") {
+        void import("../agent/MobileAgentChat").then(({activateMobileAgent}) => {
+            activateMobileAgent(app, element);
+        });
     } else if (type === "plugin") {
         if (!custom || openPluginMenu) {
             if (!custom) {

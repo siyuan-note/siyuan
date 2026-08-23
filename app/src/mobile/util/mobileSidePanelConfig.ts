@@ -8,6 +8,7 @@ export const MOBILE_SIDE_PANEL_DOCK_IDS = [
     "tag",
     "backlink",
     "inbox",
+    "agent",
     "plugin",
 ] as const;
 
@@ -45,6 +46,7 @@ export const DEFAULT_MOBILE_SIDE_PANEL_LEFT: readonly MobileSidePanelDockId[] = 
 export const DEFAULT_MOBILE_SIDE_PANEL_RIGHT: readonly MobileSidePanelDockId[] = [
     "outline",
     "backlink",
+    "agent",
 ];
 
 export const DEFAULT_MOBILE_SIDE_PANEL_CONFIG: Readonly<IMobileSidePanelConfig> = {

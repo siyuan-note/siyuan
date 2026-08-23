@@ -46,7 +46,19 @@ describe("mobile side panel config", () => {
         }));
 
         assert.deepEqual(config.left, ["plugin", "file", "tag"]);
-        assert.deepEqual(config.right, ["backlink", "outline", "bookmark", "inbox"]);
+        assert.deepEqual(config.right, ["backlink", "outline", "bookmark", "inbox", "agent"]);
+        assertCompleteConfig(config);
+    });
+
+    it("adds the Agent dock to legacy version 1 layouts", () => {
+        const config = normalizeMobileSidePanelConfig({
+            version: MOBILE_SIDE_PANEL_CONFIG_VERSION,
+            left: ["file", "bookmark", "tag", "inbox", "plugin"],
+            right: ["backlink", "outline"],
+        });
+
+        assert.deepEqual(config.left, ["file", "bookmark", "tag", "inbox", "plugin"]);
+        assert.deepEqual(config.right, ["backlink", "outline", "agent"]);
         assertCompleteConfig(config);
     });
 
@@ -58,7 +70,7 @@ describe("mobile side panel config", () => {
         });
 
         assert.deepEqual(config.left, ["tag", "outline", "bookmark", "inbox", "plugin"]);
-        assert.deepEqual(config.right, ["file", "backlink"]);
+        assert.deepEqual(config.right, ["file", "backlink", "agent"]);
         assertCompleteConfig(config);
     });
 
@@ -70,7 +82,7 @@ describe("mobile side panel config", () => {
         });
 
         assert.deepEqual(config.left, ["file"]);
-        assert.deepEqual(config.right, ["outline", "bookmark", "tag", "backlink", "inbox", "plugin"]);
+        assert.deepEqual(config.right, ["outline", "bookmark", "tag", "backlink", "inbox", "agent", "plugin"]);
         assertCompleteConfig(config);
     });
 
@@ -81,7 +93,7 @@ describe("mobile side panel config", () => {
             right: [],
         });
 
-        assert.deepEqual(config.left, ["file", "bookmark", "tag", "backlink", "inbox", "plugin"]);
+        assert.deepEqual(config.left, ["file", "bookmark", "tag", "backlink", "inbox", "agent", "plugin"]);
         assert.deepEqual(config.right, ["outline"]);
         assertCompleteConfig(config);
     });
@@ -95,7 +107,7 @@ describe("mobile side panel config", () => {
         });
 
         assert.deepEqual(config.left, ["file", "tag", "inbox", "plugin"]);
-        assert.deepEqual(config.right, ["outline", "bookmark", "backlink"]);
+        assert.deepEqual(config.right, ["outline", "bookmark", "backlink", "agent"]);
         assertCompleteConfig(config);
     });
 
@@ -103,7 +115,7 @@ describe("mobile side panel config", () => {
         const state = normalizeMobileSidePanelConfig({
             version: MOBILE_SIDE_PANEL_CONFIG_VERSION,
             left: ["file"],
-            right: ["outline", "bookmark", "tag", "backlink", "inbox", "plugin"],
+            right: ["outline", "bookmark", "tag", "backlink", "inbox", "agent", "plugin"],
         });
         const config = reduceMobileSidePanelConfig(state, {
             type: "move",

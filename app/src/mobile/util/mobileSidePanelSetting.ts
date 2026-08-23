@@ -24,6 +24,8 @@ const getDockLabel = (dockId: MobileSidePanelDockId) => {
             return window.siyuan.languages.backlinks;
         case "inbox":
             return window.siyuan.languages.inbox;
+        case "agent":
+            return window.siyuan.languages.agentChat;
         case "plugin":
             return window.siyuan.languages.plugin;
     }
@@ -43,6 +45,8 @@ const getDockIcon = (dockId: MobileSidePanelDockId) => {
             return "iconLink";
         case "inbox":
             return "iconInbox";
+        case "agent":
+            return "iconSparkles";
         case "plugin":
             return "iconPlugin";
     }

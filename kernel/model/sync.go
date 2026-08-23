@@ -361,6 +361,9 @@ func checkSync(boot, exit, byHand bool) bool {
 		}
 		return false
 	}
+	if nil == Conf.GetUser() {
+		return false
+	}
 
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:

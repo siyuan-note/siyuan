@@ -16,6 +16,7 @@ import md5 from "blueimp-md5";
 import type {SettingTabBuilder} from "../setting/builder";
 import {patchSyncConfig, refreshSyncCloudSpaceGroup} from "./syncRuntime";
 import {escapeAttr, escapeHtml} from "../../util/escape";
+import {bindAccountAuthEnter, isAccountLoginDisabled} from "./accountAuth";
 
 /** 账号节：由 syncTab 注册 */
 export const registerAccountGroup = (tab: SettingTabBuilder) => {
@@ -389,9 +390,11 @@ const bindAccountAuthForm = (
 
     if (mode === "login") {
         const agreeLoginCheckbox = authFormRoot.querySelector("#agreeLogin") as HTMLInputElement;
-        agreeLoginCheckbox.addEventListener("click", () => {
-            loginBtn.disabled = !agreeLoginCheckbox.checked;
-        });
+        const updateLoginButton = () => {
+            loginBtn.disabled = isAccountLoginDisabled(agreeLoginCheckbox.checked, userPasswordInput.value);
+        };
+        agreeLoginCheckbox.addEventListener("change", updateLoginButton);
+        userPasswordInput.addEventListener("input", updateLoginButton);
         const cloudRegionSelect = authFormRoot.querySelector("#cloudRegion") as HTMLSelectElement;
         cloudRegionSelect.addEventListener("change", () => {
             window.siyuan.config.cloudRegion = parseInt(cloudRegionSelect.value);
@@ -404,6 +407,11 @@ const bindAccountAuthForm = (
     captchaImg.addEventListener("click", () => {
         refreshCaptchaImg();
     });
+
+    bindAccountAuthEnter(userNameInput, () => loginBtn.click());
+    bindAccountAuthEnter(userPasswordInput, () => loginBtn.click());
+    bindAccountAuthEnter(captchaInput, () => loginBtn.click());
+    bindAccountAuthEnter(twofactorAuthCodeInput, () => login2Btn.click());
 
     const completeLogin = (response: IWebSocketData) => {
         if (mode === "login") {
@@ -456,6 +464,11 @@ const bindAccountAuthForm = (
             code: twofactorAuthCodeInput.value,
             token,
         }, (faResponse) => {
+            if (faResponse.code !== 0) {
+                showMessage(faResponse.msg);
+                twofactorAuthCodeInput.select();
+                return;
+            }
             completeLogin(faResponse);
         });
     });

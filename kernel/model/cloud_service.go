@@ -694,19 +694,56 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 	return
 }
 
-func Login2fa(token, code string) (map[string]any, error) {
+func Login2fa(token, code string) (ret *gulu.Result) {
 	result := map[string]any{}
 	request := httpclient.NewCloudRequest30s()
-	_, err := request.
+	resp, err := request.
 		SetSuccessResult(&result).
 		SetBody(map[string]string{"twofactorAuthCode": code}).
 		SetHeader("token", token).
 		Post(util.GetCloudServer() + "/apis/siyuan/login/2fa")
 	if err != nil {
 		logging.LogErrorf("login 2fa failed: %s", err)
-		return nil, errors.New(Conf.Language(18))
+		return failedLogin2faResult()
 	}
-	return result, nil
+	if http.StatusOK != resp.StatusCode {
+		logging.LogErrorf("login 2fa failed: %d", resp.StatusCode)
+		return failedLogin2faResult()
+	}
+
+	ret, ok := parseLogin2faResult(result)
+	if !ok {
+		logging.LogErrorf("login 2fa failed: invalid cloud response")
+		return failedLogin2faResult()
+	}
+	return
+}
+
+func failedLogin2faResult() *gulu.Result {
+	ret := gulu.Ret.NewResult()
+	ret.Code = -1
+	ret.Msg = Conf.Language(18)
+	return ret
+}
+
+func parseLogin2faResult(result map[string]any) (ret *gulu.Result, ok bool) {
+	code, codeOK := result["code"].(float64)
+	msg, msgOK := result["msg"].(string)
+	if !codeOK || !msgOK {
+		return nil, false
+	}
+	if 0 == code {
+		token, tokenOK := result["token"].(string)
+		if !tokenOK || "" == token {
+			return nil, false
+		}
+	}
+
+	ret = &gulu.Result{Code: int(code), Msg: msg, Data: result}
+	if -1 == ret.Code {
+		ret.Code = 1
+	}
+	return ret, true
 }
 
 func LogoutUser() {

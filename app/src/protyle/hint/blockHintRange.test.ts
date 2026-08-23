@@ -99,6 +99,11 @@ describe("shouldCaptureHintUndoFocus", () => {
         assert.equal(shouldCaptureHintUndoFocus("、", blockHintKeys, true), true);
     });
 
+    it("captures slash emoji focus in regular editors", () => {
+        assert.equal(shouldCaptureHintUndoFocus("/", blockHintKeys, false, "emoji"), true);
+        assert.equal(shouldCaptureHintUndoFocus("、", blockHintKeys, false, "emoji"), true);
+    });
+
     it("does not change regular editor slash hint focus handling", () => {
         assert.equal(shouldCaptureHintUndoFocus("/", blockHintKeys, false), false);
         assert.equal(shouldCaptureHintUndoFocus("#", blockHintKeys, true), false);

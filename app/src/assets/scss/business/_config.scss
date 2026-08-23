@@ -1194,6 +1194,10 @@
 }
 
 #configAccountPayment {
+  &.config-account--deactivate {
+    padding-bottom: 8px;
+  }
+
   @media (max-width: 750px) {
     .config-wrap > .fn__space {
       display: block;
@@ -1208,12 +1212,15 @@
   }
 
   .config-account__deactivate {
-    margin-top: 32px;
+    margin-top: 8px;
     text-align: right;
 
     .b3-button {
       color: var(--b3-theme-on-surface-light);
       font-size: 12px;
+      max-width: 100%;
+      text-align: right;
+      white-space: normal;
     }
   }
 }

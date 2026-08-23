@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": " (Devre dışı bırakıldıktan sonra mevcut cep telefonu numarası ve bağlı üçüncü taraf hesapları yeniden kayıt veya bağlantı için kullanılamaz; dikkatli ilerleyin)",
+	"deactivateUserNorthAmericaWarning": " (Devre dışı bırakıldıktan sonra mevcut e-posta adresi yeniden kayıt için kullanılamaz; dikkatli ilerleyin)",
 	"exportFile": "Dosyayı dışa aktar",
 	"namingEmpty": "Ad boş olamaz",
 	"recentCreated": "Yakın zamanda oluşturulanlar",

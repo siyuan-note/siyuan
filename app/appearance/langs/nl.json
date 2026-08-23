@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": " (Na deactivering kunnen het huidige mobiele nummer en gekoppelde accounts van derden niet opnieuw worden gebruikt voor registratie of koppeling; ga voorzichtig te werk)",
+	"deactivateUserNorthAmericaWarning": " (Na deactivering kan het huidige e-mailadres niet opnieuw worden gebruikt voor registratie; ga voorzichtig te werk)",
 	"exportFile": "Bestand exporteren",
 	"namingEmpty": "De naam mag niet leeg zijn",
 	"recentCreated": "Recent gemaakt",

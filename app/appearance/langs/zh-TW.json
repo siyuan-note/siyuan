@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": "（註銷後，目前手機號碼及已綁定的第三方賬號將無法再次用於註冊或綁定，請謹慎操作）",
+	"deactivateUserNorthAmericaWarning": "（註銷後，目前電子郵件地址將無法再次用於註冊，請謹慎操作）",
 	"exportFile": "導出檔案",
 	"namingEmpty": "命名不能為空",
 	"recentCreated": "最近建立",

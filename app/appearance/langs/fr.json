@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": " (Après la désactivation, le numéro de mobile actuel et les comptes tiers associés ne pourront plus servir à s’inscrire ou à être associés de nouveau ; procédez avec prudence)",
+	"deactivateUserNorthAmericaWarning": " (Après la désactivation, l’adresse e-mail actuelle ne pourra plus servir à s’inscrire ; procédez avec prudence)",
 	"exportFile": "Exporter le fichier",
 	"namingEmpty": "Le nom ne peut pas être vide",
 	"recentCreated": "Récemment créés",

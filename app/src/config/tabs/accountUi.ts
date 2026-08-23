@@ -69,6 +69,8 @@ export const registerAccountGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.activationCode,
             window.siyuan.languages.activationCodePlaceholder,
             window.siyuan.languages.deactivateUser,
+            window.siyuan.languages.deactivateUserChinaWarning,
+            window.siyuan.languages.deactivateUserNorthAmericaWarning,
         ],
         html: genAccountPaymentHTML,
         afterMount: bindAccountPaymentEvent,
@@ -375,11 +377,15 @@ ${iconVIP}${isOnetimePaid ? window.siyuan.languages.account4 : window.siyuan.lan
     <input class="b3-text-field fn__block" style="padding-right: 52px;" placeholder="${window.siyuan.languages.activationCodePlaceholder}">
     <button type="button" id="activationCode" class="b3-button b3-button--text" style="position: absolute; right: 0; top: 0;">${window.siyuan.languages.confirm}</button>
 </div>` : "";
-    const deactivateHTML = isIOS ? `<div class="config-account__deactivate">
-    <button type="button" class="b3-button b3-button--cancel" id="deactivateUser">${window.siyuan.languages.deactivateUser}</button>
+    const showDeactivate = isMobile();
+    const deactivateWarning = window.siyuan.config.cloudRegion === 0
+        ? window.siyuan.languages.deactivateUserChinaWarning
+        : window.siyuan.languages.deactivateUserNorthAmericaWarning;
+    const deactivateHTML = showDeactivate ? `<div class="config-account__deactivate">
+    <button type="button" class="b3-button b3-button--cancel" id="deactivateUser">${window.siyuan.languages.deactivateUser}${deactivateWarning}</button>
 </div>` : "";
 
-    return `<div id="configAccountPayment" class="b3-label config-item">
+    return `<div id="configAccountPayment" class="b3-label config-item${showDeactivate ? " config-account--deactivate" : ""}">
     <div class="fn__flex config-wrap">
         <span class="config-name">${window.siyuan.languages.paymentStatus}</span>
         <span class="fn__space"></span><span class="ft__on-surface">${statusHTML}</span>

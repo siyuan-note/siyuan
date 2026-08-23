@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": " (Setelah akun dinonaktifkan, nomor ponsel saat ini dan akun pihak ketiga yang tertaut tidak dapat digunakan lagi untuk mendaftar atau menautkan; lanjutkan dengan hati-hati)",
+	"deactivateUserNorthAmericaWarning": " (Setelah akun dinonaktifkan, alamat email saat ini tidak dapat digunakan lagi untuk mendaftar; lanjutkan dengan hati-hati)",
 	"exportFile": "Ekspor file",
 	"namingEmpty": "Nama tidak boleh kosong",
 	"recentCreated": "Baru dibuat",

@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": " (Nach der Deaktivierung können die aktuelle Mobilnummer und verknüpfte Drittanbieterkonten nicht erneut zur Registrierung oder Verknüpfung verwendet werden; bitte mit Bedacht fortfahren)",
+	"deactivateUserNorthAmericaWarning": " (Nach der Deaktivierung kann die aktuelle E-Mail-Adresse nicht erneut zur Registrierung verwendet werden; bitte mit Bedacht fortfahren)",
 	"exportFile": "Datei exportieren",
 	"namingEmpty": "Der Name darf nicht leer sein",
 	"recentCreated": "Kürzlich erstellt",

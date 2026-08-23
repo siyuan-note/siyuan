@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": " (Dopo la disattivazione, il numero di cellulare attuale e gli account di terze parti collegati non potranno più essere usati per registrarsi o collegarsi; procedere con cautela)",
+	"deactivateUserNorthAmericaWarning": " (Dopo la disattivazione, l’indirizzo e-mail attuale non potrà più essere usato per registrarsi; procedere con cautela)",
 	"exportFile": "Esporta file",
 	"namingEmpty": "Il nome non può essere vuoto",
 	"recentCreated": "Creati di recente",

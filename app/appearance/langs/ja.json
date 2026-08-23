@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": "（アカウント無効化後、現在の携帯電話番号と連携済みのサードパーティーアカウントは再登録や再連携に使用できなくなるため、慎重に操作してください）",
+	"deactivateUserNorthAmericaWarning": "（アカウント無効化後、現在のメールアドレスは再登録に使用できなくなるため、慎重に操作してください）",
 	"exportFile": "ファイルをエクスポート",
 	"namingEmpty": "名前を空にすることはできません",
 	"recentCreated": "最近作成",

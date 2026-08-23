@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": " (Po deaktivácii nebude možné aktuálne mobilné číslo a prepojené účty tretích strán znova použiť na registráciu ani prepojenie; postupujte opatrne)",
+	"deactivateUserNorthAmericaWarning": " (Po deaktivácii nebude možné aktuálnu e-mailovú adresu znova použiť na registráciu; postupujte opatrne)",
 	"exportFile": "Exportovať súbor",
 	"namingEmpty": "Názov nemôže byť prázdny",
 	"recentCreated": "Nedávno vytvorené",

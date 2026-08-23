@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": "(계정 비활성화 후 현재 휴대전화 번호와 연결된 타사 계정은 다시 가입하거나 연결하는 데 사용할 수 없으므로 신중하게 진행하세요)",
+	"deactivateUserNorthAmericaWarning": "(계정 비활성화 후 현재 이메일 주소는 다시 가입하는 데 사용할 수 없으므로 신중하게 진행하세요)",
 	"exportFile": "파일 내보내기",
 	"namingEmpty": "이름은 비워 둘 수 없습니다",
 	"recentCreated": "최근 생성",

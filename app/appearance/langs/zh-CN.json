@@ -1,4 +1,6 @@
 {
+	"deactivateUserChinaWarning": "（注销后，当前手机号及已绑定的第三方账号将无法再次用于注册或绑定，请谨慎操作）",
+	"deactivateUserNorthAmericaWarning": "（注销后，当前邮箱将无法再次用于注册，请谨慎操作）",
 	"exportFile": "导出文件",
 	"namingEmpty": "命名不能为空",
 	"recentCreated": "最近创建",

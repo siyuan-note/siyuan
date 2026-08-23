@@ -17,6 +17,7 @@ let programmaticScrollTimeout = 0;
 let barsTransitionTimeout = 0;
 let barsTransitionFrame = 0;
 let barsTransitionEndHandler: ((event: TransitionEvent) => void) | undefined;
+let barsTransitionElement: HTMLElement | undefined;
 let initialized = false;
 
 const hasTextSelection = () => {
@@ -48,10 +49,11 @@ const clearBarsTransitionWatch = () => {
     document.body.classList.remove("mobile-chrome--transitioning");
     barsTransitionTimeout = 0;
     barsTransitionFrame = 0;
-    if (barsTransitionEndHandler) {
-        document.getElementById("mobileTopBar")?.removeEventListener("transitionend", barsTransitionEndHandler);
-        barsTransitionEndHandler = undefined;
+    if (barsTransitionEndHandler && barsTransitionElement) {
+        barsTransitionElement.removeEventListener("transitionend", barsTransitionEndHandler);
     }
+    barsTransitionEndHandler = undefined;
+    barsTransitionElement = undefined;
 };
 
 const finishBarsTransition = () => {
@@ -74,19 +76,20 @@ const startBarsTransition = () => {
         active: true,
         scrollTop: scrollElement?.scrollTop,
     });
-    const topbarElement = document.getElementById("mobileTopBar");
-    if (!topbarElement || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    barsTransitionElement = document.body.classList.contains("mobile-topbar--merged") ?
+        document.getElementById("mobileBottomBar") : document.getElementById("mobileTopBar");
+    if (!barsTransitionElement || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         barsTransitionFrame = requestAnimationFrame(() => {
             barsTransitionFrame = requestAnimationFrame(finishBarsTransition);
         });
         return;
     }
     barsTransitionEndHandler = (event: TransitionEvent) => {
-        if (event.target === topbarElement && event.propertyName === "transform") {
+        if (event.target === barsTransitionElement && event.propertyName === "transform") {
             finishBarsTransition();
         }
     };
-    topbarElement.addEventListener("transitionend", barsTransitionEndHandler);
+    barsTransitionElement.addEventListener("transitionend", barsTransitionEndHandler);
     barsTransitionTimeout = window.setTimeout(finishBarsTransition, MOBILE_BARS_TRANSITION_FALLBACK);
 };
 

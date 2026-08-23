@@ -26,6 +26,24 @@ body.mobile-keyboard--open {
 .protyle-breadcrumb {
   -webkit-user-select: none;
   user-select: none;
+
+  &__space--mobile-title {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    height: 42px;
+    padding: 0;
+    text-align: left;
+
+    .toolbar__title {
+      min-width: 0;
+    }
+
+    .toolbar__button {
+      width: 40px;
+      height: 40px;
+    }
+  }
 }
 
 .protyle-preview__title {
@@ -392,6 +410,24 @@ body.mobile-keyboard--open {
 
 .mobile-chrome--transitioning #editor {
   margin-bottom: -48px;
+}
+
+body.mobile-topbar--merged {
+  .mobile-topbar {
+    height: 0;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    border-bottom: 0;
+    transform: none;
+    visibility: hidden;
+  }
+
+  &.mobile-chrome--hidden #editor,
+  &.mobile-chrome--transitioning #editor {
+    margin-bottom: 0;
+    transform: none;
+  }
 }
 
 .mobile-keyboard--open .mobile-bottom-bar {

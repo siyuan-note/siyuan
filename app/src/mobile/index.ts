@@ -55,6 +55,7 @@ import {initTouchDragBridge} from "../util/touchDragBridge";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {openByMobile} from "../editor/openLink";
 import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
+import {updateMobileTopBarLayout} from "./util/mobileTopBar";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -167,6 +168,7 @@ class App {
         // 判断手机横竖屏状态
         window.matchMedia("(orientation:portrait)").addEventListener("change", () => {
             updateCardHV();
+            updateMobileTopBarLayout();
             activeBlur();
         });
         fetchPost("/api/system/getConf", {}, async (confResponse) => {

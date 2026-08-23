@@ -20,7 +20,7 @@ import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
 import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
-import {addPluginDock, afterLoadPlugin, loadPlugins} from "./loader";
+import {addPluginDock, afterLoadPlugin, loadPlugins, removePluginDock} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
 import {Kernel} from "./kernel";
 import {IAgentCapabilityEffects, registerCapability} from "../layout/dock/agent/frontendCapabilities";
@@ -89,6 +89,7 @@ export class Plugin {
     } = {};
     public docks: {
         [key: string]: {
+            id: string,
             config: IPluginDockTab,
             /// #if !MOBILE
             model: (options: { tab: Tab }) => Custom
@@ -518,6 +519,7 @@ export class Plugin {
     }
 
     public addDock(options: {
+        id?: string,
         config: IPluginDockTab,
         data: any,
         type: string,
@@ -526,11 +528,18 @@ export class Plugin {
         update?: () => void,
         init: () => void
     }) {
+        const id = options.id || options.type;
         const type2 = this.name + options.type;
+        const existingID = this.docks[type2]?.id;
+        if (existingID && existingID !== id) {
+            removePluginDock(this, existingID);
+        }
+        removePluginDock(this, id);
         if (typeof options.config.index === "undefined") {
             options.config.index = 1000;
         }
         this.docks[type2] = {
+            id,
             config: options.config,
             /// #if MOBILE
             mobileModel: (element) => {
@@ -570,6 +579,10 @@ export class Plugin {
         options.config.hotkey = updatePluginKeymap(this.name, type2, options.config.hotkey).default;
         addPluginDock(this);
         return this.docks[type2];
+    }
+
+    public removeDock(id: string) {
+        removePluginDock(this, id);
     }
 
     public addFloatLayer = (options: {

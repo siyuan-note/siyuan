@@ -18,9 +18,11 @@ import {
     getEntryParentPath,
     getEntryOrderParents,
     getEntryPaths,
+    getPluginDockEntryKey,
     getPluginSlashEntryKey,
     getSlashMenuEntryPath,
     isEntryOrderSortable,
+    refreshDockCatalog,
     refreshSlashMenuCatalog,
     refreshToolbarCatalog,
     SLASH_MENU_ROOT_PATH,
@@ -147,6 +149,47 @@ test("toolbar catalog follows plugin insertion slots and removes unloaded plugin
         refreshToolbarCatalog(defaults);
     }
     assert.equal(getEntryCatalogNode(`${TOOLBAR_ENTRY_ROOT_PATH}.${pluginKey}`), undefined);
+});
+
+test("dock catalog refreshes unique plugin docks and removes unloaded entries", () => {
+    const firstKey = getPluginDockEntryKey("plugin.one", "shared.id");
+    const secondKey = getPluginDockEntryKey("plugin.two", "shared.id");
+    try {
+        refreshDockCatalog([{
+            name: "plugin.one",
+            displayName: "Plugin One",
+            docks: {
+                first: {id: "shared.id", config: {title: "First Dock"}},
+                duplicate: {id: "shared.id", config: {title: "Duplicate Dock"}},
+            },
+        }, {
+            name: "plugin.two",
+            displayName: "Plugin Two",
+            docks: {
+                second: {id: "shared.id", config: {title: "Second Dock"}},
+            },
+        }]);
+
+        const children = getEntryCatalogChildren("dock");
+        assert.deepEqual(children.slice(-2).map((item) => item.key), [firstKey, secondKey]);
+        assert.equal(children.filter((item) => item.key === firstKey).length, 1);
+        assert.equal(getEntryCatalogNode(`dock.${firstKey}`)?.label(), "Plugin One - First Dock");
+        assert.equal(getEntryCatalogNode(`dock.${secondKey}`)?.label(), "Plugin Two - Second Dock");
+        assert.equal(getEntryParentPath(`dock.${firstKey}`), "dock");
+    } finally {
+        refreshDockCatalog([]);
+    }
+    assert.equal(getEntryCatalogNode(`dock.${firstKey}`), undefined);
+});
+
+test("plugin dock keys encode dotted names and IDs without ambiguity", () => {
+    const dottedPlugin = getPluginDockEntryKey("plugin.name", "entry");
+    const dottedEntry = getPluginDockEntryKey("plugin", "name.entry");
+    assert.equal(dottedPlugin, "plugin:plugin%2Ename:entry");
+    assert.equal(dottedEntry, "plugin:plugin:name%2Eentry");
+    assert.notEqual(dottedPlugin, dottedEntry);
+    assert.equal(dottedPlugin.includes("."), false);
+    assert.equal(dottedEntry.includes("."), false);
 });
 
 test("slash menu catalog follows the built-in hint order", () => {

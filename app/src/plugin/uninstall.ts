@@ -14,6 +14,7 @@ import {getAllEditor} from "../layout/getAll";
 import {unregisterCapability} from "../layout/dock/agent/frontendCapabilities";
 import {cancelAssetUploadsByPlugin} from "../protyle/upload/pluginEvent";
 import {removeBreadcrumbButtons} from "./breadcrumbButton";
+import {refreshDockCatalog} from "../config/entryVisibility/catalog";
 
 export const uninstall = (app: App, name: string, isReload: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {
@@ -91,6 +92,7 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             });
             // rm plugin
             app.plugins.splice(index, 1);
+            refreshDockCatalog(app.plugins);
             /// #if MOBILE
             // 移动端卸载插件后，若无任何插件 dock 则隐藏插件入口图标
             if (app.plugins.every(p => Object.keys(p.docks).length === 0)) {

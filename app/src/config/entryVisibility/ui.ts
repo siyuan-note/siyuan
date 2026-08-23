@@ -10,6 +10,7 @@ import {
     IEntryCatalogNode,
     IEntryCatalogSection,
     isEntryOrderSortable,
+    refreshDockCatalog,
     refreshSlashMenuCatalog,
 } from "./catalog";
 import {
@@ -365,7 +366,9 @@ const getEntrySearchFilter = (query: string) => {
 };
 
 const openProfileEditor = (root: HTMLElement, profileID?: string) => {
-    refreshSlashMenuCatalog(window.siyuan.ws?.app?.plugins || []);
+    const plugins = window.siyuan.ws?.app?.plugins || [];
+    refreshDockCatalog(plugins);
+    refreshSlashMenuCatalog(plugins);
     const builtin = profileID === ENTRY_PROFILE_SIMPLE || profileID === ENTRY_PROFILE_FULL;
     let selectedTemplate: TEntryVisibilityTemplate | "current" = ENTRY_PROFILE_SIMPLE;
     const existing = profileID
@@ -696,7 +699,9 @@ export const genEntryVisibilityHtml = () => `<div class="b3-label config-item" d
 </div>`;
 
 export const mountEntryVisibility = (root: HTMLElement) => {
-    refreshSlashMenuCatalog(window.siyuan.ws?.app?.plugins || []);
+    const plugins = window.siyuan.ws?.app?.plugins || [];
+    refreshDockCatalog(plugins);
+    refreshSlashMenuCatalog(plugins);
     renderProfileCards(root);
     root.querySelector("[data-action='create']")?.addEventListener("click", () => openProfileEditor(root));
     root.querySelector("[data-action='export-all']")?.addEventListener("click", exportBundle);

@@ -21,7 +21,6 @@ import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
-import {MobileCustom} from "../dock/MobileCustom";
 import {Menu} from "../../plugin/Menu";
 import {showMessage} from "../../dialog/message";
 import {setTitle} from "../../util/processTitle";
@@ -36,8 +35,7 @@ import {
     type MobileSidePanelDockId,
 } from "./mobileSidePanelConfig";
 import {getMobileSidePanelConfig} from "./mobileSidePanelSetting";
-
-let custom: MobileCustom;
+import {getMobilePluginDock, openMobilePluginDock} from "../dock/pluginDockState";
 const getDockTabElement = (type: MobileSidePanelDockId) => {
     return document.querySelector(`[data-type="sidebar-${type}-tab"]`) as HTMLElement;
 };
@@ -97,17 +95,7 @@ const openDockMenu = (app: App, element: HTMLElement) => {
                 label: plugin.docks[dockId].config.title,
                 icon: plugin.docks[dockId].config.icon,
                 click() {
-                    if (custom?.type === dockId) {
-                        return;
-                    } else {
-                        if (custom) {
-                            if (custom.destroy) {
-                                custom.destroy();
-                            }
-                        }
-                        custom = plugin.docks[dockId].mobileModel(element);
-                        window.siyuan.mobile.docks[dockId] = custom;
-                    }
+                    openMobilePluginDock(dockId, () => plugin.docks[dockId].mobileModel(element));
                 }
             });
         });
@@ -156,6 +144,7 @@ const updateDock = (app: App, type: MobileSidePanelDockId, element: HTMLElement,
             activateMobileAgent(app, element);
         });
     } else if (type === "plugin") {
+        const custom = getMobilePluginDock();
         if (!custom || openPluginMenu) {
             if (!custom) {
                 element.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;

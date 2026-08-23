@@ -7,7 +7,6 @@ import {setModelsHash} from "../window/setHeader";
 /// #endif
 import {countBlockWord} from "../layout/status";
 import type {App} from "../index";
-import {fullscreen} from "../protyle/breadcrumb/action";
 import {fetchPost} from "../util/fetch";
 import {Backlink} from "../layout/dock/Backlink";
 
@@ -70,8 +69,7 @@ export class Editor extends Model {
             scrollPosition: options.scrollPosition,
             after: (editor) => {
                 if (window.siyuan.editorIsFullscreen) {
-                    fullscreen(editor.protyle.element);
-                    setPadding(editor.protyle);
+                    editor.setFullscreen(true);
                 }
                 countBlockWord([], editor.protyle.block.rootID);
                 /// #if !BROWSER

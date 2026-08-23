@@ -202,7 +202,7 @@ export const addPluginDock = (plugin: Plugin) => {
     /// #if MOBILE
     // 移动端只有存在插件 dock 时才显示插件入口图标
     if (Object.keys(plugin.docks).length > 0) {
-        document.querySelector('#sidebar [data-type="sidebar-plugin-tab"]')?.classList.remove("fn__none");
+        document.querySelector("[data-type='sidebar-plugin-tab']")?.classList.remove("fn__none");
     }
     /// #else
     if (isWindow() || !window.siyuan.layout.leftDock) {

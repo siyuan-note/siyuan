@@ -4,7 +4,7 @@ import {
     reduceMobileBarsState,
 } from "./mobileBarsState";
 
-const PANEL_IDS = ["sidebar", "menu", "model"];
+const PANEL_IDS = ["sidebar", "sidebarRight", "menu", "model"];
 const MOBILE_BARS_TRANSITION_FALLBACK = 320;
 
 let barsState = createMobileBarsState();
@@ -36,6 +36,9 @@ export const isMobileBlockSelecting = () => {
 
 const isPanelOpen = () => PANEL_IDS.some((id) => {
     const element = document.getElementById(id);
+    if (id === "menu") {
+        return Boolean(element && !element.classList.contains("fn__none"));
+    }
     return Boolean(element?.style.transform);
 });
 
@@ -257,7 +260,7 @@ export const initMobileBars = () => {
     panelObserver = new MutationObserver(updatePanelState);
     panelElements.forEach((element) => panelObserver.observe(element, {
         attributes: true,
-        attributeFilter: ["style"],
+        attributeFilter: ["class", "style"],
     }));
     barsState = createMobileBarsState(scrollElement?.scrollTop);
     renderMobileBars();

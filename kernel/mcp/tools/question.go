@@ -19,6 +19,7 @@ package tools
 var QuestionTool = &Tool{
 	Name:        "question",
 	Description: "Ask the user questions to clarify needs/preferences (do NOT use for plain-text option lists). questions[]: each {header (short label), question, options[] {label, description}, multiple?, custom?}.",
+	AgentOnly:   true,
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{

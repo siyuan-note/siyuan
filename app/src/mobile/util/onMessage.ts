@@ -17,9 +17,14 @@ import {updateServerAddresses} from "../../config/tabs/accessRuntime";
 import {reloadInlineStyles} from "../../util/assets";
 import {renderMobileBottomBar} from "./mobileBottomBar";
 import {Constants} from "../../constants";
+import {MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT} from "./mobileSidePanelConfig";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;
+
+const dispatchMobileSidePanelConfigChange = () => {
+    window.dispatchEvent(new CustomEvent(MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT));
+};
 
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
@@ -104,6 +109,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 if (data.data.key === Constants.LOCAL_MOBILE_BOTTOM_BAR) {
                     renderMobileBottomBar();
                 }
+                if (data.data.key === Constants.LOCAL_MOBILE_SIDE_PANEL) {
+                    dispatchMobileSidePanelConfigChange();
+                }
                 break;
             case "setLocalStorageVals":
                 Object.keys(data.data.keyVals).forEach((k) => {
@@ -112,11 +120,17 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 if (Object.prototype.hasOwnProperty.call(data.data.keyVals, Constants.LOCAL_MOBILE_BOTTOM_BAR)) {
                     renderMobileBottomBar();
                 }
+                if (Object.prototype.hasOwnProperty.call(data.data.keyVals, Constants.LOCAL_MOBILE_SIDE_PANEL)) {
+                    dispatchMobileSidePanelConfigChange();
+                }
                 break;
             case "removeLocalStorageVal":
                 delete window.siyuan.storage[data.data.key];
                 if (data.data.key === Constants.LOCAL_MOBILE_BOTTOM_BAR) {
                     renderMobileBottomBar();
+                }
+                if (data.data.key === Constants.LOCAL_MOBILE_SIDE_PANEL) {
+                    dispatchMobileSidePanelConfigChange();
                 }
                 break;
             case "removeLocalStorageVals":
@@ -125,6 +139,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 });
                 if (data.data.keys.includes(Constants.LOCAL_MOBILE_BOTTOM_BAR)) {
                     renderMobileBottomBar();
+                }
+                if (data.data.keys.includes(Constants.LOCAL_MOBILE_SIDE_PANEL)) {
+                    dispatchMobileSidePanelConfigChange();
                 }
                 break;
             case"progress":

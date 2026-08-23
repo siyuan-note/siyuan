@@ -28,6 +28,7 @@ type CapabilityManifest struct {
 	OwnerID     string                     `json:"ownerId,omitempty"`
 	OwnerName   string                     `json:"ownerName,omitempty"`
 	Runtime     string                     `json:"runtime"`
+	AgentOnly   bool                       `json:"agentOnly,omitempty"`
 	Effects     ToolEffects                `json:"effects,omitempty"`
 	Available   bool                       `json:"available"`
 	Actions     []CapabilityActionManifest `json:"actions,omitempty"`
@@ -78,6 +79,7 @@ func ListCapabilityManifests() []CapabilityManifest {
 			OwnerID:     tool.OwnerID,
 			OwnerName:   tool.OwnerName,
 			Runtime:     runtime,
+			AgentOnly:   tool.AgentOnly,
 			Effects:     effects,
 			Available:   true,
 			Actions:     capabilityActionsForTool(tool),

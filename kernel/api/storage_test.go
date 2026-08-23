@@ -28,6 +28,75 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func TestCriteriaCRUD(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = oldDataDir
+	})
+
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(model.RoleContextKey, model.RoleAdministrator)
+		c.Next()
+	})
+	ServeAPI(engine)
+	perform := func(path, body string) *httptest.ResponseRecorder {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		engine.ServeHTTP(recorder, request)
+		return recorder
+	}
+	type criterionData struct {
+		Name     string          `json:"name"`
+		SubTypes map[string]bool `json:"subTypes"`
+	}
+	getCriteria := func() []criterionData {
+		t.Helper()
+		recorder := perform("/api/storage/getCriteria", `{}`)
+		response := &struct {
+			Code int             `json:"code"`
+			Data []criterionData `json:"data"`
+		}{}
+		if err := json.Unmarshal(recorder.Body.Bytes(), response); err != nil {
+			t.Fatalf("unmarshal criteria response failed: %v", err)
+		}
+		if response.Code != 0 {
+			t.Fatalf("get criteria failed: %s", recorder.Body.String())
+		}
+		return response.Data
+	}
+
+	setRecorder := perform("/api/storage/setCriterion", `{"criterion":{"name":"Public notes","subTypes":{"h1":true}}}`)
+	if responseCode(t, setRecorder) != 0 {
+		t.Fatalf("set criterion failed: %s", setRecorder.Body.String())
+	}
+	criteria := getCriteria()
+	if len(criteria) != 1 || criteria[0].Name != "Public notes" || !criteria[0].SubTypes["h1"] {
+		t.Fatalf("criterion was not persisted: %#v", criteria)
+	}
+
+	overwriteRecorder := perform("/api/storage/setCriterion", `{"criterion":{"name":"Public notes","subTypes":{"h2":true}}}`)
+	if responseCode(t, overwriteRecorder) != 0 {
+		t.Fatalf("overwrite criterion failed: %s", overwriteRecorder.Body.String())
+	}
+	criteria = getCriteria()
+	if len(criteria) != 1 || criteria[0].SubTypes["h1"] || !criteria[0].SubTypes["h2"] {
+		t.Fatalf("criterion was not overwritten: %#v", criteria)
+	}
+
+	removeRecorder := perform("/api/storage/removeCriterion", `{"name":"Public notes"}`)
+	if responseCode(t, removeRecorder) != 0 {
+		t.Fatalf("remove criterion failed: %s", removeRecorder.Body.String())
+	}
+	if criteria = getCriteria(); len(criteria) != 0 {
+		t.Fatalf("criterion was not removed: %#v", criteria)
+	}
+}
+
 func TestGetLocalStorageByRole(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

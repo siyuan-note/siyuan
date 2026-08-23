@@ -22,6 +22,7 @@ export const goForward = () => {
 
 export const goBack = () => {
     const editor = getCurrentEditor();
+    const menuElement = document.getElementById("menu");
     if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         window.siyuan.menus.menu.element.dispatchEvent(new CustomEvent("click", {detail: "back"}));
@@ -46,8 +47,9 @@ export const goBack = () => {
             searchAssetsPanelElement.classList.add("fn__none");
         }
         return;
-    } else if (document.getElementById("menu").style.transform === "translateX(0px)" ||
-        document.getElementById("sidebar").style.transform === "translateX(0px)") {
+    } else if ((menuElement && !menuElement.classList.contains("fn__none")) ||
+        document.getElementById("sidebar")?.style.transform === "translateX(0px)" ||
+        document.getElementById("sidebarRight")?.style.transform === "translateX(0px)") {
         closePanel();
         return;
     } else if (editor && !editor.protyle.toolbar.subElement.classList.contains("fn__none")) {

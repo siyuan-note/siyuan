@@ -208,9 +208,10 @@ export class Plugin {
     }
 
     public addTopBar(options: {
+        id?: string,
         icon: string,
         title: string,
-        position?: "south" | "left",
+        position?: "right" | "left",
         callback: (evt: MouseEvent) => void
     }) {
         options.icon = options.icon.trim();
@@ -218,10 +219,25 @@ export class Plugin {
             console.error(`plugin ${this.name} addTopBar error: icon must be svg id or svg tag`);
             return;
         }
-        const iconElement = document.createElement("div");
+        let iconElement = typeof options.id === "string" ? this.topBarIcons.find(item =>
+            item.getAttribute("data-id") === options.id) as HTMLElement : undefined;
+        const isNew = !iconElement;
+        if (!iconElement) {
+            iconElement = document.createElement("div");
+            if (typeof options.id === "string") {
+                iconElement.id = `plugin_${encodeURIComponent(this.name)}:${encodeURIComponent(options.id)}`;
+                iconElement.setAttribute("data-id", options.id);
+            } else {
+                let index = this.topBarIcons.length;
+                do {
+                    iconElement.id = `plugin_${this.name}_${index}`;
+                    index++;
+                } while (this.topBarIcons.some(item => item.getAttribute("id") === iconElement.id));
+            }
+        }
+        const previousLocation = iconElement.getAttribute("data-location");
         iconElement.setAttribute("data-menu", "true");
-        iconElement.addEventListener("click", options.callback);
-        iconElement.id = `plugin_${this.name}_${this.topBarIcons.length}`;
+        iconElement.onclick = options.callback;
         if (isMobile()) {
             iconElement.className = "b3-menu__item";
             const iconHTML = options.icon.startsWith("icon") ?
@@ -233,27 +249,46 @@ export class Plugin {
             iconElement.className = "toolbar__item ariaLabel";
             iconElement.setAttribute("aria-label", options.title);
             iconElement.innerHTML = options.icon.startsWith("icon") ? `<svg><use xlink:href="#${options.icon}"></use></svg>` : options.icon;
-            iconElement.addEventListener("click", options.callback);
             iconElement.setAttribute("data-location", options.position || "right");
-            resizeTopBar();
         }
         if (isMobile() && window.siyuan.storage) {
-            if (!window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {
+            if (!window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id) &&
+                !document.contains(iconElement)) {
                 document.getElementById("menuPluginTopBar")?.after(iconElement);
             }
         } else if (!isWindow() && window.siyuan.storage) {
             if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {
                 iconElement.classList.add("fn__none");
             }
-            document.querySelector("#" + (iconElement.getAttribute("data-location") === "right" ? "barPlugins" : "drag"))?.before(iconElement);
+            if (!document.contains(iconElement) || previousLocation !== iconElement.getAttribute("data-location")) {
+                document.querySelector("#" + (iconElement.getAttribute("data-location") === "right" ? "barPlugins" : "drag"))?.before(iconElement);
+            }
         }
-        this.topBarIcons.push(iconElement);
+        if (isNew) {
+            this.topBarIcons.push(iconElement);
+        }
         /// #if !MOBILE
         if (!isWindow()) {
+            resizeTopBar();
             setTabPosition(true);
         }
         /// #endif
         return iconElement;
+    }
+
+    public removeTopBar(id: string) {
+        const index = this.topBarIcons.findIndex(item => item.getAttribute("data-id") === id);
+        if (index === -1) {
+            return;
+        }
+        this.topBarIcons[index].remove();
+        this.topBarIcons.splice(index, 1);
+        /// #if !MOBILE
+        if (!isWindow()) {
+            resizeTopBar();
+            setTabPosition(true);
+        }
+        /// #endif
     }
 
     public addBreadcrumbButton(options: {

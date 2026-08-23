@@ -51,13 +51,11 @@ import {openCard, openCardByData} from "../../card/openCard";
 import {lockScreen} from "../../dialog/processSystem";
 import {isWindow} from "../../util/functions";
 import {reloadProtyle} from "../../protyle/util/reload";
-import {fullscreen} from "../../protyle/breadcrumb/action";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import type {App} from "../../index";
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
-import {resize} from "../../protyle/util/resize";
 import {Search} from "../../search";
 import {Custom} from "../../layout/dock/Custom";
 import {transaction} from "../../protyle/wysiwyg/transaction";
@@ -515,8 +513,8 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.fullscreen.custom, event)) {
-        fullscreen(protyle.element);
-        resize(protyle);
+        const editor = protyle.getInstance();
+        editor.setFullscreen(!editor.isFullscreen());
         event.preventDefault();
         return true;
     }

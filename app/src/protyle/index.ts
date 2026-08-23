@@ -53,6 +53,7 @@ import {setFoldById, zoomOut} from "../menus/protyle";
 import {setEditMode} from "./util/setEditMode";
 import {waitForPendingTransactions} from "./util/transactionQueue";
 import {applyViewFoldStates, invalidateViewFoldRequests} from "./util/viewFold";
+import {setFullscreen as setFullscreenState} from "./breadcrumb/action";
 
 export class Protyle {
 
@@ -544,6 +545,16 @@ export class Protyle {
 
     public resize() {
         resize(this.protyle);
+    }
+
+    public isFullscreen() {
+        return this.protyle.element.classList.contains("fullscreen");
+    }
+
+    public setFullscreen(enter: boolean) {
+        if (setFullscreenState(this.protyle.element, enter)) {
+            resize(this.protyle);
+        }
     }
 
     public reload(focus: boolean, updateReadonly?: boolean) {

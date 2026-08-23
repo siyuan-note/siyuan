@@ -2,16 +2,36 @@ import {activeBlur} from "./keyboardToolbar";
 import {Constants} from "../../constants";
 import {destroyModel} from "../menu/model";
 
+let hidePanelMaskTimer = 0;
+
+export const showPanelMask = () => {
+    clearTimeout(hidePanelMaskTimer);
+    hidePanelMaskTimer = 0;
+    const maskElement = document.querySelector(".side-mask") as HTMLElement;
+    maskElement?.classList.remove("fn__none");
+    return maskElement;
+};
+
 export const closePanel = () => {
     destroyModel();
-    document.getElementById("menu").style.transform = "";
-    document.getElementById("sidebar").style.transform = "";
-    document.getElementById("model").style.transform = "";
+    const menuElement = document.getElementById("menu");
+    if (menuElement) {
+        menuElement.classList.add("fn__none");
+        menuElement.style.removeProperty("transform");
+        menuElement.style.removeProperty("z-index");
+    }
+    document.getElementById("sidebar")?.style.removeProperty("transform");
+    document.getElementById("sidebarRight")?.style.removeProperty("transform");
+    document.getElementById("model")?.style.removeProperty("transform");
     const maskElement = document.querySelector(".side-mask") as HTMLElement;
-    setTimeout(() => {
-        maskElement.classList.add("fn__none");
+    clearTimeout(hidePanelMaskTimer);
+    hidePanelMaskTimer = window.setTimeout(() => {
+        maskElement?.classList.add("fn__none");
+        hidePanelMaskTimer = 0;
     }, Constants.TIMEOUT_TRANSITION);
-    maskElement.style.opacity = "";
+    if (maskElement) {
+        maskElement.style.opacity = "";
+    }
     window.siyuan.menus.menu.remove();
 };
 

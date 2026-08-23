@@ -140,7 +140,7 @@ func RefreshToolExposure() {
 }
 
 func externalMCPToolAllowed(tool *tools.Tool) bool {
-	if tool == nil || tool.Source == "mcp" || tool.Runtime == "mcp" {
+	if tool == nil || tool.AgentOnly || tool.Source == "mcp" || tool.Runtime == "mcp" {
 		return false
 	}
 	if model.Conf == nil || model.Conf.AI == nil || model.Conf.AI.MCP == nil {

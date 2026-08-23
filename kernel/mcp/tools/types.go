@@ -55,6 +55,8 @@ type Tool struct {
 	OwnerName string `json:"ownerName,omitempty"`
 	// Runtime 描述执行位置：kernel、plugin-worker 或 mcp。
 	Runtime string `json:"runtime,omitempty"`
+	// AgentOnly 标记能力仅供应用内 Agent 使用，不得投影到外部 MCP 服务。
+	AgentOnly bool `json:"agentOnly,omitempty"`
 	// ReadOnlyHint 仅在外部工具明确声明只读时为 true；未声明时按可能写入处理并要求确认。
 	ReadOnlyHint bool `json:"readOnlyHint,omitempty"`
 	// EffectScope 描述写操作影响范围，用于判断本地数据仓库快照是否具有回滚价值。

@@ -94,7 +94,20 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             /// #if MOBILE
             // 移动端卸载插件后，若无任何插件 dock 则隐藏插件入口图标
             if (app.plugins.every(p => Object.keys(p.docks).length === 0)) {
-                document.querySelector('#sidebar [data-type="sidebar-plugin-tab"]')?.classList.add("fn__none");
+                const pluginTabElement = document.querySelector("[data-type='sidebar-plugin-tab']");
+                pluginTabElement?.classList.add("fn__none");
+                if (pluginTabElement?.classList.contains("toolbar__icon--active")) {
+                    const fallbackTabElement = pluginTabElement.parentElement.querySelector<HTMLElement>(
+                        "[data-type$='-tab']:not(.fn__none)"
+                    );
+                    if (fallbackTabElement) {
+                        fallbackTabElement.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+                    } else {
+                        pluginTabElement.classList.remove("toolbar__icon--active");
+                        document.querySelector("[data-type='sidebar-plugin']")?.classList.add("fn__none");
+                        (pluginTabElement.closest(".side-panel") as HTMLElement).style.transform = "";
+                    }
+                }
             }
             /// #endif
             // rm icons

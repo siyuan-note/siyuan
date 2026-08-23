@@ -103,6 +103,9 @@ const getCell = (target: EventTarget | Node) => {
 };
 
 const getTableNode = (cell: HTMLTableCellElement) => {
+    if (cell?.closest(".protyle-custom")) {
+        return;
+    }
     return cell?.closest<HTMLElement>('[data-type="NodeTable"]');
 };
 
@@ -1009,6 +1012,9 @@ export class TableControl {
     private getEdgeHover(clientX: number, clientY: number) {
         const candidates: ITableEdgeHover[] = [];
         this.wysiwygElement.querySelectorAll<HTMLTableElement>('[data-type="NodeTable"] table').forEach(table => {
+            if (table.closest(".protyle-custom")) {
+                return;
+            }
             const gridRect = this.getTableGridRect(table);
             const addColumnEdge = gridRect.right;
             const viewportRect = this.getTableGridViewportRect(table, gridRect);
@@ -1169,6 +1175,9 @@ export class TableControl {
         const actions = new Map<HTMLTableElement, HTMLElement>();
         this.wysiwygElement.querySelectorAll<HTMLTableElement>(
             '[data-type="NodeTable"][custom-pinthead="true"] table').forEach(table => {
+            if (table.closest(".protyle-custom")) {
+                return;
+            }
             const action = table.nextElementSibling as HTMLElement;
             if (!action?.classList.contains("protyle-action__table")) {
                 return;
@@ -1293,7 +1302,7 @@ export class TableControl {
                     rowControlCenter);
             }
         }
-        if (!this.dragState && !this.selection && caretCell) {
+        if (!this.dragState && !this.selection && caretCell && getTableNode(caretCell) && !this.protyle.disabled) {
             const table = caretCell.closest("table") as HTMLTableElement;
             const viewportRect = table ? this.getTableGridViewportRect(table) : undefined;
             if (viewportRect) {

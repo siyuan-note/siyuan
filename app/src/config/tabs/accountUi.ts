@@ -16,6 +16,7 @@ import md5 from "blueimp-md5";
 import type {SettingTabBuilder} from "../setting/builder";
 import {patchSyncConfig, refreshSyncCloudSpaceGroup} from "./syncRuntime";
 import {escapeAttr, escapeHtml} from "../../util/escape";
+import {bindAccountAuthEnter, isAccountLoginDisabled} from "./accountAuth";
 
 /** 账号节：由 syncTab 注册 */
 export const registerAccountGroup = (tab: SettingTabBuilder) => {
@@ -390,7 +391,7 @@ const bindAccountAuthForm = (
     if (mode === "login") {
         const agreeLoginCheckbox = authFormRoot.querySelector("#agreeLogin") as HTMLInputElement;
         const updateLoginButton = () => {
-            loginBtn.disabled = !agreeLoginCheckbox.checked || userPasswordInput.value.length === 0;
+            loginBtn.disabled = isAccountLoginDisabled(agreeLoginCheckbox.checked, userPasswordInput.value);
         };
         agreeLoginCheckbox.addEventListener("change", updateLoginButton);
         userPasswordInput.addEventListener("input", updateLoginButton);
@@ -407,19 +408,10 @@ const bindAccountAuthForm = (
         refreshCaptchaImg();
     });
 
-    const bindEnter = (input: HTMLInputElement, button: HTMLButtonElement) => {
-        input.addEventListener("keydown", (event) => {
-            if (event.isComposing || event.repeat || event.key !== "Enter") {
-                return;
-            }
-            button.click();
-            event.preventDefault();
-        });
-    };
-    bindEnter(userNameInput, loginBtn);
-    bindEnter(userPasswordInput, loginBtn);
-    bindEnter(captchaInput, loginBtn);
-    bindEnter(twofactorAuthCodeInput, login2Btn);
+    bindAccountAuthEnter(userNameInput, () => loginBtn.click());
+    bindAccountAuthEnter(userPasswordInput, () => loginBtn.click());
+    bindAccountAuthEnter(captchaInput, () => loginBtn.click());
+    bindAccountAuthEnter(twofactorAuthCodeInput, () => login2Btn.click());
 
     const completeLogin = (response: IWebSocketData) => {
         if (mode === "login") {

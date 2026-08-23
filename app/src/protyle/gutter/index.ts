@@ -114,6 +114,7 @@ import {getBacklinkGutterContentTop, getFixedGutterPosition, getGutterMarginHeig
 import {closeSubElement} from "../toolbar/subElementLifecycle";
 import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
 import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFold} from "../util/viewFold";
+import {exportImage} from "../export/util";
 
 // 块类型 data-type 到本地化名称键的映射，用于块标提示中的 ${x}
 const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
@@ -3376,6 +3377,13 @@ export class Gutter {
             click() {
                 copyPlainText(getPlainText(nodeElement as HTMLElement).trimEnd());
                 focusBlock(nodeElement);
+            }
+        }, {
+            id: "copyAsPNG",
+            iconHTML: "",
+            label: window.siyuan.languages.copyAsPNG,
+            click() {
+                exportImage(id, true);
             }
         }, {
             id: type === "NodeAttributeView" ? "copyMirror" : "copy",

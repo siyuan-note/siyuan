@@ -45,7 +45,6 @@ export const registerAccountGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.refresh,
             window.siyuan.languages.manage,
             window.siyuan.languages.logout,
-            window.siyuan.languages.deactivateUser,
         ],
         html: genAccountMainHTML,
         afterMount: bindAccountMainEvent,
@@ -69,6 +68,7 @@ export const registerAccountGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.clickMeToRenew,
             window.siyuan.languages.activationCode,
             window.siyuan.languages.activationCodePlaceholder,
+            window.siyuan.languages.deactivateUser,
         ],
         html: genAccountPaymentHTML,
         afterMount: bindAccountPaymentEvent,
@@ -123,7 +123,6 @@ const genAccountMainHTML = () => {
         <button class="b3-button b3-button--text" id="refresh">
             <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.refresh}
         </button>
-        <button type="button" class="b3-button b3-button--cancel${isIOS ? "" : " fn__none"}" id="deactivateUser">${window.siyuan.languages.deactivateUser}</button>
         <a class="b3-button b3-button--cancel${isIOS ? " fn__none" : ""}" href="${getCloudURL("settings")}" target="_blank">${window.siyuan.languages.manage}</a>
         <button class="b3-button b3-button--cancel" id="logout">${window.siyuan.languages.logout}</button>
     </div>
@@ -235,7 +234,10 @@ const bindAccountMainEvent = (accountSettingsRoot: Element) => {
             });
         });
     });
-    accountMainEl.querySelector("#deactivateUser")?.addEventListener("click", (event) => {
+};
+
+const bindAccountDeactivateEvent = (accountSettingsRoot: Element) => {
+    accountSettingsRoot.querySelector("#deactivateUser")?.addEventListener("click", (event) => {
         const dialog = new Dialog({
             title: "⚠️ " + window.siyuan.languages.deactivateUser,
             width: isMobile() ? "92vw" : "520px",
@@ -259,6 +261,7 @@ const bindAccountPaymentEvent = (accountSettingsRoot: Element) => {
             iOSPurchase(iOSPayBtn.getAttribute("data-type"));
         });
     });
+    bindAccountDeactivateEvent(accountSettingsRoot);
     accountPaymentEl.querySelector("#trialSub")?.addEventListener("click", () => {
         fetchPost("/api/account/startFreeTrial", {}, () => {
             accountSettingsRoot.querySelector("#refresh")?.dispatchEvent(new Event("click"));
@@ -372,6 +375,9 @@ ${iconVIP}${isOnetimePaid ? window.siyuan.languages.account4 : window.siyuan.lan
     <input class="b3-text-field fn__block" style="padding-right: 52px;" placeholder="${window.siyuan.languages.activationCodePlaceholder}">
     <button type="button" id="activationCode" class="b3-button b3-button--text" style="position: absolute; right: 0; top: 0;">${window.siyuan.languages.confirm}</button>
 </div>` : "";
+    const deactivateHTML = isIOS ? `<div class="config-account__deactivate">
+    <button type="button" class="b3-button b3-button--cancel" id="deactivateUser">${window.siyuan.languages.deactivateUser}</button>
+</div>` : "";
 
     return `<div id="configAccountPayment" class="b3-label config-item">
     <div class="fn__flex config-wrap">
@@ -381,6 +387,7 @@ ${iconVIP}${isOnetimePaid ? window.siyuan.languages.account4 : window.siyuan.lan
         ${actionsHTML}
     </div>
     ${activationHTML}
+    ${deactivateHTML}
 </div>`;
 };
 

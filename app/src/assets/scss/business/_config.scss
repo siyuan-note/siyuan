@@ -1206,6 +1206,16 @@
     vertical-align: -3px;
     margin-right: 4px;
   }
+
+  .config-account__deactivate {
+    margin-top: 32px;
+    text-align: right;
+
+    .b3-button {
+      color: var(--b3-theme-on-surface-light);
+      font-size: 12px;
+    }
+  }
 }
 
 #configAccountMain.config-wrap {

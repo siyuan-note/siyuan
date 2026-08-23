@@ -180,22 +180,20 @@ func installPackage(data []byte, installPath, pkgType, packageName string, updat
 		return fmt.Errorf("marketplace package name mismatch: expected [%s], got [%s]", packageName, pkg.Name)
 	}
 
-	if err = filelock.Copy(srcPath, installPath); err != nil {
+	if err = replacePackageDirectory(srcPath, installPath, update); err != nil {
 		return
 	}
 	return
 }
 
-// InstallLocalPackage 从已解压并验证的目录安装本地集市包。
-func InstallLocalPackage(sourcePath, installPath, pkgType, packageName string, update bool) (err error) {
+// replacePackageDirectory 将 sourcePath 整目录替换到 installPath。
+// 先拷到安装目录同级的 staging，更新时再把旧目录 rename 成 backup，最后把 staging rename 成目标路径。
+// 这样新包已删除的文件不会残留，失败时也可以把 backup rename 回去。
+func replacePackageDirectory(sourcePath, installPath string, update bool) (err error) {
 	if err = os.MkdirAll(filepath.Dir(installPath), 0755); err != nil {
 		return
 	}
 
-	var fallbackInstallTime time.Time
-	if info, statErr := os.Stat(installPath); statErr == nil {
-		fallbackInstallTime = info.ModTime()
-	}
 	operationPath := filepath.Join(filepath.Dir(installPath), ".siyuan-package-install-"+gulu.Rand.String(7))
 	stagingPath := filepath.Join(operationPath, "staging")
 	backupPath := filepath.Join(operationPath, "backup")
@@ -218,15 +216,27 @@ func InstallLocalPackage(sourcePath, installPath, pkgType, packageName string, u
 		if update {
 			if rollbackErr := os.Rename(backupPath, installPath); rollbackErr != nil {
 				preserveOperationPath = true
-				return fmt.Errorf("install local marketplace package failed: %w; rollback failed: %s", err, rollbackErr)
+				return fmt.Errorf("install marketplace package failed: %w; rollback failed: %s", err, rollbackErr)
 			}
 		}
 		return
 	}
 	if update {
 		if removeErr := os.RemoveAll(operationPath); removeErr != nil {
-			logging.LogWarnf("remove local package backup [%s] failed: %s", backupPath, removeErr)
+			logging.LogWarnf("remove package backup [%s] failed: %s", backupPath, removeErr)
 		}
+	}
+	return
+}
+
+// InstallLocalPackage 从已解压并验证的目录安装本地集市包。
+func InstallLocalPackage(sourcePath, installPath, pkgType, packageName string, update bool) (err error) {
+	var fallbackInstallTime time.Time
+	if info, statErr := os.Stat(installPath); statErr == nil {
+		fallbackInstallTime = info.ModTime()
+	}
+	if err = replacePackageDirectory(sourcePath, installPath, update); err != nil {
+		return
 	}
 
 	RemoveInstalledPackageSizeCache(pkgType, packageName)

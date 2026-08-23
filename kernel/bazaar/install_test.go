@@ -112,6 +112,46 @@ func TestInstallPackageRefusesOverwriteWithoutUpdate(t *testing.T) {
 	}
 }
 
+// TestInstallPackageUpdateReplacesDirectory 校验在线更新会整目录替换，新版本已删除的文件不会残留
+// https://github.com/siyuan-note/siyuan/issues/18933
+func TestInstallPackageUpdateReplacesDirectory(t *testing.T) {
+	oldTempDir := util.TempDir
+	util.TempDir = t.TempDir()
+	t.Cleanup(func() { util.TempDir = oldTempDir })
+
+	installPath := filepath.Join(t.TempDir(), "plugins", "sample")
+	if err := os.MkdirAll(installPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(installPath, "stale.js"), []byte("stale"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(installPath, "plugin.json"), []byte(`{"name":"sample","version":"1.0.0"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	data := buildInstallPackageArchive(t, map[string]string{
+		"plugin.json": `{"name":"sample","version":"2.0.0"}`,
+		"new.js":      "new",
+	})
+	if err := installPackage(data, installPath, "plugins", "sample", true); err != nil {
+		t.Fatalf("expected update install to succeed: %s", err)
+	}
+	if _, err := os.Stat(filepath.Join(installPath, "new.js")); err != nil {
+		t.Fatalf("new package file is missing: %s", err)
+	}
+	if _, err := os.Stat(filepath.Join(installPath, "stale.js")); !os.IsNotExist(err) {
+		t.Fatalf("stale package file was not removed: %v", err)
+	}
+	entries, err := os.ReadDir(filepath.Dir(installPath))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Name() != "sample" {
+		t.Fatalf("temporary installation directory was not cleaned up: %#v", entries)
+	}
+}
+
 // TestInstallPackageUpdateOverwrites 校验对同名已安装包的更新安装正常覆盖
 func TestInstallPackageUpdateOverwrites(t *testing.T) {
 	oldTempDir := util.TempDir

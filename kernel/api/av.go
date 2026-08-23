@@ -533,7 +533,7 @@ func getAttributeViewRelationCandidates(c *gin.Context) {
 		}
 	}
 
-	name, blockIDs, columns, selectedRows, rows, total, err := model.GetAttributeViewRelationCandidates(
+	name, blockIDs, customColors, columns, selectedRows, rows, total, err := model.GetAttributeViewRelationCandidates(
 		avID, keyID, keyword, selectedBlockIDs, page, pageSize)
 	if err != nil {
 		ret.Code = -1
@@ -549,6 +549,7 @@ func getAttributeViewRelationCandidates(c *gin.Context) {
 	ret.Data = map[string]any{
 		"name":         name,
 		"blockIDs":     blockIDs,
+		"customColors": customColors,
 		"notebookID":   notebookID,
 		"columns":      columns,
 		"selectedRows": selectedRows,
@@ -1142,15 +1143,17 @@ func renderSnapshotAttributeView(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"name":              attrView.Name,
-		"id":                attrView.ID,
-		"viewType":          view.GetType(),
-		"viewID":            view.GetID(),
-		"views":             views,
-		"view":              view,
-		"isMirror":          av.IsMirror(attrView.ID),
-		"newItemTemplates":  attrView.NewItemTemplates,
-		"defaultTemplateID": attrView.DefaultTemplateID,
+		"name":                   attrView.Name,
+		"id":                     attrView.ID,
+		"customColors":           attrView.CustomColors,
+		"usedCustomColorIndexes": attrView.UsedCustomColorIndexes(),
+		"viewType":               view.GetType(),
+		"viewID":                 view.GetID(),
+		"views":                  views,
+		"view":                   view,
+		"isMirror":               av.IsMirror(attrView.ID),
+		"newItemTemplates":       attrView.NewItemTemplates,
+		"defaultTemplateID":      attrView.DefaultTemplateID,
 	}
 }
 
@@ -1237,15 +1240,17 @@ func renderHistoryAttributeView(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"name":              attrView.Name,
-		"id":                attrView.ID,
-		"viewType":          view.GetType(),
-		"viewID":            view.GetID(),
-		"views":             views,
-		"view":              view,
-		"isMirror":          av.IsMirror(attrView.ID),
-		"newItemTemplates":  attrView.NewItemTemplates,
-		"defaultTemplateID": attrView.DefaultTemplateID,
+		"name":                   attrView.Name,
+		"id":                     attrView.ID,
+		"customColors":           attrView.CustomColors,
+		"usedCustomColorIndexes": attrView.UsedCustomColorIndexes(),
+		"viewType":               view.GetType(),
+		"viewID":                 view.GetID(),
+		"views":                  views,
+		"view":                   view,
+		"isMirror":               av.IsMirror(attrView.ID),
+		"newItemTemplates":       attrView.NewItemTemplates,
+		"defaultTemplateID":      attrView.DefaultTemplateID,
 	}
 }
 
@@ -1392,15 +1397,17 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 	}
 
 	retData := map[string]any{
-		"name":              attrView.Name,
-		"id":                attrView.ID,
-		"viewType":          view.GetType(),
-		"viewID":            view.GetID(),
-		"views":             views,
-		"view":              view,
-		"isMirror":          av.IsMirror(attrView.ID),
-		"newItemTemplates":  attrView.NewItemTemplates,
-		"defaultTemplateID": attrView.DefaultTemplateID,
+		"name":                   attrView.Name,
+		"id":                     attrView.ID,
+		"customColors":           attrView.CustomColors,
+		"usedCustomColorIndexes": attrView.UsedCustomColorIndexes(),
+		"viewType":               view.GetType(),
+		"viewID":                 view.GetID(),
+		"views":                  views,
+		"view":                   view,
+		"isMirror":               av.IsMirror(attrView.ID),
+		"newItemTemplates":       attrView.NewItemTemplates,
+		"defaultTemplateID":      attrView.DefaultTemplateID,
 	}
 	if nil != target {
 		retData["target"] = target

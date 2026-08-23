@@ -1,6 +1,6 @@
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
-import {escapeAttr, escapeHtml} from "../../../util/escape";
+import {escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
 import {getFieldsByData} from "./view";
 import {fetchSyncPost} from "../../../util/fetch";
@@ -8,6 +8,7 @@ import {Menu} from "../../../plugin/Menu";
 import {objEquals} from "../../../util/functions";
 import {Constants} from "../../../constants";
 import {mergeGroupResponseView} from "./groupResponse";
+import {getAVColorStyle} from "./color";
 
 export const getPageSize = (blockElement: Element) => {
     const groupPageSize: {
@@ -201,7 +202,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
                 let titleHTML = `<div class="b3-menu__label fn__flex-1 fn__ellipsis">${escapeHtml(item.name || "")}</div>`;
                 if (item.groupValue?.mSelect?.length > 0) {
                     titleHTML = `<div class="fn__flex-1">
-        <span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(item.groupValue.mSelect[0].color)});color:var(--b3-font-color${escapeAttr(item.groupValue.mSelect[0].color)})">
+        <span class="b3-chip" style="${getAVColorStyle(item.groupValue.mSelect[0])}">
             <span class="fn__ellipsis">${escapeHtml(item.groupValue.mSelect[0].content)}</span>
         </span>
     </div>`;

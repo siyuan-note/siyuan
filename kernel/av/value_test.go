@@ -178,7 +178,7 @@ func TestValueRollupBuildContentsFiltersEligibleItems(t *testing.T) {
 	}
 	rollup := &ValueRollup{}
 
-	rollup.BuildContents(keyValues, destKey, relationValue, &RollupCalc{Operator: CalcOperatorCountAll},
+	rollup.BuildContents(&AttributeView{KeyValues: keyValues}, destKey, relationValue, &RollupCalc{Operator: CalcOperatorCountAll},
 		&RollupRenderContext{EligibleItemIDs: map[string]bool{"item-b": true, "item-c": true}})
 
 	if 1 != len(rollup.Contents) || nil == rollup.Contents[0].Number {
@@ -202,10 +202,42 @@ func TestValueRollupBuildContentsPreservesBlockRefSubtype(t *testing.T) {
 	relationValue := &Value{Type: KeyTypeRelation, Relation: &ValueRelation{BlockIDs: []string{"item-a"}}}
 	rollup := &ValueRollup{}
 
-	rollup.BuildContents(keyValues, destKey, relationValue, nil, nil)
+	rollup.BuildContents(&AttributeView{KeyValues: keyValues}, destKey, relationValue, nil, nil)
 
 	if 1 != len(rollup.Contents) || nil == rollup.Contents[0].Block ||
 		BlockRefSubtypeDynamic != rollup.Contents[0].Block.RefSubtype {
 		t.Fatalf("rollup did not preserve the block reference subtype: %+v", rollup.Contents)
+	}
+}
+
+func TestValueRollupBuildContentsResolvesTargetCustomColor(t *testing.T) {
+	destKey := &Key{ID: "select", Type: KeyTypeSelect}
+	destView := &AttributeView{
+		CustomColors: []*AttributeViewCustomColor{
+			testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c"),
+		},
+		KeyValues: []*KeyValues{{
+			Key: destKey,
+			Values: []*Value{{
+				BlockID: "item-a",
+				Type:    KeyTypeSelect,
+				MSelect: []*ValueSelect{{Content: "Target", Color: "15"}},
+			}},
+		}},
+	}
+	relationValue := &Value{Type: KeyTypeRelation, Relation: &ValueRelation{BlockIDs: []string{"item-a"}}}
+	rollup := &ValueRollup{}
+
+	rollup.BuildContents(destView, destKey, relationValue, nil, nil)
+	if 1 != len(rollup.Contents) || 1 != len(rollup.Contents[0].MSelect) {
+		t.Fatalf("unexpected rollup contents: %+v", rollup.Contents)
+	}
+	selection := rollup.Contents[0].MSelect[0]
+	if nil == selection.ResolvedColor || "#010203" != selection.ResolvedColor.Light.Color ||
+		"#0a0b0c" != selection.ResolvedColor.Dark.BackgroundColor {
+		t.Fatalf("rollup did not resolve the target database color: %+v", selection)
+	}
+	if nil != destView.KeyValues[0].Values[0].MSelect[0].ResolvedColor {
+		t.Fatal("rollup resolution mutated the persisted target value")
 	}
 }

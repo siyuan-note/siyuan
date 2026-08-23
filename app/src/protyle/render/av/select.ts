@@ -15,12 +15,23 @@ import {getFieldIdByCellElement} from "./row";
 import {Constants} from "../../../constants";
 import {setPosition} from "../../../util/setPosition";
 import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
+import {
+    AV_MANAGE_CUSTOM_COLORS_TYPE,
+    applyAVColorPalette,
+    getAVColorGridHTML,
+    getAVColorStyle,
+    getAVCustomColors,
+    getAVResolvedColor,
+    getNextAVOptionColor,
+} from "./color";
+import {openAVCustomColorDialog} from "./colorDialog";
 
 let cellValues: IAVCellValue[];
 
 const filterSelectHTML = (key: string, options: {
     name: string,
     color: string,
+    resolvedColor?: IAVColor,
     desc?: string
 }[], selected: string[] = []) => {
     let html = "";
@@ -40,7 +51,7 @@ const filterSelectHTML = (key: string, options: {
                 html += `<button data-type="addColOptionOrCell" class="b3-menu__item${currentName === item.name ? " b3-menu__item--current" : ""}" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${escapeAttr(item.color)}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${airaLabel}">
-        <span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">
+        <span class="b3-chip" style="${getAVColorStyle(item)}">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
     </div>
@@ -55,11 +66,11 @@ const filterSelectHTML = (key: string, options: {
     }
     if (!hasMatch && key) {
         html = html.replace('class="b3-menu__item b3-menu__item--current"', 'class="b3-menu__item"');
-        const colorIndex = (options?.length || 0) % 14 + 1;
+        const colorIndex = getNextAVOptionColor(options?.length || 0);
         html = `<button data-type="addColOptionOrCell" class="b3-menu__item b3-menu__item--current" data-name="${key}" data-color="${colorIndex}">
 <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
 <div class="fn__flex-1">
-    <span class="b3-chip" style="background-color:var(--b3-font-background${colorIndex});color:var(--b3-font-color${colorIndex})">
+    <span class="b3-chip" style="${getAVColorStyle(colorIndex)}">
         <span class="fn__ellipsis">${escapeHtml(key)}</span>
     </span>
 </div>
@@ -265,6 +276,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     if (menu.isOpen) {
         return;
     }
+    applyAVColorPalette(menu.element, getAVCustomColors(data));
     menu.addItem({
         iconHTML: "",
         type: "empty",
@@ -389,18 +401,26 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         }
     });
     menu.addSeparator();
-    let html = "<div class=\"fn__flex fn__flex-wrap\" style=\"width: 238px\">";
-    Array.from(Array(14).keys()).forEach(index => {
-        html += `<button data-color="${index + 1}" class="color__square${parseInt(color) === index + 1 ? " color__square--current" : ""}" style="color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</button>`;
-    });
+    const html = `<div class="fn__flex fn__flex-wrap" style="width:238px;max-height:238px;overflow:auto">${getAVColorGridHTML(
+        getAVCustomColors(data), color, window.siyuan.languages.manageCustomColors)}</div>`;
     menu.addItem({
         type: "empty",
         iconHTML: "",
-        label: html + "</div>",
+        label: html,
         bind(element) {
             element.addEventListener("click", (event) => {
-                const colorTarget = event.target as HTMLElement;
-                if (colorTarget.classList.contains("color__square") && !colorTarget.classList.contains("color__square--current")) {
+                const colorTarget = (event.target as HTMLElement).closest<HTMLElement>("button");
+                if (colorTarget?.dataset.type === AV_MANAGE_CUSTOM_COLORS_TYPE) {
+                    menu.close();
+                    document.querySelector(".av__panel")?.remove();
+                    openAVCustomColorDialog({
+                        protyle,
+                        data,
+                        blockElement: blockElement as HTMLElement,
+                    });
+                    return;
+                }
+                if (colorTarget?.classList.contains("color__square") && !colorTarget.classList.contains("color__square--current")) {
                     element.querySelector(".color__square--current")?.classList.remove("color__square--current");
                     colorTarget.classList.add("color__square--current");
                     const newColor = colorTarget.getAttribute("data-color");
@@ -438,6 +458,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                 if (item.name === name) {
                                     item.name = inputElement.value;
                                     item.color = newColor;
+                                    item.resolvedColor = getAVResolvedColor(data, newColor);
                                     return true;
                                 }
                             });
@@ -463,6 +484,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                 if (item.content === name) {
                                     item.content = inputElement.value;
                                     item.color = newColor;
+                                    item.resolvedColor = getAVResolvedColor(data, newColor);
                                     return true;
                                 }
                             });
@@ -583,6 +605,8 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
 
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
+    const resolvedColor = colData.options.find(option => option.name === currentElement.dataset.name)?.resolvedColor ||
+        getAVResolvedColor(data, currentElement.dataset.color);
     let mSelectValue: IAVCellSelectValue[];
     const batchMode = getAVBatchEditMode(cellElements[0]);
     cellElements.forEach((item, index) => {
@@ -604,7 +628,8 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
                 }
                 cellValue.mSelect.push({
                     color: currentElement.dataset.color,
-                    content: currentElement.dataset.name
+                    content: currentElement.dataset.name,
+                    resolvedColor,
                 });
             }
         } else if (index === 0) {
@@ -619,13 +644,15 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
                 if (!hasOption) {
                     cellValue.mSelect.push({
                         color: currentElement.dataset.color,
-                        content: currentElement.dataset.name
+                        content: currentElement.dataset.name,
+                        resolvedColor,
                     });
                 }
             } else {
                 cellValue.mSelect = [{
                     color: currentElement.dataset.color,
-                    content: currentElement.dataset.name
+                    content: currentElement.dataset.name,
+                    resolvedColor,
                 }];
             }
             mSelectValue = cellValue.mSelect;
@@ -720,6 +747,11 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
             return item;
         }
     });
+    cellValues.forEach(value => {
+        value.mSelect?.forEach(item => {
+            item.resolvedColor = colData.options?.find(option => option.name === item.content)?.resolvedColor;
+        });
+    });
     let selectedHTML = "";
     const selected: string[] = [];
     const batchMode = getAVBatchEditMode(cellElements[0]);
@@ -728,7 +760,10 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
     visibleValues?.forEach((item) => {
         const option = colData.options?.find((colOption) => colOption.name === item.content);
         selected.push(item.content);
-        selectedHTML += `<div class="b3-chip b3-chip--middle${canSort ? " fn__grab" : " b3-chip--pointer"}" data-content="${escapeAttr(item.content)}" data-name="${escapeAttr(item.content)}" data-desc="${escapeAttr(option?.desc || "")}" data-color="${escapeAttr(option?.color || item.color)}" data-value-color="${escapeAttr(item.color)}" style="white-space: nowrap;max-width:100%;background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconClose"></use></svg></div>`;
+        selectedHTML += `<div class="b3-chip b3-chip--middle${canSort ? " fn__grab" : " b3-chip--pointer"}" data-content="${escapeAttr(item.content)}" data-name="${escapeAttr(item.content)}" data-desc="${escapeAttr(option?.desc || "")}" data-color="${escapeAttr(option ? option.color : item.color)}" data-value-color="${escapeAttr(item.color)}" style="white-space: nowrap;max-width:100%;${getAVColorStyle({
+            color: option ? option.color : item.color,
+            resolvedColor: option ? option.resolvedColor : item.resolvedColor,
+        })}"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconClose"></use></svg></div>`;
     });
 
     return `<div class="b3-menu__items" style="display: flex;flex-direction: column;flex: 1;">
@@ -747,17 +782,15 @@ export const mergeAddOption = (column: IAVColumn, cellValue: IAVCellValue, avID:
         if (!column.options) {
             column.options = [];
         }
-        const needAdd = column.options.find((option: {
-            name: string,
-            color: string,
-        }) => {
+        const needAdd = column.options.find((option) => {
             if (option.name === item.content) {
                 item.color = option.color;
+                item.resolvedColor = option.resolvedColor;
                 return true;
             }
         });
         if (!needAdd) {
-            const newColor = ((column.options?.length || 0) % 14 + 1).toString();
+            const newColor = getNextAVOptionColor(column.options?.length || 0);
             column.options.push({
                 name: item.content,
                 color: newColor

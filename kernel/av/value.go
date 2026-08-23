@@ -204,6 +204,7 @@ func (value *Value) Clone() (ret *Value) {
 	if err != nil {
 		return
 	}
+	copyValueResolvedColors(ret, value)
 	return
 }
 
@@ -820,8 +821,9 @@ func Round(val float64, precision int) float64 {
 }
 
 type ValueSelect struct {
-	Content string `json:"content"`
-	Color   string `json:"color"` // 1-14
+	Content       string              `json:"content"`
+	Color         string              `json:"color"`                   // 1-78
+	ResolvedColor *AttributeViewColor `json:"resolvedColor,omitempty"` // 渲染阶段解析后的自定义颜色
 }
 
 func MSelectRemoveOption(mSelect []*ValueSelect, opt string) (ret []*ValueSelect) {
@@ -1001,15 +1003,18 @@ type RollupRenderContext struct {
 	EligibleItemIDs   map[string]bool
 }
 
-func (r *ValueRollup) BuildContents(keyValues []*KeyValues, destKey *Key, relationVal *Value, calc *RollupCalc,
+func (r *ValueRollup) BuildContents(attrView *AttributeView, destKey *Key, relationVal *Value, calc *RollupCalc,
 	context *RollupRenderContext) {
 	r.Contents = nil
+	if nil == attrView {
+		return
+	}
 	for _, blockID := range relationVal.Relation.BlockIDs {
 		if nil != context && nil != context.EligibleItemIDs && !context.EligibleItemIDs[blockID] {
 			continue
 		}
 
-		destVal := GetValue(keyValues, destKey.ID, blockID)
+		destVal := GetValue(attrView.KeyValues, destKey.ID, blockID)
 		if nil != context && nil != context.FurtherCollection &&
 			(KeyTypeTemplate == destKey.Type || KeyTypeUpdated == destKey.Type || KeyTypeCreated == destKey.Type) {
 			destVal = context.FurtherCollection.GetValue(blockID, destKey.ID)
@@ -1042,7 +1047,11 @@ func (r *ValueRollup) BuildContents(keyValues []*KeyValues, destKey *Key, relati
 			destVal.Updated.FormatDate(destKey.DateFormat, isNotTime)
 		}
 
-		r.Contents = append(r.Contents, destVal.Clone())
+		cloned := destVal.Clone()
+		if KeyTypeSelect == destKey.Type || KeyTypeMSelect == destKey.Type {
+			resolveValueSelectColors(cloned, attrView)
+		}
+		r.Contents = append(r.Contents, cloned)
 	}
 
 	r.calcContents(calc, destKey)

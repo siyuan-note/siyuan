@@ -154,6 +154,41 @@ func TestTopAddingDoesNotUseGroupedViewDefault(t *testing.T) {
 	}
 }
 
+func TestAddingDefaultValueResolvesCustomSelectColor(t *testing.T) {
+	setupAttributeViewValidationTest(t)
+
+	attrView := av.NewAttributeView("20260824150000-colors3")
+	selectKey := attrView.KeyValues[1].Key
+	selectKey.Options = []*av.SelectOption{{
+		Name: "Custom", Color: "15",
+	}}
+	attrView.CustomColors = []*av.AttributeViewCustomColor{{
+		Index: 15,
+		AttributeViewColor: av.AttributeViewColor{
+			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
+			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+		},
+	}}
+	view := attrView.Views[0]
+	view.Filters = []*av.ViewFilter{{
+		Column:   selectKey.ID,
+		Operator: av.FilterOperatorIsEqual,
+		Value: &av.Value{Type: av.KeyTypeSelect, MSelect: []*av.ValueSelect{{
+			Content: "Custom", Color: "15",
+		}}},
+	}}
+
+	values := getAttrViewAddingBlockDefaultValues(attrView, view, view, "", "new-item", true, false)
+	value := values[selectKey.ID]
+	if nil == value || 1 != len(value.MSelect) || nil == value.MSelect[0].ResolvedColor {
+		t.Fatalf("select filter default lost its resolved custom color: %+v", value)
+	}
+	if "#010203" != value.MSelect[0].ResolvedColor.Light.Color ||
+		"#0a0b0c" != value.MSelect[0].ResolvedColor.Dark.BackgroundColor {
+		t.Fatalf("unexpected resolved custom color: %+v", value.MSelect[0].ResolvedColor)
+	}
+}
+
 func TestFillAttrViewAutoFillNowValuesOverridesExistingValue(t *testing.T) {
 	const (
 		itemID = "new-item"

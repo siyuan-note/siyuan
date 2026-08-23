@@ -363,6 +363,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doUpdateAttrViewColOption(op)
 			case "setAttrViewColOptionDesc":
 				ret = tx.doSetAttrViewColOptionDesc(op)
+			case "setAttrViewCustomColors":
+				ret = tx.doSetAttrViewCustomColors(op)
 			case "setAttrViewColCalc":
 				ret = tx.doSetAttrViewColCalc(op)
 			case "updateAttrViewColNumberFormat":

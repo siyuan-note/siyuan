@@ -609,6 +609,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		if nil == destAv {
 			return false
 		}
+		attrView.ApplyRelatedCustomColorRenderContext(destAv)
 
 		destKey, _ := destAv.GetKey(key.Rollup.KeyID)
 		if nil == destKey {
@@ -616,7 +617,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		}
 
 		rollupContext := rollupFurtherCollections[key.ID]
-		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, rollupContext)
+		value.Rollup.BuildContents(destAv, destKey, relVal, key.Rollup.Calc, rollupContext)
 		relationContentCount := len(relVal.Relation.Contents)
 		if nil != rollupContext && nil != rollupContext.EligibleItemIDs {
 			relationContentCount = 0

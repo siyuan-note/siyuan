@@ -20,6 +20,7 @@ const refreshActions = new Set<TOperation>([
     "setAttrViewColIcon",
     "setAttrViewColDesc",
     "setAttrViewName",
+    "setAttrViewCustomColors",
     "updateAttrViewColNumberFormat",
     "setAttrViewColDateFormat",
 ]);

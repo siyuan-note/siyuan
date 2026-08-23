@@ -1,7 +1,8 @@
 {
+	"namingEmpty": "Nazwa nie może być pusta",
 	"recentCreated": "Ostatnio utworzone",
 	"manageCustomColors": "Zarządzaj kolorami niestandardowymi",
-	"deleteCustomColorTip": "Po usunięciu i zapisaniu zawartość używająca niestandardowego koloru „${name}” powróci do koloru zapisanego podczas zastosowania i przestanie reagować na przełączanie trybu jasnego i ciemnego. Czy na pewno chcesz go usunąć?",
+	"deleteCustomColorTip": "Po usunięciu i zapisaniu zawartość, która już używa niestandardowego koloru „${name}”, powróci do koloru trybu jasnego z pierwszego zapisu i nie będzie już obsługiwać dynamicznego dostosowywania. Czy na pewno chcesz go usunąć?",
 	"mobileMenuNavigation": "Nawigacja",
 	"mobileBottomBar": "Dolny pasek",
 	"insertSuperBlockLeft": "Wstaw kolumnę po lewej",

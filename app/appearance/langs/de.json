@@ -1,7 +1,8 @@
 {
+	"namingEmpty": "Der Name darf nicht leer sein",
 	"recentCreated": "Kürzlich erstellt",
 	"manageCustomColors": "Benutzerdefinierte Farben verwalten",
-	"deleteCustomColorTip": "Nach dem Löschen und Speichern verwendet Inhalt mit der benutzerdefinierten Farbe „${name}“ wieder die beim Anwenden gespeicherte Farbe und folgt nicht mehr dem Wechsel zwischen hellem und dunklem Modus. Möchten Sie sie wirklich löschen?",
+	"deleteCustomColorTip": "Nach dem Löschen und Speichern fällt Inhalt, der bereits die benutzerdefinierte Farbe „${name}“ verwendet, auf die beim ersten Speichern festgelegte Farbe für den hellen Modus zurück und kann nicht mehr dynamisch angepasst werden. Möchten Sie sie wirklich löschen?",
 	"mobileMenuNavigation": "Navigation",
 	"mobileBottomBar": "Untere Leiste",
 	"insertSuperBlockLeft": "Spalte links einfügen",

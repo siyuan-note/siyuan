@@ -1,7 +1,8 @@
 {
+	"namingEmpty": "이름은 비워 둘 수 없습니다",
 	"recentCreated": "최근 생성",
 	"manageCustomColors": "사용자 지정 색상 관리",
-	"deleteCustomColorTip": "삭제 후 저장하면 사용자 지정 색상 “${name}”을 사용하는 콘텐츠는 적용할 때 저장된 색상으로 대체되며 더 이상 밝은/어두운 모드 전환을 따르지 않습니다. 삭제하시겠습니까?",
+	"deleteCustomColorTip": "삭제 후 저장하면 사용자 지정 색상 “${name}”을 이미 사용하는 콘텐츠는 처음 저장한 밝은 모드 색상으로 돌아가며 더 이상 동적으로 조정할 수 없습니다. 삭제하시겠습니까?",
 	"mobileMenuNavigation": "내비게이션",
 	"mobileBottomBar": "하단 바",
 	"insertSuperBlockLeft": "왼쪽에 열 삽입",

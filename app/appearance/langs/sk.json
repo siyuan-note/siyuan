@@ -1,7 +1,8 @@
 {
+	"namingEmpty": "Názov nemôže byť prázdny",
 	"recentCreated": "Nedávno vytvorené",
 	"manageCustomColors": "Spravovať vlastné farby",
-	"deleteCustomColorTip": "Po odstránení a uložení sa obsah používajúci vlastnú farbu „${name}“ vráti k farbe uloženej pri jej použití a prestane sa prispôsobovať prepínaniu svetlého a tmavého režimu. Naozaj ju chcete odstrániť?",
+	"deleteCustomColorTip": "Po odstránení a uložení sa obsah, ktorý už používa vlastnú farbu „${name}“, vráti k farbe svetlého režimu z prvého uloženia a prestane podporovať dynamické úpravy. Naozaj ju chcete odstrániť?",
 	"mobileMenuNavigation": "Navigácia",
 	"mobileBottomBar": "Spodná lišta",
 	"insertSuperBlockLeft": "Vložiť stĺpec vľavo",

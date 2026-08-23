@@ -1,7 +1,8 @@
 {
+	"namingEmpty": "命名不能为空",
 	"recentCreated": "最近创建",
 	"manageCustomColors": "管理自定义颜色",
-	"deleteCustomColorTip": "删除并保存后，文档中使用自定义颜色“${name}”的内容将回退到应用时保存的颜色，且不再随明亮模式和暗黑模式切换。确定要删除吗？",
+	"deleteCustomColorTip": "删除并保存后，文档中已使用自定义颜色“${name}”的内容将回退到首次保存的明亮模式颜色，不再支持动态调整。确定要删除吗？",
 	"mobileMenuNavigation": "导航",
 	"mobileBottomBar": "底栏",
 	"insertSuperBlockLeft": "左侧插入分栏",

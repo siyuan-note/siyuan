@@ -1,7 +1,8 @@
 {
+	"namingEmpty": "Il nome non può essere vuoto",
 	"recentCreated": "Creati di recente",
 	"manageCustomColors": "Gestisci colori personalizzati",
-	"deleteCustomColorTip": "Dopo l’eliminazione e il salvataggio, il contenuto che usa il colore personalizzato “${name}” tornerà al colore salvato al momento dell’applicazione e non seguirà più il cambio tra modalità chiara e scura. Vuoi davvero eliminarlo?",
+	"deleteCustomColorTip": "Dopo l’eliminazione e il salvataggio, il contenuto che usa già il colore personalizzato “${name}” tornerà al colore della modalità chiara definito al primo salvataggio e non supporterà più la regolazione dinamica. Vuoi davvero eliminarlo?",
 	"mobileMenuNavigation": "Navigazione",
 	"mobileBottomBar": "Barra inferiore",
 	"insertSuperBlockLeft": "Inserisci colonna a sinistra",

@@ -1,7 +1,8 @@
 {
+	"namingEmpty": "Nama tidak boleh kosong",
 	"recentCreated": "Baru dibuat",
 	"manageCustomColors": "Kelola warna kustom",
-	"deleteCustomColorTip": "Setelah dihapus dan disimpan, konten yang menggunakan warna kustom “${name}” akan kembali ke warna yang disimpan saat diterapkan dan tidak lagi mengikuti perubahan mode terang/gelap. Yakin ingin menghapusnya?",
+	"deleteCustomColorTip": "Setelah dihapus dan disimpan, konten yang sudah menggunakan warna kustom “${name}” akan kembali ke warna mode terang saat pertama kali disimpan dan tidak lagi mendukung penyesuaian dinamis. Yakin ingin menghapusnya?",
 	"mobileMenuNavigation": "Navigasi",
 	"mobileBottomBar": "Bilah bawah",
 	"insertSuperBlockLeft": "Sisipkan kolom di sebelah kiri",

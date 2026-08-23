@@ -14,6 +14,10 @@ export const shouldDragOpenSidebar = (side: MobileSidebarSide, direction: Mobile
     return direction === getSidebarClosingDirection(side);
 };
 
+export const shouldCloseGlobalMenu = (direction: MobileSwipeDirection, reversing: boolean) => {
+    return direction === "toRight" && !reversing;
+};
+
 export const getOpenSidebarReleaseAction = (
     side: MobileSidebarSide,
     firstDirection: MobileSwipeDirection,

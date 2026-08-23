@@ -8111,6 +8111,74 @@ func unbindBlockAv(tx *Transaction, avID, nodeID string) {
 	return
 }
 
+func (tx *Transaction) doSortAttrViewBinding(operation *Operation) (ret *TxErr) {
+	tree, err := tx.loadTree(operation.ID)
+	if err != nil {
+		logging.LogErrorf("load tree [%s] failed: %s", operation.ID, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ID}
+	}
+
+	node := treenode.GetNodeInTree(tree, operation.ID)
+	if nil == node {
+		logging.LogErrorf("get node [%s] in tree [%s] failed", operation.ID, tree.Root.ID)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ID}
+	}
+
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	avIDs, err := sortAttrViewBindingIDs(strings.Split(attrs[av.NodeAttrNameAvs], ","), operation.AvID, operation.PreviousID)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+
+	avs := strings.Join(avIDs, ",")
+	if _, err = setNodeAttrs0(node, map[string]string{
+		av.NodeAttrNameAvs:   avs,
+		av.NodeAttrViewNames: getAvNames(avs),
+	}, tree.Box); err != nil {
+		logging.LogErrorf("sort attribute view binding [%s] failed: %s", operation.AvID, err)
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+
+	tx.writeTree(tree)
+	cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
+	return
+}
+
+func sortAttrViewBindingIDs(avIDs []string, avID, previousAvID string) (ret []string, err error) {
+	ret = append([]string(nil), avIDs...)
+	if avID == previousAvID {
+		return
+	}
+
+	index := -1
+	for i, id := range ret {
+		if id == avID {
+			index = i
+			break
+		}
+	}
+	if 0 > index {
+		return nil, fmt.Errorf("attribute view [%s] is not bound", avID)
+	}
+
+	ret = append(ret[:index], ret[index+1:]...)
+	previousIndex := -1
+	if "" != previousAvID {
+		for i, id := range ret {
+			if id == previousAvID {
+				previousIndex = i
+				break
+			}
+		}
+		if 0 > previousIndex {
+			return nil, fmt.Errorf("previous attribute view [%s] is not bound", previousAvID)
+		}
+	}
+
+	ret = util.InsertElem(ret, previousIndex+1, avID)
+	return
+}
+
 func bindBlockAv(tx *Transaction, avID, blockID string) {
 	node, tree, err := getNodeByBlockID(tx, blockID)
 	if err != nil {

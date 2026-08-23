@@ -28,6 +28,7 @@ type TOperation =
     | "sortAttrViewRow"
     | "sortAttrViewCol"
     | "sortAttrViewKey"
+    | "sortAttrViewBinding"
     | "setAttrViewColPin"
     | "setAttrViewColHidden"
     | "setAttrViewColWrap"

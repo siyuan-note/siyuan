@@ -6,7 +6,7 @@ body {
   --mobile-bottom-bar-height: 48px;
   --mobile-bottom-bar-gap: 8px;
   --mobile-status-height: 24px;
-  --mobile-bottom-bar-safe-area: max(8px, env(safe-area-inset-bottom));
+  --mobile-bottom-bar-safe-area: env(safe-area-inset-bottom);
   --mobile-bottom-bar-bottom: calc(var(--mobile-status-height) + var(--mobile-bottom-bar-gap) + var(--mobile-bottom-bar-safe-area));
   --mobile-bottom-bar-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-bottom));
 }
@@ -441,7 +441,6 @@ body.mobile-keyboard--open {
 
 #editor {
   box-sizing: border-box;
-  padding-bottom: var(--mobile-bottom-bar-offset);
   transition: transform 240ms cubic-bezier(.2, 0, 0, 1);
 }
 
@@ -1208,13 +1207,13 @@ body.mobile-keyboard--open {
 
 .status {
   position: fixed;
-  bottom: -30px;
-  height: var(--mobile-status-height);
+  bottom: calc(0px - var(--mobile-status-height) - var(--mobile-bottom-bar-safe-area));
+  height: calc(var(--mobile-status-height) + var(--mobile-bottom-bar-safe-area));
   line-height: 16px;
   transition: var(--b3-transition);
   font-size: 12px;
   color: var(--b3-theme-on-surface);
-  padding: 4px;
+  padding: 4px 4px calc(4px + var(--mobile-bottom-bar-safe-area));
   white-space: nowrap;
   width: 100%;
   box-sizing: border-box;

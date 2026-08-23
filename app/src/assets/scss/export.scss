@@ -69,6 +69,16 @@ svg {
     }
   }
 
+  .protyle-wysiwyg .code-block[data-type="NodeCodeBlock"]:not(.render-node):not(pre)[style*="max-height:"] {
+    display: block;
+    padding-top: 4px;
+
+    & > .hljs {
+      min-height: 22px !important;
+      padding-top: 2em;
+    }
+  }
+
   // 尽量避免块内分页
   .protyle-wysiwyg [data-node-id] {
     &[data-type=NodeAudio],

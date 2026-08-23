@@ -269,17 +269,26 @@ body.mobile-keyboard--open {
 }
 
 .mobile-safe-area {
+  position: relative;
+  z-index: 4;
   height: env(safe-area-inset-top);
   flex-shrink: 0;
   background-color: var(--b3-theme-background);
 }
 
 .mobile-topbar {
+  position: relative;
+  z-index: 3;
   box-sizing: border-box;
+  height: 48px;
   min-height: 48px;
   padding: 0 max(4px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
   flex-shrink: 0;
-  transition: margin-bottom 240ms cubic-bezier(.2, 0, 0, 1), opacity 240ms cubic-bezier(.2, 0, 0, 1), transform 240ms cubic-bezier(.2, 0, 0, 1), visibility 240ms;
+  transition: transform 240ms cubic-bezier(.2, 0, 0, 1), visibility 240ms;
+
+  > * {
+    transition: opacity 160ms cubic-bezier(.2, 0, 0, 1), transform 240ms cubic-bezier(.2, 0, 0, 1);
+  }
 }
 
 .mobile-bottom-bar {
@@ -359,10 +368,18 @@ body.mobile-keyboard--open {
 
 .mobile-chrome--hidden {
   .mobile-topbar {
-    margin-bottom: -48px;
-    opacity: 0;
     transform: translateY(-100%);
     visibility: hidden;
+
+    > * {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+  }
+
+  #editor {
+    margin-bottom: -48px;
+    transform: translateY(-48px);
   }
 
   .mobile-bottom-bar {
@@ -371,6 +388,10 @@ body.mobile-keyboard--open {
     transform: translateY(100%);
     visibility: hidden;
   }
+}
+
+.mobile-chrome--transitioning #editor {
+  margin-bottom: -48px;
 }
 
 .mobile-keyboard--open .mobile-bottom-bar {
@@ -421,10 +442,13 @@ body.mobile-keyboard--open {
 #editor {
   box-sizing: border-box;
   padding-bottom: var(--mobile-bottom-bar-offset);
+  transition: transform 240ms cubic-bezier(.2, 0, 0, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .mobile-topbar,
+  .mobile-topbar > *,
+  #editor,
   .mobile-bottom-bar {
     transition: none;
   }

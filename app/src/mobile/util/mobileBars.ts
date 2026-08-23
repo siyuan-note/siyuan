@@ -45,6 +45,7 @@ const isPanelOpen = () => PANEL_IDS.some((id) => {
 const clearBarsTransitionWatch = () => {
     clearTimeout(barsTransitionTimeout);
     cancelAnimationFrame(barsTransitionFrame);
+    document.body.classList.remove("mobile-chrome--transitioning");
     barsTransitionTimeout = 0;
     barsTransitionFrame = 0;
     if (barsTransitionEndHandler) {
@@ -67,6 +68,7 @@ const finishBarsTransition = () => {
 
 const startBarsTransition = () => {
     clearBarsTransitionWatch();
+    document.body.classList.add("mobile-chrome--transitioning");
     barsState = reduceMobileBarsState(barsState, {
         type: "set-bars-transitioning",
         active: true,
@@ -80,7 +82,7 @@ const startBarsTransition = () => {
         return;
     }
     barsTransitionEndHandler = (event: TransitionEvent) => {
-        if (event.target === topbarElement && event.propertyName === "margin-bottom") {
+        if (event.target === topbarElement && event.propertyName === "transform") {
             finishBarsTransition();
         }
     };

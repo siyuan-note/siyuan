@@ -61,7 +61,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
             <input class="b3-text-field fn__flex-1" data-field="name" style="margin-top:0">
         </label>
         <label class="b3-label b3-label--inner fn__flex" style="align-items:center">
-            <span style="min-width:96px">${window.siyuan.languages.color}</span>
+            <span style="min-width:96px">${window.siyuan.languages.type}</span>
             <select class="b3-select fn__flex-1" data-field="type" style="margin-top:0">
                 <option value="color">${window.siyuan.languages.colorFont}</option>
                 <option value="backgroundColor">${window.siyuan.languages.colorPrimary}</option>

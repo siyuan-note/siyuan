@@ -35,11 +35,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// GroupViewRenderSource 保存分组渲染可复用的表格行索引。
-// 索引中的行已经完成字段值生成和查询过滤，各分组仍会独立执行视图过滤、排序、统计和分页。
+// GroupViewRenderSource 保存分组渲染可复用的条目索引。
+// 索引中的条目已经完成字段值生成和查询过滤，各分组仍会独立执行视图过滤、排序、统计和分页。
 type GroupViewRenderSource struct {
-	query     string
-	tableRows map[string]*av.TableRow
+	query      string
+	layoutType av.LayoutType
+	items      map[string]av.Item
 }
 
 // AttributeViewRenderContext 收集一次属性视图渲染期间产生的模板错误。
@@ -126,20 +127,21 @@ func (context *AttributeViewRenderContext) PushTemplateErrors() {
 	}
 }
 
-// NewGroupViewRenderSource 在父视图分页前建立可供所有表格分组复用的行索引。
+// NewGroupViewRenderSource 在父视图分页前建立可供所有同布局分组复用的条目索引。
 func NewGroupViewRenderSource(viewable av.Viewable, query string) (ret *GroupViewRenderSource) {
-	table, ok := viewable.(*av.Table)
+	collection, ok := viewable.(av.Collection)
 	if !ok {
 		return
 	}
 
 	ret = &GroupViewRenderSource{
-		query:     query,
-		tableRows: make(map[string]*av.TableRow, len(table.Rows)),
+		query:      query,
+		layoutType: viewable.GetType(),
+		items:      make(map[string]av.Item, collection.CountItems()),
 	}
-	for _, row := range table.Rows {
-		if nil != row {
-			ret.tableRows[row.ID] = row
+	for _, item := range collection.GetItems() {
+		if nil != item {
+			ret.items[item.GetID()] = item
 		}
 	}
 	return
@@ -149,7 +151,7 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 	return RenderGroupViewWithSource(attrView, view, groupView, query, nil, false)
 }
 
-// RenderGroupViewWithSource 优先从父表行索引组装分组；其他布局和查询不匹配时沿用独立渲染。
+// RenderGroupViewWithSource 优先从父视图条目索引组装分组；布局或查询不匹配时沿用独立渲染。
 func RenderGroupViewWithSource(attrView *av.AttributeView, view, groupView *av.View, query string,
 	source *GroupViewRenderSource, ignoreRows bool) (ret av.Viewable) {
 	context := NewAttributeViewRenderContext()
@@ -214,17 +216,16 @@ func RenderGroupViewWithSourceContext(attrView *av.AttributeView, view, groupVie
 
 	groupView.Filters = view.Filters
 	groupView.Sorts = view.Sorts
-	reuseTableRows := nil != source && av.LayoutTypeTable == groupView.LayoutType && source.query == query
-	ret = RenderViewWithContext(attrView, groupView, query, ignoreRows || reuseTableRows, context)
+	reuseItems := nil != source && source.layoutType == groupView.LayoutType && source.query == query
+	ret = RenderViewWithContext(attrView, groupView, query, ignoreRows || reuseItems, context)
 	if ignoreRows {
 		return
 	}
-	if !reuseTableRows {
+	if !reuseItems {
 		return
 	}
 
-	table := ret.(*av.Table)
-	table.Rows = make([]*av.TableRow, 0, len(groupView.GroupItemIDs))
+	items := make([]av.Item, 0, len(groupView.GroupItemIDs))
 	lastPositions := make(map[string]int, len(groupView.GroupItemIDs))
 	for i, itemID := range groupView.GroupItemIDs {
 		lastPositions[itemID] = i
@@ -233,10 +234,11 @@ func RenderGroupViewWithSourceContext(attrView *av.AttributeView, view, groupVie
 		if lastPositions[itemID] != i {
 			continue
 		}
-		if row := source.tableRows[itemID]; nil != row {
-			table.Rows = append(table.Rows, row)
+		if item := source.items[itemID]; nil != item {
+			items = append(items, item)
 		}
 	}
+	ret.(av.Collection).SetItems(items)
 	return
 }
 
@@ -250,16 +252,32 @@ func RenderView(attrView *av.AttributeView, view *av.View, query string, ignoreR
 // RenderViewWithContext 使用指定的渲染上下文渲染属性视图。
 func RenderViewWithContext(attrView *av.AttributeView, view *av.View, query string, ignoreRows bool,
 	renderContext *AttributeViewRenderContext) (ret av.Viewable) {
+	ret = renderViewWithContext(attrView, view, query, ignoreRows, false, renderContext)
+	return
+}
+
+// RenderViewWithDeferredTemplatesContext 生成尚未计算模板字段的普通视图。
+func RenderViewWithDeferredTemplatesContext(attrView *av.AttributeView, view *av.View, query string, ignoreRows bool,
+	renderContext *AttributeViewRenderContext) (ret av.Viewable) {
+	ret = renderViewWithContext(attrView, view, query, ignoreRows, true, renderContext)
+	return
+}
+
+func renderViewWithContext(attrView *av.AttributeView, view *av.View, query string, ignoreRows,
+	deferTemplateValues bool, renderContext *AttributeViewRenderContext) (ret av.Viewable) {
 	if nil == renderContext {
 		renderContext = NewAttributeViewRenderContext()
+	}
+	if ignoreRows || "" != strings.TrimSpace(query) {
+		deferTemplateValues = false
 	}
 	depth := 1
 	renderedAttrViews := map[string]*av.AttributeView{}
 	renderedAttrViews[attrView.ID] = attrView
-	ret = renderView(attrView, view, query, &depth, renderedAttrViews, ignoreRows, renderContext)
+	ret = renderView(attrView, view, query, &depth, renderedAttrViews, ignoreRows, deferTemplateValues, renderContext)
 
-	// ignoreRows 下不写入缓存，否则同请求内 genAttrViewGroups 对同一 view.ID 二次渲染会拿到空表
-	if !ignoreRows {
+	// 元数据和延迟模板渲染不写入缓存，避免后续全集渲染读取到不完整条目。
+	if !ignoreRows && !deferTemplateValues {
 		attrView.RenderedViewables[ret.GetID()] = ret
 	}
 	renderedAttrViews[attrView.ID] = attrView
@@ -267,7 +285,7 @@ func RenderViewWithContext(attrView *av.AttributeView, view *av.View, query stri
 }
 
 func renderView(attrView *av.AttributeView, view *av.View, query string, depth *int,
-	cachedAttrViews map[string]*av.AttributeView, ignoreRows bool,
+	cachedAttrViews map[string]*av.AttributeView, ignoreRows, deferTemplateValues bool,
 	renderContext *AttributeViewRenderContext) (ret av.Viewable) {
 	if 7 < *depth {
 		return
@@ -276,11 +294,14 @@ func renderView(attrView *av.AttributeView, view *av.View, query string, depth *
 	*depth++
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
-		ret = renderAttributeViewTable(attrView, view, query, depth, cachedAttrViews, ignoreRows, renderContext)
+		ret = renderAttributeViewTable(attrView, view, query, depth, cachedAttrViews, ignoreRows, deferTemplateValues,
+			renderContext)
 	case av.LayoutTypeGallery:
-		ret = renderAttributeViewGallery(attrView, view, query, depth, cachedAttrViews, ignoreRows, renderContext)
+		ret = renderAttributeViewGallery(attrView, view, query, depth, cachedAttrViews, ignoreRows, deferTemplateValues,
+			renderContext)
 	case av.LayoutTypeKanban:
-		ret = renderAttributeViewKanban(attrView, view, query, depth, cachedAttrViews, ignoreRows, renderContext)
+		ret = renderAttributeViewKanban(attrView, view, query, depth, cachedAttrViews, ignoreRows, deferTemplateValues,
+			renderContext)
 	}
 	return
 }
@@ -727,7 +748,7 @@ func fillAttributeViewAutoGeneratedValues(attrView *av.AttributeView, collection
 		isSameAv := destAv.ID == attrView.ID
 		var furtherCollection av.Collection
 		if av.KeyTypeTemplate == destKey.Type || (!isSameAv && (av.KeyTypeUpdated == destKey.Type || av.KeyTypeCreated == destKey.Type || av.KeyTypeRelation == destKey.Type)) {
-			viewable := renderView(destAv, destAv.Views[0], "", depth, cachedAttrViews, false, renderContext)
+			viewable := renderView(destAv, destAv.Views[0], "", depth, cachedAttrViews, false, false, renderContext)
 			if nil != viewable {
 				furtherCollection = viewable.(av.Collection)
 			} else {
@@ -848,7 +869,7 @@ func filterAttributeViewItemIDs(attrView *av.AttributeView, filters []*av.ViewFi
 		added[keyValues.Key.ID] = true
 	}
 
-	viewable := renderView(attrView, view, "", depth, cachedAttrViews, false, renderContext)
+	viewable := renderView(attrView, view, "", depth, cachedAttrViews, false, false, renderContext)
 	if nil == viewable {
 		return
 	}
@@ -890,7 +911,7 @@ func getFurtherCollections(attrView *av.AttributeView, cachedAttrViews map[strin
 
 		var furtherCollection av.Collection
 		if av.KeyTypeTemplate == destKey.Type || (!isSameAv && (av.KeyTypeUpdated == destKey.Type || av.KeyTypeCreated == destKey.Type || av.KeyTypeRelation == destKey.Type)) {
-			viewable := renderView(destAv, destAv.Views[0], "", depth, cachedAttrViews, false, renderContext)
+			viewable := renderView(destAv, destAv.Views[0], "", depth, cachedAttrViews, false, false, renderContext)
 			if nil != viewable {
 				furtherCollection = viewable.(av.Collection)
 			}
@@ -918,6 +939,20 @@ func GetFurtherCollectionsWithContext(attrView *av.AttributeView, cachedAttrView
 	renderContext *AttributeViewRenderContext) map[string]*av.RollupRenderContext {
 	depth := 1
 	return getFurtherCollections(attrView, cachedAttrViews, &depth, renderContext)
+}
+
+// FillAttributeViewTemplateValuesWithContext 计算集合中当前条目的模板字段值。
+func FillAttributeViewTemplateValuesWithContext(attrView *av.AttributeView, view *av.View, collection av.Collection,
+	renderContext *AttributeViewRenderContext) {
+	var ialIDs []string
+	for _, item := range collection.GetItems() {
+		blockValue := item.GetBlockValue()
+		if nil == blockValue || nil == blockValue.Block || blockValue.IsDetached {
+			continue
+		}
+		ialIDs = append(ialIDs, blockValue.Block.ID)
+	}
+	fillAttributeViewTemplateValues(attrView, view, collection, BatchGetBlockAttrs(ialIDs), renderContext)
 }
 
 func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, collection av.Collection,

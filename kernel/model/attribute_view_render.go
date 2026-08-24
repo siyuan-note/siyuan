@@ -536,10 +536,15 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	// 渲染视图
 	renderContext := sql.NewAttributeViewRenderContext()
 	defer renderContext.PushTemplateErrors()
-	viewable = sql.RenderViewWithContext(attrView, view, query, ignoreRows, renderContext)
+	deferTemplateValues := shouldDeferAttributeViewTemplateValues(attrView, view, query, ignoreRows)
+	if deferTemplateValues {
+		viewable = sql.RenderViewWithDeferredTemplatesContext(attrView, view, query, ignoreRows, renderContext)
+	} else {
+		viewable = sql.RenderViewWithContext(attrView, view, query, ignoreRows, renderContext)
+	}
 	var groupRenderSource *sql.GroupViewRenderSource
 	if !ignoreRows && view.IsGroupView() {
-		// 在父视图分页前保存完整行索引，分组表格复用已经生成的字段值。
+		// 在父视图分页前保存完整条目索引，各分组复用已经生成的字段值。
 		groupRenderSource = sql.NewGroupViewRenderSource(viewable, query)
 	}
 	renderTargetItemID := targetItemID(target)
@@ -551,6 +556,9 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 		renderTargetItemID, renderContext)
 	if nil != err {
 		return
+	}
+	if deferTemplateValues {
+		sql.FillAttributeViewTemplateValuesWithContext(attrView, view, viewable.(av.Collection), renderContext)
 	}
 	if nil != target && targetIndex >= 0 && !view.IsGroupView() && view.LayoutType != av.LayoutTypeKanban {
 		setAttributeViewRenderTarget(target, "", targetIndex, targetOffset, view.PageSize)
@@ -908,6 +916,62 @@ func isGroupByTemplate(attrView *av.AttributeView, view *av.View) bool {
 		return false
 	}
 	return av.KeyTypeTemplate == groupKey.Type
+}
+
+func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, query string,
+	ignoreRows bool) bool {
+	if nil == attrView || nil == view || ignoreRows || "" != strings.TrimSpace(query) || view.IsGroupView() ||
+		av.LayoutTypeKanban == view.LayoutType {
+		return false
+	}
+
+	templateKeyIDs := map[string]bool{}
+	for _, keyValues := range attrView.KeyValues {
+		if nil != keyValues && nil != keyValues.Key && av.KeyTypeTemplate == keyValues.Key.Type {
+			templateKeyIDs[keyValues.Key.ID] = true
+		}
+	}
+	if 0 == len(templateKeyIDs) {
+		return false
+	}
+
+	for keyID := range templateKeyIDs {
+		if attrViewFiltersContainColumn(view.Filters, keyID) {
+			return false
+		}
+	}
+	for _, viewSort := range view.Sorts {
+		if nil != viewSort && templateKeyIDs[viewSort.Column] {
+			return false
+		}
+	}
+	if nil != view.GroupCalc && templateKeyIDs[view.GroupCalc.Field] {
+		return false
+	}
+
+	hasTemplateField := false
+	checkField := func(fieldID string, calc *av.FieldCalc) bool {
+		if !templateKeyIDs[fieldID] {
+			return false
+		}
+		hasTemplateField = true
+		return nil != calc && av.CalcOperatorNone != calc.Operator
+	}
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		for _, column := range view.Table.Columns {
+			if nil != column && nil != column.BaseField && checkField(column.ID, column.Calc) {
+				return false
+			}
+		}
+	case av.LayoutTypeGallery:
+		for _, field := range view.Gallery.CardFields {
+			if nil != field && nil != field.BaseField && checkField(field.ID, field.Calc) {
+				return false
+			}
+		}
+	}
+	return hasTemplateField
 }
 
 func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int,

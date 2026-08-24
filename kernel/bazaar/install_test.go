@@ -198,14 +198,14 @@ func TestInstallPackageFreshInstall(t *testing.T) {
 	}
 }
 
-// TestInstallPackageFreshInstallReplacesEmptyDirectory 校验新安装可以替换已存在的空目标目录
-func TestInstallPackageFreshInstallReplacesEmptyDirectory(t *testing.T) {
+// TestInstallPackageFreshInstallReplacesEmptyDirectoryTree 校验新安装可以替换仅包含空目录的目标目录
+func TestInstallPackageFreshInstallReplacesEmptyDirectoryTree(t *testing.T) {
 	oldTempDir := util.TempDir
 	util.TempDir = t.TempDir()
 	t.Cleanup(func() { util.TempDir = oldTempDir })
 
 	installPath := filepath.Join(t.TempDir(), "plugins", "sample")
-	if err := os.MkdirAll(installPath, 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(installPath, "i18n"), 0755); err != nil {
 		t.Fatal(err)
 	}
 	data := buildInstallPackageArchive(t, map[string]string{
@@ -213,7 +213,7 @@ func TestInstallPackageFreshInstallReplacesEmptyDirectory(t *testing.T) {
 		"index.js":    "new",
 	})
 	if err := installPackage(data, installPath, "plugins", "sample", false); err != nil {
-		t.Fatalf("expected fresh install into empty directory to succeed: %s", err)
+		t.Fatalf("expected fresh install into empty directory tree to succeed: %s", err)
 	}
 	if _, err := os.Stat(filepath.Join(installPath, "index.js")); err != nil {
 		t.Fatalf("installed file is missing: %s", err)

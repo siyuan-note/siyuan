@@ -113,6 +113,32 @@ func TestInstalledPackageSizeCacheAndInvalidation(t *testing.T) {
 	}
 }
 
+func TestPackageDirContainsFile(t *testing.T) {
+	root := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, "i18n", "nested"), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	containsFile, err := PackageDirContainsFile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if containsFile {
+		t.Fatal("expected an empty directory tree not to contain files")
+	}
+
+	if err = os.WriteFile(filepath.Join(root, "i18n", "nested", "en_US.json"), nil, 0644); err != nil {
+		t.Fatal(err)
+	}
+	containsFile, err = PackageDirContainsFile(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !containsFile {
+		t.Fatal("expected an empty file to count as an actual file")
+	}
+}
+
 func TestIsValidInstalledPackageRequiresExactName(t *testing.T) {
 	if !IsValidInstalledPackage(&Package{Name: "plugin-sample"}, "plugin-sample") {
 		t.Fatal("expected an exact package name match to be valid")

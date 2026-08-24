@@ -131,11 +131,11 @@ func installPackage(data []byte, installPath, pkgType, packageName string, updat
 	// 非更新安装时目标目录已存在且非空则拒绝覆盖，防止把其他包的内容写入已有包目录
 	// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-rpx2-p6hp-x5gj
 	if !update {
-		entries, statErr := os.ReadDir(installPath)
+		containsFile, statErr := PackageDirContainsFile(installPath)
 		if statErr != nil && !os.IsNotExist(statErr) {
 			return statErr
 		}
-		if 0 < len(entries) {
+		if containsFile {
 			return errors.New("marketplace package install path already exists")
 		}
 	}
@@ -212,12 +212,12 @@ func replacePackageDirectory(sourcePath, installPath string, update bool) (err e
 		return
 	}
 
-	entries, statErr := os.ReadDir(installPath)
+	containsFile, statErr := PackageDirContainsFile(installPath)
 	targetExists := statErr == nil
 	if statErr != nil && !os.IsNotExist(statErr) {
 		return statErr
 	}
-	if targetExists && !update && 0 < len(entries) {
+	if targetExists && !update && containsFile {
 		return errors.New("marketplace package install path already exists")
 	}
 	if update && !targetExists {

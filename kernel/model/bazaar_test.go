@@ -17,6 +17,7 @@
 package model
 
 import (
+	"archive/zip"
 	"os"
 	"path/filepath"
 	"strings"
@@ -228,6 +229,56 @@ func TestGetPackageUninstallPathUsesInvalidPackageDirectory(t *testing.T) {
 	}
 	if installPath != filepath.Join(pluginsPath, "actual") {
 		t.Fatalf("expected invalid package directory, got %q", installPath)
+	}
+}
+
+func TestInstallLocalBazaarPackageReplacesEmptyDirectoryTree(t *testing.T) {
+	oldDataDir, oldTempDir := util.DataDir, util.TempDir
+	root := t.TempDir()
+	util.DataDir = filepath.Join(root, "data")
+	util.TempDir = filepath.Join(root, "temp")
+	t.Cleanup(func() {
+		util.DataDir, util.TempDir = oldDataDir, oldTempDir
+	})
+
+	installPath := filepath.Join(util.DataDir, "plugins", "sample")
+	if err := os.MkdirAll(filepath.Join(installPath, "i18n"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	archivePath := filepath.Join(root, "sample.zip")
+	archiveFile, err := os.Create(archivePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writer := zip.NewWriter(archiveFile)
+	for name, content := range map[string]string{
+		"plugin.json": `{"name":"sample","version":"1.0.0"}`,
+		"index.js":    "export default {};",
+	} {
+		entry, createErr := writer.Create(name)
+		if createErr != nil {
+			t.Fatal(createErr)
+		}
+		if _, writeErr := entry.Write([]byte(content)); writeErr != nil {
+			t.Fatal(writeErr)
+		}
+	}
+	if err = writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err = archiveFile.Close(); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := InstallLocalBazaarPackage(archivePath, "", false)
+	if err != nil {
+		t.Fatalf("expected local install into empty directory tree to succeed: %s", err)
+	}
+	if result.Updated {
+		t.Fatal("expected empty directory tree to be treated as a new installation")
+	}
+	if _, err = os.Stat(filepath.Join(installPath, "plugin.json")); err != nil {
+		t.Fatalf("installed package manifest is missing: %s", err)
 	}
 }
 

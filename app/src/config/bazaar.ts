@@ -2571,10 +2571,13 @@ type="checkbox">
                             ...themeAppearanceMode,
                             frontend: getFrontend()
                         }, response => {
+                            bazaar._onBazaar(response, pkgType, request);
                             if (response.code !== 0) {
+                                if (bazaar._isBazaarRequestCurrent(pkgType, request)) {
+                                    bazaar._refreshReadmeDetail(pkgType, installItem.name);
+                                }
                                 return;
                             }
-                            bazaar._onBazaar(response, pkgType, request);
                             if (bazaar._isMountCurrent(mount)) {
                                 bazaar._genMyHTML(pkgType, app, false);
                                 bazaar._refreshReadmeDetail(pkgType, installItem.name);

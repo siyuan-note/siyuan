@@ -1,7 +1,6 @@
 import {getInstanceById} from "../layout/util";
 import {Tab} from "../layout/Tab";
 import {lockScreen} from "../dialog/processSystem";
-import type {App} from "../index";
 import {clearTabDragPreview} from "../layout/tabDrag";
 
 const closeTab = (ipcData: IWebSocketData) => {
@@ -10,7 +9,7 @@ const closeTab = (ipcData: IWebSocketData) => {
         tab.parent.removeTab(ipcData.data);
     }
 };
-export const onWindowsMsg = (ipcData: IWebSocketData, app: App) => {
+export const onWindowsMsg = (ipcData: IWebSocketData) => {
     switch (ipcData.cmd) {
         case "closetab":
             closeTab(ipcData);
@@ -37,7 +36,7 @@ export const onWindowsMsg = (ipcData: IWebSocketData, app: App) => {
             break;
         case "lockscreenByMode":
             if (window.siyuan.config.system.lockScreenMode === 1) {
-                lockScreen(app);
+                lockScreen();
             }
             break;
     }

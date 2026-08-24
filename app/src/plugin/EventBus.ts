@@ -4,18 +4,17 @@ export {emitToPlugins, EventBus, hasPluginSubscriber} from "./EventBusCore";
 export type {IEventBusSafeEmitResult} from "./EventBusCore";
 
 export const emitOpenMenu = (options: {
-    plugins: import("./index").Plugin[],
     type: TEventBus,
     detail: any,
     separatorPosition?: "top" | "bottom",
     appendToMenu?: boolean,
 }) => {
-    if (!hasPluginSubscriber(options.plugins, options.type)) {
+    if (!hasPluginSubscriber(options.type)) {
         return [];
     }
     const pluginSubMenu = new subMenu();
     options.detail.menu = pluginSubMenu;
-    emitToPlugins(options.plugins, options.type, options.detail);
+    emitToPlugins(options.type, options.detail);
     if (pluginSubMenu.menus.length > 0 && options.appendToMenu !== false) {
         if (options.separatorPosition === "top") {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_pluginTop", type: "separator"}).element);

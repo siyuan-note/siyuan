@@ -37,6 +37,7 @@ import {
     TInlineStyleType,
 } from "../../protyle/toolbar/inlineStyle";
 import {openInlineStyleDialog} from "../../protyle/toolbar/inlineStyleDialog";
+import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {
     getKeyboardHideResult,
     getMovingSelectionEndpoint,
@@ -855,10 +856,8 @@ export const showKeyboardToolbar = () => {
         if (editor.protyle.wysiwyg.element.contains(range.startContainer)) {
             editor.protyle.element.parentElement.style.paddingBottom = "48px";
         }
-        editor.protyle.app.plugins.forEach(item => {
-            if (item.eventBus.has("mobile-keyboard-show")) {
-                item.eventBus.emit("mobile-keyboard-show");
-            }
+        forEachPluginSubscriber("mobile-keyboard-show", eventBus => {
+            eventBus.emit("mobile-keyboard-show");
         });
     }
     clearTimeout(scrollSelectionIntoViewTimeout);
@@ -937,10 +936,8 @@ export const hideKeyboardToolbar = () => {
     if (editor) {
         editor.protyle.element.parentElement.style.paddingBottom = "";
         if (!toolbarHidden) {
-            editor.protyle.app.plugins.forEach(item => {
-                if (item.eventBus.has("mobile-keyboard-hide")) {
-                    item.eventBus.emit("mobile-keyboard-hide");
-                }
+            forEachPluginSubscriber("mobile-keyboard-hide", eventBus => {
+                eventBus.emit("mobile-keyboard-hide");
             });
         }
     }

@@ -17,6 +17,7 @@ import type {App} from "../index";
 import {clearOBG} from "../layout/dock/util";
 import {getDisplayName} from "../util/pathName";
 import {PdfLoadState} from "./pdfLoadState";
+import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 
 export class Asset extends Model {
     public path: string;
@@ -37,10 +38,8 @@ export class Asset extends Model {
         this.element.addEventListener("click", (event) => {
             clearOBG();
             setPanelFocus(this.element.parentElement.parentElement);
-            this.app.plugins.forEach(item => {
-                if (item.eventBus.has("click-pdf")) {
-                    item.eventBus.emit("click-pdf", {event});
-                }
+            forEachPluginSubscriber("click-pdf", eventBus => {
+                eventBus.emit("click-pdf", {event});
             });
         });
         if (typeof this.pdfId === "string") {

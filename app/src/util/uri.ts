@@ -14,6 +14,7 @@ import {isBazaarAvailable} from "./bazaarAvailability";
 
 import type {App} from "../index";
 import {openDatabaseItem} from "../protyle/render/av/openDatabaseItem";
+import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 
 const bazaarTypes = new Set<TBazaarType>(["plugins", "themes", "icons", "templates", "widgets"]);
 
@@ -51,15 +52,13 @@ const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
                 ipcRenderer.send(Constants.SIYUAN_CMD, "show");
                 /// #endif
             }
-            app.plugins.forEach(plugin => {
-                if (plugin.eventBus.has("open-siyuan-url-block")) {
-                    plugin.eventBus.emit("open-siyuan-url-block", {
-                        url: uriObj.href,
-                        id,
-                        focus,
-                        exist: existResponse.data,
-                    });
-                }
+            forEachPluginSubscriber("open-siyuan-url-block", eventBus => {
+                eventBus.emit("open-siyuan-url-block", {
+                    url: uriObj.href,
+                    id,
+                    focus,
+                    exist: existResponse.data,
+                });
             });
         });
         return true;

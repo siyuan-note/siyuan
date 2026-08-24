@@ -75,7 +75,7 @@ export class App {
             id: genUUID(),
             type: "main",
             msgCallback: (data) => {
-                emitToPlugins(this.plugins, "ws-main", data);
+                emitToPlugins("ws-main", data);
                 if (data) {
                     switch (data.cmd) {
                         case "logoutAuth":
@@ -225,7 +225,7 @@ export class App {
                             transactionError(data.msg);
                             break;
                         case "syncing":
-                            processSync(data, this.plugins);
+                            processSync(data);
                             break;
                         case "backgroundtask":
                             progressBackgroundTask(data.data.tasks);

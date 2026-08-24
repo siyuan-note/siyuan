@@ -1513,7 +1513,6 @@ export class Gutter {
 
         if (protyle?.app?.plugins) {
             emitOpenMenu({
-                plugins: protyle.app.plugins,
                 type: "click-blockicon",
                 detail: {
                     protyle,
@@ -2861,7 +2860,6 @@ export class Gutter {
 
         if (!isEmbedMenu && protyle?.app?.plugins) {
             emitOpenMenu({
-                plugins: protyle.app.plugins,
                 type: "click-blockicon",
                 detail: {
                     protyle,

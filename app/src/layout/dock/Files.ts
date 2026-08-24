@@ -1100,7 +1100,7 @@ export class Files extends Model {
                     break;
                 case "mount":
                     this.onMount(data);
-                    emitToPlugins(this.app.plugins, "opened-notebook", data);
+                    emitToPlugins("opened-notebook", data);
                     break;
                 case "createnotebook":
                     setNoteBook((notebooks) => {
@@ -1123,7 +1123,7 @@ export class Files extends Model {
                 case "closeBox":
                 case "removeBox":
                     this.onRemove(data);
-                    emitToPlugins(this.app.plugins, "closed-notebook", data);
+                    emitToPlugins("closed-notebook", data);
                     break;
                 case "removeDoc":
                     this.onRemove(data);

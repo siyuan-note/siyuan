@@ -76,7 +76,7 @@ class App {
             id: genUUID(),
             type: "main",
             msgCallback: (data) => {
-                emitToPlugins(this.plugins, "ws-main", data);
+                emitToPlugins("ws-main", data);
                 onMessage(this, data);
             }
         });
@@ -281,7 +281,7 @@ window.reconnectWebSocket = () => {
 };
 window.lockscreenByMode = () => {
     if (window.siyuan.config?.system.lockScreenMode === 1) {
-        lockScreen(siyuanApp);
+        lockScreen();
     }
 };
 window.goBack = goBack;

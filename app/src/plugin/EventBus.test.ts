@@ -14,6 +14,7 @@ describe("plugin EventBus", () => {
         eventBus.once("before-upload-assets", () => {
             onceCount++;
         });
+        assert.equal(hasPluginSubscriber("before-upload-assets"), true);
 
         eventBus.emit("before-upload-assets", {value: 1});
         eventBus.emit("before-upload-assets", {value: 1});
@@ -22,6 +23,7 @@ describe("plugin EventBus", () => {
 
         assert.equal(persistentCount, 2);
         assert.equal(onceCount, 1);
+        assert.equal(hasPluginSubscriber("before-upload-assets"), false);
     });
 
     it("tracks listeners and preserves duplicate registration behavior", () => {
@@ -82,6 +84,7 @@ describe("plugin EventBus", () => {
         });
 
         assert.equal(eventBus.emit("before-upload-assets", {value: 1}), false);
+        eventBus.destroy();
     });
 
     it("destroys listeners permanently", () => {
@@ -110,14 +113,47 @@ describe("plugin EventBus", () => {
         const second = new EventBus("", new EventTarget());
         const third = new EventBus("", new EventTarget());
         const calls: number[] = [];
-        first.on("before-upload-assets", () => calls.push(1));
+        const firstListener = () => calls.push(1);
         third.on("before-upload-assets", () => calls.push(3));
-        const plugins = [{eventBus: first}, {eventBus: second}, {eventBus: third}];
+        first.on("before-upload-assets", firstListener);
 
-        assert.equal(hasPluginSubscriber(plugins, "before-upload-assets"), true);
-        emitToPlugins(plugins, "before-upload-assets");
+        assert.equal(hasPluginSubscriber("before-upload-assets"), true);
+        emitToPlugins("before-upload-assets");
+        assert.deepEqual(calls, [1, 3]);
+
+        calls.length = 0;
+        first.off("before-upload-assets", firstListener);
+        first.on("before-upload-assets", firstListener);
+        emitToPlugins("before-upload-assets");
 
         assert.deepEqual(calls, [1, 3]);
+        first.destroy();
+        second.destroy();
+        third.destroy();
+        assert.equal(hasPluginSubscriber("before-upload-assets"), false);
+    });
+
+    it("uses a subscriber snapshot during broadcast", () => {
+        const first = new EventBus("", new EventTarget());
+        const second = new EventBus("", new EventTarget());
+        const third = new EventBus("", new EventTarget());
+        const calls: number[] = [];
+        const thirdListener = () => calls.push(3);
+        first.on("before-upload-assets", () => {
+            calls.push(1);
+            third.on("before-upload-assets", thirdListener);
+        });
+        second.on("before-upload-assets", () => calls.push(2));
+
+        emitToPlugins("before-upload-assets");
+        assert.deepEqual(calls, [1, 2]);
+
+        emitToPlugins("before-upload-assets");
+        assert.deepEqual(calls, [1, 2, 1, 2, 3]);
+
+        first.destroy();
+        second.destroy();
+        third.destroy();
     });
 
     it("captures synchronous listener errors during safe dispatch", () => {
@@ -134,6 +170,7 @@ describe("plugin EventBus", () => {
 
         assert.equal((result.error as Error).message, "listener failed");
         assert.equal(laterListenerCalled, false);
+        eventBus.destroy();
     });
 
     it("reports prevention and asynchronous listeners during safe dispatch", async () => {
@@ -148,5 +185,6 @@ describe("plugin EventBus", () => {
 
         assert.equal(result.defaultPrevented, true);
         assert.equal(result.hasAsyncListener, true);
+        eventBus.destroy();
     });
 });

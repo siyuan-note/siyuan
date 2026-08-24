@@ -10,11 +10,15 @@ export interface IEventBusSafeEmitResult {
     hasAsyncListener: boolean;
 }
 
+const subscribers = new Map<TEventBus, EventBus[]>();
+let eventBusOrder = 0;
+
 export class EventBus<DetailType = any> {
     private eventTarget: EventTarget;
     private listeners = new Map<TEventBus, Map<(event: CustomEvent<DetailType>) => any, IEventBusListener<DetailType>>>();
     private safeDispatches = new WeakMap<Event, IEventBusSafeEmitResult>();
     private destroyed = false;
+    private readonly order = eventBusOrder++;
 
     constructor(name = "", eventTarget?: EventTarget) {
         void name;
@@ -55,6 +59,37 @@ export class EventBus<DetailType = any> {
         };
         typeListeners.set(listener, {listener, wrapped, once});
         this.eventTarget.addEventListener(type, wrapped);
+        if (typeListeners.size === 1) {
+            this.addSubscriber(type);
+        }
+    }
+
+    private addSubscriber(type: TEventBus) {
+        let typeSubscribers = subscribers.get(type);
+        if (!typeSubscribers) {
+            typeSubscribers = [];
+            subscribers.set(type, typeSubscribers);
+        }
+        const index = typeSubscribers.findIndex(eventBus => eventBus.order > this.order);
+        if (index === -1) {
+            typeSubscribers.push(this);
+        } else {
+            typeSubscribers.splice(index, 0, this);
+        }
+    }
+
+    private removeSubscriber(type: TEventBus) {
+        const typeSubscribers = subscribers.get(type);
+        if (!typeSubscribers) {
+            return;
+        }
+        const index = typeSubscribers.indexOf(this);
+        if (index > -1) {
+            typeSubscribers.splice(index, 1);
+        }
+        if (typeSubscribers.length === 0) {
+            subscribers.delete(type);
+        }
     }
 
     on(type: TEventBus, listener: (event: CustomEvent<DetailType>) => any) {
@@ -75,6 +110,7 @@ export class EventBus<DetailType = any> {
         typeListeners.delete(listener);
         if (typeListeners.size === 0) {
             this.listeners.delete(type);
+            this.removeSubscriber(type);
         }
     }
 
@@ -114,24 +150,27 @@ export class EventBus<DetailType = any> {
             typeListeners.forEach(({wrapped}) => {
                 this.eventTarget.removeEventListener(type, wrapped);
             });
+            this.removeSubscriber(type);
         });
         this.listeners.clear();
         this.safeDispatches = new WeakMap();
     }
 }
 
-type TEventBusOwner = {
-    eventBus: EventBus;
+export const forEachPluginSubscriber = (type: TEventBus, callback: (eventBus: EventBus) => void) => {
+    const typeSubscribers = subscribers.get(type);
+    if (!typeSubscribers) {
+        return;
+    }
+    Array.from(typeSubscribers).forEach(callback);
 };
 
-export const emitToPlugins = (plugins: TEventBusOwner[], type: TEventBus, detail?: any) => {
-    Array.from(plugins).forEach((plugin) => {
-        if (plugin.eventBus.has(type)) {
-            plugin.eventBus.emit(type, detail);
-        }
+export const emitToPlugins = (type: TEventBus, detail?: any) => {
+    forEachPluginSubscriber(type, eventBus => {
+        eventBus.emit(type, detail);
     });
 };
 
-export const hasPluginSubscriber = (plugins: TEventBusOwner[], type: TEventBus) => {
-    return plugins.some((plugin) => plugin.eventBus.has(type));
+export const hasPluginSubscriber = (type: TEventBus) => {
+    return !!subscribers.get(type)?.length;
 };

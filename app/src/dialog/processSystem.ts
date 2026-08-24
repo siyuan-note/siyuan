@@ -16,10 +16,8 @@ import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
-import type {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
-import {Plugin} from "../plugin";
 import {emitToPlugins} from "../plugin/EventBusCore";
 
 export const processBacklinkIndexCommit = (data: {
@@ -122,11 +120,11 @@ export const setDefRefCount = (data: {
     }
 };
 
-export const lockScreen = async (app: App) => {
+export const lockScreen = async () => {
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
-    emitToPlugins(app.plugins, "lock-screen");
+    emitToPlugins("lock-screen");
     /// #if !MOBILE
     exportLayout({
         errorExit: false,
@@ -453,7 +451,7 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     }
 };
 
-export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
+export const processSync = (data?: IWebSocketData) => {
     if (data?.code === 1) {
         window.dispatchEvent(new CustomEvent("siyuan-sync-success"));
     }
@@ -513,10 +511,10 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
     }
     /// #endif
     if (data.code === 0) {
-        emitToPlugins(plugins, "sync-start", data);
+        emitToPlugins("sync-start", data);
     } else if (data.code === 1) {
-        emitToPlugins(plugins, "sync-end", data);
+        emitToPlugins("sync-end", data);
     } else if (data.code === 2) {
-        emitToPlugins(plugins, "sync-fail", data);
+        emitToPlugins("sync-fail", data);
     }
 };

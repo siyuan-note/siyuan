@@ -1,6 +1,4 @@
 {
-	"deactivateUserChinaWarning": " (Na deactivering kunnen het huidige mobiele nummer en gekoppelde accounts van derden niet opnieuw worden gebruikt voor registratie of koppeling; ga voorzichtig te werk)",
-	"deactivateUserNorthAmericaWarning": " (Na deactivering kan het huidige e-mailadres niet opnieuw worden gebruikt voor registratie; ga voorzichtig te werk)",
 	"exportFile": "Bestand exporteren",
 	"namingEmpty": "De naam mag niet leeg zijn",
 	"recentCreated": "Recent gemaakt",
@@ -1497,7 +1495,7 @@
 	"rtlTip": "Inhoud RTL weergeven",
 	"height": "Hoogte",
 	"deactivateUser": "Account deactiveren",
-	"deactivateUserTip": "<ul class='fn__list'><li>Zodra het account is gedeactiveerd, kan het niet worden hersteld. Probeer dit niet zomaar.</li><li>Gebruikersnaam wordt ingevuld met <code>someone101</code> (cijfer is gebruikersnummer), wachtwoord wordt gereset met willekeurig getal.</li><li>Bijnaam, labels, URL, profiel, avatar, sitelink, postadres en andere gegevens worden gewist.</li><li>Alle privacy-instellingen worden teruggezet naar openbaar.</li><li>Gekoppelde sociale accounts van derden en mobiele nummers worden ontkoppeld.</li><li><strong>Gebruikersnaam, mobiel nummer en gekoppelde accounts van derden kunnen daarna niet opnieuw worden gebruikt.</strong></li><li>Gebruikersstatus wordt gedeactiveerd, inloggen is verboden.</li></ul>",
+	"deactivateUserTip": "<ul class='fn__list'><li>Zodra het account is gedeactiveerd, kan het niet worden hersteld. Probeer dit niet zomaar.</li><li>Gebruikersnaam wordt ingevuld met <code>someone101</code> (cijfer is gebruikersnummer), wachtwoord wordt gereset met willekeurig getal.</li><li>Bijnaam, labels, URL, profiel, avatar, sitelink, postadres en andere gegevens worden gewist.</li><li>Alle privacy-instellingen worden teruggezet naar openbaar.</li><li>Gekoppelde sociale accounts van derden en mobiele nummers worden ontkoppeld.</li><li><strong>Gebruikersnaam, e-mailadres, mobiel nummer en gekoppelde accounts van derden kunnen daarna niet opnieuw worden gebruikt.</strong></li><li>Gebruikersstatus wordt gedeactiveerd, inloggen is verboden.</li></ul>",
 	"mergeCell": "Cel samenvoegen",
 	"cancelMerged": "Samenvoeging annuleren",
 	"useDefaultWidth": "Standaard kolombreedte",

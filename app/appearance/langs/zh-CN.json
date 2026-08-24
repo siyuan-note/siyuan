@@ -1,6 +1,4 @@
 {
-	"deactivateUserChinaWarning": "（注销后，当前手机号及已绑定的第三方账号将无法再次用于注册或绑定，请谨慎操作）",
-	"deactivateUserNorthAmericaWarning": "（注销后，当前邮箱将无法再次用于注册，请谨慎操作）",
 	"exportFile": "导出文件",
 	"namingEmpty": "命名不能为空",
 	"recentCreated": "最近创建",
@@ -1497,7 +1495,7 @@
 	"rtlTip": "将内容以从右到左的方式进行渲染",
 	"height": "高度",
 	"deactivateUser": "注销账号",
-	"deactivateUserTip": "<ul class='fn__list'><li>账号一旦停用就无法恢复，请不要随意尝试</li><li>用户名会被 <code>someone101</code> 填充（后面的数字是用户编号），密码会被随机数重置</li><li>清空用户昵称、自我标签、URL、简介、头像、站点连接、邮寄地址等信息</li><li>所有隐私设置开关将恢复默认的公开状态</li><li>解绑关联的第三方社交账号、手机</li><li><strong>用户名、手机号、绑定的第三方账号以后将不能再次被使用</strong></li><li>用户状态被置为停用，禁止登录</li></ul>",
+	"deactivateUserTip": "<ul class='fn__list'><li>账号一旦停用就无法恢复，请不要随意尝试</li><li>用户名会被 <code>someone101</code> 填充（后面的数字是用户编号），密码会被随机数重置</li><li>清空用户昵称、自我标签、URL、简介、头像、站点连接、邮寄地址等信息</li><li>所有隐私设置开关将恢复默认的公开状态</li><li>解绑关联的第三方社交账号、手机</li><li><strong>用户名、邮箱、手机号、绑定的第三方账号以后将不能再次被使用</strong></li><li>用户状态被置为停用，禁止登录</li></ul>",
 	"mergeCell": "合并单元格",
 	"cancelMerged": "拆分单元格",
 	"useDefaultWidth": "使用默认列宽",

@@ -69,8 +69,6 @@ export const registerAccountGroup = (tab: SettingTabBuilder) => {
             window.siyuan.languages.activationCode,
             window.siyuan.languages.activationCodePlaceholder,
             window.siyuan.languages.deactivateUser,
-            window.siyuan.languages.deactivateUserChinaWarning,
-            window.siyuan.languages.deactivateUserNorthAmericaWarning,
         ],
         html: genAccountPaymentHTML,
         afterMount: bindAccountPaymentEvent,
@@ -238,18 +236,26 @@ const bindAccountMainEvent = (accountSettingsRoot: Element) => {
     });
 };
 
+const showDeactivateConfirm = (callback: () => void) => {
+    confirmDialog("⚠️ " + window.siyuan.languages.deactivateUser, window.siyuan.languages.deactivateUserTip, callback);
+};
+
+const openAccountDeactivateAuthDialog = () => {
+    const dialog = new Dialog({
+        title: "⚠️ " + window.siyuan.languages.deactivateUser,
+        width: isMobile() ? "92vw" : "520px",
+        content: `<div class="config-account--auth">${genAccountAuthHTML("deactivate")}</div>`,
+    });
+    const deactivateDialogBody = dialog.element.querySelector(".b3-dialog__body") as HTMLElement;
+    bindAccountAuthForm(deactivateDialogBody, "deactivate");
+    dialog.element.setAttribute("data-key", Constants.DIALOG_DEACTIVATEUSER);
+};
+
 const bindAccountDeactivateEvent = (accountSettingsRoot: Element) => {
     accountSettingsRoot.querySelector("#deactivateUser")?.addEventListener("click", (event) => {
-        const dialog = new Dialog({
-            title: "⚠️ " + window.siyuan.languages.deactivateUser,
-            width: isMobile() ? "92vw" : "520px",
-            content: `<div class="config-account--auth">${genAccountAuthHTML("deactivate")}</div>`,
-        });
-        const deactivateDialogBody = dialog.element.querySelector(".b3-dialog__body") as HTMLElement;
-        bindAccountAuthForm(deactivateDialogBody, "deactivate");
-        dialog.element.setAttribute("data-key", Constants.DIALOG_DEACTIVATEUSER);
         event.preventDefault();
         event.stopPropagation();
+        showDeactivateConfirm(openAccountDeactivateAuthDialog);
     });
 };
 
@@ -378,11 +384,8 @@ ${iconVIP}${isOnetimePaid ? window.siyuan.languages.account4 : window.siyuan.lan
     <button type="button" id="activationCode" class="b3-button b3-button--text" style="position: absolute; right: 0; top: 0;">${window.siyuan.languages.confirm}</button>
 </div>` : "";
     const showDeactivate = isMobile();
-    const deactivateWarning = window.siyuan.config.cloudRegion === 0
-        ? window.siyuan.languages.deactivateUserChinaWarning
-        : window.siyuan.languages.deactivateUserNorthAmericaWarning;
     const deactivateHTML = showDeactivate ? `<div class="config-account__deactivate">
-    <button type="button" class="b3-button b3-button--cancel" id="deactivateUser">${window.siyuan.languages.deactivateUser}${deactivateWarning}</button>
+    <button type="button" class="b3-button b3-button--cancel" id="deactivateUser">${window.siyuan.languages.deactivateUser}</button>
 </div>` : "";
 
     return `<div id="configAccountPayment" class="b3-label config-item${showDeactivate ? " config-account--deactivate" : ""}">
@@ -504,7 +507,7 @@ const bindAccountAuthForm = (
 
 const confirmDeactivateAccount = () => {
     hideElements(["dialog"]);
-    confirmDialog("⚠️ " + window.siyuan.languages.deactivateUser, window.siyuan.languages.deactivateUserTip, () => {
+    showDeactivateConfirm(() => {
         fetchPost("/api/account/deactivate", {}, () => {
             window.siyuan.user = null;
             /// #if MOBILE

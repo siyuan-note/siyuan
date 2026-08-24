@@ -1,6 +1,4 @@
 {
-	"deactivateUserChinaWarning": " (Po dezaktywacji bieżącego numeru telefonu komórkowego i połączonych kont zewnętrznych nie będzie można ponownie użyć do rejestracji ani powiązania; zachowaj ostrożność)",
-	"deactivateUserNorthAmericaWarning": " (Po dezaktywacji bieżącego adresu e-mail nie będzie można ponownie użyć do rejestracji; zachowaj ostrożność)",
 	"exportFile": "Eksportuj plik",
 	"namingEmpty": "Nazwa nie może być pusta",
 	"recentCreated": "Ostatnio utworzone",
@@ -1497,7 +1495,7 @@
 	"rtlTip": "Renderowanie treści od prawej do lewej",
 	"height": "Wysokość",
 	"deactivateUser": "Dezaktywuj konto",
-	"deactivateUserTip": "<ul class='fn__list'><li>Po dezaktywowaniu konto nie może zostać przywrócone, proszę nie próbować tego bez powodu</li><li>Nazwa użytkownika zostanie wypełniona <code>someone101</code> (następny numer to numer użytkownika), hasło zostanie zresetowane na losowy numer</li><li>Wyczyść pseudonim użytkownika, samodzielną etykietę, URL, profil, avatar, link do witryny, adres do korespondencji i inne informacje</li><li>Wszystkie przełączniki ustawień prywatności zostaną przywrócone do domyślnego publicznego stanu</li><li>Usunięte zostaną konta społecznościowe firmy trzeciej powiązane z numerem telefonu</li><li><strong>Nazwa użytkownika, numer telefonu, powiązane konto firm trzecich nie będą mogły być używane ponownie w przyszłości</strong></li><li>Status użytkownika zostanie ustawiony na wyłączony, zabroniony logowanie</li></ul>",
+	"deactivateUserTip": "<ul class='fn__list'><li>Po dezaktywowaniu konto nie może zostać przywrócone, proszę nie próbować tego bez powodu</li><li>Nazwa użytkownika zostanie wypełniona <code>someone101</code> (następny numer to numer użytkownika), hasło zostanie zresetowane na losowy numer</li><li>Wyczyść pseudonim użytkownika, samodzielną etykietę, URL, profil, avatar, link do witryny, adres do korespondencji i inne informacje</li><li>Wszystkie przełączniki ustawień prywatności zostaną przywrócone do domyślnego publicznego stanu</li><li>Usunięte zostaną konta społecznościowe firmy trzeciej powiązane z numerem telefonu</li><li><strong>Nazwa użytkownika, adres e-mail, numer telefonu, powiązane konto firm trzecich nie będą mogły być używane ponownie w przyszłości</strong></li><li>Status użytkownika zostanie ustawiony na wyłączony, zabroniony logowanie</li></ul>",
 	"mergeCell": "Scal komórkę",
 	"cancelMerged": "Anuluj scalanie komórek",
 	"useDefaultWidth": "Użyj domyślnej szerokości kolumny",

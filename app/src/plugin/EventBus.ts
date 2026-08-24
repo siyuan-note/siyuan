@@ -1,5 +1,6 @@
 import {MenuItem, subMenu} from "../menus/Menu";
-export {EventBus} from "./EventBusCore";
+import {emitToPlugins, hasPluginSubscriber} from "./EventBusCore";
+export {emitToPlugins, EventBus, hasPluginSubscriber} from "./EventBusCore";
 export type {IEventBusSafeEmitResult} from "./EventBusCore";
 
 export const emitOpenMenu = (options: {
@@ -9,11 +10,12 @@ export const emitOpenMenu = (options: {
     separatorPosition?: "top" | "bottom",
     appendToMenu?: boolean,
 }) => {
+    if (!hasPluginSubscriber(options.plugins, options.type)) {
+        return [];
+    }
     const pluginSubMenu = new subMenu();
     options.detail.menu = pluginSubMenu;
-    options.plugins.forEach((plugin) => {
-        plugin.eventBus.emit(options.type, options.detail);
-    });
+    emitToPlugins(options.plugins, options.type, options.detail);
     if (pluginSubMenu.menus.length > 0 && options.appendToMenu !== false) {
         if (options.separatorPosition === "top") {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_pluginTop", type: "separator"}).element);

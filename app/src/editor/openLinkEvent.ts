@@ -22,6 +22,9 @@ export const resolveOpenLinkEvent = (options: {
 
 const emitCancelablePluginEvent = <T>(app: App, type: TEventBus, detail: T) => {
     for (const plugin of app.plugins) {
+        if (!plugin.eventBus.has(type)) {
+            continue;
+        }
         if (!plugin.eventBus.emit(type, detail)) {
             return false;
         }

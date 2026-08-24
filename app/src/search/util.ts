@@ -41,6 +41,7 @@ import {
 import {resize} from "../protyle/util/resize";
 import {addClearButton} from "../util/addClearButton";
 import {checkFold} from "../util/noRelyPCFunction";
+import {emitToPlugins} from "../plugin/EventBusCore";
 import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
 import {getDefaultSubType, getDefaultType} from "./getDefault";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
@@ -1382,9 +1383,7 @@ const emitBeforeSearchResultsRender = (blocks: IBlock[], edit: Protyle,
         searchElement,
         blocks,
     };
-    edit.protyle?.app.plugins.forEach((plugin) => {
-        plugin.eventBus.emit("before-search-results-render", detail);
-    });
+    emitToPlugins(edit.protyle?.app.plugins || [], "before-search-results-render", detail);
     return detail.blocks;
 };
 
@@ -1425,11 +1424,13 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
             const previousElement = element.querySelector('[data-type="previous"]');
             const nextElement = element.querySelector('[data-type="next"]');
             edit.protyle?.app.plugins.forEach(item => {
-                item.eventBus.emit("input-search", {
-                    protyle: edit,
-                    config,
-                    searchElement: searchInputElement,
-                });
+                if (item.eventBus.has("input-search")) {
+                    item.eventBus.emit("input-search", {
+                        protyle: edit,
+                        config,
+                        searchElement: searchInputElement,
+                    });
+                }
             });
             const requestConfig = JSON.parse(JSON.stringify(config)) as Config.IUILayoutTabSearchConfig;
             const requestFocusId = focusId ? Object.assign({}, focusId) : undefined;

@@ -38,7 +38,9 @@ export class Asset extends Model {
             clearOBG();
             setPanelFocus(this.element.parentElement.parentElement);
             this.app.plugins.forEach(item => {
-                item.eventBus.emit("click-pdf", {event});
+                if (item.eventBus.has("click-pdf")) {
+                    item.eventBus.emit("click-pdf", {event});
+                }
             });
         });
         if (typeof this.pdfId === "string") {

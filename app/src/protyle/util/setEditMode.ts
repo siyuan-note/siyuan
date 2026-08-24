@@ -58,6 +58,8 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
     /// #endif
     hideElements(["gutterOnly", "toolbar", "select", "hint", "util"], protyle);
     protyle.app.plugins.forEach(item => {
-        item.eventBus.emit("switch-protyle-mode", {protyle});
+        if (item.eventBus.has("switch-protyle-mode")) {
+            item.eventBus.emit("switch-protyle-mode", {protyle});
+        }
     });
 };

@@ -285,9 +285,14 @@ export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
 
 const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[], options?: IUploadInsertOptions) => {
     if (protyle && protyle.app && protyle.app.plugins) {
-        for (let i = 0; i < protyle.app.plugins.length; i++) {
+        const plugins = Array.from(protyle.app.plugins);
+        for (let i = 0; i < plugins.length; i++) {
+            const plugin = plugins[i];
+            if (!plugin.eventBus.has("paste")) {
+                continue;
+            }
             const response: { localFiles: ILocalFiles[] } = await new Promise((resolve) => {
-                const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
+                const emitResult = plugin.eventBus.emit("paste", {
                     protyle,
                     resolve,
                     textHTML: "",
@@ -657,6 +662,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         const plugins = Array.from(protyle.app.plugins);
         for (let i = 0; i < plugins.length; i++) {
             const plugin = plugins[i];
+            if (!plugin.eventBus.has("paste")) {
+                continue;
+            }
             const response = await new Promise<IClipboardData | undefined | typeof PASTE_PLUGIN_TIMED_OUT>((resolve,
                                                                                                             reject) => {
                 let settled = false;

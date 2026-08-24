@@ -207,7 +207,9 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                             updateRecentDocSwitchTime(createRecentDocUpdate(data.data.rootID, previousRootID));
                         }
                         app.plugins.forEach(item => {
-                            item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                            if (item.eventBus.has("switch-protyle")) {
+                                item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                            }
                         });
                         complete(window.siyuan.mobile.editor.protyle);
                     }
@@ -249,7 +251,9 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                                     updateRecentDocSwitchTime(createRecentDocUpdate(data.data.rootID, previousRootID));
                                 }
                                 app.plugins.forEach(item => {
-                                    item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                                    if (item.eventBus.has("switch-protyle")) {
+                                        item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                                    }
                                 });
                                 complete(window.siyuan.mobile.editor.protyle);
                             }

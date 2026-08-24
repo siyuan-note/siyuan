@@ -42,8 +42,10 @@ export const destroy = (protyle: IProtyle) => {
         }
     }
     protyle.app.plugins.forEach(item => {
-        item.eventBus.emit("destroy-protyle", {
-            protyle,
-        });
+        if (item.eventBus.has("destroy-protyle")) {
+            item.eventBus.emit("destroy-protyle", {
+                protyle,
+            });
+        }
     });
 };

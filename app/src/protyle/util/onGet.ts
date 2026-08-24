@@ -386,10 +386,12 @@ const setHTML = (options: {
     protyle.options.defIds = [];
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {
         protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("loaded-protyle-dynamic", {
-                protyle,
-                position: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
-            });
+            if (item.eventBus.has("loaded-protyle-dynamic")) {
+                item.eventBus.emit("loaded-protyle-dynamic", {
+                    protyle,
+                    position: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
+                });
+            }
         });
         return;
     }
@@ -440,7 +442,9 @@ const setHTML = (options: {
 
     }
     protyle.app.plugins.forEach(item => {
-        item.eventBus.emit("loaded-protyle-static", {protyle});
+        if (item.eventBus.has("loaded-protyle-static")) {
+            item.eventBus.emit("loaded-protyle-static", {protyle});
+        }
     });
 };
 

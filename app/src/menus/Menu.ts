@@ -475,10 +475,12 @@ export class Menu {
             return;
         }
         window.siyuan.ws?.app?.plugins?.forEach((plugin) => {
-            plugin.eventBus.emit(type, {
-                menu: this.element,
-                ...detail,
-            });
+            if (plugin.eventBus.has(type)) {
+                plugin.eventBus.emit(type, {
+                    menu: this.element,
+                    ...detail,
+                });
+            }
         });
     }
 

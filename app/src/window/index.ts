@@ -35,6 +35,7 @@ import {applyEntryVisibility} from "../config/entryVisibility/runtime";
 import {removeBlockPanelEditors} from "../block/panelRemoval";
 import {updateServerAddresses} from "../config/tabs/accessRuntime";
 import {applyCloudUserState} from "../config/tabs/accountUi";
+import {emitToPlugins} from "../plugin/EventBusCore";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -49,9 +50,7 @@ class App {
             id: genUUID(),
             type: "main",
             msgCallback: (data) => {
-                    this.plugins.forEach((plugin) => {
-                        plugin.eventBus.emit("ws-main", data);
-                    });
+                    emitToPlugins(this.plugins, "ws-main", data);
                     if (data) {
                         switch (data.cmd) {
                             case "logoutAuth":

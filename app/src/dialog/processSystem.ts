@@ -20,6 +20,7 @@ import type {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {Plugin} from "../plugin";
+import {emitToPlugins} from "../plugin/EventBusCore";
 
 export const processBacklinkIndexCommit = (data: {
     rootIDs?: string[],
@@ -125,9 +126,7 @@ export const lockScreen = async (app: App) => {
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
-    app.plugins.forEach(item => {
-        item.eventBus.emit("lock-screen");
-    });
+    emitToPlugins(app.plugins, "lock-screen");
     /// #if !MOBILE
     exportLayout({
         errorExit: false,
@@ -513,13 +512,11 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
         useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
     }
     /// #endif
-    plugins.forEach((item) => {
-        if (data.code === 0) {
-            item.eventBus.emit("sync-start", data);
-        } else if (data.code === 1) {
-            item.eventBus.emit("sync-end", data);
-        } else if (data.code === 2) {
-            item.eventBus.emit("sync-fail", data);
-        }
-    });
+    if (data.code === 0) {
+        emitToPlugins(plugins, "sync-start", data);
+    } else if (data.code === 1) {
+        emitToPlugins(plugins, "sync-end", data);
+    } else if (data.code === 2) {
+        emitToPlugins(plugins, "sync-fail", data);
+    }
 };

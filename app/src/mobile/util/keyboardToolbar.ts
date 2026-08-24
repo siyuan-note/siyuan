@@ -856,7 +856,9 @@ export const showKeyboardToolbar = () => {
             editor.protyle.element.parentElement.style.paddingBottom = "48px";
         }
         editor.protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("mobile-keyboard-show");
+            if (item.eventBus.has("mobile-keyboard-show")) {
+                item.eventBus.emit("mobile-keyboard-show");
+            }
         });
     }
     clearTimeout(scrollSelectionIntoViewTimeout);
@@ -936,7 +938,9 @@ export const hideKeyboardToolbar = () => {
         editor.protyle.element.parentElement.style.paddingBottom = "";
         if (!toolbarHidden) {
             editor.protyle.app.plugins.forEach(item => {
-                item.eventBus.emit("mobile-keyboard-hide");
+                if (item.eventBus.has("mobile-keyboard-hide")) {
+                    item.eventBus.emit("mobile-keyboard-hide");
+                }
             });
         }
     }

@@ -52,12 +52,14 @@ const processSiYuanUriBlocks = (app: App, uriObj: URL): boolean => {
                 /// #endif
             }
             app.plugins.forEach(plugin => {
-                plugin.eventBus.emit("open-siyuan-url-block", {
-                    url: uriObj.href,
-                    id,
-                    focus,
-                    exist: existResponse.data,
-                });
+                if (plugin.eventBus.has("open-siyuan-url-block")) {
+                    plugin.eventBus.emit("open-siyuan-url-block", {
+                        url: uriObj.href,
+                        id,
+                        focus,
+                        exist: existResponse.data,
+                    });
+                }
             });
         });
         return true;

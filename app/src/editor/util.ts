@@ -664,7 +664,9 @@ export const updatePanelByEditor = (options: {
             }
         }
         options.protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("switch-protyle", {protyle: options.protyle});
+            if (item.eventBus.has("switch-protyle")) {
+                item.eventBus.emit("switch-protyle", {protyle: options.protyle});
+            }
         });
     }
     // 切换页签或关闭所有页签时，需更新对应的面板

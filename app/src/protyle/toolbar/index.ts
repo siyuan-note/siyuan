@@ -63,6 +63,7 @@ import {closeSubElement} from "./subElementLifecycle";
 import {getDefaultToolbar, getToolbarEntryId, markPluginToolbarEntries} from "./defaults";
 import {applyToolbarEntryVisibility} from "../../config/entryVisibility/runtime";
 import {refreshToolbarCatalog} from "../../config/entryVisibility/catalog";
+import {emitToPlugins} from "../../plugin/EventBusCore";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -1614,12 +1615,14 @@ export class Toolbar {
             textElement.select();
         }
         protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("open-noneditableblock", {
-                protyle,
-                toolbar: this,
-                blockElement: nodeElement,
-                renderElement,
-            });
+            if (item.eventBus.has("open-noneditableblock")) {
+                item.eventBus.emit("open-noneditableblock", {
+                    protyle,
+                    toolbar: this,
+                    blockElement: nodeElement,
+                    renderElement,
+                });
+            }
         });
     }
 
@@ -1649,9 +1652,7 @@ export class Toolbar {
 
         const eventDetail = {languages: hljsLanguages, type: "init", listElement};
         if (protyle.app && protyle.app.plugins) {
-            protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-language-update", eventDetail);
-            });
+            emitToPlugins(protyle.app.plugins, "code-language-update", eventDetail);
         }
 
         hljsLanguages = eventDetail.languages;
@@ -1723,9 +1724,7 @@ export class Toolbar {
 
             const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
             if (protyle.app && protyle.app.plugins) {
-                protyle.app.plugins.forEach((plugin: any) => {
-                    plugin.eventBus.emit("code-language-update", eventDetail);
-                });
+                emitToPlugins(protyle.app.plugins, "code-language-update", eventDetail);
             }
 
             matchLanguages = eventDetail.languages;
@@ -2303,11 +2302,13 @@ export class Toolbar {
 
         if (protyle.app && protyle.app.plugins) {
             protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-language-change", {
-                    language: currentLang,
-                    languageElements,
-                    protyle: protyle
-                });
+                if (plugin.eventBus.has("code-language-change")) {
+                    plugin.eventBus.emit("code-language-change", {
+                        language: currentLang,
+                        languageElements,
+                        protyle: protyle
+                    });
+                }
             });
         }
 

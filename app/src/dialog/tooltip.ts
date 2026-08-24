@@ -1,4 +1,5 @@
 import {isMobile} from "../util/functions";
+import {emitToPlugins} from "../plugin/EventBusCore";
 
 export const showTooltip = (
     message: string,
@@ -17,9 +18,7 @@ export const showTooltip = (
         target,
         tooltipElement: messageElement,
     };
-    window.siyuan.ws.app.plugins.forEach(plugin => {
-        plugin.eventBus.emit("before-show-tooltip", showDetail);
-    });
+    emitToPlugins(window.siyuan.ws.app.plugins, "before-show-tooltip", showDetail);
     message = showDetail.message;
     if (!message) {
         hideTooltip();
@@ -152,9 +151,11 @@ export const hideTooltip = () => {
         return;
     }
     window.siyuan.ws.app.plugins.forEach(plugin => {
-        plugin.eventBus.emit("before-hide-tooltip", {
-            tooltipElement: messageElement,
-        });
+        if (plugin.eventBus.has("before-hide-tooltip")) {
+            plugin.eventBus.emit("before-hide-tooltip", {
+                tooltipElement: messageElement,
+            });
+        }
     });
     messageElement.classList.add("fn__none");
 };

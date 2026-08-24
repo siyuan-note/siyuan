@@ -808,10 +808,12 @@ export const bindCardEvent = async (options: {
 
 const emitEvent = (app: App, card: ICard, type: string) => {
     app.plugins.forEach(item => {
-        item.eventBus.emit("click-flashcard-action", {
-            type,
-            card
-        });
+        if (item.eventBus.has("click-flashcard-action")) {
+            item.eventBus.emit("click-flashcard-action", {
+                type,
+                card
+            });
+        }
     });
 };
 

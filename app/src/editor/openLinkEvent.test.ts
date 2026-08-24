@@ -9,7 +9,7 @@ import {
 } from "./openLinkEvent";
 
 const createApp = (emitters: Array<(type: TEventBus, detail: unknown) => boolean>) => ({
-    plugins: emitters.map((emit) => ({eventBus: {emit}})),
+    plugins: emitters.map((emit) => ({eventBus: {emit, has: () => true}})),
 }) as unknown as App;
 
 describe("link opening plugin events", () => {
@@ -77,6 +77,24 @@ describe("link opening plugin events", () => {
 
         assert.equal(emitOpenLink(app, {href: "siyuan://blocks/id", originalHref: "siyuan://blocks/id"}), true);
         assert.deepEqual(calls, [1, 2]);
+    });
+
+    it("skips plugins without a matching subscription", () => {
+        const calls: number[] = [];
+        const app = {
+            plugins: [{
+                eventBus: {
+                    has: () => false,
+                    emit: () => {
+                        calls.push(1);
+                        return false;
+                    },
+                },
+            }],
+        } as unknown as App;
+
+        assert.equal(emitOpenLink(app, {href: "https://example.com", originalHref: "example.com"}), true);
+        assert.deepEqual(calls, []);
     });
 
     it("uses the same first-canceler-wins behavior for assets", () => {

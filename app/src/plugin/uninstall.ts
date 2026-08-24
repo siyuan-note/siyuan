@@ -36,6 +36,9 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
                 } catch (e) {
                     console.error(`plugin ${plugin.name} uninstall error:`, e);
                 }
+            }
+            plugin.eventBus.destroy();
+            if (!isReload) {
                 window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] = {};
                 setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);
             }
@@ -83,13 +86,6 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             resizeTopBar();
             setTabPosition(true);
             /// #endif
-            // rm listen
-            Array.from(document.childNodes).find(item => {
-                if (item.nodeType === 8 && item.textContent === name) {
-                    item.remove();
-                    return true;
-                }
-            });
             // rm plugin
             app.plugins.splice(index, 1);
             refreshDockCatalog(app.plugins);

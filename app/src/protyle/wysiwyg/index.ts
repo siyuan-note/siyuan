@@ -4281,10 +4281,12 @@ export class WYSIWYG {
                 return;
             }
             protyle.app.plugins.forEach(item => {
-                item.eventBus.emit("click-editorcontent", {
-                    protyle,
-                    event
-                });
+                if (item.eventBus.has("click-editorcontent")) {
+                    item.eventBus.emit("click-editorcontent", {
+                        protyle,
+                        event
+                    });
+                }
             });
             const templateInteractiveElement = getAVTemplateInteractiveElement(event.target);
             if (templateInteractiveElement && !isAVTemplateLink(templateInteractiveElement)) {

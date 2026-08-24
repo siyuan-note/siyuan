@@ -1,5 +1,7 @@
 export const NESTED_LIST_PASTE_MARKER = "<!--data-siyuan-paste='nested-list'-->";
 
+export const serializePastedBlockDOM = (container: Pick<HTMLElement, "innerHTML">) => container.innerHTML;
+
 export const isNestedListCrossBlockSelection = (startListItem?: Element | false, endListItem?: Element | false) => {
     return !!startListItem && !!endListItem && startListItem !== endListItem && startListItem.contains(endListItem);
 };

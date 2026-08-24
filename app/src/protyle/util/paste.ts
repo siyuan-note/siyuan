@@ -26,7 +26,11 @@ import {updateTransaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
 import {updateListOrder} from "../wysiwyg/list";
 import {refreshSbAndPersistWidth} from "../../block/util";
-import {extractCrossBlockPasteContext, shouldPreservePastedBlockStructure} from "./pasteSource";
+import {
+    extractCrossBlockPasteContext,
+    serializePastedBlockDOM,
+    shouldPreservePastedBlockStructure
+} from "./pasteSource";
 import {normalizePasteResponse} from "./pasteResponse";
 import {applyLuteMarkdownSyntax} from "../render/luteMarkdownSyntax";
 import {convertOfficeLists} from "./officeList";
@@ -894,7 +898,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             return;
         }
 
-        let tempInnerHTML = tempElement.innerHTML;
+        // innerHTML 已按属性上下文转义 HTML 块源码，保留序列化结果才能避免 data-content 被内层引号截断。
+        const tempInnerHTML = serializePastedBlockDOM(tempElement);
 
         if (!nodeElement.classList.contains("av") && tempInnerHTML.startsWith("[[{") && tempInnerHTML.endsWith("}]]")) {
             try {
@@ -908,11 +913,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 insertHTML(tempInnerHTML, protyle, isBlock);
             }
         } else {
-            if (-1 < tempInnerHTML.indexOf("NodeHTMLBlock")) {
-                // 复制 HTML 块粘贴出来的不是 HTML 块 https://github.com/siyuan-note/siyuan/issues/12994
-                tempInnerHTML = Lute.UnEscapeHTMLStr(tempInnerHTML);
-            }
-
             insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);

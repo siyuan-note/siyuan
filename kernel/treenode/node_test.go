@@ -66,6 +66,8 @@ func TestGetEmbedBlockRef(t *testing.T) {
 		expected string
 	}{
 		{name: "exact ID", stmt: "SELECT * FROM blocks WHERE id = '" + blockID + "'", expected: blockID},
+		{name: "lowercase SELECT", stmt: "select * from blocks where id = '" + blockID + "'", expected: blockID},
+		{name: "leading whitespace", stmt: "\n\t SELECT * FROM blocks WHERE id = '" + blockID + "'", expected: blockID},
 		{name: "quoted ID column", stmt: "SELECT * FROM blocks WHERE `id` = '" + blockID + "'", expected: blockID},
 		{name: "qualified ID column", stmt: "SELECT * FROM blocks WHERE blocks.id = '" + blockID + "'", expected: blockID},
 		{name: "parenthesized condition", stmt: "SELECT * FROM blocks WHERE ((id = '" + blockID + "'))", expected: blockID},
@@ -80,6 +82,9 @@ func TestGetEmbedBlockRef(t *testing.T) {
 		{name: "numeric value", stmt: "SELECT * FROM blocks WHERE id = 20060102150405"},
 		{name: "invalid ID", stmt: "SELECT * FROM blocks WHERE id = 'invalid'"},
 		{name: "non-select statement", stmt: "DELETE FROM blocks WHERE id = '" + blockID + "'"},
+		{name: "show tables", stmt: "SHOW TABLES"},
+		{name: "show grants", stmt: "show grants"},
+		{name: "empty statement"},
 		{name: "invalid SQL", stmt: "SELECT FROM"},
 	}
 

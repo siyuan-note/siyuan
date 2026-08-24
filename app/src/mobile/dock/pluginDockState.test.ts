@@ -2,6 +2,8 @@ import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
 import {
     getMobilePluginDock,
+    getMobilePluginDockEntries,
+    getMobilePluginDockLayouts,
     getMobilePluginDockSide,
     openMobilePluginDock,
     removeMobilePluginDock,
@@ -15,6 +17,31 @@ describe("mobile plugin dock state", () => {
         assert.equal(getMobilePluginDockSide("RightTop"), "right");
         assert.equal(getMobilePluginDockSide("RightBottom"), "right");
         assert.equal(getMobilePluginDockSide("BottomRight"), "right");
+    });
+
+    it("builds a stable plugin dock catalog in registered index order", () => {
+        const mobileModel = () => ({}) as never;
+        const app = {
+            plugins: [{
+                docks: {
+                    pluginSecond: {
+                        config: {position: "BottomRight", index: 20, title: "Second", icon: "iconSecond"},
+                        mobileModel,
+                    },
+                    pluginFirst: {
+                        config: {position: "LeftBottom", index: 10, title: "First", icon: "iconFirst"},
+                        mobileModel,
+                    },
+                },
+            }],
+        };
+        const entries = getMobilePluginDockEntries(app as never);
+
+        assert.deepEqual(entries.map(entry => entry.type), ["pluginFirst", "pluginSecond"]);
+        assert.deepEqual(getMobilePluginDockLayouts(entries), [
+            {id: "pluginFirst", side: "left", index: 10},
+            {id: "pluginSecond", side: "right", index: 20},
+        ]);
     });
 
     it("keeps plugin docks independent and removes only the requested model", () => {

@@ -19,7 +19,8 @@ export interface IMobileBarsState {
 }
 
 export interface IMobileBarsVisibility {
-    readingBarsVisible: boolean,
+    topbarVisible: boolean,
+    bottomBarVisible: boolean,
     editingBarVisible: boolean,
     scrollPaused: boolean,
 }
@@ -97,7 +98,8 @@ export const isMobileBarsScrollPaused = (state: IMobileBarsState) => {
 };
 
 export const getMobileBarsVisibility = (state: IMobileBarsState): IMobileBarsVisibility => ({
-    readingBarsVisible: state.readingBarsVisible && !state.editing && !state.selecting,
+    topbarVisible: state.readingBarsVisible,
+    bottomBarVisible: state.readingBarsVisible && !state.editing && !state.selecting,
     editingBarVisible: state.editing,
     scrollPaused: isMobileBarsScrollPaused(state),
 });
@@ -116,14 +118,13 @@ export const reduceMobileBarsState = (
     if (action.type === "set-reading-bars") {
         return {
             ...resetScrollTracking(state),
-            readingBarsVisible: state.editing ? false : action.visible,
+            readingBarsVisible: action.visible,
         };
     }
 
     if (action.type === "set-editing") {
         return {
             ...resetScrollTracking(state, action.scrollTop),
-            readingBarsVisible: action.active ? false : state.editing ? true : state.readingBarsVisible,
             editing: action.active,
         };
     }
@@ -131,7 +132,6 @@ export const reduceMobileBarsState = (
     if (action.type === "set-selecting") {
         return {
             ...resetScrollTracking(state, action.scrollTop),
-            readingBarsVisible: action.active ? state.readingBarsVisible : true,
             selecting: action.active,
         };
     }

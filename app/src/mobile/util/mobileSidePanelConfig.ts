@@ -1,4 +1,4 @@
-export const MOBILE_SIDE_PANEL_CONFIG_VERSION = 1 as const;
+export const MOBILE_SIDE_PANEL_CONFIG_VERSION = 2 as const;
 export const MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT = "siyuan-mobile-side-panel-config-change";
 
 export const MOBILE_SIDE_PANEL_DOCK_IDS = [
@@ -9,7 +9,6 @@ export const MOBILE_SIDE_PANEL_DOCK_IDS = [
     "backlink",
     "inbox",
     "agent",
-    "plugin",
 ] as const;
 
 export type MobileSidePanelDockId = typeof MOBILE_SIDE_PANEL_DOCK_IDS[number];
@@ -40,7 +39,6 @@ export const DEFAULT_MOBILE_SIDE_PANEL_LEFT: readonly MobileSidePanelDockId[] = 
     "bookmark",
     "tag",
     "inbox",
-    "plugin",
 ];
 
 export const DEFAULT_MOBILE_SIDE_PANEL_RIGHT: readonly MobileSidePanelDockId[] = [
@@ -108,7 +106,7 @@ export const normalizeMobileSidePanelConfig = (storedValue: unknown): IMobileSid
     }
 
     const record = value as Record<string, unknown>;
-    if (record.version !== MOBILE_SIDE_PANEL_CONFIG_VERSION ||
+    if ((record.version !== 1 && record.version !== MOBILE_SIDE_PANEL_CONFIG_VERSION) ||
         !Array.isArray(record.left) || !Array.isArray(record.right)) {
         return createDefaultMobileSidePanelConfig();
     }

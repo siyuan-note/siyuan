@@ -13,6 +13,8 @@ export const MOBILE_BOTTOM_BAR_ACTIONS = [
     "inbox",
     "agent",
     "spacedRepetition",
+    "dailyNote",
+    "newDailyNote",
     "command",
 ] as const;
 

@@ -95,12 +95,13 @@ const startBarsTransition = () => {
 
 const renderMobileBars = () => {
     const visibility = getMobileBarsVisibility(barsState);
-    const immersive = !visibility.readingBarsVisible && !visibility.editingBarVisible;
+    const immersive = !visibility.topbarVisible;
     if (document.body.classList.contains("mobile-chrome--hidden") !== immersive) {
         startBarsTransition();
     }
     document.body.classList.toggle("mobile-chrome--hidden", immersive);
     document.body.classList.toggle("mobile-keyboard--open", visibility.editingBarVisible);
+    document.body.classList.toggle("mobile-selection--active", barsState.selecting);
 
     const topbarElement = document.getElementById("mobileTopBar");
     if (topbarElement) {
@@ -109,8 +110,8 @@ const renderMobileBars = () => {
     }
     const bottomBarElement = document.getElementById("mobileBottomBar");
     if (bottomBarElement) {
-        bottomBarElement.toggleAttribute("inert", !visibility.readingBarsVisible);
-        bottomBarElement.setAttribute("aria-hidden", visibility.readingBarsVisible ? "false" : "true");
+        bottomBarElement.toggleAttribute("inert", !visibility.bottomBarVisible);
+        bottomBarElement.setAttribute("aria-hidden", visibility.bottomBarVisible ? "false" : "true");
     }
 };
 

@@ -27,7 +27,7 @@ describe("mobile side panel config", () => {
             false,
             "not json",
             [],
-            {version: 2, left: ["file"], right: ["outline"]},
+            {version: 3, left: ["file"], right: ["outline"]},
             {version: MOBILE_SIDE_PANEL_CONFIG_VERSION, left: "file", right: ["outline"]},
             {version: MOBILE_SIDE_PANEL_CONFIG_VERSION, left: ["file"], right: null},
         ].forEach((storedValue) => {
@@ -41,23 +41,23 @@ describe("mobile side panel config", () => {
     it("accepts a serialized config and preserves the configured order", () => {
         const config = normalizeMobileSidePanelConfig(JSON.stringify({
             version: MOBILE_SIDE_PANEL_CONFIG_VERSION,
-            left: ["plugin", "file", "tag"],
+            left: ["file", "tag"],
             right: ["backlink", "outline", "bookmark", "inbox"],
         }));
 
-        assert.deepEqual(config.left, ["plugin", "file", "tag"]);
+        assert.deepEqual(config.left, ["file", "tag"]);
         assert.deepEqual(config.right, ["backlink", "outline", "bookmark", "inbox", "agent"]);
         assertCompleteConfig(config);
     });
 
-    it("adds the Agent dock to legacy version 1 layouts", () => {
+    it("removes the combined plugin dock and adds the Agent when migrating version 1 layouts", () => {
         const config = normalizeMobileSidePanelConfig({
-            version: MOBILE_SIDE_PANEL_CONFIG_VERSION,
+            version: 1,
             left: ["file", "bookmark", "tag", "inbox", "plugin"],
             right: ["backlink", "outline"],
         });
 
-        assert.deepEqual(config.left, ["file", "bookmark", "tag", "inbox", "plugin"]);
+        assert.deepEqual(config.left, ["file", "bookmark", "tag", "inbox"]);
         assert.deepEqual(config.right, ["backlink", "outline", "agent"]);
         assertCompleteConfig(config);
     });
@@ -69,7 +69,7 @@ describe("mobile side panel config", () => {
             right: ["outline", "file", "unknown"],
         });
 
-        assert.deepEqual(config.left, ["tag", "outline", "bookmark", "inbox", "plugin"]);
+        assert.deepEqual(config.left, ["tag", "outline", "bookmark", "inbox"]);
         assert.deepEqual(config.right, ["file", "backlink", "agent"]);
         assertCompleteConfig(config);
     });
@@ -82,7 +82,7 @@ describe("mobile side panel config", () => {
         });
 
         assert.deepEqual(config.left, ["file"]);
-        assert.deepEqual(config.right, ["outline", "bookmark", "tag", "backlink", "inbox", "agent", "plugin"]);
+        assert.deepEqual(config.right, ["outline", "bookmark", "tag", "backlink", "inbox", "agent"]);
         assertCompleteConfig(config);
     });
 
@@ -93,7 +93,7 @@ describe("mobile side panel config", () => {
             right: [],
         });
 
-        assert.deepEqual(config.left, ["file", "bookmark", "tag", "backlink", "inbox", "agent", "plugin"]);
+        assert.deepEqual(config.left, ["file", "bookmark", "tag", "backlink", "inbox", "agent"]);
         assert.deepEqual(config.right, ["outline"]);
         assertCompleteConfig(config);
     });
@@ -106,7 +106,7 @@ describe("mobile side panel config", () => {
             index: 1,
         });
 
-        assert.deepEqual(config.left, ["file", "tag", "inbox", "plugin"]);
+        assert.deepEqual(config.left, ["file", "tag", "inbox"]);
         assert.deepEqual(config.right, ["outline", "bookmark", "backlink", "agent"]);
         assertCompleteConfig(config);
     });
@@ -115,7 +115,7 @@ describe("mobile side panel config", () => {
         const state = normalizeMobileSidePanelConfig({
             version: MOBILE_SIDE_PANEL_CONFIG_VERSION,
             left: ["file"],
-            right: ["outline", "bookmark", "tag", "backlink", "inbox", "agent", "plugin"],
+            right: ["outline", "bookmark", "tag", "backlink", "inbox", "agent"],
         });
         const config = reduceMobileSidePanelConfig(state, {
             type: "move",
@@ -131,11 +131,11 @@ describe("mobile side panel config", () => {
         const config = reduceMobileSidePanelConfig(createDefaultMobileSidePanelConfig(), {
             type: "reorder",
             side: "left",
-            fromIndex: 4,
+            fromIndex: 3,
             toIndex: 1,
         });
 
-        assert.deepEqual(config.left, ["file", "plugin", "bookmark", "tag", "inbox"]);
+        assert.deepEqual(config.left, ["file", "inbox", "bookmark", "tag"]);
         assert.deepEqual(config.right, DEFAULT_MOBILE_SIDE_PANEL_RIGHT);
         assertCompleteConfig(config);
     });
@@ -156,7 +156,7 @@ describe("mobile side panel config", () => {
     it("resets customized panels to a fresh default config", () => {
         const customized = normalizeMobileSidePanelConfig({
             version: MOBILE_SIDE_PANEL_CONFIG_VERSION,
-            left: ["plugin", "file", "outline"],
+            left: ["file", "outline"],
             right: ["backlink", "bookmark", "tag", "inbox"],
         });
         const config = reduceMobileSidePanelConfig(customized, {type: "reset"});

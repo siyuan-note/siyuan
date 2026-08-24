@@ -1,30 +1,34 @@
 import {MobileCustom} from "./MobileCustom";
 
-let custom: MobileCustom | undefined;
+export const MOBILE_PLUGIN_DOCKS_CHANGE_EVENT = "siyuan-mobile-plugin-docks-change";
 
-export const getMobilePluginDock = () => custom;
+const customs = new Map<string, MobileCustom>();
+
+export const getMobilePluginDockSide = (position: TPluginDockPosition) => {
+    return position === "LeftTop" || position === "LeftBottom" || position === "BottomLeft" ? "left" : "right";
+};
+
+export const dispatchMobilePluginDocksChange = () => {
+    window.dispatchEvent(new CustomEvent(MOBILE_PLUGIN_DOCKS_CHANGE_EVENT));
+};
+
+export const getMobilePluginDock = (type: string) => customs.get(type);
 
 export const openMobilePluginDock = (type: string, create: () => MobileCustom) => {
-    if (custom?.type === type) {
+    if (customs.has(type)) {
         return;
     }
-    const previousType = custom?.type;
-    custom?.destroy?.();
-    if (previousType) {
-        delete window.siyuan.mobile.docks[previousType];
-    }
-    custom = create();
+    const custom = create();
+    customs.set(type, custom);
     window.siyuan.mobile.docks[type] = custom;
 };
 
 export const removeMobilePluginDock = (type: string) => {
-    const dock = window.siyuan.mobile.docks[type] as MobileCustom;
-    if (custom?.type === type) {
+    const custom = customs.get(type) || window.siyuan.mobile.docks[type] as MobileCustom;
+    if (custom) {
         custom.destroy?.();
         custom.element.innerHTML = "";
-        custom = undefined;
-    } else {
-        dock?.destroy?.();
     }
+    customs.delete(type);
     delete window.siyuan.mobile.docks[type];
 };

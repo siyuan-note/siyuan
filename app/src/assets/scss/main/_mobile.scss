@@ -371,8 +371,8 @@ body.mobile-keyboard--open {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 20px;
-    height: 20px;
+    min-width: 19px;
+    height: 19px;
     padding: 0 2px;
     border: 1.5px solid currentColor;
     border-radius: 4px;
@@ -430,11 +430,16 @@ body.mobile-topbar--merged {
   }
 }
 
-.mobile-keyboard--open .mobile-bottom-bar {
+.mobile-keyboard--open .mobile-bottom-bar,
+.mobile-selection--active .mobile-bottom-bar {
   opacity: 0;
   pointer-events: none;
   transform: translateY(100%);
   visibility: hidden;
+}
+
+.mobile-keyboard--open .mobile-bottom-bar {
+  transition: none;
 }
 
 .mobile-bottom-bar-setting {

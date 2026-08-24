@@ -5,7 +5,10 @@ import {Plugin} from "./index";
 import {resizeTopBar, saveLayout} from "../layout/util";
 import {getDockByType} from "../layout/tabUtil";
 /// #else
-import {removeMobilePluginDock} from "../mobile/dock/pluginDockState";
+import {
+    dispatchMobilePluginDocksChange,
+    removeMobilePluginDock,
+} from "../mobile/dock/pluginDockState";
 /// #endif
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
@@ -221,9 +224,7 @@ export const removePluginDock = (plugin: Plugin, id: string) => {
     refreshDockCatalog(plugins);
     applyDockEntryVisibility();
     /// #if MOBILE
-    if (plugins.every((item) => Object.keys(item.docks).length === 0)) {
-        document.querySelector("[data-type='sidebar-plugin-tab']")?.classList.add("fn__none");
-    }
+    dispatchMobilePluginDocksChange();
     /// #endif
 };
 
@@ -231,10 +232,7 @@ export const addPluginDock = (plugin: Plugin) => {
     const plugins = getPluginCatalogPlugins(plugin);
     refreshDockCatalog(plugins);
     /// #if MOBILE
-    // 移动端只有存在插件 dock 时才显示插件入口图标
-    if (Object.keys(plugin.docks).length > 0) {
-        document.querySelector("[data-type='sidebar-plugin-tab']")?.classList.remove("fn__none");
-    }
+    dispatchMobilePluginDocksChange();
     /// #else
     if (isWindow() || !window.siyuan.layout.leftDock) {
         return;

@@ -35,7 +35,8 @@ describe("mobile bars state", () => {
     it("shows reading bars initially and supports explicit visibility changes", () => {
         let state = createMobileBarsState();
         assert.deepEqual(getMobileBarsVisibility(state), {
-            readingBarsVisible: true,
+            topbarVisible: true,
+            bottomBarVisible: true,
             editingBarVisible: false,
             scrollPaused: false,
         });
@@ -90,45 +91,57 @@ describe("mobile bars state", () => {
         assert.equal(state.scrollDistance, 0);
     });
 
-    it("gives the editing bar priority and restores reading bars after editing", () => {
+    it("keeps the visible title state while editing", () => {
         let state = createMobileBarsState(100);
         state = update(state, {type: "set-editing", active: true});
         assert.deepEqual(getMobileBarsVisibility(state), {
-            readingBarsVisible: false,
+            topbarVisible: true,
+            bottomBarVisible: false,
             editingBarVisible: true,
             scrollPaused: true,
         });
 
-        state = update(state, {type: "set-reading-bars", visible: true});
         state = update(state, {type: "scroll", scrollTop: 180});
-        assert.equal(state.readingBarsVisible, false);
+        assert.equal(state.readingBarsVisible, true);
         assert.equal(state.scrollTop, 180);
 
         state = update(state, {type: "set-editing", active: false, scrollTop: 180});
         assert.deepEqual(getMobileBarsVisibility(state), {
-            readingBarsVisible: true,
+            topbarVisible: true,
+            bottomBarVisible: true,
             editingBarVisible: false,
             scrollPaused: false,
         });
     });
 
-    it("preserves hidden reading bars when the keyboard is already closed", () => {
+    it("keeps the hidden title state while editing", () => {
         let state = createMobileBarsState(100);
         state = update(state, {type: "set-reading-bars", visible: false});
+        state = update(state, {type: "set-editing", active: true, scrollTop: 100});
+
+        assert.deepEqual(getMobileBarsVisibility(state), {
+            topbarVisible: false,
+            bottomBarVisible: false,
+            editingBarVisible: true,
+            scrollPaused: true,
+        });
+
         state = update(state, {type: "set-editing", active: false, scrollTop: 100});
 
         assert.deepEqual(getMobileBarsVisibility(state), {
-            readingBarsVisible: false,
+            topbarVisible: false,
+            bottomBarVisible: false,
             editingBarVisible: false,
             scrollPaused: false,
         });
     });
 
-    it("gives selection priority and restores reading bars after selection", () => {
+    it("keeps the visible title state while selecting", () => {
         let state = createMobileBarsState(100);
         state = update(state, {type: "set-selecting", active: true});
         assert.deepEqual(getMobileBarsVisibility(state), {
-            readingBarsVisible: false,
+            topbarVisible: true,
+            bottomBarVisible: false,
             editingBarVisible: false,
             scrollPaused: true,
         });
@@ -137,7 +150,28 @@ describe("mobile bars state", () => {
         assert.equal(state.scrollDistance, 0);
         state = update(state, {type: "set-selecting", active: false, scrollTop: 180});
         assert.deepEqual(getMobileBarsVisibility(state), {
-            readingBarsVisible: true,
+            topbarVisible: true,
+            bottomBarVisible: true,
+            editingBarVisible: false,
+            scrollPaused: false,
+        });
+    });
+
+    it("keeps the hidden title state while selecting", () => {
+        let state = createMobileBarsState(100);
+        state = update(state, {type: "set-reading-bars", visible: false});
+        state = update(state, {type: "set-selecting", active: true});
+        assert.deepEqual(getMobileBarsVisibility(state), {
+            topbarVisible: false,
+            bottomBarVisible: false,
+            editingBarVisible: false,
+            scrollPaused: true,
+        });
+
+        state = update(state, {type: "set-selecting", active: false, scrollTop: 100});
+        assert.deepEqual(getMobileBarsVisibility(state), {
+            topbarVisible: false,
+            bottomBarVisible: false,
             editingBarVisible: false,
             scrollPaused: false,
         });
@@ -146,14 +180,14 @@ describe("mobile bars state", () => {
     it("preserves visible reading bars while a panel opens and closes", () => {
         let state = createMobileBarsState(100);
         state = update(state, {type: "set-panel-open", open: true});
-        assert.equal(getMobileBarsVisibility(state).readingBarsVisible, true);
+        assert.equal(getMobileBarsVisibility(state).topbarVisible, true);
         assert.equal(getMobileBarsVisibility(state).scrollPaused, true);
         state = update(state, {type: "scroll", scrollTop: 200});
         assert.equal(state.readingBarsVisible, true);
         assert.equal(state.scrollDistance, 0);
 
         state = update(state, {type: "set-panel-open", open: false, scrollTop: 200});
-        assert.equal(getMobileBarsVisibility(state).readingBarsVisible, true);
+        assert.equal(getMobileBarsVisibility(state).topbarVisible, true);
         state = update(state, {type: "scroll", scrollTop: 220});
         assert.equal(state.readingBarsVisible, true);
         state = update(state, {type: "scroll", scrollTop: 231});
@@ -164,11 +198,11 @@ describe("mobile bars state", () => {
         let state = createMobileBarsState(100);
         state = update(state, {type: "set-reading-bars", visible: false});
         state = update(state, {type: "set-panel-open", open: true, scrollTop: 0});
-        assert.equal(getMobileBarsVisibility(state).readingBarsVisible, false);
+        assert.equal(getMobileBarsVisibility(state).topbarVisible, false);
         assert.equal(getMobileBarsVisibility(state).scrollPaused, true);
 
         state = update(state, {type: "set-panel-open", open: false, scrollTop: 0});
-        assert.equal(getMobileBarsVisibility(state).readingBarsVisible, false);
+        assert.equal(getMobileBarsVisibility(state).topbarVisible, false);
         assert.equal(getMobileBarsVisibility(state).scrollPaused, false);
     });
 

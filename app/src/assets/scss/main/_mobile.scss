@@ -625,7 +625,8 @@ body.mobile-topbar--merged {
   transition: opacity 150ms linear;
 }
 
-#model {
+#model,
+#menu {
   box-sizing: border-box;
 
   .mobile-setting-menu {
@@ -658,7 +659,7 @@ body.mobile-topbar--merged {
     height: 100%;
     overflow: auto;
 
-    &:has(> .config-group) {
+    &.config--mobile-items {
       background-color: var(--b3-theme-surface);
       padding: 8px 16px max(16px, env(safe-area-inset-bottom));
     }
@@ -1044,6 +1045,26 @@ body.mobile-topbar--merged {
   top: 0;
   transform: none;
   transition: none;
+
+  .mobile-main-menu {
+    &__search {
+      background-color: var(--b3-theme-surface);
+      display: flex;
+      flex-shrink: 0;
+      padding: 8px 16px;
+    }
+
+    &__groups {
+      flex: 1;
+      height: auto;
+      min-height: 0;
+
+      &--bazaar {
+        overflow: hidden;
+        padding: 0;
+      }
+    }
+  }
 
   // 兼容插件直接插入的图标
   .b3-menu__item > svg:not(.b3-menu__icon) {

@@ -310,7 +310,7 @@
       line-height: 36px;
       margin: 0;
 
-      &:not(.fn__none) ~ .b3-menu__item:not(.fn__none) {
+      &:not(.fn__none):not(.config-search-hidden) ~ .b3-menu__item:not(.fn__none):not(.config-search-hidden) {
         border-top: .5px solid var(--b3-theme-background-light);
       }
 

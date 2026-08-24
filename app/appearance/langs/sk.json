@@ -1495,7 +1495,7 @@
 	"rtlTip": "Vykresľovať obsah sprava doľava",
 	"height": "Výška",
 	"deactivateUser": "Deaktivovať účet",
-	"deactivateUserTip": "<ul class='fn__list'><li>Po deaktivácii účtu ho nemožno obnoviť, neskúšajte to len tak</li><li>Meno používateľa bude vyplnené <code>someone101</code> (nasledujúce číslo je číslo používateľa), heslo bude resetované náhodným číslom</li><li>Vymaže sa prezývka používateľa, vlastná značka, URL, profil, avatar, odkaz na lokalitu, poštová adresa a ďalšie informácie</li><li>Všetky prepínače nastavení súkromia budú obnovené na predvolený verejný stav</li><li>Zruší sa väzba na účty tretích strán a mobilné telefóny</li><li><strong>Meno používateľa, e-mailová adresa, telefónne číslo a viazaný účet tretích strán nemožno v budúcnosti znova použiť</strong></li><li>Stav používateľa sa nastaví na zakázaný, prihlásenie sa zakáže</li></ul>",
+	"deactivateUserTip": "<ul class='fn__list'><li>Po deaktivácii účtu ho nemožno obnoviť, neskúšajte to len tak</li><li>Meno používateľa bude vyplnené <code>someone101</code> (nasledujúce číslo je číslo používateľa), heslo bude resetované náhodným číslom</li><li>Vymaže sa prezývka používateľa, vlastná značka, URL, profil, avatar, odkaz na lokalitu a ďalšie informácie</li><li>Všetky prepínače nastavení súkromia budú obnovené na predvolený verejný stav</li><li>Zruší sa väzba na účty tretích strán a mobilné telefóny</li><li><strong>Meno používateľa, e-mailová adresa, telefónne číslo a viazaný účet tretích strán nemožno v budúcnosti znova použiť</strong></li><li>Stav používateľa sa nastaví na zakázaný, prihlásenie sa zakáže</li></ul>",
 	"mergeCell": "Zlúčiť bunky",
 	"cancelMerged": "Zrušiť zlúčenie buniek",
 	"useDefaultWidth": "Predvolená šírka stĺpca",

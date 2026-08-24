@@ -202,7 +202,7 @@ func TestExternalMCPToolsAreNotReexposed(t *testing.T) {
 }
 
 func TestAgentOnlyToolsAreNotExposed(t *testing.T) {
-	for _, tool := range []*tools.Tool{tools.QuestionTool, tools.TodoWriteTool} {
+	for _, tool := range []*tools.Tool{tools.QuestionTool, tools.TodoWriteTool, tools.AgentLogTool} {
 		if !tool.AgentOnly {
 			t.Fatalf("Agent session tool was not marked as Agent-only: %s", tool.Name)
 		}

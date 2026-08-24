@@ -52,11 +52,11 @@ func TestCapabilityManifestIncludesAgentOnly(t *testing.T) {
 	manifests := ListCapabilityManifests()
 	found := map[string]bool{}
 	for _, manifest := range manifests {
-		if manifest.Name == QuestionTool.Name || manifest.Name == TodoWriteTool.Name {
+		if manifest.Name == QuestionTool.Name || manifest.Name == TodoWriteTool.Name || manifest.Name == AgentLogTool.Name {
 			found[manifest.Name] = manifest.AgentOnly
 		}
 	}
-	for _, name := range []string{QuestionTool.Name, TodoWriteTool.Name} {
+	for _, name := range []string{QuestionTool.Name, TodoWriteTool.Name, AgentLogTool.Name} {
 		if !found[name] {
 			t.Fatalf("Agent-only capability metadata is missing: %s", name)
 		}

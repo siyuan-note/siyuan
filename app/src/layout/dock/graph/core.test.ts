@@ -4,6 +4,7 @@ import {
     centerGraphCamera,
     createInitialPositions,
     fitGraphCamera,
+    fitSingleNodeCamera,
     getGraphArrowGeometry,
     getGraphArrowLength,
     getDraggedGraphPosition,
@@ -112,6 +113,20 @@ describe("graph data normalization", () => {
     it("does not enlarge sparse graphs above their natural scale", () => {
         const camera = fitGraphCamera(new Float32Array([0, 0]), new Float32Array([15]), 400, 300);
         assert.deepEqual(camera, {scale: 1, x: 200, y: 150});
+    });
+
+    it("fits and centers a single node together with its label", () => {
+        const measureLabel = (scale: number) => ({height: 32 * scale, width: 180 * scale});
+        const camera = fitSingleNodeCamera(0, 0, 15, 180, 200, 1, measureLabel);
+        const radius = 15 * camera.scale;
+        const label = measureLabel(camera.scale);
+        const left = camera.x - radius;
+        const right = camera.x + radius + 4 + label.width;
+
+        assert.ok(camera.scale < 1);
+        assert.ok(left >= 8 - Number.EPSILON);
+        assert.ok(right <= 172 + Number.EPSILON);
+        assert.ok(Math.abs((left + right) / 2 - 90) < Number.EPSILON);
     });
 
     it("centers positions after resizing without changing the scale", () => {

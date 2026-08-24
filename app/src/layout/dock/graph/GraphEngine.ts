@@ -3,6 +3,7 @@ import {
     centerGraphCamera,
     createInitialPositions,
     fitGraphCamera,
+    fitSingleNodeCamera,
     getDraggedGraphPosition,
     getGraphNodeSize,
     normalizeGraphData,
@@ -182,6 +183,9 @@ export class GraphEngine {
                 });
             }
         }
+        if (nodeSizeChanged && this.data.nodes.length === 1 && !this.cameraTouched) {
+            this.fit(false);
+        }
         this.scheduleRender();
     }
 
@@ -220,6 +224,9 @@ export class GraphEngine {
         }
         this.selected = selected;
         this.selectionVersion++;
+        if (this.data?.nodes.length === 1 && !this.cameraTouched) {
+            this.fit(false);
+        }
         this.scheduleRender();
     }
 
@@ -278,7 +285,8 @@ export class GraphEngine {
         if (wasHidden) {
             this.postLayoutMessage({type: "resume", generation: this.generation});
         }
-        if (this.data && !this.cameraTouched && (wasHidden || this.autoFitPending)) {
+        if (this.data && !this.cameraTouched &&
+            (wasHidden || this.autoFitPending || (sizeChanged && this.data.nodes.length === 1))) {
             this.fit(false);
         } else if (this.data && sizeChanged) {
             this.focusAnimation++;
@@ -466,7 +474,19 @@ export class GraphEngine {
         if (!this.data || this.width < 1 || this.height < 1) {
             return;
         }
-        const target = fitGraphCamera(this.positions, this.data.sizes, this.width, this.height);
+        let target = fitGraphCamera(this.positions, this.data.sizes, this.width, this.height);
+        const node = this.data.nodes.length === 1 ? this.data.nodes[0] : undefined;
+        if (node?.label) {
+            target = fitSingleNodeCamera(
+                this.positions[0],
+                this.positions[1],
+                this.data.sizes[0],
+                this.width,
+                this.height,
+                target.scale,
+                (scale) => this.labelRenderer.measureLabel(node.label, scale, this.selected === 0 || this.hovered === 0),
+            );
+        }
         if (!animate) {
             this.focusAnimation++;
             this.camera = target;
@@ -745,11 +765,13 @@ export class GraphEngine {
     private updateHover(pointer: IPointerPosition) {
         const hovered = this.hitTest(pointer.x, pointer.y);
         this.setHovered(hovered);
-        if (hovered < 0 || !this.data.nodes[hovered].title) {
+        const node = hovered < 0 ? undefined : this.data.nodes[hovered];
+        const title = node?.title || (this.data.nodes.length === 1 ? node?.label : "");
+        if (!title) {
             this.hideTooltip();
             return;
         }
-        this.tooltip.textContent = this.data.nodes[hovered].title;
+        this.tooltip.textContent = title;
         this.tooltip.style.left = `${pointer.x + 12}px`;
         this.tooltip.style.top = `${pointer.y + 12}px`;
         this.tooltip.classList.remove("fn__none");

@@ -70,7 +70,7 @@ func TestFilterAttributeViewItemIDs(t *testing.T) {
 	depth := 1
 
 	eligible := filterAttributeViewItemIDs(attrView, filters, &depth,
-		map[string]*av.AttributeView{attrView.ID: attrView})
+		map[string]*av.AttributeView{attrView.ID: attrView}, NewAttributeViewRenderContext())
 
 	if 1 != len(eligible) || !eligible[itemA] {
 		t.Fatalf("unexpected eligible items: %+v", eligible)
@@ -149,7 +149,7 @@ func TestFilterAttributeViewItemIDsWithRollupDependency(t *testing.T) {
 	eligible := filterAttributeViewItemIDs(sourceView, filters, &depth, map[string]*av.AttributeView{
 		sourceView.ID: sourceView,
 		targetView.ID: targetView,
-	})
+	}, NewAttributeViewRenderContext())
 
 	if 1 != len(eligible) || !eligible[sourceItem] {
 		t.Fatalf("unexpected eligible items: %+v", eligible)

@@ -2630,6 +2630,7 @@
 		"370": "tráfico acelerado por LAN %s",
 		"371": "El cuaderno ya existe",
 		"372": "El cuaderno se ha restaurado y permanece cerrado",
-		"373": "Este archivo contiene datos de cuadernos. Impórtelo desde [Árbol de documentos - Más - Importar cuaderno]"
+		"373": "Este archivo contiene datos de cuadernos. Impórtelo desde [Árbol de documentos - Más - Importar cuaderno]",
+		"374": "Base de datos [%s], campo de plantilla [%s], primer elemento afectado [%s] (ID del elemento: %s), cantidad de elementos afectados: %d, error: %s"
 	}
 }

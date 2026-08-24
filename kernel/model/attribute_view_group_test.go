@@ -134,7 +134,8 @@ func TestRenderReusedGroupViewPreservesFilterSortCalcAndPagination(t *testing.T)
 	source := sql.NewGroupViewRenderSource(parent, "")
 	table := sql.RenderGroupViewWithSource(attrView, view, group, "", source, false).(*av.Table)
 
-	if _, _, err := renderViewableInstance(table, view, attrView, 1, 1, false, ""); nil != err {
+	if _, _, err := renderViewableInstance(table, view, attrView, 1, 1, false, "",
+		sql.NewAttributeViewRenderContext()); nil != err {
 		t.Fatal(err)
 	}
 	if 2 != table.RowCount || 1 != len(table.Rows) || "charlie" != table.Rows[0].ID {

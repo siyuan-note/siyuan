@@ -2630,6 +2630,7 @@
 		"370": "LAN hızlandırılmış trafik %s",
 		"371": "Defter zaten mevcut",
 		"372": "Defter geri yüklendi ve kapalı kalacak",
-		"373": "Bu arşiv not defteri verileri içeriyor. [Belge ağacı - Diğer - Not defteri içe aktar] menüsünden içe aktarın"
+		"373": "Bu arşiv not defteri verileri içeriyor. [Belge ağacı - Diğer - Not defteri içe aktar] menüsünden içe aktarın",
+		"374": "Veritabanı [%s], şablon alanı [%s], etkilenen ilk öğe [%s] (öğe kimliği: %s), etkilenen öğe sayısı: %d, hata: %s"
 	}
 }

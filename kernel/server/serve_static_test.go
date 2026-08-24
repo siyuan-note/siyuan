@@ -17,6 +17,10 @@
 package server
 
 import (
+	"bytes"
+	"compress/gzip"
+	"io"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -68,6 +72,70 @@ func TestRegisterStaticFileHandlers(t *testing.T) {
 	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/files/package/index.html", nil))
 	if recorder.Code != http.StatusForbidden {
 		t.Fatalf("access callback should deny the request, got %d", recorder.Code)
+	}
+}
+
+func TestGzipMiddlewareServesPrecompressedStaticFile(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	source := make([]byte, 128*1024)
+	if _, err := rand.New(rand.NewSource(1)).Read(source); err != nil {
+		t.Fatal(err)
+	}
+
+	var compressed bytes.Buffer
+	writer := gzip.NewWriter(&compressed)
+	if _, err := writer.Write(source); err != nil {
+		t.Fatal(err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if compressed.Len() <= 32*1024 {
+		t.Fatalf("compressed test file is too small: %d", compressed.Len())
+	}
+
+	filePath := filepath.Join(t.TempDir(), "data.gz")
+	if err := os.WriteFile(filePath, compressed.Bytes(), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	engine := gin.New()
+	engine.Use(gzipMiddleware())
+	for _, requestPath := range []string{"/data.gz", "/data.dump"} {
+		engine.GET(requestPath, func(c *gin.Context) {
+			http.ServeFile(c.Writer, c.Request, filePath)
+		})
+	}
+
+	for _, requestPath := range []string{"/data.gz", "/data.dump"} {
+		t.Run(requestPath, func(t *testing.T) {
+			request := httptest.NewRequest(http.MethodGet, requestPath, nil)
+			request.Header.Set("Accept-Encoding", "gzip")
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, request)
+			if recorder.Code != http.StatusOK {
+				t.Fatalf("unexpected status: %d", recorder.Code)
+			}
+
+			body := recorder.Body.Bytes()
+			if recorder.Header().Get("Content-Encoding") == "gzip" {
+				reader, err := gzip.NewReader(bytes.NewReader(body))
+				if err != nil {
+					t.Fatal(err)
+				}
+				body, err = io.ReadAll(reader)
+				if err != nil {
+					_ = reader.Close()
+					t.Fatal(err)
+				}
+				if err = reader.Close(); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if !bytes.Equal(body, compressed.Bytes()) {
+				t.Fatalf("response differs from the static file: got %d bytes, want %d", len(body), compressed.Len())
+			}
+		})
 	}
 }
 

@@ -152,9 +152,7 @@ func Serve(fastMode bool, cookieKey string) {
 		model.Activity,   // 记录用户活动时间，用于 AutoFixIndex 的空闲判断
 		corsMiddleware(), // 后端服务支持 CORS 预检请求验证 https://github.com/siyuan-note/siyuan/pull/5593
 		jwtMiddleware,    // 解析 JWT https://github.com/siyuan-note/siyuan/issues/11364
-		gzip.Gzip(gzip.DefaultCompression,
-			gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac"}),
-			gzip.WithExcludedPathsRegexs([]string{`(?i)\.hei[cf]$`})),
+		gzipMiddleware(),
 	)
 
 	sessionStore = cookie.NewStore([]byte(cookieKey))
@@ -310,6 +308,12 @@ func Serve(fastMode bool, cookieKey string) {
 			os.Exit(logging.ExitCodeUnavailablePort)
 		}
 	}
+}
+
+func gzipMiddleware() gin.HandlerFunc {
+	return gzip.Gzip(gzip.DefaultCompression,
+		gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac", ".gz"}),
+		gzip.WithExcludedPathsRegexs([]string{`(?i)\.hei[cf]$`}))
 }
 
 func rewritePortJSON(pid, port string) {

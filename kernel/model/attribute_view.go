@@ -3597,24 +3597,12 @@ func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttribu
 	if nil != err {
 		return
 	}
-	sql.RenderView(attrView, view, "", false)
-
-	var keyValues []*av.KeyValues
-	for _, kv := range attrView.KeyValues {
-		if av.KeyTypeLineNumber == kv.Key.Type {
-			continue
-		}
-
-		itemKeyValues := &av.KeyValues{Key: kv.Key}
-		for _, value := range kv.Values {
-			if value.BlockID == itemID {
-				itemKeyValues.Values = append(itemKeyValues.Values, value)
-			}
-		}
-		if 0 < len(itemKeyValues.Values) {
-			keyValues = append(keyValues, itemKeyValues)
-		}
+	viewable := sql.RenderView(attrView, view, "", false)
+	collection, ok := viewable.(av.Collection)
+	if !ok {
+		return
 	}
+	keyValues := getAttributeViewItemKeyValues(attrView, collection, itemID, false)
 
 	refreshAttrViewKeyIDs(attrView, true)
 	sorts := map[string]int{}
@@ -3678,26 +3666,12 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 			continue
 		}
 
-		// 渲染填充 attrView.KeyValues
-		sql.RenderView(attrView, view, "", false)
-
-		var keyValues []*av.KeyValues
-		for _, kv := range attrView.KeyValues {
-			if av.KeyTypeLineNumber == kv.Key.Type {
-				// 属性面板中不显示行号字段
-				// The line number field no longer appears in the database attribute panel https://github.com/siyuan-note/siyuan/issues/11319
-				continue
-			}
-
-			kValues := &av.KeyValues{Key: kv.Key}
-			for _, v := range kv.Values {
-				if v.BlockID == itemID {
-					kValues.Values = append(kValues.Values, v)
-				}
-			}
-
-			keyValues = append(keyValues, kValues)
+		viewable := sql.RenderView(attrView, view, "", false)
+		collection, ok := viewable.(av.Collection)
+		if !ok {
+			continue
 		}
+		keyValues := getAttributeViewItemKeyValues(attrView, collection, itemID, true)
 
 		// 字段排序
 		refreshAttrViewKeyIDs(attrView, true)
@@ -3759,6 +3733,30 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 			KeyValues:     keyValues,
 			ItemPositions: getAttributeViewItemPositions(attrView, itemID),
 		})
+	}
+	return
+}
+
+func getAttributeViewItemKeyValues(attrView *av.AttributeView, collection av.Collection, itemID string,
+	includeEmpty bool) (ret []*av.KeyValues) {
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeLineNumber == keyValues.Key.Type {
+			continue
+		}
+
+		itemKeyValues := &av.KeyValues{Key: keyValues.Key}
+		if value := collection.GetValue(itemID, keyValues.Key.ID); nil != value {
+			itemKeyValues.Values = append(itemKeyValues.Values, value)
+		} else {
+			for _, value := range keyValues.Values {
+				if value.BlockID == itemID {
+					itemKeyValues.Values = append(itemKeyValues.Values, value)
+				}
+			}
+		}
+		if includeEmpty || 0 < len(itemKeyValues.Values) {
+			ret = append(ret, itemKeyValues)
+		}
 	}
 	return
 }

@@ -47,6 +47,76 @@ func TestFillAttributeViewKeyValuesSkipsMissingKey(t *testing.T) {
 	}
 }
 
+func TestFillAttributeViewKeyValuesReplacesRenderedValues(t *testing.T) {
+	const (
+		itemID        = "20260825000000-item001"
+		templateKeyID = "20260825000001-template"
+		textKeyID     = "20260825000002-textkey1"
+		valueID       = "20260825000003-value001"
+		createdKeyID  = "20260825000006-created1"
+		updatedKeyID  = "20260825000007-updated1"
+	)
+	staleTemplate := &av.Value{
+		ID: valueID, KeyID: templateKeyID, BlockID: itemID, Type: av.KeyTypeTemplate,
+		Template: &av.ValueTemplate{Content: ".action{old}"},
+	}
+	duplicateTemplate := staleTemplate.Clone()
+	storedText := &av.Value{
+		ID: "20260825000004-textval1", KeyID: textKeyID, BlockID: itemID, Type: av.KeyTypeText,
+		Text: &av.ValueText{Content: "stored"},
+	}
+	attrView := &av.AttributeView{KeyValues: []*av.KeyValues{
+		{Key: &av.Key{ID: templateKeyID, Type: av.KeyTypeTemplate}, Values: []*av.Value{staleTemplate, duplicateTemplate}},
+		{Key: &av.Key{ID: createdKeyID, Type: av.KeyTypeCreated}, Values: []*av.Value{{
+			ID: "20260825000008-createdv", KeyID: createdKeyID, BlockID: itemID, Type: av.KeyTypeCreated,
+		}}},
+		{Key: &av.Key{ID: updatedKeyID, Type: av.KeyTypeUpdated}, Values: []*av.Value{{
+			ID: "20260825000009-updatedv", KeyID: updatedKeyID, BlockID: itemID, Type: av.KeyTypeUpdated,
+		}}},
+		{Key: &av.Key{ID: textKeyID, Type: av.KeyTypeText}, Values: []*av.Value{storedText}},
+	}}
+	renderedTemplate := &av.Value{
+		ID: valueID, KeyID: templateKeyID, BlockID: itemID, Type: av.KeyTypeTemplate,
+		Template: &av.ValueTemplate{Content: ".action{current}"},
+	}
+	renderedText := &av.Value{
+		ID: storedText.ID, KeyID: textKeyID, BlockID: itemID, Type: av.KeyTypeText,
+		Text: &av.ValueText{Content: "rendered"},
+	}
+	renderedCreated := &av.Value{
+		ID: "20260825000008-createdv", KeyID: createdKeyID, BlockID: itemID, Type: av.KeyTypeCreated,
+	}
+	renderedUpdated := &av.Value{
+		ID: "20260825000009-updatedv", KeyID: updatedKeyID, BlockID: itemID, Type: av.KeyTypeUpdated,
+	}
+	table := &av.Table{Rows: []*av.TableRow{{
+		ID: itemID,
+		Cells: []*av.TableCell{
+			{BaseValue: &av.BaseValue{Value: renderedTemplate}},
+			{BaseValue: &av.BaseValue{Value: renderedCreated}},
+			{BaseValue: &av.BaseValue{Value: renderedUpdated}},
+			{BaseValue: &av.BaseValue{Value: renderedText}},
+		},
+	}}}
+
+	fillAttributeViewKeyValues(attrView, table)
+	if 1 != len(attrView.KeyValues[0].Values) || renderedTemplate != attrView.KeyValues[0].Values[0] {
+		t.Fatalf("rendered template value was not used: %+v", attrView.KeyValues[0].Values)
+	}
+	if !renderedTemplate.IsRenderAutoFill {
+		t.Fatal("rendered template value was not marked as auto-filled")
+	}
+	if renderedCreated != attrView.KeyValues[1].Values[0] || !renderedCreated.IsRenderAutoFill {
+		t.Fatalf("rendered created value was not used: %+v", attrView.KeyValues[1].Values[0])
+	}
+	if renderedUpdated != attrView.KeyValues[2].Values[0] || !renderedUpdated.IsRenderAutoFill {
+		t.Fatalf("rendered updated value was not used: %+v", attrView.KeyValues[2].Values[0])
+	}
+	if storedText != attrView.KeyValues[3].Values[0] || "stored" != attrView.KeyValues[3].Values[0].Text.Content {
+		t.Fatalf("stored text value was replaced: %+v", attrView.KeyValues[3].Values[0])
+	}
+}
+
 func TestFillAttributeViewBlockRefSubtypes(t *testing.T) {
 	const avID = "20260814000000-avtest1"
 	dynamic := &av.Value{

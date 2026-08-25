@@ -1032,6 +1032,23 @@ func fillAttributeViewKeyValues(attrView *av.AttributeView, collection av.Collec
 			logging.LogWarnf("attribute view [%s] key [%s] not found while filling values", attrView.ID, keyID)
 			continue
 		}
+		if av.KeyTypeTemplate == keyValues.Key.Type || av.KeyTypeCreated == keyValues.Key.Type || av.KeyTypeUpdated == keyValues.Key.Type {
+			renderedBlockIDs := map[string]bool{}
+			for _, val := range values {
+				val.IsRenderAutoFill = true
+				renderedBlockIDs[val.BlockID] = true
+			}
+
+			retained := keyValues.Values[:0]
+			for _, val := range keyValues.Values {
+				if !renderedBlockIDs[val.BlockID] {
+					retained = append(retained, val)
+				}
+			}
+			keyValues.Values = append(retained, values...)
+			continue
+		}
+
 		existingIDs := map[string]bool{}
 		for _, kv := range keyValues.Values {
 			existingIDs[kv.ID] = true
@@ -1040,6 +1057,7 @@ func fillAttributeViewKeyValues(attrView *av.AttributeView, collection av.Collec
 			if !existingIDs[val.ID] {
 				val.IsRenderAutoFill = true
 				keyValues.Values = append(keyValues.Values, val)
+				existingIDs[val.ID] = true
 			}
 		}
 	}

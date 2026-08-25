@@ -402,7 +402,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     });
     menu.addSeparator();
     const html = `<div class="fn__flex fn__flex-wrap" style="width:238px;max-height:238px;overflow:auto">${getAVColorGridHTML(
-        getAVCustomColors(data), color, window.siyuan.languages.manageCustomColors)}</div>`;
+        getAVCustomColors(data), color, window.siyuan.languages.manageColors)}</div>`;
     menu.addItem({
         type: "empty",
         iconHTML: "",

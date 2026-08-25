@@ -1,4 +1,8 @@
 {
+	"manageColors": "色を管理",
+	"manageBuiltinColors": "組み込み色を管理",
+	"showInColorPicker": "カラーピッカーに表示",
+	"resetAll": "すべてリセット",
 	"exportFile": "ファイルをエクスポート",
 	"namingEmpty": "名前を空にすることはできません",
 	"recentCreated": "最近作成",

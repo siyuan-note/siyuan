@@ -1,4 +1,8 @@
 {
+	"manageColors": "Управление цветами",
+	"manageBuiltinColors": "Управление встроенными цветами",
+	"showInColorPicker": "Показывать в палитре цветов",
+	"resetAll": "Сбросить всё",
 	"exportFile": "Экспортировать файл",
 	"namingEmpty": "Имя не может быть пустым",
 	"recentCreated": "Недавно созданные",

@@ -29,6 +29,7 @@ import {
     isDefaultTableColumnWidth,
     TABLE_DEFAULT_COLUMN_WIDTH,
 } from "./tableColumnWidth";
+import {getVisibleBuiltinColorIndexes} from "../toolbar/inlineStyle";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -192,7 +193,8 @@ export const setTableCellStyle = (protyle: IProtyle, node: HTMLElement, cells: H
 export const getTableCellBackgroundMenus = (cells: HTMLTableCellElement[],
                                              onChange: (color: string) => void): IMenu[] => {
     const backgroundColor = getCommonTableCellStyle(cells, "background-color");
-    const colors = ["", ...Array.from({length: 13}, (_, index) => `var(--b3-font-background${index + 1})`)];
+    const colors = ["", ...getVisibleBuiltinColorIndexes("backgroundColor")
+        .map(index => `var(--b3-font-background${index})`)];
     const colorHTML = colors.map(color => {
         const currentClass = backgroundColor === color ? " color__square--current" : "";
         const defaultClass = color ? "" : " ariaLabel";

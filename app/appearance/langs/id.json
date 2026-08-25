@@ -1,4 +1,8 @@
 {
+	"manageColors": "Kelola warna",
+	"manageBuiltinColors": "Kelola warna bawaan",
+	"showInColorPicker": "Tampilkan di pemilih warna",
+	"resetAll": "Atur ulang semua",
 	"exportFile": "Ekspor file",
 	"namingEmpty": "Nama tidak boleh kosong",
 	"recentCreated": "Baru dibuat",

@@ -1,4 +1,8 @@
 {
+	"manageColors": "Керування кольорами",
+	"manageBuiltinColors": "Керування вбудованими кольорами",
+	"showInColorPicker": "Показувати в палітрі кольорів",
+	"resetAll": "Скинути все",
 	"exportFile": "Експортувати файл",
 	"namingEmpty": "Назва не може бути порожньою",
 	"recentCreated": "Нещодавно створені",

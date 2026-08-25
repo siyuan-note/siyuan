@@ -1,4 +1,8 @@
 {
+	"manageColors": "ניהול צבעים",
+	"manageBuiltinColors": "ניהול צבעים מובנים",
+	"showInColorPicker": "הצגה בבורר הצבעים",
+	"resetAll": "איפוס הכול",
 	"exportFile": "ייצוא קובץ",
 	"namingEmpty": "השם לא יכול להיות ריק",
 	"recentCreated": "נוצרו לאחרונה",

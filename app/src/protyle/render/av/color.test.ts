@@ -1,4 +1,4 @@
-import {describe, it} from "node:test";
+import {afterEach, describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     getAvailableAVCustomColorIndex,
@@ -8,6 +8,7 @@ import {
     getNextAVOptionColor,
     normalizeAVColorIndex,
 } from "./color";
+import {INLINE_STYLE_EMPTY, setInlineStylesCache} from "../../toolbar/inlineStyle";
 
 const customColor: IAVCustomColor = {
     index: 15,
@@ -21,6 +22,10 @@ const customColor: IAVCustomColor = {
     },
 };
 
+afterEach(() => {
+    setInlineStylesCache(INLINE_STYLE_EMPTY);
+});
+
 describe("AV color indexes", () => {
     it("accepts only bounded decimal indexes", () => {
         assert.equal(normalizeAVColorIndex("15"), 15);
@@ -31,6 +36,24 @@ describe("AV color indexes", () => {
     it("cycles new options through built-in colors", () => {
         assert.equal(getNextAVOptionColor(0), "1");
         assert.equal(getNextAVOptionColor(14), "1");
+    });
+
+    it("skips hidden built-in colors while keeping the neutral color", () => {
+        setInlineStylesCache({
+            ...INLINE_STYLE_EMPTY,
+            builtin: {
+                ...INLINE_STYLE_EMPTY.builtin,
+                hidden: {
+                    ...INLINE_STYLE_EMPTY.builtin.hidden,
+                    av: Array.from({length: 13}, (_, index) => index + 1),
+                },
+            },
+        });
+        assert.equal(getNextAVOptionColor(0), "14");
+        assert.equal(getNextAVOptionColor(12), "14");
+        const html = getAVColorGridHTML([], "1", "Manage");
+        assert.doesNotMatch(html, /data-color="1"/);
+        assert.match(html, /data-color="14"/);
     });
 
     it("finds the first available custom index", () => {

@@ -12,6 +12,7 @@ import {
     getAVCustomColors,
 } from "./color";
 import {getInlineStyleType, getInlineStylesCache} from "../../toolbar/inlineStyle";
+import {openBuiltinColorDialog} from "../../toolbar/builtinColorDialog";
 import * as dayjs from "dayjs";
 
 const cloneCustomColors = (colors: IAVCustomColor[]) => JSON.parse(JSON.stringify(colors)) as IAVCustomColor[];
@@ -31,14 +32,20 @@ export const openAVCustomColorDialog = (options: {
     let editingIndex: number | undefined;
     let editingColorIndex: number | undefined;
     const dialog = new Dialog({
-        title: window.siyuan.languages.manageCustomColors,
+        title: window.siyuan.languages.manageColors,
         width: isMobile() ? "92vw" : "600px",
         content: `<div class="b3-dialog__content" style="max-height:70vh;overflow:auto">
     <div data-panel="list">
         <div data-type="avCustomColorList" class="b3-list b3-list--background fn__selectnone" style="--file-toggle-width:0px"></div>
+        <div class="fn__flex" data-type="avColorButtons">
+        <button class="b3-button b3-button--outline" data-action="manageBuiltin" type="button">
+            <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.manageBuiltinColors}
+        </button>
+        <div class="fn__space"></div>
         <button class="b3-button b3-button--outline" data-action="new" type="button">
             <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}
         </button>
+        </div>
     </div>
     <div data-panel="editor" class="fn__none">
         <div class="b3-label b3-label--inner" data-field="colorIndex"></div>
@@ -62,6 +69,7 @@ export const openAVCustomColorDialog = (options: {
     const editorPanel = dialog.element.querySelector('[data-panel="editor"]') as HTMLElement;
     const listElement = dialog.element.querySelector('[data-type="avCustomColorList"]') as HTMLElement;
     const newElement = dialog.element.querySelector('[data-action="new"]') as HTMLButtonElement;
+    const buttonsElement = dialog.element.querySelector('[data-type="avColorButtons"]') as HTMLElement;
     const cancelElement = dialog.element.querySelector('[data-action="cancel"]') as HTMLButtonElement;
     const saveElement = dialog.element.querySelector('[data-action="save"]') as HTMLButtonElement;
     const colorIndexElement = dialog.element.querySelector('[data-field="colorIndex"]') as HTMLElement;
@@ -82,7 +90,7 @@ export const openAVCustomColorDialog = (options: {
 </div>`;
         }).join("");
         newElement.disabled = draft.length >= AV_CUSTOM_COLOR_LIMIT;
-        newElement.style.marginTop = draft.length === 0 ? "0" : "8px";
+        buttonsElement.style.marginTop = draft.length === 0 ? "0" : "8px";
     };
 
     const setEditorActionMode = (editing: boolean) => {
@@ -154,6 +162,8 @@ export const openAVCustomColorDialog = (options: {
         const index = parseInt(actionElement.dataset.index);
         if (action === "new") {
             showEditor();
+        } else if (action === "manageBuiltin") {
+            openBuiltinColorDialog("av");
         } else if (action === "edit") {
             showEditor(index);
         } else if (action === "delete") {

@@ -1,4 +1,5 @@
 import {escapeAttr} from "../../../util/escape";
+import {getVisibleBuiltinColorIndexes} from "../../toolbar/inlineStyle";
 
 export const AV_BUILTIN_COLOR_COUNT = 14;
 export const AV_CUSTOM_COLOR_MIN = 15;
@@ -56,8 +57,10 @@ export const getAVBackgroundColor = (value: TAVColorReference) => {
     return `var(--b3-font-background${index > AV_BUILTIN_COLOR_COUNT ? AV_BUILTIN_COLOR_COUNT : index})`;
 };
 
-export const getNextAVOptionColor = (optionCount: number) =>
-    (Math.max(0, optionCount) % AV_BUILTIN_COLOR_COUNT + 1).toString();
+export const getNextAVOptionColor = (optionCount: number) => {
+    const colors = [...getVisibleBuiltinColorIndexes("av"), AV_BUILTIN_COLOR_COUNT];
+    return colors[Math.max(0, optionCount) % colors.length].toString();
+};
 
 export const getAvailableAVCustomColorIndex = (colors: Pick<IAVCustomColor, "index">[]) => {
     const usedIndexes = new Set(colors.map(item => item.index));
@@ -83,9 +86,8 @@ export const getAVResolvedColor = (data: IAV | undefined, color: string) => {
 export const getAVColorGridHTML = (customColors: IAVCustomColor[], currentColor: string,
                                    manageLabel: string) => {
     const currentIndex = normalizeAVColorIndex(currentColor);
-    const colors: TAVColorReference[] = Array.from({length: AV_BUILTIN_COLOR_COUNT}, (_, index) => ({
-        color: (index + 1).toString(),
-    }));
+    const colors: TAVColorReference[] = [...getVisibleBuiltinColorIndexes("av"), AV_BUILTIN_COLOR_COUNT]
+        .map(index => ({color: index.toString()}));
     normalizeAVCustomColors(customColors).forEach(item => {
         colors.push({
             color: item.index.toString(),

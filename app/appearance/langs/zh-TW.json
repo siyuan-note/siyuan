@@ -1,4 +1,8 @@
 {
+	"manageColors": "管理顏色",
+	"manageBuiltinColors": "管理內建顏色",
+	"showInColorPicker": "在顏色選擇器中顯示",
+	"resetAll": "全部重設",
 	"exportFile": "導出檔案",
 	"namingEmpty": "命名不能為空",
 	"recentCreated": "最近建立",

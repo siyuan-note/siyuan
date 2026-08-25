@@ -7707,9 +7707,10 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 }
 
 type attrViewValueUpdateContext struct {
-	keyValues   map[string]*av.KeyValues
-	blockValues map[string]*av.Value
-	values      map[string]map[string]*av.Value
+	keyValues         map[string]*av.KeyValues
+	blockValues       map[string]*av.Value
+	values            map[string]map[string]*av.Value
+	availableAVColors []int
 }
 
 func newAttrViewValueUpdateContext(attrView *av.AttributeView) *attrViewValueUpdateContext {
@@ -7854,12 +7855,23 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 			}
 
 			// The selection options are inconsistent after pasting data into the database https://github.com/siyuan-note/siyuan/issues/11409
+			var availableColors []int
 			for _, valOpt := range val.MSelect {
 				if opt := key.GetOption(valOpt.Content); nil == opt {
 					// 不存在的选项新建保存
 					color := attrView.FilterColorValue(valOpt.Color)
 					if "" == color {
-						color = fmt.Sprintf("%d", 1+rand.Intn(14))
+						if nil == availableColors {
+							if nil != context {
+								if nil == context.availableAVColors {
+									context.availableAVColors = getVisibleAVBuiltinColorIndexes()
+								}
+								availableColors = context.availableAVColors
+							} else {
+								availableColors = getVisibleAVBuiltinColorIndexes()
+							}
+						}
+						color = fmt.Sprintf("%d", availableColors[rand.Intn(len(availableColors))])
 					}
 					opt = &av.SelectOption{Name: valOpt.Content, Color: color}
 					key.Options = append(key.Options, opt)

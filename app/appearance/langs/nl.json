@@ -1,4 +1,8 @@
 {
+	"manageColors": "Kleuren beheren",
+	"manageBuiltinColors": "Ingebouwde kleuren beheren",
+	"showInColorPicker": "Weergeven in de kleurkiezer",
+	"resetAll": "Alles resetten",
 	"exportFile": "Bestand exporteren",
 	"namingEmpty": "De naam mag niet leeg zijn",
 	"recentCreated": "Recent gemaakt",

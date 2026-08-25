@@ -19,6 +19,7 @@ package model
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/88250/lute/ast"
@@ -70,6 +71,49 @@ func fillThemeStyleVar(tree *parse.Tree) {
 func mergeInlineStyleThemeVars(themeStyles map[string]string, styles *InlineStyles, isDarkMode bool) {
 	if styles == nil {
 		return
+	}
+	if styles.Builtin != nil {
+		for _, color := range styles.Builtin.Colors {
+			if color == nil {
+				continue
+			}
+			theme := color.Light
+			if isDarkMode {
+				theme = color.Dark
+			}
+			if theme == nil {
+				continue
+			}
+			index := strconv.Itoa(color.Index)
+			if theme.Color != "" {
+				themeStyles["--b3-font-color"+index] = theme.Color
+			}
+			if theme.BackgroundColor != "" {
+				themeStyles["--b3-font-background"+index] = theme.BackgroundColor
+			}
+		}
+		for _, style := range styles.Builtin.Styles {
+			if style == nil {
+				continue
+			}
+			theme := style.Light
+			if isDarkMode {
+				theme = style.Dark
+			}
+			if theme == nil {
+				continue
+			}
+			prefix := "--b3-inline-builtin-" + style.ID
+			legacyPrefix := "--b3-card-" + style.ID
+			if theme.Color != "" {
+				themeStyles[prefix+"-color"] = theme.Color
+				themeStyles[legacyPrefix+"-color"] = theme.Color
+			}
+			if theme.BackgroundColor != "" {
+				themeStyles[prefix+"-background-color"] = theme.BackgroundColor
+				themeStyles[legacyPrefix+"-background"] = theme.BackgroundColor
+			}
+		}
 	}
 	for _, style := range styles.Styles {
 		if style == nil {

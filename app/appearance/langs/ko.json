@@ -1,4 +1,8 @@
 {
+	"manageColors": "색상 관리",
+	"manageBuiltinColors": "기본 제공 색상 관리",
+	"showInColorPicker": "색상 선택기에 표시",
+	"resetAll": "모두 초기화",
 	"exportFile": "파일 내보내기",
 	"namingEmpty": "이름은 비워 둘 수 없습니다",
 	"recentCreated": "최근 생성",

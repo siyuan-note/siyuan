@@ -1,4 +1,8 @@
 {
+	"manageColors": "จัดการสี",
+	"manageBuiltinColors": "จัดการสีในตัว",
+	"showInColorPicker": "แสดงในตัวเลือกสี",
+	"resetAll": "รีเซ็ตทั้งหมด",
 	"exportFile": "ส่งออกไฟล์",
 	"namingEmpty": "ชื่อต้องไม่ว่างเปล่า",
 	"recentCreated": "สร้างล่าสุด",

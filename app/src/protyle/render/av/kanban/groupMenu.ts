@@ -91,7 +91,7 @@ export const openKanbanGroupMenu = (options: {
     menu.addSeparator();
     const colorHTML = `<div class="b3-menu__labels">${window.siyuan.languages.color}</div>
 <div class="fn__flex fn__flex-wrap" style="width:238px;max-height:238px;overflow:auto">${getAVColorGridHTML(
-        getAVCustomColors(data), option.color, window.siyuan.languages.manageCustomColors)}</div>`;
+        getAVCustomColors(data), option.color, window.siyuan.languages.manageColors)}</div>`;
     menu.addItem({
         type: "empty",
         iconHTML: "",

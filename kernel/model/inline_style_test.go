@@ -18,8 +18,10 @@ package model
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -36,7 +38,11 @@ func TestInlineStylesCRUD(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if styles.Version != InlineStylesVersion || styles.Styles == nil || len(styles.Styles) != 0 {
+	if styles.Version != InlineStylesVersion || styles.Styles == nil || len(styles.Styles) != 0 ||
+		styles.Builtin == nil || styles.Builtin.Colors == nil || styles.Builtin.Styles == nil ||
+		styles.Builtin.Hidden == nil || styles.Builtin.Hidden.Color == nil ||
+		styles.Builtin.Hidden.BackgroundColor == nil || styles.Builtin.Hidden.Style1 == nil ||
+		styles.Builtin.Hidden.AV == nil {
 		t.Fatalf("unexpected empty inline styles: %#v", styles)
 	}
 	if _, err = os.Stat(inlineStylesPath()); !os.IsNotExist(err) {
@@ -77,6 +83,148 @@ func TestInlineStylesCRUD(t *testing.T) {
 	}
 	if _, changed, err = SetInlineStyles(loaded.Styles); err != nil || changed {
 		t.Fatalf("unchanged inline styles were rewritten: changed=%t, err=%v", changed, err)
+	}
+}
+
+func TestInlineStylesBuiltinCRUD(t *testing.T) {
+	setupInlineStylesTest(t)
+
+	saved, changed, err := SetInlineStylesData(&InlineStyles{
+		Version: InlineStylesVersion,
+		Styles:  []*InlineStyle{},
+		Builtin: &InlineStyleBuiltin{
+			Colors: []*InlineStyleBuiltinColor{
+				{
+					Index: 13,
+					Light: &InlineStyleTheme{BackgroundColor: " #ABCDEF "},
+					Dark:  &InlineStyleTheme{BackgroundColor: "#123456"},
+				},
+				{
+					Index: 2,
+					Light: &InlineStyleTheme{Color: "#AABBCC", BackgroundColor: "#DDEEFF"},
+					Dark:  &InlineStyleTheme{Color: "#112233", BackgroundColor: "#445566"},
+				},
+			},
+			Styles: []*InlineStyleBuiltinStyle{
+				{
+					ID:    "success",
+					Light: &InlineStyleTheme{Color: "#ABCDEF"},
+					Dark:  &InlineStyleTheme{Color: "#123456"},
+				},
+				{
+					ID:    " warning ",
+					Light: &InlineStyleTheme{Color: "#AABBCC", BackgroundColor: "#DDEEFF"},
+					Dark:  &InlineStyleTheme{Color: "#112233", BackgroundColor: "#445566"},
+				},
+			},
+			Hidden: &InlineStyleBuiltinHidden{
+				Color:           []int{13, 2, 2},
+				BackgroundColor: []int{9, 1},
+				Style1:          []string{"success", " warning ", "success"},
+				AV:              []int{12, 3, 3},
+			},
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !changed || len(saved.Builtin.Colors) != 2 || saved.Builtin.Colors[0].Index != 2 ||
+		saved.Builtin.Colors[1].Index != 13 || saved.Builtin.Colors[0].Light.Color != "#aabbcc" ||
+		len(saved.Builtin.Styles) != 2 || saved.Builtin.Styles[0].ID != "warning" ||
+		saved.Builtin.Styles[1].ID != "success" {
+		t.Fatalf("builtin colors were not normalized: %#v", saved.Builtin)
+	}
+	if !reflect.DeepEqual(saved.Builtin.Hidden.Color, []int{2, 13}) ||
+		!reflect.DeepEqual(saved.Builtin.Hidden.BackgroundColor, []int{1, 9}) ||
+		!reflect.DeepEqual(saved.Builtin.Hidden.Style1, []string{"warning", "success"}) ||
+		!reflect.DeepEqual(saved.Builtin.Hidden.AV, []int{3, 12}) {
+		t.Fatalf("hidden builtin colors were not normalized: %#v", saved.Builtin.Hidden)
+	}
+	if visible := getVisibleAVBuiltinColorIndexes(); !reflect.DeepEqual(visible,
+		[]int{1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 13, neutralAVColorIndex}) {
+		t.Fatalf("unexpected visible AV builtin colors: %#v", visible)
+	}
+
+	legacySaved, changed, err := SetInlineStyles([]*InlineStyle{{
+		Name:  "Custom",
+		Light: &InlineStyleTheme{Color: "#abcdef"},
+		Dark:  &InlineStyleTheme{Color: "#123456"},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !changed || len(legacySaved.Styles) != 1 || !reflect.DeepEqual(legacySaved.Builtin, saved.Builtin) {
+		t.Fatalf("legacy update did not preserve builtin colors: %#v", legacySaved)
+	}
+
+	reset, changed, err := SetInlineStylesData(&InlineStyles{Version: InlineStylesVersion, Styles: legacySaved.Styles})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !changed || len(reset.Builtin.Colors) != 0 || len(reset.Builtin.Styles) != 0 ||
+		len(reset.Builtin.Hidden.Color) != 0 || len(reset.Builtin.Hidden.BackgroundColor) != 0 ||
+		len(reset.Builtin.Hidden.Style1) != 0 || len(reset.Builtin.Hidden.AV) != 0 {
+		t.Fatalf("missing builtin configuration was not normalized to empty: %#v", reset.Builtin)
+	}
+}
+
+func TestInlineStylesVersion1Migration(t *testing.T) {
+	setupInlineStylesTest(t)
+	legacyData := []byte(`{"version":1,"styles":[{"id":"20260821000000-abcdefg","name":"Legacy","light":{"color":"#abcdef"},"dark":{"color":"#123456"}}]}`)
+	if err := os.MkdirAll(filepath.Dir(inlineStylesPath()), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(inlineStylesPath(), legacyData, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	migrated, err := GetInlineStyles()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if migrated.Version != InlineStylesVersion || len(migrated.Styles) != 1 || migrated.Builtin == nil ||
+		len(migrated.Builtin.Colors) != 0 || migrated.Builtin.Hidden == nil {
+		t.Fatalf("legacy inline styles were not migrated: %#v", migrated)
+	}
+	currentData, err := os.ReadFile(inlineStylesPath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(currentData, legacyData) {
+		t.Fatal("loading legacy inline styles rewrote the file")
+	}
+
+	if _, changed, err := SetInlineStyles(migrated.Styles); err != nil || !changed {
+		t.Fatalf("saving migrated inline styles failed: changed=%t, err=%v", changed, err)
+	}
+	var persisted InlineStyles
+	currentData, err = os.ReadFile(inlineStylesPath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal(currentData, &persisted); err != nil {
+		t.Fatal(err)
+	}
+	if persisted.Version != InlineStylesVersion || persisted.Builtin == nil {
+		t.Fatalf("migrated inline styles were not persisted as version 2: %#v", persisted)
+	}
+}
+
+func TestVisibleAVBuiltinColorIndexesAlwaysKeepsNeutralColor(t *testing.T) {
+	setupInlineStylesTest(t)
+	hidden := make([]int, 0, maxBuiltinColorIndex)
+	for index := minBuiltinColorIndex; index <= maxBuiltinColorIndex; index++ {
+		hidden = append(hidden, index)
+	}
+	if _, _, err := SetInlineStylesData(&InlineStyles{
+		Version: InlineStylesVersion,
+		Styles:  []*InlineStyle{},
+		Builtin: &InlineStyleBuiltin{Hidden: &InlineStyleBuiltinHidden{AV: hidden}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if visible := getVisibleAVBuiltinColorIndexes(); !reflect.DeepEqual(visible, []int{neutralAVColorIndex}) {
+		t.Fatalf("unexpected visible AV builtin colors: %#v", visible)
 	}
 }
 
@@ -157,13 +305,142 @@ func TestInlineStylesValidation(t *testing.T) {
 	}
 }
 
+func TestInlineStylesBuiltinValidation(t *testing.T) {
+	valid := func() *InlineStyles {
+		return &InlineStyles{
+			Version: InlineStylesVersion,
+			Styles:  []*InlineStyle{},
+			Builtin: &InlineStyleBuiltin{
+				Colors: []*InlineStyleBuiltinColor{{
+					Index: 1,
+					Light: &InlineStyleTheme{Color: "#abcdef"},
+					Dark:  &InlineStyleTheme{Color: "#123456"},
+				}},
+				Styles: []*InlineStyleBuiltinStyle{{
+					ID:    "error",
+					Light: &InlineStyleTheme{Color: "#abcdef", BackgroundColor: "#fedcba"},
+					Dark:  &InlineStyleTheme{Color: "#123456", BackgroundColor: "#654321"},
+				}},
+				Hidden: &InlineStyleBuiltinHidden{},
+			},
+		}
+	}
+	tests := []struct {
+		name   string
+		styles func() *InlineStyles
+	}{
+		{name: "null data", styles: func() *InlineStyles { return nil }},
+		{name: "legacy version", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Version = 1
+			return styles
+		}},
+		{name: "null color", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Colors[0] = nil
+			return styles
+		}},
+		{name: "low color index", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Colors[0].Index = 0
+			return styles
+		}},
+		{name: "high color index", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Colors[0].Index = 14
+			return styles
+		}},
+		{name: "duplicate color index", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Colors = append(styles.Builtin.Colors, &InlineStyleBuiltinColor{
+				Index: 1,
+				Light: &InlineStyleTheme{BackgroundColor: "#abcdef"},
+				Dark:  &InlineStyleTheme{BackgroundColor: "#123456"},
+			})
+			return styles
+		}},
+		{name: "missing color theme", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Colors[0].Dark = nil
+			return styles
+		}},
+		{name: "empty color fields", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Colors[0].Light = &InlineStyleTheme{}
+			styles.Builtin.Colors[0].Dark = &InlineStyleTheme{}
+			return styles
+		}},
+		{name: "different color fields", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Colors[0].Dark = &InlineStyleTheme{BackgroundColor: "#123456"}
+			return styles
+		}},
+		{name: "invalid color value", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Colors[0].Light.Color = "red"
+			return styles
+		}},
+		{name: "null style", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Styles[0] = nil
+			return styles
+		}},
+		{name: "invalid style ID", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Styles[0].ID = "danger"
+			return styles
+		}},
+		{name: "duplicate style ID", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Styles = append(styles.Builtin.Styles, &InlineStyleBuiltinStyle{
+				ID:    "error",
+				Light: &InlineStyleTheme{Color: "#abcdef"},
+				Dark:  &InlineStyleTheme{Color: "#123456"},
+			})
+			return styles
+		}},
+		{name: "invalid hidden color", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Hidden.Color = []int{0}
+			return styles
+		}},
+		{name: "invalid hidden background", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Hidden.BackgroundColor = []int{14}
+			return styles
+		}},
+		{name: "invalid hidden style", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Hidden.Style1 = []string{"danger"}
+			return styles
+		}},
+		{name: "invalid hidden av", styles: func() *InlineStyles {
+			styles := valid()
+			styles.Builtin.Hidden.AV = []int{14}
+			return styles
+		}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			setupInlineStylesTest(t)
+			if _, _, err := SetInlineStylesData(test.styles()); err == nil {
+				t.Fatal("expected builtin validation error")
+			}
+			if _, err := os.Stat(inlineStylesPath()); !os.IsNotExist(err) {
+				t.Fatalf("invalid builtin inline styles were written: %v", err)
+			}
+		})
+	}
+}
+
 func TestInlineStylesInvalidFileIsNotOverwritten(t *testing.T) {
 	tests := []struct {
 		name string
 		data []byte
 	}{
 		{name: "invalid JSON", data: []byte(`{"version":`)},
-		{name: "future version", data: []byte(`{"version":2,"styles":[]}`)},
+		{name: "future version", data: []byte(`{"version":3,"styles":[]}`)},
+		{name: "invalid builtin", data: []byte(`{"version":2,"styles":[],"builtin":{"colors":[{"index":14,"light":{"color":"#abcdef"},"dark":{"color":"#123456"}}]}}`)},
 		{name: "oversized", data: bytes.Repeat([]byte("x"), maxInlineStylesFileSize+1)},
 	}
 	for _, test := range tests {

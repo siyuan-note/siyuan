@@ -1,4 +1,8 @@
 {
+	"manageColors": "Gérer les couleurs",
+	"manageBuiltinColors": "Gérer les couleurs intégrées",
+	"showInColorPicker": "Afficher dans le sélecteur de couleurs",
+	"resetAll": "Tout réinitialiser",
 	"exportFile": "Exporter le fichier",
 	"namingEmpty": "Le nom ne peut pas être vide",
 	"recentCreated": "Récemment créés",

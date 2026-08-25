@@ -1,4 +1,8 @@
 {
+	"manageColors": "रंग प्रबंधित करें",
+	"manageBuiltinColors": "अंतर्निहित रंग प्रबंधित करें",
+	"showInColorPicker": "रंग चयनकर्ता में दिखाएँ",
+	"resetAll": "सभी रीसेट करें",
 	"exportFile": "फ़ाइल निर्यात करें",
 	"namingEmpty": "नाम खाली नहीं हो सकता",
 	"recentCreated": "हाल ही में बनाए गए",

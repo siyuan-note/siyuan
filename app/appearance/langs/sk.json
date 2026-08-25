@@ -1,4 +1,8 @@
 {
+	"manageColors": "Spravovať farby",
+	"manageBuiltinColors": "Spravovať vstavané farby",
+	"showInColorPicker": "Zobraziť vo výbere farieb",
+	"resetAll": "Obnoviť všetko",
 	"exportFile": "Exportovať súbor",
 	"namingEmpty": "Názov nemôže byť prázdny",
 	"recentCreated": "Nedávno vytvorené",

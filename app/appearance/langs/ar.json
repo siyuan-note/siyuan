@@ -1,4 +1,8 @@
 {
+	"manageColors": "إدارة الألوان",
+	"manageBuiltinColors": "إدارة الألوان المضمنة",
+	"showInColorPicker": "إظهار في منتقي الألوان",
+	"resetAll": "إعادة تعيين الكل",
 	"exportFile": "تصدير الملف",
 	"namingEmpty": "لا يمكن أن يكون الاسم فارغًا",
 	"recentCreated": "تم إنشاؤها مؤخرًا",

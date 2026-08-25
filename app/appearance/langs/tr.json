@@ -1,4 +1,8 @@
 {
+	"manageColors": "Renkleri yönet",
+	"manageBuiltinColors": "Yerleşik renkleri yönet",
+	"showInColorPicker": "Renk seçicide göster",
+	"resetAll": "Tümünü sıfırla",
 	"exportFile": "Dosyayı dışa aktar",
 	"namingEmpty": "Ad boş olamaz",
 	"recentCreated": "Yakın zamanda oluşturulanlar",

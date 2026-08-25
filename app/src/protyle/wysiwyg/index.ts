@@ -76,6 +76,8 @@ import {
     getImageBlockRefCheckTargets,
     getRangeBlockRefCheckTargets,
     IBlockRefCheckTargets,
+    ICrossBlockComposition,
+    prepareCrossBlockComposition,
     removeBlock,
     removeCrossBlockRange
 } from "./remove";
@@ -3841,6 +3843,7 @@ export class WYSIWYG {
         });
         // 记录组合开始时的光标位置，用于取消组合后恢复光标（输入法删空候选词会导致浏览器移动光标）
         let compositionRange: { range: Range } | { cell: HTMLElement; offset: number };
+        let crossBlockComposition: ICrossBlockComposition;
         const isAfterInlineMath = (range: Range) => {
             let previousNode: Node;
             if (range.startContainer.nodeType === Node.TEXT_NODE) {
@@ -3860,6 +3863,7 @@ export class WYSIWYG {
                 return;
             }
             isComposition = true;
+            crossBlockComposition = undefined;
             // 微软双拼由于 focusByRange 导致无法输入文字，因此不再 keydown 中记录了，但 keyup 会记录拼音字符，因此使用 isComposition 阻止 keyup 记录。
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
             const range = getEditorRange(protyle.wysiwyg.element);
@@ -3877,15 +3881,39 @@ export class WYSIWYG {
             } else {
                 compositionRange = undefined;
             }
-            if (!isMac() && nodeElement) {
+            const endElement = hasClosestBlock(range.endContainer);
+            if (!isMac() && nodeElement && endElement && nodeElement !== endElement) {
+                crossBlockComposition = prepareCrossBlockComposition(
+                    protyle, range, nodeElement, endElement);
+            }
+            if (!isMac() && nodeElement && !crossBlockComposition) {
                 setInsertWbrHTML(nodeElement, range, protyle);
             }
             event.stopPropagation();
         });
 
-        this.element.addEventListener("compositionend", (event: InputEvent) => {
+        this.element.addEventListener("compositionend", async (event: InputEvent) => {
             event.stopPropagation();
             if (getAVTemplateInteractiveElement(event.target)) {
+                return;
+            }
+            if (crossBlockComposition) {
+                const currentComposition = crossBlockComposition;
+                beforeInputCompositionHandled = false;
+                compositionRange = undefined;
+                const compositionText = event.data || "";
+                currentComposition.update(compositionText);
+                const range = getEditorRange(this.element);
+                const blockElement = hasClosestBlock(range.startContainer);
+                if (compositionText !== "" && blockElement) {
+                    this.escapeInline(protyle, range, event);
+                }
+                try {
+                    await currentComposition.complete(compositionText !== "", range);
+                } finally {
+                    crossBlockComposition = undefined;
+                    isComposition = false;
+                }
                 return;
             }
             isComposition = false;
@@ -3969,6 +3997,13 @@ export class WYSIWYG {
                     event.stopPropagation();
                     return;
                 }
+            }
+            if (crossBlockComposition && isComposition &&
+                ["insertText", "insertReplacementText", "insertCompositionText"].includes(event.inputType)) {
+                event.preventDefault();
+                event.stopPropagation();
+                crossBlockComposition.update(event.data || "");
+                return;
             }
             const multilineText = isMac() && event.cancelable ?
                 getMultilineInputText(event.inputType, event.data) : undefined;

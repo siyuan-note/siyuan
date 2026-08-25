@@ -43,6 +43,15 @@ export const exportImage = (id: string, copyOnly = false) => {
         <div class="export-img__watermark"></div>
     </div>
 </div>
+<div class="b3-label fn__flex${copyOnly ? " fn__none" : ""}">
+    <label class="fn__flex">
+        ${window.siyuan.languages.export17}
+        <span class="fn__space"></span>
+        <input id="addTitle" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.config.export.addTitle ? "checked" : ""}>
+    </label>
+    <span class="fn__space"></span>
+    <input aria-label="${window.siyuan.languages.title}" id="customTitle" class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.title}" ${window.siyuan.config.export.addTitle ? "" : "disabled"}>
+</div>
 <div class="b3-dialog__action">
     <label class="fn__flex${copyOnly ? " fn__none" : ""}">
         ${window.siyuan.languages.exportPDF5}
@@ -77,8 +86,11 @@ export const exportImage = (id: string, copyOnly = false) => {
     const previewElement = exportDialog.element.querySelector(".protyle-wysiwyg") as HTMLElement;
     const foldElement = exportDialog.element.querySelector("#keepFold") as HTMLInputElement;
     const watermarkElement = exportDialog.element.querySelector("#watermark") as HTMLInputElement;
+    const addTitleElement = exportDialog.element.querySelector("#addTitle") as HTMLInputElement;
+    const customTitleElement = exportDialog.element.querySelector("#customTitle") as HTMLInputElement;
     let imageName = "image.png";
     let outputting = false;
+    let titleRefreshTimer: number;
 
     const setActionDisabled = (disabled: boolean) => {
         cancelButton.disabled = disabled;
@@ -207,17 +219,32 @@ export const exportImage = (id: string, copyOnly = false) => {
     exportButton.addEventListener("click", () => {
         outputImage("export");
     });
-    foldElement.addEventListener("change", () => {
+    const refreshExportPreview = () => {
         setActionDisabled(true);
-        exportButton.parentElement.insertAdjacentHTML("afterend", '<div class="fn__loading"><img height="128px" width="128px" src="stage/loading-pure.svg"></div>');
-        window.siyuan.storage[Constants.LOCAL_EXPORTIMG].keepFold = foldElement.checked;
+        if (!exportDialog.element.querySelector(".fn__loading")) {
+            exportButton.parentElement.insertAdjacentHTML("afterend", '<div class="fn__loading"><img height="128px" width="128px" src="stage/loading-pure.svg"></div>');
+        }
         fetchPost("/api/export/exportPreviewHTML", {
             id,
             keepFold: foldElement.checked,
             image: true,
+            addTitle: addTitleElement.checked,
+            customTitle: customTitleElement.value,
         }, (response) => {
             refreshPreview(response);
         });
+    };
+    addTitleElement.addEventListener("change", () => {
+        customTitleElement.disabled = !addTitleElement.checked;
+        refreshExportPreview();
+    });
+    customTitleElement.addEventListener("input", () => {
+        window.clearTimeout(titleRefreshTimer);
+        titleRefreshTimer = window.setTimeout(refreshExportPreview, 300);
+    });
+    foldElement.addEventListener("change", () => {
+        window.siyuan.storage[Constants.LOCAL_EXPORTIMG].keepFold = foldElement.checked;
+        refreshExportPreview();
     });
     watermarkElement.addEventListener("change", () => {
         window.siyuan.storage[Constants.LOCAL_EXPORTIMG].watermark = watermarkElement.checked;
@@ -276,6 +303,8 @@ export const exportImage = (id: string, copyOnly = false) => {
         id,
         keepFold: foldElement.checked,
         image: true,
+        addTitle: addTitleElement.checked,
+        customTitle: customTitleElement.value,
     }, (response) => {
         imageName = response.data.name + ".png";
         refreshPreview(response);

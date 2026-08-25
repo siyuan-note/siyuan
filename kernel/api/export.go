@@ -956,8 +956,9 @@ func exportPreviewHTML(c *gin.Context) {
 	if !holdEncryptedExportRequest(c, id, ret) {
 		return
 	}
+	addTitle, customTitle := exportTitleOptions(arg)
 	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
-	name, content, node := model.ExportHTML(id, "", true, keepFold, merge, mergeHeadingOptions)
+	name, content, node := model.ExportHTMLWithTitle(id, "", true, keepFold, merge, addTitle, customTitle, mergeHeadingOptions)
 	// 导出 PDF 预览时点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5894
 	content = strings.ReplaceAll(content, "http://"+util.LocalHost+":"+util.ServerPort+"/#", "#")
 
@@ -1004,6 +1005,7 @@ func exportHTML(c *gin.Context) {
 		return
 	}
 
+	addTitle, customTitle := exportTitleOptions(arg)
 	mergeHeadingOptions := model.MergeHeadingOptions{DocHeadingMode: mergeDocHeadingMode, ContentHeadingMode: mergeContentHeadingMode}
 	savePath = strings.TrimSpace(savePath)
 	if savePath == "" {
@@ -1013,7 +1015,7 @@ func exportHTML(c *gin.Context) {
 			folderName = bt.BoxID + "/" + folderName
 		}
 		tmpDir := filepath.Join(util.TempDir, "export", folderName)
-		name, content, _ := model.ExportHTML(id, tmpDir, pdf, keepFold, merge, mergeHeadingOptions)
+		name, content, _ := model.ExportHTMLWithTitle(id, tmpDir, pdf, keepFold, merge, addTitle, customTitle, mergeHeadingOptions)
 		ret.Data = map[string]any{
 			"id":      id,
 			"name":    name,
@@ -1030,12 +1032,23 @@ func exportHTML(c *gin.Context) {
 		return
 	}
 
-	name, content, _ := model.ExportHTML(id, savePath, pdf, keepFold, merge, mergeHeadingOptions)
+	name, content, _ := model.ExportHTMLWithTitle(id, savePath, pdf, keepFold, merge, addTitle, customTitle, mergeHeadingOptions)
 	ret.Data = map[string]any{
 		"id":      id,
 		"name":    name,
 		"content": content,
 	}
+}
+
+func exportTitleOptions(arg map[string]any) (addTitle bool, customTitle string) {
+	addTitle = model.Conf.Export.AddTitle
+	if value, ok := arg["addTitle"].(bool); ok {
+		addTitle = value
+	}
+	if value, ok := arg["customTitle"].(string); ok {
+		customTitle = strings.TrimSpace(value)
+	}
+	return
 }
 
 func holdEncryptedExportRequest(c *gin.Context, id string, ret *gulu.Result) bool {

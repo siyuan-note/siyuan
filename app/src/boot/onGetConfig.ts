@@ -252,6 +252,8 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
             fetchPost("/api/export/exportHTML", {
                 id: ipcData.rootId,
                 pdf: true,
+                addTitle: ipcData.addTitle,
+                customTitle: ipcData.customTitle,
                 removeAssets: ipcData.removeAssets,
                 merge: ipcData.mergeSubdocs,
                 mergeDocHeadingMode: ipcData.mergeDocHeadingMode,

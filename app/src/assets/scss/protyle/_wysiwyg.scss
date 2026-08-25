@@ -25,6 +25,10 @@
     outline: none;
   }
 
+  [contenteditable="true"] {
+    cursor: text;
+  }
+
   [data-node-id] {
     position: relative;
 

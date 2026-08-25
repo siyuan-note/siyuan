@@ -43,14 +43,14 @@ export const exportImage = (id: string, copyOnly = false) => {
         <div class="export-img__watermark"></div>
     </div>
 </div>
-<div class="b3-label fn__flex${copyOnly ? " fn__none" : ""}">
-    <label class="fn__flex">
+<div class="b3-dialog__action${copyOnly ? " fn__none" : ""}" style="justify-content: flex-start">
+    <label class="fn__flex fn__flex-center">
         ${window.siyuan.languages.export17}
         <span class="fn__space"></span>
         <input id="addTitle" class="b3-switch fn__flex-center" type="checkbox" ${window.siyuan.config.export.addTitle ? "checked" : ""}>
     </label>
     <span class="fn__space"></span>
-    <input aria-label="${window.siyuan.languages.title}" id="customTitle" class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.title}" ${window.siyuan.config.export.addTitle ? "" : "disabled"}>
+    <input aria-label="${window.siyuan.languages.title}" id="customTitle" class="b3-text-field fn__flex-1 fn__flex-center" placeholder="${window.siyuan.languages.title}" ${window.siyuan.config.export.addTitle ? "" : "disabled"}>
 </div>
 <div class="b3-dialog__action">
     <label class="fn__flex${copyOnly ? " fn__none" : ""}">

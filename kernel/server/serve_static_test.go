@@ -200,6 +200,38 @@ func TestWidgetResponseDisablesCache(t *testing.T) {
 	}
 }
 
+func TestLanguageResponseDisablesCache(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	originalAppearancePath, originalMode := util.AppearancePath, util.Mode
+	util.AppearancePath, util.Mode = t.TempDir(), "prod"
+	t.Cleanup(func() {
+		util.AppearancePath, util.Mode = originalAppearancePath, originalMode
+	})
+
+	langDir := filepath.Join(util.AppearancePath, "langs")
+	if err := os.MkdirAll(langDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(langDir, "zh-CN.json"), []byte(`{"label":"value"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(model.RoleContextKey, model.RoleAdministrator)
+		c.Next()
+	})
+	serveAppearance(engine)
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/appearance/langs/zh-CN.json?v=old", nil))
+	if recorder.Code != http.StatusOK || strings.TrimSpace(recorder.Body.String()) != `{"label":"value"}` {
+		t.Fatalf("unexpected language response: status=%d body=%q", recorder.Code, recorder.Body.String())
+	}
+	if cacheControl := recorder.Header().Get("Cache-Control"); cacheControl != "private, no-store" {
+		t.Fatalf("unexpected language cache control [%s]", cacheControl)
+	}
+}
+
 func TestTemplatesAndExportRequireAdministrator(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	originalDataDir, originalTempDir := util.DataDir, util.TempDir

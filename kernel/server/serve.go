@@ -711,6 +711,7 @@ func serveAppearance(ginServer *gin.Engine) {
 				return
 			}
 		} else if strings.Contains(c.Request.URL.Path, "/langs/") && strings.HasSuffix(c.Request.URL.Path, ".json") {
+			c.Header("Cache-Control", "private, no-store")
 			lang := path.Base(c.Request.URL.Path)
 			lang = strings.TrimSuffix(lang, ".json")
 			if "zh-CN" != lang && "en" != lang {

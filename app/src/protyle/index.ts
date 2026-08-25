@@ -54,6 +54,10 @@ import {setEditMode} from "./util/setEditMode";
 import {waitForPendingTransactions} from "./util/transactionQueue";
 import {applyViewFoldStates, invalidateViewFoldRequests} from "./util/viewFold";
 import {setFullscreen as setFullscreenState} from "./breadcrumb/action";
+import {
+    queueDatabaseRowRefresh,
+    queueDatabaseRowRefreshForOperations
+} from "./render/av/databaseRowRefresh";
 
 export class Protyle {
 
@@ -175,25 +179,7 @@ export class Protyle {
                             if (this.protyle.databaseAttributePanel?.hasDatabase(data.data.id)) {
                                 this.protyle.databaseAttributePanel.refresh();
                             }
-                            /// #if MOBILE
-                            document.querySelectorAll<HTMLElement>(
-                                `.protyle-db-row--mobile[data-protyle-id="${this.protyle.id}"] .protyle-db-row__body > [data-av-id="${data.data.id}"]`
-                            ).forEach((item) => {
-                                renderAVAttribute(item.parentElement as HTMLElement, item.dataset.nodeId, this.protyle, undefined, {
-                                    avID: data.data.id,
-                                    itemID: item.dataset.nodeId,
-                                    valueID: "",
-                                });
-                            });
-                            /// #endif
-                            /// #if !MOBILE
-                            getAllModels().custom.forEach((item) => {
-                                if (item.type === "siyuan-database-row" && (item.data.avID === data.data.id ||
-                                    item.element.querySelector(`[data-av-id="${data.data.id}"]`))) {
-                                    item.update?.();
-                                }
-                            });
-                            /// #endif
+                            queueDatabaseRowRefresh(this.protyle.id, data.data.id);
                             break;
                         case "addLoading":
                             if (data.data === this.protyle.block.rootID) {
@@ -355,6 +341,7 @@ export class Protyle {
         if (data.context?.undoState) {
             syncMirrorFromBroadcast(data.context.undoState);
         }
+        queueDatabaseRowRefreshForOperations(this.protyle.id, data.data[0]?.doOperations || []);
         if (!this.protyle.preview.element.classList.contains("fn__none") &&
             data.context?.rootIDs?.includes(this.protyle.block.rootID)) {
             this.protyle.preview.render(this.protyle);

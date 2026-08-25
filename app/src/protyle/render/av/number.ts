@@ -1,7 +1,7 @@
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
-import {getAllEditor, getAllModels} from "../../../layout/getAll";
+import {getAllEditor} from "../../../layout/getAll";
 
 const refreshDatabaseAttributePanels = (protyle: IProtyle, avID: string) => {
     protyle.databaseAttributePanel?.refresh();
@@ -10,13 +10,6 @@ const refreshDatabaseAttributePanels = (protyle: IProtyle, avID: string) => {
             editor.protyle.databaseAttributePanel.refresh();
         }
     });
-    /// #if !MOBILE
-    getAllModels().custom.forEach((model) => {
-        if (model.type === "siyuan-database-row" && model.data.avID === avID) {
-            model.update?.();
-        }
-    });
-    /// #endif
 };
 
 const addFormatItem = (options: {

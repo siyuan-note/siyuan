@@ -5,6 +5,7 @@ import {renderAVAttribute} from "../protyle/render/av/blockAttr";
 import {Protyle} from "../protyle";
 import {getEditorHorizontalPadding} from "../protyle/ui/padding";
 import {searchMarkRender} from "../protyle/render/searchMarkRender";
+import {registerDatabaseRowRefresh} from "../protyle/render/av/databaseRowRefresh";
 
 export const newDatabaseRowModel = (options: {
     app: App,
@@ -25,6 +26,7 @@ export const newDatabaseRowModel = (options: {
     let contextProtyle: IProtyle;
     let ghostProtyle: Protyle;
     let resizeObserver: ResizeObserver;
+    let unregisterRefresh: () => void;
     let destroyed = false;
     const updateTitle = (custom: Custom, bodyElement: HTMLElement) => {
         const primaryElement = bodyElement.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');
@@ -114,6 +116,10 @@ export const newDatabaseRowModel = (options: {
                         return;
                     }
                     contextProtyle = editor.protyle;
+                    unregisterRefresh = registerDatabaseRowRefresh(contextProtyle.id, {
+                        getAVID: () => (customModel.data as typeof options.data).avID,
+                        refresh: () => render(customModel),
+                    });
                     custom.element.append(contextProtyle.highlight.styleElement);
                     render(custom);
                 },
@@ -122,6 +128,7 @@ export const newDatabaseRowModel = (options: {
         destroy() {
             destroyed = true;
             resizeObserver?.disconnect();
+            unregisterRefresh?.();
             ghostProtyle?.destroy();
         },
         update() {

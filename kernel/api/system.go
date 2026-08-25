@@ -1534,6 +1534,8 @@ func exit(c *gin.Context) {
 	ret.Data = data
 	switch exitCode {
 	case 0:
+		// Close 返回后同步和 defer 清理均已完成，此时再通知移动端宿主退出。
+		util.BroadcastByType("main", "exit", 0, "", nil)
 	case 1: // 同步执行失败
 		ret.Msg = model.Conf.Language(96) + "<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">" + model.Conf.Language(97) + "</button>"
 	case 2: // 提示新安装包

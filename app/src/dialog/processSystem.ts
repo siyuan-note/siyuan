@@ -19,6 +19,7 @@ import {hideAllElements} from "../protyle/ui/hideElements";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {emitToPlugins} from "../plugin/EventBusCore";
+import {createHostQuitGuard} from "./hostQuit";
 
 export const processBacklinkIndexCommit = (data: {
     rootIDs?: string[],
@@ -141,26 +142,32 @@ export const lockScreen = async () => {
 
 };
 
-// forceQuit 用于内核已断连、无法走 /api/system/exit 的场景：绕过内核 HTTP，直接通知宿主（Electron 主进程 /
-// 移动端原生容器）退出。浏览器/Docker 等纯 Web 环境无宿主可调，只能关闭当前页。
+const hostQuitGuard = createHostQuitGuard();
+
+export const isHostQuitStarted = hostQuitGuard.isStarted;
+
+// forceQuit 绕过内核 HTTP，直接通知宿主（Electron 主进程 / 移动端原生容器）退出。浏览器/Docker 等纯 Web
+// 环境无宿主可调，只能关闭当前页。
 export const forceQuit = () => {
-    /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-    /// #else
-    if (isInAndroid()) {
-        window.JSAndroid.exit();
-        return;
-    }
-    if (isInIOS()) {
-        window.webkit.messageHandlers.exit.postMessage("");
-        return;
-    }
-    if (isInHarmony()) {
-        window.JSHarmony.exit();
-        return;
-    }
-    window.close();
-    /// #endif
+    hostQuitGuard.run(() => {
+        /// #if !BROWSER
+        ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
+        /// #else
+        if (isInAndroid()) {
+            window.JSAndroid.exit();
+            return;
+        }
+        if (isInIOS()) {
+            window.webkit.messageHandlers.exit.postMessage("");
+            return;
+        }
+        if (isInHarmony()) {
+            window.JSHarmony.exit();
+            return;
+        }
+        window.close();
+        /// #endif
+    });
 };
 
 const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean) => {
@@ -184,19 +191,7 @@ const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean)
         force: true,
         setCurrentWorkspace,
         execInstallPkg: 1,
-    }, () => {
-        if (isInAndroid()) {
-            window.JSAndroid.exit();
-            return;
-        }
-        if (isInIOS()) {
-            window.webkit.messageHandlers.exit.postMessage("");
-            return;
-        }
-        if (isInHarmony()) {
-            window.JSHarmony.exit();
-        }
-    });
+    }, forceQuit);
     /// #endif
 };
 
@@ -217,24 +212,7 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                         installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
                         return;
                     }
-                    fetchPost("/api/system/exit", {force: true, setCurrentWorkspace}, () => {
-                        /// #if !BROWSER
-                        ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-                        /// #else
-                        if (isInAndroid()) {
-                            window.JSAndroid.exit();
-                            return;
-                        }
-                        if (isInIOS()) {
-                            window.webkit.messageHandlers.exit.postMessage("");
-                            return;
-                        }
-                        if (isInHarmony()) {
-                            window.JSHarmony.exit();
-                            return;
-                        }
-                        /// #endif
-                    });
+                    fetchPost("/api/system/exit", {force: true, setCurrentWorkspace}, forceQuit);
                 });
             }
         } else if (response.code === 2) { // 提示新安装包
@@ -253,30 +231,10 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                     force: true,
                     setCurrentWorkspace,
                     execInstallPkg: 1 // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
-                }, () => {
-                    /// #if !BROWSER
-                    ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-                    /// #endif
-                });
+                }, forceQuit);
             });
         } else { // 正常退出
-            /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-            /// #else
-            if (isInAndroid()) {
-                window.JSAndroid.exit();
-                return;
-            }
-            if (isInIOS()) {
-                window.webkit.messageHandlers.exit.postMessage("");
-                return;
-            }
-
-            if (isInHarmony()) {
-                window.JSHarmony.exit();
-                return;
-            }
-            /// #endif
+            forceQuit();
         }
     });
 };

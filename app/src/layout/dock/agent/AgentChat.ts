@@ -185,6 +185,8 @@ export class AgentChat extends Model {
     private composer: ReturnType<typeof mountComposer> | null = null;
     private sendBtn: HTMLElement;
     private stopBtn: HTMLElement;
+    private imageUploadButton: HTMLButtonElement;
+    private imageUploadInput: HTMLInputElement;
     private newSessionBtn: HTMLElement;
     private titleElement: HTMLElement;
     private sessionMenuBtn: HTMLElement;
@@ -364,6 +366,10 @@ export class AgentChat extends Model {
             '<div class="agent-chat__composer-host"></div>' +
             '<div class="agent-chat__buttons">' +
             '<div class="agent-chat__button-options">' +
+            '<button class="agent-chat__image-upload b3-button b3-button--icon b3-button--cancel ariaLabel" aria-label="' +
+            escapeAriaLabel(L.insertImage) + '" type="button"><svg><use xlink:href="#iconImage"></use></svg></button>' +
+            '<input class="agent-chat__image-upload-input fn__none" type="file" multiple="multiple" ' +
+            'accept="image/png,image/jpeg,image/gif,image/webp,application/x-siyuan-image-picker">' +
             '<button class="b3-select b3-select--noborder agent-chat__permission ariaLabel" data-menu="true" data-position="n" type="button">' +
             '<svg class="agent-chat__permission-icon"><use xlink:href="#iconShieldCheck"></use></svg>' +
             '<span class="agent-chat__permission-label"></span></button>' +
@@ -395,6 +401,8 @@ export class AgentChat extends Model {
         this.composerHost = panel.querySelector(".agent-chat__composer-host") as HTMLElement;
         this.sendBtn = panel.querySelector(".agent-chat__send") as HTMLElement;
         this.stopBtn = panel.querySelector(".agent-chat__stop") as HTMLElement;
+        this.imageUploadButton = panel.querySelector(".agent-chat__image-upload") as HTMLButtonElement;
+        this.imageUploadInput = panel.querySelector(".agent-chat__image-upload-input") as HTMLInputElement;
         this.newSessionBtn = panel.querySelector('.block__icon[data-type="new-session"]') as HTMLElement;
         this.sessionMenuBtn = panel.querySelector('.block__icon[data-type="session-menu"]') as HTMLElement;
         this.titleElement = panel.querySelector(".agent-chat__title") as HTMLElement;
@@ -883,6 +891,15 @@ export class AgentChat extends Model {
         this.sendBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
             this.sendMessage();
+        });
+        this.imageUploadButton.addEventListener("click", (e: MouseEvent) => {
+            e.stopPropagation();
+            this.imageUploadInput.click();
+        });
+        this.imageUploadInput.addEventListener("change", () => {
+            if (this.imageUploadInput.files && this.composer) {
+                this.composer.uploadImages(this.imageUploadInput.files, this.imageUploadInput);
+            }
         });
         this.stopBtn.addEventListener("click", (e: MouseEvent) => {
             e.stopPropagation();
@@ -2294,7 +2311,7 @@ export class AgentChat extends Model {
     }
 
     private async sendMessage() {
-        if (!this.composer) {
+        if (!this.composer || this.composer.isUploading()) {
             return;
         }
         const sendData = this.composer.getSendData();
@@ -4560,16 +4577,21 @@ export class AgentChat extends Model {
     // 无模型时一并禁用发送按钮与输入框（attr disabled + 灰样式 + composer-host 禁用态），从源头阻止无效请求。
     private updateSendButtonState() {
         const sessionRunning = this.isCurrentSessionRunning();
-        const disabled = sessionRunning || this.modelOptions.length === 0 || !this.hasComposerInput();
+        const modelUnavailable = this.modelOptions.length === 0;
+        const uploading = this.composer?.isUploading() || false;
+        const disabled = sessionRunning || modelUnavailable || uploading || !this.hasComposerInput();
         if (disabled) {
             this.sendBtn.setAttribute("disabled", "disabled");
         } else {
             this.sendBtn.removeAttribute("disabled");
         }
+        if (this.imageUploadButton) {
+            this.imageUploadButton.disabled = sessionRunning || modelUnavailable || uploading;
+        }
         if (this.composerHost) {
             // 复用流式时已有的禁用态样式（灰显 + 阻止交互）。
             // 注意：仅流式 / 无模型时禁用 composer；输入为空不禁用 composer（用户仍可正常编辑）。
-            const composerDisabled = sessionRunning || this.modelOptions.length === 0;
+            const composerDisabled = sessionRunning || modelUnavailable;
             this.composerHost.classList.toggle("agent-chat__composer-host--disabled", composerDisabled);
         }
     }

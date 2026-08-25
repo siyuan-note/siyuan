@@ -34,6 +34,7 @@ import (
 
 	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
@@ -300,6 +301,36 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 	return
 }
 
+// AgentMessageImageAssets 返回智能体用户消息中引用的全局资源图片。
+func AgentMessageImageAssets(markdown string) []string {
+	return agentMessageImageAssets(markdown, util.NewLute())
+}
+
+func agentMessageImageAssets(markdown string, luteEngine *lute.Lute) (ret []string) {
+	if strings.TrimSpace(markdown) == "" {
+		return
+	}
+	tree := parse.Parse("", []byte(markdown), luteEngine.ParseOptions)
+	seen := map[string]bool{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || n.Type != ast.NodeImage {
+			return ast.WalkContinue
+		}
+		linkDest := n.ChildByType(ast.NodeLinkDest)
+		if linkDest == nil {
+			return ast.WalkContinue
+		}
+		dest := strings.TrimSpace(linkDest.TokensStr())
+		if !strings.HasPrefix(AssetPathWithoutQuery(dest), "assets/") || seen[dest] {
+			return ast.WalkContinue
+		}
+		seen[dest] = true
+		ret = append(ret, dest)
+		return ast.WalkContinue
+	})
+	return
+}
+
 type ImageArtifactRef struct {
 	Kind       string `json:"kind"`
 	Path       string `json:"path"`
@@ -427,6 +458,38 @@ func PrepareDocumentImage(documentID, assetPath string) (PreparedDocumentImage, 
 	}
 	return PreparedDocumentImage{
 		Artifact: ImageArtifactRef{Kind: "image", Path: assetPath, DocumentID: bt.RootID},
+		Data:     prepared.Data,
+		MIMEType: prepared.MIMEType,
+		Prepared: prepared,
+	}, nil
+}
+
+// PrepareAgentMessageImage 校验并读取智能体用户消息引用的全局资源图片。
+func PrepareAgentMessageImage(assetPath string) (PreparedDocumentImage, error) {
+	assetPath = strings.TrimSpace(assetPath)
+	cleanPath := AssetPathWithoutQuery(assetPath)
+	if !strings.HasPrefix(cleanPath, "assets/") {
+		return PreparedDocumentImage{}, errors.New("only global assets/... images are supported")
+	}
+	relativePath, absPath, err := ResolveDataAssetPath(cleanPath)
+	if err != nil {
+		return PreparedDocumentImage{}, err
+	}
+	if !strings.HasPrefix(relativePath, "assets/") {
+		return PreparedDocumentImage{}, errors.New("only global assets/... images are supported")
+	}
+	data, err := os.ReadFile(absPath)
+	if err != nil {
+		return PreparedDocumentImage{}, fmt.Errorf("read image failed: %w", err)
+	}
+	prepared, err := util.PrepareModelImage(
+		data, documentImageMaxBytes, documentImageMaxPixels, documentImageMaxEdge,
+	)
+	if err != nil {
+		return PreparedDocumentImage{}, err
+	}
+	return PreparedDocumentImage{
+		Artifact: ImageArtifactRef{Kind: "image", Path: relativePath},
 		Data:     prepared.Data,
 		MIMEType: prepared.MIMEType,
 		Prepared: prepared,
@@ -1829,6 +1892,13 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 		}
 	}
 
+	agentSessionDests, readAgentSessionsErr := agentSessionImageAssetDests(luteEngine)
+	if readAgentSessionsErr != nil {
+		logging.LogErrorf("read agent session image assets failed: %s", readAgentSessionsErr)
+		return
+	}
+	removeReferencedAssetPaths(assetsPathMap, agentSessionDests)
+
 	var toRemoves []string
 	for asset := range assetsPathMap {
 		if strings.HasSuffix(asset, "ocr-texts.json") {
@@ -1908,6 +1978,63 @@ func UnusedAssets(sorted bool) (ret []*UnusedItem) {
 			}
 			return ret[i].Item > ret[j].Item
 		})
+	}
+	return
+}
+
+type agentAssetSessionFile struct {
+	Entries []struct {
+		Type    string `json:"type"`
+		Content string `json:"content"`
+	} `json:"entries"`
+	ActiveTurn *struct {
+		UserContent string `json:"userContent"`
+	} `json:"activeTurn"`
+}
+
+func agentSessionImageAssetDests(luteEngine *lute.Lute) (ret map[string]bool, err error) {
+	ret = map[string]bool{}
+	sessionsDir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions")
+	entries, err := os.ReadDir(sessionsDir)
+	if os.IsNotExist(err) {
+		err = nil
+		return
+	}
+	if err != nil {
+		return
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		for _, name := range []string{"session.json", "runtime.json"} {
+			data, readErr := filelock.ReadFile(filepath.Join(sessionsDir, entry.Name(), name))
+			if os.IsNotExist(readErr) {
+				continue
+			}
+			if readErr != nil {
+				err = readErr
+				return
+			}
+			file := &agentAssetSessionFile{}
+			if unmarshalErr := gulu.JSON.UnmarshalJSON(data, file); unmarshalErr != nil {
+				err = unmarshalErr
+				return
+			}
+			for _, sessionEntry := range file.Entries {
+				if sessionEntry.Type != "user" {
+					continue
+				}
+				for _, dest := range agentMessageImageAssets(sessionEntry.Content, luteEngine) {
+					ret[dest] = true
+				}
+			}
+			if file.ActiveTurn != nil {
+				for _, dest := range agentMessageImageAssets(file.ActiveTurn.UserContent, luteEngine) {
+					ret[dest] = true
+				}
+			}
+		}
 	}
 	return
 }

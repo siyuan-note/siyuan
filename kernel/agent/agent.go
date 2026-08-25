@@ -2074,10 +2074,14 @@ func buildUserMessageContent(userMessage string, references []Reference, editorC
 }
 
 func buildInitialMessages(userMessage string, language string, references []Reference, editorCtx EditorContext, capabilities *capabilitySet) []openai.ChatCompletionMessage {
-	return []openai.ChatCompletionMessage{
+	messages := []openai.ChatCompletionMessage{
 		{Role: openai.ChatMessageRoleSystem, Content: buildSystemPrompt(language, capabilities)},
 		{Role: openai.ChatMessageRoleUser, Content: buildUserMessageContent(userMessage, references, cloneEditorContext(editorCtx), capabilities)},
 	}
+	if attachmentMessage, ok := buildAttachmentMessage(agentMessageAttachments(AgentMessage{Role: "user", Content: userMessage})); ok {
+		messages = append(messages, attachmentMessage)
+	}
+	return messages
 }
 
 // skillsSegmentTokens 估算 system prompt 中 <available_skills> 段（含引导句）的 token 数。
@@ -2199,18 +2203,7 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 				"<conversation_summary>\n" + compaction.Summary + "\n</conversation_summary>",
 		})
 	}
-	latestAttachmentMsg := -1
-	for i := len(checkpointMsgs) - 1; i >= 0; i-- {
-		for _, tc := range checkpointMsgs[i].ToolCalls {
-			if len(tc.Attachments) > 0 {
-				latestAttachmentMsg = i
-				break
-			}
-		}
-		if latestAttachmentMsg >= 0 {
-			break
-		}
-	}
+	latestAttachmentMsg, latestAttachments := latestAgentMessageAttachments(checkpointMsgs)
 
 	for cmi := range checkpointMsgs {
 		cm := &checkpointMsgs[cmi]
@@ -2228,6 +2221,11 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 				Role:    openai.ChatMessageRoleUser,
 				Content: content,
 			})
+			if cmi == latestAttachmentMsg {
+				if attachmentMessage, ok := buildAttachmentMessage(latestAttachments); ok {
+					msgs = append(msgs, attachmentMessage)
+				}
+			}
 		case "assistant":
 			if len(cm.ToolCalls) == 0 {
 				content := cm.Content
@@ -2280,11 +2278,7 @@ func checkpointMessagesToOpenAIWithSummary(checkpointMsgs []AgentMessage, langua
 					})
 				}
 				if cmi == latestAttachmentMsg {
-					var attachments []AgentAttachment
-					for _, tc := range cm.ToolCalls {
-						attachments = append(attachments, tc.Attachments...)
-					}
-					if attachmentMessage, ok := buildAttachmentMessage(attachments); ok {
+					if attachmentMessage, ok := buildAttachmentMessage(latestAttachments); ok {
 						msgs = append(msgs, attachmentMessage)
 					}
 				}
@@ -2313,18 +2307,7 @@ func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, lang
 		}
 	}
 
-	latestAttachmentMsg := -1
-	for i := len(checkpointMsgs) - 1; i >= 0; i-- {
-		for _, toolCall := range checkpointMsgs[i].ToolCalls {
-			if len(toolCall.Attachments) > 0 {
-				latestAttachmentMsg = i
-				break
-			}
-		}
-		if latestAttachmentMsg >= 0 {
-			break
-		}
-	}
+	latestAttachmentMsg, latestAttachments := latestAgentMessageAttachments(checkpointMsgs)
 
 	for messageIndex := range checkpointMsgs {
 		message := &checkpointMsgs[messageIndex]
@@ -2341,6 +2324,16 @@ func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, lang
 			input = append(input, openai.ResponseInputMessage{
 				Type: "message", Role: openai.ChatMessageRoleUser, Content: content,
 			})
+			if messageIndex == latestAttachmentMsg {
+				if attachmentMessage, ok := buildAttachmentMessage(latestAttachments); ok {
+					if downgradeImages {
+						projected, _ := downgradeImageInput([]openai.ChatCompletionMessage{attachmentMessage})
+						attachmentMessage = projected[0]
+					}
+					input = append(input, util.ChatMessagesToOpenAIResponseInput(
+						[]openai.ChatCompletionMessage{attachmentMessage})...)
+				}
+			}
 		case "assistant":
 			if len(message.ResponseOutput) > 0 {
 				for _, item := range message.ResponseOutput {
@@ -2382,11 +2375,7 @@ func checkpointMessagesToOpenAIResponseInput(checkpointMsgs []AgentMessage, lang
 				})
 			}
 			if messageIndex == latestAttachmentMsg {
-				var attachments []AgentAttachment
-				for _, toolCall := range message.ToolCalls {
-					attachments = append(attachments, toolCall.Attachments...)
-				}
-				if attachmentMessage, ok := buildAttachmentMessage(attachments); ok {
+				if attachmentMessage, ok := buildAttachmentMessage(latestAttachments); ok {
 					if downgradeImages {
 						projected, _ := downgradeImageInput([]openai.ChatCompletionMessage{attachmentMessage})
 						attachmentMessage = projected[0]

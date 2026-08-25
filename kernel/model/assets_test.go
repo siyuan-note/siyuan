@@ -155,6 +155,95 @@ func TestPrepareDocumentImageRejectsNetworkImage(t *testing.T) {
 	}
 }
 
+func TestPrepareAgentMessageImageReadsGlobalAsset(t *testing.T) {
+	originalDataDir, originalWorkspaceDir := util.DataDir, util.WorkspaceDir
+	t.Cleanup(func() {
+		util.DataDir, util.WorkspaceDir = originalDataDir, originalWorkspaceDir
+	})
+	workspaceDir := t.TempDir()
+	util.WorkspaceDir = workspaceDir
+	util.DataDir = filepath.Join(workspaceDir, "data")
+	assetPath := filepath.Join(util.DataDir, "assets", "chat.png")
+	if err := os.MkdirAll(filepath.Dir(assetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	var imageData bytes.Buffer
+	if err := png.Encode(&imageData, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(assetPath, imageData.Bytes(), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	prepared, err := PrepareAgentMessageImage("assets/chat.png?style=thumb")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if prepared.Artifact.Path != "assets/chat.png" || prepared.MIMEType != "image/png" ||
+		prepared.Prepared.Width != 2 || prepared.Prepared.Height != 2 {
+		t.Fatalf("unexpected prepared agent image: %#v", prepared)
+	}
+	if _, err = PrepareAgentMessageImage("assets/../storage/secret.png"); err == nil {
+		t.Fatal("agent image path traversal should be rejected")
+	}
+}
+
+func TestAgentMessageImageAssets(t *testing.T) {
+	markdown := "![first](assets/first.png)\n\n[asset link](assets/file.png)\n\n" +
+		"![duplicate](assets/first.png)\n\n![network](https://example.com/image.png)"
+	want := []string{"assets/first.png"}
+	if got := AgentMessageImageAssets(markdown); !reflect.DeepEqual(got, want) {
+		t.Fatalf("agent message image assets: got %v, want %v", got, want)
+	}
+}
+
+func TestUnusedAssetsExcludesAgentSessionImages(t *testing.T) {
+	originalDataDir, originalWorkspaceDir := util.DataDir, util.WorkspaceDir
+	originalConf := Conf
+	t.Cleanup(func() {
+		util.DataDir, util.WorkspaceDir = originalDataDir, originalWorkspaceDir
+		Conf = originalConf
+	})
+	workspaceDir := t.TempDir()
+	util.WorkspaceDir = workspaceDir
+	util.DataDir = filepath.Join(workspaceDir, "data")
+	Conf = NewAppConf()
+	Conf.FileTree = conf.NewFileTree()
+	assetsDir := filepath.Join(util.DataDir, "assets")
+	if err := os.MkdirAll(assetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"session.png", "runtime.png", "linked.png", "unused.png"} {
+		if err := os.WriteFile(filepath.Join(assetsDir, name), []byte("image"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	sessionDir := filepath.Join(util.DataDir, "storage", "ai", "agent", "sessions", "20260825120000-abcdefg")
+	if err := os.MkdirAll(sessionDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(sessionDir, "session.json"), []byte(
+		`{"entries":[{"type":"user","content":"![session](assets/session.png?style=thumb)\n\n[link](assets/linked.png)"}]}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(sessionDir, "runtime.json"), []byte(
+		`{"activeTurn":{"userContent":"![runtime](assets/runtime.png)"}}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	items := UnusedAssets(false)
+	unused := map[string]bool{}
+	for _, item := range items {
+		unused[item.Item] = true
+	}
+	if unused["assets/session.png"] || unused["assets/runtime.png"] {
+		t.Fatalf("agent session images were classified as unused: %#v", unused)
+	}
+	if !unused["assets/linked.png"] || !unused["assets/unused.png"] {
+		t.Fatalf("unreferenced assets were not classified as unused: %#v", unused)
+	}
+}
+
 func TestNormalizeMissingAssetLinkDest(t *testing.T) {
 	tests := []struct {
 		name string

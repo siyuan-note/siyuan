@@ -26,14 +26,15 @@ func TestParseFontconfigFonts(t *testing.T) {
 		fontconfigValueSeparator + "LXGW WenKai Regular" + fontconfigPairSeparator + "en" +
 		fontconfigValueSeparator + "霞鹜文楷 常规" + fontconfigPairSeparator + "zh-cn" +
 		fontconfigFieldSeparator + fontconfigValueSeparator + "LXGWWenKai-Regular" +
-		fontconfigFieldSeparator + "80" + fontconfigRecordSeparator
+		fontconfigFieldSeparator + "80" + fontconfigFieldSeparator + "90" + fontconfigRecordSeparator
 
 	fonts := parseFontconfigFonts([]byte(data), "zh-CN")
 	if 1 != len(fonts) {
 		t.Fatalf("expected one font, got %d", len(fonts))
 	}
 	font := fonts[0]
-	if "LXGW WenKai" != font.Family || "霞鹜文楷" != font.DisplayName || 400 != font.Weight {
+	if "LXGW WenKai" != font.Family || "霞鹜文楷" != font.DisplayName || 400 != font.Weight ||
+		FontSpacingDual != font.Spacing {
 		t.Fatalf("unexpected font: %+v", font)
 	}
 	for _, expected := range []string{"常规", "LXGW WenKai Regular", "LXGWWenKai-Regular"} {
@@ -78,6 +79,21 @@ func TestParseFontconfigWeight(t *testing.T) {
 	}
 	if actual := parseFontconfigWeight("invalid", "Bold"); 700 != actual {
 		t.Fatalf("expected inferred bold weight, got %d", actual)
+	}
+}
+
+func TestParseFontconfigSpacing(t *testing.T) {
+	tests := map[string]string{
+		"0":   FontSpacingProportional,
+		"90":  FontSpacingDual,
+		"100": FontSpacingMonospace,
+		"110": FontSpacingCharacterCell,
+		"":    "",
+	}
+	for input, expected := range tests {
+		if actual := parseFontconfigSpacing(input); expected != actual {
+			t.Fatalf("expected spacing %q for %q, got %q", expected, input, actual)
+		}
 	}
 }
 

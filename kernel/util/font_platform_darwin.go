@@ -76,6 +76,8 @@ static char *siyuanCopyAvailableFontsJSON(void) {
 						siyuanCopyDescriptorString(descriptor, kCTFontNameAttribute, NO);
 
 					double weight = 0;
+					CTFontSymbolicTraits symbolicTraits = 0;
+					BOOL hasSymbolicTraits = NO;
 					CFTypeRef traitsValue = CTFontDescriptorCopyAttribute(descriptor, kCTFontTraitsAttribute);
 					if (traitsValue && CFGetTypeID(traitsValue) == CFDictionaryGetTypeID()) {
 						CFNumberRef weightValue = (CFNumberRef)CFDictionaryGetValue(
@@ -83,8 +85,17 @@ static char *siyuanCopyAvailableFontsJSON(void) {
 						if (weightValue && CFGetTypeID(weightValue) == CFNumberGetTypeID()) {
 							CFNumberGetValue(weightValue, kCFNumberDoubleType, &weight);
 						}
+						CFNumberRef symbolicValue = (CFNumberRef)CFDictionaryGetValue(
+							(CFDictionaryRef)traitsValue, kCTFontSymbolicTrait);
+						if (symbolicValue && CFGetTypeID(symbolicValue) == CFNumberGetTypeID()) {
+							hasSymbolicTraits = CFNumberGetValue(
+								symbolicValue, kCFNumberSInt32Type, &symbolicTraits);
+						}
 					}
 					if (traitsValue) CFRelease(traitsValue);
+					NSString *spacing = hasSymbolicTraits
+						? ((symbolicTraits & kCTFontTraitMonoSpace) ? @"monospace" : @"proportional")
+						: @"";
 
 					NSMutableArray *aliases = [NSMutableArray array];
 					siyuanAppendFontAlias(aliases, localizedFamily);
@@ -101,6 +112,7 @@ static char *siyuanCopyAvailableFontsJSON(void) {
 						@"style": [style length] ? style : @"",
 						@"weight": @(weight),
 						@"aliases": aliases,
+						@"spacing": spacing,
 					}];
 				}
 				CFRelease(descriptors);
@@ -133,6 +145,7 @@ type coreTextFont struct {
 	Style       string   `json:"style"`
 	Weight      float64  `json:"weight"`
 	Aliases     []string `json:"aliases"`
+	Spacing     string   `json:"spacing"`
 }
 
 func loadPlatformFonts() (ret []*Font) {
@@ -161,6 +174,7 @@ func loadPlatformFonts() (ret []*Font) {
 			Weight:      fontWeightFromNormalizedTrait(font.Weight, font.Style),
 			DisplayName: font.DisplayName,
 			Aliases:     font.Aliases,
+			Spacing:     font.Spacing,
 		})
 	}
 	return

@@ -49,6 +49,7 @@ interface IFontItem {
     weight: number;
     displayName: string;
     aliases?: string[];
+    spacing?: string;
 }
 
 type FontFamiliesConfigKey = "fontFamilies" | "codeFontFamilies";
@@ -58,6 +59,9 @@ const getEditorFonts = (editor: Config.IEditor, configKey: FontFamiliesConfigKey
 
 const getEditorFontDisplay = (fonts: IFontItem[]) =>
     fonts.map((font) => font.displayName || font.family).join(", ");
+
+const isCodeFont = (font: Pick<IFontItem, "spacing">) =>
+    font.spacing === "monospace" || font.spacing === "dual" || font.spacing === "character-cell";
 
 const genFontConfigHtml = (configKey: FontFamiliesConfigKey, title: string, description: string) => {
     const fonts = getEditorFonts(window.siyuan.config.editor, configKey);
@@ -129,7 +133,7 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
 const genFontListItemHtml = (item: IFontItem, checked: boolean) => {
     const searchText = [item.family, item.displayName, ...(item.aliases || [])].join("\n").toLowerCase();
     return `<div class="b3-list-item b3-list-item--narrow" data-id="${escapeAttr(item.id || "")}">
-    <span class="b3-menu__label" data-family="${escapeAttr(item.family)}" data-name="${escapeAttr(item.displayName)}" data-search="${escapeAttr(searchText)}" data-weight="${item.weight || 400}">${escapeHtml(item.displayName)}</span>
+    <span class="b3-menu__label" data-family="${escapeAttr(item.family)}" data-name="${escapeAttr(item.displayName)}" data-search="${escapeAttr(searchText)}" data-spacing="${escapeAttr(item.spacing || "")}" data-weight="${item.weight || 400}">${escapeHtml(item.displayName)}</span>
     ${checked ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
     ${item.id && !window.siyuan.config.readonly ? `<span class="b3-menu__action ariaLabel" data-type="delete-font" aria-label="${escapeAttr(window.siyuan.languages.delete)}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>` : ""}
 </div>`;
@@ -308,6 +312,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                 font.family === item.family && font.weight === item.weight))
         ).join("");
         const canManageCustomFonts = nativeMobile && !window.siyuan.config.readonly;
+        const canShowAllFonts = configKey === "codeFontFamilies" && fontItems.some((font) => !isCodeFont(font));
         const customFontsByID = new Map(customFonts.map((font) => [font.id, font]));
         let fontPreviewObserver: IntersectionObserver;
         const fontMenu = new Menu(undefined, () => {
@@ -320,6 +325,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
             label: `<div class="fn__flex-column b3-menu__filter">
     <div class="fn__flex">
         <input class="b3-text-field fn__flex-1" data-type="font-search" placeholder="${escapeAttr(window.siyuan.languages.searchPlaceholder)}">
+        ${canShowAllFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="show-all-fonts">${escapeHtml(window.siyuan.languages.showAll)}</button>` : ""}
         ${canManageCustomFonts ? `<span class="fn__space"></span><button class="b3-button b3-button--outline fn__flex-center" data-type="import-font"><svg><use xlink:href="#iconUpload"></use></svg>${escapeHtml(window.siyuan.languages.importFont)}</button>` : ""}
     </div>
     ${nativeMobile ? `<div class="b3-label__text ft__on-surface" style="margin-top: 8px">${escapeHtml(window.siyuan.languages.fontFileTip)}</div>` : ""}
@@ -330,6 +336,7 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
             bind(element) {
                 const listElement = element.querySelector<HTMLElement>('[data-type="available-fonts"]');
                 const inputElement = element.querySelector<HTMLInputElement>('[data-type="font-search"]');
+                let showAllFonts = configKey !== "codeFontFamilies";
                 const refreshFontMenu = () => {
                     listElement.querySelectorAll<HTMLElement>(".b3-list-item").forEach((item) => {
                         const label = item.querySelector<HTMLElement>(".b3-menu__label");
@@ -341,7 +348,10 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                         }
                     });
                 };
-                refreshOpenMenu = refreshFontMenu;
+                refreshOpenMenu = () => {
+                    refreshFontMenu();
+                    filterFontList();
+                };
                 refreshFontMenu();
                 if ("IntersectionObserver" in window) {
                     fontPreviewObserver = new IntersectionObserver((entries) => {
@@ -373,14 +383,16 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                     });
                     customFonts.forEach(registerCustomFont);
                 }
-                listElement.firstElementChild.classList.add("b3-list-item--focus");
-                const filterFontList = () => {
+                function filterFontList() {
                     const value = inputElement.value.toLowerCase().trim();
                     listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                     listElement.querySelectorAll<HTMLElement>(".b3-list-item .b3-menu__label").forEach((item) => {
                         const name = item.dataset.name;
-                        item.parentElement.classList.toggle("fn__none", !(!value ||
-                            item.dataset.search.includes(value)));
+                        const selected = selectedFonts.some((font) =>
+                            font.family === item.dataset.family && font.weight === parseInt(item.dataset.weight, 10));
+                        const codeFontVisible = showAllFonts || selected || isCodeFont({spacing: item.dataset.spacing});
+                        const searchVisible = !value || item.dataset.search.includes(value);
+                        item.parentElement.classList.toggle("fn__none", !(codeFontVisible && searchVisible));
                         const idx = name.toLowerCase().indexOf(value);
                         item.replaceChildren(document.createTextNode(name));
                         if (idx !== -1 && value) {
@@ -394,7 +406,14 @@ const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesCon
                         }
                     });
                     listElement.querySelector(".b3-list-item:not(.fn__none)")?.classList.add("b3-list-item--focus");
-                };
+                }
+                filterFontList();
+                element.querySelector<HTMLElement>('[data-type="show-all-fonts"]')?.addEventListener("click", (event) => {
+                    showAllFonts = true;
+                    (event.currentTarget as HTMLElement).remove();
+                    filterFontList();
+                    inputElement.focus();
+                });
                 inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                     event.stopPropagation();
                     if (event.isComposing) {
@@ -532,6 +551,7 @@ const fontItemFromElement = (item: HTMLElement): IFontItem => ({
     family: item.dataset.family,
     displayName: item.dataset.name,
     weight: parseInt(item.dataset.weight, 10) || 400,
+    spacing: item.dataset.spacing,
 });
 
 const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {

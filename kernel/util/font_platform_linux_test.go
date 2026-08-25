@@ -38,5 +38,10 @@ func TestLoadFontconfigFonts(t *testing.T) {
 		if font.Weight < 1 || 1000 < font.Weight {
 			t.Fatalf("Fontconfig returned an invalid font weight: %+v", font)
 		}
+		switch font.Spacing {
+		case "", FontSpacingProportional, FontSpacingDual, FontSpacingMonospace, FontSpacingCharacterCell:
+		default:
+			t.Fatalf("Fontconfig returned an invalid font spacing: %+v", font)
+		}
 	}
 }

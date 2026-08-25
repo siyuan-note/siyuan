@@ -8,6 +8,7 @@ export interface ICustomFont {
     weight: number;
     displayName: string;
     aliases?: string[];
+    spacing?: string;
     url: string;
 }
 

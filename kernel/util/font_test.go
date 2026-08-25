@@ -64,12 +64,14 @@ func TestAddFontMergesAliases(t *testing.T) {
 		Weight:      400,
 		DisplayName: "霞鹜文楷",
 		Aliases:     []string{"LXGW WenKai Regular"},
+		Spacing:     FontSpacingProportional,
 	})
 	fonts = addFont(fonts, &Font{
 		Family:      "LXGW WenKai",
 		Weight:      400,
 		DisplayName: "LXGW WenKai",
 		Aliases:     []string{"霞鹜文楷 常规体"},
+		Spacing:     FontSpacingMonospace,
 	})
 
 	if len(fonts) != 1 {
@@ -79,6 +81,18 @@ func TestAddFontMergesAliases(t *testing.T) {
 		if !slices.Contains(fonts[0].Aliases, expected) {
 			t.Fatalf("merged font alias %q is missing from %v", expected, fonts[0].Aliases)
 		}
+	}
+	if FontSpacingMonospace != fonts[0].Spacing {
+		t.Fatalf("unexpected merged font spacing: %+v", fonts[0])
+	}
+	fonts = addFont(fonts, &Font{
+		Family:      "LXGW WenKai",
+		Weight:      400,
+		DisplayName: "LXGW WenKai",
+		Spacing:     FontSpacingProportional,
+	})
+	if FontSpacingMonospace != fonts[0].Spacing {
+		t.Fatalf("proportional metadata replaced monospace metadata: %+v", fonts[0])
 	}
 }
 
@@ -109,6 +123,9 @@ func TestParseBundledFontLocalizedName(t *testing.T) {
 	}
 	if !slices.Contains(font.Aliases, font.Family) {
 		t.Fatalf("stable font family is missing from aliases: %+v", font)
+	}
+	if FontSpacingProportional != font.Spacing {
+		t.Fatalf("unexpected bundled font spacing: %+v", font)
 	}
 }
 

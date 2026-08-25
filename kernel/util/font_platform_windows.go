@@ -22,6 +22,7 @@ package util
 #cgo LDFLAGS: -ldwrite
 #define COBJMACROS
 #include <dwrite.h>
+#include <dwrite_1.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +35,7 @@ typedef struct {
 	char *style;
 	char *localizedStyle;
 	int weight;
+	int spacing;
 	char **aliases;
 	size_t aliasCount;
 } SiyuanWindowsFont;
@@ -41,6 +43,26 @@ typedef struct {
 static const GUID siyuanIIDIDWriteFactory = {
 	0xb859ee5a, 0xd838, 0x4b5b, {0xa2, 0xe8, 0x1a, 0xdc, 0x7d, 0x93, 0xdb, 0x48}
 };
+
+static const GUID siyuanIIDIDWriteFont1 = {
+	0xacd16696, 0x8c14, 0x4f5d, {0x87, 0x7e, 0xfe, 0x3f, 0xc1, 0xd3, 0x27, 0x37}
+};
+
+enum {
+	SIYUAN_FONT_SPACING_UNKNOWN = 0,
+	SIYUAN_FONT_SPACING_PROPORTIONAL = 1,
+	SIYUAN_FONT_SPACING_MONOSPACE = 2,
+};
+
+// siyuanGetFontSpacing 读取 DirectWrite 对字体等宽属性的判断。
+static int siyuanGetFontSpacing(IDWriteFont *font) {
+	IDWriteFont1 *font1 = NULL;
+	HRESULT result = IDWriteFont_QueryInterface(font, &siyuanIIDIDWriteFont1, (void **)&font1);
+	if (FAILED(result) || !font1) return SIYUAN_FONT_SPACING_UNKNOWN;
+	BOOL monospace = IDWriteFont1_IsMonospacedFont(font1);
+	IDWriteFont1_Release(font1);
+	return monospace ? SIYUAN_FONT_SPACING_MONOSPACE : SIYUAN_FONT_SPACING_PROPORTIONAL;
+}
 
 // siyuanCopyWideStringAsUTF8 将 UTF-16 字符串复制为由调用方释放的 UTF-8 字符串。
 static char *siyuanCopyWideStringAsUTF8(const WCHAR *value) {
@@ -263,6 +285,7 @@ static int32_t siyuanCopyAvailableFonts(const char *localeUTF8, SiyuanWindowsFon
 			font.style = siyuanCopyWideStringAsUTF8(stableStyle);
 			font.localizedStyle = siyuanCopyWideStringAsUTF8(localizedStyle);
 			font.weight = (int)IDWriteFont_GetWeight(directWriteFont);
+			font.spacing = siyuanGetFontSpacing(directWriteFont);
 			BOOL appended = font.family &&
 				siyuanAppendLocalizedAliases(&font, familyNames) &&
 				siyuanAppendLocalizedAliases(&font, faceNames) &&
@@ -351,6 +374,7 @@ func loadPlatformFonts() (ret []*Font) {
 			Weight:      weight,
 			DisplayName: displayName,
 			Aliases:     aliases,
+			Spacing:     directWriteFontSpacing(int(font.spacing)),
 		})
 	}
 	return
@@ -361,4 +385,15 @@ func directWriteString(value *C.char) string {
 		return ""
 	}
 	return strings.TrimSpace(C.GoString(value))
+}
+
+func directWriteFontSpacing(spacing int) string {
+	switch spacing {
+	case C.SIYUAN_FONT_SPACING_PROPORTIONAL:
+		return FontSpacingProportional
+	case C.SIYUAN_FONT_SPACING_MONOSPACE:
+		return FontSpacingMonospace
+	default:
+		return ""
+	}
 }

@@ -51,10 +51,32 @@ interface IFontItem {
     aliases?: string[];
 }
 
-const getEditorFonts = (editor: Config.IEditor): IFontItem[] => editor.fontFamilies || [];
+type FontFamiliesConfigKey = "fontFamilies" | "codeFontFamilies";
+
+const getEditorFonts = (editor: Config.IEditor, configKey: FontFamiliesConfigKey): IFontItem[] =>
+    editor[configKey] || [];
 
 const getEditorFontDisplay = (fonts: IFontItem[]) =>
     fonts.map((font) => font.displayName || font.family).join(", ");
+
+const genFontConfigHtml = (configKey: FontFamiliesConfigKey, title: string, description: string) => {
+    const fonts = getEditorFonts(window.siyuan.config.editor, configKey);
+    return `<div class="fn__flex b3-label config-item config-wrap" data-font-config-key="${configKey}">
+    <div class="fn__flex-1 config-item__main">
+        <div class="config-name">${title}</div>
+        <div class="b3-label__text">${description}</div>
+        <div class="fn__hr--small"></div>
+        <div class="b3-chips b3-chips__doctag${fonts.length === 0 ? " fn__none" : ""}" data-type="selected-fonts">${genSelectedFontListHtml(fonts)}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input
+        class="b3-select fn__flex-center fn__size200"
+        id="editor.${configKey}"
+        value="${escapeAttr(getEditorFontDisplay(fonts) || window.siyuan.languages.default)}"
+        readonly
+    >
+</div>`;
+};
 
 const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("content", window.siyuan.languages.configGroupContent);
@@ -62,23 +84,15 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
     group.slot({
         key: "fontFamilies",
         keywords: [window.siyuan.languages.font, window.siyuan.languages.font1],
-        html: () =>
-            `<div class="fn__flex b3-label config-item config-wrap">
-    <div class="fn__flex-1 config-item__main">
-        <div class="config-name">${window.siyuan.languages.font}</div>
-        <div class="b3-label__text">${window.siyuan.languages.font1}</div>
-        <div class="fn__hr--small"></div>
-        <div class="b3-chips b3-chips__doctag${getEditorFonts(window.siyuan.config.editor).length === 0 ? " fn__none" : ""}" data-type="selected-fonts">${genSelectedFontListHtml(getEditorFonts(window.siyuan.config.editor))}</div>
-    </div>
-    <span class="fn__space"></span>
-    <input
-        class="b3-select fn__flex-center fn__size200"
-        id="editor.fontFamilies"
-        value="${escapeAttr(getEditorFontDisplay(getEditorFonts(window.siyuan.config.editor)) || window.siyuan.languages.default)}"
-        readonly
-    >
-</div>`,
-        afterMount: mountAppearanceFontFamily,
+        html: () => genFontConfigHtml("fontFamilies", window.siyuan.languages.font, window.siyuan.languages.font1),
+        afterMount: (root) => mountAppearanceFontFamily(root, "fontFamilies"),
+    });
+    group.slot({
+        key: "codeFontFamilies",
+        keywords: [window.siyuan.languages.monospaceFont, window.siyuan.languages.monospaceFontTip],
+        html: () => genFontConfigHtml("codeFontFamilies", window.siyuan.languages.monospaceFont,
+            window.siyuan.languages.monospaceFontTip),
+        afterMount: (root) => mountAppearanceFontFamily(root, "codeFontFamilies"),
     });
     group.range("editor.fontSize", {
         title: window.siyuan.languages.editorFontSize,
@@ -221,13 +235,17 @@ const bindSelectedFontList = (element: HTMLElement, getFonts: () => IFontItem[],
     });
 };
 
-const mountAppearanceFontFamily = (root: HTMLElement) => {
-    const fontFamiliesElement = root.querySelector<HTMLInputElement>(`#${CSS.escape("editor.fontFamilies")}`);
-    const selectedListElement = root.querySelector<HTMLElement>('[data-type="selected-fonts"]');
-    if (!fontFamiliesElement || !selectedListElement) {
+const mountedFontConfigUpdaters = new WeakMap<HTMLElement, (editor: Config.IEditor) => void>();
+
+const mountAppearanceFontFamily = (root: HTMLElement, configKey: FontFamiliesConfigKey) => {
+    const fontConfigElement = root.querySelector<HTMLElement>(`[data-font-config-key="${configKey}"]`);
+    const fontFamiliesElement = fontConfigElement?.querySelector<HTMLInputElement>(
+        `#${CSS.escape(`editor.${configKey}`)}`);
+    const selectedListElement = fontConfigElement?.querySelector<HTMLElement>('[data-type="selected-fonts"]');
+    if (!fontConfigElement || !fontFamiliesElement || !selectedListElement) {
         return;
     }
-    let selectedFonts = getEditorFonts(window.siyuan.config.editor);
+    let selectedFonts = getEditorFonts(window.siyuan.config.editor, configKey);
     let refreshOpenMenu: (() => void) | undefined;
     const renderSelectedFonts = () => {
         selectedListElement.innerHTML = genSelectedFontListHtml(selectedFonts);
@@ -246,7 +264,7 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
             "/api/setting/setEditor",
             {
                 ...window.siyuan.config.editor,
-                fontFamilies: fonts.map((font) => ({
+                [configKey]: fonts.map((font) => ({
                     family: font.family,
                     weight: font.weight,
                     displayName: font.displayName,
@@ -254,14 +272,16 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
             },
             (response) => {
                 const data = response.data as Config.IEditor;
-                selectedFonts = getEditorFonts(data);
+                selectedFonts = getEditorFonts(data, configKey);
                 editorConfigApi.apply(data);
                 renderSelectedFonts();
+                refreshMountedFontConfigs(data, fontConfigElement);
                 refreshOpenMenu?.();
             }
         );
     };
     bindSelectedFontList(selectedListElement, () => selectedFonts, persistEditorFonts);
+    mountedFontConfigUpdaters.set(fontConfigElement, updateFontInput);
     updateFontInput(window.siyuan.config.editor);
     fontFamiliesElement.addEventListener("click", async () => {
         const nativeMobile = isNativeMobileContainer();
@@ -279,7 +299,7 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
         const systemFonts = Array.isArray(systemResponse.data) ? systemResponse.data as IFontItem[] : [];
 
         const fontItems = [...customFonts, ...systemFonts];
-        selectedFonts = getEditorFonts(window.siyuan.config.editor).map((selectedFont) =>
+        selectedFonts = getEditorFonts(window.siyuan.config.editor, configKey).map((selectedFont) =>
             fontItems.find((font) => font.family === selectedFont.family && font.weight === selectedFont.weight) ||
             selectedFont);
         renderSelectedFonts();
@@ -440,6 +460,7 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
                                     if (response.data.editor) {
                                         editorConfigApi.apply(response.data.editor);
                                         updateFontInput(response.data.editor);
+                                        refreshMountedFontConfigs(response.data.editor, fontConfigElement);
                                     }
                                     fontMenu.close();
                                 });
@@ -469,11 +490,42 @@ const mountAppearanceFontFamily = (root: HTMLElement) => {
     });
 
     function updateFontInput(data: Config.IEditor) {
-        selectedFonts = getEditorFonts(data);
+        selectedFonts = getEditorFonts(data, configKey);
         fontFamiliesElement.style.removeProperty("font-family");
         fontFamiliesElement.style.removeProperty("font-weight");
         renderSelectedFonts();
     }
+};
+
+const refreshMountedFontConfigs = (editor: Config.IEditor, currentElement?: HTMLElement) => {
+    document.querySelectorAll<HTMLElement>("[data-font-config-key]").forEach((fontConfigElement) => {
+        if (fontConfigElement === currentElement) {
+            return;
+        }
+        const updateMountedFontConfig = mountedFontConfigUpdaters.get(fontConfigElement);
+        if (updateMountedFontConfig) {
+            updateMountedFontConfig(editor);
+            return;
+        }
+        const configKey = fontConfigElement.dataset.fontConfigKey as FontFamiliesConfigKey;
+        const fonts = getEditorFonts(editor, configKey);
+        const selectedListElement = fontConfigElement.querySelector<HTMLElement>('[data-type="selected-fonts"]');
+        const fontFamiliesElement = fontConfigElement.querySelector<HTMLInputElement>(
+            `#${CSS.escape(`editor.${configKey}`)}`);
+        if (!selectedListElement || !fontFamiliesElement) {
+            return;
+        }
+        selectedListElement.innerHTML = genSelectedFontListHtml(fonts);
+        selectedListElement.classList.toggle("fn__none", fonts.length === 0);
+        selectedListElement.querySelectorAll<HTMLElement>(".b3-chip").forEach((chip) => {
+            const textElement = chip.querySelector<HTMLElement>(".config-font-family__text");
+            if (textElement) {
+                textElement.style.fontFamily = CSS.escape(chip.dataset.family);
+                textElement.style.fontWeight = chip.dataset.weight;
+            }
+        });
+        fontFamiliesElement.value = getEditorFontDisplay(fonts) || window.siyuan.languages.default;
+    });
 };
 
 const fontItemFromElement = (item: HTMLElement): IFontItem => ({

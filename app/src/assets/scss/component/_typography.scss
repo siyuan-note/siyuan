@@ -504,7 +504,8 @@
   .hljs {
     font-size: 85%;
     overflow: auto;
-    font-family: var(--b3-font-family-code);
+    font-family: var(--b3-font-family-editor-code, var(--b3-font-family-code));
+    font-weight: var(--b3-font-weight-editor-code, 400);
     min-height: 22px !important;
     overflow-x: overlay;
     tab-size: 4;
@@ -823,7 +824,8 @@
     user-select: none;
     counter-reset: linenumber;
     font-size: 85%;
-    font-family: var(--b3-font-family-code);
+    font-family: var(--b3-font-family-editor-code, var(--b3-font-family-code));
+    font-weight: var(--b3-font-weight-editor-code, 400);
     text-align: right;
     position: absolute;
 

@@ -1,4 +1,6 @@
 {
+	"monospaceFont": "Monospacelettertype",
+	"monospaceFontTip": "Wordt gebruikt voor codeblokken, inlinecode en regelnummers van codeblokken; als er geen lettertype is geselecteerd, wordt het lettertype van het thema gebruikt",
 	"manageColors": "Kleuren beheren",
 	"manageBuiltinColors": "Ingebouwde kleuren beheren",
 	"showInColorPicker": "Weergeven in de kleurkiezer",

@@ -125,3 +125,31 @@ func TestNormalizeFontFamiliesPreservesOrderAndMirrorsFirstFont(t *testing.T) {
 		t.Fatalf("legacy fields do not mirror the first font: %+v", editor)
 	}
 }
+
+func TestNormalizeFontFamiliesNormalizesCodeFontsIndependently(t *testing.T) {
+	editor := &Editor{
+		FontFamilies: []*EditorFont{
+			{Family: "Inter", Weight: 500, DisplayName: "Inter Medium"},
+		},
+		CodeFontFamilies: []*EditorFont{
+			{Family: "JetBrains Mono", Weight: 0, DisplayName: "JetBrains Mono"},
+			nil,
+			{Family: "Maple Mono", Weight: 600, DisplayName: "Maple Mono Semibold"},
+			{Family: "JetBrains Mono", Weight: 700, DisplayName: "Duplicate"},
+		},
+	}
+	editor.NormalizeFontFamilies()
+
+	if 2 != len(editor.CodeFontFamilies) {
+		t.Fatalf("expected two normalized code fonts, got %d", len(editor.CodeFontFamilies))
+	}
+	if "JetBrains Mono" != editor.CodeFontFamilies[0].Family || "Maple Mono" != editor.CodeFontFamilies[1].Family {
+		t.Fatalf("unexpected code font order: %+v", editor.CodeFontFamilies)
+	}
+	if 400 != editor.CodeFontFamilies[0].Weight {
+		t.Fatalf("expected invalid code font weight to use 400, got %d", editor.CodeFontFamilies[0].Weight)
+	}
+	if "Inter" != editor.FontFamily || 500 != editor.FontWeight || "Inter Medium" != editor.FontFamilyDisplay {
+		t.Fatalf("code fonts should not change legacy editor font fields: %+v", editor)
+	}
+}

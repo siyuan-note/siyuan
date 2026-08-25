@@ -1,4 +1,6 @@
 {
+	"monospaceFont": "Carattere monospaziato",
+	"monospaceFontTip": "Utilizzato per blocchi di codice, codice in linea e numeri di riga dei blocchi di codice; se non è selezionato alcun carattere, viene utilizzato quello del tema",
 	"manageColors": "Gestisci colori",
 	"manageBuiltinColors": "Gestisci colori integrati",
 	"showInColorPicker": "Mostra nel selettore colori",

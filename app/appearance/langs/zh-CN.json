@@ -1,4 +1,6 @@
 {
+	"monospaceFont": "等宽字体",
+	"monospaceFontTip": "用于代码块、行内代码和代码块行号，不选择任何字体时使用主题自带字体",
 	"manageColors": "管理颜色",
 	"manageBuiltinColors": "管理内置颜色",
 	"showInColorPicker": "在颜色选择器中显示",

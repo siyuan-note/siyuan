@@ -1,4 +1,6 @@
 {
+	"monospaceFont": "Czcionka o stałej szerokości",
+	"monospaceFontTip": "Używana w blokach kodu, kodzie wbudowanym i numerach wierszy bloków kodu; gdy nie wybrano czcionki, używana jest czcionka motywu",
 	"manageColors": "Zarządzaj kolorami",
 	"manageBuiltinColors": "Zarządzaj wbudowanymi kolorami",
 	"showInColorPicker": "Pokaż w selektorze kolorów",

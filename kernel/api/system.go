@@ -479,6 +479,13 @@ func exportConf(c *gin.Context) {
 			}
 		}
 		clonedConf.Editor.FontFamilies = fonts
+		codeFonts := make([]*conf.EditorFont, 0, len(clonedConf.Editor.CodeFontFamilies))
+		for _, font := range clonedConf.Editor.CodeFontFamilies {
+			if nil != font && !strings.HasPrefix(font.Family, util.CustomFontFamilyPrefix) {
+				codeFonts = append(codeFonts, font)
+			}
+		}
+		clonedConf.Editor.CodeFontFamilies = codeFonts
 		clonedConf.Editor.FontFamily = ""
 		clonedConf.Editor.FontWeight = 400
 		clonedConf.Editor.FontFamilyDisplay = ""
@@ -1112,8 +1119,16 @@ func removeCustomFont(c *gin.Context) {
 			fonts = append(fonts, selectedFont)
 		}
 	}
-	if len(fonts) != len(model.Conf.Editor.FontFamilies) {
+	codeFonts := make([]*conf.EditorFont, 0, len(model.Conf.Editor.CodeFontFamilies))
+	for _, selectedFont := range model.Conf.Editor.CodeFontFamilies {
+		if nil != selectedFont && selectedFont.Family != font.Family {
+			codeFonts = append(codeFonts, selectedFont)
+		}
+	}
+	if len(fonts) != len(model.Conf.Editor.FontFamilies) ||
+		len(codeFonts) != len(model.Conf.Editor.CodeFontFamilies) {
 		model.Conf.Editor.FontFamilies = fonts
+		model.Conf.Editor.CodeFontFamilies = codeFonts
 		model.Conf.Editor.FontFamily = ""
 		model.Conf.Editor.FontWeight = 400
 		model.Conf.Editor.FontFamilyDisplay = ""

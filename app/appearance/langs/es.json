@@ -1,4 +1,6 @@
 {
+	"monospaceFont": "Fuente monoespaciada",
+	"monospaceFontTip": "Se utiliza para bloques de código, código en línea y números de línea de bloques de código; si no se selecciona ninguna fuente, se usa la fuente del tema",
 	"manageColors": "Gestionar colores",
 	"manageBuiltinColors": "Gestionar colores integrados",
 	"showInColorPicker": "Mostrar en el selector de color",

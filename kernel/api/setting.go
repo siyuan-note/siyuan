@@ -443,6 +443,9 @@ func setEditor(c *gin.Context) {
 		editor.FontWeight == model.Conf.Editor.FontWeight {
 		editor.FontFamilies = model.Conf.Editor.FontFamilies
 	}
+	if _, ok = arg["codeFontFamilies"]; !ok {
+		editor.CodeFontFamilies = model.Conf.Editor.CodeFontFamilies
+	}
 	editor.NormalizeFontFamilies()
 
 	if "" == editor.PlantUMLServePath {

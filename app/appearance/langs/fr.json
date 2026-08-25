@@ -1,4 +1,6 @@
 {
+	"monospaceFont": "Police à chasse fixe",
+	"monospaceFontTip": "Utilisée pour les blocs de code, le code en ligne et les numéros de ligne des blocs de code ; si aucune police n’est sélectionnée, la police du thème est utilisée",
 	"manageColors": "Gérer les couleurs",
 	"manageBuiltinColors": "Gérer les couleurs intégrées",
 	"showInColorPicker": "Afficher dans le sélecteur de couleurs",

@@ -52,6 +52,7 @@ type Editor struct {
 	FontWeight                      int            `json:"fontWeight"`                      // 首选字体字重（兼容旧版本）
 	FontFamilyDisplay               string         `json:"fontFamilyDisplay"`               // 设置面板中展示的字体名称（与 FontFamily/FontWeight 对应，可选）
 	FontFamilies                    []*EditorFont  `json:"fontFamilies"`                    // 按优先级排列的字体
+	CodeFontFamilies                []*EditorFont  `json:"codeFontFamilies"`                // 按优先级排列的等宽字体
 	CodeSyntaxHighlightLineNum      bool           `json:"codeSyntaxHighlightLineNum"`      // 代码块是否显示行号
 	CodeTabSpaces                   int            `json:"codeTabSpaces"`                   // 代码块中 Tab 转换空格数，配置为 0 则表示不转换
 	CodeLineWrap                    bool           `json:"codeLineWrap"`                    // 代码块是否自动折行
@@ -112,9 +113,24 @@ func (editor *Editor) NormalizeFontFamilies() {
 		}}
 	}
 
-	fonts := make([]*EditorFont, 0, len(editor.FontFamilies))
+	editor.FontFamilies = normalizeEditorFontFamilies(editor.FontFamilies)
+	editor.CodeFontFamilies = normalizeEditorFontFamilies(editor.CodeFontFamilies)
+	if 0 == len(editor.FontFamilies) {
+		editor.FontFamily = ""
+		editor.FontWeight = 400
+		editor.FontFamilyDisplay = ""
+		return
+	}
+
+	editor.FontFamily = editor.FontFamilies[0].Family
+	editor.FontWeight = editor.FontFamilies[0].Weight
+	editor.FontFamilyDisplay = editor.FontFamilies[0].DisplayName
+}
+
+func normalizeEditorFontFamilies(fontFamilies []*EditorFont) []*EditorFont {
+	fonts := make([]*EditorFont, 0, len(fontFamilies))
 	families := map[string]bool{}
-	for _, font := range editor.FontFamilies {
+	for _, font := range fontFamilies {
 		if nil == font || "" == font.Family || families[font.Family] {
 			continue
 		}
@@ -124,17 +140,7 @@ func (editor *Editor) NormalizeFontFamilies() {
 		}
 		fonts = append(fonts, font)
 	}
-	editor.FontFamilies = fonts
-	if 0 == len(fonts) {
-		editor.FontFamily = ""
-		editor.FontWeight = 400
-		editor.FontFamilyDisplay = ""
-		return
-	}
-
-	editor.FontFamily = fonts[0].Family
-	editor.FontWeight = fonts[0].Weight
-	editor.FontFamilyDisplay = fonts[0].DisplayName
+	return fonts
 }
 
 const (

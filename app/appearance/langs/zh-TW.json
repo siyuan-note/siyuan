@@ -1,4 +1,6 @@
 {
+	"monospaceFont": "等寬字型",
+	"monospaceFontTip": "用於程式碼區塊、行內程式碼與程式碼區塊行號，未選擇任何字型時使用主題內建字型",
 	"manageColors": "管理顏色",
 	"manageBuiltinColors": "管理內建顏色",
 	"showInColorPicker": "在顏色選擇器中顯示",

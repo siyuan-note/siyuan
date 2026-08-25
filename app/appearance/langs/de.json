@@ -1,4 +1,6 @@
 {
+	"monospaceFont": "Festbreitenschrift",
+	"monospaceFontTip": "Wird für Codeblöcke, Inline-Code und Codeblock-Zeilennummern verwendet; wenn keine Schrift ausgewählt ist, wird die Schrift des Themes verwendet",
 	"manageColors": "Farben verwalten",
 	"manageBuiltinColors": "Integrierte Farben verwalten",
 	"showInColorPicker": "In der Farbauswahl anzeigen",

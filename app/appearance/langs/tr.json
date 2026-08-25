@@ -1,4 +1,6 @@
 {
+	"monospaceFont": "Eş aralıklı yazı tipi",
+	"monospaceFontTip": "Kod blokları, satır içi kod ve kod bloğu satır numaraları için kullanılır; hiçbir yazı tipi seçilmediğinde temanın yazı tipi kullanılır",
 	"manageColors": "Renkleri yönet",
 	"manageBuiltinColors": "Yerleşik renkleri yönet",
 	"showInColorPicker": "Renk seçicide göster",

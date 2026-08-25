@@ -676,6 +676,14 @@ declare namespace Config {
             displayName: string;
         }>;
         /**
+         * 编辑器等宽字体，按优先级从高到低排列
+         */
+        codeFontFamilies: Array<{
+            family: string;
+            weight: number;
+            displayName: string;
+        }>;
+        /**
          * The font size used in the editor
          */
         fontSize: number;

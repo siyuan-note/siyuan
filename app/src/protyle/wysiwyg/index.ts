@@ -3905,7 +3905,7 @@ export class WYSIWYG {
                 currentComposition.update(compositionText);
                 const range = getEditorRange(this.element);
                 const blockElement = hasClosestBlock(range.startContainer);
-                if (compositionText !== "" && blockElement) {
+                if (currentComposition.preventNativeInput && compositionText !== "" && blockElement) {
                     this.escapeInline(protyle, range, event);
                 }
                 try {
@@ -4000,8 +4000,10 @@ export class WYSIWYG {
             }
             if (crossBlockComposition && isComposition &&
                 ["insertText", "insertReplacementText", "insertCompositionText"].includes(event.inputType)) {
-                event.preventDefault();
-                event.stopPropagation();
+                if (crossBlockComposition.preventNativeInput) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
                 crossBlockComposition.update(event.data || "");
                 return;
             }

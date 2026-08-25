@@ -1,6 +1,20 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getMultilineInputText} from "./multilineInput";
+import {getMultilineInputText, isTextInputType} from "./multilineInput";
+
+describe("text input type", () => {
+    it("accepts text, replacement, and composition input", () => {
+        ["insertText", "insertReplacementText", "insertCompositionText"].forEach(inputType => {
+            assert.equal(isTextInputType(inputType, "`"), true);
+        });
+    });
+
+    it("ignores empty and non-text input", () => {
+        assert.equal(isTextInputType("insertText", null), false);
+        assert.equal(isTextInputType("insertLineBreak", "\n"), false);
+        assert.equal(isTextInputType("insertFromPaste", "text"), false);
+    });
+});
 
 describe("multiline input", () => {
     it("accepts text, replacement, and composition input", () => {

@@ -1,11 +1,15 @@
-const multilineInputTypes = new Set([
+const textInputTypes = new Set([
     "insertText",
     "insertReplacementText",
     "insertCompositionText",
 ]);
 
+export const isTextInputType = (inputType: string, data: string | null): data is string => {
+    return !!data && textInputTypes.has(inputType);
+};
+
 export const getMultilineInputText = (inputType: string, data: string | null) => {
-    if (!data || !multilineInputTypes.has(inputType) || !/[\r\n\u2028\u2029]/.test(data)) {
+    if (!isTextInputType(inputType, data) || !/[\r\n\u2028\u2029]/.test(data)) {
         return;
     }
     return data.replace(/\r\n|\r|\u2028|\u2029/g, "\n");

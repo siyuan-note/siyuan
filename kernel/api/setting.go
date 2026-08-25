@@ -175,10 +175,17 @@ func setBazaar(c *gin.Context) {
 		} else if model.OnKernelPluginsStop != nil {
 			model.OnKernelPluginsStop()
 		}
-		model.PushReloadAllEnabledPlugins(newPetalsEnabled, app)
+		model.PushReloadAllEnabledPlugins(newPetalsEnabled, bazaarPluginReloadExcludeApp(newPetalsEnabled, app))
 	}
 
 	ret.Data = bazaar
+}
+
+func bazaarPluginReloadExcludeApp(enabled bool, app string) string {
+	if enabled {
+		return app
+	}
+	return ""
 }
 
 func setAI(c *gin.Context) {

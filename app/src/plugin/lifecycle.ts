@@ -171,8 +171,9 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
 
     public requestDataChange(name: string) {
         const record = this.getRecord(name);
-        if (!record.instance || record.currentTask && this.isStructural(record.currentTask.kind) ||
-            record.tasks.some((task) => this.isStructural(task.kind))) {
+        const finalStructuralKind = this.getFinalStructuralKind(record);
+        if (finalStructuralKind === "unload" || finalStructuralKind === "uninstall" ||
+            !record.instance && finalStructuralKind !== "load" && finalStructuralKind !== "reload") {
             return Promise.resolve();
         }
         const existing = record.tasks.find((task) => task.kind === "dataChange");
@@ -233,7 +234,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
                               dataProvider?: () => Promise<TData | undefined>, sequence = ++this.sequence) {
         record.lastStructuralSequence = sequence;
         record.latestStructuralKind = kind;
-        this.dropPendingDataChanges(record);
+        const pendingDataChange = this.takePendingDataChange(record);
         const task: IPluginLifecycleTask<TData> = {
             kind,
             sequence,
@@ -243,7 +244,15 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         if (kind === "reload" || kind === "unload" || kind === "uninstall") {
             this.signalRemoval(record, this.now() + this.teardownTimeout);
         }
-        return this.enqueue(record, task);
+        const promise = this.enqueue(record, task);
+        if (pendingDataChange) {
+            if (kind === "load" || kind === "reload") {
+                record.tasks.push(pendingDataChange);
+            } else {
+                pendingDataChange.waiters.forEach((resolve) => resolve());
+            }
+        }
+        return promise;
     }
 
     private enqueue(record: IPluginLifecycleRecord<TData, TPlugin>, task: IPluginLifecycleTask<TData>) {
@@ -400,7 +409,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     }
 
     private runDataChange(record: IPluginLifecycleRecord<TData, TPlugin>) {
-        if (!record.instance || record.tasks.some((task) => this.isStructural(task.kind))) {
+        if (!record.instance) {
             return;
         }
         try {
@@ -421,17 +430,17 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
             record.state = "absent";
             return;
         }
-        const deadline = this.now() + this.teardownTimeout;
+        // 加载阶段收到的拆除请求与后续拆除钩子共用首次请求建立的超时预算。
+        // Promise 无法取消；预算耗尽后仍尽力调用后续钩子，但不再为它们追加等待时间。
+        const deadline = record.removalDeadline ?? this.now() + this.teardownTimeout;
         record.state = "unloading";
-        const unloadPromise = this.observe(record.name, "onunload", () => this.adapter.onunload(plugin));
-        if (!await this.waitUntilDeadline(unloadPromise, deadline)) {
+        if (!await this.runTeardownHook(record.name, "onunload", () => this.adapter.onunload(plugin), deadline)) {
             this.reportTimeout(record.name, "onunload");
         }
         uninstall = uninstall || this.hasPendingUninstall(record);
         if (uninstall) {
             record.state = "uninstalling";
-            const uninstallPromise = this.observe(record.name, "uninstall", () => this.adapter.uninstall(plugin));
-            if (!await this.waitUntilDeadline(uninstallPromise, deadline)) {
+            if (!await this.runTeardownHook(record.name, "uninstall", () => this.adapter.uninstall(plugin), deadline)) {
                 this.reportTimeout(record.name, "uninstall");
             }
             this.markPendingUninstallsHandled(record, task);
@@ -445,6 +454,26 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
             this.adapter.onError(record.name, "dispose", error);
         }
         this.resetInterrupt(record);
+    }
+
+    private runTeardownHook(name: string, hook: "onunload" | "uninstall",
+                            callback: () => Promise<void> | void, deadline: number) {
+        try {
+            const result = callback();
+            if (!result || typeof result.then !== "function") {
+                return Promise.resolve(true);
+            }
+            const promise = Promise.resolve(result).catch((error) => {
+                this.adapter.onError(name, hook, error);
+            });
+            if (deadline <= this.now()) {
+                return Promise.resolve(true);
+            }
+            return this.waitUntilDeadline(promise, deadline);
+        } catch (error) {
+            this.adapter.onError(name, hook, error);
+            return Promise.resolve(true);
+        }
     }
 
     private runInterruptibleHook(record: IPluginLifecycleRecord<TData, TPlugin>, hook: TPluginLifecycleHook,
@@ -481,9 +510,12 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     }
 
     private waitUntilDeadline(promise: Promise<unknown>, deadline: number) {
+        const remaining = deadline - this.now();
+        if (remaining <= 0) {
+            return Promise.resolve(false);
+        }
         return new Promise<boolean>((resolve) => {
             let settled = false;
-            const remaining = Math.max(0, deadline - this.now());
             const timer = this.setTimeout(() => {
                 if (settled) {
                     return;
@@ -515,7 +547,8 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     }
 
     private reportTimeout(name: string, hook: TPluginLifecycleHook) {
-        this.adapter.onError(name, hook, new Error(`plugin lifecycle hook timed out after ${this.teardownTimeout}ms`));
+        this.adapter.onError(name, hook,
+            new Error(`plugin lifecycle removal deadline reached while waiting for ${hook}`));
     }
 
     private markDisposed(name: string, plugin: TPlugin) {
@@ -527,10 +560,10 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     }
 
     private signalRemoval(record: IPluginLifecycleRecord<TData, TPlugin>, deadline: number) {
+        record.removalDeadline = Math.min(record.removalDeadline ?? Number.POSITIVE_INFINITY, deadline);
         if (record.state !== "loading" && record.state !== "layouting") {
             return;
         }
-        record.removalDeadline = Math.min(record.removalDeadline ?? Number.POSITIVE_INFINITY, deadline);
         if (!record.interrupt.resolved) {
             record.interrupt.resolved = true;
             record.interrupt.resolve(record.removalDeadline);
@@ -574,14 +607,30 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         return record.latestStructuralKind !== "load";
     }
 
-    private dropPendingDataChanges(record: IPluginLifecycleRecord<TData, TPlugin>) {
+    private getFinalStructuralKind(record: IPluginLifecycleRecord<TData, TPlugin>) {
+        let kind = record.currentTask && this.isStructural(record.currentTask.kind) ? record.currentTask.kind : undefined;
+        record.tasks.forEach((task) => {
+            if (this.isStructural(task.kind)) {
+                kind = task.kind;
+            }
+        });
+        return kind;
+    }
+
+    private takePendingDataChange(record: IPluginLifecycleRecord<TData, TPlugin>) {
+        let pending: IPluginLifecycleTask<TData> | undefined;
         record.tasks = record.tasks.filter((task) => {
             if (task.kind !== "dataChange") {
                 return true;
             }
-            task.waiters.forEach((resolve) => resolve());
+            if (pending) {
+                pending.waiters.push(...task.waiters);
+            } else {
+                pending = task;
+            }
             return false;
         });
+        return pending;
     }
 
     private isStructural(kind: TPluginLifecycleTaskKind): kind is TPluginStructuralTaskKind {

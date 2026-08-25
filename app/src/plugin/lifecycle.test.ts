@@ -289,7 +289,7 @@ describe("plugin lifecycle coordinator", () => {
         assert.equal(events.includes("dispose:sample:false"), true);
     });
 
-    it("abandons pending onload before applying the teardown timeout", async () => {
+    it("continues teardown when pending onload reaches the removal deadline", async () => {
         const never = new Promise<void>(() => undefined);
         const {coordinator, events} = createHarness({
             onload(plugin) {
@@ -310,12 +310,32 @@ describe("plugin lifecycle coordinator", () => {
 
         assert.equal(events.includes("init:sample"), false);
         assert.equal(events.includes("error:sample:onload"), true);
-        assert.equal(events.includes("error:sample:onunload"), true);
+        assert.equal(events.includes("error:sample:onunload"), false);
         assert.equal(events.includes("dispose:sample:false"), true);
         assert.equal(coordinator.getState("sample"), "absent");
     });
 
-    it("uses separate loading and teardown timeout budgets", async () => {
+    it("continues teardown when pending kernel initialization reaches the removal deadline", async () => {
+        const never = new Promise<void>(() => undefined);
+        const {coordinator, events} = createHarness({
+            init(plugin) {
+                events.push(`init:${plugin.name}`);
+                return never;
+            },
+        }, 10);
+        coordinator.start();
+        const loading = coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+        await nextTurn();
+
+        const unloading = coordinator.requestUnload("sample");
+        await Promise.all([loading, unloading]);
+
+        assert.equal(events.includes("error:sample:kernelInit"), true);
+        assert.equal(events.includes("error:sample:onunload"), false);
+        assert.equal(events.includes("dispose:sample:false"), true);
+    });
+
+    it("shares one removal deadline across loading and teardown", async () => {
         const clock = new FakeClock();
         const never = new Promise<void>(() => undefined);
         const {coordinator, events} = createHarness({
@@ -344,16 +364,52 @@ describe("plugin lifecycle coordinator", () => {
         clock.advance(1);
         await flushMicrotasks();
         assert.equal(events.includes("onunload:sample"), true);
-        assert.equal(events.includes("dispose:sample:false"), false);
+        assert.equal(events.includes("error:sample:onload"), true);
+        assert.equal(events.includes("error:sample:onunload"), false);
+        assert.equal(events.includes("dispose:sample:false"), true);
+        await Promise.all([loading, unloading]);
 
-        clock.advance(4999);
+        assert.equal(clock.now, 5000);
+        assert.equal(events.includes("dispose:sample:false"), true);
+    });
+
+    it("uses only the remaining removal budget after onload completes", async () => {
+        const clock = new FakeClock();
+        const loaded = deferred<void>();
+        const never = new Promise<void>(() => undefined);
+        const {coordinator, events} = createHarness({
+            onload(plugin) {
+                events.push(`onload:${plugin.name}`);
+                return loaded.promise;
+            },
+            onunload(plugin) {
+                events.push(`onunload:${plugin.name}`);
+                return never;
+            },
+        }, 5000, {
+            now: () => clock.now,
+            setTimeout: clock.setTimeout,
+            clearTimeout: clock.clearTimeout,
+        });
+        coordinator.start();
+        const loading = coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+        await flushMicrotasks();
+        const unloading = coordinator.requestUnload("sample");
+        await flushMicrotasks();
+
+        clock.advance(3000);
+        loaded.resolve();
+        await loading;
+        await flushMicrotasks();
+        assert.equal(events.includes("onunload:sample"), true);
+        clock.advance(1999);
         await flushMicrotasks();
         assert.equal(events.includes("dispose:sample:false"), false);
         clock.advance(1);
         await flushMicrotasks();
         await Promise.all([loading, unloading]);
 
-        assert.equal(clock.now, 10000);
+        assert.equal(clock.now, 5000);
         assert.equal(events.includes("dispose:sample:false"), true);
     });
 
@@ -398,8 +454,74 @@ describe("plugin lifecycle coordinator", () => {
 
         assert.equal(uninstallCalls, 1);
         assert.equal(events.includes("error:sample:onunload"), true);
-        assert.equal(events.includes("error:sample:uninstall"), true);
+        assert.equal(events.includes("error:sample:uninstall"), false);
         assert.equal(events.includes("dispose:sample:true"), true);
+    });
+
+    it("observes an uninstall rejection after the shared deadline without reporting another timeout", async () => {
+        const never = new Promise<void>(() => undefined);
+        const uninstalled = deferred<void>();
+        const errors: Array<{hook: string, message: string}> = [];
+        const {coordinator, events} = createHarness({
+            onunload(plugin) {
+                events.push(`onunload:${plugin.name}`);
+                return never;
+            },
+            uninstall(plugin) {
+                events.push(`uninstall:${plugin.name}`);
+                return uninstalled.promise;
+            },
+            onError(name, hook, error) {
+                events.push(`error:${name}:${hook}`);
+                errors.push({hook, message: error instanceof Error ? error.message : String(error)});
+            },
+        }, 10);
+        coordinator.start();
+        await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+
+        await coordinator.requestUninstall("sample");
+
+        assert.deepEqual(events.filter((event) => [
+            "onunload:sample",
+            "uninstall:sample",
+            "markDisposed:sample",
+            "dispose:sample:true",
+        ].includes(event)), [
+            "onunload:sample",
+            "uninstall:sample",
+            "markDisposed:sample",
+            "dispose:sample:true",
+        ]);
+        assert.equal(errors.some((error) => error.hook === "uninstall"), false);
+        uninstalled.reject(new Error("late uninstall failure"));
+        await nextTurn();
+        assert.deepEqual(errors.filter((error) => error.hook === "uninstall").map((error) => error.message), [
+            "late uninstall failure",
+        ]);
+    });
+
+    it("does not treat synchronous hook work as Promise waiting", async () => {
+        const clock = new FakeClock();
+        const never = new Promise<void>(() => undefined);
+        const {coordinator, events} = createHarness({
+            onunload(plugin) {
+                events.push(`onunload:${plugin.name}`);
+                clock.advance(5000);
+                return never;
+            },
+        }, 5000, {
+            now: () => clock.now,
+            setTimeout: clock.setTimeout,
+            clearTimeout: clock.clearTimeout,
+        });
+        coordinator.start();
+        await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+
+        await coordinator.requestUnload("sample");
+
+        assert.equal(clock.now, 5000);
+        assert.equal(events.includes("error:sample:onunload"), false);
+        assert.equal(events.includes("dispose:sample:false"), true);
     });
 
     it("shares one teardown deadline between onunload and uninstall", async () => {
@@ -430,12 +552,48 @@ describe("plugin lifecycle coordinator", () => {
         clock.advance(1);
         await flushMicrotasks();
         assert.equal(events.includes("uninstall:sample"), true);
+        assert.equal(events.includes("error:sample:onunload"), true);
+        assert.equal(events.includes("error:sample:uninstall"), false);
+        assert.equal(events.includes("dispose:sample:true"), true);
+        await uninstalling;
+
+        assert.equal(clock.now, 5000);
+        assert.equal(events.includes("dispose:sample:true"), true);
+    });
+
+    it("starts the removal deadline when a ready-instance request is enqueued", async () => {
+        const clock = new FakeClock();
+        const never = new Promise<void>(() => undefined);
+        const {coordinator, events} = createHarness({
+            onunload(plugin) {
+                events.push(`onunload:${plugin.name}`);
+                return never;
+            },
+        }, 5000, {
+            now: () => clock.now,
+            setTimeout: clock.setTimeout,
+            clearTimeout: clock.clearTimeout,
+        });
+        coordinator.start();
+        await coordinator.setLayoutReady();
+        await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+        assert.equal(coordinator.getState("sample"), "ready");
+
+        const uninstalling = coordinator.requestUninstall("sample");
+        clock.advance(1000);
+        await flushMicrotasks();
+        assert.equal(events.includes("onunload:sample"), true);
+        clock.advance(3999);
+        await flushMicrotasks();
         assert.equal(events.includes("dispose:sample:true"), false);
-        clock.advance(0);
+        clock.advance(1);
         await flushMicrotasks();
         await uninstalling;
 
         assert.equal(clock.now, 5000);
+        assert.equal(events.includes("error:sample:onunload"), true);
+        assert.equal(events.includes("uninstall:sample"), true);
+        assert.equal(events.includes("error:sample:uninstall"), false);
         assert.equal(events.includes("dispose:sample:true"), true);
     });
 
@@ -523,7 +681,114 @@ describe("plugin lifecycle coordinator", () => {
         assert.equal(coordinator.getInstance("sample")?.revision, 2);
     });
 
-    it("drops data changes when a structural task is pending", async () => {
+    it("delivers coalesced data changes after a pending load creates the instance", async () => {
+        const data = deferred<ITestPluginData>();
+        const {coordinator, events} = createHarness({
+            onDataChanged(plugin) {
+                events.push(`data:${plugin.name}:${plugin.revision}`);
+            },
+        });
+        coordinator.start();
+        const loading = coordinator.requestLoad("sample", () => data.promise);
+        await nextTurn();
+
+        const firstChange = coordinator.requestDataChange("sample");
+        const secondChange = coordinator.requestDataChange("sample");
+        data.resolve({name: "sample", revision: 1});
+        await Promise.all([loading, firstChange, secondChange]);
+
+        assert.equal(events.filter(item => item === "data:sample:1").length, 1);
+        const initIndex = events.indexOf("init:sample");
+        assert.ok(initIndex >= 0 && initIndex < events.indexOf("data:sample:1"));
+    });
+
+    it("moves a pending data change behind a later reload", async () => {
+        const {coordinator, events} = createHarness({
+            onDataChanged(plugin) {
+                events.push(`data:${plugin.name}:${plugin.revision}`);
+            },
+        });
+        coordinator.start();
+        await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+
+        const dataChange = coordinator.requestDataChange("sample");
+        const reload = coordinator.requestReload("sample", async () => ({name: "sample", revision: 2}));
+        await Promise.all([dataChange, reload]);
+
+        assert.equal(events.includes("data:sample:1"), false);
+        assert.equal(events.filter(item => item === "data:sample:2").length, 1);
+    });
+
+    it("coalesces data changes while the reloaded instance is still in onload", async () => {
+        const loaded = deferred<void>();
+        const {coordinator, events} = createHarness({
+            onload(plugin) {
+                events.push(`onload:${plugin.name}:${plugin.revision}`);
+                if (plugin.revision === 2) {
+                    return loaded.promise;
+                }
+            },
+            init(plugin) {
+                events.push(`init:${plugin.name}:${plugin.revision}`);
+            },
+            onDataChanged(plugin) {
+                events.push(`data:${plugin.name}:${plugin.revision}`);
+            },
+        });
+        coordinator.start();
+        await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+
+        const reload = coordinator.requestReload("sample", async () => ({name: "sample", revision: 2}));
+        await nextTurn();
+        assert.equal(coordinator.getState("sample"), "loading");
+        const firstChange = coordinator.requestDataChange("sample");
+        const secondChange = coordinator.requestDataChange("sample");
+        loaded.resolve();
+        await Promise.all([reload, firstChange, secondChange]);
+
+        assert.equal(events.filter(item => item === "data:sample:2").length, 1);
+        const initIndex = events.indexOf("init:sample:2");
+        assert.ok(initIndex >= 0 && initIndex < events.indexOf("data:sample:2"));
+    });
+
+    it("delivers data changes after a queued unload and load leave a new instance", async () => {
+        const unloaded = deferred<void>();
+        const {coordinator, events} = createHarness({
+            onDataChanged(plugin) {
+                events.push(`data:${plugin.name}:${plugin.revision}`);
+            },
+            onunload(plugin) {
+                events.push(`onunload:${plugin.name}`);
+                return unloaded.promise;
+            },
+        });
+        coordinator.start();
+        await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+
+        const unloading = coordinator.requestUnload("sample");
+        await nextTurn();
+        const loading = coordinator.requestLoad("sample", async () => ({name: "sample", revision: 2}));
+        const dataChange = coordinator.requestDataChange("sample");
+        unloaded.resolve();
+        await Promise.all([unloading, loading, dataChange]);
+
+        assert.equal(events.includes("data:sample:1"), false);
+        assert.equal(events.filter(item => item === "data:sample:2").length, 1);
+    });
+
+    it("completes a pending data change when loading produces no instance", async () => {
+        const {coordinator, events} = createHarness();
+        coordinator.start();
+        const loading = coordinator.requestLoad("sample", async () => undefined);
+        const dataChange = coordinator.requestDataChange("sample");
+
+        await Promise.all([loading, dataChange]);
+
+        assert.equal(events.includes("data:sample"), false);
+        assert.equal(coordinator.getState("sample"), "absent");
+    });
+
+    it("drops data changes when the final structural intent is unload", async () => {
         const unloaded = deferred<void>();
         const {coordinator, events} = createHarness({
             onunload(plugin) {
@@ -540,6 +805,21 @@ describe("plugin lifecycle coordinator", () => {
         await unloading;
 
         assert.equal(events.includes("data:sample"), false);
+    });
+
+    it("drops a queued data change before uninstall and resolves every waiter", async () => {
+        const {coordinator, events} = createHarness();
+        coordinator.start();
+        await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
+
+        const firstChange = coordinator.requestDataChange("sample");
+        const secondChange = coordinator.requestDataChange("sample");
+        const uninstalling = coordinator.requestUninstall("sample");
+        await Promise.all([firstChange, secondChange, uninstalling]);
+
+        assert.equal(events.includes("data:sample"), false);
+        assert.equal(events.includes("uninstall:sample"), true);
+        assert.equal(events.includes("dispose:sample:true"), true);
     });
 
     it("runs different plugin queues in parallel", async () => {

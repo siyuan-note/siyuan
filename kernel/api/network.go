@@ -186,6 +186,7 @@ func forwardProxy(c *gin.Context) {
 	}
 
 	client := getSafeClient(time.Duration(timeout) * time.Millisecond)
+	responseEncoding := configureForwardProxyResponseEncoding(client, arg["responseEncoding"])
 	if redirectArg, ok := arg["redirect"].(bool); ok && !redirectArg {
 		client.SetRedirectPolicy(req.NoRedirectPolicy())
 	}
@@ -278,11 +279,6 @@ func forwardProxy(c *gin.Context) {
 
 	elapsed := time.Since(started)
 
-	responseEncoding := "text"
-	if responseEncodingArg := arg["responseEncoding"]; nil != responseEncodingArg {
-		responseEncoding = responseEncodingArg.(string)
-	}
-
 	body := ""
 	switch responseEncoding {
 	case "base64":
@@ -326,6 +322,21 @@ func forwardProxy(c *gin.Context) {
 	//
 	//logging.LogInfof("elapsed [%.1fs], length [%d], request [url=%s, headers=%s, content-type=%s, body=%s], status [%d], body [%s]",
 	//	elapsed.Seconds(), len(bodyData), data["url"], headers, contentType, arg["payload"], data["status"], shortBody)
+}
+
+func configureForwardProxyResponseEncoding(client *req.Client, value any) string {
+	responseEncoding, ok := value.(string)
+	if !ok {
+		return "text"
+	}
+
+	switch responseEncoding {
+	case "base64", "base64-std", "base64-url", "base32", "base32-std", "base32-hex", "hex":
+		client.DisableAutoDecode()
+		return responseEncoding
+	default:
+		return "text"
+	}
 }
 
 // 创建安全的 HTTP Client，防止 SSRF 和 DNS 重绑定

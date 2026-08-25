@@ -464,6 +464,34 @@ describe("asset upload plugin event", () => {
         assert.equal(prepared.state, "canceled");
     });
 
+    it("does not cancel later processing when a completed plugin is unloaded", async () => {
+        let resolveDecision: (decision: IAssetUploadDecision) => void;
+        let completedCallbackCalled = false;
+        const completedPlugin = createPlugin(event => {
+            event.detail.onComplete(() => {
+                completedCallbackCalled = true;
+            });
+        });
+        const activePlugin = createPlugin(event => event.detail.respondWith(new Promise(resolve => {
+            resolveDecision = resolve;
+        })));
+        const pending = prepareAssetUpload({
+            plugins: [completedPlugin, activePlugin],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        cancelAssetUploadsByPlugin(completedPlugin);
+        resolveDecision({action: "replace", input: {kind: "files", files: [createFile("b.jpg")]}});
+        const prepared = await pending;
+
+        assert.equal(prepared.state, "ready");
+        assert.equal(prepared.task.signal.aborted, false);
+        prepared.task.complete({status: "success"});
+        assert.equal(completedCallbackCalled, false);
+    });
+
     it("does not dispatch a queued plugin unloaded after the active response settles", async () => {
         let resolveDecision: (decision: IAssetUploadDecision) => void;
         let queuedPluginCalled = false;
@@ -502,6 +530,24 @@ describe("asset upload plugin event", () => {
         assert.equal(prepared.state, "failed");
         if (prepared.state === "failed") {
             assert.match(prepared.error, /test-plugin.*input\.files\[0]/);
+        }
+    });
+
+    it("rejects invalid initial input before dispatching plugins", async () => {
+        let pluginCalled = false;
+        const prepared = await prepareAssetUpload({
+            plugins: [createPlugin(() => {
+                pluginCalled = true;
+            })],
+            protyle,
+            input: {kind: "local-files", files: [{path: "", size: 1}]},
+            context,
+        });
+
+        assert.equal(prepared.state, "failed");
+        assert.equal(pluginCalled, false);
+        if (prepared.state === "failed") {
+            assert.match(prepared.error, /non-empty string/);
         }
     });
 

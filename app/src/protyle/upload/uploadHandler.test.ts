@@ -12,7 +12,10 @@ describe("custom upload handler", () => {
     });
 
     it("stops waiting after the handler timeout", async () => {
-        await assert.rejects(waitForUploadHandler(new Promise<null>(() => undefined),
-            new AbortController().signal, 1), AssetUploadHandlerTimeoutError);
+        const controller = new AbortController();
+        await assert.rejects(waitForUploadHandler(new Promise<null>(() => undefined), controller.signal, 1,
+            error => controller.abort(error)), AssetUploadHandlerTimeoutError);
+        assert.equal(controller.signal.aborted, true);
+        assert.equal(controller.signal.reason instanceof AssetUploadHandlerTimeoutError, true);
     });
 });

@@ -20,6 +20,7 @@ import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../upload/base64";
 import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets} from "../upload/htmlLocalAssets";
+import {applyHTMLEmbeddedAssetPaths, collectHTMLEmbeddedAssets} from "../upload/htmlEmbeddedAssets";
 import {getAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
@@ -1063,6 +1064,18 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }, () => resolve());
                 });
             }
+            const embeddedAssets = collectHTMLEmbeddedAssets(tempElement);
+            if (embeddedAssets.length > 0) {
+                await new Promise<void>(resolve => {
+                    uploadFiles(protyle, embeddedAssets.map(item => item.file), undefined, (_response, result) => {
+                        applyHTMLEmbeddedAssetPaths(embeddedAssets,
+                            getAssetUploadPathsByInput(embeddedAssets.length, result));
+                    }, () => resolve(), {
+                        ...assetUploadOptions,
+                        requiredFileCount: embeddedAssets.length,
+                    });
+                });
+            }
             fetchPost("/api/lute/html2BlockDOM", {
                 dom: tempElement.innerHTML,
                 text: textPlain,
@@ -1071,6 +1084,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 officeMathHTML,
                 wps,
                 skipLocalAssets: localAssets.length > 0,
+                skipBase64Assets: true,
+                skipInlineSVGAssets: true,
             }, (response) => {
                 insertConvertedBlockDOM(protyle, response.data);
             });

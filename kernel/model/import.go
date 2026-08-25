@@ -87,7 +87,17 @@ func GetImportAssetsDir(boxID, docDirLocalPath string) string {
 	return globalAssetsDir
 }
 
+type HTML2TreeOptions struct {
+	SkipBase64Assets    bool
+	SkipInlineSVGAssets bool
+}
+
 func HTML2Tree(htmlStr string, luteEngine *lute.Lute, boxID string) (tree *parse.Tree, withMath bool) {
+	return HTML2TreeWithOptions(htmlStr, luteEngine, boxID, HTML2TreeOptions{})
+}
+
+func HTML2TreeWithOptions(htmlStr string, luteEngine *lute.Lute, boxID string,
+	options HTML2TreeOptions) (tree *parse.Tree, withMath bool) {
 	htmlStr = gulu.Str.RemovePUA(htmlStr)
 	assetDirPath := GetImportAssetsDir(boxID, "")
 	_ = os.MkdirAll(assetDirPath, 0755)
@@ -116,7 +126,7 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute, boxID string) (tree *parse
 							n.AppendChild(c)
 						}
 					}
-				} else if bytes.Contains(n.Tokens, []byte("<svg")) {
+				} else if !options.SkipInlineSVGAssets && bytes.Contains(n.Tokens, []byte("<svg")) {
 					processHTMLBlockSvgImg(n, assetDirPath, boxID)
 				}
 			}
@@ -130,7 +140,7 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute, boxID string) (tree *parse
 			withMath = true
 		case ast.NodeLinkDest:
 			dest := n.TokensStr()
-			if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
+			if !options.SkipBase64Assets && strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
 				processBase64Img(n, dest, assetDirPath, boxID)
 			}
 		}

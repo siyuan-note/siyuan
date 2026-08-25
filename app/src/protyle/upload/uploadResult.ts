@@ -12,7 +12,21 @@ export const getAssetUploadPathsByInput = (inputCount: number,
                                             result: Omit<IAssetUploadResult, "requestId" | "input">) => {
     const paths: Array<string | undefined> = new Array(inputCount).fill(undefined);
     const rejected = new Set((result.rejected || []).map(item => item.index));
-    const succeeded = new Map(getAssetUploadSuccesses(result).map(item => [item.index, item.path]));
+    const succeeded = new Map<number, string>();
+    if (Array.isArray(result.succFiles)) {
+        result.succFiles.forEach(item => succeeded.set(item.index, item.path));
+    } else if (result.succMap && result.acceptedInput) {
+        const names = result.acceptedInput.kind === "files" ?
+            result.acceptedInput.files.map(file => file.name) :
+            result.acceptedInput.files.map(file => file.path.split(/[\\/]/).pop() || "");
+        const nameCounts = new Map<string, number>();
+        names.forEach(name => nameCounts.set(name, (nameCounts.get(name) || 0) + 1));
+        names.forEach((name, index) => {
+            if (nameCounts.get(name) === 1 && Object.prototype.hasOwnProperty.call(result.succMap, name)) {
+                succeeded.set(index, result.succMap[name]);
+            }
+        });
+    }
     let acceptedIndex = 0;
     for (let inputIndex = 0; inputIndex < inputCount; inputIndex++) {
         if (rejected.has(inputIndex)) {

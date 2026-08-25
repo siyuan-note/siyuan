@@ -493,36 +493,48 @@ ${window.siyuan.languages.title}
     menu.element.querySelector("textarea").focus();
 };
 
+const updateCellWithUploadedAssets = (result: Omit<IAssetUploadResult, "requestId" | "input">,
+                                      protyle: IProtyle, cellElement: HTMLElement) => {
+    const blockElement = hasClosestBlock(cellElement);
+    if (!blockElement) {
+        return;
+    }
+    const addValue: IAVCellAssetValue[] = [];
+    getAssetUploadSuccesses(result).forEach(success => {
+        const type = getAssetExtension(success.name).toLowerCase();
+        const name = success.name.substring(0, success.name.length - type.length);
+        if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
+            addValue.push({
+                type: "image",
+                name,
+                content: success.path,
+            });
+        } else {
+            addValue.push({
+                type: "file",
+                name,
+                content: success.path,
+            });
+        }
+    });
+    updateAssetCell({
+        protyle,
+        blockElement,
+        cellElements: [cellElement],
+        addValue
+    });
+};
+
 export const dragUpload = (files: ILocalFiles[], protyle: IProtyle, cellElement: HTMLElement,
                            position?: IAssetUploadPosition) => {
-    uploadLocalFiles(files, protyle, true, {source: "drop", target: "av-cell", position}, (response) => {
-        const blockElement = hasClosestBlock(cellElement);
-        if (!blockElement) {
-            return;
-        }
-        const addValue: IAVCellAssetValue[] = [];
-        getAssetUploadSuccesses(response.data).forEach(success => {
-            const type = getAssetExtension(success.name).toLowerCase();
-            const name = success.name.substring(0, success.name.length - type.length);
-            if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-                addValue.push({
-                    type: "image",
-                    name,
-                    content: success.path,
-                });
-            } else {
-                addValue.push({
-                    type: "file",
-                    name,
-                    content: success.path,
-                });
-            }
-        });
-        updateAssetCell({
-            protyle,
-            blockElement,
-            cellElements: [cellElement],
-            addValue
-        });
+    uploadLocalFiles(files, protyle, true, {source: "drop", target: "av-cell", position}, (_response, result) => {
+        updateCellWithUploadedAssets(result, protyle, cellElement);
     });
+};
+
+export const dragUploadFiles = (files: FileList | File[], protyle: IProtyle, cellElement: HTMLElement,
+                                position?: IAssetUploadPosition) => {
+    uploadFiles(protyle, files, undefined, (_response, result) => {
+        updateCellWithUploadedAssets(result, protyle, cellElement);
+    }, undefined, {source: "drop", target: "av-cell", position});
 };

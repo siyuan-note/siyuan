@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/88250/lute/ast"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -79,5 +80,20 @@ func TestValidateAssetUploadPaths(t *testing.T) {
 	sshKey := filepath.Join(util.HomeDir, ".ssh", "id_rsa")
 	if _, err = validateAssetUploadPaths([]string{sshKey}); err == nil {
 		t.Fatal("credential path must be rejected")
+	}
+}
+
+func TestNewAssetUploadToolResultPreservesPartialResults(t *testing.T) {
+	succeeded := []model.AssetUploadSuccess{{Index: 0, Name: "good.png", Path: "assets/good.png"}}
+	failed := []model.AssetUploadFailure{{Index: 1, Name: "missing.png", Error: "file not found"}}
+
+	result := newAssetUploadToolResult(succeeded, failed)
+
+	if !result.IsError {
+		t.Fatal("partial upload result must be marked as an error")
+	}
+	content := result.Content[0].Text
+	if !strings.Contains(content, "good.png -> assets/good.png") || !strings.Contains(content, "missing.png: file not found") {
+		t.Fatalf("partial upload content = %q", content)
 	}
 }

@@ -357,7 +357,7 @@ interface IUpload {
     /** 校验，成功时返回 true 否则返回错误信息 */
     validate?(files: File[]): string | boolean;
 
-    /** 自定义上传，返回 Promise 时将在其完成后报告上传结果，发生错误时返回错误信息，默认 120 秒超时 */
+    /** 自定义上传，返回 Promise 时将在其完成后报告上传结果，发生错误时返回错误信息，默认 120 秒超时并中止 signal */
     handler?(files: File[], options?: { signal: AbortSignal }): string | null | PromiseLike<string | null>;
 
     /** 对服务端返回的数据进行转换，以满足内置的数据结构 */

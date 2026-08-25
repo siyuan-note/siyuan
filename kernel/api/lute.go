@@ -111,6 +111,8 @@ func html2BlockDOM(c *gin.Context) {
 	officeMathHTML, _ := arg["officeMathHTML"].(string)
 	wps, _ := arg["wps"].(string)
 	skipLocalAssets, _ := arg["skipLocalAssets"].(bool)
+	skipBase64Assets, _ := arg["skipBase64Assets"].(bool)
+	skipInlineSVGAssets, _ := arg["skipInlineSVGAssets"].(bool)
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
@@ -128,7 +130,10 @@ func html2BlockDOM(c *gin.Context) {
 	// 将 Word 和 WPS 批注转换为行级备注 https://github.com/siyuan-note/siyuan/issues/18748
 	dom = normalizeWPSComments(dom, text, wps)
 	dom = normalizeMSWordComments(dom)
-	tree, _ := model.HTML2Tree(dom, luteEngine, boxID)
+	tree, _ := model.HTML2TreeWithOptions(dom, luteEngine, boxID, model.HTML2TreeOptions{
+		SkipBase64Assets:    skipBase64Assets,
+		SkipInlineSVGAssets: skipInlineSVGAssets,
+	})
 	if nil == tree {
 		ret.Data = "Failed to convert"
 		return

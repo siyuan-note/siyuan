@@ -4,7 +4,8 @@ export class AssetUploadHandlerTimeoutError extends Error {
 }
 
 export const waitForUploadHandler = <T>(result: PromiseLike<T>, signal: AbortSignal,
-                                        timeout = ASSET_UPLOAD_HANDLER_TIMEOUT) => {
+                                        timeout = ASSET_UPLOAD_HANDLER_TIMEOUT,
+                                        onTimeout?: (error: AssetUploadHandlerTimeoutError) => void) => {
     return new Promise<T>((resolve, reject) => {
         let settled = false;
         const finish = (callback: (value: any) => void, value: any) => {
@@ -18,8 +19,11 @@ export const waitForUploadHandler = <T>(result: PromiseLike<T>, signal: AbortSig
         };
         const onAbort = () => finish(reject, signal.reason instanceof Error ? signal.reason :
             new Error("The upload was canceled"));
-        const timeoutId = setTimeout(() => finish(reject,
-            new AssetUploadHandlerTimeoutError("Custom upload handler timed out")), timeout);
+        const timeoutId = setTimeout(() => {
+            const error = new AssetUploadHandlerTimeoutError("Custom upload handler timed out");
+            onTimeout?.(error);
+            finish(reject, error);
+        }, timeout);
         signal.addEventListener("abort", onAbort, {once: true});
         if (signal.aborted) {
             onAbort();

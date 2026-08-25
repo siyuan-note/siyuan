@@ -8,7 +8,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
 import {openLink} from "../../../editor/openLink";
-import {dragUpload, editAssetItem} from "./asset";
+import {dragUpload, dragUploadFiles, editAssetItem} from "./asset";
 import {previewImages} from "../../preview/image";
 /// #if !BROWSER
 import {webUtils} from "electron";
@@ -25,7 +25,7 @@ import {
     isAVTemplateLink
 } from "./attributeValue";
 import {isLastPointerMouse} from "../../../util/touchDragBridge";
-import {hasDataTransferFiles} from "../../upload/localDropFiles";
+import {getLocalDropFiles, hasDataTransferFiles} from "../../upload/localDropFiles";
 
 interface IAVAttributeTableData {
     avID: string;
@@ -200,18 +200,19 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 } else if (!window.siyuan.dragElement && hasDataTransferFiles(event.dataTransfer.types)) {
                     const cellElement = element.querySelector(".custom-attr__avvalue--active") as HTMLElement;
                     if (cellElement) {
-                        if (hasDataTransferFiles(event.dataTransfer.types) && !isBrowser()) {
-                            const files: ILocalFiles[] = [];
-                            for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                                files.push({
-                                    path: webUtils.getPathForFile(event.dataTransfer.files[i]),
-                                    size: event.dataTransfer.files[i].size,
-                                    isDir: event.dataTransfer.files[i].size === 0 &&
-                                        event.dataTransfer.files[i].type === "" &&
-                                        !event.dataTransfer.files[i].name.includes("."),
-                                });
+                        const position = {x: event.clientX, y: event.clientY};
+                        if (!isBrowser()) {
+                            /// #if !BROWSER
+                            const files = getLocalDropFiles(event.dataTransfer.files,
+                                file => webUtils.getPathForFile(file));
+                            if (files) {
+                                dragUpload(files, protyle, cellElement, position);
+                            } else {
+                                dragUploadFiles(event.dataTransfer.files, protyle, cellElement, position);
                             }
-                            dragUpload(files, protyle, cellElement, {x: event.clientX, y: event.clientY});
+                            /// #endif
+                        } else {
+                            dragUploadFiles(event.dataTransfer.files, protyle, cellElement, position);
                         }
                     }
                 }

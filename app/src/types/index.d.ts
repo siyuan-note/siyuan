@@ -466,6 +466,7 @@ interface IBeforeUploadAssetsDetail {
     respondWith(response: IAssetUploadDecision | PromiseLike<IAssetUploadDecision>): void,
     /**
      * 必须同步注册，经思源前端上传协调层发起的资源写入成功、失败或取消时执行一次。
+     * 注册该回调的插件卸载后不再执行。
      * 不包含正文或属性视图写入，也不覆盖 HTTP API、CLI、MCP、同步、导入、历史恢复等内核写入。
      */
     onComplete(callback: (result: IAssetUploadResult) => void): void

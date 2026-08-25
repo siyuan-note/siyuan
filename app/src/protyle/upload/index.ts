@@ -509,7 +509,8 @@ const uploadPreparedFiles = (input: Extract<IAssetUploadInput, { kind: "files" }
             if (typeof handlerResult === "string" || handlerResult === null || handlerResult === undefined) {
                 finishHandler(handlerResult as string | null);
             } else {
-                void waitForUploadHandler(handlerResult, task.signal).then(finishHandler, failHandler);
+                void waitForUploadHandler(handlerResult, task.signal, undefined,
+                    error => task.abort(error)).then(finishHandler, failHandler);
             }
         } catch (error) {
             failHandler(error);

@@ -13,6 +13,7 @@ export interface IAssetUploadTask {
     readonly requestId: string;
     readonly signal: AbortSignal;
     input: IAssetUploadInput;
+    abort(reason: Error): void;
     startUpload(): void;
     complete(result: Omit<IAssetUploadResult, "requestId" | "input">): boolean;
 }
@@ -43,6 +44,7 @@ let requestSequence = 0;
 const waitingTasksByProtyle = new WeakMap<IProtyle, Set<AssetUploadTask>>();
 const waitingTasksByPlugin = new WeakMap<IAssetUploadPlugin, Set<AssetUploadTask>>();
 const activeTasksByProtyle = new WeakMap<IProtyle, Set<AssetUploadTask>>();
+const completionTasksByPlugin = new WeakMap<IAssetUploadPlugin, Set<AssetUploadTask>>();
 
 const genRequestId = () => {
     requestSequence++;
@@ -144,7 +146,10 @@ class AssetUploadTask implements IAssetUploadTask {
     public input: IAssetUploadInput;
     private completed = false;
     private readonly abortController = new AbortController();
-    private readonly callbacks: Array<(result: IAssetUploadResult) => any> = [];
+    private readonly callbacks: Array<{
+        plugin: IAssetUploadPlugin;
+        callback: (result: IAssetUploadResult) => any;
+    }> = [];
     private readonly protyle?: IProtyle;
     private waitingPlugins: IAssetUploadPlugin[] = [];
     private uploadStarted = false;
@@ -156,8 +161,23 @@ class AssetUploadTask implements IAssetUploadTask {
         this.signal = this.abortController.signal;
     }
 
-    public addCompleteCallback(callback: (result: IAssetUploadResult) => void) {
-        this.callbacks.push(callback);
+    public addCompleteCallback(plugin: IAssetUploadPlugin, callback: (result: IAssetUploadResult) => void) {
+        this.callbacks.push({plugin, callback});
+        let tasks = completionTasksByPlugin.get(plugin);
+        if (!tasks) {
+            tasks = new Set();
+            completionTasksByPlugin.set(plugin, tasks);
+        }
+        tasks.add(this);
+    }
+
+    public removeCompleteCallbacks(plugin: IAssetUploadPlugin) {
+        for (let index = this.callbacks.length - 1; index >= 0; index--) {
+            if (this.callbacks[index].plugin === plugin) {
+                this.callbacks.splice(index, 1);
+            }
+        }
+        completionTasksByPlugin.get(plugin)?.delete(this);
     }
 
     public startWaiting(plugins: IAssetUploadPlugin[]) {
@@ -228,9 +248,11 @@ class AssetUploadTask implements IAssetUploadTask {
         if (result.rejected) {
             detail.rejected = result.rejected.map(item => ({...item, reasons: Array.from(item.reasons)}));
         }
-        this.callbacks.forEach(callback => {
+        const callbacks = this.callbacks.splice(0);
+        callbacks.forEach(item => completionTasksByPlugin.get(item.plugin)?.delete(this));
+        callbacks.forEach(item => {
             try {
-                const callbackResult = callback(cloneResult(detail));
+                const callbackResult = item.callback(cloneResult(detail));
                 if (callbackResult && typeof callbackResult.then === "function") {
                     void Promise.resolve(callbackResult).catch(error => console.error(error));
                 }
@@ -252,6 +274,7 @@ export const cancelAssetUploads = (protyle: IProtyle) => {
 };
 
 export const cancelAssetUploadsByPlugin = (plugin: IAssetUploadPlugin) => {
+    Array.from(completionTasksByPlugin.get(plugin) || []).forEach(task => task.removeCompleteCallbacks(plugin));
     cancelWaitingTasks(waitingTasksByPlugin.get(plugin), `Plugin ${plugin.name || ""} was unloaded`.trim());
 };
 
@@ -308,7 +331,7 @@ export const prepareAssetUpload = (options: {
         task.complete({status: "canceled"});
         return {state: "canceled", task};
     };
-    const initialValidationError = validateTargetInput(task.input, context);
+    const initialValidationError = validateAssetUploadInput(task.input) || validateTargetInput(task.input, context);
     if (initialValidationError) {
         return fail(initialValidationError);
     }
@@ -319,7 +342,6 @@ export const prepareAssetUpload = (options: {
     if (plugins.length === 0) {
         return {state: "ready", task};
     }
-    task.startWaiting(plugins);
     const processPlugin = (index: number): TPreparedAssetUpload | Promise<TPreparedAssetUpload> => {
         if (task.signal.aborted) {
             const reason = task.signal.reason instanceof Error ? task.signal.reason.message : "The upload was canceled";
@@ -330,6 +352,7 @@ export const prepareAssetUpload = (options: {
             return {state: "ready", task};
         }
         const plugin = plugins[index];
+        task.startWaiting(plugins.slice(index));
         const pluginLabel = getPluginLabel(plugin, index);
         let response: PromiseLike<IAssetUploadDecision> | undefined;
         let responseClaimed = false;
@@ -369,7 +392,7 @@ export const prepareAssetUpload = (options: {
                         console.error(new Error(`Plugin ${pluginLabel} must register onComplete synchronously`));
                         return;
                     }
-                    task.addCompleteCallback(callback);
+                    task.addCompleteCallback(plugin, callback);
                 },
             });
         } catch (error) {

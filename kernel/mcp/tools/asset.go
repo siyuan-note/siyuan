@@ -192,6 +192,21 @@ func htmlAssetIFrameBlockDOM(assetPath string) (dom, blockID string, err error) 
 	return
 }
 
+func newAssetUploadToolResult(succeeded []model.AssetUploadSuccess, failed []model.AssetUploadFailure) CallToolResult {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Uploaded %d file(s):\n", len(succeeded)))
+	for _, result := range succeeded {
+		sb.WriteString(fmt.Sprintf("- %s -> %s\n", result.Name, result.Path))
+	}
+	if 0 < len(failed) {
+		sb.WriteString(fmt.Sprintf("\nFailed %d file(s):\n", len(failed)))
+		for _, result := range failed {
+			sb.WriteString(fmt.Sprintf("- %s: %s\n", result.Name, result.Error))
+		}
+	}
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}, IsError: 0 < len(failed)}
+}
+
 func assetUpload(args map[string]any) (CallToolResult, error) {
 	id, _ := args["id"].(string)
 	if id == "" {
@@ -211,17 +226,7 @@ func assetUpload(args map[string]any) (CallToolResult, error) {
 	if err != nil {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "upload assets failed: " + err.Error()}}, IsError: true}, nil
 	}
-	if 0 < len(failedFiles) {
-		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "upload asset failed: " +
-			failedFiles[0].Name + ": " + failedFiles[0].Error}}, IsError: true}, nil
-	}
-
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Uploaded %d file(s):\n\n", len(succFiles)))
-	for _, result := range succFiles {
-		sb.WriteString(fmt.Sprintf("- %s -> %s\n", result.Name, result.Path))
-	}
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+	return newAssetUploadToolResult(succFiles, failedFiles), nil
 }
 
 // validateAssetUploadPaths 将上传路径归一化为绝对路径，并拒绝敏感路径，

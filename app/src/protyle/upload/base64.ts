@@ -1,28 +1,17 @@
 import {type IUploadInsertOptions, uploadFiles} from "./index";
 import {getAssetUploadPathsByInput} from "./uploadResult";
+import {createBase64ImageFile} from "./base64File";
 
 export const base64ToURL = async (base64SrcList: string[], protyle: IProtyle,
                                   options?: IUploadInsertOptions) => {
     const files: File[] = [];
     const fileSourceIndices: number[] = [];
     base64SrcList.forEach((item, sourceIndex) => {
-        const srcPart = item.split(",");
-        if (srcPart.length !== 2) return;
-        // data URL 格式为 data:image/svg+xml;base64,XXX
-        const mimeMatch = srcPart[0].match(/data:([^;]+);/);
-        const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
-        const binary = atob(srcPart[1]);
-        const u8arr = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) {
-            u8arr[i] = binary.charCodeAt(i);
+        const file = createBase64ImageFile(item, `base64image-${Lute.NewNodeID()}`);
+        if (!file) {
+            return;
         }
-        files.push(new File([u8arr], `base64image-${Lute.NewNodeID()}.${{
-            "image/png": "png",
-            "image/jpeg": "jpg",
-            "image/webp": "webp",
-            "image/gif": "gif",
-            "image/svg+xml": "svg"
-        }[mime] || "png"}`, {type: mime}));
+        files.push(file);
         fileSourceIndices.push(sourceIndex);
     });
     const paths: Array<string | undefined> = new Array(base64SrcList.length).fill(undefined);

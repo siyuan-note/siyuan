@@ -87,6 +87,35 @@ describe("asset upload result", () => {
         ]);
     });
 
+    it("maps legacy partial successes by unique input names", () => {
+        const acceptedInput: IAssetUploadInput = {
+            kind: "files",
+            files: [createFile("a.png"), createFile("b.png")],
+        };
+        const result = {
+            status: "partial" as const,
+            acceptedInput,
+            succMap: {"b.png": "assets/b.png"},
+            errFiles: ["a.png"],
+        };
+
+        assert.deepEqual(getAssetUploadPathsByInput(2, result), [undefined, "assets/b.png"]);
+    });
+
+    it("does not guess legacy result positions for duplicate input names", () => {
+        const acceptedInput: IAssetUploadInput = {
+            kind: "files",
+            files: [createFile("image.png"), createFile("image.png")],
+        };
+        const result = {
+            status: "partial" as const,
+            acceptedInput,
+            succMap: {"image.png": "assets/image.png"},
+        };
+
+        assert.deepEqual(getAssetUploadPathsByInput(2, result), [undefined, undefined]);
+    });
+
     it("preserves successful and failed files from a partial kernel write", () => {
         const input: IAssetUploadInput = {
             kind: "local-files",

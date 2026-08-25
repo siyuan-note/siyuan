@@ -33,6 +33,41 @@ var assetCmd = &cobra.Command{
 	Short: "Manage assets",
 }
 
+type assetUploadCommandOutput struct {
+	Status    string                     `json:"status"`
+	Succeeded []model.AssetUploadSuccess `json:"succeeded"`
+	Failed    []model.AssetUploadFailure `json:"failed"`
+}
+
+func newAssetUploadCommandOutput(succeeded []model.AssetUploadSuccess,
+	failed []model.AssetUploadFailure) assetUploadCommandOutput {
+	status := "success"
+	if 0 < len(failed) {
+		status = "failed"
+		if 0 < len(succeeded) {
+			status = "partial"
+		}
+	}
+	return assetUploadCommandOutput{Status: status, Succeeded: succeeded, Failed: failed}
+}
+
+func printAssetUploadCommandOutput(result assetUploadCommandOutput) {
+	if outputFormat == "json" {
+		data, _ := json.MarshalIndent(result, "", "  ")
+		fmt.Println(string(data))
+		return
+	}
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "STATUS\tFILE\tASSET_PATH\tERROR")
+	for _, item := range result.Succeeded {
+		fmt.Fprintf(w, "success\t%s\t%s\t\n", item.Name, item.Path)
+	}
+	for _, item := range result.Failed {
+		fmt.Fprintf(w, "failed\t%s\t\t%s\n", item.Name, item.Error)
+	}
+	w.Flush()
+}
+
 var assetUploadCmd = &cobra.Command{
 	Use:   "upload --id <id> --file <path>",
 	Short: "Upload files to workspace assets",
@@ -60,25 +95,14 @@ var assetUploadCmd = &cobra.Command{
 			return nil
 		}
 
-		succMap, _, failedFiles, err := model.InsertLocalAssets(id, files, true)
+		_, succFiles, failedFiles, err := model.InsertLocalAssets(id, files, true)
 		if err != nil {
 			return err
 		}
+		result := newAssetUploadCommandOutput(succFiles, failedFiles)
+		printAssetUploadCommandOutput(result)
 		if 0 < len(failedFiles) {
-			return fmt.Errorf("upload asset %s failed: %s", failedFiles[0].Name, failedFiles[0].Error)
-		}
-
-		switch outputFormat {
-		case "json":
-			data, _ := json.MarshalIndent(succMap, "", "  ")
-			fmt.Println(string(data))
-		default:
-			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-			fmt.Fprintln(w, "FILE\tASSET_PATH")
-			for k, v := range succMap {
-				fmt.Fprintf(w, "%s\t%v\n", k, v)
-			}
-			w.Flush()
+			return fmt.Errorf("%d asset upload(s) failed", len(failedFiles))
 		}
 		return nil
 	},

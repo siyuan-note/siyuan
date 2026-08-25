@@ -165,6 +165,33 @@ func TestHTML2TreeUsesExistingNotebookAssets(t *testing.T) {
 	}
 }
 
+func TestHTML2TreeCanSkipEmbeddedAssetWrites(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	boxID := "20260826000000-htmlimg"
+	boxAssetsDir := filepath.Join(util.DataDir, boxID, "assets")
+	if err := os.MkdirAll(boxAssetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	options := HTML2TreeOptions{SkipBase64Assets: true, SkipInlineSVGAssets: true}
+	HTML2TreeWithOptions(`<img alt="diagram" src="data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=">`,
+		util.NewLute(), boxID, options)
+	HTML2TreeWithOptions(`<pre class="language-html"><svg><rect width="1" height="1"></rect></svg></pre>`,
+		util.NewLute(), boxID, options)
+
+	entries, err := os.ReadDir(boxAssetsDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 0 {
+		t.Fatalf("notebook assets count = %d, want 0", len(entries))
+	}
+}
+
 func TestHTML2TreeUsesBase64ImageContentType(t *testing.T) {
 	originalDataDir := util.DataDir
 	util.DataDir = t.TempDir()

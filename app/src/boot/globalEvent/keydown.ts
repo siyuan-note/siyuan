@@ -1856,6 +1856,9 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
 
 export const sendGlobalShortcut = (app: App) => {
     /// #if !BROWSER
+    if (isWindow()) {
+        return;
+    }
     const hotkeys = [clearDisallowedTextInputHotkey(window.siyuan.config.keymap.general.toggleWin.custom)];
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {
@@ -1877,6 +1880,9 @@ export const sendGlobalShortcut = (app: App) => {
 
 export const sendUnregisterGlobalShortcut = (app: App) => {
     /// #if !BROWSER
+    if (isWindow()) {
+        return;
+    }
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "unregisterGlobalShortcut",
         accelerator: window.siyuan.config.keymap.general.toggleWin.custom

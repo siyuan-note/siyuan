@@ -36,6 +36,7 @@ import {processSiYuanUri} from "../util/uri";
 import {getAllEditor} from "../layout/getAll";
 import {openDesktopOnboarding} from "../onboarding";
 import {ensureUILayout} from "../util/ensureUILayout";
+import {dispatchPluginGlobalShortcut} from "../plugin/globalShortcut";
 
 export const onGetConfig = (isStart: boolean, app: App) => {
     correctHotkey(app);
@@ -206,19 +207,9 @@ export const initWindow = async (app: App) => {
         onWindowsMsg(ipcData);
     });
     ipcRenderer.on(Constants.SIYUAN_HOTKEY, (e, data) => {
-        let matchCommand = false;
-        app.plugins.find(item => {
-            item.commands.find(command => {
-                if (command.globalCallback && data.hotkey === command.customHotkey) {
-                    matchCommand = true;
-                    command.globalCallback();
-                    return true;
-                }
-            });
-            if (matchCommand) {
-                return true;
-            }
-        });
+        if (!isWindow()) {
+            dispatchPluginGlobalShortcut(app.plugins, data.hotkey);
+        }
     });
     ipcRenderer.on(Constants.SIYUAN_EXPORT_PDF, async (e, ipcData) => {
         const msgId = showMessage(window.siyuan.languages.exporting, -1);

@@ -4,7 +4,7 @@ import {fetchPost} from "../util/fetch";
 import {isMobile, isWindow} from "../util/functions";
 /// #if !MOBILE
 import {Custom} from "../layout/dock/Custom";
-import {getAllEditor, getAllModels} from "../layout/getAll";
+import {getAllModels} from "../layout/getAll";
 import {Tab} from "../layout/Tab";
 import {resizeTopBar, setPanelFocus} from "../layout/util";
 import {getDockByType, setTabPosition} from "../layout/tabUtil";
@@ -19,8 +19,7 @@ import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
 import {Constants} from "../constants";
-import {uninstall} from "./uninstall";
-import {addPluginDock, afterLoadPlugin, loadPlugins, removePluginDock} from "./loader";
+import {addPluginDock, removePluginDock} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
 import {Kernel} from "./kernel";
 import {IAgentCapabilityEffects, registerCapability} from "../layout/dock/agent/frontendCapabilities";
@@ -29,6 +28,14 @@ import {
     addBreadcrumbButton as addPluginBreadcrumbButton,
     removeBreadcrumbButton as removePluginBreadcrumbButton,
 } from "./breadcrumbButton";
+
+const disposedPlugins = new WeakSet<Plugin>();
+
+const isPluginDisposed = (plugin: Plugin) => disposedPlugins.has(plugin);
+
+export const markPluginDisposed = (plugin: Plugin) => {
+    disposedPlugins.add(plugin);
+};
 
 const updatePluginKeymap = (pluginName: string, key: string, hotkey: unknown) => {
     if (!window.siyuan.config.keymap.plugin) {
@@ -137,40 +144,30 @@ export class Plugin {
         // 加载
     }
 
-    public onunload() {
-        // 禁用/关闭
+    public onunload(): Promise<void> | void {
+        // 禁用
     }
 
-    public uninstall() {
+    public uninstall(): Promise<void> | void {
         // 卸载
     }
 
     public onDataChanged() {
         // 存储数据变更
-        // 兼容 3.4.1 以前同步数据使用重载插件的问题
-        uninstall(this.app, this.name, true);
-        loadPlugins(this.app, [this.name], false).then(() => {
-            this.app.plugins.find(item => {
-                if (this.name === item.name) {
-                    afterLoadPlugin(item);
-                    getAllEditor().forEach(editor => {
-                        editor.protyle.toolbar.update(editor.protyle);
-                    });
-                    return true;
-                }
-            });
-        });
     }
 
     public async updateCards(options: ICardData) {
         return options;
     }
 
-    public onLayoutReady() {
+    public onLayoutReady(): Promise<void> | void {
         // 布局加载完成
     }
 
     public addCommand(command: ICommand) {
+        if (isPluginDisposed(this)) {
+            return;
+        }
         if (typeof command.hotkey !== "string") {
             command.hotkey = "";
         }
@@ -182,7 +179,8 @@ export class Plugin {
         } else {
             this.commands.push(command);
             /// #if !BROWSER
-            if (command.globalCallback && command.customHotkey && !isDisallowedTextInputHotkey(command.customHotkey)) {
+            if (!isWindow() && command.globalCallback && command.customHotkey &&
+                !isDisallowedTextInputHotkey(command.customHotkey)) {
                 ipcRenderer.send(Constants.SIYUAN_CMD, {
                     cmd: "registerGlobalShortcut",
                     accelerator: command.customHotkey
@@ -193,6 +191,9 @@ export class Plugin {
     }
 
     public addIcons(svg: string) {
+        if (isPluginDisposed(this)) {
+            return;
+        }
         const svgElement = document.querySelector(`svg[data-name="${this.name}"] defs`);
         if (svgElement) {
             svgElement.insertAdjacentHTML("afterbegin", svg);
@@ -215,6 +216,9 @@ export class Plugin {
         position?: "right" | "left",
         callback: (evt: MouseEvent) => void
     }) {
+        if (isPluginDisposed(this)) {
+            return;
+        }
         options.icon = options.icon.trim();
         if (!options.icon.startsWith("icon") && !options.icon.startsWith("<svg")) {
             console.error(`plugin ${this.name} addTopBar error: icon must be svg id or svg tag`);
@@ -278,6 +282,9 @@ export class Plugin {
     }
 
     public removeTopBar(id: string) {
+        if (isPluginDisposed(this)) {
+            return;
+        }
         const index = this.topBarIcons.findIndex(item => item.getAttribute("data-id") === id);
         if (index === -1) {
             return;
@@ -298,6 +305,9 @@ export class Plugin {
         title: string,
         callback: (event: MouseEvent, protyle: IProtyle) => void,
     }) {
+        if (isPluginDisposed(this)) {
+            return options.id;
+        }
         options.icon = options.icon.trim();
         if (!options.icon.startsWith("icon") && !options.icon.startsWith("<svg")) {
             console.error(`plugin ${this.name} addBreadcrumbButton error: icon must be svg id or svg tag`);
@@ -308,6 +318,9 @@ export class Plugin {
     }
 
     public removeBreadcrumbButton(id: string) {
+        if (isPluginDisposed(this)) {
+            return;
+        }
         removePluginBreadcrumbButton(this.name, id);
     }
 
@@ -315,6 +328,9 @@ export class Plugin {
         element: HTMLElement,
         position?: "right" | "left",
     }) {
+        if (isPluginDisposed(this)) {
+            return options.element;
+        }
         /// #if !MOBILE
         options.element.setAttribute("data-location", options.position || "right");
         this.statusBarIcons.push(options.element);
@@ -331,13 +347,16 @@ export class Plugin {
     }
 
     public openSetting() {
-        if (!this.setting) {
+        if (isPluginDisposed(this) || !this.setting) {
             return;
         }
         this.setting.open(this.displayName || this.name);
     }
 
     public loadData(storageName: string): Promise<any> {
+        if (isPluginDisposed(this)) {
+            return Promise.reject({code: 410, msg: "Plugin lifecycle has ended", data: null});
+        }
         if (typeof this.data[storageName] === "undefined") {
             this.data[storageName] = "";
         }
@@ -354,6 +373,9 @@ export class Plugin {
     }
 
     public saveData(storageName: string, data: any): Promise<any | IWebSocketData> {
+        if (isPluginDisposed(this)) {
+            return Promise.reject({code: 410, msg: "Plugin lifecycle has ended", data: null});
+        }
         if (window.siyuan.config.readonly || window.siyuan.isPublish) {
             return Promise.reject({
                 code: 403,
@@ -393,6 +415,9 @@ export class Plugin {
     }
 
     public removeData(storageName: string): Promise<IWebSocketData> {
+        if (isPluginDisposed(this)) {
+            return Promise.reject({code: 410, msg: "Plugin lifecycle has ended", data: null} as IWebSocketData);
+        }
         if (window.siyuan.config.readonly || window.siyuan.isPublish) {
             return Promise.reject({
                 code: 403,
@@ -435,6 +460,9 @@ export class Plugin {
         update?: () => void,
         init: () => void
     }) {
+        if (isPluginDisposed(this)) {
+            return;
+        }
         /// #if !MOBILE
         const type2 = this.name + options.type;
         this.models[type2] = (arg: { data: any, tab: Tab }) => {
@@ -499,6 +527,9 @@ export class Plugin {
             throw new Error("Agent capability name and description are required");
         }
         const id = "plugin/frontend/" + encodeURIComponent(this.name) + "/" + encodeURIComponent(name);
+        if (isPluginDisposed(this)) {
+            return id;
+        }
         if (!this.agentCapabilities.some((capability) => capability.id === id)) {
             const generation = registerCapability({
                 id,
@@ -528,6 +559,9 @@ export class Plugin {
         update?: () => void,
         init: () => void
     }) {
+        if (isPluginDisposed(this)) {
+            return;
+        }
         const id = options.id || options.type;
         const type2 = this.name + options.type;
         const existingID = this.docks[type2]?.id;
@@ -582,6 +616,9 @@ export class Plugin {
     }
 
     public removeDock(id: string) {
+        if (isPluginDisposed(this)) {
+            return;
+        }
         removePluginDock(this, id);
     }
 
@@ -593,6 +630,9 @@ export class Plugin {
         originalRefBlockIDs?: IObject,
         isBacklink: boolean,
     }) => {
+        if (isPluginDisposed(this)) {
+            return;
+        }
         window.siyuan.blockPanels.push(new BlockPanel({
             app: this.app,
             originalRefBlockIDs: options.originalRefBlockIDs,

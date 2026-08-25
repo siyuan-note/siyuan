@@ -2,7 +2,7 @@ import {Dialog} from "../../../dialog";
 import type {App} from "../../../index";
 import {upDownHint} from "../../../util/upDownHint";
 import {updateHotkeyTip} from "../../../protyle/util/compatibility";
-import {isMobile} from "../../../util/functions";
+import {isMobile, isWindow} from "../../../util/functions";
 import {Constants} from "../../../constants";
 /// #if MOBILE
 import {getCurrentEditor} from "../../../mobile/editor";
@@ -103,7 +103,7 @@ export const commandPanel = (app: App) => {
             liElement.addEventListener("click", (event) => {
                 if (command.callback) {
                     command.callback();
-                } else if (command.globalCallback) {
+                } else if (command.globalCallback && !isWindow()) {
                     command.globalCallback();
                 }
                 dialog.destroy();

@@ -38,6 +38,8 @@ export class Kernel implements IKernelPlugin {
 
     #rpcCallUrl: string;
 
+    #destroyed = false;
+
     constructor(options: {
         appId: string;
         name: string;
@@ -57,6 +59,9 @@ export class Kernel implements IKernelPlugin {
 
     #createState(): IKernelPluginState {
         return new KernelState((state) => {
+            if (this.#destroyed) {
+                return;
+            }
             switch (state.code) {
                 case 2: // running
                     if (this.#rpcWs == null) {
@@ -99,6 +104,9 @@ export class Kernel implements IKernelPlugin {
             notify,
             batch: this.#rpcBatchCall.bind(this),
             bind: (method: TJsonRpcMethod, handler: TJsonRpcHandler<void>) => {
+                if (this.#destroyed) {
+                    return;
+                }
                 const handlers = (() => {
                     let handlers = this.#handlers.get(method);
                     if (!handlers) {
@@ -157,7 +165,13 @@ export class Kernel implements IKernelPlugin {
     }
 
     async #fetchRpc(body: string): Promise<any> {
+        if (this.#destroyed) {
+            throw new Error("Plugin lifecycle has ended");
+        }
         for (let retry = 0; ; retry++) {
+            if (this.#destroyed) {
+                throw new Error("Plugin lifecycle has ended");
+            }
             const response = await fetch(this.#rpcCallUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -215,6 +229,9 @@ export class Kernel implements IKernelPlugin {
     }
 
     public async init() {
+        if (this.#destroyed) {
+            return;
+        }
         try {
             await this.#initState();
         } catch (error) {
@@ -223,11 +240,16 @@ export class Kernel implements IKernelPlugin {
     }
 
     public async destroy() {
+        if (this.#destroyed) {
+            return;
+        }
+        this.#destroyed = true;
         try {
             this.#rpcWs?.close();
         } catch (error) {
             console.error("Failed to close JSON-RPC WebSocket connection:", error);
         }
+        this.#handlers.clear();
     }
 }
 

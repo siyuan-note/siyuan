@@ -43,7 +43,6 @@ func setEditorReadOnly(c *gin.Context) {
 	if !ok {
 		return
 	}
-
 	readOnly := arg["readonly"].(bool)
 
 	oldReadOnly := model.Conf.Editor.ReadOnly
@@ -146,6 +145,8 @@ func setBazaar(c *gin.Context) {
 	if !ok {
 		return
 	}
+	app, _ := arg["app"].(string)
+	delete(arg, "app")
 
 	param, err := gulu.JSON.MarshalJSON(arg)
 	if err != nil {
@@ -164,6 +165,7 @@ func setBazaar(c *gin.Context) {
 	petalsEnabled := model.IsPetalsEnabled()
 	model.Conf.Bazaar = bazaar
 	model.Conf.Save()
+	util.BroadcastByType("main", "setConf", 0, "", model.Conf)
 	newPetalsEnabled := model.IsPetalsEnabled()
 	if petalsEnabled != newPetalsEnabled {
 		if newPetalsEnabled {
@@ -173,6 +175,7 @@ func setBazaar(c *gin.Context) {
 		} else if model.OnKernelPluginsStop != nil {
 			model.OnKernelPluginsStop()
 		}
+		model.PushReloadAllEnabledPlugins(newPetalsEnabled, app)
 	}
 
 	ret.Data = bazaar

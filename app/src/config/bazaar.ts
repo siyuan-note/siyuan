@@ -16,8 +16,7 @@ import {Plugin} from "../plugin";
 import type {App} from "../index";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {formatCount} from "../util/number";
-import {uninstall} from "../plugin/uninstall";
-import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
+import {loadPlugin, loadPlugins, unloadPlugin} from "../plugin/loader";
 import {useShell} from "../util/pathName";
 import {switchSettingPanelSubTab} from "./setting/mount";
 import {isThemeFrontendSupported} from "../util/themeCompatibility";
@@ -2115,8 +2114,7 @@ type="checkbox">
                 callback();
             };
             if (!enabled) {
-                uninstall(app, item.name, true);
-                finish();
+                unloadPlugin(app, item.name).then(finish);
                 return;
             }
             if (window.siyuan.config.bazaar.petalDisabled) {
@@ -2414,13 +2412,18 @@ type="checkbox">
                 fetchPost("/api/setting/setBazaar", {
                     ...window.siyuan.config.bazaar,
                     trust: true,
+                    app: Constants.SIYUAN_APPID,
                 }, (response) => {
                     window.siyuan.config.bazaar = response.data;
-                    if (!bazaar._isMountCurrent(mount)) {
-                        return;
-                    }
-                    bazaar.element.innerHTML = bazaar.genHTML();
-                    bazaar.bindEvent(app);
+                    void loadPlugins(app, null, false).then(() => {
+                        if (!bazaar._isMountCurrent(mount)) {
+                            return;
+                        }
+                        bazaar.element.innerHTML = bazaar.genHTML();
+                        bazaar.bindEvent(app);
+                    }).catch(error => {
+                        console.error(error);
+                    });
                 });
             });
             return;
@@ -2743,40 +2746,41 @@ type="checkbox">
                 } else if (type === "plugins-enable") {
                     if (!target.getAttribute("disabled")) {
                         target.setAttribute("disabled", "disabled");
-                        const pluginCards = mount.element.querySelectorAll(
-                            "#configBazaarDownloaded .b3-card[data-name]"
-                        ) as NodeListOf<HTMLElement>;
-                        const pluginNames = Array.from(pluginCards).map((item) => item.dataset.name)
-                            .filter((name): name is string => Boolean(name));
+                        const pluginNames = app.plugins.map(item => item.name);
                         window.siyuan.config.bazaar.petalDisabled = !(target as HTMLInputElement).checked;
-                        fetchPost("/api/setting/setBazaar", window.siyuan.config.bazaar, () => {
-                            if (bazaar._isMountCurrent(mount)) {
-                                target.removeAttribute("disabled");
-                                target.setAttribute("aria-label", window.siyuan.languages[
-                                    window.siyuan.config.bazaar.petalDisabled ? "enable" : "disableAll"
-                                ]);
-                            }
-                            if (window.siyuan.config.bazaar.petalDisabled) {
+                        fetchPost("/api/setting/setBazaar", {
+                            ...window.siyuan.config.bazaar,
+                            app: Constants.SIYUAN_APPID,
+                        }, () => {
+                            const finish = () => {
                                 if (bazaar._isMountCurrent(mount)) {
-                                    mount.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach((item: HTMLElement) => {
-                                        item.querySelector('[data-type="setting"]')?.classList.add("fn__none");
-                                    });
+                                    target.removeAttribute("disabled");
+                                    target.setAttribute("aria-label", window.siyuan.languages[
+                                        window.siyuan.config.bazaar.petalDisabled ? "enable" : "disableAll"
+                                    ]);
                                 }
-                                pluginNames.forEach((pluginName) => {
-                                    uninstall(app, pluginName, true);
-                                });
+                            };
+                            if (window.siyuan.config.bazaar.petalDisabled) {
+                                void Promise.all(pluginNames.map((pluginName) => unloadPlugin(app, pluginName))).then(() => {
+                                    if (bazaar._isMountCurrent(mount)) {
+                                        mount.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach((item: HTMLElement) => {
+                                            item.querySelector('[data-type="setting"]')?.classList.add("fn__none");
+                                        });
+                                    }
+                                }).catch(error => {
+                                    console.error(error);
+                                }).finally(finish);
                             } else {
-                                loadPlugins(app, null, false).then(() => {
-                                    app.plugins.forEach(item => {
-                                        afterLoadPlugin(item);
-                                    });
+                                void loadPlugins(app, null, false).then(() => {
                                     if (bazaar._isMountCurrent(mount)) {
                                         this._genMyHTML("plugins", app, false);
                                     }
-                                });
-                                /// #if !MOBILE
-                                saveLayout();
-                                /// #endif
+                                    /// #if !MOBILE
+                                    saveLayout();
+                                    /// #endif
+                                }).catch(error => {
+                                    console.error(error);
+                                }).finally(finish);
                             }
                         });
                     }

@@ -57,6 +57,7 @@ import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {openByMobile} from "../editor/openLink";
 import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 import {updateMobileTopBarLayout} from "./util/mobileTopBar";
+import {showMobileBars} from "./util/mobileBars";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -168,6 +169,7 @@ class App {
         window.matchMedia("(orientation:portrait)").addEventListener("change", () => {
             updateCardHV();
             updateMobileTopBarLayout();
+            showMobileBars();
             activeBlur();
         });
         fetchPost("/api/system/getConf", {}, async (confResponse) => {

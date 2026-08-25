@@ -1,11 +1,11 @@
 import {
     createMobileBarsState,
     getMobileBarsVisibility,
+    MOBILE_BARS_SCROLL_OPTIONS,
     reduceMobileBarsState,
 } from "./mobileBarsState";
 
 const PANEL_IDS = ["sidebar", "sidebarRight", "menu", "model"];
-const MOBILE_BARS_TRANSITION_FALLBACK = 320;
 
 let barsState = createMobileBarsState();
 let scrollElement: HTMLElement | undefined;
@@ -14,10 +14,6 @@ let panelObserver: MutationObserver | undefined;
 let selectionObserver: MutationObserver | undefined;
 let selectionFrame = 0;
 let programmaticScrollTimeout = 0;
-let barsTransitionTimeout = 0;
-let barsTransitionFrame = 0;
-let barsTransitionEndHandler: ((event: TransitionEvent) => void) | undefined;
-let barsTransitionElement: HTMLElement | undefined;
 let initialized = false;
 
 const hasTextSelection = () => {
@@ -43,73 +39,27 @@ const isPanelOpen = () => PANEL_IDS.some((id) => {
     return Boolean(element?.style.transform);
 });
 
-const clearBarsTransitionWatch = () => {
-    clearTimeout(barsTransitionTimeout);
-    cancelAnimationFrame(barsTransitionFrame);
-    document.body.classList.remove("mobile-chrome--transitioning");
-    barsTransitionTimeout = 0;
-    barsTransitionFrame = 0;
-    if (barsTransitionEndHandler && barsTransitionElement) {
-        barsTransitionElement.removeEventListener("transitionend", barsTransitionEndHandler);
-    }
-    barsTransitionEndHandler = undefined;
-    barsTransitionElement = undefined;
-};
-
-const finishBarsTransition = () => {
-    clearBarsTransitionWatch();
-    if (!barsState.barsTransitioning) {
-        return;
-    }
-    barsState = reduceMobileBarsState(barsState, {
-        type: "set-bars-transitioning",
-        active: false,
-        scrollTop: scrollElement?.scrollTop,
-    });
-};
-
-const startBarsTransition = () => {
-    clearBarsTransitionWatch();
-    document.body.classList.add("mobile-chrome--transitioning");
-    barsState = reduceMobileBarsState(barsState, {
-        type: "set-bars-transitioning",
-        active: true,
-        scrollTop: scrollElement?.scrollTop,
-    });
-    barsTransitionElement = document.body.classList.contains("mobile-topbar--merged") ?
-        document.getElementById("mobileBottomBar") : document.getElementById("mobileTopBar");
-    if (!barsTransitionElement || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        barsTransitionFrame = requestAnimationFrame(() => {
-            barsTransitionFrame = requestAnimationFrame(finishBarsTransition);
-        });
-        return;
-    }
-    barsTransitionEndHandler = (event: TransitionEvent) => {
-        if (event.target === barsTransitionElement && event.propertyName === "transform") {
-            finishBarsTransition();
-        }
-    };
-    barsTransitionElement.addEventListener("transitionend", barsTransitionEndHandler);
-    barsTransitionTimeout = window.setTimeout(finishBarsTransition, MOBILE_BARS_TRANSITION_FALLBACK);
-};
-
 const renderMobileBars = () => {
     const visibility = getMobileBarsVisibility(barsState);
     const immersive = !visibility.topbarVisible;
-    if (document.body.classList.contains("mobile-chrome--hidden") !== immersive) {
-        startBarsTransition();
-    }
     document.body.classList.toggle("mobile-chrome--hidden", immersive);
     document.body.classList.toggle("mobile-keyboard--open", visibility.editingBarVisible);
     document.body.classList.toggle("mobile-selection--active", barsState.selecting);
 
+    const progress = MOBILE_BARS_SCROLL_OPTIONS.maxOffset === 0 ? 0 :
+        barsState.readingBarsOffset / MOBILE_BARS_SCROLL_OPTIONS.maxOffset;
     const topbarElement = document.getElementById("mobileTopBar");
     if (topbarElement) {
+        topbarElement.style.setProperty("--mobile-bar-translate-y", `${0 - barsState.readingBarsOffset}px`);
         topbarElement.toggleAttribute("inert", immersive);
         topbarElement.setAttribute("aria-hidden", immersive ? "true" : "false");
     }
+    const breadcrumbElement = document.querySelector<HTMLElement>("#editor > .protyle-breadcrumb");
+    breadcrumbElement?.style.setProperty("--mobile-bar-translate-y", `${0 - barsState.readingBarsOffset}px`);
     const bottomBarElement = document.getElementById("mobileBottomBar");
     if (bottomBarElement) {
+        bottomBarElement.style.setProperty("--mobile-bar-translate-y", `${progress * 100}%`);
+        bottomBarElement.style.setProperty("--mobile-bar-opacity", (1 - progress).toString());
         bottomBarElement.toggleAttribute("inert", !visibility.bottomBarVisible);
         bottomBarElement.setAttribute("aria-hidden", visibility.bottomBarVisible ? "false" : "true");
     }
@@ -162,13 +112,6 @@ const onScroll = () => {
         }
         updatePanelState();
         updateSelectionState();
-        if (barsState.selecting || barsState.programmaticScrolling || barsState.barsTransitioning) {
-            barsState = reduceMobileBarsState(barsState, {
-                type: "scroll",
-                scrollTop: scrollElement.scrollTop,
-            });
-            return;
-        }
         barsState = reduceMobileBarsState(barsState, {
             type: "scroll",
             scrollTop: scrollElement.scrollTop,
@@ -213,13 +156,11 @@ export const clearMobileBarsScroll = () => {
     selectionObserver?.disconnect();
     selectionObserver = undefined;
     scrollElement = undefined;
-    clearBarsTransitionWatch();
     resetMobileBars(0);
 };
 
 export const resetMobileBars = (scrollTop = scrollElement?.scrollTop || 0) => {
     clearTimeout(programmaticScrollTimeout);
-    clearBarsTransitionWatch();
     barsState = reduceMobileBarsState(barsState, {type: "document-changed", scrollTop});
     renderMobileBars();
 };

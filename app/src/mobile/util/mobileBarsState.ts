@@ -1,21 +1,14 @@
-export type MobileBarsScrollDirection = "up" | "down";
-
 export interface IMobileBarsScrollOptions {
-    hideThreshold: number,
-    showThreshold: number,
-    topThreshold: number,
+    maxOffset: number,
 }
 
 export interface IMobileBarsState {
-    readingBarsVisible: boolean,
+    readingBarsOffset: number,
     editing: boolean,
     selecting: boolean,
     panelOpen: boolean,
     programmaticScrolling: boolean,
-    barsTransitioning: boolean,
     scrollTop: number,
-    scrollDirection?: MobileBarsScrollDirection,
-    scrollDistance: number,
 }
 
 export interface IMobileBarsVisibility {
@@ -48,18 +41,12 @@ export type MobileBarsAction = {
     active: boolean,
     scrollTop?: number,
 } | {
-    type: "set-bars-transitioning",
-    active: boolean,
-    scrollTop?: number,
-} | {
     type: "document-changed",
     scrollTop?: number,
 };
 
 export const MOBILE_BARS_SCROLL_OPTIONS: Readonly<IMobileBarsScrollOptions> = {
-    hideThreshold: 64,
-    showThreshold: 32,
-    topThreshold: 8,
+    maxOffset: 48,
 };
 
 const normalizeScrollTop = (scrollTop: number, fallback = 0) => {
@@ -67,42 +54,40 @@ const normalizeScrollTop = (scrollTop: number, fallback = 0) => {
 };
 
 const getScrollOptions = (options: Partial<IMobileBarsScrollOptions>) => ({
-    hideThreshold: Number.isFinite(options.hideThreshold) ?
-        Math.max(0, options.hideThreshold) : MOBILE_BARS_SCROLL_OPTIONS.hideThreshold,
-    showThreshold: Number.isFinite(options.showThreshold) ?
-        Math.max(0, options.showThreshold) : MOBILE_BARS_SCROLL_OPTIONS.showThreshold,
-    topThreshold: Number.isFinite(options.topThreshold) ?
-        Math.max(0, options.topThreshold) : MOBILE_BARS_SCROLL_OPTIONS.topThreshold,
+    maxOffset: Number.isFinite(options.maxOffset) ?
+        Math.max(0, options.maxOffset) : MOBILE_BARS_SCROLL_OPTIONS.maxOffset,
 });
 
 const resetScrollTracking = (state: IMobileBarsState, scrollTop = state.scrollTop): IMobileBarsState => ({
     ...state,
     scrollTop: normalizeScrollTop(scrollTop, state.scrollTop),
-    scrollDirection: undefined,
-    scrollDistance: 0,
 });
 
 export const createMobileBarsState = (scrollTop = 0): IMobileBarsState => ({
-    readingBarsVisible: true,
+    readingBarsOffset: 0,
     editing: false,
     selecting: false,
     panelOpen: false,
     programmaticScrolling: false,
-    barsTransitioning: false,
     scrollTop: normalizeScrollTop(scrollTop),
-    scrollDistance: 0,
 });
 
 export const isMobileBarsScrollPaused = (state: IMobileBarsState) => {
-    return state.editing || state.selecting || state.panelOpen || state.programmaticScrolling || state.barsTransitioning;
+    return state.editing || state.selecting || state.panelOpen || state.programmaticScrolling;
 };
 
-export const getMobileBarsVisibility = (state: IMobileBarsState): IMobileBarsVisibility => ({
-    topbarVisible: state.readingBarsVisible,
-    bottomBarVisible: state.readingBarsVisible && !state.editing && !state.selecting,
-    editingBarVisible: state.editing,
-    scrollPaused: isMobileBarsScrollPaused(state),
-});
+export const getMobileBarsVisibility = (
+    state: IMobileBarsState,
+    options: Partial<IMobileBarsScrollOptions> = {},
+): IMobileBarsVisibility => {
+    const readingBarsVisible = state.readingBarsOffset < getScrollOptions(options).maxOffset;
+    return {
+        topbarVisible: readingBarsVisible,
+        bottomBarVisible: readingBarsVisible && !state.editing && !state.selecting,
+        editingBarVisible: state.editing,
+        scrollPaused: isMobileBarsScrollPaused(state),
+    };
+};
 
 export const reduceMobileBarsState = (
     state: IMobileBarsState,
@@ -118,7 +103,7 @@ export const reduceMobileBarsState = (
     if (action.type === "set-reading-bars") {
         return {
             ...resetScrollTracking(state),
-            readingBarsVisible: action.visible,
+            readingBarsOffset: action.visible ? 0 : scrollOptions.maxOffset,
         };
     }
 
@@ -148,18 +133,10 @@ export const reduceMobileBarsState = (
             ...resetScrollTracking(state, action.scrollTop),
             programmaticScrolling: action.active,
         };
-        if (!action.active && !nextState.editing && !nextState.panelOpen &&
-            nextState.scrollTop <= scrollOptions.topThreshold) {
-            nextState.readingBarsVisible = true;
+        if (!action.active && !nextState.editing && !nextState.panelOpen && nextState.scrollTop === 0) {
+            nextState.readingBarsOffset = 0;
         }
         return nextState;
-    }
-
-    if (action.type === "set-bars-transitioning") {
-        return {
-            ...resetScrollTracking(state, action.scrollTop),
-            barsTransitioning: action.active,
-        };
     }
 
     const scrollTop = normalizeScrollTop(action.scrollTop, state.scrollTop);
@@ -167,31 +144,9 @@ export const reduceMobileBarsState = (
     if (isMobileBarsScrollPaused(state)) {
         return nextState;
     }
-    if (scrollTop <= scrollOptions.topThreshold) {
-        nextState.readingBarsVisible = true;
-        return nextState;
-    }
 
-    const scrollDelta = scrollTop - state.scrollTop;
-    if (scrollDelta === 0) {
-        return state;
-    }
-
-    const scrollDirection: MobileBarsScrollDirection = scrollDelta > 0 ? "down" : "up";
-    const canChangeVisibility = scrollDirection === "down" ? state.readingBarsVisible : !state.readingBarsVisible;
-    if (!canChangeVisibility) {
-        return nextState;
-    }
-
-    const scrollDistance = Math.abs(scrollDelta) +
-        (state.scrollDirection === scrollDirection ? state.scrollDistance : 0);
-    const threshold = scrollDirection === "down" ? scrollOptions.hideThreshold : scrollOptions.showThreshold;
-    if (scrollDistance >= threshold) {
-        nextState.readingBarsVisible = scrollDirection === "up";
-        return nextState;
-    }
-
-    nextState.scrollDirection = scrollDirection;
-    nextState.scrollDistance = scrollDistance;
+    const maxOffset = Math.min(scrollOptions.maxOffset, scrollTop);
+    nextState.readingBarsOffset = Math.min(maxOffset, Math.max(0,
+        state.readingBarsOffset + scrollTop - state.scrollTop));
     return nextState;
 };

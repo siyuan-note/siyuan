@@ -388,7 +388,12 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
         if (siyuanStyle) {
             siyuanStyle.innerHTML = style;
         } else {
-            document.querySelector("#pluginsStyle").insertAdjacentHTML("beforebegin", `<style id="siyuanStyle">${style}</style>`);
+            const pluginsStyle = document.getElementById("pluginsStyle");
+            if (pluginsStyle) {
+                pluginsStyle.insertAdjacentHTML("beforebegin", `<style id="siyuanStyle">${style}</style>`);
+            } else {
+                document.head.insertAdjacentHTML("beforeend", `<style id="siyuanStyle">${style}</style>`);
+            }
         }
     }
     return style;

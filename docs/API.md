@@ -1628,6 +1628,8 @@ Note: To ensure data security, access to this interface is prohibited in Publish
         * `base32` | `base32-std`
         * `base32-hex`
         * `hex`
+
+      `text` preserves the existing behavior and converts the character set to UTF-8 when applicable. The binary encodings encode the response body before character-set conversion; existing HTTP content decoding behavior, such as gzip decompression, is unchanged.
 * Return value
 
   ```json

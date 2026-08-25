@@ -14,6 +14,7 @@ import {getAllEditor} from "../layout/getAll";
 import {unregisterCapability} from "../layout/dock/agent/frontendCapabilities";
 import {cancelAssetUploadsByPlugin} from "../protyle/upload/pluginEvent";
 import {removeBreadcrumbButtons} from "./breadcrumbButton";
+import {refreshDockCatalog} from "../config/entryVisibility/catalog";
 
 export const uninstall = (app: App, name: string, isReload: boolean) => {
     app.plugins.find((plugin: Plugin, index) => {
@@ -35,6 +36,9 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
                 } catch (e) {
                     console.error(`plugin ${plugin.name} uninstall error:`, e);
                 }
+            }
+            plugin.eventBus.destroy();
+            if (!isReload) {
                 window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] = {};
                 setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);
             }
@@ -82,15 +86,9 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
             resizeTopBar();
             setTabPosition(true);
             /// #endif
-            // rm listen
-            Array.from(document.childNodes).find(item => {
-                if (item.nodeType === 8 && item.textContent === name) {
-                    item.remove();
-                    return true;
-                }
-            });
             // rm plugin
             app.plugins.splice(index, 1);
+            refreshDockCatalog(app.plugins);
             /// #if MOBILE
             // 移动端卸载插件后，若无任何插件 dock 则隐藏插件入口图标
             if (app.plugins.every(p => Object.keys(p.docks).length === 0)) {

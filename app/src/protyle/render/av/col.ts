@@ -23,6 +23,7 @@ import {openFieldVisibility} from "./fieldVisibility";
 import {createEmptyAVValue, genAVAttributeRowHTML} from "./attributeValue";
 import {getAVColumnTextMeasurer, getAVDistributedColumnWidth, getAVTableFitWidths} from "./columnWidth";
 import {getAVData} from "./virtualScroll";
+import {getAVColorStyle, getNextAVOptionColor} from "./color";
 
 export const getColId = (element: Element, viewType: TAVView) => {
     if (viewType === "table" || hasClosestByClassName(element, "custom-attr")) {
@@ -140,7 +141,7 @@ export const getEditHTML = (options: {
             html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" data-color="${escapeAttr(item.color)}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${airaLabel}">
-        <span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">
+        <span class="b3-chip" style="${getAVColorStyle(item)}">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
     </div>
@@ -466,7 +467,7 @@ export const bindEditEvent = (options: {
                     return;
                 }
                 colData.options.push({
-                    color: ((colData.options.length || 0) % 14 + 1).toString(),
+                    color: getNextAVOptionColor(colData.options.length || 0),
                     name: addOptionElement.value
                 });
                 transaction(options.protyle, [{

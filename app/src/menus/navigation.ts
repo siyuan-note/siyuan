@@ -209,7 +209,6 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
         }).element);
         if (app.plugins) {
             emitOpenMenu({
-                plugins: app.plugins,
                 type: "open-menu-doctree",
                 detail: {elements: selectItemElements, type: "notebooks", items},
                 separatorPosition: "top",
@@ -230,7 +229,6 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
         }).element);
         if (app.plugins) {
             emitOpenMenu({
-                plugins: app.plugins,
                 type: "open-menu-doctree",
                 detail: {elements: selectItemElements, type: "items", items},
                 separatorPosition: "top",
@@ -373,7 +371,6 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
     }).element);
     if (app.plugins) {
         emitOpenMenu({
-            plugins: app.plugins,
             type: "open-menu-doctree",
             detail: {
                 elements: selectItemElements,
@@ -652,7 +649,6 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     }).element);
     if (app.plugins) {
         emitOpenMenu({
-            plugins: app.plugins,
             type: "open-menu-doctree",
             detail: {
                 elements: selectItemElements,
@@ -995,7 +991,6 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     window.siyuan.menus.menu.append(exportMd(id));
     if (app.plugins) {
         emitOpenMenu({
-            plugins: app.plugins,
             type: "open-menu-doctree",
             detail: {
                 elements: selectItemElements,

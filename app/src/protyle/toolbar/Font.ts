@@ -10,14 +10,21 @@ import {escapeAttr} from "../../util/escape";
 import {
     decodeStyle1,
     encodeStyle1,
+    filterHiddenRecentInlineStyles,
+    getBuiltinInlineStyleApplication,
+    getBuiltinInlineStyleIDFromValue,
+    getBuiltinInlineStylePreview,
     getInlineStyleByValue,
     getInlineStyleIDFromValue,
     getInlineStylePreview,
     getInlineStylesCache,
     getInlineStyleType,
     getRecentInlineStyleKey,
+    getVisibleBuiltinInlineStyleIDs,
+    isBuiltinInlineStyleVisible,
     INLINE_BACKGROUND_COLORS,
     INLINE_FONT_COLORS,
+    TBuiltinInlineStyleID,
     TInlineStyleType,
 } from "./inlineStyle";
 import {openInlineStyleDialog} from "./inlineStyleDialog";
@@ -119,12 +126,31 @@ export const convertFontSize = (fontSize: string, unit: "px" | "em", baseFontSiz
 export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                                onChange?: (type: string, color?: string) => void) => {
     let colorHTML = "";
-    INLINE_FONT_COLORS.forEach((item) => {
+    INLINE_FONT_COLORS.forEach((item, index) => {
+        if (index > 0 && !isBuiltinInlineStyleVisible("color", index)) {
+            return;
+        }
         colorHTML += `<button ${item ? `class="color__square" style="color:${item}"` : `class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.default}"`} data-type="color">A</button>`;
     });
     let bgHTML = "";
-    INLINE_BACKGROUND_COLORS.forEach((item) => {
+    INLINE_BACKGROUND_COLORS.forEach((item, index) => {
+        if (index > 0 && !isBuiltinInlineStyleVisible("backgroundColor", index)) {
+            return;
+        }
         bgHTML += `<button ${item ? `class="color__square" style="background-color:${item}"` : `class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.default}"`} data-type="backgroundColor"></button>`;
+    });
+    const builtinStyleLabels: Record<TBuiltinInlineStyleID, string> = {
+        error: window.siyuan.languages.errorStyle,
+        warning: window.siyuan.languages.warningStyle,
+        info: window.siyuan.languages.infoStyle,
+        success: window.siyuan.languages.successStyle,
+    };
+    let builtinStyleHTML = "";
+    getVisibleBuiltinInlineStyleIDs().forEach(id => {
+        const preview = getBuiltinInlineStylePreview(id);
+        builtinStyleHTML += "<button class=\"color__square ariaLabel\" data-position=\"3south\" data-type=\"style1\" " +
+            `aria-label="${builtinStyleLabels[id]}" style="color:${preview.color};` +
+            `background-color:${preview.backgroundColor};">A</button>`;
     });
     let customColorHTML = "";
     let customBackgroundHTML = "";
@@ -145,7 +171,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
         }
     });
     const getManageHTML = (type: TInlineStyleType) => window.siyuan.config.readonly || window.siyuan.isPublish ? "" :
-        `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.manageCustomColors}" data-action="manageInlineStyle" data-inline-style-type="${type}"><svg class="svg--mid"><use xlink:href="#iconSettings"></use></svg></button>`;
+        `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.manageColors}" data-action="manageInlineStyle" data-inline-style-type="${type}"><svg class="svg--mid"><use xlink:href="#iconSettings"></use></svg></button>`;
 
     const element = document.createElement("div");
     element.classList.add("protyle-font");
@@ -157,7 +183,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
         }
     });
     let lastColorHTML = "";
-    const lastFonts = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
+    const lastFonts = filterHiddenRecentInlineStyles(window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
     if (lastFonts.length > 0) {
         lastColorHTML = `<div data-id="lastUsed" class="fn__flex">
     ${window.siyuan.languages.lastUsed}
@@ -189,9 +215,15 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                         lastColorHTML += `<button data-type="${lastFontStatus[0]}" data-value="${lastFontStatus[1]}" class="protyle-font__style ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.fontSize} ${lastFontStatus[1]}">${lastFontStatus[1]}</button>`;
                     }
                     break;
-                case "style1":
-                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${customLabel || window.siyuan.languages.color + (lastFontStatus[1] ? "" : " " + window.siyuan.languages.default)}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
+                case "style1": {
+                    const builtinStyleID = getBuiltinInlineStyleIDFromValue(item);
+                    const preview = builtinStyleID ? getBuiltinInlineStylePreview(builtinStyleID) : {
+                        backgroundColor: lastFontStatus[1],
+                        color: lastFontStatus[2],
+                    };
+                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${customLabel || (builtinStyleID ? builtinStyleLabels[builtinStyleID] : window.siyuan.languages.color + (lastFontStatus[1] ? "" : " " + window.siyuan.languages.default))}" ${lastFontStatus[1] ? `style="background-color:${preview.backgroundColor};color:${preview.color}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
                     break;
+                }
                 case "clear":
                     lastColorHTML += `<button style="height: 26px;display: flex;align-items: center;padding: 0 5px;" data-type="${lastFontStatus[0]}" class="protyle-font__style ariaLabel" aria-label="${window.siyuan.languages.clearFontStyle}"><svg class="svg--mid"><use xlink:href="#iconTrashcan"></use></svg></button>`;
                     break;
@@ -209,10 +241,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
 <div class="fn__hr--small"></div>
 <div data-id="colorWrap" class="fn__flex fn__flex-wrap">
     <button class="color__square ariaLabel" data-position="3south" data-type="style1" aria-label="${window.siyuan.languages.default}">A</button>
-    <button class="color__square" data-type="style1" style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);">A</button>
-    <button class="color__square" data-type="style1" style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);">A</button>
-    <button class="color__square" data-type="style1" style="color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);">A</button>
-    <button class="color__square" data-type="style1" style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);">A</button>
+    ${builtinStyleHTML}
     ${customStyleHTML}
     ${getManageHTML("style1")}
 </div>
@@ -273,6 +302,8 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
             const dataType = target.getAttribute("data-type");
             if (target.tagName === "BUTTON") {
                 if (target.dataset.action === "manageInlineStyle") {
+                    closeSubElement(protyle.toolbar);
+                    protyle.toolbar.subElement.classList.add("fn__none");
                     openInlineStyleDialog(target.dataset.inlineStyleType as TInlineStyleType);
                 } else if (dataType === "style1") {
                     applyFontStyle(dataType, encodeStyle1(target.style.backgroundColor, target.style.color));
@@ -338,11 +369,13 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
         window.siyuan.storage[Constants.LOCAL_FONTSTYLES] = localFontStyles;
         setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
     } else {
-        if (localFontStyles.length === 0) {
+        const visibleFontStyles = filterHiddenRecentInlineStyles(localFontStyles);
+        if (visibleFontStyles.length === 0) {
             type = "style1";
-            color = encodeStyle1("var(--b3-card-error-background)", "var(--b3-card-error-color)");
+            const builtinStyleID = getVisibleBuiltinInlineStyleIDs()[0];
+            color = builtinStyleID ? getBuiltinInlineStyleApplication(builtinStyleID).color : encodeStyle1();
         } else {
-            const fontStyles = localFontStyles[0].split(Constants.ZWSP);
+            const fontStyles = visibleFontStyles[0].split(Constants.ZWSP);
             type = fontStyles.splice(0, 1)[0];
             color = fontStyles.join(Constants.ZWSP);
         }

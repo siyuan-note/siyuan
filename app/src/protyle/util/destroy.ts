@@ -3,6 +3,7 @@ import {isSupportCSSHL} from "../render/searchMarkRender";
 import {destroyAIEditor} from "../../ai/editor";
 import {cancelAssetUploads} from "../upload/pluginEvent";
 import {unmountBreadcrumbButtons} from "../../plugin/breadcrumbButton";
+import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
@@ -41,8 +42,8 @@ export const destroy = (protyle: IProtyle) => {
             }, 10240);
         }
     }
-    protyle.app.plugins.forEach(item => {
-        item.eventBus.emit("destroy-protyle", {
+    forEachPluginSubscriber("destroy-protyle", eventBus => {
+        eventBus.emit("destroy-protyle", {
             protyle,
         });
     });

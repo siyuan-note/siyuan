@@ -63,6 +63,27 @@ func ReadInstalledPackageDirs(basePath string) ([]os.DirEntry, error) {
 	return dirs, nil
 }
 
+// PackageDirContainsFile 判断集市包目录中是否递归包含实际文件。
+func PackageDirContainsFile(dirPath string) (bool, error) {
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		return false, err
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			return true, nil
+		}
+		containsFile, readErr := PackageDirContainsFile(filepath.Join(dirPath, entry.Name()))
+		if readErr != nil {
+			return false, readErr
+		}
+		if containsFile {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 // SetInstalledPackageMetadata 设置本地集市包的通用元数据
 func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType string) bool {
 	clearBazaarPackageRating(pkg)

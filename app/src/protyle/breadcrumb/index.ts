@@ -1043,7 +1043,6 @@ ${padHTML}
             /// #endif
             if (protyle?.app?.plugins) {
                 emitOpenMenu({
-                    plugins: protyle.app.plugins,
                     type: "open-menu-breadcrumbmore",
                     detail: {
                         protyle,

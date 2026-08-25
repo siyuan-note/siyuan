@@ -57,31 +57,93 @@ func TestResolveCSSVars(t *testing.T) {
 }
 
 func TestMergeInlineStyleThemeVars(t *testing.T) {
-	styles := &InlineStyles{Version: InlineStylesVersion, Styles: []*InlineStyle{{
-		ID:   "20260821000000-abcdefg",
-		Name: "Combined",
-		Light: &InlineStyleTheme{
-			Color:           "#112233",
-			BackgroundColor: "#445566",
+	styles := &InlineStyles{
+		Version: InlineStylesVersion,
+		Styles: []*InlineStyle{{
+			ID:   "20260821000000-abcdefg",
+			Name: "Combined",
+			Light: &InlineStyleTheme{
+				Color:           "#112233",
+				BackgroundColor: "#445566",
+			},
+			Dark: &InlineStyleTheme{
+				Color:           "#aabbcc",
+				BackgroundColor: "#ddeeff",
+			},
+		}},
+		Builtin: &InlineStyleBuiltin{
+			Colors: []*InlineStyleBuiltinColor{{
+				Index: 3,
+				Light: &InlineStyleTheme{Color: "#010203", BackgroundColor: "#040506"},
+				Dark:  &InlineStyleTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+			}},
+			Styles: []*InlineStyleBuiltinStyle{{
+				ID:    "warning",
+				Light: &InlineStyleTheme{Color: "#111213", BackgroundColor: "#141516"},
+				Dark:  &InlineStyleTheme{Color: "#171819", BackgroundColor: "#1a1b1c"},
+			}},
 		},
-		Dark: &InlineStyleTheme{
-			Color:           "#aabbcc",
-			BackgroundColor: "#ddeeff",
-		},
-	}}}
+	}
 	colorName := "--b3-inline-style-20260821000000-abcdefg-color"
 	backgroundName := "--b3-inline-style-20260821000000-abcdefg-background-color"
 
 	light := map[string]string{colorName: "#000000"}
 	mergeInlineStyleThemeVars(light, styles, false)
-	if light[colorName] != "#112233" || light[backgroundName] != "#445566" {
+	if light[colorName] != "#112233" || light[backgroundName] != "#445566" ||
+		light["--b3-font-color3"] != "#010203" || light["--b3-font-background3"] != "#040506" ||
+		light["--b3-inline-builtin-warning-color"] != "#111213" ||
+		light["--b3-inline-builtin-warning-background-color"] != "#141516" ||
+		light["--b3-card-warning-color"] != "#111213" || light["--b3-card-warning-background"] != "#141516" {
 		t.Fatalf("unexpected light inline style variables: %#v", light)
 	}
 
 	dark := map[string]string{}
 	mergeInlineStyleThemeVars(dark, styles, true)
-	if dark[colorName] != "#aabbcc" || dark[backgroundName] != "#ddeeff" {
+	if dark[colorName] != "#aabbcc" || dark[backgroundName] != "#ddeeff" ||
+		dark["--b3-font-color3"] != "#070809" || dark["--b3-font-background3"] != "#0a0b0c" ||
+		dark["--b3-inline-builtin-warning-color"] != "#171819" ||
+		dark["--b3-inline-builtin-warning-background-color"] != "#1a1b1c" ||
+		dark["--b3-card-warning-color"] != "#171819" || dark["--b3-card-warning-background"] != "#1a1b1c" {
 		t.Fatalf("unexpected dark inline style variables: %#v", dark)
+	}
+}
+
+func TestFillThemeStyleVarUsesBuiltinOverrides(t *testing.T) {
+	setupThemeTest(t, "daylight", `:root {
+		--b3-font-color2: #010101;
+		--b3-card-error-color: #020202;
+		--b3-card-error-background: #030303;
+	}`)
+	Conf.Appearance.Mode = 0
+	Conf.Appearance.ThemeLight = "daylight"
+
+	if _, _, err := SetInlineStylesData(&InlineStyles{
+		Version: InlineStylesVersion,
+		Styles:  []*InlineStyle{},
+		Builtin: &InlineStyleBuiltin{
+			Colors: []*InlineStyleBuiltinColor{{
+				Index: 2,
+				Light: &InlineStyleTheme{Color: "#112233"},
+				Dark:  &InlineStyleTheme{Color: "#445566"},
+			}},
+			Styles: []*InlineStyleBuiltinStyle{{
+				ID:    "error",
+				Light: &InlineStyleTheme{Color: "#aabbcc", BackgroundColor: "#ddeeff"},
+				Dark:  &InlineStyleTheme{Color: "#123456", BackgroundColor: "#654321"},
+			}},
+		},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	tree, node := inlineStyleThemeTestTree("color: var(--b3-card-error-color); " +
+		"background-color: var(--b3-card-error-background); border-color: var(--b3-inline-builtin-error-color); " +
+		"text-decoration-color: var(--b3-inline-builtin-error-background-color); " +
+		"outline-color: var(--b3-font-color2);")
+	fillThemeStyleVar(tree)
+	if actual := node.KramdownIAL[0][1]; actual != "color: #aabbcc; background-color: #ddeeff; "+
+		"border-color: #aabbcc; text-decoration-color: #ddeeff; outline-color: #112233;" {
+		t.Fatalf("unexpected builtin inline style export: %s", actual)
 	}
 }
 

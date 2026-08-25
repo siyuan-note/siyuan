@@ -33,6 +33,7 @@ import {
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
+    getDisplayableBazaarRating,
     getBazaarRatingErrorLanguageKey,
     getBazaarRatingMutationVersion,
     getBazaarThemeModeLabels,
@@ -46,7 +47,6 @@ import {
     normalizeBazaarPackageRatingResponse,
     normalizeBazaarPackageRatingsResponse,
     normalizeBazaarPackageUserRatingsResponse,
-    normalizeBazaarRating,
     normalizeBazaarUserRating,
     sortBazaarPackagesByRating,
 } from "../util/bazaarPackage";
@@ -632,7 +632,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         window.addEventListener("siyuan-login-success", bazaar._ratingUserChangeHandler);
     },
     _getRatingSummaryText(rating?: IBazaarRating) {
-        const normalized = normalizeBazaarRating(rating);
+        const normalized = getDisplayableBazaarRating(rating);
         if (!normalized) {
             return window.siyuan.languages.bazaarNoRatings;
         }
@@ -653,7 +653,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
 </span>`;
     },
     _genCardRatingHTML(item: Pick<IBazaarItem, "rating">, loaded = true) {
-        const rating = normalizeBazaarRating(item.rating);
+        const rating = getDisplayableBazaarRating(item.rating);
         const hidden = !loaded || !rating;
         const summary = bazaar._getRatingSummaryText(rating);
         const average = rating?.average.toLocaleString(undefined, {
@@ -676,7 +676,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
 </span>`;
     },
     _genRatingDistributionHTML(rating?: IBazaarRating) {
-        const normalized = normalizeBazaarRating(rating);
+        const normalized = getDisplayableBazaarRating(rating);
         return [5, 4, 3, 2, 1].map((star) => {
             const count = normalized?.distribution[star - 1] || 0;
             const ratio = normalized ? Math.min(1, count / normalized.count) : 0;
@@ -702,8 +702,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             return "";
         }
         bazaar._syncRatingUser();
-        const rating = normalizeBazaarRating(item.rating);
-        const summary = bazaar._getRatingSummaryText(rating);
+        const rating = getDisplayableBazaarRating(item.rating);
         const userRating = bazaar._data.userRatings.get(bazaar._getRatingKey(bazaarType, item.name)) || 0;
         let action = "";
         if (item.installed) {
@@ -720,13 +719,15 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         } else {
             action = `<div class="config-bazaar__rating-tip">${window.siyuan.languages.bazaarRatingInstallTip}</div>`;
         }
-        return `<section class="item__meta-section config-bazaar__rating-detail">
-    <div class="item__meta-title">${window.siyuan.languages.bazaarRating}</div>
-    <div class="config-bazaar__rating-summary" aria-label="${escapeAttr(summary)}">
-        ${bazaar._genRatingStarsHTML(rating?.average || 0)}
+        const summary = rating ? bazaar._getRatingSummaryText(rating) : "";
+        const aggregate = rating ? `<div class="config-bazaar__rating-summary" aria-label="${escapeAttr(summary)}">
+        ${bazaar._genRatingStarsHTML(rating.average)}
         <span>${escapeHtml(summary)}</span>
     </div>
-    <div class="config-bazaar__rating-distribution">${bazaar._genRatingDistributionHTML(rating)}</div>
+    <div class="config-bazaar__rating-distribution">${bazaar._genRatingDistributionHTML(rating)}</div>` : "";
+        return `<section class="item__meta-section config-bazaar__rating-detail">
+    <div class="item__meta-title">${window.siyuan.languages.bazaarRating}</div>
+    ${aggregate}
     ${action}
 </section>`;
     },
@@ -1578,7 +1579,7 @@ type="checkbox">
                 const loaded = isBazaarPackageRatingLoaded(source, bazaar._data.downloadedRatingKeys.has(key),
                     item.ratingAvailable);
                 if (source === "bazaar") {
-                    const rating = loaded ? normalizeBazaarRating(item.rating) : undefined;
+                    const rating = loaded ? getDisplayableBazaarRating(item.rating) : undefined;
                     slot.classList.toggle("fn__none", !rating);
                     if (rating) {
                         slot.setAttribute("aria-label", bazaar._getRatingSummaryText(rating));
@@ -2571,10 +2572,13 @@ type="checkbox">
                             ...themeAppearanceMode,
                             frontend: getFrontend()
                         }, response => {
+                            bazaar._onBazaar(response, pkgType, request);
                             if (response.code !== 0) {
+                                if (bazaar._isBazaarRequestCurrent(pkgType, request)) {
+                                    bazaar._refreshReadmeDetail(pkgType, installItem.name);
+                                }
                                 return;
                             }
-                            bazaar._onBazaar(response, pkgType, request);
                             if (bazaar._isMountCurrent(mount)) {
                                 bazaar._genMyHTML(pkgType, app, false);
                                 bazaar._refreshReadmeDetail(pkgType, installItem.name);

@@ -17,12 +17,50 @@
 package model
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
+
+func TestSortAttrViewBindingIDs(t *testing.T) {
+	tests := []struct {
+		name       string
+		avIDs      []string
+		avID       string
+		previousID string
+		expected   []string
+		hasErr     bool
+	}{
+		{name: "move to beginning", avIDs: []string{"a", "b", "c"}, avID: "c", expected: []string{"c", "a", "b"}},
+		{name: "move to middle", avIDs: []string{"a", "b", "c"}, avID: "c", previousID: "a", expected: []string{"a", "c", "b"}},
+		{name: "move to end", avIDs: []string{"a", "b", "c"}, avID: "a", previousID: "c", expected: []string{"b", "c", "a"}},
+		{name: "same position", avIDs: []string{"a", "b", "c"}, avID: "b", previousID: "a", expected: []string{"a", "b", "c"}},
+		{name: "same ID", avIDs: []string{"a", "b", "c"}, avID: "b", previousID: "b", expected: []string{"a", "b", "c"}},
+		{name: "missing binding", avIDs: []string{"a", "b", "c"}, avID: "d", hasErr: true},
+		{name: "missing previous binding", avIDs: []string{"a", "b", "c"}, avID: "b", previousID: "d", hasErr: true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual, err := sortAttrViewBindingIDs(test.avIDs, test.avID, test.previousID)
+			if test.hasErr {
+				if nil == err {
+					t.Fatal("expected an error")
+				}
+				return
+			}
+			if nil != err {
+				t.Fatalf("unexpected error: %s", err)
+			}
+			if !reflect.DeepEqual(test.expected, actual) {
+				t.Fatalf("expected %v, got %v", test.expected, actual)
+			}
+		})
+	}
+}
 
 func TestRemoveAttributeViewBoundBlocks(t *testing.T) {
 	deletedValue1 := &av.Value{Block: &av.ValueBlock{ID: "20260805000000-deleted1"}}

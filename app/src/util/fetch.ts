@@ -144,7 +144,7 @@ export const fetchSyncPost = async (url: string, data?: any, headers?: Record<st
 };
 
 export const fetchGet = (url: string, cb: (response: IWebSocketData | IObject | string) => void) => {
-    fetch(url).then((response) => {
+    fetch(url, {cache: "no-store"}).then((response) => {
         if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
             return response.json();
         } else {

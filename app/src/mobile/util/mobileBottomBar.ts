@@ -11,6 +11,7 @@ import {openDock} from "../dock/util";
 import {closePanel} from "./closePanel";
 import {activeBlur} from "./keyboardToolbar";
 import {isMobileBlockSelecting} from "./mobileBars";
+import {newDailyNote, newDailyNoteFromLastNotebook} from "../../util/mount";
 import {
     MOBILE_BOTTOM_BAR_ACTIONS,
     normalizeMobileBottomBarConfig,
@@ -47,6 +48,10 @@ const getActionLabel = (action: MobileBottomBarAction) => {
             return window.siyuan.languages.agentChat;
         case "spacedRepetition":
             return window.siyuan.languages.spaceRepetition;
+        case "dailyNote":
+            return window.siyuan.languages.dailyNote;
+        case "newDailyNote":
+            return window.siyuan.languages.fileTree11;
         case "command":
             return window.siyuan.languages.commandPanel;
     }
@@ -57,10 +62,14 @@ const getBottomBarConfig = () => {
     const unavailableActions = new Set<MobileBottomBarAction>();
     if (window.siyuan.config.readonly) {
         unavailableActions.add("newDoc");
+        unavailableActions.add("dailyNote");
+        unavailableActions.add("newDailyNote");
         unavailableActions.add("agent");
         unavailableActions.add("spacedRepetition");
     } else if (window.siyuan.isPublish) {
         unavailableActions.add("newDoc");
+        unavailableActions.add("dailyNote");
+        unavailableActions.add("newDailyNote");
         unavailableActions.add("agent");
     }
     if (isDisabledFeature("ai")) {
@@ -111,8 +120,10 @@ export const renderMobileBottomBar = () => {
     });
     updateActionLabel(moreElement, window.siyuan.languages.more);
     bottomBarElement.setAttribute("aria-label", window.siyuan.languages.mobileBottomBar);
-    (document.getElementById("mobileBottomBarNewDoc") as HTMLButtonElement).disabled =
-        window.siyuan.config.readonly || window.siyuan.isPublish;
+    ["mobileBottomBarNewDoc", "mobileBottomBarDailyNote", "mobileBottomBarNewDailyNote"].forEach((id) => {
+        (document.getElementById(id) as HTMLButtonElement).disabled =
+            window.siyuan.config.readonly || window.siyuan.isPublish;
+    });
 };
 
 const bindBottomBarAction = (id: string, callback: () => void) => {
@@ -191,6 +202,22 @@ export const initMobileBottomBar = (app: App) => {
         }
         activeBlur();
         openCard(app);
+        closePanel();
+    });
+    bindBottomBarAction("mobileBottomBarDailyNote", () => {
+        if (isMobileBlockSelecting()) {
+            return;
+        }
+        activeBlur();
+        newDailyNote(app);
+        closePanel();
+    });
+    bindBottomBarAction("mobileBottomBarNewDailyNote", () => {
+        if (isMobileBlockSelecting()) {
+            return;
+        }
+        activeBlur();
+        newDailyNoteFromLastNotebook(app);
         closePanel();
     });
     bindBottomBarAction("mobileBottomBarCommand", () => {

@@ -3,6 +3,12 @@ import type {App} from "../index";
 import {Plugin} from "./index";
 /// #if !MOBILE
 import {resizeTopBar, saveLayout} from "../layout/util";
+import {getDockByType} from "../layout/tabUtil";
+/// #else
+import {
+    dispatchMobilePluginDocksChange,
+    removeMobilePluginDock,
+} from "../mobile/dock/pluginDockState";
 /// #endif
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
@@ -10,6 +16,8 @@ import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
+import {getPluginDockEntryKey, refreshDockCatalog} from "../config/entryVisibility/catalog";
+import {applyDockEntryVisibility, isEntryVisible} from "../config/entryVisibility/runtime";
 
 const requireFunc = (key: string) => {
     const modules = {
@@ -198,12 +206,33 @@ export const afterLayoutReady = (app: App) => {
     });
 };
 
-export const addPluginDock = (plugin: Plugin) => {
-    /// #if MOBILE
-    // 移动端只有存在插件 dock 时才显示插件入口图标
-    if (Object.keys(plugin.docks).length > 0) {
-        document.querySelector("[data-type='sidebar-plugin-tab']")?.classList.remove("fn__none");
+const getPluginCatalogPlugins = (plugin: Plugin) => window.siyuan.ws?.app?.plugins || [plugin];
+
+export const removePluginDock = (plugin: Plugin, id: string) => {
+    const key = Object.keys(plugin.docks).find((dockType) => plugin.docks[dockType].id === id);
+    if (!key) {
+        return;
     }
+    /// #if MOBILE
+    removeMobilePluginDock(key);
+    /// #else
+    getDockByType(key)?.remove(key);
+    saveLayout();
+    /// #endif
+    delete plugin.docks[key];
+    const plugins = getPluginCatalogPlugins(plugin);
+    refreshDockCatalog(plugins);
+    applyDockEntryVisibility();
+    /// #if MOBILE
+    dispatchMobilePluginDocksChange();
+    /// #endif
+};
+
+export const addPluginDock = (plugin: Plugin) => {
+    const plugins = getPluginCatalogPlugins(plugin);
+    refreshDockCatalog(plugins);
+    /// #if MOBILE
+    dispatchMobilePluginDocksChange();
     /// #else
     if (isWindow() || !window.siyuan.layout.leftDock) {
         return;
@@ -229,32 +258,28 @@ export const addPluginDock = (plugin: Plugin) => {
             plugin.docks[key].config = window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key];
         }
         const dock = plugin.docks[key];
+        const entryId = getPluginDockEntryKey(plugin.name, dock.id);
+        const show = dock.config.show && isEntryVisible(`dock.${entryId}`);
+        const dockTab: Config.IUILayoutDockTab & {entryId: string} = {
+            type: key,
+            size: dock.config.size,
+            show,
+            icon: dock.config.icon,
+            title: dock.config.title,
+            entryId,
+        };
         if (dock.config.position.startsWith("Left")) {
-            window.siyuan.layout.leftDock.genButton([{
-                type: key,
-                size: dock.config.size,
-                show: dock.config.show,
-                icon: dock.config.icon,
-                title: dock.config.title,
-            }], dock.config.position === "LeftBottom" ? 1 : 0, dock.config.index);
+            window.siyuan.layout.leftDock.genButton([dockTab], dock.config.position === "LeftBottom" ? 1 : 0,
+                dock.config.index);
         } else if (dock.config.position.startsWith("Bottom")) {
-            window.siyuan.layout.bottomDock.genButton([{
-                type: key,
-                size: dock.config.size,
-                show: dock.config.show,
-                icon: dock.config.icon,
-                title: dock.config.title,
-            }], dock.config.position === "BottomRight" ? 1 : 0, dock.config.index);
+            window.siyuan.layout.bottomDock.genButton([dockTab], dock.config.position === "BottomRight" ? 1 : 0,
+                dock.config.index);
         } else if (dock.config.position.startsWith("Right")) {
-            window.siyuan.layout.rightDock.genButton([{
-                type: key,
-                size: dock.config.size,
-                show: dock.config.show,
-                icon: dock.config.icon,
-                title: dock.config.title,
-            }], dock.config.position === "RightBottom" ? 1 : 0, dock.config.index);
+            window.siyuan.layout.rightDock.genButton([dockTab], dock.config.position === "RightBottom" ? 1 : 0,
+                dock.config.index);
         }
     });
+    applyDockEntryVisibility();
     /// #endif
 };
 

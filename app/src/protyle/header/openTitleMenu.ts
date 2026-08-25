@@ -346,7 +346,6 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
         if (protyle?.app?.plugins) {
             emitOpenMenu({
-                plugins: protyle.app.plugins,
                 type: "click-editortitleicon",
                 detail: {
                     protyle,

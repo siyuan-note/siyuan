@@ -1,4 +1,9 @@
 {
+	"manageColors": "Kelola warna",
+	"manageBuiltinColors": "Kelola warna bawaan",
+	"showInColorPicker": "Tampilkan di pemilih warna",
+	"resetAll": "Atur ulang semua",
+	"exportFile": "Ekspor file",
 	"namingEmpty": "Nama tidak boleh kosong",
 	"recentCreated": "Baru dibuat",
 	"manageCustomColors": "Kelola warna kustom",
@@ -687,7 +692,7 @@
 	"agentTimeout": "Batas waktu",
 	"agentTimeoutTip": "Batas waktu total sesi agen, 0 = tanpa batas",
 	"agentConfirmTimeout": "Batas waktu konfirmasi",
-	"agentConfirmTimeoutTip": "Tolak otomatis setelah waktu habis",
+	"agentConfirmTimeoutTip": "Tolak otomatis setelah waktu habis, 0 = tunggu tanpa batas",
 	"agentMaxRetries": "Percobaan maksimum",
 	"agentMaxRetriesTip": "Percobaan ulang API maksimum saat gagal",
 	"agentMaxToolCallRounds": "Maks. putaran panggilan alat",
@@ -1494,7 +1499,7 @@
 	"rtlTip": "Render konten dari kanan ke kiri",
 	"height": "Tinggi",
 	"deactivateUser": "Nonaktifkan Akun",
-	"deactivateUserTip": "<ul class='fn__list'><li>Setelah akun dinonaktifkan, tidak dapat dipulihkan, harap jangan mencoba dengan sembarangan</li><li>Nama pengguna akan diisi dengan <code>someone101</code> (angka berikut adalah nomor pengguna), kata sandi akan diatur ulang dengan angka acak</li><li>Hapus nama panggilan pengguna, label mandiri, URL, profil, avatar, tautan situs, alamat surat, dan informasi lainnya</li><li>Semua sakelar pengaturan privasi akan dikembalikan ke status publik default</li><li>Lepas ikatan akun media sosial pihak ketiga, ponsel</li><li><strong>Nama pengguna, nomor ponsel, akun pihak ketiga yang terikat tidak akan dapat digunakan lagi di masa mendatang</strong></li><li>Status pengguna diatur ke dinonaktifkan, login dilarang</li></ul>",
+	"deactivateUserTip": "<ul class='fn__list'><li>Setelah akun dinonaktifkan, tidak dapat dipulihkan, harap jangan mencoba dengan sembarangan</li><li>Nama pengguna akan diisi dengan <code>someone101</code> (angka berikut adalah nomor pengguna), kata sandi akan diatur ulang dengan angka acak</li><li>Hapus nama panggilan pengguna, label mandiri, URL, profil, avatar, tautan situs, dan informasi lainnya</li><li>Semua sakelar pengaturan privasi akan dikembalikan ke status publik default</li><li>Lepas ikatan akun media sosial pihak ketiga, ponsel</li><li><strong>Nama pengguna, alamat email, nomor ponsel, akun pihak ketiga yang terikat tidak akan dapat digunakan lagi di masa mendatang</strong></li><li>Status pengguna diatur ke dinonaktifkan, login dilarang</li></ul>",
 	"mergeCell": "Gabungkan Sel",
 	"cancelMerged": "Batalkan penggabungan sel",
 	"useDefaultWidth": "Gunakan Lebar Kolom Default",
@@ -2273,7 +2278,7 @@
 		"16": "Tanpa Judul",
 		"17": "Sinkronisasi awal gagal saat startup. Penimpaan data yang tidak terduga dapat terjadi jika Anda terus beroperasi. Harap lakukan sinkronisasi terlebih dahulu",
 		"18": "Gagal mendapatkan akun pengguna komunitas",
-		"19": "Informasi pengguna telah kedaluwarsa, silakan masuk lagi",
+		"19": "Informasi pengguna telah kedaluwarsa, silakan masuk lagi di [Pengaturan - Akun & Sinkronisasi - Akun]",
 		"20": "Tidak dapat diubah menjadi judul saat termasuk sub-dokumen",
 		"21": "Harap masukkan captcha",
 		"22": "Captcha salah",
@@ -2285,7 +2290,7 @@
 		"28": "Jaringan tidak normal, silakan coba lagi nanti",
 		"29": "Fitur ini memerlukan pembelian <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Langganan Tahunan]</a> (jika Anda sudah membeli, silakan segarkan atau masuk lagi di Pengaturan - Akun & Sinkronisasi - Akun)",
 		"30": "Gagal mendapatkan info cloud",
-		"31": "Otentikasi akun gagal, silakan masuk lagi",
+		"31": "Otentikasi akun gagal, silakan masuk lagi di [Pengaturan - Akun & Sinkronisasi - Akun]",
 		"32": "Gagal menghapus buku catatan cloud",
 		"33": "Izin tidak cukup untuk membaca dan menulis file atau mengakses jaringan, harap periksa izin folder ruang kerja dan pengaturan perangkat lunak antivirus/firewall. Jika Anda pernah menjalankan SiYuan sebagai administrator sebelumnya, harap pertimbangkan untuk beralih ke direktori ruang kerja baru, dan jangan menjalankannya sebagai administrator di masa mendatang (direktori ruang kerja saat ini mungkin tidak lagi dapat diakses oleh pengguna biasa)",
 		"34": "Operasi ini tidak didukung dalam mode baca-saja",
@@ -2467,7 +2472,7 @@
 		"210": "Memverifikasi data cloud %v/%v",
 		"211": "Verifikasi data cloud selesai",
 		"212": "Ada beberapa cacat pada versi sinkronisasi data cloud saat ini, silakan tingkatkan ke versi terbaru. Maaf atas ketidaknyamanannya",
-		"213": "Verifikasi cloud gagal, silakan coba tingkatkan ke versi terbaru dan masuk lagi sebelum sinkronisasi",
+		"213": "Verifikasi cloud gagal, silakan coba tingkatkan ke versi terbaru dan masuk lagi di [Pengaturan - Akun & Sinkronisasi - Akun] sebelum sinkronisasi",
 		"214": "Fitur ini memerlukan masuk ke akun dan membeli <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[Fitur PRO]</a> atau <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Langganan Tahunan]</a> untuk digunakan",
 		"215": "Tidak dapat membuka tampilan basis data yang dibuat oleh versi yang lebih baru. Harap tingkatkan ke versi terbaru dan coba lagi",
 		"216": "Membangun ulang indeks data konten aset, harap tunggu...",
@@ -2627,6 +2632,7 @@
 		"370": "lalu lintas akselerasi LAN %s",
 		"371": "Buku catatan sudah ada",
 		"372": "Buku catatan telah dipulihkan dan tetap ditutup",
-		"373": "Arsip ini berisi data buku catatan. Impor dari [Pohon dokumen - Lainnya - Impor buku catatan]"
+		"373": "Arsip ini berisi data buku catatan. Impor dari [Pohon dokumen - Lainnya - Impor buku catatan]",
+		"374": "Basis data [%s], bidang templat [%s], item pertama yang terdampak [%s] (ID item: %s), jumlah item terdampak: %d, kesalahan: %s"
 	}
 }

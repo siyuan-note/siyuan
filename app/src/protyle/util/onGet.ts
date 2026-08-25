@@ -33,6 +33,7 @@ import {updateWidgetCacheVersion} from "./widgetCache";
 import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
 import {hasFocusOffsets} from "./focusRestore";
 import {isIPhone} from "./compatibility";
+import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -385,8 +386,8 @@ const setHTML = (options: {
     });
     protyle.options.defIds = [];
     if (options.action.includes(Constants.CB_GET_APPEND) || options.action.includes(Constants.CB_GET_BEFORE)) {
-        protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("loaded-protyle-dynamic", {
+        forEachPluginSubscriber("loaded-protyle-dynamic", eventBus => {
+            eventBus.emit("loaded-protyle-dynamic", {
                 protyle,
                 position: options.action.includes(Constants.CB_GET_APPEND) ? "afterend" : "beforebegin"
             });
@@ -439,8 +440,8 @@ const setHTML = (options: {
         }
 
     }
-    protyle.app.plugins.forEach(item => {
-        item.eventBus.emit("loaded-protyle-static", {protyle});
+    forEachPluginSubscriber("loaded-protyle-static", eventBus => {
+        eventBus.emit("loaded-protyle-static", {protyle});
     });
 };
 

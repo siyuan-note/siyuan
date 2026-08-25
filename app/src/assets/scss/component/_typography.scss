@@ -438,14 +438,29 @@
     border-radius: var(--b3-border-radius);
   }
 
-  pre.code-block[style*="max-height:"],
-  .code-block:not(pre)[data-type="NodeCodeBlock"]:not(.render-node)[style*="max-height:"] {
-    // 最大高度仅约束代码内容，操作区和属性区保持在滚动容器之外。
+  pre.code-block[style*="max-height:"] {
     overflow: visible;
 
     & > .hljs {
       box-sizing: border-box;
       max-height: inherit;
+      overflow-y: auto;
+    }
+  }
+
+  .code-block:not(pre)[data-type="NodeCodeBlock"]:not(.render-node)[style*="max-height:"] {
+    // 顶部留出固定操作区，其余空间仅由代码内容滚动。
+    display: flex;
+    flex-direction: column;
+    padding-top: calc(1.7em + 4px);
+    overflow: visible;
+
+    & > .hljs {
+      box-sizing: border-box;
+      flex: 1 1 auto;
+      min-height: 0 !important;
+      max-height: none;
+      padding-top: 0;
       overflow-y: auto;
     }
   }

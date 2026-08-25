@@ -3,6 +3,7 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
 import {escapeAttr, escapeHtml} from "../../util/escape";
 import {isMobile} from "../../util/functions";
+import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../dialog/themeColorEditor";
 import {
     getCurrentInlineStyleMode,
     getInlineStylePreview,
@@ -15,6 +16,7 @@ import {
     saveInlineStyles,
     TInlineStyleType,
 } from "./inlineStyle";
+import {openBuiltinColorDialog} from "./builtinColorDialog";
 
 const escapeAttribute = (value: string) => escapeAttr(value);
 
@@ -51,9 +53,15 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         content: `<div class="b3-dialog__content" style="max-height:70vh;overflow:auto">
     <div data-panel="list">
         <div data-type="inlineStyleList" class="b3-list b3-list--background fn__selectnone" style="--file-toggle-width:0px"></div>
+        <div class="fn__flex" data-type="inlineStyleButtons">
+        <button class="b3-button b3-button--outline" data-action="manageBuiltin" type="button">
+            <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.manageBuiltinColors}
+        </button>
+        <div class="fn__space"></div>
         <button class="b3-button b3-button--outline" data-action="new" type="button">
             <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}
         </button>
+        </div>
     </div>
     <div data-panel="editor" class="fn__none">
         <label class="b3-label b3-label--inner fn__flex" style="align-items:center">
@@ -61,7 +69,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
             <input class="b3-text-field fn__flex-1" data-field="name" style="margin-top:0">
         </label>
         <label class="b3-label b3-label--inner fn__flex" style="align-items:center">
-            <span style="min-width:96px">${window.siyuan.languages.color}</span>
+            <span style="min-width:96px">${window.siyuan.languages.type}</span>
             <select class="b3-select fn__flex-1" data-field="type" style="margin-top:0">
                 <option value="color">${window.siyuan.languages.colorFont}</option>
                 <option value="backgroundColor">${window.siyuan.languages.colorPrimary}</option>
@@ -69,30 +77,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
             </select>
             <span class="fn__flex-1 fn__none" data-field="typeLabel"></span>
         </label>
-        <div class="b3-label b3-label--inner fn__flex" style="align-items:flex-start;gap:24px;flex-wrap:wrap">
-            <div class="fn__flex-1" style="min-width:200px">
-                <div>${window.siyuan.languages.themeLight}</div>
-                <label class="fn__flex" data-property="color" style="align-items:center;margin-top:8px">
-                    <span class="fn__flex-1">${window.siyuan.languages.colorFont}</span>
-                    <input class="b3-text-field" data-field="lightColor" type="color">
-                </label>
-                <label class="fn__flex" data-property="backgroundColor" style="align-items:center;margin-top:8px">
-                    <span class="fn__flex-1">${window.siyuan.languages.colorPrimary}</span>
-                    <input class="b3-text-field" data-field="lightBackgroundColor" type="color">
-                </label>
-            </div>
-            <div class="fn__flex-1" style="min-width:200px">
-                <div>${window.siyuan.languages.themeDark}</div>
-                <label class="fn__flex" data-property="color" style="align-items:center;margin-top:8px">
-                    <span class="fn__flex-1">${window.siyuan.languages.colorFont}</span>
-                    <input class="b3-text-field" data-field="darkColor" type="color">
-                </label>
-                <label class="fn__flex" data-property="backgroundColor" style="align-items:center;margin-top:8px">
-                    <span class="fn__flex-1">${window.siyuan.languages.colorPrimary}</span>
-                    <input class="b3-text-field" data-field="darkBackgroundColor" type="color">
-                </label>
-            </div>
-        </div>
+        ${getThemeColorEditorHTML()}
     </div>
 </div>
 <div class="b3-dialog__action" data-panel="actions">
@@ -105,15 +90,13 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
     const editorPanel = dialog.element.querySelector('[data-panel="editor"]') as HTMLElement;
     const listElement = dialog.element.querySelector('[data-type="inlineStyleList"]') as HTMLElement;
     const newElement = dialog.element.querySelector('[data-action="new"]') as HTMLButtonElement;
+    const buttonsElement = dialog.element.querySelector('[data-type="inlineStyleButtons"]') as HTMLElement;
     const cancelElement = dialog.element.querySelector('[data-action="cancel"]') as HTMLButtonElement;
     const saveElement = dialog.element.querySelector('[data-action="save"]') as HTMLButtonElement;
     const nameElement = dialog.element.querySelector('[data-field="name"]') as HTMLInputElement;
     const typeElement = dialog.element.querySelector('[data-field="type"]') as HTMLSelectElement;
     const typeLabelElement = dialog.element.querySelector('[data-field="typeLabel"]') as HTMLElement;
-    const lightColorElement = dialog.element.querySelector('[data-field="lightColor"]') as HTMLInputElement;
-    const darkColorElement = dialog.element.querySelector('[data-field="darkColor"]') as HTMLInputElement;
-    const lightBackgroundElement = dialog.element.querySelector('[data-field="lightBackgroundColor"]') as HTMLInputElement;
-    const darkBackgroundElement = dialog.element.querySelector('[data-field="darkBackgroundColor"]') as HTMLInputElement;
+    const themeColorEditor = bindThemeColorEditor(editorPanel);
 
     const renderList = () => {
         listElement.innerHTML = draft.styles.length === 0 ?
@@ -127,17 +110,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
     <span class="b3-list-item__action b3-list-item__action--warning ariaLabel" data-action="delete" data-index="${index}" data-position="north" aria-label="${escapeAttribute(window.siyuan.languages.delete)}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
 </div>`).join("");
         newElement.disabled = draft.styles.length >= MAX_INLINE_STYLES;
-        newElement.style.marginTop = draft.styles.length === 0 ? "0" : "8px";
-    };
-
-    const updateColorVisibility = () => {
-        const type = typeElement.value as TInlineStyleType;
-        dialog.element.querySelectorAll<HTMLElement>('[data-property="color"]').forEach(item => {
-            item.classList.toggle("fn__none", type === "backgroundColor");
-        });
-        dialog.element.querySelectorAll<HTMLElement>('[data-property="backgroundColor"]').forEach(item => {
-            item.classList.toggle("fn__none", type === "color");
-        });
+        buttonsElement.style.marginTop = draft.styles.length === 0 ? "0" : "8px";
     };
 
     const setEditorActionMode = (editing: boolean) => {
@@ -162,11 +135,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         typeElement.classList.toggle("fn__none", !!style);
         typeLabelElement.classList.toggle("fn__none", !style);
         typeLabelElement.textContent = getTypeLabel(typeElement.value as TInlineStyleType);
-        lightColorElement.value = style?.light.color || "#000000";
-        darkColorElement.value = style?.dark.color || "#ffffff";
-        lightBackgroundElement.value = style?.light.backgroundColor || "#fff3cd";
-        darkBackgroundElement.value = style?.dark.backgroundColor || "#554b00";
-        updateColorVisibility();
+        themeColorEditor.setValue(style, typeElement.value as TInlineStyleType);
         listPanel.classList.add("fn__none");
         editorPanel.classList.remove("fn__none");
         setEditorActionMode(true);
@@ -187,20 +156,13 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         }
         const type = typeElement.value as TInlineStyleType;
         const previous = editingIndex >= 0 ? draft.styles[editingIndex] : undefined;
+        const value = themeColorEditor.getValue(type);
         const style: IInlineStyle = {
             id: previous?.id || Lute.NewNodeID(),
             name,
-            light: {},
-            dark: {},
+            light: value.light,
+            dark: value.dark,
         };
-        if (type !== "backgroundColor") {
-            style.light.color = lightColorElement.value;
-            style.dark.color = darkColorElement.value;
-        }
-        if (type !== "color") {
-            style.light.backgroundColor = lightBackgroundElement.value;
-            style.dark.backgroundColor = darkBackgroundElement.value;
-        }
         if (previous) {
             draft.styles[editingIndex] = style;
         } else {
@@ -270,7 +232,9 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         clearDragStyles();
     });
 
-    typeElement.addEventListener("change", updateColorVisibility);
+    typeElement.addEventListener("change", () => {
+        themeColorEditor.setType(typeElement.value as TInlineStyleType);
+    });
     dialog.element.addEventListener("click", async event => {
         const actionElement = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
         if (!actionElement || actionElement.hasAttribute("disabled")) {
@@ -284,6 +248,8 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
                 return;
             }
             showEditor();
+        } else if (action === "manageBuiltin") {
+            openBuiltinColorDialog(initialType, onChange);
         } else if (action === "edit") {
             showEditor(index);
         } else if (action === "delete") {
@@ -312,7 +278,10 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
             saving = true;
             actionElement.setAttribute("disabled", "disabled");
             try {
-                const response = await saveInlineStyles(draft);
+                const response = await saveInlineStyles({
+                    ...draft,
+                    builtin: cloneInlineStyles().builtin,
+                });
                 if (response?.code !== 0) {
                     showMessage(response?.msg || window.siyuan.languages.invalid, 6000, "error");
                     saving = false;

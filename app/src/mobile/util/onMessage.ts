@@ -1,5 +1,6 @@
 import {openMobileFileById} from "../editor";
 import {
+    forceQuit,
     processSync,
     progressLoading,
     setDefRefCount,
@@ -20,6 +21,8 @@ import {Constants} from "../../constants";
 import {MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT} from "./mobileSidePanelConfig";
 import {appearanceConfigApi} from "../../config/tabs/appearanceRuntime";
 import {applyCloudUserState} from "../../config/tabs/accountUi";
+import {isInMobileApp} from "../../protyle/util/compatibility";
+import {handleMobileKernelExit} from "./kernelExit";
 
 let statusTimeout: number;
 const statusElement = document.querySelector("#status") as HTMLElement;
@@ -44,7 +47,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 } else {
                     clearTimeout(statusTimeout);
                     statusElement.innerHTML = `<div class="fn__flex">${data.data.tasks[0].action}<div class="fn__progress"><div></div></div>`;
-                    statusElement.style.bottom = "var(--mobile-bottom-bar-safe-area)";
+                    statusElement.style.bottom = "0";
                 }
                 break;
             case "setAppearance":
@@ -153,13 +156,22 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 progressLoading(data);
                 break;
             case"syncing":
-                processSync(data, app.plugins);
+                processSync(data);
                 if (data.code === 1) {
                     document.getElementById("toolbarSync").classList.add("fn__none");
                 }
                 break;
             case "openFileById":
                 openMobileFileById(app, data.data.id);
+                break;
+            case "exit":
+                handleMobileKernelExit({
+                    inMobileApp: isInMobileApp(),
+                    forceQuit,
+                    redirectBrowser: () => {
+                        window.location.href = "about:blank";
+                    },
+                });
                 break;
             case "filetreeSortChanged":
                 window.siyuan.mobile.docks.file?.onFiletreeSortChanged(data.data);

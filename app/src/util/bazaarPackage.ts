@@ -158,6 +158,15 @@ export const normalizeBazaarRating = (rating: Partial<IBazaarRating> | null | un
     };
 };
 
+const bazaarRatingDisplayCount = 10;
+
+export const getDisplayableBazaarRating = (
+    rating: Partial<IBazaarRating> | null | undefined,
+): IBazaarRating | undefined => {
+    const normalized = normalizeBazaarRating(rating);
+    return normalized && normalized.count >= bazaarRatingDisplayCount ? normalized : undefined;
+};
+
 export const normalizeBazaarPackageRatingResponse = (data: {
     ratingAvailable?: unknown;
     rating?: Partial<IBazaarRating> | null;
@@ -268,8 +277,8 @@ export const sortBazaarPackagesByRating = <T extends {
     rating?: IBazaarRating;
     updated?: string;
 }>(packages: T[], descending: boolean): T[] => packages.map((item, index) => ({item, index})).sort((a, b) => {
-    const aRating = a.item.ratingAvailable === true ? normalizeBazaarRating(a.item.rating) : undefined;
-    const bRating = b.item.ratingAvailable === true ? normalizeBazaarRating(b.item.rating) : undefined;
+    const aRating = a.item.ratingAvailable === true ? getDisplayableBazaarRating(a.item.rating) : undefined;
+    const bRating = b.item.ratingAvailable === true ? getDisplayableBazaarRating(b.item.rating) : undefined;
     if (!aRating && !bRating) {
         return a.index - b.index;
     }

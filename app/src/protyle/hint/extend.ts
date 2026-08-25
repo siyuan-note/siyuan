@@ -30,6 +30,22 @@ import {
 } from "../../config/entryVisibility/catalog";
 import {getEntryOrder, isEntryVisible} from "../../config/entryVisibility/runtime";
 import {resolveSlashMenuItems, TSlashMenuItem} from "./slashMenu";
+import {
+    getBuiltinInlineStylePropertyValue,
+    isBuiltinInlineStyleVisible,
+    TBuiltinInlineStyleID,
+} from "../toolbar/inlineStyle";
+
+const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
+    infoStyle: "info",
+    successStyle: "success",
+    warningStyle: "warning",
+    errorStyle: "error",
+};
+
+const getBuiltinStyleCSS = (id: TBuiltinInlineStyleID) =>
+    `color: ${getBuiltinInlineStylePropertyValue(id, "color")};` +
+    `background-color: ${getBuiltinInlineStylePropertyValue(id, "backgroundColor")};`;
 
 const getHotkeyOrMarker = (hotkey: string, marker: string) => {
     if (hotkey) {
@@ -356,23 +372,23 @@ export const getBuiltinSlashMenuItems = (protyle: IProtyle): IHintData[] => {
     }, {
         filter: [window.siyuan.languages.infoStyle, "info style", "信息样式", "xinxiyangshi", "xxys"],
         id: "infoStyle",
-        value: `style${Constants.ZWSP}color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);`,
-        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.infoStyle}</span></div>`,
+        value: `style${Constants.ZWSP}${getBuiltinStyleCSS("info")}`,
+        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("info")}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.infoStyle}</span></div>`,
     }, {
         filter: [window.siyuan.languages.successStyle, "success style", "成功样式", "chenggongyangshi", "cgys"],
         id: "successStyle",
-        value: `style${Constants.ZWSP}color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);`,
-        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.successStyle}</span></div>`,
+        value: `style${Constants.ZWSP}${getBuiltinStyleCSS("success")}`,
+        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("success")}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.successStyle}</span></div>`,
     }, {
         filter: [window.siyuan.languages.warningStyle, "warning style", "警告样式", "jinggaoyangshi", "jgys"],
         id: "warningStyle",
-        value: `style${Constants.ZWSP}color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);`,
-        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.warningStyle}</span></div>`,
+        value: `style${Constants.ZWSP}${getBuiltinStyleCSS("warning")}`,
+        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("warning")}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.warningStyle}</span></div>`,
     }, {
         filter: [window.siyuan.languages.errorStyle, "error style", "错误样式", "cuowuyangshi", "cwys"],
         id: "errorStyle",
-        value: `style${Constants.ZWSP}color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);`,
-        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.errorStyle}</span></div>`,
+        value: `style${Constants.ZWSP}${getBuiltinStyleCSS("error")}`,
+        html: `<div class="b3-list-item__first"><div style="${getBuiltinStyleCSS("error")}" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.errorStyle}</span></div>`,
     }, {
         filter: [window.siyuan.languages.clearFontStyle, "clear style", "清除样式", "qingchuyangshi", "qcys"],
         id: "clearFontStyle",
@@ -414,8 +430,11 @@ export const hintSlash = (key: string, protyle: IProtyle, sourceOrHideConfigured
         allList.pop();
     }
     refreshSlashMenuCatalog(protyle.app.plugins);
-    return resolveSlashMenuItems(allList.filter((item) =>
-        getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey))), {
+    return resolveSlashMenuItems(allList.filter((item) => {
+        const builtinStyleID = slashBuiltinStyleIDs[item.entryKey];
+        return getEntryCatalogNode(getSlashMenuEntryPath(item.entryKey)) &&
+            (!builtinStyleID || isBuiltinInlineStyleVisible("style1", builtinStyleID));
+    }), {
         enabled,
         hideConfiguredCreate,
         key,

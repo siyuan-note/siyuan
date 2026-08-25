@@ -97,6 +97,132 @@ func TestUpdateAttributeViewColumnOptionsKeepsUnspecifiedOptionsInPlace(t *testi
 	assertSelectOptionNames(t, updatedKey.Options, []string{"Second", "First", "Concurrent", "New"})
 }
 
+func TestUpdateAttributeViewColumnOptionsSynchronizesOptionColorReferences(t *testing.T) {
+	setupAttributeViewValidationTest(t)
+
+	attrView := av.NewAttributeView("20260824120000-options")
+	attrView.CustomColors = []*av.AttributeViewCustomColor{{
+		Index: 15,
+		AttributeViewColor: av.AttributeViewColor{
+			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
+			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+		},
+	}}
+	selectKey := attrView.KeyValues[1].Key
+	selectKey.Options = []*av.SelectOption{{Name: "Used", Color: "15"}}
+	selectValue := func() *av.Value {
+		return &av.Value{Type: av.KeyTypeSelect, MSelect: []*av.ValueSelect{{Content: "Used", Color: "15"}}}
+	}
+	attrView.KeyValues[1].Values = []*av.Value{selectValue()}
+	attrView.Views[0].Filters = []*av.ViewFilter{{
+		Combination: av.FilterCombinationAnd,
+		Filters:     []*av.ViewFilter{{Column: selectKey.ID, Value: selectValue()}},
+	}}
+	attrView.NewItemTemplates = []*av.NewItemTemplate{{
+		FieldValues: map[string]*av.NewItemFieldValue{
+			selectKey.ID: {Mode: av.NewItemFieldValueStatic, Value: selectValue()},
+		},
+	}}
+	if err := av.SaveAttributeView(attrView); nil != err {
+		t.Fatalf("save attribute view failed: %s", err)
+	}
+
+	operation := &Operation{AvID: attrView.ID, ID: selectKey.ID, Data: []*av.SelectOption{{Name: "Used", Color: "1"}}}
+	if err := updateAttributeViewColumnOptions(operation); nil != err {
+		t.Fatalf("update attribute view column options failed: %s", err)
+	}
+
+	parsed, err := av.ParseAttributeView(attrView.ID)
+	if nil != err {
+		t.Fatalf("parse attribute view failed: %s", err)
+	}
+	if parsed.UsesCustomColor(15) {
+		t.Fatal("old option color remained referenced after a batch option update")
+	}
+	if "1" != parsed.KeyValues[1].Values[0].MSelect[0].Color ||
+		"1" != parsed.Views[0].Filters[0].Filters[0].Value.MSelect[0].Color ||
+		"1" != parsed.NewItemTemplates[0].FieldValues[selectKey.ID].Value.MSelect[0].Color {
+		t.Fatal("batch option update did not synchronize persisted color references")
+	}
+	if err = setAttrViewCustomColors(&Operation{AvID: attrView.ID, Data: []*av.AttributeViewCustomColor{}}); nil != err {
+		t.Fatalf("unused custom color could not be deleted after a batch option update: %s", err)
+	}
+}
+
+func TestSetAttrViewCustomColorsRejectsDeletingUsedColor(t *testing.T) {
+	setupAttributeViewValidationTest(t)
+
+	attrView := av.NewAttributeView("20260824130000-colors1")
+	attrView.CustomColors = []*av.AttributeViewCustomColor{{
+		Index: 15,
+		AttributeViewColor: av.AttributeViewColor{
+			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
+			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+		},
+	}}
+	selectKey := attrView.KeyValues[1].Key
+	selectKey.Options = []*av.SelectOption{{Name: "Used", Color: "15"}}
+	if err := av.SaveAttributeView(attrView); nil != err {
+		t.Fatalf("save attribute view failed: %s", err)
+	}
+
+	if err := setAttrViewCustomColors(&Operation{AvID: attrView.ID}); nil == err {
+		t.Fatal("missing custom color array should fail")
+	}
+
+	operation := &Operation{AvID: attrView.ID, Data: []*av.AttributeViewCustomColor{}}
+	if err := setAttrViewCustomColors(operation); nil == err {
+		t.Fatal("deleting a referenced custom color should fail")
+	}
+
+	updated := []*av.AttributeViewCustomColor{{
+		Index: 15,
+		AttributeViewColor: av.AttributeViewColor{
+			Light: av.AttributeViewColorTheme{Color: "#111111", BackgroundColor: "#222222"},
+			Dark:  av.AttributeViewColorTheme{Color: "#eeeeee", BackgroundColor: "#333333"},
+		},
+	}}
+	operation.Data = updated
+	if err := setAttrViewCustomColors(operation); nil != err {
+		t.Fatalf("editing a referenced custom color should succeed: %s", err)
+	}
+	parsed, err := av.ParseAttributeView(attrView.ID)
+	if nil != err {
+		t.Fatalf("parse attribute view failed: %s", err)
+	}
+	if 1 != len(parsed.CustomColors) || "#111111" != parsed.CustomColors[0].Light.Color {
+		t.Fatalf("custom palette update was not saved: %+v", parsed.CustomColors)
+	}
+}
+
+func TestGenerateAttributeViewGroupsPreservesResolvedCustomColor(t *testing.T) {
+	setupAttributeViewValidationTest(t)
+
+	attrView := av.NewAttributeView("20260824140000-colors2")
+	attrView.CustomColors = []*av.AttributeViewCustomColor{{
+		Index: 15,
+		AttributeViewColor: av.AttributeViewColor{
+			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
+			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+		},
+	}}
+	selectKey := attrView.KeyValues[1].Key
+	selectKey.Options = []*av.SelectOption{{Name: "Custom", Color: "15"}}
+	attrView.ResolveDirectColors()
+	view := attrView.Views[0]
+	view.Group = &av.ViewGroup{Field: selectKey.ID, Method: av.GroupMethodValue}
+
+	genAttrViewGroups(view, attrView)
+	group := view.GetGroupByGroupValue("Custom")
+	if nil == group || nil == group.GroupVal || 1 != len(group.GroupVal.MSelect) {
+		t.Fatalf("custom color group was not generated: %+v", group)
+	}
+	resolved := group.GroupVal.MSelect[0].ResolvedColor
+	if nil == resolved || "#010203" != resolved.Light.Color || "#0a0b0c" != resolved.Dark.BackgroundColor {
+		t.Fatalf("custom color group lost its resolved color: %+v", group.GroupVal.MSelect[0])
+	}
+}
+
 func assertSelectOptionNames(t *testing.T, options []*av.SelectOption, expected []string) {
 	t.Helper()
 

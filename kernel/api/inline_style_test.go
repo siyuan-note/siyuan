@@ -47,17 +47,32 @@ func TestInlineStylesAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 	if getResponse.Code != 0 || getResponse.Data == nil || getResponse.Data.Version != model.InlineStylesVersion ||
-		getResponse.Data.Styles == nil || len(getResponse.Data.Styles) != 0 {
+		getResponse.Data.Styles == nil || len(getResponse.Data.Styles) != 0 || getResponse.Data.Builtin == nil ||
+		getResponse.Data.Builtin.Hidden == nil {
 		t.Fatalf("unexpected initial inline styles response: %s", getRecorder.Body.String())
 	}
 
 	setRecorder := performInlineStylesRequest(engine, "/api/storage/setInlineStyles", `{
-		"version":1,
+		"version":2,
+		"app":"test-app",
 		"styles":[{
 			"name":" Accent ",
 			"light":{"color":"#AABBCC"},
 			"dark":{"color":"#112233"}
-		}]
+		}],
+		"builtin":{
+			"colors":[{
+				"index":2,
+				"light":{"backgroundColor":"#DDEEFF"},
+				"dark":{"backgroundColor":"#445566"}
+			}],
+			"styles":[{
+				"id":"error",
+				"light":{"color":"#AABBCC","backgroundColor":"#DDEEFF"},
+				"dark":{"color":"#112233","backgroundColor":"#445566"}
+			}],
+			"hidden":{"color":[3],"backgroundColor":[4],"style1":["error"],"av":[5]}
+		}
 	}`)
 	setResponse := &struct {
 		Code int                 `json:"code"`
@@ -68,11 +83,36 @@ func TestInlineStylesAPI(t *testing.T) {
 	}
 	if setResponse.Code != 0 || setResponse.Data == nil || len(setResponse.Data.Styles) != 1 ||
 		setResponse.Data.Styles[0].ID == "" || setResponse.Data.Styles[0].Name != "Accent" ||
-		setResponse.Data.Styles[0].Light.Color != "#aabbcc" {
+		setResponse.Data.Styles[0].Light.Color != "#aabbcc" || len(setResponse.Data.Builtin.Colors) != 1 ||
+		setResponse.Data.Builtin.Colors[0].Index != 2 || len(setResponse.Data.Builtin.Styles) != 1 ||
+		len(setResponse.Data.Builtin.Hidden.AV) != 1 {
 		t.Fatalf("unexpected set inline styles response: %s", setRecorder.Body.String())
 	}
 
-	futureRecorder := performInlineStylesRequest(engine, "/api/storage/setInlineStyles", `{"version":2,"styles":[]}`)
+	legacyRecorder := performInlineStylesRequest(engine, "/api/storage/setInlineStyles", `{
+		"version":1,
+		"styles":[{
+			"name":"Legacy client",
+			"light":{"color":"#abcdef"},
+			"dark":{"color":"#123456"}
+		}],
+		"builtin":{}
+	}`)
+	legacyResponse := &struct {
+		Code int                 `json:"code"`
+		Data *model.InlineStyles `json:"data"`
+	}{}
+	if err := json.Unmarshal(legacyRecorder.Body.Bytes(), legacyResponse); err != nil {
+		t.Fatal(err)
+	}
+	if legacyResponse.Code != 0 || legacyResponse.Data == nil || legacyResponse.Data.Version != model.InlineStylesVersion ||
+		len(legacyResponse.Data.Styles) != 1 || legacyResponse.Data.Styles[0].Name != "Legacy client" ||
+		len(legacyResponse.Data.Builtin.Colors) != 1 || len(legacyResponse.Data.Builtin.Styles) != 1 ||
+		len(legacyResponse.Data.Builtin.Hidden.AV) != 1 {
+		t.Fatalf("version 1 update did not preserve builtin colors: %s", legacyRecorder.Body.String())
+	}
+
+	futureRecorder := performInlineStylesRequest(engine, "/api/storage/setInlineStyles", `{"version":3,"styles":[]}`)
 	if responseCode(t, futureRecorder) != -1 || !strings.Contains(futureRecorder.Body.String(), "unsupported") {
 		t.Fatalf("future inline styles version was accepted: %s", futureRecorder.Body.String())
 	}
@@ -80,8 +120,15 @@ func TestInlineStylesAPI(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(styles.Styles) != 1 || styles.Styles[0].ID != setResponse.Data.Styles[0].ID {
+	if len(styles.Styles) != 1 || styles.Styles[0].ID != legacyResponse.Data.Styles[0].ID ||
+		len(styles.Builtin.Colors) != 1 {
 		t.Fatalf("future request overwrote inline styles: %#v", styles)
+	}
+
+	invalidBuiltinRecorder := performInlineStylesRequest(engine, "/api/storage/setInlineStyles",
+		`{"version":2,"styles":[],"builtin":{"hidden":{"av":[14]}}}`)
+	if responseCode(t, invalidBuiltinRecorder) != -1 {
+		t.Fatalf("invalid builtin inline styles were accepted: %s", invalidBuiltinRecorder.Body.String())
 	}
 
 	missingVersionRecorder := performInlineStylesRequest(engine, "/api/storage/setInlineStyles", `{"styles":[]}`)

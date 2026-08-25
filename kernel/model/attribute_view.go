@@ -371,12 +371,22 @@ func GetAttrViewAddingBlockDefaultValues(avID, blockID, viewID, groupID, previou
 	return
 }
 
+func newAttrViewValueSelect(option *av.SelectOption) *av.ValueSelect {
+	ret := &av.ValueSelect{Content: option.Name, Color: option.Color}
+	if nil != option.ResolvedColor {
+		resolved := *option.ResolvedColor
+		ret.ResolvedColor = &resolved
+	}
+	return ret
+}
+
 func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string, isCreate, useGroupDefault bool) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
 	defer func() {
 		for keyID, value := range ret {
 			key, _ := attrView.GetKey(keyID)
 			normalizeAttrViewAddingDefaultValue(key, value)
+			attrView.ResolveValueSelectColors(value)
 		}
 	}()
 
@@ -444,23 +454,23 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 			if nil != newValue {
 				if !av.MSelectExistOption(newValue.MSelect, groupView.GetGroupValue()) {
 					if 1 > len(newValue.MSelect) || av.KeyTypeMSelect == groupKey.Type {
-						newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+						newValue.MSelect = append(newValue.MSelect, newAttrViewValueSelect(opt))
 					} else {
-						newValue.MSelect = []*av.ValueSelect{{Content: opt.Name, Color: opt.Color}}
+						newValue.MSelect = []*av.ValueSelect{newAttrViewValueSelect(opt)}
 					}
 				} else {
 					var vals []*av.ValueSelect
 					if isCreate {
-						vals = append(vals, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+						vals = append(vals, newAttrViewValueSelect(opt))
 					} else {
 						existingVal := keyValues.GetValue(addingItemID)
 						if nil != existingVal {
 							if !av.MSelectExistOption(existingVal.MSelect, opt.Name) {
-								existingVal.MSelect = append(existingVal.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+								existingVal.MSelect = append(existingVal.MSelect, newAttrViewValueSelect(opt))
 							}
 							vals = existingVal.MSelect
 						} else {
-							vals = append(vals, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+							vals = append(vals, newAttrViewValueSelect(opt))
 						}
 					}
 
@@ -476,7 +486,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 				}
 			} else {
 				newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, addingItemID, groupKey.Type, false)
-				newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+				newValue.MSelect = append(newValue.MSelect, newAttrViewValueSelect(opt))
 			}
 		}
 
@@ -2041,7 +2051,7 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 					for _, valOpt := range v.MSelect {
 						if opt := key.GetOption(valOpt.Content); nil == opt {
 							// 不存在的选项新建保存
-							opt = &av.SelectOption{Name: valOpt.Content, Color: av.FilterColorValue(valOpt.Color)}
+							opt = &av.SelectOption{Name: valOpt.Content, Color: attrView.FilterColorValue(valOpt.Color)}
 							key.Options = append(key.Options, opt)
 						} else {
 							// 已经存在的选项颜色需要保持不变
@@ -2153,7 +2163,7 @@ func DuplicateAttributeViewRow(tx *Transaction, avID, previousItemID, srcRowID, 
 			if 0 < len(newVal.MSelect) {
 				for _, valOpt := range newVal.MSelect {
 					if opt := keyValues.Key.GetOption(valOpt.Content); nil == opt {
-						opt = &av.SelectOption{Name: valOpt.Content, Color: av.FilterColorValue(valOpt.Color)}
+						opt = &av.SelectOption{Name: valOpt.Content, Color: attrView.FilterColorValue(valOpt.Color)}
 						keyValues.Key.Options = append(keyValues.Key.Options, opt)
 					} else {
 						valOpt.Color = opt.Color
@@ -2512,7 +2522,8 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, blockIDs []string, p
 }
 
 func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, selectedBlockIDs []string, page, pageSize int) (
-	attributeViewName string, databaseBlockIDs []string, columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
+	attributeViewName string, databaseBlockIDs []string, customColors []*av.AttributeViewCustomColor,
+	columns []*av.TableColumn, selectedRows, rows []*av.TableRow,
 	total int, err error,
 ) {
 	waitForSyncingStorages()
@@ -2540,6 +2551,7 @@ func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, 
 	}
 	attributeViewName = getAttrViewName(attrView)
 	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(attrView.ID)
+	customColors = attrView.CustomColors
 
 	table := renderAttributeViewRelationCandidates(attrView)
 	if nil == table {
@@ -2788,6 +2800,7 @@ type AttributeViewData struct {
 	Spec               int                                         `json:"spec"`
 	ID                 string                                      `json:"id"`
 	Name               string                                      `json:"name"`
+	CustomColors       []*av.AttributeViewCustomColor              `json:"customColors"`
 	KeyValues          []*av.KeyValues                             `json:"keyValues"`
 	KeyIDs             []string                                    `json:"keyIDs"`
 	ViewID             string                                      `json:"viewID"`
@@ -2804,7 +2817,7 @@ func NewAttributeViewData(attrView *av.AttributeView) (ret *AttributeViewData) {
 	ret = &AttributeViewData{
 		Spec: attrView.Spec, ID: attrView.ID, Name: attrView.Name, KeyValues: attrView.KeyValues, KeyIDs: attrView.KeyIDs,
 		Views: attrView.Views, NewItemTemplates: attrView.NewItemTemplates, DefaultTemplateID: attrView.DefaultTemplateID,
-		CardCoverPositions: attrView.CardCoverPositions,
+		CardCoverPositions: attrView.CardCoverPositions, CustomColors: attrView.CustomColors,
 	}
 	if view, _ := attrView.GetFirstView(); nil != view {
 		ret.ViewID = view.ID
@@ -3256,11 +3269,12 @@ func SearchAttributeViewWithOptions(options SearchAttributeViewOptions) (ret []*
 }
 
 type BlockAttributeViewKeys struct {
-	AvID          string                       `json:"avID"`
-	AvName        string                       `json:"avName"`
-	BlockIDs      []string                     `json:"blockIDs"`
-	KeyValues     []*av.KeyValues              `json:"keyValues"`
-	ItemPositions []*AttributeViewItemPosition `json:"itemPositions"`
+	AvID          string                         `json:"avID"`
+	AvName        string                         `json:"avName"`
+	CustomColors  []*av.AttributeViewCustomColor `json:"customColors"`
+	BlockIDs      []string                       `json:"blockIDs"`
+	KeyValues     []*av.KeyValues                `json:"keyValues"`
+	ItemPositions []*AttributeViewItemPosition   `json:"itemPositions"`
 }
 
 type AttributeViewItemPosition struct {
@@ -3614,6 +3628,7 @@ func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttribu
 	ret = append(ret, &BlockAttributeViewKeys{
 		AvID:          avID,
 		AvName:        getAttrViewName(attrView),
+		CustomColors:  attrView.CustomColors,
 		BlockIDs:      treenode.GetMirrorAttrViewBlockIDs(avID),
 		KeyValues:     keyValues,
 		ItemPositions: getAttributeViewItemPositions(attrView, itemID),
@@ -3739,6 +3754,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 		ret = append(ret, &BlockAttributeViewKeys{
 			AvID:          avID,
 			AvName:        getAttrViewName(attrView),
+			CustomColors:  attrView.CustomColors,
 			BlockIDs:      blockIDs,
 			KeyValues:     keyValues,
 			ItemPositions: getAttributeViewItemPositions(attrView, itemID),
@@ -3956,7 +3972,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 			if opt := groupKey.GetOption(groupValue); nil != opt {
 				v.GroupVal.Text = nil
 				v.GroupVal.Type = av.KeyTypeSelect
-				v.GroupVal.MSelect = []*av.ValueSelect{{Content: opt.Name, Color: opt.Color}}
+				v.GroupVal.MSelect = []*av.ValueSelect{newAttrViewValueSelect(opt)}
 			}
 		} else if av.KeyTypeRelation == groupKey.Type {
 			if relationDestAv != nil && groupValueDefault != groupValue {
@@ -5975,7 +5991,7 @@ func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, prev
 		if (av.KeyTypeSelect == newValue.Type || av.KeyTypeMSelect == newValue.Type) && 1 > len(newValue.MSelect) && groupValueDefault != groupView.GetGroupValue() {
 			// 单选或多选类型的值可能需要从分组条件中获取默认值
 			if opt := keyValues.Key.GetOption(groupView.GetGroupValue()); nil != opt {
-				newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+				newValue.MSelect = append(newValue.MSelect, newAttrViewValueSelect(opt))
 			}
 		}
 
@@ -7691,9 +7707,10 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 }
 
 type attrViewValueUpdateContext struct {
-	keyValues   map[string]*av.KeyValues
-	blockValues map[string]*av.Value
-	values      map[string]map[string]*av.Value
+	keyValues         map[string]*av.KeyValues
+	blockValues       map[string]*av.Value
+	values            map[string]map[string]*av.Value
+	availableAVColors []int
 }
 
 func newAttrViewValueUpdateContext(attrView *av.AttributeView) *attrViewValueUpdateContext {
@@ -7838,12 +7855,23 @@ func updateAttributeViewValue0(tx *Transaction, attrView *av.AttributeView, keyI
 			}
 
 			// The selection options are inconsistent after pasting data into the database https://github.com/siyuan-note/siyuan/issues/11409
+			var availableColors []int
 			for _, valOpt := range val.MSelect {
 				if opt := key.GetOption(valOpt.Content); nil == opt {
 					// 不存在的选项新建保存
-					color := av.FilterColorValue(valOpt.Color)
+					color := attrView.FilterColorValue(valOpt.Color)
 					if "" == color {
-						color = fmt.Sprintf("%d", 1+rand.Intn(14))
+						if nil == availableColors {
+							if nil != context {
+								if nil == context.availableAVColors {
+									context.availableAVColors = getVisibleAVBuiltinColorIndexes()
+								}
+								availableColors = context.availableAVColors
+							} else {
+								availableColors = getVisibleAVBuiltinColorIndexes()
+							}
+						}
+						color = fmt.Sprintf("%d", availableColors[rand.Intn(len(availableColors))])
 					}
 					opt = &av.SelectOption{Name: valOpt.Content, Color: color}
 					key.Options = append(key.Options, opt)
@@ -8111,6 +8139,74 @@ func unbindBlockAv(tx *Transaction, avID, nodeID string) {
 	return
 }
 
+func (tx *Transaction) doSortAttrViewBinding(operation *Operation) (ret *TxErr) {
+	tree, err := tx.loadTree(operation.ID)
+	if err != nil {
+		logging.LogErrorf("load tree [%s] failed: %s", operation.ID, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ID}
+	}
+
+	node := treenode.GetNodeInTree(tree, operation.ID)
+	if nil == node {
+		logging.LogErrorf("get node [%s] in tree [%s] failed", operation.ID, tree.Root.ID)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: operation.ID}
+	}
+
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	avIDs, err := sortAttrViewBindingIDs(strings.Split(attrs[av.NodeAttrNameAvs], ","), operation.AvID, operation.PreviousID)
+	if err != nil {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+
+	avs := strings.Join(avIDs, ",")
+	if _, err = setNodeAttrs0(node, map[string]string{
+		av.NodeAttrNameAvs:   avs,
+		av.NodeAttrViewNames: getAvNames(avs),
+	}, tree.Box); err != nil {
+		logging.LogErrorf("sort attribute view binding [%s] failed: %s", operation.AvID, err)
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+
+	tx.writeTree(tree)
+	cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
+	return
+}
+
+func sortAttrViewBindingIDs(avIDs []string, avID, previousAvID string) (ret []string, err error) {
+	ret = append([]string(nil), avIDs...)
+	if avID == previousAvID {
+		return
+	}
+
+	index := -1
+	for i, id := range ret {
+		if id == avID {
+			index = i
+			break
+		}
+	}
+	if 0 > index {
+		return nil, fmt.Errorf("attribute view [%s] is not bound", avID)
+	}
+
+	ret = append(ret[:index], ret[index+1:]...)
+	previousIndex := -1
+	if "" != previousAvID {
+		for i, id := range ret {
+			if id == previousAvID {
+				previousIndex = i
+				break
+			}
+		}
+		if 0 > previousIndex {
+			return nil, fmt.Errorf("previous attribute view [%s] is not bound", previousAvID)
+		}
+	}
+
+	ret = util.InsertElem(ret, previousIndex+1, avID)
+	return
+}
+
 func bindBlockAv(tx *Transaction, avID, blockID string) {
 	node, tree, err := getNodeByBlockID(tx, blockID)
 	if err != nil {
@@ -8237,26 +8333,85 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 	for _, opt := range selectKey.Options {
 		existingOptions[opt.Name] = opt
 	}
+	colorChanges := map[string]string{}
 	for _, opt := range options {
 		if existingOpt, exists := existingOptions[opt.Name]; exists {
 			// 如果选项已经存在则更新颜色和描述
-			existingOpt.Color = av.FilterColorValue(opt.Color)
+			newColor := attrView.FilterColorValue(opt.Color)
+			if existingOpt.Color != newColor {
+				colorChanges[existingOpt.Name] = newColor
+			}
+			existingOpt.Color = newColor
 			existingOpt.Desc = opt.Desc
 		} else {
 			// 如果选项不存在则添加新选项
 			selectKey.Options = append(selectKey.Options, &av.SelectOption{
 				Name:  opt.Name,
-				Color: av.FilterColorValue(opt.Color),
+				Color: attrView.FilterColorValue(opt.Color),
 				Desc:  opt.Desc,
 			})
 		}
 	}
 
 	sortAttributeViewColumnOptions(selectKey.Options, optionSorts)
+	for name, color := range colorChanges {
+		syncAttributeViewOptionColor(attrView, selectKey.ID, name, color)
+	}
 
 	regenAttrViewGroups(attrView)
-	err = av.SaveAttributeView(attrView)
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
+	if 0 == len(colorChanges) {
+		return
+	}
+
+	for _, relatedAvID := range av.GetSrcAvIDs(attrView.ID) {
+		if relatedAvID == attrView.ID {
+			continue
+		}
+		relatedAttrView, parseErr := av.ParseAttributeView(relatedAvID)
+		if nil != parseErr || nil == relatedAttrView {
+			continue
+		}
+		changed := false
+		for name, color := range colorChanges {
+			changed = renameAttrViewOptionInFieldFilters(relatedAttrView, attrView.ID, selectKey.ID,
+				name, name, color) || changed
+		}
+		if !changed {
+			continue
+		}
+		if err = av.SaveAttributeView(relatedAttrView); nil != err {
+			return
+		}
+		ReloadAttrView(relatedAvID)
+	}
 	return
+}
+
+func syncAttributeViewOptionColor(attrView *av.AttributeView, keyID, name, color string) {
+	attrView.RenameNewItemTemplateSelectOption(keyID, name, name, color)
+	for _, keyValues := range attrView.KeyValues {
+		if nil == keyValues || nil == keyValues.Key || keyID != keyValues.Key.ID {
+			continue
+		}
+		for _, value := range keyValues.Values {
+			if nil == value {
+				continue
+			}
+			for _, selection := range value.MSelect {
+				if nil != selection && name == selection.Content {
+					selection.Color = color
+				}
+			}
+		}
+		break
+	}
+	for _, view := range attrView.Views {
+		av.RenameSelectOptionInFilters(view.Filters, keyID, name, name, color)
+	}
+	renameAttrViewOptionInFieldFilters(attrView, attrView.ID, keyID, name, name, color)
 }
 
 func sortAttributeViewColumnOptions(options []*av.SelectOption, optionSorts map[string]int) {
@@ -8278,6 +8433,67 @@ func sortAttributeViewColumnOptions(options []*av.SelectOption, optionSorts map[
 			sortableIndex++
 		}
 	}
+}
+
+func (tx *Transaction) doSetAttrViewCustomColors(operation *Operation) (ret *TxErr) {
+	if err := setAttrViewCustomColors(operation); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewCustomColors(operation *Operation) (err error) {
+	attrView, err := avParseView(operation.AvID, operation.BlockID)
+	if nil != err {
+		return
+	}
+	if nil == operation.Data {
+		return errors.New("attribute view custom colors must be an array")
+	}
+
+	data, err := gulu.JSON.MarshalJSON(operation.Data)
+	if nil != err {
+		return
+	}
+	colors := []*av.AttributeViewCustomColor{}
+	if err = gulu.JSON.UnmarshalJSON(data, &colors); nil != err {
+		return
+	}
+	colors, err = av.NormalizeAttributeViewCustomColors(colors, true)
+	if nil != err {
+		return
+	}
+
+	retainedIndexes := map[int]struct{}{}
+	for _, color := range colors {
+		retainedIndexes[color.Index] = struct{}{}
+	}
+	usedIndexes := map[int]struct{}{}
+	for _, index := range attrView.UsedCustomColorIndexes() {
+		usedIndexes[index] = struct{}{}
+	}
+	for _, oldColor := range attrView.CustomColors {
+		if nil == oldColor {
+			continue
+		}
+		if _, retained := retainedIndexes[oldColor.Index]; !retained {
+			if _, used := usedIndexes[oldColor.Index]; used {
+				return fmt.Errorf("attribute view custom color [%d] is still in use", oldColor.Index)
+			}
+		}
+	}
+
+	attrView.CustomColors = colors
+	if err = avSaveView(attrView, operation.BlockID); nil != err {
+		return
+	}
+	ReloadAttrView(attrView.ID)
+	for _, relatedAvID := range av.GetSrcAvIDs(attrView.ID) {
+		if relatedAvID != attrView.ID {
+			ReloadAttrView(relatedAvID)
+		}
+	}
+	return
 }
 
 func (tx *Transaction) doRemoveAttrViewColOption(operation *Operation) (ret *TxErr) {
@@ -8386,7 +8602,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	oldName := strings.TrimSpace(data["oldName"].(string))
 	newName := strings.TrimSpace(data["newName"].(string))
 	newDesc := strings.TrimSpace(data["newDesc"].(string))
-	newColor := av.FilterColorValue(data["newColor"].(string))
+	newColor := attrView.FilterColorValue(data["newColor"].(string))
 
 	found := false
 	if oldName != newName {

@@ -16,6 +16,7 @@ import {initMirror} from "../protyle/undo/globalUndo";
 import {getDocByScroll, saveScroll} from "../protyle/scroll/saveScroll";
 import {isEncryptedBox} from "../util/pathName";
 import {bindMobileBarsScroll, pauseMobileBarsScroll} from "./util/mobileBars";
+import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 
 export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -206,8 +207,8 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                         if (updateRecent) {
                             updateRecentDocSwitchTime(createRecentDocUpdate(data.data.rootID, previousRootID));
                         }
-                        app.plugins.forEach(item => {
-                            item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                        forEachPluginSubscriber("switch-protyle", eventBus => {
+                            eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                         });
                         complete(window.siyuan.mobile.editor.protyle);
                     }
@@ -248,8 +249,8 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                                 if (updateRecent) {
                                     updateRecentDocSwitchTime(createRecentDocUpdate(data.data.rootID, previousRootID));
                                 }
-                                app.plugins.forEach(item => {
-                                    item.eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
+                                forEachPluginSubscriber("switch-protyle", eventBus => {
+                                    eventBus.emit("switch-protyle", {protyle: window.siyuan.mobile.editor.protyle});
                                 });
                                 complete(window.siyuan.mobile.editor.protyle);
                             }

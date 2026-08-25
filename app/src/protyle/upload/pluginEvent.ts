@@ -26,6 +26,7 @@ export type TPreparedAssetUpload = {
 interface IAssetUploadPlugin {
     name?: string;
     eventBus: {
+        has(type: TEventBus): boolean;
         emitWithErrors(type: TEventBus, detail: IBeforeUploadAssetsDetail): {
             defaultPrevented: boolean;
             error?: unknown;
@@ -294,7 +295,7 @@ export const prepareAssetUpload = (options: {
     timeout?: number;
 }): TPreparedAssetUpload | Promise<TPreparedAssetUpload> => {
     const task = new AssetUploadTask(options.input, options.requestId || genRequestId(), options.protyle);
-    const plugins = Array.from(options.plugins);
+    const plugins = Array.from(options.plugins).filter(plugin => plugin.eventBus.has("before-upload-assets"));
     const timeout = options.timeout ?? ASSET_UPLOAD_PLUGIN_TIMEOUT;
     const context = {
         ...options.context,

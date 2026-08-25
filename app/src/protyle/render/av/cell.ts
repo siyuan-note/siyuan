@@ -32,6 +32,7 @@ import {
 } from "./cellValue";
 import {setPosition} from "../../../util/setPosition";
 import {getAVSelectedCells, IAVSelectedCell, updateAVSelectedCellValue} from "./selectionState";
+import {getAVColorStyle} from "./color";
 import {
     getAVBatchDisplayValue,
     getAVBatchEditMode,
@@ -113,7 +114,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         cellElement.querySelectorAll(".b3-chip").forEach((item: HTMLElement) => {
             mSelect.push({
                 content: item.textContent.trim(),
-                color: item.style.color.replace("var(--b3-font-color", "").replace(")", "")
+                color: item.dataset.color || item.style.color.replace("var(--b3-font-color", "").replace(")", "")
             });
         });
         cellValue.mSelect = mSelect;
@@ -1122,11 +1123,15 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
             if (cellValue.type === "select" && index > 0) {
                 return;
             }
-            const desc = selectOptions?.find(option => option.name === item.content)?.desc;
+            const option = selectOptions?.find(selectOption => selectOption.name === item.content);
+            const desc = option?.desc;
             const tooltip = desc ?
                 ` data-position="north" aria-label="${escapeAriaLabel(item.content)}<div class='ft__on-surface'>${escapeAriaLabel(desc)}</div>"` :
                 "";
-            text += `<span class="b3-chip${desc ? " ariaLabel" : ""}"${tooltip} style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">${escapeHtml(item.content)}</span>`;
+            text += `<span class="b3-chip${desc ? " ariaLabel" : ""}"${tooltip} data-color="${escapeAttr(option ? option.color : item.color)}" style="${getAVColorStyle({
+                color: option ? option.color : item.color,
+                resolvedColor: option ? option.resolvedColor : item.resolvedColor,
+            })}">${escapeHtml(item.content)}</span>`;
         });
     } else if (cellValue.type === "date") {
         const dataValue = cellValue ? cellValue.date : null;

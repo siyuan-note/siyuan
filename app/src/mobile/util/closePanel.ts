@@ -4,6 +4,8 @@ import {destroyModel} from "../menu/model";
 
 let hidePanelMaskTimer = 0;
 
+export const MOBILE_MENU_CLOSE_EVENT = "siyuan-mobile-menu-close";
+
 export const showPanelMask = () => {
     clearTimeout(hidePanelMaskTimer);
     hidePanelMaskTimer = 0;
@@ -16,6 +18,7 @@ export const closePanel = () => {
     destroyModel();
     const menuElement = document.getElementById("menu");
     if (menuElement) {
+        menuElement.dispatchEvent(new CustomEvent(MOBILE_MENU_CLOSE_EVENT));
         menuElement.classList.add("fn__none");
         menuElement.style.removeProperty("transform");
         menuElement.style.removeProperty("z-index");

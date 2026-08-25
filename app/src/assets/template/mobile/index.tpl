@@ -28,7 +28,6 @@
             <svg data-type="sidebar-bookmark-tab" class="toolbar__icon"><use xlink:href="#iconBookmark"></use></svg>
             <svg data-type="sidebar-tag-tab" class="toolbar__icon"><use xlink:href="#iconTag"></use></svg>
             <svg data-type="sidebar-inbox-tab" class="toolbar__icon"><use xlink:href="#iconInbox"></use></svg>
-            <svg data-menu="true" data-type="sidebar-plugin-tab" class="toolbar__icon fn__none"><use xlink:href="#iconPlugin"></use></svg>
         </div>
         <svg class="toolbar__icon"><use xlink:href="#iconRight"></use></svg>
     </div>
@@ -37,7 +36,6 @@
         <div class="fn__flex-column fn__none" data-type="sidebar-bookmark"></div>
         <div class="fn__flex-column fn__none" data-type="sidebar-tag"></div>
         <div class="fn__flex-column fn__none" data-type="sidebar-inbox"></div>
-        <div class="fn__flex-column fn__none" data-type="sidebar-plugin"></div>
     </div>
 </div>
 <div id="sidebarRight" class="side-panel side-panel--right fn__flex-column">
@@ -113,6 +111,12 @@
     </button>
     <button id="mobileBottomBarSpacedRepetition" class="mobile-bottom-bar__item fn__none" data-action="spacedRepetition" type="button">
         <svg><use xlink:href="#iconRiffCard"></use></svg>
+    </button>
+    <button id="mobileBottomBarDailyNote" class="mobile-bottom-bar__item fn__none" data-action="dailyNote" type="button">
+        <svg><use xlink:href="#iconCalendar"></use></svg>
+    </button>
+    <button id="mobileBottomBarNewDailyNote" class="mobile-bottom-bar__item fn__none" data-action="newDailyNote" type="button">
+        <svg><use xlink:href="#iconCalendarPlus"></use></svg>
     </button>
     <button id="mobileBottomBarCommand" class="mobile-bottom-bar__item fn__none" data-action="command" type="button">
         <svg><use xlink:href="#iconTerminal"></use></svg>

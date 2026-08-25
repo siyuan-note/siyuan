@@ -33,7 +33,7 @@ require (
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/gabriel-vasile/mimetype v1.4.15
 	github.com/gen2brain/h265 v0.1.1
-	github.com/gin-contrib/gzip v1.2.6
+	github.com/gin-contrib/gzip v1.2.3
 	github.com/gin-contrib/sessions v1.1.0
 	github.com/gin-contrib/sse v1.1.1
 	github.com/gin-gonic/gin v1.12.0
@@ -99,7 +99,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/88250/lute v1.7.8-0.20260821043618-a0c40f22628e
+require github.com/88250/lute v1.7.8-0.20260824130950-65147985e134
 
 require (
 	github.com/alecthomas/chroma/v2 v2.27.0 // indirect

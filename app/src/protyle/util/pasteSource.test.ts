@@ -4,6 +4,7 @@ import {
     extractCrossBlockPasteContext,
     isNestedListCrossBlockSelection,
     NESTED_LIST_PASTE_MARKER,
+    serializePastedBlockDOM,
     shouldPreservePastedBlockStructure,
 } from "./pasteSource";
 
@@ -83,5 +84,14 @@ describe("extractCrossBlockPasteContext", () => {
             nestedList: false,
             html: "<p>content</p>",
         });
+    });
+});
+
+describe("serializePastedBlockDOM", () => {
+    it("preserves escaped HTML block attributes", () => {
+        const html = '<div data-type="NodeHTMLBlock"><protyle-html data-content="&lt;div&gt;\n' +
+            '&lt;div style=&quot;page-break-after: always;&quot;&gt;&lt;/div&gt;\n&lt;/div&gt;"></protyle-html></div>';
+
+        assert.equal(serializePastedBlockDOM({innerHTML: html}), html);
     });
 });

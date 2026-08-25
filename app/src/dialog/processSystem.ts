@@ -16,10 +16,10 @@ import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
-import type {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
-import {Plugin} from "../plugin";
+import {emitToPlugins} from "../plugin/EventBusCore";
+import {createHostQuitGuard} from "./hostQuit";
 
 export const processBacklinkIndexCommit = (data: {
     rootIDs?: string[],
@@ -121,13 +121,11 @@ export const setDefRefCount = (data: {
     }
 };
 
-export const lockScreen = async (app: App) => {
+export const lockScreen = async () => {
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
-    app.plugins.forEach(item => {
-        item.eventBus.emit("lock-screen");
-    });
+    emitToPlugins("lock-screen");
     /// #if !MOBILE
     exportLayout({
         errorExit: false,
@@ -144,26 +142,32 @@ export const lockScreen = async (app: App) => {
 
 };
 
-// forceQuit 用于内核已断连、无法走 /api/system/exit 的场景：绕过内核 HTTP，直接通知宿主（Electron 主进程 /
-// 移动端原生容器）退出。浏览器/Docker 等纯 Web 环境无宿主可调，只能关闭当前页。
+const hostQuitGuard = createHostQuitGuard();
+
+export const isHostQuitStarted = hostQuitGuard.isStarted;
+
+// forceQuit 绕过内核 HTTP，直接通知宿主（Electron 主进程 / 移动端原生容器）退出。浏览器/Docker 等纯 Web
+// 环境无宿主可调，只能关闭当前页。
 export const forceQuit = () => {
-    /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-    /// #else
-    if (isInAndroid()) {
-        window.JSAndroid.exit();
-        return;
-    }
-    if (isInIOS()) {
-        window.webkit.messageHandlers.exit.postMessage("");
-        return;
-    }
-    if (isInHarmony()) {
-        window.JSHarmony.exit();
-        return;
-    }
-    window.close();
-    /// #endif
+    hostQuitGuard.run(() => {
+        /// #if !BROWSER
+        ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
+        /// #else
+        if (isInAndroid()) {
+            window.JSAndroid.exit();
+            return;
+        }
+        if (isInIOS()) {
+            window.webkit.messageHandlers.exit.postMessage("");
+            return;
+        }
+        if (isInHarmony()) {
+            window.JSHarmony.exit();
+            return;
+        }
+        window.close();
+        /// #endif
+    });
 };
 
 const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean) => {
@@ -187,19 +191,7 @@ const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean)
         force: true,
         setCurrentWorkspace,
         execInstallPkg: 1,
-    }, () => {
-        if (isInAndroid()) {
-            window.JSAndroid.exit();
-            return;
-        }
-        if (isInIOS()) {
-            window.webkit.messageHandlers.exit.postMessage("");
-            return;
-        }
-        if (isInHarmony()) {
-            window.JSHarmony.exit();
-        }
-    });
+    }, forceQuit);
     /// #endif
 };
 
@@ -220,24 +212,7 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                         installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
                         return;
                     }
-                    fetchPost("/api/system/exit", {force: true, setCurrentWorkspace}, () => {
-                        /// #if !BROWSER
-                        ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-                        /// #else
-                        if (isInAndroid()) {
-                            window.JSAndroid.exit();
-                            return;
-                        }
-                        if (isInIOS()) {
-                            window.webkit.messageHandlers.exit.postMessage("");
-                            return;
-                        }
-                        if (isInHarmony()) {
-                            window.JSHarmony.exit();
-                            return;
-                        }
-                        /// #endif
-                    });
+                    fetchPost("/api/system/exit", {force: true, setCurrentWorkspace}, forceQuit);
                 });
             }
         } else if (response.code === 2) { // 提示新安装包
@@ -256,30 +231,10 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                     force: true,
                     setCurrentWorkspace,
                     execInstallPkg: 1 // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
-                }, () => {
-                    /// #if !BROWSER
-                    ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-                    /// #endif
-                });
+                }, forceQuit);
             });
         } else { // 正常退出
-            /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-            /// #else
-            if (isInAndroid()) {
-                window.JSAndroid.exit();
-                return;
-            }
-            if (isInIOS()) {
-                window.webkit.messageHandlers.exit.postMessage("");
-                return;
-            }
-
-            if (isInHarmony()) {
-                window.JSHarmony.exit();
-                return;
-            }
-            /// #endif
+            forceQuit();
         }
     });
 };
@@ -454,7 +409,7 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     }
 };
 
-export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
+export const processSync = (data?: IWebSocketData) => {
     if (data?.code === 1) {
         window.dispatchEvent(new CustomEvent("siyuan-sync-success"));
     }
@@ -513,13 +468,11 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
         useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
     }
     /// #endif
-    plugins.forEach((item) => {
-        if (data.code === 0) {
-            item.eventBus.emit("sync-start", data);
-        } else if (data.code === 1) {
-            item.eventBus.emit("sync-end", data);
-        } else if (data.code === 2) {
-            item.eventBus.emit("sync-fail", data);
-        }
-    });
+    if (data.code === 0) {
+        emitToPlugins("sync-start", data);
+    } else if (data.code === 1) {
+        emitToPlugins("sync-end", data);
+    } else if (data.code === 2) {
+        emitToPlugins("sync-fail", data);
+    }
 };

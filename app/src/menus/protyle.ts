@@ -321,7 +321,6 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
 
     if (protyle?.app?.plugins) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-fileannotationref",
             detail: {
                 protyle,
@@ -679,7 +678,6 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     }
     if (protyle?.app?.plugins) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-blockref",
             detail: {
                 protyle,
@@ -927,7 +925,6 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     let pluginMenus: IMenu[] = [];
     if (protyle?.app?.plugins) {
         pluginMenus = emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-content",
             detail: {
                 protyle,
@@ -1488,7 +1485,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     }).element);
     if (protyle?.app?.plugins) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-image",
             detail: {
                 protyle,
@@ -1768,7 +1764,6 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
 
     if (!protyle.disabled && protyle?.app?.plugins) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-link",
             detail: {
                 protyle,
@@ -1987,7 +1982,6 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
 
     if (protyle?.app?.plugins) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-tag",
             detail: {
                 protyle,

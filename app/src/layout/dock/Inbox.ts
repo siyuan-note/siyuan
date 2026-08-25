@@ -293,7 +293,6 @@ ${data.shorthandContent}
         }
         if (this.app.plugins) {
             emitOpenMenu({
-                plugins: this.app.plugins,
                 type: "open-menu-inbox",
                 detail: {
                     ids,

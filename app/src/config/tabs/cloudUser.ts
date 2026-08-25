@@ -1,23 +1,19 @@
 export type TCloudUser = NonNullable<typeof window.siyuan.user>;
 
-export interface ICloudUserRefreshAction {
+interface ICloudUserRefreshAction {
     apply: boolean;
     user: TCloudUser | null;
     userName: string;
 }
 
-let loginUserName = "";
+let cloudLoginUserName = "";
+
+export const getCloudLoginUserName = () => cloudLoginUserName;
 
 export const setCloudUser = (user: TCloudUser | null, userName = "") => {
     window.siyuan.user = user;
-    if (user) {
-        loginUserName = "";
-    } else if (userName) {
-        loginUserName = userName;
-    }
+    cloudLoginUserName = user ? "" : userName;
 };
-
-export const getCloudLoginUserName = () => loginUserName;
 
 export const resolveCloudUserRefresh = (
     code: number,

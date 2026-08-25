@@ -1,4 +1,9 @@
 {
+	"manageColors": "Zarządzaj kolorami",
+	"manageBuiltinColors": "Zarządzaj wbudowanymi kolorami",
+	"showInColorPicker": "Pokaż w selektorze kolorów",
+	"resetAll": "Resetuj wszystko",
+	"exportFile": "Eksportuj plik",
 	"namingEmpty": "Nazwa nie może być pusta",
 	"recentCreated": "Ostatnio utworzone",
 	"manageCustomColors": "Zarządzaj kolorami niestandardowymi",
@@ -687,7 +692,7 @@
 	"agentTimeout": "Limit czasu",
 	"agentTimeoutTip": "Całkowity limit czasu sesji agenta, 0 = bez limitu",
 	"agentConfirmTimeout": "Limit czasu potwierdzenia",
-	"agentConfirmTimeoutTip": "Automatyczne odrzucenie po przekroczeniu czasu",
+	"agentConfirmTimeoutTip": "Automatyczne odrzucenie po przekroczeniu czasu, 0 = oczekiwanie bez limitu",
 	"agentMaxRetries": "Maks. liczba ponowień",
 	"agentMaxRetriesTip": "Maks. liczba ponownych prób API przy błędzie",
 	"agentMaxToolCallRounds": "Maks. liczba rund wywołań narzędzi",
@@ -1494,7 +1499,7 @@
 	"rtlTip": "Renderowanie treści od prawej do lewej",
 	"height": "Wysokość",
 	"deactivateUser": "Dezaktywuj konto",
-	"deactivateUserTip": "<ul class='fn__list'><li>Po dezaktywowaniu konto nie może zostać przywrócone, proszę nie próbować tego bez powodu</li><li>Nazwa użytkownika zostanie wypełniona <code>someone101</code> (następny numer to numer użytkownika), hasło zostanie zresetowane na losowy numer</li><li>Wyczyść pseudonim użytkownika, samodzielną etykietę, URL, profil, avatar, link do witryny, adres do korespondencji i inne informacje</li><li>Wszystkie przełączniki ustawień prywatności zostaną przywrócone do domyślnego publicznego stanu</li><li>Usunięte zostaną konta społecznościowe firmy trzeciej powiązane z numerem telefonu</li><li><strong>Nazwa użytkownika, numer telefonu, powiązane konto firm trzecich nie będą mogły być używane ponownie w przyszłości</strong></li><li>Status użytkownika zostanie ustawiony na wyłączony, zabroniony logowanie</li></ul>",
+	"deactivateUserTip": "<ul class='fn__list'><li>Po dezaktywowaniu konto nie może zostać przywrócone, proszę nie próbować tego bez powodu</li><li>Nazwa użytkownika zostanie wypełniona <code>someone101</code> (następny numer to numer użytkownika), hasło zostanie zresetowane na losowy numer</li><li>Wyczyść pseudonim użytkownika, samodzielną etykietę, URL, profil, avatar, link do witryny i inne informacje</li><li>Wszystkie przełączniki ustawień prywatności zostaną przywrócone do domyślnego publicznego stanu</li><li>Usunięte zostaną konta społecznościowe firmy trzeciej powiązane z numerem telefonu</li><li><strong>Nazwa użytkownika, adres e-mail, numer telefonu, powiązane konto firm trzecich nie będą mogły być używane ponownie w przyszłości</strong></li><li>Status użytkownika zostanie ustawiony na wyłączony, zabroniony logowanie</li></ul>",
 	"mergeCell": "Scal komórkę",
 	"cancelMerged": "Anuluj scalanie komórek",
 	"useDefaultWidth": "Użyj domyślnej szerokości kolumny",
@@ -2273,7 +2278,7 @@
 		"16": "Bez tytułu",
 		"17": "Początkowa synchronizacja nie powiodła się przy starcie. Niekontrolowane nadpisanie danych może wystąpić, jeśli kontynuujesz działania. Proszę przeprowadzić najpierw synchronizację",
 		"18": "Nie udało się uzyskać konta użytkownika społeczności",
-		"19": "Informacje o użytkowniku wygasły, proszę zalogować się ponownie",
+		"19": "Informacje o użytkowniku wygasły, proszę zalogować się ponownie w [Ustawienia - Konto i Synchronizacja - Konto]",
 		"20": "Nie można przekształcić w nagłówek, gdy zawiera poddokumenty",
 		"21": "Proszę wprowadzić kod captcha",
 		"22": "Captcha jest nieprawidłowa",
@@ -2285,7 +2290,7 @@
 		"28": "Sieć jest nieprawidłowa, proszę spróbować ponownie później",
 		"29": "Ta funkcja jest dostępna tylko po zakupie <a target='_blank' href='${accountServer}/subscribe/siyuan'>[rocznej subskrypcji]</a> (jeśli już kupiłeś, odśwież lub zaloguj się ponownie w Ustawienia - Konto i Synchronizacja - Konto)",
 		"30": "Nie udało się uzyskać informacji w chmurze",
-		"31": "Autoryzacja konta nie powiodła się, proszę zalogować się ponownie",
+		"31": "Autoryzacja konta nie powiodła się, proszę zalogować się ponownie w [Ustawienia - Konto i Synchronizacja - Konto]",
 		"32": "Nie udało się usunąć notatnika w chmurze",
 		"33": "Niewystarczające uprawnienia do odczytu i zapisu plików lub dostępu do sieci, proszę sprawdzić uprawnienia folderu obszaru roboczego oraz ustawienia oprogramowania antywirusowego/zapory. Jeśli przedtem uruchamiałeś SiYuan jako administrator, rozważ przełączenie do nowego katalogu obszaru roboczego i nie uruchamiaj go jako administrator w przyszłości (aktualny katalog obszaru roboczego może być już niedostępny dla zwykłych użytkowników)",
 		"34": "Ta operacja nie jest wspierana w trybie tylko do odczytu",
@@ -2467,7 +2472,7 @@
 		"210": "Weryfikacja danych w chmurze %v/%v",
 		"211": "Weryfikacja danych w chmurze zakończona",
 		"212": "W bieżącej wersji synchronizacji danych w chmurze występują pewne defekty, proszę zaktualizować do najnowszej wersji. Przepraszamy za niedogodności",
-		"213": "Weryfikacja w chmurze nie powiodła się, proszę spróbować zaktualizować do najnowszej wersji i zalogować się ponownie przed synchronizacją",
+		"213": "Weryfikacja w chmurze nie powiodła się, proszę spróbować zaktualizować do najnowszej wersji i zalogować się ponownie w [Ustawienia - Konto i Synchronizacja - Konto] przed synchronizacją",
 		"214": "Ta funkcja wymaga zalogowania się na konto i zakupu <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[funkcji]</a> lub <a target='_blank' href='${accountServer}/subscribe/siyuan'>[rocznej subskrypcji]</a> przed użyciem",
 		"215": "Nie można otworzyć widoku bazy danych utworzonego w nowszej wersji. Zaktualizuj do najnowszej wersji i spróbuj ponownie",
 		"216": "Przebudowa indeksu danych zawartości zasobów, proszę czekać...",
@@ -2627,6 +2632,7 @@
 		"370": "ruch przyspieszony przez LAN %s",
 		"371": "Notatnik już istnieje",
 		"372": "Notatnik został przywrócony i pozostaje zamknięty",
-		"373": "To archiwum zawiera dane notatnika. Zaimportuj je z [Drzewo dokumentów - Więcej - Importuj notatnik]"
+		"373": "To archiwum zawiera dane notatnika. Zaimportuj je z [Drzewo dokumentów - Więcej - Importuj notatnik]",
+		"374": "Baza danych [%s], pole szablonu [%s], pierwszy element z błędem [%s] (ID elementu: %s), liczba elementów z błędem: %d, błąd: %s"
 	}
 }

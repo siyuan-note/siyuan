@@ -592,7 +592,9 @@ export const getBlockRanges = (editorElement: Element, selectedRange: Range, exc
     }
     let rangeStarted = false;
     while (item) {
-        const editableElement = getContenteditableElement(item);
+        const rangeTarget = item === startElement ? selectedRange.startContainer :
+            (item === endElement ? selectedRange.endContainer : undefined);
+        const editableElement = getContenteditableElement(item, rangeTarget);
         const isEditableBlock = editableElement && hasClosestBlock(editableElement) === item;
         const intersects = isEditableBlock && selectedRange.intersectsNode(editableElement);
         if (intersects) {
@@ -664,8 +666,8 @@ Record<string, string> | undefined => {
     if (!startBlockElement || !endBlockElement || (!ignoreZWSP && startBlockElement !== endBlockElement)) {
         return undefined;
     }
-    const startEditableElement = getContenteditableElement(startBlockElement) || startBlockElement;
-    const endEditableElement = getContenteditableElement(endBlockElement) || endBlockElement;
+    const startEditableElement = getContenteditableElement(startBlockElement, range.startContainer) || startBlockElement;
+    const endEditableElement = getContenteditableElement(endBlockElement, range.endContainer) || endBlockElement;
     if (!startEditableElement.contains(range.startContainer) || !endEditableElement.contains(range.endContainer)) {
         return undefined;
     }
@@ -691,6 +693,10 @@ Record<string, string> | undefined => {
         undoFocusEnd: end.toString(),
         undoFocusIgnoreZWSP: ignoreZWSP.toString(),
     };
+    if (startEditableElement.classList.contains("callout-title") &&
+        endEditableElement.classList.contains("callout-title")) {
+        context.undoFocusCalloutTitle = "true";
+    }
     const startEmbedElement = isInEmbedBlock(startBlockElement, false);
     if (startEmbedElement && startEmbedElement === isInEmbedBlock(endBlockElement, false)) {
         context.undoFocusEmbedId = startEmbedElement.getAttribute("data-node-id");
@@ -730,28 +736,35 @@ export const restoreFocusContext = (protyle: IProtyle, context: Record<string, s
     if (!startBlockElement || !endBlockElement) {
         return false;
     }
+    const startFocusElement = context.undoFocusCalloutTitle === "true" ?
+        startBlockElement.querySelector(".callout-title") : startBlockElement;
+    const endFocusElement = context.undoFocusCalloutTitle === "true" ?
+        endBlockElement.querySelector(".callout-title") : endBlockElement;
+    if (!startFocusElement || !endFocusElement) {
+        return false;
+    }
     const ignoreZWSP = context.undoFocusIgnoreZWSP === "true";
     if (context.undoFocusCollapseToEnd === "true") {
-        return !!focusByOffset(endBlockElement, end, end, true, ignoreZWSP);
+        return !!focusByOffset(endFocusElement, end, end, true, ignoreZWSP);
     }
     if (startBlockElement === endBlockElement) {
-        return !!focusByOffset(startBlockElement, start, end, true, ignoreZWSP);
+        return !!focusByOffset(startFocusElement, start, end, true, ignoreZWSP);
     }
     let startRange: Range;
     if (context.undoFocusStartAtEnd === "true") {
         startRange = document.createRange();
-        setLastNodeRange(getContenteditableElement(startBlockElement) || startBlockElement, startRange);
+        setLastNodeRange(getContenteditableElement(startFocusElement) || startFocusElement, startRange);
         startRange.collapse(true);
     } else {
-        startRange = focusByOffset(startBlockElement, start, start, false, ignoreZWSP) as Range;
+        startRange = focusByOffset(startFocusElement, start, start, false, ignoreZWSP) as Range;
     }
     let endRange: Range;
     if (ignoreZWSP && end === 0) {
         endRange = document.createRange();
-        endRange.setStart(getContenteditableElement(endBlockElement) || endBlockElement, 0);
+        endRange.setStart(getContenteditableElement(endFocusElement) || endFocusElement, 0);
         endRange.collapse(true);
     } else {
-        endRange = focusByOffset(endBlockElement, 0, end, false, ignoreZWSP) as Range;
+        endRange = focusByOffset(endFocusElement, 0, end, false, ignoreZWSP) as Range;
     }
     if (!startRange || !endRange) {
         return false;
@@ -991,7 +1004,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
 };
 
 export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle: IProtyle) => {
-    const editElement = getContenteditableElement(nodeElement);
+    const editElement = getContenteditableElement(nodeElement, range.startContainer);
     if (!editElement) {
         return;
     }
@@ -1013,7 +1026,9 @@ export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle
     } else {
         const offset = getSelectionOffset(editElement, nodeElement, range);
         const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
-        const cloneRange = focusByOffset(cloneNode, offset.end, offset.end, false);
+        const cloneEditElement = editElement.classList.contains("callout-title") ?
+            cloneNode.querySelector(".callout-title") : cloneNode;
+        const cloneRange = focusByOffset(cloneEditElement, offset.end, offset.end, false);
         if (cloneRange) {
             cloneRange.insertNode(document.createElement("wbr"));
         }

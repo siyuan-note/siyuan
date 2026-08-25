@@ -27,16 +27,24 @@ import {getMobilePluginToolbarItems} from "./pluginToolbar";
 import {escapeHtml} from "../../util/escape";
 import {
     encodeStyle1,
+    filterHiddenRecentInlineStyles,
+    getBuiltinInlineStyleIDFromValue,
+    getBuiltinInlineStylePreview,
+    getBuiltinInlineStylePropertyValue,
     getInlineStyleByValue,
     getInlineStyleIDFromValue,
     getInlineStylePreview,
     getInlineStylesCache,
     getInlineStyleType,
+    getVisibleBuiltinInlineStyleIDs,
+    isBuiltinInlineStyleVisible,
     INLINE_BACKGROUND_COLORS,
     INLINE_FONT_COLORS,
+    TBuiltinInlineStyleID,
     TInlineStyleType,
 } from "../../protyle/toolbar/inlineStyle";
 import {openInlineStyleDialog} from "../../protyle/toolbar/inlineStyleDialog";
+import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {
     getKeyboardHideResult,
     getMovingSelectionEndpoint,
@@ -360,9 +368,23 @@ const getSlashItem = (value: string, icon: string, text: string, focus = "false"
 </button>`;
 };
 
+const getBuiltinStyleLabel = (id: TBuiltinInlineStyleID) => ({
+    error: window.siyuan.languages.errorStyle,
+    warning: window.siyuan.languages.warningStyle,
+    info: window.siyuan.languages.infoStyle,
+    success: window.siyuan.languages.successStyle,
+})[id];
+
+const getBuiltinStyleCSS = (id: TBuiltinInlineStyleID) =>
+    `color: ${getBuiltinInlineStylePropertyValue(id, "color")};` +
+    `background-color: ${getBuiltinInlineStylePropertyValue(id, "backgroundColor")};`;
+
 export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     let colorHTML = "";
     INLINE_FONT_COLORS.forEach((item, index) => {
+        if (index > 0 && !isBuiltinInlineStyleVisible("color", index)) {
+            return;
+        }
         colorHTML += `<button class="keyboard__slash-item" data-type="color">
     <span class="keyboard__slash-icon" ${item ? `style="color:${item}"` : ""}>A</span>
     <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${item ? index : window.siyuan.languages.default}</span>
@@ -370,9 +392,20 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     });
     let bgHTML = "";
     INLINE_BACKGROUND_COLORS.forEach((item, index) => {
+        if (index > 0 && !isBuiltinInlineStyleVisible("backgroundColor", index)) {
+            return;
+        }
         bgHTML += `<button class="keyboard__slash-item" data-type="backgroundColor">
     <span class="keyboard__slash-icon" ${item ? `style="background-color:${item}"` : ""}>A</span>
     <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${item ? index : window.siyuan.languages.default}</span>
+</button>`;
+    });
+    let builtinStyleHTML = "";
+    getVisibleBuiltinInlineStyleIDs().forEach(id => {
+        const preview = getBuiltinInlineStylePreview(id);
+        builtinStyleHTML += `<button class="keyboard__slash-item" data-type="style1">
+    <span class="keyboard__slash-icon" style="color:${preview.color};background-color:${preview.backgroundColor};">A</span>
+    <span class="keyboard__slash-text">${getBuiltinStyleLabel(id)}</span>
 </button>`;
     });
     let customColorHTML = "";
@@ -399,7 +432,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     const getManageHTML = (type: TInlineStyleType) => window.siyuan.config.readonly || window.siyuan.isPublish ? "" :
         `<button class="keyboard__slash-item" data-action="manageInlineStyle" data-inline-style-type="${type}">
     <svg class="keyboard__slash-icon"><use xlink:href="#iconSettings"></use></svg>
-    <span class="keyboard__slash-text">${window.siyuan.languages.manageCustomColors}</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.manageColors}</span>
 </button>`;
 
     const nodeElements = getFontNodeElements(protyle);
@@ -412,7 +445,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     });
 
     let lastColorHTML = "";
-    const lastFonts = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
+    const lastFonts = filterHiddenRecentInlineStyles(window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
     if (lastFonts.length > 0) {
         lastColorHTML = `<div data-id="lastUsed" class="keyboard__slash-title">
     ${window.siyuan.languages.lastUsed}
@@ -456,10 +489,14 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
                     break;
                 case "style1":
                     if (lastFontStatus[1]) {
-                        const builtInStyle = lastFontStatus[2]?.match(/^var\(--b3-card-([a-z]+)-color\)$/)?.[1];
+                        const builtInStyle = getBuiltinInlineStyleIDFromValue(item);
+                        const preview = builtInStyle ? getBuiltinInlineStylePreview(builtInStyle) : {
+                            backgroundColor: lastFontStatus[1],
+                            color: lastFontStatus[2],
+                        };
                         lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
-    <span class="keyboard__slash-icon" style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}">A</span>
-    <span class="keyboard__slash-text">${customLabel || (builtInStyle ? window.siyuan.languages[builtInStyle + "Style"] : window.siyuan.languages.color)}</span>
+    <span class="keyboard__slash-icon" style="background-color:${preview.backgroundColor};color:${preview.color}">A</span>
+    <span class="keyboard__slash-text">${customLabel || (builtInStyle ? getBuiltinStyleLabel(builtInStyle) : window.siyuan.languages.color)}</span>
 </button>`;
                     } else {
                         lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
@@ -486,22 +523,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         <span class="keyboard__slash-icon">A</span>
         <span class="keyboard__slash-text">${window.siyuan.languages.color} ${window.siyuan.languages.default}</span>
     </button>
-    <button class="keyboard__slash-item" data-type="style1">
-        <span class="keyboard__slash-icon" style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);">A</span>
-        <span class="keyboard__slash-text">${window.siyuan.languages.errorStyle}</span>
-    </button>
-    <button class="keyboard__slash-item" data-type="style1">
-        <span class="keyboard__slash-icon" style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);">A</span>
-        <span class="keyboard__slash-text">${window.siyuan.languages.warningStyle}</span>
-    </button>
-    <button class="keyboard__slash-item" data-type="style1">
-        <span class="keyboard__slash-icon" style="color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);">A</span>
-        <span class="keyboard__slash-text">${window.siyuan.languages.infoStyle}</span>
-    </button>
-    <button class="keyboard__slash-item" data-type="style1">
-        <span class="keyboard__slash-icon" style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);">A</span>
-        <span class="keyboard__slash-text">${window.siyuan.languages.successStyle}</span>
-    </button>
+    ${builtinStyleHTML}
     ${customStyleHTML}
     ${getManageHTML("style1")}
 </div>
@@ -601,6 +623,15 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     if (pluginHTML) {
         pluginHTML = `<div class="keyboard__slash-title"></div><div class="keyboard__slash-block">${pluginHTML}</div>`;
     }
+    let builtinStyleHTML = "";
+    (["info", "success", "warning", "error"] as TBuiltinInlineStyleID[]).forEach(id => {
+        if (!isBuiltinInlineStyleVisible("style1", id)) {
+            return;
+        }
+        const style = getBuiltinStyleCSS(id);
+        builtinStyleHTML += getSlashItem(`style${Constants.ZWSP}${style}`,
+            `<div style="${style}" class="keyboard__slash-icon">A</div>`, getBuiltinStyleLabel(id), "true");
+    });
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `<div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
@@ -659,10 +690,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
 </div>
 <div class="keyboard__slash-title"></div>
 <div class="keyboard__slash-block">
-    ${getSlashItem(`style${Constants.ZWSP}color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);`, '<div style="color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);" class="keyboard__slash-icon">A</div>', window.siyuan.languages.infoStyle, "true")}
-    ${getSlashItem(`style${Constants.ZWSP}color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);`, '<div style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);" class="keyboard__slash-icon">A</div>', window.siyuan.languages.successStyle, "true")}
-    ${getSlashItem(`style${Constants.ZWSP}color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);`, '<div style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);" class="keyboard__slash-icon">A</div>', window.siyuan.languages.warningStyle, "true")}
-    ${getSlashItem(`style${Constants.ZWSP}color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);`, '<div style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);" class="keyboard__slash-icon">A</div>', window.siyuan.languages.errorStyle, "true")}
+    ${builtinStyleHTML}
     ${getSlashItem(`style${Constants.ZWSP}`, '<div class="keyboard__slash-icon">A</div>', window.siyuan.languages.clearFontStyle, "true")}
 </div>${pluginHTML}`;
     protyle.hint.bindUploadEvent(protyle, utilElement);
@@ -855,8 +883,8 @@ export const showKeyboardToolbar = () => {
         if (editor.protyle.wysiwyg.element.contains(range.startContainer)) {
             editor.protyle.element.parentElement.style.paddingBottom = "48px";
         }
-        editor.protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("mobile-keyboard-show");
+        forEachPluginSubscriber("mobile-keyboard-show", eventBus => {
+            eventBus.emit("mobile-keyboard-show");
         });
     }
     clearTimeout(scrollSelectionIntoViewTimeout);
@@ -935,8 +963,8 @@ export const hideKeyboardToolbar = () => {
     if (editor) {
         editor.protyle.element.parentElement.style.paddingBottom = "";
         if (!toolbarHidden) {
-            editor.protyle.app.plugins.forEach(item => {
-                item.eventBus.emit("mobile-keyboard-hide");
+            forEachPluginSubscriber("mobile-keyboard-hide", eventBus => {
+                eventBus.emit("mobile-keyboard-hide");
             });
         }
     }

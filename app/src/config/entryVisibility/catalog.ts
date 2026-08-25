@@ -196,6 +196,12 @@ const gutterTurnInto = () => node("turnInto", lang("turnInto"), true, [
         node("heading6", lang("heading6")),
         node("quote", lang("quote")),
         node("callout", lang("callout")),
+        node("calloutNote", location(lang("callout"), literal("Note"))),
+        node("calloutTip", location(lang("callout"), literal("Tip"))),
+        node("calloutImportant", location(lang("callout"), literal("Important"))),
+        node("calloutWarning", location(lang("callout"), literal("Warning"))),
+        node("calloutCaution", location(lang("callout"), literal("Caution"))),
+        node("calloutCustom", location(lang("callout"), () => `${window.siyuan.languages.custom}...`)),
         node("list", lang("list")),
         node("orderedList", lang("ordered-list")),
         node("check", lang("check")),
@@ -525,23 +531,27 @@ const toolbarCatalogSection: IEntryCatalogSection = {
     children: toolbarBuiltinChildren,
 };
 
+const dockBuiltinChildren = [
+    node("file", lang("fileTree")),
+    node("outline", lang("outline")),
+    node("bookmark", lang("bookmark")),
+    node("tag", lang("tag")),
+    node("backlink", lang("backlinks")),
+    node("agentChat", lang("ai")),
+    node("inbox", lang("inbox"), false),
+    node("graph", lang("graphView"), false),
+    node("globalGraph", lang("globalGraph"), false),
+];
+
+const dockCatalogSection: IEntryCatalogSection = {
+    key: "dock",
+    label: lang("toggleDock"),
+    sortable: false,
+    children: dockBuiltinChildren,
+};
+
 export const entryCatalog: IEntryCatalogSection[] = [
-    {
-        key: "dock",
-        label: lang("toggleDock"),
-        sortable: false,
-        children: [
-            node("file", lang("fileTree")),
-            node("outline", lang("outline")),
-            node("bookmark", lang("bookmark")),
-            node("tag", lang("tag")),
-            node("backlink", lang("backlinks")),
-            node("agentChat", lang("ai")),
-            node("inbox", lang("inbox"), false),
-            node("graph", lang("graphView"), false),
-            node("globalGraph", lang("globalGraph"), false),
-        ],
-    },
+    dockCatalogSection,
     {
         key: "docTree.panel",
         label: location(lang("entryDocPanel"), lang("more")),
@@ -965,6 +975,52 @@ export const getEntryCatalogPathChain = (sectionKey: string, path: string) => {
         current = getEntryParentPath(current);
     }
     return current === sectionKey ? chain : [];
+};
+
+interface IDockCatalogPlugin {
+    name: string;
+    displayName?: string;
+    docks: Record<string, {
+        id: string;
+        config: Pick<IPluginDockTab, "title">;
+    }>;
+}
+
+const encodeDockEntryKeyPart = (value: string) => encodeURIComponent(value).replace(/\./g, "%2E");
+
+export const getPluginDockEntryKey = (pluginName: string, dockID: string) =>
+    `plugin:${encodeDockEntryKeyPart(pluginName)}:${encodeDockEntryKeyPart(dockID)}`;
+
+let dockCatalogSignature = "[]";
+
+export const refreshDockCatalog = (plugins: IDockCatalogPlugin[]) => {
+    const signature = JSON.stringify(plugins.map((plugin) => ({
+        name: plugin.name,
+        displayName: plugin.displayName,
+        docks: Object.values(plugin.docks).map((dock) => ({
+            id: dock.id,
+            title: dock.config.title,
+        })),
+    })));
+    if (signature === dockCatalogSignature) {
+        return;
+    }
+    const pluginNodes: IEntryCatalogNode[] = [];
+    const pluginKeys = new Set<string>();
+    plugins.forEach((plugin) => {
+        Object.values(plugin.docks).forEach((dock) => {
+            const key = getPluginDockEntryKey(plugin.name, dock.id);
+            if (pluginKeys.has(key)) {
+                return;
+            }
+            pluginKeys.add(key);
+            const pluginName = plugin.displayName?.trim() || plugin.name;
+            pluginNodes.push(node(key, literal(`${pluginName} - ${dock.config.title}`)));
+        });
+    });
+    dockCatalogSection.children = [...dockBuiltinChildren, ...pluginNodes];
+    dockCatalogSignature = signature;
+    rebuildCatalogIndexes();
 };
 
 const normalizeToolbarCatalogSeparators = (nodes: IEntryCatalogNode[]) => {

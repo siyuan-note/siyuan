@@ -20,10 +20,11 @@ import "github.com/siyuan-note/siyuan/kernel/av"
 
 // AttributeViewMetadata 描述面向命令行和工具调用方的数据库元数据。
 type AttributeViewMetadata struct {
-	ID    string         `json:"id"`
-	Name  string         `json:"name"`
-	Keys  []*av.Key      `json:"keys"`
-	Views []*av.ViewData `json:"views"`
+	ID           string                         `json:"id"`
+	Name         string                         `json:"name"`
+	CustomColors []*av.AttributeViewCustomColor `json:"customColors"`
+	Keys         []*av.Key                      `json:"keys"`
+	Views        []*av.ViewData                 `json:"views"`
 }
 
 // NewAttributeViewMetadata 构造不包含数据库条目值的元数据。
@@ -33,10 +34,11 @@ func NewAttributeViewMetadata(attrView *av.AttributeView) (ret *AttributeViewMet
 	}
 
 	ret = &AttributeViewMetadata{
-		ID:    attrView.ID,
-		Name:  attrView.Name,
-		Keys:  []*av.Key{},
-		Views: []*av.ViewData{},
+		ID:           attrView.ID,
+		Name:         attrView.Name,
+		CustomColors: attrView.CustomColors,
+		Keys:         []*av.Key{},
+		Views:        []*av.ViewData{},
 	}
 	for _, keyValues := range attrView.KeyValues {
 		if nil != keyValues && nil != keyValues.Key {
@@ -62,9 +64,10 @@ func NewAttributeViewMetadata(attrView *av.AttributeView) (ret *AttributeViewMet
 
 // AttributeViewKeys 描述数据库字段及其类型专属配置。
 type AttributeViewKeys struct {
-	ID   string    `json:"id"`
-	Name string    `json:"name"`
-	Keys []*av.Key `json:"keys"`
+	ID           string                         `json:"id"`
+	Name         string                         `json:"name"`
+	CustomColors []*av.AttributeViewCustomColor `json:"customColors"`
+	Keys         []*av.Key                      `json:"keys"`
 }
 
 // NewAttributeViewKeys 构造数据库字段结果。
@@ -73,20 +76,21 @@ func NewAttributeViewKeys(attrView *av.AttributeView) (ret *AttributeViewKeys) {
 	if nil == metadata {
 		return
 	}
-	ret = &AttributeViewKeys{ID: metadata.ID, Name: metadata.Name, Keys: metadata.Keys}
+	ret = &AttributeViewKeys{ID: metadata.ID, Name: metadata.Name, CustomColors: metadata.CustomColors, Keys: metadata.Keys}
 	return
 }
 
 // AttributeViewRenderData 描述经过指定视图筛选、排序、分组和分页后的数据库结果。
 type AttributeViewRenderData struct {
-	ID       string        `json:"id"`
-	Name     string        `json:"name"`
-	ViewID   string        `json:"viewID"`
-	ViewType av.LayoutType `json:"viewType"`
-	Query    string        `json:"query,omitempty"`
-	Page     int           `json:"page"`
-	PageSize int           `json:"pageSize"`
-	View     av.Viewable   `json:"view"`
+	ID           string                         `json:"id"`
+	Name         string                         `json:"name"`
+	CustomColors []*av.AttributeViewCustomColor `json:"customColors"`
+	ViewID       string                         `json:"viewID"`
+	ViewType     av.LayoutType                  `json:"viewType"`
+	Query        string                         `json:"query,omitempty"`
+	Page         int                            `json:"page"`
+	PageSize     int                            `json:"pageSize"`
+	View         av.Viewable                    `json:"view"`
 }
 
 // NewAttributeViewRenderData 构造数据库渲染结果。
@@ -95,14 +99,15 @@ func NewAttributeViewRenderData(attrView *av.AttributeView, view av.Viewable, qu
 		return
 	}
 	ret = &AttributeViewRenderData{
-		ID:       attrView.ID,
-		Name:     attrView.Name,
-		ViewID:   view.GetID(),
-		ViewType: view.GetType(),
-		Query:    query,
-		Page:     page,
-		PageSize: pageSize,
-		View:     view,
+		ID:           attrView.ID,
+		Name:         attrView.Name,
+		CustomColors: attrView.CustomColors,
+		ViewID:       view.GetID(),
+		ViewType:     view.GetType(),
+		Query:        query,
+		Page:         page,
+		PageSize:     pageSize,
+		View:         view,
 	}
 	return
 }

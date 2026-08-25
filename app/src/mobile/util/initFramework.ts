@@ -21,9 +21,6 @@ import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
-import {MobileCustom} from "../dock/MobileCustom";
-import {Menu} from "../../plugin/Menu";
-import {showMessage} from "../../dialog/message";
 import {setTitle} from "../../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../../protyle/render/av/locate";
 import {MobileTabs} from "../tabs/MobileTabs";
@@ -31,27 +28,108 @@ import {initMobileBottomBar} from "./mobileBottomBar";
 import {initMobileBars} from "./mobileBars";
 import {openDock} from "../dock/util";
 import {
+    MOBILE_SIDE_PANEL_DOCK_IDS,
     MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT,
+    normalizeMobileSidePanelConfig,
     type IMobileSidePanelConfig,
-    type MobileSidePanelDockId,
 } from "./mobileSidePanelConfig";
 import {getMobileSidePanelConfig} from "./mobileSidePanelSetting";
+import {
+    getMobilePluginDock,
+    getMobilePluginDockEntries,
+    getMobilePluginDockLayouts,
+    getMobilePluginDockSide,
+    MOBILE_PLUGIN_DOCKS_CHANGE_EVENT,
+    openMobilePluginDock,
+    removeMobilePluginDock,
+    type IMobilePluginDockEntry,
+} from "../dock/pluginDockState";
 
-let custom: MobileCustom;
-const getDockTabElement = (type: MobileSidePanelDockId) => {
-    return document.querySelector(`[data-type="sidebar-${type}-tab"]`) as HTMLElement;
+const getDockTabElement = (type: string) => {
+    return document.querySelector(`[data-type="${CSS.escape(`sidebar-${type}-tab`)}"]`) as HTMLElement;
 };
 
-const getDockContentElement = (type: MobileSidePanelDockId) => {
-    return document.querySelector(`[data-type="sidebar-${type}"]`) as HTMLElement;
+const getDockContentElement = (type: string) => {
+    return document.querySelector(`[data-type="${CSS.escape(`sidebar-${type}`)}"]`) as HTMLElement;
+};
+
+const getDockIdFromTabElement = (element: HTMLElement) => {
+    return element.dataset.mobilePluginDockTab ||
+        element.getAttribute("data-type")?.replace(/^sidebar-/, "").replace(/-tab$/, "");
 };
 
 const getActiveDockId = (sidePanelElement: HTMLElement) => {
-    const activeElement = sidePanelElement.firstElementChild.querySelector("[data-type$='-tab'].toolbar__icon--active");
-    return activeElement?.getAttribute("data-type")?.replace("sidebar-", "").replace("-tab", "") as MobileSidePanelDockId;
+    const activeElement = sidePanelElement.firstElementChild.querySelector<HTMLElement>(
+        "[data-type$='-tab'].toolbar__icon--active");
+    return activeElement ? getDockIdFromTabElement(activeElement) : undefined;
 };
 
-export const renderMobileSidePanelLayout = (config: IMobileSidePanelConfig = getMobileSidePanelConfig()) => {
+const syncMobilePluginDockElements = (
+    entries: readonly IMobilePluginDockEntry[],
+    sidePanelElements: Record<"left" | "right", HTMLElement>,
+) => {
+    const entryTypes = new Set(entries.map(item => item.type));
+    const tabElements = new Map<string, SVGElement>();
+    const contentElements = new Map<string, HTMLElement>();
+    document.querySelectorAll<SVGElement>("[data-mobile-plugin-dock-tab]").forEach((element) => {
+        const type = element.dataset.mobilePluginDockTab;
+        if (type) {
+            tabElements.set(type, element);
+        }
+    });
+    document.querySelectorAll<HTMLElement>("[data-mobile-plugin-dock-content]").forEach((element) => {
+        const type = element.dataset.mobilePluginDockContent;
+        if (type) {
+            contentElements.set(type, element);
+        }
+    });
+    tabElements.forEach((element, type) => {
+        if (!entryTypes.has(type)) {
+            element.remove();
+            contentElements.get(type)?.remove();
+            removeMobilePluginDock(type);
+        }
+    });
+
+    entries.forEach((entry) => {
+        const side = getMobilePluginDockSide(entry.config.position);
+        const sidePanelElement = sidePanelElements[side];
+        const toolbarScrollElement = sidePanelElement.firstElementChild.firstElementChild;
+        const contentContainerElement = sidePanelElement.lastElementChild;
+        let tabElement = tabElements.get(entry.type);
+        if (!tabElement) {
+            tabElement = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            tabElement.classList.add("toolbar__icon");
+            tabElement.dataset.type = `sidebar-${entry.type}-tab`;
+            tabElement.dataset.mobilePluginDockTab = entry.type;
+            tabElement.append(document.createElementNS("http://www.w3.org/2000/svg", "use"));
+        }
+        tabElement.setAttribute("aria-label", entry.config.title);
+        tabElement.setAttribute("title", entry.config.title);
+        const useElement = tabElement.firstElementChild;
+        useElement.setAttribute("href", `#${entry.config.icon}`);
+        useElement.setAttribute("xlink:href", `#${entry.config.icon}`);
+        toolbarScrollElement.append(tabElement);
+
+        let contentElement = contentElements.get(entry.type);
+        if (!contentElement) {
+            contentElement = document.createElement("div");
+            contentElement.className = "fn__flex-column fn__none";
+            contentElement.dataset.type = `sidebar-${entry.type}`;
+            contentElement.dataset.mobilePluginDockContent = entry.type;
+        }
+        contentContainerElement.append(contentElement);
+    });
+};
+
+export const renderMobileSidePanelLayout = (
+    app: App,
+    config?: IMobileSidePanelConfig,
+) => {
+    const pluginDockEntries = getMobilePluginDockEntries(app);
+    const pluginDockLayouts = getMobilePluginDockLayouts(pluginDockEntries);
+    const resolvedConfig = normalizeMobileSidePanelConfig(
+        config || getMobileSidePanelConfig(pluginDockLayouts), pluginDockLayouts);
     getDockTabElement("agent").classList.toggle("fn__none",
         window.siyuan.config.readonly || window.siyuan.isPublish || isDisabledFeature("ai"));
     const sidePanelElements = {
@@ -63,20 +141,39 @@ export const renderMobileSidePanelLayout = (config: IMobileSidePanelConfig = get
         right: getActiveDockId(sidePanelElements.right),
     };
     const previouslyActive = new Set(Object.values(previousActive));
+    syncMobilePluginDockElements(pluginDockEntries, sidePanelElements);
+    const availableDockIds = new Set([
+        ...MOBILE_SIDE_PANEL_DOCK_IDS,
+        ...pluginDockEntries.map(item => item.type),
+    ]);
+    const sideDockIds: Record<"left" | "right", string[]> = {left: [], right: []};
 
     (["left", "right"] as const).forEach(side => {
         const sidePanelElement = sidePanelElements[side];
         const toolbarScrollElement = sidePanelElement.firstElementChild.firstElementChild;
         const contentElement = sidePanelElement.lastElementChild;
-        config[side].forEach(type => {
-            toolbarScrollElement.append(getDockTabElement(type));
-            contentElement.append(getDockContentElement(type));
+        resolvedConfig[side].forEach(type => {
+            if (!availableDockIds.has(type)) {
+                return;
+            }
+            const tabElement = getDockTabElement(type);
+            const dockContentElement = getDockContentElement(type);
+            if (!tabElement || !dockContentElement) {
+                return;
+            }
+            toolbarScrollElement.append(tabElement);
+            contentElement.append(dockContentElement);
+            sideDockIds[side].push(type);
         });
+    });
 
-        const visibleDockIds = config[side].filter(type => !getDockTabElement(type).classList.contains("fn__none"));
-        const activeDockId = visibleDockIds.includes(previousActive[side]) ? previousActive[side] :
+    (["left", "right"] as const).forEach(side => {
+        const sidePanelElement = sidePanelElements[side];
+        const visibleDockIds = sideDockIds[side].filter(type =>
+            !getDockTabElement(type).classList.contains("fn__none"));
+        const activeDockId = previousActive[side] && visibleDockIds.includes(previousActive[side]) ? previousActive[side] :
             visibleDockIds.find(type => previouslyActive.has(type)) || visibleDockIds[0];
-        config[side].forEach(type => {
+        sideDockIds[side].forEach(type => {
             getDockTabElement(type).classList.toggle("toolbar__icon--active", type === activeDockId);
             getDockContentElement(type).classList.toggle("fn__none", type !== activeDockId);
         });
@@ -86,39 +183,7 @@ export const renderMobileSidePanelLayout = (config: IMobileSidePanelConfig = get
     });
 };
 
-const openDockMenu = (app: App, element: HTMLElement) => {
-    const menu = new Menu(Constants.MENU_DOCK_MOBILE);
-    if (menu.isOpen) {
-        return;
-    }
-    app.plugins.forEach((plugin) => {
-        Object.keys(plugin.docks).forEach((dockId) => {
-            menu.addItem({
-                label: plugin.docks[dockId].config.title,
-                icon: plugin.docks[dockId].config.icon,
-                click() {
-                    if (custom?.type === dockId) {
-                        return;
-                    } else {
-                        if (custom) {
-                            if (custom.destroy) {
-                                custom.destroy();
-                            }
-                        }
-                        custom = plugin.docks[dockId].mobileModel(element);
-                        window.siyuan.mobile.docks[dockId] = custom;
-                    }
-                }
-            });
-        });
-    });
-    menu.fullscreen();
-    if (menu.element.lastElementChild.innerHTML === "") {
-        showMessage(window.siyuan.languages._kernel[122]);
-    }
-};
-
-const updateDock = (app: App, type: MobileSidePanelDockId, element: HTMLElement, openPluginMenu = false) => {
+const updateDock = (app: App, type: string, element: HTMLElement) => {
     if (type === "outline") {
         if (!window.siyuan.mobile.docks.outline) {
             window.siyuan.mobile.docks.outline = new MobileOutline({
@@ -155,16 +220,30 @@ const updateDock = (app: App, type: MobileSidePanelDockId, element: HTMLElement,
         void import("../agent/MobileAgentChat").then(({activateMobileAgent}) => {
             activateMobileAgent(app, element);
         });
-    } else if (type === "plugin") {
-        if (!custom || openPluginMenu) {
-            if (!custom) {
-                element.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
-            }
-            openDockMenu(app, element);
-        } else if (custom.update) {
+    } else {
+        const pluginDock = getMobilePluginDockEntries(app).find(item => item.type === type);
+        if (!pluginDock) {
+            return;
+        }
+        const custom = getMobilePluginDock(type);
+        if (custom?.update) {
             custom.update();
+        } else if (!custom) {
+            openMobilePluginDock(type, () => pluginDock.mobileModel(element));
         }
     }
+};
+
+const updateOpenSidePanelDocks = (app: App, sidePanelElements: HTMLElement[]) => {
+    sidePanelElements.forEach(sidePanelElement => {
+        if (sidePanelElement.style.transform !== "translateX(0px)") {
+            return;
+        }
+        const activeDockId = getActiveDockId(sidePanelElement);
+        if (activeDockId) {
+            updateDock(app, activeDockId, getDockContentElement(activeDockId));
+        }
+    });
 };
 
 const initSidePanelTabs = (app: App, sidePanelElement: HTMLElement) => {
@@ -175,7 +254,7 @@ const initSidePanelTabs = (app: App, sidePanelElement: HTMLElement) => {
         const isProgrammatic = typeof event.detail === "string";
         let svgElement: HTMLElement;
         if (isProgrammatic) {
-            svgElement = toolbarElement.querySelector(`svg[data-type="sidebar-${event.detail}-tab"]`) as HTMLElement;
+            svgElement = getDockTabElement(event.detail);
         } else {
             svgElement = hasTopClosestByTag(target, "svg") as HTMLElement;
         }
@@ -187,19 +266,23 @@ const initSidePanelTabs = (app: App, sidePanelElement: HTMLElement) => {
             closePanel();
             return;
         }
-        const type = tabType.replace("sidebar-", "").replace("-tab", "") as MobileSidePanelDockId;
+        const type = getDockIdFromTabElement(svgElement);
+        if (!type) {
+            return;
+        }
         if (svgElement.classList.contains("toolbar__icon--active")) {
             if (isProgrammatic) {
                 updateDock(app, type, getDockContentElement(type));
-            } else if (type === "plugin") {
-                openDockMenu(app, getDockContentElement(type));
             }
             return;
         }
 
         updateDock(app, type, getDockContentElement(type));
         toolbarElement.querySelectorAll(".toolbar__icon[data-type]").forEach(item => {
-            const itemType = item.getAttribute("data-type").replace("sidebar-", "").replace("-tab", "") as MobileSidePanelDockId;
+            const itemType = getDockIdFromTabElement(item as HTMLElement);
+            if (!itemType) {
+                return;
+            }
             item.classList.toggle("toolbar__icon--active", itemType === type);
             getDockContentElement(itemType).classList.toggle("fn__none", itemType !== type);
         });
@@ -214,20 +297,16 @@ export const initFramework = async (app: App, isStart: boolean) => {
     initMobileBars();
     const sidebarElement = document.getElementById("sidebar");
     const sidebarRightElement = document.getElementById("sidebarRight");
-    renderMobileSidePanelLayout();
+    renderMobileSidePanelLayout(app);
     initSidePanelTabs(app, sidebarElement);
     initSidePanelTabs(app, sidebarRightElement);
     window.addEventListener(MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT, () => {
-        renderMobileSidePanelLayout();
-        [sidebarElement, sidebarRightElement].forEach(sidePanelElement => {
-            if (sidePanelElement.style.transform !== "translateX(0px)") {
-                return;
-            }
-            const activeDockId = getActiveDockId(sidePanelElement);
-            if (activeDockId) {
-                updateDock(app, activeDockId, getDockContentElement(activeDockId));
-            }
-        });
+        renderMobileSidePanelLayout(app);
+        updateOpenSidePanelDocks(app, [sidebarElement, sidebarRightElement]);
+    });
+    window.addEventListener(MOBILE_PLUGIN_DOCKS_CHANGE_EVENT, () => {
+        renderMobileSidePanelLayout(app);
+        updateOpenSidePanelDocks(app, [sidebarElement, sidebarRightElement]);
     });
     await snippetReady;
     window.siyuan.mobile.docks.file = new MobileFiles(app, getDockContentElement("file"));

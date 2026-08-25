@@ -372,6 +372,13 @@ func TestFilterBlockAttributeViewKeysByPublishAccess(t *testing.T) {
 	newKeys := func(avID, blockID string) *BlockAttributeViewKeys {
 		attrView := av.NewAttributeView(avID)
 		attrView.Name = avID
+		attrView.CustomColors = []*av.AttributeViewCustomColor{{
+			Index: 15,
+			AttributeViewColor: av.AttributeViewColor{
+				Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
+				Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+			},
+		}}
 		blockKey := attrView.GetBlockKey()
 		textKey := av.NewKey(ast.NewNodeID(), "Text", "", av.KeyTypeText)
 		rowID := ast.NewNodeID()
@@ -433,6 +440,9 @@ func TestFilterBlockAttributeViewKeysByPublishAccess(t *testing.T) {
 				if 2 != len(blockAttributeViewKey.KeyValues) {
 					t.Fatalf("unexpected block attribute view key values: %+v", blockAttributeViewKey.KeyValues)
 				}
+				if 1 != len(blockAttributeViewKey.CustomColors) || 15 != blockAttributeViewKey.CustomColors[0].Index {
+					t.Fatalf("attribute view custom colors were not preserved: %+v", blockAttributeViewKey.CustomColors)
+				}
 				for _, keyValues := range blockAttributeViewKey.KeyValues {
 					if 1 != len(keyValues.Values) {
 						t.Fatalf("unexpected block attribute view key value count: %+v", keyValues)
@@ -457,10 +467,11 @@ func newTestBlockAttributeViewKeys(attrView *av.AttributeView, blockIDs []string
 		}
 	}
 	return &BlockAttributeViewKeys{
-		AvID:      attrView.ID,
-		AvName:    attrView.Name,
-		BlockIDs:  blockIDs,
-		KeyValues: keyValues,
+		AvID:         attrView.ID,
+		AvName:       attrView.Name,
+		CustomColors: attrView.CustomColors,
+		BlockIDs:     blockIDs,
+		KeyValues:    keyValues,
 	}
 }
 

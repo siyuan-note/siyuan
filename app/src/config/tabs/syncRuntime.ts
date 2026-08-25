@@ -13,9 +13,11 @@ import {
 /** 账号同步 Tab 根节点 */
 export let syncTabElement: HTMLElement | undefined;
 
-/** 设置对话框关闭后释放 Tab 根节点引用，避免持有已脱离文档的 DOM */
-export const clearSyncTabElement = () => {
-    syncTabElement = undefined;
+/** 释放 Tab 根节点引用；传入 root 时仅释放对应挂载，避免影响其他设置入口 */
+export const clearSyncTabElement = (root?: HTMLElement) => {
+    if (!root || syncTabElement === root) {
+        syncTabElement = undefined;
+    }
 };
 
 /** 账号同步 Tab 挂载后的额外初始化（注册表 mount 之后调用） */

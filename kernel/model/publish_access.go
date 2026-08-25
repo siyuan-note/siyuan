@@ -1123,10 +1123,11 @@ func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess P
 		}
 
 		ret = append(ret, &BlockAttributeViewKeys{
-			AvID:      blockAttributeViewKey.AvID,
-			AvName:    blockAttributeViewKey.AvName,
-			BlockIDs:  blockAttributeViewKey.BlockIDs,
-			KeyValues: keyValues,
+			AvID:         blockAttributeViewKey.AvID,
+			AvName:       blockAttributeViewKey.AvName,
+			CustomColors: blockAttributeViewKey.CustomColors,
+			BlockIDs:     blockAttributeViewKey.BlockIDs,
+			KeyValues:    keyValues,
 		})
 	}
 	return

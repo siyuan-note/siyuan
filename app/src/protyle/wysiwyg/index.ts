@@ -164,7 +164,6 @@ import {openGalleryItemMenu} from "../render/av/gallery/util";
 import {clearSelect} from "../util/clear";
 import {chartRender} from "../render/chartRender";
 import {reloadProtyle} from "../util/reload";
-import {updateCalloutType} from "./callout";
 import {nbsp2space, removeZWJ} from "../util/normalizeText";
 import {setFold} from "../util/blockFold";
 import {BlockPanel} from "../../block/Panel";
@@ -198,6 +197,7 @@ import {formatPainter} from "../toolbar/FormatPainter";
 import {shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
 import {LargeListVirtualizer} from "./listVirtualization";
+import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -2938,6 +2938,11 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
+            const calloutTitleElement = hasClosestByClassName(range.startContainer, "callout-title");
+            if (calloutTitleElement && calloutTitleElement.contains(range.endContainer)) {
+                setInsertWbrHTML(nodeElement, range, protyle);
+                return;
+            }
             // https://github.com/siyuan-note/siyuan/issues/17800 不能删除
             const embedElement = isInEmbedBlock(nodeElement);
             if (embedElement && !embedElement.classList.contains("protyle-wysiwyg--select")) {
@@ -3713,6 +3718,26 @@ export class WYSIWYG {
                 return;
             }
             const blockElement = hasClosestBlock(event.target);
+            const calloutTitleElement = hasClosestByClassName(event.target, "callout-title");
+            if (blockElement && calloutTitleElement) {
+                const range = getEditorRange(protyle.wysiwyg.element);
+                const text = event.clipboardData.getData("text/plain").replace(/\s*[\r\n]+\s*/g, " ");
+                setInsertWbrHTML(blockElement, range, protyle);
+                range.deleteContents();
+                const textNode = document.createTextNode(text);
+                range.insertNode(textNode);
+                range.setStartAfter(textNode);
+                range.collapse(true);
+                focusByRange(range);
+                calloutTitleElement.dispatchEvent(new InputEvent("input", {
+                    bubbles: true,
+                    data: text,
+                    inputType: "insertFromPaste",
+                }));
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             if (blockElement && !getContenteditableElement(blockElement)) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -3915,6 +3940,17 @@ export class WYSIWYG {
             if (event.target === this.element &&
                 (event.inputType === "historyUndo" || event.inputType === "historyRedo")) {
                 event.preventDefault();
+                return;
+            }
+            const calloutTitleElement = hasClosestByClassName(event.target as Node, "callout-title");
+            if (calloutTitleElement &&
+                (event.inputType === "insertParagraph" || event.inputType === "insertLineBreak")) {
+                const blockElement = hasClosestBlock(calloutTitleElement);
+                if (blockElement) {
+                    focusBlock(blockElement);
+                }
+                event.preventDefault();
+                event.stopPropagation();
                 return;
             }
             const unidentifiedState = isInAndroid() ? takeMobileUnidentifiedKeyState() : undefined;
@@ -4245,8 +4281,8 @@ export class WYSIWYG {
                 this.preventClick = false;
                 return;
             }
-            protyle.app.plugins.forEach(item => {
-                item.eventBus.emit("click-editorcontent", {
+            forEachPluginSubscriber("click-editorcontent", eventBus => {
+                eventBus.emit("click-editorcontent", {
                     protyle,
                     event
                 });
@@ -4773,13 +4809,6 @@ export class WYSIWYG {
                 return;
             }
 
-            const calloutTitleElement = hasTopClosestByClassName(event.target, "callout-title");
-            if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutTitleElement) {
-                updateCalloutType([hasClosestBlock(calloutTitleElement) as HTMLElement], protyle);
-                event.preventDefault();
-                event.stopPropagation();
-                return;
-            }
             const calloutIconElement = hasTopClosestByClassName(event.target, "callout-icon");
             if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutIconElement) {
                 const nodeElement = hasClosestBlock(calloutIconElement);

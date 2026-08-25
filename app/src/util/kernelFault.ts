@@ -1,11 +1,11 @@
 import {Constants} from "../constants";
 import {Dialog} from "../dialog";
-import {forceQuit} from "../dialog/processSystem";
+import {forceQuit, isHostQuitStarted} from "../dialog/processSystem";
 import {isBrowser, isKernelInContainer, isMobile} from "./functions";
 import {isInIOS, isInMobileApp} from "../protyle/util/compatibility";
 
 export const kernelError = () => {
-    if (document.querySelector("#errorLog")) {
+    if (isHostQuitStarted() || document.querySelector("#errorLog")) {
         return;
     }
     let title: string;

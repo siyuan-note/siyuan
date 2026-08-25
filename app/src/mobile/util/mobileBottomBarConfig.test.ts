@@ -55,6 +55,15 @@ describe("mobile bottom bar config", () => {
         assert.deepEqual(config.actions, ["inbox", "backlink", "agent", "spacedRepetition"]);
     });
 
+    it("supports selecting and quickly creating daily notes", () => {
+        const config = normalizeMobileBottomBarConfig({
+            version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
+            actions: ["dailyNote", "newDailyNote", "documents", "tabs"],
+        });
+
+        assert.deepEqual(config.actions, ["dailyNote", "newDailyNote", "documents", "tabs"]);
+    });
+
     it("replaces a slot when selecting an unused action", () => {
         const config = reduceMobileBottomBarConfig(createDefaultMobileBottomBarConfig(), {
             type: "select-action",
@@ -100,5 +109,14 @@ describe("mobile bottom bar config", () => {
         }, ["spacedRepetition"]);
 
         assert.deepEqual(config.actions, ["documents", "newDoc", "search", "tabs"]);
+    });
+
+    it("replaces daily note actions when document creation is unavailable", () => {
+        const config = resolveMobileBottomBarAvailability({
+            version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
+            actions: ["dailyNote", "newDailyNote", "documents", "tabs"],
+        }, ["dailyNote", "newDailyNote"]);
+
+        assert.deepEqual(config.actions, ["search", "newDoc", "documents", "tabs"]);
     });
 });

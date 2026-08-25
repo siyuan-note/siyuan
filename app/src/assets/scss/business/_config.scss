@@ -92,6 +92,7 @@
   }
 
   &-item__main {
+    font-size: 14px;
     min-height: auto;
     overflow: visible;
   }
@@ -1193,6 +1194,10 @@
 }
 
 #configAccountPayment {
+  &.config-account--deactivate {
+    padding-bottom: 8px;
+  }
+
   @media (max-width: 750px) {
     .config-wrap > .fn__space {
       display: block;
@@ -1204,6 +1209,19 @@
     height: 16px !important;
     vertical-align: -3px;
     margin-right: 4px;
+  }
+
+  .config-account__deactivate {
+    margin-top: 8px;
+    text-align: right;
+
+    .b3-button {
+      color: var(--b3-theme-on-surface-light);
+      font-size: 12px;
+      max-width: 100%;
+      text-align: right;
+      white-space: normal;
+    }
   }
 }
 

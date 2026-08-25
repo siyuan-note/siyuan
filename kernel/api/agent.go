@@ -95,10 +95,7 @@ func agentChat(c *gin.Context) {
 	}
 	client := util.NewOpenAIClientWithModel(selectedProvider.APIKey, selectedProvider.BaseURL, selectedModel.Name)
 
-	confirmTimeout := time.Duration(model.Conf.AI.Agent.ConfirmTimeout) * time.Second
-	if confirmTimeout <= 0 {
-		confirmTimeout = 120 * time.Second
-	}
+	confirmTimeout := resolveAgentConfirmTimeout(model.Conf.AI.Agent.ConfirmTimeout)
 	maxRetries := model.Conf.AI.Agent.MaxRetries
 	if maxRetries < 0 {
 		maxRetries = 0
@@ -206,6 +203,13 @@ func newAgentSessionDeadline(timeoutSeconds int) (*time.Timer, <-chan time.Time)
 	}
 	timer := time.NewTimer(time.Duration(timeoutSeconds) * time.Second)
 	return timer, timer.C
+}
+
+func resolveAgentConfirmTimeout(timeoutSeconds int) time.Duration {
+	if timeoutSeconds < 0 {
+		return 120 * time.Second
+	}
+	return time.Duration(timeoutSeconds) * time.Second
 }
 
 func recordRunningEvent(sessionID string, running *runningSession, event agent.AgentEvent) {

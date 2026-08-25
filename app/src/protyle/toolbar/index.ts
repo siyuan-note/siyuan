@@ -63,6 +63,7 @@ import {closeSubElement} from "./subElementLifecycle";
 import {getDefaultToolbar, getToolbarEntryId, markPluginToolbarEntries} from "./defaults";
 import {applyToolbarEntryVisibility} from "../../config/entryVisibility/runtime";
 import {refreshToolbarCatalog} from "../../config/entryVisibility/catalog";
+import {emitToPlugins, forEachPluginSubscriber} from "../../plugin/EventBusCore";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -1613,8 +1614,8 @@ export class Toolbar {
         if (!protyle.disabled) {
             textElement.select();
         }
-        protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("open-noneditableblock", {
+        forEachPluginSubscriber("open-noneditableblock", eventBus => {
+            eventBus.emit("open-noneditableblock", {
                 protyle,
                 toolbar: this,
                 blockElement: nodeElement,
@@ -1649,9 +1650,7 @@ export class Toolbar {
 
         const eventDetail = {languages: hljsLanguages, type: "init", listElement};
         if (protyle.app && protyle.app.plugins) {
-            protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-language-update", eventDetail);
-            });
+            emitToPlugins("code-language-update", eventDetail);
         }
 
         hljsLanguages = eventDetail.languages;
@@ -1723,9 +1722,7 @@ export class Toolbar {
 
             const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
             if (protyle.app && protyle.app.plugins) {
-                protyle.app.plugins.forEach((plugin: any) => {
-                    plugin.eventBus.emit("code-language-update", eventDetail);
-                });
+                emitToPlugins("code-language-update", eventDetail);
             }
 
             matchLanguages = eventDetail.languages;
@@ -2302,8 +2299,8 @@ export class Toolbar {
         const currentLang = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
 
         if (protyle.app && protyle.app.plugins) {
-            protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-language-change", {
+            forEachPluginSubscriber("code-language-change", eventBus => {
+                eventBus.emit("code-language-change", {
                     language: currentLang,
                     languageElements,
                     protyle: protyle

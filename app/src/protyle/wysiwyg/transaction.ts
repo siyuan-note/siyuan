@@ -1262,10 +1262,14 @@ export const onTransaction = (protyle: IProtyle, operations: IOperation[], isUnd
             }
             return;
         }
+        if (operation.action === "sortAttrViewBinding") {
+            protyle.databaseAttributePanel?.refreshForOperation(operation);
+            return;
+        }
         if (["addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
             "updateAttrViewColOption", "updateAttrViewCell", "updateAttrViewCells", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
             "setAttrViewColWrap", "setAttrViewColWidth", "setAttrViewColsWidth", "setAttrViewColAlign", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
-            "setAttrViewSorts", "setAttrViewNewItemTemplates", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "setAttrViewColDateFormat", "removeAttrViewBlock",
+            "setAttrViewSorts", "setAttrViewNewItemTemplates", "setAttrViewCustomColors", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "setAttrViewColDateFormat", "removeAttrViewBlock",
             "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColPin", "addAttrViewView", "setAttrViewColIcon",
             "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "duplicateAttrViewRow", "sortAttrViewView",
             "updateAttrViewColRelation", "setAttrViewColRelationFilters", "setAttrViewPageSize", "updateAttrViewColRollup",
@@ -1355,9 +1359,8 @@ export const turnsIntoOneTransaction = async (options: {
         parentElement.classList.add("callout");
         parentElement.setAttribute("data-node-id", id);
         parentElement.setAttribute("data-type", "NodeCallout");
-        parentElement.setAttribute("contenteditable", "false");
         parentElement.setAttribute("data-subtype", "NOTE");
-        parentElement.innerHTML = `<div class="callout-info"><span class="callout-icon">✏️</span><span class="callout-title">Note</span></div><div class="callout-content"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
+        parentElement.innerHTML = `<div class="callout-info" contenteditable="false"><span class="callout-icon">✏️</span><span contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}" class="callout-title">Note</span></div><div class="callout-content"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
     } else if (options.type.endsWith("Ls")) {
         parentElement = document.createElement("div");
         parentElement.classList.add("list");

@@ -56,26 +56,32 @@ func setInlineStyles(c *gin.Context) {
 	) {
 		return
 	}
-	if version != model.InlineStylesVersion {
+	if version != 1 && version != model.InlineStylesVersion {
 		ret.Code = -1
 		ret.Msg = "unsupported inline styles version"
 		return
 	}
 
-	data, err := gulu.JSON.MarshalJSON(stylesArg)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	var saved *model.InlineStyles
+	var changed bool
+	var err error
+	if version == 1 {
+		var data []byte
+		if data, err = gulu.JSON.MarshalJSON(stylesArg); err == nil {
+			styles := []*model.InlineStyle{}
+			if err = gulu.JSON.UnmarshalJSON(data, &styles); err == nil {
+				saved, changed, err = model.SetInlineStyles(styles)
+			}
+		}
+	} else {
+		var data []byte
+		if data, err = gulu.JSON.MarshalJSON(arg); err == nil {
+			styles := &model.InlineStyles{}
+			if err = gulu.JSON.UnmarshalJSON(data, styles); err == nil {
+				saved, changed, err = model.SetInlineStylesData(styles)
+			}
+		}
 	}
-	styles := []*model.InlineStyle{}
-	if err = gulu.JSON.UnmarshalJSON(data, &styles); err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
-
-	saved, changed, err := model.SetInlineStyles(styles)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

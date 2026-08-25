@@ -1,4 +1,9 @@
 {
+	"manageColors": "Spravovať farby",
+	"manageBuiltinColors": "Spravovať vstavané farby",
+	"showInColorPicker": "Zobraziť vo výbere farieb",
+	"resetAll": "Obnoviť všetko",
+	"exportFile": "Exportovať súbor",
 	"namingEmpty": "Názov nemôže byť prázdny",
 	"recentCreated": "Nedávno vytvorené",
 	"manageCustomColors": "Spravovať vlastné farby",
@@ -687,7 +692,7 @@
 	"agentTimeout": "Časový limit",
 	"agentTimeoutTip": "Celkový časový limit relácie agenta, 0 = bez limitu",
 	"agentConfirmTimeout": "Časový limit potvrdenia",
-	"agentConfirmTimeoutTip": "Automatické odmietnutie po uplynutí času",
+	"agentConfirmTimeoutTip": "Automatické odmietnutie po uplynutí času, 0 = čakanie bez obmedzenia",
 	"agentMaxRetries": "Max. počet opakovaní",
 	"agentMaxRetriesTip": "Max. počet opakovaných pokusov API pri chybe",
 	"agentMaxToolCallRounds": "Max. počet kôl volania nástrojov",
@@ -1494,7 +1499,7 @@
 	"rtlTip": "Vykresľovať obsah sprava doľava",
 	"height": "Výška",
 	"deactivateUser": "Deaktivovať účet",
-	"deactivateUserTip": "<ul class='fn__list'><li>Po deaktivácii účtu ho nemožno obnoviť, neskúšajte to len tak</li><li>Meno používateľa bude vyplnené <code>someone101</code> (nasledujúce číslo je číslo používateľa), heslo bude resetované náhodným číslom</li><li>Vymaže sa prezývka používateľa, vlastná značka, URL, profil, avatar, odkaz na lokalitu, poštová adresa a ďalšie informácie</li><li>Všetky prepínače nastavení súkromia budú obnovené na predvolený verejný stav</li><li>Zruší sa väzba na účty tretích strán a mobilné telefóny</li><li><strong>Meno používateľa, telefónne číslo a viazaný účet tretích strán nemožno v budúcnosti znova použiť</strong></li><li>Stav používateľa sa nastaví na zakázaný, prihlásenie sa zakáže</li></ul>",
+	"deactivateUserTip": "<ul class='fn__list'><li>Po deaktivácii účtu ho nemožno obnoviť, neskúšajte to len tak</li><li>Meno používateľa bude vyplnené <code>someone101</code> (nasledujúce číslo je číslo používateľa), heslo bude resetované náhodným číslom</li><li>Vymaže sa prezývka používateľa, vlastná značka, URL, profil, avatar, odkaz na lokalitu a ďalšie informácie</li><li>Všetky prepínače nastavení súkromia budú obnovené na predvolený verejný stav</li><li>Zruší sa väzba na účty tretích strán a mobilné telefóny</li><li><strong>Meno používateľa, e-mailová adresa, telefónne číslo a viazaný účet tretích strán nemožno v budúcnosti znova použiť</strong></li><li>Stav používateľa sa nastaví na zakázaný, prihlásenie sa zakáže</li></ul>",
 	"mergeCell": "Zlúčiť bunky",
 	"cancelMerged": "Zrušiť zlúčenie buniek",
 	"useDefaultWidth": "Predvolená šírka stĺpca",
@@ -2273,7 +2278,7 @@
 		"16": "Bez názvu",
 		"17": "Prvotná synchronizácia zlyhala. Pokračovanie môže viesť k prepísaniu dát.",
 		"18": "Získanie komunitného účtu zlyhalo",
-		"19": "Informácie o používateľovi vypršali, prihláste sa znova",
+		"19": "Informácie o používateľovi vypršali, prihláste sa znova v [Nastavenia - Účet a Synchronizácia - Účet]",
 		"20": "Nemožno zmeniť na nadpis kvôli poddokumentom",
 		"21": "Zadajte captcha kód",
 		"22": "Nesprávna captcha",
@@ -2285,7 +2290,7 @@
 		"28": "Abnormálna sieť, skúste to neskôr",
 		"29": "Táto funkcia vyžaduje nákup <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Ročné predplatné]</a> (ak ste už kúpili, obnovte alebo sa znova prihláste v [Nastavenia - Účet a Synchronizácia - Účet])",
 		"30": "Zlyhalo získanie informácií o cloude",
-		"31": "Autentifikácia zlyhala",
+		"31": "Autentifikácia zlyhala, prihláste sa znova v [Nastavenia - Účet a Synchronizácia - Účet]",
 		"32": "Zlyhalo odstránenie cloudového zápisníka",
 		"33": "Nedostatočné oprávnenia pre zápis alebo prístup k sieti",
 		"34": "Operácia nepovolená v režime len na čítanie",
@@ -2467,7 +2472,7 @@
 		"210": "Overujem cloudové dáta %v/%v",
 		"211": "Overenie cloudových dát dokončené",
 		"212": "Chyba v synchronizácii aktuálnej verzie, prosím aktualizujte",
-		"213": "Cloudové overenie zlyhalo, aktualizujte a znova sa prihláste",
+		"213": "Cloudové overenie zlyhalo, aktualizujte na najnovšiu verziu a znova sa prihláste v [Nastavenia - Účet a Synchronizácia - Účet] pred synchronizáciou",
 		"214": "Táto funkcia vyžaduje prihlásenie do účtu a zakúpenie <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[PRO funkcií]</a> alebo <a target='_blank' href='${accountServer}/subscribe/siyuan'>[ročného predplatného]</a> pre použitie",
 		"215": "Nemožno otvoriť zobrazenie databázy z novšej verzie. Aktualizujte na najnovšiu verziu a skúste to znova",
 		"216": "Prestavujem index obsahu príloh...",
@@ -2627,6 +2632,7 @@
 		"370": "prevádzka zrýchlená cez LAN %s",
 		"371": "Zápisník už existuje",
 		"372": "Zápisník bol obnovený a zostáva zatvorený",
-		"373": "Tento archív obsahuje údaje zápisníka. Importujte ho cez [Strom dokumentov - Viac - Importovať zápisník]"
+		"373": "Tento archív obsahuje údaje zápisníka. Importujte ho cez [Strom dokumentov - Viac - Importovať zápisník]",
+		"374": "Databáza [%s], pole šablóny [%s], prvá ovplyvnená položka [%s] (ID položky: %s), počet ovplyvnených položiek: %d, chyba: %s"
 	}
 }

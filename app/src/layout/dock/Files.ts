@@ -27,6 +27,7 @@ import {
 } from "../../protyle/util/hasClosest";
 import type {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
+import {emitToPlugins} from "../../plugin/EventBusCore";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -1099,9 +1100,7 @@ export class Files extends Model {
                     break;
                 case "mount":
                     this.onMount(data);
-                    this.app.plugins.forEach((item) => {
-                        item.eventBus.emit("opened-notebook", data);
-                    });
+                    emitToPlugins("opened-notebook", data);
                     break;
                 case "createnotebook":
                     setNoteBook((notebooks) => {
@@ -1124,9 +1123,7 @@ export class Files extends Model {
                 case "closeBox":
                 case "removeBox":
                     this.onRemove(data);
-                    this.app.plugins.forEach((item) => {
-                        item.eventBus.emit("closed-notebook", data);
-                    });
+                    emitToPlugins("closed-notebook", data);
                     break;
                 case "removeDoc":
                     this.onRemove(data);

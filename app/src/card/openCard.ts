@@ -36,6 +36,7 @@ import {
     showFlashcardAnswer
 } from "./flashcardMode";
 import {setFold} from "../protyle/util/blockFold";
+import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 
 const genCardCount = (cardsData: ICardData, allIndex = 0) => {
     let newIndex = 0;
@@ -719,7 +720,7 @@ export const bindCardEvent = async (options: {
             } else {
                 revealFlashcardAnswer(editor.protyle, () => {
                     showRatingActions(actionElements, currentCard);
-                    emitEvent(options.app, currentCard, type);
+                    emitEvent(currentCard, type);
                 });
                 const currentRevealState = getFlashcardRevealState(editor.protyle);
                 if (currentRevealState.pendingGeneration === currentRevealState.generation) {
@@ -739,7 +740,7 @@ export const bindCardEvent = async (options: {
                     index,
                     cardsData: options.cardsData
                 });
-                emitEvent(options.app, options.cardsData.cards[index + 1], type);
+                emitEvent(options.cardsData.cards[index + 1], type);
             }
             return;
         }
@@ -768,7 +769,7 @@ export const bindCardEvent = async (options: {
                         notebook: docId,
                         reviewedCards: options.cardsData.cards
                     }, async (result) => {
-                        emitEvent(options.app, options.cardsData.cards[index - 1], type);
+                        emitEvent(options.cardsData.cards[index - 1], type);
                         index = 0;
                         options.cardsData = result.data;
                         for (let i = 0; i < options.app.plugins.length; i++) {
@@ -799,16 +800,16 @@ export const bindCardEvent = async (options: {
                     index,
                     cardsData: options.cardsData
                 });
-                emitEvent(options.app, options.cardsData.cards[index - 1], type);
+                emitEvent(options.cardsData.cards[index - 1], type);
             });
         }
     });
     return editor;
 };
 
-const emitEvent = (app: App, card: ICard, type: string) => {
-    app.plugins.forEach(item => {
-        item.eventBus.emit("click-flashcard-action", {
+const emitEvent = (card: ICard, type: string) => {
+    forEachPluginSubscriber("click-flashcard-action", eventBus => {
+        eventBus.emit("click-flashcard-action", {
             type,
             card
         });

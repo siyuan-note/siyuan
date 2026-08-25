@@ -7,6 +7,7 @@ import {openHistory} from "../../history/history";
 import type {App} from "../../index";
 import {setTitle} from "../../util/processTitle";
 import {clearMobileBarsScroll} from "./mobileBars";
+import {updateMobileTopBarLayout} from "./mobileTopBar";
 
 export const setEmpty = (app: App) => {
     setTitle("", true);
@@ -15,6 +16,7 @@ export const setEmpty = (app: App) => {
     document.getElementById("toolbarName").classList.add("fn__hidden");
     document.getElementById("toolbarNameReadonly").classList.add("fn__hidden");
     document.getElementById("editor").classList.add("fn__none");
+    updateMobileTopBarLayout();
     const emptyElement = document.getElementById("empty");
     emptyElement.classList.remove("fn__none");
     if (emptyElement.innerHTML !== "") {
@@ -85,4 +87,5 @@ export const setEditor = () => {
     document.getElementById("toolbarNameReadonly").classList.remove("fn__hidden");
     document.getElementById("editor").classList.remove("fn__none");
     document.getElementById("empty").classList.add("fn__none");
+    updateMobileTopBarLayout();
 };

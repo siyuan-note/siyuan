@@ -2379,7 +2379,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	// 备份可能在此前同步中已经落盘，或因冲突等原因未出现在 Upserts 中。
 	restoreNotebookCryptoConfigFromBackup()
 
-	removeWidgetDirSet, unloadPluginSet, uninstallPluginSet := hashset.New(), hashset.New(), hashset.New()
+	removePluginDirSet, removeWidgetDirSet := hashset.New(), hashset.New()
+	unloadPluginSet, uninstallPluginSet := hashset.New(), hashset.New()
 	for _, file := range mergeResult.Removes {
 		removes = append(removes, file.Path)
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
@@ -2427,6 +2428,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				needReloadPlugin = true
 				// 删除插件目录：卸载
 				uninstallPluginSet.Add(parts[2])
+				removePluginDirSet.Add(parts[2])
 			}
 		}
 
@@ -2480,10 +2482,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		PushReloadSnippet(Conf.Snippet)
 	}
 
-	for _, widgetDir := range removeWidgetDirSet.Values() {
-		widgetDirPath := filepath.Join(util.DataDir, "widgets", widgetDir.(string))
-		gulu.File.RemoveEmptyDirs(widgetDirPath)
-	}
+	removeEmptyPackageDirs(filepath.Join(util.DataDir, "plugins"), removePluginDirSet)
+	removeEmptyPackageDirs(filepath.Join(util.DataDir, "widgets"), removeWidgetDirSet)
 
 	syncingFiles = sync.Map{}
 	syncingStorages.Store(false)
@@ -2566,6 +2566,16 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			}
 		}
 	}()
+}
+
+// removeEmptyPackageDirs 清理同步删除文件后遗留的空集市包目录。
+func removeEmptyPackageDirs(basePath string, dirNames *hashset.Set) {
+	for _, dirName := range dirNames.Values() {
+		dirPath := filepath.Join(basePath, dirName.(string))
+		if err := gulu.File.RemoveEmptyDirs(dirPath); err != nil && !os.IsNotExist(err) {
+			logging.LogWarnf("remove empty marketplace package directory [%s] failed: %s", dirPath, err)
+		}
+	}
 }
 
 func appendLANSyncTrafficStat(message string, trafficStat *dejavu.TrafficStat) string {

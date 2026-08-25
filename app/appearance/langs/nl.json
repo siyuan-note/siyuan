@@ -1,4 +1,9 @@
 {
+	"manageColors": "Kleuren beheren",
+	"manageBuiltinColors": "Ingebouwde kleuren beheren",
+	"showInColorPicker": "Weergeven in de kleurkiezer",
+	"resetAll": "Alles resetten",
+	"exportFile": "Bestand exporteren",
 	"namingEmpty": "De naam mag niet leeg zijn",
 	"recentCreated": "Recent gemaakt",
 	"manageCustomColors": "Aangepaste kleuren beheren",
@@ -687,7 +692,7 @@
 	"agentTimeout": "Time-out",
 	"agentTimeoutTip": "Totale time-out van de agentsessie, 0 = geen limiet",
 	"agentConfirmTimeout": "Bevestigingstime-out",
-	"agentConfirmTimeoutTip": "Automatisch afwijzen na time-out",
+	"agentConfirmTimeoutTip": "Automatisch afwijzen na time-out, 0 = onbeperkt wachten",
 	"agentMaxRetries": "Max. pogingen",
 	"agentMaxRetriesTip": "Max. API-herhalingspogingen bij fout",
 	"agentMaxToolCallRounds": "Max. toolaanroep-rondes",
@@ -1494,7 +1499,7 @@
 	"rtlTip": "Inhoud RTL weergeven",
 	"height": "Hoogte",
 	"deactivateUser": "Account deactiveren",
-	"deactivateUserTip": "<ul class='fn__list'><li>Zodra het account is gedeactiveerd, kan het niet worden hersteld. Probeer dit niet zomaar.</li><li>Gebruikersnaam wordt ingevuld met <code>someone101</code> (cijfer is gebruikersnummer), wachtwoord wordt gereset met willekeurig getal.</li><li>Bijnaam, labels, URL, profiel, avatar, sitelink, postadres en andere gegevens worden gewist.</li><li>Alle privacy-instellingen worden teruggezet naar openbaar.</li><li>Gekoppelde sociale accounts van derden en mobiele nummers worden ontkoppeld.</li><li><strong>Gebruikersnaam, mobiel nummer en gekoppelde accounts van derden kunnen daarna niet opnieuw worden gebruikt.</strong></li><li>Gebruikersstatus wordt gedeactiveerd, inloggen is verboden.</li></ul>",
+	"deactivateUserTip": "<ul class='fn__list'><li>Zodra het account is gedeactiveerd, kan het niet worden hersteld. Probeer dit niet zomaar.</li><li>Gebruikersnaam wordt ingevuld met <code>someone101</code> (cijfer is gebruikersnummer), wachtwoord wordt gereset met willekeurig getal.</li><li>Bijnaam, labels, URL, profiel, avatar, sitelink en andere gegevens worden gewist.</li><li>Alle privacy-instellingen worden teruggezet naar openbaar.</li><li>Gekoppelde sociale accounts van derden en mobiele nummers worden ontkoppeld.</li><li><strong>Gebruikersnaam, e-mailadres, mobiel nummer en gekoppelde accounts van derden kunnen daarna niet opnieuw worden gebruikt.</strong></li><li>Gebruikersstatus wordt gedeactiveerd, inloggen is verboden.</li></ul>",
 	"mergeCell": "Cel samenvoegen",
 	"cancelMerged": "Samenvoeging annuleren",
 	"useDefaultWidth": "Standaard kolombreedte",
@@ -2273,7 +2278,7 @@
 		"16": "Naamloos",
 		"17": "De initiële synchronisatie is mislukt bij het opstarten. Als u doorgaat met werken, kan onvoorspelbaar overschrijven van gegevens optreden. Voer eerst een synchronisatie uit",
 		"18": "Community-account ophalen mislukt",
-		"19": "Gebruikersinfo verlopen, log opnieuw in",
+		"19": "Gebruikersinfo verlopen, log opnieuw in via [Instellingen - Account en synchronisatie - Account]",
 		"20": "Kan niet naar kop converteren met subdocumenten",
 		"21": "Voer captcha in",
 		"22": "Captcha onjuist",
@@ -2285,7 +2290,7 @@
 		"28": "Netwerk abnormaal, probeer later",
 		"29": "Deze functie vereist de aankoop van een <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Jaarabonnement]</a> (als u al gekocht heeft, vernieuw of log opnieuw in via [Instellingen - Account en synchronisatie - Account])",
 		"30": "Cloud-info ophalen mislukt",
-		"31": "Accountverificatie mislukt",
+		"31": "Accountverificatie mislukt; log opnieuw in via [Instellingen - Account en synchronisatie - Account]",
 		"32": "Cloud-notitieboek verwijderen mislukt",
 		"33": "Onvoldoende rechten om bestanden te lezen en schrijven of om netwerktoegang te krijgen. Controleer de rechten van de werkruimtemap en de instellingen van antivirussoftware/firewall. Als u SiYuan eerder als beheerder hebt uitgevoerd, overweeg dan een nieuwe werkruimtemap en voer het programma in de toekomst niet als beheerder uit (de huidige werkruimtemap is mogelijk niet meer toegankelijk voor gewone gebruikers)",
 		"34": "Niet ondersteund in alleen-lezen modus",
@@ -2467,7 +2472,7 @@
 		"210": "Cloudgegevens verifieren %v/%v",
 		"211": "Cloudgegevens verificatie voltooid",
 		"212": "Er zijn enkele gebreken in de huidige versie van cloudgegevenssynchronisatie; upgrade naar de nieuwste versie. Onze excuses voor het ongemak",
-		"213": "Cloudverificatie mislukt; upgrade en log opnieuw in",
+		"213": "Cloudverificatie mislukt; upgrade naar de nieuwste versie en log opnieuw in via [Instellingen - Account en synchronisatie - Account] voordat u synchroniseert",
 		"214": "Vereist <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[PRO-functies]</a> of <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Jaarabonnement]</a>",
 		"215": "Kan databaseweergave die is gemaakt met een nieuwere versie niet openen. Werk bij naar de nieuwste versie en probeer het opnieuw",
 		"216": "Asset-inhoudsindex herbouwen...",
@@ -2627,6 +2632,7 @@
 		"370": "LAN-versneld verkeer %s",
 		"371": "Het notitieboek bestaat al",
 		"372": "Het notitieboek is hersteld en blijft gesloten",
-		"373": "Dit archief bevat notitieboekgegevens. Importeer het via [Documentboom - Meer - Notitieboek importeren]"
+		"373": "Dit archief bevat notitieboekgegevens. Importeer het via [Documentboom - Meer - Notitieboek importeren]",
+		"374": "Database [%s], sjabloonveld [%s], eerste betrokken item [%s] (item-ID: %s), aantal betrokken items: %d, fout: %s"
 	}
 }

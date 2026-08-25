@@ -588,11 +588,14 @@ export const stickyRow = (blockElement: HTMLElement, scrollElement: HTMLElement,
 
     // 先批量读取所有几何信息，再统一写入 style，避免读-写交错触发强制重排
     const elementRect = scrollElement.getBoundingClientRect();
+    const breadcrumbElement = scrollElement.previousElementSibling as HTMLElement;
+    const breadcrumbBottom = breadcrumbElement?.classList.contains("protyle-breadcrumb") ?
+        breadcrumbElement.getBoundingClientRect().bottom : elementRect.top;
     const scrollTop = scrollElement.scrollTop;
     const scrollLeft = scrollEl ? scrollEl.scrollLeft : 0;
     const doTop = status === "top" || status === "all";
     const doBottom = status === "bottom" || status === "all";
-    const stickyTop = Math.round(elementRect.top);
+    const stickyTop = Math.round(Math.max(elementRect.top, breadcrumbBottom));
     const viewsElement = blockElement.querySelector(".av__views") as HTMLElement;
     let viewsTask: {
         element: HTMLElement;

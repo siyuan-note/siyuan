@@ -3,16 +3,14 @@
 @use "../component/svg";
 
 body {
-  --mobile-bottom-bar-height: 56px;
+  --mobile-topbar-height: 48px;
+  --mobile-breadcrumb-height: 42px;
+  --mobile-bottom-bar-height: 48px;
   --mobile-bottom-bar-gap: 8px;
   --mobile-status-height: 24px;
-  --mobile-bottom-bar-safe-area: max(8px, env(safe-area-inset-bottom));
+  --mobile-bottom-bar-safe-area: env(safe-area-inset-bottom);
   --mobile-bottom-bar-bottom: calc(var(--mobile-status-height) + var(--mobile-bottom-bar-gap) + var(--mobile-bottom-bar-safe-area));
   --mobile-bottom-bar-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-bottom));
-}
-
-body.mobile-chrome--hidden {
-  --mobile-bottom-bar-offset: var(--mobile-bottom-bar-safe-area);
 }
 
 body.mobile-keyboard--open {
@@ -26,6 +24,24 @@ body.mobile-keyboard--open {
 .protyle-breadcrumb {
   -webkit-user-select: none;
   user-select: none;
+
+  &__space--mobile-title {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    height: 42px;
+    padding: 0;
+    text-align: left;
+
+    .toolbar__title {
+      min-width: 0;
+    }
+
+    .toolbar__button {
+      width: 40px;
+      height: 40px;
+    }
+  }
 }
 
 .protyle-preview__title {
@@ -269,17 +285,25 @@ body.mobile-keyboard--open {
 }
 
 .mobile-safe-area {
+  position: relative;
+  z-index: 4;
   height: env(safe-area-inset-top);
   flex-shrink: 0;
   background-color: var(--b3-theme-background);
 }
 
 .mobile-topbar {
+  position: absolute;
+  top: env(safe-area-inset-top);
+  right: 0;
+  left: 0;
+  z-index: 3;
   box-sizing: border-box;
-  min-height: 48px;
+  height: var(--mobile-topbar-height);
+  min-height: var(--mobile-topbar-height);
   padding: 0 max(4px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
-  flex-shrink: 0;
-  transition: margin-bottom 240ms cubic-bezier(.2, 0, 0, 1), opacity 240ms cubic-bezier(.2, 0, 0, 1), transform 240ms cubic-bezier(.2, 0, 0, 1), visibility 240ms;
+  transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);
+  will-change: transform;
 }
 
 .mobile-bottom-bar {
@@ -291,15 +315,17 @@ body.mobile-keyboard--open {
   box-sizing: border-box;
   display: flex;
   align-items: flex-start;
-  width: min(80%, 480px);
+  width: min(72%, 420px);
   height: var(--mobile-bottom-bar-height);
   margin: 0 auto;
   padding: 0;
   border: .5px solid var(--b3-border-color);
-  border-radius: 28px;
+  border-radius: calc(var(--mobile-bottom-bar-height) / 2);
   background-color: var(--b3-theme-background);
   box-shadow: var(--b3-point-shadow);
-  transition: opacity 240ms cubic-bezier(.2, 0, 0, 1), transform 240ms cubic-bezier(.2, 0, 0, 1), visibility 240ms;
+  opacity: var(--mobile-bar-opacity, 1);
+  transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);
+  will-change: opacity, transform;
   -webkit-user-select: none;
   user-select: none;
 
@@ -312,7 +338,7 @@ body.mobile-keyboard--open {
     flex: 1 1 0;
     flex-direction: column;
     gap: 0;
-    min-width: 48px;
+    min-width: 40px;
     height: var(--mobile-bottom-bar-height);
     padding: 2px;
     overflow: hidden;
@@ -323,8 +349,8 @@ body.mobile-keyboard--open {
     -webkit-tap-highlight-color: transparent;
 
     > svg {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       flex-shrink: 0;
     }
 
@@ -344,13 +370,13 @@ body.mobile-keyboard--open {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 24px;
-    height: 24px;
-    padding: 0 3px;
+    min-width: 19px;
+    height: 19px;
+    padding: 0 2px;
     border: 1.5px solid currentColor;
-    border-radius: 5px;
+    border-radius: 4px;
     color: var(--b3-theme-on-surface-light);
-    font-size: 12px;
+    font-size: 11px;
     font-weight: normal;
     line-height: 1;
     text-align: center;
@@ -359,24 +385,39 @@ body.mobile-keyboard--open {
 
 .mobile-chrome--hidden {
   .mobile-topbar {
-    margin-bottom: -48px;
-    opacity: 0;
-    transform: translateY(-100%);
     visibility: hidden;
   }
 
   .mobile-bottom-bar {
-    opacity: 0;
     pointer-events: none;
-    transform: translateY(100%);
     visibility: hidden;
   }
 }
 
-.mobile-keyboard--open .mobile-bottom-bar {
+body.mobile-topbar--merged {
+  --mobile-topbar-height: 0px;
+
+  .mobile-topbar {
+    height: 0;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    border-bottom: 0;
+    transform: none;
+    visibility: hidden;
+  }
+
+  #editor > .protyle-breadcrumb {
+    top: 0;
+    transform: none;
+  }
+}
+
+.mobile-keyboard--open .mobile-bottom-bar,
+.mobile-selection--active .mobile-bottom-bar {
   opacity: 0;
   pointer-events: none;
-  transform: translateY(100%);
+  transform: translate3d(0, 100%, 0);
   visibility: hidden;
 }
 
@@ -420,13 +461,22 @@ body.mobile-keyboard--open {
 
 #editor {
   box-sizing: border-box;
-  padding-bottom: var(--mobile-bottom-bar-offset);
-}
 
-@media (prefers-reduced-motion: reduce) {
-  .mobile-topbar,
-  .mobile-bottom-bar {
-    transition: none;
+  > .protyle-breadcrumb {
+    position: absolute;
+    top: var(--mobile-topbar-height);
+    right: 0;
+    left: 0;
+    z-index: 3;
+    height: var(--mobile-breadcrumb-height);
+    transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);
+    will-change: transform;
+  }
+
+  > .protyle-content::before {
+    display: block;
+    height: calc(var(--mobile-topbar-height) + var(--mobile-breadcrumb-height));
+    content: "";
   }
 }
 
@@ -561,7 +611,8 @@ body.mobile-keyboard--open {
   transition: opacity 150ms linear;
 }
 
-#model {
+#model,
+#menu {
   box-sizing: border-box;
 
   .mobile-setting-menu {
@@ -594,7 +645,7 @@ body.mobile-keyboard--open {
     height: 100%;
     overflow: auto;
 
-    &:has(> .config-group) {
+    &.config--mobile-items {
       background-color: var(--b3-theme-surface);
       padding: 8px 16px max(16px, env(safe-area-inset-bottom));
     }
@@ -981,6 +1032,26 @@ body.mobile-keyboard--open {
   transform: none;
   transition: none;
 
+  .mobile-main-menu {
+    &__search {
+      background-color: var(--b3-theme-surface);
+      display: flex;
+      flex-shrink: 0;
+      padding: 8px 16px;
+    }
+
+    &__groups {
+      flex: 1;
+      height: auto;
+      min-height: 0;
+
+      &--bazaar {
+        overflow: hidden;
+        padding: 0;
+      }
+    }
+  }
+
   // 兼容插件直接插入的图标
   .b3-menu__item > svg:not(.b3-menu__icon) {
     height: 18px !important;
@@ -1184,13 +1255,13 @@ body.mobile-keyboard--open {
 
 .status {
   position: fixed;
-  bottom: -30px;
-  height: var(--mobile-status-height);
+  bottom: calc(0px - var(--mobile-status-height) - var(--mobile-bottom-bar-safe-area));
+  height: calc(var(--mobile-status-height) + var(--mobile-bottom-bar-safe-area));
   line-height: 16px;
   transition: var(--b3-transition);
   font-size: 12px;
   color: var(--b3-theme-on-surface);
-  padding: 4px;
+  padding: 4px 4px calc(4px + var(--mobile-bottom-bar-safe-area));
   white-space: nowrap;
   width: 100%;
   box-sizing: border-box;

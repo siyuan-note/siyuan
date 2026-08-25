@@ -65,6 +65,77 @@ func TestRenderGroupViewWithSource(t *testing.T) {
 	}
 }
 
+func TestRenderGroupViewWithSourceReusesCardLayouts(t *testing.T) {
+	key := &av.Key{ID: "text", Name: "Text", Type: av.KeyTypeText}
+	tests := []struct {
+		name        string
+		newView     func(id string) *av.View
+		newParent   func(view *av.View, items []av.Item) av.Viewable
+		getItems    func(viewable av.Viewable) []av.Item
+		newTestItem func(id string) av.Item
+	}{
+		{
+			name: "gallery",
+			newView: func(id string) *av.View {
+				view := &av.View{ID: id, LayoutType: av.LayoutTypeGallery, Gallery: av.NewLayoutGallery()}
+				view.Gallery.CardFields = []*av.ViewGalleryCardField{{BaseField: &av.BaseField{ID: key.ID}}}
+				return view
+			},
+			newParent: func(view *av.View, items []av.Item) av.Viewable {
+				gallery := &av.Gallery{BaseInstance: av.NewViewBaseInstance(view)}
+				gallery.SetItems(items)
+				return gallery
+			},
+			getItems: func(viewable av.Viewable) []av.Item { return viewable.(*av.Gallery).GetItems() },
+			newTestItem: func(id string) av.Item {
+				return &av.GalleryCard{ID: id}
+			},
+		},
+		{
+			name: "kanban",
+			newView: func(id string) *av.View {
+				view := &av.View{ID: id, LayoutType: av.LayoutTypeKanban, Kanban: av.NewLayoutKanban()}
+				view.Kanban.Fields = []*av.ViewKanbanField{{BaseField: &av.BaseField{ID: key.ID}}}
+				return view
+			},
+			newParent: func(view *av.View, items []av.Item) av.Viewable {
+				kanban := &av.Kanban{BaseInstance: av.NewViewBaseInstance(view)}
+				kanban.SetItems(items)
+				return kanban
+			},
+			getItems: func(viewable av.Viewable) []av.Item { return viewable.(*av.Kanban).GetItems() },
+			newTestItem: func(id string) av.Item {
+				return &av.KanbanCard{ID: id}
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			view := test.newView("view")
+			group := test.newView("group")
+			group.GroupItemIDs = []string{"b", "a", "b"}
+			items := []av.Item{test.newTestItem("a"), test.newTestItem("b")}
+			parent := test.newParent(view, items)
+			source := NewGroupViewRenderSource(parent, "")
+			attrView := &av.AttributeView{
+				ID:                "av",
+				KeyValues:         []*av.KeyValues{{Key: key}},
+				RenderedViewables: map[string]av.Viewable{},
+			}
+
+			groupViewable := RenderGroupViewWithSource(attrView, view, group, "", source, false)
+			groupItems := test.getItems(groupViewable)
+			if 2 != len(groupItems) || "a" != groupItems[0].GetID() || "b" != groupItems[1].GetID() {
+				t.Fatalf("unexpected grouped items: %+v", groupItems)
+			}
+			if items[0] != groupItems[0] || items[1] != groupItems[1] {
+				t.Fatal("group cards should reuse parent cards")
+			}
+		})
+	}
+}
+
 func TestRenderGroupViewIgnoreRowsBypassesCachedRows(t *testing.T) {
 	key := &av.Key{ID: "text", Name: "Text", Type: av.KeyTypeText}
 	group := newGroupRenderTestView("group", []string{"a"})

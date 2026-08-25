@@ -41,6 +41,7 @@ import "./assets/scss/base.scss";
 import {reloadEmoji} from "./emoji";
 import {processIOSPurchaseResponse} from "./util/iOSPurchase";
 import {updateServerAddresses} from "./config/tabs/accessRuntime";
+import {emitToPlugins} from "./plugin/EventBusCore";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -74,9 +75,7 @@ export class App {
             id: genUUID(),
             type: "main",
             msgCallback: (data) => {
-                this.plugins.forEach((plugin) => {
-                    plugin.eventBus.emit("ws-main", data);
-                });
+                emitToPlugins("ws-main", data);
                 if (data) {
                     switch (data.cmd) {
                         case "logoutAuth":
@@ -226,7 +225,7 @@ export class App {
                             transactionError(data.msg);
                             break;
                         case "syncing":
-                            processSync(data, this.plugins);
+                            processSync(data);
                             break;
                         case "backgroundtask":
                             progressBackgroundTask(data.data.tasks);

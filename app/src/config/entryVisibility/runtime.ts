@@ -233,7 +233,7 @@ export const applyDockEntryVisibility = () => {
     /// #if !MOBILE
     document.querySelectorAll<HTMLElement>(".dock__item[data-type]").forEach((item) => {
         const type = item.dataset.type;
-        const path = `dock.${type}`;
+        const path = `dock.${item.dataset.entryId || type}`;
         if (!getEntryCatalogNode(path)) {
             return;
         }

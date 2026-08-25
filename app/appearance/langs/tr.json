@@ -1,4 +1,9 @@
 {
+	"manageColors": "Renkleri yönet",
+	"manageBuiltinColors": "Yerleşik renkleri yönet",
+	"showInColorPicker": "Renk seçicide göster",
+	"resetAll": "Tümünü sıfırla",
+	"exportFile": "Dosyayı dışa aktar",
 	"namingEmpty": "Ad boş olamaz",
 	"recentCreated": "Yakın zamanda oluşturulanlar",
 	"manageCustomColors": "Özel renkleri yönet",
@@ -687,7 +692,7 @@
 	"agentTimeout": "Zaman aşımı",
 	"agentTimeoutTip": "Agent oturumu toplam zaman aşımı, 0 = sınırsız",
 	"agentConfirmTimeout": "Onay zaman aşımı",
-	"agentConfirmTimeoutTip": "Zaman aşımından sonra otomatik reddet",
+	"agentConfirmTimeoutTip": "Zaman aşımından sonra otomatik reddet, 0 = sınırsız bekle",
 	"agentMaxRetries": "Maks. yeniden deneme",
 	"agentMaxRetriesTip": "Hata durumunda maks. API yeniden deneme sayısı",
 	"agentMaxToolCallRounds": "Maks. araç çağrısı turu",
@@ -1494,7 +1499,7 @@
 	"rtlTip": "İçeriği sağdan sola göster",
 	"height": "Yükseklik",
 	"deactivateUser": "Hesabı devre dışı bırak",
-	"deactivateUserTip": "<ul class='fn__list'><li>Hesap devre dışı bırakıldığında geri alınamaz, lütfen rastgele deneme</li><li>Kullanıcı adı <code>someone101</code> (numara kullanıcı kimliğidir) olarak değiştirilir, şifre rastgele oluşturulur</li><li>Kullanıcı takma adı, profil bilgisi, site bağlantısı, adresi vb. temizlenir</li><li>Tüm gizlilik ayarları varsayılan genel duruma döner</li><li>Bağlı üçüncü taraf hesaplar ve telefon numaraları kaldırılır</li><li><strong>Kullanıcı adı, telefon numarası ve bağlı hesaplar tekrar kullanılamaz</strong></li><li>Kullanıcı durumu devre dışı olarak ayarlanır, giriş yasaklanır</li></ul>",
+	"deactivateUserTip": "<ul class='fn__list'><li>Hesap devre dışı bırakıldığında geri alınamaz, lütfen rastgele deneme</li><li>Kullanıcı adı <code>someone101</code> (numara kullanıcı kimliğidir) olarak değiştirilir, şifre rastgele oluşturulur</li><li>Kullanıcı takma adı, profil bilgisi, site bağlantısı vb. temizlenir</li><li>Tüm gizlilik ayarları varsayılan genel duruma döner</li><li>Bağlı üçüncü taraf hesaplar ve telefon numaraları kaldırılır</li><li><strong>Kullanıcı adı, e-posta adresi, telefon numarası ve bağlı hesaplar tekrar kullanılamaz</strong></li><li>Kullanıcı durumu devre dışı olarak ayarlanır, giriş yasaklanır</li></ul>",
 	"mergeCell": "Hücreleri birleştir",
 	"cancelMerged": "Birleştirmeyi iptal et",
 	"useDefaultWidth": "Varsayılan sütun genişliğini kullan",
@@ -2273,7 +2278,7 @@
 		"16": "Başlıksız",
 		"17": "Başlangıçta ilk senkronizasyon başarısız oldu. Devam edersen öngörülemeyen veri üzerine yazmalar olabilir. Lütfen önce bir senkronizasyon yap",
 		"18": "Topluluk kullanıcı hesabı alınamadı",
-		"19": "Kullanıcı oturum bilgisi süresi doldu, lütfen tekrar giriş yap",
+		"19": "Kullanıcı oturum bilgisi süresi doldu, lütfen [Ayarlar - Hesap ve Senkronizasyon - Hesap] kısmından tekrar giriş yap",
 		"20": "Alt belgeler içerirken başlığa dönüştürülemez",
 		"21": "Lütfen doğrulama kodunu gir",
 		"22": "Doğrulama kodu hatalı",
@@ -2285,7 +2290,7 @@
 		"28": "Ağ hatalı, lütfen daha sonra tekrar dene",
 		"29": "Bu özellik için <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Yıllık Abonelik]</a> gereklidir (zaten satın aldıysan Ayarlar - Hesap ve Senkronizasyon - Hesap kısmından yenile veya tekrar giriş yap)",
 		"30": "Bulut bilgisi alınamadı",
-		"31": "Hesap doğrulaması başarısız, lütfen tekrar giriş yap",
+		"31": "Hesap doğrulaması başarısız, lütfen [Ayarlar - Hesap ve Senkronizasyon - Hesap] kısmından tekrar giriş yap",
 		"32": "Bulut not defteri kaldırılamadı",
 		"33": "Dosya okuma/yazma veya ağ erişim izni yetersiz. Lütfen çalışma alanı klasör izinlerini ve antivirüs/firewall ayarlarını kontrol et. SiYuan’ı daha önce yönetici olarak çalıştırdıysan yeni bir çalışma alanı dizinine geçmeyi düşün; mevcut dizin artık normal kullanıcılar tarafından erişilemiyor olabilir",
 		"34": "Bu işlem salt okunur modda desteklenmiyor",
@@ -2467,7 +2472,7 @@
 		"210": "Bulut verileri doğrulanıyor %v/%v",
 		"211": "Bulut veri doğrulaması tamamlandı",
 		"212": "Mevcut sürümde bulut senkronizasyon hataları var, lütfen en son sürüme güncelle. Verdiğimiz rahatsızlık için özür dileriz",
-		"213": "Bulut doğrulaması başarısız, lütfen en son sürüme güncelle ve tekrar giriş yaparak senkron dene",
+		"213": "Bulut doğrulaması başarısız, lütfen en son sürüme güncelle ve [Ayarlar - Hesap ve Senkronizasyon - Hesap] kısmından tekrar giriş yaptıktan sonra senkronizasyonu dene",
 		"214": "Bu özelliği kullanmak için hesabına giriş yapmalı ve <a target='_blank' href='${accountServer}/one-time-pay/siyuan'>[PRO Özellikleri]</a> veya <a target='_blank' href='${accountServer}/subscribe/siyuan'>[Yıllık Abonelik]</a> satın almalısın",
 		"215": "Daha yeni bir sürümde oluşturulmuş veritabanı görünümü açılamıyor. En son sürüme yükseltin ve tekrar deneyin",
 		"216": "Varlık içerik veri indeksi yeniden oluşturuluyor, lütfen bekle...",
@@ -2627,6 +2632,7 @@
 		"370": "LAN hızlandırılmış trafik %s",
 		"371": "Defter zaten mevcut",
 		"372": "Defter geri yüklendi ve kapalı kalacak",
-		"373": "Bu arşiv not defteri verileri içeriyor. [Belge ağacı - Diğer - Not defteri içe aktar] menüsünden içe aktarın"
+		"373": "Bu arşiv not defteri verileri içeriyor. [Belge ağacı - Diğer - Not defteri içe aktar] menüsünden içe aktarın",
+		"374": "Veritabanı [%s], şablon alanı [%s], etkilenen ilk öğe [%s] (öğe kimliği: %s), etkilenen öğe sayısı: %d, hata: %s"
 	}
 }

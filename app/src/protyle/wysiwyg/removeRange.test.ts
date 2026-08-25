@@ -6,6 +6,7 @@ import {
     getCrossBlockMergeRemoveElement,
     getCrossBlockSiblingListItemMergeContext,
     getDeletedBlockElements,
+    isNativeCrossBlockCompositionSupported,
     isEntireBlockContentSelected
 } from "./removeRange";
 
@@ -86,6 +87,26 @@ const block = (name: string, type: string, ...children: TestElement[]) =>
     new TestElement(name, type).append(...children);
 const attr = (name: string) => new TestElement(name);
 const asHTMLElement = (element: TestElement) => element as unknown as HTMLElement;
+
+describe("isNativeCrossBlockCompositionSupported", () => {
+    it("支持跨容器的文本块、代码块和表格组合输入", () => {
+        assert.equal(isNativeCrossBlockCompositionSupported(
+            ["NodeParagraph", "NodeParagraph"],
+            ["NodeBlockquote", "NodeParagraph", "NodeCallout", "NodeParagraph"]), true);
+        assert.equal(isNativeCrossBlockCompositionSupported(
+            ["NodeCodeBlock", "NodeParagraph"],
+            ["NodeSuperBlock", "NodeCodeBlock", "NodeParagraph"]), true);
+        assert.equal(isNativeCrossBlockCompositionSupported(
+            ["NodeParagraph", "NodeTable"], ["NodeParagraph", "NodeTable"]), true);
+    });
+
+    it("拒绝属性视图和需要重新渲染的快照", () => {
+        assert.equal(isNativeCrossBlockCompositionSupported(
+            ["NodeAttributeView", "NodeParagraph"], ["NodeAttributeView", "NodeParagraph"]), false);
+        assert.equal(isNativeCrossBlockCompositionSupported(
+            ["NodeHeading", "NodeParagraph"], ["NodeHeading", "NodeMathBlock", "NodeParagraph"]), false);
+    });
+});
 
 describe("getCrossBlockEndAction", () => {
     it("合并相同类型的段落和标题边界", () => {

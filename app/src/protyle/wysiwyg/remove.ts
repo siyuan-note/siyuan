@@ -61,6 +61,7 @@ import {
     getCrossBlockMergeRemoveElement,
     getCrossBlockSiblingListItemMergeContext,
     getDeletedBlockElements,
+    isNativeCrossBlockCompositionSupported,
     isEntireBlockContentSelected,
     mergeCrossBlockNestedLists,
     mergeCrossBlockSiblingListItems
@@ -395,11 +396,6 @@ const prepareNativeCrossBlockComposition = (protyle: IProtyle, selectedRange: Ra
 ICrossBlockComposition | undefined => {
     const editorElement = protyle.wysiwyg.element;
     const ranges = getBlockRanges(editorElement, selectedRange);
-    const supportedTypes = new Set(["NodeParagraph", "NodeHeading", "NodeList", "NodeListItem"]);
-    if (ranges.length < 2 || ranges.some(item =>
-        !["NodeParagraph", "NodeHeading"].includes(item.blockElement.getAttribute("data-type")))) {
-        return;
-    }
     const startRootElement = getEditorRootElement(editorElement, startElement);
     const endRootElement = getEditorRootElement(editorElement, endElement);
     const undoFocusContext = getUndoFocusContext(editorElement, selectedRange, true);
@@ -415,15 +411,16 @@ ICrossBlockComposition | undefined => {
         }
         currentNode = currentNode.nextSibling;
     }
-    if (currentNode !== endRootElement || snapshotNodes.some(node => {
+    const snapshotTypes = snapshotNodes.flatMap(node => {
         if (node.nodeType !== Node.ELEMENT_NODE) {
-            return false;
+            return [];
         }
         const element = node as HTMLElement;
-        return !supportedTypes.has(element.getAttribute("data-type")) ||
-            Array.from(element.querySelectorAll<HTMLElement>("[data-node-id]"))
-                .some(item => !supportedTypes.has(item.getAttribute("data-type")));
-    })) {
+        return [element, ...Array.from(element.querySelectorAll<HTMLElement>("[data-node-id]"))]
+            .map(item => item.getAttribute("data-type") || "");
+    });
+    if (currentNode !== endRootElement || !isNativeCrossBlockCompositionSupported(
+        ranges.map(item => item.blockElement.getAttribute("data-type") || ""), snapshotTypes)) {
         return;
     }
     const startMarker = document.createComment("siyuan-cross-block-composition-start");

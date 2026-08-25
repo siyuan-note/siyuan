@@ -1511,7 +1511,7 @@ export class Gutter {
             }).element);
         }
 
-        if (protyle?.app?.plugins) {
+        if (protyle) {
             emitOpenMenu({
                 type: "click-blockicon",
                 detail: {
@@ -2858,7 +2858,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_5", type: "separator"}).element);
         }
 
-        if (!isEmbedMenu && protyle?.app?.plugins) {
+        if (!isEmbedMenu && protyle) {
             emitOpenMenu({
                 type: "click-blockicon",
                 detail: {

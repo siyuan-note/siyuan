@@ -319,7 +319,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
         }
     }).element);
 
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         emitOpenMenu({
             type: "open-menu-fileannotationref",
             detail: {
@@ -676,7 +676,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             }
         }).element);
     }
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         emitOpenMenu({
             type: "open-menu-blockref",
             detail: {
@@ -923,7 +923,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     }
     /// #endif
     let pluginMenus: IMenu[] = [];
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         pluginMenus = emitOpenMenu({
             type: "open-menu-content",
             detail: {
@@ -1483,7 +1483,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             copyPNGByLink(imgElement.getAttribute("src"));
         }
     }).element);
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         emitOpenMenu({
             type: "open-menu-image",
             detail: {
@@ -1762,7 +1762,7 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
         }
     }
 
-    if (!protyle.disabled && protyle?.app?.plugins) {
+    if (!protyle.disabled) {
         emitOpenMenu({
             type: "open-menu-link",
             detail: {
@@ -1980,7 +1980,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         }
     }).element);
 
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         emitOpenMenu({
             type: "open-menu-tag",
             detail: {

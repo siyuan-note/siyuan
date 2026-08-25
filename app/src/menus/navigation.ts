@@ -207,13 +207,11 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                 click: () => exportMarkdownZip({notebooks: notebookIds}),
             }]
         }).element);
-        if (app.plugins) {
-            emitOpenMenu({
-                type: "open-menu-doctree",
-                detail: {elements: selectItemElements, type: "notebooks", items},
-                separatorPosition: "top",
-            });
-        }
+        emitOpenMenu({
+            type: "open-menu-doctree",
+            detail: {elements: selectItemElements, type: "notebooks", items},
+            separatorPosition: "top",
+        });
         return window.siyuan.menus.menu;
     }
     if (type === "items") {
@@ -227,13 +225,11 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
                 deleteFiles(selectedItems);
             }
         }).element);
-        if (app.plugins) {
-            emitOpenMenu({
-                type: "open-menu-doctree",
-                detail: {elements: selectItemElements, type: "items", items},
-                separatorPosition: "top",
-            });
-        }
+        emitOpenMenu({
+            type: "open-menu-doctree",
+            detail: {elements: selectItemElements, type: "items", items},
+            separatorPosition: "top",
+        });
         return window.siyuan.menus.menu;
     }
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_DOCS);
@@ -369,17 +365,15 @@ const initMultiMenu = (selectItemElements: NodeListOf<HTMLElement>, app: App) =>
             }
         }]
     }).element);
-    if (app.plugins) {
-        emitOpenMenu({
-            type: "open-menu-doctree",
-            detail: {
-                elements: selectItemElements,
-                type,
-                items,
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-doctree",
+        detail: {
+            elements: selectItemElements,
+            type,
+            items,
+        },
+        separatorPosition: "top",
+    });
     return window.siyuan.menus.menu;
 };
 
@@ -647,17 +641,15 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             }
         }]
     }).element);
-    if (app.plugins) {
-        emitOpenMenu({
-            type: "open-menu-doctree",
-            detail: {
-                elements: selectItemElements,
-                type: "notebook",
-                items: [{id: notebookId, path: "/", notebookId}],
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-doctree",
+        detail: {
+            elements: selectItemElements,
+            type: "notebook",
+            items: [{id: notebookId, path: "/", notebookId}],
+        },
+        separatorPosition: "top",
+    });
     return window.siyuan.menus.menu;
 };
 
@@ -989,17 +981,15 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
     }
     genImportMenu(notebookId, pathString);
     window.siyuan.menus.menu.append(exportMd(id));
-    if (app.plugins) {
-        emitOpenMenu({
-            type: "open-menu-doctree",
-            detail: {
-                elements: selectItemElements,
-                type: "doc",
-                items: [{id, path: pathString, notebookId}],
-            },
-            separatorPosition: "top",
-        });
-    }
+    emitOpenMenu({
+        type: "open-menu-doctree",
+        detail: {
+            elements: selectItemElements,
+            type: "doc",
+            items: [{id, path: pathString, notebookId}],
+        },
+        separatorPosition: "top",
+    });
     window.siyuan.menus.menu.element.setAttribute("data-from", Constants.MENU_FROM_DOC_TREE_MORE_DOC);
     return window.siyuan.menus.menu;
 };

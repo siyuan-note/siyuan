@@ -1214,7 +1214,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
             submenu: getAVEditFieldMenuItems(protyle, blockElement)
         });
     }
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         emitOpenMenu({
             type: "open-menu-av",
             detail: {

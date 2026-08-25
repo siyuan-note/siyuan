@@ -1,6 +1,7 @@
-import {describe, it} from "node:test";
+import {afterEach, describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import type {App} from "../index";
+import {destroyEventBus, EventBus} from "../plugin/EventBusCore";
 import {
     emitOpenAsset,
     emitOpenLink,
@@ -8,11 +9,31 @@ import {
     resolveOpenLinkEvent,
 } from "./openLinkEvent";
 
+const eventBuses: EventBus[] = [];
+
+const createPlugin = (emit: (type: TEventBus, detail: unknown) => boolean,
+                       types: TEventBus[] = ["open-link", "open-asset"]) => {
+    const eventBus = new EventBus(new EventTarget());
+    eventBuses.push(eventBus);
+    types.forEach(type => {
+        eventBus.on(type, event => {
+            if (!emit(type, event.detail)) {
+                event.preventDefault();
+            }
+        });
+    });
+    return {eventBus};
+};
+
 const createApp = (emitters: Array<(type: TEventBus, detail: unknown) => boolean>) => ({
-    plugins: emitters.map((emit) => ({eventBus: {emit, has: () => true}})),
+    plugins: emitters.map(emit => createPlugin(emit)),
 }) as unknown as App;
 
 describe("link opening plugin events", () => {
+    afterEach(() => {
+        eventBuses.splice(0).forEach(destroyEventBus);
+    });
+
     it("normalizes external links before emitting", () => {
         assert.deepEqual(resolveOpenLinkEvent({
             href: "example.com",
@@ -82,19 +103,20 @@ describe("link opening plugin events", () => {
     it("skips plugins without a matching subscription", () => {
         const calls: number[] = [];
         const app = {
-            plugins: [{
-                eventBus: {
-                    has: () => false,
-                    emit: () => {
-                        calls.push(1);
-                        return false;
-                    },
-                },
-            }],
+            plugins: [
+                createPlugin(() => {
+                    calls.push(1);
+                    return false;
+                }, ["open-asset"]),
+                createPlugin(() => {
+                    calls.push(2);
+                    return true;
+                }, ["open-link"]),
+            ],
         } as unknown as App;
 
         assert.equal(emitOpenLink(app, {href: "https://example.com", originalHref: "example.com"}), true);
-        assert.deepEqual(calls, []);
+        assert.deepEqual(calls, [2]);
     });
 
     it("uses the same first-canceler-wins behavior for assets", () => {

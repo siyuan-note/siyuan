@@ -10,29 +10,40 @@ export interface IEventBusSafeEmitResult {
     hasAsyncListener: boolean;
 }
 
+interface IEventBusInternal {
+    destroy: () => void;
+    emitWithErrors: (type: TEventBus, detail?: any) => IEventBusSafeEmitResult;
+    has: (type: TEventBus) => boolean;
+}
+
 const subscribers = new Map<TEventBus, EventBus[]>();
+const eventBusInternals = new WeakMap<EventBus, IEventBusInternal>();
 let eventBusOrder = 0;
 
 export class EventBus<DetailType = any> {
-    private eventTarget: EventTarget;
-    private listeners = new Map<TEventBus, Map<(event: CustomEvent<DetailType>) => any, IEventBusListener<DetailType>>>();
-    private safeDispatches = new WeakMap<Event, IEventBusSafeEmitResult>();
-    private destroyed = false;
-    private readonly order = eventBusOrder++;
+    #eventTarget: EventTarget;
+    #listeners = new Map<TEventBus, Map<(event: CustomEvent<DetailType>) => any, IEventBusListener<DetailType>>>();
+    #safeDispatches = new WeakMap<Event, IEventBusSafeEmitResult>();
+    #destroyed = false;
+    readonly #order = eventBusOrder++;
 
-    constructor(name = "", eventTarget?: EventTarget) {
-        void name;
-        this.eventTarget = eventTarget || new EventTarget();
+    constructor(eventTarget?: EventTarget) {
+        this.#eventTarget = eventTarget || new EventTarget();
+        eventBusInternals.set(this, {
+            destroy: () => this.#destroy(),
+            emitWithErrors: (type, detail) => this.#emitWithErrors(type, detail),
+            has: type => this.#has(type),
+        });
     }
 
-    private addListener(type: TEventBus, listener: (event: CustomEvent<DetailType>) => any, once: boolean) {
-        if (this.destroyed) {
+    #addListener(type: TEventBus, listener: (event: CustomEvent<DetailType>) => any, once: boolean) {
+        if (this.#destroyed) {
             return;
         }
-        let typeListeners = this.listeners.get(type);
+        let typeListeners = this.#listeners.get(type);
         if (!typeListeners) {
             typeListeners = new Map();
-            this.listeners.set(type, typeListeners);
+            this.#listeners.set(type, typeListeners);
         }
         if (typeListeners.has(listener)) {
             return;
@@ -41,9 +52,9 @@ export class EventBus<DetailType = any> {
             if (once) {
                 this.off(type, listener);
             }
-            const safeResult = this.safeDispatches.get(event);
+            const safeResult = this.#safeDispatches.get(event);
             try {
-                const result = listener.call(this.eventTarget, event as CustomEvent<DetailType>);
+                const result = listener.call(this.#eventTarget, event as CustomEvent<DetailType>);
                 if (safeResult && result && typeof result.then === "function") {
                     safeResult.hasAsyncListener = true;
                     void Promise.resolve(result).catch(listenerError => console.error(listenerError));
@@ -58,19 +69,19 @@ export class EventBus<DetailType = any> {
             }
         };
         typeListeners.set(listener, {listener, wrapped, once});
-        this.eventTarget.addEventListener(type, wrapped);
+        this.#eventTarget.addEventListener(type, wrapped);
         if (typeListeners.size === 1) {
-            this.addSubscriber(type);
+            this.#addSubscriber(type);
         }
     }
 
-    private addSubscriber(type: TEventBus) {
+    #addSubscriber(type: TEventBus) {
         let typeSubscribers = subscribers.get(type);
         if (!typeSubscribers) {
             typeSubscribers = [];
             subscribers.set(type, typeSubscribers);
         }
-        const index = typeSubscribers.findIndex(eventBus => eventBus.order > this.order);
+        const index = typeSubscribers.findIndex(eventBus => eventBus.#order > this.#order);
         if (index === -1) {
             typeSubscribers.push(this);
         } else {
@@ -78,7 +89,7 @@ export class EventBus<DetailType = any> {
         }
     }
 
-    private removeSubscriber(type: TEventBus) {
+    #removeSubscriber(type: TEventBus) {
         const typeSubscribers = subscribers.get(type);
         if (!typeSubscribers) {
             return;
@@ -93,69 +104,85 @@ export class EventBus<DetailType = any> {
     }
 
     on(type: TEventBus, listener: (event: CustomEvent<DetailType>) => any) {
-        this.addListener(type, listener, false);
+        this.#addListener(type, listener, false);
     }
 
     once(type: TEventBus, listener: (event: CustomEvent<DetailType>) => any) {
-        this.addListener(type, listener, true);
+        this.#addListener(type, listener, true);
     }
 
     off(type: TEventBus, listener: (event: CustomEvent<DetailType>) => any) {
-        const typeListeners = this.listeners.get(type);
+        const typeListeners = this.#listeners.get(type);
         const registered = typeListeners?.get(listener);
         if (!registered) {
             return;
         }
-        this.eventTarget.removeEventListener(type, registered.wrapped);
+        this.#eventTarget.removeEventListener(type, registered.wrapped);
         typeListeners.delete(listener);
         if (typeListeners.size === 0) {
-            this.listeners.delete(type);
-            this.removeSubscriber(type);
+            this.#listeners.delete(type);
+            this.#removeSubscriber(type);
         }
     }
 
-    has(type: TEventBus) {
-        return !this.destroyed && !!this.listeners.get(type)?.size;
+    #has(type: TEventBus) {
+        return !this.#destroyed && !!this.#listeners.get(type)?.size;
     }
 
     emit(type: TEventBus, detail?: DetailType) {
-        if (this.destroyed) {
+        if (this.#destroyed) {
             return true;
         }
-        return this.eventTarget.dispatchEvent(new CustomEvent(type, {detail, cancelable: true}));
+        return this.#eventTarget.dispatchEvent(new CustomEvent(type, {detail, cancelable: true}));
     }
 
-    emitWithErrors(type: TEventBus, detail?: DetailType): IEventBusSafeEmitResult {
-        if (this.destroyed) {
+    #emitWithErrors(type: TEventBus, detail?: DetailType): IEventBusSafeEmitResult {
+        if (this.#destroyed) {
             return {defaultPrevented: false, hasAsyncListener: false};
         }
         const event = new CustomEvent(type, {detail, cancelable: true});
         const result: IEventBusSafeEmitResult = {defaultPrevented: false, hasAsyncListener: false};
-        this.safeDispatches.set(event, result);
+        this.#safeDispatches.set(event, result);
         try {
-            this.eventTarget.dispatchEvent(event);
+            this.#eventTarget.dispatchEvent(event);
         } finally {
-            this.safeDispatches.delete(event);
+            this.#safeDispatches.delete(event);
         }
         result.defaultPrevented = event.defaultPrevented;
         return result;
     }
 
-    destroy() {
-        if (this.destroyed) {
+    #destroy() {
+        if (this.#destroyed) {
             return;
         }
-        this.destroyed = true;
-        this.listeners.forEach((typeListeners, type) => {
+        this.#destroyed = true;
+        this.#listeners.forEach((typeListeners, type) => {
             typeListeners.forEach(({wrapped}) => {
-                this.eventTarget.removeEventListener(type, wrapped);
+                this.#eventTarget.removeEventListener(type, wrapped);
             });
-            this.removeSubscriber(type);
+            this.#removeSubscriber(type);
         });
-        this.listeners.clear();
-        this.safeDispatches = new WeakMap();
+        this.#listeners.clear();
+        this.#safeDispatches = new WeakMap();
+        eventBusInternals.delete(this);
     }
 }
+
+export const destroyEventBus = (eventBus: EventBus) => {
+    eventBusInternals.get(eventBus)?.destroy();
+};
+
+export const eventBusHas = (eventBus: EventBus, type: TEventBus) => {
+    return eventBusInternals.get(eventBus)?.has(type) || false;
+};
+
+export const emitWithErrors = <DetailType>(eventBus: EventBus<DetailType>, type: TEventBus, detail?: DetailType) => {
+    return eventBusInternals.get(eventBus)?.emitWithErrors(type, detail) || {
+        defaultPrevented: false,
+        hasAsyncListener: false,
+    };
+};
 
 export const forEachPluginSubscriber = (type: TEventBus, callback: (eventBus: EventBus) => void) => {
     const typeSubscribers = subscribers.get(type);

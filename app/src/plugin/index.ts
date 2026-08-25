@@ -116,7 +116,7 @@ export class Plugin {
         this.app = options.app;
         this.i18n = options.i18n;
         this.displayName = options.displayName;
-        this.eventBus = new EventBus(options.name);
+        this.eventBus = new EventBus();
         this.kernel = new Kernel({
             appId: options.app.appId,
             name: options.name,

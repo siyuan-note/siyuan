@@ -1,7 +1,6 @@
 import {MenuItem, subMenu} from "../menus/Menu";
 import {emitToPlugins, hasPluginSubscriber} from "./EventBusCore";
-export {emitToPlugins, EventBus, hasPluginSubscriber} from "./EventBusCore";
-export type {IEventBusSafeEmitResult} from "./EventBusCore";
+export {EventBus} from "./EventBusCore";
 
 export const emitOpenMenu = (options: {
     type: TEventBus,

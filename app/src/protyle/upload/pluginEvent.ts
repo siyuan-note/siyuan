@@ -1,3 +1,6 @@
+import type {EventBus, IEventBusSafeEmitResult} from "../../plugin/EventBusCore";
+import {emitWithErrors, eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
+
 export interface IAssetUploadEventContext {
     source: TAssetUploadSource;
     target: TAssetUploadTarget;
@@ -25,14 +28,7 @@ export type TPreparedAssetUpload = {
 
 interface IAssetUploadPlugin {
     name?: string;
-    eventBus: {
-        has(type: TEventBus): boolean;
-        emitWithErrors(type: TEventBus, detail: IBeforeUploadAssetsDetail): {
-            defaultPrevented: boolean;
-            error?: unknown;
-            hasAsyncListener: boolean;
-        };
-    };
+    eventBus: EventBus<IBeforeUploadAssetsDetail>;
 }
 
 class AssetUploadCanceledError extends Error {
@@ -295,7 +291,6 @@ export const prepareAssetUpload = (options: {
     timeout?: number;
 }): TPreparedAssetUpload | Promise<TPreparedAssetUpload> => {
     const task = new AssetUploadTask(options.input, options.requestId || genRequestId(), options.protyle);
-    const plugins = Array.from(options.plugins).filter(plugin => plugin.eventBus.has("before-upload-assets"));
     const timeout = options.timeout ?? ASSET_UPLOAD_PLUGIN_TIMEOUT;
     const context = {
         ...options.context,
@@ -317,6 +312,13 @@ export const prepareAssetUpload = (options: {
     if (initialValidationError) {
         return fail(initialValidationError);
     }
+    if (!hasPluginSubscriber("before-upload-assets")) {
+        return {state: "ready", task};
+    }
+    const plugins = Array.from(options.plugins).filter(plugin => eventBusHas(plugin.eventBus, "before-upload-assets"));
+    if (plugins.length === 0) {
+        return {state: "ready", task};
+    }
     task.startWaiting(plugins);
     const processPlugin = (index: number): TPreparedAssetUpload | Promise<TPreparedAssetUpload> => {
         if (task.signal.aborted) {
@@ -333,14 +335,14 @@ export const prepareAssetUpload = (options: {
         let responseClaimed = false;
         let responseError = "";
         let acceptingRegistrations = true;
-        let emitResult: ReturnType<IAssetUploadPlugin["eventBus"]["emitWithErrors"]>;
+        let emitResult: IEventBusSafeEmitResult;
         const discardResponse = () => {
             if (response) {
                 void Promise.resolve(response).catch(error => console.error(error));
             }
         };
         try {
-            emitResult = plugin.eventBus.emitWithErrors("before-upload-assets", {
+            emitResult = emitWithErrors(plugin.eventBus, "before-upload-assets", {
                 requestId: task.requestId,
                 protyle: options.protyle,
                 source: context.source,

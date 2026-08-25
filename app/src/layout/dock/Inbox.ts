@@ -291,16 +291,14 @@ ${data.shorthandContent}
                 }
             }).element);
         }
-        if (this.app.plugins) {
-            emitOpenMenu({
-                type: "open-menu-inbox",
-                detail: {
-                    ids,
-                    element: itemElement || detailsElement,
-                },
-                separatorPosition: "top",
-            });
-        }
+        emitOpenMenu({
+            type: "open-menu-inbox",
+            detail: {
+                ids,
+                element: itemElement || detailsElement,
+            },
+            separatorPosition: "top",
+        });
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY + 16});
     }
 

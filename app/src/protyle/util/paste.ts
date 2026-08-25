@@ -43,6 +43,7 @@ import {
 } from "./wpsPresentation";
 import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
+import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -284,11 +285,11 @@ export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
 };
 
 const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[], options?: IUploadInsertOptions) => {
-    if (protyle && protyle.app && protyle.app.plugins) {
+    if (protyle && protyle.app && protyle.app.plugins && hasPluginSubscriber("paste")) {
         const plugins = Array.from(protyle.app.plugins);
         for (let i = 0; i < plugins.length; i++) {
             const plugin = plugins[i];
-            if (!plugin.eventBus.has("paste")) {
+            if (!eventBusHas(plugin.eventBus, "paste")) {
                 continue;
             }
             const response: { localFiles: ILocalFiles[] } = await new Promise((resolve) => {
@@ -658,11 +659,11 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         textHTML = Lute.Sanitize(textHTML);
     }
 
-    if (protyle && protyle.app && protyle.app.plugins) {
+    if (protyle && protyle.app && protyle.app.plugins && hasPluginSubscriber("paste")) {
         const plugins = Array.from(protyle.app.plugins);
         for (let i = 0; i < plugins.length; i++) {
             const plugin = plugins[i];
-            if (!plugin.eventBus.has("paste")) {
+            if (!eventBusHas(plugin.eventBus, "paste")) {
                 continue;
             }
             const response = await new Promise<IClipboardData | undefined | typeof PASTE_PLUGIN_TIMED_OUT>((resolve,

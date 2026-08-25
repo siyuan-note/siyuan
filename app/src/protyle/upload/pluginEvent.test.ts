@@ -1,14 +1,17 @@
-import {describe, it} from "node:test";
+import {afterEach, describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {EventBus} from "../../plugin/EventBusCore";
+import {destroyEventBus, EventBus} from "../../plugin/EventBusCore";
 import {cancelAssetUploads, cancelAssetUploadsByPlugin, prepareAssetUpload} from "./pluginEvent";
 
 type TListener = (event: CustomEvent<IBeforeUploadAssetsDetail>) => void;
 
+const eventBuses: EventBus[] = [];
+
 const createPlugin = (listener: TListener) => ({
     name: "test-plugin",
     eventBus: (() => {
-        const eventBus = new EventBus<IBeforeUploadAssetsDetail>("", new EventTarget());
+        const eventBus = new EventBus<IBeforeUploadAssetsDetail>(new EventTarget());
+        eventBuses.push(eventBus);
         eventBus.on("before-upload-assets", listener);
         return eventBus;
     })(),
@@ -19,6 +22,29 @@ const protyle = {} as IProtyle;
 const context = {source: "paste", target: "editor"} as const;
 
 describe("asset upload plugin event", () => {
+    afterEach(() => {
+        eventBuses.splice(0).forEach(destroyEventBus);
+    });
+
+    it("skips plugin waiting when nobody subscribes", () => {
+        const eventBus = new EventBus<IBeforeUploadAssetsDetail>(new EventTarget());
+        eventBuses.push(eventBus);
+        const prepared = prepareAssetUpload({
+            plugins: [{name: "test-plugin", eventBus}],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        if (prepared instanceof Promise) {
+            assert.fail("Expected plugin-free preparation to complete synchronously");
+        }
+        assert.equal(prepared.state, "ready");
+        cancelAssetUploads(protyle);
+        assert.equal(prepared.task.signal.aborted, false);
+        prepared.task.complete({status: "canceled"});
+    });
+
     it("exposes target constraints for uploads without an editor", async () => {
         let detail: IBeforeUploadAssetsDetail;
         const prepared = await prepareAssetUpload({

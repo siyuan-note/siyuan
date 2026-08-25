@@ -1041,7 +1041,7 @@ ${padHTML}
                 }).element);
             }
             /// #endif
-            if (protyle?.app?.plugins) {
+            if (protyle) {
                 emitOpenMenu({
                     type: "open-menu-breadcrumbmore",
                     detail: {

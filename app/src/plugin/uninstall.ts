@@ -16,6 +16,7 @@ import {cancelAssetUploadsByPlugin} from "../protyle/upload/pluginEvent";
 import {removeBreadcrumbButtons} from "./breadcrumbButton";
 import {refreshDockCatalog} from "../config/entryVisibility/catalog";
 import {isWindow} from "../util/functions";
+import {destroyEventBus} from "./EventBusCore";
 
 const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
     try {
@@ -33,7 +34,7 @@ const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
 export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) => {
     runCleanup(plugin, "asset upload", () => cancelAssetUploadsByPlugin(plugin));
     runCleanup(plugin, "kernel", () => plugin.kernel.destroy());
-    runCleanup(plugin, "event bus", () => plugin.eventBus.destroy());
+    runCleanup(plugin, "event bus", () => destroyEventBus(plugin.eventBus));
     if (isUninstall) {
         runCleanup(plugin, "dock storage", () => {
             const pluginDocks = window.siyuan.storage?.[Constants.LOCAL_PLUGIN_DOCKS] || {};

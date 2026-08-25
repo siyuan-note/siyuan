@@ -63,7 +63,7 @@ import {closeSubElement} from "./subElementLifecycle";
 import {getDefaultToolbar, getToolbarEntryId, markPluginToolbarEntries} from "./defaults";
 import {applyToolbarEntryVisibility} from "../../config/entryVisibility/runtime";
 import {refreshToolbarCatalog} from "../../config/entryVisibility/catalog";
-import {emitToPlugins, forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {emitToPlugins, forEachPluginSubscriber, hasPluginSubscriber} from "../../plugin/EventBusCore";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -1648,12 +1648,12 @@ export class Toolbar {
         let html = `<div data-id="clearLanguage" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
         let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
 
-        const eventDetail = {languages: hljsLanguages, type: "init", listElement};
-        if (protyle.app && protyle.app.plugins) {
+        if (hasPluginSubscriber("code-language-update")) {
+            const eventDetail = {languages: hljsLanguages, type: "init", listElement};
             emitToPlugins("code-language-update", eventDetail);
+            hljsLanguages = eventDetail.languages;
         }
 
-        hljsLanguages = eventDetail.languages;
         hljsLanguages.forEach((item) => {
             html += `<div data-id="${item}" class="b3-list-item">${item}</div>`;
         });
@@ -1720,12 +1720,12 @@ export class Toolbar {
                 }
             }
 
-            const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
-            if (protyle.app && protyle.app.plugins) {
+            if (hasPluginSubscriber("code-language-update")) {
+                const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
                 emitToPlugins("code-language-update", eventDetail);
+                matchLanguages = eventDetail.languages;
             }
 
-            matchLanguages = eventDetail.languages;
             if (value) {
                 matchLanguages.forEach((item) => {
                     if (value === item) {
@@ -2298,15 +2298,13 @@ export class Toolbar {
     private updateLanguage(languageElements: HTMLElement[], protyle: IProtyle, selectedLang: string) {
         const currentLang = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
 
-        if (protyle.app && protyle.app.plugins) {
-            forEachPluginSubscriber("code-language-change", eventBus => {
-                eventBus.emit("code-language-change", {
-                    language: currentLang,
-                    languageElements,
-                    protyle: protyle
-                });
+        forEachPluginSubscriber("code-language-change", eventBus => {
+            eventBus.emit("code-language-change", {
+                language: currentLang,
+                languageElements,
+                protyle: protyle
             });
-        }
+        });
 
         if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(currentLang)) {
             window.siyuan.storage[Constants.LOCAL_CODELANG] = currentLang;

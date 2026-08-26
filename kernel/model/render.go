@@ -296,7 +296,7 @@ func renderBlockContentByNodes(nodes []*ast.Node) string {
 	return buf.String()
 }
 
-func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resolved *[]string, depth *int) {
+func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resolved *[]string, depth *int, accessChecker ...EmbedBlockAccessChecker) {
 	var children []*ast.Node
 	if ast.NodeHeading == n.Type {
 		children = append(children, n)
@@ -343,6 +343,11 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 			stmt = html.UnescapeString(stmt)
 			stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 			sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
+			var embedAccessChecker EmbedBlockAccessChecker
+			if 0 < len(accessChecker) {
+				embedAccessChecker = accessChecker[0]
+			}
+			sqlBlocks = filterEmbedBlocksByAccess(sqlBlocks, embedAccessChecker)
 			for _, sqlBlock := range sqlBlocks {
 				if "query_embed" == sqlBlock.Type {
 					continue
@@ -485,7 +490,7 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 						return ast.WalkContinue
 					}
 
-					resolveEmbedR(insert, blockEmbedMode, luteEngine, resolved, depth)
+					resolveEmbedR(insert, blockEmbedMode, luteEngine, resolved, depth, accessChecker...)
 					*depth--
 				}
 			}

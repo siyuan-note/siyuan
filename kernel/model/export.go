@@ -973,7 +973,7 @@ func exportResourcesEncryptedBox(resourcePaths []string) (encryptedBoxID string,
 	return
 }
 
-func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
+func ExportPreview(id string, fillCSSVar bool, accessChecker ...EmbedBlockAccessChecker) (retStdHTML string) {
 	if exportErr := withExportReadLockByBlockID(id, func() error {
 		blockRefMode := Conf.Export.BlockRefMode
 		bt := getExportBlockTree(id)
@@ -989,7 +989,7 @@ func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			"#", "#", // 这里固定使用 # 包裹标签，否则无法正确解析标签 https://github.com/siyuan-note/siyuan/issues/13857
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true)
+			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true, accessChecker...)
 		luteEngine := NewLute()
 		enableLuteInlineSyntax(luteEngine)
 		luteEngine.SetFootnotes(true)
@@ -2056,7 +2056,8 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 	}
 }
 
-func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag bool) string {
+func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag bool,
+	accessChecker ...EmbedBlockAccessChecker) string {
 	var ret string
 	if exportErr := withExportReadLockByBlockID(id, func() error {
 		bt := getExportBlockTree(id)
@@ -2101,7 +2102,7 @@ func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjust
 			".md", Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, fillCSSVar, nil)
+			Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, fillCSSVar, nil, accessChecker...)
 		return nil
 	}); exportErr != nil {
 		logging.LogErrorf("export std markdown [%s] failed: %s", id, exportErr)
@@ -3084,12 +3085,13 @@ func exportMarkdownContent(rootID, ext string, exportRefMode int, defBlockIDs []
 func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string, assetsDestSpace2Underscore, adjustHeadingLv, imgTag bool,
 	ext string, blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string, blockRefTextLeft, blockRefTextRight string,
-	addTitle, inlineMemo bool, defBlockIDs []string, singleFile, fillCSSVar bool, boxPaths map[string]string) (ret string) {
+	addTitle, inlineMemo bool, defBlockIDs []string, singleFile, fillCSSVar bool, boxPaths map[string]string,
+	accessChecker ...EmbedBlockAccessChecker) (ret string) {
 	tree = exportTree(tree, false, false, false,
 		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
-		addTitle, "", inlineMemo, 0 < len(defBlockIDs), singleFile)
+		addTitle, "", inlineMemo, 0 < len(defBlockIDs), singleFile, accessChecker...)
 	if adjustHeadingLv {
 		bt := treenode.GetBlockTreeInBox(id, tree.Box)
 		adjustHeadingLevel(bt, tree, addTitle)
@@ -3237,14 +3239,15 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string,
 	blockRefTextLeft, blockRefTextRight string,
-	addTitle bool, customTitle string, inlineMemo, addDocAnchorSpan, singleFile bool) (ret *parse.Tree) {
+	addTitle bool, customTitle string, inlineMemo, addDocAnchorSpan, singleFile bool,
+	accessChecker ...EmbedBlockAccessChecker) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID
 
 	// 解析查询嵌入节点
 	depth := 0
-	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth)
+	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth, accessChecker...)
 
 	// 将当前文档的块超链接转换为引用
 	blockLink2Ref(ret)

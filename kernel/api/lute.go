@@ -69,11 +69,19 @@ func copyStdMarkdown(c *gin.Context) {
 		imgTag = arg["imgTag"].(bool)
 	}
 
-	markdownContent := model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag)
-	if model.IsReadOnlyRoleContext(c) {
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	var publishAccess model.PublishAccess
+	var accessChecker model.EmbedBlockAccessChecker
+	if isReadOnlyRole {
+		publishAccess = model.GetPublishAccess()
+		accessChecker = func(blockID string) bool {
+			return model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockID)
+		}
+	}
+	markdownContent := model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag, accessChecker)
+	if isReadOnlyRole {
 		bt := treenode.GetBlockTree(id)
 		if bt != nil {
-			publishAccess := model.GetPublishAccess()
 			markdownContent = model.FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, markdownContent, true)
 		}
 	}

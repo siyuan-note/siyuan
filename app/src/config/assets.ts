@@ -33,6 +33,9 @@ export const collectAssetsTabSearchStrings = (): string[] => [
 
 /** 资源 Tab 挂载（面板页，不走注册表渲染） */
 export const mountAssetsTab = (root: HTMLElement, keywords?: string, app?: App) => {
+    if (assets.element && assets.element !== root) {
+        unmountAssetsTab(assets.element);
+    }
     if (root.innerHTML === "") {
         assets.element = root;
         root.innerHTML = assets.genHTML();
@@ -51,8 +54,19 @@ export const mountAssetsTab = (root: HTMLElement, keywords?: string, app?: App) 
     }
 };
 
+/** 释放资源 Tab 内嵌编辑器及根节点引用 */
+export const unmountAssetsTab = (root: Element) => {
+    if (assets.element !== root) {
+        return;
+    }
+    assets.editor?.destroy();
+    assets.editor = undefined;
+    assets.element = undefined;
+};
+
 const assets = {
-    element: undefined as Element,
+    element: undefined as Element | undefined,
+    editor: undefined as Protyle | undefined,
     genHTML: () => {
         const mobile = isMobile();
         return `<div class="fn__flex-column" style="height: 100%">
@@ -115,8 +129,12 @@ const assets = {
 </div>`;
     },
     bindEvent: (app: App) => {
-        const assetsListElement = assets.element.querySelector('.config-assets[data-type="remove"] .config-assets__list');
-        const avListElement = assets.element.querySelector('.config-assets[data-type="removeAV"] .config-assets__list');
+        const root = assets.element;
+        if (!root) {
+            return;
+        }
+        const assetsListElement = root.querySelector('.config-assets[data-type="remove"] .config-assets__list');
+        const avListElement = root.querySelector('.config-assets[data-type="removeAV"] .config-assets__list');
         const editor = new Protyle(app, avListElement.nextElementSibling as HTMLElement, {
             blockId: "",
             action: [Constants.CB_GET_HISTORY],
@@ -128,11 +146,12 @@ const assets = {
             },
             typewriterMode: false,
         });
+        assets.editor = editor;
         disabledProtyle(editor.protyle);
         removeLoading(editor.protyle);
-        assets.element.addEventListener("click", (event) => {
+        root.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
-            while (target && !target.isEqualNode(assets.element)) {
+            while (target && !target.isEqualNode(root)) {
                 const type = target.getAttribute("data-type");
                 if (target.id === "removeAll") {
                     confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.clearAll}`, () => {
@@ -162,9 +181,9 @@ const assets = {
                     event.stopPropagation();
                     break;
                 } else if (target.classList.contains("item") && !target.classList.contains("item--focus")) {
-                    assets.element.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
+                    root.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
                     target.classList.add("item--focus");
-                    assets.element.querySelectorAll(".config-assets").forEach(item => {
+                    root.querySelectorAll(".config-assets").forEach(item => {
                         if (type === item.getAttribute("data-type")) {
                             item.classList.remove("fn__none");
                             if (type === "remove") {
@@ -309,7 +328,7 @@ const assets = {
             if (liElement && liElement.getAttribute("data-item") !== assetsListElement.nextElementSibling.getAttribute("data-item")) {
                 const item = liElement.getAttribute("data-item");
                 assetsListElement.nextElementSibling.setAttribute("data-item", item);
-                assetsListElement.nextElementSibling.innerHTML = renderAssetsPreview(item);
+                assetsListElement.nextElementSibling.innerHTML = renderAssetsPreview(liElement.getAttribute("data-path"), item);
             }
         });
         fetchPost("/api/asset/getUnusedAssets", {}, response => {
@@ -319,6 +338,7 @@ const assets = {
     _renderList: (data: {
         item: string,
         name: string,
+        path?: string,
         blockIDs?: string[]
     }[], element: Element, type: "unRefAV" | "unrefAssets" | "lostAssets") => {
         let html = "";
@@ -341,7 +361,7 @@ const assets = {
         <svg><use xlink:href="#iconPictureInPicture"></use></svg>
     </span>`
                 : "";
-            html += `<li data-tab-type="${type}" data-item="${item.item}"  class="b3-list-item${mobile ? "" : " b3-list-item--hide-action"}">
+            html += `<li data-tab-type="${type}" data-item="${escapeAttr(item.item)}" data-path="${escapeAttr(item.path || item.item)}" class="b3-list-item${mobile ? "" : " b3-list-item--hide-action"}">
     <span class="b3-list-item__text">${escapeHtml(item.name || item.item)}</span>
     ${blockPopoverHTML}
     <span data-type="copy" class="ariaLabel b3-list-item__action" aria-label="${type === "unRefAV" ? window.siyuan.languages.copyMirror : window.siyuan.languages.copy}">

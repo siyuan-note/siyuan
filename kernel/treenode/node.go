@@ -70,6 +70,18 @@ func GetEmbedBlockRef(embedNode *ast.Node) (blockRefID string) {
 }
 
 func GetEmbedBlockRefID(stmt string) (blockRefID string) {
+	defer func() {
+		if recovered := recover(); nil != recovered {
+			logging.LogErrorf("parse block query embed statement failed: %v", recovered)
+			blockRefID = ""
+		}
+	}()
+
+	tokenizer := sqlparser.NewStringTokenizer(stmt)
+	if token, _ := tokenizer.Scan(); sqlparser.SELECT != token {
+		return
+	}
+
 	parsedStmt, err := sqlparser.Parse(stmt)
 	if err != nil {
 		return

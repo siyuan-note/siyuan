@@ -56,6 +56,9 @@ func TestCustomFontLifecycle(t *testing.T) {
 	if len(font.Aliases) == 0 {
 		t.Fatalf("custom font aliases are missing: %+v", font)
 	}
+	if FontSpacingProportional != font.Spacing {
+		t.Fatalf("unexpected custom font spacing: %+v", font)
+	}
 
 	fonts := LoadCustomFonts()
 	if len(fonts) != 1 || fonts[0].ID != font.ID {

@@ -56,3 +56,8 @@ export const getTextSiyuanFromTextHTML = (html: string) => {
         textHtml
     };
 };
+
+export const getTextSiyuanFromClipboardData = (clipboardData: {getData(type: string): string}) => {
+    return clipboardData.getData("text/siyuan") ||
+        getTextSiyuanFromTextHTML(clipboardData.getData("text/html")).textSiyuan;
+};

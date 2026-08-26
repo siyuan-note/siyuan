@@ -19,6 +19,11 @@ export const shouldIgnoreHintTrigger = (activeHint: string, candidateHint: strin
     return activeHint === "#" && ["/", "、"].includes(candidateHint);
 };
 
+export const shouldCaptureHintUndoFocus = (splitChar: string, blockHintKeys: string[], lite: boolean,
+                                           value = "") => {
+    return value === "emoji" || blockHintKeys.includes(splitChar) || (lite && ["/", "、"].includes(splitChar));
+};
+
 export const endsWithMultiCharHintPrefix = (key: string, hintKeys: string[]) => {
     return hintKeys.some((hintKey) => hintKey.length > 1 && key.endsWith(hintKey.substring(0, 1)));
 };

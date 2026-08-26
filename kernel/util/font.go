@@ -64,7 +64,15 @@ type Font struct {
 	Weight      int      `json:"weight"`            // 对应 CSS font-weight
 	DisplayName string   `json:"displayName"`       // 给人看的名称 (Family + Subfamily)
 	Aliases     []string `json:"aliases,omitempty"` // 用于字体搜索的本地化名称和内部名称
+	Spacing     string   `json:"spacing,omitempty"` // 字体间距分类
 }
+
+const (
+	FontSpacingProportional  = "proportional"
+	FontSpacingDual          = "dual"
+	FontSpacingMonospace     = "monospace"
+	FontSpacingCharacterCell = "character-cell"
+)
 
 type fontLanguage struct {
 	PlatformID sfnt.PlatformID
@@ -130,6 +138,7 @@ func addFont(fonts []*Font, f *Font) []*Font {
 	for _, font := range fonts {
 		if strings.EqualFold(f.Family, font.Family) && f.Weight == font.Weight {
 			font.Aliases = mergeFontAliases(font.Aliases, f.Aliases, font.Family, font.DisplayName)
+			font.Spacing = mergeFontSpacing(font.Spacing, f.Spacing)
 			return fonts
 		}
 	}
@@ -259,6 +268,7 @@ func parseFontVariations(font *sfnt.Font, defaultFont *Font) (ret []*Font) {
 			Weight:      weight,
 			DisplayName: displayName,
 			Aliases:     aliases,
+			Spacing:     defaultFont.Spacing,
 		})
 	}
 	return
@@ -308,7 +318,96 @@ func parseFontInfo(font *sfnt.Font) (*Font, error) {
 		Weight:      weight,
 		DisplayName: displayName,
 		Aliases:     aliases,
+		Spacing:     detectFontSpacing(font),
 	}, nil
+}
+
+func detectFontSpacing(font *sfnt.Font) string {
+	postTable, postErr := font.Table(sfnt.MustNamedTag("post"))
+	postData := []byte(nil)
+	if nil == postErr {
+		postData = postTable.Bytes()
+		if 16 <= len(postData) && 0 != binary.BigEndian.Uint32(postData[12:16]) {
+			return FontSpacingMonospace
+		}
+	}
+
+	os2, os2Err := font.OS2Table()
+	if nil == os2Err && 2 == os2.Panose[0] && 9 == os2.Panose[3] {
+		return FontSpacingMonospace
+	}
+	if spacing := detectFontSpacingFromMetrics(font); "" != spacing {
+		return spacing
+	}
+	if 16 <= len(postData) {
+		return FontSpacingProportional
+	}
+	if nil == os2Err && 2 == os2.Panose[0] && 2 <= os2.Panose[3] && os2.Panose[3] <= 8 {
+		return FontSpacingProportional
+	}
+	return ""
+}
+
+func detectFontSpacingFromMetrics(font *sfnt.Font) string {
+	hhea, err := font.HheaTable()
+	if nil != err || hhea.NumOfLongHorMetrics < 32 {
+		return ""
+	}
+	hmtx, err := font.Table(sfnt.TagHmtx)
+	if nil != err {
+		return ""
+	}
+	metricCount := int(hhea.NumOfLongHorMetrics)
+	data := hmtx.Bytes()
+	if len(data) < metricCount*4 {
+		return ""
+	}
+
+	widths := make(map[uint16]struct{}, 3)
+	for i := 0; i < metricCount; i++ {
+		width := binary.BigEndian.Uint16(data[i*4 : i*4+2])
+		if 0 == width {
+			continue
+		}
+		widths[width] = struct{}{}
+		if 2 < len(widths) {
+			return ""
+		}
+	}
+	if 1 == len(widths) {
+		return FontSpacingMonospace
+	}
+	if 2 != len(widths) {
+		return ""
+	}
+	var first, second uint16
+	for width := range widths {
+		if 0 == first {
+			first = width
+		} else {
+			second = width
+		}
+	}
+	if second < first {
+		first, second = second, first
+	}
+	if uint32(first)*2 == uint32(second) {
+		return FontSpacingDual
+	}
+	return ""
+}
+
+func mergeFontSpacing(current, incoming string) string {
+	if "" == incoming {
+		return current
+	}
+	if "" == current || FontSpacingProportional == current {
+		return incoming
+	}
+	if FontSpacingProportional == incoming {
+		return current
+	}
+	return current
 }
 
 func selectFontName(entries []*sfnt.NameEntry, nameIDs ...sfnt.NameID) string {

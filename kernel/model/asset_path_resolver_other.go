@@ -20,6 +20,6 @@ package model
 
 import "path/filepath"
 
-func resolveAssetRealPath(path string) (string, error) {
+func ResolveRealPath(path string) (string, error) {
 	return filepath.EvalSymlinks(path)
 }

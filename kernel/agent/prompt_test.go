@@ -78,6 +78,33 @@ func TestSystemPromptDocumentsTagRendering(t *testing.T) {
 	}
 }
 
+func TestSystemPromptUsesSanitizedKernelLogTool(t *testing.T) {
+	for _, instruction := range []string{"sanitized kernel log with the log tool", "Prefer search", "use tail", "read for surrounding line ranges"} {
+		if !strings.Contains(systemPrompt, instruction) {
+			t.Fatalf("system prompt is missing the kernel log instruction %q", instruction)
+		}
+	}
+	if strings.Contains(systemPrompt, `read "temp/siyuan.log"`) {
+		t.Fatal("system prompt still asks the general file tool to read the protected raw kernel log")
+	}
+}
+
+func TestSystemPromptDocumentsSuperBlockLayout(t *testing.T) {
+	for _, instruction := range []string{
+		`"row" means a vertical layout`,
+		`"col" means a horizontal layout`,
+		`{{{col`,
+		`Use {{{row for a vertical super-block`,
+		`Never use data-layout in raw block DOM`,
+		`data-sb-layout="row" or data-sb-layout="col"`,
+		`every child must be complete block DOM with an explicit data-type`,
+	} {
+		if !strings.Contains(systemPrompt, instruction) {
+			t.Fatalf("system prompt is missing the super-block instruction %q", instruction)
+		}
+	}
+}
+
 func TestSystemPromptOmitsUnavailableSkillInstructions(t *testing.T) {
 	capabilities := &capabilitySet{registrations: map[string]*capabilityRegistration{}}
 	prompt := buildSystemPrompt("English", capabilities)

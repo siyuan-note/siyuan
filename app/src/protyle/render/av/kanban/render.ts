@@ -17,6 +17,7 @@ import {
     prepareAVLocate
 } from "../locate";
 import {getCardStyle} from "../gallery/style";
+import {getAVBackgroundColor, getAVColorStyle} from "../color";
 
 interface IIds {
     groupId: string,
@@ -28,7 +29,7 @@ const getKanbanTitleHTML = (group: IAVView, counter: number, draggable: boolean)
     let optionMenuHTML = "";
     if (["mSelect", "select"].includes(group.groupValue.type)) {
         group.groupValue.mSelect.forEach((item) => {
-            nameHTML += `<span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">${escapeHtml(item.content)}</span>`;
+            nameHTML += `<span class="b3-chip" style="${getAVColorStyle(item)}">${escapeHtml(item.content)}</span>`;
         });
         if (draggable && group.groupValue.mSelect.length === 1) {
             const value = group.groupValue.mSelect[0];
@@ -197,8 +198,8 @@ export const renderKanban = async (options: {
     const view = data.view as IAVKanban;
     const groupKey = view.fields.find(item => item.id === view.group?.field);
     const groupOptions = groupKey?.options || [];
-    const groupDraggable = !options.protyle.disabled && !created && !snapshot &&
-        !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed") &&
+    const queryEmbedElement = hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed");
+    const groupDraggable = !options.protyle.disabled && !created && !snapshot && !queryEmbedElement &&
         !["created", "date", "updated"].includes(groupKey?.type);
     const groupConfig = escapeAttr(JSON.stringify(view.group));
     let bodyHTML = "";
@@ -212,7 +213,7 @@ export const renderKanban = async (options: {
                 }
                 if (isSelectGroup) {
                     if (group.groupValue.mSelect && group.groupValue.mSelect.length > 0) {
-                        selectBg = `style="--b3-av-kanban-background: var(--b3-font-background${escapeAttr(group.groupValue.mSelect[0].color)});"`;
+                        selectBg = `style="--b3-av-kanban-background: ${getAVBackgroundColor(group.groupValue.mSelect[0])};"`;
                     } else {
                         selectBg = 'style="--b3-av-kanban-background: var(--b3-border-color);"';
                     }
@@ -226,7 +227,8 @@ export const renderKanban = async (options: {
     });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
-    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"), options.blockElement)}
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query,
+        !options.protyle.disabled && !queryEmbedElement, options.blockElement, !queryEmbedElement)}
     <div class="av__kanban${isSelectGroup ? " av__kanban--bg" : ""}" data-group-options="${escapeAttr(JSON.stringify(groupOptions))}" style="${getCardStyle(view)}">
         ${bodyHTML}
     </div>

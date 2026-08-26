@@ -973,7 +973,7 @@ func exportResourcesEncryptedBox(resourcePaths []string) (encryptedBoxID string,
 	return
 }
 
-func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
+func ExportPreview(id string, fillCSSVar bool, accessChecker ...EmbedBlockAccessChecker) (retStdHTML string) {
 	if exportErr := withExportReadLockByBlockID(id, func() error {
 		blockRefMode := Conf.Export.BlockRefMode
 		bt := getExportBlockTree(id)
@@ -989,13 +989,13 @@ func ExportPreview(id string, fillCSSVar bool) (retStdHTML string) {
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			"#", "#", // 这里固定使用 # 包裹标签，否则无法正确解析标签 https://github.com/siyuan-note/siyuan/issues/13857
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, Conf.Export.InlineMemo, true, true)
+			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true, accessChecker...)
 		luteEngine := NewLute()
 		enableLuteInlineSyntax(luteEngine)
 		luteEngine.SetFootnotes(true)
 		addBlockIALNodes(tree, false)
 
-		adjustHeadingLevel(bt, tree)
+		adjustHeadingLevel(bt, tree, Conf.Export.AddTitle)
 
 		// 移除超级块的属性列表 https://github.com/siyuan-note/siyuan/issues/13451
 		var unlinks []*ast.Node
@@ -1151,7 +1151,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptio
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, Conf.Export.InlineMemo, true, true)
+			Conf.Export.AddTitle, "", Conf.Export.InlineMemo, true, true)
 		name = path.Base(tree.HPath)
 		name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 		savePath = strings.TrimSpace(savePath)
@@ -1306,6 +1306,11 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool, mergeHeadingOptio
 }
 
 func ExportHTML(id, savePath string, pdf, keepFold, merge bool, mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
+	return ExportHTMLWithTitle(id, savePath, pdf, keepFold, merge, Conf.Export.AddTitle, "", mergeHeadingOptions...)
+}
+
+func ExportHTMLWithTitle(id, savePath string, pdf, keepFold, merge, addTitle bool, customTitle string,
+	mergeHeadingOptions ...MergeHeadingOptions) (name, dom string, node *ast.Node) {
 	if exportErr := withExportReadLockByBlockID(id, func() error {
 		savePath = strings.TrimSpace(savePath)
 
@@ -1322,7 +1327,7 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool, mergeHeadingOpti
 
 		if merge {
 			var mergeErr error
-			tree, mergeErr = mergeSubDocs(tree, mergeHeadingOptionsOrDefault(mergeHeadingOptions), Conf.Export.AddTitle)
+			tree, mergeErr = mergeSubDocs(tree, mergeHeadingOptionsOrDefault(mergeHeadingOptions), addTitle)
 			if nil != mergeErr {
 				logging.LogErrorf("merge sub docs failed: %s", mergeErr)
 				return nil
@@ -1353,8 +1358,8 @@ func ExportHTML(id, savePath string, pdf, keepFold, merge bool, mergeHeadingOpti
 			blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, Conf.Export.InlineMemo, true, true)
-		adjustHeadingLevel(bt, tree)
+			addTitle, customTitle, Conf.Export.InlineMemo, true, true)
+		adjustHeadingLevel(bt, tree, addTitle)
 		name = path.Base(tree.HPath)
 		name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
@@ -2051,7 +2056,8 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, boxID
 	}
 }
 
-func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag bool) string {
+func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag bool,
+	accessChecker ...EmbedBlockAccessChecker) string {
 	var ret string
 	if exportErr := withExportReadLockByBlockID(id, func() error {
 		bt := getExportBlockTree(id)
@@ -2096,7 +2102,7 @@ func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjust
 			".md", Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 			Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 			Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-			Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, fillCSSVar, nil)
+			Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, fillCSSVar, nil, accessChecker...)
 		return nil
 	}); exportErr != nil {
 		logging.LogErrorf("export std markdown [%s] failed: %s", id, exportErr)
@@ -3079,15 +3085,16 @@ func exportMarkdownContent(rootID, ext string, exportRefMode int, defBlockIDs []
 func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string, assetsDestSpace2Underscore, adjustHeadingLv, imgTag bool,
 	ext string, blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string, blockRefTextLeft, blockRefTextRight string,
-	addTitle, inlineMemo bool, defBlockIDs []string, singleFile, fillCSSVar bool, boxPaths map[string]string) (ret string) {
+	addTitle, inlineMemo bool, defBlockIDs []string, singleFile, fillCSSVar bool, boxPaths map[string]string,
+	accessChecker ...EmbedBlockAccessChecker) (ret string) {
 	tree = exportTree(tree, false, false, false,
 		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
-		addTitle, inlineMemo, 0 < len(defBlockIDs), singleFile)
+		addTitle, "", inlineMemo, 0 < len(defBlockIDs), singleFile, accessChecker...)
 	if adjustHeadingLv {
 		bt := treenode.GetBlockTreeInBox(id, tree.Box)
-		adjustHeadingLevel(bt, tree)
+		adjustHeadingLevel(bt, tree, addTitle)
 	}
 
 	luteEngine := NewLute()
@@ -3232,14 +3239,15 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string,
 	blockRefTextLeft, blockRefTextRight string,
-	addTitle, inlineMemo, addDocAnchorSpan, singleFile bool) (ret *parse.Tree) {
+	addTitle bool, customTitle string, inlineMemo, addDocAnchorSpan, singleFile bool,
+	accessChecker ...EmbedBlockAccessChecker) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID
 
 	// 解析查询嵌入节点
 	depth := 0
-	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth)
+	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth, accessChecker...)
 
 	// 将当前文档的块超链接转换为引用
 	blockLink2Ref(ret)
@@ -3405,7 +3413,10 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 				title.SetIALAttr(k, v)
 			}
 			title.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(title.KramdownIAL)})
-			content := html.UnescapeString(root.Content)
+			content := customTitle
+			if "" == content {
+				content = html.UnescapeString(root.Content)
+			}
 			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(content)})
 			ret.Root.PrependChild(title)
 		}
@@ -4679,14 +4690,14 @@ func getAttrViewTableAligns(table *av.Table, hiddenCol bool) (ret []int) {
 
 // adjustHeadingLevel 聚焦导出（即非文档块）的情况下，将第一个标题层级提升为一级（如果开启了添加文档标题的话提升为二级）。
 // Export preview mode supports focus use https://github.com/siyuan-note/siyuan/issues/15340
-func adjustHeadingLevel(bt *treenode.BlockTree, tree *parse.Tree) {
+func adjustHeadingLevel(bt *treenode.BlockTree, tree *parse.Tree, addTitle bool) {
 	if "d" == bt.Type {
 		return
 	}
 
 	level := 1
 	var firstHeading *ast.Node
-	if !Conf.Export.AddTitle {
+	if !addTitle {
 		for n := tree.Root.FirstChild; nil != n; n = n.Next {
 			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) && !n.ParentIs(ast.NodeCallout) {
 				firstHeading = n

@@ -18,6 +18,7 @@ import {clearAccessTabElement} from "./tabs/accessRuntime";
 import {clearSyncTabElement} from "./tabs/syncRuntime";
 import type {TSettingTab} from "./setting/tabs";
 import type {App} from "../index";
+import {unmountAssetsTab} from "./assets";
 
 /// #if !MOBILE
 const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
@@ -58,6 +59,10 @@ const openSettingDialog = (app: App, initialTab: TSettingTab = "editor") => {
             const bazaarRoot = settingDialogRef.element?.querySelector('.config__tab-container[data-name="bazaar"]') as HTMLElement | null;
             if (bazaarRoot) {
                 unmountBazaarTab(bazaarRoot);
+            }
+            const assetsRoot = settingDialogRef.element?.querySelector('.config__tab-container[data-name="assets"]');
+            if (assetsRoot) {
+                unmountAssetsTab(assetsRoot);
             }
             clearSyncTabElement();
             clearAccessTabElement();

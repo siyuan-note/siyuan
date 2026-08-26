@@ -228,7 +228,7 @@ export const toggleDockBar = (useElement: Element) => {
     document.querySelectorAll(".dock").forEach(item => {
         if (dockIsShow) {
             item.classList.add("fn__none");
-        } else if (item.querySelectorAll(".dock__item").length > 1) {
+        } else if (item.querySelector(".dock__item[data-type]")) {
             item.classList.remove("fn__none");
         }
     });
@@ -260,7 +260,7 @@ export const clearOBG = () => {
             }
             item.blockId = "";
             item.graphData = undefined;
-            item.onGraph(false);
+            item.onGraph();
         }
     });
     models.backlink.forEach(item => {

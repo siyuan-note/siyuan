@@ -1,7 +1,9 @@
 import {GraphCanvasRenderer} from "./canvasRenderer";
 import {
+    centerGraphCamera,
     createInitialPositions,
     fitGraphCamera,
+    fitSingleNodeCamera,
     getDraggedGraphPosition,
     getGraphNodeSize,
     normalizeGraphData,
@@ -15,6 +17,7 @@ import {
     IGraphEngineOptions,
     IGraphOptions,
     IGraphPalette,
+    IGraphSetDataOptions,
     IGraphSourceLink,
     IGraphSourceNode,
     TGraphLayoutRequest,
@@ -25,6 +28,8 @@ import {GraphWebGLRenderer} from "./webglRenderer";
 const MIN_SCALE = 0.02;
 const MAX_SCALE = 8;
 const CLICK_DISTANCE = 4;
+const WHEEL_ZOOM_SENSITIVITY = 0.0015;
+const TRACKPAD_PINCH_ZOOM_MULTIPLIER = 4;
 
 interface IPointerPosition {
     clientX: number;
@@ -71,7 +76,6 @@ export class GraphEngine {
     private layoutWorker: Worker;
     private options: IGraphOptions;
     private palette: IGraphPalette;
-    private pendingFocusId = "";
     private readonly pendingNodeReleases = new Map<number, number>();
     private readonly pinnedNodes = new Map<number, [number, number]>();
     private pinchAction: IPinchAction;
@@ -113,14 +117,13 @@ export class GraphEngine {
         links: IGraphSourceLink[],
         options: IGraphOptions,
         palette: IGraphPalette,
-        focusId = "",
-        resetLayout = false,
+        setDataOptions: IGraphSetDataOptions = {},
     ) {
         if (this.destroyed) {
             return;
         }
         const previous = new Map<string, [number, number]>();
-        if (!resetLayout) {
+        if (!setDataOptions.resetLayout) {
             this.data?.nodes.forEach((node, index) => {
                 previous.set(node.id, [this.positions[index * 2], this.positions[index * 2 + 1]]);
             });
@@ -132,10 +135,9 @@ export class GraphEngine {
         this.geometryVersion++;
         this.positionVersion++;
         this.styleVersion++;
-        this.selected = -1;
+        this.selected = setDataOptions.selectedId ? this.data.indexById.get(setDataOptions.selectedId) ?? -1 : -1;
         this.hovered = -1;
         this.selectionVersion++;
-        this.pendingFocusId = focusId;
         this.autoFitPending = true;
         this.cameraTouched = false;
         this.focusAnimation++;
@@ -181,6 +183,9 @@ export class GraphEngine {
                 });
             }
         }
+        if (nodeSizeChanged && this.data.nodes.length === 1 && !this.cameraTouched) {
+            this.fit(false);
+        }
         this.scheduleRender();
     }
 
@@ -196,7 +201,6 @@ export class GraphEngine {
         }
         this.focusAnimation++;
         this.autoFitPending = false;
-        this.pendingFocusId = "";
         this.pendingNodeReleases.clear();
         this.pinnedNodes.clear();
         this.data = undefined;
@@ -210,8 +214,20 @@ export class GraphEngine {
         this.labelCanvas.height = 1;
     }
 
-    public hasNode(id: string) {
-        return this.data?.indexById.has(id) || false;
+    public selectNode(id: string) {
+        if (this.destroyed) {
+            return;
+        }
+        const selected = this.data?.indexById.get(id) ?? -1;
+        if (this.selected === selected) {
+            return;
+        }
+        this.selected = selected;
+        this.selectionVersion++;
+        if (this.data?.nodes.length === 1 && !this.cameraTouched) {
+            this.fit(false);
+        }
+        this.scheduleRender();
     }
 
     public focusNode(id: string, animate = true) {
@@ -222,8 +238,7 @@ export class GraphEngine {
         if (index === undefined) {
             return;
         }
-        this.selected = index;
-        this.selectionVersion++;
+        this.selectNode(id);
         const targetX = this.width / 2 - this.positions[index * 2] * this.camera.scale;
         const targetY = this.height / 2 - this.positions[index * 2 + 1] * this.camera.scale;
         if (!animate) {
@@ -260,6 +275,7 @@ export class GraphEngine {
         const width = this.container.clientWidth;
         const height = this.container.clientHeight;
         const wasHidden = this.width < 1 || this.height < 1;
+        const sizeChanged = width !== this.width || height !== this.height;
         this.width = width;
         this.height = height;
         if (width < 1 || height < 1) {
@@ -269,8 +285,12 @@ export class GraphEngine {
         if (wasHidden) {
             this.postLayoutMessage({type: "resume", generation: this.generation});
         }
-        if (this.data && !this.cameraTouched && (wasHidden || this.autoFitPending)) {
+        if (this.data && !this.cameraTouched &&
+            (wasHidden || this.autoFitPending || (sizeChanged && this.data.nodes.length === 1))) {
             this.fit(false);
+        } else if (this.data && sizeChanged) {
+            this.focusAnimation++;
+            this.camera = centerGraphCamera(this.positions, this.data.sizes, width, height, this.camera.scale);
         }
         this.scheduleRender();
     }
@@ -343,10 +363,6 @@ export class GraphEngine {
         this.pendingNodeReleases.forEach((_token, index) => this.pinnedNodes.delete(index));
         this.pendingNodeReleases.clear();
         if (!this.data || this.data.nodes.length < 2) {
-            if (this.pendingFocusId) {
-                this.focusNode(this.pendingFocusId);
-                this.pendingFocusId = "";
-            }
             this.autoFitPending = false;
             return;
         }
@@ -384,10 +400,7 @@ export class GraphEngine {
                 this.positionVersion++;
                 this.scheduleRender();
                 if (message.settled) {
-                    if (this.pendingFocusId) {
-                        this.focusNode(this.pendingFocusId);
-                        this.pendingFocusId = "";
-                    } else if (this.autoFitPending && !this.cameraTouched) {
+                    if (this.autoFitPending && !this.cameraTouched) {
                         this.fit(true);
                     }
                     this.autoFitPending = false;
@@ -398,10 +411,6 @@ export class GraphEngine {
                 worker.terminate();
                 if (this.layoutWorker === worker) {
                     this.layoutWorker = undefined;
-                }
-                if (this.pendingFocusId) {
-                    this.focusNode(this.pendingFocusId);
-                    this.pendingFocusId = "";
                 }
                 this.autoFitPending = false;
             };
@@ -436,10 +445,6 @@ export class GraphEngine {
         } catch (error) {
             console.warn("Unable to start graph layout worker", error);
             this.stopLayout();
-            if (this.pendingFocusId) {
-                this.focusNode(this.pendingFocusId);
-                this.pendingFocusId = "";
-            }
             this.autoFitPending = false;
         }
     }
@@ -469,7 +474,19 @@ export class GraphEngine {
         if (!this.data || this.width < 1 || this.height < 1) {
             return;
         }
-        const target = fitGraphCamera(this.positions, this.data.sizes, this.width, this.height);
+        let target = fitGraphCamera(this.positions, this.data.sizes, this.width, this.height);
+        const node = this.data.nodes.length === 1 ? this.data.nodes[0] : undefined;
+        if (node?.label) {
+            target = fitSingleNodeCamera(
+                this.positions[0],
+                this.positions[1],
+                this.data.sizes[0],
+                this.width,
+                this.height,
+                target.scale,
+                (scale) => this.labelRenderer.measureLabel(node.label, scale, this.selected === 0 || this.hovered === 0),
+            );
+        }
         if (!animate) {
             this.focusAnimation++;
             this.camera = target;
@@ -704,7 +721,8 @@ export class GraphEngine {
         const y = event.clientY - rect.top;
         const anchor = screenToGraph(x, y, this.camera);
         const delta = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? event.deltaY * 16 : event.deltaY;
-        const scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, this.camera.scale * Math.exp(-delta * 0.0005)));
+        const sensitivity = WHEEL_ZOOM_SENSITIVITY * (event.ctrlKey ? TRACKPAD_PINCH_ZOOM_MULTIPLIER : 1);
+        const scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, this.camera.scale * Math.exp(-delta * sensitivity)));
         this.camera.scale = scale;
         this.camera.x = x - anchor.x * scale;
         this.camera.y = y - anchor.y * scale;
@@ -747,11 +765,13 @@ export class GraphEngine {
     private updateHover(pointer: IPointerPosition) {
         const hovered = this.hitTest(pointer.x, pointer.y);
         this.setHovered(hovered);
-        if (hovered < 0 || !this.data.nodes[hovered].title) {
+        const node = hovered < 0 ? undefined : this.data.nodes[hovered];
+        const title = node?.title || (this.data.nodes.length === 1 ? node?.label : "");
+        if (!title) {
             this.hideTooltip();
             return;
         }
-        this.tooltip.textContent = this.data.nodes[hovered].title;
+        this.tooltip.textContent = title;
         this.tooltip.style.left = `${pointer.x + 12}px`;
         this.tooltip.style.top = `${pointer.y + 12}px`;
         this.tooltip.classList.remove("fn__none");

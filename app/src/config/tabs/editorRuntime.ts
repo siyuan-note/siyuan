@@ -5,6 +5,8 @@ import {reloadProtyle} from "../../protyle/util/reload";
 import {resize} from "../../protyle/util/resize";
 import {createConfigNamespaceApi} from "../util/namespaceApi";
 import {shouldResetBottomBacklinkPanel} from "./editorRuntimeState";
+import {objEquals} from "../../util/functions";
+import {lineNumberRender} from "../../protyle/render/highlightRender";
 
 const applyEditorConfig = (data: Config.IEditor) => {
     const refreshKeepLoadedContent = window.siyuan.config.editor.keepLoadedContent !== data.keepLoadedContent;
@@ -13,8 +15,8 @@ const applyEditorConfig = (data: Config.IEditor) => {
     const refreshHeadingNumbers = window.siyuan.config.editor.headingNumber !== data.headingNumber ||
         window.siyuan.config.editor.headingNumberFormat !== data.headingNumberFormat;
     const remeasureHeadingNumbers = window.siyuan.config.editor.fontSize !== data.fontSize ||
-        window.siyuan.config.editor.fontFamily !== data.fontFamily ||
-        window.siyuan.config.editor.fontWeight !== data.fontWeight;
+        !objEquals(window.siyuan.config.editor.fontFamilies, data.fontFamilies);
+    const refreshCodeLineNumbers = !objEquals(window.siyuan.config.editor.codeFontFamilies, data.codeFontFamilies);
     window.siyuan.config.editor = data;
     const models = getAllModels();
     models.editor.forEach(item => item.updateBacklinkPanel(resetBottomBacklinkPanel));
@@ -57,6 +59,12 @@ const applyEditorConfig = (data: Config.IEditor) => {
     void setInlineStyle().then(() => {
         if (remeasureHeadingNumbers) {
             refreshHeadingNumberMeasurements();
+        }
+        if (refreshCodeLineNumbers) {
+            getAllEditor().forEach((editorItem) => {
+                editorItem.protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows")
+                    .forEach((rowsElement: HTMLElement) => lineNumberRender(rowsElement.parentElement));
+            });
         }
     });
 };

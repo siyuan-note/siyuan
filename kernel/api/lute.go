@@ -39,6 +39,9 @@ import (
 // maxSpinBlockDOMBytes 限制 spinBlockDOM 输入 DOM 的最大字节数。
 const maxSpinBlockDOMBytes = 1024 * 1024
 
+// maxHTML2BlockDOMRequestBytes 限制 html2BlockDOM 请求体的最大字节数。
+const maxHTML2BlockDOMRequestBytes int64 = 128 * 1024 * 1024
+
 func copyStdMarkdown(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -69,11 +72,19 @@ func copyStdMarkdown(c *gin.Context) {
 		imgTag = arg["imgTag"].(bool)
 	}
 
-	markdownContent := model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag)
-	if model.IsReadOnlyRoleContext(c) {
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	var publishAccess model.PublishAccess
+	var accessChecker model.EmbedBlockAccessChecker
+	if isReadOnlyRole {
+		publishAccess = model.GetPublishAccess()
+		accessChecker = func(blockID string) bool {
+			return model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockID)
+		}
+	}
+	markdownContent := model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel, imgTag, accessChecker)
+	if isReadOnlyRole {
 		bt := treenode.GetBlockTree(id)
 		if bt != nil {
-			publishAccess := model.GetPublishAccess()
 			markdownContent = model.FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, markdownContent, true)
 		}
 	}
@@ -83,6 +94,7 @@ func copyStdMarkdown(c *gin.Context) {
 func html2BlockDOM(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
+	limitHTML2BlockDOMRequestBody(c, maxHTML2BlockDOMRequestBytes)
 
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
@@ -110,26 +122,40 @@ func html2BlockDOM(c *gin.Context) {
 	office, _ := arg["office"].(string)
 	officeMathHTML, _ := arg["officeMathHTML"].(string)
 	wps, _ := arg["wps"].(string)
+	skipLocalAssets, _ := arg["skipLocalAssets"].(bool)
+	skipBase64Assets, _ := arg["skipBase64Assets"].(bool)
+	skipInlineSVGAssets, _ := arg["skipInlineSVGAssets"].(bool)
+	preflight, _ := arg["preflight"].(bool)
+	preparedHTML, _ := arg["preparedHTML"].(bool)
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
-	// 将 Word 和 WPS 公式转换为可编辑公式 https://github.com/siyuan-note/siyuan/issues/18747
-	if markdown, converted := convertClipboardMath(mathML, office, wps); converted {
-		luteEngine.SetInlineMath(true)
-		ret.Data = luteEngine.Md2BlockDOM(markdown, false)
+	dom, useHTML := prepareHTMLClipboardContent(luteEngine, dom, text, mathML, office, officeMathHTML, wps,
+		preparedHTML, convertClipboardMath, convertOfficeHTMLClipboardMath)
+	if !useHTML {
+		if preflight {
+			ret.Data = map[string]any{"converted": true, "dom": dom, "useHTML": false}
+		} else {
+			ret.Data = dom
+		}
 		return
 	}
-	if markdown, converted := convertOfficeHTMLClipboardMath(officeMathHTML); converted {
-		luteEngine.SetInlineMath(true)
-		ret.Data = luteEngine.Md2BlockDOM(markdown, false)
-		return
+	if preflight {
+		skipLocalAssets = true
+		skipBase64Assets = true
+		skipInlineSVGAssets = true
 	}
-	// 将 Word 和 WPS 批注转换为行级备注 https://github.com/siyuan-note/siyuan/issues/18748
-	dom = normalizeWPSComments(dom, text, wps)
-	dom = normalizeMSWordComments(dom)
-	tree, _ := model.HTML2Tree(dom, luteEngine, boxID)
+	normalizedHTML := dom
+	tree, _ := model.HTML2TreeWithOptions(dom, luteEngine, boxID, model.HTML2TreeOptions{
+		SkipBase64Assets:    skipBase64Assets,
+		SkipInlineSVGAssets: skipInlineSVGAssets,
+	})
 	if nil == tree {
-		ret.Data = "Failed to convert"
+		if preflight {
+			ret.Data = map[string]any{"converted": false, "dom": "Failed to convert", "normalizedHTML": normalizedHTML, "useHTML": true}
+		} else {
+			ret.Data = "Failed to convert"
+		}
 		return
 	}
 
@@ -179,7 +205,7 @@ func html2BlockDOM(c *gin.Context) {
 		}
 	}
 
-	if util.ContainerStd == model.Conf.System.Container {
+	if util.ContainerStd == model.Conf.System.Container && !skipLocalAssets {
 		// 处理本地资源文件复制
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || ast.NodeLinkDest != n.Type {
@@ -245,14 +271,60 @@ func html2BlockDOM(c *gin.Context) {
 
 	md, err := lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	if nil != err {
-		ret.Data = "Failed to convert"
+		if preflight {
+			ret.Data = map[string]any{"converted": false, "dom": "Failed to convert", "normalizedHTML": normalizedHTML, "useHTML": true}
+		} else {
+			ret.Data = "Failed to convert"
+		}
 		return
 	}
 
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	renderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	output := renderer.Render()
-	ret.Data = gulu.Str.FromBytes(output)
+	convertedDOM := gulu.Str.FromBytes(output)
+	if preflight {
+		ret.Data = map[string]any{"converted": true, "dom": convertedDOM, "normalizedHTML": normalizedHTML, "useHTML": true}
+	} else {
+		ret.Data = convertedDOM
+	}
+}
+
+func limitHTML2BlockDOMRequestBody(c *gin.Context, maxBytes int64) {
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxBytes)
+}
+
+type clipboardMathConverter func(mathML, office, wps string) (markdown string, converted bool)
+type officeHTMLClipboardMathConverter func(officeMathHTML string) (markdown string, converted bool)
+
+func prepareHTMLClipboardContent(luteEngine *lute.Lute, dom, text, mathML, office, officeMathHTML, wps string,
+	preparedHTML bool, mathConverter clipboardMathConverter,
+	officeHTMLMathConverter officeHTMLClipboardMathConverter) (resolvedDOM string, useHTML bool) {
+	if preparedHTML {
+		return dom, true
+	}
+	resolvedDOM, useHTML = resolveHTMLClipboardContent(luteEngine, dom, mathML, office, officeMathHTML, wps,
+		mathConverter, officeHTMLMathConverter)
+	if !useHTML {
+		return resolvedDOM, false
+	}
+	// 将 Word 和 WPS 批注转换为行级备注 https://github.com/siyuan-note/siyuan/issues/18748
+	resolvedDOM = normalizeWPSComments(resolvedDOM, text, wps)
+	return normalizeMSWordComments(resolvedDOM), true
+}
+
+func resolveHTMLClipboardContent(luteEngine *lute.Lute, dom, mathML, office, officeMathHTML, wps string,
+	mathConverter clipboardMathConverter, officeHTMLMathConverter officeHTMLClipboardMathConverter) (resolvedDOM string, useHTML bool) {
+	// 将 Word 和 WPS 公式转换为可编辑公式 https://github.com/siyuan-note/siyuan/issues/18747
+	if markdown, converted := mathConverter(mathML, office, wps); converted {
+		luteEngine.SetInlineMath(true)
+		return luteEngine.Md2BlockDOM(markdown, false), false
+	}
+	if markdown, converted := officeHTMLMathConverter(officeMathHTML); converted {
+		luteEngine.SetInlineMath(true)
+		return luteEngine.Md2BlockDOM(markdown, false), false
+	}
+	return dom, true
 }
 
 func normalizeMSWordComments(dom string) string {

@@ -28,6 +28,7 @@ import {hasTopClosestByClassName} from "../util/hasClosest";
 import {showMessage} from "../../dialog/message";
 import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
 import {buildWebClipboardHTML} from "../util/clipboardData";
+import {exportImage} from "../export/util";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: string) => {
     hideTooltip();
@@ -49,6 +50,14 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
         const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
         window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover-" + from : "app-" + from);
         const submenu = copySubMenu([protyle.block.rootID], true, undefined, protyle.block.showAll ? protyle.block.id : protyle.block.rootID);
+        submenu.push({
+            id: "copyAsPNG",
+            iconHTML: "",
+            label: window.siyuan.languages.copyAsPNG,
+            click() {
+                exportImage(protyle.block.showAll ? protyle.block.id : protyle.block.rootID, true);
+            }
+        });
         submenu.push({
             id: "copyDoc",
             iconHTML: "",
@@ -332,9 +341,8 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition, from: stri
         window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
 
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
-        if (protyle?.app?.plugins) {
+        if (protyle) {
             emitOpenMenu({
-                plugins: protyle.app.plugins,
                 type: "click-editortitleicon",
                 detail: {
                     protyle,

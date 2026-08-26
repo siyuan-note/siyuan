@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     getAVColumnFitWidth,
+    getAVRelationColumnWidth,
     getAVColumnResizeWidth,
     getAVDistributedColumnWidth,
     getAVTableFitWidths,
@@ -21,6 +22,16 @@ describe("getAVColumnFitWidth", () => {
 
     it("uses select padding for multi-select columns", () => {
         assert.equal(getAVColumnFitWidth("P", "mSelect", ["Long"], measureText), "72px");
+    });
+});
+
+describe("getAVRelationColumnWidth", () => {
+    it("keeps relation previews compact", () => {
+        assert.equal(getAVRelationColumnWidth("64px", "block", true), "120px");
+        assert.equal(getAVRelationColumnWidth("480px", "block", true), "160px");
+        assert.equal(getAVRelationColumnWidth("480px", "text", false), "160px");
+        assert.equal(getAVRelationColumnWidth("480px", "relation", false), "200px");
+        assert.equal(getAVRelationColumnWidth("120px", "date", false), "120px");
     });
 });
 

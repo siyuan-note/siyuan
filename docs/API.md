@@ -60,6 +60,10 @@
     * [Remove a field](#Remove-a-field)
     * [Set global field sort](#Set-global-field-sort)
     * [Set per-view field sort](#Set-per-view-field-sort)
+* [Search](#Search)
+    * [Get saved search criteria](#Get-saved-search-criteria)
+    * [Save a search criterion](#Save-a-search-criterion)
+    * [Remove a search criterion](#Remove-a-search-criterion)
 * [SQL](#SQL)
     * [Execute SQL query](#Execute-SQL-query)
     * [Flush transaction](#Flush-transaction)
@@ -717,6 +721,13 @@ Move documents by `id`:
     "msg": "",
     "data": {
       "errFiles": [""],
+      "succFiles": [
+        {
+          "index": 0,
+          "name": "foo.png",
+          "path": "assets/foo-20210719092549-9j5y79r.png"
+        }
+      ],
       "succMap": {
         "foo.png": "assets/foo-20210719092549-9j5y79r.png"
       }
@@ -725,9 +736,8 @@ Move documents by `id`:
   ```
 
     * `errFiles`: List of filenames with errors in upload processing
-    * `succMap`: For successfully processed files, the key is the file name when uploading, and the value is
-      assets/foo-id.png, which is used to replace the asset link address in the existing Markdown content with the
-      uploaded address
+    * `succFiles`: Successfully processed files in input order. `index` is the file's index in `file[]`, `name` is its upload filename, and `path` is the uploaded asset path. Use this field when a batch can contain duplicate filenames
+    * `succMap`: Compatibility mapping for existing callers. The key is the upload filename and the value is assets/foo-id.png. When a batch contains duplicate filenames, only the last item with a given key remains in this map
 
 ## Blocks
 
@@ -1618,6 +1628,10 @@ Note: To ensure data security, access to this interface is prohibited in Publish
         * `base32` | `base32-std`
         * `base32-hex`
         * `hex`
+
+      `text` preserves the existing behavior and converts the character set to UTF-8 when applicable. The binary encodings encode the response body before character-set conversion; existing HTTP content decoding behavior, such as gzip decompression, is unchanged.
+
+      The response body is limited to 32 MiB after HTTP content decoding. If the limit is exceeded, the API returns error code `10` without a partial body. Use `/api/network/proxy` for large files or streaming responses.
 * Return value
 
   ```json
@@ -2559,6 +2573,102 @@ Reorders a column within a single view's layout (e.g. a table's column order), w
     * `viewID`: Target view. When empty, uses the first available view
     * `keyID`: Field ID to move
     * `previousKeyID`: Field ID after which `keyID` should be placed. Empty string moves it to the first position
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+## Search
+
+Saved search criteria use the following fields:
+
+* `name`: Criterion name, which is also its unique key
+* `sort`: Result sorting method — `0` block type, `1` creation time ascending, `2` creation time descending, `3` update time ascending, `4` update time descending, `5` content order, `6` relevance ascending, `7` relevance descending
+* `group`: Grouping method — `0` no grouping, `1` group by document
+* `hasReplace`: Whether replacement is enabled
+* `method`: Search method — `0` keyword, `1` query syntax, `2` SQL, `3` regular expression, `4` semantic search
+* `hPath`: Human-readable search scope path
+* `idPath`: Search scope path array
+* `k`: Search keyword
+* `r`: Replacement keyword
+* `types`: Block type flags. Supported keys are `mathBlock`, `table`, `blockquote`, `superBlock`, `paragraph`, `document`, `heading`, `list`, `listItem`, `codeBlock`, `htmlBlock`, `embedBlock`, `databaseBlock`, `audioBlock`, `videoBlock`, `iframeBlock`, `widgetBlock`, and `callout`
+* `subTypes`: Block subtype flags. `h1` through `h6` select heading levels; `o`, `u`, and `t` select ordered, unordered, and task lists
+* `replaceTypes`: Replacement type flags. Supported keys are `text`, `imgText`, `imgTitle`, `imgSrc`, `aText`, `aTitle`, `aHref`, `code`, `em`, `strong`, `inlineMath`, `inlineMemo`, `blockRef`, `fileAnnotationRef`, `kbd`, `mark`, `s`, `sub`, `sup`, `tag`, `u`, `docTitle`, `codeBlock`, `mathBlock`, and `htmlBlock`
+
+Boolean flags omitted from `types`, `subTypes`, or `replaceTypes` are treated as `false`.
+
+### Get saved search criteria
+
+* `/api/storage/getCriteria`
+* No parameters
+* Return value: `data` is an array of saved search criteria in their saved order; it is an empty array when no criteria have been saved
+* For a read-only role, criteria are filtered by publish access permissions and the returned `k` and `r` values are cleared
+
+### Save a search criterion
+
+Creates a criterion or completely replaces the existing criterion with the same `name`. Replacing a criterion retains its current position; a new criterion is appended.
+
+* `/api/storage/setCriterion`
+* Administrator role required; unavailable in read-only mode
+* Parameters
+
+  ```json
+  {
+    "criterion": {
+      "name": "Public notes",
+      "sort": 0,
+      "group": 1,
+      "hasReplace": false,
+      "method": 0,
+      "hPath": "Public notes",
+      "idPath": ["20210808180117-czj9bvb"],
+      "k": "",
+      "r": "",
+      "types": {
+        "document": true,
+        "paragraph": true
+      },
+      "subTypes": {
+        "h1": true
+      },
+      "replaceTypes": {
+        "text": true
+      }
+    }
+  }
+  ```
+
+    * `criterion`: Complete search criterion to save
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+### Remove a search criterion
+
+Removes the criterion with the specified name. Removing a name that does not exist is also considered successful.
+
+* `/api/storage/removeCriterion`
+* Administrator role required; unavailable in read-only mode
+* Parameters
+
+  ```json
+  {
+    "name": "Public notes"
+  }
+  ```
+
+    * `name`: Criterion name
 * Return value
 
   ```json

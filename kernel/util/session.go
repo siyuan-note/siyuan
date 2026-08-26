@@ -40,8 +40,9 @@ func AuthCodeEquals(a, b string) bool {
 }
 
 var (
-	authThrottleLock = sync.Mutex{}
-	authThrottles    = map[string]*authThrottle{} // key: 来源 IP
+	authThrottleLock      = sync.Mutex{}
+	authThrottles         = map[string]*authThrottle{} // key: 来源 IP
+	authThrottleLastSweep = time.Time{}
 )
 
 // authThrottle 记录认证失败次数与锁定状态，用于防止无验证码的认证路径（如 Basic Auth）被暴力破解。
@@ -52,17 +53,38 @@ type authThrottle struct {
 }
 
 const (
-	authThrottleMaxFail     = 5       // 连续失败次数达到该值时开始锁定
-	authThrottleLockBaseSec = 30      // 首次锁定秒数
-	authThrottleLockMaxSec  = 15 * 60 // 锁定秒数上限
-	authThrottleWindowSec   = 15 * 60 // 失败计数滑动窗口，窗口内失败才累计
+	authThrottleMaxFail          = 5       // 连续失败次数达到该值时开始锁定
+	authThrottleLockBaseSec      = 30      // 首次锁定秒数
+	authThrottleLockMaxSec       = 15 * 60 // 锁定秒数上限
+	authThrottleWindowSec        = 15 * 60 // 失败计数滑动窗口，窗口内失败才累计
+	authThrottleMaxEntries       = 10000   // 限流记录条数上限，保证 map 内存有界
+	authThrottleSweepIntervalSec = 5 * 60  // 定期清扫过期记录的间隔秒数
 )
+
+// authThrottleSweepLocked 按固定间隔清扫过期记录，调用方须持有 authThrottleLock。
+// 清除窗口期已过且未锁定的条目，避免仅当同一 key 再次被访问时才清理，防止 map 无限增长
+// https://github.com/siyuan-note/siyuan/security/advisories/GHSA-2x7j-p79w-7744
+func authThrottleSweepLocked(now time.Time) {
+	if now.Sub(authThrottleLastSweep) < authThrottleSweepIntervalSec*time.Second {
+		return
+	}
+	authThrottleLastSweep = now
+	for key, throttle := range authThrottles {
+		if now.Before(throttle.LockUntil) {
+			continue // 仍处于锁定中，保留
+		}
+		if authThrottleWindowSec*time.Second <= now.Sub(throttle.LastFail) {
+			delete(authThrottles, key)
+		}
+	}
+}
 
 // AuthThrottleCheck 返回 key 剩余锁定秒数，0 表示未锁定。
 func AuthThrottleCheck(key string) (retryAfter int) {
 	authThrottleLock.Lock()
 	defer authThrottleLock.Unlock()
 
+	authThrottleSweepLocked(time.Now())
 	throttle := authThrottles[key]
 	if nil == throttle {
 		return 0
@@ -88,8 +110,14 @@ func AuthThrottleFail(key string) {
 	defer authThrottleLock.Unlock()
 
 	now := time.Now()
+	authThrottleSweepLocked(now)
 	throttle := authThrottles[key]
 	if nil == throttle {
+		if authThrottleMaxEntries <= len(authThrottles) {
+			// 达到条目上限后不再跟踪新 key，保证内存有界。攻击者可通过伪造来源地址制造大量唯一 key，
+			// 跳过跟踪仅影响新增 key 的限流，不影响已有记录的锁定与清理。
+			return
+		}
 		throttle = &authThrottle{}
 		authThrottles[key] = throttle
 	} else if authThrottleWindowSec*time.Second <= now.Sub(throttle.LastFail) {

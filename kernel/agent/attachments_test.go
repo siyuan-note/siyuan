@@ -9,12 +9,17 @@
 package agent
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"image"
+	"image/png"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -24,6 +29,7 @@ import (
 	kernelConf "github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
 	kernelModel "github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func testAgentAttachment() AgentAttachment {
@@ -62,6 +68,46 @@ func TestBuildAttachmentMessageUsesImageContent(t *testing.T) {
 	}
 	if !strings.Contains(string(encoded), `"content":[`) || strings.Contains(string(encoded), `"content":"`) {
 		t.Fatalf("attachment message was not encoded as multipart content: %s", encoded)
+	}
+}
+
+func TestCheckpointRestoresUserMessageImage(t *testing.T) {
+	useTestDataDir(t)
+	assetPath := filepath.Join(util.DataDir, "assets", "chat.png")
+	if err := os.MkdirAll(filepath.Dir(assetPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	var imageData bytes.Buffer
+	if err := png.Encode(&imageData, image.NewRGBA(image.Rect(0, 0, 2, 2))); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(assetPath, imageData.Bytes(), 0644); err != nil {
+		t.Fatal(err)
+	}
+	checkpoint := []AgentMessage{
+		{Role: "user", Content: "Describe ![image](assets/chat.png)", EntryID: "user-1"},
+		{Role: "assistant", Content: "It is a diagram", EntryID: "assistant-1"},
+		{Role: "user", Content: "What is the title?", EntryID: "user-2"},
+	}
+
+	initial := buildInitialMessages(checkpoint[0].Content, "English", nil, EditorContext{}, nil)
+	if len(initial) != 3 || !isAttachmentMessage(initial[2]) {
+		t.Fatalf("initial user image was not attached: %#v", initial)
+	}
+	messages := checkpointMessagesToOpenAI(checkpoint, "English", nil)
+	if len(messages) != 5 || !isAttachmentMessage(messages[2]) {
+		t.Fatalf("user image was not restored after its message: %#v", messages)
+	}
+	if messages[3].Role != openai.ChatMessageRoleAssistant || messages[4].Content != "What is the title?" {
+		t.Fatalf("user image changed conversation order: %#v", messages)
+	}
+	input := checkpointMessagesToOpenAIResponseInput(checkpoint, "English", nil, nil, false)
+	encoded, err := json.Marshal(input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(encoded), `"type":"input_image"`) {
+		t.Fatalf("Responses input omitted user image: %s", encoded)
 	}
 }
 

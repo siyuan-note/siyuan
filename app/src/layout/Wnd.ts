@@ -45,8 +45,6 @@ import type {App} from "../index";
 import {unicode2Emoji} from "../emoji";
 import {closeWindow} from "../window/closeWin";
 import {newCenterEmptyTab, resizeTabs, setTabPosition} from "./tabUtil";
-import {fullscreen} from "../protyle/breadcrumb/action";
-import {setPadding} from "../protyle/ui/initUI";
 import {setPosition} from "../util/setPosition";
 import {clearOBG} from "./dock/util";
 import {recordBeforeResizeTop} from "../protyle/util/resize";
@@ -598,7 +596,7 @@ export class Wnd {
 
         if (currentTab && target === currentTab.headElement) {
             if (currentTab.model instanceof Graph) {
-                currentTab.model.onGraph(false);
+                currentTab.model.onGraph();
             } else if (currentTab.model instanceof Asset && currentTab.model.pdfObject && currentTab.model.pdfObject.pdfViewer) {
                 // https://github.com/siyuan-note/siyuan/issues/5655
                 currentTab.model.pdfObject.pdfViewer.container.focus();
@@ -643,9 +641,8 @@ export class Wnd {
                     resize,
                 });
             }
-            if (window.siyuan.editorIsFullscreen && !currentTab.model.editor.protyle.element.className.includes("fullscreen")) {
-                fullscreen(currentTab.model.editor.protyle.element);
-                setPadding(currentTab.model.editor.protyle);
+            if (window.siyuan.editorIsFullscreen) {
+                currentTab.model.editor.setFullscreen(true);
             }
         } else {
             clearOBG();

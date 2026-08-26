@@ -36,14 +36,23 @@ type AssetOpen struct {
 	ShiftClick string `json:"shiftClick"` // Shift 加单击资源的打开方式
 }
 
+// EditorFont 描述编辑器字体及其显示信息。
+type EditorFont struct {
+	Family      string `json:"family"`
+	Weight      int    `json:"weight"`
+	DisplayName string `json:"displayName"`
+}
+
 type Editor struct {
 	AllowSVGScript                  bool           `json:"allowSVGScript"`                  // 允许执行 SVG 内脚本
 	AllowHTMLBLockScript            bool           `json:"allowHTMLBLockScript"`            // 允许执行 HTML 内容中的脚本
 	FontSize                        int            `json:"fontSize"`                        // 字体大小
 	FontSizeScrollZoom              bool           `json:"fontSizeScrollZoom"`              // 字体大小是否支持滚轮缩放
-	FontFamily                      string         `json:"fontFamily"`                      // 字体
-	FontWeight                      int            `json:"fontWeight"`                      // 字重
+	FontFamily                      string         `json:"fontFamily"`                      // 首选字体（兼容旧版本）
+	FontWeight                      int            `json:"fontWeight"`                      // 首选字体字重（兼容旧版本）
 	FontFamilyDisplay               string         `json:"fontFamilyDisplay"`               // 设置面板中展示的字体名称（与 FontFamily/FontWeight 对应，可选）
+	FontFamilies                    []*EditorFont  `json:"fontFamilies"`                    // 按优先级排列的字体
+	CodeFontFamilies                []*EditorFont  `json:"codeFontFamilies"`                // 按优先级排列的等宽字体
 	CodeSyntaxHighlightLineNum      bool           `json:"codeSyntaxHighlightLineNum"`      // 代码块是否显示行号
 	CodeTabSpaces                   int            `json:"codeTabSpaces"`                   // 代码块中 Tab 转换空格数，配置为 0 则表示不转换
 	CodeLineWrap                    bool           `json:"codeLineWrap"`                    // 代码块是否自动折行
@@ -92,6 +101,46 @@ type Editor struct {
 	PasteURLAutoConvert             bool           `json:"pasteURLAutoConvert"`             // 粘贴网址时自动转为链接
 	DragHTMLFileToIframe            bool           `json:"dragHTMLFileToIframe"`            // 是否将拖拽的 HTML 文件嵌入为 IFrame 块
 	Markdown                        *util.Markdown `json:"markdown"`                        // Markdown 配置
+}
+
+// NormalizeFontFamilies 清理字体列表并同步兼容旧版本的首选字体字段。
+func (editor *Editor) NormalizeFontFamilies() {
+	if nil == editor.FontFamilies && "" != editor.FontFamily {
+		editor.FontFamilies = []*EditorFont{{
+			Family:      editor.FontFamily,
+			Weight:      editor.FontWeight,
+			DisplayName: editor.FontFamilyDisplay,
+		}}
+	}
+
+	editor.FontFamilies = normalizeEditorFontFamilies(editor.FontFamilies)
+	editor.CodeFontFamilies = normalizeEditorFontFamilies(editor.CodeFontFamilies)
+	if 0 == len(editor.FontFamilies) {
+		editor.FontFamily = ""
+		editor.FontWeight = 400
+		editor.FontFamilyDisplay = ""
+		return
+	}
+
+	editor.FontFamily = editor.FontFamilies[0].Family
+	editor.FontWeight = editor.FontFamilies[0].Weight
+	editor.FontFamilyDisplay = editor.FontFamilies[0].DisplayName
+}
+
+func normalizeEditorFontFamilies(fontFamilies []*EditorFont) []*EditorFont {
+	fonts := make([]*EditorFont, 0, len(fontFamilies))
+	families := map[string]bool{}
+	for _, font := range fontFamilies {
+		if nil == font || "" == font.Family || families[font.Family] {
+			continue
+		}
+		families[font.Family] = true
+		if 1 > font.Weight || 1000 < font.Weight {
+			font.Weight = 400
+		}
+		fonts = append(fonts, font)
+	}
+	return fonts
 }
 
 const (

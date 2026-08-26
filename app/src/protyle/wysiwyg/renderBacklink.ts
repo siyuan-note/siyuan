@@ -10,6 +10,12 @@ import {avRender} from "../render/av/render";
 import {hasClosestByAttribute} from "../util/hasClosest";
 import {isEncryptedBox} from "../../util/pathName";
 import {decodeHTML, escapeAttr, escapeHtml, escapeSearchHighlight} from "../../util/escape";
+import {
+    applyViewFoldStates,
+    clearViewFoldDefaults,
+    clearViewFoldOccurrenceState,
+    markViewFoldDefault,
+} from "../util/viewFold";
 
 interface IBacklinkData {
     id?: string,
@@ -48,6 +54,7 @@ const createBacklinkDOMRecord = (item: IBacklinkData, index: number, id: string)
     const template = document.createElement("template");
     template.innerHTML = genBreadcrumb(item.blockPaths, false, index, id) + setBacklinkFold(item.dom, item.expand);
     const nodes = Array.from(template.content.childNodes);
+    (nodes[0] as HTMLElement).setAttribute("data-backlink-revision", item.revision || "");
     return {
         record: {
             revision: item.revision || "",
@@ -83,6 +90,7 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
     const ids = new Set(backlinkData.map((item, index) => item.id || `legacy-${index}`));
     records.forEach((record, id) => {
         if (!ids.has(id)) {
+            clearViewFoldOccurrenceState(protyle, id);
             removeBacklinkDOMRecord(record);
             records.delete(id);
         }
@@ -98,6 +106,7 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
             record = undefined;
         }
         if (!record || !item.revision || record.revision !== item.revision) {
+            clearViewFoldDefaults(protyle, id);
             const created = createBacklinkDOMRecord(item, index, id);
             if (record) {
                 created.nodes.forEach(node => element.insertBefore(node, record.anchor));
@@ -128,24 +137,41 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: IBacklinkData[])
             }
         }
     });
-    changedNodes.forEach(nodes => renderBacklinkDOMNodes(protyle, nodes));
+    const applyPromises: Promise<void>[] = [];
+    changedNodes.forEach(nodes => {
+        renderBacklinkDOMNodes(protyle, nodes);
+        nodes.forEach(node => {
+            if (node instanceof HTMLElement) {
+                applyPromises.push(applyViewFoldStates(protyle, node));
+            }
+        });
+    });
     removeLoading(protyle);
     if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {
         disabledProtyle(protyle);
     }
+    return Promise.all(applyPromises).then(() => undefined);
 };
 
 // 传递型折叠处理
-export const foldPassiveType = (expand: boolean, element: HTMLElement | DocumentFragment) => {
+export const foldPassiveType = (expand: boolean, element: HTMLElement | DocumentFragment, viewOnly = false) => {
     if (element.firstElementChild.classList.contains("li")) {
         if (expand) {
             element.querySelectorAll(".li .li").forEach(item => {
                 if (item.childElementCount > 3) {
-                    item.setAttribute("fold", "1");
+                    if (viewOnly) {
+                        markViewFoldDefault(item, true);
+                    } else {
+                        item.setAttribute("fold", "1");
+                    }
                 }
             });
         } else {
-            element.firstElementChild.setAttribute("fold", "1");
+            if (viewOnly) {
+                markViewFoldDefault(element.firstElementChild, true);
+            } else {
+                element.firstElementChild.setAttribute("fold", "1");
+            }
         }
     } else if (element.firstElementChild.getAttribute("data-type") === "NodeHeading") {
         Array.from(element.children).forEach((item, index) => {
@@ -162,7 +188,7 @@ export const foldPassiveType = (expand: boolean, element: HTMLElement | Document
 const setBacklinkFold = (html: string, expand: boolean) => {
     const tempDom = document.createElement("template");
     tempDom.innerHTML = html;
-    foldPassiveType(expand, tempDom.content);
+    foldPassiveType(expand, tempDom.content, true);
     return tempDom.innerHTML;
 };
 
@@ -184,9 +210,11 @@ export const loadBreadcrumb = (protyle: IProtyle, element: HTMLElement) => {
             tempElement.remove();
         }
         element.parentElement.insertAdjacentHTML("afterend", setBacklinkFold(getResponse.data.content, true));
+        clearViewFoldDefaults(protyle, element.parentElement.getAttribute("data-backlink-id"));
         processRender(element.parentElement.parentElement);
         avRender(element.parentElement.parentElement, protyle);
         blockRender(protyle, element.parentElement.parentElement);
+        void applyViewFoldStates(protyle);
         if (getResponse.data.isSyncing) {
             disabledForeverProtyle(protyle);
         } else if (window.siyuan.config.readonly || window.siyuan.config.editor.readOnly) {

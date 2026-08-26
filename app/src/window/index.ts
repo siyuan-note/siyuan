@@ -27,13 +27,15 @@ import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {renderSnippet} from "../config/util/snippets";
-import {refreshThemeStyle, setBodyHighlight} from "../util/assets";
+import {refreshThemeStyle, reloadInlineStyles, setBodyHighlight} from "../util/assets";
 import {reloadSync} from "../util/reloadSync";
 import {setTitle} from "../util/processTitle";
 import {ensureUILayout} from "../util/ensureUILayout";
 import {applyEntryVisibility} from "../config/entryVisibility/runtime";
 import {removeBlockPanelEditors} from "../block/panelRemoval";
 import {updateServerAddresses} from "../config/tabs/accessRuntime";
+import {applyCloudUserState} from "../config/tabs/accountUi";
+import {emitToPlugins} from "../plugin/EventBusCore";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -48,9 +50,7 @@ class App {
             id: genUUID(),
             type: "main",
             msgCallback: (data) => {
-                    this.plugins.forEach((plugin) => {
-                        plugin.eventBus.emit("ws-main", data);
-                    });
+                    emitToPlugins("ws-main", data);
                     if (data) {
                         switch (data.cmd) {
                             case "logoutAuth":
@@ -58,6 +58,9 @@ class App {
                                 break;
                             case "setAppearance":
                                 appearanceConfigApi.apply(data.data);
+                                break;
+                            case "reloadInlineStyles":
+                                void reloadInlineStyles();
                                 break;
                             case "setEntryVisibility":
                                 applyEntryVisibility(data.data);
@@ -93,6 +96,9 @@ class App {
                                 break;
                             case "setConf":
                                 window.siyuan.config = data.data;
+                                break;
+                            case "setCloudUser":
+                                applyCloudUserState(data.data.user, data.data.userName);
                                 break;
                             case "setServerAddrs":
                                 updateServerAddresses(data.data);
@@ -167,7 +173,7 @@ class App {
                                 transactionError(data.msg);
                                 break;
                             case "syncing":
-                                processSync(data, this.plugins);
+                                processSync(data);
                                 break;
                             case "backgroundtask":
                                 progressBackgroundTask(data.data.tasks);

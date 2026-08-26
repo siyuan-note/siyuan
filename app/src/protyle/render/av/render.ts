@@ -53,6 +53,8 @@ import {
     GROUP_TABLE_ESTIMATED_ROW_HEIGHT,
     GROUP_TABLE_INITIAL_ROW_BUDGET,
 } from "./groupTableVirtual";
+import {getAVHeaderEditingState} from "./headerEditing";
+import {getAVColorStyle} from "./color";
 
 interface IIds {
     groupId: string,
@@ -82,7 +84,8 @@ interface ITableOptions {
     }
 }
 
-export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boolean, blockElement: Element) => {
+export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boolean, blockElement: Element,
+                                 includeEditingControls = true) => {
     let tabHTML = "";
     let viewData = data.views.find((item) => item.id === data.viewID) || data.views[0];
     let hasFilter = false;
@@ -123,16 +126,12 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
     const defaultTemplate = data.newItemTemplates?.find(item => item.id === data.defaultTemplateID);
     const defaultTemplateID = defaultTemplate && (defaultTemplate.targetType !== "detached" ||
         defaultTemplate.primaryKeyTemplate || Object.keys(defaultTemplate.fieldValues || {}).length) ? defaultTemplate.id : "";
+    const editingState = getAVHeaderEditingState(editable, includeEditingControls);
     return `<div class="av__header" data-default-template-id="${defaultTemplateID}" data-current-view-id="${escapeAttr(data.viewID)}" data-view-count="${data.views.length}" data-view-ids="${data.views.map((view) => view.id).join(",")}" data-view-pages="${escapeAttr(serializeAVViewPageSizes(data.views))}">
         <div class="fn__flex av__views${showSearch ? " av__views--show" : ""}">
             <div class="av__selection-toolbar">
                 <span class="av__selection-count"></span>
-                ${editable ? `<button data-type="av-selection-edit" class="block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.editFields}">
-                    <svg><use xlink:href="#iconAttr"></use></svg>
-                </button>
-                <button data-type="av-selection-delete" class="block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.delete}">
-                    <svg><use xlink:href="#iconTrashcan"></use></svg>
-                </button>` : ""}
+                ${editingState.selectionHTML}
                 <button data-type="av-selection-more" class="block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.more}">
                     <svg><use xlink:href="#iconMore"></use></svg>
                 </button>
@@ -173,12 +172,9 @@ export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boole
                 <small>${visibleViewIDs.length}/${data.views.length}</small>
             </span>
             <div class="fn__space"></div>
-            ${editable ? `<div class="av__new fn__flex">
-                <button data-type="av-add-more" class="b3-button">${window.siyuan.languages.new}</button>
-                <button data-type="av-add-template" class="b3-button ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.template}"><svg><use xlink:href="#iconDown"></use></svg></button>
-            </div>` : ""}
+            ${editingState.newItemHTML}
         </div>
-        <div contenteditable="${editable}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${Lute.EscapeHTMLStr(data.name || "")}" data-tip="${window.siyuan.languages._kernel[267]}">${Lute.EscapeHTMLStr(data.name || "")}</div>
+        <div contenteditable="${editingState.contenteditable}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${Lute.EscapeHTMLStr(data.name || "")}" data-tip="${window.siyuan.languages._kernel[267]}">${Lute.EscapeHTMLStr(data.name || "")}</div>
     </div>`;
 };
 
@@ -284,7 +280,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     let nameHTML = "";
     if (["mSelect", "select"].includes(group.groupValue.type)) {
         group.groupValue.mSelect.forEach((item) => {
-            nameHTML += `<span class="b3-chip" style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">${escapeHtml(item.content)}</span>`;
+            nameHTML += `<span class="b3-chip" style="${getAVColorStyle(item)}">${escapeHtml(item.content)}</span>`;
         });
     } else if (group.groupValue.type === "checkbox") {
         nameHTML = `<svg style="width:calc(1.625em - 12px);height:calc(1.625em - 12px)"><use xlink:href="#icon${group.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
@@ -960,7 +956,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 if (operation.data && hasSelect) {
                     const nameElement = item.querySelector(".av__group-title .b3-chip") as HTMLElement;
                     if (nameElement) {
-                        item.setAttribute("style", `--b3-av-kanban-background:var(--b3-font-background${nameElement.style.backgroundColor.slice(-2, -1)})`);
+                        item.setAttribute("style", `--b3-av-kanban-background:${nameElement.style.backgroundColor}`);
                     } else {
                         item.setAttribute("style", "--b3-av-kanban-background: var(--b3-border-color)");
                     }

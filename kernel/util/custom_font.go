@@ -42,6 +42,7 @@ type CustomFont struct {
 	Weight      int      `json:"weight"`
 	DisplayName string   `json:"displayName"`
 	Aliases     []string `json:"aliases,omitempty"`
+	Spacing     string   `json:"spacing,omitempty"`
 	URL         string   `json:"url"`
 	path        string
 }
@@ -358,6 +359,7 @@ func newCustomFont(id, fontPath string, font *Font) *CustomFont {
 		Weight:      weight,
 		DisplayName: font.DisplayName,
 		Aliases:     mergeFontAliases(nil, append(append([]string(nil), font.Aliases...), font.Family), font.DisplayName),
+		Spacing:     font.Spacing,
 		URL:         "/custom-fonts/" + id,
 		path:        fontPath,
 	}

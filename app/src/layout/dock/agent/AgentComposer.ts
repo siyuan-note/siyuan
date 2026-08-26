@@ -9,6 +9,7 @@ import {blockRender} from "../../../protyle/render/blockRender";
 import {focusBlock} from "../../../protyle/util/selection";
 import {matchHotKey} from "../../../protyle/util/hotKey";
 import {isSkillHintRequestActive, shouldYieldSkillHint} from "./agentHintState";
+import {uploadFiles} from "../../../protyle/upload";
 
 export interface AgentComposerData {
     text: string;
@@ -27,6 +28,8 @@ interface ComposerHandle {
     restoreHistory: (h: string[]) => void;
     insertMention: (id: string, label: string) => void;
     insertMentions: (mentions: Array<{ id: string; label: string }>) => void;
+    uploadImages: (files: FileList, element: HTMLInputElement) => void;
+    isUploading: () => boolean;
     renderBlockHTML: (element: HTMLElement, onEmbedRender: () => void) => void;
 }
 
@@ -377,6 +380,17 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
                 protyle.insert(html);
             }
         },
+        uploadImages: (files, element) => {
+            uploadFiles(p, files, element, undefined, () => {
+                onChange?.();
+            }, {
+                source: "file-picker",
+                target: "editor",
+                allowedInputKinds: ["files"],
+            });
+            onChange?.();
+        },
+        isUploading: () => p.upload?.isUploading || false,
         renderBlockHTML: (element, onEmbedRender) => {
             resetEmbedBlocks(element);
             blockRender(p, element, undefined, onEmbedRender);

@@ -288,7 +288,8 @@ func CheckAuth(c *gin.Context) {
 			c.Next()
 			return
 		}
-		if strings.HasPrefix(c.Request.RequestURI, "/api/system/exit") {
+		if strings.HasPrefix(c.Request.RequestURI, "/api/system/exit") ||
+			strings.HasPrefix(c.Request.RequestURI, "/api/system/uiproc") {
 			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return
@@ -544,6 +545,15 @@ func ControlConcurrency(c *gin.Context) {
 		strings.HasPrefix(function, "search") ||
 		strings.HasPrefix(function, "render") ||
 		strings.HasPrefix(function, "ls") {
+		c.Next()
+		return
+	}
+
+	// 仅对已注册的静态 /api/ 路径做并发控制：路由表有限，requesting map 不会无界增长；
+	// 未知路径与带参数通配路由直接放行 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-p59v-3q54-qq55
+	if !strings.HasPrefix(reqPath, "/api/") ||
+		"" == c.FullPath() ||
+		strings.ContainsAny(c.FullPath(), ":*") {
 		c.Next()
 		return
 	}

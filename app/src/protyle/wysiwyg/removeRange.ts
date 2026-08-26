@@ -6,6 +6,27 @@ const getNextBlockSibling = (element: Element) => {
     return nextElement;
 };
 
+const NATIVE_COMPOSITION_EDITABLE_TYPES = new Set([
+    "NodeParagraph",
+    "NodeHeading",
+    "NodeCodeBlock",
+    "NodeTable",
+]);
+
+const NATIVE_COMPOSITION_SNAPSHOT_TYPES = new Set([
+    ...NATIVE_COMPOSITION_EDITABLE_TYPES,
+    "NodeList",
+    "NodeListItem",
+    "NodeBlockquote",
+    "NodeCallout",
+    "NodeSuperBlock",
+]);
+
+export const isNativeCrossBlockCompositionSupported = (rangeTypes: string[], snapshotTypes: string[]) => {
+    return rangeTypes.length >= 2 && rangeTypes.every(type => NATIVE_COMPOSITION_EDITABLE_TYPES.has(type)) &&
+        snapshotTypes.every(type => NATIVE_COMPOSITION_SNAPSHOT_TYPES.has(type));
+};
+
 const getListItemElement = (element: HTMLElement, editorElement: HTMLElement) => {
     let currentElement = element.parentElement;
     while (currentElement && currentElement !== editorElement) {

@@ -10,6 +10,7 @@ import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {getFieldsByData} from "./view";
 import {Constants} from "../../../constants";
 import {countFilterLeaves} from "./filterTree";
+import {getAVColorStyle} from "./color";
 
 const isExactRelationOperator = (operator: string) =>
     operator === "Contains any item" || operator === "Does not contain any item";
@@ -693,7 +694,11 @@ const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string
 
     // 触发器：显示已选值的 chip（与表格单元格样式一致），无选中时显示 placeholder + 下拉箭头
     const selectedChips = selectedValues.map((item: IAVCellSelectValue) => {
-        return `<span class="b3-chip b3-chip--middle av__select-chip" style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">${escapeHtml(item.content)}</span>`;
+        const option = options.find(colOption => colOption.name === item.content);
+        return `<span class="b3-chip b3-chip--middle av__select-chip" style="${getAVColorStyle({
+            color: option ? option.color : item.color,
+            resolvedColor: option ? option.resolvedColor : item.resolvedColor,
+        })}">${escapeHtml(item.content)}</span>`;
     }).join("");
     const triggerContent = selectedChips || `<span class="ft__on-surface fn__ellipsis">${placeholder}</span>`;
     const trigger = `<span class="av__select-trigger" data-type="selectTrigger" data-path="${path}">${triggerContent}<svg class="av__select-trigger-arrow"><use xlink:href="#iconDown"></use></svg></span>`;
@@ -702,11 +707,11 @@ const genInlineSelectHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     const searchInput = options.length > 5
         ? `<input class="b3-text-field" placeholder="${window.siyuan.languages.searchPlaceholder}" data-type="filterSearch" data-path="${path}">`
         : "";
-    const chips = options.map((option: { name: string; color: string; desc?: string }) => {
+    const chips = options.map(option => {
         const selected = selectedValues.some((s: IAVCellSelectValue) => s.content === option.name);
         return `<button type="button" class="av__select-option" data-name="${escapeAttr(option.name)}" data-color="${escapeAttr(option.color)}" data-type="selectOption" data-path="${path}">
 <svg class="av__select-option-check"><use xlink:href="#${selected ? "iconCheck" : "iconUncheck"}"></use></svg>
-<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${escapeAttr(option.color)});color:var(--b3-font-color${escapeAttr(option.color)})"><span class="fn__ellipsis">${escapeHtml(option.name)}</span></span>
+<span class="b3-chip b3-chip--middle" style="${getAVColorStyle(option)}"><span class="fn__ellipsis">${escapeHtml(option.name)}</span></span>
 </button>`;
     }).join("");
     const dropdown = `<div class="av__select-dropdown" data-type="selectDropdown" data-path="${path}" data-single="${allowMultiple ? "false" : "true"}" data-value-type="${valueType}" style="display:none;">
@@ -1199,8 +1204,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                 const itemUseElement = item.querySelector(".av__select-option-check use");
                 if (itemUseElement && itemUseElement.getAttribute("xlink:href") === "#iconCheck") {
                     const name = item.dataset.name;
-                    const color = item.dataset.color;
-                    selectedChips.push(`<span class="b3-chip b3-chip--middle av__select-chip" style="background-color:var(--b3-font-background${escapeAttr(color)});color:var(--b3-font-color${escapeAttr(color)})">${escapeHtml(name)}</span>`);
+                    const chipStyle = item.querySelector(".b3-chip")?.getAttribute("style") ||
+                        getAVColorStyle(item.dataset.color);
+                    selectedChips.push(`<span class="b3-chip b3-chip--middle av__select-chip" style="${escapeAttr(chipStyle)}">${escapeHtml(name)}</span>`);
                 }
             });
             const contentHTML = selectedChips.join("") || `<span class="ft__on-surface fn__ellipsis">${placeholderStr}</span>`;

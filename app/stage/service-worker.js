@@ -61,15 +61,20 @@ self.addEventListener("fetch", event => {
         return;
     }
 
+    if (url.origin === location.origin && url.pathname.startsWith("/appearance/langs/")) {
+        event.respondWith(fetch(event.request, {cache: "no-store"}));
+        return;
+    }
+
     // On fetch, go to the cache first, and then network.
     event.respondWith((async () => {
         const cache = await caches.open(CACHE_NAME);
-        const cachedResponse = await cache.match(url.pathname);
+        const cachedResponse = await cache.match(event.request);
         if (cachedResponse && cachedResponse.type !== 'opaque') {
             return cachedResponse;
         } else {
             const fetchResponse = await fetch(event.request);
-            cache.put(url.pathname, fetchResponse.clone());
+            cache.put(event.request, fetchResponse.clone());
             return fetchResponse;
         }
     })());

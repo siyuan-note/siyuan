@@ -64,6 +64,7 @@ import {
     endsWithMultiCharHintPrefix,
     getBlockHintTriggerOffset,
     getBlockRefStaticText,
+    shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
 } from "./blockHintRange";
 
@@ -248,7 +249,9 @@ export class Hint {
         const key = this.getKey(currentLineValue, textAfterCaret, protyle.options.hint.extend);
         if (typeof key === "undefined" ||
             hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "code") ||
-            hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "NodeCodeBlock")) {
+            hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "NodeCodeBlock") ||
+            (["/", "、"].includes(this.splitChar) &&
+                hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "tag"))) {
             this.element.classList.add("fn__none");
             clearTimeout(this.timeId);
             return;
@@ -382,6 +385,8 @@ export class Hint {
                     htmlAsIframe: event.target.dataset.uploadMode === "html-iframe",
                     insertPosition: createUploadInsertPosition(range,
                         getUndoFocusContext(protyle.wysiwyg.element, range, true)),
+                    source: "file-picker",
+                    target: "editor",
                 });
                 hideElements(["hint", "toolbar"], protyle);
             });
@@ -580,7 +585,7 @@ ${genHintItemHTML(item)}
         }
     }
 
-    private openEmojiInsertPanel(protyle: IProtyle, range: Range) {
+    private openEmojiInsertPanel(protyle: IProtyle, range: Range, undoContext?: Record<string, string>) {
         const targetElement = hasClosestBlock(range.startContainer);
         const targetID = targetElement ? targetElement.getAttribute("data-node-id") : protyle.block.rootID;
         const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
@@ -595,7 +600,8 @@ ${genHintItemHTML(item)}
                 return;
             }
             focusByRange(protyle.toolbar.range);
-            insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle, false, true);
+            insertHTML(protyle.lute.SpinBlockDOM(genEmojiInsertHTML(unicode)), protyle, false, true,
+                false, undefined, undoContext);
         }, undefined, {targetID});
     }
 
@@ -701,7 +707,7 @@ ${genHintItemHTML(item)}
             id = nodeElement.getAttribute("data-node-id");
         }
         const html = nodeElement.outerHTML;
-        const undoContext = Constants.BLOCK_HINT_KEYS.includes(this.splitChar) ?
+        const undoContext = shouldCaptureHintUndoFocus(this.splitChar, Constants.BLOCK_HINT_KEYS, protyle.lite, value) ?
             getUndoFocusContext(protyle.wysiwyg.element, range, true) : undefined;
         // 自顶向下法新建文档后光标定位问题 https://github.com/siyuan-note/siyuan/issues/299
         if (this.lastIndex > -1) {
@@ -786,7 +792,7 @@ ${genHintItemHTML(item)}
             return;
         } else if (this.splitChar === "/" || this.splitChar === "、") {
             if (protyle.lite) {
-                insertHTML(value, protyle);
+                insertHTML(value, protyle, false, false, false, undefined, undoContext);
             } else if (value === "((" || value === "{{") {
                 this.enableExtend = true;
                 if (value === "((") {
@@ -877,10 +883,8 @@ ${genHintItemHTML(item)}
                 protyle.toolbar.setInlineMark(protyle, value, "range");
                 return;
             } else if (value === "emoji") {
-                range.deleteContents();
-                range.collapse(false);
-                focusByRange(range);
-                this.openEmojiInsertPanel(protyle, range);
+                // 保留斜杠命令选区，选择表情时由 insertHTML 作为一个事务替换，确保撤销恢复命令文本
+                this.openEmojiInsertPanel(protyle, range, undoContext);
                 return;
             } else if (value.startsWith("style")) {
                 range.deleteContents();

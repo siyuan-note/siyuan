@@ -55,6 +55,13 @@ export const getBazaarCompatibilityFieldVisibility = (packageType: string) => {
     };
 };
 
+export const isBazaarPackageEnableDisabled = (
+    packageType: string,
+    item: {disallowInstall?: boolean, installedIncompatible?: boolean, enabled?: boolean, current?: boolean},
+) => (item.disallowInstall === true || item.installedIncompatible === true) && (
+    packageType === "plugins" ? item.enabled !== true : packageType === "themes" && item.current !== true
+);
+
 export const isBazaarPluginEnabledInPublish = (item: {
     disabledInPublish?: boolean;
     userDisabledInPublish?: boolean;
@@ -149,6 +156,15 @@ export const normalizeBazaarRating = (rating: Partial<IBazaarRating> | null | un
         count,
         distribution,
     };
+};
+
+const bazaarRatingDisplayCount = 10;
+
+export const getDisplayableBazaarRating = (
+    rating: Partial<IBazaarRating> | null | undefined,
+): IBazaarRating | undefined => {
+    const normalized = normalizeBazaarRating(rating);
+    return normalized && normalized.count >= bazaarRatingDisplayCount ? normalized : undefined;
 };
 
 export const normalizeBazaarPackageRatingResponse = (data: {
@@ -261,8 +277,8 @@ export const sortBazaarPackagesByRating = <T extends {
     rating?: IBazaarRating;
     updated?: string;
 }>(packages: T[], descending: boolean): T[] => packages.map((item, index) => ({item, index})).sort((a, b) => {
-    const aRating = a.item.ratingAvailable === true ? normalizeBazaarRating(a.item.rating) : undefined;
-    const bRating = b.item.ratingAvailable === true ? normalizeBazaarRating(b.item.rating) : undefined;
+    const aRating = a.item.ratingAvailable === true ? getDisplayableBazaarRating(a.item.rating) : undefined;
+    const bRating = b.item.ratingAvailable === true ? getDisplayableBazaarRating(b.item.rating) : undefined;
     if (!aRating && !bRating) {
         return a.index - b.index;
     }

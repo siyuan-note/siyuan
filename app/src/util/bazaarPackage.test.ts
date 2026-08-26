@@ -12,9 +12,11 @@ import {
     getBazaarFundingItems,
     getBazaarKernelSystemLabels,
     getBazaarPackageInvalidLanguageKey,
+    getDisplayableBazaarRating,
     getBazaarRatingErrorLanguageKey,
     getBazaarRatingMutationVersion,
     getBazaarThemeModeLabels,
+    isBazaarPackageEnableDisabled,
     isBazaarPackageRatingEditable,
     isBazaarPackageRatingLoaded,
     isBazaarPluginEnabledInPublish,
@@ -132,6 +134,30 @@ describe("getBazaarCompatibilityFieldVisibility", () => {
                 modes: false,
             });
         });
+    });
+});
+
+describe("isBazaarPackageEnableDisabled", () => {
+    it("disables enabling incompatible plugins and themes", () => {
+        assert.equal(isBazaarPackageEnableDisabled("plugins", {installedIncompatible: true, enabled: false}), true);
+        assert.equal(isBazaarPackageEnableDisabled("themes", {installedIncompatible: true, current: false}), true);
+    });
+
+    it("disables packages that require a newer app version", () => {
+        assert.equal(isBazaarPackageEnableDisabled("plugins", {disallowInstall: true, enabled: false}), true);
+        assert.equal(isBazaarPackageEnableDisabled("themes", {disallowInstall: true, current: false}), true);
+    });
+
+    it("keeps disabling an active incompatible package available", () => {
+        assert.equal(isBazaarPackageEnableDisabled("plugins", {installedIncompatible: true, enabled: true}), false);
+        assert.equal(isBazaarPackageEnableDisabled("themes", {installedIncompatible: true, current: true}), false);
+        assert.equal(isBazaarPackageEnableDisabled("plugins", {disallowInstall: true, enabled: true}), false);
+        assert.equal(isBazaarPackageEnableDisabled("themes", {disallowInstall: true, current: true}), false);
+    });
+
+    it("does not disable compatible or unsupported package types", () => {
+        assert.equal(isBazaarPackageEnableDisabled("plugins", {installedIncompatible: false, enabled: false}), false);
+        assert.equal(isBazaarPackageEnableDisabled("icons", {installedIncompatible: true, current: false}), false);
     });
 });
 
@@ -273,6 +299,25 @@ describe("normalizeBazaarRating", () => {
             count: 2,
             distribution: [0, 0, 0, 2, 0],
         }), undefined);
+    });
+});
+
+describe("getDisplayableBazaarRating", () => {
+    it("shows public ratings after they reach ten ratings", () => {
+        assert.equal(getDisplayableBazaarRating({
+            average: 5,
+            count: 9,
+            distribution: [0, 0, 0, 0, 9],
+        }), undefined);
+        assert.deepEqual(getDisplayableBazaarRating({
+            average: 5,
+            count: 10,
+            distribution: [0, 0, 0, 0, 10],
+        }), {
+            average: 5,
+            count: 10,
+            distribution: [0, 0, 0, 0, 10],
+        });
     });
 });
 
@@ -429,37 +474,38 @@ describe("applyBazaarPackageRatingToItem", () => {
 describe("sortBazaarPackagesByRating", () => {
     const packages = [
         {name: "unrated", updated: "20260101"},
-        {name: "few", updated: "20260104", ratingAvailable: true, rating: {average: 4.5, count: 2, distribution: [0, 0, 0, 1, 1]}},
+        {name: "few", updated: "20260104", ratingAvailable: true, rating: {average: 5, count: 9, distribution: [0, 0, 0, 0, 9]}},
         {name: "many-old", updated: "20260102", ratingAvailable: true, rating: {average: 4.5, count: 10, distribution: [0, 0, 0, 5, 5]}},
         {name: "many-new", updated: "20260103", ratingAvailable: true, rating: {average: 4.5, count: 10, distribution: [0, 0, 0, 5, 5]}},
+        {name: "many-more", updated: "20260101", ratingAvailable: true, rating: {average: 4.5, count: 20, distribution: [0, 0, 0, 10, 10]}},
         {name: "low", updated: "20260105", ratingAvailable: true, rating: {average: 2, count: 100, distribution: [0, 100, 0, 0, 0]}},
     ] as Array<{name: string, updated: string, ratingAvailable?: boolean, rating?: IBazaarRating}>;
 
     it("sorts descending with count and update-time tie breakers", () => {
         assert.deepEqual(sortBazaarPackagesByRating(packages, true).map((item) => item.name), [
-            "many-new", "many-old", "few", "low", "unrated",
+            "many-more", "many-new", "many-old", "low", "unrated", "few",
         ]);
     });
 
     it("sorts ascending while keeping unrated packages last", () => {
         assert.deepEqual(sortBazaarPackagesByRating(packages, false).map((item) => item.name), [
-            "low", "many-new", "many-old", "few", "unrated",
+            "low", "many-more", "many-new", "many-old", "unrated", "few",
         ]);
     });
 
     it("preserves the original order when all rating tie breakers match", () => {
         const tied = [
-            {name: "first", updated: "20260101", ratingAvailable: true, rating: {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]}},
-            {name: "second", updated: "20260101", ratingAvailable: true, rating: {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]}},
+            {name: "first", updated: "20260101", ratingAvailable: true, rating: {average: 5, count: 10, distribution: [0, 0, 0, 0, 10]}},
+            {name: "second", updated: "20260101", ratingAvailable: true, rating: {average: 5, count: 10, distribution: [0, 0, 0, 0, 10]}},
         ] as Array<{name: string, updated: string, ratingAvailable: boolean, rating: IBazaarRating}>;
         assert.deepEqual(sortBazaarPackagesByRating(tied, true).map((item) => item.name), ["first", "second"]);
     });
 
     it("treats ratings without an available public index as unrated", () => {
         const unavailable = [
-            {name: "available", ratingAvailable: true, rating: {average: 1, count: 1, distribution: [1, 0, 0, 0, 0]}},
-            {name: "unavailable", ratingAvailable: false, rating: {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]}},
-            {name: "missing-flag", rating: {average: 5, count: 1, distribution: [0, 0, 0, 0, 1]}},
+            {name: "available", ratingAvailable: true, rating: {average: 1, count: 10, distribution: [10, 0, 0, 0, 0]}},
+            {name: "unavailable", ratingAvailable: false, rating: {average: 5, count: 10, distribution: [0, 0, 0, 0, 10]}},
+            {name: "missing-flag", rating: {average: 5, count: 10, distribution: [0, 0, 0, 0, 10]}},
         ] as Array<{name: string, ratingAvailable?: boolean, rating?: IBazaarRating}>;
         assert.deepEqual(sortBazaarPackagesByRating(unavailable, true).map((item) => item.name), [
             "available", "unavailable", "missing-flag",

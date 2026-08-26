@@ -35,6 +35,7 @@ interface ICapabilityInfo {
     ownerId?: string;
     ownerName?: string;
     runtime: "kernel" | "plugin-worker" | "mcp" | "browser";
+    agentOnly?: boolean;
     available: boolean;
     actions?: ICapabilityActionInfo[];
 }
@@ -80,7 +81,8 @@ const getManifestActions = (capability: ReturnType<typeof listCapabilityManifest
 
 const getAllCapabilities = (backend: ICapabilityInfo[], scope: CapabilityScope): ICapabilityInfo[] => {
     if (scope === "mcp") {
-        return backend.filter((capability) => capability.source !== "mcp" && capability.runtime !== "mcp").sort((a, b) => {
+        return backend.filter((capability) => !capability.agentOnly && capability.source !== "mcp" &&
+            capability.runtime !== "mcp").sort((a, b) => {
             const group = getGroupLabel(a).localeCompare(getGroupLabel(b));
             return group || a.id.localeCompare(b.id);
         });

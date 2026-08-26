@@ -417,6 +417,20 @@ const renderPDF = async (id: string) => {
         </label>
         <label class="b3-label">
             <div>
+                ${window.siyuan.languages.export17}
+            </div>
+            <span class="fn__hr"></span>
+            <input id="addTitle" class="b3-switch" type="checkbox" ${window.siyuan.config.export.addTitle ? "checked" : ""}>
+        </label>
+        <label id="customTitlePanel" class="b3-label${window.siyuan.config.export.addTitle ? "" : " fn__none"}">
+            <div>
+                ${window.siyuan.languages.title}
+            </div>
+            <span class="fn__hr"></span>
+            <input aria-label="${window.siyuan.languages.title}" id="customTitle" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.title}">
+        </label>
+        <label class="b3-label">
+            <div>
                 ${window.siyuan.languages.mergeSubdocs}
             </div>
             <span class="fn__hr"></span>
@@ -627,6 +641,8 @@ ${getIconScript(servePath)}
     fetchPost("/api/export/exportPreviewHTML", {
         id: "${id}",
         keepFold: ${localData.keepFold},
+        addTitle: ${window.siyuan.config.export.addTitle},
+        customTitle: "",
         merge: ${localData.mergeSubdocs},
         mergeDocHeadingMode: "${localData.mergeDocHeadingMode}",
         mergeContentHeadingMode: "${localData.mergeContentHeadingMode}",
@@ -679,6 +695,18 @@ ${getIconScript(servePath)}
         keepFoldElement.addEventListener('change', () => {
             refreshPreview();
         });
+        const addTitleElement = actionElement.querySelector('#addTitle');
+        const customTitleElement = actionElement.querySelector('#customTitle');
+        const customTitlePanelElement = actionElement.querySelector('#customTitlePanel');
+        let titleRefreshTimer;
+        addTitleElement.addEventListener('change', () => {
+            customTitlePanelElement.classList.toggle('fn__none', !addTitleElement.checked);
+            refreshPreview();
+        });
+        customTitleElement.addEventListener('input', () => {
+            window.clearTimeout(titleRefreshTimer);
+            titleRefreshTimer = window.setTimeout(refreshPreview, 300);
+        });
         const mergeSubdocsElement = actionElement.querySelector('#mergeSubdocs');
         const mergeHeadingOptionsElement = actionElement.querySelector('#mergeHeadingOptions');
         const mergeDocHeadingModeElement = actionElement.querySelector('#mergeDocHeadingMode');
@@ -700,6 +728,8 @@ ${getIconScript(servePath)}
             fetchPost("/api/export/exportPreviewHTML", {
                 id: "${id}",
                 keepFold: keepFoldElement.checked,
+                addTitle: addTitleElement.checked,
+                customTitle: customTitleElement.value,
                 merge: mergeSubdocsElement.checked,
                 mergeDocHeadingMode: mergeDocHeadingModeElement.value,
                 mergeContentHeadingMode: mergeContentHeadingModeElement.value,
@@ -771,6 +801,8 @@ ${getIconScript(servePath)}
                 },
                 pageSize,
                 keepFold: keepFoldElement.checked,
+                addTitle: addTitleElement.checked,
+                customTitle: customTitleElement.value,
                 mergeSubdocs: mergeSubdocsElement.checked,
                 mergeDocHeadingMode: mergeDocHeadingModeElement.value,
                 mergeContentHeadingMode: mergeContentHeadingModeElement.value,

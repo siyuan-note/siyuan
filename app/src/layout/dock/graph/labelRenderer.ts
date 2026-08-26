@@ -4,6 +4,11 @@ const LABEL_FONT_SIZE = 32;
 const LABEL_CELL_WIDTH = 72;
 const LABEL_CELL_HEIGHT = 20;
 
+export const getGraphLabelFontSize = (scale: number, priority: boolean) => {
+    const scaledFontSize = LABEL_FONT_SIZE * scale;
+    return priority ? Math.max(12, Math.min(40, scaledFontSize)) : Math.min(40, scaledFontSize);
+};
+
 export class GraphLabelRenderer {
     private readonly canvas: HTMLCanvasElement;
     private readonly context: CanvasRenderingContext2D;
@@ -63,7 +68,7 @@ export class GraphLabelRenderer {
                 continue;
             }
             const priorityLabel = index === state.selected || index === state.hovered;
-            const fontSize = priorityLabel ? Math.max(12, Math.min(40, scaledFontSize)) : Math.min(40, scaledFontSize);
+            const fontSize = getGraphLabelFontSize(state.camera.scale, priorityLabel);
             if (fontSize < 5) {
                 continue;
             }
@@ -92,6 +97,16 @@ export class GraphLabelRenderer {
 
     public destroy() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    public measureLabel(label: string, scale: number, priority: boolean) {
+        const fontSize = getGraphLabelFontSize(scale, priority);
+        const fontFamily = getComputedStyle(document.body).getPropertyValue("--b3-font-family-graph").trim() || "sans-serif";
+        this.context.font = `${fontSize}px ${fontFamily}`;
+        return {
+            height: fontSize,
+            width: this.context.measureText(label).width,
+        };
     }
 
     private isOccupied(occupied: Set<number>, x: number, y: number, width: number, height: number) {

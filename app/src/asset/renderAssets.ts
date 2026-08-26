@@ -7,18 +7,20 @@ import * as dayjs from "dayjs";
 import {escapeAttr} from "../util/escape";
 import {getHTMLAssetIFrameSrc, isHTMLFilePath} from "./html";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
+import {getAssetsPreviewPath} from "./previewPath";
 
-export const renderAssetsPreview = (pathString: string) => {
+export const renderAssetsPreview = (pathString: string, dataPath?: string) => {
     if (!pathString) {
         return "";
     }
     const type = getAssetExtension(pathString).toLowerCase();
+    const previewPath = escapeAttr(getAssetsPreviewPath(pathString, dataPath));
     if (Constants.SIYUAN_ASSETS_IMAGE.includes(type)) {
-        return `<img style="max-height: 100%" src="${pathString}">`;
+        return `<img style="max-height: 100%" src="${previewPath}">`;
     } else if (Constants.SIYUAN_ASSETS_AUDIO.includes(type)) {
-        return `<audio style="max-width: 100%" controls="controls" src="${pathString}"></audio>`;
+        return `<audio style="max-width: 100%" controls="controls" src="${previewPath}"></audio>`;
     } else if (Constants.SIYUAN_ASSETS_VIDEO.includes(type)) {
-        return `<video style="max-width: 100%" controls="controls" src="${pathString}"></video>`;
+        return `<video style="max-width: 100%" controls="controls" src="${previewPath}"></video>`;
     } else {
         return pathString;
     }

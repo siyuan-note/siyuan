@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20260820123010"
+		"updated": "20260826175526"
 	},
 	"Children": [
 		{
@@ -32,6 +32,56 @@
 				{
 					"Type": "NodeText",
 					"Data": " と組み合わせた単一文字をショートカットに設定することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20260826175526-j4p7s2v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260826175526-j4p7s2v",
+				"updated": "20260826175526"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エディターで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと、現在のブロックを選択したり、ブロックの選択状態を解除したりできます。ブロックが選択されている場合、修飾キーを使わずに "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "A"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと選択したブロックの後に空のブロックを挿入し、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "B"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すと前に挿入します。編集可能なブロックでは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を押すとブロックの選択状態を解除し、カーソルをブロックの末尾に移動します。"
 				}
 			]
 		},

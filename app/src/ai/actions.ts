@@ -8,6 +8,7 @@ import {showMessage} from "../dialog/message";
 import {Menu} from "../plugin/Menu";
 import {upDownHint} from "../util/upDownHint";
 import {clearAIEditorHistory, startAIEditorAction} from "./editor";
+import {isDisabledFeature} from "../protyle/util/compatibility";
 
 interface IAIEditorAction {
     id: string;
@@ -282,6 +283,9 @@ const openAIActions = (actions: IAIEditorAction[], elements: HTMLElement[], prot
 let aiActionsRequestID = 0;
 
 export const AIActions = (elements: Element[], protyle: IProtyle, range?: Range) => {
+    if (isDisabledFeature("ai")) {
+        return;
+    }
     window.siyuan.menus.menu.remove();
     const sourceElements = elements.filter((item): item is HTMLElement => item instanceof HTMLElement);
     const sourceRange = range?.cloneRange();

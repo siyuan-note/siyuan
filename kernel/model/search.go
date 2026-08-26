@@ -27,6 +27,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -53,7 +54,7 @@ import (
 	"github.com/xrash/smetrics"
 )
 
-func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
+func ListInvalidBlockRefs(page, pageSize int, excludeBoxIDs, excludeDocIDs []string) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
 	refBlockMap := map[string][]string{}
 	blockMap := map[string]bool{}
 	var invalidBlockIDs []string
@@ -63,12 +64,18 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 	}
 	luteEngine := util.NewLute()
 	for _, notebook := range notebooks {
+		if slices.Contains(excludeBoxIDs, notebook.ID) {
+			continue
+		}
 		pages := pagedPaths(filepath.Join(util.DataDir, notebook.ID), 32)
 		for _, paths := range pages {
 			var trees []*parse.Tree
 			for _, localPath := range paths {
 				tree, loadTreeErr := loadTree(localPath, luteEngine)
 				if nil != loadTreeErr {
+					continue
+				}
+				if isTreeExcludedByPublishAccess(tree, excludeDocIDs) {
 					continue
 				}
 				trees = append(trees, tree)
@@ -1644,10 +1651,10 @@ func FullTextSearchBlockInBox(query string, boxes, paths []string, types, subTyp
 
 // FullTextSearchBlockInBoxWithHPath 与 FullTextSearchBlockInBox 一致，并可控制是否搜索文档层级路径。
 func FullTextSearchBlockInBoxWithHPath(query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
-	return FullTextSearchBlockInBoxWithHPathContext(context.Background(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, boxID, searchHPath)
+	return FullTextSearchBlockInBoxWithHPathContext(context.Background(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, boxID, searchHPath, nil, nil)
 }
 
-func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string, searchHPath bool) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
+func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string, boxes, paths []string, types, subTypes map[string]bool, method, orderBy, groupBy, page, pageSize int, boxID string, searchHPath bool, excludeBoxIDs, excludeDocIDs []string) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
 	ret = []*Block{}
 	if "" == query {
 		return
@@ -1657,6 +1664,8 @@ func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string,
 	if 2 != method && 3 != method && ast.IsNodeIDPattern(query) && isHiddenBoxDocBlock(query, boxID) {
 		return
 	}
+	excludeFilter, excludeArgs := buildPublishAccessExclusionFilter(excludeBoxIDs, excludeDocIDs)
+	excludeInline := buildPublishAccessExclusionInline(excludeBoxIDs, excludeDocIDs)
 	var ignoreFilter string
 	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
 		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
@@ -1676,11 +1685,12 @@ func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string,
 		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter, boxArgs := buildBoxesFilter(boxes)
 		boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs())
-		boxFilter += boxDocFilter
+		boxFilter += boxDocFilter + excludeFilter
 		boxArgs = append(boxArgs, boxDocArgs...)
+		boxArgs = append(boxArgs, excludeArgs...)
 		pathFilter, pathArgs := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
-			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize, boxID)
+			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox("SELECT * FROM `blocks` WHERE `id` = '"+query+"'"+excludeInline, beforeLen, page, pageSize, boxID)
 		} else {
 			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTSInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
 		}
@@ -1693,19 +1703,21 @@ func FullTextSearchBlockInBoxWithHPathContext(ctx context.Context, query string,
 		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter, boxArgs := buildBoxesFilter(boxes)
 		boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs())
-		boxFilter += boxDocFilter
+		boxFilter += boxDocFilter + excludeFilter
 		boxArgs = append(boxArgs, boxDocArgs...)
+		boxArgs = append(boxArgs, excludeArgs...)
 		pathFilter, pathArgs := buildPathsFilter(paths)
 		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByRegexpInBox(query, boxFilter, pathFilter, boxArgs, pathArgs, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize, boxID)
 	default: // 关键字
 		typeFilter := buildTypeFilter(types, subTypes)
 		boxFilter, boxArgs := buildBoxesFilter(boxes)
 		boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs())
-		boxFilter += boxDocFilter
+		boxFilter += boxDocFilter + excludeFilter
 		boxArgs = append(boxArgs, boxDocArgs...)
+		boxArgs = append(boxArgs, excludeArgs...)
 		pathFilter, pathArgs := buildPathsFilter(paths)
 		if ast.IsNodeIDPattern(query) {
-			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize, boxID)
+			blocks, matchedBlockCount, matchedRootCount = searchBySQLInBox("SELECT * FROM `blocks` WHERE `id` = '"+query+"'"+excludeInline, beforeLen, page, pageSize, boxID)
 		} else {
 			if 2 > len(strings.Split(strings.TrimSpace(query), " ")) {
 				ftsQuery, hPathQuery := buildKeywordSearchQueries(query)
@@ -1938,6 +1950,45 @@ func buildRootIDExclusionFilter(rootIDs []string, alias ...string) (clause strin
 	return
 }
 
+// buildPublishAccessExclusionFilter 构造发布访问排除子句，排除指定笔记本以及路径中包含指定文档 ID 的块。
+// 排除值通过绑定参数传递，避免 SQL 拼接注入；返回的 args 顺序与 clause 中 "?" 的出现顺序一致。
+func buildPublishAccessExclusionFilter(boxIDs, docIDs []string, alias ...string) (clause string, args []any) {
+	if 0 == len(boxIDs) && 0 == len(docIDs) {
+		return
+	}
+	prefix := ""
+	if 0 < len(alias) && "" != alias[0] {
+		prefix = alias[0]
+	}
+	conds := make([]string, 0, len(boxIDs)+len(docIDs))
+	for _, boxID := range boxIDs {
+		conds = append(conds, fmt.Sprintf("%sbox = ?", prefix))
+		args = append(args, boxID)
+	}
+	for _, docID := range docIDs {
+		conds = append(conds, fmt.Sprintf("%spath LIKE ?", prefix))
+		args = append(args, "%"+docID+"%")
+	}
+	clause = " AND NOT (" + strings.Join(conds, " OR ") + ")"
+	return
+}
+
+// buildPublishAccessExclusionInline 构造内联的发布访问排除子句，用于无绑定参数的原生 SQL 分支。
+// 排除 ID 均通过节点 ID 模式校验，可直接内联。
+func buildPublishAccessExclusionInline(boxIDs, docIDs []string) string {
+	conds := make([]string, 0, len(boxIDs)+len(docIDs))
+	for _, boxID := range boxIDs {
+		conds = append(conds, "box = '"+boxID+"'")
+	}
+	for _, docID := range docIDs {
+		conds = append(conds, "path LIKE '%"+docID+"%'")
+	}
+	if 0 == len(conds) {
+		return ""
+	}
+	return " AND NOT (" + strings.Join(conds, " OR ") + ")"
+}
+
 func buildOrderBy(query string, method, orderBy int) string {
 	escapedQuery := strings.ReplaceAll(query, "'", "''")
 	switch orderBy {
@@ -2154,6 +2205,17 @@ func sqlQuoteJoin(items []string) string {
 
 func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	return searchBySQLInBox(stmt, beforeLen, page, pageSize, "")
+}
+
+// isTreeExcludedByPublishAccess 判断文档树是否命中发布访问排除的文档 ID。
+// 文档路径包含排除 ID 即视为不可见，覆盖被排除文档的整个子树。
+func isTreeExcludedByPublishAccess(tree *parse.Tree, excludeDocIDs []string) bool {
+	for _, docID := range excludeDocIDs {
+		if strings.Contains(tree.Path, docID) {
+			return true
+		}
+	}
+	return false
 }
 
 // searchBySQLInBox 与 searchBySQL 一致，但按 boxID 路由到加密 db 或全局 db。
@@ -2413,12 +2475,14 @@ func fullTextSearchByFTSInBox(query, boxFilter, pathFilter string, boxArgs, path
 		"snippet(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS tag, " +
 		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH ?"
 	stmt += ") AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter + " " + orderBy
 	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	// box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入；绕开 sqlparser 以保留 "?" 占位
-	args := append(append([]any{}, boxArgs...), pathArgs...)
+	// MATCH 操作数与 box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入；绕开 sqlparser 以保留 "?" 占位
+	args := []any{columnFilter() + ":(" + query + ")"}
+	args = append(args, boxArgs...)
+	args = append(args, pathArgs...)
 	blocks := sql.SelectBlocksRawStmtArgsInBox(stmt, args, pageSize, boxID)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
@@ -2533,11 +2597,12 @@ func buildFTSSnippetBlocksByRowIDQuery(query string, rowIDs []int64) (stmt strin
 		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt = "SELECT " + projections + " FROM " + table +
-		" WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")')" +
+		" WHERE (`" + table + "` MATCH ?)" +
 		" AND rowid IN (" + strings.TrimSuffix(strings.Repeat("?,", len(rowIDs)), ",") + ")"
-	args = make([]any, len(rowIDs))
-	for i, rowID := range rowIDs {
-		args[i] = rowID
+	// MATCH 操作数与 rowid 过滤值通过绑定参数传递，避免 SQL 拼接注入
+	args = []any{columnFilter() + ":(" + query + ")"}
+	for _, rowID := range rowIDs {
+		args = append(args, rowID)
 	}
 	return
 }
@@ -2577,7 +2642,7 @@ func buildFTSAndHPathMatchesCTE(rawQuery, query, boxFilter, pathFilter string, b
 	table := "blocks_fts"
 	hPathCondition, hPathArg := buildHPathContainsCondition(rawQuery)
 	ftsMatches := "SELECT rowid AS block_rowid, rank AS fts_rank FROM " + table +
-		" WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")') AND " + typeFilter +
+		" WHERE (`" + table + "` MATCH ?) AND " + typeFilter +
 		boxFilter + pathFilter + ignoreFilter
 	pathMatches := "SELECT rowid AS block_rowid, NULL AS fts_rank, 1 AS match_source, " +
 		"length(hpath) - length(replace(hpath, '/', '')) AS path_level FROM blocks" +
@@ -2587,6 +2652,8 @@ func buildFTSAndHPathMatchesCTE(rawQuery, query, boxFilter, pathFilter string, b
 		"SELECT block_rowid, fts_rank, 0 AS match_source, 0 AS path_level FROM fts_matches UNION ALL " +
 		pathMatches + ")"
 
+	// MATCH 操作数与各过滤值通过绑定参数传递，参数顺序与语句中 "?" 占位的出现顺序一致
+	args = []any{columnFilter() + ":(" + query + ")"}
 	args = append(args, boxArgs...)
 	args = append(args, pathArgs...)
 	args = append(args, hPathArg)
@@ -2674,10 +2741,13 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter string, boxArgs, path
 func fullTextSearchCountByFTSInBox(query, boxFilter, pathFilter string, boxArgs, pathArgs []any, typeFilter, ignoreFilter, boxID string) (matchedBlockCount, matchedRootCount int) {
 	table := "blocks_fts"
 
-	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
+	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH ?"
 	stmt += ") AND " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter
-	args := append(append([]any{}, boxArgs...), pathArgs...)
+	// MATCH 操作数与 box/path 过滤值通过绑定参数传递，避免 SQL 拼接注入
+	args := []any{columnFilter() + ":(" + query + ")"}
+	args = append(args, boxArgs...)
+	args = append(args, pathArgs...)
 	result, _ := sql.QueryNoLimitArgsInBox(stmt, boxID, args...)
 	if 1 > len(result) {
 		return
@@ -2862,11 +2932,12 @@ func highlightByFTSInBox(query, typeFilter, id, boxID string) (ret []string) {
 		"fcontent, markdown, length, type, subtype, " +
 		"highlight(" + table + ", 17, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS ial, " +
 		"sort, created, updated"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH ?"
 	stmt += ") AND " + typeFilter
 	stmt += " AND root_id = '" + id + "'"
 	stmt += " LIMIT " + strconv.Itoa(limit)
-	sqlBlocks := sql.SelectBlocksRawStmtInBox(stmt, 1, limit, boxID)
+	// MATCH 操作数通过绑定参数传递，避免 SQL 拼接注入
+	sqlBlocks := sql.SelectBlocksRawStmtArgsInBox(stmt, []any{columnFilter() + ":(" + query + ")"}, limit, boxID)
 	for _, block := range sqlBlocks {
 		keyword := gulu.Str.SubstringsBetween(block.HPath, search.SearchMarkLeft, search.SearchMarkRight)
 		if 0 < len(keyword) {

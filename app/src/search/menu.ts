@@ -746,7 +746,9 @@ const configIsSame = (config: Config.IUILayoutTabSearchConfig, config2: Config.I
     if (config2.group === config.group && config2.hPath === config.hPath && config2.hasReplace === config.hasReplace &&
         config2.k === config.k && config2.method === config.method && config2.r === config.r &&
         config2.sort === config.sort && objEquals(config2.types, config.types) &&
-        objEquals(config2.replaceTypes, config.replaceTypes) && objEquals(config2.idPath, config.idPath)) {
+        objEquals({...getDefaultSubType(), ...config2.subTypes},
+            {...getDefaultSubType(), ...config.subTypes}) && objEquals(config2.replaceTypes, config.replaceTypes) &&
+        objEquals(config2.idPath, config.idPath)) {
         return true;
     }
     return false;

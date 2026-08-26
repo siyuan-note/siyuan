@@ -37,6 +37,18 @@ import {
     type TBacklinkDailyNoteFilter
 } from "./backlinkSourceFilter";
 import {escapeHtml} from "../../util/escape";
+import {ViewStateService} from "../../util/viewState";
+import {
+    applyViewFoldStates,
+    invalidateViewFoldRequests,
+    registerViewFoldContext,
+    unregisterViewFoldContext,
+} from "../../protyle/util/viewFold";
+import {
+    captureBacklinkReadingAnchor,
+    type IBacklinkReadingAnchor,
+    restoreBacklinkReadingAnchor,
+} from "./backlinkReadingAnchor";
 
 interface IBacklinkItemRecord {
     revision: string,
@@ -66,12 +78,33 @@ interface IBacklinkListResponse {
     mk: string
 }
 
-interface IBacklinkScrollAnchor {
-    rootID: string,
-    isMention: boolean,
-    offset: number,
-    scrollElement: HTMLElement,
-}
+const getBacklinkOccurrenceBreadcrumb = (element: Element) => {
+    const wysiwygElement = element.closest(".protyle-wysiwyg");
+    if (!wysiwygElement) {
+        return;
+    }
+    let topLevelElement = element;
+    while (topLevelElement.parentElement && topLevelElement.parentElement !== wysiwygElement) {
+        topLevelElement = topLevelElement.parentElement;
+    }
+    if (topLevelElement.parentElement !== wysiwygElement) {
+        return;
+    }
+    let currentElement: Element | null = topLevelElement;
+    while (currentElement) {
+        if (currentElement.classList.contains("protyle-breadcrumb__bar") &&
+            currentElement.hasAttribute("data-backlink-id")) {
+            return currentElement;
+        }
+        currentElement = currentElement.previousElementSibling;
+    }
+};
+
+const getBacklinkOccurrenceID = (element: Element) =>
+    getBacklinkOccurrenceBreadcrumb(element)?.getAttribute("data-backlink-id") || "";
+
+const getBacklinkOccurrenceRevision = (element: Element) =>
+    getBacklinkOccurrenceBreadcrumb(element)?.getAttribute("data-backlink-revision") || "";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -108,6 +141,7 @@ export class Backlink extends Model {
     private itemRecords = [new Map<string, IBacklinkItemRecord>(), new Map<string, IBacklinkItemRecord>()];
     private listRevision = "";
     private listQueryKey = "";
+    private renderedQueryKey = "";
     private indexChangeVersion = 0;
     private pendingRootIDs = new Set<string>();
     private pendingFull = false;
@@ -117,6 +151,18 @@ export class Backlink extends Model {
     private empty = false;
     private emptyChange?: (empty: boolean) => void;
     private sourceFilter = createBacklinkSourceFilter();
+    private viewState?: ViewStateService;
+    private viewStateReady: Promise<void> = Promise.resolve();
+    private viewStateLoaded = false;
+    private viewStateGeneration = 0;
+    private viewStateSearchQueued = false;
+    private viewStateSearchInit = false;
+    private viewStateSearchRefreshAll = false;
+    private readingAnchorTimers: [number?, number?] = [];
+    private restoringReadingAnchors: [boolean, boolean] = [false, false];
+    private readingAnchorScrollEpochs: [number, number] = [0, 0];
+    private readingAnchorRenderGeneration = 0;
+    private ownerScrollListener?: () => void;
 
     constructor(options: {
         app: App,
@@ -332,7 +378,7 @@ export class Backlink extends Model {
             },
             blockExtHTML: `<span class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}"><svg><use xlink:href="#iconMore"></use></svg></span>`
         });
-        this.tree.element.addEventListener("scroll", () => {
+        this.tree.element.addEventListener("scroll", (event) => {
             this.tree.element.querySelectorAll(".protyle-gutters").forEach(item => {
                 item.classList.add("fn__none");
                 item.innerHTML = "";
@@ -340,8 +386,11 @@ export class Backlink extends Model {
             this.tree.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((hlItem) => {
                 hlItem.classList.remove("protyle-wysiwyg--hl");
             });
+            if (event.isTrusted) {
+                this.handleReadingAnchorScroll(false);
+            }
         });
-        this.mTree.element.addEventListener("scroll", () => {
+        this.mTree.element.addEventListener("scroll", (event) => {
             this.mTree.element.querySelectorAll(".protyle-gutters").forEach(item => {
                 item.classList.add("fn__none");
                 item.innerHTML = "";
@@ -349,11 +398,24 @@ export class Backlink extends Model {
             this.mTree.element.querySelectorAll(".protyle-wysiwyg--hl").forEach((hlItem) => {
                 hlItem.classList.remove("protyle-wysiwyg--hl");
             });
+            if (event.isTrusted) {
+                this.handleReadingAnchorScroll(true);
+            }
         });
+        if (this.type === "bottom") {
+            this.ownerScrollListener = () => {
+                this.handleReadingAnchorScroll(false);
+            };
+            this.ownerProtyle.contentElement.addEventListener("scroll", this.ownerScrollListener);
+        }
         // 为了快捷键的 dispatch
         this.element.querySelector('[data-type="collapse"]').addEventListener("click", () => {
             this.cancelContextRequests(this.tree.element, false);
             this.hideEditorGutters(this.tree.element);
+            this.invalidateHeadingRequests(this.tree.element);
+            this.getDocumentItemElements(this.tree).forEach(item => {
+                this.setDocumentExpanded(false, item.getAttribute("data-node-id"), false);
+            });
             this.tree.element.querySelectorAll(".protyle").forEach(item => {
                 item.classList.add("fn__none");
             });
@@ -387,6 +449,10 @@ export class Backlink extends Model {
                         case "mCollapse":
                             this.cancelContextRequests(this.mTree.element, true);
                             this.hideEditorGutters(this.mTree.element);
+                            this.invalidateHeadingRequests(this.mTree.element);
+                            this.getDocumentItemElements(this.mTree).forEach(item => {
+                                this.setDocumentExpanded(true, item.getAttribute("data-node-id"), false);
+                            });
                             this.mTree.element.querySelectorAll(".protyle").forEach(item => {
                                 item.classList.add("fn__none");
                             });
@@ -443,8 +509,63 @@ export class Backlink extends Model {
             }
         });
 
+        this.setViewStateHost(this.blockId);
         this.showBottomLoading();
         this.searchBacklinks(true);
+    }
+
+    private setViewStateHost(blockID: string) {
+        this.clearReadingAnchorTimers();
+        const previousReady = this.viewStateReady;
+        const previous = this.viewState;
+        const generation = ++this.viewStateGeneration;
+        this.viewState = undefined;
+        this.viewStateLoaded = !blockID;
+        const createService = async () => {
+            await previousReady;
+            if (previous) {
+                try {
+                    await previous.destroy();
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+            if (generation !== this.viewStateGeneration || !blockID) {
+                return;
+            }
+            const service = new ViewStateService({
+                scope: "backlink",
+                surface: this.type,
+                hostID: blockID,
+            });
+            this.viewState = service;
+            await service.ready;
+        };
+        this.viewStateReady = createService().catch(error => {
+            console.error(error);
+        }).then(() => {
+            if (generation === this.viewStateGeneration) {
+                this.viewStateLoaded = true;
+            }
+        });
+    }
+
+    private getDocumentStateField(isMention: boolean, documentID: string) {
+        return `item:${isMention ? "backmention" : "backlink"}:${encodeURIComponent(documentID)}`;
+    }
+
+    private getSectionStateField(isMention: boolean) {
+        return `section:${isMention ? "backmention" : "backlink"}`;
+    }
+
+    private setDocumentExpanded(isMention: boolean, documentID: string, expanded: boolean) {
+        if (documentID && this.viewState) {
+            this.viewState.set(this.getDocumentStateField(isMention, documentID), expanded);
+        }
+    }
+
+    private setSectionFolded(isMention: boolean, folded: boolean) {
+        this.viewState?.set(this.getSectionStateField(isMention), folded);
     }
 
     private handelCallback() {
@@ -481,6 +602,10 @@ export class Backlink extends Model {
     }
 
     private setLayout(element: HTMLElement) {
+        const backlinkWasFolded = this.tree.element.classList.contains("fn__none");
+        const backmentionWasFolded = this.mTree.element.style.height === "0px";
+        this.savePendingReadingAnchor(false);
+        this.savePendingReadingAnchor(true);
         if (this.mTree.element.style.flex) {
             if (this.mTree.element.style.height === "0px") {
                 this.tree.element.classList.remove("fn__none");
@@ -506,22 +631,44 @@ export class Backlink extends Model {
                 element.querySelector("use").setAttribute("xlink:href", "#iconDown");
             }
         }
+        this.setSectionFolded(false, this.tree.element.classList.contains("fn__none"));
+        this.setSectionFolded(true, this.mTree.element.style.height === "0px");
+        const viewFoldPromises = this.syncViewFoldVisibility();
+        const restoreBacklink = backlinkWasFolded && !this.tree.element.classList.contains("fn__none");
+        const restoreBackmention = backmentionWasFolded && this.mTree.element.style.height !== "0px";
         this.tree.element.dispatchEvent(new CustomEvent("scroll"));
         this.mTree.element.dispatchEvent(new CustomEvent("scroll"));
+        if (restoreBacklink) {
+            this.restorePersistedReadingAnchorAfter(false, viewFoldPromises[0]);
+        }
+        if (restoreBackmention) {
+            this.restorePersistedReadingAnchorAfter(true, viewFoldPromises[1]);
+        }
     }
 
     private setDockSectionLayout(listElement: HTMLElement) {
         const isMention = listElement === this.mTree.element;
         const backlinkFolded = this.tree.element.classList.contains("fn__none");
         const backmentionFolded = this.mTree.element.style.height === "0px";
+        const nextBacklinkFolded = isMention ? backlinkFolded : !backlinkFolded;
+        const nextBackmentionFolded = isMention ? !backmentionFolded : backmentionFolded;
+        if (isMention ? nextBackmentionFolded : nextBacklinkFolded) {
+            this.savePendingReadingAnchor(isMention);
+        }
         this.applyDockLayout(
-            isMention ? backlinkFolded : !backlinkFolded,
-            isMention ? !backmentionFolded : backmentionFolded,
+            nextBacklinkFolded,
+            nextBackmentionFolded,
             this.status[this.blockId]?.backlinkMStatus ?? 1,
         );
-        this.saveStatus();
+        this.setSectionFolded(isMention, isMention ? nextBackmentionFolded : nextBacklinkFolded);
+        const viewFoldPromises = this.syncViewFoldVisibility();
+        const restoreAnchor = isMention ? !nextBackmentionFolded : !nextBacklinkFolded;
+        this.saveStatus(false);
         this.tree.element.dispatchEvent(new CustomEvent("scroll"));
         this.mTree.element.dispatchEvent(new CustomEvent("scroll"));
+        if (restoreAnchor) {
+            this.restorePersistedReadingAnchorAfter(isMention, viewFoldPromises[isMention ? 1 : 0]);
+        }
     }
 
     private setBottomLayout(element: HTMLElement, listElement: HTMLElement) {
@@ -530,8 +677,12 @@ export class Backlink extends Model {
         }
         const folded = !listElement.classList.contains("fn__none");
         if (folded) {
+            this.savePendingReadingAnchor(listElement === this.mTree.element);
+        }
+        if (folded) {
             this.cancelContextRequests(listElement, listElement === this.mTree.element);
             this.hideEditorGutters(listElement);
+            this.invalidateHeadingRequests(listElement);
             listElement.dataset.heightFolding = "true";
             collapseHeight(listElement, () => {
                 delete listElement.dataset.heightFolding;
@@ -540,14 +691,22 @@ export class Backlink extends Model {
         } else {
             delete listElement.dataset.heightFolding;
             listElement.classList.remove("fn__none");
-            expandHeight(listElement);
+            const viewFoldPromise = this.resumeViewFoldStates(listElement);
+            const expandPromise = new Promise<void>(resolve => {
+                expandHeight(listElement, resolve);
+            });
+            this.restorePersistedReadingAnchorAfter(
+                listElement === this.mTree.element,
+                Promise.all([viewFoldPromise, expandPromise]).then(() => undefined),
+            );
         }
         if (folded) {
             listElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
         }
         element.setAttribute("aria-label", folded ? window.siyuan.languages.expand : window.siyuan.languages.collapse);
         element.querySelector("use").setAttribute("xlink:href", folded ? "#iconRight" : "#iconDown");
-        this.saveStatus();
+        this.setSectionFolded(listElement === this.mTree.element, folded);
+        this.saveStatus(false);
     }
 
     private setFocus() {
@@ -733,7 +892,7 @@ export class Backlink extends Model {
         window.siyuan.menus.menu.popup({x: event.clientX, y: event.clientY});
     }
 
-    private toggleItem(liElement: HTMLElement, isMention: boolean) {
+    private toggleItem(liElement: HTMLElement, isMention: boolean, persist = true) {
         const svgElement = liElement.firstElementChild?.firstElementChild;
         if (!svgElement || svgElement.getAttribute("disabled")) {
             return;
@@ -748,8 +907,10 @@ export class Backlink extends Model {
             }
             if (editor && this.type === "bottom") {
                 hideElements(["gutter"], editor.protyle);
+                invalidateViewFoldRequests(editor.protyle);
                 editor.protyle.element.classList.add("fn__none");
             } else if (editor) {
+                unregisterViewFoldContext(editor.protyle);
                 editor.destroy();
                 this.editors.splice(this.editors.indexOf(editor), 1);
                 editor.protyle.element.remove();
@@ -758,13 +919,20 @@ export class Backlink extends Model {
                     record.contextRevision = "";
                 }
             }
+            if (persist) {
+                this.setDocumentExpanded(isMention, docId, false);
+            }
             this.updateBottomBacklinkSpacing();
         } else if (editor && !record?.contextDirty) {
             editor.protyle.element.classList.remove("fn__none");
             svgElement.classList.add("b3-list-item__arrow--open");
+            void applyViewFoldStates(editor.protyle);
+            if (persist) {
+                this.setDocumentExpanded(isMention, docId, true);
+            }
             this.updateBottomBacklinkSpacing();
         } else {
-            this.loadContext(liElement, isMention, true);
+            this.loadContext(liElement, isMention, true, persist);
         }
     }
 
@@ -794,7 +962,7 @@ export class Backlink extends Model {
         });
     }
 
-    private loadContext(liElement: HTMLElement, isMention: boolean, expand: boolean) {
+    private loadContext(liElement: HTMLElement, isMention: boolean, expand: boolean, persist = false) {
         const index = isMention ? 1 : 0;
         const docId = liElement.getAttribute("data-node-id");
         const record = this.itemRecords[index].get(docId);
@@ -805,6 +973,7 @@ export class Backlink extends Model {
         svgElement.setAttribute("disabled", "disabled");
         const keyword = isMention ? this.inputsElement[1].value : this.inputsElement[0].value;
         const blockId = this.blockId;
+        const viewStateGeneration = this.viewStateGeneration;
         const contextRequestVersion = this.contextRequestVersions[index];
         const requestGeneration = ++record.requestGeneration;
         const param: IObject = {
@@ -821,7 +990,8 @@ export class Backlink extends Model {
             param.knownRevision = record.contextRevision;
         }
         fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", param, (response) => {
-            if (this.destroyed || blockId !== this.blockId || !liElement.isConnected ||
+            if (this.destroyed || blockId !== this.blockId || viewStateGeneration !== this.viewStateGeneration ||
+                !liElement.isConnected ||
                 contextRequestVersion !== this.contextRequestVersions[index] ||
                 requestGeneration !== record.requestGeneration) {
                 return;
@@ -836,11 +1006,30 @@ export class Backlink extends Model {
             if (!response.data.unchanged) {
                 const backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
                 if (record.editor) {
-                    const scrollAnchor = this.captureScrollAnchor(this.type === "bottom" ? undefined : (isMention ? this.mTree : this.tree));
-                    record.editor.protyle.options.backlinkData = backlinkData;
-                    renderBacklink(record.editor.protyle, backlinkData);
-                    searchMarkRender(record.editor.protyle, response.data.keywords);
-                    this.restoreScrollAnchor(scrollAnchor);
+                    const editor = record.editor;
+                    const scrollAnchor = this.captureReadingAnchor(isMention);
+                    const scrollEpoch = this.getReadingAnchorScrollEpoch(isMention);
+                    const anchorQueryKey = this.renderedQueryKey;
+                    editor.protyle.options.backlinkData = backlinkData;
+                    void renderBacklink(editor.protyle, backlinkData).then(() => {
+                        window.requestAnimationFrame(() => {
+                            if (this.destroyed || blockId !== this.blockId ||
+                                viewStateGeneration !== this.viewStateGeneration ||
+                                contextRequestVersion !== this.contextRequestVersions[index] ||
+                                requestGeneration !== record.requestGeneration || record.editor !== editor ||
+                                !editor.protyle.element.isConnected || editor.protyle.element.classList.contains("fn__none") ||
+                                scrollEpoch !== this.getReadingAnchorScrollEpoch(isMention) ||
+                                anchorQueryKey !== this.renderedQueryKey || anchorQueryKey !== this.listQueryKey) {
+                                return;
+                            }
+                            if (scrollAnchor) {
+                                this.restoreReadingAnchor(scrollAnchor);
+                            } else {
+                                this.restorePersistedReadingAnchor(isMention, docId);
+                            }
+                        });
+                    });
+                    searchMarkRender(editor.protyle, response.data.keywords);
                 } else {
                     const editorElement = document.createElement("div");
                     editorElement.style.minHeight = "auto";
@@ -873,11 +1062,39 @@ export class Backlink extends Model {
                     searchMarkRender(editor.protyle, response.data.keywords);
                     this.editors.push(editor);
                     record.editor = editor;
+                    const service = this.viewState;
+                    const scrollEpoch = this.getReadingAnchorScrollEpoch(isMention);
+                    const anchorQueryKey = this.renderedQueryKey;
+                    if (service) {
+                        void registerViewFoldContext(editor.protyle, {
+                            store: service,
+                            pane: isMention ? "backmention" : "backlink",
+                            rootID: docId,
+                            getOccurrenceID: getBacklinkOccurrenceID,
+                            getOccurrenceRevision: getBacklinkOccurrenceRevision,
+                        }).then(() => {
+                            window.requestAnimationFrame(() => {
+                                if (this.destroyed || blockId !== this.blockId ||
+                                    viewStateGeneration !== this.viewStateGeneration || service !== this.viewState ||
+                                    contextRequestVersion !== this.contextRequestVersions[index] ||
+                                    requestGeneration !== record.requestGeneration || record.editor !== editor ||
+                                    !editor.protyle.element.isConnected || editor.protyle.element.classList.contains("fn__none") ||
+                                    scrollEpoch !== this.getReadingAnchorScrollEpoch(isMention) ||
+                                    anchorQueryKey !== this.renderedQueryKey || anchorQueryKey !== this.listQueryKey) {
+                                    return;
+                                }
+                                this.restorePersistedReadingAnchor(isMention, docId);
+                            });
+                        });
+                    }
                 }
             }
             if (expand) {
                 record.editor?.protyle.element.classList.remove("fn__none");
                 svgElement.classList.add("b3-list-item__arrow--open");
+                if (persist) {
+                    this.setDocumentExpanded(isMention, docId, true);
+                }
             }
             this.updateBottomBacklinkSpacing();
         }).finally(() => {
@@ -895,6 +1112,37 @@ export class Backlink extends Model {
         });
     }
 
+    private invalidateHeadingRequests(element: Element) {
+        this.editors.forEach(editor => {
+            if (editor.protyle.element === element || element.contains(editor.protyle.element)) {
+                invalidateViewFoldRequests(editor.protyle);
+            }
+        });
+    }
+
+    private resumeViewFoldStates(element: Element) {
+        const promises: Promise<void>[] = [];
+        this.editors.forEach(editor => {
+            if ((editor.protyle.element === element || element.contains(editor.protyle.element)) &&
+                !editor.protyle.element.classList.contains("fn__none")) {
+                promises.push(applyViewFoldStates(editor.protyle));
+            }
+        });
+        return Promise.all(promises).then(() => undefined);
+    }
+
+    private syncViewFoldVisibility() {
+        const promises: [Promise<void>, Promise<void>] = [Promise.resolve(), Promise.resolve()];
+        [this.tree.element, this.mTree.element].forEach((element, index) => {
+            if (element.classList.contains("fn__none") || element.style.height === "0px") {
+                this.invalidateHeadingRequests(element);
+            } else {
+                promises[index] = this.resumeViewFoldStates(element);
+            }
+        });
+        return promises;
+    }
+
     private cancelContextRequests(element: Element, isMention: boolean) {
         this.contextRequestVersions[isMention ? 1 : 0]++;
         element.querySelectorAll(".b3-list-item__arrow[disabled]").forEach(item => {
@@ -904,6 +1152,7 @@ export class Backlink extends Model {
 
     private destroyItemRecord(record: IBacklinkItemRecord) {
         if (record.editor) {
+            unregisterViewFoldContext(record.editor.protyle);
             record.editor.destroy();
             const editorIndex = this.editors.indexOf(record.editor);
             if (editorIndex > -1) {
@@ -1014,36 +1263,220 @@ export class Backlink extends Model {
         return changed;
     }
 
-    private captureScrollAnchor(tree?: Tree): IBacklinkScrollAnchor | undefined {
-        const scrollElement = this.type === "bottom" ? this.ownerProtyle.contentElement : tree.element;
-        const scopeElement = tree?.element || this.element;
-        const scrollRect = scrollElement.getBoundingClientRect();
-        const itemElements = Array.from(
-            scopeElement.querySelectorAll(".b3-list > .backlinkList__item[data-node-id]")
-        ) as HTMLElement[];
-        const anchorElement = itemElements.find(item => item.getBoundingClientRect().bottom >= scrollRect.top);
-        if (!anchorElement) {
-            return;
+    private getReadingAnchorField(isMention: boolean) {
+        if (this.type === "bottom") {
+            return "anchor:bottom";
         }
-        return {
-            rootID: anchorElement.getAttribute("data-node-id"),
-            isMention: this.mTree.element.contains(anchorElement),
-            offset: anchorElement.getBoundingClientRect().top - scrollRect.top,
-            scrollElement,
-        };
+        return `anchor:${isMention ? "backmention" : "backlink"}`;
     }
 
-    private restoreScrollAnchor(anchor?: IBacklinkScrollAnchor) {
+    private getReadingAnchorIndex(isMention: boolean) {
+        return this.type === "bottom" ? 0 : (isMention ? 1 : 0);
+    }
+
+    private getReadingAnchorScrollEpoch(isMention: boolean) {
+        return this.readingAnchorScrollEpochs[this.getReadingAnchorIndex(isMention)];
+    }
+
+    private isRestoringReadingAnchor(isMention: boolean) {
+        return this.restoringReadingAnchors[this.getReadingAnchorIndex(isMention)];
+    }
+
+    private isReadingAnchorPaneVisible(isMention: boolean) {
+        const listElement = isMention ? this.mTree.element : this.tree.element;
+        return !listElement.classList.contains("fn__none") && listElement.dataset.heightFolding !== "true" &&
+            (this.type === "bottom" || !isMention || listElement.style.height !== "0px");
+    }
+
+    private isBottomReadingAnchorViewportActive() {
+        if (this.type !== "bottom" || !this.ownerProtyle || this.element.classList.contains("fn__none") ||
+            this.element.getClientRects().length === 0) {
+            return this.type !== "bottom";
+        }
+        const ownerRect = this.ownerProtyle.contentElement.getBoundingClientRect();
+        const panelRect = this.element.getBoundingClientRect();
+        return panelRect.bottom > ownerRect.top && panelRect.top < ownerRect.bottom;
+    }
+
+    private capturePaneReadingAnchor(isMention: boolean): IBacklinkReadingAnchor | undefined {
+        const tree = isMention ? this.mTree : this.tree;
+        const pane = isMention ? "backmention" : "backlink";
+        const scrollElement = this.getScrollElement(tree);
+        const anchor = captureBacklinkReadingAnchor({
+            scopeElement: tree.element,
+            scrollElement,
+            pane,
+            queryKey: this.renderedQueryKey,
+        });
+        const scrollRect = scrollElement.getBoundingClientRect();
+        const scopeRect = tree.element.getBoundingClientRect();
+        const viewportTop = Math.max(scrollRect.top, scopeRect.top);
+        const viewportBottom = Math.min(scrollRect.bottom, scopeRect.bottom);
+        const titleElements = Array.from(tree.element.querySelectorAll(
+            ":scope > .b3-list > .backlinkList__item > .b3-list-item[data-node-id]"
+        )) as HTMLElement[];
+        const titleElement = titleElements.filter(item => {
+            const rect = item.getBoundingClientRect();
+            return rect.bottom > viewportTop && rect.top < viewportBottom;
+        }).sort((left, right) => {
+            const leftOffset = left.getBoundingClientRect().top - scrollRect.top;
+            const rightOffset = right.getBoundingClientRect().top - scrollRect.top;
+            if (leftOffset <= 0 && rightOffset > 0) {
+                return -1;
+            }
+            if (rightOffset <= 0 && leftOffset > 0) {
+                return 1;
+            }
+            return leftOffset <= 0 ? rightOffset - leftOffset : leftOffset - rightOffset;
+        })[0];
+        const titleAnchor = titleElement ? {
+            pane,
+            rootID: titleElement.getAttribute("data-node-id") || "",
+            occurrenceID: "",
+            blockID: "",
+            offset: titleElement.getBoundingClientRect().top - scrollRect.top,
+            queryKey: this.renderedQueryKey,
+        } satisfies IBacklinkReadingAnchor : undefined;
+        const anchors = [anchor, titleAnchor].filter((item): item is IBacklinkReadingAnchor => Boolean(item));
+        const crossingAnchor = anchors.filter(item => item.offset <= 0)
+            .sort((left, right) => right.offset - left.offset)[0];
+        return crossingAnchor || anchors.filter(item => item.offset > 0)
+            .sort((left, right) => left.offset - right.offset)[0];
+    }
+
+    private captureReadingAnchor(isMention: boolean) {
+        if (this.type !== "bottom") {
+            return this.capturePaneReadingAnchor(isMention);
+        }
+        const anchors = [this.capturePaneReadingAnchor(false), this.capturePaneReadingAnchor(true)]
+            .filter((item): item is IBacklinkReadingAnchor => Boolean(item));
+        const crossingAnchor = anchors.filter(anchor => anchor.offset <= 0)
+            .sort((left, right) => right.offset - left.offset)[0];
+        return crossingAnchor || anchors.filter(anchor => anchor.offset > 0)
+            .sort((left, right) => left.offset - right.offset)[0];
+    }
+
+    private restoreReadingAnchor(anchor?: IBacklinkReadingAnchor) {
         if (!anchor) {
             return;
         }
-        const tree = anchor.isMention ? this.mTree : this.tree;
-        const anchorElement = tree.element.querySelector(`.backlinkList__item[data-node-id="${anchor.rootID}"]`);
-        if (!anchorElement) {
+        const isMention = anchor.pane === "backmention";
+        if (!this.isReadingAnchorPaneVisible(isMention)) {
             return;
         }
-        const offset = anchorElement.getBoundingClientRect().top - anchor.scrollElement.getBoundingClientRect().top;
-        anchor.scrollElement.scrollTop += offset - anchor.offset;
+        const tree = isMention ? this.mTree : this.tree;
+        const index = this.getReadingAnchorIndex(isMention);
+        this.restoringReadingAnchors[index] = true;
+        const restored = restoreBacklinkReadingAnchor({
+            anchor,
+            scopeElement: tree.element,
+            scrollElement: this.getScrollElement(tree),
+            pane: anchor.pane,
+            queryKey: this.listQueryKey,
+        });
+        if (!restored) {
+            this.restoringReadingAnchors[index] = false;
+            return;
+        }
+        window.requestAnimationFrame(() => {
+            this.restoringReadingAnchors[index] = false;
+        });
+    }
+
+    private restorePersistedReadingAnchor(isMention: boolean, loadedRootID?: string) {
+        if (this.type === "bottom" && !this.isBottomReadingAnchorViewportActive()) {
+            return;
+        }
+        const anchor = this.viewState?.get<IBacklinkReadingAnchor>(this.getReadingAnchorField(isMention));
+        if (loadedRootID && (anchor?.rootID !== loadedRootID ||
+            anchor.pane !== (isMention ? "backmention" : "backlink"))) {
+            return;
+        }
+        this.restoreReadingAnchor(anchor);
+    }
+
+    private restorePersistedReadingAnchorAfter(isMention: boolean, promise: Promise<void>) {
+        const generation = this.viewStateGeneration;
+        const service = this.viewState;
+        const blockID = this.blockId;
+        const queryKey = this.renderedQueryKey;
+        const scrollEpoch = this.getReadingAnchorScrollEpoch(isMention);
+        void promise.then(() => {
+            if (this.destroyed || generation !== this.viewStateGeneration || service !== this.viewState ||
+                blockID !== this.blockId || queryKey !== this.renderedQueryKey || queryKey !== this.listQueryKey ||
+                scrollEpoch !== this.getReadingAnchorScrollEpoch(isMention)) {
+                return;
+            }
+            this.restorePersistedReadingAnchor(isMention);
+        });
+    }
+
+    private clearReadingAnchorTimers() {
+        this.readingAnchorTimers.forEach(timer => {
+            if (timer) {
+                window.clearTimeout(timer);
+            }
+        });
+        this.readingAnchorTimers = [];
+        this.restoringReadingAnchors = [false, false];
+        this.readingAnchorScrollEpochs[0]++;
+        this.readingAnchorScrollEpochs[1]++;
+        this.readingAnchorRenderGeneration++;
+    }
+
+    private handleReadingAnchorScroll(isMention: boolean) {
+        if (this.isRestoringReadingAnchor(isMention)) {
+            return;
+        }
+        this.readingAnchorScrollEpochs[this.getReadingAnchorIndex(isMention)]++;
+        this.scheduleReadingAnchorSave(isMention);
+    }
+
+    private scheduleReadingAnchorSave(isMention: boolean) {
+        if (this.isRestoringReadingAnchor(isMention) || !this.viewState || !this.renderedQueryKey ||
+            this.renderedQueryKey !== this.listQueryKey) {
+            return;
+        }
+        const index = this.getReadingAnchorIndex(isMention);
+        if (this.readingAnchorTimers[index]) {
+            window.clearTimeout(this.readingAnchorTimers[index]);
+        }
+        const generation = this.viewStateGeneration;
+        const service = this.viewState;
+        const queryKey = this.renderedQueryKey;
+        this.readingAnchorTimers[index] = window.setTimeout(() => {
+            this.readingAnchorTimers[index] = undefined;
+            if (this.destroyed || generation !== this.viewStateGeneration || service !== this.viewState ||
+                queryKey !== this.renderedQueryKey || queryKey !== this.listQueryKey) {
+                return;
+            }
+            this.saveReadingAnchor(isMention, service, queryKey);
+        }, 400);
+    }
+
+    private savePendingReadingAnchor(isMention: boolean) {
+        const index = this.getReadingAnchorIndex(isMention);
+        if (this.readingAnchorTimers[index]) {
+            window.clearTimeout(this.readingAnchorTimers[index]);
+            this.readingAnchorTimers[index] = undefined;
+        }
+        this.saveReadingAnchor(isMention);
+    }
+
+    private saveReadingAnchor(isMention: boolean, service = this.viewState, queryKey = this.renderedQueryKey) {
+        if (!service || service !== this.viewState || !queryKey || queryKey !== this.renderedQueryKey ||
+            queryKey !== this.listQueryKey) {
+            return;
+        }
+        const anchor = this.captureReadingAnchor(isMention);
+        if (!anchor || anchor.queryKey !== queryKey) {
+            if (this.type === "bottom" && !this.isBottomReadingAnchorViewportActive() &&
+                service.has(this.getReadingAnchorField(isMention))) {
+                service.remove(this.getReadingAnchorField(isMention));
+            }
+            return;
+        }
+        service.set(this.getReadingAnchorField(isMention), anchor);
     }
 
     private refreshExpandedContexts(rootIDs: Set<string>, full: boolean) {
@@ -1057,7 +1490,7 @@ export class Backlink extends Model {
                     return;
                 }
                 if (full || rootIDs.has(rootID)) {
-                    this.loadContext(record.headerElement, index === 1, true);
+                    this.loadContext(record.headerElement, index === 1, true, false);
                 }
             });
         });
@@ -1101,11 +1534,15 @@ export class Backlink extends Model {
         delete this.mTree.element.dataset.heightFolding;
         this.cancelContextRequests(this.tree.element, false);
         this.cancelContextRequests(this.mTree.element, true);
-        this.editors.forEach(item => item.destroy());
+        this.editors.forEach(item => {
+            unregisterViewFoldContext(item.protyle);
+            item.destroy();
+        });
         this.editors = [];
         this.itemRecords.forEach(records => records.clear());
         this.listRevision = "";
         this.listQueryKey = "";
+        this.renderedQueryKey = "";
         if (resetLists) {
             this.tree.updateData(null);
             this.mTree.updateData(null);
@@ -1126,6 +1563,7 @@ export class Backlink extends Model {
         this.notebookId = "";
         this.blockId = blockId;
         this.rootId = rootId;
+        this.setViewStateHost(blockId);
         this.setRequesting(false);
         this.showBottomLoading();
     }
@@ -1145,6 +1583,7 @@ export class Backlink extends Model {
         this.blockId = blockId;
         this.rootId = rootId;
         this.notebookId = notebookId || "";
+        this.setViewStateHost(blockId);
         const status = this.status[blockId];
         this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').setAttribute(
             "data-sort",
@@ -1231,6 +1670,25 @@ export class Backlink extends Model {
 
     private searchBacklinks(init = false, refreshAllContexts = false) {
         if (!this.blockId) {
+            return;
+        }
+        if (!this.viewStateLoaded) {
+            this.viewStateSearchInit = this.viewStateSearchInit || init;
+            this.viewStateSearchRefreshAll = this.viewStateSearchRefreshAll || refreshAllContexts;
+            if (!this.viewStateSearchQueued) {
+                this.viewStateSearchQueued = true;
+                void this.viewStateReady.then(() => {
+                    this.viewStateSearchQueued = false;
+                    if (this.destroyed) {
+                        return;
+                    }
+                    const queuedInit = this.viewStateSearchInit;
+                    const queuedRefreshAll = this.viewStateSearchRefreshAll;
+                    this.viewStateSearchInit = false;
+                    this.viewStateSearchRefreshAll = false;
+                    this.searchBacklinks(queuedInit, queuedRefreshAll);
+                });
+            }
             return;
         }
         if (this.requesting) {
@@ -1332,7 +1790,13 @@ export class Backlink extends Model {
         });
     }
 
-    public saveStatus() {
+    public saveStatus(includeReadingAnchor = true) {
+        if (includeReadingAnchor) {
+            this.saveReadingAnchor(false);
+            if (this.type !== "bottom") {
+                this.saveReadingAnchor(true);
+            }
+        }
         this.status[this.blockId] = {
             sort: parseInt(this.tree.element.previousElementSibling.querySelector('[data-type="sort"]').getAttribute("data-sort")),
             mSort: parseInt(this.mTree.element.previousElementSibling.querySelector('[data-type="mSort"]').getAttribute("data-sort")),
@@ -1390,13 +1854,30 @@ export class Backlink extends Model {
         this.notebookId = data.box;
         this.inputsElement[0].value = data.k;
         this.inputsElement[1].value = data.mk;
-        const backlinkAnchor = this.captureScrollAnchor(this.type === "bottom" ? undefined : this.tree);
-        const mentionAnchor = this.type === "bottom" ? undefined : this.captureScrollAnchor(this.mTree);
+        const runtimeAnchorRenderGeneration = ++this.readingAnchorRenderGeneration;
+        const runtimeAnchors = (this.type === "bottom" ? [false] : [false, true]).map(isMention => ({
+            anchor: this.captureReadingAnchor(isMention),
+            isMention,
+            scrollEpoch: this.getReadingAnchorScrollEpoch(isMention),
+        }));
+        const runtimeAnchorBlockID = this.blockId;
+        const runtimeAnchorQueryKey = this.renderedQueryKey;
         const backlinkChanged = this.reconcileList(this.tree, data.backlinks, false);
         const backmentionChanged = this.reconcileList(this.mTree, data.backmentions, true);
+        this.renderedQueryKey = this.listQueryKey;
         if (backlinkChanged || backmentionChanged) {
-            this.restoreScrollAnchor(backlinkAnchor);
-            this.restoreScrollAnchor(mentionAnchor);
+            window.requestAnimationFrame(() => {
+                if (this.destroyed || runtimeAnchorBlockID !== this.blockId ||
+                    runtimeAnchorRenderGeneration !== this.readingAnchorRenderGeneration ||
+                    runtimeAnchorQueryKey !== this.renderedQueryKey || runtimeAnchorQueryKey !== this.listQueryKey) {
+                    return;
+                }
+                runtimeAnchors.forEach(({anchor, isMention, scrollEpoch}) => {
+                    if (scrollEpoch === this.getReadingAnchorScrollEpoch(isMention)) {
+                        this.restoreReadingAnchor(anchor);
+                    }
+                });
+            });
         }
         const bottomVisibility = this.type === "bottom" ?
             getBottomBacklinkVisibility(data.linkRefsCount, data.mentionsCount, data.k, data.mk) : undefined;
@@ -1446,17 +1927,43 @@ export class Backlink extends Model {
             };
         }
 
+        const persistedBacklinkFolded = this.viewState?.get<boolean>(this.getSectionStateField(false));
+        const persistedBackmentionFolded = this.viewState?.get<boolean>(this.getSectionStateField(true));
+        if (typeof persistedBacklinkFolded === "boolean") {
+            this.status[this.blockId].backlinkFolded = persistedBacklinkFolded;
+        }
+        if (typeof persistedBackmentionFolded === "boolean") {
+            this.status[this.blockId].backmentionFolded = persistedBackmentionFolded;
+        }
+
+        const applyDocumentState = (items: IBlockTree[], isMention: boolean, openIDs: string[]) => {
+            items.forEach(item => {
+                const expanded = this.viewState?.get<boolean>(this.getDocumentStateField(isMention, item.id));
+                if (typeof expanded !== "boolean") {
+                    return;
+                }
+                const index = openIDs.indexOf(item.id);
+                if (expanded && index === -1) {
+                    openIDs.push(item.id);
+                } else if (!expanded && index > -1) {
+                    openIDs.splice(index, 1);
+                }
+            });
+        };
+        applyDocumentState(data.backlinks, false, this.status[this.blockId].backlinkOpenIds);
+        applyDocumentState(data.backmentions, true, this.status[this.blockId].backlinkMOpenIds);
+
         // restore status
         this.status[this.blockId].backlinkOpenIds.forEach(item => {
             const liElement = this.tree.element.querySelector(`.b3-list-item[data-node-id="${item}"]`) as HTMLElement;
             if (liElement && !liElement.querySelector(".b3-list-item__arrow--open")) {
-                this.toggleItem(liElement, false);
+                this.toggleItem(liElement, false, false);
             }
         });
         this.status[this.blockId].backlinkMOpenIds.forEach(item => {
             const liElement = this.mTree.element.querySelector(`.b3-list-item[data-node-id="${item}"]`) as HTMLElement;
             if (liElement && !liElement.querySelector(".b3-list-item__arrow--open")) {
-                this.toggleItem(liElement, true);
+                this.toggleItem(liElement, true, false);
             }
         });
         if (this.type === "bottom") {
@@ -1482,9 +1989,33 @@ export class Backlink extends Model {
         }
 
         if (init) {
+            const generation = this.viewStateGeneration;
+            const service = this.viewState;
+            const blockID = this.blockId;
+            const queryKey = this.renderedQueryKey;
+            const panes = this.type === "bottom" ? [false] : [false, true];
+            const scrollEpochs = panes.map(isMention => this.getReadingAnchorScrollEpoch(isMention));
             setTimeout(() => {
-                this.tree.element.scrollTop = this.status[this.blockId].scrollTop;
-                this.mTree.element.scrollTop = this.status[this.blockId].mScrollTop;
+                if (this.destroyed || generation !== this.viewStateGeneration || service !== this.viewState ||
+                    blockID !== this.blockId || queryKey !== this.renderedQueryKey || queryKey !== this.listQueryKey) {
+                    return;
+                }
+                panes.forEach((isMention, index) => {
+                    if (scrollEpochs[index] !== this.getReadingAnchorScrollEpoch(isMention)) {
+                        return;
+                    }
+                    const anchor = this.viewState?.get<IBacklinkReadingAnchor>(this.getReadingAnchorField(isMention));
+                    const targetIsMention = this.type === "bottom" && anchor ?
+                        anchor.pane === "backmention" : isMention;
+                    if (!this.isReadingAnchorPaneVisible(targetIsMention)) {
+                        return;
+                    }
+                    if (!anchor && this.type !== "bottom") {
+                        (isMention ? this.mTree : this.tree).element.scrollTop = isMention ?
+                            this.status[this.blockId].mScrollTop : this.status[this.blockId].scrollTop;
+                    }
+                    this.restorePersistedReadingAnchor(isMention);
+                });
             }, Constants.TIMEOUT_LOAD);
         }
     }
@@ -1592,7 +2123,12 @@ export class Backlink extends Model {
     }
 
     public destroy() {
+        if (this.blockId && !this.showingLoading) {
+            this.saveStatus();
+        }
         this.destroyed = true;
+        this.viewStateGeneration++;
+        this.clearReadingAnchorTimers();
         cancelHeightAnimation(this.tree.element);
         cancelHeightAnimation(this.mTree.element);
         delete this.tree.element.dataset.heightFolding;
@@ -1600,12 +2136,19 @@ export class Backlink extends Model {
         if (this.ownerFocusoutListener) {
             this.ownerProtyle.element.removeEventListener("focusout", this.ownerFocusoutListener);
         }
+        if (this.ownerScrollListener) {
+            this.ownerProtyle.contentElement.removeEventListener("scroll", this.ownerScrollListener);
+        }
         if (this.panelFocusoutListener) {
             this.element.removeEventListener("focusout", this.panelFocusoutListener);
         }
         this.visibilityObserver?.disconnect();
-        this.editors.forEach(item => item.destroy());
+        this.editors.forEach(item => {
+            unregisterViewFoldContext(item.protyle);
+            item.destroy();
+        });
         this.editors = [];
+        void this.viewState?.destroy().catch(error => console.error(error));
         if (this.ws) {
             this.ws.onclose = null;
             this.ws.close();

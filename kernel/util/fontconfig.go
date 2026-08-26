@@ -35,7 +35,7 @@ const (
 		"%{[]fullname,fullnamelang{" + fontconfigValueSeparator + "%{fullname}" + fontconfigPairSeparator +
 		"%{fullnamelang}}}" + fontconfigFieldSeparator +
 		"%{[]postscriptname{" + fontconfigValueSeparator + "%{postscriptname}}}" + fontconfigFieldSeparator +
-		"%{weight}" + fontconfigRecordSeparator
+		"%{weight}" + fontconfigFieldSeparator + "%{spacing}" + fontconfigRecordSeparator
 )
 
 type fontconfigLocalizedName struct {
@@ -49,7 +49,7 @@ func parseFontconfigFonts(data []byte, lang string) (ret []*Font) {
 			continue
 		}
 		fields := bytes.Split(record, []byte(fontconfigFieldSeparator))
-		if 5 != len(fields) {
+		if 6 != len(fields) {
 			continue
 		}
 
@@ -92,6 +92,7 @@ func parseFontconfigFonts(data []byte, lang string) (ret []*Font) {
 			Weight:      weight,
 			DisplayName: displayName,
 			Aliases:     aliases,
+			Spacing:     parseFontconfigSpacing(string(fields[5])),
 		})
 	}
 	return
@@ -216,4 +217,23 @@ func parseFontconfigWeight(value, style string) int {
 		}
 	}
 	return 1000
+}
+
+func parseFontconfigSpacing(value string) string {
+	spacing, err := strconv.Atoi(strings.TrimSpace(value))
+	if nil != err {
+		return ""
+	}
+	switch spacing {
+	case 0:
+		return FontSpacingProportional
+	case 90:
+		return FontSpacingDual
+	case 100:
+		return FontSpacingMonospace
+	case 110:
+		return FontSpacingCharacterCell
+	default:
+		return ""
+	}
 }

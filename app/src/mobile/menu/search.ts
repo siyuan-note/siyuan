@@ -384,6 +384,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
             updateSearchResult(config, element, true);
         }
     });
+    searchInputElement.focus();
     const replaceInputElement = element.querySelector(".toolbar .toolbar__title") as HTMLInputElement;
     replaceInputElement.value = config.r || "";
     addClearButton({

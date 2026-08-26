@@ -24,7 +24,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-const CurrentSpec = 7
+const CurrentSpec = 8
 
 const MaxFilterNestingDepth = 3
 
@@ -40,6 +40,7 @@ func UpgradeSpec(av *AttributeView) {
 	upgradeSpec5(av)
 	upgradeSpec6(av)
 	upgradeSpec7(av)
+	upgradeSpec8(av)
 }
 
 func CheckSpec(av *AttributeView) (err error) {
@@ -59,6 +60,18 @@ func upgradeSpec7(av *AttributeView) {
 	}
 
 	av.Spec = 7
+}
+
+// upgradeSpec8 初始化数据库级自定义选项颜色。
+func upgradeSpec8(av *AttributeView) {
+	if 8 <= av.Spec {
+		return
+	}
+
+	if nil == av.CustomColors {
+		av.CustomColors = []*AttributeViewCustomColor{}
+	}
+	av.Spec = 8
 }
 
 // upgradeSpec6 将卡片和看板的预设尺寸转换为可连续调节的实际宽度和宽高比。

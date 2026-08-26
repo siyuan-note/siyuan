@@ -335,36 +335,14 @@
     --b3-table-border-radius-bottom-right: var(--b3-border-radius-s);
     --b3-table-border-radius-bottom-left: var(--b3-border-radius-s);
     border-collapse: separate;
+    border-top: 1px solid var(--b3-theme-surface-lighter);
+    border-left: 1px solid var(--b3-theme-surface-lighter);
+    border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right)
+      var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
     empty-cells: show;
     margin: 0;
     border-spacing: 0;
     width: max-content;
-
-    thead,
-    tbody {
-      position: relative;
-
-      &::after {
-        position: absolute;
-        inset: 0;
-        z-index: 1;
-        border-right: 1px solid var(--b3-theme-surface-lighter);
-        border-left: 1px solid var(--b3-theme-surface-lighter);
-        box-sizing: border-box;
-        content: "";
-        pointer-events: none;
-      }
-    }
-
-    thead::after {
-      border-top: 1px solid var(--b3-theme-surface-lighter);
-      border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) 0 0;
-    }
-
-    tbody:last-of-type::after {
-      border-bottom: 1px solid var(--b3-theme-surface-lighter);
-      border-radius: 0 0 var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
-    }
 
     thead > tr:first-child > :first-child {
       border-top-left-radius: var(--b3-table-border-radius-top-left);
@@ -460,6 +438,33 @@
     border-radius: var(--b3-border-radius);
   }
 
+  pre.code-block[style*="max-height:"] {
+    overflow: visible;
+
+    & > .hljs {
+      box-sizing: border-box;
+      max-height: inherit;
+      overflow-y: auto;
+    }
+  }
+
+  .code-block:not(pre)[data-type="NodeCodeBlock"]:not(.render-node)[style*="max-height:"] {
+    // 顶部留出固定操作区，其余空间仅由代码内容滚动。
+    display: flex;
+    flex-direction: column;
+    padding-top: calc(1.7em + 4px);
+    overflow: visible;
+
+    & > .hljs {
+      box-sizing: border-box;
+      flex: 1 1 auto;
+      min-height: 0 !important;
+      max-height: none;
+      padding-top: 0;
+      overflow-y: auto;
+    }
+  }
+
   .code-block:not(pre) {
     margin: 2px 0;
     box-sizing: border-box;
@@ -481,6 +486,7 @@
         opacity: 0;
         transition: var(--b3-transition);
         line-height: calc(1.625 / 0.85);
+        user-select: none;
       }
 
       .protyle-icon {
@@ -498,7 +504,8 @@
   .hljs {
     font-size: 85%;
     overflow: auto;
-    font-family: var(--b3-font-family-code);
+    font-family: var(--b3-font-family-editor-code, var(--b3-font-family-code));
+    font-weight: var(--b3-font-weight-editor-code, 400);
     min-height: 22px !important;
     overflow-x: overlay;
     tab-size: 4;
@@ -692,7 +699,7 @@
 
 .protyle-wysiwyg [data-node-id].table table,
 .b3-typography .table table {
-  display: inline-block;
+  display: inline-table;
   vertical-align: top;
 }
 
@@ -817,7 +824,8 @@
     user-select: none;
     counter-reset: linenumber;
     font-size: 85%;
-    font-family: var(--b3-font-family-code);
+    font-family: var(--b3-font-family-editor-code, var(--b3-font-family-code));
+    font-weight: var(--b3-font-weight-editor-code, 400);
     text-align: right;
     position: absolute;
 

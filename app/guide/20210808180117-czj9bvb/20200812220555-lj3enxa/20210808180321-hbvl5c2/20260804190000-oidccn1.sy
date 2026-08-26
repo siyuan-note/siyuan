@@ -6,7 +6,7 @@
 		"id": "20260804190000-oidccn1",
 		"title": "OIDC 登录",
 		"type": "doc",
-		"updated": "20260804211500"
+		"updated": "20260820190627"
 	},
 	"Children": [
 		{
@@ -174,7 +174,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260804100011-cn0000c",
-				"updated": "20260804193000"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -741,7 +741,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260804100038-cn00013",
-				"updated": "20260804193000"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -755,12 +755,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260804100039-cn00014",
-				"updated": "20260804193000"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "启用 OIDC 后单击 "
+					"Data": "启用 OIDC 后点击 "
 				},
 				{
 					"Type": "NodeTextMark",

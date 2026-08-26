@@ -596,6 +596,10 @@ func removeRiffDeck(c *gin.Context) {
 	}
 
 	deckID := arg["deckID"].(string)
+	if util.InvalidIDPattern(deckID, ret) {
+		return
+	}
+
 	if active, ok := useFlashcardV2RiffAdapter(c, ret); !ok {
 		return
 	} else if active {

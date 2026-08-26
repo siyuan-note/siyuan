@@ -416,6 +416,18 @@ func TestConfirmSessionAcceptsResponseOnce(t *testing.T) {
 	}
 }
 
+func TestAgentConfirmationDeadlineZeroHasNoLimit(t *testing.T) {
+	if deadline := optionalAgentDeadline(0); deadline != nil {
+		t.Fatal("zero confirmation timeout created a deadline")
+	}
+	if deadline := optionalAgentDeadline(time.Second); deadline == nil {
+		t.Fatal("positive confirmation timeout did not create a deadline")
+	}
+	if timeout := resolveBrowserCapabilityTimeout(0); timeout != 120*time.Second {
+		t.Fatalf("zero confirmation timeout disabled the browser capability timeout: %v", timeout)
+	}
+}
+
 func TestQuestionAndBrowserCapabilityResultsAreAcceptedOnce(t *testing.T) {
 	const questionID = "test-question"
 	questionCh := make(chan QuestionAnswer, 1)

@@ -71,6 +71,17 @@ let bootWindow;
 let latestActiveWindow;
 let firstOpen = false;
 let workspaces = []; // workspaceDir, id, port, webContentsId, browserWindow, tray, hideShortcut
+
+const getGlobalShortcutWorkspace = (fallbackWorkspace) => {
+    const focusedWorkspace = workspaces.find(item => item.browserWindow &&
+        !item.browserWindow.isDestroyed() && item.browserWindow.isFocused());
+    if (focusedWorkspace) {
+        return focusedWorkspace;
+    }
+    if (fallbackWorkspace?.browserWindow && !fallbackWorkspace.browserWindow.isDestroyed()) {
+        return fallbackWorkspace;
+    }
+};
 const initEventId = [];
 const appMenuByWorkspaceDir = new Map();
 const appMenuWorkspaceByWebContentsId = new Map();
@@ -2187,23 +2198,34 @@ app.whenReady().then(() => {
             case "toggleDevTools":
                 event.sender.toggleDevTools();
                 break;
-            case "unregisterGlobalShortcut":
+            case "unregisterGlobalShortcut": {
+                const workspaceItem = workspaces.find(item => item.webContentsId === event.sender.id);
+                if (!workspaceItem) {
+                    break;
+                }
                 if (data.accelerator) {
                     globalShortcut.unregister(hotKey2Electron(data.accelerator));
                 }
                 break;
-            case "registerGlobalShortcut":
+            }
+            case "registerGlobalShortcut": {
+                const workspaceItem = workspaces.find(item => item.webContentsId === event.sender.id);
+                if (!workspaceItem) {
+                    break;
+                }
                 if (data.accelerator) {
                     globalShortcut.unregister(hotKey2Electron(data.accelerator));
                     globalShortcut.register(hotKey2Electron(data.accelerator), () => {
-                        BrowserWindow.getAllWindows().forEach(itemB => {
-                            itemB.webContents.send("siyuan-hotkey", {
+                        const targetWorkspace = getGlobalShortcutWorkspace(workspaceItem);
+                        if (targetWorkspace) {
+                            targetWorkspace.browserWindow.webContents.send("siyuan-hotkey", {
                                 hotkey: data.accelerator
                             });
-                        });
+                        }
                     });
                 }
                 break;
+            }
             case "setTrafficLightPosition":
                 if (!currentWindow || !currentWindow.setWindowButtonPosition) {
                     return;
@@ -2464,12 +2486,12 @@ app.whenReady().then(() => {
         if (!data.hotkeys || data.hotkeys.length === 0) {
             return;
         }
-        workspaces.find(workspaceItem => {
-            if (event.sender.id === workspaceItem.browserWindow.webContents.id) {
-                workspaceItem.hotkeys = data.hotkeys;
-                return true;
-            }
-        });
+        const ownerWorkspace = workspaces.find(workspaceItem =>
+            event.sender.id === workspaceItem.browserWindow.webContents.id);
+        if (!ownerWorkspace) {
+            return;
+        }
+        ownerWorkspace.hotkeys = data.hotkeys;
         data.hotkeys.forEach((item, index) => {
             const shortcut = hotKey2Electron(item);
             if (!shortcut) {
@@ -2507,11 +2529,12 @@ app.whenReady().then(() => {
                 });
             } else {
                 globalShortcut.register(shortcut, () => {
-                    BrowserWindow.getAllWindows().forEach(itemB => {
-                        itemB.webContents.send("siyuan-hotkey", {
+                    const targetWorkspace = getGlobalShortcutWorkspace(ownerWorkspace);
+                    if (targetWorkspace) {
+                        targetWorkspace.browserWindow.webContents.send("siyuan-hotkey", {
                             hotkey: item
                         });
-                    });
+                    }
                 });
             }
         });

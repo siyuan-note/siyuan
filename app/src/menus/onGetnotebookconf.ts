@@ -65,7 +65,7 @@ export const onGetnotebookconf = (data: INotebookConf) => {
     <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.docCreateTemplatePathInheritTip}</div>
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" id="docCreateTemplatePath" value="${data.conf.docCreateTemplatePath}">
+    <input class="b3-text-field fn__flex-center fn__block" id="docCreateTemplatePath" value="">
 </div>
 <div class="b3-label config-item config-item--save-path">
     <div class="config-name">${window.siyuan.languages.fileTree5}</div>
@@ -85,7 +85,7 @@ export const onGetnotebookconf = (data: INotebookConf) => {
     <div class="fn__hr"></div>
     <div class="b3-label__text">${window.siyuan.languages.fileTree15}</div>
     <div class="fn__hr"></div>
-    <input class="b3-text-field fn__flex-center fn__block" id="dailyNoteTemplatePath" value="${data.conf.dailyNoteTemplatePath}">
+    <input class="b3-text-field fn__flex-center fn__block" id="dailyNoteTemplatePath" value="">
 </div></div>`;
     if (isMobile()) {
         openModel({

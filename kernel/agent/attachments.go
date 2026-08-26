@@ -152,7 +152,13 @@ func resolveAgentAttachment(attachment AgentAttachment) (data []byte, mimeType s
 		height = attachment.Height
 		return
 	}
-	prepared, prepareErr := kernelModel.PrepareDocumentImage(attachment.DocumentID, attachment.Path)
+	var prepared kernelModel.PreparedDocumentImage
+	var prepareErr error
+	if attachment.DocumentID == "" {
+		prepared, prepareErr = kernelModel.PrepareAgentMessageImage(attachment.Path)
+	} else {
+		prepared, prepareErr = kernelModel.PrepareDocumentImage(attachment.DocumentID, attachment.Path)
+	}
 	if prepareErr != nil {
 		err = prepareErr
 		return
@@ -162,6 +168,28 @@ func resolveAgentAttachment(attachment AgentAttachment) (data []byte, mimeType s
 	width = prepared.Prepared.Width
 	height = prepared.Prepared.Height
 	return
+}
+
+func agentMessageAttachments(message AgentMessage) (ret []AgentAttachment) {
+	if message.Role == "user" {
+		for _, assetPath := range kernelModel.AgentMessageImageAssets(message.Content) {
+			ret = append(ret, AgentAttachment{Type: "image", Path: assetPath})
+		}
+		return
+	}
+	for _, toolCall := range message.ToolCalls {
+		ret = append(ret, toolCall.Attachments...)
+	}
+	return
+}
+
+func latestAgentMessageAttachments(messages []AgentMessage) (index int, attachments []AgentAttachment) {
+	for i := len(messages) - 1; i >= 0; i-- {
+		if attachments = agentMessageAttachments(messages[i]); len(attachments) > 0 {
+			return i, attachments
+		}
+	}
+	return -1, nil
 }
 
 func chatMessageText(message openai.ChatCompletionMessage) string {

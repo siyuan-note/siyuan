@@ -21,12 +21,14 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/88250/lute/ast"
 )
 
 // IsForbiddenAbsPath 判断绝对路径是否为敏感路径，HTTP 文件 API（kernel/api/file.go 的 refuseToAccess）
 // 与 MCP 文件工具（kernel/mcp/tools/file.go 的 resolvePath）共用同一黑名单：
 // conf 目录下的 conf.json 与 TLS 密钥材料、data/snippets/conf.json、data/templates 目录、
-// data/.siyuan/publishAccess.json 以及 temp 目录下的 siyuan.log 日志文件。
+// data/.siyuan/publishAccess.json、笔记本目录下的 .siyuan 内部文件以及 temp 目录下的 siyuan.log 日志文件。
 func IsForbiddenAbsPath(abs string) bool {
 	fileNorm := NormalizeAndResolve(abs)
 
@@ -62,9 +64,10 @@ func IsForbiddenAbsPath(abs string) bool {
 }
 
 // IsForbiddenDataRelPath 判断数据目录下的相对路径是否指向敏感位置（data/snippets/conf.json、
-// data/templates 目录以及 data/.siyuan/publishAccess.json）。历史快照与仓库 diff 检出中的文件副本
-// 位于其他绝对路径下，无法用 IsForbiddenAbsPath 的精确匹配拦截，因此 /history 与 /repo/diff 路由
-// （kernel/server/serve.go）在去掉快照目录前缀后按数据相对路径调用本函数进行片段匹配。
+// data/templates 目录、data/.siyuan/publishAccess.json 以及笔记本目录下的 .siyuan 内部文件
+// 如 conf.json、sort.json、历史快照和 notebook-crypto-backup.json）。历史快照与仓库 diff 检出
+// 中的文件副本位于其他绝对路径下，无法用 IsForbiddenAbsPath 的精确匹配拦截，因此 /history
+// 与 /repo/diff 路由（kernel/server/serve.go）在去掉快照目录前缀后按数据相对路径调用本函数进行片段匹配。
 func IsForbiddenDataRelPath(rel string) bool {
 	// 统一为斜杠并清理（path.Clean 使用斜杠语义，避免 Windows 上分隔符差异）
 	rel = path.Clean("/" + filepath.ToSlash(rel))
@@ -83,8 +86,18 @@ func IsForbiddenDataRelPath(rel string) bool {
 		return true
 	}
 
-	// 禁止访问 data/.siyuan/publishAccess.json（含发布模式明文访问密码）
-	if rel == "/.siyuan/publishaccess.json" {
+	// 禁止访问 data/.siyuan/publishAccess.json（含发布模式明文访问密码）。
+	// 磁盘上的真实文件名为驼峰 publishAccess.json：Windows/macOS 上路径已在上方转为小写，与小写常量比较即可；
+	// Linux 等大小写敏感平台需与真实名称精确比较，并对大小写变体做小写兜底比较，防止变体路径绕过黑名单
+	if rel == "/.siyuan/publishAccess.json" || strings.ToLower(rel) == "/.siyuan/publishaccess.json" {
+		return true
+	}
+
+	// 禁止访问笔记本目录下的 .siyuan 内部文件（含目录本身）：conf.json、sort.json、
+	// 历史快照与 notebook-crypto-backup.json 等均为内部数据，不应通过原始文件通道暴露。
+	// 笔记本 ID 目录名以时间戳开头，据此限定匹配范围避免误伤用户文档
+	pathParts := strings.Split(rel, "/")
+	if 3 <= len(pathParts) && ast.IsNodeIDPattern(pathParts[1]) && ".siyuan" == pathParts[2] {
 		return true
 	}
 	return false

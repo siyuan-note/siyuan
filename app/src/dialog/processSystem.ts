@@ -16,10 +16,10 @@ import {confirmDialog} from "./confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {needSubscribe} from "../util/needSubscribe";
 import {hideAllElements} from "../protyle/ui/hideElements";
-import type {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
-import {Plugin} from "../plugin";
+import {emitToPlugins} from "../plugin/EventBusCore";
+import {createHostQuitGuard} from "./hostQuit";
 
 export const processBacklinkIndexCommit = (data: {
     rootIDs?: string[],
@@ -121,13 +121,11 @@ export const setDefRefCount = (data: {
     }
 };
 
-export const lockScreen = async (app: App) => {
+export const lockScreen = async () => {
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
-    app.plugins.forEach(item => {
-        item.eventBus.emit("lock-screen");
-    });
+    emitToPlugins("lock-screen");
     /// #if !MOBILE
     exportLayout({
         errorExit: false,
@@ -144,26 +142,32 @@ export const lockScreen = async (app: App) => {
 
 };
 
-// forceQuit 用于内核已断连、无法走 /api/system/exit 的场景：绕过内核 HTTP，直接通知宿主（Electron 主进程 /
-// 移动端原生容器）退出。浏览器/Docker 等纯 Web 环境无宿主可调，只能关闭当前页。
+const hostQuitGuard = createHostQuitGuard();
+
+export const isHostQuitStarted = hostQuitGuard.isStarted;
+
+// forceQuit 绕过内核 HTTP，直接通知宿主（Electron 主进程 / 移动端原生容器）退出。浏览器/Docker 等纯 Web
+// 环境无宿主可调，只能关闭当前页。
 export const forceQuit = () => {
-    /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-    /// #else
-    if (isInAndroid()) {
-        window.JSAndroid.exit();
-        return;
-    }
-    if (isInIOS()) {
-        window.webkit.messageHandlers.exit.postMessage("");
-        return;
-    }
-    if (isInHarmony()) {
-        window.JSHarmony.exit();
-        return;
-    }
-    window.close();
-    /// #endif
+    hostQuitGuard.run(() => {
+        /// #if !BROWSER
+        ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
+        /// #else
+        if (isInAndroid()) {
+            window.JSAndroid.exit();
+            return;
+        }
+        if (isInIOS()) {
+            window.webkit.messageHandlers.exit.postMessage("");
+            return;
+        }
+        if (isInHarmony()) {
+            window.JSHarmony.exit();
+            return;
+        }
+        window.close();
+        /// #endif
+    });
 };
 
 const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean) => {
@@ -187,19 +191,7 @@ const installNewVersion = (installPkgPath: string, setCurrentWorkspace: boolean)
         force: true,
         setCurrentWorkspace,
         execInstallPkg: 1,
-    }, () => {
-        if (isInAndroid()) {
-            window.JSAndroid.exit();
-            return;
-        }
-        if (isInIOS()) {
-            window.webkit.messageHandlers.exit.postMessage("");
-            return;
-        }
-        if (isInHarmony()) {
-            window.JSHarmony.exit();
-        }
-    });
+    }, forceQuit);
     /// #endif
 };
 
@@ -220,24 +212,7 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                         installNewVersion(response.data.installPkgPath, setCurrentWorkspace);
                         return;
                     }
-                    fetchPost("/api/system/exit", {force: true, setCurrentWorkspace}, () => {
-                        /// #if !BROWSER
-                        ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-                        /// #else
-                        if (isInAndroid()) {
-                            window.JSAndroid.exit();
-                            return;
-                        }
-                        if (isInIOS()) {
-                            window.webkit.messageHandlers.exit.postMessage("");
-                            return;
-                        }
-                        if (isInHarmony()) {
-                            window.JSHarmony.exit();
-                            return;
-                        }
-                        /// #endif
-                    });
+                    fetchPost("/api/system/exit", {force: true, setCurrentWorkspace}, forceQuit);
                 });
             }
         } else if (response.code === 2) { // 提示新安装包
@@ -256,30 +231,10 @@ export const exitSiYuan = async (setCurrentWorkspace = true) => {
                     force: true,
                     setCurrentWorkspace,
                     execInstallPkg: 1 // 0：默认检查新版本，1：不返回安装包，2：返回安装包路径并退出
-                }, () => {
-                    /// #if !BROWSER
-                    ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-                    /// #endif
-                });
+                }, forceQuit);
             });
         } else { // 正常退出
-            /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_QUIT, location.port);
-            /// #else
-            if (isInAndroid()) {
-                window.JSAndroid.exit();
-                return;
-            }
-            if (isInIOS()) {
-                window.webkit.messageHandlers.exit.postMessage("");
-                return;
-            }
-
-            if (isInHarmony()) {
-                window.JSHarmony.exit();
-                return;
-            }
-            /// #endif
+            forceQuit();
         }
     });
 };
@@ -425,15 +380,16 @@ export const bootSync = () => {
 };
 
 export const downloadProgress = (data: { id: string, percent: number }) => {
-    const bazaarSideElement = document.querySelector("#configBazaarReadme .item__side");
+    const bazaarReadmeElement = document.querySelector("#configBazaarReadme");
+    const bazaarSideElement = bazaarReadmeElement?.querySelector(".item__side");
     if (!bazaarSideElement) {
         return;
     }
     if (data.id !== (bazaarSideElement.getAttribute("data-progress-id") || bazaarSideElement.getAttribute("data-repourl"))) {
         return;
     }
-    const installBtnElement = bazaarSideElement.querySelector('[data-type="install"]') as HTMLElement;
-    const updateBtnElement = bazaarSideElement.querySelector('[data-type="install-t"]') as HTMLElement;
+    const installBtnElement = bazaarReadmeElement.querySelector('[data-type="install"]') as HTMLElement;
+    const updateBtnElement = bazaarReadmeElement.querySelector('[data-type="install-t"]') as HTMLElement;
     if (!installBtnElement && !updateBtnElement) {
         return;
     }
@@ -453,7 +409,7 @@ export const downloadProgress = (data: { id: string, percent: number }) => {
     }
 };
 
-export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
+export const processSync = (data?: IWebSocketData) => {
     if (data?.code === 1) {
         window.dispatchEvent(new CustomEvent("siyuan-sync-success"));
     }
@@ -467,22 +423,22 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
             return;
         }
         menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
-        barSyncUseElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        barSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
         return;
     }
-    menuSyncUseElement?.parentElement.classList.remove("fn__rotate");
-    barSyncUseElement.parentElement.classList.remove("fn__rotate");
+    menuSyncUseElement?.parentElement?.classList.remove("fn__rotate");
+    barSyncUseElement?.parentElement?.classList.remove("fn__rotate");
     if (data.code === 0) {  // syncing
-        menuSyncUseElement?.parentElement.classList.add("fn__rotate");
-        barSyncUseElement.parentElement.classList.add("fn__rotate");
+        menuSyncUseElement?.parentElement?.classList.add("fn__rotate");
+        barSyncUseElement?.parentElement?.classList.add("fn__rotate");
         menuSyncUseElement?.setAttribute("xlink:href", "#iconRefresh");
-        barSyncUseElement.setAttribute("xlink:href", "#iconRefresh");
+        barSyncUseElement?.setAttribute("xlink:href", "#iconRefresh");
     } else if (data.code === 2) {    // error
         menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
-        barSyncUseElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
+        barSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudError");
     } else if (data.code === 1) {   // success
         menuSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
-        barSyncUseElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
+        barSyncUseElement?.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
     }
     /// #else
     const iconElement = document.querySelector("#barSync");
@@ -512,13 +468,11 @@ export const processSync = (data?: IWebSocketData, plugins?: Plugin[]) => {
         useElement.setAttribute("xlink:href", syncDisabled ? "#iconCloudOff" : "#iconCloudSucc");
     }
     /// #endif
-    plugins.forEach((item) => {
-        if (data.code === 0) {
-            item.eventBus.emit("sync-start", data);
-        } else if (data.code === 1) {
-            item.eventBus.emit("sync-end", data);
-        } else if (data.code === 2) {
-            item.eventBus.emit("sync-fail", data);
-        }
-    });
+    if (data.code === 0) {
+        emitToPlugins("sync-start", data);
+    } else if (data.code === 1) {
+        emitToPlugins("sync-end", data);
+    } else if (data.code === 2) {
+        emitToPlugins("sync-fail", data);
+    }
 };

@@ -152,8 +152,16 @@ func removeBlockCacheKey(id, key string) {
 
 var defIDRefsCache = gcache.New(30*time.Minute, 5*time.Minute)
 
+// refCacheScopeBoxID 按加密边界规范化引用缓存范围：普通笔记本共享全局范围，加密笔记本保持独立范围。
+func refCacheScopeBoxID(boxID string) string {
+	if IsEncryptedBoxFn != nil && IsEncryptedBoxFn(boxID) {
+		return boxID
+	}
+	return ""
+}
+
 func refCacheKey(defBlockID, boxID string) string {
-	return boxID + "\x00" + defBlockID
+	return refCacheScopeBoxID(boxID) + "\x00" + defBlockID
 }
 
 func GetRefsCacheByDefID(defID string) (ret []*Ref) {
@@ -164,6 +172,7 @@ func GetRefsCacheByDefIDInBox(defID, boxID string) (ret []*Ref) {
 	if encryptedBoxCacheUnavailable(boxID) {
 		return
 	}
+	boxID = refCacheScopeBoxID(boxID)
 	key := refCacheKey(defID, boxID)
 	for k, refs := range defIDRefsCache.Items() {
 		if k == key {

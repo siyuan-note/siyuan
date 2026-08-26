@@ -10,6 +10,7 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
 import type {App} from "../index";
+import {getLastDailyNoteNotebookId} from "./dailyNote";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 import {importObsidianVault} from "../menus/importObsidian";
@@ -29,7 +30,7 @@ export const fetchNewDailyNote = (app: App, notebook: string) => {
     });
 };
 
-export const newDailyNote = (app: App) => {
+const openDailyNote = (app: App, useLastNotebook: boolean) => {
     const exit = window.siyuan.dialogs.find(item => {
         if (item.element.getAttribute("data-key") === Constants.DIALOG_DIALYNOTE) {
             item.destroy();
@@ -55,13 +56,9 @@ export const newDailyNote = (app: App) => {
         return;
     }
     const localNotebookId = window.siyuan.storage[Constants.LOCAL_DAILYNOTEID];
-    const localNotebookIsOpen = window.siyuan.notebooks.find((item) => {
-        if (item.id === localNotebookId && !item.closed) {
-            return true;
-        }
-    });
-    if (localNotebookId && localNotebookIsOpen && !isMobile()) {
-        fetchNewDailyNote(app, localNotebookId);
+    const lastNotebookId = getLastDailyNoteNotebookId(window.siyuan.notebooks, localNotebookId);
+    if (lastNotebookId && useLastNotebook) {
+        fetchNewDailyNote(app, lastNotebookId);
     } else {
         let optionsHTML = "";
         window.siyuan.notebooks.forEach(item => {
@@ -96,6 +93,14 @@ export const newDailyNote = (app: App) => {
             dialog.destroy();
         });
     }
+};
+
+export const newDailyNote = (app: App) => {
+    openDailyNote(app, !isMobile());
+};
+
+export const newDailyNoteFromLastNotebook = (app: App) => {
+    openDailyNote(app, true);
 };
 
 export const mountHelp = () => {

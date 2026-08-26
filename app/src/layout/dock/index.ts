@@ -30,6 +30,7 @@ import {
 import {getDockHotkey} from "./hotkey";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
+type TDockTabData = Config.IUILayoutDockTab & {entryId?: string};
 
 export class Dock {
     public elements: HTMLElement[];
@@ -770,7 +771,7 @@ export class Dock {
         resizeTabs(isSaveLayout);
         if (target.classList.contains("dock__item--active") && !removeDock && (type === "graph" || type === "globalGraph")) {
             const graph = this.data[type] as Graph;
-            graph.onGraph(false);
+            graph.onGraph();
         }
 
         // 等待 dock 面板动画结束
@@ -869,7 +870,7 @@ export class Dock {
         if (custom.parent) {
             custom.parent.parent.removeTab(custom.parent.id);
         }
-        if (this.elements[0].parentElement.querySelectorAll(".dock__item").length === 1) {
+        if (!this.elements[0].parentElement.querySelector(".dock__item[data-type]")) {
             this.elements[0].parentElement.classList.add("fn__none");
             adjustDockPadding();
         }
@@ -919,7 +920,7 @@ export class Dock {
         return max;
     }
 
-    public genButton(data: Config.IUILayoutDockTab[], index: number, tabIndex?: number) {
+    public genButton(data: TDockTabData[], index: number, tabIndex?: number) {
         let html = "";
         const tooltipPosition = this.getTooltipPosition(index);
         data.forEach(item => {
@@ -933,7 +934,7 @@ export class Dock {
                 item.icon = "iconTag";
             }
             const hotkey = getDockHotkey(item);
-            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}" data-index="${index}" data-hotkeylangid="${item.hotkeyLangId || ""}" data-title="${item.title}" data-position="${tooltipPosition}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${hotkey ? updateHotkeyTip(hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
+            html += `<span data-height="${item.size.height}" data-width="${item.size.width}" data-type="${item.type}"${item.entryId ? ` data-entry-id="${item.entryId}"` : ""} data-index="${index}" data-hotkeylangid="${item.hotkeyLangId || ""}" data-title="${item.title}" data-position="${tooltipPosition}" class="dock__item${item.show ? " dock__item--active" : ""} ariaLabel" aria-label="<span style='white-space:pre'>${item.title} ${hotkey ? updateHotkeyTip(hotkey) : ""}${window.siyuan.languages.dockTip}</span>">
     <svg><use xlink:href="#${item.icon}"></use></svg>
 </span>`;
             this.data[item.type] = true;

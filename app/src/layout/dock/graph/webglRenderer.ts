@@ -1,5 +1,5 @@
 import {getGraphNodeColor, IGraphRenderer, IGraphRenderState, parseGraphColor} from "./renderer";
-import {getGraphEdgeOpacity, MIN_GRAPH_EDGE_WIDTH} from "./core";
+import {getGraphArrowLength, getGraphEdgeOpacity, MIN_GRAPH_EDGE_WIDTH} from "./core";
 
 const NODE_VERTEX_SHADER = `#version 300 es
 layout(location = 0) in vec2 a_corner;
@@ -50,8 +50,12 @@ layout(location = 1) in vec2 a_start;
 layout(location = 2) in vec2 a_end;
 layout(location = 3) in vec4 a_color;
 layout(location = 4) in float a_state;
+layout(location = 5) in float a_reference;
+layout(location = 6) in float a_target_size;
 uniform vec2 u_viewport;
 uniform vec3 u_camera;
+uniform float u_arrow;
+uniform float u_arrow_length;
 uniform float u_min_width;
 uniform float u_width;
 out vec4 v_color;
@@ -70,7 +74,12 @@ void main() {
     float width = max(u_min_width, u_width * u_camera.z);
     float half_width = width * 0.5;
     float outer_half_width = half_width + 1.0;
-    float line_position = mix(-outer_half_width, distance + outer_half_width, a_corner.x);
+    float line_length = distance;
+    if (u_arrow > 0.5 && a_reference > 0.5 && u_camera.z >= 0.08) {
+        line_length = max(0.0,
+            distance - max(1.0, a_target_size * u_camera.z) - u_arrow_length - half_width);
+    }
+    float line_position = mix(-outer_half_width, line_length + outer_half_width, a_corner.x);
     vec2 position = start + direction * line_position + normal * a_corner.y * outer_half_width;
     vec2 clip = position / u_viewport * 2.0 - 1.0;
     gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
@@ -78,7 +87,7 @@ void main() {
     v_state = a_state;
     v_distance = a_corner.y * outer_half_width;
     v_half_width = half_width;
-    v_length = distance;
+    v_length = line_length;
     v_position = line_position;
 }`;
 
@@ -120,7 +129,7 @@ layout(location = 4) in vec4 a_color;
 layout(location = 5) in float a_state;
 uniform vec2 u_viewport;
 uniform vec3 u_camera;
-uniform float u_width;
+uniform float u_arrow_length;
 out vec4 v_color;
 out float v_state;
 out vec3 v_barycentric;
@@ -131,9 +140,8 @@ void main() {
     float distance = max(0.001, length(delta));
     vec2 direction = delta / distance;
     vec2 normal = vec2(-direction.y, direction.x);
-    float arrow_length = max(7.0, u_width * u_camera.z * 2.2);
-    vec2 tip = end - direction * max(1.0, a_target_size * u_camera.z) * 1.15;
-    vec2 position = tip + direction * a_corner.x * arrow_length + normal * a_corner.y * arrow_length;
+    vec2 tip = end - direction * max(1.0, a_target_size * u_camera.z);
+    vec2 position = tip + direction * a_corner.x * u_arrow_length + normal * a_corner.y * u_arrow_length;
     vec2 clip = position / u_viewport * 2.0 - 1.0;
     gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
     v_color = a_color;
@@ -172,7 +180,9 @@ export class GraphWebGLRenderer implements IGraphRenderer {
     private readonly edgeColorBuffer: WebGLBuffer;
     private readonly edgeEndpointBuffer: WebGLBuffer;
     private readonly edgeProgram: WebGLProgram;
+    private readonly edgeReferenceBuffer: WebGLBuffer;
     private readonly edgeStateBuffer: WebGLBuffer;
+    private readonly edgeTargetSizeBuffer: WebGLBuffer;
     private readonly edgeVao: WebGLVertexArrayObject;
     private readonly gl: WebGL2RenderingContext;
     private readonly nodeColorBuffer: WebGLBuffer;
@@ -188,7 +198,9 @@ export class GraphWebGLRenderer implements IGraphRenderer {
     private arrowStates = new Float32Array();
     private edgeColors = new Float32Array();
     private edgeEndpoints = new Float32Array();
+    private edgeReferences = new Float32Array();
     private edgeStates = new Float32Array();
+    private edgeTargetSizes = new Float32Array();
     private geometryVersion = -1;
     private highlightLine = new Float32Array([0, 0, 0, 1]);
     private highlightPoint = new Float32Array([0, 0, 0, 1]);
@@ -225,6 +237,8 @@ export class GraphWebGLRenderer implements IGraphRenderer {
         this.edgeEndpointBuffer = this.createBuffer();
         this.edgeColorBuffer = this.createBuffer();
         this.edgeStateBuffer = this.createBuffer();
+        this.edgeReferenceBuffer = this.createBuffer();
+        this.edgeTargetSizeBuffer = this.createBuffer();
         this.arrowEndpointBuffer = this.createBuffer();
         this.arrowSizeBuffer = this.createBuffer();
         this.arrowColorBuffer = this.createBuffer();
@@ -289,10 +303,16 @@ export class GraphWebGLRenderer implements IGraphRenderer {
         this.upload(this.nodeColorBuffer, this.nodeColors, gl.STATIC_DRAW);
         const edgeCount = state.data.links.length;
         this.edgeColors = new Float32Array(edgeCount * 4);
+        this.edgeReferences = new Float32Array(edgeCount);
+        this.edgeTargetSizes = new Float32Array(edgeCount);
         state.data.links.forEach((link, index) => {
             this.edgeColors.set(getColor(link.ref ? state.palette.referenceLine : state.palette.line), index * 4);
+            this.edgeReferences[index] = link.ref ? 1 : 0;
+            this.edgeTargetSizes[index] = state.data.sizes[link.target];
         });
         this.upload(this.edgeColorBuffer, this.edgeColors, gl.STATIC_DRAW);
+        this.upload(this.edgeReferenceBuffer, this.edgeReferences, gl.STATIC_DRAW);
+        this.upload(this.edgeTargetSizeBuffer, this.edgeTargetSizes, gl.DYNAMIC_DRAW);
         const arrowIndices: number[] = [];
         if (state.options.arrow) {
             state.data.links.forEach((link, index) => {
@@ -384,6 +404,9 @@ export class GraphWebGLRenderer implements IGraphRenderer {
         gl.useProgram(this.edgeProgram);
         gl.bindVertexArray(this.edgeVao);
         this.setViewUniforms(this.edgeProgram, state);
+        gl.uniform1f(this.getUniform(this.edgeProgram, "u_arrow"), state.options.arrow ? 1 : 0);
+        gl.uniform1f(this.getUniform(this.edgeProgram, "u_arrow_length"),
+            getGraphArrowLength(state.options.linkWidth, state.camera.scale));
         gl.uniform1f(this.getUniform(this.edgeProgram, "u_min_width"), MIN_GRAPH_EDGE_WIDTH);
         gl.uniform1f(this.getUniform(this.edgeProgram, "u_width"), state.options.linkWidth);
         gl.uniform1f(this.getUniform(this.edgeProgram, "u_opacity"),
@@ -402,7 +425,8 @@ export class GraphWebGLRenderer implements IGraphRenderer {
         gl.useProgram(this.arrowProgram);
         gl.bindVertexArray(this.arrowVao);
         this.setViewUniforms(this.arrowProgram, state);
-        gl.uniform1f(this.getUniform(this.arrowProgram, "u_width"), state.options.linkWidth);
+        gl.uniform1f(this.getUniform(this.arrowProgram, "u_arrow_length"),
+            getGraphArrowLength(state.options.linkWidth, state.camera.scale));
         gl.uniform1f(this.getUniform(this.arrowProgram, "u_opacity"),
             getGraphEdgeOpacity(state.options.lineOpacity, false));
         gl.uniform1f(this.getUniform(this.arrowProgram, "u_highlight_opacity"),
@@ -428,6 +452,8 @@ export class GraphWebGLRenderer implements IGraphRenderer {
         this.configureAttribute(2, this.edgeEndpointBuffer, 2, 16, 1, 8);
         this.configureAttribute(3, this.edgeColorBuffer, 4, 0, 1);
         this.configureAttribute(4, this.edgeStateBuffer, 1, 0, 1);
+        this.configureAttribute(5, this.edgeReferenceBuffer, 1, 0, 1);
+        this.configureAttribute(6, this.edgeTargetSizeBuffer, 1, 0, 1);
         gl.bindVertexArray(this.arrowVao);
         this.configureAttribute(0, this.createStaticBuffer(arrowCorners), 2, 0, 0);
         this.configureAttribute(1, this.arrowEndpointBuffer, 2, 16, 1, 0);

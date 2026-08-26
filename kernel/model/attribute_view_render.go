@@ -26,6 +26,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -533,10 +534,17 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	}
 
 	// 渲染视图
-	viewable = sql.RenderView(attrView, view, query, ignoreRows)
+	renderContext := sql.NewAttributeViewRenderContext()
+	defer renderContext.PushTemplateErrors()
+	deferTemplateValues := shouldDeferAttributeViewTemplateValues(attrView, view, query, ignoreRows)
+	if deferTemplateValues {
+		viewable = sql.RenderViewWithDeferredTemplatesContext(attrView, view, query, ignoreRows, renderContext)
+	} else {
+		viewable = sql.RenderViewWithContext(attrView, view, query, ignoreRows, renderContext)
+	}
 	var groupRenderSource *sql.GroupViewRenderSource
 	if !ignoreRows && view.IsGroupView() {
-		// 在父视图分页前保存完整行索引，分组表格复用已经生成的字段值。
+		// 在父视图分页前保存完整条目索引，各分组复用已经生成的字段值。
 		groupRenderSource = sql.NewGroupViewRenderSource(viewable, query)
 	}
 	renderTargetItemID := targetItemID(target)
@@ -544,9 +552,13 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 		renderTargetItemID = ""
 	}
 	var targetIndex, targetOffset int
-	targetIndex, targetOffset, err = renderViewableInstance(viewable, view, attrView, page, pageSize, ignoreRows, renderTargetItemID)
+	targetIndex, targetOffset, err = renderViewableInstance(viewable, view, attrView, page, pageSize, ignoreRows,
+		renderTargetItemID, renderContext)
 	if nil != err {
 		return
+	}
+	if deferTemplateValues {
+		sql.FillAttributeViewTemplateValuesWithContext(attrView, view, viewable.(av.Collection), renderContext)
 	}
 	if nil != target && targetIndex >= 0 && !view.IsGroupView() && view.LayoutType != av.LayoutTypeKanban {
 		setAttributeViewRenderTarget(target, "", targetIndex, targetOffset, view.PageSize)
@@ -555,7 +567,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 	// 渲染分组视图。当 ignoreRows 时若有已生成的分组则渲染元数据供面板使用，无分组则跳过（生成分组需要行数据）
 	if !ignoreRows || len(view.Groups) > 0 {
 		err = renderAttributeViewGroups(viewable, attrView, view, query, page, pageSize, groupPaging, groupRenderSource,
-			ignoreRows, writable, target, targetGroupID)
+			ignoreRows, writable, target, targetGroupID, renderContext)
 	}
 	if writable && nil == err && attrView.HasCardCoverPositionChanges() {
 		if err = av.SaveAttributeView(attrView); nil != err {
@@ -568,7 +580,7 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, carrierView
 
 func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page,
 	pageSize int, groupPaging map[string]any, groupRenderSource *sql.GroupViewRenderSource, ignoreRows, writable bool,
-	target *AttributeViewRenderTarget, targetGroupID string) (err error) {
+	target *AttributeViewRenderTarget, targetGroupID string, renderContext *sql.AttributeViewRenderContext) (err error) {
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
 		if view.LayoutType == av.LayoutTypeKanban {
@@ -660,7 +672,8 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
-		groupViewable := sql.RenderGroupViewWithSource(attrView, view, groupView, query, groupRenderSource, ignoreRows)
+		groupViewable := sql.RenderGroupViewWithSourceContext(attrView, view, groupView, query, groupRenderSource,
+			ignoreRows, renderContext)
 
 		groupPage, groupPageSize := page, pageSize
 		if nil != groupPaging {
@@ -681,7 +694,8 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 				groupTargetItemID = target.ItemID
 			}
 		}
-		targetIndex, targetOffset, renderErr := renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize, ignoreRows, groupTargetItemID)
+		targetIndex, targetOffset, renderErr := renderViewableInstance(groupViewable, view, attrView, groupPage,
+			groupPageSize, ignoreRows, groupTargetItemID, renderContext)
 		err = renderErr
 		if nil != err {
 			return
@@ -904,7 +918,65 @@ func isGroupByTemplate(attrView *av.AttributeView, view *av.View) bool {
 	return av.KeyTypeTemplate == groupKey.Type
 }
 
-func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int, ignoreRows bool, targetItemID string) (targetIndex, targetOffset int, err error) {
+func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, query string,
+	ignoreRows bool) bool {
+	if nil == attrView || nil == view || ignoreRows || "" != strings.TrimSpace(query) || view.IsGroupView() ||
+		av.LayoutTypeKanban == view.LayoutType {
+		return false
+	}
+
+	templateKeyIDs := map[string]bool{}
+	for _, keyValues := range attrView.KeyValues {
+		if nil != keyValues && nil != keyValues.Key && av.KeyTypeTemplate == keyValues.Key.Type {
+			templateKeyIDs[keyValues.Key.ID] = true
+		}
+	}
+	if 0 == len(templateKeyIDs) {
+		return false
+	}
+
+	for keyID := range templateKeyIDs {
+		if attrViewFiltersContainColumn(view.Filters, keyID) {
+			return false
+		}
+	}
+	for _, viewSort := range view.Sorts {
+		if nil != viewSort && templateKeyIDs[viewSort.Column] {
+			return false
+		}
+	}
+	if nil != view.GroupCalc && templateKeyIDs[view.GroupCalc.Field] {
+		return false
+	}
+
+	hasTemplateField := false
+	checkField := func(fieldID string, calc *av.FieldCalc) bool {
+		if !templateKeyIDs[fieldID] {
+			return false
+		}
+		hasTemplateField = true
+		return nil != calc && av.CalcOperatorNone != calc.Operator
+	}
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		for _, column := range view.Table.Columns {
+			if nil != column && nil != column.BaseField && checkField(column.ID, column.Calc) {
+				return false
+			}
+		}
+	case av.LayoutTypeGallery:
+		for _, field := range view.Gallery.CardFields {
+			if nil != field && nil != field.BaseField && checkField(field.ID, field.Calc) {
+				return false
+			}
+		}
+	}
+	return hasTemplateField
+}
+
+func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int,
+	ignoreRows bool, targetItemID string,
+	renderContext *sql.AttributeViewRenderContext) (targetIndex, targetOffset int, err error) {
 	targetIndex = -1
 	if nil == viewable {
 		err = av.ErrViewNotFound
@@ -918,7 +990,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 	}
 
 	cachedAttrViews := map[string]*av.AttributeView{}
-	rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
+	rollupFurtherCollections := sql.GetFurtherCollectionsWithContext(attrView, cachedAttrViews, renderContext)
 	av.Filter(viewable, attrView, rollupFurtherCollections, cachedAttrViews)
 	av.Sort(viewable, attrView)
 	av.Calc(viewable, attrView)
@@ -1130,6 +1202,100 @@ func ResolveHistoryAttributeViewBoxID(avID, created string) (string, error) {
 	return "", nil
 }
 
+type attributeViewCustomColorPaletteCacheEntry struct {
+	colors []*av.AttributeViewCustomColor
+	found  bool
+}
+
+// newCachedAttributeViewCustomColorResolver 将历史调色板解析限制在单次渲染请求内，并避免并发重复读取。
+func newCachedAttributeViewCustomColorResolver(
+	loader func(avID string) (colors []*av.AttributeViewCustomColor, found bool),
+) func(avID string) (colors []*av.AttributeViewCustomColor, found bool) {
+	cache := map[string]attributeViewCustomColorPaletteCacheEntry{}
+	var lock sync.Mutex
+	return func(avID string) (colors []*av.AttributeViewCustomColor, found bool) {
+		lock.Lock()
+		defer lock.Unlock()
+
+		if entry, ok := cache[avID]; ok {
+			colors, _ = av.NormalizeAttributeViewCustomColors(entry.colors, false)
+			return colors, entry.found
+		}
+		colors, found = loader(avID)
+		colors, _ = av.NormalizeAttributeViewCustomColors(colors, false)
+		cache[avID] = attributeViewCustomColorPaletteCacheEntry{colors: colors, found: found}
+		colors, _ = av.NormalizeAttributeViewCustomColors(colors, false)
+		return
+	}
+}
+
+func decodeHistoricalAttributeViewCustomColors(boxID, avID string, data []byte) (ret []*av.AttributeViewCustomColor, err error) {
+	data, err = decryptHistoricalAttributeView(boxID, avID, data)
+	if nil != err {
+		return
+	}
+	attrView := &av.AttributeView{}
+	if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
+		return
+	}
+	if err = av.CheckSpec(attrView); nil != err {
+		return
+	}
+	if err = attrView.NormalizeCustomColors(false); nil != err {
+		return
+	}
+	ret = attrView.CustomColors
+	return
+}
+
+func loadHistoryAttributeViewCustomColors(historyDir, avID string) (ret []*av.AttributeViewCustomColor, found bool) {
+	if !ast.IsNodeIDPattern(avID) {
+		return nil, false
+	}
+	type source struct {
+		path  string
+		boxID string
+	}
+	var sources []source
+	globalPath := filepath.Join(historyDir, "storage", "av", avID+".json")
+	if gulu.File.IsExist(globalPath) {
+		sources = append(sources, source{path: globalPath})
+	}
+	entries, _ := os.ReadDir(historyDir)
+	for _, entry := range entries {
+		if !entry.IsDir() || !ast.IsNodeIDPattern(entry.Name()) {
+			continue
+		}
+		candidate := filepath.Join(historyDir, entry.Name(), "storage", "av", avID+".json")
+		if gulu.File.IsExist(candidate) {
+			sources = append(sources, source{path: candidate, boxID: entry.Name()})
+		}
+	}
+	if 1 != len(sources) {
+		return nil, false
+	}
+
+	data, err := os.ReadFile(sources[0].path)
+	if nil != err {
+		logging.LogWarnf("read related history attribute view [%s] failed: %s", avID, err)
+		return nil, false
+	}
+	ret, err = decodeHistoricalAttributeViewCustomColors(sources[0].boxID, avID, data)
+	if nil != err {
+		logging.LogWarnf("parse related history attribute view [%s] failed: %s", avID, err)
+		return nil, false
+	}
+	return ret, true
+}
+
+func newHistoryAttributeViewCustomColorRenderContext(historyDir string) *av.CustomColorRenderContext {
+	return &av.CustomColorRenderContext{ResolveRelatedCustomColors: newCachedAttributeViewCustomColorResolver(
+		func(avID string) (colors []*av.AttributeViewCustomColor, found bool) {
+			return loadHistoryAttributeViewCustomColors(historyDir, avID)
+		},
+	)}
+}
+
 func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	if !ast.IsNodeIDPattern(avID) {
 		err = ErrInvalidID
@@ -1190,6 +1356,38 @@ func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string
 	if err = av.CheckSpec(attrView); nil != err {
 		return
 	}
+	_ = attrView.NormalizeCustomColors(false)
+	attrView.ResolveDirectColors()
+	attrView.CustomColorRenderContext = &av.CustomColorRenderContext{
+		ResolveRelatedCustomColors: newCachedAttributeViewCustomColorResolver(
+			func(targetAvID string) (colors []*av.AttributeViewCustomColor, found bool) {
+				if !ast.IsNodeIDPattern(targetAvID) {
+					return nil, false
+				}
+				var matches []*entity.File
+				for _, file := range files {
+					if strings.HasSuffix(file.Path, "/storage/av/"+targetAvID+".json") {
+						matches = append(matches, file)
+					}
+				}
+				if 1 != len(matches) {
+					return nil, false
+				}
+				data, readErr := repo.OpenFile(matches[0])
+				if nil != readErr {
+					logging.LogWarnf("read related snapshot attribute view [%s] failed: %s", targetAvID, readErr)
+					return nil, false
+				}
+				colors, parseErr := decodeHistoricalAttributeViewCustomColors(
+					avBoxIDFromRepoPath(matches[0].Path), targetAvID, data)
+				if nil != parseErr {
+					logging.LogWarnf("parse related snapshot attribute view [%s] failed: %s", targetAvID, parseErr)
+					return nil, false
+				}
+				return colors, true
+			},
+		),
+	}
 
 	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, "", 1, -1, nil, false, false, nil, "")
 	return
@@ -1221,21 +1419,24 @@ func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page,
 	}
 
 	type historyAttributeViewSource struct {
-		path  string
-		boxID string
+		path       string
+		boxID      string
+		historyDir string
 	}
 	var sources []historyAttributeViewSource
 	for _, historyDir := range matches {
 		globalPath := filepath.Join(historyDir, "storage", "av", avID+".json")
 		if gulu.File.IsExist(globalPath) {
-			sources = append(sources, historyAttributeViewSource{path: globalPath})
+			sources = append(sources, historyAttributeViewSource{path: globalPath, historyDir: historyDir})
 		}
 		entries, _ := os.ReadDir(historyDir)
 		for _, entry := range entries {
 			if entry.IsDir() && ast.IsNodeIDPattern(entry.Name()) {
 				candidate := filepath.Join(historyDir, entry.Name(), "storage", "av", avID+".json")
 				if gulu.File.IsExist(candidate) {
-					sources = append(sources, historyAttributeViewSource{path: candidate, boxID: entry.Name()})
+					sources = append(sources, historyAttributeViewSource{
+						path: candidate, boxID: entry.Name(), historyDir: historyDir,
+					})
 				}
 			}
 		}
@@ -1272,6 +1473,9 @@ func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page,
 	if err = av.CheckSpec(attrView); nil != err {
 		return
 	}
+	_ = attrView.NormalizeCustomColors(false)
+	attrView.ResolveDirectColors()
+	attrView.CustomColorRenderContext = newHistoryAttributeViewCustomColorRenderContext(source.historyDir)
 
 	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, query, page, pageSize, groupPaging, false, false, nil, "")
 	return

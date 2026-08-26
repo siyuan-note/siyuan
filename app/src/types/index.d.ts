@@ -28,6 +28,7 @@ type TOperation =
     | "sortAttrViewRow"
     | "sortAttrViewCol"
     | "sortAttrViewKey"
+    | "sortAttrViewBinding"
     | "setAttrViewColPin"
     | "setAttrViewColHidden"
     | "setAttrViewColWrap"
@@ -37,6 +38,7 @@ type TOperation =
     | "updateAttrViewColOptions"
     | "removeAttrViewColOption"
     | "updateAttrViewColOption"
+    | "setAttrViewCustomColors"
     | "setAttrViewName"
     | "setAttrViewNewItemTemplates"
     | "doUpdateUpdated"
@@ -103,7 +105,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" | "open-menu-inbox" |
     "open-siyuan-url-plugin" | "open-siyuan-url-block" | "open-asset" | "open-link" | "opened-notebook" |
     "closed-notebook" |
-    "paste" |
+    "paste" | "before-upload-assets" | "before-search-results-render" |
     "input-search" |
     "loaded-protyle-dynamic" | "loaded-protyle-static" |
     "switch-protyle" | "switch-protyle-mode" |
@@ -159,7 +161,7 @@ type TAVFilterOperator =
     | "Is true"
     | "Is false"
 
-type TRecentDocsSort = "viewedAt" | "closedAt" | "openAt" | "updated"
+type TRecentDocsSort = "viewedAt" | "closedAt" | "openAt" | "created" | "updated"
 type TPublishAccessLevel = "public" | "protected" | "hidden" | "private" | "forbidden";
 
 /**
@@ -305,6 +307,9 @@ interface Window {
         toCanvas: (element: Element, options?: IHtmlToImageOptions) => Promise<HTMLCanvasElement>
         toBlob: (element: Element, options?: IHtmlToImageOptions) => Promise<Blob>
     };
+    modernScreenshot: {
+        domToBlob: (element: Element, options?: IModernScreenshotOptions) => Promise<Blob>
+    };
     siyuan: ISiyuan;
     JSAndroid: {
         openAuthURL(url: string): void
@@ -381,7 +386,98 @@ interface Window {
 
 interface ILocalFiles {
     path: string,
-    size: number
+    size: number | null,
+    isDir?: boolean
+}
+
+type TAssetUploadSource = "paste" | "drop" | "file-picker" | "programmatic"
+type TAssetUploadTarget = "editor" | "av-cell" | "background" | "pdf-annotation"
+type TAssetUploadStatus = "success" | "partial" | "failed" | "canceled"
+type TAssetUploadRejectionReason = "name-empty" | "size-limit" | "type-not-accepted"
+
+interface IAssetUploadPosition {
+    x: number,
+    y: number
+}
+
+type IAssetUploadInput = {
+    kind: "files",
+    files: File[]
+} | {
+    kind: "local-files",
+    files: ILocalFiles[]
+}
+
+type IAssetUploadDecision = {
+    action: "replace",
+    /** 必须保持各项的逻辑顺序；需要逐项回填的上传会按下标关联原资源。 */
+    input: IAssetUploadInput
+} | {
+    action: "cancel"
+}
+
+interface IAssetUploadRejection {
+    index: number,
+    name: string,
+    reasons: TAssetUploadRejectionReason[]
+}
+
+interface IAssetUploadSuccess {
+    index: number,
+    name: string,
+    path: string
+}
+
+interface IAssetUploadFailure {
+    index: number,
+    name: string,
+    error: string
+}
+
+interface IAssetUploadResult {
+    requestId: string,
+    status: TAssetUploadStatus,
+    /** 插件链处理结束后的完整输入。 */
+    input: IAssetUploadInput,
+    /** 通过前端校验并实际提交上传的输入。 */
+    acceptedInput?: IAssetUploadInput,
+    /** 被前端校验拒绝的文件及其在完整输入中的位置。 */
+    rejected?: IAssetUploadRejection[],
+    /** 按 acceptedInput 中的索引记录成功结果，可区分同名文件。 */
+    succFiles?: IAssetUploadSuccess[],
+    /** 按 acceptedInput 中的索引记录失败结果。 */
+    failedFiles?: IAssetUploadFailure[],
+    succMap?: Record<string, string>,
+    errFiles?: string[],
+    error?: string
+}
+
+/** 不得在该事件上调用 `preventDefault()`，取消上传应使用 `respondWith({action: "cancel"})`。 */
+interface IBeforeUploadAssetsDetail {
+    requestId: string,
+    /** PDF 标注等无编辑器上传场景不提供该字段。 */
+    protyle?: IProtyle,
+    source: TAssetUploadSource,
+    target: TAssetUploadTarget,
+    position?: IAssetUploadPosition,
+    /** 替换输入必须保持的精确文件数量；各项还须与原输入按下标一一对应。 */
+    requiredFileCount?: number,
+    /** 当前目标支持的输入类型；未提供时支持 files 和 local-files。 */
+    allowedInputKinds?: Array<IAssetUploadInput["kind"]>,
+    input: IAssetUploadInput,
+    /**
+     * 插件处理阶段的取消信号；自定义 upload.handler 执行期间也会在编辑器销毁或超时时触发。
+     * 标准传输开始后不再因编辑器销毁触发。
+     */
+    signal: AbortSignal,
+    /** 必须同步调用且每次事件只允许调用一次；替换项须保持逻辑顺序，异步处理应传入 Promise，每个插件默认 120 秒超时。 */
+    respondWith(response: IAssetUploadDecision | PromiseLike<IAssetUploadDecision>): void,
+    /**
+     * 必须同步注册，经思源前端上传协调层发起的资源写入成功、失败或取消时执行一次。
+     * 注册该回调的插件卸载后不再执行。
+     * 不包含正文或属性视图写入，也不覆盖 HTTP API、CLI、MCP、同步、导入、历史恢复等内核写入。
+     */
+    onComplete(callback: (result: IAssetUploadResult) => void): void
 }
 
 interface IClipboardData {
@@ -758,6 +854,16 @@ interface IHtmlToImageOptions {
     onImageErrorHandler?: (event: Event) => void;
 }
 
+interface IModernScreenshotOptions {
+    [key: string]: unknown;
+    type?: string;
+    scale?: number;
+    maximumCanvasSize?: number;
+    fetch?: {
+        placeholderImage?: string;
+    };
+}
+
 interface ILayoutJSON extends ILayoutOptions {
     scrollAttr?: IScrollAttr,
     instance?: string,
@@ -1108,6 +1214,20 @@ interface IBazaarPackageDetail {
     available?: IBazaarItem;
 }
 
+interface IAVColorTheme {
+    color: string;
+    backgroundColor: string;
+}
+
+interface IAVColor {
+    light: IAVColorTheme;
+    dark: IAVColorTheme;
+}
+
+interface IAVCustomColor extends IAVColor {
+    index: number;
+}
+
 interface IAV {
     id: string;
     name: string;
@@ -1118,6 +1238,8 @@ interface IAV {
     isMirror?: boolean;
     newItemTemplates?: IAVNewItemTemplate[];
     defaultTemplateID?: string;
+    customColors?: IAVCustomColor[];
+    usedCustomColorIndexes?: number[];
     target?: IAVRenderTarget;
 }
 
@@ -1298,6 +1420,7 @@ interface IAVColumn {
     options?: {
         name: string,
         color: string,
+        resolvedColor?: IAVColor,
         desc?: string,
     }[],
     relation?: IAVColumnRelation,
@@ -1396,7 +1519,8 @@ interface IAVCellDateValue {
 
 interface IAVCellSelectValue {
     content: string,
-    color: string
+    color: string,
+    resolvedColor?: IAVColor
 }
 
 interface IAVCellAssetValue {

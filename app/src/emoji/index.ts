@@ -1582,13 +1582,13 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
     /// #if MOBILE
     if (!isNotebookIcon) {
         emojiElement = document.querySelector(
-            `#sidebar [data-type="sidebar-file"] [data-node-id="${id}"] .b3-list-item__icon`
+            `[data-type="sidebar-file"] [data-node-id="${id}"] .b3-list-item__icon`
         );
     } else {
         emojiElement = document.querySelector(
-            `#sidebar [data-type="sidebar-file"] ul[data-url="${id}"] > li[data-type="navigation-root"] .b3-list-item__icon`
+            `[data-type="sidebar-file"] ul[data-url="${id}"] > li[data-type="navigation-root"] .b3-list-item__icon`
         ) || document.querySelector(
-            `#sidebar [data-type="sidebar-file"] li[data-url="${id}"] .b3-list-item__icon`
+            `[data-type="sidebar-file"] li[data-url="${id}"] .b3-list-item__icon`
         );
     }
     /// #else

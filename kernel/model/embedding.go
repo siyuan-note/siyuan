@@ -431,7 +431,7 @@ func (h *scoredHeap) Pop() any {
 	return x
 }
 
-func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes map[string]bool, page, pageSize int) (blocks []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
+func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes map[string]bool, page, pageSize int, excludeBoxIDs, excludeDocIDs []string) (blocks []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
 	blocks = []*Block{}
 
 	if !embeddingTableOk || !isEmbeddingEnabled() || "" == query {
@@ -448,8 +448,9 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 	boxFilter, boxArgs := buildBoxesFilter(boxes, "be.")
 	pathFilter, pathArgs := buildPathsFilter(paths, "be.")
 	boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs(), "b.")
+	excludeFilter, excludeArgs := buildPublishAccessExclusionFilter(excludeBoxIDs, excludeDocIDs, "b.")
 	typeFilter := buildTypeFilter(types, subTypes, "b.")
-	hasFilter := 0 < len(boxes) || 0 < len(paths) || 0 < len(types) || "" != boxDocFilter
+	hasFilter := 0 < len(boxes) || 0 < len(paths) || 0 < len(types) || "" != boxDocFilter || "" != excludeFilter
 	hasTypeFilter := 0 < len(types)
 
 	numWorkers := max(runtime.GOMAXPROCS(0), 1)
@@ -473,9 +474,10 @@ func SemanticSearchBlock(query string, boxes, paths []string, types, subTypes ma
 			if hasTypeFilter {
 				q += " AND " + typeFilter
 			}
-			q += boxFilter + pathFilter + boxDocFilter
+			q += boxFilter + pathFilter + boxDocFilter + excludeFilter
 			// 过滤值通过绑定参数传递，避免 SQL 拼接注入
 			args = append(append(append([]any{}, boxArgs...), pathArgs...), boxDocArgs...)
+			args = append(args, excludeArgs...)
 			q += fmt.Sprintf(" ORDER BY be.rowid LIMIT %d", scanSize)
 		} else {
 			q = fmt.Sprintf("SELECT rowid, id, embedding FROM block_embeddings WHERE embedding IS NOT NULL AND length(embedding) > 0 AND rowid > %d ORDER BY rowid LIMIT %d", cursor, scanSize)

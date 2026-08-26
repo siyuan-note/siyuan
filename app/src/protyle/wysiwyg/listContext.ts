@@ -117,6 +117,13 @@ export const getListShortcutAction = (context: TListContext, targetSubtype: TLis
     return "insertChildList";
 };
 
+export const isEmptyListItemBlock = (textContent: string, hasImage: boolean) =>
+    ["", "\n"].includes(textContent) && !hasImage;
+
+export const shouldCreateListItemChildOnEnter = (isPrimaryBlock: boolean, isLastBlock: boolean,
+                                                 isEmptyBlock: boolean) =>
+    !isPrimaryBlock && isLastBlock && !isEmptyBlock;
+
 export const getFollowingOrderedListMarkerUpdates = (currentMarker: string, followingMarkers: string[]) => {
     const currentIndex = Number.parseInt(currentMarker, 10);
     if (Number.isNaN(currentIndex)) {

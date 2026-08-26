@@ -12,6 +12,7 @@ import {zoomOut} from "../../../menus/protyle";
 import {Custom} from "../../../layout/dock/Custom";
 /// #endif
 import {searchMarkRender} from "../searchMarkRender";
+import {registerDatabaseRowRefresh} from "./databaseRowRefresh";
 
 export interface IDatabaseRowOpenData {
     avID: string;
@@ -55,6 +56,7 @@ const closeMobileDatabaseRow = () => {
 const openMobileDatabaseRow = (protyle: IProtyle, data: IDatabaseRowOpenData, title: string) => {
     closeMobileDatabaseRow();
     const context: { ghostProtyle?: Protyle } = {};
+    let unregisterRefresh: () => void;
     const dialog = new Dialog({
         content: `<div class="protyle-db-row protyle-db-row--mobile protyle-content">
     <div class="protyle-db-row__title"><svg><use xlink:href="#iconDatabase"></use></svg><span></span></div>
@@ -65,26 +67,48 @@ const openMobileDatabaseRow = (protyle: IProtyle, data: IDatabaseRowOpenData, ti
         containerClassName: "b3-dialog__container--database-row",
         disableAnimation: true,
         destroyCallback() {
+            unregisterRefresh?.();
             context.ghostProtyle?.destroy();
         },
     });
     const rowElement = dialog.element.querySelector<HTMLElement>(".protyle-db-row");
     rowElement.dataset.protyleId = protyle.id;
     rowElement.querySelector(".protyle-db-row__title span").textContent = title;
+    const render = (contextProtyle: IProtyle) => {
+        const previousBodyElement = rowElement.querySelector<HTMLElement>(".protyle-db-row__body");
+        if (!previousBodyElement) {
+            return;
+        }
+        const bodyElement = document.createElement("div");
+        bodyElement.className = "custom-attr protyle-db-row__body";
+        previousBodyElement.replaceWith(bodyElement);
+        renderAVAttribute(bodyElement, data.itemID, contextProtyle, (element) => {
+            const primaryElement = element.querySelector<HTMLElement>('[data-primary="true"] [data-cell-value]');
+            if (primaryElement?.dataset.cellValue) {
+                const value = JSON.parse(decodeURIComponent(primaryElement.dataset.cellValue)) as IAVCellValue;
+                const currentTitle = value.block?.content || window.siyuan.languages.untitled;
+                data.title = currentTitle;
+                rowElement.querySelector(".protyle-db-row__title span").textContent = currentTitle;
+            }
+            highlightDatabaseRow(contextProtyle, rowElement, data);
+        }, {
+            avID: data.avID,
+            itemID: data.itemID,
+            valueID: data.valueID,
+        });
+    };
     context.ghostProtyle = new Protyle(protyle.app, document.createElement("div"), {
         blockId: data.databaseBlockID,
         notebookId: data.notebookID,
         after(editor) {
             const contextProtyle = editor.protyle;
             rowElement.dataset.protyleId = contextProtyle.id;
-            rowElement.append(contextProtyle.highlight.styleElement);
-            renderAVAttribute(rowElement.querySelector<HTMLElement>(".protyle-db-row__body"), data.itemID, contextProtyle, () => {
-                highlightDatabaseRow(contextProtyle, rowElement, data);
-            }, {
-                avID: data.avID,
-                itemID: data.itemID,
-                valueID: data.valueID,
+            unregisterRefresh = registerDatabaseRowRefresh(contextProtyle.id, {
+                getAVID: () => data.avID,
+                refresh: () => render(contextProtyle),
             });
+            rowElement.append(contextProtyle.highlight.styleElement);
+            render(contextProtyle);
         },
     });
 };

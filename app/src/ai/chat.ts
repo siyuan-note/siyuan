@@ -2,8 +2,12 @@ import {Dialog} from "../dialog";
 import {isMobile} from "../util/functions";
 import {clearAIEditorHistory, startAIWriting} from "./editor";
 import {showMessage} from "../dialog/message";
+import {isDisabledFeature} from "../protyle/util/compatibility";
 
 export const AIChat = (protyle: IProtyle, element: HTMLElement) => {
+    if (isDisabledFeature("ai")) {
+        return;
+    }
     const dialog = new Dialog({
         title: "✨ " + window.siyuan.languages.aiWriting,
         content: `<div class="b3-dialog__content fn__flex"><textarea class="b3-text-field fn__flex-1" style="resize:none"></textarea></div>

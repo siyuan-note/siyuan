@@ -63,6 +63,7 @@ import {closeSubElement} from "./subElementLifecycle";
 import {getDefaultToolbar, getToolbarEntryId, markPluginToolbarEntries} from "./defaults";
 import {applyToolbarEntryVisibility} from "../../config/entryVisibility/runtime";
 import {refreshToolbarCatalog} from "../../config/entryVisibility/catalog";
+import {emitToPlugins, forEachPluginSubscriber, hasPluginSubscriber} from "../../plugin/EventBusCore";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -1260,7 +1261,7 @@ export class Toolbar {
     <span class="fn__space"></span>
     <button data-type="close" class="block__icon block__icon--show b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.close}"><svg><use xlink:href="#iconClose"></use></svg></button>
 </div>
-<div class="protyle-util__scroll"><div class="fn__flex"><div class="protyle-linenumber__rows"></div><textarea ${protyle.disabled ? " readonly" : ""} spellcheck="false" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${placeholder}" style="overflow:hidden;resize:none;font-family: var(--b3-font-family-code);"></textarea></div></div></div>
+<div class="protyle-util__scroll"><div class="fn__flex"><div class="protyle-linenumber__rows"></div><textarea ${protyle.disabled ? " readonly" : ""} spellcheck="false" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${placeholder}" style="overflow:hidden;resize:none;font-family: var(--b3-font-family-editor-code, var(--b3-font-family-code));font-weight: var(--b3-font-weight-editor-code, 400);"></textarea></div></div></div>
 <div class="resize__rd"></div><div class="resize__ld"></div><div class="resize__lt"></div><div class="resize__rt"></div><div class="resize__r"></div><div class="resize__d"></div><div class="resize__t"></div><div class="resize__l"></div>`;
         const gutter = this.subElement.querySelector(".protyle-linenumber__rows") as HTMLElement;
         const renderTextareaLineNumber = () => {
@@ -1613,8 +1614,8 @@ export class Toolbar {
         if (!protyle.disabled) {
             textElement.select();
         }
-        protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("open-noneditableblock", {
+        forEachPluginSubscriber("open-noneditableblock", eventBus => {
+            eventBus.emit("open-noneditableblock", {
                 protyle,
                 toolbar: this,
                 blockElement: nodeElement,
@@ -1647,14 +1648,12 @@ export class Toolbar {
         let html = `<div data-id="clearLanguage" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
         let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
 
-        const eventDetail = {languages: hljsLanguages, type: "init", listElement};
-        if (protyle.app && protyle.app.plugins) {
-            protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-language-update", eventDetail);
-            });
+        if (hasPluginSubscriber("code-language-update")) {
+            const eventDetail = {languages: hljsLanguages, type: "init", listElement};
+            emitToPlugins("code-language-update", eventDetail);
+            hljsLanguages = eventDetail.languages;
         }
 
-        hljsLanguages = eventDetail.languages;
         hljsLanguages.forEach((item) => {
             html += `<div data-id="${item}" class="b3-list-item">${item}</div>`;
         });
@@ -1721,14 +1720,12 @@ export class Toolbar {
                 }
             }
 
-            const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
-            if (protyle.app && protyle.app.plugins) {
-                protyle.app.plugins.forEach((plugin: any) => {
-                    plugin.eventBus.emit("code-language-update", eventDetail);
-                });
+            if (hasPluginSubscriber("code-language-update")) {
+                const eventDetail = {languages: value ? matchLanguages : hljsLanguages, type: "match", value, listElement};
+                emitToPlugins("code-language-update", eventDetail);
+                matchLanguages = eventDetail.languages;
             }
 
-            matchLanguages = eventDetail.languages;
             if (value) {
                 matchLanguages.forEach((item) => {
                     if (value === item) {
@@ -2301,15 +2298,13 @@ export class Toolbar {
     private updateLanguage(languageElements: HTMLElement[], protyle: IProtyle, selectedLang: string) {
         const currentLang = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
 
-        if (protyle.app && protyle.app.plugins) {
-            protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-language-change", {
-                    language: currentLang,
-                    languageElements,
-                    protyle: protyle
-                });
+        forEachPluginSubscriber("code-language-change", eventBus => {
+            eventBus.emit("code-language-change", {
+                language: currentLang,
+                languageElements,
+                protyle: protyle
             });
-        }
+        });
 
         if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(currentLang)) {
             window.siyuan.storage[Constants.LOCAL_CODELANG] = currentLang;

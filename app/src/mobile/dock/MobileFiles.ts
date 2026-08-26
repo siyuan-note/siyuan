@@ -29,6 +29,7 @@ import {
 } from "../../layout/dock/fileTreeAnimation";
 import {updateNotebookRootForBoxDoc} from "../../util/notebookRoot";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
+import {logMobileInputEvent} from "../util/inputEventLogger";
 import {
     collectExpandedDocIDs,
     findMovedFileTreeItem,
@@ -66,14 +67,13 @@ export class MobileFiles extends Model {
         startTime: number;
     };
 
-    constructor(app: App) {
+    constructor(app: App, filesElement: HTMLElement) {
         super({app});
         this.connect({
             id: genUUID(),
             type: "filetree",
             msgCallback: this.handleMsgCallback.bind(this)
         });
-        const filesElement = document.querySelector('#sidebar [data-type="sidebar-file"]');
         filesElement.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">${window.siyuan.languages.fileTree}</div>
@@ -100,6 +100,7 @@ export class MobileFiles extends Model {
         this.element = this.actionsElement.nextElementSibling as HTMLElement;
         this.closeElement = this.element.nextElementSibling as HTMLElement;
         filesElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
+            logMobileInputEvent("filetree-click-handler", event);
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.actionsElement)) {
                 if (target.classList.contains("b3-list-item__icon")) {
@@ -255,10 +256,18 @@ export class MobileFiles extends Model {
                     const ulElement = hasTopClosestByTag(target, "UL");
                     const notebookId = ulElement ? ulElement.getAttribute("data-url") : "";
                     if (target.getAttribute("data-type") === "navigation-file") {
+                        logMobileInputEvent("filetree-open-document", event, {
+                            id: target.getAttribute("data-node-id")?.substring(0, 7),
+                            notebook: notebookId.substring(0, 7),
+                        });
                         openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL], undefined, notebookId);
                     } else if (target.getAttribute("data-type") === "navigation-root") {
                         const boxDocID = target.getAttribute("data-node-id");
                         if (boxDocID) {
+                            logMobileInputEvent("filetree-open-document", event, {
+                                id: boxDocID.substring(0, 7),
+                                notebook: notebookId.substring(0, 7),
+                            });
                             openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL], undefined, notebookId);
                         } else if (ulElement) {
                             this.getLeaf(target, notebookId);

@@ -79,6 +79,16 @@ type File struct {
 }
 
 func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret *File) {
+	// 文档路径以根块 ID 命名，使用路径 ID 避免异常文档属性导致越界或返回错误的文档 ID。
+	pathID := util.GetTreeID(fileInfo.path)
+	if !ast.IsNodeIDPattern(pathID) {
+		logging.LogWarnf("invalid document path ID in file [%s]", fileInfo.path)
+		return nil
+	}
+	if ialID := ial["id"]; ialID != pathID {
+		logging.LogWarnf("document ID [%s] does not match path ID [%s], use path ID", ialID, pathID)
+	}
+
 	ret = &File{}
 	ret.Path = fileInfo.path
 	ret.Size = uint64(fileInfo.size)
@@ -87,7 +97,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	if icon, ok := util.FilterIconValue(ial["icon"]); ok {
 		ret.Icon = icon
 	}
-	ret.ID = ial["id"]
+	ret.ID = pathID
 	ret.Name1 = ial["name"]
 	ret.Alias = ial["alias"]
 	ret.Memo = ial["memo"]
@@ -508,6 +518,9 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				}
 
 				doc := box.docFromFileInfo(parentDocFile, ial)
+				if nil == doc {
+					continue
+				}
 				subFiles, err := os.ReadDir(filepath.Join(boxLocalPath, file.path))
 				if err == nil {
 					for _, subFile := range subFiles {
@@ -555,6 +568,9 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 			}
 
 			doc := box.docFromFileInfo(file, ial)
+			if nil == doc {
+				continue
+			}
 
 			if flashcard {
 				rootID := util.GetTreeID(file.path)

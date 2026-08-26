@@ -5,6 +5,7 @@ import {getCompressURL} from "../../../util/image";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {formatDateDisplay, formatDateValue} from "./dateFormat";
 import {getAVBlockRefSubtype} from "./cellValue";
+import {getAVColorStyle} from "./color";
 
 export const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string) => ({
     type,
@@ -138,7 +139,7 @@ export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = 
                 if (value.type === "select" && index > 0) {
                     return;
                 }
-                html += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${escapeAttr(item.color)});color:var(--b3-font-color${escapeAttr(item.color)})">${escapeHtml(item.content)}</span>`;
+                html += `<span class="b3-chip b3-chip--middle" data-color="${escapeAttr(item.color)}" style="${getAVColorStyle(item)}">${escapeHtml(item.content)}</span>`;
             });
             break;
         case "mAsset":

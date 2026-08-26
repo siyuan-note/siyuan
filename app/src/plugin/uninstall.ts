@@ -1,5 +1,5 @@
 import type {App} from "../index";
-import {Plugin} from "./index";
+import type {Plugin} from "./index";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 import {resizeTopBar} from "../layout/util";
@@ -13,62 +13,81 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
 import {unregisterCapability} from "../layout/dock/agent/frontendCapabilities";
 import {unregisterFlashcardV2PluginTypes} from "../card/flashcardV2Plugin";
+import {cancelAssetUploadsByPlugin} from "../protyle/upload/pluginEvent";
+import {removeBreadcrumbButtons} from "./breadcrumbButton";
+import {refreshDockCatalog} from "../config/entryVisibility/catalog";
+import {isWindow} from "../util/functions";
+import {destroyEventBus} from "./EventBusCore";
 
-export const uninstall = (app: App, name: string, isReload: boolean) => {
-    app.plugins.find((plugin: Plugin, index) => {
-        if (plugin.name === name) {
-            try {
-                plugin.onunload();
-            } catch (e) {
-                console.error(`plugin ${plugin.name} onunload error:`, e);
+const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
+    try {
+        const result = callback();
+        if (result && typeof (result as Promise<void>).then === "function") {
+            void Promise.resolve(result).catch(error => {
+                console.error(`plugin ${plugin.name} ${step} cleanup error:`, error);
+            });
+        }
+    } catch (error) {
+        console.error(`plugin ${plugin.name} ${step} cleanup error:`, error);
+    }
+};
+
+export const beginPluginTeardown = (plugin: Plugin) => {
+    runCleanup(plugin, "asset upload", () => cancelAssetUploadsByPlugin(plugin));
+};
+
+export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) => {
+    beginPluginTeardown(plugin);
+    runCleanup(plugin, "kernel", () => plugin.kernel.destroy());
+    runCleanup(plugin, "event bus", () => destroyEventBus(plugin.eventBus));
+    if (isUninstall) {
+        runCleanup(plugin, "dock storage", () => {
+            const pluginDocks = window.siyuan.storage?.[Constants.LOCAL_PLUGIN_DOCKS] || {};
+            pluginDocks[plugin.name] = {};
+            if (window.siyuan.storage) {
+                window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS] = pluginDocks;
             }
-            try {
-                plugin.kernel.destroy();
-            } catch (e) {
-                console.error(`plugin ${plugin.name} kernel destroy error:`, e);
-            }
-            if (!isReload) {
-                try {
-                    plugin.uninstall();
-                } catch (e) {
-                    console.error(`plugin ${plugin.name} uninstall error:`, e);
-                }
-                window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] = {};
-                setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);
-            }
-            // rm tab
-            /// #if !MOBILE
-            const modelsKeys = Object.keys(plugin.models);
-            getAllModels().custom.forEach(custom => {
-                if (modelsKeys.includes(custom.type)) {
-                    if (isReload) {
-                        if (custom.update) {
-                            custom.update();
-                        }
-                    } else {
+            setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, pluginDocks);
+        });
+    }
+    // 移除插件页签。
+    /// #if !MOBILE
+    runCleanup(plugin, "custom tabs", () => {
+        const modelsKeys = Object.keys(plugin.models);
+        getAllModels().custom.forEach(custom => {
+            if (modelsKeys.includes(custom.type)) {
+                runCleanup(plugin, "custom tab", () => {
+                    if (isUninstall) {
                         custom.parent.parent.removeTab(custom.parent.id);
+                    } else if (custom.update) {
+                        return custom.update();
                     }
-                }
-            });
-            /// #endif
-            // rm topBar
-            for (let i = 0; i < plugin.topBarIcons.length; i++) {
-                const item = plugin.topBarIcons[i];
-                item.remove();
-                plugin.topBarIcons.splice(i, 1);
-                i--;
+                });
             }
-            // 移除插件注册的 Agent 能力
-            plugin.agentCapabilities.forEach((capability) => unregisterCapability(capability.id, capability.generation));
-            unregisterFlashcardV2PluginTypes(plugin.name);
-            /// #if !MOBILE
-            // rm statusBar
-            plugin.statusBarIcons.forEach(item => {
-                item.remove();
-            });
-            // rm dock
-            const docksKeys = Object.keys(plugin.docks);
-            docksKeys.forEach(key => {
+        });
+    });
+    /// #endif
+    // 移除顶栏按钮。
+    runCleanup(plugin, "top bar", () => {
+        plugin.topBarIcons.forEach(item => runCleanup(plugin, "top bar", () => item.remove()));
+        plugin.topBarIcons.length = 0;
+    });
+    runCleanup(plugin, "breadcrumb", () => removeBreadcrumbButtons(plugin.name));
+    // 移除插件注册的 Agent 能力。
+    runCleanup(plugin, "agent capability", () => {
+        plugin.agentCapabilities.forEach((capability) => runCleanup(plugin, "agent capability", () =>
+            unregisterCapability(capability.id, capability.generation)));
+    });
+    runCleanup(plugin, "flashcard type", () => unregisterFlashcardV2PluginTypes(plugin.name));
+    /// #if !MOBILE
+    // 移除状态栏元素。
+    runCleanup(plugin, "status bar", () => {
+        plugin.statusBarIcons.forEach(item => runCleanup(plugin, "status bar", () => item.remove()));
+    });
+    // 移除插件停靠栏。
+    runCleanup(plugin, "dock", () => {
+        Object.keys(plugin.docks).forEach(key => {
+            runCleanup(plugin, "dock", () => {
                 if (window.siyuan.layout.leftDock && Object.keys(window.siyuan.layout.leftDock.data).includes(key)) {
                     window.siyuan.layout.leftDock.remove(key);
                 } else if (window.siyuan.layout.rightDock && Object.keys(window.siyuan.layout.rightDock.data).includes(key)) {
@@ -77,43 +96,61 @@ export const uninstall = (app: App, name: string, isReload: boolean) => {
                     window.siyuan.layout.bottomDock.remove(key);
                 }
             });
-            resizeTopBar();
-            setTabPosition(true);
-            /// #endif
-            // rm listen
-            Array.from(document.childNodes).find(item => {
-                if (item.nodeType === 8 && item.textContent === name) {
-                    item.remove();
-                    return true;
+        });
+    });
+    runCleanup(plugin, "top bar layout", () => resizeTopBar());
+    runCleanup(plugin, "tab layout", () => setTabPosition(true));
+    /// #endif
+    const index = app.plugins.indexOf(plugin);
+    if (index > -1) {
+        app.plugins.splice(index, 1);
+    }
+    runCleanup(plugin, "dock catalog", () => refreshDockCatalog(app.plugins));
+    /// #if MOBILE
+    // 移动端卸载插件后，若无任何插件停靠栏则隐藏插件入口图标。
+    runCleanup(plugin, "mobile plugin entry", () => {
+        if (app.plugins.every(item => Object.keys(item.docks).length === 0)) {
+            const pluginTabElement = document.querySelector("[data-type='sidebar-plugin-tab']");
+            pluginTabElement?.classList.add("fn__none");
+            if (pluginTabElement?.classList.contains("toolbar__icon--active")) {
+                const fallbackTabElement = pluginTabElement.parentElement?.querySelector<HTMLElement>(
+                    "[data-type$='-tab']:not(.fn__none)"
+                );
+                if (fallbackTabElement) {
+                    fallbackTabElement.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+                } else {
+                    pluginTabElement.classList.remove("toolbar__icon--active");
+                    document.querySelector("[data-type='sidebar-plugin']")?.classList.add("fn__none");
+                    const sidePanel = pluginTabElement.closest<HTMLElement>(".side-panel");
+                    if (sidePanel) {
+                        sidePanel.style.transform = "";
+                    }
                 }
-            });
-            // rm plugin
-            app.plugins.splice(index, 1);
-            /// #if MOBILE
-            // 移动端卸载插件后，若无任何插件 dock 则隐藏插件入口图标
-            if (app.plugins.every(p => Object.keys(p.docks).length === 0)) {
-                document.querySelector('#sidebar [data-type="sidebar-plugin-tab"]')?.classList.add("fn__none");
             }
-            /// #endif
-            // rm icons
-            document.querySelector(`svg[data-name="${plugin.name}"]`)?.remove();
-            // rm protyle toolbar
-            getAllEditor().forEach(editor => {
-                editor.protyle.toolbar.update(editor.protyle);
-            });
-            // rm style
-            document.getElementById("pluginsStyle" + name)?.remove();
-            /// #if !BROWSER
+        }
+    });
+    /// #endif
+    runCleanup(plugin, "icons", () => document.querySelector(`svg[data-name="${plugin.name}"]`)?.remove());
+    runCleanup(plugin, "editor toolbar", () => {
+        getAllEditor().forEach(editor => {
+            runCleanup(plugin, "editor toolbar", () => editor.protyle.toolbar.update(editor.protyle));
+        });
+    });
+    runCleanup(plugin, "style", () => document.getElementById("pluginsStyle" + plugin.name)?.remove());
+    /// #if !BROWSER
+    if (!isWindow()) {
+        runCleanup(plugin, "global shortcut", () => {
             plugin.commands.forEach(command => {
                 if (command.globalCallback && command.customHotkey) {
-                    ipcRenderer.send(Constants.SIYUAN_CMD, {
-                        cmd: "unregisterGlobalShortcut",
-                        accelerator: command.customHotkey
+                    runCleanup(plugin, "global shortcut", () => {
+                        ipcRenderer.send(Constants.SIYUAN_CMD, {
+                            cmd: "unregisterGlobalShortcut",
+                            accelerator: command.customHotkey
+                        });
                     });
                 }
             });
-            /// #endif
-            return true;
-        }
-    });
+        });
+    }
+    /// #endif
 };

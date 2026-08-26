@@ -9,6 +9,7 @@ import {
 import {MenuItem} from "./Menu";
 import {getTableCellVerticalAlignmentMenus, setTableCellStyle} from "../protyle/util/tableControl";
 import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
+import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFoldTransient} from "../protyle/util/viewFold";
 import {
     deleteColumn,
     deleteRow,
@@ -63,7 +64,7 @@ import {popSearch} from "../mobile/menu/search";
 import {showMessage} from "../dialog/message";
 import {img3115} from "../boot/compatibleVersion";
 import {hideTooltip} from "../dialog/tooltip";
-import {base64ToURL} from "../util/image";
+import {base64ToURL, showBase64ImageSizeLimit} from "../protyle/upload/base64";
 import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
 import {isEncryptedBox} from "../util/pathName";
@@ -318,9 +319,8 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
         }
     }).element);
 
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-fileannotationref",
             detail: {
                 protyle,
@@ -676,9 +676,8 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             }
         }).element);
     }
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-blockref",
             detail: {
                 protyle,
@@ -924,9 +923,8 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     }
     /// #endif
     let pluginMenus: IMenu[] = [];
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         pluginMenus = emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-content",
             detail: {
                 protyle,
@@ -1485,9 +1483,8 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             copyPNGByLink(imgElement.getAttribute("src"));
         }
     }).element);
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-image",
             detail: {
                 protyle,
@@ -1513,10 +1510,23 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.removeCB = async () => {
             const newSrc = textElements[0].value;
             if (src !== newSrc && newSrc.startsWith("data:image/")) {
-                const base64Src = await base64ToURL([newSrc]);
-                imgElement.setAttribute("src", base64Src[0]);
-                imgElement.setAttribute("data-src", base64Src[0]);
-                assetElement.querySelector(".img__net")?.remove();
+                let base64Src: Array<string | undefined>;
+                try {
+                    base64Src = await base64ToURL([newSrc], protyle, {
+                        source: "programmatic",
+                        target: "editor",
+                    });
+                } catch (error) {
+                    if (showBase64ImageSizeLimit(error)) {
+                        return;
+                    }
+                    throw error;
+                }
+                if (base64Src[0]) {
+                    imgElement.setAttribute("src", base64Src[0]);
+                    imgElement.setAttribute("data-src", base64Src[0]);
+                    assetElement.querySelector(".img__net")?.remove();
+                }
             }
 
             const ocrElement = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement;
@@ -1760,9 +1770,8 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
         }
     }
 
-    if (!protyle.disabled && protyle?.app?.plugins) {
+    if (!protyle.disabled) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-link",
             detail: {
                 protyle,
@@ -1979,9 +1988,8 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         }
     }).element);
 
-    if (protyle?.app?.plugins) {
+    if (protyle) {
         emitOpenMenu({
-            plugins: protyle.app.plugins,
             type: "open-menu-tag",
             detail: {
                 protyle,
@@ -2691,6 +2699,21 @@ export const setFoldById = (data: {
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.id}"]`)).find((item: Element) => {
         if (!isInEmbedBlock(item)) {
             const operations = setFold(protyle, item, true, false, true, true);
+            if (hasViewFoldContext(protyle)) {
+                const occurrenceID = getViewFoldOccurrenceID(protyle, item);
+                void setViewFoldTransient(protyle, item, false, undefined, true).then(() => {
+                    const focusElement = Array.from(protyle.wysiwyg.element.querySelectorAll(
+                        `[data-node-id="${data.currentNodeID}"]`
+                    )).find(element => getViewFoldOccurrenceID(protyle, element) === occurrenceID);
+                    if (focusElement) {
+                        focusBlock(focusElement);
+                    }
+                }).catch(error => console.error(error));
+                return true;
+            }
+            if (operations.doOperations.length === 0) {
+                return true;
+            }
             operations.doOperations[0].context = {
                 focusId: data.currentNodeID,
             };

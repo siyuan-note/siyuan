@@ -69,7 +69,7 @@ var searchCmd = &cobra.Command{
 		var matchedBlockCount, matchedRootCount, pageCount int
 		if method == 4 {
 			blocks, matchedBlockCount, matchedRootCount, pageCount =
-				model.SemanticSearchBlock(query, notebooks, paths, types, subTypes, page, pageSize)
+				model.SemanticSearchBlock(query, notebooks, paths, types, subTypes, page, pageSize, nil, nil)
 		} else {
 			blocks, matchedBlockCount, matchedRootCount, pageCount, docMode =
 				model.FullTextSearchBlock(query, notebooks, paths, types, subTypes, method, orderBy, groupBy, page, pageSize)

@@ -28,6 +28,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -471,11 +472,24 @@ func exportConf(c *gin.Context) {
 	}
 	if nil != clonedConf.Editor {
 		clonedConf.Editor.Emoji = []string{}
-		if strings.HasPrefix(clonedConf.Editor.FontFamily, util.CustomFontFamilyPrefix) {
-			clonedConf.Editor.FontFamily = ""
-			clonedConf.Editor.FontWeight = 400
-			clonedConf.Editor.FontFamilyDisplay = ""
+		fonts := make([]*conf.EditorFont, 0, len(clonedConf.Editor.FontFamilies))
+		for _, font := range clonedConf.Editor.FontFamilies {
+			if nil != font && !strings.HasPrefix(font.Family, util.CustomFontFamilyPrefix) {
+				fonts = append(fonts, font)
+			}
 		}
+		clonedConf.Editor.FontFamilies = fonts
+		codeFonts := make([]*conf.EditorFont, 0, len(clonedConf.Editor.CodeFontFamilies))
+		for _, font := range clonedConf.Editor.CodeFontFamilies {
+			if nil != font && !strings.HasPrefix(font.Family, util.CustomFontFamilyPrefix) {
+				codeFonts = append(codeFonts, font)
+			}
+		}
+		clonedConf.Editor.CodeFontFamilies = codeFonts
+		clonedConf.Editor.FontFamily = ""
+		clonedConf.Editor.FontWeight = 400
+		clonedConf.Editor.FontFamilyDisplay = ""
+		clonedConf.Editor.NormalizeFontFamilies()
 	}
 	if nil != clonedConf.Export {
 		clonedConf.Export.PandocBin = ""
@@ -1099,10 +1113,26 @@ func removeCustomFont(c *gin.Context) {
 	}
 
 	var editor *conf.Editor
-	if model.Conf.Editor.FontFamily == font.Family {
+	fonts := make([]*conf.EditorFont, 0, len(model.Conf.Editor.FontFamilies))
+	for _, selectedFont := range model.Conf.Editor.FontFamilies {
+		if nil != selectedFont && selectedFont.Family != font.Family {
+			fonts = append(fonts, selectedFont)
+		}
+	}
+	codeFonts := make([]*conf.EditorFont, 0, len(model.Conf.Editor.CodeFontFamilies))
+	for _, selectedFont := range model.Conf.Editor.CodeFontFamilies {
+		if nil != selectedFont && selectedFont.Family != font.Family {
+			codeFonts = append(codeFonts, selectedFont)
+		}
+	}
+	if len(fonts) != len(model.Conf.Editor.FontFamilies) ||
+		len(codeFonts) != len(model.Conf.Editor.CodeFontFamilies) {
+		model.Conf.Editor.FontFamilies = fonts
+		model.Conf.Editor.CodeFontFamilies = codeFonts
 		model.Conf.Editor.FontFamily = ""
 		model.Conf.Editor.FontWeight = 400
 		model.Conf.Editor.FontFamilyDisplay = ""
+		model.Conf.Editor.NormalizeFontFamilies()
 		model.Conf.Save()
 		editor = model.Conf.Editor
 	}
@@ -1471,7 +1501,16 @@ func setNetworkProxy(c *gin.Context) {
 
 func addUIProcess(c *gin.Context) {
 	pid := c.Query("pid")
-	util.UIProcessIDs.Store(pid, true)
+	pidInt, err := strconv.Atoi(pid)
+	if err != nil || 0 >= pidInt {
+		return
+	}
+
+	// 限制注册表中的 UI 进程数，防止无界增长导致内存耗尽
+	if util.UIProcessCount() >= util.MaxUIProcessCount {
+		return
+	}
+	util.UIProcessIDs.Store(strconv.Itoa(pidInt), true)
 }
 
 func exit(c *gin.Context) {
@@ -1510,6 +1549,8 @@ func exit(c *gin.Context) {
 	ret.Data = data
 	switch exitCode {
 	case 0:
+		// Close 返回后同步和 defer 清理均已完成，此时再通知移动端宿主退出。
+		util.BroadcastByType("main", "exit", 0, "", nil)
 	case 1: // 同步执行失败
 		ret.Msg = model.Conf.Language(96) + "<div class=\"fn__space\"></div><button class=\"b3-button b3-button--white\">" + model.Conf.Language(97) + "</button>"
 	case 2: // 提示新安装包

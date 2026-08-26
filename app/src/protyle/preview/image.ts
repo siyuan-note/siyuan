@@ -4,7 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {isBrowserRenderableImagePath} from "../../util/imageURL";
 
 export const previewImages = (srcList: string[], currentSrc?: string, onHidden?: () => void) => {
-    addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.11.7`, "protyleViewerScript").then(() => {
+    addScript(`${Constants.PROTYLE_CDN}/js/viewerjs/viewer.js?v=1.11.8`, "protyleViewerScript").then(() => {
         const imagesElement = document.createElement("ul");
         let html = "";
         let initialViewIndex = -1;

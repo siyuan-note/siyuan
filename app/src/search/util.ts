@@ -41,6 +41,7 @@ import {
 import {resize} from "../protyle/util/resize";
 import {addClearButton} from "../util/addClearButton";
 import {checkFold} from "../util/noRelyPCFunction";
+import {emitToPlugins, forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
 import {getDefaultSubType, getDefaultType} from "./getDefault";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
@@ -1373,6 +1374,19 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
     });
 };
 
+const emitBeforeSearchResultsRender = (blocks: IBlock[], edit: Protyle,
+                                       config: Config.IUILayoutTabSearchConfig,
+                                       searchElement: HTMLInputElement) => {
+    const detail = {
+        protyle: edit,
+        config,
+        searchElement,
+        blocks,
+    };
+    emitToPlugins("before-search-results-render", detail);
+    return detail.blocks;
+};
+
 export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchConfig,
                            edit: Protyle, rmCurrentCriteria = false,
                            focusId?: {
@@ -1409,8 +1423,8 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
             listElement.scrollTo(0, 0);
             const previousElement = element.querySelector('[data-type="previous"]');
             const nextElement = element.querySelector('[data-type="next"]');
-            edit.protyle?.app.plugins.forEach(item => {
-                item.eventBus.emit("input-search", {
+            forEachPluginSubscriber("input-search", eventBus => {
+                eventBus.emit("input-search", {
                     protyle: edit,
                     config,
                     searchElement: searchInputElement,
@@ -1428,7 +1442,8 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                             if (!isCurrent()) {
                                 return;
                             }
-                            onSearch(response.data, edit, element, requestConfig);
+                            const blocks = emitBeforeSearchResultsRender(response.data, edit, requestConfig, searchInputElement);
+                            onSearch(blocks, edit, element, requestConfig);
                             searchResultElement.innerHTML = "";
                             previousElement.setAttribute("disabled", "true");
                             nextElement.setAttribute("disabled", "true");
@@ -1475,7 +1490,8 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                         } else {
                             nextElement.setAttribute("disabled", "disabled");
                         }
-                        onSearch(response.data.blocks, edit, element, requestConfig, requestFocusId);
+                        const blocks = emitBeforeSearchResultsRender(response.data.blocks, edit, requestConfig, searchInputElement);
+                        onSearch(blocks, edit, element, requestConfig, requestFocusId);
                         if (response.data.matchedBlockCount > 0) {
                             let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
                             if (response.data.docMode) {

@@ -1,8 +1,12 @@
 import * as assert from "node:assert/strict";
 import {describe, it} from "node:test";
 import {
+    centerGraphCamera,
     createInitialPositions,
     fitGraphCamera,
+    fitSingleNodeCamera,
+    getGraphArrowGeometry,
+    getGraphArrowLength,
     getDraggedGraphPosition,
     getGraphEdgeOpacity,
     getGraphNodeSize,
@@ -106,6 +110,36 @@ describe("graph data normalization", () => {
         assert.equal(camera.y, 100);
     });
 
+    it("does not enlarge sparse graphs above their natural scale", () => {
+        const camera = fitGraphCamera(new Float32Array([0, 0]), new Float32Array([15]), 400, 300);
+        assert.deepEqual(camera, {scale: 1, x: 200, y: 150});
+    });
+
+    it("fits and centers a single node together with its label", () => {
+        const measureLabel = (scale: number) => ({height: 32 * scale, width: 180 * scale});
+        const camera = fitSingleNodeCamera(0, 0, 15, 180, 200, 1, measureLabel);
+        const radius = 15 * camera.scale;
+        const label = measureLabel(camera.scale);
+        const left = camera.x - radius;
+        const right = camera.x + radius + 4 + label.width;
+
+        assert.ok(camera.scale < 1);
+        assert.ok(left >= 8 - Number.EPSILON);
+        assert.ok(right <= 172 + Number.EPSILON);
+        assert.ok(Math.abs((left + right) / 2 - 90) < Number.EPSILON);
+    });
+
+    it("centers positions after resizing without changing the scale", () => {
+        const camera = centerGraphCamera(
+            new Float32Array([0, 0, 200, 100]),
+            new Float32Array([10, 20]),
+            600,
+            300,
+            1.5,
+        );
+        assert.deepEqual(camera, {scale: 1.5, x: 142.5, y: 67.5});
+    });
+
     it("keeps the pointer grab offset while dragging", () => {
         const position = getDraggedGraphPosition(80, 100, {scale: 2, x: 20, y: 40}, 5, -3);
         assert.deepEqual(position, {x: 35, y: 27});
@@ -116,6 +150,22 @@ describe("graph data normalization", () => {
         assert.ok(Math.abs(getGraphEdgeOpacity(0.36, true) - 0.9) < Number.EPSILON);
         assert.equal(getGraphEdgeOpacity(0.8, true), 1);
         assert.equal(getGraphEdgeOpacity(-0.5, false), 0);
+    });
+
+    it("places arrows against the target edge and ends lines at the arrow base", () => {
+        const arrowLength = getGraphArrowLength(2, 1);
+        const arrow = getGraphArrowGeometry(0, 0, 100, 0, 20, arrowLength, 4);
+        assert.equal(arrowLength, 7);
+        assert.deepEqual(arrow, {
+            baseX: 73,
+            baseY: 0,
+            directionX: 1,
+            directionY: 0,
+            lineEndX: 71,
+            lineEndY: 0,
+            tipX: 80,
+            tipY: 0,
+        });
     });
 
     it("scales referenced nodes logarithmically", () => {

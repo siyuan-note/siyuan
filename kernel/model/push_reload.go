@@ -94,6 +94,24 @@ func PushReloadPlugin(uninstallPluginNameSet, unloadPluginNameSet, reloadPluginS
 	util.BroadcastByTypeAndExcludeApp(excludeApp, "main", "reloadPlugin", 0, "", payload)
 }
 
+// PushReloadAllEnabledPlugins 向前端推送已启用插件的全局启用或禁用状态。
+func PushReloadAllEnabledPlugins(enabled bool, excludeApp string) {
+	pluginNameSet := hashset.New()
+	for _, petal := range getPetals() {
+		if petal.Enabled {
+			pluginNameSet.Add(petal.Name)
+		}
+	}
+	if pluginNameSet.Empty() {
+		return
+	}
+	if enabled {
+		PushReloadPlugin(nil, nil, pluginNameSet, nil, excludeApp)
+	} else {
+		PushReloadPlugin(nil, pluginNameSet, nil, nil, excludeApp)
+	}
+}
+
 func refreshDocInfo(tree *parse.Tree) {
 	if nil == tree {
 		return

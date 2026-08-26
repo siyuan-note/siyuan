@@ -58,6 +58,7 @@ import {getCrossBlockMergeRemoveElement} from "../wysiwyg/removeRange";
 import {getAVFilteredTipContext} from "../render/av/filteredTip";
 import {getAVSelectedCells, IAVSelectedCell} from "../render/av/selectionState";
 import {getAVSelectedTableCells} from "../render/av/virtualScroll";
+import {resetCodeBlockRenderState} from "./codeBlockRenderState";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -900,7 +901,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 在开头粘贴块则插入上方
                            insertByCursor = false,
                            // 根据块级拖拽指示线强制插入方向
-                           insertPosition?: "before" | "after") => {
+                           insertPosition?: "before" | "after",
+                           undoContext?: Record<string, string>) => {
     if (html === "") {
         return;
     }
@@ -1271,10 +1273,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             // 相邻标签之间插入空格区隔，避免后续 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
             fixAdjacentTags(getContenteditableElement(blockElement));
             protyle.wysiwyg.lastHTMLs[id] = oldHTML;
-            input(protyle, blockElement as HTMLElement, range, true, undefined, isCrossBlockRange ? {
+            input(protyle, blockElement as HTMLElement, range, true, undefined, isCrossBlockRange || undoContext ? {
                 doOperations: crossBlockDoOperations,
                 undoOperations: crossBlockUndoOperations,
-                undoContext: crossBlockUndoFocusContext,
+                undoContext: crossBlockUndoFocusContext || undoContext,
             } : undefined);
             return;
         }
@@ -1413,20 +1415,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             Array.from(item.querySelectorAll('[data-type="NodeHeading"][fold="1"]')).reverse().forEach(heading => {
                 removeFoldHeading(heading);
             });
-            const rendersElement = [];
-            if (item.classList.contains("render-node") && item.getAttribute("data-type") === "NodeCodeBlock") {
-                rendersElement.push(item);
-            } else {
-                rendersElement.push(...item.querySelectorAll('.render-node[data-type="NodeCodeBlock"]'));
-            }
-            rendersElement.forEach((renderItem) => {
-                renderItem.querySelector(".protyle-icons")?.remove();
-                const spinElement = renderItem.querySelector('[spin="1"]');
-                if (spinElement) {
-                    spinElement.innerHTML = "";
-                }
-                renderItem.removeAttribute("data-render");
-            });
+            resetCodeBlockRenderState(item);
             if (insertBefore) {
                 blockElement.before(item);
             } else {
@@ -1493,9 +1482,11 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             const childrenIDs: string[] = response.data;
             const previousId = (childrenIDs && childrenIDs.length > 0) ? childrenIDs[childrenIDs.length - 1] : blockElement.getAttribute("data-node-id");
             foldData = setFold(protyle, blockElement, true, false, false, true);
-            foldData.doOperations[0].context = {
-                focusId: lastElement?.getAttribute("data-node-id"),
-            };
+            if (foldData.doOperations.length > 0) {
+                foldData.doOperations[0].context = {
+                    focusId: lastElement?.getAttribute("data-node-id"),
+                };
+            }
             doOperation.forEach(item => {
                 if (item.action === "insert") {
                     item.previousID = previousId;

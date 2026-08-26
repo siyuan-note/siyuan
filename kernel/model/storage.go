@@ -123,16 +123,19 @@ func setLocalStorage(val map[string]any) (err error) {
 }
 
 type Criterion struct {
-	Name         string                 `json:"name"`
-	Sort         int                    `json:"sort"`       // 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）
+	Name string `json:"name"`
+	// 排序方式：0 按块类型（默认），1 按创建时间升序，2 按创建时间降序，3 按更新时间升序，4 按更新时间降序，
+	// 5 按内容顺序，6 按相关度升序，7 按相关度降序
+	Sort         int                    `json:"sort"`
 	Group        int                    `json:"group"`      // 0：不分组，1：按文档分组
 	HasReplace   bool                   `json:"hasReplace"` // 是否有替换
-	Method       int                    `json:"method"`     // 0：文本，1：查询语法，2：SQL，3：正则表达式
+	Method       int                    `json:"method"`     // 0：文本，1：查询语法，2：SQL，3：正则表达式，4：语义搜索
 	HPath        string                 `json:"hPath"`
 	IDPath       []string               `json:"idPath"`
 	K            string                 `json:"k"`            // 搜索关键字
 	R            string                 `json:"r"`            // 替换关键字
 	Types        *CriterionTypes        `json:"types"`        // 类型过滤选项
+	SubTypes     map[string]bool        `json:"subTypes"`     // 子类型过滤选项
 	ReplaceTypes *CriterionReplaceTypes `json:"replaceTypes"` // 替换类型过滤选项
 }
 
@@ -481,6 +484,17 @@ func loadRecentDocsRaw() (ret []*RecentDoc, err error) {
 	return
 }
 
+func buildRecentDocsByTimeStmt(sortBy string, hiddenRootIDs []string, limit int) (stmt string, args []any) {
+	orderBy := "updated"
+	if "created" == sortBy {
+		orderBy = "created"
+	}
+	boxDocFilter, args := buildRootIDExclusionFilter(hiddenRootIDs)
+	stmt = "SELECT * FROM blocks WHERE type = 'd'" + boxDocFilter + " ORDER BY " + orderBy + " DESC, id DESC" +
+		fmt.Sprintf(" LIMIT %d", limit)
+	return
+}
+
 func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 	ret = []*RecentDoc{} // 初始化为空切片，确保 API 始终返回非 nil
 	recentDocs, err := loadRecentDocsRaw()
@@ -558,17 +572,10 @@ func getRecentDocs(sortBy string) (ret []*RecentDoc, err error) {
 
 	// 根据排序参数进行排序
 	switch sortBy {
-	case "updated": // 按更新时间排序
-		// 从数据库查询最近修改的文档
-		boxDocFilter, boxDocArgs := buildRootIDExclusionFilter(hiddenBoxDocRootIDs())
-		var sqlBlocks []*sql.Block
-		if "" == boxDocFilter {
-			sqlBlocks = sql.SelectBlocksRawStmt("SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC", 1, Conf.FileTree.RecentDocsMaxListCount)
-		} else {
-			stmt := "SELECT * FROM blocks WHERE type = 'd'" + boxDocFilter + " ORDER BY updated DESC" +
-				fmt.Sprintf(" LIMIT %d", Conf.FileTree.RecentDocsMaxListCount)
-			sqlBlocks = sql.SelectBlocksRawStmtArgs(stmt, boxDocArgs, Conf.FileTree.RecentDocsMaxListCount)
-		}
+	case "created", "updated": // 按创建时间或更新时间排序
+		// 从数据库查询最近创建或修改的文档
+		stmt, boxDocArgs := buildRecentDocsByTimeStmt(sortBy, hiddenBoxDocRootIDs(), Conf.FileTree.RecentDocsMaxListCount)
+		sqlBlocks := sql.SelectBlocksRawStmtArgs(stmt, boxDocArgs, Conf.FileTree.RecentDocsMaxListCount)
 		ret = []*RecentDoc{}
 		if 1 > len(sqlBlocks) {
 			return

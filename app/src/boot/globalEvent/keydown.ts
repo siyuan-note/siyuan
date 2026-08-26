@@ -51,13 +51,11 @@ import {openCard, openCardByScope} from "../../card/openCard";
 import {lockScreen} from "../../dialog/processSystem";
 import {isWindow} from "../../util/functions";
 import {reloadProtyle} from "../../protyle/util/reload";
-import {fullscreen} from "../../protyle/breadcrumb/action";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import type {App} from "../../index";
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
-import {resize} from "../../protyle/util/resize";
 import {Search} from "../../search";
 import {Custom} from "../../layout/dock/Custom";
 import {createQuickSources, quickMakeCard} from "../../card/makeCard";
@@ -513,8 +511,8 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.fullscreen.custom, event)) {
-        fullscreen(protyle.element);
-        resize(protyle);
+        const editor = protyle.getInstance();
+        editor.setFullscreen(!editor.isFullscreen());
         event.preventDefault();
         return true;
     }
@@ -1433,7 +1431,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.lockScreen.custom, event)) {
-        lockScreen(app);
+        lockScreen();
         event.preventDefault();
         return;
     }
@@ -1848,6 +1846,9 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
 
 export const sendGlobalShortcut = (app: App) => {
     /// #if !BROWSER
+    if (isWindow()) {
+        return;
+    }
     const hotkeys = [clearDisallowedTextInputHotkey(window.siyuan.config.keymap.general.toggleWin.custom)];
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {
@@ -1869,6 +1870,9 @@ export const sendGlobalShortcut = (app: App) => {
 
 export const sendUnregisterGlobalShortcut = (app: App) => {
     /// #if !BROWSER
+    if (isWindow()) {
+        return;
+    }
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "unregisterGlobalShortcut",
         accelerator: window.siyuan.config.keymap.general.toggleWin.custom

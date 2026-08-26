@@ -166,6 +166,8 @@ export abstract class Constants {
     public static readonly LOCAL_SEARCHUNREF = "local-searchunref";
     public static readonly LOCAL_DOCINFO = "local-docinfo"; // only mobile
     public static readonly LOCAL_MOBILE_TABS = "local-mobile-tabs"; // only mobile
+    public static readonly LOCAL_MOBILE_BOTTOM_BAR = "local-mobile-bottom-bar"; // only mobile
+    public static readonly LOCAL_MOBILE_SIDE_PANEL = "local-mobile-side-panel"; // only mobile
     public static readonly LOCAL_DAILYNOTEID = "local-dailynoteid"; // string
     public static readonly LOCAL_HISTORY = "local-history";
     public static readonly LOCAL_CODELANG = "local-codelang"; // string
@@ -309,7 +311,6 @@ export abstract class Constants {
     public static readonly MENU_SEARCH_REPLACE_HISTORY = "search-replace-history"; // 替换历史菜单
     public static readonly MENU_SEARCH_ASSET_HISTORY = "search-asset-history"; // 资源文件搜索历史菜单
     public static readonly MENU_MOVE_PATH_HISTORY = "move-path-history"; // 移动文档窗口搜索历史菜单
-    public static readonly MENU_CALLOUT_SELECT = "callout-select"; // 提示选择菜单
 
     public static readonly MENU_BACKGROUND_ASSET = "background-asset"; // 资源文件选择器菜单
     public static readonly MENU_AI = "ai"; // 块 AI 菜单

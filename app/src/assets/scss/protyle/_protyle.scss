@@ -86,6 +86,11 @@
   z-index: 1;
   text-align: center;
 
+  // 横向超级块的块标需高于分栏宽度调节杆，避免重叠区域被调节杆截获点击
+  &--sb-column {
+    z-index: 6;
+  }
+
   &--dragging {
     opacity: 0;
     pointer-events: none;
@@ -249,6 +254,24 @@
     padding: 6px 0;
     line-height: 18px;
     flex: 1;
+  }
+
+  &__plugin {
+    display: flex;
+    align-items: center;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+
+    &:not(:empty) + .protyle-breadcrumb__icon {
+      margin-left: 8px;
+    }
   }
 
   &__bar {

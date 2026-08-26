@@ -18,6 +18,7 @@ package api
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -532,4 +533,101 @@ func removeOutlineStorage(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+}
+
+func getViewState(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var key string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("key", &key, true, true)) {
+		return
+	}
+	data, err := model.GetViewState(key)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = data
+}
+
+func patchViewState(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var key string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("key", &key, true, true)) {
+		return
+	}
+	values := map[string]any{}
+	if value, exists := arg["values"]; exists {
+		var valid bool
+		values, valid = value.(map[string]any)
+		if !valid {
+			ret.Code = -1
+			ret.Msg = "Field [values]: should be of type [Object]"
+			return
+		}
+	}
+	removeKeys, valid := parseViewStateRemoveKeys(arg["removeKeys"])
+	if !valid {
+		ret.Code = -1
+		ret.Msg = "Field [removeKeys]: each element should be a non-empty String"
+		return
+	}
+	data, err := model.PatchViewState(key, values, removeKeys)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = data
+}
+
+func removeViewState(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	var key string
+	if !util.ParseJsonArgs(arg, ret, util.BindJsonArg("key", &key, true, true)) {
+		return
+	}
+	if err := model.RemoveViewState(key); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
+}
+
+func parseViewStateRemoveKeys(value any) (ret []string, valid bool) {
+	if nil == value {
+		return []string{}, true
+	}
+	values, ok := value.([]any)
+	if !ok {
+		return nil, false
+	}
+	for _, item := range values {
+		key, ok := item.(string)
+		if !ok || "" == strings.TrimSpace(key) {
+			return nil, false
+		}
+		ret = append(ret, key)
+	}
+	return ret, true
 }

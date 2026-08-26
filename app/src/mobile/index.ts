@@ -42,6 +42,7 @@ import {initRightMenu} from "./menu";
 import {openChangelog} from "../boot/openChangelog";
 import {registerServiceWorker} from "../util/serviceWorker";
 import {loadPlugins} from "../plugin/loader";
+import {emitToPlugins} from "../plugin/EventBusCore";
 import {removeBlock} from "../protyle/wysiwyg/remove";
 import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
 import {updateCardHV} from "../card/util";
@@ -55,6 +56,9 @@ import {initTouchDragBridge} from "../util/touchDragBridge";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
 import {openByMobile} from "../editor/openLink";
 import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
+import {updateMobileTopBarLayout} from "./util/mobileTopBar";
+import {showMobileBars} from "./util/mobileBars";
+import {initMobileInputEventLogging, logMobileInputEvent} from "./util/inputEventLogger";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -74,9 +78,7 @@ class App {
             id: genUUID(),
             type: "main",
             msgCallback: (data) => {
-                this.plugins.forEach((plugin) => {
-                    plugin.eventBus.emit("ws-main", data);
-                });
+                emitToPlugins("ws-main", data);
                 onMessage(this, data);
             }
         });
@@ -98,6 +100,7 @@ class App {
                     tag: null,
                     backlink: null,
                     inbox: null,
+                    agent: null,
                 }
             },
             ws: mainWs
@@ -166,6 +169,8 @@ class App {
         // 判断手机横竖屏状态
         window.matchMedia("(orientation:portrait)").addEventListener("change", () => {
             updateCardHV();
+            updateMobileTopBarLayout();
+            showMobileBars();
             activeBlur();
         });
         fetchPost("/api/system/getConf", {}, async (confResponse) => {
@@ -205,12 +210,17 @@ class App {
                             await setNoteBook();
                             try {
                                 await initFramework(this, confResponse.data.start);
+                                logMobileInputEvent("framework-initialized");
                                 initRightMenu(this);
+                                logMobileInputEvent("menu-initialized");
                                 openChangelog();
                                 window.siyuan.isReady = true;
                                 mainWs.flushMainMessages();
                             } catch (error) {
                                 console.error("Failed to initialize mobile framework:", error);
+                                logMobileInputEvent("framework-init-error", undefined, {
+                                    error: error instanceof Error ? error.message : String(error),
+                                });
                             }
                         });
                     });
@@ -251,6 +261,7 @@ class App {
                 }
             });
             initTouchDragBridge();
+            initMobileInputEventLogging();
         });
     }
 }
@@ -279,7 +290,7 @@ window.reconnectWebSocket = () => {
 };
 window.lockscreenByMode = () => {
     if (window.siyuan.config?.system.lockScreenMode === 1) {
-        lockScreen(siyuanApp);
+        lockScreen();
     }
 };
 window.goBack = goBack;

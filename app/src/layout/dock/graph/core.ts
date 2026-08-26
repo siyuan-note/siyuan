@@ -9,10 +9,43 @@ import {
 
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 const HIGHLIGHT_EDGE_OPACITY_FACTOR = 2.5;
+const MIN_AUTO_FIT_SCALE = 0.02;
+const MAX_AUTO_FIT_SCALE = 1;
 export const MIN_GRAPH_EDGE_WIDTH = 1;
 
 export const getGraphEdgeOpacity = (lineOpacity: number, highlighted: boolean) =>
     Math.max(0, Math.min(1, lineOpacity * (highlighted ? HIGHLIGHT_EDGE_OPACITY_FACTOR : 1)));
+
+export const getGraphArrowLength = (linkWidth: number, scale: number) =>
+    Math.max(7, linkWidth * scale * 2.2);
+
+export const getGraphArrowGeometry = (
+    sourceX: number,
+    sourceY: number,
+    targetX: number,
+    targetY: number,
+    targetRadius: number,
+    arrowLength: number,
+    lineWidth = 0,
+) => {
+    const deltaX = targetX - sourceX;
+    const deltaY = targetY - sourceY;
+    const distance = Math.max(0.001, Math.hypot(deltaX, deltaY));
+    const directionX = deltaX / distance;
+    const directionY = deltaY / distance;
+    const tipX = targetX - directionX * targetRadius;
+    const tipY = targetY - directionY * targetRadius;
+    return {
+        baseX: tipX - directionX * arrowLength,
+        baseY: tipY - directionY * arrowLength,
+        directionX,
+        directionY,
+        lineEndX: tipX - directionX * (arrowLength + lineWidth / 2),
+        lineEndY: tipY - directionY * (arrowLength + lineWidth / 2),
+        tipX,
+        tipY,
+    };
+};
 
 export const getGraphNodeSize = (baseSize: number, definitions: number) => {
     if (definitions < 1) {
@@ -440,10 +473,84 @@ export const fitGraphCamera = (
     const contentHeight = Math.max(1, maxY - minY);
     const availableWidth = Math.max(1, width - padding * 2);
     const availableHeight = Math.max(1, height - padding * 2);
-    const scale = Math.max(0.02, Math.min(4, availableWidth / contentWidth, availableHeight / contentHeight));
+    const scale = Math.max(MIN_AUTO_FIT_SCALE, Math.min(MAX_AUTO_FIT_SCALE, availableWidth / contentWidth,
+        availableHeight / contentHeight));
     return {
         scale,
         x: width / 2 - (minX + maxX) / 2 * scale,
         y: height / 2 - (minY + maxY) / 2 * scale,
+    };
+};
+
+export const fitSingleNodeCamera = (
+    x: number,
+    y: number,
+    radius: number,
+    width: number,
+    height: number,
+    maxScale: number,
+    measureLabel: (scale: number) => {height: number, width: number},
+    padding = 8,
+): IGraphCamera => {
+    if (width < 1 || height < 1) {
+        return {scale: 1, x: width / 2, y: height / 2};
+    }
+    const availableWidth = Math.max(1, width - padding * 2);
+    const availableHeight = Math.max(1, height - padding * 2);
+    const getBounds = (scale: number) => {
+        const nodeRadius = Math.max(1, radius * scale);
+        const labelOffset = Math.max(2, radius * scale) + 4;
+        const label = measureLabel(scale);
+        return {
+            height: Math.max(nodeRadius * 2, label.height),
+            left: -nodeRadius,
+            right: labelOffset + label.width,
+        };
+    };
+    const fits = (scale: number) => {
+        const bounds = getBounds(scale);
+        return bounds.right - bounds.left <= availableWidth && bounds.height <= availableHeight;
+    };
+    let scale = Math.max(MIN_AUTO_FIT_SCALE, Math.min(MAX_AUTO_FIT_SCALE, maxScale));
+    if (!fits(scale)) {
+        let minimum = MIN_AUTO_FIT_SCALE;
+        let maximum = scale;
+        if (fits(minimum)) {
+            for (let index = 0; index < 24; index++) {
+                const candidate = (minimum + maximum) / 2;
+                if (fits(candidate)) {
+                    minimum = candidate;
+                } else {
+                    maximum = candidate;
+                }
+            }
+            scale = minimum;
+        } else {
+            scale = minimum;
+        }
+    }
+    const bounds = getBounds(scale);
+    const centerX = (bounds.left + bounds.right) / 2;
+    return {
+        scale,
+        x: width / 2 - centerX - x * scale,
+        y: height / 2 - y * scale,
+    };
+};
+
+export const centerGraphCamera = (
+    positions: Float32Array,
+    sizes: Float32Array,
+    width: number,
+    height: number,
+    scale: number,
+): IGraphCamera => {
+    const fitted = fitGraphCamera(positions, sizes, width, height);
+    const graphCenterX = (width / 2 - fitted.x) / fitted.scale;
+    const graphCenterY = (height / 2 - fitted.y) / fitted.scale;
+    return {
+        scale,
+        x: width / 2 - graphCenterX * scale,
+        y: height / 2 - graphCenterY * scale,
     };
 };

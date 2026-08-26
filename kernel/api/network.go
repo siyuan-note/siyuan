@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -36,6 +37,8 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+const maxForwardProxyResponseSize int64 = 32 * 1024 * 1024
 
 type File struct {
 	Filename string
@@ -186,6 +189,7 @@ func forwardProxy(c *gin.Context) {
 	}
 
 	client := getSafeClient(time.Duration(timeout) * time.Millisecond)
+	responseEncoding := configureForwardProxyClient(client, maxForwardProxyResponseSize, arg["responseEncoding"])
 	if redirectArg, ok := arg["redirect"].(bool); ok && !redirectArg {
 		client.SetRedirectPolicy(req.NoRedirectPolicy())
 	}
@@ -262,26 +266,19 @@ func forwardProxy(c *gin.Context) {
 	}
 
 	started := time.Now()
-	resp, err := request.Send(method, destURL)
+	resp, bodyData, err := sendForwardProxyRequest(request, method, destURL)
+	if errors.Is(err, req.ErrResponseBodyTooLarge) {
+		ret.Code = 10
+		ret.Msg = fmt.Sprintf("response body too large: limit is %d bytes", maxForwardProxyResponseSize)
+		return
+	}
 	if err != nil {
 		ret.Code = 8
 		ret.Msg = "forward request failed: " + err.Error()
 		return
 	}
 
-	bodyData, err := io.ReadAll(resp.Body)
-	if err != nil {
-		ret.Code = 9
-		ret.Msg = "read response body failed: " + err.Error()
-		return
-	}
-
 	elapsed := time.Since(started)
-
-	responseEncoding := "text"
-	if responseEncodingArg := arg["responseEncoding"]; nil != responseEncodingArg {
-		responseEncoding = responseEncodingArg.(string)
-	}
 
 	body := ""
 	switch responseEncoding {
@@ -326,6 +323,32 @@ func forwardProxy(c *gin.Context) {
 	//
 	//logging.LogInfof("elapsed [%.1fs], length [%d], request [url=%s, headers=%s, content-type=%s, body=%s], status [%d], body [%s]",
 	//	elapsed.Seconds(), len(bodyData), data["url"], headers, contentType, arg["payload"], data["status"], shortBody)
+}
+
+func configureForwardProxyClient(client *req.Client, maxResponseSize int64, value any) string {
+	client.SetMaxResponseSize(maxResponseSize)
+
+	responseEncoding, ok := value.(string)
+	if !ok {
+		return "text"
+	}
+
+	switch responseEncoding {
+	case "base64", "base64-std", "base64-url", "base32", "base32-std", "base32-hex", "hex":
+		client.DisableAutoDecode()
+		return responseEncoding
+	default:
+		return "text"
+	}
+}
+
+func sendForwardProxyRequest(request *req.Request, method, destURL string) (response *req.Response, body []byte, err error) {
+	response, err = request.Send(method, destURL)
+	if err != nil {
+		return
+	}
+	body = response.Bytes()
+	return
 }
 
 // 创建安全的 HTTP Client，防止 SSRF 和 DNS 重绑定

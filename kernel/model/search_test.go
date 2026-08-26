@@ -431,7 +431,7 @@ func TestFTSAndHPathMatchesDeduplicateAndSort(t *testing.T) {
 	if countPlaceholder(cte) != len(args) {
 		t.Fatalf("候选查询占位符数量错误：%q，参数：%v", cte, args)
 	}
-	if len(args) != 1 || "Parent" != args[0] {
+	if len(args) != 2 || columnFilter()+":(\"Parent\")" != args[0] || "Parent" != args[1] {
 		t.Fatalf("路径搜索参数错误：%v", args)
 	}
 	assertOrderBySequence(t, cte,

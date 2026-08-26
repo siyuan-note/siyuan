@@ -92,6 +92,11 @@ export interface IGraphEngineOptions {
     onNodeClick: (details: IGraphNodeClick) => void;
 }
 
+export interface IGraphSetDataOptions {
+    resetLayout?: boolean;
+    selectedId?: string;
+}
+
 export interface IGraphLayoutOptions {
     centerStrength: number;
     linkDistance: number;

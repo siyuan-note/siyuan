@@ -94,8 +94,44 @@ func InsertAssetBytes(id, fileName string, data []byte) (assetPath string, creat
 	return assetPath, true, nil
 }
 
-func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]any, err error) {
+// AssetUploadSuccess 记录单个输入文件的成功上传结果。
+type AssetUploadSuccess struct {
+	Index int    `json:"index"`
+	Name  string `json:"name"`
+	Path  string `json:"path"`
+}
+
+// AssetUploadFailure 记录单个输入文件的上传失败结果。
+type AssetUploadFailure struct {
+	Index int    `json:"index"`
+	Name  string `json:"name"`
+	Error string `json:"error"`
+}
+
+func recordAssetUploadSuccess(succMap map[string]any, succFiles *[]AssetUploadSuccess, index int, name, assetPath string) {
+	succMap[name] = assetPath
+	*succFiles = append(*succFiles, AssetUploadSuccess{Index: index, Name: name, Path: assetPath})
+}
+
+func recordAssetUploadFailure(failedFiles *[]AssetUploadFailure, index int, name string, err error) {
+	*failedFiles = append(*failedFiles, AssetUploadFailure{Index: index, Name: name, Error: err.Error()})
+}
+
+func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]any,
+	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
+	return insertLocalAssets(id, assetAbsPaths, isUpload, false)
+}
+
+func InsertHTMLLocalAssets(id string, assetAbsPaths []string) (succMap map[string]any,
+	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
+	return insertLocalAssets(id, assetAbsPaths, true, true)
+}
+
+func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTMLPath bool) (succMap map[string]any,
+	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
 	succMap = map[string]any{}
+	succFiles = make([]AssetUploadSuccess, 0, len(assetAbsPaths))
+	failedFiles = make([]AssetUploadFailure, 0)
 
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
@@ -111,8 +147,15 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 		}
 	}
 
-	for _, assetAbsPath := range assetAbsPaths {
+	for index, assetAbsPath := range assetAbsPaths {
+		if strings.HasPrefix(strings.ToLower(assetAbsPath), "file://") {
+			assetAbsPath = util.FileURLToLocalPath(assetAbsPath)
+		}
 		baseName := filepath.Base(assetAbsPath)
+		if validateHTMLPath && (util.IsSensitivePath(assetAbsPath) || EncryptedRawPathBoxID(assetAbsPath) != "") {
+			recordAssetUploadFailure(&failedFiles, index, baseName, errors.New("local asset path is not allowed"))
+			continue
+		}
 		fName := baseName
 		fName = util.FilterUploadFileName(fName)
 		ext := filepath.Ext(fName)
@@ -123,32 +166,33 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 			if !strings.HasPrefix(assetAbsPath, "\\\\") {
 				assetAbsPath = "file://" + assetAbsPath
 			}
-			succMap[baseName] = assetAbsPath
+			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, assetAbsPath)
 			continue
 		}
 
 		if gulu.File.IsSubPath(assetsDirPath, assetAbsPath) {
 			// 已经位于 assets 目录下的资源文件不处理
 			// Dragging a file from the assets folder into the editor causes the kernel to exit https://github.com/siyuan-note/siyuan/issues/15355
-			succMap[baseName] = "assets/" + baseName
+			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, "assets/"+baseName)
 			continue
 		}
 
 		fi, statErr := os.Stat(assetAbsPath)
 		if nil != statErr {
-			err = statErr
-			return
+			recordAssetUploadFailure(&failedFiles, index, baseName, statErr)
+			continue
 		}
 		f, openErr := os.Open(assetAbsPath)
 		if nil != openErr {
-			err = openErr
-			return
+			recordAssetUploadFailure(&failedFiles, index, baseName, openErr)
+			continue
 		}
 
 		hash, hashErr := util.GetEtagByHandle(f, fi.Size())
 		if nil != hashErr {
 			f.Close()
-			return
+			recordAssetUploadFailure(&failedFiles, index, baseName, hashErr)
+			continue
 		}
 
 		if 1 > fi.Size() {
@@ -164,7 +208,7 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 		}
 
 		if "" != existAssetPath && !strings.HasPrefix(hash, "random_") {
-			succMap[baseName] = strings.TrimPrefix(existAssetPath, "/")
+			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, strings.TrimPrefix(existAssetPath, "/"))
 			f.Close()
 		} else {
 			blockID := ast.NewNodeID()
@@ -175,13 +219,15 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 				fName = util.AssetName(fName, blockID)
 			}
 			writePath := filepath.Join(assetsDirPath, fName)
-			if _, err = f.Seek(0, io.SeekStart); err != nil {
+			if _, seekErr := f.Seek(0, io.SeekStart); seekErr != nil {
 				f.Close()
-				return
+				recordAssetUploadFailure(&failedFiles, index, baseName, seekErr)
+				continue
 			}
-			if err = writeAssetFile(writePath, f, bt.BoxID, baseName); err != nil {
+			if writeErr := writeAssetFile(writePath, f, bt.BoxID, baseName); writeErr != nil {
 				f.Close()
-				return
+				recordAssetUploadFailure(&failedFiles, index, baseName, writeErr)
+				continue
 			}
 			f.Close()
 
@@ -189,7 +235,7 @@ func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMa
 			if IsEncryptedBox(bt.BoxID) {
 				p += "?box=" + bt.BoxID
 			}
-			succMap[baseName] = p
+			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, p)
 			if !IsEncryptedBox(bt.BoxID) {
 				cache.SetAssetHash(hash, p) // 加密笔记本不写全局 cache，避免跨边界去重污染
 			}
@@ -259,12 +305,13 @@ func Upload(c *gin.Context) {
 	var errFiles []string
 	succMap := map[string]any{}
 	files := form.File["file[]"]
+	succFiles := make([]AssetUploadSuccess, 0, len(files))
 	skipIfDuplicated := false // 默认不跳过重复文件，但是有的场景需要跳过，比如上传 PDF 标注图片 https://github.com/siyuan-note/siyuan/issues/10666
 	if nil != form.Value["skipIfDuplicated"] {
 		skipIfDuplicated = "true" == form.Value["skipIfDuplicated"][0]
 	}
 
-	for _, file := range files {
+	for index, file := range files {
 		baseName := file.Filename
 		_, lastID := util.LastID(baseName)
 		if !ast.IsNodeIDPattern(lastID) {
@@ -300,7 +347,7 @@ func Upload(c *gin.Context) {
 		hash, hashErr := util.GetEtagByHandle(f, file.Size)
 		if nil != hashErr {
 			errFiles = append(errFiles, fName)
-			ret.Msg = err.Error()
+			ret.Msg = hashErr.Error()
 			f.Close()
 			break
 		}
@@ -318,7 +365,7 @@ func Upload(c *gin.Context) {
 		}
 
 		if "" != existAssetPath && !strings.HasPrefix(hash, "random_") {
-			succMap[baseName] = strings.TrimPrefix(existAssetPath, "/")
+			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, strings.TrimPrefix(existAssetPath, "/"))
 			f.Close()
 		} else {
 			if skipIfDuplicated {
@@ -338,7 +385,8 @@ func Upload(c *gin.Context) {
 				} else {
 					if 0 < len(matches) {
 						fName = filepath.Base(matches[0])
-						succMap[baseName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
+						recordAssetUploadSuccess(succMap, &succFiles, index, baseName,
+							strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/"))
 						f.Close()
 						break
 					}
@@ -439,7 +487,7 @@ func Upload(c *gin.Context) {
 			if uploadBoxID != "" && IsEncryptedBox(uploadBoxID) {
 				p += "?box=" + uploadBoxID
 			}
-			succMap[baseName] = p
+			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, p)
 			if uploadBoxID == "" || !IsEncryptedBox(uploadBoxID) {
 				cache.SetAssetHash(hash, p) // 加密笔记本不写全局 cache
 			}
@@ -447,8 +495,9 @@ func Upload(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"errFiles": errFiles,
-		"succMap":  succMap,
+		"errFiles":  errFiles,
+		"succFiles": succFiles,
+		"succMap":   succMap,
 	}
 
 	IncSync()

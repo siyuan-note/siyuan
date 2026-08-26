@@ -8,7 +8,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
 import {openLink} from "../../../editor/openLink";
-import {dragUpload, editAssetItem} from "./asset";
+import {dragUpload, dragUploadFiles, editAssetItem} from "./asset";
 import {previewImages} from "../../preview/image";
 /// #if !BROWSER
 import {webUtils} from "electron";
@@ -25,6 +25,7 @@ import {
     isAVTemplateLink
 } from "./attributeValue";
 import {isLastPointerMouse} from "../../../util/touchDragBridge";
+import {getLocalDropFiles, hasDataTransferFiles} from "../../upload/localDropFiles";
 
 interface IAVAttributeTableData {
     avID: string;
@@ -196,18 +197,22 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                         }
                     }
                     targetElement.classList.remove("dragover__bottom", "dragover__top");
-                } else if (!window.siyuan.dragElement && event.dataTransfer.types[0] === "Files") {
+                } else if (!window.siyuan.dragElement && hasDataTransferFiles(event.dataTransfer.types)) {
                     const cellElement = element.querySelector(".custom-attr__avvalue--active") as HTMLElement;
                     if (cellElement) {
-                        if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
-                            const files: ILocalFiles[] = [];
-                            for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                                files.push({
-                                    path: webUtils.getPathForFile(event.dataTransfer.files[i]),
-                                    size: event.dataTransfer.files[i].size
-                                });
+                        const position = {x: event.clientX, y: event.clientY};
+                        if (!isBrowser()) {
+                            /// #if !BROWSER
+                            const files = getLocalDropFiles(event.dataTransfer.files,
+                                file => webUtils.getPathForFile(file));
+                            if (files) {
+                                dragUpload(files, protyle, cellElement, position);
+                            } else {
+                                dragUploadFiles(event.dataTransfer.files, protyle, cellElement, position);
                             }
-                            dragUpload(files, protyle, cellElement);
+                            /// #endif
+                        } else {
+                            dragUploadFiles(event.dataTransfer.files, protyle, cellElement, position);
                         }
                     }
                 }
@@ -278,7 +283,10 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     event.preventDefault();
                     event.stopPropagation();
                     if (files && files.length > 0) {
-                        uploadFiles(protyle, files);
+                        uploadFiles(protyle, files, undefined, undefined, undefined, {
+                            source: "paste",
+                            target: "av-cell",
+                        });
                     } else {
                         const textPlain = event.clipboardData.getData("text/plain");
                         const blockElement = hasClosestBlock(assetCellElement);

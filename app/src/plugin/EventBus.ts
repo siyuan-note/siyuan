@@ -1,41 +1,19 @@
 import {MenuItem, subMenu} from "../menus/Menu";
-
-export class EventBus<DetailType = any> {
-    private eventTarget: EventTarget;
-
-    constructor(name = "") {
-        this.eventTarget = document.appendChild(document.createComment(name));
-    }
-
-    on(type: TEventBus, listener: (event: CustomEvent<DetailType>) => void) {
-        this.eventTarget.addEventListener(type, listener);
-    }
-
-    once(type: TEventBus, listener: (event: CustomEvent<DetailType>) => void) {
-        this.eventTarget.addEventListener(type, listener, {once: true});
-    }
-
-    off(type: TEventBus, listener: (event: CustomEvent<DetailType>) => void) {
-        this.eventTarget.removeEventListener(type, listener);
-    }
-
-    emit(type: TEventBus, detail?: DetailType) {
-        return this.eventTarget.dispatchEvent(new CustomEvent(type, {detail, cancelable: true}));
-    }
-}
+import {emitToPlugins, hasPluginSubscriber} from "./EventBusCore";
+export {EventBus} from "./EventBusCore";
 
 export const emitOpenMenu = (options: {
-    plugins: import("./index").Plugin[],
     type: TEventBus,
     detail: any,
     separatorPosition?: "top" | "bottom",
     appendToMenu?: boolean,
 }) => {
+    if (!hasPluginSubscriber(options.type)) {
+        return [];
+    }
     const pluginSubMenu = new subMenu();
     options.detail.menu = pluginSubMenu;
-    options.plugins.forEach((plugin) => {
-        plugin.eventBus.emit(options.type, options.detail);
-    });
+    emitToPlugins(options.type, options.detail);
     if (pluginSubMenu.menus.length > 0 && options.appendToMenu !== false) {
         if (options.separatorPosition === "top") {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_pluginTop", type: "separator"}).element);

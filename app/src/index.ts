@@ -3,7 +3,7 @@ import {Menus} from "./menus";
 import {Model} from "./layout/Model";
 import {onGetConfig} from "./boot/onGetConfig";
 import {initBlockPopover} from "./block/popover";
-import {onSetaccount} from "./config/tabs/accountUi";
+import {applyCloudUserState, onSetaccount} from "./config/tabs/accountUi";
 import {addScript, addScriptSync} from "./protyle/util/addScript";
 import {genUUID} from "./util/genID";
 import {fetchGet, fetchPost} from "./util/fetch";
@@ -41,6 +41,7 @@ import "./assets/scss/base.scss";
 import {reloadEmoji} from "./emoji";
 import {processIOSPurchaseResponse} from "./util/iOSPurchase";
 import {updateServerAddresses} from "./config/tabs/accessRuntime";
+import {emitToPlugins} from "./plugin/EventBusCore";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -49,7 +50,7 @@ import {Files} from "./layout/dock/Files";
 import {Tag} from "./layout/dock/Tag";
 import {appearanceConfigApi} from "./config/tabs/appearanceRuntime";
 import {renderSnippet} from "./config/util/snippets";
-import {refreshThemeStyle, setBodyHighlight} from "./util/assets";
+import {refreshThemeStyle, reloadInlineStyles, setBodyHighlight} from "./util/assets";
 import {reloadSync} from "./util/reloadSync";
 import {setTitle} from "./util/processTitle";
 import {ensureUILayout} from "./util/ensureUILayout";
@@ -74,9 +75,7 @@ export class App {
             id: genUUID(),
             type: "main",
             msgCallback: (data) => {
-                this.plugins.forEach((plugin) => {
-                    plugin.eventBus.emit("ws-main", data);
-                });
+                emitToPlugins("ws-main", data);
                 if (data) {
                     switch (data.cmd) {
                         case "logoutAuth":
@@ -84,6 +83,9 @@ export class App {
                             break;
                         case "setAppearance":
                             appearanceConfigApi.apply(data.data);
+                            break;
+                        case "reloadInlineStyles":
+                            void reloadInlineStyles();
                             break;
                         case "setEntryVisibility":
                             applyEntryVisibility(data.data);
@@ -124,6 +126,9 @@ export class App {
                             break;
                         case "setConf":
                             window.siyuan.config = data.data;
+                            break;
+                        case "setCloudUser":
+                            applyCloudUserState(data.data.user, data.data.userName);
                             break;
                         case "setServerAddrs":
                             updateServerAddresses(data.data);
@@ -220,7 +225,7 @@ export class App {
                             transactionError(data.msg);
                             break;
                         case "syncing":
-                            processSync(data, this.plugins);
+                            processSync(data);
                             break;
                         case "backgroundtask":
                             progressBackgroundTask(data.data.tasks);

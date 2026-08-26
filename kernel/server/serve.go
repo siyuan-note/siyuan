@@ -152,9 +152,7 @@ func Serve(fastMode bool, cookieKey string) {
 		model.Activity,   // 记录用户活动时间，用于 AutoFixIndex 的空闲判断
 		corsMiddleware(), // 后端服务支持 CORS 预检请求验证 https://github.com/siyuan-note/siyuan/pull/5593
 		jwtMiddleware,    // 解析 JWT https://github.com/siyuan-note/siyuan/issues/11364
-		gzip.Gzip(gzip.DefaultCompression,
-			gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac"}),
-			gzip.WithExcludedPathsRegexs([]string{`(?i)\.hei[cf]$`})),
+		gzipMiddleware(),
 	)
 
 	sessionStore = cookie.NewStore([]byte(cookieKey))
@@ -310,6 +308,12 @@ func Serve(fastMode bool, cookieKey string) {
 			os.Exit(logging.ExitCodeUnavailablePort)
 		}
 	}
+}
+
+func gzipMiddleware() gin.HandlerFunc {
+	return gzip.Gzip(gzip.DefaultCompression,
+		gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm", ".flac", ".gz"}),
+		gzip.WithExcludedPathsRegexs([]string{`(?i)\.hei[cf]$`}))
 }
 
 func rewritePortJSON(pid, port string) {
@@ -707,6 +711,7 @@ func serveAppearance(ginServer *gin.Engine) {
 				return
 			}
 		} else if strings.Contains(c.Request.URL.Path, "/langs/") && strings.HasSuffix(c.Request.URL.Path, ".json") {
+			c.Header("Cache-Control", "private, no-store")
 			lang := path.Base(c.Request.URL.Path)
 			lang = strings.TrimSuffix(lang, ".json")
 			if "zh-CN" != lang && "en" != lang {
@@ -930,6 +935,27 @@ func isValidResolvedAssetPath(assetAbsPath, requestBoxID string) bool {
 	return err == nil && filepath.Clean(validatedAbsPath) == filepath.Clean(assetAbsPath)
 }
 
+func resolveAssetRequestPath(cleanPath, boxID, dataPath string) (string, error) {
+	if dataPath != "" {
+		if boxID != "" {
+			return "", errors.New("box and dataPath cannot be used together")
+		}
+		dataRelativePath, assetAbsPath, err := model.ResolveDataAssetPath(dataPath)
+		if err != nil {
+			return "", err
+		}
+		assetPath, _, ok := model.AssetPathFromDataRelativePath(dataRelativePath)
+		if !ok || assetPath != cleanPath {
+			return "", fmt.Errorf("asset path [%s] does not match data path [%s]", cleanPath, dataPath)
+		}
+		return assetAbsPath, nil
+	}
+	if boxID != "" {
+		return model.GetAssetAbsPathInBox(cleanPath, boxID)
+	}
+	return model.GetAssetAbsPath(cleanPath)
+}
+
 func serveAssets(ginServer *gin.Engine) {
 	ginServer.POST("/upload", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, model.Upload)
 
@@ -954,15 +980,14 @@ func serveAssets(ginServer *gin.Engine) {
 			return
 		}
 
-		// 解析 box 查询参数，加密 box 资源按 box 内精确查找（不全局搜索）
+		// dataPath 用于精确预览普通笔记本或文档下的未引用资源，仅管理员可用
 		boxID := context.Query("box")
-		var p string
-		var err error
-		if boxID != "" {
-			p, err = model.GetAssetAbsPathInBox(cleanPath, boxID)
-		} else {
-			p, err = model.GetAssetAbsPath(cleanPath)
+		dataPath := context.Query("dataPath")
+		if dataPath != "" && !model.IsAdminRoleContext(context) {
+			context.Status(http.StatusForbidden)
+			return
 		}
+		p, err := resolveAssetRequestPath(cleanPath, boxID, dataPath)
 		if err != nil || p == "" {
 			context.Status(http.StatusNotFound)
 			return

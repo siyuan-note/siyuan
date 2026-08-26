@@ -98,7 +98,7 @@ export const fetchPost = (
         if (e?.name === "AbortError") {
             return;
         }
-        if (failCallback && url === "/api/file/getFile") {
+        if (failCallback) {
             failCallback({
                 data: null,
                 msg: e.message,
@@ -121,9 +121,11 @@ export const fetchPost = (
     });
 };
 
-export const fetchSyncPost = async (url: string, data?: any, headers?: Record<string, string>, process = true) => {
+export const fetchSyncPost = async (url: string, data?: any, headers?: Record<string, string>, process = true,
+                                    signal?: AbortSignal) => {
     const init: RequestInit = {
         method: "POST",
+        signal,
     };
     if (headers) {
         init.headers = headers;
@@ -144,7 +146,7 @@ export const fetchSyncPost = async (url: string, data?: any, headers?: Record<st
 };
 
 export const fetchGet = (url: string, cb: (response: IWebSocketData | IObject | string) => void) => {
-    fetch(url).then((response) => {
+    fetch(url, {cache: "no-store"}).then((response) => {
         if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
             return response.json();
         } else {

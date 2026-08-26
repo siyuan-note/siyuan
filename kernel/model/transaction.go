@@ -336,6 +336,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doSortAttrViewColumn(op)
 			case "sortAttrViewKey":
 				ret = tx.doSortAttrViewKey(op)
+			case "sortAttrViewBinding":
+				ret = tx.doSortAttrViewBinding(op)
 			case "updateAttrViewCell":
 				operations := []*Operation{op}
 				for nextIndex := operationIndex + 1; nextIndex < len(tx.DoOperations); nextIndex++ {
@@ -361,6 +363,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 				ret = tx.doUpdateAttrViewColOption(op)
 			case "setAttrViewColOptionDesc":
 				ret = tx.doSetAttrViewColOptionDesc(op)
+			case "setAttrViewCustomColors":
+				ret = tx.doSetAttrViewCustomColors(op)
 			case "setAttrViewColCalc":
 				ret = tx.doSetAttrViewColCalc(op)
 			case "updateAttrViewColNumberFormat":

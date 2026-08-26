@@ -35,6 +35,7 @@ import {clearOBG} from "../layout/dock/util";
 import {Model} from "../layout/Model";
 import {hideElements} from "../protyle/ui/hideElements";
 import {isBrowserRenderableImagePath} from "../util/imageURL";
+import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 
 const isSameCustomTab = (type: string, data: any, options: IOpenFileOptions) => {
     if (!options.custom || (options.custom.id && options.custom.id !== type)) {
@@ -663,8 +664,8 @@ export const updatePanelByEditor = (options: {
                 }
             }
         }
-        options.protyle.app.plugins.forEach(item => {
-            item.eventBus.emit("switch-protyle", {protyle: options.protyle});
+        forEachPluginSubscriber("switch-protyle", eventBus => {
+            eventBus.emit("switch-protyle", {protyle: options.protyle});
         });
     }
     // 切换页签或关闭所有页签时，需更新对应的面板
@@ -763,7 +764,7 @@ export const updateBacklinkGraph = (models: IModels, protyle: IProtyle) => {
                 return;
             }
             item.notebookId = notebookId;
-            item.searchGraph(true, blockId);
+            item.searchGraph({id: blockId});
         }
     });
     models.backlink.forEach(item => {

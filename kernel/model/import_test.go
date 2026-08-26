@@ -18,13 +18,20 @@ package model
 
 import (
 	"bytes"
+	"encoding/base64"
 	"errors"
+	"image"
+	"image/color"
+	"image/gif"
+	"image/jpeg"
+	"image/png"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/image/bmp"
 )
 
 func TestIsSYNotebookExport(t *testing.T) {
@@ -155,6 +162,119 @@ func TestHTML2TreeUsesExistingNotebookAssets(t *testing.T) {
 	}
 	if strings.Contains(assets[0], "?box=") {
 		t.Fatalf("ordinary notebook asset reference contains box query: %q", assets[0])
+	}
+}
+
+func TestHTML2TreeCanSkipEmbeddedAssetWrites(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	boxID := "20260826000000-htmlimg"
+	boxAssetsDir := filepath.Join(util.DataDir, boxID, "assets")
+	options := HTML2TreeOptions{SkipBase64Assets: true, SkipInlineSVGAssets: true}
+	HTML2TreeWithOptions(`<img alt="diagram" src="data:image/svg+xml;base64,PHN2Zz48L3N2Zz4=">`,
+		util.NewLute(), boxID, options)
+	HTML2TreeWithOptions(`<pre class="language-html"><svg><rect width="1" height="1"></rect></svg></pre>`,
+		util.NewLute(), boxID, options)
+
+	for _, assetsDir := range []string{boxAssetsDir, filepath.Join(util.DataDir, "assets")} {
+		if _, err := os.Stat(assetsDir); !os.IsNotExist(err) {
+			t.Fatalf("asset directory was created during non-writing conversion: path=%q err=%v", assetsDir, err)
+		}
+	}
+}
+
+func TestHTML2TreeUsesBase64ImageContentType(t *testing.T) {
+	originalDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() {
+		util.DataDir = originalDataDir
+	})
+
+	assetsDir := filepath.Join(util.DataDir, "assets")
+	if err := os.MkdirAll(assetsDir, 0755); nil != err {
+		t.Fatal(err)
+	}
+	source := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	var jpegData bytes.Buffer
+	if err := jpeg.Encode(&jpegData, source, &jpeg.Options{Quality: 90}); nil != err {
+		t.Fatal(err)
+	}
+	dataURL := "data:image/PNG;charset=binary;base64," + base64.StdEncoding.EncodeToString(jpegData.Bytes())
+	tree, _ := HTML2Tree(`<img alt="diagram" src="`+dataURL+`">`, util.NewLute(), "")
+
+	entries, err := os.ReadDir(assetsDir)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if 1 != len(entries) {
+		t.Fatalf("asset count = %d, want 1", len(entries))
+	}
+	if ".jpg" != filepath.Ext(entries[0].Name()) {
+		t.Fatalf("asset extension = %q, want .jpg", filepath.Ext(entries[0].Name()))
+	}
+	stored, err := os.ReadFile(filepath.Join(assetsDir, entries[0].Name()))
+	if nil != err {
+		t.Fatal(err)
+	}
+	if _, format, decodeErr := image.Decode(bytes.NewReader(stored)); nil != decodeErr {
+		t.Fatal(decodeErr)
+	} else if "jpeg" != format {
+		t.Fatalf("stored format = %q, want jpeg", format)
+	}
+	assets := getAssetsLinkDests(tree.Root, false)
+	if 1 != len(assets) || !strings.HasSuffix(assets[0], ".jpg") {
+		t.Fatalf("converted asset references = %v, want one JPEG reference", assets)
+	}
+}
+
+func TestNormalizeBase64RasterImage(t *testing.T) {
+	source := image.NewRGBA(image.Rect(0, 0, 2, 2))
+	source.Set(0, 0, color.RGBA{R: 255, A: 255})
+	source.Set(1, 0, color.RGBA{G: 255, A: 255})
+	source.Set(0, 1, color.RGBA{B: 255, A: 255})
+	source.Set(1, 1, color.RGBA{R: 255, G: 255, B: 255, A: 255})
+
+	tests := []struct {
+		name       string
+		encode     func(*bytes.Buffer) error
+		wantExt    string
+		wantFormat string
+	}{
+		{name: "PNG", encode: func(buf *bytes.Buffer) error { return png.Encode(buf, source) }, wantExt: ".png", wantFormat: "png"},
+		{name: "JPEG", encode: func(buf *bytes.Buffer) error {
+			return jpeg.Encode(buf, source, &jpeg.Options{Quality: 90})
+		}, wantExt: ".jpg", wantFormat: "jpeg"},
+		{name: "GIF", encode: func(buf *bytes.Buffer) error { return gif.Encode(buf, source, nil) }, wantExt: ".png", wantFormat: "png"},
+		{name: "BMP", encode: func(buf *bytes.Buffer) error { return bmp.Encode(buf, source) }, wantExt: ".png", wantFormat: "png"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var sourceData bytes.Buffer
+			if err := test.encode(&sourceData); nil != err {
+				t.Fatal(err)
+			}
+			normalized, ext, err := normalizeBase64RasterImage(sourceData.Bytes())
+			if nil != err {
+				t.Fatal(err)
+			}
+			if ext != test.wantExt {
+				t.Fatalf("normalized extension = %q, want %q", ext, test.wantExt)
+			}
+			if _, format, decodeErr := image.Decode(bytes.NewReader(normalized)); nil != decodeErr {
+				t.Fatal(decodeErr)
+			} else if format != test.wantFormat {
+				t.Fatalf("normalized format = %q, want %q", format, test.wantFormat)
+			}
+		})
+	}
+
+	if _, _, err := normalizeBase64RasterImage([]byte("not an image")); nil == err {
+		t.Fatal("invalid raster image was accepted")
 	}
 }
 

@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -361,6 +362,10 @@ func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {
 	for _, f := range entries {
 		info, infoErr := f.Info()
 		if nil != infoErr {
+			// 目录枚举后条目可能被并发移动或删除，此时跳过已失效的条目。
+			if errors.Is(infoErr, fs.ErrNotExist) {
+				continue
+			}
 			logging.LogErrorf("read file info failed: %s", infoErr)
 			continue
 		}

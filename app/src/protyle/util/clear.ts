@@ -13,7 +13,27 @@ const getAVElements = (element: Element) => {
     return elements;
 };
 
+const clearViewState = (element: Element) => {
+    const attributes = ["data-view-fold-source", "data-view-fold-hidden-source", "data-view-fold",
+        "data-view-fold-default", "data-view-fold-hidden", "data-view-heading-owner", "data-view-heading-loaded"];
+    const elements = [element, ...Array.from(element.querySelectorAll(attributes.map(attribute => {
+        return `[${attribute}]`;
+    }).join(", ")))];
+    elements.forEach(item => {
+        const sourceFold = item.getAttribute("data-view-fold-source");
+        if (sourceFold !== null) {
+            item.toggleAttribute("fold", sourceFold === "1");
+        }
+        const sourceHidden = item.getAttribute("data-view-fold-hidden-source");
+        if (sourceHidden !== null) {
+            item.classList.toggle("fn__none", sourceHidden === "1");
+        }
+        attributes.forEach(attribute => item.removeAttribute(attribute));
+    });
+};
+
 export const clearBlockElement = (element: Element, keepRefcount = false) => {
+    clearViewState(element);
     element.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
     element.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
     if (!keepRefcount) {

@@ -1,6 +1,5 @@
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
-import {escapeAriaLabel} from "../util/escape";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !MOBILE
 import {genQueryHTML} from "./util";
@@ -9,6 +8,7 @@ import {MenuItem} from "../menus/Menu";
 import {Dialog} from "../dialog";
 import {addClearButton} from "../util/addClearButton";
 import {saveAssetKeyList} from "./toggleHistory";
+import {genAssetSearchResultItemHTML, IAssetSearchResultItem} from "./assetsResult";
 
 export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
     /// #if !MOBILE
@@ -193,21 +193,8 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
                 nextElement.setAttribute("disabled", "disabled");
             }
             let resultHTML = "";
-            response.data.assetContents.forEach((item: {
-                content: string
-                ext: string
-                id: string
-                path: string
-                name: string
-                hSize: string
-            }, index: number) => {
-                resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-id="${item.id}">
-<span class="ft__on-surface">${item.ext}</span>
-<span class="fn__space"></span>
-<span class="b3-list-item__text">${item.content}</span>
-<span class="b3-list-item__meta">${item.hSize}</span>
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(item.path)}">${item.name}</span>
-</div>`;
+            response.data.assetContents.forEach((item: IAssetSearchResultItem, index: number) => {
+                resultHTML += genAssetSearchResultItemHTML(item, index);
             });
             const previewElement = element.querySelector("#searchAssetPreview");
             if (response.data.assetContents.length > 0) {
@@ -229,7 +216,23 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
 
 export const renderPreview = (element: Element, id: string, query: string, queryMethod: number) => {
     fetchPost("/api/search/getAssetContent", {id, query, queryMethod}, (response) => {
-        element.innerHTML = `<p style="white-space: pre-wrap;">${response.data.assetContent.content}</p>`;
+        if (!response.data.assetContent) {
+            element.replaceChildren();
+            return;
+        }
+        const previewElement = document.createElement("p");
+        previewElement.style.whiteSpace = "pre-wrap";
+        // 仅保留 mark/br 白名单元素并移除属性,其余元素降级为文本节点,避免 innerHTML 注入执行脚本
+        const doc = new DOMParser().parseFromString(response.data.assetContent.content, "text/html");
+        doc.body.querySelectorAll("*").forEach((childElement) => {
+            if (["MARK", "BR"].includes(childElement.tagName)) {
+                Array.from(childElement.attributes).forEach((attribute) => childElement.removeAttribute(attribute.name));
+            } else {
+                childElement.replaceWith(...childElement.childNodes);
+            }
+        });
+        previewElement.append(...doc.body.childNodes);
+        element.replaceChildren(previewElement);
         const matchElement = element.querySelector("mark");
         if (matchElement) {
             matchElement.classList.add("mark--hl");

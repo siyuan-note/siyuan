@@ -54,7 +54,7 @@ func NewAppearance() *Appearance {
 		CloseButtonBehavior: 0,
 		HideToolbar:         true,
 		HideStatusBar:       false,
-		StatusBar:           &util.StatusBar{},
+		StatusBar:           util.NewStatusBar(util.IsMobileContainer()),
 		Notifications:       util.NewNotifications(),
 		EntryVisibility:     NewEntryVisibility(EntryVisibilityProfileSimple),
 	}

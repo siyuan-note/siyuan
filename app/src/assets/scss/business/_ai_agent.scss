@@ -1173,17 +1173,6 @@
   font-size: var(--b3-font-size);
 }
 
-#model.model--agent {
-  > .toolbar {
-    display: none;
-  }
-
-  #modelMain {
-    min-height: 0;
-    overflow: hidden;
-  }
-}
-
 .sy__agentChat--mobile {
   position: relative;
   height: 100%;

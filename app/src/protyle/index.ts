@@ -52,6 +52,12 @@ import {renderAVAttribute} from "./render/av/blockAttr";
 import {setFoldById, zoomOut} from "../menus/protyle";
 import {setEditMode} from "./util/setEditMode";
 import {waitForPendingTransactions} from "./util/transactionQueue";
+import {applyViewFoldStates, invalidateViewFoldRequests} from "./util/viewFold";
+import {setFullscreen as setFullscreenState} from "./breadcrumb/action";
+import {
+    queueDatabaseRowRefresh,
+    queueDatabaseRowRefreshForOperations
+} from "./render/av/databaseRowRefresh";
 
 export class Protyle {
 
@@ -173,25 +179,7 @@ export class Protyle {
                             if (this.protyle.databaseAttributePanel?.hasDatabase(data.data.id)) {
                                 this.protyle.databaseAttributePanel.refresh();
                             }
-                            /// #if MOBILE
-                            document.querySelectorAll<HTMLElement>(
-                                `.protyle-db-row--mobile[data-protyle-id="${this.protyle.id}"] .protyle-db-row__body > [data-av-id="${data.data.id}"]`
-                            ).forEach((item) => {
-                                renderAVAttribute(item.parentElement as HTMLElement, item.dataset.nodeId, this.protyle, undefined, {
-                                    avID: data.data.id,
-                                    itemID: item.dataset.nodeId,
-                                    valueID: "",
-                                });
-                            });
-                            /// #endif
-                            /// #if !MOBILE
-                            getAllModels().custom.forEach((item) => {
-                                if (item.type === "siyuan-database-row" && (item.data.avID === data.data.id ||
-                                    item.element.querySelector(`[data-av-id="${data.data.id}"]`))) {
-                                    item.update?.();
-                                }
-                            });
-                            /// #endif
+                            queueDatabaseRowRefresh(this.protyle.id, data.data.id);
                             break;
                         case "addLoading":
                             if (data.data === this.protyle.block.rootID) {
@@ -353,6 +341,7 @@ export class Protyle {
         if (data.context?.undoState) {
             syncMirrorFromBroadcast(data.context.undoState);
         }
+        queueDatabaseRowRefreshForOperations(this.protyle.id, data.data[0]?.doOperations || []);
         if (!this.protyle.preview.element.classList.contains("fn__none") &&
             data.context?.rootIDs?.includes(this.protyle.block.rootID)) {
             this.protyle.preview.render(this.protyle);
@@ -361,10 +350,12 @@ export class Protyle {
         const hadContent = this.protyle.wysiwyg.element.childElementCount > 0;
         let needCreateAction = "";
         let hasDeleteOp = false;
+        let skippedBacklinkStructure = false;
         const operations: IOperation[] = [];
         data.data[0].doOperations.find((item: IOperation) => {
             if (this.protyle.options.backlinkData && ["delete", "move"].includes(item.action)) {
                 // 反链上下文只展示源文档的一部分，结构操作等待索引提交后按内容版本增量同步。
+                skippedBacklinkStructure = true;
                 return true;
             } else {
                 if (item.action === "delete") {
@@ -379,6 +370,9 @@ export class Protyle {
         });
         if (operations.length > 0) {
             onTransaction(this.protyle, operations, false);
+        } else if (skippedBacklinkStructure) {
+            invalidateViewFoldRequests(this.protyle);
+            void applyViewFoldStates(this.protyle);
         }
         // 聚焦块被分屏另一侧的删除操作连带删除时（容器块删除会级联删除其所有子孙块，如列表/超级块/引述等），当前页签的聚焦块已成为孤儿但仍显示，需退出聚焦
         // Improve editor state synchronization when deleting blocks https://github.com/siyuan-note/siyuan/issues/17742
@@ -538,6 +532,16 @@ export class Protyle {
 
     public resize() {
         resize(this.protyle);
+    }
+
+    public isFullscreen() {
+        return this.protyle.element.classList.contains("fullscreen");
+    }
+
+    public setFullscreen(enter: boolean) {
+        if (setFullscreenState(this.protyle.element, enter)) {
+            resize(this.protyle);
+        }
     }
 
     public reload(focus: boolean, updateReadonly?: boolean) {

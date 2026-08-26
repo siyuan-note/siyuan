@@ -41,20 +41,28 @@ import (
 
 // AttributeView 描述了属性视图的结构。
 type AttributeView struct {
-	Spec              int                `json:"spec"`                        // 格式版本
-	ID                string             `json:"id"`                          // 属性视图 ID
-	Name              string             `json:"name"`                        // 属性视图名称
-	KeyValues         []*KeyValues       `json:"keyValues"`                   // 属性视图属性键值
-	KeyIDs            []string           `json:"keyIDs"`                      // 属性视图属性键 ID，用于排序
-	Views             []*View            `json:"views"`                       // 视图
-	NewItemTemplates  []*NewItemTemplate `json:"newItemTemplates,omitempty"`  // 新增条目模板
-	DefaultTemplateID string             `json:"defaultTemplateID,omitempty"` // 默认新增条目模板 ID
+	Spec              int                         `json:"spec"`                        // 格式版本
+	ID                string                      `json:"id"`                          // 属性视图 ID
+	Name              string                      `json:"name"`                        // 属性视图名称
+	KeyValues         []*KeyValues                `json:"keyValues"`                   // 属性视图属性键值
+	KeyIDs            []string                    `json:"keyIDs"`                      // 属性视图属性键 ID，用于排序
+	Views             []*View                     `json:"views"`                       // 视图
+	NewItemTemplates  []*NewItemTemplate          `json:"newItemTemplates,omitempty"`  // 新增条目模板
+	DefaultTemplateID string                      `json:"defaultTemplateID,omitempty"` // 默认新增条目模板 ID
+	CustomColors      []*AttributeViewCustomColor `json:"customColors,omitempty"`      // 数据库级自定义选项颜色
+	// CustomColorRenderContext 保存只读渲染期间的关联数据库调色板上下文。
+	CustomColorRenderContext *CustomColorRenderContext `json:"-"`
 	// 卡片封面位置，条目 ID -> 封面来源 -> 位置
 	CardCoverPositions map[string]map[string]*CardCoverPosition `json:"cardCoverPositions,omitempty"`
 
 	RenderedViewables map[string]Viewable `json:"-"` // 已经渲染好的视图
 
 	cardCoverPositionsChanged bool
+}
+
+// CustomColorRenderContext 为历史和仓库快照渲染解析关联数据库当时的调色板。
+type CustomColorRenderContext struct {
+	ResolveRelatedCustomColors func(avID string) (colors []*AttributeViewCustomColor, found bool)
 }
 
 // NewItemTargetType 描述新增条目模板创建的目标类型。
@@ -258,12 +266,13 @@ type Relation struct {
 }
 
 type SelectOption struct {
-	Name  string `json:"name"`  // 选项名称
-	Color string `json:"color"` // 选项颜色
-	Desc  string `json:"desc"`  // 选项描述
+	Name          string              `json:"name"`                    // 选项名称
+	Color         string              `json:"color"`                   // 选项颜色
+	Desc          string              `json:"desc"`                    // 选项描述
+	ResolvedColor *AttributeViewColor `json:"resolvedColor,omitempty"` // 渲染阶段解析后的自定义颜色
 }
 
-// FilterColorValue 校验选项颜色值，仅允许空字符串或 1-14 的调色板索引，非法值返回空字符串
+// FilterColorValue 校验内置选项颜色值，仅允许空字符串或 1-14 的调色板索引，非法值返回空字符串。
 func FilterColorValue(color string) string {
 	color = strings.TrimSpace(color)
 	if "" == color {
@@ -506,6 +515,7 @@ func NewAttributeView(id string) (ret *AttributeView) {
 		ID:                id,
 		KeyValues:         []*KeyValues{{Key: blockKey}, {Key: selectKey}},
 		Views:             []*View{view},
+		CustomColors:      []*AttributeViewCustomColor{},
 		RenderedViewables: map[string]Viewable{},
 	}
 	return
@@ -882,6 +892,8 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 		err = CheckSpec(ret)
 	}
 	if nil == err {
+		_ = ret.NormalizeCustomColors(false)
+		ret.ResolveDirectColors()
 		cache.SetAVSearchDataInBox(avID, boxID, dataVersion, newAttributeViewSearchInfo(ret))
 	}
 	return
@@ -901,6 +913,9 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 	// 做一些数据兼容和订正处理
 	UpgradeSpec(av)
+	if err = av.NormalizeCustomColors(true); nil != err {
+		return
+	}
 
 	// 值去重
 	blockValues := av.GetBlockKeyValues()
@@ -944,11 +959,13 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	}
 
 	var data []byte
+	restoreResolvedColors := av.suspendResolvedColors()
 	if util.UseSingleLineSave {
 		data, err = gulu.JSON.MarshalJSON(av)
 	} else {
 		data, err = gulu.JSON.MarshalIndentJSON(av, "", "\t")
 	}
+	restoreResolvedColors()
 	if err != nil {
 		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)
 		return

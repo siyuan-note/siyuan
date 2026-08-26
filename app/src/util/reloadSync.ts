@@ -103,7 +103,7 @@ export const reloadSync = (
         if (item.type === "local" && data.removeRootIDs.includes(item.rootId)) {
             item.parent.parent.removeTab(item.parent.id, false, false);
         } else if (item.type !== "local" || data.upsertRootIDs.includes(item.rootId)) {
-            item.searchGraph(false);
+            item.searchGraph();
             if (item.type === "local") {
                 updateTitle(item.rootId, item.parent);
             }

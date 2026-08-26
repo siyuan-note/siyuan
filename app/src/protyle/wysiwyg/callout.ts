@@ -1,47 +1,96 @@
 import {transaction} from "./transaction";
-import {focusByRange} from "../util/selection";
-import {Dialog} from "../../dialog";
-import {Menu} from "../../plugin/Menu";
-import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
-import {openEmojiPanel, unicode2Emoji} from "../../emoji";
+import {Dialog} from "../../dialog";
+import {isMobile} from "../../util/functions";
+import {focusByRange} from "../util/selection";
 
-export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyle) => {
-    if (blockElements.length === 0) {
-        return;
+export interface ICalloutPreset {
+    id: string;
+    icon: string;
+    type: string;
+    title: string;
+    color: string;
+}
+
+export const CALLOUT_PRESETS: ICalloutPreset[] = [{
+    id: "calloutNote",
+    icon: "✏️",
+    type: "NOTE",
+    title: "Note",
+    color: "var(--b3-callout-note)",
+}, {
+    id: "calloutTip",
+    icon: "💡",
+    type: "TIP",
+    title: "Tip",
+    color: "var(--b3-callout-tip)",
+}, {
+    id: "calloutImportant",
+    icon: "❗",
+    type: "IMPORTANT",
+    title: "Important",
+    color: "var(--b3-callout-important)",
+}, {
+    id: "calloutWarning",
+    icon: "⚠️",
+    type: "WARNING",
+    title: "Warning",
+    color: "var(--b3-callout-warning)",
+}, {
+    id: "calloutCaution",
+    icon: "🚨",
+    type: "CAUTION",
+    title: "Caution",
+    color: "var(--b3-callout-caution)",
+}];
+
+export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyle, preset: ICalloutPreset) => {
+    const doOperations: IOperation[] = [];
+    const undoOperations: IOperation[] = [];
+    const ids = new Set<string>();
+    blockElements.forEach(item => {
+        const id = item.dataset.nodeId;
+        if (!id || ids.has(id) || item.dataset.type !== "NodeCallout") {
+            return;
+        }
+        ids.add(id);
+        const oldHTML = item.outerHTML;
+        const oldType = item.dataset.subtype || "";
+        const titleElement = item.querySelector<HTMLElement>(".callout-title");
+        const title = protyle.lute.BlockDOM2StdMd(titleElement.innerHTML).trim();
+        item.dataset.subtype = preset.type;
+        if (title.toLowerCase() === oldType.toLowerCase()) {
+            titleElement.textContent = preset.title;
+        }
+        item.querySelector<HTMLElement>(".callout-icon").textContent = preset.icon;
+        item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
+        doOperations.push({
+            id,
+            data: item.outerHTML,
+            action: "update",
+        });
+        undoOperations.push({
+            id,
+            data: oldHTML,
+            action: "update",
+        });
+    });
+    if (doOperations.length > 0) {
+        transaction(protyle, doOperations, undoOperations);
     }
-    const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
-    const blockCalloutElement = blockElements[0].querySelector(".callout-icon");
+};
+
+export const updateCustomCalloutType = (blockElements: HTMLElement[], protyle: IProtyle) => {
+    const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0).cloneRange() : undefined;
+    const currentType = blockElements.every(item => item.dataset.subtype === blockElements[0].dataset.subtype) ?
+        blockElements[0].dataset.subtype : "";
     const dialog = new Dialog({
-        title: window.siyuan.languages.callout,
+        title: `${window.siyuan.languages.callout} - ${window.siyuan.languages.custom}`,
         content: `<div class="b3-dialog__content">
     <label class="fn__flex">
-        <div class="fn__flex-center">
-            ${window.siyuan.languages.icon}
-        </div>
+        <div class="fn__flex-center">${window.siyuan.languages.type}</div>
         <span class="fn__space"></span>
-        <div class="protyle-wysiwyg" style="padding: 0;font-size: 16px" data-readonly="false">
-            <span class="callout-icon">${blockCalloutElement.innerHTML}</span>
-        </div>
-    </label>
-    <div class="fn__hr"></div>
-    <label class="fn__flex">
-        <div class="fn__flex-center">
-            ${window.siyuan.languages.type}
-        </div>
-        <span class="fn__space"></span>
-        <div class="b3-form__icona fn__flex-1" style="overflow: visible">
-            <input value="${blockElements[0].getAttribute("data-subtype")}" type="text" class="b3-text-field fn__block b3-form__icona-input">
-            <svg class="b3-form__icona-icon"><use xlink:href="#iconDown"></use></svg>
-        </div>
-    </label>
-    <div class="fn__hr"></div>
-    <label class="fn__flex">
-        <div class="fn__flex-center">
-            ${window.siyuan.languages.title}
-        </div>
-        <span class="fn__space"></span>
-        <input class="b3-text-field fn__flex-1" type="text">
+        <input class="b3-text-field fn__flex-1" value="${Lute.EscapeHTMLStr(currentType || "")}" type="text">
     </label>
 </div>
 <div class="b3-dialog__action">
@@ -50,134 +99,41 @@ export const updateCalloutType = (blockElements: HTMLElement[], protyle: IProtyl
 </div>`,
         width: isMobile() ? "92vw" : "520px",
         destroyCallback() {
-            if (range) {
+            if (range && protyle.wysiwyg.element.contains(range.startContainer)) {
                 focusByRange(range);
             }
+        },
+    });
+    const inputElement = dialog.element.querySelector<HTMLInputElement>("input");
+    const buttonElements = dialog.element.querySelectorAll<HTMLButtonElement>("button");
+    buttonElements[0].addEventListener("click", () => dialog.destroy());
+    const submit = () => {
+        const type = inputElement.value.trim();
+        if (!type) {
+            return;
         }
-    });
-    const btnElements = dialog.element.querySelectorAll(".b3-button");
-    btnElements[0].addEventListener("click", () => {
-        dialog.destroy();
-    });
-    btnElements[1].addEventListener("click", () => {
         const doOperations: IOperation[] = [];
         const undoOperations: IOperation[] = [];
-        blockElements.filter(item => {
-            const id = item.getAttribute("data-node-id");
+        const ids = new Set<string>();
+        blockElements.forEach(item => {
+            const id = item.dataset.nodeId;
+            if (!id || ids.has(id) || item.dataset.type !== "NodeCallout" || item.dataset.subtype === type) {
+                return;
+            }
+            ids.add(id);
             const oldHTML = item.outerHTML;
-            item.setAttribute("data-subtype", textElements[0].value.trim());
-            let title = textElements[1].value.trim();
-            if (title) {
-                const template = document.createElement("template");
-                template.innerHTML = protyle.lute.Md2BlockDOM(textElements[1].value.trim());
-                title = template.content.firstElementChild.firstElementChild.innerHTML;
-            }
-            item.querySelector(".callout-title").innerHTML = title ||
-                (textElements[0].value.trim().substring(0, 1).toUpperCase() + textElements[0].value.trim().substring(1).toLowerCase());
-            item.querySelector(".callout-icon").innerHTML = dialogCalloutIconElement.innerHTML;
+            item.dataset.subtype = type;
             item.setAttribute(Constants.ATTRIBUTE_EDITING, "true");
-            doOperations.push({
-                id,
-                data: item.outerHTML,
-                action: "update"
-            });
-            undoOperations.push({
-                id,
-                data: oldHTML,
-                action: "update"
-            });
+            doOperations.push({id, data: item.outerHTML, action: "update"});
+            undoOperations.push({id, data: oldHTML, action: "update"});
         });
-        transaction(protyle, doOperations, undoOperations);
+        if (doOperations.length > 0) {
+            transaction(protyle, doOperations, undoOperations);
+        }
         dialog.destroy();
-    });
-    const textElements: NodeListOf<HTMLInputElement> = dialog.element.querySelectorAll(".b3-text-field");
-    dialog.bindInput(textElements[1], () => {
-        btnElements[1].dispatchEvent(new CustomEvent("click"));
-    });
-    textElements[0].addEventListener("keydown", (event) => {
-        if (event.isComposing) {
-            return;
-        }
-        if (event.key.startsWith("Arrow")) {
-            dialog.element.querySelector(".b3-form__icona-icon").dispatchEvent(new CustomEvent("click"));
-            textElements[0].blur();
-            event.preventDefault();
-            event.stopPropagation();
-        }
-    });
-    textElements[0].focus();
-    textElements[0].select();
-    textElements[1].value = protyle.lute.BlockDOM2StdMd(blockElements[0].querySelector(".callout-title").innerHTML);
-    const dialogCalloutIconElement = dialog.element.querySelector(".callout-icon");
-    dialogCalloutIconElement.addEventListener("click", () => {
-        const emojiRect = dialogCalloutIconElement.getBoundingClientRect();
-        openEmojiPanel("", "av", {
-            x: emojiRect.left,
-            y: emojiRect.bottom,
-            h: emojiRect.height,
-            w: emojiRect.width
-        }, (unicode) => {
-            let emojiHTML = unicode2Emoji(unicode, "callout-img");
-            if (unicode === "") {
-                if (textElements[0].value === "NOTE") {
-                    emojiHTML = "✏️";
-                } else if (textElements[0].value === "TIP") {
-                    emojiHTML = "💡";
-                } else if (textElements[0].value === "IMPORTANT") {
-                    emojiHTML = "❗";
-                } else if (textElements[0].value === "WARNING") {
-                    emojiHTML = "⚠️";
-                } else if (textElements[0].value === "CAUTION") {
-                    emojiHTML = "🚨";
-                }
-            }
-            dialogCalloutIconElement.innerHTML = emojiHTML;
-        }, dialogCalloutIconElement.querySelector("img"), {
-            ownerElement: protyle.element,
-            targetID: blockElements[0].dataset.nodeId,
-        });
-    });
-    dialog.element.querySelector(".b3-form__icona-icon").addEventListener("click", (event) => {
-        const menu = new Menu(Constants.MENU_CALLOUT_SELECT, () => {
-            if (document.activeElement.tagName === "BODY") {
-                textElements[0].focus();
-            }
-        });
-        if (menu.isOpen) {
-            menu.close();
-            return;
-        }
-        [{
-            icon: "✏️", type: "Note", color: "var(--b3-callout-note)"
-        }, {
-            icon: "💡", type: "Tip", color: "var(--b3-callout-tip)"
-        }, {
-            icon: "❗", type: "Important", color: "var(--b3-callout-important)"
-        }, {
-            icon: "⚠️", type: "Warning", color: "var(--b3-callout-warning)"
-        }, {
-            icon: "🚨", type: "Caution", color: "var(--b3-callout-caution)"
-        }].forEach((item) => {
-            menu.addItem({
-                iconHTML: `<span class="b3-menu__icon">${item.icon.toUpperCase()}</span>`,
-                label: `<span style="color: ${item.color}">${item.type}</span>`,
-                click() {
-                    if (textElements[0].value.toLowerCase() === textElements[1].value.toLowerCase()) {
-                        textElements[1].value = item.type;
-                    }
-                    textElements[0].value = item.type.toUpperCase();
-                    dialogCalloutIconElement.innerHTML = item.icon;
-                    textElements[1].focus();
-                    textElements[1].select();
-                }
-            });
-        });
-        const inputRect = textElements[0].getBoundingClientRect();
-        menu.open({
-            x: inputRect.left,
-            y: inputRect.bottom
-        });
-        event.stopPropagation();
-        event.preventDefault();
-    });
+    };
+    buttonElements[1].addEventListener("click", submit);
+    dialog.bindInput(inputElement, submit);
+    inputElement.focus();
+    inputElement.select();
 };

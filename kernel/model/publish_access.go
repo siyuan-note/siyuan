@@ -474,7 +474,8 @@ func CheckPublishAuthCookie(c *gin.Context, ID string, password string) bool {
 	return err == nil && authCookie.Value == util.SHA256Hash([]byte(ID+password))
 }
 
-func assetPathFromDataRelativePath(relPath string) (assetPath, boxID string, ok bool) {
+// AssetPathFromDataRelativePath 从 data 相对路径提取文档中使用的资源路径和笔记本 ID。
+func AssetPathFromDataRelativePath(relPath string) (assetPath, boxID string, ok bool) {
 	pathParts := strings.Split(relPath, "/")
 	if 1 < len(pathParts) && pathParts[0] == "assets" {
 		return strings.Join(pathParts, "/"), "", true
@@ -510,7 +511,7 @@ func CheckAbsPathAccessableByPublishAccess(c *gin.Context, absPath string, publi
 			return true
 		}
 
-		if assetPath, box, ok := assetPathFromDataRelativePath(relPath); ok {
+		if assetPath, box, ok := AssetPathFromDataRelativePath(relPath); ok {
 			return checkAssetPathAccessableByPublishAccess(c, publishAccess, assetPath, box)
 		}
 
@@ -1079,10 +1080,55 @@ func FilterBlockAttributeViewKeysByPublishAccess(c *gin.Context, publishAccess P
 				break
 			}
 		}
-		if accessable {
-			blockAttributeViewKey.ItemPositions = nil
-			ret = append(ret, blockAttributeViewKey)
+		if !accessable {
+			continue
 		}
+
+		// 仅返回绑定文档可发布访问的行值，避免通过键值接口泄漏绑定在禁止访问文档中的数据库内容
+		var attrView *av.AttributeView
+		filter := &attributeViewPublishAccessFilter{
+			c:               c,
+			publishAccess:   publishAccess,
+			attributeViews:  map[string]*av.AttributeView{},
+			attributeAccess: map[string]bool{},
+			itemAccess:      map[string]map[string]bool{},
+		}
+		blockID := ""
+		if 0 < len(blockAttributeViewKey.BlockIDs) {
+			blockID = blockAttributeViewKey.BlockIDs[0]
+		}
+		attrView, filter.boxID = parseAttributeViewForPublishAccess(blockAttributeViewKey.AvID, blockID)
+		if nil != attrView {
+			filter.attributeViews[attrView.ID] = attrView
+		}
+
+		keyValues := []*av.KeyValues{}
+		for _, sourceKeyValues := range blockAttributeViewKey.KeyValues {
+			itemKeyValues := &av.KeyValues{Key: sourceKeyValues.Key}
+			for _, value := range sourceKeyValues.Values {
+				if !filter.isItemAccessable(attrView, value.BlockID) {
+					// 行绑定的文档对发布读者不可访问，丢弃该行值
+					continue
+				}
+				filteredValue, _ := filter.filterValue(attrView, sourceKeyValues.Key, value, value.BlockID)
+				itemKeyValues.Values = append(itemKeyValues.Values, filteredValue)
+			}
+			if 0 < len(itemKeyValues.Values) {
+				keyValues = append(keyValues, itemKeyValues)
+			}
+		}
+		if 1 > len(keyValues) {
+			// 所有行均不可访问时不返回该数据库键值，避免暴露行是否存在
+			continue
+		}
+
+		ret = append(ret, &BlockAttributeViewKeys{
+			AvID:         blockAttributeViewKey.AvID,
+			AvName:       blockAttributeViewKey.AvName,
+			CustomColors: blockAttributeViewKey.CustomColors,
+			BlockIDs:     blockAttributeViewKey.BlockIDs,
+			KeyValues:    keyValues,
+		})
 	}
 	return
 }
@@ -1337,6 +1383,44 @@ func FilterBlocksByPublishAccess(c *gin.Context, publishAccess PublishAccess, bl
 			(c == nil || password == "" || CheckPublishAuthCookie(c, passwordID, password)) {
 			ret = append(ret, block)
 		}
+	}
+	return
+}
+
+// GetPublishAccessSearchExclusion 返回当前读者在全库搜索中不可见的笔记本 ID 和文档 ID 排除集合。
+// 排除来源包括隐藏、禁止发布以及未通过密码验证的发布访问条目，保证搜索计数和分页不泄露这些条目。
+// denyAll 为 true 时当前读者不可见任何内容，调用方应直接返回空结果。
+func GetPublishAccessSearchExclusion(c *gin.Context) (denyAll bool, boxIDs, docIDs []string) {
+	publishAccess := GetPublishAccess()
+	denied := PublishAccess{}
+	denied = append(denied, GetInvisiblePublishAccess(publishAccess)...)
+	denied = append(denied, GetDisablePublishAccess(publishAccess)...)
+	for _, item := range publishAccess {
+		if "" != item.Password && !CheckPublishAuthCookie(c, item.ID, item.Password) {
+			denied = append(denied, item)
+		}
+	}
+
+	boxIDSet := map[string]bool{}
+	docIDSet := map[string]bool{}
+	for _, item := range denied {
+		if publishAccessDenyAllID == item.ID {
+			return true, nil, nil
+		}
+		if !ast.IsNodeIDPattern(item.ID) {
+			continue
+		}
+		if filelock.IsExist(filepath.Join(util.DataDir, item.ID)) {
+			boxIDSet[item.ID] = true
+		} else {
+			docIDSet[item.ID] = true
+		}
+	}
+	for boxID := range boxIDSet {
+		boxIDs = append(boxIDs, boxID)
+	}
+	for docID := range docIDSet {
+		docIDs = append(docIDs, docID)
 	}
 	return
 }

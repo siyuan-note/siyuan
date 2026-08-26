@@ -6,7 +6,7 @@
 		"id": "20200813131152-0wk5akh",
 		"title": "在内容块中遨游",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20260820190627"
 	},
 	"Children": [
 		{
@@ -229,7 +229,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090757-xwom8ia",
-				"updated": "20250115164127"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -261,7 +261,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210428225151-3kj13k3",
-				"updated": "20250115164127"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -275,7 +275,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 单击节点：跳转到该节点。"
+					"Data": "​ 点击节点：跳转到该节点。"
 				}
 			]
 		},
@@ -285,7 +285,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20200920194146-psjundj",
-				"updated": "20260810212846"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -345,7 +345,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106201308-l8nlq6w",
-				"updated": "20260810212846"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -370,7 +370,7 @@
 			},
 			"Properties": {
 				"id": "20210104090757-g5onw59",
-				"updated": "20260810212846"
+				"updated": "20260820190627"
 			},
 			"Children": [
 				{
@@ -418,7 +418,7 @@
 					},
 					"Properties": {
 						"id": "20210104090757-91fwrlj",
-						"updated": "20260809232000"
+						"updated": "20260820190627"
 					},
 					"Children": [
 						{
@@ -426,12 +426,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210205172718-s191x9n",
-								"updated": "20260809232000"
+								"updated": "20260820190627"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "单击来源文档可展开上下文，再单击上下文中的引用块进行跳转"
+									"Data": "点击来源文档可展开上下文，再点击上下文中的引用块进行跳转"
 								}
 							]
 						}

@@ -1,4 +1,5 @@
 import type {App} from "../index";
+import {eventBusHas, hasPluginSubscriber} from "../plugin/EventBusCore";
 
 export interface IOpenLinkEventDetail {
     href: string;
@@ -21,7 +22,13 @@ export const resolveOpenLinkEvent = (options: {
 };
 
 const emitCancelablePluginEvent = <T>(app: App, type: TEventBus, detail: T) => {
+    if (!hasPluginSubscriber(type)) {
+        return true;
+    }
     for (const plugin of app.plugins) {
+        if (!eventBusHas(plugin.eventBus, type)) {
+            continue;
+        }
         if (!plugin.eventBus.emit(type, detail)) {
             return false;
         }

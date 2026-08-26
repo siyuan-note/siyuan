@@ -45,7 +45,8 @@ export class MobileOutline extends Model {
     constructor(options: {
         app: App,
         blockId: string,
-        isPreview: boolean
+        isPreview: boolean,
+        element: HTMLElement
     }) {
         super({app: options.app});
         this.connect({
@@ -56,7 +57,7 @@ export class MobileOutline extends Model {
 
         this.isPreview = options.isPreview;
         this.blockId = options.blockId;
-        this.element = document.querySelector('#sidebar [data-type="sidebar-outline"]');
+        this.element = options.element;
         this.element.innerHTML = `<div class="toolbar toolbar--border toolbar--dark">
     <div class="fn__space"></div>
     <div class="toolbar__text">

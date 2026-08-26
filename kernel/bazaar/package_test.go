@@ -19,6 +19,7 @@ package bazaar
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -148,5 +149,36 @@ func TestParsePackageJSONClearsGeneratedDeprecationMetadata(t *testing.T) {
 	}
 	if pkg.Deprecated || pkg.DeprecatedReason != nil || pkg.Alternatives != nil || pkg.PreferredDeprecatedReason != "" {
 		t.Fatalf("local manifest supplied generated deprecation metadata: %#v", pkg)
+	}
+}
+
+func TestIsValidStageRepoURL(t *testing.T) {
+	tests := []struct {
+		name string
+		url  string
+		want bool
+	}{
+		{name: "valid sha1 hash", url: "88250/example@6286912c381ef3f83e455d06ba4d369c498238dc", want: true},
+		{name: "valid short hash", url: "owner/repo@abcdef0", want: true},
+		{name: "valid placeholder hash", url: "owner/repo@hash", want: true},
+		{name: "empty url", url: "", want: false},
+		{name: "missing hash", url: "owner/repo", want: false},
+		{name: "empty hash", url: "owner/repo@", want: false},
+		{name: "multiple at signs", url: "owner/repo@hash@extra", want: false},
+		{name: "hash too long", url: "owner/repo@" + strings.Repeat("a", 65), want: false},
+		{name: "quote in owner", url: `owner" onerror="alert(1)/repo@hash`, want: false},
+		{name: "quote in hash", url: `owner/repo@ha"sh`, want: false},
+		{name: "colon in hash", url: "owner/repo@javascript:alert(1)", want: false},
+		{name: "slash in hash", url: "owner/repo@ha/sh", want: false},
+		{name: "multiple path segments", url: "owner/sub/repo@hash", want: false},
+		{name: "path traversal owner", url: "../repo@hash", want: false},
+		{name: "empty owner", url: "/repo@hash", want: false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isValidStageRepoURL(tt.url); got != tt.want {
+				t.Errorf("isValidStageRepoURL(%q) = %v, want %v", tt.url, got, tt.want)
+			}
+		})
 	}
 }

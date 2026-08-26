@@ -62,8 +62,8 @@ func TestUpgradeSpec7RemovesPersistedCurrentView(t *testing.T) {
 		t.Fatal(err)
 	}
 	UpgradeSpec(attrView)
-	if 7 != attrView.Spec {
-		t.Fatalf("expected spec 7, got %d", attrView.Spec)
+	if CurrentSpec != attrView.Spec {
+		t.Fatalf("expected spec %d, got %d", CurrentSpec, attrView.Spec)
 	}
 	data, err := json.Marshal(attrView)
 	if nil != err {
@@ -75,5 +75,27 @@ func TestUpgradeSpec7RemovesPersistedCurrentView(t *testing.T) {
 	}
 	if _, ok := fields["viewID"]; ok {
 		t.Fatalf("legacy viewID was persisted: %s", data)
+	}
+}
+
+func TestUpgradeSpec8InitializesCustomColors(t *testing.T) {
+	attrView := &AttributeView{Spec: 7}
+	UpgradeSpec(attrView)
+	if CurrentSpec != attrView.Spec {
+		t.Fatalf("expected spec %d, got %d", CurrentSpec, attrView.Spec)
+	}
+	if nil == attrView.CustomColors || 0 != len(attrView.CustomColors) {
+		t.Fatalf("spec 8 upgrade should initialize an empty custom palette: %+v", attrView.CustomColors)
+	}
+
+	attrView = &AttributeView{Spec: 7, CustomColors: []*AttributeViewCustomColor{
+		testAttributeViewCustomColor(15, "#000000", "#ffffff", "#ffffff", "#000000"),
+	}}
+	UpgradeSpec(attrView)
+	if CurrentSpec != attrView.Spec {
+		t.Fatalf("expected spec %d, got %d", CurrentSpec, attrView.Spec)
+	}
+	if 1 != len(attrView.CustomColors) || 15 != attrView.CustomColors[0].Index {
+		t.Fatalf("spec 8 upgrade discarded an assigned custom palette: %+v", attrView.CustomColors)
 	}
 }

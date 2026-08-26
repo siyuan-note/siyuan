@@ -201,6 +201,17 @@ func TestExternalMCPToolsAreNotReexposed(t *testing.T) {
 	}
 }
 
+func TestAgentOnlyToolsAreNotExposed(t *testing.T) {
+	for _, tool := range []*tools.Tool{tools.QuestionTool, tools.TodoWriteTool, tools.AgentLogTool} {
+		if !tool.AgentOnly {
+			t.Fatalf("Agent session tool was not marked as Agent-only: %s", tool.Name)
+		}
+		if externalMCPToolAllowed(tool) {
+			t.Fatalf("Agent session tool was exposed through the SiYuan MCP server: %s", tool.Name)
+		}
+	}
+}
+
 func toolListContains(toolList []*mcpsdk.Tool, name string) bool {
 	for _, tool := range toolList {
 		if tool.Name == name {

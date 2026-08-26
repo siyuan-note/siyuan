@@ -390,9 +390,7 @@ func InitConf() {
 	if "" == Conf.Appearance.CodeBlockThemeLight {
 		Conf.Appearance.CodeBlockThemeLight = "github"
 	}
-	if nil == Conf.Appearance.StatusBar {
-		Conf.Appearance.StatusBar = &util.StatusBar{}
-	}
+	Conf.Appearance.StatusBar = util.NormalizeStatusBar(Conf.Appearance.StatusBar, util.IsMobileContainer())
 	util.StatusBarCfg = Conf.Appearance.StatusBar
 	if nil == Conf.Appearance.Notifications {
 		Conf.Appearance.Notifications = util.NewNotifications()
@@ -469,6 +467,7 @@ func InitConf() {
 		Conf.Editor.DatabaseAttrUseTabs = defaultEditor.DatabaseAttrUseTabs
 	}
 	Conf.Editor.AssetOpen = conf.NormalizeAssetOpen(Conf.Editor.AssetOpen)
+	Conf.Editor.NormalizeFontFamilies()
 	Conf.Editor.Emoji = util.FilterRecentIconValues(Conf.Editor.Emoji)
 	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
 		Conf.Editor.FontSize = 16
@@ -1082,7 +1081,6 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int, i
 		}
 	}
 
-	util.BroadcastByType("main", "exit", 0, "", nil)
 	util.UnlockWorkspace()
 
 	time.Sleep(500 * time.Millisecond)

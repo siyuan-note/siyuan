@@ -92,8 +92,22 @@
   }
 
   &-item__main {
+    font-size: 14px;
     min-height: auto;
     overflow: visible;
+  }
+
+  &-font-family {
+    &__chip {
+      height: 24px;
+    }
+
+    &__text {
+      align-self: stretch;
+      align-items: center;
+      display: flex;
+      line-height: normal;
+    }
   }
 
   &-cloud-space {
@@ -1180,6 +1194,10 @@
 }
 
 #configAccountPayment {
+  &.config-account--deactivate {
+    padding-bottom: 8px;
+  }
+
   @media (max-width: 750px) {
     .config-wrap > .fn__space {
       display: block;
@@ -1192,9 +1210,26 @@
     vertical-align: -3px;
     margin-right: 4px;
   }
+
+  .config-account__deactivate {
+    margin-top: 8px;
+    text-align: right;
+
+    .b3-button {
+      color: var(--b3-theme-on-surface-light);
+      font-size: 12px;
+      max-width: 100%;
+      text-align: right;
+      white-space: normal;
+    }
+  }
 }
 
 #configAccountMain.config-wrap {
+  .config-account__row-actions {
+    gap: 8px;
+  }
+
   @media (max-width: 750px) {
     .config-account__profile-meta {
       display: block;
@@ -1258,12 +1293,12 @@
 }
 
 .data-migration__item:hover .data-migration__actions,
-.data-migration__item:has(:focus-visible) .data-migration__actions {
+.data-migration__item:focus-within .data-migration__actions {
   opacity: 1;
   pointer-events: auto;
 }
 
-@media (hover: none) {
+@media (hover: none), (any-pointer: coarse) {
   .data-migration__actions {
     opacity: 1;
     pointer-events: auto;

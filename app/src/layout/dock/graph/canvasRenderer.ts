@@ -1,5 +1,5 @@
 import {getGraphNodeColor, IGraphRenderer, IGraphRenderState} from "./renderer";
-import {getGraphEdgeOpacity, MIN_GRAPH_EDGE_WIDTH} from "./core";
+import {getGraphArrowGeometry, getGraphArrowLength, getGraphEdgeOpacity, MIN_GRAPH_EDGE_WIDTH} from "./core";
 
 export class GraphCanvasRenderer implements IGraphRenderer {
     private readonly canvas: HTMLCanvasElement;
@@ -52,14 +52,25 @@ export class GraphCanvasRenderer implements IGraphRenderer {
             }
             const sourceOffset = link.source * 2;
             const targetOffset = link.target * 2;
-            context.moveTo(
-                state.positions[sourceOffset] * state.camera.scale + state.camera.x,
-                state.positions[sourceOffset + 1] * state.camera.scale + state.camera.y,
-            );
-            context.lineTo(
-                state.positions[targetOffset] * state.camera.scale + state.camera.x,
-                state.positions[targetOffset + 1] * state.camera.scale + state.camera.y,
-            );
+            const sourceX = state.positions[sourceOffset] * state.camera.scale + state.camera.x;
+            const sourceY = state.positions[sourceOffset + 1] * state.camera.scale + state.camera.y;
+            const targetX = state.positions[targetOffset] * state.camera.scale + state.camera.x;
+            const targetY = state.positions[targetOffset + 1] * state.camera.scale + state.camera.y;
+            context.moveTo(sourceX, sourceY);
+            if (link.ref && state.options.arrow && state.camera.scale >= 0.08) {
+                const arrow = getGraphArrowGeometry(
+                    sourceX,
+                    sourceY,
+                    targetX,
+                    targetY,
+                    Math.max(1, state.data.sizes[link.target] * state.camera.scale),
+                    getGraphArrowLength(state.options.linkWidth, state.camera.scale),
+                    Math.max(MIN_GRAPH_EDGE_WIDTH, state.options.linkWidth * state.camera.scale),
+                );
+                context.lineTo(arrow.lineEndX, arrow.lineEndY);
+            } else {
+                context.lineTo(targetX, targetY);
+            }
             drawn = true;
         });
         if (!drawn) {
@@ -73,7 +84,7 @@ export class GraphCanvasRenderer implements IGraphRenderer {
 
     private drawArrows(state: IGraphRenderState) {
         const context = this.context;
-        const arrowLength = Math.max(7, state.options.linkWidth * state.camera.scale * 2.2);
+        const arrowLength = getGraphArrowLength(state.options.linkWidth, state.camera.scale);
         state.data.links.forEach((link) => {
             if (!link.ref) {
                 return;
@@ -84,23 +95,19 @@ export class GraphCanvasRenderer implements IGraphRenderer {
             const sourceY = state.positions[sourceOffset + 1] * state.camera.scale + state.camera.y;
             const targetX = state.positions[targetOffset] * state.camera.scale + state.camera.x;
             const targetY = state.positions[targetOffset + 1] * state.camera.scale + state.camera.y;
-            const deltaX = targetX - sourceX;
-            const deltaY = targetY - sourceY;
-            const distance = Math.max(0.001, Math.hypot(deltaX, deltaY));
-            const directionX = deltaX / distance;
-            const directionY = deltaY / distance;
             const targetRadius = Math.max(1, state.data.sizes[link.target] * state.camera.scale);
-            const tipX = targetX - directionX * targetRadius * 1.15;
-            const tipY = targetY - directionY * targetRadius * 1.15;
+            const arrow = getGraphArrowGeometry(
+                sourceX, sourceY, targetX, targetY, targetRadius, arrowLength,
+            );
             context.beginPath();
-            context.moveTo(tipX, tipY);
+            context.moveTo(arrow.tipX, arrow.tipY);
             context.lineTo(
-                tipX - directionX * arrowLength + directionY * arrowLength * 0.6,
-                tipY - directionY * arrowLength - directionX * arrowLength * 0.6,
+                arrow.baseX + arrow.directionY * arrowLength * 0.6,
+                arrow.baseY - arrow.directionX * arrowLength * 0.6,
             );
             context.lineTo(
-                tipX - directionX * arrowLength - directionY * arrowLength * 0.6,
-                tipY - directionY * arrowLength + directionX * arrowLength * 0.6,
+                arrow.baseX - arrow.directionY * arrowLength * 0.6,
+                arrow.baseY + arrow.directionX * arrowLength * 0.6,
             );
             context.closePath();
             const highlighted = link.source === state.selected || link.target === state.selected ||

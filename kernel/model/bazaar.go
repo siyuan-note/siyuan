@@ -247,26 +247,6 @@ func buildUpdatedPackages(installedPackages []*bazaar.Package, bazaarPackagesMap
 	return
 }
 
-func packageDirContainsFile(dirPath string) (bool, error) {
-	entries, err := os.ReadDir(dirPath)
-	if err != nil {
-		return false, err
-	}
-	for _, entry := range entries {
-		if !entry.IsDir() {
-			return true, nil
-		}
-		containsFile, readErr := packageDirContainsFile(filepath.Join(dirPath, entry.Name()))
-		if readErr != nil {
-			return false, readErr
-		}
-		if containsFile {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
 // GetInstalledPackageInfos 获取本地集市包信息，并返回路径相关字段供调用方复用
 func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installedPackageInfo, basePath, baseURLPathPrefix string, err error) {
 	var jsonFileName string
@@ -331,7 +311,7 @@ func GetInstalledPackageInfos(pkgType string) (installedPackageInfos []installed
 			}
 			reason := bazaar.PackageInvalidReasonInvalidManifest
 			if errors.Is(parseErr, os.ErrNotExist) {
-				containsFile, readErr := packageDirContainsFile(installPath)
+				containsFile, readErr := bazaar.PackageDirContainsFile(installPath)
 				if readErr == nil && !containsFile {
 					continue
 				}
@@ -638,11 +618,11 @@ func InstallLocalBazaarPackage(archivePath, frontend string, overwrite bool) (re
 
 	localBazaarInstallLock.Lock()
 	defer localBazaarInstallLock.Unlock()
-	_, statErr := os.Lstat(installPath)
+	containsFile, statErr := bazaar.PackageDirContainsFile(installPath)
 	if statErr != nil && !os.IsNotExist(statErr) {
 		return result, statErr
 	}
-	result.Updated = statErr == nil
+	result.Updated = containsFile
 	if result.Updated && !overwrite {
 		return result, ErrLocalBazaarPackageExists
 	}

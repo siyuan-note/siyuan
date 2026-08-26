@@ -5,8 +5,7 @@ import {
     hasTopClosestByClassName,
     isInEmbedBlock,
 } from "../../protyle/util/hasClosest";
-import {closeModel, closePanel} from "./closePanel";
-import {popMenu} from "../menu";
+import {closeModel, closePanel, showPanelMask} from "./closePanel";
 import {activeBlur, resetAndroidBoundedSelectionGesture} from "./keyboardToolbar";
 import {isChromeBrowser, isInAndroid, isInHarmony, isIPhone} from "../../protyle/util/compatibility";
 import {getRangeByPoint} from "../../protyle/util/selection";
@@ -18,14 +17,26 @@ import {
     hasVisibleSelectionText,
     shouldRestoreLongPressSelection,
 } from "./touchSelection";
-import {getTouchAxis, shouldEnterLongPressMultiSelect} from "./touchGesture";
+import {getTouchAxis, shouldStartLongPressMultiSelect} from "./touchGesture";
+import {getMobileBlockSelectionElement} from "./blockSelection";
+import {
+    getOpeningSidebar,
+    getOpenSidebarReleaseAction,
+    getSidebarClosingOffset,
+    getSidebarOpeningOffset,
+    type MobileSidebarSide,
+    type MobileSwipeDirection,
+    shouldCloseGlobalMenu,
+    shouldDragOpenSidebar,
+} from "./touchPanelGesture";
+import {logMobileInputEvent} from "./inputEventLogger";
 
 let clientX: number;
 let clientY: number;
 let xDiff: number;
 let yDiff: number;
 let time: number;
-let firstDirection: "toLeft" | "toRight";
+let firstDirection: MobileSwipeDirection;
 let firstXY: "x" | "y";
 let lastClientX: number;    // 和起始方向不一致时，记录最后一次的 clientX
 let scrollBlock: boolean;
@@ -35,12 +46,54 @@ let longPressTimer: number;
 let longPressBlockElement: HTMLElement;
 let longPressTouchRange: Range;
 
-const popSide = (render = true) => {
+const getSidebarElement = (side: MobileSidebarSide) => {
+    return document.getElementById(side === "left" ? "sidebar" : "sidebarRight");
+};
+
+const getTargetSidebar = (target: HTMLElement): MobileSidebarSide | undefined => {
+    if (hasClosestByAttribute(target, "id", "sidebar", true)) {
+        return "left";
+    }
+    if (hasClosestByAttribute(target, "id", "sidebarRight", true)) {
+        return "right";
+    }
+};
+
+const getSidebarDock = (sidebarElement: HTMLElement | null) => {
+    if (!sidebarElement) {
+        return;
+    }
+    const toolbarElement = sidebarElement.querySelector(".toolbar--border");
+    const tabElements = Array.from(toolbarElement?.querySelectorAll<HTMLElement>("[data-type]") || []);
+    const activeElement = tabElements.find(item =>
+        item.classList.contains("toolbar__icon--active") && !item.classList.contains("fn__none")) ||
+        tabElements.find(item => !item.classList.contains("fn__none"));
+    const type = activeElement?.dataset.type?.replace(/^sidebar-/, "").replace(/-tab$/, "");
+    if (toolbarElement && type) {
+        return {toolbarElement, type};
+    }
+};
+
+const popSidebar = (side: MobileSidebarSide, render = true) => {
+    activeBlur();
+    const sidebarElement = getSidebarElement(side);
+    if (!sidebarElement) {
+        return;
+    }
+    let dock: ReturnType<typeof getSidebarDock>;
     if (render) {
-        document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
-    } else {
-        activeBlur();
-        document.getElementById("sidebar").style.transform = "translateX(0px)";
+        dock = getSidebarDock(sidebarElement);
+        if (!dock) {
+            sidebarElement.style.removeProperty("transform");
+            closePanel();
+            return;
+        }
+    }
+    const otherSidebar = side === "left" ? "right" : "left";
+    getSidebarElement(otherSidebar)?.style.removeProperty("transform");
+    sidebarElement.style.transform = "translateX(0px)";
+    if (render) {
+        dock.toolbarElement.dispatchEvent(new CustomEvent("click", {detail: dock.type}));
     }
 };
 
@@ -129,6 +182,11 @@ export const handleTouchEnd = (event: TouchEvent) => {
         Math.abs(clientY - event.changedTouches[0].clientY) < Constants.SIZE_DRAG_THRESHOLD) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
             if (longPressTimer) {
+                logMobileInputEvent("touchend-cancel-multiselect", event, {
+                    duration: currentTime - time,
+                    xDiff: Math.abs(clientX - event.changedTouches[0].clientX),
+                    yDiff: Math.abs(clientY - event.changedTouches[0].clientY),
+                });
                 event.stopImmediatePropagation();
                 event.preventDefault();
                 return;
@@ -136,8 +194,9 @@ export const handleTouchEnd = (event: TouchEvent) => {
             // 多选模式
             window.getSelection()?.removeAllRanges();
             activeBlur();
-            const blockElement = hasClosestBlock(target);
-            if (blockElement) {
+            const touchedBlockElement = hasClosestBlock(target);
+            if (touchedBlockElement) {
+                const blockElement = getMobileBlockSelectionElement(touchedBlockElement as HTMLElement);
                 // 本次按压已在按住期间触发多选，松手时不切换选中态，仅消费该手势
                 blockElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
                     item.classList.remove("protyle-wysiwyg--select");
@@ -154,6 +213,11 @@ export const handleTouchEnd = (event: TouchEvent) => {
             }
         } else if (currentTime - time > Constants.TIMEOUT_LONGPRESS) {
             // 长按：多选已在按住满阈值时触发，此处取消定时器避免重复触发
+            logMobileInputEvent("touchend-cancel-longpress", event, {
+                duration: currentTime - time,
+                xDiff: Math.abs(clientX - event.changedTouches[0].clientX),
+                yDiff: Math.abs(clientY - event.changedTouches[0].clientY),
+            });
             if (isIPhone() && !isChromeBrowser() && !window.siyuan.touchDragActive) {
                 target.dispatchEvent(new MouseEvent("contextmenu", {
                     bubbles: true,
@@ -206,10 +270,11 @@ export const handleTouchEnd = (event: TouchEvent) => {
         return;
     }
     const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
+    const reversing = typeof lastClientX !== "undefined";
     const modelElement = hasClosestByAttribute(target, "id", "model", true);
     if (modelElement) {
         // 面板内横向滚动内容（如数据快照操作按钮行）时不触发关闭面板
-        if (!scrollBlock && isXScroll && firstDirection === "toRight" && !lastClientX &&
+        if (!scrollBlock && isXScroll && firstDirection === "toRight" && !reversing &&
             !hasClosestByClassName(target, "protyle-wysiwyg", true) &&
             // 划选文字时不触发关闭面板
             (getSelection().rangeCount === 0 || getSelection().toString() === "")) {
@@ -220,8 +285,21 @@ export const handleTouchEnd = (event: TouchEvent) => {
         return;
     }
 
+    const menuElement = hasClosestByAttribute(target, "id", "menu", true);
+    if (menuElement) {
+        if (!scrollBlock && isXScroll && shouldCloseGlobalMenu(firstDirection, reversing)) {
+            closePanel();
+        }
+        return;
+    }
+
+    const targetSidebar = getTargetSidebar(target);
     if (scrollBlock) {
-        closePanel();
+        if (targetSidebar) {
+            popSidebar(targetSidebar, false);
+        } else {
+            closePanel();
+        }
         return;
     }
 
@@ -232,45 +310,11 @@ export const handleTouchEnd = (event: TouchEvent) => {
         scrollEnable = true;
     }
 
-    const menuElement = hasClosestByAttribute(target, "id", "menu");
-    if (menuElement) {
-        if (isXScroll) {
-            if (firstDirection === "toRight") {
-                if (lastClientX) {
-                    popMenu();
-                } else {
-                    closePanel();
-                }
-            } else {
-                if (lastClientX) {
-                    closePanel();
-                } else {
-                    popMenu();
-                }
-            }
+    if (targetSidebar) {
+        if (isXScroll && getOpenSidebarReleaseAction(targetSidebar, firstDirection, reversing) === "close") {
+            closePanel();
         } else {
-            popMenu();
-        }
-        return;
-    }
-    const sideElement = hasClosestByAttribute(target, "id", "sidebar");
-    if (sideElement) {
-        if (isXScroll) {
-            if (firstDirection === "toLeft") {
-                if (lastClientX) {
-                    popSide(false);
-                } else {
-                    closePanel();
-                }
-            } else {
-                if (lastClientX) {
-                    closePanel();
-                } else {
-                    popSide(false);
-                }
-            }
-        } else {
-            popSide(false);
+            popSidebar(targetSidebar, false);
         }
         return;
     }
@@ -279,18 +323,10 @@ export const handleTouchEnd = (event: TouchEvent) => {
         return;
     }
 
-    if (xDiff > 0) {
-        if (lastClientX) {
-            closePanel();
-        } else {
-            popMenu();
-        }
+    if (reversing) {
+        closePanel();
     } else {
-        if (lastClientX) {
-            closePanel();
-        } else {
-            popSide();
-        }
+        popSidebar(getOpeningSidebar(firstDirection));
     }
 };
 
@@ -349,7 +385,13 @@ export const handleTouchStart = (event: TouchEvent) => {
     clearLongPress();
     if (clientX && clientY && editor && !editor.protyle.toolbar.isMultiSelectMode()) {
         const blockElement = hasClosestBlock(target);
-        if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement)) {
+        if (blockElement && editor.protyle.wysiwyg.element.contains(blockElement) &&
+            shouldStartLongPressMultiSelect(
+                target.tagName,
+                target.dataset.type,
+                !!hasClosestByAttribute(target, "data-type", "inline-math"),
+                target.tagName === "IMG" && !!hasClosestByClassName(target, "img"),
+            )) {
             longPressBlockElement = blockElement;
             const touchRange = getRangeByPoint(event.touches[0].clientX, event.touches[0].clientY);
             const touchRangeElement = touchRange.startContainer.nodeType === Node.ELEMENT_NODE ?
@@ -360,13 +402,6 @@ export const handleTouchStart = (event: TouchEvent) => {
                 longPressTouchRange.collapse(true);
             }
             longPressTimer = window.setTimeout(() => {
-                if (!shouldEnterLongPressMultiSelect(
-                    !window.siyuan.menus.menu.element.classList.contains("fn__none"),
-                    !editor.protyle.toolbar.subElement.classList.contains("fn__none"),
-                )) {
-                    longPressTimer = undefined;
-                    return;
-                }
                 clearInvisibleEditorSelection();
                 const selection = window.getSelection();
                 if (selection?.rangeCount > 0) {
@@ -379,9 +414,10 @@ export const handleTouchStart = (event: TouchEvent) => {
                     }
                 }
                 window.getSelection()?.removeAllRanges();
-                editor.protyle.toolbar.showMultiSelectMode(editor.protyle, blockElement);
+                const selectionBlockElement = getMobileBlockSelectionElement(blockElement as HTMLElement);
+                editor.protyle.toolbar.showMultiSelectMode(editor.protyle, selectionBlockElement);
                 if (editor.protyle.options.render.gutter) {
-                    editor.protyle.gutter.render(editor.protyle, blockElement, target);
+                    editor.protyle.gutter.render(editor.protyle, selectionBlockElement, target);
                 }
             }, Constants.TIMEOUT_MULTIPLE_SELECT);
         }
@@ -451,14 +487,16 @@ export const handleTouchMove = (event: TouchEvent) => {
         }
         firstDirection = xDiff > 0 ? "toLeft" : "toRight";
         if (firstXY === "x") {
-            if ((hasClosestByAttribute(target, "id", "menu") && firstDirection === "toLeft") ||
-                (hasClosestByAttribute(target, "id", "sidebar") && firstDirection === "toRight")) {
+            const targetSidebar = getTargetSidebar(target);
+            const menuElement = hasClosestByAttribute(target, "id", "menu", true);
+            if ((menuElement && !shouldCloseGlobalMenu(firstDirection, false)) ||
+                (targetSidebar && !shouldDragOpenSidebar(targetSidebar, firstDirection))) {
                 firstXY = "y";
                 yDiff = undefined;
             }
         }
     }
-    if (previousClientX) {
+    if (typeof previousClientX !== "undefined") {
         if (firstDirection === "toRight") {
             if (previousClientX > event.touches[0].clientX) {
                 lastClientX = event.touches[0].clientX;
@@ -482,7 +520,10 @@ export const handleTouchMove = (event: TouchEvent) => {
             }
             return;
         }
-        if (sideMaskElement.classList.contains("fn__none")) {
+        if (hasClosestByAttribute(target, "id", "menu", true)) {
+            return;
+        }
+        if (sideMaskElement.classList.contains("fn__none") || getTargetSidebar(target)) {
             let scrollElement = hasClosestByAttribute(target, "data-type", "NodeCodeBlock");
             if (event.touches.length > 1 || (scrollElement && !scrollElement.classList.contains("code-block"))) {
                 scrollBlock = true;
@@ -524,42 +565,31 @@ export const handleTouchMove = (event: TouchEvent) => {
         }
 
         if (isFirstMove) {
+            const openingSidebar = getOpeningSidebar(firstDirection);
+            if (!getTargetSidebar(target) && !getSidebarDock(getSidebarElement(openingSidebar))) {
+                scrollBlock = true;
+                return;
+            }
             sideMaskElement.style.zIndex = (++window.siyuan.zIndex).toString();
-            document.getElementById("sidebar").style.zIndex = (++window.siyuan.zIndex).toString();
-            document.getElementById("menu").style.zIndex = (++window.siyuan.zIndex).toString();
+            const activeSidebar = getTargetSidebar(target) || openingSidebar;
+            getSidebarElement(activeSidebar).style.zIndex = (++window.siyuan.zIndex).toString();
             isFirstMove = false;
         }
         const windowWidth = window.innerWidth;
-        const menuElement = hasClosestByAttribute(target, "id", "menu");
-        if (menuElement) {
-            if (xDiff < 0) {
-                menuElement.style.transform = `translateX(${-xDiff}px)`;
-                transformMask(-xDiff / windowWidth);
-            } else {
-                menuElement.style.transform = "translateX(0px)";
-                transformMask(0);
-            }
-            return;
-        }
-        const sideElement = hasClosestByAttribute(target, "id", "sidebar");
-        if (sideElement) {
-            if (xDiff > 0) {
-                sideElement.style.transform = `translateX(${-xDiff}px)`;
-                transformMask(xDiff / windowWidth);
-            } else {
-                sideElement.style.transform = "translateX(0px)";
-                transformMask(0);
-            }
+        const targetSidebar = getTargetSidebar(target);
+        if (targetSidebar) {
+            const offset = getSidebarClosingOffset(targetSidebar, xDiff, windowWidth);
+            getSidebarElement(targetSidebar).style.transform = `translateX(${offset}px)`;
+            transformMask(Math.abs(offset) / windowWidth);
             return;
         }
 
-        if (firstDirection === "toRight") {
-            document.getElementById("sidebar").style.transform = `translateX(${Math.min(-xDiff - windowWidth, 0)}px)`;
-            transformMask((windowWidth + xDiff) / windowWidth);
-        } else {
-            document.getElementById("menu").style.transform = `translateX(${Math.max(windowWidth - xDiff, 0)}px)`;
-            transformMask((windowWidth - xDiff) / windowWidth);
-        }
+        const openingSidebar = getOpeningSidebar(firstDirection);
+        const otherSidebar = openingSidebar === "left" ? "right" : "left";
+        getSidebarElement(otherSidebar)?.style.removeProperty("transform");
+        const offset = getSidebarOpeningOffset(openingSidebar, xDiff, windowWidth);
+        getSidebarElement(openingSidebar).style.transform = `translateX(${offset}px)`;
+        transformMask(Math.abs(offset) / windowWidth);
         activeBlur();
         if (window.siyuan.mobile.editor) {
             window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
@@ -567,7 +597,7 @@ export const handleTouchMove = (event: TouchEvent) => {
     }
 };
 
-const transformMask = (opacity: number) => {
-    sideMaskElement.classList.remove("fn__none");
-    sideMaskElement.style.opacity = Math.min((1 - opacity), 0.68).toString();
+const transformMask = (closedRatio: number) => {
+    const maskElement = showPanelMask();
+    maskElement.style.opacity = Math.min(Math.max(1 - closedRatio, 0), 0.68).toString();
 };

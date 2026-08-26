@@ -1630,6 +1630,8 @@ Note: To ensure data security, access to this interface is prohibited in Publish
         * `hex`
 
       `text` preserves the existing behavior and converts the character set to UTF-8 when applicable. The binary encodings encode the response body before character-set conversion; existing HTTP content decoding behavior, such as gzip decompression, is unchanged.
+
+      The response body is limited to 32 MiB after HTTP content decoding. If the limit is exceeded, the API returns error code `10` without a partial body. Use `/api/network/proxy` for large files or streaming responses.
 * Return value
 
   ```json

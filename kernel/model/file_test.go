@@ -24,6 +24,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -374,6 +375,38 @@ func TestValidateCreateDocDoesNotWrite(t *testing.T) {
 	crossBoxPath := path.Join(strings.TrimSuffix(fixture.targetPath, ".sy"), newID+".sy")
 	if err := ValidateCreateDoc(otherBox.ID, crossBoxPath, "Cross notebook"); !errors.Is(err, ErrBlockNotFound) {
 		t.Fatalf("expected cross-notebook parent to return ErrBlockNotFound, got [%v]", err)
+	}
+}
+
+func TestCreateDocByMdConvertsHTMLTagsToTextMarks(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	docID := "20260718000003-abcdefg"
+	docPath := "/" + docID + ".sy"
+	tree, err := CreateDocByMd(fixture.box.ID, docPath, "HTML text marks", "<kbd>Ctrl</kbd> <u>text</u>", nil, nil)
+	if nil != err {
+		t.Fatalf("create document from Markdown failed: %v", err)
+	}
+	t.Cleanup(func() {
+		cache.RemoveTreeData(tree.ID)
+		cache.RemoveDocIAL(tree.Path)
+	})
+
+	foundKbd := false
+	foundUnderline := false
+	ast.Walk(tree.Root, func(node *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeTextMark != node.Type {
+			return ast.WalkContinue
+		}
+		if "kbd" == node.TextMarkType && strings.Contains(node.TextMarkTextContent, "Ctrl") {
+			foundKbd = true
+		}
+		if "u" == node.TextMarkType && strings.Contains(node.TextMarkTextContent, "text") {
+			foundUnderline = true
+		}
+		return ast.WalkContinue
+	})
+	if !foundKbd || !foundUnderline {
+		t.Fatalf("HTML tags were not converted to text marks: kbd=%t, underline=%t", foundKbd, foundUnderline)
 	}
 }
 

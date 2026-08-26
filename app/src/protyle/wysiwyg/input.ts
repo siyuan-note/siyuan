@@ -185,7 +185,14 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         hideElements(["util"], protyle, true);
         const tempElement = document.createElement("template");
         tempElement.innerHTML = html;
-        const renderedTitleElement = tempElement.content.firstElementChild.querySelector(".callout-title");
+        const renderedCalloutElement = tempElement.content.firstElementChild as HTMLElement;
+        const renderedTitleElement = renderedCalloutElement.querySelector(".callout-title");
+        const calloutContentElement = blockElement.querySelector(":scope > .callout-content");
+        const renderedContentElement = renderedCalloutElement.querySelector(":scope > .callout-content");
+        if (calloutContentElement && renderedContentElement) {
+            renderedContentElement.replaceWith(calloutContentElement.cloneNode(true));
+            html = renderedCalloutElement.outerHTML;
+        }
         if (needRender && renderedTitleElement?.innerHTML !== editElement.innerHTML) {
             blockElement.insertAdjacentHTML("afterend", html);
             blockElement = blockElement.nextElementSibling as HTMLElement;

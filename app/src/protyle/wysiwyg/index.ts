@@ -4936,7 +4936,14 @@ export class WYSIWYG {
                 let newRange = getEditorRange(this.element);
                 const calloutElement = ["callout", "callout-info", "callout-content"].some(className =>
                     event.target.classList.contains(className)) ? hasClosestBlock(event.target) : false;
-                if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutElement) {
+                const calloutInfoElement = event.target.classList.contains("callout-info") ? event.target : undefined;
+                if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutInfoElement) {
+                    const calloutTitleElement = calloutInfoElement.querySelector<HTMLElement>(".callout-title");
+                    if (calloutTitleElement) {
+                        const titleLength = calloutTitleElement.textContent.length;
+                        newRange = focusByOffset(calloutTitleElement, titleLength, titleLength) || newRange;
+                    }
+                } else if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutElement) {
                     // 提示块结构区域不可编辑，点击后将光标定位到首个可编辑子块
                     // https://github.com/siyuan-note/siyuan/issues/16310
                     newRange = focusBlock(calloutElement) || newRange;

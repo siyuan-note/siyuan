@@ -411,7 +411,7 @@ describe("asset upload plugin event", () => {
         assert.equal(signal.aborted, true);
     });
 
-    it("aborts the upload phase when the editor is destroyed", async () => {
+    it("does not abort a standard upload after its transport starts", async () => {
         const currentProtyle = {} as IProtyle;
         const prepared = await prepareAssetUpload({
             plugins: [],
@@ -421,6 +421,23 @@ describe("asset upload plugin event", () => {
         });
         assert.equal(prepared.state, "ready");
         prepared.task.startUpload();
+
+        cancelAssetUploads(currentProtyle);
+
+        assert.equal(prepared.task.signal.aborted, false);
+        prepared.task.complete({status: "canceled"});
+    });
+
+    it("aborts a custom upload handler when the editor is destroyed", async () => {
+        const currentProtyle = {} as IProtyle;
+        const prepared = await prepareAssetUpload({
+            plugins: [],
+            protyle: currentProtyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+        assert.equal(prepared.state, "ready");
+        prepared.task.startUpload(true);
 
         cancelAssetUploads(currentProtyle);
 

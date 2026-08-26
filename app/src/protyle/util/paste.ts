@@ -20,7 +20,11 @@ import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
 import {base64ToURL} from "../upload/base64";
 import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets} from "../upload/htmlLocalAssets";
-import {applyHTMLEmbeddedAssetPaths, collectHTMLEmbeddedAssets} from "../upload/htmlEmbeddedAssets";
+import {
+    applyHTMLEmbeddedAssetPaths,
+    collectHTMLEmbeddedAssets,
+    hasHTMLEmbeddedAssets,
+} from "../upload/htmlEmbeddedAssets";
 import {getAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
@@ -1052,6 +1056,34 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 return;
             }
             const localAssets = collectHTMLLocalAssets(tempElement);
+            const conversionContext = {
+                text: textPlain,
+                mathML,
+                office,
+                officeMathHTML,
+                wps,
+            };
+            if (localAssets.length > 0 || hasHTMLEmbeddedAssets(tempElement)) {
+                let preflightResponse: IWebSocketData;
+                try {
+                    preflightResponse = await fetchSyncPost("/api/lute/html2BlockDOM", {
+                        ...conversionContext,
+                        dom: tempElement.innerHTML,
+                        preflight: true,
+                    });
+                } catch (error) {
+                    return;
+                }
+                const preflight = preflightResponse?.data as {converted?: unknown, dom?: unknown, useHTML?: unknown};
+                if (preflightResponse?.code !== 0 || preflight?.converted !== true ||
+                    typeof preflight.useHTML !== "boolean" || typeof preflight.dom !== "string") {
+                    return;
+                }
+                if (!preflight.useHTML) {
+                    insertConvertedBlockDOM(protyle, preflight.dom);
+                    return;
+                }
+            }
             if (localAssets.length > 0) {
                 await new Promise<void>(resolve => {
                     uploadLocalFiles(localAssets.map(item => ({path: item.path, size: null})), protyle, true, {
@@ -1064,7 +1096,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }, () => resolve());
                 });
             }
-            const embeddedAssets = collectHTMLEmbeddedAssets(tempElement);
+            const embeddedAssets = collectHTMLEmbeddedAssets(tempElement, protyle.options.upload.max);
             if (embeddedAssets.length > 0) {
                 await new Promise<void>(resolve => {
                     uploadFiles(protyle, embeddedAssets.map(item => item.file), undefined, (_response, result) => {
@@ -1077,12 +1109,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 });
             }
             fetchPost("/api/lute/html2BlockDOM", {
+                ...conversionContext,
                 dom: tempElement.innerHTML,
-                text: textPlain,
-                mathML,
-                office,
-                officeMathHTML,
-                wps,
                 skipLocalAssets: localAssets.length > 0,
                 skipBase64Assets: true,
                 skipInlineSVGAssets: true,

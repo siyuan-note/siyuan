@@ -7,7 +7,7 @@ export const base64ToURL = async (base64SrcList: string[], protyle: IProtyle,
     const files: File[] = [];
     const fileSourceIndices: number[] = [];
     base64SrcList.forEach((item, sourceIndex) => {
-        const file = createBase64ImageFile(item, `base64image-${Lute.NewNodeID()}`);
+        const file = createBase64ImageFile(item, `base64image-${Lute.NewNodeID()}`, protyle.options.upload.max);
         if (!file) {
             return;
         }

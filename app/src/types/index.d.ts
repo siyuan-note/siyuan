@@ -406,6 +406,7 @@ type IAssetUploadInput = {
 
 type IAssetUploadDecision = {
     action: "replace",
+    /** 必须保持各项的逻辑顺序；需要逐项回填的上传会按下标关联原资源。 */
     input: IAssetUploadInput
 } | {
     action: "cancel"
@@ -455,14 +456,17 @@ interface IBeforeUploadAssetsDetail {
     source: TAssetUploadSource,
     target: TAssetUploadTarget,
     position?: IAssetUploadPosition,
-    /** 替换输入必须保持的精确文件数量。 */
+    /** 替换输入必须保持的精确文件数量；各项还须与原输入按下标一一对应。 */
     requiredFileCount?: number,
     /** 当前目标支持的输入类型；未提供时支持 files 和 local-files。 */
     allowedInputKinds?: Array<IAssetUploadInput["kind"]>,
     input: IAssetUploadInput,
-    /** 插件处理的取消信号，编辑器销毁、插件卸载或处理超时时触发。 */
+    /**
+     * 插件处理阶段的取消信号；自定义 upload.handler 执行期间也会在编辑器销毁或超时时触发。
+     * 标准传输开始后不再因编辑器销毁触发。
+     */
     signal: AbortSignal,
-    /** 必须同步调用且每次事件只允许调用一次，异步处理应将 Promise 作为参数传入，每个插件默认 120 秒超时。 */
+    /** 必须同步调用且每次事件只允许调用一次；替换项须保持逻辑顺序，异步处理应传入 Promise，每个插件默认 120 秒超时。 */
     respondWith(response: IAssetUploadDecision | PromiseLike<IAssetUploadDecision>): void,
     /**
      * 必须同步注册，经思源前端上传协调层发起的资源写入成功、失败或取消时执行一次。

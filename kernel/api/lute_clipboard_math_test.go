@@ -56,6 +56,39 @@ func TestConvertClipboardMathWithRunner(t *testing.T) {
 	}
 }
 
+func TestResolveHTMLClipboardContentBeforeAssetProcessing(t *testing.T) {
+	mathML := `<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi></math>`
+	htmlWithImage := `<p>fallback</p><img src="data:image/png;base64,iVBORw0KGgo=">`
+	mathConverter := func(actualMathML, office, wps string) (string, bool) {
+		markdown, converted, err := convertClipboardMathWithRunner(actualMathML, office, wps,
+			func(from, to string, input []byte) ([]byte, error) {
+				if from != "html" || to != "json" || string(input) != mathML {
+					t.Fatalf("unexpected MathML input: from=%q to=%q input=%q", from, to, input)
+				}
+				return []byte(inlineMathPandocJSON), nil
+			})
+		if err != nil {
+			t.Fatal(err)
+		}
+		return markdown, converted
+	}
+	resolvedDOM, useHTML := resolveHTMLClipboardContent(util.NewLute(), htmlWithImage, mathML, "", "", "",
+		mathConverter, func(string) (string, bool) {
+			t.Fatal("Office HTML converter should not be called after MathML conversion")
+			return "", false
+		})
+	if useHTML || strings.Contains(resolvedDOM, "data:image") || !strings.Contains(resolvedDOM, "x+y") {
+		t.Fatalf("unexpected resolved DOM: useHTML=%v dom=%q", useHTML, resolvedDOM)
+	}
+
+	resolvedDOM, useHTML = resolveHTMLClipboardContent(util.NewLute(), htmlWithImage, "", "", "", "",
+		func(string, string, string) (string, bool) { return "", false },
+		func(string) (string, bool) { return "", false })
+	if !useHTML || resolvedDOM != htmlWithImage {
+		t.Fatalf("HTML fallback was not preserved: useHTML=%v dom=%q", useHTML, resolvedDOM)
+	}
+}
+
 func TestConvertClipboardMathMixedWPS(t *testing.T) {
 	wps := buildWPSClipboard(t, `<w:document xmlns:w="urn:w" xmlns:m="urn:m"><w:body><m:oMath/></w:body></w:document>`, "")
 	pandocJSON := `{"pandoc-api-version":[1,23,1,2],"meta":{},"blocks":[{"t":"Para","c":[{"t":"Str","c":"123"}]},{"t":"Para","c":[{"t":"Math","c":[{"t":"DisplayMath"},"\\frac{S}{N}"]}]},{"t":"Para","c":[{"t":"Str","c":"456"}]}]}`

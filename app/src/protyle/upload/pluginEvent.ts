@@ -14,7 +14,7 @@ export interface IAssetUploadTask {
     readonly signal: AbortSignal;
     input: IAssetUploadInput;
     abort(reason: Error): void;
-    startUpload(): void;
+    startUpload(cancelOnEditorDestroy?: boolean): void;
     complete(result: Omit<IAssetUploadResult, "requestId" | "input">): boolean;
 }
 
@@ -209,11 +209,14 @@ class AssetUploadTask implements IAssetUploadTask {
         this.waitingPlugins = [];
     }
 
-    public startUpload() {
+    public startUpload(cancelOnEditorDestroy = false) {
         if (this.uploadStarted || !this.protyle) {
             return;
         }
         this.uploadStarted = true;
+        if (!cancelOnEditorDestroy) {
+            return;
+        }
         let tasks = activeTasksByProtyle.get(this.protyle);
         if (!tasks) {
             tasks = new Set();

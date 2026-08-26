@@ -7,7 +7,18 @@ export interface IHTMLEmbeddedAsset {
 
 export const isHTMLBase64Image = (value: string) => /^data:image\/[^,]+;base64,/i.test(value.trim());
 
-export const collectHTMLEmbeddedAssets = (root: ParentNode) => {
+export const hasHTMLEmbeddedAssets = (root: ParentNode) => {
+    if (Array.from(root.querySelectorAll("pre")).some(element => element.hasAttributes() && element.querySelector("svg"))) {
+        return true;
+    }
+    return Array.from(root.querySelectorAll("[href], [src]")).some(element =>
+        ["href", "src"].some(attribute => {
+            const source = element.getAttribute(attribute);
+            return source ? isHTMLBase64Image(source) : false;
+        }));
+};
+
+export const collectHTMLEmbeddedAssets = (root: ParentNode, maxBytes?: number) => {
     const assets: IHTMLEmbeddedAsset[] = [];
     const svgBlocks = new Set<Element>();
     root.querySelectorAll("pre").forEach(element => {
@@ -39,7 +50,7 @@ export const collectHTMLEmbeddedAssets = (root: ParentNode) => {
             if (!source || !isHTMLBase64Image(source)) {
                 return;
             }
-            const file = createBase64ImageFile(source.trim(), `html-image-${assets.length}`);
+            const file = createBase64ImageFile(source.trim(), `html-image-${assets.length}`, maxBytes);
             if (!file) {
                 return;
             }

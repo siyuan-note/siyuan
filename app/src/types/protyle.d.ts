@@ -363,7 +363,7 @@ interface IUpload {
     /** 对服务端返回的数据进行转换，以满足内置的数据结构 */
     format?(files: File[], responseText: string): string;
 
-    /** 将上传的文件处理后再返回  */
+    /** 将上传的文件逐项处理后再返回；返回项必须保持原有逻辑顺序 */
     file?(files: File[]): File[];
 
     /** 图片地址上传后的回调  */

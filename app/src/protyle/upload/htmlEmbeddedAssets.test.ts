@@ -4,6 +4,7 @@ import {createBase64ImageFile} from "./base64File";
 import {
     applyHTMLEmbeddedAssetPaths,
     collectHTMLEmbeddedAssets,
+    hasHTMLEmbeddedAssets,
     type IHTMLEmbeddedAsset,
     isHTMLBase64Image,
 } from "./htmlEmbeddedAssets";
@@ -16,16 +17,48 @@ describe("HTML embedded assets", () => {
         assert.equal(isHTMLBase64Image("https://example.com/image.png"), false);
     });
 
-    it("creates image files using the declared content type", () => {
-        const file = createBase64ImageFile("data:image/jpeg;base64,YQ==", "image");
+    it("creates image files using the detected content type", () => {
+        const file = createBase64ImageFile("data:image/png;base64,/9j/2Q==", "image");
 
         assert.equal(file.name, "image.jpg");
         assert.equal(file.type, "image/jpeg");
-        assert.equal(file.size, 1);
+        assert.equal(file.size, 4);
+    });
+
+    it("supports raster signatures and encoded Base64 line breaks", () => {
+        const gif = createBase64ImageFile("data:image/png;base64,R0lGODlh", "gif");
+        const bmp = createBase64ImageFile("data:image/png;base64,Qk0=", "bmp");
+        const png = createBase64ImageFile("data:image/png;base64,iVBORw0K%0AGgo=", "png");
+
+        assert.equal(gif.name, "gif.gif");
+        assert.equal(gif.type, "image/gif");
+        assert.equal(bmp.name, "bmp.bmp");
+        assert.equal(bmp.type, "image/bmp");
+        assert.equal(png.name, "png.png");
+        assert.equal(png.type, "image/png");
+        assert.equal(createBase64ImageFile("data:image/png;base64,UklGRgAAAABXRUJQ", "webp")?.type, "image/webp");
+        assert.equal(createBase64ImageFile("data:image/png;base64,PHN2Zz48L3N2Zz4=", "svg")?.type, "image/svg+xml");
+    });
+
+    it("rejects unsupported and oversized Base64 images before decoding", () => {
+        assert.equal(createBase64ImageFile("data:image/png;base64,YQ==", "invalid"), undefined);
+        const originalAtob = globalThis.atob;
+        let decoded = false;
+        globalThis.atob = (value: string) => {
+            decoded = true;
+            return originalAtob(value);
+        };
+        try {
+            assert.equal(createBase64ImageFile("data:image/png;base64,iVBORw0KGgo=", "large", 7), undefined);
+        } finally {
+            globalThis.atob = originalAtob;
+        }
+        assert.equal(decoded, false);
+        assert.equal(createBase64ImageFile("data:image/png;base64,iVBORw0KGgo=", "image", 8)?.size, 8);
     });
 
     it("collects Base64 attributes and rewrites them after upload", () => {
-        const attributes = new Map([["src", "data:image/png;base64,YQ=="]]);
+        const attributes = new Map([["src", "data:image/png;base64,iVBORw0KGgo="]]);
         const element = {
             getAttribute(name: string) {
                 return attributes.get(name) || null;
@@ -45,6 +78,23 @@ describe("HTML embedded assets", () => {
 
         assert.equal(assets.length, 1);
         assert.equal(attributes.get("src"), "assets/image.png");
+    });
+
+    it("detects embedded assets without decoding them", () => {
+        const root = {
+            querySelectorAll(selector: string) {
+                if (selector === "pre") {
+                    return [];
+                }
+                return [{
+                    getAttribute(attribute: string) {
+                        return attribute === "src" ? "data:image/png;base64,not-decoded" : null;
+                    },
+                }];
+            },
+        } as unknown as ParentNode;
+
+        assert.equal(hasHTMLEmbeddedAssets(root), true);
     });
 
     it("collects inline SVG blocks and replaces them with uploaded images", () => {

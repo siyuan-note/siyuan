@@ -99,8 +99,11 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute, boxID string) (tree *parse
 func HTML2TreeWithOptions(htmlStr string, luteEngine *lute.Lute, boxID string,
 	options HTML2TreeOptions) (tree *parse.Tree, withMath bool) {
 	htmlStr = gulu.Str.RemovePUA(htmlStr)
-	assetDirPath := GetImportAssetsDir(boxID, "")
-	_ = os.MkdirAll(assetDirPath, 0755)
+	assetDirPath := ""
+	if !options.SkipBase64Assets || !options.SkipInlineSVGAssets {
+		assetDirPath = GetImportAssetsDir(boxID, "")
+		_ = os.MkdirAll(assetDirPath, 0755)
+	}
 	tree = luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {

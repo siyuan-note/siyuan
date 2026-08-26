@@ -663,7 +663,7 @@ const startPreparedAssetUpload = (prepared: Awaited<ReturnType<typeof prepareAss
         return;
     }
     try {
-        prepared.task.startUpload();
+        prepared.task.startUpload(prepared.task.input.kind === "files" && Boolean(protyle.options.upload.handler));
         if (prepared.task.input.files.length === 0) {
             finishUpload(prepared.task, callbacks, {status: "canceled"});
             return;

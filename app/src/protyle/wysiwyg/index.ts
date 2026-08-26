@@ -200,6 +200,7 @@ import {shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
 import {LargeListVirtualizer} from "./listVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {syncRootAttributes} from "../util/syncRootAttributes";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -345,6 +346,8 @@ export class WYSIWYG {
     public element: HTMLDivElement;
     public preventKeyup: boolean;
 
+    private protyle: IProtyle;
+    private rootCustomAttributes = new Set<string>();
     private preventClick: boolean;
     private preventInput: boolean;
     private copyAsRichText = false;
@@ -454,6 +457,7 @@ export class WYSIWYG {
     }
 
     constructor(protyle: IProtyle) {
+        this.protyle = protyle;
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
         this.element.setAttribute("spellcheck", "false");
@@ -486,6 +490,7 @@ export class WYSIWYG {
     }
 
     public renderCustom(ial: Record<string, string>) {
+        syncRootAttributes(this.protyle.element, this.rootCustomAttributes, ial, this.protyle.block.rootID);
         let isFullWidth = ial[Constants.CUSTOM_SY_FULLWIDTH];
         if (!isFullWidth) {
             isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";

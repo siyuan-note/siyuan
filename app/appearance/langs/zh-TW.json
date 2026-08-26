@@ -1,4 +1,6 @@
 {
+	"bootAppearance": "啟動頁外觀",
+	"bootAppearanceTip": "選擇已安裝外掛提供的啟動頁外觀，僅在重新啟動後套用於目前裝置",
 	"monospaceFont": "等寬字型",
 	"monospaceFontTip": "用於程式碼區塊、行內程式碼與程式碼區塊行號，未選擇任何字型時使用主題內建字型",
 	"manageColors": "管理顏色",

@@ -1,4 +1,6 @@
 {
+	"bootAppearance": "Aspetto della pagina di avvio",
+	"bootAppearanceTip": "Scegli un aspetto della pagina di avvio fornito da un plugin installato; si applica solo a questo dispositivo dopo il riavvio",
 	"monospaceFont": "Carattere monospaziato",
 	"monospaceFontTip": "Utilizzato per blocchi di codice, codice in linea e numeri di riga dei blocchi di codice; se non è selezionato alcun carattere, viene utilizzato quello del tema",
 	"manageColors": "Gestisci colori",

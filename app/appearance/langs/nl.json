@@ -1,4 +1,6 @@
 {
+	"bootAppearance": "Uiterlijk van de opstartpagina",
+	"bootAppearanceTip": "Kies een uiterlijk voor de opstartpagina dat door een geïnstalleerde plug-in wordt geleverd; dit geldt na opnieuw opstarten alleen voor dit apparaat",
 	"monospaceFont": "Monospacelettertype",
 	"monospaceFontTip": "Wordt gebruikt voor codeblokken, inlinecode en regelnummers van codeblokken; als er geen lettertype is geselecteerd, wordt het lettertype van het thema gebruikt",
 	"manageColors": "Kleuren beheren",

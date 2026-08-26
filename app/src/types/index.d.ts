@@ -1157,6 +1157,7 @@ interface IBazaarItem {
     kernels: string[];
     backends: string[];
     frontends: string[];
+    bootAppearances?: string[];
     keywords: string[];
     preferredDesc: string;
     preferredReadme: string;

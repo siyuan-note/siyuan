@@ -1,4 +1,6 @@
 {
+	"bootAppearance": "Tampilan halaman mulai",
+	"bootAppearanceTip": "Pilih tampilan halaman mulai yang disediakan oleh plugin terpasang; pilihan hanya berlaku di perangkat ini setelah dimulai ulang",
 	"monospaceFont": "Font monospace",
 	"monospaceFontTip": "Digunakan untuk blok kode, kode sebaris, dan nomor baris blok kode; jika tidak ada font yang dipilih, font bawaan tema akan digunakan",
 	"manageColors": "Kelola warna",

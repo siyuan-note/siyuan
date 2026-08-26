@@ -1,4 +1,6 @@
 {
+	"bootAppearance": "Aparência da tela de inicialização",
+	"bootAppearanceTip": "Escolha uma aparência da tela de inicialização fornecida por um plugin instalado; ela se aplica somente a este dispositivo após reiniciar",
 	"monospaceFont": "Fonte monoespaçada",
 	"monospaceFontTip": "Usada em blocos de código, código em linha e números de linha de blocos de código; quando nenhuma fonte é selecionada, a fonte do tema é usada",
 	"manageColors": "Gerenciar cores",

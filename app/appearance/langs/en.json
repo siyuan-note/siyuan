@@ -1,4 +1,6 @@
 {
+	"bootAppearance": "Startup appearance",
+	"bootAppearanceTip": "Choose a startup appearance provided by an installed plugin; it applies only to this device after restart",
 	"monospaceFont": "Monospace Font",
 	"monospaceFontTip": "Used for code blocks, inline code, and code block line numbers; when no font is selected, the theme's font is used",
 	"manageColors": "Manage colors",

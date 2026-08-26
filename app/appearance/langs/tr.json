@@ -1,4 +1,6 @@
 {
+	"bootAppearance": "Başlangıç sayfası görünümü",
+	"bootAppearanceTip": "Yüklü bir eklentinin sağladığı başlangıç sayfası görünümünü seçin; yeniden başlatıldıktan sonra yalnızca bu cihazda uygulanır",
 	"monospaceFont": "Eş aralıklı yazı tipi",
 	"monospaceFontTip": "Kod blokları, satır içi kod ve kod bloğu satır numaraları için kullanılır; hiçbir yazı tipi seçilmediğinde temanın yazı tipi kullanılır",
 	"manageColors": "Renkleri yönet",

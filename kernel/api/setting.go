@@ -786,6 +786,52 @@ func setAppearance(c *gin.Context) {
 	util.BroadcastByType("main", "setAppearance", 0, "", model.Conf.Appearance)
 }
 
+func getBootAppearances(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	appearances := model.GetBootAppearances()
+	selection := model.GetBootAppearanceSelection()
+	current := map[string]string{"provider": "", "appearance": ""}
+	if !util.SafeMode {
+		for _, appearance := range appearances {
+			if appearance.Provider == selection.Provider && appearance.Appearance == selection.Appearance {
+				current["provider"] = selection.Provider
+				current["appearance"] = selection.Appearance
+				break
+			}
+		}
+	}
+	ret.Data = map[string]any{
+		"appearances": appearances,
+		"current":     current,
+	}
+}
+
+func setBootAppearance(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var provider, appearance string
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("provider", &provider, false, false),
+		util.BindJsonArg("appearance", &appearance, false, false),
+	) {
+		return
+	}
+	selection, err := model.SetBootAppearance(provider, appearance)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = selection
+}
+
 func setEntryVisibility(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

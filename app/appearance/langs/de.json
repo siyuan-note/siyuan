@@ -1,4 +1,6 @@
 {
+	"bootAppearance": "Erscheinungsbild der Startseite",
+	"bootAppearanceTip": "Wählen Sie ein von einem installierten Plugin bereitgestelltes Erscheinungsbild der Startseite; es gilt nach dem Neustart nur für dieses Gerät",
 	"monospaceFont": "Festbreitenschrift",
 	"monospaceFontTip": "Wird für Codeblöcke, Inline-Code und Codeblock-Zeilennummern verwendet; wenn keine Schrift ausgewählt ist, wird die Schrift des Themes verwendet",
 	"manageColors": "Farben verwalten",

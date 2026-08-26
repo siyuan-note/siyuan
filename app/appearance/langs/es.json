@@ -1,4 +1,6 @@
 {
+	"bootAppearance": "Apariencia de la página de inicio",
+	"bootAppearanceTip": "Elige una apariencia de página de inicio proporcionada por un complemento instalado; solo se aplica a este dispositivo después de reiniciar",
 	"monospaceFont": "Fuente monoespaciada",
 	"monospaceFontTip": "Se utiliza para bloques de código, código en línea y números de línea de bloques de código; si no se selecciona ninguna fuente, se usa la fuente del tema",
 	"manageColors": "Gestionar colores",

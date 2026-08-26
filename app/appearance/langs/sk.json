@@ -1,4 +1,6 @@
 {
+	"bootAppearance": "Vzhľad úvodnej stránky",
+	"bootAppearanceTip": "Vyberte vzhľad úvodnej stránky poskytovaný nainštalovaným doplnkom; po reštarte sa použije iba na tomto zariadení",
 	"monospaceFont": "Písmo s pevnou šírkou",
 	"monospaceFontTip": "Používa sa pre bloky kódu, riadkový kód a čísla riadkov v blokoch kódu; ak nie je vybrané žiadne písmo, použije sa písmo témy",
 	"manageColors": "Spravovať farby",

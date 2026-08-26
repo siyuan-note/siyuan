@@ -229,7 +229,23 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
 
 export const renderPreview = (element: Element, id: string, query: string, queryMethod: number) => {
     fetchPost("/api/search/getAssetContent", {id, query, queryMethod}, (response) => {
-        element.innerHTML = `<p style="white-space: pre-wrap;">${response.data.assetContent.content}</p>`;
+        if (!response.data.assetContent) {
+            element.replaceChildren();
+            return;
+        }
+        const previewElement = document.createElement("p");
+        previewElement.style.whiteSpace = "pre-wrap";
+        // 仅保留 mark/br 白名单元素并移除属性,其余元素降级为文本节点,避免 innerHTML 注入执行脚本
+        const doc = new DOMParser().parseFromString(response.data.assetContent.content, "text/html");
+        doc.body.querySelectorAll("*").forEach((childElement) => {
+            if (["MARK", "BR"].includes(childElement.tagName)) {
+                Array.from(childElement.attributes).forEach((attribute) => childElement.removeAttribute(attribute.name));
+            } else {
+                childElement.replaceWith(...childElement.childNodes);
+            }
+        });
+        previewElement.append(...doc.body.childNodes);
+        element.replaceChildren(previewElement);
         const matchElement = element.querySelector("mark");
         if (matchElement) {
             matchElement.classList.add("mark--hl");

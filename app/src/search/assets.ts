@@ -1,6 +1,5 @@
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
-import {escapeAriaLabel} from "../util/escape";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !MOBILE
 import {genQueryHTML} from "./util";
@@ -9,6 +8,7 @@ import {MenuItem} from "../menus/Menu";
 import {Dialog} from "../dialog";
 import {addClearButton} from "../util/addClearButton";
 import {saveAssetKeyList} from "./toggleHistory";
+import {genAssetSearchResultItemHTML, IAssetSearchResultItem} from "./assetsResult";
 
 export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
     /// #if !MOBILE
@@ -193,21 +193,8 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
                 nextElement.setAttribute("disabled", "disabled");
             }
             let resultHTML = "";
-            response.data.assetContents.forEach((item: {
-                content: string
-                ext: string
-                id: string
-                path: string
-                name: string
-                hSize: string
-            }, index: number) => {
-                resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-id="${item.id}">
-<span class="ft__on-surface">${item.ext}</span>
-<span class="fn__space"></span>
-<span class="b3-list-item__text">${item.content}</span>
-<span class="b3-list-item__meta">${item.hSize}</span>
-<span class="b3-list-item__meta b3-list-item__meta--ellipsis ariaLabel" aria-label="${escapeAriaLabel(item.path)}">${item.name}</span>
-</div>`;
+            response.data.assetContents.forEach((item: IAssetSearchResultItem, index: number) => {
+                resultHTML += genAssetSearchResultItemHTML(item, index);
             });
             const previewElement = element.querySelector("#searchAssetPreview");
             if (response.data.assetContents.length > 0) {

@@ -18,6 +18,7 @@ import {isEncryptedBox} from "../util/pathName";
 import {bindMobileBarsScroll, pauseMobileBarsScroll} from "./util/mobileBars";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {logMobileInputEvent} from "./util/inputEventLogger";
+import {restoreMobileTopBarLayout, updateMobileTopBarLayout} from "./util/mobileTopBar";
 
 export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -75,6 +76,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             return;
         }
         completed = true;
+        updateMobileTopBarLayout();
         logMobileInputEvent("document-load-complete", undefined, logDetails);
         bindMobileBarsScroll(protyle.contentElement);
         afterOpen?.(protyle);
@@ -287,6 +289,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             }
         } else {
             try {
+                restoreMobileTopBarLayout();
                 window.siyuan.mobile.editor = new Protyle(app, document.getElementById("editor"), protyleOptions);
             } catch (error) {
                 console.error(error);

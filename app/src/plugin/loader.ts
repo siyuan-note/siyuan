@@ -91,6 +91,7 @@ const getLifecycleManager = (app: App) => {
         init: (plugin) => plugin.kernel.init(),
         onLayoutReady: (plugin) => plugin.onLayoutReady(),
         mount: (plugin) => mountPlugin(plugin),
+        shouldReloadOnDataChange: (plugin) => plugin.onDataChanged === Plugin.prototype.onDataChanged,
         onDataChanged: (plugin) => plugin.onDataChanged(),
         onunload: (plugin) => plugin.onunload(),
         uninstall: (plugin) => plugin.uninstall(),
@@ -321,23 +322,14 @@ export const reloadPlugin = async (app: App, data: {
         !uninstallNames.has(name) && !unloadNames.has(name)));
     const dataChangeNames = new Set((data.dataChangePlugins || []).filter(name =>
         !uninstallNames.has(name) && !unloadNames.has(name) && !reloadNames.has(name)));
-    const defaultReloadNames = new Set<string>();
-    dataChangeNames.forEach(name => {
-        const plugin = manager.getInstance(name);
-        if (plugin && plugin.onDataChanged === Plugin.prototype.onDataChanged) {
-            defaultReloadNames.add(name);
-        }
-    });
-    defaultReloadNames.forEach(name => dataChangeNames.delete(name));
     const loadPluginData = createPluginDataLoader();
     const tasks: Promise<void>[] = [];
     uninstallNames.forEach(name => tasks.push(manager.requestUninstall(name)));
     unloadNames.forEach(name => tasks.push(manager.requestUnload(name)));
     reloadNames.forEach(name => tasks.push(manager.requestReload(name, () => loadPluginData(name))));
-    defaultReloadNames.forEach(name => tasks.push(manager.requestReload(name, () => loadPluginData(name))));
-    dataChangeNames.forEach(name => tasks.push(manager.requestDataChange(name)));
+    dataChangeNames.forEach(name => tasks.push(manager.requestDataChange(name, () => loadPluginData(name))));
     await Promise.all(tasks);
-    if (reloadNames.size > 0 || defaultReloadNames.size > 0) {
+    if (reloadNames.size > 0 || dataChangeNames.size > 0) {
         getAllEditor().forEach(editor => {
             editor.protyle.toolbar.update(editor.protyle);
         });

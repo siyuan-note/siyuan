@@ -27,7 +27,8 @@ export interface IPluginLifecycleAdapter<TData, TPlugin> {
     init(plugin: TPlugin): Promise<void> | void;
     onLayoutReady(plugin: TPlugin): Promise<void> | void;
     mount(plugin: TPlugin): void;
-    onDataChanged(plugin: TPlugin): void;
+    shouldReloadOnDataChange(plugin: TPlugin): boolean;
+    onDataChanged(plugin: TPlugin): Promise<void> | void;
     onunload(plugin: TPlugin): Promise<void> | void;
     uninstall(plugin: TPlugin): Promise<void> | void;
     markDisposed(plugin: TPlugin): void;
@@ -169,7 +170,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         return this.enqueueStructural(this.getRecord(name), "uninstall");
     }
 
-    public requestDataChange(name: string) {
+    public requestDataChange(name: string, dataProvider: () => Promise<TData | undefined>) {
         const record = this.getRecord(name);
         const finalStructuralKind = this.getFinalStructuralKind(record);
         if (finalStructuralKind === "unload" || finalStructuralKind === "uninstall" ||
@@ -183,6 +184,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         return this.enqueue(record, {
             kind: "dataChange",
             sequence: 0,
+            dataProvider,
             waiters: [],
         });
     }
@@ -196,11 +198,16 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         this.records.forEach((record) => {
             if (record.instance && record.state === "loaded" &&
                 !record.tasks.some((task) => task.kind === "layout")) {
-                tasks.push(this.enqueue(record, {
+                const pendingDataChange = this.takePendingDataChange(record);
+                const task = this.enqueue(record, {
                     kind: "layout",
                     sequence: 0,
                     waiters: [],
-                }));
+                });
+                if (pendingDataChange) {
+                    record.tasks.push(pendingDataChange);
+                }
+                tasks.push(task);
             }
         });
         return Promise.all(tasks).then(() => undefined);
@@ -263,7 +270,8 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     }
 
     private schedule(record: IPluginLifecycleRecord<TData, TPlugin>) {
-        if (!this.started || record.processing || record.tasks.length === 0) {
+        if (!this.started || record.processing || record.tasks.length === 0 ||
+            this.isDataChangeWaitingForReady(record)) {
             return;
         }
         record.processing = true;
@@ -273,6 +281,9 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
     private async process(record: IPluginLifecycleRecord<TData, TPlugin>) {
         try {
             while (record.tasks.length > 0) {
+                if (this.isDataChangeWaitingForReady(record)) {
+                    break;
+                }
                 const task = record.tasks.shift()!;
                 record.currentTask = task;
                 try {
@@ -310,7 +321,7 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
                 await this.runLayout(record);
                 break;
             case "dataChange":
-                this.runDataChange(record);
+                await this.runDataChange(record, task);
                 break;
         }
     }
@@ -408,19 +419,22 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
         record.state = "ready";
     }
 
-    private runDataChange(record: IPluginLifecycleRecord<TData, TPlugin>) {
-        if (!record.instance) {
+    private async runDataChange(record: IPluginLifecycleRecord<TData, TPlugin>, task: IPluginLifecycleTask<TData>) {
+        const plugin = record.instance;
+        if (!plugin || record.state !== "ready") {
             return;
         }
-        try {
-            const result = this.adapter.onDataChanged(record.instance) as unknown;
-            if (result && typeof (result as Promise<void>).then === "function") {
-                void Promise.resolve(result).catch((error) =>
-                    this.adapter.onError(record.name, "onDataChanged", error));
-            }
-        } catch (error) {
-            this.adapter.onError(record.name, "onDataChanged", error);
+        // 是否覆盖基类实现只能在 Ready 实例上判断；未覆盖时将当前任务原位提升为重载，并保留原有等待者。
+        if (this.adapter.shouldReloadOnDataChange(plugin)) {
+            task.kind = "reload";
+            task.sequence = ++this.sequence;
+            record.lastStructuralSequence = task.sequence;
+            record.latestStructuralKind = "reload";
+            this.signalRemoval(record, this.now() + this.teardownTimeout);
+            await this.runLoad(record, task, true);
+            return;
         }
+        await this.runInterruptibleHook(record, "onDataChanged", () => this.adapter.onDataChanged(plugin));
     }
 
     private async teardown(record: IPluginLifecycleRecord<TData, TPlugin>,
@@ -561,7 +575,8 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
 
     private signalRemoval(record: IPluginLifecycleRecord<TData, TPlugin>, deadline: number) {
         record.removalDeadline = Math.min(record.removalDeadline ?? Number.POSITIVE_INFINITY, deadline);
-        if (record.state !== "loading" && record.state !== "layouting") {
+        if (record.state !== "loading" && record.state !== "layouting" &&
+            record.currentTask?.kind !== "dataChange") {
             return;
         }
         if (!record.interrupt.resolved) {
@@ -631,6 +646,11 @@ export class PluginLifecycleCoordinator<TData, TPlugin> {
             return false;
         });
         return pending;
+    }
+
+    private isDataChangeWaitingForReady(record: IPluginLifecycleRecord<TData, TPlugin>) {
+        // 数据变更保留在队列中，待布局挂载完成，期间仍可由后续结构任务重排或丢弃。
+        return record.tasks[0]?.kind === "dataChange" && record.state !== "ready" && record.state !== "absent";
     }
 
     private isStructural(kind: TPluginLifecycleTaskKind): kind is TPluginStructuralTaskKind {

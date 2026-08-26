@@ -152,7 +152,7 @@ export class Plugin {
         // 卸载
     }
 
-    public onDataChanged() {
+    public onDataChanged(): Promise<void> | void {
         // 存储数据变更
     }
 

@@ -26,6 +26,7 @@ const deferred = <T>() => {
 };
 
 const nextTurn = () => new Promise<void>(resolve => setTimeout(resolve, 0));
+const getSampleData = (revision = 1) => async () => ({name: "sample", revision});
 
 const flushMicrotasks = async () => {
     for (let i = 0; i < 8; i++) {
@@ -85,6 +86,9 @@ const createHarness = (overrides: Partial<IPluginLifecycleAdapter<ITestPluginDat
         },
         mount(plugin) {
             events.push(`mount:${plugin.name}`);
+        },
+        shouldReloadOnDataChange() {
+            return false;
         },
         onDataChanged(plugin) {
             events.push(`data:${plugin.name}`);
@@ -689,17 +693,132 @@ describe("plugin lifecycle coordinator", () => {
             },
         });
         coordinator.start();
+        await coordinator.setLayoutReady();
         const loading = coordinator.requestLoad("sample", () => data.promise);
         await nextTurn();
 
-        const firstChange = coordinator.requestDataChange("sample");
-        const secondChange = coordinator.requestDataChange("sample");
+        const firstChange = coordinator.requestDataChange("sample", getSampleData());
+        const secondChange = coordinator.requestDataChange("sample", getSampleData());
         data.resolve({name: "sample", revision: 1});
         await Promise.all([loading, firstChange, secondChange]);
 
         assert.equal(events.filter(item => item === "data:sample:1").length, 1);
-        const initIndex = events.indexOf("init:sample");
-        assert.ok(initIndex >= 0 && initIndex < events.indexOf("data:sample:1"));
+        const mountIndex = events.indexOf("mount:sample");
+        assert.ok(mountIndex >= 0 && mountIndex < events.indexOf("data:sample:1"));
+    });
+
+    it("decides the default data-change reload after the pending instance reaches ready", async () => {
+        const data = deferred<ITestPluginData>();
+        const inspectedRevisions: number[] = [];
+        const {coordinator, events} = createHarness({
+            shouldReloadOnDataChange(plugin) {
+                inspectedRevisions.push(plugin.revision);
+                return true;
+            },
+        });
+        coordinator.start();
+        await coordinator.setLayoutReady();
+        const loading = coordinator.requestLoad("sample", () => data.promise);
+        await nextTurn();
+        const dataChange = coordinator.requestDataChange("sample", getSampleData(2));
+
+        data.resolve({name: "sample", revision: 1});
+        await Promise.all([loading, dataChange]);
+
+        assert.deepEqual(inspectedRevisions, [1]);
+        assert.deepEqual(events.filter((event) => event.startsWith("create:sample")), [
+            "create:sample:1",
+            "create:sample:2",
+        ]);
+        assert.equal(events.includes("data:sample"), false);
+        assert.equal(coordinator.getInstance("sample")?.revision, 2);
+        assert.equal(coordinator.getState("sample"), "ready");
+    });
+
+    it("holds data changes until layout mounting reaches ready", async () => {
+        const {coordinator, events} = createHarness();
+        coordinator.start();
+        await coordinator.requestLoad("sample", getSampleData());
+
+        let dataChangeCompleted = false;
+        const dataChange = coordinator.requestDataChange("sample", getSampleData()).then(() => {
+            dataChangeCompleted = true;
+        });
+        await flushMicrotasks();
+        assert.equal(coordinator.getState("sample"), "loaded");
+        assert.equal(events.includes("data:sample"), false);
+        assert.equal(dataChangeCompleted, false);
+
+        await coordinator.setLayoutReady();
+        await dataChange;
+
+        assert.deepEqual(events.filter((event) => [
+            "layout:sample",
+            "mount:sample",
+            "data:sample",
+        ].includes(event)), [
+            "layout:sample",
+            "mount:sample",
+            "data:sample",
+        ]);
+    });
+
+    it("waits for an active asynchronous data change before unloading", async () => {
+        const changed = deferred<void>();
+        const {coordinator, events} = createHarness({
+            onDataChanged(plugin) {
+                events.push(`data:${plugin.name}`);
+                return changed.promise;
+            },
+        }, 5000);
+        coordinator.start();
+        await coordinator.setLayoutReady();
+        await coordinator.requestLoad("sample", getSampleData());
+        const dataChange = coordinator.requestDataChange("sample", getSampleData());
+        await flushMicrotasks();
+
+        const unloading = coordinator.requestUnload("sample");
+        await flushMicrotasks();
+        assert.equal(events.includes("onunload:sample"), false);
+        changed.resolve();
+        await Promise.all([dataChange, unloading]);
+
+        assert.ok(events.indexOf("data:sample") < events.indexOf("onunload:sample"));
+    });
+
+    it("uses the removal deadline while waiting for an active data change", async () => {
+        const clock = new FakeClock();
+        const never = new Promise<void>(() => undefined);
+        const {coordinator, events} = createHarness({
+            onDataChanged(plugin) {
+                events.push(`data:${plugin.name}`);
+                return never;
+            },
+        }, 5000, {
+            now: () => clock.now,
+            setTimeout: clock.setTimeout,
+            clearTimeout: clock.clearTimeout,
+        });
+        coordinator.start();
+        await coordinator.setLayoutReady();
+        await coordinator.requestLoad("sample", getSampleData());
+        const dataChange = coordinator.requestDataChange("sample", getSampleData());
+        await flushMicrotasks();
+        const unloading = coordinator.requestUnload("sample");
+        await flushMicrotasks();
+
+        clock.advance(4999);
+        await flushMicrotasks();
+        assert.equal(events.includes("onunload:sample"), false);
+        clock.advance(1);
+        await flushMicrotasks();
+        await Promise.all([dataChange, unloading]);
+
+        assert.equal(clock.now, 5000);
+        assert.equal(events.includes("error:sample:onDataChanged"), true);
+        assert.equal(events.includes("onunload:sample"), true);
+        assert.equal(events.includes("error:sample:onunload"), false);
+        assert.equal(events.includes("dispose:sample:false"), true);
     });
 
     it("moves a pending data change behind a later reload", async () => {
@@ -709,9 +828,10 @@ describe("plugin lifecycle coordinator", () => {
             },
         });
         coordinator.start();
+        await coordinator.setLayoutReady();
         await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
 
-        const dataChange = coordinator.requestDataChange("sample");
+        const dataChange = coordinator.requestDataChange("sample", getSampleData());
         const reload = coordinator.requestReload("sample", async () => ({name: "sample", revision: 2}));
         await Promise.all([dataChange, reload]);
 
@@ -736,19 +856,20 @@ describe("plugin lifecycle coordinator", () => {
             },
         });
         coordinator.start();
+        await coordinator.setLayoutReady();
         await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
 
         const reload = coordinator.requestReload("sample", async () => ({name: "sample", revision: 2}));
         await nextTurn();
         assert.equal(coordinator.getState("sample"), "loading");
-        const firstChange = coordinator.requestDataChange("sample");
-        const secondChange = coordinator.requestDataChange("sample");
+        const firstChange = coordinator.requestDataChange("sample", getSampleData());
+        const secondChange = coordinator.requestDataChange("sample", getSampleData());
         loaded.resolve();
         await Promise.all([reload, firstChange, secondChange]);
 
         assert.equal(events.filter(item => item === "data:sample:2").length, 1);
-        const initIndex = events.indexOf("init:sample:2");
-        assert.ok(initIndex >= 0 && initIndex < events.indexOf("data:sample:2"));
+        const mountIndex = events.lastIndexOf("mount:sample");
+        assert.ok(mountIndex >= 0 && mountIndex < events.indexOf("data:sample:2"));
     });
 
     it("delivers data changes after a queued unload and load leave a new instance", async () => {
@@ -763,12 +884,13 @@ describe("plugin lifecycle coordinator", () => {
             },
         });
         coordinator.start();
+        await coordinator.setLayoutReady();
         await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
 
         const unloading = coordinator.requestUnload("sample");
         await nextTurn();
         const loading = coordinator.requestLoad("sample", async () => ({name: "sample", revision: 2}));
-        const dataChange = coordinator.requestDataChange("sample");
+        const dataChange = coordinator.requestDataChange("sample", getSampleData());
         unloaded.resolve();
         await Promise.all([unloading, loading, dataChange]);
 
@@ -780,7 +902,7 @@ describe("plugin lifecycle coordinator", () => {
         const {coordinator, events} = createHarness();
         coordinator.start();
         const loading = coordinator.requestLoad("sample", async () => undefined);
-        const dataChange = coordinator.requestDataChange("sample");
+        const dataChange = coordinator.requestDataChange("sample", getSampleData());
 
         await Promise.all([loading, dataChange]);
 
@@ -800,11 +922,25 @@ describe("plugin lifecycle coordinator", () => {
         await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
 
         const unloading = coordinator.requestUnload("sample");
-        await coordinator.requestDataChange("sample");
+        await coordinator.requestDataChange("sample", getSampleData());
         unloaded.resolve();
         await unloading;
 
         assert.equal(events.includes("data:sample"), false);
+    });
+
+    it("drops a queued data change before unload and resolves every waiter", async () => {
+        const {coordinator, events} = createHarness();
+        coordinator.start();
+        await coordinator.requestLoad("sample", getSampleData());
+
+        const firstChange = coordinator.requestDataChange("sample", getSampleData());
+        const secondChange = coordinator.requestDataChange("sample", getSampleData());
+        const unloading = coordinator.requestUnload("sample");
+        await Promise.all([firstChange, secondChange, unloading]);
+
+        assert.equal(events.includes("data:sample"), false);
+        assert.equal(events.includes("dispose:sample:false"), true);
     });
 
     it("drops a queued data change before uninstall and resolves every waiter", async () => {
@@ -812,8 +948,8 @@ describe("plugin lifecycle coordinator", () => {
         coordinator.start();
         await coordinator.requestLoad("sample", async () => ({name: "sample", revision: 1}));
 
-        const firstChange = coordinator.requestDataChange("sample");
-        const secondChange = coordinator.requestDataChange("sample");
+        const firstChange = coordinator.requestDataChange("sample", getSampleData());
+        const secondChange = coordinator.requestDataChange("sample", getSampleData());
         const uninstalling = coordinator.requestUninstall("sample");
         await Promise.all([firstChange, secondChange, uninstalling]);
 

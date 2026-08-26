@@ -106,7 +106,12 @@ func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType
 	// 安装状态
 	pkg.Installed = true
 	pkg.DisallowInstall = isBelowRequiredAppVersion(pkg)
-	pkg.RepoURL = pkg.URL
+	// 清单中的 URL 字段不可信，仅展示 http/https 链接，防止注入 javascript: 等伪协议
+	if util.IsNetworkIconURL(pkg.URL) {
+		pkg.RepoURL = pkg.URL
+	} else {
+		pkg.RepoURL = ""
+	}
 
 	// 安装信息
 	pkg.InstallTime, pkg.UpdateTime = getPackageTimes(pkgType, pkg.Name, installPath)

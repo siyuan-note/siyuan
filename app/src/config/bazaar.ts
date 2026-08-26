@@ -735,7 +735,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         const showDisable = item.installed && item.current && ["icons", "themes"].includes(bazaarType);
         return `<div data-name="${escapeAttr(item.name)}" data-package-type="${bazaarType}" data-package-source="bazaar" class="b3-card${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img">
-        <img src="${item.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/>
+        <img src="${escapeAttr(item.iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/>
     </div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
@@ -820,7 +820,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         const ratingKey = bazaar._getRatingKey(bazaarType, installed.name);
         const ratingLoaded = isBazaarPackageRatingLoaded("updated", bazaar._data.downloadedRatingKeys.has(ratingKey));
         return `<div class="b3-card" data-name="${escapeAttr(installed.name)}" data-package-type="${bazaarType}" data-package-source="updated">
-    <div class="b3-card__img"><img src="${installed.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
+    <div class="b3-card__img"><img src="${escapeAttr(installed.iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             ${escapeHtml(installed.preferredName)}
@@ -1069,7 +1069,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                     const available = bazaar._getUpdatedItem(bazaarType, bazaarItem.name)?.available;
                     const ratingKey = bazaar._getRatingKey(bazaarType, bazaarItem.name);
                     return `<div data-name="${escapeAttr(bazaarItem.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}">
-    <div class="b3-card__img"><img src="${bazaarItem.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
+    <div class="b3-card__img"><img src="${escapeAttr(bazaarItem.iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             ${escapeHtml(bazaarItem.preferredName)}
@@ -1262,11 +1262,11 @@ type="checkbox">
 <div class="fn__flex">
     <svg class="svg ft__on-surface"><use xlink:href="#iconStar"></use></svg>
     <span class="fn__space--small"></span>
-    <a href="${resourceData.repoURL}/stargazers" target="_blank" title="Stars">${formatCount(resourceData.stars)}</a>
+    <a href="${escapeAttr(resourceData.repoURL)}/stargazers" target="_blank" title="Stars">${formatCount(resourceData.stars)}</a>
     <span class="fn__space"></span>
     <svg class="svg ft__on-surface"><use xlink:href="#iconGitHubI"></use></svg>
     <span class="fn__space--small"></span>
-    <a href="${resourceData.repoURL}/issues" target="_blank" title="Open issues">${formatCount(resourceData.openIssues)}</a>
+    <a href="${escapeAttr(resourceData.repoURL)}/issues" target="_blank" title="Open issues">${formatCount(resourceData.openIssues)}</a>
     <span class="fn__space"></span>
     <svg class="svg ft__on-surface"><use xlink:href="#iconDownload"></use></svg>
     <span class="fn__space--small"></span>
@@ -1293,7 +1293,7 @@ type="checkbox">
         readmeElement.innerHTML = `${isMobile() ? backHeaderHTML : ""}<div class="item__body"><div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
     ${isMobile() ? "" : backHeaderHTML}
     <div class="fn__flex-1">
-        <img class="item__img" src="${displayData.iconURL}" loading="lazy" onerror="this.src='/stage/images/icon.png'">
+        <img class="item__img" src="${escapeAttr(displayData.iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'">
         <div>
             <span class="item__title">${escapeHtml(displayData.preferredName)}</span>
         </div>
@@ -1307,9 +1307,9 @@ type="checkbox">
             <section class="item__meta-section item__resources">
                 <div class="item__meta-title">${window.siyuan.languages.bazaarResources}</div>
                 <div class="fn__flex">
-                    <a href="${resourceData.repoURL}" target="_blank" title="${escapeAttr(resourceData.repoURL)}">GitHub</a>
+                    <a href="${escapeAttr(resourceData.repoURL)}" target="_blank" title="${escapeAttr(resourceData.repoURL)}">GitHub</a>
                     <span class="fn__space"></span>
-                    <a href="${resourceData.repoURL}/issues" target="_blank" title="Feedback via GitHub Issues" data-type="feedback">${window.siyuan.languages.feedback}</a>
+                    <a href="${escapeAttr(resourceData.repoURL)}/issues" target="_blank" title="Feedback via GitHub Issues" data-type="feedback">${window.siyuan.languages.feedback}</a>
                 </div>
                 ${resourceStats}
             </section>
@@ -1319,7 +1319,7 @@ type="checkbox">
     ${isMobile() ? "" : readmeActionsHTML}
 </div>
 <div class="item__main">
-    <div class="item__preview" data-preview-url="${escapeAttr(displayData.previewURL)}" style="background-image: url(${displayData.previewURL})"></div>
+    <div class="item__preview" data-preview-url="${escapeAttr(displayData.previewURL)}" style="background-image: url(${escapeAttr(displayData.previewURL)})"></div>
     <div class="b3-typography${displayData.preferredDesc ? "" : " fn__none"}">
         <blockquote>
             <p>

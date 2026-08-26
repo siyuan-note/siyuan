@@ -70,10 +70,30 @@ func GetBazaarPackagesMap(pkgType, frontend string) (packagesMap map[string]*Pac
 	return
 }
 
+// isValidStageRepoURL 判断 stage 仓库 URL（owner/repo@hash）是否仅包含安全字符，
+// 防止拼装图标、预览图等展示链接时混入恶意内容
+func isValidStageRepoURL(url string) bool {
+	parts := strings.Split(url, "@")
+	if 2 != len(parts) || !isValidBazaarRepo(parts[0]) {
+		return false
+	}
+	hash := parts[1]
+	if "" == hash || 64 < len(hash) {
+		return false
+	}
+	for _, char := range []byte(hash) {
+		if ('a' > char || char > 'z') && ('A' > char || char > 'Z') && ('0' > char || char > '9') &&
+			'-' != char && '_' != char && '.' != char {
+			return false
+		}
+	}
+	return true
+}
+
 // buildBazaarPackageWithMetadata 从 StageRepo 构建带有在线元数据的集市包。
 func buildBazaarPackageWithMetadata(repo *StageRepo, bazaarStats map[string]*bazaarStats,
 	bazaarRatings map[string]*PackageRating, ratingsAvailable bool, pkgType string, frontend string) *Package {
-	if nil == repo || nil == repo.Package {
+	if nil == repo || nil == repo.Package || !isValidStageRepoURL(repo.URL) {
 		return nil
 	}
 

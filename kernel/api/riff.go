@@ -426,6 +426,10 @@ func removeRiffDeck(c *gin.Context) {
 	}
 
 	deckID := arg["deckID"].(string)
+	if util.InvalidIDPattern(deckID, ret) {
+		return
+	}
+
 	err := model.RemoveDeck(deckID)
 	if err != nil {
 		ret.Code = -1

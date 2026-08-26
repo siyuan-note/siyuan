@@ -1213,6 +1213,11 @@ func RenameDeck(deckID, name string) (err error) {
 }
 
 func RemoveDeck(deckID string) (err error) {
+	if !ast.IsNodeIDPattern(deckID) {
+		err = errors.New("invalid deck ID")
+		return
+	}
+
 	deckLock.Lock()
 	defer deckLock.Unlock()
 

@@ -35,6 +35,11 @@ import {
     unregisterCustomFont
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
+import {
+    shouldShowBootAppearanceSetting,
+    type IBootAppearanceListItem,
+    type IBootAppearanceSelection,
+} from "./bootAppearanceState";
 /// #if MOBILE
 import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../mobile/util/mobileBottomBar";
 import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../mobile/util/mobileSidePanelSetting";
@@ -52,19 +57,9 @@ interface IFontItem {
     spacing?: string;
 }
 
-interface IBootAppearanceListItem {
-    provider: string;
-    appearance: string;
-    displayName: string;
-    frontends: string[];
-}
-
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];
-    current: {
-        provider: string;
-        appearance: string;
-    };
+    current: IBootAppearanceSelection;
 }
 
 type FontFamiliesConfigKey = "fontFamilies" | "codeFontFamilies";
@@ -569,7 +564,7 @@ const fontItemFromElement = (item: HTMLElement): IFontItem => ({
     spacing: item.dataset.spacing,
 });
 
-const genBootAppearanceHtml = () => `<label class="fn__flex b3-label config-item config-wrap">
+const genBootAppearanceHtml = () => `<label class="fn__flex b3-label config-item config-wrap fn__none">
     <div class="fn__flex-1 config-item__main">
         <div class="config-name">${escapeHtml(window.siyuan.languages.bootAppearance)}</div>
         <div class="b3-label__text">${escapeHtml(window.siyuan.languages.bootAppearanceTip)}</div>
@@ -585,23 +580,30 @@ const mountBootAppearance = async (root: HTMLElement) => {
     if (!selectElement) {
         return;
     }
+    const itemElement = selectElement.closest<HTMLElement>(".config-item");
     let response: IWebSocketData;
     try {
         response = await fetchSyncPost("/api/setting/getBootAppearances");
     } catch (error) {
         console.warn("get boot appearances failed", error);
+        itemElement?.classList.remove("fn__none");
         return;
     }
     const data = response.data as IBootAppearanceListData;
-    if (!data || !Array.isArray(data.appearances)) {
+    if (response.code !== 0 || !data || !Array.isArray(data.appearances)) {
+        itemElement?.classList.remove("fn__none");
         return;
     }
 
     const frontend = getFrontend() === "mobile" ? "mobile" : "desktop";
-    selectElement.replaceChildren(new Option(window.siyuan.languages.default, ""));
     const configuredValue = data.current?.provider && data.current?.appearance
         ? JSON.stringify([data.current.provider, data.current.appearance])
         : "";
+    if (!shouldShowBootAppearanceSetting(data.appearances, data.current, frontend)) {
+        return;
+    }
+
+    selectElement.replaceChildren(new Option(window.siyuan.languages.default, ""));
     const providerGroups = new Map<string, HTMLOptGroupElement>();
     data.appearances.forEach((item) => {
         const value = JSON.stringify([item.provider, item.appearance]);
@@ -625,6 +627,7 @@ const mountBootAppearance = async (root: HTMLElement) => {
         : "";
     let savedValue = selectElement.value;
     selectElement.disabled = window.siyuan.config.readonly;
+    itemElement?.classList.remove("fn__none");
     selectElement.addEventListener("change", async () => {
         const nextValue = selectElement.value;
         const [provider, appearance] = nextValue ? JSON.parse(nextValue) as [string, string] : ["", ""];

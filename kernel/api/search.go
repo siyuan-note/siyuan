@@ -554,6 +554,14 @@ func fullTextSearchBlock(c *gin.Context) {
 		return
 	}
 
+	// SQL mode is blocked in read-only mode, consistent with /api/query/sql
+	if method == 2 && util.ReadOnly {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(34)
+		ret.Data = map[string]any{"closeTimeout": 5000}
+		return
+	}
+
 	notebook, _ := arg["notebook"].(string)
 	if isEncryptedNotebookDeniedForPublish(c, notebook) {
 		ret.Data = map[string]any{

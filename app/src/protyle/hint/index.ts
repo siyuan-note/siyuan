@@ -249,7 +249,9 @@ export class Hint {
         const key = this.getKey(currentLineValue, textAfterCaret, protyle.options.hint.extend);
         if (typeof key === "undefined" ||
             hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "code") ||
-            hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "NodeCodeBlock")) {
+            hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "NodeCodeBlock") ||
+            (["/", "、"].includes(this.splitChar) &&
+                hasClosestByAttribute(protyle.toolbar.range.startContainer, "data-type", "tag"))) {
             this.element.classList.add("fn__none");
             clearTimeout(this.timeId);
             return;

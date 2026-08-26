@@ -1,6 +1,11 @@
 import {Constants} from "../../constants";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import type {IUploadInsertOptions} from "../upload";
+import {
+    createUploadInsertPosition,
+    getAvailableUploadInsertRange,
+    isUploadInsertPositionAvailable,
+} from "../upload/insertPosition";
 import {processPasteCode, processRender} from "./processCode";
 import {getLocalFiles, getTextSiyuanFromTextHTML, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
@@ -18,12 +23,14 @@ import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {fixAdjacentTags, getCalloutInfo, getContenteditableElement} from "../wysiwyg/getBlock";
 import {clearBlockElement} from "./clear";
 import {removeZWJ} from "./normalizeText";
-import {base64ToURL} from "../upload/base64";
+import {base64ToURL, showBase64ImageSizeLimit} from "../upload/base64";
 import {applyHTMLLocalAssetPaths, collectHTMLLocalAssets} from "../upload/htmlLocalAssets";
 import {
     applyHTMLEmbeddedAssetPaths,
     collectHTMLEmbeddedAssets,
     hasHTMLEmbeddedAssets,
+    type IHTMLEmbeddedAsset,
+    validateHTMLEmbeddedAssetSizes,
 } from "../upload/htmlEmbeddedAssets";
 import {getAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
@@ -297,23 +304,57 @@ const readLocalFile = async (protyle: IProtyle, localFiles: ILocalFiles[], optio
             if (!eventBusHas(plugin.eventBus, "paste")) {
                 continue;
             }
-            const response: { localFiles: ILocalFiles[] } = await new Promise((resolve) => {
+            const response = await new Promise<{ localFiles: ILocalFiles[] } | undefined |
+                typeof PASTE_PLUGIN_TIMED_OUT>((resolve, reject) => {
+                let settled = false;
+                const finish = (value: { localFiles: ILocalFiles[] } | undefined | typeof PASTE_PLUGIN_TIMED_OUT) => {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    clearTimeout(timeoutId);
+                    resolve(value);
+                };
+                const resolveResponse = (value: { localFiles: ILocalFiles[] } |
+                    PromiseLike<{ localFiles: ILocalFiles[] } | undefined> | undefined) => {
+                    void Promise.resolve(value).then(finish, error => {
+                        if (!settled) {
+                            settled = true;
+                            clearTimeout(timeoutId);
+                            reject(error);
+                        }
+                    });
+                };
+                const timeoutId = setTimeout(() => finish(PASTE_PLUGIN_TIMED_OUT), PASTE_PLUGIN_TIMEOUT);
                 const emitResult = plugin.eventBus.emit("paste", {
                     protyle,
-                    resolve,
+                    resolve: resolveResponse,
                     textHTML: "",
                     textPlain: "",
                     siyuanHTML: "",
                     localFiles
                 });
                 if (emitResult) {
-                    resolve(undefined);
+                    finish(undefined);
                 }
             });
+            if (options?.insertPosition &&
+                !isUploadInsertPositionAvailable(protyle.wysiwyg.element, options.insertPosition)) {
+                return;
+            }
+            if (response === PASTE_PLUGIN_TIMED_OUT) {
+                console.error(new Error(`Plugin ${plugin.name || `#${i + 1}`} paste processing timed out`));
+                showMessage(window.siyuan.languages.uploadError);
+                return;
+            }
             if (response?.localFiles) {
                 localFiles = response.localFiles;
             }
         }
+    }
+    if (options?.insertPosition &&
+        !isUploadInsertPositionAvailable(protyle.wysiwyg.element, options.insertPosition)) {
+        return;
     }
     uploadLocalFiles(localFiles, protyle, true, options);
 };
@@ -520,8 +561,9 @@ const pasteCrossBlockRange = (protyle: IProtyle, tempElement: HTMLElement, range
     return true;
 };
 
-const insertConvertedBlockDOM = (protyle: IProtyle, dom: string) => {
-    insertHTML(dom, protyle, false, false, true);
+const insertConvertedBlockDOM = (protyle: IProtyle, dom: string, range: Range) => {
+    protyle.toolbar.range = range;
+    insertHTML(dom, protyle, false, true, true);
     protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
         if (item.textContent === "") {
             fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
@@ -543,8 +585,20 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         event.stopPropagation();
         event.preventDefault();
     }
+    const pasteInsertPosition = uploadOptions?.insertPosition ||
+        createUploadInsertPosition(getEditorRange(protyle.wysiwyg.element));
+    const isPasteInsertPositionAvailable = () =>
+        isUploadInsertPositionAvailable(protyle.wysiwyg.element, pasteInsertPosition);
+    const restorePasteInsertRange = () => {
+        return getAvailableUploadInsertRange(protyle.wysiwyg.element, pasteInsertPosition);
+    };
+    const insertAtPasteRange = (html: string, range: Range, isBlock = false, insertByCursor = false) => {
+        protyle.toolbar.range = range;
+        insertHTML(html, protyle, isBlock, true, insertByCursor);
+    };
     const assetUploadOptions: IUploadInsertOptions = {
         ...uploadOptions,
+        insertPosition: pasteInsertPosition,
         source: uploadOptions?.source || ("dataTransfer" in event ? "drop" : "paste"),
         target: uploadOptions?.target || "editor",
         position: uploadOptions?.position || ("dataTransfer" in event ? {x: event.clientX, y: event.clientY} : undefined),
@@ -613,9 +667,15 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 text: textPlain,
             }),
         ]);
+        if (!isPasteInsertPositionAvailable()) {
+            return;
+        }
     }
     if (!siyuanHTML && !textHTML && !textPlain && !wpsPresentation && ("clipboardData" in event)) {
         const localFiles: ILocalFiles[] = await getLocalFiles();
+        if (!isPasteInsertPositionAvailable()) {
+            return;
+        }
         if (localFiles.length > 0) {
             readLocalFile(protyle, localFiles, assetUploadOptions);
             return;
@@ -706,6 +766,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
             });
 
+            if (!isPasteInsertPositionAvailable()) {
+                return;
+            }
+
             if (response === PASTE_PLUGIN_TIMED_OUT) {
                 console.error(new Error(`Plugin ${plugin.name || `#${i + 1}`} paste processing timed out`));
                 showMessage(window.siyuan.languages.uploadError);
@@ -747,8 +811,11 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     originalTextHTML = extractCrossBlockPasteContext(originalTextHTML).html;
 
 
+    let range = restorePasteInsertRange();
+    if (!range) {
+        return;
+    }
     let nodeElement = hasClosestBlock(event.target);
-    const range = getEditorRange(protyle.wysiwyg.element);
     if (!nodeElement) {
         nodeElement = hasClosestBlock(range.startContainer);
     }
@@ -767,42 +834,53 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
         // https://github.com/siyuan-note/siyuan/issues/13552
-        insertHTML(removeZWJ(textPlain).replace(/```/g, "\u200D```"), protyle);
+        insertAtPasteRange(removeZWJ(textPlain).replace(/```/g, "\u200D```"), range);
         return;
     } else if (siyuanHTML) {
         async function streamInsert(container: HTMLElement, bigHtmlString: string) {
             const iframe = document.createElement("iframe");
             iframe.style.display = "none";
             document.body.appendChild(iframe);
+            try {
+                const doc = iframe.contentWindow.document;
+                doc.open();
 
-            const doc = iframe.contentWindow.document;
-            doc.open();
+                const chunkSize = 102400;
+                let offset = 0;
+                while (offset < bigHtmlString.length) {
+                    const chunk = bigHtmlString.substring(offset, offset + chunkSize);
+                    doc.write(chunk);
+                    offset += chunkSize;
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                    if (!isPasteInsertPositionAvailable()) {
+                        return false;
+                    }
+                }
 
-            const chunkSize = 102400;
-            let offset = 0;
-            while (offset < bigHtmlString.length) {
-                const chunk = bigHtmlString.substring(offset, offset + chunkSize);
-                doc.write(chunk);
-                offset += chunkSize;
-                await new Promise(resolve => setTimeout(resolve, 0));
+                doc.close();
+
+                const fragment = document.createDocumentFragment();
+                while (doc.body.firstChild) {
+                    fragment.appendChild(doc.body.firstChild);
+                }
+
+                container.appendChild(fragment);
+                return true;
+            } finally {
+                iframe.remove();
             }
-
-            doc.close();
-
-            const fragment = document.createDocumentFragment();
-            while (doc.body.firstChild) {
-                fragment.appendChild(doc.body.firstChild);
-            }
-
-            container.appendChild(fragment);
-
-            document.body.removeChild(iframe);
         }
 
         // 编辑器内部粘贴
         const tempElement = document.createElement("div");
         if (1024 * 512 < siyuanHTML.length) {
-            await streamInsert(tempElement, siyuanHTML);
+            if (!await streamInsert(tempElement, siyuanHTML)) {
+                return;
+            }
+            range = restorePasteInsertRange();
+            if (!range) {
+                return;
+            }
         } else {
             tempElement.innerHTML = siyuanHTML;
         }
@@ -849,6 +927,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
 
             if (types.includes("block-ref")) {
+                protyle.toolbar.range = range;
                 const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",
                     color: `${linkElement.dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
@@ -859,6 +938,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 return;
             }
             if (types.includes("a")) {
+                protyle.toolbar.range = range;
                 protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
                     color: `${linkElement.dataset.href}${Constants.ZWSP}${range.toString()}`
@@ -878,6 +958,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 oldIds.push(e.getAttribute("data-node-id"));
             });
             const existResponse = await fetchSyncPost("/api/block/checkBlocksExist", {ids: oldIds});
+            range = restorePasteInsertRange();
+            if (!range) {
+                return;
+            }
             pastedBlockElements.forEach((e) => {
                 const originalId = e.getAttribute("data-node-id");
                 const isCutPaste = existResponse.data[originalId] === false; // 剪切来的（原块已删）
@@ -919,15 +1003,15 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             try {
                 const json = JSON.parse(tempInnerHTML);
                 if (json.length > 0 && json[0].length > 0 && json[0][0].id && json[0][0].type) {
-                    insertHTML(textPlain, protyle, isBlock);
+                    insertAtPasteRange(textPlain, range, isBlock);
                 } else {
-                    insertHTML(tempInnerHTML, protyle, isBlock);
+                    insertAtPasteRange(tempInnerHTML, range, isBlock);
                 }
             } catch (e) {
-                insertHTML(tempInnerHTML, protyle, isBlock);
+                insertAtPasteRange(tempInnerHTML, range, isBlock);
             }
         } else {
-            insertHTML(tempInnerHTML, protyle, isBlock, false, true);
+            insertAtPasteRange(tempInnerHTML, range, isBlock, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);
@@ -936,9 +1020,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     } else if (code) {
         if (!code.startsWith('<div data-type="NodeCodeBlock" class="code-block" data-node-id="')) {
             // 原有代码在行内元素中粘贴会嵌套
-            insertHTML(code, protyle);
+            insertAtPasteRange(code, range);
         } else {
-            insertHTML(code, protyle, true, false, true);
+            insertAtPasteRange(code, range, true, true);
             highlightRender(protyle.wysiwyg.element);
         }
         hideElements(["hint"], protyle);
@@ -954,9 +1038,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             } catch (e) {
                 // 内核不可用时继续使用剪贴板中的纯文本或图片
             }
+            range = restorePasteInsertRange();
+            if (!range) {
+                return;
+            }
             const result = response?.data as { converted?: unknown, dom?: unknown };
             if (response?.code === 0 && result?.converted === true && typeof result.dom === "string" && result.dom.trim() !== "") {
-                insertConvertedBlockDOM(protyle, result.dom);
+                insertConvertedBlockDOM(protyle, result.dom, range);
                 return;
             }
             const fallback = getWPSPresentationFallback(wpsPresentation.type, Boolean(files?.length));
@@ -1038,6 +1126,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
             if (linkElement) {
                 const selectText = range.toString();
+                protyle.toolbar.range = range;
                 const aElements = protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
                     color: `${linkElement.getAttribute("href")}${Constants.ZWSP}${selectText || linkElement.textContent}`
@@ -1052,10 +1141,11 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 return;
             }
             if (nodeElement.classList.contains("av") && tempElement.querySelector("table")) {
-                insertHTML(tempElement.innerHTML, protyle, false, false, true);
+                insertAtPasteRange(tempElement.innerHTML, range, false, true);
                 return;
             }
-            const localAssets = collectHTMLLocalAssets(tempElement);
+            let localAssets = collectHTMLLocalAssets(tempElement);
+            let preparedHTML = false;
             const conversionContext = {
                 text: textPlain,
                 mathML,
@@ -1064,25 +1154,58 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 wps,
             };
             if (localAssets.length > 0 || hasHTMLEmbeddedAssets(tempElement)) {
+                try {
+                    validateHTMLEmbeddedAssetSizes(tempElement, protyle.options.upload.max);
+                } catch (error) {
+                    if (showBase64ImageSizeLimit(error)) {
+                        return;
+                    }
+                    throw error;
+                }
                 let preflightResponse: IWebSocketData;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), PASTE_PLUGIN_TIMEOUT);
                 try {
                     preflightResponse = await fetchSyncPost("/api/lute/html2BlockDOM", {
                         ...conversionContext,
                         dom: tempElement.innerHTML,
                         preflight: true,
-                    });
+                    }, undefined, true, controller.signal);
                 } catch (error) {
+                    console.error(error);
+                    if (isPasteInsertPositionAvailable()) {
+                        showMessage(window.siyuan.languages.uploadError);
+                    }
+                    return;
+                } finally {
+                    clearTimeout(timeoutId);
+                }
+                range = restorePasteInsertRange();
+                if (!range) {
                     return;
                 }
-                const preflight = preflightResponse?.data as {converted?: unknown, dom?: unknown, useHTML?: unknown};
+                const preflight = preflightResponse?.data as {
+                    converted?: unknown,
+                    dom?: unknown,
+                    normalizedHTML?: unknown,
+                    useHTML?: unknown,
+                };
                 if (preflightResponse?.code !== 0 || preflight?.converted !== true ||
                     typeof preflight.useHTML !== "boolean" || typeof preflight.dom !== "string") {
+                    showMessage(window.siyuan.languages.uploadError);
                     return;
                 }
                 if (!preflight.useHTML) {
-                    insertConvertedBlockDOM(protyle, preflight.dom);
+                    insertConvertedBlockDOM(protyle, preflight.dom, range);
                     return;
                 }
+                if (typeof preflight.normalizedHTML !== "string") {
+                    showMessage(window.siyuan.languages.uploadError);
+                    return;
+                }
+                tempElement.innerHTML = preflight.normalizedHTML;
+                localAssets = collectHTMLLocalAssets(tempElement);
+                preparedHTML = true;
             }
             if (localAssets.length > 0) {
                 await new Promise<void>(resolve => {
@@ -1095,8 +1218,20 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                             getAssetUploadPathsByInput(localAssets.length, result));
                     }, () => resolve());
                 });
+                range = restorePasteInsertRange();
+                if (!range) {
+                    return;
+                }
             }
-            const embeddedAssets = collectHTMLEmbeddedAssets(tempElement, protyle.options.upload.max);
+            let embeddedAssets: IHTMLEmbeddedAsset[];
+            try {
+                embeddedAssets = collectHTMLEmbeddedAssets(tempElement, protyle.options.upload.max);
+            } catch (error) {
+                if (showBase64ImageSizeLimit(error)) {
+                    return;
+                }
+                throw error;
+            }
             if (embeddedAssets.length > 0) {
                 await new Promise<void>(resolve => {
                     uploadFiles(protyle, embeddedAssets.map(item => item.file), undefined, (_response, result) => {
@@ -1107,16 +1242,37 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                         requiredFileCount: embeddedAssets.length,
                     });
                 });
+                range = restorePasteInsertRange();
+                if (!range) {
+                    return;
+                }
             }
-            fetchPost("/api/lute/html2BlockDOM", {
-                ...conversionContext,
-                dom: tempElement.innerHTML,
-                skipLocalAssets: localAssets.length > 0,
-                skipBase64Assets: true,
-                skipInlineSVGAssets: true,
-            }, (response) => {
-                insertConvertedBlockDOM(protyle, response.data);
-            });
+            let conversionResponse: IWebSocketData;
+            try {
+                conversionResponse = await fetchSyncPost("/api/lute/html2BlockDOM", {
+                    ...conversionContext,
+                    dom: tempElement.innerHTML,
+                    preparedHTML,
+                    skipLocalAssets: localAssets.length > 0,
+                    skipBase64Assets: true,
+                    skipInlineSVGAssets: true,
+                });
+            } catch (error) {
+                console.error(error);
+                if (isPasteInsertPositionAvailable()) {
+                    showMessage(window.siyuan.languages.uploadError);
+                }
+                return;
+            }
+            range = restorePasteInsertRange();
+            if (!range) {
+                return;
+            }
+            if (conversionResponse?.code !== 0 || typeof conversionResponse?.data !== "string") {
+                showMessage(window.siyuan.languages.uploadError);
+                return;
+            }
+            insertConvertedBlockDOM(protyle, conversionResponse.data, range);
             return;
         } else if (files && files.length > 0) {
             uploadFiles(protyle, files, undefined, undefined, undefined, assetUploadOptions);
@@ -1125,6 +1281,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (range.toString() !== "") {
                 const firstLine = textPlain.split("\n")[0];
                 if (isDynamicRef(textPlain)) {
+                    protyle.toolbar.range = range;
                     const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
                         // range 不能 escape，否则 https://github.com/siyuan-note/siyuan/issues/8359
@@ -1135,6 +1292,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }
                     return;
                 } else if (isFileAnnotation(firstLine)) {
+                    protyle.toolbar.range = range;
                     protyle.toolbar.setInlineMark(protyle, "file-annotation-ref", "range", {
                         type: "file-annotation-ref",
                         color: firstLine.substring(2).replace(/ ".+">>$/, "")
@@ -1144,6 +1302,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     // https://github.com/siyuan-note/siyuan/issues/8475
                     const linkDest = resolveLinkDest(textPlain, protyle.lute);
                     if (linkDest) {
+                        protyle.toolbar.range = range;
                         protyle.toolbar.setInlineMark(protyle, "a", "range", {
                             type: "a",
                             color: linkDest
@@ -1172,7 +1331,19 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                         imageElements.push(item);
                     }
                 });
-                const base64SrcList = await base64ToURL(imgSrcList, protyle, assetUploadOptions);
+                let base64SrcList: Array<string | undefined>;
+                try {
+                    base64SrcList = await base64ToURL(imgSrcList, protyle, assetUploadOptions);
+                } catch (error) {
+                    if (showBase64ImageSizeLimit(error)) {
+                        return;
+                    }
+                    throw error;
+                }
+                range = restorePasteInsertRange();
+                if (!range) {
+                    return;
+                }
                 base64SrcList.forEach((item, index) => {
                     if (!item) {
                         return;
@@ -1183,7 +1354,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 });
                 textPlainDom = tempElement.innerHTML;
             }
-            insertHTML(textPlainDom, protyle, false, false, true);
+            insertAtPasteRange(textPlainDom, range, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);

@@ -1,12 +1,21 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {createBase64ImageFile} from "./base64File";
+import {
+    addBase64ImageBatchSize,
+    BASE64_IMAGE_BATCH_MAX_BYTES,
+    BASE64_IMAGE_ITEM_MAX_BYTES,
+    Base64ImageSizeLimitError,
+    assertBase64ImageItemSize,
+    createBase64ImageFile,
+    isBase64ImageSizeLimitError,
+} from "./base64File";
 import {
     applyHTMLEmbeddedAssetPaths,
     collectHTMLEmbeddedAssets,
     hasHTMLEmbeddedAssets,
     type IHTMLEmbeddedAsset,
     isHTMLBase64Image,
+    validateHTMLEmbeddedAssetSizes,
 } from "./htmlEmbeddedAssets";
 
 describe("HTML embedded assets", () => {
@@ -40,6 +49,14 @@ describe("HTML embedded assets", () => {
         assert.equal(createBase64ImageFile("data:image/png;base64,PHN2Zz48L3N2Zz4=", "svg")?.type, "image/svg+xml");
     });
 
+    it("recognizes SVG documents with comments and a doctype", () => {
+        const comment = "x".repeat(5000);
+        const svg = `<!--${comment}--><!DOCTYPE svg><svg xmlns="http://www.w3.org/2000/svg"></svg>`;
+        const source = `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+
+        assert.equal(createBase64ImageFile(source, "svg")?.type, "image/svg+xml");
+    });
+
     it("rejects unsupported and oversized Base64 images before decoding", () => {
         assert.equal(createBase64ImageFile("data:image/png;base64,YQ==", "invalid"), undefined);
         const originalAtob = globalThis.atob;
@@ -49,12 +66,83 @@ describe("HTML embedded assets", () => {
             return originalAtob(value);
         };
         try {
-            assert.equal(createBase64ImageFile("data:image/png;base64,iVBORw0KGgo=", "large", 7), undefined);
+            assert.throws(() => createBase64ImageFile("data:image/png;base64,iVBORw0KGgo=", "large", 7),
+                (error: unknown) => isBase64ImageSizeLimitError(error) && error.scope === "item" &&
+                    error.actualBytes === 8 && error.maxBytes === 7);
         } finally {
             globalThis.atob = originalAtob;
         }
         assert.equal(decoded, false);
         assert.equal(createBase64ImageFile("data:image/png;base64,iVBORw0KGgo=", "image", 8)?.size, 8);
+    });
+
+    it("rejects a Base64 batch that exceeds the hard limit", () => {
+        assert.throws(() => assertBase64ImageItemSize(BASE64_IMAGE_ITEM_MAX_BYTES + 1, Number.MAX_SAFE_INTEGER),
+            (error: unknown) => error instanceof Base64ImageSizeLimitError && error.scope === "item" &&
+                error.maxBytes === BASE64_IMAGE_ITEM_MAX_BYTES);
+        assert.equal(addBase64ImageBatchSize(BASE64_IMAGE_BATCH_MAX_BYTES - 1, 1), BASE64_IMAGE_BATCH_MAX_BYTES);
+        assert.throws(() => addBase64ImageBatchSize(BASE64_IMAGE_BATCH_MAX_BYTES, 1),
+            (error: unknown) => error instanceof Base64ImageSizeLimitError && error.scope === "batch" &&
+                error.actualBytes === BASE64_IMAGE_BATCH_MAX_BYTES + 1 &&
+                error.maxBytes === BASE64_IMAGE_BATCH_MAX_BYTES);
+    });
+
+    it("validates HTML Base64 sizes without decoding", () => {
+        const root = {
+            querySelectorAll(selector: string) {
+                if (selector === "pre") {
+                    return [];
+                }
+                return [{
+                    getAttribute(attribute: string) {
+                        return attribute === "src" ? "data:image/png;base64,iVBORw0KGgo=" : null;
+                    },
+                }];
+            },
+        } as unknown as ParentNode;
+        const originalAtob = globalThis.atob;
+        let decoded = false;
+        globalThis.atob = () => {
+            decoded = true;
+            return "";
+        };
+        try {
+            assert.throws(() => validateHTMLEmbeddedAssetSizes(root, 7), isBase64ImageSizeLimitError);
+        } finally {
+            globalThis.atob = originalAtob;
+        }
+        assert.equal(decoded, false);
+    });
+
+    it("validates the complete HTML Base64 batch before creating files", () => {
+        const sources = [
+            "data:image/png;base64,iVBORw0KGgo=",
+            "data:image/png;base64,iVBORw0KGgoAA",
+        ];
+        const root = {
+            querySelectorAll(selector: string) {
+                if (selector === "pre") {
+                    return [];
+                }
+                return sources.map(source => ({
+                    getAttribute(attribute: string) {
+                        return attribute === "src" ? source : null;
+                    },
+                }));
+            },
+        } as unknown as ParentNode;
+        const originalAtob = globalThis.atob;
+        let decoded = false;
+        globalThis.atob = () => {
+            decoded = true;
+            return "";
+        };
+        try {
+            assert.throws(() => collectHTMLEmbeddedAssets(root, 8), isBase64ImageSizeLimitError);
+        } finally {
+            globalThis.atob = originalAtob;
+        }
+        assert.equal(decoded, false);
     });
 
     it("collects Base64 attributes and rewrites them after upload", () => {

@@ -31,8 +31,12 @@ const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
     }
 };
 
-export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) => {
+export const beginPluginTeardown = (plugin: Plugin) => {
     runCleanup(plugin, "asset upload", () => cancelAssetUploadsByPlugin(plugin));
+};
+
+export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) => {
+    beginPluginTeardown(plugin);
     runCleanup(plugin, "kernel", () => plugin.kernel.destroy());
     runCleanup(plugin, "event bus", () => destroyEventBus(plugin.eventBus));
     if (isUninstall) {

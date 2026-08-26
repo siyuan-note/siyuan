@@ -85,6 +85,28 @@ describe("asset upload plugin event", () => {
         assert.notEqual(prepared.task.input.files, input.files);
     });
 
+    it("generates unique UUID request identifiers", async () => {
+        const plugin = createPlugin(() => undefined);
+        const first = await prepareAssetUpload({
+            plugins: [plugin],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+        const second = await prepareAssetUpload({
+            plugins: [plugin],
+            protyle,
+            input: {kind: "files", files: [createFile("b.png")]},
+            context,
+        });
+
+        assert.match(first.task.requestId, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+        assert.match(second.task.requestId, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+        assert.notEqual(first.task.requestId, second.task.requestId);
+        first.task.complete({status: "canceled"});
+        second.task.complete({status: "canceled"});
+    });
+
     it("isolates local file input from listener mutations", async () => {
         const originalFile: ILocalFiles = {path: "a.png", size: 1};
         const prepared = await prepareAssetUpload({
@@ -462,6 +484,25 @@ describe("asset upload plugin event", () => {
         const prepared = await pending;
         assert.equal(prepared.state, "canceled");
         assert.equal(signal.aborted, true);
+    });
+
+    it("does not dispatch new uploads after the plugin starts unloading", async () => {
+        let pluginCalled = false;
+        const plugin = createPlugin(() => {
+            pluginCalled = true;
+        });
+        cancelAssetUploadsByPlugin(plugin);
+
+        const prepared = await prepareAssetUpload({
+            plugins: [plugin],
+            protyle,
+            input: {kind: "files", files: [createFile("a.png")]},
+            context,
+        });
+
+        assert.equal(prepared.state, "ready");
+        assert.equal(pluginCalled, false);
+        prepared.task.complete({status: "canceled"});
     });
 
     it("cancels pending processing when a queued plugin is unloaded", async () => {

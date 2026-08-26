@@ -1,4 +1,9 @@
-import {createBase64ImageFile} from "./base64File";
+import {
+    addBase64ImageBatchSize,
+    assertBase64ImageItemSize,
+    createBase64ImageFile,
+    getBase64ImageDecodedSize,
+} from "./base64File";
 
 export interface IHTMLEmbeddedAsset {
     file: File;
@@ -18,18 +23,38 @@ export const hasHTMLEmbeddedAssets = (root: ParentNode) => {
         }));
 };
 
+const getInlineSVGBlocks = (root: ParentNode) => new Set(Array.from(root.querySelectorAll("pre")).filter(element =>
+    element.hasAttributes() && element.querySelector("svg")));
+
+export const validateHTMLEmbeddedAssetSizes = (root: ParentNode, maxBytes?: number) => {
+    const svgBlocks = getInlineSVGBlocks(root);
+    let totalBytes = 0;
+    root.querySelectorAll("[href], [src]").forEach(element => {
+        if (Array.from(svgBlocks).some(block => block.contains(element))) {
+            return;
+        }
+        (["href", "src"] as const).forEach(attribute => {
+            const source = element.getAttribute(attribute);
+            if (!source || !isHTMLBase64Image(source)) {
+                return;
+            }
+            const size = getBase64ImageDecodedSize(source.trim());
+            if (size === undefined) {
+                return;
+            }
+            assertBase64ImageItemSize(size, maxBytes);
+            totalBytes = addBase64ImageBatchSize(totalBytes, size);
+        });
+    });
+};
+
 export const collectHTMLEmbeddedAssets = (root: ParentNode, maxBytes?: number) => {
+    validateHTMLEmbeddedAssetSizes(root, maxBytes);
     const assets: IHTMLEmbeddedAsset[] = [];
-    const svgBlocks = new Set<Element>();
-    root.querySelectorAll("pre").forEach(element => {
-        if (!element.hasAttributes()) {
-            return;
-        }
-        const svg = element.querySelector("svg");
-        if (!svg) {
-            return;
-        }
-        svgBlocks.add(element);
+    let base64Bytes = 0;
+    const svgBlocks = getInlineSVGBlocks(root);
+    svgBlocks.forEach(element => {
+        const svg = element.querySelector("svg")!;
         const file = new File([svg.outerHTML], `inline-svg-${assets.length}.svg`, {type: "image/svg+xml"});
         assets.push({
             file,
@@ -54,6 +79,7 @@ export const collectHTMLEmbeddedAssets = (root: ParentNode, maxBytes?: number) =
             if (!file) {
                 return;
             }
+            base64Bytes = addBase64ImageBatchSize(base64Bytes, file.size);
             assets.push({
                 file,
                 apply(path) {

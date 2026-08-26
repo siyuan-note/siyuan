@@ -64,7 +64,7 @@ import {popSearch} from "../mobile/menu/search";
 import {showMessage} from "../dialog/message";
 import {img3115} from "../boot/compatibleVersion";
 import {hideTooltip} from "../dialog/tooltip";
-import {base64ToURL} from "../protyle/upload/base64";
+import {base64ToURL, showBase64ImageSizeLimit} from "../protyle/upload/base64";
 import {setPosition} from "../util/setPosition";
 import {setFold} from "../protyle/util/blockFold";
 import {isEncryptedBox} from "../util/pathName";
@@ -1510,10 +1510,18 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.removeCB = async () => {
             const newSrc = textElements[0].value;
             if (src !== newSrc && newSrc.startsWith("data:image/")) {
-                const base64Src = await base64ToURL([newSrc], protyle, {
-                    source: "programmatic",
-                    target: "editor",
-                });
+                let base64Src: Array<string | undefined>;
+                try {
+                    base64Src = await base64ToURL([newSrc], protyle, {
+                        source: "programmatic",
+                        target: "editor",
+                    });
+                } catch (error) {
+                    if (showBase64ImageSizeLimit(error)) {
+                        return;
+                    }
+                    throw error;
+                }
                 if (base64Src[0]) {
                     imgElement.setAttribute("src", base64Src[0]);
                     imgElement.setAttribute("data-src", base64Src[0]);

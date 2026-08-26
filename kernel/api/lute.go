@@ -39,6 +39,9 @@ import (
 // maxSpinBlockDOMBytes 限制 spinBlockDOM 输入 DOM 的最大字节数。
 const maxSpinBlockDOMBytes = 1024 * 1024
 
+// maxHTML2BlockDOMRequestBytes 限制 html2BlockDOM 请求体的最大字节数。
+const maxHTML2BlockDOMRequestBytes int64 = 128 * 1024 * 1024
+
 func copyStdMarkdown(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -91,6 +94,7 @@ func copyStdMarkdown(c *gin.Context) {
 func html2BlockDOM(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
+	limitHTML2BlockDOMRequestBody(c, maxHTML2BlockDOMRequestBytes)
 
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
@@ -122,11 +126,12 @@ func html2BlockDOM(c *gin.Context) {
 	skipBase64Assets, _ := arg["skipBase64Assets"].(bool)
 	skipInlineSVGAssets, _ := arg["skipInlineSVGAssets"].(bool)
 	preflight, _ := arg["preflight"].(bool)
+	preparedHTML, _ := arg["preparedHTML"].(bool)
 	luteEngine := util.NewLute()
 	luteEngine.SetHTMLTag2TextMark(true)
 	luteEngine.SetHTML2MarkdownAttrs([]string{"alias", "memo", "bookmark", "custom-*"})
-	dom, useHTML := resolveHTMLClipboardContent(luteEngine, dom, mathML, office, officeMathHTML, wps,
-		convertClipboardMath, convertOfficeHTMLClipboardMath)
+	dom, useHTML := prepareHTMLClipboardContent(luteEngine, dom, text, mathML, office, officeMathHTML, wps,
+		preparedHTML, convertClipboardMath, convertOfficeHTMLClipboardMath)
 	if !useHTML {
 		if preflight {
 			ret.Data = map[string]any{"converted": true, "dom": dom, "useHTML": false}
@@ -140,16 +145,14 @@ func html2BlockDOM(c *gin.Context) {
 		skipBase64Assets = true
 		skipInlineSVGAssets = true
 	}
-	// 将 Word 和 WPS 批注转换为行级备注 https://github.com/siyuan-note/siyuan/issues/18748
-	dom = normalizeWPSComments(dom, text, wps)
-	dom = normalizeMSWordComments(dom)
+	normalizedHTML := dom
 	tree, _ := model.HTML2TreeWithOptions(dom, luteEngine, boxID, model.HTML2TreeOptions{
 		SkipBase64Assets:    skipBase64Assets,
 		SkipInlineSVGAssets: skipInlineSVGAssets,
 	})
 	if nil == tree {
 		if preflight {
-			ret.Data = map[string]any{"converted": false, "dom": "Failed to convert", "useHTML": true}
+			ret.Data = map[string]any{"converted": false, "dom": "Failed to convert", "normalizedHTML": normalizedHTML, "useHTML": true}
 		} else {
 			ret.Data = "Failed to convert"
 		}
@@ -269,7 +272,7 @@ func html2BlockDOM(c *gin.Context) {
 	md, err := lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 	if nil != err {
 		if preflight {
-			ret.Data = map[string]any{"converted": false, "dom": "Failed to convert", "useHTML": true}
+			ret.Data = map[string]any{"converted": false, "dom": "Failed to convert", "normalizedHTML": normalizedHTML, "useHTML": true}
 		} else {
 			ret.Data = "Failed to convert"
 		}
@@ -281,14 +284,34 @@ func html2BlockDOM(c *gin.Context) {
 	output := renderer.Render()
 	convertedDOM := gulu.Str.FromBytes(output)
 	if preflight {
-		ret.Data = map[string]any{"converted": true, "dom": convertedDOM, "useHTML": true}
+		ret.Data = map[string]any{"converted": true, "dom": convertedDOM, "normalizedHTML": normalizedHTML, "useHTML": true}
 	} else {
 		ret.Data = convertedDOM
 	}
 }
 
+func limitHTML2BlockDOMRequestBody(c *gin.Context, maxBytes int64) {
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxBytes)
+}
+
 type clipboardMathConverter func(mathML, office, wps string) (markdown string, converted bool)
 type officeHTMLClipboardMathConverter func(officeMathHTML string) (markdown string, converted bool)
+
+func prepareHTMLClipboardContent(luteEngine *lute.Lute, dom, text, mathML, office, officeMathHTML, wps string,
+	preparedHTML bool, mathConverter clipboardMathConverter,
+	officeHTMLMathConverter officeHTMLClipboardMathConverter) (resolvedDOM string, useHTML bool) {
+	if preparedHTML {
+		return dom, true
+	}
+	resolvedDOM, useHTML = resolveHTMLClipboardContent(luteEngine, dom, mathML, office, officeMathHTML, wps,
+		mathConverter, officeHTMLMathConverter)
+	if !useHTML {
+		return resolvedDOM, false
+	}
+	// 将 Word 和 WPS 批注转换为行级备注 https://github.com/siyuan-note/siyuan/issues/18748
+	resolvedDOM = normalizeWPSComments(resolvedDOM, text, wps)
+	return normalizeMSWordComments(resolvedDOM), true
+}
 
 func resolveHTMLClipboardContent(luteEngine *lute.Lute, dom, mathML, office, officeMathHTML, wps string,
 	mathConverter clipboardMathConverter, officeHTMLMathConverter officeHTMLClipboardMathConverter) (resolvedDOM string, useHTML bool) {

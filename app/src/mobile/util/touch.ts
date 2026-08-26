@@ -29,6 +29,7 @@ import {
     shouldCloseGlobalMenu,
     shouldDragOpenSidebar,
 } from "./touchPanelGesture";
+import {logMobileInputEvent} from "./inputEventLogger";
 
 let clientX: number;
 let clientY: number;
@@ -181,6 +182,11 @@ export const handleTouchEnd = (event: TouchEvent) => {
         Math.abs(clientY - event.changedTouches[0].clientY) < Constants.SIZE_DRAG_THRESHOLD) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
             if (longPressTimer) {
+                logMobileInputEvent("touchend-cancel-multiselect", event, {
+                    duration: currentTime - time,
+                    xDiff: Math.abs(clientX - event.changedTouches[0].clientX),
+                    yDiff: Math.abs(clientY - event.changedTouches[0].clientY),
+                });
                 event.stopImmediatePropagation();
                 event.preventDefault();
                 return;
@@ -207,6 +213,11 @@ export const handleTouchEnd = (event: TouchEvent) => {
             }
         } else if (currentTime - time > Constants.TIMEOUT_LONGPRESS) {
             // 长按：多选已在按住满阈值时触发，此处取消定时器避免重复触发
+            logMobileInputEvent("touchend-cancel-longpress", event, {
+                duration: currentTime - time,
+                xDiff: Math.abs(clientX - event.changedTouches[0].clientX),
+                yDiff: Math.abs(clientY - event.changedTouches[0].clientY),
+            });
             if (isIPhone() && !isChromeBrowser() && !window.siyuan.touchDragActive) {
                 target.dispatchEvent(new MouseEvent("contextmenu", {
                     bubbles: true,

@@ -17,6 +17,7 @@ import {getDocByScroll, saveScroll} from "../protyle/scroll/saveScroll";
 import {isEncryptedBox} from "../util/pathName";
 import {bindMobileBarsScroll, pauseMobileBarsScroll} from "./util/mobileBars";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
+import {logMobileInputEvent} from "./util/inputEventLogger";
 
 export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
@@ -62,12 +63,19 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                                    isValid: () => boolean = () => true, signal?: AbortSignal,
                                    scrollAttr?: IScrollAttr, updateRecent = true,
                                    onFailure?: (invalid?: boolean) => void) => {
+    const logDetails = {
+        id: id.substring(0, 7),
+        action: action.join("|"),
+        forceReload,
+    };
+    logMobileInputEvent("document-load-start", undefined, logDetails);
     let completed = false;
     const complete = (protyle: IProtyle) => {
         if (completed) {
             return;
         }
         completed = true;
+        logMobileInputEvent("document-load-complete", undefined, logDetails);
         bindMobileBarsScroll(protyle.contentElement);
         afterOpen?.(protyle);
     };
@@ -76,6 +84,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
             return;
         }
         completed = true;
+        logMobileInputEvent("document-load-fail", undefined, {...logDetails, invalid});
         onFailure?.(invalid);
     };
     if (!isValid()) {
@@ -133,6 +142,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
     let blockInfoHandled = false;
     void fetchPost("/api/block/getBlockInfo", blockInfoParam, (data) => {
         blockInfoHandled = true;
+        logMobileInputEvent("document-block-info", undefined, {...logDetails, code: data.code});
         if (!isValid()) {
             fail();
             return;
@@ -226,6 +236,7 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 let getDocHandled = false;
                 void fetchPost("/api/filetree/getDoc", getDocParam, getResponse => {
                     getDocHandled = true;
+                    logMobileInputEvent("document-get-doc", undefined, {...logDetails, code: getResponse.code});
                     if (!isValid()) {
                         fail();
                         return;
@@ -257,6 +268,10 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                         });
                     } catch (error) {
                         console.error(error);
+                        logMobileInputEvent("document-render-error", undefined, {
+                            ...logDetails,
+                            error: error instanceof Error ? error.message : String(error),
+                        });
                         fail();
                     }
                 }, undefined, undefined, signal).then(() => {
@@ -275,6 +290,10 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 window.siyuan.mobile.editor = new Protyle(app, document.getElementById("editor"), protyleOptions);
             } catch (error) {
                 console.error(error);
+                logMobileInputEvent("document-create-error", undefined, {
+                    ...logDetails,
+                    error: error instanceof Error ? error.message : String(error),
+                });
                 fail();
                 return;
             }

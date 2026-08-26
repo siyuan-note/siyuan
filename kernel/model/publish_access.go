@@ -1387,6 +1387,44 @@ func FilterBlocksByPublishAccess(c *gin.Context, publishAccess PublishAccess, bl
 	return
 }
 
+// GetPublishAccessSearchExclusion 返回当前读者在全库搜索中不可见的笔记本 ID 和文档 ID 排除集合。
+// 排除来源包括隐藏、禁止发布以及未通过密码验证的发布访问条目，保证搜索计数和分页不泄露这些条目。
+// denyAll 为 true 时当前读者不可见任何内容，调用方应直接返回空结果。
+func GetPublishAccessSearchExclusion(c *gin.Context) (denyAll bool, boxIDs, docIDs []string) {
+	publishAccess := GetPublishAccess()
+	denied := PublishAccess{}
+	denied = append(denied, GetInvisiblePublishAccess(publishAccess)...)
+	denied = append(denied, GetDisablePublishAccess(publishAccess)...)
+	for _, item := range publishAccess {
+		if "" != item.Password && !CheckPublishAuthCookie(c, item.ID, item.Password) {
+			denied = append(denied, item)
+		}
+	}
+
+	boxIDSet := map[string]bool{}
+	docIDSet := map[string]bool{}
+	for _, item := range denied {
+		if publishAccessDenyAllID == item.ID {
+			return true, nil, nil
+		}
+		if !ast.IsNodeIDPattern(item.ID) {
+			continue
+		}
+		if filelock.IsExist(filepath.Join(util.DataDir, item.ID)) {
+			boxIDSet[item.ID] = true
+		} else {
+			docIDSet[item.ID] = true
+		}
+	}
+	for boxID := range boxIDSet {
+		boxIDs = append(boxIDs, boxID)
+	}
+	for docID := range docIDSet {
+		docIDs = append(docIDs, docID)
+	}
+	return
+}
+
 func FilterSearchDocsByPublishAccess(c *gin.Context, publishAccess PublishAccess, docs []map[string]string) (ret []map[string]string) {
 	ret = []map[string]string{}
 

@@ -53,10 +53,20 @@ func listInvalidBlockRefs(c *gin.Context) {
 		pageSize = 32
 	}
 
-	blocks, matchedBlockCount, matchedRootCount, pageCount := model.ListInvalidBlockRefs(page, pageSize)
+	var blocks []*model.Block
+	var matchedBlockCount, matchedRootCount, pageCount int
 	if model.IsReadOnlyRoleContext(c) {
+		denyAll, excludeBoxIDs, excludeDocIDs := model.GetPublishAccessSearchExclusion(c)
+		if denyAll {
+			blocks = []*model.Block{}
+			matchedBlockCount, matchedRootCount, pageCount = 0, 0, 0
+		} else {
+			blocks, matchedBlockCount, matchedRootCount, pageCount = model.ListInvalidBlockRefs(page, pageSize, excludeBoxIDs, excludeDocIDs)
+		}
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)
+	} else {
+		blocks, matchedBlockCount, matchedRootCount, pageCount = model.ListInvalidBlockRefs(page, pageSize, nil, nil)
 	}
 	ret.Data = map[string]any{
 		"blocks":            blocks,
@@ -564,15 +574,30 @@ func fullTextSearchBlock(c *gin.Context) {
 		searchHPath = value
 	}
 	// 加密笔记本的全文搜索走 InBox 版（查加密 content db + blocks_fts）
+	var excludeBoxIDs, excludeDocIDs []string
+	if model.IsReadOnlyRoleContext(c) {
+		denyAll, deniedBoxIDs, deniedDocIDs := model.GetPublishAccessSearchExclusion(c)
+		if denyAll {
+			ret.Data = map[string]any{
+				"blocks":            []*model.Block{},
+				"matchedBlockCount": 0,
+				"matchedRootCount":  0,
+				"pageCount":         0,
+				"docMode":           false,
+			}
+			return
+		}
+		excludeBoxIDs, excludeDocIDs = deniedBoxIDs, deniedDocIDs
+	}
 	if notebook != "" && model.IsEncryptedBox(notebook) {
 		if err := holdEncryptedBoxRequest(c, notebook); err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
 			return
 		}
-		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBoxWithHPathContext(c.Request.Context(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, notebook, searchHPath)
+		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBoxWithHPathContext(c.Request.Context(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, notebook, searchHPath, excludeBoxIDs, excludeDocIDs)
 	} else {
-		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBoxWithHPathContext(c.Request.Context(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, "", searchHPath)
+		blocks, matchedBlockCount, matchedRootCount, pageCount, docMode = model.FullTextSearchBlockInBoxWithHPathContext(c.Request.Context(), query, boxes, paths, types, subTypes, method, orderBy, groupBy, page, pageSize, "", searchHPath, excludeBoxIDs, excludeDocIDs)
 	}
 	if c.Request.Context().Err() != nil {
 		return
@@ -725,7 +750,22 @@ func semanticSearchBlock(c *gin.Context) {
 
 	page, pageSize, query, paths, boxes, types, subTypes, _, _, _ := parseSearchBlockArgs(arg)
 
-	blocks, matchedBlockCount, matchedRootCount, pageCount := model.SemanticSearchBlock(query, boxes, paths, types, subTypes, page, pageSize)
+	var excludeBoxIDs, excludeDocIDs []string
+	if model.IsReadOnlyRoleContext(c) {
+		denyAll, deniedBoxIDs, deniedDocIDs := model.GetPublishAccessSearchExclusion(c)
+		if denyAll {
+			ret.Data = map[string]any{
+				"blocks":            []*model.Block{},
+				"matchedBlockCount": 0,
+				"matchedRootCount":  0,
+				"pageCount":         0,
+			}
+			return
+		}
+		excludeBoxIDs, excludeDocIDs = deniedBoxIDs, deniedDocIDs
+	}
+
+	blocks, matchedBlockCount, matchedRootCount, pageCount := model.SemanticSearchBlock(query, boxes, paths, types, subTypes, page, pageSize, excludeBoxIDs, excludeDocIDs)
 	if model.IsReadOnlyRoleContext(c) {
 		publishAccess := model.GetPublishAccess()
 		blocks = model.FilterBlocksByPublishAccess(c, publishAccess, blocks)

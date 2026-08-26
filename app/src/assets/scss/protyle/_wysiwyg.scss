@@ -560,16 +560,19 @@
     }
 
     &.table[custom-pinthead="true"] {
-      table {
+      & > div:first-child {
         max-height: 50vh;
         overflow: auto;
-        border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
-        box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
 
         &::-webkit-scrollbar-track:vertical,
         &::-webkit-scrollbar-corner {
           background-color: var(--b3-parent-background);
         }
+      }
+
+      table {
+        border-radius: var(--b3-table-border-radius-top-left) var(--b3-table-border-radius-top-right) var(--b3-table-border-radius-bottom-right) var(--b3-table-border-radius-bottom-left);
+        box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
       }
 
       thead {

@@ -244,6 +244,101 @@ func TestInlineStylesAVPalette(t *testing.T) {
 	}
 }
 
+func TestWorkspaceAVPaletteRejectsColorsUsedByOtherAttributeViews(t *testing.T) {
+	setupInlineStylesTest(t)
+	color := &av.AttributeViewCustomColor{
+		Index: 15,
+		AttributeViewColor: av.AttributeViewColor{
+			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
+			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+		},
+	}
+	if _, _, err := SetInlineStylesData(&InlineStyles{
+		Version: InlineStylesVersion,
+		AV:      &InlineStyleAV{Colors: []*av.AttributeViewCustomColor{color}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	const otherAvID = "20260827000000-colors1"
+	attrView := &av.AttributeView{Spec: av.CurrentSpec, ID: otherAvID}
+	attrView.KeyValues = []*av.KeyValues{{Key: &av.Key{
+		ID: "select", Type: av.KeyTypeSelect, Options: []*av.SelectOption{{Name: "Used", Color: "15"}},
+	}}}
+	data, err := json.Marshal(attrView)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(util.DataDir, "storage", "av", otherAvID+".json")
+	if err = os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(path, data, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, _, err = SetWorkspaceAVPalette(&WorkspaceAVPaletteUpdate{}); err == nil ||
+		!strings.Contains(err.Error(), otherAvID) {
+		t.Fatalf("used workspace color was deleted: %v", err)
+	}
+	loaded, err := GetInlineStyles()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(loaded.AV.Colors) != 1 || loaded.AV.Colors[0].Index != 15 {
+		t.Fatalf("rejected palette update changed persisted colors: %#v", loaded.AV.Colors)
+	}
+}
+
+func TestSetWorkspaceAVPalettePreservesUnrelatedInlineStyles(t *testing.T) {
+	setupInlineStylesTest(t)
+	styleID := "20260827000001-colors2"
+	if _, _, err := SetInlineStylesData(&InlineStyles{
+		Version: InlineStylesVersion,
+		Styles: []*InlineStyle{{
+			ID: styleID, Name: "Accent",
+			Light: &InlineStyleTheme{Color: "#010203"},
+			Dark:  &InlineStyleTheme{Color: "#040506"},
+		}},
+		Builtin: &InlineStyleBuiltin{Colors: []*InlineStyleBuiltinColor{{
+			Index: 1,
+			Light: &InlineStyleTheme{Color: "#111111"},
+			Dark:  &InlineStyleTheme{Color: "#eeeeee"},
+		}}},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	color := &av.AttributeViewCustomColor{
+		Index: 15,
+		AttributeViewColor: av.AttributeViewColor{
+			Light: av.AttributeViewColorTheme{Color: "#112233", BackgroundColor: "#445566"},
+			Dark:  av.AttributeViewColorTheme{Color: "#778899", BackgroundColor: "#aabbcc"},
+		},
+	}
+	saved, changed, err := SetWorkspaceAVPalette(&WorkspaceAVPaletteUpdate{
+		Colors: []*av.AttributeViewCustomColor{color},
+		Order:  []string{"15", "1"},
+		BuiltinColors: []*WorkspaceAVBuiltinColorUpdate{{
+			Index: 2, Customized: true,
+			Light:  &InlineStyleTheme{BackgroundColor: "#abcdef"},
+			Dark:   &InlineStyleTheme{BackgroundColor: "#123456"},
+			Hidden: true,
+		}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !changed || len(saved.Styles) != 1 || saved.Styles[0].ID != styleID {
+		t.Fatalf("unrelated inline styles were changed: %#v", saved.Styles)
+	}
+	if len(saved.Builtin.Colors) != 2 || saved.Builtin.Colors[0].Index != 1 || saved.Builtin.Colors[1].Index != 2 ||
+		!reflect.DeepEqual(saved.Builtin.Hidden.AV, []int{2}) {
+		t.Fatalf("builtin color patch replaced unrelated configuration: %#v", saved.Builtin)
+	}
+	if len(saved.AV.Colors) != 1 || saved.AV.Order[0] != "15" {
+		t.Fatalf("workspace palette was not saved: %#v", saved.AV)
+	}
+}
+
 func TestInlineStylesVersion1Migration(t *testing.T) {
 	setupInlineStylesTest(t)
 	legacyData := []byte(`{"version":1,"styles":[{"id":"20260821000000-abcdefg","name":"Legacy","light":{"color":"#abcdef"},"dark":{"color":"#123456"}}]}`)

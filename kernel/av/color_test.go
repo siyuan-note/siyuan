@@ -182,6 +182,31 @@ func TestAttributeViewCustomColorIndexes(t *testing.T) {
 	}
 }
 
+func TestResolveDirectColorsLoadsWorkspacePaletteOnce(t *testing.T) {
+	color := testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c")
+	old := LoadWorkspacePalette
+	t.Cleanup(func() { LoadWorkspacePalette = old })
+	calls := 0
+	LoadWorkspacePalette = func() ([]*AttributeViewCustomColor, []string) {
+		calls++
+		return []*AttributeViewCustomColor{color}, []string{"15", "1"}
+	}
+	attrView := &AttributeView{
+		KeyValues: []*KeyValues{{
+			Key:    &Key{ID: "select", Type: KeyTypeSelect, Options: []*SelectOption{{Color: "15"}, {Color: "15"}}},
+			Values: []*Value{{MSelect: []*ValueSelect{{Color: "15"}, {Color: "15"}}}},
+		}},
+		Views: []*View{{
+			GroupKey: &Key{ID: "select", Type: KeyTypeSelect, Options: []*SelectOption{{Color: "15"}}},
+			GroupVal: &Value{MSelect: []*ValueSelect{{Color: "15"}}},
+		}},
+	}
+	attrView.ResolveDirectColors()
+	if calls != 1 {
+		t.Fatalf("workspace palette was loaded %d times, want 1", calls)
+	}
+}
+
 func TestUsedCustomColorIndexesScansPersistedReferences(t *testing.T) {
 	selectValue := func(index string) *Value {
 		return &Value{MSelect: []*ValueSelect{{Content: "Value", Color: index}}}

@@ -61,6 +61,11 @@ export interface IInlineStyleAV {
     order: string[];
 }
 
+export interface IWorkspaceAVBuiltinColorUpdate extends IBuiltinInlineColor {
+    customized: boolean;
+    hidden: boolean;
+}
+
 export interface IInlineStyles {
     version: 2;
     builtin: IInlineStyleBuiltin;
@@ -502,6 +507,28 @@ export const saveInlineStyles = async (data: IInlineStyles) => {
     }
     inlineStylesRequestGeneration++;
     setInlineStylesCache(response.data || normalized);
+    return response;
+};
+
+export const saveWorkspaceAVPalette = async (data: IInlineStyleAV,
+                                             builtinColors: IWorkspaceAVBuiltinColorUpdate[]) => {
+    const [{Constants}, {fetchSyncPost}] = await Promise.all([
+        import("../../constants"),
+        import("../../util/fetch"),
+    ]);
+    const response = await fetchSyncPost("/api/storage/setWorkspaceAVPalette", {
+        colors: data.colors,
+        order: data.order,
+        builtinColors,
+        app: Constants.SIYUAN_APPID,
+    });
+    if (response?.code !== 0) {
+        return response;
+    }
+    inlineStylesRequestGeneration++;
+    if (response.data) {
+        setInlineStylesCache(response.data);
+    }
     return response;
 };
 

@@ -228,7 +228,8 @@ func NormalizeAttributeViewColorOrder(order []string, colors []*AttributeViewCus
 // NextCustomColorIndex 返回最小的可用自定义颜色编号，没有可用编号时返回 0。
 func (av *AttributeView) NextCustomColorIndex() int {
 	used := map[int]struct{}{}
-	for _, color := range av.customColorPalette() {
+	colors, _ := av.customColorPalette()
+	for _, color := range colors {
 		if nil != color {
 			used[color.Index] = struct{}{}
 		}
@@ -241,23 +242,22 @@ func (av *AttributeView) NextCustomColorIndex() int {
 	return 0
 }
 
-func (av *AttributeView) customColorPalette() []*AttributeViewCustomColor {
+func (av *AttributeView) customColorPalette() (colors []*AttributeViewCustomColor, order []string) {
 	if av != nil && av.CustomColorRenderContext != nil &&
 		av.CustomColorRenderContext.ResolveRelatedCustomColors != nil {
-		colors, found := av.CustomColorRenderContext.ResolveRelatedCustomColors(av.ID)
+		colors, order, found := av.CustomColorRenderContext.ResolveRelatedCustomColors(av.ID)
 		if !found {
-			return []*AttributeViewCustomColor{}
+			return []*AttributeViewCustomColor{}, DefaultAttributeViewColorOrder(nil)
 		}
 		normalized, _ := NormalizeAttributeViewCustomColors(colors, false)
-		return normalized
+		return normalized, NormalizeAttributeViewColorOrder(order, normalized)
 	}
-	colors, _ := WorkspacePalette()
-	return colors
+	return WorkspacePalette()
 }
 
 // Palette 返回当前渲染上下文或工作空间中的数据库自定义色。
 func (av *AttributeView) Palette() []*AttributeViewCustomColor {
-	colors := av.customColorPalette()
+	colors, _ := av.customColorPalette()
 	if nil == colors {
 		return []*AttributeViewCustomColor{}
 	}
@@ -266,22 +266,22 @@ func (av *AttributeView) Palette() []*AttributeViewCustomColor {
 
 // PaletteOrder 返回当前渲染上下文或工作空间中的数据库颜色顺序。
 func (av *AttributeView) PaletteOrder() []string {
-	colors := av.customColorPalette()
-	if av != nil && av.CustomColorRenderContext != nil &&
-		av.CustomColorRenderContext.ResolveRelatedCustomColors != nil {
-		return NormalizeAttributeViewColorOrder(nil, colors)
-	}
-	_, order := WorkspacePalette()
+	colors, order := av.customColorPalette()
 	return NormalizeAttributeViewColorOrder(order, colors)
 }
 
 // ResolveColor 根据自定义颜色编号返回经过校验的明暗主题颜色。
 func (av *AttributeView) ResolveColor(color string) *AttributeViewColor {
+	colors, _ := av.customColorPalette()
+	return resolveColor(color, colors)
+}
+
+func resolveColor(color string, colors []*AttributeViewCustomColor) *AttributeViewColor {
 	index, err := strconv.Atoi(strings.TrimSpace(color))
 	if nil != err || index < CustomColorMinIndex || CustomColorMaxIndex < index {
 		return nil
 	}
-	for _, customColor := range av.customColorPalette() {
+	for _, customColor := range colors {
 		if nil == customColor || customColor.Index != index {
 			continue
 		}
@@ -312,6 +312,7 @@ func (av *AttributeView) ResolveDirectColors() {
 	if nil == av {
 		return
 	}
+	colors, _ := av.customColorPalette()
 	for _, keyValues := range av.KeyValues {
 		if nil == keyValues {
 			continue
@@ -319,16 +320,16 @@ func (av *AttributeView) ResolveDirectColors() {
 		if nil != keyValues.Key {
 			for _, option := range keyValues.Key.Options {
 				if nil != option {
-					option.ResolvedColor = av.ResolveColor(option.Color)
+					option.ResolvedColor = resolveColor(option.Color, colors)
 				}
 			}
 		}
 		for _, value := range keyValues.Values {
-			resolveValueSelectColors(value, av)
+			resolveValueSelectColors(value, colors)
 		}
 	}
 	for _, view := range av.Views {
-		av.resolveDirectViewGroupColors(view)
+		av.resolveDirectViewGroupColors(view, colors)
 	}
 }
 
@@ -347,7 +348,7 @@ func (av *AttributeView) ApplyRelatedCustomColorRenderContext(target *AttributeV
 	target.ResolveDirectColors()
 }
 
-func (av *AttributeView) resolveDirectViewGroupColors(view *View) {
+func (av *AttributeView) resolveDirectViewGroupColors(view *View, colors []*AttributeViewCustomColor) {
 	if nil == view {
 		return
 	}
@@ -356,29 +357,30 @@ func (av *AttributeView) resolveDirectViewGroupColors(view *View) {
 			(KeyTypeSelect == key.Type || KeyTypeMSelect == key.Type) {
 			for _, option := range view.GroupKey.Options {
 				if nil != option {
-					option.ResolvedColor = av.ResolveColor(option.Color)
+					option.ResolvedColor = resolveColor(option.Color, colors)
 				}
 			}
-			resolveValueSelectColors(view.GroupVal, av)
+			resolveValueSelectColors(view.GroupVal, colors)
 		}
 	}
 	for _, group := range view.Groups {
-		av.resolveDirectViewGroupColors(group)
+		av.resolveDirectViewGroupColors(group, colors)
 	}
 }
 
 // ResolveValueSelectColors 为数据库上下文中的直接选择值填充派生颜色。
 func (av *AttributeView) ResolveValueSelectColors(value *Value) {
-	resolveValueSelectColors(value, av)
+	colors, _ := av.customColorPalette()
+	resolveValueSelectColors(value, colors)
 }
 
-func resolveValueSelectColors(value *Value, av *AttributeView) {
+func resolveValueSelectColors(value *Value, colors []*AttributeViewCustomColor) {
 	if nil == value {
 		return
 	}
 	for _, selection := range value.MSelect {
 		if nil != selection {
-			selection.ResolvedColor = av.ResolveColor(selection.Color)
+			selection.ResolvedColor = resolveColor(selection.Color, colors)
 		}
 	}
 }

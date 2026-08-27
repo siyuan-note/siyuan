@@ -24,8 +24,10 @@ import (
 
 func TestApplyRelatedCustomColorRenderContext(t *testing.T) {
 	historicalColor := customColorForContextTest("#010203", "#040506", "#070809", "#0a0b0c")
-	context := &av.CustomColorRenderContext{ResolveRelatedCustomColors: func(string) ([]*av.AttributeViewCustomColor, bool) {
-		return []*av.AttributeViewCustomColor{historicalColor}, true
+	context := &av.CustomColorRenderContext{ResolveRelatedCustomColors: func(string) (
+		[]*av.AttributeViewCustomColor, []string, bool,
+	) {
+		return []*av.AttributeViewCustomColor{historicalColor}, []string{"15", "1"}, true
 	}}
 	source := &av.AttributeView{CustomColorRenderContext: context}
 	target, key, value := relatedCustomColorTargetForContextTest(t)
@@ -55,7 +57,9 @@ func TestApplyRelatedCustomColorRenderContextMissingPalette(t *testing.T) {
 		t.Fatal("test target was not initialized with its current palette")
 	}
 	source := &av.AttributeView{CustomColorRenderContext: &av.CustomColorRenderContext{
-		ResolveRelatedCustomColors: func(string) ([]*av.AttributeViewCustomColor, bool) { return nil, false },
+		ResolveRelatedCustomColors: func(string) ([]*av.AttributeViewCustomColor, []string, bool) {
+			return nil, nil, false
+		},
 	}}
 
 	applyRelatedCustomColorRenderContext(source, target)

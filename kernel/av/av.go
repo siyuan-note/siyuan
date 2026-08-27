@@ -61,7 +61,7 @@ type AttributeView struct {
 
 // CustomColorRenderContext 为历史和仓库快照渲染解析关联数据库当时的调色板。
 type CustomColorRenderContext struct {
-	ResolveRelatedCustomColors func(avID string) (colors []*AttributeViewCustomColor, found bool)
+	ResolveRelatedCustomColors func(avID string) (colors []*AttributeViewCustomColor, order []string, found bool)
 }
 
 // NewItemTargetType 描述新增条目模板创建的目标类型。
@@ -789,6 +789,23 @@ func ParseAttributeViewByPath(avJSONPath string) (ret *AttributeView, err error)
 }
 
 func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView, err error) {
+	return parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID, true)
+}
+
+// ReadAttributeViewCustomColorUsageByPath 读取属性视图持久化数据中的自定义颜色引用，但不解析派生颜色。
+func ReadAttributeViewCustomColorUsageByPath(avJSONPath string) (avID string, indexes []int, err error) {
+	avID = strings.TrimSuffix(filepath.Base(avJSONPath), filepath.Ext(avJSONPath))
+	attrView, err := parseAttributeViewByPathInBoxWithOptions(avJSONPath, avBoxIDFromPath(avJSONPath), false)
+	if err != nil {
+		return avID, nil, err
+	}
+	if attrView == nil {
+		return avID, nil, errors.New("attribute view content is unavailable")
+	}
+	return avID, attrView.UsedCustomColorIndexes(), nil
+}
+
+func parseAttributeViewByPathInBoxWithOptions(avJSONPath, boxID string, resolveColors bool) (ret *AttributeView, err error) {
 	if !filelock.IsExist(avJSONPath) {
 		err = ErrViewNotFound
 		return
@@ -890,8 +907,10 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 		err = CheckSpec(ret)
 	}
 	if nil == err {
-		ret.ResolveDirectColors()
-		cache.SetAVSearchDataInBox(avID, boxID, dataVersion, newAttributeViewSearchInfo(ret))
+		if resolveColors {
+			ret.ResolveDirectColors()
+			cache.SetAVSearchDataInBox(avID, boxID, dataVersion, newAttributeViewSearchInfo(ret))
+		}
 	}
 	return
 }

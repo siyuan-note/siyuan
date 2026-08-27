@@ -1204,27 +1204,31 @@ func ResolveHistoryAttributeViewBoxID(avID, created string) (string, error) {
 
 type attributeViewCustomColorPaletteCacheEntry struct {
 	colors []*av.AttributeViewCustomColor
+	order  []string
 	found  bool
 }
 
 // newCachedAttributeViewCustomColorResolver 将历史调色板解析限制在单次渲染请求内，并避免并发重复读取。
 func newCachedAttributeViewCustomColorResolver(
-	loader func(avID string) (colors []*av.AttributeViewCustomColor, found bool),
-) func(avID string) (colors []*av.AttributeViewCustomColor, found bool) {
+	loader func(avID string) (colors []*av.AttributeViewCustomColor, order []string, found bool),
+) func(avID string) (colors []*av.AttributeViewCustomColor, order []string, found bool) {
 	cache := map[string]attributeViewCustomColorPaletteCacheEntry{}
 	var lock sync.Mutex
-	return func(avID string) (colors []*av.AttributeViewCustomColor, found bool) {
+	return func(avID string) (colors []*av.AttributeViewCustomColor, order []string, found bool) {
 		lock.Lock()
 		defer lock.Unlock()
 
 		if entry, ok := cache[avID]; ok {
 			colors, _ = av.NormalizeAttributeViewCustomColors(entry.colors, false)
-			return colors, entry.found
+			order = av.NormalizeAttributeViewColorOrder(entry.order, colors)
+			return colors, order, entry.found
 		}
-		colors, found = loader(avID)
+		colors, order, found = loader(avID)
 		colors, _ = av.NormalizeAttributeViewCustomColors(colors, false)
-		cache[avID] = attributeViewCustomColorPaletteCacheEntry{colors: colors, found: found}
+		order = av.NormalizeAttributeViewColorOrder(order, colors)
+		cache[avID] = attributeViewCustomColorPaletteCacheEntry{colors: colors, order: order, found: found}
 		colors, _ = av.NormalizeAttributeViewCustomColors(colors, false)
+		order = av.NormalizeAttributeViewColorOrder(order, colors)
 		return
 	}
 }
@@ -1237,9 +1241,11 @@ func decodeHistoricalAttributeViewCustomColors(boxID, avID string, data []byte) 
 	return av.DecodePersistedPalette(data)
 }
 
-func loadHistoryAttributeViewCustomColors(historyDir, avID string) (ret []*av.AttributeViewCustomColor, found bool) {
+func loadHistoryAttributeViewCustomColors(historyDir, avID string) (
+	ret []*av.AttributeViewCustomColor, order []string, found bool,
+) {
 	if !ast.IsNodeIDPattern(avID) {
-		return nil, false
+		return nil, nil, false
 	}
 	type source struct {
 		path  string
@@ -1261,53 +1267,62 @@ func loadHistoryAttributeViewCustomColors(historyDir, avID string) (ret []*av.At
 		}
 	}
 	if 1 != len(sources) {
-		return nil, false
+		return nil, nil, false
 	}
 
 	data, err := os.ReadFile(sources[0].path)
 	if nil != err {
 		logging.LogWarnf("read related history attribute view [%s] failed: %s", avID, err)
-		return nil, false
+		return nil, nil, false
 	}
 	ret, err = decodeHistoricalAttributeViewCustomColors(sources[0].boxID, avID, data)
 	if nil != err {
 		logging.LogWarnf("parse related history attribute view [%s] failed: %s", avID, err)
-		return nil, false
+		return nil, nil, false
 	}
 	if 0 < len(ret) {
-		return ret, true
+		return ret, av.DefaultAttributeViewColorOrder(ret), true
 	}
 	return loadHistoryWorkspacePalette(historyDir)
 }
 
-func loadHistoryWorkspacePalette(historyDir string) (ret []*av.AttributeViewCustomColor, found bool) {
+func loadHistoryWorkspacePalette(historyDir string) (
+	ret []*av.AttributeViewCustomColor, order []string, found bool,
+) {
 	path := filepath.Join(historyDir, "storage", "inline-styles.json")
 	if !gulu.File.IsExist(path) {
-		return nil, false
+		return nil, nil, false
 	}
 	data, err := os.ReadFile(path)
 	if nil != err {
 		logging.LogWarnf("read historical inline styles failed: %s", err)
-		return nil, false
+		return nil, nil, false
 	}
+	return decodeHistoricalWorkspacePalette(data)
+}
+
+func decodeHistoricalWorkspacePalette(data []byte) (
+	ret []*av.AttributeViewCustomColor, order []string, found bool,
+) {
 	var styles struct {
 		AV *struct {
 			Colors []*av.AttributeViewCustomColor `json:"colors"`
+			Order  []string                       `json:"order"`
 		} `json:"av"`
 	}
-	if err = gulu.JSON.UnmarshalJSON(data, &styles); nil != err || nil == styles.AV {
-		return nil, false
+	if err := gulu.JSON.UnmarshalJSON(data, &styles); nil != err || nil == styles.AV {
+		return nil, nil, false
 	}
 	colors, err := av.NormalizeAttributeViewCustomColors(styles.AV.Colors, false)
-	if nil != err || 0 == len(colors) {
-		return nil, false
+	if nil != err {
+		return nil, nil, false
 	}
-	return colors, true
+	return colors, av.NormalizeAttributeViewColorOrder(styles.AV.Order, colors), true
 }
 
 func newHistoryAttributeViewCustomColorRenderContext(historyDir string) *av.CustomColorRenderContext {
 	return &av.CustomColorRenderContext{ResolveRelatedCustomColors: newCachedAttributeViewCustomColorResolver(
-		func(avID string) (colors []*av.AttributeViewCustomColor, found bool) {
+		func(avID string) (colors []*av.AttributeViewCustomColor, order []string, found bool) {
 			return loadHistoryAttributeViewCustomColors(historyDir, avID)
 		},
 	)}
@@ -1373,11 +1388,26 @@ func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string
 	if err = av.CheckSpec(attrView); nil != err {
 		return
 	}
+	var snapshotColors []*av.AttributeViewCustomColor
+	var snapshotOrder []string
+	var snapshotPaletteFound bool
+	for _, file := range files {
+		if !isInlineStylesRepoPath(file.Path) {
+			continue
+		}
+		inlineStylesData, openErr := repo.OpenFile(file)
+		if openErr != nil {
+			logging.LogWarnf("read snapshot inline styles failed: %s", openErr)
+			break
+		}
+		snapshotColors, snapshotOrder, snapshotPaletteFound = decodeHistoricalWorkspacePalette(inlineStylesData)
+		break
+	}
 	attrView.CustomColorRenderContext = &av.CustomColorRenderContext{
 		ResolveRelatedCustomColors: newCachedAttributeViewCustomColorResolver(
-			func(targetAvID string) (colors []*av.AttributeViewCustomColor, found bool) {
+			func(targetAvID string) (colors []*av.AttributeViewCustomColor, order []string, found bool) {
 				if !ast.IsNodeIDPattern(targetAvID) {
-					return nil, false
+					return nil, nil, false
 				}
 				var matches []*entity.File
 				for _, file := range files {
@@ -1386,20 +1416,26 @@ func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string
 					}
 				}
 				if 1 != len(matches) {
-					return nil, false
+					return nil, nil, false
 				}
 				data, readErr := repo.OpenFile(matches[0])
 				if nil != readErr {
 					logging.LogWarnf("read related snapshot attribute view [%s] failed: %s", targetAvID, readErr)
-					return nil, false
+					return nil, nil, false
 				}
 				colors, parseErr := decodeHistoricalAttributeViewCustomColors(
 					avBoxIDFromRepoPath(matches[0].Path), targetAvID, data)
 				if nil != parseErr {
 					logging.LogWarnf("parse related snapshot attribute view [%s] failed: %s", targetAvID, parseErr)
-					return nil, false
+					return nil, nil, false
 				}
-				return colors, true
+				if 0 < len(colors) {
+					return colors, av.DefaultAttributeViewColorOrder(colors), true
+				}
+				if snapshotPaletteFound {
+					return snapshotColors, snapshotOrder, true
+				}
+				return []*av.AttributeViewCustomColor{}, av.DefaultAttributeViewColorOrder(nil), true
 			},
 		),
 	}

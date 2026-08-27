@@ -2488,6 +2488,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	syncingFiles = sync.Map{}
 	syncingStorages.Store(false)
 	if needReloadInlineStyles && !exit {
+		invalidateWorkspaceAVPaletteCache()
 		util.BroadcastByType("main", "reloadInlineStyles", 0, "", nil)
 		util.ReloadPublishServiceSessions()
 	}

@@ -26,14 +26,14 @@ func TestRollupFilterUsesHistoricalTargetCustomColorContext(t *testing.T) {
 	}
 	source := &AttributeView{
 		CustomColorRenderContext: &CustomColorRenderContext{
-			ResolveRelatedCustomColors: func(string) ([]*AttributeViewCustomColor, bool) {
+			ResolveRelatedCustomColors: func(string) ([]*AttributeViewCustomColor, []string, bool) {
 				return []*AttributeViewCustomColor{{
 					Index: 15,
 					AttributeViewColor: AttributeViewColor{
 						Light: AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
 						Dark:  AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
 					},
-				}}, true
+				}}, []string{"15", "1"}, true
 			},
 		},
 		KeyValues: []*KeyValues{

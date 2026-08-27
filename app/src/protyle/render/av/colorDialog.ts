@@ -13,8 +13,9 @@ import {
 } from "./color";
 import {
     getInlineStylesCache,
+    IInlineStyles,
     normalizeInlineStyles,
-    saveInlineStyles,
+    saveWorkspaceAVPalette,
 } from "../../toolbar/inlineStyle";
 import {
     applyPreviewStyle,
@@ -32,7 +33,8 @@ import {
 
 const cloneCustomColors = (colors: IAVCustomColor[]) => JSON.parse(JSON.stringify(colors)) as IAVCustomColor[];
 
-const cloneInlineStyles = () => JSON.parse(JSON.stringify(normalizeInlineStyles(getInlineStylesCache())));
+const cloneInlineStyles = () =>
+    JSON.parse(JSON.stringify(normalizeInlineStyles(getInlineStylesCache()))) as IInlineStyles;
 
 export const openAVCustomColorDialog = (options: {
     protyle: IProtyle,
@@ -45,6 +47,7 @@ export const openAVCustomColorDialog = (options: {
     const draft = cloneCustomColors(getAVCustomColors());
     let orderDraft = [...getAVColorOrder()];
     const builtinDraft = cloneInlineStyles();
+    const modifiedBuiltinIndexes = new Set<number>();
     const usedIndexes = new Set(options.data.usedCustomColorIndexes || []);
     const properties = getProperties("av");
     let editingColorIndex: number | undefined;
@@ -93,6 +96,10 @@ export const openAVCustomColorDialog = (options: {
     const getListKeys = () => normalizeAVColorOrder(orderDraft, draft);
     const findCustomColor = (index: number) => draft.find(item => item.index === index);
     const getBuiltinEntry = (key: string) => createBuiltinDialogEntry("av", Number(key), builtinDraft);
+    const writeBuiltinDraft = (entry: ReturnType<typeof createBuiltinDialogEntry>) => {
+        writeBuiltinEntry(builtinDraft, "av", entry);
+        modifiedBuiltinIndexes.add(Number(entry.key));
+    };
 
     const builtinEditor = bindBuiltinEditor(builtinEditorPanel, "av", () =>
         editingBuiltinKey ? getBuiltinEntry(editingBuiltinKey) : undefined);
@@ -177,7 +184,7 @@ export const openAVCustomColorDialog = (options: {
 
     const confirmEditor = () => {
         if (editingBuiltinKey) {
-            writeBuiltinEntry(builtinDraft, "av", builtinEditor.commit(getBuiltinEntry(editingBuiltinKey)));
+            writeBuiltinDraft(builtinEditor.commit(getBuiltinEntry(editingBuiltinKey)));
             showList();
             return;
         }
@@ -227,7 +234,7 @@ export const openAVCustomColorDialog = (options: {
         if (itemElement.dataset.kind === "builtin") {
             const entry = getBuiltinEntry(itemElement.dataset.key);
             entry.show = switchElement.checked;
-            writeBuiltinEntry(builtinDraft, "av", entry);
+            writeBuiltinDraft(entry);
             itemElement.querySelector('[data-action="resetItem"]')?.classList.toggle("fn__none", isEntryDefault(entry, properties));
             return;
         }
@@ -260,13 +267,13 @@ export const openAVCustomColorDialog = (options: {
         } else if (action === "resetItem" && key) {
             const entry = getBuiltinEntry(key);
             resetEntry(entry, properties);
-            writeBuiltinEntry(builtinDraft, "av", entry);
+            writeBuiltinDraft(entry);
             renderList();
         } else if (action === "reset") {
             if (editingBuiltinKey) {
                 const entry = getBuiltinEntry(editingBuiltinKey);
                 resetEntry(entry, properties);
-                writeBuiltinEntry(builtinDraft, "av", entry);
+                writeBuiltinDraft(entry);
                 showBuiltinEditor(editingBuiltinKey);
             }
         } else if (action === "delete" && key) {
@@ -297,15 +304,25 @@ export const openAVCustomColorDialog = (options: {
                     colors: cloneCustomColors(draft),
                     order: normalizeAVColorOrder(orderDraft, draft),
                 };
-                const response = await saveInlineStyles(builtinDraft);
+                const response = await saveWorkspaceAVPalette(builtinDraft.av,
+                    Array.from(modifiedBuiltinIndexes).map(index => {
+                        const color = builtinDraft.builtin.colors.find(item => item.index === index);
+                        return {
+                            index,
+                            customized: !!color,
+                            light: color?.light || {},
+                            dark: color?.dark || {},
+                            hidden: builtinDraft.builtin.hidden.av.includes(index),
+                        };
+                    }));
                 if (response?.code !== 0) {
                     showMessage(response?.msg || window.siyuan.languages.invalid, 6000, "error");
                     saving = false;
                     actionElement.removeAttribute("disabled");
                     return;
                 }
-                options.data.customColors = builtinDraft.av.colors;
-                options.data.colorOrder = builtinDraft.av.order;
+                options.data.customColors = cloneCustomColors(getInlineStylesCache().av.colors);
+                options.data.colorOrder = [...getInlineStylesCache().av.order];
                 void import("../../../util/assets").then(module => module.setInlineStyle());
                 dialog.destroy();
             } catch (error) {

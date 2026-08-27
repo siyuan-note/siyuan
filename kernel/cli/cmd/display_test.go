@@ -10,6 +10,56 @@ package cmd
 
 import "testing"
 
+func TestResolvePath(t *testing.T) {
+	paths := map[string]string{
+		"/parent":       "/20260827000000-parent1.sy",
+		"/parent/child": "/20260827000000-parent1/20260827000001-child01.sy",
+	}
+	lookup := func(hPath string) (string, bool) {
+		p, found := paths[hPath]
+		return p, found
+	}
+	tests := []struct {
+		name     string
+		userPath string
+		hPath    string
+		want     string
+		wantErr  bool
+	}{
+		{name: "explicit internal path", userPath: "/explicit.sy", hPath: "/missing", want: "/explicit.sy"},
+		{name: "default root", want: "/"},
+		{name: "root hpath", hPath: "/", want: "/"},
+		{name: "relative root hpath", hPath: ".", want: "/"},
+		{name: "existing hpath", hPath: "/parent", want: "/20260827000000-parent1.sy"},
+		{name: "relative hpath", hPath: "parent", want: "/20260827000000-parent1.sy"},
+		{name: "hpath with trailing slash", hPath: "/parent/", want: "/20260827000000-parent1.sy"},
+		{
+			name:  "nested hpath",
+			hPath: "/parent/child",
+			want:  "/20260827000000-parent1/20260827000001-child01.sy",
+		},
+		{name: "missing hpath", hPath: "/missing", wantErr: true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := resolvePathWithLookup(test.userPath, test.hPath, lookup)
+			if test.wantErr {
+				if nil == err {
+					t.Fatalf("expected an error, got path %q", got)
+				}
+				return
+			}
+			if nil != err {
+				t.Fatalf("resolve path failed: %v", err)
+			}
+			if got != test.want {
+				t.Fatalf("unexpected path: got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
 func TestResolveDocumentMovePath(t *testing.T) {
 	paths := map[string]string{
 		"/parent":         "/20260726000000-parent1.sy",

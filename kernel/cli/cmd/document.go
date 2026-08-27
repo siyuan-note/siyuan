@@ -46,7 +46,11 @@ var documentListCmd = &cobra.Command{
 		if notebook == "" {
 			return fmt.Errorf("--notebook is required")
 		}
-		files, _, err := model.ListDocTree(notebook, resolvePath(notebook, docPath, hpath), 0, false, false, 128)
+		listPath, err := resolvePath(notebook, docPath, hpath)
+		if err != nil {
+			return err
+		}
+		files, _, err := model.ListDocTree(notebook, listPath, 0, false, false, 128)
 		if err != nil {
 			return err
 		}
@@ -292,16 +296,32 @@ var documentInfoCmd = &cobra.Command{
 	},
 }
 
-func resolvePath(boxID, userPath, hpath string) string {
-	if userPath != "" {
-		return userPath
-	}
-	if hpath != "" {
-		if bt := treenode.GetBlockTreeRootByHPath(boxID, hpath); bt != nil {
-			return strings.TrimSuffix(bt.Path, ".sy") + "/"
+func resolvePath(boxID, userPath, hpath string) (string, error) {
+	return resolvePathWithLookup(userPath, hpath, func(targetHPath string) (string, bool) {
+		bt := treenode.GetBlockTreeRootByHPath(boxID, targetHPath)
+		if nil == bt {
+			return "", false
 		}
+		return bt.Path, true
+	})
+}
+
+func resolvePathWithLookup(userPath, hpath string, lookup func(string) (string, bool)) (string, error) {
+	if "" != userPath {
+		return userPath, nil
 	}
-	return "/"
+	if "" == hpath {
+		return "/", nil
+	}
+
+	targetHPath := path.Clean("/" + strings.TrimPrefix(hpath, "/"))
+	if "/" == targetHPath {
+		return "/", nil
+	}
+	if targetPath, found := lookup(targetHPath); found {
+		return targetPath, nil
+	}
+	return "", fmt.Errorf("target human-readable path not found: %s", targetHPath)
 }
 
 func resolveDocumentMovePath(boxID, userPath, hpath, sourceHPath string) (string, error) {

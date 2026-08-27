@@ -50,7 +50,7 @@ func writeSkillToolTestFile(t *testing.T, file, content string) {
 	}
 }
 
-func TestSkillLoadFormatsActivationAndRawResource(t *testing.T) {
+func TestSkillLoadResolvesVariablesOnlyInInstructions(t *testing.T) {
 	skillsRoot := setSkillToolTestEnvironment(t)
 	skillDir := filepath.Join(skillsRoot, "skill-dir")
 	writeSkillToolTestFile(t, filepath.Join(skillDir, "SKILL.md"),

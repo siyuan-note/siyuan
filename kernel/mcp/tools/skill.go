@@ -101,10 +101,12 @@ func skillLoad(args map[string]any) (CallToolResult, error) {
 
 	var result string
 	if loaded.ResourcePath == "" {
-		// 变量（非敏感）仅在技能正文注入对话时解析；资源文件必须保持原文。
+		// 变量（非敏感）在技能正文注入对话时解析。
+		// 资源可能包含脚本或模板，因此只解析技能正文，避免误改资源内容。
 		loaded.Content = model.Conf.Variables.Resolve(loaded.Content)
 		result = formatSkillContent(loaded)
 	} else {
+		// 不做变量解析注入，避免误杀 $NAME ${NAME} 等 reference 文件中常见模式
 		result = formatSkillResource(loaded)
 	}
 	return CallToolResult{

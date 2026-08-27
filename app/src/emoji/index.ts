@@ -13,13 +13,13 @@ import {getLuteInstance} from "../protyle/render/setLute";
 import * as dayjs from "dayjs";
 import {
     bindDynamicIconTarget,
-    genEmojiImageHTML,
     getIconSearchText,
     getIconValueKind,
     getNetworkIconName,
     normalizeNetworkIconURL,
     normalizeRecentIconValue,
     parseBase64Image,
+    unicode2Emoji,
     updateRecentIconValues,
 } from "./iconValue";
 import {showMessage} from "../dialog/message";
@@ -35,6 +35,9 @@ import {
     type TEmojiPanelPageMode,
     type TRandomEmojiScope,
 } from "./panel";
+import {updateFileTreeItemIcon} from "./fileTreeIcon";
+
+export {unicode2Emoji};
 
 export const getRandomEmoji = (scope: TRandomEmojiScope = "all") => {
     const categories = getRandomEmojiCategories(window.siyuan.emojis, scope);
@@ -43,35 +46,6 @@ export const getRandomEmoji = (scope: TRandomEmojiScope = "all") => {
     }
     const category = categories[getRandom(0, categories.length - 1)];
     return category.items[getRandom(0, category.items.length - 1)].unicode;
-};
-
-export const unicode2Emoji = (unicode: string, className = "", needSpan = false, lazy = false) => {
-    if (!unicode) {
-        return "";
-    }
-    let emoji = "";
-    const imageHTML = genEmojiImageHTML(unicode, className, lazy);
-    if (imageHTML) {
-        emoji = Lute.Sanitize(imageHTML);
-    } else {
-        try {
-            unicode.split("-").forEach(item => {
-                if (item.length < 5) {
-                    emoji += String.fromCodePoint(parseInt("0" + item, 16));
-                } else {
-                    emoji += String.fromCodePoint(parseInt(item, 16));
-                }
-            });
-        } catch (e) {
-            // 自定义表情搜索报错 https://github.com/siyuan-note/siyuan/issues/5883
-            // 这里忽略错误不做处理
-        }
-        emoji = Lute.Sanitize(emoji);
-        if (needSpan) {
-            emoji = `<span class="${className}">${emoji}</span>`;
-        }
-    }
-    return emoji;
 };
 
 const genEmojiButton = (unicode: string, label: string, lazy = false) => {
@@ -1602,8 +1576,9 @@ export const updateFileTreeEmoji = (unicode: string, id: string, icon = "iconFil
         }
     }
     /// #endif
-    if (emojiElement) {
-        emojiElement.innerHTML = unicode2Emoji(unicode || (!isNotebookIcon ? (emojiElement.previousElementSibling.classList.contains("fn__hidden") ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder) : window.siyuan.storage[Constants.LOCAL_IMAGES].note));
+    const liElement = emojiElement?.closest("li") as HTMLElement | null;
+    if (liElement) {
+        updateFileTreeItemIcon(liElement, unicode, isNotebookIcon ? "notebook" : undefined);
     }
 };
 

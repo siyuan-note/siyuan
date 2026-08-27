@@ -1,4 +1,6 @@
 {
+	"useSVGDefaultIcon": "Używaj domyślnych ikon SVG",
+	"useSVGDefaultIconTip": "Używaj ikon SVG dla notatników i dokumentów bez niestandardowej ikony",
 	"bootAppearance": "Wygląd strony startowej",
 	"bootAppearanceTip": "Wybierz wygląd strony startowej dostarczony przez zainstalowaną wtyczkę; po ponownym uruchomieniu obowiązuje tylko na tym urządzeniu",
 	"monospaceFont": "Czcionka o stałej szerokości",

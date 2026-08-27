@@ -586,6 +586,7 @@ func setFiletree(c *gin.Context) {
 
 	fileTree := conf.NewFileTree()
 	fileTree.BoxDocEnabled = nil
+	fileTree.UseSVGDefaultIcon = nil
 	if err = gulu.JSON.UnmarshalJSON(param, fileTree); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -596,6 +597,13 @@ func setFiletree(c *gin.Context) {
 			fileTree.BoxDocEnabled = model.Conf.FileTree.BoxDocEnabled
 		} else {
 			fileTree.BoxDocEnabled = new(bool)
+		}
+	}
+	if nil == fileTree.UseSVGDefaultIcon {
+		if nil != model.Conf.FileTree && nil != model.Conf.FileTree.UseSVGDefaultIcon {
+			fileTree.UseSVGDefaultIcon = model.Conf.FileTree.UseSVGDefaultIcon
+		} else {
+			fileTree.UseSVGDefaultIcon = new(bool)
 		}
 	}
 	oldBoxDocEnabled := model.IsBoxDocEnabled()

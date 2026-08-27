@@ -1,4 +1,6 @@
 {
+	"useSVGDefaultIcon": "Utiliser les icônes SVG par défaut",
+	"useSVGDefaultIconTip": "Utiliser des icônes SVG pour les carnets et les documents sans icône personnalisée",
 	"bootAppearance": "Apparence de la page de démarrage",
 	"bootAppearanceTip": "Choisissez une apparence de page de démarrage fournie par une extension installée ; elle ne s’applique qu’à cet appareil après le redémarrage",
 	"monospaceFont": "Police à chasse fixe",

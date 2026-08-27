@@ -1,4 +1,6 @@
 {
+	"useSVGDefaultIcon": "Používať predvolené ikony SVG",
+	"useSVGDefaultIconTip": "Používať ikony SVG pre zápisníky a dokumenty bez vlastnej ikony",
 	"bootAppearance": "Vzhľad úvodnej stránky",
 	"bootAppearanceTip": "Vyberte vzhľad úvodnej stránky poskytovaný nainštalovaným doplnkom; po reštarte sa použije iba na tomto zariadení",
 	"monospaceFont": "Písmo s pevnou šírkou",

@@ -1,4 +1,6 @@
 {
+	"useSVGDefaultIcon": "Standaard SVG-pictogrammen gebruiken",
+	"useSVGDefaultIconTip": "SVG-pictogrammen gebruiken voor notitieboeken en documenten zonder aangepast pictogram",
 	"bootAppearance": "Uiterlijk van de opstartpagina",
 	"bootAppearanceTip": "Kies een uiterlijk voor de opstartpagina dat door een geïnstalleerde plug-in wordt geleverd; dit geldt na opnieuw opstarten alleen voor dit apparaat",
 	"monospaceFont": "Monospacelettertype",

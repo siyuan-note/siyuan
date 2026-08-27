@@ -1,4 +1,6 @@
 {
+	"useSVGDefaultIcon": "기본 SVG 아이콘 사용",
+	"useSVGDefaultIconTip": "사용자 지정 아이콘이 없는 노트북과 문서에 SVG 아이콘 사용",
 	"bootAppearance": "시작 페이지 모양",
 	"bootAppearanceTip": "설치된 플러그인이 제공하는 시작 페이지 모양을 선택하며 다시 시작한 후 이 기기에만 적용됩니다",
 	"monospaceFont": "고정폭 글꼴",

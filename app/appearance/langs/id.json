@@ -1,4 +1,6 @@
 {
+	"useSVGDefaultIcon": "Gunakan ikon SVG bawaan",
+	"useSVGDefaultIconTip": "Gunakan ikon SVG untuk buku catatan dan dokumen tanpa ikon khusus",
 	"bootAppearance": "Tampilan halaman mulai",
 	"bootAppearanceTip": "Pilih tampilan halaman mulai yang disediakan oleh plugin terpasang; pilihan hanya berlaku di perangkat ini setelah dimulai ulang",
 	"monospaceFont": "Font monospace",

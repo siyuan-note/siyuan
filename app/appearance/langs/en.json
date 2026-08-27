@@ -1,4 +1,6 @@
 {
+	"useSVGDefaultIcon": "Use SVG default icons",
+	"useSVGDefaultIconTip": "Use SVG icons for notebooks and documents without a custom icon",
 	"bootAppearance": "Startup appearance",
 	"bootAppearanceTip": "Choose a startup appearance provided by an installed plugin; it applies only to this device after restart",
 	"monospaceFont": "Monospace Font",

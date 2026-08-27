@@ -27,6 +27,7 @@ type FileTree struct {
 	DocIconClickExpand       bool   `json:"docIconClickExpand"`       // 单击文档或笔记本图标时展开或折叠下级文档
 	ParentDocClickExpand     bool   `json:"parentDocClickExpand"`     // 单击父文档标题时展开或折叠下级文档
 	BoxDocEnabled            *bool  `json:"boxDocEnabled"`            // 是否启用顶层笔记本文档
+	UseSVGDefaultIcon        *bool  `json:"useSVGDefaultIcon"`        // 是否使用 SVG 默认图标
 	RefCreateSaveBox         string `json:"refCreateSaveBox"`         // 块引时新建文档存储笔记本
 	RefCreateSavePath        string `json:"refCreateSavePath"`        // 块引时新建文档存储路径
 	DocCreateSaveBox         string `json:"docCreateSaveBox"`         // 新建文档存储笔记本
@@ -56,6 +57,7 @@ func NewFileTree() *FileTree {
 		DocIconClickExpand:       false,
 		ParentDocClickExpand:     false,
 		BoxDocEnabled:            new(bool),
+		UseSVGDefaultIcon:        new(true),
 		Sort:                     util.SortModeCustom,
 		MaxListCount:             512,
 		MaxOpenTabCount:          8,

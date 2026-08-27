@@ -1,4 +1,6 @@
 {
+	"useSVGDefaultIcon": "Usar iconos SVG predeterminados",
+	"useSVGDefaultIconTip": "Usar iconos SVG para cuadernos y documentos sin un icono personalizado",
 	"bootAppearance": "Apariencia de la página de inicio",
 	"bootAppearanceTip": "Elige una apariencia de página de inicio proporcionada por un complemento instalado; solo se aplica a este dispositivo después de reiniciar",
 	"monospaceFont": "Fuente monoespaciada",

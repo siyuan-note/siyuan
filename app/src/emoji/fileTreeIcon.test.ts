@@ -61,7 +61,7 @@ after(() => {
 
 describe("file tree icon", () => {
     it("renders the configured SVG defaults", () => {
-        assert.match(getFileTreeIconHTML("", "notebook", "", false, true), /#iconFilesRoot/);
+        assert.match(getFileTreeIconHTML("", "notebook", "", false, true), /#iconNotebook/);
         assert.match(getFileTreeIconHTML("", "folder", "", false, true), /#iconFileText/);
         assert.match(getFileTreeIconHTML("", "file", "", false, true), /#iconFile/);
     });

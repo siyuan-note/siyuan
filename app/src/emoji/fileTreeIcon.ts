@@ -5,7 +5,7 @@ import {unicode2Emoji} from "./iconValue";
 export type TFileTreeDefaultIcon = "notebook" | "folder" | "file";
 
 const FILE_TREE_SVG_ICONS: Record<TFileTreeDefaultIcon, string> = {
-    notebook: "iconFilesRoot",
+    notebook: "iconNotebook",
     folder: "iconFileText",
     file: "iconFile",
 };

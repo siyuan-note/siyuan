@@ -35,6 +35,18 @@ func testAttributeViewCustomColor(index int, lightColor, lightBackground, darkCo
 	}
 }
 
+func withWorkspacePalette(t *testing.T, colors *[]*AttributeViewCustomColor) {
+	t.Helper()
+	old := LoadWorkspacePalette
+	t.Cleanup(func() { LoadWorkspacePalette = old })
+	LoadWorkspacePalette = func() ([]*AttributeViewCustomColor, []string) {
+		if colors == nil {
+			return nil, nil
+		}
+		return *colors, DefaultAttributeViewColorOrder(*colors)
+	}
+}
+
 func TestFilterColorValuePreservesPaletteIndex(t *testing.T) {
 	for _, color := range []string{"", "1", "14"} {
 		if filtered := FilterColorValue(color); filtered != color {
@@ -106,24 +118,29 @@ func TestNormalizeAttributeViewCustomColors(t *testing.T) {
 	if err = json.Unmarshal(data, &fields); nil != err {
 		t.Fatalf("unmarshal custom color fields failed: %s", err)
 	}
-	if 3 != len(fields) || nil == fields["index"] || nil == fields["light"] || nil == fields["dark"] {
-		t.Fatalf("custom color JSON must contain only index/light/dark: %s", data)
+	if nil == fields["index"] || nil == fields["light"] || nil == fields["dark"] {
+		t.Fatalf("custom color JSON is missing required fields: %s", data)
+	}
+	for key := range fields {
+		if key != "index" && key != "light" && key != "dark" && key != "hidden" {
+			t.Fatalf("unexpected custom color JSON field [%s]: %s", key, data)
+		}
 	}
 
-	invalidView := &AttributeView{ID: "20260824120000-colors1", Spec: CurrentSpec}
-	invalidView.CustomColors = []*AttributeViewCustomColor{
+	if _, err = NormalizeAttributeViewCustomColors([]*AttributeViewCustomColor{
 		testAttributeViewCustomColor(14, "#000000", "#ffffff", "#000000", "#ffffff"),
-	}
-	if err = SaveAttributeView(invalidView); nil == err {
-		t.Fatal("save attribute view accepted an invalid custom palette")
+	}, true); nil == err {
+		t.Fatal("invalid custom palette index was accepted")
 	}
 }
 
 func TestAttributeViewCustomColorIndexes(t *testing.T) {
-	attrView := &AttributeView{CustomColors: []*AttributeViewCustomColor{
+	palette := []*AttributeViewCustomColor{
 		testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c"),
 		testAttributeViewCustomColor(17, "#111213", "#141516", "#171819", "#1a1b1c"),
-	}}
+	}
+	withWorkspacePalette(t, &palette)
+	attrView := &AttributeView{}
 	if 16 != attrView.NextCustomColorIndex() {
 		t.Fatalf("expected the smallest free custom color index, got %d", attrView.NextCustomColorIndex())
 	}
@@ -159,9 +176,34 @@ func TestAttributeViewCustomColorIndexes(t *testing.T) {
 	if 16 != attrView.NextCustomColorIndex() {
 		t.Fatalf("existing gaps were unexpectedly reordered, got next index %d", attrView.NextCustomColorIndex())
 	}
-	attrView.CustomColors = attrView.CustomColors[1:]
-	if 15 != attrView.NextCustomColorIndex() || 17 != attrView.CustomColors[0].Index {
-		t.Fatalf("deleting a color reordered stable indexes: %+v", attrView.CustomColors)
+	palette = palette[1:]
+	if 15 != attrView.NextCustomColorIndex() || 17 != palette[0].Index {
+		t.Fatalf("deleting a color reordered stable indexes: %+v", palette)
+	}
+}
+
+func TestResolveDirectColorsLoadsWorkspacePaletteOnce(t *testing.T) {
+	color := testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c")
+	old := LoadWorkspacePalette
+	t.Cleanup(func() { LoadWorkspacePalette = old })
+	calls := 0
+	LoadWorkspacePalette = func() ([]*AttributeViewCustomColor, []string) {
+		calls++
+		return []*AttributeViewCustomColor{color}, []string{"15", "1"}
+	}
+	attrView := &AttributeView{
+		KeyValues: []*KeyValues{{
+			Key:    &Key{ID: "select", Type: KeyTypeSelect, Options: []*SelectOption{{Color: "15"}, {Color: "15"}}},
+			Values: []*Value{{MSelect: []*ValueSelect{{Color: "15"}, {Color: "15"}}}},
+		}},
+		Views: []*View{{
+			GroupKey: &Key{ID: "select", Type: KeyTypeSelect, Options: []*SelectOption{{Color: "15"}}},
+			GroupVal: &Value{MSelect: []*ValueSelect{{Color: "15"}}},
+		}},
+	}
+	attrView.ResolveDirectColors()
+	if calls != 1 {
+		t.Fatalf("workspace palette was loaded %d times, want 1", calls)
 	}
 }
 
@@ -231,14 +273,15 @@ func TestResolvedColorCannotBeLoadedFromJSON(t *testing.T) {
 	}
 
 	attrView := &AttributeView{
-		CustomColors: []*AttributeViewCustomColor{
-			testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c"),
-		},
 		KeyValues: []*KeyValues{{
 			Key:    &Key{Options: []*SelectOption{option}},
 			Values: []*Value{{Type: KeyTypeSelect, MSelect: []*ValueSelect{selection}}},
 		}},
 	}
+	palette := []*AttributeViewCustomColor{
+		testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c"),
+	}
+	withWorkspacePalette(t, &palette)
 	attrView.ResolveDirectColors()
 	if nil == option.ResolvedColor || nil == selection.ResolvedColor {
 		t.Fatal("direct option and value colors were not resolved from the validated palette")
@@ -271,10 +314,9 @@ func TestGroupResolvedColorSurvivesPersistenceRoundTrip(t *testing.T) {
 	selectKey := &Key{ID: "select", Type: KeyTypeSelect}
 	selectKey.Options = []*SelectOption{{Name: "Group", Color: "15"}}
 	attrView := &AttributeView{
-		Spec:         CurrentSpec,
-		ID:           "20260824120000-colors2",
-		CustomColors: []*AttributeViewCustomColor{testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c")},
-		KeyValues:    []*KeyValues{{Key: selectKey}},
+		Spec:      CurrentSpec,
+		ID:        "20260824120000-colors2",
+		KeyValues: []*KeyValues{{Key: selectKey}},
 		Views: []*View{{
 			ID:         "view",
 			LayoutType: LayoutTypeTable,
@@ -285,6 +327,10 @@ func TestGroupResolvedColorSurvivesPersistenceRoundTrip(t *testing.T) {
 			}},
 		}},
 	}
+	palette := []*AttributeViewCustomColor{
+		testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c"),
+	}
+	withWorkspacePalette(t, &palette)
 	attrView.ResolveDirectColors()
 	if nil == attrView.Views[0].Groups[0].GroupVal.MSelect[0].ResolvedColor {
 		t.Fatal("group value color was not initially resolved")
@@ -308,5 +354,45 @@ func TestGroupResolvedColorSurvivesPersistenceRoundTrip(t *testing.T) {
 	groupValue := parsed.Views[0].Groups[0].GroupVal.MSelect[0]
 	if nil == groupValue.ResolvedColor || "#010203" != groupValue.ResolvedColor.Light.Color {
 		t.Fatalf("group value color was not resolved after persistence round trip: %+v", groupValue)
+	}
+}
+
+func TestNormalizeAttributeViewColorOrder(t *testing.T) {
+	color := testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c")
+	color.Hidden = true
+	got := NormalizeAttributeViewColorOrder([]string{"15", "1", "15", "99", "14"}, []*AttributeViewCustomColor{color})
+	if 15 != len(got) || "15" != got[0] || "1" != got[1] || "14" != got[2] || "2" != got[3] || "13" != got[len(got)-1] {
+		t.Fatalf("unexpected mixed color order: %+v", got)
+	}
+
+	normalized, err := NormalizeAttributeViewCustomColors([]*AttributeViewCustomColor{color}, true)
+	if nil != err {
+		t.Fatalf("normalize hidden custom color failed: %s", err)
+	}
+	if 1 != len(normalized) || !normalized[0].Hidden {
+		t.Fatalf("custom color hidden flag was not preserved: %+v", normalized)
+	}
+
+	defaults := DefaultAttributeViewColorOrder(normalized)
+	if BuiltinColorCount+1 != len(defaults) || "1" != defaults[0] || "14" != defaults[BuiltinColorCount-1] ||
+		"15" != defaults[len(defaults)-1] {
+		t.Fatalf("unexpected default color order: %+v", defaults)
+	}
+}
+
+func TestResolveColorUsesWorkspacePalette(t *testing.T) {
+	old := LoadWorkspacePalette
+	t.Cleanup(func() { LoadWorkspacePalette = old })
+	LoadWorkspacePalette = func() ([]*AttributeViewCustomColor, []string) {
+		return []*AttributeViewCustomColor{testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c")}, nil
+	}
+
+	attrView := &AttributeView{}
+	if 16 != attrView.NextCustomColorIndex() {
+		t.Fatalf("workspace palette was not considered: %d", attrView.NextCustomColorIndex())
+	}
+	resolved := attrView.ResolveColor("15")
+	if nil == resolved || "#010203" != resolved.Light.Color {
+		t.Fatalf("workspace palette was not resolved: %+v", resolved)
 	}
 }

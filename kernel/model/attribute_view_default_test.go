@@ -162,13 +162,18 @@ func TestAddingDefaultValueResolvesCustomSelectColor(t *testing.T) {
 	selectKey.Options = []*av.SelectOption{{
 		Name: "Custom", Color: "15",
 	}}
-	attrView.CustomColors = []*av.AttributeViewCustomColor{{
-		Index: 15,
-		AttributeViewColor: av.AttributeViewColor{
-			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
-			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
-		},
-	}}
+	if _, _, err := SetInlineStylesData(&InlineStyles{
+		Version: InlineStylesVersion,
+		AV: &InlineStyleAV{Colors: []*av.AttributeViewCustomColor{{
+			Index: 15,
+			AttributeViewColor: av.AttributeViewColor{
+				Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
+				Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+			},
+		}}},
+	}); err != nil {
+		t.Fatal(err)
+	}
 	view := attrView.Views[0]
 	view.Filters = []*av.ViewFilter{{
 		Column:   selectKey.ID,

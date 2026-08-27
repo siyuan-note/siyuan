@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "Usar el color predeterminado del tema",
 	"useSVGDefaultIcon": "Usar iconos SVG",
 	"useSVGDefaultIconTip": "Usar iconos SVG para cuadernos y documentos sin un icono personalizado",
 	"bootAppearance": "Apariencia de la página de inicio",
@@ -6,9 +7,7 @@
 	"monospaceFont": "Fuente monoespaciada",
 	"monospaceFontTip": "Se utiliza para bloques de código, código en línea y números de línea de bloques de código; si no se selecciona ninguna fuente, se usa la fuente del tema",
 	"manageColors": "Gestionar colores",
-	"manageBuiltinColors": "Gestionar colores integrados",
 	"showInColorPicker": "Mostrar en el selector de color",
-	"resetAll": "Restablecer todo",
 	"exportFile": "Exportar archivo",
 	"namingEmpty": "El nombre no puede estar vacío",
 	"recentCreated": "Creados recientemente",

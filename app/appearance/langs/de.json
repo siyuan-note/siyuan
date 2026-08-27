@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "Standardfarbe des Designs verwenden",
 	"useSVGDefaultIcon": "SVG-Symbole verwenden",
 	"useSVGDefaultIconTip": "SVG-Symbole für Notizbücher und Dokumente ohne benutzerdefiniertes Symbol verwenden",
 	"bootAppearance": "Erscheinungsbild der Startseite",
@@ -6,9 +7,7 @@
 	"monospaceFont": "Festbreitenschrift",
 	"monospaceFontTip": "Wird für Codeblöcke, Inline-Code und Codeblock-Zeilennummern verwendet; wenn keine Schrift ausgewählt ist, wird die Schrift des Themes verwendet",
 	"manageColors": "Farben verwalten",
-	"manageBuiltinColors": "Integrierte Farben verwalten",
 	"showInColorPicker": "In der Farbauswahl anzeigen",
-	"resetAll": "Alle zurücksetzen",
 	"exportFile": "Datei exportieren",
 	"namingEmpty": "Der Name darf nicht leer sein",
 	"recentCreated": "Kürzlich erstellt",

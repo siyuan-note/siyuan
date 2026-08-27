@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "テーマのデフォルト色を使用",
 	"useSVGDefaultIcon": "SVG アイコンを使用",
 	"useSVGDefaultIconTip": "カスタムアイコンがないノートブックと文書に SVG アイコンを使用",
 	"bootAppearance": "起動画面の外観",
@@ -6,9 +7,7 @@
 	"monospaceFont": "等幅フォント",
 	"monospaceFontTip": "コードブロック、インラインコード、コードブロックの行番号に使用され、フォントが選択されていない場合はテーマのフォントが使用されます",
 	"manageColors": "色を管理",
-	"manageBuiltinColors": "組み込み色を管理",
 	"showInColorPicker": "カラーピッカーに表示",
-	"resetAll": "すべてリセット",
 	"exportFile": "ファイルをエクスポート",
 	"namingEmpty": "名前を空にすることはできません",
 	"recentCreated": "最近作成",

@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "Utiliser la couleur par défaut du thème",
 	"useSVGDefaultIcon": "Utiliser les icônes SVG",
 	"useSVGDefaultIconTip": "Utiliser des icônes SVG pour les carnets et les documents sans icône personnalisée",
 	"bootAppearance": "Apparence de la page de démarrage",
@@ -6,9 +7,7 @@
 	"monospaceFont": "Police à chasse fixe",
 	"monospaceFontTip": "Utilisée pour les blocs de code, le code en ligne et les numéros de ligne des blocs de code ; si aucune police n’est sélectionnée, la police du thème est utilisée",
 	"manageColors": "Gérer les couleurs",
-	"manageBuiltinColors": "Gérer les couleurs intégrées",
 	"showInColorPicker": "Afficher dans le sélecteur de couleurs",
-	"resetAll": "Tout réinitialiser",
 	"exportFile": "Exporter le fichier",
 	"namingEmpty": "Le nom ne peut pas être vide",
 	"recentCreated": "Récemment créés",

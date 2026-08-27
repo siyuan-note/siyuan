@@ -1009,6 +1009,10 @@ func (r *ValueRollup) BuildContents(attrView *AttributeView, destKey *Key, relat
 	if nil == attrView {
 		return
 	}
+	var customColors []*AttributeViewCustomColor
+	if KeyTypeSelect == destKey.Type || KeyTypeMSelect == destKey.Type {
+		customColors, _ = attrView.customColorPalette()
+	}
 	for _, blockID := range relationVal.Relation.BlockIDs {
 		if nil != context && nil != context.EligibleItemIDs && !context.EligibleItemIDs[blockID] {
 			continue
@@ -1049,7 +1053,7 @@ func (r *ValueRollup) BuildContents(attrView *AttributeView, destKey *Key, relat
 
 		cloned := destVal.Clone()
 		if KeyTypeSelect == destKey.Type || KeyTypeMSelect == destKey.Type {
-			resolveValueSelectColors(cloned, attrView)
+			resolveValueSelectColors(cloned, customColors)
 		}
 		r.Contents = append(r.Contents, cloned)
 	}

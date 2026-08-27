@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "테마 기본 색상 사용",
 	"useSVGDefaultIcon": "SVG 아이콘 사용",
 	"useSVGDefaultIconTip": "사용자 지정 아이콘이 없는 노트북과 문서에 SVG 아이콘 사용",
 	"bootAppearance": "시작 페이지 모양",
@@ -6,9 +7,7 @@
 	"monospaceFont": "고정폭 글꼴",
 	"monospaceFontTip": "코드 블록, 인라인 코드 및 코드 블록 줄 번호에 사용되며 글꼴을 선택하지 않으면 테마의 글꼴을 사용합니다",
 	"manageColors": "색상 관리",
-	"manageBuiltinColors": "기본 제공 색상 관리",
 	"showInColorPicker": "색상 선택기에 표시",
-	"resetAll": "모두 초기화",
 	"exportFile": "파일 내보내기",
 	"namingEmpty": "이름은 비워 둘 수 없습니다",
 	"recentCreated": "최근 생성",

@@ -19,6 +19,7 @@ import {
     AV_MANAGE_CUSTOM_COLORS_TYPE,
     applyAVColorPalette,
     getAVColorGridHTML,
+    getAVColorOrder,
     getAVColorStyle,
     getAVCustomColors,
     getAVResolvedColor,
@@ -276,7 +277,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     if (menu.isOpen) {
         return;
     }
-    applyAVColorPalette(menu.element, getAVCustomColors(data));
+    applyAVColorPalette(menu.element, getAVCustomColors());
     menu.addItem({
         iconHTML: "",
         type: "empty",
@@ -402,7 +403,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     });
     menu.addSeparator();
     const html = `<div class="fn__flex fn__flex-wrap" style="width:238px;max-height:238px;overflow:auto">${getAVColorGridHTML(
-        getAVCustomColors(data), color, window.siyuan.languages.manageColors)}</div>`;
+        getAVCustomColors(), color, window.siyuan.languages.manageColors, getAVColorOrder())}</div>`;
     menu.addItem({
         type: "empty",
         iconHTML: "",
@@ -458,7 +459,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                 if (item.name === name) {
                                     item.name = inputElement.value;
                                     item.color = newColor;
-                                    item.resolvedColor = getAVResolvedColor(data, newColor);
+                                    item.resolvedColor = getAVResolvedColor(newColor);
                                     return true;
                                 }
                             });
@@ -484,7 +485,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                 if (item.content === name) {
                                     item.content = inputElement.value;
                                     item.color = newColor;
-                                    item.resolvedColor = getAVResolvedColor(data, newColor);
+                                    item.resolvedColor = getAVResolvedColor(newColor);
                                     return true;
                                 }
                             });
@@ -606,7 +607,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
     const resolvedColor = colData.options.find(option => option.name === currentElement.dataset.name)?.resolvedColor ||
-        getAVResolvedColor(data, currentElement.dataset.color);
+        getAVResolvedColor(currentElement.dataset.color);
     let mSelectValue: IAVCellSelectValue[];
     const batchMode = getAVBatchEditMode(cellElements[0]);
     cellElements.forEach((item, index) => {

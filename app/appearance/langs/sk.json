@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "Použiť predvolenú farbu témy",
 	"useSVGDefaultIcon": "Používať ikony SVG",
 	"useSVGDefaultIconTip": "Používať ikony SVG pre zápisníky a dokumenty bez vlastnej ikony",
 	"bootAppearance": "Vzhľad úvodnej stránky",
@@ -6,9 +7,7 @@
 	"monospaceFont": "Písmo s pevnou šírkou",
 	"monospaceFontTip": "Používa sa pre bloky kódu, riadkový kód a čísla riadkov v blokoch kódu; ak nie je vybrané žiadne písmo, použije sa písmo témy",
 	"manageColors": "Spravovať farby",
-	"manageBuiltinColors": "Spravovať vstavané farby",
 	"showInColorPicker": "Zobraziť vo výbere farieb",
-	"resetAll": "Obnoviť všetko",
 	"exportFile": "Exportovať súbor",
 	"namingEmpty": "Názov nemôže byť prázdny",
 	"recentCreated": "Nedávno vytvorené",

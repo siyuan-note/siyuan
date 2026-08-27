@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "Temanın varsayılan rengini kullan",
 	"useSVGDefaultIcon": "SVG simgelerini kullan",
 	"useSVGDefaultIconTip": "Özel simgesi olmayan not defterleri ve belgeler için SVG simgelerini kullan",
 	"bootAppearance": "Başlangıç sayfası görünümü",
@@ -6,9 +7,7 @@
 	"monospaceFont": "Eş aralıklı yazı tipi",
 	"monospaceFontTip": "Kod blokları, satır içi kod ve kod bloğu satır numaraları için kullanılır; hiçbir yazı tipi seçilmediğinde temanın yazı tipi kullanılır",
 	"manageColors": "Renkleri yönet",
-	"manageBuiltinColors": "Yerleşik renkleri yönet",
 	"showInColorPicker": "Renk seçicide göster",
-	"resetAll": "Tümünü sıfırla",
 	"exportFile": "Dosyayı dışa aktar",
 	"namingEmpty": "Ad boş olamaz",
 	"recentCreated": "Yakın zamanda oluşturulanlar",

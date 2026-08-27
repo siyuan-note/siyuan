@@ -1,5 +1,5 @@
 {
-	"useSVGDefaultIcon": "Varsayılan SVG simgelerini kullan",
+	"useSVGDefaultIcon": "SVG simgelerini kullan",
 	"useSVGDefaultIconTip": "Özel simgesi olmayan not defterleri ve belgeler için SVG simgelerini kullan",
 	"bootAppearance": "Başlangıç sayfası görünümü",
 	"bootAppearanceTip": "Yüklü bir eklentinin sağladığı başlangıç sayfası görünümünü seçin; yeniden başlatıldıktan sonra yalnızca bu cihazda uygulanır",

@@ -1,5 +1,5 @@
 {
-	"useSVGDefaultIcon": "Usar ícones SVG padrão",
+	"useSVGDefaultIcon": "Usar ícones SVG",
 	"useSVGDefaultIconTip": "Usar ícones SVG para cadernos e documentos sem um ícone personalizado",
 	"bootAppearance": "Aparência da tela de inicialização",
 	"bootAppearanceTip": "Escolha uma aparência da tela de inicialização fornecida por um plugin instalado; ela se aplica somente a este dispositivo após reiniciar",

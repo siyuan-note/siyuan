@@ -1,5 +1,5 @@
 {
-	"useSVGDefaultIcon": "Usa icone SVG predefinite",
+	"useSVGDefaultIcon": "Usa icone SVG",
 	"useSVGDefaultIconTip": "Usa icone SVG per taccuini e documenti senza un'icona personalizzata",
 	"bootAppearance": "Aspetto della pagina di avvio",
 	"bootAppearanceTip": "Scegli un aspetto della pagina di avvio fornito da un plugin installato; si applica solo a questo dispositivo dopo il riavvio",

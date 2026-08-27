@@ -1,5 +1,5 @@
 {
-	"useSVGDefaultIcon": "デフォルトの SVG アイコンを使用",
+	"useSVGDefaultIcon": "SVG アイコンを使用",
 	"useSVGDefaultIconTip": "カスタムアイコンがないノートブックと文書に SVG アイコンを使用",
 	"bootAppearance": "起動画面の外観",
 	"bootAppearanceTip": "インストール済みのプラグインが提供する起動画面の外観を選択し、再起動後にこのデバイスだけに適用します",

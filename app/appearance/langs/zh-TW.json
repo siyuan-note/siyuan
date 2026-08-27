@@ -1,5 +1,5 @@
 {
-	"useSVGDefaultIcon": "使用 SVG 預設圖示",
+	"useSVGDefaultIcon": "使用 SVG 圖示",
 	"useSVGDefaultIconTip": "為未自訂圖示的筆記本與文件使用 SVG 圖示",
 	"bootAppearance": "啟動頁外觀",
 	"bootAppearanceTip": "選擇已安裝外掛提供的啟動頁外觀，僅在重新啟動後套用於目前裝置",

@@ -107,6 +107,47 @@ describe("asset upload plugin event", () => {
         second.task.complete({status: "canceled"});
     });
 
+    it("generates a request identifier without crypto.randomUUID", () => {
+        const cryptoDescriptor = Object.getOwnPropertyDescriptor(globalThis, "crypto");
+        const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, "window");
+        const nativeCrypto = globalThis.crypto;
+        const insecureCrypto = {
+            getRandomValues: nativeCrypto.getRandomValues.bind(nativeCrypto),
+        } as unknown as Crypto;
+        try {
+            Object.defineProperty(globalThis, "crypto", {configurable: true, value: insecureCrypto});
+            Object.defineProperty(globalThis, "window", {
+                configurable: true,
+                value: {crypto: insecureCrypto},
+            });
+            const prepared = prepareAssetUpload({
+                plugins: [],
+                protyle,
+                input: {kind: "files", files: [createFile("a.png")]},
+                context,
+            });
+
+            if (prepared instanceof Promise) {
+                assert.fail("Expected plugin-free preparation to complete synchronously");
+            }
+            assert.equal(prepared.state, "ready");
+            assert.match(prepared.task.requestId,
+                /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+            prepared.task.complete({status: "canceled"});
+        } finally {
+            if (cryptoDescriptor) {
+                Object.defineProperty(globalThis, "crypto", cryptoDescriptor);
+            } else {
+                Reflect.deleteProperty(globalThis, "crypto");
+            }
+            if (windowDescriptor) {
+                Object.defineProperty(globalThis, "window", windowDescriptor);
+            } else {
+                Reflect.deleteProperty(globalThis, "window");
+            }
+        }
+    });
+
     it("isolates local file input from listener mutations", async () => {
         const originalFile: ILocalFiles = {path: "a.png", size: 1};
         const prepared = await prepareAssetUpload({

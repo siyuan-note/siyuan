@@ -29,6 +29,12 @@ const getInlineSVGBlocks = (root: ParentNode) => new Set(Array.from(root.querySe
 export const validateHTMLEmbeddedAssetSizes = (root: ParentNode, maxBytes?: number) => {
     const svgBlocks = getInlineSVGBlocks(root);
     let totalBytes = 0;
+    svgBlocks.forEach(element => {
+        const svg = element.querySelector("svg")!;
+        const size = new Blob([svg.outerHTML]).size;
+        assertBase64ImageItemSize(size, maxBytes);
+        totalBytes = addBase64ImageBatchSize(totalBytes, size);
+    });
     root.querySelectorAll("[href], [src]").forEach(element => {
         if (Array.from(svgBlocks).some(block => block.contains(element))) {
             return;

@@ -185,6 +185,29 @@ describe("HTML embedded assets", () => {
         assert.equal(hasHTMLEmbeddedAssets(root), true);
     });
 
+    it("counts inline SVG bytes against the item limit", () => {
+        const svgHTML = "<svg><text>inline image</text></svg>";
+        const block = {
+            hasAttributes() {
+                return true;
+            },
+            querySelector() {
+                return {outerHTML: svgHTML};
+            },
+        } as unknown as Element;
+        const root = {
+            querySelectorAll(selector: string) {
+                return selector === "pre" ? [block] : [];
+            },
+        } as unknown as ParentNode;
+        const size = new Blob([svgHTML]).size;
+
+        assert.throws(() => validateHTMLEmbeddedAssetSizes(root, size - 1),
+            (error: unknown) => isBase64ImageSizeLimitError(error) && error.scope === "item" &&
+                error.actualBytes === size && error.maxBytes === size - 1);
+        assert.doesNotThrow(() => validateHTMLEmbeddedAssetSizes(root, size));
+    });
+
     it("collects inline SVG blocks and replaces them with uploaded images", () => {
         const attributes = new Map<string, string>();
         const image = {

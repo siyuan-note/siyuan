@@ -16,9 +16,15 @@ export const createUploadInsertPosition = (range: Range, context?: Record<string
 };
 
 export const isUploadInsertPositionAvailable = (editorElement: Element, position?: IUploadInsertPosition) => {
-    return !!position &&
+    return editorElement.isConnected && !!position &&
         editorElement.contains(position.startContainer) &&
         editorElement.contains(position.endContainer) &&
         editorElement.contains(position.range.startContainer) &&
         editorElement.contains(position.range.endContainer);
+};
+
+export const getAvailableUploadInsertRange = (editorElement: Element, position?: IUploadInsertPosition) => {
+    if (isUploadInsertPositionAvailable(editorElement, position)) {
+        return position.range.cloneRange();
+    }
 };

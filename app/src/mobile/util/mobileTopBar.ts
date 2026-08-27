@@ -12,6 +12,23 @@ const getTopBarElements = () => {
     return topBarElements;
 };
 
+export const restoreMobileTopBarLayout = () => {
+    const topBarElement = document.getElementById("mobileTopBar");
+    if (!topBarElement) {
+        return;
+    }
+    if (mergedBreadcrumbSpace) {
+        mergedBreadcrumbSpace.classList.remove("protyle-breadcrumb__space--mobile-title");
+        mergedBreadcrumbSpace = undefined;
+    }
+    getTopBarElements().forEach((element) => {
+        if (element.parentElement !== topBarElement) {
+            topBarElement.appendChild(element);
+        }
+    });
+    document.body.classList.remove("mobile-topbar--merged");
+};
+
 export const updateMobileTopBarLayout = () => {
     const topBarElement = document.getElementById("mobileTopBar");
     const editorElement = document.getElementById("editor");

@@ -89,6 +89,30 @@ func TestResolveHTMLClipboardContentBeforeAssetProcessing(t *testing.T) {
 	}
 }
 
+func TestPrepareHTMLClipboardContentFreezesNormalizedHTML(t *testing.T) {
+	htmlWithCommentImage := `<p>kept</p><div style="mso-element:comment-list"><p class="MsoCommentText">` +
+		`<img src="data:image/png;base64,removed"></p></div>`
+	noMath := func(string, string, string) (string, bool) { return "", false }
+	noOfficeMath := func(string) (string, bool) { return "", false }
+	normalizedHTML, useHTML := prepareHTMLClipboardContent(util.NewLute(), htmlWithCommentImage, "", "", "", "", "",
+		false, noMath, noOfficeMath)
+	if !useHTML || !strings.Contains(normalizedHTML, "kept") || strings.Contains(normalizedHTML, "data:image") {
+		t.Fatalf("unexpected normalized HTML: useHTML=%v dom=%q", useHTML, normalizedHTML)
+	}
+
+	preparedHTML, useHTML := prepareHTMLClipboardContent(util.NewLute(), normalizedHTML, "", "ignored", "", "", "",
+		true, func(string, string, string) (string, bool) {
+			t.Fatal("prepared HTML should not run clipboard math conversion")
+			return "", false
+		}, func(string) (string, bool) {
+			t.Fatal("prepared HTML should not run Office HTML math conversion")
+			return "", false
+		})
+	if !useHTML || preparedHTML != normalizedHTML {
+		t.Fatalf("prepared HTML changed: useHTML=%v dom=%q", useHTML, preparedHTML)
+	}
+}
+
 func TestConvertClipboardMathMixedWPS(t *testing.T) {
 	wps := buildWPSClipboard(t, `<w:document xmlns:w="urn:w" xmlns:m="urn:m"><w:body><m:oMath/></w:body></w:document>`, "")
 	pandocJSON := `{"pandoc-api-version":[1,23,1,2],"meta":{},"blocks":[{"t":"Para","c":[{"t":"Str","c":"123"}]},{"t":"Para","c":[{"t":"Math","c":[{"t":"DisplayMath"},"\\frac{S}{N}"]}]},{"t":"Para","c":[{"t":"Str","c":"456"}]}]}`

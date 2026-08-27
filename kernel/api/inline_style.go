@@ -95,3 +95,48 @@ func setInlineStyles(c *gin.Context) {
 		util.ReloadPublishServiceSessions()
 	}
 }
+
+func setWorkspaceAVPalette(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	var app string
+	var colors, order, builtinColors []any
+	if !util.ParseJsonArgs(arg, ret,
+		util.BindJsonArg("colors", &colors, true, false),
+		util.BindJsonArg("order", &order, true, false),
+		util.BindJsonArg("builtinColors", &builtinColors, false, false),
+		util.BindJsonArg("app", &app, false, false),
+	) {
+		return
+	}
+	data, err := gulu.JSON.MarshalJSON(arg)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	update := &model.WorkspaceAVPaletteUpdate{}
+	if err = gulu.JSON.UnmarshalJSON(data, update); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	saved, changed, err := model.SetWorkspaceAVPalette(update)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = saved
+	if changed {
+		evt := util.NewCmdResult("reloadInlineStyles", 0, util.PushModeBroadcastMainExcludeSelfApp)
+		evt.AppId = app
+		util.PushEvent(evt)
+		util.ReloadPublishServiceSessions()
+	}
+}

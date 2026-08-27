@@ -31,15 +31,14 @@ import {
     getBuiltinInlineStyleIDFromValue,
     getBuiltinInlineStylePreview,
     getBuiltinInlineStylePropertyValue,
+    getInlineStyleByID,
     getInlineStyleByValue,
     getInlineStyleIDFromValue,
     getInlineStylePreview,
     getInlineStylesCache,
-    getInlineStyleType,
-    getVisibleBuiltinInlineStyleIDs,
+    getVisibleOrderedStyleKeys,
     isBuiltinInlineStyleVisible,
-    INLINE_BACKGROUND_COLORS,
-    INLINE_FONT_COLORS,
+    isBuiltinOrderKey,
     TBuiltinInlineStyleID,
     TInlineStyleType,
 } from "../../protyle/toolbar/inlineStyle";
@@ -380,55 +379,51 @@ const getBuiltinStyleCSS = (id: TBuiltinInlineStyleID) =>
     `background-color: ${getBuiltinInlineStylePropertyValue(id, "backgroundColor")};`;
 
 export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
-    let colorHTML = "";
-    INLINE_FONT_COLORS.forEach((item, index) => {
-        if (index > 0 && !isBuiltinInlineStyleVisible("color", index)) {
-            return;
-        }
-        colorHTML += `<button class="keyboard__slash-item" data-type="color">
-    <span class="keyboard__slash-icon" ${item ? `style="color:${item}"` : ""}>A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${item ? index : window.siyuan.languages.default}</span>
+    const renderOrderedItems = (type: TInlineStyleType) => {
+        const data = getInlineStylesCache();
+        return getVisibleOrderedStyleKeys(type, data).map(key => {
+            if (isBuiltinOrderKey(type, key)) {
+                if (type === "color") {
+                    const index = Number(key);
+                    return `<button class="keyboard__slash-item" data-type="color">
+    <span class="keyboard__slash-icon" style="color:var(--b3-font-color${index})">A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${index}</span>
 </button>`;
-    });
-    let bgHTML = "";
-    INLINE_BACKGROUND_COLORS.forEach((item, index) => {
-        if (index > 0 && !isBuiltinInlineStyleVisible("backgroundColor", index)) {
-            return;
-        }
-        bgHTML += `<button class="keyboard__slash-item" data-type="backgroundColor">
-    <span class="keyboard__slash-icon" ${item ? `style="background-color:${item}"` : ""}>A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${item ? index : window.siyuan.languages.default}</span>
+                }
+                if (type === "backgroundColor") {
+                    const index = Number(key);
+                    return `<button class="keyboard__slash-item" data-type="backgroundColor">
+    <span class="keyboard__slash-icon" style="background-color:var(--b3-font-background${index})">A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${index}</span>
 </button>`;
-    });
-    let builtinStyleHTML = "";
-    getVisibleBuiltinInlineStyleIDs().forEach(id => {
-        const preview = getBuiltinInlineStylePreview(id);
-        builtinStyleHTML += `<button class="keyboard__slash-item" data-type="style1">
+                }
+                const preview = getBuiltinInlineStylePreview(key as TBuiltinInlineStyleID);
+                return `<button class="keyboard__slash-item" data-type="style1">
     <span class="keyboard__slash-icon" style="color:${preview.color};background-color:${preview.backgroundColor};">A</span>
-    <span class="keyboard__slash-text">${getBuiltinStyleLabel(id)}</span>
+    <span class="keyboard__slash-text">${getBuiltinStyleLabel(key as TBuiltinInlineStyleID)}</span>
 </button>`;
-    });
-    let customColorHTML = "";
-    let customBackgroundHTML = "";
-    let customStyleHTML = "";
-    getInlineStylesCache().styles.forEach(style => {
-        const type = getInlineStyleType(style);
-        if (!type) {
-            return;
-        }
-        const preview = getInlineStylePreview(style);
-        const html = `<button class="keyboard__slash-item" data-type="${type}" data-inline-style-id="${style.id}">
+            }
+            const style = getInlineStyleByID(key, data);
+            if (!style) {
+                return "";
+            }
+            const preview = getInlineStylePreview(style);
+            return `<button class="keyboard__slash-item" data-type="${type}" data-inline-style-id="${style.id}">
     <span class="keyboard__slash-icon" style="${preview.color ? `color:${preview.color};` : ""}${preview.backgroundColor ? `background-color:${preview.backgroundColor};` : ""}">A</span>
     <span class="keyboard__slash-text">${escapeHtml(style.name)}</span>
 </button>`;
-        if (type === "color") {
-            customColorHTML += html;
-        } else if (type === "backgroundColor") {
-            customBackgroundHTML += html;
-        } else {
-            customStyleHTML += html;
-        }
-    });
+        }).join("");
+    };
+    let colorHTML = `<button class="keyboard__slash-item" data-type="color">
+    <span class="keyboard__slash-icon">A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${window.siyuan.languages.default}</span>
+</button>`;
+    colorHTML += renderOrderedItems("color");
+    let bgHTML = `<button class="keyboard__slash-item" data-type="backgroundColor">
+    <span class="keyboard__slash-icon">A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${window.siyuan.languages.default}</span>
+</button>`;
+    bgHTML += renderOrderedItems("backgroundColor");
     const getManageHTML = (type: TInlineStyleType) => window.siyuan.config.readonly || window.siyuan.isPublish ? "" :
         `<button class="keyboard__slash-item" data-action="manageInlineStyle" data-inline-style-type="${type}">
     <svg class="keyboard__slash-icon"><use xlink:href="#iconSettings"></use></svg>
@@ -523,20 +518,17 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         <span class="keyboard__slash-icon">A</span>
         <span class="keyboard__slash-text">${window.siyuan.languages.color} ${window.siyuan.languages.default}</span>
     </button>
-    ${builtinStyleHTML}
-    ${customStyleHTML}
+    ${renderOrderedItems("style1")}
     ${getManageHTML("style1")}
 </div>
 <div data-id="colorFont" class="keyboard__slash-title">${window.siyuan.languages.colorFont}</div>
 <div data-id="colorFontWrap" class="keyboard__slash-block">
     ${colorHTML}
-    ${customColorHTML}
     ${getManageHTML("color")}
 </div>
 <div data-id="colorPrimary" class="keyboard__slash-title">${window.siyuan.languages.colorPrimary}</div>
 <div data-id="colorPrimaryWrap" class="keyboard__slash-block">
     ${bgHTML}
-    ${customBackgroundHTML}
     ${getManageHTML("backgroundColor")}
 </div>
 <div data-id="fontStyle" class="keyboard__slash-title">${window.siyuan.languages.fontStyle}</div>

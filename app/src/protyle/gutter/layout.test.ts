@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getBacklinkGutterContentTop, getFixedGutterPosition, getGutterMarginHeight} from "./layout";
+import {
+    getBacklinkGutterContentTop,
+    getContainerGutterSpace,
+    getFixedGutterPosition,
+    getGutterMarginHeight
+} from "./layout";
 
 describe("getGutterMarginHeight", () => {
     it("uses the natural height after heading gutter buttons wrap", () => {
@@ -40,5 +45,18 @@ describe("getFixedGutterPosition", () => {
 
     it("converts viewport coordinates to transformed container coordinates", () => {
         assert.equal(getFixedGutterPosition(860, 640), 220);
+    });
+});
+
+describe("getContainerGutterSpace", () => {
+    it("compensates for container padding when a child rectangle positions the gutter", () => {
+        assert.equal(getContainerGutterSpace("NodeBlockquote", false), 10);
+        assert.equal(getContainerGutterSpace("NodeCallout", false), 10);
+    });
+
+    it("does not offset a gutter already positioned from the container rectangle", () => {
+        assert.equal(getContainerGutterSpace("NodeBlockquote", true), 0);
+        assert.equal(getContainerGutterSpace("NodeCallout", true), 0);
+        assert.equal(getContainerGutterSpace("NodeParagraph", false), 0);
     });
 });

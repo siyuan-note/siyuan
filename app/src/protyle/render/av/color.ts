@@ -1,10 +1,20 @@
 import {escapeAttr} from "../../../util/escape";
-import {getVisibleBuiltinColorIndexes} from "../../toolbar/inlineStyle";
+import {
+    AV_BUILTIN_COLOR_COUNT,
+    AV_CUSTOM_COLOR_LIMIT,
+    AV_CUSTOM_COLOR_MAX,
+    AV_CUSTOM_COLOR_MIN,
+    getInlineStylesCache,
+    getVisibleBuiltinColorIndexes,
+    isBuiltinInlineStyleVisible,
+} from "../../toolbar/inlineStyle";
 
-export const AV_BUILTIN_COLOR_COUNT = 14;
-export const AV_CUSTOM_COLOR_MIN = 15;
-export const AV_CUSTOM_COLOR_MAX = 78;
-export const AV_CUSTOM_COLOR_LIMIT = 64;
+export {
+    AV_BUILTIN_COLOR_COUNT,
+    AV_CUSTOM_COLOR_LIMIT,
+    AV_CUSTOM_COLOR_MAX,
+    AV_CUSTOM_COLOR_MIN,
+};
 export const AV_MANAGE_CUSTOM_COLORS_TYPE = "manageAVCustomColors";
 
 type TAVColorReference = string | {
@@ -35,6 +45,12 @@ const isResolvedColor = (color: IAVColor | undefined): color is IAVColor => !!co
 
 const getModeColor = (light: string, dark: string) => `light-dark(${light}, ${dark})`;
 
+const cssVarsForIndex = (index: number) =>
+    `background-color:var(--b3-font-background${index});color:var(--b3-font-color${index})`;
+
+const hasWorkspaceCustomColor = (index: number) =>
+    getInlineStylesCache().av.colors.some(item => item.index === index);
+
 export const getAVColorStyle = (value: TAVColorReference) => {
     const reference = getColorReference(value);
     if (isResolvedColor(reference.resolvedColor)) {
@@ -42,9 +58,14 @@ export const getAVColorStyle = (value: TAVColorReference) => {
             reference.resolvedColor.dark.backgroundColor)};color:${getModeColor(reference.resolvedColor.light.color,
             reference.resolvedColor.dark.color)}`;
     }
-    const normalizedIndex = normalizeAVColorIndex(reference.color || AV_BUILTIN_COLOR_COUNT);
-    const index = normalizedIndex > AV_BUILTIN_COLOR_COUNT ? AV_BUILTIN_COLOR_COUNT : normalizedIndex;
-    return `background-color:var(--b3-font-background${index});color:var(--b3-font-color${index})`;
+    const index = normalizeAVColorIndex(reference.color || AV_BUILTIN_COLOR_COUNT);
+    if (index > AV_BUILTIN_COLOR_COUNT && hasWorkspaceCustomColor(index)) {
+        return cssVarsForIndex(index);
+    }
+    if (index > AV_BUILTIN_COLOR_COUNT) {
+        return cssVarsForIndex(AV_BUILTIN_COLOR_COUNT);
+    }
+    return cssVarsForIndex(index);
 };
 
 export const getAVBackgroundColor = (value: TAVColorReference) => {
@@ -54,11 +75,20 @@ export const getAVBackgroundColor = (value: TAVColorReference) => {
             reference.resolvedColor.dark.backgroundColor);
     }
     const index = normalizeAVColorIndex(reference.color || AV_BUILTIN_COLOR_COUNT);
-    return `var(--b3-font-background${index > AV_BUILTIN_COLOR_COUNT ? AV_BUILTIN_COLOR_COUNT : index})`;
+    if (index > AV_BUILTIN_COLOR_COUNT && hasWorkspaceCustomColor(index)) {
+        return `var(--b3-font-background${index})`;
+    }
+    if (index > AV_BUILTIN_COLOR_COUNT) {
+        return `var(--b3-font-background${AV_BUILTIN_COLOR_COUNT})`;
+    }
+    return `var(--b3-font-background${index})`;
 };
 
 export const getNextAVOptionColor = (optionCount: number) => {
-    const colors = [...getVisibleBuiltinColorIndexes("av"), AV_BUILTIN_COLOR_COUNT];
+    const colors = getVisibleBuiltinColorIndexes("av");
+    if (colors.length === 0) {
+        return AV_BUILTIN_COLOR_COUNT.toString();
+    }
     return colors[Math.max(0, optionCount) % colors.length].toString();
 };
 
@@ -76,23 +106,60 @@ const normalizeAVCustomColors = (colors: IAVCustomColor[]) => colors
     .sort((a, b) => a.index - b.index)
     .slice(0, AV_CUSTOM_COLOR_LIMIT);
 
-export const getAVCustomColors = (data: IAV | undefined) => normalizeAVCustomColors(data?.customColors || []);
+export const getDefaultAVColorOrder = (customColors: Pick<IAVCustomColor, "index">[] = []) => [
+    ...Array.from({length: AV_BUILTIN_COLOR_COUNT}, (_, index) => (index + 1).toString()),
+    ...normalizeAVCustomColors(customColors as IAVCustomColor[]).map(item => item.index.toString()),
+];
 
-export const getAVResolvedColor = (data: IAV | undefined, color: string) => {
+export const normalizeAVColorOrder = (order: string[] | undefined, customColors: Pick<IAVCustomColor, "index">[] = []) => {
+    const allowed = new Set(getDefaultAVColorOrder(customColors));
+    const result: string[] = [];
+    const seen = new Set<string>();
+    (order || []).forEach(key => {
+        if (typeof key !== "string" || !allowed.has(key) || seen.has(key)) {
+            return;
+        }
+        seen.add(key);
+        result.push(key);
+    });
+    getDefaultAVColorOrder(customColors).forEach(key => {
+        if (!seen.has(key)) {
+            result.push(key);
+        }
+    });
+    return result;
+};
+
+export const getAVCustomColors = () => getInlineStylesCache().av.colors;
+
+export const getAVColorOrder = () =>
+    normalizeAVColorOrder(getInlineStylesCache().av.order, getAVCustomColors());
+
+export const getAVResolvedColor = (color: string) => {
     const index = normalizeAVColorIndex(color);
-    return getAVCustomColors(data).find(item => item.index === index);
+    return getAVCustomColors().find(item => item.index === index);
 };
 
 export const getAVColorGridHTML = (customColors: IAVCustomColor[], currentColor: string,
-                                   manageLabel: string) => {
+                                   manageLabel: string, order?: string[]) => {
     const currentIndex = normalizeAVColorIndex(currentColor);
-    const colors: TAVColorReference[] = [...getVisibleBuiltinColorIndexes("av"), AV_BUILTIN_COLOR_COUNT]
-        .map(index => ({color: index.toString()}));
-    normalizeAVCustomColors(customColors).forEach(item => {
-        colors.push({
-            color: item.index.toString(),
-            resolvedColor: item,
-        });
+    const colors: TAVColorReference[] = [];
+    const customByIndex = new Map(normalizeAVCustomColors(customColors).map(item => [item.index.toString(), item]));
+    normalizeAVColorOrder(order, customColors).forEach(key => {
+        const index = Number(key);
+        if (index >= 1 && index <= AV_BUILTIN_COLOR_COUNT) {
+            if (isBuiltinInlineStyleVisible("av", index)) {
+                colors.push({color: key});
+            }
+            return;
+        }
+        const custom = customByIndex.get(key);
+        if (custom && !custom.hidden) {
+            colors.push({
+                color: custom.index.toString(),
+                resolvedColor: custom,
+            });
+        }
     });
     const colorHTML = colors.map(item => {
         const reference = getColorReference(item);

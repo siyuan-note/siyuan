@@ -1,5 +1,6 @@
 import type {EventBus, IEventBusSafeEmitResult} from "../../plugin/EventBusCore";
 import {emitWithErrors, eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
+import {genUUID} from "../../util/genID";
 
 export interface IAssetUploadEventContext {
     source: TAssetUploadSource;
@@ -40,16 +41,14 @@ class AssetUploadTimeoutError extends Error {
 
 export const ASSET_UPLOAD_PLUGIN_TIMEOUT = 120_000;
 
-let requestSequence = 0;
 const waitingTasksByProtyle = new WeakMap<IProtyle, Set<AssetUploadTask>>();
 const waitingTasksByPlugin = new WeakMap<IAssetUploadPlugin, Set<AssetUploadTask>>();
 const activeTasksByProtyle = new WeakMap<IProtyle, Set<AssetUploadTask>>();
 const completionTasksByPlugin = new WeakMap<IAssetUploadPlugin, Set<AssetUploadTask>>();
+const unloadingPlugins = new WeakSet<IAssetUploadPlugin>();
 
-const genRequestId = () => {
-    requestSequence++;
-    return `${Date.now()}-${requestSequence}`;
-};
+const genRequestId = () => typeof globalThis.crypto.randomUUID === "function" ?
+    globalThis.crypto.randomUUID() : genUUID();
 
 const cloneInput = (input: IAssetUploadInput): IAssetUploadInput => {
     if (input.kind === "files") {
@@ -277,6 +276,7 @@ export const cancelAssetUploads = (protyle: IProtyle) => {
 };
 
 export const cancelAssetUploadsByPlugin = (plugin: IAssetUploadPlugin) => {
+    unloadingPlugins.add(plugin);
     Array.from(completionTasksByPlugin.get(plugin) || []).forEach(task => task.removeCompleteCallbacks(plugin));
     cancelWaitingTasks(waitingTasksByPlugin.get(plugin), `Plugin ${plugin.name || ""} was unloaded`.trim());
 };
@@ -341,7 +341,8 @@ export const prepareAssetUpload = (options: {
     if (!hasPluginSubscriber("before-upload-assets")) {
         return {state: "ready", task};
     }
-    const plugins = Array.from(options.plugins).filter(plugin => eventBusHas(plugin.eventBus, "before-upload-assets"));
+    const plugins = Array.from(options.plugins).filter(plugin => !unloadingPlugins.has(plugin) &&
+        eventBusHas(plugin.eventBus, "before-upload-assets"));
     if (plugins.length === 0) {
         return {state: "ready", task};
     }
@@ -355,6 +356,9 @@ export const prepareAssetUpload = (options: {
             return {state: "ready", task};
         }
         const plugin = plugins[index];
+        if (unloadingPlugins.has(plugin)) {
+            return processPlugin(index + 1);
+        }
         task.startWaiting(plugins.slice(index));
         const pluginLabel = getPluginLabel(plugin, index);
         let response: PromiseLike<IAssetUploadDecision> | undefined;
@@ -393,6 +397,9 @@ export const prepareAssetUpload = (options: {
                 onComplete(callback) {
                     if (!acceptingRegistrations) {
                         console.error(new Error(`Plugin ${pluginLabel} must register onComplete synchronously`));
+                        return;
+                    }
+                    if (unloadingPlugins.has(plugin)) {
                         return;
                     }
                     task.addCompleteCallback(plugin, callback);

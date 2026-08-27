@@ -7,6 +7,7 @@ import type {SettingTabBuilder} from "../setting/builder";
 import {controlNumber, controlSelect, controlString} from "../setting/control";
 import {genConfigItemName} from "../render/fragments";
 import {genButtonHtml, genNumberInputHtml} from "../render/render";
+import {refreshDefaultFileTreeIcons} from "../../emoji/fileTreeIcon";
 /// #if !MOBILE
 import {getAllModels} from "../../layout/getAll";
 /// #endif
@@ -309,6 +310,13 @@ const registerFileManagementGroup = (tab: SettingTabBuilder) => {
 const registerFileOthersGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("others", window.siyuan.languages.configGroupOthers);
 
+    group.switch("fileTree.useSVGDefaultIcon", {
+        title: window.siyuan.languages.useSVGDefaultIcon,
+        desc: window.siyuan.languages.useSVGDefaultIconTip,
+        save: (value) => fileConfigApi.patch("useSVGDefaultIcon", value, () => {
+            refreshDefaultFileTreeIcons();
+        }),
+    });
     group.switch("fileTree.boxDocEnabled", {
         title: window.siyuan.languages.boxDocEnabled,
         desc: window.siyuan.languages.boxDocEnabledTip,

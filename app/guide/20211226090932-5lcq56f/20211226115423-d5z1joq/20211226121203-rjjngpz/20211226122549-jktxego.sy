@@ -34,6 +34,56 @@
 			]
 		},
 		{
+			"ID": "20260826175526-t6w2r9x",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260826175526-t6w2r9x",
+				"updated": "20260826175526"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "編輯器中按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可進入或退出目前區塊的選取狀態。區塊處於選取狀態時，可直接按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "A"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 在所選區塊後插入空區塊，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "B"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 在所選區塊前插入空區塊。對於可編輯區塊，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可退出區塊選取狀態並將游標移至區塊末尾。"
+				}
+			]
+		},
+		{
 			"ID": "20211226122652-0t4c1qf",
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,

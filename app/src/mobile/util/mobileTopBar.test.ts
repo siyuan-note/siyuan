@@ -1,6 +1,6 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {updateMobileTopBarLayout} from "./mobileTopBar";
+import {restoreMobileTopBarLayout, updateMobileTopBarLayout} from "./mobileTopBar";
 
 class TestClassList {
     private classes = new Set<string>();
@@ -91,10 +91,22 @@ describe("mobile top bar layout", () => {
             assert.equal(breadcrumbSpace.classList.contains("protyle-breadcrumb__space--mobile-title"), true);
             assert.deepEqual(breadcrumbSpace.children, [toolbarName, toolbarNameReadonly, toolbarSync]);
 
+            restoreMobileTopBarLayout();
+            assert.equal(bodyElement.classList.contains("mobile-topbar--merged"), false);
+            assert.equal(breadcrumbSpace.classList.contains("protyle-breadcrumb__space--mobile-title"), false);
+            assert.deepEqual(topBarElement.children, [toolbarName, toolbarNameReadonly, toolbarSync]);
+
+            const replacementBreadcrumbSpace = new TestElement();
+            editorElement.breadcrumbSpace = replacementBreadcrumbSpace;
+            updateMobileTopBarLayout();
+            assert.equal(bodyElement.classList.contains("mobile-topbar--merged"), true);
+            assert.equal(replacementBreadcrumbSpace.classList.contains("protyle-breadcrumb__space--mobile-title"), true);
+            assert.deepEqual(replacementBreadcrumbSpace.children, [toolbarName, toolbarNameReadonly, toolbarSync]);
+
             landscape = false;
             updateMobileTopBarLayout();
             assert.equal(bodyElement.classList.contains("mobile-topbar--merged"), false);
-            assert.equal(breadcrumbSpace.classList.contains("protyle-breadcrumb__space--mobile-title"), false);
+            assert.equal(replacementBreadcrumbSpace.classList.contains("protyle-breadcrumb__space--mobile-title"), false);
             assert.deepEqual(topBarElement.children, [toolbarName, toolbarNameReadonly, toolbarSync]);
 
             landscape = true;

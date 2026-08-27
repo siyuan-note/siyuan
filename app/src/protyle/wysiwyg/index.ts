@@ -200,6 +200,8 @@ import {shouldOpenListItemAttr} from "./listContext";
 import {getBlockEdgeCaretRange, isCaretRangeInsideElement} from "./blockEdgeCaret";
 import {LargeListVirtualizer} from "./listVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {syncRootAttributes} from "../util/syncRootAttributes";
+import {isDirectCalloutStructureClick} from "./calloutClick";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -345,9 +347,12 @@ export class WYSIWYG {
     public element: HTMLDivElement;
     public preventKeyup: boolean;
 
+    private protyle: IProtyle;
+    private rootCustomAttributes = new Set<string>();
     private preventClick: boolean;
     private preventInput: boolean;
     private copyAsRichText = false;
+    private mouseDownTarget: EventTarget | null = null;
     private inputTimeout: number;
     private pendingInputTimeouts = new Map<number, () => void | Promise<void>>();
     public tableControl: TableControl;
@@ -454,6 +459,7 @@ export class WYSIWYG {
     }
 
     constructor(protyle: IProtyle) {
+        this.protyle = protyle;
         this.element = document.createElement("div");
         this.element.className = "protyle-wysiwyg";
         this.element.setAttribute("spellcheck", "false");
@@ -486,6 +492,7 @@ export class WYSIWYG {
     }
 
     public renderCustom(ial: Record<string, string>) {
+        syncRootAttributes(this.protyle.element, this.rootCustomAttributes, ial, this.protyle.block.rootID);
         let isFullWidth = ial[Constants.CUSTOM_SY_FULLWIDTH];
         if (!isFullWidth) {
             isFullWidth = window.siyuan.config.editor.fullWidth ? "true" : "false";
@@ -1059,6 +1066,7 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            this.mouseDownTarget = event.target;
             // 常规划选时排除属性占位，三击时恢复以保留浏览器的整段选择行为
             this.element.classList.toggle("protyle-wysiwyg--select-attr", event.button === 0 && event.detail > 2);
             if (protyle.toolbar.isMultiSelectMode()) {
@@ -4926,12 +4934,23 @@ export class WYSIWYG {
 
             // 需在工具栏渲染前记录鼠标释放位置，避免浮层覆盖选区末端
             const pointerElement = document.elementFromPoint(event.clientX, event.clientY);
+            const isDirectCalloutClick = isDirectCalloutStructureClick(this.mouseDownTarget, event.target,
+                pointerElement);
             setTimeout(() => {
                 // 选中后，在选中的文字上点击需等待 range 更新
                 let newRange = getEditorRange(this.element);
                 const calloutElement = ["callout", "callout-info", "callout-content"].some(className =>
                     event.target.classList.contains(className)) ? hasClosestBlock(event.target) : false;
-                if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutElement) {
+                const calloutInfoElement = event.target.classList.contains("callout-info") ? event.target : undefined;
+                if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutInfoElement &&
+                    isDirectCalloutClick) {
+                    const calloutTitleElement = calloutInfoElement.querySelector<HTMLElement>(".callout-title");
+                    if (calloutTitleElement) {
+                        const titleLength = calloutTitleElement.textContent.length;
+                        newRange = focusByOffset(calloutTitleElement, titleLength, titleLength) || newRange;
+                    }
+                } else if (!protyle.disabled && !event.shiftKey && !ctrlIsPressed && calloutElement &&
+                    isDirectCalloutClick) {
                     // 提示块结构区域不可编辑，点击后将光标定位到首个可编辑子块
                     // https://github.com/siyuan-note/siyuan/issues/16310
                     newRange = focusBlock(calloutElement) || newRange;

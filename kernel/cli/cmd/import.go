@@ -49,13 +49,17 @@ var importMdCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		targetPath, err := resolvePath(notebook, toPath, hpath)
+		if err != nil {
+			return err
+		}
 
 		if dryRun {
 			fmt.Printf("[dry-run] Would import Markdown from \"%s\" to notebook %s\n", filePath, notebook)
 			return nil
 		}
 
-		if err := model.ImportFromLocalPath(notebook, absPath, resolvePath(notebook, toPath, hpath)); err != nil {
+		if err := model.ImportFromLocalPath(notebook, absPath, targetPath); err != nil {
 			return formatNotebookWriteError(notebook, err)
 		}
 		model.AppendPushReloadFiletreeEntry()
@@ -83,13 +87,17 @@ var importSYCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		targetPath, err := resolvePath(notebook, toPath, hpath)
+		if err != nil {
+			return err
+		}
 
 		if dryRun {
 			fmt.Printf("[dry-run] Would import .sy.zip from \"%s\" to notebook %s\n", filePath, notebook)
 			return nil
 		}
 
-		if err := model.ImportSY(absPath, notebook, resolvePath(notebook, toPath, hpath)); err != nil {
+		if err := model.ImportSY(absPath, notebook, targetPath); err != nil {
 			return err
 		}
 		model.AppendPushReloadFiletreeEntry()

@@ -191,7 +191,7 @@ func semanticSearch(args map[string]any) (CallToolResult, error) {
 	subtypes := parseStringSet(args["subtype"])
 
 	blocks, matchedCount, matchedRootCount, pageCount := model.SemanticSearchBlock(
-		query, notebooks, paths, types, subtypes, page, pageSize,
+		query, notebooks, paths, types, subtypes, page, pageSize, nil, nil,
 	)
 
 	if matchedCount == 0 {

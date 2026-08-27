@@ -246,7 +246,7 @@ export const getAVLocateParams = (blockElement: HTMLElement, enabled = true) => 
 export const applyAVRenderContext = (blockElement: HTMLElement, data: IAV) => {
     blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, data.viewID);
     blockElement.setAttribute("data-av-type", data.viewType);
-    applyAVColorPalette(blockElement, getAVCustomColors(data));
+    applyAVColorPalette(blockElement, getAVCustomColors());
 };
 
 export const persistAVLocateView = (blockElement: HTMLElement, protyle: IProtyle, data: IAV) => {

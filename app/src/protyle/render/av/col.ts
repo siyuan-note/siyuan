@@ -24,6 +24,9 @@ import {createEmptyAVValue, genAVAttributeRowHTML} from "./attributeValue";
 import {getAVColumnTextMeasurer, getAVDistributedColumnWidth, getAVTableFitWidths} from "./columnWidth";
 import {getAVData} from "./virtualScroll";
 import {getAVColorStyle, getNextAVOptionColor} from "./color";
+/// #if MOBILE
+import {activeBlur} from "../../../mobile/util/keyboardToolbar";
+/// #endif
 
 export const getColId = (element: Element, viewType: TAVView) => {
     if (viewType === "table" || hasClosestByClassName(element, "custom-attr")) {
@@ -1545,6 +1548,9 @@ const genUpdateColItem = (type: TAVCol, oldType: TAVCol) => {
 };
 
 export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: string) => {
+    /// #if MOBILE
+    activeBlur();
+    /// #endif
     const menu = new Menu(Constants.MENU_AV_HEADER_ADD);
     const avID = blockElement.getAttribute("data-av-id");
     if (typeof previousID === "undefined" && blockElement.getAttribute("data-av-type") === "table") {

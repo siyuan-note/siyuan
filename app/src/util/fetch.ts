@@ -121,9 +121,11 @@ export const fetchPost = (
     });
 };
 
-export const fetchSyncPost = async (url: string, data?: any, headers?: Record<string, string>, process = true) => {
+export const fetchSyncPost = async (url: string, data?: any, headers?: Record<string, string>, process = true,
+                                    signal?: AbortSignal) => {
     const init: RequestInit = {
         method: "POST",
+        signal,
     };
     if (headers) {
         init.headers = headers;

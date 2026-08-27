@@ -18,12 +18,18 @@ package conf
 
 import "testing"
 
-func TestNewFileTreeDisablesBoxDoc(t *testing.T) {
+func TestNewFileTreeDefaults(t *testing.T) {
 	fileTree := NewFileTree()
 	if nil == fileTree.BoxDocEnabled {
 		t.Fatal("box document setting should be initialized")
 	}
 	if *fileTree.BoxDocEnabled {
 		t.Fatal("box documents should be disabled for new users")
+	}
+	if nil == fileTree.UseSVGDefaultIcon {
+		t.Fatal("default icon setting should be initialized")
+	}
+	if !*fileTree.UseSVGDefaultIcon {
+		t.Fatal("SVG default icons should be enabled for new users")
 	}
 }

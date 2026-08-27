@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {createUploadInsertPosition, isUploadInsertPositionAvailable} from "./insertPosition";
 
 class TestElement {
+    public isConnected = true;
     public parent?: TestElement;
     public children: TestElement[] = [];
 
@@ -62,6 +63,15 @@ describe("upload insert position", () => {
             editor as unknown as Node;
         (position.range as unknown as {startContainer: Node; endContainer: Node}).endContainer =
             editor as unknown as Node;
+
+        assert.equal(isUploadInsertPositionAvailable(editor as unknown as Element, position), false);
+    });
+
+    it("rejects a position after the editor is detached", () => {
+        const target = new TestElement();
+        const editor = new TestElement().append(target);
+        const position = createUploadInsertPosition(createRange(target));
+        editor.isConnected = false;
 
         assert.equal(isUploadInsertPositionAvailable(editor as unknown as Element, position), false);
     });

@@ -1129,11 +1129,19 @@ func exportPreview(c *gin.Context) {
 		}
 	}
 
-	stdHTML := model.ExportPreview(id, fillCSSVar)
-	if model.IsReadOnlyRoleContext(c) {
+	isReadOnlyRole := model.IsReadOnlyRoleContext(c)
+	var publishAccess model.PublishAccess
+	var accessChecker model.EmbedBlockAccessChecker
+	if isReadOnlyRole {
+		publishAccess = model.GetPublishAccess()
+		accessChecker = func(blockID string) bool {
+			return model.CheckBlockIdAccessableByPublishAccess(c, publishAccess, blockID)
+		}
+	}
+	stdHTML := model.ExportPreview(id, fillCSSVar, accessChecker)
+	if isReadOnlyRole {
 		bt := treenode.GetBlockTree(id)
 		if bt != nil {
-			publishAccess := model.GetPublishAccess()
 			stdHTML = model.FilterContentByPublishAccess(c, publishAccess, bt.BoxID, bt.Path, stdHTML, true)
 		}
 	}

@@ -213,9 +213,6 @@ func TestValueRollupBuildContentsPreservesBlockRefSubtype(t *testing.T) {
 func TestValueRollupBuildContentsResolvesTargetCustomColor(t *testing.T) {
 	destKey := &Key{ID: "select", Type: KeyTypeSelect}
 	destView := &AttributeView{
-		CustomColors: []*AttributeViewCustomColor{
-			testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c"),
-		},
 		KeyValues: []*KeyValues{{
 			Key: destKey,
 			Values: []*Value{{
@@ -225,6 +222,15 @@ func TestValueRollupBuildContentsResolvesTargetCustomColor(t *testing.T) {
 			}},
 		}},
 	}
+	palette := []*AttributeViewCustomColor{
+		testAttributeViewCustomColor(15, "#010203", "#040506", "#070809", "#0a0b0c"),
+	}
+	old := LoadWorkspacePalette
+	t.Cleanup(func() { LoadWorkspacePalette = old })
+	LoadWorkspacePalette = func() ([]*AttributeViewCustomColor, []string) {
+		return palette, DefaultAttributeViewColorOrder(palette)
+	}
+
 	relationValue := &Value{Type: KeyTypeRelation, Relation: &ValueRelation{BlockIDs: []string{"item-a"}}}
 	rollup := &ValueRollup{}
 

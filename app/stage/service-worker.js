@@ -50,6 +50,15 @@ self.addEventListener("fetch", event => {
         return;
     }
 
+    // 启动页外观的选择和资源由内核校验，始终请求当前版本，避免切换或更新后命中旧缓存。
+    if (url.origin === location.origin &&
+        (url.pathname === "/api/system/getBootAppearance" ||
+            url.pathname.startsWith("/boot-appearance-assets/"))
+    ) {
+        event.respondWith(fetch(event.request, {cache: "no-store"}));
+        return;
+    }
+
     // Don't care about other requests.
     if (!url.pathname.startsWith("/stage/") &&
         !url.pathname.startsWith("/appearance/boot/") &&

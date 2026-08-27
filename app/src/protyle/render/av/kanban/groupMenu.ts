@@ -8,6 +8,7 @@ import {
     AV_MANAGE_CUSTOM_COLORS_TYPE,
     applyAVColorPalette,
     getAVColorGridHTML,
+    getAVColorOrder,
     getAVCustomColors,
 } from "../color";
 import {openAVCustomColorDialog} from "../colorDialog";
@@ -37,7 +38,7 @@ export const openKanbanGroupMenu = (options: {
     if (!option) {
         return;
     }
-    applyAVColorPalette(menu.element, getAVCustomColors(data));
+    applyAVColorPalette(menu.element, getAVCustomColors());
 
     menu.addItem({
         icon: "iconTrashcan",
@@ -91,7 +92,7 @@ export const openKanbanGroupMenu = (options: {
     menu.addSeparator();
     const colorHTML = `<div class="b3-menu__labels">${window.siyuan.languages.color}</div>
 <div class="fn__flex fn__flex-wrap" style="width:238px;max-height:238px;overflow:auto">${getAVColorGridHTML(
-        getAVCustomColors(data), option.color, window.siyuan.languages.manageColors)}</div>`;
+        getAVCustomColors(), option.color, window.siyuan.languages.manageColors, getAVColorOrder())}</div>`;
     menu.addItem({
         type: "empty",
         iconHTML: "",

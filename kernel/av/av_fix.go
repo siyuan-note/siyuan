@@ -68,9 +68,6 @@ func upgradeSpec8(av *AttributeView) {
 		return
 	}
 
-	if nil == av.CustomColors {
-		av.CustomColors = []*AttributeViewCustomColor{}
-	}
 	av.Spec = 8
 }
 

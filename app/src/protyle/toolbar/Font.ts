@@ -14,14 +14,15 @@ import {
     getBuiltinInlineStyleApplication,
     getBuiltinInlineStyleIDFromValue,
     getBuiltinInlineStylePreview,
+    getInlineStyleApplication,
+    getInlineStyleByID,
     getInlineStyleByValue,
     getInlineStyleIDFromValue,
     getInlineStylePreview,
     getInlineStylesCache,
-    getInlineStyleType,
     getRecentInlineStyleKey,
-    getVisibleBuiltinInlineStyleIDs,
-    isBuiltinInlineStyleVisible,
+    getVisibleOrderedStyleKeys,
+    isBuiltinOrderKey,
     INLINE_BACKGROUND_COLORS,
     INLINE_FONT_COLORS,
     TBuiltinInlineStyleID,
@@ -125,51 +126,45 @@ export const convertFontSize = (fontSize: string, unit: "px" | "em", baseFontSiz
 
 export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                                onChange?: (type: string, color?: string) => void) => {
-    let colorHTML = "";
-    INLINE_FONT_COLORS.forEach((item, index) => {
-        if (index > 0 && !isBuiltinInlineStyleVisible("color", index)) {
-            return;
-        }
-        colorHTML += `<button ${item ? `class="color__square" style="color:${item}"` : `class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.default}"`} data-type="color">A</button>`;
-    });
-    let bgHTML = "";
-    INLINE_BACKGROUND_COLORS.forEach((item, index) => {
-        if (index > 0 && !isBuiltinInlineStyleVisible("backgroundColor", index)) {
-            return;
-        }
-        bgHTML += `<button ${item ? `class="color__square" style="background-color:${item}"` : `class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.default}"`} data-type="backgroundColor"></button>`;
-    });
     const builtinStyleLabels: Record<TBuiltinInlineStyleID, string> = {
         error: window.siyuan.languages.errorStyle,
         warning: window.siyuan.languages.warningStyle,
         info: window.siyuan.languages.infoStyle,
         success: window.siyuan.languages.successStyle,
     };
-    let builtinStyleHTML = "";
-    getVisibleBuiltinInlineStyleIDs().forEach(id => {
-        const preview = getBuiltinInlineStylePreview(id);
-        builtinStyleHTML += "<button class=\"color__square ariaLabel\" data-position=\"3south\" data-type=\"style1\" " +
-            `aria-label="${builtinStyleLabels[id]}" style="color:${preview.color};` +
-            `background-color:${preview.backgroundColor};">A</button>`;
+    const renderOrderedButtons = (type: TInlineStyleType) => {
+        const data = getInlineStylesCache();
+        return getVisibleOrderedStyleKeys(type, data).map(key => {
+            if (isBuiltinOrderKey(type, key)) {
+                if (type === "color") {
+                    return `<button class="color__square" style="color:var(--b3-font-color${key})" data-type="color">A</button>`;
+                }
+                if (type === "backgroundColor") {
+                    return `<button class="color__square" style="background-color:var(--b3-font-background${key})" data-type="backgroundColor"></button>`;
+                }
+                const preview = getBuiltinInlineStylePreview(key as TBuiltinInlineStyleID);
+                return "<button class=\"color__square ariaLabel\" data-position=\"3south\" data-type=\"style1\" " +
+                    `aria-label="${builtinStyleLabels[key as TBuiltinInlineStyleID]}" style="color:${preview.color};` +
+                    `background-color:${preview.backgroundColor};">A</button>`;
+            }
+            const style = getInlineStyleByID(key, data);
+            if (!style) {
+                return "";
+            }
+            const preview = getInlineStylePreview(style);
+            return `<button class="color__square ariaLabel" data-position="3south" aria-label="${escapeAttr(style.name)}" data-inline-style-id="${style.id}" data-type="${type}" style="${preview.color ? `color:${preview.color};` : ""}${preview.backgroundColor ? `background-color:${preview.backgroundColor};` : ""}">${type === "backgroundColor" ? "" : "A"}</button>`;
+        }).join("");
+    };
+    let colorHTML = "";
+    INLINE_FONT_COLORS.slice(0, 1).forEach(item => {
+        colorHTML += `<button ${item ? `class="color__square" style="color:${item}"` : `class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.default}"`} data-type="color">A</button>`;
     });
-    let customColorHTML = "";
-    let customBackgroundHTML = "";
-    let customStyleHTML = "";
-    getInlineStylesCache().styles.forEach(style => {
-        const type = getInlineStyleType(style);
-        if (!type) {
-            return;
-        }
-        const preview = getInlineStylePreview(style);
-        const html = `<button class="color__square ariaLabel" data-position="3south" aria-label="${escapeAttr(style.name)}" data-inline-style-id="${style.id}" data-type="${type}" style="${preview.color ? `color:${preview.color};` : ""}${preview.backgroundColor ? `background-color:${preview.backgroundColor};` : ""}">${type === "backgroundColor" ? "" : "A"}</button>`;
-        if (type === "color") {
-            customColorHTML += html;
-        } else if (type === "backgroundColor") {
-            customBackgroundHTML += html;
-        } else {
-            customStyleHTML += html;
-        }
+    colorHTML += renderOrderedButtons("color");
+    let bgHTML = "";
+    INLINE_BACKGROUND_COLORS.slice(0, 1).forEach(item => {
+        bgHTML += `<button ${item ? `class="color__square" style="background-color:${item}"` : `class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.default}"`} data-type="backgroundColor"></button>`;
     });
+    bgHTML += renderOrderedButtons("backgroundColor");
     const getManageHTML = (type: TInlineStyleType) => window.siyuan.config.readonly || window.siyuan.isPublish ? "" :
         `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.manageColors}" data-action="manageInlineStyle" data-inline-style-type="${type}"><svg class="svg--mid"><use xlink:href="#iconSettings"></use></svg></button>`;
 
@@ -241,8 +236,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
 <div class="fn__hr--small"></div>
 <div data-id="colorWrap" class="fn__flex fn__flex-wrap">
     <button class="color__square ariaLabel" data-position="3south" data-type="style1" aria-label="${window.siyuan.languages.default}">A</button>
-    ${builtinStyleHTML}
-    ${customStyleHTML}
+    ${renderOrderedButtons("style1")}
     ${getManageHTML("style1")}
 </div>
 <div class="fn__hr"></div>
@@ -250,7 +244,6 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
 <div class="fn__hr--small"></div>
 <div data-id="colorFontWrap" class="fn__flex fn__flex-wrap">
     ${colorHTML}
-    ${customColorHTML}
     ${getManageHTML("color")}
 </div>
 <div class="fn__hr"></div>
@@ -258,7 +251,6 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
 <div class="fn__hr--small"></div>
 <div data-id="colorPrimaryWrap" class="fn__flex fn__flex-wrap">
     ${bgHTML}
-    ${customBackgroundHTML}
     ${getManageHTML("backgroundColor")}
 </div>
 <div class="fn__hr"></div>
@@ -372,8 +364,13 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
         const visibleFontStyles = filterHiddenRecentInlineStyles(localFontStyles);
         if (visibleFontStyles.length === 0) {
             type = "style1";
-            const builtinStyleID = getVisibleBuiltinInlineStyleIDs()[0];
-            color = builtinStyleID ? getBuiltinInlineStyleApplication(builtinStyleID).color : encodeStyle1();
+            const firstKey = getVisibleOrderedStyleKeys("style1")[0];
+            if (firstKey && isBuiltinOrderKey("style1", firstKey)) {
+                color = getBuiltinInlineStyleApplication(firstKey as TBuiltinInlineStyleID).color;
+            } else {
+                const style = getInlineStyleByID(firstKey);
+                color = (style && getInlineStyleApplication(style)?.color) || encodeStyle1();
+            }
         } else {
             const fontStyles = visibleFontStyles[0].split(Constants.ZWSP);
             type = fontStyles.splice(0, 1)[0];

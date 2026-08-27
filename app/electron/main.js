@@ -68,6 +68,8 @@ const expectedKernelExitPorts = new Set();
 const handledCrashWebContents = new Set();
 const kernelProcesses = new Map();
 let bootWindow;
+let bootIndexPath;
+let bootAppearanceFallback = false;
 let latestActiveWindow;
 let firstOpen = false;
 let workspaces = []; // workspaceDir, id, port, webContentsId, browserWindow, tray, hideShortcut
@@ -1489,6 +1491,22 @@ const showAppleSiliconWarning = async (lang) => {
     return false;
 };
 
+const loadBootWindow = (disableAppearance = false) => {
+    if (!bootWindow || bootWindow.isDestroyed() || !bootIndexPath) {
+        return;
+    }
+    if (disableAppearance) {
+        bootAppearanceFallback = true;
+    }
+    const query = {v: appVer, port: kernelPort};
+    if (bootAppearanceFallback) {
+        query.appearance = "0";
+    }
+    bootWindow.loadFile(bootIndexPath, {query}).catch((error) => {
+        writeLog("load boot window failed: " + error);
+    });
+};
+
 const initKernel = (workspace, port, lang, safeMode) => {
     return new Promise(async (resolve) => {
         // 必须在首次异步等待前创建窗口，避免工作空间选择窗口关闭后因无窗口触发应用退出。
@@ -1504,17 +1522,23 @@ const initKernel = (workspace, port, lang, safeMode) => {
                 webSecurity: false,
             },
         });
+        bootAppearanceFallback = false;
+        bootIndexPath = path.join(appDir, "app", "electron", "boot.html");
+        if (isDevEnv) {
+            bootIndexPath = path.join(appDir, "electron", "boot.html");
+        }
+        bootWindow.on("unresponsive", () => {
+            if (!bootAppearanceFallback) {
+                writeLog("boot window is unresponsive, reload without custom appearance");
+                loadBootWindow(true);
+            }
+        });
         if (!await showAppleSiliconWarning(lang)) {
             bootWindow.destroy();
             app.quit();
             resolve(false);
             return;
         }
-        let bootIndex = path.join(appDir, "app", "electron", "boot.html");
-        if (isDevEnv) {
-            bootIndex = path.join(appDir, "electron", "boot.html");
-        }
-        bootWindow.loadFile(bootIndex, {query: {v: appVer, port: kernelPort}});
         if (openAsHidden) {
             bootWindow.minimize();
         } else {
@@ -1558,6 +1582,7 @@ const initKernel = (workspace, port, lang, safeMode) => {
             resolve(false);
             return;
         }
+        loadBootWindow();
         const currentKernelPort = kernelPort;
         const cmds = ["serve", "--port", currentKernelPort, "--wd", appDir, "--attach-ui"];
         if (isDevEnv && workspaces.length === 0) {
@@ -1726,6 +1751,14 @@ app.whenReady().then(() => {
         }
         if (expectedRendererExitIds.delete(webContents.id)) {
             writeLog("ignore expected renderer exit [webContentsId=" + webContents.id + "]");
+            return;
+        }
+
+        if (bootWindow && !bootWindow.isDestroyed() && bootWindow.webContents.id === webContents.id) {
+            if (!bootAppearanceFallback) {
+                writeLog("boot renderer exited, reload without custom appearance");
+                loadBootWindow(true);
+            }
             return;
         }
 

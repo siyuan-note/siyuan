@@ -22,29 +22,27 @@ const DEFAULT_THEME_COLOR_VALUE: IThemeColorValue = {
     },
 };
 
-export const getThemeColorEditorHTML = () => `<div data-type="themeColorEditor" class="b3-label b3-label--inner fn__flex" style="align-items:flex-start;gap:24px;flex-wrap:wrap">
-    <div class="fn__flex-1" style="min-width:200px">
-        <div>${window.siyuan.languages.themeLight}</div>
-        <label class="fn__flex" data-property="color" style="align-items:center;margin-top:8px">
-            <span class="fn__flex-1">${window.siyuan.languages.colorFont}</span>
-            <input class="b3-text-field" data-field="lightColor" type="color">
+const getThemeColorGroupHTML = (title: string, colorField: string, backgroundField: string) =>
+    `<div class="fn__flex-1">
+        <div>${title}</div>
+        <div class="fn__hr"></div>
+        <label class="fn__flex" data-property="color">
+            <span class="fn__flex-center">${window.siyuan.languages.colorFont}</span>
+            <span class="fn__space"></span>
+            <input class="b3-text-field fn__flex-center" data-field="${colorField}" type="color">
         </label>
-        <label class="fn__flex" data-property="backgroundColor" style="align-items:center;margin-top:8px">
-            <span class="fn__flex-1">${window.siyuan.languages.colorPrimary}</span>
-            <input class="b3-text-field" data-field="lightBackgroundColor" type="color">
+        <div class="fn__hr"></div>
+        <label class="fn__flex" data-property="backgroundColor">
+            <span class="fn__flex-center">${window.siyuan.languages.colorPrimary}</span>
+            <span class="fn__space"></span>
+            <input class="b3-text-field fn__flex-center" data-field="${backgroundField}" type="color">
         </label>
-    </div>
-    <div class="fn__flex-1" style="min-width:200px">
-        <div>${window.siyuan.languages.themeDark}</div>
-        <label class="fn__flex" data-property="color" style="align-items:center;margin-top:8px">
-            <span class="fn__flex-1">${window.siyuan.languages.colorFont}</span>
-            <input class="b3-text-field" data-field="darkColor" type="color">
-        </label>
-        <label class="fn__flex" data-property="backgroundColor" style="align-items:center;margin-top:8px">
-            <span class="fn__flex-1">${window.siyuan.languages.colorPrimary}</span>
-            <input class="b3-text-field" data-field="darkBackgroundColor" type="color">
-        </label>
-    </div>
+    </div>`;
+
+export const getThemeColorEditorHTML = () => `<div data-type="themeColorEditor" class="b3-label b3-label--inner fn__flex fn__flex-wrap">
+    ${getThemeColorGroupHTML(window.siyuan.languages.themeLight, "lightColor", "lightBackgroundColor")}
+    <div class="fn__space"></div>
+    ${getThemeColorGroupHTML(window.siyuan.languages.themeDark, "darkColor", "darkBackgroundColor")}
 </div>`;
 
 export const bindThemeColorEditor = (element: Element) => {

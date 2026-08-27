@@ -1,6 +1,6 @@
 import {before, describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import type {IInlineStyle, IInlineStyleBuiltin} from "./inlineStyle";
+import type {IInlineStyle, IInlineStyleBuiltin, IInlineStyleOrder} from "./inlineStyle";
 
 let inlineStyle: typeof import("./inlineStyle");
 
@@ -23,6 +23,21 @@ const combinedStyle: IInlineStyle = {
         color: "#fefefe",
         backgroundColor: "#223344",
     },
+};
+
+const defaultOrder = (styles: IInlineStyle[] = []): IInlineStyleOrder => {
+    const order: IInlineStyleOrder = {
+        color: [...inlineStyle.DEFAULT_INLINE_STYLE_ORDER.color],
+        backgroundColor: [...inlineStyle.DEFAULT_INLINE_STYLE_ORDER.backgroundColor],
+        style1: [...inlineStyle.DEFAULT_INLINE_STYLE_ORDER.style1],
+    };
+    styles.forEach(style => {
+        const type = inlineStyle.getInlineStyleType(style);
+        if (type && !order[type].includes(style.id)) {
+            order[type].push(style.id);
+        }
+    });
+    return order;
 };
 
 const emptyBuiltin: IInlineStyleBuiltin = {
@@ -65,6 +80,13 @@ describe("normalizeInlineStyles", () => {
                 light: {backgroundColor: "#aabbcc"},
                 dark: {backgroundColor: "#001122"},
             }],
+            order: defaultOrder([combinedStyle, {
+                id: "20260821120001-bbcdefg",
+                name: "Background",
+                light: {backgroundColor: "#aabbcc"},
+                dark: {backgroundColor: "#001122"},
+            }]),
+            av: inlineStyle.INLINE_STYLE_EMPTY.av,
         });
     });
 
@@ -78,6 +100,10 @@ describe("normalizeInlineStyles", () => {
                     dark: {color: "#001122"},
                 }, {
                     index: 2,
+                    light: {color: "#ffffff"},
+                    dark: {color: "#000000"},
+                }, {
+                    index: 15,
                     light: {color: "#ffffff"},
                     dark: {color: "#000000"},
                 }, {
@@ -109,6 +135,10 @@ describe("normalizeInlineStyles", () => {
                     index: 2,
                     light: {color: "#aabbcc"},
                     dark: {color: "#001122"},
+                }, {
+                    index: 14,
+                    light: {color: "#ffffff"},
+                    dark: {color: "#000000"},
                 }],
                 styles: [{
                     id: "warning",
@@ -123,7 +153,31 @@ describe("normalizeInlineStyles", () => {
                 },
             },
             styles: [],
+            order: defaultOrder(),
+            av: inlineStyle.INLINE_STYLE_EMPTY.av,
         });
+    });
+
+    it("keeps mixed built-in and custom order and appends missing keys", () => {
+        const custom = {
+            ...combinedStyle,
+            id: "20260821120003-dbcdefg",
+            name: "Accent",
+            light: {color: "#112233"},
+            dark: {color: "#fefefe"},
+        };
+        const normalized = inlineStyle.normalizeInlineStyles({
+            styles: [custom],
+            order: {
+                color: ["2", custom.id, "1", "2", "unknown", "14"],
+                backgroundColor: ["13"],
+                style1: ["success", "missing"],
+            },
+        });
+        assert.deepEqual(normalized.order.color.slice(0, 3), ["2", custom.id, "1"]);
+        assert.equal(normalized.order.color[normalized.order.color.length - 1], "13");
+        assert.deepEqual(normalized.order.backgroundColor.slice(0, 2), ["13", "1"]);
+        assert.deepEqual(normalized.order.style1, ["success", "error", "warning", "info"]);
     });
 
     it("limits names by Unicode code points without splitting surrogate pairs", () => {
@@ -266,7 +320,24 @@ describe("recent inline styles", () => {
             custom,
         ]);
         assert.deepEqual(inlineStyle.getVisibleBuiltinColorIndexes("av", data),
-            [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13]);
+            [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14]);
+        assert.deepEqual(inlineStyle.getVisibleOrderedStyleKeys("color", data),
+            ["1", "2", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"]);
+        assert.deepEqual(inlineStyle.getVisibleOrderedStyleKeys("style1", {
+            ...data,
+            order: {
+                ...data.order,
+                style1: ["success", "error", "warning", "info", combinedStyle.id],
+            },
+        }), ["success", "warning", "info", combinedStyle.id]);
+        assert.deepEqual(inlineStyle.getVisibleOrderedStyleKeys("style1", {
+            ...data,
+            styles: [{...combinedStyle, hidden: true}],
+            order: {
+                ...data.order,
+                style1: ["success", "error", "warning", "info", combinedStyle.id],
+            },
+        }), ["success", "warning", "info"]);
     });
 });
 

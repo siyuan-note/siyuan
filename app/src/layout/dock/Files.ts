@@ -16,7 +16,13 @@ import {
     openPublishAccessDialog
 } from "../../protyle/util/publishAccess";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
-import {openEmojiPanel, unicode2Emoji} from "../../emoji";
+import {openEmojiPanel} from "../../emoji";
+import {
+    getFileTreeDefaultIconAttr,
+    getFileTreeIconHTML,
+    syncFileTreeItemDefaultIcon,
+    updateFileTreeItemIcon,
+} from "../../emoji/fileTreeIcon";
 import {importNotebook, newEncryptedNotebook, newNotebook, openEncryptedNotebook} from "../../util/mount";
 import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyAfterTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
@@ -1192,6 +1198,7 @@ export class Files extends Model {
         } else {
             liElement.querySelector(".b3-list-item__toggle")?.classList.remove("fn__hidden");
         }
+        syncFileTreeItemDefaultIcon(liElement);
         this.updateDocActionElement(liElement);
     }
 
@@ -1273,6 +1280,7 @@ export class Files extends Model {
                 if (hiddenElement) {
                     // 原先无子文档：显示展开箭头
                     hiddenElement.classList.remove("fn__hidden");
+                    syncFileTreeItemDefaultIcon(liElement as HTMLElement);
                 } else if (liElement.querySelector(".b3-list-item__arrow--open")) {
                     // 父文档已展开：刷新子列表
                     this.getLeaf(liElement, notebookId, true);
@@ -1299,21 +1307,19 @@ export class Files extends Model {
             this.element.querySelector<HTMLElement>(
                 `ul[data-url="${data.boxID}"] > li[data-type="navigation-root"]`
             );
-        const iconElement = liElement?.querySelector<HTMLElement>(".b3-list-item__icon");
-        if (iconElement) {
-            const iconHTML = unicode2Emoji(data.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note);
-            if (iconElement.innerHTML !== iconHTML) {
-                iconElement.innerHTML = iconHTML;
-            }
+        if (liElement) {
+            updateFileTreeItemIcon(liElement, data.icon, "notebook");
         }
     }
 
     private genNotebook(item: INotebook) {
         const editingPublishAccess = this.element.classList.contains("file-tree__publish-access--active");
-        // 加密笔记本关闭（锁定）时用 🔒 提示需解锁；打开（解锁）后恢复正常 emoji
-        const iconContent = (item.encrypted && item.closed)
+        // 加密笔记本关闭（锁定）时用 🔒 提示需解锁
+        const locked = item.encrypted && item.closed;
+        const iconContent = locked
             ? "🔒️"
-            : unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note);
+            : getFileTreeIconHTML(item.icon, "notebook");
+        const defaultIconAttr = getFileTreeDefaultIconAttr(item.icon, "notebook", locked);
         const isBoxDoc = !item.closed && window.siyuan.config.fileTree.boxDocEnabled;
         const hasChildren = !item.closed && item.subFileCount > 0;
         const iconExpands = window.siyuan.config.fileTree.docIconClickExpand && hasChildren;
@@ -1326,7 +1332,7 @@ export class Files extends Model {
         const emojiHTML = `<span class="b3-list-item__icon ariaLabel${isBoxDoc ? " popover__block" : ""}${editingPublishAccess && !item.encrypted ? " fn__none" : ""}" data-position="8east"${isBoxDoc ? ` data-id="${item.id}"` : ""} aria-label="${iconAriaLabel}">${iconContent}</span>`;
         const switchHTML = `<span class="b3-list-item__switch b3-tooltips b3-tooltips__e${editingPublishAccess && !item.encrypted ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>`;
         if (item.closed) {
-            return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action"${item.encrypted ? ' data-encrypted="true"' : ""}>
+            return `<li data-url="${item.id}" class="b3-list-item b3-list-item--hide-action"${item.encrypted ? ' data-encrypted="true"' : ""}${defaultIconAttr}>
     <span class="b3-list-item__toggle fn__hidden">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1341,7 +1347,7 @@ export class Files extends Model {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}" data-sortmode="${item.sortMode}"${item.encrypted ? " data-encrypted=\"true\"" : ""}>
 <li class="b3-list-item b3-list-item--hide-action${actionClasses}" ${window.siyuan.config.fileTree.sort === 6 ? 'draggable="true"' : ""}
 style="--file-toggle-width:22px;--file-action-offset:22px"
-data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? item.id : ""}">
+data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}" data-node-id="${window.siyuan.config.fileTree.boxDocEnabled ? item.id : ""}"${defaultIconAttr}>
     <span class="b3-list-item__toggle b3-list-item__toggle--hl${isBoxDoc && !hasChildren ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
@@ -1454,10 +1460,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                         }
                         parentElement.setAttribute("data-count", "0");
                         this.updateDocActionElement(parentElement);
-                        const emojiElement = iconElement.parentElement.nextElementSibling;
-                        if (emojiElement.innerHTML === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder)) {
-                            emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file);
-                        }
+                        syncFileTreeItemDefaultIcon(parentElement);
                     }
                     targetElement.parentElement.remove();
                 } else {
@@ -1619,14 +1622,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                         );
                         parentLiElement.setAttribute("data-count", "0");
                         this.updateDocActionElement(parentLiElement);
-                        const emojiElement = parentLiElement.querySelector(".b3-list-item__icon");
-                        if (emojiElement.innerHTML === unicode2Emoji(
-                            window.siyuan.storage[Constants.LOCAL_IMAGES].folder
-                        )) {
-                            emojiElement.innerHTML = unicode2Emoji(
-                                window.siyuan.storage[Constants.LOCAL_IMAGES].file
-                            );
-                        }
+                        syncFileTreeItemDefaultIcon(parentLiElement);
                     }
                     sourceListElement.remove();
                 } else {
@@ -1642,6 +1638,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                     parentElement.querySelector(".b3-list-item__arrow").classList.remove(
                         "b3-list-item__arrow--open"
                     );
+                    syncFileTreeItemDefaultIcon(parentElement);
                 }
             }
 
@@ -1660,10 +1657,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
                 );
                 this.updateDocActionElement(targetElement);
             }
-            const emojiElement = targetElement.querySelector(".b3-list-item__icon");
-            if (emojiElement.innerHTML === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file)) {
-                emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
-            }
+            syncFileTreeItemDefaultIcon(targetElement);
 
             const targetListElement = getFileTreeChildList(targetElement);
             const targetExpanded = Boolean(targetElement.querySelector(".b3-list-item__arrow--open"));
@@ -1794,10 +1788,7 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         const arrowElement = liElement.querySelector(".b3-list-item__arrow");
         arrowElement.classList.add("b3-list-item__arrow--open");
         arrowElement.parentElement.classList.remove("fn__hidden");
-        const emojiElement = liElement.querySelector(".b3-list-item__icon");
-        if (emojiElement.textContent === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file)) {
-            emojiElement.textContent = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
-        }
+        syncFileTreeItemDefaultIcon(liElement as HTMLElement);
         const effectiveSortMode = getResponseEffectiveSortMode(data, data.box);
         liElement.insertAdjacentHTML("afterend", `<ul ${FILE_TREE_EFFECTIVE_SORT_MODE}="${effectiveSortMode}">${fileHTML}</ul>`);
         this.restoreMovedExpandedItems(liElement.nextElementSibling, data.box);
@@ -1991,14 +1982,15 @@ data-type="navigation-root" data-path="/" data-count="${item.subFileCount || 0}"
         const actionClasses = `${iconExpands && item.subFileCount > 0 && !editingPublishAccess ? " file-tree__item--icon-expand" : ""}${
             iconExpands && item.subFileCount === 0 && !editingPublishAccess ? " file-tree__item--icon-open" : ""}${
             window.siyuan.config.fileTree.parentDocClickExpand && item.subFileCount > 0 ? " file-tree__item--title-expand" : ""}`;
+        const defaultIcon = item.subFileCount === 0 ? "file" : "folder";
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" ${FILE_TREE_CHILDREN_SORT_MODE}="${item.childrenSortMode ?? ""}"
 data-type="navigation-file" 
 style="--file-toggle-width:${paddingLeft + 18}px;--file-action-offset:${paddingLeft + 20}px"
-class="b3-list-item b3-list-item--hide-action${actionClasses}" data-path="${item.path}">
+class="b3-list-item b3-list-item--hide-action${actionClasses}" data-path="${item.path}"${getFileTreeDefaultIconAttr(item.icon, defaultIcon)}>
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon ariaLabel popover__block${editingPublishAccess ? " fn__none" : ""}" data-position="8east" data-id="${item.id}" aria-label="${iconAriaLabel}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
+    <span class="b3-list-item__icon ariaLabel popover__block${editingPublishAccess ? " fn__none" : ""}" data-position="8east" data-id="${item.id}" aria-label="${iconAriaLabel}">${getFileTreeIconHTML(item.icon, defaultIcon)}</span>
     <span class="b3-list-item__switch b3-tooltips b3-tooltips__n${editingPublishAccess ? "" : " fn__none"}" aria-label="${window.siyuan.languages.publishAccess}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
     <span class="b3-list-item__text ariaLabel" data-delay="200" data-position="parentE"
 aria-label="${ariaLabel}">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>

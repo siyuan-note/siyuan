@@ -13,7 +13,7 @@ import {
 import {API} from "./API";
 import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
-import {destroyPlugin} from "./uninstall";
+import {beginPluginTeardown, destroyPlugin} from "./uninstall";
 import {setStorageVal} from "../protyle/util/compatibility";
 import {getAllEditor} from "../layout/getAll";
 import {getPluginDockEntryKey, refreshDockCatalog} from "../config/entryVisibility/catalog";
@@ -93,7 +93,10 @@ const getLifecycleManager = (app: App) => {
         mount: (plugin) => mountPlugin(plugin),
         shouldReloadOnDataChange: (plugin) => plugin.onDataChanged === Plugin.prototype.onDataChanged,
         onDataChanged: (plugin) => plugin.onDataChanged(),
-        onunload: (plugin) => plugin.onunload(),
+        onunload: (plugin) => {
+            beginPluginTeardown(plugin);
+            return plugin.onunload();
+        },
         uninstall: (plugin) => plugin.uninstall(),
         markDisposed: (plugin) => markPluginDisposed(plugin),
         dispose: (plugin, isUninstall) => destroyPlugin(app, plugin, isUninstall),

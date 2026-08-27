@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -37,6 +38,7 @@ func TestInlineStylesAPI(t *testing.T) {
 	engine := gin.New()
 	engine.POST("/api/storage/getInlineStyles", getInlineStyles)
 	engine.POST("/api/storage/setInlineStyles", setInlineStyles)
+	engine.POST("/api/storage/setWorkspaceAVPalette", setWorkspaceAVPalette)
 
 	getRecorder := performInlineStylesRequest(engine, "/api/storage/getInlineStyles", "")
 	getResponse := &struct {
@@ -126,7 +128,7 @@ func TestInlineStylesAPI(t *testing.T) {
 	}
 
 	invalidBuiltinRecorder := performInlineStylesRequest(engine, "/api/storage/setInlineStyles",
-		`{"version":2,"styles":[],"builtin":{"hidden":{"av":[14]}}}`)
+		`{"version":2,"styles":[],"builtin":{"hidden":{"av":[15]}}}`)
 	if responseCode(t, invalidBuiltinRecorder) != -1 {
 		t.Fatalf("invalid builtin inline styles were accepted: %s", invalidBuiltinRecorder.Body.String())
 	}
@@ -134,6 +136,35 @@ func TestInlineStylesAPI(t *testing.T) {
 	missingVersionRecorder := performInlineStylesRequest(engine, "/api/storage/setInlineStyles", `{"styles":[]}`)
 	if responseCode(t, missingVersionRecorder) != -1 || !strings.Contains(missingVersionRecorder.Body.String(), "version") {
 		t.Fatalf("missing inline styles version was accepted: %s", missingVersionRecorder.Body.String())
+	}
+
+	paletteRecorder := performInlineStylesRequest(engine, "/api/storage/setWorkspaceAVPalette", `{
+		"colors":[{
+			"index":15,
+			"light":{"color":"#010203","backgroundColor":"#040506"},
+			"dark":{"color":"#070809","backgroundColor":"#0A0B0C"}
+		}],
+		"order":["15","1"],
+		"builtinColors":[{
+			"index":3,
+			"customized":true,
+			"light":{"backgroundColor":"#ABCDEF"},
+			"dark":{"backgroundColor":"#123456"},
+			"hidden":true
+		}]
+	}`)
+	paletteResponse := &struct {
+		Code int                 `json:"code"`
+		Data *model.InlineStyles `json:"data"`
+	}{}
+	if err := json.Unmarshal(paletteRecorder.Body.Bytes(), paletteResponse); err != nil {
+		t.Fatal(err)
+	}
+	if paletteResponse.Code != 0 || paletteResponse.Data == nil || len(paletteResponse.Data.Styles) != 1 ||
+		len(paletteResponse.Data.AV.Colors) != 1 || paletteResponse.Data.AV.Order[0] != "15" ||
+		len(paletteResponse.Data.Builtin.Colors) != 2 ||
+		!reflect.DeepEqual(paletteResponse.Data.Builtin.Hidden.AV, []int{3, 5}) {
+		t.Fatalf("unexpected workspace palette response: %s", paletteRecorder.Body.String())
 	}
 }
 
@@ -155,6 +186,11 @@ func TestInlineStylesAPIPermissions(t *testing.T) {
 	setRecorder := performInlineStylesRequest(engine, "/api/storage/setInlineStyles", `{"version":1,"styles":[]}`)
 	if setRecorder.Code != http.StatusForbidden {
 		t.Fatalf("reader changed inline styles: status=%d, body=%s", setRecorder.Code, setRecorder.Body.String())
+	}
+	paletteRecorder := performInlineStylesRequest(engine, "/api/storage/setWorkspaceAVPalette", `{"colors":[],"order":[]}`)
+	if paletteRecorder.Code != http.StatusForbidden {
+		t.Fatalf("reader changed workspace palette: status=%d, body=%s", paletteRecorder.Code,
+			paletteRecorder.Body.String())
 	}
 }
 

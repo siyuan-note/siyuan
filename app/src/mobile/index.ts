@@ -58,7 +58,6 @@ import {openByMobile} from "../editor/openLink";
 import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 import {updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {showMobileBars} from "./util/mobileBars";
-import {initMobileInputEventLogging, logMobileInputEvent} from "./util/inputEventLogger";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -210,17 +209,12 @@ class App {
                             await setNoteBook();
                             try {
                                 await initFramework(this, confResponse.data.start);
-                                logMobileInputEvent("framework-initialized");
                                 initRightMenu(this);
-                                logMobileInputEvent("menu-initialized");
                                 openChangelog();
                                 window.siyuan.isReady = true;
                                 mainWs.flushMainMessages();
                             } catch (error) {
                                 console.error("Failed to initialize mobile framework:", error);
-                                logMobileInputEvent("framework-init-error", undefined, {
-                                    error: error instanceof Error ? error.message : String(error),
-                                });
                             }
                         });
                     });
@@ -261,7 +255,6 @@ class App {
                 }
             });
             initTouchDragBridge();
-            initMobileInputEventLogging();
         });
     }
 }

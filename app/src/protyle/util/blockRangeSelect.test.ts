@@ -111,4 +111,28 @@ describe("getBlockRangeSelectElements", () => {
         assert.deepEqual(getBlockRangeSelectElements(asElement(first), asElement(second), getBlock).selectElements,
             [asElement(first), asElement(second)]);
     });
+
+    it("keeps child blocks selected in the left vertical super block", () => {
+        const editor = new TestElement("editor", 0, ["protyle-wysiwyg"]);
+        const outer = block("outer", 0, "NodeSuperBlock", ["sb"]);
+        const left = block("left", 0, "NodeSuperBlock", ["sb"]);
+        const first = block("first", 10);
+        const second = block("second", 20);
+        const leftAttr = new TestElement("left-attr", 20, ["protyle-attr"]);
+        const resize = new TestElement("resize", 0, ["sb__resize"]);
+        const right = block("right", 0, "NodeSuperBlock", ["sb"]);
+        const third = block("third", 10);
+        const fourth = block("fourth", 20);
+        const rightAttr = new TestElement("right-attr", 20, ["protyle-attr"]);
+        const outerAttr = new TestElement("outer-attr", 20, ["protyle-attr"]);
+        editor.append(outer.append(left.append(first, second, leftAttr), resize,
+            right.append(third, fourth, rightAttr), outerAttr));
+
+        const expected = [asElement(first), asElement(second)];
+        assert.deepEqual(getBlockRangeSelectElements(asElement(first), asElement(second), getBlock).selectElements,
+            expected);
+        const upwardSelection = getBlockRangeSelectElements(asElement(second), asElement(first), getBlock);
+        assert.deepEqual(upwardSelection.selectElements, expected);
+        assert.equal(upwardSelection.toDown, false);
+    });
 });

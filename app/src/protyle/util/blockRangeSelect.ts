@@ -58,6 +58,10 @@ export const getBlockRangeSelectElements = (rangeStartElement: HTMLElement, rang
                     if (!currentElement.classList.contains("sb__resize")) {
                         selectElements.push(currentElement);
                     }
+                    // 到达实际选区终点后停止，避免经过属性节点继续提升到父容器。
+                    if (currentElement === endElement) {
+                        break;
+                    }
                     const parentElement = currentElement.parentElement;
                     currentElement = currentElement.nextElementSibling as HTMLElement;
                     // 提示块内容使用无块 ID 的包装层，末尾需回到提示块后继续遍历同级块。

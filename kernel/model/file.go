@@ -1369,6 +1369,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string, arg map[string]an
 	}
 
 	luteEngine := util.NewLute()
+	luteEngine.SetHTMLTag2TextMark(true)
 	dom := luteEngine.Md2BlockDOM(md, false)
 	tree, err = createDoc(box.ID, p, title, dom, false)
 	if err != nil {

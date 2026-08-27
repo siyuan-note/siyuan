@@ -1191,11 +1191,15 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     useHTML?: unknown,
                 };
                 if (preflightResponse?.code !== 0 || preflight?.converted !== true ||
-                    typeof preflight.useHTML !== "boolean" || typeof preflight.dom !== "string") {
+                    typeof preflight.useHTML !== "boolean") {
                     showMessage(window.siyuan.languages.uploadError);
                     return;
                 }
                 if (!preflight.useHTML) {
+                    if (typeof preflight.dom !== "string") {
+                        showMessage(window.siyuan.languages.uploadError);
+                        return;
+                    }
                     insertConvertedBlockDOM(protyle, preflight.dom, range);
                     return;
                 }
@@ -1248,6 +1252,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
             }
             let conversionResponse: IWebSocketData;
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), PASTE_PLUGIN_TIMEOUT);
             try {
                 conversionResponse = await fetchSyncPost("/api/lute/html2BlockDOM", {
                     ...conversionContext,
@@ -1256,13 +1262,15 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     skipLocalAssets: localAssets.length > 0,
                     skipBase64Assets: true,
                     skipInlineSVGAssets: true,
-                });
+                }, undefined, true, controller.signal);
             } catch (error) {
                 console.error(error);
                 if (isPasteInsertPositionAvailable()) {
                     showMessage(window.siyuan.languages.uploadError);
                 }
                 return;
+            } finally {
+                clearTimeout(timeoutId);
             }
             range = restorePasteInsertRange();
             if (!range) {

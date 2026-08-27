@@ -169,6 +169,7 @@ func Serve(fastMode bool, cookieKey string) {
 	serveAssets(ginServer)
 	serveCustomFonts(ginServer)
 	serveAppearance(ginServer)
+	serveBootAppearanceAssets(ginServer)
 	serveWebSocket(ginServer)
 	serveMCP(ginServer)
 	serveWebDAV(ginServer)
@@ -459,6 +460,31 @@ func servePlugins(ginServer *gin.Engine) {
 		name, _, _ := strings.Cut(filepath.ToSlash(relativePath), "/")
 		return model.CheckPluginAccessableInPublish(name)
 	})
+}
+
+func serveBootAppearanceAssets(ginServer *gin.Engine) {
+	handler := func(c *gin.Context) {
+		c.Header("Cache-Control", "no-store")
+		c.Header("X-Content-Type-Options", "nosniff")
+		if !model.IsLocalRequest(c) {
+			c.Status(http.StatusForbidden)
+			return
+		}
+		relativePath := strings.TrimPrefix(c.Param("filepath"), "/")
+		filePath, contentType, err := model.ResolveBootAppearanceAsset(c.Param("provider"), c.Param("appearance"), relativePath)
+		if err != nil {
+			if errors.Is(err, model.ErrBootAppearanceNotFound) {
+				c.Status(http.StatusNotFound)
+			} else {
+				c.Status(http.StatusForbidden)
+			}
+			return
+		}
+		c.Header("Content-Type", contentType)
+		http.ServeFile(c.Writer, c.Request, filePath)
+	}
+	ginServer.GET("/boot-appearance-assets/:provider/:appearance/*filepath", handler)
+	ginServer.HEAD("/boot-appearance-assets/:provider/:appearance/*filepath", handler)
 }
 
 func serveEmojis(ginServer *gin.Engine) {

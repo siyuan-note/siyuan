@@ -34,7 +34,11 @@ func TestLoadHistoryAttributeViewCustomColors(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(path), 0755); nil != err {
 		t.Fatal(err)
 	}
-	data, err := json.Marshal(&av.AttributeView{
+	data, err := json.Marshal(struct {
+		Spec         int                            `json:"spec"`
+		ID           string                         `json:"id"`
+		CustomColors []*av.AttributeViewCustomColor `json:"customColors"`
+	}{
 		Spec: av.CurrentSpec,
 		ID:   avID,
 		CustomColors: []*av.AttributeViewCustomColor{{
@@ -52,22 +56,68 @@ func TestLoadHistoryAttributeViewCustomColors(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	colors, found := loadHistoryAttributeViewCustomColors(historyDir, avID)
+	colors, order, found := loadHistoryAttributeViewCustomColors(historyDir, avID)
 	if !found || 1 != len(colors) || "#010203" != colors[0].Light.Color {
 		t.Fatalf("unexpected historical palette: %+v, found %v", colors, found)
 	}
-	if _, found = loadHistoryAttributeViewCustomColors(historyDir, "20260824000001-missing"); found {
+	if len(order) != av.BuiltinColorCount+1 || order[len(order)-1] != "15" {
+		t.Fatalf("unexpected historical palette order: %v", order)
+	}
+	if _, _, found = loadHistoryAttributeViewCustomColors(historyDir, "20260824000001-missing"); found {
 		t.Fatal("missing historical palette was reported as found")
 	}
-	if _, found = loadHistoryAttributeViewCustomColors(historyDir, "../target1"); found {
+	if _, _, found = loadHistoryAttributeViewCustomColors(historyDir, "../target1"); found {
 		t.Fatal("invalid related attribute view ID was accepted")
+	}
+}
+
+func TestLoadHistoryAttributeViewUsesWorkspacePaletteOrder(t *testing.T) {
+	const avID = "20260824000002-target2"
+	historyDir := t.TempDir()
+	avPath := filepath.Join(historyDir, "storage", "av", avID+".json")
+	if err := os.MkdirAll(filepath.Dir(avPath), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(avPath, []byte(`{"spec":13,"id":"20260824000002-target2"}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+	stylesPath := filepath.Join(historyDir, "storage", "inline-styles.json")
+	styles := &InlineStyles{
+		Version: InlineStylesVersion,
+		AV: &InlineStyleAV{
+			Colors: []*av.AttributeViewCustomColor{{
+				Index: 15,
+				AttributeViewColor: av.AttributeViewColor{
+					Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
+					Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+				},
+			}},
+			Order: []string{"15", "2", "1"},
+		},
+	}
+	data, err := json.Marshal(styles)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(stylesPath, data, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	colors, order, found := loadHistoryAttributeViewCustomColors(historyDir, avID)
+	if !found || len(colors) != 1 || len(order) != av.BuiltinColorCount+1 ||
+		order[0] != "15" || order[1] != "2" || order[2] != "1" {
+		t.Fatalf("unexpected historical workspace palette: colors=%+v order=%v found=%v", colors, order, found)
+	}
+	attrView := &av.AttributeView{ID: avID, CustomColorRenderContext: newHistoryAttributeViewCustomColorRenderContext(historyDir)}
+	if resolvedOrder := attrView.PaletteOrder(); len(resolvedOrder) == 0 || resolvedOrder[0] != "15" {
+		t.Fatalf("historical render context lost palette order: %v", resolvedOrder)
 	}
 }
 
 func TestCachedAttributeViewCustomColorResolverIsRequestLocalAndConcurrentSafe(t *testing.T) {
 	var calls atomic.Int32
 	resolver := newCachedAttributeViewCustomColorResolver(
-		func(string) ([]*av.AttributeViewCustomColor, bool) {
+		func(string) ([]*av.AttributeViewCustomColor, []string, bool) {
 			calls.Add(1)
 			return []*av.AttributeViewCustomColor{{
 				Index: 15,
@@ -75,7 +125,7 @@ func TestCachedAttributeViewCustomColorResolverIsRequestLocalAndConcurrentSafe(t
 					Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
 					Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
 				},
-			}}, true
+			}}, []string{"15", "1"}, true
 		},
 	)
 
@@ -86,9 +136,12 @@ func TestCachedAttributeViewCustomColorResolverIsRequestLocalAndConcurrentSafe(t
 		waitGroup.Add(1)
 		go func() {
 			defer waitGroup.Done()
-			colors, found := resolver("20260824000000-target1")
+			colors, order, found := resolver("20260824000000-target1")
 			if !found || 1 != len(colors) || "#0a0b0c" != colors[0].Dark.BackgroundColor {
 				errs <- "resolver returned an invalid palette"
+			}
+			if len(order) == 0 || order[0] != "15" {
+				errs <- "resolver returned an invalid palette order"
 			}
 		}()
 	}
@@ -103,12 +156,12 @@ func TestCachedAttributeViewCustomColorResolverIsRequestLocalAndConcurrentSafe(t
 
 	secondCalls := atomic.Int32{}
 	secondResolver := newCachedAttributeViewCustomColorResolver(
-		func(string) ([]*av.AttributeViewCustomColor, bool) {
+		func(string) ([]*av.AttributeViewCustomColor, []string, bool) {
 			secondCalls.Add(1)
-			return nil, false
+			return nil, nil, false
 		},
 	)
-	if _, found := secondResolver("20260824000000-target1"); found || 1 != secondCalls.Load() {
+	if _, _, found := secondResolver("20260824000000-target1"); found || 1 != secondCalls.Load() {
 		t.Fatal("separate request resolver reused another request cache")
 	}
 }

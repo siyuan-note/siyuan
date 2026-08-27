@@ -36,7 +36,7 @@ func NewAttributeViewMetadata(attrView *av.AttributeView) (ret *AttributeViewMet
 	ret = &AttributeViewMetadata{
 		ID:           attrView.ID,
 		Name:         attrView.Name,
-		CustomColors: attrView.CustomColors,
+		CustomColors: attrView.Palette(),
 		Keys:         []*av.Key{},
 		Views:        []*av.ViewData{},
 	}
@@ -101,7 +101,7 @@ func NewAttributeViewRenderData(attrView *av.AttributeView, view av.Viewable, qu
 	ret = &AttributeViewRenderData{
 		ID:           attrView.ID,
 		Name:         attrView.Name,
-		CustomColors: attrView.CustomColors,
+		CustomColors: attrView.Palette(),
 		ViewID:       view.GetID(),
 		ViewType:     view.GetType(),
 		Query:        query,

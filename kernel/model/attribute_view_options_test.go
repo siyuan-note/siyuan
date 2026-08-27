@@ -17,7 +17,9 @@
 package model
 
 import (
+	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -101,13 +103,7 @@ func TestUpdateAttributeViewColumnOptionsSynchronizesOptionColorReferences(t *te
 	setupAttributeViewValidationTest(t)
 
 	attrView := av.NewAttributeView("20260824120000-options")
-	attrView.CustomColors = []*av.AttributeViewCustomColor{{
-		Index: 15,
-		AttributeViewColor: av.AttributeViewColor{
-			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
-			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
-		},
-	}}
+	saveTestWorkspacePalette(t, []*av.AttributeViewCustomColor{testAVCustomColor(15, false)}, nil)
 	selectKey := attrView.KeyValues[1].Key
 	selectKey.Options = []*av.SelectOption{{Name: "Used", Color: "15"}}
 	selectValue := func() *av.Value {
@@ -153,13 +149,7 @@ func TestSetAttrViewCustomColorsRejectsDeletingUsedColor(t *testing.T) {
 	setupAttributeViewValidationTest(t)
 
 	attrView := av.NewAttributeView("20260824130000-colors1")
-	attrView.CustomColors = []*av.AttributeViewCustomColor{{
-		Index: 15,
-		AttributeViewColor: av.AttributeViewColor{
-			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
-			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
-		},
-	}}
+	saveTestWorkspacePalette(t, []*av.AttributeViewCustomColor{testAVCustomColor(15, false)}, nil)
 	selectKey := attrView.KeyValues[1].Key
 	selectKey.Options = []*av.SelectOption{{Name: "Used", Color: "15"}}
 	if err := av.SaveAttributeView(attrView); nil != err {
@@ -190,22 +180,67 @@ func TestSetAttrViewCustomColorsRejectsDeletingUsedColor(t *testing.T) {
 	if nil != err {
 		t.Fatalf("parse attribute view failed: %s", err)
 	}
-	if 1 != len(parsed.CustomColors) || "#111111" != parsed.CustomColors[0].Light.Color {
-		t.Fatalf("custom palette update was not saved: %+v", parsed.CustomColors)
+	if 1 != len(parsed.Palette()) || "#111111" != parsed.Palette()[0].Light.Color {
+		t.Fatalf("custom palette update was not saved: %+v", parsed.Palette())
 	}
+	assertWorkspaceAVPalette(t, parsed.Palette(), parsed.PaletteOrder())
+	assertAttributeViewDiskOmitsPalette(t, attrView.ID)
+}
+
+func TestSetAttrViewCustomColorsSavesOrder(t *testing.T) {
+	setupAttributeViewValidationTest(t)
+
+	attrView := av.NewAttributeView("20260827130000-corder1")
+	if err := av.SaveAttributeView(attrView); nil != err {
+		t.Fatalf("save attribute view failed: %s", err)
+	}
+
+	color := &av.AttributeViewCustomColor{
+		Index:  15,
+		Hidden: true,
+		AttributeViewColor: av.AttributeViewColor{
+			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
+			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+		},
+	}
+	if err := setAttrViewCustomColors(&Operation{AvID: attrView.ID, Data: map[string]any{
+		"colors": []*av.AttributeViewCustomColor{color},
+		"order":  []string{"15", "1", "14"},
+	}}); nil != err {
+		t.Fatalf("save custom colors with order failed: %s", err)
+	}
+
+	parsed, err := av.ParseAttributeView(attrView.ID)
+	if nil != err {
+		t.Fatalf("parse attribute view failed: %s", err)
+	}
+	if 1 != len(parsed.Palette()) || !parsed.Palette()[0].Hidden {
+		t.Fatalf("custom color hidden flag was not saved: %+v", parsed.Palette())
+	}
+	if 15 != len(parsed.PaletteOrder()) || "15" != parsed.PaletteOrder()[0] || "1" != parsed.PaletteOrder()[1] ||
+		"14" != parsed.PaletteOrder()[2] {
+		t.Fatalf("custom color order was not saved: %+v", parsed.PaletteOrder())
+	}
+
+	if err = setAttrViewCustomColors(&Operation{AvID: attrView.ID, Data: parsed.Palette()}); nil != err {
+		t.Fatalf("array-only custom color update failed: %s", err)
+	}
+	parsed, err = av.ParseAttributeView(attrView.ID)
+	if nil != err {
+		t.Fatalf("parse attribute view failed: %s", err)
+	}
+	if "15" != parsed.PaletteOrder()[0] || "1" != parsed.PaletteOrder()[1] || "14" != parsed.PaletteOrder()[2] {
+		t.Fatalf("array-only update reset color order: %+v", parsed.PaletteOrder())
+	}
+	assertWorkspaceAVPalette(t, parsed.Palette(), parsed.PaletteOrder())
+	assertAttributeViewDiskOmitsPalette(t, attrView.ID)
 }
 
 func TestGenerateAttributeViewGroupsPreservesResolvedCustomColor(t *testing.T) {
 	setupAttributeViewValidationTest(t)
 
 	attrView := av.NewAttributeView("20260824140000-colors2")
-	attrView.CustomColors = []*av.AttributeViewCustomColor{{
-		Index: 15,
-		AttributeViewColor: av.AttributeViewColor{
-			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
-			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
-		},
-	}}
+	saveTestWorkspacePalette(t, []*av.AttributeViewCustomColor{testAVCustomColor(15, false)}, nil)
 	selectKey := attrView.KeyValues[1].Key
 	selectKey.Options = []*av.SelectOption{{Name: "Custom", Color: "15"}}
 	attrView.ResolveDirectColors()
@@ -223,6 +258,27 @@ func TestGenerateAttributeViewGroupsPreservesResolvedCustomColor(t *testing.T) {
 	}
 }
 
+func testAVCustomColor(index int, hidden bool) *av.AttributeViewCustomColor {
+	return &av.AttributeViewCustomColor{
+		Index:  index,
+		Hidden: hidden,
+		AttributeViewColor: av.AttributeViewColor{
+			Light: av.AttributeViewColorTheme{Color: "#010203", BackgroundColor: "#040506"},
+			Dark:  av.AttributeViewColorTheme{Color: "#070809", BackgroundColor: "#0a0b0c"},
+		},
+	}
+}
+
+func saveTestWorkspacePalette(t *testing.T, colors []*av.AttributeViewCustomColor, order []string) {
+	t.Helper()
+	if _, _, err := SetInlineStylesData(&InlineStyles{
+		Version: InlineStylesVersion,
+		AV:      &InlineStyleAV{Colors: colors, Order: order},
+	}); err != nil {
+		t.Fatalf("save workspace palette failed: %s", err)
+	}
+}
+
 func assertSelectOptionNames(t *testing.T, options []*av.SelectOption, expected []string) {
 	t.Helper()
 
@@ -232,5 +288,31 @@ func assertSelectOptionNames(t *testing.T, options []*av.SelectOption, expected 
 	}
 	if !reflect.DeepEqual(expected, actual) {
 		t.Fatalf("expected option names %v, got %v", expected, actual)
+	}
+}
+
+func assertWorkspaceAVPalette(t *testing.T, colors []*av.AttributeViewCustomColor, order []string) {
+	t.Helper()
+	styles, err := GetInlineStyles()
+	if err != nil {
+		t.Fatalf("get inline styles failed: %s", err)
+	}
+	if !reflect.DeepEqual(styles.AV.Colors, colors) || !reflect.DeepEqual(styles.AV.Order, order) {
+		t.Fatalf("workspace palette mismatch: %#v vs colors=%+v order=%+v", styles.AV, colors, order)
+	}
+}
+
+func assertAttributeViewDiskOmitsPalette(t *testing.T, avID string) {
+	t.Helper()
+	path, _ := av.FindAttributeViewPath(avID)
+	if path == "" {
+		path = av.GetAttributeViewDataPath(avID)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read attribute view failed: %s", err)
+	}
+	if strings.Contains(string(data), "\"customColors\"") || strings.Contains(string(data), "\"colorOrder\"") {
+		t.Fatalf("attribute view file persisted workspace palette: %s", data)
 	}
 }

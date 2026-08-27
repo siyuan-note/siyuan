@@ -11,11 +11,16 @@ export interface IInlineStyleColors {
 export interface IInlineStyle {
     id: string;
     name: string;
+    hidden?: boolean;
     light: IInlineStyleColors;
     dark: IInlineStyleColors;
 }
 
 export const BUILTIN_INLINE_COLOR_COUNT = 13;
+export const AV_BUILTIN_COLOR_COUNT = 14;
+export const AV_CUSTOM_COLOR_MIN = 15;
+export const AV_CUSTOM_COLOR_MAX = 78;
+export const AV_CUSTOM_COLOR_LIMIT = 64;
 export const BUILTIN_INLINE_STYLE_IDS = ["error", "warning", "info", "success"] as const;
 
 export type TBuiltinInlineStyleID = typeof BUILTIN_INLINE_STYLE_IDS[number];
@@ -45,16 +50,46 @@ export interface IInlineStyleBuiltin {
     hidden: IBuiltinInlineStyleHidden;
 }
 
+export interface IInlineStyleOrder {
+    color: string[];
+    backgroundColor: string[];
+    style1: string[];
+}
+
+export interface IInlineStyleAV {
+    colors: IAVCustomColor[];
+    order: string[];
+}
+
+export interface IWorkspaceAVBuiltinColorUpdate extends IBuiltinInlineColor {
+    customized: boolean;
+    hidden: boolean;
+}
+
 export interface IInlineStyles {
     version: 2;
     builtin: IInlineStyleBuiltin;
     styles: IInlineStyle[];
+    order: IInlineStyleOrder;
+    av: IInlineStyleAV;
 }
 
 export interface IInlineStyleApplication {
     type: TInlineStyleType;
     color: string;
 }
+
+export const DEFAULT_BUILTIN_COLOR_ORDER = Array.from({length: BUILTIN_INLINE_COLOR_COUNT}, (_, index) =>
+    (index + 1).toString());
+
+export const DEFAULT_INLINE_STYLE_ORDER: IInlineStyleOrder = {
+    color: [...DEFAULT_BUILTIN_COLOR_ORDER],
+    backgroundColor: [...DEFAULT_BUILTIN_COLOR_ORDER],
+    style1: [...BUILTIN_INLINE_STYLE_IDS],
+};
+
+export const DEFAULT_AV_COLOR_ORDER = Array.from({length: AV_BUILTIN_COLOR_COUNT}, (_, index) =>
+    (index + 1).toString());
 
 export const INLINE_STYLE_EMPTY: IInlineStyles = {
     version: 2,
@@ -69,6 +104,15 @@ export const INLINE_STYLE_EMPTY: IInlineStyles = {
         },
     },
     styles: [],
+    order: {
+        color: [...DEFAULT_INLINE_STYLE_ORDER.color],
+        backgroundColor: [...DEFAULT_INLINE_STYLE_ORDER.backgroundColor],
+        style1: [...DEFAULT_INLINE_STYLE_ORDER.style1],
+    },
+    av: {
+        colors: [],
+        order: [...DEFAULT_AV_COLOR_ORDER],
+    },
 };
 
 export const MAX_INLINE_STYLES = 64;
@@ -134,6 +178,7 @@ const normalizeStyle = (value: unknown): IInlineStyle | undefined => {
     return {
         id: style.id,
         name: [...style.name.trim()].slice(0, MAX_INLINE_STYLE_NAME_LENGTH).join(""),
+        ...(style.hidden === true ? {hidden: true} : {}),
         ...colors,
     };
 };
@@ -177,7 +222,7 @@ const normalizeBuiltinColors = (value: unknown) => {
         }
         const index = Number((item as Partial<IBuiltinInlineColor>).index);
         const pairedColors = normalizePairedColors(item);
-        if (!Number.isInteger(index) || index < 1 || index > BUILTIN_INLINE_COLOR_COUNT ||
+        if (!Number.isInteger(index) || index < 1 || index > AV_BUILTIN_COLOR_COUNT ||
             indexes.has(index) || !pairedColors) {
             return;
         }
@@ -209,12 +254,12 @@ const normalizeBuiltinStyles = (value: unknown) => {
     return styles.sort((a, b) => BUILTIN_INLINE_STYLE_IDS.indexOf(a.id) - BUILTIN_INLINE_STYLE_IDS.indexOf(b.id));
 };
 
-const normalizeHiddenIndexes = (value: unknown) => {
+const normalizeHiddenIndexes = (value: unknown, max = BUILTIN_INLINE_COLOR_COUNT) => {
     if (!Array.isArray(value)) {
         return [];
     }
     return Array.from(new Set(value.filter(item => Number.isInteger(item) && item >= 1 &&
-        item <= BUILTIN_INLINE_COLOR_COUNT) as number[])).sort((a, b) => a - b);
+        item <= max) as number[])).sort((a, b) => a - b);
 };
 
 const normalizeHiddenStyleIDs = (value: unknown) => {
@@ -237,8 +282,140 @@ const normalizeBuiltin = (value: unknown): IInlineStyleBuiltin => {
             color: normalizeHiddenIndexes(hidden.color),
             backgroundColor: normalizeHiddenIndexes(hidden.backgroundColor),
             style1: normalizeHiddenStyleIDs(hidden.style1),
-            av: normalizeHiddenIndexes(hidden.av),
+            av: normalizeHiddenIndexes(hidden.av, AV_BUILTIN_COLOR_COUNT),
         },
+    };
+};
+
+const normalizeStoredAVColor = (value: unknown): IAVCustomColor | undefined => {
+    if (!value || typeof value !== "object") {
+        return;
+    }
+    const color = value as Partial<IAVCustomColor>;
+    const index = Number(color.index);
+    const lightColor = normalizeColor(color.light?.color);
+    const lightBackground = normalizeColor(color.light?.backgroundColor);
+    const darkColor = normalizeColor(color.dark?.color);
+    const darkBackground = normalizeColor(color.dark?.backgroundColor);
+    if (!Number.isInteger(index) || index < AV_CUSTOM_COLOR_MIN || index > AV_CUSTOM_COLOR_MAX ||
+        !lightColor || !lightBackground || !darkColor || !darkBackground) {
+        return;
+    }
+    return {
+        index,
+        ...(color.hidden === true ? {hidden: true} : {}),
+        light: {color: lightColor, backgroundColor: lightBackground},
+        dark: {color: darkColor, backgroundColor: darkBackground},
+    };
+};
+
+const normalizeStoredAVColors = (value: unknown) => {
+    const colors: IAVCustomColor[] = [];
+    const indexes = new Set<number>();
+    if (!Array.isArray(value)) {
+        return colors;
+    }
+    value.forEach(item => {
+        if (colors.length >= AV_CUSTOM_COLOR_LIMIT) {
+            return;
+        }
+        const color = normalizeStoredAVColor(item);
+        if (!color || indexes.has(color.index)) {
+            return;
+        }
+        indexes.add(color.index);
+        colors.push(color);
+    });
+    return colors.sort((a, b) => a.index - b.index);
+};
+
+const defaultAVColorOrder = (colors: Pick<IAVCustomColor, "index">[]) => [
+    ...DEFAULT_AV_COLOR_ORDER,
+    ...colors.map(item => item.index.toString()),
+];
+
+const normalizeStoredAVOrder = (value: unknown, colors: Pick<IAVCustomColor, "index">[]) => {
+    const allowed = new Set(defaultAVColorOrder(colors));
+    const result: string[] = [];
+    const seen = new Set<string>();
+    if (Array.isArray(value)) {
+        value.forEach(item => {
+            if (typeof item !== "string" || !allowed.has(item) || seen.has(item)) {
+                return;
+            }
+            seen.add(item);
+            result.push(item);
+        });
+    }
+    defaultAVColorOrder(colors).forEach(key => {
+        if (!seen.has(key)) {
+            result.push(key);
+        }
+    });
+    return result;
+};
+
+const normalizeAVPalette = (value: unknown): IInlineStyleAV => {
+    const av = value && typeof value === "object" ? value as Partial<IInlineStyleAV> : {};
+    const colors = normalizeStoredAVColors(av.colors);
+    return {
+        colors,
+        order: normalizeStoredAVOrder(av.order, colors),
+    };
+};
+
+export const getInlineStyleType = (style: IInlineStyle): TInlineStyleType | undefined => {
+    const hasColor = !!style.light.color && !!style.dark.color;
+    const hasBackground = !!style.light.backgroundColor && !!style.dark.backgroundColor;
+    if (hasColor && hasBackground) {
+        return "style1";
+    }
+    if (hasColor) {
+        return "color";
+    }
+    if (hasBackground) {
+        return "backgroundColor";
+    }
+};
+
+export const getDefaultBuiltinOrderKeys = (type: TInlineStyleType) =>
+    type === "style1" ? [...BUILTIN_INLINE_STYLE_IDS] : [...DEFAULT_BUILTIN_COLOR_ORDER];
+
+export const isBuiltinOrderKey = (type: TInlineStyleType, key: string) =>
+    getDefaultBuiltinOrderKeys(type).includes(key);
+
+const getCustomOrderKeys = (type: TInlineStyleType, styles: IInlineStyle[]) =>
+    styles.filter(style => getInlineStyleType(style) === type).map(style => style.id);
+
+const normalizeOrderKeys = (value: unknown, type: TInlineStyleType, styles: IInlineStyle[]) => {
+    const builtinKeys = getDefaultBuiltinOrderKeys(type);
+    const customKeys = getCustomOrderKeys(type, styles);
+    const allowed = new Set([...builtinKeys, ...customKeys]);
+    const result: string[] = [];
+    const seen = new Set<string>();
+    if (Array.isArray(value)) {
+        value.forEach(item => {
+            if (typeof item !== "string" || !allowed.has(item) || seen.has(item)) {
+                return;
+            }
+            seen.add(item);
+            result.push(item);
+        });
+    }
+    [...builtinKeys, ...customKeys].forEach(key => {
+        if (!seen.has(key)) {
+            result.push(key);
+        }
+    });
+    return result;
+};
+
+const normalizeOrder = (value: unknown, styles: IInlineStyle[]): IInlineStyleOrder => {
+    const order = value && typeof value === "object" ? value as Partial<IInlineStyleOrder> : {};
+    return {
+        color: normalizeOrderKeys(order.color, "color", styles),
+        backgroundColor: normalizeOrderKeys(order.backgroundColor, "backgroundColor", styles),
+        style1: normalizeOrderKeys(order.style1, "style1", styles),
     };
 };
 
@@ -262,6 +439,10 @@ export const normalizeInlineStyles = (value: unknown): IInlineStyles => {
         builtin: normalizeBuiltin(value && typeof value === "object" ?
             (value as Partial<IInlineStyles>).builtin : undefined),
         styles,
+        order: normalizeOrder(value && typeof value === "object" ?
+            (value as Partial<IInlineStyles>).order : undefined, styles),
+        av: normalizeAVPalette(value && typeof value === "object" ?
+            (value as Partial<IInlineStyles>).av : undefined),
     };
 };
 
@@ -329,18 +510,26 @@ export const saveInlineStyles = async (data: IInlineStyles) => {
     return response;
 };
 
-export const getInlineStyleType = (style: IInlineStyle): TInlineStyleType | undefined => {
-    const hasColor = !!style.light.color && !!style.dark.color;
-    const hasBackground = !!style.light.backgroundColor && !!style.dark.backgroundColor;
-    if (hasColor && hasBackground) {
-        return "style1";
+export const saveWorkspaceAVPalette = async (data: IInlineStyleAV,
+                                             builtinColors: IWorkspaceAVBuiltinColorUpdate[]) => {
+    const [{Constants}, {fetchSyncPost}] = await Promise.all([
+        import("../../constants"),
+        import("../../util/fetch"),
+    ]);
+    const response = await fetchSyncPost("/api/storage/setWorkspaceAVPalette", {
+        colors: data.colors,
+        order: data.order,
+        builtinColors,
+        app: Constants.SIYUAN_APPID,
+    });
+    if (response?.code !== 0) {
+        return response;
     }
-    if (hasColor) {
-        return "color";
+    inlineStylesRequestGeneration++;
+    if (response.data) {
+        setInlineStylesCache(response.data);
     }
-    if (hasBackground) {
-        return "backgroundColor";
-    }
+    return response;
 };
 
 export const getCurrentInlineStyleMode = (): TInlineStyleMode =>
@@ -441,17 +630,36 @@ export const isBuiltinInlineStyleVisible = (type: TBuiltinColorType, value: numb
             !data.builtin.hidden.style1.includes(value as TBuiltinInlineStyleID);
     }
     const index = Number(value);
-    return !Number.isInteger(index) || index < 1 || index > BUILTIN_INLINE_COLOR_COUNT ||
+    const max = type === "av" ? AV_BUILTIN_COLOR_COUNT : BUILTIN_INLINE_COLOR_COUNT;
+    return !Number.isInteger(index) || index < 1 || index > max ||
         !data.builtin.hidden[type].includes(index);
 };
 
 export const getVisibleBuiltinColorIndexes = (type: Exclude<TBuiltinColorType, "style1">,
-                                              data = getInlineStylesCache()) =>
-    Array.from({length: BUILTIN_INLINE_COLOR_COUNT}, (_, index) => index + 1)
+                                              data = getInlineStylesCache()) => {
+    const count = type === "av" ? AV_BUILTIN_COLOR_COUNT : BUILTIN_INLINE_COLOR_COUNT;
+    return Array.from({length: count}, (_, index) => index + 1)
         .filter(index => isBuiltinInlineStyleVisible(type, index, data));
+};
 
 export const getVisibleBuiltinInlineStyleIDs = (data = getInlineStylesCache()) =>
     BUILTIN_INLINE_STYLE_IDS.filter(id => isBuiltinInlineStyleVisible("style1", id, data));
+
+export const getOrderedStyleKeys = (type: TInlineStyleType, data = getInlineStylesCache()) =>
+    normalizeInlineStyles(data).order[type];
+
+export const getVisibleOrderedStyleKeys = (type: TInlineStyleType, data = getInlineStylesCache()) => {
+    const normalized = normalizeInlineStyles(data);
+    return normalized.order[type].filter(key => {
+        if (!isBuiltinOrderKey(type, key)) {
+            const style = normalized.styles.find(item => item.id === key);
+            return !!style && !style.hidden;
+        }
+        return type === "style1" ?
+            isBuiltinInlineStyleVisible("style1", key as TBuiltinInlineStyleID, normalized) :
+            isBuiltinInlineStyleVisible(type, Number(key), normalized);
+    });
+};
 
 export const getBuiltinInlineStyleIDFromValue = (value?: string): TBuiltinInlineStyleID | undefined => {
     const id = value?.match(/--b3-(?:inline-builtin-|card-)(error|warning|info|success)-(?:background(?:-color)?|color)/)?.[1];
@@ -462,17 +670,22 @@ export const isRecentInlineStyleVisible = (value: string, data = getInlineStyles
     const [type, propertyValue] = value.split(INLINE_STYLE_SEPARATOR);
     if (type === "color") {
         const index = Number(propertyValue?.match(BUILTIN_FONT_COLOR_VARIABLE_PATTERN)?.[1]);
-        return !index || isBuiltinInlineStyleVisible("color", index, data);
-    }
-    if (type === "backgroundColor") {
+        if (index) {
+            return isBuiltinInlineStyleVisible("color", index, data);
+        }
+    } else if (type === "backgroundColor") {
         const index = Number(propertyValue?.match(BUILTIN_BACKGROUND_COLOR_VARIABLE_PATTERN)?.[1]);
-        return !index || isBuiltinInlineStyleVisible("backgroundColor", index, data);
-    }
-    if (type === "style1") {
+        if (index) {
+            return isBuiltinInlineStyleVisible("backgroundColor", index, data);
+        }
+    } else if (type === "style1") {
         const id = getBuiltinInlineStyleIDFromValue(value);
-        return !id || isBuiltinInlineStyleVisible("style1", id, data);
+        if (id) {
+            return isBuiltinInlineStyleVisible("style1", id, data);
+        }
     }
-    return true;
+    const style = getInlineStyleByValue(value, data);
+    return !style || !style.hidden;
 };
 
 export const filterHiddenRecentInlineStyles = (values: string[], data = getInlineStylesCache()) =>
@@ -486,7 +699,7 @@ export const getRecentInlineStyleKey = (value: string) => {
     return value.split(INLINE_STYLE_SEPARATOR)[0] + INLINE_STYLE_SEPARATOR + id;
 };
 
-export const getInlineStylesCSS = (data = getInlineStylesCache()) => {
+export const getInlineStylesCSS = (data: unknown = getInlineStylesCache()) => {
     const normalized = normalizeInlineStyles(data);
     return (["light", "dark"] as TInlineStyleMode[]).map(mode => {
         const declarations: string[] = [];
@@ -499,6 +712,11 @@ export const getInlineStylesCSS = (data = getInlineStylesCache()) => {
                 declarations.push(`  ${getBuiltinColorVariableName(color.index, "backgroundColor")}: ` +
                     `${color[mode].backgroundColor};`);
             }
+        });
+        normalized.av.colors.forEach(color => {
+            declarations.push(`  ${getBuiltinColorVariableName(color.index, "color")}: ${color[mode].color};`);
+            declarations.push(`  ${getBuiltinColorVariableName(color.index, "backgroundColor")}: ` +
+                `${color[mode].backgroundColor};`);
         });
         normalized.builtin.styles.forEach(style => {
             if (style[mode].color) {

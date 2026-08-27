@@ -63,6 +63,7 @@ type Package struct {
 	Kernels           []string      `json:"kernels"`
 	Backends          []string      `json:"backends"`
 	Frontends         []string      `json:"frontends"`
+	BootAppearances   []string      `json:"bootAppearances,omitempty"`
 	DisplayName       LocaleStrings `json:"displayName"`
 	Description       LocaleStrings `json:"description"`
 	Readme            LocaleStrings `json:"readme"`

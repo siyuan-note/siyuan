@@ -1,24 +1,38 @@
 import {Dialog} from "../../dialog";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
-import {escapeAttr, escapeHtml} from "../../util/escape";
-import {isMobile} from "../../util/functions";
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../dialog/themeColorEditor";
+import {escapeHtml} from "../../util/escape";
+import {isMobile} from "../../util/functions";
 import {
     getCurrentInlineStyleMode,
+    getInlineStyleByID,
     getInlineStylePreview,
     getInlineStylesCache,
-    getInlineStyleType,
+    getOrderedStyleKeys,
     IInlineStyle,
     IInlineStyles,
+    isBuiltinOrderKey,
     MAX_INLINE_STYLE_NAME_LENGTH,
     MAX_INLINE_STYLES,
+    normalizeInlineStyles,
     saveInlineStyles,
+    TBuiltinInlineStyleID,
     TInlineStyleType,
 } from "./inlineStyle";
-import {openBuiltinColorDialog} from "./builtinColorDialog";
-
-const escapeAttribute = (value: string) => escapeAttr(value);
+import {
+    applyPreviewStyle,
+    bindBuiltinEditor,
+    bindColorListDrag,
+    createBuiltinDialogEntry,
+    getBuiltinEditorHTML,
+    getColorListItemHTML,
+    getProperties,
+    isEntryCustomized,
+    isEntryDefault,
+    resetEntry,
+    writeBuiltinEntry,
+} from "./builtinColorDialog";
 
 const getTypeLabel = (type: TInlineStyleType) => {
     if (type === "color") {
@@ -30,13 +44,17 @@ const getTypeLabel = (type: TInlineStyleType) => {
     return window.siyuan.languages.color;
 };
 
-const cloneInlineStyles = (): IInlineStyles => JSON.parse(JSON.stringify(getInlineStylesCache())) as IInlineStyles;
+const cloneInlineStyles = (data = getInlineStylesCache()): IInlineStyles =>
+    JSON.parse(JSON.stringify(normalizeInlineStyles(data))) as IInlineStyles;
 
 const renderPreviewStyle = (style: IInlineStyle) => {
     const preview = getInlineStylePreview(style, getCurrentInlineStyleMode(), false);
     return `${preview.color ? `color:${preview.color};` : ""}` +
         `${preview.backgroundColor ? `background-color:${preview.backgroundColor};` : ""}`;
 };
+
+const getBuiltinKey = (type: TInlineStyleType, key: string) =>
+    type === "style1" ? key as TBuiltinInlineStyleID : Number(key);
 
 export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroundColor",
                                       onChange?: (data: IInlineStyles) => void) => {
@@ -45,104 +63,150 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
     }
     const draft = cloneInlineStyles();
     const persistedStyleIDs = new Set(draft.styles.map(style => style.id));
-    let editingIndex: number | undefined;
+    const properties = getProperties(initialType);
+    let editingKey: string | undefined;
+    let editingKind: "builtin" | "custom" | "new" | undefined;
     let saving = false;
     const dialog = new Dialog({
         title: window.siyuan.languages.color,
         width: isMobile() ? "92vw" : "600px",
-        content: `<div class="b3-dialog__content" style="max-height:70vh;overflow:auto">
+        content: `<div class="b3-dialog__content" style="max-height:70vh">
     <div data-panel="list">
-        <div data-type="inlineStyleList" class="b3-list b3-list--background fn__selectnone" style="--file-toggle-width:0px"></div>
+        <div data-type="inlineStyleList" class="b3-list b3-list--background fn__selectnone"></div>
+        <div class="fn__hr" data-type="listSpacer"></div>
         <div class="fn__flex" data-type="inlineStyleButtons">
-        <button class="b3-button b3-button--outline" data-action="manageBuiltin" type="button">
-            <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.manageBuiltinColors}
-        </button>
-        <div class="fn__space"></div>
-        <button class="b3-button b3-button--outline" data-action="new" type="button">
-            <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}
-        </button>
+            <button class="b3-button b3-button--outline" data-action="new" type="button">
+                <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}
+            </button>
         </div>
     </div>
-    <div data-panel="editor" class="fn__none">
-        <label class="b3-label b3-label--inner fn__flex" style="align-items:center">
-            <span style="min-width:96px">${window.siyuan.languages.name}</span>
-            <input class="b3-text-field fn__flex-1" data-field="name" style="margin-top:0">
+    <div data-panel="customEditor" class="fn__none">
+        <label class="b3-label b3-label--inner fn__flex">
+            <span class="fn__size96 fn__flex-center">${window.siyuan.languages.name}</span>
+            <input class="b3-text-field fn__flex-1 fn__flex-center" data-field="name">
         </label>
-        <label class="b3-label b3-label--inner fn__flex" style="align-items:center">
-            <span style="min-width:96px">${window.siyuan.languages.type}</span>
-            <select class="b3-select fn__flex-1" data-field="type" style="margin-top:0">
-                <option value="color">${window.siyuan.languages.colorFont}</option>
-                <option value="backgroundColor">${window.siyuan.languages.colorPrimary}</option>
-                <option value="style1">${window.siyuan.languages.color}</option>
-            </select>
-            <span class="fn__flex-1 fn__none" data-field="typeLabel"></span>
+        <label class="b3-label b3-label--inner fn__flex">
+            <span class="fn__size96 fn__flex-center">${window.siyuan.languages.type}</span>
+            <span class="fn__flex-1 fn__flex-center" data-field="typeLabel"></span>
         </label>
         ${getThemeColorEditorHTML()}
     </div>
+    <div data-panel="builtinEditor" class="fn__none">
+        ${getBuiltinEditorHTML(initialType)}
+    </div>
 </div>
 <div class="b3-dialog__action" data-panel="actions">
+    <button class="b3-button b3-button--outline fn__none" data-action="reset" type="button">${window.siyuan.languages.reset}</button>
+    <div class="fn__flex-1"></div>
     <button class="b3-button b3-button--cancel" data-action="cancel" type="button">${window.siyuan.languages.cancel}</button>
     <div class="fn__space"></div>
     <button class="b3-button b3-button--text" data-action="save" type="button">${window.siyuan.languages.save}</button>
 </div>`,
     });
     const listPanel = dialog.element.querySelector('[data-panel="list"]') as HTMLElement;
-    const editorPanel = dialog.element.querySelector('[data-panel="editor"]') as HTMLElement;
+    const customEditorPanel = dialog.element.querySelector('[data-panel="customEditor"]') as HTMLElement;
+    const builtinEditorPanel = dialog.element.querySelector('[data-panel="builtinEditor"]') as HTMLElement;
     const listElement = dialog.element.querySelector('[data-type="inlineStyleList"]') as HTMLElement;
     const newElement = dialog.element.querySelector('[data-action="new"]') as HTMLButtonElement;
-    const buttonsElement = dialog.element.querySelector('[data-type="inlineStyleButtons"]') as HTMLElement;
+    const spacerElement = dialog.element.querySelector('[data-type="listSpacer"]') as HTMLElement;
+    const resetElement = dialog.element.querySelector('[data-action="reset"]') as HTMLButtonElement;
     const cancelElement = dialog.element.querySelector('[data-action="cancel"]') as HTMLButtonElement;
     const saveElement = dialog.element.querySelector('[data-action="save"]') as HTMLButtonElement;
     const nameElement = dialog.element.querySelector('[data-field="name"]') as HTMLInputElement;
-    const typeElement = dialog.element.querySelector('[data-field="type"]') as HTMLSelectElement;
     const typeLabelElement = dialog.element.querySelector('[data-field="typeLabel"]') as HTMLElement;
-    const themeColorEditor = bindThemeColorEditor(editorPanel);
+    const customThemeEditor = bindThemeColorEditor(customEditorPanel);
+
+    const getListKeys = () => getOrderedStyleKeys(initialType, draft);
+
+    const getBuiltinEntry = (key: string) =>
+        createBuiltinDialogEntry(initialType, getBuiltinKey(initialType, key), draft);
+
+    const builtinEditor = bindBuiltinEditor(builtinEditorPanel, initialType, () =>
+        editingKind === "builtin" && editingKey ? getBuiltinEntry(editingKey) : undefined);
 
     const renderList = () => {
-        listElement.innerHTML = draft.styles.length === 0 ?
-            "" :
-            draft.styles.map((style, index) => `<div class="b3-list-item b3-list-item--narrow" data-id="${escapeAttribute(style.id)}" data-index="${index}">
-    <span class="b3-list-item__graphic ariaLabel fn__grab" data-drag="true" draggable="true" data-position="north" aria-label="${escapeAttribute(window.siyuan.languages.sort)}"><svg><use xlink:href="#iconDrag"></use></svg></span>
-    <span class="color__square color__square--list" style="${renderPreviewStyle(style)}">A</span>
-    <span class="b3-list-item__text" title="${escapeAttribute(style.name)}">${escapeHtml(style.name)}</span>
-    <span class="b3-list-item__meta">${escapeHtml(getTypeLabel(getInlineStyleType(style) || "color"))}</span>
-    <span class="b3-list-item__action ariaLabel" data-action="edit" data-index="${index}" data-position="north" aria-label="${escapeAttribute(window.siyuan.languages.edit)}"><svg><use xlink:href="#iconEdit"></use></svg></span>
-    <span class="b3-list-item__action b3-list-item__action--warning ariaLabel" data-action="delete" data-index="${index}" data-position="north" aria-label="${escapeAttribute(window.siyuan.languages.delete)}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
-</div>`).join("");
+        const keys = getListKeys();
+        listElement.innerHTML = keys.map((key, index) => {
+            const builtin = isBuiltinOrderKey(initialType, key);
+            if (builtin) {
+                const entry = getBuiltinEntry(key);
+                return getColorListItemHTML({
+                    kind: "builtin",
+                    key,
+                    index,
+                    label: entry.label,
+                    show: entry.show,
+                    customized: isEntryCustomized(entry, properties),
+                    resetHidden: isEntryDefault(entry, properties),
+                });
+            }
+            const style = getInlineStyleByID(key, draft);
+            if (!style) {
+                return "";
+            }
+            return getColorListItemHTML({
+                kind: "custom",
+                key,
+                index,
+                label: style.name,
+                title: style.name,
+                previewStyle: renderPreviewStyle(style),
+                show: !style.hidden,
+                canDelete: true,
+            });
+        }).join("");
+        listElement.querySelectorAll<HTMLElement>('[data-kind="builtin"][data-key]').forEach(item => {
+            const preview = item.querySelector('[data-role="preview"]') as HTMLElement;
+            if (preview) {
+                applyPreviewStyle(initialType, preview, getBuiltinEntry(item.dataset.key));
+            }
+        });
         newElement.disabled = draft.styles.length >= MAX_INLINE_STYLES;
-        buttonsElement.style.marginTop = draft.styles.length === 0 ? "0" : "8px";
+        spacerElement.classList.toggle("fn__none", keys.length === 0);
     };
 
-    const setEditorActionMode = (editing: boolean) => {
-        cancelElement.dataset.action = editing ? "cancelEdit" : "cancel";
-        saveElement.dataset.action = editing ? "confirmEdit" : "save";
-        saveElement.textContent = editing ? window.siyuan.languages.confirm : window.siyuan.languages.save;
+    const setEditorActionMode = (mode: "list" | "custom" | "builtin") => {
+        listPanel.classList.toggle("fn__none", mode !== "list");
+        customEditorPanel.classList.toggle("fn__none", mode !== "custom");
+        builtinEditorPanel.classList.toggle("fn__none", mode !== "builtin");
+        resetElement.classList.toggle("fn__none", mode !== "builtin");
+        cancelElement.dataset.action = mode === "list" ? "cancel" : "cancelEdit";
+        saveElement.dataset.action = mode === "list" ? "save" : "confirmEdit";
+        saveElement.textContent = mode === "list" ? window.siyuan.languages.save : window.siyuan.languages.confirm;
+        saveElement.removeAttribute("disabled");
     };
 
     const showList = () => {
-        editingIndex = undefined;
-        editorPanel.classList.add("fn__none");
-        listPanel.classList.remove("fn__none");
-        setEditorActionMode(false);
+        editingKey = undefined;
+        editingKind = undefined;
+        setEditorActionMode("list");
         renderList();
     };
 
-    const showEditor = (index?: number) => {
-        editingIndex = index ?? -1;
-        const style = typeof index === "number" ? draft.styles[index] : undefined;
+    const showCustomEditor = (key?: string) => {
+        const style = key ? getInlineStyleByID(key, draft) : undefined;
+        editingKey = key;
+        editingKind = style ? "custom" : "new";
         nameElement.value = style?.name || "";
-        typeElement.value = style ? getInlineStyleType(style) : initialType;
-        typeElement.classList.toggle("fn__none", !!style);
-        typeLabelElement.classList.toggle("fn__none", !style);
-        typeLabelElement.textContent = getTypeLabel(typeElement.value as TInlineStyleType);
-        themeColorEditor.setValue(style, typeElement.value as TInlineStyleType);
-        listPanel.classList.add("fn__none");
-        editorPanel.classList.remove("fn__none");
-        setEditorActionMode(true);
+        typeLabelElement.textContent = getTypeLabel(initialType);
+        customThemeEditor.setValue(style, initialType);
+        setEditorActionMode("custom");
         nameElement.focus();
     };
 
+    const showBuiltinEditor = (key: string) => {
+        editingKey = key;
+        editingKind = "builtin";
+        builtinEditor.fill(getBuiltinEntry(key));
+        setEditorActionMode("builtin");
+    };
+
     const confirmEditor = () => {
+        if (editingKind === "builtin" && editingKey) {
+            writeBuiltinEntry(draft, initialType, builtinEditor.commit(getBuiltinEntry(editingKey)));
+            showList();
+            return;
+        }
         const name = nameElement.value.trim();
         if (!name) {
             showMessage(window.siyuan.languages.namingEmpty, 6000, "error");
@@ -154,111 +218,100 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
             nameElement.focus();
             return;
         }
-        const type = typeElement.value as TInlineStyleType;
-        const previous = editingIndex >= 0 ? draft.styles[editingIndex] : undefined;
-        const value = themeColorEditor.getValue(type);
+        const previous = editingKey ? getInlineStyleByID(editingKey, draft) : undefined;
+        const value = customThemeEditor.getValue(initialType);
         const style: IInlineStyle = {
             id: previous?.id || Lute.NewNodeID(),
             name,
+            hidden: previous?.hidden,
             light: value.light,
             dark: value.dark,
         };
         if (previous) {
-            draft.styles[editingIndex] = style;
+            draft.styles = draft.styles.map(item => item.id === previous.id ? style : item);
         } else {
             draft.styles.push(style);
+            if (!draft.order[initialType].includes(style.id)) {
+                draft.order[initialType].push(style.id);
+            }
         }
         showList();
     };
 
-    let draggingIndex = -1;
-    const clearDragover = () => {
-        listElement.querySelectorAll<HTMLElement>(".b3-list-item[data-index]").forEach(item => {
-            item.classList.remove("dragover__top", "dragover__bottom");
-        });
-    };
-    const clearDragStyles = () => {
-        clearDragover();
-        listElement.querySelectorAll<HTMLElement>(".b3-list-item[data-index]").forEach(item => {
-            item.style.opacity = "";
-        });
-    };
-    listElement.addEventListener("dragstart", (event: DragEvent) => {
-        const handleElement = (event.target as HTMLElement).closest<HTMLElement>('[data-drag="true"]');
-        const itemElement = handleElement?.closest<HTMLElement>(".b3-list-item[data-index]");
-        if (!itemElement) {
-            event.preventDefault();
+    bindColorListDrag(listElement, getListKeys, keys => {
+        draft.order[initialType] = keys;
+        renderList();
+    });
+    listElement.addEventListener("click", event => {
+        if ((event.target as HTMLElement).closest('[data-action="toggleShow"]')) {
+            event.stopPropagation();
+        }
+    });
+    listElement.addEventListener("change", event => {
+        const switchElement = (event.target as HTMLElement).closest<HTMLInputElement>('[data-action="toggleShow"]');
+        const itemElement = switchElement?.closest<HTMLElement>("[data-key]");
+        if (!switchElement || !itemElement) {
             return;
         }
-        draggingIndex = parseInt(itemElement.dataset.index);
-        event.dataTransfer.effectAllowed = "move";
-        event.dataTransfer.setData("text/plain", itemElement.dataset.index);
-        itemElement.style.opacity = ".38";
-    });
-    listElement.addEventListener("dragover", (event: DragEvent) => {
-        const itemElement = (event.target as HTMLElement).closest<HTMLElement>(".b3-list-item[data-index]");
-        if (!itemElement || draggingIndex < 0) {
+        if (itemElement.dataset.kind === "builtin") {
+            const entry = getBuiltinEntry(itemElement.dataset.key);
+            entry.show = switchElement.checked;
+            writeBuiltinEntry(draft, initialType, entry);
+            itemElement.querySelector('[data-action="resetItem"]')?.classList.toggle("fn__none", isEntryDefault(entry, properties));
             return;
         }
-        event.preventDefault();
-        event.dataTransfer.dropEffect = "move";
-        clearDragover();
-        const rect = itemElement.getBoundingClientRect();
-        itemElement.classList.add(event.clientY < rect.top + rect.height / 2 ? "dragover__top" : "dragover__bottom");
-    });
-    listElement.addEventListener("drop", (event: DragEvent) => {
-        const itemElement = (event.target as HTMLElement).closest<HTMLElement>(".b3-list-item[data-index]");
-        if (!itemElement || draggingIndex < 0) {
-            return;
+        const style = getInlineStyleByID(itemElement.dataset.key, draft);
+        if (style) {
+            style.hidden = !switchElement.checked;
         }
-        event.preventDefault();
-        const targetIndex = parseInt(itemElement.dataset.index);
-        const rect = itemElement.getBoundingClientRect();
-        const before = event.clientY < rect.top + rect.height / 2;
-        let insertIndex = targetIndex + (before ? 0 : 1);
-        if (draggingIndex < insertIndex) {
-            insertIndex--;
-        }
-        if (draggingIndex !== insertIndex) {
-            const [style] = draft.styles.splice(draggingIndex, 1);
-            draft.styles.splice(insertIndex, 0, style);
-            renderList();
-        }
-        draggingIndex = -1;
-        clearDragStyles();
-    });
-    listElement.addEventListener("dragend", () => {
-        draggingIndex = -1;
-        clearDragStyles();
     });
 
-    typeElement.addEventListener("change", () => {
-        themeColorEditor.setType(typeElement.value as TInlineStyleType);
-    });
     dialog.element.addEventListener("click", async event => {
         const actionElement = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
-        if (!actionElement || actionElement.hasAttribute("disabled")) {
+        if (!actionElement || actionElement.hasAttribute("disabled") || actionElement.classList.contains("fn__none")) {
             return;
         }
         const action = actionElement.dataset.action;
-        const index = parseInt(actionElement.dataset.index);
+        if (action === "toggleShow") {
+            event.stopPropagation();
+            return;
+        }
+        const itemElement = actionElement.closest<HTMLElement>("[data-key]");
+        const key = itemElement?.dataset.key;
         if (action === "new") {
             if (draft.styles.length >= MAX_INLINE_STYLES) {
                 showMessage(window.siyuan.languages.invalid, 6000, "error");
                 return;
             }
-            showEditor();
-        } else if (action === "manageBuiltin") {
-            openBuiltinColorDialog(initialType, onChange);
-        } else if (action === "edit") {
-            showEditor(index);
-        } else if (action === "delete") {
-            const style = draft.styles[index];
+            showCustomEditor();
+        } else if (action === "edit" && key) {
+            if (itemElement.dataset.kind === "builtin") {
+                showBuiltinEditor(key);
+            } else {
+                showCustomEditor(key);
+            }
+        } else if (action === "resetItem" && key) {
+            const entry = getBuiltinEntry(key);
+            resetEntry(entry, properties);
+            writeBuiltinEntry(draft, initialType, entry);
+            renderList();
+        } else if (action === "reset") {
+            if (editingKind === "builtin" && editingKey) {
+                const entry = getBuiltinEntry(editingKey);
+                resetEntry(entry, properties);
+                writeBuiltinEntry(draft, initialType, entry);
+                showBuiltinEditor(editingKey);
+            }
+        } else if (action === "delete" && key) {
+            const style = getInlineStyleByID(key, draft);
             if (!style) {
                 return;
             }
             const removeStyle = () => {
-                draft.styles.splice(index, 1);
+                draft.styles = draft.styles.filter(item => item.id !== key);
+                (["color", "backgroundColor", "style1"] as TInlineStyleType[]).forEach(type => {
+                    draft.order[type] = draft.order[type].filter(item => item !== key);
+                });
                 renderList();
             };
             if (persistedStyleIDs.has(style.id)) {
@@ -278,10 +331,7 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
             saving = true;
             actionElement.setAttribute("disabled", "disabled");
             try {
-                const response = await saveInlineStyles({
-                    ...draft,
-                    builtin: cloneInlineStyles().builtin,
-                });
+                const response = await saveInlineStyles(draft);
                 if (response?.code !== 0) {
                     showMessage(response?.msg || window.siyuan.languages.invalid, 6000, "error");
                     saving = false;
@@ -301,5 +351,6 @@ export const openInlineStyleDialog = (initialType: TInlineStyleType = "backgroun
         event.preventDefault();
         event.stopPropagation();
     });
+    typeLabelElement.textContent = getTypeLabel(initialType);
     renderList();
 };

@@ -40,6 +40,7 @@ import {
     getConfiguredChildrenSortMode,
     isCustomFileTreeList
 } from "../util/fileTreeSort";
+import {syncFileTreeItemDefaultIcon} from "../emoji/fileTreeIcon";
 /// #if MOBILE
 import {openEmojiPanel} from "../emoji";
 import {openMobileFileByIdInNewTab} from "../mobile/editor";
@@ -978,6 +979,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
         /// #endif
         const liElement = files.element.querySelector(`[data-path="${pathString}"]`);
         liElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
+        syncFileTreeItemDefaultIcon(liElement as HTMLElement);
         files.getLeaf(liElement, notebookId, true);
         window.siyuan.menus.menu.remove();
     };

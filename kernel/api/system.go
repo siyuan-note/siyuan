@@ -1164,6 +1164,17 @@ func bootProgress(c *gin.Context) {
 	ret.Data = map[string]any{"progress": progress, "details": details}
 }
 
+func getBootAppearance(c *gin.Context) {
+	if !model.IsLocalRequest(c) {
+		c.Status(http.StatusForbidden)
+		return
+	}
+	c.Header("Cache-Control", "no-store")
+	ret := gulu.Ret.NewResult()
+	ret.Data = model.GetBootAppearance()
+	c.JSON(http.StatusOK, ret)
+}
+
 // bootProgressSSE 以 Server-Sent Events 推送启动进度，仅在进度发生变化时写一帧。
 func bootProgressSSE(c *gin.Context) {
 	c.Header("Content-Type", "text/event-stream")

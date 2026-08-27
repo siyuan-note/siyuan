@@ -1,5 +1,6 @@
 import type {EventBus, IEventBusSafeEmitResult} from "../../plugin/EventBusCore";
 import {emitWithErrors, eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
+import {genUUID} from "../../util/genID";
 
 export interface IAssetUploadEventContext {
     source: TAssetUploadSource;
@@ -46,7 +47,8 @@ const activeTasksByProtyle = new WeakMap<IProtyle, Set<AssetUploadTask>>();
 const completionTasksByPlugin = new WeakMap<IAssetUploadPlugin, Set<AssetUploadTask>>();
 const unloadingPlugins = new WeakSet<IAssetUploadPlugin>();
 
-const genRequestId = () => crypto.randomUUID();
+const genRequestId = () => typeof globalThis.crypto.randomUUID === "function" ?
+    globalThis.crypto.randomUUID() : genUUID();
 
 const cloneInput = (input: IAssetUploadInput): IAssetUploadInput => {
     if (input.kind === "files") {

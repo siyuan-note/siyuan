@@ -282,11 +282,10 @@ func html2BlockDOM(c *gin.Context) {
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	renderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	output := renderer.Render()
-	convertedDOM := gulu.Str.FromBytes(output)
 	if preflight {
-		ret.Data = map[string]any{"converted": true, "dom": convertedDOM, "normalizedHTML": normalizedHTML, "useHTML": true}
+		ret.Data = map[string]any{"converted": true, "normalizedHTML": normalizedHTML, "useHTML": true}
 	} else {
-		ret.Data = convertedDOM
+		ret.Data = gulu.Str.FromBytes(output)
 	}
 }
 

@@ -10,6 +10,7 @@
         }
 
         body {
+            position: relative;
             height: 100%;
             margin: 0;
             background: #1e1e1e;
@@ -17,11 +18,30 @@
             font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
         }
 
+        #bootAppearance {
+            position: fixed;
+            z-index: 0;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        #bootAppearance.boot-appearance--loaded {
+            opacity: 1;
+        }
+
         #bg {
+            position: relative;
+            z-index: 1;
             width: 100%;
             display: flex;
             justify-content: space-around;
             height: 100%;
+            pointer-events: none;
         }
 
         #bg svg {
@@ -83,6 +103,7 @@
         /* 底部进度区，预留安全区域防止移动端手势条遮挡 */
         #progressWrap {
             position: absolute;
+            z-index: 2;
             bottom: env(safe-area-inset-bottom);
             width: 100%;
             padding-bottom: env(safe-area-inset-bottom);
@@ -118,6 +139,7 @@
     </style>
 </head>
 <body>
+<iframe id="bootAppearance" sandbox="" allow="autoplay" tabindex="-1" aria-hidden="true"></iframe>
 <div id="bg">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
         <g class="streaks"></g>
@@ -209,6 +231,273 @@
         return value
     }
 
+    const escapeBootAppearanceHTML = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;",
+    })[character]);
+
+    const getBootAppearanceColor = (value, fallback) => {
+        if (typeof value === "string" && /^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i.test(value)) {
+            return value;
+        }
+        return fallback;
+    };
+
+    const getBootAppearanceResourceURL = (value, serverURL, resourceRootPath) => {
+        if (typeof value !== "string" || value === "") {
+            return "";
+        }
+        try {
+            const url = new URL(value, serverURL + "/");
+            if (url.origin !== serverURL || !url.pathname.startsWith(resourceRootPath)) {
+                return "";
+            }
+            return url.href;
+        } catch (error) {
+            return "";
+        }
+    };
+
+    const bootAppearancePreloadTimeout = 5000;
+    const preloadBootAppearanceImage = (url) => new Promise((resolve) => {
+        const image = new Image();
+        let settled = false;
+        const finish = (valid) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            clearTimeout(timeout);
+            image.onload = null;
+            image.onerror = null;
+            image.removeAttribute("src");
+            resolve(valid);
+        };
+        const timeout = setTimeout(() => finish(false), bootAppearancePreloadTimeout);
+        image.decoding = "async";
+        image.onload = () => {
+            if (image.naturalWidth < 1 || image.naturalHeight < 1) {
+                finish(false);
+                return;
+            }
+            if (typeof image.decode !== "function") {
+                finish(true);
+                return;
+            }
+            image.decode().then(() => finish(true)).catch(() => finish(false));
+        };
+        image.onerror = () => finish(false);
+        image.src = url;
+    });
+
+    const preloadBootAppearanceVideo = (url) => new Promise((resolve) => {
+        const video = document.createElement("video");
+        let settled = false;
+        const finish = (valid) => {
+            if (settled) {
+                return;
+            }
+            settled = true;
+            clearTimeout(timeout);
+            video.onloadeddata = null;
+            video.onerror = null;
+            video.pause();
+            video.removeAttribute("src");
+            video.load();
+            video.remove();
+            resolve(valid);
+        };
+        const timeout = setTimeout(() => finish(false), bootAppearancePreloadTimeout);
+        video.preload = "auto";
+        video.muted = true;
+        video.defaultMuted = true;
+        video.playsInline = true;
+        video.setAttribute("playsinline", "");
+        video.style.cssText = "position:fixed;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none";
+        video.onloadeddata = () => finish(video.readyState >= 2 && video.videoWidth > 0 && video.videoHeight > 0);
+        video.onerror = () => finish(false);
+        document.body.appendChild(video);
+        video.src = url;
+        video.load();
+    });
+
+    const preloadBootAppearanceStyle = async (url) => {
+        if (!url) {
+            return true;
+        }
+        const abortController = new AbortController();
+        const timeout = setTimeout(() => abortController.abort(), bootAppearancePreloadTimeout);
+        try {
+            const response = await fetch(url, {cache: "no-store", signal: abortController.signal});
+            if (!response.ok) {
+                return false;
+            }
+            await response.text();
+            return true;
+        } catch (error) {
+            return false;
+        } finally {
+            clearTimeout(timeout);
+        }
+    };
+
+    const validateBootAppearanceResources = async (styleURL, imageURLs, videoURLs) => {
+        const validations = [preloadBootAppearanceStyle(styleURL)];
+        imageURLs.forEach((url) => validations.push(preloadBootAppearanceImage(url)));
+        videoURLs.forEach((url) => validations.push(preloadBootAppearanceVideo(url)));
+        const results = await Promise.all(validations);
+        return results.every((valid) => valid);
+    };
+
+    const applyBootAppearanceOfficialUI = (officialUI) => {
+        const logoEl = document.querySelector("#bg svg");
+        const detailsEl = document.getElementById("details");
+        const progressEl = document.getElementById("progress");
+        const progressTrackEl = document.getElementById("progressTrack");
+        if (logoEl) {
+            logoEl.style.display = officialUI?.showLogo === false ? "none" : "";
+        }
+        detailsEl.style.display = officialUI?.showDetails === false ? "none" : "";
+        detailsEl.style.color = getBootAppearanceColor(officialUI?.textColor, "#9aa0a6");
+        const progressColor = getBootAppearanceColor(officialUI?.progressColor, "#3b3e43");
+        progressEl.style.backgroundColor = progressColor;
+        progressEl.style.boxShadow = "0 0 8px " + progressColor;
+        progressTrackEl.style.backgroundColor = getBootAppearanceColor(officialUI?.trackColor, "#2a2c2f");
+    };
+
+    let bootAppearanceRequestID = 0;
+    const loadBootAppearance = (port, frontend) => {
+        if (getSearch("appearance") === "0" || getSearch("safe") === "1") {
+            return;
+        }
+        const normalizedPort = String(port);
+        if (!/^\d{1,5}$/.test(normalizedPort) || Number(normalizedPort) < 1 || Number(normalizedPort) > 65535) {
+            return;
+        }
+        const requestID = ++bootAppearanceRequestID;
+        const serverURL = "http://127.0.0.1:" + normalizedPort;
+        const request = async () => {
+            try {
+                const response = await fetch(serverURL + "/api/system/getBootAppearance", {cache: "no-store"});
+                if (!response.ok) {
+                    if (response.status >= 500 && requestID === bootAppearanceRequestID) {
+                        setTimeout(request, 100);
+                    }
+                    return;
+                }
+                const result = await response.json();
+                const appearance = result?.code === 0 ? result.data : undefined;
+                if (requestID !== bootAppearanceRequestID || !appearance?.enabled) {
+                    return;
+                }
+                if (Array.isArray(appearance.frontends) && !appearance.frontends.includes(frontend)) {
+                    return;
+                }
+                if (typeof appearance.provider !== "string" || typeof appearance.appearance !== "string") {
+                    return;
+                }
+
+                const resourceRootPath = "/boot-appearance-assets/" + encodeURIComponent(appearance.provider) + "/" +
+                    encodeURIComponent(appearance.appearance) + "/";
+                const resourceRootURL = serverURL + resourceRootPath;
+                const layerPositions = new Map([
+                    ["center", "center"],
+                    ["top", "center top"],
+                    ["right", "right center"],
+                    ["bottom", "center bottom"],
+                    ["left", "left center"],
+                    ["top-left", "left top"],
+                    ["top-right", "right top"],
+                    ["bottom-right", "right bottom"],
+                    ["bottom-left", "left bottom"],
+                ]);
+                const layerFits = new Set(["contain", "cover", "fill", "none", "scale-down"]);
+                const layers = [];
+                const imageURLs = new Set();
+                const videoURLs = new Set();
+                let layersValid = true;
+                if (Array.isArray(appearance.layers)) {
+                    appearance.layers.forEach((layer) => {
+                        if (!layer || typeof layer.id !== "string" || layer.id.length > 64 ||
+                            !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(layer.id)) {
+                            layersValid = false;
+                            return;
+                        }
+                        const src = getBootAppearanceResourceURL(layer.src, serverURL, resourceRootPath);
+                        if (!src) {
+                            layersValid = false;
+                            return;
+                        }
+                        const fit = layerFits.has(layer.fit) ? layer.fit : "cover";
+                        const position = layerPositions.get(layer.position) || "center";
+                        const attributes = "class=\"boot-appearance__layer\" data-layer=\"" +
+                            escapeBootAppearanceHTML(layer.id) + "\" style=\"object-fit: " + fit +
+                            "; object-position: " + position + ";\"";
+                        if (layer.type === "image") {
+                            imageURLs.add(src);
+                            layers.push("<img " + attributes + " src=\"" + escapeBootAppearanceHTML(src) +
+                                "\" alt=\"\" draggable=\"false\">");
+                        } else if (layer.type === "video") {
+                            const poster = getBootAppearanceResourceURL(layer.poster, serverURL, resourceRootPath);
+                            if (!poster) {
+                                layersValid = false;
+                                return;
+                            }
+                            imageURLs.add(poster);
+                            videoURLs.add(src);
+                            layers.push("<video " + attributes + " src=\"" + escapeBootAppearanceHTML(src) +
+                                "\" poster=\"" + escapeBootAppearanceHTML(poster) +
+                                "\" autoplay muted loop playsinline preload=\"auto\" disablepictureinpicture></video>");
+                        } else {
+                            layersValid = false;
+                        }
+                    });
+                }
+
+                const styleURL = getBootAppearanceResourceURL(appearance.style, serverURL, resourceRootPath);
+                if (!layersValid || (appearance.style && !styleURL)) {
+                    return;
+                }
+                if (!await validateBootAppearanceResources(styleURL, imageURLs, videoURLs) ||
+                    requestID !== bootAppearanceRequestID) {
+                    return;
+                }
+                const backgroundColor = getBootAppearanceColor(appearance.backgroundColor, "#1e1e1e");
+                const escapedResourceRootURL = escapeBootAppearanceHTML(resourceRootURL);
+                const contentSecurityPolicy = "default-src 'none'; style-src 'unsafe-inline' " +
+                    escapedResourceRootURL + "; img-src " + escapedResourceRootURL + "; media-src " +
+                    escapedResourceRootURL + "; font-src 'none'; connect-src 'none'; frame-src 'none'; " +
+                    "object-src 'none'; base-uri 'none'; form-action 'none'";
+                const styleLink = styleURL ? "<link rel=\"stylesheet\" href=\"" +
+                    escapeBootAppearanceHTML(styleURL) + "\">" : "";
+                const iframeEl = document.getElementById("bootAppearance");
+                iframeEl.classList.remove("boot-appearance--loaded");
+                iframeEl.onload = () => {
+                    if (requestID !== bootAppearanceRequestID) {
+                        return;
+                    }
+                    applyBootAppearanceOfficialUI(appearance.officialUI);
+                    iframeEl.classList.add("boot-appearance--loaded");
+                };
+                iframeEl.srcdoc = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\">" +
+                    "<meta http-equiv=\"Content-Security-Policy\" content=\"" + contentSecurityPolicy + "\">" +
+                    "<style>html,body{width:100%;height:100%;margin:0;overflow:hidden;background:" +
+                    backgroundColor + ";}.boot-appearance__layer{position:absolute;inset:0;width:100%;height:100%;" +
+                    "border:0;user-select:none;}</style>" + styleLink + "</head><body>" + layers.join("") +
+                    "</body></html>";
+            } catch (error) {
+                // 内核 HTTP 服务暂不可用时短延迟重试，且不阻塞启动进度和页面跳转。
+                if (requestID === bootAppearanceRequestID) {
+                    setTimeout(request, 100);
+                }
+            }
+        };
+        request();
+    };
+
     // 进度文案直接使用内核推送的原始英文
     const redirect = () => {
         const uri = 'http://127.0.0.1:' + location.port
@@ -219,6 +508,7 @@
         const progressEl = document.getElementById('progress')
         const detailsEl = document.getElementById('details')
         detailsEl.textContent = "v" + v + ' Booting kernel...'
+        loadBootAppearance(location.port, "mobile");
         const bootShowStart = Date.now()
 
         // 随机起始基数（15~25），等待内核进度时先平滑填充到此值

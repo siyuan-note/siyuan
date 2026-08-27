@@ -1145,7 +1145,8 @@ func renderSnapshotAttributeView(c *gin.Context) {
 	ret.Data = map[string]any{
 		"name":                   attrView.Name,
 		"id":                     attrView.ID,
-		"customColors":           attrView.CustomColors,
+		"customColors":           attrView.Palette(),
+		"colorOrder":             attrView.PaletteOrder(),
 		"usedCustomColorIndexes": attrView.UsedCustomColorIndexes(),
 		"viewType":               view.GetType(),
 		"viewID":                 view.GetID(),
@@ -1242,7 +1243,8 @@ func renderHistoryAttributeView(c *gin.Context) {
 	ret.Data = map[string]any{
 		"name":                   attrView.Name,
 		"id":                     attrView.ID,
-		"customColors":           attrView.CustomColors,
+		"customColors":           attrView.Palette(),
+		"colorOrder":             attrView.PaletteOrder(),
 		"usedCustomColorIndexes": attrView.UsedCustomColorIndexes(),
 		"viewType":               view.GetType(),
 		"viewID":                 view.GetID(),
@@ -1399,7 +1401,8 @@ func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, gro
 	retData := map[string]any{
 		"name":                   attrView.Name,
 		"id":                     attrView.ID,
-		"customColors":           attrView.CustomColors,
+		"customColors":           attrView.Palette(),
+		"colorOrder":             attrView.PaletteOrder(),
 		"usedCustomColorIndexes": attrView.UsedCustomColorIndexes(),
 		"viewType":               view.GetType(),
 		"viewID":                 view.GetID(),

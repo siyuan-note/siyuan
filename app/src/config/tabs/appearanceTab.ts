@@ -35,6 +35,11 @@ import {
     unregisterCustomFont
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
+import {
+    shouldShowBootAppearanceSetting,
+    type IBootAppearanceListItem,
+    type IBootAppearanceSelection,
+} from "./bootAppearanceState";
 /// #if MOBILE
 import {genMobileBottomBarSettingHTML, mountMobileBottomBarSetting} from "../../mobile/util/mobileBottomBar";
 import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../mobile/util/mobileSidePanelSetting";
@@ -50,6 +55,11 @@ interface IFontItem {
     displayName: string;
     aliases?: string[];
     spacing?: string;
+}
+
+interface IBootAppearanceListData {
+    appearances: IBootAppearanceListItem[];
+    current: IBootAppearanceSelection;
 }
 
 type FontFamiliesConfigKey = "fontFamilies" | "codeFontFamilies";
@@ -554,6 +564,90 @@ const fontItemFromElement = (item: HTMLElement): IFontItem => ({
     spacing: item.dataset.spacing,
 });
 
+const genBootAppearanceHtml = () => `<label class="fn__flex b3-label config-item config-wrap fn__none">
+    <div class="fn__flex-1 config-item__main">
+        <div class="config-name">${escapeHtml(window.siyuan.languages.bootAppearance)}</div>
+        <div class="b3-label__text">${escapeHtml(window.siyuan.languages.bootAppearanceTip)}</div>
+    </div>
+    <span class="fn__space"></span>
+    <select class="b3-select fn__flex-center fn__size200" id="bootAppearance" disabled>
+        <option value="">${escapeHtml(window.siyuan.languages.default)}</option>
+    </select>
+</label>`;
+
+const mountBootAppearance = async (root: HTMLElement) => {
+    const selectElement = root.querySelector<HTMLSelectElement>("#bootAppearance");
+    if (!selectElement) {
+        return;
+    }
+    const itemElement = selectElement.closest<HTMLElement>(".config-item");
+    let response: IWebSocketData;
+    try {
+        response = await fetchSyncPost("/api/setting/getBootAppearances");
+    } catch (error) {
+        console.warn("get boot appearances failed", error);
+        itemElement?.classList.remove("fn__none");
+        return;
+    }
+    const data = response.data as IBootAppearanceListData;
+    if (response.code !== 0 || !data || !Array.isArray(data.appearances)) {
+        itemElement?.classList.remove("fn__none");
+        return;
+    }
+
+    const frontend = getFrontend() === "mobile" ? "mobile" : "desktop";
+    const configuredValue = data.current?.provider && data.current?.appearance
+        ? JSON.stringify([data.current.provider, data.current.appearance])
+        : "";
+    if (!shouldShowBootAppearanceSetting(data.appearances, data.current, frontend)) {
+        return;
+    }
+
+    selectElement.replaceChildren(new Option(window.siyuan.languages.default, ""));
+    const providerGroups = new Map<string, HTMLOptGroupElement>();
+    data.appearances.forEach((item) => {
+        const value = JSON.stringify([item.provider, item.appearance]);
+        const compatible = item.frontends?.includes(frontend);
+        if (!compatible && value !== configuredValue) {
+            return;
+        }
+        let groupElement = providerGroups.get(item.provider);
+        if (!groupElement) {
+            groupElement = document.createElement("optgroup");
+            groupElement.label = item.provider;
+            providerGroups.set(item.provider, groupElement);
+            selectElement.append(groupElement);
+        }
+        const optionElement = new Option(item.displayName, value);
+        optionElement.disabled = !compatible;
+        groupElement.append(optionElement);
+    });
+    selectElement.value = Array.from(selectElement.options).some((option) => option.value === configuredValue)
+        ? configuredValue
+        : "";
+    let savedValue = selectElement.value;
+    selectElement.disabled = window.siyuan.config.readonly;
+    itemElement?.classList.remove("fn__none");
+    selectElement.addEventListener("change", async () => {
+        const nextValue = selectElement.value;
+        const [provider, appearance] = nextValue ? JSON.parse(nextValue) as [string, string] : ["", ""];
+        selectElement.disabled = true;
+        try {
+            const setResponse = await fetchSyncPost("/api/setting/setBootAppearance", {provider, appearance});
+            if (setResponse.code === 0) {
+                savedValue = nextValue;
+            } else {
+                selectElement.value = savedValue;
+            }
+        } catch (error) {
+            console.warn("set boot appearance failed", error);
+            selectElement.value = savedValue;
+        } finally {
+            selectElement.disabled = window.siyuan.config.readonly;
+        }
+    });
+};
+
 const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
     const group = tab.group("interface", window.siyuan.languages.configGroupInterface);
 
@@ -579,6 +673,14 @@ const registerAppearanceInterfaceGroup = (tab: SettingTabBuilder) => {
             saveThemeMode(themeValue);
         },
     });
+    /// #if !BROWSER
+    group.slot({
+        key: "bootAppearance",
+        keywords: [window.siyuan.languages.bootAppearance, window.siyuan.languages.bootAppearanceTip],
+        html: genBootAppearanceHtml,
+        afterMount: mountBootAppearance,
+    });
+    /// #endif
     group.stack({
         key: "theme",
         keywords: [

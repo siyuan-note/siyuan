@@ -111,7 +111,12 @@ import {
     setOrderedListStart
 } from "../wysiwyg/list";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
-import {getBacklinkGutterContentTop, getFixedGutterPosition, getGutterMarginHeight} from "./layout";
+import {
+    getBacklinkGutterContentTop,
+    getContainerGutterSpace,
+    getFixedGutterPosition,
+    getGutterMarginHeight
+} from "./layout";
 import {closeSubElement} from "../toolbar/subElementLifecycle";
 import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
 import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFold} from "../util/viewFold";
@@ -3681,9 +3686,7 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
                 if (type === "NodeHeading") {
                     html = html + foldHTML;
                 }
-                if (["NodeBlockquote", "NodeCallout"].includes(type)) {
-                    space += 10;
-                }
+                space += getContainerGutterSpace(type, element === nodeElement);
                 // 前一个块兄弟（跳过 sb__resize 拖拽手柄，手柄无 data-node-id）
                 let previousBlock = nodeElement.previousElementSibling;
                 while (previousBlock && !previousBlock.getAttribute("data-node-id")) {

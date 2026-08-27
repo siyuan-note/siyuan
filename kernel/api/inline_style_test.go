@@ -126,7 +126,7 @@ func TestInlineStylesAPI(t *testing.T) {
 	}
 
 	invalidBuiltinRecorder := performInlineStylesRequest(engine, "/api/storage/setInlineStyles",
-		`{"version":2,"styles":[],"builtin":{"hidden":{"av":[14]}}}`)
+		`{"version":2,"styles":[],"builtin":{"hidden":{"av":[15]}}}`)
 	if responseCode(t, invalidBuiltinRecorder) != -1 {
 		t.Fatalf("invalid builtin inline styles were accepted: %s", invalidBuiltinRecorder.Body.String())
 	}

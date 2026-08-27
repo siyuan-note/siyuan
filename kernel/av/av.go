@@ -41,15 +41,14 @@ import (
 
 // AttributeView 描述了属性视图的结构。
 type AttributeView struct {
-	Spec              int                         `json:"spec"`                        // 格式版本
-	ID                string                      `json:"id"`                          // 属性视图 ID
-	Name              string                      `json:"name"`                        // 属性视图名称
-	KeyValues         []*KeyValues                `json:"keyValues"`                   // 属性视图属性键值
-	KeyIDs            []string                    `json:"keyIDs"`                      // 属性视图属性键 ID，用于排序
-	Views             []*View                     `json:"views"`                       // 视图
-	NewItemTemplates  []*NewItemTemplate          `json:"newItemTemplates,omitempty"`  // 新增条目模板
-	DefaultTemplateID string                      `json:"defaultTemplateID,omitempty"` // 默认新增条目模板 ID
-	CustomColors      []*AttributeViewCustomColor `json:"customColors,omitempty"`      // 数据库级自定义选项颜色
+	Spec              int                `json:"spec"`                        // 格式版本
+	ID                string             `json:"id"`                          // 属性视图 ID
+	Name              string             `json:"name"`                        // 属性视图名称
+	KeyValues         []*KeyValues       `json:"keyValues"`                   // 属性视图属性键值
+	KeyIDs            []string           `json:"keyIDs"`                      // 属性视图属性键 ID，用于排序
+	Views             []*View            `json:"views"`                       // 视图
+	NewItemTemplates  []*NewItemTemplate `json:"newItemTemplates,omitempty"`  // 新增条目模板
+	DefaultTemplateID string             `json:"defaultTemplateID,omitempty"` // 默认新增条目模板 ID
 	// CustomColorRenderContext 保存只读渲染期间的关联数据库调色板上下文。
 	CustomColorRenderContext *CustomColorRenderContext `json:"-"`
 	// 卡片封面位置，条目 ID -> 封面来源 -> 位置
@@ -515,7 +514,6 @@ func NewAttributeView(id string) (ret *AttributeView) {
 		ID:                id,
 		KeyValues:         []*KeyValues{{Key: blockKey}, {Key: selectKey}},
 		Views:             []*View{view},
-		CustomColors:      []*AttributeViewCustomColor{},
 		RenderedViewables: map[string]Viewable{},
 	}
 	return
@@ -892,7 +890,6 @@ func parseAttributeViewByPathInBox(avJSONPath, boxID string) (ret *AttributeView
 		err = CheckSpec(ret)
 	}
 	if nil == err {
-		_ = ret.NormalizeCustomColors(false)
 		ret.ResolveDirectColors()
 		cache.SetAVSearchDataInBox(avID, boxID, dataVersion, newAttributeViewSearchInfo(ret))
 	}
@@ -913,9 +910,6 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 	// 做一些数据兼容和订正处理
 	UpgradeSpec(av)
-	if err = av.NormalizeCustomColors(true); nil != err {
-		return
-	}
 
 	// 值去重
 	blockValues := av.GetBlockKeyValues()

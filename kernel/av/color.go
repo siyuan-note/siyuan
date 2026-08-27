@@ -31,9 +31,17 @@ const (
 	CustomColorMinIndex = 15
 	CustomColorMaxIndex = 78
 	MaxCustomColors     = CustomColorMaxIndex - CustomColorMinIndex + 1
+	BuiltinColorCount   = 14
 )
 
 var attributeViewColorPattern = regexp.MustCompile(`^#[0-9a-f]{6}$`)
+
+// LoadWorkspacePalette 返回工作空间级数据库自定义色。由 model 在启动时绑定。
+var LoadWorkspacePalette func() (colors []*AttributeViewCustomColor, order []string)
+
+type persistedAttributeViewPalette struct {
+	CustomColors []*AttributeViewCustomColor `json:"customColors"`
+}
 
 // AttributeViewColorTheme 描述一种主题模式下的数据库选项颜色。
 type AttributeViewColorTheme struct {
@@ -49,7 +57,8 @@ type AttributeViewColor struct {
 
 // AttributeViewCustomColor 描述数据库级自定义选项颜色及其稳定编号。
 type AttributeViewCustomColor struct {
-	Index int `json:"index"`
+	Index  int  `json:"index"`
+	Hidden bool `json:"hidden,omitempty"`
 	AttributeViewColor
 }
 
@@ -128,7 +137,7 @@ func normalizeAttributeViewCustomColor(color *AttributeViewCustomColor) (ret *At
 			color.Index, CustomColorMinIndex, CustomColorMaxIndex)
 	}
 
-	ret = &AttributeViewCustomColor{Index: color.Index}
+	ret = &AttributeViewCustomColor{Index: color.Index, Hidden: color.Hidden}
 	ret.Light, err = normalizeAttributeViewColorTheme(color.Light)
 	if nil != err {
 		return nil, fmt.Errorf("invalid light theme of attribute view custom color [%d]: %w", color.Index, err)
@@ -152,27 +161,76 @@ func normalizeAttributeViewColorTheme(theme AttributeViewColorTheme) (ret Attrib
 	return
 }
 
-// NormalizeCustomColors 校验并替换数据库自定义颜色。
-func (av *AttributeView) NormalizeCustomColors(strict bool) error {
-	if nil == av {
-		return errors.New("attribute view must not be nil")
+// WorkspacePalette 返回当前工作空间的数据库自定义色和混排顺序。
+func WorkspacePalette() (colors []*AttributeViewCustomColor, order []string) {
+	if LoadWorkspacePalette != nil {
+		colors, order = LoadWorkspacePalette()
 	}
-	colors, err := NormalizeAttributeViewCustomColors(av.CustomColors, strict)
-	if nil != err {
-		return err
+	if nil == colors {
+		colors = []*AttributeViewCustomColor{}
 	}
-	av.CustomColors = colors
-	return nil
+	order = NormalizeAttributeViewColorOrder(order, colors)
+	return
+}
+
+// DecodePersistedPalette 从属性视图 JSON 中读取历史快照里的自定义色，不写入属性视图结构体。
+func DecodePersistedPalette(data []byte) (colors []*AttributeViewCustomColor, err error) {
+	parsed := &persistedAttributeViewPalette{}
+	if err = json.Unmarshal(data, parsed); nil != err {
+		return
+	}
+	return NormalizeAttributeViewCustomColors(parsed.CustomColors, false)
+}
+
+// DefaultAttributeViewColorOrder 返回内置色在前、自定义色按编号排列的默认顺序。
+func DefaultAttributeViewColorOrder(colors []*AttributeViewCustomColor) []string {
+	keys := make([]string, 0, BuiltinColorCount+len(colors))
+	for index := 1; index <= BuiltinColorCount; index++ {
+		keys = append(keys, strconv.Itoa(index))
+	}
+	for _, color := range colors {
+		if nil != color {
+			keys = append(keys, strconv.Itoa(color.Index))
+		}
+	}
+	return keys
+}
+
+// NormalizeAttributeViewColorOrder 保留已保存的混排顺序，并补上新增的内置色或自定义色。
+func NormalizeAttributeViewColorOrder(order []string, colors []*AttributeViewCustomColor) []string {
+	allowed := make(map[string]struct{}, BuiltinColorCount+len(colors))
+	defaults := DefaultAttributeViewColorOrder(colors)
+	for _, key := range defaults {
+		allowed[key] = struct{}{}
+	}
+	seen := make(map[string]struct{}, len(allowed))
+	ret := make([]string, 0, len(allowed))
+	for _, key := range order {
+		if _, ok := allowed[key]; !ok {
+			continue
+		}
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		ret = append(ret, key)
+	}
+	for _, key := range defaults {
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		ret = append(ret, key)
+	}
+	return ret
 }
 
 // NextCustomColorIndex 返回最小的可用自定义颜色编号，没有可用编号时返回 0。
 func (av *AttributeView) NextCustomColorIndex() int {
 	used := map[int]struct{}{}
-	if nil != av {
-		for _, color := range av.CustomColors {
-			if nil != color {
-				used[color.Index] = struct{}{}
-			}
+	for _, color := range av.customColorPalette() {
+		if nil != color {
+			used[color.Index] = struct{}{}
 		}
 	}
 	for index := CustomColorMinIndex; index <= CustomColorMaxIndex; index++ {
@@ -183,13 +241,47 @@ func (av *AttributeView) NextCustomColorIndex() int {
 	return 0
 }
 
+func (av *AttributeView) customColorPalette() []*AttributeViewCustomColor {
+	if av != nil && av.CustomColorRenderContext != nil &&
+		av.CustomColorRenderContext.ResolveRelatedCustomColors != nil {
+		colors, found := av.CustomColorRenderContext.ResolveRelatedCustomColors(av.ID)
+		if !found {
+			return []*AttributeViewCustomColor{}
+		}
+		normalized, _ := NormalizeAttributeViewCustomColors(colors, false)
+		return normalized
+	}
+	colors, _ := WorkspacePalette()
+	return colors
+}
+
+// Palette 返回当前渲染上下文或工作空间中的数据库自定义色。
+func (av *AttributeView) Palette() []*AttributeViewCustomColor {
+	colors := av.customColorPalette()
+	if nil == colors {
+		return []*AttributeViewCustomColor{}
+	}
+	return colors
+}
+
+// PaletteOrder 返回当前渲染上下文或工作空间中的数据库颜色顺序。
+func (av *AttributeView) PaletteOrder() []string {
+	colors := av.customColorPalette()
+	if av != nil && av.CustomColorRenderContext != nil &&
+		av.CustomColorRenderContext.ResolveRelatedCustomColors != nil {
+		return NormalizeAttributeViewColorOrder(nil, colors)
+	}
+	_, order := WorkspacePalette()
+	return NormalizeAttributeViewColorOrder(order, colors)
+}
+
 // ResolveColor 根据自定义颜色编号返回经过校验的明暗主题颜色。
 func (av *AttributeView) ResolveColor(color string) *AttributeViewColor {
 	index, err := strconv.Atoi(strings.TrimSpace(color))
-	if nil != err || index < CustomColorMinIndex || CustomColorMaxIndex < index || nil == av {
+	if nil != err || index < CustomColorMinIndex || CustomColorMaxIndex < index {
 		return nil
 	}
-	for _, customColor := range av.CustomColors {
+	for _, customColor := range av.customColorPalette() {
 		if nil == customColor || customColor.Index != index {
 			continue
 		}
@@ -252,11 +344,6 @@ func (av *AttributeView) ApplyRelatedCustomColorRenderContext(target *AttributeV
 		return
 	}
 	target.CustomColorRenderContext = context
-	colors, found := context.ResolveRelatedCustomColors(target.ID)
-	if !found {
-		colors = []*AttributeViewCustomColor{}
-	}
-	target.CustomColors, _ = NormalizeAttributeViewCustomColors(colors, false)
 	target.ResolveDirectColors()
 }
 
@@ -302,7 +389,6 @@ type resolvedColorBinding struct {
 	color     *AttributeViewColor
 }
 
-// suspendResolvedColors 在序列化持久化数据期间临时清除所有派生颜色。
 func (av *AttributeView) suspendResolvedColors() (restore func()) {
 	var bindings []resolvedColorBinding
 	if nil != av {

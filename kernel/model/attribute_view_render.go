@@ -1234,18 +1234,7 @@ func decodeHistoricalAttributeViewCustomColors(boxID, avID string, data []byte) 
 	if nil != err {
 		return
 	}
-	attrView := &av.AttributeView{}
-	if err = gulu.JSON.UnmarshalJSON(data, attrView); nil != err {
-		return
-	}
-	if err = av.CheckSpec(attrView); nil != err {
-		return
-	}
-	if err = attrView.NormalizeCustomColors(false); nil != err {
-		return
-	}
-	ret = attrView.CustomColors
-	return
+	return av.DecodePersistedPalette(data)
 }
 
 func loadHistoryAttributeViewCustomColors(historyDir, avID string) (ret []*av.AttributeViewCustomColor, found bool) {
@@ -1285,7 +1274,35 @@ func loadHistoryAttributeViewCustomColors(historyDir, avID string) (ret []*av.At
 		logging.LogWarnf("parse related history attribute view [%s] failed: %s", avID, err)
 		return nil, false
 	}
-	return ret, true
+	if 0 < len(ret) {
+		return ret, true
+	}
+	return loadHistoryWorkspacePalette(historyDir)
+}
+
+func loadHistoryWorkspacePalette(historyDir string) (ret []*av.AttributeViewCustomColor, found bool) {
+	path := filepath.Join(historyDir, "storage", "inline-styles.json")
+	if !gulu.File.IsExist(path) {
+		return nil, false
+	}
+	data, err := os.ReadFile(path)
+	if nil != err {
+		logging.LogWarnf("read historical inline styles failed: %s", err)
+		return nil, false
+	}
+	var styles struct {
+		AV *struct {
+			Colors []*av.AttributeViewCustomColor `json:"colors"`
+		} `json:"av"`
+	}
+	if err = gulu.JSON.UnmarshalJSON(data, &styles); nil != err || nil == styles.AV {
+		return nil, false
+	}
+	colors, err := av.NormalizeAttributeViewCustomColors(styles.AV.Colors, false)
+	if nil != err || 0 == len(colors) {
+		return nil, false
+	}
+	return colors, true
 }
 
 func newHistoryAttributeViewCustomColorRenderContext(historyDir string) *av.CustomColorRenderContext {
@@ -1356,8 +1373,6 @@ func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string
 	if err = av.CheckSpec(attrView); nil != err {
 		return
 	}
-	_ = attrView.NormalizeCustomColors(false)
-	attrView.ResolveDirectColors()
 	attrView.CustomColorRenderContext = &av.CustomColorRenderContext{
 		ResolveRelatedCustomColors: newCachedAttributeViewCustomColorResolver(
 			func(targetAvID string) (colors []*av.AttributeViewCustomColor, found bool) {
@@ -1388,6 +1403,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID, viewID, carrierViewID string
 			},
 		),
 	}
+	attrView.ResolveDirectColors()
 
 	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, "", 1, -1, nil, false, false, nil, "")
 	return
@@ -1473,9 +1489,8 @@ func RenderHistoryAttributeView(avID, viewID, carrierViewID, query string, page,
 	if err = av.CheckSpec(attrView); nil != err {
 		return
 	}
-	_ = attrView.NormalizeCustomColors(false)
-	attrView.ResolveDirectColors()
 	attrView.CustomColorRenderContext = newHistoryAttributeViewCustomColorRenderContext(source.historyDir)
+	attrView.ResolveDirectColors()
 
 	viewable, err = renderAttributeView(attrView, "", viewID, carrierViewID, query, page, pageSize, groupPaging, false, false, nil, "")
 	return

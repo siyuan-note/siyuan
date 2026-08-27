@@ -50,16 +50,21 @@ func TestRollupFilterUsesHistoricalTargetCustomColorContext(t *testing.T) {
 	}
 	target := &AttributeView{
 		ID: "target",
-		CustomColors: []*AttributeViewCustomColor{{
-			Index: 15,
-			AttributeViewColor: AttributeViewColor{
-				Light: AttributeViewColorTheme{Color: "#111213", BackgroundColor: "#141516"},
-				Dark:  AttributeViewColorTheme{Color: "#171819", BackgroundColor: "#1a1b1c"},
-			},
-		}},
 		KeyValues: []*KeyValues{{
 			Key: &Key{ID: "select", Type: KeyTypeSelect}, Values: []*Value{targetValue},
 		}},
+	}
+	current := []*AttributeViewCustomColor{{
+		Index: 15,
+		AttributeViewColor: AttributeViewColor{
+			Light: AttributeViewColorTheme{Color: "#111213", BackgroundColor: "#141516"},
+			Dark:  AttributeViewColorTheme{Color: "#171819", BackgroundColor: "#1a1b1c"},
+		},
+	}}
+	old := LoadWorkspacePalette
+	t.Cleanup(func() { LoadWorkspacePalette = old })
+	LoadWorkspacePalette = func() ([]*AttributeViewCustomColor, []string) {
+		return current, DefaultAttributeViewColorOrder(current)
 	}
 	target.ResolveDirectColors()
 	rollupValue := &Value{KeyID: rollupKey.ID, BlockID: "source-item", Type: KeyTypeRollup, Rollup: &ValueRollup{}}

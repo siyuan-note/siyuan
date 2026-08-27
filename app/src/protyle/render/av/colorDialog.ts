@@ -2,20 +2,37 @@ import {Dialog} from "../../../dialog";
 import {confirmDialog} from "../../../dialog/confirmDialog";
 import {showMessage} from "../../../dialog/message";
 import {bindThemeColorEditor, getThemeColorEditorHTML} from "../../../dialog/themeColorEditor";
-import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {isMobile} from "../../../util/functions";
-import {transaction} from "../../wysiwyg/transaction";
 import {
     AV_CUSTOM_COLOR_LIMIT,
     getAvailableAVCustomColorIndex,
+    getAVColorOrder,
     getAVColorStyle,
     getAVCustomColors,
+    normalizeAVColorOrder,
 } from "./color";
-import {getInlineStyleType, getInlineStylesCache} from "../../toolbar/inlineStyle";
-import {openBuiltinColorDialog} from "../../toolbar/builtinColorDialog";
-import * as dayjs from "dayjs";
+import {
+    getInlineStylesCache,
+    normalizeInlineStyles,
+    saveInlineStyles,
+} from "../../toolbar/inlineStyle";
+import {
+    applyPreviewStyle,
+    bindBuiltinEditor,
+    bindColorListDrag,
+    createBuiltinDialogEntry,
+    getBuiltinEditorHTML,
+    getColorListItemHTML,
+    getProperties,
+    isEntryCustomized,
+    isEntryDefault,
+    resetEntry,
+    writeBuiltinEntry,
+} from "../../toolbar/builtinColorDialog";
 
 const cloneCustomColors = (colors: IAVCustomColor[]) => JSON.parse(JSON.stringify(colors)) as IAVCustomColor[];
+
+const cloneInlineStyles = () => JSON.parse(JSON.stringify(normalizeInlineStyles(getInlineStylesCache())));
 
 export const openAVCustomColorDialog = (options: {
     protyle: IProtyle,
@@ -25,109 +42,153 @@ export const openAVCustomColorDialog = (options: {
     if (window.siyuan.config.readonly || window.siyuan.isPublish) {
         return;
     }
-    const originalColors = cloneCustomColors(getAVCustomColors(options.data));
-    const draft = cloneCustomColors(originalColors);
+    const draft = cloneCustomColors(getAVCustomColors());
+    let orderDraft = [...getAVColorOrder()];
+    const builtinDraft = cloneInlineStyles();
     const usedIndexes = new Set(options.data.usedCustomColorIndexes || []);
-    const appearanceStyles = getInlineStylesCache().styles.filter(style => getInlineStyleType(style) === "style1");
-    let editingIndex: number | undefined;
+    const properties = getProperties("av");
     let editingColorIndex: number | undefined;
+    let editingBuiltinKey: string | undefined;
+    let saving = false;
     const dialog = new Dialog({
         title: window.siyuan.languages.manageColors,
         width: isMobile() ? "92vw" : "600px",
-        content: `<div class="b3-dialog__content" style="max-height:70vh;overflow:auto">
+        content: `<div class="b3-dialog__content" style="max-height:70vh">
     <div data-panel="list">
-        <div data-type="avCustomColorList" class="b3-list b3-list--background fn__selectnone" style="--file-toggle-width:0px"></div>
+        <div data-type="avCustomColorList" class="b3-list b3-list--background fn__selectnone"></div>
+        <div class="fn__hr" data-type="listSpacer"></div>
         <div class="fn__flex" data-type="avColorButtons">
-        <button class="b3-button b3-button--outline" data-action="manageBuiltin" type="button">
-            <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.manageBuiltinColors}
-        </button>
-        <div class="fn__space"></div>
-        <button class="b3-button b3-button--outline" data-action="new" type="button">
-            <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}
-        </button>
+            <button class="b3-button b3-button--outline" data-action="new" type="button">
+                <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.new}
+            </button>
         </div>
     </div>
-    <div data-panel="editor" class="fn__none">
+    <div data-panel="customEditor" class="fn__none">
         <div class="b3-label b3-label--inner" data-field="colorIndex"></div>
-        ${appearanceStyles.length > 0 ? `<label class="b3-label b3-label--inner fn__flex" style="align-items:center">
-            <span style="min-width:96px">${window.siyuan.languages.appearance}</span>
-            <select class="b3-select fn__flex-1" data-field="appearance" style="margin-top:0">
-                <option value="">${window.siyuan.languages.select}</option>
-                ${appearanceStyles.map((style, index) => `<option value="${index}">${escapeHtml(style.name)}</option>`).join("")}
-            </select>
-        </label>` : ""}
         ${getThemeColorEditorHTML()}
+    </div>
+    <div data-panel="builtinEditor" class="fn__none">
+        ${getBuiltinEditorHTML("av")}
     </div>
 </div>
 <div class="b3-dialog__action">
+    <button class="b3-button b3-button--outline fn__none" data-action="reset" type="button">${window.siyuan.languages.reset}</button>
+    <div class="fn__flex-1"></div>
     <button class="b3-button b3-button--cancel" data-action="cancel" type="button">${window.siyuan.languages.cancel}</button>
     <div class="fn__space"></div>
     <button class="b3-button b3-button--text" data-action="save" type="button">${window.siyuan.languages.save}</button>
 </div>`,
     });
     const listPanel = dialog.element.querySelector('[data-panel="list"]') as HTMLElement;
-    const editorPanel = dialog.element.querySelector('[data-panel="editor"]') as HTMLElement;
+    const customEditorPanel = dialog.element.querySelector('[data-panel="customEditor"]') as HTMLElement;
+    const builtinEditorPanel = dialog.element.querySelector('[data-panel="builtinEditor"]') as HTMLElement;
     const listElement = dialog.element.querySelector('[data-type="avCustomColorList"]') as HTMLElement;
     const newElement = dialog.element.querySelector('[data-action="new"]') as HTMLButtonElement;
-    const buttonsElement = dialog.element.querySelector('[data-type="avColorButtons"]') as HTMLElement;
+    const resetElement = dialog.element.querySelector('[data-action="reset"]') as HTMLButtonElement;
     const cancelElement = dialog.element.querySelector('[data-action="cancel"]') as HTMLButtonElement;
     const saveElement = dialog.element.querySelector('[data-action="save"]') as HTMLButtonElement;
     const colorIndexElement = dialog.element.querySelector('[data-field="colorIndex"]') as HTMLElement;
-    const themeColorEditor = bindThemeColorEditor(editorPanel);
-    const appearanceElement = dialog.element.querySelector('[data-field="appearance"]') as HTMLSelectElement;
+    const themeColorEditor = bindThemeColorEditor(customEditorPanel);
+
+    const getListKeys = () => normalizeAVColorOrder(orderDraft, draft);
+    const findCustomColor = (index: number) => draft.find(item => item.index === index);
+    const getBuiltinEntry = (key: string) => createBuiltinDialogEntry("av", Number(key), builtinDraft);
+
+    const builtinEditor = bindBuiltinEditor(builtinEditorPanel, "av", () =>
+        editingBuiltinKey ? getBuiltinEntry(editingBuiltinKey) : undefined);
 
     const renderList = () => {
-        listElement.innerHTML = draft.map((color, index) => {
-            const used = usedIndexes.has(color.index);
-            return `<div class="b3-list-item b3-list-item--narrow" data-index="${index}">
-    <span class="color__square color__square--list" style="${getAVColorStyle({
-        color: color.index.toString(),
-        resolvedColor: color,
-    })}">A</span>
-    <span class="b3-list-item__text">${window.siyuan.languages.color} ${color.index}</span>
-    <span class="b3-list-item__action ariaLabel" data-action="edit" data-index="${index}" data-position="north" aria-label="${escapeAttr(window.siyuan.languages.edit)}"><svg><use xlink:href="#iconEdit"></use></svg></span>
-    <span class="b3-list-item__action b3-list-item__action--warning ariaLabel" data-action="delete" data-index="${index}" data-position="north" aria-disabled="${used}"${used ? ' style="cursor:not-allowed;opacity:.38"' : ""} aria-label="${escapeAttr(window.siyuan.languages.delete)}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
-</div>`;
+        const keys = getListKeys();
+        listElement.innerHTML = keys.map((key, index) => {
+            const colorIndex = Number(key);
+            const custom = findCustomColor(colorIndex);
+            if (custom) {
+                return getColorListItemHTML({
+                    kind: "custom",
+                    key,
+                    index,
+                    label: `${window.siyuan.languages.color} ${custom.index}`,
+                    previewStyle: getAVColorStyle({
+                        color: custom.index.toString(),
+                        resolvedColor: custom,
+                    }),
+                    show: !custom.hidden,
+                    canDelete: true,
+                });
+            }
+            const entry = getBuiltinEntry(key);
+            return getColorListItemHTML({
+                kind: "builtin",
+                key,
+                index,
+                label: entry.label,
+                show: entry.show,
+                customized: isEntryCustomized(entry, properties),
+                resetHidden: isEntryDefault(entry, properties),
+            });
         }).join("");
+        listElement.querySelectorAll<HTMLElement>('[data-kind="builtin"][data-key]').forEach(item => {
+            const preview = item.querySelector('[data-role="preview"]') as HTMLElement;
+            if (preview) {
+                applyPreviewStyle("av", preview, getBuiltinEntry(item.dataset.key));
+            }
+        });
         newElement.disabled = draft.length >= AV_CUSTOM_COLOR_LIMIT;
-        buttonsElement.style.marginTop = draft.length === 0 ? "0" : "8px";
     };
 
-    const setEditorActionMode = (editing: boolean) => {
-        cancelElement.dataset.action = editing ? "cancelEdit" : "cancel";
-        saveElement.dataset.action = editing ? "confirmEdit" : "save";
-        saveElement.textContent = editing ? window.siyuan.languages.confirm : window.siyuan.languages.save;
+    const setEditorActionMode = (mode: "list" | "custom" | "builtin") => {
+        listPanel.classList.toggle("fn__none", mode !== "list");
+        customEditorPanel.classList.toggle("fn__none", mode !== "custom");
+        builtinEditorPanel.classList.toggle("fn__none", mode !== "builtin");
+        resetElement.classList.toggle("fn__none", mode !== "builtin");
+        cancelElement.dataset.action = mode === "list" ? "cancel" : "cancelEdit";
+        saveElement.dataset.action = mode === "list" ? "save" : "confirmEdit";
+        saveElement.textContent = mode === "list" ? window.siyuan.languages.save : window.siyuan.languages.confirm;
+        saveElement.removeAttribute("disabled");
     };
+
     const showList = () => {
-        editingIndex = undefined;
         editingColorIndex = undefined;
-        editorPanel.classList.add("fn__none");
-        listPanel.classList.remove("fn__none");
-        setEditorActionMode(false);
+        editingBuiltinKey = undefined;
+        setEditorActionMode("list");
         renderList();
     };
-    const showEditor = (index?: number) => {
-        const color = typeof index === "number" ? draft[index] : undefined;
-        const colorIndex = color?.index || getAvailableAVCustomColorIndex(draft);
-        if (!colorIndex) {
+
+    const showCustomEditor = (colorIndex?: number) => {
+        const color = typeof colorIndex === "number" ? findCustomColor(colorIndex) : undefined;
+        const nextIndex = color?.index || getAvailableAVCustomColorIndex(draft);
+        if (!nextIndex) {
             showMessage(window.siyuan.languages.invalid, 6000, "error");
             return;
         }
-        editingIndex = index ?? -1;
-        editingColorIndex = colorIndex;
-        colorIndexElement.textContent = `${window.siyuan.languages.color} ${colorIndex}`;
-        if (appearanceElement) {
-            appearanceElement.value = "";
-        }
+        editingColorIndex = nextIndex;
+        editingBuiltinKey = undefined;
+        colorIndexElement.textContent = `${window.siyuan.languages.color} ${nextIndex}`;
         themeColorEditor.setValue(color, "style1");
-        listPanel.classList.add("fn__none");
-        editorPanel.classList.remove("fn__none");
-        setEditorActionMode(true);
+        setEditorActionMode("custom");
     };
+
+    const showBuiltinEditor = (key: string) => {
+        editingBuiltinKey = key;
+        editingColorIndex = undefined;
+        builtinEditor.fill(getBuiltinEntry(key));
+        setEditorActionMode("builtin");
+    };
+
     const confirmEditor = () => {
+        if (editingBuiltinKey) {
+            writeBuiltinEntry(builtinDraft, "av", builtinEditor.commit(getBuiltinEntry(editingBuiltinKey)));
+            showList();
+            return;
+        }
+        if (typeof editingColorIndex !== "number") {
+            return;
+        }
         const value = themeColorEditor.getValue("style1");
+        const previous = findCustomColor(editingColorIndex);
         const color: IAVCustomColor = {
             index: editingColorIndex,
+            hidden: previous?.hidden,
             light: {
                 color: value.light.color,
                 backgroundColor: value.light.backgroundColor,
@@ -137,37 +198,79 @@ export const openAVCustomColorDialog = (options: {
                 backgroundColor: value.dark.backgroundColor,
             },
         };
-        if (editingIndex >= 0) {
-            draft[editingIndex] = color;
+        if (previous) {
+            draft[draft.indexOf(previous)] = color;
         } else {
             draft.push(color);
-            draft.sort((a, b) => a.index - b.index);
+            if (!orderDraft.includes(color.index.toString())) {
+                orderDraft.push(color.index.toString());
+            }
         }
         showList();
     };
 
-    appearanceElement?.addEventListener("change", () => {
-        const style = appearanceStyles[parseInt(appearanceElement.value)];
-        if (style) {
-            themeColorEditor.setValue(style, "style1");
+    bindColorListDrag(listElement, getListKeys, keys => {
+        orderDraft = keys;
+        renderList();
+    });
+    listElement.addEventListener("click", event => {
+        if ((event.target as HTMLElement).closest('[data-action="toggleShow"]')) {
+            event.stopPropagation();
+        }
+    });
+    listElement.addEventListener("change", event => {
+        const switchElement = (event.target as HTMLElement).closest<HTMLInputElement>('[data-action="toggleShow"]');
+        const itemElement = switchElement?.closest<HTMLElement>("[data-key]");
+        if (!switchElement || !itemElement) {
+            return;
+        }
+        if (itemElement.dataset.kind === "builtin") {
+            const entry = getBuiltinEntry(itemElement.dataset.key);
+            entry.show = switchElement.checked;
+            writeBuiltinEntry(builtinDraft, "av", entry);
+            itemElement.querySelector('[data-action="resetItem"]')?.classList.toggle("fn__none", isEntryDefault(entry, properties));
+            return;
+        }
+        const color = findCustomColor(Number(itemElement.dataset.key));
+        if (color) {
+            color.hidden = !switchElement.checked;
         }
     });
 
-    dialog.element.addEventListener("click", event => {
+    dialog.element.addEventListener("click", async event => {
         const actionElement = (event.target as HTMLElement).closest<HTMLElement>("[data-action]");
-        if (!actionElement || actionElement.hasAttribute("disabled")) {
+        if (!actionElement || actionElement.hasAttribute("disabled") || actionElement.classList.contains("fn__none")) {
             return;
         }
         const action = actionElement.dataset.action;
-        const index = parseInt(actionElement.dataset.index);
+        if (action === "toggleShow") {
+            event.stopPropagation();
+            return;
+        }
+        const itemElement = actionElement.closest<HTMLElement>(".b3-list-item");
+        const key = itemElement?.dataset.key;
         if (action === "new") {
-            showEditor();
-        } else if (action === "manageBuiltin") {
-            openBuiltinColorDialog("av");
+            showCustomEditor();
         } else if (action === "edit") {
-            showEditor(index);
-        } else if (action === "delete") {
-            const color = draft[index];
+            if (itemElement?.dataset.kind === "builtin" && key) {
+                showBuiltinEditor(key);
+            } else if (itemElement?.dataset.kind === "custom" && key) {
+                showCustomEditor(Number(key));
+            }
+        } else if (action === "resetItem" && key) {
+            const entry = getBuiltinEntry(key);
+            resetEntry(entry, properties);
+            writeBuiltinEntry(builtinDraft, "av", entry);
+            renderList();
+        } else if (action === "reset") {
+            if (editingBuiltinKey) {
+                const entry = getBuiltinEntry(editingBuiltinKey);
+                resetEntry(entry, properties);
+                writeBuiltinEntry(builtinDraft, "av", entry);
+                showBuiltinEditor(editingBuiltinKey);
+            }
+        } else if (action === "delete" && key) {
+            const color = findCustomColor(Number(key));
             if (!color) {
                 return;
             }
@@ -176,7 +279,8 @@ export const openAVCustomColorDialog = (options: {
                 return;
             }
             confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.confirmDelete, () => {
-                draft.splice(index, 1);
+                draft.splice(draft.indexOf(color), 1);
+                orderDraft = orderDraft.filter(item => item !== key);
                 renderList();
             }, undefined, true);
         } else if (action === "cancelEdit") {
@@ -185,26 +289,30 @@ export const openAVCustomColorDialog = (options: {
             confirmEditor();
         } else if (action === "cancel") {
             dialog.destroy();
-        } else if (action === "save") {
-            transaction(options.protyle, [{
-                action: "setAttrViewCustomColors",
-                avID: options.data.id,
-                blockID: options.blockElement.dataset.nodeId,
-                data: draft,
-            }, {
-                action: "doUpdateUpdated",
-                id: options.blockElement.dataset.nodeId,
-                data: dayjs().format("YYYYMMDDHHmmss"),
-            }], [{
-                action: "setAttrViewCustomColors",
-                avID: options.data.id,
-                blockID: options.blockElement.dataset.nodeId,
-                data: originalColors,
-            }], {
-                callback: () => {
-                    dialog.destroy();
-                },
-            });
+        } else if (action === "save" && !saving) {
+            saving = true;
+            actionElement.setAttribute("disabled", "disabled");
+            try {
+                builtinDraft.av = {
+                    colors: cloneCustomColors(draft),
+                    order: normalizeAVColorOrder(orderDraft, draft),
+                };
+                const response = await saveInlineStyles(builtinDraft);
+                if (response?.code !== 0) {
+                    showMessage(response?.msg || window.siyuan.languages.invalid, 6000, "error");
+                    saving = false;
+                    actionElement.removeAttribute("disabled");
+                    return;
+                }
+                options.data.customColors = builtinDraft.av.colors;
+                options.data.colorOrder = builtinDraft.av.order;
+                void import("../../../util/assets").then(module => module.setInlineStyle());
+                dialog.destroy();
+            } catch (error) {
+                showMessage(error instanceof Error ? error.message : window.siyuan.languages.invalid, 6000, "error");
+                saving = false;
+                actionElement.removeAttribute("disabled");
+            }
         }
         event.preventDefault();
         event.stopPropagation();

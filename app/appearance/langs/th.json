@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "ใช้สีเริ่มต้นของธีม",
 	"useSVGDefaultIcon": "ใช้ไอคอน SVG",
 	"useSVGDefaultIconTip": "ใช้ไอคอน SVG สำหรับสมุดบันทึกและเอกสารที่ไม่มีไอคอนแบบกำหนดเอง",
 	"bootAppearance": "รูปลักษณ์หน้าเริ่มต้น",
@@ -6,9 +7,7 @@
 	"monospaceFont": "แบบอักษรความกว้างคงที่",
 	"monospaceFontTip": "ใช้สำหรับบล็อกโค้ด โค้ดในบรรทัด และหมายเลขบรรทัดของบล็อกโค้ด หากไม่ได้เลือกแบบอักษร ระบบจะใช้แบบอักษรของธีม",
 	"manageColors": "จัดการสี",
-	"manageBuiltinColors": "จัดการสีในตัว",
 	"showInColorPicker": "แสดงในตัวเลือกสี",
-	"resetAll": "รีเซ็ตทั้งหมด",
 	"exportFile": "ส่งออกไฟล์",
 	"namingEmpty": "ชื่อต้องไม่ว่างเปล่า",
 	"recentCreated": "สร้างล่าสุด",

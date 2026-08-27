@@ -1223,6 +1223,7 @@ interface IAVColor {
 
 interface IAVCustomColor extends IAVColor {
     index: number;
+    hidden?: boolean;
 }
 
 interface IAV {
@@ -1236,6 +1237,7 @@ interface IAV {
     newItemTemplates?: IAVNewItemTemplate[];
     defaultTemplateID?: string;
     customColors?: IAVCustomColor[];
+    colorOrder?: string[];
     usedCustomColorIndexes?: number[];
     target?: IAVRenderTarget;
 }

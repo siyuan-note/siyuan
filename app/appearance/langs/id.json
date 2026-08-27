@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "Gunakan warna bawaan tema",
 	"useSVGDefaultIcon": "Gunakan ikon SVG",
 	"useSVGDefaultIconTip": "Gunakan ikon SVG untuk buku catatan dan dokumen tanpa ikon khusus",
 	"bootAppearance": "Tampilan halaman mulai",
@@ -6,9 +7,7 @@
 	"monospaceFont": "Font monospace",
 	"monospaceFontTip": "Digunakan untuk blok kode, kode sebaris, dan nomor baris blok kode; jika tidak ada font yang dipilih, font bawaan tema akan digunakan",
 	"manageColors": "Kelola warna",
-	"manageBuiltinColors": "Kelola warna bawaan",
 	"showInColorPicker": "Tampilkan di pemilih warna",
-	"resetAll": "Atur ulang semua",
 	"exportFile": "Ekspor file",
 	"namingEmpty": "Nama tidak boleh kosong",
 	"recentCreated": "Baru dibuat",

@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "השתמש בצבע ברירת המחדל של ערכת הנושא",
 	"useSVGDefaultIcon": "שימוש בסמלי SVG",
 	"useSVGDefaultIconTip": "שימוש בסמלי SVG עבור מחברות ומסמכים ללא סמל מותאם אישית",
 	"bootAppearance": "מראה דף ההפעלה",
@@ -6,9 +7,7 @@
 	"monospaceFont": "גופן ברוחב קבוע",
 	"monospaceFontTip": "משמש לבלוקי קוד, קוד בתוך שורה ומספרי שורות בבלוקי קוד; כאשר לא נבחר גופן, נעשה שימוש בגופן של ערכת הנושא",
 	"manageColors": "ניהול צבעים",
-	"manageBuiltinColors": "ניהול צבעים מובנים",
 	"showInColorPicker": "הצגה בבורר הצבעים",
-	"resetAll": "איפוס הכול",
 	"exportFile": "ייצוא קובץ",
 	"namingEmpty": "השם לא יכול להיות ריק",
 	"recentCreated": "נוצרו לאחרונה",

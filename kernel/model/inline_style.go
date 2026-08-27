@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"unicode/utf8"
@@ -31,6 +32,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -62,10 +64,11 @@ type InlineStyleTheme struct {
 }
 
 type InlineStyle struct {
-	ID    string            `json:"id"`
-	Name  string            `json:"name"`
-	Light *InlineStyleTheme `json:"light"`
-	Dark  *InlineStyleTheme `json:"dark"`
+	ID     string            `json:"id"`
+	Name   string            `json:"name"`
+	Hidden bool              `json:"hidden,omitempty"`
+	Light  *InlineStyleTheme `json:"light"`
+	Dark   *InlineStyleTheme `json:"dark"`
 }
 
 type InlineStyleBuiltinColor struct {
@@ -93,10 +96,23 @@ type InlineStyleBuiltin struct {
 	Hidden *InlineStyleBuiltinHidden  `json:"hidden"`
 }
 
+type InlineStyleOrder struct {
+	Color           []string `json:"color"`
+	BackgroundColor []string `json:"backgroundColor"`
+	Style1          []string `json:"style1"`
+}
+
+type InlineStyleAV struct {
+	Colors []*av.AttributeViewCustomColor `json:"colors"`
+	Order  []string                       `json:"order"`
+}
+
 type InlineStyles struct {
 	Version int                 `json:"version"`
 	Styles  []*InlineStyle      `json:"styles"`
 	Builtin *InlineStyleBuiltin `json:"builtin"`
+	Order   *InlineStyleOrder   `json:"order"`
+	AV      *InlineStyleAV      `json:"av"`
 }
 
 func GetInlineStyles() (ret *InlineStyles, err error) {
@@ -147,7 +163,17 @@ func setInlineStylesData(styles *InlineStyles) (ret *InlineStyles, changed bool,
 	if err != nil {
 		return nil, false, err
 	}
-	ret = &InlineStyles{Version: InlineStylesVersion, Styles: normalizedStyles, Builtin: normalizedBuiltin}
+	normalizedAV, err := normalizeInlineStyleAV(styles.AV, true)
+	if err != nil {
+		return nil, false, err
+	}
+	ret = &InlineStyles{
+		Version: InlineStylesVersion,
+		Styles:  normalizedStyles,
+		Builtin: normalizedBuiltin,
+		Order:   normalizeInlineStyleOrder(styles.Order, normalizedStyles),
+		AV:      normalizedAV,
+	}
 	data, err := gulu.JSON.MarshalIndentJSON(ret, "", "  ")
 	if err != nil {
 		return nil, false, fmt.Errorf("marshal inline styles failed: %w", err)
@@ -209,6 +235,11 @@ func loadInlineStyles() (ret *InlineStyles, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid inline styles data: %w", err)
 	}
+	ret.Order = normalizeInlineStyleOrder(ret.Order, ret.Styles)
+	ret.AV, err = normalizeInlineStyleAV(ret.AV, false)
+	if err != nil {
+		return nil, fmt.Errorf("invalid inline styles data: %w", err)
+	}
 	ret.Version = InlineStylesVersion
 	return ret, nil
 }
@@ -218,6 +249,15 @@ func newEmptyInlineStyles() *InlineStyles {
 		Version: InlineStylesVersion,
 		Styles:  []*InlineStyle{},
 		Builtin: newEmptyInlineStyleBuiltin(),
+		Order:   defaultInlineStyleOrder(),
+		AV:      newEmptyInlineStyleAV(),
+	}
+}
+
+func newEmptyInlineStyleAV() *InlineStyleAV {
+	return &InlineStyleAV{
+		Colors: []*av.AttributeViewCustomColor{},
+		Order:  av.DefaultAttributeViewColorOrder(nil),
 	}
 }
 
@@ -234,6 +274,105 @@ func newEmptyInlineStyleBuiltin() *InlineStyleBuiltin {
 	}
 }
 
+func defaultBuiltinColorOrderKeys() []string {
+	keys := make([]string, 0, maxBuiltinColorIndex)
+	for index := minBuiltinColorIndex; index <= maxBuiltinColorIndex; index++ {
+		keys = append(keys, strconv.Itoa(index))
+	}
+	return keys
+}
+
+func defaultInlineStyleOrder() *InlineStyleOrder {
+	colorKeys := defaultBuiltinColorOrderKeys()
+	return &InlineStyleOrder{
+		Color:           append([]string{}, colorKeys...),
+		BackgroundColor: append([]string{}, colorKeys...),
+		Style1:          []string{"error", "warning", "info", "success"},
+	}
+}
+
+func getInlineStyleKind(style *InlineStyle) string {
+	if style == nil || style.Light == nil {
+		return ""
+	}
+	hasColor := style.Light.Color != ""
+	hasBackground := style.Light.BackgroundColor != ""
+	if hasColor && hasBackground {
+		return "style1"
+	}
+	if hasColor {
+		return "color"
+	}
+	if hasBackground {
+		return "backgroundColor"
+	}
+	return ""
+}
+
+func builtinOrderKeys(styleType string) []string {
+	if styleType == "style1" {
+		return []string{"error", "warning", "info", "success"}
+	}
+	return defaultBuiltinColorOrderKeys()
+}
+
+func customOrderKeys(styleType string, styles []*InlineStyle) []string {
+	keys := make([]string, 0)
+	for _, style := range styles {
+		if getInlineStyleKind(style) == styleType {
+			keys = append(keys, style.ID)
+		}
+	}
+	return keys
+}
+
+func normalizeOrderKeys(saved []string, styleType string, styles []*InlineStyle) []string {
+	builtinKeys := builtinOrderKeys(styleType)
+	customKeys := customOrderKeys(styleType, styles)
+	allowed := make(map[string]struct{}, len(builtinKeys)+len(customKeys))
+	for _, key := range builtinKeys {
+		allowed[key] = struct{}{}
+	}
+	for _, key := range customKeys {
+		allowed[key] = struct{}{}
+	}
+	seen := make(map[string]struct{}, len(allowed))
+	ret := make([]string, 0, len(allowed))
+	for _, key := range saved {
+		if _, ok := allowed[key]; !ok {
+			continue
+		}
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		ret = append(ret, key)
+	}
+	for _, key := range append(append([]string{}, builtinKeys...), customKeys...) {
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		ret = append(ret, key)
+	}
+	return ret
+}
+
+// normalizeInlineStyleOrder 保留已保存的混排顺序，并补上新增的内置色或自定义色。
+func normalizeInlineStyleOrder(order *InlineStyleOrder, styles []*InlineStyle) *InlineStyleOrder {
+	var color, backgroundColor, style1 []string
+	if order != nil {
+		color = order.Color
+		backgroundColor = order.BackgroundColor
+		style1 = order.Style1
+	}
+	return &InlineStyleOrder{
+		Color:           normalizeOrderKeys(color, "color", styles),
+		BackgroundColor: normalizeOrderKeys(backgroundColor, "backgroundColor", styles),
+		Style1:          normalizeOrderKeys(style1, "style1", styles),
+	}
+}
+
 func getVisibleAVBuiltinColorIndexes() []int {
 	styles, err := GetInlineStyles()
 	if err != nil {
@@ -243,13 +382,16 @@ func getVisibleAVBuiltinColorIndexes() []int {
 	for _, index := range styles.Builtin.Hidden.AV {
 		hidden[index] = struct{}{}
 	}
-	ret := make([]int, 0, maxBuiltinColorIndex+1)
-	for index := minBuiltinColorIndex; index <= maxBuiltinColorIndex; index++ {
+	ret := make([]int, 0, neutralAVColorIndex)
+	for index := minBuiltinColorIndex; index <= neutralAVColorIndex; index++ {
 		if _, ok := hidden[index]; !ok {
 			ret = append(ret, index)
 		}
 	}
-	return append(ret, neutralAVColorIndex)
+	if len(ret) == 0 {
+		return []int{neutralAVColorIndex}
+	}
+	return ret
 }
 
 func normalizeInlineStyles(styles []*InlineStyle, generateIDs bool) (ret []*InlineStyle, err error) {
@@ -308,7 +450,7 @@ func normalizeInlineStyles(styles []*InlineStyle, generateIDs bool) (ret []*Inli
 			return nil, fmt.Errorf("inline style [%s] must use the same fields in light and dark themes", id)
 		}
 
-		ret = append(ret, &InlineStyle{ID: id, Name: name, Light: light, Dark: dark})
+		ret = append(ret, &InlineStyle{ID: id, Name: name, Hidden: style.Hidden, Light: light, Dark: dark})
 	}
 	return ret, nil
 }
@@ -324,9 +466,9 @@ func normalizeInlineStyleBuiltin(builtin *InlineStyleBuiltin) (ret *InlineStyleB
 		if color == nil {
 			return nil, errors.New("builtin color must not be null")
 		}
-		if color.Index < minBuiltinColorIndex || maxBuiltinColorIndex < color.Index {
+		if color.Index < minBuiltinColorIndex || neutralAVColorIndex < color.Index {
 			return nil, fmt.Errorf("builtin color index [%d] must be between %d and %d", color.Index,
-				minBuiltinColorIndex, maxBuiltinColorIndex)
+				minBuiltinColorIndex, neutralAVColorIndex)
 		}
 		if _, exists := colorIndexes[color.Index]; exists {
 			return nil, fmt.Errorf("duplicate builtin color index [%d]", color.Index)
@@ -385,6 +527,20 @@ func normalizeInlineStyleBuiltin(builtin *InlineStyleBuiltin) (ret *InlineStyleB
 	return ret, nil
 }
 
+func normalizeInlineStyleAV(palette *InlineStyleAV, strict bool) (ret *InlineStyleAV, err error) {
+	ret = newEmptyInlineStyleAV()
+	if palette == nil {
+		return ret, nil
+	}
+	colors, err := av.NormalizeAttributeViewCustomColors(palette.Colors, strict)
+	if err != nil {
+		return nil, err
+	}
+	ret.Colors = colors
+	ret.Order = av.NormalizeAttributeViewColorOrder(palette.Order, colors)
+	return ret, nil
+}
+
 func normalizeInlineStyleThemePair(light, dark *InlineStyleTheme, description string) (normalizedLight,
 	normalizedDark *InlineStyleTheme, err error) {
 	if light == nil || dark == nil {
@@ -410,10 +566,14 @@ func normalizeInlineStyleThemePair(light, dark *InlineStyleTheme, description st
 func normalizeHiddenBuiltinColorIndexes(indexes []int, field string) (ret []int, err error) {
 	ret = make([]int, 0, len(indexes))
 	seen := make(map[int]struct{}, len(indexes))
+	maxIndex := maxBuiltinColorIndex
+	if field == "av" {
+		maxIndex = neutralAVColorIndex
+	}
 	for _, index := range indexes {
-		if index < minBuiltinColorIndex || maxBuiltinColorIndex < index {
+		if index < minBuiltinColorIndex || maxIndex < index {
 			return nil, fmt.Errorf("hidden builtin %s index [%d] must be between %d and %d", field, index,
-				minBuiltinColorIndex, maxBuiltinColorIndex)
+				minBuiltinColorIndex, maxIndex)
 		}
 		if _, exists := seen[index]; exists {
 			continue
@@ -464,4 +624,32 @@ func normalizeInlineStyleColor(color string) (ret string, err error) {
 		return "", fmt.Errorf("color [%s] must use #RRGGBB format", color)
 	}
 	return ret, nil
+}
+
+func init() {
+	av.LoadWorkspacePalette = loadWorkspaceAVPalette
+}
+
+func loadWorkspaceAVPalette() (colors []*av.AttributeViewCustomColor, order []string) {
+	styles, err := GetInlineStyles()
+	if err != nil || styles == nil || styles.AV == nil {
+		return
+	}
+	return styles.AV.Colors, styles.AV.Order
+}
+
+func replaceWorkspaceAVPalette(colors []*av.AttributeViewCustomColor, order []string) error {
+	waitForSyncingStorages()
+	inlineStylesLock.Lock()
+	defer inlineStylesLock.Unlock()
+	styles, err := loadInlineStyles()
+	if err != nil {
+		return err
+	}
+	styles.AV = &InlineStyleAV{
+		Colors: colors,
+		Order:  av.NormalizeAttributeViewColorOrder(order, colors),
+	}
+	_, _, err = setInlineStylesData(styles)
+	return err
 }

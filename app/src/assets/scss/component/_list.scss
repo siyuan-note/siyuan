@@ -2,6 +2,8 @@
 @use "../util/function";
 
 .b3-list {
+  --file-toggle-width: 0px;
+
   mark {
     background-color: var(--b3-protyle-inline-mark-background);
     color: var(--b3-protyle-inline-mark-color);

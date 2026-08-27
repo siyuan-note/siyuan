@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "使用主题默认颜色",
 	"useSVGDefaultIcon": "使用 SVG 图标",
 	"useSVGDefaultIconTip": "为未自定义图标的笔记本和文档使用 SVG 图标",
 	"bootAppearance": "启动页外观",
@@ -6,9 +7,7 @@
 	"monospaceFont": "等宽字体",
 	"monospaceFontTip": "用于代码块、行内代码和代码块行号，不选择任何字体时使用主题自带字体",
 	"manageColors": "管理颜色",
-	"manageBuiltinColors": "管理内置颜色",
 	"showInColorPicker": "在颜色选择器中显示",
-	"resetAll": "全部重置",
 	"exportFile": "导出文件",
 	"namingEmpty": "命名不能为空",
 	"recentCreated": "最近创建",

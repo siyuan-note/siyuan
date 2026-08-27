@@ -115,6 +115,24 @@ func mergeInlineStyleThemeVars(themeStyles map[string]string, styles *InlineStyl
 			}
 		}
 	}
+	if styles.AV != nil {
+		for _, color := range styles.AV.Colors {
+			if color == nil {
+				continue
+			}
+			theme := color.Light
+			if isDarkMode {
+				theme = color.Dark
+			}
+			index := strconv.Itoa(color.Index)
+			if theme.Color != "" {
+				themeStyles["--b3-font-color"+index] = theme.Color
+			}
+			if theme.BackgroundColor != "" {
+				themeStyles["--b3-font-background"+index] = theme.BackgroundColor
+			}
+		}
+	}
 	for _, style := range styles.Styles {
 		if style == nil {
 			continue

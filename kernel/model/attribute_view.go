@@ -2551,7 +2551,7 @@ func GetAttributeViewRelationCandidates(srcAvID, relationKeyID, keyword string, 
 	}
 	attributeViewName = getAttrViewName(attrView)
 	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(attrView.ID)
-	customColors = attrView.CustomColors
+	customColors = attrView.Palette()
 
 	table := renderAttributeViewRelationCandidates(attrView)
 	if nil == table {
@@ -2817,7 +2817,7 @@ func NewAttributeViewData(attrView *av.AttributeView) (ret *AttributeViewData) {
 	ret = &AttributeViewData{
 		Spec: attrView.Spec, ID: attrView.ID, Name: attrView.Name, KeyValues: attrView.KeyValues, KeyIDs: attrView.KeyIDs,
 		Views: attrView.Views, NewItemTemplates: attrView.NewItemTemplates, DefaultTemplateID: attrView.DefaultTemplateID,
-		CardCoverPositions: attrView.CardCoverPositions, CustomColors: attrView.CustomColors,
+		CardCoverPositions: attrView.CardCoverPositions, CustomColors: attrView.Palette(),
 	}
 	if view, _ := attrView.GetFirstView(); nil != view {
 		ret.ViewID = view.ID
@@ -3616,7 +3616,7 @@ func GetAttributeViewItemKeys(avID, itemID, valueID string) (ret []*BlockAttribu
 	ret = append(ret, &BlockAttributeViewKeys{
 		AvID:          avID,
 		AvName:        getAttrViewName(attrView),
-		CustomColors:  attrView.CustomColors,
+		CustomColors:  attrView.Palette(),
 		BlockIDs:      treenode.GetMirrorAttrViewBlockIDs(avID),
 		KeyValues:     keyValues,
 		ItemPositions: getAttributeViewItemPositions(attrView, itemID),
@@ -3728,7 +3728,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 		ret = append(ret, &BlockAttributeViewKeys{
 			AvID:          avID,
 			AvName:        getAttrViewName(attrView),
-			CustomColors:  attrView.CustomColors,
+			CustomColors:  attrView.Palette(),
 			BlockIDs:      blockIDs,
 			KeyValues:     keyValues,
 			ItemPositions: getAttributeViewItemPositions(attrView, itemID),
@@ -8440,26 +8440,53 @@ func (tx *Transaction) doSetAttrViewCustomColors(operation *Operation) (ret *TxE
 	return
 }
 
+func parseAttrViewCustomColorsData(data []byte) (colors []*av.AttributeViewCustomColor, order []string, err error) {
+	trimmed := bytes.TrimSpace(data)
+	if len(trimmed) > 0 && trimmed[0] == '{' {
+		decoded := struct {
+			Colors []*av.AttributeViewCustomColor `json:"colors"`
+			Order  []string                       `json:"order"`
+		}{}
+		if err = gulu.JSON.UnmarshalJSON(data, &decoded); nil != err {
+			return
+		}
+		return decoded.Colors, decoded.Order, nil
+	}
+	colors = []*av.AttributeViewCustomColor{}
+	err = gulu.JSON.UnmarshalJSON(data, &colors)
+	return
+}
+
 func setAttrViewCustomColors(operation *Operation) (err error) {
 	attrView, err := avParseView(operation.AvID, operation.BlockID)
 	if nil != err {
 		return
 	}
 	if nil == operation.Data {
-		return errors.New("attribute view custom colors must be an array")
+		return errors.New("attribute view custom colors must not be empty")
 	}
 
 	data, err := gulu.JSON.MarshalJSON(operation.Data)
 	if nil != err {
 		return
 	}
-	colors := []*av.AttributeViewCustomColor{}
-	if err = gulu.JSON.UnmarshalJSON(data, &colors); nil != err {
+	colors, order, err := parseAttrViewCustomColorsData(data)
+	if nil != err {
 		return
 	}
 	colors, err = av.NormalizeAttributeViewCustomColors(colors, true)
 	if nil != err {
 		return
+	}
+
+	oldColors := []*av.AttributeViewCustomColor{}
+	oldOrder := []string{}
+	if styles, stylesErr := GetInlineStyles(); nil == stylesErr && styles != nil && styles.AV != nil {
+		oldColors = styles.AV.Colors
+		oldOrder = styles.AV.Order
+	}
+	if nil == order {
+		order = oldOrder
 	}
 
 	retainedIndexes := map[int]struct{}{}
@@ -8470,7 +8497,7 @@ func setAttrViewCustomColors(operation *Operation) (err error) {
 	for _, index := range attrView.UsedCustomColorIndexes() {
 		usedIndexes[index] = struct{}{}
 	}
-	for _, oldColor := range attrView.CustomColors {
+	for _, oldColor := range oldColors {
 		if nil == oldColor {
 			continue
 		}
@@ -8481,8 +8508,7 @@ func setAttrViewCustomColors(operation *Operation) (err error) {
 		}
 	}
 
-	attrView.CustomColors = colors
-	if err = avSaveView(attrView, operation.BlockID); nil != err {
+	if err = replaceWorkspaceAVPalette(colors, order); nil != err {
 		return
 	}
 	ReloadAttrView(attrView.ID)

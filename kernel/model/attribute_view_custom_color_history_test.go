@@ -34,7 +34,11 @@ func TestLoadHistoryAttributeViewCustomColors(t *testing.T) {
 	if err := os.MkdirAll(filepath.Dir(path), 0755); nil != err {
 		t.Fatal(err)
 	}
-	data, err := json.Marshal(&av.AttributeView{
+	data, err := json.Marshal(struct {
+		Spec         int                            `json:"spec"`
+		ID           string                         `json:"id"`
+		CustomColors []*av.AttributeViewCustomColor `json:"customColors"`
+	}{
 		Spec: av.CurrentSpec,
 		ID:   avID,
 		CustomColors: []*av.AttributeViewCustomColor{{

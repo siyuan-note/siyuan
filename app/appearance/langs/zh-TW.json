@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "使用主題預設顏色",
 	"useSVGDefaultIcon": "使用 SVG 圖示",
 	"useSVGDefaultIconTip": "為未自訂圖示的筆記本與文件使用 SVG 圖示",
 	"bootAppearance": "啟動頁外觀",
@@ -6,9 +7,7 @@
 	"monospaceFont": "等寬字型",
 	"monospaceFontTip": "用於程式碼區塊、行內程式碼與程式碼區塊行號，未選擇任何字型時使用主題內建字型",
 	"manageColors": "管理顏色",
-	"manageBuiltinColors": "管理內建顏色",
 	"showInColorPicker": "在顏色選擇器中顯示",
-	"resetAll": "全部重設",
 	"exportFile": "導出檔案",
 	"namingEmpty": "命名不能為空",
 	"recentCreated": "最近建立",

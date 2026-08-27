@@ -1,4 +1,5 @@
 {
+	"useThemeDefaultColor": "Use the theme default color",
 	"useSVGDefaultIcon": "Use SVG icons",
 	"useSVGDefaultIconTip": "Use SVG icons for notebooks and documents without a custom icon",
 	"bootAppearance": "Startup appearance",
@@ -6,9 +7,7 @@
 	"monospaceFont": "Monospace Font",
 	"monospaceFontTip": "Used for code blocks, inline code, and code block line numbers; when no font is selected, the theme's font is used",
 	"manageColors": "Manage colors",
-	"manageBuiltinColors": "Manage built-in colors",
 	"showInColorPicker": "Show in color picker",
-	"resetAll": "Reset all",
 	"exportFile": "Export file",
 	"namingEmpty": "Name cannot be empty",
 	"recentCreated": "Recently Created",

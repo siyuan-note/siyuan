@@ -14,3 +14,6 @@ export const getBacklinkGutterContentTop = (contentTop: number, panelTop?: numbe
 export const getFixedGutterPosition = (viewportPosition: number, fixedContainerPosition?: number) => {
     return viewportPosition - (fixedContainerPosition ?? 0);
 };
+
+export const getContainerGutterSpace = (type: string, usesContainerRect: boolean) =>
+    !usesContainerRect && ["NodeBlockquote", "NodeCallout"].includes(type) ? 10 : 0;

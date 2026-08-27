@@ -39,10 +39,6 @@ var attributeViewColorPattern = regexp.MustCompile(`^#[0-9a-f]{6}$`)
 // LoadWorkspacePalette 返回工作空间级数据库自定义色。由 model 在启动时绑定。
 var LoadWorkspacePalette func() (colors []*AttributeViewCustomColor, order []string)
 
-type persistedAttributeViewPalette struct {
-	CustomColors []*AttributeViewCustomColor `json:"customColors"`
-}
-
 // AttributeViewColorTheme 描述一种主题模式下的数据库选项颜色。
 type AttributeViewColorTheme struct {
 	Color           string `json:"color"`
@@ -171,15 +167,6 @@ func WorkspacePalette() (colors []*AttributeViewCustomColor, order []string) {
 	}
 	order = NormalizeAttributeViewColorOrder(order, colors)
 	return
-}
-
-// DecodePersistedPalette 从属性视图 JSON 中读取历史快照里的自定义色，不写入属性视图结构体。
-func DecodePersistedPalette(data []byte) (colors []*AttributeViewCustomColor, err error) {
-	parsed := &persistedAttributeViewPalette{}
-	if err = json.Unmarshal(data, parsed); nil != err {
-		return
-	}
-	return NormalizeAttributeViewCustomColors(parsed.CustomColors, false)
 }
 
 // DefaultAttributeViewColorOrder 返回内置色在前、自定义色按编号排列的默认顺序。

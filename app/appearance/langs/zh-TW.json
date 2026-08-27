@@ -1,4 +1,8 @@
 {
+	"applicationZoom": "應用程式介面縮放",
+	"increaseEditorFontSize": "增大編輯器字型大小",
+	"decreaseEditorFontSize": "減小編輯器字型大小",
+	"resetEditorFontSize": "恢復預設編輯器字型大小",
 	"monospaceFont": "等寬字型",
 	"monospaceFontTip": "用於程式碼區塊、行內程式碼與程式碼區塊行號，未選擇任何字型時使用主題內建字型",
 	"manageColors": "管理顏色",
@@ -1827,8 +1831,6 @@
 	"kernelFault2": "如果仍然出現該問題，請在<a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">這裡</a>尋求幫助或者報告缺陷",
 	"fontSize": "字型大小",
 	"fontSizeTip": "字號預設為 <code class='fn__code'>16</code>，該設置影響編輯器和導出 PDF/HTML 字體大小顯示",
-	"fontSizeScrollZoom": "快速調整編輯器字號",
-	"fontSizeScrollZoomTip": "啟用後按住 <code class='fn__code'>Ctrl</code> 通過鼠標滾輪或觸摸板雙指縮放手勢可快速調整字號",
 	"font1": "該設定僅影響編輯器內字體顯示，未選擇任何字體時則使用主題自帶字體",
 	"newNameFile": "新建子文件名為",
 	"newNameSettingFile": "新建文件名為",

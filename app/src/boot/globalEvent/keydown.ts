@@ -76,6 +76,16 @@ import {onlyProtyleCommand} from "./command/protyle";
 import {cancelDrag} from "./dragover";
 import {bindAVPanelKeydown} from "../../protyle/render/av/keydown";
 import {formatPainter} from "../../protyle/toolbar/FormatPainter";
+import {adjustEditorFontSize, type TEditorFontSizeAction} from "../../util/editorFontSize";
+
+const EDITOR_FONT_SIZE_COMMANDS: Array<{
+    command: "increaseEditorFontSize" | "decreaseEditorFontSize" | "resetEditorFontSize",
+    action: TEditorFontSizeAction,
+}> = [
+    {command: "increaseEditorFontSize", action: "increase"},
+    {command: "decreaseEditorFontSize", action: "decrease"},
+    {command: "resetEditorFontSize", action: "reset"},
+];
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -1433,6 +1443,13 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.general.commandPanel.custom, event)) {
         event.preventDefault();
         commandPanel(app);
+        return;
+    }
+    const editorFontSizeCommand = EDITOR_FONT_SIZE_COMMANDS.find((item) =>
+        matchHotKey(window.siyuan.config.keymap.general[item.command].custom, event));
+    if (editorFontSizeCommand) {
+        event.preventDefault();
+        adjustEditorFontSize(editorFontSizeCommand.action);
         return;
     }
     if (matchHotKey(window.siyuan.config.keymap.general.editReadonly.custom, event)) {

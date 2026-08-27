@@ -1,4 +1,8 @@
 {
+	"applicationZoom": "Zoom de l’interface de l’application",
+	"increaseEditorFontSize": "Augmenter la taille de police de l’éditeur",
+	"decreaseEditorFontSize": "Réduire la taille de police de l’éditeur",
+	"resetEditorFontSize": "Réinitialiser la taille de police de l’éditeur",
 	"monospaceFont": "Police à chasse fixe",
 	"monospaceFontTip": "Utilisée pour les blocs de code, le code en ligne et les numéros de ligne des blocs de code ; si aucune police n’est sélectionnée, la police du thème est utilisée",
 	"manageColors": "Gérer les couleurs",
@@ -1827,8 +1831,6 @@
 	"kernelFault2": "Si le problème persiste, veuillez rechercher de l'aide ou signaler les bogues <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">ici</a>",
 	"fontSize": "Taille de la police",
 	"fontSizeTip": "La taille de police par défaut est de <code class='fn__code'>16</code>, ce paramètre affecte l'éditeur et l'affichage de la taille de police PDF/HTML exportée",
-	"fontSizeScrollZoom": "Ajuster rapidement la taille de la police de l'éditeur",
-	"fontSizeScrollZoomTip": "Après l'activation, maintenez enfoncée la touche <code class='fn__code'>Ctrl</code> pour ajuster rapidement la taille de la police via la molette de la souris ou le geste de zoom par pincement du trackpad",
 	"font1": "Ce paramètre n'affecte que l'affichage des polices dans l'éditeur ; si aucune police n'est sélectionnée, la police du thème est utilisée",
 	"newNameFile": "Le nom du nouveau sous-document est",
 	"newNameSettingFile": "Le nom du nouveau document est",

@@ -1,4 +1,8 @@
 {
+	"applicationZoom": "Zoom antarmuka aplikasi",
+	"increaseEditorFontSize": "Perbesar ukuran font editor",
+	"decreaseEditorFontSize": "Perkecil ukuran font editor",
+	"resetEditorFontSize": "Atur ulang ukuran font editor",
 	"monospaceFont": "Font monospace",
 	"monospaceFontTip": "Digunakan untuk blok kode, kode sebaris, dan nomor baris blok kode; jika tidak ada font yang dipilih, font bawaan tema akan digunakan",
 	"manageColors": "Kelola warna",
@@ -1827,8 +1831,6 @@
 	"kernelFault2": "Jika masalah berlanjut, silakan cari bantuan atau laporkan bug <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">di sini</a>",
 	"fontSize": "Ukuran Font",
 	"fontSizeTip": "Ukuran font default adalah <code class='fn__code'>16</code>, pengaturan ini memengaruhi tampilan ukuran font editor dan PDF/HTML yang diekspor",
-	"fontSizeScrollZoom": "Sesuaikan ukuran font editor dengan cepat",
-	"fontSizeScrollZoomTip": "Saat diaktifkan, tahan <code class='fn__code'>Ctrl</code> untuk menyesuaikan ukuran font dengan cepat melalui roda mouse atau gerakan cubit-perbesar trackpad",
 	"font1": "Pengaturan ini hanya memengaruhi tampilan font di editor; jika tidak ada font yang dipilih, font tema akan digunakan",
 	"newNameFile": "Nama sub-dokumen baru adalah",
 	"newNameSettingFile": "Nama dokumen baru adalah",

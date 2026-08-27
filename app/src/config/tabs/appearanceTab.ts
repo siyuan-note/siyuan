@@ -26,6 +26,7 @@ import {editorConfigApi} from "./editorRuntime";
 import {appearanceThemeModeValue, saveThemeMode} from "./appearanceRuntime";
 import {upDownHint} from "../../util/upDownHint";
 import {isThemeFrontendSupported} from "../../util/themeCompatibility";
+import {setEditorFontSize} from "../../util/editorFontSize";
 import {
     ICustomFont,
     invalidateCustomFonts,
@@ -101,18 +102,13 @@ const registerAppearanceContentGroup = (tab: SettingTabBuilder) => {
     group.range("editor.fontSize", {
         title: window.siyuan.languages.editorFontSize,
         desc: window.siyuan.languages.fontSizeTip,
-        min: 9,
-        max: 72,
+        min: Constants.EDITOR_FONT_SIZE_MIN,
+        max: Constants.EDITOR_FONT_SIZE_MAX,
         step: 1,
-        save: (value) => editorConfigApi.patch("editor.fontSize", value),
+        save: (value) => {
+            setEditorFontSize(value as number);
+        },
     });
-    /// #if !MOBILE
-    group.switch("editor.fontSizeScrollZoom", {
-        title: window.siyuan.languages.fontSizeScrollZoom,
-        desc: window.siyuan.languages.fontSizeScrollZoomTip,
-        save: (value) => editorConfigApi.patch("editor.fontSizeScrollZoom", value),
-    });
-    /// #endif
     group.switch("editor.fullWidth", {
         title: window.siyuan.languages.fullWidth,
         desc: window.siyuan.languages.fullWidthTip,

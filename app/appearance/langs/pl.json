@@ -1,4 +1,8 @@
 {
+	"applicationZoom": "Powiększenie interfejsu aplikacji",
+	"increaseEditorFontSize": "Zwiększ rozmiar czcionki edytora",
+	"decreaseEditorFontSize": "Zmniejsz rozmiar czcionki edytora",
+	"resetEditorFontSize": "Przywróć rozmiar czcionki edytora",
 	"monospaceFont": "Czcionka o stałej szerokości",
 	"monospaceFontTip": "Używana w blokach kodu, kodzie wbudowanym i numerach wierszy bloków kodu; gdy nie wybrano czcionki, używana jest czcionka motywu",
 	"manageColors": "Zarządzaj kolorami",
@@ -1827,8 +1831,6 @@
 	"kernelFault2": "Jeśli problem będzie się powtarzał, poszukaj pomocy lub zgłoś błąd <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">tutaj</a>",
 	"fontSize": "Rozmiar czcionki",
 	"fontSizeTip": "Domyślny rozmiar czcionki to <code class='fn__code'>16</code>, to ustawienie wpływa na wyświetlanie rozmiaru czcionki w edytorze i wyeksportowanych plikach PDF/HTML",
-	"fontSizeScrollZoom": "Szybka regulacja rozmiaru czcionki edytora",
-	"fontSizeScrollZoomTip": "Po włączeniu, przytrzymaj <code class='fn__code'>Ctrl</code>, aby szybko dostosować rozmiar czcionki za pomocą kółka myszy lub gestu powiększenia gładzika",
 	"font1": "To ustawienie wpływa tylko na wyświetlanie czcionek w edytorze; gdy nie wybrano żadnej czcionki, używana jest czcionka motywu",
 	"newNameFile": "Nazwa nowego poddokumentu to",
 	"newNameSettingFile": "Nazwa nowego dokumentu to",

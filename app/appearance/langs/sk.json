@@ -1,4 +1,8 @@
 {
+	"applicationZoom": "Priblíženie rozhrania aplikácie",
+	"increaseEditorFontSize": "Zväčšiť písmo editora",
+	"decreaseEditorFontSize": "Zmenšiť písmo editora",
+	"resetEditorFontSize": "Obnoviť veľkosť písma editora",
 	"monospaceFont": "Písmo s pevnou šírkou",
 	"monospaceFontTip": "Používa sa pre bloky kódu, riadkový kód a čísla riadkov v blokoch kódu; ak nie je vybrané žiadne písmo, použije sa písmo témy",
 	"manageColors": "Spravovať farby",
@@ -1827,8 +1831,6 @@
 	"kernelFault2": "Ak problém pretrváva, vyhľadajte pomoc alebo nahláste chyby <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">tu</a>",
 	"fontSize": "Veľkosť písma",
 	"fontSizeTip": "Predvolená veľkosť písma je <code class='fn__code'>16</code>, toto nastavenie ovplyvňuje editor a veľkosť písma exportovaného PDF/HTML",
-	"fontSizeScrollZoom": "Rýchla zmena veľkosti písma editora",
-	"fontSizeScrollZoomTip": "Po zapnutí podržte <code class='fn__code'>Ctrl</code> pre rýchle nastavenie veľkosti písma pomocou kolieska myši alebo gesta pinch-zoom na trackpade",
 	"font1": "Toto nastavenie ovplyvňuje iba zobrazenie písiem v editore; ak nie je vybraté žiadne písmo, použije sa písmo témy",
 	"newNameFile": "Názov nového poddokumentu",
 	"newNameSettingFile": "Názov nového dokumentu",

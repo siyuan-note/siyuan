@@ -1,4 +1,8 @@
 {
+	"applicationZoom": "Uygulama arayüzü yakınlaştırması",
+	"increaseEditorFontSize": "Düzenleyici yazı tipi boyutunu artır",
+	"decreaseEditorFontSize": "Düzenleyici yazı tipi boyutunu azalt",
+	"resetEditorFontSize": "Düzenleyici yazı tipi boyutunu sıfırla",
 	"monospaceFont": "Eş aralıklı yazı tipi",
 	"monospaceFontTip": "Kod blokları, satır içi kod ve kod bloğu satır numaraları için kullanılır; hiçbir yazı tipi seçilmediğinde temanın yazı tipi kullanılır",
 	"manageColors": "Renkleri yönet",
@@ -1827,8 +1831,6 @@
 	"kernelFault2": "Sorun devam ederse <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">buradan</a> yardım al veya hata bildir",
 	"fontSize": "Yazı boyutu",
 	"fontSizeTip": "Varsayılan yazı boyutu <code class='fn__code'>16</code>. Bu ayar düzenleyici ve dışa aktarılan PDF/HTML yazı boyutunu etkiler",
-	"fontSizeScrollZoom": "Editör yazı boyutunu hızlı ayarla",
-	"fontSizeScrollZoomTip": "<code class='fn__code'>Ctrl</code> tuşunu basılı tutarak fare tekerleğiyle veya dokunmatik yüzeyle hızlıca yazı boyutunu ayarlayabilirsin",
 	"font1": "Bu ayar yalnızca düzenleyicideki yazı tipi görünümünü etkiler; hiçbir yazı tipi seçilmediğinde tema yazı tipi kullanılır",
 	"newNameFile": "Yeni alt belgenin adı",
 	"newNameSettingFile": "Yeni belgenin adı",

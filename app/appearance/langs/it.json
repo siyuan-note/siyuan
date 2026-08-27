@@ -1,4 +1,8 @@
 {
+	"applicationZoom": "Zoom dell’interfaccia dell’applicazione",
+	"increaseEditorFontSize": "Aumenta la dimensione del carattere dell’editor",
+	"decreaseEditorFontSize": "Riduci la dimensione del carattere dell’editor",
+	"resetEditorFontSize": "Ripristina la dimensione del carattere dell’editor",
 	"monospaceFont": "Carattere monospaziato",
 	"monospaceFontTip": "Utilizzato per blocchi di codice, codice in linea e numeri di riga dei blocchi di codice; se non è selezionato alcun carattere, viene utilizzato quello del tema",
 	"manageColors": "Gestisci colori",
@@ -1827,8 +1831,6 @@
 	"kernelFault2": "Se il problema persiste, cerca aiuto o segnala bug <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">qui</a>",
 	"fontSize": "Dimensione del font",
 	"fontSizeTip": "La dimensione predefinita del font è <code class='fn__code'>16</code>, questa impostazione influisce sulla visualizzazione del font nell'editor e nei file PDF/HTML esportati",
-	"fontSizeScrollZoom": "Regola rapidamente la dimensione del font dell'editor",
-	"fontSizeScrollZoomTip": "Dopo l'abilitazione, tieni premuto <code class='fn__code'>Ctrl</code> per regolare rapidamente la dimensione del font usando la rotella del mouse o il gesto pinch-zoom sul trackpad",
 	"font1": "Questa impostazione influisce solo sulla visualizzazione dei caratteri nell'editor; se non è selezionato alcun carattere, viene utilizzato quello del tema",
 	"newNameFile": "Il nome del nuovo sottodocumento è",
 	"newNameSettingFile": "Il nome del nuovo documento è",

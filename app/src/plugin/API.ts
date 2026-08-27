@@ -34,6 +34,7 @@ import type {MobileFiles} from "../mobile/dock/MobileFiles";
 import type {Files} from "../layout/dock/Files";
 import {ProtyleMethod} from "./ProtyleMethod";
 import {openEmojiPanel} from "../emoji";
+import {adjustEditorFontSize, setEditorFontSize} from "../util/editorFontSize";
 
 let openTab;
 let openWindow;
@@ -347,6 +348,8 @@ export const API = {
     Constants,
     showMessage,
     hideMessage,
+    adjustEditorFontSize,
+    setEditorFontSize,
     fetchPost,
     fetchSyncPost,
     fetchGet,

@@ -1,4 +1,8 @@
 {
+	"applicationZoom": "Zoom van toepassingsinterface",
+	"increaseEditorFontSize": "Lettergrootte van editor vergroten",
+	"decreaseEditorFontSize": "Lettergrootte van editor verkleinen",
+	"resetEditorFontSize": "Lettergrootte van editor herstellen",
 	"monospaceFont": "Monospacelettertype",
 	"monospaceFontTip": "Wordt gebruikt voor codeblokken, inlinecode en regelnummers van codeblokken; als er geen lettertype is geselecteerd, wordt het lettertype van het thema gebruikt",
 	"manageColors": "Kleuren beheren",
@@ -1827,8 +1831,6 @@
 	"kernelFault2": "Blijft het probleem aanhouden? Zoek hulp of meld bugs <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">hier</a>",
 	"fontSize": "Lettergrootte",
 	"fontSizeTip": "Standaard <code class='fn__code'>16</code>; beinvloedt editor en PDF/HTML",
-	"fontSizeScrollZoom": "Editorlettergrootte snel aanpassen",
-	"fontSizeScrollZoomTip": "Ingeschakeld: houd <code class='fn__code'>Ctrl</code> ingedrukt en gebruik muiswiel of touchpad-knijpbeweging om lettergrootte snel aan te passen",
 	"font1": "Deze instelling heeft alleen invloed op de lettertypeweergave in de editor; als er geen lettertype is geselecteerd, wordt het lettertype van het thema gebruikt",
 	"newNameFile": "Naam subdocument",
 	"newNameSettingFile": "Naam document",

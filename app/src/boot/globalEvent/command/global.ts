@@ -42,6 +42,7 @@ import {unsplitCurrentWnd, unsplitWnd} from "../../../menus/tab";
 import {openFile} from "../../../editor/util";
 import {fetchPost} from "../../../util/fetch";
 import {sanitizeClosedTabs, setStorageVal} from "../../../protyle/util/compatibility";
+import {adjustEditorFontSize} from "../../../util/editorFontSize";
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -429,6 +430,15 @@ export const globalCommand = (command: string, app: App) => {
     /// #endif
 
     switch (command) {
+        case "increaseEditorFontSize":
+            adjustEditorFontSize("increase");
+            return true;
+        case "decreaseEditorFontSize":
+            adjustEditorFontSize("decrease");
+            return true;
+        case "resetEditorFontSize":
+            adjustEditorFontSize("reset");
+            return true;
         case "dailyNote":
             newDailyNote(app);
             return true;

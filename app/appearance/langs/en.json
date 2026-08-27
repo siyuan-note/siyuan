@@ -1,4 +1,8 @@
 {
+	"applicationZoom": "Application Zoom",
+	"increaseEditorFontSize": "Increase Editor Font Size",
+	"decreaseEditorFontSize": "Decrease Editor Font Size",
+	"resetEditorFontSize": "Reset Editor Font Size",
 	"monospaceFont": "Monospace Font",
 	"monospaceFontTip": "Used for code blocks, inline code, and code block line numbers; when no font is selected, the theme's font is used",
 	"manageColors": "Manage colors",
@@ -1827,8 +1831,6 @@
 	"kernelFault2": "If the problem persists, please look for help or report bugs <a href=\"https://liuyun.io/article/1686530886208\" target=\"_blank\">here</a>",
 	"fontSize": "Font Size",
 	"fontSizeTip": "The default font size is <code class='fn__code'>16</code>, this setting affects the editor and exported PDF/HTML font size display",
-	"fontSizeScrollZoom": "Quickly adjust editor font size",
-	"fontSizeScrollZoomTip": "When enabled, press and hold <code class='fn__code'>Ctrl</code> to quickly adjust the font size through the mouse wheel or trackpad pinch-zoom gesture",
 	"font1": "This setting only affects font display in the editor; when no font is selected, the theme&#039;s font is used",
 	"newNameFile": "The name of the new subdocument is",
 	"newNameSettingFile": "The name of the new document is",

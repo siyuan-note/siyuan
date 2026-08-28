@@ -91,6 +91,7 @@ export const exportImage = (id: string, copyOnly = false) => {
     let imageName = "image.png";
     let outputting = false;
     let titleRefreshTimer: number;
+    let titleComposing = false;
 
     const setActionDisabled = (disabled: boolean) => {
         cancelButton.disabled = disabled;
@@ -238,9 +239,22 @@ export const exportImage = (id: string, copyOnly = false) => {
         customTitleElement.disabled = !addTitleElement.checked;
         refreshExportPreview();
     });
-    customTitleElement.addEventListener("input", () => {
+    const scheduleTitleRefresh = () => {
         window.clearTimeout(titleRefreshTimer);
         titleRefreshTimer = window.setTimeout(refreshExportPreview, 300);
+    };
+    customTitleElement.addEventListener("compositionstart", () => {
+        titleComposing = true;
+        window.clearTimeout(titleRefreshTimer);
+    });
+    customTitleElement.addEventListener("compositionend", () => {
+        titleComposing = false;
+        scheduleTitleRefresh();
+    });
+    customTitleElement.addEventListener("input", () => {
+        if (!titleComposing) {
+            scheduleTitleRefresh();
+        }
     });
     foldElement.addEventListener("change", () => {
         window.siyuan.storage[Constants.LOCAL_EXPORTIMG].keepFold = foldElement.checked;

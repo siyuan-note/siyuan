@@ -699,13 +699,27 @@ ${getIconScript(servePath)}
         const customTitleElement = actionElement.querySelector('#customTitle');
         const customTitlePanelElement = actionElement.querySelector('#customTitlePanel');
         let titleRefreshTimer;
+        let titleComposing = false;
         addTitleElement.addEventListener('change', () => {
             customTitlePanelElement.classList.toggle('fn__none', !addTitleElement.checked);
             refreshPreview();
         });
-        customTitleElement.addEventListener('input', () => {
+        const scheduleTitleRefresh = () => {
             window.clearTimeout(titleRefreshTimer);
             titleRefreshTimer = window.setTimeout(refreshPreview, 300);
+        };
+        customTitleElement.addEventListener('compositionstart', () => {
+            titleComposing = true;
+            window.clearTimeout(titleRefreshTimer);
+        });
+        customTitleElement.addEventListener('compositionend', () => {
+            titleComposing = false;
+            scheduleTitleRefresh();
+        });
+        customTitleElement.addEventListener('input', () => {
+            if (!titleComposing) {
+                scheduleTitleRefresh();
+            }
         });
         const mergeSubdocsElement = actionElement.querySelector('#mergeSubdocs');
         const mergeHeadingOptionsElement = actionElement.querySelector('#mergeHeadingOptions');

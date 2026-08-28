@@ -21,6 +21,15 @@ export const getBlockDragoverTarget = (scope: HTMLElement, cachedTarget?: Elemen
     return scope.querySelector(BLOCK_DRAGOVER_SELECTOR) || (cachedTargetInScope ? cachedTarget : null);
 };
 
+export const getBlockDragInsertPosition = (targetElement?: Element | null): "before" | "after" | undefined => {
+    if (targetElement?.classList.contains("dragover__top") || targetElement?.classList.contains("dragover__left")) {
+        return "before";
+    }
+    if (targetElement?.classList.contains("dragover__bottom") || targetElement?.classList.contains("dragover__right")) {
+        return "after";
+    }
+};
+
 export const isAttributeViewTitleTarget = (targetNode: Node | null, point?: {x: number, y: number}) => {
     if (!targetNode) {
         return false;

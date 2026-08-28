@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {
     BLOCK_DRAGOVER_SELECTOR,
     getAVRowDropTarget,
+    getBlockDragInsertPosition,
     getBlockDragoverTarget,
     getSameSuperBlockEdgeTarget,
     getSuperBlockResizeDropTarget,
@@ -117,6 +118,29 @@ describe("getBlockDragoverTarget", () => {
         const scope = createDragoverScope(null, []);
 
         assert.equal(getBlockDragoverTarget(scope, cachedTarget), null);
+    });
+});
+
+describe("getBlockDragInsertPosition", () => {
+    const createTarget = (className: string) => ({
+        classList: {
+            contains: (value: string) => value === className,
+        },
+    }) as unknown as Element;
+
+    it("maps top and left indicators to insertion before the target", () => {
+        assert.equal(getBlockDragInsertPosition(createTarget("dragover__top")), "before");
+        assert.equal(getBlockDragInsertPosition(createTarget("dragover__left")), "before");
+    });
+
+    it("maps bottom and right indicators to insertion after the target", () => {
+        assert.equal(getBlockDragInsertPosition(createTarget("dragover__bottom")), "after");
+        assert.equal(getBlockDragInsertPosition(createTarget("dragover__right")), "after");
+    });
+
+    it("leaves structural list indicators to their dedicated drop handling", () => {
+        assert.equal(getBlockDragInsertPosition(createTarget("dragover__top--sibling")), undefined);
+        assert.equal(getBlockDragInsertPosition(createTarget("dragover__bottom--child")), undefined);
     });
 });
 

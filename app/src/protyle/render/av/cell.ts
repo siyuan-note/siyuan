@@ -22,6 +22,9 @@ import {getFieldsByData} from "./view";
 import {getCompressURL, removeCompressURL} from "../../../util/image";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {callMobileAppShowKeyboard} from "../../../mobile/util/mobileAppUtil";
+/// #if MOBILE
+import {activeBlur} from "../../../mobile/util/keyboardToolbar";
+/// #endif
 import {
     cellValueIsEmpty,
     cloneAVCellValueSnapshot,
@@ -476,6 +479,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     } else if (type === "number") {
         html = `<input type="number" spellcheck="false" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
     } else {
+        /// #if MOBILE
+        activeBlur();
+        /// #endif
         if (["select", "mSelect"].includes(type)) {
             if (blockElement.getAttribute("data-rendering") === "true") {
                 options?.destroyCallback?.();

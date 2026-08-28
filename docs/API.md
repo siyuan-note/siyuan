@@ -718,9 +718,16 @@ Move documents by `id`:
   ```json
   {
     "code": 0,
-    "msg": "",
+    "msg": "disk full",
     "data": {
-      "errFiles": [""],
+      "errFiles": ["bar.png"],
+      "failedFiles": [
+        {
+          "index": 1,
+          "name": "bar.png",
+          "error": "disk full"
+        }
+      ],
       "succFiles": [
         {
           "index": 0,
@@ -736,6 +743,7 @@ Move documents by `id`:
   ```
 
     * `errFiles`: List of filenames with errors in upload processing
+    * `failedFiles`: Files explicitly reported as failed. `index` is the file's index in `file[]`, `name` is its upload filename, and `error` is the failure message. This field may omit files that were not attempted or not reported individually; use `succFiles` when each input item must be identified unambiguously
     * `succFiles`: Successfully processed files in input order. `index` is the file's index in `file[]`, `name` is its upload filename, and `path` is the uploaded asset path. Use this field when a batch can contain duplicate filenames
     * `succMap`: Compatibility mapping for existing callers. The key is the upload filename and the value is assets/foo-id.png. When a batch contains duplicate filenames, only the last item with a given key remains in this map
 

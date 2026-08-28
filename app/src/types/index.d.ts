@@ -409,6 +409,7 @@ type IAssetUploadDecision = {
     /** 必须保持各项的逻辑顺序；需要逐项回填的上传会按下标关联原资源。 */
     input: IAssetUploadInput
 } | {
+    /** 取消当前资源写入；未取得全部资源路径时，HTML 粘贴将停止正文提交。 */
     action: "cancel"
 }
 
@@ -439,16 +440,16 @@ interface IAssetUploadResult {
     acceptedInput?: IAssetUploadInput,
     /** 被前端校验拒绝的文件及其在完整输入中的位置。 */
     rejected?: IAssetUploadRejection[],
-    /** 按 acceptedInput 中的索引记录成功结果，可区分同名文件。 */
+    /** 按 acceptedInput 中的索引记录明确报告成功的结果，可区分同名文件；需要逐项确认时以该字段为准。 */
     succFiles?: IAssetUploadSuccess[],
-    /** 按 acceptedInput 中的索引记录失败结果。 */
+    /** 按 acceptedInput 中的索引记录明确报告失败的结果；可能不包含未尝试或未逐项报告的项。 */
     failedFiles?: IAssetUploadFailure[],
     succMap?: Record<string, string>,
     errFiles?: string[],
     error?: string
 }
 
-/** 不得在该事件上调用 `preventDefault()`，取消上传应使用 `respondWith({action: "cancel"})`。 */
+/** 不得在该事件上调用 `preventDefault()`，取消上传应使用 `respondWith({action: "cancel"})`；未取得全部资源路径时，HTML 粘贴将停止正文提交。 */
 interface IBeforeUploadAssetsDetail {
     requestId: string,
     /** PDF 标注等无编辑器上传场景不提供该字段。 */
@@ -471,7 +472,7 @@ interface IBeforeUploadAssetsDetail {
     /**
      * 必须同步注册，经思源前端上传协调层发起的资源写入成功、失败或取消时执行一次。
      * 注册该回调的插件卸载后不再执行。
-     * 不包含正文或属性视图写入，也不覆盖 HTTP API、CLI、MCP、同步、导入、历史恢复等内核写入。
+     * 回调结果不表示父级正文或属性视图已完成写入，也不覆盖 HTTP API、CLI、MCP、同步、导入、历史恢复等内核写入。
      */
     onComplete(callback: (result: IAssetUploadResult) => void): void
 }

@@ -1,4 +1,4 @@
-import {updateHeader} from "../render/av/row";
+import {updateAVSelectionStatus, updateHeader} from "../render/av/row";
 import {resetAVRowSelect} from "../render/av/virtualScroll";
 import {hasClosestByClassName} from "./hasClosest";
 import {Constants} from "../../constants";
@@ -122,13 +122,12 @@ const resetAVBodySelect = (element: Element, type: "table" | "gallery" | "all") 
             return;
         }
         avElement.querySelectorAll(".av__body").forEach((bodyElement: HTMLElement) => {
+            if (hasClosestByClassName(bodyElement, "av") !== avElement) {
+                return;
+            }
             resetAVRowSelect(bodyElement, []);
         });
-        const itemElement = avElement.querySelector(
-            ".av__row:not(.av__row--header):not(.av__row--footer):not(.av__row--util), .av__gallery-item") as HTMLElement;
-        if (itemElement) {
-            updateHeader(itemElement);
-        }
+        updateAVSelectionStatus(avElement);
     });
 };
 

@@ -1,6 +1,8 @@
-export const MOBILE_BOTTOM_BAR_CONFIG_VERSION = 1 as const;
+export const MOBILE_BOTTOM_BAR_CONFIG_VERSION = 2 as const;
 
 export const MOBILE_BOTTOM_BAR_ACTIONS = [
+    "back",
+    "forward",
     "documents",
     "search",
     "newDoc",
@@ -19,8 +21,9 @@ export const MOBILE_BOTTOM_BAR_ACTIONS = [
 ] as const;
 
 export type MobileBottomBarAction = typeof MOBILE_BOTTOM_BAR_ACTIONS[number];
-export type MobileBottomBarSlot = 0 | 1 | 2 | 3;
+export type MobileBottomBarSlot = 0 | 1 | 2 | 3 | 4;
 export type MobileBottomBarSlots = readonly [
+    MobileBottomBarAction,
     MobileBottomBarAction,
     MobileBottomBarAction,
     MobileBottomBarAction,
@@ -41,11 +44,14 @@ export type MobileBottomBarConfigEvent = {
 };
 
 export const DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS: MobileBottomBarSlots = [
+    "back",
+    "forward",
     "documents",
     "search",
-    "newDoc",
     "tabs",
 ];
+
+const LEGACY_DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS = ["documents", "search", "newDoc", "tabs"];
 
 export const DEFAULT_MOBILE_BOTTOM_BAR_CONFIG: IMobileBottomBarConfig = {
     version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
@@ -59,11 +65,11 @@ export const isMobileBottomBarAction = (value: unknown): value is MobileBottomBa
 };
 
 const toMobileBottomBarSlots = (actions: MobileBottomBarAction[]): MobileBottomBarSlots => {
-    return [actions[0], actions[1], actions[2], actions[3]];
+    return [actions[0], actions[1], actions[2], actions[3], actions[4]];
 };
 
 const normalizeMobileBottomBarActions = (storedActions: unknown[]): MobileBottomBarSlots => {
-    const actions = new Array<MobileBottomBarAction>(4);
+    const actions = new Array<MobileBottomBarAction>(5);
     const usedActions = new Set<MobileBottomBarAction>();
 
     for (let slot = 0; slot < actions.length; slot++) {
@@ -112,7 +118,11 @@ export const normalizeMobileBottomBarConfig = (storedValue: unknown): IMobileBot
     }
 
     const record = value as Record<string, unknown>;
-    if (record.version !== MOBILE_BOTTOM_BAR_CONFIG_VERSION || !Array.isArray(record.actions)) {
+    if ((record.version !== 1 && record.version !== MOBILE_BOTTOM_BAR_CONFIG_VERSION) || !Array.isArray(record.actions)) {
+        return createDefaultMobileBottomBarConfig();
+    }
+    if (record.version === 1 && record.actions.length === LEGACY_DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS.length &&
+        record.actions.every((action, index) => action === LEGACY_DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS[index])) {
         return createDefaultMobileBottomBarConfig();
     }
     return {

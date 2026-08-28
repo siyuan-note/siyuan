@@ -7,6 +7,7 @@ import {getTopBarHeight} from "../layout/getTopBarHeight";
 import {electronUndo} from "../protyle/undo";
 import {escapeAttr} from "../util/escape";
 import {setMenuInputCurrent} from "./menuKeyboard";
+import {resetMenuHorizontalScroll} from "./menuScroll";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 /// #if !MOBILE
 import {applyMenuEntryVisibility} from "../config/entryVisibility/runtime";
@@ -68,6 +69,7 @@ export class Menu {
     private sheetCanDrag = false;
     private sheetDragging = false;
     private suppressSheetClick = false;
+    private sheetHorizontalScrollFrame: number | undefined;
     private targetPositionFrame: number | undefined;
 
     private updateTargetPosition = () => {
@@ -349,7 +351,21 @@ export class Menu {
         labelElement.textContent = parentLabelElement?.textContent.trim() || window.siyuan.languages.back;
     }
 
+    private resetSheetHorizontalScroll() {
+        resetMenuHorizontalScroll(this.element);
+        if (typeof this.sheetHorizontalScrollFrame === "number") {
+            cancelAnimationFrame(this.sheetHorizontalScrollFrame);
+        }
+        this.sheetHorizontalScrollFrame = requestAnimationFrame(() => {
+            this.sheetHorizontalScrollFrame = undefined;
+            if (this.element.classList.contains("b3-menu--sheet")) {
+                resetMenuHorizontalScroll(this.element);
+            }
+        });
+    }
+
     private setSheetHeight() {
+        this.resetSheetHorizontalScroll();
         this.updateSheetTitle();
         const mobileSize = window.siyuan.mobile.size;
         const orientationSize = mobileSize.isLandscape ? mobileSize.landscape : mobileSize.portrait;
@@ -491,6 +507,11 @@ export class Menu {
         this.hideFullscreenScrim();
         this.finishSheetTouch();
         this.stopTrackingTargetPosition();
+        if (typeof this.sheetHorizontalScrollFrame === "number") {
+            cancelAnimationFrame(this.sheetHorizontalScrollFrame);
+            this.sheetHorizontalScrollFrame = undefined;
+        }
+        resetMenuHorizontalScroll(this.element);
         if (this.removeCB) {
             const removeCB = this.removeCB;
             this.removeCB = undefined;
@@ -630,6 +651,7 @@ export class Menu {
         void this.element.offsetHeight;
         requestAnimationFrame(() => {
             if (this.element.classList.contains("b3-menu--sheet")) {
+                resetMenuHorizontalScroll(this.element);
                 this.element.style.transform = "translateY(0px)";
             }
         });

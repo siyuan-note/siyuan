@@ -253,6 +253,11 @@
     & .b3-menu__submenu .b3-menu__submenu {
       top: 0;
     }
+
+    // 避免移动端聚焦输入框时缩放视口。
+    & .b3-text-field {
+      font-size: 16px;
+    }
   }
 
   &__scrim {

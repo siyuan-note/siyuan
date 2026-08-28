@@ -296,12 +296,11 @@ export class AVAttributePanel {
         }
         tabsElement.dataset.dragBound = "true";
         let draggedAvID = "";
+        let oldPreviousID = "";
         const clearDragState = () => {
-            tabsElement.querySelectorAll(".dragover__left, .dragover__right").forEach(item => {
-                item.classList.remove("dragover__left", "dragover__right");
-            });
             tabsElement.querySelector('[data-dragging="true"]')?.removeAttribute("data-dragging");
             draggedAvID = "";
+            oldPreviousID = "";
             setTimeout(() => {
                 this.suppressTabClick = false;
             });
@@ -317,6 +316,9 @@ export class AVAttributePanel {
                 event.preventDefault();
                 return;
             }
+            const tabElements = Array.from(tabsElement.querySelectorAll<HTMLElement>('[data-type="av-tab"]'));
+            const oldIndex = tabElements.indexOf(tabElement);
+            oldPreviousID = 0 < oldIndex ? tabElements[oldIndex - 1].dataset.id || "" : "";
             this.suppressTabClick = true;
             tabElement.dataset.dragging = "true";
             event.dataTransfer.effectAllowed = "move";
@@ -330,15 +332,22 @@ export class AVAttributePanel {
             event.preventDefault();
             event.stopPropagation();
             event.dataTransfer.dropEffect = "move";
-            tabsElement.querySelectorAll(".dragover__left, .dragover__right").forEach(item => {
-                item.classList.remove("dragover__left", "dragover__right");
-            });
-            const targetElement = (event.target as HTMLElement).closest<HTMLElement>('[data-type="av-tab"]');
-            if (!targetElement || targetElement.dataset.id === draggedAvID) {
+            const draggedElement = tabsElement.querySelector<HTMLElement>(`[data-type="av-tab"][data-id="${draggedAvID}"]`);
+            if (!draggedElement) {
                 return;
             }
-            const rect = targetElement.getBoundingClientRect();
-            targetElement.classList.add(event.clientX < rect.left + rect.width / 2 ? "dragover__left" : "dragover__right");
+            const targetElement = Array.from(tabsElement.querySelectorAll<HTMLElement>('[data-type="av-tab"]')).find(item => {
+                if (item === draggedElement) {
+                    return false;
+                }
+                const rect = item.getBoundingClientRect();
+                return event.clientX < rect.left + rect.width / 2;
+            });
+            if (targetElement) {
+                targetElement.before(draggedElement);
+            } else {
+                tabsElement.append(draggedElement);
+            }
         });
         tabsElement.addEventListener("dragenter", (event: DragEvent) => {
             if (draggedAvID) {
@@ -350,11 +359,6 @@ export class AVAttributePanel {
             if (draggedAvID) {
                 event.stopPropagation();
             }
-            if (!tabsElement.contains(event.relatedTarget as Node)) {
-                tabsElement.querySelectorAll(".dragover__left, .dragover__right").forEach(item => {
-                    item.classList.remove("dragover__left", "dragover__right");
-                });
-            }
         });
         tabsElement.addEventListener("drop", (event: DragEvent) => {
             if (!draggedAvID) {
@@ -364,32 +368,18 @@ export class AVAttributePanel {
             event.stopPropagation();
             const tabElements = Array.from(tabsElement.querySelectorAll<HTMLElement>('[data-type="av-tab"]'));
             const avIDs = tabElements.map(item => item.dataset.id || "");
-            const oldIndex = avIDs.indexOf(draggedAvID);
-            if (-1 === oldIndex) {
+            const index = avIDs.indexOf(draggedAvID);
+            if (-1 === index) {
                 clearDragState();
                 return;
             }
-            const oldPreviousID = 0 < oldIndex ? avIDs[oldIndex - 1] : "";
-            const remainingAvIDs = avIDs.filter(id => id !== draggedAvID);
-            const targetElement = (event.target as HTMLElement).closest<HTMLElement>('[data-type="av-tab"]');
-            if (targetElement?.dataset.id === draggedAvID) {
-                clearDragState();
-                return;
-            }
-            let insertIndex = remainingAvIDs.length;
-            if (targetElement && targetElement.dataset.id !== draggedAvID) {
-                const targetIndex = remainingAvIDs.indexOf(targetElement.dataset.id || "");
-                if (-1 < targetIndex) {
-                    insertIndex = targetIndex + (targetElement.classList.contains("dragover__right") ? 1 : 0);
-                }
-            }
-            const previousID = 0 < insertIndex ? remainingAvIDs[insertIndex - 1] : "";
+            const previousID = 0 < index ? avIDs[index - 1] : "";
             if (previousID === oldPreviousID) {
+                this.updateTabs();
                 clearDragState();
                 return;
             }
-            remainingAvIDs.splice(insertIndex, 0, draggedAvID);
-            this.applyBindingOrder(remainingAvIDs);
+            this.applyBindingOrder(avIDs);
             transaction(this.protyle, [{
                 action: "sortAttrViewBinding",
                 id: this.targetID,
@@ -410,6 +400,7 @@ export class AVAttributePanel {
                 return;
             }
             event.stopPropagation();
+            this.updateTabs();
             clearDragState();
         });
     }

@@ -545,7 +545,7 @@ const dockBuiltinChildren = [
 
 const dockCatalogSection: IEntryCatalogSection = {
     key: "dock",
-    label: lang("toggleDock"),
+    label: lang("entryDock"),
     sortable: false,
     children: dockBuiltinChildren,
 };

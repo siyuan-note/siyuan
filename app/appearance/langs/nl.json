@@ -1,4 +1,5 @@
 {
+	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Eén scherm omhoog scrollen zonder de cursor te verplaatsen",
 	"scrollPageDownWithoutMovingCaret": "Eén scherm omlaag scrollen zonder de cursor te verplaatsen",
 	"toggleLeftDockPanel": "Linker dockpaneel tonen/verbergen",

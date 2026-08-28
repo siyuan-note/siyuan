@@ -1,4 +1,5 @@
 {
+	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Scroll up one screen without moving the cursor",
 	"scrollPageDownWithoutMovingCaret": "Scroll down one screen without moving the cursor",
 	"toggleLeftDockPanel": "Show/Hide Left Dock Panel",

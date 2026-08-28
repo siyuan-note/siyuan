@@ -1,4 +1,5 @@
 {
+	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Scorri di una schermata verso l'alto senza spostare il cursore",
 	"scrollPageDownWithoutMovingCaret": "Scorri di una schermata verso il basso senza spostare il cursore",
 	"toggleLeftDockPanel": "Mostra/nascondi il pannello dock sinistro",

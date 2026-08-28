@@ -1,4 +1,5 @@
 {
+	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Rolar uma tela para cima sem mover o cursor",
 	"scrollPageDownWithoutMovingCaret": "Rolar uma tela para baixo sem mover o cursor",
 	"toggleLeftDockPanel": "Mostrar/ocultar painel de encaixe esquerdo",

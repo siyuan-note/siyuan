@@ -1,4 +1,5 @@
 {
+	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Gulir satu layar ke atas tanpa memindahkan kursor",
 	"scrollPageDownWithoutMovingCaret": "Gulir satu layar ke bawah tanpa memindahkan kursor",
 	"toggleLeftDockPanel": "Tampilkan/sembunyikan panel dock kiri",

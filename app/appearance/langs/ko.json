@@ -1,4 +1,5 @@
 {
+	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "커서를 이동하지 않고 한 화면 위로 스크롤",
 	"scrollPageDownWithoutMovingCaret": "커서를 이동하지 않고 한 화면 아래로 스크롤",
 	"toggleLeftDockPanel": "왼쪽 Dock 패널 보이기/숨기기",

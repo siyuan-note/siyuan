@@ -10,6 +10,8 @@ import {focusBlock} from "../../../protyle/util/selection";
 import {matchHotKey} from "../../../protyle/util/hotKey";
 import {isSkillHintRequestActive, shouldYieldSkillHint} from "./agentHintState";
 import {uploadFiles} from "../../../protyle/upload";
+import {previewImages} from "../../../protyle/preview/image";
+import {removeCompressURL} from "../../../util/image";
 
 export interface AgentComposerData {
     text: string;
@@ -253,6 +255,24 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     } else {
         setEmptyContent();
     }
+
+    // 智能体输入框没有文档 ID，直接预览输入框中的图片，避免走依赖文档资源列表的默认逻辑。
+    wysiwyg.element.addEventListener("dblclick", (event: MouseEvent) => {
+        const image = (event.target as HTMLElement).closest("img:not(.emoji)") as HTMLImageElement | null;
+        if (!image || !wysiwyg.element.contains(image)) {
+            return;
+        }
+        const currentSrc = removeCompressURL(image.dataset.src || image.getAttribute("src") || "");
+        if (!currentSrc) {
+            return;
+        }
+        const srcList = Array.from(wysiwyg.element.querySelectorAll<HTMLImageElement>("img:not(.emoji)"))
+            .map((item) => removeCompressURL(item.dataset.src || item.getAttribute("src") || ""))
+            .filter(Boolean);
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        previewImages(srcList, currentSrc);
+    }, true);
 
     const updatePlaceholder = () => {
         const isEmpty = (wysiwyg.element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim() === "";

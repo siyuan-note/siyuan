@@ -3903,6 +3903,10 @@ export class WYSIWYG {
             event.stopPropagation();
         });
 
+        this.element.addEventListener("input", () => {
+            crossBlockComposition?.preservePreview();
+        });
+
         this.element.addEventListener("compositionend", async (event: InputEvent) => {
             event.stopPropagation();
             if (getAVTemplateInteractiveElement(event.target)) {

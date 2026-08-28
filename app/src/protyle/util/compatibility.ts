@@ -13,6 +13,7 @@ import {genUUID} from "../../util/genID";
 import {buildBlockDOMClipboardData} from "./blockDOMClipboard";
 import {buildWebClipboardHTML, getTextSiyuanFromTextHTML} from "./clipboardData";
 import {prepareExternalClipboardHTML} from "./richClipboard";
+import {isIOSPlatform, isIPadOSPlatform} from "./browserCompatibility";
 
 export {encodeBase64, getTextSiyuanFromTextHTML} from "./clipboardData";
 
@@ -524,13 +525,17 @@ export const isIPhone = () => {
     return navigator.userAgent.indexOf("iPhone") > -1;
 };
 
+export const isIOSDevice = () => {
+    return isIOSPlatform(navigator);
+};
+
 export const isSafari = () => {
     const userAgent = navigator.userAgent;
     return userAgent.includes("Safari") && !userAgent.includes("Chrome") && !userAgent.includes("Chromium");
 };
 
 export const isIPad = () => {
-    return navigator.userAgent.indexOf("iPad") > -1;
+    return isIPadOSPlatform(navigator);
 };
 
 export const isMac = () => {

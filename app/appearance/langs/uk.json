@@ -1,4 +1,5 @@
 {
+	"entryDock": "Док",
 	"scrollPageUpWithoutMovingCaret": "Прокрутити на один екран угору, не переміщуючи курсор",
 	"scrollPageDownWithoutMovingCaret": "Прокрутити на один екран униз, не переміщуючи курсор",
 	"toggleLeftDockPanel": "Показати/приховати ліву док-панель",

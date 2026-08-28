@@ -442,13 +442,25 @@ func serveExport(ginServer *gin.Engine) {
 func serveWidgets(ginServer *gin.Engine) {
 	widgets := ginServer.Group("/widgets/", model.CheckAuth)
 	registerStaticFileHandlers(widgets, filepath.Join(util.DataDir, "widgets"), true, func(c *gin.Context, relativePath string) bool {
-		c.Header("Cache-Control", "private, no-store")
-		if !model.IsReadOnlyRoleContext(c) {
-			return true
+		if model.IsReadOnlyRoleContext(c) {
+			name, _, _ := strings.Cut(filepath.ToSlash(relativePath), "/")
+			if !model.CheckWidgetAccessableByPublishAccess(c, name, model.GetPublishAccess()) {
+				c.Header("Cache-Control", "private, no-store")
+				return false
+			}
 		}
-		name, _, _ := strings.Cut(filepath.ToSlash(relativePath), "/")
-		return model.CheckWidgetAccessableByPublishAccess(c, name, model.GetPublishAccess())
+		setWidgetCacheControl(c, relativePath)
+		return true
 	})
+}
+
+func setWidgetCacheControl(c *gin.Context, relativePath string) {
+	switch strings.ToLower(filepath.Ext(relativePath)) {
+	case "", ".htm", ".html":
+		c.Header("Cache-Control", "private, no-store")
+	default:
+		c.Header("Cache-Control", "private")
+	}
 }
 
 func servePlugins(ginServer *gin.Engine) {
@@ -730,6 +742,9 @@ func serveAppearance(ginServer *gin.Engine) {
 			return
 		}
 
+		if strings.HasPrefix(c.Request.URL.Path, "/appearance/themes/") {
+			c.Header("Cache-Control", "private, no-store")
+		}
 		if strings.HasSuffix(c.Request.URL.Path, "/theme.js") {
 			if !gulu.File.IsExist(filePath) {
 				// 主题 js 不存在时生成空内容返回

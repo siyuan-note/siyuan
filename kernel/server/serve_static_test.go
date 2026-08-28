@@ -232,6 +232,39 @@ func TestLanguageResponseDisablesCache(t *testing.T) {
 	}
 }
 
+func TestThemeResponseDisablesCache(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	originalAppearancePath, originalMode := util.AppearancePath, util.Mode
+	util.AppearancePath, util.Mode = t.TempDir(), "prod"
+	t.Cleanup(func() {
+		util.AppearancePath, util.Mode = originalAppearancePath, originalMode
+	})
+
+	themeDir := filepath.Join(util.AppearancePath, "themes", "example", "style", "module")
+	if err := os.MkdirAll(themeDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(themeDir, "color.css"), []byte("body {}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	engine := gin.New()
+	engine.Use(func(c *gin.Context) {
+		c.Set(model.RoleContextKey, model.RoleAdministrator)
+		c.Next()
+	})
+	serveAppearance(engine)
+	recorder := httptest.NewRecorder()
+	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet,
+		"/appearance/themes/example/style/module/color.css", nil))
+	if recorder.Code != http.StatusOK || strings.TrimSpace(recorder.Body.String()) != "body {}" {
+		t.Fatalf("unexpected theme response: status=%d body=%q", recorder.Code, recorder.Body.String())
+	}
+	if cacheControl := recorder.Header().Get("Cache-Control"); cacheControl != "private, no-store" {
+		t.Fatalf("unexpected theme cache control [%s]", cacheControl)
+	}
+}
+
 func TestTemplatesAndExportRequireAdministrator(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	originalDataDir, originalTempDir := util.DataDir, util.TempDir

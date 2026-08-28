@@ -730,6 +730,9 @@ func serveAppearance(ginServer *gin.Engine) {
 			return
 		}
 
+		if strings.HasPrefix(c.Request.URL.Path, "/appearance/themes/") {
+			c.Header("Cache-Control", "private, no-store")
+		}
 		if strings.HasSuffix(c.Request.URL.Path, "/theme.js") {
 			if !gulu.File.IsExist(filePath) {
 				// 主题 js 不存在时生成空内容返回

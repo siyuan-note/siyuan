@@ -24,6 +24,10 @@ import {
 
 const getActionLabel = (action: MobileBottomBarAction) => {
     switch (action) {
+        case "back":
+            return window.siyuan.languages.goBack;
+        case "forward":
+            return window.siyuan.languages.goForward;
         case "documents":
             return window.siyuan.languages.fileTree;
         case "search":
@@ -142,6 +146,20 @@ export const initMobileBottomBar = (app: App) => {
     }
     bottomBarElement.classList.remove("fn__none");
     bottomBarElement.dataset.bound = "true";
+    bindBottomBarAction("mobileBottomBarBack", () => {
+        if (isMobileBlockSelecting()) {
+            return;
+        }
+        activeBlur();
+        void window.siyuan.mobile.tabs?.goBack();
+    });
+    bindBottomBarAction("mobileBottomBarForward", () => {
+        if (isMobileBlockSelecting()) {
+            return;
+        }
+        activeBlur();
+        void window.siyuan.mobile.tabs?.goForward();
+    });
     bindBottomBarAction("mobileBottomBarSearch", () => {
         if (isMobileBlockSelecting()) {
             return;
@@ -237,7 +255,7 @@ const genBottomBarOptions = () => MOBILE_BOTTOM_BAR_ACTIONS.map((action) =>
 export const genMobileBottomBarSettingHTML = () => {
     const title = window.siyuan.languages.mobileBottomBar;
     const disabled = window.siyuan.config.readonly || window.siyuan.isPublish ? " disabled" : "";
-    const selects = [0, 1, 2, 3].map((slot) => `<label class="mobile-bottom-bar-setting__slot">
+    const selects = [0, 1, 2, 3, 4].map((slot) => `<label class="mobile-bottom-bar-setting__slot">
         <span>${slot + 1}</span>
         <select class="b3-select fn__flex-1" data-bottom-bar-slot="${slot}" aria-label="${escapeAttr(`${title} ${slot + 1}`)}"${disabled}>${genBottomBarOptions()}</select>
     </label>`).join("");
@@ -271,7 +289,7 @@ export const mountMobileBottomBarSetting = (root: HTMLElement) => {
         }
         const slot = Number(selectElement.dataset.bottomBarSlot);
         const action = selectElement.value as MobileBottomBarAction;
-        if (![0, 1, 2, 3].includes(slot) || !MOBILE_BOTTOM_BAR_ACTIONS.includes(action)) {
+        if (![0, 1, 2, 3, 4].includes(slot) || !MOBILE_BOTTOM_BAR_ACTIONS.includes(action)) {
             syncSelects();
             return;
         }

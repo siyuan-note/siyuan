@@ -76,6 +76,12 @@
 <div id="tooltip" class="tooltip fn__none"></div>
 <div id="status" class="status"></div>
 <div id="mobileBottomBar" class="mobile-bottom-bar fn__none" role="group" aria-hidden="false" data-prevent-swipe>
+    <button id="mobileBottomBarBack" class="mobile-bottom-bar__item fn__none" data-action="back" type="button" disabled>
+        <svg><use xlink:href="#iconLeft"></use></svg>
+    </button>
+    <button id="mobileBottomBarForward" class="mobile-bottom-bar__item fn__none" data-action="forward" type="button" disabled>
+        <svg><use xlink:href="#iconRight"></use></svg>
+    </button>
     <button id="toolbarFile" class="mobile-bottom-bar__item" data-action="documents" type="button">
         <svg><use xlink:href="#iconFiles"></use></svg>
     </button>

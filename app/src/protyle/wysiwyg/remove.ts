@@ -7,7 +7,6 @@ import {
     getSelectionOffset,
     getUndoFocusContext,
     restoreFocusContext,
-    restoreUndoFocus,
     setLastNodeRange
 } from "../util/selection";
 import {
@@ -17,7 +16,6 @@ import {
     getEmbedChildOperationParentID,
     getLastBlock,
     getNextBlock,
-    getNextBlockSibling,
     getParentBlock,
     getPreviousBlock,
     getPreviousBlockSibling,
@@ -28,7 +26,7 @@ import {
     hasPreviousSibling,
     IEmbedChildOperationContext
 } from "./getBlock";
-import {onTransaction, transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
+import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../../block/util";
 import {
     getFocusedOrderedListDeleteOperations,
@@ -52,6 +50,9 @@ import {getAllModels} from "../../layout/getAll";
 import {fetchSyncPost} from "../../util/fetch";
 import {setFold} from "../util/blockFold";
 import {highlightRender} from "../render/highlightRender";
+import {processRender} from "../util/processCode";
+import {avRender} from "../render/av/render";
+import {blockRender} from "../render/blockRender";
 import * as dayjs from "dayjs";
 import {mergeSameInlineElement} from "../toolbar/util";
 import {
@@ -391,8 +392,8 @@ const getEditorRootElement = (editorElement: HTMLElement, blockElement: HTMLElem
     return rootElement.parentElement === editorElement ? rootElement : undefined;
 };
 
-const prepareNativeCrossBlockComposition = (protyle: IProtyle, selectedRange: Range,
-                                              startElement: HTMLElement, endElement: HTMLElement):
+export const prepareCrossBlockComposition = (protyle: IProtyle, selectedRange: Range,
+                                               startElement: HTMLElement, endElement: HTMLElement):
 ICrossBlockComposition | undefined => {
     const editorElement = protyle.wysiwyg.element;
     const ranges = getBlockRanges(editorElement, selectedRange);
@@ -442,8 +443,13 @@ ICrossBlockComposition | undefined => {
         if (node !== endMarker) {
             return;
         }
+        const restoredElements: HTMLElement[] = [];
         snapshotNodes.forEach(snapshotNode => {
-            editorElement.insertBefore(snapshotNode.cloneNode(true), endMarker);
+            const restoredNode = snapshotNode.cloneNode(true);
+            editorElement.insertBefore(restoredNode, endMarker);
+            if (restoredNode.nodeType === Node.ELEMENT_NODE) {
+                restoredElements.push(restoredNode as HTMLElement);
+            }
         });
         startMarker.remove();
         endMarker.remove();
@@ -454,7 +460,10 @@ ICrossBlockComposition | undefined => {
         if (selection.rangeCount === 0) {
             return;
         }
-        return selection.getRangeAt(0).cloneRange();
+        return {
+            elements: restoredElements,
+            range: selection.getRangeAt(0).cloneRange(),
+        };
     };
 
     return {
@@ -463,10 +472,31 @@ ICrossBlockComposition | undefined => {
             compositionText = text;
         },
         async complete(committed: boolean) {
-            const restoredRange = restore();
-            if (!committed || !restoredRange) {
+            const restored = restore();
+            if (!restored) {
                 return;
             }
+            if (!committed) {
+                restored.elements.forEach(element => {
+                    element.querySelectorAll<HTMLElement>(
+                        ".render-node[data-render], [data-type=\"NodeAttributeView\"][data-render], " +
+                        "[data-type=\"NodeBlockQueryEmbed\"][data-render]"
+                    ).forEach(item => item.removeAttribute("data-render"));
+                    if (element.matches(".render-node[data-render], [data-type=\"NodeAttributeView\"][data-render], " +
+                        "[data-type=\"NodeBlockQueryEmbed\"][data-render]")) {
+                        element.removeAttribute("data-render");
+                    }
+                    processRender(element);
+                    avRender(element, protyle);
+                    blockRender(protyle, element);
+                    if (element.getAttribute("data-type") === "NodeSuperBlock") {
+                        refreshSbResize(element);
+                    }
+                    element.querySelectorAll('[data-type="NodeSuperBlock"]').forEach(refreshSbResize);
+                });
+                return;
+            }
+            const restoredRange = restored.range;
             const restoredRanges = getBlockRanges(editorElement, restoredRange);
             const restoredStartElement = restoredRanges[0]?.blockElement ||
                 hasClosestBlock(restoredRange.startContainer) as HTMLElement;
@@ -477,148 +507,6 @@ ICrossBlockComposition | undefined => {
             }
             await removeCrossBlockRange(protyle, restoredRange, restoredStartElement, restoredEndElement, false, {
                 text: compositionText,
-            });
-        },
-    };
-};
-
-export const prepareCrossBlockComposition = (protyle: IProtyle, selectedRange: Range,
-                                              startElement: HTMLElement, endElement: HTMLElement):
-ICrossBlockComposition | undefined => {
-    const editorElement = protyle.wysiwyg.element;
-    const context = getCrossBlockRemovalPlan(editorElement, selectedRange, startElement, endElement, true, true);
-    const {
-        ranges,
-        removeElements,
-        rangesByBlock,
-        startEditableElement,
-        endEditableElement,
-        mergeEndElement,
-        nestedListMergeContext,
-        siblingListItemMergeContext,
-        updateElements,
-    } = context;
-    const blockType = startElement.getAttribute("data-type");
-    let expectedRemoveElement = getNextBlockSibling(startElement);
-    const hasConsecutiveRemoveElements = removeElements.every(item => {
-        if (item !== expectedRemoveElement) {
-            return false;
-        }
-        expectedRemoveElement = getNextBlockSibling(item);
-        return true;
-    });
-    if (!startEditableElement || !endEditableElement || mergeEndElement !== endElement ||
-        nestedListMergeContext || siblingListItemMergeContext || context.startElement !== startElement ||
-        startElement.parentElement !== endElement.parentElement ||
-        !["NodeParagraph", "NodeHeading"].includes(blockType) ||
-        endElement.getAttribute("data-type") !== blockType ||
-        updateElements.length !== 1 || updateElements[0] !== startElement || removeElements.length === 0 ||
-        removeElements.some(item => item.parentElement !== startElement.parentElement) ||
-        !hasConsecutiveRemoveElements) {
-        return prepareNativeCrossBlockComposition(protyle, selectedRange, startElement, endElement);
-    }
-    const firstRange = ranges.find(item => item.blockElement === startElement);
-    if (!firstRange) {
-        return prepareNativeCrossBlockComposition(protyle, selectedRange, startElement, endElement);
-    }
-    const oldStartHTML = startElement.outerHTML;
-    const startID = startElement.getAttribute("data-node-id");
-    const undoFocusContext = getUndoFocusContext(editorElement, selectedRange, true);
-    const checkTargets = getBlockRefCheckTargetsFromContext(context, removeElements, context.retainedElements);
-    const checkIDs = checkTargets.elements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
-    const insertOperations: IOperation[] = removeElements.map(item => ({
-        action: "insert",
-        id: item.getAttribute("data-node-id"),
-        data: item.classList.contains("render-node") || item.querySelector("div.render-node") ?
-            protyle.lute.SpinBlockDOM(item.outerHTML) : item.outerHTML,
-        previousID: getPreviousBlockSibling(item)?.getAttribute("data-node-id"),
-        parentID: getOperationParentID(item, protyle.block.parentID),
-    }));
-    const doOperations: IOperation[] = removeElements.map(item => ({
-        action: "delete",
-        id: item.getAttribute("data-node-id"),
-    }));
-    let compositionTextNode: Text;
-
-    const restore = () => {
-        const operations: IOperation[] = [{
-            action: "update",
-            id: startID,
-            data: oldStartHTML,
-            context: undoFocusContext,
-        }, ...insertOperations.map(item => editorElement.querySelector(`[data-node-id="${item.id}"]`) ? {
-            action: "update",
-            id: item.id,
-            data: item.data,
-        } as IOperation : item)];
-        onTransaction(protyle, operations, true);
-        restoreUndoFocus(protyle, operations);
-        delete protyle.wysiwyg.lastHTMLs[startID];
-    };
-    const update = (text: string) => {
-        if (!compositionTextNode) {
-            if (text === "") {
-                return;
-            }
-            deleteCrossBlockRangeContents(rangesByBlock);
-            const firstEndNode = endEditableElement.firstChild;
-            while (endEditableElement.firstChild) {
-                startEditableElement.append(endEditableElement.firstChild);
-            }
-            if (firstEndNode?.nodeType === Node.ELEMENT_NODE) {
-                const currentElement = firstEndNode as HTMLElement;
-                let previousElement = currentElement.previousSibling as HTMLElement;
-                while (previousElement?.nodeType === Node.ELEMENT_NODE &&
-                    mergeSameInlineElement(currentElement, previousElement)) {
-                    previousElement.remove();
-                    previousElement = currentElement.previousSibling as HTMLElement;
-                }
-            }
-            startEditableElement.normalize();
-            fixAdjacentTags(startEditableElement);
-            removeElements.forEach(item => item.remove());
-            startElement.classList.remove("protyle-wysiwyg--select");
-            startElement.removeAttribute("select-start");
-            startElement.removeAttribute("select-end");
-            const replacementRange = focusByOffset(
-                startEditableElement, firstRange.start, firstRange.start, false, true);
-            if (!replacementRange) {
-                return;
-            }
-            compositionTextNode = document.createTextNode(text);
-            replacementRange.insertNode(compositionTextNode);
-        } else {
-            compositionTextNode.data = text;
-        }
-        const range = document.createRange();
-        range.setStartAfter(compositionTextNode);
-        range.collapse(true);
-        focusByRange(range);
-    };
-    return {
-        preventNativeInput: true,
-        update,
-        async complete(committed: boolean, range: Range) {
-            const currentStartElement = editorElement.querySelector<HTMLElement>(`[data-node-id="${startID}"]`);
-            if (!committed || !currentStartElement || !compositionTextNode) {
-                restore();
-                return;
-            }
-            if (checkIDs.length > 0 && !await confirmBlockRef({
-                scope: "blocks",
-                ids: checkIDs,
-                exactIDs: checkTargets.exactIDs,
-                deletedIDs: checkTargets.deletedIDs,
-                notebook: protyle.notebookId,
-            }, protyle)) {
-                restore();
-                return;
-            }
-            protyle.wysiwyg.lastHTMLs[startID] = oldStartHTML;
-            await input(protyle, currentStartElement, range, true, undefined, {
-                doOperations,
-                undoOperations: insertOperations,
-                undoContext: undoFocusContext,
             });
         },
     };

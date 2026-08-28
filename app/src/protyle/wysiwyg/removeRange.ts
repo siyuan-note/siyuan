@@ -20,6 +20,15 @@ const NATIVE_COMPOSITION_SNAPSHOT_TYPES = new Set([
     "NodeBlockquote",
     "NodeCallout",
     "NodeSuperBlock",
+    "NodeAttributeView",
+    "NodeAudio",
+    "NodeBlockQueryEmbed",
+    "NodeHTMLBlock",
+    "NodeIFrame",
+    "NodeMathBlock",
+    "NodeThematicBreak",
+    "NodeVideo",
+    "NodeWidget",
 ]);
 
 export const isNativeCrossBlockCompositionSupported = (rangeTypes: string[], snapshotTypes: string[]) => {

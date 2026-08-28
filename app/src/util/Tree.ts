@@ -6,6 +6,7 @@ import {Constants} from "../constants";
 import {escapeAriaLabel, escapeHtml} from "./escape";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {headingNumberNeedsSpacing} from "../protyle/util/headingNumberCore";
+import {getTreeItemTailHTML} from "./treeItemTail";
 
 const genOutlineNumberHTML = (number?: string) => {
     if (!number) {
@@ -98,7 +99,7 @@ export class Tree {
                 iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             } else if (item.type === "outline") {
                 titleTip = ` aria-label="${escapeAriaLabel(Lute.BlockDOM2Content(item.name))}"`;
-                iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: 22px;width: ${isM ? 20 : 16}px;"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
+                iconHTML = `<svg class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: ${isM ? 16 : 22}px;width: 16px;"><use xlink:href="#${getIconByType(item.nodeType, item.subType)}"></use></svg>`;
             }
             let countHTML = "";
             if (item.count) {
@@ -130,8 +131,7 @@ ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'`
     ${iconHTML}
     ${numberHTML}
     <span class="b3-list-item__text ariaLabel" data-position="${this.titleTooltipPosition}"${titleTip}>${item.name}</span>
-    ${this.topExtHTML || ""}
-    ${countHTML}
+    ${getTreeItemTailHTML(countHTML, this.topExtHTML || "", isM)}
 </li>`;
             if (item.children && item.children.length > 0) {
                 html += this.genHTML(item.children) + "</ul>";
@@ -161,7 +161,7 @@ ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'`
             const numberHTML = type === "outline" ? genOutlineNumberHTML(item.number) : "";
             let iconHTML;
             if (type === "outline") {
-                iconHTML = `<svg data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: 22px;width: ${isM?20:16}px;"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
+                iconHTML = `<svg data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: ${isM ? 16 : 22}px;width: 16px;"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
             } else {
                 if (item.type === "NodeDocument") {
                     iconHTML = `<span data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}">${unicode2Emoji(item.ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span>`;
@@ -192,8 +192,7 @@ data-def-path="${item.defPath}">
     ${iconHTML}
     ${numberHTML}
     <span class="b3-list-item__text ariaLabel" data-position="${this.titleTooltipPosition}" ${type === "outline" ? ' aria-label="' + escapeAriaLabel(Lute.BlockDOM2Content(item.content)) + '"' : ""}>${item.content}</span>
-    ${this.blockExtHTML || ""}
-    ${countHTML}
+    ${getTreeItemTailHTML(countHTML, this.blockExtHTML || "", isM)}
 </li>`;
             if (item.children && item.children.length > 0) {
                 html += this.genBlockHTML(item.children, type === "outline" ? !item.folded : false, type) + "</ul>";

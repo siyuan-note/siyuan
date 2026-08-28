@@ -289,6 +289,77 @@ body.mobile-keyboard--open {
   }
 }
 
+#sidebar,
+#sidebarRight {
+  .toolbar {
+    &__icon {
+      width: 18px;
+      height: 18px;
+      padding: 11px;
+      margin: 2px;
+    }
+
+    &__text {
+      font-size: 15px;
+    }
+  }
+
+  .b3-list--mobile {
+    .b3-list-item {
+      font-size: 14px;
+
+      &__icon,
+      &__switch {
+        svg, img {
+          width: 18px;
+          height: 18px;
+        }
+      }
+
+      &__graphic {
+        width: 16px;
+        height: 16px;
+        margin-inline-end: 6px;
+        font-size: 16px;
+        line-height: 16px;
+      }
+
+      &__arrow {
+        width: 14px;
+        height: 14px;
+      }
+
+      &__action {
+        height: 16px;
+        padding: 8px;
+        margin-left: 0;
+        margin-inline-start: 2px;
+
+        svg {
+          width: 16px;
+          height: 16px;
+        }
+      }
+    }
+
+    .counter {
+      box-sizing: border-box;
+      flex-shrink: 0;
+      min-width: 24px;
+      height: 20px;
+      margin-left: 0;
+      margin-inline-start: 2px;
+      padding: 0 6px;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      line-height: 20px;
+      text-align: end;
+      unicode-bidi: isolate;
+      white-space: nowrap;
+    }
+  }
+}
+
 .mobile-safe-area {
   position: relative;
   z-index: 4;
@@ -587,6 +658,11 @@ body.mobile-topbar--merged {
     transform: translateX(100vw);
   }
 
+  &--swiping {
+    transition: none;
+    will-change: transform;
+  }
+
   // 窄屏下 Dock 图标过多时可横向滚动，关闭按钮固定在工具栏末端始终可触达
   & > .toolbar--border > .toolbar__scroll {
     flex: 1;
@@ -614,6 +690,11 @@ body.mobile-topbar--merged {
   background-color: #000;
   opacity: 0;
   transition: opacity 150ms linear;
+
+  &--swiping {
+    transition: none;
+    will-change: opacity;
+  }
 }
 
 #model,

@@ -151,6 +151,48 @@ func TestRecordAssetUploadFailurePreservesInputIndex(t *testing.T) {
 	}
 }
 
+func TestInsertLocalAssetsWithoutBlockIDUsesGlobalAssets(t *testing.T) {
+	assetsDir := setupAssetUploadTest(t)
+	sourceData := []byte("agent pasted image")
+	sourcePath := filepath.Join(t.TempDir(), "pasted.png")
+	if err := os.WriteFile(sourcePath, sourceData, 0644); err != nil {
+		t.Fatal(err)
+	}
+	hash, err := util.GetEtagByHandle(bytes.NewReader(sourceData), int64(len(sourceData)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.MkdirAll(assetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(filepath.Join(assetsDir, "existing.png"), sourceData, 0644); err != nil {
+		t.Fatal(err)
+	}
+	cache.SetAssetHash(hash, "assets/existing.png")
+	t.Cleanup(func() { cache.RemoveAssetHash(hash) })
+
+	succMap, succFiles, failedFiles, err := InsertLocalAssets("", []string{sourcePath}, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(failedFiles) != 0 || len(succFiles) != 1 {
+		t.Fatalf("unexpected local asset result: successes=%+v failures=%+v", succFiles, failedFiles)
+	}
+	if succMap["pasted.png"] != succFiles[0].Path || filepath.ToSlash(filepath.Dir(succFiles[0].Path)) != "assets" {
+		t.Fatalf("local asset was not inserted into global assets: %+v", succFiles[0])
+	}
+	uploadedData, err := os.ReadFile(filepath.Join(assetsDir, filepath.Base(succFiles[0].Path)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(uploadedData, sourceData) {
+		t.Fatalf("unexpected uploaded data: %q", uploadedData)
+	}
+	if uploadedHash := cache.GetAssetHashByPath(succFiles[0].Path); uploadedHash != nil {
+		cache.RemoveAssetHash(uploadedHash.Hash)
+	}
+}
+
 func TestMultipartUploadContinuesAfterFileOpenFailure(t *testing.T) {
 	assetsDir := setupAssetUploadTest(t)
 	firstData := []byte("first upload")

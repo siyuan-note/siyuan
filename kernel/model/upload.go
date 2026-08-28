@@ -147,14 +147,18 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 	succFiles = make([]AssetUploadSuccess, 0, len(assetAbsPaths))
 	failedFiles = make([]AssetUploadFailure, 0)
 
-	bt := treenode.GetBlockTree(id)
-	if nil == bt {
-		err = errors.New(Conf.Language(71))
-		return
+	boxID := ""
+	assetsDirPath := filepath.Join(util.DataDir, "assets")
+	if id != "" {
+		bt := treenode.GetBlockTree(id)
+		if nil == bt {
+			err = errors.New(Conf.Language(71))
+			return
+		}
+		boxID = bt.BoxID
+		docDirLocalPath := filepath.Join(util.DataDir, boxID, path.Dir(bt.Path))
+		assetsDirPath = getAssetsDir(filepath.Join(util.DataDir, boxID), docDirLocalPath)
 	}
-
-	docDirLocalPath := filepath.Join(util.DataDir, bt.BoxID, path.Dir(bt.Path))
-	assetsDirPath := getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
 	if !gulu.File.IsExist(assetsDirPath) {
 		if err = os.MkdirAll(assetsDirPath, 0755); err != nil {
 			return
@@ -213,7 +217,7 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 			hash = "random_1_" + gulu.Rand.String(12)
 		}
 
-		existAssetPath := GetAssetPathByHash(hash, bt.BoxID)
+		existAssetPath := GetAssetPathByHash(hash, boxID)
 		if "" != existAssetPath {
 			originalName := util.RemoveID(filepath.Base(existAssetPath))
 			if strings.ToLower(fName) != strings.ToLower(originalName) {
@@ -226,7 +230,7 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 			f.Close()
 		} else {
 			blockID := ast.NewNodeID()
-			if IsEncryptedBox(bt.BoxID) {
+			if IsEncryptedBox(boxID) {
 				// 加密 box：磁盘文件名脱敏为 uuid-blockID.ext，原始名存加密映射
 				fName = encryptedAssetName(util.Ext(fName), blockID)
 			} else {
@@ -238,7 +242,7 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 				recordAssetUploadFailure(&failedFiles, index, baseName, seekErr)
 				continue
 			}
-			if writeErr := writeAssetFile(writePath, f, bt.BoxID, baseName); writeErr != nil {
+			if writeErr := writeAssetFile(writePath, f, boxID, baseName); writeErr != nil {
 				f.Close()
 				recordAssetUploadFailure(&failedFiles, index, baseName, writeErr)
 				continue
@@ -246,11 +250,11 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 			f.Close()
 
 			p := "assets/" + fName
-			if IsEncryptedBox(bt.BoxID) {
-				p += "?box=" + bt.BoxID
+			if IsEncryptedBox(boxID) {
+				p += "?box=" + boxID
 			}
 			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, p)
-			if !IsEncryptedBox(bt.BoxID) {
+			if !IsEncryptedBox(boxID) {
 				cache.SetAssetHash(hash, p) // 加密笔记本不写全局 cache，避免跨边界去重污染
 			}
 		}

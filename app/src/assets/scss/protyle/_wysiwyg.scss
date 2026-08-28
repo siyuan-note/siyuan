@@ -1,5 +1,19 @@
 @use "../util/mixin";
 
+.protyle-cross-block-preview {
+  pointer-events: none;
+
+  &__selection {
+    background-color: var(--b3-theme-primary-lighter);
+  }
+}
+
+.protyle-cross-block-source {
+  position: fixed !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .protyle-wysiwyg {
   padding: 16px 16px 16px 24px;
   box-sizing: border-box;

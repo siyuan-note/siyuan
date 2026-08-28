@@ -1,4 +1,5 @@
 {
+	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Eine Bildschirmseite nach oben scrollen, ohne den Cursor zu bewegen",
 	"scrollPageDownWithoutMovingCaret": "Eine Bildschirmseite nach unten scrollen, ohne den Cursor zu bewegen",
 	"toggleLeftDockPanel": "Linkes Dock-Panel ein-/ausblenden",

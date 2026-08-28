@@ -611,7 +611,7 @@ func insertLocalAssets(c *gin.Context) {
 	if nil != isUploadArg {
 		isUpload = isUploadArg.(bool)
 	}
-	id := arg["id"].(string)
+	id, _ := arg["id"].(string)
 	fromHTMLPaste, _ := arg["fromHTMLPaste"].(bool)
 	var succMap map[string]any
 	var succFiles []model.AssetUploadSuccess

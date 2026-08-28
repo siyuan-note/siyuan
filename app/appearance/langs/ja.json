@@ -1,4 +1,5 @@
 {
+	"entryDock": "ドック",
 	"scrollPageUpWithoutMovingCaret": "カーソルを移動せずに 1 画面上へスクロール",
 	"scrollPageDownWithoutMovingCaret": "カーソルを移動せずに 1 画面下へスクロール",
 	"toggleLeftDockPanel": "左側ドックパネルの表示/非表示",

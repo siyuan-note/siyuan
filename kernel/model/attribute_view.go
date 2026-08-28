@@ -8157,16 +8157,13 @@ func (tx *Transaction) doSortAttrViewBinding(operation *Operation) (ret *TxErr) 
 	}
 
 	avs := strings.Join(avIDs, ",")
-	if _, err = setNodeAttrs0(node, map[string]string{
+	if err = setNodeAttrsWithTx(tx, node, tree, map[string]string{
 		av.NodeAttrNameAvs:   avs,
 		av.NodeAttrViewNames: getAvNames(avs),
-	}, tree.Box); err != nil {
+	}); err != nil {
 		logging.LogErrorf("sort attribute view binding [%s] failed: %s", operation.AvID, err)
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
-
-	tx.writeTree(tree)
-	cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 	return
 }
 

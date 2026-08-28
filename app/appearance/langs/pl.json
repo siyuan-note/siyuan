@@ -1,4 +1,5 @@
 {
+	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Przewiń o jeden ekran w górę bez przesuwania kursora",
 	"scrollPageDownWithoutMovingCaret": "Przewiń o jeden ekran w dół bez przesuwania kursora",
 	"toggleLeftDockPanel": "Pokaż/ukryj lewy panel dokowania",

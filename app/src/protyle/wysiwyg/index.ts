@@ -3903,6 +3903,10 @@ export class WYSIWYG {
             event.stopPropagation();
         });
 
+        this.element.addEventListener("input", () => {
+            crossBlockComposition?.preservePreview();
+        });
+
         this.element.addEventListener("compositionend", async (event: InputEvent) => {
             event.stopPropagation();
             if (getAVTemplateInteractiveElement(event.target)) {
@@ -4816,6 +4820,12 @@ export class WYSIWYG {
                     } else {
                         if (actionElement.classList.contains("protyle-action--task")) {
                             if (!protyle.disabled) {
+                                /// #if MOBILE
+                                event.preventDefault();
+                                if (document.getElementById("keyboardToolbar")?.classList.contains("fn__none")) {
+                                    activeBlur(true);
+                                }
+                                /// #endif
                                 toggleTaskListItem(protyle, actionElement.parentElement);
                             }
                         } else if (window.siyuan.config.editor.listItemDotNumberClickFocus) {

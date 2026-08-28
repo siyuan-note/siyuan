@@ -1,4 +1,5 @@
 {
+	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Faire défiler d’un écran vers le haut sans déplacer le curseur",
 	"scrollPageDownWithoutMovingCaret": "Faire défiler d’un écran vers le bas sans déplacer le curseur",
 	"toggleLeftDockPanel": "Afficher/masquer le panneau d’ancrage gauche",

@@ -1,4 +1,5 @@
 {
+	"entryDock": "停靠栏",
 	"scrollPageUpWithoutMovingCaret": "光标不动向上滚动一屏",
 	"scrollPageDownWithoutMovingCaret": "光标不动向下滚动一屏",
 	"toggleLeftDockPanel": "显示/隐藏左侧停靠栏面板",

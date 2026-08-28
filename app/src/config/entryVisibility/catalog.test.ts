@@ -635,6 +635,7 @@ test("configuration labels distinguish block scopes and size controls", () => {
                     entryPercentageWidth: "Percentage width",
                     entryPixelHeight: "Pixel height",
                     entryPercentageHeight: "Percentage height",
+                    entryDock: "Dock",
                     height: "Height",
                     entryDocumentStatistics: "Document statistics",
                 },
@@ -642,6 +643,7 @@ test("configuration labels distinguish block scopes and size controls", () => {
         },
     });
     try {
+        assert.equal(getEntryCatalogSection("dock")?.label(), "Dock");
         assert.equal(getEntryCatalogSection("gutter.single")?.label(),
             "Editor - Block icon menu - Single block");
         assert.equal(getEntryCatalogSection("gutter.multi")?.label(),

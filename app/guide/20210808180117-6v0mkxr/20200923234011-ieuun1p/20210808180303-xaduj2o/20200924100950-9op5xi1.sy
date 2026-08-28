@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260828174741"
+		"updated": "20260828200251"
 	},
 	"Children": [
 		{
@@ -30,56 +30,6 @@
 				{
 					"Type": "NodeText",
 					"Data": " cannot be set as a shortcut."
-				}
-			]
-		},
-		{
-			"ID": "20260826175526-n7d3k5m",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20260826175526-n7d3k5m",
-				"updated": "20260826175526"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "In the editor, press "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Esc"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to select the current block or leave block selection. While a block is selected, press "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "A"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " without a modifier to insert an empty block after it, "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "B"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to insert an empty block before it. For an editable block, press "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " to leave block selection and move the caret to the end of the block."
 				}
 			]
 		},
@@ -4037,7 +3987,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260809003223"
+				"updated": "20260828200251"
 			},
 			"Children": [
 				{
@@ -4056,7 +4006,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20260828174741"
+				"updated": "20260828200251"
 			},
 			"Children": [
 				{
@@ -4076,7 +4026,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20260828174741"
+				"updated": "20260828200251"
 			},
 			"Children": [
 				{
@@ -6262,6 +6212,45 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "Select/deselect the current block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Esc"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "Insert an empty block before the block"
 								}
 							]
@@ -6314,7 +6303,22 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When a block is selected, press "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "B"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " without a modifier"
+								}
+							]
 						}
 					]
 				},
@@ -6380,7 +6384,67 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "When a block is selected, press "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "A"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " without a modifier"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Leave block selection and move the caret to the end"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Editable blocks only"
+								}
+							]
 						}
 					]
 				},

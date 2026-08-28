@@ -1,4 +1,6 @@
 {
+	"scrollPageUpWithoutMovingCaret": "Posunúť o jednu obrazovku nahor bez presunutia kurzora",
+	"scrollPageDownWithoutMovingCaret": "Posunúť o jednu obrazovku nadol bez presunutia kurzora",
 	"toggleLeftDockPanel": "Zobraziť/skryť ľavý dokovací panel",
 	"toggleRightDockPanel": "Zobraziť/skryť pravý dokovací panel",
 	"toggleBottomDockPanel": "Zobraziť/skryť spodný dokovací panel",

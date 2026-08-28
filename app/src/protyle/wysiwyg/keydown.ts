@@ -121,6 +121,7 @@ import {hideMessage, showMessage} from "../../dialog/message";
 import {isMobile} from "../../util/functions";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {scheduleCaretScroll} from "./caretScroll";
+import {scrollPage} from "../scroll/page";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -724,15 +725,21 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if ((event.key === "Home" || event.key === "End") && !event.shiftKey && !event.altKey && isNotCtrl(event)) {
             hideElements(["hint"], protyle);
         }
+        let scrollDirection: "up" | "down" | undefined;
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.scrollPageUpWithoutMovingCaret.custom, event)) {
+            scrollDirection = "up";
+        } else if (matchHotKey(window.siyuan.config.keymap.editor.general.scrollPageDownWithoutMovingCaret.custom, event)) {
+            scrollDirection = "down";
+        }
+        if (scrollDirection) {
+            scrollPage(protyle, scrollDirection);
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
         // 向上/下滚动一屏
         if (!event.altKey && !event.shiftKey && isNotCtrl(event) && (event.key === "PageUp" || event.key === "PageDown")) {
-            if (event.key === "PageUp") {
-                protyle.contentElement.scrollTop = protyle.contentElement.scrollTop - protyle.contentElement.clientHeight + 60;
-                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop + 1;
-            } else {
-                protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + protyle.contentElement.clientHeight - 60;
-                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
-            }
+            scrollPage(protyle, event.key === "PageUp" ? "up" : "down");
             const contentRect = protyle.contentElement.getBoundingClientRect();
             let centerElement = document.elementFromPoint(contentRect.x + contentRect.width / 2, contentRect.y + contentRect.height / 2);
             if (centerElement.classList.contains("protyle-wysiwyg")) {

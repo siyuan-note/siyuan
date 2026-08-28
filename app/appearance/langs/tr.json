@@ -1,4 +1,6 @@
 {
+	"scrollPageUpWithoutMovingCaret": "İmleci hareket ettirmeden bir ekran yukarı kaydır",
+	"scrollPageDownWithoutMovingCaret": "İmleci hareket ettirmeden bir ekran aşağı kaydır",
 	"toggleLeftDockPanel": "Sol dock panelini göster/gizle",
 	"toggleRightDockPanel": "Sağ dock panelini göster/gizle",
 	"toggleBottomDockPanel": "Alt dock panelini göster/gizle",

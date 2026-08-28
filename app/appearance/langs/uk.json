@@ -1,4 +1,6 @@
 {
+	"scrollPageUpWithoutMovingCaret": "Прокрутити на один екран угору, не переміщуючи курсор",
+	"scrollPageDownWithoutMovingCaret": "Прокрутити на один екран униз, не переміщуючи курсор",
 	"toggleLeftDockPanel": "Показати/приховати ліву док-панель",
 	"toggleRightDockPanel": "Показати/приховати праву док-панель",
 	"toggleBottomDockPanel": "Показати/приховати нижню док-панель",

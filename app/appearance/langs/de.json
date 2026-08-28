@@ -1,4 +1,6 @@
 {
+	"scrollPageUpWithoutMovingCaret": "Eine Bildschirmseite nach oben scrollen, ohne den Cursor zu bewegen",
+	"scrollPageDownWithoutMovingCaret": "Eine Bildschirmseite nach unten scrollen, ohne den Cursor zu bewegen",
 	"toggleLeftDockPanel": "Linkes Dock-Panel ein-/ausblenden",
 	"toggleRightDockPanel": "Rechtes Dock-Panel ein-/ausblenden",
 	"toggleBottomDockPanel": "Unteres Dock-Panel ein-/ausblenden",

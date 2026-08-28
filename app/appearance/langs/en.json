@@ -1,4 +1,6 @@
 {
+	"scrollPageUpWithoutMovingCaret": "Scroll up one screen without moving the cursor",
+	"scrollPageDownWithoutMovingCaret": "Scroll down one screen without moving the cursor",
 	"toggleLeftDockPanel": "Show/Hide Left Dock Panel",
 	"toggleRightDockPanel": "Show/Hide Right Dock Panel",
 	"toggleBottomDockPanel": "Show/Hide Bottom Dock Panel",

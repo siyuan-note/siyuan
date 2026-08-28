@@ -590,6 +590,8 @@ export abstract class Constants {
                 moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
                 selectToPageStart: {default: "⇧Home", custom: "⇧Home"},
                 selectToPageEnd: {default: "⇧End", custom: "⇧End"},
+                scrollPageUpWithoutMovingCaret: {default: "⌥PageUp", custom: "⌥PageUp"},
+                scrollPageDownWithoutMovingCaret: {default: "⌥PageDown", custom: "⌥PageDown"},
                 duplicateCompletely: {default: "", custom: ""},
                 copyRichText: {default: "", custom: ""},
                 copyPlainText: {default: "", custom: ""},

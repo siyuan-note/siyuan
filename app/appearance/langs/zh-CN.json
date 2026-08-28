@@ -1,4 +1,6 @@
 {
+	"scrollPageUpWithoutMovingCaret": "光标不动向上滚动一屏",
+	"scrollPageDownWithoutMovingCaret": "光标不动向下滚动一屏",
 	"toggleLeftDockPanel": "显示/隐藏左侧停靠栏面板",
 	"toggleRightDockPanel": "显示/隐藏右侧停靠栏面板",
 	"toggleBottomDockPanel": "显示/隐藏下侧停靠栏面板",

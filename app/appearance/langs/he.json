@@ -1,4 +1,6 @@
 {
+	"scrollPageUpWithoutMovingCaret": "גלילה מסך אחד למעלה מבלי להזיז את הסמן",
+	"scrollPageDownWithoutMovingCaret": "גלילה מסך אחד למטה מבלי להזיז את הסמן",
 	"toggleLeftDockPanel": "הצג/הסתר את חלונית העגינה השמאלית",
 	"toggleRightDockPanel": "הצג/הסתר את חלונית העגינה הימנית",
 	"toggleBottomDockPanel": "הצג/הסתר את חלונית העגינה התחתונה",

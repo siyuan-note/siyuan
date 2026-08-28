@@ -1,4 +1,6 @@
 {
+	"scrollPageUpWithoutMovingCaret": "カーソルを移動せずに 1 画面上へスクロール",
+	"scrollPageDownWithoutMovingCaret": "カーソルを移動せずに 1 画面下へスクロール",
 	"toggleLeftDockPanel": "左側ドックパネルの表示/非表示",
 	"toggleRightDockPanel": "右側ドックパネルの表示/非表示",
 	"toggleBottomDockPanel": "下側ドックパネルの表示/非表示",

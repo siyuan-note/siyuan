@@ -39,6 +39,7 @@ import {adjustDockPadding} from "./dock/util";
 import {setTitle} from "../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
 import {applyDockEntryVisibility} from "../config/entryVisibility/runtime";
+import {panePercentages, resizePanePercentages} from "./resizePane";
 
 const isBuiltInCustomModel = (type: string) => {
     return type === "siyuan-card" || type === "siyuan-database-row";
@@ -647,6 +648,10 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
         if (layout.parent) {
             if (layout.element.classList.contains("fn__flex-1")) {
                 json.size = "auto";
+            } else if (layout.parent.direction === "lr" && layout.element.style.width.endsWith("%")) {
+                json.size = layout.element.style.width;
+            } else if (layout.parent.direction === "tb" && layout.element.style.height.endsWith("%")) {
+                json.size = layout.element.style.height;
             } else {
                 if (layout.element.style.maxWidth && layout.parent.direction !== "tb") {
                     json.size = layout.element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH) + "px";
@@ -966,6 +971,16 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
     };
 
     const resizeWnd = (resizeElement: HTMLElement, direction: string) => {
+        const getPaneElements = () => Array.from(resizeElement.parentElement.children).filter((item: HTMLElement) =>
+            !item.classList.contains("layout__resize") && !item.classList.contains("layout__dockresize")) as HTMLElement[];
+
+        const setPanePercentages = (paneElements: HTMLElement[], percentages: number[]) => {
+            paneElements.forEach((item, index) => {
+                item.classList.remove("fn__flex-1");
+                item.style[direction === "lr" ? "width" : "height"] = percentages[index] + "%";
+            });
+        };
+
         const setSize = (item: HTMLElement, direction: string) => {
             if (item.classList.contains("fn__flex-1")) {
                 if (direction === "lr") {
@@ -992,14 +1007,21 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             documentSelf.body.classList.add("fn__pointer-none");
             const nextElement = resizeElement.nextElementSibling as HTMLElement;
             const previousElement = resizeElement.previousElementSibling as HTMLElement;
+            const isCenterResize = !!resizeElement.parentElement.closest(".layout__center");
+            const paneElements = isCenterResize ? getPaneElements() : [];
+            const paneSizes = paneElements.map((item) => direction === "lr" ? item.clientWidth : item.clientHeight);
+            const previousIndex = paneElements.indexOf(previousElement);
+            const nextIndex = paneElements.indexOf(nextElement);
             nextElement.style.overflow = "auto"; // 拖动时 layout__resize 会出现 https://github.com/siyuan-note/siyuan/issues/6221
             previousElement.style.overflow = "auto";
             nextElement.style.transition = "none";
             previousElement.style.transition = "none";
-            if (!nextElement.nextElementSibling || nextElement.nextElementSibling.classList.contains("layout__dockresize")) {
-                setSize(nextElement, direction);
-            } else {
-                setSize(previousElement, direction);
+            if (!isCenterResize) {
+                if (!nextElement.nextElementSibling || nextElement.nextElementSibling.classList.contains("layout__dockresize")) {
+                    setSize(nextElement, direction);
+                } else {
+                    setSize(previousElement, direction);
+                }
             }
             const x = event[direction === "lr" ? "clientX" : "clientY"];
             const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
@@ -1040,11 +1062,23 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 if (nextElement.classList.contains("layout__center") && nextNowSize <= 148) {
                     return;
                 }
-                if (!previousElement.classList.contains("fn__flex-1")) {
-                    previousElement.style[direction === "lr" ? "width" : "height"] = previousNowSize + "px";
-                }
-                if (!nextElement.classList.contains("fn__flex-1")) {
-                    nextElement.style[direction === "lr" ? "width" : "height"] = nextNowSize + "px";
+                if (isCenterResize) {
+                    const percentages = resizePanePercentages(
+                        paneSizes,
+                        previousIndex,
+                        nextIndex,
+                        moveEvent[direction === "lr" ? "clientX" : "clientY"] - x,
+                    );
+                    if (percentages) {
+                        setPanePercentages(paneElements, percentages);
+                    }
+                } else {
+                    if (!previousElement.classList.contains("fn__flex-1")) {
+                        previousElement.style[direction === "lr" ? "width" : "height"] = previousNowSize + "px";
+                    }
+                    if (!nextElement.classList.contains("fn__flex-1")) {
+                        nextElement.style[direction === "lr" ? "width" : "height"] = nextNowSize + "px";
+                    }
                 }
             };
 
@@ -1145,16 +1179,30 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
 };
 
 export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.parent) => {
+    const sizeProperty = layout.direction === "lr" ? "width" : "height";
+    if (layout.element.closest(".layout__center") &&
+        layout.children.some((item) => item.element.style[sizeProperty].endsWith("px"))) {
+        const percentages = panePercentages(layout.children.map((item) =>
+            layout.direction === "lr" ? item.element.clientWidth : item.element.clientHeight));
+        if (percentages) {
+            layout.children.forEach((item, index) => {
+                item.element.classList.remove("fn__flex-1");
+                item.element.style[sizeProperty] = percentages[index] + "%";
+            });
+        }
+    }
     layout.children.forEach((item: Layout | Wnd) => {
         item.element.style.maxWidth = "";
         item.element.removeAttribute(Constants.ATTRIBUTE_DOCK_WIDTH);
-        if (!item.element.style.width && !item.element.classList.contains("layout__center")) {
+        if ((!item.element.style.width || item.element.style.width.endsWith("%")) &&
+            !item.element.classList.contains("layout__center")) {
             item.element.style.minWidth = "8px";
         } else {
             item.element.style.minWidth = "";
         }
 
-        if (!item.element.style.height && !item.element.classList.contains("layout__center") &&
+        if ((!item.element.style.height || item.element.style.height.endsWith("%")) &&
+            !item.element.classList.contains("layout__center") &&
             item.element.classList.contains("fn__flex-column")) {
             item.element.style.minHeight = "8px";
         } else {

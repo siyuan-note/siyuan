@@ -27,6 +27,7 @@ import {
     getInlineStylesCSS,
     loadInlineStyles
 } from "../protyle/toolbar/inlineStyle";
+import {refreshChartTheme} from "../protyle/render/chartRender";
 
 let headingNumberMeasurementRefreshTimer: number;
 const DEJAVU_EMOJI_PRESENTATION_UNICODE_RANGE = "U+25fd-25fe, U+2614-2615, U+2648-2653, U+267f, U+2693, U+26a1, " +
@@ -96,10 +97,12 @@ export const loadAssets = (data: Config.IAppearance) => {
     const changedThemeStyleElements: HTMLLinkElement[] = [];
     let themeStylesChanged = false;
     const htmlElement = document.getElementsByTagName("html")[0];
+    const previousThemeMode = htmlElement.getAttribute("data-theme-mode");
+    const themeMode = getThemeMode();
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
     htmlElement.setAttribute("data-frontend", getFrontend()); // https://github.com/siyuan-note/siyuan/issues/12549
     htmlElement.setAttribute("data-backend", getBackend());
-    htmlElement.setAttribute("data-theme-mode", getThemeMode());
+    htmlElement.setAttribute("data-theme-mode", themeMode);
     htmlElement.setAttribute("data-light-theme", window.siyuan.config.appearance.themeLight);
     htmlElement.setAttribute("data-dark-theme", window.siyuan.config.appearance.themeDark);
     const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -109,6 +112,9 @@ export const loadAssets = (data: Config.IAppearance) => {
     )) {
         fetchPost("/api/system/setAppearanceMode", {mode: OSTheme === "light" ? 0 : 1});
         window.siyuan.config.appearance.mode = (OSTheme === "light" ? 0 : 1);
+    }
+    if (previousThemeMode && previousThemeMode !== themeMode) {
+        refreshChartTheme(document.body);
     }
     const defaultStyleElement = document.getElementById("themeDefaultStyle");
     const defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;

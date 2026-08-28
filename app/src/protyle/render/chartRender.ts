@@ -54,3 +54,26 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
         });
     });
 };
+
+export const refreshChartTheme = (element: Element) => {
+    if (typeof window.echarts === "undefined") {
+        return;
+    }
+    let echartsElements: HTMLElement[] | NodeListOf<HTMLElement> = [];
+    if (element.matches('[data-subtype="echarts"]')) {
+        echartsElements = [element as HTMLElement];
+    } else {
+        echartsElements = element.querySelectorAll<HTMLElement>('[data-subtype="echarts"]');
+    }
+    const refreshElements: HTMLElement[] = [];
+    echartsElements.forEach((item) => {
+        const chartElement = item.querySelector<HTMLElement>("[_echarts_instance_]");
+        if (!chartElement) {
+            return;
+        }
+        window.echarts.dispose(chartElement);
+        item.removeAttribute("data-render");
+        refreshElements.push(item);
+    });
+    refreshElements.forEach(item => chartRender(item));
+};

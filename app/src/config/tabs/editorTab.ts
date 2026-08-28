@@ -45,6 +45,12 @@ const registerEditorBehaviorGroup = (tab: SettingTabBuilder) => {
         max: 8,
         step: 2,
     });
+    group.number("editor.cursorSurroundingLines", {
+        title: window.siyuan.languages.cursorSurroundingLines,
+        desc: window.siyuan.languages.cursorSurroundingLinesTip,
+        min: 0,
+        max: 20,
+    });
     group.switch("editor.listLogicalOutdent", {
         title: window.siyuan.languages.outlineOutdent,
         desc: window.siyuan.languages.outlineOutdentTip,

@@ -1,4 +1,11 @@
 {
+	"scrollPageUpWithoutMovingCaret": "Прокрутить на один экран вверх, не перемещая курсор",
+	"scrollPageDownWithoutMovingCaret": "Прокрутить на один экран вниз, не перемещая курсор",
+	"toggleLeftDockPanel": "Показать/скрыть левую док-панель",
+	"toggleRightDockPanel": "Показать/скрыть правую док-панель",
+	"toggleBottomDockPanel": "Показать/скрыть нижнюю док-панель",
+	"cursorSurroundingLines": "Строки контекста вокруг курсора",
+	"cursorSurroundingLinesTip": "Минимальное количество видимых строк между курсором и верхним или нижним краем редактора при вертикальной навигации с клавиатуры, 0 для отключения",
 	"applicationZoom": "Масштаб интерфейса приложения",
 	"increaseEditorFontSize": "Увеличить размер шрифта редактора",
 	"decreaseEditorFontSize": "Уменьшить размер шрифта редактора",

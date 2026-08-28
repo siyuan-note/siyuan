@@ -2,6 +2,7 @@ import {Wnd} from "./Wnd";
 import {genUUID} from "../util/genID";
 import {addResize, fixWndFlex1} from "./util";
 import {resizeTabs} from "./tabUtil";
+import {splitPanePercentages} from "./resizePane";
 /// #if MOBILE
 // 检测移动端是否引入了桌面端的代码
 console.error("Need remove unused code");
@@ -71,6 +72,12 @@ export class Layout {
     }
 
     addWnd(child: Wnd, id?: string, after = true) {
+        const isCenterSplit = !!id && !!this.element.closest(".layout__center");
+        const splitDirection = this.direction === "lr" ? "width" : "height";
+        const splitSizes = isCenterSplit ? this.children.map((item) =>
+            this.direction === "lr" ? item.element.clientWidth : item.element.clientHeight) : [];
+        const splitIndex = isCenterSplit ? this.children.findIndex((item) => item.id === id) : -1;
+        const splitPercentages = splitPanePercentages(splitSizes, splitIndex, after);
         if (!id) {
             this.children.splice(this.children.length, 0, child);
             this.element.append(child.element);
@@ -103,7 +110,14 @@ export class Layout {
             });
         }
         if (id) {
-            fixWndFlex1(this);
+            if (splitPercentages && splitIndex > -1) {
+                this.children.forEach((item, index) => {
+                    item.element.classList.remove("fn__flex-1");
+                    item.element.style[splitDirection] = splitPercentages[index] + "%";
+                });
+            } else {
+                fixWndFlex1(this);
+            }
         }
         addResize(child, after);
         resizeTabs(false);

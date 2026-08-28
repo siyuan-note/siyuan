@@ -280,6 +280,12 @@ func html2BlockDOM(c *gin.Context) {
 	}
 
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering && ast.NodeIFrame == n.Type {
+			normalizeIFramePosition(n)
+		}
+		return ast.WalkContinue
+	})
 	renderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	output := renderer.Render()
 	if preflight {
@@ -287,6 +293,42 @@ func html2BlockDOM(c *gin.Context) {
 	} else {
 		ret.Data = gulu.Str.FromBytes(output)
 	}
+}
+
+func normalizeIFramePosition(node *ast.Node) {
+	// iframe 的绝对或固定定位依赖原网页容器，粘贴后需让块保留在文档流中。
+	if isOutOfFlowPosition(node.IALAttr("style")) {
+		node.RemoveIALAttr("style")
+	}
+
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(node.TokensStr()))
+	if err != nil {
+		return
+	}
+	iframe := doc.Find("iframe").First()
+	style, exists := iframe.Attr("style")
+	if !exists || !isOutOfFlowPosition(style) {
+		return
+	}
+
+	iframe.RemoveAttr("style")
+	if normalized, renderErr := goquery.OuterHtml(iframe); renderErr == nil {
+		node.Tokens = []byte(normalized)
+	}
+}
+
+func isOutOfFlowPosition(style string) bool {
+	position := ""
+	for _, declaration := range strings.Split(style, ";") {
+		property, value, ok := strings.Cut(declaration, ":")
+		if !ok || !strings.EqualFold(strings.TrimSpace(property), "position") {
+			continue
+		}
+		value = strings.ToLower(strings.TrimSpace(value))
+		value = strings.TrimSpace(strings.TrimSuffix(value, "!important"))
+		position = value
+	}
+	return position == "absolute" || position == "fixed"
 }
 
 func limitHTML2BlockDOMRequestBody(c *gin.Context, maxBytes int64) {

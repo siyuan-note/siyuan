@@ -31,6 +31,7 @@ import {
     getLocalStorage,
     initWindowOpenOverride,
     isChromeBrowser,
+    isInAndroid,
     isInIOS,
     isInMobileApp,
     writeText
@@ -177,6 +178,7 @@ class App {
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = confResponse.data.conf;
             window.siyuan.isPublish = confResponse.data.isPublish;
+            document.body.classList.toggle("body--android", Boolean(isInAndroid()));
             correctHotkey(siyuanApp);
             await loadPlugins(this);
             getLocalStorage(() => {

@@ -688,6 +688,10 @@ declare namespace Config {
          */
         fontSize: number;
         /**
+         * 使用键盘纵向移动时光标周围至少保留的可见行数
+         */
+        cursorSurroundingLines: number;
+        /**
          * Whether the editor uses maximum width
          */
         fullWidth: boolean;
@@ -1248,6 +1252,8 @@ declare namespace Config {
         refresh: IKey;
         refTab: IKey;
         rename: IKey;
+        scrollPageDownWithoutMovingCaret: IKey;
+        scrollPageUpWithoutMovingCaret: IKey;
         selectToPageEnd: IKey;
         selectToPageStart: IKey;
         showInFolder: IKey;
@@ -1403,6 +1409,9 @@ declare namespace Config {
         switchLeftDock: IKey;
         switchRightDock: IKey;
         switchBottomDock: IKey;
+        toggleLeftDockPanel: IKey;
+        toggleRightDockPanel: IKey;
+        toggleBottomDockPanel: IKey;
         toggleDock: IKey;
         splitLR: IKey;
         splitMoveR: IKey;

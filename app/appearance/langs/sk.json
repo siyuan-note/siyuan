@@ -1,4 +1,11 @@
 {
+	"scrollPageUpWithoutMovingCaret": "Posunúť o jednu obrazovku nahor bez presunutia kurzora",
+	"scrollPageDownWithoutMovingCaret": "Posunúť o jednu obrazovku nadol bez presunutia kurzora",
+	"toggleLeftDockPanel": "Zobraziť/skryť ľavý dokovací panel",
+	"toggleRightDockPanel": "Zobraziť/skryť pravý dokovací panel",
+	"toggleBottomDockPanel": "Zobraziť/skryť spodný dokovací panel",
+	"cursorSurroundingLines": "Riadky kontextu okolo kurzora",
+	"cursorSurroundingLinesTip": "Minimálny počet viditeľných riadkov medzi kurzorom a horným alebo dolným okrajom editora pri zvislej navigácii klávesnicou, 0 funkciu vypne",
 	"applicationZoom": "Priblíženie rozhrania aplikácie",
 	"increaseEditorFontSize": "Zväčšiť písmo editora",
 	"decreaseEditorFontSize": "Zmenšiť písmo editora",

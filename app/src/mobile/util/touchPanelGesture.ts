@@ -2,6 +2,31 @@ export type MobileSidebarSide = "left" | "right";
 export type MobileSwipeDirection = "toLeft" | "toRight";
 export type MobileSidebarReleaseAction = "close" | "open";
 
+export const MOBILE_SIDEBAR_SWIPING_CLASS = "side-panel--swiping";
+export const MOBILE_SIDEBAR_MASK_SWIPING_CLASS = "side-mask--swiping";
+
+interface IMobileSidebarSwipeClassTarget {
+    classList: {
+        add(className: string): void;
+        remove(className: string): void;
+    };
+}
+
+export const setSidebarSwipeState = (
+    sidebars: Partial<Record<MobileSidebarSide, IMobileSidebarSwipeClassTarget | null>>,
+    mask: IMobileSidebarSwipeClassTarget | null,
+    activeSide?: MobileSidebarSide,
+) => {
+    Object.values(sidebars).forEach(item => item?.classList.remove(MOBILE_SIDEBAR_SWIPING_CLASS));
+    mask?.classList.remove(MOBILE_SIDEBAR_MASK_SWIPING_CLASS);
+    const activeSidebar = activeSide ? sidebars[activeSide] : undefined;
+    if (!activeSidebar) {
+        return;
+    }
+    activeSidebar.classList.add(MOBILE_SIDEBAR_SWIPING_CLASS);
+    mask?.classList.add(MOBILE_SIDEBAR_MASK_SWIPING_CLASS);
+};
+
 export const getOpeningSidebar = (direction: MobileSwipeDirection): MobileSidebarSide => {
     return direction === "toRight" ? "left" : "right";
 };

@@ -39,6 +39,27 @@ func TestNormalizeBacklinkExpandCount(t *testing.T) {
 	}
 }
 
+func TestNormalizeCursorSurroundingLines(t *testing.T) {
+	tests := []struct {
+		name     string
+		lines    int
+		expected int
+	}{
+		{"clamps negative values", -1, 0},
+		{"preserves disabled state", 0, 0},
+		{"preserves configured lines", 5, 5},
+		{"clamps values above maximum", 21, MaxCursorSurroundingLines},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if actual := NormalizeCursorSurroundingLines(test.lines); actual != test.expected {
+				t.Fatalf("expected %d, got %d", test.expected, actual)
+			}
+		})
+	}
+}
+
 func TestNormalizeAssetOpen(t *testing.T) {
 	defaults := NormalizeAssetOpen(nil)
 	if defaults.Click != AssetOpenActionFollowTab || defaults.CtrlClick != AssetOpenActionFolder ||

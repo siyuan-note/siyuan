@@ -650,7 +650,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (target.classList.contains("item") && target.parentElement.classList.contains("layout-tab-bar")) {
             /// #if MOBILE
-            activeBlur();
+            activeBlur(true);
             /// #endif
             if (target.classList.contains("item--focus")) {
                 openViewMenu({protyle, blockElement, element: target});

@@ -1,4 +1,11 @@
 {
+	"scrollPageUpWithoutMovingCaret": "कर्सर को हिलाए बिना एक स्क्रीन ऊपर स्क्रॉल करें",
+	"scrollPageDownWithoutMovingCaret": "कर्सर को हिलाए बिना एक स्क्रीन नीचे स्क्रॉल करें",
+	"toggleLeftDockPanel": "बायाँ डॉक पैनल दिखाएँ/छिपाएँ",
+	"toggleRightDockPanel": "दायाँ डॉक पैनल दिखाएँ/छिपाएँ",
+	"toggleBottomDockPanel": "निचला डॉक पैनल दिखाएँ/छिपाएँ",
+	"cursorSurroundingLines": "कर्सर के आसपास संदर्भ पंक्तियाँ",
+	"cursorSurroundingLinesTip": "कीबोर्ड से लंबवत नेविगेट करते समय कर्सर और संपादक के ऊपरी या निचले किनारे के बीच दिखाई देने वाली पंक्तियों की न्यूनतम संख्या, अक्षम करने के लिए 0",
 	"applicationZoom": "एप्लिकेशन इंटरफ़ेस ज़ूम",
 	"increaseEditorFontSize": "संपादक फ़ॉन्ट का आकार बढ़ाएँ",
 	"decreaseEditorFontSize": "संपादक फ़ॉन्ट का आकार घटाएँ",

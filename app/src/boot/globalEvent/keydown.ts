@@ -53,6 +53,7 @@ import {isWindow} from "../../util/functions";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import type {App} from "../../index";
+import {toggleDockPanel} from "../../layout/dock/panel";
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
@@ -1484,6 +1485,21 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
     if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.switchBottomDock.custom, event)) {
         window.siyuan.layout.bottomDock.togglePin();
+        event.preventDefault();
+        return;
+    }
+    if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.toggleLeftDockPanel.custom, event)) {
+        toggleDockPanel("Left");
+        event.preventDefault();
+        return;
+    }
+    if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.toggleRightDockPanel.custom, event)) {
+        toggleDockPanel("Right");
+        event.preventDefault();
+        return;
+    }
+    if (!isTabWindow && matchHotKey(window.siyuan.config.keymap.general.toggleBottomDockPanel.custom, event)) {
+        toggleDockPanel("Bottom");
         event.preventDefault();
         return;
     }

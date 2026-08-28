@@ -120,6 +120,8 @@ import {focusAVByArrow} from "../render/av/focus";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {isMobile} from "../../util/functions";
 import {confirmBlockRef} from "../../util/checkBlockRef";
+import {scheduleCaretScroll} from "./caretScroll";
+import {scrollPage} from "../scroll/page";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -377,6 +379,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         } else if (event.key !== "Escape") {
             window.siyuan.menus.menu.remove();
+        }
+
+        if (!event.altKey && isNotCtrl(event) && !event.isComposing &&
+            (event.key === "ArrowUp" || event.key === "ArrowDown") &&
+            !protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
+            scheduleCaretScroll(protyle, event.key === "ArrowUp" ? "up" : "down");
         }
 
         if (!["Alt", "Meta", "Shift", "Control", "CapsLock", "Escape"].includes(event.key) && protyle.options.render.breadcrumb) {
@@ -717,15 +725,21 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if ((event.key === "Home" || event.key === "End") && !event.shiftKey && !event.altKey && isNotCtrl(event)) {
             hideElements(["hint"], protyle);
         }
+        let scrollDirection: "up" | "down" | undefined;
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.scrollPageUpWithoutMovingCaret.custom, event)) {
+            scrollDirection = "up";
+        } else if (matchHotKey(window.siyuan.config.keymap.editor.general.scrollPageDownWithoutMovingCaret.custom, event)) {
+            scrollDirection = "down";
+        }
+        if (scrollDirection) {
+            scrollPage(protyle, scrollDirection);
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
         // 向上/下滚动一屏
         if (!event.altKey && !event.shiftKey && isNotCtrl(event) && (event.key === "PageUp" || event.key === "PageDown")) {
-            if (event.key === "PageUp") {
-                protyle.contentElement.scrollTop = protyle.contentElement.scrollTop - protyle.contentElement.clientHeight + 60;
-                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop + 1;
-            } else {
-                protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + protyle.contentElement.clientHeight - 60;
-                protyle.scroll.lastScrollTop = protyle.contentElement.scrollTop - 1;
-            }
+            scrollPage(protyle, event.key === "PageUp" ? "up" : "down");
             const contentRect = protyle.contentElement.getBoundingClientRect();
             let centerElement = document.elementFromPoint(contentRect.x + contentRect.width / 2, contentRect.y + contentRect.height / 2);
             if (centerElement.classList.contains("protyle-wysiwyg")) {
@@ -1033,6 +1047,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         const endElement = hasClosestBlock(range.endContainer);
         const isCrossBlock = !!endElement && nodeElement !== endElement;
+        const getSuperBlockSelectElements = () => {
+            const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectsElement.length === 0 && isCrossBlock && selectText !== "") {
+                return getBlockElementsByRange(range);
+            }
+            return selectsElement;
+        };
         const turnCrossBlockRangeInto = (type: TTurnInto, level?: number) => {
             if (!isCrossBlock || selectText === "") {
                 return false;
@@ -2252,7 +2273,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.vLayout.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
-            const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            const selectsElement = getSuperBlockSelectElements();
             if (selectsElement.length === 1 && selectsElement[0].getAttribute("data-type") === "NodeSuperBlock") {
                 if (selectsElement[0].getAttribute("data-sb-layout") === "col") {
                     const oldHTML = selectsElement[0].outerHTML;
@@ -2267,7 +2288,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 return;
             }
-            if (selectsElement.length < 2 || selectsElement[0]?.classList.contains("li")) {
+            if (selectsElement.length < 2 || selectsElement.some(item => item.classList.contains("li"))) {
                 return;
             }
             turnsIntoOneTransaction({
@@ -2281,7 +2302,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.general.hLayout.custom, event)) {
             event.preventDefault();
             event.stopPropagation();
-            const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            const selectsElement = getSuperBlockSelectElements();
             if (selectsElement.length === 1 && selectsElement[0].getAttribute("data-type") === "NodeSuperBlock") {
                 if (selectsElement[0].getAttribute("data-sb-layout") === "row") {
                     const oldHTML = selectsElement[0].outerHTML;
@@ -2296,7 +2317,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 return;
             }
-            if (selectsElement.length < 2 || selectsElement[0]?.classList.contains("li")) {
+            if (selectsElement.length < 2 || selectsElement.some(item => item.classList.contains("li"))) {
                 return;
             }
             turnsIntoOneTransaction({

@@ -1,4 +1,11 @@
 {
+	"scrollPageUpWithoutMovingCaret": "Eine Bildschirmseite nach oben scrollen, ohne den Cursor zu bewegen",
+	"scrollPageDownWithoutMovingCaret": "Eine Bildschirmseite nach unten scrollen, ohne den Cursor zu bewegen",
+	"toggleLeftDockPanel": "Linkes Dock-Panel ein-/ausblenden",
+	"toggleRightDockPanel": "Rechtes Dock-Panel ein-/ausblenden",
+	"toggleBottomDockPanel": "Unteres Dock-Panel ein-/ausblenden",
+	"cursorSurroundingLines": "Kontextzeilen um den Cursor",
+	"cursorSurroundingLinesTip": "Mindestanzahl sichtbarer Zeilen zwischen Cursor und oberem bzw. unterem Editorrand bei vertikaler Tastaturnavigation, 0 deaktiviert die Funktion",
 	"applicationZoom": "Anwendungsoberfläche skalieren",
 	"increaseEditorFontSize": "Editorschrift vergrößern",
 	"decreaseEditorFontSize": "Editorschrift verkleinern",

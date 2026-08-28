@@ -1,4 +1,11 @@
 {
+	"scrollPageUpWithoutMovingCaret": "Rolar uma tela para cima sem mover o cursor",
+	"scrollPageDownWithoutMovingCaret": "Rolar uma tela para baixo sem mover o cursor",
+	"toggleLeftDockPanel": "Mostrar/ocultar painel de encaixe esquerdo",
+	"toggleRightDockPanel": "Mostrar/ocultar painel de encaixe direito",
+	"toggleBottomDockPanel": "Mostrar/ocultar painel de encaixe inferior",
+	"cursorSurroundingLines": "Linhas de contexto ao redor do cursor",
+	"cursorSurroundingLinesTip": "Número mínimo de linhas visíveis entre o cursor e as bordas superior ou inferior do editor ao navegar verticalmente com o teclado, 0 para desativar",
 	"applicationZoom": "Zoom da interface do aplicativo",
 	"increaseEditorFontSize": "Aumentar o tamanho da fonte do editor",
 	"decreaseEditorFontSize": "Diminuir o tamanho da fonte do editor",

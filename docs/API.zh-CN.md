@@ -716,9 +716,16 @@
   ```json
   {
     "code": 0,
-    "msg": "",
+    "msg": "disk full",
     "data": {
-      "errFiles": [""],
+      "errFiles": ["bar.png"],
+      "failedFiles": [
+        {
+          "index": 1,
+          "name": "bar.png",
+          "error": "disk full"
+        }
+      ],
       "succFiles": [
         {
           "index": 0,
@@ -734,6 +741,7 @@
   ```
 
     * `errFiles`：处理时遇到错误的文件名
+    * `failedFiles`：记录明确报告失败的文件，`index` 为文件在 `file[]` 中的索引，`name` 为上传时的文件名，`error` 为失败信息；该字段可能不包含未尝试或未逐项报告的文件，需要无歧义地确认每个输入项时应使用 `succFiles`
     * `succFiles`：按输入顺序记录处理成功的文件，`index` 为文件在 `file[]` 中的索引，`name` 为上传时的文件名，`path` 为上传后的资源文件路径；同一批文件包含同名文件时应使用该字段
     * `succMap`：为兼容现有调用方保留的成功文件映射，key 为上传时的文件名，value 为 assets/foo-id.png；同一批文件包含同名文件时，同名 key 仅保留最后一项
 

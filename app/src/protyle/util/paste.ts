@@ -32,7 +32,7 @@ import {
     type IHTMLEmbeddedAsset,
     validateHTMLEmbeddedAssetSizes,
 } from "../upload/htmlEmbeddedAssets";
-import {getAssetUploadPathsByInput} from "../upload/uploadResult";
+import {getCompleteAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
@@ -1212,20 +1212,24 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 preparedHTML = true;
             }
             if (localAssets.length > 0) {
+                let localAssetPaths: string[] | undefined;
                 await new Promise<void>(resolve => {
                     uploadLocalFiles(localAssets.map(item => ({path: item.path, size: null})), protyle, true, {
                         ...assetUploadOptions,
                         requiredFileCount: localAssets.length,
                         fromHTMLPaste: true,
                     }, (_response, result) => {
-                        applyHTMLLocalAssetPaths(localAssets,
-                            getAssetUploadPathsByInput(localAssets.length, result));
+                        localAssetPaths = getCompleteAssetUploadPathsByInput(localAssets.length, result);
                     }, () => resolve());
                 });
+                if (!localAssetPaths) {
+                    return;
+                }
                 range = restorePasteInsertRange();
                 if (!range) {
                     return;
                 }
+                applyHTMLLocalAssetPaths(localAssets, localAssetPaths);
             }
             let embeddedAssets: IHTMLEmbeddedAsset[];
             try {
@@ -1237,19 +1241,23 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 throw error;
             }
             if (embeddedAssets.length > 0) {
+                let embeddedAssetPaths: string[] | undefined;
                 await new Promise<void>(resolve => {
                     uploadFiles(protyle, embeddedAssets.map(item => item.file), undefined, (_response, result) => {
-                        applyHTMLEmbeddedAssetPaths(embeddedAssets,
-                            getAssetUploadPathsByInput(embeddedAssets.length, result));
+                        embeddedAssetPaths = getCompleteAssetUploadPathsByInput(embeddedAssets.length, result);
                     }, () => resolve(), {
                         ...assetUploadOptions,
                         requiredFileCount: embeddedAssets.length,
                     });
                 });
+                if (!embeddedAssetPaths) {
+                    return;
+                }
                 range = restorePasteInsertRange();
                 if (!range) {
                     return;
                 }
+                applyHTMLEmbeddedAssetPaths(embeddedAssets, embeddedAssetPaths);
             }
             let conversionResponse: IWebSocketData;
             const controller = new AbortController();

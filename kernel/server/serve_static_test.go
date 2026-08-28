@@ -166,7 +166,7 @@ func TestStaticFileNestedSymlinkEscape(t *testing.T) {
 	}
 }
 
-func TestWidgetResponseDisablesCache(t *testing.T) {
+func TestWidgetResponseCacheControl(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	originalDataDir, originalConf := util.DataDir, model.Conf
 	util.DataDir = t.TempDir()
@@ -180,8 +180,15 @@ func TestWidgetResponseDisablesCache(t *testing.T) {
 	if err := os.MkdirAll(widgetDir, 0755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(widgetDir, "index.html"), []byte("content"), 0644); err != nil {
-		t.Fatal(err)
+	for fileName, content := range map[string]string{
+		"index.html": "html",
+		"page.html":  "html",
+		"page.htm":   "htm",
+		"app.js":     "javascript",
+	} {
+		if err := os.WriteFile(filepath.Join(widgetDir, fileName), []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	engine := gin.New()
@@ -190,13 +197,31 @@ func TestWidgetResponseDisablesCache(t *testing.T) {
 		c.Next()
 	})
 	serveWidgets(engine)
-	recorder := httptest.NewRecorder()
-	engine.ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, "/widgets/example/", nil))
-	if recorder.Code != http.StatusOK || recorder.Body.String() != "content" {
-		t.Fatalf("unexpected widget response: status=%d body=%q", recorder.Code, recorder.Body.String())
-	}
-	if cacheControl := recorder.Header().Get("Cache-Control"); cacheControl != "private, no-store" {
-		t.Fatalf("unexpected widget cache control [%s]", cacheControl)
+
+	for _, test := range []struct {
+		method       string
+		requestPath  string
+		status       int
+		body         string
+		cacheControl string
+	}{
+		{http.MethodGet, "/widgets/example/", http.StatusOK, "html", "private, no-store"},
+		{http.MethodGet, "/widgets/example/index.html", http.StatusMovedPermanently, "", "private, no-store"},
+		{http.MethodGet, "/widgets/example/page.html", http.StatusOK, "html", "private, no-store"},
+		{http.MethodGet, "/widgets/example/page.htm", http.StatusOK, "htm", "private, no-store"},
+		{http.MethodGet, "/widgets/example/app.js", http.StatusOK, "javascript", "private"},
+		{http.MethodHead, "/widgets/example/app.js", http.StatusOK, "", "private"},
+	} {
+		t.Run(test.method+" "+test.requestPath, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			engine.ServeHTTP(recorder, httptest.NewRequest(test.method, test.requestPath, nil))
+			if recorder.Code != test.status || recorder.Body.String() != test.body {
+				t.Fatalf("unexpected widget response: status=%d body=%q", recorder.Code, recorder.Body.String())
+			}
+			if cacheControl := recorder.Header().Get("Cache-Control"); cacheControl != test.cacheControl {
+				t.Fatalf("unexpected widget cache control [%s]", cacheControl)
+			}
+		})
 	}
 }
 

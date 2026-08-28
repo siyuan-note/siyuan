@@ -1,4 +1,7 @@
 {
+	"toggleLeftDockPanel": "Mostrar/ocultar panel de acoplamiento izquierdo",
+	"toggleRightDockPanel": "Mostrar/ocultar panel de acoplamiento derecho",
+	"toggleBottomDockPanel": "Mostrar/ocultar panel de acoplamiento inferior",
 	"cursorSurroundingLines": "Líneas de contexto alrededor del cursor",
 	"cursorSurroundingLinesTip": "Número mínimo de líneas visibles entre el cursor y los bordes superior e inferior del editor al desplazarse verticalmente con el teclado, 0 para desactivar",
 	"applicationZoom": "Escala de la interfaz de la aplicación",

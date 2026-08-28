@@ -1,4 +1,7 @@
 {
+	"toggleLeftDockPanel": "הצג/הסתר את חלונית העגינה השמאלית",
+	"toggleRightDockPanel": "הצג/הסתר את חלונית העגינה הימנית",
+	"toggleBottomDockPanel": "הצג/הסתר את חלונית העגינה התחתונה",
 	"cursorSurroundingLines": "שורות הקשר סביב הסמן",
 	"cursorSurroundingLinesTip": "מספר השורות הגלויות המזערי בין הסמן לקצה העליון או התחתון של העורך בעת ניווט אנכי באמצעות המקלדת, 0 להשבתה",
 	"applicationZoom": "שינוי קנה המידה של ממשק היישום",

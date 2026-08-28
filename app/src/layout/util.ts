@@ -653,7 +653,17 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
             } else if (layout.parent.direction === "tb" && layout.element.style.height.endsWith("%")) {
                 json.size = layout.element.style.height;
             } else {
-                if (layout.element.style.maxWidth && layout.parent.direction !== "tb") {
+                let collapsedDockSize: string | undefined;
+                if (layout.type === "left") {
+                    collapsedDockSize = window.siyuan.layout.leftDock?.getCollapsedPanelSize();
+                } else if (layout.type === "right") {
+                    collapsedDockSize = window.siyuan.layout.rightDock?.getCollapsedPanelSize();
+                } else if (layout.type === "bottom") {
+                    collapsedDockSize = window.siyuan.layout.bottomDock?.getCollapsedPanelSize();
+                }
+                if (collapsedDockSize) {
+                    json.size = collapsedDockSize;
+                } else if (layout.element.style.maxWidth && layout.parent.direction !== "tb") {
                     json.size = layout.element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH) + "px";
                 } else {
                     json.size = (layout.parent.direction === "tb" ? layout.element.clientHeight : layout.element.clientWidth) + "px";

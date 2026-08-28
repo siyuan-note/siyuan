@@ -241,7 +241,7 @@ export const applyDockEntryVisibility = () => {
         if (!visible && item.classList.contains("dock__item--active")) {
             const dock = [window.siyuan.layout.leftDock, window.siyuan.layout.rightDock, window.siyuan.layout.bottomDock]
                 .find((candidate) => candidate?.elements.some((element) => element.contains(item)));
-            dock?.toggleModel(type, false, false, false, true);
+            dock?.toggleModel(type, false, false, false, true, false);
         }
         item.classList.toggle("fn__none", !visible);
     });

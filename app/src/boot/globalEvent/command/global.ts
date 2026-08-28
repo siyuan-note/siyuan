@@ -43,6 +43,9 @@ import {openFile} from "../../../editor/util";
 import {fetchPost} from "../../../util/fetch";
 import {sanitizeClosedTabs, setStorageVal} from "../../../protyle/util/compatibility";
 import {adjustEditorFontSize} from "../../../util/editorFontSize";
+/// #if !MOBILE
+import {toggleDockPanel} from "../../../layout/dock/panel";
+/// #endif
 
 export const globalCommand = (command: string, app: App) => {
     /// #if MOBILE
@@ -257,6 +260,15 @@ export const globalCommand = (command: string, app: App) => {
             return true;
         case "switchBottomDock":
             window.siyuan.layout.bottomDock.togglePin();
+            return true;
+        case "toggleLeftDockPanel":
+            toggleDockPanel("Left");
+            return true;
+        case "toggleRightDockPanel":
+            toggleDockPanel("Right");
+            return true;
+        case "toggleBottomDockPanel":
+            toggleDockPanel("Bottom");
             return true;
         case "toggleWin":
             /// #if !BROWSER

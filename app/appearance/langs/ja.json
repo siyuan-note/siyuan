@@ -1,4 +1,7 @@
 {
+	"toggleLeftDockPanel": "左側ドックパネルの表示/非表示",
+	"toggleRightDockPanel": "右側ドックパネルの表示/非表示",
+	"toggleBottomDockPanel": "下側ドックパネルの表示/非表示",
 	"cursorSurroundingLines": "カーソル周辺のコンテキスト行数",
 	"cursorSurroundingLinesTip": "キーボードで上下に移動するとき、カーソルとエディターの上端または下端との間に表示する最小行数、0 で無効",
 	"applicationZoom": "アプリケーションインターフェースのズーム",

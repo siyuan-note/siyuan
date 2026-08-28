@@ -1,4 +1,7 @@
 {
+	"toggleLeftDockPanel": "Pokaż/ukryj lewy panel dokowania",
+	"toggleRightDockPanel": "Pokaż/ukryj prawy panel dokowania",
+	"toggleBottomDockPanel": "Pokaż/ukryj dolny panel dokowania",
 	"cursorSurroundingLines": "Wiersze kontekstu wokół kursora",
 	"cursorSurroundingLinesTip": "Minimalna liczba widocznych wierszy między kursorem a górną lub dolną krawędzią edytora podczas pionowej nawigacji klawiaturą, 0 wyłącza funkcję",
 	"applicationZoom": "Powiększenie interfejsu aplikacji",

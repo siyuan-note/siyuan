@@ -1,4 +1,7 @@
 {
+	"toggleLeftDockPanel": "顯示/隱藏左側停靠欄面板",
+	"toggleRightDockPanel": "顯示/隱藏右側停靠欄面板",
+	"toggleBottomDockPanel": "顯示/隱藏下側停靠欄面板",
 	"cursorSurroundingLines": "游標上下文行數",
 	"cursorSurroundingLinesTip": "使用鍵盤縱向移動游標時，游標與編輯器上下邊緣之間至少保留的可見行數，0 表示停用",
 	"applicationZoom": "應用程式介面縮放",

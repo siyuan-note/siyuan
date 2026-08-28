@@ -1,4 +1,7 @@
 {
+	"toggleLeftDockPanel": "Afficher/masquer le panneau d’ancrage gauche",
+	"toggleRightDockPanel": "Afficher/masquer le panneau d’ancrage droit",
+	"toggleBottomDockPanel": "Afficher/masquer le panneau d’ancrage inférieur",
 	"cursorSurroundingLines": "Lignes de contexte autour du curseur",
 	"cursorSurroundingLinesTip": "Nombre minimal de lignes visibles entre le curseur et les bords supérieur et inférieur de l’éditeur lors d’un déplacement vertical au clavier, 0 pour désactiver",
 	"applicationZoom": "Zoom de l’interface de l’application",

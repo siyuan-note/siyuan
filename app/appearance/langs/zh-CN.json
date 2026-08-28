@@ -1,4 +1,7 @@
 {
+	"toggleLeftDockPanel": "显示/隐藏左侧停靠栏面板",
+	"toggleRightDockPanel": "显示/隐藏右侧停靠栏面板",
+	"toggleBottomDockPanel": "显示/隐藏下侧停靠栏面板",
 	"cursorSurroundingLines": "光标上下文行数",
 	"cursorSurroundingLinesTip": "使用键盘纵向移动光标时，光标与编辑器上下边缘之间至少保留的可见行数，0 表示禁用",
 	"applicationZoom": "应用界面缩放",

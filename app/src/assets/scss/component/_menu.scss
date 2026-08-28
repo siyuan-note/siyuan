@@ -242,6 +242,7 @@
       &__submenu {
         top: 56px;
         left: 100%;
+        width: 100vw;
       }
     }
 
@@ -254,10 +255,6 @@
       top: 0;
     }
 
-    // 避免移动端聚焦输入框时缩放视口。
-    & .b3-text-field {
-      font-size: 16px;
-    }
   }
 
   &__scrim {

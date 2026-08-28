@@ -154,11 +154,22 @@ const getSourceConflict = (task: IAIEditorTask) => {
     return {missing, changed};
 };
 
-const sourcePartText = (protyle: IProtyle, range: Range) => {
+const isMarkdownInlineElement = (element: Element) => {
+    return element.matches("span[data-type], code, strong, em, b, i, s, del, u, mark, sub, sup, kbd, a");
+};
+
+const sourcePartMarkdown = (protyle: IProtyle, range: Range, editableElement: Element) => {
     const text = range.toString().replace(new RegExp(Constants.ZWSP, "g"), "");
-    const fragment = range.cloneContents();
-    if (!fragment.querySelector('.img, [data-type~="inline-math"], [data-type~="a"], [data-type~="block-ref"]')) {
-        return text;
+    let fragment: Node = range.cloneContents();
+    let ancestor = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE ?
+        range.commonAncestorContainer as Element : range.commonAncestorContainer.parentElement;
+    while (ancestor && ancestor !== editableElement && editableElement.contains(ancestor)) {
+        if (isMarkdownInlineElement(ancestor)) {
+            const clone = ancestor.cloneNode(false) as Element;
+            clone.append(fragment);
+            fragment = clone;
+        }
+        ancestor = ancestor.parentElement;
     }
     const element = document.createElement("div");
     element.append(fragment);
@@ -180,7 +191,8 @@ const buildSelectionSource = (protyle: IProtyle, range: Range, action: string): 
         kind: "selection",
         parts,
         ids: [],
-        input: blockRanges.map(item => sourcePartText(protyle, item.range)).filter(Boolean).join("\n\n"),
+        input: blockRanges.map(item => sourcePartMarkdown(protyle, item.range, item.editableElement))
+            .filter(Boolean).join("\n\n"),
         action,
         insertSupported: !protyle.disabled,
     };

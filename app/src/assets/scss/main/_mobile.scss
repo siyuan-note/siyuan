@@ -3,6 +3,7 @@
 @use "../component/svg";
 
 body {
+  --mobile-top-safe-area: env(safe-area-inset-top);
   --mobile-topbar-height: 48px;
   --mobile-breadcrumb-height: 42px;
   --mobile-bottom-bar-height: 48px;
@@ -11,6 +12,10 @@ body {
   --mobile-bottom-bar-safe-area: env(safe-area-inset-bottom);
   --mobile-bottom-bar-bottom: calc(var(--mobile-status-height) + var(--mobile-bottom-bar-gap) + var(--mobile-bottom-bar-safe-area));
   --mobile-bottom-bar-offset: calc(var(--mobile-bottom-bar-height) + var(--mobile-bottom-bar-bottom));
+}
+
+body.body--android {
+  --mobile-top-safe-area: 0px;
 }
 
 body.mobile-keyboard--open {
@@ -287,14 +292,14 @@ body.mobile-keyboard--open {
 .mobile-safe-area {
   position: relative;
   z-index: 4;
-  height: env(safe-area-inset-top);
+  height: var(--mobile-top-safe-area);
   flex-shrink: 0;
   background-color: var(--b3-theme-background);
 }
 
 .mobile-topbar {
   position: absolute;
-  top: env(safe-area-inset-top);
+  top: var(--mobile-top-safe-area);
   right: 0;
   left: 0;
   z-index: 3;

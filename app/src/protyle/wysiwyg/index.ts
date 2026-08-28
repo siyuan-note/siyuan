@@ -2953,9 +2953,12 @@ export class WYSIWYG {
                 setInsertWbrHTML(nodeElement, range, protyle);
                 return;
             }
-            // https://github.com/siyuan-note/siyuan/issues/17800 不能删除
+            // 嵌入块内仅允许剪切同一内容块中的文本，避免触发块删除或跨块结构变更。
             const embedElement = isInEmbedBlock(nodeElement);
-            if (embedElement && !embedElement.classList.contains("protyle-wysiwyg--select")) {
+            const isSameBlockTextCut = !range.collapsed && range.toString() !== "" &&
+                hasClosestBlock(range.endContainer) === nodeElement;
+            if (embedElement && !embedElement.classList.contains("protyle-wysiwyg--select") &&
+                !isSameBlockTextCut) {
                 event.stopPropagation();
                 event.preventDefault();
                 return;

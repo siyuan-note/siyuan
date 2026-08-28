@@ -1,4 +1,6 @@
 {
+	"cursorSurroundingLines": "カーソル周辺のコンテキスト行数",
+	"cursorSurroundingLinesTip": "キーボードで上下に移動するとき、カーソルとエディターの上端または下端との間に表示する最小行数、0 で無効",
 	"applicationZoom": "アプリケーションインターフェースのズーム",
 	"increaseEditorFontSize": "エディタのフォントサイズを拡大",
 	"decreaseEditorFontSize": "エディタのフォントサイズを縮小",

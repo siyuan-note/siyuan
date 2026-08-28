@@ -1,4 +1,6 @@
 {
+	"cursorSurroundingLines": "커서 주변 문맥 줄 수",
+	"cursorSurroundingLinesTip": "키보드로 세로 이동할 때 커서와 편집기 위쪽 또는 아래쪽 가장자리 사이에 표시할 최소 줄 수, 0이면 비활성화",
 	"applicationZoom": "애플리케이션 인터페이스 확대/축소",
 	"increaseEditorFontSize": "편집기 글꼴 크기 늘리기",
 	"decreaseEditorFontSize": "편집기 글꼴 크기 줄이기",

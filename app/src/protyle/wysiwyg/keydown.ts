@@ -120,6 +120,7 @@ import {focusAVByArrow} from "../render/av/focus";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {isMobile} from "../../util/functions";
 import {confirmBlockRef} from "../../util/checkBlockRef";
+import {scheduleCaretScroll} from "./caretScroll";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -377,6 +378,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         } else if (event.key !== "Escape") {
             window.siyuan.menus.menu.remove();
+        }
+
+        if (!event.altKey && isNotCtrl(event) && !event.isComposing &&
+            (event.key === "ArrowUp" || event.key === "ArrowDown") &&
+            !protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
+            scheduleCaretScroll(protyle, event.key === "ArrowUp" ? "up" : "down");
         }
 
         if (!["Alt", "Meta", "Shift", "Control", "CapsLock", "Escape"].includes(event.key) && protyle.options.render.breadcrumb) {

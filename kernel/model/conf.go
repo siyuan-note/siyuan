@@ -493,6 +493,7 @@ func InitConf() {
 	} else {
 		*Conf.Editor.FloatWindowDelay = max(0, min(2000, *Conf.Editor.FloatWindowDelay))
 	}
+	Conf.Editor.CursorSurroundingLines = conf.NormalizeCursorSurroundingLines(Conf.Editor.CursorSurroundingLines)
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
 	}

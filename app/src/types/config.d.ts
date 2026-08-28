@@ -688,6 +688,10 @@ declare namespace Config {
          */
         fontSize: number;
         /**
+         * 使用键盘纵向移动时光标周围至少保留的可见行数
+         */
+        cursorSurroundingLines: number;
+        /**
          * Whether the editor uses maximum width
          */
         fullWidth: boolean;

@@ -1,4 +1,6 @@
 {
+	"cursorSurroundingLines": "Baris konteks di sekitar kursor",
+	"cursorSurroundingLinesTip": "Jumlah minimum baris yang terlihat antara kursor dan tepi atas atau bawah editor saat bernavigasi secara vertikal dengan papan ketik, 0 untuk menonaktifkan",
 	"applicationZoom": "Zoom antarmuka aplikasi",
 	"increaseEditorFontSize": "Perbesar ukuran font editor",
 	"decreaseEditorFontSize": "Perkecil ukuran font editor",

@@ -1,4 +1,6 @@
 {
+	"cursorSurroundingLines": "游標上下文行數",
+	"cursorSurroundingLinesTip": "使用鍵盤縱向移動游標時，游標與編輯器上下邊緣之間至少保留的可見行數，0 表示停用",
 	"applicationZoom": "應用程式介面縮放",
 	"increaseEditorFontSize": "增大編輯器字型大小",
 	"decreaseEditorFontSize": "減小編輯器字型大小",

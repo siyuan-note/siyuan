@@ -1,4 +1,6 @@
 {
+	"cursorSurroundingLines": "Kontextzeilen um den Cursor",
+	"cursorSurroundingLinesTip": "Mindestanzahl sichtbarer Zeilen zwischen Cursor und oberem bzw. unterem Editorrand bei vertikaler Tastaturnavigation, 0 deaktiviert die Funktion",
 	"applicationZoom": "Anwendungsoberfläche skalieren",
 	"increaseEditorFontSize": "Editorschrift vergrößern",
 	"decreaseEditorFontSize": "Editorschrift verkleinern",

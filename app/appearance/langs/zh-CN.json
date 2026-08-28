@@ -1,4 +1,6 @@
 {
+	"cursorSurroundingLines": "光标上下文行数",
+	"cursorSurroundingLinesTip": "使用键盘纵向移动光标时，光标与编辑器上下边缘之间至少保留的可见行数，0 表示禁用",
 	"applicationZoom": "应用界面缩放",
 	"increaseEditorFontSize": "增大编辑器字号",
 	"decreaseEditorFontSize": "减小编辑器字号",

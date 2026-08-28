@@ -1,4 +1,6 @@
 {
+	"cursorSurroundingLines": "Righe di contesto attorno al cursore",
+	"cursorSurroundingLinesTip": "Numero minimo di righe visibili tra il cursore e il bordo superiore o inferiore dell’editor durante la navigazione verticale con la tastiera, 0 per disattivare",
 	"applicationZoom": "Zoom dell’interfaccia dell’applicazione",
 	"increaseEditorFontSize": "Aumenta la dimensione del carattere dell’editor",
 	"decreaseEditorFontSize": "Riduci la dimensione del carattere dell’editor",

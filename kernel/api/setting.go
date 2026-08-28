@@ -478,6 +478,7 @@ func setEditor(c *gin.Context) {
 	} else {
 		*editor.FloatWindowDelay = max(0, min(2000, *editor.FloatWindowDelay))
 	}
+	editor.CursorSurroundingLines = conf.NormalizeCursorSurroundingLines(editor.CursorSurroundingLines)
 	editor.AssetOpen = conf.NormalizeAssetOpen(editor.AssetOpen)
 
 	oldVirtualBlockRef := model.Conf.Editor.VirtualBlockRef

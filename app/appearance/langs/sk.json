@@ -1,4 +1,6 @@
 {
+	"cursorSurroundingLines": "Riadky kontextu okolo kurzora",
+	"cursorSurroundingLinesTip": "Minimálny počet viditeľných riadkov medzi kurzorom a horným alebo dolným okrajom editora pri zvislej navigácii klávesnicou, 0 funkciu vypne",
 	"applicationZoom": "Priblíženie rozhrania aplikácie",
 	"increaseEditorFontSize": "Zväčšiť písmo editora",
 	"decreaseEditorFontSize": "Zmenšiť písmo editora",

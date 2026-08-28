@@ -1,4 +1,6 @@
 {
+	"cursorSurroundingLines": "أسطر السياق حول المؤشر",
+	"cursorSurroundingLinesTip": "الحد الأدنى لعدد الأسطر المرئية بين المؤشر وحافتي المحرر العلوية والسفلية عند التنقل عموديًا باستخدام لوحة المفاتيح، و0 لتعطيل الميزة",
 	"applicationZoom": "تكبير/تصغير واجهة التطبيق",
 	"increaseEditorFontSize": "زيادة حجم خط المحرر",
 	"decreaseEditorFontSize": "تقليل حجم خط المحرر",

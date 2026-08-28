@@ -1,4 +1,6 @@
 {
+	"cursorSurroundingLines": "Contextregels rond de cursor",
+	"cursorSurroundingLinesTip": "Minimumaantal zichtbare regels tussen de cursor en de boven- of onderrand van de editor bij verticale toetsenbordnavigatie, 0 om uit te schakelen",
 	"applicationZoom": "Zoom van toepassingsinterface",
 	"increaseEditorFontSize": "Lettergrootte van editor vergroten",
 	"decreaseEditorFontSize": "Lettergrootte van editor verkleinen",

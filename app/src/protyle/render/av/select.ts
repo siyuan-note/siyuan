@@ -6,7 +6,6 @@ import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getColId, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
 import {isCustomAttr} from "./blockAttr";
-import {genAVValueHTML} from "./attributeValue";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements} from "./cell";
 import * as dayjs from "dayjs";
@@ -141,9 +140,7 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
             avID,
             data: oldValue
         });
-        if (item.classList.contains("custom-attr__avvalue")) {
-            item.innerHTML = genAVValueHTML(cellValue);
-        } else {
+        if (!item.classList.contains("custom-attr__avvalue")) {
             updateAttrViewCellAnimation(item, cellValue);
         }
         updateAttrViewCellInOtherElements(protyle, avID, rowID, colId, cellValue, item);
@@ -257,9 +254,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         return true;
                     }
                 });
-                if (cellElement.classList.contains("custom-attr__avvalue")) {
-                    cellElement.innerHTML = genAVValueHTML(cellValues[index]);
-                } else {
+                if (!cellElement.classList.contains("custom-attr__avvalue")) {
                     updateAttrViewCellAnimation(cellElement, cellValues[index]);
                 }
                 updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId, cellValues[index], cellElement);
@@ -381,9 +376,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                 return true;
                             }
                         });
-                        if (cellElement.classList.contains("custom-attr__avvalue")) {
-                            cellElement.innerHTML = genAVValueHTML(cellValues[index]);
-                        } else {
+                        if (!cellElement.classList.contains("custom-attr__avvalue")) {
                             updateAttrViewCellAnimation(cellElement, cellValues[index]);
                         }
                         updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId,
@@ -489,9 +482,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                                     return true;
                                 }
                             });
-                            if (cellElement.classList.contains("custom-attr__avvalue")) {
-                                cellElement.innerHTML = genAVValueHTML(cellValues[cellIndex]);
-                            } else {
+                            if (!cellElement.classList.contains("custom-attr__avvalue")) {
                                 updateAttrViewCellAnimation(cellElement, cellValues[cellIndex]);
                             }
                             updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId,
@@ -677,9 +668,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
             avID: data.id,
             data: oldValue
         });
-        if (item.classList.contains("custom-attr__avvalue")) {
-            item.innerHTML = genAVValueHTML(cellValue);
-        } else {
+        if (!item.classList.contains("custom-attr__avvalue")) {
             updateAttrViewCellAnimation(item, cellValue);
         }
         updateAttrViewCellInOtherElements(protyle, data.id, rowID, colId, cellValue, item);

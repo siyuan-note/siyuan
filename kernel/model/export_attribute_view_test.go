@@ -39,3 +39,23 @@ func TestGetAttrViewTableAligns(t *testing.T) {
 		t.Fatalf("expected visible table aligns %v, got %v", expected, actual)
 	}
 }
+
+func TestGetAttrViewCSVRenderedValue(t *testing.T) {
+	const keyID = "rendered"
+	table := &av.Table{Columns: []*av.TableColumn{{BaseInstanceField: &av.BaseInstanceField{
+		ID: keyID, RenderTemplate: ".action{.Value}",
+	}}}}
+	value := &av.Value{KeyID: keyID, Type: av.KeyTypeText, Text: &av.ValueText{Content: "stored"}}
+
+	if actual, ok := getAttrViewCSVRenderedValue(table, value); !ok || "" != actual {
+		t.Fatalf("empty rendered content should not fall back to the stored value: %q, %v", actual, ok)
+	}
+	value.RenderedContent = "rendered"
+	if actual, ok := getAttrViewCSVRenderedValue(table, value); !ok || "rendered" != actual {
+		t.Fatalf("unexpected rendered CSV value: %q, %v", actual, ok)
+	}
+	table.Columns[0].RenderTemplate = ""
+	if _, ok := getAttrViewCSVRenderedValue(table, value); ok {
+		t.Fatal("a field without a display template should use its stored CSV formatting")
+	}
+}

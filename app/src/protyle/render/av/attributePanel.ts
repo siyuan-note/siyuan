@@ -21,6 +21,7 @@ const refreshActions = new Set<TOperation>([
     "setAttrViewColDesc",
     "setAttrViewName",
     "setAttrViewCustomColors",
+    "updateAttrViewColTemplate",
     "updateAttrViewColNumberFormat",
     "setAttrViewColDateFormat",
 ]);
@@ -37,6 +38,7 @@ export class AVAttributePanel {
     private showEmptyFields = false;
     private suppressTabClick = false;
     private renderCallbacks: ((element: HTMLElement) => void)[] = [];
+    private refreshTimeout?: ReturnType<typeof setTimeout>;
 
     constructor(protyle: IProtyle) {
         this.protyle = protyle;
@@ -141,6 +143,10 @@ export class AVAttributePanel {
     }
 
     public refresh() {
+        if (typeof this.refreshTimeout !== "undefined") {
+            clearTimeout(this.refreshTimeout);
+            this.refreshTimeout = undefined;
+        }
         this.render(true);
     }
 
@@ -183,20 +189,37 @@ export class AVAttributePanel {
             this.refresh();
             return;
         }
-        if (operation.action === "updateAttrViewCell" && ["block", "number"].includes(operation.data?.type) && operation.rowID &&
-            this.hasItem(operation.rowID)) {
-            this.refresh();
+        if (operation.action === "updateAttrViewCell" && operation.rowID && this.hasItem(operation.rowID) &&
+            (["block", "number"].includes(operation.data?.type) || this.hasRenderTemplate(avID))) {
+            this.queueRefresh();
             return;
         }
         if (operation.action === "updateAttrViewCells" && operation.cellUpdates?.some(cell =>
-            ["block", "number"].includes(cell.data?.type) && this.hasItem(cell.rowID))) {
-            this.refresh();
+            this.hasItem(cell.rowID) && (["block", "number"].includes(cell.data?.type) ||
+                this.hasRenderTemplate(avID)))) {
+            this.queueRefresh();
             return;
         }
         if (operation.action === "removeAttrViewBlock" &&
             (this.hasDatabase(operation.avID) || operation.srcIDs?.some(item => this.hasItem(item)))) {
             this.refresh();
         }
+    }
+
+    private hasRenderTemplate(avID: string) {
+        const databaseElement = this.bodyElement.querySelector<HTMLElement>(`[data-av-id="${avID}"]`);
+        return Array.from(databaseElement?.querySelectorAll<HTMLElement>("[data-render-template]") || [])
+            .some(item => Boolean(item.dataset.renderTemplate?.trim()));
+    }
+
+    private queueRefresh() {
+        if (typeof this.refreshTimeout !== "undefined") {
+            clearTimeout(this.refreshTimeout);
+        }
+        this.refreshTimeout = setTimeout(() => {
+            this.refreshTimeout = undefined;
+            this.refresh();
+        }, 100);
     }
 
     public expand(avID?: string, animate = false) {

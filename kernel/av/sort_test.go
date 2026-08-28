@@ -99,6 +99,86 @@ func TestDateEndpointSortWithoutTime(t *testing.T) {
 	assertDateSortRowIDs(t, table, []string{"a", "b"})
 }
 
+func TestSortByRenderedValue(t *testing.T) {
+	newTable := func(source ValueSource) *Table {
+		rows := []*TableRow{}
+		for _, item := range []struct {
+			id       string
+			stored   string
+			rendered string
+		}{
+			{id: "a", stored: "z", rendered: "A"},
+			{id: "b", stored: "a", rendered: "Z"},
+		} {
+			rows = append(rows, &TableRow{
+				ID: item.id,
+				Cells: []*TableCell{
+					{BaseValue: &BaseValue{ValueType: KeyTypeBlock, Value: &Value{
+						Type: KeyTypeBlock, Block: &ValueBlock{Content: item.id},
+					}}},
+					{BaseValue: &BaseValue{ValueType: KeyTypeText, Value: &Value{
+						Type: KeyTypeText, Text: &ValueText{Content: item.stored}, RenderedContent: item.rendered,
+					}}},
+				},
+			})
+		}
+		return &Table{
+			BaseInstance: &BaseInstance{Sorts: []*ViewSort{{Column: "text", ValueSource: source, Order: SortOrderAsc}}},
+			Columns: []*TableColumn{
+				{BaseInstanceField: &BaseInstanceField{ID: "block", Type: KeyTypeBlock}},
+				{BaseInstanceField: &BaseInstanceField{ID: "text", Type: KeyTypeText}},
+			},
+			Rows: rows,
+		}
+	}
+
+	stored := newTable(ValueSourceStored)
+	Sort(stored, &AttributeView{})
+	assertDateSortRowIDs(t, stored, []string{"b", "a"})
+
+	rendered := newTable(ValueSourceRendered)
+	Sort(rendered, &AttributeView{})
+	assertDateSortRowIDs(t, rendered, []string{"a", "b"})
+}
+
+func TestSortByRenderedValueWithEmptyStoredValue(t *testing.T) {
+	const createdAt = 1800000000000
+	rows := []*TableRow{}
+	for _, item := range []struct {
+		id       string
+		rendered string
+	}{
+		{id: "a", rendered: "Z"},
+		{id: "b", rendered: "A"},
+	} {
+		rows = append(rows, &TableRow{
+			ID: item.id,
+			Cells: []*TableCell{
+				{BaseValue: &BaseValue{ValueType: KeyTypeBlock, Value: &Value{
+					Type: KeyTypeBlock, Block: &ValueBlock{Content: item.id}, CreatedAt: createdAt, UpdatedAt: createdAt,
+				}}},
+				{BaseValue: &BaseValue{ValueType: KeyTypeText, Value: &Value{
+					Type: KeyTypeText, Text: &ValueText{}, RenderedContent: item.rendered, CreatedAt: createdAt,
+					UpdatedAt: createdAt,
+				}}},
+			},
+		})
+	}
+	table := &Table{
+		BaseInstance: &BaseInstance{Sorts: []*ViewSort{{
+			Column: "text", ValueSource: ValueSourceRendered, Order: SortOrderAsc,
+		}}},
+		Columns: []*TableColumn{
+			{BaseInstanceField: &BaseInstanceField{ID: "block", Type: KeyTypeBlock}},
+			{BaseInstanceField: &BaseInstanceField{ID: "text", Type: KeyTypeText}},
+		},
+		Rows: rows,
+	}
+
+	Sort(table, &AttributeView{})
+	assertDateSortRowIDs(t, table, []string{"b", "a"})
+}
+
 func newDateSortTestTable(values map[string]dateSortTestValue, order SortOrder, dateEndpoint DateEndpoint) *Table {
 	const (
 		blockColumnID = "block"

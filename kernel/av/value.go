@@ -58,7 +58,8 @@ type Value struct {
 	Relation *ValueRelation `json:"relation,omitempty"`
 	Rollup   *ValueRollup   `json:"rollup,omitempty"`
 
-	IsRenderAutoFill bool `json:"-"` // 标识是否是渲染阶段自动填充的值，保存数据的时候要删掉
+	RenderedContent  string `json:"renderedContent,omitempty"` // 显示模板的运行时渲染结果，保存时剥离
+	IsRenderAutoFill bool   `json:"-"`                         // 标识是否是渲染阶段自动填充的值，保存数据的时候要删掉
 }
 
 func (value *Value) SetUpdatedAt(mills int64) {

@@ -1356,6 +1356,7 @@ interface IAVKanban extends IAVView {
 
 interface IAVFilter {
     column?: string,                                  // 叶子节点：字段（列）ID
+    valueSource?: "stored" | "rendered",             // 叶子节点：值来源，默认为存储值
     operator?: TAVFilterOperator,                     // 叶子节点：操作符
     quantifier?: string,                              // 叶子节点：量词
     value?: IAVCellValue,                             // 叶子节点：过滤值
@@ -1374,6 +1375,7 @@ interface IAVRelativeDate {
 
 interface IAVGroup {
     field: string,
+    valueSource?: "stored" | "rendered",             // 值来源，默认为存储值
     method?: number //  0: 按值分组、1: 按数字范围分组、2: 按相对日期分组、3: 按天日期分组、4: 按周日期分组、5: 按月日期分组、6: 按年日期分组
     range?: {
         numStart: number // 数字范围起始值 0
@@ -1386,6 +1388,7 @@ interface IAVGroup {
 
 interface IAVSort {
     column: string,
+    valueSource?: "stored" | "rendered",             // 值来源，默认为存储值
     order: "ASC" | "DESC",
     dateEndpoint?: "start" | "end"
 }
@@ -1405,6 +1408,7 @@ interface IAVColumn {
     numberFormat: string,
     dateFormat?: TAVDateFormat,
     template: string,
+    renderTemplate?: string,
     calc: IAVCalc,
     updated?: {
         includeTime: boolean
@@ -1459,6 +1463,7 @@ interface IAVCellValue {
     id?: string,
     blockID?: string // 为 row id
     type: TAVCol,
+    renderedContent?: string,
     isDetached?: boolean,
     text?: {
         content: string

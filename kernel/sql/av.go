@@ -25,7 +25,6 @@ import (
 	"text/template/parse"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
@@ -41,6 +40,7 @@ type GroupViewRenderSource struct {
 	query      string
 	layoutType av.LayoutType
 	items      map[string]av.Item
+	ordered    []av.Item
 }
 
 // AttributeViewRenderContext 收集一次属性视图渲染期间产生的模板错误。
@@ -138,13 +138,23 @@ func NewGroupViewRenderSource(viewable av.Viewable, query string) (ret *GroupVie
 		query:      query,
 		layoutType: viewable.GetType(),
 		items:      make(map[string]av.Item, collection.CountItems()),
+		ordered:    make([]av.Item, 0, collection.CountItems()),
 	}
 	for _, item := range collection.GetItems() {
 		if nil != item {
 			ret.items[item.GetID()] = item
+			ret.ordered = append(ret.ordered, item)
 		}
 	}
 	return
+}
+
+// GetItems 返回父视图分页前的完整有序条目列表。
+func (source *GroupViewRenderSource) GetItems() (ret []av.Item) {
+	if nil == source {
+		return
+	}
+	return append(ret, source.ordered...)
 }
 
 func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query string) (ret av.Viewable) {
@@ -320,7 +330,8 @@ func compileTemplateField(tplContent string) (tpl *template.Template, err error)
 	return
 }
 
-func executeTemplateField(tpl *template.Template, ial map[string]string, keyValues []*av.KeyValues) (ret string, err error) {
+func executeTemplateField(tpl *template.Template, ial map[string]string, keyValues []*av.KeyValues,
+	storedValueCache map[*av.Value]*av.Value) (ret string, err error) {
 	if "" == ial["id"] {
 		block := getBlockValue(keyValues)
 		if nil != block {
@@ -452,11 +463,16 @@ func executeTemplateField(tpl *template.Template, ial map[string]string, keyValu
 		}
 
 		// Database template fields support access to the raw value https://github.com/siyuan-note/siyuan/issues/14903
-		dataModel[keyValue.Key.Name+"_raw"] = v
+		rawValue := storedValueCache[v]
+		if nil == rawValue {
+			rawValue = av.CloneStoredValue(v)
+			storedValueCache[v] = rawValue
+		}
+		dataModel[keyValue.Key.Name+"_raw"] = rawValue
 
 		// Database template fields support access by ID https://github.com/siyuan-note/siyuan/issues/11237
 		dataModel["id_mod"].(map[string]any)[keyValue.Key.ID] = dataModel[keyValue.Key.Name]
-		dataModel["id_mod_raw"].(map[string]any)[keyValue.Key.ID] = v
+		dataModel["id_mod_raw"].(map[string]any)[keyValue.Key.ID] = rawValue
 	}
 
 	if err = tpl.Execute(buf, dataModel); err != nil {
@@ -941,7 +957,7 @@ func GetFurtherCollectionsWithContext(attrView *av.AttributeView, cachedAttrView
 	return getFurtherCollections(attrView, cachedAttrViews, &depth, renderContext)
 }
 
-// FillAttributeViewTemplateValuesWithContext 计算集合中当前条目的模板字段值。
+// FillAttributeViewTemplateValuesWithContext 计算集合中当前条目的模板字段值和显示模板结果。
 func FillAttributeViewTemplateValuesWithContext(attrView *av.AttributeView, view *av.View, collection av.Collection,
 	renderContext *AttributeViewRenderContext) {
 	var ialIDs []string
@@ -960,9 +976,16 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, 
 	items := generateAttrViewItems(attrView, view)
 	existTemplateField := false
 	for _, kVals := range attrView.KeyValues {
-		if av.KeyTypeTemplate == kVals.Key.Type {
+		if av.KeyTypeTemplate == kVals.Key.Type || "" != strings.TrimSpace(kVals.Key.RenderTemplate) {
 			existTemplateField = true
 			break
+		}
+	}
+	for _, item := range collection.GetItems() {
+		for _, value := range item.GetValues() {
+			if nil != value {
+				value.RenderedContent = ""
+			}
 		}
 	}
 	if !existTemplateField {
@@ -973,10 +996,16 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, 
 	// 按模板内容缓存已编译模板，避免逐行重复 Parse。坏内容缓存为 nil，保留原先「逐行设置 err 并继续」的语义。
 	tplCache := map[string]*template.Template{}
 	compileErrCache := map[string]error{}
+	storedValueCache := map[*av.Value]*av.Value{}
 	for _, templateKey := range templateKeys {
+		templateContent := templateKey.Template
+		isRenderTemplate := av.KeyTypeTemplate != templateKey.Type
+		if isRenderTemplate {
+			templateContent = templateKey.RenderTemplate
+		}
 		for _, item := range collection.GetItems() {
 			value := item.GetValue(templateKey.ID)
-			if nil == value || nil == value.Template {
+			if nil == value || (!isRenderTemplate && nil == value.Template) {
 				continue
 			}
 
@@ -992,28 +1021,32 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, 
 
 			var content string
 			var renderErr error
-			tpl, tried := tplCache[value.Template.Content]
+			tpl, tried := tplCache[templateContent]
 			if !tried {
-				compiled, compileErr := compileTemplateField(value.Template.Content)
-				tplCache[value.Template.Content] = compiled // 坏内容时 compiled 为 nil，仍写入缓存
+				compiled, compileErr := compileTemplateField(templateContent)
+				tplCache[templateContent] = compiled // 坏内容时 compiled 为 nil，仍写入缓存
 				if nil != compileErr {
-					compileErrCache[value.Template.Content] = compileErr
+					compileErrCache[templateContent] = compileErr
 					renderErr = compileErr
 				} else {
 					tpl = compiled
 				}
 			} else if nil == tpl {
-				renderErr = compileErrCache[value.Template.Content] // 复用首次解析的错误
+				renderErr = compileErrCache[templateContent] // 复用首次解析的错误
 			}
 			if nil == renderErr {
-				content, renderErr = executeTemplateField(tpl, ial, keyValues)
+				content, renderErr = executeTemplateField(tpl, ial, keyValues, storedValueCache)
 			}
 			if nil != renderErr {
 				renderContext.addTemplateError(attrView, templateKey, item, renderErr)
 			}
 
-			value.Template.Content = content
-			items[item.GetID()] = append(keyValues, &av.KeyValues{Key: templateKey, Values: []*av.Value{value}})
+			if isRenderTemplate {
+				value.RenderedContent = content
+			} else {
+				value.Template.Content = content
+				items[item.GetID()] = append(keyValues, &av.KeyValues{Key: templateKey, Values: []*av.Value{value}})
+			}
 		}
 	}
 }
@@ -1265,6 +1298,9 @@ func GetTemplateKeysByResolutionOrder(attrView *av.AttributeView) (ret []*av.Key
 			}
 
 			templateKeyCount++
+			if resolvedTemplateKeys[keyValues.Key.ID] {
+				continue
+			}
 			vars, err := getTemplateVars(keyValues.Key.Template)
 			if nil != err {
 				resolvedTemplateKeys[keyValues.Key.ID] = true
@@ -1274,7 +1310,7 @@ func GetTemplateKeysByResolutionOrder(attrView *av.AttributeView) (ret []*av.Key
 
 			currentTemplateKeyResolved := true
 			for _, kValues := range attrView.KeyValues {
-				if gulu.Str.Contains(kValues.Key.Name, vars) {
+				if templateVarsReferenceKey(vars, kValues.Key) {
 					if av.KeyTypeTemplate == kValues.Key.Type {
 						if _, ok := resolvedTemplateKeys[kValues.Key.ID]; !ok {
 							currentTemplateKeyResolved = false
@@ -1294,22 +1330,50 @@ func GetTemplateKeysByResolutionOrder(attrView *av.AttributeView) (ret []*av.Key
 			break
 		}
 	}
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeTemplate != keyValues.Key.Type && "" != strings.TrimSpace(keyValues.Key.RenderTemplate) {
+			ret = append(ret, keyValues.Key)
+		}
+	}
 	return
 }
 
 func GetTemplateKeyRelevantKeys(attrView *av.AttributeView, templateKey *av.Key) (ret []*av.Key) {
 	ret = []*av.Key{}
-	if nil == templateKey || "" == templateKey.Template {
+	if nil == templateKey {
 		return
 	}
 
-	vars, err := getTemplateVars(templateKey.Template)
+	templateContent := templateKey.Template
+	if av.KeyTypeTemplate != templateKey.Type {
+		templateContent = templateKey.RenderTemplate
+	}
+	if "" == strings.TrimSpace(templateContent) {
+		return
+	}
+
+	vars, err := getTemplateVars(templateContent)
 	if nil != err {
+		return
+	}
+	dynamicDependency := false
+	for _, variable := range vars {
+		if dynamicTemplateKeyVar == variable {
+			dynamicDependency = true
+			break
+		}
+	}
+	if dynamicDependency {
+		for _, keyValues := range attrView.KeyValues {
+			if nil != keyValues && nil != keyValues.Key {
+				ret = append(ret, keyValues.Key)
+			}
+		}
 		return
 	}
 
 	for _, kValues := range attrView.KeyValues {
-		if gulu.Str.Contains(kValues.Key.Name, vars) {
+		if templateVarsReferenceKey(vars, kValues.Key) {
 			ret = append(ret, kValues.Key)
 		}
 	}
@@ -1320,13 +1384,26 @@ func GetTemplateKeyRelevantKeys(attrView *av.AttributeView, templateKey *av.Key)
 		tplFuncMap := filesys.BuiltInTemplateFuncs()
 		SQLTemplateFuncs(&tplFuncMap)
 		goTpl = goTpl.Funcs(tplFuncMap)
-		_, parseErr := goTpl.Funcs(tplFuncMap).Parse(templateKey.Template)
+		_, parseErr := goTpl.Funcs(tplFuncMap).Parse(templateContent)
 		if nil != parseErr {
 			return
 		}
 		ret = append(ret, templateKey)
 	}
 	return
+}
+
+func templateVarsReferenceKey(vars []string, key *av.Key) bool {
+	if nil == key {
+		return false
+	}
+	for _, variable := range vars {
+		if variable == key.ID || variable == key.Name || variable == key.Name+"_raw" ||
+			variable == key.Name+"_end" || variable == key.Name+"_created" || variable == key.Name+"_str" {
+			return true
+		}
+	}
+	return false
 }
 
 func getTemplateVars(tplContent string) ([]string, error) {
@@ -1347,6 +1424,13 @@ func getTemplateVars(tplContent string) ([]string, error) {
 	return result, nil
 }
 
+const dynamicTemplateKeyVar = "\x00dynamic-id-mod"
+
+func isTemplateIDModField(node parse.Node) bool {
+	field, ok := node.(*parse.FieldNode)
+	return ok && 0 < len(field.Ident) && ("id_mod" == field.Ident[0] || "id_mod_raw" == field.Ident[0])
+}
+
 func collectVars(node parse.Node, vars map[string]struct{}) {
 	switch n := node.(type) {
 	case *parse.ListNode:
@@ -1360,17 +1444,39 @@ func collectVars(node parse.Node, vars map[string]struct{}) {
 			collectVars(cmd, vars)
 		}
 	case *parse.CommandNode:
+		isIndex := 0 < len(n.Args) && n.Args[0].Type() == parse.NodeIdentifier && "index" == n.Args[0].String()
+		if isIndex && 2 <= len(n.Args) && isTemplateIDModField(n.Args[1]) {
+			for i, arg := range n.Args {
+				if 1 != i {
+					collectVars(arg, vars)
+				}
+			}
+			if 3 <= len(n.Args) && n.Args[2].Type() == parse.NodeString {
+				vars[n.Args[2].(*parse.StringNode).Text] = struct{}{}
+			} else {
+				vars[dynamicTemplateKeyVar] = struct{}{}
+			}
+			return
+		}
 		for _, arg := range n.Args {
 			collectVars(arg, vars)
 		}
 
-		if 3 <= len(n.Args) && n.Args[0].Type() == parse.NodeIdentifier && n.Args[1].Type() == parse.NodeDot && n.Args[2].Type() == parse.NodeString {
+		if isIndex && 3 <= len(n.Args) && n.Args[1].Type() == parse.NodeDot && n.Args[2].Type() == parse.NodeString {
 			vars[n.Args[2].(*parse.StringNode).Text] = struct{}{}
 		}
 
 	case *parse.FieldNode:
 		if len(n.Ident) > 0 {
-			vars[n.Ident[0]] = struct{}{}
+			if "id_mod" == n.Ident[0] || "id_mod_raw" == n.Ident[0] {
+				if 1 < len(n.Ident) {
+					vars[n.Ident[1]] = struct{}{}
+				} else {
+					vars[dynamicTemplateKeyVar] = struct{}{}
+				}
+			} else {
+				vars[n.Ident[0]] = struct{}{}
+			}
 		}
 	case *parse.VariableNode:
 		if len(n.Ident) > 0 {

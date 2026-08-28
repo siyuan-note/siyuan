@@ -78,10 +78,11 @@ import {appearanceMenu, limitRecentFontStyleRows} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation, selectRow, updateHeader} from "../render/av/row";
-import {getAVSelectedItemPoints} from "../render/av/virtualScroll";
+import {getAVData, getAVSelectedItemPoints} from "../render/av/virtualScroll";
 import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
+import {genCellValueByElement} from "../render/av/cell";
 import {getPlainText} from "../util/paste";
 import {CODE_TAB_SPACE_VALUES} from "../wysiwyg/codeBlockUtil";
 import {
@@ -240,7 +241,8 @@ export class Gutter {
                         event.preventDefault();
                         event.stopPropagation();
                         return;
-                    } else if (["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
+                    } else if (getAVData(avElement)?.view.group?.valueSource === "rendered" ||
+                        ["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
                         event.preventDefault();
                         event.stopPropagation();
                         return;
@@ -540,7 +542,8 @@ export class Gutter {
                     blockElement.setAttribute("updated", newUpdated);
                 } else {
                     if (!protyle.disabled && event.shiftKey) {
-                        const blockId = rowElement.querySelector('[data-dtype="block"] .av__celltext--ref')?.getAttribute("data-id");
+                        const primaryCell = rowElement.querySelector<HTMLElement>('[data-dtype="block"]');
+                        const blockId = primaryCell ? genCellValueByElement("block", primaryCell).block?.id : undefined;
                         if (blockId) {
                             fetchPost("/api/attr/getBlockAttrs", {id: blockId}, (response) => {
                                 openFileAttr(response.data, "av", protyle);

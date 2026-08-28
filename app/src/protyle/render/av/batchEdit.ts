@@ -3,6 +3,7 @@ import {popTextCell, renderCell, updateCellsValue} from "./cell";
 import {getAVData, getAVSelectedItemIDs} from "./virtualScroll";
 import {getFieldsByData} from "./view";
 import {TAVBatchEditMode} from "./batchValue";
+import {cloneAVCellValueSnapshot} from "./cellValue";
 
 const EDITABLE_FIELD_TYPES: TAVCol[] = [
     "block",
@@ -54,7 +55,7 @@ const getItemCell = (data: IAV, itemID: string, fieldID: string) => {
     return findItemCell(data.view, data.viewType, itemID, fieldIndex);
 };
 
-const cloneValue = <T>(value: T) => JSON.parse(JSON.stringify(value)) as T;
+const cloneValue = (value: IAVCellValue) => cloneAVCellValueSnapshot(value);
 
 const getCollectionDisplayValue = (field: IAVColumn, values: IAVCellValue[], mode: TAVBatchEditMode) => {
     const displayValue = cloneValue(values[0]);

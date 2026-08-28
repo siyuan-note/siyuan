@@ -154,15 +154,16 @@ type BaseInstanceField struct {
 
 	// 以下是某些字段类型的特有属性
 
-	Options      []*SelectOption   `json:"options,omitempty"`    // 选项列表
-	NumberFormat NumberFormat      `json:"numberFormat"`         // 数字字段格式化
-	DateFormat   DateDisplayFormat `json:"dateFormat,omitempty"` // 日期显示格式
-	Template     string            `json:"template"`             // 模板字段内容
-	Relation     *Relation         `json:"relation,omitempty"`   // 关联字段
-	Rollup       *Rollup           `json:"rollup,omitempty"`     // 汇总字段
-	Date         *Date             `json:"date,omitempty"`       // 日期设置
-	Created      *Created          `json:"created,omitempty"`    // 创建时间设置
-	Updated      *Updated          `json:"updated,omitempty"`    // 更新时间设置
+	Options        []*SelectOption   `json:"options,omitempty"`        // 选项列表
+	NumberFormat   NumberFormat      `json:"numberFormat"`             // 数字字段格式化
+	DateFormat     DateDisplayFormat `json:"dateFormat,omitempty"`     // 日期显示格式
+	Template       string            `json:"template"`                 // 模板字段内容
+	RenderTemplate string            `json:"renderTemplate,omitempty"` // 显示模板内容
+	Relation       *Relation         `json:"relation,omitempty"`       // 关联字段
+	Rollup         *Rollup           `json:"rollup,omitempty"`         // 汇总字段
+	Date           *Date             `json:"date,omitempty"`           // 日期设置
+	Created        *Created          `json:"created,omitempty"`        // 创建时间设置
+	Updated        *Updated          `json:"updated,omitempty"`        // 更新时间设置
 }
 
 func (baseInstanceField *BaseInstanceField) GetID() string {

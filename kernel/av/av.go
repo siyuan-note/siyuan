@@ -197,6 +197,9 @@ type Key struct {
 	// 模板
 	Template string `json:"template"` // 模板内容
 
+	// 显示模板
+	RenderTemplate string `json:"renderTemplate,omitempty"` // 显示模板内容
+
 	// 关联
 	Relation *Relation `json:"relation,omitempty"` // 关联信息
 
@@ -972,6 +975,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	}
 
 	var data []byte
+	restoreRenderedContents := av.suspendRenderedContents()
 	restoreResolvedColors := av.suspendResolvedColors()
 	if util.UseSingleLineSave {
 		data, err = gulu.JSON.MarshalJSON(av)
@@ -979,6 +983,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		data, err = gulu.JSON.MarshalIndentJSON(av, "", "\t")
 	}
 	restoreResolvedColors()
+	restoreRenderedContents()
 	if err != nil {
 		logging.LogErrorf("marshal attribute view [%s] failed: %s", av.ID, err)
 		return

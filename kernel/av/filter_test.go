@@ -735,6 +735,7 @@ func TestRenameSelectOptionInFilters(t *testing.T) {
 func TestCloneFilters(t *testing.T) {
 	endpointLeaf := leaf("c1")
 	endpointLeaf.DateEndpoint = DateEndpointEnd
+	endpointLeaf.ValueSource = ValueSourceRendered
 	original := []*ViewFilter{group(FilterCombinationAnd, endpointLeaf, group(FilterCombinationOr, leaf("c2")))}
 	cloned := CloneFilters(original)
 	if len(cloned) != len(original) {
@@ -751,6 +752,37 @@ func TestCloneFilters(t *testing.T) {
 	}
 	if DateEndpointEnd != cloned[0].Filters[0].DateEndpoint {
 		t.Fatalf("date endpoint not cloned")
+	}
+	if ValueSourceRendered != cloned[0].Filters[0].ValueSource {
+		t.Fatalf("value source not cloned")
+	}
+}
+
+func TestFilterByRenderedValue(t *testing.T) {
+	value := &Value{
+		Type:            KeyTypeNumber,
+		Number:          &ValueNumber{Content: 10, IsNotEmpty: true},
+		RenderedContent: "high",
+	}
+	filter := &ViewFilter{
+		ValueSource: ValueSourceRendered,
+		Operator:    FilterOperatorContains,
+		Value:       &Value{Type: KeyTypeTemplate, Template: &ValueTemplate{Content: "igh"}},
+	}
+	if !evalLeaf(filter, []*Value{value}, 0, nil, "item", nil, nil) {
+		t.Fatal("rendered value should satisfy the template filter")
+	}
+
+	filter.Value = &Value{Type: KeyTypeText, Text: &ValueText{Content: "igh"}}
+	if !evalLeaf(filter, []*Value{value}, 0, nil, "item", nil, nil) {
+		t.Fatal("rendered value should normalize legacy non-template filter inputs")
+	}
+
+	value.RenderedContent = "10"
+	filter.Operator = FilterOperatorIsEqual
+	filter.Value = &Value{Type: KeyTypeNumber, Number: &ValueNumber{Content: 10, IsNotEmpty: true}}
+	if !evalLeaf(filter, []*Value{value}, 0, nil, "item", nil, nil) {
+		t.Fatal("rendered value should normalize legacy numeric inputs like the template data model")
 	}
 }
 

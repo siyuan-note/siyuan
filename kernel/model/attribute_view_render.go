@@ -606,7 +606,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	if !ignoreRows && isGroupByDate(view) {
 		createdDate := time.UnixMilli(view.GroupCreated).Format("2006-01-02")
 		if time.Now().Format("2006-01-02") != createdDate {
-			genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
+			genAttrViewGroupsFromRenderSource(view, attrView, groupRenderSource, query)
 			if writable {
 				if err = av.SaveAttributeView(attrView); err != nil {
 					logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
@@ -619,7 +619,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	// 如果是按模板分组则需要重新生成分组。
 	// ignoreRows 时跳过重新生成（需要行数据），沿用已保存的分组。
 	if !ignoreRows && isGroupByTemplate(attrView, view) {
-		genAttrViewGroups(view, attrView) // 仅重新生成一个视图的分组以提升性能
+		genAttrViewGroupsFromRenderSource(view, attrView, groupRenderSource, query)
 		if writable {
 			if err = av.SaveAttributeView(attrView); err != nil {
 				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
@@ -633,7 +633,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		if ignoreRows {
 			return
 		}
-		genAttrViewGroups(view, attrView)
+		genAttrViewGroupsFromRenderSource(view, attrView, groupRenderSource, query)
 		if writable {
 			if err = av.SaveAttributeView(attrView); err != nil {
 				logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
@@ -730,6 +730,22 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	// 将总的视图上的项目清空，减少冗余
 	viewable.(av.Collection).SetItems(nil)
 	return
+}
+
+func genAttrViewGroupsFromRenderSource(view *av.View, attrView *av.AttributeView,
+	source *sql.GroupViewRenderSource, query string) {
+	if nil != source && "" == strings.TrimSpace(query) {
+		genAttrViewGroupsWithItems(view, attrView, source.GetItems())
+		return
+	}
+
+	// 搜索结果中的条目不完整，重新生成分组时需绕过当前视图的过滤或分页缓存。
+	cached, hasCached := attrView.RenderedViewables[view.ID]
+	delete(attrView.RenderedViewables, view.ID)
+	genAttrViewGroups(view, attrView)
+	if hasCached {
+		attrView.RenderedViewables[view.ID] = cached
+	}
 }
 
 func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
@@ -909,6 +925,9 @@ func isGroupByTemplate(attrView *av.AttributeView, view *av.View) bool {
 	if !view.IsGroupView() {
 		return false
 	}
+	if av.ValueSourceRendered == view.Group.ValueSource {
+		return true
+	}
 
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
@@ -925,12 +944,18 @@ func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av
 	}
 
 	templateKeyIDs := map[string]bool{}
+	renderTemplateKeyIDs := map[string]bool{}
 	for _, keyValues := range attrView.KeyValues {
-		if nil != keyValues && nil != keyValues.Key && av.KeyTypeTemplate == keyValues.Key.Type {
+		if nil == keyValues || nil == keyValues.Key {
+			continue
+		}
+		if av.KeyTypeTemplate == keyValues.Key.Type {
 			templateKeyIDs[keyValues.Key.ID] = true
+		} else if "" != strings.TrimSpace(keyValues.Key.RenderTemplate) {
+			renderTemplateKeyIDs[keyValues.Key.ID] = true
 		}
 	}
-	if 0 == len(templateKeyIDs) {
+	if 0 == len(templateKeyIDs) && 0 == len(renderTemplateKeyIDs) {
 		return false
 	}
 
@@ -939,8 +964,12 @@ func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av
 			return false
 		}
 	}
+	if attrViewFiltersUseRenderedValues(view.Filters, renderTemplateKeyIDs) {
+		return false
+	}
 	for _, viewSort := range view.Sorts {
-		if nil != viewSort && templateKeyIDs[viewSort.Column] {
+		if nil != viewSort && (templateKeyIDs[viewSort.Column] ||
+			(renderTemplateKeyIDs[viewSort.Column] && av.ValueSourceRendered == viewSort.ValueSource)) {
 			return false
 		}
 	}
@@ -950,11 +979,11 @@ func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av
 
 	hasTemplateField := false
 	checkField := func(fieldID string, calc *av.FieldCalc) bool {
-		if !templateKeyIDs[fieldID] {
+		if !templateKeyIDs[fieldID] && !renderTemplateKeyIDs[fieldID] {
 			return false
 		}
 		hasTemplateField = true
-		return nil != calc && av.CalcOperatorNone != calc.Operator
+		return templateKeyIDs[fieldID] && nil != calc && av.CalcOperatorNone != calc.Operator
 	}
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
@@ -971,6 +1000,24 @@ func shouldDeferAttributeViewTemplateValues(attrView *av.AttributeView, view *av
 		}
 	}
 	return hasTemplateField
+}
+
+func attrViewFiltersUseRenderedValues(filters []*av.ViewFilter, renderTemplateKeyIDs map[string]bool) bool {
+	for _, filter := range filters {
+		if nil == filter {
+			continue
+		}
+		if filter.IsGroup() {
+			if attrViewFiltersUseRenderedValues(filter.Filters, renderTemplateKeyIDs) {
+				return true
+			}
+			continue
+		}
+		if renderTemplateKeyIDs[filter.Column] && av.ValueSourceRendered == filter.ValueSource {
+			return true
+		}
+	}
+	return false
 }
 
 func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int,

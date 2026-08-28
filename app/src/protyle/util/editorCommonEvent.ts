@@ -71,7 +71,7 @@ import {
     uniqueDragIds
 } from "./dragDocument";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
-import {getAVPreviousItemID, getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
+import {getAVData, getAVPreviousItemID, getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
 import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getCaretRect} from "./caretRect";
 import {isBlockRefDropTargetDisabled} from "./blockRefDrop";
@@ -1080,7 +1080,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             event.preventDefault();
                             event.stopPropagation();
                             return;
-                        } else if (["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
+                        } else if (getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
+                            ["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
                             event.preventDefault();
                             event.stopPropagation();
                             return;
@@ -2548,8 +2549,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (bodyElement) {
                     const blockElement = hasClosestBlock(bodyElement) as HTMLElement;
                     const groupID = bodyElement.getAttribute("data-group-id");
-                    // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
-                    const isTCU = ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                    // 模板渲染结果及无法回填的字段作为分组方式时不允许跨分组拖拽
+                    // https://github.com/siyuan-note/siyuan/issues/15553
+                    const isTCU = getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
+                        ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
                     // 排序只能夸组拖拽
                     const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
                     gutterTypes[2].split(",").find(item => {
@@ -2576,8 +2579,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (bodyElement) {
                     const blockElement = hasClosestBlock(bodyElement) as HTMLElement;
                     const groupID = bodyElement.getAttribute("data-group-id");
-                    // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
-                    const isTCU = ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                    // 模板渲染结果及无法回填的字段作为分组方式时不允许跨分组拖拽
+                    // https://github.com/siyuan-note/siyuan/issues/15553
+                    const isTCU = getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
+                        ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
                     // 排序只能夸组拖拽
                     const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
                     gutterTypes[2].split(",").find(item => {

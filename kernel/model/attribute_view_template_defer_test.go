@@ -47,6 +47,44 @@ func TestShouldDeferAttributeViewTemplateValues(t *testing.T) {
 			expected: false,
 		},
 		{
+			name: "stored filter on display template",
+			configure: func(attrView *av.AttributeView, view *av.View) {
+				textKey, _ := attrView.GetKey("text")
+				textKey.RenderTemplate = "render"
+				view.Filters = []*av.ViewFilter{{Filters: []*av.ViewFilter{{Column: "text"}}}}
+			},
+			expected: true,
+		},
+		{
+			name: "rendered filter on display template",
+			configure: func(attrView *av.AttributeView, view *av.View) {
+				textKey, _ := attrView.GetKey("text")
+				textKey.RenderTemplate = "render"
+				view.Filters = []*av.ViewFilter{{Filters: []*av.ViewFilter{{
+					Column: "text", ValueSource: av.ValueSourceRendered,
+				}}}}
+			},
+			expected: false,
+		},
+		{
+			name: "stored sort on display template",
+			configure: func(attrView *av.AttributeView, view *av.View) {
+				textKey, _ := attrView.GetKey("text")
+				textKey.RenderTemplate = "render"
+				view.Sorts = []*av.ViewSort{{Column: "text"}}
+			},
+			expected: true,
+		},
+		{
+			name: "rendered sort on display template",
+			configure: func(attrView *av.AttributeView, view *av.View) {
+				textKey, _ := attrView.GetKey("text")
+				textKey.RenderTemplate = "render"
+				view.Sorts = []*av.ViewSort{{Column: "text", ValueSource: av.ValueSourceRendered}}
+			},
+			expected: false,
+		},
+		{
 			name: "field calculation",
 			configure: func(_ *av.AttributeView, view *av.View) {
 				view.Table.Columns[2].Calc = &av.FieldCalc{Operator: av.CalcOperatorCountValues}

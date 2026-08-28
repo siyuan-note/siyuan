@@ -1173,36 +1173,14 @@
 .agent-chat__msg--user {
   span[data-type~="text"][custom-agent-skill="true"] {
     margin: 0 4px;
-    display: inline;
-    position: relative;
-    box-sizing: border-box;
-    top: -1.5px;
-    padding: 3px 8px 3px 22px;
+    padding: 2px 4px;
     border: 1px solid var(--b3-theme-primary-lighter);
     border-radius: var(--b3-border-radius-b);
     background-color: var(--b3-theme-primary-lightest);
     color: var(--b3-theme-primary);
-    font-family: var(--b3-font-family-code);
-    font-size: .8125rem;
-    font-weight: 500;
-    line-height: 16px;
-    white-space: nowrap;
-    vertical-align: baseline;
 
     &::before {
-      content: "✦";
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      top: 5px;
-      left: 6px;
-      width: 12px;
-      height: 12px;
-      font-family: var(--b3-font-family);
-      font-size: 12px;
-      line-height: 12px;
-      pointer-events: none;
+      content: "✦ ";
     }
 
     &:hover {

@@ -822,6 +822,7 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
         unit: "ms",
         save: (value) => editorConfigApi.patch("editor.floatWindowDelay", value),
     });
+    /// #if !BROWSER
     group.select("appearance.closeButtonBehavior", {
         title: window.siyuan.languages.appearance10,
         desc: window.siyuan.languages.appearance12,
@@ -830,6 +831,7 @@ const registerAppearanceControlsGroup = (tab: SettingTabBuilder) => {
             {value: 1, label: window.siyuan.languages.appearance11},
         ],
     });
+    /// #endif
     group.switch("appearance.hideToolbar", {
         title: window.siyuan.languages.appearance19,
         desc: window.siyuan.languages.appearance20,

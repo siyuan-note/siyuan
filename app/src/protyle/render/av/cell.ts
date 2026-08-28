@@ -480,7 +480,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         html = `<input type="number" spellcheck="false" value="${cellElements[0].firstElementChild.getAttribute("data-content")}" ${style} class="b3-text-field">`;
     } else {
         /// #if MOBILE
-        activeBlur();
+        activeBlur(true);
         /// #endif
         if (["select", "mSelect"].includes(type)) {
             if (blockElement.getAttribute("data-rendering") === "true") {

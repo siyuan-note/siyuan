@@ -904,6 +904,9 @@ export const showAVColumnWidthMenu = (protyle: IProtyle, blockElement: HTMLEleme
 };
 
 export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElement: HTMLElement) => {
+    /// #if MOBILE
+    activeBlur(true);
+    /// #endif
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
     const avID = blockElement.getAttribute("data-av-id");
@@ -1434,11 +1437,13 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         y: cellRect.bottom,
         h: cellRect.height
     });
+    /// #if !MOBILE
     const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {
         inputElement.select();
         inputElement.focus();
     }
+    /// #endif
 };
 
 const removeColByMenu = (options: {
@@ -1549,7 +1554,7 @@ const genUpdateColItem = (type: TAVCol, oldType: TAVCol) => {
 
 export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: string) => {
     /// #if MOBILE
-    activeBlur();
+    activeBlur(true);
     /// #endif
     const menu = new Menu(Constants.MENU_AV_HEADER_ADD);
     const avID = blockElement.getAttribute("data-av-id");

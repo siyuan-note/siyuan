@@ -6,6 +6,9 @@ import {
     TOOLBAR_ENTRY_ROOT_PATH,
 } from "../../protyle/toolbar/defaults";
 import {mergeEntryOrderPreservingUnknown} from "./order";
+import {getPluginDockEntryKey} from "../../plugin/dockKey";
+
+export {getPluginDockEntryKey} from "../../plugin/dockKey";
 
 export interface IEntryCatalogNode {
     key: string;
@@ -985,11 +988,6 @@ interface IDockCatalogPlugin {
         config: Pick<IPluginDockTab, "title">;
     }>;
 }
-
-const encodeDockEntryKeyPart = (value: string) => encodeURIComponent(value).replace(/\./g, "%2E");
-
-export const getPluginDockEntryKey = (pluginName: string, dockID: string) =>
-    `plugin:${encodeDockEntryKeyPart(pluginName)}:${encodeDockEntryKeyPart(dockID)}`;
 
 let dockCatalogSignature = "[]";
 

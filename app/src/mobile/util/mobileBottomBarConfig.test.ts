@@ -3,12 +3,13 @@ import * as assert from "node:assert/strict";
 import {
     createDefaultMobileBottomBarConfig,
     DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS,
-    MOBILE_BOTTOM_BAR_ACTIONS,
+    isMobileBottomBarBuiltInAction,
     MOBILE_BOTTOM_BAR_CONFIG_VERSION,
     normalizeMobileBottomBarConfig,
     reduceMobileBottomBarConfig,
     resolveMobileBottomBarAvailability,
 } from "./mobileBottomBarConfig";
+import {getPluginDockEntryKey} from "../../plugin/dockKey";
 
 describe("mobile bottom bar config", () => {
     it("falls back to the default for malformed storage values", () => {
@@ -17,7 +18,7 @@ describe("mobile bottom bar config", () => {
             false,
             "not json",
             [],
-            {version: 3, actions: ["recent", "outline", "bookmark", "tag", "back"]},
+            {version: 4, actions: ["recent", "outline", "bookmark", "tag", "back"]},
             {version: MOBILE_BOTTOM_BAR_CONFIG_VERSION, actions: "documents"},
         ].forEach((storedValue) => {
             assert.deepEqual(normalizeMobileBottomBarConfig(storedValue), createDefaultMobileBottomBarConfig());
@@ -35,6 +36,16 @@ describe("mobile bottom bar config", () => {
         });
 
         assert.deepEqual(config, createDefaultMobileBottomBarConfig());
+    });
+
+    it("migrates version 2 configs without changing their slots", () => {
+        const config = normalizeMobileBottomBarConfig({
+            version: 2,
+            actions: ["recent", "outline", "bookmark", "tag", "back"],
+        });
+
+        assert.equal(config.version, MOBILE_BOTTOM_BAR_CONFIG_VERSION);
+        assert.deepEqual(config.actions, ["recent", "outline", "bookmark", "tag", "back"]);
     });
 
     it("preserves customized legacy slots and appends back", () => {
@@ -55,7 +66,7 @@ describe("mobile bottom bar config", () => {
         assert.deepEqual(config.actions, ["recent", "back", "forward", "tag", "documents"]);
         assert.equal(config.actions.length, 5);
         assert.equal(new Set(config.actions).size, 5);
-        assert.equal(config.actions.every((action) => MOBILE_BOTTOM_BAR_ACTIONS.includes(action)), true);
+        assert.equal(config.actions.every(isMobileBottomBarBuiltInAction), true);
     });
 
     it("swaps slots when selecting an action already in the bottom bar", () => {
@@ -103,7 +114,7 @@ describe("mobile bottom bar config", () => {
         });
         const config = reduceMobileBottomBarConfig(customized, {type: "reset"});
 
-        assert.equal(config.version, 2);
+        assert.equal(config.version, MOBILE_BOTTOM_BAR_CONFIG_VERSION);
         assert.deepEqual(config.actions, DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS);
         assert.notEqual(config.actions, DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS);
     });
@@ -143,5 +154,58 @@ describe("mobile bottom bar config", () => {
         }, ["dailyNote", "newDailyNote"]);
 
         assert.deepEqual(config.actions, ["forward", "search", "documents", "tabs", "back"]);
+    });
+
+    it("accepts stable plugin dock keys and rejects malformed keys", () => {
+        const pluginAction = getPluginDockEntryKey("plugin.one", "dock.one");
+        const config = normalizeMobileBottomBarConfig({
+            version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
+            actions: [pluginAction, "plugin::dock", "plugin:name:", "plugin:name:dock:extra", "search"],
+        });
+
+        assert.deepEqual(config.actions, [pluginAction, "back", "forward", "documents", "search"]);
+    });
+
+    it("swaps stable plugin dock actions between slots", () => {
+        const pluginAction = getPluginDockEntryKey("sample-plugin", "sample-dock");
+        const state = normalizeMobileBottomBarConfig({
+            version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
+            actions: [pluginAction, "forward", "documents", "tabs", "search"],
+        });
+        const config = reduceMobileBottomBarConfig(state, {
+            type: "select-action",
+            slot: 3,
+            action: pluginAction,
+        });
+
+        assert.deepEqual(config.actions, ["tabs", "forward", "documents", pluginAction, "search"]);
+    });
+
+    it("temporarily replaces a missing plugin without changing the stored config", () => {
+        const pluginAction = getPluginDockEntryKey("sample-plugin", "sample-dock");
+        const storedConfig = normalizeMobileBottomBarConfig({
+            version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
+            actions: [pluginAction, "forward", "documents", "tabs", "search"],
+        });
+        const resolvedConfig = resolveMobileBottomBarAvailability(storedConfig, [pluginAction]);
+
+        assert.deepEqual(resolvedConfig.actions, ["back", "forward", "documents", "tabs", "search"]);
+        assert.equal(storedConfig.actions[0], pluginAction);
+        assert.deepEqual(resolveMobileBottomBarAvailability(storedConfig, []).actions, storedConfig.actions);
+    });
+
+    it("keeps a missing plugin action when another stored slot changes", () => {
+        const pluginAction = getPluginDockEntryKey("sample-plugin", "sample-dock");
+        const storedConfig = normalizeMobileBottomBarConfig({
+            version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
+            actions: [pluginAction, "forward", "documents", "tabs", "search"],
+        });
+        const config = reduceMobileBottomBarConfig(storedConfig, {
+            type: "select-action",
+            slot: 1,
+            action: "outline",
+        });
+
+        assert.deepEqual(config.actions, [pluginAction, "outline", "documents", "tabs", "search"]);
     });
 });

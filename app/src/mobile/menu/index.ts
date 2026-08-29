@@ -27,6 +27,8 @@ import {clearSyncTabElement} from "../../config/tabs/syncRuntime";
 import {clearAccessTabElement} from "../../config/tabs/accessRuntime";
 import {isMobileMenuSearchMatch} from "./searchFilter";
 import {unmountAssetsTab} from "../../config/assets";
+import {escapeAttr, escapeHtml} from "../../util/escape";
+import {getMobilePluginDockEntries, MOBILE_PLUGIN_DOCKS_CHANGE_EVENT} from "../dock/pluginDockState";
 
 const getSettingTabFromMenuTarget = (target: HTMLElement): ISettingTabShell<TSettingTab> | undefined => {
     const item = target.closest(".b3-menu__item") as HTMLElement | null;
@@ -342,6 +344,20 @@ export const popMenu = () => {
     menuElement.style.transform = "translateX(0px)";
 };
 
+const renderMobilePluginDockMenu = (app: App, menuElement: HTMLElement) => {
+    menuElement.querySelectorAll('[data-type="mobile-plugin-dock"]').forEach(item => item.remove());
+    const markerElement = menuElement.querySelector("#menuPluginDocks");
+    if (!markerElement) {
+        return;
+    }
+    const html = getMobilePluginDockEntries(app).map((entry) =>
+        `<div class="b3-menu__item" data-type="mobile-plugin-dock" data-plugin-dock-key="${escapeAttr(entry.key)}">
+            <svg class="b3-menu__icon"><use xlink:href="#${escapeAttr(entry.config.icon)}"></use></svg>
+            <span class="b3-menu__label">${escapeHtml(`${entry.pluginDisplayName} - ${entry.config.title}`)}</span>
+        </div>`).join("");
+    markerElement.insertAdjacentHTML("beforebegin", html);
+};
+
 export const initRightMenu = (app: App) => {
     const menuElement = document.getElementById("menu");
     menuElement.innerHTML = `<div class="b3-menu__title">
@@ -439,6 +455,7 @@ export const initRightMenu = (app: App) => {
                 <svg class="b3-menu__icon"><use xlink:href="#iconPlugin"></use></svg><span class="b3-menu__label">${window.siyuan.languages.plugin}</span>
             </div>
             <div id="menuPluginTopBar" class="fn__none"></div>
+            <div id="menuPluginDocks" class="fn__none"></div>
         </div>
     </div>
     <div class="b3-menu__group">
@@ -457,6 +474,10 @@ export const initRightMenu = (app: App) => {
     <div class="b3-list--empty fn__none" data-type="menu-search-empty">${window.siyuan.languages.emptyContent}</div>
     ${getSettingTabResultsHTML()}
 </div>`;
+    renderMobilePluginDockMenu(app, menuElement);
+    window.addEventListener(MOBILE_PLUGIN_DOCKS_CHANGE_EVENT, () => {
+        renderMobilePluginDockMenu(app, menuElement);
+    });
     const searchElement = menuElement.querySelector(".mobile-main-menu__search input") as HTMLInputElement;
     const groupsElement = menuElement.querySelector(".mobile-main-menu__groups") as HTMLElement;
     const searchMountQueue = createSettingSearchMountQueue(app);
@@ -660,6 +681,16 @@ export const initRightMenu = (app: App) => {
                 event.preventDefault();
                 event.stopPropagation();
                 exitSiYuan();
+                break;
+            } else if (target.dataset.type === "mobile-plugin-dock") {
+                const pluginDockEntry = getMobilePluginDockEntries(app)
+                    .find(entry => entry.key === target.dataset.pluginDockKey);
+                closePanel();
+                if (pluginDockEntry) {
+                    openDock(pluginDockEntry.type);
+                }
+                event.preventDefault();
+                event.stopPropagation();
                 break;
             } else if (target.id === "menuPlugin") {
                 openTopBarMenu(app);

@@ -1,4 +1,6 @@
-export const MOBILE_BOTTOM_BAR_CONFIG_VERSION = 2 as const;
+import {isPluginDockEntryKey, type PluginDockEntryKey} from "../../plugin/dockKey";
+
+export const MOBILE_BOTTOM_BAR_CONFIG_VERSION = 3 as const;
 
 export const MOBILE_BOTTOM_BAR_ACTIONS = [
     "back",
@@ -20,7 +22,8 @@ export const MOBILE_BOTTOM_BAR_ACTIONS = [
     "command",
 ] as const;
 
-export type MobileBottomBarAction = typeof MOBILE_BOTTOM_BAR_ACTIONS[number];
+export type MobileBottomBarBuiltInAction = typeof MOBILE_BOTTOM_BAR_ACTIONS[number];
+export type MobileBottomBarAction = MobileBottomBarBuiltInAction | PluginDockEntryKey;
 export type MobileBottomBarSlot = 0 | 1 | 2 | 3 | 4;
 export type MobileBottomBarSlots = readonly [
     MobileBottomBarAction,
@@ -43,13 +46,13 @@ export type MobileBottomBarConfigEvent = {
     type: "reset",
 };
 
-export const DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS: MobileBottomBarSlots = [
+export const DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS = [
     "back",
     "forward",
     "documents",
     "tabs",
     "search",
-];
+] as const satisfies MobileBottomBarSlots;
 
 const LEGACY_DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS = ["documents", "search", "newDoc", "tabs"];
 
@@ -60,8 +63,12 @@ export const DEFAULT_MOBILE_BOTTOM_BAR_CONFIG: IMobileBottomBarConfig = {
 
 const mobileBottomBarActionSet = new Set<string>(MOBILE_BOTTOM_BAR_ACTIONS);
 
-export const isMobileBottomBarAction = (value: unknown): value is MobileBottomBarAction => {
+export const isMobileBottomBarBuiltInAction = (value: unknown): value is MobileBottomBarBuiltInAction => {
     return typeof value === "string" && mobileBottomBarActionSet.has(value);
+};
+
+export const isMobileBottomBarAction = (value: unknown): value is MobileBottomBarAction => {
+    return isMobileBottomBarBuiltInAction(value) || isPluginDockEntryKey(value);
 };
 
 const toMobileBottomBarSlots = (actions: MobileBottomBarAction[]): MobileBottomBarSlots => {
@@ -80,7 +87,7 @@ const normalizeMobileBottomBarActions = (storedActions: unknown[]): MobileBottom
         }
     }
 
-    const fallbackActions: readonly MobileBottomBarAction[] = [
+    const fallbackActions: readonly MobileBottomBarBuiltInAction[] = [
         ...DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS,
         ...MOBILE_BOTTOM_BAR_ACTIONS,
     ];
@@ -118,7 +125,8 @@ export const normalizeMobileBottomBarConfig = (storedValue: unknown): IMobileBot
     }
 
     const record = value as Record<string, unknown>;
-    if ((record.version !== 1 && record.version !== MOBILE_BOTTOM_BAR_CONFIG_VERSION) || !Array.isArray(record.actions)) {
+    if ((record.version !== 1 && record.version !== 2 && record.version !== MOBILE_BOTTOM_BAR_CONFIG_VERSION) ||
+        !Array.isArray(record.actions)) {
         return createDefaultMobileBottomBarConfig();
     }
     if (record.version === 1 && record.actions.length === LEGACY_DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS.length &&

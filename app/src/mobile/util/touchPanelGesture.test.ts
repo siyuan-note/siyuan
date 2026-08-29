@@ -5,9 +5,7 @@ import {
     getOpenSidebarReleaseAction,
     getSidebarClosingDirection,
     getSidebarClosingOffset,
-    getSidebarMaskOpacity,
     getSidebarOpeningOffset,
-    MOBILE_SIDEBAR_MASK_MAX_OPACITY,
     MOBILE_SIDEBAR_MASK_SWIPING_CLASS,
     MOBILE_SIDEBAR_SWIPING_CLASS,
     setSidebarSwipeState,
@@ -76,14 +74,6 @@ describe("mobile sidebar touch gesture", () => {
         assert.equal(getSidebarOpeningOffset("right", 120, 300), 180);
         assert.equal(getSidebarOpeningOffset("right", -20, 300), 300);
         assert.equal(getSidebarOpeningOffset("right", 400, 300), 0);
-    });
-
-    it("dims the page gently in proportion to the open sidebar", () => {
-        assert.equal(getSidebarMaskOpacity(1), 0);
-        assert.equal(getSidebarMaskOpacity(0.5), MOBILE_SIDEBAR_MASK_MAX_OPACITY / 2);
-        assert.equal(getSidebarMaskOpacity(0), MOBILE_SIDEBAR_MASK_MAX_OPACITY);
-        assert.equal(getSidebarMaskOpacity(-1), MOBILE_SIDEBAR_MASK_MAX_OPACITY);
-        assert.equal(getSidebarMaskOpacity(2), 0);
     });
 
     it("keeps only the active sidebar in the swiping state", () => {

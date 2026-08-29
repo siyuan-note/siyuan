@@ -4,7 +4,6 @@ export type MobileSidebarReleaseAction = "close" | "open";
 
 export const MOBILE_SIDEBAR_SWIPING_CLASS = "side-panel--swiping";
 export const MOBILE_SIDEBAR_MASK_SWIPING_CLASS = "side-mask--swiping";
-export const MOBILE_SIDEBAR_MASK_MAX_OPACITY = 0.32;
 
 interface IMobileSidebarSwipeClassTarget {
     classList: {
@@ -65,9 +64,4 @@ export const getSidebarOpeningOffset = (side: MobileSidebarSide, xDiff: number, 
         return Math.min(Math.max(-xDiff - width, -width), 0);
     }
     return Math.max(Math.min(width - xDiff, width), 0);
-};
-
-export const getSidebarMaskOpacity = (closedRatio: number) => {
-    const openRatio = 1 - Math.min(Math.max(closedRatio, 0), 1);
-    return openRatio * MOBILE_SIDEBAR_MASK_MAX_OPACITY;
 };

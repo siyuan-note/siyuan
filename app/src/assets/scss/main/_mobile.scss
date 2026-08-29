@@ -741,31 +741,6 @@ body.mobile-topbar--merged {
 #menu {
   box-sizing: border-box;
 
-  .mobile-setting-menu {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 0;
-
-    &__search {
-      background-color: var(--b3-theme-surface);
-      display: flex;
-      flex-shrink: 0;
-      padding: 8px 16px;
-    }
-
-    &__groups {
-      flex: 1;
-      height: auto;
-      min-height: 0;
-
-      &--bazaar {
-        overflow: hidden;
-        padding: 0;
-      }
-    }
-  }
-
   .config--mobile {
     box-sizing: border-box;
     height: 100%;

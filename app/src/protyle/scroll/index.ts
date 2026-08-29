@@ -15,6 +15,8 @@ import {
     type IDynamicLoadRequest,
     type TDynamicLoadMode
 } from "./dynamicLoadState";
+import {saveScroll} from "./saveScroll";
+import {getScrollIndexFromPointer} from "./slider";
 
 export class Scroll {
     public element: HTMLElement;
@@ -23,6 +25,8 @@ export class Scroll {
     private dynamicLoadState = new DynamicLoadState();
     private dynamicLoadAbortController?: AbortController;
     private dynamicLoadFinish?: (success: boolean) => void;
+    private indexAbortController?: AbortController;
+    private indexRequestID = 0;
     private loadingAll = false;
     public lastScrollTop: number;
     public keepLoadedContent: boolean;   // 保持加载内容
@@ -46,15 +50,67 @@ export class Scroll {
         this.lastScrollTop = 0;
         this.inputElement = this.element.firstElementChild as HTMLInputElement;
         this.inputElement.addEventListener("input", () => {
-            this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
+            this.updateLabel(protyle);
             showTooltip(this.element.getAttribute("aria-label"), this.element);
         });
-        /// #if BROWSER
         this.inputElement.addEventListener("change", () => {
             this.setIndex(protyle);
         });
-        this.inputElement.addEventListener("touchend", () => {
+        /// #if MOBILE
+        let activePointerID: number | undefined;
+        const updatePointerIndex = (clientY: number) => {
+            const index = getScrollIndexFromPointer(
+                clientY,
+                this.inputElement.getBoundingClientRect(),
+                parseInt(this.inputElement.min),
+                parseInt(this.inputElement.max),
+            );
+            if (this.inputElement.value !== index.toString()) {
+                this.inputElement.value = index.toString();
+                this.updateLabel(protyle);
+                showTooltip(this.element.getAttribute("aria-label"), this.element);
+            }
+        };
+        this.inputElement.addEventListener("pointerdown", (event) => {
+            if (event.pointerType === "mouse") {
+                return;
+            }
+            activePointerID = event.pointerId;
+            this.inputElement.setPointerCapture(event.pointerId);
+            updatePointerIndex(event.clientY);
+            event.preventDefault();
+        });
+        this.inputElement.addEventListener("pointermove", (event) => {
+            if (activePointerID !== event.pointerId) {
+                return;
+            }
+            updatePointerIndex(event.clientY);
+            event.preventDefault();
+        });
+        const releasePointer = (event: PointerEvent) => {
+            if (activePointerID !== event.pointerId) {
+                return false;
+            }
+            if (this.inputElement.hasPointerCapture(event.pointerId)) {
+                this.inputElement.releasePointerCapture(event.pointerId);
+            }
+            activePointerID = undefined;
+            return true;
+        };
+        const finishPointer = (event: PointerEvent) => {
+            if (activePointerID !== event.pointerId) {
+                return;
+            }
+            updatePointerIndex(event.clientY);
+            releasePointer(event);
             this.setIndex(protyle);
+            event.preventDefault();
+        };
+        this.inputElement.addEventListener("pointerup", finishPointer);
+        this.inputElement.addEventListener("pointercancel", (event) => {
+            if (releasePointer(event)) {
+                event.preventDefault();
+            }
         });
         /// #endif
         this.parentElement.addEventListener("click", (event) => {
@@ -218,7 +274,8 @@ export class Scroll {
         if (protyle.wysiwyg.element.getAttribute("data-top")) {
             return;
         }
-        protyle.wysiwyg.element.setAttribute("data-top", protyle.wysiwyg.element.scrollTop.toString());
+        this.cancelIndexRequest();
+        protyle.wysiwyg.element.setAttribute("data-top", protyle.contentElement.scrollTop.toString());
         protyle.contentElement.style.overflow = "hidden";
         const getDocParam: IObject = {
             index: parseInt(this.inputElement.value),
@@ -234,10 +291,12 @@ export class Scroll {
                 data: getResponse,
                 protyle,
                 action: [Constants.CB_GET_FOCUSFIRST, Constants.CB_GET_UNCHANGEID],
+                suppressFocus: true,
                 afterCB: () => {
                     setTimeout(() => {
                         protyle.contentElement.style.overflow = "";
                     }, Constants.TIMEOUT_INPUT);    // 需和 onGet 中的 preventScroll 保持一致
+                    void saveScroll(protyle);
                     showTooltip(this.element.getAttribute("aria-label"), this.element);
                 }
             });
@@ -245,15 +304,25 @@ export class Scroll {
     }
 
     public updateIndex(protyle: IProtyle, id: string, cb?: (index: number) => void) {
-        fetchPost("/api/block/getBlockIndex", {id}, (response) => {
+        const requestID = ++this.indexRequestID;
+        this.indexAbortController?.abort();
+        const abortController = new AbortController();
+        this.indexAbortController = abortController;
+        const rootID = protyle.block.rootID;
+        void fetchPost("/api/block/getBlockIndex", {id}, (response) => {
+            if (requestID !== this.indexRequestID || rootID !== protyle.block.rootID) {
+                return;
+            }
             if (!response.data) {
                 return;
             }
-            const inputElement = protyle.scroll.element.querySelector(".b3-slider") as HTMLInputElement;
-            inputElement.value = response.data;
-            protyle.scroll.element.setAttribute("aria-label", `Blocks ${response.data}/${protyle.block.blockCount}`);
+            protyle.scroll.setCurrentIndex(protyle, response.data);
             if (cb) {
                 cb(response.data);
+            }
+        }, undefined, undefined, abortController.signal).finally(() => {
+            if (this.indexAbortController === abortController) {
+                this.indexAbortController = undefined;
             }
         });
     }
@@ -267,5 +336,23 @@ export class Scroll {
             !protyle.contentElement.classList.contains("fn__none");
         const barVisible = containerVisible && !protyle.block.showAll && protyle.block.scroll;
         updateScrollVisibility(this.parentElement, this.element, containerVisible, barVisible);
+    }
+
+    public setCurrentIndex(protyle: IProtyle, index: number, cancelPending = false) {
+        if (cancelPending) {
+            this.cancelIndexRequest();
+        }
+        this.inputElement.value = Math.max(1, Math.min(protyle.block.blockCount, index)).toString();
+        this.updateLabel(protyle);
+    }
+
+    private cancelIndexRequest() {
+        this.indexRequestID++;
+        this.indexAbortController?.abort();
+        this.indexAbortController = undefined;
+    }
+
+    private updateLabel(protyle: IProtyle) {
+        this.element.setAttribute("aria-label", `Blocks ${this.inputElement.value}/${protyle.block.blockCount}`);
     }
 }

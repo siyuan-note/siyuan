@@ -1,5 +1,5 @@
 import {Constants} from "../../constants";
-import {unicode2Emoji} from "../../emoji";
+import {getDocumentIconHTML} from "../../emoji/fileTreeIcon";
 import type {App} from "../../index";
 import {saveScroll} from "../../protyle/scroll/saveScroll";
 import {setStorageVal} from "../../protyle/util/compatibility";
@@ -767,10 +767,9 @@ export class MobileTabs {
         this.persist();
         const active = this.state.activeTabID;
         const rows = this.state.tabs.map((tab) => {
-            const iconHTML = tab.current ? unicode2Emoji(
-                tab.current.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file,
+            const iconHTML = tab.current ? getDocumentIconHTML(
+                tab.current.icon || "",
                 "mobile-tabs__item-icon",
-                true,
             ) : '<svg class="mobile-tabs__item-icon"><use xlink:href="#iconFile"></use></svg>';
             return `<div class="mobile-tabs__item${tab.id === active ? " mobile-tabs__item--active" : ""}" data-tab-id="${escapeAttr(tab.id)}">
     ${iconHTML}

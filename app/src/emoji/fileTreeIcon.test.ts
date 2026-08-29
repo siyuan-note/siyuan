@@ -7,6 +7,7 @@ const originalNodeEnv = Object.getOwnPropertyDescriptor(globalThis, "NODE_ENV");
 const originalSiYuanVersion = Object.getOwnPropertyDescriptor(globalThis, "SIYUAN_VERSION");
 let getFileTreeDefaultIconAttr: typeof import("./fileTreeIcon").getFileTreeDefaultIconAttr;
 let getFileTreeIconHTML: typeof import("./fileTreeIcon").getFileTreeIconHTML;
+let getDocumentIconHTML: typeof import("./fileTreeIcon").getDocumentIconHTML;
 let refreshDefaultFileTreeIcons: typeof import("./fileTreeIcon").refreshDefaultFileTreeIcons;
 let syncFileTreeItemDefaultIcon: typeof import("./fileTreeIcon").syncFileTreeItemDefaultIcon;
 let updateFileTreeItemIcon: typeof import("./fileTreeIcon").updateFileTreeItemIcon;
@@ -30,6 +31,7 @@ before(async () => {
     ({
         getFileTreeDefaultIconAttr,
         getFileTreeIconHTML,
+        getDocumentIconHTML,
         refreshDefaultFileTreeIcons,
         syncFileTreeItemDefaultIcon,
         updateFileTreeItemIcon,
@@ -64,16 +66,22 @@ describe("file tree icon", () => {
         assert.match(getFileTreeIconHTML("", "notebook", "", false, true), /#iconNotebook/);
         assert.match(getFileTreeIconHTML("", "folder", "", false, true), /#iconFileText/);
         assert.match(getFileTreeIconHTML("", "file", "", false, true), /#iconFile/);
+        assert.equal(getDocumentIconHTML("", "mobile-tabs__item-icon", true),
+            '<svg class="mobile-tabs__item-icon"><use xlink:href="#iconFile"></use></svg>');
     });
 
     it("keeps the Emoji defaults when SVG icons are disabled", () => {
         assert.equal(getFileTreeIconHTML("", "notebook", "", false, false), "🗃");
         assert.equal(getFileTreeIconHTML("", "folder", "", false, false), "📑");
         assert.equal(getFileTreeIconHTML("", "file", "", false, false), "📄");
+        assert.equal(getDocumentIconHTML("", "mobile-tabs__item-icon", false),
+            '<span class="mobile-tabs__item-icon">📄</span>');
     });
 
     it("treats an explicitly configured icon as custom", () => {
         assert.equal(getFileTreeIconHTML("1f4c4", "folder", "", false, true), "📄");
+        assert.equal(getDocumentIconHTML("1f4c4", "mobile-tabs__item-icon", true),
+            '<span class="mobile-tabs__item-icon">📄</span>');
         assert.equal(getFileTreeDefaultIconAttr("1f4c4", "folder"), "");
         assert.equal(getFileTreeDefaultIconAttr("", "folder"), ' data-default-icon="folder"');
         assert.equal(getFileTreeDefaultIconAttr("", "notebook", true), "");

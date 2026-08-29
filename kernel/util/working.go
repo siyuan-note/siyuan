@@ -44,7 +44,7 @@ import (
 // var Mode = "dev"
 var Mode = "prod"
 
-const Ver = "3.8.2-beta.2"
+const Ver = "3.8.2-beta.3"
 
 // IsReleaseVer 判断是否为正式版（不含 alpha、beta、rc 等预发布标识）。
 func IsReleaseVer(ver string) bool {

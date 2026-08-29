@@ -454,6 +454,11 @@ body.mobile-keyboard--open {
     &[data-action="more"] {
       border-top-right-radius: calc(var(--mobile-bottom-bar-height) / 2);
       border-bottom-right-radius: calc(var(--mobile-bottom-bar-height) / 2);
+
+      > svg {
+        width: 18px;
+        height: 18px;
+      }
     }
 
     > svg {
@@ -483,13 +488,13 @@ body.mobile-keyboard--open {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 19px;
-    height: 19px;
+    min-width: 18px;
+    height: 18px;
     padding: 0 2px;
-    border: 1.5px solid currentColor;
+    border: 1.25px solid currentColor;
     border-radius: 4px;
     color: var(--b3-theme-on-surface-light);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: normal;
     line-height: 1;
     text-align: center;

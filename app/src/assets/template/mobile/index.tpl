@@ -53,7 +53,7 @@
         <div class="fn__flex-column fn__none" data-type="sidebar-agent"></div>
     </div>
 </div>
-<div id="menu" class="b3-menu b3-menu--fullscreen fn__none"></div>
+<div id="menu" class="b3-menu b3-menu--fullscreen"></div>
 <div id="model" class="side-panel side-panel--all fn__flex-column">
     <div class="toolbar toolbar--border">
         <svg class="toolbar__icon"><use xlink:href="#iconMenu"></use></svg>

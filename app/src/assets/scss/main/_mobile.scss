@@ -1137,8 +1137,7 @@ body.mobile-topbar--merged {
 #menu {
   z-index: 7;
   top: 0;
-  transform: none;
-  transition: none;
+  transform: translateX(100vw);
 
   .mobile-main-menu {
     &__search {

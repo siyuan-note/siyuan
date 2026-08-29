@@ -14,6 +14,7 @@ import {newFile} from "../../util/newFile";
 import {showMessage} from "../../dialog/message";
 import {reloadProtyle} from "../../protyle/util/reload";
 import {activeBlur} from "../util/keyboardToolbar";
+import {callMobileAppShowKeyboard} from "../util/mobileAppUtil";
 import type {App} from "../../index";
 import {
     assetFilterMenu,
@@ -384,7 +385,12 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
             updateSearchResult(config, element, true);
         }
     });
-    searchInputElement.focus();
+    if (window.JSAndroid?.showKeyboard || window.JSHarmony?.showKeyboard) {
+        callMobileAppShowKeyboard();
+        setTimeout(() => searchInputElement.focus(), Constants.TIMEOUT_TRANSITION);
+    } else {
+        searchInputElement.focus();
+    }
     const replaceInputElement = element.querySelector(".toolbar .toolbar__title") as HTMLInputElement;
     replaceInputElement.value = config.r || "";
     addClearButton({

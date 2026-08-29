@@ -61,6 +61,13 @@ import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 import {updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {showMobileBars} from "./util/mobileBars";
 
+const updateMobileSafeArea = () => {
+    const statusBarHeight = window.JSAndroid?.getStatusBarHeight?.();
+    if (typeof statusBarHeight === "number" && Number.isFinite(statusBarHeight) && statusBarHeight >= 0) {
+        document.body.style.setProperty("--mobile-top-safe-area", `${statusBarHeight}px`);
+    }
+};
+
 class App {
     public plugins: import("../plugin").Plugin[] = [];
     public appId: string;
@@ -169,6 +176,7 @@ class App {
         }, false);
         // 判断手机横竖屏状态
         window.matchMedia("(orientation:portrait)").addEventListener("change", () => {
+            updateMobileSafeArea();
             updateCardHV();
             updateMobileTopBarLayout();
             showMobileBars();
@@ -180,6 +188,7 @@ class App {
             window.siyuan.config = confResponse.data.conf;
             window.siyuan.isPublish = confResponse.data.isPublish;
             document.body.classList.toggle("body--android", Boolean(isInAndroid()));
+            updateMobileSafeArea();
             correctHotkey(siyuanApp);
             await loadPlugins(this);
             getLocalStorage(() => {

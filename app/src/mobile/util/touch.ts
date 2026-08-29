@@ -23,6 +23,7 @@ import {
     getOpeningSidebar,
     getOpenSidebarReleaseAction,
     getSidebarClosingOffset,
+    getSidebarMaskOpacity,
     getSidebarOpeningOffset,
     type MobileSidebarSide,
     type MobileSwipeDirection,
@@ -600,5 +601,5 @@ export const handleTouchMove = (event: TouchEvent) => {
 
 const transformMask = (closedRatio: number) => {
     const maskElement = showPanelMask();
-    maskElement.style.opacity = Math.min(Math.max(1 - closedRatio, 0), 0.68).toString();
+    maskElement.style.opacity = getSidebarMaskOpacity(closedRatio).toString();
 };

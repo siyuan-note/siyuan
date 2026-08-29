@@ -665,6 +665,8 @@ body.mobile-topbar--merged {
 
 .side-panel {
   position: fixed;
+  top: 0;
+  left: 0;
   background-color: var(--b3-theme-surface);
   height: 100%;
   width: 100vw;
@@ -683,6 +685,10 @@ body.mobile-topbar--merged {
 
   &--swiping {
     transition: none;
+  }
+
+  & > .toolbar {
+    padding-top: var(--mobile-top-safe-area);
   }
 
   // 窄屏下 Dock 图标过多时可横向滚动，关闭按钮固定在工具栏末端始终可触达
@@ -1018,7 +1024,7 @@ body.mobile-topbar--merged {
             height: auto;
             margin: 0;
             min-height: 44px;
-            padding: max(8px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));
+            padding: max(8px, var(--mobile-top-safe-area)) max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left));
             position: sticky;
             top: 0;
             width: 100%;
@@ -1138,6 +1144,18 @@ body.mobile-topbar--merged {
   z-index: 7;
   top: 0;
   transform: translateX(100vw);
+
+  &:not(.b3-menu--sheet) {
+    padding-top: var(--mobile-top-safe-area);
+
+    .b3-menu__submenu {
+      top: calc(48px + var(--mobile-top-safe-area));
+    }
+
+    .b3-menu__submenu .b3-menu__submenu {
+      top: var(--mobile-top-safe-area);
+    }
+  }
 
   .mobile-main-menu {
     &__search {

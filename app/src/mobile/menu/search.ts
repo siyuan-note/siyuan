@@ -222,7 +222,7 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
     });
     listElement.innerHTML = resultHTML ||
         `<div class="b3-list-item b3-list-item--focus" data-type="search-new">
-    <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconAddDoc"></use></svg>
     <span class="b3-list-item__text">
         ${window.siyuan.languages.newFile} <mark>${(document.querySelector("#toolbarSearch") as HTMLInputElement).value}</mark>
     </span>
@@ -796,7 +796,7 @@ export const popSearch = (app: App, searchConfig?: Config.IUILayoutTabSearchConf
         <svg class="svg--smaller"><use xlink:href="#iconDown"></use></svg>
     </span>
     <input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" class="toolbar__title fn__block" autocomplete="off" autocorrect="off" spellcheck="false">
-    <svg id="toolbarSearchNew" class="toolbar__icon"><use xlink:href="#iconFile"></use></svg>
+    <svg id="toolbarSearchNew" class="toolbar__icon"><use xlink:href="#iconAddDoc"></use></svg>
 </div>`,
         html: `<div class="fn__flex-column" style="height: 100%">
     <div class="toolbar toolbar--border${config.hasReplace ? "" : " fn__none"}">

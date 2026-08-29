@@ -421,7 +421,7 @@ export const initRightMenu = (app: App) => {
         <div class="b3-menu__group-title">${window.siyuan.languages.mobileMenuCreate}</div>
         <div class="b3-menu__group-items">
             <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuNewDoc">
-                <svg class="b3-menu__icon"><use xlink:href="#iconFile"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newFile}</span>
+                <svg class="b3-menu__icon"><use xlink:href="#iconAddDoc"></use></svg><span class="b3-menu__label">${window.siyuan.languages.newFile}</span>
             </div>
             <div id="menuNewDaily" class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}">
                 <svg class="b3-menu__icon"><use xlink:href="#iconCalendar"></use></svg><span class="b3-menu__label">${window.siyuan.languages.dailyNote}</span>

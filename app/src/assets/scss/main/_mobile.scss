@@ -63,6 +63,21 @@ body.mobile-keyboard--open {
   }
 }
 
+.fn__flex-column[data-type="sidebar-outline"] {
+  .b3-list-item__toggle--hl {
+    &::before {
+      inset-inline-end: -22px;
+      z-index: 1;
+    }
+
+    &:hover,
+    &:active {
+      color: var(--b3-theme-on-surface-light);
+      background-color: transparent;
+    }
+  }
+}
+
 .b3-list--mobile {
 
   & > .fn__flex-column {

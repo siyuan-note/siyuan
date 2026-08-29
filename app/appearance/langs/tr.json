@@ -26,7 +26,7 @@
 	"manageCustomColors": "Özel renkleri yönet",
 	"deleteCustomColorTip": "Silip kaydettikten sonra “${name}” özel rengini zaten kullanan içerik, ilk kayıttaki açık mod rengine döner ve artık dinamik ayarlamayı desteklemez. Silmek istediğinizden emin misiniz?",
 	"mobileMenuNavigation": "Gezinme",
-	"mobileBottomBar": "Alt çubuk",
+	"mobileBottomBar": "Gezinti çubuğu",
 	"insertSuperBlockLeft": "Sola sütun ekle",
 	"insertSuperBlockRight": "Sağa sütun ekle",
 	"assetOpen": "Kaynakları açma",

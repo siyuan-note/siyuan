@@ -26,7 +26,7 @@
 	"manageCustomColors": "จัดการสีที่กำหนดเอง",
 	"deleteCustomColorTip": "หลังจากลบและบันทึก เนื้อหาที่ใช้สีที่กำหนดเอง “${name}” อยู่แล้วจะกลับไปใช้สีโหมดสว่างจากการบันทึกครั้งแรก และจะไม่รองรับการปรับแบบไดนามิกอีกต่อไป คุณแน่ใจหรือไม่ว่าต้องการลบ?",
 	"mobileMenuNavigation": "การนำทาง",
-	"mobileBottomBar": "แถบด้านล่าง",
+	"mobileBottomBar": "แถบนำทาง",
 	"insertSuperBlockLeft": "แทรกคอลัมน์ทางซ้าย",
 	"insertSuperBlockRight": "แทรกคอลัมน์ทางขวา",
 	"assetOpen": "การเปิดทรัพยากร",

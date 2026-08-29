@@ -26,7 +26,7 @@
 	"manageCustomColors": "Manage custom colors",
 	"deleteCustomColorTip": "After deleting and saving, content already using the custom color “${name}” will fall back to the light mode color from its first save and will no longer support dynamic adjustment. Are you sure you want to delete it?",
 	"mobileMenuNavigation": "Navigation",
-	"mobileBottomBar": "Bottom bar",
+	"mobileBottomBar": "Navigation bar",
 	"insertSuperBlockLeft": "Insert column to the left",
 	"insertSuperBlockRight": "Insert column to the right",
 	"assetOpen": "Resource opening",

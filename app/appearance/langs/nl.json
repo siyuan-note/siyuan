@@ -26,7 +26,7 @@
 	"manageCustomColors": "Aangepaste kleuren beheren",
 	"deleteCustomColorTip": "Na verwijderen en opslaan valt inhoud die de aangepaste kleur ‘${name}’ al gebruikt terug op de kleur voor de lichte modus van de eerste opslag en kan deze niet meer dynamisch worden aangepast. Weet je zeker dat je deze wilt verwijderen?",
 	"mobileMenuNavigation": "Navigatie",
-	"mobileBottomBar": "Onderste balk",
+	"mobileBottomBar": "Navigatiebalk",
 	"insertSuperBlockLeft": "Kolom links invoegen",
 	"insertSuperBlockRight": "Kolom rechts invoegen",
 	"assetOpen": "Bronnen openen",

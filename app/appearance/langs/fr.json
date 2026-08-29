@@ -26,7 +26,7 @@
 	"manageCustomColors": "Gérer les couleurs personnalisées",
 	"deleteCustomColorTip": "Après la suppression et l’enregistrement, le contenu utilisant déjà la couleur personnalisée « ${name} » reprendra la couleur du mode clair définie lors du premier enregistrement et ne pourra plus être ajusté dynamiquement. Voulez-vous vraiment la supprimer ?",
 	"mobileMenuNavigation": "Navigation",
-	"mobileBottomBar": "Barre inférieure",
+	"mobileBottomBar": "Barre de navigation",
 	"insertSuperBlockLeft": "Insérer une colonne à gauche",
 	"insertSuperBlockRight": "Insérer une colonne à droite",
 	"assetOpen": "Ouverture des ressources",

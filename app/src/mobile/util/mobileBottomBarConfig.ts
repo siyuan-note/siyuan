@@ -47,8 +47,8 @@ export const DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS: MobileBottomBarSlots = [
     "back",
     "forward",
     "documents",
-    "search",
     "tabs",
+    "search",
 ];
 
 const LEGACY_DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS = ["documents", "search", "newDoc", "tabs"];

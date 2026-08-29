@@ -24,8 +24,8 @@ describe("mobile bottom bar config", () => {
         });
     });
 
-    it("uses back, forward, documents, search, and tabs by default", () => {
-        assert.deepEqual(DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS, ["back", "forward", "documents", "search", "tabs"]);
+    it("uses back, forward, documents, tabs, and search by default", () => {
+        assert.deepEqual(DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS, ["back", "forward", "documents", "tabs", "search"]);
     });
 
     it("migrates the legacy default to the new five-slot default", () => {
@@ -65,7 +65,7 @@ describe("mobile bottom bar config", () => {
             action: "tabs",
         });
 
-        assert.deepEqual(config.actions, ["tabs", "forward", "documents", "search", "back"]);
+        assert.deepEqual(config.actions, ["tabs", "forward", "documents", "back", "search"]);
     });
 
     it("supports inbox, backlinks, the agent, spaced repetition, and forward as configurable actions", () => {
@@ -93,7 +93,7 @@ describe("mobile bottom bar config", () => {
             action: "outline",
         });
 
-        assert.deepEqual(config.actions, ["back", "outline", "documents", "search", "tabs"]);
+        assert.deepEqual(config.actions, ["back", "outline", "documents", "tabs", "search"]);
     });
 
     it("resets customized actions to a fresh default config", () => {

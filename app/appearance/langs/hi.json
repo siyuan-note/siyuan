@@ -26,7 +26,7 @@
 	"manageCustomColors": "कस्टम रंग प्रबंधित करें",
 	"deleteCustomColorTip": "हटाने और सहेजने के बाद, कस्टम रंग “${name}” का पहले से उपयोग करने वाली सामग्री पहली बार सहेजे गए हल्के मोड के रंग पर वापस आ जाएगी और फिर डायनेमिक समायोजन का समर्थन नहीं करेगी। क्या आप वाकई इसे हटाना चाहते हैं?",
 	"mobileMenuNavigation": "नेविगेशन",
-	"mobileBottomBar": "निचली पट्टी",
+	"mobileBottomBar": "नेविगेशन बार",
 	"insertSuperBlockLeft": "बाईं ओर कॉलम डालें",
 	"insertSuperBlockRight": "दाईं ओर कॉलम डालें",
 	"assetOpen": "संसाधन खोलना",

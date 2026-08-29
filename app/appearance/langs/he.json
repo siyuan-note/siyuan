@@ -26,7 +26,7 @@
 	"manageCustomColors": "ניהול צבעים מותאמים אישית",
 	"deleteCustomColorTip": "לאחר המחיקה והשמירה, תוכן שכבר משתמש בצבע המותאם אישית „${name}” יחזור לצבע של המצב הבהיר מהשמירה הראשונה ולא יתמוך עוד בהתאמה דינמית. האם למחוק אותו?",
 	"mobileMenuNavigation": "ניווט",
-	"mobileBottomBar": "סרגל תחתון",
+	"mobileBottomBar": "סרגל ניווט",
 	"insertSuperBlockLeft": "הוספת עמודה משמאל",
 	"insertSuperBlockRight": "הוספת עמודה מימין",
 	"assetOpen": "פתיחת משאבים",

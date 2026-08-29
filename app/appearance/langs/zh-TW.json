@@ -26,7 +26,7 @@
 	"manageCustomColors": "管理自定義顏色",
 	"deleteCustomColorTip": "刪除並儲存後，文件中已使用自定義顏色「${name}」的內容將回退到首次儲存的明亮模式顏色，不再支援動態調整。確定要刪除嗎？",
 	"mobileMenuNavigation": "導航",
-	"mobileBottomBar": "底欄",
+	"mobileBottomBar": "導航欄",
 	"insertSuperBlockLeft": "左側插入分欄",
 	"insertSuperBlockRight": "右側插入分欄",
 	"assetOpen": "資源開啟方式",

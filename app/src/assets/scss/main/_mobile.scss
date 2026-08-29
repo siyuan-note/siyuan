@@ -587,6 +587,7 @@ body.mobile-topbar--merged {
     left: 0;
     z-index: 3;
     height: var(--mobile-breadcrumb-height);
+    border-radius: 0;
     transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);
     will-change: transform;
   }

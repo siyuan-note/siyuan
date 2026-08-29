@@ -31,13 +31,7 @@ export const isMobileBlockSelecting = () => {
     return Boolean(multiSelectElement && !multiSelectElement.closest(".fn__none"));
 };
 
-const isPanelOpen = () => PANEL_IDS.some((id) => {
-    const element = document.getElementById(id);
-    if (id === "menu") {
-        return Boolean(element && !element.classList.contains("fn__none"));
-    }
-    return Boolean(element?.style.transform);
-});
+const isPanelOpen = () => PANEL_IDS.some((id) => Boolean(document.getElementById(id)?.style.transform));
 
 const renderMobileBars = () => {
     const visibility = getMobileBarsVisibility(barsState);

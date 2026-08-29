@@ -63,7 +63,7 @@ body.mobile-keyboard--open {
   }
 }
 
-.fn__flex-column[data-type="sidebar-outline"] {
+.b3-list--mobile {
   .b3-list-item__toggle--hl {
     &::before {
       inset-inline-end: -22px;
@@ -76,9 +76,6 @@ body.mobile-keyboard--open {
       background-color: transparent;
     }
   }
-}
-
-.b3-list--mobile {
 
   & > .fn__flex-column {
     height: 100%;

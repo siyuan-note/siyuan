@@ -1231,7 +1231,7 @@
 	"continueReview1": "복습 계속",
 	"continueReview2": "아직 복습할 카드가 <code class='fn__code'>${count}</code>장 있습니다. 계속하시겠습니까?",
 	"whatsNewInSiYuan": "SiYuan의 새로운 기능",
-	"returnDesktop": "다시 뒤로 가기를 누르면 바탕화면으로 돌아갑니다. 애플리케이션을 정상적으로 종료하려면 오른쪽 사이드바 패널의 [애플리케이션 종료]를 사용하세요",
+	"returnDesktop": "뒤로 가기를 한 번 더 누르면 바탕화면으로 돌아갑니다. 종료하려면 [더 보기 - 애플리케이션 종료]를 사용하세요",
 	"enterNew": "엔터(Enter)하여 생성",
 	"enterNewTip": "문서를 찾을 수 없습니다. 새 문서를 만들려면 엔터(Enter)를 누르세요.",
 	"searchTip1": "이동",

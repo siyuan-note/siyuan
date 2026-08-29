@@ -1231,7 +1231,7 @@
 	"continueReview1": "Continue Review",
 	"continueReview2": "There are still <code class='fn__code'>${count}</code> cards to review, continue?",
 	"whatsNewInSiYuan": "What's New in SiYuan",
-	"returnDesktop": "Press back again to desktop. Use [Exit Application] in the right sidebar panel to normally exit the application",
+	"returnDesktop": "Press back again to return to the desktop. To exit, use [More - Exit Application]",
 	"enterNew": "Enter to create",
 	"enterNewTip": "No documents found, Enter to create a new document.",
 	"searchTip1": "to navigate",

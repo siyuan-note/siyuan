@@ -1231,7 +1231,7 @@
 	"continueReview1": "Continuar Revisão",
 	"continueReview2": "Ainda há <code class='fn__code'>${count}</code> cartões para revisar, continuar?",
 	"whatsNewInSiYuan": "Novidades no SiYuan",
-	"returnDesktop": "Pressione voltar novamente para a área de trabalho. Use [Sair do Aplicativo] no painel da barra lateral direita para sair normalmente do aplicativo",
+	"returnDesktop": "Pressione Voltar novamente para retornar à área de trabalho. Para sair, use [Mais - Sair do Aplicativo]",
 	"enterNew": "Enter para criar",
 	"enterNewTip": "Nenhum documento encontrado, Enter para criar um novo documento.",
 	"searchTip1": "para navegar",

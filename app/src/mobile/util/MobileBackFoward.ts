@@ -47,7 +47,7 @@ export const goBack = () => {
             searchAssetsPanelElement.classList.add("fn__none");
         }
         return;
-    } else if ((menuElement && !menuElement.classList.contains("fn__none")) ||
+    } else if (menuElement?.style.transform === "translateX(0px)" ||
         document.getElementById("sidebar")?.style.transform === "translateX(0px)" ||
         document.getElementById("sidebarRight")?.style.transform === "translateX(0px)") {
         closePanel();

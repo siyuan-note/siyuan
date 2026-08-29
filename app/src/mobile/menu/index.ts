@@ -339,7 +339,7 @@ export const popMenu = () => {
     closePanel();
     const menuElement = document.getElementById("menu");
     menuElement.style.zIndex = (++window.siyuan.zIndex).toString();
-    menuElement.classList.remove("fn__none");
+    menuElement.style.transform = "translateX(0px)";
 };
 
 export const initRightMenu = (app: App) => {

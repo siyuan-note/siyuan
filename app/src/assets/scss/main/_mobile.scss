@@ -350,15 +350,15 @@ body.mobile-keyboard--open {
     .counter {
       box-sizing: border-box;
       flex-shrink: 0;
-      min-width: 24px;
-      height: 20px;
+      min-width: 18px;
+      height: 18px;
       margin-left: 0;
       margin-inline-start: 2px;
-      padding: 0 6px;
-      font-size: 12px;
+      padding: 0 4px;
+      font-size: 11px;
       font-variant-numeric: tabular-nums;
-      line-height: 20px;
-      text-align: end;
+      line-height: 18px;
+      text-align: center;
       unicode-bidi: isolate;
       white-space: nowrap;
     }
@@ -395,8 +395,8 @@ body.mobile-keyboard--open {
   z-index: 3;
   box-sizing: border-box;
   display: flex;
-  align-items: flex-start;
-  width: min(88%, 420px);
+  align-items: center;
+  width: min(calc(100% - 32px), calc(var(--mobile-bottom-bar-height) * 6));
   height: var(--mobile-bottom-bar-height);
   margin: 0 auto;
   padding: 0;
@@ -427,7 +427,19 @@ body.mobile-keyboard--open {
     border-radius: var(--b3-border-radius);
     color: var(--b3-theme-on-surface-light);
     background: transparent;
+    background-clip: content-box;
+    transition: color 80ms ease, background-color 80ms ease, transform 80ms ease;
     -webkit-tap-highlight-color: transparent;
+
+    &[data-slot="0"] {
+      border-top-left-radius: calc(var(--mobile-bottom-bar-height) / 2);
+      border-bottom-left-radius: calc(var(--mobile-bottom-bar-height) / 2);
+    }
+
+    &[data-action="more"] {
+      border-top-right-radius: calc(var(--mobile-bottom-bar-height) / 2);
+      border-bottom-right-radius: calc(var(--mobile-bottom-bar-height) / 2);
+    }
 
     > svg {
       width: 20px;
@@ -435,9 +447,14 @@ body.mobile-keyboard--open {
       flex-shrink: 0;
     }
 
-    &:active,
     &:focus-visible {
       color: var(--b3-theme-on-surface);
+    }
+
+    &:active:not([disabled]) {
+      color: var(--b3-theme-on-surface);
+      background-color: var(--b3-list-hover);
+      transform: scale(.92);
     }
 
     &[disabled] {
@@ -654,6 +671,7 @@ body.mobile-topbar--merged {
   z-index: 7;
   transform: translateX(-100vw);
   transition: transform .15s cubic-bezier(0, 0, .2, 1) 0ms;
+  will-change: transform;
 
   &--all {
     transform: translateX(100vw);
@@ -665,7 +683,6 @@ body.mobile-topbar--merged {
 
   &--swiping {
     transition: none;
-    will-change: transform;
   }
 
   // 窄屏下 Dock 图标过多时可横向滚动，关闭按钮固定在工具栏末端始终可触达
@@ -1120,8 +1137,7 @@ body.mobile-topbar--merged {
 #menu {
   z-index: 7;
   top: 0;
-  transform: none;
-  transition: none;
+  transform: translateX(100vw);
 
   .mobile-main-menu {
     &__search {

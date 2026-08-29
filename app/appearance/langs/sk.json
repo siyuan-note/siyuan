@@ -1231,7 +1231,7 @@
 	"continueReview1": "Pokračovať v opakovaní",
 	"continueReview2": "Zostáva <code class='fn__code'>${count}</code> kariet na prehodnotenie, pokračovať?",
 	"whatsNewInSiYuan": "Čo je nové v SiYuan",
-	"returnDesktop": "Stlačte späť pre návrat na plochu. Aplikáciu ukončite cez bočný panel.",
+	"returnDesktop": "Opätovným stlačením tlačidla Späť sa vrátite na plochu. Aplikáciu ukončíte cez [Viac - Ukončiť aplikáciu]",
 	"enterNew": "Enter pre vytvorenie",
 	"enterNewTip": "Nenašli sa dokumenty, Enter vytvorí nový.",
 	"searchTip1": "navigácia",

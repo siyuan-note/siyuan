@@ -7,7 +7,7 @@
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
 		"type": "doc",
-		"updated": "20260819224004"
+		"updated": "20260829104731"
 	},
 	"Children": [
 		{
@@ -408,7 +408,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110513-pxc89dc",
-				"updated": "20250114215505"
+				"updated": "20260829104731"
 			},
 			"Children": [
 				{
@@ -428,7 +428,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240113110513-hrvrjsj",
-				"updated": "20240113110557"
+				"updated": "20260829104731"
 			},
 			"Children": [
 				{
@@ -468,7 +468,7 @@
 					},
 					"Properties": {
 						"id": "20240113110513-2q984od",
-						"updated": "20240113110557"
+						"updated": "20260829104731"
 					},
 					"Children": [
 						{
@@ -476,12 +476,21 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240113110513-4xcnhoh",
-								"updated": "20240113110557"
+								"updated": "20260829104731"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "退出應用程式請使用右側面板中的 "
+									"Data": "退出應用程式請使用 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "更多"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",

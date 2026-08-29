@@ -6,7 +6,7 @@
 		"id": "20230106104821-9nfphwm",
 		"title": "Workspace",
 		"type": "doc",
-		"updated": "20250306083914"
+		"updated": "20260829104731"
 	},
 	"Children": [
 		{
@@ -111,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230109113955-ja8w7gp",
-				"updated": "20250306083914"
+				"updated": "20260829104731"
 			},
 			"Children": [
 				{
@@ -126,7 +126,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230109113955-471odxk",
-				"updated": "20250306083914"
+				"updated": "20260829104731"
 			},
 			"Children": [
 				{
@@ -216,7 +216,7 @@
 					},
 					"Properties": {
 						"id": "20230109113955-gi1ao5j",
-						"updated": "20250306083914"
+						"updated": "20260829104731"
 					},
 					"Children": [
 						{
@@ -224,12 +224,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113955-hpw3tsz",
-								"updated": "20250306083914"
+								"updated": "20260829104731"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "On the mobile, we can switch between different workspaces in "
+									"Data": "On mobile, you can switch between workspaces in "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "More"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -238,7 +256,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ in the right colum panel"
+									"Data": "​."
 								}
 							]
 						}

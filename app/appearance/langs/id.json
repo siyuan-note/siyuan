@@ -1231,7 +1231,7 @@
 	"continueReview1": "Lanjutkan Ulasan",
 	"continueReview2": "Masih ada <code class='fn__code'>${count}</code> kartu untuk diulas, lanjutkan?",
 	"whatsNewInSiYuan": "Apa yang Baru di SiYuan",
-	"returnDesktop": "Tekan kembali lagi ke desktop. Gunakan [Keluar Aplikasi] di panel bilah sisi kanan untuk keluar dari aplikasi secara normal",
+	"returnDesktop": "Tekan kembali sekali lagi untuk kembali ke desktop. Untuk keluar, gunakan [Lainnya - Keluar Aplikasi]",
 	"enterNew": "Enter untuk membuat",
 	"enterNewTip": "Tidak ada dokumen ditemukan, Enter untuk membuat dokumen baru.",
 	"searchTip1": "untuk bernavigasi",

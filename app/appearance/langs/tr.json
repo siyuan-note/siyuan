@@ -1231,7 +1231,7 @@
 	"continueReview1": "Gözden geçirmeye devam et",
 	"continueReview2": "Hâlâ <code class='fn__code'>${count}</code> kart kaldı, devam edilsin mi?",
 	"whatsNewInSiYuan": "SiYuan’daki yenilikler",
-	"returnDesktop": "Ana ekrana dönmek için tekrar geri tuşuna bas. Uygulamadan normal çıkmak için sağ kenar çubuğundaki [Uygulamadan Çık] seçeneğini kullan",
+	"returnDesktop": "Ana ekrana dönmek için Geri tuşuna tekrar bas. Çıkmak için [Daha fazla - Uygulamadan çık] seçeneğini kullan",
 	"enterNew": "Oluşturmak için Enter’a bas",
 	"enterNewTip": "Belge bulunamadı, yeni belge oluşturmak için Enter’a bas",
 	"searchTip1": "ile gez",

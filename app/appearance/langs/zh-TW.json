@@ -1231,7 +1231,7 @@
 	"continueReview1": "繼續複習",
 	"continueReview2": "還有 <code class='fn__code'>${count}</code> 張卡片待複習，是否繼續？",
 	"whatsNewInSiYuan": "思源筆記最新變化",
-	"returnDesktop": "再按一次返回桌面，如需退出請使用右側欄面板中的 [退出應用]",
+	"returnDesktop": "再按一次返回桌面，如需退出請使用 [更多 - 退出應用]",
 	"enterNew": "Enter建立",
 	"enterNewTip": "搜索結果為空，Enter建立新文件",
 	"searchTip1": "導航",

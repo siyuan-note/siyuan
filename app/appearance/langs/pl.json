@@ -1231,7 +1231,7 @@
 	"continueReview1": "Kontynuuj przegląd",
 	"continueReview2": "Pozostało jeszcze <code class='fn__code'>${count}</code> kart do przeglądu, kontynuować?",
 	"whatsNewInSiYuan": "Co nowego w SiYuan",
-	"returnDesktop": "Naciśnij ponownie, aby przejść do pulpitu. Użyj [Wyjście z aplikacji] w panelu bocznym po prawej, aby normalnie wyjść z aplikacji",
+	"returnDesktop": "Naciśnij ponownie Wstecz, aby przejść do pulpitu. Aby wyjść, użyj [Więcej - Wyjdź z aplikacji]",
 	"enterNew": "Wprowadź, aby utworzyć",
 	"enterNewTip": "Nie znaleziono dokumentów, wprowadź, aby utworzyć nowy dokument.",
 	"searchTip1": "aby nawigować",

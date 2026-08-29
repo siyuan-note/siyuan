@@ -4,7 +4,8 @@ import {
     getBacklinkGutterContentTop,
     getContainerGutterSpace,
     getFixedGutterPosition,
-    getGutterMarginHeight
+    getGutterMarginHeight,
+    getListGutterAnchorLeft
 } from "./layout";
 
 describe("getGutterMarginHeight", () => {
@@ -58,5 +59,15 @@ describe("getContainerGutterSpace", () => {
         assert.equal(getContainerGutterSpace("NodeBlockquote", true), 0);
         assert.equal(getContainerGutterSpace("NodeCallout", true), 0);
         assert.equal(getContainerGutterSpace("NodeParagraph", false), 0);
+    });
+});
+
+describe("getListGutterAnchorLeft", () => {
+    it("uses the content edge for RTL list actions", () => {
+        assert.equal(getListGutterAnchorLeft(680, 120, true), 120);
+    });
+
+    it("keeps the list action edge for LTR lists", () => {
+        assert.equal(getListGutterAnchorLeft(120, 154, false), 120);
     });
 });

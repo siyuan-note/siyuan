@@ -4,7 +4,7 @@ import {UDLRHint, upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeAttr, escapeHtml, escapeLessThans} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
-import {getCellValueText, renderCell, updateCellsValue} from "./cell";
+import {genCellValueByElement, getCellValueText, renderCell, updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
@@ -19,6 +19,8 @@ import {Constants} from "../../../constants";
 import {openDatabaseRowByData} from "./openDatabaseRow";
 import {getAVColumnTextMeasurer, getAVRelationColumnWidth, getAVTableFitWidths} from "./columnWidth";
 import {getSearchAVFocus} from "./searchAVFocus";
+import {getAVTemplateHTML} from "./attributeValue";
+import {hasAVRenderTemplateResult} from "./cellValue";
 
 interface IAVItem {
     avID: string;
@@ -422,20 +424,23 @@ style="grid-template-columns:${gridTemplate}">
         const cell = row.cells.find((item) => item.value?.keyID === column.id) || row.cells[index];
         if (index === 0) {
             const isDetached = primaryValue.isDetached;
+            const useRenderedContent = hasAVRenderTemplateResult(primaryValue, column.renderTemplate);
+            const content = useRenderedContent ? getAVTemplateHTML(primaryValue.renderedContent || "") :
+                Lute.EscapeHTMLStr(primaryValue.block?.content || window.siyuan.languages.untitled);
             html += `<span class="av__relation-table-cell av__relation-table-primary" data-row-id="${escapeAttr(row.id)}"
 data-value-id="${escapeAttr(primaryCell.id || "")}"
 style="${primaryCell.bgColor ? `background-color:${primaryCell.bgColor};` : ""}${primaryCell.color ? `color:${primaryCell.color};` : ""}">
     ${selected ? '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>' : ""}
-    <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}"
+    <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}${useRenderedContent ? " av__celltext--template" : ""}"
         ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'}
-        data-id="${escapeAttr(primaryValue.block?.id || "")}">${Lute.EscapeHTMLStr(primaryValue.block?.content || window.siyuan.languages.untitled)}</span>
+        data-id="${escapeAttr(primaryValue.block?.id || "")}" data-content="${escapeAttr(primaryValue.block?.content || "")}">${content}</span>
     ${primaryCell.id ? `<button type="button" class="av__relation-row-open ariaLabel" data-type="openRelationRow" draggable="false"
         data-position="north" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></button>` : ""}
 </span>`;
         } else {
             html += `<span class="av__relation-table-cell"
 style="${cell?.bgColor ? `background-color:${cell.bgColor};` : ""}${cell?.color ? `color:${cell.color};` : ""}">${cell?.value ?
-                renderCell(cell.value, 0, false, "table", column.options, column.dateFormat) : ""}</span>`;
+                renderCell(cell.value, 0, false, "table", column.options, column.dateFormat, column.renderTemplate) : ""}</span>`;
         }
     });
     return html + "</div>";
@@ -592,21 +597,21 @@ export const bindRelationEvent = (options: {
                 return {
                     id: item.dataset.rowId,
                     blockID: blockElement.dataset.id,
-                    content: blockElement.textContent,
+                    content: blockElement.dataset.content ?? blockElement.textContent,
                     isDetached: !blockElement.classList.contains("popover__block"),
                 };
             });
         }
-        return Array.from(options.cellElements[0].querySelectorAll(".av__cell--relation")).
-            map((item: HTMLElement) => {
-                const blockElement = item.querySelector(".av__celltext") as HTMLElement;
-                return {
-                    id: item.dataset.rowId,
-                    blockID: blockElement.dataset.id,
-                    content: blockElement.textContent,
-                    isDetached: !blockElement.classList.contains("av__celltext--ref"),
-                };
-            });
+        const relation = genCellValueByElement("relation", options.cellElements[0]).relation;
+        return (relation?.blockIDs || []).map((id, index) => {
+            const value = relation.contents?.[index];
+            return {
+                id,
+                blockID: value?.block?.id,
+                content: value?.block?.content || "",
+                isDetached: value?.isDetached === true || !value?.block?.id,
+            };
+        });
     };
     const renderFooter = (hasCandidates: boolean) => {
         listElement.querySelector('[data-relation-type="create"], [data-relation-type="empty"]')?.remove();
@@ -886,7 +891,7 @@ const getRelationValue = (menuElement: HTMLElement) => {
             type: "block",
             block: {
                 id: blockElement.dataset.id,
-                content: blockElement.textContent
+                content: blockElement.dataset.content ?? blockElement.textContent
             },
             isDetached: !blockElement.classList.contains("popover__block")
         });

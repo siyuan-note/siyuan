@@ -5,7 +5,8 @@ interface IAVCellValueTarget {
 }
 
 export const rebindAVCellValue = (source: IAVCellValue, target: IAVCellValueTarget) => {
-    const value = JSON.parse(JSON.stringify(source)) as IAVCellValue & {
+    const value = JSON.parse(JSON.stringify(source,
+        (key, item) => key === "renderedContent" ? undefined : item)) as IAVCellValue & {
         createdAt?: number;
         updatedAt?: number;
     };

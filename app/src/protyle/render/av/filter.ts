@@ -3,7 +3,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {getColIconByType} from "./col";
 import {setPosition} from "../../../util/setPosition";
-import {genCellValue} from "./cell";
+import {genCellValue, getCellValueText} from "./cell";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
@@ -291,9 +291,15 @@ export const getFiltersHTML = (data: IAV) => {
         ).join("");
         const fieldSelect = `<select class="b3-select fn__flex-1 av__filter-field" data-type="fieldSelect" data-path="${path}">${fieldOptions}</select>`;
         const fieldWrapper = `<span class="av__field-wrapper ariaLabel" data-position="4west" aria-label="${escapeAttr(colData.name)}">${iconHTML}${fieldSelect}</span>`;
+        const valueSourceSelect = colData.type !== "template" && (colData.renderTemplate?.trim() || node.valueSource === "rendered")
+            ? `<select class="b3-select" data-type="valueSource" data-path="${path}">
+<option value="stored" ${node.valueSource !== "rendered" ? "selected" : ""}>${window.siyuan.languages.original}</option>
+<option value="rendered" ${node.valueSource === "rendered" ? "selected" : ""}>${window.siyuan.languages.template}</option>
+</select>`
+            : "";
         const inlineHTML = genInlineFilterHTML(node, colData, path);
         const leafAndOrHTML = 0 === index ? genWhenLabel() : 1 === index ? genAndOrSelect(groupPath, groupCombination) : genAndOrLabel(groupCombination);
-        return `<div class="b3-menu__item av__filter-row" data-path="${path}" data-column="${node.column}">${leafAndOrHTML}<div class="fn__flex-1 av__filter-rowinner">${fieldWrapper}${inlineHTML}</div><svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg></div>`;
+        return `<div class="b3-menu__item av__filter-row" data-path="${path}" data-column="${node.column}">${leafAndOrHTML}<div class="fn__flex-1 av__filter-rowinner">${fieldWrapper}${valueSourceSelect}${inlineHTML}</div><svg class="b3-menu__action ariaLabel" data-position="4west" data-type="moreFilter" data-path="${path}" aria-label="${window.siyuan.languages.more}"><use xlink:href="#iconMore"></use></svg></div>`;
     };
 
     const isRootGroup = data.view.filters.length === 1 && (data.view.filters[0].filters || data.view.filters[0].combination);
@@ -518,6 +524,9 @@ export const prepareFilterColumns = async (data: IAV) => {
 // resolveFilterValueType 解析 filter 实际的值类型。
 // 汇总类型优先使用计算结果类型，否则使用汇总指向的原始字段类型。
 const resolveFilterValueType = (filter: IAVFilter, colData: IAVColumn): { type: TAVCol, colData: IAVColumn, isRollup: boolean } => {
+    if (filter.valueSource === "rendered") {
+        return {type: "template", colData, isRollup: false};
+    }
     const valueType = filter.value?.type as TAVCol;
     if (valueType !== "rollup") {
         return {type: valueType, colData, isRollup: false};
@@ -547,7 +556,13 @@ const genEmptyCellValue = (type: TAVCol): IAVCellValue => type === "checkbox"
     ? genCellValue(type, {checked: undefined})
     : {type} as IAVCellValue;
 
-const genEmptyFilterValue = (column: IAVColumn): { operator: TAVFilterOperator, value: IAVCellValue } => {
+const genEmptyFilterValue = (column: IAVColumn, valueSource: "stored" | "rendered" = "stored"): { operator: TAVFilterOperator, value: IAVCellValue } => {
+    if (valueSource === "rendered") {
+        return {
+            operator: getDefaultOperatorByType("template"),
+            value: genEmptyCellValue("template"),
+        };
+    }
     if (column.type !== "rollup") {
         return {
             operator: getDefaultOperatorByType(column.type),
@@ -590,7 +605,8 @@ const genInlineFilterHTML = (filter: IAVFilter, colData: IAVColumn, path: string
     let extraHTML = ""; // 放在 valueContainer 外的附加 HTML（如 select 下拉面板，避免影响行宽）
     const filterValue = getFilterCellValue(filter);
     if (["text", "url", "block", "email", "phone", "template"].includes(valueType)) {
-        const content = filterValue?.[valueType as "text"]?.content || "";
+        const content = valueType === "template" && filterValue && filterValue.type !== "template" ?
+            getCellValueText(filterValue) : filterValue?.[valueType as "text"]?.content || "";
         valueHTML = `<input class="b3-text-field b3-text-field--text fn__flex-1" value="${escapeFilterValue(content)}" data-type="filterValue" data-path="${path}">`;
     } else if (valueType === "mAsset") {
         const content = filterValue?.mAsset?.[0]?.content || "";
@@ -949,6 +965,9 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
             relativeDate,
             relativeDate2,
         };
+        if (filter.valueSource === "rendered") {
+            newFilter.valueSource = "rendered";
+        }
         const dateEndpointSel = rowElement.querySelector('[data-type="dateEndpoint"]') as HTMLSelectElement;
         if (dateEndpointSel?.value === "end") {
             newFilter.dateEndpoint = "end";
@@ -1075,6 +1094,22 @@ export const bindInlineFilterEvents = (panelElement: HTMLElement, data: IAV, pro
                     operator,
                     value,
                 };
+                commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, true, filterOperation);
+            }
+        } else if (type === "valueSource") {
+            const filter = getFilterByPath(getEditableFilters(data), path);
+            const colData = findColData(path);
+            if (filter && colData) {
+                const valueSource = (target as HTMLSelectElement).value === "rendered" ? "rendered" : "stored";
+                const {operator, value} = genEmptyFilterValue(colData, valueSource);
+                const newFilter: IAVFilter = {
+                    column: filter.column,
+                    operator,
+                    value,
+                };
+                if (valueSource === "rendered") {
+                    newFilter.valueSource = "rendered";
+                }
                 commitFilter(data, path, newFilter, protyle, blockID, avID, menuElement, true, filterOperation);
             }
         } else if (type === "operation") {

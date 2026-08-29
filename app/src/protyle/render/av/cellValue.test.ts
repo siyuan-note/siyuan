@@ -6,6 +6,7 @@ import {
     genRelationAVCellValue,
     getAVBlockRefSubtype,
     getConvertedEmptyAVCellValue,
+    hasAVRenderTemplateResult,
 } from "./cellValue";
 
 describe("getAVBlockRefSubtype", () => {
@@ -26,6 +27,29 @@ describe("getAVBlockRefSubtype", () => {
             type: "block",
             block: {content: "Invalid", refSubtype: "invalid"},
         } as unknown as IAVCellValue), "s");
+    });
+});
+
+describe("hasAVRenderTemplateResult", () => {
+    it("distinguishes configured display templates from template fields and blank configuration", () => {
+        assert.equal(hasAVRenderTemplateResult({
+            type: "number",
+            number: {content: 0, isNotEmpty: true},
+            renderedContent: "",
+        }), true);
+        assert.equal(hasAVRenderTemplateResult({
+            type: "number",
+            number: {content: 0, isNotEmpty: true},
+        }, "<strong>.action{.Amount}</strong>"), true);
+        assert.equal(hasAVRenderTemplateResult({
+            type: "number",
+            number: {content: 0, isNotEmpty: true},
+        }, "   "), false);
+        assert.equal(hasAVRenderTemplateResult({
+            type: "template",
+            template: {content: "rendered"},
+            renderedContent: "rendered",
+        }, "ignored"), false);
     });
 });
 
@@ -59,6 +83,30 @@ describe("cloneAVCellValueSnapshot", () => {
 
         snapshot.mAsset[0].name = "changed.png";
         assert.equal(value.mAsset[0].name, "asset.png");
+    });
+
+    it("removes transient rendered content from stored snapshots", () => {
+        const value = {
+            type: "rollup",
+            renderedContent: "<strong>outer</strong>",
+            rollup: {
+                contents: [{
+                    type: "text",
+                    text: {content: "stored"},
+                    renderedContent: "<strong>inner</strong>",
+                }],
+            },
+        } as IAVCellValue;
+
+        assert.deepEqual(cloneAVCellValueSnapshot(value), {
+            type: "rollup",
+            rollup: {
+                contents: [{
+                    type: "text",
+                    text: {content: "stored"},
+                }],
+            },
+        });
     });
 });
 
@@ -116,6 +164,31 @@ describe("getConvertedEmptyAVCellValue", () => {
                 isNotEmpty: true,
             },
         }), false);
+    });
+
+    it("can use rendered content when determining display emptiness", () => {
+        const value: IAVCellValue = {
+            type: "text",
+            text: {content: ""},
+            renderedContent: "<strong>fallback</strong>",
+        };
+        assert.equal(cellValueIsEmpty(value), true);
+        assert.equal(cellValueIsEmpty(value, true), false);
+    });
+
+    it("treats a configured display template with an empty result as empty", () => {
+        const value: IAVCellValue = {
+            type: "number",
+            number: {
+                content: 12,
+                isNotEmpty: true,
+            },
+        };
+
+        assert.equal(cellValueIsEmpty(value), false);
+        assert.equal(cellValueIsEmpty(value, true, "{{.action{.Amount}}}"), true);
+        value.renderedContent = "visible";
+        assert.equal(cellValueIsEmpty(value, true, "{{.action{.Amount}}}"), false);
     });
 });
 

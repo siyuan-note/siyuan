@@ -6,9 +6,29 @@ import {
     getSidebarClosingDirection,
     getSidebarClosingOffset,
     getSidebarOpeningOffset,
+    MOBILE_SIDEBAR_MASK_SWIPING_CLASS,
+    MOBILE_SIDEBAR_SWIPING_CLASS,
+    setSidebarSwipeState,
     shouldCloseGlobalMenu,
     shouldDragOpenSidebar,
 } from "./touchPanelGesture";
+
+const createClassTarget = () => {
+    const classes = new Set<string>();
+    return {
+        classes,
+        target: {
+            classList: {
+                add(className: string) {
+                    classes.add(className);
+                },
+                remove(className: string) {
+                    classes.delete(className);
+                },
+            },
+        },
+    };
+};
 
 describe("mobile sidebar touch gesture", () => {
     it("opens the sidebar opposite the finger movement", () => {
@@ -54,5 +74,35 @@ describe("mobile sidebar touch gesture", () => {
         assert.equal(getSidebarOpeningOffset("right", 120, 300), 180);
         assert.equal(getSidebarOpeningOffset("right", -20, 300), 300);
         assert.equal(getSidebarOpeningOffset("right", 400, 300), 0);
+    });
+
+    it("keeps only the active sidebar in the swiping state", () => {
+        const left = createClassTarget();
+        const right = createClassTarget();
+        const mask = createClassTarget();
+        const sidebars = {left: left.target, right: right.target};
+
+        setSidebarSwipeState(sidebars, mask.target, "left");
+        assert.equal(left.classes.has(MOBILE_SIDEBAR_SWIPING_CLASS), true);
+        assert.equal(right.classes.has(MOBILE_SIDEBAR_SWIPING_CLASS), false);
+        assert.equal(mask.classes.has(MOBILE_SIDEBAR_MASK_SWIPING_CLASS), true);
+
+        setSidebarSwipeState(sidebars, mask.target, "right");
+        assert.equal(left.classes.has(MOBILE_SIDEBAR_SWIPING_CLASS), false);
+        assert.equal(right.classes.has(MOBILE_SIDEBAR_SWIPING_CLASS), true);
+        assert.equal(mask.classes.has(MOBILE_SIDEBAR_MASK_SWIPING_CLASS), true);
+    });
+
+    it("clears the swiping state when a gesture finishes", () => {
+        const left = createClassTarget();
+        const right = createClassTarget();
+        const mask = createClassTarget();
+        const sidebars = {left: left.target, right: right.target};
+
+        setSidebarSwipeState(sidebars, mask.target, "left");
+        setSidebarSwipeState(sidebars, mask.target);
+        assert.equal(left.classes.has(MOBILE_SIDEBAR_SWIPING_CLASS), false);
+        assert.equal(right.classes.has(MOBILE_SIDEBAR_SWIPING_CLASS), false);
+        assert.equal(mask.classes.has(MOBILE_SIDEBAR_MASK_SWIPING_CLASS), false);
     });
 });

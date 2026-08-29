@@ -11,6 +11,7 @@ describe("rebindAVCellValue", () => {
             type: "text",
             createdAt: 100,
             updatedAt: 200,
+            renderedContent: "<strong>333</strong>",
             text: {
                 content: "333",
             },

@@ -191,7 +191,7 @@
     max-height: 90dvh;
     border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
     box-shadow: var(--b3-dialog-shadow);
-    overflow: hidden;
+    overflow: clip;
     transform: translateY(100%);
     transition: transform .15s cubic-bezier(0, 0, .2, 1), height .15s cubic-bezier(0, 0, .2, 1);
     will-change: transform;
@@ -253,6 +253,7 @@
     & .b3-menu__submenu .b3-menu__submenu {
       top: 0;
     }
+
   }
 
   &__scrim {

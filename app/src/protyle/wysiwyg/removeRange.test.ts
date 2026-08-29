@@ -100,11 +100,13 @@ describe("isNativeCrossBlockCompositionSupported", () => {
             ["NodeParagraph", "NodeTable"], ["NodeParagraph", "NodeTable"]), true);
     });
 
-    it("拒绝属性视图和需要重新渲染的快照", () => {
+    it("支持跨过渲染块但拒绝将其作为文本边界", () => {
         assert.equal(isNativeCrossBlockCompositionSupported(
             ["NodeAttributeView", "NodeParagraph"], ["NodeAttributeView", "NodeParagraph"]), false);
         assert.equal(isNativeCrossBlockCompositionSupported(
-            ["NodeHeading", "NodeParagraph"], ["NodeHeading", "NodeMathBlock", "NodeParagraph"]), false);
+            ["NodeHeading", "NodeParagraph"], ["NodeHeading", "NodeMathBlock", "NodeParagraph"]), true);
+        assert.equal(isNativeCrossBlockCompositionSupported(
+            ["NodeParagraph", "NodeParagraph"], ["NodeParagraph", "NodeUnknown", "NodeParagraph"]), false);
     });
 });
 

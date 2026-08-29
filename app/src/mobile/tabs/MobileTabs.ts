@@ -175,12 +175,24 @@ export class MobileTabs {
         };
         window.siyuan.storage[Constants.LOCAL_MOBILE_TABS] = persistedState;
         setStorageVal(Constants.LOCAL_MOBILE_TABS, persistedState);
+        this.updateNavigationButtons();
     }
 
     private updateCounter() {
         const countElement = document.querySelector("#toolbarTabs .toolbar__tabs-count");
         if (countElement) {
             countElement.textContent = this.state.tabs.length.toString();
+        }
+    }
+
+    private updateNavigationButtons() {
+        const backElement = document.getElementById("mobileBottomBarBack") as HTMLButtonElement;
+        const forwardElement = document.getElementById("mobileBottomBarForward") as HTMLButtonElement;
+        if (backElement) {
+            backElement.disabled = !this.canGoBack();
+        }
+        if (forwardElement) {
+            forwardElement.disabled = !this.canGoForward();
         }
     }
 
@@ -556,6 +568,14 @@ export class MobileTabs {
         return false;
     }
 
+    canGoBack() {
+        return Boolean(this.activeTab?.backStack.length) || this.hasActivationTarget(this.activationBackStack);
+    }
+
+    canGoForward() {
+        return Boolean(this.activeTab?.forwardStack.length) || this.hasActivationTarget(this.activationForwardStack);
+    }
+
     async goBack(): Promise<boolean> {
         const tab = this.activeTab;
         if (!tab?.backStack.length) {
@@ -760,14 +780,13 @@ export class MobileTabs {
     </button>
 </div>`;
         }).join("");
-        const tab = this.activeTab;
         openModel({
             title: `${window.siyuan.languages.mobileTabs} ${this.state.tabs.length}`,
             html: `<div class="mobile-tabs">
     <div class="mobile-tabs__list">${rows || `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`}</div>
     <div class="mobile-tabs__actions">
-        <button class="b3-button b3-button--outline" data-action="back"${tab?.backStack.length || this.hasActivationTarget(this.activationBackStack) ? "" : " disabled"}><svg><use xlink:href="#iconLeft"></use></svg>${window.siyuan.languages.goBack}</button>
-        <button class="b3-button b3-button--outline" data-action="forward"${tab?.forwardStack.length || this.hasActivationTarget(this.activationForwardStack) ? "" : " disabled"}><svg><use xlink:href="#iconRight"></use></svg>${window.siyuan.languages.goForward}</button>
+        <button class="b3-button b3-button--outline" data-action="back"${this.canGoBack() ? "" : " disabled"}><svg><use xlink:href="#iconLeft"></use></svg>${window.siyuan.languages.goBack}</button>
+        <button class="b3-button b3-button--outline" data-action="forward"${this.canGoForward() ? "" : " disabled"}><svg><use xlink:href="#iconRight"></use></svg>${window.siyuan.languages.goForward}</button>
         <button class="b3-button b3-button--outline" data-action="new-doc"><svg><use xlink:href="#iconAddDoc"></use></svg>${window.siyuan.languages.newFile}</button>
         <button class="b3-button b3-button--outline" data-action="close-all"${this.state.tabs.length ? "" : " disabled"}><svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.closeAll}</button>
     </div>

@@ -65,6 +65,43 @@ func TestFilterLocalStorageByPublishAccess(t *testing.T) {
 	}
 }
 
+func TestPublishAccessClearsRenderedContentWithInaccessibleDependencies(t *testing.T) {
+	const itemID = "20260828000000-item001"
+	templates := []string{
+		".action{.Secret_raw}",
+		`.action{index .id_mod "secret"}`,
+		`.action{index .id_mod_raw "secret"}`,
+		`.action{index .id_mod (printf "%s" "secret")}`,
+	}
+	for _, renderTemplate := range templates {
+		t.Run(renderTemplate, func(t *testing.T) {
+			secretKey := &av.Key{ID: "secret", Name: "Secret", Type: av.KeyTypeRelation}
+			visibleKey := &av.Key{
+				ID: "visible", Name: "Visible", Type: av.KeyTypeText, RenderTemplate: renderTemplate,
+			}
+			attrView := &av.AttributeView{ID: "attribute-view", KeyValues: []*av.KeyValues{
+				{Key: secretKey},
+				{Key: visibleKey},
+			}}
+			original := &av.Value{
+				KeyID: visibleKey.ID, BlockID: itemID, Type: av.KeyTypeText,
+				Text: &av.ValueText{Content: "stored"}, RenderedContent: "private rendered content",
+			}
+			baseValue := &av.BaseValue{Value: original}
+			filter := &attributeViewPublishAccessFilter{}
+
+			filter.filterBaseValue(attrView, itemID, baseValue)
+
+			if "" != baseValue.Value.RenderedContent {
+				t.Fatalf("published value exposed inaccessible rendered content: %+v", baseValue.Value)
+			}
+			if "private rendered content" != original.RenderedContent {
+				t.Fatal("publish filtering changed the cached source value")
+			}
+		})
+	}
+}
+
 func TestAssetPathFromDataRelativePath(t *testing.T) {
 	const boxID = "20260806000000-box0001"
 	tests := []struct {

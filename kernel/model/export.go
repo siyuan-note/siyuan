@@ -147,6 +147,17 @@ func ExportCodeBlock(blockID string) (filePath string, err error) {
 	return
 }
 
+func getAttrViewCSVRenderedValue(table *av.Table, value *av.Value) (ret string, ok bool) {
+	if nil == table || nil == value {
+		return
+	}
+	column := table.GetColumn(value.KeyID)
+	if nil == column || "" == strings.TrimSpace(column.RenderTemplate) {
+		return
+	}
+	return value.RenderedContent, true
+}
+
 func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
 
@@ -224,6 +235,10 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 			for _, cell := range row.Cells {
 				var val string
 				if nil != cell.Value {
+					if rendered, ok := getAttrViewCSVRenderedValue(table, cell.Value); ok {
+						rowVal = append(rowVal, rendered)
+						continue
+					}
 					if av.KeyTypeDate == cell.Value.Type {
 						if nil != cell.Value.Date {
 							key, _ := attrView.GetKey(cell.Value.KeyID)
@@ -3628,6 +3643,23 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 				mdTableRow.AppendChild(mdTableCell)
 				var val string
 				if nil != cell.Value {
+					col := table.GetColumn(cell.Value.KeyID)
+					if nil != col && "" != strings.TrimSpace(col.RenderTemplate) {
+						val = cell.Value.RenderedContent
+						val = strings.ReplaceAll(val, "\\|", "|")
+						val = strings.ReplaceAll(val, "|", "\\|")
+						if col.Wrap {
+							lines := strings.SplitSeq(val, "\n")
+							for line := range lines {
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+							}
+						} else {
+							val = strings.ReplaceAll(val, "\n", " ")
+							mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+						}
+						continue
+					}
 					if av.KeyTypeBlock == cell.Value.Type {
 						if nil != cell.Value.Block {
 							val = cell.Value.Block.Content

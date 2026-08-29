@@ -31,8 +31,10 @@ import {
     getLocalStorage,
     initWindowOpenOverride,
     isChromeBrowser,
+    isInAndroid,
     isInIOS,
     isInMobileApp,
+    isIOSDevice,
     writeText
 } from "../protyle/util/compatibility";
 import {getCurrentEditor, openMobileFileById} from "./editor";
@@ -58,7 +60,6 @@ import {openByMobile} from "../editor/openLink";
 import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 import {updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {showMobileBars} from "./util/mobileBars";
-import {initMobileInputEventLogging, logMobileInputEvent} from "./util/inputEventLogger";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -178,6 +179,7 @@ class App {
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = confResponse.data.conf;
             window.siyuan.isPublish = confResponse.data.isPublish;
+            document.body.classList.toggle("body--android", Boolean(isInAndroid()));
             correctHotkey(siyuanApp);
             await loadPlugins(this);
             getLocalStorage(() => {
@@ -194,7 +196,7 @@ class App {
                             document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-content, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
                         } else {
                             document.querySelector('meta[name="viewport"]').setAttribute("content", "width=device-width, height=device-height, interactive-widget=resizes-visual, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover");
-                            if (!window.siyuan.config.readonly && !window.siyuan.isPublish
+                            if (!isIOSDevice() && !window.siyuan.config.readonly && !window.siyuan.isPublish
                                 && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
                                 showMessage(window.siyuan.languages.useChrome, 0, "error");
                             }
@@ -210,17 +212,12 @@ class App {
                             await setNoteBook();
                             try {
                                 await initFramework(this, confResponse.data.start);
-                                logMobileInputEvent("framework-initialized");
                                 initRightMenu(this);
-                                logMobileInputEvent("menu-initialized");
                                 openChangelog();
                                 window.siyuan.isReady = true;
                                 mainWs.flushMainMessages();
                             } catch (error) {
                                 console.error("Failed to initialize mobile framework:", error);
-                                logMobileInputEvent("framework-init-error", undefined, {
-                                    error: error instanceof Error ? error.message : String(error),
-                                });
                             }
                         });
                     });
@@ -261,7 +258,6 @@ class App {
                 }
             });
             initTouchDragBridge();
-            initMobileInputEventLogging();
         });
     }
 }

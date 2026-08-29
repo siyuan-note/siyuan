@@ -27,7 +27,6 @@ import {clearSyncTabElement} from "../../config/tabs/syncRuntime";
 import {clearAccessTabElement} from "../../config/tabs/accessRuntime";
 import {isMobileMenuSearchMatch} from "./searchFilter";
 import {unmountAssetsTab} from "../../config/assets";
-import {logMobileInputEvent} from "../util/inputEventLogger";
 
 const getSettingTabFromMenuTarget = (target: HTMLElement): ISettingTabShell<TSettingTab> | undefined => {
     const item = target.closest(".b3-menu__item") as HTMLElement | null;
@@ -340,7 +339,7 @@ export const popMenu = () => {
     closePanel();
     const menuElement = document.getElementById("menu");
     menuElement.style.zIndex = (++window.siyuan.zIndex).toString();
-    menuElement.classList.remove("fn__none");
+    menuElement.style.transform = "translateX(0px)";
 };
 
 export const initRightMenu = (app: App) => {
@@ -544,7 +543,6 @@ export const initRightMenu = (app: App) => {
     afterLayoutReady(app);
     // 只能用 click，否则无法上下滚动 https://github.com/siyuan-note/siyuan/issues/6628
     menuElement.addEventListener("click", (event) => {
-        logMobileInputEvent("menu-click-handler", event);
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(menuElement)) {
             const settingTabDef = getSettingTabFromMenuTarget(target);
@@ -554,7 +552,6 @@ export const initRightMenu = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (settingTabDef) {
-                logMobileInputEvent("menu-open-setting", event, {setting: settingTabDef.id});
                 const keywords = normalizeSearchText(searchElement.value);
                 if (keywords) {
                     const result = getSettingTab(settingTabDef.id).scanSearch(keywords);
@@ -565,7 +562,6 @@ export const initRightMenu = (app: App) => {
                     showSearchResult(keywords, settingTabDef.id, result);
                 } else {
                     openSettingTab(app, settingTabDef, closeModel);
-                    logMobileInputEvent("menu-setting-opened", event, {setting: settingTabDef.id});
                 }
                 event.preventDefault();
                 event.stopPropagation();

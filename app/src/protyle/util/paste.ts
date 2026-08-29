@@ -32,7 +32,7 @@ import {
     type IHTMLEmbeddedAsset,
     validateHTMLEmbeddedAssetSizes,
 } from "../upload/htmlEmbeddedAssets";
-import {getAssetUploadPathsByInput} from "../upload/uploadResult";
+import {getCompleteAssetUploadPathsByInput} from "../upload/uploadResult";
 import {resolveLinkDest} from "../toolbar/util";
 import {updateTransaction} from "../wysiwyg/transaction";
 import * as dayjs from "dayjs";
@@ -793,6 +793,11 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
     }
 
+    // 外部网页可通过 copy 事件伪造 text/siyuan 或 ZWSP 结尾的 text/plain，与内部数据混同，粘贴前统一消毒 https://github.com/siyuan-note/siyuan/security/advisories/GHSA-9rr9-pxr4-gcgc
+    if (siyuanHTML) {
+        siyuanHTML = Lute.Sanitize(siyuanHTML);
+    }
+
     if (!siyuanHTML && textHTML) {
         const officeList = convertOfficeLists(textHTML);
         textHTML = officeList.html;
@@ -838,37 +843,20 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         return;
     } else if (siyuanHTML) {
         async function streamInsert(container: HTMLElement, bigHtmlString: string) {
-            const iframe = document.createElement("iframe");
-            iframe.style.display = "none";
-            document.body.appendChild(iframe);
-            try {
-                const doc = iframe.contentWindow.document;
-                doc.open();
-
-                const chunkSize = 102400;
-                let offset = 0;
-                while (offset < bigHtmlString.length) {
-                    const chunk = bigHtmlString.substring(offset, offset + chunkSize);
-                    doc.write(chunk);
-                    offset += chunkSize;
-                    await new Promise(resolve => setTimeout(resolve, 0));
-                    if (!isPasteInsertPositionAvailable()) {
-                        return false;
-                    }
-                }
-
-                doc.close();
-
-                const fragment = document.createDocumentFragment();
-                while (doc.body.firstChild) {
-                    fragment.appendChild(doc.body.firstChild);
-                }
-
-                container.appendChild(fragment);
-                return true;
-            } finally {
-                iframe.remove();
+            // 大段内容使用惰性解析避免将 HTML 写入同源 iframe，防止 script 执行
+            const doc = new DOMParser().parseFromString(bigHtmlString, "text/html");
+            if (!doc.body || !doc.body.firstChild) {
+                return false;
             }
+            if (!isPasteInsertPositionAvailable()) {
+                return false;
+            }
+            const fragment = document.createDocumentFragment();
+            while (doc.body.firstChild) {
+                fragment.appendChild(doc.body.firstChild);
+            }
+            container.appendChild(fragment);
+            return true;
         }
 
         // 编辑器内部粘贴
@@ -1212,20 +1200,24 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 preparedHTML = true;
             }
             if (localAssets.length > 0) {
+                let localAssetPaths: string[] | undefined;
                 await new Promise<void>(resolve => {
                     uploadLocalFiles(localAssets.map(item => ({path: item.path, size: null})), protyle, true, {
                         ...assetUploadOptions,
                         requiredFileCount: localAssets.length,
                         fromHTMLPaste: true,
                     }, (_response, result) => {
-                        applyHTMLLocalAssetPaths(localAssets,
-                            getAssetUploadPathsByInput(localAssets.length, result));
+                        localAssetPaths = getCompleteAssetUploadPathsByInput(localAssets.length, result);
                     }, () => resolve());
                 });
+                if (!localAssetPaths) {
+                    return;
+                }
                 range = restorePasteInsertRange();
                 if (!range) {
                     return;
                 }
+                applyHTMLLocalAssetPaths(localAssets, localAssetPaths);
             }
             let embeddedAssets: IHTMLEmbeddedAsset[];
             try {
@@ -1237,19 +1229,23 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 throw error;
             }
             if (embeddedAssets.length > 0) {
+                let embeddedAssetPaths: string[] | undefined;
                 await new Promise<void>(resolve => {
                     uploadFiles(protyle, embeddedAssets.map(item => item.file), undefined, (_response, result) => {
-                        applyHTMLEmbeddedAssetPaths(embeddedAssets,
-                            getAssetUploadPathsByInput(embeddedAssets.length, result));
+                        embeddedAssetPaths = getCompleteAssetUploadPathsByInput(embeddedAssets.length, result);
                     }, () => resolve(), {
                         ...assetUploadOptions,
                         requiredFileCount: embeddedAssets.length,
                     });
                 });
+                if (!embeddedAssetPaths) {
+                    return;
+                }
                 range = restorePasteInsertRange();
                 if (!range) {
                     return;
                 }
+                applyHTMLEmbeddedAssetPaths(embeddedAssets, embeddedAssetPaths);
             }
             let conversionResponse: IWebSocketData;
             const controller = new AbortController();

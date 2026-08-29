@@ -2,12 +2,6 @@ import {setEditMode} from "../util/setEditMode";
 import {scrollEvent} from "../scroll/event";
 import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
-import {isMac} from "../util/compatibility";
-import {setInlineStyle} from "../../util/assets";
-import {fetchPost} from "../../util/fetch";
-import {lineNumberRender} from "../render/highlightRender";
-import {hideMessage, showMessage} from "../../dialog/message";
-import {genUUID} from "../../util/genID";
 import {getContenteditableElement, getEmbedGutterOperationContext, getLastBlock} from "../wysiwyg/getBlock";
 import {genEmptyElement, genHeadingElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
@@ -107,51 +101,6 @@ export const initUI = (protyle: IProtyle) => {
     setEditMode(protyle, protyle.options.mode);
     document.execCommand("DefaultParagraphSeparator", false, "p");
 
-    let wheelTimeout: number;
-    const wheelId = genUUID();
-    const isMacOS = isMac();
-    protyle.contentElement.addEventListener("mousewheel", (event: WheelEvent) => {
-        if (!window.siyuan.config.editor.fontSizeScrollZoom || (isMacOS && !event.metaKey) || (!isMacOS && !event.ctrlKey) || event.deltaX !== 0) {
-            return;
-        }
-        event.stopPropagation();
-        if (event.deltaY < 0) {
-            if (window.siyuan.config.editor.fontSize < 72) {
-                window.siyuan.config.editor.fontSize++;
-            } else {
-                return;
-            }
-        } else if (event.deltaY > 0) {
-            if (window.siyuan.config.editor.fontSize > 9) {
-                window.siyuan.config.editor.fontSize--;
-            } else {
-                return;
-            }
-        }
-        setInlineStyle();
-        clearTimeout(wheelTimeout);
-        showMessage(`${window.siyuan.languages.fontSize} ${window.siyuan.config.editor.fontSize}px<span class="fn__space"></span>
-<button class="b3-button b3-button--white">${window.siyuan.languages.reset} 16px</button>`, undefined, undefined, wheelId);
-        wheelTimeout = window.setTimeout(() => {
-            fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-                window.siyuan.config.editor = response.data;
-            });
-            protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((block: HTMLElement) => {
-                lineNumberRender(block.parentElement);
-            });
-            document.querySelector(`#message [data-id="${wheelId}"] button`)?.addEventListener("click", () => {
-                window.siyuan.config.editor.fontSize = 16;
-                setInlineStyle();
-                fetchPost("/api/setting/setEditor", window.siyuan.config.editor, (response) => {
-                    window.siyuan.config.editor = response.data;
-                });
-                hideMessage(wheelId);
-                protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((block: HTMLElement) => {
-                    lineNumberRender(block.parentElement);
-                });
-            });
-        }, Constants.TIMEOUT_LOAD);
-    }, {passive: true});
     protyle.contentElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
         if (event.button !== 0 || !event.shiftKey) {
             return;

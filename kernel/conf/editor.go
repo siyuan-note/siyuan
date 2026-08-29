@@ -46,8 +46,9 @@ type EditorFont struct {
 type Editor struct {
 	AllowSVGScript                  bool           `json:"allowSVGScript"`                  // 允许执行 SVG 内脚本
 	AllowHTMLBLockScript            bool           `json:"allowHTMLBLockScript"`            // 允许执行 HTML 内容中的脚本
+	CursorSurroundingLines          int            `json:"cursorSurroundingLines"`          // 光标上下文行数
 	FontSize                        int            `json:"fontSize"`                        // 字体大小
-	FontSizeScrollZoom              bool           `json:"fontSizeScrollZoom"`              // 字体大小是否支持滚轮缩放
+	FontSizeScrollZoom              bool           `json:"fontSizeScrollZoom"`              // 保留用于配置兼容，前端不再使用
 	FontFamily                      string         `json:"fontFamily"`                      // 首选字体（兼容旧版本）
 	FontWeight                      int            `json:"fontWeight"`                      // 首选字体字重（兼容旧版本）
 	FontFamilyDisplay               string         `json:"fontFamilyDisplay"`               // 设置面板中展示的字体名称（与 FontFamily/FontWeight 对应，可选）
@@ -145,11 +146,16 @@ func normalizeEditorFontFamilies(fontFamilies []*EditorFont) []*EditorFont {
 
 const (
 	MinDynamicLoadBlocks       = 48
+	MaxCursorSurroundingLines  = 20
 	DefaultHeadingNumberFormat = "decimal-hierarchical"
 )
 
 func NormalizeBacklinkExpandCount(count int) int {
 	return max(-1, count)
+}
+
+func NormalizeCursorSurroundingLines(lines int) int {
+	return max(0, min(MaxCursorSurroundingLines, lines))
 }
 
 func NewAssetOpen() *AssetOpen {
@@ -185,6 +191,7 @@ func normalizeAssetOpenAction(action, fallback string) string {
 
 func NewEditor() *Editor {
 	return &Editor{
+		CursorSurroundingLines:          0,
 		FontSize:                        16,
 		FontSizeScrollZoom:              false,
 		CodeSyntaxHighlightLineNum:      false,

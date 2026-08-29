@@ -83,8 +83,19 @@ export const bindSortsEvent = (protyle: IProtyle, menuElement: HTMLElement, data
                 const oldColumn = fields.find((column) => column.id === sort.column);
                 const newColumn = fields.find((column) => column.id === item.value);
                 sort.column = item.value;
+                if (!newColumn?.renderTemplate?.trim() || newColumn?.type === "template") {
+                    delete sort.valueSource;
+                }
                 if (oldColumn?.type !== "date" || newColumn?.type !== "date") {
                     delete sort.dateEndpoint;
+                }
+                reRender = true;
+            } else if (item.dataset.type === "sortValueSource") {
+                if (item.value === "rendered") {
+                    sort.valueSource = "rendered";
+                    delete sort.dateEndpoint;
+                } else {
+                    delete sort.valueSource;
                 }
                 reRender = true;
             } else if (item.dataset.type === "sortDateEndpoint") {
@@ -126,7 +137,13 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
     };
     sorts.forEach((item: IAVSort) => {
         const column = columns.find((column) => column.id === item.column);
-        const dateEndpointHTML = column?.type === "date" ? `
+        const valueSourceHTML = column?.type !== "template" && (column?.renderTemplate?.trim() || item.valueSource === "rendered") ? `
+    <span class="fn__space"></span>
+    <select class="b3-select" data-type="sortValueSource" style="margin: 4px 0">
+        <option value="stored" ${item.valueSource !== "rendered" ? "selected" : ""}>${window.siyuan.languages.original}</option>
+        <option value="rendered" ${item.valueSource === "rendered" ? "selected" : ""}>${window.siyuan.languages.template}</option>
+    </select>` : "";
+        const dateEndpointHTML = column?.type === "date" && item.valueSource !== "rendered" ? `
     <span class="fn__space"></span>
     <select class="b3-select" data-type="sortDateEndpoint" style="margin: 4px 0">
         <option value="start" ${item.dateEndpoint !== "end" ? "selected" : ""}>${window.siyuan.languages.startDate}</option>
@@ -136,7 +153,7 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <select class="b3-select fn__flex-1" data-type="sortColumn" style="margin: 4px 0">
         ${genSortItem(item.column)}
-    </select>${dateEndpointHTML}
+    </select>${valueSourceHTML}${dateEndpointHTML}
     <span class="fn__space"></span>
     <select class="b3-select" data-type="sortOrder" style="margin: 4px 0">
         <option value="ASC" ${item.order === "ASC" ? "selected" : ""}>${window.siyuan.languages.asc}</option>

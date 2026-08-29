@@ -63,14 +63,12 @@ import {getEditableAVFields, openAVFieldEditor, updateAVFieldValue} from "./batc
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "./attributeValue";
 import {isMobile} from "../../../util/functions";
 import {getAVCurrentViewID} from "./viewVisibility";
+import {cloneAVCellValueSnapshot} from "./cellValue";
 import {formatAVItemLinks, genAVItemLink} from "./itemLink";
+import {openLink} from "../../../editor/openLink";
 /// #if MOBILE
 import {activeBlur} from "../../../mobile/util/keyboardToolbar";
 /// #endif
-
-const isDetachedDatabaseCell = (cellElement: HTMLElement) => {
-    return cellElement.dataset.detached === "true" || !cellElement.querySelector(".av__celltext--ref");
-};
 
 const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement?: HTMLElement, itemID = rowElement?.dataset.id) => {
     const cellElement = rowElement?.querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
@@ -83,7 +81,7 @@ const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement?: HTMLElement, 
             fieldID: cellElement.dataset.fieldId || cellElement.dataset.colId,
             content: value.block?.content || "",
             blockID: value.block?.id || "",
-            isDetached: isDetachedDatabaseCell(cellElement),
+            isDetached: value.isDetached === true || !value.block?.id,
         };
     }
     const cell = getAVPrimaryCell(blockElement, itemID);
@@ -91,7 +89,7 @@ const getPrimaryRowInfo = (blockElement: HTMLElement, rowElement?: HTMLElement, 
         return;
     }
     return {
-        value: cell.value,
+        value: cloneAVCellValueSnapshot(cell.value),
         valueID: cell.id,
         fieldID: cell.value.keyID,
         content: cell.value.block?.content || "",
@@ -196,7 +194,8 @@ const updateDatabaseRow = (protyle: IProtyle, target: HTMLElement) => {
     focusByRange(protyle.toolbar.range);
     cellElement.classList.add("av__cell--select");
     addDragFill(cellElement);
-    hintRef(textElement.textContent.trim(), protyle, "av");
+    const value = genCellValueByElement("block", cellElement);
+    hintRef(value.block?.content?.trim() || textElement.textContent.trim(), protyle, "av");
 };
 
 const getAVEditFieldMenuItems = (protyle: IProtyle, blockElement: HTMLElement): IMenu[] => {
@@ -283,7 +282,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const templateInteractiveElement = getAVTemplateInteractiveElement(event.target);
     if (templateInteractiveElement) {
         if (isAVTemplateLink(templateInteractiveElement)) {
-            event.preventDefault();
+            const link = templateInteractiveElement.getAttribute("data-href") ||
+                templateInteractiveElement.getAttribute("href");
+            if (link) {
+                openLink(protyle.app, link, event, event.ctrlKey || event.metaKey);
+                event.preventDefault();
+            }
         }
         event.stopPropagation();
         return true;
@@ -650,7 +654,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (target.classList.contains("item") && target.parentElement.classList.contains("layout-tab-bar")) {
             /// #if MOBILE
-            activeBlur();
+            activeBlur(true);
             /// #endif
             if (target.classList.contains("item--focus")) {
                 openViewMenu({protyle, blockElement, element: target});
@@ -1309,6 +1313,16 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
         }
         const viewType = blockElement.getAttribute("data-av-type") as TAVView;
         const iconElement = cellElement.querySelector(".b3-menu__avemoji");
+        const renderTemplate = cellElement.dataset.renderTemplate;
+        if (renderTemplate?.trim() && typeof value.renderedContent !== "string" &&
+            cellElement.querySelector(".av__celltext--template")) {
+            const valueElement = cellElement.querySelector<HTMLElement>("[data-cell-value]");
+            if (valueElement) {
+                valueElement.dataset.cellValue = encodeURIComponent(JSON.stringify(cloneAVCellValueSnapshot(value)));
+            }
+            renderCellAttr(cellElement, value);
+            return;
+        }
         if (["gallery", "kanban"].includes(viewType)) {
             if (value.type === "checkbox") {
                 value.checkbox = {
@@ -1317,11 +1331,12 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
                 };
             }
             cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
-                viewType, undefined, cellElement.dataset.dateFormat as TAVDateFormat);
-            cellElement.parentElement.setAttribute("data-empty", cellValueIsEmpty(value).toString());
+                viewType, undefined, cellElement.dataset.dateFormat as TAVDateFormat, renderTemplate);
+            cellElement.parentElement.setAttribute("data-empty",
+                cellValueIsEmpty(value, true, renderTemplate).toString());
         } else {
             cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false,
-                undefined, undefined, cellElement.dataset.dateFormat as TAVDateFormat);
+                undefined, undefined, cellElement.dataset.dateFormat as TAVDateFormat, renderTemplate);
         }
         if (hasDragFill) {
             addDragFill(cellElement);

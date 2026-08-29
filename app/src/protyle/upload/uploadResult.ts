@@ -38,6 +38,18 @@ export const getAssetUploadPathsByInput = (inputCount: number,
     return paths;
 };
 
+export const getCompleteAssetUploadPathsByInput = (inputCount: number,
+                                                     result: Omit<IAssetUploadResult, "requestId" | "input">) => {
+    if (result.status !== "success") {
+        return;
+    }
+    const paths = getAssetUploadPathsByInput(inputCount, result);
+    if (paths.some(path => !path)) {
+        return;
+    }
+    return paths as string[];
+};
+
 export const getAssetUploadResult = (responseText: string, acceptedInput: IAssetUploadInput,
                                      rejected: IAssetUploadRejection[] = []):
 Omit<IAssetUploadResult, "requestId" | "input"> => {

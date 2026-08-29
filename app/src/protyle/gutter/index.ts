@@ -79,10 +79,11 @@ import {appearanceMenu, limitRecentFontStyleRows} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation, selectRow, updateHeader} from "../render/av/row";
-import {getAVSelectedItemPoints} from "../render/av/virtualScroll";
+import {getAVData, getAVSelectedItemPoints} from "../render/av/virtualScroll";
 import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
+import {genCellValueByElement} from "../render/av/cell";
 import {getPlainText} from "../util/paste";
 import {CODE_TAB_SPACE_VALUES} from "../wysiwyg/codeBlockUtil";
 import {
@@ -115,7 +116,8 @@ import {
     getBacklinkGutterContentTop,
     getContainerGutterSpace,
     getFixedGutterPosition,
-    getGutterMarginHeight
+    getGutterMarginHeight,
+    getListGutterAnchorLeft
 } from "./layout";
 import {closeSubElement} from "../toolbar/subElementLifecycle";
 import {canShowGutterInsert, genGutterBlockButtonHTML} from "./button";
@@ -240,7 +242,8 @@ export class Gutter {
                         event.preventDefault();
                         event.stopPropagation();
                         return;
-                    } else if (["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
+                    } else if (getAVData(avElement)?.view.group?.valueSource === "rendered" ||
+                        ["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
                         event.preventDefault();
                         event.stopPropagation();
                         return;
@@ -540,7 +543,8 @@ export class Gutter {
                     blockElement.setAttribute("updated", newUpdated);
                 } else {
                     if (!protyle.disabled && event.shiftKey) {
-                        const blockId = rowElement.querySelector('[data-dtype="block"] .av__celltext--ref')?.getAttribute("data-id");
+                        const primaryCell = rowElement.querySelector<HTMLElement>('[data-dtype="block"]');
+                        const blockId = primaryCell ? genCellValueByElement("block", primaryCell).block?.id : undefined;
                         if (blockId) {
                             fetchPost("/api/attr/getBlockAttrs", {id: blockId}, (response) => {
                                 openFileAttr(response.data, "av", protyle);
@@ -3774,16 +3778,25 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
         }
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
-        if (listItem && !window.siyuan.config.editor.rtl && getComputedStyle(element).direction !== "rtl") {
+        const isRTL = window.siyuan.config.editor.rtl || getComputedStyle(element).direction === "rtl";
+        if (listItem && !isRTL) {
             rect = listItem.firstElementChild.getBoundingClientRect();
             space = 0;
         } else if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
             rect = nodeElement.getBoundingClientRect();
             space = 0;
         }
+        let horizontalAnchorLeft = rect.left;
+        if (listItem && element.classList.contains("protyle-action") &&
+            element.parentElement.getAttribute("data-type") === "NodeListItem") {
+            const listItemElement = element.parentElement;
+            const contentElement = listItemElement.querySelector<HTMLElement>(":scope > [data-node-id]");
+            const contentLeft = (contentElement || listItemElement).getBoundingClientRect().left;
+            horizontalAnchorLeft = getListGutterAnchorLeft(rect.left, contentLeft, isRTL);
+        }
         const buttonCount = html.split("</button>").length - 1;
         const getNaturalLeft = (width: number) => {
-            let left = rect.left - width - space;
+            let left = horizontalAnchorLeft - width - space;
             if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed" && buttonCount === 1) {
                 // 嵌入块为列表时
                 left = nodeElement.getBoundingClientRect().left - width - space;
@@ -3842,7 +3855,8 @@ data-type="fold"${viewOccurrenceID ? ` data-view-occurrence-id="${encodeURICompo
         const top = Math.max(rect.top + marginHeight, contentTop, foldElement ? foldElement.getBoundingClientRect().top : 0);
         this.element.style.top = `${getFixedGutterPosition(top, fixedContainerRect?.top)}px`;
         // 压缩模式需加 2，否则和折叠标题无法对齐
-        const left = compressed ? rect.left - this.element.clientWidth - space / 2 + 3 : getNaturalLeft(this.element.clientWidth);
+        const left = compressed ? horizontalAnchorLeft - this.element.clientWidth - space / 2 + 3 :
+            getNaturalLeft(this.element.clientWidth);
         this.element.style.left = `${getFixedGutterPosition(left, fixedContainerRect?.left)}px`;
     }
 }

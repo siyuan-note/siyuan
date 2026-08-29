@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getAssetUploadPathsByInput, getAssetUploadResult, getAssetUploadSuccesses} from "./uploadResult";
+import {
+    getAssetUploadPathsByInput,
+    getAssetUploadResult,
+    getAssetUploadSuccesses,
+    getCompleteAssetUploadPathsByInput,
+} from "./uploadResult";
 
 const createFile = (name: string) => new File(["content"], name, {type: "image/png"});
 
@@ -85,6 +90,26 @@ describe("asset upload result", () => {
             undefined,
             "assets/d.png",
         ]);
+    });
+
+    it("requires a successful path for every input before committing HTML", () => {
+        assert.deepEqual(getCompleteAssetUploadPathsByInput(2, {
+            status: "success",
+            succFiles: [
+                {index: 0, name: "a.png", path: "assets/a.png"},
+                {index: 1, name: "b.png", path: "assets/b.png"},
+            ],
+        }), ["assets/a.png", "assets/b.png"]);
+        assert.equal(getCompleteAssetUploadPathsByInput(2, {
+            status: "partial",
+            succFiles: [{index: 0, name: "a.png", path: "assets/a.png"}],
+        }), undefined);
+        assert.equal(getCompleteAssetUploadPathsByInput(1, {status: "canceled"}), undefined);
+        assert.equal(getCompleteAssetUploadPathsByInput(1, {status: "failed"}), undefined);
+        assert.equal(getCompleteAssetUploadPathsByInput(1, {
+            status: "success",
+            acceptedInput: {kind: "files", files: [createFile("a.png")]},
+        }), undefined);
     });
 
     it("maps legacy partial successes by unique input names", () => {

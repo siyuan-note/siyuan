@@ -57,6 +57,7 @@ import {setFold} from "./blockFold";
 import {isEncryptedBox} from "../../util/pathName";
 import {
     getAVRowDropTarget,
+    getBlockDragInsertPosition,
     getBlockDragoverTarget,
     getSameSuperBlockEdgeTarget,
     getSuperBlockResizeDropTarget,
@@ -70,12 +71,13 @@ import {
     uniqueDragIds
 } from "./dragDocument";
 import {getAVFilteredTipContext, getAVViewID} from "../render/av/filteredTip";
-import {getAVPreviousItemID, getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
+import {getAVData, getAVPreviousItemID, getAVSelectedItemPoints, updateAVRowSelect} from "../render/av/virtualScroll";
 import {setAVItemAnchor} from "../render/av/rangeSelect";
 import {getCaretRect} from "./caretRect";
 import {isBlockRefDropTargetDisabled} from "./blockRefDrop";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`;
+const SHIFT_EMBED_INSERT_TARGET_TYPES = ["NodeParagraph", "NodeHeading", "NodeCodeBlock", "NodeAttributeView"];
 
 const convertListItemSubtype = (listItem: Element, subtype: string) => {
     const actionElement = listItem.querySelector(".protyle-action");
@@ -1078,7 +1080,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             event.preventDefault();
                             event.stopPropagation();
                             return;
-                        } else if (["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
+                        } else if (getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
+                            ["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
                             event.preventDefault();
                             event.stopPropagation();
                             return;
@@ -1457,17 +1460,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (isBlockRefDropTargetDisabled([event.target as Node, range.startContainer])) {
                         return;
                     } else {
-                        // 数据库和代码块的工具区不属于编辑内容，需按拖拽指示线将光标定位到可编辑区域开头或末尾。
-                        if (event.shiftKey && ["NodeAttributeView", "NodeCodeBlock"].includes(targetElement?.getAttribute("data-type"))) {
+                        // 嵌入块为块级插入，需按拖拽指示线统一目标与方向，避免光标命中块上半区时插入到下方。
+                        if (event.shiftKey && SHIFT_EMBED_INSERT_TARGET_TYPES.includes(targetElement?.getAttribute("data-type"))) {
                             const editableElement = getContenteditableElement(targetElement);
-                            const isBefore = targetElement.classList.contains("dragover__top") ||
-                                targetElement.classList.contains("dragover__left");
-                            const isAfter = targetElement.classList.contains("dragover__bottom") ||
-                                targetElement.classList.contains("dragover__right");
-                            if (editableElement && (isBefore || isAfter)) {
+                            const dragInsertPosition = getBlockDragInsertPosition(targetElement);
+                            if (editableElement && dragInsertPosition) {
                                 range.selectNodeContents(editableElement);
-                                range.collapse(isBefore);
-                                insertPosition = isBefore ? "before" : "after";
+                                range.collapse(dragInsertPosition === "before");
+                                insertPosition = dragInsertPosition;
                             }
                         }
                         focusByRange(range);
@@ -2549,8 +2549,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (bodyElement) {
                     const blockElement = hasClosestBlock(bodyElement) as HTMLElement;
                     const groupID = bodyElement.getAttribute("data-group-id");
-                    // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
-                    const isTCU = ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                    // 模板渲染结果及无法回填的字段作为分组方式时不允许跨分组拖拽
+                    // https://github.com/siyuan-note/siyuan/issues/15553
+                    const isTCU = getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
+                        ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
                     // 排序只能夸组拖拽
                     const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
                     gutterTypes[2].split(",").find(item => {
@@ -2577,8 +2579,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (bodyElement) {
                     const blockElement = hasClosestBlock(bodyElement) as HTMLElement;
                     const groupID = bodyElement.getAttribute("data-group-id");
-                    // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
-                    const isTCU = ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                    // 模板渲染结果及无法回填的字段作为分组方式时不允许跨分组拖拽
+                    // https://github.com/siyuan-note/siyuan/issues/15553
+                    const isTCU = getAVData(blockElement)?.view.group?.valueSource === "rendered" ||
+                        ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
                     // 排序只能夸组拖拽
                     const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
                     gutterTypes[2].split(",").find(item => {

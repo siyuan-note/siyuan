@@ -716,9 +716,16 @@
   ```json
   {
     "code": 0,
-    "msg": "",
+    "msg": "disk full",
     "data": {
-      "errFiles": [""],
+      "errFiles": ["bar.png"],
+      "failedFiles": [
+        {
+          "index": 1,
+          "name": "bar.png",
+          "error": "disk full"
+        }
+      ],
       "succFiles": [
         {
           "index": 0,
@@ -734,6 +741,7 @@
   ```
 
     * `errFiles`: アップロード処理でエラーが発生したファイル名のリスト
+    * `failedFiles`: 明示的に失敗として報告されたファイルを記録します。`index` は `file[]` 内のインデックス、`name` はアップロード時のファイル名、`error` はエラーメッセージです。未実行または項目ごとに報告されなかったファイルは含まれない場合があります。各入力項目を曖昧さなく確認する必要がある場合は `succFiles` を使用してください
     * `succFiles`: 正常に処理されたファイルを入力順に記録します。`index` は `file[]` 内のインデックス、`name` はアップロード時のファイル名、`path` はアップロード後のアセットパスです。同じバッチに同名ファイルが含まれる場合は、このフィールドを使用してください
     * `succMap`: 既存の呼び出し元との互換性を保つための成功ファイルマッピングです。キーはアップロード時のファイル名、値は assets/foo-id.png です。同じバッチに同名ファイルが含まれる場合、同じキーでは最後の項目のみが保持されます
 
@@ -1888,10 +1896,11 @@
   ```
 
     * `data.view`: レンダリングされたビューインスタンス。構造は `viewType` により異なります。`table` は `columns`/`rows`/`rowCount` を、`gallery` と `kanban` は `fields`/`cards`/`cardCount` を返します。グループ化が有効な場合、`groups` には `groupKey`/`groupValue` を持つグループごとのビューインスタンスが含まれます。`view` は `filters`/`sorts`/`group`/`showIcon`/`wrapField`/`groupFolded`/`groupHidden` も含みます。注意：有効なフィルターまたはグループ化により、アイテムの総数が 0 より大きくてもアイテムリストが空になることがあります
-    * `data.view.columns[]`: 各列は `id`/`name`/`type`/`icon`/`wrap`/`hidden`/`desc`/`calc`/`numberFormat`/`template`/`pin`/`width` を持ちます；`select`/`mSelect` 列はさらに `options` を含みます
+    * `data.view.columns[]`: 各列は `id`/`name`/`type`/`icon`/`wrap`/`hidden`/`desc`/`calc`/`numberFormat`/`template`/`renderTemplate`/`pin`/`width` を持ちます。`select`/`mSelect` 列はさらに `options` を含みます。ギャラリーとカンバンのフィールドでは、同じフィールドメタデータが `data.view.fields[]` に返されます
+    * `data.view.columns[].renderTemplate`: 通常フィールドの任意の表示テンプレートです。表示内容のみを変更し、元の型付き保存値は変更しません
     * `data.view.rows[].id`: 表形式の行の**アイテム ID**（`itemID`）です。その行の主キーセルにある `value.blockID` とも同じです。紐づく行の場合、紐づくブロック ID は主キーセルの `value.block.id` にあります。両者は異なる概念であり、同一であると仮定してはいけません
     * `data.view.cards[].id`: ギャラリーまたはカンバンのカードの**アイテム ID**（`itemID`）です。グループ化が有効な場合、表形式の行またはカードは `groups[]` 内の対応するビューインスタンスにあります
-    * `data.view.rows[].cells[].value`: `Value` オブジェクト——すべての value 形状は [セル値を設定](#セル値を設定) を参照。`createdAt`/`updatedAt` は int64 ミリ秒タイムスタンプ
+    * `data.view.rows[].cells[].value`: `Value` オブジェクト——すべての value 形状は [セル値を設定](#セル値を設定) を参照。`createdAt`/`updatedAt` は int64 ミリ秒タイムスタンプ。通常フィールドに空でない `renderTemplate` が設定されている場合、任意の `renderedContent` プロパティに実行時の表示テンプレート結果が入ります。このプロパティは永続化されず、元の型のプロパティには引き続き保存値が入ります。`data.view.cards[]` 内の値も同じ規則に従います
     * `data.views`: 全ビューのメタデータ（行データなし）
     * `data.isMirror`: データベースブロックがデータベースのミラー（読み取り専用コピー）の場合 `true`
 
@@ -2289,6 +2298,7 @@
     * `blockID`: このビューを所有するデータベースブロック
     * `group`: グループ化ルール
     * `group.field`: グループ化の基準フィールド（列）ID。空文字列でグループ化を削除
+    * `group.valueSource`: 任意の値ソース——`stored` はフィールドの保存値を使用し、省略時のデフォルトです。`rendered` はフィールドの表示テンプレート結果を使用し、テキスト値としてグループ化します
     * `group.method`: グループ化方式——`0` 値ごと、`1` 数値範囲、`2` 相対日付、`3` 日ごと、`4` 週ごと、`5` 月ごと、`6` 年ごと
     * `group.range`: 任意。`method` が `1`（数値範囲）の場合は必須：`{ "numStart": 0, "numEnd": 100, "numStep": 10 }`
     * `group.order`: グループの並び順——`0` 昇順、`1` 降順、`2` 手動、`3` 選択肢の順序に従う
@@ -2355,13 +2365,15 @@
 
     * `data.filters`: `ViewFilter` の配列。最上位は単一のルートグループノード `{ "combination": "and"|"or", "filters": [...] }` で、配列要素はリーフフィルターまたはネストされたグループノードのいずれかで、再帰的な AND/OR 組み合わせをサポートします
     * `data.filters[].column`: フィルターが適用されるフィールド（列）ID（リーフノードのみ）
+    * `data.filters[].valueSource`: リーフノードの任意の値ソース——省略時は `stored` がデフォルトで、`rendered` はフィールドの表示テンプレート結果をフィルターします
     * `data.filters[].operator`: フィルター演算子（下記の演算子表を参照；リーフノードのみ）
-    * `data.filters[].value`: フィルター値。`Value` オブジェクト（形状は [セル値を設定](#セル値を設定) を参照；リーフノードのみ）
+    * `data.filters[].value`: フィルターのオペランドとなる `Value` オブジェクト（形状は [セル値を設定](#セル値を設定) を参照；リーフノードのみ）。`valueSource` が `rendered` の場合、`{ "type": "template", "template": { "content": "..." } }` 形式のテンプレート値を使用します
     * `data.filters[].relativeDate`: 任意。日付フィルターが使用する相対日時記述子（`{ "count": 7, "unit": 0, "direction": -1 }`、`unit`：`0` 日、`1` 週、`2` 月、`3` 年、`direction`：`-1` 前、`0` 今期、`1` 後；リーフノードのみ）
     * `data.filters[].combination`: グループの組み合わせ方法、`"and"` または `"or"`（グループノードのみ）
     * `data.filters[].filters`: 子フィルターノード、再帰的な `ViewFilter`（グループノードのみ）
     * `data.sorts`: `ViewSort` の配列
     * `data.sorts[].column`: ソートが適用されるフィールド（列）ID
+    * `data.sorts[].valueSource`: 任意の値ソース——省略時は `stored` がデフォルトで、`rendered` はフィールドの表示テンプレート結果でソートします
     * `data.sorts[].order`: `ASC` または `DESC`
 
   フィルター演算子：

@@ -32,7 +32,7 @@ import {
 } from "./dialog/processSystem";
 import {initMessage, showMessage} from "./dialog/message";
 import {getAllModels, getAllTabs} from "./layout/getAll";
-import {getLocalStorage, isChromeBrowser, isInMobileApp} from "./protyle/util/compatibility";
+import {getLocalStorage, isChromeBrowser, isInMobileApp, isIOSDevice} from "./protyle/util/compatibility";
 import {isBrowser} from "./util/functions";
 import {checkPublishServiceClosed} from "./util/processMessage";
 import {hideAllElements} from "./protyle/ui/hideElements";
@@ -313,7 +313,8 @@ export class App {
                         setTitle("", true);
                         initMessage();
                         /// #if BROWSER && !MOBILE
-                        if (!isInMobileApp() && !window.siyuan.config.readonly && !window.siyuan.isPublish && !isChromeBrowser()
+                        if (!isInMobileApp() && !isIOSDevice() && !window.siyuan.config.readonly &&
+                            !window.siyuan.isPublish && !isChromeBrowser()
                             && window.siyuan.config.appearance.notifications?.browserCompatibility !== false) {
                             showMessage(window.siyuan.languages.useChrome, 0, "error");
                         }

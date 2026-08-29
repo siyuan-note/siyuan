@@ -7,7 +7,14 @@ import {getOpenNotebookCount, originalPath, pathPosix, useShell} from "../util/p
 import {fetchNewDailyNote, mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {isInAndroid, isInHarmony, isInMobileApp, isIPad, setStorageVal, writeText} from "../protyle/util/compatibility";
+import {
+    isInAndroid,
+    isInHarmony,
+    isInMobileApp,
+    isIPad,
+    setStorageVal,
+    writeText,
+} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
@@ -30,6 +37,7 @@ import * as dayjs from "dayjs";
 import {upDownHint} from "../util/upDownHint";
 import {openDataMigration} from "./dataMigration";
 import {openLink} from "../editor/openLink";
+import {adjustEditorFontSize} from "../util/editorFontSize";
 
 const editLayout = (layoutName?: string) => {
     const dialog = new Dialog({
@@ -138,6 +146,99 @@ const togglePinDock = (id: "switchLeftDock" | "switchRightDock" | "switchBottomD
             dock.togglePin();
         }
     };
+};
+
+const getApplicationZoomSubMenu = () => {
+    const zoom = window.siyuan.storage[Constants.LOCAL_ZOOM];
+    const index = Constants.SIZE_ZOOM.findIndex((item) => item.zoom === zoom);
+    const setApplicationZoom = (type: "zoomIn" | "zoomOut" | "restore") => {
+        void import("../layout/topBar").then(({setZoom}) => setZoom(type));
+    };
+    return [
+        {
+            id: "applicationZoomIn",
+            label: window.siyuan.languages.zoomIn,
+            icon: "iconZoomIn",
+            accelerator: "⌘=",
+            disabled: index >= Constants.SIZE_ZOOM.length - 1,
+            click: () => setApplicationZoom("zoomIn"),
+        },
+        {
+            id: "applicationZoomOut",
+            label: window.siyuan.languages.zoomOut,
+            icon: "iconZoomOut",
+            accelerator: "⌘-",
+            disabled: index <= 0,
+            click: () => setApplicationZoom("zoomOut"),
+        },
+        {
+            id: "resetApplicationZoom",
+            icon: "iconRefresh",
+            label: window.siyuan.languages.reset,
+            accelerator: "⌘0",
+            disabled: zoom === 1,
+            click: () => setApplicationZoom("restore"),
+        },
+    ] as IMenu[];
+};
+
+const getEditorFontSizeSubMenu = () => [
+    {
+        id: "increaseEditorFontSize",
+        label: window.siyuan.languages.increaseEditorFontSize,
+        icon: "iconZoomIn",
+        accelerator: window.siyuan.config.keymap.general.increaseEditorFontSize.custom,
+        disabled: window.siyuan.config.editor.fontSize >= Constants.EDITOR_FONT_SIZE_MAX ||
+            window.siyuan.config.readonly,
+        click: () => {
+            adjustEditorFontSize("increase");
+        },
+    },
+    {
+        id: "decreaseEditorFontSize",
+        label: window.siyuan.languages.decreaseEditorFontSize,
+        icon: "iconZoomOut",
+        accelerator: window.siyuan.config.keymap.general.decreaseEditorFontSize.custom,
+        disabled: window.siyuan.config.editor.fontSize <= Constants.EDITOR_FONT_SIZE_MIN ||
+            window.siyuan.config.readonly,
+        click: () => {
+            adjustEditorFontSize("decrease");
+        },
+    },
+    {
+        icon:"iconRefresh",
+        id: "resetEditorFontSize",
+        label: window.siyuan.languages.resetEditorFontSize,
+        accelerator: window.siyuan.config.keymap.general.resetEditorFontSize.custom,
+        disabled: window.siyuan.config.editor.fontSize === Constants.EDITOR_FONT_SIZE_DEFAULT ||
+            window.siyuan.config.readonly,
+        click: () => {
+            adjustEditorFontSize("reset");
+        },
+    },
+] as IMenu[];
+
+const getZoomSubMenu = () => {
+    const submenu: IMenu[] = [];
+    if (!isBrowser()) {
+        submenu.push({
+            id: "applicationZoom",
+            iconHTML: "",
+            type: "submenu",
+            label: window.siyuan.languages.applicationZoom,
+            accelerator: Math.round(window.siyuan.storage[Constants.LOCAL_ZOOM] * 100) + "%",
+            submenu: getApplicationZoomSubMenu(),
+        });
+    }
+    submenu.push({
+        id: "editorFontSize",
+        iconHTML: "",
+        type: "submenu",
+        label: window.siyuan.languages.editorFontSize,
+        accelerator: window.siyuan.config.editor.fontSize + " px",
+        submenu: getEditorFontSizeSubMenu(),
+    });
+    return submenu;
 };
 
 export const workspaceMenu = (app: App, rect: DOMRect) => {
@@ -454,6 +555,13 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 submenu: layoutSubMenu
             }).element);
         }
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "zoomControls",
+            label: window.siyuan.languages.zoom,
+            icon: "iconZoomIn",
+            type: "submenu",
+            submenu: getZoomSubMenu(),
+        }).element);
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
         if (!window.siyuan.config.readonly) {
             if (getOpenNotebookCount() < 2) {

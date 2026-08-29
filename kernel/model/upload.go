@@ -117,6 +117,20 @@ func recordAssetUploadFailure(failedFiles *[]AssetUploadFailure, index int, name
 	*failedFiles = append(*failedFiles, AssetUploadFailure{Index: index, Name: name, Error: err.Error()})
 }
 
+func copyRTFDEntries(entries []os.DirEntry, srcDir, destDir string, copyFile func(string, string) error) error {
+	for _, entry := range entries {
+		from := filepath.Join(srcDir, entry.Name())
+		to := filepath.Join(destDir, entry.Name())
+		if err := copyFile(from, to); err != nil {
+			if removeErr := os.RemoveAll(destDir); removeErr != nil {
+				logging.LogErrorf("remove partial RTFD directory [%s] failed: %s", destDir, removeErr)
+			}
+			return err
+		}
+	}
+	return nil
+}
+
 func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]any,
 	succFiles []AssetUploadSuccess, failedFiles []AssetUploadFailure, err error) {
 	return insertLocalAssets(id, assetAbsPaths, isUpload, false)
@@ -133,14 +147,18 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 	succFiles = make([]AssetUploadSuccess, 0, len(assetAbsPaths))
 	failedFiles = make([]AssetUploadFailure, 0)
 
-	bt := treenode.GetBlockTree(id)
-	if nil == bt {
-		err = errors.New(Conf.Language(71))
-		return
+	boxID := ""
+	assetsDirPath := filepath.Join(util.DataDir, "assets")
+	if id != "" {
+		bt := treenode.GetBlockTree(id)
+		if nil == bt {
+			err = errors.New(Conf.Language(71))
+			return
+		}
+		boxID = bt.BoxID
+		docDirLocalPath := filepath.Join(util.DataDir, boxID, path.Dir(bt.Path))
+		assetsDirPath = getAssetsDir(filepath.Join(util.DataDir, boxID), docDirLocalPath)
 	}
-
-	docDirLocalPath := filepath.Join(util.DataDir, bt.BoxID, path.Dir(bt.Path))
-	assetsDirPath := getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
 	if !gulu.File.IsExist(assetsDirPath) {
 		if err = os.MkdirAll(assetsDirPath, 0755); err != nil {
 			return
@@ -199,7 +217,7 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 			hash = "random_1_" + gulu.Rand.String(12)
 		}
 
-		existAssetPath := GetAssetPathByHash(hash, bt.BoxID)
+		existAssetPath := GetAssetPathByHash(hash, boxID)
 		if "" != existAssetPath {
 			originalName := util.RemoveID(filepath.Base(existAssetPath))
 			if strings.ToLower(fName) != strings.ToLower(originalName) {
@@ -212,7 +230,7 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 			f.Close()
 		} else {
 			blockID := ast.NewNodeID()
-			if IsEncryptedBox(bt.BoxID) {
+			if IsEncryptedBox(boxID) {
 				// 加密 box：磁盘文件名脱敏为 uuid-blockID.ext，原始名存加密映射
 				fName = encryptedAssetName(util.Ext(fName), blockID)
 			} else {
@@ -224,7 +242,7 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 				recordAssetUploadFailure(&failedFiles, index, baseName, seekErr)
 				continue
 			}
-			if writeErr := writeAssetFile(writePath, f, bt.BoxID, baseName); writeErr != nil {
+			if writeErr := writeAssetFile(writePath, f, boxID, baseName); writeErr != nil {
 				f.Close()
 				recordAssetUploadFailure(&failedFiles, index, baseName, writeErr)
 				continue
@@ -232,11 +250,11 @@ func insertLocalAssets(id string, assetAbsPaths []string, isUpload, validateHTML
 			f.Close()
 
 			p := "assets/" + fName
-			if IsEncryptedBox(bt.BoxID) {
-				p += "?box=" + bt.BoxID
+			if IsEncryptedBox(boxID) {
+				p += "?box=" + boxID
 			}
 			recordAssetUploadSuccess(succMap, &succFiles, index, baseName, p)
-			if !IsEncryptedBox(bt.BoxID) {
+			if !IsEncryptedBox(boxID) {
 				cache.SetAssetHash(hash, p) // 加密笔记本不写全局 cache，避免跨边界去重污染
 			}
 		}
@@ -306,6 +324,14 @@ func Upload(c *gin.Context) {
 	succMap := map[string]any{}
 	files := form.File["file[]"]
 	succFiles := make([]AssetUploadSuccess, 0, len(files))
+	failedFiles := make([]AssetUploadFailure, 0)
+	recordFailure := func(index int, inputName, errorName string, uploadErr error) {
+		errFiles = append(errFiles, errorName)
+		recordAssetUploadFailure(&failedFiles, index, inputName, uploadErr)
+		if ret.Msg == "" {
+			ret.Msg = uploadErr.Error()
+		}
+	}
 	skipIfDuplicated := false // 默认不跳过重复文件，但是有的场景需要跳过，比如上传 PDF 标注图片 https://github.com/siyuan-note/siyuan/issues/10666
 	if nil != form.Value["skipIfDuplicated"] {
 		skipIfDuplicated = "true" == form.Value["skipIfDuplicated"][0]
@@ -333,23 +359,21 @@ func Upload(c *gin.Context) {
 		fName += ext
 		f, openErr := file.Open()
 		if nil != openErr {
-			errFiles = append(errFiles, fName)
-			ret.Msg = openErr.Error()
-			break
+			recordFailure(index, file.Filename, fName, openErr)
+			continue
 		}
 		if needUnzip2Dir && IsEncryptedBox(uploadBoxID) {
-			errFiles = append(errFiles, fName)
-			ret.Msg = "directory assets are not supported in encrypted notebooks"
+			unsupportedErr := errors.New("directory assets are not supported in encrypted notebooks")
+			recordFailure(index, file.Filename, fName, unsupportedErr)
 			f.Close()
-			break
+			continue
 		}
 
 		hash, hashErr := util.GetEtagByHandle(f, file.Size)
 		if nil != hashErr {
-			errFiles = append(errFiles, fName)
-			ret.Msg = hashErr.Error()
+			recordFailure(index, file.Filename, fName, hashErr)
 			f.Close()
-			break
+			continue
 		}
 
 		if 1 > file.Size {
@@ -388,7 +412,7 @@ func Upload(c *gin.Context) {
 						recordAssetUploadSuccess(succMap, &succFiles, index, baseName,
 							strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/"))
 						f.Close()
-						break
+						continue
 					}
 				}
 			}
@@ -406,27 +430,31 @@ func Upload(c *gin.Context) {
 			tmpDir := filepath.Join(util.TempDir, "convert", "zip", gulu.Rand.String(7))
 			if needUnzip2Dir {
 				if err = os.MkdirAll(tmpDir, 0755); err != nil {
-					errFiles = append(errFiles, fName)
-					ret.Msg = err.Error()
+					recordFailure(index, file.Filename, fName, err)
 					f.Close()
-					break
+					_ = os.RemoveAll(tmpDir)
+					continue
 				}
 				writePath = filepath.Join(tmpDir, fName)
 			}
 
 			if _, err = f.Seek(0, io.SeekStart); err != nil {
 				logging.LogErrorf("seek failed: %s", err)
-				errFiles = append(errFiles, fName)
-				ret.Msg = err.Error()
+				recordFailure(index, file.Filename, fName, err)
 				f.Close()
-				break
+				if needUnzip2Dir {
+					_ = os.RemoveAll(tmpDir)
+				}
+				continue
 			}
 			if err = writeAssetFile(writePath, f, uploadBoxID, baseName); err != nil {
 				logging.LogErrorf("write file failed: %s", err)
-				errFiles = append(errFiles, fName)
-				ret.Msg = err.Error()
+				recordFailure(index, file.Filename, fName, err)
 				f.Close()
-				break
+				if needUnzip2Dir {
+					_ = os.RemoveAll(tmpDir)
+				}
+				continue
 			}
 			f.Close()
 
@@ -441,46 +469,48 @@ func Upload(c *gin.Context) {
 				fName = util.AssetName(fName, ast.NewNodeID())
 				tmpDir2 := filepath.Join(util.TempDir, "convert", "zip", gulu.Rand.String(7))
 				if err = gulu.Zip.Unzip(writePath, tmpDir2); err != nil {
-					errFiles = append(errFiles, fName)
-					ret.Msg = err.Error()
-					break
+					recordFailure(index, file.Filename, fName, err)
+					_ = os.RemoveAll(tmpDir)
+					_ = os.RemoveAll(tmpDir2)
+					continue
 				}
 
 				entries, readErr := os.ReadDir(tmpDir2)
 				if nil != readErr {
 					logging.LogErrorf("read dir [%s] failed: %s", tmpDir2, readErr)
-					errFiles = append(errFiles, fName)
-					ret.Msg = readErr.Error()
-					break
+					recordFailure(index, file.Filename, fName, readErr)
+					_ = os.RemoveAll(tmpDir)
+					_ = os.RemoveAll(tmpDir2)
+					continue
 				}
 				if 1 > len(entries) {
 					logging.LogErrorf("read dir [%s] failed: no entry", tmpDir2)
-					errFiles = append(errFiles, fName)
-					ret.Msg = "no entry"
-					break
+					noEntryErr := errors.New("no entry")
+					recordFailure(index, file.Filename, fName, noEntryErr)
+					_ = os.RemoveAll(tmpDir)
+					_ = os.RemoveAll(tmpDir2)
+					continue
 				}
 				dirName := entries[0].Name()
 				srcDir := filepath.Join(tmpDir2, dirName)
 				entries, readErr = os.ReadDir(srcDir)
 				if nil != readErr {
 					logging.LogErrorf("read dir [%s] failed: %s", filepath.Join(tmpDir2, entries[0].Name()), readErr)
-					errFiles = append(errFiles, fName)
-					ret.Msg = readErr.Error()
-					break
+					recordFailure(index, file.Filename, fName, readErr)
+					_ = os.RemoveAll(tmpDir)
+					_ = os.RemoveAll(tmpDir2)
+					continue
 				}
 				destDir := filepath.Join(assetsDirPath, fName)
-				for _, entry := range entries {
-					from := filepath.Join(srcDir, entry.Name())
-					to := filepath.Join(destDir, entry.Name())
-					if copyErr := gulu.File.Copy(from, to); nil != copyErr {
-						logging.LogErrorf("copy [%s] to [%s] failed: %s", from, to, copyErr)
-						errFiles = append(errFiles, fName)
-						ret.Msg = copyErr.Error()
-						break
-					}
+				if copyErr := copyRTFDEntries(entries, srcDir, destDir, gulu.File.Copy); nil != copyErr {
+					logging.LogErrorf("copy RTFD directory [%s] failed: %s", srcDir, copyErr)
+					recordFailure(index, file.Filename, fName, copyErr)
+					_ = os.RemoveAll(tmpDir)
+					_ = os.RemoveAll(tmpDir2)
+					continue
 				}
-				os.RemoveAll(tmpDir)
-				os.RemoveAll(tmpDir2)
+				_ = os.RemoveAll(tmpDir)
+				_ = os.RemoveAll(tmpDir2)
 			}
 
 			p := strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
@@ -495,9 +525,10 @@ func Upload(c *gin.Context) {
 	}
 
 	ret.Data = map[string]any{
-		"errFiles":  errFiles,
-		"succFiles": succFiles,
-		"succMap":   succMap,
+		"errFiles":    errFiles,
+		"failedFiles": failedFiles,
+		"succFiles":   succFiles,
+		"succMap":     succMap,
 	}
 
 	IncSync()

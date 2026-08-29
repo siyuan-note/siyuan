@@ -11,7 +11,6 @@ import {copyPNGByLink, exportAsset, writeAssetToClipboard} from "../../../menus/
 import {setPosition} from "../../../util/setPosition";
 import {getAVBatchEditMode, getAVBatchSourceValue} from "./batchValue";
 import {previewAttrViewImages} from "../../preview/image";
-import {genAVValueHTML} from "./attributeValue";
 import {showMessage} from "../../../dialog/message";
 import {hasClosestBlock} from "../../util/hasClosest";
 import {genCellValueByElement, getTypeByCellElement, updateAttrViewCellInOtherElements} from "./cell";
@@ -199,9 +198,7 @@ export const updateAssetCell = (options: {
             avID,
             data: oldValue
         });
-        if (item.classList.contains("custom-attr__avvalue")) {
-            item.innerHTML = genAVValueHTML(cellValue);
-        } else {
+        if (!item.classList.contains("custom-attr__avvalue")) {
             updateAttrViewCellAnimation(item, cellValue);
         }
         updateAttrViewCellInOtherElements(options.protyle, avID, rowID, colId, cellValue, item);

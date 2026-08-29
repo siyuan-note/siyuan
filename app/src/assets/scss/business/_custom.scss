@@ -315,25 +315,6 @@
         white-space: nowrap;
       }
 
-      &.dragover__left::after,
-      &.dragover__right::after {
-        background-color: var(--b3-theme-primary);
-        bottom: 4px;
-        content: "";
-        pointer-events: none;
-        position: absolute;
-        top: 4px;
-        width: 2px;
-      }
-
-      &.dragover__left::after {
-        left: 0;
-      }
-
-      &.dragover__right::after {
-        right: 0;
-      }
-
       &[data-dragging="true"] {
         opacity: .38;
       }

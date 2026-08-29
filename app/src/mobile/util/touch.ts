@@ -26,10 +26,10 @@ import {
     getSidebarOpeningOffset,
     type MobileSidebarSide,
     type MobileSwipeDirection,
+    setSidebarSwipeState,
     shouldCloseGlobalMenu,
     shouldDragOpenSidebar,
 } from "./touchPanelGesture";
-import {logMobileInputEvent} from "./inputEventLogger";
 
 let clientX: number;
 let clientY: number;
@@ -48,6 +48,15 @@ let longPressTouchRange: Range;
 
 const getSidebarElement = (side: MobileSidebarSide) => {
     return document.getElementById(side === "left" ? "sidebar" : "sidebarRight");
+};
+
+const sideMaskElement = document.querySelector(".side-mask") as HTMLElement;
+
+const updateSidebarSwipeState = (activeSide?: MobileSidebarSide) => {
+    setSidebarSwipeState({
+        left: getSidebarElement("left"),
+        right: getSidebarElement("right"),
+    }, sideMaskElement, activeSide);
 };
 
 const getTargetSidebar = (target: HTMLElement): MobileSidebarSide | undefined => {
@@ -154,6 +163,7 @@ const restoreInvisibleLongPressSelection = () => {
 };
 
 export const handleTouchUp = () => {
+    updateSidebarSwipeState();
     resetAndroidBoundedSelectionGesture();
     if (Date.now() - time < Constants.TIMEOUT_MULTIPLE_SELECT) {
         clearLongPress();
@@ -172,6 +182,7 @@ export const handleTouchSelectionChange = () => {
 };
 
 export const handleTouchEnd = (event: TouchEvent) => {
+    updateSidebarSwipeState();
     const target = event.target as HTMLElement;
     const currentTime = Date.now();
     const editor = getCurrentEditor();
@@ -182,11 +193,6 @@ export const handleTouchEnd = (event: TouchEvent) => {
         Math.abs(clientY - event.changedTouches[0].clientY) < Constants.SIZE_DRAG_THRESHOLD) {
         if (editor && editor.protyle.toolbar.isMultiSelectMode()) {
             if (longPressTimer) {
-                logMobileInputEvent("touchend-cancel-multiselect", event, {
-                    duration: currentTime - time,
-                    xDiff: Math.abs(clientX - event.changedTouches[0].clientX),
-                    yDiff: Math.abs(clientY - event.changedTouches[0].clientY),
-                });
                 event.stopImmediatePropagation();
                 event.preventDefault();
                 return;
@@ -213,11 +219,6 @@ export const handleTouchEnd = (event: TouchEvent) => {
             }
         } else if (currentTime - time > Constants.TIMEOUT_LONGPRESS) {
             // 长按：多选已在按住满阈值时触发，此处取消定时器避免重复触发
-            logMobileInputEvent("touchend-cancel-longpress", event, {
-                duration: currentTime - time,
-                xDiff: Math.abs(clientX - event.changedTouches[0].clientX),
-                yDiff: Math.abs(clientY - event.changedTouches[0].clientY),
-            });
             if (isIPhone() && !isChromeBrowser() && !window.siyuan.touchDragActive) {
                 target.dispatchEvent(new MouseEvent("contextmenu", {
                     bubbles: true,
@@ -331,6 +332,7 @@ export const handleTouchEnd = (event: TouchEvent) => {
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
+    updateSidebarSwipeState();
     time = Date.now();
     longPressBlockElement = undefined;
     longPressTouchRange = undefined;
@@ -425,8 +427,6 @@ export const handleTouchStart = (event: TouchEvent) => {
 };
 
 let previousClientX: number;
-const sideMaskElement = document.querySelector(".side-mask") as HTMLElement;
-
 const isHorizontalScrollable = (target: HTMLElement, xDiff: number) => {
     let element: HTMLElement = target;
     while (element && element.id !== "model") {
@@ -572,6 +572,7 @@ export const handleTouchMove = (event: TouchEvent) => {
             }
             sideMaskElement.style.zIndex = (++window.siyuan.zIndex).toString();
             const activeSidebar = getTargetSidebar(target) || openingSidebar;
+            updateSidebarSwipeState(activeSidebar);
             getSidebarElement(activeSidebar).style.zIndex = (++window.siyuan.zIndex).toString();
             isFirstMove = false;
         }

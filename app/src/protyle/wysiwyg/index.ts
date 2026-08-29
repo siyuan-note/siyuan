@@ -2953,9 +2953,12 @@ export class WYSIWYG {
                 setInsertWbrHTML(nodeElement, range, protyle);
                 return;
             }
-            // https://github.com/siyuan-note/siyuan/issues/17800 不能删除
+            // 嵌入块内仅允许剪切同一内容块中的文本，避免触发块删除或跨块结构变更。
             const embedElement = isInEmbedBlock(nodeElement);
-            if (embedElement && !embedElement.classList.contains("protyle-wysiwyg--select")) {
+            const isSameBlockTextCut = !range.collapsed && range.toString() !== "" &&
+                hasClosestBlock(range.endContainer) === nodeElement;
+            if (embedElement && !embedElement.classList.contains("protyle-wysiwyg--select") &&
+                !isSameBlockTextCut) {
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -3900,6 +3903,10 @@ export class WYSIWYG {
             event.stopPropagation();
         });
 
+        this.element.addEventListener("input", () => {
+            crossBlockComposition?.preservePreview();
+        });
+
         this.element.addEventListener("compositionend", async (event: InputEvent) => {
             event.stopPropagation();
             if (getAVTemplateInteractiveElement(event.target)) {
@@ -4813,6 +4820,12 @@ export class WYSIWYG {
                     } else {
                         if (actionElement.classList.contains("protyle-action--task")) {
                             if (!protyle.disabled) {
+                                /// #if MOBILE
+                                event.preventDefault();
+                                if (document.getElementById("keyboardToolbar")?.classList.contains("fn__none")) {
+                                    activeBlur(true);
+                                }
+                                /// #endif
                                 toggleTaskListItem(protyle, actionElement.parentElement);
                             }
                         } else if (window.siyuan.config.editor.listItemDotNumberClickFocus) {

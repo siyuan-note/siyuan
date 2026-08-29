@@ -4,7 +4,7 @@ import {Constants} from "../../../constants";
 import {getCompressURL} from "../../../util/image";
 import {isBrowserRenderableImagePath} from "../../../util/imageURL";
 import {formatDateDisplay, formatDateValue} from "./dateFormat";
-import {getAVBlockRefSubtype} from "./cellValue";
+import {cloneAVCellValueSnapshot, getAVBlockRefSubtype, hasAVRenderTemplateResult} from "./cellValue";
 import {getAVColorStyle} from "./color";
 
 export const createEmptyAVValue = (keyID: string, type: TAVCol, blockID?: string) => ({
@@ -121,7 +121,11 @@ const genAVRollupHTML = (value: IAVCellValue) => {
     return html;
 };
 
-export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = "") => {
+export const genAVValueHTML = (value: IAVCellValue, dateFormat: TAVDateFormat = "", renderTemplate?: string) => {
+    if (hasAVRenderTemplateResult(value, renderTemplate)) {
+        const storedValue = cloneAVCellValueSnapshot(value);
+        return `<div class="fn__flex-1 av__celltext--template" data-cell-value="${escapeAttr(encodeURIComponent(JSON.stringify(storedValue)))}" placeholder="${window.siyuan.languages.empty}">${getAVTemplateHTML(value.renderedContent || "")}</div>`;
+    }
     let html = "";
     switch (value.type) {
         case "block":
@@ -234,10 +238,12 @@ export const genAVAttributeRowHTML = (options: {
         color: string
     }[],
     dateFormat?: TAVDateFormat,
+    renderTemplate?: string,
     value: IAVCellValue,
     empty: boolean,
 }) => {
     const value = options.value;
+    const storedValue = cloneAVCellValueSnapshot(value);
     const textInputType = ["url", "text", "email", "phone", "block"].includes(value.type);
     const hasOwnPlaceholder = ["text", "number", "date", "url", "phone", "template", "email"].includes(value.type);
     return `<div class="block__icons av__row" data-id="${options.nodeID}" data-col-id="${options.keyID}" data-empty="${options.empty}"${options.type === "block" ? ' data-primary="true"' : ""}>
@@ -246,10 +252,11 @@ export const genAVAttributeRowHTML = (options: {
         ${options.icon ? unicode2Emoji(options.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${options.typeIcon}"></use></svg>`}
         <span>${escapeHtml(options.name)}</span>
     </div>
-    <div data-av-id="${options.avID}" data-col-id="${value.keyID}" data-row-id="${value.blockID}"${value.id ? ` data-id="${value.id}"` : ""} data-cell-value="${encodeURIComponent(JSON.stringify(value))}" data-type="${value.type}"${value.isDetached ? ' data-detached="true"' : ""}
+    <div data-av-id="${options.avID}" data-col-id="${value.keyID}" data-row-id="${value.blockID}"${value.id ? ` data-id="${value.id}"` : ""} data-cell-value="${encodeURIComponent(JSON.stringify(storedValue))}" data-type="${value.type}"${value.isDetached ? ' data-detached="true"' : ""}
 data-options="${options.selectOptions ? escapeAttr(JSON.stringify(options.selectOptions)) : "[]"}"
 data-date-format="${options.dateFormat || ""}"
+${options.renderTemplate?.trim() ? 'data-render-template="true"' : ""}
 ${hasOwnPlaceholder ? "" : `placeholder="${window.siyuan.languages.empty}"`}
-class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(value.type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(value, options.dateFormat)}</div>
+class="fn__flex-1 fn__flex${textInputType ? "" : " custom-attr__avvalue"}${["created", "updated"].includes(value.type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(value, options.dateFormat, options.renderTemplate)}</div>
 </div>`;
 };

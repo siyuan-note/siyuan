@@ -200,7 +200,7 @@ export const renderKanban = async (options: {
     const groupOptions = groupKey?.options || [];
     const queryEmbedElement = hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed");
     const groupDraggable = !options.protyle.disabled && !created && !snapshot && !queryEmbedElement &&
-        !["created", "date", "updated"].includes(groupKey?.type);
+        (view.group?.valueSource === "rendered" || !["created", "date", "updated"].includes(groupKey?.type));
     const groupConfig = escapeAttr(JSON.stringify(view.group));
     let bodyHTML = "";
     let isSelectGroup = false;

@@ -9,7 +9,7 @@ import {Bookmark} from "./Bookmark";
 import {Tag} from "./Tag";
 import {Graph} from "./Graph";
 import {Model} from "../Model";
-import {adjustLayout, saveLayout, setPanelFocus} from "../util";
+import {adjustLayout, getWndByLayout, saveLayout, setPanelFocus} from "../util";
 import {getDockByType, resizeTabs, setTabPosition} from "../tabUtil";
 import {Inbox} from "./Inbox";
 import {Protyle} from "../../protyle";
@@ -28,6 +28,7 @@ import {
     updatePluginDockShowStates,
 } from "./pluginDockState";
 import {getDockHotkey} from "./hotkey";
+import {resolveDockPanelVisibility} from "./panelVisibility";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
 type TDockTabData = Config.IUILayoutDockTab & {entryId?: string};
@@ -43,6 +44,8 @@ export class Dock {
     private hideResizeTimeout: number;
     private showDockTimeout = 0;
     private hideDockTimeout = 0;
+    private panelVisible = true;
+    private collapsedPanelSize = "";
 
     constructor(options: {
         app: App,
@@ -91,8 +94,8 @@ export class Dock {
         const fileElement = document.querySelector('.dock__item[data-type="file"]');
         if (fileElement && !fileElement.classList.contains("dock__item--active") &&
             (this.elements[0].contains(fileElement) || this.elements[1].contains(fileElement))) {
-            this.toggleModel("file", true, false, false, false);
-            this.toggleModel("file", false, false, false, false);
+            this.toggleModel("file", true, false, false, false, false);
+            this.toggleModel("file", false, false, false, false, false);
         }
 
         if (!activeElements[0] && !activeElements[1]) {
@@ -107,7 +110,7 @@ export class Dock {
         } else {
             activeElements.forEach(item => {
                 if (item) {
-                    this.toggleModel(item.getAttribute("data-type") as TDock, true, false, false, false);
+                    this.toggleModel(item.getAttribute("data-type") as TDock, true, false, false, false, false);
                 }
             });
         }
@@ -318,6 +321,79 @@ export class Dock {
         }
     }
 
+    public isPanelVisible() {
+        return this.panelVisible && this.hasActive();
+    }
+
+    public getCollapsedPanelSize() {
+        return this.panelVisible || !this.collapsedPanelSize ? undefined : this.collapsedPanelSize;
+    }
+
+    public togglePanel(visible?: boolean) {
+        const hasActive = this.hasActive();
+        const resolution = resolveDockPanelVisibility(this.panelVisible, hasActive, visible);
+        if (!hasActive) {
+            // 空面板不保留隐藏状态，后续打开工具时应正常显示
+            this.panelVisible = resolution.storedVisible;
+            this.collapsedPanelSize = "";
+            this.layout.element.classList.remove("fn__none");
+            this.resizeElement.classList.add("fn__none");
+            return false;
+        }
+
+        if (!resolution.changed) {
+            return resolution.visible;
+        }
+
+        if (!resolution.visible) {
+            const fullscreenElement = this.layout.element.querySelector(".fullscreen");
+            if (fullscreenElement && fullscreenElement.clientHeight > 0) {
+                return true;
+            }
+        }
+        const hadPanelFocus = Boolean(this.layout.element.querySelector(".layout__tab--active") ||
+            document.activeElement && this.layout.element.contains(document.activeElement));
+        if (this.pin) {
+            recordBeforeResizeTop();
+        }
+        if (!resolution.visible) {
+            this.collapsedPanelSize = this.getCurrentLayoutSize();
+        } else {
+            this.collapsedPanelSize = "";
+        }
+        this.panelVisible = resolution.storedVisible;
+        this.layout.element.classList.toggle("fn__none", !resolution.visible);
+        if (resolution.visible && this.pin) {
+            adjustLayout();
+            this.resizeElement.classList.remove("fn__none");
+        } else {
+            this.resizeElement.classList.add("fn__none");
+        }
+        if (!resolution.visible) {
+            this.clearDockHoverTimeout();
+            window.clearTimeout(this.hideResizeTimeout);
+            if (document.activeElement && this.layout.element.contains(document.activeElement)) {
+                (document.activeElement as HTMLElement).blur();
+            }
+            if (hadPanelFocus) {
+                const centerWnd = window.siyuan.layout.centerLayout && getWndByLayout(window.siyuan.layout.centerLayout);
+                if (centerWnd) {
+                    setPanelFocus(centerWnd.element.firstElementChild, false);
+                } else {
+                    document.querySelectorAll(".layout__tab--active").forEach(item => {
+                        item.classList.remove("layout__tab--active");
+                    });
+                    document.querySelectorAll(".dock__item--activefocus").forEach(item => {
+                        item.classList.remove("dock__item--activefocus");
+                    });
+                }
+            }
+        }
+        resizeTabs(false);
+        setTabPosition(true);
+        return this.isPanelVisible();
+    }
+
     public togglePin() {
         this.clearDockHoverTimeout();
         this.pin = !this.pin;
@@ -331,7 +407,7 @@ export class Dock {
         } else {
             this.layout.element.style.transform = "";
             this.layout.element.style.zIndex = "";
-            if (hasActive) {
+            if (hasActive && this.panelVisible) {
                 this.resizeElement.classList.remove("fn__none");
             }
         }
@@ -341,19 +417,20 @@ export class Dock {
     }
 
     private resetDockPosition(show: boolean) {
+        const size = this.getCurrentSize();
         if (this.position === "Left") {
-            this.layout.element.setAttribute("style", `${show ? "margin-right: var(--b3-layout-space);" : ""}width:${this.layout.element.clientWidth}px;opacity:${show ? 1 : 0};min-height:8px;`);
+            this.layout.element.setAttribute("style", `${show ? "margin-right: var(--b3-layout-space);" : ""}width:${size}px;opacity:${show ? 1 : 0};min-height:8px;`);
         } else if (this.position === "Right") {
-            this.layout.element.setAttribute("style", `${show ? "margin-left: var(--b3-layout-space);" : ""}width:${this.layout.element.clientWidth}px;opacity:${show ? 1 : 0};min-height:8px;`);
+            this.layout.element.setAttribute("style", `${show ? "margin-left: var(--b3-layout-space);" : ""}width:${size}px;opacity:${show ? 1 : 0};min-height:8px;`);
         } else {
-            this.layout.element.setAttribute("style", `${show ? "margin-top: var(--b3-layout-space);" : ""}height:${this.layout.element.clientHeight}px;opacity:${show ? 1 : 0};`);
+            this.layout.element.setAttribute("style", `${show ? "margin-top: var(--b3-layout-space);" : ""}height:${size}px;opacity:${show ? 1 : 0};`);
         }
     }
 
     public showDockByHover() {
         window.clearTimeout(this.hideDockTimeout);
         this.hideDockTimeout = 0;
-        if (this.showDockTimeout || this.pin || this.layout.element.style.opacity === "1") {
+        if (!this.panelVisible || this.showDockTimeout || this.pin || this.layout.element.style.opacity === "1") {
             return;
         }
         this.showDockTimeout = window.setTimeout(() => {
@@ -365,7 +442,7 @@ export class Dock {
     public hideDockByHover() {
         window.clearTimeout(this.showDockTimeout);
         this.showDockTimeout = 0;
-        if (this.hideDockTimeout || this.pin || this.layout.element.style.opacity === "0") {
+        if (!this.panelVisible || this.hideDockTimeout || this.pin || this.layout.element.style.opacity === "0") {
             return;
         }
         this.hideDockTimeout = window.setTimeout(() => {
@@ -383,7 +460,7 @@ export class Dock {
 
     public showDock(reset = false) {
         this.clearDockHoverTimeout();
-        if (!reset && (this.pin || this.layout.element.style.opacity === "1") ||
+        if (!this.panelVisible || (!reset && (this.pin || this.layout.element.style.opacity === "1")) ||
             (!this.elements[0].querySelector(".dock__item--active") && !this.elements[1].querySelector(".dock__item--active"))
         ) {
             return;
@@ -449,11 +526,11 @@ export class Dock {
             return;
         }
         if (this.position === "Left") {
-            this.layout.element.style.transform = `translateX(-${this.layout.element.clientWidth + 8}px)`;
+            this.layout.element.style.transform = `translateX(-${this.getCurrentSize() + 8}px)`;
         } else if (this.position === "Right") {
-            this.layout.element.style.transform = `translateX(${this.layout.element.clientWidth + 8}px)`;
+            this.layout.element.style.transform = `translateX(${this.getCurrentSize() + 8}px)`;
         } else if (this.position === "Bottom") {
-            this.layout.element.style.transform = `translateY(${this.layout.element.clientHeight + 8}px)`;
+            this.layout.element.style.transform = `translateY(${this.getCurrentSize() + 8}px)`;
         }
         if (reset) {
             return;
@@ -464,19 +541,38 @@ export class Dock {
         this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");
     }
 
-    public toggleModel(type: TDock | string, show = false, close = false, removeDock = false, isSaveLayout = true) {
+    public toggleModel(type: TDock | string, show = false, close = false, removeDock = false, isSaveLayout = true,
+                       restorePanel = true) {
         if (!type) {
             return;
         }
-        if (this.pin) {
+        const target = document.querySelector(`.dock__item[data-type="${type}"]`) as HTMLElement;
+        const index = parseInt(target.getAttribute("data-index"));
+        const wnd = this.layout.children[index] as Wnd;
+        let restoredPanel = false;
+        if (!this.panelVisible && restorePanel && !removeDock) {
+            this.togglePanel(true);
+            restoredPanel = true;
+            if (target.classList.contains("dock__item--active")) {
+                Array.from(wnd.element.querySelector(".layout-tab-container").children).find(item => {
+                    if (item.getAttribute("data-id") === target.getAttribute("data-id")) {
+                        setPanelFocus(item);
+                        return true;
+                    }
+                });
+                if (document.activeElement) {
+                    (document.activeElement as HTMLElement).blur();
+                }
+                this.showDock();
+                return;
+            }
+        }
+        if (this.pin && !restoredPanel) {
             recordBeforeResizeTop();
         }
-        const target = document.querySelector(`.dock__item[data-type="${type}"]`) as HTMLElement;
         if (show && target.classList.contains("dock__item--active")) {
             target.classList.remove("dock__item--active", "dock__item--activefocus");
         }
-        const index = parseInt(target.getAttribute("data-index"));
-        const wnd = this.layout.children[index] as Wnd;
         if (target.classList.contains("dock__item--active") || removeDock) {
             if (!close) {
                 let needFocus = false;
@@ -503,6 +599,9 @@ export class Dock {
             // dock 隐藏
             if (!this.elements[0].querySelector(".dock__item--active") &&
                 !this.elements[1].querySelector(".dock__item--active")) {
+                this.panelVisible = true;
+                this.collapsedPanelSize = "";
+                this.layout.element.classList.remove("fn__none");
                 if (this.position === "Left") {
                     this.layout.element.style.width = "0px";
                     this.layout.element.style.marginRight = "0px";
@@ -701,8 +800,10 @@ export class Dock {
             if (this.pin) {
                 this.layout.element.style.opacity = "";
                 this.hideResizeTimeout = window.setTimeout(() => {
-                    this.resizeElement.classList.remove("fn__none");
-                    adjustLayout();
+                    if (this.panelVisible && this.hasActive()) {
+                        this.resizeElement.classList.remove("fn__none");
+                        adjustLayout();
+                    }
                 }, Constants.TIMEOUT_TRANSITION);    // 需等待动画完毕后再出现，否则会出现滚动条 https://ld246.com/article/1676596622064
             }
             if (document.activeElement) {
@@ -822,7 +923,7 @@ export class Dock {
         }
         const hasActive = sourceElement.classList.contains("dock__item--active");
         if (hasActive) {
-            sourceDock.toggleModel(type, false, false, false, false);
+            sourceDock.toggleModel(type, false, false, false, false, false);
         }
         delete sourceDock.data[type];
         // 目标处理
@@ -837,7 +938,7 @@ export class Dock {
         resetFloatDockSize();
         this.data[type] = true;
         if (hasActive) {
-            this.toggleModel(type, true, false, false, false);
+            this.toggleModel(type, true, false, false, false, false);
         }
         // 保存布局需等待动画完毕 https://github.com/siyuan-note/siyuan/issues/13507
         setTimeout(() => {
@@ -879,6 +980,9 @@ export class Dock {
     }
 
     public setSize() {
+        if (!this.panelVisible) {
+            return;
+        }
         const activesElement = [...this.elements[0].querySelectorAll(".dock__item--active"),
             ...this.elements[1].querySelectorAll(".dock__item--active")];
         activesElement.forEach((item) => {
@@ -920,6 +1024,36 @@ export class Dock {
         return max;
     }
 
+    private hasActive() {
+        return Boolean(this.elements[0].querySelector(".dock__item--active") ||
+            this.elements[1].querySelector(".dock__item--active"));
+    }
+
+    private getCurrentSize() {
+        const isBottom = this.position === "Bottom";
+        const clientSize = isBottom ? this.layout.element.clientHeight : this.layout.element.clientWidth;
+        if (clientSize > 0) {
+            return clientSize;
+        }
+        const styleSize = parseInt(this.layout.element.style[isBottom ? "height" : "width"]);
+        return styleSize || this.getMaxSize();
+    }
+
+    private getCurrentLayoutSize() {
+        if (this.layout.element.style.maxWidth && this.position !== "Bottom") {
+            const dockWidth = this.layout.element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH);
+            if (dockWidth) {
+                return dockWidth + "px";
+            }
+        }
+        const dimension = this.position === "Bottom" ? "height" : "width";
+        const styleSize = this.layout.element.style[dimension];
+        if (styleSize && parseFloat(styleSize) > 0) {
+            return styleSize;
+        }
+        return this.getCurrentSize() + "px";
+    }
+
     public genButton(data: TDockTabData[], index: number, tabIndex?: number) {
         let html = "";
         const tooltipPosition = this.getTooltipPosition(index);
@@ -958,7 +1092,7 @@ export class Dock {
                 adjustDockPadding();
             }
             if (data[0].show) {
-                this.toggleModel(data[0].type, true, false, false, false);
+                this.toggleModel(data[0].type, true, false, false, false, false);
             }
         }
         this.adjustSplit();

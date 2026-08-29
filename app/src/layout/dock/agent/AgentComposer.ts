@@ -10,6 +10,8 @@ import {focusBlock} from "../../../protyle/util/selection";
 import {matchHotKey} from "../../../protyle/util/hotKey";
 import {isSkillHintRequestActive, shouldYieldSkillHint} from "./agentHintState";
 import {uploadFiles} from "../../../protyle/upload";
+import {previewImages} from "../../../protyle/preview/image";
+import {removeCompressURL} from "../../../util/image";
 
 export interface AgentComposerData {
     text: string;
@@ -36,6 +38,7 @@ interface ComposerHandle {
 type OnChangeCallback = () => void;
 
 const AGENT_HINT_OVERLAY_CLASS = "protyle-hint--agent-overlay";
+const AGENT_SKILL_SELECTOR = '[data-type~="text"][custom-agent-skill="true"]';
 const skillHintRequestIDs = new WeakMap<IProtyle, number>();
 
 interface ComposerOptions {
@@ -69,7 +72,7 @@ const hintAgentRef = (key: string, protyle: IProtyle, source: THintSource): IHin
     return hintRef(key, protyle, source);
 };
 
-// / 技能菜单：异步拉取 lsSkills，选中后把技能名作为纯文本插入（value 即技能名）。
+// / 技能菜单：异步拉取 lsSkills，选中后把技能名作为带持久标识的智能体行级元素插入。
 // 返回 [] 占位，数据在 fetch 回调里通过 protyle.hint.genHTML 填充（与 hintRef 异步模式一致）。
 const hintSkill = (key: string, protyle: IProtyle): IHintData[] => {
     const requestID = (skillHintRequestIDs.get(protyle) || 0) + 1;
@@ -100,8 +103,10 @@ const hintSkill = (key: string, protyle: IProtyle): IHintData[] => {
             .filter((s: Record<string, string>) => !q ||
                 (s.name || "").toLowerCase().includes(q) || (s.description || "").toLowerCase().includes(q))
             .map((s: Record<string, string>) => ({
-                value: s.name + " ",
-                html: '<div class="b3-list-item__first"><span class="b3-list-item__text">' +
+                value: '<span data-type="text" custom-agent-skill="true">' +
+                    escapeHtml(s.name) + "</span> ",
+                html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic">' +
+                    '<use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">' +
                     escapeHtml(s.name) + "</span></div>" +
                     (s.description ? '<div class="b3-list-item__meta b3-list-item__showall">' + escapeHtml(s.description) + "</div>" : ""),
             }));
@@ -230,6 +235,8 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     hintElement.classList.add(AGENT_HINT_OVERLAY_CLASS);
     document.body.appendChild(hintElement);
     wysiwyg.element.setAttribute("data-readonly", "false");
+    // 智能体输入区高度较小，工具栏子面板需以窗口而非编辑器作为垂直边界。
+    p.toolbar.subElement.setAttribute("data-position-boundary", "viewport");
 
     const setEmptyContent = () => {
         wysiwyg.element.innerHTML = "";
@@ -248,6 +255,24 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     } else {
         setEmptyContent();
     }
+
+    // 智能体输入框没有文档 ID，直接预览输入框中的图片，避免走依赖文档资源列表的默认逻辑。
+    wysiwyg.element.addEventListener("dblclick", (event: MouseEvent) => {
+        const image = (event.target as HTMLElement).closest("img:not(.emoji)") as HTMLImageElement | null;
+        if (!image || !wysiwyg.element.contains(image)) {
+            return;
+        }
+        const currentSrc = removeCompressURL(image.dataset.src || image.getAttribute("src") || "");
+        if (!currentSrc) {
+            return;
+        }
+        const srcList = Array.from(wysiwyg.element.querySelectorAll<HTMLImageElement>("img:not(.emoji)"))
+            .map((item) => removeCompressURL(item.dataset.src || item.getAttribute("src") || ""))
+            .filter(Boolean);
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        previewImages(srcList, currentSrc);
+    }, true);
 
     const updatePlaceholder = () => {
         const isEmpty = (wysiwyg.element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim() === "";
@@ -327,7 +352,11 @@ export function mountComposer(host: HTMLElement, onSend: () => void, onChange?: 
     }, true);
 
     const getMarkdown = (): string => {
-        return p.lute.BlockDOM2StdMd(wysiwyg.element.innerHTML).trim();
+        const clone = wysiwyg.element.cloneNode(true) as HTMLElement;
+        clone.querySelectorAll(AGENT_SKILL_SELECTOR).forEach((skillElement) => {
+            skillElement.replaceWith(document.createTextNode(skillElement.textContent || ""));
+        });
+        return p.lute.BlockDOM2StdMd(clone.innerHTML).trim();
     };
 
     const getBlockHTML = (): string => {

@@ -176,8 +176,10 @@ export class Toolbar {
             return;
         }
         const protyleRect = protyle.element.getBoundingClientRect();
-        const topBoundary = protyleRect.top + 30;
-        const bottomBoundary = Math.min(protyleRect.bottom, window.innerHeight);
+        const viewportBoundary = element.dataset.positionBoundary === "viewport";
+        const topBoundary = viewportBoundary ? 8 : protyleRect.top + 30;
+        const bottomBoundary = viewportBoundary ? window.innerHeight - 8 :
+            Math.min(protyleRect.bottom, window.innerHeight);
         const rangeRects = this.range.getClientRects();
         const rangeRect = (typeof this.rangePosition.rectIndex === "number" ?
             rangeRects[this.rangePosition.rectIndex] : undefined) ||

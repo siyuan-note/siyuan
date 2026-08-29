@@ -993,9 +993,9 @@ export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
     return result;
 };
 
-export const activeBlur = () => {
+export const activeBlur = (force = false) => {
     const now = Date.now();
-    if (now < keyboardLockUntil) {
+    if (!force && now < keyboardLockUntil) {
         console.warn(`activeBlur blocked by lock (remaining: ${keyboardLockUntil - now}ms)`);
         return;
     }

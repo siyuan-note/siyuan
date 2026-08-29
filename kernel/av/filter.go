@@ -18,6 +18,7 @@ package av
 
 import (
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -31,6 +32,7 @@ import (
 // 分组节点：Combination 指明子节点的组合方式，Filters 为子节点列表（递归）。
 type ViewFilter struct {
 	Column        string            `json:"column"`                  // 字段（列）ID，叶子节点有效
+	ValueSource   ValueSource       `json:"valueSource,omitempty"`   // 值来源，叶子节点有效
 	Qualifier     FilterQuantifier  `json:"quantifier,omitempty"`    // 量词，叶子节点有效
 	Operator      FilterOperator    `json:"operator"`                // 操作符，叶子节点有效
 	Value         *Value            `json:"value"`                   // 过滤值，叶子节点有效
@@ -255,7 +257,23 @@ func evalLeaf(filter *ViewFilter, values []*Value, index int, attrView *Attribut
 		return evalMissingLeaf(filter)
 	}
 
-	return values[index].Filter(filter, attrView, itemID, rollupFurtherCollections, cachedAttrViews)
+	return ResolveValueSource(values[index], filter.ValueSource).Filter(resolveFilterValueSource(filter), attrView, itemID,
+		rollupFurtherCollections, cachedAttrViews)
+}
+
+func resolveFilterValueSource(filter *ViewFilter) *ViewFilter {
+	if nil == filter || ValueSourceRendered != filter.ValueSource || nil == filter.Value ||
+		KeyTypeTemplate == filter.Value.Type {
+		return filter
+	}
+
+	ret := *filter
+	content := filter.Value.String(false)
+	if KeyTypeNumber == filter.Value.Type && nil != filter.Value.Number && filter.Value.Number.IsNotEmpty {
+		content = strconv.FormatFloat(filter.Value.Number.Content, 'f', -1, 64)
+	}
+	ret.Value = &Value{Type: KeyTypeTemplate, Template: &ValueTemplate{Content: content}}
+	return &ret
 }
 
 func evalMissingLeaf(filter *ViewFilter) bool {
@@ -302,6 +320,7 @@ func CloneFilters(filters []*ViewFilter) (ret []*ViewFilter) {
 		}
 		cloned := &ViewFilter{
 			Column:        f.Column,
+			ValueSource:   f.ValueSource,
 			Qualifier:     f.Qualifier,
 			Operator:      f.Operator,
 			Value:         f.Value,

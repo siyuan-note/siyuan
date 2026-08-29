@@ -688,9 +688,9 @@ declare namespace Config {
          */
         fontSize: number;
         /**
-         * Whether to enable the use of the mouse wheel to adjust the font size of the editor
+         * 使用键盘纵向移动时光标周围至少保留的可见行数
          */
-        fontSizeScrollZoom: boolean;
+        cursorSurroundingLines: number;
         /**
          * Whether the editor uses maximum width
          */
@@ -1252,6 +1252,8 @@ declare namespace Config {
         refresh: IKey;
         refTab: IKey;
         rename: IKey;
+        scrollPageDownWithoutMovingCaret: IKey;
+        scrollPageUpWithoutMovingCaret: IKey;
         selectToPageEnd: IKey;
         selectToPageStart: IKey;
         showInFolder: IKey;
@@ -1356,6 +1358,9 @@ declare namespace Config {
     export interface IKeymapGeneral extends IKeys {
         mainMenu: IKey;
         commandPanel: IKey;
+        increaseEditorFontSize: IKey;
+        decreaseEditorFontSize: IKey;
+        resetEditorFontSize: IKey;
         editReadonly: IKey;
         syncNow: IKey;
         enterBack: IKey;
@@ -1404,6 +1409,9 @@ declare namespace Config {
         switchLeftDock: IKey;
         switchRightDock: IKey;
         switchBottomDock: IKey;
+        toggleLeftDockPanel: IKey;
+        toggleRightDockPanel: IKey;
+        toggleBottomDockPanel: IKey;
         toggleDock: IKey;
         splitLR: IKey;
         splitMoveR: IKey;

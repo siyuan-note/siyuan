@@ -64,7 +64,8 @@ export const commandPanel = (app: App) => {
         /// #if MOBILE
         keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
             "dataHistory", "editReadonly", "enter", "enterBack", "globalSearch", "lockScreen", "mainMenu", "move",
-            "newFile", "recentDocs", "replace", "riffCard", "search", "selectOpen1", "syncNow"];
+            "newFile", "recentDocs", "replace", "riffCard", "search", "selectOpen1", "syncNow",
+            "increaseEditorFontSize", "decreaseEditorFontSize", "resetEditorFontSize"];
         /// #else
         keys = ["addToDatabase", "fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
             "graphView", "globalGraph", "closeAll", "closeLeft", "closeOthers", "closeRight", "closeTab",
@@ -73,7 +74,9 @@ export const commandPanel = (app: App) => {
             "goToTab5", "goToTab6", "goToTab7", "goToTab8", "goToTab9", "goToTabNext", "goToTabPrev", "lockScreen",
             "mainMenu", "move", "newFile", "recentDocs", "replace", "riffCard", "search", "selectOpen1", "syncNow",
             "splitLR", "splitMoveB", "splitMoveR", "splitTB", "switchLeftDock", "switchRightDock", "switchBottomDock",
-            "tabToWindow", "stickSearch", "toggleDock", "unsplitAll", "unsplit", "recentClosed"];
+            "tabToWindow", "stickSearch", "toggleDock", "toggleLeftDockPanel", "toggleRightDockPanel",
+            "toggleBottomDockPanel", "unsplitAll", "unsplit", "recentClosed",
+            "increaseEditorFontSize", "decreaseEditorFontSize", "resetEditorFontSize"];
         /// #if !BROWSER
         keys.push("toggleWin");
         /// #endif

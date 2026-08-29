@@ -17,11 +17,33 @@ describe("mobile bottom bar config", () => {
             false,
             "not json",
             [],
-            {version: 2, actions: ["recent", "outline", "bookmark", "tag"]},
+            {version: 3, actions: ["recent", "outline", "bookmark", "tag", "back"]},
             {version: MOBILE_BOTTOM_BAR_CONFIG_VERSION, actions: "documents"},
         ].forEach((storedValue) => {
             assert.deepEqual(normalizeMobileBottomBarConfig(storedValue), createDefaultMobileBottomBarConfig());
         });
+    });
+
+    it("uses back, forward, documents, search, and tabs by default", () => {
+        assert.deepEqual(DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS, ["back", "forward", "documents", "search", "tabs"]);
+    });
+
+    it("migrates the legacy default to the new five-slot default", () => {
+        const config = normalizeMobileBottomBarConfig({
+            version: 1,
+            actions: ["documents", "search", "newDoc", "tabs"],
+        });
+
+        assert.deepEqual(config, createDefaultMobileBottomBarConfig());
+    });
+
+    it("preserves customized legacy slots and appends back", () => {
+        const config = normalizeMobileBottomBarConfig({
+            version: 1,
+            actions: ["recent", "outline", "bookmark", "tag"],
+        });
+
+        assert.deepEqual(config.actions, ["recent", "outline", "bookmark", "tag", "back"]);
     });
 
     it("accepts serialized config and fills invalid or duplicate slots in order", () => {
@@ -30,9 +52,9 @@ describe("mobile bottom bar config", () => {
             actions: ["recent", "recent", "unknown", "tag"],
         }));
 
-        assert.deepEqual(config.actions, ["recent", "documents", "search", "tag"]);
-        assert.equal(config.actions.length, 4);
-        assert.equal(new Set(config.actions).size, 4);
+        assert.deepEqual(config.actions, ["recent", "back", "forward", "tag", "documents"]);
+        assert.equal(config.actions.length, 5);
+        assert.equal(new Set(config.actions).size, 5);
         assert.equal(config.actions.every((action) => MOBILE_BOTTOM_BAR_ACTIONS.includes(action)), true);
     });
 
@@ -43,25 +65,25 @@ describe("mobile bottom bar config", () => {
             action: "tabs",
         });
 
-        assert.deepEqual(config.actions, ["tabs", "search", "newDoc", "documents"]);
+        assert.deepEqual(config.actions, ["tabs", "forward", "documents", "search", "back"]);
     });
 
-    it("supports inbox, backlinks, the agent, and spaced repetition as configurable actions", () => {
+    it("supports inbox, backlinks, the agent, spaced repetition, and forward as configurable actions", () => {
         const config = normalizeMobileBottomBarConfig({
             version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
-            actions: ["inbox", "backlink", "agent", "spacedRepetition"],
+            actions: ["inbox", "backlink", "agent", "spacedRepetition", "forward"],
         });
 
-        assert.deepEqual(config.actions, ["inbox", "backlink", "agent", "spacedRepetition"]);
+        assert.deepEqual(config.actions, ["inbox", "backlink", "agent", "spacedRepetition", "forward"]);
     });
 
     it("supports selecting and quickly creating daily notes", () => {
         const config = normalizeMobileBottomBarConfig({
             version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
-            actions: ["dailyNote", "newDailyNote", "documents", "tabs"],
+            actions: ["dailyNote", "newDailyNote", "documents", "tabs", "back"],
         });
 
-        assert.deepEqual(config.actions, ["dailyNote", "newDailyNote", "documents", "tabs"]);
+        assert.deepEqual(config.actions, ["dailyNote", "newDailyNote", "documents", "tabs", "back"]);
     });
 
     it("replaces a slot when selecting an unused action", () => {
@@ -71,52 +93,55 @@ describe("mobile bottom bar config", () => {
             action: "outline",
         });
 
-        assert.deepEqual(config.actions, ["documents", "outline", "newDoc", "tabs"]);
+        assert.deepEqual(config.actions, ["back", "outline", "documents", "search", "tabs"]);
     });
 
     it("resets customized actions to a fresh default config", () => {
         const customized = normalizeMobileBottomBarConfig({
             version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
-            actions: ["recent", "outline", "bookmark", "command"],
+            actions: ["recent", "outline", "bookmark", "command", "back"],
         });
         const config = reduceMobileBottomBarConfig(customized, {type: "reset"});
 
-        assert.equal(config.version, 1);
+        assert.equal(config.version, 2);
         assert.deepEqual(config.actions, DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS);
         assert.notEqual(config.actions, DEFAULT_MOBILE_BOTTOM_BAR_ACTIONS);
     });
 
     it("replaces actions that are unavailable in the current mode", () => {
-        const config = resolveMobileBottomBarAvailability(createDefaultMobileBottomBarConfig(), ["newDoc"]);
+        const config = resolveMobileBottomBarAvailability({
+            version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
+            actions: ["back", "forward", "documents", "newDoc", "tabs"],
+        }, ["newDoc"]);
 
-        assert.deepEqual(config.actions, ["documents", "search", "recent", "tabs"]);
+        assert.deepEqual(config.actions, ["back", "forward", "documents", "search", "tabs"]);
         assert.equal(config.actions.includes("newDoc"), false);
     });
 
     it("replaces the agent when AI is unavailable", () => {
         const config = resolveMobileBottomBarAvailability({
             version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
-            actions: ["documents", "agent", "newDoc", "tabs"],
+            actions: ["documents", "agent", "newDoc", "tabs", "back"],
         }, ["agent"]);
 
-        assert.deepEqual(config.actions, ["documents", "search", "newDoc", "tabs"]);
+        assert.deepEqual(config.actions, ["documents", "forward", "newDoc", "tabs", "back"]);
     });
 
     it("replaces spaced repetition in read-only mode", () => {
         const config = resolveMobileBottomBarAvailability({
             version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
-            actions: ["documents", "spacedRepetition", "search", "tabs"],
+            actions: ["documents", "spacedRepetition", "search", "tabs", "back"],
         }, ["spacedRepetition"]);
 
-        assert.deepEqual(config.actions, ["documents", "newDoc", "search", "tabs"]);
+        assert.deepEqual(config.actions, ["documents", "forward", "search", "tabs", "back"]);
     });
 
     it("replaces daily note actions when document creation is unavailable", () => {
         const config = resolveMobileBottomBarAvailability({
             version: MOBILE_BOTTOM_BAR_CONFIG_VERSION,
-            actions: ["dailyNote", "newDailyNote", "documents", "tabs"],
+            actions: ["dailyNote", "newDailyNote", "documents", "tabs", "back"],
         }, ["dailyNote", "newDailyNote"]);
 
-        assert.deepEqual(config.actions, ["search", "newDoc", "documents", "tabs"]);
+        assert.deepEqual(config.actions, ["forward", "search", "documents", "tabs", "back"]);
     });
 });

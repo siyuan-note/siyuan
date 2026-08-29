@@ -26,6 +26,7 @@ import {
 } from "./attributeValue";
 import {isLastPointerMouse} from "../../../util/touchDragBridge";
 import {getLocalDropFiles, hasDataTransferFiles} from "../../upload/localDropFiles";
+import {cloneAVCellValueSnapshot} from "./cellValue";
 
 interface IAVAttributeTableData {
     avID: string;
@@ -87,6 +88,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     icon: string,
                     id: string,
                     dateFormat?: TAVDateFormat,
+                    renderTemplate?: string,
                     options?: {
                         name: string,
                         color: string
@@ -129,8 +131,9 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     typeIcon: getColIconByType(item.key.type),
                     selectOptions: item.key.options,
                     dateFormat: item.key.dateFormat,
+                    renderTemplate: item.key.renderTemplate,
                     value,
-                    empty: cellValueIsEmpty(value),
+                    empty: cellValueIsEmpty(value, true, item.key.renderTemplate),
                 });
             });
             innerHTML += `<div class="fn__hr"></div>
@@ -379,7 +382,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                             if (!value || item.key.type === "rollup") {
                                 return;
                             }
-                            const valueData = JSON.parse(JSON.stringify(value)) as IAVCellValue;
+                            const valueData = cloneAVCellValueSnapshot(value);
                             undoOperations.push({
                                 action: "updateAttrViewCell",
                                 avID,
@@ -574,6 +577,12 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
                     openLink(protyle.app, target.dataset.url, event, event.ctrlKey || event.metaKey);
                 }
             }
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (["text", "url", "email", "phone", "block"].includes(type) &&
+            target.querySelector(":scope > .av__celltext--template")) {
+            popTextCell(protyle, [target], type as TAVCol);
             event.stopPropagation();
             event.preventDefault();
             break;

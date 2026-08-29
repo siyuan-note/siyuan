@@ -674,6 +674,23 @@
   max-height: 120px;
   overflow-y: auto;
   cursor: text;
+
+  .protyle-wysiwyg .img {
+    & > span:nth-child(2) {
+      width: 96px !important;
+      height: 96px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    }
+
+    .protyle-action__drag {
+      display: none !important;
+    }
+  }
 }
 
 .agent-chat__composer-host--disabled {
@@ -1167,6 +1184,26 @@
   min-height: 24px;
   max-height: 120px;
   overflow-y: auto;
+}
+
+.agent-chat__composer-host,
+.agent-chat__msg--user {
+  span[data-type~="text"][custom-agent-skill="true"] {
+    margin: 0 4px;
+    padding: 2px 4px;
+    border: 1px solid var(--b3-theme-primary-lighter);
+    border-radius: var(--b3-border-radius-b);
+    background-color: var(--b3-theme-primary-lightest);
+    color: var(--b3-theme-primary);
+
+    &::before {
+      content: "✦ ";
+    }
+
+    &:hover {
+      border-color: var(--b3-theme-primary-light);
+    }
+  }
 }
 
 .protyle-hint--agent-overlay {

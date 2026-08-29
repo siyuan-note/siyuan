@@ -1,5 +1,6 @@
 import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {escapeHtml} from "../../util/escape";
+import {getTreeItemTailHTML} from "../../util/treeItemTail";
 import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
 import {getDocDisplayName, isMoveTargetAllowed, pathPosix, setNoteBook} from "../../util/pathName";
@@ -34,7 +35,6 @@ import {
 } from "../../layout/dock/fileTreeAnimation";
 import {updateNotebookRootForBoxDoc} from "../../util/notebookRoot";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
-import {logMobileInputEvent} from "../util/inputEventLogger";
 import {
     collectExpandedDocIDs,
     findMovedFileTreeItem,
@@ -105,7 +105,6 @@ export class MobileFiles extends Model {
         this.element = this.actionsElement.nextElementSibling as HTMLElement;
         this.closeElement = this.element.nextElementSibling as HTMLElement;
         filesElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
-            logMobileInputEvent("filetree-click-handler", event);
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.actionsElement)) {
                 if (target.classList.contains("b3-list-item__icon")) {
@@ -261,18 +260,10 @@ export class MobileFiles extends Model {
                     const ulElement = hasTopClosestByTag(target, "UL");
                     const notebookId = ulElement ? ulElement.getAttribute("data-url") : "";
                     if (target.getAttribute("data-type") === "navigation-file") {
-                        logMobileInputEvent("filetree-open-document", event, {
-                            id: target.getAttribute("data-node-id")?.substring(0, 7),
-                            notebook: notebookId.substring(0, 7),
-                        });
                         openMobileFileById(app, target.getAttribute("data-node-id"), [Constants.CB_GET_SCROLL], undefined, notebookId);
                     } else if (target.getAttribute("data-type") === "navigation-root") {
                         const boxDocID = target.getAttribute("data-node-id");
                         if (boxDocID) {
-                            logMobileInputEvent("filetree-open-document", event, {
-                                id: boxDocID.substring(0, 7),
-                                notebook: notebookId.substring(0, 7),
-                            });
                             openMobileFileById(app, boxDocID, [Constants.CB_GET_SCROLL], undefined, notebookId);
                         } else if (ulElement) {
                             this.getLeaf(target, notebookId);
@@ -1455,6 +1446,12 @@ export class MobileFiles extends Model {
         const paddingLeft = (item.path.split("/").length - 1) * 20;
         const editingPublishAccess = this.actionsElement.querySelector('[data-type="publish-access"]').classList.contains("block__icon--active");
         const defaultIcon = item.subFileCount === 0 ? "file" : "folder";
+        const actionHTML = `<span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
+        <svg><use xlink:href="#iconMore"></use></svg>
+    </span>
+    <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__nw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">
+        <svg><use xlink:href="#iconAdd"></use></svg>
+    </span>`;
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" data-count="${item.subFileCount}" ${FILE_TREE_CHILDREN_SORT_MODE}="${item.childrenSortMode ?? ""}" data-type="navigation-file"
 class="b3-list-item" data-path="${item.path}" style="--file-toggle-width:${paddingLeft + 20}px"${getFileTreeDefaultIconAttr(item.icon, defaultIcon)}>
     <span style="padding-left: ${paddingLeft}px" class="b3-list-item__toggle${item.subFileCount === 0 ? " fn__hidden" : ""}">
@@ -1463,13 +1460,7 @@ class="b3-list-item" data-path="${item.path}" style="--file-toggle-width:${paddi
     <span class="b3-list-item__icon"${editingPublishAccess ? " fn__none" : ""}>${getFileTreeIconHTML(item.icon, defaultIcon)}</span>
     <span class="b3-list-item__switch${editingPublishAccess ? "" : " fn__none"}">${getPublishAccessOptionByLevel("public").iconHTML}</span>
     <span class="b3-list-item__text">${getDocDisplayName(item.name, item.titleEmpty, true)}</span>
-    <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
-        <svg><use xlink:href="#iconMore"></use></svg>
-    </span>
-    <span data-type="new" class="b3-list-item__action b3-tooltips b3-tooltips__nw${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.newSubDoc}">
-        <svg><use xlink:href="#iconAdd"></use></svg>
-    </span>
-    ${countHTML}
+    ${getTreeItemTailHTML(countHTML, actionHTML, true)}
 </li>`;
     };
 

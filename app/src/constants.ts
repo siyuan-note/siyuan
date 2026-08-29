@@ -96,6 +96,9 @@ export abstract class Constants {
     public static readonly SIZE_UNDO = 64;
     public static readonly SIZE_TITLE = 512;
     public static readonly SIZE_EDITOR_WIDTH = 760;
+    public static readonly EDITOR_FONT_SIZE_DEFAULT = 16;
+    public static readonly EDITOR_FONT_SIZE_MIN = 9;
+    public static readonly EDITOR_FONT_SIZE_MAX = 72;
     public static readonly SIZE_ZOOM = [
         {
             zoom: 0.67,
@@ -469,6 +472,9 @@ export abstract class Constants {
         general: {
             mainMenu: {default: "⌥\\", custom: "⌥\\"},
             commandPanel: {default: "⌥⇧P", custom: "⌥⇧P"},
+            increaseEditorFontSize: {default: "", custom: ""},
+            decreaseEditorFontSize: {default: "", custom: ""},
+            resetEditorFontSize: {default: "", custom: ""},
             editReadonly: {default: "⇧⌘G", custom: "⇧⌘G"},
             syncNow: {default: "F9", custom: "F9"},
             enterBack: {default: "⌥←", custom: "⌥←"},
@@ -517,6 +523,9 @@ export abstract class Constants {
             switchLeftDock: {default: "", custom: ""},
             switchRightDock: {default: "", custom: ""},
             switchBottomDock: {default: "", custom: ""},
+            toggleLeftDockPanel: {default: "", custom: ""},
+            toggleRightDockPanel: {default: "", custom: ""},
+            toggleBottomDockPanel: {default: "", custom: ""},
             toggleDock: {default: "", custom: ""},
             splitLR: {default: "", custom: ""},
             splitMoveR: {default: "", custom: ""},
@@ -581,6 +590,8 @@ export abstract class Constants {
                 moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
                 selectToPageStart: {default: "⇧Home", custom: "⇧Home"},
                 selectToPageEnd: {default: "⇧End", custom: "⇧End"},
+                scrollPageUpWithoutMovingCaret: {default: "⌥PageUp", custom: "⌥PageUp"},
+                scrollPageDownWithoutMovingCaret: {default: "⌥PageDown", custom: "⌥PageDown"},
                 duplicateCompletely: {default: "", custom: ""},
                 copyRichText: {default: "", custom: ""},
                 copyPlainText: {default: "", custom: ""},

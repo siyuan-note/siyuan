@@ -6,7 +6,7 @@
 		"id": "20230106101434-e6g4av3",
 		"title": "工作空间",
 		"type": "doc",
-		"updated": "20250306083454"
+		"updated": "20260829104731"
 	},
 	"Children": [
 		{
@@ -110,7 +110,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230109113547-eg7zbrh",
-				"updated": "20250306083454"
+				"updated": "20260829104731"
 			},
 			"Children": [
 				{
@@ -125,7 +125,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230106104300-j6nj9t2",
-				"updated": "20250306083454"
+				"updated": "20260829104731"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 					},
 					"Properties": {
 						"id": "20230109113624-du5o3e3",
-						"updated": "20230109113641"
+						"updated": "20260829104731"
 					},
 					"Children": [
 						{
@@ -223,12 +223,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113624-zjqzh5l",
-								"updated": "20230109113641"
+								"updated": "20260829104731"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "移动端可以在右侧栏 "
+									"Data": "移动端可以在 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "更多"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
 								},
 								{
 									"Type": "NodeTextMark",

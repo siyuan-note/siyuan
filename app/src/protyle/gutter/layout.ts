@@ -17,3 +17,6 @@ export const getFixedGutterPosition = (viewportPosition: number, fixedContainerP
 
 export const getContainerGutterSpace = (type: string, usesContainerRect: boolean) =>
     !usesContainerRect && ["NodeBlockquote", "NodeCallout"].includes(type) ? 10 : 0;
+
+export const getListGutterAnchorLeft = (actionLeft: number, contentLeft: number, rtl: boolean) =>
+    rtl ? contentLeft : actionLeft;

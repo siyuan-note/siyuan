@@ -718,9 +718,16 @@ Move documents by `id`:
   ```json
   {
     "code": 0,
-    "msg": "",
+    "msg": "disk full",
     "data": {
-      "errFiles": [""],
+      "errFiles": ["bar.png"],
+      "failedFiles": [
+        {
+          "index": 1,
+          "name": "bar.png",
+          "error": "disk full"
+        }
+      ],
       "succFiles": [
         {
           "index": 0,
@@ -736,6 +743,7 @@ Move documents by `id`:
   ```
 
     * `errFiles`: List of filenames with errors in upload processing
+    * `failedFiles`: Files explicitly reported as failed. `index` is the file's index in `file[]`, `name` is its upload filename, and `error` is the failure message. This field may omit files that were not attempted or not reported individually; use `succFiles` when each input item must be identified unambiguously
     * `succFiles`: Successfully processed files in input order. `index` is the file's index in `file[]`, `name` is its upload filename, and `path` is the uploaded asset path. Use this field when a batch can contain duplicate filenames
     * `succMap`: Compatibility mapping for existing callers. The key is the upload filename and the value is assets/foo-id.png. When a batch contains duplicate filenames, only the last item with a given key remains in this map
 
@@ -1894,10 +1902,11 @@ The field types (`keyType`) are:
   ```
 
     * `data.view`: The rendered view instance. Its shape depends on `viewType`: `table` returns `columns`/`rows`/`rowCount`, while `gallery` and `kanban` return `fields`/`cards`/`cardCount`. When grouping is enabled, `groups` contains a view instance for each group, including `groupKey`/`groupValue`. `view` also carries `filters`, `sorts`, `group`, `showIcon`, `wrapField`, `groupFolded`, and `groupHidden`. Note: active filters or grouping can make the item list empty even when the total item count is greater than 0
-    * `data.view.columns[]`: Each has `id`, `name`, `type`, `icon`, `wrap`, `hidden`, `desc`, `calc`, `numberFormat`, `template`, `pin`, `width`; `select`/`mSelect` columns additionally carry `options`
+    * `data.view.columns[]`: Each has `id`, `name`, `type`, `icon`, `wrap`, `hidden`, `desc`, `calc`, `numberFormat`, `template`, `renderTemplate`, `pin`, `width`; `select`/`mSelect` columns additionally carry `options`. Gallery and kanban fields expose the same field metadata under `data.view.fields[]`
+    * `data.view.columns[].renderTemplate`: Optional display template for a normal field. It changes only the displayed content; the field's stored typed value remains unchanged
     * `data.view.rows[].id`: The table row's **item ID** (`itemID`). It also equals `value.blockID` in that row's primary-key cell. For a bound row, the bound block ID is stored in `value.block.id` in the primary-key cell; these are distinct concepts and must not be assumed equal
     * `data.view.cards[].id`: The **item ID** (`itemID`) of a gallery or kanban card. When grouping is enabled, table rows or cards are in the corresponding view instances under `groups[]`
-    * `data.view.rows[].cells[].value`: A `Value` object — see [Set a cell value](#Set-a-cell-value) for all value shapes. `createdAt`/`updatedAt` are int64 millisecond timestamps
+    * `data.view.rows[].cells[].value`: A `Value` object — see [Set a cell value](#Set-a-cell-value) for all value shapes. `createdAt`/`updatedAt` are int64 millisecond timestamps. When a normal field has a non-empty `renderTemplate`, its optional `renderedContent` property contains the runtime display-template result; this property is not persisted, and the original typed property continues to contain the stored value. Values under `data.view.cards[]` follow the same rule
     * `data.views`: Metadata of every view (no rows)
     * `data.isMirror`: `true` when the database block is a mirror (read-only copy) of the database
 
@@ -2298,6 +2307,7 @@ Sets or clears the grouping rule for a kanban view. When `group.field` is empty,
     * `blockID`: The database block that owns the view
     * `group`: Grouping rule
     * `group.field`: Field (column) ID to group by. Empty string removes grouping
+    * `group.valueSource`: Optional value source — `stored` (the default when omitted) uses the stored typed value, while `rendered` uses the field's display-template result and groups it as text by value
     * `group.method`: Group method — `0` by value, `1` by number range, `2` by relative date, `3` by day, `4` by week, `5` by month, `6` by year
     * `group.range`: Optional. Required when `method` is `1` (number range): `{ "numStart": 0, "numEnd": 100, "numStep": 10 }`
     * `group.order`: Group ordering — `0` ascending, `1` descending, `2` manual, `3` follow select-option order
@@ -2364,13 +2374,15 @@ Returns the current filter and sort rules of the view bound to a database block.
 
     * `data.filters`: Array of `ViewFilter`. The top level holds a single root group node `{ "combination": "and"|"or", "filters": [...] }`; the array elements are either leaf filters or nested group nodes, enabling recursive AND/OR combinations.
     * `data.filters[].column`: Field (column) ID the filter applies to (leaf node only)
+    * `data.filters[].valueSource`: Optional value source for a leaf node — `stored` is the default when omitted, and `rendered` filters the field's display-template result
     * `data.filters[].operator`: Filter operator (see the operator table below; leaf node only)
-    * `data.filters[].value`: Filter value, a `Value` object (see [Set a cell value](#Set-a-cell-value) for the value shapes; leaf node only)
+    * `data.filters[].value`: Filter operand, a `Value` object (see [Set a cell value](#Set-a-cell-value) for the value shapes; leaf node only). When `valueSource` is `rendered`, use a template value in the form `{ "type": "template", "template": { "content": "..." } }`
     * `data.filters[].relativeDate`: Optional relative-date descriptor used by date filters (`{ "count": 7, "unit": 0, "direction": -1 }`; `unit`: `0` day, `1` week, `2` month, `3` year; `direction`: `-1` before, `0` this, `1` after; leaf node only)
     * `data.filters[].combination`: Group combinator, `"and"` or `"or"` (group node only)
     * `data.filters[].filters`: Child filter nodes, recursively `ViewFilter` (group node only)
     * `data.sorts`: Array of `ViewSort`
     * `data.sorts[].column`: Field (column) ID the sort applies to
+    * `data.sorts[].valueSource`: Optional value source — `stored` is the default when omitted, and `rendered` sorts by the field's display-template result
     * `data.sorts[].order`: `ASC` or `DESC`
 
   Filter operators:

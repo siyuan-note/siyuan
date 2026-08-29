@@ -221,6 +221,13 @@ export const getEditHTML = (options: {
     <input data-type="includeTime" type="checkbox" class="b3-switch b3-switch--menu" ${(!colData[colData.type as "updated"] || colData[colData.type as "updated"].includeTime) ? "checked" : ""}>
 </label>`;
     }
+    if (!["template", "rollup", "lineNumber", "created", "updated"].includes(colData.type)) {
+        const renderTemplate = colData.renderTemplate || "";
+        html += `<button class="b3-menu__separator" data-id="separator_render_template"></button>
+<button class="b3-menu__item" data-type="nobg">
+    <textarea spellcheck="false" rows="${Math.min(renderTemplate.split("\n").length, 8)}" placeholder="${window.siyuan.languages.template}" data-type="updateRenderTemplate" style="margin: 4px 0" class="fn__block b3-text-field">${escapeHtml(renderTemplate)}</textarea>
+</button>`;
+    }
     html += `<button class="b3-menu__separator" data-id="separator_3"></button>
 <label class="b3-menu__item">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconSoftWrap"></use></svg>
@@ -399,6 +406,41 @@ export const bindEditEvent = (options: {
                 options.menuElement.parentElement.remove();
             } else if (event.key === "Enter" && !event.shiftKey) {
                 tplElement.dispatchEvent(new CustomEvent("blur"));
+                options.menuElement.parentElement.remove();
+            }
+        });
+    }
+    const renderTplElement = options.menuElement.querySelector('[data-type="updateRenderTemplate"]') as HTMLTextAreaElement;
+    if (renderTplElement) {
+        renderTplElement.addEventListener("blur", () => {
+            const newValue = renderTplElement.value;
+            const oldValue = colData.renderTemplate || "";
+            if (newValue === oldValue) {
+                return;
+            }
+            transaction(options.protyle, [{
+                action: "updateAttrViewColTemplate",
+                id: colId,
+                avID,
+                data: newValue,
+                type: colData.type,
+            }], [{
+                action: "updateAttrViewColTemplate",
+                id: colId,
+                avID,
+                data: oldValue,
+                type: colData.type,
+            }]);
+            colData.renderTemplate = newValue;
+        });
+        renderTplElement.addEventListener("keydown", (event: KeyboardEvent) => {
+            if (event.isComposing) {
+                return;
+            }
+            if (event.key === "Escape") {
+                options.menuElement.parentElement.remove();
+            } else if (event.key === "Enter" && !event.shiftKey) {
+                renderTplElement.dispatchEvent(new CustomEvent("blur"));
                 options.menuElement.parentElement.remove();
             }
         });
@@ -706,6 +748,7 @@ data-wrap="false" data-dtype="${options.type}" data-date-format="${dateFormat}" 
             typeIcon: getColIconByType(options.type),
             selectOptions: colData?.options,
             dateFormat,
+            renderTemplate: colData?.renderTemplate,
             value: createEmptyAVValue(options.id, options.type, rowID),
             empty: true,
         }));
@@ -904,6 +947,9 @@ export const showAVColumnWidthMenu = (protyle: IProtyle, blockElement: HTMLEleme
 };
 
 export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElement: HTMLElement) => {
+    /// #if MOBILE
+    activeBlur(true);
+    /// #endif
     const type = cellElement.getAttribute("data-dtype") as TAVCol;
     const colId = cellElement.getAttribute("data-col-id");
     const avID = blockElement.getAttribute("data-av-id");
@@ -1434,11 +1480,13 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         y: cellRect.bottom,
         h: cellRect.height
     });
+    /// #if !MOBILE
     const inputElement = window.siyuan.menus.menu.element.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {
         inputElement.select();
         inputElement.focus();
     }
+    /// #endif
 };
 
 const removeColByMenu = (options: {
@@ -1549,7 +1597,7 @@ const genUpdateColItem = (type: TAVCol, oldType: TAVCol) => {
 
 export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: string) => {
     /// #if MOBILE
-    activeBlur();
+    activeBlur(true);
     /// #endif
     const menu = new Menu(Constants.MENU_AV_HEADER_ADD);
     const avID = blockElement.getAttribute("data-av-id");
@@ -2183,6 +2231,7 @@ const genColDataByType = (type: TAVCol, id: string, name: string) => {
         dateFormat: getDefaultDateFormat(type),
         pin: false,
         template: "",
+        renderTemplate: "",
         type,
         width: "",
         align: "",

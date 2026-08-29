@@ -34,6 +34,10 @@ import type {MobileFiles} from "../mobile/dock/MobileFiles";
 import type {Files} from "../layout/dock/Files";
 import {ProtyleMethod} from "./ProtyleMethod";
 import {openEmojiPanel} from "../emoji";
+import {adjustEditorFontSize, setEditorFontSize} from "../util/editorFontSize";
+/// #if !MOBILE
+import {isDockPanelVisible, toggleDockPanel} from "../layout/dock/panel";
+/// #endif
 
 let openTab;
 let openWindow;
@@ -341,12 +345,62 @@ const openEmoji = (options: {
     });
 };
 
+const toggleLeftDock = (visible?: boolean) => {
+    /// #if MOBILE
+    return false;
+    /// #else
+    return toggleDockPanel("Left", visible);
+    /// #endif
+};
+
+const toggleRightDock = (visible?: boolean) => {
+    /// #if MOBILE
+    return false;
+    /// #else
+    return toggleDockPanel("Right", visible);
+    /// #endif
+};
+
+const toggleBottomDock = (visible?: boolean) => {
+    /// #if MOBILE
+    return false;
+    /// #else
+    return toggleDockPanel("Bottom", visible);
+    /// #endif
+};
+
+const isLeftDockVisible = () => {
+    /// #if MOBILE
+    return false;
+    /// #else
+    return isDockPanelVisible("Left");
+    /// #endif
+};
+
+const isRightDockVisible = () => {
+    /// #if MOBILE
+    return false;
+    /// #else
+    return isDockPanelVisible("Right");
+    /// #endif
+};
+
+const isBottomDockVisible = () => {
+    /// #if MOBILE
+    return false;
+    /// #else
+    return isDockPanelVisible("Bottom");
+    /// #endif
+};
+
 export const API = {
     adaptHotkey: updateHotkeyTip,
     confirm: confirmDialog,
     Constants,
     showMessage,
     hideMessage,
+    adjustEditorFontSize,
+    setEditorFontSize,
     fetchPost,
     fetchSyncPost,
     fetchGet,
@@ -378,5 +432,11 @@ export const API = {
     saveLayout,
     globalCommand,
     expandDocTree,
-    openEmoji
+    openEmoji,
+    toggleLeftDock,
+    toggleRightDock,
+    toggleBottomDock,
+    isLeftDockVisible,
+    isRightDockVisible,
+    isBottomDockVisible,
 };

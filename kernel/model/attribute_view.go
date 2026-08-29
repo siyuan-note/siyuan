@@ -429,6 +429,10 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	if !useGroupDefault {
 		return
 	}
+	if nil != view.Group && av.ValueSourceRendered == view.Group.ValueSource {
+		// 模板渲染结果无法反向推导分组字段的存储值。
+		return
+	}
 
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
@@ -640,6 +644,10 @@ func applyFilterDefaultValues0(filters []*av.ViewFilter, attrView *av.AttributeV
 		if !filter.IsValid() {
 			continue
 		}
+		if av.ValueSourceRendered == filter.ValueSource {
+			// 显示模板结果无法反向推导字段存储值。
+			continue
+		}
 		filterKeyIDs[filter.Column] = true
 
 		if av.KeyTypeTemplate == keyValues.Key.Type && nil != nearItem {
@@ -733,6 +741,10 @@ func filterBranchMatchesDefaultValues(filter *av.ViewFilter, attrView *av.Attrib
 		return false
 	}
 	if !filter.IsValid() {
+		return true
+	}
+	if av.ValueSourceRendered == filter.ValueSource {
+		// 显示模板结果无法在新增条目时根据存储值准确判断。
 		return true
 	}
 	switch keyValues.Key.Type {
@@ -1093,6 +1105,13 @@ func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.
 		removeAttributeViewGroup0(view)
 		return
 	}
+	if av.ValueSourceRendered == group.ValueSource {
+		group.Method = av.GroupMethodValue
+		group.Range = nil
+		if av.GroupOrderSelectOption == group.Order {
+			group.Order = av.GroupOrderAsc
+		}
+	}
 
 	var firstInit, changeGroupField bool
 	if nil != view.Group {
@@ -1107,7 +1126,7 @@ func setAttributeViewGroup(attrView *av.AttributeView, view *av.View, group *av.
 	setAttrViewGroupStates(view, groupStates)
 	syncAttrViewGroupHiddenStates(attrView, view)
 
-	if firstInit || changeGroupField { // 首次设置分组时
+	if (firstInit || changeGroupField) && av.ValueSourceRendered != group.ValueSource { // 首次设置分组时
 		if groupKey := view.GetGroupKey(attrView); nil != groupKey {
 			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 				// 如果分组字段是单选或多选，则将分组排序方式改为按选项排序 https://github.com/siyuan-note/siyuan/issues/15534
@@ -3765,28 +3784,41 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 	if !view.IsGroupView() {
 		return
 	}
+	viewable := sql.RenderView(attrView, view, "", false)
+	genAttrViewGroupsWithItems(view, attrView, viewable.(av.Collection).GetItems())
+}
+
+func genAttrViewGroupsWithItems(view *av.View, attrView *av.AttributeView, sourceItems []av.Item) {
+	if !view.IsGroupView() {
+		return
+	}
 
 	groupStates := getAttrViewGroupStates(view)
 
 	group := view.Group
 	view.Groups = nil
-	viewable := sql.RenderView(attrView, view, "", false)
-	var items []av.Item
-	for _, item := range viewable.(av.Collection).GetItems() {
-		items = append(items, item)
-	}
+	items := append([]av.Item(nil), sourceItems...)
 
 	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
 		return
 	}
+	groupByRendered := av.ValueSourceRendered == group.ValueSource
+	groupMethod := group.Method
+	if groupByRendered {
+		// 显示模板结果按文本值分组，不应用源字段的数字或日期分组方法。
+		groupMethod = av.GroupMethodValue
+	}
+	getGroupValue := func(item av.Item) *av.Value {
+		return av.ResolveValueSource(item.GetValue(group.Field), group.ValueSource)
+	}
 
 	var rangeStart, rangeEnd float64
-	switch group.Method {
+	switch groupMethod {
 	case av.GroupMethodValue:
 		if av.GroupOrderMan != group.Order {
 			sort.SliceStable(items, func(i, j int) bool {
-				return items[i].GetValue(group.Field).String(false) < items[j].GetValue(group.Field).String(false)
+				return getGroupValue(items[i]).String(false) < getGroupValue(items[j]).String(false)
 			})
 		}
 	case av.GroupMethodRangeNum:
@@ -3818,7 +3850,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 	todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
 
 	var relationDestAv *av.AttributeView
-	if av.KeyTypeRelation == groupKey.Type && nil != groupKey.Relation {
+	if !groupByRendered && av.KeyTypeRelation == groupKey.Type && nil != groupKey.Relation {
 		if attrView.ID == groupKey.Relation.AvID {
 			relationDestAv = attrView
 		} else {
@@ -3828,21 +3860,21 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 
 	groupItemsMap := map[string][]av.Item{}
 	for _, item := range items {
-		value := item.GetValue(group.Field)
+		value := getGroupValue(item)
 		if value.IsBlank() {
 			groupItemsMap[groupValueDefault] = append(groupItemsMap[groupValueDefault], item)
 			continue
 		}
 
 		var groupVal string
-		switch group.Method {
+		switch groupMethod {
 		case av.GroupMethodValue:
-			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
+			if !groupByRendered && (av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type) {
 				for _, s := range value.MSelect {
 					groupItemsMap[s.Content] = append(groupItemsMap[s.Content], item)
 				}
 				continue
-			} else if av.KeyTypeRelation == groupKey.Type {
+			} else if !groupByRendered && av.KeyTypeRelation == groupKey.Type {
 				if nil == relationDestAv {
 					continue
 				}
@@ -3878,7 +3910,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 			case av.KeyTypeUpdated:
 				contentTime = time.UnixMilli(value.Updated.Content)
 			}
-			switch group.Method {
+			switch groupMethod {
 			case av.GroupMethodDateDay:
 				groupVal = contentTime.Format("2006-01-02")
 			case av.GroupMethodDateWeek:
@@ -3917,7 +3949,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		groupItemsMap[groupVal] = append(groupItemsMap[groupVal], item)
 	}
 
-	if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
+	if !groupByRendered && (av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type) {
 		for _, o := range groupKey.Options {
 			if _, ok := groupItemsMap[o.Name]; !ok {
 				groupItemsMap[o.Name] = []av.Item{}
@@ -3925,7 +3957,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
-	if av.KeyTypeCheckbox != groupKey.Type {
+	if groupByRendered || av.KeyTypeCheckbox != groupKey.Type {
 		if 1 > len(groupItemsMap[groupValueDefault]) {
 			// 始终保留默认分组 https://github.com/siyuan-note/siyuan/issues/15587
 			groupItemsMap[groupValueDefault] = []av.Item{}
@@ -3966,13 +3998,13 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		v.GroupHidden = 1 // 默认隐藏空白分组
 		v.GroupKey = groupKey
 		v.GroupVal = &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: groupValue}}
-		if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
+		if !groupByRendered && (av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type) {
 			if opt := groupKey.GetOption(groupValue); nil != opt {
 				v.GroupVal.Text = nil
 				v.GroupVal.Type = av.KeyTypeSelect
 				v.GroupVal.MSelect = []*av.ValueSelect{newAttrViewValueSelect(opt)}
 			}
-		} else if av.KeyTypeRelation == groupKey.Type {
+		} else if !groupByRendered && av.KeyTypeRelation == groupKey.Type {
 			if relationDestAv != nil && groupValueDefault != groupValue {
 				v.GroupVal.Text = nil
 				v.GroupVal.Type = av.KeyTypeRelation
@@ -3982,7 +4014,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 					v.GroupVal.Relation.Contents = []*av.Value{destBlock}
 				}
 			}
-		} else if av.KeyTypeCheckbox == groupKey.Type {
+		} else if !groupByRendered && av.KeyTypeCheckbox == groupKey.Type {
 			v.GroupVal.Text = nil
 			v.GroupVal.Type = av.KeyTypeCheckbox
 			v.GroupVal.Checkbox = &av.ValueCheckbox{}
@@ -4827,6 +4859,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	for _, s := range masterView.Sorts {
 		view.Sorts = append(view.Sorts, &av.ViewSort{
 			Column:       s.Column,
+			ValueSource:  s.ValueSource,
 			Order:        s.Order,
 			DateEndpoint: s.DateEndpoint,
 		})
@@ -6736,7 +6769,8 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		if groupView := view.GetGroupByID(operation.GroupID); nil != groupView {
 			groupKey := view.GetGroupKey(attrView)
 			isAcrossGroup := operation.GroupID != operation.TargetGroupID
-			if isAcrossGroup && (av.KeyTypeTemplate == groupKey.Type || av.KeyTypeCreated == groupKey.Type || av.KeyTypeUpdated == groupKey.Type) {
+			if isAcrossGroup && (av.ValueSourceRendered == view.Group.ValueSource || av.KeyTypeTemplate == groupKey.Type ||
+				av.KeyTypeCreated == groupKey.Type || av.KeyTypeUpdated == groupKey.Type) {
 				// 这些字段类型不支持跨分组移动，因为它们的值是自动计算生成的
 				return
 			}
@@ -7136,15 +7170,21 @@ func updateAttributeViewColTemplate(operation *Operation) (err error) {
 		return
 	}
 
+	templateContent, ok := operation.Data.(string)
+	if !ok {
+		return errors.New("invalid attribute view field template")
+	}
 	colType := av.KeyType(operation.Typ)
-	switch colType {
-	case av.KeyTypeTemplate:
-		for _, keyValues := range attrView.KeyValues {
-			if keyValues.Key.ID == operation.ID && av.KeyTypeTemplate == keyValues.Key.Type {
-				keyValues.Key.Template = operation.Data.(string)
-				break
-			}
+	for _, keyValues := range attrView.KeyValues {
+		if keyValues.Key.ID != operation.ID || keyValues.Key.Type != colType {
+			continue
 		}
+		if av.KeyTypeTemplate == colType {
+			keyValues.Key.Template = templateContent
+		} else {
+			keyValues.Key.RenderTemplate = templateContent
+		}
+		break
 	}
 
 	regenAttrViewGroups(attrView)
@@ -8157,16 +8197,13 @@ func (tx *Transaction) doSortAttrViewBinding(operation *Operation) (ret *TxErr) 
 	}
 
 	avs := strings.Join(avIDs, ",")
-	if _, err = setNodeAttrs0(node, map[string]string{
+	if err = setNodeAttrsWithTx(tx, node, tree, map[string]string{
 		av.NodeAttrNameAvs:   avs,
 		av.NodeAttrViewNames: getAvNames(avs),
-	}, tree.Box); err != nil {
+	}); err != nil {
 		logging.LogErrorf("sort attribute view binding [%s] failed: %s", operation.AvID, err)
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
-
-	tx.writeTree(tree)
-	cache.PutBlockIALInBox(node.ID, tree.Box, parse.IAL2Map(node.KramdownIAL))
 	return
 }
 

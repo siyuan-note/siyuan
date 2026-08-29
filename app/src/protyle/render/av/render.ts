@@ -1,7 +1,7 @@
 import {fetchSyncPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
-import {addDragFill, cellScrollIntoView, popTextCell} from "./cell";
+import {addDragFill, cellScrollIntoView, genCellValueByElement, popTextCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {getPendingBlockFocusMode} from "../../util/focusRestore";
@@ -1134,7 +1134,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 }
                             }
                             if (popCellElement && popCellElement.getAttribute("data-detached") === "true" &&
-                                popCellElement.querySelector(".av__celltext").textContent === "" &&
+                                !genCellValueByElement("block", popCellElement).block?.content &&
                                 popCellElement.getBoundingClientRect().height !== 0 && hasGhost) {
                                 if (item.getAttribute("data-av-type") !== "table") {
                                     if (addingFocusTokens.get(addingFocusKey) === addingFocusToken) {
@@ -1157,7 +1157,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                         }
                                         addingFocusTokens.delete(addingFocusKey);
                                         if (!result || result.cellElement.getAttribute("data-detached") !== "true" ||
-                                            result.cellElement.querySelector(".av__celltext").textContent !== "") {
+                                            genCellValueByElement("block", result.cellElement).block?.content) {
                                             return;
                                         }
                                         popTextCell(protyle, [result.cellElement], "block", {scrollIntoView: false});

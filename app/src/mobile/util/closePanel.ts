@@ -19,7 +19,6 @@ export const closePanel = () => {
     const menuElement = document.getElementById("menu");
     if (menuElement) {
         menuElement.dispatchEvent(new CustomEvent(MOBILE_MENU_CLOSE_EVENT));
-        menuElement.classList.add("fn__none");
         menuElement.style.removeProperty("transform");
         menuElement.style.removeProperty("z-index");
     }

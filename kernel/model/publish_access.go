@@ -781,9 +781,33 @@ func (filter *attributeViewPublishAccessFilter) filterBaseValue(attrView *av.Att
 		key, _ = attrView.GetKey(baseValue.Value.KeyID)
 	}
 	value, changed := filter.filterValue(attrView, key, baseValue.Value, itemID)
+	if "" != value.RenderedContent && !filter.checkRenderTemplateDependencies(attrView, key, itemID) {
+		if !changed {
+			value = cloneAttributeViewSensitiveValue(value)
+			changed = true
+		}
+		value.RenderedContent = ""
+	}
 	if changed {
 		baseValue.Value = value
 	}
+}
+
+func (filter *attributeViewPublishAccessFilter) checkRenderTemplateDependencies(attrView *av.AttributeView,
+	key *av.Key, itemID string) bool {
+	if nil == attrView || nil == key || "" == strings.TrimSpace(key.RenderTemplate) {
+		return false
+	}
+	dependencies := sql.GetTemplateKeyRelevantKeys(attrView, key)
+	if 1 > len(dependencies) {
+		return false
+	}
+	for _, dependency := range dependencies {
+		if !filter.checkKeyDependencies(attrView, dependency, itemID, map[string]bool{}) {
+			return false
+		}
+	}
+	return true
 }
 
 func (filter *attributeViewPublishAccessFilter) filterValue(attrView *av.AttributeView, key *av.Key, value *av.Value, itemID string) (*av.Value, bool) {
@@ -949,6 +973,15 @@ func (filter *attributeViewPublishAccessFilter) checkKeyDependencies(attrView *a
 		for _, targetItemID := range targetItemIDs {
 			if !filter.isItemAccessable(targetAttrView, targetItemID) ||
 				!filter.checkKeyDependencies(targetAttrView, targetKey, targetItemID, visited) {
+				return false
+			}
+		}
+	case av.KeyTypeTemplate:
+		for _, dependency := range sql.GetTemplateKeyRelevantKeys(attrView, key) {
+			if dependency.ID == key.ID {
+				continue
+			}
+			if !filter.checkKeyDependencies(attrView, dependency, itemID, visited) {
 				return false
 			}
 		}

@@ -395,7 +395,7 @@ body.mobile-keyboard--open {
   z-index: 3;
   box-sizing: border-box;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   width: min(calc(100% - 32px), calc(var(--mobile-bottom-bar-height) * 6));
   height: var(--mobile-bottom-bar-height);
   margin: 0 auto;
@@ -427,8 +427,19 @@ body.mobile-keyboard--open {
     border-radius: var(--b3-border-radius);
     color: var(--b3-theme-on-surface-light);
     background: transparent;
+    background-clip: content-box;
     transition: color 80ms ease, background-color 80ms ease, transform 80ms ease;
     -webkit-tap-highlight-color: transparent;
+
+    &[data-slot="0"] {
+      border-top-left-radius: calc(var(--mobile-bottom-bar-height) / 2);
+      border-bottom-left-radius: calc(var(--mobile-bottom-bar-height) / 2);
+    }
+
+    &[data-action="more"] {
+      border-top-right-radius: calc(var(--mobile-bottom-bar-height) / 2);
+      border-bottom-right-radius: calc(var(--mobile-bottom-bar-height) / 2);
+    }
 
     > svg {
       width: 20px;

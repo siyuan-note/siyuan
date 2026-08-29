@@ -16,7 +16,7 @@ import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {escapeAttr, escapeHtml} from "../../util/escape";
-import {unicode2Emoji} from "../../emoji";
+import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
 import type {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
@@ -525,7 +525,7 @@ export class Outline extends Model {
                 return;
             }
             if (ial) {
-                let iconHTML = `${unicode2Emoji(ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true)}`;
+                let iconHTML = getFileTreeIconHTML(ial.icon, "file", "b3-list-item__graphic", true);
                 if (ial.icon === Constants.ZWSP && docTitleElement.firstElementChild) {
                     iconHTML = docTitleElement.firstElementChild.outerHTML;
                 }

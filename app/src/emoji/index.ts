@@ -35,7 +35,7 @@ import {
     type TEmojiPanelPageMode,
     type TRandomEmojiScope,
 } from "./panel";
-import {updateFileTreeItemIcon} from "./fileTreeIcon";
+import {getFileTreeIconHTML, updateFileTreeItemIcon} from "./fileTreeIcon";
 
 export {unicode2Emoji};
 
@@ -1532,7 +1532,7 @@ export const updateOutlineEmoji = (unicode: string, id: string) => {
     /// #if !MOBILE
     getAllModels().outline.forEach(model => {
         if (model.blockId === id) {
-            model.headerElement.nextElementSibling.firstElementChild.outerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true);
+            model.headerElement.nextElementSibling.firstElementChild.outerHTML = getFileTreeIconHTML(unicode, "file", "b3-list-item__graphic", true);
         }
     });
     /// #endif

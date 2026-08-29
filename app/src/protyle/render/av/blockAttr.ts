@@ -4,6 +4,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {cellValueIsEmpty, popTextCell, updateCellsValue} from "./cell";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
+import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
@@ -543,7 +544,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
                 h: rect.height,
                 w: rect.width,
             }, (unicode) => {
-                target.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
+                target.innerHTML = getFileTreeIconHTML(unicode, "file");
             }, target.querySelector("img"), {ownerElement: protyle.element});
             event.preventDefault();
             event.stopPropagation();

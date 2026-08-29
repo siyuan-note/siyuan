@@ -1,5 +1,5 @@
 import {fetchPost} from "../../util/fetch";
-import {unicode2Emoji} from "../../emoji";
+import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
 import {Constants} from "../../constants";
 import {escapeHtml} from "../../util/escape";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
@@ -19,7 +19,7 @@ const renderRecentDocs = (data: IRecentDoc[], element: HTMLElement, key = "") =>
     data.forEach((item) => {
         if (!key || item.title.toLowerCase().includes(key.toLowerCase())) {
             html += `<li data-node-id="${item.rootID}" class="b3-list-item">
-${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true)}
+${getFileTreeIconHTML(item.icon, "file", "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
 </li>`;
         }

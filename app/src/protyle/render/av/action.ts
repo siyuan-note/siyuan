@@ -33,6 +33,7 @@ import {focusBlock, focusByRange} from "../../util/selection";
 import {showMessage} from "../../../dialog/message";
 import {previewAttrViewImages} from "../../preview/image";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
+import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender, initUnfoldedGroupTables, setAVGroupFolded as setGroupFolded} from "./render";
@@ -537,7 +538,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 h: rect.height,
                 w: rect.width,
             }, (unicode) => {
-                target.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
+                target.innerHTML = getFileTreeIconHTML(unicode, "file");
             }, target.querySelector("img"), {ownerElement: protyle.element});
             event.preventDefault();
             event.stopPropagation();

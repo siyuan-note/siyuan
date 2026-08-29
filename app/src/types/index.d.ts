@@ -327,7 +327,6 @@ interface Window {
         showKeyboard(): void
         print(title: string, html: string): void
         getScreenWidthPx(): number
-        getStatusBarHeight?(): number
         exit(): void
         setWebViewFocusable(enable: boolean): void
         sendNotification(channel: string, title: string, body: string, delayInSeconds: number): number

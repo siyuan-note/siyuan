@@ -1231,7 +1231,7 @@
 	"continueReview1": "Continua la revisione",
 	"continueReview2": "Ci sono ancora <code class='fn__code'>${count}</code> carte da rivedere, continuare?",
 	"whatsNewInSiYuan": "Novità in SiYuan",
-	"returnDesktop": "Premi indietro di nuovo per tornare al desktop. Usa [Esci dall'applicazione] nel pannello laterale destro per uscire dall'app normalmente",
+	"returnDesktop": "Premi di nuovo Indietro per tornare al desktop. Per uscire, usa [Altro - Esci dall'applicazione]",
 	"enterNew": "Invio per creare",
 	"enterNewTip": "Nessun documento trovato, premi Invio per creare un nuovo documento.",
 	"searchTip1": "per navigare",

@@ -1231,7 +1231,7 @@
 	"continueReview1": "Überprüfung fortsetzen",
 	"continueReview2": "Es sind noch <code class='fn__code'>${count}</code> Karten zur Überprüfung vorhanden, fortfahren?",
 	"whatsNewInSiYuan": "Was gibt es Neues in SiYuan",
-	"returnDesktop": "Drücken Sie erneut, um zum Desktop zurückzukehren. Verwenden Sie [Anwendung beenden] im rechten Seitenfeld, um die Anwendung normal zu beenden.",
+	"returnDesktop": "Drücken Sie erneut die Zurück-Taste, um zum Desktop zurückzukehren. Verwenden Sie zum Beenden [Mehr - Anwendung beenden]",
 	"enterNew": "Eingeben, um zu erstellen",
 	"enterNewTip": "Keine Dokumente gefunden, drücken Sie Eingabe, um ein neues Dokument zu erstellen.",
 	"searchTip1": "um zu navigieren",

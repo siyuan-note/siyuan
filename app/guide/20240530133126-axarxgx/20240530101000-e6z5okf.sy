@@ -8,7 +8,7 @@
 		"id": "20240530101000-e6z5okf",
 		"title": "モバイルアプリ",
 		"type": "doc",
-		"updated": "20260819224004"
+		"updated": "20260829104731"
 	},
 	"Children": [
 		{
@@ -112,7 +112,7 @@
 			"Properties": {
 				"ID": "20240530101000-yx7xlm6",
 				"id": "20240530101000-zx8lkgl",
-				"updated": "20250114215535"
+				"updated": "20260829104731"
 			},
 			"Children": [
 				{
@@ -137,7 +137,7 @@
 			"Properties": {
 				"ID": "20240530101000-355qyas",
 				"id": "20240530101000-vg6rjty",
-				"updated": "20240530101000"
+				"updated": "20260829104731"
 			},
 			"Children": [
 				{
@@ -180,7 +180,7 @@
 					"Properties": {
 						"ID": "20240530101000-2vsx7me",
 						"id": "20240530101000-286lfpp",
-						"updated": "20240530101000"
+						"updated": "20260829104731"
 					},
 					"Children": [
 						{
@@ -189,17 +189,26 @@
 							"Properties": {
 								"ID": "20240530101000-8e3p06k",
 								"id": "20240530101000-w6mhqnc",
-								"updated": "20240530101000"
+								"updated": "20260829104731"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "アプリを終了するときは、右側のパネルの "
+									"Data": "アプリを終了するときは "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "アプリケーションの終了"
+									"TextMarkTextContent": "詳細"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アプリケーションを終了"
 								},
 								{
 									"Type": "NodeText",

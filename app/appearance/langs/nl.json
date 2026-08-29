@@ -1231,7 +1231,7 @@
 	"continueReview1": "Doorgaan",
 	"continueReview2": "Nog <code class='fn__code'>${count}</code> kaarten te herhalen, doorgaan?",
 	"whatsNewInSiYuan": "Nieuw in SiYuan",
-	"returnDesktop": "Druk nogmaals terug voor bureaublad. Gebruik [Applicatie afsluiten] in het rechterzijpaneel om normaal af te sluiten",
+	"returnDesktop": "Druk nogmaals op Terug om naar het bureaublad te gaan. Gebruik [Meer - Applicatie afsluiten] om af te sluiten",
 	"enterNew": "Enter om aan te maken",
 	"enterNewTip": "Geen documenten gevonden; druk op Enter om een nieuw document aan te maken",
 	"searchTip1": "navigeren",

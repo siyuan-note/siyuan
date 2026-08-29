@@ -7,7 +7,7 @@
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
 		"type": "doc",
-		"updated": "20260819224004"
+		"updated": "20260829104731"
 	},
 	"Children": [
 		{
@@ -408,7 +408,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110114-3h7r74i",
-				"updated": "20250114215310"
+				"updated": "20260829104731"
 			},
 			"Children": [
 				{
@@ -428,7 +428,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240113110114-7cvpqyg",
-				"updated": "20240113110431"
+				"updated": "20260829104731"
 			},
 			"Children": [
 				{
@@ -468,7 +468,7 @@
 					},
 					"Properties": {
 						"id": "20240113110114-fn3cur4",
-						"updated": "20240113110423"
+						"updated": "20260829104731"
 					},
 					"Children": [
 						{
@@ -476,21 +476,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240113110114-z7ij7u2",
-								"updated": "20240113110423"
+								"updated": "20260829104731"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "To exit the application, please use "
+									"Data": "To exit the application normally, use "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Exit the application"
+									"TextMarkTextContent": "More"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ in the right panel to exit normally. Swiping away directly will force the application to end, resulting in data synchronization not being executed"
+									"Data": " - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Exit Application"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​. Swiping away directly will force the application to end, resulting in data synchronization not being executed"
 								}
 							]
 						}

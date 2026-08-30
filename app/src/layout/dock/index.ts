@@ -341,14 +341,14 @@ export class Dock {
         this.responsiveManualOverride = false;
     }
 
-    public setResponsiveFloating(value: boolean) {
+    public setResponsiveFloating(value: boolean, preferredSize: number) {
         const responsiveFloating = value && this.position !== "Bottom" && this.pin;
         if (this.responsiveFloating === responsiveFloating) {
             return false;
         }
-        this.restoreResponsivePreferredSize();
+        this.restoreResponsivePreferredSize(preferredSize);
         this.responsiveFloating = responsiveFloating;
-        this.applyFloatingState(false);
+        this.applyFloatingState(false, preferredSize);
         return true;
     }
 
@@ -478,14 +478,14 @@ export class Dock {
         this.applyFloatingState(true);
     }
 
-    private applyFloatingState(isSaveLayout: boolean) {
+    private applyFloatingState(isSaveLayout: boolean, preferredSize?: number) {
         this.clearDockHoverTimeout();
         const hasActive = this.hasActive();
-        this.resetDockPosition(hasActive);
+        this.resetDockPosition(hasActive, preferredSize);
         this.layout.element.style.opacity = "";
         if (this.isFloating()) {
             this.resizeElement.classList.add("fn__none");
-            this.hideDock(true);
+            this.hideDock(true, preferredSize);
         } else {
             this.layout.element.style.transform = "";
             this.layout.element.style.zIndex = "";
@@ -498,11 +498,12 @@ export class Dock {
         setTabPosition(true);
     }
 
-    private restoreResponsivePreferredSize() {
+    private restoreResponsivePreferredSize(preferredSize?: number) {
         if (this.position === "Bottom") {
             return;
         }
-        const responsiveWidth = parseInt(this.layout.element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH));
+        const responsiveWidth = typeof preferredSize === "number" && preferredSize > 0 ? preferredSize :
+            parseInt(this.layout.element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH));
         this.layout.element.style.maxWidth = "";
         this.layout.element.removeAttribute(Constants.ATTRIBUTE_DOCK_WIDTH);
         if (responsiveWidth > 0) {
@@ -510,8 +511,8 @@ export class Dock {
         }
     }
 
-    private resetDockPosition(show: boolean) {
-        const size = this.getCurrentSize();
+    private resetDockPosition(show: boolean, preferredSize?: number) {
+        const size = typeof preferredSize === "number" && preferredSize > 0 ? preferredSize : this.getCurrentSize();
         if (this.position === "Left") {
             this.layout.element.setAttribute("style", `${show ? "margin-right: var(--b3-layout-space);" : ""}width:${size}px;opacity:${show ? 1 : 0};min-height:8px;`);
         } else if (this.position === "Right") {
@@ -596,7 +597,7 @@ export class Dock {
         }
     }
 
-    public hideDock(reset = false) {
+    public hideDock(reset = false, preferredSize?: number) {
         this.clearDockHoverTimeout();
         if (!reset && (this.layout.element.style.opacity === "0" || !this.isFloating())) {
             return;
@@ -621,12 +622,13 @@ export class Dock {
         ) {
             return;
         }
+        const size = typeof preferredSize === "number" && preferredSize > 0 ? preferredSize : this.getCurrentSize();
         if (this.position === "Left") {
-            this.layout.element.style.transform = `translateX(-${this.getCurrentSize() + 8}px)`;
+            this.layout.element.style.transform = `translateX(-${size + 8}px)`;
         } else if (this.position === "Right") {
-            this.layout.element.style.transform = `translateX(${this.getCurrentSize() + 8}px)`;
+            this.layout.element.style.transform = `translateX(${size + 8}px)`;
         } else if (this.position === "Bottom") {
-            this.layout.element.style.transform = `translateY(${this.getCurrentSize() + 8}px)`;
+            this.layout.element.style.transform = `translateY(${size + 8}px)`;
         }
         if (reset) {
             return;

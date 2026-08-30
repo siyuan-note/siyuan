@@ -4,6 +4,7 @@ import {
     type ICenterMinimumLayoutNode,
     resolveDockResponsiveLayout,
 } from "./responsiveLayout";
+import {runWithoutDockTransitions} from "./responsiveTransition";
 
 const EDITOR_MINIMUM_WIDTH = 480;
 const RESPONSIVE_HYSTERESIS = 32;
@@ -43,27 +44,35 @@ const getLayoutGap = () => {
     return Number.isFinite(value) ? Math.max(0, value) : 0;
 };
 
-const clearResponsiveWidth = (dock: typeof window.siyuan.layout.leftDock, preferredSize: number) => {
-    const element = dock.layout.element;
-    const hasResponsiveWidth = Boolean(element.style.maxWidth ||
-        element.hasAttribute(Constants.ATTRIBUTE_DOCK_WIDTH));
-    element.style.maxWidth = "";
-    element.removeAttribute(Constants.ATTRIBUTE_DOCK_WIDTH);
-    if (hasResponsiveWidth && preferredSize > 0) {
-        element.style.width = preferredSize + "px";
-    }
-};
-
-const applyResponsiveWidth = (
+const updateResponsiveWidth = (
     dock: typeof window.siyuan.layout.leftDock,
     preferredSize: number,
     fixedSize: number,
 ) => {
-    if (dock.isResponsiveFloating() || fixedSize <= 0 || fixedSize >= preferredSize) {
+    const element = dock.layout.element;
+    const hasResponsiveWidth = Boolean(element.style.maxWidth ||
+        element.hasAttribute(Constants.ATTRIBUTE_DOCK_WIDTH));
+    const shouldConstrain = !dock.isResponsiveFloating() && fixedSize > 0 && fixedSize < preferredSize;
+    if (!shouldConstrain) {
+        if (!hasResponsiveWidth) {
+            return;
+        }
+        element.style.maxWidth = "";
+        element.removeAttribute(Constants.ATTRIBUTE_DOCK_WIDTH);
+        const preferredWidth = preferredSize + "px";
+        if (preferredSize > 0 && element.style.width !== preferredWidth) {
+            element.style.width = preferredWidth;
+        }
         return;
     }
-    dock.layout.element.setAttribute(Constants.ATTRIBUTE_DOCK_WIDTH, preferredSize.toString());
-    dock.layout.element.style.maxWidth = fixedSize + "px";
+    const preferredWidth = preferredSize.toString();
+    const maximumWidth = fixedSize + "px";
+    if (element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH) !== preferredWidth) {
+        element.setAttribute(Constants.ATTRIBUTE_DOCK_WIDTH, preferredWidth);
+    }
+    if (element.style.maxWidth !== maximumWidth) {
+        element.style.maxWidth = maximumWidth;
+    }
 };
 
 export const reconcileResponsiveDockLayout = () => {
@@ -127,28 +136,39 @@ export const reconcileResponsiveDockLayout = () => {
             },
         });
 
-        clearResponsiveWidth(leftDock, leftPreferredSize);
-        clearResponsiveWidth(rightDock, rightPreferredSize);
+        const floatingStateChanged = result.left.autoFloating !== leftDock.isResponsiveFloating() ||
+            result.right.autoFloating !== rightDock.isResponsiveFloating();
+        const applyResult = () => {
+            // 拉宽时先恢复左侧，再恢复右侧。
+            if (!result.left.autoFloating && leftDock.isResponsiveFloating()) {
+                leftDock.setResponsiveFloating(false, leftPreferredSize);
+            }
+            if (!result.right.autoFloating && rightDock.isResponsiveFloating()) {
+                rightDock.setResponsiveFloating(false, rightPreferredSize);
+            }
+            // 缩窄时先浮动右侧，再浮动左侧。
+            if (result.right.autoFloating && !rightDock.isResponsiveFloating()) {
+                rightDock.setResponsiveFloating(true, rightPreferredSize);
+            }
+            if (result.left.autoFloating && !leftDock.isResponsiveFloating()) {
+                leftDock.setResponsiveFloating(true, leftPreferredSize);
+            }
 
-        // 拉宽时先恢复左侧，再恢复右侧。
-        if (!result.left.autoFloating && leftDock.isResponsiveFloating()) {
-            leftDock.setResponsiveFloating(false);
-        }
-        if (!result.right.autoFloating && rightDock.isResponsiveFloating()) {
-            rightDock.setResponsiveFloating(false);
-        }
-        // 缩窄时先浮动右侧，再浮动左侧。
-        if (result.right.autoFloating && !rightDock.isResponsiveFloating()) {
-            rightDock.setResponsiveFloating(true);
-        }
-        if (result.left.autoFloating && !leftDock.isResponsiveFloating()) {
-            leftDock.setResponsiveFloating(true);
-        }
-
-        applyResponsiveWidth(leftDock, leftPreferredSize, result.left.fixedSize);
-        applyResponsiveWidth(rightDock, rightPreferredSize, result.right.fixedSize);
-        if (centerLayout.element.clientWidth !== centerSizeBefore && hasCenterMaximumWidth(centerLayout)) {
-            leftDock.adjustResponsiveCenterLayout();
+            updateResponsiveWidth(leftDock, leftPreferredSize, result.left.fixedSize);
+            updateResponsiveWidth(rightDock, rightPreferredSize, result.right.fixedSize);
+            if (centerLayout.element.clientWidth !== centerSizeBefore && hasCenterMaximumWidth(centerLayout)) {
+                leftDock.adjustResponsiveCenterLayout();
+            }
+        };
+        if (floatingStateChanged) {
+            runWithoutDockTransitions([
+                leftDock.layout.element,
+                rightDock.layout.element,
+            ], applyResult, () => {
+                void outerLayout.element.offsetWidth;
+            });
+        } else {
+            applyResult();
         }
     } finally {
         applying = false;

@@ -26,6 +26,10 @@
     overflow: hidden;
   }
 
+  &--no-transition {
+    transition: none !important;
+  }
+
   &__dockl + .layout__resize {
     margin: 0 0 0 var(--b3-layout-space-margin);
     width: var(--b3-layout-space);

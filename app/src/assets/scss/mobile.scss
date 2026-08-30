@@ -69,6 +69,7 @@
 
   #sidebarContainer {
     max-width: calc(100vw - 24px);
+    z-index: 4; // 窄屏侧栏覆盖正文时需高于标注层
   }
 
   .pdf__rect-resize {

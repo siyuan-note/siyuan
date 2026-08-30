@@ -51,6 +51,7 @@ import {
 } from "../util/bazaarPackage";
 import {Dialog} from "../dialog";
 import {previewImages} from "../protyle/preview/image";
+import {BAZAAR_README_SANITIZE_OPTIONS} from "./bazaarReadmeSanitize";
 
 interface IBazaarMountSnapshot {
     element: HTMLElement;
@@ -1334,7 +1335,7 @@ type="checkbox">
         const isInstalledReadme = from === "downloaded";
         if (isInstalledReadme) {
             const mdElement = readmeElement.querySelector(".item__readme");
-            mdElement.innerHTML = window.DOMPurify.sanitize(displayData.preferredReadme || "", {FORBID_TAGS: ["iframe", "frame", "frameset"]});
+            mdElement.innerHTML = window.DOMPurify.sanitize(displayData.preferredReadme || "", BAZAAR_README_SANITIZE_OPTIONS);
             highlightRender(mdElement);
         } else {
             fetchPost("/api/bazaar/getBazaarPackageREADME", {
@@ -1352,7 +1353,7 @@ type="checkbox">
                     return;
                 }
                 const mdElement = readmeElement.querySelector(".item__readme");
-                mdElement.innerHTML = window.DOMPurify.sanitize(response.data.html, {FORBID_TAGS: ["iframe", "frame", "frameset"]});
+                mdElement.innerHTML = window.DOMPurify.sanitize(response.data.html, BAZAAR_README_SANITIZE_OPTIONS);
                 highlightRender(mdElement);
             });
         }

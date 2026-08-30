@@ -9,6 +9,7 @@ import {showMessage} from "../../dialog/message";
 import {cancelDrag} from "./dragover";
 import {nbsp2space, removeZWJ} from "../../protyle/util/normalizeText";
 import {getDockByType} from "../../layout/tabUtil";
+import {SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "../../protyle/toolbar/subElementLifecycle";
 
 export const globalClickHideMenu = (element: HTMLElement) => {
     if (!window.siyuan.menus.menu.element.contains(element) && !hasClosestByAttribute(element, "data-menu", "true")) {
@@ -34,10 +35,14 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
         }
     }
 
-    if (!hasTopClosestByClassName(event.target, "protyle-util") &&
-        !hasTopClosestByClassName(event.target, "protyle-toolbar")) {
+    const toolbarElement = hasTopClosestByClassName(event.target, "protyle-toolbar");
+    const appearanceTrigger = toolbarElement && hasClosestByAttribute(event.target, "data-type", "text");
+    if (!hasTopClosestByClassName(event.target, "protyle-util") && !appearanceTrigger) {
         document.querySelectorAll(".protyle-font").forEach((item: HTMLElement) => {
             item.parentElement.classList.add("fn__none");
+            if (item.parentElement.dataset.subElementSource === SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE) {
+                delete item.parentElement.dataset.subElementSource;
+            }
         });
     }
 

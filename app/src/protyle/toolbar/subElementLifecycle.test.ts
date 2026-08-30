@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {closeSubElement, ISubElementLifecycleState} from "./subElementLifecycle";
+import {
+    closeSubElement,
+    ISubElementLifecycleState,
+    SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE,
+    setSubElementSource,
+} from "./subElementLifecycle";
 
 describe("closeSubElement", () => {
     it("runs a pending close callback exactly once", () => {
@@ -59,5 +64,35 @@ describe("closeSubElement", () => {
         assert.throws(() => closeSubElement(state), /close failed/);
         assert.equal(state.subElementCloseCB, undefined);
         assert.equal(state.subElementResizeCB, undefined);
+    });
+
+    it("clears the sub-element source before invoking its close handler", () => {
+        const subElement = {dataset: {}} as HTMLElement;
+        const state: ISubElementLifecycleState = {
+            subElement,
+            subElementCloseCB: () => {
+                assert.equal(subElement.dataset.subElementSource, undefined);
+            },
+        };
+        setSubElementSource(state, SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE);
+
+        closeSubElement(state);
+
+        assert.equal(subElement.dataset.subElementSource, undefined);
+    });
+
+    it("preserves a replacement sub-element source installed while closing", () => {
+        const subElement = {dataset: {}} as HTMLElement;
+        const state: ISubElementLifecycleState = {
+            subElement,
+            subElementCloseCB: () => {
+                setSubElementSource(state, "replacement");
+            },
+        };
+        setSubElementSource(state, SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE);
+
+        closeSubElement(state);
+
+        assert.equal(subElement.dataset.subElementSource, "replacement");
     });
 });

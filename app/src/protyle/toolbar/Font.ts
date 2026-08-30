@@ -5,7 +5,11 @@ import {Constants} from "../../constants";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {updateBatchTransaction} from "../wysiwyg/transaction";
 import {lineNumberRender} from "../render/highlightRender";
-import {closeSubElement} from "./subElementLifecycle";
+import {
+    closeSubElement,
+    SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE,
+    setSubElementSource,
+} from "./subElementLifecycle";
 import {escapeAttr} from "../../util/escape";
 import {
     decodeStyle1,
@@ -61,15 +65,31 @@ export class Font extends ToolbarItem {
     constructor(protyle: IProtyle, menuItem: IMenuItem) {
         super(protyle, menuItem);
         this.element.addEventListener("click", () => {
+            if (protyle.toolbar.subElement.dataset.subElementSource === SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE &&
+                !protyle.toolbar.subElement.classList.contains("fn__none")) {
+                protyle.toolbar.subElement.classList.add("fn__none");
+                closeSubElement(protyle.toolbar);
+                focusByRange(protyle.toolbar.range);
+                return;
+            }
+            closeSubElement(protyle.toolbar);
+            /// #if !MOBILE
+            if (protyle.toolbar.element.classList.contains("fn__none")) {
+                protyle.toolbar.render(protyle, protyle.toolbar.range);
+            }
+            /// #else
+            protyle.toolbar.element.classList.add("fn__none");
+            /// #endif
             const triggerRect = this.element.getBoundingClientRect();
             const visibleTriggerRect = triggerRect.width > 0 && triggerRect.height > 0 ? triggerRect : undefined;
-            protyle.toolbar.element.classList.add("fn__none");
-            closeSubElement(protyle.toolbar);
             protyle.toolbar.subElement.innerHTML = "";
             protyle.toolbar.subElement.style.width = "";
             protyle.toolbar.subElement.style.padding = "";
             const appearanceElement = appearanceMenu(protyle, getFontNodeElements(protyle));
             protyle.toolbar.subElement.append(appearanceElement);
+            /// #if !MOBILE
+            setSubElementSource(protyle.toolbar, SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE);
+            /// #endif
             protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
             protyle.toolbar.subElement.classList.remove("fn__none");
             limitRecentFontStyleRows(appearanceElement);
@@ -230,6 +250,15 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
     const applyFontStyle = (type: string, color?: string) => {
         fontEvent(protyle, nodeElements, type, color, true, onChange);
     };
+    const closeSelectionToolbarAppearance = () => {
+        if (protyle.toolbar.subElement.dataset.subElementSource !== SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE) {
+            return;
+        }
+        protyle.toolbar.subElement.classList.add("fn__none");
+        closeSubElement(protyle.toolbar);
+        protyle.toolbar.render(protyle, protyle.toolbar.range);
+        focusByRange(protyle.toolbar.range);
+    };
     element.innerHTML = `${lastColorHTML}
 <div class="fn__hr"></div>
 <div data-id="color">${window.siyuan.languages.color}</div>
@@ -296,17 +325,23 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                 if (target.dataset.action === "manageInlineStyle") {
                     closeSubElement(protyle.toolbar);
                     protyle.toolbar.subElement.classList.add("fn__none");
+                    protyle.toolbar.element.classList.add("fn__none");
                     openInlineStyleDialog(target.dataset.inlineStyleType as TInlineStyleType);
                 } else if (dataType === "style1") {
                     applyFontStyle(dataType, encodeStyle1(target.style.backgroundColor, target.style.color));
+                    closeSelectionToolbarAppearance();
                 } else if (dataType === "fontSize") {
                     applyFontStyle(dataType, target.getAttribute("data-value"));
+                    closeSelectionToolbarAppearance();
                 } else if (dataType === "backgroundColor") {
                     applyFontStyle(dataType, target.style.backgroundColor);
+                    closeSelectionToolbarAppearance();
                 } else if (dataType === "color") {
                     applyFontStyle(dataType, target.style.color);
+                    closeSelectionToolbarAppearance();
                 } else {
                     applyFontStyle(dataType);
+                    closeSelectionToolbarAppearance();
                 }
                 break;
             }

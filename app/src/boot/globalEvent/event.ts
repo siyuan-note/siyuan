@@ -18,6 +18,7 @@ import {fetchPost} from "../../util/fetch";
 import {initHarmonyTextSelectionMenu} from "../../util/harmonyTextSelectionMenu";
 import {clearDragTipGhost, hideDragTip} from "../../protyle/util/dragTip";
 import {formatPainter} from "../../protyle/toolbar/FormatPainter";
+import {SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "../../protyle/toolbar/subElementLifecycle";
 
 const KANBAN_GROUP_DRAG_TYPE = `${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Group${Constants.ZWSP}`.toLowerCase();
 
@@ -241,7 +242,8 @@ export const initWindowEvent = (app: App) => {
             event.preventDefault();
         }
         // protyle.toolbar 点击空白处时进行隐藏
-        if (!hasClosestByClassName(event.target as Element, "protyle-toolbar")) {
+        if (!hasClosestByClassName(event.target as Element, "protyle-toolbar") &&
+            !hasClosestByAttribute(event.target, "data-sub-element-source", SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE)) {
             hideAllElements(["toolbar"]);
         }
     });

@@ -59,11 +59,12 @@ import {activeBlur, updateMobilePluginToolbar} from "../../mobile/util/keyboardT
 import {FormatPainter} from "./FormatPainter";
 import {IFormatPainterSnapshot} from "./formatPainterCore";
 import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
-import {closeSubElement} from "./subElementLifecycle";
+import {closeSubElement, SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE} from "./subElementLifecycle";
 import {getDefaultToolbar, getToolbarEntryId, markPluginToolbarEntries} from "./defaults";
 import {applyToolbarEntryVisibility} from "../../config/entryVisibility/runtime";
 import {refreshToolbarCatalog} from "../../config/entryVisibility/catalog";
 import {emitToPlugins, forEachPluginSubscriber, hasPluginSubscriber} from "../../plugin/EventBusCore";
+import {getSelectionElementAvailableHeight, getSelectionElementY} from "./selectionElementPosition";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -186,24 +187,28 @@ export class Toolbar {
             (this.rangePosition.isBottom ? rangeRects[rangeRects.length - 1] : rangeRects[0]) ||
             this.range.getBoundingClientRect();
         const gap = this.isMultipleClick ? 2 : 4;
+        const toolbarRect = element.dataset.subElementSource === SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE &&
+        !this.element.classList.contains("fn__none") ? this.element.getBoundingClientRect() : undefined;
+        const positionOptions = {
+            elementHeight: element.offsetHeight,
+            rangeTop: rangeRect.top,
+            rangeBottom: rangeRect.bottom,
+            topBoundary,
+            bottomBoundary,
+            gap,
+            isBottom: this.rangePosition.isBottom,
+            toolbarTop: toolbarRect?.top,
+            toolbarBottom: toolbarRect?.bottom,
+        };
         if (scrollElement) {
-            const availableHeight = Math.max(
-                rangeRect.top - topBoundary - gap,
-                bottomBoundary - rangeRect.bottom - gap,
-                0
-            );
+            const availableHeight = getSelectionElementAvailableHeight(positionOptions);
             if (element.offsetHeight > availableHeight) {
                 const outerHeight = element.offsetHeight - scrollElement.offsetHeight;
                 scrollElement.style.maxHeight = `${Math.max(0, availableHeight - outerHeight)}px`;
+                positionOptions.elementHeight = element.offsetHeight;
             }
         }
-        const above = rangeRect.top - element.offsetHeight - gap;
-        const below = rangeRect.bottom + gap;
-        const y = this.rangePosition.isBottom ?
-            (below + element.offsetHeight <= bottomBoundary ?
-                below : Math.max(above, topBoundary)) :
-            (above >= topBoundary ?
-                above : Math.min(below, bottomBoundary - element.offsetHeight));
+        const y = getSelectionElementY(positionOptions);
         const horizontalDivisor = this.isMultipleClick ? 3 : 4;
         // 子面板与触发按钮水平居中，垂直方向继续避让选区
         const left = triggerRect ?

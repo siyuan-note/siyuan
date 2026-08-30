@@ -62,6 +62,7 @@ import {
 } from "../../block/util";
 import {getHorizontalSuperBlockChild} from "../../block/superBlock";
 import {setDragTipGhost} from "../util/dragTip";
+import {stringifyBlockDragData} from "../util/dragDocument";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
 import {mathRender} from "../render/mathRender";
@@ -326,7 +327,11 @@ export class Gutter {
             }
             window.siyuan.dragElement = avElement as HTMLElement || protyle.wysiwyg.element;
             event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}${Constants.ZWSP}${window.siyuan.config.system.workspaceDir}`,
-                protyle.wysiwyg.element.innerHTML);
+                stringifyBlockDragData({
+                    html: protyle.wysiwyg.element.innerHTML,
+                    notebookID: protyle.notebookId,
+                    rootID: protyle.block.rootID,
+                }));
             isGutterDragging = true;
             dragCleanupController?.abort();
             const cleanupController = new AbortController();

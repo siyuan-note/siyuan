@@ -47,3 +47,12 @@ export const buildCancelSuperBlockOperations = (options: TCancelSuperBlockOperat
     ];
     return {doOperations, undoOperations};
 };
+
+export const appendCancelSuperBlockOperations = (
+    doOperations: IOperation[], undoOperations: IOperation[],
+    cancelOperations: {doOperations: IOperation[], undoOperations: IOperation[]}
+) => {
+    doOperations.push(...cancelOperations.doOperations);
+    // moveTo 会在返回前反转撤销数组，因此这里先按相反顺序压入。
+    undoOperations.push(...[...cancelOperations.undoOperations].reverse());
+};

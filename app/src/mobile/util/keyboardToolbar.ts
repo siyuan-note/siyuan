@@ -55,6 +55,7 @@ import {
     shouldPreserveTableCellSelectAll,
     type TSelectionEndpoint,
 } from "./touchSelection";
+import {getVisibleViewportBounds} from "./visibleViewport";
 
 type TAndroidBoundedSelection = {
     container: HTMLElement,
@@ -327,19 +328,6 @@ const preventKeyboardToolbarRender = () => {
     preventRenderTimeout = window.setTimeout(() => {
         preventRender = false;
     }, 1000);
-};
-
-const getVisibleViewportBounds = () => {
-    if (!isInMobileApp() && window.visualViewport) {
-        return {
-            top: window.visualViewport.offsetTop,
-            bottom: window.visualViewport.offsetTop + window.visualViewport.height,
-        };
-    }
-    return {
-        top: 0,
-        bottom: window.innerHeight,
-    };
 };
 
 const updateKeyboardToolbarPosition = () => {

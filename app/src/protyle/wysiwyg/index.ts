@@ -4399,6 +4399,8 @@ export class WYSIWYG {
                 }
             }
             const range = getEditorRange(this.element);
+            const resumeBlockHint = !protyle.hint.element.classList.contains("fn__none") &&
+                Constants.BLOCK_HINT_KEYS.includes(protyle.hint.splitChar);
             // 面包屑定位，需至于前，否则 return 的元素就无法进行面包屑定位
             if (protyle.options.render.breadcrumb) {
                 protyle.breadcrumb.render(protyle, false, hasClosestBlock(range.startContainer));
@@ -5044,7 +5046,7 @@ export class WYSIWYG {
                 mobileBlur = false;
             }, (isMobile() || isInIOS()) ? 520 : 0); // Android/iPad 双击慢了出不来
 
-            protyle.hint.enableExtend = false;
+            protyle.hint.enableExtend = resumeBlockHint && protyle.hint.canResumeBlockHint(protyle, range);
 
             if (this.element.querySelector(".protyle-wysiwyg--select") && range.toString() !== "") {
                 // 选中块后，文字不能被选中。需在 shift click 之后，防止shift点击单个块出现文字选中

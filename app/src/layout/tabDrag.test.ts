@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     clearTabHoverSwitch,
+    findDefaultTabNextId,
     findNextTabId,
     reorderTabItems,
     scheduleTabHoverSwitch
@@ -15,6 +16,34 @@ const createItems = () => [
 ];
 
 describe("tab drag ordering", () => {
+    it("places a pinned tab before the first unpinned tab by default", () => {
+        const items = [
+            {id: "a", pin: true},
+            {id: "b", pin: false},
+            {id: "c", pin: false},
+        ];
+
+        assert.equal(findDefaultTabNextId(items, true), "b");
+    });
+
+    it("places a pinned tab at the end when all tabs are pinned", () => {
+        const items = [
+            {id: "a", pin: true},
+            {id: "b", pin: true},
+        ];
+
+        assert.equal(findDefaultTabNextId(items, true), undefined);
+    });
+
+    it("places an unpinned tab at the end by default", () => {
+        const items = [
+            {id: "a", pin: true},
+            {id: "b", pin: false},
+        ];
+
+        assert.equal(findDefaultTabNextId(items, false), undefined);
+    });
+
     it("uses the first surviving successor after tabs are removed", () => {
         const items = createItems();
         items.splice(1, 1);

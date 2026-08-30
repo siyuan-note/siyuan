@@ -37,6 +37,13 @@ export const findNextTabId = <T extends { id: string }>(items: T[], candidateIds
     return candidateIds.find((id) => existingIds.has(id));
 };
 
+export const findDefaultTabNextId = <T extends { id: string, pin: boolean }>(items: T[], pin: boolean) => {
+    if (!pin) {
+        return undefined;
+    }
+    return items.find((item) => !item.pin)?.id;
+};
+
 type TTabHoverScheduler = (callback: () => void, delay: number) => () => void;
 
 let tabHoverId: string;

@@ -54,6 +54,7 @@ import {dragOverScroll} from "../boot/globalEvent/dragover";
 import {
     clearTabDragPreview,
     clearTabHoverSwitch,
+    findDefaultTabNextId,
     findNextTabId,
     reorderTabItems,
     scheduleTabHoverSwitch
@@ -74,6 +75,22 @@ const createDragTabPlaceholder = () => {
         element.setAttribute("data-drag-fallback", "true");
     }
     return element;
+};
+
+const insertTabHeaderElement = (tabBarElement: HTMLElement, tabHeaderElement: HTMLElement) => {
+    const tabElements = (Array.from(tabBarElement.children) as HTMLElement[]).filter((item) =>
+        item !== tabHeaderElement && item.dataset.id);
+    const nextId = findDefaultTabNextId(tabElements.map((item) => ({
+        id: item.dataset.id,
+        pin: item.classList.contains("item--pin"),
+    })), tabHeaderElement.classList.contains("item--pin"));
+    const nextElement = tabElements.find((item) => item.dataset.id === nextId);
+    if (nextElement) {
+        nextElement.before(tabHeaderElement);
+    } else {
+        tabBarElement.append(tabHeaderElement);
+    }
+    return nextId;
 };
 
 export class Wnd {
@@ -252,33 +269,21 @@ export class Wnd {
                 const placeholderElement = createDragTabPlaceholder();
                 oldTabHeaderElement.replaceWith(placeholderElement);
                 oldTabHeaderElement = placeholderElement;
+                insertTabHeaderElement(tabBarElement, oldTabHeaderElement);
             }
             if (!oldTabHeaderElement && window.siyuan.dragElement && tabBarElement.contains(window.siyuan.dragElement)) {
                 oldTabHeaderElement = window.siyuan.dragElement;
             } else if (!oldTabHeaderElement && window.siyuan.dragElement) {
-                if (window.siyuan.dragElement.classList.contains("item--pin")) {
-                    return;
-                }
                 oldTabHeaderElement = window.siyuan.dragElement.cloneNode(true) as HTMLElement;
                 oldTabHeaderElement.setAttribute("data-clone", "true");
                 oldTabHeaderElement.removeAttribute("data-id");
                 oldTabHeaderElement.removeAttribute("draggable");
                 oldTabHeaderElement.style.removeProperty("opacity");
                 delete oldTabHeaderElement.dataset.dragDocumentId;
-                tabBarElement.append(oldTabHeaderElement);
+                insertTabHeaderElement(tabBarElement, oldTabHeaderElement);
             } else if (!oldTabHeaderElement) {
                 oldTabHeaderElement = createDragTabPlaceholder();
-                if (oldTabHeaderElement.classList.contains("item--pin")) {
-                    const firstUnpinnedElement = Array.from(tabBarElement.children).find((item: HTMLElement) =>
-                        !item.classList.contains("item--pin"));
-                    if (firstUnpinnedElement) {
-                        firstUnpinnedElement.before(oldTabHeaderElement);
-                    } else {
-                        tabBarElement.append(oldTabHeaderElement);
-                    }
-                } else {
-                    tabBarElement.append(oldTabHeaderElement);
-                }
+                insertTabHeaderElement(tabBarElement, oldTabHeaderElement);
             }
             const newTabHeaderElement = hasClosestByAttribute(event.target, "data-type", "tab-header");
             if (!newTabHeaderElement) {
@@ -487,9 +492,9 @@ export class Wnd {
             }
             if (targetWnd) {
                 recordBeforeResizeTop();
-                targetWnd.headersElement.append(oldTab.headElement);
+                const nextTabId = insertTabHeaderElement(targetWnd.headersElement, oldTab.headElement);
                 targetWnd.headersElement.parentElement.classList.remove("fn__none");
-                targetWnd.moveTab(oldTab);
+                targetWnd.moveTab(oldTab, nextTabId);
                 resizeTabs();
             }
         });

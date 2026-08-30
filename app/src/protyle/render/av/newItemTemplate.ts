@@ -2,7 +2,6 @@ import {Dialog} from "../../../dialog";
 import {showMessage} from "../../../dialog/message";
 import {Menu} from "../../../plugin/Menu";
 import {MenuItem} from "../../../menus/Menu";
-import {Constants} from "../../../constants";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {fetchPost} from "../../../util/fetch";
 import {transaction} from "../../wysiwyg/transaction";
@@ -10,6 +9,7 @@ import {avRender} from "./render";
 import {getFieldsByData} from "./view";
 import {getColIconByType} from "./col";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
+import {getFileTreeIconHTML} from "../../../emoji/fileTreeIcon";
 import {upDownHint} from "../../../util/upDownHint";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import * as dayjs from "dayjs";
@@ -329,7 +329,7 @@ const renderRelationFieldValue = (target: HTMLElement, options: IRelationOption[
         if (option.isDetached) {
             return `<span class="av__cell--relation" data-row-id="${escapeAttr(option.id)}"><span><svg><use xlink:href="#iconLine"></use></svg><span class="fn__space--5"></span></span><span class="av__celltext">${escapeHtml(option.content)}</span></span>`;
         }
-        const icon = unicode2Emoji(option.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
+        const icon = getFileTreeIconHTML(option.icon, "file");
         return `<span class="av__cell--relation" data-row-id="${escapeAttr(option.id)}" data-block-id="${escapeAttr(option.blockID)}"><span class="b3-menu__avemoji" data-unicode="${escapeAttr(option.icon)}">${icon}</span><span data-type="block-ref" data-id="${escapeAttr(option.blockID)}" data-subtype="${option.refSubtype}" class="av__celltext av__celltext--ref">${escapeHtml(option.content)}</span></span>`;
     }).join("");
     target.innerHTML = html;
@@ -545,7 +545,7 @@ const getEditorHTML = (itemTemplate: IAVNewItemTemplate, primaryKey: IAVColumn |
         <div class="custom-attr">
             <div class="block__icons av__row">
                 <div class="block__logo block__logo--icon"><svg class="block__logoicon"><use xlink:href="#iconEmoji"></use></svg><span>${window.siyuan.languages.icon}</span></div>
-                <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center"><button class="b3-text-field b3-text-field--text fn__flex-1 fn__flex" data-role="template-icon" data-value="${escapeAttr(itemTemplate.icon || "")}" type="button" style="align-items:center;text-align:left"><span class="b3-menu__avemoji">${unicode2Emoji(itemTemplate.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span></button></div>
+                <div class="fn__flex-1 fn__flex custom-attr__avvalue" style="align-items:center"><button class="b3-text-field b3-text-field--text fn__flex-1 fn__flex" data-role="template-icon" data-value="${escapeAttr(itemTemplate.icon || "")}" type="button" style="align-items:center;text-align:left"><span class="b3-menu__avemoji">${getFileTreeIconHTML(itemTemplate.icon, "file")}</span></button></div>
             </div>
             <div class="block__icons av__row">
                 <div class="block__logo block__logo--icon ariaLabel" data-position="parentE" aria-label="${escapeAttr(`${window.siyuan.languages.fileTree14}<br>${window.siyuan.languages.fileTree13}`)}"><svg class="block__logoicon"><use xlink:href="#iconFolder"></use></svg><span>${window.siyuan.languages.savePath}</span></div>
@@ -661,7 +661,7 @@ export const openNewItemTemplateDialog = (options: {
                 w: rect.width,
             }, unicode => {
                 iconElement.dataset.value = unicode;
-                emojiElement.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
+                emojiElement.innerHTML = getFileTreeIconHTML(unicode, "file");
             }, emojiElement.querySelector("img"), {
                 ownerElement: options.protyle.element,
                 targetID: options.protyle.block.rootID,

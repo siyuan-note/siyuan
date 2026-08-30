@@ -571,6 +571,7 @@ export const handleTouchMove = (event: TouchEvent) => {
                 return;
             }
             sideMaskElement.style.zIndex = (++window.siyuan.zIndex).toString();
+            showPanelMask();
             const activeSidebar = getTargetSidebar(target) || openingSidebar;
             updateSidebarSwipeState(activeSidebar);
             getSidebarElement(activeSidebar).style.zIndex = (++window.siyuan.zIndex).toString();
@@ -581,7 +582,6 @@ export const handleTouchMove = (event: TouchEvent) => {
         if (targetSidebar) {
             const offset = getSidebarClosingOffset(targetSidebar, xDiff, windowWidth);
             getSidebarElement(targetSidebar).style.transform = `translateX(${offset}px)`;
-            transformMask(Math.abs(offset) / windowWidth);
             return;
         }
 
@@ -590,15 +590,9 @@ export const handleTouchMove = (event: TouchEvent) => {
         getSidebarElement(otherSidebar)?.style.removeProperty("transform");
         const offset = getSidebarOpeningOffset(openingSidebar, xDiff, windowWidth);
         getSidebarElement(openingSidebar).style.transform = `translateX(${offset}px)`;
-        transformMask(Math.abs(offset) / windowWidth);
         activeBlur();
         if (window.siyuan.mobile.editor) {
             window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
         }
     }
-};
-
-const transformMask = (closedRatio: number) => {
-    const maskElement = showPanelMask();
-    maskElement.style.opacity = Math.min(Math.max(1 - closedRatio, 0), 0.68).toString();
 };

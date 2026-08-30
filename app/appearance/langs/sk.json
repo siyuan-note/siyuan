@@ -26,7 +26,7 @@
 	"manageCustomColors": "Spravovať vlastné farby",
 	"deleteCustomColorTip": "Po odstránení a uložení sa obsah, ktorý už používa vlastnú farbu „${name}“, vráti k farbe svetlého režimu z prvého uloženia a prestane podporovať dynamické úpravy. Naozaj ju chcete odstrániť?",
 	"mobileMenuNavigation": "Navigácia",
-	"mobileBottomBar": "Spodná lišta",
+	"mobileBottomBar": "Navigačný panel",
 	"insertSuperBlockLeft": "Vložiť stĺpec vľavo",
 	"insertSuperBlockRight": "Vložiť stĺpec vpravo",
 	"assetOpen": "Otváranie zdrojov",

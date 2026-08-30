@@ -56,6 +56,7 @@ export class Breadcrumb {
     private uploadingRecordFiles = new Set<File>();
     private startingRecord = false;
     private stoppingRecord = false;
+    private mobileMenuLoading = false;
     private previousFocusElement: HTMLElement;
     private previousRange: Range;
 
@@ -591,10 +592,13 @@ ${padHTML}
     }
 
     private genMobileMenu(protyle: IProtyle) {
-        if (protyle.toolbar.isMultiSelectMode()) {
+        if (protyle.toolbar.isMultiSelectMode() || this.mobileMenuLoading) {
             return;
         }
         const menu = new Menu(Constants.MENU_BREADCRUMB_MOBILE_PATH);
+        if (menu.isOpen) {
+            return;
+        }
         let blockElement: Element;
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);
@@ -615,6 +619,7 @@ ${padHTML}
         if (isEncryptedBox(protyle.notebookId)) {
             breadcrumbParam.notebook = protyle.notebookId;
         }
+        this.mobileMenuLoading = true;
         fetchPost("/api/block/getBlockBreadcrumb", breadcrumbParam, (response) => {
             response.data.forEach((item: IBreadcrumb) => {
                 let isCurrent = false;
@@ -633,6 +638,8 @@ ${padHTML}
                 });
             });
             menu.fullscreen();
+        }).finally(() => {
+            this.mobileMenuLoading = false;
         });
     }
 

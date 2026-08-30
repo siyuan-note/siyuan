@@ -1,8 +1,7 @@
 import {getIconByType} from "../editor/getIcon";
 import {isMobile} from "./functions";
 import {mathRender} from "../protyle/render/mathRender";
-import {unicode2Emoji} from "../emoji";
-import {Constants} from "../constants";
+import {getFileTreeIconHTML} from "../emoji/fileTreeIcon";
 import {escapeAriaLabel, escapeHtml} from "./escape";
 import {hasClosestByTag} from "../protyle/util/hasClosest";
 import {headingNumberNeedsSpacing} from "../protyle/util/headingNumberCore";
@@ -164,7 +163,7 @@ ${item.label !== undefined && item.label !== null ? `data-label='${item.label}'`
                 iconHTML = `<svg data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: ${isM ? 16 : 22}px;width: 16px;"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
             } else {
                 if (item.type === "NodeDocument") {
-                    iconHTML = `<span data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}">${unicode2Emoji(item.ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span>`;
+                    iconHTML = `<span data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}">${getFileTreeIconHTML(item.ial.icon, "file")}</span>`;
                 } else {
                     iconHTML = `<svg data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
                 }

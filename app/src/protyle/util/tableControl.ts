@@ -638,7 +638,13 @@ export class TableControl {
             event.clientX <= targetViewportRect.left + TABLE_EDGE_CONTROL_TRIGGER_SIZE) ?
             this.getEdgeHover(event.clientX, event.clientY) : undefined;
         const cell = edgeHover?.cell || targetCell;
-        if (cell && getTableNode(cell) && !this.protyle.disabled) {
+        const node = getTableNode(cell);
+        if (cell && node && !this.protyle.disabled) {
+            const nodeID = node.getAttribute("data-node-id");
+            if (nodeID && !this.protyle.gutter.element.querySelector(`[data-node-id="${CSS.escape(nodeID)}"]`)) {
+                // 初次移入时块标可能因编辑器仍在完成渲染而跳过，指针继续移动时补充渲染
+                this.protyle.gutter.render(this.protyle, node, cell);
+            }
             const hoverType = edgeHover?.type || "cell";
             if (cell === this.hoverCell && hoverType === this.hoverType) {
                 return;

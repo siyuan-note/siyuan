@@ -61,9 +61,18 @@ export const openFileById = async (options: {
     keepAVPanel?: boolean
     afterOpen?: (model: Model) => void,
     scrollPosition?: ScrollLogicalPosition
-}) => {
+    retryOnUnavailable?: number
+}): Promise<Tab | void> => {
     const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id, notebook: options.notebookId});
     if (response.code === -1) {
+        const retryOnUnavailable = options.retryOnUnavailable || 0;
+        if (retryOnUnavailable > 0) {
+            await new Promise(resolve => window.setTimeout(resolve, Constants.TIMEOUT_TRANSITION));
+            return openFileById({
+                ...options,
+                retryOnUnavailable: retryOnUnavailable - 1,
+            });
+        }
         return;
     }
     if (response.code === 3) {

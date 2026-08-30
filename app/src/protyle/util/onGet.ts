@@ -49,6 +49,7 @@ export const onGet = (options: {
     dataDocType?: string,
     isValid?: () => boolean,
     focusAfterZoom?: boolean,
+    suppressFocus?: boolean,
 }) => {
     if (options.isValid && !options.isValid()) {
         return;
@@ -140,7 +141,8 @@ export const onGet = (options: {
             refreshHeadingNumbers,
             afterCB: options.afterCB,
             scrollPosition: options.scrollPosition,
-            focusAfterZoom: options.focusAfterZoom
+            focusAfterZoom: options.focusAfterZoom,
+            suppressFocus: options.suppressFocus,
         }, options.protyle);
         removeLoading(options.protyle);
         return;
@@ -158,7 +160,8 @@ export const onGet = (options: {
             refreshHeadingNumbers,
             afterCB: options.afterCB,
             scrollPosition: options.scrollPosition,
-            focusAfterZoom: options.focusAfterZoom
+            focusAfterZoom: options.focusAfterZoom,
+            suppressFocus: options.suppressFocus,
         }, options.protyle);
         removeLoading(options.protyle);
         return;
@@ -189,7 +192,8 @@ export const onGet = (options: {
             refreshHeadingNumbers,
             afterCB: options.afterCB,
             scrollPosition: options.scrollPosition,
-            focusAfterZoom: options.focusAfterZoom
+            focusAfterZoom: options.focusAfterZoom,
+            suppressFocus: options.suppressFocus,
         }, options.protyle);
         removeLoading(options.protyle);
     };
@@ -220,6 +224,7 @@ const setHTML = (options: {
     refreshHeadingNumbers?: boolean,
     afterCB?: () => void,
     focusAfterZoom?: boolean,
+    suppressFocus?: boolean,
 }, protyle: IProtyle) => {
     if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
         return;
@@ -371,7 +376,8 @@ const setHTML = (options: {
         }
     }
 
-    focusElementById(protyle, options.action, options.scrollAttr, options.scrollPosition, options.focusAfterZoom);
+    focusElementById(protyle, options.action, options.scrollAttr, options.scrollPosition,
+        options.focusAfterZoom, options.suppressFocus);
 
     if (options.action.includes(Constants.CB_GET_SETID) ||
         (protyle.model && !protyle.block.showAll)) {
@@ -543,7 +549,7 @@ export const enableProtyle = (protyle: IProtyle) => {
 };
 
 const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScrollAttr,
-                          scrollPosition?: ScrollLogicalPosition, focusAfterZoom = false) => {
+                          scrollPosition?: ScrollLogicalPosition, focusAfterZoom = false, suppressFocus = false) => {
     let focusElement: Element;
     if (scrollAttr && scrollAttr.focusId) {
         focusElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${scrollAttr.focusId}"]`);
@@ -569,7 +575,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         preventScroll(protyle); // 搜索页签滚动会导致再次请求
         bgFade(focusElement);
     }
-    if (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST)) {
+    if (!suppressFocus && (action.includes(Constants.CB_GET_FOCUS) || action.includes(Constants.CB_GET_FOCUSFIRST))) {
         setTimeout(() => {
             let range: Range;
             if (hasFocusOffsets(scrollAttr)) {

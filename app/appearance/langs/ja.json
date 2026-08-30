@@ -26,7 +26,7 @@
 	"manageCustomColors": "カスタム色を管理",
 	"deleteCustomColorTip": "削除して保存すると、カスタム色「${name}」をすでに使用している内容は初回保存時のライトモードの色へ戻り、動的に調整できなくなります。削除してもよろしいですか？",
 	"mobileMenuNavigation": "ナビゲーション",
-	"mobileBottomBar": "下部バー",
+	"mobileBottomBar": "ナビゲーションバー",
 	"insertSuperBlockLeft": "左側に列を挿入",
 	"insertSuperBlockRight": "右側に列を挿入",
 	"assetOpen": "リソースの開き方",

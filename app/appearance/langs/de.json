@@ -26,7 +26,7 @@
 	"manageCustomColors": "Benutzerdefinierte Farben verwalten",
 	"deleteCustomColorTip": "Nach dem Löschen und Speichern fällt Inhalt, der bereits die benutzerdefinierte Farbe „${name}“ verwendet, auf die beim ersten Speichern festgelegte Farbe für den hellen Modus zurück und kann nicht mehr dynamisch angepasst werden. Möchten Sie sie wirklich löschen?",
 	"mobileMenuNavigation": "Navigation",
-	"mobileBottomBar": "Untere Leiste",
+	"mobileBottomBar": "Navigationsleiste",
 	"insertSuperBlockLeft": "Spalte links einfügen",
 	"insertSuperBlockRight": "Spalte rechts einfügen",
 	"assetOpen": "Ressourcen öffnen",

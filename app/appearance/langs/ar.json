@@ -26,7 +26,7 @@
 	"manageCustomColors": "إدارة الألوان المخصصة",
 	"deleteCustomColorTip": "بعد الحذف والحفظ، سيعود المحتوى الذي يستخدم بالفعل اللون المخصص «${name}» إلى لون الوضع الفاتح عند الحفظ لأول مرة، ولن يدعم الضبط الديناميكي بعد ذلك. هل أنت متأكد من حذفه؟",
 	"mobileMenuNavigation": "التنقل",
-	"mobileBottomBar": "الشريط السفلي",
+	"mobileBottomBar": "شريط التنقل",
 	"insertSuperBlockLeft": "إدراج عمود إلى اليسار",
 	"insertSuperBlockRight": "إدراج عمود إلى اليمين",
 	"assetOpen": "فتح الموارد",

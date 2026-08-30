@@ -64,9 +64,13 @@ import {
     endsWithMultiCharHintPrefix,
     getBlockHintTriggerOffset,
     getBlockRefStaticText,
+    isBlockHintQueryAtCaret,
     shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
 } from "./blockHintRange";
+import {getMobileHintPosition} from "./mobileHintPosition";
+import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
+import {getTopBarHeight} from "../../layout/getTopBarHeight";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -327,6 +331,44 @@ export class Hint {
         });
     }
 
+    public canResumeBlockHint(protyle: IProtyle, range: Range) {
+        if (!range.collapsed || !protyle.wysiwyg.element.contains(range.startContainer) ||
+            !Constants.BLOCK_HINT_KEYS.includes(this.splitChar) ||
+            hasClosestByAttribute(range.startContainer, "data-type", "code") ||
+            hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
+            return false;
+        }
+        const start = getSelectionOffset(range.startContainer, protyle.wysiwyg.element, range).start;
+        const textBeforeCaret = range.startContainer.textContent.substring(0, start) || "";
+        let textAfterCaret = "";
+        if (range.startContainer.nodeType === 3) {
+            const textNode = range.startContainer as Text;
+            const caretOffset = getWholeTextOffset(textNode, range.startOffset);
+            textAfterCaret = textNode.wholeText.substring(caretOffset);
+        }
+        return isBlockHintQueryAtCaret(textBeforeCaret, textAfterCaret, this.splitChar,
+            Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar], Constants.SIZE_TITLE);
+    }
+
+    private setMobilePosition(anchorTop: number, anchorBottom: number) {
+        const viewportBounds = getVisibleViewportBounds();
+        const viewportTop = Math.max(viewportBounds.top, getTopBarHeight());
+        let viewportBottom = viewportBounds.bottom;
+        const keyboardToolbarElement = document.getElementById("keyboardToolbar");
+        if (keyboardToolbarElement && !keyboardToolbarElement.classList.contains("fn__none")) {
+            viewportBottom = Math.min(viewportBottom, keyboardToolbarElement.getBoundingClientRect().top);
+        }
+        viewportBottom = Math.max(viewportTop, viewportBottom);
+        const heightLimit = (viewportBottom - viewportTop) / 2;
+        let position = getMobileHintPosition(anchorTop, anchorBottom, this.element.scrollHeight,
+            viewportTop, viewportBottom, heightLimit);
+        this.element.style.maxHeight = `${position.maxHeight}px`;
+        position = getMobileHintPosition(anchorTop, anchorBottom, this.element.getBoundingClientRect().height,
+            viewportTop, viewportBottom, heightLimit);
+        this.element.style.left = "0";
+        this.element.style.top = `${position.top}px`;
+    }
+
     public genLoading(protyle: IProtyle) {
         this.destroyEmojiPanel();
         if (this.element.classList.contains("fn__none")) {
@@ -335,19 +377,19 @@ export class Hint {
             if (this.source === "av") {
                 const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
                 if (cellElement) {
-                    /// #if !MOBILE
                     const cellRect = cellElement.getBoundingClientRect();
+                    /// #if !MOBILE
                     setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
                     /// #else
-                    setPosition(this.element, 0, 0);
+                    this.setMobilePosition(cellRect.top, cellRect.bottom);
                     /// #endif
                 }
             } else {
-                /// #if !MOBILE
                 const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
+                /// #if !MOBILE
                 setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
                 /// #else
-                setPosition(this.element, 0, 0);
+                this.setMobilePosition(textareaPosition.top, textareaPosition.top + 26);
                 /// #endif
             }
         } else if (!this.element.querySelector(".fn__loading")) {
@@ -436,7 +478,7 @@ export class Hint {
                 /// #if !MOBILE
                 setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
                 /// #else
-                setPosition(this.element, 0, 0);
+                this.setMobilePosition(cellRect.top, cellRect.bottom);
                 /// #endif
             }
         } else {
@@ -444,7 +486,7 @@ export class Hint {
             /// #if !MOBILE
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
             /// #else
-            setPosition(this.element, 0, 0);
+            this.setMobilePosition(textareaPosition.top, textareaPosition.top + 26);
             /// #endif
         }
         this.element.scrollTop = 0;

@@ -7,6 +7,7 @@ import type {App} from "../../index";
 import {openTagMenu} from "../../menus/tag";
 import {Constants} from "../../constants";
 import {filterTagData, getTagFilterKeywords} from "../../layout/dock/tagFilter";
+import {showMobileFilterInput} from "./mobileFilterInput";
 
 export class MobileTags {
     public element: HTMLElement;
@@ -101,8 +102,7 @@ export class MobileTags {
                             event.stopPropagation();
                             break;
                         case "search":
-                            inputElement.classList.remove("fn__none");
-                            inputElement.select();
+                            showMobileFilterInput(inputElement, target);
                             break;
                         case "sort":
                             window.siyuan.menus.menu.remove();

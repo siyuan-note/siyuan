@@ -119,6 +119,7 @@ export const openMenuPanel = (options: {
         blockID: options.blockElement.getAttribute("data-node-id"),
         ignoreRows,
     };
+    let relationDataRetryCount = 0;
     // 接收视图数据并构建面板 DOM、绑定事件。fetch 回调与 options.data 复用两条路径都走这里
     const renderData = async (responseData: IAV) => {
         const response = {data: responseData} as IWebSocketData;
@@ -191,6 +192,23 @@ export const openMenuPanel = (options: {
         } else if (options.type === "relation") {
             html = getRelationHTML(data, options.cellElements);
             if (!html) {
+                if (!options.data && relationDataRetryCount < 5 && options.blockElement.isConnected &&
+                    options.cellElements?.every(item => item.isConnected)) {
+                    relationDataRetryCount++;
+                    // 关系配置事务完成后渲染接口可能短暂返回旧字段，等待数据一致后再判断是否需要配置
+                    window.setTimeout(() => {
+                        if (document.querySelector(".av__panel") || !options.blockElement.isConnected ||
+                            !options.cellElements?.every(item => item.isConnected)) {
+                            return;
+                        }
+                        fetchPost("/api/av/renderAttributeView", fetchPayload, response => {
+                            if (!document.querySelector(".av__panel")) {
+                                renderData(response.data as IAV);
+                            }
+                        });
+                    }, Constants.TIMEOUT_TRANSITION);
+                    return;
+                }
                 openMenuPanel({
                     protyle: options.protyle,
                     blockElement: options.blockElement,

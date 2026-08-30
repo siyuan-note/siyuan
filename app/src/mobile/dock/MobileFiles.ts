@@ -199,7 +199,7 @@ export class MobileFiles extends Model {
                         } else if (!isFileTreeCollapsing(liElement)) {
                             this.getLeaf(liElement, notebookId);
                         }
-                        this.setCurrent(target.parentElement);
+                        this.setCurrent(liElement, false);
                         window.siyuan.menus.menu.remove();
                     }
                     event.preventDefault();

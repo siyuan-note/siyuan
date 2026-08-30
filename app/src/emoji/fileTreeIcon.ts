@@ -42,6 +42,14 @@ export const getFileTreeIconHTML = (icon: string, defaultIcon: TFileTreeDefaultI
     return needSpan ? `<span class="${escapeAttr(className)}">${svg}</span>` : svg;
 };
 
+export const getDocumentIconHTML = (icon: string, className = "", useSVGDefaultIcon =
+    window.siyuan.config.fileTree.useSVGDefaultIcon === true) => {
+    if (!icon && useSVGDefaultIcon) {
+        return `<svg class="${escapeAttr(className)}"><use xlink:href="#${FILE_TREE_SVG_ICONS.file}"></use></svg>`;
+    }
+    return getFileTreeIconHTML(icon, "file", className, true, useSVGDefaultIcon);
+};
+
 const resolveDefaultIcon = (liElement: HTMLElement): TFileTreeDefaultIcon => {
     if (liElement.getAttribute("data-type") === "navigation-root" ||
         liElement.dataset.defaultIcon === "notebook") {

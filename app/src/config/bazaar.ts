@@ -920,7 +920,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         }
         counterElement.classList.remove("fn__none");
         counterElement.textContent = items.length.toString();
-        installAllElement?.classList.toggle("fn__none", getFrontend() === "mobile" ||
+        installAllElement?.classList.toggle("fn__none",
             !items.some(({item}) => !item.available.disallowUpdate));
         contentElement.innerHTML = items.map(({type, item}) => this._genUpdateItemHTML(item, type)).join("");
         this._loadUpdatedRatings();
@@ -2604,11 +2604,6 @@ type="checkbox">
                     }
                     break;
                 } else if (type === "install-all") {
-                    if (getFrontend() === "mobile") {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        break;
-                    }
                     confirmDialog("⬆️ " + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
                         fetchPost("/api/bazaar/batchUpdatePackage", {frontend: getFrontend()}, (response) => {
                             if (response.code !== 0) {

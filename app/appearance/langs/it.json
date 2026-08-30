@@ -26,7 +26,7 @@
 	"manageCustomColors": "Gestisci colori personalizzati",
 	"deleteCustomColorTip": "Dopo l’eliminazione e il salvataggio, il contenuto che usa già il colore personalizzato “${name}” tornerà al colore della modalità chiara definito al primo salvataggio e non supporterà più la regolazione dinamica. Vuoi davvero eliminarlo?",
 	"mobileMenuNavigation": "Navigazione",
-	"mobileBottomBar": "Barra inferiore",
+	"mobileBottomBar": "Barra di navigazione",
 	"insertSuperBlockLeft": "Inserisci colonna a sinistra",
 	"insertSuperBlockRight": "Inserisci colonna a destra",
 	"assetOpen": "Apertura delle risorse",

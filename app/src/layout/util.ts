@@ -575,6 +575,8 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
                     activateQueuedAVLocate(protyle, info.id);
                 }
             },
+            // 笔记本刚打开时块索引可能暂不可用，确保外部 URL 最终能打开目标块
+            retryOnUnavailable: 10,
         });
     } else {
         if (applyTabStartupMode && window.siyuan.config.fileTree.tabStartupMode === 1) {

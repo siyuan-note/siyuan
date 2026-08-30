@@ -45,13 +45,6 @@
     }
   }
 
-  @media (hover: none) {
-    &__down,
-    &__up {
-      opacity: 1;
-    }
-  }
-
   &__bar {
     position: absolute;
     right: calc(4px - var(--b3-dynamicscroll-width) / 2);
@@ -73,6 +66,22 @@
       &::-moz-range-thumb {
         background-color: var(--b3-border-color);
         box-shadow: none;
+      }
+    }
+  }
+
+  @media (hover: none) {
+    &__down,
+    &__up {
+      opacity: 1;
+    }
+
+    &__bar {
+      top: calc(50% - 22px);
+
+      .b3-slider {
+        height: 44px;
+        touch-action: none;
       }
     }
   }

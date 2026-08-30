@@ -4,6 +4,7 @@ import {
     endsWithMultiCharHintPrefix,
     getBlockHintTriggerOffset,
     getBlockRefStaticText,
+    isBlockHintQueryAtCaret,
     shouldCaptureHintUndoFocus,
     shouldIgnoreHintTrigger,
 } from "./blockHintRange";
@@ -55,6 +56,23 @@ describe("getBlockHintTriggerOffset", () => {
         const triggerOffset = getBlockHintTriggerOffset(text, "", "[[", "]]");
 
         assert.equal(text.substring(triggerOffset + 2), "foo]]");
+    });
+});
+
+describe("isBlockHintQueryAtCaret", () => {
+    it("recognizes an unfinished query around the caret", () => {
+        assert.equal(isBlockHintQueryAtCaret("prefix [[que", "ry", "[[", "]]", 512), true);
+        assert.equal(isBlockHintQueryAtCaret("prefix ((query", "", "((", "))", 512), true);
+    });
+
+    it("keeps a query editable before its closing marker", () => {
+        assert.equal(isBlockHintQueryAtCaret("[[que", "ry]]", "[[", "]]", 512), true);
+    });
+
+    it("rejects text outside a valid query", () => {
+        assert.equal(isBlockHintQueryAtCaret("plain text", "", "[[", "]]", 512), false);
+        assert.equal(isBlockHintQueryAtCaret("[[ query", "", "[[", "]]", 512), false);
+        assert.equal(isBlockHintQueryAtCaret("[[12345", "", "[[", "]]", 5), false);
     });
 });
 

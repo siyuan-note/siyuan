@@ -39,6 +39,7 @@ import {
     getAssetOpenGestures,
     type TAssetOpenGesture,
 } from "../editor/assetOpen";
+import {resolvePdfAssetLink} from "../editor/pdfAssetLink";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -853,7 +854,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
         accelerator: showAccelerator ? window.siyuan.languages.click : "",
         click: () => {
-            openByMobile(src);
+            openByMobile(resolvePdfAssetLink(src).linkAddress);
         }
     });
     /// #else

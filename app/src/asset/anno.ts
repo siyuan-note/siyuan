@@ -24,36 +24,77 @@ import {
 } from "./pdfRectCapture";
 import {uploadStandaloneAssetFiles} from "../protyle/upload";
 import {getAssetUploadSuccesses} from "../protyle/upload/uploadResult";
+import {
+    bindPdfAnnotationPointerDrag,
+    destroyAnno,
+    getRegisteredPdfInstance,
+    registerAnnoCleanup,
+    registerPdfInstance,
+} from "./annoRuntime";
+import {appendPdfAnnotationId} from "../editor/pdfAssetLink";
+
+export {destroyAnno, registerPdfInstance, unregisterPdfInstance} from "./annoRuntime";
 
 const RECT_RESIZE_MIN_SIZE = 8;
 
 export const initAnno = (element: HTMLElement, pdf: any) => {
+    destroyAnno(element);
+    registerPdfInstance(element, pdf);
     getConfig(pdf);
     const pdfConfig = pdf.appConfig;
     const rectAnnoElement = pdfConfig.toolbar.rectAnno;
-    rectAnnoElement.addEventListener("click", () => {
+    const originalMainContainerTouchAction = pdfConfig.mainContainer.style.touchAction;
+    const setRectCreationMode = (enabled: boolean) => {
+        rectAnnoElement.classList.toggle("toggled", enabled);
+        pdfConfig.mainContainer.classList.toggle("rect-to-annotation", enabled);
+        pdfConfig.mainContainer.style.touchAction = enabled ? "none" : originalMainContainerTouchAction;
+    };
+    let activePointerCancel: (() => void) | undefined;
+    const startPointerDrag = (
+        pointerId: number,
+        pointermove: (event: PointerEvent) => void,
+        pointerup: (event: PointerEvent) => void,
+        pointercancel: () => void,
+    ) => {
+        if (activePointerCancel) {
+            return false;
+        }
+        const cancel = bindPdfAnnotationPointerDrag(document, pointerId, pointermove, (event) => {
+            activePointerCancel = undefined;
+            pointerup(event);
+        }, () => {
+            activePointerCancel = undefined;
+            pointercancel();
+        });
+        activePointerCancel = cancel;
+        return true;
+    };
+    const rectToolbarClick = () => {
         if (rectAnnoElement.classList.contains("toggled")) {
-            rectAnnoElement.classList.remove("toggled");
-            pdfConfig.mainContainer.classList.remove("rect-to-annotation");
+            setRectCreationMode(false);
         } else {
             pdf.pdfCursorTools.switchTool(0);
-            rectAnnoElement.classList.add("toggled");
-            pdfConfig.mainContainer.classList.add("rect-to-annotation");
+            setRectCreationMode(true);
             if (getSelection().rangeCount > 0) {
                 getSelection().getRangeAt(0).collapse(true);
             }
             hideToolbar(element);
         }
-    });
+    };
+    rectAnnoElement.addEventListener("click", rectToolbarClick);
     const rectResizeElement = pdfConfig.mainContainer.lastElementChild;
-    pdfConfig.mainContainer.addEventListener("mousedown", (event: MouseEvent) => {
-        if (event.button === 2 || !rectAnnoElement.classList.contains("toggled")) {
+    const rectCreatePointerDown = (event: PointerEvent) => {
+        if (event.button === 2 || event.isPrimary === false || !rectAnnoElement.classList.contains("toggled")) {
             // 右键
             return;
         }
-        let canvasRect = pdf.pdfViewer._getVisiblePages().first.view.canvas.getBoundingClientRect();
+        const visiblePages = pdf.pdfViewer._getVisiblePages();
+        if (!visiblePages.first?.view?.canvas || !visiblePages.last?.view?.canvas) {
+            return;
+        }
+        let canvasRect = visiblePages.first.view.canvas.getBoundingClientRect();
         if (event.clientX > canvasRect.right) {
-            canvasRect = pdf.pdfViewer._getVisiblePages().last.view.canvas.getBoundingClientRect();
+            canvasRect = visiblePages.last.view.canvas.getBoundingClientRect();
         }
         const containerRet = pdfConfig.mainContainer.getBoundingClientRect();
         const mostLeft = canvasRect.left;
@@ -67,8 +108,8 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
         }
         const mostTop = containerRet.top;
         const y = event.clientY;
-        const documentSelf = document;
-        documentSelf.onmousemove = (moveEvent) => {
+        const initialResizeStyle = rectResizeElement.getAttribute("style");
+        const pointermove = (moveEvent: PointerEvent) => {
             rectResizeElement.classList.remove("fn__none");
             let newTop = 0;
             let newLeft = 0;
@@ -118,14 +159,14 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             rectResizeElement.setAttribute("style",
                 `top:${newTop}px;height:${newHeight}px;left:${newLeft}px;width:${newWidth}px;background-color:${moveEvent.altKey ? "color-mix(in srgb, var(--b3-pdf-background1) 35%, transparent)" : ""}`);
         };
-        documentSelf.onmouseup = () => {
-            documentSelf.onmousemove = null;
-            documentSelf.onmouseup = null;
-            documentSelf.ondragstart = null;
-            documentSelf.onselectstart = null;
-            documentSelf.onselect = null;
-            rectAnnoElement.classList.remove("toggled");
-            pdfConfig.mainContainer.classList.remove("rect-to-annotation");
+        const stopRectCreation = () => {
+            setRectCreationMode(false);
+        };
+        const pointerup = () => {
+            document.ondragstart = null;
+            document.onselectstart = null;
+            document.onselect = null;
+            stopRectCreation();
 
             const coords = getHightlightCoordsByRect(pdf, window.siyuan.storage[Constants.LOCAL_PDFTHEME].annoColor || "var(--b3-pdf-background1)", rectResizeElement,
                 rectResizeElement.style.backgroundColor ? "text" : "border");
@@ -135,7 +176,8 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                     const newElement = showHighlight(item, pdf);
                     if (index === 0) {
                         rectElement = newElement;
-                        copyAnno(`${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${rectElement.getAttribute("data-node-id")}`,
+                        copyAnno(appendPdfAnnotationId(pdf.appConfig.file.replace(location.origin, "").substr(1),
+                            rectElement.getAttribute("data-node-id")),
                             pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""), pdf);
                     }
                 });
@@ -143,10 +185,24 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 rectElement = null;
             }
         };
-    });
+        const pointercancel = () => {
+            stopRectCreation();
+            rectResizeElement.classList.add("fn__none");
+            if (initialResizeStyle === null) {
+                rectResizeElement.removeAttribute("style");
+            } else {
+                rectResizeElement.setAttribute("style", initialResizeStyle);
+            }
+        };
+        if (startPointerDrag(event.pointerId, pointermove, pointerup, pointercancel)) {
+            event.preventDefault();
+        }
+    };
+    pdfConfig.mainContainer.addEventListener("pointerdown", rectCreatePointerDown);
     let ignoreRectClick = false;
-    element.firstElementChild.addEventListener("mousedown", (event: MouseEvent) => {
-        if (event.button !== 0 || rectAnnoElement.classList.contains("toggled")) {
+    const pdfElement = element.firstElementChild as HTMLElement;
+    const rectChangePointerDown = (event: PointerEvent) => {
+        if (event.button !== 0 || event.isPrimary === false || rectAnnoElement.classList.contains("toggled")) {
             return;
         }
         const eventTarget = event.target as HTMLElement;
@@ -198,7 +254,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             setRectPosition(annotationElement, page, position);
         };
         let moved = false;
-        const mousemove = (moveEvent: MouseEvent) => {
+        const pointermove = (moveEvent: PointerEvent) => {
             const deltaX = moveEvent.clientX - startX;
             const deltaY = moveEvent.clientY - startY;
             if (!moved && Math.hypot(deltaX, deltaY) < Constants.SIZE_DRAG_THRESHOLD) {
@@ -218,9 +274,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 moveRectBounds(initial, boundary, deltaX, deltaY);
             updateAnnotationElement();
         };
-        const mouseup = () => {
-            document.removeEventListener("mousemove", mousemove);
-            document.removeEventListener("mouseup", mouseup);
+        const pointerup = () => {
             target.classList.remove("pdf__rect--dragging");
             if (!moved) {
                 return;
@@ -249,12 +303,56 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             });
             hideToolbarMenu(element);
         };
-        document.addEventListener("mousemove", mousemove);
-        document.addEventListener("mouseup", mouseup);
-        event.preventDefault();
-        event.stopPropagation();
-    }, {capture: true});
-    element.firstElementChild.addEventListener("click", (event: MouseEvent) => {
+        const pointercancel = () => {
+            target.classList.remove("pdf__rect--dragging");
+            if (moved) {
+                bounds = initial;
+                updateAnnotationElement();
+                hideToolbarMenu(element);
+            }
+        };
+        if (startPointerDrag(event.pointerId, pointermove, pointerup, pointercancel)) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+    };
+    pdfElement.addEventListener("pointerdown", rectChangePointerDown, {capture: true});
+    let isAnnoDestroyed = false;
+    let selectionToolbarTimer: number | undefined;
+    const showSelectionToolbar = () => {
+        if (isAnnoDestroyed || !element.isConnected) {
+            return false;
+        }
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) {
+            return false;
+        }
+        const range = selection.getRangeAt(0);
+        if (range.toString() === "" || !element.contains(range.commonAncestorContainer) ||
+            !hasClosestByClassName(range.commonAncestorContainer, "pdfViewer")) {
+            return false;
+        }
+        return showToolbar(element, range);
+    };
+    const scheduleSelectionToolbar = (hideWhenEmpty = false) => {
+        if (typeof selectionToolbarTimer !== "undefined") {
+            window.clearTimeout(selectionToolbarTimer);
+        }
+        selectionToolbarTimer = window.setTimeout(() => {
+            selectionToolbarTimer = undefined;
+            if (!showSelectionToolbar() && hideWhenEmpty && !isAnnoDestroyed) {
+                hideToolbar(element);
+            }
+        });
+    };
+    const pdfPointerSelectionEnd = (event: PointerEvent) => {
+        if (event.pointerType !== "mouse" && (event.target as Element).closest(".textLayer")) {
+            scheduleSelectionToolbar();
+        }
+    };
+    pdfElement.addEventListener("pointerup", pdfPointerSelectionEnd);
+    pdfElement.addEventListener("pointercancel", pdfPointerSelectionEnd);
+    const pdfClick = (event: MouseEvent) => {
         let processed = false;
         let target = event.target as HTMLElement;
         if (ignoreRectClick) {
@@ -279,7 +377,8 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                     const newElement = showHighlight(item, pdf);
                     if (index === 0) {
                         rectElement = newElement;
-                        copyAnno(`${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${rectElement.getAttribute("data-node-id")}`,
+                        copyAnno(appendPdfAnnotationId(pdf.appConfig.file.replace(location.origin, "").substr(1),
+                            rectElement.getAttribute("data-node-id")),
                             pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""), pdf);
                     }
                 });
@@ -311,7 +410,8 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                             const newElement = showHighlight(item, pdf);
                             if (index === 0) {
                                 rectElement = newElement;
-                                copyAnno(`${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${rectElement.getAttribute("data-node-id")}`,
+                                copyAnno(appendPdfAnnotationId(pdf.appConfig.file.replace(location.origin, "").substr(1),
+                                    rectElement.getAttribute("data-node-id")),
                                     pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""), pdf);
                             }
                         });
@@ -347,7 +447,8 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 break;
             } else if (type === "copy") {
                 hideToolbar(element);
-                copyAnno(`${pdf.appConfig.file.replace(location.origin, "").substr(1)}/${rectElement.getAttribute("data-node-id")}`,
+                copyAnno(appendPdfAnnotationId(pdf.appConfig.file.replace(location.origin, "").substr(1),
+                    rectElement.getAttribute("data-node-id")),
                     pdf.appConfig.file.replace(location.origin, "").substr(8).replace(/-\d{14}-\w{7}.pdf$/, ""), pdf);
                 event.preventDefault();
                 event.stopPropagation();
@@ -388,21 +489,23 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             return;
         }
 
-        setTimeout(() => {
-            let isShow = false;
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                if (range.toString() !== "" &&
-                    hasClosestByClassName(range.commonAncestorContainer, "pdfViewer")) {
-                    showToolbar(element, range);
-                    isShow = true;
-                }
-            }
-            if (!isShow) {
-                hideToolbar(element);
-            }
-        });
+        scheduleSelectionToolbar(true);
+    };
+    pdfElement.addEventListener("click", pdfClick);
+    registerAnnoCleanup(element, () => {
+        isAnnoDestroyed = true;
+        if (typeof selectionToolbarTimer !== "undefined") {
+            window.clearTimeout(selectionToolbarTimer);
+            selectionToolbarTimer = undefined;
+        }
+        activePointerCancel?.();
+        rectAnnoElement.removeEventListener("click", rectToolbarClick);
+        pdfConfig.mainContainer.removeEventListener("pointerdown", rectCreatePointerDown);
+        pdfElement.removeEventListener("pointerdown", rectChangePointerDown, true);
+        pdfElement.removeEventListener("pointerup", pdfPointerSelectionEnd);
+        pdfElement.removeEventListener("pointercancel", pdfPointerSelectionEnd);
+        pdfElement.removeEventListener("click", pdfClick);
+        setRectCreationMode(false);
     });
     return pdf;
 };
@@ -536,9 +639,13 @@ const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) =
         utilElement.classList.add("pdf__util--hide");
         const rects = range.getClientRects();
         const rect = rects[rects.length - 1];
+        if (!rect) {
+            utilElement.classList.add("fn__none");
+            return false;
+        }
         setPosition(utilElement, rect.left, rect.bottom);
         rectElement = null;
-        return;
+        return true;
     }
     rectElement = target;
     if (isRectAnnotationElement(target)) {
@@ -560,6 +667,7 @@ const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) =
     utilElement.classList.remove("pdf__util--hide");
     const targetRect = target.firstElementChild.getBoundingClientRect();
     setPosition(utilElement, targetRect.left, targetRect.bottom + 4, targetRect.height + 8);
+    return true;
 };
 
 const getTextNode = (element: HTMLElement, isFirst: boolean) => {
@@ -787,6 +895,11 @@ const mergeRects = (range: Range) => {
 };
 
 export const getPdfInstance = (element: HTMLElement) => {
+    const registeredInstance = getRegisteredPdfInstance(element);
+    if (registeredInstance) {
+        return registeredInstance;
+    }
+
     let pdfInstance;
     getAllModels().asset.find(item => {
         if (item.pdfObject && element && item.element && typeof item.element.contains !== "undefined" && item.element.contains(element)) {
@@ -870,6 +983,9 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
         rectDiv.append(rectChild);
     });
     rectDiv.setAttribute("data-content", selected.content);
+    if (isRectAnnotationElement(rectDiv)) {
+        rectDiv.style.touchAction = "none";
+    }
     rectsElement.append(rectDiv);
     if (hl) {
         hlPDFRect(rectsElement, selected.id);

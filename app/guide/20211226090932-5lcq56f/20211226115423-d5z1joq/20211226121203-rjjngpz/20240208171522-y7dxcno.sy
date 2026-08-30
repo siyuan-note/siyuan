@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260830124100"
 	},
 	"Children": [
 		{
@@ -2427,7 +2427,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208172038-fewwv8i",
-				"updated": "20260612204716"
+				"updated": "20260830124100"
 			},
 			"Children": [
 				{
@@ -2900,6 +2900,131 @@
 			},
 			"AttributeViewID": "20240208172113-d44j7tk",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20260830120200-a1dsptw",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260830120200-a1dsptw",
+				"updated": "20260830124100"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "顯示範本"
+				}
+			]
+		},
+		{
+			"ID": "20260830120201-b2dsptw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120201-b2dsptw",
+				"updated": "20260830120201"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "普通欄位無須變更欄位類型即可設定顯示範本。在欄頭開啟欄位選單，於底部的範本輸入框中輸入範本。顯示範本只會變更顯示內容；編輯儲存格時仍會讀取和寫入原始儲存值。範本、匯總、行號、建立時間和更新時間欄位不支援顯示範本。"
+				}
+			]
+		},
+		{
+			"ID": "20260830120202-c3dsptw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120202-c3dsptw",
+				"updated": "20260830124002"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "顯示範本使用與範本片段相同的 Go 範本語法，以 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 為分隔符號，並可包含 HTML。例如，進度欄位的儲存值為 42 時，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "&lt;progress value=\".action{.進度}\" max=\"100\"&gt;&lt;/progress&gt; .action{.進度}%"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 會顯示進度為 42% 的進度列及文字 42%。HTML 預設會經過安全過濾。"
+				}
+			]
+		},
+		{
+			"ID": "20260830120203-d4dsptw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120203-d4dsptw",
+				"updated": "20260830124003"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以依名稱引用同一筆資料中的其他欄位。例如，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "&lt;strong&gt;.action{.名稱}&lt;/strong&gt;：.action{.進度}%"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 會組合名稱和進度欄位。欄位名稱包含空格或符號時，使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{index . \"專案 名稱\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。為避免欄位重名或重新命名產生歧義，可使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{index .id_mod \"欄位ID\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 依欄位 ID 引用。"
+				}
+			]
+		},
+		{
+			"ID": "20260830120204-e5dsptw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120204-e5dsptw",
+				"updated": "20260830120204"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "顯示範本讀取各欄位的原始儲存值，不會讀取其他欄位的顯示範本結果。篩選、排序和分組可選擇使用原始值或範本值。清空顯示範本即可還原欄位原本的顯示方式。"
+				}
+			]
 		},
 		{
 			"ID": "20240818174403-xnbqd38",

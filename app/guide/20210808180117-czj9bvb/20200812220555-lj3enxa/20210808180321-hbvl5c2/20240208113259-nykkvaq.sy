@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20260803171606"
+		"updated": "20260830124100"
 	},
 	"Children": [
 		{
@@ -2427,7 +2427,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208120846-72y7j0d",
-				"updated": "20260612204505"
+				"updated": "20260830124100"
 			},
 			"Children": [
 				{
@@ -2900,6 +2900,131 @@
 			},
 			"AttributeViewID": "20240208163918-rxu3llx",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20260830120100-a1dspcn",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20260830120100-a1dspcn",
+				"updated": "20260830124100"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "显示模板"
+				}
+			]
+		},
+		{
+			"ID": "20260830120101-b2dspcn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120101-b2dspcn",
+				"updated": "20260830120101"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "普通字段无需更改字段类型即可配置显示模板。在列头打开字段菜单，在底部的模板输入框中输入模板。显示模板仅改变展示内容；编辑单元格时仍然读取和写入原始存储值。模板、汇总、行号、创建时间和更新时间字段不支持显示模板。"
+				}
+			]
+		},
+		{
+			"ID": "20260830120102-c3dspcn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120102-c3dspcn",
+				"updated": "20260830124002"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "显示模板使用与模板片段相同的 Go 模板语法，以 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 为分隔符，并可包含 HTML。例如，进度字段存储值为 42 时，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "&lt;progress value=\".action{.进度}\" max=\"100\"&gt;&lt;/progress&gt; .action{.进度}%"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 会显示进度为 42% 的进度条及文本 42%。HTML 默认会经过安全过滤。"
+				}
+			]
+		},
+		{
+			"ID": "20260830120103-d4dspcn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120103-d4dspcn",
+				"updated": "20260830124003"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "可以按名称引用同一行中的其他字段。例如，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "&lt;strong&gt;.action{.名称}&lt;/strong&gt;：.action{.进度}%"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 会组合名称和进度字段。字段名包含空格或符号时，使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{index . \"项目 名称\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。为避免字段重名或改名产生歧义，可使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": ".action{index .id_mod \"字段ID\"}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 按字段 ID 引用。"
+				}
+			]
+		},
+		{
+			"ID": "20260830120104-e5dspcn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830120104-e5dspcn",
+				"updated": "20260830120104"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "显示模板读取各字段的原始存储值，不会读取其他字段的显示模板结果。过滤、排序和分组可选择使用原始值或模板值。清空显示模板即可恢复字段原有的展示方式。"
+				}
+			]
 		},
 		{
 			"ID": "20240818174119-3zag9wr",

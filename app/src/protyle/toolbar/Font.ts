@@ -33,6 +33,11 @@ import {
     TInlineStyleType,
 } from "./inlineStyle";
 import {openInlineStyleDialog} from "./inlineStyleDialog";
+import {
+    getSemanticInlineVisibleText,
+    hasSemanticInlineType,
+    stripSemanticMarkersFromRangeText
+} from "../util/inlineElementMarker";
 
 const MAX_RECENT_FONT_STYLES = 14;
 
@@ -524,7 +529,8 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 textElement.className = "render-node";
                 textElement.setAttribute("contenteditable", "false");
                 textElement.setAttribute("data-subtype", "math");
-                textElement.setAttribute("data-content", textElement.textContent.replace(Constants.ZWSP, ""));
+                textElement.setAttribute("data-content", hasSemanticInlineType(textElement.getAttribute("data-type")) ?
+                    getSemanticInlineVisibleText(textElement) : textElement.textContent.replace(Constants.ZWSP, ""));
                 textElement.removeAttribute("data-render");
                 textElement.textContent = "";
                 break;
@@ -614,7 +620,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
 
 export const getFontNodeElements = (protyle: IProtyle) => {
     let nodeElements: Element[];
-    if (protyle.toolbar.range.toString() === "") {
+    if (stripSemanticMarkersFromRangeText(protyle.toolbar.range).split(Constants.ZWSP).join("") === "") {
         nodeElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
         if (nodeElements.length === 0) {
             const nodeElement = hasClosestBlock(protyle.toolbar.range.startContainer);

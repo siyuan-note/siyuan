@@ -924,6 +924,7 @@ export abstract class Constants {
         "nnfx-light", "panda-syntax-light", "paraiso-light", "purebasic", "qtcreator-light", "rose-pine-dawn", "routeros",
         "school-book", "stackoverflow-light", "tokyo-night-light", "vs", "xcode", "default"];
     public static readonly ZWSP: string = "\u200b";
+    public static readonly WORD_JOINER: string = "\u2060";
     public static readonly INLINE_TYPE: string[] = ["block-ref", "kbd", "text", "file-annotation-ref", "a", "strong", "em", "u", "s", "mark", "sup", "sub", "tag", "code", "inline-math", "inline-memo", "clear"];
     public static readonly BLOCK_HINT_KEYS: string[] = ["((", "[[", "（（", "【【"];
     public static readonly BLOCK_HINT_CLOSE_KEYS: Record<string, string> = {"((": "))", "[[": "]]", "（（": "））", "【【": "】】"};

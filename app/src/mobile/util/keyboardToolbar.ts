@@ -56,6 +56,10 @@ import {
     type TSelectionEndpoint,
 } from "./touchSelection";
 import {getVisibleViewportBounds} from "./visibleViewport";
+import {
+    getTextWithoutSemanticMarkers,
+    stripSemanticMarkersFromRangeText
+} from "../../protyle/util/inlineElementMarker";
 
 type TAndroidBoundedSelection = {
     container: HTMLElement,
@@ -133,7 +137,8 @@ const rememberAndroidTableCellSelectAll = () => {
         hasClosestByTag(range.startContainer, "TH")) as HTMLTableCellElement;
     const endCell = (hasClosestByTag(range.endContainer, "TD") ||
         hasClosestByTag(range.endContainer, "TH")) as HTMLTableCellElement;
-    if (!startCell || startCell !== endCell || !isTableCellSelectAll(range.toString(), startCell.textContent)) {
+    if (!startCell || startCell !== endCell || !isTableCellSelectAll(
+        stripSemanticMarkersFromRangeText(range), getTextWithoutSemanticMarkers(startCell))) {
         if (pendingAndroidTableCellSelectAll && startCell && startCell !== pendingAndroidTableCellSelectAll.cell) {
             pendingAndroidTableCellSelectAll = undefined;
         }
@@ -741,7 +746,7 @@ const renderKeyboardToolbar = () => {
             return;
         }
 
-        const selectText = range.toString();
+        const selectText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
         const startCellElement = hasClosestByTag(range.startContainer, "TD") ||
             hasClosestByTag(range.startContainer, "TH");
         const endCellElement = hasClosestByTag(range.endContainer, "TD") ||
@@ -969,7 +974,7 @@ export const hideKeyboardToolbarByApp = (preserveSelection = false) => {
     }
     hideElements(["util"], editor.protyle);
     const range = selection?.rangeCount > 0 && !selection.isCollapsed ? selection.getRangeAt(0) : undefined;
-    const hasVisibleEditorSelection = !!range && hasVisibleSelectionText(range.toString()) &&
+    const hasVisibleEditorSelection = !!range && hasVisibleSelectionText(stripSemanticMarkersFromRangeText(range)) &&
         editor.protyle.wysiwyg.element.contains(range.startContainer) &&
         editor.protyle.wysiwyg.element.contains(range.endContainer);
     const result = getKeyboardHideResult(preserveSelection, tableCellSelectionRestored, hasVisibleEditorSelection);

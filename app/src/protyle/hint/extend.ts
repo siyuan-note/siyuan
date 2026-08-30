@@ -42,6 +42,7 @@ import {
     TBuiltinInlineStyleID,
 } from "../toolbar/inlineStyle";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {buildSemanticInlineHTML} from "../util/inlineElementMarker";
 import {
     getBlockSelectionModeElement,
     getBlockSelectionStatusIDs,
@@ -498,7 +499,7 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         response.data.tags.forEach((item: string) => {
             const value = item.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             dataList.push({
-                value: `<span data-type="tag">${value}</span>`,
+                value: buildSemanticInlineHTML("tag", value),
                 html: `<div class="b3-list-item__text">${item}</div>`,
             });
             if (value === response.data.k) {
@@ -507,7 +508,7 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         });
         if (response.data.k && !hasKey) {
             dataList.splice(0, 0, {
-                value: `<span data-type="tag">${response.data.k}</span>`,
+                value: buildSemanticInlineHTML("tag", response.data.k),
                 html: `<div class="b3-list-item__text">${window.siyuan.languages.newTag} <mark>${escapeHtml(response.data.k)}</mark></div>`,
             });
             if (dataList.length > 1) {

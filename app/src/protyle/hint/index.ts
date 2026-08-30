@@ -71,6 +71,7 @@ import {
 import {getMobileHintPosition} from "./mobileHintPosition";
 import {getVisibleViewportBounds} from "../../mobile/util/visibleViewport";
 import {getTopBarHeight} from "../../layout/getTopBarHeight";
+import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
 
 const genEmojiInsertHTML = (value: string) => {
     const kind = getIconValueKind(value);
@@ -795,7 +796,7 @@ ${genHintItemHTML(item)}
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");
             tempElement = tempElement.firstElementChild as HTMLDivElement;
             if (refIsS) {
-                const selectedText = range.toString();
+                const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
                 const staticText = getBlockRefStaticText(selectedText, this.splitChar, this.lastIndex > -1);
                 if (staticText) {
                     tempElement.setAttribute("data-subtype", "s");

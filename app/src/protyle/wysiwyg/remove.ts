@@ -81,6 +81,7 @@ import {
     setBlockSelectionModeElement
 } from "./blockSelection";
 import {countBlockWord} from "../../layout/status";
+import {getTextWithoutSemanticMarkers} from "../util/inlineElementMarker";
 
 export interface IBlockRefCheckTargets {
     elements: HTMLElement[];
@@ -104,7 +105,7 @@ export interface ICrossBlockComposition {
 }
 
 const hasMeaningfulContent = (element: Element) => {
-    const text = (element.textContent || "").replace(new RegExp(Constants.ZWSP, "g"), "").trim();
+    const text = getTextWithoutSemanticMarkers(element).split(Constants.ZWSP).join("").trim();
     return text !== "" || !!element.querySelector(".img, .emoji, [data-type~='inline-math']");
 };
 

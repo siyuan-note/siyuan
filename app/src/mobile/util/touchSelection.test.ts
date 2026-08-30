@@ -20,6 +20,7 @@ describe("mobile touch selection", () => {
 
     it("preserves selections containing visible text", () => {
         assert.equal(hasVisibleSelectionText("\u200b内容\u200b"), true);
+        assert.equal(hasVisibleSelectionText("\u2060"), true);
     });
 
     it("identifies table cell select all while ignoring placeholders", () => {

@@ -4,6 +4,7 @@ import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
 import {readClipboard} from "../util/compatibility";
 import {Constants} from "../../constants";
 import {genLinkText, resolveLinkDest} from "./util";
+import {stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
 
 export class Link extends ToolbarItem {
     public element: HTMLElement;
@@ -27,7 +28,7 @@ export class Link extends ToolbarItem {
             }
 
             let dataHref = "";
-            let dataText = range.toString().trim().replace(Constants.ZWSP, "");
+            let dataText = stripSemanticMarkersFromRangeText(range).trim().split(Constants.ZWSP).join("");
             let showMenu = false;
             try {
                 // 选中链接时需忽略剪切板内容 https://ld246.com/article/1643035329737

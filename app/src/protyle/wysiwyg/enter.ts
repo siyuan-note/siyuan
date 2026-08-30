@@ -38,6 +38,7 @@ import {
     clearBlockSelectionMode,
     getBlockSelectionModeElement
 } from "./blockSelection";
+import {getTextWithoutSemanticMarkers} from "../util/inlineElementMarker";
 
 export const enter = async (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
     const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
@@ -171,7 +172,7 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
     }
 
     // bq || callout
-    if (editableElement.textContent.replace(Constants.ZWSP, "").replace("\n", "") === "" &&
+    if (getTextWithoutSemanticMarkers(editableElement).split(Constants.ZWSP).join("").replace(/\n/g, "") === "" &&
         ((blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") &&
                 blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") ||
             (blockElement.parentElement.classList.contains("callout-content") && !blockElement.nextElementSibling))) {

@@ -59,6 +59,7 @@ import {getAVFilteredTipContext} from "../render/av/filteredTip";
 import {getAVSelectedCells, IAVSelectedCell} from "../render/av/selectionState";
 import {getAVSelectedTableCells} from "../render/av/virtualScroll";
 import {resetCodeBlockRenderState} from "./codeBlockRenderState";
+import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 
 // 粘贴时临时插入的占位行标记，遍历结束后统一移除，避免污染虚拟滚动的 renderedStart/renderedEnd/spacer 状态
 const PLACEHOLDER_ROW_CLASS = "av__row--placeholder";
@@ -1210,7 +1211,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
 
     // https://github.com/siyuan-note/siyuan/issues/14162 & https://github.com/siyuan-note/siyuan/issues/14965
     if (/^\s*&gt;|\*|-|\+|\d*.|\[ \]|[x]/.test(html) &&
-        editableElement.textContent.replace(Constants.ZWSP, "") !== "") {
+        getTextWithoutSemanticMarkers(editableElement).split(Constants.ZWSP).join("") !== "") {
         unSpinHTML = html;
     }
 
@@ -1222,7 +1223,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
 
     let block2text = false;
     if ((
-            editableElement.textContent.replace(Constants.ZWSP, "") !== "" ||
+            getTextWithoutSemanticMarkers(editableElement).split(Constants.ZWSP).join("") !== "" ||
             type === "NodeHeading"
         ) &&
         tempElement.content.childElementCount === 1 &&
@@ -1266,7 +1267,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             if (isCrossBlockRange) {
                 let rangeStartParentElement = rangeStartWbrElement.parentElement;
                 while (rangeStartParentElement && rangeStartParentElement !== editableElement &&
-                    rangeStartParentElement.textContent.replace(Constants.ZWSP, "") === "" &&
+                    getTextWithoutSemanticMarkers(rangeStartParentElement).split(Constants.ZWSP).join("") === "" &&
                     Array.from(rangeStartParentElement.querySelectorAll("*")).every(item => item.tagName === "WBR")) {
                     rangeStartParentElement.before(rangeStartWbrElement);
                     rangeStartParentElement.remove();
@@ -1282,7 +1283,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             blockElement.querySelector("wbr")?.remove();
             // 移除行级元素边界插入时产生的空拆分元素，避免相邻标签修复在新标签后插入空格
             splitElements.forEach((item) => {
-                if (item.childElementCount === 0 && item.textContent.split(Constants.ZWSP).join("") === "") {
+                if (item.childElementCount === 0 &&
+                    getTextWithoutSemanticMarkers(item).split(Constants.ZWSP).join("") === "") {
                     item.remove();
                 }
             });
@@ -1447,7 +1449,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         emptyStartType === "NodeCodeBlock" ||
         (emptyStartType === "NodeHeading" && blockElement.getAttribute("fold") !== "1");
     const startTextIsEmpty = editableElement &&
-        editableElement.textContent.split(Constants.ZWSP).join("").replace(/\n/g, "") === "";
+        getTextWithoutSemanticMarkers(editableElement).split(Constants.ZWSP).join("").replace(/\n/g, "") === "";
     if (!insertPosition && startTextIsEmpty && canRemoveEmptyStart && !keepEmptyBlock &&
         !editableElement?.querySelector("img, video, audio, iframe, canvas, .emoji")) {
         // 选中当前块所有内容粘贴再撤销会导致异常 https://ld246.com/article/1662542137636
@@ -1517,7 +1519,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     // 粘贴到空列表项（第一个段落为空）后删除空列表项 https://github.com/siyuan-note/siyuan/issues/17890
     if (isListPaste && cursorLiElement && isFirstBlockInLi) {
         const editEl = getContenteditableElement(cursorLiElement);
-        if (editEl && editEl.textContent.replace(Constants.ZWSP, "").trim() === "") {
+        if (editEl && getTextWithoutSemanticMarkers(editEl).split(Constants.ZWSP).join("").trim() === "") {
             // 把空列表项的子列表移到粘贴的最后一项下面
             const subList = cursorLiElement.querySelector(":scope > [data-type='NodeList']");
             if (subList && lastElement && lastElement.classList.contains("li")) {

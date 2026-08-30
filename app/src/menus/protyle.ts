@@ -76,6 +76,10 @@ import {
 } from "../protyle/util/tableColumnWidth";
 import {getParentDocumentID} from "../protyle/util/parentDocument";
 import {shouldFocusAfterZoom} from "../protyle/util/focusRestore";
+import {
+    getSemanticInlineVisibleText,
+    normalizeSemanticInlineElement
+} from "../protyle/util/inlineElementMarker";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -1841,12 +1845,13 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
     let inputElement: HTMLInputElement;
     const oldHTML = nodeElement.outerHTML;
     window.siyuan.menus.menu.removeCB = () => {
-        tagElement.innerHTML = Constants.ZWSP + Lute.EscapeHTMLStr(inputElement.value || "");
+        tagElement.textContent = Constants.WORD_JOINER + (inputElement.value || "");
         if (!inputElement.value) {
             tagElement.insertAdjacentHTML("afterend", "<wbr>");
             tagElement.remove();
             focusByWbr(nodeElement, protyle.toolbar.range);
         } else {
+            normalizeSemanticInlineElement(tagElement);
             protyle.toolbar.range.selectNodeContents(tagElement);
             protyle.toolbar.range.collapse(false);
             focusByRange(protyle.toolbar.range);
@@ -1866,7 +1871,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         bind(element) {
             const listElement = element.querySelector(".b3-list") as HTMLElement;
             inputElement = element.querySelector("input");
-            inputElement.value = tagElement.textContent.replace(Constants.ZWSP, "");
+            inputElement.value = getSemanticInlineVisibleText(tagElement);
             inputElement.addEventListener("compositionend", () => {
                 genTagList(listElement, inputElement.value.trim());
                 setPosition(listElement, inputElementRect.right + 8, inputElementRect[isMobile() ? "bottom" : "top"], inputElementRect.height);
@@ -1917,15 +1922,16 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         accelerator: window.siyuan.languages.click,
         icon: "iconSearch",
         click() {
+            const tagName = getSemanticInlineVisibleText(tagElement);
             /// #if !MOBILE
-            openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, false, {method: 0});
+            openGlobalSearch(protyle.app, `#${tagName}#`, false, {method: 0});
             /// #else
             popSearch(protyle.app, {
                 hasReplace: false,
                 method: 0,
                 hPath: "",
                 idPath: [],
-                k: `#${tagElement.textContent}#`,
+                k: `#${tagName}#`,
                 r: "",
                 page: 1,
             });
@@ -1937,7 +1943,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         label: window.siyuan.languages.rename,
         icon: "iconEdit",
         click() {
-            const tagName = tagElement.textContent.replace(Constants.ZWSP, "");
+            const tagName = getSemanticInlineVisibleText(tagElement);
             window.siyuan.menus.menu.remove();
             renameTag(tagName);
         }

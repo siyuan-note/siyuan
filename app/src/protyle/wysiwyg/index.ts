@@ -173,6 +173,14 @@ import {isEncryptedBox, parseSiYuanUriInfo} from "../../util/pathName";
 import {processSiYuanUri} from "../../util/uri";
 import {enhanceRichClipboard, prepareExternalClipboardHTML, prepareRichClipboardHTML} from "../util/richClipboard";
 import {buildBlockDOMClipboardRichData} from "../util/blockDOMClipboard";
+import {
+    getSemanticInlineVisibleText,
+    getTextWithoutSemanticMarkers,
+    hasSemanticInlineType,
+    normalizeSemanticInlineHTML,
+    stripSemanticMarkersFromRangeText,
+    transformSemanticInlineHTML
+} from "../util/inlineElementMarker";
 import {addSpellcheckMenuItems, requestSpellcheckContext} from "../../menus/spellcheck";
 import {getAVTemplateInteractiveElement, isAVTemplateLink} from "../render/av/attributeValue";
 import {focusAVByArrow} from "../render/av/focus";
@@ -632,7 +640,7 @@ export class WYSIWYG {
         attrElements.forEach(item => {
             item.textContent = Constants.ZWSP;
         });
-        return element.textContent;
+        return getTextWithoutSemanticMarkers(element);
     }
 
     private normalizeCrossBlockCopy(element: HTMLElement, range: Range) {
@@ -729,6 +737,7 @@ export class WYSIWYG {
             event.stopPropagation();
             event.preventDefault();
             const range = getEditorRange(protyle.wysiwyg.element);
+            const semanticRangeText = stripSemanticMarkersFromRangeText(range);
             const nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {
                 return;
@@ -916,8 +925,13 @@ export class WYSIWYG {
                 const selectTypes = protyle.toolbar.getCurrentType(range);
                 const spanElement = hasClosestByTag(range.startContainer, "SPAN");
                 const headingElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeHeading");
-                const matchHeading = headingElement && headingElement.textContent.replace(Constants.ZWSP, "") === range.toString();
-                if ((selectTypes.length > 0 && spanElement && spanElement.textContent.replace(Constants.ZWSP, "") === range.toString()) ||
+                const matchHeading = headingElement &&
+                    getTextWithoutSemanticMarkers(headingElement).split(Constants.ZWSP).join("") ===
+                    semanticRangeText.split(Constants.ZWSP).join("");
+                if ((selectTypes.length > 0 && spanElement &&
+                    (hasSemanticInlineType(spanElement.getAttribute("data-type")) ?
+                        getSemanticInlineVisibleText(spanElement) : spanElement.textContent.replace(Constants.ZWSP, "")) ===
+                    semanticRangeText) ||
                     matchHeading) {
                     if (matchHeading) {
                         // 复制标题 https://github.com/siyuan-note/insider/issues/297
@@ -944,7 +958,7 @@ export class WYSIWYG {
                         this.emojiToMd(tempElement);
                     }
                     html = tempElement.innerHTML;
-                    textPlain = textPlain || range.toString();
+                    textPlain = textPlain || semanticRangeText;
                 } else if (selectImgElement) {
                     html = selectImgElement.outerHTML;
                     // 和图片菜单中的复制保持一致
@@ -965,7 +979,7 @@ export class WYSIWYG {
                     }
                     spanElement.textContent = range.toString();
                     html = spanElement.outerHTML;
-                    textPlain = range.toString();
+                    textPlain = semanticRangeText;
                 } else {
                     tempElement.append(range.cloneContents());
                     const isCrossBlock = nodeElement !== hasClosestBlock(range.endContainer);
@@ -989,7 +1003,7 @@ export class WYSIWYG {
                         html = tempElement.innerHTML;
                     }
                     // 不能使用 commonAncestorContainer https://ld246.com/article/1643282894693
-                    textPlain = crossBlockTextPlain ?? tempElement.textContent;
+                    textPlain = crossBlockTextPlain ?? getTextWithoutSemanticMarkers(tempElement);
                     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
@@ -997,7 +1011,8 @@ export class WYSIWYG {
                         isInCodeBlock = true;
                     } else if (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) {
                         tempElement.innerHTML = tempElement.innerHTML.replace(/<br>/g, "\n").replace(/<br\/>/g, "\n");
-                        textPlain = tempElement.textContent.endsWith("\n") ? tempElement.textContent.replace(/\n$/, "") : tempElement.textContent;
+                        const tableText = getTextWithoutSemanticMarkers(tempElement);
+                        textPlain = tableText.endsWith("\n") ? tableText.replace(/\n$/, "") : tableText;
                     } else if (tempElement.querySelector('.img, [data-type~="inline-math"]')) {
                         textPlain = "";
                         tempElement.childNodes.forEach((item: Element) => {
@@ -1010,11 +1025,12 @@ export class WYSIWYG {
                                 }
                                 textPlain += protyle.lute.BlockDOM2StdMd(item.outerHTML).trimEnd();
                             } else {
-                                textPlain += item.textContent;
+                                textPlain += item.nodeType === Node.ELEMENT_NODE ?
+                                    getTextWithoutSemanticMarkers(item) : item.textContent;
                             }
                         });
                     } else if (!hasClosestByTag(range.startContainer, "CODE")) {
-                        textPlain = crossBlockTextPlain ?? textWithoutAttr ?? range.toString();
+                        textPlain = crossBlockTextPlain ?? textWithoutAttr ?? semanticRangeText;
                     }
                 }
             }
@@ -1022,7 +1038,8 @@ export class WYSIWYG {
             if (protyle.disabled) {
                 html = getEnableHTML(html);
             }
-            textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd();
+            textPlain = textPlain || protyle.lute.BlockDOM2StdMd(selectAVElement ? html :
+                transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy")).trimEnd();
             textPlain = removeZWJ(nbsp2space(textPlain)) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
@@ -1030,8 +1047,10 @@ export class WYSIWYG {
 
             if (!isInCodeBlock) {
                 enableLuteMarkdownSyntax(protyle);
+                const clipboardBlockDOM = selectAVElement ? html :
+                    transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy");
                 const blockDOMClipboardRichData = useBlockDOMClipboardRichData && !copyAsRichText ?
-                    buildBlockDOMClipboardRichData(protyle.lute, html) : undefined;
+                    buildBlockDOMClipboardRichData(protyle.lute, clipboardBlockDOM) : undefined;
                 // 表格选区（框选或跨多单元格文本选区）直接构建 BlockDOM，不走 HTML2BlockDOM 的 markdown 往返
                 //（GFM 表格只有单行表头，markdown 往返会丢失多行 thead 和单元格 th 属性）
                 let textSiyuan = blockDOMClipboardRichData?.textSiyuan;
@@ -1039,18 +1058,22 @@ export class WYSIWYG {
                     // 表格选区：html 已是合法 <table>...</table>（含 thead/tbody/fn__none 占位），
                     // 构建最小化 NodeTable BlockDOM，不经过 markdown 往返（GFM 表格只有单行表头，往返会丢失多行 thead）
                     const newId = Lute.NewNodeID();
-                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${clipboardBlockDOM}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
                     html = textSiyuan;
                 } else if (!textSiyuan) {
-                    textSiyuan = html;
+                    textSiyuan = clipboardBlockDOM;
+                }
+                if (!selectAVElement) {
+                    textSiyuan = transformSemanticInlineHTML(textSiyuan, "legacy");
                 }
                 event.clipboardData.setData("text/siyuan", textSiyuan);
                 restoreLuteMarkdownSyntax(protyle);
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
                 let exportedHTML = blockDOMClipboardRichData?.textHTML ??
                     removeZWJ((selectTableElement || selectTableRange) ? html :
-                        (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : html) :
-                            protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
+                        (copyAsRichText ? protyle.lute.BlockDOM2RichHTML(selectAVElement ? textPlain : clipboardBlockDOM) :
+                            protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : clipboardBlockDOM)));
+                exportedHTML = transformSemanticInlineHTML(exportedHTML, "remove");
                 if (copyAsRichText) {
                     const prepared = prepareRichClipboardHTML(exportedHTML);
                     exportedHTML = prepared.html;
@@ -1944,7 +1967,7 @@ export class WYSIWYG {
                     setTimeout(() => {
                         if (getSelection().rangeCount > 0) {
                             const range = getSelection().getRangeAt(0);
-                            if (range.toString().replace(Constants.ZWSP, "") !== "") {
+                            if (stripSemanticMarkersFromRangeText(range).replace(new RegExp(Constants.ZWSP, "g"), "") !== "") {
                                 protyle.toolbar.render(protyle, range, {
                                     x: mouseUpEvent.clientX,
                                     y: mouseUpEvent.clientY,
@@ -2941,6 +2964,7 @@ export class WYSIWYG {
                 protyle.breadcrumb.hide();
             }
             const range = getEditorRange(protyle.wysiwyg.element);
+            const semanticRangeText = stripSemanticMarkersFromRangeText(range);
             let nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {
                 event.stopPropagation();
@@ -3217,7 +3241,7 @@ export class WYSIWYG {
                     }
                 }
                 const headElement = hasClosestByAttribute(startContainer, "data-type", "NodeHeading");
-                if (headElement && range.toString() === headElement.firstElementChild.textContent) {
+                if (headElement && semanticRangeText === getTextWithoutSemanticMarkers(headElement.firstElementChild)) {
                     tempElement.insertAdjacentHTML("afterbegin", headElement.firstElementChild.innerHTML);
                     headElement.firstElementChild.innerHTML = "";
                 } else if (range.toString() !== "" && startContainer === range.endContainer &&
@@ -3228,7 +3252,7 @@ export class WYSIWYG {
                     !["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                     // 选中整个内联元素
                     tempElement.append(range.startContainer.parentElement);
-                    textPlain = tempElement.textContent;
+                    textPlain = getTextWithoutSemanticMarkers(tempElement);
                 } else if (selectImgElement) {
                     tempElement.append(selectImgElement);
                 } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
@@ -3247,8 +3271,9 @@ export class WYSIWYG {
                         newSpanElement.setAttribute("data-subtype", "s");
                         spanElement.setAttribute("data-subtype", "s");
                     }
-                    newSpanElement.textContent = range.toString();
-                    textPlain = range.toString();
+                    newSpanElement.textContent = hasSemanticInlineType(newSpanElement.getAttribute("data-type")) ?
+                        Constants.WORD_JOINER + semanticRangeText : semanticRangeText;
+                    textPlain = semanticRangeText;
                     range.deleteContents();
                     tempElement.append(newSpanElement);
                 } else {
@@ -3313,11 +3338,12 @@ export class WYSIWYG {
                                         (item.classList.contains("img") || item.getAttribute("data-type") === "inline-math")) {
                                         textPlain += protyle.lute.BlockDOM2StdMd(item.outerHTML).trimEnd();
                                     } else {
-                                        textPlain += item.textContent;
+                                        textPlain += item.nodeType === Node.ELEMENT_NODE ?
+                                            getTextWithoutSemanticMarkers(item) : item.textContent;
                                     }
                                 });
                             } else if (!hasClosestByTag(range.startContainer, "CODE")) {
-                                textPlain = range.toString();
+                                textPlain = semanticRangeText;
                             }
                             range.deleteContents();
                             if (parentElement) {
@@ -3338,7 +3364,7 @@ export class WYSIWYG {
                 // https://github.com/siyuan-note/siyuan/issues/10722
                 if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
                     hasClosestByTag(range.startContainer, "CODE")) {
-                    textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
+                    textPlain = getTextWithoutSemanticMarkers(tempElement).replace(Constants.ZWSP, "");
                     isInCodeBlock = true;
                 }
                 // https://github.com/siyuan-note/siyuan/issues/4321
@@ -3362,13 +3388,16 @@ export class WYSIWYG {
             }
             protyle.hint.render(protyle);
             if (!selectAVElement) {
-                textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
+                textPlain = textPlain || protyle.lute.BlockDOM2StdMd(
+                    transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy")
+                ).trimEnd(); // 需要 trimEnd，否则 \n 会导致 https://github.com/siyuan-note/siyuan/issues/6218
                 if (nodeElement.classList.contains("table")) {
                     textPlain = textPlain.replace(/<br>/g, "\n").replace(/<br\/>/g, "\n");
                     textPlain = textPlain.endsWith("\n") ? textPlain.replace(/\n$/, "") : textPlain;
                 }
             }
-            textPlain = removeZWJ(nbsp2space(textPlain)); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+            textPlain = removeZWJ(nbsp2space(textPlain)) // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
+                .replace(new RegExp(Constants.ZWSP, "g"), "");
             if (!cutClipboardWritten) {
                 event.clipboardData.setData("text/plain", textPlain);
             }
@@ -3376,26 +3405,31 @@ export class WYSIWYG {
             if (!isInCodeBlock) {
                 html = sanitizeViewFoldHTML(html);
                 enableLuteMarkdownSyntax(protyle);
+                const clipboardBlockDOM = selectAVElement ? html :
+                    transformSemanticInlineHTML(normalizeSemanticInlineHTML(html), "legacy");
                 const blockDOMClipboardRichData = useBlockDOMClipboardRichData ?
-                    buildBlockDOMClipboardRichData(protyle.lute, html) : undefined;
+                    buildBlockDOMClipboardRichData(protyle.lute, clipboardBlockDOM) : undefined;
                 // 表格选区（框选或跨多单元格文本选区）直接构建 BlockDOM，不走 HTML2BlockDOM 的 markdown 往返
                 let textSiyuan = blockDOMClipboardRichData?.textSiyuan;
                 if (!textSiyuan && (selectTableElement || selectTableRange)) {
                     // 表格选区：html 已是合法 <table>...</table>，构建最小化 NodeTable BlockDOM，不走 markdown 往返
                     const newId = Lute.NewNodeID();
-                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${html}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
+                    textSiyuan = `<div data-node-id="${newId}" data-type="NodeTable" class="table"><div contenteditable="true" spellcheck="false">${clipboardBlockDOM}<div class="protyle-action__table"><div class="table__resize"></div><div class="table__select"></div></div></div><div class="protyle-attr" contenteditable="false">\u200b</div></div>`;
                     html = textSiyuan;
                 } else if (!textSiyuan) {
-                    textSiyuan = html;
+                    textSiyuan = clipboardBlockDOM;
+                }
+                if (!selectAVElement) {
+                    textSiyuan = transformSemanticInlineHTML(textSiyuan, "legacy");
                 }
                 restoreLuteMarkdownSyntax(protyle);
                 if (!cutClipboardWritten) {
                     event.clipboardData.setData("text/siyuan", textSiyuan);
                 }
                 // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-                const exportedHTML = prepareExternalClipboardHTML(blockDOMClipboardRichData?.textHTML ??
+                const exportedHTML = transformSemanticInlineHTML(prepareExternalClipboardHTML(blockDOMClipboardRichData?.textHTML ??
                     removeZWJ((selectTableElement || selectTableRange) ? html :
-                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
+                        protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : clipboardBlockDOM))), "remove");
                 const textHTML = `<!--data-siyuan='${encodeBase64(textSiyuan)}'-->${exportedHTML}`;
                 if (!cutClipboardWritten) {
                     event.clipboardData.setData("text/html", textHTML);
@@ -4607,8 +4641,9 @@ export class WYSIWYG {
 
             const tagElement = hasClosestByAttribute(event.target, "data-type", "tag");
             if (tagElement && !event.altKey && !event.shiftKey && range.toString() === "") {
+                const tagName = getSemanticInlineVisibleText(tagElement);
                 /// #if !MOBILE
-                openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, !ctrlIsPressed, {method: 0});
+                openGlobalSearch(protyle.app, `#${tagName}#`, !ctrlIsPressed, {method: 0});
                 hideElements(["dialog"]);
                 /// #else
                 popSearch(protyle.app, {
@@ -4616,7 +4651,7 @@ export class WYSIWYG {
                     method: 0,
                     hPath: "",
                     idPath: [],
-                    k: `#${tagElement.textContent}#`,
+                    k: `#${tagName}#`,
                     r: "",
                     page: 1,
                 });
@@ -5038,7 +5073,7 @@ export class WYSIWYG {
                     focusByRange(newRange);
                 }
                 /// #if !MOBILE
-                if (newRange.toString().replace(Constants.ZWSP, "") !== "") {
+                if (stripSemanticMarkersFromRangeText(newRange).replace(new RegExp(Constants.ZWSP, "g"), "") !== "") {
                     const paintedRange = formatPainter.paint(protyle, newRange);
                     if (paintedRange) {
                         newRange = paintedRange;

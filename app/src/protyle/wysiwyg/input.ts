@@ -24,6 +24,10 @@ import {updateAVName} from "../render/av/action";
 import {setFold} from "../util/blockFold";
 import {nbsp2space} from "../util/normalizeText";
 import {getBlockquoteContext, isBlockquoteMarker, shouldCancelBlockquote} from "./blockquote";
+import {
+    getSemanticMarkerPrefixLengthForNode,
+    normalizeSemanticInlineElements
+} from "../util/inlineElementMarker";
 
 interface IInputOperations {
     doOperations: IOperation[];
@@ -142,11 +146,12 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         const wbrNextElement = hasNextSibling(wbrElement) as HTMLElement;
         // 行内代码前软换行，光标应在行内代码前
         if (!hasPreviousSibling(wbrElement) && wbrElement.parentElement.tagName === "SPAN" &&
-            wbrNextElement && wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
+            getSemanticMarkerPrefixLengthForNode(wbrNextElement) > 0) {
             wbrElement.parentElement.before(wbrElement);
         }
         if (event.inputType === "deleteContentForward") {
-            if (wbrNextElement && wbrNextElement.nodeType === 1 && !wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
+            if (wbrNextElement && wbrNextElement.nodeType === 1 &&
+                getSemanticMarkerPrefixLengthForNode(wbrNextElement.firstChild) === 0) {
                 const nextType = (wbrNextElement.getAttribute("data-type") || "").split(" ");
                 if (nextType.includes("code") || nextType.includes("kbd") || nextType.includes("tag")) {
                     wbrNextElement.insertAdjacentElement("afterbegin", wbrElement);
@@ -181,6 +186,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     } : undefined;
     if (editElement.classList.contains("callout-title")) {
         fixAdjacentTags(editElement);
+        normalizeSemanticInlineElements(editElement);
         let html = protyle.lute.SpinBlockDOM(blockElement.outerHTML);
         hideElements(["util"], protyle, true);
         const tempElement = document.createElement("template");
@@ -322,6 +328,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     // 相邻标签之间插入空格区隔，避免 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
     fixAdjacentTags(editElement);
+    normalizeSemanticInlineElements(editElement);
     let html = blockElement.outerHTML;
     let focusHR = false;
     if (["---", "___", "***"].includes(editElement.textContent) && type !== "NodeCodeBlock") {

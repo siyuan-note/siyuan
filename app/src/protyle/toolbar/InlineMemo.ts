@@ -1,5 +1,7 @@
 import {ToolbarItem} from "./ToolbarItem";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
+import {getSemanticInlineVisibleText, stripSemanticMarkersFromRangeText} from "../util/inlineElementMarker";
+import {Constants} from "../../constants";
 
 export class InlineMemo extends ToolbarItem {
     public element: HTMLElement;
@@ -16,13 +18,14 @@ export class InlineMemo extends ToolbarItem {
                 return;
             }
             const memoElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-memo");
-            if (memoElement && memoElement.textContent === range.toString()) {
+            const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
+            if (memoElement && getSemanticInlineVisibleText(memoElement) === selectedText) {
                 // https://github.com/siyuan-note/siyuan/issues/6569
                 protyle.toolbar.showRender(protyle, memoElement);
                 return;
             }
 
-            if (range.toString() === "") {
+            if (selectedText === "") {
                 return;
             }
 

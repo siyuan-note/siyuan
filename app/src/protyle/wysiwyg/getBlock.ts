@@ -1,5 +1,6 @@
 import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
+import {getTextWithoutSemanticMarkers} from "../util/inlineElementMarker";
 
 export interface IEmbedOperationContext {
     resultElement: HTMLElement;
@@ -242,7 +243,7 @@ export const getTopEmptyElement = (element: Element, boundaryElement?: Element) 
         } else {
             let hasText = false;
             Array.from(topElement.parentElement.querySelectorAll('[contenteditable="true"]')).find(item => {
-                if (item.textContent.replace(Constants.ZWSP, "").replace("\n", "") !== "") {
+                if (getTextWithoutSemanticMarkers(item).split(Constants.ZWSP).join("").replace(/\n/g, "") !== "") {
                     hasText = true;
                     return true;
                 }

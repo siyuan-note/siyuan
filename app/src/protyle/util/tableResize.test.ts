@@ -15,6 +15,7 @@ describe("isTableCellContentEmpty", () => {
 
     it("keeps text and non-text content", () => {
         assert.equal(isTableCellContentEmpty("content", false), false);
+        assert.equal(isTableCellContentEmpty("\u2060", false), false);
         assert.equal(isTableCellContentEmpty("", true), false);
     });
 });

@@ -65,6 +65,19 @@ import {applyToolbarEntryVisibility} from "../../config/entryVisibility/runtime"
 import {refreshToolbarCatalog} from "../../config/entryVisibility/catalog";
 import {emitToPlugins, forEachPluginSubscriber, hasPluginSubscriber} from "../../plugin/EventBusCore";
 import {getSelectionElementAvailableHeight, getSelectionElementY} from "./selectionElementPosition";
+import {
+    getInlinePlaceholder,
+    getSemanticInlineVisibleText,
+    getSemanticInternalMarkerPrefixLength,
+    getSemanticMarkerPrefixLengthForNode,
+    hasSemanticInlineType,
+    normalizeSemanticInlineElements,
+    normalizeSemanticInternalMarkerPrefix,
+    removeSemanticInlineExternalBoundaries,
+    setSemanticInlineElementMarker,
+    stripSemanticMarkersFromRangeText,
+    stripSemanticInternalMarkerPrefix
+} from "../util/inlineElementMarker";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -336,7 +349,8 @@ export class Toolbar {
             if (range.intersectsNode(textNode)) {
                 const start = range.startContainer === textNode ? range.startOffset : 0;
                 const end = range.endContainer === textNode ? range.endOffset : textNode.data.length;
-                if (start < end && textNode.data.substring(start, end).split(Constants.ZWSP).join("") &&
+                const visibleStart = Math.max(start, getSemanticMarkerPrefixLengthForNode(textNode));
+                if (visibleStart < end && textNode.data.substring(visibleStart, end).split(Constants.ZWSP).join("") &&
                     !hasClosestByAttribute(textNode, "data-type", type)) {
                     return false;
                 }
@@ -380,7 +394,7 @@ export class Toolbar {
         const ranges = getBlockRanges(protyle.wysiwyg.element, selectedRange,
             ["NodeCodeBlock", "NodeAttributeView"]).filter(item =>
             !(startsAtBlockEnd && item.editableElement.contains(selectedRange.startContainer)) &&
-            item.range.toString().split(Constants.ZWSP).join(""));
+            stripSemanticMarkersFromRangeText(item.range).split(Constants.ZWSP).join(""));
         if (ranges.length === 0) {
             return false;
         }
@@ -457,7 +471,7 @@ export class Toolbar {
         const ranges = getBlockRanges(protyle.wysiwyg.element, selectedRange,
             ["NodeCodeBlock", "NodeAttributeView"]).filter(item =>
             !(startsAtBlockEnd && item.editableElement.contains(selectedRange.startContainer)) &&
-            item.range.toString().split(Constants.ZWSP).join(""));
+            stripSemanticMarkersFromRangeText(item.range).split(Constants.ZWSP).join(""));
         const preserveStart = !ranges.some(item => item.editableElement.contains(selectedRange.startContainer));
         const preserveEnd = !ranges.some(item => item.editableElement.contains(selectedRange.endContainer));
 
@@ -481,7 +495,7 @@ export class Toolbar {
             }
             const range = document.createRange();
             range.selectNodeContents(cellElement);
-            if (!range.toString().split(Constants.ZWSP).join("")) {
+            if (!stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("")) {
                 return;
             }
             const position = getSelectionOffset(cellElement, undefined, range);
@@ -611,10 +625,12 @@ export class Toolbar {
             this.range.startOffset > -1 && this.range.endOffset <= this.range.endContainer.textContent.length) {
             rangeTypes = rangeTypes.concat((this.range.startContainer.parentElement.getAttribute("data-type") || "").split(" "));
         }
-        const selectText = this.range.toString();
+        const selectText = stripSemanticMarkersFromRangeText(this.range);
         let keepZWPS = false;
         // ctrl+b/u/i  https://github.com/siyuan-note/siyuan/issues/14820
-        if (!selectText && this.range.startOffset === 1 && this.range.startContainer.textContent === Constants.ZWSP) {
+        const rangeStartMarkerLength = getSemanticMarkerPrefixLengthForNode(this.range.startContainer);
+        if (!selectText && ((rangeStartMarkerLength > 0 && this.range.startOffset === rangeStartMarkerLength) ||
+            (this.range.startOffset === 1 && this.range.startContainer.textContent === Constants.ZWSP))) {
             let newElement;
             if (this.range.startContainer.nodeType === 1) {
                 newElement = this.range.startContainer as HTMLElement;
@@ -669,7 +685,7 @@ export class Toolbar {
                         this.range.endContainer.nextSibling.parentElement === this.range.endContainer.parentElement
                     )
                 ) &&
-                !(this.range.startOffset === 1 && this.range.startContainer.textContent.startsWith(Constants.ZWSP))) {
+                !(rangeStartMarkerLength > 0 && this.range.startOffset <= rangeStartMarkerLength)) {
                 // 切割元素
                 const parentElement = this.range.startContainer.parentElement;
                 const afterElement = document.createElement("span");
@@ -726,7 +742,9 @@ export class Toolbar {
                     emptyNode = this.range.startContainer as HTMLElement;
                 }
             }
-            if (emptyNode && emptyNode.nodeType !== 3 && emptyNode.textContent.replace(Constants.ZWSP, "") === "" &&
+            if (emptyNode && emptyNode.nodeType !== 3 &&
+                (hasSemanticInlineType(emptyNode.getAttribute("data-type")) ?
+                    getSemanticInlineVisibleText(emptyNode) : emptyNode.textContent.replace(Constants.ZWSP, "")) === "" &&
                 !["TD", "TH", "BR"].includes(emptyNode.tagName)) {
                 emptyNode.remove();
             }
@@ -786,7 +804,7 @@ export class Toolbar {
                     }
                     const inlineElement = document.createElement("span");
                     inlineElement.setAttribute("data-type", rangeTypes.join(" "));
-                    inlineElement.textContent = Constants.ZWSP;
+                    inlineElement.textContent = getInlinePlaceholder(rangeTypes.join(" "));
                     newNodes.push(inlineElement);
                     startContainer = newNodes[0].firstChild;
                 }
@@ -795,6 +813,7 @@ export class Toolbar {
             }
             contents.childNodes.forEach((item: HTMLElement) => {
                 if (item.nodeType !== 3 && item.tagName !== "BR" && item.tagName !== "IMG" && !item.classList.contains("img")) {
+                    const wasSemanticInline = hasSemanticInlineType(item.getAttribute("data-type"));
                     const types = (item.getAttribute("data-type") || "").split(" ");
                     if (type === "clear") {
                         for (let i = 0; i < types.length; i++) {
@@ -819,7 +838,11 @@ export class Toolbar {
                         });
                     }
                     if (types.length === 0) {
-                        newNodes.push(document.createTextNode(item.textContent));
+                        if (wasSemanticInline) {
+                            removeSemanticInlineExternalBoundaries(item);
+                        }
+                        newNodes.push(document.createTextNode(wasSemanticInline ?
+                            stripSemanticInternalMarkerPrefix(item.textContent) : item.textContent));
                     } else {
                         if (type === "clear") {
                             item.style.color = "";
@@ -830,6 +853,12 @@ export class Toolbar {
                             item.style.fontSize = "";
                         }
                         item.setAttribute("data-type", types.join(" "));
+                        if (hasSemanticInlineType(types.join(" "))) {
+                            setSemanticInlineElementMarker(item, "canonical");
+                        } else if (wasSemanticInline) {
+                            removeSemanticInlineExternalBoundaries(item);
+                            setSemanticInlineElementMarker(item, "remove");
+                        }
                         newNodes.push(item);
                     }
                 } else {
@@ -861,7 +890,7 @@ export class Toolbar {
                     }
                 }
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
-                inlineElement.textContent = Constants.ZWSP;
+                inlineElement.textContent = getInlinePlaceholder(inlineElement.getAttribute("data-type"));
                 setFontStyle(inlineElement, textObj);
                 newNodes.push(inlineElement);
                 keepZWPS = true;
@@ -884,7 +913,8 @@ export class Toolbar {
                         if (item.textContent) {
                             const inlineElement = document.createElement("span");
                             inlineElement.setAttribute("data-type", type);
-                            inlineElement.textContent = item.textContent;
+                            inlineElement.textContent = hasSemanticInlineType(type) ?
+                                normalizeSemanticInternalMarkerPrefix(item.textContent) : item.textContent;
                             if (type === "a") {
                                 if (!inlineElement.textContent) {
                                     inlineElement.textContent = "*";
@@ -900,6 +930,7 @@ export class Toolbar {
                             }
                         }
                     } else if (item.nodeType === 1) {
+                        const wasSemanticInline = hasSemanticInlineType(item.getAttribute("data-type"));
                         let types = (item.getAttribute("data-type") || "").split(" ");
                         for (let i = 0; i < types.length; i++) {
                             // "backslash", "virtual-block-ref", "search-mark" 只能单独存在
@@ -976,6 +1007,11 @@ export class Toolbar {
                         types = [...new Set(types)];
                         if (item.tagName !== "BR" && item.tagName !== "IMG" && !types.includes("img")) {
                             item.setAttribute("data-type", types.join(" "));
+                            if (hasSemanticInlineType(types.join(" "))) {
+                                setSemanticInlineElementMarker(item, "canonical");
+                            } else if (wasSemanticInline) {
+                                setSemanticInlineElementMarker(item, "remove");
+                            }
                             if (type === "a") {
                                 if (!item.textContent) {
                                     item.textContent = "*";
@@ -1009,7 +1045,10 @@ export class Toolbar {
         for (let i = newNodes.length - 1; i > -1; i--) {
             this.range.insertNode(newNodes[i]);
         }
-        if (newNodes.length === 1 && newNodes[0].textContent === Constants.ZWSP) {
+        if (newNodes.length === 1 && (newNodes[0].textContent === Constants.ZWSP ||
+            (newNodes[0].nodeType !== Node.TEXT_NODE && hasSemanticInlineType(
+                (newNodes[0] as HTMLElement).getAttribute("data-type")) &&
+                getSemanticInternalMarkerPrefixLength(newNodes[0].textContent) === newNodes[0].textContent.length))) {
             this.range.setStart(newNodes[0], 1);
             this.range.collapse(true);
             if (newNodes[0].nodeType !== 3) {
@@ -1124,6 +1163,7 @@ export class Toolbar {
                 }
             }
         }
+        normalizeSemanticInlineElements(nodeElement);
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         if (!isBatch) {
             updateTransaction(protyle, nodeElement, html, undoContext);
@@ -1165,7 +1205,10 @@ export class Toolbar {
                 }
             } else if (type === "a") {
                 if (!isBatch && showMenuTypes.includes("a") &&
-                    (showMenuElement.textContent.replace(Constants.ZWSP, "") === "" || !showMenuElement.getAttribute("data-href"))) {
+                    ((hasSemanticInlineType(showMenuElement.getAttribute("data-type")) ?
+                        getSemanticInlineVisibleText(showMenuElement) :
+                        showMenuElement.textContent.replace(Constants.ZWSP, "")) === "" ||
+                        !showMenuElement.getAttribute("data-href"))) {
                     linkMenu(protyle, showMenuElement, showMenuElement.getAttribute("data-href") ? true : false);
                 }
             }
@@ -2107,7 +2150,8 @@ export class Toolbar {
         this.subElement.style.width = "auto";
         this.subElement.style.padding = "0 8px";
         let html = "";
-        const hasCopy = range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji");
+        const hasCopy = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("") !== "" ||
+            (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji");
         if (hasCopy) {
             html += '<button class="keyboard__action" data-action="copy"><svg><use xlink:href="#iconCopy"></use></svg></button>';
             if (!protyle.disabled) {

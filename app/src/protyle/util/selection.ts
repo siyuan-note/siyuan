@@ -20,6 +20,11 @@ import {genRenderFrame} from "../render/util";
 import {Constants} from "../../constants";
 import {getUndoFocusElement} from "./selectionFocus";
 import {getBlockRangeSelectElements as getBlockRangeSelectElementsByDOM} from "./blockRangeSelect";
+import {
+    getMarkerAwareTextLength,
+    getSemanticMarkerPrefixLengthForNode,
+    stripSemanticMarkersFromRangeText
+} from "./inlineElementMarker";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -481,11 +486,13 @@ export const getSelectionOffset = (selectElement: Node, editorElement?: Element,
         preSelectionRange.selectNodeContents(selectElement);
     }
     preSelectionRange.setEnd(range.startContainer, range.startOffset);
-    const getTextLength = (text: string) => (ignoreZWSP ? text.split(Constants.ZWSP).join("") : text).length;
+    const getRangeTextLength = (textRange: Range) => ignoreZWSP ?
+        stripSemanticMarkersFromRangeText(textRange).split(Constants.ZWSP).join("").length :
+        textRange.toString().length;
     // 需加上表格内软换行 br 的长度
-    position.start = getTextLength(preSelectionRange.toString()) +
+    position.start = getRangeTextLength(preSelectionRange) +
         preSelectionRange.cloneContents().querySelectorAll("br, .emoji").length;
-    position.end = position.start + getTextLength(range.toString()) +
+    position.end = position.start + getRangeTextLength(range) +
         range.cloneContents().querySelectorAll("br, .emoji").length;
     return position;
 };
@@ -813,17 +820,19 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
     return range;
 };
 
-const getDOMOffset = (text: string, offset: number, skipZWSP: boolean) => {
+const getDOMOffset = (textNode: Text, offset: number, skipZWSP: boolean) => {
+    const text = textNode.data;
+    const semanticPrefixLength = getSemanticMarkerPrefixLengthForNode(textNode);
     let domOffset = 0;
     let textOffset = 0;
     while (domOffset < text.length && textOffset < offset) {
-        if (text[domOffset] !== Constants.ZWSP) {
+        if (text[domOffset] !== Constants.ZWSP && domOffset >= semanticPrefixLength) {
             textOffset++;
         }
         domOffset++;
     }
     if (skipZWSP) {
-        while (text[domOffset] === Constants.ZWSP) {
+        while (text[domOffset] === Constants.ZWSP || domOffset < semanticPrefixLength) {
             domOffset++;
         }
     }
@@ -845,8 +854,8 @@ export const focusByOffset = (container: Element, start: number, end: number, is
     let startNode: Node;
     searchNode(container, container.firstChild, node => {
         if (node.nodeType === Node.TEXT_NODE) {
-            const dataLength = ignoreZWSP ?
-                (node as Text).data.split(Constants.ZWSP).join("").length : (node as Text).data.length;
+            const textNode = node as Text;
+            const dataLength = ignoreZWSP ? getMarkerAwareTextLength(textNode, true) : textNode.data.length;
             if (start <= dataLength) {
                 startNode = node;
                 return true;
@@ -873,8 +882,8 @@ export const focusByOffset = (container: Element, start: number, end: number, is
         } else {
             searchNode(container, startNode, node => {
                 if (node.nodeType === Node.TEXT_NODE) {
-                    const dataLength = ignoreZWSP ?
-                        (node as Text).data.split(Constants.ZWSP).join("").length : (node as Text).data.length;
+                    const textNode = node as Text;
+                    const dataLength = ignoreZWSP ? getMarkerAwareTextLength(textNode, true) : textNode.data.length;
                     if (end <= dataLength) {
                         endNode = node;
                         return true;
@@ -897,8 +906,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
     const range = document.createRange();
     if (startNode) {
         if (startNode.nodeType === Node.TEXT_NODE) {
-            const data = (startNode as Text).data;
-            range.setStart(startNode, ignoreZWSP ? getDOMOffset(data, start, true) : start);
+            range.setStart(startNode, ignoreZWSP ? getDOMOffset(startNode as Text, start, true) : start);
         } else {
             range.setStartAfter(startNode);
         }
@@ -914,8 +922,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
     } else {
         if (endNode) {
             if (endNode.nodeType === Node.TEXT_NODE) {
-                const data = (endNode as Text).data;
-                range.setEnd(endNode, ignoreZWSP ? getDOMOffset(data, end, false) : end);
+                range.setEnd(endNode, ignoreZWSP ? getDOMOffset(endNode as Text, end, false) : end);
             } else {
                 range.setEndAfter(endNode);
             }
@@ -984,7 +991,10 @@ export const focusByWbr = (element: Element, range: Range, preserveWbr = false) 
             range.setStart(wbrElement.previousSibling, wbrElement.previousSibling.textContent.length);
         } else if (wbrElement.nextSibling) {
             if (wbrElement.nextSibling.nodeType === 3) {
-                if (wbrElement.nextSibling.textContent === Constants.ZWSP) {
+                const semanticPrefixLength = getSemanticMarkerPrefixLengthForNode(wbrElement.nextSibling);
+                if (semanticPrefixLength > 0) {
+                    range.setStart(wbrElement.nextSibling, semanticPrefixLength);
+                } else if (wbrElement.nextSibling.textContent === Constants.ZWSP) {
                     // <wbr>零宽空格text
                     range.setStart(wbrElement.nextSibling, 1);
                 } else {

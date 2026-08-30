@@ -18,6 +18,13 @@ import {
     setLastNodeRange,
 } from "../util/selection";
 import {selectTextToEditorBoundary} from "../util/selectionBoundary";
+import {
+    getSemanticInlineVisibleText,
+    getSemanticMarkerPrefixLengthForNode,
+    hasSemanticInlineType,
+    moveCaretAcrossSemanticMarker,
+    moveCaretForSemanticDelete
+} from "../util/inlineElementMarker";
 import {hasUnloadedDocumentBlocks} from "../util/documentRange";
 import {
     hasClosestBlock,
@@ -963,6 +970,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
             const nodeEditableElement = (tdElement || getContenteditableElement(nodeElement) || nodeElement) as HTMLElement;
+            if (selectText === "" && range.collapsed && (event.key === "ArrowLeft" || event.key === "ArrowRight") &&
+                moveCaretAcrossSemanticMarker(range, event.key === "ArrowLeft" ? "left" : "right")) {
+                focusByRange(range);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             // 光标移向相邻行内公式时直接打开编辑框 https://github.com/siyuan-note/siyuan/issues/14938
             const inlineMathElement = range.collapsed && (event.key === "ArrowLeft" || event.key === "ArrowRight") ?
                 getAdjacentInlineMath(range, nodeEditableElement, event.key === "ArrowLeft") : undefined;
@@ -1228,6 +1242,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
                 return;
             }
+            if (selectText === "" && range.collapsed) {
+                if (moveCaretForSemanticDelete(range, event.key === "Delete" || matchHotKey("⌃D", event))) {
+                    focusByRange(range);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
+            }
             // https://github.com/siyuan-note/siyuan/issues/6796
             if (selectText === "" && event.key === "Backspace" &&
                 range.startOffset === range.startContainer.textContent.length &&
@@ -1427,7 +1449,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const rangeNextElement = hasNextSibling(range.startContainer) as HTMLElement;
                     // \n1`2` 1后按 Backspace 光标错误 https://github.com/siyuan-note/siyuan/issues/15424
                     if (rangeNextElement && rangeNextElement.nodeType === 1 &&
-                        ["code", "tag", "kbd"].includes(rangeNextElement.dataset.type)) {
+                        hasSemanticInlineType(rangeNextElement.dataset.type)) {
                         if (position.start === 1 || range.startContainer.textContent.slice(-2, -1) === "\n") {
                             range.insertNode(document.createTextNode(Constants.ZWSP));
                             range.collapse(true);
@@ -1473,9 +1495,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const inlineElement = hasClosestByTag(range.startContainer, "SPAN");
                     if (position.start === 2 && inlineElement &&
                         getSelectionOffset(inlineElement, protyle.wysiwyg.element, range).start === 1 &&
-                        inlineElement.innerText.startsWith(Constants.ZWSP) &&
+                        getSemanticMarkerPrefixLengthForNode(inlineElement.firstChild) > 0 &&
                         // 7.1 ctrl+g 后删除 https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2867478746
-                        inlineElement.innerText !== Constants.ZWSP &&
+                        getSemanticInlineVisibleText(inlineElement) !== "" &&
                         // 需排除行内代码前有一个字符的情况
                         editElement.innerText.startsWith(Constants.ZWSP)) {
                         focusBlock(nodeElement);

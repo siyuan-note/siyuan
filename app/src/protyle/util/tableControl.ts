@@ -30,6 +30,7 @@ import {
     TABLE_DEFAULT_COLUMN_WIDTH,
 } from "./tableColumnWidth";
 import {getVisibleBuiltinColorIndexes} from "../toolbar/inlineStyle";
+import {getTextWithoutSemanticMarkers} from "./inlineElementMarker";
 
 type TableSelectionMode = "row" | "column" | "cell";
 type TableAddControlType = "add-row" | "add-column" | "add-both";
@@ -2066,7 +2067,8 @@ export class TableControl {
     }
 
     private isTableCellEmpty(cell: HTMLTableCellElement) {
-        return isTableCellContentEmpty(cell.textContent || "", !!cell.querySelector(TABLE_NON_TEXT_CONTENT_SELECTOR));
+        return isTableCellContentEmpty(getTextWithoutSemanticMarkers(cell),
+            !!cell.querySelector(TABLE_NON_TEXT_CONTENT_SELECTOR));
     }
 
     private getResizeLimits(grid: ITableGrid) {

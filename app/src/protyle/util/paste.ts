@@ -56,6 +56,7 @@ import {
 import {hasDataTransferFiles} from "../upload/localDropFiles";
 import {resetPastedQueryEmbedRenderState} from "../render/embedRenderState";
 import {eventBusHas, hasPluginSubscriber} from "../../plugin/EventBusCore";
+import {normalizeSemanticInlineElements, stripSemanticMarkersFromRangeText} from "./inlineElementMarker";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -876,6 +877,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         } else {
             tempElement.innerHTML = siyuanHTML;
         }
+        normalizeSemanticInlineElements(tempElement);
         const preservePastedBlockStructure = shouldPreservePastedBlockStructure(tempElement.children);
         const startRangeBlockElement = hasClosestBlock(range.startContainer);
         const endRangeBlockElement = hasClosestBlock(range.endContainer);
@@ -895,7 +897,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 return;
             }
         }
-        if (range.toString() && startRangeBlockElement === endRangeBlockElement) {
+        const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
+        if (selectedText && startRangeBlockElement === endRangeBlockElement) {
             let types: string[] = [];
             let linkElement: HTMLElement;
             if (tempElement.childNodes.length === 1 && tempElement.childElementCount === 1) {
@@ -922,7 +925,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 protyle.toolbar.range = range;
                 const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",
-                    color: `${linkElement.dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
+                    color: `${linkElement.dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${selectedText}`
                 });
                 if (refElement[0]) {
                     protyle.toolbar.range.selectNodeContents(refElement[0]);
@@ -933,7 +936,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 protyle.toolbar.range = range;
                 protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
-                    color: `${linkElement.dataset.href}${Constants.ZWSP}${range.toString()}`
+                    color: `${linkElement.dataset.href}${Constants.ZWSP}${selectedText}`
                 });
                 return;
             }
@@ -1117,7 +1120,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
             }
             if (linkElement) {
-                const selectText = range.toString();
+                const selectText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
                 protyle.toolbar.range = range;
                 const aElements = protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
@@ -1286,14 +1289,15 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             uploadFiles(protyle, files, undefined, undefined, undefined, assetUploadOptions);
             return;
         } else if (textPlain.trim() !== "" && (files && files.length === 0 || !files)) {
-            if (range.toString() !== "") {
+            const selectedText = stripSemanticMarkersFromRangeText(range).split(Constants.ZWSP).join("");
+            if (selectedText !== "") {
                 const firstLine = textPlain.split("\n")[0];
                 if (isDynamicRef(textPlain)) {
                     protyle.toolbar.range = range;
                     const refElement = protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                         type: "id",
                         // range 不能 escape，否则 https://github.com/siyuan-note/siyuan/issues/8359
-                        color: `${textPlain.substring(2, 22 + 2)}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
+                        color: `${textPlain.substring(2, 22 + 2)}${Constants.ZWSP}s${Constants.ZWSP}${selectedText}`
                     });
                     if (refElement[0]) {
                         protyle.toolbar.range.selectNodeContents(refElement[0]);

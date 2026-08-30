@@ -50,15 +50,21 @@
     margin-right: 4px;
   }
 
-  #pdfHistoryBack,
-  #pdfHistoryForward,
   .b3-menu__accelerator--hotkey {
     display: none;
   }
 
   .dropdownToolbarButton {
-    --scale-select-width: 88px;
+    --scale-select-width: 72px;
     margin-right: 4px;
+  }
+
+  #scaleSelectContainer {
+    display: block;
+  }
+
+  .toolbarField.pageNumber {
+    width: 44px;
   }
 
   .findbar {
@@ -75,5 +81,11 @@
   .pdf__rect-resize {
     width: 24px;
     height: 24px;
+  }
+}
+
+@media (max-width: 340px) {
+  .pdf-viewer--mobile #numPages {
+    display: none;
   }
 }

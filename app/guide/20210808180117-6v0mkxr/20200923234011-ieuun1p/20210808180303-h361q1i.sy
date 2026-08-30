@@ -7,7 +7,7 @@
 		"id": "20210808180303-h361q1i",
 		"title": "Editor",
 		"type": "doc",
-		"updated": "20260809232000"
+		"updated": "20260830213256"
 	},
 	"Children": [
 		{
@@ -194,6 +194,23 @@
 					"TextMarkBlockRefID": "20200924093441-ft2rhps",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "Formatting elements"
+				}
+			]
+		},
+		{
+			"ID": "20260830213256-hfs4974",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20260830213256-hfs4974",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20260830213256-fgl32qu",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "Select and operate content blocks"
 				}
 			]
 		},

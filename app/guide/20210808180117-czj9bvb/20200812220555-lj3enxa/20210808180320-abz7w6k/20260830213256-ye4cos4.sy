@@ -1,0 +1,305 @@
+{
+	"ID": "20260830213256-ye4cos4",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260830213256-ye4cos4",
+		"title": "选择和操作内容块",
+		"type": "doc",
+		"updated": "20260830213256"
+	},
+	"Children": [
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-05q4uos",
+			"Properties": {
+				"id": "20260830213256-05q4uos",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "块选择模式让你无需在每次操作后返回文本编辑，即可使用键盘选择和操作内容块。浅色轮廓仅表示当前块，只有标记块才会包含在多块选择中。"
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-ub9wfgv",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-ub9wfgv",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "进入和退出块选择模式"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-2bk3bwx",
+			"Properties": {
+				"id": "20260830213256-2bk3bwx",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将光标置于任意内容块中，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 进入块选择模式。按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 将上一块或下一块设为当前块。再次按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可退出并清除所有标记。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-pnwuo8h",
+			"Properties": {
+				"id": "20260830213256-pnwuo8h",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "对于可编辑块，按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可退出并将光标定位到当前块末尾。输入其他文本也会退出模式并编辑当前块。在此模式下，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "A"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 会在当前块后插入块，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "B"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 会在当前块前插入块。需要将这两个字母作为文本输入时，请先退出块选择模式。"
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-6elx6xx",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-6elx6xx",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "标记块并确定操作对象"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-ggq55pk",
+			"Properties": {
+				"id": "20260830213256-ggq55pk",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "按 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "空格"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 标记或取消标记当前块，标记后当前块不会切换。使用方向键切换当前块并重复上述操作，可以标记任意数量的块，包括不连续的块。使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 或 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 可以形成连续选择。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-kx3rlyp",
+			"Properties": {
+				"id": "20260830213256-kx3rlyp",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "存在标记块时，复制、删除、剪切和移动等操作仅作用于标记块，未标记的当前块不会被自动包含。没有标记块时，当前块就是操作对象。"
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-sqt2kmg",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-sqt2kmg",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "删除和移动块"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-lm5qtwk",
+			"Properties": {
+				"id": "20260830213256-lm5qtwk",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "没有标记块时，"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Delete"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 和 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Backspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 都会删除当前块。存在标记块时，这两个按键都会删除所有标记块。如果当前块被删除，前者会将下一剩余块设为当前块，后者会在可用时将上一剩余块设为当前块；未被删除的当前块会保持不变。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-3ml574k",
+			"Properties": {
+				"id": "20260830213256-3ml574k",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "单个块或连续选择的块可以使用相应的块命令向上或向下移动。不连续的标记块不能直接上下重新排序，但可以使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "移动"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " 功能将它们一起移到另一个文档。"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-fe67bww",
+			"Properties": {
+				"id": "20260830213256-fe67bww",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "删除、剪切或移动块后，块选择模式会保持开启，可以继续选择和操作内容块。"
+				}
+			]
+		}
+	]
+}

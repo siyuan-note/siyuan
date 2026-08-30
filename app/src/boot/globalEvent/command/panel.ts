@@ -475,7 +475,7 @@ export const execByCommand = async (options: {
                     }
                     movePathTo({
                         cb: (toPath) => {
-                            hintMoveBlock(toPath[0], selectElements, protyle);
+                            void hintMoveBlock(toPath[0], selectElements, protyle);
                         },
                         flashcard: false,
                         rootIDs: [protyle.block.rootID],

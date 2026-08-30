@@ -78,7 +78,7 @@ import {
     IBlockRefCheckTargets,
     ICrossBlockComposition,
     prepareCrossBlockComposition,
-    removeBlock,
+    removeBlockPreservingSelectionMode,
     removeCrossBlockRange
 } from "./remove";
 import {highlightRender} from "../render/highlightRender";
@@ -202,6 +202,14 @@ import {LargeListVirtualizer} from "./listVirtualization";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
 import {syncRootAttributes} from "../util/syncRootAttributes";
 import {isDirectCalloutStructureClick} from "./calloutClick";
+import {
+    BLOCK_SELECTION_CLASS,
+    clearBlockSelectionMode,
+    cleanBlockSelectionModeHTML,
+    getBlockSelectionModeElement,
+    getBlockSelectionStatusIDs,
+    toggleBlockSelection
+} from "./blockSelection";
 
 interface IShiftClickBlockPoint {
     blockElement: HTMLElement;
@@ -725,6 +733,7 @@ export class WYSIWYG {
             if (!nodeElement) {
                 return;
             }
+            const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select") ||
                 (getAVSelectedCells(nodeElement).length > 0 ||
@@ -749,12 +758,15 @@ export class WYSIWYG {
                     }
                 }
             }
-            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(`.${BLOCK_SELECTION_CLASS}`));
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
                 !selectImgElement && !selectAVElement && !selectTableElement) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-                countBlockWord([nodeElement.getAttribute("data-node-id")]);
-                selectElements = [nodeElement];
+                const copyElement = selectionModeElement || nodeElement;
+                if (!selectionModeElement) {
+                    copyElement.classList.add(BLOCK_SELECTION_CLASS);
+                    countBlockWord([copyElement.getAttribute("data-node-id")]);
+                }
+                selectElements = [copyElement];
             }
             let html = "";
             let textPlain = "";
@@ -803,6 +815,7 @@ export class WYSIWYG {
                         } else {
                             itemHTML = removeEmbed(item);
                         }
+                        itemHTML = cleanBlockSelectionModeHTML(itemHTML);
                         if (item.getAttribute("data-type") === "NodeListItem") {
                             if (!listHTML) {
                                 listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
@@ -1079,6 +1092,13 @@ export class WYSIWYG {
                 // 右键
                 return;
             }
+            if (getBlockSelectionModeElement(this.element)) {
+                const preserveMarks = isOnlyMeta(event) || event.shiftKey;
+                clearBlockSelectionMode(this.element, !preserveMarks);
+                if (!preserveMarks) {
+                    countBlockWord([], protyle.block.rootID);
+                }
+            }
             if (getAVTemplateInteractiveElement(event.target)) {
                 event.stopPropagation();
                 return;
@@ -1202,29 +1222,8 @@ export class WYSIWYG {
                         ctrlElement = embedBlockElement;
                     }
                     ctrlElement = getTopAloneElement(ctrlElement) as HTMLElement;
-                    if (ctrlElement.classList.contains("protyle-wysiwyg--select")) {
-                        ctrlElement.classList.remove("protyle-wysiwyg--select");
-                        ctrlElement.removeAttribute("select-start");
-                        ctrlElement.removeAttribute("select-end");
-                    } else {
-                        ctrlElement.classList.add("protyle-wysiwyg--select");
-                    }
-                    ctrlElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                        item.classList.remove("protyle-wysiwyg--select");
-                        item.removeAttribute("select-start");
-                        item.removeAttribute("select-end");
-                    });
-                    const ctrlParentElement = hasClosestByClassName(ctrlElement.parentElement, "protyle-wysiwyg--select");
-                    if (ctrlParentElement) {
-                        ctrlParentElement.classList.remove("protyle-wysiwyg--select");
-                        ctrlParentElement.removeAttribute("select-start");
-                        ctrlParentElement.removeAttribute("select-end");
-                    }
-                    const ids: string[] = [];
-                    protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                        ids.push(item.getAttribute("data-node-id"));
-                    });
-                    countBlockWord(ids);
+                    toggleBlockSelection(protyle.wysiwyg.element, ctrlElement);
+                    countBlockWord(getBlockSelectionStatusIDs(protyle.wysiwyg.element));
                 }
                 return;
             }
@@ -2948,8 +2947,10 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
+            const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+            const hasMarkedBlocks = !!protyle.wysiwyg.element.querySelector(`.${BLOCK_SELECTION_CLASS}`);
             const calloutTitleElement = hasClosestByClassName(range.startContainer, "callout-title");
-            if (calloutTitleElement && calloutTitleElement.contains(range.endContainer)) {
+            if (!hasMarkedBlocks && calloutTitleElement && calloutTitleElement.contains(range.endContainer)) {
                 setInsertWbrHTML(nodeElement, range, protyle);
                 return;
             }
@@ -2957,7 +2958,7 @@ export class WYSIWYG {
             const embedElement = isInEmbedBlock(nodeElement);
             const isSameBlockTextCut = !range.collapsed && range.toString() !== "" &&
                 hasClosestBlock(range.endContainer) === nodeElement;
-            if (embedElement && !embedElement.classList.contains("protyle-wysiwyg--select") &&
+            if (!hasMarkedBlocks && embedElement && !embedElement.classList.contains(BLOCK_SELECTION_CLASS) &&
                 !isSameBlockTextCut) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -2989,15 +2990,28 @@ export class WYSIWYG {
                     }
                 }
             }
-            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(`.${BLOCK_SELECTION_CLASS}`));
             const cloneElement = range.cloneContents();
             let autoSelectedBlock = false;
+            let autoSelectedElement: HTMLElement;
             if (selectElements.length === 0 && range.toString() === "" && !cloneElement.querySelector("img") &&
                 !selectImgElement && !selectAVElement && !selectTableElement) {
-                nodeElement.classList.add("protyle-wysiwyg--select");
-                selectElements = [nodeElement];
+                autoSelectedElement = selectionModeElement || nodeElement;
+                autoSelectedElement.classList.add(BLOCK_SELECTION_CLASS);
+                selectElements = [autoSelectedElement];
                 autoSelectedBlock = true;
             }
+            const clearAutoSelectedBlock = () => {
+                if (!autoSelectedBlock || !autoSelectedElement?.isConnected) {
+                    return;
+                }
+                autoSelectedElement.classList.remove(BLOCK_SELECTION_CLASS);
+                autoSelectedElement.removeAttribute("select-start");
+                autoSelectedElement.removeAttribute("select-end");
+                if (selectionModeElement) {
+                    countBlockWord(getBlockSelectionStatusIDs(protyle.wysiwyg.element), protyle.block.rootID);
+                }
+            };
             const selectedStateElements = [...selectElements];
             const endElement = hasClosestBlock(range.endContainer);
             const cutCrossBlockRange = selectedStateElements.length === 0 && !range.collapsed &&
@@ -3095,6 +3109,7 @@ export class WYSIWYG {
                             id: item.getAttribute("data-node-id"),
                         });
                         if (deleteResponse.code !== 0) {
+                            clearAutoSelectedBlock();
                             return;
                         }
                         deleteResponse.data.doOperations.forEach((operation: IOperation) => {
@@ -3113,6 +3128,7 @@ export class WYSIWYG {
                     } else {
                         itemHTML = removeEmbed(item);
                     }
+                    itemHTML = cleanBlockSelectionModeHTML(itemHTML);
                     if (item.getAttribute("data-type") === "NodeListItem") {
                         if (!listHTML) {
                             listHTML = `<div data-subtype="${item.getAttribute("data-subtype")}" data-node-id="${Lute.NewNodeID()}" data-type="NodeList" class="list">`;
@@ -3136,12 +3152,11 @@ export class WYSIWYG {
                     deletedIDs: uniqueCheckIDs,
                     notebook: protyle.notebookId,
                 }, protyle)) {
-                    if (autoSelectedBlock) {
-                        nodeElement.classList.remove("protyle-wysiwyg--select");
-                    }
+                    clearAutoSelectedBlock();
                     return;
                 }
                 if (selectedStateElements.some(item => !item.isConnected || !item.classList.contains("protyle-wysiwyg--select"))) {
+                    clearAutoSelectedBlock();
                     return;
                 }
                 needClipboardWrite = true;
@@ -3405,11 +3420,16 @@ export class WYSIWYG {
                         undefined, false, false, false, cutAVCells);
                 }
                 if (cutBlockSelection && clipboardWriteSucceeded) {
-                    const removed = await removeBlock(protyle, nodeElement, range, "remove", true);
-                    if (removed && cutNextElement && cutNextElement.isConnected) {
+                    const removed = await removeBlockPreservingSelectionMode(protyle, nodeElement, range,
+                        "remove", true);
+                    if (!removed && autoSelectedBlock) {
+                        clearAutoSelectedBlock();
+                    } else if (removed && !selectionModeElement && cutNextElement && cutNextElement.isConnected) {
                         // Ctrl+X 剪切后光标应跳到下一行行首 https://github.com/siyuan-note/siyuan/issues/5485
                         focusBlock(cutNextElement);
                     }
+                } else if (autoSelectedBlock && selectionModeElement?.isConnected) {
+                    clearAutoSelectedBlock();
                 }
             }
         });
@@ -3426,7 +3446,8 @@ export class WYSIWYG {
             const x = event.clientX || event.detail.x;
             const y = event.clientY || event.detail.y;
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 1) {
+            if (selectElements.length > 1 ||
+                getBlockSelectionModeElement(protyle.wysiwyg.element) && selectElements.length > 0) {
                 // 多选块
                 hideElements(["util"], protyle);
                 protyle.gutter.renderMenu(protyle, selectElements[0]);
@@ -3879,6 +3900,11 @@ export class WYSIWYG {
             // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
             const range = getEditorRange(protyle.wysiwyg.element);
             const nodeElement = hasClosestBlock(range.startContainer);
+            const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+            if (selectionModeElement) {
+                clearBlockSelectionMode(protyle.wysiwyg.element, true);
+                countBlockWord([], protyle.block.rootID);
+            }
             if (nodeElement) {
                 const startCell = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
                 if (startCell && !isAfterInlineMath(range)) {
@@ -3897,7 +3923,7 @@ export class WYSIWYG {
                 crossBlockComposition = prepareCrossBlockComposition(
                     protyle, range, nodeElement, endElement);
             }
-            if (!isMac() && nodeElement && !crossBlockComposition) {
+            if ((selectionModeElement || !isMac()) && nodeElement && !crossBlockComposition) {
                 setInsertWbrHTML(nodeElement, range, protyle);
             }
             event.stopPropagation();

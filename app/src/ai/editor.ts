@@ -19,6 +19,7 @@ import {escapeAriaLabel, escapeHtml} from "../util/escape";
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
 import {bindThinkingCardToggle} from "./thinkingCard";
+import {BLOCK_SELECTION_MODE_CLASS} from "../protyle/wysiwyg/blockSelection";
 
 type TAIEditorSourceKind = "selection" | "blocks" | "writing";
 type TAIEditorTaskStatus = "streaming" | "done" | "stopped" | "error";
@@ -109,10 +110,10 @@ const updateTaskModel = (task: IAIEditorTask) => {
 
 const normalizeSourceElement = (element: HTMLElement) => {
     const clone = element.cloneNode(true) as HTMLElement;
-    clone.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
+    clone.classList.remove("protyle-wysiwyg--select", BLOCK_SELECTION_MODE_CLASS, "protyle-wysiwyg--hl");
     clone.removeAttribute(Constants.ATTRIBUTE_EDITING);
-    clone.querySelectorAll(".protyle-wysiwyg--select, .protyle-wysiwyg--hl").forEach(item => {
-        item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
+    clone.querySelectorAll(`.protyle-wysiwyg--select, .${BLOCK_SELECTION_MODE_CLASS}, .protyle-wysiwyg--hl`).forEach(item => {
+        item.classList.remove("protyle-wysiwyg--select", BLOCK_SELECTION_MODE_CLASS, "protyle-wysiwyg--hl");
     });
     clone.querySelectorAll(`[${Constants.ATTRIBUTE_EDITING}]`).forEach(item => {
         item.removeAttribute(Constants.ATTRIBUTE_EDITING);

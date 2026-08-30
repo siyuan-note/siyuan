@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20260828200251"
+		"updated": "20260830213256"
 	},
 	"Children": [
 		{
@@ -3987,7 +3987,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20260828200251"
+				"updated": "20260830213256"
 			},
 			"Children": [
 				{
@@ -4006,7 +4006,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20260828200251"
+				"updated": "20260830213256"
 			},
 			"Children": [
 				{
@@ -4026,7 +4026,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20260828200251"
+				"updated": "20260830213256"
 			},
 			"Children": [
 				{
@@ -6212,7 +6212,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Select/deselect the current block"
+									"Data": "Enter or exit block selection mode"
 								}
 							]
 						},
@@ -6237,7 +6237,69 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Block selection mode remains active after deleting, cutting, or moving blocks; see "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20260830213256-fgl32qu",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "Select and operate content blocks"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "."
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Mark or unmark the current block"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Space"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Block selection mode only; supports marking non-contiguous blocks"
+								}
+							]
 						}
 					]
 				},
@@ -6307,7 +6369,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "When a block is selected, press "
+									"Data": "When block selection mode is active, press "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -6388,7 +6450,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "When a block is selected, press "
+									"Data": "When block selection mode is active, press "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -6413,7 +6475,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Leave block selection and move the caret to the end"
+									"Data": "Exit block selection mode and move the caret to the end"
 								}
 							]
 						},
@@ -6558,7 +6620,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Single block or contiguous block selection only"
+								}
+							]
 						}
 					]
 				},
@@ -6624,7 +6692,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Single block or contiguous block selection only"
+								}
+							]
 						}
 					]
 				},

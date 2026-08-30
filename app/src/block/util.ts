@@ -17,7 +17,11 @@ import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
 import {mathRender} from "../protyle/render/mathRender";
-import {buildCancelSuperBlockOperations} from "./cancelSuperBlock";
+import {
+    buildCancelSuperBlockOperations,
+    resolveCancelSuperBlockChildren,
+    type ISuperBlockChildReplacement
+} from "./cancelSuperBlock";
 import {shouldFocusJumpTarget, shouldFocusParentDocumentTitle} from "./jumpToParent";
 import {getHorizontalSuperBlockChild} from "./superBlock";
 
@@ -28,6 +32,7 @@ export const getCancelSBOperations = async (nodeElement: Element, options: {
     fallbackParentID?: string,
     resolveMissingPosition?: boolean,
     excludedChildIDs?: Set<string>,
+    childReplacements?: Map<string, ISuperBlockChildReplacement>,
 }) => {
     const id = nodeElement.getAttribute("data-node-id");
     const visibleChildElements = Array.from(nodeElement.children).filter(item =>
@@ -43,11 +48,21 @@ export const getCancelSBOperations = async (nodeElement: Element, options: {
         template.innerHTML = response.data?.dom || "";
         const fullSuperBlockElement = template.content.querySelector(`[data-node-id="${id}"]`);
         if (!fullSuperBlockElement) {
-            return {doOperations: [], undoOperations: [], previousId: options.previousID};
+            return {
+                doOperations: [] as IOperation[],
+                undoOperations: [] as IOperation[],
+                childIDs: [] as string[],
+                foldedHeadingIDs: [] as string[],
+                previousId: options.previousID
+            };
         }
         operationChildElements = Array.from(fullSuperBlockElement.children).filter(item =>
             item.hasAttribute("data-node-id") && !options.excludedChildIDs?.has(item.getAttribute("data-node-id")));
     }
+    const {childIDs, foldedHeadingIDs} = resolveCancelSuperBlockChildren(operationChildElements.map(item => ({
+        id: item.getAttribute("data-node-id"),
+        folded: item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1",
+    })), options.excludedChildIDs, options.childReplacements);
     const sbElement = nodeElement.cloneNode() as HTMLElement;
     sbElement.innerHTML = nodeElement.lastElementChild.outerHTML;
     let previousId = options.previousID;
@@ -72,21 +87,23 @@ export const getCancelSBOperations = async (nodeElement: Element, options: {
     const operationData = buildCancelSuperBlockOperations({
         id,
         data: sbElement.outerHTML,
-        childIDs: operationChildElements.map(item => item.getAttribute("data-node-id")),
-        foldedHeadingIDs: operationChildElements.filter(item =>
-            item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1"
-        ).map(item => item.getAttribute("data-node-id")),
+        childIDs,
+        foldedHeadingIDs,
         previousID: previousId,
         parentID,
     });
     const focusId = visibleChildElements[visibleChildElements.length - 1]?.getAttribute("data-node-id") || previousId;
     return {
         ...operationData,
+        childIDs,
+        foldedHeadingIDs,
         previousId: focusId
     };
 };
 
-export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range) => {
+export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range,
+                               excludedChildIDs?: Set<string>,
+                               childReplacements?: Map<string, ISuperBlockChildReplacement>) => {
     nodeElement.classList.remove("protyle-wysiwyg--select");
     nodeElement.removeAttribute("select-start");
     nodeElement.removeAttribute("select-end");
@@ -94,6 +111,8 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
         notebookID: protyle.notebookId,
         fallbackParentID: protyle.block.rootID,
         resolveMissingPosition: protyle.block.showAll || !!protyle.options.backlinkData,
+        excludedChildIDs,
+        childReplacements,
     });
     if (operationData.doOperations.length === 0) {
         return operationData;

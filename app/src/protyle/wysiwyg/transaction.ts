@@ -59,6 +59,34 @@ import {
     prepareViewFoldTransaction,
     setViewFoldTransient,
 } from "../util/viewFold";
+import {
+    captureBlockSelectionModeState,
+    cleanBlockSelectionModeHTML,
+    getBlockSelectionStatusIDs,
+    restoreBlockSelectionModeState
+} from "./blockSelection";
+
+const cleanBlockSelectionModeOperations = (operations?: IOperation[]) => {
+    operations?.forEach(operation => {
+        if (["appendInsert", "insert", "prependInsert", "update"].includes(operation.action) &&
+            typeof operation.data === "string") {
+            operation.data = cleanBlockSelectionModeHTML(operation.data);
+        }
+        if (operation.action === "unfoldHeading" && typeof operation.retData === "string") {
+            operation.retData = cleanBlockSelectionModeHTML(operation.retData);
+        }
+    });
+};
+
+const focusRestoredBlockSelectionMode = (selectionModeElement?: Element) => {
+    if (!selectionModeElement?.isConnected) {
+        return;
+    }
+    const selection = getSelection();
+    if (selection.rangeCount === 0 || !selectionModeElement.contains(selection.getRangeAt(0).startContainer)) {
+        focusBlock(selectionModeElement);
+    }
+};
 
 const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // 移动到其他文档中，该块需移除
@@ -169,6 +197,7 @@ const promiseTransaction = (options: {
             if (operation.action === "update") {
                 // 当前编辑器中的其他块
                 let updatedEmbed = false;
+                let restoredSelectionModeElement: HTMLElement;
 
                 const updateElements = Array.from(
                     protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)
@@ -184,8 +213,9 @@ const promiseTransaction = (options: {
                         item.removeAttribute(Constants.ATTRIBUTE_EDITING);
                         return;
                     }
+                    const selectionModeState = captureBlockSelectionModeState(item);
                     const tempElement = document.createElement("template");
-                    tempElement.innerHTML = getVisibleFoldHeadingHTML(html);
+                    tempElement.innerHTML = cleanBlockSelectionModeHTML(getVisibleFoldHeadingHTML(html));
                     tempElement.content.querySelectorAll(".protyle-wysiwyg--select").forEach(selectItem => {
                         selectItem.classList.remove("protyle-wysiwyg--select");
                     });
@@ -194,12 +224,18 @@ const promiseTransaction = (options: {
                         wbrElement.remove();
                     }
                     disposeCustomBlocksInElement(item);
-                    item.outerHTML = tempElement.innerHTML;
+                    item.insertAdjacentHTML("afterend", tempElement.innerHTML);
+                    const replacementElement = item.nextElementSibling;
+                    item.remove();
+                    if (replacementElement) {
+                        restoredSelectionModeElement = restoreBlockSelectionModeState(protyle.wysiwyg.element,
+                            replacementElement, selectionModeState) || restoredSelectionModeElement;
+                    }
                     updatedEmbed = true;
                 };
 
                 const allTempElement = document.createElement("template");
-                allTempElement.innerHTML = getVisibleFoldHeadingHTML(operation.data);
+                allTempElement.innerHTML = cleanBlockSelectionModeHTML(getVisibleFoldHeadingHTML(operation.data));
                 updateElements.forEach((item) => {
                     if ((currentEmbedElement && isInEmbedBlock(item, false) === currentEmbedElement) ||
                         (range && (item === range.startContainer || item.contains(range.startContainer)))) {
@@ -230,6 +266,7 @@ const promiseTransaction = (options: {
                     highlightRender(protyle.wysiwyg.element);
                     avRender(protyle.wysiwyg.element, protyle);
                 }
+                focusRestoredBlockSelectionMode(restoredSelectionModeElement);
                 return;
             }
             if (operation.action === "delete" || operation.action === "append") {
@@ -501,10 +538,7 @@ const promiseTransaction = (options: {
         }]
     }, (response) => {
         invalidateViewFoldRequests(protyle);
-        const ids: string[] = [];
-        protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-            ids.push(item.getAttribute("data-node-id"));
-        });
+        const ids = getBlockSelectionStatusIDs(protyle.wysiwyg.element);
         countBlockWord(ids, protyle.block.rootID, true);
         if (!options.skipSync) {
             response.data[0].doOperations.forEach((operation: IOperation) => {
@@ -638,10 +672,13 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
         const data = item.getAttribute("data-subtype") === "echarts" ?
             // 图标撤销后无法渲染
             protyle.lute.SpinBlockDOM(operation.data) : operation.data;
+        const selectionModeState = captureBlockSelectionModeState(item);
         disposeCustomBlocksInElement(item);
         item.insertAdjacentHTML("afterend", getVisibleFoldHeadingHTML(data));
         item = item.nextElementSibling;
         item.previousElementSibling.remove();
+        const restoredSelectionModeElement = restoreBlockSelectionModeState(protyle.wysiwyg.element, item,
+            selectionModeState);
 
         const wbrElement = item.querySelector("wbr");
         const codeElement = item.getAttribute("data-type") === "NodeCodeBlock" ? item.querySelector(".hljs") : undefined;
@@ -679,6 +716,7 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
         highlightRender(item);
         avRender(item, protyle);
         blockRender(protyle, item);
+        focusRestoredBlockSelectionMode(restoredSelectionModeElement);
     });
 };
 
@@ -2153,6 +2191,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         options?.callback?.();
         return;
     }
+    cleanBlockSelectionModeOperations(doOperations);
+    cleanBlockSelectionModeOperations(undoOperations);
     cleanHeadingNumberOperations(doOperations);
     cleanHeadingNumberOperations(undoOperations);
     if (!protyle) {
@@ -2293,8 +2333,8 @@ export const updateTransaction = (protyle: IProtyle, element: Element, oldHTML: 
         refreshSbResize(element);
     }
     const id = element.getAttribute("data-node-id");
-    const newHTML = cleanHeadingNumberHTML(element.outerHTML);
-    const cleanOldHTML = cleanHeadingNumberHTML(oldHTML);
+    const newHTML = cleanHeadingNumberHTML(cleanBlockSelectionModeHTML(element.outerHTML));
+    const cleanOldHTML = cleanHeadingNumberHTML(cleanBlockSelectionModeHTML(oldHTML));
     if (newHTML === cleanOldHTML.replace("<wbr>", "") && !additionalOperations) {
         return;
     }

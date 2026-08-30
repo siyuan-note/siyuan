@@ -1,6 +1,30 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {appendCancelSuperBlockOperations, buildCancelSuperBlockOperations} from "./cancelSuperBlock";
+import {
+    appendCancelSuperBlockOperations,
+    buildCancelSuperBlockOperations,
+    resolveCancelSuperBlockChildren
+} from "./cancelSuperBlock";
+
+describe("resolveCancelSuperBlockChildren", () => {
+    it("uses promoted children when a nested super block was already canceled", () => {
+        const result = resolveCancelSuperBlockChildren([{
+            id: "inner-super-block",
+            folded: false,
+        }, {
+            id: "deleted-sibling",
+            folded: false,
+        }], new Set(["deleted-sibling"]), new Map([["inner-super-block", {
+            childIDs: ["folded-heading", "heading-child"],
+            foldedHeadingIDs: ["folded-heading"],
+        }]]));
+
+        assert.deepEqual(result, {
+            childIDs: ["folded-heading", "heading-child"],
+            foldedHeadingIDs: ["folded-heading"],
+        });
+    });
+});
 
 describe("buildCancelSuperBlockOperations", () => {
     it("moves every direct child with stable forward and undo anchors", () => {

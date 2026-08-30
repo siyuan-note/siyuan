@@ -31,6 +31,7 @@ import {
     getImageBlockRefCheckTargets,
     getRangeBlockRefCheckTargets,
     removeBlock,
+    removeBlockPreservingSelectionMode,
     removeCrossBlockRange,
     removeImage
 } from "./remove";
@@ -122,6 +123,31 @@ import {isMobile} from "../../util/functions";
 import {confirmBlockRef} from "../../util/checkBlockRef";
 import {scheduleCaretScroll} from "./caretScroll";
 import {scrollPage} from "../scroll/page";
+import {
+    BLOCK_SELECTION_CLASS,
+    clearBlockSelectionMode,
+    clearBlockSelection,
+    getBlockSelectionModeElement,
+    getBlockSelectionStatusIDs,
+    isContinuousBlockSelection,
+    setBlockSelectionModeElement,
+    toggleBlockSelection
+} from "./blockSelection";
+
+const countBlockSelectionMode = (protyle: IProtyle) => {
+    countBlockWord(getBlockSelectionStatusIDs(protyle.wysiwyg.element), protyle.block.rootID);
+};
+
+const syncBlockSelectionModeToSelectionEnd = (protyle: IProtyle, direction: "up" | "down") => {
+    const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>(
+        `.${BLOCK_SELECTION_CLASS}`));
+    const targetElement = selectElements.find(item => item.getAttribute("select-end") === "true") ||
+        (direction === "up" ? selectElements[0] : selectElements[selectElements.length - 1]);
+    if (targetElement) {
+        setBlockSelectionModeElement(protyle.wysiwyg.element, targetElement);
+        focusBlock(targetElement);
+    }
+};
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -279,6 +305,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!nodeElement) {
             return;
         }
+        const blockSelectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
         const calloutTitleElement = hasClosestByClassName(range.startContainer, "callout-title");
 
         if (document.querySelector(".av__panel")) {
@@ -288,23 +315,32 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (nodeElement.classList.contains("protyle-wysiwyg--select") && isNotCtrl(event) && !event.shiftKey && !event.altKey &&
+        if ((nodeElement.classList.contains(BLOCK_SELECTION_CLASS) || blockSelectionModeElement) &&
+            isNotCtrl(event) && !event.shiftKey && !event.altKey &&
             !isInEmbedBlock(nodeElement)) {
             if (event.key.toLowerCase() === "a") {
                 event.stopPropagation();
                 event.preventDefault();
                 protyle.wysiwyg.element.blur();
+                if (blockSelectionModeElement) {
+                    clearBlockSelectionMode(protyle.wysiwyg.element, true);
+                    countBlockWord([], protyle.block.rootID);
+                }
                 // 阻止中文输入的残留
                 setTimeout(() => {
-                    insertEmptyBlock(protyle, "afterend");
+                    insertEmptyBlock(protyle, "afterend", blockSelectionModeElement);
                 }, 100);
                 return false;
             } else if (event.key.toLowerCase() === "b") {
                 event.stopPropagation();
                 event.preventDefault();
                 protyle.wysiwyg.element.blur();
+                if (blockSelectionModeElement) {
+                    clearBlockSelectionMode(protyle.wysiwyg.element, true);
+                    countBlockWord([], protyle.block.rootID);
+                }
                 setTimeout(() => {
-                    insertEmptyBlock(protyle, "beforebegin");
+                    insertEmptyBlock(protyle, "beforebegin", blockSelectionModeElement);
                 }, 100);
                 return false;
             }
@@ -336,14 +372,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 有可能输入 shift+. ，因此需要使用 event.key 来进行判断
         if (typeof event.key === "string" && event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" && event.key.indexOf("Arrow") === -1 &&
             event.key !== "Escape" && event.key !== "Shift" && event.key !== "Meta" && event.key !== "Alt" && event.key !== "Control" && event.key !== "CapsLock" &&
-            !isNotEditBlock(nodeElement) && !/^F\d{1,2}$/.test(event.key) &&
+            !blockSelectionModeElement && !isNotEditBlock(nodeElement) && !/^F\d{1,2}$/.test(event.key) &&
             // 微软双拼使用 compositionstart，否则 focusByRange 导致无法输入文字
             event.key !== "Process") {
             setInsertWbrHTML(nodeElement, range, protyle);
             protyle.wysiwyg.preventKeyup = true;
         }
 
-        if (calloutTitleElement && !event.isComposing) {
+        if (calloutTitleElement && !event.isComposing && !blockSelectionModeElement) {
             if (matchHotKey("⌘A", event)) {
                 range.selectNodeContents(calloutTitleElement);
                 focusByRange(range);
@@ -383,7 +419,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         if (!event.altKey && isNotCtrl(event) && !event.isComposing &&
             (event.key === "ArrowUp" || event.key === "ArrowDown") &&
-            !protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
+            !blockSelectionModeElement && !protyle.wysiwyg.element.querySelector(`.${BLOCK_SELECTION_CLASS}`)) {
             scheduleCaretScroll(protyle, event.key === "ArrowUp" ? "up" : "down");
         }
 
@@ -392,13 +428,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (!event.altKey && !event.shiftKey && isNotCtrl(event) && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
+            const selectElements = protyle.wysiwyg.element.querySelectorAll(`.${BLOCK_SELECTION_CLASS}`);
+            if (blockSelectionModeElement || selectElements.length > 0) {
                 event.preventDefault();
                 event.stopPropagation();
-                hideElements(["select"], protyle);
+                if (!blockSelectionModeElement) {
+                    hideElements(["select"], protyle);
+                }
                 if (event.key === "ArrowDown") {
-                    const currentSelectElement = selectElements[selectElements.length - 1] as HTMLElement;
+                    const currentSelectElement = blockSelectionModeElement ||
+                        selectElements[selectElements.length - 1] as HTMLElement;
                     let nextElement = getNextBlock(currentSelectElement) as HTMLElement;
                     if (nextElement) {
                         if (nextElement.getBoundingClientRect().width === 0) {
@@ -424,8 +463,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         nextElement = currentSelectElement;
                     }
 
-                    nextElement.classList.add("protyle-wysiwyg--select");
-                    countBlockWord([nextElement.getAttribute("data-node-id")]);
+                    if (blockSelectionModeElement) {
+                        setBlockSelectionModeElement(protyle.wysiwyg.element, nextElement);
+                        countBlockSelectionMode(protyle);
+                    } else {
+                        nextElement.classList.add(BLOCK_SELECTION_CLASS);
+                        countBlockWord([nextElement.getAttribute("data-node-id")]);
+                    }
                     const bottom = nextElement.getBoundingClientRect().bottom - protyle.contentElement.getBoundingClientRect().bottom;
                     if (bottom > 0) {
                         protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + bottom;
@@ -433,7 +477,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     focusBlock(nextElement);
                 } else if (event.key === "ArrowUp") {
-                    let previousElement: HTMLElement = getPreviousBlock(selectElements[0]) as HTMLElement;
+                    const currentSelectElement = blockSelectionModeElement || selectElements[0] as HTMLElement;
+                    let previousElement: HTMLElement = getPreviousBlock(currentSelectElement) as HTMLElement;
                     if (previousElement) {
                         previousElement = getLastBlock(previousElement) as HTMLElement;
                         if (previousElement.getBoundingClientRect().width === 0) {
@@ -442,7 +487,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (foldElement) {
                                 previousElement = getFirstBlock(foldElement) as HTMLElement;
                             } else {
-                                previousElement = selectElements[0] as HTMLElement;
+                                previousElement = currentSelectElement;
                             }
                         } else if (previousElement) {
                             // https://github.com/siyuan-note/siyuan/issues/3913
@@ -458,15 +503,24 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         focusByRange(titleRange);
                         event.stopPropagation();
                         event.preventDefault();
+                        if (blockSelectionModeElement) {
+                            clearBlockSelectionMode(protyle.wysiwyg.element, true);
+                            countBlockWord([], protyle.block.rootID);
+                        }
                     } else if (protyle.contentElement.scrollTop !== 0) {
                         protyle.contentElement.scrollTop = 0;
                         protyle.scroll.lastScrollTop = 8;
                     } else {
-                        previousElement = selectElements[0] as HTMLElement;
+                        previousElement = currentSelectElement;
                     }
                     if (previousElement) {
-                        previousElement.classList.add("protyle-wysiwyg--select");
-                        countBlockWord([previousElement.getAttribute("data-node-id")]);
+                        if (blockSelectionModeElement) {
+                            setBlockSelectionModeElement(protyle.wysiwyg.element, previousElement);
+                            countBlockSelectionMode(protyle);
+                        } else {
+                            previousElement.classList.add(BLOCK_SELECTION_CLASS);
+                            countBlockWord([previousElement.getAttribute("data-node-id")]);
+                        }
                         const top = previousElement.getBoundingClientRect().top - protyle.contentElement.getBoundingClientRect().top;
                         if (top < 0) {
                             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + top;
@@ -479,16 +533,57 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         }
 
-        // 仅处理以下快捷键操作
-        if (event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" && event.key.indexOf("Arrow") === -1 &&
-            isNotCtrl(event) && event.key !== "Escape" && !event.shiftKey && !event.altKey && !/^F\d{1,2}$/.test(event.key) &&
-            event.key !== "Enter" && event.key !== "Tab" && event.key !== "Backspace" && event.key !== "Delete" && event.key !== "ContextMenu") {
+        if (blockSelectionModeElement && !event.altKey && !event.shiftKey && isNotCtrl(event) &&
+            (event.key === " " || event.code === "Space")) {
+            event.preventDefault();
             event.stopPropagation();
+            if (!event.repeat) {
+                let targetElement: Element = isInEmbedBlock(blockSelectionModeElement) || blockSelectionModeElement;
+                targetElement = getTopAloneElement(targetElement);
+                const selectionModeTarget = setBlockSelectionModeElement(protyle.wysiwyg.element, targetElement);
+                if (!selectionModeTarget) {
+                    return;
+                }
+                toggleBlockSelection(protyle.wysiwyg.element, selectionModeTarget);
+                countBlockSelectionMode(protyle);
+                if (selectionModeTarget !== blockSelectionModeElement) {
+                    focusBlock(selectionModeTarget);
+                }
+            }
+            return;
+        }
+
+        const isSingleCharacter = typeof event.key === "string" && event.key.length === 1;
+        const isSelectionModeTextInput = !!blockSelectionModeElement && isSingleCharacter &&
+            (isNotCtrl(event) && !event.altKey || event.getModifierState("AltGraph"));
+        const isRegularTextInput = !blockSelectionModeElement && isSingleCharacter &&
+            isNotCtrl(event) && !event.shiftKey && !event.altKey;
+        if (isSelectionModeTextInput || isRegularTextInput) {
+            event.stopPropagation();
+            let inputRange = range;
+            let inputNodeElement = nodeElement;
+            if (blockSelectionModeElement) {
+                clearBlockSelectionMode(protyle.wysiwyg.element, true);
+                countBlockWord([], protyle.block.rootID);
+                if (!isNotEditBlock(blockSelectionModeElement)) {
+                    if (!blockSelectionModeElement.contains(inputRange.startContainer)) {
+                        focusBlock(blockSelectionModeElement);
+                        inputRange = getEditorRange(protyle.wysiwyg.element);
+                    }
+                    const editingBlockElement = hasClosestBlock(inputRange.startContainer);
+                    if (editingBlockElement) {
+                        inputNodeElement = editingBlockElement;
+                        setInsertWbrHTML(editingBlockElement, inputRange, protyle);
+                        protyle.wysiwyg.preventKeyup = true;
+                    }
+                }
+            }
             hideElements(["select"], protyle);
             // https://github.com/siyuan-note/siyuan/issues/14743
-            if (nodeElement && getContenteditableElement(nodeElement) &&
-                range.endContainer.nodeType === 1 && (range.endContainer as HTMLElement).classList.contains("protyle-attr")) {
-                range.collapse(true);
+            if (inputNodeElement && getContenteditableElement(inputNodeElement) &&
+                inputRange.endContainer.nodeType === 1 &&
+                (inputRange.endContainer as HTMLElement).classList.contains("protyle-attr")) {
+                inputRange.collapse(true);
             }
             return false;
         }
@@ -541,6 +636,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
+        if (blockSelectionModeElement && event.shiftKey && !event.altKey && isNotCtrl(event) &&
+            (event.key === "ArrowUp" || event.key === "ArrowDown")) {
+            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll<HTMLElement>(
+                `.${BLOCK_SELECTION_CLASS}`));
+            if (!isContinuousBlockSelection(selectElements) ||
+                !blockSelectionModeElement.classList.contains(BLOCK_SELECTION_CLASS) ||
+                blockSelectionModeElement.getAttribute("select-end") !== "true") {
+                clearBlockSelection(protyle.wysiwyg.element);
+                blockSelectionModeElement.classList.add(BLOCK_SELECTION_CLASS);
+                blockSelectionModeElement.setAttribute("select-start", "true");
+                blockSelectionModeElement.setAttribute("select-end", "true");
+            }
+        }
+
         if (matchHotKey(window.siyuan.config.keymap.editor.general.expandUp.custom, event)) {
             upSelect({
                 protyle, event, nodeElement, editorElement, range,
@@ -563,6 +672,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
             });
+            if (blockSelectionModeElement) {
+                syncBlockSelectionModeToSelectionEnd(protyle, "up");
+            }
             return;
         }
 
@@ -589,6 +701,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
             });
+            if (blockSelectionModeElement) {
+                syncBlockSelectionModeToSelectionEnd(protyle, "down");
+            }
             return;
         }
 
@@ -626,6 +741,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
             });
+            if (blockSelectionModeElement) {
+                syncBlockSelectionModeToSelectionEnd(protyle, "up");
+            }
             return;
         }
 
@@ -673,6 +791,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                 }
             });
+            if (blockSelectionModeElement) {
+                syncBlockSelectionModeToSelectionEnd(protyle, "down");
+            }
             return;
         }
 
@@ -747,6 +868,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             const centerBlockElement = hasClosestBlock(centerElement);
             if (centerBlockElement && centerBlockElement !== nodeElement) {
+                if (blockSelectionModeElement) {
+                    setBlockSelectionModeElement(protyle.wysiwyg.element, centerBlockElement);
+                    countBlockSelectionMode(protyle);
+                }
                 focusBlock(centerBlockElement, undefined, false);
             }
             event.stopPropagation();
@@ -1090,8 +1215,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 await removeCrossBlockRange(protyle, range, nodeElement, endElement);
                 return;
             }
-            if (protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
-                removeBlock(protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete");
+            if (blockSelectionModeElement) {
+                await removeBlockPreservingSelectionMode(protyle, nodeElement, range,
+                    event.key === "Backspace" ? "Backspace" : "Delete");
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+            if (protyle.wysiwyg.element.querySelector(`.${BLOCK_SELECTION_CLASS}`)) {
+                await removeBlock(protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete");
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -1431,6 +1563,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             event.preventDefault();
             await enter(nodeElement, range, protyle);
+            if (blockSelectionModeElement) {
+                countBlockWord([], protyle.block.rootID);
+            }
             return;
         }
 
@@ -1680,13 +1815,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 } else if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
                     // 防止 ESC 时选中当前块
                     window.siyuan.menus.menu.remove(true);
-                } else if (nodeElement.classList.contains("protyle-wysiwyg--select")) {
+                } else if (blockSelectionModeElement) {
+                    clearBlockSelectionMode(protyle.wysiwyg.element, true);
+                    countBlockWord([], protyle.block.rootID);
+                } else if (nodeElement.classList.contains(BLOCK_SELECTION_CLASS)) {
                     hideElements(["select"], protyle);
                     countBlockWord([], protyle.block.rootID);
                 } else {
                     hideElements(["select"], protyle);
                     range.collapse(false);
-                    nodeElement.classList.add("protyle-wysiwyg--select");
+                    setBlockSelectionModeElement(protyle.wysiwyg.element, nodeElement);
                     countBlockWord([nodeElement.getAttribute("data-node-id")], protyle.block.rootID);
                 }
             }
@@ -1934,15 +2072,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectElements.length > 0) {
                 event.preventDefault();
                 event.stopPropagation();
-                let isContinuous = true;
-                selectElements.forEach((item, index) => {
-                    if (item.nextElementSibling && selectElements[index + 1]) {
-                        if (selectElements[index + 1] !== item.nextElementSibling) {
-                            isContinuous = false;
-                        }
-                    }
-                });
-                if (isContinuous &&
+                if (isContinuousBlockSelection(Array.from(selectElements)) &&
                     (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
                     await listOutdent(protyle, Array.from(selectElements), range);
                 }
@@ -1968,15 +2098,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectElements.length > 0) {
                 event.preventDefault();
                 event.stopPropagation();
-                let isContinuous = true;
-                selectElements.forEach((item, index) => {
-                    if (item.nextElementSibling && selectElements[index + 1]) {
-                        if (selectElements[index + 1] !== item.nextElementSibling) {
-                            isContinuous = false;
-                        }
-                    }
-                });
-                if (isContinuous &&
+                if (isContinuousBlockSelection(Array.from(selectElements)) &&
                     (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
                     await listIndent(protyle, Array.from(selectElements), range);
                 }
@@ -2376,9 +2498,26 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // tab 需等待 list 和 table 处理完成
         if (event.key === "Tab" && isNotCtrl(event) && !event.altKey) {
             event.preventDefault();
-            if (nodeType === "NodeCodeBlock") {
+            let tabNodeElement = nodeElement;
+            let tabRange = range;
+            if (blockSelectionModeElement && !event.shiftKey) {
+                tabNodeElement = blockSelectionModeElement;
+                if (!tabNodeElement.contains(tabRange.startContainer)) {
+                    focusBlock(tabNodeElement);
+                    tabRange = getEditorRange(protyle.wysiwyg.element);
+                }
+                const editingBlockElement = hasClosestBlock(tabRange.startContainer);
+                if (editingBlockElement) {
+                    tabNodeElement = editingBlockElement;
+                    setInsertWbrHTML(editingBlockElement, tabRange, protyle);
+                    protyle.wysiwyg.preventKeyup = true;
+                }
+                clearBlockSelectionMode(protyle.wysiwyg.element, true);
+                countBlockWord([], protyle.block.rootID);
+            }
+            if (tabNodeElement.getAttribute("data-type") === "NodeCodeBlock") {
                 if (selectText !== "" || !event.shiftKey) {
-                    tabCodeBlock(protyle, nodeElement, range, event.shiftKey);
+                    tabCodeBlock(protyle, tabNodeElement, tabRange, event.shiftKey);
                     return true;
                 }
                 return;
@@ -2557,8 +2696,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         // 置于最后，太多快捷键会使用到选中元素
-        if (isNotCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" && !event.shiftKey && !event.altKey && event.key !== "Enter") {
+        if (isNotCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" &&
+            !event.shiftKey && !event.altKey && event.key !== "Enter" && event.key !== "Process") {
             hideElements(["select"], protyle);
+            if (blockSelectionModeElement) {
+                clearBlockSelectionMode(protyle.wysiwyg.element, true);
+                countBlockWord([], protyle.block.rootID);
+            }
         }
 
         if (matchHotKey("⌘B", event) || matchHotKey("⌘I", event) || matchHotKey("⌘U", event)) {

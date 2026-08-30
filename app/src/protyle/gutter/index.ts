@@ -35,7 +35,7 @@ import {
     updateBatchTransaction,
     updateTransaction
 } from "../wysiwyg/transaction";
-import {removeBlock} from "../wysiwyg/remove";
+import {removeBlockPreservingSelectionMode} from "../wysiwyg/remove";
 import {focusBlock, focusByRange, getBlockElementsByRange, getEditorRange, selectBlocksByRange} from "../util/selection";
 import {hideElements} from "../ui/hideElements";
 import {markGutterForFoldRestore} from "../ui/gutterVisibility";
@@ -112,6 +112,7 @@ import {
     setOrderedListStart
 } from "../wysiwyg/list";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../util/headingTransform";
+import {getBlockSelectionModeElement} from "../wysiwyg/blockSelection";
 import {
     getBacklinkGutterContentTop,
     getContainerGutterSpace,
@@ -1423,7 +1424,7 @@ export class Gutter {
                 click: () => {
                     movePathTo({
                         cb: (toPath) => {
-                            hintMoveBlock(toPath[0], selectsElement, protyle);
+                            void hintMoveBlock(toPath[0], selectsElement, protyle);
                         },
                         flashcard: false
                     });
@@ -1456,7 +1457,8 @@ export class Gutter {
                 accelerator: "⌫",
                 click: () => {
                     protyle.breadcrumb?.hide();
-                    removeBlock(protyle, selectsElement[0], getEditorRange(selectsElement[0]), "Backspace");
+                    void removeBlockPreservingSelectionMode(protyle, selectsElement[0],
+                        getEditorRange(selectsElement[0]), "Backspace");
                 }
             }).element);
 
@@ -1591,7 +1593,8 @@ export class Gutter {
         }
         const embedContext = getEmbedGutterOperationContext(nodeElement);
         const selectsElement = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-        if (!embedContext && selectsElement.length > 1) {
+        if (!embedContext && (selectsElement.length > 1 ||
+            getBlockSelectionModeElement(protyle.wysiwyg.element) && selectsElement.length > 0)) {
             window.siyuan.menus.menu.element.setAttribute("data-name", Constants.MENU_BLOCK_MULTI);
             const match = Array.from(selectsElement).find(item => {
                 if (id === item.getAttribute("data-node-id") ||
@@ -2007,7 +2010,7 @@ export class Gutter {
                 click: () => {
                     movePathTo({
                         cb: (toPath) => {
-                            hintMoveBlock(toPath[0], [nodeElement], protyle);
+                            void hintMoveBlock(toPath[0], [nodeElement], protyle);
                         },
                         flashcard: false,
                     });
@@ -2036,7 +2039,8 @@ export class Gutter {
                 accelerator: "⌫",
                 click: () => {
                     protyle.breadcrumb?.hide();
-                    removeBlock(protyle, nodeElement, getEditorRange(nodeElement), "Backspace");
+                    void removeBlockPreservingSelectionMode(protyle, nodeElement, getEditorRange(nodeElement),
+                        "Backspace");
                 }
             }).element);
         }

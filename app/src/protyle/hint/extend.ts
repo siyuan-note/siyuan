@@ -8,11 +8,17 @@ import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
 import {focusBlock, focusByRange, getEditorRange} from "../util/selection";
 import {hasClosestBlock, hasClosestByClassName} from "../util/hasClosest";
-import {getContenteditableElement, getTopAloneElement} from "../wysiwyg/getBlock";
+import {
+    getContenteditableElement,
+    getNextBlock,
+    getPreviousBlock,
+    getSbChildBlockCount,
+    getTopAloneElement
+} from "../wysiwyg/getBlock";
 import {replaceFileName} from "../../editor/rename";
 import {transaction} from "../wysiwyg/transaction";
 import {getAssetExtension, getAssetName, getDisplayName, isEncryptedBox} from "../../util/pathName";
-import {genEmptyElement} from "../../block/util";
+import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../../block/util";
 import {getOrderedListStart, updateListOrder} from "../wysiwyg/list";
 import {escapeHtml, escapeSearchHighlight, stripSearchMark} from "../../util/escape";
 import {zoomOut} from "../../menus/protyle";
@@ -36,6 +42,13 @@ import {
     TBuiltinInlineStyleID,
 } from "../toolbar/inlineStyle";
 import {confirmDialog} from "../../dialog/confirmDialog";
+import {
+    getBlockSelectionModeElement,
+    getBlockSelectionStatusIDs,
+    getDeleteSelectionCandidate,
+    setBlockSelectionModeElement
+} from "../wysiwyg/blockSelection";
+import {countBlockWord} from "../../layout/status";
 
 interface ITemplateDocTreePlan {
     id: string;
@@ -713,7 +726,7 @@ export const hintRenderAssets = (value: string, protyle: IProtyle) => {
     hideElements(["util"], protyle);
 };
 
-export const hintMoveBlock = (pathString: string, sourceElements: Element[], protyle: IProtyle) => {
+export const hintMoveBlock = async (pathString: string, sourceElements: Element[], protyle: IProtyle) => {
     if (pathString === "/") {
         return;
     }
@@ -722,18 +735,31 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
         return;
     }
     const doOperations: IOperation[] = [];
-    let topSourceElement: Element;
-    const parentElement = sourceElements[0].parentElement;
-    const listStart = getOrderedListStart(parentElement);
-    let sideElement;
-    sourceElements.forEach((item, index) => {
-        if (index === sourceElements.length - 1 &&
-            // 动态加载过慢，导致 item 被移除
-            item.parentElement) {
-            topSourceElement = getTopAloneElement(item);
-            sideElement = topSourceElement.nextElementSibling || topSourceElement.previousElementSibling;
-            if (topSourceElement === item) {
-                topSourceElement = undefined;
+    const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+    const sourceParents = new Map<Element, number | undefined>();
+    const sourceSuperBlocks = new Map<Element, Set<string>>();
+    sourceElements.forEach(item => {
+        if (item.parentElement && !sourceParents.has(item.parentElement)) {
+            sourceParents.set(item.parentElement, getOrderedListStart(item.parentElement));
+        }
+    });
+    const candidateElements = Array.from(new Set(sourceElements.filter(item => item.parentElement)
+        .map(item => getTopAloneElement(item))));
+    const sideElement = getDeleteSelectionCandidate(candidateElements, "remove",
+        getPreviousBlock, getNextBlock)?.element;
+    sourceElements.forEach((item) => {
+        let topSourceElement: Element;
+        // 动态加载过慢时 item 可能已被移除，此时仍提交移动操作，但不再处理本地容器。
+        if (item.parentElement) {
+            const topElement = getTopAloneElement(item);
+            if (topElement.parentElement?.getAttribute("data-type") === "NodeSuperBlock") {
+                if (!sourceSuperBlocks.has(topElement.parentElement)) {
+                    sourceSuperBlocks.set(topElement.parentElement, new Set());
+                }
+                sourceSuperBlocks.get(topElement.parentElement).add(topElement.getAttribute("data-node-id"));
+            }
+            if (topElement !== item) {
+                topSourceElement = topElement;
             }
         }
         doOperations.push({
@@ -742,18 +768,21 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
             parentID,
         });
         item.remove();
+        if (topSourceElement) {
+            doOperations.push({
+                action: "delete",
+                id: topSourceElement.getAttribute("data-node-id"),
+            });
+            topSourceElement.remove();
+        }
     });
-    // 删除空元素
-    if (topSourceElement) {
-        doOperations.push({
-            action: "delete",
-            id: topSourceElement.getAttribute("data-node-id"),
-        });
-        topSourceElement.remove();
-    } else if (parentElement.classList.contains("list") && parentElement.getAttribute("data-subtype") === "o" &&
-        parentElement.childElementCount > 1) {
-        updateListOrder(parentElement, listStart);
-        Array.from(parentElement.children).forEach((item) => {
+    sourceParents.forEach((listStart, sourceParent) => {
+        if (!sourceParent.isConnected || !sourceParent.classList.contains("list") ||
+            sourceParent.getAttribute("data-subtype") !== "o" || sourceParent.childElementCount <= 1) {
+            return;
+        }
+        updateListOrder(sourceParent, listStart);
+        Array.from(sourceParent.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;
             }
@@ -764,12 +793,71 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
                 data: item.outerHTML
             });
         });
-    } else if (protyle.block.showAll && parentElement.classList.contains("protyle-wysiwyg") && parentElement.childElementCount === 0) {
+    });
+    const getElementDepth = (element: Element) => {
+        let depth = 0;
+        let parentElement = element.parentElement;
+        while (parentElement) {
+            depth++;
+            parentElement = parentElement.parentElement;
+        }
+        return depth;
+    };
+    const childReplacements = new Map<string, {
+        childIDs: string[],
+        foldedHeadingIDs: string[]
+    }>();
+    const sortedSuperBlocks = Array.from(sourceSuperBlocks.entries())
+        .sort(([first], [second]) => getElementDepth(second) - getElementDepth(first));
+    for (const [superBlock, excludedChildIDs] of sortedSuperBlocks) {
+        if (!superBlock.isConnected) {
+            continue;
+        }
+        if (getSbChildBlockCount(superBlock) === 1) {
+            const cancelOperations = await cancelSB(protyle, superBlock, undefined, excludedChildIDs,
+                childReplacements);
+            doOperations.push(...cancelOperations.doOperations);
+            if (cancelOperations.doOperations.length > 0) {
+                childReplacements.set(superBlock.getAttribute("data-node-id"), {
+                    childIDs: cancelOperations.childIDs || [],
+                    foldedHeadingIDs: cancelOperations.foldedHeadingIDs || [],
+                });
+            }
+        } else {
+            refreshSbResize(superBlock);
+            rebalanceSbWidth(superBlock).forEach(change => {
+                const targetElement = superBlock.querySelector(`[data-node-id="${change.id}"]`);
+                if (targetElement) {
+                    doOperations.push({
+                        action: "setAttrs",
+                        id: change.id,
+                        data: JSON.stringify({style: targetElement.getAttribute("style") || ""})
+                    });
+                }
+            });
+        }
+    }
+    const editorElement = protyle.wysiwyg.element;
+    if (protyle.block.showAll && editorElement.childElementCount === 0) {
+        const focusID = protyle.block.parent2ID;
         setTimeout(() => {
-            zoomOut({protyle, id: protyle.block.parent2ID, focusId: protyle.block.parent2ID});
+            zoomOut({
+                protyle,
+                id: focusID,
+                focusId: focusID,
+                callback: selectionModeElement ? () => {
+                    const targetElement = editorElement.querySelector<HTMLElement>(`[data-node-id="${focusID}"]`) ||
+                        editorElement.querySelector<HTMLElement>("[data-node-id]");
+                    if (targetElement) {
+                        setBlockSelectionModeElement(editorElement, targetElement);
+                        focusBlock(targetElement);
+                        countBlockWord(getBlockSelectionStatusIDs(editorElement), protyle.block.rootID);
+                    }
+                } : undefined,
+            });
         }, Constants.TIMEOUT_INPUT * 2 + 100);
-    } else if (parentElement.classList.contains("protyle-wysiwyg") && parentElement.innerHTML === "" &&
-        !hasClosestByClassName(parentElement, "block__edit", true) &&
+    } else if (editorElement.innerHTML === "" &&
+        !hasClosestByClassName(editorElement, "block__edit", true) &&
         protyle.block.id === protyle.block.rootID) {
         // 根文档原内容为空
         const newId = Lute.NewNodeID();
@@ -780,10 +868,32 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
             data: newElement.outerHTML,
             parentID: protyle.block.parentID
         });
-        parentElement.innerHTML = newElement.outerHTML;
-        focusBlock(newElement);
-    } else if (sideElement) {
-        focusBlock(sideElement);
+        editorElement.innerHTML = newElement.outerHTML;
+        if (!selectionModeElement) {
+            focusBlock(editorElement.firstElementChild);
+        }
+    } else if (sideElement?.isConnected && editorElement.contains(sideElement) &&
+        sideElement.getAttribute("data-node-id")) {
+        if (!selectionModeElement) {
+            focusBlock(sideElement);
+        }
+    }
+    if (selectionModeElement) {
+        let nextSelectionModeElement: Element;
+        const isValidSelectionModeElement = (element?: Element) => !!element && element.isConnected &&
+            editorElement.contains(element) && !!element.getAttribute("data-node-id");
+        if (isValidSelectionModeElement(selectionModeElement)) {
+            nextSelectionModeElement = selectionModeElement;
+        } else if (isValidSelectionModeElement(sideElement)) {
+            nextSelectionModeElement = sideElement;
+        } else {
+            nextSelectionModeElement = editorElement.querySelector<HTMLElement>("[data-node-id]");
+        }
+        if (nextSelectionModeElement) {
+            setBlockSelectionModeElement(editorElement, nextSelectionModeElement);
+            focusBlock(nextSelectionModeElement);
+            countBlockWord(getBlockSelectionStatusIDs(editorElement), protyle.block.rootID);
+        }
     }
     // 跨文档不支持撤销
     transaction(protyle, doOperations);

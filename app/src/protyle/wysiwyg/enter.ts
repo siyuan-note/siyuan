@@ -33,18 +33,35 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {blockRender} from "../render/blockRender";
 import {isCodeBlockFenceBeforeCaret} from "./codeBlockEnter";
 import {isEmptyListItemBlock, shouldCreateListItemChildOnEnter} from "./listContext";
+import {
+    BLOCK_SELECTION_CLASS,
+    clearBlockSelectionMode,
+    getBlockSelectionModeElement
+} from "./blockSelection";
 
 export const enter = async (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
+    const selectionModeElement = getBlockSelectionModeElement(protyle.wysiwyg.element);
+    if (selectionModeElement) {
+        blockElement = selectionModeElement;
+    }
     const embedResultElement = hasClosestByClassName(blockElement, "protyle-wysiwyg__embed");
     const embedContext = getEmbedChildOperationContext(blockElement);
     if (embedResultElement && !embedContext && !blockElement.classList.contains("code-block")) {
+        if (selectionModeElement) {
+            clearBlockSelectionMode(protyle.wysiwyg.element, true);
+        }
         return;
     }
     const disableElement = isNotEditBlock(blockElement);
-    if (!disableElement && blockElement.classList.contains("protyle-wysiwyg--select")) {
+    const isBlockMode = !!selectionModeElement || blockElement.classList.contains(BLOCK_SELECTION_CLASS);
+    if (!disableElement && isBlockMode) {
         setLastNodeRange(getContenteditableElement(blockElement), range, false);
         range.collapse(false);
-        hideElements(["select"], protyle);
+        if (selectionModeElement) {
+            clearBlockSelectionMode(protyle.wysiwyg.element, true);
+        } else {
+            hideElements(["select"], protyle);
+        }
         return;
     }
     protyle.observerLoad?.disconnect();
@@ -52,7 +69,10 @@ export const enter = async (blockElement: HTMLElement, range: Range, protyle: IP
     if (disableElement ||
         // https://github.com/siyuan-note/siyuan/issues/10633
         blockElement.classList.contains("table")) {
-        if (blockElement.classList.contains("protyle-wysiwyg--select") && blockElement.classList.contains("render-node")) {
+        if (selectionModeElement) {
+            clearBlockSelectionMode(protyle.wysiwyg.element, true);
+        }
+        if (isBlockMode && blockElement.classList.contains("render-node")) {
             protyle.toolbar.showRender(protyle, blockElement);
         } else {
             insertEmptyBlock(protyle, "afterend");

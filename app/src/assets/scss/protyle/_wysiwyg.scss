@@ -534,6 +534,7 @@
 
         /* 选中块的高亮覆盖 border */
         &.protyle-wysiwyg--select::after,
+        &.protyle-wysiwyg--select-mode::after,
         &.protyle-wysiwyg--hl::after {
           width: calc(100% + 2px);
           height: calc(100% + 2px);
@@ -752,6 +753,7 @@
   }
 
   &--select::after,
+  &--select-mode::after,
   &--hl::after {
     background-color: var(--b3-theme-primary-lightest);
     position: absolute;
@@ -763,6 +765,10 @@
     z-index: 3;
     pointer-events: none;
     border-radius: var(--b3-border-radius);
+  }
+
+  &--select-mode::after {
+    box-shadow: inset 0 0 0 1px var(--b3-theme-primary-lighter);
   }
 
   &--hl {

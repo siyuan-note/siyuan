@@ -1,0 +1,305 @@
+{
+	"ID": "20260830213256-fgl32qu",
+	"Spec": "2",
+	"Type": "NodeDocument",
+	"Properties": {
+		"id": "20260830213256-fgl32qu",
+		"title": "Select and operate content blocks",
+		"type": "doc",
+		"updated": "20260830213256"
+	},
+	"Children": [
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-c2i118b",
+			"Properties": {
+				"id": "20260830213256-c2i118b",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Block selection mode lets you select and operate content blocks with the keyboard without returning to text editing after every action. A light outline indicates the current block; only marked blocks are included in a multi-block selection."
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-5do6z3r",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-5do6z3r",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Enter and exit block selection mode"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-819rhwy",
+			"Properties": {
+				"id": "20260830213256-819rhwy",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Place the caret in a content block and press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to enter block selection mode. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to make the previous or next block current. Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Esc"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " again to exit and clear all marks."
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-03duw1y",
+			"Properties": {
+				"id": "20260830213256-03duw1y",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to exit and place the caret at the end of the current block when it is editable. Typing other text also exits the mode and edits the current block. In this mode, "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "A"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " inserts a block after the current block and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "B"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " inserts one before it. To enter either letter as text, exit block selection mode first."
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-9z618x3",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-9z618x3",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Mark blocks and choose operation targets"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-fuhxdnf",
+			"Properties": {
+				"id": "20260830213256-fuhxdnf",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Press "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Space"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to mark or unmark the current block without moving away from it. Switch the current block with the arrow keys and repeat this action to mark any number of blocks, including non-contiguous blocks. Use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↑"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " or "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "↓"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " to create a contiguous selection."
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-xkf9bt3",
+			"Properties": {
+				"id": "20260830213256-xkf9bt3",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "When one or more blocks are marked, copying, deleting, cutting, and moving apply only to the marked blocks; an unmarked current block is not implicitly included. When no blocks are marked, the current block is the operation target."
+				}
+			]
+		},
+		{
+			"Type": "NodeHeading",
+			"ID": "20260830213256-7sdato5",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20260830213256-7sdato5",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Delete and move blocks"
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-ernfh4j",
+			"Properties": {
+				"id": "20260830213256-ernfh4j",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "With no marked blocks, both "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Delete"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " and "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Backspace"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " delete the current block. With marked blocks, either key deletes all marked blocks. If the current block is deleted, the former makes the next remaining block current and the latter makes the previous remaining block current when available; an unmarked current block remains current."
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-6ah9tb8",
+			"Properties": {
+				"id": "20260830213256-6ah9tb8",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "A single block or a contiguous selection can be moved up or down with the corresponding block commands. Non-contiguous marked blocks cannot be reordered up or down, but "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Move"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " can move them together to another document."
+				}
+			]
+		},
+		{
+			"Type": "NodeParagraph",
+			"ID": "20260830213256-9bb0mci",
+			"Properties": {
+				"id": "20260830213256-9bb0mci",
+				"updated": "20260830213256"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Block selection mode remains active after deleting, cutting, or moving blocks so you can continue selecting and operating blocks."
+				}
+			]
+		}
+	]
+}

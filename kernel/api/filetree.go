@@ -1101,6 +1101,11 @@ func getShorthandSavePath(c *gin.Context) {
 	if "" == shorthandSaveBox {
 		shorthandSaveBox = notebook
 	}
+	if !model.IsShorthandSaveBoxAvailable(shorthandSaveBox) {
+		ret.Code = -1
+		ret.Msg = model.Conf.Language(375)
+		return
+	}
 
 	if shorthandSaveBox != notebook {
 		if "" != shorthandSavePathTpl && !strings.HasPrefix(shorthandSavePathTpl, "/") {

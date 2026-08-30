@@ -2648,6 +2648,7 @@
 		"371": "Das Notizbuch ist bereits vorhanden",
 		"372": "Das Notizbuch wurde wiederhergestellt und bleibt geschlossen",
 		"373": "Dieses Archiv enthält Notizbuchdaten. Bitte importieren Sie es über [Dokumentenbaum - Mehr - Notizbuch importieren]",
-		"374": "Datenbank [%s], Vorlagenfeld [%s], erster betroffener Eintrag [%s] (Element-ID: %s), Anzahl betroffener Einträge: %d, Fehler: %s"
+		"374": "Datenbank [%s], Vorlagenfeld [%s], erster betroffener Eintrag [%s] (Element-ID: %s), Anzahl betroffener Einträge: %d, Fehler: %s",
+		"375": "Das Notizbuch zum Speichern von Kurznotizen ist nicht verfügbar. Wählen Sie unter Einstellungen - Dokument ein geöffnetes, unverschlüsseltes Notizbuch"
 	}
 }

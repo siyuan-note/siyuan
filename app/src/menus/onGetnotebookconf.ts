@@ -21,7 +21,8 @@ declare interface INotebookConf {
     }
 }
 
-export const genNotebookOption = (id: string, notebookId?: string, noCurrent?: boolean) => {
+export const genNotebookOption = (id: string, notebookId?: string, noCurrent?: boolean,
+                                  filter?: (item: INotebook) => boolean) => {
     let html = "";
     if (!noCurrent) {
         html = `<option value="">${window.siyuan.languages.currentNotebook}</option>`;
@@ -30,9 +31,14 @@ export const genNotebookOption = (id: string, notebookId?: string, noCurrent?: b
     Object.keys(Constants.HELP_PATH).forEach((key: "zh-CN") => {
         helpIds.push(Constants.HELP_PATH[key]);
     });
+    const configuredNotebook = window.siyuan.notebooks.find((item) => item.id === id);
+    if (noCurrent && id && (!configuredNotebook || helpIds.includes(id) || (filter && !filter(configuredNotebook)))) {
+        const name = configuredNotebook?.name || id;
+        html += `<option value="${id}" selected disabled>${escapeHtml(name)} (${window.siyuan.languages.agentCapabilitiesUnavailable})</option>`;
+    }
     let firstNotebookId = "";
     window.siyuan.notebooks.forEach((item) => {
-        if (helpIds.includes(item.id) || item.id === notebookId) {
+        if (helpIds.includes(item.id) || item.id === notebookId || (filter && !filter(item))) {
             return;
         }
         if ("" === firstNotebookId) {
@@ -44,6 +50,9 @@ export const genNotebookOption = (id: string, notebookId?: string, noCurrent?: b
         }
         html += `<option value="${item.id}" ${selected ? "selected" : ""}>${escapeHtml(item.name)}</option>`;
     });
+    if (noCurrent && !firstNotebookId && !id) {
+        html = `<option value="" selected disabled>${window.siyuan.languages.agentCapabilitiesUnavailable}</option>`;
+    }
     return html;
 };
 

@@ -2648,6 +2648,7 @@
 		"371": "Notatnik już istnieje",
 		"372": "Notatnik został przywrócony i pozostaje zamknięty",
 		"373": "To archiwum zawiera dane notatnika. Zaimportuj je z [Drzewo dokumentów - Więcej - Importuj notatnik]",
-		"374": "Baza danych [%s], pole szablonu [%s], pierwszy element z błędem [%s] (ID elementu: %s), liczba elementów z błędem: %d, błąd: %s"
+		"374": "Baza danych [%s], pole szablonu [%s], pierwszy element z błędem [%s] (ID elementu: %s), liczba elementów z błędem: %d, błąd: %s",
+		"375": "Notatnik zapisu szybkich notatek jest niedostępny. Wybierz otwarty, niezaszyfrowany notatnik w Ustawienia - Dokument"
 	}
 }

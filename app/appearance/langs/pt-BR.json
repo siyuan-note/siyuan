@@ -2648,6 +2648,7 @@
 		"371": "O caderno já existe",
 		"372": "O caderno foi restaurado e permanece fechado",
 		"373": "Este arquivo contém dados de caderno. Importe-o em [Árvore de documentos - Mais - Importar caderno]",
-		"374": "Banco de dados [%s], campo de modelo [%s], primeiro item afetado [%s] (ID do item: %s), quantidade de itens afetados: %d, erro: %s"
+		"374": "Banco de dados [%s], campo de modelo [%s], primeiro item afetado [%s] (ID do item: %s), quantidade de itens afetados: %d, erro: %s",
+		"375": "O caderno para salvar notas rápidas não está disponível. Selecione um caderno aberto e não criptografado em Configurações - Documento"
 	}
 }

@@ -2648,6 +2648,7 @@
 		"371": "Il taccuino esiste già",
 		"372": "Il taccuino è stato ripristinato e rimane chiuso",
 		"373": "Questo archivio contiene dati di un taccuino. Importalo da [Albero dei documenti - Altro - Importa taccuino]",
-		"374": "Database [%s], campo modello [%s], primo elemento interessato [%s] (ID elemento: %s), numero di elementi interessati: %d, errore: %s"
+		"374": "Database [%s], campo modello [%s], primo elemento interessato [%s] (ID elemento: %s), numero di elementi interessati: %d, errore: %s",
+		"375": "Il taccuino per il salvataggio delle note rapide non è disponibile. Seleziona un taccuino aperto e non crittografato in Impostazioni - Documento"
 	}
 }

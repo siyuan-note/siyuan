@@ -47,6 +47,10 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 		logging.LogErrorf("read dir [%s] failed: %s", shorthandsDir, err)
 		return
 	}
+	if !IsShorthandSaveBoxAvailable(boxID) {
+		err = errors.New(Conf.Language(375))
+		return
+	}
 
 	assetsDir := filepath.Join(util.DataDir, "assets")
 	for _, entry := range entries {
@@ -304,6 +308,33 @@ func createShorthandDocByDOM(boxID, hPath, dom, docID string) (retID string, err
 }
 
 var consumeShorthandsLock = sync.Mutex{}
+var shorthandSaveBoxUnavailableNotified bool
+
+func isShorthandSaveBoxAvailable(box *Box) bool {
+	return nil != box && !box.Closed && !box.Encrypted && !IsUserGuide(box.ID)
+}
+
+func selectShorthandSaveBox(configuredID string, boxes []*Box) *Box {
+	if "" != configuredID {
+		for _, box := range boxes {
+			if nil != box && box.ID == configuredID && isShorthandSaveBoxAvailable(box) {
+				return box
+			}
+		}
+		return nil
+	}
+
+	for _, box := range boxes {
+		if isShorthandSaveBoxAvailable(box) {
+			return box
+		}
+	}
+	return nil
+}
+
+func IsShorthandSaveBoxAvailable(boxID string) bool {
+	return isShorthandSaveBoxAvailable(Conf.GetBox(boxID))
+}
 
 func consumeShorthands() {
 	if !util.IsMobileContainer() {
@@ -336,33 +367,26 @@ func consumeShorthands() {
 	}
 
 	if !hasShorthand {
+		shorthandSaveBoxUnavailableNotified = false
 		return
 	}
 
-	var notebookID string
-	notebookID = Conf.FileTree.ShorthandSaveBox
-	if "" != notebookID && nil == Conf.Box(notebookID) {
-		notebookID = ""
-	}
-
-	if "" == notebookID {
-		boxes := Conf.GetBoxes()
-		for _, box := range boxes {
-			if !IsUserGuide(box.ID) {
-				notebookID = box.ID
-				break
-			}
-		}
-	}
-
-	if "" == notebookID {
+	boxes := Conf.GetBoxes()
+	box := selectShorthandSaveBox(Conf.FileTree.ShorthandSaveBox, boxes)
+	if nil == box {
 		logging.LogWarnf("auto consume shorthands failed: no available notebook found")
+		if !shorthandSaveBoxUnavailableNotified {
+			util.PushErrMsg(Conf.Language(375), 7000)
+			shorthandSaveBoxUnavailableNotified = true
+		}
 		return
 	}
 
-	if _, err = MoveLocalShorthands(notebookID); nil != err {
+	if _, err = MoveLocalShorthands(box.ID); nil != err {
 		logging.LogErrorf("auto consume shorthands failed: %s", err)
+		return
 	}
+	shorthandSaveBoxUnavailableNotified = false
 }
 
 func AutoConsumeShorthandsJob() {

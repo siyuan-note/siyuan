@@ -2648,6 +2648,7 @@
 		"371": "The notebook already exists",
 		"372": "The notebook has been restored and remains closed",
 		"373": "This archive contains notebook data. Please import it from [Document Tree - More - Import Notebook]",
-		"374": "Database [%s], template field [%s], first affected item [%s] (item ID: %s), affected item count: %d, error: %s"
+		"374": "Database [%s], template field [%s], first affected item [%s] (item ID: %s), affected item count: %d, error: %s",
+		"375": "The shorthand save notebook is unavailable. Select an opened non-encrypted notebook in Settings - Document"
 	}
 }

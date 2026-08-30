@@ -2648,6 +2648,7 @@
 		"371": "Le carnet existe déjà",
 		"372": "Le carnet a été restauré et reste fermé",
 		"373": "Cette archive contient des données de carnet. Veuillez l’importer depuis [Arborescence des documents - Plus - Importer un carnet]",
-		"374": "Base de données [%s], champ de modèle [%s], premier élément affecté [%s] (ID de l’élément : %s), nombre d’éléments affectés : %d, erreur : %s"
+		"374": "Base de données [%s], champ de modèle [%s], premier élément affecté [%s] (ID de l’élément : %s), nombre d’éléments affectés : %d, erreur : %s",
+		"375": "Le carnet d’enregistrement des notes rapides n’est pas disponible. Sélectionnez un carnet ouvert et non chiffré dans Paramètres - Document"
 	}
 }

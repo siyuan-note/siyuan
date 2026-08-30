@@ -198,7 +198,8 @@ const registerFileNewDocumentGroup = (tab: SettingTabBuilder) => {
                 shorthandDesc,
                 "fileTree.shorthandSaveBox",
                 "fileTree.shorthandSavePath",
-                genNotebookOption(window.siyuan.config.fileTree.shorthandSaveBox, undefined, true),
+                genNotebookOption(window.siyuan.config.fileTree.shorthandSaveBox, undefined, true,
+                    (item) => !item.closed && !item.encrypted),
             ),
             afterMount: (root) => {
                 const el = root.querySelector<HTMLInputElement>(`#${CSS.escape("fileTree.shorthandSavePath")}`);

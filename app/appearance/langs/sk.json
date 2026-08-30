@@ -2648,6 +2648,7 @@
 		"371": "Zápisník už existuje",
 		"372": "Zápisník bol obnovený a zostáva zatvorený",
 		"373": "Tento archív obsahuje údaje zápisníka. Importujte ho cez [Strom dokumentov - Viac - Importovať zápisník]",
-		"374": "Databáza [%s], pole šablóny [%s], prvá ovplyvnená položka [%s] (ID položky: %s), počet ovplyvnených položiek: %d, chyba: %s"
+		"374": "Databáza [%s], pole šablóny [%s], prvá ovplyvnená položka [%s] (ID položky: %s), počet ovplyvnených položiek: %d, chyba: %s",
+		"375": "Zápisník na ukladanie rýchlych poznámok nie je k dispozícii. Vyberte otvorený nezašifrovaný zápisník v Nastavenia - Dokument"
 	}
 }

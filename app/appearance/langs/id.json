@@ -2648,6 +2648,7 @@
 		"371": "Buku catatan sudah ada",
 		"372": "Buku catatan telah dipulihkan dan tetap ditutup",
 		"373": "Arsip ini berisi data buku catatan. Impor dari [Pohon dokumen - Lainnya - Impor buku catatan]",
-		"374": "Basis data [%s], bidang templat [%s], item pertama yang terdampak [%s] (ID item: %s), jumlah item terdampak: %d, kesalahan: %s"
+		"374": "Basis data [%s], bidang templat [%s], item pertama yang terdampak [%s] (ID item: %s), jumlah item terdampak: %d, kesalahan: %s",
+		"375": "Buku catatan penyimpanan catatan cepat tidak tersedia. Pilih buku catatan terbuka dan tidak terenkripsi di Pengaturan - Dokumen"
 	}
 }

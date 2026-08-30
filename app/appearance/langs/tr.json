@@ -2648,6 +2648,7 @@
 		"371": "Defter zaten mevcut",
 		"372": "Defter geri yüklendi ve kapalı kalacak",
 		"373": "Bu arşiv not defteri verileri içeriyor. [Belge ağacı - Diğer - Not defteri içe aktar] menüsünden içe aktarın",
-		"374": "Veritabanı [%s], şablon alanı [%s], etkilenen ilk öğe [%s] (öğe kimliği: %s), etkilenen öğe sayısı: %d, hata: %s"
+		"374": "Veritabanı [%s], şablon alanı [%s], etkilenen ilk öğe [%s] (öğe kimliği: %s), etkilenen öğe sayısı: %d, hata: %s",
+		"375": "Hızlı notların kaydedileceği not defteri kullanılamıyor. Ayarlar - Belge bölümünde açık ve şifrelenmemiş bir not defteri seçin"
 	}
 }

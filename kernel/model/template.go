@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -372,10 +373,26 @@ func dynamicIconTemplateFuncs() template.FuncMap {
 }
 
 func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, err error) {
+	mode := TemplateRenderModeContent
+	if preview {
+		mode = TemplateRenderModePreview
+	}
+	tree, dom, _, err = RenderTemplateWithMode(p, id, mode)
+	return
+}
+
+func RenderTemplateWithMode(p, id string, mode TemplateRenderMode) (tree *parse.Tree, dom string,
+	summary *TemplateDocTreePlanSummary, err error) {
+	if TemplateRenderModeContent != mode && TemplateRenderModePreview != mode && TemplateRenderModeEditorInsert != mode {
+		err = fmt.Errorf("unsupported template render mode [%s]", mode)
+		return
+	}
+	preview := TemplateRenderModePreview == mode
 	tree, err = LoadTreeByBlockID(id)
 	if err != nil {
 		return
 	}
+	sourceTree := tree
 
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
@@ -399,16 +416,39 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 		dataModel["id"] = block.ID
 		dataModel["name"] = block.Name
 		dataModel["alias"] = block.Alias
+		dataModel["rootID"] = sourceTree.Root.ID
+		dataModel["hPath"] = sourceTree.HPath
+		if parentDir := path.Dir(sourceTree.Path); "/" != parentDir && "." != parentDir {
+			dataModel["parentID"] = path.Base(parentDir)
+		} else {
+			dataModel["parentID"] = ""
+		}
+	}
+	collector := &templateDocTreeCollector{
+		rootID:        sourceTree.Root.ID,
+		boxID:         sourceTree.Box,
+		rootPath:      sourceTree.Path,
+		rootHPath:     sourceTree.HPath,
+		templatePath:  p,
+		enabled:       TemplateRenderModePreview == mode || TemplateRenderModeEditorInsert == mode,
+		allowCreation: TemplateRenderModePreview == mode || TemplateRenderModeEditorInsert == mode,
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")
 	tplFuncMap := filesys.BuiltInTemplateFuncs()
-	sql.SQLTemplateFuncs(&tplFuncMap, tree.Box)
+	tplFuncMap["createDocTree"] = collector.create
+	tplFuncMap["renderDocRef"] = collector.renderDocRef
+	sql.SQLTemplateFuncs(&tplFuncMap, sourceTree.Box)
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(gulu.Str.FromBytes(md))
 	if err != nil {
 		err = fmt.Errorf(Conf.Language(44), err.Error())
 		return
+	}
+	if collector.enabled && templateUsesFunction(tpl, "createDocTree") {
+		if err = validateTemplateCallGraph(tpl, tpl.Name()); nil != err {
+			return
+		}
 	}
 
 	buf := &bytes.Buffer{}
@@ -417,6 +457,11 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 		err = fmt.Errorf(Conf.Language(44), err.Error())
 		return
 	}
+	if 0 < len(collector.nodes) && maxTemplateDocTreeOutputSize < buf.Len() {
+		err = fmt.Errorf("template output exceeds %d bytes", maxTemplateDocTreeOutputSize)
+		return
+	}
+	collector.totalOutput = buf.Len()
 	md = buf.Bytes()
 	tree = parseKTree(md)
 	if nil == tree {
@@ -424,6 +469,19 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 		logging.LogError(msg)
 		err = errors.New(msg)
 		return
+	}
+	tree.Box = sourceTree.Box
+	if 0 < len(collector.nodes) {
+		if err = collector.validateLocations(); nil != err {
+			return
+		}
+		if templateTreeContainsAttributeView(tree) {
+			err = errors.New("database blocks are not supported by createDocTree templates")
+			return
+		}
+		if err = renderTemplateDocTreeNodes(collector, tpl, tplFuncMap); nil != err {
+			return
+		}
 	}
 
 	var nodesNeedAppendChild, unlinks []*ast.Node
@@ -584,6 +642,9 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 	for _, n := range unlinks {
 		n.Unlink()
 	}
+	if 0 < len(collector.nodes) && nil == tree.Root.FirstChild {
+		tree.Root.AppendChild(treenode.NewParagraph(""))
+	}
 
 	// 折叠标题下方块需要在模板插入后从当前 DOM 中移除，展开标题时再由内核加载，避免内容重复。
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -605,6 +666,13 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 
 	luteEngine := NewLute()
 	dom = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
+	if 0 < len(collector.nodes) {
+		if TemplateRenderModeEditorInsert == mode {
+			summary = collector.storePlan()
+		} else {
+			summary = collector.summary("")
+		}
+	}
 	return
 }
 

@@ -144,6 +144,7 @@ const promiseTransaction = (options: {
     undoOperations: IOperation[],
     skipSync: boolean,
     callback?: () => void,
+    templateDocTreePlanID?: string,
 }) => {
     const protyle = options.protyle;
     // 受影响的嵌入块需推迟到事务提交后再渲染，否则其查询请求会早于写入到达内核而拿到旧数据
@@ -470,13 +471,23 @@ const promiseTransaction = (options: {
             const newID = Lute.NewNodeID();
             const emptyElement = genEmptyElement(false, true, newID);
             protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
-            transaction(protyle, [{
+            const emptyOperation: IOperation = {
                 action: "insert",
                 data: emptyElement.outerHTML,
                 id: newID,
                 parentID: protyle.block.parentID
-            }]);
-            // 不能撤销，否则就无限循环了
+            };
+            if (options.templateDocTreePlanID) {
+                // 文档树计划必须与父文档的全部变更保持在同一事务中。
+                options.doOperations.push(emptyOperation);
+                options.undoOperations.unshift({
+                    action: "delete",
+                    id: newID,
+                });
+            } else {
+                transaction(protyle, [emptyOperation]);
+            }
+            // 普通编辑不记录撤销，否则会无限循环；文档树计划随主事务统一撤销。
             focusByWbr(emptyElement, range);
         }
     }
@@ -486,6 +497,7 @@ const promiseTransaction = (options: {
         transactions: [{
             doOperations: options.doOperations,
             undoOperations: options.undoOperations,// 目前用于 ws 推送更新大纲
+            templateDocTreePlanID: options.templateDocTreePlanID,
         }]
     }, (response) => {
         invalidateViewFoldRequests(protyle);
@@ -2130,6 +2142,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                             options?: {
                                 skipSync?: boolean,
                                 callback?: () => void,
+                                templateDocTreePlanID?: string,
                             }) => {
     if (protyle) {
         const prepared = prepareViewFoldTransaction(protyle, doOperations, undoOperations);
@@ -2169,6 +2182,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         undoOperations: undoOperations,
         skipSync: options?.skipSync,
         callback: options?.callback,
+        templateDocTreePlanID: options?.templateDocTreePlanID,
     });
     // 插入块后会导致高度变化，从而产生再次定位 https://github.com/siyuan-note/siyuan/issues/11798
     doOperations.find(item => {

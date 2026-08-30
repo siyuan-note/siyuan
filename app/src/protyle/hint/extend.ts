@@ -35,6 +35,35 @@ import {
     isBuiltinInlineStyleVisible,
     TBuiltinInlineStyleID,
 } from "../toolbar/inlineStyle";
+import {confirmDialog} from "../../dialog/confirmDialog";
+
+interface ITemplateDocTreePlan {
+    id: string;
+    count: number;
+    nodes: Array<{
+        id: string;
+        title: string;
+        parentID: string;
+        hPath: string;
+        depth: number;
+    }>;
+}
+
+const genTemplateDocTreePlanHTML = (plan: ITemplateDocTreePlan) => {
+    const itemsHTML = plan.nodes.map((item) => {
+        const depth = Number.isFinite(item.depth) ? Math.min(32, Math.max(0, Math.trunc(item.depth))) : 0;
+        return `<li class="b3-list-item" style="padding-left: ${depth * 18 + 4}px">
+    <svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg>
+    <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
+</li>`;
+    }).join("");
+    const count = Number.isFinite(plan.count) ? Math.max(0, Math.trunc(plan.count)) : plan.nodes.length;
+    return `<div class="fn__flex">
+    <span class="fn__flex-1">${window.siyuan.languages.newSubDoc}</span>
+    <span class="counter">${count}</span>
+</div>
+<ul class="b3-list b3-list--background" style="max-height: 50vh; overflow: auto">${itemsHTML}</ul>`;
+};
 
 const slashBuiltinStyleIDs: Partial<Record<string, TBuiltinInlineStyleID>> = {
     infoStyle: "info",
@@ -631,24 +660,39 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
 export const hintRenderTemplate = (value: string, protyle: IProtyle, nodeElement: Element) => {
     fetchPost("/api/template/render", {
         id: protyle.block.parentID,
-        path: value
+        path: value,
+        mode: "editorInsert"
     }, (response) => {
-        focusByRange(protyle.toolbar.range);
-        const editElement = getContenteditableElement(nodeElement);
-        if (editElement && editElement.textContent.trim() === "") {
-            insertHTML(response.data.content, protyle, true);
+        const insertTemplate = (templateDocTreePlanID?: string) => {
+            focusByRange(protyle.toolbar.range);
+            const editElement = getContenteditableElement(nodeElement);
+            if (templateDocTreePlanID || (editElement && editElement.textContent.trim() === "")) {
+                insertHTML(response.data.content, protyle, true, false, false, undefined, undefined,
+                    templateDocTreePlanID);
+            } else {
+                insertHTML(response.data.content, protyle);
+            }
+            // https://github.com/siyuan-note/siyuan/issues/4488
+            protyle.wysiwyg.element.querySelectorAll('[status="temp"]').forEach(item => {
+                item.remove();
+            });
+            blockRender(protyle, protyle.wysiwyg.element);
+            processRender(protyle.wysiwyg.element);
+            highlightRender(protyle.wysiwyg.element);
+            avRender(protyle.wysiwyg.element, protyle);
+            hideElements(["util"], protyle);
+        };
+        const docTreePlan = response.data.docTreePlan as ITemplateDocTreePlan | undefined;
+        if (docTreePlan?.id) {
+            hideElements(["util"], protyle);
+            confirmDialog(window.siyuan.languages.template, genTemplateDocTreePlanHTML(docTreePlan), () => {
+                insertTemplate(docTreePlan.id);
+            }, () => {
+                focusByRange(protyle.toolbar.range);
+            });
         } else {
-            insertHTML(response.data.content, protyle);
+            insertTemplate();
         }
-        // https://github.com/siyuan-note/siyuan/issues/4488
-        protyle.wysiwyg.element.querySelectorAll('[status="temp"]').forEach(item => {
-            item.remove();
-        });
-        blockRender(protyle, protyle.wysiwyg.element);
-        processRender(protyle.wysiwyg.element);
-        highlightRender(protyle.wysiwyg.element);
-        avRender(protyle.wysiwyg.element, protyle);
-        hideElements(["util"], protyle);
     });
 };
 

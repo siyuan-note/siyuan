@@ -902,9 +902,13 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            insertByCursor = false,
                            // 根据块级拖拽指示线强制插入方向
                            insertPosition?: "before" | "after",
-                           undoContext?: Record<string, string>) => {
+                           undoContext?: Record<string, string>,
+                           templateDocTreePlanID?: string) => {
     if (html === "") {
         return;
+    }
+    if (templateDocTreePlanID) {
+        isBlock = true;
     }
     const range = useProtyleRange ? protyle.toolbar.range : getEditorRange(protyle.wysiwyg.element);
     const rangeStartBlockElement = hasClosestBlock(range.startContainer);
@@ -915,7 +919,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             {blockElement: rangeStartBlockElement, container: range.startContainer},
             {blockElement: rangeEndBlockElement, container: range.endContainer},
         ].some(item => {
-            if (item.blockElement.classList.contains("av") || isInEmbedBlock(item.blockElement)) {
+            if (item.blockElement.classList.contains("av") || isInEmbedBlock(item.blockElement) ||
+                (templateDocTreePlanID && item.blockElement.classList.contains("table"))) {
                 return true;
             }
             const editableElement = getContenteditableElement(item.blockElement);
@@ -949,6 +954,12 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     if (!blockElement) {
         return;
     }
+    if (templateDocTreePlanID && (protyle.lite || blockElement.classList.contains("av") ||
+        blockElement.classList.contains("table") || isInEmbedBlock(blockElement) ||
+        !getContenteditableElement(blockElement))) {
+        return;
+    }
+    const transactionOptions = templateDocTreePlanID ? {templateDocTreePlanID} : undefined;
 
     if (blockElement.classList.contains("av")) {
         const avTitleElement = hasClosestByClassName(range.startContainer, "av__title");
@@ -964,6 +975,11 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
 
     const blockRanges = !range.collapsed ? getBlockRanges(protyle.wysiwyg.element, range) : [];
+    if (templateDocTreePlanID && blockRanges.some(item => item.blockElement.classList.contains("av") ||
+        item.blockElement.classList.contains("table") || isInEmbedBlock(item.blockElement) ||
+        !item.editableElement)) {
+        return;
+    }
     const isCrossBlockRange = blockRanges.length > 1 && blockRanges[0].blockElement === blockElement;
     let crossBlockUndoFocusContext: Record<string, string> | undefined;
     if (isCrossBlockRange) {
@@ -1094,7 +1110,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             }
         });
     };
-    if (!isBlock &&
+    if (!isBlock && !templateDocTreePlanID &&
         (isNodeCodeBlock || protyle.toolbar.getCurrentType(range).includes("code"))) {
         range.deleteContents();
         if (isCrossBlockRange && rangeStartWbrElement.isConnected) {
@@ -1133,7 +1149,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                 id,
                 data: oldHTML,
                 context: crossBlockUndoFocusContext
-            }, ...crossBlockUndoOperations]);
+            }, ...crossBlockUndoOperations], transactionOptions);
         } else {
             updateTransaction(protyle, blockElement, oldHTML);
         }
@@ -1212,14 +1228,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         tempElement.content.childElementCount === 1 &&
         tempElement.content.firstChild.nodeType !== 3 &&
         tempElement.content.firstElementChild.getAttribute("data-type") === "NodeHeading") {
-        if (!isCrossBlockRange) {
+        if (!isCrossBlockRange && !templateDocTreePlanID) {
             // https://github.com/siyuan-note/siyuan/issues/14114
             isBlock = false;
             block2text = true;
         }
     }
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
-    if (!isBlock) {
+    if (!isBlock && !templateDocTreePlanID) {
         if (tempElement.content.firstChild.nodeType === 3 || block2text ||
             (tempElement.content.firstChild.nodeType !== 3 &&
                 ((tempElement.content.firstElementChild.classList.contains("p") && tempElement.content.childElementCount === 1) ||
@@ -1494,7 +1510,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             });
             doOperation.splice(0, 0, ...foldData.doOperations);
             undoOperation.push(...foldData.undoOperations);
-            transaction(protyle, doOperation, undoOperation);
+            transaction(protyle, doOperation, undoOperation, transactionOptions);
         });
         return;
     }
@@ -1597,5 +1613,5 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             }
         });
     });
-    transaction(protyle, doOperation, undoOperation);
+    transaction(protyle, doOperation, undoOperation, transactionOptions);
 };

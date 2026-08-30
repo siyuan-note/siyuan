@@ -85,11 +85,31 @@ func performTransactions(c *gin.Context) {
 		return
 	}
 	for _, transaction := range transactions {
+		if nil != transaction && "" != transaction.TemplateDocTreePlanID {
+			model.FlushTxQueue()
+			break
+		}
+	}
+	templateDocTreeAttached, err := model.AttachTemplateDocTreePlans(transactions)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = util.EscapeHTML(err.Error())
+		return
+	}
+	for _, transaction := range transactions {
 		transaction.Timestamp = timestamp
 		transaction.MarkFromAPI() // 标记来自 HTTP 入口，供全局撤销日志捕获判别
 	}
 
-	model.PerformTransactions(&transactions)
+	if templateDocTreeAttached {
+		if err = model.PerformTxSync(transactions[0]); nil != err {
+			ret.Code = -1
+			ret.Msg = util.EscapeHTML(err.Error())
+			return
+		}
+	} else {
+		model.PerformTransactions(&transactions)
+	}
 
 	ret.Data = transactions
 

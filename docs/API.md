@@ -1253,12 +1253,15 @@ Note: To ensure data security, access to this interface is prohibited in Publish
   ```json
   {
     "id": "20220724223548-j6g0o87",
-    "path": "F:\\SiYuan\\data\\templates\\foo.md"
+    "path": "F:\\SiYuan\\data\\templates\\foo.md",
+    "mode": "editorInsert"
   }
   ```
 
     * `id`: The ID of the document where the rendering is called
     * `path`: Template file absolute path
+    * `mode`: Optional rendering mode. Currently supports `"preview"` and `"editorInsert"` only. Preview mode produces a document tree plan without writing files; editor-insert mode produces a plan that can be confirmed and applied with the corresponding editor transaction
+    * When `mode` is omitted, the legacy `preview` Boolean parameter remains supported: `preview: true` is equivalent to `mode: "preview"`; otherwise the template is rendered as ordinary content and `createDocTree` is disabled
 * Return value
 
   ```json
@@ -1267,10 +1270,41 @@ Note: To ensure data security, access to this interface is prohibited in Publish
     "msg": "",
     "data": {
       "content": "<div data-node-id=\"20220729234848-dlgsah7\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\" updated=\"20220729234840\"><div contenteditable=\"true\" spellcheck=\"false\">foo</div><div class=\"protyle-attr\" contenteditable=\"false\">​</div></div>",
-      "path": "F:\\SiYuan\\data\\templates\\foo.md"
+      "path": "F:\\SiYuan\\data\\templates\\foo.md",
+      "docTreePlan": {
+        "id": "template-plan-token",
+        "count": 2,
+        "nodes": [
+          {
+            "id": "20260830150000-abc1234",
+            "title": "Materials",
+            "parentID": "20220724223548-j6g0o87",
+            "hPath": "/Parent/Materials",
+            "depth": 1
+          },
+          {
+            "id": "20260830150001-def5678",
+            "title": "Review",
+            "parentID": "20260830150000-abc1234",
+            "hPath": "/Parent/Materials/Review",
+            "depth": 2
+          }
+        ]
+      }
     }
   }
   ```
+
+    * `docTreePlan`: Present when the template declares a child document tree with `createDocTree`
+        * `id`: Empty in preview mode, which never writes files. In editor-insert mode, this is a short-lived, one-time plan token; after confirmation, submit it as the top-level `templateDocTreePlanID` field of the corresponding transaction object
+        * `count`: Total number of child documents in the plan
+        * `nodes`: Static descriptions of the planned documents
+            * `id`: Planned document ID
+            * `title`: Planned document title
+            * `parentID`: Planned parent document ID
+            * `hPath`: Planned human-readable document path
+            * `depth`: Depth relative to the document where the template is inserted
+        * A single plan can contain at most 128 documents, and its declared child document tree can be at most 16 levels deep. The resulting absolute file tree depth remains subject to the setting that controls whether sub-documents deeper than 7 levels may be created
 
 ### Render Sprig
 

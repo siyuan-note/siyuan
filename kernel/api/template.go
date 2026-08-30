@@ -94,22 +94,35 @@ func renderTemplate(c *gin.Context) {
 		return
 	}
 
-	preview := false
-	if previewArg := arg["preview"]; nil != previewArg {
-		preview = previewArg.(bool)
+	mode := model.TemplateRenderModeContent
+	if modeArg := arg["mode"]; nil != modeArg {
+		modeString, isString := modeArg.(string)
+		if !isString || (string(model.TemplateRenderModePreview) != modeString &&
+			string(model.TemplateRenderModeEditorInsert) != modeString) {
+			ret.Code = -1
+			ret.Msg = "Unsupported template render mode"
+			return
+		}
+		mode = model.TemplateRenderMode(modeString)
+	} else if previewArg := arg["preview"]; nil != previewArg && previewArg.(bool) {
+		mode = model.TemplateRenderModePreview
 	}
 
-	_, content, err := model.RenderTemplate(p, id, preview)
+	_, content, docTreePlan, err := model.RenderTemplateWithMode(p, id, mode)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = util.EscapeHTML(err.Error())
 		return
 	}
 
-	ret.Data = map[string]any{
+	data := map[string]any{
 		"path":    p,
 		"content": content,
 	}
+	if nil != docTreePlan {
+		data["docTreePlan"] = docTreePlan
+	}
+	ret.Data = data
 }
 
 // isPathInTemplatesDir 校验绝对路径是否位于 <data>/templates/ 目录内，解析符号链接后再次校验，

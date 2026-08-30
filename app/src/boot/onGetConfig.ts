@@ -37,6 +37,7 @@ import {getAllEditor} from "../layout/getAll";
 import {openDesktopOnboarding} from "../onboarding";
 import {ensureUILayout} from "../util/ensureUILayout";
 import {dispatchPluginGlobalShortcut} from "../plugin/globalShortcut";
+import {requestResponsiveDockLayout} from "../layout/dock/responsive";
 
 export const onGetConfig = (isStart: boolean, app: App) => {
     correctHotkey(app);
@@ -69,7 +70,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
                     JSONToLayout(app, isStart);
                     setTimeout(() => {
                         adjustLayout();
-                    }); // 等待 dock 中 !this.pin 的 setTimeout
+                    }); // 等待浮动 Dock 的初始化完成
                     /// #if !BROWSER
                     sendGlobalShortcut(app);
                     /// #endif
@@ -99,6 +100,7 @@ export const onGetConfig = (isStart: boolean, app: App) => {
     let resizeTimeout = 0;
     let firstResize = true;
     window.addEventListener("resize", () => {
+        requestResponsiveDockLayout();
         if (firstResize) {
             recordBeforeResizeTop();
             firstResize = false;

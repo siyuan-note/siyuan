@@ -125,10 +125,11 @@ export const initWindowEvent = (app: App) => {
         // 拖拽文档页签或标题/列表项块标时，按浮窗模型控制文档树所在浮动 dock 的显隐：
         // 鼠标在边缘触发区或面板内则展开，离开则收起 https://github.com/siyuan-note/siyuan/issues/18043
         if (!isWindow() &&
-            (!window.siyuan.layout.leftDock.pin || !window.siyuan.layout.rightDock.pin || !window.siyuan.layout.bottomDock.pin)) {
+            (window.siyuan.layout.leftDock.isFloating() || window.siyuan.layout.rightDock.isFloating() ||
+                window.siyuan.layout.bottomDock.isFloating())) {
             const fileDock = getDockByType("file");
             // 文档树所在 dock 为浮动且文档树图标激活时才处理
-            if (fileDock && !fileDock.pin &&
+            if (fileDock && fileDock.isFloating() &&
                 document.querySelector('.dock__items > .dock__item--active[data-type="file"]')) {
                 let gutterBlockType = "";
                 for (const itemType of event.dataTransfer.types) {

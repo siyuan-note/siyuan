@@ -194,13 +194,13 @@ export const openOutline = async (options: {
 };
 
 export const resetFloatDockSize = () => {
-    if (!window.siyuan.layout.leftDock.pin && window.siyuan.layout.leftDock.layout.element.style.opacity === "1") {
+    if (window.siyuan.layout.leftDock.isFloating() && window.siyuan.layout.leftDock.layout.element.style.opacity === "1") {
         window.siyuan.layout.leftDock.showDock(true);
     }
-    if (!window.siyuan.layout.rightDock.pin && window.siyuan.layout.rightDock.layout.element.style.opacity === "1") {
+    if (window.siyuan.layout.rightDock.isFloating() && window.siyuan.layout.rightDock.layout.element.style.opacity === "1") {
         window.siyuan.layout.rightDock.showDock(true);
     }
-    if (!window.siyuan.layout.bottomDock.pin && window.siyuan.layout.bottomDock.layout.element.style.opacity === "1") {
+    if (window.siyuan.layout.bottomDock.isFloating() && window.siyuan.layout.bottomDock.layout.element.style.opacity === "1") {
         window.siyuan.layout.bottomDock.showDock(true);
     }
 };

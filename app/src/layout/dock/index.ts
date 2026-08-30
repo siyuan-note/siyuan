@@ -31,6 +31,9 @@ import {getDockHotkey} from "./hotkey";
 import {resolveDockPanelVisibility} from "./panelVisibility";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink", "agentChat"];
+const DEFAULT_DOCK_SIZE = 232;
+const WIDE_DOCK_SIZE = 320;
+const WIDE_DOCK_TYPES = ["graph", "globalGraph", "backlink", "inbox"];
 type TDockTabData = Config.IUILayoutDockTab & {entryId?: string};
 
 export class Dock {
@@ -46,6 +49,8 @@ export class Dock {
     private hideDockTimeout = 0;
     private panelVisible = true;
     private collapsedPanelSize = "";
+    private responsiveFloating = false;
+    private responsiveManualOverride = false;
 
     constructor(options: {
         app: App,
@@ -241,7 +246,7 @@ export class Dock {
             this.showDockByHover();
         });
         this.layout.element.addEventListener("mouseleave", (event: MouseEvent & { toElement: HTMLElement }) => {
-            if (event.buttons !== 0 || this.pin || event.toElement?.classList.contains("b3-menu") ||
+            if (event.buttons !== 0 || !this.isFloating() || event.toElement?.classList.contains("b3-menu") ||
                 event.toElement?.classList.contains("tooltip")) {
                 return;
             }
@@ -262,6 +267,7 @@ export class Dock {
             const direction = this.position === "Bottom" ? "tb" : "lr";
             const x = event[direction === "lr" ? "clientX" : "clientY"];
             const currentSize = direction === "lr" ? this.layout.element.clientWidth : this.layout.element.clientHeight;
+            let responsiveResizePrepared = false;
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 moveEvent.preventDefault();
                 moveEvent.stopPropagation();
@@ -273,21 +279,19 @@ export class Dock {
                 } else {
                     currentNowSize = (currentSize + (x - moveEvent.clientY));
                 }
-                let minSize = 232;
-                Array.from(this.layout.element.querySelectorAll(".file-tree")).find((item) => {
-                    if (item.classList.contains("sy__backlink") || item.classList.contains("sy__graph")
-                        || item.classList.contains("sy__globalGraph") || item.classList.contains("sy__inbox")) {
-                        if (!item.classList.contains("fn__none") && !hasClosestByClassName(item, "fn__none")) {
-                            minSize = 320;
-                            return true;
-                        }
-                    }
-                });
+                const minSize = this.getResponsiveMinimumSize();
                 if (currentNowSize < minSize && direction === "lr") {
                     return;
                 }
                 if (currentNowSize < 64 && direction === "tb") {
                     return;
+                }
+                if (currentNowSize === currentSize) {
+                    return;
+                }
+                if (!responsiveResizePrepared) {
+                    this.prepareForManualResize();
+                    responsiveResizePrepared = true;
                 }
                 this.layout.element.style[direction === "lr" ? "width" : "height"] = currentNowSize + "px";
             };
@@ -319,6 +323,74 @@ export class Dock {
                 this.resizeElement.classList.add("fn__none");
             });   // 需等待所有 Dock 初始化完成后才有稳定布局，才可进行定位
         }
+    }
+
+    public isFloating() {
+        return !this.pin || this.responsiveFloating;
+    }
+
+    public isResponsiveFloating() {
+        return this.responsiveFloating;
+    }
+
+    public hasResponsiveManualOverride() {
+        return this.responsiveManualOverride;
+    }
+
+    public clearResponsiveManualOverride() {
+        this.responsiveManualOverride = false;
+    }
+
+    public setResponsiveFloating(value: boolean) {
+        const responsiveFloating = value && this.position !== "Bottom" && this.pin;
+        if (this.responsiveFloating === responsiveFloating) {
+            return false;
+        }
+        this.restoreResponsivePreferredSize();
+        this.responsiveFloating = responsiveFloating;
+        this.applyFloatingState(false);
+        return true;
+    }
+
+    public adjustResponsiveCenterLayout() {
+        adjustLayout(window.siyuan.layout.centerLayout);
+    }
+
+    public prepareForManualResize() {
+        if (this.position === "Bottom") {
+            return;
+        }
+        this.responsiveManualOverride = true;
+        this.restoreResponsivePreferredSize();
+    }
+
+    public getResponsivePreferredSize() {
+        const isBottom = this.position === "Bottom";
+        if (!isBottom) {
+            const responsiveWidth = parseInt(this.layout.element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH));
+            if (responsiveWidth > 0) {
+                return responsiveWidth;
+            }
+        }
+        const dimension = isBottom ? "height" : "width";
+        const styleSize = parseInt(this.layout.element.style[dimension]);
+        if (styleSize > 0) {
+            return styleSize;
+        }
+        const clientSize = isBottom ? this.layout.element.clientHeight : this.layout.element.clientWidth;
+        return clientSize || this.getMaxSize();
+    }
+
+    public getResponsiveMinimumSize() {
+        if (this.position === "Bottom") {
+            return 64;
+        }
+        const widePanel = Array.from(this.layout.element.querySelectorAll(".file-tree")).find((item) => {
+            return (item.classList.contains("sy__backlink") || item.classList.contains("sy__graph") ||
+                item.classList.contains("sy__globalGraph") || item.classList.contains("sy__inbox")) &&
+                !item.classList.contains("fn__none") && !hasClosestByClassName(item, "fn__none");
+        });
+        return widePanel ? WIDE_DOCK_SIZE : DEFAULT_DOCK_SIZE;
     }
 
     public isPanelVisible() {
@@ -353,7 +425,7 @@ export class Dock {
         }
         const hadPanelFocus = Boolean(this.layout.element.querySelector(".layout__tab--active") ||
             document.activeElement && this.layout.element.contains(document.activeElement));
-        if (this.pin) {
+        if (!this.isFloating()) {
             recordBeforeResizeTop();
         }
         if (!resolution.visible) {
@@ -363,7 +435,7 @@ export class Dock {
         }
         this.panelVisible = resolution.storedVisible;
         this.layout.element.classList.toggle("fn__none", !resolution.visible);
-        if (resolution.visible && this.pin) {
+        if (resolution.visible && !this.isFloating()) {
             adjustLayout();
             this.resizeElement.classList.remove("fn__none");
         } else {
@@ -395,13 +467,23 @@ export class Dock {
     }
 
     public togglePin() {
+        if (this.responsiveFloating) {
+            this.responsiveFloating = false;
+            this.responsiveManualOverride = true;
+        } else {
+            this.pin = !this.pin;
+            this.responsiveManualOverride = this.pin;
+        }
+        this.restoreResponsivePreferredSize();
+        this.applyFloatingState(true);
+    }
+
+    private applyFloatingState(isSaveLayout: boolean) {
         this.clearDockHoverTimeout();
-        this.pin = !this.pin;
-        const hasActive = this.elements[0].querySelector(".dock__item--active") ||
-            this.elements[1].querySelector(".dock__item--active");
-        this.resetDockPosition(hasActive ? true : false);
+        const hasActive = this.hasActive();
+        this.resetDockPosition(hasActive);
         this.layout.element.style.opacity = "";
-        if (!this.pin) {
+        if (this.isFloating()) {
             this.resizeElement.classList.add("fn__none");
             this.hideDock(true);
         } else {
@@ -411,9 +493,21 @@ export class Dock {
                 this.resizeElement.classList.remove("fn__none");
             }
         }
-        this.layout.element.classList.toggle("layout--float");
-        resizeTabs();
+        this.layout.element.classList.toggle("layout--float", this.isFloating());
+        resizeTabs(isSaveLayout);
         setTabPosition(true);
+    }
+
+    private restoreResponsivePreferredSize() {
+        if (this.position === "Bottom") {
+            return;
+        }
+        const responsiveWidth = parseInt(this.layout.element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH));
+        this.layout.element.style.maxWidth = "";
+        this.layout.element.removeAttribute(Constants.ATTRIBUTE_DOCK_WIDTH);
+        if (responsiveWidth > 0) {
+            this.layout.element.style.width = responsiveWidth + "px";
+        }
     }
 
     private resetDockPosition(show: boolean) {
@@ -430,7 +524,8 @@ export class Dock {
     public showDockByHover() {
         window.clearTimeout(this.hideDockTimeout);
         this.hideDockTimeout = 0;
-        if (!this.panelVisible || this.showDockTimeout || this.pin || this.layout.element.style.opacity === "1") {
+        if (!this.panelVisible || this.showDockTimeout || !this.isFloating() ||
+            this.layout.element.style.opacity === "1") {
             return;
         }
         this.showDockTimeout = window.setTimeout(() => {
@@ -442,7 +537,8 @@ export class Dock {
     public hideDockByHover() {
         window.clearTimeout(this.showDockTimeout);
         this.showDockTimeout = 0;
-        if (!this.panelVisible || this.hideDockTimeout || this.pin || this.layout.element.style.opacity === "0") {
+        if (!this.panelVisible || this.hideDockTimeout || !this.isFloating() ||
+            this.layout.element.style.opacity === "0") {
             return;
         }
         this.hideDockTimeout = window.setTimeout(() => {
@@ -460,7 +556,7 @@ export class Dock {
 
     public showDock(reset = false) {
         this.clearDockHoverTimeout();
-        if (!this.panelVisible || (!reset && (this.pin || this.layout.element.style.opacity === "1")) ||
+        if (!this.panelVisible || (!reset && (!this.isFloating() || this.layout.element.style.opacity === "1")) ||
             (!this.elements[0].querySelector(".dock__item--active") && !this.elements[1].querySelector(".dock__item--active"))
         ) {
             return;
@@ -502,7 +598,7 @@ export class Dock {
 
     public hideDock(reset = false) {
         this.clearDockHoverTimeout();
-        if (!reset && (this.layout.element.style.opacity === "0" || this.pin)) {
+        if (!reset && (this.layout.element.style.opacity === "0" || !this.isFloating())) {
             return;
         }
         // 关系图全屏不应该退出 & https://github.com/siyuan-note/siyuan/issues/11775
@@ -567,7 +663,7 @@ export class Dock {
                 return;
             }
         }
-        if (this.pin && !restoredPanel) {
+        if (!this.isFloating() && !restoredPanel) {
             recordBeforeResizeTop();
         }
         if (show && target.classList.contains("dock__item--active")) {
@@ -797,7 +893,7 @@ export class Dock {
             if ((type === "graph" || type === "globalGraph") && this.layout.element.querySelector(".fullscreen")) {
                 document.getElementById("drag")?.classList.add("fn__hidden");
             }
-            if (this.pin) {
+            if (!this.isFloating()) {
                 this.layout.element.style.opacity = "";
                 this.hideResizeTimeout = window.setTimeout(() => {
                     if (this.panelVisible && this.hasActive()) {
@@ -876,7 +972,7 @@ export class Dock {
         }
 
         // 等待 dock 面板动画结束
-        if (this.pin) {
+        if (!this.isFloating()) {
             let rafId: number;
             const updateTabPos = () => {
                 setTabPosition(true);
@@ -985,13 +1081,15 @@ export class Dock {
         }
         const activesElement = [...this.elements[0].querySelectorAll(".dock__item--active"),
             ...this.elements[1].querySelectorAll(".dock__item--active")];
+        const preferredWidth = this.layout.element.style.maxWidth ?
+            this.getResponsivePreferredSize() : this.layout.element.clientWidth;
         activesElement.forEach((item) => {
             if (this.position === "Left" || this.position === "Right") {
                 if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
                     const dockElement = (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element;
                     item.setAttribute("data-height", dockElement.style.height ? dockElement.clientHeight.toString() : "");
                 }
-                item.setAttribute("data-width", this.layout.element.clientWidth.toString());
+                item.setAttribute("data-width", preferredWidth.toString());
             } else {
                 if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
                     const dockElement = (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element;
@@ -1013,9 +1111,10 @@ export class Dock {
         [...this.elements[0].querySelectorAll(".dock__item--active"), ...this.elements[1].querySelectorAll(".dock__item--active")].forEach((item) => {
             let size;
             if (this.position === "Left" || this.position === "Right") {
-                size = parseInt(item.getAttribute("data-width")) || (["graph", "globalGraph", "backlink"].includes(item.getAttribute("data-type")) ? 320 : 232);
+                size = parseInt(item.getAttribute("data-width")) ||
+                    (WIDE_DOCK_TYPES.includes(item.getAttribute("data-type")) ? WIDE_DOCK_SIZE : DEFAULT_DOCK_SIZE);
             } else {
-                size = parseInt(item.getAttribute("data-height")) || 232;
+                size = parseInt(item.getAttribute("data-height")) || DEFAULT_DOCK_SIZE;
             }
             if (size > max) {
                 max = size;

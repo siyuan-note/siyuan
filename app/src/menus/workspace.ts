@@ -136,12 +136,13 @@ const editLayout = (layoutName?: string) => {
 };
 
 const togglePinDock = (id: "switchLeftDock" | "switchRightDock" | "switchBottomDock", dock: Dock, pinIcon: string, unpinIcon: string) => {
+    const isFloating = dock.isFloating();
     return {
         id,
-        label: `${dock.pin ? window.siyuan.languages.switchToFloatingLayout : window.siyuan.languages.switchToFixedLayout}`,
-        icon: `${dock.pin ? unpinIcon : pinIcon}`,
+        label: `${isFloating ? window.siyuan.languages.switchToFixedLayout : window.siyuan.languages.switchToFloatingLayout}`,
+        icon: `${isFloating ? pinIcon : unpinIcon}`,
         accelerator: window.siyuan.config.keymap.general[id].custom,
-        current: !dock.pin,
+        current: isFloating,
         click() {
             dock.togglePin();
         }

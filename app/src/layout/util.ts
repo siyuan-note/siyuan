@@ -40,6 +40,7 @@ import {setTitle} from "../util/processTitle";
 import {activateQueuedAVLocate, queueAVLocateRequest} from "../protyle/render/av/locate";
 import {applyDockEntryVisibility} from "../config/entryVisibility/runtime";
 import {panePercentages, resizePanePercentages} from "./resizePane";
+import {requestResponsiveDockLayout} from "./dock/responsive";
 
 const isBuiltInCustomModel = (type: string) => {
     return type === "siyuan-card" || type === "siyuan-database-row";
@@ -969,6 +970,11 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
     }
 
     const getMinSize = (element: HTMLElement) => {
+        const dock = [window.siyuan.layout?.leftDock, window.siyuan.layout?.rightDock].find((item) =>
+            item?.layout.element === element);
+        if (dock) {
+            return dock.getResponsiveMinimumSize();
+        }
         let minSize = 232;
         Array.from(element.querySelectorAll(".file-tree")).find((item) => {
             if (item.classList.contains("sy__backlink") || item.classList.contains("sy__graph")
@@ -1020,6 +1026,10 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             const nextElement = resizeElement.nextElementSibling as HTMLElement;
             const previousElement = resizeElement.previousElementSibling as HTMLElement;
             const isCenterResize = !!resizeElement.parentElement.closest(".layout__center");
+            const responsiveDock = !isCenterResize && direction === "lr" ?
+                [window.siyuan.layout?.leftDock, window.siyuan.layout?.rightDock].find((dock) =>
+                    dock?.layout.element === previousElement || dock?.layout.element === nextElement) : undefined;
+            let responsiveResizePrepared = false;
             const paneElements = isCenterResize ? getPaneElements() : [];
             const paneSizes = paneElements.map((item) => direction === "lr" ? item.clientWidth : item.clientHeight);
             const previousIndex = paneElements.indexOf(previousElement);
@@ -1073,6 +1083,11 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                 }
                 if (nextElement.classList.contains("layout__center") && nextNowSize <= 148) {
                     return;
+                }
+                if (responsiveDock && !responsiveResizePrepared &&
+                    (previousNowSize !== previousSize || nextNowSize !== nextSize)) {
+                    responsiveDock.prepareForManualResize();
+                    responsiveResizePrepared = true;
                 }
                 if (isCenterResize) {
                     const percentages = resizePanePercentages(
@@ -1143,6 +1158,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
             previousElement.style.transition = "none";
             if (resizeElement.classList.contains("layout__resize--lr")) {
                 if (previousElement.classList.contains("layout__dockl")) {
+                    window.siyuan.layout.leftDock.prepareForManualResize();
                     document.querySelectorAll("#dockLeft .dock__item--active").forEach(item => {
                         if (bigType.includes(item.getAttribute("data-type"))) {
                             size = 320;
@@ -1151,6 +1167,7 @@ export const addResize = (obj: Layout | Wnd, after = true) => {
                     previousElement.style.width = size + "px";
                     window.siyuan.layout.leftDock.setSize();
                 } else if (nextElement.classList.contains("layout__dockr")) {
+                    window.siyuan.layout.rightDock.prepareForManualResize();
                     document.querySelectorAll("#dockRight .dock__item--active").forEach(item => {
                         if (bigType.includes(item.getAttribute("data-type"))) {
                             size = 320;
@@ -1245,6 +1262,7 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
             adjustLayout(item);
         }
     });
+    requestResponsiveDockLayout();
 };
 
 export const fixWndFlex1 = (layout: Layout) => {

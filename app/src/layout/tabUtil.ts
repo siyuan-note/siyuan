@@ -25,6 +25,7 @@ import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 import {isWindow} from "../util/functions";
 import {Wnd} from "./Wnd";
+import {requestResponsiveDockLayout} from "./dock/responsive";
 
 export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
     const isWindowMode = isWindow();
@@ -192,12 +193,17 @@ export const switchTabByIndex = (index: number) => {
 };
 
 let resizeTimeout: number;
+let resizeSaveLayout = false;
 export const resizeTabs = (isSaveLayout = true) => {
+    resizeSaveLayout = resizeSaveLayout || isSaveLayout;
+    requestResponsiveDockLayout();
     hideAllElements(["gutter"]);
     clearTimeout(resizeTimeout);
     //  .layout .fn__flex-shrink {width .15s cubic-bezier(0, 0, .2, 1) 0ms} 时需要再次计算 padding
     // PDF 避免分屏多次调用后，页码跳转到1 https://github.com/siyuan-note/siyuan/issues/5646
     resizeTimeout = window.setTimeout(() => {
+        const shouldSaveLayout = resizeSaveLayout;
+        resizeSaveLayout = false;
         const models = getAllModels();
         models.editor.forEach((item) => {
             if (item.editor && item.editor.protyle &&
@@ -230,7 +236,7 @@ export const resizeTabs = (isSaveLayout = true) => {
         });
         pdfResize();
         hideAllElements(["gutter"]);
-        if (isSaveLayout) {
+        if (shouldSaveLayout) {
             saveLayout();
         }
     }, 200);

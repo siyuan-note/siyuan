@@ -107,7 +107,7 @@ export const windowMouseMove = (event: MouseEvent) => {
                 !hasClosestByClassName(target, "protyle-toolbar") &&
                 !hasClosestByClassName(target, "protyle-util");
             const leftDock = window.siyuan.layout.leftDock;
-            const leftTrigger = canTrigger && inYRange && !leftDock.pin && leftDock.layout.element.clientWidth > 0 &&
+            const leftTrigger = canTrigger && inYRange && leftDock.isFloating() && leftDock.layout.element.clientWidth > 0 &&
                 event.clientX < Math.max(document.getElementById("dockLeft").clientWidth + 1, 16) &&
                 // 隐藏停靠栏会导致点击两侧内容触发浮动面板弹出，因此需减小鼠标范围
                 (leftDock.elements[0].clientWidth > 0 || event.clientX < 8);
@@ -118,7 +118,7 @@ export const windowMouseMove = (event: MouseEvent) => {
             }
 
             const rightDock = window.siyuan.layout.rightDock;
-            const rightTrigger = canTrigger && inYRange && !rightDock.pin && rightDock.layout.element.clientWidth > 0 &&
+            const rightTrigger = canTrigger && inYRange && rightDock.isFloating() && rightDock.layout.element.clientWidth > 0 &&
                 event.clientX > window.innerWidth - Math.max(document.getElementById("dockRight").clientWidth - 2, 16) &&
                 (rightDock.elements[0].clientWidth > 0 || event.clientX > window.innerWidth - 8);
             if (rightTrigger || rightDock.layout.element.contains(target)) {
@@ -128,7 +128,7 @@ export const windowMouseMove = (event: MouseEvent) => {
             }
 
             const bottomDock = window.siyuan.layout.bottomDock;
-            const bottomTrigger = canTrigger && !bottomDock.pin && bottomDock.layout.element.clientHeight > 0 &&
+            const bottomTrigger = canTrigger && bottomDock.isFloating() && bottomDock.layout.element.clientHeight > 0 &&
                 event.clientY > Math.min(window.innerHeight - 10, window.innerHeight - statusHeight);
             if (bottomTrigger || bottomDock.layout.element.contains(target)) {
                 bottomDock.showDockByHover();

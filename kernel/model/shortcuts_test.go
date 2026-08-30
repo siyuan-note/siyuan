@@ -16,7 +16,14 @@
 
 package model
 
-import "testing"
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
+)
 
 func TestSelectShorthandSaveBox(t *testing.T) {
 	boxes := []*Box{
@@ -55,5 +62,50 @@ func TestSelectShorthandSaveBoxSkipsUserGuide(t *testing.T) {
 	}
 	if got = selectShorthandSaveBox("", boxes[:2]); nil != got {
 		t.Fatalf("no shorthand box should be selected: %v", got)
+	}
+}
+
+func TestMoveLocalShorthandsKeepsSourceWhileSyncing(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	Conf.Lang = "en"
+	originalShortcutsPath := util.ShortcutsPath
+	util.ShortcutsPath = t.TempDir()
+	t.Cleanup(func() {
+		util.ShortcutsPath = originalShortcutsPath
+	})
+
+	shorthandsDir := filepath.Join(util.ShortcutsPath, "shorthands")
+	if err := os.MkdirAll(shorthandsDir, 0755); nil != err {
+		t.Fatalf("create shorthand directory failed: %v", err)
+	}
+	shorthandPath := filepath.Join(shorthandsDir, "1788062238740.md")
+	if err := os.WriteFile(shorthandPath, []byte("retained shorthand"), 0644); nil != err {
+		t.Fatalf("write shorthand file failed: %v", err)
+	}
+
+	syncLock.Lock()
+	_, err := MoveLocalShorthands(fixture.box.ID)
+	syncLock.Unlock()
+	if nil == err {
+		t.Fatal("expected shorthand move to pause while syncing")
+	}
+	if _, statErr := os.Stat(shorthandPath); nil != statErr {
+		t.Fatalf("shorthand source was not retained: %v", statErr)
+	}
+}
+
+func TestVerifyShorthandDocPersisted(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	bt := treenode.GetBlockTree(fixture.sourceID)
+	if err := verifyShorthandDocPersisted(bt, fixture.sourceID); nil != err {
+		t.Fatalf("verify persisted shorthand document failed: %v", err)
+	}
+
+	docPath := filepath.Join(util.DataDir, fixture.box.ID, bt.Path)
+	if err := os.Remove(docPath); nil != err {
+		t.Fatalf("remove persisted document failed: %v", err)
+	}
+	if err := verifyShorthandDocPersisted(bt, fixture.sourceID); nil == err {
+		t.Fatal("expected missing persisted shorthand document to fail verification")
 	}
 }

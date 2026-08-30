@@ -619,6 +619,24 @@ func TestCreateDocsByHPathKeepsHPathFallbackForDifferentParent(t *testing.T) {
 	}
 }
 
+func TestPerformCreateDocTransactionSyncReturnsWriteError(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	docID := "20260718000009-abcdefg"
+	tree := treenode.NewTree(fixture.box.ID, "/"+docID+".sy", "/Shorthand", "Shorthand")
+	treenode.UpsertBlockTree(tree)
+	if bt := treenode.GetBlockTree(docID); nil == bt {
+		t.Fatalf("test document block tree [%s] not found before write", docID)
+	}
+	tree.Path = "/\x00/" + docID + ".sy"
+
+	if err := performCreateDocTransaction(tree, true); nil == err {
+		t.Fatal("expected synchronous document creation to return the write error")
+	}
+	if bt := treenode.GetBlockTree(docID); nil != bt {
+		t.Fatalf("failed document block tree [%s] was not removed", docID)
+	}
+}
+
 func TestGetBoxesByPathsStrictRejectsInvalidPaths(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	tests := []struct {

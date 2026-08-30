@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -32,6 +33,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -41,6 +43,11 @@ func MoveLocalShorthands(boxID string) (retIDs []string, err error) {
 	if !gulu.File.IsDir(shorthandsDir) {
 		return
 	}
+	if !syncLock.TryLock() {
+		err = errors.New(Conf.Language(222))
+		return
+	}
+	defer syncLock.Unlock()
 
 	entries, err := os.ReadDir(shorthandsDir)
 	if nil != err {
@@ -289,15 +296,13 @@ func createShorthandDocByDOM(boxID, hPath, dom, docID string) (retID string, err
 	}
 
 	FlushTxQueue()
-	retID, err = createDocsByHPath(box.ID, hPath, dom, "", docID, false)
+	retID, err = createDocsByHPathSync(box.ID, hPath, dom, "", docID, false)
 	if nil != err {
 		return
 	}
-	FlushTxQueue()
 
 	bt := treenode.GetBlockTree(retID)
-	if nil == bt {
-		logging.LogWarnf("get block tree by id [%s] failed after create", retID)
+	if err = verifyShorthandDocPersisted(bt, retID); nil != err {
 		return
 	}
 	box.setSortByConf(path.Dir(bt.Path), retID)
@@ -305,6 +310,22 @@ func createShorthandDocByDOM(boxID, hPath, dom, docID string) (retID string, err
 	FlushTxQueue()
 	PushCreate(box, bt.Path, nil)
 	return
+}
+
+func verifyShorthandDocPersisted(bt *treenode.BlockTree, expectedID string) (err error) {
+	if nil == bt {
+		return fmt.Errorf("get block tree by id [%s] failed after create", expectedID)
+	}
+	// 清除写入缓存，确保从文件系统重新读取并验证文档。
+	cache.RemoveTreeDataInBox(expectedID, bt.BoxID)
+	persisted, err := loadTreeByBlockTree(bt)
+	if nil != err {
+		return fmt.Errorf("load created shorthand document [%s] failed: %w", expectedID, err)
+	}
+	if nil == persisted || persisted.ID != expectedID {
+		return fmt.Errorf("verify created shorthand document [%s] failed", expectedID)
+	}
+	return nil
 }
 
 var consumeShorthandsLock = sync.Mutex{}
@@ -338,6 +359,9 @@ func IsShorthandSaveBoxAvailable(boxID string) bool {
 
 func consumeShorthands() {
 	if !util.IsMobileContainer() {
+		return
+	}
+	if isSyncing.Load() {
 		return
 	}
 

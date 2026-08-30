@@ -63,9 +63,9 @@ func FlushTxQueue() {
 	}
 }
 
-// PerformTxSync 同步执行单笔事务并返回错误，供 undo/redo 重放使用。
+// PerformTxSync 同步执行单笔事务并返回错误，供需要获知落盘结果的调用方使用。
 // 与异步入队的 PerformTransactions 不同，这里直接持有 flushLock 串行执行 performTx，
-// 失败时返回原始错误（不转成推送消息），调用方据此回滚撤销栈状态。
+// 失败时返回原始错误（不转成推送消息），调用方可以保留待处理数据或回滚状态。
 func PerformTxSync(tx *Transaction) (err error) {
 	defer logging.Recover()
 	flushLock.Lock()

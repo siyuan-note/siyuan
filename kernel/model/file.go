@@ -2391,6 +2391,14 @@ func cleanBoxDocDir(p string) string {
 }
 
 func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
+	return createDoc0(boxID, p, title, dom, titleEmpty, false)
+}
+
+func createDocSync(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, err error) {
+	return createDoc0(boxID, p, title, dom, titleEmpty, true)
+}
+
+func createDoc0(boxID, p, title, dom string, titleEmpty, syncWrite bool) (tree *parse.Tree, err error) {
 	validation, err := validateCreateDoc(boxID, p, title, titleEmpty)
 	if nil != err {
 		return
@@ -2451,7 +2459,20 @@ func createDoc(boxID, p, title, dom string, titleEmpty bool) (tree *parse.Tree, 
 		unlink.Unlink()
 	}
 
+	err = performCreateDocTransaction(tree, syncWrite)
+	return
+}
+
+func performCreateDocTransaction(tree *parse.Tree, syncWrite bool) (err error) {
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
+	if syncWrite {
+		if err = PerformTxSync(transaction); nil != err {
+			// 事务在写文件前会更新块树，失败时清理未落盘文档的索引。
+			treenode.RemoveBlockTreesByRootID(tree.Box, tree.ID)
+			return
+		}
+		return
+	}
 	PerformTransactions(&[]*Transaction{transaction})
 	FlushTxQueue()
 	return

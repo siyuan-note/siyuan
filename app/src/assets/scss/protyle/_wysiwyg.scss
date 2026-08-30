@@ -569,6 +569,20 @@
       }
     }
 
+    &.custom-block {
+      min-height: 32px;
+
+      & > .custom-block__content > pre {
+        color: var(--b3-theme-on-surface-light);
+        font-family: var(--b3-font-family-code);
+        margin: 0;
+        overflow: auto;
+        padding: 8px;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+    }
+
     code:not(.hljs):empty {
       padding: 0;
     }

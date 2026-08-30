@@ -9,6 +9,7 @@ import {plantumlRender} from "../render/plantumlRender";
 import {htmlRender} from "../render/htmlRender";
 import {Constants} from "../../constants";
 import {escapeHtml} from "../../util/escape";
+import {customBlockRender} from "../../plugin/customBlockRender";
 
 export const processPasteCode = (html: string, text: string, originalTextHTML: string, protyle: IProtyle) => {
     const tempElement = document.createElement("div");
@@ -59,6 +60,7 @@ const RENDER_MAP: Record<string, (previewPanel: Element) => void> = {
 };
 
 export const processRender = (previewPanel: Element) => {
+    customBlockRender(previewPanel);
     const language = previewPanel.getAttribute("data-subtype");
     if (RENDER_MAP[language]) {
         RENDER_MAP[language](previewPanel);

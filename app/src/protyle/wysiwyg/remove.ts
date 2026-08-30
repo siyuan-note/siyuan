@@ -24,7 +24,8 @@ import {
     getTopEmptyElement,
     hasNextSibling,
     hasPreviousSibling,
-    IEmbedChildOperationContext
+    IEmbedChildOperationContext,
+    isNotEditBlock
 } from "./getBlock";
 import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement, rebalanceSbWidth, refreshSbResize} from "../../block/util";
@@ -1475,7 +1476,8 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     }
 
     if (!previousElement) {
-        if (protyle.wysiwyg.element.childElementCount > 1 && getContenteditableElement(blockElement).textContent === "") {
+        if (protyle.wysiwyg.element.childElementCount > 1 &&
+            getContenteditableElement(blockElement)?.textContent === "") {
             focusBlock(protyle.wysiwyg.element.firstElementChild.nextElementSibling);
             // 列表项中包含超级块时需要到顶层
             const topElement = getTopAloneElement(blockElement);
@@ -1499,7 +1501,8 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
     const parentElement = hasClosestBlock(getParentBlock(blockElement));
     const editableElement = getContenteditableElement(blockElement);
     let previousLastElement = getLastBlock(previousElement) as HTMLElement;
-    if (range.toString() === "" && isMobile() && previousLastElement && previousLastElement.classList.contains("hr") && getSelectionOffset(editableElement).start === 0) {
+    if (range.toString() === "" && isMobile() && previousLastElement &&
+        previousLastElement.classList.contains("hr") && editableElement && getSelectionOffset(editableElement).start === 0) {
         if (!await confirmRefRemoval(protyle,
             [previousLastElement.getAttribute("data-node-id")], [previousLastElement])) {
             return;
@@ -1517,13 +1520,20 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         previousLastElement.remove();
         return;
     }
+    if (!editableElement) {
+        if (!focusByWbr(protyle.wysiwyg.element, range)) {
+            focusBlock(previousLastElement, undefined, false);
+        }
+        return;
+    }
     const isSelectNode = previousLastElement && (
         previousLastElement.classList.contains("table") ||
         previousLastElement.classList.contains("render-node") ||
         previousLastElement.classList.contains("iframe") ||
         previousLastElement.classList.contains("hr") ||
         previousLastElement.classList.contains("av") ||
-        previousLastElement.classList.contains("code-block"));
+        previousLastElement.classList.contains("code-block") ||
+        isNotEditBlock(previousLastElement));
     const previousId = previousLastElement.getAttribute("data-node-id");
     if (isSelectNode) {
         if (previousLastElement.classList.contains("code-block")) {

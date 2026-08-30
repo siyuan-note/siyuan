@@ -17,11 +17,54 @@
 package treenode
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 )
+
+func TestCustomBlockTypeAbbr(t *testing.T) {
+	if actual := TypeAbbr(ast.NodeCustomBlock.String()); "custom" != actual {
+		t.Fatalf("expected custom block abbreviation %q, got %q", "custom", actual)
+	}
+	if actual := FromAbbrType("custom"); ast.NodeCustomBlock.String() != actual {
+		t.Fatalf("expected custom block type %q, got %q", ast.NodeCustomBlock.String(), actual)
+	}
+}
+
+func TestCustomBlockBlockDOMRoundTrip(t *testing.T) {
+	const (
+		id      = "20260830000000-custom1"
+		info    = "example-plugin/chart"
+		content = "((20260830000000-ref0001 \"reference\"))\n![image](assets/chart.png)\n{\"value\":\"A&B\"}"
+	)
+	node := &ast.Node{Type: ast.NodeCustomBlock, ID: id, CustomBlockInfo: info, Tokens: []byte(content)}
+	node.SetIALAttr("id", id)
+	node.SetIALAttr("updated", id[:14])
+
+	luteEngine := lute.New()
+	luteEngine.SetCustomBlock(true)
+	dom := luteEngine.RenderNodeBlockDOM(node)
+	if !strings.Contains(dom, `data-type="NodeCustomBlock"`) || !strings.Contains(dom, `data-info="`+info+`"`) {
+		t.Fatalf("unexpected custom block DOM: %s", dom)
+	}
+
+	tree := luteEngine.BlockDOM2Tree(dom)
+	if nil == tree || nil == tree.Root || nil == tree.Root.FirstChild {
+		t.Fatalf("custom block DOM was not parsed: %s", dom)
+	}
+	actual := tree.Root.FirstChild
+	if ast.NodeCustomBlock != actual.Type || info != actual.CustomBlockInfo || content != string(actual.Tokens) {
+		t.Fatalf("unexpected custom block round trip: type=%s, info=%q, content=%q", actual.Type, actual.CustomBlockInfo, actual.Tokens)
+	}
+
+	markdown := luteEngine.BlockDOM2Md(dom)
+	if !strings.Contains(markdown, ";;;"+info+"\n"+content+"\n;;;") {
+		t.Fatalf("unexpected custom block Markdown: %q", markdown)
+	}
+}
 
 func TestGetDocTitleImgPath(t *testing.T) {
 	tests := []struct {

@@ -19,6 +19,10 @@ import {getAllEditor} from "../layout/getAll";
 import {getPluginDockEntryKey, refreshDockCatalog} from "../config/entryVisibility/catalog";
 import {applyDockEntryVisibility, isEntryVisible} from "../config/entryVisibility/runtime";
 import {PluginLifecycleCoordinator} from "./lifecycle";
+import {
+    activateCustomBlockPlugin,
+    deactivateCustomBlockPlugin,
+} from "./customBlockRender";
 
 const requireFunc = (key: string) => {
     const modules = {
@@ -90,16 +94,23 @@ const getLifecycleManager = (app: App) => {
         onload: (plugin) => plugin.onload(),
         init: (plugin) => plugin.kernel.init(),
         onLayoutReady: (plugin) => plugin.onLayoutReady(),
-        mount: (plugin) => mountPlugin(plugin),
+        mount: (plugin) => {
+            mountPlugin(plugin);
+            activateCustomBlockPlugin(plugin.name);
+        },
         shouldReloadOnDataChange: (plugin) => plugin.onDataChanged === Plugin.prototype.onDataChanged,
         onDataChanged: (plugin) => plugin.onDataChanged(),
         onunload: (plugin) => {
+            deactivateCustomBlockPlugin(plugin.name);
             beginPluginTeardown(plugin);
             return plugin.onunload();
         },
         uninstall: (plugin) => plugin.uninstall(),
         markDisposed: (plugin) => markPluginDisposed(plugin),
-        dispose: (plugin, isUninstall) => destroyPlugin(app, plugin, isUninstall),
+        dispose: (plugin, isUninstall) => {
+            deactivateCustomBlockPlugin(plugin.name);
+            destroyPlugin(app, plugin, isUninstall);
+        },
         onError: (name, hook, error) => console.error(`plugin ${name} ${hook} error:`, error),
     });
     lifecycleManagers.set(app, manager);

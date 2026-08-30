@@ -527,6 +527,9 @@ func SetIndexAssetPath(b bool) {
 func refsFromTree(tree *parse.Tree) (refs []*Ref, fileAnnotationRefs []*FileAnnotationRef) {
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering {
+			if ast.NodeCustomBlock == n.Type {
+				return ast.WalkSkipChildren
+			}
 			return ast.WalkContinue
 		}
 
@@ -689,6 +692,9 @@ func fromTree(node *ast.Node, tree *parse.Tree) (blocks []*Block, spans []*Span,
 		blocks = append(blocks, b)
 		if 0 < len(attrs) {
 			attributes = append(attributes, attrs...)
+		}
+		if ast.NodeCustomBlock == n.Type {
+			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue
 	})

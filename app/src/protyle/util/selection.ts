@@ -1047,7 +1047,9 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
     }
 
     // hr、嵌入块、数学公式、iframe、音频、视频、图表渲染块等，删除段落块后，光标位置矫正 https://github.com/siyuan-note/siyuan/issues/4143
-    if (element.classList.contains("render-node") || element.classList.contains("iframe") || element.classList.contains("hr") || element.classList.contains("av")) {
+    if (element.classList.contains("render-node") || element.classList.contains("iframe") ||
+        element.classList.contains("hr") || element.classList.contains("av") ||
+        element.classList.contains("custom-block")) {
         const range = document.createRange();
         const type = element.getAttribute("data-type");
         let setRange = false;
@@ -1067,7 +1069,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             range.setStart(element.lastElementChild.previousElementSibling.lastElementChild.firstChild, 0);
             range.collapse(true);
             setRange = true;
-        } else if (type === "NodeIFrame" || type === "NodeWidget") {
+        } else if (type === "NodeIFrame" || type === "NodeWidget" || type === "NodeCustomBlock") {
             range.setStart(element, 0);
             setRange = true;
         } else if (type === "NodeVideo") {

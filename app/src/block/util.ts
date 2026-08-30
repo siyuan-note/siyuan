@@ -495,6 +495,9 @@ export const getLangByType = (type: string) => {
         case "NodeAudio":
             lang = window.siyuan.languages.audio;
             break;
+        case "NodeCustomBlock":
+            lang = window.siyuan.languages.custom;
+            break;
         case "NodeBlockQueryEmbed":
             lang = window.siyuan.languages.blockEmbed;
             break;

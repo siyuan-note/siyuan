@@ -96,6 +96,24 @@ func TestDecodeDocTextMarkContentPreservesEntities(t *testing.T) {
 	}
 }
 
+func TestDocDiffCustomBlockSignature(t *testing.T) {
+	newCustomBlock := func(info, content string) *ast.Node {
+		return &ast.Node{
+			Type:            ast.NodeCustomBlock,
+			CustomBlockInfo: info,
+			Tokens:          []byte(content),
+		}
+	}
+
+	base := docDiffBlockSignature(newCustomBlock("example-plugin/chart", "data"))
+	if base == docDiffBlockSignature(newCustomBlock("example-plugin/table", "data")) {
+		t.Fatal("custom block info must affect the history diff signature")
+	}
+	if base == docDiffBlockSignature(newCustomBlock("example-plugin/chart", "changed")) {
+		t.Fatal("custom block content must affect the history diff signature")
+	}
+}
+
 func TestMarkDocInlineDiff(t *testing.T) {
 	left := &ast.Node{Type: ast.NodeParagraph, ID: "20260729000000-left01"}
 	left.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte("before")})

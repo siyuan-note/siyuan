@@ -3,13 +3,14 @@ import * as assert from "node:assert/strict";
 
 let getEmbedChildOperationContext: typeof import("./getBlock").getEmbedChildOperationContext;
 let getEmbedGutterOperationContext: typeof import("./getBlock").getEmbedGutterOperationContext;
+let isNotEditBlock: typeof import("./getBlock").isNotEditBlock;
 
 before(async () => {
     Object.assign(globalThis, {
         SIYUAN_VERSION: "test",
         NODE_ENV: "test",
     });
-    ({getEmbedChildOperationContext, getEmbedGutterOperationContext} = await import("./getBlock"));
+    ({getEmbedChildOperationContext, getEmbedGutterOperationContext, isNotEditBlock} = await import("./getBlock"));
 });
 
 class TestElement {
@@ -111,5 +112,15 @@ describe("getEmbedGutterOperationContext", () => {
 
         assert.equal(context?.allowChildOperation, true);
         assert.equal(getEmbedChildOperationContext(asNode(child))?.targetElement, context?.targetElement);
+    });
+});
+
+describe("isNotEditBlock", () => {
+    it("treats custom blocks as non-editable removal boundaries", () => {
+        const customBlock = new TestElement().setAttribute("data-type", "NodeCustomBlock");
+        const paragraph = new TestElement().setAttribute("data-type", "NodeParagraph");
+
+        assert.equal(isNotEditBlock(customBlock as unknown as Element), true);
+        assert.equal(isNotEditBlock(paragraph as unknown as Element), false);
     });
 });

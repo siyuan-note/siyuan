@@ -143,6 +143,7 @@ const BLOCK_TYPE_LANG_KEYS: { [key: string]: string } = {
     NodeAudio: "audio",
     NodeWidget: "widget",
     NodeAttributeView: "database",
+    NodeCustomBlock: "custom",
 };
 
 const getGutterFixedContainerRect = (protyle: IProtyle) => {
@@ -2836,7 +2837,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
         }
         if (window.siyuan.config.cloudRegion === 0 &&
-            !["NodeThematicBreak", "NodeBlockQueryEmbed", "NodeIFrame", "NodeHTMLBlock", "NodeWidget", "NodeVideo", "NodeAudio"].includes(type) &&
+            !["NodeThematicBreak", "NodeBlockQueryEmbed", "NodeIFrame", "NodeHTMLBlock", "NodeWidget", "NodeVideo", "NodeAudio", "NodeCustomBlock"].includes(type) &&
             getContenteditableElement(nodeElement)?.textContent.trim() !== "" &&
             (type !== "NodeCodeBlock" || (type === "NodeCodeBlock" && !nodeElement.getAttribute("data-subtype")))) {
             window.siyuan.menus.menu.append(new MenuItem({

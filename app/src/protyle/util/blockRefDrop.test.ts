@@ -36,6 +36,7 @@ describe("isBlockRefDropTargetDisabled", () => {
             "NodeWidget",
             "NodeVideo",
             "NodeAudio",
+            "NodeCustomBlock",
         ].forEach(type => {
             const blockElement = createElement(type);
             assert.equal(isBlockRefDropTargetDisabled([createElement(undefined, blockElement)]), true);

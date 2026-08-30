@@ -4,6 +4,7 @@ import {destroyAIEditor} from "../../ai/editor";
 import {cancelAssetUploads} from "../upload/pluginEvent";
 import {unmountBreadcrumbButtons} from "../../plugin/breadcrumbButton";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {unregisterCustomBlockRoot} from "../../plugin/customBlockRender";
 
 export const destroy = (protyle: IProtyle) => {
     if (!protyle) {
@@ -26,6 +27,7 @@ export const destroy = (protyle: IProtyle) => {
     protyle.element.classList.remove("protyle");
     protyle.element.removeAttribute("style");
     if (protyle.wysiwyg) {
+        unregisterCustomBlockRoot(protyle.wysiwyg.element);
         protyle.wysiwyg.destroy();
         protyle.wysiwyg.tableControl?.destroy();
         protyle.wysiwyg.lastHTMLs = {};

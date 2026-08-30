@@ -23,6 +23,7 @@ const NATIVE_COMPOSITION_SNAPSHOT_TYPES = new Set([
     "NodeAttributeView",
     "NodeAudio",
     "NodeBlockQueryEmbed",
+    "NodeCustomBlock",
     "NodeHTMLBlock",
     "NodeIFrame",
     "NodeMathBlock",

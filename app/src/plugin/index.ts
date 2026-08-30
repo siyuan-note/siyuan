@@ -28,6 +28,7 @@ import {
     addBreadcrumbButton as addPluginBreadcrumbButton,
     removeBreadcrumbButton as removePluginBreadcrumbButton,
 } from "./breadcrumbButton";
+import type {TCustomBlockRender} from "./customBlockRender";
 
 const disposedPlugins = new WeakSet<Plugin>();
 
@@ -75,13 +76,9 @@ export class Plugin {
         id: string,
         callback: (protyle: import("../protyle").Protyle, nodeElement: HTMLElement) => void
     }[] = [];
-    // TODO
     public customBlockRenders: {
         [key: string]: {
-            icon: string,
-            action: "edit" | "more"[],
-            genCursor: boolean,
-            render: (options: { app: App, element: Element }) => void
+            render: TCustomBlockRender
         }
     } = {};
     public topBarIcons: Element[] = [];

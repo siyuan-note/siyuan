@@ -116,6 +116,8 @@ export const getTextStar = (blockElement: HTMLElement, contentOnly = false) => {
         refText = window.siyuan.languages.video;
     } else if ("NodeAudio" === dataType) {
         refText = window.siyuan.languages.audio;
+    } else if ("NodeCustomBlock" === dataType) {
+        refText = blockElement.getAttribute("data-content") || window.siyuan.languages.custom;
     } else if (["NodeCodeBlock", "NodeTable"].includes(dataType)) {
         refText = getPlainText(blockElement);
     } else if (blockElement.classList.contains("render-node")) {
@@ -159,6 +161,8 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
         text += blockElement.querySelector("video").getAttribute("src");
     } else if ("NodeAudio" === dataType) {
         text += blockElement.querySelector("audio").getAttribute("src");
+    } else if ("NodeCustomBlock" === dataType) {
+        text += blockElement.getAttribute("data-content") || "";
     } else if (blockElement.classList.contains("render-node")) {
         // 需在嵌入块后，代码块前
         text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));

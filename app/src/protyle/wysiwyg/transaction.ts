@@ -50,6 +50,7 @@ import {getPartialUpdateCleanupElements, shouldDeferCodeBlockCaretRestore} from 
 import {getMoveAffectedEmbedElements, shouldSyncMoveCopies} from "./transactionEmbed";
 import {cloneMoveElements, getVisibleMoveElements} from "./transactionMove";
 import {normalizeHTMLAssetIFrameBlockDOM} from "../../asset/html";
+import {disposeCustomBlocksInElement} from "../../plugin/customBlockRender";
 import {
     applyViewFoldStates,
     handleViewFoldSourceOperation,
@@ -191,6 +192,7 @@ const promiseTransaction = (options: {
                     if (wbrElement) {
                         wbrElement.remove();
                     }
+                    disposeCustomBlocksInElement(item);
                     item.outerHTML = tempElement.innerHTML;
                     updatedEmbed = true;
                 };
@@ -624,6 +626,7 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
         const data = item.getAttribute("data-subtype") === "echarts" ?
             // 图标撤销后无法渲染
             protyle.lute.SpinBlockDOM(operation.data) : operation.data;
+        disposeCustomBlocksInElement(item);
         item.insertAdjacentHTML("afterend", getVisibleFoldHeadingHTML(data));
         item = item.nextElementSibling;
         item.previousElementSibling.remove();
@@ -1631,7 +1634,12 @@ const removeUnfoldRepeatBlock = (html: string, protyle: IProtyle) => {
     const temp = document.createElement("template");
     temp.innerHTML = html;
     Array.from(temp.content.children).forEach(item => {
-        protyle.wysiwyg.element.querySelector(`[data-node-id="${item.getAttribute("data-node-id")}"]`)?.remove();
+        const repeatedElement = protyle.wysiwyg.element.querySelector(
+            `[data-node-id="${item.getAttribute("data-node-id")}"]`);
+        if (repeatedElement) {
+            disposeCustomBlocksInElement(repeatedElement);
+            repeatedElement.remove();
+        }
     });
 };
 
@@ -1733,6 +1741,7 @@ export const turnsIntoTransaction = (options: {
                 } else {
                     previousId = undefined;
                 }
+                disposeCustomBlocksInElement(item);
                 item.outerHTML = newHTML;
             } else {
                 let foldData;
@@ -1757,6 +1766,7 @@ export const turnsIntoTransaction = (options: {
                 if (foldData && foldData.undoOperations?.length > 0) {
                     undoOperations.push(...foldData.undoOperations);
                 }
+                disposeCustomBlocksInElement(item);
                 item.insertAdjacentHTML("afterend", newHTML);
                 item = item.nextElementSibling as HTMLElement;
                 item.previousElementSibling.remove();
@@ -1794,8 +1804,10 @@ export const turnsIntoTransaction = (options: {
                         id: tempItemId,
                     });
                 });
+                disposeCustomBlocksInElement(item);
                 item.outerHTML = newHTML;
             } else {
+                disposeCustomBlocksInElement(item);
                 item.remove();
             }
         }
@@ -1933,6 +1945,7 @@ export const turnListsRecursively = async (options: {
                 id: context.id,
                 data: oldHTML
             });
+            disposeCustomBlocksInElement(nodeElement);
             nodeElement.insertAdjacentHTML("afterend", newHTML);
             const newElement = nodeElement.nextElementSibling as HTMLElement;
             nodeElement.remove();
@@ -1970,6 +1983,7 @@ export const turnListsRecursively = async (options: {
             previousID: context.previousId,
             parentID: context.parentId
         });
+        disposeCustomBlocksInElement(nodeElement);
         nodeElement.insertAdjacentHTML("afterend", newHTML);
         nodeElement.remove();
     });
@@ -2053,6 +2067,7 @@ export const turnsOneInto = async (options: {
         getParentBlock(options.nodeElement).getAttribute("data-node-id") || options.protyle.block.parentID;
     // @ts-ignore
     const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);
+    disposeCustomBlocksInElement(options.nodeElement);
     options.nodeElement.insertAdjacentHTML("afterend", newHTML);
     options.nodeElement = options.nodeElement.nextElementSibling as HTMLElement;
     options.nodeElement.previousElementSibling.remove();

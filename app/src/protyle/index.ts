@@ -58,6 +58,7 @@ import {
     queueDatabaseRowRefresh,
     queueDatabaseRowRefreshForOperations
 } from "./render/av/databaseRowRefresh";
+import {registerCustomBlockRoot} from "../plugin/customBlockRender";
 
 export class Protyle {
 
@@ -133,6 +134,10 @@ export class Protyle {
         // lite 模式用前端操作日志 undo（不依赖 kernel），其余走 kernel 的 GlobalUndoLog。
         this.protyle.undo = this.protyle.lite ? new LocalUndo() : new Undo();
         this.protyle.wysiwyg = new WYSIWYG(this.protyle);
+        registerCustomBlockRoot(this.protyle.wysiwyg.element, {
+            disabled: () => this.protyle.disabled,
+            update: (element, oldHTML) => updateTransaction(this.protyle, element, oldHTML),
+        });
         this.protyle.toolbar = new Toolbar(this.protyle);
         this.protyle.scroll = new Scroll(this.protyle); // 不能使用 render.scroll 来判读是否初始化，除非重构后面用到的相关变量
         if (this.protyle.options.render.gutter) {

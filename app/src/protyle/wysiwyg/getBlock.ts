@@ -206,7 +206,7 @@ export const getContenteditableElement = (element: Element, target?: Node): Elem
         return blockElement.querySelector(".hljs").lastElementChild;
     } else if ("NodeAttributeView" === type) {
         return blockElement.querySelector(".av__title");
-    } else if (["NodeBlockQueryEmbed", "NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
+    } else if (["NodeBlockQueryEmbed", "NodeMathBlock", "NodeHTMLBlock", "NodeCustomBlock"].includes(type)) {
         return undefined;
     } else if (blockElement.getAttribute("data-node-id")) {
         return getContenteditableElement(blockElement.querySelector("[data-node-id]"));
@@ -229,7 +229,7 @@ export const isNotEditBlock = (element: Element) => {
         });
         return !hasEditable;
     }
-    return ["NodeBlockQueryEmbed", "NodeThematicBreak", "NodeMathBlock", "NodeHTMLBlock", "NodeIFrame", "NodeWidget", "NodeVideo", "NodeAudio"].includes(element.getAttribute("data-type")) ||
+    return ["NodeBlockQueryEmbed", "NodeThematicBreak", "NodeMathBlock", "NodeHTMLBlock", "NodeIFrame", "NodeWidget", "NodeVideo", "NodeAudio", "NodeCustomBlock"].includes(element.getAttribute("data-type")) ||
         (element.getAttribute("data-type") === "NodeCodeBlock" && element.classList.contains("render-node"));
 };
 

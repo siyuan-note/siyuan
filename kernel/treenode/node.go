@@ -407,6 +407,7 @@ var typeAbbrMap = map[string]string{
 	"NodeThematicBreak":    "tb",
 	"NodeVideo":            "video",
 	"NodeAudio":            "audio",
+	"NodeCustomBlock":      "custom",
 	"NodeCallout":          "callout",
 	// 行级元素
 	"NodeText":     "text",

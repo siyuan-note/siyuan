@@ -34,6 +34,7 @@ import {normalizeHTMLAssetIFrameSources} from "../../asset/html";
 import {hasFocusOffsets} from "./focusRestore";
 import {isIPhone} from "./compatibility";
 import {forEachPluginSubscriber} from "../../plugin/EventBusCore";
+import {disposeCustomBlocksInElement, setCustomBlockRootReady} from "../../plugin/customBlockRender";
 /// #if MOBILE
 import {updateMobileTitleReadonly} from "./setEditMode";
 /// #endif
@@ -229,6 +230,7 @@ const setHTML = (options: {
     if (protyle.contentElement.classList.contains("fn__none") && protyle.wysiwyg.element.innerHTML !== "") {
         return;
     }
+    setCustomBlockRootReady(protyle.wysiwyg.element, false);
 
     // XSS in inline memo elements https://github.com/siyuan-note/siyuan/issues/15280
     const parser = new DOMParser();
@@ -265,6 +267,7 @@ const setHTML = (options: {
             }
             const lastRemoveTop = removeElement.getBoundingClientRect().top;
             removeElements.forEach(item => {
+                disposeCustomBlocksInElement(item);
                 item.remove();
             });
             protyle.contentElement.scrollTop = protyle.contentElement.scrollTop + (removeElement.getBoundingClientRect().top - lastRemoveTop) - 1;
@@ -292,11 +295,13 @@ const setHTML = (options: {
                 scrollHeight -= lastElement.clientHeight + 8;   // 大部分元素的 margin
             }
             removeElements.forEach((item) => {
+                disposeCustomBlocksInElement(item);
                 item.remove();
             });
             hideElements(["toolbar"], protyle);
         }
     } else {
+        disposeCustomBlocksInElement(protyle.wysiwyg.element);
         protyle.wysiwyg.element.innerHTML = options.content;
         // 设置 innerHTML 会导致浏览器将 scrollTop 重置为 0，此处立即恢复以避免页面跳转到开头
         // https://github.com/siyuan-note/siyuan/issues/17886
@@ -375,6 +380,7 @@ const setHTML = (options: {
             setReadonlyByConfig(protyle, updateReadonly);
         }
     }
+    setCustomBlockRootReady(protyle.wysiwyg.element, true);
 
     focusElementById(protyle, options.action, options.scrollAttr, options.scrollPosition,
         options.focusAfterZoom, options.suppressFocus);

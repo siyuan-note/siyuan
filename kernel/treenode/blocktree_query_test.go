@@ -22,6 +22,7 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/88250/lute/ast"
 	"github.com/mattn/go-sqlite3"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -54,6 +55,41 @@ func TestGetRootBlockIDsByBoxID(t *testing.T) {
 
 	if rootIDs := GetRootBlockIDsByBoxID(boxID); !slices.Equal(rootIDs, []string{docID}) {
 		t.Fatalf("unexpected document root IDs: %v", rootIDs)
+	}
+}
+
+func TestCustomBlockTypeInBlockTree(t *testing.T) {
+	const (
+		boxID   = "20260830000000-box0001"
+		docID   = "20260830000001-doc0001"
+		blockID = "20260830000002-custom1"
+	)
+
+	previousBlockTreeDBPath := util.BlockTreeDBPath
+	util.BlockTreeDBPath = filepath.Join(t.TempDir(), "blocktree.db")
+	InitBlockTree(true)
+	t.Cleanup(func() {
+		CloseDatabase()
+		util.BlockTreeDBPath = previousBlockTreeDBPath
+		if "" != previousBlockTreeDBPath {
+			InitBlockTree(false)
+		}
+	})
+
+	tree := NewTree(boxID, "/"+docID+".sy", "/Document", "Document")
+	tree.Root.FirstChild.Unlink()
+	customBlock := &ast.Node{Type: ast.NodeCustomBlock, ID: blockID, CustomBlockInfo: "example-plugin/chart", Tokens: []byte("payload")}
+	customBlock.SetIALAttr("id", blockID)
+	customBlock.SetIALAttr("updated", blockID[:14])
+	tree.Root.AppendChild(customBlock)
+	UpsertBlockTree(tree)
+
+	blockTree := GetBlockTreeInBox(blockID, boxID)
+	if nil == blockTree {
+		t.Fatal("custom block was not written to blocktree")
+	}
+	if "custom" != blockTree.Type || docID != blockTree.ParentID {
+		t.Fatalf("unexpected custom blocktree: type=%q, parentID=%q", blockTree.Type, blockTree.ParentID)
 	}
 }
 

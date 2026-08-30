@@ -66,6 +66,8 @@ describe("file tree icon", () => {
         assert.match(getFileTreeIconHTML("", "notebook", "", false, true), /#iconNotebook/);
         assert.match(getFileTreeIconHTML("", "folder", "", false, true), /#iconFileText/);
         assert.match(getFileTreeIconHTML("", "file", "", false, true), /#iconFile/);
+        assert.equal(getFileTreeIconHTML("", "notebook", "b3-menu__icon", true, true),
+            '<svg class="b3-menu__icon"><use xlink:href="#iconNotebook"></use></svg>');
         assert.equal(getDocumentIconHTML("", "mobile-tabs__item-icon", true),
             '<svg class="mobile-tabs__item-icon"><use xlink:href="#iconFile"></use></svg>');
     });

@@ -222,11 +222,10 @@ func TestLoadSkillReadsOnlyEnabledUserResources(t *testing.T) {
 	}
 }
 
-func TestLoadSkillRejectsUnsafeOrOversizedResources(t *testing.T) {
+func TestLoadSkillRejectsUnsafeOrUnsupportedResources(t *testing.T) {
 	workspaceRoot, _ := setSkillTestRoots(t)
 	writeSkill(t, workspaceRoot, "safe", "safe", "description", "body")
-	legacyEncoded := []byte{0xd6, 0xd0, 0xce, 0xc4}
-	writeSkillResource(t, workspaceRoot, "safe", "legacy-gbk.txt", legacyEncoded)
+	writeSkillResource(t, workspaceRoot, "safe", "invalid-utf8.txt", []byte{0xd6, 0xd0, 0xce, 0xc4})
 	writeSkillResource(t, workspaceRoot, "safe", "limit.txt", bytes.Repeat([]byte("x"), maxSkillResourceBytes))
 	writeSkillResource(t, workspaceRoot, "safe", "large.txt", bytes.Repeat([]byte("x"), maxSkillResourceBytes+1))
 
@@ -240,9 +239,9 @@ func TestLoadSkillRejectsUnsafeOrOversizedResources(t *testing.T) {
 			t.Errorf("LoadSkill(%q) error = %v", locator, err)
 		}
 	}
-	legacy, err := LoadSkill("safe/legacy-gbk.txt", nil)
-	if err != nil || !bytes.Equal([]byte(legacy.Content), legacyEncoded) {
-		t.Fatalf("legacy-encoded resource = %v, %v", []byte(legacy.Content), err)
+	if _, err := LoadSkill("safe/invalid-utf8.txt", nil); err == nil ||
+		!strings.Contains(err.Error(), "skill resource is not valid UTF-8") {
+		t.Fatalf("invalid UTF-8 resource error = %v", err)
 	}
 	atLimit, err := LoadSkill("safe/limit.txt", nil)
 	if err != nil || len(atLimit.Content) != maxSkillResourceBytes {

@@ -28,6 +28,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
@@ -385,6 +386,9 @@ func readSkillResource(skillDir, skillName, resource string) (string, error) {
 	}
 	if len(data) > maxSkillResourceBytes {
 		return "", fmt.Errorf("skill resource exceeds the %d byte limit: %s/%s", maxSkillResourceBytes, skillName, resource)
+	}
+	if !utf8.Valid(data) {
+		return "", fmt.Errorf("skill resource is not valid UTF-8: %s/%s", skillName, resource)
 	}
 	return string(data), nil
 }

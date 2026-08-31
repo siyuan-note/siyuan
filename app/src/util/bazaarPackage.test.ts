@@ -220,18 +220,33 @@ describe("getBazaarFundingItems", () => {
             github: "sponsor",
             custom: ["custom text", "https://example.com/custom", "custom text"],
         }), [
-            "https://opencollective.com/collective",
-            "https://example.com/patreon",
-            "https://github.com/sponsors/sponsor",
-            "custom text",
-            "https://example.com/custom",
-            "custom text",
+            {url: "https://opencollective.com/collective"},
+            {url: "https://example.com/patreon"},
+            {url: "https://github.com/sponsors/sponsor"},
+            {url: "custom text"},
+            {url: "https://example.com/custom"},
+            {url: "custom text"},
         ]);
     });
 
     it("removes empty values without discarding later custom items", () => {
-        assert.deepEqual(getBazaarFundingItems({custom: ["", "https://example.com"]}), ["https://example.com"]);
+        assert.deepEqual(getBazaarFundingItems({custom: ["", "https://example.com"]}), [
+            {url: "https://example.com"},
+        ]);
         assert.deepEqual(getBazaarFundingItems(undefined), []);
+    });
+
+    it("preserves labeled links after custom items", () => {
+        assert.deepEqual(getBazaarFundingItems({
+            custom: ["https://example.com/custom"],
+            links: [
+                {label: "Buy me a coffee", url: "https://example.com/coffee"},
+                {label: "Empty", url: ""},
+            ],
+        }), [
+            {url: "https://example.com/custom"},
+            {label: "Buy me a coffee", url: "https://example.com/coffee"},
+        ]);
     });
 });
 

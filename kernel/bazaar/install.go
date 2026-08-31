@@ -96,7 +96,7 @@ var packageManifestNames = func() map[string]string {
 }()
 
 // InstallPackage 安装集市包
-func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageName string, update bool) error {
+func InstallPackage(repoURL, repoHash, repoRef, installPath, systemID, pkgType, packageName string, update bool) error {
 	var fallbackInstallTime time.Time
 	if update {
 		if info, statErr := os.Stat(installPath); statErr == nil {
@@ -116,7 +116,7 @@ func InstallPackage(repoURL, repoHash, installPath, systemID, pkgType, packageNa
 
 	// 记录首次安装时间或最近更新时间
 	now := time.Now()
-	recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update)
+	recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update, repoURL, repoRef)
 
 	// 文件夹的修改时间设置为当前操作时间
 	if err = os.Chtimes(installPath, now, now); err != nil {
@@ -258,7 +258,7 @@ func InstallLocalPackage(sourcePath, installPath, pkgType, packageName string, u
 
 	RemoveInstalledPackageSizeCache(pkgType, packageName)
 	now := time.Now()
-	recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update)
+	recordPackageOperationTime(pkgType, packageName, now, fallbackInstallTime, update, "", "")
 	if chtimesErr := os.Chtimes(installPath, now, now); chtimesErr != nil {
 		logging.LogWarnf("set package [%s] folder mtime failed: %s", packageName, chtimesErr)
 	}

@@ -419,17 +419,28 @@ export const bazaar = {
             return `${space}<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" class="block__icon block__icon--show ariaLabel" data-position="north" aria-label="${window.siyuan.languages.sponsor} ${escapeAttr(funding)}"><svg class="ft__pink"><use xlink:href="#iconHeart"></use></svg></span>`;
         }
     },
-    _genReadmeFundingHTML(funding: string): string {
+    _genReadmeFundingHTML(funding: {url: string, label?: string}): string {
         try {
-            const url = new URL(funding);
+            const url = new URL(funding.url);
             if (!["http:", "https:", "mailto:"].includes(url.protocol)) {
                 throw new Error("not an allowed URL protocol");
             }
-            const displayFunding = url.host || url.pathname || funding;
-            return `<a target="_blank" href="${escapeAttr(funding)}" title="${escapeAttr(funding)}" class="item__meta-funding">${escapeHtml(displayFunding)}</a>`;
+            const displayFunding = funding.label?.trim() || url.host || url.pathname || funding.url;
+            return `<a target="_blank" href="${escapeAttr(funding.url)}" title="${escapeAttr(funding.url)}" class="item__meta-funding">${escapeHtml(displayFunding)}</a>`;
         } catch (e) {
-            return `<span data-type="copy-funding" data-funding="${escapeAttr(funding)}" title="${escapeAttr(funding)}" class="item__meta-funding ft__primary fn__pointer">${escapeHtml(funding)}</span>`;
+            const displayFunding = funding.label?.trim() || funding.url;
+            return `<span data-type="copy-funding" data-funding="${escapeAttr(funding.url)}" title="${escapeAttr(funding.url)}" class="item__meta-funding ft__primary fn__pointer">${escapeHtml(displayFunding)}</span>`;
         }
+    },
+    _genPackageIconHTML(iconURL: string, detail = false): string {
+        if (iconURL) {
+            const className = detail ? " class=\"item__img\"" : "";
+            return `<img${className} src="${escapeAttr(iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'">`;
+        }
+        if (detail) {
+            return "<svg class=\"item__img item__img--placeholder\"><use xlink:href=\"#iconBazaar\"></use></svg>";
+        }
+        return "<span><svg class=\"b3-card__icon\"><use xlink:href=\"#iconBazaar\"></use></svg></span>";
     },
     _genIncompatibleChipHTML(item: IBazaarItem, source: "installed" | "bazaar", bazaarType: TBazaarType) {
         const incompatible = bazaarType === "themes" ?
@@ -474,7 +485,7 @@ export const bazaar = {
     _genInvalidDownloadedCardHTML(item: IBazaarItem, bazaarType: TBazaarType) {
         const tip = bazaar._getInvalidPackageTip(item.invalidReason);
         return `<div data-name="${escapeAttr(item.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card">
-    <div class="b3-card__img"><img src="/stage/images/icon.png" loading="lazy"/></div>
+    <div class="b3-card__img">${bazaar._genPackageIconHTML("")}</div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">${escapeHtml(item.name)}</div>
     </div>
@@ -761,7 +772,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         const showDisable = item.installed && item.current && ["icons", "themes"].includes(bazaarType);
         return `<div data-name="${escapeAttr(item.name)}" data-package-type="${bazaarType}" data-package-source="bazaar" class="b3-card${item.current ? " b3-card--current" : ""}">
     <div class="b3-card__img">
-        <img src="${escapeAttr(item.iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/>
+        ${bazaar._genPackageIconHTML(item.iconURL)}
     </div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info fn__flex-1">
@@ -846,7 +857,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         const ratingKey = bazaar._getRatingKey(bazaarType, installed.name);
         const ratingLoaded = isBazaarPackageRatingLoaded("updated", bazaar._data.downloadedRatingKeys.has(ratingKey));
         return `<div class="b3-card" data-name="${escapeAttr(installed.name)}" data-package-type="${bazaarType}" data-package-source="updated">
-    <div class="b3-card__img"><img src="${escapeAttr(installed.iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
+    <div class="b3-card__img">${bazaar._genPackageIconHTML(installed.iconURL)}</div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             ${escapeHtml(installed.preferredName)}
@@ -1099,7 +1110,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                     const available = bazaar._getUpdatedItem(bazaarType, bazaarItem.name)?.available;
                     const ratingKey = bazaar._getRatingKey(bazaarType, bazaarItem.name);
                     return `<div data-name="${escapeAttr(bazaarItem.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}">
-    <div class="b3-card__img"><img src="${escapeAttr(bazaarItem.iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'"/></div>
+    <div class="b3-card__img">${bazaar._genPackageIconHTML(bazaarItem.iconURL)}</div>
     <div class="fn__flex-1 fn__flex-column">
         <div class="b3-card__info b3-card__info--left fn__flex-1">
             ${escapeHtml(bazaarItem.preferredName)}
@@ -1308,7 +1319,7 @@ type="checkbox">
 </div>` : "";
         const fundingItems = getBazaarFundingItems(resourceData.funding);
         if (fundingItems.length === 0 && resourceData.preferredFunding) {
-            fundingItems.push(resourceData.preferredFunding);
+            fundingItems.push({url: resourceData.preferredFunding});
         }
         const packageSection = `<section class="item__meta-section">
     <div class="item__meta-title">${window.siyuan.languages.bazaarPackageInfo}</div>
@@ -1324,10 +1335,12 @@ type="checkbox">
         ${bazaar._genReadmeActionsHTML(bazaarType, installed, available)}
         ${bazaar._genReadmeUpdateButtonHTML(available, bazaarType, Boolean(installed))}
     </div>`;
+        const previewHTML = displayData.previewURL ?
+            `<div class="item__preview" data-preview-url="${escapeAttr(displayData.previewURL)}"></div>` : "";
         readmeElement.innerHTML = `${isMobile() ? backHeaderHTML : ""}<div class="item__body"><div class="item__side" data-from="${from}" data-name="${escapeAttr(displayData.name)}" data-package-type="${bazaarType}" data-repourl="${escapeAttr(resourceData.repoURL)}" data-progress-id="${escapeAttr(available?.repoURL || resourceData.repoURL)}">
     ${isMobile() ? "" : backHeaderHTML}
     <div class="fn__flex-1">
-        <img class="item__img" src="${escapeAttr(displayData.iconURL)}" loading="lazy" onerror="this.src='/stage/images/icon.png'">
+        ${bazaar._genPackageIconHTML(displayData.iconURL, true)}
         <div>
             <span class="item__title">${escapeHtml(displayData.preferredName)}</span>
         </div>
@@ -1353,7 +1366,7 @@ type="checkbox">
     ${isMobile() ? "" : readmeActionsHTML}
 </div>
 <div class="item__main">
-    <div class="item__preview" data-preview-url="${escapeAttr(displayData.previewURL)}" style="background-image: url(${escapeAttr(displayData.previewURL)})"></div>
+    ${previewHTML}
     <div class="b3-typography${displayData.preferredDesc ? "" : " fn__none"}">
         <blockquote>
             <p>
@@ -1365,6 +1378,10 @@ type="checkbox">
         <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
     </div>
 </div></div>${isMobile() ? readmeActionsHTML : ""}`;
+        const previewElement = readmeElement.querySelector<HTMLElement>(".item__preview");
+        if (previewElement) {
+            previewElement.style.backgroundImage = `url(${JSON.stringify(displayData.previewURL)})`;
+        }
         const isInstalledReadme = from === "downloaded";
         if (isInstalledReadme) {
             const mdElement = readmeElement.querySelector(".item__readme");
@@ -2621,6 +2638,7 @@ type="checkbox">
                             repoURL: installItem.repoURL,
                             packageName: installItem.name,
                             repoHash: installItem.repoHash,
+                            repoRef: installItem.repoRef || "",
                             ...themeAppearanceMode,
                             frontend: getFrontend()
                         }, response => {

@@ -17,8 +17,10 @@
 package bazaar
 
 import (
+	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 
@@ -87,20 +89,24 @@ func PackageDirContainsFile(dirPath string) (bool, error) {
 // SetInstalledPackageMetadata 设置本地集市包的通用元数据
 func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType string) bool {
 	clearBazaarPackageRating(pkg)
+	pkg.InstallTime, pkg.UpdateTime = getPackageTimes(pkgType, pkg.Name, installPath)
+	pkg.RepoRef = getPackageRepoRef(pkgType, pkg.Name)
+	cacheVersion := installedPackageCacheVersion(pkg)
 	if pkg.InvalidReason != "" {
 		pkg.PreferredName = pkg.Name
 		pkg.Installed = true
-		pkg.InstallTime, pkg.UpdateTime = getPackageTimes(pkgType, pkg.Name, installPath)
 		pkg.HInstallDate = time.UnixMilli(pkg.InstallTime).Format("2006-01-02")
 		return true
 	}
 
 	// 展示信息
-	pkg.IconURL = baseURLPath + "icon.png"
-	pkg.PreviewURL = baseURLPath + "preview.png"
+	pkg.IconURL = installedPackageImageURL(installPath, baseURLPath, packageImageName(pkg.Icon, "icon.png"), cacheVersion)
+	pkg.PreviewURL = installedPackageImageURL(installPath, baseURLPath, packageImageName(pkg.Preview, "preview.png"), cacheVersion)
 	pkg.PreferredName = GetPreferredLocaleString(pkg.DisplayName, pkg.Name)
 	pkg.PreferredDesc = GetPreferredLocaleString(pkg.Description, "")
-	pkg.PreferredReadme = getInstalledPackageREADME(installPath, baseURLPath, pkg.Readme)
+	sourceRepoURL, sourceRepoRef := getPackageSource(pkgType, pkg.Name)
+	pkg.PreferredReadme = getInstalledPackageREADME(installPath, baseURLPath, sourceRepoURL, sourceRepoRef,
+		cacheVersion, pkg.Readme)
 	pkg.PreferredFunding = getPreferredFunding(pkg.Funding)
 
 	// 安装状态
@@ -113,11 +119,46 @@ func SetInstalledPackageMetadata(pkg *Package, installPath, baseURLPath, pkgType
 		pkg.RepoURL = ""
 	}
 
-	// 安装信息
-	pkg.InstallTime, pkg.UpdateTime = getPackageTimes(pkgType, pkg.Name, installPath)
 	pkg.HInstallDate = time.UnixMilli(pkg.InstallTime).Format("2006-01-02")
 
 	return true
+}
+
+// RefreshInstalledPackageREADME 使用已确认的在线版本来源重新渲染本地 README。
+func RefreshInstalledPackageREADME(pkg *Package, installPath, baseURLPath, repoURL, repoRef string) {
+	if pkg == nil {
+		return
+	}
+	repoURL, repoRef = normalizeGitHubPackageSource(repoURL, repoRef)
+	if repoURL == "" || repoRef == "" {
+		return
+	}
+	pkg.PreferredReadme = getInstalledPackageREADME(installPath, baseURLPath, repoURL, repoRef,
+		installedPackageCacheVersion(pkg), pkg.Readme)
+	pkg.RepoRef = repoRef
+}
+
+func installedPackageCacheVersion(pkg *Package) int64 {
+	ret := pkg.InstallTime
+	if pkg.UpdateTime > ret {
+		ret = pkg.UpdateTime
+	}
+	return ret
+}
+
+func installedPackageImageURL(installPath, baseURLPath, imageName string, cacheVersion int64) string {
+	if !isSupportedPackageImageName(imageName) {
+		return ""
+	}
+	info, err := os.Stat(filepath.Join(installPath, imageName))
+	if err != nil || !info.Mode().IsRegular() {
+		return ""
+	}
+	ret := baseURLPath + url.PathEscape(imageName)
+	if cacheVersion > 0 {
+		ret += "?v=" + strconv.FormatInt(cacheVersion, 10)
+	}
+	return ret
 }
 
 // GetInstalledPackageSize 获取本地集市包的安装大小，结果缓存一分钟
@@ -193,8 +234,10 @@ type BazaarInfo struct {
 
 // PackageInfo 集市包的持久化信息
 type PackageInfo struct {
-	InstallTime int64 `json:"installTime"` // 安装时间戳（毫秒）
-	UpdateTime  int64 `json:"updateTime"`  // 更新时间戳（毫秒）
+	InstallTime int64  `json:"installTime"` // 安装时间戳（毫秒）
+	UpdateTime  int64  `json:"updateTime"`  // 更新时间戳（毫秒）
+	RepoURL     string `json:"repoURL,omitempty"`
+	RepoRef     string `json:"repoRef,omitempty"`
 }
 
 var (
@@ -286,8 +329,10 @@ func saveBazaarInfo() {
 }
 
 // recordPackageOperationTime 记录集市包的首次安装时间或最近更新时间
-func recordPackageOperationTime(pkgType, pkgName string, operationTime, fallbackInstallTime time.Time, update bool) {
+func recordPackageOperationTime(pkgType, pkgName string, operationTime, fallbackInstallTime time.Time, update bool,
+	repoURL, repoRef string) {
 	getBazaarInfo()
+	repoURL, repoRef = normalizeGitHubPackageSource(repoURL, repoRef)
 
 	bazaarInfoCacheLock.Lock()
 	defer bazaarInfoCacheLock.Unlock()
@@ -318,7 +363,27 @@ func recordPackageOperationTime(pkgType, pkgName string, operationTime, fallback
 		p.InstallTime = operationTime.UnixMilli()
 		p.UpdateTime = 0
 	}
+	p.RepoURL = repoURL
+	p.RepoRef = repoRef
 	saveBazaarInfo()
+}
+
+func getPackageSource(pkgType, pkgName string) (repoURL, repoRef string) {
+	getBazaarInfo()
+	bazaarInfoCacheLock.RLock()
+	defer bazaarInfoCacheLock.RUnlock()
+	if bazaarInfoCache == nil || bazaarInfoCache.Packages[pkgType] == nil {
+		return
+	}
+	if info := bazaarInfoCache.Packages[pkgType][pkgName]; info != nil {
+		return normalizeGitHubPackageSource(info.RepoURL, info.RepoRef)
+	}
+	return
+}
+
+func getPackageRepoRef(pkgType, pkgName string) string {
+	_, repoRef := getPackageSource(pkgType, pkgName)
+	return repoRef
 }
 
 // ensurePackageInstallTime 在没有首次安装时间时进行初始化

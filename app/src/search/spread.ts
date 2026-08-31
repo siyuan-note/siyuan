@@ -6,6 +6,7 @@ import {focusByRange} from "../protyle/util/selection";
 import {genSearch, updateConfig} from "./util";
 import type {App} from "../index";
 import {cancelSearchRequest} from "./request";
+import {resolveGlobalSearchScope} from "./config";
 
 export const openSearch = async (options: {
     app: App,
@@ -36,13 +37,9 @@ export const openSearch = async (options: {
             idPath[0] = pathPosix().join(idPath[0], options.searchPath);
         }
     } else if (Constants.DIALOG_GLOBALSEARCH === options.hotkey) {
-        if (localData.removed) {
-            hPath = "";
-            idPath = [];
-        } else {
-            hPath = localData.hPath;
-            idPath = [...localData.idPath];
-        }
+        const globalScope = resolveGlobalSearchScope(localData);
+        hPath = globalScope.hPath;
+        idPath = globalScope.idPath;
     }
     const config = {
         removed: localData.removed,
@@ -70,19 +67,23 @@ export const openSearch = async (options: {
                 cloneData.k = selectText;
             }
             item.element.setAttribute("data-key", options.hotkey);
+            const updateOptions = {
+                persistedConfig: localData.removed ? undefined : localData,
+                useCurrentPath: false,
+            };
             if (options.notebookId || options.notebookIds?.length) {
                 cloneData.hasReplace = options.hotkey === Constants.DIALOG_REPLACE;
                 cloneData.hPath = hPath;
                 cloneData.idPath = [...idPath];
-                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit, updateOptions);
             } else if (options.hotkey === Constants.DIALOG_REPLACE) {
                 cloneData.hasReplace = true;
-                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit, updateOptions);
             } else if (options.hotkey === Constants.DIALOG_GLOBALSEARCH) {
                 cloneData.hasReplace = false;
-                cloneData.hPath = "";
-                cloneData.idPath = [];
-                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                cloneData.hPath = hPath;
+                cloneData.idPath = [...idPath];
+                item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit, updateOptions);
             } else if (options.hotkey === Constants.DIALOG_SEARCH) {
                 cloneData.hasReplace = false;
                 const toPath = item.editors.edit.protyle.path;
@@ -92,9 +93,7 @@ export const openSearch = async (options: {
                     }
                     cloneData.idPath = [pathPosix().join(item.editors.edit.protyle.notebookId, toPath)];
                     cloneData.hPath = response.data[0];
-                    item.data.idPath = cloneData.idPath;
-                    item.data.hPath = cloneData.hPath;
-                    item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit);
+                    item.data = updateConfig(searchElement, cloneData, item.data, item.editors.edit, updateOptions);
                 });
             }
             return true;

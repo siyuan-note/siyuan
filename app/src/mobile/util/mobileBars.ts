@@ -15,6 +15,7 @@ let selectionObserver: MutationObserver | undefined;
 let selectionFrame = 0;
 let programmaticScrollTimeout = 0;
 let initialized = false;
+let breadcrumbPositionChange: (() => void) | undefined;
 
 const hasTextSelection = () => {
     const selection = getSelection();
@@ -49,7 +50,13 @@ const renderMobileBars = () => {
         topbarElement.setAttribute("aria-hidden", immersive ? "true" : "false");
     }
     const breadcrumbElement = document.querySelector<HTMLElement>("#editor > .protyle-breadcrumb");
-    breadcrumbElement?.style.setProperty("--mobile-bar-translate-y", `${0 - barsState.readingBarsOffset}px`);
+    const breadcrumbTranslateY = `${0 - barsState.readingBarsOffset}px`;
+    const breadcrumbPositionChanged = breadcrumbElement &&
+        breadcrumbElement.style.getPropertyValue("--mobile-bar-translate-y") !== breadcrumbTranslateY;
+    breadcrumbElement?.style.setProperty("--mobile-bar-translate-y", breadcrumbTranslateY);
+    if (breadcrumbPositionChanged) {
+        breadcrumbPositionChange?.();
+    }
     const bottomBarElement = document.getElementById("mobileBottomBar");
     if (bottomBarElement) {
         bottomBarElement.style.setProperty("--mobile-bar-translate-y", `${progress * 100}%`);
@@ -114,7 +121,8 @@ const onScroll = () => {
     });
 };
 
-export const bindMobileBarsScroll = (element: HTMLElement) => {
+export const bindMobileBarsScroll = (element: HTMLElement, onBreadcrumbPositionChange?: () => void) => {
+    breadcrumbPositionChange = onBreadcrumbPositionChange;
     if (scrollElement === element) {
         resetMobileBars(element.scrollTop);
         updateSelectionState();
@@ -150,6 +158,7 @@ export const clearMobileBarsScroll = () => {
     selectionObserver?.disconnect();
     selectionObserver = undefined;
     scrollElement = undefined;
+    breadcrumbPositionChange = undefined;
     resetMobileBars(0);
 };
 

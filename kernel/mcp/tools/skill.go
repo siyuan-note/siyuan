@@ -19,6 +19,7 @@ package tools
 import (
 	"fmt"
 	"html"
+	"path/filepath"
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -27,12 +28,15 @@ import (
 
 var SkillTool = &Tool{
 	Name:        "skill",
-	Description: "Skill operations: load(name), save(name, content), install(url), remove(name), rename(name, new_name), list().\n\n" + skillListDesc(),
+	Description: "Skill operations: load(name) loads Skill instructions; load(name/resource-path) loads a bundled text resource; save(name, content), install(url), remove(name), rename(name, new_name), list().\n\n" + skillListDesc(),
 	InputSchema: ToolSchema{
 		Type: "object",
 		Properties: map[string]Property{
-			"action":   {Type: "string", Description: "Operation", Enum: []string{"load", "save", "install", "remove", "rename", "list"}},
-			"name":     {Type: "string", Description: "Skill name (directory name)"},
+			"action": {Type: "string", Description: "Operation", Enum: []string{"load", "save", "install", "remove", "rename", "list"}},
+			"name": {
+				Type:        "string",
+				Description: "Skill name. For load, use <skill-name> for instructions or <skill-name>/<relative-resource-path> for a bundled text resource",
+			},
 			"content":  {Type: "string", Description: "SKILL.md full content with YAML frontmatter (for save)"},
 			"url":      {Type: "string", Description: "Skill source for install: 'owner/repo' shorthand (e.g. Tencent/WeChatReading), a full GitHub URL, a raw SKILL.md URL, or a release zip URL"},
 			"new_name": {Type: "string", Description: "New skill name (for rename)"},
@@ -87,21 +91,76 @@ func skillLoad(args map[string]any) (CallToolResult, error) {
 		}, nil
 	}
 
-	content := util.LoadSkillContent(name, model.EnabledUserSkills())
-	if content == "" {
+	loaded, err := util.LoadSkill(name, model.EnabledUserSkills())
+	if err != nil {
 		return CallToolResult{
-			Content: []ContentItem{{Type: "text", Text: fmt.Sprintf("skill not found: %s", name)}},
+			Content: []ContentItem{{Type: "text", Text: err.Error()}},
 			IsError: true,
 		}, nil
 	}
 
-	// 变量（非敏感）在技能正文注入对话时解析，让 LLM 看到实际值；密钥不进上下文。
-	content = model.Conf.Variables.Resolve(content)
-
-	result := "<skill_content name=\"" + html.EscapeString(name) + "\">\n\n" + content + "\n\n</skill_content>"
+	var result string
+	if loaded.ResourcePath == "" {
+		// Variables.Resolve 还会匹配 $NAME 和 ${NAME}。
+		// 资源可能包含脚本或模板，因此只解析技能正文，避免误改资源内容。
+		loaded.Content = model.Conf.Variables.Resolve(loaded.Content)
+		result = formatSkillContent(loaded)
+	} else {
+		result = formatSkillResource(loaded)
+	}
 	return CallToolResult{
 		Content: []ContentItem{{Type: "text", Text: result}},
 	}, nil
+}
+
+func formatSkillContent(loaded *util.SkillLoadResult) string {
+	var sb strings.Builder
+	sb.WriteString(`<skill_content name="`)
+	sb.WriteString(html.EscapeString(loaded.Name))
+	sb.WriteString("\">\n\n")
+	sb.WriteString(loaded.Content)
+
+	if len(loaded.Resources) > 0 || loaded.ResourcesTruncated {
+		sb.WriteString("\n\n<skill_resources")
+		if loaded.ResourcesTruncated {
+			sb.WriteString(` truncated="true"`)
+		}
+		sb.WriteString(">\n")
+		for _, resource := range loaded.Resources {
+			sb.WriteString("  <file>")
+			sb.WriteString(html.EscapeString(resource))
+			sb.WriteString("</file>\n")
+		}
+		sb.WriteString("</skill_resources>")
+	}
+
+	if location := workspaceSkillLocation(loaded.SkillDir); location != "" {
+		sb.WriteString("\n\n<skill_location path=\"")
+		sb.WriteString(html.EscapeString(location))
+		sb.WriteString("\">\n")
+		sb.WriteString("  For this skill directory, use the `file` tool's read-only actions: `read`, `list`, `grep`, and `find`.\n")
+		sb.WriteString("</skill_location>")
+	}
+
+	sb.WriteString("\n\n</skill_content>")
+	return sb.String()
+}
+
+func formatSkillResource(loaded *util.SkillLoadResult) string {
+	return `<skill_resource skill="` + html.EscapeString(loaded.Name) + `" path="` +
+		html.EscapeString(loaded.ResourcePath) + "\">\n\n" + loaded.Content + "\n\n</skill_resource>"
+}
+
+func workspaceSkillLocation(skillDir string) string {
+	location, err := filepath.Rel(util.WorkspaceDir, skillDir)
+	if err != nil {
+		return ""
+	}
+	location = filepath.ToSlash(location)
+	if _, err = resolvePath(location); err != nil {
+		return ""
+	}
+	return location
 }
 
 func skillSave(args map[string]any) (CallToolResult, error) {

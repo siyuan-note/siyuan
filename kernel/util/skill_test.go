@@ -17,6 +17,8 @@
 package util
 
 import (
+	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -79,6 +81,17 @@ func writeSkill(t *testing.T, root, id, name, description, body string) {
 	}
 }
 
+func writeSkillResource(t *testing.T, root, id, resource string, content []byte) {
+	t.Helper()
+	file := filepath.Join(root, id, filepath.FromSlash(resource))
+	if err := os.MkdirAll(filepath.Dir(file), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(file, content, 0644); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestDiscoverSkillsUsesEnabledUserSkillsWithWorkspacePriority(t *testing.T) {
 	workspaceRoot, userRoot := setSkillTestRoots(t)
 	writeSkill(t, workspaceRoot, "workspace-shared", "Shared", "workspace description", "workspace body")
@@ -95,11 +108,13 @@ func TestDiscoverSkillsUsesEnabledUserSkillsWithWorkspacePriority(t *testing.T) 
 	if got := DiscoverSkills([]string{"SHARED", "external"}); !reflect.DeepEqual(got, want) {
 		t.Fatalf("DiscoverSkills(enabled) = %#v, want %#v", got, want)
 	}
-	if got := LoadSkillContent("shared", []string{"shared", "external"}); got != "workspace body" {
-		t.Fatalf("LoadSkillContent(shared) = %q", got)
+	shared, err := LoadSkill("shared", []string{"shared", "external"})
+	if err != nil || shared.Content != "workspace body" {
+		t.Fatalf("LoadSkill(shared) = %#v, %v", shared, err)
 	}
-	if got := LoadSkillContent("External", []string{"external"}); got != "external body" {
-		t.Fatalf("LoadSkillContent(external) = %q", got)
+	external, err := LoadSkill("External", []string{"external"})
+	if err != nil || external.Content != "external body" {
+		t.Fatalf("LoadSkill(external) = %#v, %v", external, err)
 	}
 }
 
@@ -154,6 +169,155 @@ func TestDiscoverUserSkillsFollowsDirectorySymlinks(t *testing.T) {
 	want := []UserSkillInfo{{ID: "linked", Name: "Linked", Description: "linked description"}}
 	if got := DiscoverUserSkills(nil); !reflect.DeepEqual(got, want) {
 		t.Fatalf("DiscoverUserSkills(symlink) = %#v, want %#v", got, want)
+	}
+}
+
+func TestLoadSkillListsAndReadsBundledResources(t *testing.T) {
+	workspaceRoot, _ := setSkillTestRoots(t)
+	writeSkill(t, workspaceRoot, "skill-dir", "DisplayName", "description", "body {{vars.VALUE}}")
+	writeSkillResource(t, workspaceRoot, "skill-dir", "scripts/run.py", []byte("print('ok')\n"))
+	writeSkillResource(t, workspaceRoot, "skill-dir", "references/spec.md", []byte("{{vars.VALUE}}\n"))
+	writeSkillResource(t, workspaceRoot, "skill-dir", ".git/config", []byte("ignored"))
+	writeSkillResource(t, workspaceRoot, "skill-dir", ".venv/pyvenv.cfg", []byte("ignored"))
+
+	loaded, err := LoadSkill("DisplayName", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wantResources := []string{"references/spec.md", "scripts/run.py"}
+	if loaded.Name != "DisplayName" || loaded.Content != "body {{vars.VALUE}}" ||
+		!reflect.DeepEqual(loaded.Resources, wantResources) || loaded.ResourcesTruncated {
+		t.Fatalf("LoadSkill(activation) = %#v", loaded)
+	}
+
+	resource, err := LoadSkill("skill-dir/references/./spec.md", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if resource.Name != "skill-dir" || resource.ResourcePath != "references/spec.md" ||
+		resource.Content != "{{vars.VALUE}}\n" || len(resource.Resources) != 0 {
+		t.Fatalf("LoadSkill(resource) = %#v", resource)
+	}
+
+	explicitSkillMD, err := LoadSkill("skill-dir/SKILL.md", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if explicitSkillMD.ResourcePath != "" || !reflect.DeepEqual(explicitSkillMD.Resources, wantResources) {
+		t.Fatalf("LoadSkill(SKILL.md) = %#v", explicitSkillMD)
+	}
+}
+
+func TestLoadSkillReadsOnlyEnabledUserResources(t *testing.T) {
+	_, userRoot := setSkillTestRoots(t)
+	writeSkill(t, userRoot, "external", "External", "description", "user body")
+	writeSkillResource(t, userRoot, "external", "references/spec.md", []byte("user resource"))
+
+	if _, err := LoadSkill("External/references/spec.md", nil); err == nil {
+		t.Fatal("disabled user skill resource should not be readable")
+	}
+	loaded, err := LoadSkill("External/references/spec.md", []string{"external"})
+	if err != nil || loaded.Content != "user resource" {
+		t.Fatalf("LoadSkill(enabled user resource) = %#v, %v", loaded, err)
+	}
+}
+
+func TestLoadSkillRejectsUnsafeOrUnsupportedResources(t *testing.T) {
+	workspaceRoot, _ := setSkillTestRoots(t)
+	writeSkill(t, workspaceRoot, "safe", "safe", "description", "body")
+	writeSkillResource(t, workspaceRoot, "safe", "invalid-utf8.txt", []byte{0xd6, 0xd0, 0xce, 0xc4})
+	writeSkillResource(t, workspaceRoot, "safe", "limit.txt", bytes.Repeat([]byte("x"), maxSkillResourceBytes))
+	writeSkillResource(t, workspaceRoot, "safe", "large.txt", bytes.Repeat([]byte("x"), maxSkillResourceBytes+1))
+
+	for _, locator := range []string{
+		"safe/../outside.txt",
+		"safe/references/../../../outside.txt",
+		"safe//absolute.txt",
+		"safe/C:/absolute.txt",
+	} {
+		if _, err := LoadSkill(locator, nil); err == nil || !strings.Contains(err.Error(), "invalid skill resource path") {
+			t.Errorf("LoadSkill(%q) error = %v", locator, err)
+		}
+	}
+	if _, err := LoadSkill("safe/invalid-utf8.txt", nil); err == nil ||
+		!strings.Contains(err.Error(), "skill resource is not valid UTF-8") {
+		t.Fatalf("invalid UTF-8 resource error = %v", err)
+	}
+	atLimit, err := LoadSkill("safe/limit.txt", nil)
+	if err != nil || len(atLimit.Content) != maxSkillResourceBytes {
+		t.Fatalf("resource at size limit = %d bytes, %v", len(atLimit.Content), err)
+	}
+	if _, err = LoadSkill("safe/large.txt", nil); err == nil || !strings.Contains(err.Error(), "65536 byte limit") {
+		t.Fatalf("large resource error = %v", err)
+	}
+}
+
+func TestLoadSkillEnforcesResolvedSkillRoot(t *testing.T) {
+	workspaceRoot, _ := setSkillTestRoots(t)
+	externalRoot := t.TempDir()
+	writeSkill(t, externalRoot, "linked-target", "Linked", "description", "linked body")
+	writeSkillResource(t, externalRoot, "linked-target", "references/inside.md", []byte("inside"))
+	if err := os.MkdirAll(workspaceRoot, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(filepath.Join(externalRoot, "linked-target"), filepath.Join(workspaceRoot, "linked")); err != nil {
+		t.Skipf("symlinks are unavailable: %v", err)
+	}
+
+	loaded, err := LoadSkill("Linked/references/inside.md", nil)
+	if err != nil || loaded.Content != "inside" {
+		t.Fatalf("LoadSkill(resource in symlinked skill) = %#v, %v", loaded, err)
+	}
+
+	outside := filepath.Join(t.TempDir(), "outside.md")
+	if err = os.WriteFile(outside, []byte("outside"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	resourceLink := filepath.Join(externalRoot, "linked-target", "references", "outside.md")
+	if err = os.Symlink(outside, resourceLink); err != nil {
+		t.Skipf("resource symlinks are unavailable: %v", err)
+	}
+	if _, err = LoadSkill("Linked/references/outside.md", nil); err == nil ||
+		!strings.Contains(err.Error(), "escapes skill directory") {
+		t.Fatalf("symlink escape error = %v", err)
+	}
+}
+
+func TestLoadSkillCapsResourceManifest(t *testing.T) {
+	workspaceRoot, _ := setSkillTestRoots(t)
+	writeSkill(t, workspaceRoot, "many", "many", "description", "body")
+	for i := 0; i <= maxSkillResourceEntries; i++ {
+		writeSkillResource(t, workspaceRoot, "many", fmt.Sprintf("references/%03d.md", i), []byte("x"))
+	}
+
+	loaded, err := LoadSkill("many", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(loaded.Resources) != maxSkillResourceEntries || !loaded.ResourcesTruncated {
+		t.Fatalf("resource cap = %d, truncated=%v", len(loaded.Resources), loaded.ResourcesTruncated)
+	}
+	if loaded.Resources[0] != "references/000.md" || loaded.Resources[len(loaded.Resources)-1] != "references/199.md" {
+		t.Fatalf("unexpected capped resources: first=%q last=%q", loaded.Resources[0], loaded.Resources[len(loaded.Resources)-1])
+	}
+}
+
+func TestLoadSkillCapsManifestTraversal(t *testing.T) {
+	workspaceRoot, _ := setSkillTestRoots(t)
+	writeSkill(t, workspaceRoot, "many-dirs", "many-dirs", "description", "body")
+	skillDir := filepath.Join(workspaceRoot, "many-dirs")
+	for i := 0; i < maxSkillResourceVisited; i++ {
+		if err := os.Mkdir(filepath.Join(skillDir, fmt.Sprintf("empty-%04d", i)), 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	loaded, err := LoadSkill("many-dirs", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(loaded.Resources) != 0 || !loaded.ResourcesTruncated {
+		t.Fatalf("manifest traversal cap = %d resources, truncated=%v", len(loaded.Resources), loaded.ResourcesTruncated)
 	}
 }
 

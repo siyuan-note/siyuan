@@ -1,4 +1,6 @@
 {
+	"fontFamily": "字體",
+	"mixed": "混合",
 	"entryDock": "停靠欄",
 	"scrollPageUpWithoutMovingCaret": "游標不動向上滾動一畫面",
 	"scrollPageDownWithoutMovingCaret": "游標不動向下滾動一畫面",

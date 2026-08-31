@@ -1,4 +1,6 @@
 {
+	"fontFamily": "Сімейство шрифтів",
+	"mixed": "Змішаний",
 	"entryDock": "Док",
 	"scrollPageUpWithoutMovingCaret": "Прокрутити на один екран угору, не переміщуючи курсор",
 	"scrollPageDownWithoutMovingCaret": "Прокрутити на один екран униз, не переміщуючи курсор",

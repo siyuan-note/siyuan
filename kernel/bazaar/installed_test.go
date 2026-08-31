@@ -19,13 +19,15 @@ package bazaar
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestRecordPackageOperationTime(t *testing.T) {
+func useTestBazaarInfo(t *testing.T) {
+	t.Helper()
 	oldDataDir := util.DataDir
 	bazaarInfoCacheLock.Lock()
 	oldCache := bazaarInfoCache
@@ -41,11 +43,17 @@ func TestRecordPackageOperationTime(t *testing.T) {
 		bazaarInfoModTime = oldModTime
 		bazaarInfoCacheLock.Unlock()
 	})
+}
+
+func TestRecordPackageOperationTime(t *testing.T) {
+	useTestBazaarInfo(t)
 
 	installTime := time.UnixMilli(1000)
 	updateTime := time.UnixMilli(2000)
-	recordPackageOperationTime("plugins", "test-package", installTime, time.Time{}, false)
-	recordPackageOperationTime("plugins", "test-package", updateTime, time.Time{}, true)
+	recordPackageOperationTime("plugins", "test-package", installTime, time.Time{}, false,
+		"https://github.com/owner/repo", "v1.0.0")
+	recordPackageOperationTime("plugins", "test-package", updateTime, time.Time{}, true,
+		"https://github.com/owner/repo", "v2.0.0")
 
 	info := bazaarInfoCache.Packages["plugins"]["test-package"]
 	if info.InstallTime != installTime.UnixMilli() {
@@ -54,6 +62,9 @@ func TestRecordPackageOperationTime(t *testing.T) {
 	if info.UpdateTime != updateTime.UnixMilli() {
 		t.Fatalf("unexpected update time: %d", info.UpdateTime)
 	}
+	if info.RepoURL != "https://github.com/owner/repo" || info.RepoRef != "v2.0.0" {
+		t.Fatalf("unexpected package source: %#v", info)
+	}
 
 	gotInstallTime, gotUpdateTime := ensurePackageInstallTime("plugins", "test-package", time.UnixMilli(3000))
 	if gotInstallTime != installTime.UnixMilli() || gotUpdateTime != updateTime.UnixMilli() {
@@ -61,13 +72,64 @@ func TestRecordPackageOperationTime(t *testing.T) {
 	}
 
 	reinstallTime := time.UnixMilli(4000)
-	recordPackageOperationTime("plugins", "test-package", reinstallTime, time.Time{}, false)
+	recordPackageOperationTime("plugins", "test-package", reinstallTime, time.Time{}, false, "", "")
 	info = bazaarInfoCache.Packages["plugins"]["test-package"]
 	if info.InstallTime != reinstallTime.UnixMilli() {
 		t.Fatalf("unexpected reinstall time: %d", info.InstallTime)
 	}
 	if info.UpdateTime != 0 {
 		t.Fatalf("update time was not cleared after reinstall: %d", info.UpdateTime)
+	}
+	if info.RepoURL != "" || info.RepoRef != "" {
+		t.Fatalf("local reinstall retained remote source: %#v", info)
+	}
+}
+
+func TestRecordPackageOperationTimeRejectsUntrustedSource(t *testing.T) {
+	useTestBazaarInfo(t)
+	recordPackageOperationTime("plugins", "test-package", time.UnixMilli(1000), time.Time{}, false,
+		"https://example.com/owner/repo", "v1.0.0")
+	info := bazaarInfoCache.Packages["plugins"]["test-package"]
+	if info.RepoURL != "" || info.RepoRef != "" {
+		t.Fatalf("untrusted package source was persisted: %#v", info)
+	}
+}
+
+func TestSetInstalledPackageMetadataImageURLs(t *testing.T) {
+	useTestBazaarInfo(t)
+	installPath := t.TempDir()
+	for name, content := range map[string]string{
+		"README.md":         "README\n\n![icon](custom%20%23%25%28+%29.webp)",
+		"custom #%(+).webp": "icon",
+		"preview.png":       "preview",
+	} {
+		if err := os.WriteFile(filepath.Join(installPath, name), []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	icon := "custom #%(+).webp"
+	noPreview := ""
+	recordPackageOperationTime("plugins", "A B#C%D(E)+F", time.UnixMilli(2000), time.Time{}, false, "", "")
+	recordPackageOperationTime("plugins", "A B#C%D(E)+F", time.UnixMilli(1000), time.Time{}, true, "", "")
+	pkg := &Package{
+		Name:    "A B#C%D(E)+F",
+		Icon:    &icon,
+		Preview: &noPreview,
+		Readme:  LocaleStrings{"default": "README.md"},
+	}
+	baseURL := "/plugins/A%20B%23C%25D%28E%29+F/"
+	if !SetInstalledPackageMetadata(pkg, installPath, baseURL, "plugins") {
+		t.Fatal("expected installed metadata")
+	}
+	if pkg.IconURL != baseURL+"custom%20%23%25%28+%29.webp?v=2000" {
+		t.Fatalf("unexpected icon URL: %q", pkg.IconURL)
+	}
+	if pkg.PreviewURL != "" {
+		t.Fatalf("explicit missing preview should not use preview.png: %q", pkg.PreviewURL)
+	}
+	if !strings.Contains(pkg.PreferredReadme, baseURL+"custom%20%23%25%28+%29.webp?v=2000") ||
+		!strings.Contains(pkg.PreferredReadme, "README") {
+		t.Fatalf("unexpected installed README: %q", pkg.PreferredReadme)
 	}
 }
 

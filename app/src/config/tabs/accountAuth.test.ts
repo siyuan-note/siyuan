@@ -6,6 +6,7 @@ test("login requires agreement and a non-empty password", () => {
     assert.equal(isAccountLoginDisabled(false, "password"), true);
     assert.equal(isAccountLoginDisabled(true, ""), true);
     assert.equal(isAccountLoginDisabled(true, "password"), false);
+    assert.equal(isAccountLoginDisabled(true, "password", true), true);
 });
 
 test("Enter submits account authentication", () => {

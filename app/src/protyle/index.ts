@@ -46,6 +46,12 @@ import {setStorageVal} from "./util/compatibility";
 import {merge} from "./util/merge";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
+import {
+    invalidateSearchPathRequests,
+    refreshSearchPathAfterNotebookRename,
+    refreshSearchPathAfterRename,
+} from "../search/path";
+import {syncSearchConfigHPath} from "../search/config";
 /// #endif
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
@@ -59,6 +65,31 @@ import {
     queueDatabaseRowRefreshForOperations
 } from "./render/av/databaseRowRefresh";
 import {registerCustomBlockRoot} from "../plugin/customBlockRender";
+
+/// #if !MOBILE
+const forSearchByEditor = (edit: Protyle, callback: (config: Config.IUILayoutTabSearchConfig, element: Element) => void) => {
+    window.siyuan.dialogs.find((item) => {
+        const searchElement = item.element.querySelector(".b3-dialog__body");
+        if (item.editors?.edit === edit && item.data && searchElement) {
+            callback(item.data, searchElement);
+            return true;
+        }
+    });
+    getAllModels().search.find((item) => {
+        if (item.editors.edit === edit) {
+            callback(item.config, item.element);
+            return true;
+        }
+    });
+};
+
+const persistRefreshedSearchPath = (config: Config.IUILayoutTabSearchConfig) => {
+    const localConfig = window.siyuan.storage[Constants.LOCAL_SEARCHDATA];
+    if (syncSearchConfigHPath(localConfig, config)) {
+        setStorageVal(Constants.LOCAL_SEARCHDATA, localConfig);
+    }
+};
+/// #endif
 
 export class Protyle {
 
@@ -232,6 +263,22 @@ export class Protyle {
                                 /// #endif
                             }
                             break;
+                        case "renamenotebook":
+                            /// #if !MOBILE
+                            forSearchByEditor(this, (config, element) => {
+                                void refreshSearchPathAfterNotebookRename({
+                                    config,
+                                    element,
+                                    notebookId: data.data.box,
+                                    notebookName: data.data.name,
+                                }).then((refreshed) => {
+                                    if (refreshed) {
+                                        persistRefreshedSearchPath(config);
+                                    }
+                                });
+                            });
+                            /// #endif
+                            break;
                         case "rename":
                             if (this.protyle.path === data.data.path) {
                                 if (this.protyle.model) {
@@ -265,6 +312,19 @@ export class Protyle {
                                     item.innerHTML = data.data.refText;
                                 }
                             });
+                            /// #if !MOBILE
+                            forSearchByEditor(this, (config, element) => {
+                                void refreshSearchPathAfterRename({
+                                    config,
+                                    element,
+                                    rename: data.data,
+                                }).then((refreshed) => {
+                                    if (refreshed) {
+                                        persistRefreshedSearchPath(config);
+                                    }
+                                });
+                            });
+                            /// #endif
                             break;
                         case "moveDoc":
                             if (this.protyle.path === data.data.fromPath) {
@@ -276,6 +336,11 @@ export class Protyle {
                                     this.protyle.element.removeAttribute("data-notebook-id");
                                 }
                             }
+                            /// #if !MOBILE
+                            forSearchByEditor(this, (_config, element) => {
+                                invalidateSearchPathRequests(element);
+                            });
+                            /// #endif
                             break;
                         case "closeBox":
                         case "removeBox":

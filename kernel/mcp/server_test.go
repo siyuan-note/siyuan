@@ -22,11 +22,14 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	mcpsdk "github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/siyuan-note/siyuan/kernel/mcp/tools"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func newTestHTTPServer(t *testing.T) (*mcpsdk.Server, *httptest.Server) {
@@ -389,6 +392,44 @@ func TestToolInputAndOutputValidation(t *testing.T) {
 	outputText, ok := outputResult.Content[0].(*mcpsdk.TextContent)
 	if !ok || !strings.Contains(outputText.Text, "must not be retried automatically") {
 		t.Fatalf("invalid output did not warn against retrying: %#v", outputResult.Content)
+	}
+}
+
+func TestSkillResourceContentSurvivesMCPConversion(t *testing.T) {
+	originalDataDir, originalHomeDir := util.DataDir, util.HomeDir
+	root := t.TempDir()
+	util.DataDir = filepath.Join(root, "workspace", "data")
+	util.HomeDir = filepath.Join(root, "home")
+	t.Cleanup(func() {
+		util.DataDir, util.HomeDir = originalDataDir, originalHomeDir
+	})
+
+	skillDir := filepath.Join(util.SkillsDir(), "transport-skill")
+	if err := os.MkdirAll(filepath.Join(skillDir, "references"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(skillDir, "SKILL.md"),
+		[]byte("---\nname: transport-skill\ndescription: transport test\n---\nbody"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(skillDir, "references", "valid.txt"), []byte("中文内容"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := tools.SkillTool.Handler(map[string]any{
+		"action": "load",
+		"name":   "transport-skill/references/valid.txt",
+	})
+	if err != nil || result.IsError || len(result.Content) != 1 {
+		t.Fatalf("unexpected Skill resource result: %#v, %v", result, err)
+	}
+	converted, err := convertContentItem(result.Content[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	text, ok := converted.(*mcpsdk.TextContent)
+	if !ok || text.Text != "<skill_resource skill=\"transport-skill\" path=\"references/valid.txt\">\n\n中文内容\n\n</skill_resource>" {
+		t.Fatalf("Skill resource changed during MCP conversion: %#v", converted)
 	}
 }
 

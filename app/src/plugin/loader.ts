@@ -323,12 +323,18 @@ export const addPluginDock = (plugin: Plugin) => {
     /// #endif
 };
 
-export const reloadPlugin = async (app: App, data: {
+export interface IPluginReloadData {
     uninstallPlugins?: string[],  // 插件卸载
     unloadPlugins?: string[],     // 插件禁用
     reloadPlugins?: string[],     // 插件启用，或插件代码变更
     dataChangePlugins?: string[], // 插件存储数据变更
-} = {}) => {
+    globalPetalEnabled?: boolean,
+    globalPetalDisabled?: boolean,
+    globalPetalRevision?: number,
+    globalPetalChanged?: boolean,
+}
+
+export const reloadPlugin = async (app: App, data: IPluginReloadData = {}) => {
     const manager = getLifecycleManager(app);
     const uninstallNames = new Set(data.uninstallPlugins || []);
     const unloadNames = new Set((data.unloadPlugins || []).filter(name => !uninstallNames.has(name)));

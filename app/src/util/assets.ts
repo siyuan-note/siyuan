@@ -162,6 +162,7 @@ export const loadAssets = (data: Config.IAppearance) => {
     if (themeStylesChanged) {
         scheduleHeadingNumberMeasurementRefresh(changedThemeStyleElements);
     }
+    updateMobileTheme(OSTheme);
     /// #if !MOBILE
     getAllModels().graph.forEach(item => {
         item.searchGraph();

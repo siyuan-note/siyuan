@@ -8,7 +8,7 @@ import {
     transactionError
 } from "../../dialog/processSystem";
 import type {App} from "../../index";
-import {reloadPlugin} from "../../plugin/loader";
+import {applyPluginReload, syncGlobalPluginConfig} from "../../plugin/globalState";
 import {reloadEmoji} from "../../emoji";
 import {renderSnippet} from "../../config/util/snippets";
 import {redirectToCheckAuth} from "../../util/pathName";
@@ -70,7 +70,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 setRefDynamicText(data.data);
                 break;
             case "reloadPlugin":
-                reloadPlugin(app, data.data);
+                void applyPluginReload(app, data.data).catch((error) => console.error(error));
                 break;
             case "reloadEmojiConf":
                 reloadEmoji();
@@ -80,6 +80,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setConf":
                 window.siyuan.config = data.data;
+                syncGlobalPluginConfig(app, data.data.bazaar.petalDisabled);
                 break;
             case "setCloudUser":
                 applyCloudUserState(data.data.user, data.data.userName);

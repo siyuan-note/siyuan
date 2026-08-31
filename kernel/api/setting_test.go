@@ -21,7 +21,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -29,21 +31,114 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func TestBazaarPluginReloadExcludeApp(t *testing.T) {
-	for _, test := range []struct {
-		name    string
-		enabled bool
-		app     string
-		want    string
-	}{
-		{name: "enable excludes requesting app", enabled: true, app: "current-app", want: "current-app"},
-		{name: "disable includes requesting app", enabled: false, app: "current-app", want: ""},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			if got := bazaarPluginReloadExcludeApp(test.enabled, test.app); got != test.want {
-				t.Fatalf("unexpected excluded app: got %q, want %q", got, test.want)
-			}
-		})
+func TestSetBazaarPetalDisabledSerializesTransitions(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	previousConf := model.Conf
+	previousReadOnly := util.ReadOnly
+	previousDataDir := util.DataDir
+	previousStart := model.OnKernelPluginsStart
+	previousStop := model.OnKernelPluginsStop
+	util.ReadOnly = true
+	util.DataDir = t.TempDir()
+	model.Conf = model.NewAppConf()
+	model.Conf.Bazaar = &conf.Bazaar{Trust: true}
+	bazaarPetalStateMu.Lock()
+	bazaarPetalStateRevision = 0
+	bazaarPetalStateMu.Unlock()
+	t.Cleanup(func() {
+		bazaarPetalStateMu.Lock()
+		bazaarPetalStateRevision = 0
+		bazaarPetalStateMu.Unlock()
+		model.Conf = previousConf
+		util.ReadOnly = previousReadOnly
+		util.DataDir = previousDataDir
+		model.OnKernelPluginsStart = previousStart
+		model.OnKernelPluginsStop = previousStop
+	})
+
+	stopEntered := make(chan struct{})
+	releaseStop := make(chan struct{})
+	startCalled := make(chan struct{})
+	var transitionMu sync.Mutex
+	transitions := []string{}
+	model.OnKernelPluginsStop = func() {
+		transitionMu.Lock()
+		transitions = append(transitions, "stop")
+		transitionMu.Unlock()
+		close(stopEntered)
+		<-releaseStop
+	}
+	model.OnKernelPluginsStart = func() {
+		transitionMu.Lock()
+		transitions = append(transitions, "start")
+		transitionMu.Unlock()
+		close(startCalled)
+	}
+
+	engine := gin.New()
+	engine.POST("/api/setting/setBazaarPetalDisabled", setBazaarPetalDisabled)
+	type response struct {
+		Code int `json:"code"`
+		Data struct {
+			Enabled       bool   `json:"globalPetalEnabled"`
+			PetalDisabled bool   `json:"globalPetalDisabled"`
+			Revision      uint64 `json:"globalPetalRevision"`
+			Changed       bool   `json:"globalPetalChanged"`
+		} `json:"data"`
+	}
+	request := func(body string) (*httptest.ResponseRecorder, response) {
+		recorder := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/api/setting/setBazaarPetalDisabled", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		engine.ServeHTTP(recorder, req)
+		result := response{}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+			t.Errorf("unmarshal setBazaarPetalDisabled response failed: %v", err)
+		}
+		return recorder, result
+	}
+
+	disableResult := make(chan response, 1)
+	go func() {
+		_, result := request(`{"petalDisabled":true}`)
+		disableResult <- result
+	}()
+	<-stopEntered
+
+	enableResult := make(chan response, 1)
+	go func() {
+		_, result := request(`{"petalDisabled":false}`)
+		enableResult <- result
+	}()
+	select {
+	case <-startCalled:
+		t.Fatal("enable transition started before the preceding disable transition completed")
+	case <-time.After(20 * time.Millisecond):
+	}
+	close(releaseStop)
+
+	disabled := <-disableResult
+	enabled := <-enableResult
+	if disabled.Code != 0 || !disabled.Data.Changed || !disabled.Data.PetalDisabled || disabled.Data.Enabled ||
+		disabled.Data.Revision != 1 {
+		t.Fatalf("unexpected disabled response: %#v", disabled)
+	}
+	if enabled.Code != 0 || !enabled.Data.Changed || enabled.Data.PetalDisabled || !enabled.Data.Enabled ||
+		enabled.Data.Revision != 2 {
+		t.Fatalf("unexpected enabled response: %#v", enabled)
+	}
+	if model.Conf.Bazaar.PetalDisabled {
+		t.Fatal("final bazaar plugin state is disabled")
+	}
+	_, unchanged := request(`{"petalDisabled":false}`)
+	if unchanged.Code != 0 || unchanged.Data.Changed || unchanged.Data.PetalDisabled || !unchanged.Data.Enabled ||
+		unchanged.Data.Revision != 2 {
+		t.Fatalf("unexpected unchanged response: %#v", unchanged)
+	}
+	transitionMu.Lock()
+	defer transitionMu.Unlock()
+	if len(transitions) != 2 || transitions[0] != "stop" || transitions[1] != "start" {
+		t.Fatalf("unexpected transition order: %v", transitions)
 	}
 }
 

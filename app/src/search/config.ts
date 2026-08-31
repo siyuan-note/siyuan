@@ -191,3 +191,22 @@ export const getGlobalSearchPath = (config: Config.IUILayoutTabSearchConfig) => 
         idPath: [...(config.idPath || [])],
     };
 };
+
+export const resolveGlobalSearchScope = getGlobalSearchPath;
+
+export const resolveSearchConfigUpdate = (options: {
+    selectedConfig: Config.IUILayoutTabSearchConfig,
+    currentConfig: Config.IUILayoutTabSearchConfig,
+    useCurrentPath: boolean,
+    persistedConfig?: Config.IUILayoutTabSearchConfig,
+}) => {
+    const runtimeConfig = cloneSearchConfig(options.selectedConfig);
+    if (options.useCurrentPath) {
+        runtimeConfig.hPath = options.currentConfig.hPath || "";
+        runtimeConfig.idPath = [...(options.currentConfig.idPath || [])];
+    }
+    return {
+        runtimeConfig,
+        persistedConfig: cloneSearchConfig(options.persistedConfig || options.selectedConfig),
+    };
+};

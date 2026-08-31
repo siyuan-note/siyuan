@@ -60,6 +60,12 @@ import {
     getTextWithoutSemanticMarkers,
     stripSemanticMarkersFromRangeText
 } from "../../protyle/util/inlineElementMarker";
+import {
+    getInlineFontFamilyLabel,
+    getInlineFontFamilyState,
+    getInlineFontFamilyValue,
+    renderMobileFontFamilyMenu,
+} from "../../protyle/toolbar/fontFamilyMenu";
 
 type TAndroidBoundedSelection = {
     container: HTMLElement,
@@ -503,6 +509,8 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         lastColorHTML += "</div>";
     }
     const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
+    const fontFamilyState = getInlineFontFamilyState(protyle, nodeElements);
+    const disableFontFamily = disableFont || fontFamilyState.disabled;
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `${lastColorHTML}
 <div data-id="color" class="keyboard__slash-title">${window.siyuan.languages.color}</div>
@@ -537,6 +545,13 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         <span class="keyboard__slash-text">${window.siyuan.languages.clearFontStyle}</span>
     </button>
 </div>
+<div data-id="fontFamily" class="keyboard__slash-title${disableFontFamily ? " fn__none" : ""}">${window.siyuan.languages.fontFamily}</div>
+<div data-id="fontFamilyWrap" class="keyboard__slash-block${disableFontFamily ? " fn__none" : ""}">
+    <button class="keyboard__slash-item" data-action="fontFamilyMenu">
+        <span class="keyboard__slash-icon" data-type="fontFamilyPreview">A</span>
+        <span class="keyboard__slash-text">${escapeHtml(getInlineFontFamilyLabel(fontFamilyState))}</span>
+    </button>
+</div>
 <div data-id="fontSize" class="keyboard__slash-title${disableFont ? " fn__none" : ""}">${window.siyuan.languages.fontSize}</div>
 <div data-id="fontSizeWrap" class="keyboard__slash-block${disableFont ? " fn__none" : ""}">
     <label class="keyboard__font-size-toggle">
@@ -553,6 +568,10 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         <span data-type="fontSizeValue">${(parseFloat(fontSize) * 100).toFixed(0)}%</span>
     </label>
 </div>`;
+    if (fontFamilyState.family) {
+        (utilElement.querySelector('[data-type="fontFamilyPreview"]') as HTMLElement).style.fontFamily =
+            getInlineFontFamilyValue(fontFamilyState.family);
+    }
     const switchElement = utilElement.querySelector('[data-id="fontSizeWrap"] .b3-switch') as HTMLInputElement;
     const fontSizePXElement = utilElement.querySelector('[data-type="fontSizePX"]') as HTMLInputElement;
     const fontSizeEMElement = utilElement.querySelector('[data-type="fontSizeEM"]') as HTMLInputElement;
@@ -1163,6 +1182,42 @@ export const initKeyboardToolbar = () => {
         const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
+        if (slashBtnElement && slashBtnElement.dataset.action === "fontFamilyMenu") {
+            const range = protyle.toolbar.range.cloneRange();
+            const nodeElements = getFontNodeElements(protyle);
+            const fontFamilyState = getInlineFontFamilyState(protyle, nodeElements);
+            const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
+            const isFontFamilyMenuValid = () => getCurrentEditor()?.protyle === protyle &&
+                toolbarElement.clientHeight > 100 && range.startContainer.isConnected &&
+                range.endContainer.isConnected && toolbarElement.querySelector('.keyboard__action[data-type="text"]')
+                    ?.classList.contains("protyle-toolbar__item--current") === true;
+            preventKeyboardToolbarRender();
+            void renderMobileFontFamilyMenu(utilElement, {
+                ...fontFamilyState,
+                isOpenValid: isFontFamilyMenuValid,
+                onBack() {
+                    if (!isFontFamilyMenuValid()) {
+                        return;
+                    }
+                    protyle.toolbar.range = range;
+                    renderTextMenu(protyle, toolbarElement);
+                    focusByRange(range);
+                },
+                onInteraction: preventKeyboardToolbarRender,
+                onSelect(family) {
+                    if (!isFontFamilyMenuValid()) {
+                        return;
+                    }
+                    protyle.toolbar.range = range;
+                    fontEvent(protyle, nodeElements, "fontFamily", getInlineFontFamilyValue(family), false);
+                    renderTextMenu(protyle, toolbarElement);
+                    focusByRange(protyle.toolbar.range);
+                }
+            });
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         if (slashBtnElement && slashBtnElement.dataset.action === "manageInlineStyle") {
             openInlineStyleDialog(slashBtnElement.dataset.inlineStyleType as TInlineStyleType, () => {
                 renderTextMenu(protyle, toolbarElement);

@@ -15,9 +15,11 @@ import {
     refreshSearchConfigHPath,
     replaceSearchConfigPath,
     resolvePersistedSearchConfig,
+    resolveGlobalSearchScope,
     resolveSearchHPath,
     resolveSearchNotebookHPath,
     resolveSearchConfig,
+    resolveSearchConfigUpdate,
     setSearchConfigTemporaryPath,
     syncSearchConfig,
     syncSearchConfigHPath,
@@ -57,7 +59,7 @@ describe("search configuration scope", () => {
 
     it("restores the saved criterion path for global search", () => {
         const {persistedConfig} = resolveSearchConfig(criterionA, documentB, true);
-        const globalPath = getGlobalSearchPath(persistedConfig);
+        const globalPath = resolveGlobalSearchScope(persistedConfig);
 
         assert.equal(globalPath.hPath, criterionA.hPath);
         assert.deepEqual(globalPath.idPath, criterionA.idPath);
@@ -336,5 +338,54 @@ describe("search configuration scope", () => {
         assert.deepEqual(reference.idPath, criterionA.idPath);
         assert.equal(reference.query, undefined);
         assert.notEqual(reference.idPath, criterionA.idPath);
+    });
+
+    it("keeps the saved path while overriding the runtime path for document search", () => {
+        const criterion: Config.IUILayoutTabSearchConfig = {
+            removed: false,
+            name: "Document A search",
+            hPath: "Notebook/Document A",
+            idPath: ["notebook/document-a"],
+            replaceTypes: {
+                aText: true,
+            },
+        };
+        const currentConfig: Config.IUILayoutTabSearchConfig = {
+            hPath: "Notebook/Document B",
+            idPath: ["notebook/document-b"],
+        };
+
+        const result = resolveSearchConfigUpdate({
+            selectedConfig: criterion,
+            currentConfig,
+            useCurrentPath: true,
+            persistedConfig: criterion,
+        });
+
+        assert.equal(result.runtimeConfig.hPath, "Notebook/Document B");
+        assert.deepEqual(result.runtimeConfig.idPath, ["notebook/document-b"]);
+        assert.equal(result.persistedConfig.hPath, "Notebook/Document A");
+        assert.deepEqual(result.persistedConfig.idPath, ["notebook/document-a"]);
+        assert.notStrictEqual(result.runtimeConfig.idPath, currentConfig.idPath);
+        assert.notStrictEqual(result.persistedConfig.idPath, criterion.idPath);
+        assert.notStrictEqual(result.persistedConfig.replaceTypes, criterion.replaceTypes);
+        assert.deepEqual(criterion.idPath, ["notebook/document-a"]);
+    });
+
+    it("uses the selected runtime path when no contextual override is requested", () => {
+        const result = resolveSearchConfigUpdate({
+            selectedConfig: {
+                hPath: "Notebook/Document B",
+                idPath: ["notebook/document-b"],
+            },
+            currentConfig: {
+                hPath: "Notebook/Document A",
+                idPath: ["notebook/document-a"],
+            },
+            useCurrentPath: false,
+        });
+
+        assert.equal(result.runtimeConfig.hPath, "Notebook/Document B");
+        assert.deepEqual(result.runtimeConfig.idPath, ["notebook/document-b"]);
     });
 });

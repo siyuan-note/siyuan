@@ -1,4 +1,6 @@
 {
+	"fontFamily": "Keluarga font",
+	"mixed": "Campuran",
 	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Gulir satu layar ke atas tanpa memindahkan kursor",
 	"scrollPageDownWithoutMovingCaret": "Gulir satu layar ke bawah tanpa memindahkan kursor",

@@ -1,4 +1,6 @@
 {
+	"fontFamily": "フォントファミリー",
+	"mixed": "混在",
 	"entryDock": "ドック",
 	"scrollPageUpWithoutMovingCaret": "カーソルを移動せずに 1 画面上へスクロール",
 	"scrollPageDownWithoutMovingCaret": "カーソルを移動せずに 1 画面下へスクロール",

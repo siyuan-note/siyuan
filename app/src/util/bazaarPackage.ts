@@ -129,11 +129,12 @@ export const getBazaarFundingItems = (funding: IBazaarFunding | null | undefined
         return [];
     }
     return [
-        normalizeBazaarFundingURL(funding.openCollective, "https://opencollective.com/"),
-        normalizeBazaarFundingURL(funding.patreon, "https://www.patreon.com/"),
-        normalizeBazaarFundingURL(funding.github, "https://github.com/sponsors/"),
-        ...(funding.custom || []),
-    ].filter(Boolean);
+        {url: normalizeBazaarFundingURL(funding.openCollective, "https://opencollective.com/")},
+        {url: normalizeBazaarFundingURL(funding.patreon, "https://www.patreon.com/")},
+        {url: normalizeBazaarFundingURL(funding.github, "https://github.com/sponsors/")},
+        ...(funding.custom || []).map((url) => ({url})),
+        ...(funding.links || []).map((link) => ({url: link.url, label: link.label})),
+    ].filter((item) => Boolean(item.url));
 };
 
 export const normalizeBazaarRating = (rating: Partial<IBazaarRating> | null | undefined): IBazaarRating | undefined => {

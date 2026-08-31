@@ -1,5 +1,5 @@
-export const isAccountLoginDisabled = (agreed: boolean, password: string) => {
-    return !agreed || password.length === 0;
+export const isAccountLoginDisabled = (agreed: boolean, password: string, submitting = false) => {
+    return submitting || !agreed || password.length === 0;
 };
 
 export const bindAccountAuthEnter = (input: HTMLInputElement, submit: () => void) => {

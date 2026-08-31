@@ -1102,9 +1102,11 @@ func ExportDocx(id, savePath string, removeAssets, merge bool, mergeHeadingOptio
 			}
 		}
 
-		if !hasPandocOption(args, "--lua-filter") && "" != pandocRuntime.ColorFilterPath {
-			args = append(args, "--lua-filter", pandocRuntime.ColorFilterPath)
+		filterPath, filterErr := writePandocDocxFilter(tmpDir)
+		if nil != filterErr {
+			return filterErr
 		}
+		args = appendBuiltinPandocDocxFilter(args, filterPath)
 
 		if !hasPandocOption(args, "--reference-doc") && "" != pandocRuntime.TemplatePath {
 			args = append(args, "--reference-doc", pandocRuntime.TemplatePath)
@@ -3224,6 +3226,7 @@ func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string,
 
 	luteEngine.SetUnorderedListMarker("-")
 	luteEngine.SetImgTag(imgTag)
+	prepareMarkdownFontFamilyTextMarks(tree.Root)
 	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions, luteEngine.ParseOptions)
 	ret = gulu.Str.FromBytes(renderer.Render())
 	return

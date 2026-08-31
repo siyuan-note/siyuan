@@ -1,4 +1,6 @@
 {
+	"fontFamily": "Famiglia di caratteri",
+	"mixed": "Misto",
 	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Scorri di una schermata verso l'alto senza spostare il cursore",
 	"scrollPageDownWithoutMovingCaret": "Scorri di una schermata verso il basso senza spostare il cursore",

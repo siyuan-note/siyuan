@@ -674,7 +674,8 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 	}
 
 	result := map[string]any{}
-	request := httpclient.NewCloudRequest30s()
+	// 登录请求不是幂等操作，关闭自动重试以避免重复登录。
+	request := httpclient.NewCloudRequest30s().SetRetryCount(0)
 	resp, err := request.
 		SetSuccessResult(&result).
 		SetBody(map[string]string{"userName": userName, "userPassword": password, "captcha": captcha}).
@@ -711,7 +712,8 @@ func Login(userName, password, captcha string, cloudRegion int) (ret *gulu.Resul
 
 func Login2fa(token, code string) (ret *gulu.Result) {
 	result := map[string]any{}
-	request := httpclient.NewCloudRequest30s()
+	// 两步验证登录不是幂等操作，关闭自动重试以避免重复登录。
+	request := httpclient.NewCloudRequest30s().SetRetryCount(0)
 	resp, err := request.
 		SetSuccessResult(&result).
 		SetBody(map[string]string{"twofactorAuthCode": code}).

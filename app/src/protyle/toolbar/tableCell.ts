@@ -31,7 +31,7 @@ export const openTableCellAppearance = (protyle: IProtyle, cellElements: HTMLTab
     const appearanceElement = appearanceMenu(protyle, [fontElement], (type, color) => {
         applyTableCellFontStyle(protyle, cells, type, color);
         onApply?.();
-    });
+    }, cells);
     protyle.toolbar.subElement.append(appearanceElement);
     protyle.toolbar.subElement.style.zIndex = (++window.siyuan.zIndex).toString();
     protyle.toolbar.subElement.classList.remove("fn__none");

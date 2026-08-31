@@ -20,11 +20,15 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
@@ -52,6 +56,23 @@ type skillRecord struct {
 	Content string
 	Body    string
 }
+
+// SkillLoadResult 描述技能正文激活或单个资源读取的结果。
+type SkillLoadResult struct {
+	Name               string
+	Content            string
+	ResourcePath       string
+	Resources          []string
+	ResourcesTruncated bool
+	SkillDir           string
+}
+
+const (
+	maxSkillResourceEntries       = 200
+	maxSkillResourceVisited       = 2000
+	maxSkillResourceManifestBytes = 64 * 1024
+	maxSkillResourceBytes         = 64 * 1024
+)
 
 func SkillsDir() string {
 	return filepath.Join(DataDir, "storage", "ai", "agent", "skills")
@@ -216,11 +237,160 @@ func findSkillRecord(records []skillRecord, name string) (skillRecord, bool) {
 	return skillRecord{}, false
 }
 
-func LoadSkillContent(name string, enabledUserSkills []string) string {
-	if record, ok := findSkillRecord(resolveSkillRecords(enabledUserSkills), name); ok {
-		return record.Body
+// LoadSkill 按技能名加载正文，或按“技能名/相对路径”加载单个文本资源。
+func LoadSkill(locator string, enabledUserSkills []string) (*SkillLoadResult, error) {
+	name, resource := splitSkillLocator(locator)
+	record, ok := findSkillRecord(resolveSkillRecords(enabledUserSkills), name)
+	if !ok {
+		return nil, fmt.Errorf("skill not found: %s", name)
 	}
-	return ""
+
+	skillDir := filepath.Join(record.Root, record.DirName)
+	result := &SkillLoadResult{
+		Name:     name,
+		Content:  record.Body,
+		SkillDir: skillDir,
+	}
+	if resource == "" {
+		result.Resources, result.ResourcesTruncated = listSkillResources(skillDir)
+		return result, nil
+	}
+
+	resource, err := normalizeSkillResourcePath(resource)
+	if err != nil {
+		return nil, err
+	}
+	if resource == "SKILL.md" {
+		result.Resources, result.ResourcesTruncated = listSkillResources(skillDir)
+		return result, nil
+	}
+
+	content, err := readSkillResource(skillDir, name, resource)
+	if err != nil {
+		return nil, err
+	}
+	result.Content = content
+	result.ResourcePath = resource
+	return result, nil
+}
+
+func splitSkillLocator(locator string) (name, resource string) {
+	locator = strings.TrimSpace(strings.ReplaceAll(locator, `\`, "/"))
+	name, resource, _ = strings.Cut(locator, "/")
+	return
+}
+
+func normalizeSkillResourcePath(resource string) (string, error) {
+	resource = strings.ReplaceAll(resource, `\`, "/")
+	cleaned := path.Clean(resource)
+	native := filepath.FromSlash(cleaned)
+	if cleaned == "." || path.IsAbs(cleaned) || cleaned == ".." || strings.HasPrefix(cleaned, "../") ||
+		filepath.IsAbs(native) || filepath.VolumeName(native) != "" || hasWindowsDrivePrefix(cleaned) {
+		return "", fmt.Errorf("invalid skill resource path: %s", resource)
+	}
+	return cleaned, nil
+}
+
+func hasWindowsDrivePrefix(resource string) bool {
+	if len(resource) < 2 || resource[1] != ':' {
+		return false
+	}
+	drive := resource[0]
+	return 'a' <= drive && drive <= 'z' || 'A' <= drive && drive <= 'Z'
+}
+
+func listSkillResources(skillDir string) (resources []string, truncated bool) {
+	realRoot, err := filepath.EvalSymlinks(skillDir)
+	if err != nil {
+		return nil, false
+	}
+
+	visited, manifestBytes := 0, 0
+	err = filepath.WalkDir(realRoot, func(current string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if current == realRoot {
+			return nil
+		}
+		visited++
+		if visited > maxSkillResourceVisited {
+			truncated = true
+			return filepath.SkipAll
+		}
+		if entry.IsDir() {
+			switch entry.Name() {
+			case ".git", ".svn", ".hg", ".venv", "node_modules":
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if entry.Type()&os.ModeSymlink != 0 || !entry.Type().IsRegular() {
+			return nil
+		}
+
+		rel, relErr := filepath.Rel(realRoot, current)
+		if relErr != nil {
+			return relErr
+		}
+		rel = filepath.ToSlash(rel)
+		if rel == "SKILL.md" {
+			return nil
+		}
+		if len(resources) == maxSkillResourceEntries || manifestBytes+len(rel) > maxSkillResourceManifestBytes {
+			truncated = true
+			return filepath.SkipAll
+		}
+		resources = append(resources, rel)
+		manifestBytes += len(rel)
+		return nil
+	})
+	if err != nil {
+		truncated = true
+	}
+	sort.Strings(resources)
+	return resources, truncated
+}
+
+func readSkillResource(skillDir, skillName, resource string) (string, error) {
+	realRoot, err := filepath.EvalSymlinks(skillDir)
+	if err != nil {
+		return "", fmt.Errorf("skill not found: %s", skillName)
+	}
+
+	target := filepath.Join(realRoot, filepath.FromSlash(resource))
+	realTarget, err := filepath.EvalSymlinks(target)
+	if err != nil {
+		return "", fmt.Errorf("skill resource not found: %s/%s", skillName, resource)
+	}
+	if realTarget != realRoot && !gulu.File.IsSubPath(realRoot, realTarget) {
+		return "", fmt.Errorf("skill resource escapes skill directory: %s", resource)
+	}
+
+	info, err := os.Stat(realTarget)
+	if err != nil || !info.Mode().IsRegular() {
+		return "", fmt.Errorf("skill resource is not a regular file: %s/%s", skillName, resource)
+	}
+	if info.Size() > maxSkillResourceBytes {
+		return "", fmt.Errorf("skill resource exceeds the %d byte limit: %s/%s", maxSkillResourceBytes, skillName, resource)
+	}
+
+	file, err := os.Open(realTarget)
+	if err != nil {
+		return "", fmt.Errorf("skill resource not found: %s/%s", skillName, resource)
+	}
+	defer file.Close()
+	data, err := io.ReadAll(io.LimitReader(file, maxSkillResourceBytes+1))
+	if err != nil {
+		return "", fmt.Errorf("skill resource read failed: %s/%s", skillName, resource)
+	}
+	if len(data) > maxSkillResourceBytes {
+		return "", fmt.Errorf("skill resource exceeds the %d byte limit: %s/%s", maxSkillResourceBytes, skillName, resource)
+	}
+	if !utf8.Valid(data) {
+		return "", fmt.Errorf("skill resource is not valid UTF-8: %s/%s", skillName, resource)
+	}
+	return string(data), nil
 }
 
 func validateSkillName(name string) error {

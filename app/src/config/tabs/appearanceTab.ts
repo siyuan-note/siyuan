@@ -36,6 +36,7 @@ import {
     unregisterCustomFont
 } from "../../util/customFont";
 import {showMessage} from "../../dialog/message";
+import {IFontItem, loadSystemFonts} from "../../util/systemFont";
 import {
     shouldShowBootAppearanceSetting,
     type IBootAppearanceListItem,
@@ -48,15 +49,6 @@ import {genMobileSidePanelSettingHTML, mountMobileSidePanelSetting} from "../../
 /// #if !MOBILE
 import {genEntryVisibilityHtml, mountEntryVisibility} from "../entryVisibility/ui";
 /// #endif
-
-interface IFontItem {
-    id?: string;
-    family: string;
-    weight: number;
-    displayName: string;
-    aliases?: string[];
-    spacing?: string;
-}
 
 interface IBootAppearanceListData {
     appearances: IBootAppearanceListItem[];
@@ -76,11 +68,10 @@ const isCodeFont = (font: Pick<IFontItem, "spacing">) =>
 
 const loadAvailableFonts = async () => {
     const nativeMobile = isNativeMobileContainer();
-    const [systemResponse, customFonts] = await Promise.all([
-        fetchSyncPost("/api/system/getSysFonts"),
+    const [systemFonts, customFonts] = await Promise.all([
+        loadSystemFonts(),
         nativeMobile ? loadCustomFonts() : Promise.resolve([] as ICustomFont[])
     ]);
-    const systemFonts = Array.isArray(systemResponse.data) ? systemResponse.data as IFontItem[] : [];
     return {
         nativeMobile,
         customFonts,

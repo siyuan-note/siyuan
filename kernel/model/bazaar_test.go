@@ -50,6 +50,13 @@ func TestIsBuiltInAppearancePackageIgnoresCase(t *testing.T) {
 	}
 }
 
+func TestInstalledPackageBaseURLPathEscapesPackageNameOnce(t *testing.T) {
+	got := installedPackageBaseURLPath("/plugins/", "A B#C%D(E)+F")
+	if got != "/plugins/A%20B%23C%25D%28E%29+F/" {
+		t.Fatalf("unexpected installed package URL: %q", got)
+	}
+}
+
 func TestBuildUpdatedPackagesKeepsInstalledAndAvailableMetadataSeparate(t *testing.T) {
 	installed := &bazaar.Package{
 		Name:          "example",
@@ -116,6 +123,55 @@ func TestBuildUpdatedPackagesIgnoresMissingAndCurrentPackages(t *testing.T) {
 	updated := buildUpdatedPackages(installedPackages, bazaarPackagesMap)
 	if len(updated) != 0 {
 		t.Fatalf("expected no updated packages, got %d", len(updated))
+	}
+}
+
+func TestRefreshInstalledPackageREADMEUsesOnlyMatchingVersion(t *testing.T) {
+	oldDataDir := util.DataDir
+	util.DataDir = t.TempDir()
+	t.Cleanup(func() { util.DataDir = oldDataDir })
+
+	packageName := "sample #%(test)+ package"
+	installPath := filepath.Join(util.DataDir, "plugins", packageName)
+	if err := os.MkdirAll(installPath, 0755); err != nil {
+		t.Fatal(err)
+	}
+	manifest := `{"name":"sample #%(test)+ package","version":"1.0.0","readme":{"default":"README.md"}}`
+	if err := os.WriteFile(filepath.Join(installPath, "plugin.json"), []byte(manifest), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(installPath, "README.md"), []byte("![missing](missing.webp)"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	installed := &bazaar.Package{
+		Name:        packageName,
+		Version:     "1.0.0",
+		Readme:      bazaar.LocaleStrings{"default": "README.md"},
+		InstallTime: 42,
+	}
+	available := &bazaar.Package{
+		Name:    packageName,
+		Version: "1.0.0",
+		RepoURL: "https://github.com/owner/repo",
+		RepoRef: "v1.0.0",
+	}
+	refreshInstalledPackageREADME("plugins", installed, available)
+	if !strings.Contains(installed.PreferredReadme,
+		"https://cdn.jsdelivr.net/gh/owner/repo@v1.0.0/missing.webp") {
+		t.Fatalf("matching version did not use the pinned README source: %q", installed.PreferredReadme)
+	}
+	if installed.RepoRef != "v1.0.0" {
+		t.Fatalf("matching version did not expose its repo ref: %q", installed.RepoRef)
+	}
+
+	installed.PreferredReadme = "unchanged"
+	installed.RepoRef = ""
+	available.Version = "2.0.0"
+	available.RepoRef = "v2.0.0"
+	refreshInstalledPackageREADME("plugins", installed, available)
+	if installed.PreferredReadme != "unchanged" || installed.RepoRef != "" {
+		t.Fatalf("outdated installed README used the latest source: %#v", installed)
 	}
 }
 

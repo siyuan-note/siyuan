@@ -9,6 +9,7 @@ import {isSensitiveSearchConfig, setStorageVal} from "../protyle/util/compatibil
 import {confirmDialog} from "../dialog/confirmDialog";
 import {goUnRef, updateSearchResult} from "../mobile/menu/search";
 import {getDefaultSubType} from "./getDefault";
+import {hasSearchConfigTemporaryPath, resolvePersistedSearchConfig} from "./config";
 
 export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => void) => {
     const filterDialog = new Dialog({
@@ -288,7 +289,11 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
             }
         });
         cb();
-        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = resolvePersistedSearchConfig(
+            config,
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA],
+            hasSearchConfigTemporaryPath(config),
+        );
         setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         filterDialog.destroy();
     });
@@ -325,7 +330,11 @@ export const replaceFilterMenu = (config: Config.IUILayoutTabSearchConfig) => {
         filterDialog.element.querySelectorAll(".b3-switch").forEach((item: HTMLInputElement) => {
             config.replaceTypes[item.getAttribute("data-type") as keyof (typeof config.replaceTypes)] = item.checked;
         });
-        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
+        window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = resolvePersistedSearchConfig(
+            config,
+            window.siyuan.storage[Constants.LOCAL_SEARCHDATA],
+            hasSearchConfigTemporaryPath(config),
+        );
         setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         filterDialog.destroy();
     });
@@ -743,7 +752,7 @@ export const moreMenu = async (config: Config.IUILayoutTabSearchConfig,
 };
 
 const configIsSame = (config: Config.IUILayoutTabSearchConfig, config2: Config.IUILayoutTabSearchConfig) => {
-    if (config2.group === config.group && config2.hPath === config.hPath && config2.hasReplace === config.hasReplace &&
+    if (config2.group === config.group && config2.hasReplace === config.hasReplace &&
         config2.k === config.k && config2.method === config.method && config2.r === config.r &&
         config2.sort === config.sort && objEquals(config2.types, config.types) &&
         objEquals({...getDefaultSubType(), ...config2.subTypes},

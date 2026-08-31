@@ -1,4 +1,6 @@
 {
+	"fontFamily": "Familia tipográfica",
+	"mixed": "Mixto",
 	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Desplazarse una pantalla hacia arriba sin mover el cursor",
 	"scrollPageDownWithoutMovingCaret": "Desplazarse una pantalla hacia abajo sin mover el cursor",

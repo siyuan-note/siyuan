@@ -26,6 +26,7 @@ import {fetchPost} from "../util/fetch";
 import {isWindow} from "../util/functions";
 import {Wnd} from "./Wnd";
 import {requestResponsiveDockLayout} from "./dock/responsive";
+import {cloneSearchConfig} from "../search/config";
 
 export const setTabPosition = (onlyPadding = false, onlyClear = false) => {
     const isWindowMode = isWindow();
@@ -420,7 +421,7 @@ export const copyTab = (app: App, tab: Tab) => {
                 model = new Search({
                     app,
                     tab: newTab,
-                    config: tab.model.config
+                    config: cloneSearchConfig(tab.model.config)
                 });
             } else if (tab.model instanceof Custom) {
                 const custom = tab.model as Custom;

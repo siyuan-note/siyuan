@@ -22,7 +22,8 @@ import {initMessage} from "../dialog/message";
 import {getAllTabs} from "../layout/getAll";
 import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "./init";
-import {loadPlugins, reloadPlugin} from "../plugin/loader";
+import {loadPlugins} from "../plugin/loader";
+import {applyPluginReload, syncGlobalPluginConfig} from "../plugin/globalState";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
 import {appearanceConfigApi} from "../config/tabs/appearanceRuntime";
@@ -79,7 +80,7 @@ class App {
                                 setRefDynamicText(data.data);
                                 break;
                             case "reloadPlugin":
-                                reloadPlugin(this, data.data);
+                                void applyPluginReload(this, data.data).catch((error) => console.error(error));
                                 break;
                             case "reloadEmojiConf":
                                 reloadEmoji();
@@ -96,6 +97,7 @@ class App {
                                 break;
                             case "setConf":
                                 window.siyuan.config = data.data;
+                                syncGlobalPluginConfig(this, data.data.bazaar.petalDisabled);
                                 break;
                             case "setCloudUser":
                                 applyCloudUserState(data.data.user, data.data.userName);

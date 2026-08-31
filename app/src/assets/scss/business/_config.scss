@@ -771,6 +771,12 @@
           margin: 24px auto 16px;
           border-radius: var(--b3-border-radius);
           flex-shrink: 0;
+
+          &--placeholder {
+            box-sizing: border-box;
+            color: var(--b3-theme-primary);
+            padding: 24px;
+          }
         }
 
         &__meta {

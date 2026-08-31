@@ -40,7 +40,7 @@ func InitAppearance() {
 	}
 
 	from := filepath.Join(util.WorkingDir, "appearance")
-	if err := filelock.Copy(from, util.AppearancePath); err != nil {
+	if err := filelock.CopyWritable(from, util.AppearancePath); err != nil {
 		logging.LogErrorf("copy appearance resources from [%s] to [%s] failed: %s", from, util.AppearancePath, err)
 		util.ReportFileSysFatalError(err)
 		return

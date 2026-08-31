@@ -415,11 +415,15 @@ const bindAccountAuthForm = (
     const login2Btn = authFormRoot.querySelector("#login2") as HTMLButtonElement;
     let token = "";
     let needCaptcha = "";
+    let submitting = false;
+    let updateLoginButton = () => {
+        loginBtn.disabled = submitting;
+    };
 
     if (mode === "login") {
         const agreeLoginCheckbox = authFormRoot.querySelector("#agreeLogin") as HTMLInputElement;
-        const updateLoginButton = () => {
-            loginBtn.disabled = isAccountLoginDisabled(agreeLoginCheckbox.checked, userPasswordInput.value);
+        updateLoginButton = () => {
+            loginBtn.disabled = isAccountLoginDisabled(agreeLoginCheckbox.checked, userPasswordInput.value, submitting);
         };
         agreeLoginCheckbox.addEventListener("change", updateLoginButton);
         userPasswordInput.addEventListener("input", updateLoginButton);
@@ -441,9 +445,15 @@ const bindAccountAuthForm = (
     bindAccountAuthEnter(captchaInput, () => loginBtn.click());
     bindAccountAuthEnter(twofactorAuthCodeInput, () => login2Btn.click());
 
+    const finishSubmitting = () => {
+        submitting = false;
+        updateLoginButton();
+        login2Btn.disabled = false;
+    };
+
     const completeLogin = (response: IWebSocketData) => {
         if (mode === "login") {
-            fetchPost("/api/setting/getCloudUser", {
+            return fetchPost("/api/setting/getCloudUser", {
                 token: response.data.token,
             }, (userResponse) => {
                 const action = resolveCloudUserRefresh(userResponse.code, userResponse.data, userNameInput.value.trim());
@@ -459,9 +469,16 @@ const bindAccountAuthForm = (
         } else if (mode === "deactivate") {
             confirmDeactivateAccount();
         }
+        return Promise.resolve();
     };
 
     loginBtn.addEventListener("click", () => {
+        if (submitting) {
+            return;
+        }
+        submitting = true;
+        updateLoginButton();
+        let completing = false;
         fetchPost("/api/account/login", {
             userName: userNameInput.value.trim(),
             userPassword: md5(userPasswordInput.value),
@@ -487,10 +504,21 @@ const bindAccountAuthForm = (
                 token = loginResponse.data.token;
                 return;
             }
-            completeLogin(loginResponse);
+            completing = true;
+            completeLogin(loginResponse).finally(finishSubmitting);
+        }).finally(() => {
+            if (!completing) {
+                finishSubmitting();
+            }
         });
     });
     login2Btn.addEventListener("click", () => {
+        if (submitting) {
+            return;
+        }
+        submitting = true;
+        login2Btn.disabled = true;
+        let completing = false;
         fetchPost("/api/setting/login2faCloudUser", {
             code: twofactorAuthCodeInput.value,
             token,
@@ -500,7 +528,12 @@ const bindAccountAuthForm = (
                 twofactorAuthCodeInput.select();
                 return;
             }
-            completeLogin(faResponse);
+            completing = true;
+            completeLogin(faResponse).finally(finishSubmitting);
+        }).finally(() => {
+            if (!completing) {
+                finishSubmitting();
+            }
         });
     });
 };

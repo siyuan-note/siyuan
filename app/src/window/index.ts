@@ -37,6 +37,7 @@ import {removeBlockPanelEditors} from "../block/panelRemoval";
 import {updateServerAddresses} from "../config/tabs/accessRuntime";
 import {applyCloudUserState} from "../config/tabs/accountUi";
 import {emitToPlugins} from "../plugin/EventBusCore";
+import {initializeEnglishCommandTranslations} from "../command/english";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -218,6 +219,11 @@ class App {
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
+                    void initializeEnglishCommandTranslations(
+                        window.siyuan.config.appearance.lang,
+                        lauguages as Record<string, string>,
+                        Constants.SIYUAN_VERSION,
+                    );
                     window.siyuan.menus = new Menus(this);
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {
                         window.siyuan.user = userResponse.data;

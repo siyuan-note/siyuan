@@ -11,7 +11,7 @@ import {fetchPost} from "../../../util/fetch";
 
 export const onlyProtyleCommand = (options: {
     command: string,
-    previousRange: Range,
+    previousRange?: Range,
     protyle: IProtyle,
 }) => {
     if (options.command === "switchReadonly") {
@@ -31,6 +31,9 @@ export const onlyProtyleCommand = (options: {
             attrs: {[Constants.CUSTOM_SY_FULLWIDTH]: fullWidth}
         });
         return true;
+    }
+    if (!options.previousRange) {
+        return false;
     }
     const nodeElement = hasClosestBlock(options.previousRange.startContainer);
     if (!nodeElement) {

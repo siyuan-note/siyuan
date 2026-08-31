@@ -1,7 +1,7 @@
 import {Constants} from "../../constants";
 import {fetchPost} from "../../util/fetch";
 /// #if !BROWSER
-import {sendGlobalShortcut} from "./keydown";
+import {sendGlobalShortcut} from "./globalShortcut";
 import {ipcRenderer} from "electron";
 /// #endif
 import type {App} from "../../index";

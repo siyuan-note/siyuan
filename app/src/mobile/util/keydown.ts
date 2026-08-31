@@ -1,5 +1,5 @@
 import type {App} from "../../index";
-import {execByCommand} from "../../boot/globalEvent/command/panel";
+import {execByCommand} from "../../command/executor";
 import {matchHotKey} from "../../protyle/util/hotKey";
 import {getCurrentEditor} from "../editor";
 import {filterHotkey} from "../../boot/globalEvent/commonHotkey";

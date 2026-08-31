@@ -44,7 +44,6 @@ import {getNextFileLi, getPreviousFileLi} from "../../protyle/wysiwyg/getBlock";
 import {Backlink} from "../../layout/dock/Backlink";
 /// #if !BROWSER
 import {setZoom} from "../../layout/topBar";
-import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../../history/history";
 import {openCard, openCardByData} from "../../card/openCard";
@@ -54,7 +53,6 @@ import {reloadProtyle} from "../../protyle/util/reload";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import type {App} from "../../index";
 import {toggleDockPanel} from "../../layout/dock/panel";
-import {clearDisallowedTextInputHotkey} from "../../util/hotKeyPolicy";
 import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/dock/util";
 import {workspaceMenu} from "../../menus/workspace";
 import {Search} from "../../search";
@@ -66,7 +64,8 @@ import {searchKeydown} from "./searchKeydown";
 import {historyKeydown} from "../../history/keydown";
 import {zoomOut} from "../../menus/protyle";
 import {getPlainText} from "../../protyle/util/paste";
-import {commandPanel, execByCommand} from "./command/panel";
+import {commandPanel} from "./command/panel";
+import {execByCommand} from "../../command/executor";
 import {filterHotkey} from "./commonHotkey";
 import {editorConfigApi} from "../../config/tabs/editorRuntime";
 import {copyPNGByLink} from "../../menus/util";
@@ -1885,50 +1884,4 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-};
-
-export const sendGlobalShortcut = (app: App) => {
-    /// #if !BROWSER
-    if (isWindow()) {
-        return;
-    }
-    const hotkeys = [clearDisallowedTextInputHotkey(window.siyuan.config.keymap.general.toggleWin.custom)];
-    app.plugins.forEach(plugin => {
-        plugin.commands.forEach(command => {
-            if (command.globalCallback && command.customHotkey) {
-                const hotkey = clearDisallowedTextInputHotkey(command.customHotkey);
-                if (hotkey) {
-                    hotkeys.push(hotkey);
-                }
-            }
-        });
-    });
-    ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
-        languages: window.siyuan.languages["_trayMenu"],
-        hotkeys
-    });
-    /// #endif
-};
-
-
-export const sendUnregisterGlobalShortcut = (app: App) => {
-    /// #if !BROWSER
-    if (isWindow()) {
-        return;
-    }
-    ipcRenderer.send(Constants.SIYUAN_CMD, {
-        cmd: "unregisterGlobalShortcut",
-        accelerator: window.siyuan.config.keymap.general.toggleWin.custom
-    });
-    app.plugins.forEach(plugin => {
-        plugin.commands.forEach(command => {
-            if (command.globalCallback) {
-                ipcRenderer.send(Constants.SIYUAN_CMD, {
-                    cmd: "unregisterGlobalShortcut",
-                    accelerator: command.customHotkey
-                });
-            }
-        });
-    });
-    /// #endif
 };

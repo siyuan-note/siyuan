@@ -57,6 +57,7 @@ import {setTitle} from "./util/processTitle";
 import {ensureUILayout} from "./util/ensureUILayout";
 import {applyEntryVisibility} from "./config/entryVisibility/runtime";
 import {removeBlockPanelEditors} from "./block/panelRemoval";
+import {initializeEnglishCommandTranslations} from "./command/english";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -304,6 +305,11 @@ export class App {
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
+                    void initializeEnglishCommandTranslations(
+                        window.siyuan.config.appearance.lang,
+                        lauguages as Record<string, string>,
+                        Constants.SIYUAN_VERSION,
+                    );
                     window.siyuan.menus = new Menus(this);
                     bootSync();
                     fetchPost("/api/setting/getCloudUser", {}, async userResponse => {

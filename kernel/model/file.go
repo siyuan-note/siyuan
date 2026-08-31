@@ -1576,7 +1576,7 @@ func GetHPathByPath(boxID, p string) (hPath string, err error) {
 		return
 	}
 
-	bt := treenode.GetBlockTreeByBoxPath(boxID, p)
+	bt := treenode.GetBlockTreeRootByPath(boxID, p)
 	if nil == bt {
 		err = ErrBlockNotFound
 		return
@@ -1593,7 +1593,7 @@ func GetHPathsByPaths(paths []string) (hPaths []string, err error) {
 			continue
 		}
 
-		bt := treenode.GetBlockTreeByBoxPath(box.ID, p)
+		bt := treenode.GetBlockTreeRootByPath(box.ID, p)
 		if nil == bt {
 			logging.LogWarnf("block tree not found by path [%s]", p)
 			continue

@@ -28,7 +28,7 @@ import {mountHelp} from "../util/mount";
 import {openChangelog} from "./openChangelog";
 import type {App} from "../index";
 import {initWindowEvent} from "./globalEvent/event";
-import {sendGlobalShortcut} from "./globalEvent/keydown";
+import {sendGlobalShortcut} from "./globalEvent/globalShortcut";
 import {closeWindow} from "../window/closeWin";
 import {correctHotkey, syncAppMenuShortcuts} from "./globalEvent/commonHotkey";
 import {recordBeforeResizeTop} from "../protyle/util/resize";

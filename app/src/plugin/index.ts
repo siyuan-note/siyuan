@@ -29,6 +29,7 @@ import {
     removeBreadcrumbButton as removePluginBreadcrumbButton,
 } from "./breadcrumbButton";
 import type {TCustomBlockRender} from "./customBlockRender";
+import {registerPluginCommand} from "./commandAdapter";
 
 const disposedPlugins = new WeakSet<Plugin>();
 
@@ -175,6 +176,7 @@ export class Plugin {
             console.error(`${this.name} - commands data is error and has been removed.`);
         } else {
             this.commands.push(command);
+            registerPluginCommand(this.app, this, command);
             /// #if !BROWSER
             if (!isWindow() && command.globalCallback && command.customHotkey &&
                 !isDisallowedTextInputHotkey(command.customHotkey)) {

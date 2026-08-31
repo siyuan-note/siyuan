@@ -17,6 +17,8 @@ import {removeBreadcrumbButtons} from "./breadcrumbButton";
 import {refreshDockCatalog} from "../config/entryVisibility/catalog";
 import {isWindow} from "../util/functions";
 import {destroyEventBus} from "./EventBusCore";
+import {unregisterPluginCommands} from "./commandAdapter";
+import {sendGlobalShortcut} from "../boot/globalEvent/globalShortcut";
 
 const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
     try {
@@ -32,6 +34,7 @@ const runCleanup = (plugin: Plugin, step: string, callback: () => unknown) => {
 };
 
 export const beginPluginTeardown = (plugin: Plugin) => {
+    runCleanup(plugin, "commands", () => unregisterPluginCommands(plugin));
     runCleanup(plugin, "asset upload", () => cancelAssetUploadsByPlugin(plugin));
 };
 
@@ -135,6 +138,7 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
         });
     });
     runCleanup(plugin, "style", () => document.getElementById("pluginsStyle" + plugin.name)?.remove());
+    runCleanup(plugin, "commands", () => unregisterPluginCommands(plugin));
     /// #if !BROWSER
     if (!isWindow()) {
         runCleanup(plugin, "global shortcut", () => {
@@ -149,6 +153,9 @@ export const destroyPlugin = (app: App, plugin: Plugin, isUninstall: boolean) =>
                 }
             });
         });
+        if (window.siyuan.languages?.["_trayMenu"]) {
+            runCleanup(plugin, "global shortcut sync", () => sendGlobalShortcut(app));
+        }
     }
     /// #endif
 };

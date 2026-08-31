@@ -60,6 +60,7 @@ import {openByMobile} from "../editor/openLink";
 import {initHarmonyTextSelectionMenu} from "../util/harmonyTextSelectionMenu";
 import {updateMobileTopBarLayout} from "./util/mobileTopBar";
 import {showMobileBars} from "./util/mobileBars";
+import {initializeEnglishCommandTranslations} from "../command/english";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -185,6 +186,11 @@ class App {
             getLocalStorage(() => {
                 fetchGet(`/appearance/langs/${window.siyuan.config.appearance.lang}.json?v=${Constants.SIYUAN_VERSION}`, (lauguages: IObject) => {
                     window.siyuan.languages = lauguages;
+                    void initializeEnglishCommandTranslations(
+                        window.siyuan.config.appearance.lang,
+                        lauguages as Record<string, string>,
+                        Constants.SIYUAN_VERSION,
+                    );
                     window.siyuan.menus = new Menus(this);
                     document.title = window.siyuan.languages.siyuanNote;
                     bootSync();

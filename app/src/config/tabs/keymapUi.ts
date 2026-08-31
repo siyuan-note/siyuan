@@ -9,7 +9,7 @@ import {fetchPost} from "../../util/fetch";
 import {exportLayout} from "../../layout/util";
 import {updateDockHotkeys} from "../../layout/dock/util";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/keydown";
+import {sendGlobalShortcut, sendUnregisterGlobalShortcut} from "../../boot/globalEvent/globalShortcut";
 import {syncAppMenuShortcuts} from "../../boot/globalEvent/commonHotkey";
 import {normalizeSearchText} from "../search/normalize";
 import {genButtonRowHtml, genConfigGroup} from "../render/render";

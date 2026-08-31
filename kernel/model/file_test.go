@@ -637,6 +637,35 @@ func TestPerformCreateDocTransactionSyncReturnsWriteError(t *testing.T) {
 	}
 }
 
+func TestGetHPathsByPathsUsesDocumentRoot(t *testing.T) {
+	fixture := setupFileOperationTest(t)
+	tree, err := LoadTreeByBlockID(fixture.sourceID)
+	if nil != err {
+		t.Fatalf("load source document failed: %v", err)
+	}
+
+	tree.Root.FirstChild.Unlink()
+	tree.HPath = "/Renamed"
+	tree.Root.SetIALAttr("title", "Renamed")
+	tree.Root.AppendChild(treenode.NewParagraph("20260831000000-newpath"))
+	treenode.UpsertBlockTree(tree)
+
+	staleBlock := treenode.GetBlockTree(fixture.childID)
+	if nil == staleBlock || "/Source" != staleBlock.HPath {
+		t.Fatalf("expected stale content block path to remain in the fixture: %+v", staleBlock)
+	}
+
+	hPath, err := GetHPathByPath(fixture.box.ID, fixture.sourcePath)
+	if nil != err || "/Renamed" != hPath {
+		t.Fatalf("unexpected document path: got %q, err=%v", hPath, err)
+	}
+
+	hPaths, err := GetHPathsByPaths([]string{fixture.sourcePath})
+	if nil != err || !reflect.DeepEqual([]string{"File operation test/Renamed"}, hPaths) {
+		t.Fatalf("unexpected document paths: got %v, err=%v", hPaths, err)
+	}
+}
+
 func TestGetBoxesByPathsStrictRejectsInvalidPaths(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	tests := []struct {

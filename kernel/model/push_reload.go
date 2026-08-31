@@ -20,6 +20,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -94,22 +95,43 @@ func PushReloadPlugin(uninstallPluginNameSet, unloadPluginNameSet, reloadPluginS
 	util.BroadcastByTypeAndExcludeApp(excludeApp, "main", "reloadPlugin", 0, "", payload)
 }
 
-// PushReloadAllEnabledPlugins 向前端推送已启用插件的全局启用或禁用状态。
-func PushReloadAllEnabledPlugins(enabled bool, excludeApp string) {
-	pluginNameSet := hashset.New()
+// PushReloadAllEnabledPlugins 向前端推送已启用插件的全局状态，并返回相同的权威状态供请求方应用。
+func PushReloadAllEnabledPlugins(enabled, petalDisabled bool, revision uint64, changed bool) map[string]any {
+	pluginNames := []string{}
 	for _, petal := range getPetals() {
 		if petal.Enabled {
-			pluginNameSet.Add(petal.Name)
+			pluginNames = append(pluginNames, petal.Name)
 		}
 	}
-	if pluginNameSet.Empty() {
-		return
+	sort.Strings(pluginNames)
+
+	unloadPlugins, reloadPlugins := []string{}, []string{}
+	if changed {
+		if enabled {
+			reloadPlugins = pluginNames
+		} else {
+			unloadPlugins = pluginNames
+		}
 	}
-	if enabled {
-		PushReloadPlugin(nil, nil, pluginNameSet, nil, excludeApp)
-	} else {
-		PushReloadPlugin(nil, pluginNameSet, nil, nil, excludeApp)
+	payload := map[string]any{
+		"uninstallPlugins":    []string{},
+		"unloadPlugins":       unloadPlugins,
+		"reloadPlugins":       reloadPlugins,
+		"dataChangePlugins":   []string{},
+		"globalPetalEnabled":  enabled,
+		"globalPetalDisabled": petalDisabled,
+		"globalPetalRevision": revision,
+		"globalPetalChanged":  changed,
 	}
+	if changed {
+		logging.LogInfof("reload plugins for global state, unloads=%v, reloads=%v, revision=%d",
+			unloadPlugins, reloadPlugins, revision)
+		if 0 < len(unloadPlugins)+len(reloadPlugins) {
+			util.ReloadPublishServiceSessions()
+		}
+		util.BroadcastByType("main", "reloadPlugin", 0, "", payload)
+	}
+	return payload
 }
 
 func refreshDocInfo(tree *parse.Tree) {

@@ -2,9 +2,6 @@ import {showMessage} from "../dialog/message";
 import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {highlightRender} from "../protyle/render/highlightRender";
-/// #if !MOBILE
-import {saveLayout} from "../layout/util";
-/// #endif
 import {Constants} from "../constants";
 /// #if !BROWSER
 import * as path from "path";
@@ -16,7 +13,8 @@ import {Plugin} from "../plugin";
 import type {App} from "../index";
 import {escapeAttr, escapeHtml} from "../util/escape";
 import {formatCount} from "../util/number";
-import {loadPlugin, loadPlugins, unloadPlugin} from "../plugin/loader";
+import {loadPlugin, unloadPlugin} from "../plugin/loader";
+import {setGlobalPluginsDisabled, subscribeGlobalPluginState} from "../plugin/globalState";
 import {useShell} from "../util/pathName";
 import {switchSettingPanelSubTab} from "./setting/mount";
 import {isThemeFrontendSupported} from "../util/themeCompatibility";
@@ -110,6 +108,12 @@ export const bazaar = {
     _updateRequestID: 0,
     _localPackageUploading: false,
     _pluginEnablePending: new Set<string>(),
+    _downloadedPluginsReady: false,
+    _pluginGlobalRequestPending: false,
+    _pluginGlobalLifecyclePending: false,
+    _pluginGlobalRequestID: 0,
+    _lastGlobalPluginSettledRevision: -1,
+    _globalPluginStateUnsubscribe: undefined as (() => void) | undefined,
     _ratingUserID: "",
     _ratingUserChangeHandler: undefined as (() => void) | undefined,
     _activateMount(element: HTMLElement, force = false) {
@@ -122,6 +126,13 @@ export const bazaar = {
     _invalidateMount() {
         this._mountGeneration++;
         this._updateRequestID++;
+        this._pluginGlobalRequestID++;
+        this._downloadedPluginsReady = false;
+        this._pluginGlobalRequestPending = false;
+        this._pluginGlobalLifecyclePending = false;
+        this._lastGlobalPluginSettledRevision = -1;
+        this._globalPluginStateUnsubscribe?.();
+        this._globalPluginStateUnsubscribe = undefined;
         this._data.deprecationMetadata.clear();
         this._data.deprecationTypesLoaded.clear();
         this._data.deprecationTypesLoading.clear();
@@ -153,6 +164,20 @@ export const bazaar = {
     _isBazaarRequestCurrent(bazaarType: TBazaarType, mount: IBazaarMountSnapshot) {
         return this._isMountCurrent(mount) && (mount.requestID === undefined ||
             this._bazaarRequestIDs.get(bazaarType) === mount.requestID);
+    },
+    _syncPluginGlobalSwitch() {
+        const switchElement = this.element?.querySelector('[data-type="plugins-enable"]') as HTMLInputElement;
+        if (!switchElement) {
+            return;
+        }
+        const petalDisabled = this._pluginGlobalRequestPending ?
+            !switchElement.checked : window.siyuan.config.bazaar.petalDisabled;
+        if (!this._pluginGlobalRequestPending) {
+            switchElement.checked = !petalDisabled;
+        }
+        switchElement.disabled = !this._downloadedPluginsReady || this._pluginGlobalRequestPending ||
+            this._pluginGlobalLifecyclePending;
+        switchElement.setAttribute("aria-label", window.siyuan.languages[petalDisabled ? "enable" : "disableAll"]);
     },
     genHTML() {
         if (!window.siyuan.config.bazaar.trust) {
@@ -249,7 +274,7 @@ export const bazaar = {
                         <input class="b3-form__upload" data-type="local-package-file" type="file" accept=".zip,application/zip">
                     </label>
                     <button class="b3-button fn__none" data-type="install-all">${window.siyuan.languages.updateAll}</button>
-                    <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" data-position="north" type="checkbox" class="b3-switch fn__flex-center ariaLabel" aria-label="${window.siyuan.languages[window.siyuan.config.bazaar.petalDisabled ? "enable" : "disableAll"]}">
+                    <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" data-position="north" type="checkbox" class="b3-switch fn__flex-center ariaLabel" aria-label="${window.siyuan.languages[window.siyuan.config.bazaar.petalDisabled ? "enable" : "disableAll"]}" disabled>
                     <div class="counter counter--bg fn__none fn__flex-center ariaLabel" data-position="north" aria-label="${window.siyuan.languages.total}"></div>
                 </div>
             </div>
@@ -1007,6 +1032,10 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             typeBtn?.classList.contains("b3-button--outline")) {
             return false;
         }
+        if (bazaarType === "plugins") {
+            bazaar._downloadedPluginsReady = false;
+            bazaar._syncPluginGlobalSwitch();
+        }
         bazaar._updateDownloadedToolbar(bazaarType);
         contentElement.setAttribute("data-loading", "true");
         const installedAPI: Record<TBazaarType, string> = {
@@ -1117,6 +1146,10 @@ type="checkbox">
             bazaar._data.downloaded = packages;
             bazaar._data.downloadedType = bazaarType;
             contentElement.innerHTML = html ? html : `<ul class="b3-list b3-list--background"><li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li></ul>`;
+            if (bazaarType === "plugins") {
+                bazaar._downloadedPluginsReady = true;
+                bazaar._syncPluginGlobalSwitch();
+            }
             bazaar._loadDownloadedRatings(bazaarType, packageItems);
             bazaar._loadDownloadedUserRatings(bazaarType, packageItems);
             bazaar._loadDownloadedDeprecations(bazaarType, app);
@@ -2416,15 +2449,11 @@ type="checkbox">
                     app: Constants.SIYUAN_APPID,
                 }, (response) => {
                     window.siyuan.config.bazaar = response.data;
-                    void loadPlugins(app, null, false).then(() => {
-                        if (!bazaar._isMountCurrent(mount)) {
-                            return;
-                        }
-                        bazaar.element.innerHTML = bazaar.genHTML();
-                        bazaar.bindEvent(app);
-                    }).catch(error => {
-                        console.error(error);
-                    });
+                    if (!bazaar._isMountCurrent(mount)) {
+                        return;
+                    }
+                    bazaar.element.innerHTML = bazaar.genHTML();
+                    bazaar.bindEvent(app);
                 });
             });
             return;
@@ -2437,6 +2466,25 @@ type="checkbox">
         const mount = this._captureMount();
         (["plugins", "themes", "icons", "templates", "widgets"] as TBazaarType[]).forEach((type) => {
             this._data.update[type] = [];
+        });
+        this._downloadedPluginsReady = false;
+        this._pluginGlobalRequestPending = false;
+        this._pluginGlobalLifecyclePending = false;
+        let initialGlobalPluginState = true;
+        this._globalPluginStateUnsubscribe?.();
+        this._globalPluginStateUnsubscribe = subscribeGlobalPluginState(app, (state) => {
+            const shouldRefresh = !initialGlobalPluginState && !state.pending &&
+                state.revision > this._lastGlobalPluginSettledRevision;
+            this._pluginGlobalLifecyclePending = state.pending;
+            this._syncPluginGlobalSwitch();
+            if (!state.pending) {
+                this._lastGlobalPluginSettledRevision = Math.max(
+                    this._lastGlobalPluginSettledRevision, state.revision);
+            }
+            initialGlobalPluginState = false;
+            if (shouldRefresh && bazaar._isMountCurrent(mount)) {
+                this._genMyHTML("plugins", app, true);
+            }
         });
         this._genMyHTML("plugins", app);
         this._checkUpdate(true);
@@ -2741,43 +2789,17 @@ type="checkbox">
                     break;
                 } else if (type === "plugins-enable") {
                     if (!target.getAttribute("disabled")) {
-                        target.setAttribute("disabled", "disabled");
-                        const pluginNames = app.plugins.map(item => item.name);
-                        window.siyuan.config.bazaar.petalDisabled = !(target as HTMLInputElement).checked;
-                        fetchPost("/api/setting/setBazaar", {
-                            ...window.siyuan.config.bazaar,
-                            app: Constants.SIYUAN_APPID,
-                        }, () => {
-                            const finish = () => {
-                                if (bazaar._isMountCurrent(mount)) {
-                                    target.removeAttribute("disabled");
-                                    target.setAttribute("aria-label", window.siyuan.languages[
-                                        window.siyuan.config.bazaar.petalDisabled ? "enable" : "disableAll"
-                                    ]);
-                                }
-                            };
-                            if (window.siyuan.config.bazaar.petalDisabled) {
-                                void Promise.all(pluginNames.map((pluginName) => unloadPlugin(app, pluginName))).then(() => {
-                                    if (bazaar._isMountCurrent(mount)) {
-                                        mount.element.querySelectorAll("#configBazaarDownloaded .b3-card").forEach((item: HTMLElement) => {
-                                            item.querySelector('[data-type="setting"]')?.classList.add("fn__none");
-                                        });
-                                    }
-                                }).catch(error => {
-                                    console.error(error);
-                                }).finally(finish);
-                            } else {
-                                void loadPlugins(app, null, false).then(() => {
-                                    if (bazaar._isMountCurrent(mount)) {
-                                        this._genMyHTML("plugins", app, false);
-                                    }
-                                    /// #if !MOBILE
-                                    saveLayout();
-                                    /// #endif
-                                }).catch(error => {
-                                    console.error(error);
-                                }).finally(finish);
+                        const requestID = ++this._pluginGlobalRequestID;
+                        this._pluginGlobalRequestPending = true;
+                        this._syncPluginGlobalSwitch();
+                        void setGlobalPluginsDisabled(app, !(target as HTMLInputElement).checked).catch((error) => {
+                            console.error(error);
+                        }).finally(() => {
+                            if (requestID !== this._pluginGlobalRequestID) {
+                                return;
                             }
+                            this._pluginGlobalRequestPending = false;
+                            this._syncPluginGlobalSwitch();
                         });
                     }
                     event.stopPropagation();

@@ -36,7 +36,8 @@ import {getLocalStorage, isChromeBrowser, isInMobileApp, isIOSDevice} from "./pr
 import {isBrowser} from "./util/functions";
 import {checkPublishServiceClosed} from "./util/processMessage";
 import {hideAllElements} from "./protyle/ui/hideElements";
-import {loadPlugins, reloadPlugin} from "./plugin/loader";
+import {loadPlugins} from "./plugin/loader";
+import {applyPluginReload, syncGlobalPluginConfig} from "./plugin/globalState";
 import "./assets/scss/base.scss";
 import {reloadEmoji} from "./emoji";
 import {processIOSPurchaseResponse} from "./util/iOSPurchase";
@@ -109,7 +110,7 @@ export class App {
                             setRefDynamicText(data.data);
                             break;
                         case "reloadPlugin":
-                            reloadPlugin(this, data.data);
+                            void applyPluginReload(this, data.data).catch((error) => console.error(error));
                             break;
                         case "reloadEmojiConf":
                             reloadEmoji();
@@ -126,6 +127,7 @@ export class App {
                             break;
                         case "setConf":
                             window.siyuan.config = data.data;
+                            syncGlobalPluginConfig(this, data.data.bazaar.petalDisabled);
                             break;
                         case "setCloudUser":
                             applyCloudUserState(data.data.user, data.data.userName);

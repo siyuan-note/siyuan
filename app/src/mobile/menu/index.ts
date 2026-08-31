@@ -281,7 +281,7 @@ export const initRightMenu = (app: App) => {
                 <svg class="b3-menu__icon"><use xlink:href="#iconInbox"></use></svg><span class="b3-menu__label">${window.siyuan.languages.inbox}</span>
             </div>
             <div id="menuRecent" class="b3-menu__item">
-                <svg class="b3-menu__icon"><use xlink:href="#iconList"></use></svg><span class="b3-menu__label">${window.siyuan.languages.recentDocs}</span>
+                <svg class="b3-menu__icon"><use xlink:href="#iconRecentDocs"></use></svg><span class="b3-menu__label">${window.siyuan.languages.recentDocs}</span>
             </div>
             <div id="menuSearch" class="b3-menu__item">
                 <svg class="b3-menu__icon"><use xlink:href="#iconSearch"></use></svg><span class="b3-menu__label">${window.siyuan.languages.search}</span>

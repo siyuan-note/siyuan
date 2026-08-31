@@ -33,7 +33,7 @@ export const getRecentDocs = (app: App) => {
         let recentDocs = response.data as IRecentDoc[];
         openModel({
             title: window.siyuan.languages.recentDocs,
-            icon: "iconList",
+            icon: "iconRecentDocs",
             html: `<div class="fn__flex-column" style="height: 100%">
     <div class="toolbar toolbar--border" style="padding: 8px">
         <input placeholder="${window.siyuan.languages.searchPlaceholder}" class="b3-text-field fn__flex-1" autocomplete="off" autocorrect="off" spellcheck="false">

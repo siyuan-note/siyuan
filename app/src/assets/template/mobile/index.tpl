@@ -95,7 +95,7 @@
         <span class="toolbar__tabs-count">0</span>
     </button>
     <button id="mobileBottomBarRecent" class="mobile-bottom-bar__item fn__none" data-action="recent" type="button">
-        <svg><use xlink:href="#iconList"></use></svg>
+        <svg><use xlink:href="#iconRecentDocs"></use></svg>
     </button>
     <button id="mobileBottomBarOutline" class="mobile-bottom-bar__item fn__none" data-action="outline" type="button">
         <svg><use xlink:href="#iconOutline"></use></svg>

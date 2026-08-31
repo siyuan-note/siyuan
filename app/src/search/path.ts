@@ -52,7 +52,8 @@ const renderSearchPath = (element: Element, hPath: string) => {
     const pathElement = element.querySelector("#searchPathInput");
     if (pathElement) {
         pathElement.innerHTML = `${escapeHtml(hPath)}<svg class="search__rmpath"><use xlink:href="#iconCloseRound"></use></svg>`;
-        pathElement.setAttribute("aria-label", hPath);
+        // Tooltip 会将 aria-label 作为 HTML 渲染，动态赋值时需要保留一层实体转义。
+        pathElement.setAttribute("aria-label", escapeHtml(hPath));
     }
 };
 

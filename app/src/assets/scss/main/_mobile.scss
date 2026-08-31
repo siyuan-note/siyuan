@@ -582,7 +582,8 @@ body.mobile-topbar--merged {
     top: var(--mobile-topbar-height);
     right: 0;
     left: 0;
-    z-index: 3;
+    // 需高于数据库吸顶工具栏，避免数据库离开吸顶区域时覆盖面包屑
+    z-index: 5;
     height: var(--mobile-breadcrumb-height);
     border-radius: 0;
     transform: translate3d(0, var(--mobile-bar-translate-y, 0), 0);

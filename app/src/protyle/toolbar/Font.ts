@@ -10,7 +10,7 @@ import {
     SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE,
     setSubElementSource,
 } from "./subElementLifecycle";
-import {escapeAttr} from "../../util/escape";
+import {escapeAttr, escapeHtml} from "../../util/escape";
 import {
     decodeStyle1,
     encodeStyle1,
@@ -38,6 +38,13 @@ import {
     hasSemanticInlineType,
     stripSemanticMarkersFromRangeText
 } from "../util/inlineElementMarker";
+import {
+    getInlineFontFamilyLabel,
+    getInlineFontFamilyState,
+    getInlineFontFamilyValue,
+    openFontFamilyMenu,
+} from "./fontFamilyMenu";
+import {hasInlineFontFamilyExcludedType} from "./fontFamilyCore";
 
 const MAX_RECENT_FONT_STYLES = 14;
 
@@ -150,7 +157,8 @@ export const convertFontSize = (fontSize: string, unit: "px" | "em", baseFontSiz
 };
 
 export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
-                               onChange?: (type: string, color?: string) => void) => {
+                               onChange?: (type: string, color?: string) => void,
+                               fontFamilyElements?: Element[]) => {
     const builtinStyleLabels: Record<TBuiltinInlineStyleID, string> = {
         error: window.siyuan.languages.errorStyle,
         warning: window.siyuan.languages.warningStyle,
@@ -252,17 +260,20 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
         lastColorHTML += "</div>";
     }
     const {fontSize, baseFontSize} = getFontSizeInfo(protyle, nodeElements);
+    const fontFamilyState = getInlineFontFamilyState(protyle, fontFamilyElements || nodeElements);
+    const disableFontFamily = disableFont || fontFamilyState.disabled;
     const applyFontStyle = (type: string, color?: string) => {
         fontEvent(protyle, nodeElements, type, color, true, onChange);
     };
     const closeSelectionToolbarAppearance = () => {
         if (protyle.toolbar.subElement.dataset.subElementSource !== SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE) {
-            return;
+            return false;
         }
         protyle.toolbar.subElement.classList.add("fn__none");
         closeSubElement(protyle.toolbar);
         protyle.toolbar.render(protyle, protyle.toolbar.range);
         focusByRange(protyle.toolbar.range);
+        return true;
     };
     element.innerHTML = `${lastColorHTML}
 <div class="fn__hr"></div>
@@ -293,6 +304,15 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
 <div data-id="fontStyleWrap" class="fn__flex">
     <button data-type="style2" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.hollow}" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">A</button>
     <button data-type="style4" class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.shadow}" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">A</button>
+</div>
+<div class="fn__hr${disableFontFamily ? " fn__none" : ""}"></div>
+<div data-id="fontFamily" class="fn__flex${disableFontFamily ? " fn__none" : ""}">
+    ${window.siyuan.languages.fontFamily}
+    <span class="fn__flex-1"></span>
+    <button class="b3-button b3-button--outline fn__flex-center" data-type="fontFamilyMenu">
+        <span class="fn__ellipsis" data-type="fontFamilyLabel">${escapeHtml(getInlineFontFamilyLabel(fontFamilyState))}</span>
+        <svg><use xlink:href="#iconRight"></use></svg>
+    </button>
 </div>
 <div class="fn__hr${disableFont ? " fn__none" : ""}"></div>
 <div data-id="fontSize" class="fn__flex${disableFont ? " fn__none" : ""}">
@@ -332,6 +352,25 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
                     protyle.toolbar.subElement.classList.add("fn__none");
                     protyle.toolbar.element.classList.add("fn__none");
                     openInlineStyleDialog(target.dataset.inlineStyleType as TInlineStyleType);
+                } else if (dataType === "fontFamilyMenu") {
+                    const range = protyle.toolbar.range.cloneRange();
+                    void openFontFamilyMenu(target, {
+                        ...fontFamilyState,
+                        isOpenValid: () => target.isConnected && element.isConnected &&
+                            protyle.toolbar.subElement.contains(element) &&
+                            !protyle.toolbar.subElement.classList.contains("fn__none") &&
+                            range.startContainer.isConnected && range.endContainer.isConnected,
+                        onSelect(family) {
+                            if (!range.startContainer.isConnected || !range.endContainer.isConnected) {
+                                return;
+                            }
+                            protyle.toolbar.range = range;
+                            applyFontStyle("fontFamily", getInlineFontFamilyValue(family));
+                            if (!closeSelectionToolbarAppearance()) {
+                                focusByRange(protyle.toolbar.range);
+                            }
+                        }
+                    });
                 } else if (dataType === "style1") {
                     applyFontStyle(dataType, encodeStyle1(target.style.backgroundColor, target.style.color));
                     closeSelectionToolbarAppearance();
@@ -394,12 +433,14 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                           focusRange = true, onChange?: (type: string, color?: string) => void) => {
     let localFontStyles = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (type) {
-        const value = `${type}${Constants.ZWSP}${color}`;
-        const recentKey = getRecentInlineStyleKey(value);
-        localFontStyles = [value, ...localFontStyles.filter((item: string) =>
-            getRecentInlineStyleKey(item) !== recentKey)].slice(0, MAX_RECENT_FONT_STYLES);
-        window.siyuan.storage[Constants.LOCAL_FONTSTYLES] = localFontStyles;
-        setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
+        if (type !== "fontFamily") {
+            const value = `${type}${Constants.ZWSP}${color}`;
+            const recentKey = getRecentInlineStyleKey(value);
+            localFontStyles = [value, ...localFontStyles.filter((item: string) =>
+                getRecentInlineStyleKey(item) !== recentKey)].slice(0, MAX_RECENT_FONT_STYLES);
+            window.siyuan.storage[Constants.LOCAL_FONTSTYLES] = localFontStyles;
+            setStorageVal(Constants.LOCAL_FONTSTYLES, window.siyuan.storage[Constants.LOCAL_FONTSTYLES]);
+        }
     } else {
         const visibleFontStyles = filterHiddenRecentInlineStyles(localFontStyles);
         if (visibleFontStyles.length === 0) {
@@ -422,6 +463,20 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
         return;
     }
     if (nodeElements && nodeElements.length > 0) {
+        if (type === "clear" &&
+            protyle.toolbar.setBlockElementsInlineMark(protyle, nodeElements, type, {type: "text"}, true)) {
+            if (focusRange) {
+                focusByRange(protyle.toolbar.range);
+            }
+            return;
+        }
+        if (type === "fontFamily" &&
+            protyle.toolbar.setBlockElementsInlineMark(protyle, nodeElements, "text", {type, color})) {
+            if (focusRange) {
+                focusByRange(protyle.toolbar.range);
+            }
+            return;
+        }
         updateBatchTransaction(nodeElements, protyle, (e: HTMLElement) => {
             if (type === "clear") {
                 e.style.color = "";
@@ -430,6 +485,7 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.textShadow = "";
                 e.style.backgroundColor = "";
                 e.style.fontSize = "";
+                e.style.fontFamily = "";
                 e.style.removeProperty("--b3-parent-background");
             } else if (type === "style1") {
                 const style = decodeStyle1(color);
@@ -448,6 +504,9 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.setProperty("--b3-parent-background", color);
             } else if (type === "fontSize") {
                 e.style.fontSize = color;
+            } else if (type === "fontFamily" &&
+                !["NodeCodeBlock", "NodeMathBlock", "NodeAttributeView"].includes(e.getAttribute("data-type"))) {
+                e.style.fontFamily = color;
             }
             if ((type === "fontSize" || type === "clear") && e.getAttribute("data-type") === "NodeCodeBlock") {
                 lineNumberRender(e.querySelector(".hljs"));
@@ -505,6 +564,12 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 break;
             case "fontSize":
                 textElement.style.fontSize = textOption.color;
+                break;
+            case "fontFamily":
+                if (!hasInlineFontFamilyExcludedType(
+                    (textElement.getAttribute("data-type") || "").split(" ").filter(Boolean))) {
+                    textElement.style.fontFamily = textOption.color;
+                }
                 break;
             case "backgroundColor":
                 textElement.style.backgroundColor = textOption.color;
@@ -577,7 +642,8 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             sideElement.style.webkitTextStroke === currentElement.style.webkitTextStroke &&
             sideElement.style.textShadow === currentElement.style.textShadow &&
             sideElement.style.backgroundColor === currentElement.style.backgroundColor &&
-            sideElement.style.fontSize === currentElement.style.fontSize) {
+            sideElement.style.fontSize === currentElement.style.fontSize &&
+            sideElement.style.fontFamily === currentElement.style.fontFamily) {
             return true;
         }
         return false;
@@ -591,6 +657,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
                 !sideElement.style.webkitTextStroke &&
                 !sideElement.style.textShadow &&
                 !sideElement.style.fontSize &&
+                !sideElement.style.fontFamily &&
                 !sideElement.style.backgroundColor;
         }
         if (textObj.type === "color") {
@@ -613,6 +680,9 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
         }
         if (textObj.type === "fontSize") {
             return textObj.color === sideElement.style.fontSize;
+        }
+        if (textObj.type === "fontFamily") {
+            return textObj.color === sideElement.style.fontFamily;
         }
     }
     return false;

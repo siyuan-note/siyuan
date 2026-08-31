@@ -1,4 +1,6 @@
 {
+	"fontFamily": "Yazı tipi ailesi",
+	"mixed": "Karışık",
 	"entryDock": "Yuva",
 	"scrollPageUpWithoutMovingCaret": "İmleci hareket ettirmeden bir ekran yukarı kaydır",
 	"scrollPageDownWithoutMovingCaret": "İmleci hareket ettirmeden bir ekran aşağı kaydır",

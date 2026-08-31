@@ -1,4 +1,6 @@
 {
+	"fontFamily": "Font family",
+	"mixed": "Mixed",
 	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Scroll up one screen without moving the cursor",
 	"scrollPageDownWithoutMovingCaret": "Scroll down one screen without moving the cursor",

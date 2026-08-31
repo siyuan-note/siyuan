@@ -1,4 +1,6 @@
 {
+	"fontFamily": "Rodzina czcionek",
+	"mixed": "Mieszane",
 	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Przewiń o jeden ekran w górę bez przesuwania kursora",
 	"scrollPageDownWithoutMovingCaret": "Przewiń o jeden ekran w dół bez przesuwania kursora",

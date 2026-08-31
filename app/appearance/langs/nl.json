@@ -1,4 +1,6 @@
 {
+	"fontFamily": "Lettertypefamilie",
+	"mixed": "Gemengd",
 	"entryDock": "Dock",
 	"scrollPageUpWithoutMovingCaret": "Eén scherm omhoog scrollen zonder de cursor te verplaatsen",
 	"scrollPageDownWithoutMovingCaret": "Eén scherm omlaag scrollen zonder de cursor te verplaatsen",

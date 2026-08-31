@@ -49,7 +49,7 @@ const genRangeRow = (
     step: number,
     value: number,
 ): string =>
-    `<div class="fn__flex b3-label config-item config-wrap config-wrap--range">
+    `<div class="fn__flex b3-label config-item config-range">
     ${genConfigItemMainHtml(title, desc)}
     <span class="fn__space"></span>
     <div class="config-range__desktop b3-tooltips b3-tooltips__n fn__flex-center" aria-label="${value}">
@@ -117,7 +117,7 @@ export const genButtonRowHtml = (
     label: string,
     icon: string,
 ): string =>
-    `<div class="fn__flex b3-label config-item config-wrap">
+    `<div class="fn__flex b3-label config-item">
     ${genConfigItemMainHtml(title, desc)}
     <span class="fn__space"></span>
     ${genButtonHtml(id, label, icon)}
@@ -130,7 +130,7 @@ export const genTextPairHtml = (
     left: StringControl,
     right: StringControl,
 ): string =>
-    `<div class="fn__flex b3-label config-item config-wrap">
+    `<div class="fn__flex b3-label config-item">
     ${genConfigItemMainHtml(title, desc)}
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size96" id="${left.id}" value="${Lute.EscapeHTMLStr(left.readConfig() as string)}">
@@ -173,7 +173,7 @@ export const genStackHtml = (lines: StackLine[]): string => {
             parts.push(genStackLeft(left, false));
         } else {
             const tag = right.kind === "switch" ? "label" : "div";
-            parts.push(`<${tag} class="fn__flex${right.kind === "switch" ? "" : " config-wrap"}">
+            parts.push(`<${tag} class="fn__flex">
     ${genStackLeft(left, true)}
     <span class="fn__space"></span>
     ${genStackRight(right)}
@@ -211,7 +211,7 @@ const renderControlParts = (parts: RowPart[]): string => {
         case "switch":
             return genSwitchRow(control.id, title, desc, control.readConfig() as boolean);
         case "number":
-            return `<div class="fn__flex b3-label config-item config-wrap">
+            return `<div class="fn__flex b3-label config-item">
     ${genConfigItemMainHtml(title, desc)}
     <span class="fn__space"></span>
     ${genNumberInputHtml(control.id, control.readConfig() as number, control.min, control.max, control.step, control.unit)}
@@ -221,13 +221,13 @@ const renderControlParts = (parts: RowPart[]): string => {
             return genRangeRow(control.id, title, desc ?? "", control.min, control.max, control.step, num);
         }
         case "select":
-            return `<div class="fn__flex b3-label config-item config-wrap">
+            return `<div class="fn__flex b3-label config-item">
     ${genConfigItemMainHtml(title, desc)}
     <span class="fn__space"></span>
     ${genSelectOptionsHtml(control.id, control.options, control.readConfig() as number | string)}
 </div>`;
         case "text":
-            return `<div class="fn__flex b3-label config-item config-wrap">
+            return `<div class="fn__flex b3-label config-item">
     ${genConfigItemMainHtml(title, desc ?? "")}
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-center fn__size200" id="${control.id}" value="${Lute.EscapeHTMLStr(control.readConfig() as string)}"/>

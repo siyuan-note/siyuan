@@ -67,7 +67,7 @@ const renderUserSkills = (root: HTMLElement, skills: IUserSkillInfo[]) => {
         list.innerHTML = `<div class="b3-label config-item"><div class="b3-label__text">${window.siyuan.languages.agentUserSkillsEmpty}</div></div>`;
         return;
     }
-    list.innerHTML = `${skills.map((skill) => `<label class="fn__flex b3-label config-item config-wrap" data-user-skill-id="${escapeAttribute(skill.id)}">
+    list.innerHTML = `${skills.map((skill) => `<label class="fn__flex b3-label config-item" data-user-skill-id="${escapeAttribute(skill.id)}">
     <div class="fn__flex-1">
         <div class="config-name">${escapeHtml(skill.name)}</div>
         ${skill.description ? `<div class="b3-label__text">${escapeHtml(skill.description)}</div>` : ""}

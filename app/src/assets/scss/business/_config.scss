@@ -87,7 +87,10 @@
     display: none;
   }
 
-  &-wrap {
+  &-wrap,
+  &-item.fn__flex,
+  &-item > .fn__flex,
+  &-item .b3-label--inner.fn__flex {
     align-items: center;
   }
 
@@ -131,7 +134,7 @@
     }
   }
 
-  &-wrap--range {
+  &-range {
     min-width: 0;
 
     .config-range__mobile {
@@ -1246,7 +1249,7 @@
   }
 
   @media (max-width: 750px) {
-    .config-wrap > .fn__space {
+    .fn__flex > .fn__space {
       display: block;
     }
   }
@@ -1272,12 +1275,23 @@
   }
 }
 
-#configAccountMain.config-wrap {
+#configAccountMain {
   .config-account__row-actions {
     gap: 8px;
   }
 
   @media (max-width: 750px) {
+    // 头像资料行占满整行，内部保持横向（头像 + 信息），不被默认换行规则影响
+    .config-account__profile {
+      flex: 1 1 100%;
+      min-width: 0;
+      flex-wrap: nowrap;
+    }
+
+    .config-account__profile > .fn__space {
+      display: block;
+    }
+
     .config-account__profile-meta {
       display: block;
       flex: 0 1 auto;
@@ -1305,7 +1319,15 @@
     }
 
     .config-account__row-actions {
+      flex-wrap: nowrap;
       margin-top: 8px;
+
+      & > .b3-button {
+        flex: 0 1 auto;
+        width: auto;
+        max-width: none;
+        margin-top: 0;
+      }
     }
   }
 }

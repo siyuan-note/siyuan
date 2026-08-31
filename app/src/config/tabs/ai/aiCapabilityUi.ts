@@ -243,7 +243,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
                     <input class="b3-text-field b3-form__icon-input fn__block" data-type="searchAgentCapabilities" placeholder="${escapeAttribute(window.siyuan.languages.agentCapabilitiesSearch)}">
                 </div>
             </div>
-            <label class="fn__flex b3-label config-item config-wrap">
+            <label class="fn__flex b3-label config-item">
                 <div class="fn__flex-1">
                     <div class="config-name">${window.siyuan.languages.agentCapabilitiesOnlySelected}</div>
                     <div class="b3-label__text" data-type="agentCapabilitySelectedCount"></div>
@@ -301,7 +301,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
             const actions = capability.actions || [];
             const opened = scope === "agent" && expanded.has(capability.id);
             return `<div class="b3-label config-item" data-capability-id="${escapeAttribute(capability.id)}">
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         ${scope === "agent" ? `<button class="block__icon block__icon--show config-agent-capability__expand" data-type="toggleAgentCapabilityActions" aria-label="${escapeAttribute(window.siyuan.languages.config)}"><svg style="transform:rotate(${opened ? "90deg" : "0"});"><use xlink:href="#iconRight"></use></svg></button>` : ""}
         <div class="fn__flex-1 config-agent-capability__main">
             <div class="config-name">${escapeHtml(capability.title || capability.name)}</div>
@@ -315,7 +315,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
         <div class="b3-label b3-label--inner">
             <div class="b3-label__text"><code>${escapeHtml(capability.id)}</code></div>
         </div>
-        <label class="fn__flex b3-label b3-label--inner config-wrap">
+        <label class="fn__flex b3-label b3-label--inner">
             <span class="fn__flex-1">${window.siyuan.languages.agentCapabilitiesCapabilityApprovalMode}</span>
             <span class="fn__space"></span>
             <select class="b3-select" data-type="toggleAgentCapabilityApproval">
@@ -327,7 +327,7 @@ const openAgentCapabilityView = (settingRoot: HTMLElement, backendCapabilities: 
         ${actions.length > 0 ? `<div class="b3-label b3-label--inner config-name fn__flex">
             <span class="fn__flex-1">${window.siyuan.languages.agentCapabilitiesActionApprovalMode}</span>
         </div>
-        ${actions.map((action) => `<label class="fn__flex b3-label b3-label--inner config-wrap">
+        ${actions.map((action) => `<label class="fn__flex b3-label b3-label--inner">
         <code class="fn__flex-1">${escapeHtml(action.name)}</code>
         <span class="fn__space"></span>
         <select class="b3-select" data-type="toggleAgentCapabilityActionApproval" data-capability-action="${escapeAttribute(action.name)}">

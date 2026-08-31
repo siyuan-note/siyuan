@@ -210,7 +210,7 @@ const genKeymapListHtml = () => {
     const pluginHtml = pluginHtmlParts.join("");
 
     return `<div class="b3-label file-tree config-keymap config-item" id="keymapList">
-    <div class="fn__flex config-wrap">
+    <div class="fn__flex">
         <input id="keymapInput" class="b3-text-field fn__flex-1" placeholder="${window.siyuan.languages.searchPlaceholder}">
         <div class="fn__space"></div>
         <label class="b3-form__icon fn__flex-1 searchByKeyLabel" style="overflow: visible">

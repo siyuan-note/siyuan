@@ -9,14 +9,15 @@ import {
 
 describe("inline font family", () => {
     it("round-trips font names and preserves the editor fallback stack", () => {
-        const family = 'A "quoted" \\ family 字体';
+        const family = "A \"quoted\" 'single' \\ family 字体";
         const value = getInlineFontFamilyStyle(family);
-        assert.match(value, /^"Emojis Additional", "Emojis Reset",/);
+        assert.match(value, /^'Emojis Additional', 'Emojis Reset',/);
+        assert.doesNotMatch(value, /"/);
         assert.match(value, /var\(--b3-font-family-editor\), var\(--b3-font-family\)$/);
         assert.equal(getInlineFontFamilyName(value), family);
         const defaultValue = getInlineFontFamilyStyle();
         assert.equal(defaultValue,
-            '"Emojis Additional", "Emojis Reset", var(--b3-font-family-editor), var(--b3-font-family)');
+            "'Emojis Additional', 'Emojis Reset', var(--b3-font-family-editor), var(--b3-font-family)");
         assert.equal(getInlineFontFamilyName(defaultValue), undefined);
         assert.equal(getInlineFontFamilyName('"Emojis Additional", "Emojis Reset", "Font, Name", serif'),
             "Font, Name");

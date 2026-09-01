@@ -1,4 +1,4 @@
-const INLINE_FONT_FAMILY_PREFIX = '"Emojis Additional", "Emojis Reset"';
+const INLINE_FONT_FAMILY_PREFIX = "'Emojis Additional', 'Emojis Reset'";
 const INLINE_FONT_FAMILY_SUFFIX = "var(--b3-font-family-editor), var(--b3-font-family)";
 
 export const INLINE_FONT_FAMILY_EXCLUDED_TYPES = ["code", "kbd", "inline-math"];
@@ -6,7 +6,10 @@ export const FONT_FAMILY_EXCLUDED_BLOCK_TYPES = ["NodeCodeBlock", "NodeMathBlock
 
 const escapeCSSString = (value: string) => Array.from(value).map(character => {
     const codePoint = character.codePointAt(0);
-    if (character === '"' || character === "\\") {
+    if (character === '"') {
+        return "\\22 ";
+    }
+    if (character === "'" || character === "\\") {
         return `\\${character}`;
     }
     if (codePoint < 32 || codePoint === 127) {
@@ -25,7 +28,7 @@ const unescapeCSSString = (value: string) => value.replace(/\\([0-9a-fA-F]{1,6})
     });
 
 export const getInlineFontFamilyStyle = (family?: string) => family ?
-    `${INLINE_FONT_FAMILY_PREFIX}, "${escapeCSSString(family)}", ${INLINE_FONT_FAMILY_SUFFIX}` :
+    `${INLINE_FONT_FAMILY_PREFIX}, '${escapeCSSString(family)}', ${INLINE_FONT_FAMILY_SUFFIX}` :
     `${INLINE_FONT_FAMILY_PREFIX}, ${INLINE_FONT_FAMILY_SUFFIX}`;
 
 export const getInlineFontFamilyName = (fontFamily?: string) => {

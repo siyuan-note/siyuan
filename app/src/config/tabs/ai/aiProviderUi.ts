@@ -262,8 +262,7 @@ const renderDraftModels = (container: HTMLElement, models: Config.IModel[], avai
         container.innerHTML = `<div class="b3-label config-item b3-card__desc">${window.siyuan.languages.noModelConfigured}</div>`;
         return;
     }
-    const modelInputClass = availableModels.length > 0 ? "b3-select" : "b3-text-field";
-    const modelInputAction = availableModels.length > 0 ? ' data-action="selectModel" data-menu="true" readonly' : "";
+    const modelInputAction = availableModels.length > 0 ? ' data-action="selectModel" data-menu="true"' : "";
     container.innerHTML = models.map((model, index) => `<div class="fn__flex b3-label config-item config-wrap config-ai-provider__model" data-model-index="${index}">
     <button class="block__icon block__icon--show config-ai-provider__model-drag" data-action="sortModel" type="button" draggable="true" aria-label="${window.siyuan.languages.sort}">
         <svg><use xlink:href="#iconDrag"></use></svg>
@@ -271,7 +270,7 @@ const renderDraftModels = (container: HTMLElement, models: Config.IModel[], avai
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" data-model-field="enabled" type="checkbox"${model.enabled ? " checked" : ""} aria-label="${window.siyuan.languages.enable}">
     <span class="fn__space"></span>
-    <input class="${modelInputClass} fn__flex-1" data-model-field="name" type="text"${modelInputAction} spellcheck="false" placeholder="${window.siyuan.languages.selectModel}" value="${escapeHTML(model.name)}">
+    <input class="b3-text-field fn__flex-1" data-model-field="name" type="text"${modelInputAction} spellcheck="false" placeholder="${window.siyuan.languages.selectModel}" value="${escapeHTML(model.name)}">
     <span class="fn__space"></span>
     <input class="b3-text-field fn__flex-1" data-model-field="displayName" type="text" spellcheck="false" placeholder="${window.siyuan.languages.customDisplayName}" value="${escapeHTML(model.displayName || "")}">
     <span class="fn__space"></span>
@@ -364,7 +363,6 @@ const openAvailableModelMenu = (modelInput: HTMLInputElement, models: string[]) 
     const rect = modelInput.getBoundingClientRect();
     menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target: modelInput});
     menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
-    menu.element.querySelector<HTMLInputElement>("input").focus();
 };
 
 const showTestResult = (data: Record<string, unknown>) => {
@@ -614,10 +612,9 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
         if (!modelInput) {
             return;
         }
+        modelInput.focus();
         if (availableModels.length > 0) {
             openAvailableModelMenu(modelInput, availableModels);
-        } else {
-            modelInput.focus();
         }
     };
 
@@ -787,7 +784,7 @@ const openProviderDetail = (root: HTMLElement, providerId?: string, preset?: IPr
     view.addEventListener("keydown", (event) => {
         const target = event.target as HTMLInputElement;
         if (target.dataset.action !== "selectModel" ||
-            !["Enter", " ", "ArrowDown"].includes(event.key)) {
+            !["Enter", "ArrowDown"].includes(event.key)) {
             return;
         }
         event.preventDefault();

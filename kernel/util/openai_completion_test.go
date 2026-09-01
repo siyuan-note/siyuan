@@ -339,3 +339,35 @@ func TestModelFallsBackToResponses(t *testing.T) {
 			available, matched, responsesCalled)
 	}
 }
+
+func TestModelFallsBackWhenAvailableListOmitsModel(t *testing.T) {
+	var completionCalled bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/v1/models":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprint(w, "{\"object\":\"list\",\"data\":[{\"id\":\"listed-model\","+
+				"\"object\":\"model\",\"created\":0,\"owned_by\":\"test\"}]}")
+		case "/v1/chat/completions":
+			completionCalled = true
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = fmt.Fprint(w, "{\"id\":\"chatcmpl-1\",\"object\":\"chat.completion\","+
+				"\"created\":0,\"model\":\"custom-model\",\"choices\":[{\"index\":0,"+
+				"\"message\":{\"role\":\"assistant\",\"content\":\"1\"},\"finish_reason\":\"stop\"}]}")
+		default:
+			t.Errorf("unexpected path: %s", r.URL.Path)
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+
+	available, matched, err := TestModel(
+		"test", server.URL+"/v1", OpenAIProtocolChatCompletions, "custom-model", 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(available) != 1 || available[0] != "listed-model" || !matched || !completionCalled {
+		t.Fatalf("unexpected model test result: available=%v, matched=%v, completion=%v",
+			available, matched, completionCalled)
+	}
+}

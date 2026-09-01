@@ -19,11 +19,13 @@ import {
 } from "../util/selection";
 import {selectTextToEditorBoundary} from "../util/selectionBoundary";
 import {
+    getEmptySemanticInlineForDelete,
     getSemanticInlineVisibleText,
     getSemanticMarkerPrefixLengthForNode,
     hasSemanticInlineType,
     moveCaretAcrossSemanticMarker,
-    moveCaretForSemanticDelete
+    moveCaretForSemanticDelete,
+    removeEmptySemanticInlineElement
 } from "../util/inlineElementMarker";
 import {hasUnloadedDocumentBlocks} from "../util/documentRange";
 import {
@@ -1243,7 +1245,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (selectText === "" && range.collapsed) {
-                if (moveCaretForSemanticDelete(range, event.key === "Delete" || matchHotKey("⌃D", event))) {
+                const forward = event.key === "Delete" || matchHotKey("⌃D", event);
+                const emptySemanticElement = getEmptySemanticInlineForDelete(range, forward);
+                if (emptySemanticElement) {
+                    const oldHTML = nodeElement.outerHTML;
+                    if (removeEmptySemanticInlineElement(range, emptySemanticElement)) {
+                        nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                        updateTransaction(protyle, nodeElement, oldHTML);
+                        focusByRange(range);
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return;
+                    }
+                }
+                if (moveCaretForSemanticDelete(range, forward)) {
                     focusByRange(range);
                     event.stopPropagation();
                     event.preventDefault();

@@ -78,6 +78,7 @@ import {emitToPlugins, forEachPluginSubscriber, hasPluginSubscriber} from "../..
 import {getSelectionElementAvailableHeight, getSelectionElementY} from "./selectionElementPosition";
 import {
     getInlinePlaceholder,
+    getSemanticInlineFirstTextNode,
     getSemanticInlineVisibleText,
     getSemanticInternalMarkerPrefixLength,
     getSemanticMarkerPrefixLengthForNode,
@@ -1208,7 +1209,15 @@ export class Toolbar {
             (newNodes[0].nodeType !== Node.TEXT_NODE && hasSemanticInlineType(
                 (newNodes[0] as HTMLElement).getAttribute("data-type")) &&
                 getSemanticInternalMarkerPrefixLength(newNodes[0].textContent) === newNodes[0].textContent.length))) {
-            this.range.setStart(newNodes[0], 1);
+            const semanticTextNode = newNodes[0].nodeType === Node.ELEMENT_NODE &&
+                hasSemanticInlineType((newNodes[0] as HTMLElement).getAttribute("data-type")) ?
+                getSemanticInlineFirstTextNode(newNodes[0] as HTMLElement) : undefined;
+            if (semanticTextNode) {
+                this.range.setStart(semanticTextNode,
+                    getSemanticInternalMarkerPrefixLength(semanticTextNode.data));
+            } else {
+                this.range.setStart(newNodes[0], 1);
+            }
             this.range.collapse(true);
             if (newNodes[0].nodeType !== 3) {
                 // 不选中后，ctrl+g 光标重置
@@ -1304,9 +1313,6 @@ export class Toolbar {
                 } else {
                     const currentType = currentNode.nodeType === 3 ? [] : (currentNode.getAttribute("data-type") || "").split(" ");
                     if (currentType.includes("code") || currentType.includes("tag") || currentType.includes("kbd")) {
-                        if (!currentNode.textContent.startsWith(Constants.ZWSP)) {
-                            currentNode.insertAdjacentText("afterbegin", Constants.ZWSP);
-                        }
                         if (!previousElement || (previousElement.nodeType === 3 && previousElement.textContent.endsWith("\n"))) {
                             currentNode.insertAdjacentText("beforebegin", Constants.ZWSP);
                         }

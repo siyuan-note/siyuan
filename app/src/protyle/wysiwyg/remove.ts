@@ -81,7 +81,13 @@ import {
     setBlockSelectionModeElement
 } from "./blockSelection";
 import {countBlockWord} from "../../layout/status";
-import {getTextWithoutSemanticMarkers} from "../util/inlineElementMarker";
+import {
+    getSemanticInlineVisibleText,
+    getTextWithoutSemanticMarkers,
+    hasSemanticInlineType,
+    normalizeSemanticInlineElements,
+    removeSemanticInlineExternalBoundaries
+} from "../util/inlineElementMarker";
 
 export interface IBlockRefCheckTargets {
     elements: HTMLElement[];
@@ -390,12 +396,22 @@ const deleteCrossBlockRangeContents = (rangesByBlock: ReturnType<typeof getCross
                 }
             });
             boundarySpans.forEach(spanElement => {
-                if (spanElement.isConnected && spanElement.textContent === "" && !spanElement.querySelector("img")) {
+                const isSemanticInline = hasSemanticInlineType(spanElement.getAttribute("data-type"));
+                const isEmpty = isSemanticInline ?
+                    getSemanticInlineVisibleText(spanElement) === "" : spanElement.textContent === "";
+                if (spanElement.isConnected && isEmpty && !spanElement.querySelector("img")) {
+                    if (isSemanticInline) {
+                        removeSemanticInlineExternalBoundaries(spanElement);
+                    }
                     spanElement.remove();
                 }
             });
-            fixAdjacentTags(item.editableElement);
         });
+        const editableElement = blockRanges[0]?.editableElement;
+        if (editableElement?.isConnected) {
+            fixAdjacentTags(editableElement);
+            normalizeSemanticInlineElements(editableElement);
+        }
     });
 };
 
@@ -811,8 +827,14 @@ export const removeCrossBlockRange = async (protyle: IProtyle, selectedRange: Ra
         }
         startEditableElement.normalize();
         fixAdjacentTags(startEditableElement);
+        normalizeSemanticInlineElements(startEditableElement);
     }
     removeElements.forEach(item => item.remove());
+    updateElements.forEach(item => {
+        if (item.isConnected) {
+            normalizeSemanticInlineElements(item);
+        }
+    });
 
     const firstRange = ranges.find(item => item.editableElement.isConnected);
     let replacementRange: Range;

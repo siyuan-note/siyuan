@@ -83,12 +83,18 @@ export const isSemanticBackwardDeleteBoundary = (text: string, offset: number) =
     getSemanticInternalMarkerPrefixLength(text) > 0 && offset <= getSemanticInternalMarkerPrefixLength(text);
 
 export const setSemanticInlineElementMarker = (element: HTMLElement, mode: TSemanticInlineMarkerMode) => {
+    // 合并浏览器编辑产生的相邻文本节点，确保语义元素只保留一个内部标记。
+    element.normalize();
     let textNode = getFirstTextNode(element);
     if (!textNode) {
         textNode = element.ownerDocument.createTextNode("");
         element.prepend(textNode);
     }
-    textNode.data = normalizeSemanticInternalMarkerPrefix(textNode.data, mode);
+    const normalizedText = normalizeSemanticInternalMarkerPrefix(textNode.data, mode);
+    // 对文本节点重复赋值会重置 Chromium 中位于该节点内的光标偏移。
+    if (textNode.data !== normalizedText) {
+        textNode.data = normalizedText;
+    }
 };
 
 const ensureLeftExternalBoundary = (element: HTMLElement) => {
@@ -332,6 +338,45 @@ const setRangeAfterRightBoundary = (range: Range, element: HTMLElement) => {
     return true;
 };
 
+export const removeEmptySemanticInlineElement = (range: Range, element: HTMLElement) => {
+    if (stripSemanticInternalMarkerPrefix(element.textContent || "") !== "") {
+        return false;
+    }
+    const parentElement = element.parentElement;
+    if (!parentElement) {
+        return false;
+    }
+    removeSemanticInlineExternalBoundaries(element);
+    const caretElement = element.ownerDocument.createElement("wbr");
+    element.before(caretElement);
+    element.remove();
+    normalizeSemanticInlineElements(parentElement);
+    range.setStartBefore(caretElement);
+    range.collapse(true);
+    caretElement.remove();
+    return true;
+};
+
+export const getEmptySemanticInlineForDelete = (range: Range, forward: boolean) => {
+    if (!range.collapsed || range.startContainer.nodeType !== Node.TEXT_NODE) {
+        return;
+    }
+    const textNode = range.startContainer as Text;
+    const semanticElement = textNode.parentElement?.closest("span[data-type]") as HTMLElement | null;
+    if (isSemanticInlineElement(semanticElement) &&
+        stripSemanticInternalMarkerPrefix(semanticElement.textContent || "") === "") {
+        return semanticElement;
+    }
+    const adjacentSemantic = getAdjacentSemanticInline(textNode, !forward);
+    const atAdjacentBoundary = forward ?
+        range.startOffset >= textNode.data.length - (textNode.data.match(/\u200b+$/u)?.[0].length || 0) :
+        range.startOffset <= (textNode.data.match(/^\u200b+/u)?.[0].length || 0);
+    if (atAdjacentBoundary && adjacentSemantic &&
+        stripSemanticInternalMarkerPrefix(adjacentSemantic.textContent || "") === "") {
+        return adjacentSemantic;
+    }
+};
+
 export const moveCaretAcrossSemanticMarker = (range: Range, direction: "left" | "right") => {
     if (!range.collapsed || range.startContainer.nodeType !== Node.TEXT_NODE) {
         return false;
@@ -399,11 +444,26 @@ export const moveCaretForSemanticDelete = (range: Range, forward: boolean) => {
         if (nextSemantic && range.startOffset >= textNode.data.length - boundaryLength) {
             return setRangeAtSemanticStart(range, nextSemantic);
         }
+        const previousSemantic = getAdjacentSemanticInline(textNode, true);
+        const leadingBoundaryLength = textNode.data.match(/^\u200b+/u)?.[0].length || 0;
+        if (previousSemantic && leadingBoundaryLength > 0 && range.startOffset < leadingBoundaryLength) {
+            range.setStart(textNode, leadingBoundaryLength);
+            range.collapse(true);
+            return true;
+        }
     } else {
         const previousSemantic = getAdjacentSemanticInline(textNode, true);
         const boundaryLength = textNode.data.match(/^\u200b+/u)?.[0].length || 0;
         if (previousSemantic && range.startOffset <= boundaryLength) {
             return setRangeAtSemanticEnd(range, previousSemantic);
+        }
+        const nextSemantic = getAdjacentSemanticInline(textNode, false);
+        const trailingBoundaryLength = textNode.data.match(/\u200b+$/u)?.[0].length || 0;
+        if (nextSemantic && trailingBoundaryLength > 0 &&
+            range.startOffset > textNode.data.length - trailingBoundaryLength) {
+            range.setStart(textNode, textNode.data.length - trailingBoundaryLength);
+            range.collapse(true);
+            return true;
         }
     }
     return false;

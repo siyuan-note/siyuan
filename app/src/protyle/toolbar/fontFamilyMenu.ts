@@ -311,7 +311,7 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
     });
     const rect = target.getBoundingClientRect();
     target.setAttribute("aria-expanded", "true");
-    menu.open({x: rect.right, y: rect.top, h: rect.height});
+    menu.open({x: rect.left, y: rect.bottom, h: rect.height, w: rect.width, target});
     menu.element.querySelector(".b3-menu__items")?.setAttribute("style", "overflow: initial");
     menu.element.querySelector<HTMLInputElement>('[data-type="font-family-search"]')?.focus();
 };

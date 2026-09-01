@@ -307,7 +307,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
 </div>
 <div class="fn__hr${disableFontFamily ? " fn__none" : ""}"></div>
 <div data-id="fontFamily" class="fn__flex${disableFontFamily ? " fn__none" : ""}">
-    ${window.siyuan.languages.fontFamily}
+    <span class="fn__flex-center">${window.siyuan.languages.fontFamily}</span>
     <span class="fn__flex-1"></span>
     <input class="b3-select fn__flex-center fn__size96" data-type="fontFamilyMenu" data-menu="true" type="text" value="${escapeAttr(getInlineFontFamilyLabel(fontFamilyState))}" readonly aria-label="${escapeAttr(window.siyuan.languages.fontFamily)}" aria-haspopup="listbox" aria-expanded="false">
 </div>

@@ -1,4 +1,6 @@
 {
+	"originalValue": "Oorspronkelijke waarde",
+	"templateRenderedValue": "Door sjabloon gerenderde waarde",
 	"fontFamily": "Lettertypefamilie",
 	"mixed": "Gemengd",
 	"entryDock": "Dock",

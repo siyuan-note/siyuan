@@ -1,4 +1,6 @@
 {
+	"originalValue": "元の値",
+	"templateRenderedValue": "テンプレートレンダリング値",
 	"fontFamily": "フォントファミリー",
 	"mixed": "混在",
 	"entryDock": "ドック",

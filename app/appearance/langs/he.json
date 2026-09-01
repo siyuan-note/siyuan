@@ -1,4 +1,6 @@
 {
+	"originalValue": "ערך מקורי",
+	"templateRenderedValue": "ערך מעובד באמצעות תבנית",
 	"fontFamily": "משפחת גופנים",
 	"mixed": "מעורב",
 	"entryDock": "רציף",

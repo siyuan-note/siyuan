@@ -1,4 +1,6 @@
 {
+	"originalValue": "原始值",
+	"templateRenderedValue": "模板渲染值",
 	"fontFamily": "字体",
 	"mixed": "混合",
 	"entryDock": "停靠栏",

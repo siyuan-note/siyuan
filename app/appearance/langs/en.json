@@ -1,4 +1,6 @@
 {
+	"originalValue": "Original value",
+	"templateRenderedValue": "Template-rendered value",
 	"fontFamily": "Font family",
 	"mixed": "Mixed",
 	"entryDock": "Dock",

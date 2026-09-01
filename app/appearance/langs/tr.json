@@ -1,4 +1,6 @@
 {
+	"originalValue": "Orijinal değer",
+	"templateRenderedValue": "Şablonla işlenmiş değer",
 	"fontFamily": "Yazı tipi ailesi",
 	"mixed": "Karışık",
 	"entryDock": "Yuva",

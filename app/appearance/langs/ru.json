@@ -1,4 +1,6 @@
 {
+	"originalValue": "Исходное значение",
+	"templateRenderedValue": "Значение, отрисованное шаблоном",
 	"fontFamily": "Семейство шрифтов",
 	"mixed": "Смешанный",
 	"entryDock": "Док-панель",

@@ -293,8 +293,8 @@ export const getFiltersHTML = (data: IAV) => {
         const fieldWrapper = `<span class="av__field-wrapper ariaLabel" data-position="4west" aria-label="${escapeAttr(colData.name)}">${iconHTML}${fieldSelect}</span>`;
         const valueSourceSelect = colData.type !== "template" && (colData.renderTemplate?.trim() || node.valueSource === "rendered")
             ? `<select class="b3-select" data-type="valueSource" data-path="${path}">
-<option value="stored" ${node.valueSource !== "rendered" ? "selected" : ""}>${window.siyuan.languages.original}</option>
-<option value="rendered" ${node.valueSource === "rendered" ? "selected" : ""}>${window.siyuan.languages.template}</option>
+<option value="stored" ${node.valueSource !== "rendered" ? "selected" : ""}>${window.siyuan.languages.originalValue}</option>
+<option value="rendered" ${node.valueSource === "rendered" ? "selected" : ""}>${window.siyuan.languages.templateRenderedValue}</option>
 </select>`
             : "";
         const inlineHTML = genInlineFilterHTML(node, colData, path);

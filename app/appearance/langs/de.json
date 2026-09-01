@@ -1,4 +1,6 @@
 {
+	"originalValue": "Originalwert",
+	"templateRenderedValue": "Gerenderter Vorlagenwert",
 	"fontFamily": "Schriftfamilie",
 	"mixed": "Gemischt",
 	"entryDock": "Dock",

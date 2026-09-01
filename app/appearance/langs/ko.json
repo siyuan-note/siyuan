@@ -1,4 +1,6 @@
 {
+	"originalValue": "원본 값",
+	"templateRenderedValue": "템플릿 렌더링 값",
 	"fontFamily": "글꼴 모음",
 	"mixed": "혼합",
 	"entryDock": "Dock",

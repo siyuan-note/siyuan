@@ -1,4 +1,6 @@
 {
+	"originalValue": "Valeur d’origine",
+	"templateRenderedValue": "Valeur rendue par le modèle",
 	"fontFamily": "Famille de polices",
 	"mixed": "Mixte",
 	"entryDock": "Dock",

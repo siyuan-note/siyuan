@@ -1,4 +1,6 @@
 {
+	"originalValue": "Pôvodná hodnota",
+	"templateRenderedValue": "Hodnota vykreslená šablónou",
 	"fontFamily": "Rodina písiem",
 	"mixed": "Zmiešané",
 	"entryDock": "Dok",

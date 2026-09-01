@@ -1,4 +1,6 @@
 {
+	"originalValue": "Nilai asli",
+	"templateRenderedValue": "Nilai hasil render templat",
 	"fontFamily": "Keluarga font",
 	"mixed": "Campuran",
 	"entryDock": "Dock",

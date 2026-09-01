@@ -1,4 +1,6 @@
 {
+	"originalValue": "Valor original",
+	"templateRenderedValue": "Valor renderizado pelo modelo",
 	"fontFamily": "Família da fonte",
 	"mixed": "Misto",
 	"entryDock": "Dock",

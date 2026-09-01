@@ -1,4 +1,6 @@
 {
+	"originalValue": "Wartość oryginalna",
+	"templateRenderedValue": "Wartość renderowana przez szablon",
 	"fontFamily": "Rodzina czcionek",
 	"mixed": "Mieszane",
 	"entryDock": "Dock",

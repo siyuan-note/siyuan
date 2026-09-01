@@ -1,4 +1,4 @@
-const INLINE_FONT_FAMILY_PREFIX = "'Emojis Additional', 'Emojis Reset'";
+const INLINE_FONT_FAMILY_PREFIX = "var(--b3-font-family-emoji-reset)";
 const INLINE_FONT_FAMILY_SUFFIX = "var(--b3-font-family-editor), var(--b3-font-family)";
 
 export const INLINE_FONT_FAMILY_EXCLUDED_TYPES = ["code", "kbd", "inline-math"];

@@ -1,5 +1,9 @@
 @use "../util/function";
 
+:root {
+  --b3-font-family-emoji-reset: "Emojis Additional", "Emojis Reset";
+}
+
 @font-face {
   font-family: 'JetBrainsMono-Regular';
   /*! /* webpackIgnore: true */

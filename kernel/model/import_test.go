@@ -55,6 +55,78 @@ func TestIsSYNotebookExport(t *testing.T) {
 	}
 }
 
+func TestBuildImportedSYSortValues(t *testing.T) {
+	first := &importedSYSortDoc{
+		oldID: "20260801000001-aaaaaaa", newID: "20260801000001-newaaaa", sourcePath: "/20260801000001-aaaaaaa.sy"}
+	second := &importedSYSortDoc{
+		oldID: "20260801000002-bbbbbbb", newID: "20260801000002-newbbbb", sourcePath: "/20260801000002-bbbbbbb.sy"}
+	childOld := &importedSYSortDoc{
+		oldID: "20260801000003-ccccccc", newID: "20260801000003-newcccc",
+		sourcePath: "/20260801000001-aaaaaaa/20260801000003-ccccccc.sy"}
+	childNew := &importedSYSortDoc{
+		oldID: "20260801000004-ddddddd", newID: "20260801000004-newdddd",
+		sourcePath: "/20260801000001-aaaaaaa/20260801000004-ddddddd.sy"}
+	hidden := &importedSYSortDoc{
+		oldID: "20260801000005-eeeeeee", newID: "20260801000005-neweeee",
+		sourcePath: "/20260801000005-eeeeeee.sy", hidden: true}
+	importedDocs := []*importedSYSortDoc{first, second, childOld, childNew, hidden}
+	sourceSortIDs := map[string]int{first.oldID: 20, second.oldID: 10}
+	existingRootIDs := []string{"existing-first", "existing-second"}
+
+	tests := []struct {
+		name           string
+		createDocAtTop bool
+		want           map[string]int
+	}{
+		{
+			name:           "prepend batch",
+			createDocAtTop: true,
+			want: map[string]int{
+				second.newID: 0, first.newID: 1, "existing-first": 2, "existing-second": 3,
+				childNew.newID: 0, childOld.newID: 1,
+			},
+		},
+		{
+			name: "append batch",
+			want: map[string]int{
+				"existing-first": 0, "existing-second": 1, second.newID: 2, first.newID: 3,
+				childNew.newID: 0, childOld.newID: 1,
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := buildImportedSYSortValues(importedDocs, sourceSortIDs, existingRootIDs, test.createDocAtTop)
+			assertImportedSYSortValues(t, got, test.want)
+			if _, ok := got[hidden.newID]; ok {
+				t.Fatalf("hidden notebook document received a sort value")
+			}
+		})
+	}
+}
+
+func TestBuildImportedSYSortValuesWithoutSourceSort(t *testing.T) {
+	older := &importedSYSortDoc{
+		oldID: "20260801000001-aaaaaaa", newID: "20260801000001-newaaaa", sourcePath: "/20260801000001-aaaaaaa.sy"}
+	newer := &importedSYSortDoc{
+		oldID: "20260801000002-bbbbbbb", newID: "20260801000002-newbbbb", sourcePath: "/20260801000002-bbbbbbb.sy"}
+
+	got := buildImportedSYSortValues([]*importedSYSortDoc{older, newer}, nil, []string{"existing"}, true)
+	assertImportedSYSortValues(t, got, map[string]int{newer.newID: 0, older.newID: 1, "existing": 2})
+}
+
+func assertImportedSYSortValues(t *testing.T, got, want map[string]int) {
+	t.Helper()
+	if len(got) != len(want) {
+		t.Fatalf("sort value count = %d, want %d: got=%v", len(got), len(want), got)
+	}
+	for id, wantValue := range want {
+		if gotValue, ok := got[id]; !ok || gotValue != wantValue {
+			t.Fatalf("sort value for [%s] = %d, want %d: got=%v", id, gotValue, wantValue, got)
+		}
+	}
+}
+
 func TestImportFromLocalPathRejectsClosedNotebookBeforeWriting(t *testing.T) {
 	fixture := setupFileOperationTest(t)
 	boxConf := fixture.box.GetConf()

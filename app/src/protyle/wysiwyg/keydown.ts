@@ -137,6 +137,7 @@ import {
     getBlockSelectionModeElement,
     getBlockSelectionStatusIDs,
     isContinuousBlockSelection,
+    runBlockSelectionDelete,
     setBlockSelectionModeElement,
     toggleBlockSelection
 } from "./blockSelection";
@@ -1230,16 +1231,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (blockSelectionModeElement) {
-                await removeBlockPreservingSelectionMode(protyle, nodeElement, range,
-                    event.key === "Backspace" ? "Backspace" : "Delete");
-                event.stopPropagation();
-                event.preventDefault();
+                await runBlockSelectionDelete(event, () => removeBlockPreservingSelectionMode(
+                    protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete"));
                 return;
             }
             if (protyle.wysiwyg.element.querySelector(`.${BLOCK_SELECTION_CLASS}`)) {
-                await removeBlock(protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete");
-                event.stopPropagation();
-                event.preventDefault();
+                await runBlockSelectionDelete(event, () => removeBlock(
+                    protyle, nodeElement, range, event.key === "Backspace" ? "Backspace" : "Delete"));
                 return;
             }
             if (selectText === "" && range.collapsed) {

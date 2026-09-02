@@ -7,7 +7,8 @@ import {
     getBlockSelectionToggle,
     getDeleteSelectionCandidate,
     isContinuousBlockSelection,
-    restoreBlockSelectionModeState
+    restoreBlockSelectionModeState,
+    runBlockSelectionDelete
 } from "./blockSelection";
 
 class TestElement {
@@ -176,6 +177,33 @@ describe("isContinuousBlockSelection", () => {
         assert.equal(isContinuousBlockSelection([], getNextBlock), false);
         assert.equal(isContinuousBlockSelection([asElement(first), asElement(third)], getNextBlock), false);
         assert.equal(isContinuousBlockSelection([asElement(first), asElement(other)], getNextBlock), false);
+    });
+});
+
+describe("runBlockSelectionDelete", () => {
+    it("prevents native deletion before starting asynchronous removal", async () => {
+        let defaultPrevented = false;
+        let propagationStopped = false;
+        let resolveRemoval: () => void = () => undefined;
+        const removal = runBlockSelectionDelete({
+            preventDefault: () => {
+                defaultPrevented = true;
+            },
+            stopPropagation: () => {
+                propagationStopped = true;
+            },
+        }, () => {
+            assert.equal(defaultPrevented, true);
+            assert.equal(propagationStopped, true);
+            return new Promise<void>(resolve => {
+                resolveRemoval = resolve;
+            });
+        });
+
+        assert.equal(defaultPrevented, true);
+        assert.equal(propagationStopped, true);
+        resolveRemoval();
+        await removal;
     });
 });
 

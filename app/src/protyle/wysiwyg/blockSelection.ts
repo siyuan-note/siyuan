@@ -152,6 +152,16 @@ export const getBlockSelectionStatusIDs = (editorElement: Element) => {
     return operationElements.map(item => item.getAttribute("data-node-id")).filter(Boolean);
 };
 
+export const runBlockSelectionDelete = <T>(
+    event: Pick<KeyboardEvent, "preventDefault" | "stopPropagation">,
+    remove: () => T,
+) => {
+    // 删除操作会等待引用检查，必须先阻止浏览器修改 DOM。
+    event.stopPropagation();
+    event.preventDefault();
+    return remove();
+};
+
 export const isContinuousBlockSelection = (elements: Element[], getNext: TAdjacentBlock = getNextBlockSibling) => {
     const uniqueElements = Array.from(new Set(elements));
     if (uniqueElements.length === 0) {

@@ -97,3 +97,38 @@ func TestNormalizeEntryVisibilityRemovesLegacyBase(t *testing.T) {
 		t.Fatalf("unexpected normalized legacy config: %+v", entryVisibility)
 	}
 }
+
+func TestNormalizeEntryVisibilityMigratesEditMode(t *testing.T) {
+	entryVisibility := NormalizeEntryVisibility(&EntryVisibility{
+		Version: 3,
+		Active:  "custom",
+		Profiles: []*EntryVisibilityProfile{
+			{
+				ID:   "custom",
+				Name: "Custom",
+				Entries: map[string]bool{
+					"document.more.editMode":         true,
+					"document.more.editMode.wysiwyg": false,
+					"document.more.editMode.preview": false,
+				},
+				Orders: map[string][]string{
+					"document.more.editMode": {"preview", "wysiwyg"},
+				},
+			},
+		},
+	}, EntryVisibilityProfileFull)
+
+	profile := entryVisibility.Profiles[0]
+	if profile.Entries["document.more.editMode"] {
+		t.Fatalf("hidden legacy mode entries should hide the merged entry: %+v", profile.Entries)
+	}
+	if _, ok := profile.Entries["document.more.editMode.wysiwyg"]; ok {
+		t.Fatalf("legacy WYSIWYG entry should be removed: %+v", profile.Entries)
+	}
+	if _, ok := profile.Entries["document.more.editMode.preview"]; ok {
+		t.Fatalf("legacy preview entry should be removed: %+v", profile.Entries)
+	}
+	if _, ok := profile.Orders["document.more.editMode"]; ok {
+		t.Fatalf("legacy mode order should be removed: %+v", profile.Orders)
+	}
+}

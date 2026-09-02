@@ -133,7 +133,7 @@ func agentChat(c *gin.Context) {
 	if req.ContentRevision != nil {
 		contentRevision = *req.ContentRevision
 	}
-	contextLimit := agent.ResolveModelContextLimit(selectedModel.Name, selectedModel.ContextLength)
+	contextLimit := agent.ResolveModelContextLimit(selectedProvider.BaseURL, selectedModel.Name, selectedModel.ContextLength)
 	imageCapabilityKey := fmt.Sprintf("%s\x00%s\x00%s\x00%s\x00%s",
 		selectedProvider.ID, selectedModel.ID, selectedProvider.BaseURL, selectedProvider.Protocol, selectedModel.Name)
 	eventCh := agent.AgentChat(ctx, client, selectedProvider.Protocol, selectedModel.Name, imageCapabilityKey,

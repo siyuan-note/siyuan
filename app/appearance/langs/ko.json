@@ -1,4 +1,6 @@
 {
+	"originalValue": "원본 값",
+	"templateRenderedValue": "템플릿 렌더링 값",
 	"fontFamily": "글꼴 모음",
 	"mixed": "혼합",
 	"entryDock": "Dock",
@@ -1993,8 +1995,8 @@
 	"fileTree21": "활성화하면 .sy 문서 및 데이터베이스 .json을 저장할 때 한 줄 JSON 형식이 사용되어 파일 크기를 약 30% 줄이고 읽기 및 쓰기 효율성을 50% 향상시킬 수 있습니다",
 	"fileTree22": "대용량 파일 경고",
 	"fileTree23": ".sy 파일 또는 데이터베이스 .json이 이 크기를 초과할 때 알림",
-	"fileTree24": "새 하위 문서를 맨 위에 배치",
-	"fileTree25": "활성화하면 새로 생성된 하위 문서가 하위 문서 목록의 맨 위에 배치됩니다(사용자 지정 정렬이 활성화된 경우에만 적용됨)",
+	"fileTree24": "새 노트북과 문서를 맨 위에 배치",
+	"fileTree25": "활성화하면 새로 생성된 노트북과 문서 및 열린 사용자 가이드가 각각의 목록 맨 위에 배치됩니다(사용자 지정 정렬이 활성화된 경우에만 적용됨)",
 	"fileTree26": "빠른 메모의 기본 저장 경로",
 	"fileTree27": "예: <code class=\"fn__code\">/shorthands/{{now | date \"20060102150405\"}}</code>, 템플릿 변수를 사용하지 않으면 빠른 메모가 지정된 경로의 문서 끝에 추가됩니다",
 	"export10": "예: <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, 비어 있으면 워터마크 텍스트 또는 워터마크 파일 경로를 사용합니다.",

@@ -91,10 +91,13 @@ func GetModelContextLimit(model string) int {
 	return 0
 }
 
-// ResolveModelContextLimit 优先使用具体 Provider 模型配置中的上下文窗口，未配置时回退到内置表。
-func ResolveModelContextLimit(model string, configured int) int {
+// ResolveModelContextLimit 优先使用具体 Provider 模型配置中的上下文窗口，其次使用 models.dev，最后回退到内置表。
+func ResolveModelContextLimit(providerBaseURL, model string, configured int) int {
 	if 0 < configured {
 		return configured
+	}
+	if limit := getModelsDevContextLimit(providerBaseURL, model); 0 < limit {
+		return limit
 	}
 	return GetModelContextLimit(model)
 }

@@ -43,6 +43,7 @@ import (
 	"github.com/mssola/useragent"
 	"github.com/olahol/melody"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/agent"
 	"github.com/siyuan-note/siyuan/kernel/api"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cmd"
@@ -137,6 +138,9 @@ var (
 )
 
 func Serve(fastMode bool, cookieKey string) {
+	if !fastMode {
+		agent.StartModelMetadataRefresh()
+	}
 	gin.SetMode(gin.ReleaseMode)
 	ginServer := gin.New()
 	if err := ginServer.SetTrustedProxies([]string{"127.0.0.1", "::1"}); err != nil {

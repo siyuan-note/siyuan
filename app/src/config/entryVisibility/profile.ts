@@ -36,6 +36,15 @@ export const normalizeEntryVisibilityImportProfile = (
             }
             return result;
         }, {})
-        : defaultOrders;
+        : Object.fromEntries(Object.entries(defaultOrders).map(([path, order]) => [path, [...order]]));
+    if (version < 4) {
+        if (entries["document.more.editMode.wysiwyg"] === false &&
+            entries["document.more.editMode.preview"] === false) {
+            entries["document.more.editMode"] = false;
+        }
+        delete entries["document.more.editMode.wysiwyg"];
+        delete entries["document.more.editMode.preview"];
+        delete orders["document.more.editMode"];
+    }
     return {name: profile.name, entries, orders};
 };

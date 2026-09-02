@@ -301,6 +301,31 @@ export const sortBazaarPackagesByRating = <T extends {
     return updatedResult || a.index - b.index;
 }).map(({item}) => item);
 
+export const sortBazaarPackages = <T extends {
+    updated: string;
+    downloads: number;
+    ratingAvailable?: boolean;
+    rating?: IBazaarRating;
+}>(packages: T[], sortValue: string): T[] => {
+    if (["4", "5"].includes(sortValue)) {
+        return sortBazaarPackagesByRating(packages, sortValue === "4");
+    }
+    const indexed = packages.map((item, index) => ({item, index}));
+    return indexed.sort((a, b) => {
+        let result = 0;
+        if (sortValue === "0") {
+            result = b.item.updated.localeCompare(a.item.updated);
+        } else if (sortValue === "1") {
+            result = a.item.updated.localeCompare(b.item.updated);
+        } else if (sortValue === "2") {
+            result = b.item.downloads - a.item.downloads;
+        } else if (sortValue === "3") {
+            result = a.item.downloads - b.item.downloads;
+        }
+        return result || a.index - b.index;
+    }).map(({item}) => item);
+};
+
 export const isBazaarPackageRatingLoaded = (
     source: "downloaded" | "updated" | "bazaar",
     asynchronouslyLoaded: boolean,

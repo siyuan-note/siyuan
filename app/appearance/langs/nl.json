@@ -1,4 +1,6 @@
 {
+	"originalValue": "Oorspronkelijke waarde",
+	"templateRenderedValue": "Door sjabloon gerenderde waarde",
 	"fontFamily": "Lettertypefamilie",
 	"mixed": "Gemengd",
 	"entryDock": "Dock",
@@ -1993,8 +1995,8 @@
 	"fileTree21": "Bij inschakelen wordt enkelregelige JSON gebruikt bij opslaan van .sy-documenten en database-.json. Dit verkleint de bestandsgrootte met ~30% en verbetert lees-/schrijfefficiëntie met 50%",
 	"fileTree22": "Waarschuwing groot bestand",
 	"fileTree23": "Melden wanneer .sy-bestanden of database-.json deze grootte overschrijden",
-	"fileTree24": "Nieuwe subdocumenten bovenaan plaatsen",
-	"fileTree25": "Indien ingeschakeld worden nieuw aangemaakte subdocumenten bovenaan de subdocumentenlijst geplaatst (werkt alleen wanneer aangepaste sortering is ingeschakeld)",
+	"fileTree24": "Nieuwe notitieboeken en documenten bovenaan plaatsen",
+	"fileTree25": "Indien ingeschakeld worden nieuwe notitieboeken en documenten en de gebruikersgids bij het openen bovenaan hun lijsten geplaatst (werkt alleen wanneer aangepaste sortering is ingeschakeld)",
 	"fileTree26": "Standaard opslaglocatie voor snelle notities",
 	"fileTree27": "Bv. <code class=\"fn__code\">/shorthands/{{now | date \"20060102150405\"}}</code>, als er geen sjabloonvariabele wordt gebruikt, wordt de snelle notitie toegevoegd aan het einde van het document op het opgegeven pad",
 	"export10": "Bijv. <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, indien leeg wordt watermerktekst of watermerkbestandspad gebruikt.",

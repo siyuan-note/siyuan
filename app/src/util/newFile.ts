@@ -46,7 +46,8 @@ type NewDocRequest = {
     /** 是否有来自编辑器或文件树选中项的焦点目标 */
     hasFocusTarget: boolean;
     name?: string;
-    paths?: string[];
+    sortTargetID?: string;
+    sortPosition?: "before" | "after";
     listDocTree?: boolean;
     onCreated?: (id: string, title: string) => void;
 };
@@ -87,13 +88,17 @@ export const newFileInProtyle = (protyle: IProtyle, onCreated: (id: string, titl
     });
 };
 
-export const newFileInTree = (app: App, notebookId: string, currentPath: string, paths?: string[]) => {
+export const newFileInTree = (app: App, notebookId: string, currentPath: string, sortPlacement?: {
+    targetID: string;
+    position: "before" | "after";
+}) => {
     runNewDocInTree({
         app,
         notebookId,
         currentPath,
         hasFocusTarget: true,
-        paths,
+        sortTargetID: sortPlacement?.targetID,
+        sortPosition: sortPlacement?.position,
         listDocTree: true,
     });
 };
@@ -404,16 +409,14 @@ function createNewDocByHPath(request: NewDocRequest, target: NewDocTargetByHPath
 function createNewDocAsSubDoc(request: NewDocRequest, target: NewDocTargetSubDoc, docCreateTemplatePath: string) {
     const id = Lute.NewNodeID();
     const newPath = pathPosix().join(getDisplayName(target.parentPath, false, true), id + ".sy");
-    if (request.paths) {
-        request.paths[request.paths.indexOf(undefined)] = newPath;
-    }
     fetchPost("/api/filetree/createDoc", {
         notebook: target.targetNotebookId,
         path: newPath,
         title: target.title,
         md: "",
         docCreateTemplatePath,
-        sorts: request.paths,
+        sortTargetID: request.sortTargetID,
+        sortPosition: request.sortPosition,
         listDocTree: request.listDocTree,
     }, () => {
         openCreatedDoc(request.app, id, request.onCreated, target.title);

@@ -10,7 +10,7 @@ import {
     SELECTION_TOOLBAR_SUB_ELEMENT_SOURCE,
     setSubElementSource,
 } from "./subElementLifecycle";
-import {escapeAttr, escapeHtml} from "../../util/escape";
+import {escapeAttr} from "../../util/escape";
 import {
     decodeStyle1,
     encodeStyle1,
@@ -307,12 +307,9 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
 </div>
 <div class="fn__hr${disableFontFamily ? " fn__none" : ""}"></div>
 <div data-id="fontFamily" class="fn__flex${disableFontFamily ? " fn__none" : ""}">
-    ${window.siyuan.languages.fontFamily}
+    <span class="fn__flex-center">${window.siyuan.languages.fontFamily}</span>
     <span class="fn__flex-1"></span>
-    <button class="b3-button b3-button--outline fn__flex-center" data-type="fontFamilyMenu">
-        <span class="fn__ellipsis" data-type="fontFamilyLabel">${escapeHtml(getInlineFontFamilyLabel(fontFamilyState))}</span>
-        <svg><use xlink:href="#iconRight"></use></svg>
-    </button>
+    <input class="b3-select fn__flex-center fn__size96" data-type="fontFamilyMenu" data-menu="true" type="text" value="${escapeAttr(getInlineFontFamilyLabel(fontFamilyState))}" readonly aria-label="${escapeAttr(window.siyuan.languages.fontFamily)}" aria-haspopup="listbox" aria-expanded="false">
 </div>
 <div class="fn__hr${disableFont ? " fn__none" : ""}"></div>
 <div data-id="fontSize" class="fn__flex${disableFont ? " fn__none" : ""}">
@@ -346,31 +343,33 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(element)) {
             const dataType = target.getAttribute("data-type");
+            if (dataType === "fontFamilyMenu") {
+                const range = protyle.toolbar.range.cloneRange();
+                void openFontFamilyMenu(target, {
+                    ...fontFamilyState,
+                    isOpenValid: () => target.isConnected && element.isConnected &&
+                        protyle.toolbar.subElement.contains(element) &&
+                        !protyle.toolbar.subElement.classList.contains("fn__none") &&
+                        range.startContainer.isConnected && range.endContainer.isConnected,
+                    onSelect(family) {
+                        if (!range.startContainer.isConnected || !range.endContainer.isConnected) {
+                            return;
+                        }
+                        protyle.toolbar.range = range;
+                        applyFontStyle("fontFamily", getInlineFontFamilyValue(family));
+                        if (!closeSelectionToolbarAppearance()) {
+                            focusByRange(protyle.toolbar.range);
+                        }
+                    }
+                });
+                break;
+            }
             if (target.tagName === "BUTTON") {
                 if (target.dataset.action === "manageInlineStyle") {
                     closeSubElement(protyle.toolbar);
                     protyle.toolbar.subElement.classList.add("fn__none");
                     protyle.toolbar.element.classList.add("fn__none");
                     openInlineStyleDialog(target.dataset.inlineStyleType as TInlineStyleType);
-                } else if (dataType === "fontFamilyMenu") {
-                    const range = protyle.toolbar.range.cloneRange();
-                    void openFontFamilyMenu(target, {
-                        ...fontFamilyState,
-                        isOpenValid: () => target.isConnected && element.isConnected &&
-                            protyle.toolbar.subElement.contains(element) &&
-                            !protyle.toolbar.subElement.classList.contains("fn__none") &&
-                            range.startContainer.isConnected && range.endContainer.isConnected,
-                        onSelect(family) {
-                            if (!range.startContainer.isConnected || !range.endContainer.isConnected) {
-                                return;
-                            }
-                            protyle.toolbar.range = range;
-                            applyFontStyle("fontFamily", getInlineFontFamilyValue(family));
-                            if (!closeSelectionToolbarAppearance()) {
-                                focusByRange(protyle.toolbar.range);
-                            }
-                        }
-                    });
                 } else if (dataType === "style1") {
                     applyFontStyle(dataType, encodeStyle1(target.style.backgroundColor, target.style.color));
                     closeSelectionToolbarAppearance();
@@ -391,6 +390,16 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[],
             }
             target = target.parentElement;
         }
+    });
+    element.addEventListener("keydown", (event: KeyboardEvent) => {
+        const target = event.target as HTMLElement;
+        if (target.getAttribute("data-type") !== "fontFamilyMenu" ||
+            !["Enter", " ", "ArrowDown"].includes(event.key)) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        target.click();
     });
     const switchElement = element.querySelector(".b3-switch") as HTMLInputElement;
     const fontSizePXElement = element.querySelector("#fontSizePX") as HTMLInputElement;

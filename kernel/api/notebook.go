@@ -17,6 +17,7 @@
 package api
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"sort"
@@ -116,6 +117,32 @@ func changeSortNotebook(c *gin.Context) {
 		}
 	}
 	model.ChangeBoxSort(ids)
+}
+
+func reorderNotebooks(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	request := &struct {
+		SourceIDs []string `json:"sourceIDs"`
+		TargetID  string   `json:"targetID"`
+		Position  string   `json:"position"`
+	}{}
+	if err := c.ShouldBindJSON(request); nil != err {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf("Parses request [%s] failed: %s", c.Request.URL.Path, err)
+		return
+	}
+	if !validateReorderRequest(request.SourceIDs, request.TargetID, request.Position, ret) {
+		return
+	}
+
+	result, err := model.ReorderNotebooks(request.SourceIDs, request.TargetID, request.Position)
+	ret.Data = result
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
 }
 
 func renameNotebook(c *gin.Context) {

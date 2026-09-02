@@ -528,6 +528,66 @@
   }
   ```
 
+### 兄弟ドキュメントを基準にドキュメントの順序を変更
+
+* `/api/filetree/reorderDocs`
+* パラメータ
+
+  ```json
+  {
+    "sourceIDs": ["20210917220056-yxtyl7i"],
+    "targetID": "20210917220057-abcdefg",
+    "position": "before"
+  }
+  ```
+
+    * `sourceIDs`: 配列順に挿入する移動元ドキュメント ID
+    * `targetID`: 基準となる兄弟ドキュメント ID
+    * `position`: `before` または `after`
+    * 移動後、すべての移動元ドキュメントは対象と同じノートブックおよび親ドキュメントに属する必要があります。非表示および未一覧表示のドキュメントを含む完全な兄弟リストを使用して並べ替えます
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "changed": true,
+      "notebook": "20210817205410-2kvfpfn",
+      "parentPath": "/"
+    }
+  }
+  ```
+
+### 別のノートブックを基準にノートブックの順序を変更
+
+* `/api/notebook/reorder`
+* パラメータ
+
+  ```json
+  {
+    "sourceIDs": ["20210817205410-2kvfpfn"],
+    "targetID": "20210817205411-abcdefg",
+    "position": "after"
+  }
+  ```
+
+    * `sourceIDs`: 配列順に挿入する移動元ノートブック ID
+    * `targetID`: 基準となるノートブック ID
+    * `position`: `before` または `after`
+    * 閉じたノートブックを含む完全なノートブックリストを使用して並べ替えます
+* 戻り値
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "changed": true
+    }
+  }
+  ```
+
 ### ノートブックとドキュメントのソート値を設定
 
 * `/api/filetree/setSort`

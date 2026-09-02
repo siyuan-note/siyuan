@@ -655,3 +655,6 @@ export class Plugin {
         return this.protyleOptionsValue;
     }
 }
+
+export const hasPluginSetting = (plugin: Plugin) => Boolean(plugin.setting) ||
+    plugin.openSetting !== Plugin.prototype.openSetting;

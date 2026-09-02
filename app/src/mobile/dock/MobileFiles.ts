@@ -38,6 +38,7 @@ import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mou
 import {
     collectExpandedDocIDs,
     findMovedFileTreeItem,
+    getRelativeReorderRequest,
     getFileTreeChildList,
     IFileTreeMove,
     restoreMovedExpandedDocItems,
@@ -442,6 +443,12 @@ export class MobileFiles extends Model {
                     const targetListElement = newElement.parentElement;
                     if (window.siyuan.config.fileTree.sort === 6 && selectRootElements.length > 0 &&
                         newElement.getAttribute("data-path") === "/") {
+                        const sourceIDs = selectRootElements.map(item => item.parentElement.getAttribute("data-url"));
+                        if (sourceIDs.includes(toURL)) {
+                            this.clearDragIndicators();
+                            this.touchDragState = null;
+                            return;
+                        }
                         if (newElement.classList.contains("dragover__top")) {
                             selectRootElements.forEach(item => {
                                 newElement.parentElement.before(item.parentElement);
@@ -451,13 +458,11 @@ export class MobileFiles extends Model {
                                 newElement.parentElement.after(item.parentElement);
                             });
                         }
-                        const notebooks: string[] = [];
-                        Array.from(this.element.children).forEach(item => {
-                            notebooks.push(item.getAttribute("data-url"));
-                        });
-                        fetchPost("/api/notebook/changeSortNotebook", {
-                            notebooks,
-                        });
+                        fetchPost("/api/notebook/reorder", getRelativeReorderRequest(
+                            sourceIDs,
+                            toURL,
+                            !newElement.classList.contains("dragover__top")
+                        ));
                     } else if (isCustomFileTreeList(targetListElement) && selectFileElements.length > 0) {
                         let hasMove = false;
                         const toDir = pathPosix().dirname(toPath);
@@ -511,16 +516,11 @@ export class MobileFiles extends Model {
                                 }
                             });
                         }
-                        const paths: string[] = [];
-                        Array.from(newElement.parentElement.children).forEach(item => {
-                            if (item.tagName === "LI") {
-                                paths.push(item.getAttribute("data-path"));
-                            }
-                        });
-                        fetchPost("/api/filetree/changeSort", {
-                            paths,
-                            notebook: toURL
-                        }, () => {
+                        fetchPost("/api/filetree/reorderDocs", getRelativeReorderRequest(
+                            selectFileElements.map(item => item.getAttribute("data-node-id")),
+                            newElement.getAttribute("data-node-id"),
+                            !newElement.classList.contains("dragover__top")
+                        ), () => {
                             if (hasMove) {
                                 fetchPost("/api/filetree/listDocsByPath", {
                                     notebook: toURL,

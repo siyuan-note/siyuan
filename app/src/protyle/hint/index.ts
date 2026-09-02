@@ -351,6 +351,39 @@ export class Hint {
             Constants.BLOCK_HINT_CLOSE_KEYS[this.splitChar], Constants.SIZE_TITLE);
     }
 
+    private getMobileSelectionBounds(protyle: IProtyle) {
+        const range = getEditorRange(protyle.wysiwyg.element);
+        const position = getSelectionPosition(protyle.wysiwyg.element, range);
+        if (range.startContainer.nodeType === 3 && range.startContainer.textContent.length > 0) {
+            const textLength = range.startContainer.textContent.length;
+            const offset = Math.min(range.startOffset, textLength);
+            const textRange = range.cloneRange();
+            if (offset > 0) {
+                textRange.setStart(range.startContainer, offset - 1);
+                textRange.setEnd(range.startContainer, offset);
+            } else {
+                textRange.setStart(range.startContainer, 0);
+                textRange.setEnd(range.startContainer, 1);
+            }
+            const rects = textRange.getClientRects();
+            const rect = rects[rects.length - 1];
+            if (rect?.height > 0) {
+                return {
+                    top: rect.top,
+                    bottom: rect.bottom,
+                };
+            }
+        }
+        const rangeElement = range.startContainer.nodeType === 3 ?
+            range.startContainer.parentElement : range.startContainer as HTMLElement;
+        const computedLineHeight = rangeElement ? parseFloat(getComputedStyle(rangeElement).lineHeight) : NaN;
+        const lineHeight = Number.isNaN(computedLineHeight) ? 26 : computedLineHeight;
+        return {
+            top: position.top - lineHeight,
+            bottom: position.top + lineHeight,
+        };
+    }
+
     private setMobilePosition(anchorTop: number, anchorBottom: number) {
         const viewportBounds = getVisibleViewportBounds();
         const viewportTop = Math.max(viewportBounds.top, getTopBarHeight());
@@ -360,12 +393,13 @@ export class Hint {
             viewportBottom = Math.min(viewportBottom, keyboardToolbarElement.getBoundingClientRect().top);
         }
         viewportBottom = Math.max(viewportTop, viewportBottom);
-        const heightLimit = (viewportBottom - viewportTop) / 2;
+        const heightLimit = (viewportBottom - viewportTop) / 3;
+        const gap = 4;
         let position = getMobileHintPosition(anchorTop, anchorBottom, this.element.scrollHeight,
-            viewportTop, viewportBottom, heightLimit);
+            viewportTop, viewportBottom, heightLimit, gap);
         this.element.style.maxHeight = `${position.maxHeight}px`;
         position = getMobileHintPosition(anchorTop, anchorBottom, this.element.getBoundingClientRect().height,
-            viewportTop, viewportBottom, heightLimit);
+            viewportTop, viewportBottom, heightLimit, gap);
         this.element.style.left = "0";
         this.element.style.top = `${position.top}px`;
     }
@@ -390,7 +424,8 @@ export class Hint {
                 /// #if !MOBILE
                 setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
                 /// #else
-                this.setMobilePosition(textareaPosition.top, textareaPosition.top + 26);
+                const selectionBounds = this.getMobileSelectionBounds(protyle);
+                this.setMobilePosition(selectionBounds.top, selectionBounds.bottom);
                 /// #endif
             }
         } else if (!this.element.querySelector(".fn__loading")) {
@@ -487,7 +522,8 @@ export class Hint {
             /// #if !MOBILE
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
             /// #else
-            this.setMobilePosition(textareaPosition.top, textareaPosition.top + 26);
+            const selectionBounds = this.getMobileSelectionBounds(protyle);
+            this.setMobilePosition(selectionBounds.top, selectionBounds.bottom);
             /// #endif
         }
         this.element.scrollTop = 0;

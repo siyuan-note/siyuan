@@ -376,14 +376,14 @@ export const setInlineStyle = async (set = true, servePath = "../../../") => {
     const editorFontWeight = editorFonts[0]?.weight;
     const codeFontFamilies = codeFonts.map((font) => CSS.escape(font.family)).join(", ");
     const codeFontFamily = codeFontFamilies ?
-        `"Emojis Additional", "Emojis Reset", ${codeFontFamilies}, var(--b3-font-family-code)` :
+        `var(--b3-font-family-emoji-reset), ${codeFontFamilies}, var(--b3-font-family-code)` :
         "var(--b3-font-family-code)";
     const codeFontWeight = codeFonts[0]?.weight || 400;
     style += `\n:root { --b3-font-size-editor: ${window.siyuan.config.editor.fontSize}px; --b3-font-family-editor: ${editorFontFamilies || "var(--b3-font-family-protyle)"}; --b3-font-family-editor-code: ${codeFontFamily}; --b3-font-weight-editor-code: ${codeFontWeight} }
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .b3-typography:not(.b3-typography--default) code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-family: var(--b3-font-family-editor-code); font-weight: var(--b3-font-weight-editor-code) }${window.siyuan.config.editor.justify ? "\n.protyle-wysiwyg [data-node-id] { text-align: justify }" : ""}`;
     if (editorFontFamilies) {
-        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${editorFontWeight ? `font-weight: ${editorFontWeight};` : ""}font-family: "Emojis Additional", "Emojis Reset", var(--b3-font-family-editor), var(--b3-font-family)}`;
+        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {${editorFontWeight ? `font-weight: ${editorFontWeight};` : ""}font-family: var(--b3-font-family-emoji-reset), var(--b3-font-family-editor), var(--b3-font-family)}`;
     }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {

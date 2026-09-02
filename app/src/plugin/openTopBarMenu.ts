@@ -6,6 +6,7 @@ import {isBazaarAvailable} from "../util/bazaarAvailability";
 import {setTabPosition} from "../layout/tabUtil";
 /// #endif
 import {Constants} from "../constants";
+import {hasPluginSetting} from "./index";
 
 export const openTopBarMenu = (app: App, target?: Element) => {
     const menu = new Menu(Constants.MENU_BAR_PLUGIN);
@@ -24,8 +25,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
     });
     let hasPlugin = false;
     app.plugins.forEach((plugin) => {
-        // @ts-ignore
-        const hasSetting = plugin.setting || plugin.__proto__.hasOwnProperty("openSetting");
+        const hasSetting = hasPluginSetting(plugin);
         let hasTopBar = false;
         for (let i = 0; i < plugin.topBarIcons.length; i++) {
             const item = plugin.topBarIcons[i];

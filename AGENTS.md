@@ -66,6 +66,7 @@ SiYuan repository guide. Module path `github.com/siyuan-note/siyuan`, license AG
      3. Call the appropriate endpoint with `gh api --method <method> "<endpoint>" --input "<absolute-json-path>"`
      4. Inspect the returned resource and read it back with `gh api` to verify the published text exactly, including line breaks and non-ASCII characters
      5. Delete the temporary JSON file and confirm that it no longer exists
+   - For shell-independent read-back verification, query one field per `gh api --jq` call, for example `--jq .title` and `--jq .body`
    - Example for an issue comment: write `{"body":"<comment text>"}` to the UTF-8 JSON file, run `gh api --method POST "repos/{owner}/{repo}/issues/<number>/comments" --input "<absolute-json-path>"`, then read the returned comment by its `id` before deleting the file
 7. **Issue titles:** Whenever the user asks to generate an issue title, provide it in English regardless of the wording of the request, and do not start it with `Fix`. These rules choose title wording from the issue's nature; they are not an instruction to apply GitHub labels
    - For a bug, objectively describe the problem or symptom instead of writing from a bug-fix perspective

@@ -4,7 +4,7 @@ import {Constants} from "../../constants";
 import {MenuItem} from "../../menus/Menu";
 import {net2LocalAssets, updateReadonly} from "./action";
 import {openFileAttr} from "../../menus/commonMenuItem";
-import {setEditMode} from "../util/setEditMode";
+import {toggleEditMode} from "../util/toggleEditMode";
 import {RecordMedia, RecordMediaInputEndedError} from "../util/RecordMedia";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {uploadFiles} from "../upload";
@@ -900,33 +900,14 @@ ${padHTML}
                 id: "editMode",
                 icon: "iconEdit",
                 label: window.siyuan.languages["edit-mode"],
-                type: "submenu",
-                submenu: [{
-                    id: "wysiwyg",
-                    current: !protyle.contentElement.classList.contains("fn__none"),
-                    label: window.siyuan.languages.wysiwyg,
-                    accelerator: window.siyuan.config.keymap.editor.general.wysiwyg.custom,
-                    click: () => {
-                        setEditMode(protyle, "wysiwyg");
-                        reloadProtyle(protyle, true);
-                        /// #if !MOBILE
-                        saveLayout();
-                        /// #endif
-                    }
-                }, {
-                    id: "preview",
-                    current: !protyle.preview.element.classList.contains("fn__none"),
-                    icon: "iconPreview",
-                    label: window.siyuan.languages.preview,
-                    accelerator: window.siyuan.config.keymap.editor.general.preview.custom,
-                    click: () => {
-                        setEditMode(protyle, "preview");
-                        window.siyuan.menus.menu.remove();
-                        /// #if !MOBILE
-                        saveLayout();
-                        /// #endif
-                    }
-                }]
+                accelerator: window.siyuan.config.keymap.editor.general["edit-mode"].custom,
+                click: () => {
+                    toggleEditMode(protyle);
+                    window.siyuan.menus.menu.remove();
+                    /// #if !MOBILE
+                    saveLayout();
+                    /// #endif
+                }
             }).element);
             if (!window.siyuan.config.editor.readOnly && !window.siyuan.config.readonly) {
                 const isCustomReadonly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);

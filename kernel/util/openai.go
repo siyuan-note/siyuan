@@ -237,7 +237,7 @@ func NewOpenAIClientWithModel(apiKey, apiBaseURL, model string) *openai.Client {
 }
 
 // TestModel 测试模型可用性。优先调用 ListModels（GET /v1/models）拉取可用模型清单，
-// 校验 model 是否在其中；若该端点不可用，则按 Provider 协议回退到极简文本生成请求。
+// 列表不包含指定模型或该端点不可用时，按 Provider 协议回退到极简文本生成请求。
 // 返回值：available 为可用模型清单（仅 ListModels 成功时填充），matched 表示 model 是否可用，
 // err 为请求错误（鉴权失败、网络异常、模型不存在等，原样返回便于调用方展示原因）。
 func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int) (available []string, matched bool, err error) {
@@ -259,11 +259,15 @@ func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int) (availab
 				matched = true
 			}
 		}
-		return
+		if matched {
+			return
+		}
+		logging.LogInfof("model [%s] not found in available list, fallback to text completion", model)
+	} else {
+		// ListModels 不可用时回退到极简文本生成请求验证连通性与鉴权。
+		logging.LogInfof("list models failed [%s], fallback to text completion: %s", apiBaseURL, listErr)
 	}
 
-	// ListModels 不可用时回退到极简文本生成请求验证连通性与鉴权。
-	logging.LogInfof("list models failed [%s], fallback to text completion: %s", apiBaseURL, listErr)
 	messages := []openai.ChatCompletionMessage{{Role: "user", Content: "1"}}
 	_, err = CreateOpenAICompletion(ctx, client, protocol, openai.ChatCompletionRequest{
 		Model:               model,
@@ -276,7 +280,6 @@ func TestModel(apiKey, apiBaseURL, protocol, model string, timeout int) (availab
 		return
 	}
 	matched = true
-	available = nil
 	return
 }
 

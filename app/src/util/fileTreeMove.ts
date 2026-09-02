@@ -14,6 +14,12 @@ export interface IDocumentTabDragData {
 
 const BLOCK_ID_PATTERN = /^\d{14}-[0-9a-z]{7}$/;
 
+export const getRelativeReorderRequest = (sourceIDs: string[], targetID: string, insertAfter: boolean) => ({
+    sourceIDs,
+    targetID,
+    position: insertAfter ? "after" as const : "before" as const,
+});
+
 export const parseDocumentTabDragData = (data: string) => {
     try {
         const result = JSON.parse(data) as IDocumentTabDragData;

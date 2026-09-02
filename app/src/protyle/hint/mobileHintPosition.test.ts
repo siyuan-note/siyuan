@@ -41,4 +41,15 @@ describe("getMobileHintPosition", () => {
             top: 194,
         });
     });
+
+    it("leaves a gap around the caret line", () => {
+        assert.deepEqual(getMobileHintPosition(420, 446, 200, 48, 500, Infinity, 4), {
+            maxHeight: 368,
+            top: 216,
+        });
+        assert.deepEqual(getMobileHintPosition(80, 106, 200, 48, 500, Infinity, 4), {
+            maxHeight: 390,
+            top: 110,
+        });
+    });
 });

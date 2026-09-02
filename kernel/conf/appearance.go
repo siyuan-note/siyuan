@@ -61,7 +61,7 @@ func NewAppearance() *Appearance {
 }
 
 const (
-	EntryVisibilityVersion       = 3
+	EntryVisibilityVersion       = 4
 	EntryVisibilityProfileSimple = "simple"
 	EntryVisibilityProfileFull   = "full"
 )
@@ -94,7 +94,7 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 	if nil == entryVisibility {
 		return NewEntryVisibility(fallback)
 	}
-	entryVisibility.Version = EntryVisibilityVersion
+	version := entryVisibility.Version
 	if nil == entryVisibility.Profiles {
 		entryVisibility.Profiles = []*EntryVisibilityProfile{}
 	}
@@ -112,9 +112,20 @@ func NormalizeEntryVisibility(entryVisibility *EntryVisibility, fallback string)
 		if nil == profile.Orders {
 			profile.Orders = map[string][]string{}
 		}
+		if version < 4 {
+			wysiwygVisible, wysiwygConfigured := profile.Entries["document.more.editMode.wysiwyg"]
+			previewVisible, previewConfigured := profile.Entries["document.more.editMode.preview"]
+			if wysiwygConfigured && previewConfigured && !wysiwygVisible && !previewVisible {
+				profile.Entries["document.more.editMode"] = false
+			}
+			delete(profile.Entries, "document.more.editMode.wysiwyg")
+			delete(profile.Entries, "document.more.editMode.preview")
+			delete(profile.Orders, "document.more.editMode")
+		}
 		profileIDs[profile.ID] = true
 		profiles = append(profiles, profile)
 	}
+	entryVisibility.Version = EntryVisibilityVersion
 	entryVisibility.Profiles = profiles
 	if entryVisibility.Active != EntryVisibilityProfileSimple && entryVisibility.Active != EntryVisibilityProfileFull &&
 		!profileIDs[entryVisibility.Active] {

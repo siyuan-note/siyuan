@@ -20,7 +20,7 @@ import {getInstanceById, saveLayout} from "../../layout/util";
 import {getActiveTab, getDockByType, switchTabByIndex} from "../../layout/tabUtil";
 import {Tab} from "../../layout/Tab";
 import {Editor} from "../../editor";
-import {setEditMode} from "../../protyle/util/setEditMode";
+import {toggleEditMode} from "../../protyle/util/toggleEditMode";
 import {rename} from "../../editor/rename";
 import {Files} from "../../layout/dock/Files";
 import {newDailyNote} from "../../util/mount";
@@ -528,15 +528,9 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.preview.custom, event)) {
-        setEditMode(protyle, "preview");
-        saveLayout();
-        event.preventDefault();
-        return true;
-    }
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.wysiwyg.custom, event) && !protyle.options.backlinkData) {
-        setEditMode(protyle, "wysiwyg");
-        reloadProtyle(protyle, true);
+    if (!event.repeat && !protyle.options.backlinkData &&
+        matchHotKey(window.siyuan.config.keymap.editor.general["edit-mode"].custom, event)) {
+        toggleEditMode(protyle);
         saveLayout();
         event.preventDefault();
         return true;

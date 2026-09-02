@@ -1,4 +1,6 @@
 {
+	"originalValue": "Wartość oryginalna",
+	"templateRenderedValue": "Wartość renderowana przez szablon",
 	"fontFamily": "Rodzina czcionek",
 	"mixed": "Mieszane",
 	"entryDock": "Dock",
@@ -1993,8 +1995,8 @@
 	"fileTree21": "Po włączeniu, format JSON w pojedynczej linii będzie używany przy zapisywaniu .sy dokumentów i plików .json bazy danych, co może zmniejszyć rozmiar pliku o około 30% i poprawić wydajność odczytu i zapisu o 50%",
 	"fileTree22": "Powiadomienie o dużym pliku",
 	"fileTree23": "Powiadom, gdy plik .sy lub baza danych .json przekroczy ten rozmiar",
-	"fileTree24": "Umieść nowy poddokument na górze",
-	"fileTree25": "Po włączeniu nowe poddokumenty będą umieszczane na początku listy poddokumentów (działa tylko, gdy włączone jest niestandardowe sortowanie)",
+	"fileTree24": "Umieszczaj nowe notesy i dokumenty na górze",
+	"fileTree25": "Po włączeniu nowe notesy i dokumenty oraz podręcznik użytkownika po otwarciu będą umieszczane na początku odpowiednich list (działa tylko, gdy włączone jest niestandardowe sortowanie)",
 	"fileTree26": "Domyślna ścieżka zapisu dla szybkich notatek",
 	"fileTree27": "Na przykład, <code class=\"fn__code\">/shorthands/{{now | date \"20060102150405\"}}</code>, jeśli nie użyto zmiennej szablonu, szybka notatka zostanie dodana na końcu dokumentu w określonej ścieżce",
 	"export10": "Na przykład <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, jeśli jest puste, użyj tekstu znaków wodnych lub ścieżki pliku znaku wodnego.",

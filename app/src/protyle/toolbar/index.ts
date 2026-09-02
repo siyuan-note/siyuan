@@ -78,6 +78,7 @@ import {emitToPlugins, forEachPluginSubscriber, hasPluginSubscriber} from "../..
 import {getSelectionElementAvailableHeight, getSelectionElementY} from "./selectionElementPosition";
 import {
     getInlinePlaceholder,
+    getSemanticInlineFirstTextNode,
     getSemanticInlineVisibleText,
     getSemanticInternalMarkerPrefixLength,
     getSemanticMarkerPrefixLengthForNode,
@@ -89,6 +90,7 @@ import {
     stripSemanticMarkersFromRangeText,
     stripSemanticInternalMarkerPrefix
 } from "../util/inlineElementMarker";
+import {canExpandInlineRangeToParent, getInlineRangeElement} from "./inlineRangeBoundary";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -750,6 +752,7 @@ export class Toolbar {
         if (!nodeElement || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             return;
         }
+        const editableElement = getContenteditableElement(nodeElement, this.range.startContainer);
         const isBatch = remove !== undefined;
         let rangeTypes: string[] = [];
         this.range.cloneContents().childNodes.forEach((item: HTMLElement) => {
@@ -764,10 +767,10 @@ export class Toolbar {
         const isSameNode = this.range.startContainer === this.range.endContainer ||
             (rangeStartNextSibling && rangeStartNextSibling === this.range.endContainer &&
                 this.range.startContainer.parentElement === this.range.endContainer.parentElement);
-        if (this.range.startContainer.nodeType === 3 && this.range.startContainer.parentElement.tagName === "SPAN" &&
-            isSameNode &&
+        const rangeStartInlineElement = getInlineRangeElement(this.range.startContainer, editableElement);
+        if (rangeStartInlineElement && isSameNode &&
             this.range.startOffset > -1 && this.range.endOffset <= this.range.endContainer.textContent.length) {
-            rangeTypes = rangeTypes.concat((this.range.startContainer.parentElement.getAttribute("data-type") || "").split(" "));
+            rangeTypes = rangeTypes.concat((rangeStartInlineElement.getAttribute("data-type") || "").split(" "));
         }
         const selectText = stripSemanticMarkersFromRangeText(this.range);
         const isInSameExcludedFontFamilyElement = INLINE_FONT_FAMILY_EXCLUDED_TYPES.some(inlineType => {
@@ -789,7 +792,7 @@ export class Toolbar {
             } else {
                 newElement = this.range.startContainer.parentElement;
             }
-            if (newElement.tagName === "SPAN") {
+            if (newElement.tagName === "SPAN" && newElement !== editableElement) {
                 rangeTypes = rangeTypes.concat((newElement.getAttribute("data-type") || "").split(" "));
                 this.range.setStart(newElement.firstChild, 0);
                 this.range.setEnd(newElement.lastChild, newElement.lastChild.textContent.length || 0);
@@ -815,8 +818,7 @@ export class Toolbar {
         let contents;
         let html;
         let needWrapTarget;
-        if (this.range.startContainer.nodeType === 3 && this.range.startContainer.parentElement.tagName === "SPAN" &&
-            isSameNode) {
+        if (getInlineRangeElement(this.range.startContainer, editableElement) && isSameNode) {
             if (this.range.startOffset > -1 && this.range.endOffset <= this.range.endContainer.textContent.length) {
                 needWrapTarget = this.range.startContainer.parentElement;
             }
@@ -858,13 +860,13 @@ export class Toolbar {
         let isEndSpan = false;
         // https://github.com/siyuan-note/siyuan/issues/7200
         if (this.range.endOffset === this.range.endContainer.textContent.length &&
-            !["DIV", "TD", "TH", "TR"].includes(this.range.endContainer.parentElement.tagName) &&
+            canExpandInlineRangeToParent(this.range.endContainer, editableElement) &&
             !hasNextSibling(this.range.endContainer)) {
             this.range.setEndAfter(this.range.endContainer.parentElement);
             isEndSpan = true;
         }
         if (this.range.startOffset === 0 &&
-            !["DIV", "TD", "TH", "TR"].includes(this.range.startContainer.parentElement.tagName) &&
+            canExpandInlineRangeToParent(this.range.startContainer, editableElement) &&
             !hasPreviousSibling(this.range.startContainer)) {
             this.range.setStartBefore(this.range.startContainer.parentElement);
         }
@@ -1208,7 +1210,15 @@ export class Toolbar {
             (newNodes[0].nodeType !== Node.TEXT_NODE && hasSemanticInlineType(
                 (newNodes[0] as HTMLElement).getAttribute("data-type")) &&
                 getSemanticInternalMarkerPrefixLength(newNodes[0].textContent) === newNodes[0].textContent.length))) {
-            this.range.setStart(newNodes[0], 1);
+            const semanticTextNode = newNodes[0].nodeType === Node.ELEMENT_NODE &&
+                hasSemanticInlineType((newNodes[0] as HTMLElement).getAttribute("data-type")) ?
+                getSemanticInlineFirstTextNode(newNodes[0] as HTMLElement) : undefined;
+            if (semanticTextNode) {
+                this.range.setStart(semanticTextNode,
+                    getSemanticInternalMarkerPrefixLength(semanticTextNode.data));
+            } else {
+                this.range.setStart(newNodes[0], 1);
+            }
             this.range.collapse(true);
             if (newNodes[0].nodeType !== 3) {
                 // 不选中后，ctrl+g 光标重置
@@ -1304,9 +1314,6 @@ export class Toolbar {
                 } else {
                     const currentType = currentNode.nodeType === 3 ? [] : (currentNode.getAttribute("data-type") || "").split(" ");
                     if (currentType.includes("code") || currentType.includes("tag") || currentType.includes("kbd")) {
-                        if (!currentNode.textContent.startsWith(Constants.ZWSP)) {
-                            currentNode.insertAdjacentText("afterbegin", Constants.ZWSP);
-                        }
                         if (!previousElement || (previousElement.nodeType === 3 && previousElement.textContent.endsWith("\n"))) {
                             currentNode.insertAdjacentText("beforebegin", Constants.ZWSP);
                         }

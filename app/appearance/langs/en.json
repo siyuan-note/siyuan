@@ -1,4 +1,6 @@
 {
+	"originalValue": "Original value",
+	"templateRenderedValue": "Template-rendered value",
 	"fontFamily": "Font family",
 	"mixed": "Mixed",
 	"entryDock": "Dock",
@@ -1993,8 +1995,8 @@
 	"fileTree21": "When enabled, the single-line JSON format will be used when saving .sy docs and database .json files, which can reduce the file size by about 30% and improve read and write efficiency by 50%",
 	"fileTree22": "Large File Warning",
 	"fileTree23": "Notify when .sy files or database .json exceed this size",
-	"fileTree24": "Place new subdocuments at the top",
-	"fileTree25": "When enabled, newly created subdocuments will be placed at the top of the subdocument list (only takes effect when custom sorting is enabled)",
+	"fileTree24": "Place new notebooks and documents at the top",
+	"fileTree25": "When enabled, newly created notebooks and documents, and the user guide when opened, will be placed at the top of their lists (only takes effect when custom sorting is enabled)",
 	"fileTree26": "Default shorthand save path",
 	"fileTree27": "For example, <code class=\"fn__code\">/shorthands/{{now | date \"20060102150405\"}}</code>, if no template variable is used the shorthand will be appended to the end of the document at the specified path",
 	"export10": "For example <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, if empty, use watermark text or watermark file path.",

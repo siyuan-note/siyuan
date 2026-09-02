@@ -544,6 +544,13 @@ test("document loading actions follow the document menu order", () => {
     assert.equal(children[loadAllIndex + 2]?.key, "separator_1");
 });
 
+test("document mode switch is a direct configurable entry", () => {
+    const editMode = getEntryCatalogNode("document.more.editMode");
+    assert.equal(editMode?.type, "entry");
+    assert.equal(editMode?.simple, true);
+    assert.equal(editMode?.children, undefined);
+});
+
 test("multiple document and notebook entries follow their document tree menus", () => {
     assert.deepEqual(getEntryCatalogChildren("docTree.panel").map((item) => item.key), [
         "newNotebook",

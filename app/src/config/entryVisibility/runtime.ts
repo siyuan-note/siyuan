@@ -13,7 +13,7 @@ import {getProfileEntryVisibility} from "./profile";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {resolveToolbarItems} from "../../protyle/toolbar/entryVisibility";
 
-export const ENTRY_VISIBILITY_VERSION = 3;
+export const ENTRY_VISIBILITY_VERSION = 4;
 export const ENTRY_PROFILE_SIMPLE = "simple";
 export const ENTRY_PROFILE_FULL = "full";
 export type TEntryVisibilityTemplate = typeof ENTRY_PROFILE_SIMPLE | typeof ENTRY_PROFILE_FULL;

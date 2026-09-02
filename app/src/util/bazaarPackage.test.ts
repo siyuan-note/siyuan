@@ -29,6 +29,7 @@ import {
     normalizeBazaarPackageUserRatingsResponse,
     normalizeBazaarRating,
     normalizeBazaarUserRating,
+    sortBazaarPackages,
     sortBazaarPackagesByRating,
 } from "./bazaarPackage";
 
@@ -525,6 +526,37 @@ describe("sortBazaarPackagesByRating", () => {
         assert.deepEqual(sortBazaarPackagesByRating(unavailable, true).map((item) => item.name), [
             "available", "unavailable", "missing-flag",
         ]);
+    });
+});
+
+describe("sortBazaarPackages", () => {
+    const packages = [
+        {name: "first", updated: "20260102", downloads: 10},
+        {name: "second", updated: "20260103", downloads: 5},
+        {name: "third", updated: "20260102", downloads: 10},
+    ];
+
+    it("sorts update times in both directions and preserves ties", () => {
+        assert.deepEqual(sortBazaarPackages(packages, "0").map((item) => item.name), [
+            "second", "first", "third",
+        ]);
+        assert.deepEqual(sortBazaarPackages(packages, "1").map((item) => item.name), [
+            "first", "third", "second",
+        ]);
+    });
+
+    it("sorts download counts in both directions and preserves ties", () => {
+        assert.deepEqual(sortBazaarPackages(packages, "2").map((item) => item.name), [
+            "first", "third", "second",
+        ]);
+        assert.deepEqual(sortBazaarPackages(packages, "3").map((item) => item.name), [
+            "second", "first", "third",
+        ]);
+    });
+
+    it("does not mutate the source order", () => {
+        sortBazaarPackages(packages, "0");
+        assert.deepEqual(packages.map((item) => item.name), ["first", "second", "third"]);
     });
 });
 

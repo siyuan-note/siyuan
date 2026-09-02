@@ -2,11 +2,12 @@
   "_meta": {
     "source": "https://openrouter.ai/api/v1/models",
     "fetchedAt": "2026-07-30",
+    "supplementedAt": "2026-09-02",
     "format": "OpenRouter: key 为模型 id 最后一段（provider 前缀已去除）；火山引擎豆包/零一/百川/InternLM/星火/盘古: key 为完整模型 id 或 OpenAI 兼容 model 名。contextLength 取同名模型最大值；已过滤 :free 后缀、末段等于 free、context_length 为 null/0 的条目。",
     "totalCount": 367,
     "nullFiltered": 0,
     "zeroFiltered": 0,
-    "outputCount": 398
+    "outputCount": 404
   },
   "aion-2.0": {
     "contextLength": 131072
@@ -194,7 +195,25 @@
   "deepseek-v4-flash": {
     "contextLength": 1048576
   },
+  "deepseek-v4-flash-0731": {
+    "contextLength": 1310720
+  },
+  "deepseek-v4-flash-0731:batch": {
+    "contextLength": 1048576
+  },
+  "deepseek-v4-flash-latest": {
+    "contextLength": 1310720
+  },
+  "deepseek-v4-flash-vision-exp": {
+    "contextLength": 1048576
+  },
   "deepseek-v4-pro": {
+    "contextLength": 1048576
+  },
+  "deepseek-v4-pro-0813": {
+    "contextLength": 1048576
+  },
+  "deepseek-v4-pro-0813:batch": {
     "contextLength": 1048576
   },
   "devstral-2512": {

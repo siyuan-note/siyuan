@@ -577,7 +577,11 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
             case "fontFamily":
                 if (!hasInlineFontFamilyExcludedType(
                     (textElement.getAttribute("data-type") || "").split(" ").filter(Boolean))) {
-                    textElement.style.fontFamily = textOption.color;
+                    if (textOption.color) {
+                        textElement.style.fontFamily = textOption.color;
+                    } else {
+                        textElement.style.removeProperty("font-family");
+                    }
                 }
                 break;
             case "backgroundColor":

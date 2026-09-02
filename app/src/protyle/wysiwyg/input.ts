@@ -26,14 +26,26 @@ import {nbsp2space} from "../util/normalizeText";
 import {getBlockquoteContext, isBlockquoteMarker, shouldCancelBlockquote} from "./blockquote";
 import {
     getSemanticMarkerPrefixLengthForNode,
-    normalizeSemanticInlineElements
+    normalizeSemanticInlineElements,
+    removeEmptySemanticInlineElement
 } from "../util/inlineElementMarker";
+import {normalizeInlineFontFamilyStyle} from "../toolbar/fontFamilyCore";
 
 interface IInputOperations {
     doOperations: IOperation[];
     undoOperations: IOperation[];
     undoContext?: Record<string, string>;
 }
+
+const normalizeInlineFontFamilyStyles = (element: ParentNode) => {
+    element.querySelectorAll<HTMLElement>("span[style]").forEach(item => {
+        const fontFamily = item.style.fontFamily;
+        const normalizedFontFamily = normalizeInlineFontFamilyStyle(fontFamily);
+        if (normalizedFontFamily !== fontFamily) {
+            item.style.fontFamily = normalizedFontFamily;
+        }
+    });
+};
 
 export const beforeBlockquoteInput = (protyle: IProtyle, event: InputEvent) => {
     if (event.isComposing || !event.cancelable || (event.data !== ">" && event.data !== "》")) {
@@ -174,6 +186,15 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             }
         }
     }
+    const removeEmptySemanticElementAtCaret = () => {
+        if (event?.inputType !== "deleteContentForward") {
+            return;
+        }
+        const semanticElement = wbrElement.closest("span[data-type]") as HTMLElement | null;
+        if (semanticElement) {
+            removeEmptySemanticInlineElement(range, semanticElement, wbrElement);
+        }
+    };
     const id = blockElement.getAttribute("data-node-id");
     const conversionOperations: IInputOperations | undefined = inputOperations ? {
         doOperations: inputOperations.doOperations,
@@ -187,6 +208,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     if (editElement.classList.contains("callout-title")) {
         fixAdjacentTags(editElement);
         normalizeSemanticInlineElements(editElement);
+        removeEmptySemanticElementAtCaret();
+        normalizeInlineFontFamilyStyles(editElement);
         let html = protyle.lute.SpinBlockDOM(blockElement.outerHTML);
         hideElements(["util"], protyle, true);
         const tempElement = document.createElement("template");
@@ -329,6 +352,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     // 相邻标签之间插入空格区隔，避免 SpinBlockDOM 解析时合并为一个标签 https://github.com/siyuan-note/siyuan/issues/18191
     fixAdjacentTags(editElement);
     normalizeSemanticInlineElements(editElement);
+    removeEmptySemanticElementAtCaret();
+    normalizeInlineFontFamilyStyles(editElement);
     let html = blockElement.outerHTML;
     let focusHR = false;
     if (["---", "___", "***"].includes(editElement.textContent) && type !== "NodeCodeBlock") {

@@ -1,5 +1,7 @@
 const INLINE_FONT_FAMILY_PREFIX = "var(--b3-font-family-emoji-reset)";
 const INLINE_FONT_FAMILY_SUFFIX = "var(--b3-font-family-editor), var(--b3-font-family)";
+const LEGACY_INLINE_FONT_FAMILY_PREFIX = /^(?:"Emojis Additional"|'Emojis Additional')\s*,\s*(?:"Emojis Reset"|'Emojis Reset')\s*,/i;
+const INLINE_FONT_FAMILY_SUFFIX_PATTERN = /,\s*var\(--b3-font-family-editor\)\s*,\s*var\(--b3-font-family\)\s*$/i;
 
 export const INLINE_FONT_FAMILY_EXCLUDED_TYPES = ["code", "kbd", "inline-math"];
 export const FONT_FAMILY_EXCLUDED_BLOCK_TYPES = ["NodeCodeBlock", "NodeMathBlock", "NodeAttributeView"];
@@ -29,7 +31,7 @@ const unescapeCSSString = (value: string) => value.replace(/\\([0-9a-fA-F]{1,6})
 
 export const getInlineFontFamilyStyle = (family?: string) => family ?
     `${INLINE_FONT_FAMILY_PREFIX}, '${escapeCSSString(family)}', ${INLINE_FONT_FAMILY_SUFFIX}` :
-    `${INLINE_FONT_FAMILY_PREFIX}, ${INLINE_FONT_FAMILY_SUFFIX}`;
+    "";
 
 export const getInlineFontFamilyName = (fontFamily?: string) => {
     const value = fontFamily?.trim();
@@ -77,6 +79,15 @@ export const getInlineFontFamilyName = (fontFamily?: string) => {
             return family;
         }
     }
+};
+
+export const normalizeInlineFontFamilyStyle = (fontFamily?: string) => {
+    const value = fontFamily?.trim();
+    if (!value || !LEGACY_INLINE_FONT_FAMILY_PREFIX.test(value) ||
+        !INLINE_FONT_FAMILY_SUFFIX_PATTERN.test(value)) {
+        return fontFamily;
+    }
+    return getInlineFontFamilyStyle(getInlineFontFamilyName(value));
 };
 
 export const hasInlineFontFamilyExcludedType = (types: string[]) =>

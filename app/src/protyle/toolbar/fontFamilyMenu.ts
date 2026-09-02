@@ -1,6 +1,11 @@
 import {Menu} from "../../plugin/Menu";
 import {escapeAttr, escapeHtml} from "../../util/escape";
-import {getUniqueFontFamilies, IFontItem, loadSystemFonts} from "../../util/systemFont";
+import {
+    getFontFamilyDisplayName,
+    getUniqueFontFamilies,
+    IFontItem,
+    loadSystemFonts,
+} from "../../util/systemFont";
 import {upDownHint} from "../../util/upDownHint";
 import {Constants} from "../../constants";
 import {getBlockRanges} from "../util/selection";
@@ -265,6 +270,8 @@ const bindFontPicker = (element: HTMLElement, options: IFontFamilyPickerOptions)
     return cleanup;
 };
 
+let loadedFontFamilies: IFontItem[] = [];
+
 const loadFontFamilies = async (currentFamily?: string) => {
     let fonts: IFontItem[] = [];
     try {
@@ -275,6 +282,7 @@ const loadFontFamilies = async (currentFamily?: string) => {
     if (currentFamily && !fonts.some(font => font.family === currentFamily)) {
         fonts.unshift({family: currentFamily, displayName: currentFamily, weight: 400});
     }
+    loadedFontFamilies = fonts;
     return fonts;
 };
 
@@ -288,6 +296,9 @@ export const openFontFamilyMenu = async (target: HTMLElement, options: IFontFami
     const fonts = await loadFontFamilies(options.family);
     if (requestID !== desktopRequestID || !target.isConnected || options.isOpenValid?.() === false) {
         return;
+    }
+    if (target.tagName === "INPUT") {
+        (target as HTMLInputElement).value = getInlineFontFamilyLabel(options);
     }
     let cleanup: () => void;
     const menu = new Menu(undefined, () => {
@@ -332,6 +343,7 @@ export const renderMobileFontFamilyMenu = async (element: HTMLElement, options: 
 };
 
 export const getInlineFontFamilyLabel = (state: IInlineFontFamilyState) => state.mixed ?
-    window.siyuan.languages.mixed : (state.family || window.siyuan.languages.default);
+    window.siyuan.languages.mixed :
+    (getFontFamilyDisplayName(loadedFontFamilies, state.family) || window.siyuan.languages.default);
 
 export const getInlineFontFamilyValue = (family?: string) => getInlineFontFamilyStyle(family);

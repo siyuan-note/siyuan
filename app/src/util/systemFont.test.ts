@@ -1,6 +1,25 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getUniqueFontFamilies} from "./systemFontCore";
+import {getFontFamilyDisplayName, getUniqueFontFamilies} from "./systemFontCore";
+
+describe("getFontFamilyDisplayName", () => {
+    const fonts = [{
+        family: "eryapang",
+        weight: 400,
+        displayName: "尔雅胖丁体",
+    }, {
+        family: "Fallback Font",
+        weight: 400,
+        displayName: "",
+    }];
+
+    it("uses the display name and falls back to the CSS family", () => {
+        assert.equal(getFontFamilyDisplayName(fonts, "eryapang"), "尔雅胖丁体");
+        assert.equal(getFontFamilyDisplayName(fonts, "Fallback Font"), "Fallback Font");
+        assert.equal(getFontFamilyDisplayName(fonts, "Unknown Font"), "Unknown Font");
+        assert.equal(getFontFamilyDisplayName(fonts), undefined);
+    });
+});
 
 describe("getUniqueFontFamilies", () => {
     it("keeps one regular entry per family and merges searchable aliases", () => {

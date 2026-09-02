@@ -101,10 +101,16 @@ const ensureLeftExternalBoundary = (element: HTMLElement) => {
     const previousSibling = element.previousSibling;
     if (previousSibling?.nodeType === Node.TEXT_NODE) {
         const textNode = previousSibling as Text;
-        textNode.data = textNode.data.replace(/\u200b+$/u, "") + ZERO_WIDTH_SPACE;
+        const normalizedText = textNode.data.replace(/\u200b+$/u, "") + ZERO_WIDTH_SPACE;
+        if (textNode.data !== normalizedText) {
+            textNode.data = normalizedText;
+        }
         if (textNode.data === ZERO_WIDTH_SPACE && textNode.previousSibling?.nodeType === Node.TEXT_NODE) {
             const previousTextNode = textNode.previousSibling as Text;
-            previousTextNode.data = previousTextNode.data.replace(/\u200b+$/u, "");
+            const normalizedPreviousText = previousTextNode.data.replace(/\u200b+$/u, "");
+            if (previousTextNode.data !== normalizedPreviousText) {
+                previousTextNode.data = normalizedPreviousText;
+            }
         }
     } else {
         element.before(element.ownerDocument.createTextNode(ZERO_WIDTH_SPACE));
@@ -115,10 +121,16 @@ const ensureRightExternalBoundary = (element: HTMLElement) => {
     const nextSibling = element.nextSibling;
     if (nextSibling?.nodeType === Node.TEXT_NODE) {
         const textNode = nextSibling as Text;
-        textNode.data = ZERO_WIDTH_SPACE + textNode.data.replace(/^\u200b+/u, "");
+        const normalizedText = ZERO_WIDTH_SPACE + textNode.data.replace(/^\u200b+/u, "");
+        if (textNode.data !== normalizedText) {
+            textNode.data = normalizedText;
+        }
         if (textNode.data === ZERO_WIDTH_SPACE && textNode.nextSibling?.nodeType === Node.TEXT_NODE) {
             const nextTextNode = textNode.nextSibling as Text;
-            nextTextNode.data = nextTextNode.data.replace(/^\u200b+/u, "");
+            const normalizedNextText = nextTextNode.data.replace(/^\u200b+/u, "");
+            if (nextTextNode.data !== normalizedNextText) {
+                nextTextNode.data = normalizedNextText;
+            }
         }
     } else {
         element.after(element.ownerDocument.createTextNode(ZERO_WIDTH_SPACE));
@@ -338,8 +350,9 @@ const setRangeAfterRightBoundary = (range: Range, element: HTMLElement) => {
     return true;
 };
 
-export const removeEmptySemanticInlineElement = (range: Range, element: HTMLElement) => {
-    if (stripSemanticInternalMarkerPrefix(element.textContent || "") !== "") {
+export const removeEmptySemanticInlineElement = (range: Range, element: HTMLElement,
+                                                   preservedCaretElement?: HTMLElement) => {
+    if (!isSemanticInlineElement(element) || stripSemanticInternalMarkerPrefix(element.textContent || "") !== "") {
         return false;
     }
     const parentElement = element.parentElement;
@@ -347,13 +360,16 @@ export const removeEmptySemanticInlineElement = (range: Range, element: HTMLElem
         return false;
     }
     removeSemanticInlineExternalBoundaries(element);
-    const caretElement = element.ownerDocument.createElement("wbr");
+    const preserveCaret = !!preservedCaretElement && element.contains(preservedCaretElement);
+    const caretElement = preserveCaret ? preservedCaretElement : element.ownerDocument.createElement("wbr");
     element.before(caretElement);
     element.remove();
     normalizeSemanticInlineElements(parentElement);
     range.setStartBefore(caretElement);
     range.collapse(true);
-    caretElement.remove();
+    if (!preserveCaret) {
+        caretElement.remove();
+    }
     return true;
 };
 

@@ -7,6 +7,7 @@ import {
     getInlineFontFamilySelection,
     getInlineFontFamilyStyle,
     hasInlineFontFamilyExcludedType,
+    normalizeInlineFontFamilyStyle,
 } from "./fontFamilyCore";
 
 describe("inline font family", () => {
@@ -18,8 +19,7 @@ describe("inline font family", () => {
         assert.match(value, /var\(--b3-font-family-editor\), var\(--b3-font-family\)$/);
         assert.equal(getInlineFontFamilyName(value), family);
         const defaultValue = getInlineFontFamilyStyle();
-        assert.equal(defaultValue,
-            "var(--b3-font-family-emoji-reset), var(--b3-font-family-editor), var(--b3-font-family)");
+        assert.equal(defaultValue, "");
         assert.equal(getInlineFontFamilyName(defaultValue), undefined);
         assert.equal(getInlineFontFamilyName('"Emojis Additional", "Emojis Reset", "Font, Name", serif'),
             "Font, Name");
@@ -50,6 +50,17 @@ describe("inline font family", () => {
             family: undefined,
             mixed: true,
         });
+    });
+
+    it("normalizes persisted font stacks that contain quoted emoji fallbacks", () => {
+        assert.equal(normalizeInlineFontFamilyStyle(
+            '"Emojis Additional", "Emojis Reset", "KaiTi", var(--b3-font-family-editor), var(--b3-font-family)'),
+        "var(--b3-font-family-emoji-reset), 'KaiTi', var(--b3-font-family-editor), var(--b3-font-family)");
+        assert.equal(normalizeInlineFontFamilyStyle(
+            '"Emojis Additional", "Emojis Reset", var(--b3-font-family-editor), var(--b3-font-family)'), "");
+        assert.equal(normalizeInlineFontFamilyStyle('"Arial", sans-serif'), '"Arial", sans-serif');
+        assert.equal(normalizeInlineFontFamilyStyle(getInlineFontFamilyStyle("KaiTi")),
+            getInlineFontFamilyStyle("KaiTi"));
     });
 
     it("disables selections without eligible text and recognizes protected inline types", () => {

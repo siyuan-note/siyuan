@@ -7,6 +7,13 @@ export interface IFontItem {
     spacing?: string;
 }
 
+export const getFontFamilyDisplayName = (fonts: IFontItem[], family?: string) => {
+    if (!family) {
+        return family;
+    }
+    return fonts.find(font => font.family === family)?.displayName || family;
+};
+
 export const getUniqueFontFamilies = (fonts: IFontItem[]) => {
     const families = new Map<string, IFontItem>();
     fonts.forEach(font => {

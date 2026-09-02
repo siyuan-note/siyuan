@@ -1,7 +1,7 @@
 import {fetchSyncPost} from "./fetch";
 import type {IFontItem} from "./systemFontCore";
 
-export {getUniqueFontFamilies} from "./systemFontCore";
+export {getFontFamilyDisplayName, getUniqueFontFamilies} from "./systemFontCore";
 export type {IFontItem} from "./systemFontCore";
 
 let systemFontsRequest: Promise<IFontItem[]> | undefined;

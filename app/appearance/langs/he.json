@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "רענון מודלים זמינים",
 	"fetchAvailableModelsSuccess": "אוחזרו ${x} מודלים; ניתן לבחור אחד מההצעות בשדה שם המודל",
 	"fetchAvailableModelsFail": "אחזור המודלים הזמינים נכשל",
-	"selectModel": "נא לבחור מודל",
+	"selectModel": "נא להזין או לבחור מודל",
 	"secretsVariables": "סודות ומשתנים",
 	"secrets": "סודות",
 	"variables": "משתנים",

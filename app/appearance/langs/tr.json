@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "Kullanılabilir modelleri yenile",
 	"fetchAvailableModelsSuccess": "${x} model getirildi; model adı önerilerinden birini seçin",
 	"fetchAvailableModelsFail": "Kullanılabilir modeller getirilemedi",
-	"selectModel": "Bir model seçin",
+	"selectModel": "Bir model girin veya seçin",
 	"secretsVariables": "Gizli Anahtarlar ve Değişkenler",
 	"secrets": "Gizli Anahtarlar",
 	"variables": "Değişkenler",

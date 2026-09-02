@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "تحديث النماذج المتاحة",
 	"fetchAvailableModelsSuccess": "تم جلب ${x} نموذج، ويمكن اختيارها من حقل اسم النموذج",
 	"fetchAvailableModelsFail": "فشل جلب النماذج المتاحة",
-	"selectModel": "يرجى اختيار نموذج",
+	"selectModel": "يرجى إدخال نموذج أو اختياره",
 	"secretsVariables": "الأسرار والمتغيرات",
 	"secrets": "الأسرار",
 	"variables": "المتغيرات",

@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "Segarkan model yang tersedia",
 	"fetchAvailableModelsSuccess": "${x} model berhasil diambil; pilih salah satu dari saran nama model",
 	"fetchAvailableModelsFail": "Gagal mengambil model yang tersedia",
-	"selectModel": "Pilih model",
+	"selectModel": "Masukkan atau pilih model",
 	"secretsVariables": "Rahasia dan Variabel",
 	"secrets": "Rahasia",
 	"variables": "Variabel",

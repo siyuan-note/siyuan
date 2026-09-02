@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "Aggiorna modelli disponibili",
 	"fetchAvailableModelsSuccess": "Recuperati ${x} modelli; selezionane uno dai suggerimenti del nome del modello",
 	"fetchAvailableModelsFail": "Recupero dei modelli disponibili non riuscito",
-	"selectModel": "Seleziona un modello",
+	"selectModel": "Inserisci o seleziona un modello",
 	"secretsVariables": "Secret e variabili",
 	"secrets": "Secret",
 	"variables": "Variabili",

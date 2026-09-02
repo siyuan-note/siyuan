@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "Obnoviť dostupné modely",
 	"fetchAvailableModelsSuccess": "Získaných modelov: ${x}. Vyberte model z návrhov v poli názvu modelu",
 	"fetchAvailableModelsFail": "Nepodarilo sa získať dostupné modely",
-	"selectModel": "Vyberte model",
+	"selectModel": "Zadajte alebo vyberte model",
 	"secretsVariables": "Tajomstvá a premenné",
 	"secrets": "Tajomstvá",
 	"variables": "Premenné",

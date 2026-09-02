@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "Odśwież dostępne modele",
 	"fetchAvailableModelsSuccess": "Pobrano ${x} modeli; wybierz model z podpowiedzi w polu nazwy modelu",
 	"fetchAvailableModelsFail": "Nie udało się pobrać dostępnych modeli",
-	"selectModel": "Wybierz model",
+	"selectModel": "Wprowadź lub wybierz model",
 	"secretsVariables": "Tajemnice i zmienne",
 	"secrets": "Tajemnice",
 	"variables": "Zmienne",

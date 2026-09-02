@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "Обновить доступные модели",
 	"fetchAvailableModelsSuccess": "Получено моделей: ${x}. Выберите модель из подсказок в поле имени",
 	"fetchAvailableModelsFail": "Не удалось получить доступные модели",
-	"selectModel": "Выберите модель",
+	"selectModel": "Введите или выберите модель",
 	"secretsVariables": "Секреты и переменные",
 	"secrets": "Секреты",
 	"variables": "Переменные",

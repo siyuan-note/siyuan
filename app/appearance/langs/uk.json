@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "Оновити доступні моделі",
 	"fetchAvailableModelsSuccess": "Отримано моделей: ${x}. Виберіть модель із підказок у полі назви",
 	"fetchAvailableModelsFail": "Не вдалося отримати доступні моделі",
-	"selectModel": "Виберіть модель",
+	"selectModel": "Введіть або виберіть модель",
 	"secretsVariables": "Секрети та змінні",
 	"secrets": "Секрети",
 	"variables": "Змінні",

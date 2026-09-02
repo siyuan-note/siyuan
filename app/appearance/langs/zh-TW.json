@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "重新整理可用模型",
 	"fetchAvailableModelsSuccess": "取得 ${x} 個模型，可在模型名稱輸入框中選擇",
 	"fetchAvailableModelsFail": "取得可用模型失敗",
-	"selectModel": "請選擇模型",
+	"selectModel": "請輸入或選擇模型",
 	"secretsVariables": "金鑰和變數",
 	"secrets": "金鑰",
 	"variables": "變數",

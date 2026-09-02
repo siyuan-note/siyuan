@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "Beschikbare modellen vernieuwen",
 	"fetchAvailableModelsSuccess": "${x} modellen opgehaald; selecteer er een uit de suggesties voor de modelnaam",
 	"fetchAvailableModelsFail": "Ophalen van beschikbare modellen mislukt",
-	"selectModel": "Selecteer een model",
+	"selectModel": "Voer een model in of selecteer er een",
 	"secretsVariables": "Secrets en variabelen",
 	"secrets": "Geheimen",
 	"variables": "Variabelen",

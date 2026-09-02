@@ -568,7 +568,7 @@
 	"fetchAvailableModels": "รีเฟรชโมเดลที่ใช้ได้",
 	"fetchAvailableModelsSuccess": "ดึงโมเดลแล้ว ${x} รายการ เลือกได้จากคำแนะนำในช่องชื่อโมเดล",
 	"fetchAvailableModelsFail": "ดึงโมเดลที่ใช้ได้ไม่สำเร็จ",
-	"selectModel": "กรุณาเลือกโมเดล",
+	"selectModel": "กรุณาป้อนหรือเลือกโมเดล",
 	"secretsVariables": "ความลับและตัวแปร",
 	"secrets": "ความลับ",
 	"variables": "ตัวแปร",

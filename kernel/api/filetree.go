@@ -1143,6 +1143,66 @@ func changeSort(c *gin.Context) {
 	model.ChangeFileTreeSort(notebook, paths)
 }
 
+func reorderDocs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	request := &struct {
+		SourceIDs []string `json:"sourceIDs"`
+		TargetID  string   `json:"targetID"`
+		Position  string   `json:"position"`
+	}{}
+	if err := c.ShouldBindJSON(request); nil != err {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf("Parses request [%s] failed: %s", c.Request.URL.Path, err)
+		return
+	}
+	if !validateReorderRequest(request.SourceIDs, request.TargetID, request.Position, ret) {
+		return
+	}
+
+	result, err := model.ReorderDocs(request.SourceIDs, request.TargetID, request.Position)
+	ret.Data = result
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+	}
+}
+
+func validateReorderRequest(sourceIDs []string, targetID, position string, ret *gulu.Result) bool {
+	if 1 > len(sourceIDs) {
+		ret.Code = -1
+		ret.Msg = "Field [sourceIDs] must not be empty"
+		return false
+	}
+	if util.InvalidIDPattern(targetID, ret) {
+		return false
+	}
+	if "before" != position && "after" != position {
+		ret.Code = -1
+		ret.Msg = "Field [position] must be [before] or [after]"
+		return false
+	}
+	ids := map[string]struct{}{}
+	for i, sourceID := range sourceIDs {
+		if util.InvalidIDPattern(sourceID, ret) {
+			return false
+		}
+		if sourceID == targetID {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [targetID] must not be included in [sourceIDs] at index [%d]", i)
+			return false
+		}
+		if _, exists := ids[sourceID]; exists {
+			ret.Code = -1
+			ret.Msg = fmt.Sprintf("Field [sourceIDs] contains duplicate ID [%s]", sourceID)
+			return false
+		}
+		ids[sourceID] = struct{}{}
+	}
+	return true
+}
+
 type sortRequestItem struct {
 	ID   string `json:"id"`
 	Sort *int   `json:"sort"`

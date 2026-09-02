@@ -529,6 +529,66 @@ Move documents by `id`:
   }
   ```
 
+### Reorder documents relative to a sibling
+
+* `/api/filetree/reorderDocs`
+* Parameters
+
+  ```json
+  {
+    "sourceIDs": ["20210917220056-yxtyl7i"],
+    "targetID": "20210917220057-abcdefg",
+    "position": "before"
+  }
+  ```
+
+    * `sourceIDs`: Source document IDs inserted in array order
+    * `targetID`: Target sibling document ID
+    * `position`: `before` or `after`
+    * After moving, every source document must have the same notebook and parent as the target; sorting uses the complete sibling list, including hidden and unlisted documents
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "changed": true,
+      "notebook": "20210817205410-2kvfpfn",
+      "parentPath": "/"
+    }
+  }
+  ```
+
+### Reorder notebooks relative to another notebook
+
+* `/api/notebook/reorder`
+* Parameters
+
+  ```json
+  {
+    "sourceIDs": ["20210817205410-2kvfpfn"],
+    "targetID": "20210817205411-abcdefg",
+    "position": "after"
+  }
+  ```
+
+    * `sourceIDs`: Source notebook IDs inserted in array order
+    * `targetID`: Target notebook ID
+    * `position`: `before` or `after`
+    * Sorting uses the complete notebook list, including closed notebooks
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": {
+      "changed": true
+    }
+  }
+  ```
+
 ### Set notebook and document sort values
 
 * `/api/filetree/setSort`

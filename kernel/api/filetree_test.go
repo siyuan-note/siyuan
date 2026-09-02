@@ -74,6 +74,42 @@ func TestSetSortRejectsInvalidRequest(t *testing.T) {
 	}
 }
 
+func TestReorderDocsRejectsInvalidRequest(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	engine.POST("/api/filetree/reorderDocs", reorderDocs)
+
+	tests := []struct {
+		name string
+		body string
+	}{
+		{name: "empty", body: `{}`},
+		{name: "invalid source ID", body: `{"sourceIDs":["invalid"],"targetID":"20260718000002-abcdefg","position":"before"}`},
+		{name: "invalid target ID", body: `{"sourceIDs":["20260718000001-abcdefg"],"targetID":"invalid","position":"before"}`},
+		{name: "invalid position", body: `{"sourceIDs":["20260718000001-abcdefg"],"targetID":"20260718000002-abcdefg","position":"middle"}`},
+		{name: "target in sources", body: `{"sourceIDs":["20260718000002-abcdefg"],"targetID":"20260718000002-abcdefg","position":"after"}`},
+		{name: "duplicate source", body: `{"sourceIDs":["20260718000001-abcdefg","20260718000001-abcdefg"],"targetID":"20260718000002-abcdefg","position":"after"}`},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			request := httptest.NewRequest(http.MethodPost, "/api/filetree/reorderDocs", strings.NewReader(test.body))
+			request.Header.Set("Content-Type", "application/json")
+			engine.ServeHTTP(recorder, request)
+
+			response := &struct {
+				Code int `json:"code"`
+			}{}
+			if err := json.Unmarshal(recorder.Body.Bytes(), response); nil != err {
+				t.Fatalf("unmarshal response failed: %v", err)
+			}
+			if -1 != response.Code {
+				t.Fatalf("invalid request returned code %d: %s", response.Code, recorder.Body.String())
+			}
+		})
+	}
+}
+
 func TestSetDocSortModeRejectsInvalidRequest(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	engine := gin.New()

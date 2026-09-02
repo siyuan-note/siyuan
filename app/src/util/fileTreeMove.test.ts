@@ -2,6 +2,7 @@ import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
     findMovedFileTreeItem,
+    getRelativeReorderRequest,
     IFileTreeMove,
     insertDocumentSortPath,
     insertDocumentsSortPaths,
@@ -10,6 +11,19 @@ import {
     restoreMovedExpandedDocItems,
     updateMovedSubtree
 } from "./fileTreeMove";
+
+describe("getRelativeReorderRequest", () => {
+    it("keeps source order and encodes the relative position", () => {
+        const sourceIDs = ["20260802120000-abcdefg", "20260802120001-abcdefg"];
+
+        assert.deepEqual(getRelativeReorderRequest(sourceIDs, "20260802120002-abcdefg", false), {
+            sourceIDs,
+            targetID: "20260802120002-abcdefg",
+            position: "before",
+        });
+        assert.equal(getRelativeReorderRequest(sourceIDs, "20260802120002-abcdefg", true).position, "after");
+    });
+});
 
 describe("parseDocumentTabDragData", () => {
     it("parses a document tab payload", () => {

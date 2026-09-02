@@ -29,7 +29,6 @@ import (
 	"io"
 	"io/fs"
 	"maps"
-	"math"
 	"net/url"
 	"os"
 	"path"
@@ -243,7 +242,12 @@ func applyImportedSYSort(boxID, targetPath string, importedDocs []*importedSYSor
 	fileTreeSortLock.Lock()
 	defer fileTreeSortLock.Unlock()
 
-	docs, _, err := ListDocTree(boxID, targetPath, util.SortModeCustom, false, false, math.MaxInt)
+	confPath := filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
+	fullSortIDs, err := readSortConfMap(confPath)
+	if nil != err {
+		return err
+	}
+	existingIDs, err := loadSiblingCustomOrder(boxID, targetPath, fullSortIDs)
 	if nil != err {
 		return err
 	}
@@ -253,10 +257,10 @@ func applyImportedSYSort(boxID, targetPath string, importedDocs []*importedSYSor
 			importedIDs[doc.newID] = struct{}{}
 		}
 	}
-	existingRootIDs := make([]string, 0, len(docs))
-	for _, doc := range docs {
-		if _, imported := importedIDs[doc.ID]; !imported {
-			existingRootIDs = append(existingRootIDs, doc.ID)
+	existingRootIDs := make([]string, 0, len(existingIDs))
+	for _, id := range existingIDs {
+		if _, imported := importedIDs[id]; !imported {
+			existingRootIDs = append(existingRootIDs, id)
 		}
 	}
 
@@ -264,11 +268,6 @@ func applyImportedSYSort(boxID, targetPath string, importedDocs []*importedSYSor
 	sortValues := buildImportedSYSortValues(importedDocs, sourceSortIDs, existingRootIDs, createDocAtTop)
 	if 1 > len(sortValues) {
 		return nil
-	}
-	confPath := filepath.Join(util.DataDir, boxID, ".siyuan", "sort.json")
-	fullSortIDs, err := readSortConfMap(confPath)
-	if nil != err {
-		return err
 	}
 	maps.Copy(fullSortIDs, sortValues)
 	return writeSortConfMap(confPath, fullSortIDs)

@@ -49,6 +49,7 @@ import {updateNotebookRootForBoxDoc} from "../../util/notebookRoot";
 import {
     collectExpandedDocIDs,
     findMovedFileTreeItem,
+    getRelativeReorderRequest,
     getFileTreeChildList,
     IDocumentTabDragData,
     IFileTreeMove,
@@ -856,6 +857,11 @@ export class Files extends Model {
                 const targetListElement = newElement.parentElement;
                 if (window.siyuan.config.fileTree.sort === 6 && selectRootElements.length > 0 &&
                     newElement.getAttribute("data-path") === "/") {
+                    const sourceIDs = selectRootElements.map(item => item.parentElement.getAttribute("data-url"));
+                    if (sourceIDs.includes(toURL)) {
+                        newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                        return;
+                    }
                     if (newElement.classList.contains("dragover__top")) {
                         selectRootElements.forEach(item => {
                             newElement.parentElement.before(item.parentElement);
@@ -865,13 +871,11 @@ export class Files extends Model {
                             newElement.parentElement.after(item.parentElement);
                         });
                     }
-                    const notebooks: string[] = [];
-                    Array.from(this.element.children).forEach(item => {
-                        notebooks.push(item.getAttribute("data-url"));
-                    });
-                    fetchPost("/api/notebook/changeSortNotebook", {
-                        notebooks,
-                    });
+                    fetchPost("/api/notebook/reorder", getRelativeReorderRequest(
+                        sourceIDs,
+                        toURL,
+                        !newElement.classList.contains("dragover__top")
+                    ));
                 } else if (isCustomFileTreeList(targetListElement) && selectFileElements.length > 0) {
                     const toDir = pathPosix().dirname(toPath);
                     const newElementClassList = newElement.getAttribute("class");
@@ -943,10 +947,11 @@ export class Files extends Model {
                             }
                         });
                     }
-                    const sortResponse = await fetchSyncPost("/api/filetree/changeSort", {
-                        paths: sortedPaths,
-                        notebook: toURL
-                    });
+                    const sortResponse = await fetchSyncPost("/api/filetree/reorderDocs", getRelativeReorderRequest(
+                        selectFileElements.map(item => item.getAttribute("data-node-id")),
+                        newElement.getAttribute("data-node-id"),
+                        !newElementClassList.includes("dragover__top")
+                    ));
                     if (sortResponse.code !== 0) {
                         newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
                         return;
@@ -1050,10 +1055,11 @@ export class Files extends Model {
         if (moveResponse.code !== 0) {
             return;
         }
-        const sortResponse = await fetchSyncPost("/api/filetree/changeSort", {
-            paths: sortedPaths,
-            notebook: targetNotebook,
-        });
+        const sortResponse = await fetchSyncPost("/api/filetree/reorderDocs", getRelativeReorderRequest(
+            [documentTabData.rootId],
+            targetElement.getAttribute("data-node-id"),
+            insertAfter
+        ));
         if (sortResponse.code !== 0) {
             return;
         }

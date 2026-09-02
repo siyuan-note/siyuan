@@ -710,16 +710,10 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 icon: "iconBefore",
                 label: window.siyuan.languages.newDocAbove,
                 click: () => {
-                    const paths: string[] = [];
-                    Array.from(liElement.parentElement.children).forEach((item) => {
-                        if (item.tagName === "LI") {
-                            if (item === liElement) {
-                                paths.push(undefined);
-                            }
-                            paths.push(item.getAttribute("data-path"));
-                        }
+                    newFileInTree(app, notebookId, pathPosix().dirname(pathString), {
+                        targetID: id,
+                        position: "before",
                     });
-                    newFileInTree(app, notebookId, pathPosix().dirname(pathString), paths);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -727,16 +721,10 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 icon: "iconAfter",
                 label: window.siyuan.languages.newDocBelow,
                 click: () => {
-                    const paths: string[] = [];
-                    Array.from(liElement.parentElement.children).forEach((item) => {
-                        if (item.tagName === "LI") {
-                            paths.push(item.getAttribute("data-path"));
-                            if (item === liElement) {
-                                paths.push(undefined);
-                            }
-                        }
+                    newFileInTree(app, notebookId, pathPosix().dirname(pathString), {
+                        targetID: id,
+                        position: "after",
                     });
-                    newFileInTree(app, notebookId, pathPosix().dirname(pathString), paths);
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);

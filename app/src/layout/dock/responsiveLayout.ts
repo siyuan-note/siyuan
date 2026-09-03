@@ -25,6 +25,20 @@ export interface IDockResponsiveLayoutResult {
     right: IDockResponsiveSideResult;
 }
 
+export interface IDockResponsiveWidthInput {
+    active: boolean;
+    preferredSize: number;
+    fixedSize: number;
+    floating: boolean;
+    constrained: boolean;
+}
+
+export interface IDockResponsiveWidthResult {
+    clearConstraint: boolean;
+    width?: number;
+    maximumWidth?: number;
+}
+
 export interface ICenterMinimumLayoutNode {
     inactive?: boolean;
     direction?: "lr" | "tb";
@@ -38,6 +52,31 @@ interface INormalizedSide extends IDockResponsiveSideInput {
 type SideName = "left" | "right";
 
 const normalizeSize = (size: number) => Number.isFinite(size) ? Math.max(0, size) : 0;
+
+export const resolveDockResponsiveWidth = (input: IDockResponsiveWidthInput): IDockResponsiveWidthResult => {
+    if (!input.active) {
+        return {
+            clearConstraint: true,
+            width: 0,
+        };
+    }
+
+    const preferredSize = normalizeSize(input.preferredSize);
+    const fixedSize = normalizeSize(input.fixedSize);
+    if (!input.floating && fixedSize > 0 && fixedSize < preferredSize) {
+        return {
+            clearConstraint: false,
+            maximumWidth: fixedSize,
+        };
+    }
+    if (input.constrained) {
+        return {
+            clearConstraint: true,
+            width: preferredSize,
+        };
+    }
+    return {clearConstraint: false};
+};
 
 const normalizeSide = (side: IDockResponsiveSideInput): INormalizedSide => {
     const preferredSize = normalizeSize(side.preferredSize);

@@ -5,6 +5,7 @@ import {
     IDockResponsiveLayoutInput,
     IDockResponsiveSideInput,
     resolveDockResponsiveLayout,
+    resolveDockResponsiveWidth,
 } from "./responsiveLayout";
 
 const createSide = (overrides: Partial<IDockResponsiveSideInput> = {}): IDockResponsiveSideInput => ({
@@ -133,6 +134,57 @@ describe("responsive dock layout", () => {
             left: {autoFloating: false, fixedSize: 240},
             right: {autoFloating: false, fixedSize: 260},
         });
+    });
+});
+
+describe("responsive dock width", () => {
+    it("clears stale constraints and keeps an inactive dock collapsed", () => {
+        assert.deepEqual(resolveDockResponsiveWidth({
+            active: false,
+            preferredSize: 580,
+            fixedSize: 0,
+            floating: false,
+            constrained: true,
+        }), {
+            clearConstraint: true,
+            width: 0,
+        });
+    });
+
+    it("restores the preferred width for a collapsed panel that still has active tools", () => {
+        assert.deepEqual(resolveDockResponsiveWidth({
+            active: true,
+            preferredSize: 580,
+            fixedSize: 0,
+            floating: false,
+            constrained: true,
+        }), {
+            clearConstraint: true,
+            width: 580,
+        });
+    });
+
+    it("applies the allocated maximum width to an active fixed dock", () => {
+        assert.deepEqual(resolveDockResponsiveWidth({
+            active: true,
+            preferredSize: 580,
+            fixedSize: 420,
+            floating: false,
+            constrained: false,
+        }), {
+            clearConstraint: false,
+            maximumWidth: 420,
+        });
+    });
+
+    it("leaves an unconstrained active dock unchanged", () => {
+        assert.deepEqual(resolveDockResponsiveWidth({
+            active: true,
+            preferredSize: 580,
+            fixedSize: 580,
+            floating: false,
+            constrained: false,
+        }), {clearConstraint: false});
     });
 });
 

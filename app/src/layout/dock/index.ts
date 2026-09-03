@@ -494,6 +494,9 @@ export class Dock {
             }
         }
         this.layout.element.classList.toggle("layout--float", this.isFloating());
+        if (!hasActive && !this.isFloating()) {
+            this.layout.element.style[this.position === "Bottom" ? "height" : "width"] = "0px";
+        }
         resizeTabs(isSaveLayout);
         setTabPosition(true);
     }
@@ -1125,7 +1128,7 @@ export class Dock {
         return max;
     }
 
-    private hasActive() {
+    public hasActive() {
         return Boolean(this.elements[0].querySelector(".dock__item--active") ||
             this.elements[1].querySelector(".dock__item--active"));
     }

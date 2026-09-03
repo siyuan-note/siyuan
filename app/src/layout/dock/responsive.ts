@@ -3,6 +3,7 @@ import {
     getCenterMinimumSize,
     type ICenterMinimumLayoutNode,
     resolveDockResponsiveLayout,
+    resolveDockResponsiveWidth,
 } from "./responsiveLayout";
 import {runWithoutDockTransitions} from "./responsiveTransition";
 
@@ -48,30 +49,37 @@ const updateResponsiveWidth = (
     dock: typeof window.siyuan.layout.leftDock,
     preferredSize: number,
     fixedSize: number,
+    active: boolean,
 ) => {
     const element = dock.layout.element;
     const hasResponsiveWidth = Boolean(element.style.maxWidth ||
         element.hasAttribute(Constants.ATTRIBUTE_DOCK_WIDTH));
-    const shouldConstrain = !dock.isResponsiveFloating() && fixedSize > 0 && fixedSize < preferredSize;
-    if (!shouldConstrain) {
-        if (!hasResponsiveWidth) {
-            return;
-        }
+    const result = resolveDockResponsiveWidth({
+        active,
+        preferredSize,
+        fixedSize,
+        floating: dock.isResponsiveFloating(),
+        constrained: hasResponsiveWidth,
+    });
+    if (result.clearConstraint) {
         element.style.maxWidth = "";
         element.removeAttribute(Constants.ATTRIBUTE_DOCK_WIDTH);
-        const preferredWidth = preferredSize + "px";
-        if (preferredSize > 0 && element.style.width !== preferredWidth) {
-            element.style.width = preferredWidth;
+    }
+    if (typeof result.width === "number") {
+        const width = result.width + "px";
+        if (element.style.width !== width) {
+            element.style.width = width;
         }
-        return;
     }
-    const preferredWidth = preferredSize.toString();
-    const maximumWidth = fixedSize + "px";
-    if (element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH) !== preferredWidth) {
-        element.setAttribute(Constants.ATTRIBUTE_DOCK_WIDTH, preferredWidth);
-    }
-    if (element.style.maxWidth !== maximumWidth) {
-        element.style.maxWidth = maximumWidth;
+    if (typeof result.maximumWidth === "number") {
+        const preferredWidth = preferredSize.toString();
+        const maximumWidth = result.maximumWidth + "px";
+        if (element.getAttribute(Constants.ATTRIBUTE_DOCK_WIDTH) !== preferredWidth) {
+            element.setAttribute(Constants.ATTRIBUTE_DOCK_WIDTH, preferredWidth);
+        }
+        if (element.style.maxWidth !== maximumWidth) {
+            element.style.maxWidth = maximumWidth;
+        }
     }
 };
 
@@ -104,6 +112,8 @@ export const reconcileResponsiveDockLayout = () => {
         ));
         const leftPreferredSize = leftDock.getResponsivePreferredSize();
         const rightPreferredSize = rightDock.getResponsivePreferredSize();
+        const leftActive = leftDock.hasActive();
+        const rightActive = rightDock.hasActive();
         const leftParticipating = leftDock.pin && leftDock.isPanelVisible();
         const rightParticipating = rightDock.pin && rightDock.isPanelVisible();
         const preferredOccupiedSize = centerMinimumSize +
@@ -154,8 +164,8 @@ export const reconcileResponsiveDockLayout = () => {
                 leftDock.setResponsiveFloating(true, leftPreferredSize);
             }
 
-            updateResponsiveWidth(leftDock, leftPreferredSize, result.left.fixedSize);
-            updateResponsiveWidth(rightDock, rightPreferredSize, result.right.fixedSize);
+            updateResponsiveWidth(leftDock, leftPreferredSize, result.left.fixedSize, leftActive);
+            updateResponsiveWidth(rightDock, rightPreferredSize, result.right.fixedSize, rightActive);
             if (centerLayout.element.clientWidth !== centerSizeBefore && hasCenterMaximumWidth(centerLayout)) {
                 leftDock.adjustResponsiveCenterLayout();
             }

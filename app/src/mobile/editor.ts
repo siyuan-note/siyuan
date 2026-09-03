@@ -77,6 +77,9 @@ export const loadMobileFileById = (app: App, id: string, action: TProtyleAction[
                 stickyRow(item, protyle.contentElement, "top");
             });
         });
+        if (window.siyuan.config.fileTree.alwaysSelectOpenedFile && protyle.path) {
+            void window.siyuan.mobile.docks.file?.selectOpenedFile(protyle.notebookId, protyle.path);
+        }
         afterOpen?.(protyle);
     };
     const fail = (invalid = false) => {

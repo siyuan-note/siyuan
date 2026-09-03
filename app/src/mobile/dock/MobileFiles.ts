@@ -55,6 +55,7 @@ import {
     type IDocSortModeChanged,
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
+import {MobileOpenedFileSelection} from "./mobileOpenedFileSelection";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
@@ -64,6 +65,7 @@ export class MobileFiles extends Model {
     private docSortModeRefreshTimeout: number;
     private docSortModeChanges = new Map<string, IDocSortModeChanged>();
     private movedExpandedDocIDs = new Set<string>();
+    private openedFileSelection = new MobileOpenedFileSelection();
     private touchDragState: {
         selectedElement: HTMLElement;
         startX: number;
@@ -1328,6 +1330,26 @@ export class MobileFiles extends Model {
             const elementRect = this.element.getBoundingClientRect();
             this.element.scrollTop = this.element.scrollTop + (target.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
         }
+    }
+
+    public async selectOpenedFile(notebookId: string, filePath: string) {
+        const currentElement = this.element.querySelector(
+            `ul[data-url="${notebookId}"] li[data-path="${filePath}"]`
+        );
+        if (currentElement?.classList.contains("b3-list-item--focus")) {
+            this.openedFileSelection.cancel();
+            return;
+        }
+        const target = await this.openedFileSelection.resolve(
+            () => this.selectItem(notebookId, filePath, undefined, true, false),
+            () => {
+                const protyle = window.siyuan.mobile.editor?.protyle;
+                return window.siyuan.config.fileTree.alwaysSelectOpenedFile &&
+                    !protyle?.element.classList.contains("fn__none") &&
+                    protyle?.notebookId === notebookId && protyle.path === filePath;
+            }
+        );
+        this.setCurrent(target);
     }
 
     public getLeaf(liElement: Element, notebookId: string, focusUpdate = false) {

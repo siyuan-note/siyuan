@@ -1581,11 +1581,17 @@ const initKernel = (workspace, port, lang, safeMode) => {
             resolve(false);
             return;
         }
+        if (!openAsHidden) {
+            const currentBootWindow = bootWindow;
+            currentBootWindow.once("ready-to-show", () => {
+                if (bootWindow === currentBootWindow && !currentBootWindow.isDestroyed()) {
+                    currentBootWindow.show();
+                }
+            });
+        }
         loadBootWindow();
         if (openAsHidden) {
             bootWindow.minimize();
-        } else {
-            bootWindow.show();
         }
         const currentKernelPort = kernelPort;
         const cmds = ["serve", "--port", currentKernelPort, "--wd", appDir, "--attach-ui"];

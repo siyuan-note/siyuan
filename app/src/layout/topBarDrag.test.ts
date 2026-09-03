@@ -76,6 +76,19 @@ class TestEventTarget {
 class TestElement extends TestEventTarget {
     public children: TestElement[] = [];
     public className = "";
+    public classList = {
+        add: (...tokens: string[]) => {
+            const names = new Set(this.className.split(/\s+/).filter(Boolean));
+            tokens.forEach((token) => names.add(token));
+            this.className = Array.from(names).join(" ");
+        },
+        contains: (token: string) => this.className.split(/\s+/).includes(token),
+        remove: (...tokens: string[]) => {
+            const removed = new Set(tokens);
+            this.className = this.className.split(/\s+/).filter((token) => token && !removed.has(token)).join(" ");
+        },
+    };
+    public innerHTML = "";
     public parentElement: TestElement | null = null;
     public style: Record<string, string> = {opacity: ""};
     private attributes = new Map<string, string>();
@@ -210,6 +223,9 @@ const createToolbar = () => {
     return {controls, documentSelf, drag, left, more, right, toolbar, workspace};
 };
 
+const getPlaceholder = (toolbar: TestElement) => toolbar.children.find((item) =>
+    item.hasAttribute("data-topbar-drag-placeholder"));
+
 describe("top bar drag", () => {
     it("reads only direct configurable entries and the fixed drag key", () => {
         const toolbar = {
@@ -252,7 +268,7 @@ describe("top bar drag", () => {
     });
 
     it("moves an entry across drag, cleans up, and suppresses the generated click", () => {
-        const {documentSelf, drag, left, toolbar} = createToolbar();
+        const {controls, documentSelf, drag, left, toolbar} = createToolbar();
         const orders: string[][] = [];
         const unbind = topBarDrag.bindTopBarDrag(
             toolbar as unknown as HTMLElement,
@@ -264,7 +280,20 @@ describe("top bar drag", () => {
         documentSelf.dispatch("mousemove", new TestEvent(drag, 120, 12));
         assert.equal(documentSelf.body.children.length, 1);
         assert.equal(left.style.opacity, "0.38");
-        documentSelf.dispatch("mouseup", new TestEvent(drag, 120, 12));
+        assert.deepEqual(topBarDrag.getTopBarOrder(toolbar as unknown as HTMLElement), ["back", "drag", "search"]);
+        assert.equal(getPlaceholder(toolbar), undefined);
+        const ghost = documentSelf.body.children[0];
+        assert.equal(ghost.style.backgroundColor, "var(--b3-theme-background-light)");
+        assert.equal(ghost.style.left, "108px");
+        assert.equal(ghost.style.top, "0px");
+        assert.equal(ghost.style.transition, "none");
+        documentSelf.dispatch("mousemove", new TestEvent(drag, 120, 12));
+        const placeholder = getPlaceholder(toolbar);
+        assert.ok(placeholder);
+        assert.equal(placeholder.classList.contains("fn__none"), false);
+        documentSelf.dispatch("mousemove", new TestEvent(controls, 250, 12));
+        assert.equal(getPlaceholder(toolbar), placeholder);
+        documentSelf.dispatch("mouseup", new TestEvent(controls, 250, 12));
 
         assert.deepEqual(topBarDrag.getTopBarOrder(toolbar as unknown as HTMLElement), ["drag", "back", "search"]);
         assert.deepEqual(orders, [["drag", "back", "search"]]);
@@ -286,6 +315,36 @@ describe("top bar drag", () => {
         unbind();
         assert.equal(toolbar.listenerCount("mousedown"), 0);
         assert.equal(toolbar.listenerCount("click"), 0);
+    });
+
+    it("stabilizes target changes and hides the candidate after returning to the source", () => {
+        const {documentSelf, drag, left, right, toolbar} = createToolbar();
+        const orders: string[][] = [];
+        const unbind = topBarDrag.bindTopBarDrag(
+            toolbar as unknown as HTMLElement,
+            (order) => orders.push(order),
+        );
+
+        toolbar.dispatch("mousedown", new TestEvent(left, 30, 12));
+        documentSelf.dispatch("mousemove", new TestEvent(drag, 120, 12));
+        documentSelf.dispatch("mousemove", new TestEvent(drag, 120, 12));
+        const placeholder = getPlaceholder(toolbar);
+        assert.ok(placeholder);
+        assert.equal(toolbar.children.indexOf(placeholder), toolbar.children.indexOf(drag) + 1);
+
+        documentSelf.dispatch("mousemove", new TestEvent(right, 165, 12));
+        assert.equal(toolbar.children.indexOf(placeholder), toolbar.children.indexOf(drag) + 1);
+        documentSelf.dispatch("mousemove", new TestEvent(right, 165, 12));
+        assert.equal(toolbar.children.indexOf(placeholder), toolbar.children.indexOf(right) + 1);
+
+        documentSelf.dispatch("mousemove", new TestEvent(left, 30, 12));
+        assert.equal(placeholder.classList.contains("fn__none"), true);
+        documentSelf.dispatch("mouseup", new TestEvent(left, 30, 12));
+
+        assert.deepEqual(orders, []);
+        assert.deepEqual(topBarDrag.getTopBarOrder(toolbar as unknown as HTMLElement), ["back", "drag", "search"]);
+        assert.equal(documentSelf.body.children.length, 0);
+        unbind();
     });
 
     it("ignores non-primary, readonly, and below-threshold mouse movement", () => {

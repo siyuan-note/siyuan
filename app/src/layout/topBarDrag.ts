@@ -126,12 +126,11 @@ export const bindTopBarDrag = (
         const startX = event.clientX;
         const startY = event.clientY;
         const sourceRect = sourceElement.getBoundingClientRect();
-        const offsetX = startX - sourceRect.left;
-        const offsetY = startY - sourceRect.top;
         const sourceOpacity = sourceElement.style.opacity;
         let dragging = false;
         let ghostElement: HTMLElement | undefined;
         let placeholderElement: HTMLElement | undefined;
+        let selectedElement: HTMLElement | undefined;
 
         const preventNativeDrag = (dragEvent: DragEvent) => {
             dragEvent.preventDefault();
@@ -160,17 +159,19 @@ export const bindTopBarDrag = (
             ghostElement.removeAttribute("aria-label");
             ghostElement.setAttribute("aria-hidden", "true");
             ghostElement.setAttribute("data-topbar-drag-ghost", "true");
+            ghostElement.style.backgroundColor = "var(--b3-theme-background-light)";
             ghostElement.style.boxSizing = "border-box";
             ghostElement.style.height = `${sourceRect.height}px`;
             ghostElement.style.margin = "0";
             ghostElement.style.pointerEvents = "none";
             ghostElement.style.position = "fixed";
+            ghostElement.style.transition = "none";
             ghostElement.style.width = `${sourceRect.width}px`;
             ghostElement.style.zIndex = "999997";
             documentSelf.body.appendChild(ghostElement);
 
             placeholderElement = documentSelf.createElement("span");
-            placeholderElement.className = "toolbar__item";
+            placeholderElement.className = "toolbar__item fn__none";
             placeholderElement.setAttribute("aria-hidden", "true");
             placeholderElement.setAttribute("data-topbar-drag-placeholder", "true");
             placeholderElement.style.background = "var(--b3-theme-primary-light)";
@@ -178,6 +179,7 @@ export const bindTopBarDrag = (
             placeholderElement.style.height = `${sourceRect.height}px`;
             placeholderElement.style.pointerEvents = "none";
             placeholderElement.style.width = `${sourceRect.width}px`;
+            placeholderElement.innerHTML = "<svg></svg>";
         };
 
         const onMouseMove = (moveEvent: MouseEvent) => {
@@ -192,40 +194,49 @@ export const bindTopBarDrag = (
 
             moveEvent.preventDefault();
             moveEvent.stopPropagation();
-            ghostElement.style.left = `${moveEvent.clientX - offsetX}px`;
-            ghostElement.style.top = `${moveEvent.clientY - offsetY}px`;
+            ghostElement.style.left = `${moveEvent.clientX - sourceRect.width / 2}px`;
+            ghostElement.style.top = `${moveEvent.clientY - sourceRect.height / 2}px`;
 
-            placeholderElement.remove();
             const targetElement = getDirectChild(toolbarElement, moveEvent.target);
+            if (targetElement && selectedElement && targetElement === selectedElement) {
+                const side = resolveTopBarDropSide(
+                    selectedElement.id,
+                    moveEvent.clientX,
+                    selectedElement.getBoundingClientRect(),
+                );
+                if (!side) {
+                    return;
+                }
+                const children = Array.from(toolbarElement.children).filter((item) => item !== placeholderElement);
+                if (isTopBarDropNoop(
+                    children.indexOf(sourceElement),
+                    children.indexOf(selectedElement),
+                    side,
+                )) {
+                    placeholderElement.classList.add("fn__none");
+                } else {
+                    placeholderElement.classList.remove("fn__none");
+                    if (side === "before") {
+                        selectedElement.before(placeholderElement);
+                    } else {
+                        selectedElement.after(placeholderElement);
+                    }
+                }
+                return;
+            }
             if (!isDropTarget(targetElement) || targetElement === sourceElement) {
+                if (targetElement === sourceElement) {
+                    placeholderElement.classList.add("fn__none");
+                }
                 return;
             }
-            const side = resolveTopBarDropSide(
-                targetElement.id,
-                moveEvent.clientX,
-                targetElement.getBoundingClientRect(),
-            );
-            if (!side) {
-                return;
-            }
-            const children = Array.from(toolbarElement.children);
-            if (isTopBarDropNoop(
-                children.indexOf(sourceElement),
-                children.indexOf(targetElement),
-                side,
-            )) {
-                return;
-            }
-            if (side === "before") {
-                targetElement.before(placeholderElement);
-            } else {
-                targetElement.after(placeholderElement);
-            }
+            selectedElement = targetElement;
         };
 
         const onMouseUp = () => {
             let changedOrder: string[] | undefined;
-            if (dragging && placeholderElement.parentElement === toolbarElement &&
+            if (dragging && !view.siyuan.config.readonly && !placeholderElement.classList.contains("fn__none") &&
+                placeholderElement.parentElement === toolbarElement &&
                 sourceElement.parentElement === toolbarElement) {
                 const previousOrder = getTopBarOrder(toolbarElement);
                 placeholderElement.replaceWith(sourceElement);

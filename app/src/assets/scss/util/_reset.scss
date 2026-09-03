@@ -179,6 +179,11 @@ body {
         right: 0;
         width: var(--b3-toolbar-drag-right);
       }
+
+      &[data-topbar-reordering="true"]::before,
+      &[data-topbar-reordering="true"]::after {
+        -webkit-app-region: no-drag;
+      }
     }
 
     .fullscreen > .protyle-breadcrumb,

@@ -6,7 +6,7 @@
 		"id": "20260903150000-u4065fm",
 		"title": "连接远程内核",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20260903205342"
 	},
 	"Children": [
 		{
@@ -111,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260903150000-bh8cy8d",
-				"updated": "20260903150000"
+				"updated": "20260903205342"
 			},
 			"Children": [
 				{
@@ -125,12 +125,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20260903150000-w1kgmix",
-				"updated": "20260903150000"
+				"updated": "20260903205342"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "首版远程模式暂不支持以下功能，本地模式不受影响："
+					"Data": "远程模式不支持以下功能，本地模式不受影响："
 				}
 			]
 		},

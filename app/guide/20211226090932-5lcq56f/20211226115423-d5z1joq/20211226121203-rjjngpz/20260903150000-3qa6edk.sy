@@ -6,7 +6,7 @@
 		"id": "20260903150000-3qa6edk",
 		"title": "連線至遠端內核",
 		"type": "doc",
-		"updated": "20260903150000"
+		"updated": "20260903205342"
 	},
 	"Children": [
 		{"ID": "20260903150000-jrf9aw4", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-jrf9aw4", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "概述"}]},
@@ -15,8 +15,8 @@
 		{"ID": "20260903150000-m5fkfh5", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-m5fkfh5", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "完全結束思源桌面用戶端後，從命令列啟動桌面端並加入參數 "}, {"Type": "NodeTextMark", "TextMarkType": "code", "TextMarkTextContent": "--remote=https://host[:port]"}, {"Type": "NodeText", "Data": "。如果已有執行中的實例，單一實例機制不會切換目前的連線。"}]},
 		{"ID": "20260903150000-l1lghrh", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-l1lghrh", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "安全性與版本"}]},
 		{"ID": "20260903150000-dk8m7z0", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-dk8m7z0", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "僅支援 HTTPS 遠端位址，用戶端作業系統必須信任伺服器使用的 TLS 憑證。請只連線至你信任的伺服器；桌面用戶端與遠端內核的版本必須完全一致，否則無法連線。桌面用戶端僅載入安裝套件內建的前端，不會載入遠端伺服器提供的 HTML、指令碼等可執行前端資源，因此同源的遠端 HTML 嵌入內容也無法使用。"}]},
-		{"ID": "20260903150000-uleg2f1", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-uleg2f1", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "功能限制"}]},
-		{"ID": "20260903150000-ovlxdje", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-ovlxdje", "updated": "20260903150000"}, "Children": [{"Type": "NodeText", "Data": "首版遠端模式暫不支援以下功能，本機模式不受影響："}]},
+		{"ID": "20260903150000-uleg2f1", "Type": "NodeHeading", "HeadingLevel": 2, "Properties": {"id": "20260903150000-uleg2f1", "updated": "20260903205342"}, "Children": [{"Type": "NodeText", "Data": "功能限制"}]},
+		{"ID": "20260903150000-ovlxdje", "Type": "NodeParagraph", "Properties": {"id": "20260903150000-ovlxdje", "updated": "20260903205342"}, "Children": [{"Type": "NodeText", "Data": "遠端模式不支援以下功能，本機模式不受影響："}]},
 		{
 			"ID": "20260903150000-lw8m6qj",
 			"Type": "NodeList",

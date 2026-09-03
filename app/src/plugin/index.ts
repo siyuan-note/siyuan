@@ -2,9 +2,9 @@ import type {App} from "../index";
 import {EventBus} from "./EventBus";
 import {fetchPost} from "../util/fetch";
 import {isMobile, isWindow} from "../util/functions";
+import {getAllEditor, getAllModels} from "../layout/getAll";
 /// #if !MOBILE
 import {Custom} from "../layout/dock/Custom";
-import {getAllModels} from "../layout/getAll";
 import {Tab} from "../layout/Tab";
 import {resizeTopBar, setPanelFocus} from "../layout/util";
 import {getDockByType, setTabPosition} from "../layout/tabUtil";
@@ -23,13 +23,21 @@ import {addPluginDock, removePluginDock} from "./loader";
 import {normalizeStoragePath} from "../util/pathName";
 import {Kernel} from "./kernel";
 import {IAgentCapabilityEffects, registerCapability} from "../layout/dock/agent/frontendCapabilities";
-import {isDisallowedTextInputHotkey, normalizePluginHotkey} from "../util/hotKeyPolicy";
+import {isDisallowedTextInputHotkey} from "../util/hotKeyPolicy";
 import {
     addBreadcrumbButton as addPluginBreadcrumbButton,
     removeBreadcrumbButton as removePluginBreadcrumbButton,
 } from "./breadcrumbButton";
 import type {TCustomBlockRender} from "./customBlockRender";
 import {registerPluginCommand} from "./commandAdapter";
+import {updatePluginKeymap} from "./keymap";
+import {
+    clearPluginToolbarItems,
+    removePluginToolbarItem,
+    resolvePluginToolbar,
+    setPluginToolbarItem,
+} from "./toolbarItem";
+import {isBuiltinToolbarItemName} from "../protyle/toolbar/defaults";
 
 const disposedPlugins = new WeakSet<Plugin>();
 
@@ -37,30 +45,13 @@ const isPluginDisposed = (plugin: Plugin) => disposedPlugins.has(plugin);
 
 export const markPluginDisposed = (plugin: Plugin) => {
     disposedPlugins.add(plugin);
+    clearPluginToolbarItems(plugin);
 };
 
-const updatePluginKeymap = (pluginName: string, key: string, hotkey: unknown) => {
-    if (!window.siyuan.config.keymap.plugin) {
-        window.siyuan.config.keymap.plugin = {};
-    }
-    if (!window.siyuan.config.keymap.plugin[pluginName]) {
-        window.siyuan.config.keymap.plugin[pluginName] = {};
-    }
-    const keymapItem = window.siyuan.config.keymap.plugin[pluginName][key];
-    const normalized = normalizePluginHotkey(hotkey, keymapItem?.custom);
-    if (!keymapItem) {
-        window.siyuan.config.keymap.plugin[pluginName][key] = {
-            default: normalized.defaultHotkey,
-            custom: normalized.customHotkey,
-        };
-    } else {
-        keymapItem.default = normalized.defaultHotkey;
-        keymapItem.custom = normalized.customHotkey;
-    }
-    normalized.ignoredHotkeys.forEach((ignoredHotkey) => {
-        console.warn(`Plugin ${pluginName} ignored disallowed hotkey "${ignoredHotkey}" for "${key}".`);
+const refreshPluginToolbars = () => {
+    getAllEditor().forEach(editor => {
+        editor.protyle.toolbar.update(editor.protyle);
     });
-    return window.siyuan.config.keymap.plugin[pluginName][key];
 };
 
 export class Plugin {
@@ -127,7 +118,7 @@ export class Plugin {
             writable: false,
         });
 
-        this.updateProtyleToolbar([]).forEach(toolbarItem => {
+        resolvePluginToolbar(this, []).forEach(toolbarItem => {
             if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name)) {
                 return;
             }
@@ -160,6 +151,31 @@ export class Plugin {
 
     public onLayoutReady(): Promise<void> | void {
         // 布局加载完成
+    }
+
+    public addToolbarItem(item: IMenuItem) {
+        if (isPluginDisposed(this)) {
+            return;
+        }
+        if (typeof item?.name !== "string" || !item.name.trim() || item.name !== item.name.trim() ||
+            Constants.INLINE_TYPE.includes(item.name) || isBuiltinToolbarItemName(item.name)) {
+            console.error(`plugin ${this.name} addToolbarItem error: name must be a unique custom toolbar item name`);
+            return;
+        }
+        const toolbarItem = {...item};
+        if (typeof toolbarItem.hotkey !== "string") {
+            toolbarItem.hotkey = "";
+        }
+        toolbarItem.hotkey = updatePluginKeymap(this.name, toolbarItem.name, toolbarItem.hotkey).default;
+        setPluginToolbarItem(this, toolbarItem);
+        refreshPluginToolbars();
+    }
+
+    public removeToolbarItem(name: string) {
+        if (isPluginDisposed(this) || !removePluginToolbarItem(this, name)) {
+            return;
+        }
+        refreshPluginToolbars();
     }
 
     public addCommand(command: ICommand) {

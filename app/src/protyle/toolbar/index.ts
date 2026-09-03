@@ -96,6 +96,7 @@ import {
     getInlineRangeElement,
     normalizeCalloutTitleRange
 } from "./inlineRangeBoundary";
+import {resolvePluginToolbar} from "../../plugin/toolbarItem";
 
 const filterPluginToolbar = (toolbar: Array<string | IMenuItem>, lite: boolean) => {
     if (!lite) {
@@ -118,7 +119,7 @@ const applyPluginToolbar = (toolbar: Array<string | IMenuItem>, protyle: IProtyl
     let result = toolbar;
     protyle.app.plugins.forEach((plugin) => {
         const previous = [...result];
-        result = markPluginToolbarEntries(previous, plugin.updateProtyleToolbar(result), plugin.name, (item) => {
+        result = markPluginToolbarEntries(previous, resolvePluginToolbar(plugin, result), plugin.name, (item) => {
             const pluginName = plugin.displayName?.trim() || plugin.name;
             const label = item.tip || (item.lang ? window.siyuan.languages[item.lang] : "") || item.name;
             return `${pluginName} - ${label}`;

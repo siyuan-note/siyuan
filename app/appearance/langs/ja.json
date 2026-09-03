@@ -1,4 +1,5 @@
 {
+	"editMode": "編集モードの切り替え",
 	"originalValue": "元の値",
 	"templateRenderedValue": "テンプレートレンダリング値",
 	"fontFamily": "フォントファミリー",
@@ -2144,7 +2145,6 @@
 	"delete-row": "行を削除",
 	"down": "下へ",
 	"downloadTip": "ブラウザはダウンロード機能をサポートしていません",
-	"edit-mode": "編集モードの切り替え",
 	"emoji": "絵文字",
 	"export": "エクスポート",
 	"saveCodeBlockAsFile": "コードブロックをファイルとして保存",

@@ -1,4 +1,5 @@
 {
+	"editMode": "Modus schakelen",
 	"originalValue": "Oorspronkelijke waarde",
 	"templateRenderedValue": "Door sjabloon gerenderde waarde",
 	"fontFamily": "Lettertypefamilie",
@@ -2144,7 +2145,6 @@
 	"delete-row": "Rij verwijderen",
 	"down": "Omlaag",
 	"downloadTip": "Download niet ondersteund",
-	"edit-mode": "Modus schakelen",
 	"emoji": "Pictogram",
 	"export": "Exporteren",
 	"saveCodeBlockAsFile": "Codeblok als bestand",

@@ -1,4 +1,5 @@
 {
+	"editMode": "模式切换",
 	"originalValue": "原始值",
 	"templateRenderedValue": "模板渲染值",
 	"fontFamily": "字体",
@@ -2144,7 +2145,6 @@
 	"delete-row": "删除行",
 	"down": "下",
 	"downloadTip": "该浏览器不支持下载功能",
-	"edit-mode": "模式切换",
 	"emoji": "表情",
 	"export": "导出",
 	"saveCodeBlockAsFile": "另存为文件",

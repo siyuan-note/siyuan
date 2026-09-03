@@ -1,4 +1,5 @@
 {
+	"editMode": "สลับโหมด",
 	"originalValue": "ค่าดั้งเดิม",
 	"templateRenderedValue": "ค่าที่เรนเดอร์ด้วยเทมเพลต",
 	"fontFamily": "ตระกูลฟอนต์",
@@ -2144,7 +2145,6 @@
 	"delete-row": "ลบแถว",
 	"down": "ลง",
 	"downloadTip": "ไม่รองรับดาวน์โหลด",
-	"edit-mode": "สลับโหมด",
 	"emoji": "อิโมจิ",
 	"export": "ส่งออก",
 	"saveCodeBlockAsFile": "บันทึกโค้ดเป็นไฟล์",

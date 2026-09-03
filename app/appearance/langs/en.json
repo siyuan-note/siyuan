@@ -1,4 +1,5 @@
 {
+	"editMode": "Toggle Mode",
 	"originalValue": "Original value",
 	"templateRenderedValue": "Template-rendered value",
 	"fontFamily": "Font family",
@@ -2144,7 +2145,6 @@
 	"delete-row": "Delete Row",
 	"down": "Down",
 	"downloadTip": "The browser does not support the download function",
-	"edit-mode": "Toggle Mode",
 	"emoji": "Emoji",
 	"export": "Export",
 	"saveCodeBlockAsFile": "Save code block as file",

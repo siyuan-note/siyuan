@@ -1,4 +1,5 @@
 {
+	"editMode": "Prepnúť režim",
 	"originalValue": "Pôvodná hodnota",
 	"templateRenderedValue": "Hodnota vykreslená šablónou",
 	"fontFamily": "Rodina písiem",
@@ -2144,7 +2145,6 @@
 	"delete-row": "Odstrániť riadok",
 	"down": "Dole",
 	"downloadTip": "Prehliadač nepodporuje sťahovanie",
-	"edit-mode": "Prepnúť režim",
 	"emoji": "Emoji",
 	"export": "Exportovať",
 	"saveCodeBlockAsFile": "Uložiť blok kódu ako súbor",

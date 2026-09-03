@@ -529,7 +529,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
     if (!event.repeat && !protyle.options.backlinkData &&
-        matchHotKey(window.siyuan.config.keymap.editor.general["edit-mode"].custom, event)) {
+        matchHotKey(window.siyuan.config.keymap.editor.general.editMode.custom, event)) {
         toggleEditMode(protyle);
         saveLayout();
         event.preventDefault();

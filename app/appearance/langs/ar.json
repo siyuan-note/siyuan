@@ -1,4 +1,5 @@
 {
+	"editMode": "تبديل الوضع",
 	"originalValue": "القيمة الأصلية",
 	"templateRenderedValue": "القيمة المُصيّرة بالقالب",
 	"fontFamily": "عائلة الخط",
@@ -2144,7 +2145,6 @@
 	"delete-row": "حذف الصف",
 	"down": "أسفل",
 	"downloadTip": "المتصفح لا يدعم وظيفة التنزيل",
-	"edit-mode": "تبديل الوضع",
 	"emoji": "الرموز التعبيرية",
 	"export": "تصدير",
 	"saveCodeBlockAsFile": "حفظ كتلة الكود كملف",

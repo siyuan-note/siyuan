@@ -1,4 +1,5 @@
 {
+	"editMode": "मोड बदलें",
 	"originalValue": "मूल मान",
 	"templateRenderedValue": "टेम्पलेट से रेंडर किया गया मान",
 	"fontFamily": "फ़ॉन्ट परिवार",
@@ -2144,7 +2145,6 @@
 	"delete-row": "पंक्ति हटाएं",
 	"down": "नीचे",
 	"downloadTip": "ब्राउज़र डाउनलोड फ़ंक्शन का समर्थन नहीं करता",
-	"edit-mode": "मोड बदलें",
 	"emoji": "इमोजी",
 	"export": "निर्यात करें",
 	"saveCodeBlockAsFile": "कोड ब्लॉक को फ़ाइल के रूप में सहेजें",

@@ -8,7 +8,6 @@ import type {App} from "../../index";
 import {isMac, isNotCtrl, isOnlyMeta} from "../../protyle/util/compatibility";
 import {showPopover} from "../../block/popover";
 import {clearDisallowedKeymapItems} from "../../util/hotKeyPolicy";
-import {migrateEditModeKeymap} from "../../util/keymapMigration";
 
 const matchKeymap = (keymap: Config.IKeys, key1: "general" | "editor", key2?: "general" | "insert" | "heading" | "list" | "table") => {
     if (key1 === "general") {
@@ -124,11 +123,6 @@ export const correctHotkey = (app: App) => {
             Constants.SIYUAN_KEYMAP.editor.general.selectToPageStart.default = "⇧⌘Home";
         Constants.SIYUAN_KEYMAP.editor.general.selectToPageEnd.custom =
             Constants.SIYUAN_KEYMAP.editor.general.selectToPageEnd.default = "⇧⌘End";
-    }
-    const editorGeneralKeymap = window.siyuan.config.keymap?.editor?.general as unknown as
-        Record<string, Config.IKey | undefined> | undefined;
-    if (editorGeneralKeymap) {
-        migrateEditModeKeymap(editorGeneralKeymap, Constants.SIYUAN_KEYMAP.editor.general["edit-mode"].default);
     }
     const matchKeymap1 = matchKeymap(Constants.SIYUAN_KEYMAP.general, "general");
     const matchKeymap2 = matchKeymap(Constants.SIYUAN_KEYMAP.editor.general, "editor", "general");

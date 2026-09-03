@@ -577,7 +577,7 @@ export abstract class Constants {
                 alignLeft: {default: "⌥L", custom: "⌥L"},
                 alignCenter: {default: "⌥C", custom: "⌥C"},
                 alignRight: {default: "⌥R", custom: "⌥R"},
-                "edit-mode": {default: "⌥⌘9", custom: "⌥⌘9"},
+                editMode: {default: "⌥⌘9", custom: "⌥⌘9"},
                 insertBefore: {default: "⇧⌘B", custom: "⇧⌘B"},
                 insertAfter: {default: "⇧⌘A", custom: "⇧⌘A"},
                 insertSuperBlockLeft: {default: "", custom: ""},

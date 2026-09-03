@@ -1,4 +1,5 @@
 {
+	"editMode": "Modus umschalten",
 	"originalValue": "Originalwert",
 	"templateRenderedValue": "Gerenderter Vorlagenwert",
 	"fontFamily": "Schriftfamilie",
@@ -2144,7 +2145,6 @@
 	"delete-row": "Zeile löschen",
 	"down": "Nach unten",
 	"downloadTip": "Der Browser unterstützt die Download-Funktion nicht",
-	"edit-mode": "Modus umschalten",
 	"emoji": "Emoji",
 	"export": "Exportieren",
 	"saveCodeBlockAsFile": "Codeblock als Datei speichern",

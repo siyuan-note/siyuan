@@ -1,4 +1,5 @@
 {
+	"editMode": "החלף מצב",
 	"originalValue": "ערך מקורי",
 	"templateRenderedValue": "ערך מעובד באמצעות תבנית",
 	"fontFamily": "משפחת גופנים",
@@ -2144,7 +2145,6 @@
 	"delete-row": "מחק שורה",
 	"down": "למטה",
 	"downloadTip": "הדפדפן לא תומך בפונקציית ההורדה",
-	"edit-mode": "החלף מצב",
 	"emoji": "אימוג'י",
 	"export": "ייצוא",
 	"saveCodeBlockAsFile": "שמור בלוק קוד כקובץ",

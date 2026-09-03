@@ -1,4 +1,5 @@
 {
+	"editMode": "Mode Toggle",
 	"originalValue": "Valeur d’origine",
 	"templateRenderedValue": "Valeur rendue par le modèle",
 	"fontFamily": "Famille de polices",
@@ -2144,7 +2145,6 @@
 	"delete-row": "Supprimer la ligne",
 	"down": "En bas",
 	"downloadTip": "Ce navigateur ne prend pas en charge la fonction de téléchargement",
-	"edit-mode": "Mode Toggle",
 	"emoji": "Emoji",
 	"export": "Exporter",
 	"saveCodeBlockAsFile": "Enregistrer le bloc de code en tant que fichier",

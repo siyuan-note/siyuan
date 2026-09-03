@@ -899,8 +899,8 @@ ${padHTML}
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "editMode",
                 icon: "iconEdit",
-                label: window.siyuan.languages["edit-mode"],
-                accelerator: window.siyuan.config.keymap.editor.general["edit-mode"].custom,
+                label: window.siyuan.languages.editMode,
+                accelerator: window.siyuan.config.keymap.editor.general.editMode.custom,
                 click: () => {
                     toggleEditMode(protyle);
                     window.siyuan.menus.menu.remove();

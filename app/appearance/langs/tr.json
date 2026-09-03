@@ -1,4 +1,5 @@
 {
+	"editMode": "Düzenleme modunu değiştir",
 	"originalValue": "Orijinal değer",
 	"templateRenderedValue": "Şablonla işlenmiş değer",
 	"fontFamily": "Yazı tipi ailesi",
@@ -2144,7 +2145,6 @@
 	"delete-row": "Satırı sil",
 	"down": "Aşağı",
 	"downloadTip": "Tarayıcı indirme işlevini desteklemiyor",
-	"edit-mode": "Düzenleme modunu değiştir",
 	"emoji": "Emoji",
 	"export": "Dışa aktar",
 	"saveCodeBlockAsFile": "Kod bloğunu dosya olarak kaydet",

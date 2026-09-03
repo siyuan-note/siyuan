@@ -1,4 +1,5 @@
 {
+	"editMode": "Alihkan Mode",
 	"originalValue": "Nilai asli",
 	"templateRenderedValue": "Nilai hasil render templat",
 	"fontFamily": "Keluarga font",
@@ -2144,7 +2145,6 @@
 	"delete-row": "Hapus Baris",
 	"down": "Bawah",
 	"downloadTip": "Browser tidak mendukung fungsi unduh",
-	"edit-mode": "Alihkan Mode",
 	"emoji": "Emoji",
 	"export": "Ekspor",
 	"saveCodeBlockAsFile": "Simpan blok kode sebagai file",

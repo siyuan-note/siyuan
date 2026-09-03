@@ -1,4 +1,5 @@
 {
+	"editMode": "모드 전환",
 	"originalValue": "원본 값",
 	"templateRenderedValue": "템플릿 렌더링 값",
 	"fontFamily": "글꼴 모음",
@@ -2144,7 +2145,6 @@
 	"delete-row": "행 삭제",
 	"down": "아래",
 	"downloadTip": "브라우저가 다운로드 기능을 지원하지 않습니다",
-	"edit-mode": "모드 전환",
 	"emoji": "이모티콘",
 	"export": "내보내기",
 	"saveCodeBlockAsFile": "코드 블록을 파일로 저장",

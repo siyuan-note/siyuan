@@ -1,4 +1,5 @@
 {
+	"editMode": "Przełącz tryb",
 	"originalValue": "Wartość oryginalna",
 	"templateRenderedValue": "Wartość renderowana przez szablon",
 	"fontFamily": "Rodzina czcionek",
@@ -2144,7 +2145,6 @@
 	"delete-row": "Usuń wiersz",
 	"down": "W dół",
 	"downloadTip": "Przeglądarka nie obsługuje funkcji pobierania",
-	"edit-mode": "Przełącz tryb",
 	"emoji": "Emoji",
 	"export": "Eksportuj",
 	"saveCodeBlockAsFile": "Zapisz blok kodu jako plik",

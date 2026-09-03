@@ -1,4 +1,5 @@
 {
+	"editMode": "Alternar Modo",
 	"originalValue": "Valor original",
 	"templateRenderedValue": "Valor renderizado pelo modelo",
 	"fontFamily": "Família da fonte",
@@ -2144,7 +2145,6 @@
 	"delete-row": "Excluir Linha",
 	"down": "Para baixo",
 	"downloadTip": "O navegador não suporta a função de download",
-	"edit-mode": "Alternar Modo",
 	"emoji": "Emoji",
 	"export": "Exportar",
 	"saveCodeBlockAsFile": "Salvar bloco de código como arquivo",

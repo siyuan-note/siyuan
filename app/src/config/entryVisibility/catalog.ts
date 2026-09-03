@@ -696,7 +696,7 @@ export const entryCatalog: IEntryCatalogSection[] = [
             node("refresh", lang("refresh")),
             node("optimizeTypography", lang("optimizeTypography")),
             node("fullscreen", lang("fullscreen")),
-            node("editMode", lang("edit-mode")),
+            node("editMode", lang("editMode")),
             node("editReadonly", lang("editReadonly"), false, [
                 node("enable", lang("enable"), false),
                 node("disable", lang("disable"), false),

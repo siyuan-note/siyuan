@@ -273,6 +273,7 @@ const getRangeListItemElements = (editorElement: HTMLElement, range: Range) => {
 };
 
 export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
+    let forwardBlockRemovalPending = false;
     editorElement.addEventListener("keydown", async (event: KeyboardEvent & { target: HTMLElement }) => {
         if (event.target.localName === "protyle-html" || event.target.localName === "input") {
             event.stopPropagation();
@@ -1223,6 +1224,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 不可使用 !event.shiftKey，否则 https://ld246.com/article/1666434796806
         if ((!event.altKey && (event.key === "Backspace" || event.key === "Delete")) ||
             matchHotKey("⌃D", event)) {
+            if (forwardBlockRemovalPending) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
             const rangeCheckTargets = !range.collapsed && endElement ?
                 getRangeBlockRefCheckTargets(protyle.wysiwyg.element, range, nodeElement, endElement, true) :
                 {elements: [], exactIDs: [], deletedIDs: []};
@@ -1382,8 +1388,20 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                             (getContenteditableElement(nextBlockElement).textContent == "\n") || nextBlockElement.parentElement.classList.contains("li")))
                                 ) {
                                     // 反向删除合并为一个块时，光标应保持在尾部 https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2849810529
-                                    cloneRange.insertNode(document.createElement("wbr"));
-                                    removeBlock(protyle, nextBlockElement, nextRange, "Delete");
+                                    const caretElement = document.createElement("wbr");
+                                    cloneRange.insertNode(caretElement);
+                                    focusByWbr(nodeElement, cloneRange, true);
+                                    event.stopPropagation();
+                                    event.preventDefault();
+                                    forwardBlockRemovalPending = true;
+                                    try {
+                                        await removeBlock(protyle, nextBlockElement, nextRange, "Delete");
+                                    } finally {
+                                        forwardBlockRemovalPending = false;
+                                        if (caretElement.isConnected) {
+                                            focusByWbr(nodeElement, cloneRange);
+                                        }
+                                    }
                                 }
                             }
                             event.stopPropagation();

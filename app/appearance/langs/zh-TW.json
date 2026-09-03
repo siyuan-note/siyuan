@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "切換為匯出預覽模式",
+	"switchToWYSIWYG": "切換為所見即所得模式",
 	"openStorageLocation": "開啟儲存位置",
 	"moveDocToSameLevel": "同級文件",
 	"moveDocAsChild": "子文件",

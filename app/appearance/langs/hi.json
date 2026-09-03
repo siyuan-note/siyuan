@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "निर्यात पूर्वावलोकन मोड पर स्विच करें",
+	"switchToWYSIWYG": "जो दिखे वही मिले मोड पर स्विच करें",
 	"openStorageLocation": "संग्रहण स्थान खोलें",
 	"moveDocToSameLevel": "समान स्तर",
 	"moveDocAsChild": "उप-दस्तावेज़",

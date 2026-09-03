@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "プレビューモードに切り替える",
+	"switchToWYSIWYG": "WYSIWYG モードに切り替える",
 	"openStorageLocation": "保存場所を開く",
 	"moveDocToSameLevel": "同じ階層",
 	"moveDocAsChild": "子文書",

@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "Beralih ke mode Pratinjau Ekspor",
+	"switchToWYSIWYG": "Beralih ke mode WYSIWYG",
 	"openStorageLocation": "Buka lokasi penyimpanan",
 	"moveDocToSameLevel": "Tingkat yang sama",
 	"moveDocAsChild": "Dokumen anak",

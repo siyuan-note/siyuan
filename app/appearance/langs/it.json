@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "Passa alla modalità anteprima esportazione",
+	"switchToWYSIWYG": "Passa alla modalità WYSIWYG",
 	"openStorageLocation": "Apri percorso di archiviazione",
 	"moveDocToSameLevel": "Stesso livello",
 	"moveDocAsChild": "Documento secondario",

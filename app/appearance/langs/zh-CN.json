@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "切换为导出预览模式",
+	"switchToWYSIWYG": "切换为所见即所得模式",
 	"openStorageLocation": "打开存储位置",
 	"moveDocToSameLevel": "同级文档",
 	"moveDocAsChild": "子文档",

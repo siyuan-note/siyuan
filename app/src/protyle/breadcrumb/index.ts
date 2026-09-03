@@ -899,7 +899,8 @@ ${padHTML}
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "editMode",
                 icon: "iconEdit",
-                label: window.siyuan.languages.editMode,
+                label: protyle.preview.element.classList.contains("fn__none") ?
+                    window.siyuan.languages.switchToPreview : window.siyuan.languages.switchToWYSIWYG,
                 accelerator: window.siyuan.config.keymap.editor.general.editMode.custom,
                 click: () => {
                     toggleEditMode(protyle);

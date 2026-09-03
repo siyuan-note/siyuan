@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "내보내기 미리보기 모드로 전환",
+	"switchToWYSIWYG": "WYSIWYG 모드로 전환",
 	"openStorageLocation": "저장 위치 열기",
 	"moveDocToSameLevel": "같은 수준",
 	"moveDocAsChild": "하위 문서",

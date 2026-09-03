@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "Перемкнутися в режим попереднього перегляду експорту",
+	"switchToWYSIWYG": "Перемкнутися в режим WYSIWYG",
 	"openStorageLocation": "Відкрити розташування сховища",
 	"moveDocToSameLevel": "Той самий рівень",
 	"moveDocAsChild": "Дочірній документ",

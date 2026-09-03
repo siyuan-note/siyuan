@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "التبديل إلى وضع معاينة التصدير",
+	"switchToWYSIWYG": "التبديل إلى وضع WYSIWYG",
 	"openStorageLocation": "فتح موقع التخزين",
 	"moveDocToSameLevel": "نفس المستوى",
 	"moveDocAsChild": "مستند فرعي",

@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "สลับเป็นโหมดตัวอย่างการส่งออก",
+	"switchToWYSIWYG": "สลับเป็นโหมด WYSIWYG",
 	"openStorageLocation": "เปิดตำแหน่งที่เก็บข้อมูล",
 	"moveDocToSameLevel": "ระดับเดียวกัน",
 	"moveDocAsChild": "เอกสารย่อย",

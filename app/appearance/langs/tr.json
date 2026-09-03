@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "Dışa aktarma önizleme moduna geç",
+	"switchToWYSIWYG": "WYSIWYG moduna geç",
 	"openStorageLocation": "Depolama konumunu aç",
 	"moveDocToSameLevel": "Aynı düzey",
 	"moveDocAsChild": "Alt belge",

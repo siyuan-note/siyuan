@@ -1,4 +1,6 @@
 {
+	"switchToPreview": "Prepnúť do režimu náhľadu exportu",
+	"switchToWYSIWYG": "Prepnúť do režimu WYSIWYG",
 	"openStorageLocation": "Otvoriť umiestnenie úložiska",
 	"moveDocToSameLevel": "Rovnaká úroveň",
 	"moveDocAsChild": "Podriadený dokument",

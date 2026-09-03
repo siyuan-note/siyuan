@@ -57,6 +57,7 @@ import {
     clearTabHoverSwitch,
     findDefaultTabNextId,
     findNextTabId,
+    getDocumentTabMovePreviewLeft,
     getDocumentTabMovePosition,
     reorderTabItems,
     scheduleTabHoverSwitch
@@ -70,7 +71,10 @@ interface IDocumentTabMoveTarget {
 }
 
 const getDocumentTabMoveTarget = (target: HTMLElement, headersElement: HTMLElement) => {
-    const tabHeaderElement = hasClosestByAttribute(target, "data-type", "tab-header");
+    const dropElement = hasClosestByClassName(target, "item__document-drop");
+    const tabHeaderElement = dropElement ? (Array.from(headersElement.children) as HTMLElement[]).find((item) =>
+        item.dataset.id === dropElement.dataset.targetTabId) :
+        hasClosestByAttribute(target, "data-type", "tab-header");
     if (!tabHeaderElement || !headersElement.contains(tabHeaderElement)) {
         return;
     }
@@ -88,18 +92,27 @@ const getDocumentTabMoveTarget = (target: HTMLElement, headersElement: HTMLEleme
     };
 };
 
-const updateDocumentTabMovePreview = (target: IDocumentTabMoveTarget, clientX: number) => {
-    if (!target.element.classList.contains("item--document-drop")) {
+const updateDocumentTabMovePreview = (target: IDocumentTabMoveTarget, tabHeadersElement: HTMLElement, clientX: number) => {
+    let dropElement = tabHeadersElement.querySelector<HTMLElement>(":scope > .item__document-drop");
+    if (!target.element.classList.contains("item--document-drop") || !dropElement) {
         clearDocumentTabMovePreview();
         target.element.classList.add("item--document-drop");
-        target.element.insertAdjacentHTML("beforeend", `<span class="item__document-drop">
+        tabHeadersElement.classList.add("layout-tab-bars--document-drop");
+        tabHeadersElement.insertAdjacentHTML("beforeend", `<span class="item__document-drop" data-target-tab-id="${escapeHtml(target.element.dataset.id)}">
     <span class="item__document-drop-option" data-position="sibling">${escapeHtml(window.siyuan.languages.moveDocToSameLevel)}</span>
     <span class="item__document-drop-option" data-position="child">${escapeHtml(window.siyuan.languages.moveDocAsChild)}</span>
 </span>`);
+        dropElement = tabHeadersElement.querySelector<HTMLElement>(":scope > .item__document-drop");
     }
-    const dropElement = target.element.querySelector<HTMLElement>(":scope > .item__document-drop");
+    const headersRect = tabHeadersElement.getBoundingClientRect();
+    const targetRect = target.element.getBoundingClientRect();
     const rect = dropElement.getBoundingClientRect();
-    const position = getDocumentTabMovePosition(clientX, rect.left, rect.width);
+    dropElement.style.left = `${getDocumentTabMovePreviewLeft(targetRect.left, targetRect.width, headersRect.left,
+        headersRect.width, rect.width)}px`;
+    dropElement.style.top = `${targetRect.top - headersRect.top}px`;
+    dropElement.style.height = `${targetRect.height}px`;
+    const positionedRect = dropElement.getBoundingClientRect();
+    const position = getDocumentTabMovePosition(clientX, positionedRect.left, positionedRect.width);
     target.element.dataset.documentDropPosition = position;
     dropElement.querySelectorAll<HTMLElement>(".item__document-drop-option").forEach((item) => {
         item.classList.toggle("item__document-drop-option--active", item.dataset.position === position);
@@ -334,7 +347,7 @@ export class Wnd {
                     const documentTabTarget = getDocumentTabMoveTarget(event.target, this.headersElement);
                     it.classList.remove("layout-tab-bars--drag");
                     if (documentTabTarget) {
-                        updateDocumentTabMovePreview(documentTabTarget, event.clientX);
+                        updateDocumentTabMovePreview(documentTabTarget, it, event.clientX);
                         event.dataTransfer.dropEffect = "move";
                     } else {
                         clearDocumentTabMovePreview(tabHeadersElement);

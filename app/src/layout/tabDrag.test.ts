@@ -1,6 +1,7 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    getDocumentTabMovePreviewLeft,
     getDocumentTabMovePosition,
     clearTabHoverSwitch,
     findDefaultTabNextId,
@@ -14,6 +15,11 @@ describe("document tab move target", () => {
         assert.equal(getDocumentTabMovePosition(119, 100, 40), "sibling");
         assert.equal(getDocumentTabMovePosition(120, 100, 40), "child");
         assert.equal(getDocumentTabMovePosition(139, 100, 40), "child");
+    });
+
+    it("keeps the preview inside the tab bar for a single narrow tab", () => {
+        assert.equal(getDocumentTabMovePreviewLeft(435, 68, 422, 538, 200), 104);
+        assert.equal(getDocumentTabMovePreviewLeft(700, 68, 422, 538, 200), 312);
     });
 });
 

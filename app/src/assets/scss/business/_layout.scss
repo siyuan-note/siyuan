@@ -203,6 +203,44 @@
       background-color: var(--b3-theme-primary-lightest);
     }
 
+    &-bars--document-drop {
+      position: relative;
+
+      > .item__document-drop {
+        align-items: stretch;
+        background-color: var(--b3-theme-background);
+        border-radius: var(--b3-border-radius);
+        box-shadow: 0 0 0 1px var(--b3-theme-primary-lighter) inset, var(--b3-point-shadow);
+        direction: ltr;
+        display: flex;
+        max-width: calc(100% - 8px);
+        overflow: hidden;
+        position: absolute;
+        transform: translateX(-50%);
+        width: 200px;
+        z-index: 4;
+
+        .item__document-drop-option {
+          align-items: center;
+          direction: initial;
+          display: flex;
+          flex: 1;
+          font-size: 12px;
+          justify-content: center;
+          min-width: 0;
+          overflow: hidden;
+          padding: 0 8px;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+
+          &--active {
+            background-color: var(--b3-theme-primary-lightest);
+            color: var(--b3-theme-primary);
+          }
+        }
+      }
+    }
+
     &-bar {
       list-style: none;
       align-items: center;
@@ -245,40 +283,7 @@
 
         &--document-drop {
           cursor: grabbing;
-          overflow: visible;
           z-index: 3;
-        }
-
-        &__document-drop {
-          align-items: stretch;
-          background-color: var(--b3-theme-background);
-          border-radius: var(--b3-border-radius);
-          box-shadow: 0 0 0 1px var(--b3-theme-primary-lighter) inset, var(--b3-point-shadow);
-          direction: ltr;
-          display: flex;
-          height: 100%;
-          left: 50%;
-          min-width: 200px;
-          overflow: hidden;
-          position: absolute;
-          top: 0;
-          transform: translateX(-50%);
-
-          &-option {
-            align-items: center;
-            direction: initial;
-            display: flex;
-            flex: 1;
-            font-size: 12px;
-            justify-content: center;
-            padding: 0 8px;
-            white-space: nowrap;
-
-            &--active {
-              background-color: var(--b3-theme-primary-lightest);
-              color: var(--b3-theme-primary);
-            }
-          }
         }
 
         &--full {

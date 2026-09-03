@@ -155,6 +155,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         });
         if (element.innerHTML === "") {
             let dragBlockElement: HTMLElement;
+            let removeEditorRange: Range | undefined;
             element.addEventListener("dragstart", (event: DragEvent) => {
                 const target = event.target as HTMLElement;
                 window.siyuan.dragElement = target.parentElement;
@@ -303,6 +304,16 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                     }
                 }
             });
+            element.addEventListener("mousedown", (event) => {
+                if (!hasClosestByAttribute(event.target as HTMLElement, "data-type", "remove")) {
+                    return;
+                }
+                const selection = document.getSelection();
+                const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+                removeEditorRange = getAVAttributeEditorRange(protyle.wysiwyg.element, currentRange,
+                    protyle.toolbar.range);
+                event.preventDefault();
+            });
             element.addEventListener("click", (event) => {
                 if (handleTemplateInteraction(protyle, event)) {
                     return;
@@ -353,6 +364,11 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 }
                 const removeElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "remove");
                 if (removeElement) {
+                    const selection = document.getSelection();
+                    const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+                    const editorRange = removeEditorRange || getAVAttributeEditorRange(protyle.wysiwyg.element,
+                        currentRange, protyle.toolbar.range);
+                    removeEditorRange = undefined;
                     const blockElement = hasClosestBlock(removeElement);
                     if (blockElement) {
                         const table = attributeTableData.get(blockElement as HTMLElement);
@@ -418,10 +434,6 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                             srcIDs: [rowID],
                             avID,
                         }];
-                        const selection = document.getSelection();
-                        const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
-                        const editorRange = getAVAttributeEditorRange(protyle.wysiwyg.element, currentRange,
-                            protyle.toolbar.range);
                         const restoreEditorRange = () => restoreAVAttributeEditorRange(protyle.wysiwyg.element,
                             editorRange);
                         confirmDialog(window.siyuan.languages.removeAV, window.siyuan.languages.confirmDelete + "?", () => {

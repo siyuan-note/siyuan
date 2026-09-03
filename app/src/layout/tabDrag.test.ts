@@ -3,6 +3,7 @@ import * as assert from "node:assert/strict";
 import {
     getDocumentTabMovePreviewLeft,
     getDocumentTabMovePosition,
+    isDocumentTabMovePreviewPoint,
     clearTabHoverSwitch,
     findDefaultTabNextId,
     findNextTabId,
@@ -20,6 +21,11 @@ describe("document tab move target", () => {
     it("keeps the preview inside the tab bar for a single narrow tab", () => {
         assert.equal(getDocumentTabMovePreviewLeft(435, 68, 422, 538, 200), 104);
         assert.equal(getDocumentTabMovePreviewLeft(700, 68, 422, 538, 200), 312);
+    });
+
+    it("keeps both preview options available outside the original tab bounds", () => {
+        assert.equal(isDocumentTabMovePreviewPoint(620, 20, 438, 6, 200, 29), true);
+        assert.equal(isDocumentTabMovePreviewPoint(640, 20, 438, 6, 200, 29), false);
     });
 });
 

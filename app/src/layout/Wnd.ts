@@ -59,6 +59,7 @@ import {
     findNextTabId,
     getDocumentTabMovePreviewLeft,
     getDocumentTabMovePosition,
+    isDocumentTabMovePreviewPoint,
     reorderTabItems,
     scheduleTabHoverSwitch
 } from "./tabDrag";
@@ -70,8 +71,12 @@ interface IDocumentTabMoveTarget {
     rootID: string;
 }
 
-const getDocumentTabMoveTarget = (target: HTMLElement, headersElement: HTMLElement) => {
-    const dropElement = hasClosestByClassName(target, "item__document-drop");
+const getDocumentTabMoveTarget = (target: HTMLElement, headersElement: HTMLElement, clientX: number, clientY: number) => {
+    const previewElement = headersElement.parentElement.querySelector<HTMLElement>(":scope > .item__document-drop");
+    const previewRect = previewElement?.getBoundingClientRect();
+    const dropElement = hasClosestByClassName(target, "item__document-drop") ||
+        (previewElement && previewRect && isDocumentTabMovePreviewPoint(clientX, clientY, previewRect.left,
+            previewRect.top, previewRect.width, previewRect.height) ? previewElement : undefined);
     const tabHeaderElement = dropElement ? (Array.from(headersElement.children) as HTMLElement[]).find((item) =>
         item.dataset.id === dropElement.dataset.targetTabId) :
         hasClosestByAttribute(target, "data-type", "tab-header");
@@ -344,7 +349,8 @@ export class Wnd {
             if (isFileDrag) {
                 event.preventDefault();
                 if (event.shiftKey && isDocumentDrag) {
-                    const documentTabTarget = getDocumentTabMoveTarget(event.target, this.headersElement);
+                    const documentTabTarget = getDocumentTabMoveTarget(event.target, this.headersElement,
+                        event.clientX, event.clientY);
                     it.classList.remove("layout-tab-bars--drag");
                     if (documentTabTarget) {
                         updateDocumentTabMovePreview(documentTabTarget, it, event.clientX);
@@ -411,7 +417,8 @@ export class Wnd {
                 // 文档树拖拽
                 const documentDragData = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENTS) ?
                     parseDocumentTreeDragData(event.dataTransfer.getData(Constants.SIYUAN_DROP_DOCUMENTS)) : undefined;
-                const documentTabTarget = getDocumentTabMoveTarget(event.target, it.firstElementChild as HTMLElement);
+                const documentTabTarget = getDocumentTabMoveTarget(event.target, it.firstElementChild as HTMLElement,
+                    event.clientX, event.clientY);
                 const movePosition = documentTabTarget?.element.dataset.documentDropPosition as
                     "sibling" | "child" | undefined;
                 setPanelFocus(it.parentElement);

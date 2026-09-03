@@ -744,7 +744,7 @@ export class Toolbar {
             const memoElements = newNodes.filter(item => item.nodeType !== 3 &&
                 ((item as HTMLElement).getAttribute("data-type") || "").split(" ").includes("inline-memo")) as HTMLElement[];
             const memoElement = memoElements[0];
-            if (memoElement && !memoElement.getAttribute("data-inline-memo-content")) {
+            if (memoElement) {
                 this.showRender(protyle, memoElement, memoElements, memoOldHTMLs);
             }
         }
@@ -1372,8 +1372,7 @@ export class Toolbar {
                     protyle.toolbar.showRender(protyle, showMenuElement, undefined, html);
                 }
             } else if (type === "inline-memo") {
-                if (!isBatch && !showMenuElement.getAttribute("data-inline-memo-content") &&
-                    showMenuTypes.includes("inline-memo")) {
+                if (!isBatch && showMenuTypes.includes("inline-memo")) {
                     protyle.toolbar.showRender(protyle, showMenuElement, newNodes as Element[], html);
                 }
             } else if (type === "a") {

@@ -38,6 +38,7 @@ import {
     hasSemanticInlineType,
     stripSemanticMarkersFromRangeText
 } from "../util/inlineElementMarker";
+import {setInlineMemoContentIfMissing} from "./inlineMemoSelection";
 import {
     getInlineFontFamilyLabel,
     getInlineFontFamilyState,
@@ -621,6 +622,7 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
             case "inline-memo":
                 textElement.removeAttribute("contenteditable");
                 textElement.removeAttribute("data-content");
+                setInlineMemoContentIfMissing(textElement, textOption.color);
                 break;
         }
 

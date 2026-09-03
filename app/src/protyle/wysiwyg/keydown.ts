@@ -395,6 +395,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (matchHotKey("⌘A", event)) {
                 range.selectNodeContents(calloutTitleElement);
                 focusByRange(range);
+                protyle.toolbar.render(protyle, range);
                 event.preventDefault();
                 event.stopPropagation();
                 return;

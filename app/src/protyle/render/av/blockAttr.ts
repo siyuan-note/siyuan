@@ -28,6 +28,7 @@ import {
 import {isLastPointerMouse} from "../../../util/touchDragBridge";
 import {getLocalDropFiles, hasDataTransferFiles} from "../../upload/localDropFiles";
 import {cloneAVCellValueSnapshot} from "./cellValue";
+import {getAVAttributeEditorRange, restoreAVAttributeEditorRange} from "./blockAttrFocus";
 
 interface IAVAttributeTableData {
     avID: string;
@@ -417,6 +418,12 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                             srcIDs: [rowID],
                             avID,
                         }];
+                        const selection = document.getSelection();
+                        const currentRange = selection?.rangeCount ? selection.getRangeAt(0) : undefined;
+                        const editorRange = getAVAttributeEditorRange(protyle.wysiwyg.element, currentRange,
+                            protyle.toolbar.range);
+                        const restoreEditorRange = () => restoreAVAttributeEditorRange(protyle.wysiwyg.element,
+                            editorRange);
                         confirmDialog(window.siyuan.languages.removeAV, window.siyuan.languages.confirmDelete + "?", () => {
                             removeElement.setAttribute("disabled", "true");
                             transaction(protyle, doOperations, undoOperations.length > 0 ? undoOperations : undefined, {
@@ -433,7 +440,8 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                                     }
                                 }
                             });
-                        }, undefined, true);
+                            restoreEditorRange();
+                        }, restoreEditorRange, true);
                     }
                     event.stopPropagation();
                     return;

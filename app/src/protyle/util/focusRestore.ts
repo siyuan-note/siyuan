@@ -8,6 +8,15 @@ export const shouldFocusAfterZoom = (options: {
 export const hasFocusOffsets = (scrollAttr?: IScrollAttr) => Boolean(scrollAttr?.focusId) &&
     typeof scrollAttr.focusStart === "number" && typeof scrollAttr.focusEnd === "number";
 
+export const getZoomFocusScrollAttr = (rootId: string, focusId?: string,
+                                       focusPosition?: { start: number, end: number }): IScrollAttr | undefined =>
+    focusId ? {
+        rootId,
+        focusId,
+        focusStart: focusPosition?.start,
+        focusEnd: focusPosition?.end,
+    } : undefined;
+
 export const getPendingBlockFocusMode = (value: string | null): "default" | "zoom" | undefined => {
     if (value === "zoom") {
         return "zoom";

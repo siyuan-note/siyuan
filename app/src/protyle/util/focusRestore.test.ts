@@ -1,6 +1,11 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
-import {getPendingBlockFocusMode, hasFocusOffsets, shouldFocusAfterZoom} from "./focusRestore";
+import {
+    getPendingBlockFocusMode,
+    getZoomFocusScrollAttr,
+    hasFocusOffsets,
+    shouldFocusAfterZoom
+} from "./focusRestore";
 
 describe("shouldFocusAfterZoom", () => {
     it("focuses a block entered through regular navigation", () => {
@@ -60,6 +65,30 @@ describe("hasFocusOffsets", () => {
             focusStart: 0,
             focusEnd: 0,
         }), false);
+    });
+});
+
+describe("getZoomFocusScrollAttr", () => {
+    it("preserves block offsets while zooming out", () => {
+        assert.deepEqual(getZoomFocusScrollAttr("root-id", "block-id", {start: 7, end: 7}), {
+            rootId: "root-id",
+            focusId: "block-id",
+            focusStart: 7,
+            focusEnd: 7,
+        });
+    });
+
+    it("keeps block-only focus behavior without a position", () => {
+        assert.deepEqual(getZoomFocusScrollAttr("root-id", "block-id"), {
+            rootId: "root-id",
+            focusId: "block-id",
+            focusStart: undefined,
+            focusEnd: undefined,
+        });
+    });
+
+    it("does not create scroll attributes without a focus target", () => {
+        assert.equal(getZoomFocusScrollAttr("root-id"), undefined);
     });
 });
 

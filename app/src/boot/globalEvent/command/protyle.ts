@@ -1,5 +1,5 @@
 import {hasClosestBlock} from "../../../protyle/util/hasClosest";
-import {getTopAloneElement} from "../../../protyle/wysiwyg/getBlock";
+import {getContenteditableElement, getTopAloneElement} from "../../../protyle/wysiwyg/getBlock";
 import {enterBack, zoomOut} from "../../../menus/protyle";
 /// #if !MOBILE
 import {openFileById} from "../../../editor/util";
@@ -8,6 +8,7 @@ import {checkFold} from "../../../util/noRelyPCFunction";
 import {updateReadonly} from "../../../protyle/breadcrumb/action";
 import {Constants} from "../../../constants";
 import {fetchPost} from "../../../util/fetch";
+import {getSelectionOffset} from "../../../protyle/util/selection";
 
 export const onlyProtyleCommand = (options: {
     command: string,
@@ -63,7 +64,10 @@ export const onlyProtyleCommand = (options: {
         return true;
     }
     if (options.command === "enterBack") {
-        enterBack(options.protyle, nodeElement.getAttribute("data-node-id"));
+        const editableElement = getContenteditableElement(nodeElement, options.previousRange.startContainer) || nodeElement;
+        const focusPosition = editableElement.contains(options.previousRange.endContainer) ?
+            getSelectionOffset(editableElement, undefined, options.previousRange) : undefined;
+        enterBack(options.protyle, nodeElement.getAttribute("data-node-id"), focusPosition);
         return true;
     }
     return false;

@@ -8,7 +8,7 @@ import {
 } from "../protyle/util/hasClosest";
 import {MenuItem} from "./Menu";
 import {getTableCellVerticalAlignmentMenus, setTableCellStyle} from "../protyle/util/tableControl";
-import {focusBlock, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
+import {focusBlock, focusByOffset, focusByRange, focusByWbr, getEditorRange, selectAll,} from "../protyle/util/selection";
 import {getViewFoldOccurrenceID, hasViewFoldContext, setViewFoldTransient} from "../protyle/util/viewFold";
 import {
     deleteColumn,
@@ -75,7 +75,7 @@ import {
     TABLE_DEFAULT_COLUMN_WIDTH,
 } from "../protyle/util/tableColumnWidth";
 import {getParentDocumentID} from "../protyle/util/parentDocument";
-import {shouldFocusAfterZoom} from "../protyle/util/focusRestore";
+import {getZoomFocusScrollAttr, shouldFocusAfterZoom} from "../protyle/util/focusRestore";
 import {
     getSemanticInlineVisibleText,
     normalizeSemanticInlineElement
@@ -944,7 +944,7 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
     /// #endif
 };
 
-export const enterBack = (protyle: IProtyle, id: string) => {
+export const enterBack = (protyle: IProtyle, id: string, focusPosition?: { start: number, end: number }) => {
     if (!protyle.block.showAll) {
         const parentDocumentID = getParentDocumentID({
             path: protyle.path,
@@ -964,7 +964,7 @@ export const enterBack = (protyle: IProtyle, id: string) => {
             /// #endif
         }
     } else {
-        zoomOut({protyle, id: protyle.block.parent2ID, focusId: id});
+        zoomOut({protyle, id: protyle.block.parent2ID, focusId: id, focusPosition});
     }
 };
 
@@ -972,6 +972,7 @@ export const zoomOut = (options: {
     protyle: IProtyle,
     id: string,
     focusId?: string,
+    focusPosition?: { start: number, end: number },
     isPushBack?: boolean,
     callback?: () => void,
     reload?: boolean,
@@ -1048,10 +1049,7 @@ export const zoomOut = (options: {
             data: getResponse,
             protyle: options.protyle,
             action,
-            scrollAttr: options.focusId ? {
-                rootId: options.id,
-                focusId: options.focusId
-            } : undefined,
+            scrollAttr: getZoomFocusScrollAttr(options.id, options.focusId, options.focusPosition),
             scrollPosition: options.focusId ? "start" : undefined,
             afterCB: options.callback,
             dataDocType: options.dataDocType,
@@ -1077,7 +1075,11 @@ export const zoomOut = (options: {
                 } else {
                     showElement = getFirstBlock(showElement);
                 }
-                focusBlock(showElement, undefined, true, true);
+                if (showElement === focusElement && options.focusPosition) {
+                    focusByOffset(showElement, options.focusPosition.start, options.focusPosition.end);
+                } else {
+                    focusBlock(showElement, undefined, true, true);
+                }
             } else if (!options.focusId) {
                 const getDocParam: IObject = {
                     id: options.protyle.block.rootID,

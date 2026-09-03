@@ -515,8 +515,10 @@ export class WYSIWYG {
         }
         if (isFullWidth === "true") {
             this.element.parentElement.setAttribute("data-fullwidth", "true");
+            this.protyle.preview.element.setAttribute("data-fullwidth", "true");
         } else {
             this.element.parentElement.removeAttribute("data-fullwidth");
+            this.protyle.preview.element.removeAttribute("data-fullwidth");
         }
         const ialKeys = Object.keys(ial);
         for (let i = 0; i < this.element.attributes.length; i++) {
@@ -5052,7 +5054,8 @@ export class WYSIWYG {
                         if (embedElement) {
                             blockElement = embedElement;
                         }
-                        newRange = focusBlock(blockElement, undefined, event.clientX < rect.left + parseInt(this.element.style.paddingLeft)) || newRange;
+                        const paddingLeft = parseFloat(getComputedStyle(this.element).paddingLeft);
+                        newRange = focusBlock(blockElement, undefined, event.clientX < rect.left + paddingLeft) || newRange;
                         if (protyle.options.render.breadcrumb) {
                             protyle.breadcrumb.render(protyle, false, blockElement);
                         }

@@ -432,24 +432,97 @@
     outline: none;
   }
 
-  &--transition {
-    > .protyle-wysiwyg,
-    > .sy__backlink--bottom {
-      transition: padding .3s cubic-bezier(.25, .46, .45, .94) 0ms;
-    }
-
-    .protyle-title,
-    .protyle-background__ia,
-    .protyle-db-attr {
-      transition: margin .3s cubic-bezier(.25, .46, .45, .94) 0ms;
-    }
-  }
-
   &--backlink-reveal {
     > .protyle-wysiwyg,
     > .sy__backlink--bottom {
       transition: none;
     }
+  }
+}
+
+.protyle-content[data-padding-mode="responsive"],
+.protyle-preview[data-padding-mode="responsive"] {
+  container-name: protyle-padding;
+  container-type: inline-size;
+}
+
+// 水平边距的断点与 getEditorHorizontalPadding 保持一致，容器尺寸变化时由浏览器实时更新。
+.protyle-content[data-padding-mode="responsive"] {
+  > .protyle-top,
+  > .protyle-wysiwyg,
+  > .sy__backlink--bottom {
+    --b3-protyle-padding-left: 24px;
+    --b3-protyle-padding-right: 16px;
+  }
+
+  > .protyle-wysiwyg,
+  > .sy__backlink--bottom {
+    padding-left: var(--b3-protyle-padding-left);
+    padding-right: var(--b3-protyle-padding-right);
+  }
+
+  > .protyle-top {
+    .protyle-title,
+    .protyle-background__ia,
+    .protyle-db-attr {
+      margin-left: var(--b3-protyle-padding-left);
+      margin-right: var(--b3-protyle-padding-right);
+    }
+  }
+}
+
+.protyle-preview[data-padding-mode="responsive"][data-device="desktop"] > .b3-typography {
+  --b3-protyle-padding-left: 24px;
+  --b3-protyle-padding-right: 16px;
+  padding-left: var(--b3-protyle-padding-left);
+  padding-right: var(--b3-protyle-padding-right);
+}
+
+@container protyle-padding (width > 760px) {
+  .protyle-content[data-padding-mode="responsive"] {
+    > .protyle-top,
+    > .protyle-wysiwyg,
+    > .sy__backlink--bottom {
+      --b3-protyle-padding-left: 96px;
+      --b3-protyle-padding-right: 96px;
+    }
+  }
+
+  .protyle-preview[data-padding-mode="responsive"][data-device="desktop"] > .b3-typography {
+    --b3-protyle-padding-left: 96px;
+    --b3-protyle-padding-right: 96px;
+  }
+}
+
+@container protyle-padding (width > 952px) {
+  .protyle-content[data-padding-mode="responsive"]:not([data-fullwidth]) {
+    > .protyle-top,
+    > .protyle-wysiwyg,
+    > .sy__backlink--bottom {
+      --b3-protyle-padding-left: calc((100cqi - 760px) / 2);
+      --b3-protyle-padding-right: calc((100cqi - 760px) / 2);
+    }
+  }
+
+  .protyle-preview[data-padding-mode="responsive"][data-device="desktop"]:not([data-fullwidth]) > .b3-typography {
+    --b3-protyle-padding-left: calc((100cqi - 760px) / 2);
+    --b3-protyle-padding-right: calc((100cqi - 760px) / 2);
+  }
+}
+
+@container protyle-padding (width > 2280px) {
+  .protyle-content[data-padding-mode="responsive"]:not([data-fullwidth]) {
+    > .protyle-top,
+    > .protyle-wysiwyg,
+    > .sy__backlink--bottom {
+      --b3-protyle-padding-left: calc(100cqi * .382 / 1.382);
+      --b3-protyle-padding-right: calc(100cqi * .382 / 1.382);
+    }
+  }
+
+  .protyle-preview[data-padding-mode="responsive"][data-device="desktop"]:not([data-fullwidth]) > .b3-typography {
+    --b3-protyle-padding-left: calc(100cqi * .382 / 1.382);
+    --b3-protyle-padding-right: calc(100cqi * .382 / 1.382);
   }
 }
 

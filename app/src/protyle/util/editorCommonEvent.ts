@@ -1195,9 +1195,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     };
     const getAdjustedDragTarget = (event: DragEvent) => {
         const contentRect = protyle.contentElement.getBoundingClientRect();
-        const editorLeft = contentRect.left + (parseInt(editorElement.style.paddingLeft) || 0);
+        const editorStyle = getComputedStyle(editorElement);
+        const editorLeft = contentRect.left + (parseFloat(editorStyle.paddingLeft) || 0);
         const editorRight = contentRect.left + protyle.contentElement.clientWidth -
-            (parseInt(editorElement.style.paddingRight) || 0);
+            (parseFloat(editorStyle.paddingRight) || 0);
         const x = event.clientX < editorLeft ? editorLeft :
             (event.clientX >= editorRight ? editorRight - 6 : event.clientX);
         return document.elementFromPoint(x, event.clientY);
@@ -2505,9 +2506,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 point.className = "dragover__top";
             } else {
                 const contentRect = protyle.contentElement.getBoundingClientRect();
+                const editorStyle = getComputedStyle(editorElement);
                 const editorPosition = {
-                    left: contentRect.left + parseInt(editorElement.style.paddingLeft),
-                    right: contentRect.left + protyle.contentElement.clientWidth - parseInt(editorElement.style.paddingRight)
+                    left: contentRect.left + parseFloat(editorStyle.paddingLeft),
+                    right: contentRect.left + protyle.contentElement.clientWidth - parseFloat(editorStyle.paddingRight)
                 };
                 if (event.clientX < editorPosition.left) {
                     // 左侧

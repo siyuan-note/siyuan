@@ -46,10 +46,18 @@ func getBazaarPackages(pkgType, frontend string, showError bool) (packages []*Pa
 		return make([]*Package, 0), err
 	}
 
-	packages = make([]*Package, 0, len(result.StageIndex.Repos))
-	for _, repo := range result.StageIndex.Repos {
-		pkg := buildBazaarPackageWithMetadata(repo, result.BazaarStats, result.BazaarRatings,
-			result.RatingAvailable, pkgType, frontend)
+	packages = buildBazaarPackages(result.StageIndex, result.BazaarStats, result.BazaarRatings,
+		result.RatingAvailable, pkgType, frontend)
+	return
+}
+
+// buildBazaarPackages 仅以 Stage 索引中的仓库构建在线集市包，统计索引只用于补充元数据。
+func buildBazaarPackages(stageIndex *StageIndex, bazaarStats map[string]*bazaarStats,
+	bazaarRatings map[string]*PackageRating, ratingsAvailable bool, pkgType, frontend string) (packages []*Package) {
+	packages = make([]*Package, 0, len(stageIndex.Repos))
+	for _, repo := range stageIndex.Repos {
+		pkg := buildBazaarPackageWithMetadata(repo, bazaarStats, bazaarRatings,
+			ratingsAvailable, pkgType, frontend)
 		if nil == pkg {
 			continue
 		}

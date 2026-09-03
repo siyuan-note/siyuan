@@ -22,6 +22,8 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
@@ -142,12 +144,13 @@ var reservedPackageNames = map[string]bool{
 
 // IsValidPackageName 判断包名是否可以安全地用作跨平台目录名。
 func IsValidPackageName(packageName string) bool {
-	if len(packageName) < 1 || len(packageName) > 255 || packageName[0] == '.' || packageName[0] == ' ' ||
+	if !utf8.ValidString(packageName) || len(packageName) < 1 || len(packageName) > 255 || packageName[0] == '.' ||
+		packageName[0] == ' ' ||
 		packageName[len(packageName)-1] == '.' || packageName[len(packageName)-1] == ' ' || strings.Contains(packageName, "..") {
 		return false
 	}
-	for _, char := range []byte(packageName) {
-		if char < 0x20 || char > 0x7E || strings.ContainsRune(`<>&'":/\|?*`, rune(char)) {
+	for _, char := range packageName {
+		if !unicode.IsPrint(char) || strings.ContainsRune(`<>&'":/\|?*`, char) {
 			return false
 		}
 	}

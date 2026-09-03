@@ -48,6 +48,24 @@ func TestParseBazaarIndex(t *testing.T) {
 	}
 }
 
+func TestParseCurrentBazaarIndexSupportsUnicodePackagesAndIgnoresLegacyFields(t *testing.T) {
+	index, err := parseBazaarIndex([]byte(`{
+		"meta":{"schema":3,"ratingsAvailable":true,"generation":"43","publishedAt":1786665600},
+		"packages":{"时间线-Timeline":{"repo":"choyy/Timeline-SY","downloads":8302}},
+		"owner/removed":{"downloads":12}
+	}`))
+	if nil != err {
+		t.Fatal(err)
+	}
+	stats := bazaarStatsFromIndex(index)
+	if 8302 != stats["时间线-Timeline"].Downloads || 1 != len(stats) {
+		t.Fatalf("unexpected current package statistics: %+v", stats)
+	}
+	if 0 != len(index.legacyStats) {
+		t.Fatalf("current index must ignore root compatibility fields: %+v", index.legacyStats)
+	}
+}
+
 func TestParseLegacyBazaarIndex(t *testing.T) {
 	index, err := parseBazaarIndex([]byte(`{
 		"Akkuman/Repo":{"downloads":7},
@@ -69,7 +87,7 @@ func TestParseLegacyBazaarIndex(t *testing.T) {
 
 func TestParseFutureBazaarIndexUsesOnlyCompatibleDownloads(t *testing.T) {
 	index, err := parseBazaarIndex([]byte(`{
-		"meta":{"schema":3,"ratingsAvailable":true,"generation":"future","publishedAt":1786665600},
+		"meta":{"schema":4,"ratingsAvailable":true,"generation":"future","publishedAt":1786665600},
 		"packages":"unknown future structure",
 		"https://github.com/Owner/Repo":{"downloads":7}
 	}`))
@@ -122,7 +140,7 @@ func TestFetchBazaarIndexUsesTimeBucket(t *testing.T) {
 	resetBazaarIndexTestState(t)
 	bazaarIndexNow = func() time.Time { return time.Unix(900, 0) }
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		if "/bazaar/index.json" != request.URL.Path || "3" != request.URL.Query().Get("t") {
+		if bazaarIndexPath != request.URL.Path || "3" != request.URL.Query().Get("t") {
 			t.Fatalf("unexpected index URL: %s", request.URL.String())
 		}
 		writer.Header().Set("Content-Type", "application/json")
@@ -134,6 +152,29 @@ func TestFetchBazaarIndexUsesTimeBucket(t *testing.T) {
 	index, err := fetchBazaarIndex(context.Background())
 	if nil != err || 1 != index.legacyStats["owner/repo"].Downloads {
 		t.Fatalf("unexpected fetched index: index=%+v err=%v", index, err)
+	}
+}
+
+func TestFetchBazaarIndexFallsBackToLegacyPath(t *testing.T) {
+	resetBazaarIndexTestState(t)
+	bazaarIndexNow = func() time.Time { return time.Unix(900, 0) }
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Content-Type", "application/json")
+		switch request.URL.Path {
+		case bazaarIndexPath:
+			writer.WriteHeader(http.StatusNotFound)
+		case bazaarLegacyIndexPath:
+			_, _ = writer.Write([]byte(`{"owner/repo":{"downloads":1}}`))
+		default:
+			t.Fatalf("unexpected index URL: %s", request.URL.String())
+		}
+	}))
+	defer server.Close()
+	bazaarIndexStatServer = server.URL
+
+	index, err := fetchBazaarIndex(context.Background())
+	if nil != err || 1 != index.legacyStats["owner/repo"].Downloads {
+		t.Fatalf("unexpected legacy fallback: index=%+v err=%v", index, err)
 	}
 }
 
@@ -373,7 +414,7 @@ func TestBazaarPublicRatingOverlayConcurrentAccess(t *testing.T) {
 
 func testBazaarIndex(downloads int, ratingsAvailable bool) *bazaarIndexSnapshot {
 	return &bazaarIndexSnapshot{
-		meta: bazaarIndexMeta{Schema: 2, RatingsAvailable: ratingsAvailable},
+		meta: bazaarIndexMeta{Schema: bazaarIndexSchema, RatingsAvailable: ratingsAvailable},
 		packages: map[string]*bazaarIndexPackage{
 			"sample": {Repo: "owner/repo", Downloads: downloads},
 		},

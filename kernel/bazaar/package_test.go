@@ -152,6 +152,21 @@ func TestBuildBazaarPackageImageURLs(t *testing.T) {
 	}
 }
 
+func TestBuildBazaarPackagesUsesStageAsPackageSet(t *testing.T) {
+	stage := &StageIndex{Repos: []*StageRepo{{
+		URL:     "owner/active@abcdef0",
+		Package: &Package{Name: "时间线-Timeline"},
+	}}}
+	stats := map[string]*bazaarStats{
+		"时间线-Timeline":    {Downloads: 12},
+		"removed-package": {Downloads: 99},
+	}
+	packages := buildBazaarPackages(stage, stats, nil, false, "widgets", "")
+	if 1 != len(packages) || "时间线-Timeline" != packages[0].Name || 12 != packages[0].Downloads {
+		t.Fatalf("statistics must enrich only packages present in Stage: %+v", packages)
+	}
+}
+
 func TestOnlinePackagePreviewURLCompression(t *testing.T) {
 	if got := onlinePackagePreviewURL("owner/repo@hash", "../preview.jpg"); got != "" {
 		t.Fatalf("unexpected invalid preview URL: %q", got)
@@ -199,7 +214,7 @@ func TestSetPreferredPackageDeprecationMetadata(t *testing.T) {
 	if pkg.PreferredDeprecatedReason != "已停止维护" {
 		t.Fatalf("unexpected preferred deprecated reason %q", pkg.PreferredDeprecatedReason)
 	}
-	if len(pkg.Alternatives) != 1 || pkg.Alternatives[0] != "new-package" {
+	if len(pkg.Alternatives) != 2 || pkg.Alternatives[0] != "new-package" || pkg.Alternatives[1] != "插件" {
 		t.Fatalf("unexpected alternatives %#v", pkg.Alternatives)
 	}
 

@@ -28,7 +28,8 @@ import (
 )
 
 func TestIsValidPackageName(t *testing.T) {
-	valid := []string{"plugin-sample", "plugin.sample_1", "plugin sample (v1) + beta!", "CON.123", strings.Repeat("a", 255)}
+	valid := []string{"plugin-sample", "plugin.sample_1", "plugin sample (v1) + beta!", "时间线-Timeline", "CON.123",
+		strings.Repeat("a", 255)}
 	for _, name := range valid {
 		if !isValidPackageName(name) {
 			t.Fatalf("expected package name %q to be valid", name)
@@ -36,7 +37,7 @@ func TestIsValidPackageName(t *testing.T) {
 	}
 
 	invalid := []string{"", strings.Repeat("a", 256), ".hidden", " leading-space", "trailing-space ",
-		"trailing-period.", "plugin/sample", "plugin..sample", "插件", "CON", "com1", "LPT9"}
+		"trailing-period.", "plugin/sample", "plugin..sample", "zero\u200bwidth", "CON", "com1", "LPT9"}
 	for _, name := range invalid {
 		if isValidPackageName(name) {
 			t.Fatalf("expected package name %q to be invalid", name)
@@ -54,6 +55,10 @@ func TestInstalledPackageBaseURLPathEscapesPackageNameOnce(t *testing.T) {
 	got := installedPackageBaseURLPath("/plugins/", "A B#C%D(E)+F")
 	if got != "/plugins/A%20B%23C%25D%28E%29+F/" {
 		t.Fatalf("unexpected installed package URL: %q", got)
+	}
+	got = installedPackageBaseURLPath("/widgets/", "时间线-Timeline")
+	if got != "/widgets/%E6%97%B6%E9%97%B4%E7%BA%BF-Timeline/" {
+		t.Fatalf("unexpected Unicode package URL: %q", got)
 	}
 }
 
@@ -223,7 +228,7 @@ func TestGetInstalledPackageInfosIncludesInvalidPackages(t *testing.T) {
 		"mismatch":     bazaar.PackageInvalidReasonNameMismatch,
 		"invalid-json": bazaar.PackageInvalidReasonInvalidManifest,
 		"missing":      bazaar.PackageInvalidReasonMissingManifest,
-		"插件":           bazaar.PackageInvalidReasonInvalidManifest,
+		"插件":           "",
 	}
 	if len(got) != len(want) {
 		t.Fatalf("expected %d packages, got %#v", len(want), got)

@@ -34,7 +34,12 @@ import (
 	"golang.org/x/sync/singleflight"
 )
 
-const bazaarIndexCDNBucket = 5 * time.Minute
+const (
+	bazaarIndexCDNBucket  = 5 * time.Minute
+	bazaarIndexPath       = "/bazaar/index-v3.json"
+	bazaarLegacyIndexPath = "/bazaar/index.json"
+	bazaarIndexSchema     = 3
+)
 
 var (
 	bazaarIndexCacheTTL       = 5 * time.Minute
@@ -163,8 +168,20 @@ func snapshotBazaarIndex(now time.Time) (snapshot *bazaarIndexSnapshot, fresh, c
 }
 
 func fetchBazaarIndex(ctx context.Context) (ret *bazaarIndexSnapshot, err error) {
+	ret, err = fetchBazaarIndexPath(ctx, bazaarIndexPath)
+	if nil == err {
+		return
+	}
+	legacy, legacyErr := fetchBazaarIndexPath(ctx, bazaarLegacyIndexPath)
+	if nil != legacyErr {
+		return nil, fmt.Errorf("get current bazaar index failed: %w; get legacy bazaar index failed: %v", err, legacyErr)
+	}
+	return legacy, nil
+}
+
+func fetchBazaarIndexPath(ctx context.Context, indexPath string) (ret *bazaarIndexSnapshot, err error) {
 	timeBucket := bazaarIndexNow().Unix() / int64(bazaarIndexCDNBucket/time.Second)
-	u := fmt.Sprintf("%s/bazaar/index.json?t=%d", bazaarIndexStatServer, timeBucket)
+	u := fmt.Sprintf("%s%s?t=%d", bazaarIndexStatServer, indexPath, timeBucket)
 	buf := &bytes.Buffer{}
 	resp, err := httpclient.NewBrowserRequest().SetRetryCount(0).SetContext(ctx).SetOutput(buf).Get(u)
 	if nil != err {
@@ -201,7 +218,7 @@ func parseBazaarIndex(data []byte) (ret *bazaarIndexSnapshot, err error) {
 		if "" == strings.TrimSpace(ret.meta.Generation) || 1 > ret.meta.PublishedAt {
 			return nil, errors.New("invalid bazaar index generation metadata")
 		}
-		if 2 < ret.meta.Schema {
+		if bazaarIndexSchema < ret.meta.Schema {
 			ret.meta.RatingsAvailable = false
 		} else {
 			if !hasPackages {
@@ -230,29 +247,31 @@ func parseBazaarIndex(data []byte) (ret *bazaarIndexSnapshot, err error) {
 		return nil, errors.New("incomplete bazaar index metadata")
 	}
 
-	for rawRepo, rawStats := range raw {
-		if "meta" == rawRepo || "packages" == rawRepo {
-			continue
-		}
-		repo, valid := normalizeLegacyBazaarRepo(rawRepo)
-		if !valid {
-			return nil, fmt.Errorf("invalid bazaar repository: %s", rawRepo)
-		}
-		stats := &bazaarStats{}
-		if err = json.Unmarshal(rawStats, stats); nil != err {
-			return nil, err
-		}
-		if 0 > stats.Downloads {
-			return nil, fmt.Errorf("invalid bazaar downloads: %s", rawRepo)
-		}
-		if current := ret.legacyStats[repo]; nil != current {
-			if stats.Downloads > int(^uint(0)>>1)-current.Downloads {
-				return nil, fmt.Errorf("bazaar downloads overflow: %s", repo)
+	if !hasMeta || 2 == ret.meta.Schema || bazaarIndexSchema < ret.meta.Schema {
+		for rawRepo, rawStats := range raw {
+			if "meta" == rawRepo || "packages" == rawRepo {
+				continue
 			}
-			current.Downloads += stats.Downloads
-			continue
+			repo, valid := normalizeLegacyBazaarRepo(rawRepo)
+			if !valid {
+				return nil, fmt.Errorf("invalid bazaar repository: %s", rawRepo)
+			}
+			stats := &bazaarStats{}
+			if err = json.Unmarshal(rawStats, stats); nil != err {
+				return nil, err
+			}
+			if 0 > stats.Downloads {
+				return nil, fmt.Errorf("invalid bazaar downloads: %s", rawRepo)
+			}
+			if current := ret.legacyStats[repo]; nil != current {
+				if stats.Downloads > int(^uint(0)>>1)-current.Downloads {
+					return nil, fmt.Errorf("bazaar downloads overflow: %s", repo)
+				}
+				current.Downloads += stats.Downloads
+				continue
+			}
+			ret.legacyStats[repo] = stats
 		}
-		ret.legacyStats[repo] = stats
 	}
 	return
 }
@@ -312,7 +331,7 @@ func bazaarStatsFromIndex(index *bazaarIndexSnapshot) map[string]*bazaarStats {
 }
 
 func bazaarRatingsFromIndex(index *bazaarIndexSnapshot) (map[string]*PackageRating, bool) {
-	if nil == index || 2 != index.meta.Schema || !index.meta.RatingsAvailable {
+	if nil == index || 2 > index.meta.Schema || bazaarIndexSchema < index.meta.Schema || !index.meta.RatingsAvailable {
 		return map[string]*PackageRating{}, false
 	}
 	ret := make(map[string]*PackageRating, len(index.packages))

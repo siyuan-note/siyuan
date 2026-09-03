@@ -2050,9 +2050,19 @@ const initKernel = (workspace, port, lang, safeMode) => {
         }
         if (!openAsHidden) {
             const currentBootWindow = bootWindow;
+            if ("win32" === process.platform) {
+                currentBootWindow.setOpacity(0);
+            }
             currentBootWindow.once("ready-to-show", () => {
                 if (bootWindow === currentBootWindow && !currentBootWindow.isDestroyed()) {
                     currentBootWindow.show();
+                    if ("win32" === process.platform) {
+                        setImmediate(() => {
+                            if (bootWindow === currentBootWindow && !currentBootWindow.isDestroyed()) {
+                                currentBootWindow.setOpacity(1);
+                            }
+                        });
+                    }
                 }
             });
         }

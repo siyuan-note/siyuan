@@ -24,6 +24,7 @@ import {
 } from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
 import {getDocDisplayName, isEncryptedBox} from "../util/pathName";
+import {syncDocTitleIAL} from "./util/docTitleIAL";
 import {initMirror, refreshUndoButtons, syncMirrorFromBroadcast} from "./undo/globalUndo";
 /// #if !MOBILE
 import {updatePanelByEditor} from "../editor/util";
@@ -285,7 +286,8 @@ export class Protyle {
                                     this.protyle.model.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                                 }
                                 if (this.protyle.background) {
-                                    this.protyle.background.ial.title = data.data.title;
+                                    syncDocTitleIAL(this.protyle.background.ial, data.data.title, data.data.empty,
+                                        Constants.CUSTOM_SY_TITLE_EMPTY);
                                 }
                                 if (window.siyuan.config.export.addTitle &&
                                     !this.protyle.preview.element.classList.contains("fn__none")) {

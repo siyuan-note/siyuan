@@ -34,6 +34,7 @@ import {
     transactionsMayChangeRootHeadingNumberSetting
 } from "../../protyle/util/headingNumberCore";
 import {applyHeadingLevelUpdates, getHeadingLevelUpdateOperations} from "../../protyle/util/headingTransform";
+import {syncDocTitleIAL} from "../../protyle/util/docTitleIAL";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -347,14 +348,16 @@ export class Outline extends Model {
                     }
                     break;
                 case "rename":
-                    if (this.type === "local" && this.blockId === data.data.id) {
+                    if (this.blockId !== data.data.id) {
+                        break;
+                    }
+                    if (this.type === "local") {
                         this.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                         this.protyle.model.parent.updateTitle(getDocDisplayName(data.data.title, data.data.empty));
                     } else {
-                        this.updateDocTitle({
-                            title: data.data.title,
-                            icon: Constants.ZWSP
-                        }, -1);
+                        this.updateDocTitle(syncDocTitleIAL({
+                            icon: Constants.ZWSP,
+                        }, data.data.title, data.data.empty, Constants.CUSTOM_SY_TITLE_EMPTY), -1);
                     }
                     break;
                 case "closeBox":

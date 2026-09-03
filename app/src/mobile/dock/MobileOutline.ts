@@ -19,6 +19,7 @@ import {getDocDisplayName, isEncryptedBox} from "../../util/pathName";
 import {dragOverScroll, stopScrollAnimation} from "../../boot/globalEvent/dragover";
 import {escapeHtml} from "../../util/escape";
 import {getFileTreeIconHTML} from "../../emoji/fileTreeIcon";
+import {syncDocTitleIAL} from "../../protyle/util/docTitleIAL";
 import {bindMousePointerTouchBridge, isMousePointerTouchEvent} from "../util/mousePointerTouchBridge";
 import {
     operationsMayChangeOutline,
@@ -431,11 +432,9 @@ export class MobileOutline extends Model {
                     break;
                 case "rename":
                     if (this.blockId === data.data.id) {
-                        this.updateDocTitle({
-                            title: data.data.title,
+                        this.updateDocTitle(syncDocTitleIAL({
                             icon: Constants.ZWSP,
-                            [Constants.CUSTOM_SY_TITLE_EMPTY]: data.data.empty ? "true" : "false"
-                        }, -1);
+                        }, data.data.title, data.data.empty, Constants.CUSTOM_SY_TITLE_EMPTY), -1);
                     }
                     break;
             }

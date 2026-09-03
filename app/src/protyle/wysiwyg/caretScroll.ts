@@ -1,5 +1,10 @@
 import {getSelectionPosition} from "../util/selection";
-import {getCaretScrollDelta, type TCaretVerticalDirection} from "./caretScrollCore";
+import {
+    getCaretOverflowDirection,
+    getCaretScrollDelta,
+    type ICaretScrollGeometry,
+    type TCaretVerticalDirection
+} from "./caretScrollCore";
 
 const pendingFrames = new WeakMap<HTMLElement, number>();
 
@@ -13,7 +18,7 @@ const getLineHeight = (element: Element) => {
     return Number.isFinite(fontSize) && fontSize > 0 ? fontSize * 1.625 : window.siyuan.config.editor.fontSize * 1.625;
 };
 
-const scrollCaretIntoMargin = (protyle: IProtyle, direction: TCaretVerticalDirection) => {
+const getCaretScrollGeometry = (protyle: IProtyle): ICaretScrollGeometry | undefined => {
     const selection = window.getSelection();
     if (!selection?.focusNode || !protyle.wysiwyg.element.contains(selection.focusNode)) {
         return;
@@ -37,14 +42,22 @@ const scrollCaretIntoMargin = (protyle: IProtyle, direction: TCaretVerticalDirec
     }
     const lineHeight = getLineHeight(editableElement);
     const viewportRect = protyle.contentElement.getBoundingClientRect();
-    const delta = getCaretScrollDelta({
+    return {
         caretTop: caretPosition.top,
         caretHeight: lineHeight,
         viewportTop: viewportRect.top,
         viewportHeight: viewportRect.height,
         lineHeight,
         surroundingLines: window.siyuan.config.editor.cursorSurroundingLines,
-    }, direction);
+    };
+};
+
+const scrollCaretIntoMargin = (protyle: IProtyle, direction: TCaretVerticalDirection) => {
+    const geometry = getCaretScrollGeometry(protyle);
+    if (!geometry) {
+        return;
+    }
+    const delta = getCaretScrollDelta(geometry, direction);
     if (delta !== 0) {
         protyle.contentElement.scrollTop += delta;
     }
@@ -64,4 +77,18 @@ export const scheduleCaretScroll = (protyle: IProtyle, direction: TCaretVertical
             scrollCaretIntoMargin(protyle, direction);
         }
     }));
+};
+
+export const scheduleOffscreenCaretScroll = (protyle: IProtyle) => {
+    if (window.siyuan.config.editor.cursorSurroundingLines <= 0) {
+        return;
+    }
+    const geometry = getCaretScrollGeometry(protyle);
+    if (!geometry) {
+        return;
+    }
+    const direction = getCaretOverflowDirection(geometry);
+    if (direction) {
+        scheduleCaretScroll(protyle, direction);
+    }
 };

@@ -130,7 +130,7 @@ import {focusAVByArrow} from "../render/av/focus";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {isMobile} from "../../util/functions";
 import {confirmBlockRef} from "../../util/checkBlockRef";
-import {scheduleCaretScroll} from "./caretScroll";
+import {scheduleCaretScroll, scheduleOffscreenCaretScroll} from "./caretScroll";
 import {scrollPage} from "../scroll/page";
 import {
     BLOCK_SELECTION_CLASS,
@@ -428,10 +428,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             window.siyuan.menus.menu.remove();
         }
 
-        if (!event.altKey && isNotCtrl(event) && !event.isComposing &&
-            (event.key === "ArrowUp" || event.key === "ArrowDown") &&
+        if (!event.altKey && isNotCtrl(event) && !event.isComposing && event.key.startsWith("Arrow") &&
             !blockSelectionModeElement && !protyle.wysiwyg.element.querySelector(`.${BLOCK_SELECTION_CLASS}`)) {
-            scheduleCaretScroll(protyle, event.key === "ArrowUp" ? "up" : "down");
+            if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+                scheduleCaretScroll(protyle, event.key === "ArrowUp" ? "up" : "down");
+            } else {
+                scheduleOffscreenCaretScroll(protyle);
+            }
         }
 
         if (!["Alt", "Meta", "Shift", "Control", "CapsLock", "Escape"].includes(event.key) && protyle.options.render.breadcrumb) {

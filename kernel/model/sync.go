@@ -788,7 +788,7 @@ func formatRepoErrorMsg(err error) string {
 	} else if errors.Is(err, cloud.ErrDecryptFailed) {
 		msg = Conf.Language(135)
 	} else {
-		logging.LogErrorf("sync failed caused by network: %s", msg)
+		logging.LogErrorf("unclassified repository error: %s", msg)
 		msgLowerCase := strings.ToLower(msg)
 		if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
 			msg = Conf.Language(33)

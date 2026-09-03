@@ -3,18 +3,6 @@ export type TDocumentTabMovePosition = "sibling" | "child";
 export const getDocumentTabMovePosition = (clientX: number, left: number, width: number): TDocumentTabMovePosition =>
     clientX < left + width / 2 ? "sibling" : "child";
 
-export const isDocumentTabMovePreviewPoint = (clientX: number, clientY: number, left: number, top: number,
-                                               width: number, height: number) =>
-    clientX >= left && clientX <= left + width && clientY >= top && clientY <= top + height;
-
-export const getDocumentTabMovePreviewLeft = (targetLeft: number, targetWidth: number, containerLeft: number,
-                                               containerWidth: number, previewWidth: number, padding = 4) => {
-    const minLeft = previewWidth / 2 + padding;
-    const maxLeft = containerWidth - previewWidth / 2 - padding;
-    const preferredLeft = targetLeft - containerLeft + targetWidth / 2;
-    return Math.min(Math.max(preferredLeft, minLeft), Math.max(minLeft, maxLeft));
-};
-
 export const clearDocumentTabMovePreview = (tabHeadersElement?: ParentNode) => {
     const root = tabHeadersElement || document;
     root.querySelectorAll(".item__document-drop").forEach((item) => item.remove());

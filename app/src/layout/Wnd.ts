@@ -57,9 +57,7 @@ import {
     clearTabHoverSwitch,
     findDefaultTabNextId,
     findNextTabId,
-    getDocumentTabMovePreviewLeft,
     getDocumentTabMovePosition,
-    isDocumentTabMovePreviewPoint,
     reorderTabItems,
     scheduleTabHoverSwitch
 } from "./tabDrag";
@@ -71,15 +69,8 @@ interface IDocumentTabMoveTarget {
     rootID: string;
 }
 
-const getDocumentTabMoveTarget = (target: HTMLElement, headersElement: HTMLElement, clientX: number, clientY: number) => {
-    const previewElement = headersElement.parentElement.querySelector<HTMLElement>(":scope > .item__document-drop");
-    const previewRect = previewElement?.getBoundingClientRect();
-    const dropElement = hasClosestByClassName(target, "item__document-drop") ||
-        (previewElement && previewRect && isDocumentTabMovePreviewPoint(clientX, clientY, previewRect.left,
-            previewRect.top, previewRect.width, previewRect.height) ? previewElement : undefined);
-    const tabHeaderElement = dropElement ? (Array.from(headersElement.children) as HTMLElement[]).find((item) =>
-        item.dataset.id === dropElement.dataset.targetTabId) :
-        hasClosestByAttribute(target, "data-type", "tab-header");
+const getDocumentTabMoveTarget = (target: HTMLElement, headersElement: HTMLElement) => {
+    const tabHeaderElement = hasClosestByAttribute(target, "data-type", "tab-header");
     if (!tabHeaderElement || !headersElement.contains(tabHeaderElement)) {
         return;
     }
@@ -98,26 +89,19 @@ const getDocumentTabMoveTarget = (target: HTMLElement, headersElement: HTMLEleme
 };
 
 const updateDocumentTabMovePreview = (target: IDocumentTabMoveTarget, tabHeadersElement: HTMLElement, clientX: number) => {
-    let dropElement = tabHeadersElement.querySelector<HTMLElement>(":scope > .item__document-drop");
+    let dropElement = target.element.querySelector<HTMLElement>(":scope > .item__document-drop");
     if (!target.element.classList.contains("item--document-drop") || !dropElement) {
         clearDocumentTabMovePreview();
         target.element.classList.add("item--document-drop");
         tabHeadersElement.classList.add("layout-tab-bars--document-drop");
-        tabHeadersElement.insertAdjacentHTML("beforeend", `<span class="item__document-drop" data-target-tab-id="${escapeHtml(target.element.dataset.id)}">
+        target.element.insertAdjacentHTML("beforeend", `<span class="item__document-drop">
     <span class="item__document-drop-option" data-position="sibling">${escapeHtml(window.siyuan.languages.moveDocToSameLevel)}</span>
     <span class="item__document-drop-option" data-position="child">${escapeHtml(window.siyuan.languages.moveDocAsChild)}</span>
 </span>`);
-        dropElement = tabHeadersElement.querySelector<HTMLElement>(":scope > .item__document-drop");
+        dropElement = target.element.querySelector<HTMLElement>(":scope > .item__document-drop");
     }
-    const headersRect = tabHeadersElement.getBoundingClientRect();
-    const targetRect = target.element.getBoundingClientRect();
     const rect = dropElement.getBoundingClientRect();
-    dropElement.style.left = `${getDocumentTabMovePreviewLeft(targetRect.left, targetRect.width, headersRect.left,
-        headersRect.width, rect.width)}px`;
-    dropElement.style.top = `${targetRect.top - headersRect.top}px`;
-    dropElement.style.height = `${targetRect.height}px`;
-    const positionedRect = dropElement.getBoundingClientRect();
-    const position = getDocumentTabMovePosition(clientX, positionedRect.left, positionedRect.width);
+    const position = getDocumentTabMovePosition(clientX, rect.left, rect.width);
     target.element.dataset.documentDropPosition = position;
     dropElement.querySelectorAll<HTMLElement>(".item__document-drop-option").forEach((item) => {
         item.classList.toggle("item__document-drop-option--active", item.dataset.position === position);
@@ -348,9 +332,8 @@ export class Wnd {
             }
             if (isFileDrag) {
                 event.preventDefault();
-                if (event.shiftKey && isDocumentDrag) {
-                    const documentTabTarget = getDocumentTabMoveTarget(event.target, this.headersElement,
-                        event.clientX, event.clientY);
+                if ((event.shiftKey || it.classList.contains("layout-tab-bars--document-drop")) && isDocumentDrag) {
+                    const documentTabTarget = getDocumentTabMoveTarget(event.target, this.headersElement);
                     it.classList.remove("layout-tab-bars--drag");
                     if (documentTabTarget) {
                         updateDocumentTabMovePreview(documentTabTarget, it, event.clientX);
@@ -417,12 +400,12 @@ export class Wnd {
                 // 文档树拖拽
                 const documentDragData = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENTS) ?
                     parseDocumentTreeDragData(event.dataTransfer.getData(Constants.SIYUAN_DROP_DOCUMENTS)) : undefined;
-                const documentTabTarget = getDocumentTabMoveTarget(event.target, it.firstElementChild as HTMLElement,
-                    event.clientX, event.clientY);
+                const documentMoveActive = event.shiftKey || it.classList.contains("layout-tab-bars--document-drop");
+                const documentTabTarget = getDocumentTabMoveTarget(event.target, it.firstElementChild as HTMLElement);
                 const movePosition = documentTabTarget?.element.dataset.documentDropPosition as
                     "sibling" | "child" | undefined;
                 setPanelFocus(it.parentElement);
-                if (event.shiftKey && documentDragData) {
+                if (documentMoveActive && documentDragData) {
                     event.preventDefault();
                     event.stopPropagation();
                     clearTabDragPreview(it);

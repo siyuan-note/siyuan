@@ -1544,12 +1544,6 @@ const initKernel = (workspace, port, lang, safeMode) => {
             resolve(false);
             return;
         }
-        if (openAsHidden) {
-            bootWindow.minimize();
-        } else {
-            bootWindow.show();
-        }
-
         const kernelName = "win32" === process.platform ? "SiYuan-Kernel.exe" : "SiYuan-Kernel";
         const kernelPath = path.join(appDir, "kernel", kernelName);
         if (!fs.existsSync(kernelPath)) {
@@ -1588,6 +1582,11 @@ const initKernel = (workspace, port, lang, safeMode) => {
             return;
         }
         loadBootWindow();
+        if (openAsHidden) {
+            bootWindow.minimize();
+        } else {
+            bootWindow.show();
+        }
         const currentKernelPort = kernelPort;
         const cmds = ["serve", "--port", currentKernelPort, "--wd", appDir, "--attach-ui"];
         if (isDevEnv && workspaces.length === 0) {

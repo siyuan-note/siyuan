@@ -31,16 +31,18 @@ import (
 )
 
 type Account struct {
-	Username string
-	Password string
-	Token    string
+	Username          string
+	Password          string
+	Token             string
+	CredentialVersion string
 }
 type AccountsMap map[string]*Account // username -> account
 
-// PublishSession 发布服务会话，记录所属用户名与最近活跃时间。
+// PublishSession 发布服务会话，记录所属用户名、凭据版本与最近活跃时间。
 type PublishSession struct {
-	Username   string
-	LastActive time.Time
+	Username          string
+	CredentialVersion string
+	LastActive        time.Time
 }
 
 type ClaimsKeyType string
@@ -106,24 +108,35 @@ func GetBasicAuthAccount(username string) *Account {
 	return &accountCopy
 }
 
-// GetBasicAuthUsernameBySessionID 返回会话对应的用户名；会话不存在或已过期时返回空字符串。
-func GetBasicAuthUsernameBySessionID(sessionID string) string {
+// GetBasicAuthAccountBySessionID 返回会话对应的账户；会话不存在、已过期或凭据已变更时返回 nil。
+func GetBasicAuthAccountBySessionID(sessionID string) *Account {
+	accountsLock.RLock()
+	defer accountsLock.RUnlock()
+
 	sessionLock.Lock()
 	defer sessionLock.Unlock()
 
 	session := sessionsMap[sessionID]
 	if nil == session {
-		return ""
+		return nil
 	}
 	if publishSessionTTL < time.Since(session.LastActive) {
 		// 会话空闲超时，删除并视为无效
 		delete(sessionsMap, sessionID)
-		return ""
+		return nil
+	}
+
+	account := accountsMap[session.Username]
+	if nil == account || account.CredentialVersion != session.CredentialVersion {
+		// 账户不存在或凭据已变更，删除并视为无效
+		delete(sessionsMap, sessionID)
+		return nil
 	}
 
 	// 刷新最近活跃时间，用于过期与淘汰判定
 	session.LastActive = time.Now()
-	return session.Username
+	accountCopy := *account
+	return &accountCopy
 }
 
 func GetNewSessionID() string {
@@ -131,11 +144,19 @@ func GetNewSessionID() string {
 	return sessionID
 }
 
-// AddSession 为指定用户注册发布服务会话并返回实际生效的会话 ID。
+// AddSession 为指定账户注册发布服务会话并返回实际生效的会话 ID；账户凭据已变更时返回空字符串。
 // 同一用户已有有效会话时复用其 ID，避免重复认证导致会话无限增长
 // https://github.com/siyuan-note/siyuan/security/advisories/GHSA-f4vj-ppp2-5hg4；
 // 同时按空闲时长清理过期会话，并在超出全局或单账户上限时淘汰最久未活跃的会话。
-func AddSession(username string) string {
+func AddSession(username, credentialVersion string) string {
+	accountsLock.RLock()
+	defer accountsLock.RUnlock()
+
+	account := accountsMap[username]
+	if nil == account || account.CredentialVersion != credentialVersion {
+		return ""
+	}
+
 	sessionLock.Lock()
 	defer sessionLock.Unlock()
 
@@ -144,7 +165,7 @@ func AddSession(username string) string {
 
 	// 复用该用户已有的有效会话
 	for id, session := range sessionsMap {
-		if session.Username == username {
+		if session.Username == username && session.CredentialVersion == credentialVersion {
 			session.LastActive = now
 			return id
 		}
@@ -161,7 +182,11 @@ func AddSession(username string) string {
 	}
 
 	sessionID := GetNewSessionID()
-	sessionsMap[sessionID] = &PublishSession{Username: username, LastActive: now}
+	sessionsMap[sessionID] = &PublishSession{
+		Username:          username,
+		CredentialVersion: credentialVersion,
+		LastActive:        now,
+	}
 	return sessionID
 }
 
@@ -244,7 +269,26 @@ func InitPublishAccounts() {
 
 	// 账户及其 token 发布后保持不可变，更新时整体替换完整快照，避免请求读取到构建中的状态。
 	accountsLock.Lock()
+	for username, account := range accounts {
+		previous := accountsMap[username]
+		if nil != previous && previous.Password == account.Password {
+			account.CredentialVersion = previous.CredentialVersion
+		}
+		if "" == account.CredentialVersion {
+			account.CredentialVersion = uuid.New().String()
+		}
+	}
 	accountsMap = accounts
+
+	// 立即撤销账户已删除或密码已变更的会话。
+	sessionLock.Lock()
+	for id, session := range sessionsMap {
+		account := accounts[session.Username]
+		if nil == account || account.CredentialVersion != session.CredentialVersion {
+			delete(sessionsMap, id)
+		}
+	}
+	sessionLock.Unlock()
 	accountsLock.Unlock()
 }
 

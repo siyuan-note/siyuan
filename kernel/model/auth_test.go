@@ -54,11 +54,34 @@ func resetPublishSessions(t *testing.T) {
 	})
 }
 
+func resetPublishAccounts(t *testing.T) {
+	t.Helper()
+	accountsLock.Lock()
+	original := accountsMap
+	accountsMap = AccountsMap{}
+	accountsLock.Unlock()
+	t.Cleanup(func() {
+		accountsLock.Lock()
+		accountsMap = original
+		accountsLock.Unlock()
+	})
+}
+
+func addTestPublishAccount(username string) *Account {
+	account := &Account{Username: username, CredentialVersion: "credential-" + username}
+	accountsLock.Lock()
+	accountsMap[username] = account
+	accountsLock.Unlock()
+	return account
+}
+
 func TestAddPublishSessionReusesSessionForSameUsername(t *testing.T) {
 	resetPublishSessions(t)
+	resetPublishAccounts(t)
+	account := addTestPublishAccount("alice")
 
-	first := AddSession("alice")
-	if second := AddSession("alice"); second != first {
+	first := AddSession(account.Username, account.CredentialVersion)
+	if second := AddSession(account.Username, account.CredentialVersion); second != first {
 		t.Fatalf("session ID = %q, want reused %q", second, first)
 	}
 
@@ -72,14 +95,16 @@ func TestAddPublishSessionReusesSessionForSameUsername(t *testing.T) {
 
 func TestPublishSessionExpiresAfterInactivity(t *testing.T) {
 	resetPublishSessions(t)
+	resetPublishAccounts(t)
+	account := addTestPublishAccount("alice")
 
-	sessionID := AddSession("alice")
+	sessionID := AddSession(account.Username, account.CredentialVersion)
 	sessionLock.Lock()
 	sessionsMap[sessionID].LastActive = time.Now().Add(-publishSessionTTL - time.Second)
 	sessionLock.Unlock()
 
-	if username := GetBasicAuthUsernameBySessionID(sessionID); "" != username {
-		t.Fatalf("expired session username = %q, want empty", username)
+	if account = GetBasicAuthAccountBySessionID(sessionID); nil != account {
+		t.Fatalf("expired session account = %+v, want nil", account)
 	}
 
 	sessionLock.Lock()
@@ -92,11 +117,13 @@ func TestPublishSessionExpiresAfterInactivity(t *testing.T) {
 
 func TestPublishSessionGlobalCapEvictsOldest(t *testing.T) {
 	resetPublishSessions(t)
+	resetPublishAccounts(t)
 
 	base := time.Now()
 	ids := make([]string, publishSessionGlobalCap)
 	for i := range ids {
-		ids[i] = AddSession("user-" + strconv.Itoa(i))
+		account := addTestPublishAccount("user-" + strconv.Itoa(i))
+		ids[i] = AddSession(account.Username, account.CredentialVersion)
 	}
 	sessionLock.Lock()
 	for i, id := range ids {
@@ -104,7 +131,8 @@ func TestPublishSessionGlobalCapEvictsOldest(t *testing.T) {
 	}
 	sessionLock.Unlock()
 
-	newID := AddSession("overflow")
+	account := addTestPublishAccount("overflow")
+	newID := AddSession(account.Username, account.CredentialVersion)
 	sessionLock.Lock()
 	defer sessionLock.Unlock()
 	if publishSessionGlobalCap != len(sessionsMap) {
@@ -140,6 +168,59 @@ func TestPublishSessionPerAccountCapEvictsOldest(t *testing.T) {
 		t.Fatal("oldest session of the account was not evicted")
 	}
 	sessionLock.Unlock()
+}
+
+func TestPublishSessionInvalidatedAfterPasswordChange(t *testing.T) {
+	InitJwtKey()
+	preserveAuthState(t)
+	resetPublishSessions(t)
+
+	Conf = NewAppConf()
+	Conf.Publish = conf.NewPublish()
+	Conf.Publish.Auth.Accounts = []*conf.BasicAuthAccount{
+		{Username: "alice", Password: "old-password"},
+		{Username: "bob", Password: "bob-password"},
+	}
+	InitPublishAccounts()
+
+	alice := GetBasicAuthAccount("alice")
+	bob := GetBasicAuthAccount("bob")
+	aliceSessionID := AddSession(alice.Username, alice.CredentialVersion)
+	bobSessionID := AddSession(bob.Username, bob.CredentialVersion)
+
+	Conf.Publish.Auth.Accounts[0].Password = "new-password"
+	InitPublishAccounts()
+
+	if sessionID := AddSession(alice.Username, alice.CredentialVersion); "" != sessionID {
+		t.Fatalf("stale credentials created session %q", sessionID)
+	}
+	if account := GetBasicAuthAccountBySessionID(aliceSessionID); nil != account {
+		t.Fatalf("password-changed account session remained valid: %+v", account)
+	}
+	if account := GetBasicAuthAccountBySessionID(bobSessionID); nil == account {
+		t.Fatal("unchanged account session became invalid")
+	}
+}
+
+func TestPublishSessionPreservedWhenCredentialsUnchanged(t *testing.T) {
+	InitJwtKey()
+	preserveAuthState(t)
+	resetPublishSessions(t)
+
+	Conf = NewAppConf()
+	Conf.Publish = conf.NewPublish()
+	Conf.Publish.Auth.Accounts = []*conf.BasicAuthAccount{
+		{Username: "alice", Password: "same-password"},
+	}
+	InitPublishAccounts()
+
+	alice := GetBasicAuthAccount("alice")
+	sessionID := AddSession(alice.Username, alice.CredentialVersion)
+	InitPublishAccounts()
+
+	if account := GetBasicAuthAccountBySessionID(sessionID); nil == account {
+		t.Fatal("session became invalid although credentials were unchanged")
+	}
 }
 
 func TestIsPublishServiceToken(t *testing.T) {

@@ -197,17 +197,11 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 		if cookieErr == nil {
 			// Check session ID
 			sessionID := sessionIdCookie.Value
-			if username := model.GetBasicAuthUsernameBySessionID(sessionID); username != "" {
+			if account := model.GetBasicAuthAccountBySessionID(sessionID); account != nil {
 				// Valid session
-				if account := model.GetBasicAuthAccount(username); account != nil {
-					// Valid account
-					request.Header.Set(model.XAuthTokenKey, account.Token)
-					response, err = publishRoundTripper.RoundTrip(request)
-					return
-				}
-
-				// Invalid account, remove session
-				model.DeleteSession(sessionID)
+				request.Header.Set(model.XAuthTokenKey, account.Token)
+				response, err = publishRoundTripper.RoundTrip(request)
+				return
 			}
 		}
 
@@ -237,7 +231,10 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 		util.AuthThrottleReset(ip)
 
 		// set session cookie，同一账户已有有效会话时复用其 ID，避免重复认证导致会话无限增长
-		sessionID := model.AddSession(username)
+		sessionID := model.AddSession(username, account.CredentialVersion)
+		if "" == sessionID {
+			return publishAuthRejectResponse(request, http.StatusUnauthorized, 0), nil
+		}
 		cookie := &http.Cookie{
 			Name:     model.SessionIdCookieName,
 			Value:    sessionID,

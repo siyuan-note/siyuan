@@ -49,25 +49,25 @@ export const refreshVisibleRatingUI = (controller: TBazaarController) => {
         const bazaarType = element.dataset.packageType;
         const packageName = element.dataset.name;
         if (isBazaarPackageType(bazaarType) && packageName) {
-            keys.add(controller._getRatingKey(bazaarType, packageName));
+            keys.add(getRatingKey(bazaarType, packageName));
         }
     });
     keys.forEach((key) => {
         const separator = key.indexOf(":");
-        controller._refreshRatingUI(key.slice(0, separator) as TBazaarType, key.slice(separator + 1));
+        refreshRatingUI(controller, key.slice(0, separator) as TBazaarType, key.slice(separator + 1));
     });
     const sideElement = controller.element?.querySelector("#configBazaarReadme.config__view--show .item__side");
     const bazaarType = sideElement?.getAttribute("data-package-type") as TBazaarType;
     const packageName = sideElement?.getAttribute("data-name");
     const from = sideElement?.getAttribute("data-from") as "downloaded" | "updated" | "bazaar";
     if (bazaarType && packageName && from) {
-        controller._loadReadmeRating(bazaarType, packageName, from);
+        loadReadmeRating(controller, bazaarType, packageName, from);
     }
     if (window.siyuan.user) {
         if (controller._isUpdatePanelActive()) {
-            controller._loadUpdatedRatings();
+            loadUpdatedRatings(controller);
         } else if (controller._data.downloadedType) {
-            controller._loadDownloadedUserRatings(controller._data.downloadedType, controller._data.downloadedDefault);
+            loadDownloadedUserRatings(controller, controller._data.downloadedType, controller._data.downloadedDefault);
         }
     }
 };
@@ -81,8 +81,8 @@ export const bindRatingUserChange = (controller: TBazaarController) => {
         if (!controller._isMountCurrent(mount)) {
             return;
         }
-        controller._syncRatingUser();
-        controller._refreshVisibleRatingUI();
+        syncRatingUser(controller);
+        refreshVisibleRatingUI(controller);
     };
     window.addEventListener("siyuan-login-success", controller._ratingUserChangeHandler);
 };
@@ -110,10 +110,10 @@ ${inactiveStars}
 </span>`;
 };
 
-export const genCardRatingHTML = (controller: TBazaarController, item: Pick<IBazaarItem, "rating">, loaded = true) => {
+export const genCardRatingHTML = (item: Pick<IBazaarItem, "rating">, loaded = true) => {
     const rating = getDisplayableBazaarRating(item.rating);
     const hidden = !loaded || !rating;
-    const summary = controller._getRatingSummaryText(rating);
+    const summary = getRatingSummaryText(rating);
     const average = rating?.average.toLocaleString(undefined, {
         minimumFractionDigits: 1,
         maximumFractionDigits: 1,
@@ -162,16 +162,16 @@ export const genReadmeRatingHTML = (controller: TBazaarController, bazaarType: T
     if (!loaded) {
         return "";
     }
-    controller._syncRatingUser();
+    syncRatingUser(controller);
     const rating = getDisplayableBazaarRating(item.rating);
-    const userRating = controller._data.userRatings.get(controller._getRatingKey(bazaarType, item.name)) || 0;
+    const userRating = controller._data.userRatings.get(getRatingKey(bazaarType, item.name)) || 0;
     let action = "";
     if (item.installed) {
         if (window.siyuan.user) {
             const actionText = userRating ? window.siyuan.languages.bazaarYourRatingValue.replace("${rating}", userRating.toString()) :
                 window.siyuan.languages.bazaarRatePackage;
             action = `<button type="button" class="config-bazaar__rating-action" data-type="rate-package" aria-label="${escapeAttr(actionText)}">
-${controller._genRatingStarsHTML(userRating)}
+${genRatingStarsHTML(userRating)}
 <span>${escapeHtml(actionText)}</span>
 </button>`;
         } else {
@@ -180,12 +180,12 @@ ${controller._genRatingStarsHTML(userRating)}
     } else {
         action = `<div class="config-bazaar__rating-tip">${window.siyuan.languages.bazaarRatingInstallTip}</div>`;
     }
-    const summary = rating ? controller._getRatingSummaryText(rating) : "";
+    const summary = rating ? getRatingSummaryText(rating) : "";
     const aggregate = rating ? `<div class="config-bazaar__rating-summary" aria-label="${escapeAttr(summary)}">
-    ${controller._genRatingStarsHTML(rating.average)}
+    ${genRatingStarsHTML(rating.average)}
     <span>${escapeHtml(summary)}</span>
 </div>
-<div class="config-bazaar__rating-distribution">${controller._genRatingDistributionHTML(rating)}</div>` : "";
+<div class="config-bazaar__rating-distribution">${genRatingDistributionHTML(rating)}</div>` : "";
     return `<section class="item__meta-section config-bazaar__rating-detail">
 <div class="item__meta-title">${window.siyuan.languages.bazaarRating}</div>
 ${aggregate}
@@ -194,7 +194,7 @@ ${action}
 };
 
 export const applyPackageRating = (controller: TBazaarController, bazaarType: TBazaarType, packageName: string, rating?: IBazaarRating, refreshUI = true) => {
-    const key = controller._getRatingKey(bazaarType, packageName);
+    const key = getRatingKey(bazaarType, packageName);
     if (rating) {
         controller._data.ratings.set(key, rating);
     } else {
@@ -216,7 +216,7 @@ export const applyPackageRating = (controller: TBazaarController, bazaarType: TB
     updateItem(detail?.installed);
     updateItem(detail?.available);
     if (refreshUI) {
-        controller._refreshRatingUI(bazaarType, packageName);
+        refreshRatingUI(controller, bazaarType, packageName);
     }
 };
 
@@ -224,15 +224,15 @@ export const applyPackageRatingResponse = (controller: TBazaarController, bazaar
         ratingAvailable?: unknown;
         rating?: Partial<IBazaarRating> | null;
     }, refreshUI = true) => {
-    const key = controller._getRatingKey(bazaarType, packageName);
+    const key = getRatingKey(bazaarType, packageName);
     const publicRating = normalizeBazaarPackageRatingResponse(data);
     if (publicRating.loaded) {
         controller._data.downloadedRatingKeys.add(key);
-        controller._applyPackageRating(bazaarType, packageName, publicRating.rating, refreshUI);
+        applyPackageRating(controller, bazaarType, packageName, publicRating.rating, refreshUI);
     } else {
         controller._data.downloadedRatingKeys.delete(key);
         if (refreshUI) {
-            controller._refreshRatingUI(bazaarType, packageName);
+            refreshRatingUI(controller, bazaarType, packageName);
         }
     }
     return publicRating.loaded;
@@ -251,23 +251,23 @@ export const getRatingItem = (controller: TBazaarController, bazaarType: TBazaar
 };
 
 export const refreshRatingUI = (controller: TBazaarController, bazaarType: TBazaarType, packageName: string) => {
-    controller._syncRatingUser();
+    syncRatingUser(controller);
     controller.element?.querySelectorAll(`.b3-card[data-package-type="${bazaarType}"]`).forEach((card) => {
         if (card.getAttribute("data-name") !== packageName) {
             return;
         }
         const source = card.getAttribute("data-package-source") as "downloaded" | "updated" | "bazaar";
-        const item = controller._getRatingItem(bazaarType, packageName, source);
+        const item = getRatingItem(controller, bazaarType, packageName, source);
         const slot = card.querySelector<HTMLElement>("[data-rating-card-slot]");
         if (item && slot) {
-            const key = controller._getRatingKey(bazaarType, packageName);
+            const key = getRatingKey(bazaarType, packageName);
             const loaded = isBazaarPackageRatingLoaded(source, controller._data.downloadedRatingKeys.has(key),
                 item.ratingAvailable);
             if (source === "bazaar") {
                 const rating = loaded ? getDisplayableBazaarRating(item.rating) : undefined;
                 slot.classList.toggle("fn__none", !rating);
                 if (rating) {
-                    slot.setAttribute("aria-label", controller._getRatingSummaryText(rating));
+                    slot.setAttribute("aria-label", getRatingSummaryText(rating));
                     const averageElement = slot.lastElementChild;
                     if (averageElement) {
                         averageElement.textContent = rating.average.toLocaleString(undefined, {
@@ -297,14 +297,14 @@ export const refreshRatingUI = (controller: TBazaarController, bazaarType: TBaza
         return;
     }
     const from = sideElement.getAttribute("data-from") as "downloaded" | "updated" | "bazaar";
-    const item = controller._getRatingItem(bazaarType, packageName, from);
+    const item = getRatingItem(controller, bazaarType, packageName, from);
     const slot = sideElement.querySelector('[data-type="rating-detail-slot"]');
     if (item && slot) {
-        const key = controller._getRatingKey(bazaarType, packageName);
+        const key = getRatingKey(bazaarType, packageName);
         const loaded = isBazaarPackageRatingLoaded(from, controller._data.downloadedRatingKeys.has(key),
             item.ratingAvailable);
         const displayItem = from === "bazaar" ? item : {...item, rating: controller._data.ratings.get(key)};
-        slot.innerHTML = controller._genReadmeRatingHTML(bazaarType, displayItem, loaded);
+        slot.innerHTML = genReadmeRatingHTML(controller, bazaarType, displayItem, loaded);
     }
 };
 
@@ -316,7 +316,7 @@ export const loadDownloadedRatings = (controller: TBazaarController, bazaarType:
     const requestID = (controller._data.ratingBatchRequestIDs.get(bazaarType) || 0) + 1;
     controller._data.ratingBatchRequestIDs.set(bazaarType, requestID);
     const mutationVersions = new Map(packageNames.map((packageName) => {
-        const key = controller._getRatingKey(bazaarType, packageName);
+        const key = getRatingKey(bazaarType, packageName);
         return [packageName, getBazaarRatingMutationVersion(controller._data.ratingMutationVersions, key)];
     }));
     const mount = controller._captureMount();
@@ -333,24 +333,24 @@ export const loadDownloadedRatings = (controller: TBazaarController, bazaarType:
             return;
         }
         ratings.forEach((ratingResponse, packageName) => {
-            const key = controller._getRatingKey(bazaarType, packageName);
+            const key = getRatingKey(bazaarType, packageName);
             if (isBazaarRatingMutationVersionCurrent(controller._data.ratingMutationVersions, key,
                 mutationVersions.get(packageName) || 0)) {
-                controller._applyPackageRatingResponse(bazaarType, packageName, ratingResponse);
+                applyPackageRatingResponse(controller, bazaarType, packageName, ratingResponse);
             }
         });
     });
 };
 
 export const loadDownloadedUserRatings = (controller: TBazaarController, bazaarType: TBazaarType, packages: IBazaarItem[]) => {
-    controller._syncRatingUser();
+    syncRatingUser(controller);
     if (!window.siyuan.user) {
         return;
     }
     const requestedUserID = controller._ratingUserID;
     const packageNames = Array.from(new Set(packages.filter((item) => !item.invalidReason).map((item) => item.name)))
         .filter((packageName) => {
-            const key = controller._getRatingKey(bazaarType, packageName);
+            const key = getRatingKey(bazaarType, packageName);
             return !controller._data.userRatingKeys.has(key) &&
                 !controller._data.userRatingLoadingKeys.has(`${requestedUserID}|${key}`);
         });
@@ -361,12 +361,12 @@ export const loadDownloadedUserRatings = (controller: TBazaarController, bazaarT
     const requestID = (controller._data.userRatingBatchRequestIDs.get(requestKey) || 0) + 1;
     controller._data.userRatingBatchRequestIDs.set(requestKey, requestID);
     const loadingKeys = packageNames.map((packageName) => {
-        const loadingKey = `${requestedUserID}|${controller._getRatingKey(bazaarType, packageName)}`;
+        const loadingKey = `${requestedUserID}|${getRatingKey(bazaarType, packageName)}`;
         controller._data.userRatingLoadingKeys.add(loadingKey);
         return loadingKey;
     });
     const mutationVersions = new Map(packageNames.map((packageName) => {
-        const key = controller._getRatingKey(bazaarType, packageName);
+        const key = getRatingKey(bazaarType, packageName);
         return [packageName, getBazaarRatingMutationVersion(controller._data.ratingMutationVersions, key)];
     }));
     const mount = controller._captureMount();
@@ -374,7 +374,7 @@ export const loadDownloadedUserRatings = (controller: TBazaarController, bazaarT
         packageType: bazaarType,
         packageNames,
     }, response => {
-        controller._syncRatingUser();
+        syncRatingUser(controller);
         if (response.code !== 0 || requestedUserID !== controller._ratingUserID ||
             controller._data.userRatingBatchRequestIDs.get(requestKey) !== requestID ||
             !controller._isMountCurrent(mount) || !controller.element?.isConnected) {
@@ -385,12 +385,12 @@ export const loadDownloadedUserRatings = (controller: TBazaarController, bazaarT
             return;
         }
         userRatings.forEach((userRating, packageName) => {
-            const key = controller._getRatingKey(bazaarType, packageName);
+            const key = getRatingKey(bazaarType, packageName);
             if (isBazaarRatingMutationVersionCurrent(controller._data.ratingMutationVersions, key,
                 mutationVersions.get(packageName) || 0)) {
                 controller._data.userRatings.set(key, userRating);
                 controller._data.userRatingKeys.add(key);
-                controller._refreshRatingUI(bazaarType, packageName);
+                refreshRatingUI(controller, bazaarType, packageName);
             }
         });
     }).finally(() => {
@@ -406,19 +406,19 @@ export const loadUpdatedRatings = (controller: TBazaarController) => {
         const items = controller._data.update[bazaarType];
         const installed = items.map((item) => item.installed);
         if (items.length && !items.every((item) => controller._data.downloadedRatingKeys.has(
-            controller._getRatingKey(bazaarType, item.installed.name)))) {
-            controller._loadDownloadedRatings(bazaarType, installed);
+            getRatingKey(bazaarType, item.installed.name)))) {
+            loadDownloadedRatings(controller, bazaarType, installed);
         }
         if (items.length && window.siyuan.user) {
-            controller._loadDownloadedUserRatings(bazaarType, installed);
+            loadDownloadedUserRatings(controller, bazaarType, installed);
         }
     });
 };
 
 export const fetchPackageRating = (controller: TBazaarController, bazaarType: TBazaarType, packageName: string, callback?: () => void, silent = true) => {
-    controller._syncRatingUser();
+    syncRatingUser(controller);
     const requestedUserID = controller._ratingUserID;
-    const key = controller._getRatingKey(bazaarType, packageName);
+    const key = getRatingKey(bazaarType, packageName);
     const loadingKey = `${requestedUserID}|${key}`;
     controller._data.userRatingLoadingKeys.add(loadingKey);
     const mount = controller._captureMount();
@@ -428,7 +428,7 @@ export const fetchPackageRating = (controller: TBazaarController, bazaarType: TB
         packageName,
     }, response => {
         handled = true;
-        controller._syncRatingUser();
+        syncRatingUser(controller);
         if (requestedUserID !== controller._ratingUserID || !controller._isMountCurrent(mount)) {
             return;
         }
@@ -443,7 +443,7 @@ export const fetchPackageRating = (controller: TBazaarController, bazaarType: TB
         const userRating = response.data.userRating;
         controller._data.userRatings.set(key, normalizeBazaarUserRating(userRating) || 0);
         controller._data.userRatingKeys.add(key);
-        if (!controller._applyPackageRatingResponse(bazaarType, packageName, response.data)) {
+        if (!applyPackageRatingResponse(controller, bazaarType, packageName, response.data)) {
             if (!silent) {
                 showMessage(window.siyuan.languages.bazaarRatingFailed);
             }
@@ -459,18 +459,18 @@ export const fetchPackageRating = (controller: TBazaarController, bazaarType: TB
 };
 
 export const loadReadmeRating = (controller: TBazaarController, bazaarType: TBazaarType, packageName: string, from: "downloaded" | "updated" | "bazaar") => {
-    controller._syncRatingUser();
-    const key = controller._getRatingKey(bazaarType, packageName);
+    syncRatingUser(controller);
+    const key = getRatingKey(bazaarType, packageName);
     const loadingKey = `${controller._ratingUserID}|${key}`;
-    if (controller._getRatingItem(bazaarType, packageName, from)?.installed && window.siyuan.user &&
+    if (getRatingItem(controller, bazaarType, packageName, from)?.installed && window.siyuan.user &&
         !controller._data.userRatingKeys.has(key) &&
         !controller._data.userRatingLoadingKeys.has(loadingKey)) {
-        controller._fetchPackageRating(bazaarType, packageName);
+        fetchPackageRating(controller, bazaarType, packageName);
     }
 };
 
 export const submitPackageRating = (controller: TBazaarController, bazaarType: TBazaarType, packageName: string, rating: number, callback: (success: boolean) => void) => {
-    controller._syncRatingUser();
+    syncRatingUser(controller);
     const mount = controller._captureMount();
     const removing = rating === 0;
     const failureMessage = removing ? window.siyuan.languages.bazaarRemoveRatingFailed :
@@ -481,7 +481,7 @@ export const submitPackageRating = (controller: TBazaarController, bazaarType: T
         return;
     }
     const requestedUserID = controller._ratingUserID;
-    const key = controller._getRatingKey(bazaarType, packageName);
+    const key = getRatingKey(bazaarType, packageName);
     const requestKey = `${requestedUserID}|${key}`;
     if (!beginBazaarRatingSubmission(controller._data.userRatingSubmittingKeys, requestKey)) {
         showMessage(window.siyuan.languages.loading);
@@ -505,7 +505,7 @@ export const submitPackageRating = (controller: TBazaarController, bazaarType: T
         rating,
     }, response => {
         handled = true;
-        controller._syncRatingUser();
+        syncRatingUser(controller);
         if (!isLatestRequest()) {
             settle(false);
             return;
@@ -522,7 +522,7 @@ export const submitPackageRating = (controller: TBazaarController, bazaarType: T
         controller._data.userRatingKeys.add(key);
         beginBazaarRatingRequest(controller._data.ratingMutationVersions, key);
         const refreshUI = controller._isMountCurrent(mount);
-        controller._applyPackageRatingResponse(bazaarType, packageName, response.data, refreshUI);
+        applyPackageRatingResponse(controller, bazaarType, packageName, response.data, refreshUI);
         const sortValue = window.siyuan.storage[Constants.LOCAL_BAZAAR][BAZAAR_PACKAGE_CONFIG[bazaarType].tabType];
         if (refreshUI && ["4", "5"].includes(sortValue)) {
             controller._renderBazaarCards(
@@ -540,7 +540,7 @@ export const submitPackageRating = (controller: TBazaarController, bazaarType: T
         if (settled) {
             return;
         }
-        controller._syncRatingUser();
+        syncRatingUser(controller);
         if (!handled && isLatestRequest()) {
             showMessage(failureMessage);
         }
@@ -549,12 +549,12 @@ export const submitPackageRating = (controller: TBazaarController, bazaarType: T
 };
 
 export const openRatingDialog = (controller: TBazaarController, bazaarType: TBazaarType, packageName: string) => {
-    controller._syncRatingUser();
+    syncRatingUser(controller);
     if (!window.siyuan.user) {
         showMessage(window.siyuan.languages.bazaarRatingLoginTip);
         return;
     }
-    const key = controller._getRatingKey(bazaarType, packageName);
+    const key = getRatingKey(bazaarType, packageName);
     const submitKey = `${controller._ratingUserID}|${key}`;
     if (controller._data.userRatingSubmittingKeys.has(submitKey)) {
         showMessage(window.siyuan.languages.loading);
@@ -566,8 +566,8 @@ export const openRatingDialog = (controller: TBazaarController, bazaarType: TBaz
             showMessage(window.siyuan.languages.loading);
             return;
         }
-        controller._fetchPackageRating(bazaarType, packageName, () => {
-            controller._openRatingDialog(bazaarType, packageName);
+        fetchPackageRating(controller, bazaarType, packageName, () => {
+            openRatingDialog(controller, bazaarType, packageName);
         }, false);
         return;
     }
@@ -676,7 +676,7 @@ ${canRemoveRating ? `<button type="button" class="b3-button b3-button--remove" d
             return;
         }
         setSubmitting(true);
-        controller._submitPackageRating(bazaarType, packageName, 0, (success) => {
+        submitPackageRating(controller, bazaarType, packageName, 0, (success) => {
             if (success) {
                 dialog.destroy();
             } else {
@@ -689,7 +689,7 @@ ${canRemoveRating ? `<button type="button" class="b3-button b3-button--remove" d
             return;
         }
         setSubmitting(true);
-        controller._submitPackageRating(bazaarType, packageName, selectedRating, (success) => {
+        submitPackageRating(controller, bazaarType, packageName, selectedRating, (success) => {
             if (success) {
                 dialog.destroy();
             } else {

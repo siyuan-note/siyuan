@@ -35,26 +35,16 @@ import {
 import {genBazaarPackagePanelHTML} from "./bazaar/html";
 import {bindBazaarEvents} from "./bazaar/events";
 import {
-    applyPackageRating,
-    applyPackageRatingResponse,
     bindRatingUserChange,
-    fetchPackageRating,
     genCardRatingHTML,
     genRatePackageActionHTML,
-    genRatingDistributionHTML,
-    genRatingStarsHTML,
     genReadmeRatingHTML,
-    getRatingItem,
     getRatingKey,
-    getRatingSummaryText,
     loadDownloadedRatings,
     loadDownloadedUserRatings,
     loadReadmeRating,
     loadUpdatedRatings,
-    openRatingDialog,
-    refreshRatingUI,
     refreshVisibleRatingUI,
-    submitPackageRating,
     syncRatingUser,
 } from "./bazaar/rating";
 
@@ -77,8 +67,8 @@ export const mountBazaarTab = (root: HTMLElement, keywords?: string, app?: App) 
             bazaar.bindEvent(app);
         }
     }
-    if (bazaar._syncRatingUser()) {
-        bazaar._refreshVisibleRatingUI();
+    if (syncRatingUser(bazaar)) {
+        refreshVisibleRatingUI(bazaar);
     }
     if (keywords) {
         switchSettingPanelSubTab(root, keywords, [
@@ -375,11 +365,8 @@ export const bazaar = {
     </div>` : ""}
 </section>`;
     },
-    _getInvalidPackageTip(reason: IBazaarItem["invalidReason"]) {
-        return window.siyuan.languages[getBazaarPackageInvalidLanguageKey(reason)];
-    },
     _genInvalidDownloadedCardHTML(item: IBazaarItem, bazaarType: TBazaarType) {
-        const tip = bazaar._getInvalidPackageTip(item.invalidReason);
+        const tip = window.siyuan.languages[getBazaarPackageInvalidLanguageKey(item.invalidReason)];
         return `<div data-name="${escapeAttr(item.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card">
     <div class="b3-card__img">${bazaar._genPackageIconHTML("")}</div>
     <div class="fn__flex-1 fn__flex-column">
@@ -505,36 +492,6 @@ export const bazaar = {
 ${primaryAction ? '<div class="fn__hr"></div>' : ""}
 <button class="b3-button b3-button--remove fn__block" data-type="uninstall">${window.siyuan.languages.uninstall}</button>`;
     },
-    _getRatingKey(bazaarType: TBazaarType, packageName: string) {
-        return getRatingKey(bazaarType, packageName);
-    },
-    _syncRatingUser() {
-        return syncRatingUser(this);
-    },
-    _refreshVisibleRatingUI() {
-        return refreshVisibleRatingUI(this);
-    },
-    _bindRatingUserChange() {
-        return bindRatingUserChange(this);
-    },
-    _getRatingSummaryText(rating?: IBazaarRating) {
-        return getRatingSummaryText(rating);
-    },
-    _genRatingStarsHTML(value: number) {
-        return genRatingStarsHTML(value);
-    },
-    _genCardRatingHTML(item: Pick<IBazaarItem, "rating">, loaded = true) {
-        return genCardRatingHTML(this, item, loaded);
-    },
-    _genRatePackageActionHTML(loaded: boolean, rating?: unknown) {
-        return genRatePackageActionHTML(loaded, rating);
-    },
-    _genRatingDistributionHTML(rating?: IBazaarRating) {
-        return genRatingDistributionHTML(rating);
-    },
-    _genReadmeRatingHTML(bazaarType: TBazaarType, item: IBazaarItem, loaded: boolean) {
-        return genReadmeRatingHTML(this, bazaarType, item, loaded);
-    },
     _genCardHTML(item: IBazaarItem, bazaarType: TBazaarType) {
         const showSwitch = item.installed && !item.current && ["icons", "themes"].includes(bazaarType);
         const showDisable = item.installed && item.current && ["icons", "themes"].includes(bazaarType);
@@ -555,7 +512,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 <span class="fn__space--small"></span>
                 ${formatCount(item.downloads)}
             </span>
-            ${bazaar._genCardRatingHTML(item,
+            ${genCardRatingHTML(item,
                 isBazaarPackageRatingLoaded("bazaar", false, item.ratingAvailable))}
             <span class="block__icon block__icon--show block__icon--text">
                 <svg><use xlink:href="#iconAccount"></use></svg>
@@ -622,7 +579,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     _genUpdateItemHTML(item: IUpdatedBazaarItem, bazaarType: TBazaarType) {
         const installed = item.installed;
         const available = item.available;
-        const ratingKey = bazaar._getRatingKey(bazaarType, installed.name);
+        const ratingKey = getRatingKey(bazaarType, installed.name);
         const ratingLoaded = isBazaarPackageRatingLoaded("updated", bazaar._data.downloadedRatingKeys.has(ratingKey));
         return `<div class="b3-card" data-name="${escapeAttr(installed.name)}" data-package-type="${bazaarType}" data-package-source="updated">
     <div class="b3-card__img">${bazaar._genPackageIconHTML(installed.iconURL)}</div>
@@ -640,7 +597,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
             <svg><use xlink:href="#iconFolder"></use></svg>
         </span>
         ${bazaar._genUpdateButtonHTML(available, bazaarType)}
-        ${bazaar._genRatePackageActionHTML(ratingLoaded, bazaar._data.userRatings.get(ratingKey))}
+        ${genRatePackageActionHTML(ratingLoaded, bazaar._data.userRatings.get(ratingKey))}
     </div>
 </div>`;
     },
@@ -728,7 +685,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
         installAllElement?.classList.toggle("fn__none",
             !items.some(({item}) => !item.available.disallowUpdate));
         contentElement.innerHTML = items.map(({type, item}) => this._genUpdateItemHTML(item, type)).join("");
-        this._loadUpdatedRatings();
+        loadUpdatedRatings(this);
     },
     _syncDownloadedUpdateButtons() {
         bazaar.element.querySelectorAll("#configBazaarDownloaded .b3-card[data-package-source='downloaded']").forEach((card) => {
@@ -857,7 +814,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
                 <span class="fn__flex-center ft__on-surface">${window.siyuan.languages.publishService}</span>
             </label>` : "";
                     const available = bazaar._getUpdatedItem(bazaarType, bazaarItem.name)?.available;
-                    const ratingKey = bazaar._getRatingKey(bazaarType, bazaarItem.name);
+                    const ratingKey = getRatingKey(bazaarType, bazaarItem.name);
                     return `<div data-name="${escapeAttr(bazaarItem.name)}" data-package-type="${bazaarType}" data-package-source="downloaded" class="b3-card${bazaarItem.current ? " b3-card--current" : ""}">
     <div class="b3-card__img">${bazaar._genPackageIconHTML(bazaarItem.iconURL)}</div>
     <div class="fn__flex-1 fn__flex-column">
@@ -870,7 +827,7 @@ ${primaryAction ? '<div class="fn__hr"></div>' : ""}
     <div class="b3-card__actions b3-card__actions--right">
         ${isMobile() ? publishSwitchHTML : ""}
         ${bazaar._genUpdateButtonHTML(available, bazaarType, true)}
-        ${bazaar._genRatePackageActionHTML(bazaar._data.downloadedRatingKeys.has(ratingKey), bazaar._data.userRatings.get(ratingKey))}
+        ${genRatePackageActionHTML(bazaar._data.downloadedRatingKeys.has(ratingKey), bazaar._data.userRatings.get(ratingKey))}
         ${bazaar._genIncompatibleChipHTML(bazaarItem, "installed", bazaarType)}
         ${bazaar._genDeprecatedChipHTML(bazaarItem, false)}
         ${bazaar._genFundingHTML(bazaarItem.preferredFunding, false)}
@@ -910,8 +867,8 @@ type="checkbox">
                 bazaar._downloadedPluginsReady = true;
                 bazaar._syncPluginGlobalSwitch();
             }
-            bazaar._loadDownloadedRatings(bazaarType, packageItems);
-            bazaar._loadDownloadedUserRatings(bazaarType, packageItems);
+            loadDownloadedRatings(bazaar, bazaarType, packageItems);
+            loadDownloadedUserRatings(bazaar, bazaarType, packageItems);
             bazaar._loadDownloadedDeprecations(bazaarType, app);
             const sideElement = bazaar.element.querySelector("#configBazaarReadme.config__view--show .item__side");
             // 仅刷新「已下载」详情，避免通过 URI 打开的在线详情被本地数据覆盖
@@ -992,7 +949,7 @@ type="checkbox">
         const available = detail?.available || updatedDetail?.available ||
             (from === "downloaded" ? bazaar._getUpdatedItem(bazaarType, data.name)?.available : data);
         const displayData = from === "downloaded" ? installed || data : available || data;
-        const ratingKey = bazaar._getRatingKey(bazaarType, displayData.name);
+        const ratingKey = getRatingKey(bazaarType, displayData.name);
         const ratingLoaded = isBazaarPackageRatingLoaded(from, bazaar._data.downloadedRatingKeys.has(ratingKey),
             displayData.ratingAvailable);
         if (from !== "bazaar" && ratingLoaded) {
@@ -1090,7 +1047,7 @@ type="checkbox">
             ${installSection}
             ${marketSection}
             ${compatibilitySection}
-            <div data-type="rating-detail-slot">${bazaar._genReadmeRatingHTML(bazaarType, displayData, ratingLoaded)}</div>
+            <div data-type="rating-detail-slot">${genReadmeRatingHTML(bazaar, bazaarType, displayData, ratingLoaded)}</div>
             <section class="item__meta-section item__resources">
                 <div class="item__meta-title">${window.siyuan.languages.bazaarResources}</div>
                 <div class="fn__flex">
@@ -1168,7 +1125,7 @@ type="checkbox">
             });
         }
         readmeElement.classList.add("config__view--show");
-        bazaar._loadReadmeRating(bazaarType, displayData.name, from);
+        loadReadmeRating(bazaar, bazaarType, displayData.name, from);
         if (needsPackageDetail) {
             bazaar._fetchPackageDetail(bazaarType, data.name, (packageDetail) => {
                 if (!readmeElement.classList.contains("config__view--show")) {
@@ -1286,42 +1243,6 @@ type="checkbox">
         });
         contentElement.append(fragment);
         bazaar._data.downloaded = packages;
-    },
-    _applyPackageRating(bazaarType: TBazaarType, packageName: string, rating?: IBazaarRating, refreshUI = true) {
-        return applyPackageRating(this, bazaarType, packageName, rating, refreshUI);
-    },
-    _applyPackageRatingResponse(bazaarType: TBazaarType, packageName: string, data: {
-        ratingAvailable?: unknown;
-        rating?: Partial<IBazaarRating> | null;
-    }, refreshUI = true) {
-        return applyPackageRatingResponse(this, bazaarType, packageName, data, refreshUI);
-    },
-    _getRatingItem(bazaarType: TBazaarType, packageName: string, from: "downloaded" | "updated" | "bazaar") {
-        return getRatingItem(this, bazaarType, packageName, from);
-    },
-    _refreshRatingUI(bazaarType: TBazaarType, packageName: string) {
-        return refreshRatingUI(this, bazaarType, packageName);
-    },
-    _loadDownloadedRatings(bazaarType: TBazaarType, packages: IBazaarItem[]) {
-        return loadDownloadedRatings(this, bazaarType, packages);
-    },
-    _loadDownloadedUserRatings(bazaarType: TBazaarType, packages: IBazaarItem[]) {
-        return loadDownloadedUserRatings(this, bazaarType, packages);
-    },
-    _loadUpdatedRatings() {
-        return loadUpdatedRatings(this);
-    },
-    _fetchPackageRating(bazaarType: TBazaarType, packageName: string, callback?: () => void, silent = true) {
-        return fetchPackageRating(this, bazaarType, packageName, callback, silent);
-    },
-    _loadReadmeRating(bazaarType: TBazaarType, packageName: string, from: "downloaded" | "updated" | "bazaar") {
-        return loadReadmeRating(this, bazaarType, packageName, from);
-    },
-    _submitPackageRating(bazaarType: TBazaarType, packageName: string, rating: number, callback: (success: boolean) => void) {
-        return submitPackageRating(this, bazaarType, packageName, rating, callback);
-    },
-    _openRatingDialog(bazaarType: TBazaarType, packageName: string) {
-        return openRatingDialog(this, bazaarType, packageName);
     },
     _refreshReadmeDetail(bazaarType: TBazaarType, packageName: string) {
         const sideElement = bazaar.element.querySelector("#configBazaarReadme.config__view--show .item__side");
@@ -1705,8 +1626,8 @@ type="checkbox">
         this._updateState = "idle";
         this._updateRequestID++;
         this._data.details.clear();
-        this._syncRatingUser();
-        this._bindRatingUserChange();
+        syncRatingUser(this);
+        bindRatingUserChange(this);
         const mount = this._captureMount();
         BAZAAR_PACKAGE_TYPES.forEach((type) => {
             this._data.update[type] = [];

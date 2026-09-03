@@ -21,6 +21,7 @@ import {
     getBazaarTypeByTab,
     isBazaarPackageType,
 } from "./packageConfig";
+import {openRatingDialog, refreshVisibleRatingUI, syncRatingUser} from "./rating";
 
 type TBazaarController = typeof import("../bazaar").bazaar;
 type TBazaarPackageSource = "downloaded" | "updated" | "bazaar";
@@ -89,7 +90,7 @@ const ACTION_HANDLERS = {
         if (!pkgType || !packageName || !isBazaarPackageRatingEditable(packageSource, packageInstalled)) {
             return CONTINUE;
         }
-        controller._openRatingDialog(pkgType, packageName);
+        openRatingDialog(controller, pkgType, packageName);
         return HANDLED;
     }) satisfies TBazaarActionHandler,
     "copy-funding": ((context, target) => {
@@ -480,8 +481,8 @@ const bindBazaarClickEvent = (
     mount: IBazaarMountSnapshot,
 ) => {
     controller.element.firstElementChild.addEventListener("click", (event: MouseEvent) => {
-        if (controller._syncRatingUser()) {
-            controller._refreshVisibleRatingUI();
+        if (syncRatingUser(controller)) {
+            refreshVisibleRatingUI(controller);
         }
         const eventTarget = event.target as HTMLElement;
         const context = resolveClickContext(controller, app, mount, eventTarget);

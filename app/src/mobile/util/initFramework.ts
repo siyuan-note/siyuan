@@ -3,7 +3,7 @@ import {closeModel, closePanel} from "./closePanel";
 import {getCurrentEditor, openMobileFileById} from "../editor";
 import {openMobileOnboarding} from "../../onboarding";
 import {validateName} from "../../editor/rename";
-import {getEventName, isDisabledFeature} from "../../protyle/util/compatibility";
+import {getEventName, isDisabledFeature, isInMobileApp} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {setInlineStyle} from "../../util/assets";
 import {renderSnippet} from "../../config/util/snippets";
@@ -44,6 +44,7 @@ import {
     removeMobilePluginDock,
     type IMobilePluginDockEntry,
 } from "../dock/pluginDockState";
+import {exitSiYuan} from "../../dialog/processSystem";
 
 const getDockTabElement = (type: string) => {
     return document.querySelector(`[data-type="${CSS.escape(`sidebar-${type}-tab`)}"]`) as HTMLElement;
@@ -300,6 +301,15 @@ export const initFramework = async (app: App, isStart: boolean) => {
     renderMobileSidePanelLayout(app);
     initSidePanelTabs(app, sidebarElement);
     initSidePanelTabs(app, sidebarRightElement);
+    const sidebarRightExitElement = document.getElementById("sidebarRightExit");
+    if (isInMobileApp() && sidebarRightExitElement) {
+        sidebarRightExitElement.classList.remove("fn__none");
+        sidebarRightExitElement.setAttribute("aria-label", window.siyuan.languages.safeQuit);
+        sidebarRightExitElement.addEventListener("click", (event) => {
+            event.stopPropagation();
+            void exitSiYuan();
+        });
+    }
     window.addEventListener(MOBILE_SIDE_PANEL_CONFIG_CHANGE_EVENT, () => {
         renderMobileSidePanelLayout(app);
         updateOpenSidePanelDocks(app, [sidebarElement, sidebarRightElement]);

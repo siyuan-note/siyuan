@@ -45,6 +45,9 @@
             <svg data-type="sidebar-backlink-tab" class="toolbar__icon"><use xlink:href="#iconLink"></use></svg>
             <svg data-type="sidebar-agent-tab" class="toolbar__icon fn__none"><use xlink:href="#iconSparkles"></use></svg>
         </div>
+        <button id="sidebarRightExit" class="toolbar__button ft__error ariaLabel fn__none" type="button">
+            <svg><use xlink:href="#iconQuit"></use></svg>
+        </button>
         <svg class="toolbar__icon"><use xlink:href="#iconLeft"></use></svg>
     </div>
     <div class="fn__flex-1 b3-list--mobile">

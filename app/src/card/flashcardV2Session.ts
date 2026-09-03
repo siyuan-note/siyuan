@@ -44,6 +44,7 @@ import {
     getFlashcardV2ReviewShortcutAction,
     shouldLoadFlashcardV2HeadingChildren,
 } from "./flashcardV2State";
+import {setFlashcardLocateBlockID} from "./flashcardLocate";
 
 interface IFlashcardV2SessionQueueCard {
     sessionCard: {
@@ -859,6 +860,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
                 choiceController = rendered.choiceController;
                 pluginAnswerController = rendered.pluginAnswerController;
                 sourceBlockID = rendered.sourceBlockID;
+                setFlashcardLocateBlockID(dialog.element, sourceBlockID);
                 playbackController = rendered.playbackController;
                 currentModel = rendered.model;
                 pluginEdit = rendered.pluginEdit;
@@ -877,6 +879,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             };
             const renderCurrent = () => {
                 const generation = ++renderGeneration;
+                setFlashcardLocateBlockID(dialog.element);
                 renderPending = true;
                 revealController = undefined;
                 typedAnswerController = undefined;
@@ -902,6 +905,7 @@ export const openFlashcardV2ReviewSession = (app: App, reviewSetID: string, name
             };
             const showCompletion = () => {
                 renderGeneration++;
+                setFlashcardLocateBlockID(dialog.element);
                 renderPending = false;
                 completedPending = true;
                 setReviewActionsEnabled(dialog, true);

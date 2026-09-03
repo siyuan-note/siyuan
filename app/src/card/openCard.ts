@@ -40,6 +40,7 @@ import {openFlashcardV2ReviewSession} from "./flashcardV2Session";
 import {flashcardV2LocationQuery} from "./flashcardV2Query";
 import {forEachPluginSubscriber} from "../plugin/EventBusCore";
 import {appendRemoteQuery} from "../util/hostCapabilities";
+import {setFlashcardLocateBlockID} from "./flashcardLocate";
 
 const genCardCount = (cardsData: ICardData, allIndex = 0) => {
     let newIndex = 0;
@@ -192,6 +193,7 @@ const showRatingActions = (actionElements: NodeListOf<Element>, currentCard: ICa
 };
 
 const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard: ICard) => {
+    setFlashcardLocateBlockID(element, id);
     const revealState = getFlashcardRevealState(protyle);
     const generation = beginFlashcardLoad(revealState);
     const actionElements = element.querySelectorAll(".card__action");
@@ -951,6 +953,10 @@ const nextCard = (options: {
 };
 
 const allDone = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>) => {
+    const cardElement = hasClosestByAttribute(countElement, "data-key", Constants.DIALOG_OPENCARD);
+    if (cardElement) {
+        setFlashcardLocateBlockID(cardElement);
+    }
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;
@@ -964,6 +970,10 @@ const allDone = (countElement: Element, editor: Protyle, actionElements: NodeLis
 };
 
 const newRound = (countElement: Element, editor: Protyle, actionElements: NodeListOf<Element>, unreviewedCount: number) => {
+    const cardElement = hasClosestByAttribute(countElement, "data-key", Constants.DIALOG_OPENCARD);
+    if (cardElement) {
+        setFlashcardLocateBlockID(cardElement);
+    }
     countElement.classList.add("fn__none");
     editor.protyle.element.classList.add("fn__none");
     const emptyElement = editor.protyle.element.nextElementSibling;

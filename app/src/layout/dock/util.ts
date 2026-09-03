@@ -16,6 +16,10 @@ import {showMessage} from "../../dialog/message";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {getDockHotkey} from "./hotkey";
 import {syncDockBarVisibility} from "./barVisibility";
+import {
+    getFlashcardLocateBlockID,
+    isCurrentFlashcardLocateTarget,
+} from "../../card/flashcardLocate";
 
 export {adjustDockPadding} from "./barVisibility";
 
@@ -272,12 +276,37 @@ export const clearOBG = () => {
     });
 };
 
+const getCurrentFlashcardElement = () => {
+    const dialog = [...window.siyuan.dialogs].reverse().find((item) =>
+        item.element.getAttribute("data-key") === Constants.DIALOG_OPENCARD &&
+        item.element.classList.contains("b3-dialog--open"));
+    if (dialog) {
+        return dialog.element;
+    }
+    return document.querySelector<HTMLElement>(
+        `.layout__wnd--active div[data-key="${Constants.DIALOG_OPENCARD}"]:not(.fn__none)`);
+};
+
 export const selectOpenTab = async () => {
     const dockFile = getDockByType("file");
     if (!dockFile) {
         return false;
     }
     const files = dockFile.data.file as Files;
+    const flashcardElement = getCurrentFlashcardElement();
+    if (flashcardElement) {
+        const blockID = getFlashcardLocateBlockID(flashcardElement);
+        if (blockID) {
+            const response = await fetchSyncPost("/api/block/getBlockInfo", {id: blockID});
+            if (response.code === 0 && response.data.box && response.data.path &&
+                isCurrentFlashcardLocateTarget(flashcardElement, blockID, getCurrentFlashcardElement())) {
+                await files.selectItem(response.data.box, response.data.path);
+                files.lastSelectedElement = files.element.querySelector(".b3-list-item--focus");
+            }
+        }
+        dockFile.toggleModel("file", true);
+        return;
+    }
     const element = document.querySelector(".layout__wnd--active > .fn__flex > .layout-tab-bar > .item--focus") ||
         document.querySelector("ul.layout-tab-bar > .item--focus");
     if (element) {

@@ -493,9 +493,13 @@ func RenderTemplateWithMode(p, id string, mode TemplateRenderMode) (tree *parse.
 		}
 
 		if "" != n.ID {
-			// 重新生成 ID，并记录旧 ID 到新 ID 的映射，用于后续成套改写模板内部的自引用
+			// 根文档映射到目标文档，其他内容块生成新 ID，并记录映射用于改写模板内部引用
 			oldID := n.ID
-			n.ID = ast.NewNodeID()
+			if ast.NodeDocument == n.Type {
+				n.ID = sourceTree.Root.ID
+			} else {
+				n.ID = ast.NewNodeID()
+			}
 			blockIDs[oldID] = n.ID
 			n.SetIALAttr("id", n.ID)
 			n.RemoveIALAttr(av.NodeAttrNameAvs)

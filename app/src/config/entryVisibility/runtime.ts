@@ -27,7 +27,9 @@ import {syncDockBarVisibility} from "../../layout/dock/barVisibility";
 import {genUUID} from "../../util/genID";
 import {
     applyDockEntryOrderSnapshot,
+    getCurrentDockEntryOrderSnapshot,
     getDockEntryOrderSnapshot,
+    getDockOrderScopePosition,
     isDockOrderScope,
     mergeCurrentDockEntryOrders,
     mergeDockEntryOrderSnapshot,
@@ -201,7 +203,7 @@ export const syncDockEntryOrders = () => {
         return;
     }
     refreshDockCatalog(window.siyuan.ws?.app?.plugins || []);
-    const currentOrders = getDockEntryOrderSnapshot();
+    const currentOrders = getCurrentDockEntryOrderSnapshot();
     const config = cloneEntryVisibilityConfig();
     const profile = getWritableEntryProfile(config);
     profile.orders ||= {};
@@ -344,7 +346,16 @@ export const applyDockEntryVisibility = () => {
     applyDockEntryOrderSnapshot(mergeDockEntryOrderSnapshot(
         getDockEntryOrderSnapshot(),
         getActiveEntryProfile()?.orders,
-    ));
+    ), undefined, (scope, item, previousItem) => {
+        const position = getDockOrderScopePosition(scope);
+        const dock = position.startsWith("Left")
+            ? window.siyuan.layout.leftDock
+            : position.startsWith("Right")
+                ? window.siyuan.layout.rightDock
+                : window.siyuan.layout.bottomDock;
+        const index = position === "LeftBottom" || position === "RightBottom" || position === "BottomRight" ? 1 : 0;
+        dock?.add(index, item, previousItem?.getAttribute("data-type") || undefined, {syncEntryOrders: false});
+    });
     document.querySelectorAll<HTMLElement>(".dock__item[data-type]").forEach((item) => {
         const type = item.dataset.type;
         const key = getDockEntryKey(item);

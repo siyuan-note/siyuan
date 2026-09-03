@@ -1001,7 +1001,9 @@ export class Dock {
         }
     }
 
-    public add(index: number, sourceElement: Element, previousType?: string) {
+    public add(index: number, sourceElement: Element, previousType?: string, options: {
+        syncEntryOrders?: boolean,
+    } = {}) {
         const type = sourceElement.getAttribute("data-type") as TDock;
         const sourceDock = getDockByType(type);
         // 仅在左右轴与下轴之间跨轴移动时清除尺寸：左右侧之间或下侧内部移动，原有尺寸维度仍然有效
@@ -1032,7 +1034,13 @@ export class Dock {
         sourceElement.setAttribute("data-index", index.toString());
         sourceElement.setAttribute("data-position", this.getTooltipPosition(index));
         if (previousType) {
-            this.elements[index].parentElement.querySelector(`[data-type="${previousType}"]`).after(sourceElement);
+            const previousElement = Array.from(this.elements[index].children)
+                .find((item) => item.getAttribute("data-type") === previousType);
+            if (previousElement) {
+                previousElement.after(sourceElement);
+            } else {
+                this.elements[index].insertAdjacentElement("afterbegin", sourceElement);
+            }
         } else {
             this.elements[index].insertAdjacentElement("afterbegin", sourceElement);
         }
@@ -1064,7 +1072,9 @@ export class Dock {
         adjustDockPadding();
         this.adjustSplit();
         sourceDock.adjustSplit();
-        syncDockEntryOrders();
+        if (options.syncEntryOrders !== false) {
+            syncDockEntryOrders();
+        }
     }
 
     public remove(key: TDock | string) {

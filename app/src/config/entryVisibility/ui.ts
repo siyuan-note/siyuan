@@ -41,11 +41,13 @@ import {
 } from "./profile";
 import {getHostCapabilities} from "../../util/hostCapabilities";
 import {
+    DOCK_ORDER_SCOPES,
     DOCK_ORDER_SCOPES_BY_SIDE,
     getDockEntryOrderSnapshot,
     getDockOrderScopeLabelKey,
     isDockOrderScope,
     mergeDockEntryOrderSnapshot,
+    moveDockEntryOrderSnapshot,
     TDockOrderScope,
     TDockOrderSnapshot,
 } from "./dockOrder";
@@ -234,16 +236,10 @@ const renderEntrySwitch = (profile: Config.IEntryVisibilityProfile, path: string
         getEntryCatalogDefaultVisibility(path)) ? " checked" : ""}>`;
 };
 
-const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
-                           nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
-                           parentEnabled: boolean, readOnly: boolean, sortable: boolean,
-                           getItemPath = (item: IEntryCatalogNode) => `${prefix}.${item.key}`) => `<section class="config-entry-visibility__column"
-    data-entry-column data-entry-depth="${depth}">
-    <div class="config-entry-visibility__column-title">
-        <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
-    </div>
-    <div class="config-entry-visibility__column-list">
-        ${nodes.map((item) => {
+const renderEntryRows = (profile: Config.IEntryVisibilityProfile, prefix: string,
+                         nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
+                         parentEnabled: boolean, readOnly: boolean, sortable: boolean,
+                         getItemPath = (item: IEntryCatalogNode) => `${prefix}.${item.key}`) => nodes.map((item) => {
         const path = getItemPath(item);
         const configurable = isEntryCatalogNodeConfigurable(item);
         const draggable = sortable && parentEnabled && configurable;
@@ -274,7 +270,18 @@ const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: strin
                 <svg><use xlink:href="#iconRight"></use></svg>
             </button>` : '<span class="config-entry-visibility__arrow-space"></span>'}
         </${rowTag}>`;
-    }).join("")}
+    }).join("");
+
+const renderEntryColumn = (profile: Config.IEntryVisibilityProfile, title: string, prefix: string,
+                           nodes: IEntryCatalogNode[], depth: number, selectedPaths: string[],
+                           parentEnabled: boolean, readOnly: boolean, sortable: boolean,
+                           getItemPath = (item: IEntryCatalogNode) => `${prefix}.${item.key}`) => `<section class="config-entry-visibility__column"
+    data-entry-column data-entry-depth="${depth}">
+    <div class="config-entry-visibility__column-title">
+        <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
+    </div>
+    <div class="config-entry-visibility__column-list">
+        ${renderEntryRows(profile, prefix, nodes, depth, selectedPaths, parentEnabled, readOnly, sortable, getItemPath)}
     </div>
 </section>`;
 
@@ -315,7 +322,6 @@ type TDockSide = keyof typeof DOCK_ORDER_SCOPES_BY_SIDE;
 
 const DOCK_SECTION_KEY = "dock";
 const DOCK_SIDES = Object.keys(DOCK_ORDER_SCOPES_BY_SIDE) as TDockSide[];
-const getDockSidePath = (side: TDockSide) => `${DOCK_SECTION_KEY}.side.${side}`;
 const getDockSideLabel = (side: TDockSide) => `${window.siyuan.languages.entryDock} - ${
     window.siyuan.languages[side === "left" ? "marginLeft" : "marginRight"]}`;
 
@@ -338,45 +344,17 @@ const getEntryOrderContext = (parentPath: string, dockOrderSnapshot: TDockOrderS
     };
 };
 
-const renderEntryNavigationColumn = (
-    title: string,
-    items: Array<{label: string; path: string}>,
-    depth: number,
-    selectedPath?: string,
-) => `<section class="config-entry-visibility__column" data-entry-column data-entry-depth="${depth}">
-    <div class="config-entry-visibility__column-title">
-        <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(title)}">${escapeHtml(title)}</span>
-    </div>
-    <div class="config-entry-visibility__column-list">
-        ${items.map((item) => `<div class="config-entry-visibility__row config-entry-visibility__row--navigable${
-        selectedPath === item.path ? " config-entry-visibility__row--current" : ""}"
-            data-action="navigate-entry" data-entry-path="${escapeAttr(item.path)}" data-entry-depth="${depth}">
-            <button class="config-entry-visibility__navigate" data-action="navigate-entry"
-                data-entry-path="${escapeAttr(item.path)}" data-entry-depth="${depth}" title="${escapeAttr(item.label)}">
-                <span>${escapeHtml(item.label)}</span>
-            </button>
-            <button class="block__icon block__icon--show config-entry-visibility__arrow" data-action="navigate-entry"
-                data-entry-path="${escapeAttr(item.path)}" data-entry-depth="${depth}"
-                aria-label="${escapeAttr(window.siyuan.languages.expand)}">
-                <svg><use xlink:href="#iconRight"></use></svg>
-            </button>
-        </div>`).join("")}
-    </div>
-</section>`;
-
 const getDockScopeLabel = (scope: TDockOrderScope) => {
     const labelKey = getDockOrderScopeLabelKey(scope);
     return window.siyuan.languages[labelKey] || labelKey;
 };
 
 const getDockScopeNodes = (
-    profile: Config.IEntryVisibilityProfile,
     scope: TDockOrderScope,
     snapshot: TDockOrderSnapshot,
 ) => {
-    const context = getEntryOrderContext(scope, snapshot);
-    const nodes = new Map(context.nodes.map((item) => [item.key, item]));
-    return resolveProfileEntryOrder(profile, scope, context.defaultOrder, context.separatorKeys)
+    const nodes = new Map((getEntryCatalogChildren(DOCK_SECTION_KEY) || []).map((item) => [item.key, item]));
+    return snapshot[scope]
         .map((key) => nodes.get(key))
         .filter((item): item is IEntryCatalogNode => Boolean(item));
 };
@@ -384,57 +362,49 @@ const getDockScopeNodes = (
 const renderDockColumns = (
     columns: string[],
     profile: Config.IEntryVisibilityProfile,
-    section: IEntryCatalogSection,
     selectedPaths: string[],
     readOnly: boolean,
     snapshot: TDockOrderSnapshot,
     visiblePaths?: Set<string>,
 ) => {
-    const sideItems = DOCK_SIDES.map((side) => ({
-        label: getDockSideLabel(side),
-        path: getDockSidePath(side),
-    }));
-    columns.push(renderEntryNavigationColumn(section.label(), sideItems, 0, selectedPaths[0]));
-    const selectedSide = DOCK_SIDES.find((side) => getDockSidePath(side) === selectedPaths[0]);
-    if (!selectedSide) {
-        return;
-    }
-    const scopes = DOCK_ORDER_SCOPES_BY_SIDE[selectedSide];
-    const scopeItems = scopes.map((scope) => ({
-        label: getDockScopeLabel(scope),
-        path: scope,
-    }));
-    columns.push(renderEntryNavigationColumn(getDockSideLabel(selectedSide), scopeItems, 1, selectedPaths[1]));
-    const selectedScope = scopes.find((scope) => scope === selectedPaths[1]);
-    if (!selectedScope) {
-        return;
-    }
-    const nodes = getDockScopeNodes(profile, selectedScope, snapshot);
-    const visibleNodes = visiblePaths
-        ? nodes.filter((item) => visiblePaths.has(`${DOCK_SECTION_KEY}.${item.key}`))
-        : nodes;
-    columns.push(renderEntryColumn(
+    const profileSnapshot = mergeDockEntryOrderSnapshot(snapshot, profile.orders);
+    DOCK_SIDES.forEach((side) => {
+        const groups = DOCK_ORDER_SCOPES_BY_SIDE[side].map((scope) => {
+            const scopeLabel = getDockScopeLabel(scope);
+            const nodes = getDockScopeNodes(scope, profileSnapshot);
+            const visibleNodes = visiblePaths
+                ? nodes.filter((item) => visiblePaths.has(`${DOCK_SECTION_KEY}.${item.key}`))
+                : nodes;
+            return `<section class="config-entry-visibility__dock-group" data-entry-drop-scope="${scope}">
+                <div class="config-entry-visibility__dock-group-title" title="${escapeAttr(scopeLabel)}">${escapeHtml(scopeLabel)}</div>
+                <div class="config-entry-visibility__dock-list" data-entry-drop-scope="${scope}">
+                    ${renderEntryRows(
         profile,
-        getDockScopeLabel(selectedScope),
-        selectedScope,
+        scope,
         visibleNodes,
-        2,
+        0,
         selectedPaths,
         true,
         readOnly,
         !visiblePaths && !readOnly,
         (item) => `${DOCK_SECTION_KEY}.${item.key}`,
-    ));
+    )}
+                    ${visibleNodes.length === 0
+        ? `<div class="config-entry-visibility__dock-empty">${window.siyuan.languages.emptyContent}</div>`
+        : ""}
+                </div>
+            </section>`;
+        }).join("");
+        columns.push(`<section class="config-entry-visibility__column config-entry-visibility__dock-column" data-entry-column>
+            <div class="config-entry-visibility__column-title">
+                <span class="fn__ellipsis fn__flex-1" title="${escapeAttr(getDockSideLabel(side))}">${escapeHtml(getDockSideLabel(side))}</span>
+            </div>
+            <div class="config-entry-visibility__column-list">${groups}</div>
+        </section>`);
+    });
 };
 
-const getDockEntrySelectedPaths = (snapshot: TDockOrderSnapshot, key: string) => {
-    for (const side of DOCK_SIDES) {
-        const scope = DOCK_ORDER_SCOPES_BY_SIDE[side].find((item) => snapshot[item].includes(key));
-        if (scope) {
-            return [getDockSidePath(side), scope, `${DOCK_SECTION_KEY}.${key}`];
-        }
-    }
-};
+const getDockEntrySelectedPaths = (key: string) => [`${DOCK_SECTION_KEY}.${key}`];
 
 const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey: string,
                             selectedPaths: string[], readOnly: boolean, visiblePaths?: Set<string>,
@@ -451,7 +421,7 @@ const renderEntryColumns = (profile: Config.IEntryVisibilityProfile, sectionKey:
 </section>`;
     const columns = [locationColumn];
     if (section.key === DOCK_SECTION_KEY) {
-        renderDockColumns(columns, profile, section, selectedPaths, readOnly, dockOrderSnapshot, visiblePaths);
+        renderDockColumns(columns, profile, selectedPaths, readOnly, dockOrderSnapshot, visiblePaths);
         return `<div class="config-entry-visibility__columns">${columns.join("")}</div>`;
     }
     const directDisplayRoot = getDirectDisplayRoot(section);
@@ -595,11 +565,19 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
     let selectedSectionKey = entryCatalog[0].key;
     let selectedPaths: string[] = [];
     let previousQuery = "";
-    let dragging: {parentPath: string; sourceKey: string; defaultOrder?: string[]; order?: string[]} | undefined;
+    let dragging: {
+        parentPath: string;
+        sourceKey: string;
+        defaultOrder?: string[];
+        order?: string[];
+        dockOrder?: TDockOrderSnapshot;
+    } | undefined;
     const clearDropTarget = () => {
         browser.querySelectorAll(".config-entry-visibility__row--drop-before, .config-entry-visibility__row--drop-after")
             .forEach((item) => item.classList.remove("config-entry-visibility__row--drop-before",
                 "config-entry-visibility__row--drop-after"));
+        browser.querySelectorAll(".config-entry-visibility__dock-group--drop")
+            .forEach((item) => item.classList.remove("config-entry-visibility__dock-group--drop"));
     };
     const renderBrowser = (scrollToEnd = false, resetEntryColumns = false, revealSelection = false) => {
         const oldColumns = Array.from(browser.querySelectorAll<HTMLElement>("[data-entry-column]"));
@@ -619,7 +597,7 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             const target = filter.results.find((item) => item.section.key === selectedSectionKey) || filter.results[0];
             selectedSectionKey = target.section.key;
             selectedPaths = target.section.key === DOCK_SECTION_KEY
-                ? getDockEntrySelectedPaths(dockOrderSnapshot, target.item.key) || []
+                ? getDockEntrySelectedPaths(target.item.key)
                 : getEntryCatalogPathChain(target.section.key, target.path);
             scrollToEnd = true;
             resetEntryColumns = true;
@@ -678,6 +656,40 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             return;
         }
         const row = (event.target as Element).closest<HTMLElement>("[data-entry-row]");
+        if (isDockOrderScope(dragging.parentPath)) {
+            const dropScopeElement = (event.target as Element).closest<HTMLElement>("[data-entry-drop-scope]");
+            const targetScopeValue = row?.dataset.entryParent || dropScopeElement?.dataset.entryDropScope || "";
+            if (!isDockOrderScope(targetScopeValue)) {
+                clearDropTarget();
+                dragging.dockOrder = undefined;
+                return;
+            }
+            const targetKey = row?.dataset.entryParent === targetScopeValue ? row.dataset.entryKey : undefined;
+            const after = targetKey
+                ? event.clientY >= row.getBoundingClientRect().top + row.offsetHeight / 2
+                : undefined;
+            const movedOrder = moveDockEntryOrderSnapshot(
+                mergeDockEntryOrderSnapshot(dockOrderSnapshot, draft.orders),
+                dragging.sourceKey,
+                targetScopeValue,
+                targetKey,
+                after,
+            );
+            clearDropTarget();
+            dragging.dockOrder = movedOrder;
+            if (!movedOrder) {
+                return;
+            }
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move";
+            if (targetKey) {
+                row.classList.add(`config-entry-visibility__row--drop-${after ? "after" : "before"}`);
+            } else {
+                dropScopeElement?.closest(".config-entry-visibility__dock-group")
+                    ?.classList.add("config-entry-visibility__dock-group--drop");
+            }
+            return;
+        }
         if (!row || row.dataset.entryParent !== dragging.parentPath || !row.dataset.entryKey) {
             clearDropTarget();
             dragging.order = undefined;
@@ -704,6 +716,19 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
         row.classList.add(`config-entry-visibility__row--drop-${after ? "after" : "before"}`);
     });
     browser.addEventListener("drop", (event: DragEvent) => {
+        if (dragging && isDockOrderScope(dragging.parentPath)) {
+            if (!dragging.dockOrder) {
+                return;
+            }
+            event.preventDefault();
+            draft.orders ||= {};
+            DOCK_ORDER_SCOPES.forEach((scope) => {
+                draft.orders[scope] = [...dragging.dockOrder[scope]];
+            });
+            dragging = undefined;
+            renderBrowser();
+            return;
+        }
         if (!dragging?.defaultOrder || !dragging.order) {
             return;
         }
@@ -722,9 +747,6 @@ const openProfileEditor = (root: HTMLElement, profileID?: string) => {
             dragging.order,
             separatorKeys,
         );
-        if (isDockOrderScope(dragging.parentPath)) {
-            Object.assign(draft.orders, mergeDockEntryOrderSnapshot(dockOrderSnapshot, draft.orders));
-        }
         dragging = undefined;
         renderBrowser();
     });

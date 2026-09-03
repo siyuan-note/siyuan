@@ -18,6 +18,7 @@ package tools
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -100,18 +101,25 @@ func sqlQuery(args map[string]any) (CallToolResult, error) {
 		return CallToolResult{Content: []ContentItem{{Type: "text", Text: "no results"}}}, nil
 	}
 
+	return CallToolResult{Content: []ContentItem{{Type: "text", Text: formatSQLRows(rows)}}}, nil
+}
+
+func formatSQLRows(rows []map[string]any) string {
+	columns := keysOf(rows[0])
+	sort.Strings(columns)
+
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Query results (%d rows):\n\n", len(rows)))
-	sb.WriteString("| " + strings.Join(keysOf(rows[0]), " | ") + " |\n")
-	sb.WriteString("|" + strings.Repeat("---|", len(rows[0])) + "\n")
+	sb.WriteString("| " + strings.Join(columns, " | ") + " |\n")
+	sb.WriteString("|" + strings.Repeat("---|", len(columns)) + "\n")
 	for _, row := range rows {
-		vals := make([]string, 0, len(row))
-		for _, k := range keysOf(row) {
+		vals := make([]string, 0, len(columns))
+		for _, k := range columns {
 			vals = append(vals, fmt.Sprintf("%v", row[k]))
 		}
 		sb.WriteString("| " + strings.Join(vals, " | ") + " |\n")
 	}
-	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
+	return sb.String()
 }
 
 func keysOf(m map[string]any) []string {

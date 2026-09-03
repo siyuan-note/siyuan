@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "Mismo nivel",
+	"moveDocAsChild": "Subdocumento",
 	"editMode": "Modo de edición",
 	"originalValue": "Valor original",
 	"templateRenderedValue": "Valor renderizado por plantilla",

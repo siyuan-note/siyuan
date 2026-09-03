@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "同じ階層",
+	"moveDocAsChild": "子文書",
 	"editMode": "編集モードの切り替え",
 	"originalValue": "元の値",
 	"templateRenderedValue": "テンプレートレンダリング値",

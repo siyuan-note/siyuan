@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "같은 수준",
+	"moveDocAsChild": "하위 문서",
 	"editMode": "모드 전환",
 	"originalValue": "원본 값",
 	"templateRenderedValue": "템플릿 렌더링 값",

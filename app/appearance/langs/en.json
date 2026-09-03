@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "Same level",
+	"moveDocAsChild": "Child document",
 	"editMode": "Toggle Mode",
 	"originalValue": "Original value",
 	"templateRenderedValue": "Template-rendered value",

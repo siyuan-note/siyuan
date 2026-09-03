@@ -1,12 +1,21 @@
 import {describe, it} from "node:test";
 import * as assert from "node:assert/strict";
 import {
+    getDocumentTabMovePosition,
     clearTabHoverSwitch,
     findDefaultTabNextId,
     findNextTabId,
     reorderTabItems,
     scheduleTabHoverSwitch
 } from "./tabDrag";
+
+describe("document tab move target", () => {
+    it("uses the left half for siblings and the right half for children", () => {
+        assert.equal(getDocumentTabMovePosition(119, 100, 40), "sibling");
+        assert.equal(getDocumentTabMovePosition(120, 100, 40), "child");
+        assert.equal(getDocumentTabMovePosition(139, 100, 40), "child");
+    });
+});
 
 const createItems = () => [
     {id: "a"},

@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "Той самий рівень",
+	"moveDocAsChild": "Дочірній документ",
 	"editMode": "Перемкнути режим",
 	"originalValue": "Початкове значення",
 	"templateRenderedValue": "Значення, відтворене шаблоном",

@@ -7,6 +7,7 @@ import {
     insertDocumentSortPath,
     insertDocumentsSortPaths,
     parseDocumentTabDragData,
+    parseDocumentTreeDragData,
     remapMovedPath,
     restoreMovedExpandedDocItems,
     updateMovedSubtree
@@ -44,6 +45,21 @@ describe("parseDocumentTabDragData", () => {
             tabId: "tab-id",
             title: "Document",
         })), undefined);
+    });
+});
+
+describe("parseDocumentTreeDragData", () => {
+    it("parses and deduplicates document IDs", () => {
+        assert.deepEqual(parseDocumentTreeDragData(JSON.stringify({
+            ids: ["20260802120000-abcdefg", "20260802120000-abcdefg", "20260802120001-hijklmn"],
+        })), {
+            ids: ["20260802120000-abcdefg", "20260802120001-hijklmn"],
+        });
+    });
+
+    it("rejects empty or invalid document selections", () => {
+        assert.equal(parseDocumentTreeDragData(JSON.stringify({ids: []})), undefined);
+        assert.equal(parseDocumentTreeDragData(JSON.stringify({ids: ["invalid"]})), undefined);
     });
 });
 

@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "समान स्तर",
+	"moveDocAsChild": "उप-दस्तावेज़",
 	"editMode": "मोड बदलें",
 	"originalValue": "मूल मान",
 	"templateRenderedValue": "टेम्पलेट से रेंडर किया गया मान",

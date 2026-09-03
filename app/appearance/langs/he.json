@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "אותה רמה",
+	"moveDocAsChild": "מסמך משנה",
 	"editMode": "החלף מצב",
 	"originalValue": "ערך מקורי",
 	"templateRenderedValue": "ערך מעובד באמצעות תבנית",

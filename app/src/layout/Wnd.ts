@@ -29,7 +29,7 @@ import {setModelsHash} from "../window/setHeader";
 import {showMessage} from "../dialog/message";
 import {openFileById, updatePanelByEditor} from "../editor/util";
 import {scrollCenter} from "../util/highlightById";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {getAllModels} from "./getAll";
 import {clearCounter} from "./status";
 import {saveScroll} from "../protyle/scroll/saveScroll";
@@ -52,13 +52,80 @@ import {sanitizeClosedTabs, setStorageVal} from "../protyle/util/compatibility";
 import {setTitle} from "../util/processTitle";
 import {dragOverScroll} from "../boot/globalEvent/dragover";
 import {
+    clearDocumentTabMovePreview,
     clearTabDragPreview,
     clearTabHoverSwitch,
     findDefaultTabNextId,
     findNextTabId,
+    getDocumentTabMovePosition,
     reorderTabItems,
     scheduleTabHoverSwitch
 } from "./tabDrag";
+import {parseDocumentTreeDragData} from "../util/fileTreeMove";
+import {pathPosix} from "../util/pathName";
+
+interface IDocumentTabMoveTarget {
+    element: HTMLElement;
+    rootID: string;
+}
+
+const getDocumentTabMoveTarget = (target: HTMLElement, headersElement: HTMLElement) => {
+    const tabHeaderElement = hasClosestByAttribute(target, "data-type", "tab-header");
+    if (!tabHeaderElement || !headersElement.contains(tabHeaderElement)) {
+        return;
+    }
+    const tab = getInstanceById(tabHeaderElement.dataset.id) as Tab;
+    if (!(tab?.model instanceof Editor)) {
+        return;
+    }
+    const rootID = tab.model.editor.protyle.block.rootID;
+    if (!rootID) {
+        return;
+    }
+    return {
+        element: tabHeaderElement,
+        rootID,
+    };
+};
+
+const updateDocumentTabMovePreview = (target: IDocumentTabMoveTarget, clientX: number) => {
+    if (!target.element.classList.contains("item--document-drop")) {
+        clearDocumentTabMovePreview();
+        target.element.classList.add("item--document-drop");
+        target.element.insertAdjacentHTML("beforeend", `<span class="item__document-drop">
+    <span class="item__document-drop-option" data-position="sibling">${escapeHtml(window.siyuan.languages.moveDocToSameLevel)}</span>
+    <span class="item__document-drop-option" data-position="child">${escapeHtml(window.siyuan.languages.moveDocAsChild)}</span>
+</span>`);
+    }
+    const dropElement = target.element.querySelector<HTMLElement>(":scope > .item__document-drop");
+    const rect = dropElement.getBoundingClientRect();
+    const position = getDocumentTabMovePosition(clientX, rect.left, rect.width);
+    target.element.dataset.documentDropPosition = position;
+    dropElement.querySelectorAll<HTMLElement>(".item__document-drop-option").forEach((item) => {
+        item.classList.toggle("item__document-drop-option--active", item.dataset.position === position);
+    });
+};
+
+const moveDocumentsToTab = async (sourceIDs: string[], target: IDocumentTabMoveTarget,
+                                  position: "sibling" | "child") => {
+    if (sourceIDs.includes(target.rootID)) {
+        return;
+    }
+    let toID = target.rootID;
+    if (position === "sibling") {
+        const response = await fetchSyncPost("/api/filetree/getPathByID", {id: target.rootID});
+        if (response.code !== 0 || typeof response.data?.path !== "string" ||
+            typeof response.data?.notebook !== "string") {
+            return;
+        }
+        const parentPath = pathPosix().dirname(response.data.path);
+        toID = parentPath === "/" ? response.data.notebook : pathPosix().basename(parentPath);
+    }
+    await fetchSyncPost("/api/filetree/moveDocsByID", {
+        fromIDs: sourceIDs,
+        toID,
+    });
+};
 
 const createDragTabPlaceholder = () => {
     const dragTab = window.siyuan.dragTab;
@@ -207,7 +274,8 @@ export class Wnd {
         tabHeadersElement.addEventListener("dragleave", (event: DragEvent) => {
             const isBlockDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_BLOCK);
             const isTabDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB);
-            if (!isBlockDrag && !isTabDrag) {
+            const isFileDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE);
+            if (!isBlockDrag && !isTabDrag && !isFileDrag) {
                 return;
             }
             const relatedTarget = event.relatedTarget;
@@ -222,6 +290,9 @@ export class Wnd {
                 }
                 if (isTabDrag) {
                     clearTabDragPreview(tabHeadersElement);
+                }
+                if (isFileDrag) {
+                    clearDocumentTabMovePreview(tabHeadersElement);
                 }
             }
         });
@@ -246,6 +317,7 @@ export class Wnd {
             }
             clearTabHoverSwitch();
             const isFileDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE);
+            const isDocumentDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENTS);
             const isTabDrag = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB);
             if (!isFileDrag && !isTabDrag) {
                 return;
@@ -258,6 +330,19 @@ export class Wnd {
             }
             if (isFileDrag) {
                 event.preventDefault();
+                if (event.shiftKey && isDocumentDrag) {
+                    const documentTabTarget = getDocumentTabMoveTarget(event.target, this.headersElement);
+                    it.classList.remove("layout-tab-bars--drag");
+                    if (documentTabTarget) {
+                        updateDocumentTabMovePreview(documentTabTarget, event.clientX);
+                        event.dataTransfer.dropEffect = "move";
+                    } else {
+                        clearDocumentTabMovePreview(tabHeadersElement);
+                        event.dataTransfer.dropEffect = "none";
+                    }
+                    return;
+                }
+                clearDocumentTabMovePreview(tabHeadersElement);
                 it.classList.add("layout-tab-bars--drag");
                 return;
             }
@@ -304,14 +389,29 @@ export class Wnd {
                 }
             }
         });
-        tabHeadersElement.addEventListener("drop", function (event: DragEvent & {
+        tabHeadersElement.addEventListener("drop", async function (event: DragEvent & {
             target: HTMLElement
         }) {
             clearTabHoverSwitch();
             const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 // 文档树拖拽
+                const documentDragData = event.dataTransfer.types.includes(Constants.SIYUAN_DROP_DOCUMENTS) ?
+                    parseDocumentTreeDragData(event.dataTransfer.getData(Constants.SIYUAN_DROP_DOCUMENTS)) : undefined;
+                const documentTabTarget = getDocumentTabMoveTarget(event.target, it.firstElementChild as HTMLElement);
+                const movePosition = documentTabTarget?.element.dataset.documentDropPosition as
+                    "sibling" | "child" | undefined;
                 setPanelFocus(it.parentElement);
+                if (event.shiftKey && documentDragData) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    clearTabDragPreview(it);
+                    window.siyuan.dragElement = undefined;
+                    if (documentTabTarget && movePosition) {
+                        await moveDocumentsToTab(documentDragData.ids, documentTabTarget, movePosition);
+                    }
+                    return;
+                }
                 event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",").forEach(item => {
                     if (item) {
                         openFileById({

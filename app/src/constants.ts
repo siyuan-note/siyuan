@@ -25,6 +25,7 @@ export abstract class Constants {
 
     // drop 事件
     public static readonly SIYUAN_DROP_FILE: string = "application/siyuan-file";
+    public static readonly SIYUAN_DROP_DOCUMENTS: string = "application/siyuan-documents";
     public static readonly SIYUAN_DROP_GUTTER: string = "application/siyuan-gutter";
     public static readonly SIYUAN_DROP_BLOCK: string = "application/siyuan-block";
     public static readonly SIYUAN_DROP_BLOCK_REF: string = "application/siyuan-block-ref";

@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "ระดับเดียวกัน",
+	"moveDocAsChild": "เอกสารย่อย",
 	"editMode": "สลับโหมด",
 	"originalValue": "ค่าดั้งเดิม",
 	"templateRenderedValue": "ค่าที่เรนเดอร์ด้วยเทมเพลต",

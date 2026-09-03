@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "Tingkat yang sama",
+	"moveDocAsChild": "Dokumen anak",
 	"editMode": "Alihkan Mode",
 	"originalValue": "Nilai asli",
 	"templateRenderedValue": "Nilai hasil render templat",

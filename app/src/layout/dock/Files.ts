@@ -70,6 +70,7 @@ import {
     type IDocSortModeChanged,
     updateFileTreeSortMode
 } from "../../util/fileTreeSort";
+import {clearDocumentTabMovePreview} from "../tabDrag";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -506,6 +507,11 @@ export class Files extends Model {
                     });
                 }
                 event.dataTransfer.setData(Constants.SIYUAN_DROP_FILE, ids);
+                if (selectElements.every((item) => item.getAttribute("data-type") === "navigation-file")) {
+                    event.dataTransfer.setData(Constants.SIYUAN_DROP_DOCUMENTS, JSON.stringify({
+                        ids: ids.split(","),
+                    }));
+                }
                 event.dataTransfer.dropEffect = "move";
                 let selectionTitle = "";
                 if (selectElements.length > 1) {
@@ -558,6 +564,7 @@ export class Files extends Model {
             window.siyuan.dragElement = undefined;
             hideDragTip();
             window.siyuan.dragTitle = "";
+            clearDocumentTabMovePreview();
             /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "rmDragStyle"});
             /// #else

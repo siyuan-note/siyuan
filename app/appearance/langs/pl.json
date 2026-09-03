@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "Ten sam poziom",
+	"moveDocAsChild": "Dokument podrzędny",
 	"editMode": "Przełącz tryb",
 	"originalValue": "Wartość oryginalna",
 	"templateRenderedValue": "Wartość renderowana przez szablon",

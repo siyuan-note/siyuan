@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "Même niveau",
+	"moveDocAsChild": "Sous-document",
 	"editMode": "Mode Toggle",
 	"originalValue": "Valeur d’origine",
 	"templateRenderedValue": "Valeur rendue par le modèle",

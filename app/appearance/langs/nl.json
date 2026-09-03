@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "Hetzelfde niveau",
+	"moveDocAsChild": "Subdocument",
 	"editMode": "Modus schakelen",
 	"originalValue": "Oorspronkelijke waarde",
 	"templateRenderedValue": "Door sjabloon gerenderde waarde",

@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "Rovnaká úroveň",
+	"moveDocAsChild": "Podriadený dokument",
 	"editMode": "Prepnúť režim",
 	"originalValue": "Pôvodná hodnota",
 	"templateRenderedValue": "Hodnota vykreslená šablónou",

@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "نفس المستوى",
+	"moveDocAsChild": "مستند فرعي",
 	"editMode": "تبديل الوضع",
 	"originalValue": "القيمة الأصلية",
 	"templateRenderedValue": "القيمة المُصيّرة بالقالب",

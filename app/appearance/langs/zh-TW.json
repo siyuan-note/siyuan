@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "同級文件",
+	"moveDocAsChild": "子文件",
 	"editMode": "模式切換",
 	"originalValue": "原始值",
 	"templateRenderedValue": "範本渲染值",

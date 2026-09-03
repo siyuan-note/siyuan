@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "Aynı düzey",
+	"moveDocAsChild": "Alt belge",
 	"editMode": "Düzenleme modunu değiştir",
 	"originalValue": "Orijinal değer",
 	"templateRenderedValue": "Şablonla işlenmiş değer",

@@ -1,4 +1,19 @@
+export type TDocumentTabMovePosition = "sibling" | "child";
+
+export const getDocumentTabMovePosition = (clientX: number, left: number, width: number): TDocumentTabMovePosition =>
+    clientX < left + width / 2 ? "sibling" : "child";
+
+export const clearDocumentTabMovePreview = (tabHeadersElement?: ParentNode) => {
+    const root = tabHeadersElement || document;
+    root.querySelectorAll<HTMLElement>(".item--document-drop").forEach((item) => {
+        item.classList.remove("item--document-drop");
+        delete item.dataset.documentDropPosition;
+        item.querySelector(":scope > .item__document-drop")?.remove();
+    });
+};
+
 export const clearTabDragPreview = (tabHeadersElement?: HTMLElement) => {
+    clearDocumentTabMovePreview(tabHeadersElement);
     if (tabHeadersElement) {
         tabHeadersElement.classList.remove("layout-tab-bars--drag");
         tabHeadersElement.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach((item) => {

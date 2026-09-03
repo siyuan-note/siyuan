@@ -1,4 +1,6 @@
 {
+	"moveDocToSameLevel": "Gleiche Ebene",
+	"moveDocAsChild": "Unterdokument",
 	"editMode": "Modus umschalten",
 	"originalValue": "Originalwert",
 	"templateRenderedValue": "Gerenderter Vorlagenwert",

@@ -6,7 +6,7 @@
 		"id": "20211226123216-tlxw66f",
 		"title": "視窗和分頁",
 		"type": "doc",
-		"updated": "20260810212846"
+		"updated": "20260903130000"
 	},
 	"Children": [
 		{
@@ -44,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20260809170000-3a8f750",
-				"updated": "20260809232000"
+				"updated": "20260903130000"
 			},
 			"Children": [
 				{
@@ -59,7 +59,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20260613204619-fm69hhx",
-				"updated": "20260810212846"
+				"updated": "20260903130000"
 			},
 			"Children": [
 				{
@@ -74,7 +74,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20260613204619-avdhx8g",
-				"updated": "20260810212846"
+				"updated": "20260903130000"
 			},
 			"Children": [
 				{
@@ -452,6 +452,48 @@
 								{
 									"Type": "NodeText",
 									"Data": "：分頁支援拖拽排序，可以自由調整分頁位置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20260903130000-h6w2c8n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20260903130000-h6w2c8n",
+						"updated": "20260903130000"
+					},
+					"Children": [
+						{
+							"ID": "20260903130000-b5t9y3u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20260903130000-b5t9y3u",
+								"updated": "20260903130000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "移動文件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "：從文件面板拖拽文件時按住 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，將其放到文件分頁臨時顯示的「同級文件」或「子文件」區域"
 								}
 							]
 						}

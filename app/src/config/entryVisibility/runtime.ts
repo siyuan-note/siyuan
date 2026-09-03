@@ -12,6 +12,7 @@ import {getDocTreeEntryScope} from "./docTreeScope";
 import {getProfileEntryVisibility} from "./profile";
 import {TOOLBAR_ENTRY_ROOT_PATH} from "../../protyle/toolbar/defaults";
 import {resolveToolbarItems} from "../../protyle/toolbar/entryVisibility";
+import {syncDockBarVisibility} from "../../layout/dock/barVisibility";
 
 export const ENTRY_VISIBILITY_VERSION = 4;
 export const ENTRY_PROFILE_SIMPLE = "simple";
@@ -245,6 +246,7 @@ export const applyDockEntryVisibility = () => {
         }
         item.classList.toggle("fn__none", !visible);
     });
+    syncDockBarVisibility();
     /// #endif
 };
 

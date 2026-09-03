@@ -306,9 +306,7 @@ func documentInfo(args map[string]any) (CallToolResult, error) {
 	if len(info.IAL) > 0 {
 		sb.WriteString("\nIAL:")
 		for k, v := range info.IAL {
-			if len(v) > 100 {
-				v = v[:100] + "..."
-			}
+			v = truncateText(v, 100)
 			sb.WriteString(fmt.Sprintf("\n  %s: %s", k, v))
 		}
 	}

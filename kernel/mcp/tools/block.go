@@ -166,9 +166,7 @@ func blockGetChildren(args map[string]any) (CallToolResult, error) {
 		if content == "" {
 			content = c.Content
 		}
-		if len(content) > 200 {
-			content = content[:200] + "..."
-		}
+		content = truncateText(content, 200)
 		sb.WriteString(fmt.Sprintf("- [%s] %s (%s)\n", c.Type, content, c.ID))
 	}
 	return CallToolResult{Content: []ContentItem{{Type: "text", Text: sb.String()}}}, nil
